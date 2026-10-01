@@ -25,26 +25,45 @@ Derived (computed, not chosen): `maxHit`, `matk`, `interval`, `hitChance`, `infl
 
 Tag (not a number): element type · status type · pen type · target cap
 
-Resource: **one only**, Momentum
+Resources: **two** — **Mana** (player, spent by skills) · **Momentum** (built by hits, spent by triggers)
 
 ---
 
-## 2. Attack rate and the tick rule
+## 2. Attack rate, skills and mana
 
-Attacks are counted per second. **A skill costs one tick**, so the rate of skills is capped by attack speed.
+Attacks are counted per second. **A skill costs one tick and mana.** Both, not either.
 
 ```
 attacks/s   = 1 / interval
-skills/s    = min( 1 / cooldown , attacks/s )
+skills/s    = min( 1 / cooldown , attacks/s , mana/s ÷ cost )
 ```
 
-**Exception — trigger-per-chance effects cost no tick.** These are the unique special effects (see [rarity](../../04-items/rarity-system.md)): *Thunder Strike* — 25% chance per Trick Attack to trigger. They ride along on an attack that already happened.
+A skill fires only when all three gates allow it.
 
-### Why the exception matters
+### Two resources, and what that costs
 
-Without it, every skill build is gated by AGI and WIS is dead stat. With it, a unique effect can add damage that **no other build can reach**, and it does not compete for the tick.
+The original rule was **one resource only**. `evidence/09` measured why a per-hit economy is dangerous: going from 1.3s to 2.6s intervals swung the result 2.5x, and once a build went resource-negative its trigger never fired and it silently dropped to 0.53x — the player loses ~47% of their rate offline with no signal.
 
-**⚠️ Unresolved:** if `1/cooldown` is already faster than `attacks/s`, then WIS does nothing for that skill. WIS only pays off where cooldown is the binding constraint. That may be fine, but it needs a deliberate answer rather than an accident.
+**Momentum still follows the measured rules** — built per second, floored at `max(0.35·gain, gain − drain)`. Those are load-bearing and were measured, so they are not being re-opened.
+
+**Mana is a second gate on a different thing**, and that is what needs care:
+
+| | Momentum | Mana |
+|---|---|---|
+| what spends it | a **trigger** | a **skill** |
+| built by | hits | INT (`mana/s`) |
+| failure mode | trigger never fires | skill never fires |
+| why a floor is mandatory | measured, kept | **not yet derived** |
+
+**⚠️ The rule that has not been written yet:** a mana-starved build will have skills that silently never fire, and offline that failure is invisible. Momentum got an explicit floor because that exact problem was measured. Mana needs the same treatment — a mana pool floor, or a rule that a skill whose cost exceeds the pool is simply disabled with a visible note in the report. **Silent failure is the thing to avoid, not low output.**
+
+### Why skills should cost mana at all
+
+Without a mana cost, INT's `mana/s` is a stat with nothing to spend it on, and the skill gate stays purely `min(cooldown, attack speed)` — which means WIS and INT are both decorative and the third gate never exists.
+
+**Exception — trigger-per-chance effects cost no tick and no mana.** These are the unique special effects (see [rarity](../../04-items/rarity-system.md)): *Thunder Strike* — 25% chance per Trick Attack to trigger. They ride along on an attack that already happened.
+
+Without that exception, every skill build is gated by AGI and mana, and a unique effect has to compete for the same ticks. With it, a unique effect can add damage that **no other build can reach**, and it is immune to every gate that makes skills expensive.
 
 ---
 
@@ -115,7 +134,9 @@ The first hands over a coupling that is genuinely wanted: small fast hits infuse
 
 ---
 
-## 7. Momentum — the single resource
+## 7. Resources — Momentum and Mana
+
+### Momentum — the rules here are measured, do not re-open them
 
 | | value |
 |---|---|
@@ -126,6 +147,27 @@ The first hands over a coupling that is genuinely wanted: small fast hits infuse
 **Why those two rules are one rule:** `evidence/09` measured that a per-hit economy makes attack speed 2x **win with every build** (going from 1.3s to 2.6s changes the result 1.78x→0.72x, a 2.5x swing, while per-sec gives 1.80x→1.38x, only 1.3x). Then, once `net <= 0`, the trigger never fires and the build silently drops to 0.53x — the player loses ~47% of their rate offline **with no signal at all**.
 
 → that is punishment the player cannot detect, which contradicts D3 ("no death") and `CONTENT-TWOTIER` directly
+
+### Mana — the rules here do not exist yet
+
+| | value |
+|---|---|
+| pool | `maxMana` — **no stat currently raises this** |
+| gain | per second, from **INT** |
+| spend | one cast costs a fixed amount (`manaCost`) |
+| floor | **undecided — and this is the important one** |
+
+**The two resources are not symmetric, and that is deliberate.** Momentum is an economy that has been tuned against measurement. Mana is a **gate on a single action**. A skill either fires or it does not, which is a cliff, not a slope — so mana needs a rule that makes the cliff visible.
+
+Three options, none chosen:
+
+| | rule | cost |
+|---|---|---|
+| **(ก)** | `maxMana` floor, same shape as `MOM-FLOOR` | keeps skills always firing, so INT's `mana/s` becomes a throughput stat rather than a gate — and then mana is barely a resource |
+| **(ข)** | no floor; a skill the pool cannot pay for is **disabled and shown as disabled** in the report | makes the failure honest, and INT becomes a real requirement — but a build can be dead on arrival |
+| **(ค)** | `maxMana` floor, but **offline only** — awake, skills stop when mana runs out | awake play gets the gate, idle play stays safe |
+
+**⚠️ Undecided.** What matters in every option is that the player can see it. `MOM-FLOOR` exists because a silent −47% was measured; mana has the same failure shape and no floor yet.
 
 ---
 
@@ -145,7 +187,8 @@ Every document that named an axis now points at a stat instead.
 | `atk-flat` affix | **absorbed by STR / INT** — see below | [affixes](../../04-items/affixes.md) |
 | `atk%` affix | **nobody holds it** — see below | [affixes](../../04-items/affixes.md) |
 | 4 layers in [balance-notes](../../10-design/balance-notes.md) | 7 stats | same file |
-| DIM-PAIRING pairs | need re-derivation against 6 stats | [content-dimensions](../../10-design/systems-specs/content-dimensions.md) |
+| one resource only | **two** — Mana and Momentum | [§7](#7-resources--momentum-and-mana) |
+| DIM-PAIRING pairs | need re-derivation against 7 stats | [content-dimensions](../../10-design/systems-specs/content-dimensions.md) |
 | O1 — 3 or 4 axes | **closed** | — |
 | window kinds, one axis each | one stat each | [design-rules](../../10-design/systems-specs/design-rules.md) |
 
@@ -157,18 +200,21 @@ Either percentage damage becomes an **affix** again, or it does not exist and ev
 
 **2. `crit-damage` has no home.** LUK holds crit *rate*. Crit damage is a different job and nothing holds it.
 
+**3. `maxMana` is the one value nothing raises.** INT sets `mana/s`, the rate. The **pool** — the number that decides whether a skill fires at all — has no stat behind it. That is a hole in the middle of the resource system, not an edge case.
+
+**4. The "one resource" rule is now false.** [§7](#7-resources--momentum-and-mana) held a single-resource rule; it now holds two. Momentum's measured rules stay. Mana has none yet.
+
 ---
 
 ## 9. Open
 
 - [x] ~~O1 — 3 or 4 axes~~ → **seven classic stats: STR DEX AGI INT WIS LUK VIT**
+- [x] ~~Is mana the second resource?~~ → **yes.** A skill costs a tick *and* mana. See §2
 - [ ] **`atk%`** — no core stat holds percentage damage. Affix again, or does it exist?
 - [ ] **`crit-damage`** — LUK holds rate only. Where does damage go?
-- [ ] **WIS can be a dead stat** — if cooldown is already faster than attack rate, reducing it changes nothing
+- [ ] **`maxMana`** — INT sets the rate, nothing sets the pool
+- [ ] **the mana floor** — see §7. A skill either fires or does not, so the cliff has to be visible
+- [ ] **WIS can be a dead stat** — if cooldown is already faster than the tick or mana, reducing it changes nothing
 - [ ] **VIT sustain has no death to sustain against.** `hp regen/s` is worth nothing if nothing kills you, exactly like `hp` itself. It only pays if regen keeps you out of a `push` state
-- [ ] **mana needs a spender.** INT gives mana/s and nothing consumes it yet — skills are gated by a tick, not by mana. If mana never runs out, mana/s is a stat with no use
-- [ ] **Is mana the second resource?** [core-stats §7](#7-momentum--the-single-resource) currently holds a rule that there is exactly one resource, Momentum
 - [ ] O5 — does ailment stay · blocks §6
 - [ ] multi-target engine (D6) is not covered here — it is a precondition for the pack layer, see [content-dimensions](../../10-design/systems-specs/content-dimensions.md)
-- [ ] O5 — does ailment stay · blocks §5
-- [ ] multi-target engine (D6) is not covered here — it is a precondition for the pack layer, see [spec-content.md](../../10-design/systems-specs/content-dimensions.md)
