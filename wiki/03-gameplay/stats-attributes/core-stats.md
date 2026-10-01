@@ -291,7 +291,7 @@ Either percentage damage becomes an **affix** again, or it does not exist and ev
 
 - [x] ~~O1 — 3 or 4 axes~~ → **seven classic stats: STR DEX AGI INT WIS LUK VIT**
 - [x] ~~Is mana the second resource?~~ → **yes.** A skill costs a tick *and* mana. See §2
-- [ ] **`atk%`** — no core stat holds percentage damage. Affix again, or does it exist?
+- [ ] **the multiplicative damage slot** — see §2. It must exist, because B13 needs somewhere for a defensive build's advantage to show up. Parked until polish
 - [ ] **`crit-damage`** — LUK holds rate only. Where does damage go?
 - [ ] **`maxMana`** — INT sets the rate, nothing sets the pool
 - [ ] **the mana floor** — see §7. A skill either fires or does not, so the cliff has to be visible
