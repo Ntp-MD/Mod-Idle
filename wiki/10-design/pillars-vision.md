@@ -10,7 +10,7 @@ Original idea: a Melvor-style idle game that adds weapon/attribute depth using i
 
 Conclusion after grilling: **the idea is worth continuing, but what looked like a single system is actually two systems that must ship together** — the item side and the monster/content side. The way projects like this die is by finishing the first one and discovering the second one does not exist.
 
-The chain that carries the whole project (if any link is missing, the idea collapses back to BI/Slot) — see [README.md](README.md#the-chain-the-whole-project-rests-on)
+The chain that carries the whole project (if any link is missing, the idea collapses back to BI/Slot) — see [README.md](../index.md#the-chain-the-whole-project-rests-on)
 
 The three decisions that evidence overturned: see [decisions.md](game-design-document.md) §2 (R1-R4)
 

@@ -1,8 +1,8 @@
 # Combat log lines
 
-> Back to: [wiki/index.md](../index.md) · zones: [zones.md](../01-world/regions/zones.md)
+> Back to: [wiki/index.md](../index.md) · zones: [zones.md](../01-world/regions/zones-and-monsters.md)
 
-**The fantasy layer that makes a text game feel like a text RPG.** This is the substitute for the visual loot satisfaction that D13 removed — see [thesis §0.1](../../design/thesis.md).
+**The fantasy layer that makes a text game feel like a text RPG.** This is the substitute for the visual loot satisfaction that D13 removed — see [thesis §0.1](pillars-vision.md).
 
 **Numbers sit inside the sentence, never beside it.**
 
