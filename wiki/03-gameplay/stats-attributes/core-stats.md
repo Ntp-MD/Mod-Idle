@@ -142,7 +142,45 @@ Melvor:  StrBonus (additive)  ×  nothing
 
 **The missing `???` is the only slot worth inventing here**, and it should be multiplicative rather than additive, because that is what makes the difference between a big hit and a many-hits build visible in the armour curve.
 
-⚠️ **Parked until polish.** The exact shape of that multiplier, and whether it is a stat or an affix, is a balance question — not a concept one. What is decided is that **one multiplicative damage slot must exist**, because without it there is no burst-vs-tempo axis and B13 loses half its meaning: a defensive build's advantage has to show up *somewhere*, and it cannot be in an additive pool.
+### The rule that replaces the central pool
+
+**A percentage multiplies only its own stat. Never a shared pool.**
+
+Melvor already does this in one place:
+
+```
+accRate = ... × (BaseAcc + 64) × (1 + AccMod/100)
+                             └────┘
+                             % multiplies accuracy alone
+```
+
+Applied consistently to all seven:
+
+| flat | its percentage | what the % actually does |
+|---|---|---|
+| STR | STR% | the physical number gets bigger |
+| INT | INT% | the magic number gets bigger |
+| AGI | AGI% | the interval shrinks |
+| DEX | DEX% | accuracy rises |
+| hp | hp% | survives longer |
+| def | def% | takes less `push` |
+| LUK | LUK% | crits more often |
+
+**Why this fixes the 12-of-18 problem.** When every affix lands in one additive pool, one number answers everything and the mods are interchangeable. Here a percentage is worth nothing without the flat stat behind it:
+
+```
+no STR  →  STR% does nothing at all
+```
+
+So the player chooses **which base to build, or which multiplier** — and the two cannot be substituted for each other. That is the decision the old pool could not pose.
+
+**It also gives B13 its place.** `def%` → takes less `push` → kph holds up → yield holds up. No new mechanic needed, and no central pool created.
+
+**Melvor has no central pool at all**, which is consistent: it needed `acc%` multiplying accuracy and stopped there. A generic `atk%` multiplying all damage is the thing that would have collapsed it.
+
+**⚠️ `atk%` is no longer a name we need.** It was STR% and INT% before it was ever one thing.
+
+**Parked until polish:** whether these fourteen numbers live on stats, on affixes, or on both — and whether seven percentages is one too many for a player to hold in their head.
 
 ---
 
@@ -291,8 +329,8 @@ Either percentage damage becomes an **affix** again, or it does not exist and ev
 
 - [x] ~~O1 — 3 or 4 axes~~ → **seven classic stats: STR DEX AGI INT WIS LUK VIT**
 - [x] ~~Is mana the second resource?~~ → **yes.** A skill costs a tick *and* mana. See §2
-- [ ] **the multiplicative damage slot** — see §2. It must exist, because B13 needs somewhere for a defensive build's advantage to show up. Parked until polish
-- [ ] **`crit-damage`** — LUK holds rate only. Where does damage go?
+- [x] ~~the multiplicative damage slot~~ → **no central pool.** A percentage multiplies only its own stat. `atk%` is no longer a name. See §2
+- [ ] **`crit-damage`** — LUK holds rate only. It would multiply crit hits alone, which is already scoped. Parked
 - [ ] **`maxMana`** — INT sets the rate, nothing sets the pool
 - [ ] **the mana floor** — see §7. A skill either fires or does not, so the cliff has to be visible
 - [x] ~~WIS can be a dead stat~~ -> **closed by the 80% cap.** It can never drive cooldown to zero, so the tick gate stays real. See §2

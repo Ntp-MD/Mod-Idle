@@ -15,7 +15,7 @@
 | `crit-damage` | **% only** | none yet | any |
 | `def-pen` | flat | STR / INT | armour zones |
 | `eva-pen` | flat | DEX | evasion zones |
-| `atk%` | % | **none — see below** | any |
+| ~~`atk%`~~ | — | **cut** — it was STR% and INT% before it was one thing | — |
 | ~~`atk-flat`~~ | flat | **absorbed by STR / INT** | — |
 
 **Defensive gear — 4 kinds**
