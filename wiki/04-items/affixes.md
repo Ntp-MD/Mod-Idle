@@ -46,15 +46,15 @@ Ten kinds also fits what is actually implementable. `evidence/06` found that add
 
 ## Four problems this pool creates
 
-### 1. The defensive half has no purpose yet — one candidate answer
+### 1. ~~The defensive half has no purpose yet~~ — RESOLVED
 
 `DEF-TEMPO` requires defensive stats to express as **tempo, not mitigation**, because there is no death offline and the currency of losing is time.
 
 But `hp`, `def` and `eva%` are pure mitigation, and **if nothing can kill you, all three are worth zero.**
 
-There is a proposed answer: **drop rate scales with clear rate**, so defensive stats raise your clear rate and therefore your drops. It does not require death, and it turns mitigation into an upgrade requirement.
+RESOLVED. The value is tempo, not survival: `def`/`eva` cut incoming `push`, so kph does not fall, so drops per hour do not fall. The currency of losing is time.
 
-→ See [proposals B13](../10-design/proposals.md). **The direction is agreed; the numbers are not.** Until it lands, the defensive half stays blocked.
+→ see [glossary](../00-getting-started/glossary.md)
 
 ### 2. Crit has no axis
 

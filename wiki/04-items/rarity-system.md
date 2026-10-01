@@ -2,58 +2,43 @@
 
 > [index](../index.md) · [affixes](affixes.md) · [weapons](weapons/weapons.md)
 
-**Status: unresolved, and it blocks the entire affix budget.**
+**The core idea comes from PoE.** Three rarities, and **rarity is the line count** — not a separate axis.
 
-## Two models that contradict each other
+## Decided
 
-**Old model — rarity *is* the line count**
+| rarity | affix lines | special |
+|---|---|---|
+| **common** | 2-4 | — |
+| **rare** | 4-5 | — |
+| **unique** | 5 | + 1 special effect |
 
-```
-magic 2 · rare 4 · ancestral 6 · unique = 1 signature that changes a rule
-```
+**`epic` is cut.** It was a fourth label doing nothing the other three did not.
 
-This came from a real measurement: Diablo 4 cut affix counts, moved tempering to *"You can now select which specific affix you want to apply"*, and stopped masterworking from raising values. The conclusion was **4/6 rather than 6-8**.
+### What makes a unique unique
 
-**Current direction — four standard rarities**
+**A gameplay effect, not a bigger number.**
 
-```
-common · rare · epic · unique
-```
+> e.g. *Thunder Strike* — 25% chance per Trick Attack to trigger a special effect
 
-Under this model rarity is a **separate axis from line count**. The label says how good the roll is, not how many lines the item has. A common could have 1 line and an epic 5.
-
----
-
-## Why it has to be resolved before balance
-
-The line budget is what decides how much power an item can hold. Without it:
-
-- there is no ceiling on an item's power
-- `MAXHIT-CAP` has nothing to count
-- the five affix tiers have no context to roll against
-
-**Balance is currently blocked on this page.** See [balance notes §4](../10-design/balance-notes.md), where the additive envelope is measured in *slots* as well as percentages — and a slot count depends on knowing how many lines compete for it.
+So a unique = 5 affix lines **plus** something that changes how the game plays. The affix lines on a unique are normal; the special effect is the point. **Which effect goes on which weapon is a separate conversation** and is not settled here.
 
 ---
 
-## The unique ceiling is also stale
+## What this buys
 
-It was derived as `4 base types x 4 axes = 16 uniques`, written when there were four base types.
-
-There are now **eleven weapons**, so the derivation no longer holds. It probably wants to be per weapon type rather than per axis, but that is not decided.
-
-The original reasoning still stands and is worth keeping: **a unique is worth adding only if the simulation can represent its state.** If the sim has no state for it, the item will lie quietly in the player's inventory. That is the ceiling that actually matters, and it is a claim about the engine, not about taste.
+1. **`MAXHIT-CAP` now has something to count.** It was blocked because there was no ceiling on an item's power. The ceiling is now **5 lines, and a unique adds one effect on top**.
+2. **The additive envelope has a frame.** `balance-notes.md` measures the budget in slots as well as percentages. A slot count needs to know how many lines compete for it — that is now **2 to 5**.
+3. **It stays close to PoE.** PoE's rarity tier is exactly this: the name tells you how big the item is. Cutting epic keeps the ladder short enough to read.
 
 ---
 
 ## Open
 
-- [ ] how many lines per rarity?
-- [ ] does the measured 4/6 still hold under a 4-tier model, or does it need a different number?
-- [ ] is unique still "1 signature that changes a rule", or does it get a line count as well?
-- [ ] which rarity holds **tier 1** of an affix? In PoE tier 1 is the weakest and drops most often.
-- [ ] re-derive the unique cap from the weapon list
+- [ ] **tier 1 — strongest or weakest?** In PoE, tier 1 is the *weakest* roll and drops most often. The project notes say tier 1 is the strongest, which inverts it. If tier 1 is always the best, the tier system is not progression, it is just a description of how lucky you were → follow PoE, or invert the numbering and call them **ranks**
+- [ ] **common at 2 lines and rare at 4 lines both land on 4.** So a rare can roll *fewer* lines than a common. Is that allowed, or does rare use 4-5 where the floor guarantees a rare is never smaller than a lucky common?
+- [ ] **the unique cap** — the old derivation was `4 base types x 4 axes = 16`, written when there were four base types. There are now eleven weapons. The ceiling that actually matters is not a number, it is this: **a unique is only worth adding if the simulation can represent its state.** No state, no unique — it would sit in the inventory and lie
+- [ ] does the unique special effect cost a line, or sit outside the line budget entirely? It reads as outside, but that has not been confirmed against the additive envelope
 
 ## Related
 
-The 15% off-signature drop rate (`DROP-SMART`) is where gambling lives now that crafting is guaranteed. That assumes there is a spread of rarities worth gambling on — which is another reason this page matters.
+The 15% off-signature drop rate (`DROP-SMART`) is where gambling lives now that crafting is guaranteed. Under this model there is a real spread to gamble on: **common can roll 4 lines and rare can roll 4 too**, so the label alone does not tell you which is better. That is the part worth keeping from PoE.

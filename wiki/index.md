@@ -120,7 +120,7 @@ The proposals page is now nearly empty — the hand system, eleven weapons, ten 
 | [~] | [`weapons/weapons.md`](04-items/weapons/weapons.md) | **eleven** weapons · hand rules · dual wield |
 | [~] | [`affixes.md`](04-items/affixes.md) | **ten** kinds, bound to a position · four open problems |
 | [~] | [`accessories/accessories.md`](04-items/accessories/accessories.md) | six slots · shield · not matched to layers yet |
-| [~] | [`rarity-system.md`](04-items/rarity-system.md) | **unresolved** · was rarity=line count, now common/rare/epic/unique |
+| [~] | [`rarity-system.md`](04-items/rarity-system.md) | **unresolved** · was rarity=line count, now common/rare/unique |
 | [ ] | `armor/` `consumables/` `materials/` `key-items/` `sets-equipment-bonus/` `accessories/` | |
 
 ### 05 Bestiary

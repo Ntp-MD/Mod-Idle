@@ -12,7 +12,7 @@
 
 | # | Blocker | Consequence |
 |---|---|---|
-| B10 | rarity is now common/rare/epic/unique, so **`Rarity = line count` is broken** | no affix budget exists, so §4 cannot be closed |
+| B10 | rarity is now common/rare/unique, so **`Rarity = line count` is broken** | no affix budget exists, so §4 cannot be closed |
 | B9 | 6 accessory slots, 9 layers, MVP was 4 slots | cannot say what competes for what |
 | B6.1 | the zone table has no window-kind column | cannot verify which axis each zone is for |
 | B6.3 | `MAG-CAP` has no derivation | §2 has to invent one |
