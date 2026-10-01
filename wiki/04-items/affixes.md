@@ -80,13 +80,11 @@ The pipeline currently has one penetration step. Sitting both pens at the same p
 
 The two map cleanly onto two axes, which is convenient — and the pipeline does not support it yet. See [damage-pipeline](../03-gameplay/combat/damage-pipeline.md).
 
-### 4. "Tier 1 = highest value" inverts PoE
+### 4. Tier numbering — RESOLVED, follow PoE
 
-In PoE, **tier 1 is the weakest** and drops most often.
+**Tier 1 is the weakest roll and drops most often.** Higher tier is a stronger roll.
 
-If tier 1 is the strongest, then **the most common drop is the best roll**, and the tier system carries no progression at all — it only says how lucky you were.
-
-→ Choose: follow PoE (1 = weakest, most common), or invert the numbering and call them **ranks**.
+This is the PoE convention and it is kept as-is. The project notes had said tier 1 was the strongest, which would have inverted it: if the most common drop is also the best, the tier system carries no progression at all and only says how lucky you were.
 
 ---
 

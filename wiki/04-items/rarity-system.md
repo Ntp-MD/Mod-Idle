@@ -34,7 +34,7 @@ So a unique = 5 affix lines **plus** something that changes how the game plays. 
 
 ## Open
 
-- [ ] **tier 1 — strongest or weakest?** In PoE, tier 1 is the *weakest* roll and drops most often. The project notes say tier 1 is the strongest, which inverts it. If tier 1 is always the best, the tier system is not progression, it is just a description of how lucky you were → follow PoE, or invert the numbering and call them **ranks**
+- [x] **tier 1 — strongest or weakest? → follow PoE.** Tier 1 is the **weakest** roll and drops most often; higher tier is a stronger roll
 - [ ] **common at 2 lines and rare at 4 lines both land on 4.** So a rare can roll *fewer* lines than a common. Is that allowed, or does rare use 4-5 where the floor guarantees a rare is never smaller than a lucky common?
 - [ ] **the unique cap** — the old derivation was `4 base types x 4 axes = 16`, written when there were four base types. There are now eleven weapons. The ceiling that actually matters is not a number, it is this: **a unique is only worth adding if the simulation can represent its state.** No state, no unique — it would sit in the inventory and lie
 - [ ] does the unique special effect cost a line, or sit outside the line budget entirely? It reads as outside, but that has not been confirmed against the additive envelope
