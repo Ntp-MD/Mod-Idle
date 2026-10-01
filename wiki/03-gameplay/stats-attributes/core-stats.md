@@ -3,7 +3,7 @@
 > Back to: [index.md](../../index.md) · rules: [rules.md](../../10-design/systems-specs/design-rules.md) · **Status: draft**
 > Calculation order lives in [damage-pipeline.md](../combat/damage-pipeline.md)
 
-⚠️ **The 4-axis system (FORCE / CADENCE / PRECISION / MASTERY) is withdrawn.** O1 is answered: there are **six classic stats** instead. Everything downstream that was written against axis names has to be re-pointed at the stat that now holds the job — see [affected documents](#8-what-this-rework-breaks).
+⚠️ **The 4-axis system (FORCE / CADENCE / PRECISION / MASTERY) is withdrawn.** O1 is answered: there are **seven classic stats** instead. Everything downstream that was written against axis names has to be re-pointed at the stat that now holds the job — see [affected documents](#8-what-this-rework-breaks).
 
 ---
 
@@ -14,11 +14,14 @@
 | **STR** | flat attack | — |
 | **DEX** | attack accuracy | ailment chance |
 | **AGI** | attack speed | evasion |
-| **INT** | flat magic attack | — |
+| **INT** | flat magic attack | mana per second |
 | **WIS** | skill cooldown reduction | — |
 | **LUK** | crit rate | drop rate |
+| **VIT** | flat HP | HP regen per second |
 
-Derived (computed, not chosen): `maxHit`, `matk`, `interval`, `hitChance`, `inflictChance`, `kph`
+Seven stats, in the order a player would list them: **STR DEX AGI INT WIS LUK VIT**.
+
+Derived (computed, not chosen): `maxHit`, `matk`, `interval`, `hitChance`, `inflictChance`, `kph`, `maxMana`, `manaRegen`
 
 Tag (not a number): element type · status type · pen type · target cap
 
@@ -59,7 +62,7 @@ POWER 2 · MASTERY 3 (1 of which should be CADENCE) · PRECISION 2 · CADENCE 1
 
 **CADENCE won once.** That was the argument for cutting it, and it is why inventing an axis set here was the wrong path — the axes did not fit the content.
 
-Six classic stats are not an abstraction over content layers. They are the vocabulary players already own from every other RPG, and each one names a job plainly: **STR hits, AGI is fast, DEX is accurate, LUK is lucky, INT is smart, WIS is ready.**
+Classic stats are not an abstraction over content layers. They are the vocabulary players already own from every other RPG, and each one names a job plainly: **STR hits, AGI is fast, DEX is accurate, LUK is lucky, INT is smart, WIS is ready, VIT is tough.**
 
 ---
 
@@ -141,14 +144,14 @@ Every document that named an axis now points at a stat instead.
 | evasion | **AGI** | [affixes](../../04-items/affixes.md) |
 | `atk-flat` affix | **absorbed by STR / INT** — see below | [affixes](../../04-items/affixes.md) |
 | `atk%` affix | **nobody holds it** — see below | [affixes](../../04-items/affixes.md) |
-| 4 layers in [balance-notes](../../10-design/balance-notes.md) | 6 stats | same file |
+| 4 layers in [balance-notes](../../10-design/balance-notes.md) | 7 stats | same file |
 | DIM-PAIRING pairs | need re-derivation against 6 stats | [content-dimensions](../../10-design/systems-specs/content-dimensions.md) |
 | O1 — 3 or 4 axes | **closed** | — |
 | window kinds, one axis each | one stat each | [design-rules](../../10-design/systems-specs/design-rules.md) |
 
 ### Two holes this creates
 
-**1. There is no percentage damage stat any more.** The old pool had `atk%` and `atk-flat`. `atk-flat` is now STR/INT, but `atk%` has no home — six classic stats cover flat damage, speed, accuracy, cooldown, crit rate and evasion, and none of them is "increase damage".
+**1. There is no percentage damage stat any more.** The old pool had `atk%` and `atk-flat`. `atk-flat` is now STR/INT, but `atk%` has no home — seven classic stats cover flat damage, speed, accuracy, cooldown, crit rate, evasion, HP and mana, and none of them is "increase damage".
 
 Either percentage damage becomes an **affix** again, or it does not exist and every damage increase is flat. That is a real fork, not a formatting question.
 
@@ -158,10 +161,13 @@ Either percentage damage becomes an **affix** again, or it does not exist and ev
 
 ## 9. Open
 
-- [x] ~~O1 — 3 or 4 axes~~ → **six classic stats: STR DEX AGI INT WIS LUK**
-- [ ] **`atk%`** — no core stat holds it. Affix again, or does not exist?
+- [x] ~~O1 — 3 or 4 axes~~ → **seven classic stats: STR DEX AGI INT WIS LUK VIT**
+- [ ] **`atk%`** — no core stat holds percentage damage. Affix again, or does it exist?
 - [ ] **`crit-damage`** — LUK holds rate only. Where does damage go?
 - [ ] **WIS can be a dead stat** — if cooldown is already faster than attack rate, reducing it changes nothing
+- [ ] **VIT sustain has no death to sustain against.** `hp regen/s` is worth nothing if nothing kills you, exactly like `hp` itself. It only pays if regen keeps you out of a `push` state
+- [ ] **mana needs a spender.** INT gives mana/s and nothing consumes it yet — skills are gated by a tick, not by mana. If mana never runs out, mana/s is a stat with no use
+- [ ] **Is mana the second resource?** [core-stats §7](#7-momentum--the-single-resource) currently holds a rule that there is exactly one resource, Momentum
 - [ ] O5 — does ailment stay · blocks §6
 - [ ] multi-target engine (D6) is not covered here — it is a precondition for the pack layer, see [content-dimensions](../../10-design/systems-specs/content-dimensions.md)
 - [ ] O5 — does ailment stay · blocks §5
