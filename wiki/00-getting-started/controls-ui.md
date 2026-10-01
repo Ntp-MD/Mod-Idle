@@ -1,6 +1,6 @@
 # Spec: Text UI
 
-> Back to: [README.md](README.md) · rules: [rules.md](rules.md) · **Status: `draft`**
+> Back to: [README.md](../index.md) · rules: [rules.md](../10-design/systems-specs/design-rules.md) · **Status: `draft`**
 > Direction: **text-based RPG idle, fantasy theme** (D13)
 
 This supersedes the earlier "PoE-style equipment slot" idea, which came up in the same session. Reasons in §4.
@@ -96,7 +96,7 @@ This session started at "PoE-style equipment slots (paperdoll + tooltip + drag-d
 | item level as a value proxy | D4 — no global item score, it has to be contextual per zone |
 | drag-drop to move items | D2 — mobile-first, and bulk is already handled by auto-salvage |
 
-**The replacement that is needed and does not exist yet** → this is the project's risk number one, see [thesis.md §0.1](thesis.md)
+**The replacement that is needed and does not exist yet** → this is the project's risk number one, see [thesis.md §0.1](../10-design/pillars-vision.md)
 
 ---
 

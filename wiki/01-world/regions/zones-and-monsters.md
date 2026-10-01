@@ -1,6 +1,6 @@
 # Spec: Content — the actual game
 
-> Back to: [README.md](README.md) · [spec-content.md](spec-content.md) (dimensions) · [spec-core.md](spec-core.md) (order of operations) · **Status: `draft`**
+> Back to: [README.md](../../index.md) · [spec-content.md](../../10-design/systems-specs/content-dimensions.md) (dimensions) · [spec-core.md](../../03-gameplay/combat/damage-pipeline.md) (order of operations) · **Status: `draft`**
 > Closes the biggest gap: D13 locked "fantasy theme" but there was no zone, monster or progression behind it.
 
 ⚠️ **Every number and name here is `assumed`.** Nothing has been measured. All magnitudes were set by hand and must be torn up and rebuilt in a real harness.
@@ -153,7 +153,7 @@ Six examples, rotating by tier:
 
 ## 8. Combat log lines — the fantasy layer that makes text an RPG
 
-This is what substitutes for the visual feeling (see [thesis.md §0.1](thesis.md)). **The number sits inside the sentence, never beside it.**
+This is what substitutes for the visual feeling (see [thesis.md §0.1](../../10-design/pillars-vision.md)). **The number sits inside the sentence, never beside it.**
 
 ```
 [04:12:03]  Your Emberforged Maul bites deep into the Gateward for 3,910.

@@ -1,6 +1,6 @@
 # Thesis — why this idea has a chance
 
-> Back to: [README.md](README.md)
+> Back to: [README.md](../index.md)
 
 ## 0. TL;DR
 
@@ -12,7 +12,7 @@ Conclusion after grilling: **the idea is worth continuing, but what looked like 
 
 The chain that carries the whole project (if any link is missing, the idea collapses back to BI/Slot) — see [README.md](README.md#the-chain-the-whole-project-rests-on)
 
-The three decisions that evidence overturned: see [decisions.md](decisions.md) §2 (R1-R4)
+The three decisions that evidence overturned: see [decisions.md](game-design-document.md) §2 (R1-R4)
 
 ### What the text-based direction changes
 

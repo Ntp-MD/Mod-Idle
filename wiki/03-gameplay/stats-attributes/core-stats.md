@@ -1,9 +1,9 @@
 # Spec: Combat
 
-> Back to: [README.md](README.md) · rules: [rules.md](rules.md) · **Status: draft — awaiting O1**
-> Calculation order lives in [spec-core.md](spec-core.md)
+> Back to: [README.md](../../index.md) · rules: [rules.md](../../10-design/systems-specs/design-rules.md) · **Status: draft — awaiting O1**
+> Calculation order lives in [spec-core.md](../combat/damage-pipeline.md)
 
-⚠️ This whole file is written on the assumption of **4 axes**, which is **not decided** — see O1 in [decisions.md](decisions.md). If O1 comes out as 3, whatever is unrelated gets deleted rather than patched.
+⚠️ This whole file is written on the assumption of **4 axes**, which is **not decided** — see O1 in [decisions.md](../../10-design/game-design-document.md). If O1 comes out as 3, whatever is unrelated gets deleted rather than patched.
 
 ---
 
@@ -53,7 +53,7 @@ POWER 2 · MASTERY 3 (1 of which should be CADENCE) · PRECISION 2 · CADENCE 1
 
 At session level, 8h (48,000 hits) gives ±0.1-1.4% in every case → variance is **not** a problem at that level, so the sim can be deterministic in the mean.
 
-**If violated:** a heavy proc forces Monte Carlo → `evidence/08` measured that 2,000 items × 60 zones becomes **27s** instead of 0.96s → per-zone valuation on mobile dies → the chain in [README.md](README.md) breaks at exactly that link.
+**If violated:** a heavy proc forces Monte Carlo → `evidence/08` measured that 2,000 items × 60 zones becomes **27s** instead of 0.96s → per-zone valuation on mobile dies → the chain in [README.md](../../index.md) breaks at exactly that link.
 
 ---
 
@@ -83,7 +83,7 @@ The second and third are **anti-inflation by rule**, not by a cap — there is n
 
 The first hands over a coupling that is genuinely wanted: small fast hits infuse worse, so **FORCE and MASTERY connect through mechanics rather than through a shared number**.
 
-**Still waiting on O5.** If it is cut, this whole section goes, including the Helm slot in [spec-items.md](spec-items.md).
+**Still waiting on O5.** If it is cut, this whole section goes, including the Helm slot in [spec-items.md](../../04-items/items-and-slots.md).
 
 ---
 
@@ -105,4 +105,4 @@ The first hands over a coupling that is genuinely wanted: small fast hits infuse
 
 - [ ] O1 — 3 or 4 axes · blocks this whole file
 - [ ] O5 — does ailment stay · blocks §5
-- [ ] multi-target engine (D6) is not covered here — it is a precondition for the pack layer, see [spec-content.md](spec-content.md)
+- [ ] multi-target engine (D6) is not covered here — it is a precondition for the pack layer, see [spec-content.md](../../10-design/systems-specs/content-dimensions.md)

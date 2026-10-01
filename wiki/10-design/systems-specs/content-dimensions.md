@@ -1,7 +1,7 @@
 # Spec: Content
 
-> Back to: [README.md](README.md) · rules: [rules.md](rules.md) · **Status: draft — awaiting O4 / O8**
-> The actual zones, monsters and progression are in [spec-fantasy-content.md](spec-fantasy-content.md)
+> Back to: [README.md](../../index.md) · rules: [rules.md](design-rules.md) · **Status: draft — awaiting O4 / O8**
+> The actual zones, monsters and progression are in [spec-fantasy-content.md](../../01-world/regions/zones-and-monsters.md)
 
 ---
 
@@ -61,7 +61,7 @@ D4 used the same logic to defuse a loot trap:
 
 ## 4. Magnitude cap — bounded from the player's side
 
-`MAG-CAP` was written as `armour_zone <= ~1.5 × player maxHit`, but PoE's own numbers say otherwise: 50% DR needs ~5x the damage and 90% DR needs 45x, so **1.5x gives roughly 23% DR**. The threshold has no derivation and has to be redefined in terms of DR — see [spec-fantasy-content.md §10.2](spec-fantasy-content.md).
+`MAG-CAP` was written as `armour_zone <= ~1.5 × player maxHit`, but PoE's own numbers say otherwise: 50% DR needs ~5x the damage and 90% DR needs 45x, so **1.5x gives roughly 23% DR**. The threshold has no derivation and has to be redefined in terms of DR — see [spec-fantasy-content.md §10.2](../../01-world/regions/zones-and-monsters.md).
 
 Past that point the cliff moves from gear to **tag magnitude** — `evidence/06` measured the cliff surviving at:
 ```

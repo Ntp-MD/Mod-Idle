@@ -1,6 +1,6 @@
 # Spec: Core — order of operations
 
-> Back to: [README.md](README.md) · rules: [rules.md](rules.md) · **Status: `draft`**
+> Back to: [README.md](../../index.md) · rules: [rules.md](../../10-design/systems-specs/design-rules.md) · **Status: `draft`**
 
 **This is the "make the core solid first" part (D15)** — everything that has to be fixed before touching balance numbers.
 
@@ -51,7 +51,7 @@ per second:
  16. contract rotation      <- every 12-24h (`CONTENT-TWOTIER`)
 ```
 
-`[AMP]` marks the steps where the **window kind** decides who benefits — see [spec-fantasy-content.md §10.1](spec-fantasy-content.md). Without that binding, one axis collects every window.
+`[AMP]` marks the steps where the **window kind** decides who benefits — see [spec-fantasy-content.md §10.1](../../01-world/regions/zones-and-monsters.md). Without that binding, one axis collects every window.
 
 ### Not settled — must be decided
 
@@ -102,7 +102,7 @@ Resource      -> Momentum: gainPerSec, cap, regen, drain
 assert everyZoneHasPairedTag(zone)
 ```
 
-The list from [spec-content.md](spec-content.md) §1 that O8 still has to resolve: `resist` and `ailment immunity` are punish-only, so if O8 cuts them they have to be removed from the data, not flagged off.
+The list from [spec-content.md](../../10-design/systems-specs/content-dimensions.md) §1 that O8 still has to resolve: `resist` and `ailment immunity` are punish-only, so if O8 cuts them they have to be removed from the data, not flagged off.
 
 ---
 

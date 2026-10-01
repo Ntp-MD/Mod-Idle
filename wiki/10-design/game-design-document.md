@@ -1,6 +1,6 @@
 # Decisions — what is settled · what evidence overturned · what is still unknown
 
-> Back to: [README.md](README.md)
+> Back to: [README.md](../index.md)
 
 **Read before answering any question** — especially §2, which is what evidence overturned. Do not copy anything from PoE/Diablo before reading it.
 
@@ -47,7 +47,7 @@ Decided 2026-10-01. Effect on the project:
 | `+12% kills/h in the Ashwood Hollow` is a sentence, which fits D4 exactly | Render fidelity still has to be decided (O9) and it might reintroduce UI work |
 | sort / diff fall out for free, so the "never-counted UI work" shrinks | **`evidence/08` matters more**: +5.3% invisible, with no visuals to soften it |
 
-→ **Gate 5 moves from "check 5" to risk number one** — see [thesis.md §0.1](thesis.md)
+→ **Gate 5 moves from "check 5" to risk number one** — see [thesis.md §0.1](pillars-vision.md)
 
 ---
 
@@ -62,7 +62,7 @@ From `evidence/06`, once base-type gating is added: **83% still flat** (wand/bow
 
 → New recommendation: 4 lines rare / 6 ancestral, and **the remaining lines are chosen by you through guaranteed crafting** rather than rolled in bulk.
 
-**Replaced by:** `LINE-BUDGET` in [rules.md](rules.md)
+**Replaced by:** `LINE-BUDGET` in [rules.md](systems-specs/design-rules.md)
 
 ### R2 — "force one downside line on every item from mid-tier up" rests on a memory I got wrong
 
@@ -162,7 +162,7 @@ Every item has **kill criteria**: the condition under which, if that is what the
 - fewer than 8 dimensions in phase 1 → **cut axes before cutting dimensions** — dimensions are what create depth, axes are just the language they speak in
 - >=8 dimensions but 3 axes cannot use them all → the axis count has to drop, and that is the answer to O1
 
-**kill:** if the authoring volume of the remaining dimensions is impossible in the time available → **content dimension count is an authoring constraint, not a taste question** — cut along the order in [spec-content.md](spec-content.md) and accept 3-4 axes in the MVP.
+**kill:** if the authoring volume of the remaining dimensions is impossible in the time available → **content dimension count is an authoring constraint, not a taste question** — cut along the order in [spec-content.md](systems-specs/content-dimensions.md) and accept 3-4 axes in the MVP.
 
 ---
 
@@ -280,6 +280,6 @@ O10 is the only question that **cannot be answered by measuring** — it has to 
 
 O9 sits high because it decides whether text UI needs a renderer, which in turn decides whether D13 actually saves work.
 
-**O1-O8 do not wait for O10** because [spec-core.md](spec-core.md) is designed to be data-driven, so O1 and O8 can be answered later without reworking the schema.
+**O1-O8 do not wait for O10** because [spec-core.md](../03-gameplay/combat/damage-pipeline.md) is designed to be data-driven, so O1 and O8 can be answered later without reworking the schema.
 
 ⚠️ **O3 was corrected** — it used to read "answerable immediately because `evidence/03`", but `evidence/06` contradicts it (2 presets = 99.6% at 8 zones vs 4 presets = 92% and still short of 95% at 15 zones) → **still undecidable until the zone count is fixed**

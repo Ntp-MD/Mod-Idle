@@ -1,6 +1,6 @@
 # Spec: Economy
 
-> Back to: [README.md](README.md) · rules: [rules.md](rules.md) · **Status: draft — everything is `prov`**
+> Back to: [README.md](../../index.md) · rules: [rules.md](../../10-design/systems-specs/design-rules.md) · **Status: draft — everything is `prov`**
 
 ⚠️ **Nothing in this area has any evidence behind it.** No script ever measured the economy. Everything below is a structural proposal and has to clear `HARNESS-INVARIANT` before it becomes a formula.
 
@@ -28,7 +28,7 @@ It is the same principle as loot volume: if currency flow tracks the number of i
 
 ## 2. Loot volume — where idle collides with loot RNG
 
-From [thesis.md §2.3](thesis.md): offline combat produces loot all night, so you open the game to a stash of a thousand items and must appraisal/salvage/filter before anything else.
+From [thesis.md §2.3](../../10-design/pillars-vision.md): offline combat produces loot all night, so you open the game to a stash of a thousand items and must appraisal/salvage/filter before anything else.
 
 | Mechanism | Why |
 |---|---|
@@ -54,6 +54,6 @@ From [thesis.md §2.3](thesis.md): offline combat produces loot all night, so yo
 
 ## 4. Open
 
-- [ ] Write an economy sim to prove `CUR-TIERLOCK` and `CUR-SOURCECAP` — **neither has ever existed**; both are `prov` in [rules.md](rules.md)
+- [ ] Write an economy sim to prove `CUR-TIERLOCK` and `CUR-SOURCECAP` — **neither has ever existed**; both are `prov` in [rules.md](../../10-design/systems-specs/design-rules.md)
 - [ ] Loop analysis for tier-lock (do gated mats and the loot cap actually coexist?)
 - [ ] Set the loot volume cap from a measurement on real hardware, not from the guessed 200

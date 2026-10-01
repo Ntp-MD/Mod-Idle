@@ -1,6 +1,6 @@
 # Spec: Items
 
-> Back to: [README.md](README.md) · rules: [rules.md](rules.md) · **Status: draft — awaiting O2 / O6**
+> Back to: [README.md](../index.md) · rules: [rules.md](../10-design/systems-specs/design-rules.md) · **Status: draft — awaiting O2 / O6**
 
 ---
 
@@ -11,8 +11,8 @@
 | **Equipment** | yes, 2/4/6 lines | yes | yes, contextual per zone | §1.1 |
 | **Consumable / Infusion** | no, single effect | yes | yes (phase-break window) | §3 · doubles as a currency sink |
 | **Salvage currency** | no | no, it's a counter | no | `CUR-TIERLOCK` |
-| **Gated material** | no | no, it's a counter | no | [spec-economy.md](spec-economy.md) §1 |
-| **Contract token** | no | no, it's a counter | no | [spec-fantasy-content.md](spec-fantasy-content.md) §6 |
+| **Gated material** | no | no, it's a counter | no | [spec-economy.md](../03-gameplay/economy/economy.md) §1 |
+| **Contract token** | no | no, it's a counter | no | [spec-fantasy-content.md](../01-world/regions/zones-and-monsters.md) §6 |
 
 **Why the last three have to be counters rather than items** — if they sit in the list they need a sort rule, they need a valuation, and they need to show a kills/h figure that means nothing. This is a consequence of `NO-DRAG` plus the text direction (D13).
 
@@ -52,14 +52,14 @@ Each one must clear `TEXT-VERIFIABLE` (its numbers must come from the sim) befor
 
 → **The game's identity space is 3 kinds, not 18**, and all three are the same axis (element).
 
-That contradicts the thesis directly — [thesis.md §2.1](thesis.md) says a new affix has to target a slot the formula does not have yet, but if 12/18 collapse into one DPS number, only 3 things remain that can separate archetypes.
+That contradicts the thesis directly — [thesis.md §2.1](../10-design/pillars-vision.md) says a new affix has to target a slot the formula does not have yet, but if 12/18 collapse into one DPS number, only 3 things remain that can separate archetypes.
 
 **Three possible routes, none chosen yet:**
 
 | Route | What it takes | Cost |
 |---|---|---|
 | (a) accept 3 | design 3 identities properly · use the 16 uniques for variety instead | lowest, but the ceiling is low |
-| (b) a second round of `evidence/05` | add zone-conditional mods covering every dimension in [spec-fantasy-content.md](spec-fantasy-content.md) §2 with the right window kind | medium · needs a new measurement |
+| (b) a second round of `evidence/05` | add zone-conditional mods covering every dimension in [spec-fantasy-content.md](../01-world/regions/zones-and-monsters.md) §2 with the right window kind | medium · needs a new measurement |
 | (c) drop affixes as the variety source | identity comes from base type + uniques only · affixes are just numbers | low, but `IDENTITY-DEF` has to be rewritten |
 
 → **Not chosen.** All three have to clear `TEXT-VERIFIABLE` and prove `IDENTITY-DEF` still holds.
@@ -161,6 +161,6 @@ Why: without this unit, smart drops (`DROP-SMART` 85/15) roll without knowing wh
 - [ ] **O2** — hard or soft requirements (kill criteria in decisions.md · tied to `DROP-SMART`)
 - [ ] **O6** — base type count · cut to 4 if over → the §1.2 cap of 16 can only be confirmed once O6 is decided
 - [ ] **Identity: 3 or 18 — §1.3** · still choosing between (a)/(b)/(c)
-- [ ] **Loot table per zone** — still unknown what the 10 zones in [spec-fantasy-content.md](spec-fantasy-content.md) drop
+- [ ] **Loot table per zone** — still unknown what the 10 zones in [spec-fantasy-content.md](../01-world/regions/zones-and-monsters.md) drop
 - [ ] Amulet into the 5-slot MVP, or deferred
 - [ ] **Passive tree** — waits on O1 (`TREE-DIM`)

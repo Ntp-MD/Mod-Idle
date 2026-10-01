@@ -1,6 +1,6 @@
 # Spec: Balance
 
-> Back to: [README.md](README.md) · rules: [rules.md](rules.md) · **Status: `draft` — blocked**
+> Back to: [README.md](../index.md) · rules: [rules.md](systems-specs/design-rules.md) · **Status: `draft` — blocked**
 
 ⚠️ **No number in this file has been measured.** The scripts that produced the original figures were deleted. Everything here is either (a) derived from a rule that *was* measured, with the derivation shown, or (b) marked as needing a number it does not have yet.
 

@@ -1,6 +1,6 @@
 # Design rules — 36 rules that must not be broken
 
-> Back to: [README.md](README.md) · decisions: [decisions.md](decisions.md)
+> Back to: [README.md](../../index.md) · decisions: [decisions.md](../game-design-document.md)
 
 **28 original + 8 promoted out of prose.** `SLOT-BUDGET` `GROUP-EXCLUSIVE` `CUR-SOURCECAP` `CRAFT-GUARANTEED` used to be sentences buried inside other rules or inside the evidence; they became their own IDs because they change formulas. `BAND-DISPLAY` `TAGGED-VERBATIM` `TEXT-VERIFIABLE` `NO-DRAG` came from D13 (text-based). `PRESET-BOUNDED` came from the `evidence/03` vs `06` contradiction.
 
@@ -16,8 +16,8 @@ Find one with `rg -n "AXIS-LAYER" .`
 |---|---|---|
 | `FORCE` `CADENCE` `PRECISION` `MASTERY` | core stat axis names | **hypothesis awaiting O1** — not yet rules |
 | `MIGHT` `GRACE` `FOCUS` | the discarded 3-axis set | do not use |
-| `BREACH` `SUNDER` `CHAIN` `SURGE` `EXPOSED` `FRACTURE` `ERUPTION` `WARD-BREAK` | **window kinds** — each one amplifies exactly one axis | defined in [spec-fantasy-content.md §10.1](spec-fantasy-content.md) |
-| `D1`-`D15` · `R1`-`R4` · `O1`-`O10` | decision / refutation / open question | live in [decisions.md](decisions.md) |
+| `BREACH` `SUNDER` `CHAIN` `SURGE` `EXPOSED` `FRACTURE` `ERUPTION` `WARD-BREAK` | **window kinds** — each one amplifies exactly one axis | defined in [spec-fantasy-content.md §10.1](../../01-world/regions/zones-and-monsters.md) |
+| `D1`-`D15` · `R1`-`R4` · `O1`-`O10` | decision / refutation / open question | live in [decisions.md](../game-design-document.md) |
 | `SLOT-GATE` `AXIS-LAYER` etc. | **actual rule IDs** | live in this file |
 
 → `rg "MASTERY"` also hits the axis name in the specs, and `rg "BREACH"` hits a window kind. Do not read either as a rule.
@@ -35,10 +35,10 @@ Find one with `rg -n "AXIS-LAYER" .`
 | ID | Rule | Evidence | status |
 |---|---|---|---|
 | `MAXHIT-CAP` | <=2 lines in the max-hit axis and <=25% of the envelope combined — PoE2 itself caps the roll at +25% | `evidence/05`, patch notes | ok |
-| `ACC-FORMULA` | **No accuracy affix under Melvor's accuracy formula** (saturates at 94-99%, +60% acc buys 0.4-6 points). If the hit/miss axis is kept, switch to PoE's hyperbolic formula | [thesis.md §2.1](thesis.md), `evidence/07` | **fixed** |
+| `ACC-FORMULA` | **No accuracy affix under Melvor's accuracy formula** (saturates at 94-99%, +60% acc buys 0.4-6 points). If the hit/miss axis is kept, switch to PoE's hyperbolic formula | [thesis.md §2.1](../pillars-vision.md), `evidence/07` | **fixed** |
 | `PROC-WEIGHT` | proc weight <=1/3 of avg hit (a heavy proc gives ±57%, forcing Monte Carlo, which breaks valuation) | `evidence/01` | ok |
 | `SLOT-BUDGET` | at most 2 slots share one additive damage pool before a swap stops being felt (S=2 gives +11.1%, above the ±9% noise floor) | `evidence/08` | ok |
-| `TREE-BUDGET` | passive-tree +%damage in the same pool as gear gets **<= ~25% increased** (crossover is 178%, after which gear is invisible) | [spec-items.md](spec-items.md) §perceptibility | ok |
+| `TREE-BUDGET` | passive-tree +%damage in the same pool as gear gets **<= ~25% increased** (crossover is 178%, after which gear is invisible) | [spec-items.md](../../04-items/items-and-slots.md) §perceptibility | ok |
 
 ## Group B — itemisation structure
 
@@ -50,7 +50,7 @@ Find one with `rg -n "AXIS-LAYER" .`
 | `BASETYPE-CARRIER` | attack speed / crit / implicit live on the **base type**, not the affix pool — PoE1: dagger 1.20-1.50 APS, crit 8-9%; Vaal Axe 1.15 vs Despot 1.40 | PoE1 | ok |
 | `IDENTITY-DEF` | identity = the number of **zone-conditional mod kinds**, not line count, gating or pool size — 12/18 mods generic means a score ladder | `evidence/05`, `evidence/06` | ok |
 | `DMG-CONDITIONAL` | unconditional damage% is budget-limited (25% envelope, nearly all of it on the weapon) · zone-conditional damage% is the main source of depth, because it does not collapse into one DPS number | `evidence/08` | ok |
-| `BUILD-SIG` | no classes → build signature = `(tree flags + weapon base + gear tags)` as the single valuation unit · cache key = build hash | [spec-items.md](spec-items.md) | ok |
+| `BUILD-SIG` | no classes → build signature = `(tree flags + weapon base + gear tags)` as the single valuation unit · cache key = build hash | [spec-items.md](../../04-items/items-and-slots.md) | ok |
 | `DROP-SMART` | build-aware smart drops ~85/15 (D3 Loot 2.0) — the 15% off-signature is the gambling source | D3 | ok |
 | `RNG-PITY` | pity / pooled randomness instead of raw chance | Firestone | ok |
 
@@ -63,14 +63,14 @@ Find one with `rg -n "AXIS-LAYER" .`
 | `AMPLIFY-TIERFALL` | amplify must scale down with monster tier — PoE2: *"Elemental Exposure now has 15% less effect on Magic monsters, 30% less on Rare, 50% less on Unique"* | patch notes | ok |
 | `MAG-CAP` | content magnitude must be capped from the player's side — **the 1.5x threshold is currently unsupported, see spec-fantasy-content.md §10.2** | `evidence/06` | prov |
 | `CONTENT-TWOTIER` | two-tier magnitude: idle-safe zones (every loadout within ~20% of optimum) + contract content allowed a full cliff, because the player *chooses* it and is *awake* | `evidence/06` | ok |
-| `PRESET-BOUNDED` | presets needed <= the number of **distinct winners**, not the number of zones — zones with the same winner share one preset · the only viable answer so far to the `evidence/03` (2 presets = 99.6%) vs `06` (4 presets = 92% at 15 zones) contradiction | `evidence/03` vs `06` · [spec-fantasy-content.md](spec-fantasy-content.md) §3 | prov |
+| `PRESET-BOUNDED` | presets needed <= the number of **distinct winners**, not the number of zones — zones with the same winner share one preset · the only viable answer so far to the `evidence/03` (2 presets = 99.6%) vs `06` (4 presets = 92% at 15 zones) contradiction | `evidence/03` vs `06` · [spec-fantasy-content.md](../../01-world/regions/zones-and-monsters.md) §3 | prov |
 | `PACK-FORMULA` | ~~pack <=3~~ → `packBonus = 1 + (pack-1)^0.55 × cleave` | `evidence/04` | **fixed** |
 
 ## Group D — survival (matters because there is no death)
 
 | ID | Rule | Evidence | status |
 |---|---|---|---|
-| `DEF-TEMPO` | defensive stats must express as **tempo**, not mitigation — the currency of losing is time, not a life (D3) | D3 + [thesis.md §2](thesis.md) | ok |
+| `DEF-TEMPO` | defensive stats must express as **tempo**, not mitigation — the currency of losing is time, not a life (D3) | D3 + [thesis.md §2](../pillars-vision.md) | ok |
 | `MOM-PERSEC` | Momentum must **gain per second**, not per hit — per-hit makes attack speed 2x the best stat in the game and every build takes it (measured: 1.3s→2.6s changes the result 2.5x per-hit but 1.3x per-sec) | `evidence/09` | ok |
 | `MOM-FLOOR` | the resource economy must have a floor, `net <= 0` is forbidden outright (e.g. `net = max(0.35·gain, gain − drain)`) — if the trigger never fires, an item that traded away base damage silently drops to ~53% offline, which is punishment the player cannot detect, and it contradicts D3 / `CONTENT-TWOTIER` | `evidence/09` | ok |
 
@@ -79,7 +79,7 @@ Find one with `rg -n "AXIS-LAYER" .`
 | ID | Rule | Evidence | status |
 |---|---|---|---|
 | `CUR-TIERLOCK` | salvage currency must not convert across tiers | loop analysis | prov |
-| `CUR-SOURCECAP` | currency needs a source cap that is not tied to loot volume (otherwise crafting is always free = no decisions) | [spec-economy.md](spec-economy.md) | prov |
+| `CUR-SOURCECAP` | currency needs a source cap that is not tied to loot volume (otherwise crafting is always free = no decisions) | [spec-economy.md](../../03-gameplay/economy/economy.md) | prov |
 | `CRAFT-GUARANTEED` | crafting is guaranteed, limited to 1 crafted mod per item · RNG lives on drops + a pity timer only | R4, PoE2 | ok |
 
 ## Group G — text direction (D13)
