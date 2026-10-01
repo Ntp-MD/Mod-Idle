@@ -40,6 +40,38 @@ skills/s    = min( 1 / cooldown , attacks/s , mana/s ÷ cost )
 
 A skill fires only when all three gates allow it.
 
+### The cooldown cap — 80%
+
+Cooldown can be reduced by **at most 80%**.
+
+```
+cooldown_effective = cooldown_base × (1 − min(0.8, cdr))
+```
+
+**Why the cap matters: it keeps AGI alive.** Without one, WIS could drive cooldown to zero, a skill would fire every tick, and **AGI would become dead stat** — attack speed would gate nothing. 80% leaves that gate permanently in play, so all three terms in the `min` stay real.
+
+**The consequence to accept:** at 80% CDR a skill fires 5x as often, so it wants 5x the mana. WIS and INT rise together or the build stops.
+
+```
+WIS ↑  →  skills/s ↑  →  mana/s needed ↑  →  INT ↑ ↑
+```
+
+That coupling is intended. It means a skill build cannot be tuned by improving one stat alone — the opposite of the score ladder the old affix pool turned into.
+
+**⚠️ Undefined:** whether the 80% cap is **per skill** or **one value for the whole sheet**.
+
+### Three clocks, not one
+
+`cooldown`, `ICD` and the attack `interval` are separate things and the docs had been blurring them.
+
+| | governs | reduced by |
+|---|---|---|
+| **interval** | attacks | AGI |
+| **cooldown** | a **skill** | WIS, capped at 80% |
+| **ICD** | a **trigger** | — |
+
+ICD has no stat. It exists so that a trigger-per-chance unique effect (see [rarity](../../04-items/rarity-system.md)) cannot fire off every attack — otherwise *Thunder Strike* at 25% per trick would be gated by nothing except its own chance, and an ICD is the only thing standing between it and a 100% uptime loop.
+
 ### Two resources, and what that costs
 
 The original rule was **one resource only**. `evidence/09` measured why a per-hit economy is dangerous: going from 1.3s to 2.6s intervals swung the result 2.5x, and once a build went resource-negative its trigger never fired and it silently dropped to 0.53x — the player loses ~47% of their rate offline with no signal.
@@ -214,7 +246,9 @@ Either percentage damage becomes an **affix** again, or it does not exist and ev
 - [ ] **`crit-damage`** — LUK holds rate only. Where does damage go?
 - [ ] **`maxMana`** — INT sets the rate, nothing sets the pool
 - [ ] **the mana floor** — see §7. A skill either fires or does not, so the cliff has to be visible
-- [ ] **WIS can be a dead stat** — if cooldown is already faster than the tick or mana, reducing it changes nothing
+- [x] ~~WIS can be a dead stat~~ -> **closed by the 80% cap.** It can never drive cooldown to zero, so the tick gate stays real. See §2
+- [ ] **is the 80% cap per skill, or one value for the whole sheet?**
+- [ ] **ICD has no stat** — what reduces it, does it scale, does it interact with the cap? See §2
 - [ ] **VIT sustain has no death to sustain against.** `hp regen/s` is worth nothing if nothing kills you, exactly like `hp` itself. It only pays if regen keeps you out of a `push` state
 - [ ] O5 — does ailment stay · blocks §6
 - [ ] multi-target engine (D6) is not covered here — it is a precondition for the pack layer, see [content-dimensions](../../10-design/systems-specs/content-dimensions.md)
