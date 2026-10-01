@@ -13,11 +13,11 @@ B1 · B2 · B3 · B4 · B5 · B7 · B8 · B9 · B10 · B11 · B12 have all moved
 
 | # | What | Where |
 |---|---|---|
-| 1 | the ten-zone table has **no window-kind column**, so a reader has to guess which axis each zone is for — and guesses wrong, which is exactly the bug that gave one axis 7 of 8 zones | [zones](../01-world/regions/zones-and-monsters.md) |
-| 2 | the **pack layer belongs to CADENCE or MASTERY** — flagged as a MISMATCH in the old measurement and never resolved | same file |
+| 1 | the ten-zone table has **no column saying which window kind each zone is**, so a reader has to guess — and guesses wrong, which is exactly the bug that gave one axis 7 of 8 zones. **Now parked**: with the 4-axis system withdrawn, the question becomes which of the seven stats each zone is for | [zones](../01-world/regions/zones-and-monsters.md) |
+| 2 | the **pack layer has no owner** — flagged as a MISMATCH in the old measurement and never resolved. Under the new stat list the candidates are AGI (attack speed) or nothing | same file |
 | 3 | **`MAG-CAP` had no threshold.** The old rule said 1.5× maxHit, which gives about 23% DR, not the 50% it was trying to prevent. A derivation now exists at ~20× maxHit | [balance notes §2](../10-design/balance-notes.md) |
 
-Number 3 has been resolved and is no longer a loose end.
+Number 3 has been resolved and is no longer a loose end. 1 and 2 are parked until polish, like the rest.
 
 ---
 

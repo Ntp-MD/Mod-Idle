@@ -78,7 +78,7 @@ base stat  → bounded punishment   (idle-safe ≤20%, contract ≤60%)
 window     → where decisiveness lives (uncapped)
 ```
 
-This is exactly why `DIM-PAIRING` is the load-bearing rule, and exactly why the window-kind bug was severe: with every zone sharing one generic amplify, one axis collected all the decisiveness and MASTERY won 7 of 8 zones.
+This is exactly why `DIM-PAIRING` is the load-bearing rule, and exactly why the window-kind bug was severe: with every zone sharing one generic amplify, one stat collected all the decisiveness and MASTERY won 7 of 8 zones.
 
 ### Contract tier
 
@@ -135,14 +135,20 @@ This is a sharper statement of `TREE-BUDGET` than the one currently written, and
 
 The only meaningful balance question per zone is: **which conditions does this zone demand, and which builds can satisfy them?**
 
-Each axis owns a condition set:
+Each stat owns a condition set:
 
-| Axis | condition it satisfies |
-|---|---|
-| FORCE | big hits vs armour (hit-size) |
-| CADENCE | many hits vs pack / tempo vs push |
-| PRECISION | accuracy vs evasion, break vs block |
-| MASTERY | burst vs amplify windows, phase-break vs regen |
+⚠️ **This table was written for the withdrawn 4-axis system.** The job column still matters — the left column needs re-derivation against the seven stats.
+
+| was | condition it satisfies | now |
+|---|---|---|
+| FORCE | big hits vs armour (hit-size) | **STR** / **INT** |
+| CADENCE | many hits vs pack / tempo vs push | **AGI** |
+| PRECISION | accuracy vs evasion, break vs block | **DEX** |
+| MASTERY | burst vs amplify windows, phase-break vs regen | **DEX** (ailment chance) |
+| — | nothing held crit rate | **LUK** |
+| — | nothing held percentage damage | **nobody** — open |
+
+**Parked until polish.** See [core-stats §8](../03-gameplay/stats-attributes/core-stats.md) for the full list of what the rework breaks.
 
 Design rule, derived from `PRESET-BOUNDED`:
 
@@ -168,9 +174,9 @@ A build that owns a condition set still has knobs. These are the balance surface
 
 | Layer | Serves | Current rule |
 |---|---|---|
-| tempo | CADENCE | `packBonus = 1 + (pack−1)^0.55 × cleave` |
-| cleave / chain | CADENCE | cap on how much of a pack one hit reaches |
-| infliction | MASTERY | threshold scales with pre-mitigation damage |
+| tempo | **AGI** | `packBonus = 1 + (pack−1)^0.55 × cleave` |
+| cleave / chain | **AGI** | cap on how much of a pack one hit reaches |
+| infliction | **DEX** | threshold scales with pre-mitigation damage |
 | Momentum | resource | gain per second + a floor, `MOM-PERSEC` / `MOM-FLOOR` |
 
 **Balance rule:** these must not add enough to make a build dominant *outside* its condition set. `evidence/09` is the cautionary case — with `decay + conduit` the trigger build still lost to FLAT, so even a paired punish/amplify zone is not automatically a trigger zone.

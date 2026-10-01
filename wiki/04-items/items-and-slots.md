@@ -35,7 +35,7 @@
 |---|---|
 | `MAXHIT-CAP` | <=2 lines in the max-hit axis, <=25% of the envelope combined |
 | `DOWNSIDE-PLACEMENT` | **every rolled affix is positive.** Downside lives on recipes and named items only |
-| `GROUP-EXCLUSIVE` | only one modifier from a group may appear, which forces lines onto different axes |
+| `GROUP-EXCLUSIVE` | only one modifier from a group may appear, which forces lines onto different jobs |
 | `BASETYPE-CARRIER` | attack speed, crit, implicit live on the **weapon**, not the affix pool |
 | `DMG-CONDITIONAL` | unconditional damage% is expensive and rare · zone-conditional damage% is the main source of depth, because it does not collapse into one DPS number |
 | `BUILD-SIG` | the valuation unit is `(tree flags + weapon base + gear tags)`, keyed by build hash |
@@ -112,7 +112,7 @@ Answering this decides a third of the affix pool, and it is the one question in 
 
 > **Parked until polish.** Concept work is still in progress; exact numbers and interaction order wait for the design polish pass, before development.
 
-- [ ] crit has no axis and no place in the pipeline — proposed `crit-rate` → PRECISION, `crit-damage` → FORCE
+- [x] ~~crit has no axis~~ → `crit-rate` is **LUK** · `crit-damage` has no home, parked
 - [ ] `atk%` against `atk-flat` — both land in the same place in the current pipeline, so flat has no reason to exist
 - [ ] `eva-pen` needs to sit at step 2, before hit chance. The pipeline has one penetration step and cannot express it
 - [ ] identity: is it 3 kinds or more? See the old measurement — 12 of 18 mods were generic. **B13 is a second axis that does not depend on affixes at all**
