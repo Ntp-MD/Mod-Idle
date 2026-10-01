@@ -30,7 +30,7 @@ Number 3 has been resolved and is no longer a loose end.
 ### The shape
 
 ```
-clear rate = your kills/h ÷ the zone's threshold
+clear rate = your kph ÷ the zone's threshold
 
    clear rate >= 1.0   ->  full drop rate
    clear rate <  1.0   ->  drop rate falls in proportion
@@ -53,7 +53,7 @@ D3 says there is no death offline. If the penalty hangs on death then:
 - it can never trigger offline, because death cannot happen offline
 - defensive stats become relevant only while awake, which is the smallest slice of an idle game
 
-→ **A loss is defined as failing to clear the zone in time, not as dying.** The player can already read it off the kills/h figure the UI shows.
+→ **A loss is defined as failing to clear the zone in time, not as dying.** The player can already read it off the kph figure the UI shows.
 
 ### It fits `CONTENT-TWOTIER` instead of fighting it
 
@@ -73,9 +73,9 @@ offensive build ->  lower clear rate   ->  has to manage the risk
 
 ### What it costs
 
-**1. A second currency.** The whole game is currently measured by one number, kills/h. Drop rate becomes a second thing the player manages, so the UI needs a second readout — see [controls-ui](../00-getting-started/controls-ui.md).
+**1. A second currency.** The whole game is currently measured by one number, kph. Drop rate becomes a second thing the player manages, so the UI needs a second readout — see [controls-ui](../00-getting-started/controls-ui.md).
 
-**2. It must not create a permanent spiral.** It does not, because progression unlocks on a kills/h threshold rather than on survival: a player who falls behind can always drop back to an easier zone and recover.
+**2. It must not create a permanent spiral.** It does not, because progression unlocks on a kph threshold rather than on survival: a player who falls behind can always drop back to an easier zone and recover.
 
 ### Open
 

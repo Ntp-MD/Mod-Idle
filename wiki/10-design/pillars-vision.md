@@ -19,7 +19,7 @@ The three decisions that evidence overturned: see [decisions.md](game-design-doc
 | Gains | Loses |
 |---|---|
 | No art pipeline / animator / UI designer needed — matches D9 (one person, no revenue) | Cuts the *visual* half of loot dopamine |
-| `+12% kills/h in the Ashwood Hollow` is a sentence — fits D4 exactly | `evidence/08` (+5.3% invisible) matters more now, because there is no art to help |
+| `+12% kph in the Ashwood Hollow` is a sentence — fits D4 exactly | `evidence/08` (+5.3% invisible) matters more now, because there is no art to help |
 | sort / diff fall out for free — the "never-counted UI work" shrinks a lot | Render fidelity still has to be decided (O9), and it could reverse the direction |
 
 ---

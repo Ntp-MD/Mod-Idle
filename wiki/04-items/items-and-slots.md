@@ -14,7 +14,7 @@
 | **Gated material** | no | no, it is a counter | no |
 | **Contract token** | no | no, it is a counter | no |
 
-**The player only calls two of these "items"** — equipment and consumable. The rest are numbers on a screen, which is why they are counters and not list entries: a counter needs no sort rule, no valuation and no kills/h figure that means nothing.
+**The player only calls two of these "items"** — equipment and consumable. The rest are numbers on a screen, which is why they are counters and not list entries: a counter needs no sort rule, no valuation and no kph figure that means nothing.
 
 ## The pages
 

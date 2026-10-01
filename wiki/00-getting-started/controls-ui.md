@@ -25,18 +25,18 @@ No drag-drop, no tiles. Everything is a line of text.
 ```
 -- INVENTORY ---------------------------- 142 / 200 --
 [rare]   Ashen Maul of Fracture          +18% pen  [ARMOUR HIGH]
-         kills/h 118-131   up +12% vs equipped
+         kph 118-131   up +12% vs equipped
 [rare]   Warden's Grips                   +1 armour shred, +9% tempo
-         kills/h 121-134   up +7% vs equipped
+         kph 121-134   up +7% vs equipped
 [magic]  Ember Sash                       +14% fire
-         kills/h  96-112   down -24% vs equipped      (FIRE-RESIST ZONE)
+         kph  96-112   down -24% vs equipped      (FIRE-RESIST ZONE)
 -- 3 more --
 ```
 
 **Principles for one line:**
 
 1. **Name + affixes** (identity)
-2. **kills/h as a band**, never a single number (D14)
+2. **kph as a band**, never a single number (D14)
 3. **Compared against what is equipped**, as a percentage — not two raw numbers side by side
 4. **The condition that makes it matter, in words** — this is what text does that a graphical UI struggles with
 
@@ -51,7 +51,7 @@ No drag-drop, no tiles. Everything is a line of text.
 | 1 proc 30% | ×1.3 | ±9% |
 | heavy proc 5% +2000% | ×2.0 | **±57%** |
 
-**Text exposes variance head-on.** Print `124.7 kills/h` and the player sees a jittering number, concludes the build is broken, and stops trusting the game.
+**Text exposes variance head-on.** Print `124.7 kph` and the player sees a jittering number, concludes the build is broken, and stops trusting the game.
 
 → print `118-131` instead · **the width of the band is the feedback**
 
@@ -132,6 +132,6 @@ This is something a graphical UI finds very hard (it needs a designed symbol sys
 
 - [ ] **O9** render level (plain / ANSI / styled markup) — blocks this whole file
 - [ ] **O10** the verb in 60 seconds — blocks the Report and Inventory screens
-- [ ] **a second readout for drop rate** - the whole game is currently measured by one number, kills/h, and `BAND-DISPLAY` covers that one. If drop rate scales with clear rate, the UI needs a second band beside it -> see [proposals B13](../10-design/proposals.md)
+- [ ] **a second readout for drop rate** - the whole game is currently measured by one number, kph, and `BAND-DISPLAY` covers that one. If drop rate scales with clear rate, the UI needs a second band beside it -> see [proposals B13](../10-design/proposals.md)
 - [ ] band format: `118-131` or `118~131 (+-5%)` — which reads faster
-- [ ] inventory sort order: by kills/h delta? by zone tag? by when it dropped?
+- [ ] inventory sort order: by kph delta? by zone tag? by when it dropped?

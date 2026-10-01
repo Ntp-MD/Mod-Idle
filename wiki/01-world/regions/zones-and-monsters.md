@@ -118,17 +118,17 @@ Authoring cost caps archetypes / weapon bases at 4 → **cut to 4**.
 
 ## 6. Progression — how you unlock when there is no death
 
-**Answer: unlock on a kills/h threshold, not on survival.**
+**Answer: unlock on a kph threshold, not on survival.**
 
 | tier | Unlocks when | Reward |
 |---|---|---|
 | 1 (zone 1) | start | — |
-| 2 (zones 2-3) | kills/h on the previous tier >= 80% of optimum | new base type + new affix group |
+| 2 (zones 2-3) | kph on the previous tier >= 80% of optimum | new base type + new affix group |
 | 3 (zones 4-5) | same | — |
 | 4 (zones 6-8) | same | first crafted slot |
 | 5 (zones 9-10, contract) | **opt in** — not a threshold | contract currency |
 
-Reason: D3 ("no death offline → the currency of losing is time"). Unlocking on survival would make players too afraid to log in, which is a paywall in a game with no money. A kills/h threshold forces you to *gain power* to progress rather than to hide.
+Reason: D3 ("no death offline → the currency of losing is time"). Unlocking on survival would make players too afraid to log in, which is a paywall in a game with no money. A kph threshold forces you to *gain power* to progress rather than to hide.
 
 **Contracts are always opt-in**, because `CONTENT-TWOTIER` only permits a full cliff while the player is awake and choosing.
 

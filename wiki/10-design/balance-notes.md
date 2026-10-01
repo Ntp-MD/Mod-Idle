@@ -44,7 +44,7 @@ There are only two kinds of power, and they have completely different rules.
 
 ### Derivation: what armour value produces a −20% penalty?
 
-kills/h is linear in effective dps (`kills = 3600·e/hp`), so a −20% kills/h budget is a −20% effective-dps budget.
+kph is linear in effective dps (`kills = 3600·e/hp`), so a −20% kph budget is a −20% effective-dps budget.
 
 PoE's formula, `DR(A, D) = A / (A + 5·D)`:
 

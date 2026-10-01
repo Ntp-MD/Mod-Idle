@@ -44,7 +44,7 @@ Decided 2026-10-01. Effect on the project:
 | Gains | Loses |
 |---|---|
 | No art pipeline / animator / UI designer, matching D9 (solo, no revenue) | Removes the *visual* share of loot satisfaction → need a replacement |
-| `+12% kills/h in the Ashwood Hollow` is a sentence, which fits D4 exactly | Render fidelity still has to be decided (O9) and it might reintroduce UI work |
+| `+12% kph in the Ashwood Hollow` is a sentence, which fits D4 exactly | Render fidelity still has to be decided (O9) and it might reintroduce UI work |
 | sort / diff fall out for free, so the "never-counted UI work" shrinks | **`evidence/08` matters more**: +5.3% invisible, with no visuals to soften it |
 
 → **Gate 5 moves from "check 5" to risk number one** — see [thesis.md §0.1](pillars-vision.md)

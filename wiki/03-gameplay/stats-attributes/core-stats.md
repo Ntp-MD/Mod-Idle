@@ -16,7 +16,7 @@
 | **PRECISION** | hit chance + block-break | evasion · block | — needs one more layer |
 | **MASTERY** | infliction · amplify consumption · phase-break · cleave | amplify window · regen phase · pack | ailment immunity |
 
-Derived (computed, not chosen): `maxHit`, `interval`, `hitChance`, `inflictChance`, `amplifyMagnitude`, `kills/h`
+Derived (computed, not chosen): `maxHit`, `interval`, `hitChance`, `inflictChance`, `amplifyMagnitude`, `kph`
 
 Tag (not a number): element type · status type · pen type · target cap
 

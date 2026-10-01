@@ -86,7 +86,7 @@ Find one with `rg -n "AXIS-LAYER" .`
 
 | ID | Rule | Evidence | status |
 |---|---|---|---|
-| `BAND-DISPLAY` | show kills/h as a **p5-p95 band**, not a mean — text exposes variance head-on, and a single number reads as a broken build · the band's width is the feedback, and it matches `CONTENT-TWOTIER` (idle-safe narrow, contract wide) | `evidence/01` + D14 | ok |
+| `BAND-DISPLAY` | show kph as a **p5-p95 band**, not a mean — text exposes variance head-on, and a single number reads as a broken build · the band's width is the feedback, and it matches `CONTENT-TWOTIER` (idle-safe narrow, contract wide) | `evidence/01` + D14 | ok |
 | `TAGGED-VERBATIM` | every zone-conditional affix must state its condition **in words**, never left to guess — the number says *how much*, the text says *when* · this rescues `SLOT-BUDGET`, which says +5.3% is invisible on the 4th slot of a shared pool | `evidence/08` + D13 | ok |
 | `TEXT-VERIFIABLE` | every number the player sees must come from the sim and be traceable — no value "guessed to look good", and no value without `provenance` (measured/sourced/assumed/opinion) | `evidence/05`: 12/18 generic mods in one model = dead letters | ok |
 | `NO-DRAG` | interaction must work through **reading + choosing** alone · no drag-drop, no tiles, no positional arrangement — if a design needs drag, it also needs a non-drag alternative | D2 (mobile-first) + auto-salvage handles bulk | ok |

@@ -109,7 +109,7 @@ The proposals page is now nearly empty — the hand system, eleven weapons, ten 
 | [~] | [`combat/damage-pipeline.md`](03-gameplay/combat/damage-pipeline.md) | 16 steps · **2 steps missing** (`eva-pen`, `crit`) |
 | [ ] | `core-loop.md` | **waits on O10** |
 | [~] | [`stats-attributes/core-stats.md`](03-gameplay/stats-attributes/core-stats.md) | 4 axes · **waits on O1** |
-| [~] | `leveling-progression/` | inside zones (unlock on kills/h) · not split out yet |
+| [~] | `leveling-progression/` | inside zones (unlock on kph) · not split out yet |
 | [~] | [`economy/economy.md`](03-gameplay/economy/economy.md) | **zero evidence** · every item is `prov` |
 | [ ] | `classes-jobs/` `skills-abilities/` `crafting-gathering/` `party-multiplayer/` `mini-games/` | |
 

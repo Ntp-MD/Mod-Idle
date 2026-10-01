@@ -91,7 +91,7 @@ Zone / Monster
   tier         -> amplify scales down with tier (`AMPLIFY-TIERFALL`)
 
 CoreStat axes -> a list in data (O1)
-Derived       -> maxHit, interval, hitChance, inflictChance, amplifyMagnitude, kills/h
+Derived       -> maxHit, interval, hitChance, inflictChance, amplifyMagnitude, kph
 Resource      -> Momentum: gainPerSec, cap, regen, drain
 ```
 
