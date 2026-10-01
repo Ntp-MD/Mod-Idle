@@ -6,28 +6,31 @@
 
 ## The pool
 
-**Offensive gear — 6 kinds**
+⚠️ **The "axis it serves" column is withdrawn.** There is no 4-axis system any more — there are six core stats: **STR DEX AGI INT WIS LUK**. See [core-stats](../03-gameplay/stats-attributes/core-stats.md). `atk-flat` is now held by **STR** (physical) and **INT** (magic).
 
-| affix | form | axis it serves | zone it answers |
+**Offensive gear — 5 kinds, after the core-stat rework**
+
+| affix | form | stat it serves | zone it answers |
 |---|---|---|---|
-| `atk%` | % | FORCE | any |
-| `atk-flat` | flat | FORCE | any |
-| `crit-rate` | **% only** | PRECISION (proposed) | any |
-| `crit-damage` | **% only** | FORCE (proposed) | any |
-| `def-pen` | flat | FORCE | armour zones |
-| `eva-pen` | flat | PRECISION | evasion zones |
+| `crit-damage` | **% only** | none yet | any |
+| `def-pen` | flat | STR / INT | armour zones |
+| `eva-pen` | flat | DEX | evasion zones |
+| `atk%` | % | **none — see below** | any |
+| ~~`atk-flat`~~ | flat | **absorbed by STR / INT** | — |
 
 **Defensive gear — 4 kinds**
 
-| affix | form | status |
+| affix | form | stat it serves |
 |---|---|---|
-| `hp` | flat + % | **blocked, see below** |
-| `def` | flat + % | **blocked** |
-| `eva%` | flat + % | **blocked** |
+| `hp` | flat + % | none — sustain, no death exists |
+| `def` | flat + % | AGI (cuts incoming `push`) |
+| `eva%` | flat + % | AGI |
 
-`crit-rate` and `crit-damage` are **percentage only**, matching PoE where flat crit does not exist. Everything else has both forms.
+**Crit rate is no longer an affix** — LUK holds it as a core stat.
 
-**Five tiers per affix.**
+`crit-damage` and `crit-rate` are **percentage only**, matching PoE where flat crit does not exist. Everything else has both forms.
+
+**Five tiers per affix.** Tier 1 is the weakest roll.
 
 ---
 
@@ -56,16 +59,16 @@ RESOLVED. The value is tempo, not survival: `def`/`eva` cut incoming `push`, so 
 
 → see [glossary](../00-getting-started/glossary.md)
 
-### 2. Crit has no axis
+### 2. Crit — half of it is a core stat now
 
-| Axis | What it is |
-|---|---|
-| FORCE | per-hit damage |
-| CADENCE | attack interval |
-| PRECISION | hit chance + block-break |
-| MASTERY | infliction / amplify consumption |
+| | held by | form |
+|---|---|---|
+| crit **rate** | **LUK** | % |
+| crit **damage** | **nobody** | % |
 
-**Nothing holds crit.** Proposed split: `crit-rate` → PRECISION (it is a chance, like hit chance) · `crit-damage` → FORCE (a burst multiplier on a hit that already landed).
+LUK holds crit rate because a classic stat list has no other home for it, and "luck" is the word players already expect to mean it.
+
+**`crit-damage` has no home.** It is a burst multiplier on a hit that already landed, which is a different job from crit rate. Six classic stats do not cover it.
 
 ### 3. `eva-pen` is missing from the calculation order
 
@@ -110,6 +113,6 @@ There is a version worth considering: flat affixes **reward having a good base**
 - [x] ~~the defensive half~~ → `def`/`eva` keep tempo up by cutting incoming `push`. Their value is time, not survival. See [glossary](../00-getting-started/glossary.md)
 - [x] ~~tier numbering direction~~ → follow PoE, tier 1 is the weakest roll
 - [x] ~~line count per rarity~~ → common 2-4 · rare 4-5 · unique 5 + effect. See [rarity-system.md](rarity-system.md)
-- [ ] crit placement in the pipeline and in the axes — proposed `crit-rate` → PRECISION, `crit-damage` → FORCE
+- [x] ~~crit placement in the axes~~ → `crit-rate` is now **LUK**, a core stat. `crit-damage` has no home, still open
 - [ ] `eva-pen` at step 2 — the pipeline has one penetration step and cannot express two
-- [ ] `atk-flat` versus `atk%` — both land in the same place, so flat has no reason to exist yet
+- [x] ~~`atk-flat` versus `atk%`~~ → `atk-flat` is **absorbed by STR/INT** · the "both land in the same place" problem is gone because one form no longer exists

@@ -1,44 +1,69 @@
 # Spec: Combat
 
-> Back to: [README.md](../../index.md) · rules: [rules.md](../../10-design/systems-specs/design-rules.md) · **Status: draft — awaiting O1**
-> Calculation order lives in [spec-core.md](../combat/damage-pipeline.md)
+> Back to: [index.md](../../index.md) · rules: [rules.md](../../10-design/systems-specs/design-rules.md) · **Status: draft**
+> Calculation order lives in [damage-pipeline.md](../combat/damage-pipeline.md)
 
-⚠️ This whole file is written on the assumption of **4 axes**, which is **not decided** — see O1 in [decisions.md](../../10-design/game-design-document.md). If O1 comes out as 3, whatever is unrelated gets deleted rather than patched.
+⚠️ **The 4-axis system (FORCE / CADENCE / PRECISION / MASTERY) is withdrawn.** O1 is answered: there are **six classic stats** instead. Everything downstream that was written against axis names has to be re-pointed at the stat that now holds the job — see [affected documents](#8-what-this-rework-breaks).
 
 ---
 
-## 1. Core stats (draft — awaiting O1)
+## 1. Core stats — DECIDED
 
-| Axis | Which slot of the formula it enters | Layers it answers | Punished by |
-|---|---|---|---|
-| **FORCE** | per-hit damage (the hit size in the DR curve) | armour hit-size · adapting armour | evasion · block |
-| **CADENCE** | attack interval + push recovery (tempo) | push/tempo · (pack, by intent) | every form of armour |
-| **PRECISION** | hit chance + block-break | evasion · block | — needs one more layer |
-| **MASTERY** | infliction · amplify consumption · phase-break · cleave | amplify window · regen phase · pack | ailment immunity |
+| stat | gives | also gives |
+|---|---|---|
+| **STR** | flat attack | — |
+| **DEX** | attack accuracy | ailment chance |
+| **AGI** | attack speed | evasion |
+| **INT** | flat magic attack | — |
+| **WIS** | skill cooldown reduction | — |
+| **LUK** | crit rate | drop rate |
 
-Derived (computed, not chosen): `maxHit`, `interval`, `hitChance`, `inflictChance`, `amplifyMagnitude`, `kph`
+Derived (computed, not chosen): `maxHit`, `matk`, `interval`, `hitChance`, `inflictChance`, `kph`
 
 Tag (not a number): element type · status type · pen type · target cap
 
-Resource: **one only**, Momentum (built by hits / spent by trigger, auto-spent while offline) — a second resource would make valuation branch
+Resource: **one only**, Momentum
 
 ---
 
-## 2. The axis set that was cut: 3 axes (MIGHT/GRACE/FOCUS)
+## 2. Attack rate and the tick rule
 
-`evidence/07` measured 3 axes against 8 layers and FOCUS got exactly 1 layer of 8 — a violation of `AXIS-LAYER` from the start. Ablation: removing armour kills MIGHT (0/13) · removing evade kills MIGHT (GRACE 12/13) · removing every layer kills MIGHT+FOCUS.
+Attacks are counted per second. **A skill costs one tick**, so the rate of skills is capped by attack speed.
 
-Win counts for the 4-axis version (7/8 rows decisive, no degenerate rows):
+```
+attacks/s   = 1 / interval
+skills/s    = min( 1 / cooldown , attacks/s )
+```
+
+**Exception — trigger-per-chance effects cost no tick.** These are the unique special effects (see [rarity](../../04-items/rarity-system.md)): *Thunder Strike* — 25% chance per Trick Attack to trigger. They ride along on an attack that already happened.
+
+### Why the exception matters
+
+Without it, every skill build is gated by AGI and WIS is dead stat. With it, a unique effect can add damage that **no other build can reach**, and it does not compete for the tick.
+
+**⚠️ Unresolved:** if `1/cooldown` is already faster than `attacks/s`, then WIS does nothing for that skill. WIS only pays off where cooldown is the binding constraint. That may be fine, but it needs a deliberate answer rather than an accident.
+
+---
+
+## 3. Why the 4-axis and 3-axis versions were both abandoned
+
+Kept for the record, because the reasoning still applies to whatever replaces them.
+
+`evidence/07` measured 3 axes (MIGHT/GRACE/FOCUS) against 8 layers and FOCUS got exactly 1 layer of 8 — a violation of `AXIS-LAYER`. Ablation: removing armour kills MIGHT (0/13) · removing evade kills MIGHT (GRACE 12/13) · removing every layer kills MIGHT+FOCUS.
+
+Win counts for 4 axes (7/8 rows decisive, no degenerate rows):
 
 ```
 POWER 2 · MASTERY 3 (1 of which should be CADENCE) · PRECISION 2 · CADENCE 1
 ```
 
-→ **CADENCE winning only once is exactly the case O1 has to re-measure.** If it still wins once across 3 runs, cut the axis.
+**CADENCE won once.** That was the argument for cutting it, and it is why inventing an axis set here was the wrong path — the axes did not fit the content.
+
+Six classic stats are not an abstraction over content layers. They are the vocabulary players already own from every other RPG, and each one names a job plainly: **STR hits, AGI is fast, DEX is accurate, LUK is lucky, INT is smart, WIS is ready.**
 
 ---
 
-## 3. The variance constraint — the heart of the whole project
+## 4. The variance constraint — the heart of the whole project
 
 `PROC-WEIGHT` is not an aesthetic choice. It is the condition that makes valuation cheap:
 
@@ -57,7 +82,7 @@ At session level, 8h (48,000 hits) gives ±0.1-1.4% in every case → variance i
 
 ---
 
-## 4. The formula worth stealing from PoE
+## 5. The formula worth stealing from PoE
 
 ```
 DR(A, D_raw) = A / (A + 5·D_raw)     cap 90%
@@ -73,7 +98,7 @@ But the cliff has not disappeared, it has **moved** — to the magnitude of the 
 
 ---
 
-## 5. Ailment — a mechanism with built-in anti-inflation
+## 6. Ailment — a mechanism with built-in anti-inflation
 
 > *"The chance to inflict ailments depends on the pre-mitigation damage of the hit and the target's ailment threshold"*
 > *"Does not stack, only highest damage instance is active"*
@@ -87,7 +112,7 @@ The first hands over a coupling that is genuinely wanted: small fast hits infuse
 
 ---
 
-## 6. Momentum — the single resource
+## 7. Momentum — the single resource
 
 | | value |
 |---|---|
@@ -101,8 +126,43 @@ The first hands over a coupling that is genuinely wanted: small fast hits infuse
 
 ---
 
-## 7. Open
+## 8. What this rework breaks
 
-- [ ] O1 — 3 or 4 axes · blocks this whole file
+Every document that named an axis now points at a stat instead.
+
+| was | now | where |
+|---|---|---|
+| FORCE (per-hit damage) | **STR** for physical, **INT** for magic | [affixes](../../04-items/affixes.md) |
+| CADENCE (attack interval) | **AGI** | [affixes](../../04-items/affixes.md) |
+| PRECISION (hit chance) | **DEX** | [affixes](../../04-items/affixes.md) |
+| MASTERY (infliction) | **DEX** (ailment chance) | [affixes](../../04-items/affixes.md) |
+| crit rate | **LUK** | [affixes](../../04-items/affixes.md) |
+| crit damage | **nobody holds it** — still open | [affixes](../../04-items/affixes.md) |
+| evasion | **AGI** | [affixes](../../04-items/affixes.md) |
+| `atk-flat` affix | **absorbed by STR / INT** — see below | [affixes](../../04-items/affixes.md) |
+| `atk%` affix | **nobody holds it** — see below | [affixes](../../04-items/affixes.md) |
+| 4 layers in [balance-notes](../../10-design/balance-notes.md) | 6 stats | same file |
+| DIM-PAIRING pairs | need re-derivation against 6 stats | [content-dimensions](../../10-design/systems-specs/content-dimensions.md) |
+| O1 — 3 or 4 axes | **closed** | — |
+| window kinds, one axis each | one stat each | [design-rules](../../10-design/systems-specs/design-rules.md) |
+
+### Two holes this creates
+
+**1. There is no percentage damage stat any more.** The old pool had `atk%` and `atk-flat`. `atk-flat` is now STR/INT, but `atk%` has no home — six classic stats cover flat damage, speed, accuracy, cooldown, crit rate and evasion, and none of them is "increase damage".
+
+Either percentage damage becomes an **affix** again, or it does not exist and every damage increase is flat. That is a real fork, not a formatting question.
+
+**2. `crit-damage` has no home.** LUK holds crit *rate*. Crit damage is a different job and nothing holds it.
+
+---
+
+## 9. Open
+
+- [x] ~~O1 — 3 or 4 axes~~ → **six classic stats: STR DEX AGI INT WIS LUK**
+- [ ] **`atk%`** — no core stat holds it. Affix again, or does not exist?
+- [ ] **`crit-damage`** — LUK holds rate only. Where does damage go?
+- [ ] **WIS can be a dead stat** — if cooldown is already faster than attack rate, reducing it changes nothing
+- [ ] O5 — does ailment stay · blocks §6
+- [ ] multi-target engine (D6) is not covered here — it is a precondition for the pack layer, see [content-dimensions](../../10-design/systems-specs/content-dimensions.md)
 - [ ] O5 — does ailment stay · blocks §5
 - [ ] multi-target engine (D6) is not covered here — it is a precondition for the pack layer, see [spec-content.md](../../10-design/systems-specs/content-dimensions.md)
