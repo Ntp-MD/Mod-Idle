@@ -109,7 +109,7 @@ There is a version worth considering: flat affixes **reward having a good base**
 
 ## Open
 
-- [ ] the no-death question, which decides whether the defensive half exists
+- [ ] CONFIRMED: `def`/`eva` keep tempo up by cutting incoming `push`. Their value is time, not survival. See [glossary](../00-getting-started/glossary.md)
 - [ ] crit placement in the pipeline and in the axes
 - [ ] `eva-pen` at step 2
 - [ ] tier numbering direction

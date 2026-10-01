@@ -91,7 +91,7 @@ The passive tree does not just compete with weapons for power, it competes with 
 
 ## The largest open question in items
 
-**The defensive affix half contradicts the no-death rule.**
+**RESOLVED - the defensive half stays.**
 
 `hp`, `def` and `eva%` are pure mitigation. `DEF-TEMPO` requires defensive stats to express as tempo, because there is no death offline and the currency of losing is time.
 
