@@ -9,17 +9,33 @@
 
 ## 1. Core stats — DECIDED
 
-| stat | gives | also gives |
-|---|---|---|
-| **STR** | flat attack | — |
-| **DEX** | attack accuracy | ailment chance |
-| **AGI** | attack speed | evasion |
-| **INT** | flat magic attack | mana per second |
-| **WIS** | skill cooldown reduction | — |
-| **LUK** | crit rate | drop rate |
-| **VIT** | flat HP | HP regen per second |
+**The stat list is Ragnarok Online. The attack-speed half is Melvor.**
+
+| stat | source | gives | also gives |
+|---|---|---|---|
+| **STR** | RO | flat attack | — |
+| **DEX** | RO | attack accuracy | ailment chance |
+| **AGI** | RO | **attack speed (Melvor)** | evasion |
+| **INT** | RO | flat magic attack | mana per second |
+| **WIS** | RO | skill cooldown reduction | — |
+| **LUK** | RO | crit rate | drop rate |
+| **VIT** | RO | flat HP | HP regen per second |
 
 Seven stats, in the order a player would list them: **STR DEX AGI INT WIS LUK VIT**.
+
+### Why this split of sources
+
+**The names and the jobs are Ragnarok's.** RO is the reference every idle-RPG player already knows, and its stat list is six of these seven. Inventing names would have cost vocabulary for nothing.
+
+**The attack-speed formula is Melvor's, not RO's.** RO gives AGI a *flat* attack-speed bonus and a per-class cap — that ceiling is a design that only works if a player is watching the screen, which is wrong for this game. Melvor's is derived from the interval, which is the thing an idle game actually has to compute:
+
+```
+attacks/s = 1 / interval        where interval is reduced by AGI
+```
+
+So the stat is RO's and the arithmetic behind it is Melvor's. That is the whole point of the split — **take the vocabulary, take the math from whichever game solved that specific problem for an idle context.**
+
+**Where this departs from both:** RO has no percentage damage and Melvor collapses it into one DPS number. `atk%` has no home here yet.
 
 Derived (computed, not chosen): `maxHit`, `matk`, `interval`, `hitChance`, `inflictChance`, `kph`, `maxMana`, `manaRegen`
 
@@ -113,7 +129,7 @@ POWER 2 · MASTERY 3 (1 of which should be CADENCE) · PRECISION 2 · CADENCE 1
 
 **CADENCE won once.** That was the argument for cutting it, and it is why inventing an axis set here was the wrong path — the axes did not fit the content.
 
-Classic stats are not an abstraction over content layers. They are the vocabulary players already own from every other RPG, and each one names a job plainly: **STR hits, AGI is fast, DEX is accurate, LUK is lucky, INT is smart, WIS is ready, VIT is tough.**
+Classic stats are not an abstraction over content layers. They are the vocabulary players already own, and each one names a job plainly: **STR hits, AGI is fast, DEX is accurate, LUK is lucky, INT is smart, WIS is ready, VIT is tough.** That vocabulary is Ragnarok's, taken wholesale rather than reinvented.
 
 ---
 
