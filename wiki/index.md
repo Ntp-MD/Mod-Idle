@@ -74,11 +74,11 @@ Warning sign: *"Astrology was reworked in V1.1 and no longer has random modifier
 | **wiki pages** | decided enough to reference · cite these |
 | **[10-design/proposals.md](10-design/proposals.md)** | **ideas still being argued · do NOT cite** |
 
-The proposals page holds the left/right hand system, the twelve weapons, the ten affix kinds, the accessory slots and the rarity change. None of it is settled.
+The proposals page is now nearly empty — the hand system, eleven weapons, ten affix kinds, accessory slots and rarity have all moved into 04-items. One loose end remains (the zone table's missing window-kind column).
 
 ---
 
-## Structure — 60 pages, 13 filled
+## Structure — 60 pages, 17 filled
 
 `[x]` has content · `[~]` has content but has never been measured · `[ ]` empty because it has not been designed
 
@@ -116,9 +116,11 @@ The proposals page holds the left/right hand system, the twelve weapons, the ten
 ### 04 Items
 | | page | |
 |---|---|---|
-| [~] | [`items-and-slots.md`](04-items/items-and-slots.md) | 5 item types · 10 slots |
-| [ ] | `weapons/` `affixes.md` | **designed but still sitting in proposals.md** — 12 weapons, 10 affix kinds |
-| [ ] | `rarity-system.md` | **unresolved** · was rarity=line count, now common/rare/epic/unique |
+| [~] | [`items-and-slots.md`](04-items/items-and-slots.md) | 5 item types · additive budget counted in slots · no auto-equip |
+| [~] | [`weapons/weapons.md`](04-items/weapons/weapons.md) | **eleven** weapons · hand rules · dual wield |
+| [~] | [`affixes.md`](04-items/affixes.md) | **ten** kinds, bound to a position · four open problems |
+| [~] | [`accessories/accessories.md`](04-items/accessories/accessories.md) | six slots · shield · not matched to layers yet |
+| [~] | [`rarity-system.md`](04-items/rarity-system.md) | **unresolved** · was rarity=line count, now common/rare/epic/unique |
 | [ ] | `armor/` `consumables/` `materials/` `key-items/` `sets-equipment-bonus/` `accessories/` | |
 
 ### 05 Bestiary
@@ -177,7 +179,7 @@ The proposals page holds the left/right hand system, the twelve weapons, the ten
 
 ## What is missing, honestly
 
-**60 pages · 13 filled · 47 empty**
+**60 pages · 17 filled · 43 empty**
 
 | Section | State |
 |---|---|
