@@ -238,7 +238,9 @@ Either percentage damage becomes an **affix** again, or it does not exist and ev
 
 ---
 
-## 9. Open
+## 9. Open — parked until polish
+
+> **These are deliberately unresolved.** We are still choosing ideas and concepts. Depth work — the exact numbers, the derived curves, the interaction orders — waits until the game-design polish pass, before development starts. Nothing here blocks the next design conversation.
 
 - [x] ~~O1 — 3 or 4 axes~~ → **seven classic stats: STR DEX AGI INT WIS LUK VIT**
 - [x] ~~Is mana the second resource?~~ → **yes.** A skill costs a tick *and* mana. See §2

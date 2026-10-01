@@ -77,6 +77,8 @@ The MVP was 4 slots (Weapon, Grip, Gloves, Chest). Accessories take it to **10**
 
 ## Open
 
+> **Parked until polish.** Concept work is still in progress; exact numbers and interaction order wait for the design polish pass, before development.
+
 - [ ] match the six slots to layers, and state what happens when two share one
 - [ ] is Cloak redundant with Gloves, and is Belt redundant with Spear?
 - [ ] two rings answering two unrelated things is not a set — should they pair?

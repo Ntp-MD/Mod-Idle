@@ -94,6 +94,8 @@ There is a fourth route that was never named: **let the weapon be the second axi
 
 ## Open
 
+> **Parked until polish.** Concept work is still in progress; exact numbers and interaction order wait for the design polish pass, before development.
+
 - [ ] **O6** — how many base types survive. The cap of 4 was set for authoring cost, and this list is 11.
 - [ ] the unique cap was derived as `4 base types x 4 axes = 16` and is now stale → see [rarity-system.md](../rarity-system.md)
 - [ ] no loot table: which zones drop which weapons is unknown, and it is gated on O6

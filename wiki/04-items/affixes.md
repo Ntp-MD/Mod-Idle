@@ -114,5 +114,7 @@ There is a version worth considering: flat affixes **reward having a good base**
 - [x] ~~tier numbering direction~~ → follow PoE, tier 1 is the weakest roll
 - [x] ~~line count per rarity~~ → common 2-4 · rare 4-5 · unique 5 + effect. See [rarity-system.md](rarity-system.md)
 - [x] ~~crit placement in the axes~~ → `crit-rate` is now **LUK**, a core stat. `crit-damage` has no home, still open
+> **Parked until polish.** Concept work is still in progress; exact numbers and interaction order wait for the design polish pass, before development.
+
 - [ ] `eva-pen` at step 2 — the pipeline has one penetration step and cannot express two
 - [x] ~~`atk-flat` versus `atk%`~~ → `atk-flat` is **absorbed by STR/INT** · the "both land in the same place" problem is gone because one form no longer exists

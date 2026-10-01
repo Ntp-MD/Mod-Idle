@@ -110,6 +110,8 @@ Answering this decides a third of the affix pool, and it is the one question in 
 
 **Open**
 
+> **Parked until polish.** Concept work is still in progress; exact numbers and interaction order wait for the design polish pass, before development.
+
 - [ ] crit has no axis and no place in the pipeline — proposed `crit-rate` → PRECISION, `crit-damage` → FORCE
 - [ ] `atk%` against `atk-flat` — both land in the same place in the current pipeline, so flat has no reason to exist
 - [ ] `eva-pen` needs to sit at step 2, before hit chance. The pipeline has one penetration step and cannot express it
