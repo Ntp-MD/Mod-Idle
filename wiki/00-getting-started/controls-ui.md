@@ -132,5 +132,6 @@ This is something a graphical UI finds very hard (it needs a designed symbol sys
 
 - [ ] **O9** render level (plain / ANSI / styled markup) — blocks this whole file
 - [ ] **O10** the verb in 60 seconds — blocks the Report and Inventory screens
+- [ ] **a second readout for drop rate** - the whole game is currently measured by one number, kills/h, and `BAND-DISPLAY` covers that one. If drop rate scales with clear rate, the UI needs a second band beside it -> see [proposals B13](../10-design/proposals.md)
 - [ ] band format: `118-131` or `118~131 (+-5%)` — which reads faster
 - [ ] inventory sort order: by kills/h delta? by zone tag? by when it dropped?

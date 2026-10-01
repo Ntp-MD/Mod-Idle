@@ -46,18 +46,15 @@ Ten kinds also fits what is actually implementable. `evidence/06` found that add
 
 ## Four problems this pool creates
 
-### 1. The defensive half contradicts the no-death rule
+### 1. The defensive half has no purpose yet — one candidate answer
 
 `DEF-TEMPO` requires defensive stats to express as **tempo, not mitigation**, because there is no death offline and the currency of losing is time.
 
-But `hp`, `def` and `eva%` are pure mitigation. **If nothing can kill you, all three are worth zero.**
+But `hp`, `def` and `eva%` are pure mitigation, and **if nothing can kill you, all three are worth zero.**
 
-This has to be answered before the defensive half can exist: **does the player die while awake?**
+There is a proposed answer: **drop rate scales with clear rate**, so defensive stats raise your clear rate and therefore your drops. It does not require death, and it turns mitigation into an upgrade requirement.
 
-- If nothing kills you ever → cut the defensive pool and move the whole budget to offence
-- If you can die while awake → there must be a real cost to it, or the affixes are decoration
-
-⚠️ This is the single largest open question in items.
+→ See [proposals B13](../10-design/proposals.md). **The direction is agreed; the numbers are not.** Until it lands, the defensive half stays blocked.
 
 ### 2. Crit has no axis
 
