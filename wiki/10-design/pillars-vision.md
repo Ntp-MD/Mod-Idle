@@ -120,3 +120,36 @@ This section exists because these are **contradictions**, not answers. Do not re
 - **§8.1 sets MVP = 4 slots** but the Amulet was approved on the strength of `evidence/09` without being added to the MVP set → spec-items.md must decide whether to expand to 5 or drop the Amulet from the MVP.
 
 Both sat in the original document with nobody noticing, because they lived in different sections. That is the kind of drift the file split exists to catch.
+
+---
+
+## 4. Melvor, and what B13 borrows from it
+
+The question "should this work like Melvor?" has a different answer per part of the design.
+
+### What Melvor already does, and B13 is that
+
+Melvor's zones are a ladder where the harder zone pays better and you simply have to be strong enough to survive it. There is no yield penalty for failing — **you just do not get there.**
+
+**B13 is Melvor's ladder plus a visible cost.** Melvor hides the failure by never letting you enter a zone you lose in; B13 lets you enter, and charges you in drop rate for being under-level.
+
+### Where B13 and Melvor genuinely differ
+
+| | Melvor | here |
+|---|---|---|
+| too weak for the zone | cannot enter | can enter, yield drops |
+| the decision | "is this zone safe?" | "is this zone worth the loss?" |
+| offline | safe zone only | safe zone never penalised |
+| failure feedback | **none** | the yield number itself |
+
+**This is the same argument as `CONTENT-TWOTIER`, one level down.** Melvor's answer is a gate before the zone. B13's answer is a price inside the zone.
+
+### The one thing worth stealing: Melvor has no death punishment and is better for it
+
+Melvor loses you nothing on death — you keep the session, you lose the time. That is the same `D3` position taken here, and it is why `D3` is worth keeping rather than re-deriving.
+
+### Where B13 adds something Melvor does not have
+
+Melvor has **no second axis**: every stat feeds one DPS number (§2.1 above, the item ceiling is ~50%). B13 creates a defensive build that is good for a different reason — it clears reliably — which is a decision Melvor cannot pose because defensive stats there are worth nothing.
+
+**This is the argument for B13 in one line:** it is the first mechanic in this project that a Melvor-style idle game structurally cannot express.
