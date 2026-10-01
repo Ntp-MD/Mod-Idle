@@ -113,6 +113,37 @@ Without a mana cost, INT's `mana/s` is a stat with nothing to spend it on, and t
 
 Without that exception, every skill build is gated by AGI and mana, and a unique effect has to compete for the same ticks. With it, a unique effect can add damage that **no other build can reach**, and it is immune to every gate that makes skills expensive.
 
+### Adapting Melvor's formula rather than copying it
+
+Melvor's real numbers, from its wiki:
+
+```
+maxHit  = floor( M × (2.2 + effLvl/10 + ((effLvl+17) × StrBonus)/640) )
+accRate = floor( (effLvl+9) × (BaseAccBonus + 64) × (1 + AccMod/100) )
+hit%    = 1 − TargetEvasion / (2 × AccRating)
+```
+
+**What is worth taking as-is:** three things, all of which are structural rather than cosmetic.
+
+| from Melvor | why it survives |
+|---|---|
+| **hit size vs armour** — `DR = A / (A + 5·D)` | creates burst vs tempo on its own, and needs no separate `push` rule. The 90% cap means no cliff |
+| **evasion as a subtraction** — `hit% = 1 − eva / (2·acc)` | eva can never reach 100%, so a high-evasion mob is never immune. That is a deliberate floor and it is already the right one |
+| **interval-based attacks** | the only clock an idle game can compute offline |
+
+**What is deliberately not taken: the three-tier accuracy split.** Melvor has `accRate` and `AccMod` as separate terms and a level term on top, so an accuracy affix can land in more than one place. That is the same collapsing failure the rest of this document keeps running into — the item ends up feeding one number.
+
+**The one adaptation that matters:** in Melvor, `StrBonus` is additive *inside* the maxHit formula and there is no percentage damage slot at all. So every damage affix lands in the same additive pool, which is exactly the `evidence` finding that 12 of 18 mods were generic.
+
+```
+Melvor:  StrBonus (additive)  ×  nothing
+ที่นี่:   STR flat (additive)   ×  ??? 
+```
+
+**The missing `???` is the only slot worth inventing here**, and it should be multiplicative rather than additive, because that is what makes the difference between a big hit and a many-hits build visible in the armour curve.
+
+⚠️ **Parked until polish.** The exact shape of that multiplier, and whether it is a stat or an affix, is a balance question — not a concept one. What is decided is that **one multiplicative damage slot must exist**, because without it there is no burst-vs-tempo axis and B13 loses half its meaning: a defensive build's advantage has to show up *somewhere*, and it cannot be in an additive pool.
+
 ---
 
 ## 3. Why the 4-axis and 3-axis versions were both abandoned
