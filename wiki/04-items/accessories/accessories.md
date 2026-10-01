@@ -1,6 +1,6 @@
 # Accessories
 
-> [index](../index.md) · [weapons](../weapons/weapons.md) · [affixes](../affixes.md) · [balance notes](../../10-design/balance-notes.md)
+> [index](../../index.md) · [weapons](../weapons/weapons.md) · [affixes](../affixes.md) · [balance notes](../../10-design/balance-notes.md)
 
 **Six slots. None of them is matched to a layer yet.** Status: slots exist, contents do not.
 

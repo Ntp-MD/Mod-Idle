@@ -73,7 +73,7 @@ Every field the model reads **must have a default** — otherwise it is bug clas
 ```
 Item
   baseTypeId   -> points at BaseType (attack speed, crit, damage range, implicit, skill grant)
-  rarity       -> magic | rare | ancestral | unique      (line count = rarity)
+  rarity       -> common | rare | epic | unique    (UNRESOLVED -- rarity-model.md)
   affixes[]    -> Affix   (positive only — `DOWNSIDE-PLACEMENT`)
   implicit[]   -> from the base type only — `BASETYPE-CARRIER`
   crafted[]    -> max 1 — `CRAFT-GUARANTEED`
@@ -128,7 +128,7 @@ assert(procWeight <= avgHit / 3)                  // `PROC-WEIGHT` — the valid
 const BUDGET = {
   MAXHIT_ENVELOPE: 0.25,   // `MAXHIT-CAP`      provenance: sourced (PoE2 caps at +25%)
   ADDITIVE_SLOTS: 2,       // `SLOT-BUDGET`    provenance: measured (evidence/08)
-  LINE_BUDGET: { rare: 4, ancestral: 6 },  // `LINE-BUDGET` provenance: sourced (D4)
+  LINE_BUDGET: { rare: 4, ancestral: 6 },  // STALE -- rarity model changed, see 04-items/rarity-system.md
   NOISE_FLOOR: 0.09,       // provenance: measured (evidence/01) — per-encounter variance
   PACK_EXP: 0.55,          // `PACK-FORMULA`   provenance: measured (evidence/04)
   MOMENTUM_FLOOR: 0.35,    // `MOM-FLOOR`      provenance: assumed — no evidence yet

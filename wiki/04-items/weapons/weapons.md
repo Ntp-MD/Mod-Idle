@@ -1,6 +1,6 @@
 # Weapons
 
-> [index](../index.md) · [affixes](../affixes.md) · [rarity](../rarity-system.md) · [accessories](../accessories/accessories.md) · [balance notes](../10-design/balance-notes.md)
+> [index](../../index.md) · [affixes](../affixes.md) · [rarity](../rarity-system.md) · [accessories](../accessories/accessories.md) · [balance notes](../../10-design/balance-notes.md)
 
 **Twelve weapons, no families, no art.** Status: designed, **never measured**, and awaiting **O6**.
 

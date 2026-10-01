@@ -70,7 +70,7 @@ And it lines up with D3 + `CONTENT-TWOTIER`:
 
 | Colour | Carries |
 |---|---|
-| rarity | magic / rare / ancestral / unique |
+| rarity | common / rare / epic / unique — **unresolved, see [rarity](../04-items/rarity-system.md)** |
 | **zone-conditional tag** | a number that only matters in that zone must be **emphasised**, or `TAGGED-VERBATIM` cannot work |
 | band | a wide band is a warning that the build is not stable |
 
