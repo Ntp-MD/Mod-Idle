@@ -107,9 +107,9 @@ There is a version worth considering: flat affixes **reward having a good base**
 
 ## Open
 
-- [ ] CONFIRMED: `def`/`eva` keep tempo up by cutting incoming `push`. Their value is time, not survival. See [glossary](../00-getting-started/glossary.md)
-- [ ] crit placement in the pipeline and in the axes
-- [ ] `eva-pen` at step 2
-- [ ] tier numbering direction
-- [ ] `atk-flat` versus `atk%`
-- [ ] line count per rarity — see [rarity-system.md](rarity-system.md), currently unresolved and blocking the whole budget
+- [x] ~~the defensive half~~ → `def`/`eva` keep tempo up by cutting incoming `push`. Their value is time, not survival. See [glossary](../00-getting-started/glossary.md)
+- [x] ~~tier numbering direction~~ → follow PoE, tier 1 is the weakest roll
+- [x] ~~line count per rarity~~ → common 2-4 · rare 4-5 · unique 5 + effect. See [rarity-system.md](rarity-system.md)
+- [ ] crit placement in the pipeline and in the axes — proposed `crit-rate` → PRECISION, `crit-damage` → FORCE
+- [ ] `eva-pen` at step 2 — the pipeline has one penetration step and cannot express two
+- [ ] `atk-flat` versus `atk%` — both land in the same place, so flat has no reason to exist yet

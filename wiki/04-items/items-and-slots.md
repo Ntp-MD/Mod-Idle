@@ -103,10 +103,16 @@ Answering this decides a third of the affix pool, and it is the one question in 
 
 ## Open
 
-- [ ] **does the player die while awake?** — decides whether the defensive affix half exists at all
-- [ ] rarity line budget — blocks everything in [affixes.md](affixes.md)
-- [ ] crit has no axis and no place in the pipeline
-- [ ] `atk%` against `atk-flat` — why does flat exist?
-- [ ] identity: is it 3 kinds or more? See the old measurement — 12 of 18 mods were generic
+**Closed**
+
+- [x] ~~does the player die while awake?~~ → no death at all. `def`/`eva` are worth their keep by cutting `push`, so kph holds up. See [glossary](../00-getting-started/glossary.md)
+- [x] ~~rarity line budget~~ → common 2-4 · rare 4-5 · unique 5 + effect · epic cut. See [rarity-system.md](rarity-system.md)
+
+**Open**
+
+- [ ] crit has no axis and no place in the pipeline — proposed `crit-rate` → PRECISION, `crit-damage` → FORCE
+- [ ] `atk%` against `atk-flat` — both land in the same place in the current pipeline, so flat has no reason to exist
+- [ ] `eva-pen` needs to sit at step 2, before hit chance. The pipeline has one penetration step and cannot express it
+- [ ] identity: is it 3 kinds or more? See the old measurement — 12 of 18 mods were generic. **B13 is a second axis that does not depend on affixes at all**
 - [ ] the unique cap was derived from 4 base types and is stale
 - [ ] no loot table per zone exists
