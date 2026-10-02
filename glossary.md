@@ -1,83 +1,103 @@
-# ศัพท์
+# Glossary
 
-คำที่ใช้ในไฟล์สเปกทั้งหมด ต้องใช้คำนี้ให้ตรงกัน ไม่งั้นแต่ละระบบจะตีความผิดกัน
+Terms used across all spec files must match exactly, otherwise systems will interpret each other incorrectly.
 
-# แกน 3 ชั้นของไอเทม
+# The 3 Layers of an Item
 
-ไอเทม 1 ชิ้น ตอบคำถามได้ 3 คำถาม แยกจากกันชัดเจน
+One item answers 3 separate questions, clearly separated.
 
-| ชั้น | ตอบคำถาม | กำหนดโดย |
+| Layer | Answers | Determined by |
 |---|---|---|
-| **Rarity** | มีกี่ช่อง affix | ชนิดของไอเทม (Common / Rare) |
-| **คุณภาพไอเทม** | แต่ละช่องจะได้ค่าในช่วงไหน | แหล่งที่ของตก (คุณภาพต่ำ / กลาง / สูง) |
-| **Tier** | ค่าในช่องนั้นอยู่ช่วงย่อยไหน | คุณภาพของไอเทม + ช่องนั้น |
+| **Rarity** | how many Mods | item type (Common / Rare) |
+| **Item quality** | value range for each Mod | drop source (low / mid / high quality) |
+| **Tier** | sub-range inside that Mod | Item quality + that Mod |
 
 ```
-Common · คุณภาพกลาง
+Common · mid quality
   ├── T3  Physical power flat  44-50
   ├── T2  Str flat             15-16
   └── T1  Dodge %              7
 ```
 
-- Rarity ไม่มีผลกับค่าที่สุ่มได้เลย มีผลแค่จำนวนช่อง
-- คุณภาพของไอเทม 1 ชิ้น เป็นค่าเดียวทั้งชิ้น ทุกช่องใช้ช่วงของคุณภาพนั้นเหมือนกัน
-- Tier เป็นของ **ไอเทม 1 ชิ้น** ไม่ใช่ของช่อง — ทุกช่องบนไอเทมนี้ถูกจำกัดช่วงเดียวกัน
+- Rarity has no effect on rolled values at all. It affects only Mod count.
+- Item quality of one item is a single value for the whole item. Every mod uses the same quality range set.
+- Tier belongs to **one item**, not to a Mod — every mod on this item is constrained to the same sub-range set.
 
-# คำที่ใช้บ่อย
+# Common Terms
 
-| คำ | หมายถึง |
+| Term | Meaning |
 |---|---|
-| **Rarity** | ความหายากของไอเทม มีแค่ Common กับ Rare ตอนนี้ · กำหนดจำนวนช่องเท่านั้น |
-| **คุณภาพไอเทม** (Item quality) | คุณภาพต่ำ / กลาง / สูง · กำหนดช่วงค่าของทุกช่องบนไอเทมนั้น · เทียบกับ ilvl ของ Path of Exile |
-| **Tier** | ช่วงย่อยภายในคุณภาพ · T1 ดีที่สุด · ตัวเลขยิ่งน้อยยิ่งดี · ไม่ใช่ตัวเลขระดับไอเทม |
-| **Affix** | ช่องสุ่ม 1 ช่อง เช่น `Physical power flat 45 (T2)` |
-| **Flat** | ค่าบวกตรง ๆ ไม่คูณอะไร · `+45` |
-| **%** | ตัวคูณเปอร์เซ็นต์ · `+12%` |
-| **Core stat** | str / vit / dex / agi / wis / int / lck · flat และ % สุ่มได้ทุกชิ้น |
-| **Offensive** | affix ฝ่ายโจมตี · ออกเฉพาะชิ้นอาวุธ |
-| **Defensive** | affix ฝ่ายป้องกัน · ออกเฉพาะชิ้นที่ไม่ใช่อาวุธ |
-| **ธาตุ** (Element) | fire / cold / lightning / poison / chaos · 1 ชิ้นมีได้ธาตุเดียว |
-| **คู่ต้านธาตุ** | ตัวคูณที่ธาตุหนึ่งทำกับอีกธาตุหนึ่ง · 0.60 คือถูกต้าน · 1.50 คือถูก weak |
-| **Weak** | innate element ของมอนสเตอร์ รับดาเมจธาตุนั้น ×1.5 |
-| **Cap** | เพดานค่าสูงสุด · ต้องมีเสมอสำหรับ crit / dodge / cdr / aspd / res **และต้องพิสูจน์ว่าแตะได้จากตาราง affix จริง** (cap ที่แตะไม่ได้ = ตัวเลขหลอก · ดูตาราง "แตะได้ไหม" ใน formula.md) |
-| **Alignment** | โอกาสยืนยันสถานะหรือธาตุ · มาจาก Dex |
-| **Physical power / Magic power** | ค่าดาเมจของตัวละครคำนวณจาก formula.md หัวข้อ 1-2 · **ไม่มี "base power ของอาวุธ"** คำนั้นถูกตัดออกจากระบบแล้ว ทุกอาวุธดึง power จากตัวละครอย่างเดียว |
-| **ค่า K** | ค่าคงที่ของเกมที่ต้องตั้งเอง เช่น K_STR = phys ต่อ Str 1 แต้ม · ผู้เล่นมองไม่เห็น |
-| **Mastery** | XP แยกตาม *ชนิดอาวุธ* 1-20 ระดับ · โบนัสชั้นขณะถือ (น้ำหนัก −1%/level · skill damage +0.5%/level ตั้งแต่ L5) และชั้นทั้งบัญชี (drop_rate +1% ต่อชนิดที่ ≥ L10) · **ไม่บวกดาเมจให้ชนิดอาวุธใด** เพื่อรักษา `weapon_mult` ให้ทุกชนิดเท่ากัน (equipment-weapon.md) |
-| **Innate element** | ธาตุประจำตัวของมอนสเตอร์ 1 ธาตุ · รับดาเมจธาตุนั้น x1.5 **และ** ตีเราเป็นธาตุนั้น (combat.md หัวข้อ 2) |
-| **พื้น / เพดานคุณภาพ** | ช่วงคุณภาพต่ำสุดและสูงสุดที่แหล่งที่ตกหนึ่งจะปล่อยได้ |
-| **Reroll** | คราฟชั้นที่สุ่มค่าใหม่ในช่องเดิม โดย tier ไม่เปลี่ยน |
-| **Refine** | คราฟชั้นที่ดัน tier ขึ้น 1 ขั้น |
-| **Ascend** | คราฟชั้นที่ยกคุณภาพขึ้น 1 ขั้น ทั้งชิ้น |
-| **DoT** | ดาเมจต่อเนื่องที่ค้างอยู่หลังตี · ทุก DoT รวมกันแล้วห้ามเกิน global DoT cap |
-| **Leech** | ดูดเลือดกลับเป็น % ของดาเมจที่เพิ่งตี |
-| **push** | เลือดหมดแล้วไม่ได้ตาย · แค่ถูกผลักออกจากการตีไปพัก `Max HP ÷ (hp_regen × 8)` วินาที แล้วกลับมาเอง · เป็นสิ่งเดียวที่เกมนี้ "เสีย" (combat.md หัวข้อ 4) |
-| **ไม่มีการตาย** | กติกาเดิมตั้งแต่ commit `908cbf7` · ค่าของฝั่งป้องกันมาจากเวลาที่ไม่เสีย ไม่ใช่จากการรอด · ถ้าจะกลับไปใช้การตาย ต้องเขียนเอกสารครึ่งฝั่งป้องกันใหม่ทั้งชุด |
-| **Base ของไอเทม** | โครงของ slot หนึ่ง (mail / plate / vestments …) · กำหนด **น้ำหนัก** และ **affix ไหนเป็น Primary** · ไม่ได้กำหนดจำนวนช่อง (นั่นคือ Rarity) และไม่ได้กำหนดค่าที่สุ่ม (นั่นคือ คุณภาพ + tier) · ดู item-base.md |
+| **Rarity** | Item Rarity. Only Common and Rare for now. Determines Mod count only. |
+| **Item quality** | low / mid / high. Determines the value range of every Mod on that item. Comparable to Path of Exile ilvl. |
+| **Tier** | Sub-range inside a quality. T1 is best. Lower number is better. Not an item level number. |
+| **Mod** | One random Mod, e.g. `Physical power flat 45 (T2)` |
+| **Flat** | Direct additive value, no multiplier. `+45` |
+| **%** | Percentage multiplier. `+12%` |
+| **Core stat** | str / vit / dex / agi / wis / int / lck. Flat and % can roll on every item. |
+| **Offensive** | Attack-side Mod. Rolls only on weapon items. |
+| **Defensive** | Defense-side Mod. Rolls only on non-weapon items. |
+| **Element** | fire / cold / lightning / poison / chaos. One item holds only one Element. |
+| **Counter element** | Multiplier one Element deals to another. 0.60 is resisted. 1.50 is Weak. |
+| **Weak** | A monster Innate element takes x1.5 damage from that Element. |
+| **Cap** | Maximum value ceiling. Always required for crit / dodge / cdr / aspd / res **and must be proven reachable from the real Mod tables** (an unreachable Cap is a fake number. See the reachability table in formula.md). |
+| **Alignment** | Chance to confirm a status or Element. Comes from Dex. |
+| **Physical power / Magic power** | Character damage values calculated from formula.md sections 1-2. **There is no "weapon Base power".** That term was removed from the system. All weapons draw power from the character only. |
+| **K value** | Hidden game constant set by design, e.g. K_STR = phys per 1 Str. Invisible to players. |
+| **Mastery** | Per *weapon type* XP, 20 levels. Bonus while equipped (weight -1%/level. skill damage +0.5%/level from L5) and account-wide (drop_rate +1% per type at >= L10). **Adds no damage to any weapon type**, keeping `weapon_mult` equal for all types (equipment-weapon.md). |
+| **Innate element** | Monster home Element, one per monster. Takes x1.5 damage from that Element **and** attacks us with that Element (combat.md section 2). |
+| **Quality floor / ceiling** | Lowest and highest quality range one drop source can emit. |
+| **Reroll** | Craft tier that re-rolls values in the same Mod without changing Tier. |
+| **Legacy mod** | Slot 1-2 of an item, fixed at drop. Never targeted by Remove mod stone. Added mods (slot 6-7) are never legacy. |
+| **Gear Mod** | The single inherent defense value of a piece (Armour, Evasion, or Energy Shield by Base school). Raised only by Quality Stone (+1 to +15). Never touched by Reroll, Refine, Flux, Remove, or Add. Always shown as its own top line, never inside the Mod list. |
+| **Refine** | Craft tier that raises Tier by 1 step. |
+| **Ascend** | Craft tier that raises quality by 1 step for the whole item. |
+| **DoT** | Lingering damage over time after a hit. All DoTs combined must not exceed the global DoT Cap. |
+| **Leech** | HP recovered as % of damage just dealt. |
+| **Push** | HP reaching zero is not death. The fighter is only pushed out of combat to rest for `Max HP / (hp_regen x 8)` seconds, then returns alone. This is the only thing this game "loses" (combat.md section 4). |
+| **No death** | Standing rule since commit `908cbf7`. Defensive value comes from time not lost, not from survival. Returning to death requires rewriting half the defensive side from scratch. |
+| **Base** | Frame of one slot (mail / plate / vestments ...). Determines **weight** and **which Mod is Primary**. Does not determine Mod count (that is Rarity) and does not determine rolled values (that is quality + Tier). See item-base.md. |
 
-# คำที่ห้ามใช้สลับกัน
+# Town terms
 
-| อย่าเขียน | ให้เขียนแทน |
+| Term | Meaning |
 |---|---|
-| tier ของไอเทม | คุณภาพไอเทม |
-| quality / คุณภาพ | rarity / ระดับความหายาก |
+| **Settlement** | One named place holding services and NPCs. Never holds combat. |
+| **Capital** | A settlement serving one quality band (low / mid / high) with the full service set. 3 total. |
+| **Zone** | The combat area attached to a settlement. Always the `world.md` zone (1-9) — a settlement never replaces a zone. |
+| **Road** | The link between two settlements. Travel only; content on it exists only in opt-in mode. |
+| **Waypoint** | A Road made instant by having visited its settlement once. |
+| **Camp** | The Push rest location only (`combat.md` section 4) = the settlement owning the current zone. Do not use it as a general word for a base. |
+| **Standing** | Per-settlement unlock counter earned from existing kill/task/boss flows. **Never spendable, never a currency, never grants a stat.** |
+| **Gold** | The quality-of-life medium. Minted only by selling a filter-rejected piece. Buys space/time/information/appearance only. |
+| **Sell / Dissolve** | The filter's third choice on a rejected piece: 1 gold or 1 Reroll value stone, never both. |
+
+# Terms That Must Not Be Interchanged
+
+| Do not write | Write instead |
+|---|---|
+| item Tier | Item quality |
+| quality | Rarity |
 | status resistance | elemental resistance |
 | status alignment | elemental alignment |
-| Attack speed (ครั้ง/วิ) | Attack speed (%) — aspd เป็นเปอร์เซ็นต์ cap 300 |
-| res ตัวแบบ flat | ไม่มี · res มีแค่ % |
+| Attack speed (times/sec) | Attack speed (%) — aspd is a percentage, Cap 300 |
+| flat res | none. res is % only |
 
-# กติกาที่ห้ามผิด
+# Rules That Must Not Be Broken
 
-1. **ห้ามพูดว่า tier หมายถึงคุณภาพไอเทม** — tier คือช่วงย่อย ส่วนคุณภาพคือช่วงใหญ่
-2. **ห้ามผูกช่วงค่าเข้ากับ Rarity** — Common ที่คุณภาพสูงต้องแรงกว่า Rare ที่คุณภาพต่ำได้
-3. **ห้ามให้ tier ต่างกันข้ามช่องในไอเทมเดียวกันเกินที่คุณภาพอนุญาต** — ทุกช่องยิงจากชุดช่วงเดียวกัน
-4. **ไม่ใช้คำว่า quality แทน rarity** และไม่ใช้คำว่า rarity แทน quality
-5. **Tier ไม่บังคับต้องมีทุก affix** — ถ้าช่วงกว้างเกินกว่าจะแบ่งแล้วอ่านไม่ออก ให้ตัด tier ออกและใช้แค่คุณภาพ 3 ระดับ (ดู attribute-item.md)
+1. **Never say Tier means Item quality** — Tier is the sub-range, quality is the large range.
+2. **Never tie value ranges to Rarity** — a high-quality Common must be able to beat a low-quality Rare.
+3. **Never allow Tier spread across Mods on the same item beyond what quality permits** — every mod rolls from the same range set.
+4. **Do not use `quality` for `Rarity`** and do not use `Rarity` for `quality`.
+5. **Tier is not required on every Mod** — if a range is too narrow to split readably, drop Tier and use only the 3 quality levels (see mod-pool.md).
+6. **One source pays one medium** — a piece yields a Reroll value stone *or* gold, never both, and no gold↔stone exchange exists anywhere (`economy.md` single-medium rule · checks.md G6).
+7. **Gold never buys power** — space, time, information and appearance only. Gear, Mods, potions and stones are not for sale at any NPC (`towns.md` section 5).
 
-# ตัวอย่างการอ่านค่า
+# Value Reading Examples
 
-| affix | อ่านว่า |
+| Mod | Reads as |
 |---|---|
-| `Physical power flat 45 (T2)` | คุณภาพกลาง ได้ช่วงกลาง ๆ ของช่วงกลาง — ดีพอสมควร ไม่ใช่ของหายาก |
-| `Physical power flat 78 (T1)` | คุณภาพสูง และเป็นช่วงดีที่สุด — ของที่ควรเอาไปลงทันที |
-| `Str flat 8 (T3)` | คุณภาพต่ำ ได้ช่วงต่ำสุดของคุณภาพต่ำ — ใช้ปลดล็อกชั่วคราว |
+| `Physical power flat 45 (T2)` | Mid quality, middle sub-range of the mid range — decent, not rare. |
+| `Physical power flat 78 (T1)` | High quality, and the best sub-range — an item to push immediately. |
+| `Str flat 8 (T3)` | Low quality, lowest sub-range of low quality — temporary unlock use. |
+
+(End of file - total 83 lines)

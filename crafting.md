@@ -2,109 +2,177 @@
 
 import glossary.md
 import item-rarity.md
-import attribute-item.md
+import mod-pool.md
 import equipment-slot.md
 
-**ร่างแรก** — โครงคือกติกาที่ต้องผ่าน ตัวเลขราคาและสกุลคราฟยังไม่ลง
+**First draft** — Structure shows the rules that must pass. Crafting currency prices and currencies are not yet set.
 
-ระบบคราฟมีหน้าที่เดียว คือ **ทำให้ผู้เล่นได้คุณภาพสูงโดยไม่ต้องไปตีเวงลสูง**
-ถ้าคราฟไม่ทำหน้าที่นี้ แกนคุณภาพไอเทมที่แยกจากระดับมอนจะกลายเป็นชื่อที่ซ้ำซาก
+The crafting system has a single duty: **let players reach high Item quality without fighting high-level zones**.
+If crafting does not serve this duty, the item Item quality axis separated from monster level becomes a redundant name.
 
-# คราฟ 3 ชั้น
+# 3 Crafting Tiers
 
-ทุกชั้นยกระดับได้ทีละขั้น และแต่ละขั้นใช้สกุลคราฟต่างกัน
+Each tier upgrades one step at a time, and each step uses different crafting currency.
 
-| ชั้น | ผลกับไอเทม | ทำอะไรได้ | ทำอะไรไม่ได้ |
+| Tier | Effect on item | Can do | Cannot do |
 |---|---|---|---|
-| **Reroll** | ไม่เปลี่ยนช่อง | สุ่มค่าใหม่ในช่องที่เลือก โดยยังอยู่ใน tier เดิม | เปลี่ยนชื่อ affix · เปลี่ยนธาตุ · เปลี่ยนคุณภาพ |
-| **Refine** | ไม่เปลี่ยนช่อง | ดัน tier ของช่องที่เลือกขึ้น 1 ขั้น (T3 → T2 → T1) | เปลี่ยนช่อง · เปลี่ยนธาตุ · เกิน T1 |
-| **Ascend** | เปลี่ยนคุณภาพทั้งชิ้น | ยกคุณภาพขึ้น 1 ขั้น (ต่ำ → กลาง → สูง) ทุกช่องขยับตาม | เกินคุณภาพสูง · เพิ่มจำนวนช่อง |
+| **Reroll** | No slot change | Reroll the value in the selected slot, staying in the same Tier | Change Mod name · Change Element · Change Item quality |
+| **Refine** | No slot change | Push the selected slot up 1 Tier (T3 → T2 → T1) | Change slot · Change Element · Exceed T1 |
+| **Ascend** | Change whole-item Item quality | Raise Item quality 1 step (low → mid → high). All mods move together | Exceed high Item quality · Add Mod count |
 
-- Ascend เป็นชั้นที่มีค่าที่สุด เพราะทำให้ **ทุกช่อง** แข็งขึ้นพร้อมกัน และเป็นทางเดียวที่ได้คุณภาพสูงโดยไม่ต้องไปตีเวงลสูง
-- Refine เป็นชั้นที่ผู้เล่นใช้บ่อยที่สุด เพราะแก้จุดอ่อนเดียวของของได้
-- ทุกชั้นคราฟแค่ช่องเดียวต่อครั้ง ยกเว้น Ascend ที่กระทบทั้งชิ้น
+- Ascend is the most valuable tier, because it strengthens **all mods** at once, and is the only path to high Item quality without fighting high-level zones.
+- Refine is the most frequently used tier, because it fixes a single weak point of an item.
+- Every tier crafts only one slot at a time, except Ascend which affects the whole piece.
 
-# กติกาที่ห้ามผ่าน
+# Blocking Rules
 
-1. **ยึดธาตุไม่ได้** — Reroll กับ Refine เปลี่ยนค่าได้แต่เปลี่ยนธาตุไม่ได้
-   เหตุผล: ถ้าคราฟเปลี่ยนธาตุได้ ผู้เล่นจะได้ res เกือบทุกธาตุจน cap ทิ้ง การเลือกธาตุจะหายไปทั้งระบบ
-   ธาตุจึงเป็น **สิ่งเดียวที่ต้องโชค** บนไอเทม
-2. **เพิ่มจำนวนช่องไม่ได้** — จำนวนช่องผูกกับ Rarity อย่างเดียว (ดู item-rarity.md) คราฟแก้ไม่ได้
-3. **เปลี่ยนชื่อ affix ไม่ได้** — ต้องการระบบ affix pool แยกอีกชั้น ซึ่งยังไม่มี
-4. **คราฟข้ามคุณภาพไม่ได้** — Ascend ขยับทีละขั้นเท่านั้น ข้ามต้องมีระบบระดับสกุลคราฟที่ละเอียดกว่านี้
+1. **Element cannot be locked** — Reroll and Refine can change values but cannot change Element.
+   Reason: if crafting could change Element, players would reach near-Cap res in every Element and Element choice would disappear from the whole system.
+   Element is therefore the **only thing left to luck** on items.
+2. **Mod count grows only via Add mod stone, up to the Rarity crafted max** — Common to 3, Rare to 7 (net counting, `mods_added 0-2` per item). No other craft touches count. Dropped Rare never exceeds 5.
+3. **Mod identity changes only via the Remove + Add combo** — Remove mod stone deletes one random non-legacy mod (slots 1-2 are Legacy mod and can never be hit); Add mod stone then fills the freed slot from the Base pool. Direct rename in place is forbidden.
+4. **Cannot skip Item quality steps** — Ascend moves one step at a time only. Skipping would need a finer currency-level system.
+5. **Reroll tier stone is the only craft allowed to roll lower.** Reroll value stone never rolls below the old value; Refine never steps down.
 
-# สกุลคราฟ
+# Crafting Stones
 
-3 ชนิด แยกตามชั้นการคราฟ ชื่อในเกมยังไม่ตัดสิน
+7 stones are the only media. No Dust, no cluster dust, no Core wallets. Flows below carry the ex-wallet rates; exact incomes finalize in the rebalance pass.
 
-| สกุล | ใช้ทำอะไร | ที่มา |
+| Stone | Used for | Source |
 |---|---|---|
-| ผงฝุ่น | Reroll | ดรอปจากมอนทุกตัว ปริมาณมาก |
-| ผงคลัด | Refine | ดรอปเฉพาะจากมอนเลเวลสูง และจาก boss |
-| แกนกลาง | Ascend | ดรอปจาก boss และจากกิจกรรมระยะยาว |
+| Reroll value stone | Reroll value | Every junk dissolve = 1 (ex-Dust flow) |
+| Reroll tier stone | Reroll tier / Refine | High-level monsters, elites, bosses (ex-cluster flow) |
+| Add mod stone | Add / Ascend | Elite / boss only |
+| Remove mod stone | Remove | Elite / boss |
+| Quality Stone | Upgrade | Monsters → elites → bosses by step |
+| Corrupt stone | Corrupt (section below, one use per piece) | Boss only, rarest stone |
+| Repair stone | Repair | Elite / boss only |
 
-- ผงฝุ่นเป็นสกุลเดียวที่หาได้จากการเล่นปกติ ทำให้ Refine เป็นสิ่งที่ต้องลงแรง
-- Ascend เป็นสิ่งเดียวที่ต้องวางแผนล่วงหน้า เพราะต้องเก็บแกนกลางไว้
-- boss เป็นที่มาหลักของสกุลคราฟและของ skill ที่สุ่มได้ พร้อมกัน
+- Reroll value stones are the only stones farmable from normal play, making tier work something that costs effort.
+- Ascend is the only thing requiring advance planning, because Add mod stones come only from elites and bosses.
+- Bosses are the main source of stones and randomly dropped skills, at the same time.
 
-**skill ไม่คราฟได้** — ไม่มี affix ไม่มีคุณภาพ ที่ทำได้มีแค่อัปขั้นบันไดจากตัวซ้ำ
-ระบบคราฟจึงไม่มีทางเข้าไปยุ่งกับ skill เลย สองระบบแยกกันสนิท
+**Skills cannot be crafted** — No Mod, no Item quality. The only action is rank-up from duplicates.
+The crafting system therefore never touches skills. The two systems are fully separate.
 
-# ที่มาของคุณภาพ — สรุป
+# Stones (simple names)
 
-| ทางที่ได้คุณภาพ | ได้ถึงระดับ |
+Registry lives in item-list.md section 1; the table below is the usage view.
+
+| Stone | Effect | Source |
+|---|---|---|
+| Add mod stone | Fill one empty slot up to the Rarity crafted max (net counting) · 1st fill costs 1, 2nd fill on the same item costs 2 | Elite / boss only |
+| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (416/hour → ~52 uses/hour) |
+| Reroll tier stone | Reroll Tier + value of one slot with drop weights (T3 50 / T2 33 / T1 17), may roll lower · Mod name and Element unchanged · **1 per randomize, 8 per deterministic Refine (+1 tier)** | High-level monsters, elites, bosses (30/hour → ~3.75 Refines/hour) |
+| Remove mod stone | Remove one random non-legacy mod (slots 3+, Legacy mod slots 1-2 immune) | Elite / boss |
+| Quality Stone | Attempt +1 (section below) · **tiered cost** (section below) | Steps 1-5 monsters · 6-10 elites · 11-15 bosses |
+| Repair stone | Revive one Broken piece at its pre-break level and refill protection to 5 | Elite / boss only |
+| Corrupt stone | One gamble per piece (section below) · corrupted pieces accept no further stones | Boss only, rarest stone |
+
+# Upgrade (+1 to +15, Ragnarok style, online only)
+
+```
++1 to +4   100% (safe)
++5 to +10  90% down to 60% · fail drops 1 level, never breaks
++11 to +15 50% down to 20% · fail breaks the piece (Broken: unequippable, stats 0, kept at its level)
+protection   5 per piece from birth · each would-be break consumes 1 instead and drops a level · Repair stone refills to 5
+cost          steps +1..+5   = 1/2/3/4/5 Quality Stones
+              steps +6..+10  = 7/9/11/13/15
+              steps +11..+15 = 18/21/24/27/30
+              source shifts 1-5 monsters · 6-10 elites · 11-15 bosses (D-009 5a)
+```
+
+- Refining runs only while online (like bosses). AFK never refines, so nothing breaks offline.
+- Each +1 raises only the piece Gear Mod (next section). Rolled Mod values are never touched by Quality Stone.
+- Power uplift folds into `mob_HP` in the rebalance pass (checks.md H1).
+
+# Corrupt (Vaal style, one use per piece)
+
+| Roll | Outcome |
 |---|---|
-| ดรอปจากมอนเวงลต่ำ | ต่ำ |
-| ดรอปจากมอนเวงลกลาง | กลาง |
-| ดรอปจากมอนเวงลสูง | สูง |
-| Ascend ด้วยแกนกลาง | สูง โดยไม่ต้องตีเวงลสูง |
+| 25% | Corrupted only, nothing changes |
+| 20% | Reroll all values inside current Tiers |
+| 15% | +1 Mod (respects Rarity crafted max and the Core slot cap) |
+| 15% | Remove 1 random non-legacy Mod |
+| 10% | Reroll Element (the only Element change in the game) |
+| 10% | Gear Mod +2 |
+| 5% | Item quality −1 step (never destroys the piece) |
 
-- **Ascend ไม่ถูกจำกัดด้วยเพดานของแหล่งที่ตก** (แก้จากเดิมที่เขียนว่า "ยกได้ไม่เกินเพดานของไอเทมตัวนั้น")
-  เหตุผล: ประโยคนั้นขัดกับบรรทัดแรกของไฟล์นี้ที่กำหนดหน้าที่คราฟว่า "ทำให้ผู้เล่นได้คุณภาพสูงโดยไม่ต้องไปตีเวงลสูง" · ถ้ายัง cap ไว้ ของที่ดรอปจากโซนกลางจะไม่มีทางเป็นสูงเลย ไม่ว่าใส่แกนกลางกี่ก้อน
-  ต้นทุนจริงที่ยังอยู่คือ **แกนกลางมาจาก boss เท่านั้น และ AFK ตี boss ไม่ได้** → เพดาน "คุณภาพสูงต้องมาจากผู้เล่นที่อยู่กับเกม" ยังครบ แต่ย้ายจาก *จำกัดแหล่งที่drop* ไปเป็น *จำกัดสกุลคราฟ* ซึ่งคือสิ่งที่ผู้เล่นลงแรงได้จริง
-- ผลข้างเคียงที่ตั้งใจ: ของพื้นๆ ที่drop จากโซนต่ำก็ยังไต่ขึ้นสูงได้ **ถ้า** เสียเวลาเก็บแกนกลาง · ทำให้ "ทิ้งเวงลแล้วกลับมานั่งคราฟ" เป็นทางเดินจริง ไม่ใช่คำสวย · เพดานคุณภาพของ *drop* ยังผูกกับโซนเหมือนเดิม (item-rarity.md)
+- One use per piece. A corrupted piece accepts no further stones of any kind.
+- Weights pending rebalance.
 
-# ตัวเลขที่ตั้งแล้ว (ที่มา: loot.md หัวข้อ 5)
+# Gear Mod (PoE mechanics)
 
-| ชั้น | ราคา | ครั้งที่ได้จริง/ชม. ที่โซนสูง | ความหมาย |
+Bases map to one school: heavy (barbute · plate · cuisses · sabatons · gauntlets) = Armour · light (coif · mail · greaves · striders · gloves) = Evasion · cloth (circlet · vestments · wrap · soft boots) = Energy Shield.
+
+```
+armour reduction% = armour / (armour + 5 × raw_hit)   physical half only
+evasion           = PoE entropy roll vs mob accuracy, ahead of dodge (combat.md section 2)
+energy shield     = second pool ahead of HP · chaos bypasses · recharges after 5 sec without a hit
+```
+
+- Evasion feeds no separate dodge number; it is its own entropy layer. Reachable caps and K values follow in the mob-sheet rebalance pass.
+
+# Item Quality Sources — Summary
+
+| Path to Item quality | Reaches level |
+|---|---|
+| Drop from low-level monsters | Low |
+| Drop from mid-level monsters | Mid |
+| Drop from high-level monsters | High |
+| Ascend with Core | High without fighting high-level zones |
+
+- **Ascend is not limited by the drop-source ceiling** (fixed from the earlier text "can raise at most to the ceiling of that item").
+  Reason: that sentence contradicts the first line of this file defining the crafting duty as "let players reach high Item quality without fighting high-level zones" · If still capped, items dropped in mid zones could never become high no matter how many Add mod stones are spent.
+  The real cost that remains is **Add mod stones come only from elites and bosses, and AFK cannot fight bosses** → the ceiling "high Item quality must come from players staying in the game" still holds, but moves from *drop-source limit* to *stone limit*, which is what players can actually work toward.
+- Intended side effect: plain items dropped in low zones can still climb to high **if** time is spent collecting Add mod stones · Makes "leave the zone and sit down to craft" a real path, not a slogan · The *drop* Item quality ceiling stays tied to zones as before (item-rarity.md).
+
+# Set Numbers (source: loot.md section 5)
+
+| Tier | Price | Actual casts/hour at high zone | Meaning |
 |---|---|---|---|
-| Reroll | 8 ผงฝุ่น | ~52 | ถูก ทำรัวได้ · เก็บค่าภายใน tier เดิม |
-| Refine | 8 ผงคลัด | ~3.8 | ทางอัปเกรดหลัก · ผงคลัดมาจาก elite (1% ของการฆ่า) + boss เท่านั้น |
-| Ascend | 3 แกนกลาง + 30 ผงคลัด | ~0.8 | ช้าที่สุดและต้องวางแผน · แกนกลางมาจาก boss เท่านั้น (AFK ไม่มีทางได้) |
+| Reroll value | 8 Reroll value stones | ~52 | Cheap, can spam · Keeps values inside the same Tier |
+| Refine | 8 Reroll tier stones | ~3.75 | Main upgrade path · Tier stones come only from elites (0.5% ×2) + bosses |
+| Ascend | 1 Add mod stone + 8 Reroll tier stones | ~0.8 | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |
+| Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to Rarity crafted max (net counting) |
+| Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set (D-009 5a) | Raises Gear Mod only |
+| Repair | 1 Repair stone | elite / boss only | Revives Broken + refills protection |
 
 ```
-Refine ทั้งเซ็ต (12 ชิ้น × ~2.5 ช่อง × 2 ขั้น = 60 ครั้ง) ≈ 16 ชม.
-Ascend ทั้งเซ็ต (12 ชิ้น)                             ≈ 15 ชม.
+Refine full set (12 pieces × ~2.5 mods × 2 steps = 60 casts) ≈ 16 hours
+Ascend full set (12 pieces)                             ≈ 15 hours
 ```
 
-# ปิดแล้ว
+# Closed
 
-- **ราคาและที่มาของสกุลคราฟ** → ตารางข้างบน ผูกกับ drops/ชม. และโอกาสเกิด elite/boss ใน loot.md
-- **การกันไม่ให้ reroll เสียของ** → **ตัดสิน: Reroll ห้ามได้ค่าต่ำกว่าเดิม** (เก็บค่าสูงสุดของช่องเป็น baseline · reroll จะไต่ขึ้นหรือเท่าเดิม)
-  ทางเลือกเดิมคือ "ให้กดยืนยันทุกครั้ง" ซึ่งที่ ~52 ครั้ง/ชม. คืองานจุกจิกที่ต้องกดทั้งวันในเกม idle · การกันแบบ passive ไม่ต้องกดอะไรเลย
-  ต้นทุนที่ยอมรับ: reroll จะดู "ไต่ทางเดียว" จึงไม่น่าตื่นเต้น — ชดเชยด้วยการให้ Refine/Ascend เป็นตัวดึงคุณภาพจริง
-- **คราฟข้ามระดับสกุล** → ยังไม่ทำ และตอนนี้ยังไม่จำเป็น เพราะ flow ผงคลัด 3.8 ครั้ง/ชม. เพียงพอต่อ 60 ครั้งทั้งเซ็ตแล้ว
+- **Crafting currency prices and sources** → Table above, tied to drops/hour and elite/boss spawn chances in loot.md.
+- **Preventing Reroll from ruining items** → **Decided: Reroll cannot roll below the old value** (keep the slot maximum as baseline · Reroll climbs or stays equal).
+  The old option was "confirm every click", which at ~52 casts/hour is fiddly work to click all day in an idle game · Passive protection needs no clicks at all.
+  Accepted cost: Reroll looks "one-way climbing" and thus less exciting — compensated by letting Refine/Ascend carry the real quality pulls.
+- **Cross-level stone crafting** → Not yet done, and not needed now, because Reroll tier stone flow at 3.8 casts/hour already covers 60 casts for a full set.
 
-## ขัดเงา vs ขยับชั้น (วัดจากช่วง T1 จริงใน attribute-item.md)
+## Polish vs Tier Jump (measured from real T1 ranges in mod-pool.md)
 
-ช่วง T1 ของแต่ละเส้นกว้างไม่เท่ากัน: `%` กว้าง 1-2 คะแนน · crit damage 12 · **Max HP flat 19 · Max Mana flat 20**
+T1 ranges differ per line: `%` spans 1-2 points · crit damage 12 · **Max HP Flat 19 · Max Mana Flat 20**.
 
 ```
-reroll 1 ครั้งบนเส้นที่ค่ากลาง ๆ → ขยับได้ ≈ ครึ่งของช่วง T1
-เฉลี่ยทุกเส้น ≈ 4.9 คะแนน · ทั้งเซ็ต 12 ชิ้น × ~3 ช่อง ≈ 100 ครั้งถึงจะเงาหมด
-ที่ 52 ครั้ง/ชม. = ประมาณ 2 ชั่วโมงต่อเซ็ต
+1 Reroll on a mid-value line → moves ≈ half of the T1 range
+Average across all lines ≈ 4.9 points · Full 12-piece set × ~3 mods ≈ 100 casts to fully polish
+At 52 casts/hour = about 2 hours per set
 ```
 
-- **Reroll ถูกและเร็วโดยเจตนา** เพราะหน้าที่จริงของมันคือ "แก้ค่าที่ออกแย่" ไม่ใช่ไต่พลัง · ตัวที่ช้าคือ Refine (16 ชม./เซ็ต) กับ Ascend (15 ชม./เซ็ต) ซึ่งเป็นตัว *ขยับชั้น*
-- **จุดที่วัดแล้วรู้สึกผิดรูป**: เส้นที่ช่วง T1 กว้างที่สุด (Max HP flat 19 · Max Mana flat 20) คือเส้นที่มีค่าน้อยที่สุดตอนปลายเกม (+1% และ +0%) → แปลว่า *การขัดเงาจะดูได้ผลมากที่สุดในช่องที่ไร้ค่าที่สุด*
-  **บรรเทาแล้ว (ไม่บีบช่วง)**: equipment-slot.md ให้เส้น flat หนัก 0.5/0.4/0.25 ตามชั้นคุณภาพ → ที่โซนสูงโอกาสที่ reroll จะไปลงเส้น flat ลดจาก ~8% เป็น ~4.4% ของช่องทั้งหมด · ช่วง flat ใน attribute-item.md ยังเท่าเดิม (มันยังจำเป็นช่วงต้นเกม: Max HP flat 90 = +2.1% EHP ตอนเลเวล 10 เทียบกับ +1.0% ตอน 100 — เป็นเส้นที่ออกแบบมาให้ *หมดอายุ*)
+- **Reroll is cheap and fast by design** because its real duty is "fix bad rolls", not climbing power · The slow ones are Refine (16 hours/set) and Ascend (15 hours/set), which are the true *tier movers*.
+- **Measured shape problem**: lines with the widest T1 ranges (Max HP Flat 19 · Max Mana Flat 20) are the least valuable late-game lines (+1% and +0%) → meaning *polishing looks most effective in the most worthless mods*.
+  **Mitigated (without squeezing ranges)**: equipment-slot.md weights Flat lines at 0.5/0.4/0.25 by Item quality tier → at high zones the chance a Reroll lands on a Flat line drops from ~8% to ~4.4% of all mods · Flat ranges in mod-pool.md stay unchanged (they are still needed early-game: Max HP Flat 90 = +2.1% EHP at level 10 vs +1.0% at 100 — lines designed to *expire*).
 
-# ปิดแล้วเพิ่ม (หลังจาก item-base.md เกิด)
+# Additionally Closed (after item-base.md was created)
 
-- ~~**ฐานของไอเทม (base)**~~ — ทุก slot มี 2-3 โครง กำหนดน้ำหนัก + ว่าจะ emphasis pool ไหน (mail / plate / vestments) แต่ **ไม่แตะจำนวนช่อง affix** เพราะนั่นเป็นงานของ Rarity (glossary กติกาข้อ 2)
-- **จำนวนครั้งที่คราฟต่อชิ้น: ไม่มีเพดานแยก** (ตัดสินแล้ว) เพราะเพดานโครงสร้างมีอยู่แล้ว — Refine หยุดที่ T1 · Ascend หยุดที่คุณภาพสูง · ต้นทุนจริงคือราคาสกุลคราฟในหัวข้อ "ตัวเลขที่ตั้งแล้ว" · ถ้าใส่ limit ซ้ำเข้าไปอีกชั้น จะเป็นกติกาที่สองทับกติกาแรกซึ่งผู้เล่นแยกไม่ออก
-- เส้น 60 Refine / 12 Ascend ต่อเซ็ตจึงเป็น "เพดานธรรมชาติ" ไม่ใช่ cap ที่ต้องบันทึกต่อชิ้น → save.md ไม่ต้องเก็บ counter จำนวนครั้งคราฟของชิ้นนั้น
+- ~~**Item Base**~~ — Every slot has 2-3 frames defining weight + which pool is emphasized (mail / plate / vestments), but **does not touch Mod count** because that is Rarity work (glossary rule 2).
+- **Crafts per piece: no separate limit** (decided) because structural ceilings already exist — Refine stops at T1 · Ascend stops at high Item quality · The real cost is currency prices in the "Set Numbers" section · Adding another limit would stack a second rule over the first which players cannot distinguish.
+- The 60 Refine / 12 Ascend lines per set are therefore a "natural ceiling", not a per-piece Cap to record → save.md need not store per-piece craft counters.
 
-# สิ่งที่ยังไม่ลง
+# Still Open
 
-- ~~**น้ำหนัก secondary ของ affix**~~ **ปิดแล้วใน equipment-slot.md หัวข้อ "น้ำหนักต่อ affix"** — ทุก secondary ถูกถ่วงด้วย `value` ที่วัดจากค่า marginal จริง · และน้ำหนักนี้ถูกใส่เข้าไปในการจำลองของ loot.md แล้ว (ตาราง taper ในหัวข้อ 3 คือรุ่นที่รวมน้ำหนักนี้)
+- ~~**Mod secondary weights**~~ **Closed in equipment-slot.md section "per-Mod weights"** — Every secondary is weighted by `value` measured from real marginal value · And this weight is already included in the loot.md simulation (the taper table in section 3 is the version including this weight).
+
+(End of file - total 110 lines)

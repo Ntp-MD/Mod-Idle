@@ -3,42 +3,44 @@
 import item-rarity.md
 import crafting.md
 
-**สเปกครบแล้ว** — ต้องเก็บรายการด้านล่างและตัดสิน 5 ข้อในหัวข้อท้ายไฟล์ · ตัวเลขที่อ้างอิง (12 ชม. · 8 ฝุ่น · 52 ครั้ง/ชม. · 15/16 ชม. · boss 15 นาที) มาจาก checks.md กลุ่ม E/F/G จึงห้ามแก้ตัวเลขเหล่านี้ในไฟล์นี้ให้ต่างจากต้นทาง
+**Spec complete** — must store the list below and resolve the 5 decisions at the end of the file · Referenced numbers (12 hours · 8 stones · 52 times/hour · 15/16 hours · boss 15 minutes) come from checks.md groups E/F/G, so these numbers in this file must not differ from the source
 
-# ต้องบันทึกอะไร
+# What to store
 
-| หมวด | รายการ |
+| Category | Items |
 |---|---|
-| ตัวละคร | เลเวล · stat ที่ลงจุด · ของที่สวมใส่ · น้ำหนัก |
-| ความคืบหน้า | zone ที่ปลดล็อกแล้ว · เป้าหมายปัจจุบัน · เวงล |
-| กระเป๋า | ไอเทมทั้งหมดพร้อมคุณภาพ tier ธาตุ และช่อง affix ทุกช่อง |
-| คราฟ | สกุลคราฟทั้งหมด · ประวัติของชิ้นที่คราฟล่าสุด |
-| เวลา | เวลาเล่นสะสม · รอบการฟื้นตามเวลาจริง |
-| ตั้งค่า | ฟิลเตอร์กระเป๋า · ข้อกำหนดอัตโนมัติ |
+| Character | Level · allocated stat points · equipped items · weight |
+| Progress | Unlocked zones · current target · wave |
+| Town *(towns.md · doors chosen)* | Visited settlements · open Road/Waypoint links · Standing per settlement (kill counter, not a spendable pool) · owned house, plot deeds, pouch tier, stash tabs, **bag category slots and the potion carrier slot** · **bought filter preset slots** · Curio pedlar stock + refresh day · Collector set progress + which pieces were turned in · Collector hint line bought or not · per-slot **sell-or-dissolve** choice |
+| Bag | All items with Item quality, Tier, Element, every Mod slot, Legacy mod flags (slots 1-2), `mods_added 0-2`, `refine_lv +0-15`, `broken` flag, `protection_left 0-5`, `corrupted` flag |
+| Craft | All 7 stones (Add mod / Reroll value / Reroll tier / Remove mod / Quality / Repair / Corrupt) · **gold count** (single-medium mint, economy.md) · history of most recently crafted items |
+| Provision | Herb counts by tier · potion counts by type and tier · farm plots (planted tier + ready time each) · potion auto config (per-type toggle + threshold) · owned plot deeds and pouch tier |
+| Time | Total play time · real-time recovery cycle |
+| Settings | Bag filter · automation rules |
 
-# เรื่องที่ต้องคิดเป็นพิเศษ
+# Special considerations
 
-- **เก็บ tier ของแต่ละช่อง** — ไม่ใช่แค่ตัวเลขสุดท้าย ถ้าเก็บแค่ค่า จะคราฟต่อไม่ได้ว่าช่องนั้นเป็น T2 หรือ T1
-  ต้องเก็บทั้งค่า ชื่อ affix และ tier แยกกัน
-- **เก็บธาตุของชิ้น** — ต้องเก็บเป็นค่าแยก ไม่ใช่แปลงเป็นค่า res แล้ว เพราะคราฟห้ามเปลี่ยนธาตุ
-- **เก็บเป้าหมายและคิวการโจมตี** — ถ้าผู้เล่นออกจากเกมแล้วกลับมา ต้องรู้ว่าจะต่อจากตรงไหน ไม่ใช่เริ่มใหม่
-- **เวลาออฟไลน์** — ถ้ามี ต้องกันการโกงด้วยว่าเวลาเดินหน้าเกินจริงไม่ได้ · cap ที่ **12 ชั่วโมง** (concept.md) · ผลตอนออฟไลน์คิดเหมือน AFK: drop เท่ากันแต่คุณภาพได้แค่พื้นของโซน และไม่มีรายได้จาก boss (loot.md หัวข้อ 7)
-- **เกณฑ์ฟิลเตอร์กระเป๋า** — ต้องบันทึกต่อ slot เพราะเป็นสิ่งที่กำหนดว่าอะไรกลายเป็นผงฝุ่น (loot.md หัวข้อ 4) · รวมรายการ "ธาตุ res ที่ยังขาด" ที่ฟิลเตอร์ใช้เก็บของ
-- ** baseline ของ Reroll** — ต้องเก็บ "ค่าสูงสุดที่ช่องนั้นเคยมี" แยกจากค่าปัจจุบัน เพราะกติกาใหม่คือ Reroll ห้ามได้ต่ำกว่าเดิม (crafting.md)
-- **จำนวนครั้งที่ใช้คราฟต่อชิ้น** — ต้องเก็บไว้กันผู้เล่น Ascend/Refine ชิ้นเดียวซ้ำจนเกินเส้นเวลาที่ loot.md ตั้ง (60 Refine / 12 Ascend ต่อเซ็ต)
+- **Store the Tier of each Mod** — not just the final value. If only the value is stored, it is impossible to tell whether the Mod is T2 or T1 for further crafting. Must store value, Mod name, and Tier separately
+- **Store the Element of the item** — must store it as a separate value, not converted into a res value, because crafting must not change Element
+- **Store target and attack queue** — if the player leaves the game and returns, the game must know where to resume, not restart
+- **Offline time** — if present, must guard against cheating by not allowing time to advance beyond reality · Cap at **12 hours** (concept.md) · Offline results are calculated as AFK: same drops but Item quality limited to the zone floor, and no boss income (loot.md section 7)
+- **Bag filter thresholds** — must store per slot, because they determine what becomes a Reroll value stone (loot.md section 4) · Includes the list of "missing Element res" that the filter uses to keep items
+- **Reroll baseline** — must store "highest value that slot ever had" separately from the current value, because the new rule is Reroll must never roll lower than before (crafting.md)
+- **Craft count per item** — store `mods_added 0-2`, `refine_lv +0-15`, `protection_left 0-5`, and `broken` per piece. Add is capped at 2 fills (net counting); refine stops at +15; protection never refills except via Repair stone.
 
-# คำตัดสิน 5 ข้อ (ปิดแล้ว · อ้างอิงจากตัวเลขที่ประกาศไว้ในไฟล์อื่น)
+# 5 decisions (closed · referencing numbers declared in other files)
 
-- **เก็บที่ไหน** — **local อย่างเดียว** ไม่มี cloud · เหตุผล: ไม่มีสกุลเงิน ไม่มีร้านค้า ไม่มีซื้อขาย (checks.md G1) จึงไม่มีอะไรที่ *ต้อง* เช็กกับเซิร์ฟเวอร์ และ cap เวลาออฟไลน์ 12 ชม. ตรวจไม่ได้เลยถ้าไม่มี server · ทางออกย้ายเครื่องคือ export/import เป็นไฟล์ JSON ที่ผู้เล่นถือเอง (ข้อ 4)
-- **กี่ตัวละคร** — **3 สล็อต** · ข้อมูลที่ *ใช้ร่วมกันทั้งบัญชี*: mastery ของอาวุธ 12 ชนิด · collection/dex · ค่า drop_rate ที่ได้จาก mastery (equipment-weapon.md ตั้งไว้เป็น "ทั้งบัญชี" อยู่แล้ว) · preset ฟิลเตอร์ · เวลาที่เล่นสะสมทั้งหมด · ข้อมูล *แยกต่อตัว*: เลเวล · stat · ของที่สวม · กระเป๋า · สกุลคราฟ · ความคืบหน้าโซน · **Reroll baseline และเลขคราฟต่อชิ้น** (ถ้าใช้ร่วม จะเปิดช่องให้ Refine ซ้ำข้ามตัวได้ ผิดเส้นเวลา loot.md)
-  ต้นทุนที่จ่าย: alt ตัวที่ 2 ไม่ได้สร้าง mastery ใหม่ (mastery นับต่ออาวุธไม่ใช่ต่อตัวละคร) จึง **ไม่กด drop_rate ให้บานปลาย** — funnel ใน loot.md F1-F5 อยู่กับที่
-- **ย้อนกลับได้ไหม** — **ไม่มี undo ในเกม** · เหตุผลเป็นตัวเลขชัด: กติกา Reroll คือ "ห้ามได้ค่าต่ำกว่าเดิม" (crafting.md · G4) และฝุ่นราคา 8 หน่วยต่อครั้ง (~52 ครั้ง/ชม. · E8 ขัดเงาทั้งเซ็ต ~2 ชม.) · ถ้าย้อนได้ ผู้เล่นจะ reroll เก็บค่าที่ดีที่สุดโดยทิ้งเวลาไปเปล่า ๆ = ราคาของฝุ่นและความเวลา 2 ชม. กลายเป็นศูนย์ · การสำรอง (ข้อ 5) ใช้ *เฉพาะกรณีไฟล์เสีย* และการ restore ต้องถือเป็น "ย้อนเวลาทั้งบัญชี" ไม่ใช่ยกผลคราฟล่าสุดทิ้ง · เลขคราฟต่อชิ้นถูกบันทึกไว้แล้ว (หัวข้อก่อน) จึงAscend ซ้ำจนเกินเส้นเวลา 15 ชม. ไม่ได้แม้จะ restore
-- **ย้ายเครื่องได้ไหม** — ได้ ผ่าน export/import · ในไฟล์ต้องมี *ครบ*: baseline ของ Reroll · เลขครั้งคราฟต่อชิ้น · tier แยกตามช่อง · ธาตุของชิ้น · เกณฑ์ฟิลเตอร์ต่อ slot · ค่าเวลาสะสมแบบ monotonic (ข้อ 6) · import ที่ schema คนละเวอร์ชัน = ปฏิเสธ ไม่ใช่พยายามแปลง
-- **สำรองอัตโนมัติ** — snapshot เดิน 3 ที่ · trigger = เลเวลขึ้น / Ascend หรือ Refine สำเร็จ / ทุก 10 นาทีที่เล่น · เป้าหมายกัน "ไฟล์เสีย" ไม่ใช่กัน "ตัดสินใจผิด" (ดูข้อ 3)
+- **Where to store** — **local only**, no cloud · Reason: **no player trading** (checks.md G1) — the town stalls are NPC-only and gold never converts into stones, so there is nothing that *must* be checked against a server, and the 12-hour offline Cap cannot be verified at all without one · Gold makes this decision slightly weaker (a medium that could be duplicated), so the guard is that gold buys no power: a copied save file cannot shorten E6/E7 or beat a boss · The cross-machine solution is export/import as a player-held JSON file (item 4)
+- **How many characters** — **3 slots** · Data *shared account-wide*: Mastery of all 12 weapon types · collection/dex · drop_rate gained from Mastery (equipment-weapon.md already defines it as "account-wide") · filter presets · total play time · Data *per character*: level · stats · equipped items · bag · crafting currencies · zone progress · **Reroll baselines and per-item craft counts** (if shared, it would open Refine reuse across characters, breaking the loot.md timeline). Cost paid: alt 2 does not create new Mastery (Mastery counts per weapon, not per character), so it does **not inflate drop_rate** — the funnel in loot.md F1-F5 stays fixed
+- **Can it be undone** — **no in-game undo** · The reason is numeric: the Reroll rule is "never roll lower than before" (crafting.md · G4) and Reroll value stones cost 8 per attempt (~52 times/hour · E8 full-set polish ~2 hours) · If undo were allowed, players would Reroll to keep only the best value while discarding the time cost = the stone price and the 2-hour time cost become zero · Backups (item 5) are *only for file corruption*, and restore must count as "rewinding the whole account", not discarding the latest craft result · Per-item craft counts are already recorded (previous section), so repeated Ascend beyond the 15-hour timeline is impossible even with restore
+- **Can it be moved across machines** — yes, via export/import · The file must contain *all of*: Reroll baselines · per-item craft counts · per-slot Tier · item Element · per-slot filter thresholds · gold count · visited settlements, Road links and Standing · monotonic accumulated time (item 6) · Import with a different schema version = reject, not attempt conversion → **the town layer is a schema version bump** (`towns.md` adds a medium and a progress category)
+- **Automatic backup** — 3 walking snapshots · Triggers = level up / successful Ascend or Refine / every 10 minutes of play · Goal is protection against "file corruption", not against "wrong decisions" (see item 3)
 
-- **เวลานับยังไงกันโกง** — เกบ `elapsedสะสม` ต่อ session แบบ monotonic (นาฬิกาเดินของ device boot) แล้วบวกกับผลต่าง real-clock เฉพาะช่วงที่ *มากกว่าศูนย์* และตีกาปกไว้ที่ 12 ชม. (concept.md) · ถ้าตรวจพบว่า real-clock ถอยหลัง = ถือว่าออฟไลน์ 0 ชม. ไม่ให้รายได้ชดเชย · ผลตอนออฟไลน์คิดเหมือน AFK: drop เท่ากัน แต่คุณภาพได้แค่พื้นของโซน และไม่มีรายได้จาก boss (loot.md หัวข้อ 7) → ไม่มีแรงจูงใจให้ปลอมเวลา เพราะของที่ได้จาก 12 ชม. เป็นของชั้นต่ำของโซนเท่านั้น
-- **ต้องเก็บ timestamp การเกิด boss** — boss เกิดทุก 15 นาทีต่อโซน (G5) ถ้าไม่เก็บเวลาที่ *ควร* เกิดครั้งถัดไป กลับมาแล้วจะกด boss ได้ถี่เกินจนแกนกลาง (2.4/ชม. · F9) ล้น → Ascend ทั้งเซ็ตถูกกว่าที่ออกแบบไว้ 15 ชม. (E7)
+- **How time is counted against cheating** — store `accumulated elapsed` per session as monotonic (device boot clock), then add real-clock deltas only for periods *greater than zero*, capped at 12 hours (concept.md) · If real-clock is detected moving backward = count as 0 hours offline, no compensation income · Offline results are calculated as AFK: same drops, but Item quality limited to the zone floor, and no boss income (loot.md section 7) → no incentive to fake time, because 12 hours of gains are only zone-floor items
+- **Must store boss spawn timestamps** — boss spawns every 15 minutes per zone (G5). If the next-due spawn time is not stored, on return the player could trigger bosses too frequently until core income (2.4/hour · F9) overflows → full-set Ascend becomes cheaper than the designed 15 hours (E7)
 
-# สิ่งที่ยังไม่ลง
+# Unresolved items
 
-- ไม่มีแล้วในหัวข้อ save · คำถามที่เหลือของโปรเจคย้ายไปรวมที่ checks.md กลุ่ม I ทั้งหมด
+- None left under save · Remaining project questions are consolidated in checks.md group I
+
+(End of file - total 44 lines)

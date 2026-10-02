@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "note": "Deprecated terms. tools/lint.js fails when one appears in a doc outside its allow_in list. Add an entry whenever a term is renamed so the old spelling cannot creep back in.",
+    "terms": []
+  },
+  "terms": [
+    { "old": "Affix", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename" },
+    { "old": "Attribute", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename (do not use for item mods)" }
+  ]
+}

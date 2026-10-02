@@ -1,88 +1,86 @@
 # Weapon types
 
-อาวุธมี **12 ชนิด** · concept.md เดิมเขียนว่า 10 ชนิด เพราะนับ two-handed เป็นชนิดเดียวและไม่มี mace
-ตัวเลข `weapon_aspd` / `weapon_mult` ชุดเดียวกับที่คำนวณใน formula.md หัวข้อ 1 และ 7
+Weapons have **12 types** · concept.md originally stated 10 types because it counted two-handed as one type and had no mace. The `weapon_aspd` / `weapon_mult` numbers are the same set calculated in formula.md sections 1 and 7
 
-| อาวุธ | มือ | กลุ่ม skill | ประเภทดาเมจ | weapon_aspd (ครั้ง/วิ ฐาน) | weapon_mult | dual-wield |
+| Weapon | Hands | Skill group | Damage type | weapon_aspd (Base hits/sec) | weapon_mult | dual-wield |
 |---|---|---|---|---|---|---|
-| one-handed sword | เดียว | melee | physical | 1.2 | 1.00 | ได้ |
-| one-handed axe | เดียว | melee | physical | 1.2 | 1.00 | ได้ |
-| dagger | เดียว | melee | physical | 1.5 | 0.80 | ได้ |
-| mace | เดียว | melee | physical | 1.0 | 1.20 | ไม่ได้ |
-| rod | เดียว | magic | magic | 1.0 | 1.20 | ไม่ได้ |
-| wand | เดียว | magic | magic | 1.0 | 1.20 | ไม่ได้ |
-| staff | สอง | magic | magic | 0.85 | 1.41 | — |
-| spear | สอง | melee | physical | 0.85 | 1.41 | — |
-| two-handed sword | สอง | melee | physical | 0.7 | 1.71 | — |
-| two-handed axe | สอง | melee | physical | 0.7 | 1.71 | — |
-| bow | สอง (range) | ranged | physical | 1.1 | 1.09 | — |
-| crossbow | สอง (range) | ranged | physical | 1.1 | 1.09 | — |
+| one-handed sword | Single | melee | physical | 1.2 | 1.00 | Yes |
+| one-handed axe | Single | melee | physical | 1.2 | 1.00 | Yes |
+| dagger | Single | melee | physical | 1.5 | 0.80 | Yes |
+| mace | Single | melee | physical | 1.0 | 1.20 | No |
+| rod | Single | magic | magic | 1.0 | 1.20 | No |
+| wand | Single | magic | magic | 1.0 | 1.20 | No |
+| staff | Two | magic | magic | 0.85 | 1.41 | — |
+| spear | Two | melee | physical | 0.85 | 1.41 | — |
+| two-handed sword | Two | melee | physical | 0.7 | 1.71 | — |
+| two-handed axe | Two | melee | physical | 0.7 | 1.71 | — |
+| bow | Two (range) | ranged | physical | 1.1 | 1.09 | — |
+| crossbow | Two (range) | ranged | physical | 1.1 | 1.09 | — |
 
 # Off-hand only
 
-- **shield** — defensive (Max HP · Dodge)
-- **book** — defensive (Max Mana · Cooldown reduction) · นับเป็นกลุ่ม magic สำหรับโบนัส skill (ดู skill.md)
+- **shield** — Defensive (Max HP · Dodge)
+- **book** — Defensive (Max Mana · Cooldown reduction) · Counts as magic group for skill bonus (see skill-pool.md)
 
-# กติกาที่มาจากการตัดสินใจชุดนี้
+# Rules resulting from this decision set
 
-- **dagger เป็น melee ไม่ใช่ ranged** — ไฟล์นี้เดิมมีหัวข้อว่า "Ranged (one-handed)" ทั้งที่รายการคือดาบ/ขวาน/มีด ทำให้ตารางกลุ่มอาวุธใน skill.md ลาก dagger ไปอยู่ ranged ตาม
-  ตอนนี้แบ่งจริง: melee 7 ชนิด · ranged = bow/crossbow · magic = rod/wand/staff (+ book ที่ off hand)
-- **ทุกชนิดมี DPS เท่ากันที่ stat เท่ากัน** เพราะ `weapon_mult = 1.2 / weapon_aspd` · เช็คแล้วที่ build Str 12 ชิ้น ทุกชนิดให้ DPS 9,847 เท่ากันหมด
-  สิ่งที่ต่างกันคือจำนวนครั้งที่ตี (ซึ่งมีผลกับ proc ต่อครั้ง · Sonic Blow · Flurry · chill · การ tick ของ DoT) และใครชน cap aspd ก่อน
-- **ไม่มี base power ต่อชนิดอาวุธ** ทุกชนิดดึง power จากตัวละคร (formula.md หัวข้อ 1)
-- **dual-wield ใช้ได้เฉพาะ sword / axe / dagger** · ชิ้นที่สองใช้ pool เดียวกับ main hand แต่ให้น้ำหนัก Primary ครึ่งหนึ่ง (equipment-slot.md)
-- อาวุธสองมือกับ bow/crossbow กิน off hand → **เสียโอกาสใส่ shield/book** ซึ่งคือต้นทุนจริงของ weapon_aspd สูง ๆ
+- **Dagger is melee, not ranged** — this file originally had a heading "Ranged (one-handed)" even though the list was sword/axe/knife, which caused the weapon-group table in skill-pool.md to drag dagger into ranged. Now split correctly: melee 7 types · ranged = bow/crossbow · magic = rod/wand/staff (+ book in off hand)
+- **All types have equal DPS at equal stats** because `weapon_mult = 1.2 / weapon_aspd` · Verified on a 12-piece Str build: every type yields 9,847 DPS. What differs is hit count (which affects per-hit procs · Sonic Blow · Flurry · chill · DoT ticking) and who hits the aspd Cap first
+- **No Base power per weapon type**. All types draw power from the character (formula.md section 1)
+- **Dual-wield allowed only for sword / axe / dagger** · The second piece uses the same pool as the main hand but grants half Primary weight (equipment-slot.md)
+- Two-handed weapons and bow/crossbow occupy the off hand → **lose the chance to equip shield/book**, which is the real cost of high weapon_aspd
 
 # Weapon mastery
 
-**mastery = XP แยกตามชนิดอาวุธ** · เป็นช่องที่ concept.md เขียนไว้ว่าเป็นเหตุผลให้ผู้เล่น "ลองสลับอาวุธโดยไม่ต้องออกจากการตี" แต่ยังไม่มีสูตร
+**Mastery = per-weapon-type XP** · This is the slot that concept.md described as the reason for players to "try swapping weapons without leaving combat", but it had no formula yet
 
 ```
-mastery_xp   = 1 ต่อการตี 1 ครั้ง + 4 ต่อการฆ่า 1 ตัว (นับเฉพาะอาวุธที่ถืออยู่)
+mastery_xp   = 1 per 1 hit + 4 per 1 kill (counts only the held weapon)
 mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 ```
 
-| level | xp สะสม | ที่เลเวล 90 (xp 11,054/ชม.) |
+| Level | Cumulative xp | At level 90 (11,054 xp/hour) |
 |---|---|---|
-| 5 | 1,600 | 0.14 ชม. |
-| 10 | 8,100 | 0.73 ชม. |
-| 15 | 19,600 | 1.77 ชม. |
-| 20 | 36,100 | 3.27 ชม. |
+| 5 | 1,600 | 0.14 hours |
+| 10 | 8,100 | 0.73 hours |
+| 15 | 19,600 | 1.77 hours |
+| 20 | 36,100 | 3.27 hours |
 
-## โบนัสสองชั้น — และชั้นที่ตั้งใจ *ไม่แตะ DPS*
+## Two-layer bonus — and the layer intentionally *not touching DPS*
 
-| ชั้น | ผล | สูงสุด |
+| Layer | Effect | Maximum |
 |---|---|---|
-| **ขณะถือ** (อาวุธชนิดนั้น) | น้ำหนักของอาวุธที่ถือ **−1% ต่อ level** · และ skill ที่ใช้กับอาวุธนี้แรงขึ้น **+0.5% ต่อ level ตั้งแต่ L5** | −20% น้ำหนัก · +8% skill damage |
-| **ทั้งบัญชี** | ทุกชนิดอาวุธที่ mastery ≥ 10 → **+1% ของ drop_rate** รวมกันทุกชนิด | +12% (12 ชนิด) |
+| **While held** (that weapon type) | Held weapon weight **-1% per level** · And skills used with this weapon deal **+0.5% per level from L5** | -20% weight · +8% skill damage |
+| **Account-wide** | Every weapon type with Mastery ≥ 10 → **+1% of drop_rate**, summed across types | +12% (12 types) |
 
-**เหตุผลที่ mastery ไม่ได้ +ดาเมจ**: ทุกชนิดอาวุธถูกตั้งให้ DPS เท่ากันอยู่แล้ว (`weapon_mult = 1.2 / weapon_aspd` · พิสูจน์แล้วว่าทุกชนิดได้ 9,847 เท่ากันที่ stat เท่ากัน)
-ถ้า mastery ให้ดาเมจ อาวุธชนิดเดียวจะ "ดีกว่า" ตลอดเวลา และเหตุผลที่ mastery มีอยู่ (ให้ลองสลับอาวุธ) จะตายทันที · โบนัสทั้งสองชั้นจึงอยู่ในมิติ *น้ำหนัก* กับ *อัตราการได้ของ* ซึ่งไม่เลื่อนตัวเลขใน formula.md หัวข้อ 0 เลย
+**Why Mastery grants no +damage**: all weapon types are already tuned to equal DPS (`weapon_mult = 1.2 / weapon_aspd` · proven equal at 9,847 at equal stats). If Mastery granted damage, a single weapon type would be "better" permanently, and the reason Mastery exists (to encourage weapon swapping) would die immediately · Both bonus layers are therefore in the dimensions of *weight* and *drop rate*, which do not shift any number in formula.md section 0
 
-## เส้นเวลาของทั้งบัญชี (วัดที่เลเวล 90 · ใช้อาวุธเดียวต่อเนื่อง)
+## Timeline for the whole account (measured at level 90 · using one weapon continuously)
 
 ```
-12 ชนิดถึง L10  = 8.8 ชม.   → ถึงตอนนี้ได้ +12% drop_rate แบบถาวร
-12 ชนิดถึง L20  = 39 ชม.    → นี่คือ endgame จริง ไม่ใช่สิ่งที่มาถึงในสัปดาห์แรก
+12 types to L10  = 8.8 hours   → at this point +12% drop_rate permanently
+12 types to L20  = 39 hours    → this is true endgame, not reached in the first week
 ```
 
-- ที่เลเวล 10-30 ช้ากว่าเกือบ 2 เท่า (xp 5,500/ชม.) เพราะ kill น้อยกว่าและตีช้ากว่า · ดังนั้น mastery จะเป็น "เส้นคู่ขนาน" ที่เดินตอนต้นเกมแล้วเร่งตอนปลาย
-- **AFK เก็บ mastery ได้เต็ม** เพราะมันนับจากการตีล้วน ๆ ไม่เกี่ยวกับ boss หรือคุณภาพของ · เป็นสิ่งเดียวในระบบที่ปิดเกมแล้วยังไต่ได้เต็มตัว — ตั้งใจให้เป็นแบบนั้น เพื่อที่คนเล่นน้อยจะได้มีเส้นความคืบหน้าของตัวเอง
+- At levels 10-30 it is almost 2x slower (5,500 xp/hour) because of fewer kills and slower hits · Therefore Mastery is a "parallel track" that walks early game then accelerates late
+- **AFK earns full Mastery** because it counts purely from hits, unrelated to boss or Item quality · It is the only system in the game that progresses fully while closed — intentionally, so low-playtime players have their own progress track
 
-## ผลข้างเคียงที่วัดแล้ว (mastery L20 ต่อภาษีน้ำหนัก)
+## Measured side effects (Mastery L20 on weight tax)
 
-| set | น้ำหนักเดิม | หลัง −20% ของอาวุธ | ภาษีถ้าไม่ลง Str | ภาษีถ้าลง Str 2 ชิ้น |
+| Set | Original weight | After -20% weapon | Tax without Str | Tax with 2 Str pieces |
 |---|---|---|---|---|
-| armored (2h axe) | 657 | 635 | 50% → **50% (ยังชนเพดาน)** | 26% → **22%** |
+| armored (2h axe) | 657 | 635 | 50% → **50% (still capped)** | 26% → **22%** |
 | balanced (1h sword) | 507 | 491 | 21% → **17%** | 0% |
 | cloth/glass (dagger) | 322 | 314 | 0% | 0% |
 
-- mastery **ไม่ได้เป็นทางลัดข้าม Str** — armored ที่ไม่ลง Str ยังโดนเพดานภาษีอยู่ดี มันแค่ซื้อคืน ~4 คะแนน aspd
-- ผลต่อ drop: คนไม่ลง Lck ได้ 418 → 468 ชิ้น/ชม. (+12%) · Lck เต็ม 1,319 → 1,477/ชม. — Mastery เพิ่ม *ปริมาณ* ทางเดียวกับ Lck แต่แรงแค่ 1/8 ของ Lck เต็มๆ จึงไม่แย่งบทบาทที่ loot.md ตั้งไว้
+- Mastery **is not a shortcut past Str** — armored without Str still hits the tax Cap; it only buys back ~4 aspd points
+- Drop effect: no-Lck players get 418 → 468 pieces/hour (+12%) · Full Lck 1,319 → 1,477/hour — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
 
-# ค้างอยู่
+# Pending
 
-- Mastery ใช้ XP จาก hit/kill ซึ่ง **ยังไม่ผูกกับสูตร XP ของตัวละคร** (ยังไม่มีไฟล์ไหนตั้ง) · เมื่อตั้ง XP curve แล้วต้องเช็คเส้น 8.8 ชม. / 39 ชม. ใหม่
-- ยังไม่ได้ตั้งว่า mastery แสดงบนหน้าตัวละครยังไง → แนะนำ (character-sheet.md): แสดง `Mastery 14/20 · หนัก −14%` ในหน้าอาวุธ ไม่ใช่แผงหลัก เพราะมันไม่ใช่ stat ที่ใช้คำนวณ build
+- Mastery uses XP from hits/kills, which is **not yet tied to the character XP formula** (no file sets it yet) · Once the XP curve is set, re-check the 8.8-hour / 39-hour tracks
+- Not yet defined how Mastery displays on the character sheet → recommendation (character-sheet.md): show `Mastery 14/20 · weight -14%` on the weapon panel, not the main panel, because it is not a stat used in build calculation
 
-> **ปิดคำถามเดิมใน concept.md**: "mastery ยังไม่มีสูตร — โบนัสต่อ level คืออะไร แล้วอาวุธ 12 ชนิดจะไม่คุ้มเท่ากันหรือเปล่า" → ตอบแล้ว: โบนัส = น้ำหนัก + drop_rate และ skill damage เฉพาะอาวุธที่ถือ · ความคุ้มเท่ากันทุกชนิดเพราะไม่แตะ DPS เลย
+> **Closes the original question in concept.md**: "Mastery has no formula yet — what is the per-level bonus, and will all 12 weapon types be equally worthwhile?" → Answered: bonus = weight + drop_rate and skill damage only for the held weapon · All types are equally worthwhile because DPS is never touched
+
+(End of file - total 88 lines)

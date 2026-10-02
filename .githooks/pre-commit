@@ -1,0 +1,9 @@
+#!/bin/sh
+# ModWorld pre-commit: run every cage + the cross-file linter.
+# Enable once with:  git config core.hooksPath .githooks
+node tools/verify.js || {
+  echo ""
+  echo "pre-commit blocked: a cage or the doc linter failed."
+  echo "Fix the numbers/data, run 'node tools/verify.js', and commit again."
+  exit 1
+}

@@ -2,129 +2,140 @@
 
 import glossary.md
 import item-rarity.md
-import attribute-item.md
+import mod-pool.md
 import equipment-slot.md
 import combat.md
 import crafting.md
 import world.md
 
-ไฟล์นี้คือเอนจินของลูปหลัก ("ตีมอนไปเรื่อย ๆ แล้วประกอบ build จากของที่ดรอป") — ทุกตัวเลขที่นี่วัดจากการจำลองการสุ่มตามกติกาใน attribute-item.md ไม่ใช่ตั้งจากความรู้สึก
+This file is the engine of the core loop ("keep killing monsters and assemble a build from drops") — every number here is measured from random-roll simulation under the rules in mod-pool.md, not set by feel
 
-# 1. กติกาการสุ่มของ 1 ชิ้น (ลำดับตายตัว)
+# 1. Roll rules for 1 item (fixed order)
 
 ```
-1 slot     · สุ่มจาก 12 ช่องที่ผู้เล่นใส่ได้ (เท่ากันทุกช่อง)
-2 base     · สุ่มเท่ากันทุกโครงของ slot นั้น (item-base.md · helmet 1/3 · ring 1/2)
+1 slot     · Roll from 12 equippable slots (equal for all slots)
+2 base     · Equal roll among all frames of that slot (item-base.md · helmet 1/3 · ring 1/2)
 3 Rarity   · Common 82% / Rare 18%
-4 จำนวนช่อง· Common 2-3 · Rare 3-5 (uniform)
-5 คุณภาพ   · ตามพื้น/เพดานของโซน (item-rarity.md) แล้วสุ่มในขั้นที่โซนอนุญาต:
-              โซนต่ำ   = ต่ำ 100%
-              โซนกลาง  = ต่ำ 55% · กลาง 45%
-              โซนสูง   = กลาง 45% · สูง 55%   (ไม่มีต่ำ เพราะพื้นของโซนสูงคือกลาง)
-6 tier     · ต่อช่อง: T3 50% · T2 33% · T1 17%
-7 ค่า      · uniform ในช่วงของ tier นั้นของคุณภาพที่locked แล้ว
+4 Mod count· Common 2-3 · Rare 3-5 (uniform)
+5 quality  · Zone floor/ceiling (item-rarity.md) then roll within the Tiers the zone allows:
+              low zone   = low 100%
+              mid zone   = low 55% · mid 45%
+              high zone  = mid 40% · high 60%   (no low, P2-1 option A)
+6 tier     · Per slot: T3 50% · T2 33% · T1 17%
+7 value    · Uniform within that Tier range of the already-locked Item quality
 ```
 
-- **T1 17% ไม่ใช่ 33%** เพราะถ้า tier สุ่มเท่ากันทั้ง 3 ระดับ ของทุกชิ้นจะ "เต็ม" เร็ว และ Refine จะไม่มีความหมาย · 17% ทำให้ T1 เป็นเป้าหมายที่ต้องคราฟ ไม่ใช่ที่ตกมาบ่อย ๆ
-- **Primary/Secondary ของชิ้นมาจาก base ที่สุ่มได้ในขั้น 2** (item-base.md) ไม่ใช่ pool รวมทั้ง slot · น้ำหนักก็มาจาก base เดียวกันนั้น ทำให้ "โครงที่ถูก" เป็นเงื่อนไขหนึ่งของของดี (cloth 248 เทียบกับ armored 657) และภาษีน้ำหนัก 0-50% ที่ formula.md หัวข้อ 11 ตั้งไว้ก็เป็นผลจากการสุ่มนี้ด้วย
-- **โอกาสออกของแต่ละเส้น = role × `value(affix)`** ตามตารางใน equipment-slot.md · ตาราง taper ในหัวข้อ 3 **รันใหม่ด้วยน้ำหนักนี้แล้ว** พร้อมค่า marginal ที่วัดจริงต่อเส้น (ไม่ใช่ percentile ของช่วงค่าอีกต่อไป)
-- **เส้น flat ถ่วงหนักตามชั้นคุณภาพ 0.5 / 0.4 / 0.25** (ของต่ำ/กลาง/สูง) · รัน MC ซ้ำวัดได้: จำนวนเส้น flat ต่อชิ้นที่ตกในโซนสูงลด 0.28 → 0.15 (-46%) แต่ keep-rate รวมแทบไม่ขยับ (1.01% → 1.02%) และผงฝุ่นเท่าเดิม
-  → การแก้ "ของเต็มไปด้วยเส้นอ่อน" ทำได้แค่ระดับ *ความรู้สึกของชิ้น* ไม่ใช่ระดับ *อัตราได้ของ* · ราคาสกุลคราฟใน crafting.md จึงใช้ต่อได้โดยไม่ต้องแก้อีก
+- **T1 17%, not 33%** because with equal Tier rolls across all 3 levels, every item would be "full" quickly and Refine would lose meaning · 17% makes T1 a crafting target, not a common drop
+- **Primary/Secondary of a piece come from the base rolled in step 2** (item-base.md), not from the combined slot pool · Weights also come from that same single base, so "the right frame" is one condition for a good item (cloth 248 vs armored 657), and the 0-50% weight tax set in formula.md section 11 is also a result of this roll
+- **Proc chance per line = role × `value(mod)`** per the table in equipment-slot.md · The taper table in section 3 **was re-run with these weights**, with measured real marginal values per line (no longer percentiles of the value range)
+- **Flat lines weighted by Item quality Tier 0.5 / 0.4 / 0.25** (low/mid/high) · Re-run MC measured: Flat lines per drop in the high zone fell 0.28 → 0.15 (-46%) but total keep-rate barely moved (1.01% → 1.02%) and stone income unchanged
+  → Fixing "items full of weak lines" works only at the *piece-feel* level, not at the *acquisition-rate* level · Stone prices in crafting.md can therefore be used without further changes
 
-# 2. อัตราการฆ่าต่อชั่วโมง
+# 2. Kills per hour
 
-ตั้งจาก combat.md (TTK 1 ตัว ≈ 1 วิ) + เวลาเกิดกลุ่มใหม่ **4 วินาทีต่อกลุ่ม (ค่าคงที่ทุกโซน)**
+Set from combat.md (TTK ≈ 1 sec per kill) + new-group spawn time **4 seconds per group (constant in all zones)**
 
-| โซน | กลุ่มเฉลี่ย | วัฏจักร | kills/ชม | Lck ที่เลเวลนั้น | drop/ชม |
+| Zone | Average group | Cycle | kills/hour | Lck at that level | drops/hour |
 |---|---|---|---|---|---|
-| ต่ำ (1-30) | 1.5 ตัว | 5.5 วิ | 980 | 72 (L30) → ×1.72 | 135 |
-| กลาง (31-60) | 2.5 ตัว | 6.5 วิ | 1,385 | 130 (L60) → ×2.30 | 255 |
-| สูง (61-90) | 4 ตัว | 8.0 วิ | 1,800 | 192 (L90) → ×2.92 | 421 |
-| สูง + ลง Lck เต็ม | 4 ตัว | 8.0 วิ | 1,800 | 816 → ×9.16 | **1,319** |
+| low (1-30) | 1.5 mobs | 5.5 sec | 980 | 70 (L30) → ×1.70 | 133 |
+| mid (31-60) | 2.5 mobs | 6.5 sec | 1,385 | 130 (L60) → ×2.30 | 255 |
+| high (61-90) | 4 mobs | 8.0 sec | 1,800 | 190 (L90) → ×2.90 | 418 |
+| high + full Lck | 4 mobs | 8.0 sec | 1,800 | 816 → ×9.16 | **1,319** |
 
-- **base drop chance = 8% ต่อการฆ่า 1 ตัว** แล้วคูณ `drop_rate = (1 + Lck×0.01) × (1 + mastery_collection/100)` (formula.md หัวข้อ 10)
-- mastery ทั้งบัญชี 12 ชนิดถึง L10 = **+12% ของรายได้ทุกทางในไฟล์นี้** (drops · ผงฝุ่น · โอกาสได้ skill) · ที่ 418 drops/ชม. → 468/ชม. · Lck เต็ม 1,319 → 1,477/ชม. (equipment-weapon.md)
-- AoE ลดเวลาวัฏจักรแต่ไม่ฟรี: ภายใต้กติกาใหม่ (60% ต่อเป้า · เพดาน 3 เป้า · mana ×1.5 · skill.md) กลุ่ม 5 ตายใน 3.75 วิแทน 4.50 วิ = เร็วขึ้น **1.20 เท่า** เท่านั้น และเป็น 0.40-0.80 เท่าเมื่อเจอลูก 1-2 ตัว 1-2 ตัว · ตัวเลข 1.20 นี้คือเพดานที่ funnel ทั้งหมดรับ (loot.md F1-F5) ·กลไกที่ commit `93cde79` ตั้งไว้ว่า "drop rate scales with clear rate" จึงยังอยู่แต่ถูกล็อกขอบ
-- **ตารางนี้เป็นเส้นฐาน ไม่ใช่เพดาน**: mob HP ตั้งจาก "คนที่ gear+tree พอดีเลเวล" → TTK 1 วิ · คนที่ของเต็ม T1 + tree โด้น ๆ ฆ่าใน 0.79 วิ = kills/ชม. สูงกว่าตารางนี้ได้ถึง ~25% · ใช้ตัวเลขในตารางเป็นค่าต่ำสุดที่ออกแบบรายได้ไว้แล้วกัน
+- **Base drop chance = 8% per kill** for gear, multiplied by `drop_rate = (1 + Lck×0.01) × (1 + mastery_collection/100)` (formula.md section 10)
+- **Herb bundles ride a separate small roll**: 2% per kill (mid zones) · 3% (high zones), 1-3 zone-tier herbs each (farm.md). Bounded to leave kills/hour and F1-F5 intact; exact rate finalizes in the rebalance pass.
+- Account-wide Mastery of all 12 types to L10 = **+12% of all income in this file** (drops · stones · skill chance) · At 418 drops/hour → 468/hour · Full Lck 1,319 → 1,477/hour (equipment-weapon.md)
+- AoE shortens the cycle but is not free: under the new rules (60% per target · 3-target Cap · mana ×1.5 · skill-pool.md), a group of 5 dies in 3.75 sec instead of 4.50 sec = only **1.20x** faster, and 0.40-0.80x against 1-2 small mobs · This 1.20 figure is the ceiling accepted by the whole funnel (loot.md F1-F5) · The mechanism committed in `93cde79` stating "drop rate scales with clear rate" therefore remains but is edge-locked
+- **This table is a baseline, not a ceiling**: mob HP is set for "gear+tree on-level" → 1 sec TTK · A full-T1 + tuned-tree player kills in 0.79 sec = kills/hour can exceed this table by ~25% · Use the table numbers as the minimum income the design already covers
 
-# 3. ผลที่วัดได้ — ลuck หมดเร็ว และการตัดสินใจไม่ได้ขึ้นกับจำนวนของ
+# 3. Measured results — luck runs out fast, and decisions do not depend on item count
 
-จำลอง 14 ชั่วโมงต่อโซน โดยผู้เล่นเก็บเฉพาะของที่ดีกว่าชิ้นที่ใส่อยู่ (12 ช่อง)
+Simulated 14 hours per zone, with the player keeping only items better than the currently equipped piece (12 slots)
 
-| โซน | ชม.ที่ 1 | 2 | 3 | 4 | 6 | 12 | อัปเกรดรวมจาก drop |
+| Zone | Hour 1 | 2 | 3 | 4 | 6 | 12 | Total upgrades from drops |
 |---|---|---|---|---|---|---|---|
-| ต่ำ | 18 | 5 | 7 | 2 | 1 | 1 | 2.2% ของ drop |
-| กลาง | 12 | 3 | 9 | 2 | 3 | 0 | 1.2% ของ drop |
-| สูง | 15 | 7 | 3 | 3 | 2 | 1 | 0.7% ของ drop |
-| สูง + ลง Lck เต็ม | 23 | 5 | 6 | 5 | 4 | 2 | 0.3% ของ drop |
+| low | 18 | 5 | 7 | 2 | 1 | 1 | 2.2% of drops |
+| mid | 12 | 3 | 9 | 2 | 3 | 0 | 1.2% of drops |
+| high | 15 | 7 | 3 | 3 | 2 | 1 | 0.7% of drops |
+| high + full Lck | 23 | 5 | 6 | 5 | 4 | 2 | 0.3% of drops |
 
-- **รุ่นนี้ใช้ค่าจริงของแต่ละเส้น** (marginal % ที่วัดใน equipment-slot.md · ตารางน้ำหนักต่อ affix) ไม่ใช่ percentile ของช่วงค่า · และรวม base ในการสุ่มแล้ว · เส้น flat ไร้ค่าตอนปลายเกมถูกถ่วงเหลือ 0.5 ทำให้ keep-rate รวม *ลดลง* เล็กน้อยแต่เที่ยงธรรมขึ้น เพราะของ "เต็มไปด้วยเส้นที่อ่อนแอ" ไม่นับเป็นอัปเกรดอีกต่อไป
-- gear score เฉลี่ยต่อชิ้นที่จบ 14 ชม. ของโซน: 10.7 (ต่ำ) · 19.1 (กลาง) · 27.6 (สูง) → **ของโซนสูงแรงกว่าโซนต่ำ ~2.6 เท่า** ซึ่งเป็นความชันที่ loot ซื้อให้ผู้เล่น
+- This revision uses the true value of each line (measured marginal % in equipment-slot.md · per-Mod weight table), not percentiles of the value range · And Base is included in the roll · Worthless late-game Flat lines are weighted down to 0.5, so total keep-rate *falls* slightly but is fairer, because items "full of weak lines" no longer count as upgrades
+- Average gear score per piece after 14 hours per zone: 10.7 (low) · 19.1 (mid) · 27.6 (high) → **high-zone items are ~2.6x stronger than low-zone items**, which is the power slope loot buys the player
 
-**สามข้อสรุปที่เปลี่ยนการออกแบบ**
+**Three design-changing conclusions**
 
-1. **ความถี่การตัดสินใจตกจาก ~30/ชม. เป็น ~1-5/ชม. ภายใน 2-3 ชั่วโมงของโซนนั้น** · ถ้าปล่อยให้ drop เป็นตัวขับความคืบหน้าอย่างเดียว เกมจะเงียบตามข้อความใน concept.md ข้อ "จุดที่อาจพัง" ข้อ 1
-2. **Lck ไม่ได้ซื้อ "ของดี" แต่ซื้อ "จำนวนของ"** — ที่ Lck 816 ได้ drop 1,319/ชม. (×3.15 ของคนไม่ลง Lck ที่ 418/ชม.) แต่ได้ *อัปเกรด* แค่ ~4/ชม. เทียบกับ ~3/ชม. (×1.3) · แปลว่า **×3.15 ของจำนวน = ×1.3 ของการตัดสินใจ + ×3.15 ของผงฝุ่น (1,315/ชม.)**
-   สรุปเป็นกติกา: Lck คือ stat ของ *ความเร็วคราฟ* ไม่ใช่ความเร็วใส่ของ · นี่คือคำตอบของคำถามค้างใน concept.md ว่า Lck จะเด่นเกินไหม — มันเด่นทางเดียวและทางนั้นคือบ่อฝุ่น
-3. **ของที่ไม่เก็บไม่หาย · มันกลายเป็นสกุลคราฟ** (หัวข้อ 5) → ดังนั้น drop ที่ "ไร้ค่า" ไม่มีจริง · และ crafting ไม่ใช่ทางเลือกเสริม แต่คือเอนจินทางยาวของโซน
+1. **Decision frequency falls from ~30/hour to ~1-5/hour within 2-3 hours of that zone** · If drops alone drive progress, the game goes quiet per concept.md "failure points" item 1
+2. **Lck does not buy "good items", it buys "item count"** — at Lck 816 the player gets 1,319 drops/hour (×3.15 of the no-Lck 418/hour) but only ~4 upgrades/hour vs ~3/hour (×1.3) · In other words **×3.15 count = ×1.3 decisions + ×3.15 Reroll value stones (1,315/hour)**. As a rule: Lck is a *craft-speed* stat, not an equip-speed stat · This answers the open question in concept.md whether Lck is too dominant — it dominates in one direction only, and that direction is the stone pool
+3. **Unkept items are not lost · They become crafting currency** (section 5) → therefore no "worthless" drop truly exists · And crafting is not a side option, but the long-term engine of the zone
 
-# 4. ฟิลเตอร์กระเป๋า (ตัวที่ทำให้ประโยค "ทุกชิ้นต้องตัดสินใจ" เป็นจริง)
+# 4. Bag filter (what makes the sentence "every piece needs a decision" true)
 
 ```
-เก็บ (ให้ผู้เล่นเห็น) = ดีกว่าชิ้นที่ใส่อยู่ในช่องเดียวกันอย่างน้อย 1 แกน:
-  · คุณภาพสูงกว่า · หรือ tier ของช่องใดช่องหนึ่งสูงกว่า · หรือ elemental res ธาตุที่ผู้เล่นยังไม่มี · หรือ skill ที่ยังไม่มีในบัญชี
-ไม่เก็บ = สลายเป็นผงฝุ่นทันที (1 ชิ้น = 1 ผงฝุ่น)
+Keep (show to player) = better than the equipped piece in the same slot on at least 1 axis:
+  · Higher Item quality · Or higher Tier on any slot · Or Elemental res of an Element the player lacks · Or a skill not yet in the collection
+Keep always = herbs (never dissolve)
+Do not keep = 1 Reroll value stone (dissolve) OR 1 gold (sell) — the filter picks one medium per piece, default dissolve, never both (economy.md single-medium rule)
+
+Salvage milestones (luck protection, bounded): every 500 salvaged gear pieces grants 1 Reroll tier stone (~+2.7% of §5 flow, inside the funnel). No new junk types exist: gear, herbs, and stones are the only three streams.
 ```
 
-- ฟิลเตอร์ **ตั้งเกณฑ์ได้** (เช่น "เก็บเฉพาะ Rare" / "เก็บถ้ามีช่อง res") · การตั้งเกณฑ์คือการตัดสินใจของผู้เล่นจริง และเป็น 1 ใน 3 เหตุผลที่ concept.md บอกว่าต้องเปิดเกมมา
-- ไม่มีขายของ ไม่มีเงิน (หัวข้อ 6) → ไม่มี "ของในกระเป๋าที่คั่งค้าง" เพราะของที่ไม่เก็บกลายเป็นสกุลคราฟทันที · ช่องเก็บของจึงไม่ต้องมีเพดาน
-- save.md ต้องบันทึก: เกณฑ์ฟิลเตอร์ต่อ slot · และรายการ "ธาตุ/ช่องที่ผู้เล่นยังหาไม่ได้" เพราะมันคือเงื่อนไขของฟิลเตอร์
+- The filter is **configurable** (e.g. "keep only Rare" / "keep if it has a res slot") · Configuring thresholds is a real player decision, and 1 of the 3 reasons concept.md says to open the game
+- No bag backlog either way: both media convert on the spot (section 6) → the stash still needs no Cap
+- **The sell/dissolve switch is a real decision, and it is gold's primary mint** (Road events are the only other one · checks.md G6). Any source that paid both media would inflate one of them silently (`economy.md`)
+- save.md must store: per-slot filter thresholds · And the list of "Elements/slots the player has not yet found", because it is a filter condition
 
-# 5. อัตราการได้สกุลคราฟและราคา (ตั้งจากตัวเลขในหัวข้อ 2-3)
+# 5. Stone income and prices (set from the numbers in sections 2-3)
 
-| สกุล | ที่มาต่อชั่วโมง (โซนสูง · ไม่ลง Lck) | ใช้ทำอะไร | ราคาต่อครั้ง |
+| Stone | Source per hour (high zone · no Lck) | Used for | Price per use |
 |---|---|---|---|
-| ผงฝุ่น | 416 (junk ทุกชิ้น = 1) | Reroll | **8** → ~52 ครั้ง/ชม |
-| ผงคลัด | elite 18 (1% ของการฆ่า ×1) + boss 12 (4 ตัว ×3) = 30 | Refine | **8** → ~3.8 ครั้ง/ชม |
-| แกนกลาง | boss 2.4 (4 ตัว × 60%) | Ascend | **3 + 30 ผงคลัด** → ~0.8 ครั้ง/ชม |
+| Reroll value stone | 416 (every junk piece = 1) | Reroll value | **8** → ~52 times/hour |
+| Reroll tier stone | elite 18 (0.5% of kills ×2) + boss 12 (4 ×3) = 30 | Reroll tier / Refine | **1 / 8** → ~3.75 Refines/hour |
+| Add mod stone | elite / boss only (rate pending) | Add / Ascend | **1** (2nd fill 2 · Ascend 1 + 8 tier stones) → ~0.8 Ascends/hour |
+| Quality Stone | monsters → elites → bosses by step | Upgrade | tiered: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 |
+| Repair stone | elite / boss only | Repair | **1** |
+| Corrupt stone | boss only, rarest stone | Corrupt | **1** |
 
-เส้นเวลาที่ต้องเช็คได้:
+Checkable timelines:
 
 ```
-Refine ทั้งเซ็ต 12 ชิ้น (เฉลี่ย 2.5 ช่อง/ชิ้น × 2 ขั้น = 60 ครั้ง) ≈ 16 ชม.
-Ascend ทั้งเซ็ต 12 ชิ้น ≈ 15 ชม.  (และได้เฉพาะของที่คุณภาพพื้นต่ำกว่าเพดานของโซน)
-Skill 1 ตัวเต็มขั้นบันได 32 ตัวซ้ำ ≈ 23 ชม.ของ boss (35% ต่อการฆ่า)
+Refine full 12-piece set (average 2.5 slots/piece × 2 steps = 60 uses) ≈ 16 hours
+Ascend full 12-piece set ≈ 15 hours  (and only for items whose floor Item quality is below the zone ceiling)
+Skill 1 unit to full ladder 32 duplicates ≈ 23 boss hours (35% per kill)
 ```
 
-- **ทำไมถึงตั้งแบบนี้**: Reroll ถูกและเกิดบ่อย (แก้ค่าใน tier เดิม) · Refine คือทางอัปเกรดหลักที่ต้องล่า elite/boss · Ascend ต้องวางแผนเพราะแกนครึ่งเดือนต่อชิ้น
-- **boss เป็นคอขวดของสองอย่างพร้อมกัน** (แกนกลาง + skill ซ้ำ) ตามที่ concept.md วางไว้ · AFK ตี boss ไม่ได้ → ครึ่งหลังของเอนจินคราฟเป็น active ล้วน ๆ
-- **แพ้ = เสีย spawn** (combat.md หัวข้อ 7) ดังนั้น 4 ครั้ง/ชม. คือเพดาน theoretic ไม่ใช่ค่าจริง: ผู้เล่นที่ยังอ่อนกว่าโซนจะชนะราว 1 ใน 3 นัด → แกนกลางจริง ~0.8/ชม. ไม่ใช่ 2.4/ชม. · ตารางใน combat.md ระบุว่า build ไหนแพ้ที่โซนไหน
-  ผลพลอยได้ที่ตั้งใจ: การ *อับเกรด* (tree/heal/ของ) เพิ่มอัตราชนะ ไม่ใช่แค่ความเร็ว → เปลี่ยนเส้นรายได้คราฟทั้งเส้น
-- ถ้าจะให้อัตราเร็วขึ้น 2 เท่า สิ่งที่ควรแก้คือ *โอกาสเกิด boss* ไม่ใช่ราคา — ราคาเป็นสิ่งที่ผู้เล่นอ่านออก โอกาสเกิด boss เป็นสิ่งที่เกมกำหนด
+- **Why set this way**: Reroll is cheap and frequent (fixes value within the same Tier) · Refine is the main upgrade path requiring elite/boss hunting · Ascend requires planning because cores are half a month per piece
+- **Boss is the bottleneck for two things at once** (cores + duplicate skills) as concept.md laid out · AFK cannot hit bosses → the second half of the craft engine is fully active
+- **Losing = losing the spawn** (combat.md section 7), so 4 times/hour is a theoretic ceiling, not a real value: players weaker than the zone win about 1 in 3 fights → real cores ~0.8/hour, not 2.4/hour · The table in combat.md states which build loses in which zone. Intended side effect: *upgrading* (tree/heal/gear) raises win rate, not just speed → shifts the whole craft-income line
+- To make rates 2x faster, the right fix is *boss spawn chance*, not price — price is what players read, boss spawn chance is what the game controls
 
-# 6. คำตอบให้ economy.md
+# 6. Answers for economy.md
 
-- **ไม่มีสกุลเงิน** · ไม่มีร้านค้า NPC · ไม่มีระบบซื้อขาย/แลกของระหว่างผู้เล่น · ตัวกลางทั้งหมดคือสกุลคราฟ 3 ชนิด
-- เหตุผล: เกมนี้ตัวที่มีค่าคือ *เวลา* (combat.md หัวข้อ 4) และของทุกชิ้นที่ดรอปมีมูลค่าอยู่แล้วผ่าน tier/quality ของมัน → ถ้าใส่เงินเข้ามา เงินจะซื้อสิ่งที่มีอยู่ฟรี ๆ หรือซื้อสิ่งที่ไม่ได้มาจากการเล่น ซึ่งพังทั้งสองทาง
-- **แลกไอเทมเป็นสกุลคราฟ: ไม่ทำ** (economy.md เคยเตือนว่าทำให้ผู้เล่นไม่รู้ว่าควรเก็บอะไร) — ฟิลเตอร์หัวข้อ 4 ทำหน้าที่นั้นอยู่แล้วและโปร่งกว่า
-- ของที่ผู้เล่นไม่เก็บจึงไม่ใช่ "ขยะ" แต่คือรายได้ Passive ของระบบคราฟ → ไม่มีกระเป๋าเต็ม ไม่มีวันต้องมานั่งลบของ
+- **Two media** · 7 stones (power) + **gold** (quality-of-life) · No player-to-player buying/selling/trading · Gold is minted *only* by the sell/dissolve choice in section 4, so drop count is the ceiling on both media at once. Full model in `economy.md` · the stalls that spend it are in `towns.md` sections 4-5.
+  > This replaces the first-draft answer "no currency · no NPC shops". It is safe because nothing gold buys grants power: Reroll/Refine/Ascend stay priced in stones, and the stone bottleneck (F7-F10, elite 0.5% + boss 4/hour) is untouched.
+- Reason the time framing still holds: what is valuable in this game is *time* (combat.md section 4). Gold converts time into convenience, never into the crafted quality that E6/E7 measure.
+- **Converting items to crafting currency: not done as a separate action** (economy.md warned it leaves players unsure what to keep) — the section 4 filter already does it, and now it also offers the gold alternative at the same moment of decision.
+- Items the player does not keep are therefore not "trash" but Passive income of the craft system → no full bag, never needing to sit and delete items
 
-# 7. AFK เทียบ Active ด้วยตัวเลขนี้
+# 7. AFK vs Active with these numbers
 
 | | Active | AFK |
 |---|---|---|
-| kills/ชม | เท่ากัน (TTK ไม่ต่างกัน) | เท่ากัน |
-| drops/ชม | 446 | 446 |
-| คุณภาพสูงสุดที่drop | เพดานโซน | **พื้นของโซนเท่านั้น** (concept.md) |
-| ผงคลัด/ชม | 30 (elite + boss) | **18** (elite เท่านั้น · ไม่มี boss) |
-| แกนกลาง/ชม | 2.4 | **0** |
-| อัปเกรด/ชม จาก drop | 1-5 | ต่ำกว่า เพราะยิงได้แค่ช่วงพื้น |
+| kills/hour | Same (TTK identical) | Same |
+| drops/hour | 446 | 446 |
+| Highest droppable Item quality | Zone ceiling | **Zone floor only** (concept.md) |
+| Reroll tier stone/hour | 30 (elite + boss) | **18** (elite only · no boss) |
+| Add mod stone/hour | boss-gated | **0** |
+| Upgrades/hour from drops | 1-5 | Lower, because only the floor range can roll |
 
-- ตัวเลขนี้ทำให้ "AFK 40-50%" มีเนื้อ: ของเท่ากันแต่ **ชั้นคุณภาพและสกุลคราฟระดับสูงหายไป** · ไม่ได้ตัดด้วยการทำให้ตีช้าลง
-- ข้อนี้ยังตอบคำถาม "offline cap" ที่ค้างใน concept.md ไม่ได้ — ต้องเลือกเวลาเก็บสูงสุด (แนะนำ 12 ชม. = 1 วันจริงที่ทำงาน = 1 โซนครึ่งของเอนจินคราฟ)
+- These numbers give "AFK 40-50%" substance: same item count but **high Tier Item quality and high crafting currencies are missing** · Not cut by making hits slower
+- This does not yet answer the "offline Cap" question pending in concept.md — a maximum storage time must be chosen (recommended 12 hours = 1 real work day = 1.5 zones of the craft engine)
 
-# 8. ช่องที่ต้องตัดสินต่อ (ของไฟล์นี้)
+# 8. Open slots for this file
 
-- **โอกาสเกิด elite 1%** ตั้งไว้ตามที่ต้องการให้ผงคลัดไหล · ยังไม่ผูกกับ "ความรู้สึกเป็นงานใหญ่" · ถ้า 18 ครั้ง/ชม. มากไป ให้ลดเหลือ 0.2% แล้วขึ้นผงคลัดต่อตัวเป็น ×5 (รวมแล้ว supply เท่าเดิม elite หายากลงแต่แต่ละตัวมีความหมาย)
-- **จำนวนโซน** ยังไม่มี · หัวข้อ 2 คิดเป็นโซนใหญ่ 3 ขั้นคุณภาพ · ถ้า 90 เลเวลแบ่งเป็น 9 โซน เส้นเวลาทั้งเกม = ~9 × (2-3 ชม. luck + 16 ชม. คราฟ) ซึ่งเกินไปมาก · ต้องเลือกระหว่าง "โซนน้อยแต่คราฟลึก" กับ "โซนเยอะแต่คราฟตื้น"
-- **คุณภาพของ drop กระจายตามสูตรในหัวข้อ 1 ข้อ 4** — โซนสูงยังมี ต่ำ 28% อยู่ เพราะกติกาพื้น/เพดานของ item-rarity.md · ถ้าอยากให้โซนสูงน่าตีขึ้นให้ลดช่องนั้นลง (ไม่ใช่เพิ่ม drop chance)
+- **Which numbers this file owns vs what is computed**: `node tools/check.js --checks` derives F1 · F2 · F3 · F5 · F6 · F7 · F8 (and the gold-per-minute line F18) from `tools/data/engine.json`, and it reads the section 2 table back out of this file — so a row here that stops matching the engine is a FAIL, not a note. **F4 and F11 are simulation output** (section 3), and F9 · F10 · F13 are unset; the cage carries those rows instead of inventing them, and `tools/loot.js` (not written yet) is what would replace them.
+- **Elite spawn chance 0.5% with 2 tier stones each (decided P2-2)** — supply stays 30/hour, elites are rarer but each is a mini-boss event (HP ×6 / damage ×4).
+- **Zone count** still missing · Section 2 thinks in 3 large Item-quality steps · If 90 levels split into 9 zones, total game time = ~9 × (2-3 hours luck + 16 hours craft), which is far too much · Must choose between "few zones but deep craft" vs "many zones but shallow craft"
+- **Drop Item quality spreads per the formula in section 1 item 4 (decided P2-1)** — high zone carries no low (mid 40% / high 60%). Simulation keep-rates in section 3 predate this change; rerun pending.
+- **Per-settlement Base bias** (towns.md section 4) — if Bases roll unequally by town, step 2 of section 1 needs a weight column and section 3 must be re-simulated. `item-base.md` already states this condition. The 5-step check list is `towns-stalls.md` section 8, caged as `checks.md` T15 by `node tools/town.js --checks`; no weight may be written into the data file while the status is `pending`.
+
+(End of file - total 130 lines)

@@ -6,189 +6,221 @@ import item-rarity.md
 import elements.md
 import combat.md
 
-**ร่างแรก** — โครงคือสิ่งที่ต้องตัดสิน ตัวเลขจริงยังไม่ลง
+**First draft** — structure is what must be decided. Real numbers are not yet in.
 
-# เวงล
+# Level
 
-| ช่วงเวงล | คุณภาพของที่ตก |
+| Level range | Dropped Item quality |
 |---|---|
-| 1-30 | ต่ำ |
-| 31-60 | กลาง |
-| 61-90 | สูง |
+| 1-30 | low |
+| 31-60 | mid |
+| 61-90 | high |
 
-- เวงลของไอเทม = เวงลมอนที่ตก
-- ช่วงเวงลตรงกับคุณภาพ 1:1 ในตอนนี้ เพราะยังไม่มีแหล่งที่ตกนอกเวงล
-  ถ้าใช้แบบนี้ต่อ แกนคุณภาพจะซ้ำกับเวงล ต้องระวัง (ดู item-rarity.md)
+- Item level = level of dropping mob.
+- Level ranges currently match Item quality 1:1 because there is still no drop source outside levels.
+  If kept this way, the Item quality axis duplicates levels. Be careful (see item-rarity.md).
 
-# โซนและเลเวล (ตัดสินแล้ว)
+# Zones and Levels (Decided)
 
-**9 โซน · โซนละ 10 เลเวล · boss 1 ตัวต่อโซน**
+**9 zones · 10 levels per zone · 1 boss per zone.**
 
-| โซน | เลเวล | เพดานคุณภาพของที่ตก | mob HP รวม tree (ขอบโซน) |
+| Zone | Level | Dropped Quality ceiling | mob HP with tree (zone edge) |
 |---|---|---|---|
-| 1 | 1-10 | ต่ำ | 121 → 682 
-| 2 | 11-20 | ต่ำ | 798 → 1,527 
-| 3 | 21-30 | ต่ำ | 1,692 → 2,289 
-| 4 | 31-40 | กลาง (พื้น = ต่ำ) | 4,481 → 5,404 
-| 5 | 41-50 | กลาง | 5,516 → 6,600 
-| 6 | 51-60 | กลาง | 6,731 → 7,992 
-| 7 | 61-70 | สูง (พื้น = กลาง) | 11,752 → 13,696 
-| 8 | 71-80 | สูง | 13,926 → 16,137 
-| 9 | 81-90 | สูง | 16,399 → 18,901 
+| 1 | 1-10 | low | 121 → 682 
+| 2 | 11-20 | low | 798 → 1,527 
+| 3 | 21-30 | low | 1,692 → 2,289 
+| 4 | 31-40 | mid (floor = low) | 4,481 → 5,404 
+| 5 | 41-50 | mid | 5,516 → 6,600 
+| 6 | 51-60 | mid | 6,731 → 7,992 
+| 7 | 61-70 | high (floor = mid) | 11,752 → 13,696 
+| 8 | 71-80 | high | 13,926 → 16,137 
+| 9 | 81-90 | high | 16,399 → 18,901 
 
-## คุณสมบัติต่อโซน
+## Properties Per Zone
 
-| คุณสมบัติ | ค่า |
+| Property | Value |
 |---|---|
-| เวงลของโซน | ช่วง 10 เลเวล · เป็นตัวกำหนดคุณภาพพื้นและเพดานของที่ตก |
-| จำนวนมอนต่อกลุ่ม | 1-2 (โซน 1-3) · 2-3 (โซน 4-6) · 3-5 (โซน 7-9) · ค่าเฉลี่ยที่ใช้คำนวณคือ 1.5 / 2.5 / 4 |
-| โอกาสเกิด elite | **1% จากการฆ่า 1 ตัว** · ตัวเดียวเสมอ · เป็นแหล่งผงคลัดหลัก (loot.md หัวข้อ 5) |
-| โอกาสเกิด boss | **1 ตัว / 15 นาทีต่อตัวละคร** (4 ครั้ง/ชม.) · ตีได้เฉพาะตอนออนไลน์ |
-| เวลาเกิดกลุ่มใหม่ | 4 วินาทีหลังกวาดกลุ่มก่อนหน้าเสร็จ · ค่าคงที่ทุกโซน |
-| innate element ที่พบบ่อย | 1-2 ธาตุต่อโซน · มอนแต่ละตัวสุ่ม innate จาก 5 ธาตุ |
+| Zone level | 10-level range · defines Quality floor and ceiling of drops |
+| Mobs per group | 1-2 (zones 1-3) · 2-3 (zones 4-6) · 3-5 (zones 7-9) · averages used for math are 1.5 / 2.5 / 4 |
+| Elite spawn chance | **0.5% per kill** · always single · drops 2 Reroll tier stones each · main tier-stone source (loot.md section 5) |
+| Boss spawn chance | **1 per 15 min per character** (4/hour) · only attackable while online |
+| New group spawn time | 4 sec after clearing the previous group · constant across zones |
+| Common innate Elements | 1-2 Elements per zone · each mob rolls innate from 5 Elements |
 
-- **ปลดล็อกโซนด้วยเลเวล ไม่ใช่ด้วย boss** · boss ของโซน i เกิดเมื่อผู้เล่นเลเวล ≥ โซนนั้น และให้ *เพดานคุณภาพ* + สกุลคราฟ + skill (concept.md)
-- **เพดานคุณภาพของที่ตกในโซน i ปลดล็อกหลังชนะ boss ของโซน i−1** (โซน 1 ปลดทันที) · เหตุผล: ถ้าให้เพดานเต็มตั้งเขาเข้าโซน ความจำเป็นต้องตี boss จะหายไป · และถ้าเอา boss เป็นประตูก้าวหน้าเลย build ที่แพ้ boss จะติดกำแพงถาวร
-- **แพ้ boss = เสีย spawn นั้น** (boss ถอยกลับ เลือดเต็ม ต้องรอตัวถัดไปตามรอบ 15 นาที) · กติกาเต็ม + ตารางว่า build ไหนชนะที่โซนไหนใน combat.md หัวข้อ 7
-- **เลเวล 91-100 ไม่มีโซนใหม่** · เป็นการตีโซน 9 ต่อเพื่อดันคุณภาพของ (ตรงกับที่เขียนไว้ใน concept.md และ formula.md หัวข้อ 0)
+- **Zone unlock by level, not by boss** · zone i boss spawns when player level ≥ that zone, and grants *Quality ceiling* + craft currency + skill (concept.md).
+- **Dropped Quality ceiling in zone i unlocks after beating zone i−1 boss** (zone 1 unlocked immediately) · reason: granting full ceiling on zone entry removes the need to fight bosses · and making bosses a hard progress gate would permanently wall builds that lose to bosses.
+- **Losing to a boss = losing that spawn** (boss retreats, full HP, must wait for next 15 min cycle) · full rules + which build wins at which zone in combat.md section 7.
+- **Levels 91-100 have no new zone** · they mean farming zone 9 to Push Item quality (as stated in concept.md and formula.md section 0).
 
-# เส้นเวลาทั้งเกม (ทุกตัวเลขคำนวณจากอัตราฆ่าใน loot.md + คราฟใน crafting.md + mastery)
+# Full Game Timeline (All Numbers Calculated From loot.md Kill Rates + crafting.md Crafting + Mastery)
 
-| จุด | เวลาสะสม |
+| Point | Cumulative time |
 |---|---|
-| เลเวล 10 | 0.5 ชม. |
-| เลเวล 30 | 3.1 ชม. |
-| เลเวล 60 | 12.6 ชม. |
-| **เลเวล 90 (จบโซน)** | **31.2 ชม.** |
-| เลเวล 100 | 40.2 ชม. |
-| คราฟเซ็ตจบ (Refine 60 ครั้ง + Ascend 12 ชิ้น) | ~31 ชม. (ทับซ้อนกับช่วงเลเวลท้าย) |
-| mastery 12 ชนิดถึง L10 (+12% drop) | 8.8 ชม. |
-| mastery 12 ชนิดถึง L20 | 39 ชม. |
+| Level 10 | 0.5 hr |
+| Level 30 | 3.1 hr |
+| Level 60 | 12.6 hr |
+| **Level 90 (zone end)** | **31.2 hr** |
+| Level 100 | 40.2 hr |
+| Finished crafted set (60 Refine + 12 Ascend items) | ~31 hr (overlaps late leveling) |
+| Mastery 12 types to L10 (+12% drop) | 8.8 hr |
+| Mastery 12 types to L20 | 39 hr |
 
 ```
-xp ต่อการฆ่า 1 ตัว   = 10 × เลเวลของมอน
-xp ถึงเลเวลถัดไป     = ตาราง 5 เลเวลขั้น (คำนวณกลับจาก "เวลาต่อเลเวลที่เกมตั้งใจให้")
-kills ต่อเลเวล       = 14 (L1) · 70 (L10) · 174 (L30) · 495 (L50) · 1,473 (L90) · 1,735 (L100)
+xp per kill   = 10 × mob level (normal) · ×3 elite · ×15 boss
+xp to next level     = 5-level-step table (generated below from the kills anchors)
+kills per level       = 14 (L1) · 70 (L10) · 174 (L30) · 495 (L50) · 1,473 (L90) · 1,735 (L100)
+```
+- Timeline retime pending (P1-3 option B): elite ×3 and boss ×15 accelerate leveling ~10-15% and widen the active-vs-AFK gap (AFK earns no boss XP). The table keeps pre-bonus kill counts until the rebalance pass.
+
+**XP per 5-level step** — generated by `node tools/timeline.js` from `engine.json` `xp` (anchors + band rates); do not hand-type:
+
+<!-- BEGIN GENERATED:xp-table -->
+Derived from `xp_to_next(L) = kills(L) × 10 × min(L, 90)` with the kills anchors and band rates in `engine.json`.
+
+| Levels | XP to clear the step | Cumulative XP | Cumulative hr |
+|---|---|---|---|
+| 1-5 | 4,589 | 4,589 | 0.1 |
+| 6-10 | 23,644 | 28,233 | 0.4 |
+| 11-15 | 56,160 | 84,393 | 0.9 |
+| 16-20 | 100,960 | 185,353 | 1.4 |
+| 21-25 | 158,760 | 344,113 | 2.1 |
+| 26-30 | 229,560 | 573,673 | 3.0 |
+| 31-35 | 368,153 | 941,826 | 3.8 |
+| 36-40 | 576,165 | 1,517,991 | 4.9 |
+| 41-45 | 824,303 | 2,342,293 | 6.2 |
+| 46-50 | 1,112,565 | 3,454,858 | 7.9 |
+| 51-55 | 1,508,573 | 4,963,431 | 10.0 |
+| 56-60 | 2,005,185 | 6,968,616 | 12.5 |
+| 61-65 | 2,562,923 | 9,531,538 | 14.7 |
+| 66-70 | 3,181,785 | 12,713,323 | 17.3 |
+| 71-75 | 3,861,773 | 16,575,096 | 20.3 |
+| 76-80 | 4,602,885 | 21,177,981 | 23.5 |
+| 81-85 | 5,405,123 | 26,583,103 | 27.1 |
+| 86-90 | 6,268,485 | 32,851,588 | 31.1 |
+| 91-95 | 6,982,200 | 39,833,788 | 35.4 |
+| 96-100 | 7,571,700 | 47,405,488 | 40.1 |
+<!-- END GENERATED:xp-table -->
+
+- This game **ends at about 40 hours of real play** (AFK counts as half a Quality tier) · at 1 hr/day = about 6 weeks; at 3 hr/day = 2 weeks.
+- This number decides the "many zones or deep zones" question: at 40 hr and 9 zones → average 4.5 hr/zone, matching the luck stream measured in loot.md (dry in the first 2-3 hr, rest is crafting) · to add zones, *reduce* craft time per zone, not increase level time.
+- **Conflict to decide (from the 40 hr number)**: the 32-duplicate random skill ladder = ~300 hr, 7x longer than the whole game · this 40 hr number is the evidence that it must be fixed (see skill-pool.md open items).
+
+# Mob HP Formula Per Level (Replaces Placeholder Line)
+
+```
+mob_HP(L)     = DPS of "level L + mid-Tier (T2) gear + on-level tree" player × 1 second
+item count = min(12, ceil(L/2))   → L1 = 1 item · L24+ full 12
+tree multiplier    = 1 + 0.0085 × L      → ×1.25 at L30 · ×1.85 at L100 (skill-tree.md section 3)
+skill multiplier   = 1 + 0.0034 × L      → ×1.30 at L90 · ×1.34 at L100 (skill-pool.md K_SKILL section)
+mob_damage(L)  = typical_gear_DPS(L) / 27 per second  (50% physical + 50% Element by innate · combat.md)
+
+> **Why the damage line is not set from mob_HP** — mob_HP is multiplied by the tree factor (×1.85 at L100) to keep TTK at 1 sec · if that same number were divided by 27, damage would also grow ×1.85 while the player pool does not grow with tree (tree is the speed side, not the endurance side) · the result is on-level gear+tree players dying in 14 sec instead of 27 sec, and groups of 5 pushing every build, which destroys the AFK promise in concept.md · the damage line is therefore set from `typical DPS (gear only) ÷ 27` = "one mob kills an on-level player in 27 sec", measured on players who *have* tree already · intended side effect: tree power shortens fights = less danger · if an endurance tree is ever added, this line must be moved back to divide the pool (recorded in checks.md group I)
 ```
 
-- เกมนี้ **จบที่ราว 40 ชั่วโมงของการเล่นจริง** (AFK นับเป็นครึ่งชั้นคุณภาพ) · ถ้าผู้เล่นเปิดวันละ 1 ชม. = ประมาณ 6 สัปดาห์ ถ้าเล่น 3 ชม./วัน = 2 สัปดาห์
-- เลขนี้คือตัวตัดสินคำถาม "โซนเยอะหรือโซนลึก": ที่ 40 ชม. และ 9 โซน → เฉลี่ย 4.5 ชม./โซน ซึ่งตรงกับ luck stream ที่ loot.md วัด (แห้งใน 2-3 ชม. แรก ที่เหลือเป็นการคราฟ) · ถ้าจะเพิ่มโซนต้อง *ลด* เวลาคราฟต่อโซน ไม่ใช่เพิ่มเวลาเลเวล
-- **ข้อขัดแย้งที่ต้องตัดสินใจ (จากเลข 40 ชม.)**: บันได skill 32 ตัวซ้ำแบบกระจายสุ่ม = ~300 ชม. ซึ่งยาวกว่าทั้งเกม 7 เท่า · ตัวเลข 40 ชม. นี้คือหลักฐานว่าต้องแก้ (ดู skill.md ข้อค้าง)
-
-# สูตร HP ของมอนต่อเลเวล (แทนที่เส้น placeholder)
-
-```
-mob_HP(L)     = DPS ของผู้เล่น "เลเวล L + ของกลางชั้น (T2) + tree ตามเลเวล" × 1 วินาที
-จำนวนชิ้นของ = min(12, ceil(L/2))   → L1 = 1 ชิ้น · L24+ ครบ 12
-ตัวคูณ tree    = 1 + 0.0085 × L      → ×1.25 ที่ L30 · ×1.85 ที่ L100 (skill-tree.md หัวข้อ 3)
-ตัวคูณ skill   = 1 + 0.0034 × L      → ×1.30 ที่ L90 · ×1.34 ที่ L100 (skill.md หัวข้อ K_SKILL)
-mob_ดาเมจ(L)  = DPS_typical_gear(L) / 27 ต่อวินาที  (50% กายภาพ + 50% ธาตุตาม innate · combat.md)
-
-> **ทำไมเส้นดาเมจไม่ตั้งตาม mob_HP** — mob_HP ถูกคูณด้วยปัจจัย tree (×1.85 ที่ L100) เพื่อให้ TTK ยังเป็น 1 วิ · ถ้าเอาตัวเลขเดียวกันนั้นหาร 27 ด้านดาเมจจะโต ×1.85 ตามไปด้วย ขณะที่ pool ของผู้เล่นไม่ได้โตตาม tree (tree เป็นฝั่งความเร็ว ไม่ใช่ฝั่งอดทน) · ผลคือคนที่ของ+tree พอดีเลเวลจะตายใน 14 วิแทน 27 วิ และกลุ่ม 5 จะ push ทุก build ซึ่งทำลายสัญญา AFK ใน concept.md · เส้นดาเมจจึงตั้งจาก `DPS_typical (gear อย่างเดียว) ÷ 27` = "มอนตัวเดียวตีคนพอดีเลเวลตายใน 27 วิ" ซึ่งเป็นจำนวนที่วัดจากคนที่ *มี* tree ด้วยแล้ว · ผลข้างเคียงที่ตั้งใจ: พลังจาก tree ทำให้ศึกสั้นลง = อันตรายน้อยลง · ถ้าวันไหน tree ฝั่งอดทนถูกใส่เข้ามาจริง ต้องย้ายเส้นนี้กลับมาหาร pool ใหม่ (บันทึกไว้ใน checks.md กลุ่ม I)
-```
-
-| เลเวล | 1 | 5 | 10 | 20 | 30 | 40 | 60 | 80 | 90 | 100 |
+| Level | 1 | 5 | 10 | 20 | 30 | 40 | 60 | 80 | 90 | 100 |
 |---|---|---|---|---|---|---|---|---|---|---|
 | mob HP | 121 | 271 | 682 | 1,527 | 2,289 | 5,404 | 7,992 | 16,137 | 18,901 | 22,016 |
-| mob ดาเมจ/วิ | 4 | 9 | 23 | 45 | 61 | 131 | 163 | 280 | 304 | 329 |
+| mob damage/sec | 4 | 9 | 23 | 45 | 61 | 131 | 163 | 280 | 304 | 329 |
 
-- **TTK = 1 วิสำหรับคนที่ของพอดีเลเวล** · คนของเต็ม T1 ฆ่าใน 0.9 วิ · คนเพิ่งเข้าโซนยังไม่มีของใช้เวลา 2-6 วิ (เลเวล 1 = ~2 วิ ไม่ใช่ 16 วิ)
-- เส้นนี้แทนที่ข้อความเดิมที่ว่า "HP ตั้งตามเวงล" โดยไม่มีสูตร · และทำให้ combat.md มีเลขต่อเลเวลใช้ได้แล้ว
-- elite = HP ×3 / ดาเมจ ×2 · boss = HP ×15 / **ดาเมจ ×4** (ทั้งคู่ตัวเดียวเสมอ) → ที่เลเวล 90 boss มี HP 283,516 · คนที่ gear+tree พอดีเลเวลตีลงใน ~15 วิ (boss ยาว 15 เท่าของ mob พอดีเลเวลโดยนิยาม) · แต่โดนตีกลับ 114-203% ของ pool = **ต้องมี heal** (combat.md หัวข้อ 7)
+- **TTK = 1 sec for on-level gear players** · full T1 gear kills in 0.9 sec · fresh zone entrants with no gear take 2-6 sec (level 1 = ~2 sec, not 16 sec).
+- This line replaces the old text stating "HP is set by level" with no formula · and gives combat.md usable per-level numbers.
+- Elite = HP ×6 / damage ×4 · boss = HP ×15 / **damage ×4** (both always single) → numbers below predate the Elite buff; survival rerun pending (combat.md section 6-7).
 
 
 
-- โซนหนึ่งควรมี innate element ที่พบบ่อย 1-2 ธาตุ เพื่อให้ผู้เล่นมีเหตุผลต้องหาชิ้น res ให้ตรง
-- ถ้าโซนหนึ่งมีมอนทุกธาตุเท่ากัน ผู้เล่นต้องกันทั้ง 5 ธาตุ ซึ่งแพงเกินควรจะเป็นในโซนเดียว
+- One zone should have 1-2 common innate Elements so players have reason to hunt matching res items.
+- If one zone has all Elements equally, players must guard all 5 Elements, which is too expensive for a single zone.
 
-# มอนสเตอร์
+# Monsters
 
-| คุณสมบัติ | ค่า |
+| Property | Value |
 |---|---|
-| เวงล | 1-90 (เพดานผู้เล่นคือ 100 · เลเวล 91-100 คือตีโซน 90 ต่อเพื่อดันคุณภาพของ) |
-| HP | `DPS ของผู้เล่นที่ของพอดีเลเวล × 1 วิ × ตัวคูณ tree × ตัวคูณ skill` · ก่อนรวม: 10 = 608 · 30 = 1,655 · 60 = 4,396 · 90 = 8,200 · 100 = 8,881 · รวม tree อย่างเดียว: 100 = 16,430 · รวม tree + skill (ค่าจริง): 10 = 682 · 30 = 2,289 · 60 = 7,992 · 90 = 18,901 · 100 = 22,016 (ตารางเต็มใน combat.md หัวข้อ 3) |
-| innate element | 1 ธาตุ สุ่มตอน spawn · รับดาเมจธาตุนั้น x1.5 |
-| evasion | `mob_level × 1` · เลเวล 100 ได้ 100 |
-| ดาเมจที่ตีกลับมา | `DPS_typical ÷ 27` ต่อวินาที (L100 = 329) · 50% กายภาพ + 50% ธาตุตาม innate (combat.md หัวข้อ 3) |
-| drop table | ตารางไอเทมที่มอนนั้นปล่อย |
-| อาวุธที่ใช้ | มีผลต่อ weight และ drop |
+| Level | 1-90 (player ceiling is 100 · levels 91-100 mean farming zone 90 to Push Item quality) |
+| HP | `DPS of on-level gear player × 1 sec × tree multiplier × skill multiplier` · before combining: 10 = 608 · 30 = 1,655 · 60 = 4,396 · 90 = 8,200 · 100 = 8,881 · tree only: 100 = 16,430 · tree + skill (true values): 10 = 682 · 30 = 2,289 · 60 = 7,992 · 90 = 18,901 · 100 = 22,016 (full table in combat.md section 3) |
+| innate Element | 1 Element, rolled on spawn · takes ×1.5 damage from that Element |
+| Core stats | Same 7-stat block as players (`stat_c = 12 + 2 × (L − 1)`, no Flat/% from equipment) · feeds accuracy, res, crit, aspd via the same K values · Full mob sheet with per-level table follows in the rebalance pass (P1-1) |
+| evasion | `mob_level × 1` · level 100 gives 100 |
+| Return damage | `typical DPS ÷ 27` per second (L100 = 329) · 50% physical + 50% Element by innate (combat.md section 3) |
+| drop table | item table that mob drops |
+| Weapon used | affects weight and drops |
 
-- เดิมเขียน evasion ว่าเลเวล 100 = 600 ซึ่งคำนวณบนสมมติฐานว่าผู้เล่นมี Dex 890 · เพดานจริงคือ 816 และไม่มี buildไหนทุ่มให้ Dex ทั้ง 12 ชิ้น
-  ที่ 600 คนที่ไม่ได้ลง Dex จะ hit chance 40% ในเกมที่ต้องตีทั้งวัน · จึงเปลี่ยนเป็น `level × 1` ซึ่งทำให้โอกาสโดนคงที่ทุกเลเวลเพราะทั้งสองฝั่งโตเป็นเส้นตรงเท่ากัน (80% ถ้าไม่ลง Dex, 94% ถ้าลงเต็ม)
-- HP ของมอนไล่จาก DPS ใน formula.md หัวข้อ 0 · ที่เลเวล 100 คนของเต็ม T1 มี 9,847 DPS แต่ mob HP ตั้ง 8,881 เพราะตั้งจากคนที่ของ *พอดี* เลเวล ไม่ใช่คนของเต็ม · เส้นเชื่อมระหว่างเลเวลใช้ `จำนวนชิ้นของ = min(12, ceil(L/2))` (combat.md หัวข้อ 3)
+- Old evasion was written as level 100 = 600, calculated on the assumption players have Dex 890 · true ceiling is 816 and no build stacks all 12 items on Dex.
+  At 600, no-Dex players get 40% hit chance in a game that attacks all day · so it changed to `level × 1`, which keeps hit chance constant across levels because both sides grow linearly (80% with no Dex, 94% with full Dex).
+- Mob HP derives from DPS in formula.md section 0 · at level 100 full T1 gear players have 9,847 DPS but mob HP is set to 8,881 because it is set from *on-level* gear players, not full-gear players · the inter-level line uses `item count = min(12, ceil(L/2))` (combat.md section 3).
 
-- HP คือตัวเดียวที่กำหนดความเร็วของเกม ต้องตั้งจาก DPS ที่คาดว่าผู้เล่นจะมี ไม่ใช่ตั้งแล้วค่อยปรับ
-- innate element ของมอนสุ่มตอน spawn ไม่ใช่ตายตัว เพื่อให้ผู้เล่นกลัวไม่ถึง ต้องเตรียม res ไว้ล่วงหน้า
+- HP is the single value setting game speed. It must be set from expected player DPS, not set-then-tuned.
+- Mob innate Element is rolled on spawn, not fixed, so players cannot fully predict and must prepare res in advance.
 
-# กลุ่มมอน
+# Mob Groups
 
-**มอนมาเป็นกลุ่ม ไม่ใช่ทีละตัว** — นี่คือเหตุผลที่ skill แบบ AoE มีค่า และเป็นเหตุผลที่การตีแค่ 1 เป้าหมายจะไม่พอ
+**Mobs come in groups, not one by one** — this is why AoE skills have value, and why single-target attacks alone are not enough.
 
-| ช่วงเวงล | จำนวนมอนต่อกลุ่ม |
+| Level range | Mobs per group |
 |---|---|
 | 1-30 | 1-2 |
 | 31-60 | 2-3 |
 | 61-90 | 3-5 |
-| boss | 1 เสมอ |
+| boss | always 1 |
 
-- เลขเป็นช่วง สุ่มทุกครั้งที่เข้าห้อง ผู้เล่นเจอกลุ่มต่างกันตลอด
-- **เข้าพร้อมกันได้สุด 3 ตัว** — กลุ่มที่ใหญ่กว่านั้น ตัวที่ 4-5 รอคิว · กติกานี้เป็นส่วนหนึ่งของสัญญา AFK: combat.md หัวข้อ 6 วัดว่าที่ 3 ตัวพร้อมกัน กลุ่ม 5 กิน 23-46% ของ pool ซึ่งไม่มีใครถูก push · ถ้าให้ 5 ตัวตีพร้อมกันเลขจะพุ่งไป 109-180% และทุก build จะถูก push ระหว่างวางมือ ตัวเลขในหัวข้อ 6 และ 7 ขึ้นกับกติกาข้อนี้อย่างเดียว
-- elite และ boss ไม่มีเพื่อน เป็นตัวเดียวเสมอ
-- ยิ่งช่วงเลย์สูง กลุ่มยิ่งใหญ่ ทำให้ต้องหาวิธีจัดการกลุ่มตั้งแต่เกมช่วงต้น
+- Numbers are ranges, rolled on every zone entry. Players always meet different groups.
+- **Max 3 engage at once** — in larger groups, mobs 4-5 queue · this rule is part of the AFK promise: combat.md section 6 measures that with 3 engaging, groups of 5 cost 23-46% of pool with nobody pushed · with 5 engaging at once the number jumps to 109-180% and every build is pushed while idle. The numbers in sections 6 and 7 depend on this rule alone. **This is also the definition of "nearby" for auras and debuffs: 3 mobs** (D-009 7a · skill-pool-system.md).
+- Elite and boss have no companions, always single.
+- Higher level ranges mean larger groups, requiring group answers from early game.
 
-## ลำดับการโจมตี
+## Attack Order
 
-**ตีตัวที่ HP ต่ำสุดก่อนเสมอ**
+**Always hit the lowest-HP target first.**
 
-- ทำให้กลุ่มหมดเร็วขึ้น เพราะลดจำนวนเป้าหมายที่ยังตีกลับมาเร็วที่สุด
-- ทำให้ Execute และ Overkill มีค่าขึ้นมาก เพราะตัวที่ HP ต่ำคือตัวที่ฆ่าจบ
-- ผู้เล่นไม่ต้องเลือกเอง เกมจัดให้ · ไม่มีกติกาโฟกัสเป้าหมายให้ยุ่ง
+- This clears groups faster because it fastest reduces the number of targets still hitting back.
+- This gives Execute and Overkill much more value because the lowest-HP target is the one to finish.
+- Players choose nothing; the game assigns it · no fiddly focus-target rules.
 
-## มอนโจมตีพร้อมกัน
+## Mobs Attack Together
 
-**ทุกตัวในกลุ่มโจมตีในรอบเดียวกัน** ไม่ใช่ตาเวียนกันโจมตีทีละตัว
+**All units in the group attack in the same round**, not taking turns one by one.
 
-- กลุ่ม 5 ตัวจึงทำให้ผู้เล่นโดน 5 ครั้งต่อรอบ นี่คือต้นทุนของการตีช้า
-- **dodge ใช้แยกต่อตัว** · dodge 25% กับกลุ่ม 5 ตัว = โดนราว 3.75 ครั้งต่อรอบ
-- นี่คือเหตุผลที่ dodge, Max HP และ Vit มีความหมายแม้ผู้เล่นจะเล่นแบบโจมตีหนัก
-- AoE จึงไม่ใช่ของฟรี ถ้าฆ่าไม่ทัน เป้าหมายที่เหลือจะยิงกลับมาเรื่อย ๆ
-  **แต่ประโยคนี้ยังไม่เป็นจริงตามตัวเลข** — วัดใน combat.md หัวข้อ 6 ข้อ 4: ด้วยกติกา "AoE = 50% ต่อทุกเป้า" กลุ่ม 5 ตายเร็วกว่า (2.0 วิ เทียบกับ 5.0) *และ* เจ็บน้อยกว่า (14% เทียบกับ 35%) พร้อมกันทั้งสองทาง
-  ต้องแตะกติกา AoE ก่อนถึงจะขายประโยคนี้ได้ · แนะนำ: นับเป้าไม่เกิน 3 และลดดาเมจตามจำนวนเป้าที่โดนจริง ไม่ใช่ตรึง 50% (ยังไม่แก้เพราะนี่เป็นการเปลี่ยนกติกา ไม่ใช่แก้ตัวเลข)
+- A 5-mob group therefore deals 5 hits per round to the player. This is the cost of killing slowly.
+- **Dodge rolls separately per unit** · 25% dodge against a 5-mob group = about 3.75 hits taken per round.
+- This is why dodge, Max HP, and Vit matter even for heavy-attack players.
+- AoE is therefore not free. If kills are not fast enough, remaining targets keep firing back.
+  **But this sentence is not yet true by the numbers** — measured in combat.md section 6 item 4: with the rule "AoE = 50% per target", groups of 5 die faster (2.0 sec vs 5.0) *and* hurt less (14% vs 35%) on both paths at once.
+  The AoE rule must be touched before this sentence can be sold · suggestion: Cap targets at 3 and scale damage by actual targets hit, not a fixed 50% (not yet changed because this is a rule change, not a number fix).
 
-> **แก้แล้วใน combat.md**: รอบการตีของมอน = 1 ครั้ง/วิ (boss 0.8) · นาฬิกาเดินต่อเนื่องไม่มีเทิร์น · กลุ่ม 5 ตัวที่เลเวลตรงกันทำให้ผู้เล่นเสีย 23-46% ของ pool ต่อรอบและไม่ถูก push (วัดทุก build ใน combat.md หัวข้อ 6 · ภายใต้กติกาเข้าพร้อมกันสุด 3 ตัว)
-> ถ้าอยากได้ตัวเลขกลุ่มที่โหดกว่านี้ ต้องไปเพิ่มที่ elite ไม่ใช่ลดเส้นฐานนี้ลง — ดู combat.md หัวข้อ 6 ข้อ 3
+> **Fixed in combat.md**: mob attack round = 1 time/sec (boss 0.8) · clock runs continuously with no turns · on-level groups of 5 cost players 23-46% of pool per round with no Push (measured for all builds in combat.md section 6 · under the max-3-engage rule).
+> For harsher group numbers, buff elite instead of lowering this baseline — see combat.md section 6 item 3.
 
-## ระยะ AoE
+## AoE Range
 
-| ค่า | ตัวอย่าง |
+| Value | Example |
 |---|---|
-| ระยะ AoE ของ skill โจมตี | โดนทุกตัวที่อยู่ในระยะ 3 ช่อง โดยไม่ต้องเป็นเป้าหมายหลัก |
-| ระยะ aura | ตลอดเวลาที่ aura เปิดอยู่ ไม่มีระยะจำกัดเวลา |
+| Attack skill AoE range | hits all units within 3 tiles, no need to be the main target |
+| Aura range | always while aura is on, no time range limit |
 
-- ระยะเดียวกันหมดเพื่อความง่าย · ถ้าจะทำหลายระยะต้องบอกผู้เล่นให้ชัดก่อน
+- Same range everywhere for simplicity · multiple ranges require clear player notice first.
 
-# Drop
+# Drops
 
-| ประเภท | คุณภาพ | ได้เมื่อ |
+| Type | Item quality | Gained when |
 |---|---|---|
-| มอนธรรมดา | ตามเพดานเวงล | ทุกตัว |
-| มอนแผ่น / elite | พื้นขึ้น 1 ขั้น | หายาก |
-| boss | พื้นเท่าเพดาน | หายากมาก |
-| กระเป๋า | ตามเพดานเวงล | หายาก |
-| **skill** | ไม่มีระดับคุณภาพ | boss สูง · มอนธรรมดาต่ำมาก · elite กลาง |
+| Normal mobs | per level ceiling | every unit |
+| Elite mobs | floor +1 tier | rare |
+| Boss | floor equals ceiling | very rare |
+| Bag | per level ceiling | rare |
+| **skill** | no Quality level | high bosses · very low normal mobs · mid elite |
 
-- **มอนธรรมดายังหลุดคุณภาพต่ำได้ในโซนคุณภาพกลาง** ตามกติกาพื้น/เพดาน
-- boss บังคับคุณภาพไว้ที่เพดาน คือจ่ายคุณภาพสูงสุดที่โซนนั้นตกได้
-- สกุลคราฟหลุดตาม drop table ของมอนแต่ละตัว (ดู crafting.md)
-- skill ไม่มีคุณภาพ · ที่ดรอปได้คือ skill ใหม่หรือตัวซ้ำเพื่ออัปขั้น (ดู skill.md)
+- **Normal mobs can still drop low Quality in mid-Quality zones** under floor/ceiling rules.
+- Boss forces Quality to ceiling, i.e. pays the highest Quality that zone can drop.
+- Craft currency drops per mob drop table (see crafting.md).
+- Skills have no Item quality · drops are new skills or duplicates to upgrade tiers (see skill-pool.md).
 
-# สิ่งที่ยังไม่ลง
+# Still Not Set
 
-- ~~จำนวนโซนและลำดับการปลดล็อก~~ **ปิดแล้ว** — 9 โซน × 10 เลเวล · ปลดล็อกตามเลเวล · boss 1 ตัวต่อโซน (ดูหัวข้อโซนและเลเวลข้างบน)
-- ~~XP ต่อเวงล~~ **ปิดแล้ว** — `xp ต่อ kill = 10 × เลเวลมอน` · L10 = 0.5 ชม. · L30 = 3.1 · L60 = 12.6 · L90 = 31.2 · L100 = 40.2 ชม.
-  เลเวล 91-100 ใช้ 9 ชม. (22% ของทั้งเกม) ในโซน 9 · ตรงกับเจตนาเดิมที่ให้ช่วงท้ายเล่นช้าเพื่อดัน คุณภาพของแทนการปีนเลเวล
-- **เงื่อนไขการเลือกเป้าหมาย** — เกมจัดให้อัตโนมัติว่าตีตัวที่ HP ต่ำสุดก่อน ผู้เล่นไม่ต้องเลือก
-- ~~**ความตายและการฟื้น**~~ **ปิดแล้วใน combat.md** — ไม่มีการตาย · ใช้ `push`: เลือดหมด = พัก `Max HP ÷ (hp_regen × 8)` วินาทีแล้วกลับมาตีต่อเอง (AFK เดินต่อได้ ไม่ต้องกดอะไร)
-- ~~**รอบการโจมตีของมอน**~~ **ปิดแล้วใน combat.md** — มอนธรรมดา/elite 1 ครั้ง/วิ · boss 0.8 ครั้ง/วิ · DoT tick ทุก 1 วินาที
-- **HP/ดาเมจของมอนระหว่างเลเวล** — combat.md มี anchors แค่ 8 จุด (ไม่มีของ/ของเต็มขั้น × 4 ระดับ) เส้นเชื่อมรอระบบ zone + XP
-- **มอนแต่ละเวงลมีหลายเทมพลิท** — ยังไม่มี ถ้ามีจะช่วยให้คุณภาพไอเทมมีทางเลือกมากขึ้น
+- ~~Zone count and unlock order~~ **Closed** — 9 zones × 10 levels · unlock by level · 1 boss per zone (see zones and levels section above).
+- ~~XP per level~~ **Closed** — `xp per kill = 10 × mob level` · L10 = 0.5 hr · L30 = 3.1 · L60 = 12.6 · L90 = 31.2 · L100 = 40.2 hr.
+  Levels 91-100 take 9 hr (22% of the whole game) in zone 9 · matches the original intent to slow the endgame to Push Item quality instead of climbing levels.
+- **Target selection conditions** — game auto-assigns lowest-HP target first. Players choose nothing.
+- ~~**Death and recovery**~~ **Closed in combat.md** — no death · uses `Push`: HP empty = rest `Max HP ÷ (hp_regen × 8)` seconds then resume automatically (AFK keeps walking, no input needed).
+- ~~**Mob attack rounds**~~ **Closed in combat.md** — normal/elite mobs 1 time/sec · boss 0.8 times/sec · DoT ticks every 1 sec.
+- **Mob HP/damage between levels** — combat.md has only 8 anchors (no-gear/full-tier × 4 levels); the connecting line waits on the zone + XP system.
+- **Multiple templates per level** — none yet. More would give Item quality more options.
+- **Settlements and travel** — **defined in `towns.md`** (doors chosen): the 9 zones above sit under 3 capitals (zones 3/6/9) and 6 towns, travel is by free Waypoint with an optional opt-in Road. A settlement never gates a zone — unlock stays by level, exactly as this file defines it. Prices, rosters, stock and the Standing kill thresholds per settlement are generated in `towns-stalls.md` (`checks.md` group T), and the screens are in `towns-ui.md`. The per-settlement Base bias column in `towns.md` section 4 is still flavor until `loot.md` section 3 keep-rates are re-simulated (`checks.md` T15).

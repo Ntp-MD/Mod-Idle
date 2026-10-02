@@ -2,134 +2,138 @@
 
 import glossary.md
 import world.md
-import skill.md
+import skill-pool.md
 import item-rarity.md
 import crafting.md
 
-เอากรอบของ Melvor Idle มาใช้ แต่เลือกทางที่ต่างออกไปอย่างตั้งใจ
+Uses the Melvor Idle frame, but deliberately diverges from it.
 
-**หนึ่งบรรทัด** — ตีมอนไปเรื่อย ๆ แล้วประกอบ build จากของที่ดรอปมา ทุกชิ้นที่ดรอปต้องตัดสินใจว่าจะใส่หรือทิ้ง
+**One line** — Grind monsters and assemble a build from dropped items. Every drop forces a keep-or-trash decision.
 
-# ตัดสินใจหลัก: ไม่มี resource skill
+# Main Decision: No Resource Skills
 
-Melvor มี skill ~20 อย่าง (ตั้ง/หา/คราฟ/ทำอาหาร) เกมนี้มีแค่ **การตี**
+Melvor has ~20 skills (gather/find/craft/cook). This game has only **combat**.
 
-| เหตุผล | |
+| Reason | |
 |---|---|
-| ทุก skill ที่ไม่ใช่การตี จะกลายเป็นตัวคลิกที่ผู้เล่นไม่สนใจ | ยิ่ง skill เยอะ ยิ่งต้องกลับมาเช็คทุกอัน |
-| ถ้ามีการหาไม้ ทุกของดรอปที่ได้จะกลายเป็นแค่วัตถุดิบ | ความตื่นเต้นของ loot หายไป |
-| ความลึกควรอยู่ที่ตัวของ ไม่ใช่ที่จำนวน skill | เกมนี้มี affix × คุณภาพ × tier × ธาตุ × คราฟ ให้ตัดสินใจอยู่แล้ว |
+| Every non-combat skill becomes a clicker the player ignores | The more skills there are, the more upkeep must be checked |
+| If wood gathering existed, every drop would become mere material | Loot excitement would disappear |
+| Depth should live in items, not in skill count | This game already offers mod × quality × tier × element × crafting decisions |
 
-**ต้นทุนที่ต้องยอมรับ** — ตอน AFK ผู้เล่นไม่มีอะไรสลับไปทำ
-ปัญหานี้แก้ไม่ด้วยการเพิ่ม skill แต่แก้ด้วยการทำให้ **การตีมีความหมายพอที่จะทำซ้ำได้นาน ๆ** ดูหัวข้อความหายาก
+**Cost to accept** — While AFK the player has nothing else to switch to.
+This is not fixed by adding skills, but by making **combat meaningful enough to repeat long-term**. See Rarity.
 
-# โครงหลัก
+> **Narrow exception (farm.md): a 3-plot herb farm exists as timers only — no levels, no XP, no skill.** It costs 2 taps a day, outputs potion herbs only, never gear or power. It does not reopen the skill-count question above: nothing here levels, nothing here is upkeep-gated, and potions never heal on bosses.
+
+# Core Loop
 
 ```
-เลือก zone → ตีมอน → ได้ XP + ไอเทม + สกุลคราฟ → ตัดสินใจใส่/คราฟ → zone ถัดไป
+Select zone → Fight monsters → Gain XP + items + crafting currency → Decide equip/craft → Next zone
 ```
+- The same loop, in place names (`towns.md`): arrive at a settlement → sell or dissolve the junk at its counter → use the stalls and the bench → take the Waypoint to the next zone. Settlements add no clicks to automate and no power.
 
-| ชั้น | คืออะไร | ปลดล็อกอะไร |
+| Layer | What it is | What it unlocks |
 |---|---|---|
-| **Zone** | เลเวล 1-90 แบ่งเป็นช่วง (ดู world.md) | มอนเลเวลสูงขึ้น · เพดานคุณภาพไอเทมขยับขึ้น |
-| **Build** | ชุดของ 11 สล็อต + อาวุธ | ความเร็วตี · สิ่งที่ต้านได้ |
-| **อาวุธ mastery** | XP แยกตามชนิดอาวุธ | อาวุธที่ถือเบาลง + skill ของอาวุธนั้นแรงขึ้น · ทั้งบัญชีได้ +drop_rate |
-| **Boss** | มอนพิเศษที่ตีได้ทุกเลเวล | เพดานคุณภาพของโซนนั้น · สกุลคราฟ |
+| **Zone** | Levels 1-90 divided into bands (see world.md) | Higher-level monsters · Item quality ceiling rises |
+| **Build** | 11-slot set + weapon | Attack speed · What can be resisted |
+| **Weapon Mastery** | Separate XP per weapon type | Lighter equipped weapon + stronger skills of that weapon · Account-wide +drop_rate |
+| **Boss** | Special monster fightable at every level | Quality ceiling of that zone · Crafting currency |
 
-# Active กับ AFK
+# Active vs AFK
 
-นี่คือการตัดสินใจที่สำคัญที่สุดของเกมนี้ ถ้าออกแบบผิด เกมจะตายในวันที่สอง
+This is the most important design decision in this game. If designed wrong, the game dies on day two.
 
 | | Active | AFK |
 |---|---|---|
-| ผู้เล่นทำอะไร | เลือก zone · จัดลำดับ skill ในลิสต์ · เปิด aura · เปลี่ยน preset | ไม่ต้องทำอะไร |
-| ได้ loot | เต็ม | เต็ม |
-| ได้คุณภาพ | พื้น–เพดาน | พื้นเท่านั้น · ไม่มีของคุณภาพสูงจาก AFK |
-| ได้ boss | ได้ | ไม่ได้ |
-| ประสิทธิภาพต่อชั่วโมง | 100% | 40-50% |
+| What the player does | Select zone · Order skills in list · Enable aura · Switch preset | Do nothing |
+| Loot | Full | Full |
+| Item quality | Floor–ceiling | Floor only · No high-quality items from AFK |
+| Boss | Yes | No |
+| Efficiency per hour | 100% | 40-50% |
 
-**หลักที่ใช้ตัดสิน** — ผู้เล่นต้องได้อะไรจากการอยู่กับเกมที่ไม่ได้จากการปิดเกม
+**Decision rule** — The player must gain something from staying in the game that closing the game does not give.
 
-ตอนนี้ที่คิดไว้มี 3 อย่าง
+Three items currently planned:
 
-1. **เพดานคุณภาพ** — AFK ดรอปได้แค่คุณภาพพื้นของโซน ของคุณภาพสูงต้องออนไลน์หรือเอามาจากคราฟ
-2. **การจัดลำดับ skill และ aura** — ลิสต์ยาวได้ไม่จำกัด ยิ่งรู้จัก skill มากกว่าเท่าไรยิ่งจัดลำดับได้ดีกว่า และ mana ที่จะกิน aura กี่ตัวก็ต้องคำนวณเอง
-3. **Boss** — พื้นที่เดียวที่ของคุณภาพสูงหลุดโดยไม่ต้องคราฟ · และเป็นที่เดียวที่ได้ตัวซ้ำมาอัปขั้น skill
+1. **Quality ceiling** — AFK drops only floor quality of the zone. High-quality items require being online or coming from crafting.
+2. **Skill ordering and aura** — Unlimited list length. The more skills known, the better the ordering, and auras reserve a share of Max Mana that the player manages directly (total may not reach 100%), so the player reads the aura budget up front instead of recalculating it while fighting.
+3. **Boss** — The only place high-quality items drop without crafting · And the only place to get duplicates for upgrading skills.
 
-> **ปิดแล้วด้วยตัวเลข** (loot.md หัวข้อ 7): อัตราฆ่าตอน AFK **เท่ากัน 100%** · จำนวน drop เท่ากัน · ได้ **XP เต็ม** (ตั้งใจ) · ต่างจริง 2 อย่างคือ
-> ① คุณภาพของ drop ได้แค่ *พื้นของโซน* ② ผงคลัดได้แค่ 18 จาก 30 ต่อชม. (ไม่มี boss) และแกนกลาง = 0 → ครึ่งหลังของเอนจินคราฟเป็น online ล้วน
-> ผลรวมแล้วความคืบหน้าของชุดอุปกรณ์ตอน AFK อยู่ราว **40-50%** ตามที่ตั้งไว้ โดยไม่ได้ตัดอัตราฆ่า · และ **AFK ได้ XP เต็ม** เพราะถ้าตัดทั้ง XP ทั้งคุณภาพ ผู้เล่นจะรู้สึกว่าการปิดเกมเสียเปล่าแบบวัดไม่ได้
-> สิ่งที่ต้องระวังจากตัวเลขนี้: AFK ไม่ได้ *ช้า* ลง แต่ *ตื้น* ลง · เกมจึงต้องทำให้ "พื้นของโซน" ยัง-progress ได้ ไม่งั้นคืนแรกที่ไม่ออนไลน์จะรู้สึกว่างเปล่า
+> **Closed with numbers** (loot.md section 7): AFK kill rate is **identical at 100%** · Same drop count · **Full XP** (intentional) · Only 2 real differences are ① Drop quality is *zone floor only* ② Reroll tier stones are only 18 of 30 per hour (no boss) and Add mod stones = 0 (boss-bonus XP excluded too, P1-3) → the second half of the crafting engine is fully online.
+> Combined, gear progress while AFK stays around **40-50%** as intended, without cutting kill rate · And **AFK grants full XP** because cutting both XP and quality would make closing the game feel like unmeasurable waste.
+> Risk from these numbers: AFK is not *slower*, it is *shallower* · The game must keep "zone floor" progressing, otherwise the first night offline will feel empty.
 
-> **ปิดแล้ว**: offline cap = **12 ชั่วโมง** · เหตุผลจากตัวเลขใน loot.md: 12 ชม. = ครึ่งหนึ่งของเอนจินคราฟ 1 โซน (Refine ทั้งเซ็ต ~16 ชม.) และพอดีกับ "1 วันทำงาน" · ต่ำกว่านี้ผู้เล่นที่กลับมาทุกเช้าจะรู้สึกว่าการปิดเกมไม่มีความหมาย · สูงกว่านี้ไม่มีอะไรให้เร่งกลับเข้ามา
-> สิ่งที่ได้ตอน offline ตรงกับตารางในหัวข้อนี้: drop เท่ากันแต่ **คุณภาพได้แค่พื้นของโซน** · ไม่มี boss → ไม่มีแกนกลางและไม่มีผงคลัดจาก boss → ครึ่งหลังของเอนจินคราฟเป็น active ล้วน (loot.md หัวข้อ 7)
+> **Closed**: offline cap = **12 hours** · Reason from numbers in loot.md: 12 hours = half of one zone crafting engine (Refine full set ~16 hours) and matches "1 work day" · Lower than this, players returning every morning will feel closing the game meant nothing · Higher than this, there is nothing urging a return.
+> Offline gains match the table in this section: same drops but **quality is zone floor only** · No boss → no Add mod stones and no boss share of Reroll tier stones → the second half of the crafting engine is fully active (loot.md section 7).
 
-# ความกว้างของเกมแทนที่ skill
+# Game Breadth Replacing Skills
 
-เกมนี้ไม่มี resource skill แต่มีหลายทางให้เล่นพร้อมกันได้ โดยไม่ต้องคลิกสลับ
+This game has no resource skills, but offers multiple parallel paths without click-switching.
 
-| ทาง | คืออะไร |
+| Path | What it is |
 |---|---|
-| **อาวุธ 12 ชนิด** | sword / axe / dagger / mace / spear / bow / crossbow / staff / rod / wand / two-handed sword / two-handed axe · แต่ละชนิดใช้ skill คนละชุด (ดู equipment-weapon.md) |
-| **ธาตุ 5 ธาตุ** | แต่ละธาตุมีสถานะและคู่ต้านต่างกัน · ต้องคิดว่าจะเจอมอนธาตุอะไร |
-| **skill 51 ตัว** | ลิสต์ไม่จำกัดจำนวน ทำงานตามลำดับ · aura มีสวิตช์เปิดเองตาม mana · buff มีสวิตช์ใช้ซ้ำเมื่อหมดเวลา (ดู `skill.md`) |
-| **คุณภาพ × tier** | ของชิ้นเดียวแข่งกันได้หลายทาง |
-| **คราฟ 3 คำสั่ง** | แก้ของที่ได้มาให้เข้ากับ build |
+| **12 weapon types** | sword / axe / dagger / mace / spear / bow / crossbow / staff / rod / wand / two-handed sword / two-handed axe · Each type uses a different skill set (see equipment-weapon.md) |
+| **5 Elements** | Each Element has different status and counter pairs · Must consider which monster Element will be faced |
+| **43 skills** | Unlimited list, runs in order · Auras reserve Max Mana, player-managed · Buffs auto-recast on expiry (see `skill-pool.md`) |
+| **Quality × Tier** | A single item can compete on multiple axes |
+| **3 crafting commands** | Fix dropped items to fit the build |
 
-**อาวุธ mastery** — แต่ละชนิดอาวุธมี XP ของตัวเอง 1-20 ระดับ
-โบนัสมี 2 ชั้น: **ชั้นขณะถือ** (อาวุธนั้นเบาลง + skill ของอาวุธนั้นแรงขึ้น) และ **ชั้นทั้งบัญชี** (+drop_rate ต่อชนิดที่ถึง L10)
-ทำให้ผู้เล่นลองสลับอาวุธเพื่อเก็บ mastery ได้ โดยไม่ต้องออกจากการตีเลย — เพราะของที่ "เก็บแล้ว" นับรวมเป็นโบนัสถาวรของบัญชี
-แตกต่างจาก Melvor ตรงที่ Melvor ต้องสลับ skill เพื่อเก็บ XP — เกมนี้สลับแค่ของที่ใส่ · และ AFK ยังเก็บ mastery ได้เต็ม (สูตร + เส้นเวลาอยู่ใน equipment-weapon.md)
+**Weapon Mastery** — Each weapon type has its own XP, levels 1-20.
+Bonuses have 2 layers: **while-equipped layer** (that weapon is lighter + skills of that weapon are stronger) and **account-wide layer** (+drop_rate per type reaching L10).
+This lets players try swapping weapons to farm Mastery without ever leaving combat — because "collected" items count as permanent account bonuses.
+Unlike Melvor, where skills must be swapped to farm XP — here only equipped items are swapped · And AFK still farms Mastery at full rate (formula + timeline in equipment-weapon.md).
 
-> **ปิดแล้วใน equipment-weapon.md**: mastery 1-20 ระดับต่อชนิดอาวุธ · XP จากการตี (1/hit + 4/kill) · L10 ใช้ 0.73 ชม. ที่เลเวล 90 ทั้งบัญชี 12 ชนิด = 8.8 ชม.
-> โบนัส = **น้ำหนักอาวุธ −1%/level** (ขณะถือ) · **skill damage +0.5%/level ตั้งแต่ L5** (ขณะถือ) · **drop_rate +1% ต่อชนิดที่ L10 ขึ้นไป** (ทั้งบัญชี สูงสุด +12%)
-> เหตุผลที่ไม่ให้ดาเมจ: ทุกชนิดอาวุธถูกตั้งให้ DPS เท่ากันอยู่แล้ว (`weapon_mult = 1.2 / weapon_aspd` · พิสูจน์ว่า 9,847 เท่ากันทั้ง 12 ชนิด) ถ้า mastery ให้ดาเมจ อาวุธชนิดเดียวจะดีกว่าตลอดและ "เหตุผลให้ลองสลับอาวุธ" จะตาย · AFK ยังเก็บ mastery ได้เต็มเพราะนับจากการตีล้วน ๆ
+> **Closed in equipment-weapon.md**: Mastery levels 1-20 per weapon type · XP from combat (1/hit + 4/kill) · L10 takes 0.73 hours at level 90. All 12 types account-wide = 8.8 hours.
+> Bonuses = **weapon weight −1%/level** (while equipped) · **skill damage +0.5%/level from L5** (while equipped) · **drop_rate +1% per type at L10 or above** (account-wide, max +12%).
+> Reason for no damage bonus: all weapon types are already tuned to equal DPS (`weapon_mult = 1.2 / weapon_aspd` · Proven equal at 9,847 across all 12 types). If Mastery granted damage, one weapon type would stay best forever and the "reason to try swapping weapons" would die · AFK still farms Mastery at full rate because it counts purely from attacks.
 
 # Build
 
-จากระบบใน `formula.md` ที่ stat ทั้ง 7 ใช้สเกลเท่ากัน build จึงไม่ได้แยกด้วยการถ่วงน้ำหนัก stat แต่แยกด้วย **ทางที่ลง affix**
+From the system in `formula.md` where all 7 stats use the same scale, builds are not separated by stat weighting but by **where Mods are invested**.
 
-| Build | อาวุธ | ชิ้นป้องกันเน้น | ต้องดูอะไร |
+| Build | Weapon | Defensive pieces focus | What to watch |
 |---|---|---|---|
-| physical burst | sword / axe | Max HP % | crit chance + crit damage ที่ main hand |
-| magic burst | staff / rod / wand | Max Mana % · CDR % | Magic power + alignment |
-| fast hit | dagger / bow | Dodge flat % | Attack speed % · core stat Agi |
-| elemental dot | อะไรก็ได้ที่มีธาตุ | Elemental res ของธาตุที่ใช้ | alignment + burn/poison |
-| dodge tank | shield / mace | Dodge + Max HP | core stat Vit + Agi |
-| loot | อะไรก็ได้ | อะไรก็ได้ | core stat Lck · drop rate |
+| physical burst | sword / axe | Max HP % | crit chance + crit damage on main hand |
+| magic burst | staff / rod / wand | Max Mana % · CDR % | Magic power + Alignment |
+| fast hit | dagger / bow | Dodge Flat % | Attack speed % · Core stat Agi |
+| elemental dot | any with Element | Elemental res of the used Element | Alignment + burn/poison |
+| dodge tank | shield / mace | Dodge + Max HP | Core stat Vit + Agi |
+| loot | anything | anything | Core stat Lck · drop rate |
 
-- ทุก build ใช้ core stat จากทุกชิ้น ต่างกันที่ว่าลงตัวไหน
-- Lck เป็นตัวเดียวที่ช่วยทั้ง DPS (crit) และ loot (drop) จึงเป็น build ที่คุ้มที่สุดในระยะยาว ต้องระวังให้ไม่เด่นเกิน
-- **วัดแล้ว build "fast hit" (ลง Agi 12 ชิ้น) ทำ DPS ได้ 3,830 ขณะที่ "physical burst" (Str 12 ชิ้น) ทำ 9,847** เพราะ aspd ชน cap ที่ Agi ~512 แต้มที่เหลือคือศูนย์
-  ถ้าอยากให้ fast hit มีอยู่จริง ค่าของมันต้องมาจาก *จำนวนครั้งที่ตี* (proc ต่อครั้ง · DoT tick · chill) ไม่ใช่จาก DPS รวม · ดูตารางใน formula.md หัวข้อ 0
+- Every build uses Core stats from all pieces; they differ in which one is stacked.
+- Lck is the only stat helping both DPS (crit) and loot (drop), so it is the most valuable long-term build. Must be watched so it does not dominate.
+- **Decided (P0-2): "fast hit" stays as a hit-count build, not a DPS race.** Measured gap stands (Agi 12 = 3,830 vs Str 12 = 9,847) and its value must come from *hit count* (proc per hit · DoT tick · chill), with Riposte as its boss path (dodge-scaling damage). Full numeric rebalance deferred to the mob-sheet pass.
 
-> **แก้แล้ว**: Wis เคยไม่มีทางออกเพราะยังไม่มี skill ตอนนี้ `skill.md` มี skill ที่ใช้ CDR จริงแล้ว
-> ส่วน Str/Int/Dex/Agi/Lck เป็น stat ที่ scale skill ได้ ตัวเลข CDR จึงมีที่ใช้ครบทุกตัว
+> **Fixed**: Wis previously had no outlet because there were no skills. Now `skill-pool.md` has skills that actually use CDR.
+> Str/Int/Dex/Agi/Lck are stats that scale skills, so CDR values now have uses for every stat.
 
-# เหตุผลที่ควรเล่นเกมนี้แทน Melvor
+# Why Play This Instead of Melvor
 
-| | Melvor | เกมนี้ |
+| | Melvor | This game |
 |---|---|---|
-| ความลึกของของ | ของเป็น tier + ค่าคราฟคงที่ | affix × คุณภาพ × tier × ธาตุ |
-| ธาตุ | ไม่มี | มี 5 ธาตุ มีคู่ต้าน · ทุกโซนมีธาตุประจำ |
-| ชิ่องอุปกรณ์ | 10 ช่อง ต่างกันแค่ชื่อ | 11 ช่อง ต่างกันจริง เพราะอาวุธได้ offensive ที่เดียว |
-| คราฟ | คราฟตามสูตร ไม่ยืดหยุ่น | 3 คำสั่ง ยกคุณภาพ / ยกช่อง / เปลี่ยนช่อง |
-| จำนวน skill | ~20 | ไม่มี skill ด้านหาทรัพยากร · มี skill 43 ตัว = active 26 + aura 5 + passive 12 |
-| สิ่งที่ต้องคลิก | สลับไปมา 20 อย่าง | เลือก zone กับจัดลำดับในลิสต์ |
+| Item depth | Items are tier + fixed craft values | mod × Item quality × tier × Element |
+| Elements | None | 5 Elements with counters · Every zone has a native Element |
+| Equipment slots | 10 slots differing only by name | 11 slots genuinely different, because Offensive comes from weapons only |
+| Crafting | Craft by fixed recipe, inflexible | 3 commands: raise quality / raise slot / change slot |
+| Skill count | ~20 | No resource-gathering skills · 43 skills = 31 active + 12 aura (the 12 passives became tree keystones) |
+| What must be clicked | Swap across 20 things | Select zone and order the list |
 
-# จุดที่อาจพัง
+# Failure Points
 
-1. **ตัวเลขไม่มีอะไรให้ดูนอกจาก loot** — ถ้าผู้เล่นอยู่กับ zone ที่ตีแล้วไม่พัฒนา เกมจะน่าเบื่อในวันที่สาม ต้องมีอย่างน้อย 1 อย่างที่เห็นผลทุกวัน เช่นขั้นบันไดของ skill ที่ยังไม่ครบ
-2. **1 ช่อง offensive อาจแคบเกิน** — crit, attack speed, accuracy อยู่ main hand ชิ้นเดียว (ดู `equipment-slot.md`) ถ้าเล่นแล้วรู้สึกว่าทุก build เหมือนกัน ต้องผ่อนกติกานี้
-3. **skill สุ่มดรอป อาจทำให้ผู้เล่นหงุดหงิด** — ถ้า boss ดรอปไม่บ่อยพอ ผู้เล่นจะไม่ได้ skill ที่ต้องการเลยแม้เล่นนาน · ต้องดูโอกาสดรอปก่อนว่าคร่าว ๆ
-4. ~~**ลิสต์ skill ไม่จำกัดจำนวน**~~ **ตอบแล้วด้วยเลข** — DPS จาก skill ถูกจำกัดโดย mana_regen ÷ mana cost ไม่ใช่ความยาวลิสต์ (K_SKILL=5 ใน skill.md): glass build กดได้ ~0.13 ครั้ง/วิไม่ว่าจะวาง 6 หรือ 26 ตัว · ลิสต์ยาวจึงเพิ่ม *ความยืดหยุ่นต่อการเจอมอน* ไม่ใช่ DPS · สิ่งที่ต้องแก้จริงคือ UI จัดลำดับ ไม่ใช่กติกา
-5. **คราฟอาจทำให้ loot ที่ดรอปมาไม่มีค่า** — ถ้ายก tier ถึง T1 ได้ง่าย ของดีก็เหมือนของธรรมดา ดูคำถามที่ค้างใน `crafting.md`
-6. **มอนยังไม่มี skill** — **แก้แล้วครึ่งหนึ่งใน combat.md**: มอนไม่ต้องมี skill ก็ยังเปลี่ยนจังหวะเรา เพราะธาตุประจำตัว (innate) ทิ้งสถานะใส่ผู้เล่น 20% ต่อครั้งที่ตีโดน — chill ลด aspd · shock หยุดตี+หยุด regen · burn/poison เป็น DoT · debuff ของเรา (Cripple · Blinding Mark) จึงมีเป้าหมายจริงเพราะมอนมีนาฬิกาของตัวเอง
-   ส่วนที่ยังไม่แก้: มอนยังไม่มี skill เฉพาะตัว ถ้าอยากให้โซน "ต้องแก้ทาง" มากกว่าต้องอ่านธาตุ ต้องเพิ่มทีละตัวตอนออกแบบ zone
+1. **Numbers offer nothing to watch except loot** — If the player sits in a zone with no progress, the game bores by day three. Answered by the task board (tasks.md): 3 visible slots with daily progress, plus the skill upgrade ladder.
+2. **1 Offensive slot may be too narrow** — crit, attack speed, accuracy live on main hand alone (see `equipment-slot.md`). If every build feels identical in play, this rule must be relaxed.
+3. **Random skill drops may frustrate players** — If bosses do not drop often enough, players will never get wanted skills no matter how long they play · Drop chances must be reviewed first.
+4. ~~**Unlimited skill list**~~ **Answered with numbers** — Skill DPS is limited by mana_regen ÷ mana cost, not list length (K_SKILL=5 in skill-pool.md): a glass build casts ~0.13 times/sec whether placing 6 or 26 skills · A long list adds *flexibility against monsters*, not DPS · The real fix is list-ordering UI, not rules.
+5. **Crafting may devalue dropped loot** — If raising tier to T1 is easy, good items equal common items. See open questions in `crafting.md`.
+6. **Monsters still have no skills** — **Half-fixed in combat.md**: monsters need no skills to still shift our rhythm, because their Innate Element applies status to the player at 20% per landed hit — chill lowers aspd · shock stops attacks+regen · burn/poison are DoT · Our debuffs (Cripple · Blinding Mark) thus have real targets because monsters have their own clocks.
+   **Decided (D-009 7b):** late-zone bosses gain 1-2 signature skills during zone design; normal and elite mobs keep innate Element only.
 
-# สิ่งที่ยังไม่ลง
+# Not Yet Defined
 
-- ~~**จำนวนโซนและจังหวะเลเวล**~~ **ปิดแล้วใน world.md** — 9 โซน × 10 เลเวล · L10 0.5 ชม. · L30 3.1 · L60 12.6 · L90 31.2 · L100 40.2 ชม.
-- ~~**ความยาวของเกม**~~ **ปิดแล้ว** — เกมจบที่ ~40 ชม. ของการเล่นจริง (เลเวล 100) และ ~31 ชม. สำหรับการคราฟเซ็ตจบ · เลเวล 91-100 คือ 9 ชม. สุดท้ายในโซน 9 · **ไม่มี prestige** ในเวอร์ชันนี้ เพราะ loop หลังจบต้องไม่ทำให้แกนคุณภาพไอเทมที่คำนวณไว้พัง (ข้อกังวลเดิมในไฟล์นี้)
-- **เงื่อนไขชนะ — ตัดสินแล้ว** · จบ = **ฆ่า boss ของโซน 9 (เลเวล 90 · HP 283,516) ให้ลงในรอบเกิดเดียว โดยไม่ถูก push** · เป็นเลขที่วัดได้จริงจาก combat.md หัวข้อ 7 (ไม่มี heal: glass 125% / mix 117% / tank 114% / dodge 203% ของ pool = push ทุก build · มี heal ×1.52: ลงเหลือ 82/77/75% = ผ่านสามจากสี่) จึงไม่ใช่ด่านที่ต้องมีของใหม่ เป็นด่านที่ต้อง *กด heal* ซึ่งคือสิ่งที่แยก active play ออกจาก AFK ตามที่ G5 สัญญา · dodge ล้วนคือ build เดียวที่จบเกมไม่ได้ถ้าไม่แบ่งช่องให้เลือด (133%) · **หลังจบ = loop ปรับปรุงต่อ ไม่มี prestige**: เลเวล 91-100 คือช่วงดันคุณภาพของในโซน 9 (world.md) · เป้าที่เหลือวัดเป็นเวลาแล้ว — Ascend ครบ 12 ชิ้น ~15 ชม. (E7) · Refine ทั้งเซ็ต ~16 ชม. (E6) · mastery 12 ชนิดถึง L20 ~39 ชม. · skill เต็มขั้น 2-4 ตัว ~24 ชม./ตัว (E11)
-- **เนื้อหาแบบสั้น** — boss 9 ตัว (1 ต่อโซน) ตามเลขโซนใหม่ · achievement ยังไม่คิด · elite ถูกตั้งที่ 1% ของการฆ่า (loot.md)
+- ~~**Zone count and level pacing**~~ **Closed in world.md** — 9 zones × 10 levels · L10 0.5 hours · L30 3.1 · L60 12.6 · L90 31.2 · L100 40.2 hours.
+- ~~**Game length**~~ **Closed** — Game ends at ~40 hours of real play (level 100) and ~31 hours for a finished crafted set · Levels 91-100 are the final 9 hours in zone 9 · **No prestige** in this version, because the post-completion loop must not break the calculated item quality core (original concern in this file).
+- **Win condition — Decided** · Completion = **kill the zone 9 boss (level 90 · HP 283,516) within a single spawn without being Pushed** · A truly measurable number from combat.md section 7 (without heal: glass 125% / mix 117% / tank 114% / dodge 203% of pool = Push on every build · With ×1.52 heal: reduced to 82/77/75% = three of four pass). So it is not a gate requiring new items, but a gate requiring *heal casts*, which is what separates active play from AFK as G5 promised · Full-dodge is the only build that cannot finish without allocating slots to health (133%) · **After completion = continued improvement loop, no prestige**: levels 91-100 are the item-quality push in zone 9 (world.md) · Remaining goals are timed — Ascend full 12 pieces ~15 hours (E7) · Refine full set ~16 hours (E6) · Mastery 12 types to L20 ~39 hours · Full skill ranks for 2-4 skills ~24 hours/skill (E11).
+- **Short-form content** — 9 bosses (1 per zone) per new zone numbers · **Achievements are cut** (D-009 7c) · Elite set at 1% of kills (loot.md).
+- ~~**Settlements, travel and NPC stalls**~~ **Defined in towns.md** (doors chosen) — 3 capitals + 6 towns over the 9 zones · waypoints free, carriage priced, Road opt-in and online-only · NPC stalls sell space/time/information/appearance only · **gold now exists** as the quality-of-life medium, minted by the sell-or-dissolve choice and Road events only (`economy.md`, checks.md G6-G9) · Nothing gold buys grants power, so no new `mob_HP` term was needed (H1) and the 40.2 hr timeline stands.
+
+(End of file - total 135 lines)

@@ -4,221 +4,227 @@ import core-stats.md
 import formula.md
 import elements.md
 import world.md
-import skill.md
+import skill-pool.md
 
-ปิดช่องที่ไฟล์อื่นอ้างถึงแต่ไม่เคยมี: **มอนตีกลับเท่าไร · เร็วแค่ไหน · ลำดับการคิดดาเมจ · และเกิดอะไรขึ้นเมื่อเลือดหมด**
+Closes gaps referenced by other files but never defined: **how hard mobs hit back · how fast · damage order · and what happens when HP runs out.**
 
-การตัดสินใจเดิมที่ยังใช้ต่อ (จากบันทึกก่อนหน้า · commit `908cbf7` ใน git history): **ไม่มีการตาย ·สกุลเงินของเกมนี้คือเวลา · ค่าของฝั่งป้องกันมาจาก `push` ไม่ใช่จากการรอดชีวิต**
-ไฟล์นี้คือกลไกที่ทำให้ข้อความนั้นคำนวณได้จริง
+Prior decision still in force (from earlier notes · commit `908cbf7` in git history): **no death · the currency of this game is time · Defensive value comes from `Push`, not from survival.**
+This file is the mechanism that makes that statement actually calculable.
 
 ```
-dodge / res ลดดาเมจขาเข้า
-  → ถูก push น้อยลง
-    → เวลาน้อยลงที่ต้องเสียเปล่า
-      → kph ไม่ตก
-        → ของต่อชั่วโมงไม่ตก
+dodge / res reduce incoming damage
+  → less Push
+    → less wasted time
+      → kph does not drop
+        → items per hour do not drop
 ```
 
-# 1. นาฬิกาของการตี
+# 1. Attack Clock
 
-**ไม่มีเทิร์น · ทุกตัวมีตัวนับเวลาของตัวเอง**
+**No turns · every unit has its own timer.**
 
-| ผู้ถือเวลา | ค่า |
+| Timer owner | Value |
 |---|---|
-| ผู้เล่น | ตีทุก `100/aspd` วินาที (cap = 3 ครั้ง/วิ) |
-| มอนธรรมดา / elite | 1 ครั้ง/วิ |
-| boss | 0.8 ครั้ง/วิ (ตีช้าแต่แรง · ให้จังหวะอ่านสถานะ) |
-| DoT ทุกก้อน | tick ทีละ 1 วินาที |
-| สถานะ (chill/shock/mark) | นับถอยหลังตามเวลาจริง บนเป้าหมาย |
+| Player | attacks every `100/aspd` seconds (Cap = 3 times/sec) |
+| Normal / elite mobs | 1 time/sec |
+| Boss | 0.8 times/sec (slow but heavy · gives time to read status) |
+| All DoT ticks | tick once per 1 second |
+| Status (chill/shock/mark) | counts down in real time on target |
 
-- โลกจริงของเกม idle ต้องเดินต่อเนื่อง ไม่ใช่เป็นตา ๆ · world.md เขียนไว้แล้วว่า "ทุกตัวในกลุ่มโจมตีในรอบเดียวกัน" ซึ่งในโมเดลนี้หมายถึงทุกตัวมีนาฬิกาของตัวเองที่เดินพร้อมกัน
-- `shock` หยุดนาฬิกาของเป้าหมาย 1 วิ (โจมตีหยุด + regen หยุด) — เป็นเหตุผลที่ stun ของ lightning มีความหมายตอนอยู่ที่ฝั่งเราโดน
+- A real idle game must run continuously, not in turns · world.md already states "all units in the group attack in the same round", which in this model means every unit has its own timer running together.
+- `shock` stops the target clock for 1 sec (attacks stop + regen stops) — the reason lightning stun matters when we are the ones hit.
 
-# 2. ลำดับการคิดดาเมจ ฝิ่ยใช้ฟฬัง
+# 2. Damage Order, Player Side
 
-**ขาออก (เราตีมอน)**
+**Outgoing (we hit mobs)**
 
 ```
 1  hit_chance  = accuracy / (accuracy + evasion_mobs)      evasion = mob_level × 1
-2  crit?       = crit_chance → ×(1 + crit_dmg/100 − 1)      เฉพาะ physical / magic · ธาตุไม่ crit
-3  weak?       = ×1.5 ถ้าธาตุอาวุธตรงกับ innate ของมอน
-4  คู่ต้านธาตุ  = ตาราง elements.md (0.60–1.15)
-5  ลบจาก HP มอน
+2  crit?       = crit_chance → ×(1 + crit_dmg/100 − 1)      physical / magic only · Elements do not crit
+3  weak?       = ×1.5 if weapon Element matches mob innate Element
+4  Element counter  = elements.md table (0.60–1.15)
+5  subtract from mob HP
 ```
 
-**ขาเข้า (มอนตีเรา)** — เรียงคนละแบบ เพราะเราไม่มี evasion เป็น stat
+**Incoming (mobs hit us)** — ordered differently because we have no evasion stat.
 
 ```
-1  perfect_dodge  (cap 5%)   ผ่าน = ไม่เกิดอะไรเลย · นี่คือทางเดียวที่กันสิ่งที่ "หลบไม่ได้"
-2  dodge          (cap 60%)  ผ่าน = ไม่โดน
-3  แบ่งดาเมจ      = 50% กายภาพ (ลดไม่ได้ นอกจากด้วย HP) + 50% ธาตุตาม innate ของมอน
-4  elemental resistance ของธาตุนั้น (cap 75) → ลดเฉพาะครึ่งธาตุ
-5  ติดสถานะของธาตุนั้น (ดูหัวข้อ 5)
-6  ลบจาก HP ผู้เล่น
+1  perfect_dodge  (Cap 5%)   pass = nothing happens · this is the only path that blocks "undodgeable" effects
+2  evasion        (PoE entropy vs mob accuracy)  pass = no hit · new layer, numbers pending mob sheet
+3  dodge          (Cap 90%)  pass = no hit · opposed by mob accuracy (P1-1 option A2)
+4  split damage   = 50% physical (reduced by armour) + 50% Element by mob innate Element
+5  armour         = armour / (armour + 5 × raw_hit) reduces the physical half only (PoE formula)
+6  Energy Shield takes damage before HP (chaos bypasses) · recharges after 5 sec without a hit
+7  Elemental resistance of that Element (Cap 75) → reduces only the Element half
+8  apply that Element status (gated by Alignment on the mob side, see section 5)
+9  subtract from player HP
 ```
 
-- **ไม่มี `def` / armor / damage reduction แยก** — ฝั่งลดดาเมจมีแค่ dodge กับ elemental res เท่านั้น สองตัวนี้จึงเป็นทั้งหมดที่ผู้เล่นกันขาเข้าได้ (ส่วน HP คือตัวรับไม่ใช่ตัวลด)
-- ** innate element ของมอนทำหน้าที่สองทาง**: เป็นธาตุที่เราตีแล้วแรง ×1.5 และเป็นธาตุที่มันตีเรา → **res ต้องดูจากโซนที่เล่น ไม่ใช่สุ่ม** (ยืนยันบรรทัดใน world.md ที่เขียนไว้ว่า "ต้องเตรียม res ไว้ล่วงหน้า")
-- perfect dodge ต้องอยู่ก่อน dodge เพราะนิยามของมันคือ "หลบสิ่งที่หลบไม่ได้" (DoT tick · ผลที่ไม่มีเงื่อนไขหลบ เช่น Aura of Dread) — ถ้าไม่มีลำดับนี้ stat ตัวนี้ไร้ความหมาย
+- **No separate `def` / armor / damage reduction** — damage reduction has only dodge and Elemental res. These two are therefore all players can use against incoming damage (HP is the receiver, not the reducer).
+- **Mob innate Element serves two ways**: it is the Element we hit for ×1.5, and it is the Element it hits us with → **res must be prepared from the zone played, not rolled randomly** (confirms the world.md line stating "res must be prepared in advance").
+- Perfect dodge must come before dodge because its definition is "dodge the undodgeable" (DoT tick · unconditional effects such as an aura's debuff). **Dodge is an opposed roll against accuracy; perfect dodge is not opposed** — when it triggers, the hit is removed outright (D-009 3c). Without this order the stat is meaningless.
 
-# 3. สถิติของมอนต่อเลเวล
+# 3. Mob Stats Per Level
 
-เส้นฐานตั้งจาก **DPS ที่ผู้เล่นระดับเดียวกันมีจริง** ตาม formula.md หัวข้อ 0 ไม่ใช่ตั้งแล้วค่อยปรับ
+Baseline is set from **DPS players at the same level actually have** per formula.md section 0, not set-then-tuned.
 
 ```
-mob_HP(L)   = DPS ของผู้เล่นที่เลเวล L พร้อมของ "กลางชั้น + จำนวนชิ้นที่ควรมีแล้ว" × ตัวคูณ tree × 1 วินาที
-              จำนวนชิ้น = min(12, ceil(L/2))   → L1 = 1 ชิ้น · L24+ = ครบ 12
-              ตัวคูณ tree = 1 + 0.0085 × L   → ×1.25 (L30) · ×1.85 (L100) · ดู skill-tree.md หัวข้อ 3
-mob_PS(L)   = DPS_typical_gear(L) / 27   (ไม่ใช่ mob_HP / 27)
-ตัวคูณ skill = 1 + 0.0034 × L  → ×1.30 (L90) · ×1.34 (L100)   (เส้น HP รวมแล้ว · เส้นดาเมจไม่รวม)
+mob_HP(L)   = DPS of level L player with "mid-Tier + expected item count" gear × tree multiplier × 1 second
+              item count = min(12, ceil(L/2))   → L1 = 1 item · L24+ = full 12
+              tree multiplier = 1 + 0.0085 × L   → ×1.25 (L30) · ×1.85 (L100) · see skill-tree.md section 3
+mob_PS(L)   = typical_gear_DPS(L) / 27   (not mob_HP / 27)
+skill multiplier = 1 + 0.0034 × L  → ×1.30 (L90) · ×1.34 (L100)   (HP line includes it · damage line excludes it)
 
-> **ทำไมเส้นดาเมจไม่ตั้งตาม mob_HP** — mob_HP ถูกคูณด้วยปัจจัย tree (×1.85 ที่ L100) เพื่อให้ TTK ยังเป็น 1 วิ · ถ้าเอาตัวเลขเดียวกันนั้นหาร 27 ด้านดาเมจจะโต ×1.85 ตามไปด้วย ขณะที่ pool ของผู้เล่นไม่ได้โตตาม tree (tree เป็นฝั่งความเร็ว ไม่ใช่ฝั่งอดทน) · ผลคือคนที่ของ+tree พอดีเลเวลจะตายใน 14 วิแทน 27 วิ และกลุ่ม 5 จะ push ทุก build ซึ่งทำลายสัญญา AFK ใน concept.md · เส้นดาเมจจึงตั้งจาก `DPS_typical (gear อย่างเดียว) ÷ 27` = "มอนตัวเดียวตีคนพอดีเลเวลตายใน 27 วิ" ซึ่งเป็นจำนวนที่วัดจากคนที่ *มี* tree ด้วยแล้ว · ผลข้างเคียงที่ตั้งใจ: พลังจาก tree ทำให้ศึกสั้นลง = อันตรายน้อยลง · ถ้าวันไหน tree ฝั่งอดทนถูกใส่เข้ามาจริง ต้องย้ายเส้นนี้กลับมาหาร pool ใหม่ (บันทึกไว้ใน checks.md กลุ่ม I)
-mob_acc     = ไม่มีการสุ่ม · มอน swing ตลอด · ฝั่งเราใช้ dodge เท่านั้น
+> **Why the damage line is not set from mob_HP** — mob_HP is multiplied by the tree factor (×1.85 at L100) to keep TTK at 1 sec · if that same number were divided by 27, damage would also grow ×1.85 while the player pool does not grow with tree (tree is the speed side, not the endurance side) · the result is on-level gear+tree players dying in 14 sec instead of 27 sec, and groups of 5 pushing every build, which destroys the AFK promise in concept.md · the damage line is therefore set from `typical DPS (gear only) ÷ 27` = "one mob kills an on-level player in 27 sec", measured on players who *have* tree already · intended side effect: tree power shortens fights = less danger · if an endurance tree is ever added, this line must be moved back to divide the pool (recorded in checks.md group I)
+mob_acc     = no roll · mobs always swing · our side uses dodge only
 ```
 
-| เลเวล | 1 | 5 | 10 | 20 | 30 | 40 | 60 | 80 | 90 | 100 |
+| Level | 1 | 5 | 10 | 20 | 30 | 40 | 60 | 80 | 90 | 100 |
 |---|---|---|---|---|---|---|---|---|---|---|
 | mob HP | 121 | 271 | 682 | 1,527 | 2,289 | 5,404 | 7,992 | 16,137 | 18,901 | 22,016 |
-| mob ดาเมจ/วิ | 4 | 9 | 23 | 45 | 61 | 131 | 163 | 280 | 304 | 329 |
+| mob damage/sec | 4 | 9 | 23 | 45 | 61 | 131 | 163 | 280 | 304 | 329 |
 
-- เส้นนี้คำนวณจาก `attribute-item.md` (ช่วงค่า T2 ของแต่ละขั้นคุณภาพ) + `formula.md` หัวข้อ 0-7 · ตารางเต็มและเส้นเวลาต่อโซนอยู่ใน world.md
-- **TTK = 1 วิสำหรับคนที่ gear+tree พอดีเลเวล** · gear เต็ม T1 + tree ทั่วไป = 0.90 วิ · gear เต็ม T1 แต่*ไม่มี tree* = 1.67 วิ (mob HP รวม tree แล้ว) · มือเปล่าเข้าโซนใหม่ = 2-8 วิ · ดังสูทร skill-tree.md หัวข้า 3
-- ตัวเลขในตารางคือ **gear × tree × skill** · ถ้าแยกจะเห็นต้นทาง: gear typical = 8,881 · gear เต็ม T1 = 9,847 · คูณปัจจัย tree (+85%) และ skill list (+34%) = **22,016** ที่ผู้เล่นทั่วไปมีเมื่อถึงเลเวล 100 · ดู skill-tree.md หัวข้อ 3
+- This line is calculated from `mod-pool.md` (T2 ranges of each Item quality tier) + `formula.md` sections 0-7 · full table and per-zone time lines are in world.md.
+- **TTK = 1 sec for on-level gear+tree players** · full T1 gear + typical tree = 0.90 sec · full T1 gear but *no tree* = 1.67 sec (mob HP already includes tree) · naked entering a new zone = 2-8 sec · per skill-tree.md section 3 formula.
+- Numbers in the table are **gear × tree × skill** · split to see origin: typical gear = 8,881 · full T1 gear = 9,847 · multiplied by tree (+85%) and skill list (+34%) factors = **22,016** that typical players have at level 100 · see skill-tree.md section 3.
 
-| ระดับ gear ของผู้เล่น (build ทุ่ม Str) | เลเวล 1 | เลเวล 30 | เลเวล 60 | เลเวล 100 |
+| Player gear level (Str-stacked build) | Level 1 | Level 30 | Level 60 | Level 100 |
 |---|---|---|---|---|
-| ไม่มีของ · stat จากเลเวลล้วน | DPS 69 | 390 | 833 | 1,610 |
-| ของเต็มขั้นคุณภาพ (12 ชิ้น T1 ของขั้นนั้น) | — | 1,980 | 4,860 | 9,847 |
-| → **mob HP ที่ตั้งจริง (typical gear × tree × skill ตามเลเวล)** | 121 | 2,289 | 7,992 | 22,016 |
+| No gear · level-only stats | DPS 69 | 390 | 833 | 1,610 |
+| Full Quality-tier gear (12 T1 items of that tier) | — | 1,980 | 4,860 | 9,847 |
+| → **Actual mob HP set (typical gear × tree × skill by level)** | 121 | 2,289 | 7,992 | 22,016 |
 
-- ของเต็มขั้น **แรงกว่าไม่มีของ 5-6 เท่า** ที่เลเวล 100 (9,847 เทียบกับ 1,610) และ 5.1 เท่าที่เลเวล 30 · ตัวเลขนี้คือเพดานที่ loot ซื้อให้ได้ และเป็นเหตุผลที่เกมนี้เป็นเกม loot ไม่ใช่เกมเลเวล
-- **สองแถวบนคือขอบล่าง-ขอบบนของผู้เล่นคนเดียวในเลเวลนั้น** · ตาราง mob HP ด้านบนตั้งไว้ *ระหว่างสองแถว* (ของ T2 ตามจำนวนชิ้นที่ควรมีแล้ว) เพื่อให้คนเพิ่งเข้าโซนยังฆ่าได้และคนของเต็มไม่รู้สึกหน่วง · ของเต็มขั้นแรงกว่าไม่มีของ 5-6 เท่าที่เลเวล 100 (9,847 เทียบกับ 1,610) นี่คือเหตุผลที่เกมนี้เป็นเกม loot ไม่ใช่เกมเลเวล
+- Full-tier gear is **5-6x stronger than no gear** at level 100 (9,847 vs 1,610) and 5.1x at level 30 · this number is the ceiling loot can buy, and the reason this is a loot game, not a level game.
+- **The two rows above are the lower-upper bounds of a single player at that level** · the mob HP table above is set *between the two rows* (T2 gear with expected item count) so fresh zone entrants can still kill and full-gear players feel no drag · full-tier gear is 5-6x stronger than no gear at level 100 (9,847 vs 1,610). This is why this is a loot game, not a level game.
 
-| ประเภท | HP | ดาเมจ/วิ | จำนวนตัว | อ้างอิง |
+| Type | HP | damage/sec | Count | Reference |
 |---|---|---|---|---|
-| ธรรมดา | ×1 | ×1 | มาเป็นกลุ่ม 1-5 (world.md) | |
-| elite | ×3 | ×2 | 1 ตัวเสมอ | ของคุณภาพพื้นขึ้น 1 ขั้น |
-| boss | ×15 | ×4 | 1 ตัวเสมอ | เพดานคุณภาพของโซน + สกุลคราฟ + skill |
+| Normal | ×1 | ×1 | comes in groups 1-5 (world.md) | |
+| Elite | ×6 | ×4 | always 1, spawn 0.5% of kills, drops 2 Reroll tier stones | mini-boss · Item quality floor +1 tier (P1-2 option A) |
+| Boss | ×15 | ×4 | always 1 | zone Quality ceiling + craft currency + skill |
 
-# 4. `push` — กลไกที่แทนความตาย
+# 4. `Push` — Mechanism Replacing Death
 
 ```
-HP ถึง 0  →  ไม่ตาย · ไม่เสียของ
-  1. หยุดตีทันที ออกจากโซนกลับ camp
-  2. ฟื้นฟูที่ camp_regen = hp_regen × 8 จนกว่าจะเต็ม
-  3. กลับเข้าโซนเดิมอัตโนมัติ (AFK เดินต่อได้ ไม่ต้องกดอะไร)
-  4. เวลาที่เสีย = Max HP / (hp_regen × 8)
+HP reaches 0  →  no death · no item loss
+  1. Stop attacking immediately, leave zone back to camp
+  2. Recover at camp_regen = hp_regen × 8 until full
+  3. Re-enter the same zone automatically (AFK keeps walking, no input needed)
+  4. Time lost = Max HP / (hp_regen × 8)
 ```
 
-| build ที่เลเวล 100 | Vit ที่ลง | Max HP | hp_regen | เวลานอนต่อ 1 push |
+| Build at level 100 | Vit invested | Max HP | hp_regen | Downtime per Push |
 |---|---|---|---|---|
-| ทุ่ม Str ทั้ง 12 ชิ้น (glass) | 210 (ไม่ลงเลย) | 9,466 | 53/วิ | **23 วิ** |
-| Str 6 / Agi 3 / Vit 2 / Lck 1 | 286 | 11,225 | 72/วิ | 20 วิ |
-| Vit 10 / Agi 2 (tank) | 690 | 20,602 | 173/วิ | **15 วิ** |
-| Agi 8 / Vit 4 (dodge) | 372 | 13,224 | 93/วิ | 18 วิ |
+| Full Str all 12 items (glass) | 210 (none) | 9,466 | 53/sec | **23 sec** |
+| Str 6 / Agi 3 / Vit 2 / Lck 1 | 286 | 11,225 | 72/sec | 20 sec |
+| Vit 10 / Agi 2 (tank) | 690 | 20,602 | 173/sec | **15 sec** |
+| Agi 8 / Vit 4 (dodge) | 372 | 13,224 | 93/sec | 18 sec |
 
-- **Vit ถูกลงสองต่อ**: เพิ่มเพดานเลือด และลดเวลานอน · เป็นเหตุผลที่ tank ไม่ได้ "ตายยาก" (ไม่มีใครตาย) แต่ **เสียเวลาน้อยกว่า**
-- ไม่มีค่าปรับอื่น · ไม่เสียของ ไม่เสีย XP ไม่ถอยโซน · สิ่งที่เสียมีอย่างเดียวคือเวลา · ตามการตัดสินใจเดิม
-- ตอนถูก push ให้สลับไป preset หลัก (skill.md เขียนไว้แล้วว่า "ตอนตายให้กลับไปชุดหลัก" — ตอนนี้คำนั้นหมายถึง push)
+- **Vit pays twice**: raises the blood ceiling, and shortens downtime · the reason tanks are not "hard to kill" (nobody dies) but **lose less time**.
+- No other penalty · no item loss, no XP loss, no zone rollback · the only loss is time · per the original decision.
+- On Push, switch back to the main preset (skill-pool.md already states "on death return to main set" — that phrase now means Push).
 
-# 5. สถานะที่มอนทิ้งบนผู้เล่น
+# 5. Status Mobs Leave on Players
 
-ใช้กฎและตัวเลขของ elements.md ทั้งหมด แต่ฝั่งผู้เล่นเป็นเป้าหมาย
+Uses all rules and numbers from elements.md, but the player is the target.
 
-| ธาตุของมอน | ผลบนผู้เล่น | ค่า | ทางกัน |
+| Mob Element | Effect on player | Value | Counter |
 |---|---|---|---|
-| fire | burn | `elem_half × 0.30` ต่อชั้น สูงสุด 3 ชั้น · 4 วิ | res · perfect dodge |
-| cold | chill | aspd −10% (ครึ่งหนึ่งของที่มอนโดน) · 3 วิ · ซ้อนไม่ได้ | res |
-| lightning | shock | หยุดตี + หยุด regen 1 วิ · สุ่ม 1 ครั้งต่อการตี | res |
-| poison | poison | `elem_half × 0.08` ต่อชั้น สูงสุด 10 · ลด 1 ชั้น/8 วิ | res · perfect dodge |
-| chaos | mark ของมันเอง | ดาเมจมัน +0.5% ต่อชั้น สูงสุด +10% | res · การสลับเป้า |
+| fire | burn | `elem_half × 0.30` per stack, max 3 stacks · 4 sec | res · perfect dodge |
+| cold | chill | aspd −10% (half of what mobs take) · 3 sec · does not stack | res |
+| lightning | shock | stop attacking + stop regen 1 sec · rolls once per attack | res |
+| poison | poison | `elem_half × 0.08` per stack, max 10 · loses 1 stack/8 sec | res · perfect dodge |
+| chaos | its own mark | its damage +0.5% per stack, max +10% | res · target switching |
 
-- **โอกาสติดสถานะ 20% ต่อการตีที่โดน** · มอนไม่ต้องมี skill ของตัวเอง · ธาตุประจำตัวคือ skill ของมัน
-- `elem_half` = ครึ่งธาตุของดาเมจต่อครั้งที่คำนวณแล้ว (หัวข้อ 2 ข้อ 3)
-- เหตุผลที่ chill/shock ถูก halve บนผู้เล่น: เป้าหมายเดียวที่เกมนี้ต้องชนะคือเวลาของเราเอง ถ้าลด aspd เรา 20% พร้อมกัน 5 ตัว = DPS หายไปเกินครึ่งโดยผู้เล่นกดอะไรไม่ได้เลย
-- **skill ฟื้นชีวิตมีงานชัดเจนจากตารางนี้**: Lesser Mend (4% Max HP/วิ × 8 วิ) = เพิ่ม pool 32% · Second Wind (20% ทันที) = กัน push ที่เหลือไม่กี่ %
+- **20% status proc chance per landed hit** · mobs need no skills of their own · innate Element is their skill.
+- `elem_half` = the Element half of calculated per-hit damage (section 2 item 3).
+- Reason chill/shock are halved on players: the only target this game must beat is our own time. Reducing our aspd 20% across 5 mobs at once = over half DPS gone with no player input.
+- **Healing skills have clear work from this table**: Heal (4% Max HP/sec × 8 sec) = +32% pool · Greater Heal (20% instant) = blocks Push at the last few %.
 
-# 6. ผลวัดจริง: build ไหนรอดอะไร (ทุกตัวเลขมาจาก `node tools/survival.js` · ไม่มีการพิมพ์มือ)
+# 6. Measured Results: Which Build Survives What (All Numbers From `node tools/survival.js` · No Hand-Typed Values)
 
-**นิยาม build** — 12 ชิ้นที่สวม แบ่งให้ core stat เท่านั้น · main hand ถือ affix T1 ของขั้นคุณภาพ (power flat 80 / power % 16 / aspd 25% / crit 8%) เหมือนกันทุก build · เลเวล 100 `stat_c` = 210 · ทุก build มี tree ตามเลเวล (DPS ×1.85)
+> Stale pending rerun: tables below predate P0-1 (full Element damage), P0-3 (AoE falloff), P1-1 (dodge 90 + mob accuracy + PoE defense), and P1-2 (Elite ×6/×4). Rules above are decided; numbers below rerun in the rebalance pass. Do not hand-edit.
 
-| build | แบ่ง 12 ชิ้น | Str | Vit | Agi | Max HP | regen/วิ | dodge | res |
+**Build definitions** — 12 worn items split to Core stat only · main hand holds same T1 Mod of the Quality tier (power Flat 80 / power % 16 / aspd 25% / crit 8%) for all builds · level 100 `stat_c` = 210 · all builds have on-level tree (DPS ×1.85).
+
+| build | 12-item split | Str | Vit | Agi | Max HP | regen/sec | dodge | res |
 |---|---|---|---|---|---|---|---|---|
 | glass | Str 12 | 816 | 210 | 210 | 8,160 | 53 | 38% | 10.5% |
 | mix | Str 6 / Vit 3 / Agi 3 | 468 | 328 | 328 | 10,515 | 82 | 44% | 16.4% |
 | tank | Vit 12 | 210 | 816 | 210 | 20,280 | 204 | 38% | 40.8% |
-| dodge | Agi 12 | 210 | 210 | 816 | 8,160 | 53 | 60% (ชน cap) | 10.5% |
+| dodge | Agi 12 | 210 | 210 | 816 | 8,160 | 53 | 60% (old cap; new cap 90, opposed by mob accuracy, path pending) | 10.5% |
 
-**กติกาของสนาม** (3 ข้อนี้คือสิ่งที่กำหนดตัวเลขด้านล่าง ถ้าแก้ข้อใดต้องรันใหม่)
+**Field rules** (these 3 rules define the numbers below; changing any requires a rerun):
 
-1. **มอนเข้าพร้อมกันได้สูงสุด 3 ตัว** — กลุ่ม 5 ไม่ได้ตีพร้อมกัน 5 ชุด · ตัวที่ 4-5 รอคิว
-   ถ้าตัดข้อนี้ทิ้ง ตัวเลข "กลุ่ม 5" จะพุ่งจาก 23-46% → **109-180%** ของ pool → AFK พังทันที · กติกาจึงไม่ใช่รสนิยม แต่เป็นสิ่งที่ทำให้สัญญาใน concept.md เป็นจริง (world.md หัวข้อ คุณสมบัติโซน)
-2. **hp_regen ทำงานระหว่างสู้** — ตัวที่ลดคือ `ดาเมจขาเข้า − regen` · จึงเป็นเหตุผลที่ tank ชนะบอสทั้งที่ DPS ต่ำที่สุด
-3. **ฆ่าทีละตัวตามลำดับเกิด** สำหรับตารางนี้ · AoE ให้ผลตามกติกาใน skill.md หัวข้อ AoE (60% ต่อเป้า · เพดาน 3 · mana ×1.5) ซึ่งวัดแล้วว่า groupe 3 ขึ้นไปเร็วกว่า 20% และกลุ่ม 1-2 *ช้ากว่า* single target
+1. **Max 3 mobs engage at once** — groups of 5 do not hit with 5 sets at once · mobs 4-5 queue.
+   Without this rule, "group of 5" numbers jump from 23-46% → **109-180%** of pool → AFK breaks immediately · the rule is therefore not taste but what makes the concept.md promise true (world.md zone properties section).
+2. **hp_regen works during combat** — the reducer is `incoming damage − regen` · hence tanks beat bosses despite lowest DPS.
+3. **Kill one by one in spawn order** for this table · AoE follows the skill-pool.md AoE rule (60% per target · Cap 3 · mana ×1.5), which measures 20% faster on groups of 3+ and *slower* on groups of 1-2 than single target.
 
-### เลเวล 100 · mob HP 22,016 · mob ดาเมจ 329/วิ
+### Level 100 · mob HP 22,016 · mob damage 329/sec
 
-| build | DPS รวม tree | รับจริง (หลัง dodge+res) | 1 ตัว | กลุ่ม 5 | elite | boss | boss + heal |
+| build | Total DPS with tree | Actual taken (after dodge+res) | 1 mob | group of 5 | elite | boss | boss + heal |
 |---|---|---|---|---|---|---|---|
-| glass | 18,217 | 59% ของขาเข้า | 2% (0.9 วิ) | 29% (4.5 วิ) | 11% (2.7 วิ) | **119% (13.5 วิ) → push** | 78% |
-| mix | 12,385 | 51% | 1% (1.3 วิ) | 27% (6.6 วิ) | 10% (4.0 วิ) | **112% (19.9 วิ) → push** | 74% |
-| tank | 4,948 | 49% | 0% (3.3 วิ) | 23% (16.6 วิ) | 6% (10.0 วิ) | **109% (49.8 วิ) → push** | 72% |
-| dodge | 7,089 | 38% | 2% (2.3 วิ) | 46% (11.6 วิ) | 17% (7.0 วิ) | **190% (34.8 วิ) → push** | **125% → push อีก** |
+| glass | 18,217 | 59% of incoming | 2% (0.9 sec) | 29% (4.5 sec) | 11% (2.7 sec) | **119% (13.5 sec) → Push** | 78% |
+| mix | 12,385 | 51% | 1% (1.3 sec) | 27% (6.6 sec) | 10% (4.0 sec) | **112% (19.9 sec) → Push** | 74% |
+| tank | 4,948 | 49% | 0% (3.3 sec) | 23% (16.6 sec) | 6% (10.0 sec) | **109% (49.8 sec) → Push** | 72% |
+| dodge | 7,089 | 38% | 2% (2.3 sec) | 46% (11.6 sec) | 17% (7.0 sec) | **190% (34.8 sec) → Push** | **125% → Push again** |
 
-heal = ×1.52 ของ pool (Second Wind 20% + Lesser Mend 4%/วิ × 8 วิ) · boss ตั้งดาเมจที่ **×4** ของ mob PS (เหตุผลข้างล่างข้อ 2 + หัวข้อ 7)
+heal = ×1.52 of pool (Greater Heal 20% + Heal 4%/sec × 8 sec) · boss damage set at **×4** of mob PS (reason below item 2 + section 7).
 
-อ่านผล:
+Reading:
 
-1. **AFK ปลอดภัยจริงในทุก build** — กลุ่ม 5 กิน 23-46% ของ pool ไม่ push ใครเลยที่เลเวลตรง (และ 0-10% ที่โซนต่ำ) · นี่คือเลขที่ยืนยันสัญญาใน concept.md ไม่ใช่แค่ข้อความ
-2. **boss คือประตู active-play ไม่ใช่ประตู DPS** — ที่ดาเมจ boss ×3 มีแค่ dodge build ตัวเดียวที่ถูก push ส่วน glass 87% / mix 80% / tank 69% *ฆ่าได้ทั้งที่ยืนดู* → ขัดกับกติกาที่เขียนไว้ใน crafting.md/checks.md G5 ว่า "AFK ตี boss ไม่ได้" · ยกเป็น ×4 แล้วทุก build ถูก push ที่โซน 9 ถ้าไม่กด heal และกด heal แล้วผ่านสามจากสี่ (78/74/72%) · ตัวเลขนี้คือเหตุผลที่เลือก ×4 ไม่ใช่รสนิยม
-3. **dodge ล้วนแพ้ boss แม้จะมี heal (125%)** — pool เท่า glass แต่ยืดเวลาสู้ 2.6 เท่า ทางแก้มีอยู่ในเลขแล้ว: แบ่ง 4 ชิ้นให้ Vit แล้วจะลงมาเป็น ~97% ของ pool เมื่อมี heal (ที่ L90) · build "หลบหมด" จึงต้องกันช่องให้เลือด ไม่ใช่หลบล้วน 12 ชิ้น · เชื่อมกับ fork fast hit ใน checks.md กลุ่ม I
-4. **elite อ่อนเกินจริง ตัวเลขยืนยัน** — ได้แค่ 6-17% ของ pool ซึ่ง *ต่ำกว่ากลุ่ม 5 ทุก build* ทั้งที่เป็นเหตุการณ์พิเศษ · ยังเป็น fork ที่ให้ผู้เล่นตัดสิน (D12)
-5. **AoE เป็นทางเลือกแล้ว ไม่ใช่ของฟรี** — ภายใต้กติกาใหม่ (เพดาน 3 เป้า · mana ×1.5) กลุ่ม 5 ใช้ 3.75 วิ แทน 4.50 วิ และรับ 25% แทน 31% ซึ่งยังดีกว่า *แต่* ตัวเดียวจะช้าลง 2.5 เท่า และ boss ยาวขึ้น 2.5 เท่า = 312% ของ pool = push แน่นอน · รายละเอียดใน skill.md หัวข้อ AoE (ปิด D11 แล้ว)
+1. **AFK is truly safe in all builds** — groups of 5 cost 23-46% of pool and Push nobody at matching level (and 0-10% in lower zones) · this is the number confirming the concept.md promise, not just text.
+2. **Boss is an active-play gate, not a DPS gate** — at boss damage ×3 only the dodge build is pushed, while glass 87% / mix 80% / tank 69% *kill while idle* → conflicts with the rule stated in crafting.md/checks.md G5 that "AFK cannot kill bosses" · raised to ×4, all builds are pushed at zone 9 without heal, and with heal three of four pass (78/74/72%) · this number is why ×4 was chosen, not taste.
+3. **Pure dodge loses to bosses even with heal (125%)** — same pool as glass but fight lasts 2.6x longer. The fix is already in the numbers: split 4 items to Vit to drop to ~97% of pool with heal (at L90) · a "dodge everything" build must therefore reserve slots for blood, not pure 12-item dodge · links to the fast-hit fork in checks.md group I.
+4. **Elite is provably too weak** — only 6-17% of pool, *lower than groups of 5 in every build* despite being a special event · still a fork for player ruling (D12).
+5. **AoE is now a choice, not free** — under the new rule (Cap 3 targets · mana ×1.5) groups of 5 take 3.75 sec instead of 4.50 sec and take 25% instead of 31%, still better *but* single targets take 2.5x longer and bosses 2.5x longer = 312% of pool = certain Push · details in skill-pool.md AoE section (D11 closed).
 
-# 7. Boss — กติกาการต่อสู้ (วัดทุก build ทุกขอบโซน)
+# 7. Boss — Combat Rules (Measured For All Builds At All Zone Edges)
 
 ```
-HP = mob_HP(เลเวลโซน) × 15      ดาเมจ = mob_PS × 4      ตัวเดียวเสมอ      เกิดทุก 15 นาทีต่อโซน
-แพ้ = ถูก push → boss ถอยกลับ + เลือดเต็ม + จบ spawn นั้น (ต้องรอตัวถัดไป)
+HP = mob_HP(zone level) × 15      damage = mob_PS × 4      always single      spawns every 15 min per zone
+Loss = pushed → boss retreats + full HP + spawn ends (must wait for next spawn)
+Potions = suppressed by boss aura (farm.md) — bosses are won with casted heals only
 ```
 
-กติกา "แพ้แล้วสูญเสียด spawn" คือตัวที่ทำให้ตัวเลขข้างล่างมีความหมาย: ถ้ายอมให้ตีต่อได้เรื่อย ๆ boss จะเป็นแค่ mob ยาว ๆ เพราะ cost ของ push มีเพียง 12-19 วิ (ตารางคำนวณในหัวข้อ 4 · glass 19 วิ / tank 12 วิ) เมื่อเทียบกับรอบเกิด 900 วิ
+The "loss forfeits the spawn" rule is what gives the numbers below meaning: if continuous retries were allowed, bosses would be just long mobs because Push costs only 12-19 sec (calculated table in section 4 · glass 19 sec / tank 12 sec) against a 900 sec spawn cycle.
 
-**ทำไมดาเมจ boss เป็น ×4 ไม่ใช่ ×3** — ข้อนี้เป็นการเปลี่ยนกติกาตามหลักฐาน ไม่ใช่รสนิยม · ที่ ×3 มีแค่ dodge build ตัวเดียวที่ถูก push ที่โซน 9 ส่วน glass 87% / mix 80% / tank 69% *ฆ่า boss ได้ทั้งที่ยืนดู* ซึ่งขัดกับกติกาที่ประกาศไว้ทั้งไฟล์ว่า "AFK ตี boss ไม่ได้" (checks.md G5 · crafting.md) · ที่ ×4 ทุก build ถูก push ที่โซน 9 ถ้าไม่กด heal และกด heal แล้วผ่านสามจากสี่ · ประตูกีฬาจริงเกิดขึ้นที่ตัวเลขนี้
+**Why boss damage is ×4 not ×3** — this is a rule change by evidence, not taste · at ×3 only the dodge build was pushed at zone 9, while glass 87% / mix 80% / tank 69% *killed bosses while idle*, contradicting the announced rule across files that "AFK cannot kill bosses" (checks.md G5 · crafting.md) · at ×4 all builds are pushed at zone 9 without heal, and with heal three of four pass · the real gate happens at this number.
 
-ตารางทั้งหมดรันจาก `node tools/survival.js` (กติกาสนาม: มอนเข้าพร้อมกันสุด 3 ตัว · regen ทำงานระหว่างสู้ · single-target)
+All tables run from `node tools/survival.js` (field rules: max 3 mobs engage · regen works during combat · single-target).
 
-| โซน (เลเวล) | boss HP | build | เวลาตี | ไม่ heal | มี heal |
+| Zone (level) | boss HP | build | Fight time | No heal | With heal |
 |---|---|---|---|---|---|
-| 10 | 9,898 | glass | 2.0 วิ | 12% | 8% |
-| 10 | 9,898 | mix | 3.6 วิ | 4% | 2% |
-| 10 | 9,898 | tank | 23.3 วิ | 0% | 0% |
-| 10 | 9,898 | dodge | 12.1 วิ | 44% | 29% |
-| 30 | 31,158 | glass | 4.5 วิ | 27% | 18% |
-| 30 | 31,158 | mix | 7.8 วิ | 19% | 13% |
-| 30 | 31,158 | tank | 32.1 วิ | 0% | 0% |
-| 30 | 31,158 | dodge | 17.9 วิ | 65% | 43% |
-| 60 | 99,563 | glass | 9.2 วิ | 72% | 48% |
-| 60 | 99,563 | mix | 14.6 วิ | 64% | 42% |
-| 60 | 99,563 | tank | 44.6 วิ | 52% | 34% |
-| 60 | 99,563 | dodge | 27.6 วิ | **132% push** | 87% |
-| 90 | 283,516 | glass | 13.5 วิ | **125% push** | 82% |
-| 90 | 283,516 | mix | 20.2 วิ | **117% push** | 77% |
-| 90 | 283,516 | tank | 52.4 วิ | **114% push** | 75% |
-| 90 | 283,516 | dodge | 35.5 วิ | **203% push** | **133% push** |
+| 10 | 9,898 | glass | 2.0 sec | 12% | 8% |
+| 10 | 9,898 | mix | 3.6 sec | 4% | 2% |
+| 10 | 9,898 | tank | 23.3 sec | 0% | 0% |
+| 10 | 9,898 | dodge | 12.1 sec | 44% | 29% |
+| 30 | 31,158 | glass | 4.5 sec | 27% | 18% |
+| 30 | 31,158 | mix | 7.8 sec | 19% | 13% |
+| 30 | 31,158 | tank | 32.1 sec | 0% | 0% |
+| 30 | 31,158 | dodge | 17.9 sec | 65% | 43% |
+| 60 | 99,563 | glass | 9.2 sec | 72% | 48% |
+| 60 | 99,563 | mix | 14.6 sec | 64% | 42% |
+| 60 | 99,563 | tank | 44.6 sec | 52% | 34% |
+| 60 | 99,563 | dodge | 27.6 sec | **132% Push** | 87% |
+| 90 | 283,516 | glass | 13.5 sec | **125% Push** | 82% |
+| 90 | 283,516 | mix | 20.2 sec | **117% Push** | 77% |
+| 90 | 283,516 | tank | 52.4 sec | **114% Push** | 75% |
+| 90 | 283,516 | dodge | 35.5 sec | **203% Push** | **133% Push** |
 
-อ่านผล:
+Reading:
 
-1. **boss เป็นประตูของ "ความอึด + เวลา" ไม่ใช่ของ DPS** — glass ที่ DPS สูงสุดก็ถูก push ที่โซน 9 เช่นกัน เพราะ boss ยืดเป็น 13.5-52 วิ ซึ่งยาวพอที่ regen จะยังไม่ช่วยปิดช่อง · ตัวที่ *รอด* โดยไม่กด heal คือ tank ที่โซน 60 (52%) เท่านั้น
-2. **heal คือปุ่มที่ทำให้ boss ชนะได้** — ×1.52 ของ pool เปลี่ยน push ทั้งสามแถวของโซน 9 เป็น 82/77/75% · แปลว่าผู้เล่นที่ยืนดู (AFK) จะเสีย spawn ไปเปล่า ๆ ทุก 15 นาที = ตรงกับที่ crafting.md ตั้งใจให้ครึ่งหลังของคราฟเป็น active play
-3. **เส้นความยากเรียงชั้นชัด**: โซน 1-3 แทบไม่คุกคาม (0-65%) · โซน 60 เริ่มคัด (เฉพาะ dodge ที่แพ้) · โซน 90 คือกำแพง · จึงไม่ต้องลดตัวคูณ HP ของ boss ในโซนต้นอีกแล้ว (ข้อความเดิมที่เสนอให้ลด 15 → 10 ใช้ไม่ได้แล้ว · ตัวเลขเก่าตั้งบนดาเมจ ×3)
-4. **dodge ล้วนคือ build เดียวที่ชนะ boss ไม่ได้** — 203% / 133% แม้มี heal เพราะ pool เท่า glass แต่ยืดเวลา 2.6 เท่า · ทางแก้ที่มีหลักฐาน: แบ่ง 4 ชิ้นให้ Vit → ~97% ของ pool ที่โซน 9 (ยังฉิวเฉียดมาก) · โยงกับ fork "fast hit เป็น build ได้ไหม" ใน checks.md กลุ่ม I
-5. **tank ชนะแต่ช้า 3-4 เท่า** (52.4 วิ เทียบกับ 13.5 วิ) โดยเสีย pool น้อยที่สุด · trade-off ที่วัดได้จริง: เร็ว=ต้องกด heal, ช้า=ปลอดภัย
+1. **Boss is an endurance + time gate, not a DPS gate** — even max-DPS glass is pushed at zone 9 because bosses stretch to 13.5-52 sec, long enough that regen cannot yet close the gap · the only *survivor* without heal is tank at zone 60 (52%).
+2. **Heal is the button that wins bosses** — ×1.52 of pool turns all three zone 9 pushes into 82/77/75% · meaning idle (AFK) players forfeit the spawn every 15 min = matches crafting.md intent that the second half of crafting is active play.
+3. **Clear difficulty ladder**: zones 1-3 barely threaten (0-65%) · zone 60 starts filtering (only dodge loses) · zone 90 is the wall · so the boss HP multiplier in early zones no longer needs lowering (the old proposal to cut 15 → 10 no longer applies · old numbers were set on ×3 damage).
+4. **Pure dodge is the only build that cannot beat bosses** — 203% / 133% even with heal because same pool as glass but 2.6x longer · evidenced fix: split 4 items to Vit → ~97% of pool at zone 9 (still marginal) · links to the "can fast hit be a build" fork in checks.md group I.
+5. **Tank wins but 3-4x slower** (52.4 sec vs 13.5 sec) with the smallest pool cost · measured trade-off: fast = must press heal, slow = safe.
 
-# 8. ช่องที่ไฟล์นี้ยังปิดไม่ได้ (พร้อมเหตุผล)
+# 8. Gaps This File Still Cannot Close (With Reasons)
 
-- ~~HP/PS ระหว่างเลเวล~~ **ปิดแล้ว** — สูตร `min(12, ceil(L/2))` ชิ้น + ตารางเต็มข้างบน + โซน 9 โซนใน world.md
-- ~~จำนวนมอนต่อกลุ่มต่อโซน~~ **ปิดแล้วใน world.md** — 1-2 (โซน 1-3) · 2-3 (โซน 4-6) · 3-5 (โซน 7-9)
-- ~~kph เส้นฐาน~~ **ปิดแล้วใน loot.md** — 982 / 1,385 / 1,800 kills/ชม. ตามขั้นคุณภาพ · drops 135 / 255 / 421 ชิ้น/ชม.
-- **elite เท่านั้นที่ต้องตัดสิน** — elite อ่อนกว่ากลุ่ม 5 (17% เทียบกับ 46% ที่เลวที่สุดของ dodge) · ส่วน AoE ถูกแก้กติกาเป็นเพดาน 3 เป้า + mana ×1.5 แล้ว (skill.md · checks.md D11 ปิดแล้ว)
-- **XP ของ monster แต่ละชนิดไม่เท่ากันไหม** — ตอนนี้ `xp = 10 × เลเวล` เท่ากันทุกชนิด · ถ้า elite/boss ควรให้ xp เพิ่มต้องตัดสินตอนตั้งเส้นเวลาใหม่
+- ~~HP/PS between levels~~ **Closed** — formula `min(12, ceil(L/2))` items + full table above + 9 zones in world.md.
+- ~~Mobs per group per zone~~ **Closed in world.md** — 1-2 (zones 1-3) · 2-3 (zones 4-6) · 3-5 (zones 7-9).
+- ~~Base kph~~ **Closed in loot.md** — 980 / 1,385 / 1,800 kills/hour by Quality tier · drops 133 / 255 / 418 items/hour (`node tools/check.js --checks` reads both lines back out of loot.md).
+- **Only elite needs ruling** — elite is weaker than groups of 5 (17% vs 46% at worst for dodge) · AoE already fixed to Cap 3 targets + mana ×1.5 (skill-pool.md · checks.md D11 closed).
+- **Should XP differ per monster type** — currently `xp = 10 × level` for all types · if elite/boss should grant bonus XP it must be decided when setting the new time line.

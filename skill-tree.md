@@ -1,344 +1,127 @@
 # Skill Tree
 
 import glossary.md
-import skill.md
+import skill-pool.md
 import world.md
 import combat.md
+import skill-tree-impact.md
+import skill-tree-stream.md
+import skill-tree-control.md
+import skill-tree-keystone.md
 
-ออกแบบแล้วทั้งโครง · ไฟล์นี้คือข้อบังคับ + ตัวเลขที่ผูกกับฐานที่คำนวณไว้ (world.md / combat.md / formula.md)
-ข้อความ "ยังไม่ได้วาง tree จริง / ค้างอยู่" ทุกข้อในไฟล์นี้ถูกตอบแล้ว ยกเว้น 6 keystone ที่ระบุไว้ในหัวข้อ 8
+Fully designed · This file is the constraints + numbers tied to the calculated Base (world.md / combat.md / formula.md). Every "tree not yet laid / pending" note in this file is answered, except the 6 keystones noted in section 8
 
-# 1. งบจุด — 100
+Detail files:
+- skill-tree-impact.md — Impact branch, 41 minor in 5 limbs
+- skill-tree-stream.md — Stream branch, 41 minor in 5 limbs
+- skill-tree-control.md — Control branch, 40 minor in 5 limbs
+- skill-tree-keystone.md — 18 keystones + 9 exclusive pairs + pool accounting
 
-| คำถามเดิม | คำตอบ |
+# 1. Point budget — 100
+
+| Original question | Answer |
 |---|---|
-| 30 จุด (1 ต่อ 3 เลเวล) หรือ 90 (1 ต่อเลเวล)? | **100 จุด = 1 จุดต่อเลเวล 1-100** · ตัวเลข 90 ในไฟล์เดิมเขียนก่อนเราตั้งเพดานผู้เล่นที่ 100 |
-| ได้เมื่อไร | L10 = 10 จุด (0.5 ชม.) · L30 = 30 (3.1 ชม.) · L60 = 60 (12.6 ชม.) · L100 = 100 (40.2 ชม.) |
-| มีจุดจากแหล่งอื่นไหม | **ไม่มี** · boss ไม่ให้จุด แต่ปลดล็อก keystone บางตัว (หัวข้อ 6) · ถ้าให้จุดจาก boss ด้วย ผู้เล่นที่ AFK ตลอดจะเสียเปรียบสองชั้น |
+| 30 points (1 per 3 levels) or 90 (1 per level)? | **100 points = 1 point per level 1-100** · The 90 figure was written before the player Cap was set at 100 |
+| When granted | L10 = 10 points (0.5 hours) · L30 = 30 (3.1 hours) · L60 = 60 (12.6 hours) · L100 = 100 (40.2 hours) |
+| Points from other sources | **None** · Bosses grant no points, but unlock some keystones (section 6) · If bosses also granted points, full-AFK players would be doubly penalized |
 
-- 100 จุดใน 40 ชม. = **จุดใหม่ที่ต่อ 24 นาที** · นี่คือความถี่ที่ผู้เล่นมี "อะไรให้ตัดสินใจ" จาก tree · ถ้าช้ากว่านี้ tree จะกลายเป็นของประดับ
+- 100 points in 40 hours = **a new point every 24 minutes** · This is the frequency at which the player has "something to decide" from the tree · Any slower and the tree becomes decoration
 
-# 2. โครง 3 สาขา — ตัดสินด้วยตัวเลข ไม่ใช่อารมณ์
+# 2. 3-branch frame — decided by numbers, not feeling
 
-คำถามเดิมคือ "สาขาตามกลุ่มอาวุธหรือตามธาตุ" → **ไม่เอาทั้งสอง**
+The original question was "branches by weapon group or by Element" → **neither**
 
-| สาเหตุที่ปฏิเสธ | |
+| Rejected cause | |
 |---|---|
-| สาขาตามกลุ่มอาวุธ | ทุกชนิดอาวุธถูกตั้งให้ DPS เท่ากันแล้ว (`weapon_mult = 1.2/weapon_aspd` · พิสูจน์ 9,847 เท่ากัน 12 ชนิด) ถ้า tree แยกตามอาวุธจะมีอาวุธ "ดีกว่า" ซึ่งทำลายกติกาที่วางไว้ |
-| สาขาตามธาตุ | ธาตุคือ *tag* ของดาเมจ ไม่ใช่แกนการเล่น · และธาตุยังถูกจัดเป็น "ของแถม +21%" อยู่ (elements.md) ถ้าเอามาวางเป็นแกน tree จะล็อกทางเดินที่ยังไม่แน่นอน |
+| Branches by weapon group | All weapon types are already tuned to equal DPS (`weapon_mult = 1.2/weapon_aspd` · proven equal 9,847 across 12 types). If the tree split by weapon, some weapon would be "better", destroying the established rule |
+| Branches by Element | Element is a damage *tag*, not a play axis · And Elements are still staged as a "+21% bonus" (elements.md). Placing them as tree axes would lock paths that are not yet fixed |
 
-**สาขาจริง = แกนที่ผู้เล่นต่างกันอย่างวัดได้**
+**True branches = axes where players measurably differ**
 
-| สาขา | สิ่งที่มันเปลี่ยน | keystone ตัวอย่าง |
+| Branch | What it changes | Example keystone |
 |---|---|---|
-| **Impact** | ค่าต่อครั้งที่ตี · crit · proc ที่นับจำนวนครั้ง | Sonic Blow · Counter · Brute |
-| **Stream** | ค่าที่ไหลต่อวินาที · DoT · การสะสมชั้น | Burning Focus · Elemental Attunement · Overkill |
-| **Control** | เวลาของทุกฝ่าย · chill/stun/shock · aura · การกัน push | Rapid Fire · Flurry · Noble Phantasm |
+| **Impact** | Per-hit value · crit · count-based procs | Sonic Blow · Counter · Brute |
+| **Stream** | Per-second flow value · DoT · stack accumulation | Burning Focus · Elemental Attunement · Overkill |
+| **Control** | Timing of all sides · chill/stun/shock · aura · Push defense | Rapid Fire · Flurry · Noble Phantasm |
 
-- ทั้ง 3 สาขาไม่ผูกกับอาวุธหรือธาตุ → ผู้เล่น daggers หรือ staff ก็เข้าสาขาเดียวกันได้ (ตรงข้ามกับข้อ 3 เดิมที่ว่า tree ต้องไม่บังคับอาวุธ)
-- **สาขาไม่บล็อกกัน** · ทุกสาขาเชื่อมที่ hub กลาง · ผู้เล่นกระจายได้ แต่ระยะทางทำให้การกระโดดข้ามสาขาแพง (ดูหัวข้อ 4)
+- All 3 branches bind to neither weapon nor Element → dagger or staff players can enter the same branch (opposite of the old item 3 claiming the tree must not force weapons)
+- **Branches do not block each other** · All branches connect at the central hub · Players can spread, but distance makes jumping branches expensive (see section 4)
 
-# 3. งบพลังของ tree — ผูกกับ mob HP เพื่อไม่ให้ฐานเลื่อน
+# 3. Tree power budget — folded into mob HP so the Base does not shift
 
-นี่คือจุดสำคัญที่สุดของไฟล์นี้: **tree ที่ให้กำลังฟรีจะทำให้เส้นเวลาใน loot.md พัง** (kills/ชม. ตั้งบน TTK 1 วิ)
+This is the most important point of this file: **a tree granting free power breaks the timeline in loot.md** (kills/hour set on 1-sec TTK)
 
 ``
-keystone 1 ตัว                    ≈ +14% ของ build   (วัดจาก 12 ตัวเดิม: 5% ถึง 30% เฉลี่ย 14%)
-ทางที่ผู้เล่นทั่วไปเดิน (6 keystone + 82 minor) ≈ +85%
-mob_HP(L) = DPS_gear(L) × (1 + 0.0085 × L) × (1 + 0.0034 × L)   ← fold ทั้ง tree และ skill list เข้าสูตรเดิม
+keystone 1 unit                    ≈ +14% of build   (measured from 12 originals: 5% to 30%, mean 14%)
+Typical path (6 keystones + 82 minor) ≈ +85%
+mob_HP(L) = DPS_gear(L) × (1 + 0.0085 × L) × (1 + 0.0034 × L)   ← folds both tree and skill list into the same formula
 ``
 
-| เลเวล | 1 | 10 | 30 | 60 | 90 | 100 |
+| Level | 1 | 10 | 30 | 60 | 90 | 100 |
 |---|---|---|---|---|---|---|
-| ตัวคูณ tree | ×1.01 | ×1.09 | ×1.26 | ×1.51 | ×1.77 | **×1.85** |
-| mob HP (แทนค่าเดิม) | 121 | 682 | 2,289 | 7,992 | 18,901 | 22,016 |
-| mob ดาเมจ/วิ | 4 | 23 | 61 | 163 | 304 | 329 |
+| Tree multiplier | ×1.01 | ×1.09 | ×1.26 | ×1.51 | ×1.77 | **×1.85** |
+| mob HP (substituted) | 121 | 682 | 2,289 | 7,992 | 18,901 | 22,016 |
+| mob damage/sec | 4 | 23 | 61 | 163 | 304 | 329 |
 
-- **งบพลังของ tree แยกเป็นโหนดได้จริง (คำนวณย้อนกลับ)** — ตัวเลข +85% ไม่ได้ตั้งลอย แต่ equals **6 keystone × 14.2% = 85%** ซึ่งตรงกับค่าเฉลี่ยที่วัดจาก 12 passive เดิม (+14%) · ส่วน build เพอร์เฟก +110% = **6 keystone × 18.3%** ยังอยู่ในช่วงที่วัดได้ (5-30%) แปลว่า +110% มาจาก *การเลือก keystone ให้ตรง build* ไม่ใช่จากโหนดอื่น
-- **ผลที่บังคับตามมา: minor node 122 ตัวต้องงบ DPS = ศูนย์** — เอา 84% จาก keystone ออกจาก 85% เหลือ 1% ให้นับ 82 ตัว = ตัวละ 0.012% · จึงสรุปเป็นกติกาเขียนเนื้อหาได้ทันที: **minor ห้ามให้พลังตัวเลขล้วน** (ตรงกับการที่ข้อ 4 ห้าม `+5% Str`) เพราะ minor ตัวแรกที่ให้ +1% DPS จะดัน mob_HP ทั้งเส้นขึ้นตาม และงบที่ล็อกไว้ใน checks.md D1 พังทั้งชุด · มูลค่าจริงของ minor ต้องเป็น *ตัวเปิดใช้* (เช่น "ชั้น burn สูงสุด +1" · "chill หมดช้าลง 25%") ที่เปลี่ยนว่า keystone ไหนใช้ได้นับ ไม่ใช่เปลี่ยน DPS ตรง ๆ
-- **แถบความกว้างของ tree (เทียบเคียงแถบของ gear)**: คนที่ได้ keystone 4/5/6 ตัวตอนเลเวล 100 จะได้ตัวคูณ ×1.56 / ×1.70 / ×1.84 → TTK **1.19 / 1.09 / 1.01 วิ** บน mob HP เดิม · เส้นฐาน mob_HP ตั้งไว้ที่ 6 keystone (= ×1.85 · TTK 1 วิ) ดังนั้นคนที่เดินสายแคบ (keystone น้อย) ไม่ได้โดนลงโทษ แต่แค่ช้ากว่า ~19% · นี่คือตัวเลขเดียวกับที่ D3-D5 ใช้กับของ
-- TTK ยังเป็น 1 วิสำหรับ "คนที่ของและ tree พอดีเลเวล" · build เพอร์เฟก (ของ T1 + tree +110%) ฆ่าใน **0.79 วิ** · มือเปล่าเข้าโซนใหม่ 2-8 วิ
-- **ลำดับความสำคัญของแหล่งพลัง** ที่วัดได้: ของ ×5.6 (ไม่มีของ → ของเต็มขั้น) · tree ×1.85 · skill ×1.1-1.4 → ของยังเป็นแกนที่ 1 ตามที่ concept.md ขายไว้
-- ตาราง mob HP ใน world.md และ combat.md ถูกอัปเดตตามนี้แล้ว · ถ้าจะเปลี่ยนงบ tree ต้องไล่คูณกลับทั้งสองไฟล์
+- **Tree power budget is reverse-calculable into nodes** — the +85% is not set loosely but equals **6 keystones × 14.2% = 85%**, matching the mean measured from the 12 original passives (+14%) · The perfect-build +110% = **6 keystones × 18.3%** still sits inside the measured range (5-30%), meaning +110% comes from *picking keystones that fit the build*, not from other nodes
+- **Forced result: 122 minor nodes must have zero DPS budget** — removing 84% for keystones from 85% leaves 1% for 82 nodes = 0.012% each · This immediately becomes a content-writing rule: **minors must not grant pure numbers** (matching section 4 banning `+5% Str`), because the first minor granting +1% DPS would push the whole mob_HP line up and break the full budget locked in checks.md D1 · True minor value must be an *enabler* (e.g. "maximum burn stacks +1" · "chill expires 25% slower") that changes which keystone is usable, not direct DPS
+- **Tree width band (mirroring the gear band)**: players with 4/5/6 keystones at level 100 get multipliers ×1.56 / ×1.70 / ×1.84 → TTK **1.19 / 1.09 / 1.01 sec** on the same mob HP · The mob_HP baseline is set at 6 keystones (= ×1.85 · 1-sec TTK), so narrow-path players are not punished, only ~19% slower · This is the same figure D3-D5 use for gear
+- TTK remains 1 sec for "gear and tree on-level" players · Perfect builds (T1 gear + +110% tree) kill in **0.79 sec** · Empty-handed into a new zone: 2-8 sec
+- **Measured power-source ranking**: gear ×5.6 (no gear → full-step gear) · tree ×1.85 · skill ×1.1-1.4 → gear is still core #1 as concept.md sells
+- The mob-HP tables in world.md and combat.md are already updated accordingly · Changing the tree budget requires re-multiplying both files
 
-# 4. ระยะทางคือราคา
+# 4. Distance is price
 
-- จาก hub แต่ละสาขาเป็นเส้นกิ่ง · **minor node = 1 จุด · keystone = 3 จุด**
-- กว่าจะถึง keystone ชั้นในต้องผ่าน minor 8-12 ตัว → keystone ตัวที่ 6 ในอีกสาขาจะแพงมากโดยธรรมชาติ (ไม่ต้องใส่กติกาห้าม)
-- โหนดหนึ่งตัวอ้างถึง *กติกา* ไม่ใช่ตัวเลข: `+5% Str` / `+10 HP` **ห้ามมี** (ข้อบังคับเดิมข้อ 2 ยังอยู่) · minor ที่ดูเป็นตัวเลขต้องผูกกับกติกา เช่น "ชั้น burn สูงสุด +1" หรือ "chill บนเป้าหมายหมดช้าลง 25%" ไม่ใช่ "aspd +3%"
+- From the hub each branch is a limb · **minor node = 1 point · keystone = 3 points**
+- Reaching an inner keystone requires passing 8-12 minors → the 6th keystone in another branch is naturally very expensive (no ban rule needed)
+- One node references a *rule*, not a number: `+5% Str` / `+10 HP` **are banned** (original constraint 2 still holds) · Numeric-looking minors must tie to a rule, e.g. "maximum burn stacks +1" or "chill on target expires 25% slower", not "aspd +3%"
 
-# 4b. ผัง tree ที่จัดแล้ว (122 minor + 18 keystone)
+# 4b. Laid-out tree (122 minor + 18 keystone)
 
-- **hub กลาง → 3 กิ่งใหญ่ (Impact · Stream · Control) → กิ่งละ 5 สาขา = 15 สาขา** · ทุกโหนดอยู่ใน 1 ใน 15 สาขานี้ ไม่มีโหนดกลาง
-- **ชั้น = ระยะจาก hub** · สาขาแต่ละ branch เริ่มที่ชั้น 1 ติดกับ root ของ branch ตัวเอง · ค่าใช้ minor = 1 จุด · keystone = 3 จุด
-- **keystone 6 ตัวต่อ branch (18 รวม) วางที่ปลาย 2 สาขาของ branch นั้น** → กว่าจะถึงต้องผ่าน minor 8-12 ตัวตามที่เคยตั้งไว้ (หัวข้อ 4) และคู่ exclusive ทั้ง 9 คู่ถูกวางคนละปลายของ pair เสมอ (ไม่มีทางได้ทั้งคู่โดยไม่สละ)
-- **เลขที่ตรวจแล้ว**: ทางทั่วไป = 82 minor + 6 keystone = 82 + 18 = **100 จุดพอดี** ที่เลเวล 100 (1 จุด/เลเวล) · ระยะเฉลี่ยถึง keystone ปลายกิ่ง = 10.4 จุด
-- **งบพลัง**: minor ทุกตัว *ไม่แจกตัวเลขดิบ* (ไม่มี \`+5% Str\` · ไม่มี \`+10 HP\`) — ตามที่ D15 บังคับ · เครื่องมือ `node tools/tree.js --checks` ตรวจข้อนี้ทุกโหนด และตรวจว่าทุกโหนดอ้างถึง skill หรือ keystone ที่มีจริงใน roster 51 ตัว
-- **โหนดที่ "ว่าง" สำหรับบาง build ถือว่ารับได้** (เช่นโหนดที่ชน cap aspd) · เป้าคือ 15 สาขา × 8-10 โหนดให้เลือก ไม่ใช่ทุกโหนดต้องดีกับทุก build · ถ้าโหนดไหนว่างสำหรับทุก build = บั๊กของโหนดนั้น ให้แก้ที่ `tools/tree.js` แล้วรันใหม่
+- **Central hub → 3 large limbs (Impact · Stream · Control) → 5 sub-branches each = 15 branches** · Every node sits in one of these 15 branches; there are no middle nodes
+- **Tier = distance from hub** · Each branch starts at Tier 1 attached to its own branch root · Minor cost = 1 point · Keystone = 3 points
+- **6 keystones per branch (18 total) sit at the ends of 2 sub-branches of that branch** → reaching them requires passing 8-12 minors as set (section 4), and all 9 exclusive pairs are always placed at opposite ends of a pair (never obtainable together without sacrifice)
+- **Verified numbers**: typical path = 82 minor + 6 keystone = 82 + 18 = **exactly 100 points** at level 100 (1 point/level) · Average distance to an end-limb keystone = 10.4 points
+- **Power budget**: all minors grant *no raw numbers* (no `+5% Str` · no `+10 HP`) — as D15 enforces · The `node tools/tree.js --checks` tool checks every node for this and verifies every node references a skill or keystone that truly exists in the current skill roster (43 units)
+- **Nodes "empty" for some builds are acceptable** (e.g. nodes hitting the aspd Cap) · The goal is 15 branches × 8-10 choices, not every node good for every build · If a node is empty for all builds = a bug in that node; fix `tools/tree.js` and re-run
 
-### สาขา Impact — 41 minor ใน 5 กิ่ง
+Branch details (moved, no data changed):
+- Impact branch — 41 minor in 5 limbs → skill-tree-impact.md
+- Stream branch — 41 minor in 5 limbs → skill-tree-stream.md
+- Control branch — 40 minor in 5 limbs → skill-tree-control.md
+- Keystones — 12 original + 6 new + 9 exclusive pairs → skill-tree-keystone.md
 
-**กิ่ง Hit Counting** (10 โหนด · ชั้น 1 = ติด hub, ชั้น 10 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Second Contact | การ hit ครั้งแรกของเป้าหมายไม่นับเป็นชั้นสำหรับ Brute | Brute |
-| 2 | Even Hand | ทุก 4 hit บนเป้าหมายเดียวกัน = 1 hit แบบนับสองเท่า (proc ที่นับครั้งได้ 2) | Sonic Blow |
-| 3 | Open Wound | เป้าหมายที่ HP เต็มถูกรวมในคิวการนับ hit เดียวกับตัวอื่น | Brute |
-| 4 | Chain of Blows | hit จาก skill instance แรกของรอบนับเป็น hit ส่งท้ายรอบก่อนหน้า | Sonic Blow |
-| 5 | Steady Tempo | ถ้า hit ห่างกันไม่เกิน 1 วิ ให้นับเป็น hit สั้น (ป้อน counter เร็วขึ้น) | Flurry |
-| 6 | Rebound Count | การถูกหลบ 1 ครั้งนับเป็น 2 hit สำหรับตัวนับที่ยังไม่รีเซ็ต | Counter |
-| 7 | Debt Paid | เมื่อตัวนับครบ 5 ให้รีเซ็ตเฉพาะครึ่งหนึ่ง ไม่ใช่ทั้งหมด | Sonic Blow |
-| 8 | Twin Mark | hit ที่เกิดพร้อมกันบน 2 เป้าหมายนับรวมเป็นก้อนเดียว | Whirlwind |
-| 9 | Cold Reading | ถ้าเป้าหมาย dodge ไม่สำเร็จ 2 ครั้งติด ตัวนับ proc เดินเร็วขึ้นหนึ่งขั้น | Sonic Blow |
-| 10 | Last Word | hit สุดท้ายก่อนเป้าหมายตายนับเป็น 2 ครั้ง | Overkill |
+**Parsed shape** (generated by `node tools/tree.js` from the node tables + `tools/data/tree.json`):
 
-**กิ่ง Crit Conditions** (9 โหนด · ชั้น 1 = ติด hub, ชั้น 9 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Read the Guard | crit ใส่เป้าหมายที่ติด curse ใด ๆ ได้เกิน cap crit chance ปกติ 5% | Jinx |
-| 2 | Cold Blooded | เป้าหมายที่ถูก chill ถือนับเป็นเป้าหมายที่ HP ต่ำกว่าครึ่ง | Shatter |
-| 3 | Patient Hunter | ถ้าไม่ crit 3 ครั้งติด ครั้งถัดไปนับ crit chance สองเท่า | Headshot |
-| 4 | Heavy Entry | hit แรกหลังเข้ากลุ่มใหม่การันตี crit | Execute |
-| 5 | Split Attention | crit บนเป้าหมายที่มีหลายตัวในระยะ นับเป็น crit สองครั้งต่อตัวนับ | Sonic Blow |
-| 6 | Fool Errant | ถ้าเป้าหมายถูกหลบสำเร็จ crit ครั้งถัดไปของผู้เล่นแรงขึ้นหนึ่งขั้น | Counter |
-| 7 | Clean Kill | crit ที่ทำให้เป้าหมายตายทันที ไม่รีเซ็ตตัวนับของ build | Brute |
-| 8 | Second Sight | crit chance ของ skill instance แรกในแต่ละรอบนับเพิ่มจาก alignment | Focus |
-| 9 | Margin Call | ถ้า crit chance เกิน 45% ให้ส่วนเกินครึ่งหนึ่งย้ายไป crit damage แทน | Reaver's Edge |
+<!-- BEGIN GENERATED:tree-summary -->
+| Branch | File | Minor declared | Minor parsed | Limbs parsed | Keystones | Dangling refs |
+|---|---|---|---|---|---|---|
+| Impact | `skill-tree-impact.md` | 41 | 41 | 5 | 6 | 6 |
+| Stream | `skill-tree-stream.md` | 41 | 41 | 5 | 6 | 3 |
+| Control | `skill-tree-control.md` | 40 | 40 | 5 | 6 | 14 |
+| **total** | 3 files | **122** | **122** | **15** | **18** | **23** |
 
-**กิ่ง Single Target** (7 โหนด · ชั้น 1 = ติด hub, ชั้น 7 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Duelist Poise | ถ้าเป้าหมายตัวเดียวในระยะ น้ำหนักที่ถือไม่คิดภาษี (ครึ่งหนึ่ง) | Ancestral Pace |
-| 2 | Narrow Focus | skill ที่ระบุ 1/1 ในคอลัมน์ตัว/ฮิต ได้ instance เพิ่ม 1 ครั้ง | Headshot |
-| 3 | Settled Stance | อยู่กับที่เกิน 3 วิ การถูก dodge ของฝั่งผู้เล่นไม่มีผลต่อ hit chance ของเรา | Piercing Shot |
-| 4 | Weight of One | ดาเมจของ hit แรกต่อเป้าหมายใหม่เพิ่มขึ้นหนึ่งขั้นตาม tier ที่ซื้อ | Weighted Edge |
-| 5 | No Waste | ดาเมจเกิน (overkill) ของการตีเป้าหมายเดียวไม่หายไป แต่แปลงเป็นชั้น mark | Overkill |
-| 6 | Locked In | ระหว่างตีเป้าหมายเดิมเกิน 5 วิ ผลของ chill บนเราถูกลดครึ่ง | Iron Will |
-| 7 | One Cut Deep | ทุกครั้งที่เป้าหมายหลุดจากสถานะ immobilise ให้ hit ถัดไปนับเป็น 2 instance | Riposte |
+> **23 dangling "Enables" references** — a node points at a skill that no longer exists in `skills.json` (mostly the cleared buff set). `checks.md` D19 stays FAIL until these nodes are rewritten. Full list: Impact · Second Sight → Focus · Impact · Margin Call → Reaver's Edge · Impact · Duelist Poise → Ancestral Pace · Impact · Locked In → Iron Will · Impact · Read and Reply → Guardian's Veil · Impact · Blood Price → Blood Pact · Stream · Slow Burn Debt → Bloodletting · Stream · Tick Counter → Bloodletting · Stream · Early Harvest → Bloodletting · Control · Turn Aside → Guardian's Veil · Control · Stalled → Focus · Control · Hourglass → Battle Orders · Control · Borrowed Second → War Cry · Control · Stagger Train → Focus · Control · Kept Warm → Stone Skin · Control · Stacked Orders → Battle Orders · Control · Slow Ticking Patience → War Cry · Control · One for the Road → Blood Pact · Control · Second Helpings → Stone Skin · Control · Lean Rotation → Deep Breath …
+<!-- END GENERATED:tree-summary -->
 
-**กิ่ง Finish Thresholds** (8 โหนด · ชั้น 1 = ติด hub, ชั้น 8 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Low Tide | เกณฑ์ "HP ต่ำ" ของทุกกติกาขยับจาก 20% เป็น 25% | Execute |
-| 2 | Counting Coup | ถ้าเป้าหมายตายด้วย skill ที่ไม่ใช่การตีสุดท้าย ให้ตัวนับ Brute ไม่รีเซ็ต | Brute |
-| 3 | Gravedancer | เป้าหมายที่ HP ต่ำกว่าเกณฑ์ถูกนับเป็นเป้าหมายที่ติด curse ด้วย | Mark of the Executioner |
-| 4 | Clean Finish | การฆ่าภายในครั้งเดียว (ไม่ผ่านเกณฑ์ HP ต่ำ) ให้โบนัสเท่ากับการใช้ Finisher | Finishing Blow |
-| 5 | Borrowed Time | ถ้าเราถูก push ในศึกที่เป้าหมาย HP ต่ำกว่าเกณฑ์ ให้ cd ของ skill นั้นลดลง 25% | Deep Pockets |
-| 6 | Second Last Chance | Last Stand ทำงานที่ HP 40% แทน 30% | Last Stand |
-| 7 | Final Word | instance สุดท้ายของ multi-hit skill นับเกณฑ์ HP ของเป้าหมายก่อนการกด ไม่ใช่หลัง | Arrow Shower |
-| 8 | Reserve Stroke | ถ้า skill ถูกระงับเพราะ mana หมด ให้ hit ถัดไปของ auto นับเป็น instance ของ skill นั้น 1 ครั้ง | Execute |
+# 6. Keystones and bosses (exit from "short content")
 
-**กิ่ง Retaliation** (7 โหนด · ชั้น 1 = ติด hub, ชั้น 7 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Thorn Mail | ผลสะท้อนของ Noble Phantasm นับเป็น hit สำหรับ proc ต่อ hit | Noble Phantasm |
-| 2 | Read and Reply | ถ้าถูกโจมตี 2 ครั้งติดโดยไม่ dodge ให้ dodge ครั้งถัดไปการันตี | Guardian's Veil |
-| 3 | Hard Shell | ภาษีน้ำหนักที่ถูกตัด ให้เปลี่ยนเป็นดาเมจสะท้อนครึ่งหนึ่งแทน | Anchor |
-| 4 | Provoking Stance | เป้าหมายที่ hit เราครั้งแรก ถูกนับว่าติด curse "สนใจเรา" (ป้อน Jinx) | Jinx |
-| 5 | Even Score | dodge ที่สำเร็จลดดาเมจขาเข้าของครั้งถัดไปหนึ่งขั้นแทนที่จะไม่เกิดผล | Counter |
-| 6 | Blood Price | เมื่อ HP ต่ำกว่าเกณฑ์ ผลของ Blood Pact ย้ายไปทำงานกับ hit ที่สะท้อน | Blood Pact |
-| 7 | Still Standing | ถ้าไม่ถูก push ทั้งศึก ผล EHP ของ Anchor +50% ของตัวมันเอง | Anchor |
+- End-limb keystones of every branch (3 units) **require beating the zone 3/6/9 boss first** before purchase unlocks
+- Result: bosses grant no extra points (no double-penalty for AFK) but bosses gate maximum tree power · Matches concept.md stating bosses are where rewards unobtainable from grinding live
+- Key point: **losing to a boss = that spawn ends** (on Push the boss retreats at full health, next one must wait 15 minutes · combat.md section 7) → a locked keystone becomes the question "does my build counter enough", not "have I farmed enough"
 
-### สาขา Stream — 41 minor ใน 5 กิ่ง
-
-**กิ่ง Stack Caps** (9 โหนด · ชั้น 1 = ติด hub, ชั้น 9 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Ember Hold | ชั้น burn สูงสุด 4 แทน 3 | Flame Lash |
-| 2 | Deep Rot | ชั้น poison สูงสุด 12 แทน 10 | Toxic Spray |
-| 3 | Label Ledger | ชั้น mark ของเป้าหมายนับรวมกับ curse ที่ติดอยู่ | Pandemonium |
-| 4 | Kindling Layer | เป้าหมายที่มี burn อยู่แล้วได้ชั้นแรกของธาตุอื่นเร็วขึ้น 1 ขั้น | Elemental Crossfeed |
-| 5 | Full Book | ถ้าชั้นของธาตุใดเต็ม ส่วนเกินแปลงเป็นชั้น chaos ครึ่งหนึ่ง | Void Lance |
-| 6 | Overstuffed | ทุก 3 ชั้นที่เกิน cap ให้ลด 1 ชั้นลงเป็น 2 แทนการหายไป | Burning Focus |
-| 7 | Slow Ledger | ชั้นที่ไม่เต็มจะหมดช้าลงหนึ่งในสาม | Venom Bind |
-| 8 | Ledger of Ash |  burn ที่หมดเองบนเป้าหมายที่ตายแล้ว นับเป็น 1 ชั้นบนตัวที่ใกล้ที่สุด | Spreading Burn |
-| 9 | Twin Brands |  burn และ poison บนเป้าหมายเดียวกันนับเป็น "สองธาตุ" ทันที | Elemental Crossfeed |
-
-**กิ่ง Duration** (9 โหนด · ชั้น 1 = ติด hub, ชั้น 9 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Long Fuse | เวลาของ burn บนเป้าหมายที่ immobilise อยู่ ไม่เดิน | Burning Focus |
-| 2 | Spreading Warmth | เป้าหมายที่ตายด้วย DoT ส่งต่อ 25% ของเวลาที่เหลือให้ตัวข้างเคียง | Spreading Burn |
-| 3 | Cold Keeps | chill บน boss ลดลงครึ่งเดียวของเวลาที่ควรหมด | Frost Nova |
-| 4 | Slow Burn Debt | ทุกครั้งที่ DoT tick หนึ่งชั้น ให้บวกเวลาคืน 0.2 วิ | Bloodletting |
-| 5 | Preserve Rot | poison ไม่หมดระหว่างที่ผู้เล่นถูก push | Venom Bind |
-| 6 | Marked Forever | curse จาก Mark of the Executioner ค้างอยู่แม้เป้าหมายตาย (นับเป็น 1 ชั้น mark ของโซน) | Pandemonium |
-| 7 | Ember Bank | time ที่เหลือของ burn บนเป้าหมายที่ตายถูกเก็บไว้ใช้กับตัวถัดไปใน 4 วิ | Flame Lash |
-| 8 | Standing Chill | chill ไม่หายเมื่อเป้าหมายถูก shatter แต่ลดเหลือ 1 ขั้น | Shatter |
-| 9 | Late Reckoning | instance ของ DoT ที่เกินเพดานชั้นจะต่ออายุแทนการถูกทิ้ง | Burning Focus |
-
-**กิ่ง Spread** (7 โหนด · ชั้น 1 = ติด hub, ชั้น 7 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Carry the Torch | การ hit เป้าหมายที่ติด burn จะส่ง 1 ชั้นไปยังตัวที่อยู่ไกลสุดในกลุ่ม | Spreading Burn |
-| 2 | Even Spread | AoE ที่โดนไม่ครบ 3 ตัว ส่งส่วนต่างไปยังตัวที่ติดอยู่แทน | Volley |
-| 3 | Second Hand | curse ที่ติดอยู่บนศพยังนับเป็น "มีชีวิต" สำหรับกติกาส่งต่อ | Pandemonium |
-| 4 | Ring of Marks | เป้าหมายที่อยู่ถัดจากตัวที่ DoT tick ไป 1 ช่องก็ติดชั้นด้วย (1 ชั้นเท่านั้น) | Chain Spark |
-| 5 | Shared Fate | ถ้าเป้าหมาย 2 ตัวในกลุ่มมีธาตุเดียวกัน ให้ชั้นรวมกันไม่เกิน cap รวม | Elemental Crossfeed |
-| 6 | Leaky Chains |  shock ที่เกิดจากการ hit ต่อเนื่องส่ง 1 instance ไปยังตัวข้างเคียง | Chain Spark |
-| 7 | Crowd Control | กลุ่มที่โตกว่า 3 ถูกนับว่ามี 3 ตัวสำหรับ AoE (ทำให้คำอื่นทำงาน) | Whirlwind |
-
-**กิ่ง Elemental Gating** (9 โหนด · ชั้น 1 = ติด hub, ชั้น 9 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Tuned Rod | ธาตุที่ยืนยันอยู่แล้วนับ alignment จาก Dex สองเท่าเฉพาะธาตุนั้น | Elemental Attunement |
-| 2 | Two Tongues | ถ้ามีสองธาตุในชุด ให้ gate ของธาตุรองแรงขึ้นหนึ่งขั้น | Elemental Crossfeed |
-| 3 | Untethered |  Void Lance ไม่ต้องสุ่ม hit_chance เมื่อเป้าหมายติด curse ธาตุอื่น | Void Lance |
-| 4 | Cold Reception | res ที่ถูกเจาะด้วย Sunder นับเป็นติด status "เปิดช่อง" (ป้อน Shatter) | Sunder |
-| 5 | Spark Conductor | เป้าหมายที่ติด shock ถือนับเป็นเป้าหมายที่ wet สำหรับกติกาธาตุอื่น | Chain Spark |
-| 6 | Rot Contract | poison ที่ครบ 6 ชั้นทำให้เป้าหมายรับ res ลดหนึ่งขั้นจนกว่าจะหมด | Toxic Spray |
-| 7 | Ash Sign |  burn ที่หมดเอง (ไม่ถูก dispel) ทิ้ง mark 1 ชั้น | Flame Lash |
-| 8 | Balance Keeper | ถ้า res ของธาตุหนึ่งสูงกว่า 60% ให้ส่วนเกินย้ายไปธาตุที่ต่ำสุดในกลุ่ม | Aura of Frost |
-| 9 | Two Key Turn | ถ้าเป้าหมายติด curse สองชนิดพร้อมกัน gate ธาตุรองนับเต็มหนึ่งขั้น | Elemental Crossfeed |
-
-**กิ่ง Tick Rules** (7 โหนด · ชั้น 1 = ติด hub, ชั้น 7 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Tick Counter |  DoT tick ทุก 8 ครั้งนับเป็น 1 hit สำหรับ proc ที่นับครั้ง (น้อยแต่ชัด) | Bloodletting |
-| 2 | Early Harvest |  Bloodletting ทำได้ 2 ครั้งต่อการกด แทน 1 | Bloodletting |
-| 3 | Tick Debt | การกด DoT ใหม่บนเป้าหมายที่ชั้นเต็ม ทำให้ tick ถัดไปเกิดสองครั้ง | Toxic Spray |
-| 4 | Slow Release |  DoT ของเป้าหมายที่ตายก่อนหมดเวลา กระจายให้ตัวอื่นตามเวลาที่เหลือ | Spreading Burn |
-| 5 | Double Dip | ถ้าเป้าหมายมี DoT สองธาตุ tick ถัดไปของแต่ละธาตุเกิดพร้อมกัน | Elemental Crossfeed |
-| 6 | Idle Burn | DoT ยังเดินต่อ 1 วิหลังเป้าหมายตาย (นับเป็นชั้นของตัวถัดไป) | Burning Focus |
-| 7 | Quiet Rot |  DoT ไม่ทำให้เป้าหมายหลุดจาก stealth ของกติกา "ตัวแรก" ในกลุ่ม | Puncture |
-
-### สาขา Control — 40 minor ใน 5 กิ่ง
-
-**กิ่ง Time of Others** (9 โหนด · ชั้น 1 = ติด hub, ชั้น 9 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Deep Frost | chill ลด aspd ของผู้เล่นเพียง 5% (จาก 10%) | Aura of Frost |
-| 2 | Slow Hands | เป้าหมายที่ติด chill ถูกรวมในคิวการตีของเราช้าลง 1 ช่อง | Frost Nova |
-| 3 | Static Leash |  shock ที่เกิดจากการ hit ติดกัน 3 ครั้ง กินเวลา 2 วิ แทน 1 | Chain Spark |
-| 4 | Cold Debts | ถ้า boss ถูก chill ครบ 3 ครั้ง ให้ skill ที่ cd เหลือ 1 วิ ลดลง 1 วิ | Deep Pockets |
-| 5 | Turn Aside | dodge ที่สำเร็จทำให้เป้าหมายเสียจังหวะการตี 1 ครั้ง | Guardian's Veil |
-| 6 | Stalled | เป้าหมายที่ stun ไม่ได้ (boss) จะถูกนับว่าติด "chill หนัก" แทน | Focus |
-| 7 | Hourglass | ทุก 30 วิ ของศึกเดียวกัน ให้ cd ของ skill ทั้งหมดลดลง 1 วิ ครั้งเดียว | Battle Orders |
-| 8 | Second Breath | buff ที่ถูกกดตอนถูก push นับเป็นการกดที่ไม่กิน cd ของรอบนั้น | Second Wind |
-| 9 | Borrowed Second | ถ้าเป้าหมายตายก่อนตีเรา การตีนั้นกลายเป็นเวลาเพิ่มให้ buff ที่เหลือ 0.5 วิ | War Cry |
-
-**กิ่ง Stun and Alignment** (7 โหนด · ชั้น 1 = ติด hub, ชั้น 7 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Stagger Train | stun ที่เกิดจาก alignment นับเป็นการ hit (ป้อน proc) แม้ไม่มีความเสียหาย | Focus |
-| 2 | Heavy Ledger | เป้าหมายที่ถูก stun ภายใน 10 วิที่ผ่านมา ถูกนับว่าติด curse หนึ่งขั้น | Jinx |
-| 3 | Clean Line | ถ้า alignment ถึง 45% ให้การ stun ครั้งถัดไปกินเวลา 2 เท่า (stun ยังไม่เกิน cap) | Elemental Break |
-| 4 | Off Balance | เป้าหมายที่ติด curse ใด ๆ นับ dodge chance ของเราลดลงสำหรับตัวมันเอง | Riposte |
-| 5 | Chain of Slows | stun ที่สองบนเป้าหมายเดิมภายใน 8 วิ ลด aspd ของมันแทน (ไม่รีเซ็ตเวลา) | Cripple |
-| 6 | Guard Breaker |  elemental res ที่ถูกเจาะ 1 ครั้ง ทำให้ alignment ครั้งถัดไปนับเต็ม | Void Lance |
-| 7 | Patient Pressure | ทุกครั้งที่เป้าหมายหลุดจาก stun ให้เพิ่มชั้น mark 1 | Mark of the Executioner |
-
-**กิ่ง Aura Economy** (7 โหนด · ชั้น 1 = ติด hub, ชั้น 7 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Lean Field | aura ตัวแรกของลิสต์ใช้ drain ลดลงหนึ่งในสี่ | Aura of Clarity |
-| 2 | Priority Line | ถ้า mana ต่ำกว่า 25% ให้ aura ตัวบนสุดไม่ดับ (กัน aura สำคัญหลุด) | Aura of Dread |
-| 3 | Shared Load |  aura สองตัวที่กลุ่มอาวุธเดียวกัน รวม drain เป็นก้อนเดียว ลด 15% | Aura of Might |
-| 4 | Frost Reservoir | ผล chill ของ Aura of Frost ค้าง 2 วิหลังปิด aura | Aura of Frost |
-| 5 | Dread Radius | รัศมีของ Aura of Dread กว้างขึ้นจนเท่ากับ AoE ปกติ (3 ตัว) | Aura of Dread |
-| 6 | Second Wind of Mana | เมื่อ Deep Breath ทำงาน aura ทั้งหมดไม่ดับแม้ mana ต่ำ | Deep Breath |
-| 7 | Clear Head | ถ้าปิด aura เอง (ไม่ดับเพราะ mana) ให้ skill ตัวถัดไปในลิสต์ใช้ mana ลด 10% | Aura of Clarity |
-
-**กิ่ง Buff Economy** (8 โหนด · ชั้น 1 = ติด hub, ชั้น 8 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Kept Warm | buff ที่หมดเวลาขณะถูก push จะเริ่มนับใหม่แทนการหายไป | Stone Skin |
-| 2 | Effort Saved | การกดซ้ำ buff ที่ยังไม่หมดไม่กิน mana (นับเป็นการต่อเวลา 3 วิ) | Deep Pockets |
-| 3 | Stacked Orders | Battle Orders กับ Flurry ทำงานพร้อมกันได้โดยผลรวมไม่เกิน cap CDR | Battle Orders |
-| 4 | Slow Ticking Patience | buff ทุกตัวในลิสต์ได้ +2 วิ ต่อบuff ที่มีเวลาเหลือต่ำกว่า 4 วิ | War Cry |
-| 5 | One for the Road | ถ้า buff หมดระหว่างการตี ให้ผลของมันต่ออีก 1 instance | Blood Pact |
-| 6 | Second Helpings |  buff ที่กดซ้ำก่อนหมด 4 วิ นับเป็นการกดที่ไม่กิน cd | Stone Skin |
-| 7 | Lean Rotation | ถ้าลิสต์มี buff เกิน 3 ตัว ให้ตัวที่ 4 เป็นต้นไปใช้ mana ลดครึ่งหนึ่ง | Deep Breath |
-| 8 | Held Line |  Iron Will นับเป้าหมายที่ติด curse เป็น "กันอยู่แล้ว" ไม่ต้องกดซ้ำ | Iron Will |
-
-**กิ่ง Mana and Queue** (9 โหนด · ชั้น 1 = ติด hub, ชั้น 9 = ปลายกิ่ง)
-| ชั้น | โหนด | กติกาที่เปลี่ยน | เปิดใช้ |
-|---|---|---|---|
-| 1 | Deep Well | pool mana นับ Vit x 1 เป็น mana ด้วย (Vit จึงมีงานนอกเหนือจาก HP) | Stone Skin |
-| 2 | Charging Order | skill ที่ cd ครบแล้วแต่ mana ไม่พอ จะชาร์จ mana ให้ก่อนตัวอื่นในลิสต์ | Aura of Clarity |
-| 3 | Cheap Shots | Piercing Shot และ skill ที่ 1/1 ทั้งหมดใช้ mana ลด 15% | Cheap Casting |
-| 4 | Queue of Two | อนุญาตให้ skill สองตัวมี cd พร้อมกันโดยไม่กดยังไม่กด (กันการเปลือง cd) | Flurry |
-| 5 | Cast Reserve | เหลือ mana อย่างน้อย 12% ไว้เสมอเพื่อ heal; เกินนั้นใช้หมดได้ | Lesser Mend |
-| 6 | Spent Wisely | ถ้า skill ที่กดไปถูก dodge ทั้งหมด ให้คืน mana ครึ่งหนึ่ง | Cunning |
-| 7 | Idle Hands | auto hit ที่ไม่ crit ให้คืน mana 0.3% ของ pool | Deep Breath |
-| 8 | Short Fuse |  Cunning ทำงานที่ 30% mana แทน 25% แต่ bonus เหลือ 20% | Cunning |
-| 9 | Open Queue | ถ้า skill บนสุดของลิสต์ติด cd อยู่ ให้ตัวที่สองมีโอกาสกดก่อนโดยไม่นับเป็นการข้ามคิว | Flurry |
-
-> ตารางนี้คือ *ผลลัพธ์ของข้อมูลใน* `tools/tree.js` · แก้ที่นั่นแล้วรัน `node tools/tree.js --checks` ก่อนวางใหม่ ห้ามพิมพ์มือ
-
-# 5. 12 passive เดิม → ทั้งหมดคือ keystone
-
-| เดิม | สาขา | มูลค่าที่วัด (%) | หมายเหตุ |
-|---|---|---|---|
-| Sonic Blow (ครั้งที่ 5 ×2.5) | Impact | **+30%** | ทุก build ที่ตีช้าจะได้ประโยชน์ต่างจากตีเร็ว → ต้องเช็คกับ cap aspd |
-| Rapid Fire (aspd +30% คงที่) | Control | +30% | อาจชน cap 300 ที่ Agi สูง → โหนดนี้จะ "ว่าง" สำหรับบาง build (รับได้) |
-| Brute (+3%/kills ถึง +30%) | Impact | +30% | รีเซ็ตเมื่อโดนหลบ (กติกาเดิม) |
-| Overkill (ส่งดาเมจเกินต่อ) | Stream | +18% | แรงกับกลุ่ม · อ่อนกับ boss ตัวเดียว |
-| Cheap Casting (mana −25%) | Control | +16% | *เพิ่ม casts* → เพิ่ม DPS จริงตามเพดาน mana |
-| Flurry (cd −30% ทุก 3 ครั้ง) | Control | +13% | |
-| Burning Focus (สถานะยาว 2×) | Stream | +8% | ค่าจริงคือ DoT ไม่ใช่ hit |
-| Elemental Attunement | Stream | +6% | gate ของธาตุ |
-| Counter | Impact | +5% | |
-| Cunning (+30% ใต้ 25% mana) | Control | +4.5% | ขัดกับ aura โดยเจตนา (aura ดับที่ 25%) |
-| Last Stand (+50% ใต้ 30% HP) | Impact | +12.5% | ค่าจริงขึ้นกับว่าโดนแรงไหม |
-| Noble Phantasm (สะท้อน 30%) | Control | 0% DPS | เป็น EHP ไม่ใช่ DPS · เช็คกับ combat.md: ดาเมจที่มอนทำ 4-329/วิ |
-
-# 5b. keystone อีก 6 ตัวที่ขาด (รวมเป็น 18 = 9 คู่ exclusive) — ค่าของแต่ละตัวคำนวณจากกติกาของมัน ไม่ใช่ตั้งจากความรู้สึก
-
-| keystone | สาขา | กติกา | มูลค่าที่คำนวณ | คู่ที่ขัดกัน |
-|---|---|---|---|---|
-| Finishing Blow | Impact | ดาเมจ ×2 ใส่เป้าหมายที่ HP ต่ำกว่า 20% | **+11.1%** · เวลาฆ่าทั้งตัวเหลือ 0.9 เท่า → `1/0.9 − 1` | Brute (ทั้งสองต้องการศึกยาว) |
-| Weighted Edge | Impact | ถ้าเป้าหมาย *ตัวเดียว* (mob เดี่ยว/elite/boss) ดาเมจ +20% · กลุ่ม = ไม่ได้ผล | **+7%** ตอนฟาร์ม (`20% × สัดส่วนศึกตัวเดียว ~35%`) · **+20% บน boss จริง** | Spreading Burn · และ Overkill (ฝั่งกลุ่ม) |
-| Deep Pockets | Stream | ทุก 6 วิ skill ที่ cd อยู่จะเร็วขึ้น 25% เป็นเวลา 3 วิ (stack ไม่ได้) | **+7%** · casts +25% × ส่วนแบ่ง skill ของ DPS (~28% จากหัวข้อ skill.md) | Cunning (เศรษฐกิจ mana ช่องเดียวกัน) |
-| Elemental Crossfeed | Stream | เมื่อเป้าหมายมี status จาก *สองธาตุ* พร้อมกัน จะระเบิดแล้วกิน status ทั้งสอง | **+15%** · เท่ากับการกด skill เพิ่ม ~1 ครั้งต่อ 3 ครั้ง · ต้องผูกกับ gate ธาตุ (Attunement) | Elemental Attunement · Burning Focus |
-| Spreading Burn | Stream | เมื่อเป้าหมายที่ติด status ตาย status 1 ชั้นจะกระโดดไปตัวถัดไป (ในรัศมี · เพดาน 3 ตัวตามกติกา AoE) | **+16%** ในกลุ่ม 3-5 · ~0% กับ boss ตัวเดียว | Weighted Edge · Sonic Blow |
-| Anchor | Control | ระหว่างที่น้ำหนักของ *เกิน 50% ของ capacity* จะรับดาเมจลดลง 15% (ภาษีน้ำหนักกลายเป็นกำไร) | **0% DPS · +20% EHP** (นับแบบเดียวกับ Noble Phantasm) | Rapid Fire (เบา-เร็ว vs หนัก-แน่น) |
-
-**ตรวจงบ (pool accounting)** — 18 ตัว = ค่าเดิม 12 ตัว (mean 14.4%) + 6 ตัวใหม่ (mean 9.4%) → **mean ทั้ง pool 12.7%**
-- ทางทั่วไปที่คำนวณไว้ = pick 6 ตัวเฉลี่ย **14.2%** → ยังสูงกว่า mean ของ pool เล็กน้อย แปลว่าผู้เล่นต้องเลือก *พอใช้* ไม่ใช่สุ่ม · ถือว่าผ่าน
-- **แต่งบเพอร์เฟกยังพัง**: ถ้า pick 6 ตัวที่ดีที่สุดใน pool (Sonic Blow 30 + Rapid Fire 30 + Brute 30 + Overkill 18 + Spreading Burn 16 + Crossfeed 15 = mean **23.2%**) จะได้ tree **×2.39** ไม่ใช่ ×1.85 ที่ mob_HP ตั้งไว้ → ศึกจะสั้นลงเหลือ ~0.78 วิ ตรงกับ "build เพอร์เฟก 0.79 วิ" ใน D4b พอดี · **จึงสรุปได้ว่า ×1.85 คือค่าของทางทั่วไป และ ×2.39 คือเพดานที่ mob_HP ไม่ได้กันไว้** ซึ่งเป็นเจตนาเดิมของตาราง (คนเต็มของ+เต็ม tree ฆ่าเร็วกว่า 1 วิ) ไม่ใช่บั๊ก · สิ่งที่ต้องรักษา: ถ้าเพิ่ม keystone ตัวใหม่ที่ทำให้ *path ที่ไม่ใช่เพดาน* เฉลี่ยเกิน 14.2% ให้ถือว่ามีปัญหาที่ mob_HP ไม่ใช่ที่โหนด
-- **9 คู่ exclusive**: 5 คู่จากตารางนี้ + Last Stand↔Overkill + Counter↔(โหนดสาย crit) + Flurry↔(โหนดสาย cd) + Cheap Casting↔Cunning · 3 คู่หลังมีตัวตรงข้ามแล้วในหัวข้อ 5c → **คู่ครบ 9 คู่** · งานเนื้อหาที่เหลือคือ minor node 122 ตัว
-
-# 5c. 9 คู่ exclusive ที่ครบแล้ว (18 ตัวใช้ครบ ไม่มีโหนดไร้คู่)
-
-| คู่ | ทำไมมันตัดกันจริง (ไม่ใช่จับคู่ตามสาขา) |
-|---|---|
-| Sonic Blow ↔ Burning Focus | สองแนวทางของ "ค่าต่อครั้งที่ตี" กับ "ค่าที่ไหลต่อชั้น" · เลือกทางเดียวเพราะเป้าหมายของ stat คนละตัว |
-| Brute ↔ Finishing Blow | Brute โตตามจำนวนครั้งที่ตีค้าง (ต้องการศึกยาว) · Finishing Blow ทอนศึกให้สั้นลง 10% → สองตัวถอนรากกัน |
-| Counter ↔ Noble Phantasm | ทั้งคู่ลงโทษคนที่ตีเรา (สวนกลับ vs สะท้อน) ซ้อนกันจะกลายเป็นกองหลังเต็มสูตร → เลือกอย่างใดอย่างหนึ่ง |
-| Overkill ↔ Last Stand | ส่งดาเมจเกินต่อ (เล่นกับHP มอน) vs แรงขึ้นตอนHPเราต่ำ (เล่นกับHPเรา) · คนละมุมของแถบเลือด |
-| Rapid Fire ↔ Anchor | เบา-เร็ว (aspd +30%) กับ หนัก-แน่น (ภาษีน้ำหนักกลายเป็น −15% รับเข้า) · เป็นขั้วตรงข้ามของน้ำหนักใน formula.md หัวข้อ 11 |
-| Cheap Casting ↔ Cunning | สอง lever ของ mana เดียวกัน (ลด cost vs แรงแบบใต้ 25% mana) และ Cunning ยังตัดกับ aura อยู่แล้ว |
-| Flurry ↔ Deep Pockets | สองเครื่องลด cd ที่จะคูณกันแบบควบคุมไม่ได้ (cd −30% ทุก 3 ครั้ง + เร่ง 25% เป็นช่วง) · กันไม่ให้หลุดไปชนเพดาน CDR 50 แบบเงียบ ๆ |
-| Elemental Attunement ↔ Crossfeed | ทางหนึ่ง *ขยาย gate ธาตุ* ให้อีกธาตุหนึ่ง · อีกทางต้องอาศัย status จาก *สองธาตุ* พร้อมกัน → ห้ามได้พร้อมกัน |
-| Weighted Edge ↔ Spreading Burn | ตัวเดียวเจ็บกว่า vs กลุ่มกระจายต่อ · ขั้วตรงข้ามของเป้า (และชนกับ Overkill ฝั่งกลุ่มตามตารางเดิม) |
-
-**แถบที่วัดได้หลังจัดคู่ครบ** (แต่ละคู่เลือกได้ 1 ตัว · ทางทั่วไปเลือก 6 ตัว):
-- pick ที่ *ดีที่สุดถูกกติกา* = 30/30/30/18/16/16 → เฉลี่ย **23.3%** → tree **×2.40** (คือเพดานที่ mob_HP ไม่ได้กันไว้ · TTK ~0.77 วิ = D4b)
-- pick ที่ *แย่ที่สุดถูกกติกา* = 12.5/11.1/8/7/7/6 → เฉลี่ย **8.6%** → tree **×1.52** (= แถบต่ำของ D15)
-- เส้นฐาน mob_HP ตั้งไว้ที่ **×1.85 (เฉลี่ย 14.2% ต่อตัว)** ซึ่งอยู่กลางแถบ 1.52-2.40 พอดี → *ทางเดินทั่วไป* คือคำตอบที่ถูกของเส้นฐาน ไม่ใช่ทางสุดโต่งสองข้าง · และนี่คือเหตุผลที่คู่ exclusive ต้องครบ 9 คู่: มันคือตัวคุมความกว้างของแถบนี้
-
-- ค่าเฉลี่ย **14% ต่อ keystone** คือที่มาของ `+85%` ในหัวข้อ 3
-- 2 ตัวที่ *ขัดกันโดยเจตนา*: Cunning กับ aura · Last Stand กับ Overkill → ปล่อยให้อยู่คนละปลายสาขาให้ผู้เล่นเลือก
-
-# 6. Keystone กับ boss (ทางออกของ "เนื้อหาแบบสั้น")
-
-- keystone ชั้นสุดของทุกสาขา (3 ตัว) **ต้องชนะ boss ของโซน 3/6/9 ก่อน** จึงจะปลดให้ซื้อได้
-- ผล: boss ไม่ได้ให้จุดเพิ่ม (ไม่ลงโทษ AFK ซ้ำสอง) แต่ boss เป็นประตูกำลังสูงสุดของ tree · ตรงกับที่ concept.md เขียนว่า boss คือพื้นที่ที่ได้ของที่ไม่ได้จากการตีเรื่อย ๆ
-- คีย์สำคัญ: **แพ้ boss = จบ spawn นั้น** (push แล้ว boss ถอยไปเต็มเลือด ต้องรอตัวใหม่ 15 นาที · combat.md หัวข้อ 7) → keystone ที่ lock ไว้จะกลายเป็นโจทย์ว่า "build ฉันแก้ทางพอไหม" ไม่ใช่ "ฟาร์มมากพอรึยัง"
-
-# 7. การย้อนจุด
+# 7. Respec
 
 ``
-respec = ฟรี · แต่พัก 3 นาที ต่อ 1 จุดที่ดึงกลับ
+respec = free · but 3-minute cooldown per 1 point pulled back
 ``
 
-- ทั้ง tree = 5 ชม. · 25 จุด = 1.25 ชม. · 10 จุด = 30 นาที
-- เหตุผลที่ไม่วางให้ฟรีทันที: เกมนี้สกุลเงินคือเวลา (combat.md) · ถ้า respec ฟรีทันทีผู้เล่นจะลองมั่วและไม่ผูกกับสิ่งที่เลือก · ถ้าแพงเกินเกม idle จะไม่กล้าลองอะไรเลย — 3 นาที/จุดอยู่ตรงกลางที่วัดได้
-- โหนดที่อ้าง skill ที่ยังไม่มีในบัญชี: **แสดง "ยังไม่ทำง่ายน" แต่ซื้อได้** และทำง่ายนทันทีที่ได้ skill นั้น (ตอบคำถามข้อ 5 เดิม: ผู้เล่นที่ยังไม่รู้ skill ไม่ต้องซื้อทั้งอย่างเปล่า)
+- Whole tree = 5 hours · 25 points = 1.25 hours · 10 points = 30 minutes
+- Why not instant-free: the currency of this game is time (combat.md) · If respec is instant-free, players experiment randomly and attach to nothing · If too expensive, an idle game dares try nothing — 3 minutes/point sits at the measurable middle
+- Nodes referencing unowned skills: **show "not yet easy" but still purchasable**, and take effect immediately once that skill is owned (answers old question 5: players who do not yet know a skill need not buy blindly)
 
-# 8. ช่องที่ยังเปิด (พร้อมเหตุผล)
+# 8. Still-open slots (with reasons)
 
-- **6 keystone ใหม่** ที่ต้องออกแบบให้ครบ 18 ตัว (มี 12 เดิมแล้ว) · ยังไม่ใส่เพราะต้องเขียนหลังตัดสิน 2 เรื่อง: AoE จะแพ้เป้าเดียวหรือไม่ · ธาตุจะเป็น build จริงไหม (ทั้งคู่อยู่ใน combat.md/elements.md)
-- ~~minor 122 ตัว~~ **เขียนแล้ว** (หัวข้อ 4b · `tools/tree.js`) · โหนด minor ต้องเป็นกติกาเล็กและวัดได้ · ก่อนเขียนต้องตั้ง "ตารางมูลค่า minor" (แนะนำ 0.3-2% ต่อตัว) ไม่งั้นจะกลายเป็น affix บนของที่ย้ายมาอยู่ใน tree
-- ~~หน้าตา tree / จำนวนชั้นต่อสาขา~~ **จัดแล้ว** (หัวข้อ 4b)วาง · ตัวเลขที่บังคับไว้แล้ว: 3 สาขา · keystone อยู่ชั้น 8-12 ของแต่ละกิ่ง · 122 minor + 18 keystone · hub กลาง 1 จุดเริ่ม
+- **6 new keystones written** (skill-tree-keystone.md 5b · 18 total = 9 exclusive pairs complete). Entry rulings closed: AoE uses the falloff table in skill-pool-system.md (mana 1.0x · 100/85/70/60/50% · Cap 5) and Elements deal full damage with Alignment gating status only (elements.md section 2). Remaining work is numeric rebalance, not rules.
+- ~~122 minor~~ **Written** (section 4b · `tools/tree.js`) · Minor nodes must be small measurable rules · Before writing, a "minor value table" must be set (recommended 0.3-2% each), otherwise they become Mods on gear moved into the tree
+- ~~Tree look / tiers per branch~~ **Laid out** (section 4b). Numbers already enforced: 3 branches · keystones at Tiers 8-12 of each limb · 122 minor + 18 keystone · 1 central hub start
