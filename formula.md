@@ -3,171 +3,381 @@
 import core-stats.md
 import attribute-item.md
 import equipment-slot.md
+import elements.md
 
 สัญลักษณ์: `x` = ค่าที่ได้จาก build · `x_c` = ค่าจาก core stat · `x_f` = ค่าจาก affix flat · `x_p` = ค่าจาก affix %
 
-# 1. Core stat รวม
+# 0. เป้าหมายตัวเลข
 
-ค่าสุดทุกตัวคำนวณจาก 3 แหล่งแล้วนำมาก่อนเข้าสูตรอื่น
+ตัวเลขทั้งหมดถูกออกแบบมาให้ผ่านเช็คนี้ — ถ้าแก้ตัวเลขใดแล้วเบรคจุดนี้ต้องปรับค่าอื่นตาม
+
+**ทุกค่าในไฟล์นี้ต้องคำนวณย้อนกลับได้จากตาราง affix ใน `attribute-item.md`** ตัวเลขที่ตั้งขึ้นเองโดยคำนวณไม่ถึงถือว่าผิด ให้แก้ที่นี่ไม่ใช่แก้ตัวเลขให้ตรงความรู้สึก
+
+**ระดับ** — ตัวละครเพดานเลเวล 100 · โซนสูงสุดเลเวล 90 · เลเวล 91-100 คือช่วงที่ยังตีโซน 90 เพื่อดันคุณภาพของ แทนการปีนเลเวล (ดู world.md)
+
+| จุดอ้างอิง | ค่า | คำนวณจาก |
+|---|---|---|
+| เลเวล 1 | stat ทุกตัว = 12 · sword ตี 1.2 ครั้ง/วิ | `stat_c` +หัวข้อ 7 |
+| เลเวล 100 (ไม่มีของ) | stat ทุกตัว = 210 | `12 + 2 × 99` |
+| เลเวล 100 · เพดาน stat เดียว | **816** | `(210 + 25×12 ชิ้น) × (1 + 5%×12 ชิ้น)` |
+| เลเวล 100 · แบ่งสอง stat เท่ากัน | 468 ต่อตัว | ลง 6 ชิ้น + 6 ชิ้น |
+| เลเวล 100 · build Str 12 ชิ้น | Physical power 4,826 · 2.09 ครั้ง/วิ | `(816×5 + 80) × 1.16` |
+| DPS คาดหวังเลเวล 100 (build ที่สูงสุด) | **9,847 ต่อวินาที** | รวม hit 80% และ crit เฉลี่ย 1.22 แล้ว · **ยังไม่รวม tree** (tree ×1.85 → 18,217) |
+| เวลาฆ่า mob เลเวล 100 | คนที่ gear+tree พอดีเลเวล ≈ 1 วิ · คนที่เต็มทั้งสองทาง ≈ 0.79 วิ · มือเปล่าเข้าโซน ≈ 5-8 วิ | mob HP เลเวล 100 = **22,016** = 8,881 (gear typical) × 1.85 (tree) × 1.34 (skill list) |
+
+> **ตัวเลขชุดนี้แทนค่าเดิมที่เขียนไว้ว่า stat ≈ 890 · power ≈ 5,000 · DPS ≈ 24,000 · HP mob ≈ 24,000**
+> ค่าเดิมคำนวณจาก 13.2 ชิ้น · คูณ crit 1.62 แบบที่crit เกิดทุกครั้ง และไม่ได้หักโอกาสพลาด
+> และสูตร attack speed เดิมใช้ไม่ได้ที่เลเวล 1 (ดูหัวข้อ 7) จึงตั้งใหม่ทั้งหมดจากตาราง affix จริง
+
+**ทุก stat ใช้สูตรเดียวกันทั้ง 7 ตัว** ไม่มีสถิติใดได้เปรียบ
 
 ```
-x_c = base + level_gain + gear_flat
-x   = x_c * (1 + gear_pct/100)
+stat_c = 12 + 2 * (level - 1)
+stat   = (stat_c + core_stat_flat) * (1 + core_stat_pct/100)
 ```
 
-ลำดับ: flat ก่อน แล้วค่อยคูณ % — เพราะถ้าคูณ % ก่อน flat ค่า flat จะถูกขยายตาม % ซึ่งไม่ตรงกับเจตนาของผู้เล่น
+- 1 ชิ้นสุ่มได้ core stat สูงสุด 2 ช่อง = `core_stat_flat` 1 ช่อง + `core_stat_pct` 1 ช่อง **และทั้ง 2 ช่องเป็น stat เดียวกันได้** (กติกาเดียวกับ equipment-slot.md)
+  ถ้าบังคับให้ 2 ช่องต้องคนละ stat เพดาน stat เดียวจะเหลือ 510 แทน 816 แล้วตัวคูณ K ทุกตัวข้างล่างจะเบรคหมด
+- เลเวล 100 ได้ flat จากของสูงสุด 300 (25 × 12 ชิ้น) และ % สูงสุด 60 (5% × 12 ชิ้น) รวมเป็น `(210 + 300) × 1.60 = 816`
+- ลำดับ: flat ก่อน แล้วค่อยคูณ % — ถ้าคูณ % ก่อน flat ค่า flat จะถูกขยายตาม % ซึ่งไม่ตรงเจตนาผู้เล่น
 
-# 2. Physical power
+## DPS คาดหวังตามวิธีแบ่ง 12 ชิ้น
+
+ทุกแถวใช้ sword (`weapon_aspd` 1.2 · weapon_mult 1.0) · mob เลเวล 100 evasion 100 · รวม hit_chance และ crit ค่าคาดหวังแล้ว
+
+| แบ่งชิ้น (Str/Agi/Lck/Dex) | Str | Agi | power | ครั้ง/วิ | crit% | hit% | DPS คาดหวัง |
+|---|---|---|---|---|---|---|---|
+| Str 12 | 816 | 210 | 4,826 | 2.09 | 18.5 | 80 | **9,847** |
+| Str 11 / Dex 1 | 752 | 210 | 4,450 | 2.09 | 18.5 | 82 | 9,370 |
+| Str 10 / Agi 2 | 690 | 286 | 4,100 | 2.32 | 18.5 | 80 | 9,270 |
+| Str 8 / Agi 4 | 574 | 372 | 3,420 | 2.58 | 18.5 | 80 | 8,600 |
+| Str 6 / Agi 6 | 468 | 468 | 2,810 | 2.87 | 18.5 | 80 | 7,850 |
+| Agi 12 | 210 | 816 | 1,310 | 3.00 | 18.5 | 80 | 3,830 |
+
+**สิ่งที่ตารางนี้บอก — และเป็นการตัดสินที่ต้องรู้ตัว**
+
+- "ไม่มี stat ใดได้เปรียบ" เป็นจริงในระดับ *สูตร* เท่านั้น (ทุก stat ใช้ช่วง 5-25 + 1-5% เท่ากัน เพดาน 816 เท่ากัน) ไม่ใช่ในระดับ *ผลลัพธ์*
+- **DPS สูงสุดคือทุ่ม Str ทั้ง 12 ชิ้น (9,847) และการลง Agi เต็มต่ำสุด (3,830) ต่างกัน 2.6 เท่า**
+  สาเหตุคือ Agi ชน cap 300 ที่ ~Agi 512 แต้มที่เกินจึงเป็นศูนย์ ขณะที่ power จาก Str ไม่มี cap
+- ผลกับหัวข้อความเร็วโจมตีที่ขายไว้ใน concept.md: build "fast hit" จะไม่มีวันเร็วกว่าในเชิง DPS · ค่าของมันต้องมาจาก **จำนวนครั้งที่ตี** (proc ต่อครั้ง · Sonic Blow · Flurry · chill · count ของ DoT tick) ไม่ใช่จากตัวเลขรวม
+  ถ้ารับไม่ได้กับ 2.6 เท่า ต้องเลือกอย่างใดอย่างหนึ่ง: ใส่ cap ให้ทาง power · ลดค่าน้ำหนักของ Str ต่อ phys · หรือหาคุณค่าอื่นให้ Agi นอกเหนือ aspd
+- mob HP เส้นฐาน **ไม่ได้** ตั้งจากแถวบนสุด · ตั้งจาก `DPS ของคนที่ของพอดีเลเวล` (8,881 ที่เลเวล 100) แล้วคูณปัจจัย tree · แถวล่าง ๆ ของตารางนี้คือต้นทุนจริงของคนที่ไม่ได้ทุ่ม Str: build ที่แบ่ง stat ยังฆ่า mob ตัวเดียวกันใน 1.2-2.6 วินาที (D4/D5 ใน checks.md)
+
+# 1. Physical power
 
 ```
 phys = (str * K_STR + phys_flat) * (1 + phys_pct/100) * weapon_mult
 ```
 
-- `K_STR` = ค่าต่อ Str 1 แต้ม (ค่าคงที่ของเกม ต้องตั้ง)
-- `phys_flat` = Physical power flat รวมทุกชิ้น
-- `phys_pct` = Physical power % รวมทุกชิ้น
-- `weapon_mult` = ตัวคูณจากชนิดอาวุธ (ดู equpment-weapon.md)
+- `K_STR` = 5 · Str 816 (เพดานเลเวล 100) ได้ 4,080
+- `phys_flat` = Physical power flat รวมทุกชิ้น (มีแค่ main hand ตามกติกา offensive/defensive) · สูงสุด 80
+- `phys_pct` = Physical power % รวมทุกชิ้น · สูงสุด 16 เพราะออกได้ที่ main hand ชิ้นเดียว
+- `weapon_mult` = ตัวคูณจากชนิดอาวุธ · ตัดสินแล้วข้างล่าง
 
-> **ค้างอยู่**: flat power ยังไม่มีตัวคูณ ถ้าอยากให้ flat มีความหมายตลอดเกม ให้ตั้ง `K_STR` ให้สูงพอที่ flat จะยังรู้สึกได้ หรือเปลี่ยน `phys_flat` เป็น `% ของ base phys` แทน
+```
+phys = (816 × 5 + 80) × 1.16 × weapon_mult = 4,826 × weapon_mult
+```
 
-# 3. Magic power
+## weapon_mult — ไม่มี base power ของอาวุธ
+
+**ทุกอาวุธดึง power จากตัวละครอย่างเดียว** ไม่มี base power ต่อชนิดอาวุธ อาวุธต่างกันว่าตีเร็วแค่ไหน (`weapon_aspd`) และ affix pool เป็น phys หรือ magic
+
+`weapon_mult` ตั้งให้ **DPS เท่ากันทุกชนิดอาวุธที่ stat เท่ากัน** = `1.2 / weapon_aspd` แล้วให้ความต่างของอาวุธอยู่ที่จังหวะการตี ไม่ใช่ตัวเลขรวม
+
+| อาวุธ | weapon_aspd | weapon_mult |
+|---|---|---|
+| dagger | 1.5 | 0.80 |
+| one-handed sword / axe | 1.2 | 1.00 (เส้นฐาน) |
+| bow / crossbow | 1.1 | 1.09 |
+| mace / wand / rod | 1.0 | 1.20 |
+| staff / spear | 0.85 | 1.41 |
+| two-handed sword / axe | 0.7 | 1.71 |
+
+- ผลข้างเคียงที่ตั้งใจ: อาวุธเร็วโดน cap aspd ตัด · ที่ Agi 816 dagger ทำ aspd ดิบได้ 383 แต่ใช้ได้ 300 = เสีย 22% ส่วน 2h อยู่ที่ 178 ไม่โดน cut เลย
+  ตอนปลายเกมอาวุธหนักจึงแรงกว่าอาวุธเร็วเล็กน้อยแลกกับ proc ต่อวินาทีที่น้อยกว่า (Sonic Blow · Flurry · chill · burn ทำงานตามจำนวนครั้งที่ตี)
+- **glossary.md เดิมเขียนว่า base power "ใช้เป็นฐานคำนวณ crit damage"** — ไม่มีค่านั้นอีกแล้ว crit damage ตั้งจากค่าฐาน 100% + affix ล้วน
+
+> flat power เป็นแค่ ~2% ของ phys เพราะมี main hand ชิ้นเดียวที่ออก power ได้
+> ทางหลักของ Str คือ core stat ที่คูณด้วย `K_STR` ไม่ใช่ flat power
+> ถ้าอยากให้ flat สำคัญขึ้น ให้เพิ่มช่อง power flat ใน off hand (ดาบคู่) แทนการแก้ K_STR
+
+# 2. Magic power
 
 ```
 magic = (int * K_INT + magic_flat) * (1 + magic_pct/100) * weapon_mult
 ```
 
-โครงเดียวกับ physical แต่ไม่แตะ Str
+- `K_INT` = 5 · Int 816 ได้ 4,080 · โครงเดียวกับ physical แต่ไม่แตะ Str
+- build เวทใช้ตัวเลขชุดเดียวกันกับตารางในหัวข้อ 0 เปลี่ยนแค่ Str→Int และ phys→magic · ทุกแถวในตารางนั้นจึงใช้กับเวทได้ทันที
 
-# 4. Critical
+# 3. Critical
 
 ```
-crit_cap = 100
-crit_chance = lck * K_LCK_CRIT + crit_chance_pct + (dex หรืออะไรคิดเป็น % ได้ภายหลัง)
-crit_chance = min(crit_chance, crit_cap)
+crit_chance = lck * K_LCK_CRIT + crit_chance_pct
+crit_chance = min(crit_chance, 100)
 
-crit_dmg_p = 100 + crit_dmg_phys_pct
-crit_dmg_m = 100 + crit_dmg_magic_pct
-
-ดาเมจ = power * crit_chance/100 * (เลือก crit_dmg_p หรือ crit_dmg_m)
+crit_dmg_phys = 100 + crit_dmg_phys_pct
+crit_dmg_magic = 100 + crit_dmg_magic_pct
 ```
 
-- Lck ให้ crit chance → ต้องตั้ง `K_LCK_CRIT` ว่า Lck 1 แต้มเท่ากี่ % (หน่วยเล็กมาก เช่น 0.05)
-- crit chance ต้องมี capเสมอ ไม่งั้น dodge/miss จะพัง
+- `K_LCK_CRIT` = 0.05 · Lck 816 ได้ 40.8% + affix จาก main hand อีก 8% = 48.8% ที่เพดานสุดทาง
+- crit chance ต้องมี cap เสมอ ไม่งั้น dodge/miss จะพัง
 - crit damage เกิน 100 ได้ ไม่ต้อง cap
-
-> **ค้างอยู่**: ตอนนี้มีแค่ `Critical damage %` ชนิดเดียว ผูกกับ base Physical power → magic build ไม่มี crit scaling ต้องแยกเป็น physical / magic ตามหมายเหตุท้าย equipment-slot.md
-
-# 5. Dodge
+- **crit ไม่เกิดกับดาเมจธาตุ** (ดู elements.md)
+- `Critical damage %` แยกเป็น physical / magic เพราะอาวุธเมฆต้องมี scaling ของตัวเอง
 
 ```
-dodge_rate = agi * K_AGI_DODGE + dodge_flat
-dodge_rate = min(dodge_rate, dodge_cap)
+dmg_per_hit = phys + magic + elem * elem_align/100
+dmg_per_hit = dmg_per_hit * (crit ? crit_dmg : 1)
+
+dps_คาดหวัง = dmg_per_hit × ครั้ง/วิ × hit_chance × (1 + crit_chance × (crit_dmg/100 − 1))
+```
+
+- อาวุธหนึ่งชิ้นออกได้ทางเดียว phys **หรือ** magic ตามชนิดอาวุธ · `elem` เป็นช่องทางที่สามที่ซ้อนกับทุกอาวุธ
+  (ช่อง elemental power เป็น secondary ของ main hand ทุกชนิด ดู equipment-slot.md)
+- **DPS ที่ใช้อ้างอิงเป้าคือค่าคาดหวัง ไม่ใช่ค่าที่ crit ทุกครั้ง** — ที่ crit 18.5% + crit damage 120% ตัวคูณเฉลี่ย = 1.22 ไม่ใช่ 2.2
+  ตัวเลขเดิมในหัวข้อ 0 ใช้ 1.62 ซึ่งไม่ใช่องค์ประกอบใด ๆ ของสูตรนี้ (crit chance ยังไม่ถึง 100%) จึงถือเป็นค่าที่ผิด และถูกแทนที่ด้วยตารางใหม่
+
+# 4. Dodge
+
+```
+dodge_rate   = (agi * K_AGI_DODGE + dodge_flat) * (1 + dodge_pct/100)
 dodge_chance = dodge_rate / (dodge_rate + K_dodge)
+dodge_chance = min(dodge_chance, 60)
 ```
 
-- **โครงสร้าง dodge ใช้สัดส่วนไม่ใช้บวกตรง** (เหมือน crit chance) เพราะ dodge สูงเกินจะทำให้ตีไม่โดนเลย ทำให้ meta เสีย
-- `dodge_cap` ปักที่ประมาณ 75-80%
-- Lck ให้ perfect dodge แยกออกไป ไม่ปนกับ dodge ปกติ
+- `K_AGI_DODGE` = 0.15 · `K_dodge` = **100** (เดิม 25) · cap เป็น **โอกาสหลบ 60%** ไม่ใช่ค่า rate 75
+- เหตุผลที่แก้: แบบเดิม dodge flat สองชิ้น (40+40 = 80) ชน rate cap 75 ตั้งแต่ไม่ต้องมี Agi เลย · dodge จึงเป็นสวิตช์เปิดปิด ไม่ใช่ stat ที่ค่อย ๆ แข็งขึ้น
+  ยืดตัวหารเป็น 100 แล้วตัด cap ที่โอกาส ทำให้แต่ละแต้ม Agi ยังซื้อโอกาสหลบได้จริง
+- ช่วง dodge flat จึงลดจาก 8-40 เหลือ **3-15** (แก้ใน attribute-item.md แล้ว)
 
-# 6. HP / Mana
+| build | Agi | dodge flat | rate | โอกาสหลบ |
+|---|---|---|---|---|
+| ลง Agi เต็ม 12 ชิ้น + boots/gloves T1 | 816 | 15 + 15 | 152 | **60% (ชน cap)** |
+| ลง Agi 6 ชิ้น + 1 ชิ้น T1 | 468 | 15 | 85 | 46% |
+| ไม่ลง Agi เลย + 1 ชิ้นคุณภาพต่ำ | 210 | 10 | 42 | 29% |
+
+- โครงสร้าง dodge ใช้สัดส่วนไม่ใช้บวกตรง เพราะ dodge สูงเกินจะทำให้ตีไม่โดนเลย ทำให้ meta เสีย
+- Agi ที่เกินจุดชน cap ไม่ได้ dodge เพิ่ม ไปช่วย attack speed แทน
+- dodge มีไว้รับกลุ่มมอน · กลุ่ม 5 ตัวที่หลบ 46% = โดนราว 2.7 ครั้งต่อรอบ (ดู world.md)
 
 ```
-max_hp   = (vit * K_VIT_HP + level_gain_hp) * (1 + vit_hp_pct/100)
+perfect_dodge = lck * K_LCK_PDOGE
+perfect_dodge = min(perfect_dodge, 5)
+```
+
+- perfect dodge แยกจาก dodge ปกติ ไม่ปน และ cap ไว้ต่ำมากเพราะเป็นกับดักต่อมอน
+- `K_LCK_PDOGE` = **0.01** (เดิม 0.005) · เดิมเพดาน Lck 816 ทำได้แค่ 4.1% ซึ่งชน cap 5 ไม่ได้ถ้าไม่มี affix ช่วย และ affix perfect dodge ก็ไม่มี
+  ที่ 0.01 จะชน cap ที่ Lck 500 · ต้องลง Lck จริงจึงได้ ไม่ใช่ของแถมจาก build อื่น
+
+# 5. HP / Mana
+
+```
+max_hp   = (vit * K_VIT_HP + level_gain_hp) * (1 + hp_pct/100)
 hp_regen = vit * K_VIT_REGEN * (1 + hp_regen_pct/100)
 
-max_mana   = (int * K_INT_MP + level_gain_mp) * (1 + int_mp_pct/100)
+max_mana   = (int * K_INT_MP + level_gain_mp) * (1 + mp_pct/100)
 mana_regen = int * K_INT_MREGEN * (1 + mregen_pct/100)
 ```
 
-Vit ให้ทั้ง hp และ regen ใช้สเกล K คนละตัว เพื่อปรับสมดุลแยกได้
-
-# 7. Cooldown reduction
-
-```
-cdr_cap = 50
-cdr = (wis * K_WIS_CDR + cdr_flat) * (1 + cdr_pct/100)
-cdr = min(cdr, cdr_cap)
-
-cooldown = base_cooldown * (1 - cdr/100)
-```
-
-- ต้องมี cap เสมอ (50-60%) ไม่งั้นสล็อต skill จะหายไป
-- Wis ยังไม่มี affix รองรับ ต้องเพิ่ม `Cooldown reduction %` ก่อน (ดูหมายเหตุท้าย equipment-slot.md)
-
-# 8. Attack speed
+- `K_VIT_HP` = 20 · `K_VIT_REGEN` = 0.25 → Vit 816 ได้ 16,320 HP ดิบ และ regen 204/วิ
+- `K_INT_MP` = 4 · `K_INT_MREGEN` = **0.15** (เดิม 0.2) → Int 816 ได้ 3,264 mana ดิบ และ regen 122/วิ
+- `level_gain_hp` = 40 × (level − 1) → เลเวล 100 ได้ 3,960 (เดิมเขียน 4,000 ซึ่งนับเกินหนึ่งเลเวล)
+- `level_gain_mp` = 16 × (level − 1) → เลเวล 100 ได้ 1,584
 
 ```
-aspd_cap = 200
-aspd = (agi * K_AGI_ASPD * weapon_aspd + aspd_flat) * (1 + aspd_pct/100)
-aspd = min(aspd, aspd_cap)
-
-interval = base_interval * 100 / aspd
-dps      = power / interval
+Max HP   เลเวล 100 · Vit เต็ม 12 ชิ้น + ช่อง Max HP % 1 ชิ้น = (16,320 + 3,960) × 1.16 = 23,500
+Max Mana เลเวล 100 · Int เต็ม                                = (3,264 + 1,584)          = 4,848
+pool ÷ regen                                                  = 4,848 ÷ 122 = 39.6 วินาที
 ```
 
-- `weapon_aspd` = ความเร็วโจมตีของอาวุธ (ดาบเร็ว โบวมือช้า) คูณเข้าไปแทนบวก เพราะ Agi ควรช่วยอาวุธช้าได้มากกว่าอาวุธเร็ว
-- Agi ยังไม่มี affix รองรับ ต้องเพิ่ม `Attack speed %` ก่อน
+> **`K_INT_MREGEN` เดิม 0.2 → 0.15** — เจตนาที่เขียนไว้คือ "ประมาณ 40 วินาทีต่อ mana หนึ่งหน่วยเต็ม"
+> แต่ที่ 0.2 อัตราส่วนจริงคือ 29.7 วินาที · mana จึงใหญ่กว่าที่คิดไว้เกือบ 40% และทำให้ skill กดได้แทบไม่จำกัด
+> ที่ 0.15 ได้ 39.6 วินาที ตรงเจตนา · พอยังพอให้กด skill ได้ต่อเนื่อง แต่ไม่พอเปิด aura ครบทุกตัว
+> ผู้เล่นต้องเลือกว่าจะใช้ mana ไปกด skill หรือค้างไว้เป็น aura (ดู skill.md · ตาราง drain ของ aura คิดใหม่จาก pool 4,848 แล้ว)
 
-# 9. Accuracy / Status
+# 6. Cooldown reduction
 
 ```
-accuracy    = dex * K_DEX_ACC + accuracy_flat
-hit_chance  = accuracy / (accuracy + evasion_target)
+cdr = (wis * K_WIS_CDR) * (1 + cdr_pct_total/100)
+cdr = min(cdr, 50)
 
-status_res  = str * K_STR_RES + status_res_flat
-status_res  = min(status_res, status_res_cap)   cap ~ 75%
-
-status_align = dex * K_DEX_ALIGN   chance ต่านสถานะเป็น % (ต้องตรวจกันสองทางฝ่ายผู้โจมตี/เป้าหมาย)
+cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)
 ```
 
-Dex มี 2 ด้านคือ accuracy (ยิงโดน) กับ status alignment (ตรึงสถานะ) ต้องตั้ง K แยก เพราะคนละเรื่อง
+- `K_WIS_CDR` = 0.03 · Wis 816 ได้ 24.5%
+- cap 50 เพราะเกินนี้สล็อต skill หายเร็วเกินจนเล่นไม่ได้
+- **ไม่มี `cdr_flat`** — CDR มีแต่ % (ดู attribute-item.md) สูตรเดิมบวกช่องที่ไม่มีอยู่จริง
+- `cdr_pct_total` รวมทุกแหล่งเข้า pool เดียวกัน ทั้ง affix `Cooldown reduction %` (สูงสุด 25 ต่อชิ้น) และ buff จาก skill เช่น Battle Orders +15%
+- เส้นทางไปสู่ cap ต้องเช็คได้: Wis 816 + affix 3 ชิ้น + Battle Orders = `24.5 × 1.90 = 46.6` **ยังไม่เต็ม** · ต้อง 4 ชิ้น = `24.5 × 2.15 = 52.6` จึงชน cap
+  ยืนยันเจตนาเดิมว่า CDR ต้องลงทุนหลายชิ้นจริง Wis อย่างเดียวไม่เคยพอ
+
+# 7. Attack speed
+
+```
+aspd     = weapon_aspd × (100 + (agi − 12) × K_AGI_ASPD + aspd_pct)
+aspd     = min(aspd, 300)
+hits/sec = aspd / 100
+dps      = dmg_per_hit × hits/sec
+```
+
+- `K_AGI_ASPD` = 0.25 ต่อ Agi 1 แต้ม · `100` คือเส้นฐานที่เลเวล 1 · `− 12` คือ base stat ของเลเวล 1 ไม่นับซ้ำ
+- **สูตรเดิม `aspd = agi × 0.25 × weapon_aspd` ใช้ไม่ได้ที่เลเวล 1** — Agi 12 ทำให้ aspd = 3.6 ซึ่งแปลว่า ตีครั้งละ 28 วินาที · เกม idle ที่เปิดมาแล้วต้องรอครึ่งนาทีต่อหมัดตายในนาทีแรก
+  โมเดลใหม่นี้ที่เลเวล 1 (ไม่มีของ) sword ตี 1.2 ครั้ง/วิ dagger 1.5 ครั้ง/วิ ตรงกับที่ weapon_aspd เขียนไว้แต่แรกว่าเป็น "ครั้ง/วิ ฐานของอาวุธ"
+- **ไม่มี `aspd_flat`** — affix aspd มีแต่ % (ดู attribute-item.md) สูตรเดิมบวกช่องที่ไม่มีอยู่จริง
+- `interval` เดิมเขียนว่า `base_interval × 100 / aspd` โดยไม่บอกหน่วย · เปลี่ยนเป็น `hits/sec = aspd/100` ให้ตรงสิ่งที่ผู้เล่นเห็น
+- **cap 300 = 3 ครั้ง/วิ** สำหรับทุกอาวุธ · aspd เป็นเปอร์เซ็นต์ ไม่ใช่จำนวนครั้ง
+
+| อาวุธ | weapon_aspd (ครั้ง/วิ ฐาน) | weapon_mult | Agi ที่ชน cap 300 (พร้อม affix 25%) |
+|---|---|---|---|
+| dagger | 1.5 | 0.80 | 312 |
+| one-handed sword / axe | 1.2 | 1.00 | 512 |
+| bow / crossbow | 1.1 | 1.09 | 603 |
+| mace / wand / rod | 1.0 | 1.20 | 712 |
+| staff / spear | 0.85 | 1.41 | 924 · ชนไม่ได้ |
+| two-handed sword / axe | 0.7 | 1.71 | 1,226 · ชนไม่ได้ |
+
+- `weapon_aspd` คูณทั้งวงเล็บ (ไม่ใช่แค่ term ของ Agi) เพื่อให้เลเวล 1 ยังตีได้ และอาวุธช้ายังช้ากว่าเสมอ
+- weapon_mult = `1.2 / weapon_aspd` ทำให้ DPS เท่ากันทุกชนิดอาวุธตราบที่ไม่มีใครชน cap · เช็คแล้วที่ build Str 12: ทุกอาวุธได้ DPS 9,847 เท่ากันเป๊ะ (dagger 2.62 ครั้ง/วิ × power 3,860 = twoh 1.22 ครั้ง/วิ × power 8,270)
+- **ผลข้างเคียงที่ต้องรู้**: Agi เกินจุดชน cap เป็นแต้มเสียเปล่า (sword เกิน 512 คือศูนย์) · ดูข้อสรุปเรื่อง build ในหัวข้อ 0
+
+# 8. Accuracy
+
+```
+accuracy   = (dex * K_DEX_ACC) * (1 + accuracy_pct/100)
+hit_chance = accuracy / (accuracy + evasion_target)
+```
+
+- `K_DEX_ACC` = 1.5 · Dex 816 ได้ 1,224 แล้วคูณ affix `Accuracy %` สูงสุด 25 ที่ main hand = **1,530** ที่เพดาน
+- **ไม่มี `accuracy_flat`** — affix Accuracy มีแต่ % (ดู attribute-item.md) สูตรเดิมบวกช่องที่ไม่มีอยู่จริงเหมือน aspd
+- **ลบ `accuracy_cap` 2,000 ทิ้ง** — สูตรสัดส่วนจำกัดตัวเองอยู่แล้ว (เข้าใกล้ 100% แต่ไม่มีวันถึง) และเพดานที่คำนวณได้ 1,530 ไม่เคยชน 2,000 cap เดิมจึงไม่ได้กันอะไรนอกจากทำให้ตัวเลขดูมีเหตุผล
+- **evasion ของมอนเปลี่ยนเป็น `evasion = mob_level × 1`** (เลเวล 100 = 100 ไม่ใช่ 600)
+  ที่ 600 คนที่ไม่ได้ลง Dex จะ hit chance แค่ 40% ในเกมที่ต้องตีทั้งวัน · และเลข 600 เดิมตั้งบนสมมติฐานว่า Dex = 890 ซึ่งไม่มี build จริงที่เป็นไปได้
+  เพราะเพดาน stat เดียวคือ 816 และยังต้องแบ่งชิ้นให้ Str/Agi ด้วย · ที่ `level × 1` ทั้งสองฝั่งโตเป็นเส้นตรงเท่ากัน อัตรา hit จึงคงที่ทุกเลเวล:
+
+| build | Dex | accuracy | evasion มอนเลเวล 100 | hit chance |
+|---|---|---|---|---|
+| ไม่ลง Dex เลย | 210 | 394 | 100 | 80% |
+| ลง Dex 1 ชิ้น | 247 | 463 | 100 | 82% |
+| ลง Dex 2 ชิ้น | 286 | 536 | 100 | 84% |
+| Dex เต็ม 12 ชิ้น | 816 | 1,530 | 100 | 94% |
+
+- **มอนไม่มีการหลบ** (ยังไม่มีค่า dodge ให้มอน) · `hit_chance` ใช้กับผู้เล่นฝั่งเดียว ถ้าจะให้มอนหลบได้ต้องตั้งค่า evasion/dodge ของมอนก่อน (ดู combat.md · ยังไม่มี)
+- accuracy เป็น offensive ออกได้แค่ main hand ส่วน Dex ที่ได้จาก core stat ยังใช้คำนวณ accuracy ได้ตามปกติ
+
+# 9. Alignment และ Elemental resistance
+
+```
+elem_align   = dex * K_DEX_ALIGN + elem_align_flat
+elem_align   = min(elem_align, 50)
+
+res_c        = vit * K_VIT_RES
+elem_res_x   = res_c * (1 + elem_res_pct_x/100)
+elem_res_x   = min(elem_res_x, 75)
+
+status_align = dex * K_DEX_ALIGN     ใช้ตัวเดียวกับ elem_align
+```
+
+- `K_DEX_ALIGN` = 0.05 · Dex 816 ได้ 40.8% + ช่อง alignment บนชิ้นป้องกัน (สูงสุด 5% ต่อชิ้น) = 45.8% เมื่อลง 1 ชิ้น · cap 50
+- `K_VIT_RES` = 0.05 · Vit 816 ได้ 40.8% แล้วคูณด้วย affix
+- ยุบ `status_res` เดิมที่เคยให้ Str ทิ้งไปแล้ว ไม่มี stat ไหนให้ status res นอกจากนี้
+- **cap 75 ใช้ได้แต่ต้องลงทุน 3 ชิ้น** `40.8 × (1 + 30+30+30)% = 77.5 → ตัดที่ 75` · 2 ชิ้นได้ 65.3% · ไม่ลง affix เลยได้ 40.8%
+  res ยังเป็นการซื้อทีละชิ้นที่เห็นผลจริง ไม่ฟรีจาก Vit อย่างเดียว
+- **cap alignment เดิม 60 ชนไม่ได้** · ค่าสูงสุดที่กติกาปัจจุบันอนุญาตคือ Dex 816 (40.8%) + ช่อง alignment จาก amulet กับ gloves เท่านั้น (+5 +5) = **50.8%**
+  จึงลด cap เป็น **50** ให้เป็นเพดานที่ extreme elemental build แตะได้จริง (Buff อย่าง Focus +20% ยังดันข้ามช่วงสั้น ๆ ได้ก่อนโดนตัดกลับ)
+  ถ้าอยากให้ cap 60 เป็นจริง ต้องขยายช่อง alignment ไปที่ cape ด้วย — เลือกแบบลด cap ก่อนเพราะไม่แตะ pool ของ slot
 
 # 10. Drop chance
 
 ```
-drop_rate = 1 + lck * K_LCK_DROP
+drop_rate = (1 + lck * K_LCK_DROP) × (1 + mastery_collection/100)
 ```
 
-Lck มีผลกับ drop ด้วย ต้องระวังไม่ให้ Lck เป็น stat ที่คุ้มทุกทางจนเด่นเกินตัวอื่น
+- `K_LCK_DROP` = 0.01 · Lck 816 ได้ 9.2 เท่า
+- **`drop_rate` เป็นตัวคูณ ไม่ใช่ความน่าจะเป็น** — base drop chance ตั้งแล้วที่ **8% ต่อการฆ่า** (loot.md หัวข้อ 2) → ไม่ลง Lck ที่เลเวล 100 ได้ 24.8% · Lck 816 ได้ 73.3%
+  ตัวเลขนี้ผูกกับราคาสกุลคราฟและกับโอกาสได้ skill ของ boss (loot.md · crafting.md · economy.md ปิดแล้วทั้งหมด)
+- `mastery_collection` = จำนวนชนิดอาวุธที่ mastery ≥ 10 → **+1% ต่อชนิด สูงสุด +12%** (equipment-weapon.md) · ไม่แตะ DPS เลย จึงเลื่อนเฉพาะรายได้ของ ไม่ใช่ความแรง
+- Lck มีผลกับ drop ด้วย ต้องระวังไม่ให้ Lck เป็น stat ที่คุ้มทุกทางจนเด่นเกินตัวอื่น — Lck ให้ crit, perfect dodge และ drop ครบ 3 ทาง จึงต้องลด K ทุกตัวให้ต่ำ
+  จากตาราง DPS หัวข้อ 0: เอา 2 ชิ้นจาก Str ไปลง Lck (Str 8 / Agi 2 / Lck 2) ทำให้ DPS ลดจาก 9,847 เหลือ **7,670 (−22%)** เพื่อแลก crit จาก 18.5% เป็น 21% · ค่าของ Lck จึงอยู่ที่ความสบายตอน crit ไม่ใช่ตัวเลขหลัก · และค่าของ mastery อยู่ที่ความเร็วเก็บฝุ่น ไม่ใช่ความแรง
 
-# สรุป K ที่ต้องตั้ง
+# 11. Weight
 
-| K | หน่วย | หมายเหตุ |
+```
+weight_capacity = str * K_STR_WEIGHT
+weight_used     = ผลรวมของ 12 ชิ้น (ตารางน้ำหนักใน attribute-item.md)
+encumbrance     = min( (weight_used − weight_capacity) / weight_capacity , 0.50 )
+aspd            = aspd × (1 − encumbrance)
+```
+
+- `K_STR_WEIGHT` = 2 · Str 816 ถือได้ 1,632 · ไม่ลง Str เลย (Str = 210 จากเลเวลล้วน) ถือได้ 420
+- **ไม่มีการล็อกช่องใส่** — ของหนักเกินไม่ได้ห้ามใส่ แต่ทำให้ *ตีช้าลง* สูงสุด -50% ของ aspd
+  ทางเลือกที่ปฏิเสธ: "ใส่ไม่ได้ถ้าหนักเกิน" ซึ่งในเกม idle จะกลายเป็นประตูปิดทาง drop ที่ผู้เล่นเพิ่งได้มา และบังคับให้ต้องถอดของอัตโนมัติตอน AFK
+- เกมใช้หน่วยเดียวกันกับที่แสดงบนไอเทม (หน่วยน้ำหนัก) และแสดงเป็น `used / capacity` ตามกติกาของ character-sheet.md
+
+| set ที่ใส่ (item-base.md) | น้ำหนักสูง | ไม่ลง Str (420) | Str 2 ชิ้น (520) | Str 6 ชิ้น (936) |
+|---|---|---|---|---|
+| cloth/glass (circlet · vestments · wrap · soft · sash · wraps · band · pendant · cloak + dagger + buckler) | 322 | 0% | 0% | 0% |
+| balanced (coif · mail · greaves · striders · clasp · gloves + sword + tome) | 507 | **−21%** | 0% | 0% |
+| armored (barbute · plate · cuisses · sabatons · girdle · gauntlets · signet · talisman · mantle + 2h axe) | 657 | **−50% (ชนเพดาน)** | −26% | 0% |
+
+- ที่คุณภาพ **กลาง** เซ็ตอยู่ระหว่าง 248-505 ซึ่งคนไม่ลง Str (420) พ้นสองทางแรก · **ภาษีเริ่มมีผลจริงตอนคุณภาพสูงและตอนเลือกเกราะหนัก** ซึ่งเป็นจังหวะที่ผู้เล่นรู้ตัวแล้วว่าตัวเองเลือกอะไร
+- น้ำหนักเป็นต้นทุนของของที่ดีกว่าโดยธรรมชาติ เพราะตัวคูณคุณภาพ ×1.3 ใช้กับน้ำหนักด้วย ไม่ใช่กับค่า stat อย่างเดียว
+- **ผลต่อตาราง build ในหัวข้อ 0**: ตัวเลข DPS ทั้งหมดตั้งบนสมมติฐานว่าไม่โดน encumbrance · cloth/glass build ไม่โดนเลยจึงอ่านตารางนั้นได้ตรง · armored build ที่ข้ามช่องให้ Str ไม่พอจะต่ำกว่าตารางนั้น 21-50%
+
+# สรุป K ที่ตั้งแล้ว
+
+| K | ค่า | หน่วย | หมายเหตุ |
+|---|---|---|---|
+| K_STR | 5 | phys / Str | Str 816 → 4,080 · ตัวหลักของ Str |
+| K_INT | 5 | magic / Int | ตัวหลักของ Int |
+| K_ELEM | 4 | elem / Int | ต่ำกว่า Int เพราะต้องผ่าน alignment ก่อน |
+| K_VIT_HP | 20 | hp / Vit | Vit 816 → 16,320 ดิบ |
+| K_VIT_REGEN | 0.25 | hp regen / Vit | 204/วิ ที่ 816 |
+| K_INT_MP | 4 | mana / Int | ตั้งให้ mana เป็นข้อจำกัด ดูหัวข้อ 5 |
+| K_INT_MREGEN | **0.15** | mana regen / Int | เดิม 0.2 ทำ pool/regen เหลือ 29.7 วิ ขัดเจตนา 40 วิ |
+| K_AGI_DODGE | 0.15 | dodge / Agi | Agi 816 + flat 2 ชิ้น = 152 → ชน cap โอกาส 60% |
+| K_AGI_ASPD | 0.25 | aspd % ต่อ Agi | `aspd = weapon_aspd × (100 + (agi−12)×0.25 + aspd_pct)` · เลเวล 1 sword = 1.2 ครั้ง/วิ |
+| K_WIS_CDR | 0.03 | cdr / Wis | 24.5% ที่ 816 · ต้อง affix 4 ชิ้นจึงชน cap 50 |
+| K_DEX_ACC | 1.5 | accuracy / Dex | ไม่มี cap แล้ว สูตรสัดส่วนจำกัดตัวเอง |
+| K_DEX_ALIGN | 0.05 | alignment / Dex | ใช้ร่วมกันทั้งธาตุและสถานะ · cap 50 |
+| K_VIT_RES | 0.05 | elem res / Vit | ไม่มี flat · 40.8% ที่ 816 |
+| K_LCK_CRIT | 0.05 | crit chance / Lck | 40.8% ที่ 816 + 8 จาก main hand |
+| K_LCK_PDOGE | **0.01** | perfect dodge / Lck | เดิม 0.005 ชน cap 5 ไม่ได้เพดานคือ 4.1% |
+| K_LCK_DROP | 0.01 | drop rate multiplier / Lck | 9.2 เท่าที่ 816 · ยังไม่มี base drop |
+| K_STR_WEIGHT | 2 | weight / Str | 1,632 ที่ Str 816 · เกินแล้วตัด aspd สูงสุด -50% (หัวข้อ 11) |
+| K_dodge | **100** | ตัวหารสูตร dodge | เดิม 25 ทำให้ dodge flat สองชิ้นชน cap คนเดียว |
+| evasion ของมอน | **level × 1** | ต่อเลเวลมอน | เดิม 600 ที่เลเวล 100 ทำให้คนไม่ลง Dex hit แค่ 40% |
+| weapon_aspd | 0.7-1.5 | ครั้ง/วิ ฐานของอาวุธ | เป็นตัวคูณทั้งวงเล็บในหัวข้อ 7 ไม่ใช่ตัวคูณของ term Agi เท่านั้น |
+| weapon_mult | 1.2 / weapon_aspd | ต่อชนิดอาวุธ | ตัดสินแล้ว · ให้ DPS เท่ากันทุกชนิดที่ Agi ไม่ชน cap |
+
+# Cap ที่มี
+
+| ค่า | cap | แตะได้ไหมที่เพดานจริง |
 |---|---|---|
-| K_STR | phys / Str | ตัวหลักของ Str |
-| K_STR_RES | status res / Str | |
-| K_INT | magic / Int | ตัวหลักของ Int |
-| K_INT_MP | mana / Int | |
-| K_INT_MREGEN | mana regen / Int | |
-| K_VIT_HP | hp / Vit | |
-| K_VIT_REGEN | hp regen / Vit | |
-| K_AGI_DODGE | dodge / Agi | |
-| K_AGI_ASPD | aspd / Agi | |
-| K_WIS_CDR | cdr / Wis | |
-| K_DEX_ACC | accuracy / Dex | |
-| K_DEX_ALIGN | status align / Dex | |
-| K_LCK_CRIT | crit chance / Lck | หน่วยเล็กมาก |
-| K_LCK_DROP | drop rate / Lck | |
-| K_dodge | ตัวหารสูตร dodge | ควบคุมความชัน |
-| weapon_aspd | ต่อชนิดอาวุธ | ดู equpment-weapon.md |
-| weapon_mult | ต่อชนิดอาวุธ | ดู equpment-weapon.md |
+| Critical chance | 100 | ได้ 48.8% จาก Lck 816 + main hand · ที่เหลือต้องมาจาก buff/skill เท่านั้น |
+| Dodge (โอกาสหลบ) | **60** | ชนพอดีเมื่อลง Agi 12 ชิ้น + dodge flat T1 สองชิ้น · เดิม 75 เป็นค่า rate ที่ชนตั้งแต่ไม่มี Agi |
+| Perfect dodge | 5 | ชนที่ Lck 500 (K ใหม่ 0.01) |
+| Elemental alignment | **50** | Dex 816 + amulet + gloves = 50.8 → พอดี · เดิม 60 แตะไม่ได้ |
+| Elemental resistance | 75 | ต้อง Vit 816 + ช่อง res 3 ชิ้น |
+| Cooldown reduction | 50 | ต้อง Wis 816 + ช่อง CDR 4 ชิ้น |
+| Attack speed | 300 (= 3 ครั้ง/วิ) | dagger ชนที่ Agi 312 · sword/axe 512 · bow 603 · mace 712 · staff และ 2h แตะไม่ได้ (จงใจ) |
+| Accuracy | ~~2,000~~ **ลบทิ้ง** | สูตรสัดส่วนห้าม 100% อยู่แล้ว เพดานคำนวณได้ 1,530 ไม่เคยชน cap เดิม |
 
-# Cap ที่ต้องมี
+Cap ทั้งหมดนี้ต้องอยู่รวมกันในไฟล์เดียว ไม่งั้นแต่ละระบบจะตั้งค่าเองแล้วชนกัน
+และ **cap ทุกตัวต้องมีคอลัมน์ "แตะได้ไหม"** — cap ที่แตะไม่ได้ไม่ใช่การจำกัดพลัง แต่เป็นตัวเลขที่หลอกผู้เล่นว่ายังไปต่อได้อีก
 
-| ค่า | cap |
-|---|---|
-| Critical chance | 100 |
-| Dodge | 75-80 |
-| Status resistance | 75 |
-| Cooldown reduction | 50-60 |
-| Attack speed | 200 |
+# ตัวเลขฐานที่ยังไม่มี
 
-Cap ทั้งหมดนี้ควรอยู่ร่วมกันในไฟล์เดียว ไม่งั้นแต่ละระบบจะตั้งค่าเองแล้วชนกัน
+# ตัวเลขฐานที่ยังไม่มี
 
-# ยังไม่มีข้อมูลตั้งต้น
+ตัดไปแล้วเพราะตัดสินแล้ว: `weapon_mult` (= 1.2/weapon_aspd) · base power ของอาวุธ (ไม่มี) · `accuracy_cap` (ลบทิ้ง) · evasion ของมอน (= level × 1)
 
-- ค่า K ทั้งหมดยังไม่ได้ตั้ง
-- base power ของอาวุธแต่ละชนิดยังไม่มี
-- ต้องการค่า level gain ของ core stat และ hp/mana ต่อ level
+ยังขาดจริง และแต่ละข้อปิดไม่ได้จากในไฟล์นี้ไฟล์เดียว:
 
-ช่องเหล่านี้คือตัวเลขที่ต้องหามาเพื่อให้สูตรทั้งหมดรันได้จริง
+- ~~ตารางน้ำหนักของไอเทม~~ **ปิดแล้ว** — ตารางต่อ slot + ชนิดอาวุธใน attribute-item.md · เกินพิกัดแล้วตัด aspd สูงสุด -50% (หัวข้อ 11) · สิ่งที่ยังไม่ปิดคือ "ฐานของไอเทม (base)" ที่จะทำให้ของ slot เดียวกันหนักต่างกัน
+- ~~base drop chance ต่อการฆ่า 1 ตัว~~ **ปิดแล้วใน loot.md** — 8% ต่อการฆ่า · ให้ 135-421 drops/ชม. ตามขั้นคุณภาพ (Lck เต็ม 1,319/ชม.) · ราคาสกุลคราฟทั้งหมดใน crafting.md ผูกกับเลขนี้
+- ~~ดาเมจของมอน + รอบการโจมตี + กติกาตาย~~ **ปิดแล้วใน combat.md** — มอน 1 ครั้ง/วิ (boss 0.8) · ดาเมจ = `DPS_typical ÷ 27` ต่อวิ โดย 50% เป็นกายภาพ 50% เป็นธาตุตาม innate ของมัน · **ไม่มีการตาย** ใช้ `push` = พัก `Max HP ÷ (hp_regen × 8)` วินาที
+  ผลที่วัดได้ (`node tools/survival.js`): กลุ่ม 5 ตัวที่เลเวลตรงกันทำให้เสีย 23-46% ของ pool และ **ไม่ push buildใด** ภายใต้กติกา "มอนเข้าพร้อมกันได้สุด 3 ตัว" · boss เลเวลเท่าตัว push แค่ build ที่ pool บางแล้วฆ่าช้า (dodge 137%) ส่วน glass 87% / mix 80% / tank 69% ผ่าน · heal ×1.52 ทำให้ dodge ผ่านที่ 90%
+- **สูตร XP และจำนวนโซน** — world.md ยังไม่มี ทำให้จับเวลาคือเกมยาวเท่าไรไม่ได้ และจับขั้นบันได skill 32 ตัวซ้ำว่าเป็นไปได้ไหม
+- **K ของแต่ละ skill** — ตอนนี้นิยามแล้วว่า "weapon power" ในตาราง skill = ค่า phys/magic power ของตัวละครที่คำนวณจากหัวข้อ 1-2 · แต่ % ของ skill เทียบกับการโจมตีปกติยังไม่ได้ตั้ง
+- **ตัวคูณ alignment กับความแรงธาตุ** — ดู elements.md (หัวข้อถัดไปที่ต้องตัดสิน: gate นี้ทำให้ดาเมจธาตุเหลือ ~35% ของดาเมจกายภาพ)
