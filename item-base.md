@@ -24,7 +24,7 @@ A Base does two things, and **is intentionally allowed to do nothing else**
 
 | Base | Weight | Primary | Secondary |
 |---|---|---|---|
-| coif | 30 | Dodge % · Max HP flat | Elemental resistance % |
+| coif | 30 | Evasion % · Max HP flat | Elemental resistance % |
 | barbute | 45 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
 | circlet | 18 | Max Mana % · Cooldown reduction % | Elemental resistance % · Mana Regeneration % |
 
@@ -32,7 +32,7 @@ A Base does two things, and **is intentionally allowed to do nothing else**
 
 | Base | Weight | Primary | Secondary |
 |---|---|---|---|
-| mail | 60 | Dodge % · Max HP % | Elemental resistance % · Max HP flat |
+| mail | 60 | Evasion % · Max HP % | Elemental resistance % · Max HP flat |
 | plate | 85 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
 | vestments | 28 | Max Mana % · Max Mana flat | Cooldown reduction % · Mana Regeneration % |
 
@@ -40,7 +40,7 @@ A Base does two things, and **is intentionally allowed to do nothing else**
 
 | Base | Weight | Primary | Secondary |
 |---|---|---|---|
-| greaves | 50 | Dodge flat · Dodge % | Max HP flat |
+| greaves | 50 | Evasion flat · Evasion % | Max HP flat |
 | cuisses | 70 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
 | wrap | 25 | Cooldown reduction % · Max Mana flat | Elemental resistance % · Mana Regeneration % |
 
@@ -48,9 +48,9 @@ A Base does two things, and **is intentionally allowed to do nothing else**
 
 | Base | Weight | Primary | Secondary |
 |---|---|---|---|
-| striders | 35 | Dodge flat · Dodge % | Cooldown reduction % |
+| striders | 35 | Evasion flat · Evasion % | Cooldown reduction % |
 | sabatons | 55 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
-| soft boots | 30 | Max Mana flat · Cooldown reduction % | Dodge % · Max Energy Shield % |
+| soft boots | 30 | Max Mana flat · Cooldown reduction % | Evasion % · Max Energy Shield % |
 
 ## belt
 
@@ -58,15 +58,15 @@ A Base does two things, and **is intentionally allowed to do nothing else**
 |---|---|---|---|
 | girdle | 40 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
 | sash | 20 | Max Mana % · Cooldown reduction % | Elemental resistance % · Mana Regeneration % |
-| clasp | 28 | Elemental resistance % · Max HP flat | Dodge flat |
+| clasp | 28 | Elemental resistance % · Max HP flat | Evasion flat |
 
 ## gloves
 
 | Base | Weight | Primary | Secondary |
 |---|---|---|---|
-| gauntlets | 45 | Max HP % · Dodge flat | Elemental alignment % · Life Regeneration % |
+| gauntlets | 45 | Max HP % · Evasion flat | Elemental alignment % · Life Regeneration % |
 | wraps | 20 | Elemental alignment % · Cooldown reduction % | Max Mana flat |
-| gloves | 25 | Dodge % · Dodge flat | Elemental alignment % |
+| gloves | 25 | Evasion % · Evasion flat | Elemental alignment % |
 
 ## ring (each ring picks independently)
 
@@ -86,15 +86,15 @@ A Base does two things, and **is intentionally allowed to do nothing else**
 
 | Base | Weight | Primary | Secondary |
 |---|---|---|---|
-| cloak | 20 | Dodge % · Elemental resistance % | Cooldown reduction % · All Resistance % |
+| cloak | 20 | Evasion % · Elemental resistance % | Cooldown reduction % · All Resistance % |
 | mantle | 32 | Max HP flat · Elemental resistance % | Max Mana flat · All Resistance % |
 
 ## off hand
 
 | Base | Weight | Primary | Secondary |
 |---|---|---|---|
-| buckler | 25 | Dodge % · Cooldown reduction % | Max HP flat |
-| kite shield | 55 | Max HP flat · Max HP % | Dodge % |
+| buckler | 25 | Evasion % · Cooldown reduction % | Max HP flat |
+| kite shield | 55 | Max HP flat · Max HP % | Evasion % |
 | tome | 30 | Max Mana % · Cooldown reduction % | Max Mana flat · Elemental alignment % |
 
 - Main-hand weapons: **ruled that a weapon type MAY carry more than one Base** (A10 · D-072) — the old "the weapon type is already its Base" (12 types in equipment-weapon.md, each with its own weight + weapon_aspd + pool) is lifted, so the same type can ship as frame variants. The concrete Base frames per type and their effect on the craftable-Mod count are enumerate-and-cage work now tracked in `harness/todo.md` section B, not invented here.
@@ -110,8 +110,8 @@ Heavy Bases (barbute · plate · cuisses · sabatons · gauntlets) carry Armour 
 | Chosen path | Combined total (low quality) | Full set (mid quality) | Full set (high quality) | Aspd tax with no Str investment |
 |---|---|---|---|---|
 | cloth/glass (circlet · vestments · wrap · soft boots · sash · wraps · band ×2 · pendant · cloak) | 193 | 251 | 326 | 0% |
-| balanced (coif · mail · greaves · striders · clasp · gloves · band ×2 · pendant · cloak) | 280 | 364 | 473 | −14% |
-| armored (barbute · plate · cuisses · sabatons · girdle · gauntlets · signet ×2 · talisman · mantle) | 420 | 546 | 710 | −50% |
+| balanced (coif · mail · greaves · striders · clasp · gloves · band ×2 · pendant · cloak) | 280 | 364 | 473 | 0% |
+| armored (barbute · plate · cuisses · sabatons · girdle · gauntlets · signet ×2 · talisman · mantle) | 420 | 546 | 710 | 0% |
 
 Printed by `node tools/bases.js --blocks` from `tools/data/bases.json`. Mid and high apply `quality_weight_multiplier` (×1.3) per Item quality band, the same way `weightAtQuality` applies it to a single item. The held weapon is not folded into these sets: it weighs 25 to 85 at Base weight (`equipment-weapon.md` · D-101), the same ×-quality multiplier applies, and an off-hand weapon counts ×0.8 of its own type (`mod-pool.md`).
 <!-- END GENERATED:three-paths -->
@@ -131,7 +131,7 @@ Printed by `node tools/bases.js --blocks` from `tools/data/bases.json`. Mid and 
 |---|---|
 | mod-pool.md | Per-slot weight table → becomes per-*Base* weight |
 | formula.md section 11 | The penalty numbers are the ones printed above (cloth pays nothing, the heavy paths pay up to the Cap) |
-| equipment-slot.md | Per-slot Primary/Secondary → moved here per Base · the old notes 2 (Dodge Flat on only 2 slots) and 3 (Alignment on only 2 slots) are **retired**: the union pools now give Dodge Flat 4 slots, and **Elemental alignment and Elemental resistance are separated onto disjoint slot families** (alignment · gloves · ring · amulet · off hand; resistance · helmet · chest · pant · boots · belt · cape) so an Element build never trades survival against the line that gates its status and scales its Element damage — see the generated Mod availability table in equipment-slot-pools.md |
+| equipment-slot.md | Per-slot Primary/Secondary → moved here per Base · the old notes 2 (Evasion Flat on only 2 slots) and 3 (Alignment on only 2 slots) are **retired**: the union pools now give Evasion Flat 4 slots, and **Elemental alignment and Elemental resistance are separated onto disjoint slot families** (alignment · gloves · ring · amulet · off hand; resistance · helmet · chest · pant · boots · belt · cape) so an Element build never trades survival against the line that gates its status and scales its Element damage — see the generated Mod availability table in equipment-slot-pools.md |
 | item-rarity.md | Third-Rarity (Unique) **cut** (D-009 5c) — Rarity stays two levels; Base frame + Mods carry identity |
 | crafting.md | Open question "item Base" in the missing-slots list → now answered · **per-item craft-attempt ceiling: none** (D-009 5b) — structural ceilings (Refine T1 · Ascend high quality) already bound it |
 | loot.md section 1 | Roll order gains a "pick Base" step before Primary/Secondary |

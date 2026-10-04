@@ -293,10 +293,10 @@ export function castOnce(
     if (hits > 1) dmg *= hits * (valueOf(skill, 'hit_pct', 100) / 100);
     dmg *= sm.groupBonus(skill, c.weaponName) * mastery.skillBonus(c.weaponMastery || 0);
     const effects = (skill.effects || []) as any[];
-    const perDodge = effects.find((e) => e.stat === 'damage_per_dodge_pct');
-    // Riposte scaled off dodge chance, which is gone: it now reads the Evasion chance the sheet
-    // carries, so the row keeps its boss path on the merged line (D-112)
-    if (perDodge) dmg *= 1 + Math.min(perDodge.cap ?? Infinity, c.evasionChance * perDodge.value) / 100;
+    const perEvasion = effects.find((e) => e.stat === 'damage_per_evasion_pct');
+    // Riposte's boss path: the row scales on the Evasion chance the sheet carries, which is the line
+    // Dodge was merged into (D-112), so the key names what it actually reads.
+    if (perEvasion) dmg *= 1 + Math.min(perEvasion.cap ?? Infinity, c.evasionChance * perEvasion.value) / 100;
     // Retribution: nothing extra at full HP, the row's own multiplier at the share of lost HP it
     // names, growing in between (D-102) — the tank tool that gives Vit a damage line at last
     const atMissing = effects.find((e: any) => e.stat === 'missing_hp_pct_for_max');

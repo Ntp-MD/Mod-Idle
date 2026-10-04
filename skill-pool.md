@@ -10,25 +10,25 @@ import skill-pool-system.md
 The core rule is that a skill must change **what you do**, not just add numbers. If it is only numbers, it should be an Mod instead
 
 # Detail files
-- skill-pool-attack.md — 18 attack skills (Cleave..Void Lance)
+- skill-pool-attack.md — attack skills (Cleave..Void Lance)
 - skill-pool-buff.md — buff skills (roster cleared for redesign)
-- skill-pool-curse.md — 10 curse skills + attach rule (Weaken..Pandemonium)
-- skill-pool-aura-heal.md — Reservation + 3 heals + 12 auras + baseline
+- skill-pool-curse.md — curse skills + attach rule (Weaken..Pandemonium)
+- skill-pool-aura-heal.md — Reservation + heals + auras + baseline
 - skill-pool-system.md — combat clock + AoE + passives→keystones + acquisition + ladder + level + open numbers
 
 <!-- BEGIN GENERATED:skill-count -->
-# Skill count = 43
+# Skill count = 51
 
 | Type | Count | Controlled by |
 |---|---|---|
 | **attack** | 18 | Order list · cd + mana |
-| **buff** | 0 | Cleared for redesign · tree nodes still reference the old 14 |
-| **curse** | 10 | Attached to target · Uses same hit_chance as attacks |
+| **buff** | 6 | Timed self-buff - 10 sec, 15 sec cd, never persists between fights |
+| **curse** | 11 | Attached to target · Uses same hit_chance as attacks |
 | **heal** | 3 | Same list (key on bosses) |
-| **aura** | 12 | Player-managed set · **Reserves Max Mana** |
-| **total** | **43** | Roster mid-redesign · buff + aura set not final |
+| **aura** | 13 | Player-managed set · **Reserves Max Mana** |
+| **total** | **51** | Roster mid-redesign · buff + aura set not final |
 
-> **Counts are provisional.** The buff roster was cleared for a redesign and the aura set moved from 6 to 12 (`skill-pool-aura-heal.md` · Decision 1), which drops the total from 51 to 43 and leaves tree nodes in `skill-tree-*.md` referencing skills that no longer exist (`checks.md` D19 will fail until those nodes are rewritten). If `Retribution` is also removed from the attack table, attack drops 18 → 17 and the total lands at **42**.
+> **Counts are provisional.** The buff roster was cleared for a redesign and the aura set moved from 6 to 13 (`skill-pool-aura-heal.md` · Decision 1), which drops the total from 51 to 51 and leaves tree nodes in `skill-tree-*.md` referencing skills that no longer exist (`checks.md` D19 will fail until those nodes are rewritten). If `Retribution` is also removed from the attack table, attack drops 18 → 17 and the total lands at **50**.
 <!-- END GENERATED:skill-count -->
 
 # Skill frame
@@ -44,14 +44,9 @@ The core rule is that a skill must change **what you do**, not just add numbers.
 | Skill level | Gains XP from use, maximum equals character level |
 
 **Mana cost is % rather than a number** because a fixed number would be unusable early and irrelevant late. Percent keeps balance equal at all levels and gives `Max Mana %` meaning
-**"Weapon power" in the skill table = character phys/magic power** from formula.md sections 1-2, not the power value of the weapon piece (this game has no Base power per weapon type · decided in formula.md). The two % parts of each skill must sum to 100, so no new formula is needed:
-```
-skill_damage = stat × K_stat × (stat%/100) + power × (power%/100)
-```
-- Measured example: Cleave (Str 40% + power 60%) on a 12-piece Str build at level 100 → `816×5×0.40 + 4,826×0.60 = 1,632 + 2,895 = 4,527` per hit
-- Compared to normal attacks of the same build (true DPS 9,847) → at K_SKILL = 1.5 (new decision below) Cleave deals 8,828 per press and fires ~0.13 times/sec because **mana is the limiter**; a single skill adds a low-double-digit percent of build DPS, and a 3-skill rotation adds more (run `node tools/skills.js`)
-- This number is still too low as a baseline for the system that is the heart of the game · See targets in "Numbers not yet fixed"
-**Cooldown calculation order**
+**"Weapon power" in the skill table = character phys/magic power** from formula.md sections 1-2, not the power value of the weapon piece (this game has no Base power per weapon type · decided in formula.md).
+- **A press is one percentage of the hit the build already deals**, taken from the finished physical hit or the magic hit plus Element — the full form and its level ramp live in `skill-pool-system.md`, and `tools/skills.js` prints every row's measured press. The old `stat × K_stat × stat% + power × power%` split is retired (D-070 · D-097): a skill inherits gear and globals rather than dipping into the stats a second time.
+- **Cooldown calculation order**
 ```
 cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)
 ```

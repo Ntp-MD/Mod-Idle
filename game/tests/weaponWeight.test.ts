@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BASES, E } from '../src/engine/client';
+import { BASES } from '../src/engine/client';
 import { weaponWeightOf } from '../src/sim/drop';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import type { Item } from '../src/sim/types';
@@ -13,7 +13,7 @@ import type { Item } from '../src/sim/types';
  * it into `bases.json`, and the client reads it from there, so nothing below is a second copy.
  */
 
-const axeIn = (): Item[] => {
+const axeIn = (): (Item | null)[] => {
   const gear = emptyGear();
   gear[10] = weaponPiece('two-handed axe');
   return gear;
@@ -51,17 +51,16 @@ describe('the held weapon weighs its type', () => {
     expect(off).toBeLessThan(full);
   });
 
-  it('a heavy weapon taxes a weak arm, and Mastery discounts the weight it taxes', () => {
+  it('a level-1 character carries any single weapon untaxed, and Mastery discounts the weight it would tax', () => {
     const heavy = buildCharacter(1, axeIn());
     const light = buildCharacter(1, gearWith('wand'));
     expect(heavy.weightUsed).toBeGreaterThan(light.weightUsed);
-    // level 1 capacity is the bare Str line × K_STR_WEIGHT, so the axe is far over it and the wand
-    // only just — which is the whole reason the tax is a percentage and not a slot lock
-    expect(heavy.encumbrance).toBe((E.caps as any).weight_overload);
-    expect(light.encumbrance).toBeGreaterThan(0);
-    expect(light.encumbrance).toBeLessThan(heavy.encumbrance);
+    // `weight_base` lifts the level-1 capacity clear of every weapon in the table, so a lone weapon
+    // is never taxed — the tax is a percentage that binds only on a set heavy enough to cross the line
+    expect(heavy.encumbrance).toBe(0);
+    expect(light.encumbrance).toBe(0);
     const mastered = buildCharacter(1, gearWith('two-handed axe'), {}, 20);
     expect(mastered.weightUsed).toBeLessThan(heavy.weightUsed);
-    expect(mastered.encumbrance).toBeLessThanOrEqual(heavy.encumbrance);
+    expect(mastered.encumbrance).toBe(0);
   });
 });

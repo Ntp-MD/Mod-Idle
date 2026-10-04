@@ -49,7 +49,7 @@ describe('starting a trip', () => {
     expect(linkReachable(s, 0)).toBe(true);    // Eastgate is where the player starts
     expect(startTrip(s, 0).ok).toBe(true);
     expect(startTrip(s, 1).ok).toBe(false);
-    expect(s.road.encountersLeft).toBe(road.encountersPerTrip);
+    expect(s.road!.encountersLeft).toBe(road.encountersPerTrip);
   });
 
   it('walking the Road opens the settlement at the far end', () => {

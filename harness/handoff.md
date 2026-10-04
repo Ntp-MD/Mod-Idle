@@ -153,7 +153,7 @@ inside the line it raises.
 
 What the queue holds now is one owner question and one housekeeping line: **A11** (the hit-count
 build’s proc leg is thin — raise the mob-side DoT budget, which re-prices `mob_HP`, or re-word
-`concept.md` P0-2 so that build’s identity is swing count, chill uptime and Riposte’s dodge scaling;
+`concept.md` P0-2 so that build’s identity is swing count, chill uptime and Riposte’s Evasion scaling;
 both answers move a published promise, so neither is taken here) and **C1** (`npm run check` is not
 green yet). Section B is empty: the audit ran end to end — B1 (D-103) · B3 (D-106) · B4 (D-105) · B5 ·
 B8 · B9 · B10 · B13 · B21 — and each one’s numbers are in `harness/decisions.md` rather than in this

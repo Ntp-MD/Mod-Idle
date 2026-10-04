@@ -40,16 +40,16 @@ export function createEngine(E) {
     return statAt(S.level_cap) + S.core_flat_max * n;
   };
 
-  const CEIL = Math.round(ceilStat(S.item_slots, false) * 100) / 100;   // 816
-  const SPLIT = Math.round(ceilStat(S.item_slots, true) * 10) / 10;      // 468
+  const CEIL = Math.round(ceilStat(S.item_slots, false) * 100) / 100;   // twelve items on one stat
+  const SPLIT = Math.round(ceilStat(S.item_slots, true) * 10) / 10;      // twelve items split two ways
   const FORCED_SPLIT = (statAt(S.level_cap) + S.core_flat_max * S.item_slots) * 1; // 510
 
   // ---- derived ceilings (cages group B)
 
   const DERIVED = {
     phys: (CEIL * K.K_STR + M.phys_flat_main_hand) * (1 + M.phys_pct_main_hand / 100),
-    hp: (CEIL * K.K_VIT_HP + LG.hp_per_level * (S.level_cap - 1)) * (1 + M.hp_pct_per_item * LG.hp_pct_mod_slots / 100),
-    mana: CEIL * K.K_INT_MP + LG.mp_per_level * (S.level_cap - 1),
+    hp: (LG.hp_base + CEIL * K.K_VIT_HP + LG.hp_per_level * (S.level_cap - 1)) * (1 + M.hp_pct_per_item * LG.hp_pct_mod_slots / 100),
+    mana: LG.mana_base + CEIL * K.K_INT_MP + LG.mp_per_level * (S.level_cap - 1),
     mana_regen: CEIL * K.K_INT_MREGEN,
     crit: CEIL * K.K_LCK_CRIT + M.crit_pct_main_hand,
     res_raw: CEIL * K.K_VIT_RES,
@@ -59,7 +59,7 @@ export function createEngine(E) {
     cdr_raw: CEIL * K.K_WIS_CDR,
     cdr_four: CEIL * K.K_WIS_CDR * (1 + (M.cdr_pct_per_item * LG.cdr_mod_items + LG.cdr_buff_pct) / 100),
     accuracy: CEIL * K.K_DEX_ACC * (1 + M.accuracy_pct / 100),
-    weight: CEIL * K.K_STR_WEIGHT,
+    weight: LG.weight_base + CEIL * K.K_STR_WEIGHT,
     drop_mult: 1 + CEIL * K.K_LCK_DROP,
   };
   DERIVED.pool_regen_sec = DERIVED.mana / DERIVED.mana_regen;
@@ -145,7 +145,7 @@ export function createEngine(E) {
   DERIVED.es_pool = CEIL * K.K_INT_ES;
   DERIVED.es_regen = CEIL * K.K_INT_ESREGEN;
   DERIVED.es_recover_sec = DERIVED.es_pool / DERIVED.es_regen;
-  DERIVED.es_cast_hp = statAt(S.level_cap) * K.K_VIT_HP + LG.hp_per_level * (S.level_cap - 1);
+  DERIVED.es_cast_hp = LG.hp_base + statAt(S.level_cap) * K.K_VIT_HP + LG.hp_per_level * (S.level_cap - 1);
   DERIVED.es_share_of_hp = DERIVED.es_pool / DERIVED.es_cast_hp;
 
   // ---- mob curve: HP is published per zone edge, and the damage line divides back out of it
@@ -269,7 +269,7 @@ export function createEngine(E) {
   const dodgeRate = (agi) => agi * K.K_MOB_DODGE;
   const dodgeChance = (rate, attackerAccuracy) => (rate / (rate + attackerAccuracy)) * 100;
   // perfect dodge is a ratio on the Lck line; `pct` scales that line so a Mod can lift it.
-  // The Cap still binds first, so the % can never push a build past 25.
+  // The Cap binds first, so the % can never push a build past `caps.perfect_dodge`.
   const perfectDodgeChance = (lck, pct = 0) => {
     const rate = lck * K.K_LCK_PDOGE * (1 + pct / 100);
     return Math.min(CAP.perfect_dodge, rate / (rate + K.K_PDOGE) * 100);
@@ -279,9 +279,9 @@ export function createEngine(E) {
   const critChanceOf = (pool) => Math.min(pool, K.K_CRIT_CAP);
   const critDmgOf = (pool, dmgPct = 0) => 100 + dmgPct + (pool - critChanceOf(pool)) * K.K_CRIT_OVERFLOW;
 
-  const maxHpOf = (vit, level, pct = 0, flat = 0) => (vit * K.K_VIT_HP + LG.hp_per_level * (level - 1) + flat) * (1 + pct / 100);
+  const maxHpOf = (vit, level, pct = 0, flat = 0) => (LG.hp_base + vit * K.K_VIT_HP + LG.hp_per_level * (level - 1) + flat) * (1 + pct / 100);
   const hpRegenOf = (vit, pct = 0, flat = 0) => vit * K.K_VIT_REGEN * (1 + pct / 100) + flat;
-  const maxManaOf = (int, level, pct = 0, flat = 0) => (int * K.K_INT_MP + LG.mp_per_level * (level - 1) + flat) * (1 + pct / 100);
+  const maxManaOf = (int, level, pct = 0, flat = 0) => (LG.mana_base + int * K.K_INT_MP + LG.mp_per_level * (level - 1) + flat) * (1 + pct / 100);
   const manaRegenOf = (int, pct = 0, flat = 0) => int * K.K_INT_MREGEN * (1 + pct / 100) + flat;
   const maxEsOf = (int, flat = 0, pct = 0) => (int * K.K_INT_ES + flat) * (1 + pct / 100);
   const esRegenOf = (int) => int * K.K_INT_ESREGEN;
@@ -290,7 +290,7 @@ export function createEngine(E) {
   // "alignment and Elemental resistance x1.20"); the Cap still applies after it
   const alignmentOf = (dex, flat = 0, mult = 1) => Math.min(CAP.alignment, (dex * K.K_DEX_ALIGN + flat) * mult);
   const resistanceOf = (vit, pct = 0, mult = 1) => Math.min(CAP.elem_res, vit * K.K_VIT_RES * (1 + pct / 100) * mult);
-  const weightCapacityOf = (str) => str * K.K_STR_WEIGHT;
+  const weightCapacityOf = (str) => LG.weight_base + str * K.K_STR_WEIGHT;
 
   // ---- carried weight (formula-utility.md §11): the tax is a slowdown, never a slot lock
   // encumbrance = min((used − capacity) / capacity, 0.50) · aspd ×= (1 − encumbrance)

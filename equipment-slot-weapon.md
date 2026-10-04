@@ -12,8 +12,8 @@ import equipment-slot.md
 |---|---|
 | Primary | Physical power flat · Physical power % · Critical chance % · Critical damage % |
 | Secondary | Attack speed % · Accuracy % |
-| Stat Mod | Stat Mod flat · Stat Mod % (every item) |
-| Blocked | Max HP · Dodge · Cooldown reduction · Elemental resistance |
+| Stat Mod | Stat Mod flat (every item) |
+| Blocked | Max HP · Evasion · Cooldown reduction · Elemental resistance |
 
 - **`Critical damage %` is physical only** — a magic weapon can roll it, but magic damage never uses it, so a caster buys physical crit gear that does nothing for it. That is the intended shape: crit is the physical payoff (formula-offense.md section 3 · D-017).
 
@@ -31,10 +31,10 @@ import equipment-slot.md
 
 | Role | Mod |
 |---|---|
-| Shield | Max HP flat · Max HP % · Dodge % |
+| Shield | Max HP flat · Max HP % · Evasion % |
 | Book | Max Mana flat · Max Mana % · Cooldown reduction % |
 | Dual-wield weapon | Same pool as main hand but Primary weight halved |
-| Stat Mod | Stat Mod flat · Stat Mod % (every item) |
+| Stat Mod | Stat Mod flat (every item) |
 
 - Shield and book are Defensive items by rule
 - **Dual-wield is the sole exception to the rule** because it is a second weapon, so it gets Element damage and power at half weight
@@ -47,7 +47,7 @@ import equipment-slot.md
 | Group | Members |
 |---|---|
 | Offensive | Power Flat/% of every type · Critical chance % · Critical damage % · Attack speed % · Accuracy % · Str %/Flat · Int %/Flat |
-| Defensive | Max HP Flat/% · Max Mana Flat/% · Dodge Flat/% · Cooldown reduction % · Elemental resistance % · Elemental alignment % |
+| Defensive | Max HP Flat/% · Max Mana Flat/% · Evasion Flat/% · Cooldown reduction % · Elemental resistance % · Elemental alignment % |
 | Stat Mod | Assigned to neither group, accepted equally by every item per the Stat Mod section |
 
 - Main hand is the only Offensive slot, except off hand while dual-wielding
@@ -62,7 +62,7 @@ import equipment-slot.md
 | Str / physical | main hand (power + Str) + Core stat on every item |
 | Int / magic | main hand (magic power + Int) + Core stat on every item |
 | Vit / tank | chest · pant · belt + Core stat Vit on every item |
-| Agi / dodge | boots · gloves · cape · helmet + Core stat Agi on every item |
+| Agi / Evasion | boots · gloves · cape · helmet + Core stat Agi on every item |
 | Crit | main hand only — uses **Core stat Lck rolling on every item** as the main crit support instead of crit Mods |
 | Wis / CDR | amulet · cape · ring · belt · boots |
 | Dex / accuracy | main hand (Accuracy %) + Core stat Dex on every item |

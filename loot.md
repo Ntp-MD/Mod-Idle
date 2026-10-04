@@ -46,7 +46,7 @@ Set from combat.md (TTK ≈ 1 sec per kill) + new-group spawn time **4 seconds p
 
 - **Base drop chance = 8% per kill** for gear, multiplied by `drop_rate = (1 + Lck×0.01) × (1 + mastery_collection/100)` (formula.md section 10)
 - **Herb bundles ride a separate small roll**: 2% per kill (mid zones) · 3% (high zones), 1-3 zone-tier herbs each (farm.md). Bounded to leave kills/hour and F1-F5 intact; exact rate finalizes in the rebalance pass.
-- Account-wide Mastery of all 12 types to L10 = **+12% of all income in this file** (drops · stones · skill chance) · At 418 drops/hour → 468/hour · Full Lck 1,319 → 1,477/hour (equipment-weapon.md)
+- Account-wide Mastery of all 12 types to L10 = **+12% of all income in this file** (drops · stones · skill chance) · At 418 drops/hour → 468/hour · Full Lck 878 → 983/hour (equipment-weapon.md)
 - AoE shortens the cycle but is not free: under the new rules (60% per target · 3-target Cap · mana ×1.5 · skill-pool.md), a group of 5 dies in 3.75 sec instead of 4.50 sec = only **1.20x** faster, and 0.40-0.80x against 1-2 small mobs · This 1.20 figure is the ceiling accepted by the whole funnel (loot.md F1-F5) · The mechanism committed in `93cde79` stating "drop rate scales with clear rate" therefore remains but is edge-locked
 - **This table is a baseline, not a ceiling**: mob HP is set for "gear+tree on-level" → 1 sec TTK · A full-T1 + tuned-tree player kills in 0.79 sec = kills/hour can exceed this table by ~25% · Use the table numbers as the minimum income the design already covers
 
@@ -57,27 +57,27 @@ Simulated 14 hours per zone, with the player keeping only items better than the 
 <!-- BEGIN GENERATED:loot-sim -->
 | Zone | Hour 1 | 2 | 3 | 4 | 6 | 12 | Total upgrades | Keep-rate of drops | Upgrades/hr | Avg score per equipped piece |
 |---|---|---|---|---|---|---|---|---|---|---|
-| low | 30.17 | 4.42 | 2.17 | 1.75 | 0.92 | 0.50 | 44 | **2.35%** | 3.13 | 1.91 |
-| mid | 35.00 | 4.50 | 3.33 | 1.33 | 0.67 | 0.17 | 49 | **1.36%** | 3.46 | 3.06 |
-| high | 36.83 | 3.00 | 0.92 | 0.42 | 0.33 | 0.08 | 42 | **0.72%** | 3.02 | 4.07 |
-| high + full_lck | 40.75 | 1.08 | 0.33 | 0.08 | 0.00 | 0.17 | 43 | **0.23%** | 3.06 | 4.09 |
+| low | 28.67 | 4.92 | 2.75 | 1.75 | 0.92 | 0.67 | 44 | **2.35%** | 3.13 | 1.91 |
+| mid | 35.33 | 4.58 | 3.00 | 1.67 | 1.08 | 0.33 | 50 | **1.40%** | 3.56 | 3.01 |
+| high | 35.67 | 3.75 | 1.33 | 1.00 | 0.25 | 0.08 | 44 | **0.75%** | 3.13 | 4.06 |
+| high + full_lck | 39.58 | 2.25 | 0.75 | 0.33 | 0.33 | 0.00 | 44 | **0.36%** | 3.15 | 4.07 |
 
 Measured by `node tools/loot.js --sim` · 14 hours per band x 12 seeds, drop rate and Lck from `engine.json` `loot`, Mod ranges from `mods.json`, Mod weights from `engine.json` `mod_weights`, Base frames and the Gear Mod school from `item-base.md`.
 
 **An item scores the sum of `weight(line) x value / Total` over its own Mod lines, and the filter keeps it when it outscores the piece equipped in the same slot — that is the operational reading of "better on at least 1 axis" (loot.md section 4). A second, weaker keep reason survives: Elemental lines of an Element the player has no resistance for are always kept, so hunting a new Element still pays.**
 
-- Flat lines per drop: 0.358 (low) · 0.342 (mid) · 0.295 (high) · 0.293 (high + full_lck) — the four early-game Flat lines are weighted 0.5 / 0.4 / 0.25 by Item quality, so they thin out exactly as the player leaves the early zones (F11)
-- Mod lines per item: 2.76 · 2.77 · 2.77 · 2.77 · Element-hunt keeps: 1.4 · 1.8 · 1.2 · 1.2
-- Keep-rate spread across seeds: ±0.26% (low) · ±0.14% (mid) · ±0.05% (high) · ±0.02% (high + full_lck) — the row above is the mean, not a single lucky run
+- Flat lines per drop: 0.364 (low) · 0.350 (mid) · 0.305 (high) · 0.303 (high + full_lck) — the four early-game Flat lines are weighted 0.5 / 0.4 / 0.25 by Item quality, so they thin out exactly as the player leaves the early zones (F11)
+- Mod lines per item: 2.74 · 2.75 · 2.75 · 2.75 · Element-hunt keeps: 1.0 · 1.6 · 1.0 · 1.0
+- Keep-rate spread across seeds: ±0.21% (low) · ±0.12% (mid) · ±0.07% (high) · ±0.03% (high + full_lck) — the row above is the mean, not a single lucky run
 
 **Swap margin sensitivity** — the filter keeps a drop only when it beats the equipped piece by more than `loot.filter.upgrade_margin_pct` = 10% (a 2% gain is a reroll, not a decision):
 
 | Zone | 0% (any gain counts) | set margin | 2x margin |
 |---|---|---|---|
-| low | 3.53% | **2.35%** | 1.99% |
-| mid | 2.03% | **1.36%** | 1.17% |
-| high | 1.26% | **0.72%** | 0.65% |
-| high + full_lck | 0.45% | **0.23%** | 0.21% |
+| low | 3.68% | **2.35%** | 1.93% |
+| mid | 2.06% | **1.40%** | 1.19% |
+| high | 1.28% | **0.75%** | 0.67% |
+| high + full_lck | 0.65% | **0.36%** | 0.32% |
 
 The published keep-rates for this design (2.2% / 1.2% / 0.7% / 0.3% of drops) sit on the set-margin column, which is the evidence that the filter always meant this and the earlier numbers were measured the same way.
 
@@ -85,9 +85,9 @@ The published keep-rates for this design (2.2% / 1.2% / 0.7% / 0.3% of drops) si
 
 | Scenario | Keep-rate | Upgrades/hr | Avg score |
 |---|---|---|---|
-| no bias (equal frames, published rule) | 0.73% | 3.07 | 4.08 |
-| a soldier town (armored frames x2.5, cloth x0.4) | 0.74% | 3.08 | 4.08 |
-| the same town inverted (cloth x2.5, armored x0.4) | 0.76% | 3.19 | 4.10 |
+| no bias (equal frames, published rule) | 0.77% | 3.20 | 4.07 |
+| a soldier town (armored frames x2.5, cloth x0.4) | 0.77% | 3.24 | 4.07 |
+| the same town inverted (cloth x2.5, armored x0.4) | 0.78% | 3.27 | 4.07 |
 
 A settlement that rolls one school more often does move the measured rows, so a Base weight is not free — which is why `town.json` carries no frame weight while the status is pending. The pipeline above is bias-ready: add `frame_weight` and re-run.
 <!-- END GENERATED:loot-sim -->
@@ -95,7 +95,7 @@ A settlement that rolls one school more often does move the measured rows, so a 
 **Three design-changing conclusions**
 
 1. **Decision frequency collapses inside a single band** — the low band measures ~28 upgrades in hour 1, ~10 across hours 2-4, and under 1/hour by hour 6, so a zone goes quiet within hours of arriving. If drops alone drive progress, the game goes quiet per concept.md "failure points" item 1. The measured figure is not ~30/hour for long; it is ~30/hour for about an hour.
-2. **Lck does not buy "good items", it buys "item count"** — at Lck 816 the player gets 1,319 drops/hour (×3.15 of the no-Lck 418/hour) but 3.3 upgrades/hour against 3.3 (×1.01) · In other words **×3.15 count = ×1.01 decisions + ×3.15 Reroll value stones (1,316/hour)**. As a rule: Lck is a *craft-speed* stat, not an equip-speed stat · This answers the open question in concept.md whether Lck is too dominant — it dominates in one direction only, and that direction is the stone pool. Measured by gate LT5, which fails if the ratio ever crosses 1.6.
+2. **Lck does not buy "good items", it buys "item count"** — at Lck 510 the player gets 878 drops/hour (×2.10 of the no-Lck 418/hour) but 3.15 upgrades/hour against 3.13 (×1.01) · In other words **×2.10 count = ×1.01 decisions + ×2.10 Reroll value stones (875/hour)**. As a rule: Lck is a *craft-speed* stat, not an equip-speed stat · This answers the open question in concept.md whether Lck is too dominant — it dominates in one direction only, and that direction is the stone pool. Measured by gate LT5, which fails if the ratio ever crosses 1.6.
 3. **Unkept items are not lost · They become crafting currency** (section 5) → therefore no "worthless" drop truly exists · And crafting is not a side option, but the long-term engine of the zone
 
 # 4. Bag filter (what makes the sentence "every piece needs a decision" true)

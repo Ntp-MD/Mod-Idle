@@ -17,7 +17,7 @@ describe('game and cages run one engine', () => {
     expect(eng.BAND.high.drop_chance_pct).toBe(cage.BAND.high.drop_chance_pct);
     expect(eng.mobHpAt(100)).toBe(cage.mobHpAt(100));
     expect(eng.xpToNext(30)).toBe(cage.xpToNext(30));
-    expect(eng.aspdOf(816, 1.2, 25)).toBe(cage.aspdOf(816, 1.2, 25));
+    expect(eng.aspdOf(510, 1.2, 25)).toBe(cage.aspdOf(510, 1.2, 25));
   });
 
   it('passes the doc read-back the cages gate with', () => {
@@ -28,7 +28,8 @@ describe('game and cages run one engine', () => {
 
 describe('published anchors the docs quote', () => {
   it('single-stat ceiling and the naked level-100 stat', () => {
-    expect(eng.CEIL).toBe(816);
+    // flat-only since Core Stat % was retired (D-114): 210 + 25 x 12
+    expect(eng.CEIL).toBe(510);
     expect(eng.statAt(100)).toBe(210);
   });
 

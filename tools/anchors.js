@@ -68,7 +68,13 @@ const ANCHORS = [
     note: 'Tier belongs to the piece, so a cast moves a whole item (D-033 · E6)',
   },
   {
-    id: 'A-roster', label: 'skill roster size', value: () => R.total(), max: 4,
+    id: 'A-roster', label: 'skill roster size', value: () => R.total(), max: 1,
+    // The roster count shares its token with three unrelated figures this repo prints: the zone-6
+    // level range (`51-60`), an Energy Shield regen rate (`51/sec`) and a CDR item count (`51.8`).
+    // Those are not copies of the roster, so this anchor reads only lines that also name skills —
+    // which is exactly what the gate claims to guard, and what lets its cap sit at the one
+    // historical quote that is legitimately about the roster.
+    context: /\b(skills?|roster)\b/i,
     note: 'skills.json is the source (L5 guards the headings; this guards the prose)',
   },
 ];
@@ -102,7 +108,7 @@ function forms(v) {
 
 // Which *other* values share a token with this anchor, so a stale copy can be told
 // apart from a legitimate different number. e.g. 816 the ceiling vs 816 anywhere else.
-function scan(re) {
+function scan(re, context) {
   const hits = [];
   for (const file of DOCS) {
     const lines = fs.readFileSync(path.join(ROOT, file), 'utf8').split(/\r?\n/);
@@ -111,6 +117,7 @@ function scan(re) {
       if (/^\s*<!-- BEGIN GENERATED:/.test(line)) { inBlock = true; return; }
       if (/^\s*<!-- END GENERATED:/.test(line)) { inBlock = false; return; }
       if (inBlock) return;
+      if (context && !context.test(line)) return;
       if (re.test(line)) hits.push({ file, line: i + 1, text: line.trim() });
     });
   }
@@ -129,7 +136,7 @@ function runChecks() {
 
   for (const a of ANCHORS) {
     const v = a.value();
-    const hits = scan(new RegExp(forms(v).map((r) => r.source).join('|')));
+    const hits = scan(new RegExp(forms(v).map((r) => r.source).join('|')), a.context);
     rows.push({ a, v, hits });
     if (hits.length > a.max) over.push(`${a.id} ${a.label}: ${hits.length} copies > cap ${a.max}`);
   }

@@ -42,6 +42,7 @@ const specs = {
       } },
       level_gain: { kind: 'constmap', group: 'Stat model', label: 'Level gain', fields: {
         hp_per_level: ['int', 'HP per level'], mp_per_level: ['int', 'Mana per level'],
+        hp_base: ['int', 'Base Max HP'], mana_base: ['int', 'Base Max Mana'], weight_base: ['int', 'Base weight capacity'],
         hp_pct_mod_slots: ['int', 'Slots carrying HP %'], res_mod_items: ['int', 'Items carrying element res'],
         cdr_mod_items: ['int', 'Items carrying CDR'], cdr_buff_pct: ['int', 'CDR from buffs', { unit: '%' }],
       } },

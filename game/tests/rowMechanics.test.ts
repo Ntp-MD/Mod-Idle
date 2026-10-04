@@ -66,7 +66,7 @@ describe('the attack rows that press differently', () => {
   it('Retribution grows with the HP the row names, to its own maximum', () => {
     const at = (missing: number) => {
       const t = mob({ id: `t${missing}` });
-      return cast('attack.retribution', c, [t], { missingHpPct: missing })!.dealt;
+      return cast('attack.retribution', c, [t], { missingHpPct: missing })!.dealt!;
     };
     const full = at(0);
     const half = at(valueOf('attack.retribution', 'missing_hp_pct_for_max') / 2);
@@ -275,7 +275,7 @@ describe('the curse rows that act on other mobs', () => {
       alignedPerSec: 0, stoppedSec: 0, elapsedSec: 5, poisonHeldUntil: 11,
     };
     for (let i = 0; i < 3; i++) stepMob(store, 'm1');
-    expect(store.m1.statuses.poison.stacks).toBe(10);
+    expect(store.m1.statuses.poison!.stacks).toBe(10);
   });
 });
 

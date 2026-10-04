@@ -70,7 +70,7 @@ describe('gold stays the convenience medium', () => {
 describe('the Guild board', () => {
   it('minute one offers the hunt engine.json describes', () => {
     const s = newGame();
-    const task = s.town.tasks[0];
+    const task = s.town.tasks[0]!;
     expect(task.kind).toBe('hunt');
     expect(task.zone).toBe(E.opening.settlement_zone);
     expect(task.n).toBe(5);
@@ -80,7 +80,7 @@ describe('the Guild board', () => {
   it('N scales with the zone group size and the payout is in stones', () => {
     expect(huntN(9)).toBeGreaterThan(huntN(1));
     const s = newGame();
-    const task = s.town.tasks[0];
+    const task = s.town.tasks[0]!;
     expect(task.stone).toBe('reroll_value');
     expect(task.count).toBe(eng.taskPayout('low', TOWN.task_sizing.reward_minutes_of_band_income).reroll_value);
     expect(Number.isInteger(task.count)).toBe(true);

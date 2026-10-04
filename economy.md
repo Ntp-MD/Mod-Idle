@@ -30,17 +30,17 @@ import checks.md
 
 ```
 gold per junk piece sold          = 1
-mob junk/hour (high zone, no Lck)    = 416      (kills/hr x a flat expected gold per kill; rarity sets the price, not the income)
-max gold/hour                        = 416  → 6.9 gold per minute of income
+mob junk/hour (high zone, no Lck)    = 415      (kills/hr x a flat expected gold per kill; rarity sets the price, not the income)
+max gold/hour                        = 415  → 6.9 gold per minute of income
 opportunity cost of 1 gold           = 1 Reroll value stone forgone = 1/52 of an hour of Reroll capacity ≈ 1.15 min of craft progress
-full-Lck ceiling (F3 1,319 drops/hr) = ~1,315 gold/hour
+full-Lck ceiling (F3 878 drops/hr)   = ~875 gold/hour
 ```
 
 - These four lines are **computed, not typed**: `tools/data/engine.json` → `tools/lib/engine.js` → `node tools/check.js --checks` (rows X5-X8) and `node tools/town.js --checks` (T2-T7). Changing a drop rate therefore moves the gold prices in `towns-stalls.md` automatically.
 
 - Every price in this project is therefore written as **"minutes of full-sell income"**, the same unit `tasks.md` uses. A 30-minute item costs ~210 gold and 30 minutes of Reroll progress, and that second number is the real price.
 - Junk is kept by the filter automatically and sold manually at the Counterhand, so the crafting engine (E6/E7/E8 timelines) keeps its designed stone income while gold tracks the same kill count.
-- Accepted imbalance: an Lck build mints up to ×3.15 more gold per hour. Legal **only while** gold has no power sink. Guard row: checks.md G8.
+- Accepted imbalance: an Lck build mints up to ×2.11 more gold per hour. Legal **only while** gold has no power sink. Guard row: checks.md G8.
 
 # Why gold must have repeatable sinks
 

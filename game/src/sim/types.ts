@@ -10,6 +10,11 @@ export interface ModLine {
    * because crafting must never change it (`item-rarity.md` · `save.md`).
    */
   element?: string | null;
+  /**
+   * The Core stat a `stat_mod_flat` line feeds, chosen on the detail card. Only that line carries it
+   * (`sim/gear.ts` sets it as the piece is built, and D-114 left it the sole Stat Mod line).
+   */
+  stat?: StatKey;
 }
 
 /** One worn or bagged piece. Rarity = Mod count, quality = value range, Tier = sub-range. */
@@ -53,6 +58,8 @@ export interface Mob {
   hpMax: number;
   ps: number;
   acc: number;
+  /** The mob's own evasion rating our accuracy rolls against (D-112): `mob_evasion = Dex × K_EVASION`. */
+  evasion: number;
   /** A mob dodging our swing runs its own thin opposed roll off its Agi (D-024 · X24). */
   dodgeRate: number;
   armour: number;

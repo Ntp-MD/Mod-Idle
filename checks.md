@@ -61,40 +61,40 @@ Every id in this project is a **row label**, not jargon — this is the decoder.
 |---|---|---|---|
 | A1 | stat at level 1 | `12 + 2×0` | 12 |
 | A2 | stat at level 100 no gear | `12 + 2×99` | 210 |
-| A3 | single-stat ceiling | `(210 + 25×12) × (1 + undefined%×12)` | **510** |
-| A4 | two-stat split ceiling | `6 items + 6 items` = `(210 + 25×6) × (1 + undefined×6%) ` | 360 / 360 |
-| A5 | if Flat and % forced to different stats | `(210 + 25×12) × 1.0` | 510 → **never revert to this** because all K values are set on 510 |
+| A3 | single-stat ceiling | `210 + 25×12` | **510** |
+| A4 | two-stat split ceiling | `6 items + 6 items` = `210 + 25×6` | 360 / 360 |
+| A5 | no % term reinstated | `(210 + 25×12) × 1.0` | 510 → **never revert to this** because all K values are set on 510 |
 | A6 | item count origin | 12 worn slots (11 + main hand) · from equipment-slot.md | 12 |
 
-Source: `node tools/check.js` · stat line = `stat_c = 12 + 2 × (level − 1)` (formula.md) · the Flat maximum from mod-pool.md (Stat Mod flat 25 · Stat Mod % undefined) · slot count from equipment-slot.md.
+Source: `node tools/check.js` · stat line = `stat_c = 12 + 2 × (level − 1)` (formula.md) · the Flat maximum from mod-pool.md (Stat Mod flat 25 · Stat Mod % is retired, D-114, so A3 is a flat-only sum) · slot count from equipment-slot.md.
 
 <!-- END GENERATED:group-A -->
 
-# B · Derived Stat Ceilings (At 816 + One Slot From Main Hand)
+# B · Derived Stat Ceilings (At 510 + One Slot From Main Hand)
 
 <!-- BEGIN GENERATED:group-B -->
 | id | Value | Expression | Result |
 |---|---|---|---|
 | B1 | Physical / Magic power | `(510×5 + 80) × 1.16` | **3,051** |
-| B2 | Max HP (Vit build) | `(510×20 + 3,960) × 1.16` | 16,426 |
-| B3 | Max Mana | `510×4 + 1,584` | 3,624 |
-| B4 | Mana regen | `510×0.15` | 77/sec |
-| B5 | **pool ÷ regen** | `3,624 ÷ 76.5` | **47.4 sec** (intent = 40) |
+| B2 | Max HP (Vit build) | `(510×20 + 3,960) × 1.16` | 16,774 |
+| B3 | Max Mana | `510×4 + 1,584` | 3,724 |
+| B4 | Mana regen | `510×0.18` | 92/sec |
+| B5 | **pool ÷ regen** | `3,724 ÷ 91.8` | **40.6 sec** (intent = 40) |
 | B6 | Crit chance (no Flat) | `510×0.05 + 8% Mod` | 33.5% |
 | B6b | Crit chance Cap → overflow | `min(33.5, 100)` | 33.5% chance · overflow 0.0% → crit damage 220% |
 | B7 | Elem res raw | `510×0.05` | 25.5% |
-| B8 | Elem res + 3 Mod items | `25.5 × (1 + 30×3)%` | 48.4 → cut 75 |
+| B8 | Elem res + 3 Mod items | `25.5 × (1 + 30×3)%` | 48.4 → cut 45 |
 | B9 | Alignment raw | `510×0.05` | 25.5% |
 | B10 | CDR raw | `510×0.03` | 15.3% |
-| B11 | CDR + 4 Mod + BO | `15.3 × (1 + 25×11 + 0)%` | 57.4 → cut 80 |
+| B11 | CDR + 4 Mod + BO | `15.3 × (1 + 25×11 + 0)%` | 57.4 → cut 55 |
 | B12 | Accuracy | `510×1.5×1.25` | 956 |
-| B13 | Weight capacity | `510×2` | 1,020 |
+| B13 | Weight capacity | `510×2` | 2,020 |
 | B14 | Drop multiplier | `1 + 510×0.01` | 6.10x |
-| B15 | Energy Shield pool (Int build) | `510×4` | **2,040** · 25.0% of the same build's 8,160 HP |
+| B15 | Energy Shield pool (Int build) | `510×4` | **2,040** · 24.1% of the same build's 8,460 HP |
 | B16 | ES recharge · full recovery | `510×0.1/sec · after 5 sec without a hit` | 51.0/sec → **40.0 sec** for the whole pool · pool ÷ regen held by **X25** |
 
 Every row is the single-stat ceiling (510) plus the one Mod slot that can roll that line (mod-pool.md maxima · equipment-slot.md slot rules).
-B5 is the row K_INT_MREGEN was retuned for: 47.4 sec against the 40 sec intent (tolerance ±1 sec).
+B5 is the row K_INT_MREGEN was retuned for: 40.6 sec against the 40 sec intent (tolerance ±1 sec).
 
 <!-- END GENERATED:group-B -->
 
@@ -107,12 +107,12 @@ B5 is the row K_INT_MREGEN was retuned for: 47.4 sec against the 40 sec intent (
 | C2 | (compare) Dex 360 + 1 Flat item vs the floor lineage | rating = 360×0.5 + 30 = 210, + Agi 360 ÷ 30 | 80.0% vs Husk · does not hit Cap ✓ |
 | C3 | aspd 500 | sword 1.2 + 25% Mod → Agi = 1,179 | **1,179** (ceiling 510) ✓ |
 | C4 | aspd 500 | dagger 1.5 + 25% Mod | 845 ✓ · staff/2h unreachable by intent |
-| C5 | Perfect dodge 25 | ratio: Lck 510 × 0.03 = rate 15.3 ÷ (rate + 57) = 21.2% · the Cap binds first · reached at Lck 634 | **25%** at the Cap · reachable at Lck 634 (under the 510 ceiling) ✓ |
-| C6 | Alignment 50 | Dex 510 (25.5) + amulet + gloves (+5 +5) | 35.5 ✓ |
-| C7 | Elem res 75 | Vit 510 + 3 res items | 48.4 → 75 ✓ |
-| C8 | CDR 80 | Wis 510 + 11 CDR items + BO | 57.4 → 80 ✓ |
+| C5 | Perfect dodge 21 | ratio: Lck 510 × 0.03 = rate 15.3 ÷ (rate + 57) = 21.2% · the Cap binds first · reached at Lck 506 | **21%** at the Cap · reachable at Lck 506 (under the 510 ceiling) ✓ |
+| C6 | Alignment 35 | Dex 510 (25.5) + amulet + gloves (+5 +5) | 35.5 ✓ |
+| C7 | Elem res 45 | Vit 510 + 3 res items | 48.4 → 45 ✓ |
+| C8 | CDR 55 | Wis 510 + 11 CDR items + BO | 57.4 → 55 ✓ |
 | C9 | Crit (no Cap) | Lck 510 + 8% Mod + buff | 33.5% from stats alone · anything over 100 becomes crit damage (B6b) ✓ |
-| C10 | stun 15% | Alignment 50 × 0.3 | 15 ✓ (old K 0.15 unreachable) |
+| C10 | stun 11% | Alignment 35 × 0.3 | 11 ✓ (old K 0.15 unreachable) |
 | C11 | Accuracy | no Cap · `acc/(acc+E)` forbids 100% itself | 956 → 90.6% ✓ |
 
 H3 rule: every Cap states whether it is reachable, and no row reads `pending` any more — the last one, evasion, was closed by putting it on the opposed form the mob side already uses, so X20 can prove it both ways.
@@ -127,18 +127,18 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 | D1 | `mob_HP(L) = typical_gear_DPS(L) x (1 + 0.0034 L)` - the skill list is the only power multiplier that folds into this line (H1) · **there is no passive tree**, so nothing else multiplies here · the curve is anchored at every zone edge and interpolated inside the zone, so every level 1-90 has an HP (**X37**) | L1 120 · L10 629 · L30 1,824 · L60 5,293 · L90 **10,709 (highest level a mob can spawn)** · L100 11,901 *(theoretical - the spawn cap is 90)* · zone edges in `world.md` · per-entry numbers in `mob-roster.md` |
 | D2 | `mob_PS = typical_gear_DPS ÷ 27` (**not** `mob_HP ÷ 27`) | L30 61 · L60 163 · L90 **304 (highest a mob can spawn)** · L100 329 *(theoretical)* · elite ×4 · boss ×16 (D-048) |
 | D3 | TTK of on-level players | 1.0 sec ✓ (by D1 definition) |
-| D4 | TTK on-level gear + skill list | `11,901 ÷ (9,847 × 1.34)` = **0.90 sec** (T1 gear + full skill list; the tree no longer exists, so this is the only build ceiling) |
-| D5 | TTK T1 gear *without* skill (fresh zone entrant) | `11,901 ÷ 9,847` = **1.21 sec** at the level-100 curve; at the spawn cap 90 it is `10,709 ÷ 9,847` = 1.09 sec |
-| D6 | groups of 5 Push no build at matching level | the generated `survival-group` block in `combat.md` §6 (max 3.3% of pool at L100, no Push) · **single condition is the "max 3 engage at once" rule (world.md · D13)** · `node tools/survival.js` |
-| D7 | on-level boss (×15 HP / **×16 damage**) at L100 without heal | printed live in the `survival-boss` block of `combat.md` §6 — three of the four builds are Pushed, the tank build clears · `SV6` |
-| D8 | heal = Greater Heal 45% + Heal 64% → pool **×2.09** (`engine.json` `build.heal_pool_mult`) | one round turns the §6 boss Pushes into passes for all but the dodge build, which stays Pushed even with heal · the boss is a press-to-play gate, not a damage gate · `SV6` |
+| D4 | TTK on-level gear + skill list | `11,901 ÷ (8,881 × 1.34)` = **1.00 sec** (T1 gear + full skill list; there is no passive tree, so this is the only build ceiling) |
+| D5 | TTK T1 gear *without* skill (fresh zone entrant) | `11,901 ÷ 8,881` = **the skill multiplier, read as seconds** — mob_HP is priced for a player who already holds the list · at the spawn cap 90 it is `10,709 ÷ 8,881` = 1.21 sec |
+| D6 | groups of 5 Push no build at matching level | the generated `survival-group` block in `combat.md` §6 (no build is Pushed at L100) · **single condition is the "max 3 engage at once" rule (world.md · D13)** · `node tools/survival.js` |
+| D7 | on-level boss (×15 HP / **×16 damage**) at L100 without heal | printed live in the `survival-boss` block of `combat.md` §6 — every build is Pushed, no theme clears it standing still · `SV6` |
+| D8 | heal = Greater Heal 45% + Heal 64% → pool **×2.09** (`engine.json` `build.heal_pool_mult`) | one round turns the §6 boss Pushes into passes for the two themes that spend their items on surviving (`mix` · `tank`), while the glass and Evasion themes stay Pushed even with heal · the boss is a press-to-play gate, not a damage gate · `SV6` names the pair |
 | D12 | elite (×6 HP / ×4 damage) is a mini-boss, not a group · generated by `tools/survival.js` (block `survival-elite`), no longer hand-typed |
 | D13 | "max 3 mobs engage" rule props the AFK promise | if removed, 5 attackers replace 3 and the group cost scales by roughly 5/3; the measured cost under the rule is the generated `survival-group` block |
-| D14 | boss must gate active play as G5 promises — **run from `tools/survival.js`, gated by SV6** | the boss damage multiplier is forced by the promise, not freely chosen: it must Push ≥3 of 4 builds without heal and let exactly 3 pass with one heal round. The value that does both is **×16** (`engine.json` `mob.sizes` boss `ps`) |
+| D14 | boss must gate active play as G5 promises — **run from `tools/survival.js`, gated by SV6** | the boss damage multiplier is forced by the promise, not freely chosen: it must Push at least three of the four builds without heal and let the two surviving themes pass with one heal round — SV6/SV7 assert *which* themes pass, not just how many. The value that does both is **×16** (`engine.json` `mob.sizes` boss `ps`) |
 | D18 | roster passes mechanic gate — **PASSES via `node tools/skills.js --checks`** | every Element has an attack skill · every weapon group has at least 4 · buff is a timed self-buff (10 sec on / 15 sec cd) · no skill references mob armour or mob mana · the live per-type counts are the generated block in `skill-pool.md`, never typed here · **skill share columns are stale under reservation and need a rerun** |
-| D22 | **armour is one Str line on both sides** — every number in this row is printed by `node tools/check.js --checks` (**X22**) | `K_ARMOUR` = 2 · reduction `armour ÷ (armour + 5 × raw physical)` · no Cap. Guard: the full-Str cut of a zone-9 boss's *physical half* must sit inside **10-40%** (the floor moved down from 25% when boss damage was raised to ×16 for the G5 gate — a PoE ratio cuts less of a bigger hit, D-048), armour must still answer trash mobs, and no mob's own armour may cost a max physical hit more than 10% |
+| D22 | **armour is one Str line on both sides** — every number in this row is printed by `node tools/check.js --checks` (**X22**) | `K_ARMOUR` · reduction `armour ÷ (armour + K_armour_divisor × raw physical)` · no Cap. Guard: **X22** holds the full-Str cut of a zone-9 boss's *physical half* inside its design band, requires armour to keep answering trash mobs, and forbids any mob's own armour walling a max physical hit. The band's floor has moved twice for a stated reason: down when boss damage was raised for the G5 gate — a PoE ratio cuts less of a bigger hit (D-048) — and down again when Core Stat % retired, because the armour line is Str-driven and the boss's physical half is anchored on mob DPS, which did not move (D-114) |
 | D23 | **the mob roster is complete** — generated by `mobRoster()` and checked by **X23** · `mob-roster.md` is the output | 15 species × 4 body classes (Small · Medium · Large · Boss) over the 9 zones, plus Elite and one named boss per zone. Guard: at least 5 entries per zone, the boss species must actually live in its zone, and a species may not bias an Element none of its zones carry |
-| D26 | **Energy Shield is a 40-second buffer, player-only** — printed by **X25** | `K_INT_ES` 4 · `K_INT_ESREGEN` 0.10 · 5 sec delay · full pool in 40.0 sec · guard: the shield must stay between 30% and 45% of the same Int build's HP, so it supplements HP instead of doubling it, and it must never leak to the mob side (H1) |
+| D26 | **Energy Shield is a timed second pool, player-only** — printed by **X25** | `K_INT_ES` · `K_INT_ESREGEN` · `energy_shield.delay_sec` · full pool in `energy_shield.recover_sec` · guard: **X25** holds the shield inside its share band of the same Int build's HP, so it supplements HP instead of doubling it, and forbids any leak to the mob side (H1). The share fell when Core Stat % retired, because the pool is Int-driven and follows the stat ceiling while the level-only HP it is compared against does not (D-114) |
 | D24 | **a mob dodges the way we do** — generated and checked by **X24** | `dodge = own Agi rate ÷ (own rate + attacker accuracy)` (D-024) · guard: every roster entry between 2% and 25%, so mob Agi stays flavour and never a second wall |
 | D30 | **Ascend is priced by the engine at the hour the design sells** — **X30** | 8 Add mod stones + 8 Reroll tier stones per Ascend, so Add stones bind and a full 12-piece set lands near the promised ~15 hr (F10 · E7) |
 | D31 | **body class may not move the funnel** — **X32** | `mob_HP(L)` is the zone average; group entries divide by the zone's weighted body factor (spawn weights Small 3 · Medium 2 · Large 1), so kills/hour, drops/hour and the timeline hold by construction |
@@ -148,8 +148,8 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 | D35 | **a mob skill re-times damage and never adds it — bounded by the pool, gated by SV8** | `combat.md` §5b prices a mob skill as a re-timing of that mob's own `mob_PS` (D-067). No skill list exists yet to name a window, so the cage bounds the window instead of guessing one: every AFK-reachable shape must absorb at least two seconds of its own priced damage before the pool empties, which is what stops "burst then gap" from becoming a one-hit kill. SV8 prints the measured margin per build and kind |
 | D36 | **the Upgrade ladder's value is published and bounded — X42 and SV7** | one +1 adds `craft.gear_mod_per_level`, and the full ladder lands exactly on the smallest of the three school ceilings in `mod_max` (`item-base.md` says which school a Base raises), so no upgraded piece out-prints a T1 rolled line. The uplift is paid for at the encounter — SV7 re-runs the level-cap boss against a full set and the G5 promise still holds — so `mob_HP` does not move (H1 · D-103) |
 | D20 | skill income must feed the ladder — **generated by `node tools/ladder.js --checks`** | the generated `ladder-math` block in `skill-pool-system.md` prints the funnel, the per-target split and the zone pool; never typed here |
-| D9 | Push downtime `MaxHP ÷ (regen×8)` — generated by `node tools/survival.js` (block `push-table`) | glass 44 sec · tank 28 sec |
-| D10 | all weapons equal DPS | `weapon_mult = 1.2 ÷ weapon_aspd` · 9,847 for all 12 types ✓ |
+| D9 | Push downtime `MaxHP ÷ (regen×8)` — generated by `node tools/survival.js` (block `push-table`) | glass 44 sec · tank 32 sec |
+| D10 | all weapons equal DPS | `weapon_mult = 1.2 ÷ weapon_aspd` · `weapon_aspd` cancels out of `power × times/sec`, so all 12 types land on the same Expected DPS at equal stats ✓ (**X14**) |
 | D11 | AoE is a real choice, not free (**closed** · skill-pool.md AoE section) | new rule 60% per target · Cap 3 targets · mana ×1.5 → damage per mana = 0.40x (1 target) / 0.80x (2) / **1.20x (3+)** · groups of 5 faster by 1.20x (3.75 sec instead of 4.50) but bosses 2.5x longer = 312% of pool = Push · the AoE table is hand-typed and no cage generates it yet (`harness/todo.md` section B) |
 
 # E · Timeline (All From D1 + Kill Rates)
@@ -177,7 +177,7 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 | F1 | kills/hr | `3600 ÷ (group × 1 sec clear + 4 sec spawn) × group` = 1,800 high · 1,385 mid · 980 low |
 | F2 | drops per kill | `8% × (1 + Lck×0.01)` = 13.6% (L30) · 18.4% (L60) · 23.2% (L90) · 48.8% (full Lck 510) |
 | F3 | drops/hr | `kills/hr × F2` = **418** (L90) · 255 (L60) · 133 (L30) · 878 (full Lck) |
-| F4 | upgrades/hr | `measured — tools/loot.js, the seven roll steps in loot.md section 1` = hr1 30.2 → hr2-4 8.3 → after that 5.3 (low band) · keep-rate 2.35% low · 1.36% mid · 0.72% high · 0.23% high + full_lck |
+| F4 | upgrades/hr | `measured — tools/loot.js, the seven roll steps in loot.md section 1` = hr1 28.7 → hr2-4 9.4 → after that 5.7 (low band) · keep-rate 2.35% low · 1.40% mid · 0.75% high · 0.36% high + full_lck |
 | F5 | Reroll value stone/hr | `junk × 1 = drops − upgrades` = **415** |
 | F6 | Reroll value uses/hr | `415 ÷ 8` = **52** |
 | F7 | Reroll tier stone/hr | `elite 18 (20% of kills ×0.05) + boss 12 (4 ×3)` = 30 |
@@ -192,7 +192,7 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 | F20 | Quality Stone/hr | `monster 18 (1% of kills) + elite 90 (1 in 5 × 25%) + boss 96 (4 ×24)` = **204** |
 | F21 | Upgrade full set | `1 + 2 + 3 + 4 + 5 + 7 + 9 + 11 + 13 + 15 + 18 + 21 + 24 + 27 + 30 = 190 per piece × 12 pieces = 2280 stones ÷ F20` = **11.2 hr** for a full +15 set · the steps 11-15 third alone, hunted only from bosses, is **15.0 hr** (crafting.md "sources shift monsters → elites → bosses by step") |
 | F22 | Repair and Corrupt stone/hr | `Repair: elite 18 (1 in 5 × 5%) + boss 4 · Corrupt: boss 4 × 25% chance` = Repair **22/hr** · Corrupt **1.0/hr** — the rarest stone, so one gamble per piece costs about an hour and a full 12-piece set of gambles is 12 hr (crafting.md §Corrupt) |
-| F11 | 0.29 Flat lines per high-zone drop (2.77 lines per item) · the four early-game Flats thin out as Item quality rises | Flat line per drop (high zone, after the 0.25 early-game weighting) · status **measured** |
+| F11 | 0.31 Flat lines per high-zone drop (2.75 lines per item) · the four early-game Flats thin out as Item quality rises | Flat line per drop (high zone, after the 0.25 early-game weighting) · status **measured** |
 | F12 | boss 1.4 + elite 1.4 + normal 1.8 = 4.6 | skill/hr · skill-pool.md drop chances · status **carried** |
 | F14 | max 3 uses per fight · 30 sec shared cooldown · suppressed on bosses | potion sustain bound · status **rule** |
 | F15 | 1 Reroll tier stone per 500 salvages (~+2.7% of F7) | salvage milestone bound · status **rule** |
@@ -224,12 +224,12 @@ Every row is computed by `node tools/town.js` from `tools/data/town.json`; the t
 | id | Must hold | Expression | Value |
 |---|---|---|---|
 | T1 | gold is minted by the sell choice, plus one bounded exception: the Road purse (G2 · G6 · X36) | `1 gold per sold junk piece · Road ceiling 24 gold/day, never stones, never AFK` | 1 |
-| T2 | the price unit is real income, not a feeling | `junk/hr ÷ 60, per band` | 2.2 low · 4.2 mid · 6.9 high · 21.9 high+full Lck gold per 1 m |
-| T3 | lifetime gold supply is the junk line, not a new faucet | `3.1×130 + 9.5×252 + 18.6×415 + 9.0×415` | 14,251 gold |
+| T2 | the price unit is real income, not a feeling | `junk/hr ÷ 60, per band` | 2.2 low · 4.2 mid · 6.9 high · 14.6 high+full Lck gold per 1 m |
+| T3 | lifetime gold supply is the junk line, not a new faucet | `3.1×130 + 9.5×251 + 18.6×415 + 9.0×415` | 14,242 gold |
 | T4 | one-time stall demand ≤ 1.50× the supply — a funnel, not a wall | `Σ 17 one-time lines at their charge band` | 18,664 = 1.31× ✓ |
 | T5 | essentials ≤ 20% of the supply while ~80%+ still dissolves | `4 Road links · tab 1 at Eastgate · tab 2 · pouch II · deed 4` | 1,951 = 13.7% ✓ |
-| T6 | selling everything is a craft decision, priced in craft | `14,251 ÷ 8 stones · ÷ 100 casts per full polish` | 1,781 Reroll casts ≈ 17.8 full-set polishes forgone |
-| T7 | the full-Lck advantage stops at the junk line (G8) | `27.6 high-band hr × 1,316 vs × 415` | 36,322 vs 11,454 gold = ×3.17 against the ×3.17 ceiling ✓ |
+| T6 | selling everything is a craft decision, priced in craft | `14,242 ÷ 8 stones · ÷ 100 casts per full polish` | 1,780 Reroll casts ≈ 17.8 full-set polishes forgone |
+| T7 | the full-Lck advantage stops at the junk line (G8) | `27.6 high-band hr × 875 vs × 415` | 24,150 vs 11,454 gold = ×2.11 against the ×2.11 ceiling ✓ |
 | T8 | every stall line is space · time · information · appearance only (G7) | `kind tag on all 26 lines · power nouns need an explicit display_only flag` | 26 lines, 0 power lines ✓ |
 | T9 | travel never gates content and never beats farming (G9) | `8 links × 20 m one-time · Road trip ≤ 5 real min` | 754 gold = 5.3% of supply ✓ |
 | T10 | Armourer repair costs more than the elite time it replaces (D2 service class) | `60 ÷ 18 tier stones/hr = 3.33 m floor · F9 re-checked in T10b` | 14 m · 12 m at Ironrow ✓ |
@@ -276,6 +276,6 @@ Source: `node tools/town.js --checks` · data in `tools/data/town.json` · price
 
 | Topic | Numbers forcing the decision |
 |---|---|
-| Pure-dodge beats no boss | the `survival-boss` block keeps the dodge build Pushed even with heal (smallest pool, slowest kill) · the fix is splitting items to Vit · the question left is what a "full dodge" build must pay · links to fast hit |
+| Pure-Evasion beats no boss | the `survival-boss` block keeps the evasion build Pushed even with heal, alongside the glass build (SV6) · the fix is splitting items to Vit · the question left is what a "full evasion" build must pay · links to fast hit |
 | skill ladder | E11 |
 | Towns · travel · NPC stalls | **doors chosen** (towns.md section 9) · **prices chosen**: every gold line, both ladders, the 9 rosters, stock and the 27 Standing kill thresholds are generated in group T + `towns-stalls.md` · Base bias is **ruled even-weighted** (T15 permanent flavour, A9) and Collector sets are **finishable without the filter** (a rule, not a number) · still open: the F9/F13 lines the repair floor and the pouch ladder depend on (T10), which are measurements for `harness/todo.md` section B |

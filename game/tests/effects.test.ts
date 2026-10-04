@@ -46,7 +46,7 @@ describe('the sheet moves when a skill is up', () => {
     expect(energy.es - b.es).toBe(row('aura.energy_guard').effects[0].value);
 
     const grace = buildCharacter(40, emptyGear(), {}, 0, effectsOf('aura.grace'));
-    expect(grace.dodgeRate).toBeGreaterThan(b.dodgeRate);
+    expect(grace.evasion - b.evasion).toBe(row('aura.grace').effects[0].value);
 
     const vit = buildCharacter(40, emptyGear(), {}, 0, effectsOf('aura.vitality'));
     expect(vit.hpRegen / b.hpRegen).toBeCloseTo(1 + row('aura.vitality').effects[0].value / 100, 6);
@@ -102,7 +102,7 @@ describe('only what is up counts', () => {
 describe('the toggle track', () => {
   it('refuses an aura that would reserve past the block, and never refuses taking one off', () => {
     const sk = newSkillState();
-    const auras = sm.all().filter((s: any) => s.type === 'aura' && s.reserve).map((s: any) => s.id);
+    const auras: string[] = sm.all().filter((s: any) => s.type === 'aura' && s.reserve).map((s: any) => s.id);
     let reserved = 0;
     let refused = 0;
     for (const id of auras) {

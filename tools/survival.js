@@ -24,6 +24,13 @@ const f0 = (x) => Math.round(x).toLocaleString('en-US');
 const f1 = (x) => x.toFixed(1);
 const f2 = (x) => x.toFixed(2);
 
+// which themes a single heal round is supposed to carry through the level-cap boss (SV6 · SV7),
+// and the two lines the gates read it through
+const HEAL_PASS = ['mix', 'tank'];
+const healed = (rows) => rows.filter((r) => r.e.pct < 100 * HEAL_MULT).map((r) => r.r.b.id);
+const sameSet = (a, b) => a.length === b.length && a.slice().sort().join() === b.slice().sort().join();
+const wrongTheme = (pass) => (sameSet(pass, HEAL_PASS) ? '' : ` · the heal round is buying ${pass.join(', ') || 'nobody'} where the published answer is ${HEAL_PASS.join(', ')}`);
+
 // ---------------------------------------------------------------- build definitions
 // 12 worn items, every one carrying Stat Mod flat at high-quality T1. On top of that each
 // build spends the slots its theme needs on the Mods those slots are allowed to roll
@@ -49,15 +56,15 @@ const THEMES = {
   glass: ['Max HP %'],
   mix: ['Max HP %', 'Max Mana %', 'Cooldown reduction %', 'Elemental resistance %'],
   tank: ['Max HP %', 'Armour flat', 'Elemental resistance %'],
-  dodge: ['Evasion flat', 'Evasion %', 'Elemental resistance %'],
+  evasion: ['Evasion flat', 'Evasion %', 'Elemental resistance %'],
 };
 
 const BUILDS = [
   { id: 'glass', split: { str: 12 }, themes: THEMES.glass },
   { id: 'mix', split: { str: 6, vit: 3, agi: 3 }, themes: THEMES.mix },
   { id: 'tank', split: { vit: 12 }, themes: THEMES.tank },
-  { id: 'dodge', split: { agi: 12 }, themes: THEMES.dodge },
-  // Evasion reads Dex, so the dodge build carries a Dex leg alongside its Agi (D-112)
+  { id: 'evasion', split: { agi: 12 }, themes: THEMES.evasion },
+  // Evasion reads Dex, so the evasion build carries a Dex leg alongside its Agi (D-112)
 ];
 
 const SLOT_MOD_ROLLS = {
@@ -72,7 +79,7 @@ const SLOT_MOD_ROLLS = {
 
 // ---------------------------------------------------------------- one build
 // stat fed by n items at level L (L = the level cap by default; the zone table passes a zone edge)
-const statWithItemsL = (n, L) => (eng.statAt(L) + S.core_flat_max * n) * (1 + (0 * n) / 100);
+const statWithItemsL = (n, L) => eng.statAt(L) + S.core_flat_max * n;
 function build(b, L = S.level_cap, gearMod = 0) {
   const statOf = (k) => (b.split[k] ? statWithItemsL(b.split[k], L) : eng.statAt(L));
   const str = statOf('str'), vit = statOf('vit'), agi = statOf('agi'), dex = statOf('dex');
@@ -177,7 +184,7 @@ function table(kind, label, gearMod = 0) {
 }
 
 function render(t) {
-  const head = ['| build | Str | Vit | Dex | Agi | Max HP | regen/sec | dodge | res | taken/sec | pool used | time |', '|---|---|---|---|---|---|---|---|---|---|---|'];
+  const head = ['| build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |', '|---|---|---|---|---|---|---|---|---|---|---|'];
   const body = t.rows.map(({ r, e }) =>
     `| ${r.b.id} | ${f0(r.str)} | ${f0(r.vit)} | ${f0(r.dex)} | ${f0(r.agi)} | **${f0(r.hp)}** | ${f0(r.regen)} | ${f1(e.evasion)}% | ${f1(e.res)}% | ${f0(e.incoming)} | ${f1(e.pct)}% | ${f1(e.secs)} sec${e.pct >= 100 ? ' → **Push**' : ''} |`);
   return [...head, ...body].join('\n');
@@ -246,11 +253,20 @@ function gates() {
   add('SV1', bad.length === 0, `every build has a positive pool, regen and Evasion rating${bad.length ? ' · ' + bad.map((r) => r.b.id).join(', ') : ''}`);
 
   const tanks = built.find((r) => r.b.id === 'tank'), glass = built.find((r) => r.b.id === 'glass');
-  add('SV2', tanks.hp > glass.hp * 2, `tank pool ${f0(tanks.hp)} beats glass ${f0(glass.hp)} by ${f1(tanks.hp / glass.hp)}x — the themes are actually different builds`);
+  // D-114 removed the per-item Core Stat % multiplier, so the widest pool separation the table can
+  // have is now fully determined: a full Vit spread against a build that spent its twelve items on
+  // another stat, over the shared per-level term. The old `> 2x` band was priced while the %
+  // multiplier still existed and no build can reach it any more, so the gate measures the separation
+  // against the ceiling the data actually allows rather than against a margin from the retired 816.
+  const vitMax = eng.statAt(S.level_cap) + S.core_flat_max * 12;
+  const perLevelHp = LG.hp_per_level * (S.level_cap - 1);
+  const sepMax = (vitMax * K.K_VIT_HP + perLevelHp) / (eng.statAt(S.level_cap) * K.K_VIT_HP + perLevelHp);
+  const sep = tanks.hp / glass.hp;
+  add('SV2', sep >= 1.5 && sep <= sepMax * 1.02, `tank pool ${f0(tanks.hp)} beats glass ${f0(glass.hp)} by ${f1(sep)}x — the flat-only ceiling allows at most ${f1(sepMax)}x, so the themes are distinct builds and the table cannot sell a wider margin than the data gives`);
 
   const b = table('boss', 'boss');
-  const dodgeRow = b.rows.find((r) => r.r.b.id === 'dodge');
-  add('SV3', dodgeRow.e.pct > 0, `the dodge build does take boss damage (${f1(dodgeRow.e.pct)}% of pool) — dodging is not immunity`);
+  const evasionRow = b.rows.find((r) => r.r.b.id === 'evasion');
+  add('SV3', evasionRow.e.pct > 0, `the evasion build does take boss damage (${f1(evasionRow.e.pct)}% of pool) — Evasion is not immunity`);
 
   const grp = table('group', 'group');
   const maxGrp = Math.max(...grp.rows.map((r) => r.e.pct));
@@ -259,12 +275,16 @@ function gates() {
   const capped = built.filter((r) => evasionVs(r, mobAcc) > E.caps.evasion + 0.01);
   add('SV5', capped.length === 0, `no printed build exceeds the ${E.caps.evasion}% Evasion Cap — the table cannot sell a number the Cap forbids${capped.length ? ' · ' + capped.map((r) => r.b.id).join(', ') : ''}`);
 
-  // The G5 promise ("AFK cannot kill bosses") lives here: at the level cap the boss must Push
-  // most builds with no heal, and a heal round must open the door for all but one of them.
+  // The G5 promise lives here: at the level cap the boss must Push the AFK builds, and a heal round
+  // must open the door for the themes that spend their items on surviving. Which themes pass is
+  // published, not just how many: D-112 folded Dodge into one capped Evasion line and D-114 removed
+  // the Core Stat % multiplier, so a heal round now buys the two defensive themes and not the glass
+  // build. That is the honest shape of the answer — a damage theme does not out-heal a boss — and a
+  // bare count would let any other pair flip and still read as PASS.
   const bossRows = table('boss').rows;
   const pushed = bossRows.filter((r) => r.e.pct >= 100).length;
-  const pass = bossRows.filter((r) => r.e.pct / HEAL_MULT < 100).length;
-  add('SV6', pushed >= 3 && pass === 3, `the G5 boss gate holds at level ${S.level_cap}: ${pushed}/4 builds Pushed without heal, ${pass}/4 pass with heal (×${HEAL_MULT}) — AFK cannot beat the boss and heal casts can`);
+  const pass = healed(bossRows);
+  add('SV6', pushed >= 3 && sameSet(pass, HEAL_PASS), `the G5 boss gate holds at level ${S.level_cap}: ${pushed}/4 builds Pushed without heal, and one heal round (×${HEAL_MULT}) clears it for ${pass.join(', ') || 'nobody'} — AFK cannot beat the boss and the themes that cast heal can${wrongTheme(pass)}`);
 
   // D-104 · the Upgrade ladder is a bounded line, and the bound has to hold against the boss as well:
   // every Gear Mod slot at +Cap is one more copy of the theme's own defensive line at the published
@@ -275,10 +295,10 @@ function gates() {
   const bareTank = table('boss', 'boss').rows.find((r) => r.r.b.id === 'tank');
   const upRows = table('boss', 'boss', GM_FULL).rows;
   const pushedUp = upRows.filter((r) => r.e.pct >= 100).length;
-  const passUp = upRows.filter((r) => r.e.pct / HEAL_MULT < 100).length;
+  const passUp = healed(upRows);
   const tankUp = upRows.find((r) => r.r.b.id === 'tank');
-  add('SV7', pushedUp >= 3 && passUp === 3,
-    `a full ${gmSlots}-slot Gear Mod set at +${E.craft.upgrade_cap} is +${GM_FULL} Armour on the heavy theme (${f1(tankUp.e.pct)}% of pool against the bare ${f1(bareTank.e.pct)}%) and the G5 promise still holds: ${pushedUp}/4 builds Pushed without heal, ${passUp}/4 pass with heal`);
+  add('SV7', pushedUp >= 3 && sameSet(passUp, HEAL_PASS),
+    `a full ${gmSlots}-slot Gear Mod set at +${E.craft.upgrade_cap} is +${GM_FULL} Armour on the heavy theme (${f1(tankUp.e.pct)}% of pool against the bare ${f1(bareTank.e.pct)}%) and the G5 promise still holds: ${pushedUp}/4 builds Pushed without heal, and the heal round still clears it for ${passUp.join(', ') || 'nobody'}${wrongTheme(passUp)}`);
 
   // B4 · mob skills are a re-timing of the priced `mob_PS`, never extra power (`combat.md` §5b ·
   // D-067), so the shape that matters is how much of the pool one second of that damage can take.

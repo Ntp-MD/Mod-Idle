@@ -101,8 +101,8 @@ incoming = base * (1 - elem_res_x/100) * Element counter
 - **Auras feed the same pool.** `Trinity Form` grants an Elemental resistance % that joins `elem_res_pct_x` exactly like a gear roll — no separate aura stat and no flat (D-009 3b). `Elemental Fury` applies the same form on the target side as a reduction.
 - Merged away the old `status_res` (once given by Str), leaving Elemental res only.
 - Res is split per Element, not one value. The character sheet must show all 5 values.
-- **Vit 816 (true ceiling) gives 40.8% raw**, not 44.5% as previously written · the old number was calculated from stat 890, which no build can actually reach.
-  To hit Cap 75 requires `40.8 × (1 + 30+30+30)% = 77.5 → cut to 75`, i.e. 3 res slots · two slots give 65.3% · Cap 75 is therefore still reachable and still fair.
+- **Vit 510 (true ceiling) gives 25.5% raw**, not 44.5% as previously written · the old number was calculated from stat 890, which no build can actually reach.
+  To hit Cap 45 requires `25.5 × (1 + 30+30+30)% = 48.5 → cut to 45`, i.e. 3 res slots · two slots give 40.8%, just under the Cap · Cap 45 is therefore still reachable and still fair (D-114).
 
 # 5. Status Per Element
 
@@ -118,7 +118,7 @@ burn_stack_max = 5
 regen_mult = 1 - burn_stacks * K_BURN_REGEN_CUT   K_BURN_REGEN_CUT = 0.10
 ```
 
-- Ticks per second. Does not crit and cannot be dodged.
+- Ticks per second. Does not crit and is not contested by Evasion — Perfect dodge still deletes a tick.
 - Re-hitting with the same Element weapon resets duration; it does not extend the old duration.
 - Max 5 stacks. Excess stacks reset the oldest stack instead of dropping.
 - **Burn also cuts HP regen, by 10% of it per stack.** Five stacks is **−50% HP regen**, which is the whole effect: a build at 10 regen/sec is left at 5. There is no separate Cap because the stack count is the Cap.
@@ -152,7 +152,7 @@ shock_align_cut = 20%   applied to our own elem_align against this target
 
 - Stun queues the target attack sequence. During stun it stops attacking and stops regen.
 - Rolls once per attack, not per damage instance.
-- **Old K 0.15 made Cap 15 unreachable** — ceiling Alignment is 50 → max stun only 7.5% · K is set to 0.30 so 15% stun only happens when Alignment hits Cap (Dex 816 + amulet + gloves).
+- **The stun Cap is `Alignment × K_STUN_PER_ALIGN` = 35 × 0.30 = 10.5%** (C10 prints 11) — at the old K 0.15 a ceiling Alignment of 50 reached only 7.5%, so the K was raised to 0.30 and the Cap now sits exactly where a full Alignment build lands (Dex 510 + amulet + gloves).
 - Values a real Element build sees: Dex 328 + amulet + gloves → Alignment 26.4% → 7.9% stun per attack.
 - **Shock also cuts the target's attack speed by 20%** (its own Cap 20, separate from chill's). Shock does not stack, so this is a flat 20% while it is up.
 - **Shock also cuts our own Alignment against that target by 20%** — the debuff is applied to the *target's* tolerance, not to our stat: `elem_align_used = elem_align × 0.80` for every further status we try to put on that target.
@@ -168,7 +168,7 @@ poison_decay = lose 1 stack every 8 sec
 ```
 
 - Does not vanish immediately when firing stops, in exchange for lower damage per piece than fire.
-- DoT cannot be dodged and does not crit, preventing targets from falsely missing and losing out.
+- DoT is not contested by Evasion and does not crit, preventing targets from falsely missing and losing out.
 - Stacks persist across weapon swaps because they live on the target, not on the item.
 - Value 0.08 makes full 10 stacks equal 0.80 of Element damage per second, slightly below burn.
 
@@ -241,7 +241,7 @@ dot_total = min(dot_total, elem_aligned_damage * 1.5)
 | K_POISON | 0.08 | poison per stack · 10 stacks = 0.80 |
 | K_CHAOS_DMG | 0.01 | +dmg per mark stack · 25 stacks = +25% damage |
 | K_CHAOS_LEECH | 0.002 | lifesteal per mark stack · 25 stacks = 0.05% |
-| K_LIGHTNING_STUN | 0.30 | stun chance per Alignment (0.15 could never reach Cap 15%) |
+| K_LIGHTNING_STUN | 0.30 | stun chance per Alignment (0.15 could never reach Cap 11%) |
 | K_BLEED | 0.70 | bleed total as a fraction of the inflicting physical hit · physical DoT, not an Element — see formula-offense.md section 4 |
 | bleed_time_sec | 5 | PoE base bleed duration · bleed does not stack |
 | K_BLEED_CHANCE | 0.40 | chance per landed physical hit while `Lacerate` is up (curse, 10 sec ÷ 14 sec = 71% uptime) |

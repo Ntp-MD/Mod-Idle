@@ -69,7 +69,7 @@ describe('the Reroll baseline survives a downgrade (save.md)', () => {
     expect(up.ok).toBe(true);
     const baseline = up.item.lines[0].value;
     // the 1-stone randomize may land lower; the baseline must not forget
-    const down = craft.randomize({ ...up.item, lines: up.item.lines.map((l) => ({ ...l, value: 1 })) }, 0, mulberry32(4));
+    const down = craft.randomize({ ...up.item, lines: up.item.lines.map((l: any) => ({ ...l, value: 1 })) }, 0, mulberry32(4));
     expect(down.ok).toBe(true);
     const again = craft.reroll(down.item, 0, mulberry32(5));
     expect(again.ok).toBe(true);

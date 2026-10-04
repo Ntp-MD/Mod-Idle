@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildCharacter, emptyGear } from '../src/sim/player';
+import { buildCharacter, emptyGear, type Character } from '../src/sim/player';
 import { mobSwing } from '../src/sim/combat';
 import { NO_CURSE } from '../src/sim/curse';
 import { newGame, tick, carried, heldWeaponName } from '../src/sim/game';
@@ -28,13 +28,16 @@ describe('a pool spends only what stands in it', () => {
   it('one swing cannot spend more Energy Shield than is left', () => {
     const c = buildCharacter(90, emptyGear());
     expect(c.es).toBeGreaterThan(0);
+    // This test is about the split, so the swing has to land: the Evasion layer is zeroed rather
+    // than hunting a seed that happens to get past it.
+    const sheet = { ...c, evasion: 0, evasionFromAgi: 0 } as Character;
 
-    const standing = mobSwing(mulberry32(3), c, mob(), {}, NO_CURSE, c.es);
-    const half = mobSwing(mulberry32(3), c, mob(), {}, NO_CURSE, c.es / 2);
-    const gone = mobSwing(mulberry32(3), c, mob(), {}, NO_CURSE, 0);
+    const standing = mobSwing(mulberry32(3), sheet, mob(), {}, NO_CURSE, sheet.es);
+    const half = mobSwing(mulberry32(3), sheet, mob(), {}, NO_CURSE, sheet.es / 2);
+    const gone = mobSwing(mulberry32(3), sheet, mob(), {}, NO_CURSE, 0);
 
     expect(standing.toEs).toBeGreaterThan(0);
-    expect(half.toEs).toBeLessThanOrEqual(c.es / 2 + 1e-9);
+    expect(half.toEs).toBeLessThanOrEqual(sheet.es / 2 + 1e-9);
     expect(gone.toEs).toBe(0);
     expect(gone.toHp).toBeGreaterThan(0); // the damage does not vanish, it moves onto HP
     // and the swing totals the same either way — the clamp moves the split, it never invents a hit

@@ -27,8 +27,8 @@ import skill-tree.md
 
 **Order and queue**
 
-10. **No GCD** — attack · curse and heal skills are instant and the game runs top-down through the **15 active slots** (`skill-pool.md`), casting the first skill with cd ready *and* enough mana · A skill stuck at the top long blocks lower ones forever → list order is a real lever, not formatting
-11. **Buffs and auras are a toggle track, not rotation entries** — a buff left switched on re-presses itself the moment it lapses, and an open aura holds its reservation; both run in parallel with the 15 active slots and take **no slot**, costing only mana (buff) or reservation (aura) · Heal is an *active*, so keep it at the top of the list in boss zones because bosses require heal (combat.md §7)
+10. **No GCD** — attack · curse and heal skills are instant and the game runs top-down through the **active slots** (count in `skill-pool.md`), casting the first skill with cd ready *and* enough mana · A skill stuck at the top long blocks lower ones forever → list order is a real lever, not formatting
+11. **Buffs and auras are a toggle track, not rotation entries** — a buff left switched on re-presses itself the moment it lapses, and an open aura holds its reservation; both run in parallel with the active slots and take **no slot**, costing only mana (buff) or reservation (aura) · Heal is an *active*, so keep it at the top of the list in boss zones because bosses require heal (combat.md §7)
 12. **Cooldowns do not reset on Push** — HP depletion returns to the main preset, but skills already counting cd keep counting · Mobs do not die because we were pushed, so no fired work is lost
 
 **True-number comparison** (glass Str 12 at level 100 · run `node tools/timeline.js`)
@@ -37,7 +37,7 @@ import skill-tree.md
 |---|---|---|
 | Rate | 2.094 hits/sec (every 478 ms) | 1 press/11.54 sec (mana is the bottleneck · 6 sec base cd) |
 | Per press | 5,897 (expected including crit · 79.7% hit) | 8,828 spread over 3 targets = 5,297 per target |
-| Added DPS | 9,847 (baseline) | +459 = **+5%** from a single skill |
+| Added DPS | 8,881 (baseline) | +459 = **+5%** from a single skill |
 | Accelerated by | aspd (Agi + Mod + weight) | CDR (Wis + Mod + Battle Orders) |
 | Resource | Free | 2,424 mana pool · 31.5/sec regen |
 | Feeds procs | 2.09 rolls/sec | 3 rolls in one press |
@@ -104,7 +104,7 @@ Passives are not plain numbers but combat-rule changes. Because if it were `+5% 
 | 9 | **Last Stand** | 3 | While HP below 30%, all damage +50% |
 | 10 | **Burning Focus** | 4 | Firing the same Element continuously over 5 sec doubles applied status duration |
 | 11 | **Flurry** | 4 | Every 3 consecutive active-skill presses, the next one has -30% cooldown |
-| 12 | **Brute** | 5 | Every monster kill: all damage +3%, maximum +30%, resets when dodged |
+| 12 | **Brute** | 5 | Every monster kill: all damage +3%, maximum +30%, resets when a hit is evaded |
 
 ## Price rises with purchase order
 
@@ -124,7 +124,7 @@ Buy 7th+ → 4 points
 - **Overkill can be too strong**. If targets have low HP, all excess damage is discarded, speeding kills greatly · Must check against the lowest-HP mobs whether it is still fair
 - **Cunning's conflict with auras changed shape.** The old rule was a hard mutual exclusion — auras switched *off* below 25% mana, exactly when Cunning starts. Reservation deletes that switch-off, so the specific conflict is gone, but a budget tension replaces it: **Cunning wants a small usable pool** (sitting below 25% more often is the point) while **reservation wants a large usable pool** (every reserved point is a point Cunning cannot reach). So a Cunning build reserves little. It is a budget trade, not a mutual exclusion — weaker as a design conflict
 - **Last Stand pairs with Overkill and looks very strong**. Must check whether anything stops players from fighting at low HP like that
-- **Brute must reset on dodge**. Without reset, players would accumulate to +30% permanently without killing anything
+- **Brute must reset when a hit is evaded**. Without reset, players would accumulate to +30% permanently without killing anything
 
 # Skill acquisition
 
@@ -219,7 +219,7 @@ multiplier  = 1 + skill_level x 1.5/100     # at 20 = x1.30
   ```
   The band it was set on still holds — "the whole rotation is ×1.1-1.4 of the build" (checks.md E12) — and **gate S10 now reads that Cap multiplier out of the calculator** and fails if it leaves the band, so re-cutting `level_step_pct` cannot drift. What the old K was fitted with (the per-build uplift of ×1.33 glass / ×1.30 mix / ×1.43 Int6-Wis3 / ×1.90 Int8) was measured on the `stat% / power%` split and is superseded: the same figures are re-measured by `node tools/skills.js --calc --build glass|caster`, and the skill share mob_HP folds (checks.md D17 · D4) moves with that measurement — and that pass has now run on a geared character (**D-103**): the list measures ×1.29 · ×1.44 · ×1.76 at Cap against the ×1.10 · ×1.20 · ×1.31 the curve spends, while the geared player still sits *under* the priced line, so the fold taken was none, and `mob.curve.skill_per_level` stays where the published mob line fits it. The reason the fold is not taken off one build alone is unchanged — an Int-heavy build leans on its skills for a much larger share of its damage because its auto hit is the lowest, and a longer list still does not raise DPS beyond the mana ceiling (maximum casts = mana_regen ÷ cost).
   → **This number creates real paths**: Int+Wis builds rely on skills for 47% of the build, glass relies 25% (rotation table at end of file). And **a longer list does not raise DPS beyond the mana ceiling** (maximum casts = mana_regen ÷ cost)
-- **Mana cost** — **fully checked across the roster** (line below) · The old line still holds at pool 4,848 / 122/sec regen: 10% skill = 485 mana = 4.0 sec of regen per press. Meaning the 6-sec-cd unit cannot fire continuously (mana is a true bottleneck as designed) · But 2-3 units in 10 seconds still work. Verified with `node tools/skills.js` · 3 attack-skill + 3 support rotation consumes almost all regen on every build (glass cannot charge Cleave in time for cd: 11.54 sec vs 6 sec cd) → *mana is a true bottleneck as designed*, and repeated (buff) skills must sit at the end of the list or they steal mana from attack skills
+- **Mana cost** — **fully checked across the roster** (line below) · The old line still holds at pool 3,624 / 91.8/sec regen: 10% skill = 362 mana = 3.9 sec of regen per press. Meaning the 6-sec-cd unit cannot fire continuously (mana is a true bottleneck as designed) · But 2-3 units in 10 seconds still work. Verified with `node tools/skills.js` · 3 attack-skill + 3 support rotation consumes almost all regen on every build (glass cannot charge Cleave in time for cd: 11.54 sec vs 6 sec cd) → *mana is a true bottleneck as designed*, and repeated (buff) skills must sit at the end of the list or they steal mana from attack skills
 - **Duplicate ladder → decided (ladder 12 + 2:1 conversion), measured on the old 51-skill roster** — old 32 pure-random measured as *unreachable*: at 51 skills clustered in 6-per-zone pools, maxing one takes 41.7 hours (almost the whole 40-hour game) · Of the three once-pending options, only 1+3 were used together (2:1 duplicate conversion and ladder cut to 12) because option 2 (smaller pool per zone) became impossible once the roster grew to 51 · Measured result: 4 maxed = 96 of 184 pieces (52% of funnel) in 20.9 hours · The remaining 47 average 1.9 pieces = sit at step 1, which is intentional (this game never intends every skill maxed) · **The historical figures below were sized on the old 51-skill roster; the live ones are recomputed by `node tools/ladder.js --checks`** (LD3-LD5). History forcing the cut: pure random on a 43-skill roster needed ~300 hours each (7x the whole game) · Moving to 51 + 6-per-zone pools worsened it (41.7 hours each) · Option 2 (smaller pool) became unusable as the roster grew, leaving option 1 (2:1 conversion) + option 3 (ladder 12), decided above
 - **Iron Guard / Energy Guard reserve** — **closed.** Both were priced at **mid (11%)** in D-035; the `K_ARMOUR` (2) and ES coefficient `K_INT_ES` (4) they were said to wait on already landed (D-022 · D-026), and there is no separate `K_ENERGY_SHIELD` — ES runs off Int. The effect flats are set to 80% of each line's item ceiling, the Grace parity rule, and printed by `node tools/skills.js` (skill-pool-aura-heal.md). D-069
 - **Melee range** — **3 mobs count as "nearby"** (matches the "max 3 engage at once" rule in world.md · D-009 7a). Damage-reduction auras and debuffs read this number

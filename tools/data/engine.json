@@ -57,7 +57,7 @@
         "weapon-mult"
       ],
       "formula-defense.md": [
-        "dodge-table",
+        "evasion-table",
         "hp-mana-block"
       ],
       "combat.md": [
@@ -112,7 +112,7 @@
     "K_VIT_HP": 20,
     "K_VIT_REGEN": 0.25,
     "K_INT_MP": 4,
-    "K_INT_MREGEN": 0.15,
+    "K_INT_MREGEN": 0.18,
     "K_AGI_ASPD": 0.25,
     "K_WIS_CDR": 0.03,
     "K_DEX_ACC": 1.5,
@@ -550,7 +550,7 @@
           "wis": 1.05,
           "lck": 0.93
         },
-        "trait": "the accuracy floor - dodge Cap 80 is reachable against this and nothing else, and it hits for very little"
+        "trait": "the accuracy floor - Evasion Cap 80 is reachable against this and nothing else, and it hits for very little"
       },
       {
         "id": "goblin",
@@ -615,7 +615,7 @@
           "wis": 1.25,
           "lck": 1.04
         },
-        "trait": "the magic accuracy floor - dodge answers it completely, and Element damage is what kills it quickly"
+        "trait": "the magic accuracy floor - Evasion answers it completely, and Element damage is what kills it quickly"
       },
       {
         "id": "bandit",
@@ -711,7 +711,7 @@
           "wis": 0.93,
           "lck": 1.03
         },
-        "trait": "full accuracy on a fast body - dodge is close to worthless against it, which is what makes it the mid-game check on a pure-Agi build"
+        "trait": "full accuracy on a fast body - Evasion is close to worthless against it, which is what makes it the mid-game check on a pure-Agi build"
       },
       {
         "id": "orc",
@@ -898,7 +898,7 @@
           "wis": 1.08,
           "lck": 0.86
         },
-        "trait": "armoured and inaccurate - the late-game answer to a dodge build, and the species that finally gives chill's Armour cut a target"
+        "trait": "armoured and inaccurate - the late-game answer to an Evasion build, and the species that finally gives chill's Armour cut a target"
       },
       {
         "id": "drake",
@@ -962,7 +962,7 @@
     ],
     "species_rules": [
       "A species is a MULTIPLY vector on the same stat block a player has, so total mob power stays put and mob_HP keeps deriving from player DPS. Check X19 fails any species whose multipliers do not average 1.00.",
-      "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the dodge Cap 80 question answerable: Cap 80 is reachable against the x0.05 species (Husk · Slime) and close to worthless against the x1.00 ones (Wolf · Elf · Drake), so no single mob accuracy number can close C1 - the species mix does.",
+      "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the Evasion Cap 80 question answerable: Cap 80 is reachable against the x0.05 species (Husk · Slime) and close to worthless against the x1.00 ones (Wolf · Elf · Drake), so no single mob accuracy number can close C1 - the species mix does.",
       "innate Element is rolled on spawn and is NOT part of the species. element_bias only tilts the roll inside the zone's own 1-2 Elements, so players still have to prepare res in advance (world.md).",
       "A species that carries a weapon is the only kind a weapon-slot piece can come from; every species still drops from the non-weapon slots, so the 8% base drop rate and the loot.md funnel are untouched by this flag. Rat · Husk · Slime · Spider are the weaponless lineages, which is why goblin (zone 2) is where the weapon part of the drop table starts.",
       "A species is not zone-locked. The same species in two zones is the same species at a higher level, never a reskinned one.",
@@ -986,10 +986,14 @@
   "level_gain": {
     "hp_per_level": 40,
     "mp_per_level": 16,
+    "hp_base": 300,
+    "mana_base": 100,
+    "weight_base": 1000,
     "hp_pct_mod_slots": 1,
     "res_mod_items": 3,
     "cdr_mod_items": 11,
-    "cdr_buff_pct": 0
+    "cdr_buff_pct": 0,
+    "base_note": "The flat base each pool starts from before its Core stat is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term · Max Mana = mana_base + Int x K_INT_MP + level term · weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening 35-weight sword is carried untaxed — this closes harness/todo.md A12."
   },
   "xp": {
     "per_kill_mob_level": 10,
@@ -1049,7 +1053,7 @@
       "physical_power_flat",
       "magic_power_flat"
     ],
-    "flat_group_note": "The 0.5 group is the early-game line: at level 10 it is 1/3 of power, at level 100 it is 1%. Drops full of Flat lines naturally stop being upgrades as the player moves up zones, which is what makes crafting the answer rather than luck (equipment-slot-pools.md). These four ids are also what F11 counts as a Flat line — Stat Mod flat, Dodge flat and the three Gear Mods are Flats by name but not part of this group.",
+    "flat_group_note": "The 0.5 group is the early-game line: at level 10 it is 1/3 of power, at level 100 it is 1%. Drops full of Flat lines naturally stop being upgrades as the player moves up zones, which is what makes crafting the answer rather than luck (equipment-slot-pools.md). These four ids are also what F11 counts as a Flat line — Stat Mod flat, Evasion flat and the three Gear Mods are Flats by name but not part of this group.",
     "rows": [
       {
         "label": "Max HP %",
@@ -1243,7 +1247,7 @@
         "ids": [
           "life_regen_pct"
         ],
-        "v100": "+15% of the Vit-derived regen line · 816 Vit × 0.25 = 204/sec, so +30.6/sec and 13% off Push downtime",
+        "v100": "+15% of the Vit-derived regen line · Vit 510 × 0.25 = 127.5/sec, so +19.1/sec and 13% off Push downtime",
         "early": "+5%",
         "weight": 1,
         "why": "Recovery, not a pool — it cannot raise the ceiling, so it is the defensive line that never breaks an HP Cap, and the only one that shortens the walk back to camp (checks.md D9)"
@@ -1253,7 +1257,7 @@
         "ids": [
           "mana_regen_pct"
         ],
-        "v100": "+25% of the Int-derived regen line · 816 Int × 0.15 = 122.4/sec, so +30.6/sec of cast sustain",
+        "v100": "+25% of the Int-derived regen line · Int 510 × 0.18 = 91.8/sec, so +23.0/sec of cast sustain",
         "early": "+10%",
         "weight": 1,
         "why": "Mana is the real casting bottleneck as designed (skill-pool-system.md), so this buys uptime with the bar full rather than more damage per press"
@@ -1293,7 +1297,7 @@
         "ids": [
           "life_regen_flat"
         ],
-        "v100": "+31/sec on top of 204/sec (816 Vit x 0.25) = +15%",
+        "v100": "+31/sec on top of 128/sec (Vit 510 x 0.25) = +24%",
         "early": "a level-1 build has 3/sec, so +31 more than doubles it",
         "weight": [
           0.5,
@@ -1307,7 +1311,7 @@
         "ids": [
           "mana_regen_flat"
         ],
-        "v100": "+31/sec on top of 122/sec (816 Int x 0.15) = +25%",
+        "v100": "+31/sec on top of 92/sec (Int 510 x 0.18) = +34%",
         "early": "a level-1 build has 1.8/sec",
         "weight": [
           0.5,
@@ -1321,10 +1325,10 @@
         "ids": [
           "perfect_dodge_pct"
         ],
-        "v100": "scales the Lck line, so it is worth most below the Lck 633 Cap point",
-        "early": "Lck 12 sits at 0.63%, where +3% is a 5.8x multiplier on the chance",
+        "v100": "scales the Lck line, so it is worth most on a build that has not finished the line",
+        "early": "a level-1 Lck sits at under 1%, where +3% is a large multiplier on the chance",
         "weight": 0.7,
-        "why": "The Cap binds at Lck 633, so this line is dead on a maxed Lck build and decisive on a low one — the same shape as Dodge % (0.7), which is also a multiplier on a low rate"
+        "why": "The Cap binds near the top of the maxed Lck ratio, so this line is worth least on a maxed-Lck piece and decisive on a low one — the same shape as an % line on any other low rate. It is also defined but not offered: no Base pool in bases.json rolls it, so today it is a drop-weight row and nothing more (harness/todo.md)."
       },
       {
         "label": "Status Alignment resistance %",
@@ -1348,14 +1352,14 @@
   "caps": {
     "crit_chance": null,
     "evasion": 80,
-    "perfect_dodge": 25,
-    "alignment": 50,
-    "elem_res": 75,
-    "cdr": 80,
+    "perfect_dodge": 21,
+    "alignment": 35,
+    "elem_res": 45,
+    "cdr": 55,
     "aspd": 500,
     "accuracy": null,
     "weight_overload": 0.5,
-    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together (D-112). `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright."
+    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together (D-112). `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright. `alignment`, `elem_res`, `cdr` and `perfect_dodge` were re-based to the flat-only stat ceiling when Core Stat % was removed (D-114): each sits just under what a real build actually reaches, so every one of them binds instead of standing behind a build no player can assemble. `perfect_dodge` in particular binds on the Lck ratio alone — the `Perfect dodge %` line is defined in mods.json but no Base pool in bases.json offers it, so nothing lifts that ratio today. **X11** is the gate that proves reachability for the three Mod-driven lines, and it fails the moment a Cap drifts above its own build."
   },
   "weapons": [
     {
@@ -1542,7 +1546,7 @@
         "group_mobs": 2.5,
         "kills_per_hr_published": 1385,
         "lck_level": 60,
-        "upgrades_per_hr": 3
+        "upgrades_per_hr": 4
       },
       "high": {
         "group_mobs": 4,
@@ -1879,13 +1883,13 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "hr1 30.2 → hr2-4 8.3 → after that 5.3 (low band) · keep-rate 2.35% low · 1.36% mid · 0.72% high · 0.23% high + full_lck",
+      "value": "hr1 28.7 → hr2-4 9.4 → after that 5.7 (low band) · keep-rate 2.35% low · 1.40% mid · 0.75% high · 0.36% high + full_lck",
       "expression": "measured — tools/loot.js, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
     {
       "id": "F11",
-      "value": "0.29 Flat lines per high-zone drop (2.77 lines per item) · the four early-game Flats thin out as Item quality rises",
+      "value": "0.31 Flat lines per high-zone drop (2.75 lines per item) · the four early-game Flats thin out as Item quality rises",
       "expression": "Flat line per drop (high zone, after the 0.25 early-game weighting)",
       "status": "measured"
     },
@@ -2003,12 +2007,12 @@
     },
     "no_death": "the player cannot be killed by the opening: zone-1 mobs take minutes to kill a level-1 character, and Push returns them to camp at full HP"
   },
-  "doc_prose_lines_max": 1390,
+  "doc_prose_lines_max": 1349,
   "doc_prose": {
     "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
     "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",
-    "lines_max": 1390,
-    "lines_now": 1368,
+    "lines_max": 1349,
+    "lines_now": 1349,
     "gate": "L9 fails when the count rises above lines_max. Lower the cap as lines are fixed.",
     "exempt": "harness/decisions.md, harness/todo.md, harness/handoff.md, harness/HARNESS.md, and any line marked lint:allow",
     "baseline_note": "Baseline measured on 2026-10-04 with every doc present. skill-pool.md was restored from git mid-pass and its prose legitimately raised the count from 1370 to 1390, which is the gate working: the cap may only fall, and every fix must lower it here."

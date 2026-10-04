@@ -180,7 +180,7 @@ A mob is three independent things: a **species**, a **body class**, and an **inn
 
 - **The player has no class.** Species is a creature lineage (Rat · Husk · Drake), not a job, and nothing about it is available to the player.
 - **A species is a multiply vector on the player's own stat block.** Every mob starts from `stat_c` per stat, then the species multiplies it. Check **X19** fails any species whose seven multipliers do not average 1.00, so no species can quietly be stronger overall than `mob_HP` was derived against.
-- **`accuracy` is the load-bearing column.** Mob accuracy is the shared `stat_c × K_DEX_ACC` scaled by the species multiplier. Against a ×0.25 species (Husk · Slime · Knight) the dodge **Cap 80 is reachable**; against a ×1.00 species (Wolf · Elf · Drake) full Agi only reaches the low thirties. That is why no single mob accuracy number could ever close `checks.md` C1 — the species mix does, and dodge becomes a build that works *against some things*.
+- **`accuracy` is the load-bearing column.** Mob accuracy is the shared `stat_c × K_DEX_ACC` scaled by the species multiplier. Against a ×0.25 species (Husk · Slime · Knight) the Evasion **Cap 80 is reachable**; against a ×1.00 species (Wolf · Elf · Drake) full Dex only reaches the low thirties. That is why no single mob accuracy number could ever close `checks.md` C1 — the species mix does, and Evasion becomes a build that works *against some things*.
 - **`element_bias` only tilts the roll** inside the zone's own 1-2 Elements. It never adds an Element, so res still has to be prepared in advance.
 - **Four card sizes, copied from Ragnarok** (Small · Medium · Large · Boss). **Elite is a rarity flag, not a fifth size**: an Elite is always a Large body and carries its own numbers, so two multipliers never stack.
 - Size raises HP faster than PS, so a Large body is a longer fight rather than a harder hit — which is what makes Small the farming body and Large the roadblock.
@@ -229,10 +229,10 @@ Every column is the player's own formula at level 100 (stat block 210 per stat):
 | drop table | item table that mob drops |
 | Weapon used | affects weight and drops |
 
-- Old evasion was written as level 100 = 600, calculated on the assumption players have Dex 890 · true ceiling is 816 and no build stacks all 12 items on Dex.
+- Old evasion was written as level 100 = 600, calculated on the assumption players have Dex 890 · true ceiling is 510 and no build stacks all 12 items on Dex.
   At 600, no-Dex players get 40% hit chance in a game that attacks all day · so it changed to `level × 1`, which keeps hit chance constant across levels because both sides grow linearly (80% with no Dex, 94% with full Dex).
   `level × 1` was always a stand-in for "evasion grows with the mob's own Dex". Once every species carried a Dex line (D-019) the stand-in became wrong twice over: it made a Slime and an Elf equally hard to hit, and it ignored the body class that already carried its own evasion multiplier. Both are now derived from the same K the player uses.
-- Mob HP derives from DPS in formula.md section 0 · at level 100 full T1 gear players have 9,847 DPS but mob HP is set to 8,881 because it is set from *on-level* gear players, not full-gear players · the inter-level line uses `item count = min(12, ceil(L/2))` (combat.md section 3).
+- Mob HP derives from DPS in formula.md section 0 · at level 100 it is set from *on-level* gear players (8,881 DPS), not from a full-gear player, so a fully geared character clears faster than the anchor · the inter-level line uses `item count = min(12, ceil(L/2))` (combat.md section 3).
 
 - HP is the single value setting game speed. It must be set from expected player DPS, not set-then-tuned.
 - Mob innate Element is rolled on spawn, not fixed, so players cannot fully predict and must prepare res in advance.
@@ -266,8 +266,8 @@ Every column is the player's own formula at level 100 (stat block 210 per stat):
 **All units in the group attack in the same round**, not taking turns one by one.
 
 - **Max 3 engage at once** (section "Mob Groups"), so a group of 5 fields 3 attackers per round, not 5. A 5-mob group therefore deals 3 hits per round to the player — the cost of killing slowly.
-- **Dodge rolls separately per unit** · 25% dodge against 3 attackers ≈ 2.25 hits taken per round.
-- This is why dodge, Max HP, and Vit matter even for heavy-attack players.
+- **Evasion rolls separately per unit** · 25% Evasion against 3 attackers ≈ 2.25 hits taken per round.
+- This is why Evasion, Max HP, and Vit matter even for heavy-attack players.
 - AoE is therefore not free: if kills are not fast enough, the remaining targets keep firing back. Under the decided AoE rule (60% per target · Cap 3 · mana ×1.5 · `skill-pool-system.md`), a group of 5 dies in 3.75 sec instead of 4.50 — 1.20× faster — while it costs 0.40-0.80× damage per mana against 1-2 small mobs, so the trade is real.
 - The measured pool cost per group is the generated `survival-group` table in combat.md section 6, not a hand number.
 

@@ -25,7 +25,7 @@ Shows all 7 stats with a breakdown of their sources.
 | Str | Physical power, Weight, Armour | Physical power, Weight capacity, Armour |
 | Vit | HP, HP regen, all 5 Elemental resistances | Max HP, HP regen, all 5 Elemental res |
 | Dex | Accuracy, Elemental Alignment, Evasion | Accuracy, Elemental Alignment %, Evasion |
-| Agi | Attack speed, Dodge | Attack speed, Dodge % |
+| Agi | Attack speed, Evasion points | Attack speed, Evasion |
 | Wis | Cooldown reduction | CDR % |
 | Int | Magic power, Mana regen, Elemental power, Energy Shield | Magic power, Mana regen, Elemental power, Energy Shield |
 | Lck | Critical chance, Drop chance, Perfect dodge | All 3 values |
@@ -51,17 +51,17 @@ Physical power   715        ( 125 × 5 + 37 ) × 1.08
 | Elemental power | number | Must pass Alignment before dealing damage |
 | Critical chance | % | **No Cap shown** — chance is held at 100 and the excess is added to crit damage, so show `chance` and `overflow` separately |
 | Critical damage | % | Physical only — magic and Elements never crit |
-| Dodge | % | Show Cap **90** too (opposed by mob accuracy) |
+| Evasion | % | Show the Cap too — one Cap binds the Dex rating and the Agi points together (D-112), and the chance is opposed by that mob accuracy |
 | Attack speed | hits/sec | Show Cap 500% = 5 hits/sec too (the 0.2 sec floor between hits) |
-| Cooldown reduction | % | Show Cap 80 too |
+| Cooldown reduction | % | Show the Cap too |
 | Accuracy | number | **No Cap shown** — the 2,000 Cap was removed; the ratio formula never reaches 100% by itself |
-| Elemental Alignment | % | Show Cap **50** too · Shared with all statuses (no separate status Alignment remains) |
-| Perfect dodge | % | **No Cap shown** — show the bare chance (the ratio limits it at 30%) |
+| Elemental Alignment | % | Show the Cap too · Shared with all statuses (no separate status Alignment remains) |
+| Perfect dodge | % | Show the Cap too — it caps the Lck ratio, and the generated Cap table in formula.md prints whether a build reaches it |
 | Drop chance | multiplier | Shown as `×9.2`, not % — `drop_rate` is a multiplier of base drop chance |
 | HP regen | /sec | |
 | Mana regen | /sec | |
 
-**Every capped value is shown as `value / Cap`** e.g. `Dodge chance 42% / 90%` so players do not invest further with no effect. Critical chance is not one of them — it has no Cap, so show it as a bare number plus the crit damage it spills into.
+**Every capped value is shown as `value / Cap`** e.g. `Evasion 42% / 80%` so players do not invest further with no effect. Critical chance is not one of them — it has no Cap, so show it as a bare number plus the crit damage it spills into.
 
 # Elemental
 
@@ -69,12 +69,12 @@ Always shows all 5 Elemental res, no matter which Element is used, because playe
 
 ```
 Elemental res
-  Fire       45% / 75%
-  Cold       32% / 75%
-  Lightning  18% / 75%
-  Poison     45% / 75%
-  Chaos       0% / 75%
-Elemental alignment    44% / 50%
+  Fire       45% / 45%
+  Cold       32% / 45%
+  Lightning  18% / 45%
+  Poison     45% / 45%
+  Chaos       0% / 45%
+Elemental alignment    44% / 35%
 ```
 
 - Zero values are still shown, never hidden.
@@ -99,15 +99,15 @@ Critical damage   152%          (physical only)
 
 ```
 Max HP            3,914        HP regen   31/sec
-Max Mana          816          Mana regen 13/sec
-Dodge             24% / 90%    (rate 125×0.15 + 12 = 31 → 31/131)
+Max Mana          816          Mana regen 15/sec
+Evasion           39% / 80%    (Dex 125 × 0.5 + gear 12 = rating 74 → 74 ÷ (74 + mob accuracy 135) = 35% + Agi 125 ÷ 30 = 4 points)
 Accuracy          135
-Elem alignment    8% / 50%
-Perfect dodge     1% (no Cap · the ratio limits it at 30%)
+Elem alignment    8% / 35%
+Perfect dodge     1% / 21%    (ratio on the Lck line · the Cap binds at Lck 506)
 ```
 
-- Verify each number: `stat_c(31) = 12 + 2×30 = 72` · Vit 125 → `HP = (125×20 + 40×30) × 1.06 = 3,914` · Int 84 → `mana = 84×4 + 16×30 = 816` · regen `= 84×0.15 = 12.6`
-- Old numbers in this file (`2.4 /sec · power 1,450 · HP 4,200 · Dodge 28% / 75% · Accuracy 340 / 2,000`) were tied to the old formula and Cap set already fixed in formula.md, so both were rewritten.
+- Verify each number: `stat_c(31) = 12 + 2×30 = 72` · Vit 125 → `HP = (125×20 + 40×30) × 1.06 = 3,914` · Int 84 → `mana = 84×4 + 16×30 = 816` · regen `= 84×0.18 = 15.1`
+- Old numbers in this file (`2.4 /sec · power 1,450 · HP 4,200 · avoidance 28% / 75% · Accuracy 340 / 2,000`) were tied to the old formula and Cap set already fixed in formula.md, so both were rewritten.
 
 # How to Show Caps
 
@@ -136,7 +136,7 @@ All 4 original items now have values in formula.md.
 
 1. **Status resistance** — Merged into Vit Elemental res. No separate status res remains.
 2. **Weight capacity** — `K_STR_WEIGHT` = 2 per 1 Str.
-3. **Drop chance / Perfect dodge** — Drop is a multiplier `1 + Lck × 0.01` (9.2× at Lck 816) · Perfect dodge is a ratio on the same Lck line (rate `Lck × 0.03`, `K_PDOGE` 57 → 30% at Lck 816) clamped by **Cap 25**, which binds at Lck 633.
+3. **Drop chance / Perfect dodge** — Drop is a multiplier `1 + Lck × 0.01` (6.1× at Lck 510) · Perfect dodge is a ratio on the same Lck line (rate `Lck × 0.03`, `K_PDOGE` 57 → 21.2% at Lck 510) clamped by **Cap 21**, which binds at Lck 506.
 4. **Base stat per level** — Base 12 at level 1 and +2 per level, allowing `(Base · level · gear)` display.
 
 # Where the Sheet Sits on the Main Screen
@@ -153,7 +153,7 @@ The screen holds four regions, all visible at once: the combat scene with the fo
 - Always show maximum (max) numbers, not uncalculated values, e.g. Max HP rather than current HP.
 - Zero values are still shown, never hidden — players must see their Int is 0 because magic power has no investment yet.
 - At most 1 decimal place, and round down, never up.
-- Always show Caps for dodge / perfect dodge / cdr / aspd / Alignment / elem res · **Accuracy and Critical chance have no Cap**, so show them as bare numbers — for crit, show the overflow going into crit damage instead of a Cap.
+- Always show Caps for Evasion / perfect dodge / cdr / aspd / Alignment / elem res · **Accuracy and Critical chance have no Cap**, so show them as bare numbers — for crit, show the overflow going into crit damage instead of a Cap.
 - No separate status Alignment or status resistance remain. Use Elemental Alignment instead.
 - **Mastery shows on the weapon panel, not the main panel** — `Mastery <lvl>/20 · weight −<lvl>%` (weight is −1% per level, Cap −20% at L20 · `equipment-weapon.md`), e.g. `Mastery 14/20 · weight -14%`. It is a per-weapon side track, not a build-calculation stat, so it never clutters the twelve-item main read.
 

@@ -109,13 +109,14 @@ describe('Berserker pays for its own speed', () => {
 });
 
 describe('Riposte and Execute spend their own sentences', () => {
-  it('Riposte adds 3% per 1% of our dodge and stops at the Cap the row states', () => {
-    const per = row('attack.riposte').effects.find((e: any) => e.stat === 'damage_per_dodge_pct');
-    const caster = (dodge: number) => ({ ...buildCharacter(90, emptyGear()), dodgeRate: dodge } as Character);
-    const dmg = (dodge: number) => castDamage('attack.riposte', caster(dodge), mob({ id: `d${dodge}` }));
+  it('Riposte adds 3% per 1% of our Evasion chance and stops at the Cap the row states', () => {
+    const per = row('attack.riposte').effects.find((e: any) => e.stat === 'damage_per_evasion_pct');
+    const caster = (chance: number) => ({ ...buildCharacter(90, emptyGear()), evasionChance: chance } as Character);
+    const dmg = (chance: number) => castDamage('attack.riposte', caster(chance), mob({ id: `e${chance}` }));
     expect(dmg(20) / dmg(5)).toBeCloseTo((100 + 20 * per.value) / (100 + 5 * per.value), 6);
-    // 80% dodge would be +240%, but the row caps the bonus at +120%
-    expect(dmg(80) / dmg(20)).toBeCloseTo((100 + per.cap) / (100 + 20 * per.value), 6);
+    // 80% Evasion would be +240%, but the row caps the bonus at +120%, so the Cap binds from 40% on
+    expect(dmg(40) / dmg(20)).toBeCloseTo((100 + per.cap) / (100 + 20 * per.value), 6);
+    expect(dmg(80) / dmg(40)).toBeCloseTo(1, 6);
   });
 
   it('Execute doubles under its threshold and not above it', () => {

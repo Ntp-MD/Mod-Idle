@@ -135,7 +135,7 @@ function dressUp(s: GameState, t?: Theme) {
     s.bag.forEach((item, i) => {
       if (!item || item.heldFor) return; // a Collector piece is spoken for
       const score = scoreOf(item);
-      const wornScore = Math.max(-1, ...s.gear.filter((g) => g && g.slot === item.slot).map(scoreOf));
+      const wornScore = Math.max(-1, ...s.gear.filter((g): g is Item => !!g && g.slot === item.slot).map(scoreOf));
       if (wornScore >= 0 && score <= wornScore) return; // this one would be a downgrade
       const key: [number, number] = [themeHit(item, t) ? 1 : 0, score];
       if (key[0] > pickKey[0] || (key[0] === pickKey[0] && key[1] > pickKey[1])) { pickKey = key; pick = i; }

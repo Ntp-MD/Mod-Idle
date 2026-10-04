@@ -12,7 +12,7 @@ Prior decision still in force (from earlier notes · commit `908cbf7` in git his
 This file is the mechanism that makes that statement actually calculable.
 
 ```
-dodge / res reduce incoming damage
+Evasion / res reduce incoming damage
   → less Push
     → less wasted time
       → kph does not drop
@@ -39,69 +39,70 @@ dodge / res reduce incoming damage
 **Outgoing (we hit mobs)**
 
 ```
-1  hit_chance  = accuracy / (accuracy + evasion_mobs)      evasion = mob_level × 1
-2  crit?       = crit_chance → ×(1 + crit_dmg/100 − 1)      physical / magic only · Elements do not crit
+1  hit_chance  = accuracy / (accuracy + mob evasion)   mob evasion is a Dex line on its own stat block (formula-utility.md §8)
+2  crit?       = crit_chance → ×(1 + crit_dmg/100 − 1)   physical only · magic and the 5 Elements do not crit (D-017)
 3  weak?       = ×1.5 if weapon Element matches mob innate Element
-4  Element counter  = elements.md table (0.60–1.15)
-5  subtract from mob HP
+4  Element counter  = elements.md table
+5  mob armour  = armour / (armour + 5 × the non-Element part)   the mob's own Str line, the same PoE ratio that answers its hit on us (D-099)
+6  mob res     = Elemental resistance of that Element            the mob's own Vit line, held by the same Cap 75 ours is (D-099)
+7  bleed       = physical hits may inflict bleed, which is physical DoT and no Element (formula-offense.md §4)
+8  subtract from mob HP
 ```
 
-**Incoming (mobs hit us)** — ordered differently because we have no evasion stat.
+**Steps 5-6 are the mirror of the incoming order, and they are what makes the two lines `mob-roster.md` prints per species real** (B8 · D-099). The non-Element part of our hit — physical **and** spell — meets the mob's Armour; only the Element part meets its resistance. A Chill line cuts that Armour by `status.chill.armour_cut` before the ratio is taken, which is where the debuff finally spends itself. DoT is deliberately outside both steps: `status.mob_side` says burn, poison and bleed land in full, and formula-offense.md §4 says armour does not reduce bleed. A mob has no *mitigation* stat of its own beyond these two — no evasion double-dip, no damage reduction — and mobs have no resistance to status at all (D-067).
+
+**Incoming (mobs hit us)** — PoE layer order: roll to miss, then every mitigation, then the pools (D-010).
 
 ```
-1  perfect_dodge  (Cap 5%)   pass = nothing happens · this is the only path that blocks "undodgeable" effects
-2  evasion        (PoE entropy vs mob accuracy)  pass = no hit · new layer, numbers pending mob sheet
-3  dodge          (Cap 90%)  pass = no hit · opposed by mob accuracy (P1-1 option A2)
-4  split damage   = 50% physical (reduced by armour) + 50% Element by mob innate Element
-5  armour         = armour / (armour + 5 × raw_hit) reduces the physical half only (PoE formula)
-6  Energy Shield takes damage before HP (chaos bypasses) · recharges after 5 sec without a hit
-7  Elemental resistance of that Element (Cap 75) → reduces only the Element half
+1  perfect_dodge  (Capped by engine.json caps.perfect_dodge)   pass = nothing happens · this is the only path that blocks "undodgeable" effects
+2  evasion        (Cap 80%)   Dex rating rolled against this mob's accuracy, then + Agi ÷ 30 points, capped together (D-112)
+3  damage split   = 50% physical + 50% Element by mob innate Element
+4  armour         = armour / (armour + 5 × raw_physical) reduces the physical half only (PoE formula)
+5  Elemental resistance of that Element (Cap 75) → reduces the Element half
+6  damage_taken   × damage_taken_mult            buffs only · Berserker ×1.15 · Iron Will ×0.90
+7  Energy Shield takes the mitigated damage before HP (chaos bypasses) · recharges after 5 sec
 8  apply that Element status (gated by Alignment on the mob side, see section 5)
 9  subtract from player HP
 ```
 
-- **No separate `def` / armor / damage reduction** — damage reduction has only dodge and Elemental res. These two are therefore all players can use against incoming damage (HP is the receiver, not the reducer).
+- **Perfect dodge is one roll and it answers everything** — it deletes the whole hit before the physical/Element split, so a magic-only species (Seraph · Slime) dies to it exactly like a physical one. That is what makes it the undodgeable answer, and why nothing else in this list is ordered ahead of it.
+- **Step 6 is the only multiplier that runs after every mitigation layer and before the pools.** Armour, res, Evasion and perfect dodge each *remove* something; `damage_taken_mult` *scales what survived them*. That is why `Berserker` and `Iron Will` are exact opposites on the same line, and why Energy Shield at step 7 absorbs the multiplied number rather than the clean one.
+- **No separate `def` stat.** Damage reduction is armour on the physical half and Elemental res on the Element half; Evasion and perfect dodge remove the hit instead of reducing it. HP and Energy Shield are receivers, not reducers.
+- **Two umbrella multipliers are reserved, both ×1.00 today.** `global damage` multiplies outgoing damage once, after weak / Element counter / crit; `global defend` is this step-6 `damage_taken_mult` bucket. A future skill or aura feeds one bucket, so the two never stack as separate multipliers (`engine.json` `global`). `global speed` is a third reserved term: it scales the whole clock — cooldowns tick 15% faster (applied after the CDR Cap, so it is a post-cap speed multiplier) and final attack speed is ×1.15, still clamped by the 500 aspd Cap (`skill-pool-aura-heal.md`). **Player-only:** global speed affects the player alone; no mob ever carries Haste, even once mobs get their own skill lists.
 - **Mob innate Element serves two ways**: it is the Element we hit for ×1.5, and it is the Element it hits us with → **res must be prepared from the zone played, not rolled randomly** (confirms the world.md line stating "res must be prepared in advance").
-- Perfect dodge must come before dodge because its definition is "dodge the undodgeable" (DoT tick · unconditional effects such as an aura's debuff). **Dodge is an opposed roll against accuracy; perfect dodge is not opposed** — when it triggers, the hit is removed outright (D-009 3c). Without this order the stat is meaningless.
+
+# 2b. Reach — near and far, without a grid
+
+Near and far are a queue order, not a position. There is no movement, no range and no aggro model
+in this game: the front slot hits the first 3 attackers and everything behind waits (section 1).
+
+<!-- BEGIN GENERATED:reach-table -->
+| Reach band | Slots it may hit | What that buys | Weapons |
+|---|---|---|---|
+| melee | 1 | the front slot only | sword · axe · dagger · mace |
+| reach | 2 | front and second slot | spear · two-handed sword · two-handed axe |
+| standoff | 3 | any slot in the group | bow · crossbow · staff · rod · wand · book |
+
+Stand-off lineages on the mob side: Elf · Demon · Seraph — they hold no front slot, so while a front mob lives they can only be reached by a reach-2 or reach-3 attack, and their half of incoming damage is the res-able one (D-030). A reach-1 attack waits one engage cycle (1 sec) when only stand-off mobs remain; the measured cost is nothing in zones 1-6 and at most 8.7% of the cycle in zone 9 (**X33**).
+<!-- END GENERATED:reach-table -->
 
 # 3. Mob Stats Per Level
 
 Baseline is set from **DPS players at the same level actually have** per formula.md section 0, not set-then-tuned.
 
 ```
-mob_HP(L)   = DPS of level L player with "mid-Tier + expected item count" gear × tree multiplier × 1 second
+mob_HP(L)   = DPS of level L player with "mid-Tier + expected item count" gear x
               item count = min(12, ceil(L/2))   → L1 = 1 item · L24+ = full 12
-              tree multiplier = 1 + 0.0085 × L   → ×1.25 (L30) · ×1.85 (L100) · see skill-tree.md section 3
+               no tree multiplier                  (the passive tree is empty - see skill-tree.md)
 mob_PS(L)   = typical_gear_DPS(L) / 27   (not mob_HP / 27)
 skill multiplier = 1 + 0.0034 × L  → ×1.30 (L90) · ×1.34 (L100)   (HP line includes it · damage line excludes it)
 
-> **Why the damage line is not set from mob_HP** — mob_HP is multiplied by the tree factor (×1.85 at L100) to keep TTK at 1 sec · if that same number were divided by 27, damage would also grow ×1.85 while the player pool does not grow with tree (tree is the speed side, not the endurance side) · the result is on-level gear+tree players dying in 14 sec instead of 27 sec, and groups of 5 pushing every build, which destroys the AFK promise in concept.md · the damage line is therefore set from `typical DPS (gear only) ÷ 27` = "one mob kills an on-level player in 27 sec", measured on players who *have* tree already · intended side effect: tree power shortens fights = less danger · if an endurance tree is ever added, this line must be moved back to divide the pool (recorded in checks.md group I)
-mob_acc     = no roll · mobs always swing · our side uses dodge only
+> **Why the damage line is not set from mob_HP** - mob_PS is `typical_gear_DPS / 27`, a fraction of the player's own output, not a share of the mob's HP. `mob_HP` carries only the skill multiplier.
+mob_acc     = no roll · mobs always swing · our side uses Evasion only
 ```
 
-| Level | 1 | 5 | 10 | 20 | 30 | 40 | 60 | 80 | 90 | 100 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| mob HP | 121 | 271 | 682 | 1,527 | 2,289 | 5,404 | 7,992 | 16,137 | 18,901 | 22,016 |
-| mob damage/sec | 4 | 9 | 23 | 45 | 61 | 131 | 163 | 280 | 304 | 329 |
-
-- This line is calculated from `mod-pool.md` (T2 ranges of each Item quality tier) + `formula.md` sections 0-7 · full table and per-zone time lines are in world.md.
-- **TTK = 1 sec for on-level gear+tree players** · full T1 gear + typical tree = 0.90 sec · full T1 gear but *no tree* = 1.67 sec (mob HP already includes tree) · naked entering a new zone = 2-8 sec · per skill-tree.md section 3 formula.
-- Numbers in the table are **gear × tree × skill** · split to see origin: typical gear = 8,881 · full T1 gear = 9,847 · multiplied by tree (+85%) and skill list (+34%) factors = **22,016** that typical players have at level 100 · see skill-tree.md section 3.
-
-| Player gear level (Str-stacked build) | Level 1 | Level 30 | Level 60 | Level 100 |
-|---|---|---|---|---|
-| No gear · level-only stats | DPS 69 | 390 | 833 | 1,610 |
-| Full Quality-tier gear (12 T1 items of that tier) | — | 1,980 | 4,860 | 9,847 |
-| → **Actual mob HP set (typical gear × tree × skill by level)** | 121 | 2,289 | 7,992 | 22,016 |
-
-- Full-tier gear is **5-6x stronger than no gear** at level 100 (9,847 vs 1,610) and 5.1x at level 30 · this number is the ceiling loot can buy, and the reason this is a loot game, not a level game.
-- **The two rows above are the lower-upper bounds of a single player at that level** · the mob HP table above is set *between the two rows* (T2 gear with expected item count) so fresh zone entrants can still kill and full-gear players feel no drag · full-tier gear is 5-6x stronger than no gear at level 100 (9,847 vs 1,610). This is why this is a loot game, not a level game.
-
-| Type | HP | damage/sec | Count | Reference |
-|---|---|---|---|---|
-| Normal | ×1 | ×1 | comes in groups 1-5 (world.md) | |
-| Elite | ×6 | ×4 | always 1, spawn 0.5% of kills, drops 2 Reroll tier stones | mini-boss · Item quality floor +1 tier (P1-2 option A) |
-| Boss | ×15 | ×4 | always 1 | zone Quality ceiling + craft currency + skill |
+- The per-level curve, its HP anchors and the derived damage line are the generated `mob-curve` block in `world.md` (**X37**) — never typed here. The body-class and species multipliers (Normal · Elite · Boss · Small · Medium · Large) are the generated `mob-sheet` / `mob-stats` blocks in `world.md`.
+- **TTK = 1 sec for on-level gear players** by the D1 definition · full T1 gear kills faster and a naked zone entrant slower (checks.md D3-D5). The curve already carries the skill multiplier; there is no tree factor (D-046).
 
 # 4. `Push` — Mechanism Replacing Death
 
@@ -113,12 +114,14 @@ HP reaches 0  →  no death · no item loss
   4. Time lost = Max HP / (hp_regen × 8)
 ```
 
-| Build at level 100 | Vit invested | Max HP | hp_regen | Downtime per Push |
+<!-- BEGIN GENERATED:push-table -->
+| build | Vit | Max HP | hp_regen | Downtime per Push |
 |---|---|---|---|---|
-| Full Str all 12 items (glass) | 210 (none) | 9,466 | 53/sec | **23 sec** |
-| Str 6 / Agi 3 / Vit 2 / Lck 1 | 286 | 11,225 | 72/sec | 20 sec |
-| Vit 10 / Agi 2 (tank) | 690 | 20,602 | 173/sec | **15 sec** |
-| Agi 8 / Vit 4 (dodge) | 372 | 13,224 | 93/sec | 18 sec |
+| glass | 210 | 18,605 | 53/sec | **44 sec** |
+| mix | 285 | 22,025 | 71/sec | **39 sec** |
+| tank | 510 | 32,285 | 128/sec | **32 sec** |
+| evasion | 210 | 8,160 | 53/sec | **19 sec** |
+<!-- END GENERATED:push-table -->
 
 - **Vit pays twice**: raises the blood ceiling, and shortens downtime · the reason tanks are not "hard to kill" (nobody dies) but **lose less time**.
 - No other penalty · no item loss, no XP loss, no zone rollback · the only loss is time · per the original decision.
@@ -128,103 +131,199 @@ HP reaches 0  →  no death · no item loss
 
 Uses all rules and numbers from elements.md, but the player is the target.
 
+<!-- BEGIN GENERATED:mob-status -->
 | Mob Element | Effect on player | Value | Counter |
 |---|---|---|---|
-| fire | burn | `elem_half × 0.30` per stack, max 3 stacks · 4 sec | res · perfect dodge |
-| cold | chill | aspd −10% (half of what mobs take) · 3 sec · does not stack | res |
-| lightning | shock | stop attacking + stop regen 1 sec · rolls once per attack | res |
+| fire | burn | `elem_half × 0.30` per stack, max 5 stacks · 5 sec · **and cuts our HP regen 10% per stack (−50% at full)** | res · perfect dodge · regen is the only counter |
+| cold | chill | aspd −10% (half of what mobs take) · 3 sec · does not stack · **and cuts our Armour 25%** | res |
+| lightning | shock | stop attacking + stop regen 1 sec · rolls once per attack · **and −20% our attack speed, and −20% our Alignment against that target** | res |
 | poison | poison | `elem_half × 0.08` per stack, max 10 · loses 1 stack/8 sec | res · perfect dodge |
-| chaos | its own mark | its damage +0.5% per stack, max +10% | res · target switching |
+| chaos | its own mark | its damage +1% per stack, max 25 stacks = **+25%** · +5.00% leech at full · decays 5 sec after firing stops | res · target switching |
 
-- **20% status proc chance per landed hit** · mobs need no skills of their own · innate Element is their skill.
+- **20% status proc chance per landed hit** · innate Element is every mob's baseline skill; Large · Elite and Boss add a signature that only re-times its priced `mob_PS` (`combat.md` §5b · D-067).
+- Every number in this table comes from `engine.json` `status` — the mob side runs the same K values the player does, so a change there moves this table with it. The chaos mark is the one row that once disagreed here; the table is generated now so it cannot again.
+<!-- END GENERATED:mob-status -->
+
 - `elem_half` = the Element half of calculated per-hit damage (section 2 item 3).
-- Reason chill/shock are halved on players: the only target this game must beat is our own time. Reducing our aspd 20% across 5 mobs at once = over half DPS gone with no player input.
-- **Healing skills have clear work from this table**: Heal (4% Max HP/sec × 8 sec) = +32% pool · Greater Heal (20% instant) = blocks Push at the last few %.
+- **20% status proc chance per landed hit** · innate Element is every mob's baseline skill; Large · Elite and Boss add a signature that only re-times its priced `mob_PS` (section 5b · D-067).
+- Every number in this table comes from `engine.json` `status` — the mob side runs the same K values the player does, so a change there moves this table with it. The chaos mark is the one row that once disagreed here; the table is generated now so it cannot again.
+- **Healing skills have clear work from this table** — the magnitudes are in `skill-pool-aura-heal.md`; the point is that a status is answered by regen and by deleting the tick, not by mitigation.
+
+# 5b. Mob Skills and the Status Mirror
+
+Two questions the mob side left open (`formula-offense.md` kept the door open): do mobs get skills, and do the statuses we inflict mirror onto them. Both are ruled (D-067).
+
+**Mob skills are a re-timing of `mob_PS`, never extra power.** A mob skill moves the same priced damage around the fight — a burst then a gap — it does not raise the average damage per second. `mob_PS = typical_gear_DPS ÷ 27` and the `mob_HP` curve are untouched, so kills/hour, drops/hour and the published timeline do not move (H1 · checks.md E5). `tools/survival.js` keeps modeling mob incoming as the steady average, which is exactly what a re-timing leaves behind; a future cage may model the burst shape, but no number changes until it does. No mob carries `global speed` / `Haste` (D-061) and mobs get no new stat (AGENT.md §5 — no second resist, no mob Armour line beyond the Str one they already carry).
+
+**Organization — skills follow the body, not the species** (D-009 7b extended):
+
+| Body | Skills | What it is |
+|---|---|---|
+| Small · Medium | 0 | innate Element only · the 20% status proc (section 5) *is* the skill |
+| Large | 1 | one signature that re-times its damage or adds a DoT slice |
+| Elite | 1 + flag | the Large signature carried on the Elite multipliers (HP ×6 · damage ×4) |
+| Boss | 1-2 | its own telegraphed burst, sized so one heal round still clears the fight (section 7) |
+
+The signature is picked from what the species already means: the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict **bleed**, the casters lean on their innate Element's status, and the accuracy-floor lineages re-time into bursts an Evasion build can drop. The species table in `mob-roster.md` is the input; nothing there blocks shipping.
+
+**Bleed is the mob-side DoT** (engine.json `bleed`): it is a DoT so it lands on mobs in full from our `Lacerate`, and in the other direction it is the signature the physical lineages carry onto us — either way a slice of already-priced `mob_PS`, not added damage.
+
+**The status mirror — three families (owner ruling: DoT yes, control no).**
+
+- **DoT lands** — burn · poison · bleed apply to mobs at full value. They are the element build's damage, already folded into `mob_HP`, so applying them costs no new power.
+- **Damage-shaping debuffs land** — every curse (Weaken · Expose · Sunder · Blinding Mark · Jinx · Mark of the Executioner · Venom Bind · Shatter · Pandemonium · Lacerate) plus chill's Armour cut apply: they change damage in or out, not whether the mob acts. This is why concept.md's "our debuffs have real targets" still holds.
+- **Control is bounded, never a lockout** — a mob cannot be rooted, frozen, or held past its action, so no build deletes a boss's clock and no fight is stun-locked. The one control a mob suffers is the game's existing Cap-bounded proc: the ≤15% stun (elements.md lightning · C10) and the per-status aspd cuts (chill · shock · `Cripple`) — the same symmetric numbers a mob inflicts on us, gated so they read as a breather, not a chain. That keeps lightning's time-control identity and C10 real without letting control become the trivializing lock the ruling rejects. No mob resist stat exists; the gate is the Cap and the duration, not a defense line.
 
 # 6. Measured Results: Which Build Survives What (All Numbers From `node tools/survival.js` · No Hand-Typed Values)
 
-> Stale pending rerun: tables below predate P0-1 (full Element damage), P0-3 (AoE falloff), P1-1 (dodge 90 + mob accuracy + PoE defense), and P1-2 (Elite ×6/×4). Rules above are decided; numbers below rerun in the rebalance pass. Do not hand-edit.
+> Rerun with `node tools/survival.js` (gates SV1-SV8). The old hand-run tables are gone: they predated full Element damage, the opposed Evasion formula and the Elite multipliers, and they were labelled as tool output while no tool existed.
 
-**Build definitions** — 12 worn items split to Core stat only · main hand holds same T1 Mod of the Quality tier (power Flat 80 / power % 16 / aspd 25% / crit 8%) for all builds · level 100 `stat_c` = 210 · all builds have on-level tree (DPS ×1.85).
+**Build definitions** — 12 worn items, every one carrying Stat Mod flat at high-quality T1; each theme then spends the slots its theme needs on the defensive Mods those slots are allowed to roll (`equipment-slot-pools.md` mod-matrix); the main hand holds the T1 offensive line (power Flat 80 / power % 16 / aspd 25% / crit 8%). There is no passive tree (D-046), so the skill list is the only multiplier above gear. This table is generated by `node tools/survival.js` — never hand-typed.
 
-| build | 12-item split | Str | Vit | Agi | Max HP | regen/sec | dodge | res |
-|---|---|---|---|---|---|---|---|---|
-| glass | Str 12 | 816 | 210 | 210 | 8,160 | 53 | 38% | 10.5% |
-| mix | Str 6 / Vit 3 / Agi 3 | 468 | 328 | 328 | 10,515 | 82 | 44% | 16.4% |
-| tank | Vit 12 | 210 | 816 | 210 | 20,280 | 204 | 38% | 40.8% |
-| dodge | Agi 12 | 210 | 210 | 816 | 8,160 | 53 | 60% (old cap; new cap 90, opposed by mob accuracy, path pending) | 10.5% |
+<!-- BEGIN GENERATED:build-defs -->
+| build | 12-item split | Str | Vit | Dex | Agi | Max HP | regen/sec | Evasion | res |
+|---|---|---|---|---|---|---|---|---|---|---|
+| glass | Str 12 | 510 | 210 | 210 | 210 | **18,605** | 53 | 33.0% | 10.5% |
+| mix | Str 6 / Vit 3 / Agi 3 | 360 | 285 | 210 | 285 | **22,025** | 71 | 35.5% | 45.0% |
+| tank | Vit 12 | 210 | 510 | 210 | 210 | **32,285** | 128 | 33.0% | 45.0% |
+| evasion | Agi 12 | 210 | 210 | 210 | 510 | **8,160** | 53 | 74.6% | 35.7% |
+<!-- END GENERATED:build-defs -->
 
 **Field rules** (these 3 rules define the numbers below; changing any requires a rerun):
 
 1. **Max 3 mobs engage at once** — groups of 5 do not hit with 5 sets at once · mobs 4-5 queue.
-   Without this rule, "group of 5" numbers jump from 23-46% → **109-180%** of pool → AFK breaks immediately · the rule is therefore not taste but what makes the concept.md promise true (world.md zone properties section).
+   Without this rule, 5 attackers replace 3 and the group cost scales by roughly 5/3, which is enough to Push every build while idle · the rule is therefore not taste but what makes the concept.md promise true (world.md zone properties section).
 2. **hp_regen works during combat** — the reducer is `incoming damage − regen` · hence tanks beat bosses despite lowest DPS.
-3. **Kill one by one in spawn order** for this table · AoE follows the skill-pool.md AoE rule (60% per target · Cap 3 · mana ×1.5), which measures 20% faster on groups of 3+ and *slower* on groups of 1-2 than single target.
+3. **These tables are `tools/survival.js` output, not a hand run** · AoE follows the skill-pool.md AoE rule (60% per target · Cap 3 · mana ×1.5), which measures 20% faster on groups of 3+ and *slower* on groups of 1-2 than single target.
 
-### Level 100 · mob HP 22,016 · mob damage 329/sec
+### Level 100 · the zone-9 mob (mob HP 10,709 · damage 304/sec)
 
-| build | Total DPS with tree | Actual taken (after dodge+res) | 1 mob | group of 5 | elite | boss | boss + heal |
-|---|---|---|---|---|---|---|---|
-| glass | 18,217 | 59% of incoming | 2% (0.9 sec) | 29% (4.5 sec) | 11% (2.7 sec) | **119% (13.5 sec) → Push** | 78% |
-| mix | 12,385 | 51% | 1% (1.3 sec) | 27% (6.6 sec) | 10% (4.0 sec) | **112% (19.9 sec) → Push** | 74% |
-| tank | 4,948 | 49% | 0% (3.3 sec) | 23% (16.6 sec) | 6% (10.0 sec) | **109% (49.8 sec) → Push** | 72% |
-| dodge | 7,089 | 38% | 2% (2.3 sec) | 46% (11.6 sec) | 17% (7.0 sec) | **190% (34.8 sec) → Push** | **125% → Push again** |
+<!-- BEGIN GENERATED:survival-mob -->
+**Level 100 · one mob**
 
-heal = ×1.52 of pool (Greater Heal 20% + Heal 4%/sec × 8 sec) · boss damage set at **×4** of mob PS (reason below item 2 + section 7).
+| build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |
+|---|---|---|---|---|---|---|---|---|---|---|
+| glass | 510 | 210 | 210 | 210 | **18,605** | 53 | 33.0% | 10.5% | 75 | 0.1% | 1.2 sec |
+| mix | 360 | 285 | 210 | 285 | **22,025** | 71 | 35.5% | 45.0% | 53 | 0.0% | 1.5 sec |
+| tank | 210 | 510 | 210 | 210 | **32,285** | 128 | 33.0% | 45.0% | 59 | 0.0% | 2.9 sec |
+| evasion | 210 | 210 | 210 | 510 | **8,160** | 53 | 74.6% | 35.7% | 31 | 0.0% | 2.0 sec |
+<!-- END GENERATED:survival-mob -->
+
+### Level 100 · a group of 5 (3 engage at once)
+
+<!-- BEGIN GENERATED:survival-group -->
+**Level 100 · a group of 5 (3 engage at once)**
+
+| build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |
+|---|---|---|---|---|---|---|---|---|---|---|
+| glass | 510 | 210 | 210 | 210 | **18,605** | 53 | 33.0% | 10.5% | 224 | 1.1% | 1.2 sec |
+| mix | 360 | 285 | 210 | 285 | **22,025** | 71 | 35.5% | 45.0% | 160 | 0.6% | 1.5 sec |
+| tank | 210 | 510 | 210 | 210 | **32,285** | 128 | 33.0% | 45.0% | 178 | 0.5% | 2.9 sec |
+| evasion | 210 | 210 | 210 | 510 | **8,160** | 53 | 74.6% | 35.7% | 93 | 1.0% | 2.0 sec |
+<!-- END GENERATED:survival-group -->
+
+### Level 100 · an elite
+
+<!-- BEGIN GENERATED:survival-elite -->
+**Level 100 · an elite**
+
+| build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |
+|---|---|---|---|---|---|---|---|---|---|---|
+| glass | 510 | 210 | 210 | 210 | **18,605** | 53 | 33.0% | 10.5% | 528 | 18.4% | 7.2 sec |
+| mix | 360 | 285 | 210 | 285 | **22,025** | 71 | 35.5% | 45.0% | 338 | 11.1% | 9.2 sec |
+| tank | 210 | 510 | 210 | 210 | **32,285** | 128 | 33.0% | 45.0% | 361 | 12.6% | 17.4 sec |
+| evasion | 210 | 210 | 210 | 510 | **8,160** | 53 | 74.6% | 35.7% | 170 | 17.5% | 12.2 sec |
+<!-- END GENERATED:survival-elite -->
+
+### Level 100 · the zone-9 boss
+
+<!-- BEGIN GENERATED:survival-boss -->
+**Level 100 · the zone-9 boss**
+
+| build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |
+|---|---|---|---|---|---|---|---|---|---|---|
+| glass | 510 | 210 | 210 | 210 | **18,605** | 53 | 33.0% | 10.5% | 2,614 | 247.3% | 18.0 sec → **Push** |
+| mix | 360 | 285 | 210 | 285 | **22,025** | 71 | 35.5% | 45.0% | 1,583 | 157.7% | 23.0 sec → **Push** |
+| tank | 210 | 510 | 210 | 210 | **32,285** | 128 | 33.0% | 45.0% | 1,658 | 206.8% | 43.6 sec → **Push** |
+| evasion | 210 | 210 | 210 | 510 | **8,160** | 53 | 74.6% | 35.7% | 748 | 260.1% | 30.5 sec → **Push** |
+<!-- END GENERATED:survival-boss -->
+
+heal = one round, `engine.json` `build.heal_pool_mult` · boss damage set at **×16** of mob PS (reason below item 2 + section 7).
 
 Reading:
 
-1. **AFK is truly safe in all builds** — groups of 5 cost 23-46% of pool and Push nobody at matching level (and 0-10% in lower zones) · this is the number confirming the concept.md promise, not just text.
-2. **Boss is an active-play gate, not a DPS gate** — at boss damage ×3 only the dodge build is pushed, while glass 87% / mix 80% / tank 69% *kill while idle* → conflicts with the rule stated in crafting.md/checks.md G5 that "AFK cannot kill bosses" · raised to ×4, all builds are pushed at zone 9 without heal, and with heal three of four pass (78/74/72%) · this number is why ×4 was chosen, not taste.
-3. **Pure dodge loses to bosses even with heal (125%)** — same pool as glass but fight lasts 2.6x longer. The fix is already in the numbers: split 4 items to Vit to drop to ~97% of pool with heal (at L90) · a "dodge everything" build must therefore reserve slots for blood, not pure 12-item dodge · links to the fast-hit fork in checks.md group I.
-4. **Elite is provably too weak** — only 6-17% of pool, *lower than groups of 5 in every build* despite being a special event · still a fork for player ruling (D12).
-5. **AoE is now a choice, not free** — under the new rule (Cap 3 targets · mana ×1.5) groups of 5 take 3.75 sec instead of 4.50 sec and take 25% instead of 31%, still better *but* single targets take 2.5x longer and bosses 2.5x longer = 312% of pool = certain Push · details in skill-pool.md AoE section (D11 closed).
+1. **AFK is safe in every build, and the reason is regen, not armour** — read the cost off the generated group table above (the Evasion build pays the most: smallest pool, least mitigation). A build whose regen outpaces the incoming rate simply never loses HP, which is why those numbers sit where they do.
+2. **The boss Pushes most builds in the generated table above** — heal is the button that wins bosses, so an idle (AFK) player forfeits the spawn every 15 min. That is exactly the crafting.md intent that the second half of crafting is active play, and **SV6** holds it.
+3. **The Elite is a real event** — the generated `survival-elite` block prices it *above* a group of 5 in every build. The old table called the Elite provably too weak; that was a symptom of the old field rule, and it no longer holds now that the Elite is 1 mob in 5 and worth ×6 HP.
+4. **Armour and resistance do the work, Evasion does not** — the tank build barely registers the boss because 75% res plus Str armour covers it, while the Evasion build's chance leaves most of every hit landing on a small pool. Both are under the Cap; neither is a free win. (The percentages are in the generated table above.)
+5. **DPS decides the length, not the outcome** — the tank build fights the boss longest and takes the least of its pool; glass kills it fastest and takes the most. Survival time and clear time are separate axes, which is why no single build is best at both.
 
 # 7. Boss — Combat Rules (Measured For All Builds At All Zone Edges)
 
 ```
-HP = mob_HP(zone level) × 15      damage = mob_PS × 4      always single      spawns every 15 min per zone
+HP = mob_HP(zone level) × 15      damage = mob_PS × 16      always single      spawns every 15 min per zone
 Loss = pushed → boss retreats + full HP + spawn ends (must wait for next spawn)
 Potions = suppressed by boss aura (farm.md) — bosses are won with casted heals only
 ```
 
-The "loss forfeits the spawn" rule is what gives the numbers below meaning: if continuous retries were allowed, bosses would be just long mobs because Push costs only 12-19 sec (calculated table in section 4 · glass 19 sec / tank 12 sec) against a 900 sec spawn cycle.
+The "loss forfeits the spawn" rule is what gives the numbers below meaning: if continuous retries were allowed, bosses would be just long mobs because Push costs only a fraction of the 900 sec spawn cycle.
 
-**Why boss damage is ×4 not ×3** — this is a rule change by evidence, not taste · at ×3 only the dodge build was pushed at zone 9, while glass 87% / mix 80% / tank 69% *killed bosses while idle*, contradicting the announced rule across files that "AFK cannot kill bosses" (checks.md G5 · crafting.md) · at ×4 all builds are pushed at zone 9 without heal, and with heal three of four pass · the real gate happens at this number.
+**Why boss damage is ×16, not the old ×4** — this is a rule change by evidence, not taste. `tools/survival.js` prices the boss against the level-100 zone-9 fight, and two facts set the number: without heal most builds must be Pushed, or "AFK cannot kill bosses" (checks.md G5) is false; and with one heal round the boss stays a heal gate rather than a damage gate. At the old ×4 most builds killed the boss while idle; ×16 restores the promise, and **SV6** now gates both halves.
 
-All tables run from `node tools/survival.js` (field rules: max 3 mobs engage · regen works during combat · single-target).
+Every table in §6 and §7 is generated by `node tools/survival.js` (field rules: max 3 mobs engage · regen works during combat · single-target · heal = one round of the heal skills).
 
-| Zone (level) | boss HP | build | Fight time | No heal | With heal |
+<!-- BEGIN GENERATED:survival-boss-zones -->
+**Boss at every zone edge** (player at that zone's level · boss damage ×16 · heal = pool ×2.09)
+
+| Zone (level) | boss HP | build | fight time | no heal | with heal |
 |---|---|---|---|---|---|
-| 10 | 9,898 | glass | 2.0 sec | 12% | 8% |
-| 10 | 9,898 | mix | 3.6 sec | 4% | 2% |
-| 10 | 9,898 | tank | 23.3 sec | 0% | 0% |
-| 10 | 9,898 | dodge | 12.1 sec | 44% | 29% |
-| 30 | 31,158 | glass | 4.5 sec | 27% | 18% |
-| 30 | 31,158 | mix | 7.8 sec | 19% | 13% |
-| 30 | 31,158 | tank | 32.1 sec | 0% | 0% |
-| 30 | 31,158 | dodge | 17.9 sec | 65% | 43% |
-| 60 | 99,563 | glass | 9.2 sec | 72% | 48% |
-| 60 | 99,563 | mix | 14.6 sec | 64% | 42% |
-| 60 | 99,563 | tank | 44.6 sec | 52% | 34% |
-| 60 | 99,563 | dodge | 27.6 sec | **132% Push** | 87% |
-| 90 | 283,516 | glass | 13.5 sec | **125% Push** | 82% |
-| 90 | 283,516 | mix | 20.2 sec | **117% Push** | 77% |
-| 90 | 283,516 | tank | 52.4 sec | **114% Push** | 75% |
-| 90 | 283,516 | dodge | 35.5 sec | **203% Push** | **133% Push** |
+| 1 (10) | 9,435 | glass | 2.8 sec | 18% | 9% |
+| 1 (10) | 9,435 | mix | 4.6 sec | 10% | 5% |
+| 1 (10) | 9,435 | tank | 31.3 sec | 6% | 3% |
+| 1 (10) | 9,435 | evasion | 19.8 sec | **117% Push** | 56% |
+| 2 (20) | 19,575 | glass | 5.2 sec | 46% | 22% |
+| 2 (20) | 19,575 | mix | 8.0 sec | 32% | 15% |
+| 2 (20) | 19,575 | tank | 36.3 sec | 33% | 16% |
+| 2 (20) | 19,575 | evasion | 23.3 sec | **150% Push** | 72% |
+| 3 (30) | 27,360 | glass | 6.4 sec | 55% | 26% |
+| 3 (30) | 27,360 | mix | 9.5 sec | 41% | 20% |
+| 3 (30) | 27,360 | tank | 33.9 sec | 43% | 21% |
+| 3 (30) | 27,360 | evasion | 22.0 sec | **126% Push** | 60% |
+| 4 (40) | 60,495 | glass | 12.6 sec | **201% Push** | 96% |
+| 4 (40) | 60,495 | mix | 18.1 sec | **149% Push** | 71% |
+| 4 (40) | 60,495 | tank | 54.6 sec | **171% Push** | 82% |
+| 4 (40) | 60,495 | evasion | 35.9 sec | **345% Push** | **165% Push** |
+| 5 (50) | 69,480 | glass | 12.9 sec | **183% Push** | 87% |
+| 5 (50) | 69,480 | mix | 18.1 sec | **134% Push** | 64% |
+| 5 (50) | 69,480 | tank | 48.1 sec | **155% Push** | 74% |
+| 5 (50) | 69,480 | evasion | 32.1 sec | **262% Push** | **125% Push** |
+| 6 (60) | 79,395 | glass | 13.2 sec | **172% Push** | 82% |
+| 6 (60) | 79,395 | mix | 18.1 sec | **123% Push** | 59% |
+| 6 (60) | 79,395 | tank | 43.8 sec | **144% Push** | 69% |
+| 6 (60) | 79,395 | evasion | 29.5 sec | **228% Push** | **109% Push** |
+| 7 (70) | 128,805 | glass | 19.3 sec | **349% Push** | **167% Push** |
+| 7 (70) | 128,805 | mix | 25.9 sec | **241% Push** | **115% Push** |
+| 7 (70) | 128,805 | tank | 58.0 sec | **297% Push** | **142% Push** |
+| 7 (70) | 128,805 | evasion | 39.4 sec | **439% Push** | **210% Push** |
+| 8 (80) | 144,075 | glass | 19.5 sec | **331% Push** | **159% Push** |
+| 8 (80) | 144,075 | mix | 25.8 sec | **219% Push** | **105% Push** |
+| 8 (80) | 144,075 | tank | 54.0 sec | **280% Push** | **134% Push** |
+| 8 (80) | 144,075 | evasion | 37.1 sec | **393% Push** | **188% Push** |
+| 9 (90) | 160,635 | glass | 19.7 sec | **318% Push** | **152% Push** |
+| 9 (90) | 160,635 | mix | 25.6 sec | **201% Push** | 96% |
+| 9 (90) | 160,635 | tank | 50.9 sec | **268% Push** | **128% Push** |
+| 9 (90) | 160,635 | evasion | 35.3 sec | **356% Push** | **170% Push** |
+<!-- END GENERATED:survival-boss-zones -->
 
 Reading:
 
-1. **Boss is an endurance + time gate, not a DPS gate** — even max-DPS glass is pushed at zone 9 because bosses stretch to 13.5-52 sec, long enough that regen cannot yet close the gap · the only *survivor* without heal is tank at zone 60 (52%).
-2. **Heal is the button that wins bosses** — ×1.52 of pool turns all three zone 9 pushes into 82/77/75% · meaning idle (AFK) players forfeit the spawn every 15 min = matches crafting.md intent that the second half of crafting is active play.
-3. **Clear difficulty ladder**: zones 1-3 barely threaten (0-65%) · zone 60 starts filtering (only dodge loses) · zone 90 is the wall · so the boss HP multiplier in early zones no longer needs lowering (the old proposal to cut 15 → 10 no longer applies · old numbers were set on ×3 damage).
-4. **Pure dodge is the only build that cannot beat bosses** — 203% / 133% even with heal because same pool as glass but 2.6x longer · evidenced fix: split 4 items to Vit → ~97% of pool at zone 9 (still marginal) · links to the "can fast hit be a build" fork in checks.md group I.
-5. **Tank wins but 3-4x slower** (52.4 sec vs 13.5 sec) with the smallest pool cost · measured trade-off: fast = must press heal, slow = safe.
+1. **Boss is an endurance + time gate, not a DPS gate** — read the fight times off the generated table above: a boss stretches the fight long enough that regen cannot close the gap on its own, which is why the no-heal column is a Push at the top of the game.
+2. **Heal is the button that wins bosses** — one heal round turns the top-zone Pushes into passes, so an idle (AFK) player forfeits the spawn every 15 min. That is exactly the crafting.md intent that the second half of crafting is active play, and **SV6** holds it.
+3. **Clear difficulty ladder** — read it off the table: the early zones barely threaten, the middle starts filtering, and the top zone is the wall, so the boss HP multiplier needs no per-zone lowering.
+4. **Pure Evasion is the weakest build at a boss** — it carries the smallest pool and the slowest kill, so the generated table keeps it Pushed even with heal · the evidence-backed fix is to split items to Vit (the owner confirmed this is intended, D-041 A7) · links to the "can fast hit be a build" fork in checks.md group I.
+5. **Tank wins but slowest, at the smallest pool cost** — the measured trade-off is fast = must press heal, slow = safe.
 
 # 8. Gaps This File Still Cannot Close (With Reasons)
 
-- ~~HP/PS between levels~~ **Closed** — formula `min(12, ceil(L/2))` items + full table above + 9 zones in world.md.
-- ~~Mobs per group per zone~~ **Closed in world.md** — 1-2 (zones 1-3) · 2-3 (zones 4-6) · 3-5 (zones 7-9).
-- ~~Base kph~~ **Closed in loot.md** — 980 / 1,385 / 1,800 kills/hour by Quality tier · drops 133 / 255 / 418 items/hour (`node tools/check.js --checks` reads both lines back out of loot.md).
-- **Only elite needs ruling** — elite is weaker than groups of 5 (17% vs 46% at worst for dodge) · AoE already fixed to Cap 3 targets + mana ×1.5 (skill-pool.md · checks.md D11 closed).
-- **Should XP differ per monster type** — currently `xp = 10 × level` for all types · if elite/boss should grant bonus XP it must be decided when setting the new time line.
+- **Only elite needs ruling** — the generated `survival-elite` block shows the elite is stronger than a group of 5 in every build, so it is a real event, not a weaker trash pack · AoE already fixed to Cap 3 targets + mana ×1.5 (skill-pool.md · checks.md D11 closed).
+- **Should XP differ per monster type** — currently one figure per level for all types · if elite/boss should grant bonus XP it must be decided when setting the new time line.

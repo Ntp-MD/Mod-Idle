@@ -83,7 +83,13 @@ const add = (id, ok, detail, status) => out.push({ id, ok, detail, status });
   const NOTE_DOC = /(^|\/)draft-patch\.md$/; // owner note-only until the owner asks for the write (D-043)
   for (const t of ALIASES.terms) {
     const allow = new Set(t.allow_in || []);
-    const re = new RegExp(`\\b${t.old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    // a trailing `%` is not a word character, so the closing \b would never match; only
+    // require it when the retired spelling ends on one
+    const tail = /[\w]$/.test(t.old) ? '\\b' : '';
+    // `not_prefix` keeps a banned spelling out of a *live* compound term: `Perfect dodge %`
+    // and `mob dodge` are current vocabulary, while the retired player Mod is `Dodge %`
+    const guard = (t.not_prefix || []).map((p) => `(?<!${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} )`).join('');
+    const re = new RegExp(`${guard}\\b${t.old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${tail}`, 'i');
     for (const f of DOCS) {
       if (LOG_DOC.test(f) || NOTE_DOC.test(f) || allow.has(f)) continue;
       TEXT[f].split(/\r?\n/).forEach((line, i) => {

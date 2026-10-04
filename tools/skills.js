@@ -22,6 +22,10 @@ const { SKILLS, TYPES, TYPE_META, RESERVE, byType, count, total, fmt } = R;
 
 const elementLabel = (e) => (e === 'physical' ? 'phys' : e);
 
+// `final_pct` is stored at full precision and the engine reads it for cast damage, so this is a
+// display cap only — the table shows at most 2 decimals without forcing trailing zeros.
+const pct2 = (x) => Math.round(x * 100) / 100;
+
 function countBlock() {
   const rows = TYPES.map((t) => `| **${t}** | ${count(t)} | ${TYPE_META[t]} |`);
   return [
@@ -43,7 +47,7 @@ function attackRoster() {
     const r = M.row(s, { cdrPct: M.CAST_REF.cdr_pct, ladderPct: M.CAST_REF.ladder_pct });
     const glass = fmt(Math.round(M.pressOn(s, 'glass', L)));
     const caster = fmt(Math.round(M.pressOn(s, 'caster', L)));
-    return `| ${s.name} | ${s.group} | ${elementLabel(s.element)} | ${s.cd} sec | ${r.effCd.toFixed(2)} sec | ${r.pressesPerSec.toFixed(2)} | ${s.mana} | ${s.basis} · ${s.final_pct}% | ${s.targets} | ${glass} / ${caster} | ${s.effect} |`;
+    return `| ${s.name} | ${s.group} | ${elementLabel(s.element)} | ${s.cd} sec | ${r.effCd.toFixed(2)} sec | ${r.pressesPerSec.toFixed(2)} | ${s.mana} | ${s.basis} · ${pct2(s.final_pct)}% | ${s.targets} | ${glass} / ${caster} | ${s.effect} |`;
   });
   const B = M.referenceBases();
   return [
@@ -121,8 +125,9 @@ function auraRoster() {
     const abs = tier ? tier.abs : '—';
     return `| ${s.name} | ${s.kind} | ${reserve} | ${abs} | ${s.effect} |`;
   });
+  const pool = require('./lib/engine').DERIVED.mana;
   return [
-    '| Aura | Kind | reserve | At pool 4,848 | Effect at skill level 20 |',
+    `| Aura | Kind | reserve | At pool ${pool.toLocaleString('en-US')} | Effect at skill level 20 |`,
     '|---|---|---|---|---|',
     ...rows,
   ].join('\n');

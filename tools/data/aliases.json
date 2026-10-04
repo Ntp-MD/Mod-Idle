@@ -7,6 +7,8 @@
     { "old": "Affix", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename" },
     { "old": "Attribute", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename (do not use for item mods)" },
     { "old": "pdef", "new": "Armour", "note": "there is no second physical-defence stat — Armour is the Str line (AGENT.md section 5)" },
-    { "old": "mdef", "new": "Elemental resistance", "note": "there is no magic-defence stat — the res-able half is Elemental resistance (combat.md section 2)" }
+    { "old": "mdef", "new": "Elemental resistance", "note": "there is no magic-defence stat — the res-able half is Elemental resistance (combat.md section 2)" },
+    { "old": "Dodge flat", "new": "Evasion flat", "not_prefix": ["Perfect", "mob"], "note": "D-112 merged the two avoidance lines into one capped Evasion rating" },
+    { "old": "Dodge %", "new": "Evasion %", "not_prefix": ["Perfect", "mob"], "note": "D-112 merged the two avoidance lines into one capped Evasion rating; `Perfect dodge %` stays a live term, so the guard skips it" }
   ]
 }

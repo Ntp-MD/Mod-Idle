@@ -11,7 +11,7 @@ import skill-pool.md
 | Skill | cd | mana | Duration | What it does |
 |---|---|---|---|---|
 | Weaken | 12 sec | 14% | 8 sec | Target deals -25% damage |
-| Blinding Mark | 12 sec | 14% | 8 sec | Target accuracy -30% (multiplies with our dodge = true EHP) |
+| Blinding Mark | 12 sec | 14% | 8 sec | Target accuracy -30% (multiplies with our Evasion = true EHP) |
 | Sunder | 15 sec | 16% | 8 sec | Target Elemental res -20% · Opens res-blocked zones |
 | Expose | 14 sec | 16% | 8 sec | Target takes +20% damage |
 | Cripple | 12 sec | 14% | 8 sec | Target aspd -20% · Element-free so usable with all weapons |

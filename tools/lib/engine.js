@@ -81,7 +81,7 @@ const GENERIC_RULES = [
   { file: 'formula.md', label: 'formula.md K_INT_MREGEN', re: /\| K_INT_MREGEN \| \*\*([\d.]+)\*\*/, pick: 1, expect: K.K_INT_MREGEN },
   { file: 'formula-utility.md', label: 'formula-utility.md dagger Cap Agi', re: /\| dagger \| ([\d.]+) \| [\d.]+ \| ([\d,]+)/, pick: 2, expect: WEAPONS[0].agi_to_cap },
   { file: 'formula-utility.md', label: 'formula-utility.md sword Cap Agi', re: /\| one-handed sword \/ axe \| ([\d.]+) \| [\d.]+ \| ([\d,]+)/, pick: 2, expect: WEAPONS[1].agi_to_cap },
-  { file: 'formula-defense.md', label: 'formula-defense.md CDR path to Cap (11 items)', re: /11 Mod items[^=]*= `24\.5 × ([\d.]+) = ([\d.]+)`/, pick: [1, 2], expect: [1 + M.cdr_pct_per_item * LG.cdr_mod_items / 100, r1(DERIVED.cdr_four)] },
+  { file: 'formula-defense.md', label: 'formula-defense.md CDR path to Cap (11 items)', re: /11 Mod items[^=]*= `([\d.]+) × ([\d.]+) = \**([\d.]+)\**`/, pick: [1, 2, 3], expect: [r1(DERIVED.cdr_raw), r2(1 + M.cdr_pct_per_item * LG.cdr_mod_items / 100), r1(DERIVED.cdr_four)] },
   { file: 'formula-utility.md', label: 'formula-utility.md accuracy ceiling', re: /Mod max 25 on main hand = \*\*([\d,]+)\*\*/, pick: 1, expect: Math.round(DERIVED.accuracy) },
   { file: 'formula.md', label: 'formula.md K_EVASION row', re: /\| K_EVASION \| ([\d.]+) \|/, pick: 1, expect: K.K_EVASION },
   { file: 'core-stats.md', label: 'core-stats.md Evasion K', re: /Dex x K_EVASION` \(([\d.]+)\)/, pick: 1, expect: K.K_EVASION },
@@ -92,8 +92,10 @@ const GENERIC_RULES = [
 
 
   { file: 'concept.md', label: 'concept.md zone-9 boss HP', re: /zone 9 boss \(level 90, HP ([\d,]+)\)/, pick: 1, expect: Math.round(E.mob.zones[8].hp[1] * E.mob.sizes.find((s) => s.id === 'boss').hp) },
-  { file: 'formula-utility.md', label: 'formula-utility.md weight capacity', re: /Str 816 carries ([\d,]+)/, pick: 1, expect: Math.round(DERIVED.weight) },
-  { file: 'formula-utility.md', label: 'formula-utility.md drop multiplier', re: /Lck 816 gives ([\d.]+)x/, pick: 1, expect: r1(DERIVED.drop_mult) },
+  // The stat value in front of each of these is the ceiling itself, so it is interpolated from CEIL
+  // rather than typed: a re-based ceiling moves the pattern instead of silently breaking the match.
+  { file: 'formula-utility.md', label: 'formula-utility.md weight capacity', re: new RegExp('Str ' + Math.round(CEIL) + ' carries ([\\d,]+)'), pick: 1, expect: Math.round(DERIVED.weight) },
+  { file: 'formula-utility.md', label: 'formula-utility.md drop multiplier', re: new RegExp('Lck ' + Math.round(CEIL) + ' gives ([\\d.]+)x'), pick: 1, expect: r1(DERIVED.drop_mult) },
   { file: 'formula-defense.md', label: 'formula-defense.md level_gain_hp', re: /level_gain_hp` = 40 × \(level − 1\) → at level 100 gives ([\d,]+)/, pick: 1, expect: LG.hp_per_level * (S.level_cap - 1) },
   { file: 'formula-defense.md', label: 'formula-defense.md pool ÷ regen', re: /pool ÷ regen\s*=\s*([\d,]+) ÷ (\d+) = ([\d.]+) seconds/, pick: [1, 3], expect: [Math.round(DERIVED.mana), r1(DERIVED.pool_regen_sec)] },
   { file: 'core-stats.md', label: 'core-stats.md Evasion Cap', re: /Evasion - % Cap (\d+)/, pick: 1, expect: E.caps.evasion },

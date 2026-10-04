@@ -62,7 +62,7 @@ import elements.md
 - **Elemental power ranges slightly below phys/magic** because Elemental damage must pass through an Alignment check first
 - Res is Defensive, so it never rolls on main hand (see equipment-slot.md)
 - Res has no Flat — raw res comes from Vit only, Mods add percentage multipliers
-- Res ranges much higher than Dodge % because it must also race monster Counter elements and Weak
+- Res ranges much higher than Evasion % because it must also race monster Counter elements and Weak
 - Alignment is % only, no Flat · one shared stat confirms both Elements and statuses
 
 # Item Weight
@@ -73,18 +73,18 @@ import elements.md
 - **Per-Base weight table is in item-base.md** · one slot has several frames (chest = mail 60 / plate 85 / vestments 28). This is why weight becomes a *choice*, not a forced slot number
 - Main-hand weapons use weight by type (wand/rod 25 → two-handed axe 85) · dual-wield counts x0.8
 - Full 12-item set: cloth ≈ **248 / 322** · balanced ≈ **390 / 507** · armored ≈ **505 / 657** (first pair mid quality · second pair high quality)
-- Carry capacity = Str x 2 (420 with no Str investment · 1,632 at full Str) · exceeding it cuts Attack speed up to -50% → full rule is in formula.md section 11
+- Carry capacity = Str x 2 (420 with no Str investment · 1,020 at the full-Str ceiling) · exceeding it cuts Attack speed up to -50% → full rule is in formula.md section 11
 
 # Roll Examples
 
 
 Table values are the **T3 range start** of that quality: the worst roll that still counts as that quality.
 
-| Quality | Stat Mod % | Stat Mod flat | Power flat | Power % | Crit chance % | Elem res % |
-|---|---|---|---|---|---|---|
-| Low | 1% | 5 | 15 | 3% | 1% | 15% |
-| Mid | 3% | 12 | 37 | 8% | 4% | 20% |
-| High | 5% | 19 | 59 | 12% | 6% | 25% |
+| Quality | Stat Mod flat | Power flat | Power % | Crit chance % | Elem res % |
+|---|---|---|---|---|---|
+| Low | 5 | 15 | 3% | 1% | 15% |
+| Mid | 12 | 37 | 8% | 4% | 20% |
+| High | 19 | 59 | 12% | 6% | 25% |
 
 Example of one item
 
@@ -92,7 +92,7 @@ Example of one item
 Rare · mid quality
    Physical power flat 44   (T2 of mid quality)
    Str flat            16   (T1 of mid quality)
-   Dodge %6            (T2 of mid quality)
+   Evasion % 9         (T2 of mid quality)
    Elemental res %    24   (T1 of mid quality · Cold Element)
 ```
 

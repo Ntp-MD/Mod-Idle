@@ -85,7 +85,7 @@ Unlike Melvor, where skills must be swapped to farm XP — here only equipped it
 
 > **Closed in equipment-weapon.md**: Mastery levels 1-20 per weapon type · XP from the character XP kill stream (4/kill, no hit term · D-065) · L10 takes 1.13 hours at level 90. All 12 types account-wide = 13.5 hours.
 > Bonuses = **weapon weight −1%/level** (while equipped) · **skill damage +0.5%/level from L5** (while equipped) · **drop_rate +1% per type at L10 or above** (account-wide, max +12%).
-> Reason for no damage bonus: all weapon types are already tuned to equal DPS (`weapon_mult = 1.2 / weapon_aspd` · Proven equal at 9,847 across all 12 types). If Mastery granted damage, one weapon type would stay best forever and the "reason to try swapping weapons" would die · AFK still farms Mastery at full rate because it counts purely from kills.
+> Reason for no damage bonus: all weapon types are already tuned to equal DPS (`weapon_mult = 1.2 / weapon_aspd` · proven equal across all 12 types by **X14**). If Mastery granted damage, one weapon type would stay best forever and the "reason to try swapping weapons" would die · AFK still farms Mastery at full rate because it counts purely from kills.
 
 # Build
 
@@ -95,14 +95,14 @@ From the system in `formula.md` where all 7 stats use the same scale, builds are
 |---|---|---|---|
 | physical burst | sword / axe | Max HP % | crit chance + crit damage on main hand |
 | magic burst | staff / rod / wand | Max Mana % · CDR % | Magic power + Alignment |
-| fast hit | dagger / bow | Dodge Flat % | Attack speed % · Core stat Agi |
+| fast hit | dagger / bow | Evasion flat · Evasion % | Attack speed % · Core stat Agi |
 | elemental dot | any with Element | Elemental res of the used Element | Alignment + burn/poison |
-| dodge tank | shield / mace | Dodge + Max HP | Core stat Vit + Agi |
+| evasion tank | shield / mace | Evasion + Max HP | Core stat Vit + Agi |
 | loot | anything | anything | Core stat Lck · drop rate |
 
 - Every build uses Core stats from all pieces; they differ in which one is stacked.
 - Lck is the only stat helping both DPS (crit) and loot (drop), so it is the most valuable long-term build. Must be watched so it does not dominate.
-- **Decided (P0-2): "fast hit" stays as a hit-count build, not a DPS race.** Measured gap stands (Agi 12 = 3,830 vs Str 12 = 9,847) and its value must come from *hit count* (proc per hit · DoT tick · chill), with Riposte as its boss path (dodge-scaling damage). The numeric rebalance that line deferred to the mob-sheet pass has now run on geared characters (**D-106**): the same bag spent two ways leaves the hit-count build at ×0.87 of the big-hit build and carries **more** of its damage through a swing or something a swing left behind, so the identity holds and no number moved. The thin leg is the procs themselves — `harness/todo.md` B22.
+- **Decided (P0-2): "fast hit" stays as a hit-count build, not a DPS race.** The big-hit build outscores it on raw damage per bag and nothing in the K set changes that; its value comes from **swing count** — more procs per second, more chill uptime, and Riposte's Evasion-scaling damage as its boss path. The numeric rebalance this line deferred to the mob-sheet pass has now run on geared characters (**D-106**): the same bag spent two ways leaves the hit-count build behind on damage but carrying **more** of it through a swing or something a swing left behind, so the identity holds and no number moved. The DoT leg is **not** this build's — burn and poison are the payload of the poison build, which spends its slots on the curse lines, so the hit-count identity does not lean on a status budget it does not own.
 
 > **Fixed**: Wis previously had no outlet because there were no skills. Now `skill-pool.md` has skills that actually use CDR.
 > Str/Int/Dex/Agi/Lck are stats that scale skills, so CDR values now have uses for every stat.
@@ -135,13 +135,13 @@ is hand-typed — the table is generated, and five opening checks hold it agains
 | | Given | Why |
 |---|---|---|
 | Settlement | **Eastgate** (zone 1, levels 1-10) | the zone the player opens in |
-| Level | **1** · 12 each stat · 240 Max HP · 3.0 regen/sec | level-1 baseline, no gear |
+| Level | **1** · 12 each stat · 540 Max HP · 3.0 regen/sec | level-1 baseline, no gear |
 | Gear | **1 item**: one-handed sword, low quality T3, Physical power flat +15 | the floor of the low-quality table |
 | Skills | **none** | the first skill is the first boss drop |
 | Gold / stones | **0 / 0** | minute one buys nothing |
 | First rule | **kill 5 in zone 1** (from the Guild counter, Eastgate) | the task board already exists and pays stones only |
 
-**First fight, measured:** a level-1 character kills a zone-1 mob in **1.3 sec** as the curve prices it, and in **2.5 sec** as a character actually carrying the 35-weight sword swings it (§11 takes 46% of aspd against a 24 capacity · survives **168 sec** of the mob's return damage). Numbers come from the same engine the cages use, so the opening cannot drift away from the mob curve it is priced against.
+**First fight, measured:** a level-1 character kills a zone-1 mob in **1.3 sec** as the curve prices it, and in **1.3 sec** as a character actually carrying the 35-weight sword swings it (§11 takes 0% of aspd against a 1,024 capacity · survives **378 sec** of the mob's return damage). Numbers come from the same engine the cages use, so the opening cannot drift away from the mob curve it is priced against.
 <!-- END GENERATED:opening -->
 
 - **Why the starting weapon is the worst roll in the table.** The mob-health curve already prices a
@@ -155,7 +155,7 @@ is hand-typed — the table is generated, and five opening checks hold it agains
 
 # Not Yet Defined
 
-- **Win condition — Decided** · Completion = **kill the zone 9 boss (level 90, HP 160,635) within a single spawn without being Pushed** · A truly measurable number from combat.md §6/§7 and `node tools/survival.js` (**SV6**): without heal three of the four builds are Pushed, and one heal round (pool ×2.09) passes all but the dodge build. So it is not a gate requiring new items, but a gate requiring *heal casts*, which is what separates active play from AFK as G5 promised · Full-dodge is the only build that cannot finish without allocating slots to health · **After completion = continued improvement loop, no prestige**: levels 91-100 are the item-quality push in zone 9 (world.md) · Remaining goals are timed — Ascend full 12 pieces ~15 hours (E7) · Refine full set ~16 hours (E6) · Mastery 12 types to L20 ~60 hours · Full skill ranks for 2-4 skills ~24 hours/skill (E11).
+- **Win condition — Decided** · Completion = **kill the zone 9 boss (level 90, HP 160,635) within a single spawn without being Pushed** · A truly measurable number from combat.md §6/§7 and `node tools/survival.js` (**SV6**): without heal all four builds are Pushed, and one heal round (pool ×2.09) clears it for the two themes that spend their items on surviving — `mix` and `tank` — so it is not a gate requiring new items, but a gate requiring *heal casts*, which is what separates active play from AFK as G5 promised · The glass and Evasion themes are the two that cannot finish without allocating slots to health · **After completion = continued improvement loop, no prestige**: levels 91-100 are the item-quality push in zone 9 (world.md) · Remaining goals are timed — Ascend full 12 pieces ~15 hours (E7) · Refine full set ~16 hours (E6) · Mastery 12 types to L20 ~60 hours · Full skill ranks for 2-4 skills ~24 hours/skill (E11).
 - **Short-form content** — 9 bosses (1 per zone) per new zone numbers · **Achievements are cut** (D-009 7c) · Elite set at 1 in 5 kills (D-041 · `engine.json` `elite_spawn_chance`).
 
 (End of file - total 135 lines)

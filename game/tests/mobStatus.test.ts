@@ -119,6 +119,7 @@ describe('control is bounded, never a lockout', () => {
     const mob1 = mob();
     const r = mobSwing(mulberry32(5), buildCharacter(90, emptyGear()), mob1, {}, combineMods({
       damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: true,
+      armourCut: 0, resistCut: 0, elemTakenPct: 0,
     }, {}));
     expect(r.blocked).toBe('shocked');
     expect(r.toHp).toBe(0);
@@ -127,7 +128,7 @@ describe('control is bounded, never a lockout', () => {
   it('a shocked mob swings slower in the sim clock, not never', () => {
     const c = charWith('cold', 100);
     const store = inflict('cold', c);
-    const tm = combineMods({ damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: false }, targetMods(modsOn(store, 'm1')));
+    const tm = combineMods({ damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: false, armourCut: 0, resistCut: 0, elemTakenPct: 0 }, targetMods(modsOn(store, 'm1')));
     expect(tm.attackSpeed).toBe(-20);
     expect(Math.max(0, 1 + tm.attackSpeed / 100)).toBeCloseTo(0.8, 10);
   });
@@ -154,6 +155,7 @@ describe('mark is the one status that multiplies the hit it rides on', () => {
     const tm = targetMods(modsOn(store, 'm1'));
     const hit = playerSwing(mulberry32(3), plain, target, null, combineMods({
       damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: false,
+      armourCut: 0, resistCut: 0, elemTakenPct: 0,
     }, tm));
     expect(hit.damage).toBeCloseTo(base * (1 + tm.damageTaken! / 100), 6);
     expect(hit.leech!).toBeGreaterThan(0);

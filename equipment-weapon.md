@@ -21,13 +21,13 @@ Weapons have **12 types** · concept.md originally stated 10 types because it co
 
 # Off-hand only
 
-- **shield** — Defensive (Max HP · Dodge)
+- **shield** — Defensive (Max HP · Evasion)
 - **book** — Defensive (Max Mana · Cooldown reduction) · Counts as magic group for skill bonus (see skill-pool.md)
 
 # Rules resulting from this decision set
 
 - **Dagger is melee, not ranged** — this file originally had a heading "Ranged (one-handed)" even though the list was sword/axe/knife, which caused the weapon-group table in skill-pool.md to drag dagger into ranged. Now split correctly: melee 7 types · ranged = bow/crossbow · magic = rod/wand/staff (+ book in off hand)
-- **All types have equal DPS at equal stats** because `weapon_mult = 1.2 / weapon_aspd` · Verified on a 12-piece Str build: every type yields 9,847 DPS. What differs is hit count (which affects per-hit procs · Sonic Blow · Flurry · chill · DoT ticking) and who hits the aspd Cap first
+- **All types have equal DPS at equal stats** because `weapon_mult = 1.2 / weapon_aspd` · `weapon_aspd` cancels out of `power × times/sec`, so every type lands on the same Expected DPS at equal stats (the section 0 table · **X14**). What differs is hit count (which affects per-hit procs · Sonic Blow · Flurry · chill · DoT ticking) and who hits the aspd Cap first
 - **No Base power per weapon type**. All types draw power from the character (formula.md section 1)
 - **Dual-wield allowed only for sword / axe / dagger** · The second piece uses the same pool as the main hand but grants half Primary weight (equipment-slot.md)
 - Two-handed weapons and bow/crossbow occupy the off hand → **lose the chance to equip shield/book**, which is the real cost of high weapon_aspd
@@ -57,7 +57,7 @@ mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 | **While held** (that weapon type) | Held weapon weight **-1% per level** · And skills used with this weapon deal **+0.5% per level from L5** | -20% weight · +8% skill damage |
 | **Account-wide** | Every weapon type with Mastery ≥ 10 → **+1% of drop_rate**, summed across types | +12% (12 types) |
 
-**Why Mastery grants no +damage**: all weapon types are already tuned to equal DPS (`weapon_mult = 1.2 / weapon_aspd` · proven equal at 9,847 at equal stats). If Mastery granted damage, a single weapon type would be "better" permanently, and the reason Mastery exists (to encourage weapon swapping) would die immediately · Both bonus layers are therefore in the dimensions of *weight* and *drop rate*, which do not shift any number in formula.md section 0
+**Why Mastery grants no +damage**: all weapon types are already tuned to equal DPS (`weapon_mult = 1.2 / weapon_aspd` · proven equal at equal stats by **X14**). If Mastery granted damage, a single weapon type would be "better" permanently, and the reason Mastery exists (to encourage weapon swapping) would die immediately · Both bonus layers are therefore in the dimensions of *weight* and *drop rate*, which do not shift any number in formula.md section 0
 
 ## Timeline for the whole account (measured at level 90 · using one weapon continuously)
 
@@ -74,7 +74,7 @@ mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 No table here: the set weights and their taxes are printed once, from `tools/data/bases.json`, in the generated block in `formula-utility.md` section 11 (`node tools/bases.js --blocks`). Mastery acts on the **held weapon** only — it discounts that weapon's weight by up to 20% — and the weight it discounts is the **weight** column above, per type (B13 · D-101), so the size of the saving scales with the type you are holding and this file states the number exactly once.
 
 - Mastery **is not a shortcut past Str** — an armored build without Str still hits the tax Cap; the discount applies to one weapon line out of twelve
-- Drop effect: no-Lck players get 418 → 468 pieces/hour (+12%) · Full Lck 1,319 → 1,477/hour — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
+- Drop effect: no-Lck players get 418 → 468 pieces/hour (+12%) · Full Lck 878 → 983/hour — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
 
 # Display
 

@@ -21,11 +21,11 @@ Every price is anchored to a number in `checks.md` groups E/F, and nothing here 
 <!-- BEGIN GENERATED:price-unit -->
 ```
 gold per sold junk piece        = 1                       (economy.md · loot.md section 4)
-drops/hour per band             = 133 low · 255 mid · 418 high · 1,319 high+full Lck   (loot.md section 2 · F3)
-upgrades/hour from drops        = 3 low · 3 mid · 3 high · 3 high+full Lck   (F4)
-junk/hour = drops - upgrades    = 130 low · 252 mid · 415 high · 1,316 high+full Lck
+drops/hour per band             = 133 low · 255 mid · 418 high · 878 high+full Lck   (loot.md section 2 · F3)
+upgrades/hour from drops        = 3 low · 4 mid · 3 high · 3 high+full Lck   (F4)
+junk/hour = drops - upgrades    = 130 low · 251 mid · 415 high · 875 high+full Lck
 1 m  = 1 minute of full-sell income in that band
-gold per 1 m                    = 2.2 low · 4.2 mid · 6.9 high · 21.9 high+full Lck
+gold per 1 m                    = 2.2 low · 4.2 mid · 6.9 high · 14.6 high+full Lck
 kills/hour per band (F1)        = 980 low · 1,385 mid · 1,800 high
 opportunity cost of 1 gold      = 1 Reroll value stone forgone = 1/52 hour of Reroll capacity ≈ 1.15 min of craft progress (F6 · E8)
 
@@ -42,18 +42,18 @@ band hours (low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (
 <!-- BEGIN GENERATED:supply -->
 ```
 band hours                      = low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (91-100) = 9.0
-lifetime junk pieces            = 3.1×130 + 9.5×252 + 18.6×415 + 9.0×415 = 14,251
-max lifetime gold (sell everything, no Lck)              = 14,251
+lifetime junk pieces            = 3.1×130 + 9.5×251 + 18.6×415 + 9.0×415 = 14,242
+max lifetime gold (sell everything, no Lck)              = 14,242
 one-time stall demand (section 3, all 9 places)          = 18,664 gold = 1.31x the max
 essentials only (road link · stash tab 1 · stash tab 2 · herb pouch ii · plot deed 4) = 1,951 = 13.7% of the max
-full-Lck ceiling over the 27.6 high-band hours               = 36,322 gold (= ×3.17 of the 11,454 a no-Lck run earns there · ceiling ×3.17)
-stones forgone by selling everything                     = 14,251 ÷ 8 = 1,781 Reroll casts ≈ 17.8 full-set polishes (E8)
+full-Lck ceiling over the 27.6 high-band hours               = 24,150 gold (= ×2.11 of the 11,454 a no-Lck run earns there · ceiling ×2.11)
+stones forgone by selling everything                     = 14,242 ÷ 8 = 1,780 Reroll casts ≈ 17.8 full-set polishes (E8)
 repeatable demand (section 4)                            = absorbs whatever the one-time list does not, no ceiling
 ```
 <!-- END GENERATED:supply -->
 
 - The list is **a funnel, not a wall**: the essentials are affordable while still dissolving ~85% of junk, and the full one-time list is only closable by a build that sells most of its loot and gives up Reroll polish.
-- A full-Lck player raises the junk line ×3.15 (`loot.md` section 3 conclusion 2), so the tail is reachable *for that build* — exactly Lck's designed identity as the loot/craft stat. Guard: `checks.md` G8 + T7.
+- A full-Lck player raises the junk line ×2.11 (`loot.md` section 3 conclusion 2), so the tail is reachable *for that build* — exactly Lck's designed identity as the loot/craft stat. Guard: `checks.md` G8 + T7.
 - Repeatables (section 4) absorb whatever the one-time list does not, which is the problem `economy.md` states: one-time purchases alone would leave the medium dead by hour 20.
 
 # 3. One-time purchases

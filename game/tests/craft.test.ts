@@ -5,11 +5,33 @@ import { rollDrop } from '../src/sim/drop';
 import { doCraft, stoneNames, craft as clientCraft } from '../src/sim/craft';
 import { newGame, tick } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
+import type { Item } from '../src/sim/types';
 
 const craft = createCraft(E, loot);
 
-function piece(seed = 1, band = 'low') {
-  return rollDrop(mulberry32(seed), band, 1.2);
+// `rollDrop` always stamps the quality band (`sim/drop.ts`), so a rolled piece carries a `q` even
+// though `Item.q` is optional for hand-built fixtures elsewhere.
+function piece(seed = 1, band = 'low'): Item & { q: number } {
+  return rollDrop(mulberry32(seed), band, 1.2) as Item & { q: number };
+}
+
+type CraftResult = { ok: boolean; why?: string; item?: any; changed?: any };
+
+/** The success branch, typed — throws the refusal's own reason so a failed craft names itself. */
+function made(r: CraftResult): { ok: true; item: any; changed: any } {
+  if (!r.ok || !r.item) throw new Error(`craft refused: ${r.why ?? 'unknown reason'}`);
+  return r as { ok: true; item: any; changed: any };
+}
+
+/** The refusal branch, typed — asserts the craft did not succeed. */
+function refused(r: CraftResult): { ok: false; why: string } {
+  if (r.ok) throw new Error('expected the craft to be refused');
+  return { ok: false, why: r.why ?? '' };
+}
+
+/** Narrows a craft result to its success branch without throwing, for loops that tolerate a refusal. */
+function isMade(r: CraftResult): r is { ok: true; item: any; changed: any } {
+  return !!r.ok && r.item !== undefined;
 }
 
 describe('bench prices are the ones crafting.md prints', () => {
@@ -29,7 +51,7 @@ describe('Reroll', () => {
     const [lo, hi] = loot.rangeOf(line.id, item.q, line.slice);
     let current = item;
     for (let s = 0; s < 200; s++) {
-      const r = craft.reroll(current, 0, mulberry32(s));
+      const r = made(craft.reroll(current, 0, mulberry32(s)));
       expect(r.ok).toBe(true);
       const next = r.item.lines[0];
       expect(next.value).toBeGreaterThanOrEqual(current.lines[0].value);
@@ -47,10 +69,10 @@ describe('Refine and Randomize', () => {
   it('Refine pushes one Tier up and stops dead at T1', () => {
     let item = piece(4);
     item = { ...item, lines: item.lines.map((l) => ({ ...l, slice: 2 })) };
-    const r = craft.refine(item, 0, mulberry32(1));
+    const r = made(craft.refine(item, 0, mulberry32(1)));
     expect(r.ok).toBe(true);
     expect(r.item.lines[0].slice).toBe(1);
-    const again = craft.refine({ ...item, lines: item.lines.map((l) => ({ ...l, slice: 0 })) }, 0, mulberry32(1));
+    const again = refused(craft.refine({ ...item, lines: item.lines.map((l) => ({ ...l, slice: 0 })) }, 0, mulberry32(1)));
     expect(again.ok).toBe(false);
     expect(again.why).toMatch(/already T1/);
   });
@@ -58,7 +80,7 @@ describe('Refine and Randomize', () => {
   it('the 1-stone roll may land anywhere in the published Tier weights, including lower', () => {
     const item = { ...piece(5), lines: piece(5).lines.map((l) => ({ ...l, slice: 0 })) };
     const seen = new Set<number>();
-    for (let s = 0; s < 60; s++) seen.add(craft.randomize(item, 0, mulberry32(s)).item.lines[0].slice);
+    for (let s = 0; s < 60; s++) seen.add(made(craft.randomize(item, 0, mulberry32(s))).item.lines[0].slice);
     expect(seen.size).toBeGreaterThan(1);
   });
 });
@@ -66,7 +88,7 @@ describe('Refine and Randomize', () => {
 describe('Ascend', () => {
   it('moves the whole piece one quality step and carries every line into the next band', () => {
     const item = piece(6);
-    const r = craft.ascend(item, mulberry32(2));
+    const r = made(craft.ascend(item, mulberry32(2)));
     expect(r.ok).toBe(true);
     expect(r.item.q).toBe(item.q + 1);
     for (const line of r.item.lines) {
@@ -78,9 +100,9 @@ describe('Ascend', () => {
 
   it('cannot skip a step and cannot pass high', () => {
     const item = piece(7);
-    const one = craft.ascend(item, mulberry32(1));
-    const two = craft.ascend(one.item, mulberry32(1));
-    const three = craft.ascend(two.item, mulberry32(1));
+    const one = made(craft.ascend(item, mulberry32(1)));
+    const two = made(craft.ascend(one.item, mulberry32(1)));
+    const three = refused(craft.ascend(two.item, mulberry32(1)));
     expect(two.item.q).toBe(one.item.q + 1);
     expect(three.ok).toBe(false);
     expect(three.why).toMatch(/already high/);
@@ -91,7 +113,7 @@ describe('Remove', () => {
   it('never touches the two Legacy slots', () => {
     for (let s = 0; s < 40; s++) {
       const item = { ...piece(8), lines: [{ id: 'stat_mod_flat', value: 20, slice: 2 }, { id: 'physical_power_flat', value: 70, slice: 2 }, { id: 'attack_speed', value: 20, slice: 2 }] };
-      const r = craft.remove(item, mulberry32(s));
+      const r = made(craft.remove(item, mulberry32(s)));
       expect(r.ok).toBe(true);
       expect(r.changed.index).toBeGreaterThanOrEqual(craft.LEGACY_SLOTS);
       expect(r.item.lines[0].value).toBe(20);
@@ -108,21 +130,21 @@ describe('Remove', () => {
 describe('Add mod stone', () => {
   const poolFor = (item: any) => {
     const frame = require('../../tools/data/bases.json').bases.find((b: any) => b.name === item.base && b.slot === item.slot);
-    return frame ? [...frame.primary, ...frame.secondary, 'stat_mod_flat', 'stat_mod'] : ['physical_power_flat', 'attack_speed', 'stat_mod_flat'];
+    return frame ? [...frame.primary, ...frame.secondary, 'stat_mod_flat'] : ['physical_power_flat', 'attack_speed', 'stat_mod_flat'];
   };
 
   it('costs 1 stone then 2, and stops at the Rarity crafted max', () => {
     let item = { ...piece(21), rarity: 'Rare', lines: piece(21).lines.slice(0, 3) };
     expect(craft.costOf('add', item)).toEqual({ add: 1 });
-    const one = craft.add(item, poolFor(item), mulberry32(1));
+    const one = made(craft.add(item, poolFor(item), mulberry32(1)));
     expect(one.ok).toBe(true);
     item = one.item;
     expect(item.mods_added).toBe(1);
     expect(craft.costOf('add', item)).toEqual({ add: 2 });
-    const two = craft.add(item, poolFor(item), mulberry32(2));
+    const two = made(craft.add(item, poolFor(item), mulberry32(2)));
     expect(two.ok).toBe(true);
     expect(two.item.lines.length).toBe(item.lines.length + 1);
-    const three = craft.add(two.item, poolFor(two.item), mulberry32(3));
+    const three = refused(craft.add(two.item, poolFor(two.item), mulberry32(3)));
     expect(three.ok).toBe(false);
     expect(String(three.why)).toMatch(/2 Add stones/);
   });
@@ -132,7 +154,7 @@ describe('Add mod stone', () => {
     const seen = new Set<string>();
     for (let s = 0; s < 40; s++) {
       const r = craft.add(item, ['stat_mod_flat', 'max_hp_flat', 'armour_flat'], mulberry32(s));
-      if (!r.ok) continue;
+      if (!isMade(r)) continue;
       seen.add(r.changed.id);
       expect(r.changed.id).not.toBe('stat_mod_flat');
     }
@@ -143,30 +165,36 @@ describe('Add mod stone', () => {
     const full = { ...piece(23), rarity: 'Common', lines: [
       { id: 'stat_mod_flat', value: 9, slice: 2 }, { id: 'max_hp_flat', value: 40, slice: 2 }, { id: 'armour_flat', value: 12, slice: 2 },
     ] };
-    const atMax = craft.add(full, ['evasion_flat'], mulberry32(1));
+    const atMax = refused(craft.add(full, ['evasion_flat'], mulberry32(1)));
     expect(atMax.ok).toBe(false);
     expect(String(atMax.why)).toMatch(/stops at 3 Mods/);
     const base = { ...piece(23), rarity: 'Common', lines: [{ id: 'stat_mod_flat', value: 9, slice: 2 }] };
-    const first = craft.add(base, ['max_hp_flat', 'stat_mod'], mulberry32(1));
+    const first = made(craft.add(base, ['max_hp_flat', 'armour_flat'], mulberry32(1)));
     expect(first.ok).toBe(true);
-    const second = craft.add(first.item, ['max_hp_flat', 'stat_mod'], mulberry32(2));
+    const second = made(craft.add(first.item, ['max_hp_flat', 'armour_flat'], mulberry32(2)));
     expect(second.ok).toBe(true);
-    const third = craft.add(second.item, ['max_hp_flat', 'stat_mod'], mulberry32(3));
+    const third = refused(craft.add(second.item, ['max_hp_flat', 'armour_flat'], mulberry32(3)));
     expect(third.ok).toBe(false);
     expect(String(third.why)).toMatch(/2 Add stones/);
   });
 
-  it('slots 6-7 stop offering a Stat Mod once the piece holds its two', () => {
+  // Stat Mod % was retired with Core Stat % (D-114), so `stat_mod_flat` is the only Stat Mod line a
+  // piece can hold — and once it holds that one, the stone must never offer it again.
+  it('a piece stops offering a Stat Mod once it holds the one', () => {
     const lines = [
-      { id: 'stat_mod_flat', value: 9, slice: 2 }, { id: 'stat_mod', value: 3, slice: 2 },
+      { id: 'stat_mod_flat', value: 9, slice: 2 },
       { id: 'max_hp_flat', value: 50, slice: 2 }, { id: 'armour_flat', value: 20, slice: 2 },
       { id: 'evasion_flat', value: 10, slice: 2 },
     ];
     const item = { ...piece(24), rarity: 'Rare', q: 0, lines, mods_added: 0 };
+    let offered = 0;
     for (let s = 0; s < 25; s++) {
-      const r = craft.add(item, ['stat_mod_flat', 'stat_mod', 'cooldown_reduction'], mulberry32(s));
-      if (r.ok) expect(['stat_mod_flat', 'stat_mod']).not.toContain(r.changed.id);
+      const r = craft.add(item, ['stat_mod_flat', 'cooldown_reduction'], mulberry32(s));
+      if (!isMade(r)) continue;
+      offered++;
+      expect(r.changed.id).not.toBe('stat_mod_flat');
     }
+    expect(offered).toBeGreaterThan(0); // the loop is not green because nothing ever landed
   });
 
   it('the bench pays the stone and the client refuses without one', () => {
@@ -188,7 +216,7 @@ describe('the bench in the game', () => {
     const s = newGame(21);
     s.counters.stones.reroll_value = 0;
     s.bag.unshift(piece(11));
-    const denied = doCraft(s, 'bag', 0, 'reroll', 0, mulberry32(1));
+    const denied = refused(doCraft(s, 'bag', 0, 'reroll', 0, mulberry32(1)));
     expect(denied.ok).toBe(false);
     expect(String(denied.why)).toMatch(/needs/);
     s.counters.stones.reroll_value = 8;

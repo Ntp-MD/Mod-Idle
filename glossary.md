@@ -16,9 +16,9 @@ One item answers 3 separate questions. They are separate on purpose: collapsing 
 
 ```
 Common · mid quality
-  ├── T3  Physical power flat  44-50
+  ├── T3  Physical power flat  37-43
   ├── T2  Str flat             15-16
-  └── T1  Dodge %              7
+  └── T1  Evasion %            10-11
 ```
 
 - **Rarity never touches a rolled value.** A high-quality Common must beat a low-quality Rare, or Rarity would be the more important axis.
@@ -52,20 +52,19 @@ The three damage paths — physical, magic, Element — are added together **bef
 | # | Layer | Kind | What it decides | What it cannot do |
 |---|---|---|---|---|
 | 1 | **perfect dodge** | removes | not contested — deletes the hit outright | cannot be opposed, so accuracy does not touch it |
-| 2 | **evasion** | removes | mob accuracy vs our evasion | — |
-| 3 | **dodge** | removes | contested against mob accuracy, and Capped | cannot block a DoT tick or an unconditional effect |
-| 4 | **split** | divides | 50% physical + 50% the mob's Innate Element | the two halves then meet different layers |
-| 5 | **armour** | reduces | the **physical half only**, by PoE's ratio | never touches the Element half, never touches DoT |
-| 6 | **Elemental resistance** | reduces | the **Element half only**, per Element | never touches the physical half, never stops a debuff |
-| 7 | **damage taken** | scales | the one multiplier that runs after every reduction | cannot make a hit miss |
-| 8 | **Energy Shield** | receives | takes the mitigated number before HP | chaos bypasses it |
-| 9 | **status** | adds | the mob's Element status, gated by its Alignment | res does not block this |
-| 10 | **HP** | receives | the remainder | HP is a receiver, never a reducer |
+| 2 | **evasion** | removes | mob accuracy vs our evasion rating, and Capped | cannot block a DoT tick or an unconditional effect |
+| 3 | **split** | divides | 50% physical + 50% the mob's Innate Element | the two halves then meet different layers |
+| 4 | **armour** | reduces | the **physical half only**, by PoE's ratio | never touches the Element half, never touches DoT |
+| 5 | **Elemental resistance** | reduces | the **Element half only**, per Element | never touches the physical half, never stops a debuff |
+| 6 | **damage taken** | scales | the one multiplier that runs after every reduction | cannot make a hit miss |
+| 7 | **Energy Shield** | receives | takes the mitigated number before HP | chaos bypasses it |
+| 8 | **status** | adds | the mob's Element status, gated by its Alignment | res does not block this |
+| 9 | **HP** | receives | the remainder | HP is a receiver, never a reducer |
 
 Three consequences worth remembering, because most defensive confusion comes from them:
-- **The order is the rule.** Layers 1-3 decide whether the hit exists, so nothing later can be wasted on a miss; layers 5-7 shrink what survived them; layers 8 and 10 are the only pools.
+- **The order is the rule.** Layers 1-2 decide whether the hit exists, so nothing later can be wasted on a miss; layers 4-6 shrink what survived them; layers 7 and 9 are the only pools.
 - **Armour and resistance never overlap.** They meet different halves of the split, which is why a build cannot max one and ignore the other.
-- **Every Element debuff bypasses resistance.** Layers 5-6 shrink damage; layer 9 hands you burn, chill, shock, poison or mark regardless. `Holy veil` exists to answer exactly that.
+- **Every Element debuff bypasses resistance.** Layers 4-5 shrink damage; layer 8 hands you burn, chill, shock, poison or mark regardless. `Holy veil` exists to answer exactly that.
 
 # Item and Mod Vocabulary
 
@@ -77,7 +76,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Mod** | One rolled stat line on an item, read as `name value (Tier)` — e.g. `Physical power flat 45 (T2)`. |
 | **Flat** | A value added straight into the stat before any % modifier runs. `Str flat 24` adds 24 to Str. |
 | **%** | A multiplier applied to the finished stat. `Str % 5` makes the whole Str total 5% larger. Flat lands first, then % multiplies it. |
-| **Stat Mod** | The Mods that are neither Offensive nor Defensive — `Stat Mod flat` + `Stat Mod %`, rolling any of the 7 Core stats. They roll on **every** item and no slot blocks them. |
+| **Stat Mod** | The Mods that are neither Offensive nor Defensive — `Stat Mod flat`, rolling any of the 7 Core stats. It rolls on **every** item and no slot blocks it; the `Stat Mod %` sibling is retired (D-114). |
 | **Offensive** | Attack-side Mods. Roll on weapon slots only. |
 | **Defensive** | Defence-side Mods. Roll on the 10 non-weapon slots only. |
 | **Legacy mod** | Slots 1-2 of a dropped item, fixed at drop. The Remove mod stone can never target them, and an added Mod (slots 6-7) is never legacy. |
@@ -93,14 +92,14 @@ Three consequences worth remembering, because most defensive confusion comes fro
 |---|---|
 | **Core stat** | The 7 attributes: str / vit / dex / agi / wis / int / lck. Every item can raise all of them through Stat Mods. |
 | **K value** | A hidden constant that converts a stat into a game value — `K_STR` is physical power per point of Str. Set by design, invisible to the player, and never retyped into prose. |
-| **Cap** | The ceiling on a stat. **Every Cap must be proven reachable from the real Mod tables** — an unreachable Cap is not a limit, it is a number that lies to the player (`formula.md` reachability table). Not every stat has one: Critical chance and Perfect dodge deliberately have none. |
+| **Cap** | The ceiling on a stat. **Every Cap must be proven reachable from the real Mod tables** — an unreachable Cap is not a limit, it is a number that lies to the player (`formula.md` reachability table). Not every stat has one: Critical chance and Accuracy deliberately have none. |
 | **Alignment** | Dex, spent twice: it is the gate that lets a status land, **and** the multiplier on that status's damage. One value, both jobs. |
 | **Physical power / Magic power** | Damage derived from the character (`formula.md` sections 1-2). **There is no "weapon Base power"** — every weapon draws its damage from the character alone. |
 | **Elemental power** | The third damage path, derived from Int and gated by nothing but the weapon's own Element (`elements.md`). |
 | **hit_chance** | `accuracy ÷ (accuracy + evasion)` — the chance a hit connects at all. Never 100% by design: the ratio caps itself. |
 | **crit overflow** | Critical chance has no Cap. Chance stops at 100% and **everything above it becomes crit damage**, so stacking more crit is never wasted. |
-| **damage taken** | A multiplier that runs **after** every mitigation layer and before any pool. Armour, resistance, dodge and evasion each remove something; this scales what survived them (`combat.md` section 2). |
-| **global damage / global defend / global speed** | The three reserved umbrella multipliers (`engine.json` `global`). `global damage` scales outgoing damage once, after weak / Element counter / crit; `global defend` is the incoming step-7 `damage_taken` bucket; `global speed` scales the whole clock (the `Haste` aura) and is **player-only** — no mob carries Haste. All start at ×1.00 — a future source feeds one bucket, so they never stack as separate multipliers. |
+| **damage taken** | A multiplier that runs **after** every mitigation layer and before any pool. Armour and resistance each shrink something; evasion and Perfect dodge remove the hit before this ever sees it; this scales what survived them (`combat.md` section 2). |
+| **global damage / global defend / global speed** | The three reserved umbrella multipliers (`engine.json` `global`). `global damage` scales outgoing damage once, after weak / Element counter / crit; `global defend` is the incoming step-6 `damage_taken` bucket; `global speed` scales the whole clock (the `Haste` aura) and is **player-only** — no mob carries Haste. All start at ×1.00 — a future source feeds one bucket, so they never stack as separate multipliers. |
 
 # Combat
 
@@ -111,7 +110,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Camp** | The Push rest location, and nothing else — the settlement that owns the current zone. Never a general word for a base. |
 | **DoT** | Damage over time, ticking once a second. All Element DoT shares one budget (`elements.md` section 6). |
 | **Leech** | HP returned as a percentage of damage just dealt. |
-| **Perfect dodge** | Removes the hit outright and is **not** contested — the only answer to things dodge cannot block, such as DoT ticks and unconditional effects. Chance comes from Lck as a ratio and has no Cap. |
+| **Perfect dodge** | Removes the hit outright and is **not** contested — the only answer to things Evasion cannot block, such as DoT ticks and unconditional effects. Chance comes from Lck as a ratio, with a Cap just under the top that ratio reaches (the generated Cap table in `formula.md` prints both). |
 | **Reach** | How far a build can act. There is no map, no tiles and no movement: near and far are a queue (`combat.md` section 2b). |
 | **Elite** | A rarity flag, **not** a size — an Elite is a Large body carrying its own stronger numbers, so two multipliers never stack. |
 | **Attack layer / Defend layer** | One step of the damage calculation in its fixed order (`combat.md` §2). **Not** the same thing as an Offensive or Defensive Mod, which is a Mod pool. A layer removes the hit, reduces the damage, scales it, or receives it. |
@@ -179,7 +178,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Base school** | The three armour families a Base can belong to - light (Evasion), heavy (Armour), cloth (Energy Shield). It decides the Gear Mod a piece carries, and it is what a Collector set is built from. |
 | **weapon group** | The three families a weapon belongs to - melee, ranged, magic. It decides which attack skills can use the weapon and which stat the weapon scales. A dagger is melee, not ranged. |
 | **Elite** | A rarity flag on a Large body, not a fifth size. Spawns as its own event and drops its own stone. |
-| **mob accuracy** | Derived from the mob's own stats through the same K values the player uses, scaled by the species accuracy tier. This is why dodge works against some species and is nearly worthless against others. |
+| **mob accuracy** | Derived from the mob's own stats through the same K values the player uses, scaled by the species accuracy tier. This is why Evasion works against some species and is nearly worthless against others. |
 
 # Abbreviations
 

@@ -35,7 +35,7 @@ Each tier upgrades one step at a time, and each step uses different crafting cur
 3. **Mod identity changes only via the Remove + Add combo** — Remove mod stone deletes one random non-legacy mod (slots 1-2 are Legacy mod and can never be hit); Add mod stone then fills the freed slot from the Base pool. Direct rename in place is forbidden.
 4. **Cannot skip Item quality steps** — Ascend moves one step at a time only. Skipping would need a finer currency-level system.
 5. **Reroll tier stone is the only craft allowed to roll lower.** Reroll value stone never rolls below the old value; Refine never steps down.
-6. **Add mod stone never offers a Mod line the item already has.** One item holds each Mod line at most once, and the only pairing allowed is Stat Mod Flat + Stat Mod % (mod-pool.md). The Add always rolls from the Base Primary/Secondary pool and is never chosen by the player — the stone draws, it does not ask.
+6. **Add mod stone never offers a Mod line the item already has.** One item holds each Mod line at most once, and with the `Stat Mod %` sibling retired (D-114) there is no flat+% pairing left (mod-pool.md). The Add always rolls from the Base Primary/Secondary pool and is never chosen by the player — the stone draws, it does not ask.
    Reason: a chosen-mod Add would make Add mod stone a guaranteed line instead of a gamble, and the whole crafting duty here is "raise Item quality by luck you paid for", not "buy a specific stat".
 
 # Crafting Stones
@@ -111,11 +111,11 @@ Bases map to one school: heavy (barbute · plate · cuisses · sabatons · gaunt
 
 ```
 armour reduction% = armour / (armour + 5 × raw_hit)   physical half only
-evasion           = PoE entropy roll vs mob accuracy, ahead of dodge (combat.md section 2)
+evasion           = PoE entropy roll vs mob accuracy, contested once per hit (combat.md section 2)
 energy shield     = second pool ahead of HP · Int x K_INT_ES · chaos bypasses · recharges after 5 sec without a hit (D-026)
 ```
 
-- Evasion feeds no separate dodge number; it is its own entropy layer. Reachable caps and K values follow in the mob-sheet rebalance pass.
+- Evasion is the only avoidance layer (D-112): the retired Dodge lines feed this one roll, and its Cap is proven reachable by **X20** rather than asserted.
 
 # Item Quality Sources — Summary
 

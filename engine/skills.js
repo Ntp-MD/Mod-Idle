@@ -168,7 +168,7 @@ export function createSkillModel(SKILLS, E) {
     'damage_dealt', 'accuracy', 'crit_chance',
     // what the per-Element pool (D-090) and the status store (D-094) made expressible
     'leech', 'elemental_power', 'burn_stacks', 'poison_stacks', 'bleed_chance', 'poison_hold_sec',
-    'execute_threshold_pct', 'execute_damage', 'damage_per_dodge_pct', 'resistance_pierce_pct', 'global_speed',
+    'execute_threshold_pct', 'execute_damage', 'damage_per_evasion_pct', 'resistance_pierce_pct', 'global_speed',
     // a strip of the mob's own Elemental resistance, in percentage points (B8 · D-099)
     'mob_elemental_resistance_pct',
     // D-102 (B9 close-out): the magnitudes the last prose rows state

@@ -415,12 +415,21 @@ function docCheck() {
 }
 // ---------------------------------------------------------------- docs I/O
 
-const { begin, end, replaceBlock, blockState } = require('./lib/generated');
+const { begin, end, replaceBlock, blockState, writeAll } = require('./lib/generated');
 
 function targets() {
   const map = {};
   for (const [file, keys] of Object.entries(DATA.meta.targets)) (map[file] = map[file] || []).push(...keys);
   return map;
+}
+
+/** The same writer table the shared guard runs, built from `meta.targets`. */
+function writerTable() {
+  const out = [];
+  for (const [file, keys] of Object.entries(targets())) {
+    for (const k of keys) out.push({ file, key: k, render: () => BLOCKS[k]() });
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------- cli
@@ -433,17 +442,9 @@ if (arg === '--emit') {
     for (const k of keys) console.log(`\n${begin(k)}\n${BLOCKS[k]()}${end(k)}`);
   }
 } else if (arg === '--write') {
-  for (const [file, keys] of Object.entries(targets())) {
-    const p = path.join(ROOT, file);
-    let text = fs.readFileSync(p, 'utf8');
-    for (const k of keys) {
-      const r = replaceBlock(text, k, BLOCKS[k]());
-      if (!r.found) { console.error(`MISSING MARKER ${k} in ${file}`); process.exitCode = 1; continue; }
-      text = r.text;
-      console.log(`wrote ${k} → ${file}`);
-    }
-    fs.writeFileSync(p, text, 'utf8');
-  }
+  // generated.writeAll owns the guards (D-113): this file used to write a doc whose markers were
+  // gone, which is how a generated table ends up half-present and reads as current.
+  if (writeAll(writerTable())) process.exitCode = 1;
 } else if (arg === '--checks' || arg === '--verify') {
   const rows = runChecks();
   const width = Math.max(...rows.map((r) => r.id.length));

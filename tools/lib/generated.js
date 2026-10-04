@@ -63,11 +63,30 @@ function listDocs() {
   return out.sort();
 }
 
+/**
+ * Writing is guarded, and the guard is the point: a writer that empties a doc destroys work that
+ * was never committed and cannot be recovered from git. This happened twice on 2026-10-04 —
+ * `combat.md` and `skill-pool.md` both went to zero bytes and came back as the last *committed*
+ * version, which is older than what the owner had been editing. So a write is refused, loudly,
+ * when the text it was handed is empty or has lost a marker pair it is supposed to fill.
+ *
+ * `writeAll` applies the same rule one level up, and that is the one that actually matters: the
+ * truncations were not a renderer producing a short body, they were a writer run against a doc
+ * whose markers were gone. A block whose marker pair is missing is not skipped and left for a
+ * later pass — it aborts the whole file, because the half-written version of a generated doc is
+ * worse than the stale one: it looks current and it is not.
+ */
 function write(file, text) {
-  fs.writeFileSync(path.join(ROOT, file), text, 'utf8');
+  const abs = path.join(ROOT, file);
+  if (!text || !text.trim()) throw new Error(`refusing to write ${file}: the rendered text is empty — the file would be destroyed`);
+  const before = fs.readFileSync(abs, 'utf8');
+  if (before && before.length > 200 && text.length < before.length * 0.5) {
+    throw new Error(`refusing to write ${file}: ${before.length} bytes would become ${text.length} — that is a truncation, not a block rewrite`);
+  }
+  fs.writeFileSync(abs, text, 'utf8');
 }
 
-/** Run a writer table: [{ file, key, render() }]. */
+/** Run a writer table: [{ file, key, render() }]. Returns the number of missing marker pairs. */
 function writeAll(writers, log = console.log) {
   const byFile = new Map();
   for (const w of writers) {
@@ -76,11 +95,21 @@ function writeAll(writers, log = console.log) {
   }
   let missing = 0;
   for (const [file, ws] of byFile) {
-    let text = read(file);
+    let text;
+    try { text = read(file); } catch (e) {
+      log(`REFUSED ${file}: the file is unreadable (${e.code || e.message}) — nothing written`);
+      missing += ws.length;
+      continue;
+    }
+    const absent = ws.filter((w) => blockState(text, w.key, '') === 'missing');
+    if (absent.length) {
+      for (const w of absent) log(`MISSING MARKER ${w.key} in ${file}`);
+      log(`REFUSED ${file}: ${absent.length} of ${ws.length} marker pair(s) absent — the whole file is left untouched`);
+      missing += absent.length;
+      continue;
+    }
     for (const w of ws) {
-      const r = replaceBlock(text, w.key, w.render());
-      if (!r.found) { log(`MISSING MARKER ${w.key} in ${file}`); missing++; continue; }
-      text = r.text;
+      text = replaceBlock(text, w.key, w.render()).text;
       log(`wrote ${w.key} → ${file}`);
     }
     write(file, text);

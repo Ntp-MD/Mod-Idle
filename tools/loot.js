@@ -374,8 +374,14 @@ function gates(rows, bias) {
   add('LT4', low.keepRate > high.keepRate,
     `keep-rate falls with Item quality: low ${low.keepRate.toFixed(2)}% > high ${high.keepRate.toFixed(2)}% — higher zones mean better equipped pieces, so a drop has to clear a higher bar`);
 
-  add('LT5', lck.drops > high.drops * 3 && lck.upgrades <= high.upgrades * 1.6,
-    `Lck buys count, not decisions: ${lck.drops.toFixed(0)} drops vs ${high.drops.toFixed(0)} (x${(lck.drops / high.drops).toFixed(2)}) but ${lck.upgrades.toFixed(0)} upgrades vs ${high.upgrades.toFixed(0)} (x${(lck.upgrades / high.upgrades).toFixed(2)}) — the rule Lck is craft-speed, not equip-speed`);
+  // The count leg used to be a bare `> x3`, which was really the 816-era full-Lck junk bound
+  // (drop_mult 9.16 → junk x3.16) written as a floor. With the ceiling flat-only at 510 (D-114) the
+  // published bound is x2.11, so the gate now asks the honest question instead: does the simulation
+  // reproduce the anchor `engine.json` publishes, and does the decision leg stay flat?
+  const lckBound = BAND.high_full_lck.junk_per_hr / BAND.high.junk_per_hr;
+  const lckRatio = lck.drops / high.drops;
+  add('LT5', Math.abs(lckRatio - lckBound) / lckBound <= 0.05 && lck.upgrades <= high.upgrades * 1.6,
+    `Lck buys count, not decisions: ${lck.drops.toFixed(0)} drops vs ${high.drops.toFixed(0)} (x${lckRatio.toFixed(2)} against the published junk bound x${lckBound.toFixed(2)}) but ${lck.upgrades.toFixed(0)} upgrades vs ${high.upgrades.toFixed(0)} (x${(lck.upgrades / high.upgrades).toFixed(2)}) — the rule Lck is craft-speed, not equip-speed`);
 
   add('LT6', rows.every((r) => r.avgScore > 0 && r.linesPerItem >= 2),
     'every equipped piece carries real lines: ' + rows.map((r) => `${r.band.replace('_', ' + ')} score ${r.avgScore.toFixed(2)} on ${r.linesPerItem.toFixed(2)} lines`).join(' · '));
@@ -383,8 +389,13 @@ function gates(rows, bias) {
   add('LT7', high.flatPerDrop < low.flatPerDrop && high.flatPerDrop < 0.4,
     `Flat lines per drop fall with Item quality: low ${low.flatPerDrop.toFixed(3)} → high ${high.flatPerDrop.toFixed(3)} of ${high.linesPerItem.toFixed(2)} lines — the 0.25 high-quality weighting keeps drops from being full of dead early-game lines (F11)`);
 
-  add('LT8', bias.length === 3 && new Set(bias.map((b) => b.avgScore.toFixed(3))).size === 3,
-    'the Base-bias experiment moves the measured rows, so a per-settlement frame weight is a real balance change — which is why the owner ruled to ship even-weighted (A9 · D-071) and no weight is ever added to the data');
+  // The signal a frame weight would move is the upgrade rate, not the average item score. Score is
+  // carried by Item quality and line count, so once Dodge and Armour sat on one merged Evasion shape
+  // the three school biases scored within a thousandth of each other while decisions-per-hour still
+  // separated cleanly — and the rate is the row `towns.md` section 4 would actually be changing.
+  const biasRows = bias.map((b) => `${b.perHr.toFixed(2)} up/hr · ${b.keepRate.toFixed(2)}% keep · ${b.avgScore.toFixed(2)} score`);
+  add('LT8', bias.length === 3 && new Set(bias.map((b) => b.perHr.toFixed(2))).size === 3,
+    `the Base-bias experiment moves the upgrade rate (${biasRows.join(' | ')}), so a per-settlement frame weight is a real balance change — which is why the owner ruled to ship even-weighted (A9 · D-071) and no weight is ever added to the data`);
 
   add('LT9', rows.every((r) => r.keepSd / Math.max(r.keepRate, 0.01) < 0.35),
     'every keep-rate is stable across seeds: ' + rows.map((r) => `±${(100 * r.keepSd / r.keepRate).toFixed(0)}% (${r.band.replace('_', ' + ')})`).join(' · '));

@@ -41,20 +41,20 @@ describe('bases.json is the mirror the cage gates', () => {
 });
 
 describe('the weight tax from formula-utility.md section 11', () => {
-  it('capacity is Str x 2 and the tax only bites past it', () => {
-    expect(eng.weightCapacityOf(210)).toBe(420);
-    expect(eng.weightCapacityOf(816)).toBe(1632);
+  it('capacity is weight_base + Str x 2, and the printed sets sit under it', () => {
+    expect(eng.weightCapacityOf(210)).toBe(1420);
+    expect(eng.weightCapacityOf(510)).toBe(2020);
     expect(eng.encumbranceOf(193, 210)).toBe(0);
     expect(eng.encumbranceOf(420, 210)).toBe(0);
   });
 
-  it('a balanced high-quality set costs 21% aspd and an armored one hits the 50% ceiling', () => {
-    expect(eng.encumbranceOf(507, 210)).toBeCloseTo(0.20714, 5);
-    expect(eng.encumbranceOf(657, 210)).toBe(E.caps.weight_overload);
+  it('the tax bites only past capacity, and a set heavy enough to cross it hits the 50% ceiling', () => {
+    expect(eng.encumbranceOf(1700, 210)).toBeCloseTo((1700 - 1420) / 1420, 5);
+    expect(eng.encumbranceOf(2130, 210)).toBe(E.caps.weight_overload);
     expect(eng.encumbranceOf(9999, 210)).toBe(E.caps.weight_overload);
   });
 
-  it('the tax lands on attack speed, not on the equip slots', () => {
+  it('a printed set stays under the base line, so the tax does not fire on it', () => {
     const bare = buildCharacter(100, emptyGear());
     const heavy = emptyGear();
     for (let i = 0; i < heavy.length; i++) {
@@ -63,10 +63,9 @@ describe('the weight tax from formula-utility.md section 11', () => {
       heavy[i] = { slot: frame.slot, base: frame.name, rarity: 'Rare', quality: 'high', tier: 'T3', lines: [], q: 2, weight: frame.weight * 1.3 };
     }
     const c = buildCharacter(100, heavy);
-    expect(c.weightUsed).toBeGreaterThan(c.weightCap);
-    expect(c.encumbrance).toBe(E.caps.weight_overload);
-    expect(c.hitsPerSec).toBeLessThan(bare.hitsPerSec);
-    expect(c.hitsPerSec).toBeCloseTo(bare.hitsPerSec * (1 - E.caps.weight_overload), 4);
+    expect(c.weightUsed).toBeLessThanOrEqual(c.weightCap);
+    expect(c.encumbrance).toBe(0);
+    expect(c.hitsPerSec).toBeCloseTo(bare.hitsPerSec, 6);
   });
 });
 

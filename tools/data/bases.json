@@ -31,6 +31,7 @@
    "name": "coif",
    "weight": 30,
    "primary": [
+    "evasion_pct",
     "max_hp_flat"
    ],
    "secondary": [
@@ -71,6 +72,7 @@
    "name": "mail",
    "weight": 60,
    "primary": [
+    "evasion_pct",
     "max_hp"
    ],
    "secondary": [
@@ -111,7 +113,10 @@
   {
    "name": "greaves",
    "weight": 50,
-   "primary": [],
+   "primary": [
+    "evasion_flat",
+    "evasion_pct"
+   ],
    "secondary": [
     "max_hp_flat"
    ],
@@ -149,7 +154,10 @@
   {
    "name": "striders",
    "weight": 35,
-   "primary": [],
+   "primary": [
+    "evasion_flat",
+    "evasion_pct"
+   ],
    "secondary": [
     "cooldown_reduction"
    ],
@@ -178,6 +186,7 @@
     "cooldown_reduction"
    ],
    "secondary": [
+    "evasion_pct",
     "max_energy_shield_pct"
    ],
    "slot": "boots",
@@ -218,7 +227,9 @@
     "elemental_resistance",
     "max_hp_flat"
    ],
-   "secondary": [],
+   "secondary": [
+    "evasion_flat"
+   ],
    "slot": "belt",
    "school": null
   },
@@ -226,7 +237,8 @@
    "name": "gauntlets",
    "weight": 45,
    "primary": [
-    "max_hp"
+    "max_hp",
+    "evasion_flat"
    ],
    "secondary": [
     "elemental_alignment",
@@ -251,7 +263,10 @@
   {
    "name": "gloves",
    "weight": 25,
-   "primary": [],
+   "primary": [
+    "evasion_pct",
+    "evasion_flat"
+   ],
    "secondary": [
     "elemental_alignment"
    ],
@@ -318,6 +333,7 @@
    "name": "cloak",
    "weight": 20,
    "primary": [
+    "evasion_pct",
     "elemental_resistance"
    ],
    "secondary": [
@@ -345,6 +361,7 @@
    "name": "buckler",
    "weight": 25,
    "primary": [
+    "evasion_pct",
     "cooldown_reduction"
    ],
    "secondary": [
@@ -360,7 +377,9 @@
     "max_hp_flat",
     "max_hp"
    ],
-   "secondary": [],
+   "secondary": [
+    "evasion_pct"
+   ],
    "slot": "off hand",
    "school": null
   },
@@ -519,6 +538,7 @@
    ],
    "Blocked": [
     "max_hp",
+    "evasion_flat",
     "cooldown_reduction",
     "elemental_resistance"
    ],
@@ -537,7 +557,8 @@
   "off hand": {
    "Shield": [
     "max_hp_flat",
-    "max_hp"
+    "max_hp",
+    "evasion_pct"
    ],
    "Book": [
     "max_mana_flat",

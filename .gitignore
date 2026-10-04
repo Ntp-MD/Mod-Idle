@@ -14,6 +14,8 @@ tools/.wiki-backup/
 
 # Owner-private idea parking - local only, never synced, never read by agents
 # unless the owner assigns the exact file path in chat.
+# owner/
+art/
 owner/
 
 # Installed dependencies and build output for the client

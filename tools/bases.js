@@ -194,14 +194,16 @@ const ENGINE = SHARED.createEngine(EDATA);
 /** The worn sets the tax math is shown against: Str from levels only, then 2 and 6 slots on Str. */
 function capacities() {
   const S = EDATA.stat;
-  const K = EDATA.K.K_STR_WEIGHT;
   const bare = ENGINE.statAt(S.level_cap - 1);
-  const at = (n) => (bare + n * S.core_flat_max) * (1 + (n * 0) / 100);
+  const strAt = (n) => bare + n * S.core_flat_max;
   return {
     level: S.level_cap - 1,
-    none: bare * K,
-    two: Math.round(at(2) * K),
-    six: Math.round(at(6) * K),
+    strNone: bare,
+    strTwo: strAt(2),
+    strSix: strAt(6),
+    none: Math.round(ENGINE.weightCapacityOf(bare)),
+    two: Math.round(ENGINE.weightCapacityOf(strAt(2))),
+    six: Math.round(ENGINE.weightCapacityOf(strAt(6))),
     capPct: ENGINE.CAP.weight_overload,
   };
 }
@@ -216,8 +218,8 @@ function renderPaths(kind) {
   const C = capacities();
   const mult = data.quality_weight_multiplier;
   const w = (name) => data.bases.find((b) => b.name === name)?.weight || 0;
-  const taxOf = (high, cap) => {
-    const e = Math.min(C.capPct, Math.max(0, (high - cap) / cap));
+  const taxOf = (high, str) => {
+    const e = ENGINE.encumbranceOf(high, str);
     return e > 0 ? '\u2212' + Math.round(e * 100) + '%' : '0%';
   };
   const sets = PATHS.map((p) => {
@@ -229,15 +231,15 @@ function renderPaths(kind) {
       '| Worn set at high quality (item-base.md) | High weight | No Str (' + C.none + ') | Str 2 items (' + C.two + ') | Str 6 items (' + C.six + ') |',
       '|---|---|---|---|---|',
       ...sets.map((s) => '| ' + s.p.name + ' (' + s.p.gear + ') | ' + s.high
-        + ' | ' + taxOf(s.high, C.none) + ' | ' + taxOf(s.high, C.two) + ' | ' + taxOf(s.high, C.six) + ' |'),
+        + ' | ' + taxOf(s.high, C.strNone) + ' | ' + taxOf(s.high, C.strTwo) + ' | ' + taxOf(s.high, C.strSix) + ' |'),
       '',
-      'Capacity is Str \u00d7 `K_STR_WEIGHT` at level ' + C.level + ' with no investment (' + Math.round(C.none / EDATA.K.K_STR_WEIGHT) + ' \u2192 ' + C.none + '), then `core_flat_max` and `core_pct_max` per slot spent on Str: 2 items (' + C.two + ') and 6 items (' + C.six + '). The tax is the engine\u2019s own `encumbranceOf`, capped at ' + Math.round(C.capPct * 100) + '%.',
+      'Capacity is `weight_base` plus Str \u00d7 `K_STR_WEIGHT` at level ' + C.level + ' with no investment (' + C.strNone + ' \u2192 ' + C.none + '), then `core_flat_max` flat per slot spent on Str: 2 items (' + C.two + ') and 6 items (' + C.six + ') \u2014 Core Stat has no % line any more (D-114). The tax is the engine\u2019s own `encumbranceOf`, capped at ' + Math.round(C.capPct * 100) + '%.',
     ].join('\n');
   }
   return [
     '| Chosen path | Combined total (low quality) | Full set (mid quality) | Full set (high quality) | Aspd tax with no Str investment |',
     '|---|---|---|---|---|',
-    ...sets.map((s) => '| ' + s.p.name + ' (' + s.p.gear + ') | ' + s.base + ' | ' + s.mid + ' | ' + s.high + ' | ' + taxOf(s.high, C.none) + ' |'),
+    ...sets.map((s) => '| ' + s.p.name + ' (' + s.p.gear + ') | ' + s.base + ' | ' + s.mid + ' | ' + s.high + ' | ' + taxOf(s.high, C.strNone) + ' |'),
     '',
     'Printed by `node tools/bases.js --blocks` from `tools/data/bases.json`. Mid and high apply `quality_weight_multiplier` (\u00d7' + mult + ') per Item quality band, the same way `weightAtQuality` applies it to a single item. The held weapon is not folded into these sets: it weighs ' + Math.min(...data.weapons.map((x) => x.weight)) + ' to ' + Math.max(...data.weapons.map((x) => x.weight)) + ' at Base weight (`equipment-weapon.md` \u00b7 D-101), the same \u00d7-quality multiplier applies, and an off-hand weapon counts \u00d7' + data.dual_wield_weight_mult + ' of its own type (`mod-pool.md`).',
   ].join('\n');

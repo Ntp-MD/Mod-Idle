@@ -21,7 +21,7 @@ dps      = dmg_per_hit × hits/sec
   In this new model at level 1 (no gear) sword attacks 1.2 times/sec and dagger 1.5 times/sec, matching what weapon_aspd always stated as the weapon "Base times/sec."
 - **There is no `aspd_flat`** — aspd Mod is % only (see mod-pool.md). The old formula added a slot that does not exist.
 - Old `interval` was written as `base_interval × 100 / aspd` without stating units · changed to `hits/sec = aspd/100` to match what players see.
-- **Cap 500 = 5 times/sec** for all weapons · aspd is a percentage, not a hit count · 5 times/sec is the 0.2 sec floor between hits, a clock rule rather than a build target: no weapon reaches it at the Agi ceiling, because `K_AGI_ASPD` is set so the fastest weapon needs Agi 845 and the ceiling is 816.
+- **Cap 500 = 5 times/sec** for all weapons · aspd is a percentage, not a hit count · 5 times/sec is the 0.2 sec floor between hits, a clock rule rather than a build target: no weapon reaches it at the Agi ceiling, because `K_AGI_ASPD` is set so the fastest weapon needs Agi 845 and the ceiling is 510.
 
 <!-- BEGIN GENERATED:weapon-cap -->
 | Weapon | weapon_aspd (Base times/sec) | weapon_mult | Agi to hit Cap 500 (with 25% Mod) |
@@ -35,7 +35,7 @@ dps      = dmg_per_hit × hits/sec
 <!-- END GENERATED:weapon-cap -->
 
 - `weapon_aspd` multiplies the whole parenthesis (not only the Agi term) so level 1 can still attack and slow weapons stay slower.
-- weapon_mult = `1.2 / weapon_aspd` equalizes DPS across weapon types while nobody hits Cap · verified at Str 12 build: all weapons give exactly 9,847 DPS (dagger 2.62 times/sec × power 3,860 = twoh 1.22 times/sec × power 8,270).
+- weapon_mult = `1.2 / weapon_aspd` equalizes DPS across weapon types while nobody hits Cap · `weapon_aspd` cancels out of `power × times/sec`, so every type lands on the same Expected DPS at equal stats (the Str 12 row of the section 0 table · **X14**).
 - **Side effect to know**: Agi never reaches the Cap point, so no Agi is wasted on this axis (dagger would need Agi 845) · see build conclusions in section 0.
 
 # 8. Accuracy
@@ -46,12 +46,12 @@ evasion    = stat_c(mob_level) × species.dex × K_EVASION × body_class
 hit_chance = accuracy / (accuracy + evasion)
 ```
 
-- `K_DEX_ACC` = 1.5 · Dex 816 gives 1,224, multiplied by `Accuracy %` Mod max 25 on main hand = **1,530** at ceiling.
+- `K_DEX_ACC` = 1.5 · Dex 510 gives 765, multiplied by `Accuracy %` Mod max 25 on main hand = **956** at ceiling.
 - `K_EVASION` = 0.5 · the same K the player's own Evasion rating uses, because a mob runs the player's stat block (D-019). The value is chosen so the average species on a Medium body lands back on the retired `level × 1` curve, so this is a derivation, not a rebalance — **X21** fails if it stops being true.
 - **There is no `accuracy_flat`** — Accuracy Mod is % only (see mod-pool.md), same missing-slot issue as aspd.
-- **Removed `accuracy_cap` 2,000** — the ratio formula already limits itself (approaches 100% but never reaches it), and the calculable ceiling 1,530 never hit 2,000, so the old Cap guarded nothing except making numbers look reasoned.
+- **Removed `accuracy_cap` 2,000** — the ratio formula already limits itself (approaches 100% but never reaches it), and the calculable ceiling 956 never came near 2,000, so the old Cap guarded nothing except making numbers look reasoned.
 - **Mob evasion left `level × 1`.** That curve was a stand-in for "evasion grows with the mob's own Dex", and once D-019 gave every species a Dex line the stand-in became wrong: it made a Slime and an Elf equally hard to hit at the same level. Body class already moved the number the other way (Small ×1.10 · Large and Elite ×0.90), so size now divides evasion, not just HP.
-- The older value, `level 100 = 600`, was set on the assumption Dex = 890 · no real build reaches that (ceiling 816), and at 600 a player with no Dex sat at 40% hit chance in a game that attacks all day.
+- The older value, `level 100 = 600`, was set on the assumption Dex = 890 — no build has ever reached that, and the real ceiling is now 510 (D-114).
 
 <!-- BEGIN GENERATED:hit-chance -->
 | Dex from items | Dex | accuracy | hit vs easiest species | hit vs reference mob | hit vs hardest species |
@@ -75,7 +75,7 @@ The reference is set on the mean so the anchor does not move: `stat_c × 0.5` at
 | ×0.75 | Rat · Goblin · Bandit · Orc · Demon | 230 | 68.6% | 47.4% |
 | ×1.00 | Wolf · Elf · Drake | 330 | 75.8% | 56.4% |
 
-K_DEX_ACC 1.5 against K_EVASION 0.5 is a 3:1 ratio, so equal Dex on both sides lands the attacker at 75.0%. The defensive line is deliberately the weaker one per point, so one stat alone cannot approach untouchable, and this roll runs *before* Dodge and Perfect dodge (combat.md section 2).
+K_DEX_ACC 1.5 against K_EVASION 0.5 is a 3:1 ratio, so equal Dex on both sides lands the attacker at 75.0%. The defensive line is deliberately the weaker one per point, so one stat alone cannot approach untouchable, and this roll sits at step 2 of the incoming order — behind perfect dodge, ahead of every mitigation (combat.md section 2).
 <!-- END GENERATED:hit-chance -->
 
 - **Mobs dodge too** — the second avoidance layer on the same stat block: `own Agi rate ÷ (rate + the attacking player's accuracy)`, the opposed shape X20 already uses on the player side (D-024). It is *not* folded into `hit_chance` above, which is the evasion layer only, so a fast weapon with low per-hit damage loses both rolls more often than a slow one. The band is guarded by **X24** and the per-entry numbers are generated in `mob-roster.md`.
@@ -87,37 +87,37 @@ K_DEX_ACC 1.5 against K_EVASION 0.5 is a 3:1 ratio, so equal Dex on both sides l
 drop_rate = (1 + lck * K_LCK_DROP) × (1 + mastery_collection/100)
 ```
 
-- `K_LCK_DROP` = 0.01 · Lck 816 gives 9.2x.
-- **`drop_rate` is a multiplier, not a probability** — Base drop chance is set at **8% per kill** (loot.md section 2) → no Lck at level 100 gives 24.8% · Lck 816 gives 73.3%.
+- `K_LCK_DROP` = 0.01 · Lck 510 gives 6.1x.
+- **`drop_rate` is a multiplier, not a probability** — Base drop chance is set at **8% per kill** (loot.md section 2) → no Lck at level 100 gives 24.8% · Lck 510 gives 48.8%.
   This number is tied to craft currency prices and boss skill chances (loot.md · crafting.md · economy.md all closed).
 - `mastery_collection` = number of weapon types with Mastery ≥ 10 → **+1% per type, max +12%** (equipment-weapon.md) · does not touch DPS at all, so it moves only item income, not power.
 - Lck affects drops, so Lck must not become the stat that is good at everything and outshines the rest — Lck gives crit, perfect dodge, and drops all three, so every K must stay low.
-  From the DPS table in section 0: moving 2 items from Str to Lck (Str 8 / Agi 2 / Lck 2) drops DPS from 9,847 to **7,670 (−22%)** in exchange for crit 18.5% to 21% · Lck value is therefore in crit comfort, not in headline numbers · and Mastery value is in stone farming speed, not power.
+  From the DPS table in section 0: moving 2 items from Str to Lck at the same Agi (Str 8 / Agi 4 → Str 6 / Agi 4 / Lck 2) drops DPS from 6,877 to **6,231 (−9.4%)** in exchange for crit 10.5% → 13.0% — at the retired 816 ceiling the same move cost 22% DPS. The ceiling drop made Lck roughly half as expensive, so the guard this rule was written to set up is held by the G8 ×2.11 junk-line bound (**X7**) instead of by the DPS penalty alone.
 
 # 11. Weight
 
 ```
-weight_capacity = str * K_STR_WEIGHT
+weight_capacity = weight_base + str * K_STR_WEIGHT
 weight_used     = sum of 12 items (weight table in mod-pool.md) + carried potions × 2 each (condensed × 12) · farm.md
 encumbrance     = min( (weight_used − weight_capacity) / weight_capacity , 0.50 )
 aspd            = aspd × (1 − encumbrance)
 ```
 
-- `K_STR_WEIGHT` = 2 · Str 816 carries 1,632 · no Str at all (Str = 210 from levels only) carries 420.
+- `K_STR_WEIGHT` = 2 · `weight_base` = 1,000 · Str 510 carries 2,020 · no Str at all (Str = 210 from levels only) carries 1,420.
 - **No slot lock** — overweight does not forbid equipping, but *slows attacks* up to -50% aspd.
   Rejected alternative: "cannot equip if overweight", which in an idle game becomes a closed gate on just-dropped loot and forces auto-unequip during AFK.
 - The game uses the same unit shown on items (weight unit) and displays `used / capacity` per character-sheet.md rules.
 
 <!-- BEGIN GENERATED:weight-tax -->
-| Worn set at high quality (item-base.md) | High weight | No Str (416) | Str 2 items (568) | Str 6 items (931) |
+| Worn set at high quality (item-base.md) | High weight | No Str (1416) | Str 2 items (1516) | Str 6 items (1716) |
 |---|---|---|---|---|
 | cloth/glass (circlet · vestments · wrap · soft boots · sash · wraps · band ×2 · pendant · cloak) | 326 | 0% | 0% | 0% |
-| balanced (coif · mail · greaves · striders · clasp · gloves · band ×2 · pendant · cloak) | 473 | −14% | 0% | 0% |
-| armored (barbute · plate · cuisses · sabatons · girdle · gauntlets · signet ×2 · talisman · mantle) | 710 | −50% | −25% | 0% |
+| balanced (coif · mail · greaves · striders · clasp · gloves · band ×2 · pendant · cloak) | 473 | 0% | 0% | 0% |
+| armored (barbute · plate · cuisses · sabatons · girdle · gauntlets · signet ×2 · talisman · mantle) | 710 | 0% | 0% | 0% |
 
-Capacity is Str × `K_STR_WEIGHT` at level 99 with no investment (208 → 416), then `core_flat_max` and `core_pct_max` per slot spent on Str: 2 items (568) and 6 items (931). The tax is the engine’s own `encumbranceOf`, capped at 50%.
+Capacity is `weight_base` plus Str × `K_STR_WEIGHT` at level 99 with no investment (208 → 1416), then `core_flat_max` flat per slot spent on Str: 2 items (1516) and 6 items (1716) — Core Stat has no % line any more (D-114). The tax is the engine’s own `encumbranceOf`, capped at 50%.
 <!-- END GENERATED:weight-tax -->
 
-- A no-Str character clears the light path at every quality and the heavy ones only after spending slots on Str, so **the tax bites at high Quality and on heavy armour choices** — when the player already chose them. The figures above are printed from `tools/data/bases.json`.
+- **The tax does not bind on the printed sets.** The `weight_base` line sits above the heaviest printed set in every Str column, so none of them is encumbered — the figures are printed above from `tools/data/bases.json`, and a heavier Base weight moves them without a doc edit.
 - Weight is a natural cost of better gear because the Quality multiplier in `engine.json` applies to weight too, not only to stat values — once per Item quality band, the same rule `weightAtQuality` uses for a single item.
-- **Effect on the build table in section 0**: all DPS numbers assume no encumbrance · cloth/glass builds take none so the table reads directly · armored builds without enough Str run below that table by the tax printed above, up to the Cap.
+- **Effect on the build table in section 0**: all DPS numbers assume no encumbrance, and at `weight_base` 1,000 no printed set is encumbered, so the table reads directly.

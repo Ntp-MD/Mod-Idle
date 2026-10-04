@@ -66,7 +66,7 @@ Actual level numbers do not exist yet. Waiting for the zone and monster system. 
 ```
 Rare · High quality · 4 slots        Common · Low quality · 3 slots
   power Flat 78 (T1)              power Flat 15 (T3)
-  crit %     8  (T1)              dodge %    2 (T2)
+  crit %     8  (T1)              Evasion %  4 (T2)
   str Flat   24 (T1)              str Flat    5 (T3)
   elem res % 30 (T1) Element Fire
 ```

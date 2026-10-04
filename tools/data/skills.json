@@ -44,19 +44,19 @@
   "reserve_tiers": {
     "cheap": {
       "pct": 8,
-      "abs": 388
+      "abs": 290
     },
     "mid": {
       "pct": 11,
-      "abs": 533
+      "abs": 399
     },
     "heavy": {
       "pct": 14,
-      "abs": 679
+      "abs": 507
     },
     "extreme": {
       "pct": 25,
-      "abs": 1212
+      "abs": 906
     }
   },
   "skills": [
@@ -173,10 +173,10 @@
       "basis": "phys",
       "final_pct": 138.129,
       "targets": "1/1",
-      "effect": "Damage +3% per 1% player dodge chance (Cap +120%) · Gives dodge builds a boss path",
+      "effect": "Damage +3% per 1% player Evasion chance (Cap +120%) · Gives Evasion builds a boss path",
       "effects": [
         {
-          "stat": "damage_per_dodge_pct",
+          "stat": "damage_per_evasion_pct",
           "op": "add_pct",
           "value": 3,
           "cap": 120,
@@ -584,7 +584,7 @@
       "cd": 12,
       "mana": "14%",
       "duration": "8 sec",
-      "effect": "Target accuracy -30% (multiplies with our dodge = true EHP)",
+      "effect": "Target accuracy -30% (multiplies with our Evasion = true EHP)",
       "effects": [
         {
           "stat": "accuracy",
@@ -1005,12 +1005,12 @@
       "type": "aura",
       "kind": "defense",
       "reserve": "cheap",
-      "effect": "Evasion flat +12",
+      "effect": "Evasion flat +24",
       "effects": [
         {
           "stat": "evasion",
           "op": "add_flat",
-          "value": 12
+          "value": 24
         }
       ]
     },
