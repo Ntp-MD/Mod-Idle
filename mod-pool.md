@@ -5,124 +5,58 @@ import elements.md
 
 ## Available Mods
 
-### Combat
-
-- Physical power flat
-- Physical power %
-- Magic power flat
-- Magic power %
-- Critical chance %
-- Critical damage % (physical)
-- Critical damage % (magic)
-- Attack speed %
-- Accuracy %
-
-### Defensive
-
-- Dodge flat
-- Dodge %
-- Max HP flat
-- Max HP %
-- Cooldown reduction %
-- Max Mana flat
-- Max Mana %
-
-### Elemental
-
-One item can roll only one of 5 Elements.
-
-- Fire
-- Cold
-- Lightning
-- Poison
-- Chaos
-
-Element mods
-
-- Elemental power flat
-- Elemental power %
-- Elemental resistance % — % only, no Flat
-- Elemental alignment %
-
-### Core stat
-
-- str / vit / dex / agi / wis / int / lck — Flat and %
-
-# Rolled Values
-
-Every mod value is constrained by **2 axes**, not one.
-
-1. **Item quality** — selects the large range (low / mid / high) by drop source
-2. **Tier** — selects the sub-range inside the large range · T1 is best
-
-**Reading tables** — each mod is written as `T3 / T2 / T1` ordered worst to best
-
-- Mods with 3 ranges have all 3 Tiers
-- Mods with 2 ranges have only T2 / T1
-- Mods with a single value have no Tier split and use quality only, because the range is too narrow to split readably
-
-All mods on one item roll from the same Item quality range set. No mod borrows from another quality.
-
+<!-- BEGIN GENERATED:mod-pool -->
 ## Combat
 
 | Mod | Total | Low quality | Mid quality | High quality |
 |---|---|---|---|---|
-| Physical power flat | 15-80 | 15-21 / 22-28 / 29-36 | 37-43 / 44-50 / 51-58 | 59-65 / 66-72 / 73-80 |
+| Accuracy % | 5-25% | 5-8 / 9-12 | 13-17 / 18-21 | 22-23 / 24-25 |
+| Attack speed % | 5-25% | 5-8 / 9-12 | 13-17 / 18-21 | 22-23 / 24-25 |
+| Critical chance % | 1-8% | 1-2 / 3 | 4 / 5 | 6-7 / 8 |
+| Critical damage % | 12-120% | 12-23 / 24-35 / 36-47 | 48-59 / 60-71 / 72-83 | 84-96 / 97-108 / 109-120 |
+| Magic power % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
 | Magic power flat | 15-80 | 15-21 / 22-28 / 29-36 | 37-43 / 44-50 / 51-58 | 59-65 / 66-72 / 73-80 |
 | Physical power % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
-| Magic power % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
-| Critical chance % | 1-8% | 1-2 / 3 | 4 / 5 | 6-7 / 8 |
-| Critical damage % (physical) | 12-120% | 12-23 / 24-35 / 36-47 | 48-59 / 60-71 / 72-83 | 84-96 / 97-108 / 109-120 |
-| Critical damage % (magic) | 12-120% | 12-23 / 24-35 / 36-47 | 48-59 / 60-71 / 72-83 | 84-96 / 97-108 / 109-120 |
-| Attack speed % | 5-25% | 5-8 / 9-12 | 13-17 / 18-21 | 22-23 / 24-25 |
-| Accuracy % | 5-25% | 5-8 / 9-12 | 13-17 / 18-21 | 22-23 / 24-25 |
-
-- Crit chance has no Flat, % only
-- Attack speed % is % only, no Flat · multiplies with aspd from Agi (see formula.md)
-- Accuracy % multiplies accuracy from Dex · no Flat
+| Physical power flat | 15-80 | 15-21 / 22-28 / 29-36 | 37-43 / 44-50 / 51-58 | 59-65 / 66-72 / 73-80 |
 
 ## Defensive
 
 | Mod | Total | Low quality | Mid quality | High quality |
 |---|---|---|---|---|
-| Dodge flat | 3-15 | 3-7 | 8-12 | 13-15 |
-| Dodge % | 2-10% | 2-3 / 4 | 5-6 / 7 | 8-9 / 10 |
-| Max HP flat | 40-200 | 40-55 / 56-72 / 73-90 | 91-108 / 109-126 / 127-145 | 146-163 / 164-181 / 182-200 |
-| Max HP % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
+| Armour flat | 8-40 | 8-11 / 12-14 / 15-18 | 19-22 / 23-25 / 26-29 | 30-33 / 34-36 / 37-40 |
+| Armour % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
 | Cooldown reduction % | 5-25% | 5-8 / 9-12 | 13-17 / 18-21 | 22-23 / 24-25 |
-| Max Mana flat | 20-140 | 20-27 / 28-36 / 37-45 | 46-60 / 61-75 / 76-90 | 91-105 / 106-120 / 121-140 |
+| Energy Shield flat | 12-60 | 12-16 / 17-22 / 23-27 | 28-33 / 34-38 / 39-44 | 45-49 / 50-55 / 56-60 |
+| Evasion flat | 6-30 | 6-8 / 9-10 / 11-13 | 14-16 / 17-19 / 20-22 | 23-25 / 26-27 / 28-30 |
+| Evasion % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
+| Life Regeneration flat | 2-31 | 2-5 / 6-9 | 10-14 / 15-19 | 20-25 / 26-31 |
+| Life Regeneration % | 5-15% | 5-6 / 7-8 | 9-10 / 11-12 | 13-14 / 15 |
+| Mana Regeneration flat | 2-31 | 2-5 / 6-9 | 10-14 / 15-19 | 20-25 / 26-31 |
+| Mana Regeneration % | 10-25% | 10-11 / 12-14 | 15-16 / 17-19 | 20-22 / 23-25 |
+| Max Energy Shield % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
+| Max HP % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
+| Max HP flat | 40-200 | 40-55 / 56-72 / 73-90 | 91-108 / 109-126 / 127-145 | 146-163 / 164-181 / 182-200 |
 | Max Mana % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
-| Armour flat | TBD | TBD | TBD | TBD |
-| Evasion flat | TBD | TBD | TBD | TBD |
-| Energy Shield flat | TBD | TBD | TBD | TBD |
+| Max Mana flat | 20-140 | 20-27 / 28-36 / 37-45 | 46-60 / 61-75 / 76-90 | 91-105 / 106-120 / 121-140 |
+| Perfect dodge % | 1-3% | 1 | 2 | 3 |
+| Status Alignment resistance % | 5-25% | 5-8 / 9-11 | 12-15 / 16-18 | 19-22 / 23-25 |
 
-- Max HP Flat is 2.5x Power Flat because HP must race damage that scales with level
-- Armour flat / Evasion flat / Energy Shield flat roll only on helmet, chest, pant, boots, gloves as main Mods. Ranges are TBD pending K_ARMOUR / K_EVASION / K_ENERGY_SHIELD in the mob sheet rebalance pass — no numbers are set by feel here.
-- CDR % has no Flat because CDR is already a multiplier. A direct add would over-favor high-quality items
-- **Dodge Flat was 8-40 · now 3-15** with Tier removed (one range per quality, per glossary.md rule 5, because the range is too narrow to split readably)
-  Reason for the reduction: the dodge formula is `rate / (rate + 100)` · previously two Dodge Flat items (40+40) = 80 reached the Cap alone with no Agi
-  That turned dodge into an on/off switch instead of a stat that hardens gradually. Now it takes 816 Agi + two T1 items to reach the 60% chance Cap (see formula.md section 4)
-
-## Core stat
+## Stat Mod
 
 | Mod | Total | Low quality | Mid quality | High quality |
 |---|---|---|---|---|
-| Core stat flat | 5-25 | 5-7 / 8-9 / 10-11 | 12-14 / 15-16 / 17-18 | 19-21 / 22-23 / 24-25 |
-| Core stat % | 1-5% | 1-2 | 3-4 | 5 |
-
-All Core stats (str, vit, dex, agi, wis, int, lck) use the same Flat and % ranges
-
-- One item holds at most 1 Flat mod + 1 % mod **and both can be the same stat** (str Flat 25 + str %)
-  This is the source of the stat ceiling in formula.md: 12 items x 25 Flat = 300 and 12 items x 5% = 60 → `(210 + 300) x 1.60 = 816` at level 100
+| Stat Mod flat | 5-25 | 5-7 / 8-9 / 10-11 | 12-14 / 15-16 / 17-18 | 19-21 / 22-23 / 24-25 |
 
 ## Elemental
 
 | Mod | Total | Low quality | Mid quality | High quality |
 |---|---|---|---|---|
-| Elemental power flat | 12-64 | 12-17 / 18-23 / 24-29 | 30-35 / 36-41 / 42-46 | 47-52 / 53-58 / 59-64 |
-| Elemental power % | 3-14% | 3-4 / 5-6 | 7-8 / 9-10 | 11-12 / 13-14 |
-| Elemental resistance % | 15-30% | 15-17 / 18-19 | 20-22 / 23-24 | 25-27 / 28-30 |
+| All Resistance % | 10-20% | 10-11 / 12-13 | 14-15 / 16-17 | 18-19 / 20 |
 | Elemental alignment % | 1-5% | 1-2 | 3-4 | 5 |
+| Elemental power % | 3-14% | 3-4 / 5-6 | 7-8 / 9-10 | 11-12 / 13-14 |
+| Elemental power flat | 12-64 | 12-17 / 18-23 / 24-29 | 30-35 / 36-41 / 42-46 | 47-52 / 53-58 / 59-64 |
+| Elemental resistance % | 15-30% | 15-17 / 18-19 | 20-22 / 23-24 | 25-27 / 28-30 |
+<!-- END GENERATED:mod-pool -->
 
 - All 5 Elements use the same ranges, no split table needed
 - **Elemental power ranges slightly below phys/magic** because Elemental damage must pass through an Alignment check first
@@ -146,7 +80,7 @@ All Core stats (str, vit, dex, agi, wis, int, lck) use the same Flat and % range
 
 Table values are the **T3 range start** of that quality: the worst roll that still counts as that quality.
 
-| Quality | Core stat % | Core stat flat | Power flat | Power % | Crit chance % | Elem res % |
+| Quality | Stat Mod % | Stat Mod flat | Power flat | Power % | Crit chance % | Elem res % |
 |---|---|---|---|---|---|---|
 | Low | 1% | 5 | 15 | 3% | 1% | 15% |
 | Mid | 3% | 12 | 37 | 8% | 4% | 20% |

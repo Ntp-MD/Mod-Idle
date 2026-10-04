@@ -97,6 +97,9 @@ const NO_LCK_HIGH_BAND = Math.round(HIGH_BAND_HOURS * junk('high'));
 const CASTS_FORGONE = Math.round(SUPPLY / E.reroll_stones_per_cast);
 const POLISHES_FORGONE = SUPPLY / E.reroll_stones_per_cast / E.reroll_casts_per_full_set_polish;
 const MIN_PER_TIER_STONE = 60 / E.elite_reroll_tier_stones_per_hr;
+// T10b: with F9 landed, the Armourer floor is re-checked against the Add mod stone, which is the
+// stone Ascend actually needs and the one the Armourer competes with for the same boss kills.
+const MIN_PER_ADD_STONE = 60 / E.add_mod_stones_per_hr;
 
 function standing(s) {
   const kph = E.bands[s.band].kills_per_hr;
@@ -219,11 +222,11 @@ BLOCKS.collector = () => {
 };
 
 BLOCKS['base-bias'] = () => [
-  `Status: **${DATA.base_bias.status}** — the column above is ${DATA.base_bias.column_meaning}, and it stays that way until every line below is closed.`,
+  `Status: **${DATA.base_bias.status}** (${DATA.base_bias.decision}) — the column above is ${DATA.base_bias.column_meaning}`,
   '',
   ...DATA.base_bias.checks.map((c, i) => `${i + 1}. ${c}`),
   '',
-  'Not written while the status is pending:',
+  'Never written (the ruling forbids it, not merely a pending gate):',
   ...DATA.base_bias.forbidden_until_closed.map((f) => `- ${f}`),
   ''
 ].join('\n');
@@ -238,7 +241,7 @@ BLOCKS['group-T'] = () => {
   const head = '| id | Must hold | Expression | Value |';
   const dc = docCheck();
   const rows = [
-    ['T1', 'gold is minted one piece at a time by the sell choice and nothing else (G2 · G6)', `${E.gold_per_junk_piece} gold per sold junk piece`, `${E.gold_per_junk_piece}`],
+    ['T1', 'gold is minted by the sell choice, plus one bounded exception: the Road purse (G2 · G6 · X36)', `${E.gold_per_junk_piece} gold per sold junk piece · Road ceiling ${(eng.E.road.links.length * eng.E.road.purse_gold)} gold/day, never stones, never AFK`, `${E.gold_per_junk_piece}`],
     ['T2', 'the price unit is real income, not a feeling', `junk/hr ÷ 60, per band`, `${rate('low')} low · ${rate('mid')} mid · ${rate('high')} high · ${rate('high_full_lck')} high+full Lck gold per 1 m`],
     ['T3', 'lifetime gold supply is the junk line, not a new faucet', `${hr(E.bands.low.band_hours, 1)}×${junk('low')} + ${hr(E.bands.mid.band_hours, 1)}×${junk('mid')} + ${hr(E.bands.high.band_hours, 1)}×${junk('high')} + ${hr(E.push_hr_levels_91_100, 1)}×${junk('high')}`, fmt(SUPPLY) + ' gold'],
     ['T4', `one-time stall demand ≤ ${(INV.onetime_demand_max_multiple_of_lifetime_supply).toFixed(2)}× the supply — a funnel, not a wall`, `Σ ${DATA.one_time.length} one-time lines at their charge band`, `${fmt(ONETIME_DEMAND)} = ${(ONETIME_DEMAND / SUPPLY).toFixed(2)}× ✓`],
@@ -247,12 +250,12 @@ BLOCKS['group-T'] = () => {
     ['T7', 'the full-Lck advantage stops at the junk line (G8)', `${hr(HIGH_BAND_HOURS, 1)} high-band hr × ${fmt(junk('high_full_lck'))} vs × ${fmt(junk('high'))}`, `${fmt(LCK_HIGH_BAND)} vs ${fmt(NO_LCK_HIGH_BAND)} gold = ×${(LCK_HIGH_BAND / NO_LCK_HIGH_BAND).toFixed(2)} against the ×${E.towns_gold_rate_multiplier_bound} ceiling ✓`],
     ['T8', 'every stall line is space · time · information · appearance only (G7)', `kind tag on all ${DATA.one_time.length + DATA.repeatable.length} lines · power nouns need an explicit display_only flag`, `${DATA.one_time.length + DATA.repeatable.length} lines, 0 power lines ✓`],
     ['T9', 'travel never gates content and never beats farming (G9)', `8 links × ${LINE.road_link.m} m one-time · Road trip ≤ ${INV.road_trip_max_real_minutes} real min`, `${fmt(lineGoldTotal(LINE.road_link))} gold = ${pct(lineGoldTotal(LINE.road_link) / SUPPLY)} of supply ✓`],
-    ['T10', 'Armourer repair costs more than the elite time it replaces (D2 service class)', `60 ÷ ${E.elite_reroll_tier_stones_per_hr} tier stones/hr = ${MIN_PER_TIER_STONE.toFixed(2)} m floor`, `${LINE.repair.m} m · ${LINE.repair_ironrow.m} m at Ironrow ✓ · final floor waits on F9`],
+    ['T10', 'Armourer repair costs more than the elite time it replaces (D2 service class)', `60 ÷ ${E.elite_reroll_tier_stones_per_hr} tier stones/hr = ${MIN_PER_TIER_STONE.toFixed(2)} m floor · F9 re-checked in T10b`, `${LINE.repair.m} m · ${LINE.repair_ironrow.m} m at Ironrow ✓`],
     ['T11', 'skip tokens stay inside the tasks.md bound', `${LINE.skip_token.m} m × ${LINE.skip_token.per_day_cap}/day`, `${LINE.skip_token.m * LINE.skip_token.per_day_cap} m/day ✓ (payouts untouched)`],
     ['T12', `Standing has ${INV.standing_min_tiers} tiers per settlement and is counted from F1 kills`, `budget hr × tier share × band kills/hr`, 'see table T-S below, 27 thresholds ✓'],
     ['T13', 'Tier III is a chase, never a formality', `tier III share ≥ ${INV.chase_tier_min_share} × the zone budget`, `${DATA.standing.tiers[2].share} on all 9 ✓`],
     ['T14', 'Collector sets pay items, never gold (G6)', `pays_gold flag on ${DATA.collector_sets.length} sets`, '0 gold ✓'],
-    ['T15', 'Base bias carries no numbers until the keep-rate re-sim', `loot.md section 1 step 2 + section 3`, `status = ${DATA.base_bias.status} · ${DATA.base_bias.checks.length} checks open`],
+    ['T15', 'Base bias is permanent flavour — ruled even-weighted, so it may never carry a number', `loot.md section 1 step 2 + section 3`, `status = ${DATA.base_bias.status} · ${DATA.base_bias.checks.length} guards · 0 numeric weights`],
     ['T16', 'price ladders are monotonic, so no later tier is cheaper', ladderRanges(), '✓'],
     ['T17', 'this file owns no kill rate: income is loot.md unchanged', `F1 = ${BANDS.map((b) => fmt(E.bands[b].kills_per_hr)).join(' / ')} kills/hr`, 'mob_HP and the 40.2 hr timeline unmoved ✓ (H1)'],
     ['T18', 'no band number is retyped here — town prices divide the engine junk line by 60', `tools/lib/engine.js (engine.json) → junk/hr per band, then loot.md section 2 read back`, dc.problems.length ? `MISMATCH: ${dc.problems.join(' · ')}` : `F1 ${dc.d.f1} · F3 ${dc.d.f3} · F5 ${dc.d.f5} · ${dc.d.rows} loot.md numbers read back equal ✓`],
@@ -315,7 +318,8 @@ function runChecks() {
   const repairLines = [...DATA.one_time, ...DATA.repeatable].filter((l) => /repair/.test(l.id));
   add('T10', repairLines.every((l) => l.m > MIN_PER_TIER_STONE),
     `repair ${repairLines.map((l) => l.m + ' m').join(' / ')} > ${MIN_PER_TIER_STONE.toFixed(2)} m per Reroll tier stone (F7 elite ${E.elite_reroll_tier_stones_per_hr}/hr)`);
-  pending('T10b', 'Armourer final floor re-checks when F9 (Add mod stone rate) lands');
+  add('T10b', repairLines.every((l) => l.m > MIN_PER_ADD_STONE),
+    `with F9 landed, repair ${repairLines.map((l) => l.m + ' m').join(' / ')} > ${MIN_PER_ADD_STONE.toFixed(2)} m per Add mod stone (F9 ${E.add_mod_stones_per_hr}/hr) — the same floor still holds against the stone Ascend needs, so the Add rate never makes repair a bad deal`);
 
   // T11 — skip tokens
   add('T11', LINE.skip_token.per_day_cap <= INV.skip_token_max_per_day
@@ -342,10 +346,10 @@ function runChecks() {
     && new Set(DATA.collector_sets.map((c) => c.school)).size === 3,
     `${DATA.collector_sets.length} sets, ${new Set(DATA.collector_sets.map((c) => c.school)).size} schools (light/heavy/cloth), 0 gold paid`);
 
-  // T15 — Base bias gate
+  // T15 — Base bias gate: ruled even-weighted (A9 · D-071), so the column must never carry a numeric weight.
   const weighted = DATA.settlements.filter((s) => s.base_bias_weight != null);
-  add('T15', DATA.base_bias.status === 'pending' && weighted.length === 0,
-    `status ${DATA.base_bias.status} · ${weighted.length} numeric weights in data · ${DATA.base_bias.checks.length} re-sim checks open`);
+  add('T15', DATA.base_bias.status === 'decided' && weighted.length === 0,
+    `status ${DATA.base_bias.status} (even-weighted) · ${weighted.length} numeric weights in data · ${DATA.base_bias.checks.length} guards — any weight added here would break the ruling`);
 
   // T16 — ladders
   const ladders = {};
@@ -411,23 +415,7 @@ function docCheck() {
 }
 // ---------------------------------------------------------------- docs I/O
 
-function begin(key) { return `<!-- BEGIN GENERATED:${key} -->`; }
-function end(key) { return `<!-- END GENERATED:${key} -->`; }
-
-function replaceBlock(text, key, body) {
-  const re = new RegExp(escapeRe(begin(key)) + '[\\s\\S]*?' + escapeRe(end(key)));
-  if (!re.test(text)) return { text, found: false };
-  return { text: text.replace(re, `${begin(key)}\n${body}\n${end(key)}`), found: true };
-}
-
-function blockIsCurrent(text, key, body) {
-  const re = new RegExp(escapeRe(begin(key)) + '([\\s\\S]*?)' + escapeRe(end(key)));
-  const m = text.match(re);
-  if (!m) return 'missing';
-  return m[1].trim() === body.trim() ? 'current' : 'stale';
-}
-
-function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+const { begin, end, replaceBlock, blockState } = require('./lib/generated');
 
 function targets() {
   const map = {};
@@ -469,7 +457,7 @@ if (arg === '--emit') {
     if (!fs.existsSync(p)) { stale.push(`${file} (absent)`); continue; }
     const text = fs.readFileSync(p, 'utf8');
     for (const k of keys) {
-      const s = blockIsCurrent(text, k, BLOCKS[k]());
+      const s = blockState(text, k, BLOCKS[k]());
       if (s !== 'current') stale.push(`${file} :: ${k} (${s})`);
     }
   }

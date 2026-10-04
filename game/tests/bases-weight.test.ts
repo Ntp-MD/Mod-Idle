@@ -1,0 +1,99 @@
+import { describe, it, expect } from 'vitest';
+import { createRequire } from 'node:module';
+import { eng, E, BASES } from '../src/engine/client';
+import { rollDrop } from '../src/sim/drop';
+import { buildCharacter, emptyGear } from '../src/sim/player';
+import { mulberry32 } from '../src/engine/client-helpers';
+
+const require = createRequire(import.meta.url);
+const basesCage = require('../../tools/bases.js');
+
+const PATHS: Record<string, string[]> = {
+  cloth: ['circlet', 'vestments', 'wrap', 'soft boots', 'sash', 'wraps', 'band', 'band', 'pendant', 'cloak'],
+  armored: ['barbute', 'plate', 'cuisses', 'sabatons', 'girdle', 'gauntlets', 'signet', 'signet', 'talisman', 'mantle'],
+};
+
+const weightOf = (names: string[]) => names.reduce((t, n) => t + (BASES.bases.find((b: any) => b.name === n)?.weight || 0), 0);
+
+describe('bases.json is the mirror the cage gates', () => {
+  it('carries every frame with a weight and a Primary pool', () => {
+    expect(BASES.bases.length).toBeGreaterThan(20);
+    for (const b of BASES.bases) {
+      expect(b.weight).toBeGreaterThan(0);
+      expect(b.primary.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('agrees with the cage side, including what is still PENDING', () => {
+    const rows = basesCage.checks();
+    const failed = rows.filter((r: any) => r.status === 'fail');
+    expect(failed).toEqual([]);
+    const mirror = rows.find((r: any) => r.id === 'BS1');
+    expect(mirror.status).toBe('pass');
+    // the client and the cage must disagree about nothing, including the doc's own set totals
+    expect(BASES.bases.length).toBe(Number(String(mirror.detail).match(/(\d+) Base rows/)?.[1]));
+  });
+
+  it('reproduces two of the three published path weights exactly', () => {
+    expect(weightOf(PATHS.cloth)).toBe(193);
+    expect(weightOf(PATHS.armored)).toBe(420);
+  });
+});
+
+describe('the weight tax from formula-utility.md section 11', () => {
+  it('capacity is Str x 2 and the tax only bites past it', () => {
+    expect(eng.weightCapacityOf(210)).toBe(420);
+    expect(eng.weightCapacityOf(816)).toBe(1632);
+    expect(eng.encumbranceOf(193, 210)).toBe(0);
+    expect(eng.encumbranceOf(420, 210)).toBe(0);
+  });
+
+  it('a balanced high-quality set costs 21% aspd and an armored one hits the 50% ceiling', () => {
+    expect(eng.encumbranceOf(507, 210)).toBeCloseTo(0.20714, 5);
+    expect(eng.encumbranceOf(657, 210)).toBe(E.caps.weight_overload);
+    expect(eng.encumbranceOf(9999, 210)).toBe(E.caps.weight_overload);
+  });
+
+  it('the tax lands on attack speed, not on the equip slots', () => {
+    const bare = buildCharacter(100, emptyGear());
+    const heavy = emptyGear();
+    for (let i = 0; i < heavy.length; i++) {
+      const name = PATHS.armored[i % PATHS.armored.length];
+      const frame = BASES.bases.find((b: any) => b.name === name)!;
+      heavy[i] = { slot: frame.slot, base: frame.name, rarity: 'Rare', quality: 'high', tier: 'T3', lines: [], q: 2, weight: frame.weight * 1.3 };
+    }
+    const c = buildCharacter(100, heavy);
+    expect(c.weightUsed).toBeGreaterThan(c.weightCap);
+    expect(c.encumbrance).toBe(E.caps.weight_overload);
+    expect(c.hitsPerSec).toBeLessThan(bare.hitsPerSec);
+    expect(c.hitsPerSec).toBeCloseTo(bare.hitsPerSec * (1 - E.caps.weight_overload), 4);
+  });
+});
+
+describe('drops are built from the Base table', () => {
+  it('every piece names a real frame for its slot and carries only lines that frame may roll', () => {
+    const rng = mulberry32(20260104);
+    for (let i = 0; i < 400; i++) {
+      const item = rollDrop(rng, ['low', 'mid', 'high'][i % 3], 1.2);
+      if (item.slot === 'main hand' || item.slot === 'off hand') {
+        expect(BASES.weapons.map((w: any) => w.name)).toContain(item.base);
+      } else {
+        const frame = BASES.bases.find((b: any) => b.name === item.base);
+        expect(frame?.slot).toBe(item.slot);
+        const allowed = new Set([...(frame?.primary || []), ...(frame?.secondary || []), frame?.school].filter(Boolean));
+        for (const line of item.lines) {
+          expect(allowed.has(line.id) || line.id === 'stat_mod_flat' || line.id === 'stat_mod').toBe(true);
+        }
+        expect(item.weight).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('quality weighs more, at the multiplier bases.json carries', () => {
+    const low = rollDrop(mulberry32(7), 'low', 1.2);
+    const frame = BASES.bases.find((b: any) => b.name === low.base);
+    if (frame) {
+      expect(low.weight).toBeCloseTo(frame.weight * Math.pow(BASES.quality_weight_multiplier, low.q!), 6);
+    }
+  });
+});

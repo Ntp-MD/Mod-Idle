@@ -183,10 +183,10 @@ The forfeit line is mandatory text: the Road is a content choice, and the screen
 
 # 12. Still Missing
 
-1. Whether capitals are teased on the map before their level requirement (`towns.md` section 10) — decided no detail above, needs a door.
-2. Whether a Collector set can be finished without opening the filter — the panel design in section 6 assumes the reject flag exists.
-3. Whether gold carries across the 3 character slots — UI currently reads per-character (`save.md` default no).
-4. Pedlar refresh wording when the player returns after 20 days — needs one line, not a mechanism.
-5. Road event UI is a placeholder card until the F5-bounded payout numbers of `towns.md` section 7 mode D are sized.
+The three below are UI-layout or copy tasks, not design gaps.
+
+1. Whether capitals are teased on the map before their level requirement (`towns.md` section 10) — **owner decision, a UI preference**: no mechanic number depends on it, so it can be settled when the map screen is built.
+2. Pedlar refresh wording when the player returns after 20 days — one copy line, not a mechanism (the refresh rule itself is set: per real day, `checks.md` group T).
+3. Road event UI is a placeholder card — the **payout is already sized** (purse 3 gold/link/day = a 24 gold/day ceiling, Standing 15/trip, no stones · D-040 · `checks.md` X36); only the card layout remains, no number is missing.
 
 (End of file)

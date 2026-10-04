@@ -9,7 +9,7 @@ import skill-tree.md
 
 # How skills and normal attacks work together
 
-**One clock · Two speed markets** — this is the core keeping "gear/tree/skill" from overlapping in meaning
+**One clock · Two speed markets** — this is the core keeping "gear/skill" from overlapping in meaning (there is no passive tree — D-046)
 
 1. **Auto does not stop when pressing skills** · Pressing a skill does not "replace" attacks, shift the attack table, or reset aspd (combat.md section 3 already sets a continuous clock)
 2. **Skill damage does not multiply aspd** because the formula is `per press × (1/cd)` → aspd accelerates only auto, CDR accelerates only skills · The two are therefore separate markets and do not hit each other's Cap · **This is the answer to the "fast hit" fork** (checks.md group I): fast builds buy *hit count* (per-hit procs), not total DPS
@@ -21,14 +21,14 @@ import skill-tree.md
 
 5. Every **damage instance** of a skill counts as 1 hit for per-hit procs (Sonic Blow · Brute · Flurry · Jinx · stun from Alignment · 20% status chance) · The `targets/hits` column in the skill table is this number
 6. **DoT ticks do not count as hits** — no crit, no per-hit procs, no refresh of "per-hit" buffs · They are damage-over-time only
-7. **Hit roll (accuracy vs evasion) rolls per instance** · If a skill says "guaranteed hit", it skips the roll only for that hit (Piercing Shot) · Note: in this game *monsters have no dodge* (formula.md section 9), so the old text "never misses from dodge" has been fixed
-8. **Crit**: phys/magic instances crit normally · Elements do not crit per the original rule · Headshot adds crit chance only to that hit
-9. **Multi-hits on different targets roll separately** (Whirlwind 3 hits = 3 rolls) but per-Element status stacks still use the same Cap (3 burn stacks / 10 poison stacks)
+7. **Hit roll (accuracy vs evasion) rolls per instance** · If a skill says "guaranteed hit", it skips the roll only for that hit (Piercing Shot) · Note: a mob can avoid a hit twice — the accuracy-vs-evasion roll and its own Agi dodge (D-021 · D-024) — so a "guaranteed hit" line skips both, not one
+8. **Crit**: physical instances only · magic and the 5 Elements never crit (formula-offense.md section 3) · Headshot adds crit chance only to that hit
+9. **Multi-hits on different targets roll separately** (Whirlwind 3 hits = 3 rolls) but per-Element status stacks still use the same Cap (5 burn stacks / 10 poison stacks)
 
 **Order and queue**
 
-10. **No GCD** — skills are instant and the game runs top-down through the list, using the first skill with cd ready *and* enough mana · A skill stuck at the top long blocks lower ones forever → list order is a real lever, not formatting
-11. Buffs have a "re-press when expired" switch (default on) · When off, no repeated mana cost · Heal should be set to the top of the list in boss zones because bosses require heal (combat.md §7)
+10. **No GCD** — attack · curse and heal skills are instant and the game runs top-down through the **15 active slots** (`skill-pool.md`), casting the first skill with cd ready *and* enough mana · A skill stuck at the top long blocks lower ones forever → list order is a real lever, not formatting
+11. **Buffs and auras are a toggle track, not rotation entries** — a buff left switched on re-presses itself the moment it lapses, and an open aura holds its reservation; both run in parallel with the 15 active slots and take **no slot**, costing only mana (buff) or reservation (aura) · Heal is an *active*, so keep it at the top of the list in boss zones because bosses require heal (combat.md §7)
 12. **Cooldowns do not reset on Push** — HP depletion returns to the main preset, but skills already counting cd keep counting · Mobs do not die because we were pushed, so no fired work is lost
 
 **True-number comparison** (glass Str 12 at level 100 · run `node tools/timeline.js`)
@@ -59,25 +59,21 @@ import skill-tree.md
 
 ## Damage rules
 
+<!-- BEGIN GENERATED:aoe-rules -->
 ```
 single target → 100% damage · mana cost 1.0×
-AoE           → falloff per target · 5-target Cap · mana cost 1.0×
-1 target 100% · 2 targets 85% · 3 targets 70% · 4 targets 60% · 5 targets 50%
+AoE           → 60% damage per target hit · Cap 3 targets · mana cost 1.5×
+
+damage per mana: 1 target 0.40× · 2 targets 0.80× · 3+ targets 1.20×
 ```
+<!-- END GENERATED:aoe-rules -->
 
-- **Decided (P0-3): mana stays 1.0x for AoE and single alike; balance lives in the falloff only.** 2-target interpolated values (85% / 60%) are placeholders pending the rebalance pass with P0-2.
-- **Skills are gated by mana** (maximum casts/sec = mana_regen ÷ cost) · The true currency of AoE is therefore "damage landed on monster HP per mana", not damage per press
-
-| Targets hit | Damage/mana vs single (mana 1.0x) | Group clear time at L90 (glass) | Damage taken % of pool |
-|---|---|---|---|
-| 1 target | 1.00× | 0.90 sec (same as single — pending rerun) | 2% (same as single) |
-| 2 targets | 1.70× | pending rerun (`tools/survival.js`) | pending rerun |
-| 3 targets | **2.10×** | pending rerun | pending rerun |
-| 5 targets | 2.50× (hits 5 Cap) | pending rerun | pending rerun |
-
-- **AoE pays off at 2+ targets** → zones 1 (1-2 mobs) break-even · zones 4+ win clearly · Rebalance pending with P0-2.
-- **Boss gate broken by this change and must be re-established in the rebalance pass.** Bosses are single → AoE now deals 1.00× damage per mana → fight length no longer stretches 2.5x. Old line (0.40× → 312% of pool = certain Push) no longer holds. Options for the pass: single-target damage bonus vs AoE, or boss AoE resistance. Old clear-time column above is stale until `tools/survival.js` reruns.
-- **The 5-target Cap is the funnel lock** — loot.md sets kills/hour on this number. Raising the Cap from 3 to 5 shifts craft income across the file (see loot.md section 2). Rebalance pending.
+- **Skills are gated by mana** (maximum casts/sec = mana_regen ÷ cost), so the true currency of AoE is damage landed on mob HP per mana, not damage per press.
+- **AoE pays off at 3 targets**, breaks even at 2, and loses at 1. The mana cost is what makes it a choice, not a free upgrade.
+- **Cap 3 targets is the funnel lock** — loot.md sets kills/hour on it. Raising the Cap shifts craft income across the file (loot.md section 2).
+- A group of 5 clears in 3.75 sec instead of 4.50 (1.20× faster); against 1-2 small mobs AoE deals 0.40-0.80× damage per mana, so single-target still wins there.
+- Bosses are single, so AoE deals 0.40× damage per mana against them and stretches the fight ~2.5× — the trade holds at the boss gate too.
+- Which 3 targets the AoE hits is the reach queue (`combat.md` section 2b), not a fixed set.
 
 ## What AoE adds beyond damage
 
@@ -85,15 +81,15 @@ AoE           → falloff per target · 5-target Cap · mana cost 1.0×
 - **Debuffs remain single-target** — because the Expose target must be chosen; spreading after investing mana would dissolve the value
 - **Creates work queues** — Frost Nova chills all, so the remainder all attack slower equally
 
-# 12 passives → now tree keystones
+# 12 passives - withdrawn with the tree
 
-> This file no longer counts these 12 as skills (skill count = 43, i.e. attack 18 + buff 0 + curse 10 + heal 3 + aura 12 — buff roster cleared for redesign) · All 12 were moved to skill-tree keystones as decided in skill-tree.md section 5 · The table below remains as *value evidence* (5-30% each) referenced by the tree budget, not as a list players will equip
+> This file no longer counts these 12 as skills — the live roster split is the generated block in `skill-pool.md` (`node tools/skills.js`) · All 12 were moved to skill-tree keystones as decided in skill-tree.md section 5 · The table below remains as *value evidence* (5-30% each) referenced by the tree budget, not as a list players will equip
 
 **Takes no skill slot · Costs no mana · Has no cooldown · Bought with skill points**
 
 Passives are not plain numbers but combat-rule changes. Because if it were `+5% Str` it should be an Mod on gear instead, without needing a player-decision point
 
-> **Not yet the final list** — expected to move into the skill tree (see skill-tree.md). This table exists to show what good nodes look like; true cost and placement wait for tree design
+> **Withdrawn** - these twelve were waiting for a passive tree to live in. The tree is empty, so they are not part of the design.
 
 | # | Passive | Cost | Effect |
 |---|---|---|---|
@@ -182,48 +178,57 @@ Buy 7th+ → 4 points
 <!-- BEGIN GENERATED:ladder-math -->
 | Quantity | Value |
 |---|---|
-| roster | 43 skills |
-| pool per zone | 43 ÷ 9 = **4.8** |
+| roster | 51 skills |
+| pool per zone | 51 ÷ 9 = **5.7** |
 | funnel | 4.6/hr × 40 hr = **184 pieces** |
 | ladder to max one skill | 12 duplicates = **24 pieces** via the 2:1 conversion |
 | 4 maxed targets | **96 pieces = 52% of funnel = 20.9 hr** |
-| remaining 39 skills | 88 pieces → **2.26 each** |
+| remaining 47 skills | 88 pieces → **1.87 each** |
 <!-- END GENERATED:ladder-math -->
 
 # Skill level
 
 ```
-skill_xp gained from using that skill
-skill_level = floor((skill_xp / 1000) ^ (1/3)) + 1
-skill_level = min(skill_level, 20)          # 20-step Cap, not character level
-multiplier = (1 + skill_level × 1.5/100)        # maxed = ×1.30
+skill_xp += 1            for every kill, per skill in the list (attack / curse / heal) or open (aura)
+skill_level = floor(skill_xp / 400) + 1
+skill_level = min(skill_level, 20)          # Cap 20, not character level
+multiplier  = 1 + skill_level x 1.5/100     # at 20 = x1.30
 ```
 
-- **Fixed from "Cap = character level"** · The old model gave ×2.0 at level 100, which combined with a 3-skill rotation pushed every build DPS up 33-133% beyond the gear ceiling and broke the folded `mob_HP` (×1.34) across the line · The 20-step Cap (×1.30) keeps `node tools/skills.js` numbers inside the band checks.md D17 sets
-- More frequent firing levels faster, like Melvor using this formula · 1 XP per press per instance (multi-hit grants multiple XP per press)
-- **Cap at 20** lets mid-game new skills still "catch up" within 1 week of real play (20 steps ≈ 8,000 uses)
-- Unequipped skills gain no XP · Auras gain XP per open second, independent of what they cost
+- **XP is per kill, not per press.** A skill earns while it is slotted whether or not it fired this second, so a long list, a mana-bound rotation or a high-cooldown build never slows levelling, and the rate is the same clock the rest of the game is priced on (kills/hour, loot.md section 2). This is the PoE model (socketed gems gain on kill), which is what D-039 was answered with.
+- **Why the old curve was deleted**: `skill_level = (xp/1000)^(1/3) + 1` with 1 XP per press needs **6.86M presses** to reach 20 - roughly 147 days of non-stop casting at the reference rate. It also meant the only way to level was to build for cast rate, taxing the axis it was supposed to reward.
+- **Hours to max one skill** = 8,000 kills of using it: **4.4 hr** high band (1,800 kills/hr) · **5.8 hr** mid · **8.2 hr** low. A skill picked up mid-run therefore catches up inside roughly one zone of play, which is the point of the Cap.
+- **One rule for every type.** Attack, curse and heal skills gain while slotted; an aura gains while it is open and reserves normally. The level multiplier is the same +1.5%/step for all of them, and ≈8,000 uses is the number this file already quoted - now it is the actual rule instead of a hope.
+- **Unequipped skills gain nothing**, and levelling is *separate* from the duplicate ladder (skill-pool-system.md above): level buys damage/effect up to x1.30, the ladder buys cooldown. Two tracks, one visible each.
 
 # Numbers not yet fixed
 
-- ~~**Max Mana must be reduced** — currently `K_INT_MP` = 8~~ **This text is left over from an old version** · `K_INT_MP` has long been 4. What was truly wrong is `K_INT_MREGEN` = 0.2, which left pool/regen at 29.7 seconds instead of the intended 40 · Fixed to 0.15 in formula.md section 5
-- **Drop chance per skill range** — set in loot.md: **boss 35% per kill · elite 8% · normal mobs 0.1%**. In the high zone this yields about boss 1.4 + elite 1.4 + normal 1.8 = **~4.6 skills per hour** · The duplicate-protection rule in this file makes every early piece guaranteed new
-- **Pool size per level range → needs rerun (was closed for 51 skills)** — 9 zones ÷ 51 skills = 6 per zone was the old answer · **At the current roster of 43 it becomes 4.8**, which makes the ladder *easier* (fewer targets to spread 184 pieces across) · The zone-pool rule itself is unchanged: a zone boss drops only that zone's pool, so the first new skill in a zone still matters · `node tools/ladder.js` does not exist yet, so no corrected figure is proposed here
-- **K per skill → re-decided: `K_SKILL = 1.5` (was 5)**
-  ```
-  skill_damage = (stat × K_stat × stat%/100 + power × power%/100) × K_SKILL × (1 + skill_level × 1.5/100)   · skill_level Cap 20
-  ```
-  The 1.5 comes from the target "whole rotation = ×1.1-1.4 of build" (old 5 was set for a single skill · 3-skill rotation exceeded the gear ceiling 33-133%). Measured across all builds (level 100 · average 1.6 presses per 8 sec): at K_SKILL = 1.5 with a 3-skill rotation (run `node tools/skills.js`): uplift per build = glass ×1.33 · mix ×1.30 · Int6/Wis3 ×1.43 · Int8 ×1.90 but *all totals still below the gear ceiling* (133% / 88% / 83% / 69% of 9,847) · The honest conclusion: the ×1.1-1.4 band written in skill-tree.md section 3 **holds only for builds spending slots on non-Int Str/Vit/Agi**. Builds giving 8 slots to Int get skills as the majority of the build (47%) because their auto is low — not stronger than glass but *more skill-dependent*, and this is why mob_HP must fold ×1.34 (D17), not fold to any single build
-  → **This number creates real paths**: Int+Wis builds rely on skills for 47% of the build, glass relies 25% (rotation table at end of file). And **a longer list does not raise DPS beyond the mana ceiling** (maximum casts = mana_regen ÷ cost), which answers concern 4 in concept.md with numbers, not limits
-- **Mana cost** — ~~half-checked~~ **fully checked across the roster** (line below) · The old line still holds at pool 4,848 / 122/sec regen: 10% skill = 485 mana = 4.0 sec of regen per press. Meaning the 6-sec-cd unit cannot fire continuously (mana is a true bottleneck as designed) · But 2-3 units in 10 seconds still work. Verified with `node tools/skills.js` · 3 attack-skill + 3 support rotation consumes almost all regen on every build (glass cannot charge Cleave in time for cd: 11.54 sec vs 6 sec cd) → *mana is a true bottleneck as designed*, and repeated (buff) skills must sit at the end of the list or they steal mana from attack skills
-- **Duplicate ladder → decided (ladder 12 + 2:1 conversion), measured on the old 51-skill roster** — old 32 pure-random measured as *unreachable*: at 51 skills clustered in 6-per-zone pools, maxing one takes 41.7 hours (almost the whole 40-hour game) · Of the three once-pending options, only 1+3 were used together (2:1 duplicate conversion and ladder cut to 12) because option 2 (smaller pool per zone) became impossible once the roster grew to 51 · Measured result: 4 maxed = 96 of 184 pieces (52% of funnel) in 20.9 hours · The remaining 47 average 1.9 pieces = sit at step 1, which is intentional (this game never intends every skill maxed) · **All of these figures are sized on 51 skills. The roster is now 43, so every number here is stale** — re-check with `node tools/ladder.js --checks` when that tool exists. History forcing the cut: pure random on 43 needed ~300 hours each (7x the whole game) · Moving to 51 + 6-per-zone pools worsened it (41.7 hours each) · Option 2 (smaller pool) became unusable as the roster grew, leaving option 1 (2:1 conversion) + option 3 (ladder 12), decided above
-- **Iron Guard / Energy Guard reserve** — the two unpriced auras cannot be given a reserve value until `K_ARMOUR` / `K_ENERGY_SHIELD` land (skill-pool-aura-heal.md · Blocker 1). Do not hand-pick a number by feel
-- **Melee range** — **3 mobs count as "nearby"** (matches the "max 3 engage at once" rule in world.md · D-009 7a). Damage-reduction auras and debuffs read this number
-- ~~**Death rules**~~ **Closed in combat.md** — no death · Uses `Push` (HP depleted → rest `Max HP ÷ (hp_regen × 8)` sec). Heal therefore buys *time*, not *life*, and is measurable (combat.md section 6 · `node tools/survival.js`): at the level-100 boss, the full-Str build takes 87% of pool, which already passes · The one that gets **pushed is dodge at 137%** because pool equals glass but kills 2.6x slower · Heal (Greater Heal + Heal = pool ×1.52) pulls dodge down to 90% → narrow pass · The role of heal in this game is "opening boss doors for non-tanky builds", not "preventing general death". This is the direct answer to the old question "without death, do healing skills lose meaning"
+<!-- BEGIN GENERATED:skill-drop -->
+| Source | Rate | High-band volume | Skills/hr |
+|---|---|---|---|
+| Boss (single, always online-only) | 35.0% per boss kill | 4.0/hr | 1.4/hr |
+| Elite (1 in 5 kills) | 8.0% per elite kill | 360/hr | 28.80/hr |
+| Normal mob | 0.10% per kill | 1,800/hr | 1.4/hr |
 
-# Questions to decide
+**31.64 skills per hour** in the high band (boss 1.40 + elite 28.80 + normal 1.44) — the rare item the whole skill list is gated on. Every number above comes from engine.json; the rates were previously quoted in this file and stored nowhere, so nothing could check them.
+<!-- END GENERATED:skill-drop -->
+- **Pool size per level range → closed by `node tools/ladder.js --checks`** — the generated ladder block above prints the roster ÷ 9 zones (LD3), so the per-zone pool is never typed here · The zone-pool rule itself is unchanged: a zone boss drops only that zone's pool, so the first new skill in a zone still matters
+- **Press per skill → re-cut to a fraction of the finished hit (D-070 · B5 · D-097)**
+  ```
+  press = final_pct × basis × (1 + (skill_level − 1) × 1.5%)   · skill_level Cap 20 · basis = the finished physical hit, or the magic hit + Element × Alignment/100
+  ```
+  The band it was set on still holds — "the whole rotation is ×1.1-1.4 of the build" (checks.md E12) — and **gate S10 now reads that Cap multiplier out of the calculator** and fails if it leaves the band, so re-cutting `level_step_pct` cannot drift. What the old K was fitted with (the per-build uplift of ×1.33 glass / ×1.30 mix / ×1.43 Int6-Wis3 / ×1.90 Int8) was measured on the `stat% / power%` split and is superseded: the same figures are re-measured by `node tools/skills.js --calc --build glass|caster`, and the skill share mob_HP folds (checks.md D17 · D4) moves with that measurement — and that pass has now run on a geared character (**D-103**): the list measures ×1.29 · ×1.44 · ×1.76 at Cap against the ×1.10 · ×1.20 · ×1.31 the curve spends, while the geared player still sits *under* the priced line, so the fold taken was none, and `mob.curve.skill_per_level` stays where the published mob line fits it. The reason the fold is not taken off one build alone is unchanged — an Int-heavy build leans on its skills for a much larger share of its damage because its auto hit is the lowest, and a longer list still does not raise DPS beyond the mana ceiling (maximum casts = mana_regen ÷ cost).
+  → **This number creates real paths**: Int+Wis builds rely on skills for 47% of the build, glass relies 25% (rotation table at end of file). And **a longer list does not raise DPS beyond the mana ceiling** (maximum casts = mana_regen ÷ cost)
+- **Mana cost** — **fully checked across the roster** (line below) · The old line still holds at pool 4,848 / 122/sec regen: 10% skill = 485 mana = 4.0 sec of regen per press. Meaning the 6-sec-cd unit cannot fire continuously (mana is a true bottleneck as designed) · But 2-3 units in 10 seconds still work. Verified with `node tools/skills.js` · 3 attack-skill + 3 support rotation consumes almost all regen on every build (glass cannot charge Cleave in time for cd: 11.54 sec vs 6 sec cd) → *mana is a true bottleneck as designed*, and repeated (buff) skills must sit at the end of the list or they steal mana from attack skills
+- **Duplicate ladder → decided (ladder 12 + 2:1 conversion), measured on the old 51-skill roster** — old 32 pure-random measured as *unreachable*: at 51 skills clustered in 6-per-zone pools, maxing one takes 41.7 hours (almost the whole 40-hour game) · Of the three once-pending options, only 1+3 were used together (2:1 duplicate conversion and ladder cut to 12) because option 2 (smaller pool per zone) became impossible once the roster grew to 51 · Measured result: 4 maxed = 96 of 184 pieces (52% of funnel) in 20.9 hours · The remaining 47 average 1.9 pieces = sit at step 1, which is intentional (this game never intends every skill maxed) · **The historical figures below were sized on the old 51-skill roster; the live ones are recomputed by `node tools/ladder.js --checks`** (LD3-LD5). History forcing the cut: pure random on a 43-skill roster needed ~300 hours each (7x the whole game) · Moving to 51 + 6-per-zone pools worsened it (41.7 hours each) · Option 2 (smaller pool) became unusable as the roster grew, leaving option 1 (2:1 conversion) + option 3 (ladder 12), decided above
+- **Iron Guard / Energy Guard reserve** — **closed.** Both were priced at **mid (11%)** in D-035; the `K_ARMOUR` (2) and ES coefficient `K_INT_ES` (4) they were said to wait on already landed (D-022 · D-026), and there is no separate `K_ENERGY_SHIELD` — ES runs off Int. The effect flats are set to 80% of each line's item ceiling, the Grace parity rule, and printed by `node tools/skills.js` (skill-pool-aura-heal.md). D-069
+- **Melee range** — **3 mobs count as "nearby"** (matches the "max 3 engage at once" rule in world.md · D-009 7a). Damage-reduction auras and debuffs read this number
+
+# Questions — all decided
+
+(Every question this file raised is now answered; kept so none is re-litigated.)
 
 1. **Should duplicates upgrade cooldown or duration** — decided: cooldown only (ladder in this file).
-2. **Do monsters have skills** — decided: late-zone bosses gain 1-2 signature skills during zone design. Normal and elite mobs keep innate Element only.
+2. **Do monsters have skills** — decided (extended · D-067): skills follow the body tier — Small/Medium 0 (innate Element only), Large and Elite 1, Boss 1-2 — and each skill only re-times the mob's priced `mob_PS`, so `mob_HP` and the timeline never move (`combat.md` §5b). Normal mobs keep innate Element as their baseline.
 3. **25% weapon-group bonus** — kept at 25% (P3). Strong enough to pull weapon choice without killing cross-group skills.
-4. **Unlimited list, any problem with a complete collection** — decided: max 20 actives in the list, remainder stay in reserve.
+4. **Unlimited list, any problem with a complete collection** — decided: the active bar is **15 slots** (`skill-pool.md` owns the number), remainder stay in reserve · Buffs and auras sit on a separate toggle track and cost none of the 15.

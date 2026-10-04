@@ -128,6 +128,18 @@ function gates(branches) {
   const badBranch = TREE.keystones.filter((k) => !branchIds.has(k.branch)).map((k) => k.name);
   add('T3', badBranch.length === 0, `every keystone names a real branch${badBranch.length ? ' · BAD: ' + badBranch.join(', ') : ''}`);
 
+  // the tree multiplier SUMS a typical path of 6, and mob_HP is built on x1.85 — so the
+  // band has to straddle that. A new keystone that pushes every legal path past it is a
+  // mob_HP problem, not a node problem (skill-tree.md section 3).
+  const KB = keystoneBudget();
+  add('T7', TREE.keystones.length === 0 || (KB.bestMul >= 1.85 && KB.worstMul < 1.85),
+    `legal tree band is x${KB.worstMul} (worst ${KB.worstVals.join('/')}) to x${KB.bestMul} (best ${KB.bestVals.join('/')}), so the x1.85 mob_HP baseline sits inside it`);
+
+  const missingCalc = TREE.keystones.filter((k) => k.origin !== 'original' && !k.calc).map((k) => k.name);
+  const missingRule = TREE.keystones.filter((k) => k.rule === undefined).map((k) => k.name);
+  add('T8', missingCalc.length === 0 && missingRule.length === 0,
+    `every keystone carries the rule and the worked calculation its table prints${missingRule.length ? ' · no rule: ' + missingRule.join(', ') : ''}${missingCalc.length ? ' · no calc: ' + missingCalc.join(', ') : ''}`);
+
   const mismatched = [];
   for (const b of branches) {
     if (b.parsed.nodes.length !== b.minors) mismatched.push(`${b.name} minors ${b.parsed.nodes.length}≠${b.minors}`);
@@ -149,6 +161,17 @@ function gates(branches) {
   } else {
     add('T5', true, 'every "Enables" cell resolves to a real skill or keystone');
   }
+
+  // The tree has to be buildable: a fixed shape, derived from the tables, not invented per node.
+  const shape = [];
+  for (const b of branches) {
+    if (b.parsed.limbs.length !== 5) shape.push(`${b.name} has ${b.parsed.limbs.length} limbs, not the 5 the shape needs`);
+    for (const l of b.parsed.limbs) if (l.parsed < 4) shape.push(`${b.name}/${l.name} has only ${l.parsed} nodes (a spoke needs 4+)`);
+  }
+  const totalMinors = branches.reduce((t, b) => t + b.parsed.nodes.length, 0);
+  if (totalMinors > 0 && totalMinors !== 122) shape.push(totalMinors + ' minor nodes parsed, not the 122 the removed tree declared');
+  add('T6', shape.length === 0, shape.length ? shape.join(' · ')
+    : `the tree is buildable from the tables: 3 branches × 5 limbs × ≥4 nodes = ${totalMinors} minors, and tier = position within its own limb (hub → branch gateway → limb gateway → node 1..N)`);
 
   return out;
 }
@@ -180,10 +203,107 @@ function summaryBlock(branches) {
   ].join('\n');
 }
 
+function layoutBlock(branches) {
+  const rows = [];
+  for (const br of branches) {
+    const keys = TREE.keystones.filter((k) => k.branch === br.id);
+    br.parsed.limbs.forEach((l, i) => {
+      const key = keys.length ? keys[i % keys.length].name : '—';
+      rows.push(`| ${br.name} | ${i + 1} · ${l.name} | ${l.parsed} | 1-${l.parsed} | ${key} |`);
+    });
+  }
+  return [
+    '| Branch | Limb (order from the hub) | Nodes | Tiers it can hold | Spoke keystone |',
+    '|---|---|---|---|---|',
+    ...rows,
+    '',
+    'Pathing, so a client guesses nothing: **hub → branch gateway → limb gateway → nodes in table order**. A node is purchasable once the node before it in the same limb is owned; tier is distance from the hub, exactly as this file already describes it. The keystone column is the paired-spoke assignment, cycled per branch — a keystone is reachable through two limbs, never one (T2).',
+  ].join('\n');
+}
+
+// ---------------------------------------------------------------- keystone tables
+
+const BRANCH_LABEL = { impact: 'Impact', stream: 'Stream', control: 'Control' };
+
+/** One pick per exclusive pair: walk `order` and take a keystone, claiming its whole pair
+ *  so the partner is skipped. Returns every legal pick, not just the first 6. */
+function legalPicks(order) {
+  const claimed = new Set();
+  const picks = [];
+  for (const k of order) {
+    if (claimed.has(k.name) || claimed.has(k.pair)) continue;
+    claimed.add(k.name);
+    claimed.add(k.pair);
+    picks.push(k);
+  }
+  return picks;
+}
+
+function keystoneBudget() {
+  const K = TREE.keystones;
+  const orig = K.filter((k) => k.origin === 'original');
+  const fresh = K.filter((k) => k.origin !== 'original');
+  const mean = (a) => (a.reduce((s, k) => s + k.value, 0) / a.length).toFixed(1);
+  // the tree multiplier sums the picks, it does not average them (6 x 14.2% = x1.85)
+  const mul = (picks) => (1 + picks.reduce((s, k) => s + k.value, 0) / 100).toFixed(2);
+  const sum = (picks) => (picks.reduce((s, k) => s + k.value, 0)).toFixed(1);
+  const best = legalPicks([...K].sort((a, b) => b.value - a.value)).slice(0, 6);
+  const worst = legalPicks([...K].sort((a, b) => a.value - b.value)).slice(0, 6);
+  return {
+    origMean: mean(orig), freshMean: mean(fresh), poolMean: mean(K),
+    bestVals: best.map((k) => k.value), bestSum: sum(best), bestMul: mul(best),
+    worstVals: worst.map((k) => k.value), worstSum: sum(worst), worstMul: mul(worst),
+    pairs: new Set(K.map((k) => k.pair)).size,
+  };
+}
+
+function keystoneOriginalBlock() {
+  return [
+    '| Original | Branch | Measured value (%) | Notes |',
+    '|---|---|---|---|',
+    ...TREE.keystones.filter((k) => k.origin === 'original').map((k) => {
+      const label = k.rule ? `${k.name} (${k.rule})` : k.name;
+      const v = k.value === 0 ? '0% DPS' : (k.value % 1 ? `+${k.value}%` : `+${k.value}%`);
+      return `| ${label} | ${BRANCH_LABEL[k.branch]} | ${k.value >= 20 ? `**${v}**` : v} | ${k.note || ''} |`;
+    }),
+  ].join('\n');
+}
+
+function keystoneNewBlock() {
+  const B = keystoneBudget();
+  return [
+    '| Keystone | Branch | Rule | Calculated value | Conflicting pair |',
+    '|---|---|---|---|---|',
+    ...TREE.keystones.filter((k) => k.origin !== 'original').map((k) => {
+      const v = k.value === 0 ? '**0% DPS**' : `**+${k.value}%**`;
+      const extra = k.pair_note ? ` · ${k.pair_note}` : '';
+      return `| ${k.name} | ${BRANCH_LABEL[k.branch]} | ${k.rule} | ${v} · ${k.calc}${extra} | ${k.pair} |`;
+    }),
+    '',
+    `**Pool accounting check** — ${TREE.keystones.length} units = ${TREE.keystones.filter((k) => k.origin === 'original').length} original (mean ${B.origMean}%) + ${TREE.keystones.filter((k) => k.origin !== 'original').length} new (mean ${B.freshMean}%) → **whole-pool mean ${B.poolMean}%**`,
+    `- The multiplier **sums** the picks, so a typical path of 6 at 14.2% is ×1.85 — that is the \`mob_HP\` baseline`,
+    `- Best *legal* picks = ${B.bestVals.join('/')} → sum **${B.bestSum}%** → tree **×${B.bestMul}** (the ceiling \`mob_HP\` does not cover)`,
+    `- Worst *legal* picks = ${B.worstVals.join('/')} → sum **${B.worstSum}%** → tree **×${B.worstMul}**`,
+    `- **${B.pairs} exclusive pairs**, one pick each (T2) — this is what controls the band width`,
+  ].join('\n');
+}
+
+function keystonePairBlock() {
+  return [
+    '| Pair | Why they truly cut each other (not paired by branch) |',
+    '|---|---|',
+    ...TREE.keystones.filter((k) => k.pair_reason).map((k) => `| ${k.name} ↔ ${k.pair} | ${k.pair_reason} |`),
+  ].join('\n');
+}
+
 // ---------------------------------------------------------------- writers
 
 const WRITERS = [
   { file: 'skill-tree.md', key: 'tree-summary', render: () => summaryBlock(analyze()) },
+  { file: 'skill-tree.md', key: 'tree-layout', render: () => layoutBlock(analyze()) },
+  { file: 'skill-tree-keystone.md', key: 'keystone-original', render: keystoneOriginalBlock },
+  { file: 'skill-tree-keystone.md', key: 'keystone-new', render: keystoneNewBlock },
+  { file: 'skill-tree-keystone.md', key: 'keystone-pairs', render: keystonePairBlock },
 ];
 
 // ---------------------------------------------------------------- cli

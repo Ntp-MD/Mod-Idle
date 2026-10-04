@@ -1,32 +1,9 @@
 {
   "meta": {
-    "note": "Skill-tree source of truth for the parts the cage owns: branch/limb shape and the 18 keystones. The 122 minor nodes stay as prose tables in skill-tree-*.md; tools/tree.js parses those tables, validates every \"Enables\" cell against skills.json + keystones, and regenerates the summary in skill-tree.md.",
+    "note": "The game has no passive skill tree. It was cleared because the fundamentals were still moving: 82 of its 100 points bought rules that granted no numbers, so every point of DPS sat in 18 keystones and the tree was a keystone picker with connective tissue rather than a node graph. Kept as an empty shell so the mob_HP fold point and the cage survive for whatever replaces it. Nothing here grants power, and no document may quote a tree multiplier while this file is empty.",
     "node_columns": ["Tier", "Node", "Changed rule", "Enables"]
   },
-  "pending_refs": ["Ancestral Pace", "Battle Orders", "Blood Pact", "Bloodletting", "Deep Breath", "Focus", "Guardian's Veil", "Iron Will", "Reaver's Edge", "Stone Skin", "War Cry"],
-  "branches": [
-    { "id": "impact", "name": "Impact", "file": "skill-tree-impact.md", "minors": 41, "limbs": 5 },
-    { "id": "stream", "name": "Stream", "file": "skill-tree-stream.md", "minors": 41, "limbs": 5 },
-    { "id": "control", "name": "Control", "file": "skill-tree-control.md", "minors": 40, "limbs": 5 }
-  ],
-  "keystones": [
-    { "id": "keystone.sonic_blow", "name": "Sonic Blow", "branch": "impact", "value": 30, "pair": "Burning Focus", "origin": "original" },
-    { "id": "keystone.rapid_fire", "name": "Rapid Fire", "branch": "control", "value": 30, "pair": "Anchor", "origin": "original" },
-    { "id": "keystone.brute", "name": "Brute", "branch": "impact", "value": 30, "pair": "Finishing Blow", "origin": "original" },
-    { "id": "keystone.overkill", "name": "Overkill", "branch": "stream", "value": 18, "pair": "Last Stand", "origin": "original" },
-    { "id": "keystone.cheap_casting", "name": "Cheap Casting", "branch": "control", "value": 16, "pair": "Cunning", "origin": "original" },
-    { "id": "keystone.flurry", "name": "Flurry", "branch": "control", "value": 13, "pair": "Deep Pockets", "origin": "original" },
-    { "id": "keystone.burning_focus", "name": "Burning Focus", "branch": "stream", "value": 8, "pair": "Sonic Blow", "origin": "original" },
-    { "id": "keystone.elemental_attunement", "name": "Elemental Attunement", "branch": "stream", "value": 6, "pair": "Elemental Crossfeed", "origin": "original" },
-    { "id": "keystone.counter", "name": "Counter", "branch": "impact", "value": 5, "pair": "Noble Phantasm", "origin": "original" },
-    { "id": "keystone.cunning", "name": "Cunning", "branch": "control", "value": 4.5, "pair": "Cheap Casting", "origin": "original" },
-    { "id": "keystone.last_stand", "name": "Last Stand", "branch": "impact", "value": 12.5, "pair": "Overkill", "origin": "original" },
-    { "id": "keystone.noble_phantasm", "name": "Noble Phantasm", "branch": "control", "value": 0, "pair": "Counter", "origin": "original" },
-    { "id": "keystone.finishing_blow", "name": "Finishing Blow", "branch": "impact", "value": 11.1, "pair": "Brute", "origin": "new" },
-    { "id": "keystone.weighted_edge", "name": "Weighted Edge", "branch": "impact", "value": 7, "pair": "Spreading Burn", "origin": "new" },
-    { "id": "keystone.deep_pockets", "name": "Deep Pockets", "branch": "stream", "value": 7, "pair": "Flurry", "origin": "new" },
-    { "id": "keystone.elemental_crossfeed", "name": "Elemental Crossfeed", "branch": "stream", "value": 15, "pair": "Elemental Attunement", "origin": "new" },
-    { "id": "keystone.spreading_burn", "name": "Spreading Burn", "branch": "stream", "value": 16, "pair": "Weighted Edge", "origin": "new" },
-    { "id": "keystone.anchor", "name": "Anchor", "branch": "control", "value": 0, "pair": "Rapid Fire", "origin": "new" }
-  ]
+  "pending_refs": [],
+  "branches": [],
+  "keystones": []
 }

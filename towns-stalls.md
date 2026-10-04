@@ -22,8 +22,8 @@ Every price is anchored to a number in `checks.md` groups E/F, and nothing here 
 ```
 gold per sold junk piece        = 1                       (economy.md · loot.md section 4)
 drops/hour per band             = 133 low · 255 mid · 418 high · 1,319 high+full Lck   (loot.md section 2 · F3)
-upgrades/hour from drops        = 2 low · 3 mid · 2 high · 4 high+full Lck   (F4)
-junk/hour = drops - upgrades    = 131 low · 252 mid · 416 high · 1,315 high+full Lck
+upgrades/hour from drops        = 3 low · 3 mid · 3 high · 3 high+full Lck   (F4)
+junk/hour = drops - upgrades    = 130 low · 252 mid · 415 high · 1,316 high+full Lck
 1 m  = 1 minute of full-sell income in that band
 gold per 1 m                    = 2.2 low · 4.2 mid · 6.9 high · 21.9 high+full Lck
 kills/hour per band (F1)        = 980 low · 1,385 mid · 1,800 high
@@ -34,7 +34,7 @@ band hours (low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (
 <!-- END GENERATED:price-unit -->
 
 - Prices are **fixed in gold**; `m` is the readable anchor, gold is the charge. A price is set in the band where the purchase actually matters, which is why each row states its charge band.
-- Default for every piece stays **dissolve**, so the crafting engine keeps its designed 416 stones/hour unless the player deliberately redirects a piece to gold (`loot.md` section 4 · `checks.md` G2).
+- Default for every piece stays **dissolve**, so the crafting engine keeps its designed 415 stones/hour unless the player deliberately redirects a piece to gold (`loot.md` section 4 · `checks.md` G2).
 - The opportunity cost of one gold is a *Reroll value stone*, not a fraction of a second of progress: `economy.md` single-medium rule.
 
 # 2. Lifetime gold supply and the demand check
@@ -42,12 +42,12 @@ band hours (low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (
 <!-- BEGIN GENERATED:supply -->
 ```
 band hours                      = low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (91-100) = 9.0
-lifetime junk pieces            = 3.1×131 + 9.5×252 + 18.6×416 + 9.0×416 = 14,282
-max lifetime gold (sell everything, no Lck)              = 14,282
+lifetime junk pieces            = 3.1×130 + 9.5×252 + 18.6×415 + 9.0×415 = 14,251
+max lifetime gold (sell everything, no Lck)              = 14,251
 one-time stall demand (section 3, all 9 places)          = 18,664 gold = 1.31x the max
 essentials only (road link · stash tab 1 · stash tab 2 · herb pouch ii · plot deed 4) = 1,951 = 13.7% of the max
-full-Lck ceiling over the 27.6 high-band hours               = 36,294 gold (= ×3.16 of the 11,482 a no-Lck run earns there · ceiling ×3.16)
-stones forgone by selling everything                     = 14,282 ÷ 8 = 1,785 Reroll casts ≈ 17.9 full-set polishes (E8)
+full-Lck ceiling over the 27.6 high-band hours               = 36,322 gold (= ×3.17 of the 11,454 a no-Lck run earns there · ceiling ×3.17)
+stones forgone by selling everything                     = 14,251 ÷ 8 = 1,781 Reroll casts ≈ 17.8 full-set polishes (E8)
 repeatable demand (section 4)                            = absorbs whatever the one-time list does not, no ceiling
 ```
 <!-- END GENERATED:supply -->
@@ -68,8 +68,8 @@ repeatable demand (section 4)                            = absorbs whatever the 
 | Stash tab 4 | Porter | space | 180 | 396 | 756 | 1,242 | high band | 1 | 1,242 |  |
 | Stash tab 5 | Porter | space | 240 | 528 | 1,008 | 1,656 | high band | 1 | 1,656 |  |
 | Stash tab 6 | Porter | space | 300 | 660 | 1,260 | 2,070 | high band | 1 | 2,070 | Cap 6 tabs |
-| Herb pouch II | Porter | space | 60 | 132 | 252 | 414 | mid band | 1 | 252 | raises the herb stack ceiling (farm.md) |
-| Herb pouch III | Porter | space | 240 | 528 | 1,008 | 1,656 | high band | 1 | 1,656 |  |
+| Herb pouch II | Porter | space | 60 | 132 | 252 | 414 | mid band | 1 | 252 | one more slot in the character bag (`inventory.character_slots` is the base) |
+| Herb pouch III | Porter | space | 240 | 528 | 1,008 | 1,656 | high band | 1 | 1,656 | one more slot in the character bag (`inventory.character_slots` is the base) |
 | Bag category slot (herbs / stones / gear display) | Porter | space | 45 | 99 | 189 | 311 | low band | 3 | 297 | display and sorting only · sells no stone, no gear |
 | Plot deed 4 | Steward | space | 180 | 396 | 756 | 1,242 | mid band | 1 | 756 | 4th farm plot (farm.md) |
 | Plot deed 5 | Steward | space | 540 | 1,188 | 2,268 | 3,726 | high band | 1 | 3,726 | 5th plot · the most expensive non-cosmetic line |
@@ -107,7 +107,7 @@ Skip-token ceiling = 8 m × 3/day = **24 m/day** = 166 gold/day in the high band
 
 <!-- END GENERATED:repeatable -->
 
-- Repair is the only **D2 service class** line: it converts a rare-stone dependency into gold, so it must never be cheaper than hunting the stone. The floor in `checks.md` T10 is proven against F7 (18 Reroll tier stones/hour → 3.33 min of elite hunting per stone); it re-opens when F9 lands.
+- Repair is the only **D2 service class** line: it converts a rare-stone dependency into gold, so it must never be cheaper than hunting the stone. The floor in `checks.md` T10 is proven against F7 (18 Reroll tier stones/hour → 3.33 min of elite hunting per stone) and re-proven in T10b against F9 (6.25 Add mod stones/hour → 9.60 min per stone) — repair at 14 m and the Ironrow discount at 12 m both clear the larger floor.
 - Ironrow's 12 m repair is the cheapest service in the game and the only settlement-specific price, which is what "the armourer town" is allowed to mean.
 - Pedlar rotation refreshes **per real day**, not on the 12-hour offline clock (`save.md`): a refresh the player can sleep into would not be a reason to return.
 
@@ -161,7 +161,7 @@ Presence rules:
 <!-- END GENERATED:stock -->
 
 - **Specialisation rule:** any line sold in exactly one place must be convenience or cosmetic, never the only source of something a build needs. That would re-gate progression by geography, which `world.md` refuses (unlock by level only).
-- The Base-bias column is **flavour** until section 8 closes; it says which school a zone reads like, not which frame drops more often.
+- The Base-bias column is **permanent flavour** (A9 · ruled even-weighted): it says which school a zone reads like, never which frame drops more often, and no numeric weight may be added.
 - Standing kill counts in the last column are the same numbers as section 6, repeated here so one row per settlement is enough to run the town.
 
 # 6. Standing tiers
@@ -208,21 +208,19 @@ Turn in named pieces at the Collector; the payment is the item itself (cosmetic,
 
 - The three sets map onto the three Base schools in `item-base.md` (light / heavy / cloth → Evasion / Armour / Energy Shield), so a set is a *school* test, not a new item family.
 - Set progress is stored (`save.md` town row) and is per character.
-- Whether a set can be finished without opening the filter is an open design question (`towns.md` section 10), not a number, so it is not priced here.
+- Whether a set can be finished without opening the filter is **decided — yes, from drops alone** (D-073), so the filter is a convenience and not priced or required here.
 
 # 8. Base bias per settlement — check list, not numbers
 
 <!-- BEGIN GENERATED:base-bias -->
-Status: **pending** — the column above is which Base school a zone's mobs flavour, not a weight anyone can yet buy, and it stays that way until every line below is closed.
+Status: **decided** (ship even-weighted (harness/todo.md A9 · D-071)) — the column above is which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.
 
-1. Add a Base weight column to loot.md section 1 step 2 (currently "equal roll among all frames of that slot").
-2. Re-run the loot.md section 3 keep-rate simulation — the 2.2% / 1.2% / 0.7% numbers and the "1 in ~30-60 drops" line in item-base.md both move.
-3. Confirm F3 drops/hour is unmoved: bias is a redistribution between frames of the same slot, never a change in drop count.
-4. Confirm the three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) are all still reachable — no settlement may make one school unobtainable.
-5. Only then decide whether a build must travel for a frame — if yes, that is a progression gate by geography and must be argued against world.md "unlock by level" first.
+1. Ruled even-weighted: loot.md section 1 step 2 stays "equal roll among all frames of that slot" — no Base weight column is added, and the tools/loot.js frame_weight path stays a what-if only.
+2. The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable — even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises.
+3. No build must travel for a frame: frames roll equally everywhere, so Base bias is never a progression gate and world.md "unlock by level" is untouched.
 
-Not written while the status is pending:
-- numeric per-settlement Base weights
+Never written (the ruling forbids it, not merely a pending gate):
+- numeric per-settlement Base weights (ruled out, not merely pending)
 - any stock line that is the only source of a frame
 - any gold price that buys frame odds
 
@@ -233,12 +231,8 @@ Not written while the status is pending:
 <!-- BEGIN GENERATED:pending -->
 | Pending number | Line it moves | Status |
 |---|---|---|
-| F9 (Add mod stone rate) | Armourer repair floor (repeatable table) | open |
-| F13 (herb bundle rate) | Herbalist + pouch ladder demand | open |
-| Per-level XP table | Standing budgets — the kill counts here sit on interpolated band splits | open |
 | Task reward sizing (tasks.md rebalance) | skip-token m price vs the ≤10% bound | open |
 | Reroll/Refine price rebalance | the opportunity-cost line in the price unit block | open |
-| loot.md section 3 keep-rate re-simulation | Base bias column (flavour only until done) | open |
 
 <!-- END GENERATED:pending -->
 
@@ -261,7 +255,7 @@ What the cage refuses (`--checks` rows, mirrored in `checks.md` group T):
 - a repair price at or below the elite time of one Reroll tier stone → **T10**
 - a skip-token cap above 3/day or 24 m/day → **T11**
 - a price ladder that is not monotonic → **T16**
-- a numeric Base weight while the re-simulation is pending → **T15**
+- a numeric Base weight in the data (ruled even-weighted, so any weight violates A9 · D-071) → **T15**
 - band hours that no longer sum to the E1-E5 timeline, or settlement budgets that no longer sum to 40.2 hr → **T3a · T3b**
 - a kill rate that differs from loot.md section 2 → **T17** (H1)
 - an engine number in the data file that no longer matches what `loot.md` section 2 and the prose formula files publish → **T18** + `tools/check.js` read-back. This row already earned its keep twice: the high-band drop rate was written as 421 in `loot.md` · `combat.md` · `formula.md` while F3 derives 1,800 × 23.2% = **418**, and the low band read 135 with `Lck 72 → ×1.72` while `stat_c(30) = 70` gives **133** with ×1.70 (`stat_c(90) = 190` → ×2.90 → 418 ✓). All three docs were corrected, the Refine rate went from "~3.8" to the exact **3.75** the price pair gives, and no gold price moved: 133 − 2 = 131 junk/hour still prices a minute at 2.2 gold

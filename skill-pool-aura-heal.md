@@ -33,7 +33,7 @@ usable for skills. There is no other cap.
 | heavy | 14% | 679 |
 
 - Reserve prices are **spread 8-14% on purpose.** With a flat price every aura would cost the same and the choice would carry no information; the spread is what makes "which auras to drop" a real question.
-- **All 12 auras together reserve 110% of the pool** (3×8 + 4×11 + 3×14), so the full set can never run. Dropping the single most expensive aura leaves 96% — the lightest legal set — and every other combination is the player's call.
+- **All the auras together reserve more of the pool than the block allows** — the sum is printed by the cage (**S9**), never typed here, and both guards now carry a tier like their weight. So the full set can never run. Dropping the single most expensive aura leaves 96% — the lightest legal set — and every other combination is the player's call.
 
 # Auto-press rules
 
@@ -49,25 +49,30 @@ If mana insufficient → skip that one, try the next
 - If mana is so low that only one can fire, the placed order determines which one fires
 - **Auras never fire here.** They hold no action in the queue and consume no press.
 
+<!-- BEGIN GENERATED:heal-heading -->
 # 3 healing skills
+<!-- END GENERATED:heal-heading -->
 
 <!-- BEGIN GENERATED:heal-roster -->
-| Skill | Scale | cd | mana | Duration | What it does |
-|---|---|---|---|---|---|
-| Heal | Wis | 20 sec | 20% | 8 sec | Restores 4% Max HP per second 8 sec (= +32% pool in long fights) |
-| Greater Heal | Vit | 40 sec | 25% | Instant | Restores 20% Max HP instantly · Covers last-moment windows |
-| Cleanse | Vit | 24 sec | 16% | Instant | Cleanses all statuses on self + restores 8% Max HP · Answer to 10-stack poison |
+| Skill | cd | mana | Duration | What it does |
+|---|---|---|---|---|
+| Heal | 20 sec | 20% | 8 sec | Restores 8% Max HP per second 8 sec (= +64% pool in long fights) |
+| Greater Heal | 40 sec | 25% | Instant | Restores 45% Max HP instantly · Covers last-moment windows |
+| Cleanse | 24 sec | 16% | Instant | Cleanses all statuses on self + restores 8% Max HP · Answer to 10-stack poison |
 <!-- END GENERATED:heal-roster -->
 
-# 12 aura skills
+<!-- BEGIN GENERATED:aura-heading -->
+# 13 aura skills
+<!-- END GENERATED:aura-heading -->
 
-**Decision 1 (applied): these 12 replace the old 6.** Reading the new list as additive would put two different auras under `Clarity` and `Grace`, because both names already existed with a different effect — so the old roster (Aura of Might · Aura of Grace · Aura of Fury · Aura of Clarity · Aura of Dread · Aura of Frost) is treated as **replaced**. The old Clarity role (a skill-mana-cost reduction) is **dropped, not moved**: it was the only sink that let a player fund skills 5-6 beyond what regen covers, and nothing in the new 12 replaces it.
+**Decision 1 (applied): these auras replace the old 6.** Reading the new list as additive would put two different auras under `Clarity` and `Grace`, because both names already existed with a different effect — so the old roster (Aura of Might · Aura of Grace · Aura of Fury · Aura of Clarity · Aura of Dread · Aura of Frost) is treated as **replaced**. The old Clarity role (a skill-mana-cost reduction) is **dropped, not moved**: it was the only sink that let a player fund skills 5-6 beyond what regen covers, and nothing in the new 12 replaces it.
 
 <!-- BEGIN GENERATED:aura-roster -->
 | Aura | Kind | reserve | At pool 4,848 | Effect at skill level 20 |
 |---|---|---|---|---|
 | Wraith of Fury | self | cheap 8% | 388 | aspd +12% |
 | Clarity | self | cheap 8% | 388 | mana regen +25% |
+| Haste | self | extreme 25% | 1212 | global speed ×1.15: every cooldown ticks 15% faster (a post-cap cooldown multiplier) and final attack speed ×1.15 (still clamped by the 500 Cap) |
 | Vitality | self | mid 11% | 533 | hp regen +30% |
 | Herald of Ash | fire | heavy 14% | 679 | fire damage flat +50 · Alignment +6 |
 | Herald of Frost | cold | heavy 14% | 679 | cold damage flat +50 · Alignment +6 |
@@ -76,13 +81,13 @@ If mana insufficient → skip that one, try the next
 | Elemental Fury | debuff | mid 11% | 533 | target Elemental res −12% |
 | Trinity Form | defense | mid 11% | 533 | Elemental res +15% on fire / cold / lightning |
 | Grace | defense | cheap 8% | 388 | Dodge flat +12 |
-| Iron Guard | defense | **TBD** | — | Armour flat (the "physical damage 5-15%" is folded into the flat, not a second layer) |
-| Energy Guard | defense | **TBD** | — | Energy Shield flat (the "ES %" half is dropped — no ES % Mod exists) |
+| Iron Guard | defense | mid 11% | 533 | Armour flat +32 |
+| Energy Guard | defense | mid 11% | 533 | Energy Shield flat +48 |
 <!-- END GENERATED:aura-roster -->
 
 Sizing — this is the *reasoning* behind each value in the table above. The table is the source of the value; this text explains why it sits there, and deliberately does not restate it.
 
-- **Wraith of Fury** (aspd) — War Cry and Berserk are *timed buffs*, so a permanent aura must sit below both. The aspd Cap is 300 (core-stats.md) and Agi 816 already reaches 204, so the aura is sized to keep mid-Agi builds under the Cap instead of wasting it.
+- **Wraith of Fury** (aspd) — War Cry and Berserk are *timed buffs*, so a permanent aura must sit below both. The aspd Cap is 500 = 5 times/sec (core-stats.md), a clock floor rather than a build target, so the aura is sized against ordinary Agi builds and not against the Cap.
 - **Clarity** (mana regen) — `mana_regen = int × 0.15 × (1 + mregen_pct/100)` (formula-defense.md:49), so the aura is a % of an Int-driven value: at Int 816 it lifts regen from 122 to 152/sec. Deep Breath's burst is larger, so the permanent aura sits under it.
 - **Vitality** (hp regen) — `hp_regen = vit × 0.25 × (1 + hp_regen_pct/100)` (formula-defense.md:46); on a tank build it lifts regen from 204 to 265/sec, cutting Push downtime from 12.6 to 9.7 sec.
 - **Heralds** (Elemental power flat · Alignment) — Elemental power flat is 12-64 per item (mod-pool.md:122) ≈ one high-quality item held permanently; Elemental alignment % is 1-5% per item (mod-pool.md:125) ≈ 1.2 items. Alignment gates only status *application*, not damage (elements.md P0-1), so the Alignment half buys DoT uptime, not hit count. The flat is Element-only, or all three are one aura with three names. Both halves scale with skill level (level 1 ≈ 40% of the level-20 value). The Heralds are the only auras in the set that add **DPS**, which is why they are the most expensive tier.
@@ -90,7 +95,9 @@ Sizing — this is the *reasoning* behind each value in the table above. The tab
 - **Elemental Fury** (Elemental res) — Sunder gives −20% as a deliberate single-target press, and Void Lance pierces 100% res; an always-on aura must be weaker than a press.
 - **Trinity Form** (Elemental res) — `elem_res_x = res_c × (1 + elem_res_pct_x/100)` (elements.md:83), a multiplier on Vit-derived `res_c`; the aura feeds the same `elem_res_pct_x` pool as a gear roll, so it is worth roughly one item (D-009 3b).
 - **Grace** (Dodge flat) — `Dodge flat 3-15` per item (mod-pool.md:88) ≈ one gear item held permanently. Flat is the right form because `dodge_chance = rate / (rate + 100)` (formula-defense.md:13) is a ratio — a flat add moves it, a % barely does.
-- **Iron Guard / Energy Guard are unpriced** — reservation must be priced against the strength of the effect, and their effect sizes wait on `K_ARMOUR` / `K_ENERGY_SHIELD` (mod-pool.md:95 · equipment-slot-pools.md:55-57). Iron Guard's target is statable now — *the armour that yields 10% mitigation against an on-level boss* (1,316/sec at L100) is 731 armour — but the L100 flat lands when `K_ARMOUR` arrives, and AGENT.md section 4 forbids hand-typing it.
+- **Iron Guard** (Armour flat) — Armour is `Str × K_ARMOUR` (2) plus this flat, mitigating by `armour ÷ (armour + 5 × raw physical)` (formula-defense.md §5 · core-stats.md) — `K_ARMOUR` landed in D-022, so nothing here is blocked. Priced exactly like Grace: one strong heavy item held permanently without spending a slot, i.e. **80% of the Armour item ceiling** (range 8-40, mod-pool.md), the same fraction Grace (12 of 15) and the Heralds (50 of 64) sit at. The old *"armour for 10% mitigation against an on-level boss"* target is **rejected** — against the physical half of the zone-9 boss it prices an aura at a whole twelve-item Str-armour build, not one item (see the B-1 note in `harness/decisions.md`); the physical-damage % was folded into this flat rather than run as a second layer.
+- **Energy Guard** (Energy Shield flat) — ES is `Int × K_INT_ES` (4) plus this flat; `K_INT_ES` landed in D-026 and **there is no `K_ENERGY_SHIELD` and no ES % Mod**, so flat is the only form (the ES % half is dropped, not deferred). Same 80%-of-ceiling rule (range 12-60). The Int-driven pool is large, so one flat item is a thin buffer on a pure caster — precisely as an ES *gear* item is thin there — which makes this aura the low-Int build's small buffer off its own mana line, not the caster's (who already holds the pool). Both guards keep D-035's **mid (11%)** reserve, which was never blocked on a K value; the effect sizes come from the ranges above and are printed by the writer, never typed here.
+- **Haste** (global speed) — the only aura that moves the clock itself instead of a stat. It reserves `extreme` (25%) because ×1.15 on both cooldowns and final attack speed is worth more than any other aura. Cooldown is a **post-Cap** multiplier (it runs after the CDR Cap), while aspd still clamps at the 500 Cap. It is the reserved power the H1 fold must price first (`checks.md` D34). **Player-only:** it affects the player alone, and no mob ever carries Haste, even when mobs get their own skill lists.
 
 - **Aura XP** is gained per second while **open**, independent of what it costs.
 
@@ -98,19 +105,9 @@ Sizing — this is the *reasoning* behind each value in the table above. The tab
 
 - **Rimbo Form stacks past the chill Cap.** `chill_pct` Cap 20 governs chill alone; Rimbo Form stacks on top, so a chilled target under the aura can reach **−35%** total aspd. The aura pays reservation for the extra layer (D-009 3a · `elements.md`).
 - **Trinity Form / Elemental Fury are straight %.** Both feed `elem_res_pct_x` exactly like a gear roll — no separate aura stat, no flat (D-009 3b · `elements.md`).
-- **Grace keeps Dodge flat only.** Perfect dodge deletes the hit outright on trigger and is not opposed, but Cap 5 stays, so a perfect-dodge bonus would be clipped for the builds that want it; the half is dropped (D-009 3c · `combat.md`).
+- **Grace keeps Dodge flat only.** Perfect dodge deletes the hit outright on trigger and is not opposed, but it is a ratio on the Lck line while `Grace` feeds `dodge_rate` — a perfect-dodge bonus would miss the stat she scales, so the half is dropped (D-009 3c · `combat.md`).
 - **Heralds stay fire / cold / lightning.** Poison and chaos get no dedicated aura — they work through stacking DoT and marks (D-009 3d).
-- **Tree knock-on** — the Control branch "Aura Economy limb" still names the old auras and 4 of its 7 nodes describe the deleted drain mechanic; it must be rewritten before `checks.md` D19 passes (see `skill-tree-control.md`).
 
-## Measured baseline (3 attack-skill rotation + support that mana allows)
+## Live numbers, not a frozen baseline
 
-| Build | Auto DPS | 3 skills | Total | Skill share | % of old gear ceiling |
-|---|---|---|---|---|---|
-| glass | 9,847 | 3,253 | 13,100 | 25% | 133% |
-| mix | 6,695 | 1,985 | 8,679 | 23% | 88% |
-| skill | 5,728 | 2,489 | 8,217 | 30% | 83% |
-| caster | 3,574 | 3,226 | 6,800 | 47% | 69% |
-
-> Read these rows like the combat.md §6 cards: glass is the full-Str build (least mana → skills add only +33% of auto) · caster gives 8 slots to Int (low auto but skills are 47% of the build core, and the total is still 31% below the gear ceiling) → **Gear is still #1, tree #2, skill #3 in the order concept.md sells**, and because mob_HP is multiplied by the skill factor (1 + 0.0034 × L), loot.md kills/hour does not shift (checks.md D17)
-
-> **Stale under reservation — these rows are measured against the old drain table**, where two auras ate 80% of regen (24/sec reached skills). Reservation returns all 122/sec to the skill list, so the "3 skills" column and every skill-share percentage here are now understated. `checks.md` D17 (`skillF(L) = 1 + 0.0034 × L`) was measured on the drain numbers too and needs a rerun. `node tools/skills.js` does not exist yet, so no corrected figures are proposed here.
+The old "3 attack-skill rotation" table was measured against the deleted aura-drain model, so it is gone rather than corrected in place. The live per-skill numbers (dmg/press · eff cd · presses/sec · mana%/s) come from `node tools/skills.js --calc` and from the same view in `dashboard.html`; both read `tools/lib/skillmodel.js`, so no rotation figure is hand-typed here and none can go stale.

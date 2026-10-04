@@ -63,7 +63,7 @@ Three items currently planned:
 > Combined, gear progress while AFK stays around **40-50%** as intended, without cutting kill rate · And **AFK grants full XP** because cutting both XP and quality would make closing the game feel like unmeasurable waste.
 > Risk from these numbers: AFK is not *slower*, it is *shallower* · The game must keep "zone floor" progressing, otherwise the first night offline will feel empty.
 
-> **Closed**: offline cap = **12 hours** · Reason from numbers in loot.md: 12 hours = half of one zone crafting engine (Refine full set ~16 hours) and matches "1 work day" · Lower than this, players returning every morning will feel closing the game meant nothing · Higher than this, there is nothing urging a return.
+> **Closed**: offline cap = **12 hours** · Reason from numbers in loot.md: 12 hours = about twice a full-set Refine pass (6.4 hr · E6) and matches "1 work day" · Lower than this, players returning every morning will feel closing the game meant nothing · Higher than this, there is nothing urging a return.
 > Offline gains match the table in this section: same drops but **quality is zone floor only** · No boss → no Add mod stones and no boss share of Reroll tier stones → the second half of the crafting engine is fully active (loot.md section 7).
 
 # Game Breadth Replacing Skills
@@ -74,7 +74,7 @@ This game has no resource skills, but offers multiple parallel paths without cli
 |---|---|
 | **12 weapon types** | sword / axe / dagger / mace / spear / bow / crossbow / staff / rod / wand / two-handed sword / two-handed axe · Each type uses a different skill set (see equipment-weapon.md) |
 | **5 Elements** | Each Element has different status and counter pairs · Must consider which monster Element will be faced |
-| **43 skills** | Unlimited list, runs in order · Auras reserve Max Mana, player-managed · Buffs auto-recast on expiry (see `skill-pool.md`) |
+| **Combat skills** | Unlimited list, runs in order · Auras reserve Max Mana, player-managed · count and split in `skill-pool.md` |
 | **Quality × Tier** | A single item can compete on multiple axes |
 | **3 crafting commands** | Fix dropped items to fit the build |
 
@@ -83,9 +83,9 @@ Bonuses have 2 layers: **while-equipped layer** (that weapon is lighter + skills
 This lets players try swapping weapons to farm Mastery without ever leaving combat — because "collected" items count as permanent account bonuses.
 Unlike Melvor, where skills must be swapped to farm XP — here only equipped items are swapped · And AFK still farms Mastery at full rate (formula + timeline in equipment-weapon.md).
 
-> **Closed in equipment-weapon.md**: Mastery levels 1-20 per weapon type · XP from combat (1/hit + 4/kill) · L10 takes 0.73 hours at level 90. All 12 types account-wide = 8.8 hours.
+> **Closed in equipment-weapon.md**: Mastery levels 1-20 per weapon type · XP from the character XP kill stream (4/kill, no hit term · D-065) · L10 takes 1.13 hours at level 90. All 12 types account-wide = 13.5 hours.
 > Bonuses = **weapon weight −1%/level** (while equipped) · **skill damage +0.5%/level from L5** (while equipped) · **drop_rate +1% per type at L10 or above** (account-wide, max +12%).
-> Reason for no damage bonus: all weapon types are already tuned to equal DPS (`weapon_mult = 1.2 / weapon_aspd` · Proven equal at 9,847 across all 12 types). If Mastery granted damage, one weapon type would stay best forever and the "reason to try swapping weapons" would die · AFK still farms Mastery at full rate because it counts purely from attacks.
+> Reason for no damage bonus: all weapon types are already tuned to equal DPS (`weapon_mult = 1.2 / weapon_aspd` · Proven equal at 9,847 across all 12 types). If Mastery granted damage, one weapon type would stay best forever and the "reason to try swapping weapons" would die · AFK still farms Mastery at full rate because it counts purely from kills.
 
 # Build
 
@@ -102,7 +102,7 @@ From the system in `formula.md` where all 7 stats use the same scale, builds are
 
 - Every build uses Core stats from all pieces; they differ in which one is stacked.
 - Lck is the only stat helping both DPS (crit) and loot (drop), so it is the most valuable long-term build. Must be watched so it does not dominate.
-- **Decided (P0-2): "fast hit" stays as a hit-count build, not a DPS race.** Measured gap stands (Agi 12 = 3,830 vs Str 12 = 9,847) and its value must come from *hit count* (proc per hit · DoT tick · chill), with Riposte as its boss path (dodge-scaling damage). Full numeric rebalance deferred to the mob-sheet pass.
+- **Decided (P0-2): "fast hit" stays as a hit-count build, not a DPS race.** Measured gap stands (Agi 12 = 3,830 vs Str 12 = 9,847) and its value must come from *hit count* (proc per hit · DoT tick · chill), with Riposte as its boss path (dodge-scaling damage). The numeric rebalance that line deferred to the mob-sheet pass has now run on geared characters (**D-106**): the same bag spent two ways leaves the hit-count build at ×0.87 of the big-hit build and carries **more** of its damage through a swing or something a swing left behind, so the identity holds and no number moved. The thin leg is the procs themselves — `harness/todo.md` B22.
 
 > **Fixed**: Wis previously had no outlet because there were no skills. Now `skill-pool.md` has skills that actually use CDR.
 > Str/Int/Dex/Agi/Lck are stats that scale skills, so CDR values now have uses for every stat.
@@ -115,7 +115,7 @@ From the system in `formula.md` where all 7 stats use the same scale, builds are
 | Elements | None | 5 Elements with counters · Every zone has a native Element |
 | Equipment slots | 10 slots differing only by name | 11 slots genuinely different, because Offensive comes from weapons only |
 | Crafting | Craft by fixed recipe, inflexible | 3 commands: raise quality / raise slot / change slot |
-| Skill count | ~20 | No resource-gathering skills · 43 skills = 31 active + 12 aura (the 12 passives became tree keystones) |
+| Skill count | ~20 | Combat skills only in this count (count and split in `skill-pool.md` · the old passives became tree keystones) · the one life skill, Farming, is a separate provisioning track (`farm.md`), not in the combat roster |
 | What must be clicked | Swap across 20 things | Select zone and order the list |
 
 # Failure Points
@@ -123,17 +123,39 @@ From the system in `formula.md` where all 7 stats use the same scale, builds are
 1. **Numbers offer nothing to watch except loot** — If the player sits in a zone with no progress, the game bores by day three. Answered by the task board (tasks.md): 3 visible slots with daily progress, plus the skill upgrade ladder.
 2. **1 Offensive slot may be too narrow** — crit, attack speed, accuracy live on main hand alone (see `equipment-slot.md`). If every build feels identical in play, this rule must be relaxed.
 3. **Random skill drops may frustrate players** — If bosses do not drop often enough, players will never get wanted skills no matter how long they play · Drop chances must be reviewed first.
-4. ~~**Unlimited skill list**~~ **Answered with numbers** — Skill DPS is limited by mana_regen ÷ mana cost, not list length (K_SKILL=5 in skill-pool.md): a glass build casts ~0.13 times/sec whether placing 6 or 26 skills · A long list adds *flexibility against monsters*, not DPS · The real fix is list-ordering UI, not rules.
-5. **Crafting may devalue dropped loot** — If raising tier to T1 is easy, good items equal common items. See open questions in `crafting.md`.
-6. **Monsters still have no skills** — **Half-fixed in combat.md**: monsters need no skills to still shift our rhythm, because their Innate Element applies status to the player at 20% per landed hit — chill lowers aspd · shock stops attacks+regen · burn/poison are DoT · Our debuffs (Cripple · Blinding Mark) thus have real targets because monsters have their own clocks.
-   **Decided (D-009 7b):** late-zone bosses gain 1-2 signature skills during zone design; normal and elite mobs keep innate Element only.
+4. **Crafting may devalue dropped loot** — If raising tier to T1 is easy, good items equal common items. See open questions in `crafting.md`.
+5. **Monster skills and the status mirror — Closed in `combat.md` §5b (D-067)** — mobs add skills by body tier (Small/Medium 0, Large and Elite 1, Boss 1-2) and every skill only re-times its priced `mob_PS`, so `mob_HP`, kills/hour and the timeline never move. Player statuses mirror three ways: DoT and damage-shaping debuffs land on mobs in full (our curses have real targets because monsters keep their own clocks), and control is Cap-bounded — a mob takes the ≤15% stun and the per-status aspd cuts but can never be locked, so no fight is stun-locked and no boss loses its clock. Innate Element stays every mob's baseline: its status still hits us at 20% per landed hit — chill lowers aspd · shock stops attacks+regen · burn/poison are DoT.
+
+# Minute One
+
+**A client builds the starting character from one read of `engine.json` `opening`.** Nothing below
+is hand-typed — the table is generated, and five opening checks hold it against the mob curve.
+
+<!-- BEGIN GENERATED:opening -->
+| | Given | Why |
+|---|---|---|
+| Settlement | **Eastgate** (zone 1, levels 1-10) | the zone the player opens in |
+| Level | **1** · 12 each stat · 240 Max HP · 3.0 regen/sec | level-1 baseline, no gear |
+| Gear | **1 item**: one-handed sword, low quality T3, Physical power flat +15 | the floor of the low-quality table |
+| Skills | **none** | the first skill is the first boss drop |
+| Gold / stones | **0 / 0** | minute one buys nothing |
+| First rule | **kill 5 in zone 1** (from the Guild counter, Eastgate) | the task board already exists and pays stones only |
+
+**First fight, measured:** a level-1 character kills a zone-1 mob in **1.3 sec** as the curve prices it, and in **2.5 sec** as a character actually carrying the 35-weight sword swings it (§11 takes 46% of aspd against a 24 capacity · survives **168 sec** of the mob's return damage). Numbers come from the same engine the cages use, so the opening cannot drift away from the mob curve it is priced against.
+<!-- END GENERATED:opening -->
+
+- **Why the starting weapon is the worst roll in the table.** The mob-health curve already prices a
+  level-1 zone-1 mob against a character holding one weapon, so a top-tier free weapon would pay out
+  more damage than the curve allows. The floor of the low-quality table is what the curve expects.
+- **Why there is no starting skill.** The curve gives a level-1 character almost no skill power, so
+  a free attack skill would be power the mobs are not priced against. The first skill is the first
+  boss drop, which is also the first moment the skill axis becomes visible.
+- **Why the first rule is a hunt task.** The task board already exists and pays stones only, so the
+  opening instruction costs no new system and no power outside the loot funnel.
 
 # Not Yet Defined
 
-- ~~**Zone count and level pacing**~~ **Closed in world.md** — 9 zones × 10 levels · L10 0.5 hours · L30 3.1 · L60 12.6 · L90 31.2 · L100 40.2 hours.
-- ~~**Game length**~~ **Closed** — Game ends at ~40 hours of real play (level 100) and ~31 hours for a finished crafted set · Levels 91-100 are the final 9 hours in zone 9 · **No prestige** in this version, because the post-completion loop must not break the calculated item quality core (original concern in this file).
-- **Win condition — Decided** · Completion = **kill the zone 9 boss (level 90 · HP 283,516) within a single spawn without being Pushed** · A truly measurable number from combat.md section 7 (without heal: glass 125% / mix 117% / tank 114% / dodge 203% of pool = Push on every build · With ×1.52 heal: reduced to 82/77/75% = three of four pass). So it is not a gate requiring new items, but a gate requiring *heal casts*, which is what separates active play from AFK as G5 promised · Full-dodge is the only build that cannot finish without allocating slots to health (133%) · **After completion = continued improvement loop, no prestige**: levels 91-100 are the item-quality push in zone 9 (world.md) · Remaining goals are timed — Ascend full 12 pieces ~15 hours (E7) · Refine full set ~16 hours (E6) · Mastery 12 types to L20 ~39 hours · Full skill ranks for 2-4 skills ~24 hours/skill (E11).
-- **Short-form content** — 9 bosses (1 per zone) per new zone numbers · **Achievements are cut** (D-009 7c) · Elite set at 1% of kills (loot.md).
-- ~~**Settlements, travel and NPC stalls**~~ **Defined in towns.md** (doors chosen) — 3 capitals + 6 towns over the 9 zones · waypoints free, carriage priced, Road opt-in and online-only · NPC stalls sell space/time/information/appearance only · **gold now exists** as the quality-of-life medium, minted by the sell-or-dissolve choice and Road events only (`economy.md`, checks.md G6-G9) · Nothing gold buys grants power, so no new `mob_HP` term was needed (H1) and the 40.2 hr timeline stands.
+- **Win condition — Decided** · Completion = **kill the zone 9 boss (level 90, HP 160,635) within a single spawn without being Pushed** · A truly measurable number from combat.md §6/§7 and `node tools/survival.js` (**SV6**): without heal three of the four builds are Pushed, and one heal round (pool ×2.09) passes all but the dodge build. So it is not a gate requiring new items, but a gate requiring *heal casts*, which is what separates active play from AFK as G5 promised · Full-dodge is the only build that cannot finish without allocating slots to health · **After completion = continued improvement loop, no prestige**: levels 91-100 are the item-quality push in zone 9 (world.md) · Remaining goals are timed — Ascend full 12 pieces ~15 hours (E7) · Refine full set ~16 hours (E6) · Mastery 12 types to L20 ~60 hours · Full skill ranks for 2-4 skills ~24 hours/skill (E11).
+- **Short-form content** — 9 bosses (1 per zone) per new zone numbers · **Achievements are cut** (D-009 7c) · Elite set at 1 in 5 kills (D-041 · `engine.json` `elite_spawn_chance`).
 
 (End of file - total 135 lines)

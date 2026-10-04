@@ -2,12 +2,15 @@
   "name": "modworld-specs",
   "version": "0.1.0",
   "private": true,
-  "description": "Design-phase specs and cages for ModWorld. No runtime code yet.",
+  "description": "ModWorld: design specs and cages in the root, the playable client in game/, the shared math in engine/.",
   "scripts": {
     "verify": "node tools/verify.js",
     "report": "node tools/report.js",
     "skills": "node tools/skills.js",
     "tree": "node tools/tree.js",
-    "lint": "node tools/lint.js"
+    "lint": "node tools/lint.js",
+    "dev": "npm --prefix game run dev",
+    "build": "npm --prefix game run build",
+    "test": "npm --prefix game run test"
   }
 }

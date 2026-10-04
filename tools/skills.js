@@ -37,14 +37,23 @@ function countBlock() {
 }
 
 function attackRoster() {
+  // the skill level the tables print is the Cap the XP rule reaches (`engine.json` skill_xp)
+  const L = require('./lib/engine').E.skill_xp.level_cap;
   const rows = byType('attack').map((s) => {
     const r = M.row(s, { cdrPct: M.CAST_REF.cdr_pct, ladderPct: M.CAST_REF.ladder_pct });
-    return `| ${s.name} | ${s.group} | ${elementLabel(s.element)} | ${s.cd} sec | ${r.effCd.toFixed(2)} sec | ${r.pressesPerSec.toFixed(2)} | ${s.mana} | ${s.scale} | ${s.targets} | ${fmt(s.damage.glass)} / ${fmt(s.damage.caster)} | ${s.effect} |`;
+    const glass = fmt(Math.round(M.pressOn(s, 'glass', L)));
+    const caster = fmt(Math.round(M.pressOn(s, 'caster', L)));
+    return `| ${s.name} | ${s.group} | ${elementLabel(s.element)} | ${s.cd} sec | ${r.effCd.toFixed(2)} sec | ${r.pressesPerSec.toFixed(2)} | ${s.mana} | ${s.basis} · ${s.final_pct}% | ${s.targets} | ${glass} / ${caster} | ${s.effect} |`;
   });
+  const B = M.referenceBases();
   return [
-    '| Skill | Group | Element | cd | eff cd | presses/sec | mana | Scale | Targets/Hits | Damage per press (glass / caster) | What it does |',
+    '| Skill | Group | Element | cd | eff cd | presses/sec | mana | Basis · final_pct (level 1) | Targets/Hits | Damage per press (glass / caster) | What it does |',
     '|---|---|---|---|---|---|---|---|---|---|---|',
     ...rows,
+    '',
+    `press = final_pct × basis × (1 + (skill_level − 1) × ${M.LEVEL_STEP}%) at skill level ${L} (D-070 · B5) — the two columns are the same press read on the two published reference builds:`,
+    `glass = Str 12 · basis phys ${fmt(Math.round(B.glass.phys))} · caster = Int 12 · basis magic ${fmt(Math.round(B.caster.magic))} + elem ${fmt(B.caster.elem)} × Alignment ${B.caster.align}% (${fmt(Math.round(B.caster.elem * B.caster.align / 100))}) = ${fmt(Math.round(M.basisOf({ basis: 'magic' }, B.caster)))}.`,
+    `A phys-basis press can crit and a magic-basis one cannot, so neither column includes crit (formula.md section 0's DPS row does).`,
   ].join('\n');
 }
 
@@ -58,16 +67,16 @@ function calc() {
   }
   const cdrPct = flags.cdr != null ? flags.cdr : M.CAST_REF.cdr_pct;
   const ladderPct = flags.ladder != null ? flags.ladder : M.CAST_REF.ladder_pct;
-  const level = flags.level != null ? flags.level : 20;
-  const stat = flags.stat != null ? flags.stat : 816;
-  const power = flags.power != null ? flags.power : 4826;
-  console.log(`# Skill workshop — stat ${stat} · power ${power} · skill level ${level} · CDR ${cdrPct}% · ladder ${ladderPct}%`);
-  console.log(`# per-press = (stat×${M.K_STAT}×stat% + power×power%) × ${M.K_SKILL} × (1 + level×${M.LEVEL_STEP}%) · mana%/s = presses/sec × mana%`);
+  const level = flags.level != null ? flags.level : require('./lib/engine').E.skill_xp.level_cap;
+  const build = flags.build != null ? String(flags.build) : 'glass';
+  const ref = M.referenceBases()[build] || M.referenceBases().glass;
+  console.log(`# Skill workshop — ${build} reference (basis phys ${Math.round(ref.phys)} · basis magic ${Math.round(M.basisOf({ basis: 'magic' }, ref))}) · skill level ${level} · CDR ${cdrPct}% · ladder ${ladderPct}%`);
+  console.log(`# press = final_pct × basis × (1 + (level−1)×${M.LEVEL_STEP}%) · mana%/s = presses/sec × mana%`);
   console.log('');
-  const head = ['Skill', 'cd', 'eff cd', 'press/s', 'mana%', 'mana%/s', 'dmg/press'];
+  const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'mana%', 'mana%/s', 'dmg/press'];
   const rows = byType('attack').map((s) => {
-    const r = M.row(s, { cdrPct, ladderPct, level, stat, power });
-    return [s.name, `${s.cd}`, r.effCd.toFixed(2), r.pressesPerSec.toFixed(2), r.manaPct != null ? `${r.manaPct}%` : '—', r.manaPerSecPct != null ? `${r.manaPerSecPct.toFixed(2)}%` : '—', r.damage != null ? fmt(Math.round(r.damage)) : '—'];
+    const r = M.row(s, { ...ref, cdrPct, ladderPct, level });
+    return [s.name, s.basis, `${s.cd}`, r.effCd.toFixed(2), r.pressesPerSec.toFixed(2), r.manaPct != null ? `${r.manaPct}%` : '—', r.manaPerSecPct != null ? `${r.manaPerSecPct.toFixed(2)}%` : '—', r.damage != null ? fmt(Math.round(r.damage)) : '—'];
   });
   const widths = head.map((h, i) => Math.max(h.length, ...rows.map((r) => String(r[i]).length)));
   const line = (r) => r.map((c, i) => String(c).padEnd(widths[i])).join('  ');
@@ -78,30 +87,30 @@ function calc() {
 
 function curseRoster() {
   const rows = byType('curse').map((s) =>
-    `| ${s.name} | ${s.scale} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`);
+    `| ${s.name} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`);
   return [
-    '| Skill | Scale | cd | mana | Duration | What it does |',
-    '|---|---|---|---|---|---|',
+    '| Skill | cd | mana | Duration | What it does |',
+    '|---|---|---|---|---|',
     ...rows,
   ].join('\n');
 }
 
 function healRoster() {
   const rows = byType('heal').map((s) =>
-    `| ${s.name} | ${s.scale} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`);
+    `| ${s.name} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`);
   return [
-    '| Skill | Scale | cd | mana | Duration | What it does |',
-    '|---|---|---|---|---|---|',
+    '| Skill | cd | mana | Duration | What it does |',
+    '|---|---|---|---|---|',
     ...rows,
   ].join('\n');
 }
 
 function buffRoster() {
   return [
-    '| Skill | Scale | cd | mana | Duration | What it does |',
-    '|---|---|---|---|---|---|',
+    '| Skill | cd | mana | Duration | What it does |',
+    '|---|---|---|---|---|',
     ...byType('buff').map((s) =>
-      `| ${s.name} | ${s.scale} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`),
+      `| ${s.name} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`),
   ].join('\n');
 }
 
@@ -119,14 +128,22 @@ function auraRoster() {
   ].join('\n');
 }
 
+// per-type headings are generated too, so adding or removing a skill never needs a hand edit
+const heading = (type, label) => `# ${count(type)} ${label}`;
+
 // ---------------------------------------------------------------- writers
 
 const WRITERS = [
   { file: 'skill-pool.md', key: 'skill-count', render: countBlock },
+  { file: 'skill-pool-attack.md', key: 'attack-heading', render: () => heading('attack', 'attack skills') },
   { file: 'skill-pool-attack.md', key: 'attack-roster', render: attackRoster },
+  { file: 'skill-pool-curse.md', key: 'curse-heading', render: () => heading('curse', 'curse skills') },
   { file: 'skill-pool-curse.md', key: 'curse-roster', render: curseRoster },
+  { file: 'skill-pool-buff.md', key: 'buff-heading', render: () => heading('buff', 'buff skills') },
   { file: 'skill-pool-buff.md', key: 'buff-roster', render: buffRoster },
+  { file: 'skill-pool-aura-heal.md', key: 'heal-heading', render: () => heading('heal', 'healing skills') },
   { file: 'skill-pool-aura-heal.md', key: 'heal-roster', render: healRoster },
+  { file: 'skill-pool-aura-heal.md', key: 'aura-heading', render: () => heading('aura', 'aura skills') },
   { file: 'skill-pool-aura-heal.md', key: 'aura-roster', render: auraRoster },
 ];
 
@@ -161,6 +178,6 @@ if (arg === '--calc') {
   node tools/skills.js --write    rewrite skill-pool*.md roster blocks
   node tools/skills.js --checks   mechanic gate (checks.md D18) + stale-block check
   node tools/skills.js --calc     live skill workshop: dmg/press · eff cd · press/s · mana/s
-                                  flags: --stat N --power N --level N --cdr N --ladder N
+                                  flags: --build glass|caster --level N --cdr N --ladder N
 `);
 }

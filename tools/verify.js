@@ -20,7 +20,12 @@ const STEPS = [
   ['skills cage', 'tools/skills.js', ['--checks']],
   ['tree cage', 'tools/tree.js', ['--checks']],
   ['ladder cage', 'tools/ladder.js', ['--checks']],
+  ['loot cage', 'tools/loot.js', ['--checks']],
+  ['bases cage', 'tools/bases.js', ['--checks']],
   ['timeline cage', 'tools/timeline.js', ['--checks']],
+  ['survival cage', 'tools/survival.js', ['--checks']],
+  ['inventory cage', 'tools/inventory.js', ['--checks']],
+  ['anchor cage', 'tools/anchors.js', ['--checks']],
   ['doc lint', 'tools/lint.js', []],
 ];
 

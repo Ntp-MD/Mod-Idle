@@ -20,11 +20,8 @@ const ZONES = 9;
 const DROP_PER_HR = 4.6;      // loot.md F12 · boss 1.4 + elite 1.4 + normal 1.8
 const GAME_HOURS = 40;        // checks.md E5 · 40.2 hr rounded for the funnel
 const TARGETS = 4;            // checks.md D20 · four full targets
-const CONVERSION = 2;         // 2:1 duplicate conversion (skill-pool.md)
-const LADDER = [
-  { step: 1, cdr: 5, cost: 1 }, { step: 2, cdr: 10, cost: 1 }, { step: 3, cdr: 15, cost: 2 },
-  { step: 4, cdr: 20, cost: 2 }, { step: 5, cdr: 25, cost: 3 }, { step: 6, cdr: 30, cost: 3 },
-];
+const CONVERSION = require('./lib/skillmodel').CONVERSION; // 2:1 duplicate conversion (skill-pool.md)
+const LADDER = require('./lib/skillmodel').LADDER;        // engine/skills.js owns the rungs
 
 function model() {
   const total = R.total();

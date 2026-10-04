@@ -27,7 +27,7 @@ const engLib = eng;
 
 // ---------------------------------------------------------------- inputs
 
-const docs = fs.readdirSync(ROOT).filter((f) => f.endsWith('.md')).sort();
+const docs = require('./lib/generated').listDocs();
 const docText = {};
 for (const f of docs) docText[f] = fs.readFileSync(path.join(ROOT, f), 'utf8');
 
@@ -39,6 +39,7 @@ const CAGES = [
   { script: 'tools/skills.js', owns: 'skills.json → skill-pool*.md roster tables + counts', label: 'skills cage' },
   { script: 'tools/tree.js', owns: 'tree.json + node tables → skill-tree.md summary + D19 refs', label: 'tree cage' },
   { script: 'tools/ladder.js', owns: 'roster × drop rate → D20/E11 duplicate economy', label: 'ladder cage' },
+  { script: 'tools/loot.js', owns: 'loot pipeline → loot.md §3 + F4/F11 + upgrades/hr', label: 'loot cage' },
   { script: 'tools/timeline.js', owns: 'engine.json xp → world.md 5-level-step table', label: 'timeline cage' },
   { script: 'tools/lint.js', owns: 'cross-file references · counts · deprecated terms', label: 'doc lint' },
 ];
@@ -230,24 +231,29 @@ sections.push({
     + '</tbody></table>',
 });
 
-const workshopSkills = R.byType('attack').map((s) => {
-  const sc = SM.parseScale(s.scale) || { statPct: 0, powerPct: 0 };
-  return { name: s.name, group: s.group, cd: s.cd, manaPct: SM.manaPct(s), statPct: sc.statPct, powerPct: sc.powerPct };
-});
-const workshopConst = { K_STAT: SM.K_STAT, K_SKILL: SM.K_SKILL, LEVEL_STEP: SM.LEVEL_STEP };
+const workshopSkills = R.byType('attack').map((s) => ({
+  name: s.name, group: s.group, cd: s.cd, manaPct: SM.manaPct(s), basis: s.basis, finalPct: s.final_pct,
+}));
+const workshopRef = SM.referenceBases().glass;
+const workshopConst = {
+  LEVEL_STEP: SM.LEVEL_STEP, phys: workshopRef.phys, magic: workshopRef.magic,
+  elem: workshopRef.elem, align: workshopRef.align,
+};
 
 sections.push({
   id: 'workshop',
   title: '3b · Skill workshop (live)',
-  hint: 'Change a build value and the table recomputes from the same formula as `tools/lib/skillmodel.js` and `node tools/skills.js --calc`. `stat` is the skill\'s scaling-stat value; `power` is phys/magic power.',
+  hint: 'Every value here is what `tools/lib/skillmodel.js` computes right now: press = final_pct × basis × (1 + (skill level − 1) × level step), and `basis magic` is the magic line plus Element × Alignment. The four build boxes start on the published glass reference.',
   body: `<div style="display:flex;gap:16px;flex-wrap:wrap;margin:.2em 0 1em;font:13px var(--mono)">
-<label>stat <input id="ws-stat" type="number" value="816" style="width:90px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
-<label>power <input id="ws-power" type="number" value="4826" style="width:90px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
+<label>basis phys <input id="ws-phys" type="number" value="${Math.round(workshopRef.phys)}" style="width:90px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
+<label>basis magic <input id="ws-magic" type="number" value="${Math.round(workshopRef.magic)}" style="width:90px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
+<label>Element <input id="ws-elem" type="number" value="${Math.round(workshopRef.elem)}" style="width:90px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
+<label>Alignment % <input id="ws-align" type="number" value="${workshopRef.align}" style="width:80px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
 <label>skill level <input id="ws-level" type="number" value="20" min="1" max="20" style="width:70px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
 <label>CDR % <input id="ws-cdr" type="number" value="50" style="width:70px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
 <label>ladder % <input id="ws-ladder" type="number" value="30" style="width:70px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
 </div>
-<table class="num" id="ws-table"><thead><tr><th>Skill</th><th>Group</th><th>cd</th><th>eff cd</th><th>press/s</th><th>mana%</th><th>mana%/s</th><th>dmg/press</th></tr></thead><tbody></tbody></table>
+<table class="num" id="ws-table"><thead><tr><th>Skill</th><th>Group</th><th>basis</th><th>final_pct</th><th>cd</th><th>eff cd</th><th>press/s</th><th>mana%</th><th>mana%/s</th><th>dmg/press</th></tr></thead><tbody></tbody></table>
 <script>
 (function(){
 var S = ${JSON.stringify(workshopSkills)};
@@ -255,18 +261,19 @@ var C = ${JSON.stringify(workshopConst)};
 function v(id){return Number(document.getElementById(id).value)||0;}
 function fmt(n){return Math.round(n).toLocaleString('en-US');}
 function calc(){
-  var stat=v('ws-stat'),power=v('ws-power'),level=v('ws-level'),cdr=v('ws-cdr'),lad=v('ws-ladder');
+  var phys=v('ws-phys'),magic=v('ws-magic'),elem=v('ws-elem'),align=v('ws-align'),level=v('ws-level'),cdr=v('ws-cdr'),lad=v('ws-ladder');
   var body='';
   for(var i=0;i<S.length;i++){
     var s=S[i];
     var ec=s.cd*(1-cdr/100)*(1-lad/100);
     var pps=ec>0?1/ec:0;
-    var dmg=(stat*C.K_STAT*s.statPct/100 + power*s.powerPct/100)*C.K_SKILL*(1+level*C.LEVEL_STEP/100);
-    body+='<tr><td>'+s.name+'</td><td>'+s.group+'</td><td>'+s.cd+'</td><td>'+ec.toFixed(2)+'</td><td>'+pps.toFixed(2)+'</td><td>'+(s.manaPct!=null?s.manaPct+'%':'—')+'</td><td>'+(s.manaPct!=null?(pps*s.manaPct).toFixed(2)+'%':'—')+'</td><td>'+fmt(dmg)+'</td></tr>';
+    var basis=s.basis==='magic' ? magic + elem*align/100 : phys;
+    var dmg=s.finalPct/100*basis*(1+Math.max(0,level-1)*C.LEVEL_STEP/100);
+    body+='<tr><td>'+s.name+'</td><td>'+s.group+'</td><td>'+s.basis+'</td><td>'+s.finalPct+'%</td><td>'+s.cd+'</td><td>'+ec.toFixed(2)+'</td><td>'+pps.toFixed(2)+'</td><td>'+(s.manaPct!=null?s.manaPct+'%':'—')+'</td><td>'+(s.manaPct!=null?(pps*s.manaPct).toFixed(2)+'%':'—')+'</td><td>'+fmt(dmg)+'</td></tr>';
   }
   document.getElementById('ws-table').getElementsByTagName('tbody')[0].innerHTML=body;
 }
-['ws-stat','ws-power','ws-level','ws-cdr','ws-ladder'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',calc);});
+['ws-phys','ws-magic','ws-elem','ws-align','ws-level','ws-cdr','ws-ladder'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',calc);});
 calc();
 })();
 </script>`,

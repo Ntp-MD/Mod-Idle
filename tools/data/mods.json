@@ -1,0 +1,1349 @@
+{
+  "note": "Mod value ranges, lifted out of mod-pool.md so the table is generated rather than typed. `min`/`max` is the Total column; `bands` is [low, mid, high] quality, each holding its Tier slices worst-to-best. Eight mods have quality bands that are not equal widths (see check.js MP3) — the numbers are as published, deliberately unbalanced, because re-cutting them would move loot income and the 40.2 hr timeline.",
+  "quality_bands": [
+    "low",
+    "mid",
+    "high"
+  ],
+  "band_skew_limit": 1.35,
+  "mods": [
+    {
+      "id": "accuracy",
+      "name": "Accuracy %",
+      "group": "Combat",
+      "min": 5,
+      "max": 25,
+      "pct": true,
+      "bands": [
+        [
+          [
+            5,
+            8
+          ],
+          [
+            9,
+            12
+          ]
+        ],
+        [
+          [
+            13,
+            17
+          ],
+          [
+            18,
+            21
+          ]
+        ],
+        [
+          [
+            22,
+            23
+          ],
+          [
+            24,
+            25
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "attack_speed",
+      "name": "Attack speed %",
+      "group": "Combat",
+      "min": 5,
+      "max": 25,
+      "pct": true,
+      "bands": [
+        [
+          [
+            5,
+            8
+          ],
+          [
+            9,
+            12
+          ]
+        ],
+        [
+          [
+            13,
+            17
+          ],
+          [
+            18,
+            21
+          ]
+        ],
+        [
+          [
+            22,
+            23
+          ],
+          [
+            24,
+            25
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "critical_chance",
+      "name": "Critical chance %",
+      "group": "Combat",
+      "min": 1,
+      "max": 8,
+      "pct": true,
+      "bands": [
+        [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        [
+          [
+            4,
+            4
+          ],
+          [
+            5,
+            5
+          ]
+        ],
+        [
+          [
+            6,
+            7
+          ],
+          [
+            8,
+            8
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "critical_damage",
+      "name": "Critical damage %",
+      "group": "Combat",
+      "min": 12,
+      "max": 120,
+      "pct": true,
+      "bands": [
+        [
+          [
+            12,
+            23
+          ],
+          [
+            24,
+            35
+          ],
+          [
+            36,
+            47
+          ]
+        ],
+        [
+          [
+            48,
+            59
+          ],
+          [
+            60,
+            71
+          ],
+          [
+            72,
+            83
+          ]
+        ],
+        [
+          [
+            84,
+            96
+          ],
+          [
+            97,
+            108
+          ],
+          [
+            109,
+            120
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "magic_power",
+      "name": "Magic power %",
+      "group": "Combat",
+      "min": 3,
+      "max": 16,
+      "pct": true,
+      "bands": [
+        [
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            7
+          ]
+        ],
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            16
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "magic_power_flat",
+      "name": "Magic power flat",
+      "group": "Combat",
+      "min": 15,
+      "max": 80,
+      "pct": false,
+      "bands": [
+        [
+          [
+            15,
+            21
+          ],
+          [
+            22,
+            28
+          ],
+          [
+            29,
+            36
+          ]
+        ],
+        [
+          [
+            37,
+            43
+          ],
+          [
+            44,
+            50
+          ],
+          [
+            51,
+            58
+          ]
+        ],
+        [
+          [
+            59,
+            65
+          ],
+          [
+            66,
+            72
+          ],
+          [
+            73,
+            80
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "physical_power",
+      "name": "Physical power %",
+      "group": "Combat",
+      "min": 3,
+      "max": 16,
+      "pct": true,
+      "bands": [
+        [
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            7
+          ]
+        ],
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            16
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "physical_power_flat",
+      "name": "Physical power flat",
+      "group": "Combat",
+      "min": 15,
+      "max": 80,
+      "pct": false,
+      "bands": [
+        [
+          [
+            15,
+            21
+          ],
+          [
+            22,
+            28
+          ],
+          [
+            29,
+            36
+          ]
+        ],
+        [
+          [
+            37,
+            43
+          ],
+          [
+            44,
+            50
+          ],
+          [
+            51,
+            58
+          ]
+        ],
+        [
+          [
+            59,
+            65
+          ],
+          [
+            66,
+            72
+          ],
+          [
+            73,
+            80
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "armour_flat",
+      "name": "Armour flat",
+      "group": "Defensive",
+      "min": 8,
+      "max": 40,
+      "pct": false,
+      "bands": [
+        [
+          [
+            8,
+            11
+          ],
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            18
+          ]
+        ],
+        [
+          [
+            19,
+            22
+          ],
+          [
+            23,
+            25
+          ],
+          [
+            26,
+            29
+          ]
+        ],
+        [
+          [
+            30,
+            33
+          ],
+          [
+            34,
+            36
+          ],
+          [
+            37,
+            40
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "armour_pct",
+      "name": "Armour %",
+      "group": "Defensive",
+      "min": 3,
+      "max": 16,
+      "pct": true,
+      "bands": [
+        [
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            7
+          ]
+        ],
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            16
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "cooldown_reduction",
+      "name": "Cooldown reduction %",
+      "group": "Defensive",
+      "min": 5,
+      "max": 25,
+      "pct": true,
+      "bands": [
+        [
+          [
+            5,
+            8
+          ],
+          [
+            9,
+            12
+          ]
+        ],
+        [
+          [
+            13,
+            17
+          ],
+          [
+            18,
+            21
+          ]
+        ],
+        [
+          [
+            22,
+            23
+          ],
+          [
+            24,
+            25
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "energy_shield_flat",
+      "name": "Energy Shield flat",
+      "group": "Defensive",
+      "min": 12,
+      "max": 60,
+      "pct": false,
+      "bands": [
+        [
+          [
+            12,
+            16
+          ],
+          [
+            17,
+            22
+          ],
+          [
+            23,
+            27
+          ]
+        ],
+        [
+          [
+            28,
+            33
+          ],
+          [
+            34,
+            38
+          ],
+          [
+            39,
+            44
+          ]
+        ],
+        [
+          [
+            45,
+            49
+          ],
+          [
+            50,
+            55
+          ],
+          [
+            56,
+            60
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "evasion_flat",
+      "name": "Evasion flat",
+      "group": "Defensive",
+      "min": 6,
+      "max": 30,
+      "pct": false,
+      "bands": [
+        [
+          [
+            6,
+            8
+          ],
+          [
+            9,
+            10
+          ],
+          [
+            11,
+            13
+          ]
+        ],
+        [
+          [
+            14,
+            16
+          ],
+          [
+            17,
+            19
+          ],
+          [
+            20,
+            22
+          ]
+        ],
+        [
+          [
+            23,
+            25
+          ],
+          [
+            26,
+            27
+          ],
+          [
+            28,
+            30
+          ]
+        ]
+      ],
+      "note": "Absorbs the retired `Dodge flat` (3-15) — one avoidance line, so the pool is one choice (D-112)."
+    },
+    {
+      "id": "evasion_pct",
+      "name": "Evasion %",
+      "group": "Defensive",
+      "min": 3,
+      "max": 16,
+      "pct": true,
+      "bands": [
+        [
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            7
+          ]
+        ],
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            16
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "life_regen_flat",
+      "name": "Life Regeneration flat",
+      "group": "Defensive",
+      "min": 2,
+      "max": 31,
+      "pct": false,
+      "bands": [
+        [
+          [
+            2,
+            5
+          ],
+          [
+            6,
+            9
+          ]
+        ],
+        [
+          [
+            10,
+            14
+          ],
+          [
+            15,
+            19
+          ]
+        ],
+        [
+          [
+            20,
+            25
+          ],
+          [
+            26,
+            31
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "life_regen_pct",
+      "name": "Life Regeneration %",
+      "group": "Defensive",
+      "min": 5,
+      "max": 15,
+      "pct": true,
+      "bands": [
+        [
+          [
+            5,
+            6
+          ],
+          [
+            7,
+            8
+          ]
+        ],
+        [
+          [
+            9,
+            10
+          ],
+          [
+            11,
+            12
+          ]
+        ],
+        [
+          [
+            13,
+            14
+          ],
+          [
+            15,
+            15
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "mana_regen_flat",
+      "name": "Mana Regeneration flat",
+      "group": "Defensive",
+      "min": 2,
+      "max": 31,
+      "pct": false,
+      "bands": [
+        [
+          [
+            2,
+            5
+          ],
+          [
+            6,
+            9
+          ]
+        ],
+        [
+          [
+            10,
+            14
+          ],
+          [
+            15,
+            19
+          ]
+        ],
+        [
+          [
+            20,
+            25
+          ],
+          [
+            26,
+            31
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "mana_regen_pct",
+      "name": "Mana Regeneration %",
+      "group": "Defensive",
+      "min": 10,
+      "max": 25,
+      "pct": true,
+      "bands": [
+        [
+          [
+            10,
+            11
+          ],
+          [
+            12,
+            14
+          ]
+        ],
+        [
+          [
+            15,
+            16
+          ],
+          [
+            17,
+            19
+          ]
+        ],
+        [
+          [
+            20,
+            22
+          ],
+          [
+            23,
+            25
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "max_energy_shield_pct",
+      "name": "Max Energy Shield %",
+      "group": "Defensive",
+      "min": 3,
+      "max": 16,
+      "pct": true,
+      "bands": [
+        [
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            7
+          ]
+        ],
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            16
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "max_hp",
+      "name": "Max HP %",
+      "group": "Defensive",
+      "min": 3,
+      "max": 16,
+      "pct": true,
+      "bands": [
+        [
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            7
+          ]
+        ],
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            16
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "max_hp_flat",
+      "name": "Max HP flat",
+      "group": "Defensive",
+      "min": 40,
+      "max": 200,
+      "pct": false,
+      "bands": [
+        [
+          [
+            40,
+            55
+          ],
+          [
+            56,
+            72
+          ],
+          [
+            73,
+            90
+          ]
+        ],
+        [
+          [
+            91,
+            108
+          ],
+          [
+            109,
+            126
+          ],
+          [
+            127,
+            145
+          ]
+        ],
+        [
+          [
+            146,
+            163
+          ],
+          [
+            164,
+            181
+          ],
+          [
+            182,
+            200
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "max_mana",
+      "name": "Max Mana %",
+      "group": "Defensive",
+      "min": 3,
+      "max": 16,
+      "pct": true,
+      "bands": [
+        [
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            7
+          ]
+        ],
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            16
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "max_mana_flat",
+      "name": "Max Mana flat",
+      "group": "Defensive",
+      "min": 20,
+      "max": 140,
+      "pct": false,
+      "bands": [
+        [
+          [
+            20,
+            27
+          ],
+          [
+            28,
+            36
+          ],
+          [
+            37,
+            45
+          ]
+        ],
+        [
+          [
+            46,
+            60
+          ],
+          [
+            61,
+            75
+          ],
+          [
+            76,
+            90
+          ]
+        ],
+        [
+          [
+            91,
+            105
+          ],
+          [
+            106,
+            120
+          ],
+          [
+            121,
+            140
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "perfect_dodge_pct",
+      "name": "Perfect dodge %",
+      "group": "Defensive",
+      "min": 1,
+      "max": 3,
+      "pct": true,
+      "bands": [
+        [
+          [
+            1,
+            1
+          ]
+        ],
+        [
+          [
+            2,
+            2
+          ]
+        ],
+        [
+          [
+            3,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "status_resistance_pct",
+      "name": "Status Alignment resistance %",
+      "group": "Defensive",
+      "min": 5,
+      "max": 25,
+      "pct": true,
+      "bands": [
+        [
+          [
+            5,
+            8
+          ],
+          [
+            9,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            15
+          ],
+          [
+            16,
+            18
+          ]
+        ],
+        [
+          [
+            19,
+            22
+          ],
+          [
+            23,
+            25
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "stat_mod_flat",
+      "name": "Stat Mod flat",
+      "group": "Stat Mod",
+      "min": 5,
+      "max": 25,
+      "pct": false,
+      "bands": [
+        [
+          [
+            5,
+            7
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            17,
+            18
+          ]
+        ],
+        [
+          [
+            19,
+            21
+          ],
+          [
+            22,
+            23
+          ],
+          [
+            24,
+            25
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "all_resistance_pct",
+      "name": "All Resistance %",
+      "group": "Elemental",
+      "min": 10,
+      "max": 20,
+      "pct": true,
+      "bands": [
+        [
+          [
+            10,
+            11
+          ],
+          [
+            12,
+            13
+          ]
+        ],
+        [
+          [
+            14,
+            15
+          ],
+          [
+            16,
+            17
+          ]
+        ],
+        [
+          [
+            18,
+            19
+          ],
+          [
+            20,
+            20
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "elemental_alignment",
+      "name": "Elemental alignment %",
+      "group": "Elemental",
+      "min": 1,
+      "max": 5,
+      "pct": true,
+      "bands": [
+        [
+          [
+            1,
+            2
+          ]
+        ],
+        [
+          [
+            3,
+            4
+          ]
+        ],
+        [
+          [
+            5,
+            5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "elemental_power",
+      "name": "Elemental power %",
+      "group": "Elemental",
+      "min": 3,
+      "max": 14,
+      "pct": true,
+      "bands": [
+        [
+          [
+            3,
+            4
+          ],
+          [
+            5,
+            6
+          ]
+        ],
+        [
+          [
+            7,
+            8
+          ],
+          [
+            9,
+            10
+          ]
+        ],
+        [
+          [
+            11,
+            12
+          ],
+          [
+            13,
+            14
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "elemental_power_flat",
+      "name": "Elemental power flat",
+      "group": "Elemental",
+      "min": 12,
+      "max": 64,
+      "pct": false,
+      "bands": [
+        [
+          [
+            12,
+            17
+          ],
+          [
+            18,
+            23
+          ],
+          [
+            24,
+            29
+          ]
+        ],
+        [
+          [
+            30,
+            35
+          ],
+          [
+            36,
+            41
+          ],
+          [
+            42,
+            46
+          ]
+        ],
+        [
+          [
+            47,
+            52
+          ],
+          [
+            53,
+            58
+          ],
+          [
+            59,
+            64
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "elemental_resistance",
+      "name": "Elemental resistance %",
+      "group": "Elemental",
+      "min": 15,
+      "max": 30,
+      "pct": true,
+      "bands": [
+        [
+          [
+            15,
+            17
+          ],
+          [
+            18,
+            19
+          ]
+        ],
+        [
+          [
+            20,
+            22
+          ],
+          [
+            23,
+            24
+          ]
+        ],
+        [
+          [
+            25,
+            27
+          ],
+          [
+            28,
+            30
+          ]
+        ]
+      ]
+    }
+  ],
+  "pending": []
+}

@@ -1,0 +1,42 @@
+:root {
+  color-scheme: dark;
+  --bg: #14161a;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #d8dee9;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #8e44ad;
+  --xp: #d4a017;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+}
+
+h1, h2, h3 { font-weight: 600; margin: 0 0 .5rem; letter-spacing: .02em; }
+h1 { font-size: 1.15rem; }
+h2 { font-size: .95rem; color: var(--dim); text-transform: uppercase; }
+
+button, select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: .3rem .6rem;
+  font: inherit;
+  cursor: pointer;
+}
+button:hover { border-color: var(--dim); }
+
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: .2rem .4rem; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+th { color: var(--dim); font-weight: 500; }

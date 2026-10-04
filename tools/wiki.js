@@ -77,6 +77,10 @@ function build() {
   const out = path.resolve(ROOT, String(flag('out', 'wiki')));
   const state = st.getState();
   const list = pages.allPages(state, 'build');
+  // The tree is a pure projection of the data: wipe it first so a removed skill, doc or
+  // record cannot leave a stale page behind (wiki/ is gitignored and always rebuildable).
+  if (path.resolve(out) === ROOT) throw new Error('refusing to wipe the repo root — pass --out <dir>');
+  if (fs.existsSync(out)) fs.rmSync(out, { recursive: true, force: true });
   fs.mkdirSync(out, { recursive: true });
   let bytes = 0;
   for (const p of list) {

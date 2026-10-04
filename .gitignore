@@ -11,3 +11,12 @@ tools/.wiki-backup/
 
 # Local browser-automation logs
 .playwright-mcp/
+
+# Owner-private idea parking - local only, never synced, never read by agents
+# unless the owner assigns the exact file path in chat.
+owner/
+
+# Installed dependencies and build output for the client
+node_modules/
+game/dist/
+game/.vite/

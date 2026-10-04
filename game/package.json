@@ -1,0 +1,23 @@
+{
+  "name": "modworld-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ModWorld playable client. Reads tools/data/*.json and the shared engine module; holds no formula of its own.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@types/node": "^26.6.4",
+    "svelte": "^5.22.0",
+    "svelte-check": "^4.1.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
+  }
+}

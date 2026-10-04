@@ -1,100 +1,2016 @@
 {
   "meta": {
     "title": "Engine source data — stat model, K values, caps, loot model, craft prices",
-    "read_by": ["tools/check.js", "tools/town.js"],
-    "sources": ["mod-pool.md", "formula.md", "formula-offense.md", "formula-defense.md", "formula-utility.md", "core-stats.md", "equipment-slot.md", "item-base.md", "crafting.md", "loot.md section 2", "checks.md A/B/C/F"],
-    "targets": { "checks.md": ["group-A", "group-B", "group-C", "group-F"] }
+    "read_by": [
+      "tools/check.js",
+      "tools/town.js"
+    ],
+    "sources": [
+      "mod-pool.md",
+      "formula.md",
+      "formula-offense.md",
+      "formula-defense.md",
+      "formula-utility.md",
+      "core-stats.md",
+      "equipment-slot.md",
+      "item-base.md",
+      "crafting.md",
+      "loot.md section 2",
+      "checks.md A/B/C/F"
+    ],
+    "targets": {
+      "checks.md": [
+        "group-A",
+        "group-B",
+        "group-C",
+        "group-F"
+      ],
+      "equipment-slot-pools.md": [
+        "mod-matrix",
+        "defensive-ranges",
+        "mod-weights"
+      ],
+      "world.md": [
+        "mob-sheet",
+        "mob-stats",
+        "zone-table",
+        "mob-curve"
+      ],
+      "formula-utility.md": [
+        "hit-chance",
+        "weapon-cap"
+      ],
+      "loot.md": [
+        "loot-bands"
+      ],
+      "core-stats.md": [
+        "cap-lines"
+      ],
+      "crafting.md": [
+        "craft-set"
+      ],
+      "formula.md": [
+        "k-table",
+        "cap-table"
+      ],
+      "formula-offense.md": [
+        "weapon-mult"
+      ],
+      "formula-defense.md": [
+        "dodge-table",
+        "hp-mana-block"
+      ],
+      "combat.md": [
+        "reach-table",
+        "mob-status"
+      ],
+      "towns.md": [
+        "road-rules"
+      ],
+      "equipment-slot-armor.md": [
+        "slot-pools"
+      ],
+      "mob-roster.md": [
+        "zone-cast",
+        "mob-roster"
+      ],
+      "elements.md": [
+        "element-k",
+        "element-counter",
+        "element-list"
+      ],
+      "mod-pool.md": [
+        "mod-pool"
+      ],
+      "skill-pool-system.md": [
+        "skill-drop",
+        "aoe-rules"
+      ],
+      "concept.md": [
+        "opening"
+      ],
+      "farm.md": [
+        "farm-model",
+        "potion-table"
+      ]
+    }
   },
-
-  "stat": { "base": 12, "per_level": 2, "level_cap": 100, "mob_level_cap": 90, "item_slots": 12, "core_flat_max": 25, "core_pct_max": 5, "split_items": 6 },
-
+  "stat": {
+    "base": 12,
+    "per_level": 2,
+    "level_cap": 100,
+    "mob_level_cap": 90,
+    "item_slots": 12,
+    "core_flat_max": 25,
+    "split_items": 6,
+    "note": "`core_pct_max` is gone (owner ruling, D-112): Core Stat is Flat only. The single-stat ceiling is now `stat_c + core_flat_max x 12` = 510, not 816 — every K value, Cap and anchor that was set on 816 moves with it."
+  },
   "K": {
-    "K_STR": 5, "K_INT": 5, "K_ELEM": 4,
-    "K_VIT_HP": 20, "K_VIT_REGEN": 0.25, "K_INT_MP": 4, "K_INT_MREGEN": 0.15,
-    "K_AGI_DODGE": 0.15, "K_AGI_ASPD": 0.25, "K_WIS_CDR": 0.03,
-    "K_DEX_ACC": 1.5, "K_DEX_ALIGN": 0.05, "K_VIT_RES": 0.05,
-    "K_LCK_CRIT": 0.05, "K_LCK_PDOGE": 0.01, "K_LCK_DROP": 0.01, "K_STR_WEIGHT": 2,
-    "K_dodge": 100, "K_STUN_PER_ALIGN": 0.30, "mob_evasion_per_level": 1, "mob_damage_divisor": 27
+    "K_STR": 5,
+    "K_INT": 5,
+    "K_ELEM": 4,
+    "K_VIT_HP": 20,
+    "K_VIT_REGEN": 0.25,
+    "K_INT_MP": 4,
+    "K_INT_MREGEN": 0.15,
+    "K_AGI_ASPD": 0.25,
+    "K_WIS_CDR": 0.03,
+    "K_DEX_ACC": 1.5,
+    "K_DEX_ALIGN": 0.05,
+    "K_VIT_RES": 0.05,
+    "K_LCK_CRIT": 0.05,
+    "K_LCK_PDOGE": 0.03,
+    "K_LCK_DROP": 0.01,
+    "K_STR_WEIGHT": 2,
+    "K_PDOGE": 57,
+    "K_CRIT_CAP": 100,
+    "K_CRIT_OVERFLOW": 1,
+    "K_STUN_PER_ALIGN": 0.3,
+    "K_EVASION": 0.5,
+    "K_ARMOUR": 2,
+    "armour_divisor": 5,
+    "mob_damage_divisor": 27,
+    "K_INT_ES": 4,
+    "K_INT_ESREGEN": 0.1,
+    "K_BLEED": 0.7,
+    "K_BLEED_CHANCE": 0.4,
+    "bleed_time_sec": 5,
+    "K_AGI_EVAS": 0.03333333333333333,
+    "K_MOB_DODGE": 0.15
   },
-
-  "level_gain": { "hp_per_level": 40, "mp_per_level": 16, "hp_pct_mod_slots": 1, "res_mod_items": 3, "cdr_mod_items": 4, "cdr_buff_pct": 15 },
-
+  "status": {
+    "burn": {
+      "k_dps": 0.3,
+      "stack_max": 5,
+      "time_sec": 5,
+      "regen_cut_per_stack": 0.1,
+      "regen_cut_max": 0.5
+    },
+    "chill": {
+      "aspd_pct": 10,
+      "aspd_cap": 20,
+      "acc_pct": 10,
+      "acc_cap": 30,
+      "time_sec": 3,
+      "armour_cut": 0.25
+    },
+    "shock": {
+      "aspd_pct": 20,
+      "aspd_cap": 20,
+      "stop_sec": 1,
+      "align_cut": 0.2,
+      "stacks": false
+    },
+    "poison": {
+      "k_dps": 0.08,
+      "stack_max": 10,
+      "decay_sec": 8
+    },
+    "mark": {
+      "stack_max": 25,
+      "k_dmg": 0.01,
+      "k_leech": 0.002,
+      "decay_sec": 5
+    },
+    "dot_cap": 1.5,
+    "dot_cap_note": "burn + poison combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches it exactly at 5 stacks x 0.30, so a maxed fire build fills the whole budget on its own",
+    "proc_chance": 0.2,
+    "mob_side": "decided (D-067) — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action but DO take the game's existing Cap-bounded proc (stun ≤15%, chill/shock/Cripple aspd cut under their own Caps), the same symmetric numbers a mob inflicts on us, so no fight can be stun-locked. No mob resist stat (AGENT.md §5). combat.md §5b"
+  },
+  "mob": {
+    "note": "Species (not classes - the player has no class) and body classes, copied from Ragnarok Online: a species is a stat-multiply vector plus an accuracy tier plus a damage type, and a body class is one of the four card sizes. innate Element stays a separate spawn roll (world.md) so the three axes never collapse into one.",
+    "stat_block": "every mob gets the same 7-stat block as a player: stat_c = 12 + 2 x (level - 1) per stat, then each species multiplies it (world.md Monsters)",
+    "curve": {
+      "skill_per_level": 0.0034,
+      "hp_at_player_level_cap": 11901,
+      "note": "No passive skill tree exists (tools/data/tree.json is an empty shell), so mob_HP(L) = typical_gear_DPS(L) x (1 + skill_per_level x L) and mob_PS(L) = typical_gear_DPS(L) / mob_damage_divisor. skill_per_level is the only power multiplier left; any future power source is multiplied in here in the same commit that adds it. mob_HP(L) is anchored at every zone edge in mob.zones and interpolated linearly between them; levels above the spawn cap (90) run to hp_at_player_level_cap (11901 = the published theoretical mob_HP(100)). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.js mobHpAt · checks.md X37)."
+    },
+    "zones": [
+      {
+        "id": 1,
+        "name": "Eastgate",
+        "levels": [
+          1,
+          10
+        ],
+        "hp": [
+          120,
+          629
+        ],
+        "quality": "low",
+        "elements": [
+          "fire"
+        ],
+        "group": "1-2"
+      },
+      {
+        "id": 2,
+        "name": "Millbrook",
+        "levels": [
+          11,
+          20
+        ],
+        "hp": [
+          730,
+          1305
+        ],
+        "quality": "low",
+        "elements": [
+          "poison"
+        ],
+        "group": "1-2"
+      },
+      {
+        "id": 3,
+        "name": "Ashfall",
+        "levels": [
+          21,
+          30
+        ],
+        "hp": [
+          1436,
+          1824
+        ],
+        "quality": "low",
+        "elements": [
+          "fire"
+        ],
+        "group": "1-2"
+      },
+      {
+        "id": 4,
+        "name": "Ironrow",
+        "levels": [
+          31,
+          40
+        ],
+        "hp": [
+          3546,
+          4033
+        ],
+        "quality": "mid (floor = low)",
+        "elements": [
+          "lightning"
+        ],
+        "group": "2-3"
+      },
+      {
+        "id": 5,
+        "name": "Wolf Cross",
+        "levels": [
+          41,
+          50
+        ],
+        "hp": [
+          4090,
+          4632
+        ],
+        "quality": "mid",
+        "elements": [
+          "cold"
+        ],
+        "group": "2-3"
+      },
+      {
+        "id": 6,
+        "name": "Highspire",
+        "levels": [
+          51,
+          60
+        ],
+        "hp": [
+          4696,
+          5293
+        ],
+        "quality": "mid",
+        "elements": [
+          "cold",
+          "lightning"
+        ],
+        "group": "2-3"
+      },
+      {
+        "id": 7,
+        "name": "Bonegate",
+        "levels": [
+          61,
+          70
+        ],
+        "hp": [
+          7739,
+          8587
+        ],
+        "quality": "high (floor = mid)",
+        "elements": [
+          "chaos"
+        ],
+        "group": "3-5"
+      },
+      {
+        "id": 8,
+        "name": "Frosthold",
+        "levels": [
+          71,
+          80
+        ],
+        "hp": [
+          8685,
+          9605
+        ],
+        "quality": "high",
+        "elements": [
+          "cold"
+        ],
+        "group": "3-5"
+      },
+      {
+        "id": 9,
+        "name": "Vermolch",
+        "levels": [
+          81,
+          90
+        ],
+        "hp": [
+          9712,
+          10709
+        ],
+        "quality": "high",
+        "elements": [
+          "poison",
+          "chaos"
+        ],
+        "group": "3-5"
+      }
+    ],
+    "damage_split": {
+      "physical": [
+        1,
+        0
+      ],
+      "magic": [
+        0,
+        1
+      ],
+      "mixed": [
+        0.5,
+        0.5
+      ],
+      "note": "a species tag decides how its hit is divided: physical is entirely the armour-able half, magic is entirely the res-able half, mixed is the old 50/50. This is what makes the tag a rule instead of decoration (D-030): Knight and Golem are answered by Armour and chill, Seraph and Slime only by Elemental resistance."
+    },
+    "reach": {
+      "bands": {
+        "melee": 1,
+        "reach": 2,
+        "standoff": 3
+      },
+      "weapons": {
+        "sword": 1,
+        "axe": 1,
+        "dagger": 1,
+        "mace": 1,
+        "spear": 2,
+        "two-handed sword": 2,
+        "two-handed axe": 2,
+        "bow": 3,
+        "crossbow": 3,
+        "staff": 3,
+        "rod": 3,
+        "wand": 3,
+        "book": 3
+      },
+      "rules": "A group is a queue ordered front line first. A weapon's reach is how many queue slots it may hit: 1 = the front slot only, 2 = front and second, 3 = any slot in the group. Only the front slot swings at the player; a stand-off mob shoots or casts from where it stands and still counts inside the 3-attacker cap. If the front slot dies while stand-off mobs live, a reach-1 attack waits one engage cycle (1 sec) for the group to close; reach 2 and 3 keep pressing. AoE keeps its rules (60% per target · Cap 3 · mana ×1.5) and only changes which 3: melee fans from the front, stand-off picks any 3. There are no tiles, no movement speed and no coordinates — reach is the whole positional model, and it replaces the stray 'within 3 tiles' wording (D-032)."
+    },
+    "spawn_weights": {
+      "small": 3,
+      "medium": 2,
+      "large": 1,
+      "note": "how often each farming body shows up in a group. Every zone spends its encounter budget once: the published mob_HP(L) curve is the zone AVERAGE mob, so each group entry divides its body multiplier by the weighted average of the bodies that zone can field. A Large mob is tougher and rarer, a Small mob cheaper and common, and kills per hour, drops per hour, the stone funnel and the 40.2 hour timeline never move (D-031)."
+    },
+    "element_roll": {
+      "bias_weight": 3,
+      "other_weight": 1,
+      "note": "innate Element is rolled on spawn inside the zone's own Elements: every Element in the species element_bias weighs 3, any other Element the zone carries weighs 1. A one-Element zone is therefore always that Element, and a two-Element zone lands on the species bias about 3 of every 4 rolls."
+    },
+    "level_rule": "a mob spawns at the attacking player's level clamped into its zone's range, so mob_HP is read at that level between the two ends printed in mob-roster.md (checks.md D1). Levels 91-100 keep fighting zone 9 at level 90.",
+    "bosses": [
+      {
+        "zone": 1,
+        "name": "Eastgate Emberling",
+        "species": "husk"
+      },
+      {
+        "zone": 2,
+        "name": "Millbrook Tallyman",
+        "species": "goblin"
+      },
+      {
+        "zone": 3,
+        "name": "Ashfall Chieftain",
+        "species": "rat"
+      },
+      {
+        "zone": 4,
+        "name": "Ironrow Warden",
+        "species": "bandit"
+      },
+      {
+        "zone": 5,
+        "name": "The Bloated Shepherd",
+        "species": "slime"
+      },
+      {
+        "zone": 6,
+        "name": "Highspire Herald",
+        "species": "troll"
+      },
+      {
+        "zone": 7,
+        "name": "Bonegate Tyrant",
+        "species": "orc"
+      },
+      {
+        "zone": 8,
+        "name": "Frosthold Siege-Marshal",
+        "species": "knight"
+      },
+      {
+        "zone": 9,
+        "name": "Vermolch Ninefold Choir",
+        "species": "seraph"
+      }
+    ],
+    "sizes": [
+      {
+        "id": "small",
+        "name": "Small",
+        "hp": 0.7,
+        "ps": 0.7,
+        "evasion": 1.1,
+        "group": "up to 5"
+      },
+      {
+        "id": "medium",
+        "name": "Medium",
+        "hp": 1,
+        "ps": 1,
+        "evasion": 1,
+        "group": "up to 5"
+      },
+      {
+        "id": "large",
+        "name": "Large",
+        "hp": 1.7,
+        "ps": 1.35,
+        "evasion": 0.9,
+        "group": "alone"
+      },
+      {
+        "id": "boss",
+        "name": "Boss",
+        "hp": 15,
+        "ps": 16,
+        "evasion": 1,
+        "group": "alone"
+      }
+    ],
+    "elite": {
+      "name": "Elite",
+      "hp": 6,
+      "ps": 4,
+      "evasion": 0.9,
+      "group": "alone",
+      "note": "Elite is a rarity flag, not a fifth size: an Elite is always forced to the Large body and carries its own numbers, so no two multipliers ever stack. Drops 2 Reroll tier stones."
+    },
+    "size_rules": [
+      "Four card sizes, copied from Ragnarok: Small · Medium · Large · Boss. A size REPLACES the base numbers, it never multiplies with Elite or with another size.",
+      "Small and Medium form the groups world.md counts (1-2 / 2-3 / 3-5). Large, Elite and Boss always appear alone.",
+      "Bigger bodies are easier to hit: evasion x1.10 on Small down to x0.90 on Large, because a large target presents more of itself.",
+      "Size raises HP faster than PS, so a Large mob takes longer to kill without hitting proportionally harder - that is what makes Small the farming body and Large the roadblock."
+    ],
+    "species": [
+      {
+        "id": "rat",
+        "name": "Rat",
+        "zones": [
+          1,
+          2,
+          3
+        ],
+        "carries_weapon": false,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.75,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "fire",
+          "poison"
+        ],
+        "stats": {
+          "str": 0.84,
+          "agi": 1.46,
+          "vit": 0.73,
+          "dex": 1.15,
+          "int": 0.63,
+          "wis": 0.84,
+          "lck": 1.36
+        },
+        "trait": "the trash mob - fastest body in the game, dies to any aoe, arrives in the biggest groups"
+      },
+      {
+        "id": "husk",
+        "name": "Husk",
+        "zones": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "carries_weapon": false,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.05,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "fire",
+          "poison",
+          "lightning"
+        ],
+        "stats": {
+          "str": 1.17,
+          "agi": 0.7,
+          "vit": 1.63,
+          "dex": 0.82,
+          "int": 0.7,
+          "wis": 1.05,
+          "lck": 0.93
+        },
+        "trait": "the accuracy floor - dodge Cap 80 is reachable against this and nothing else, and it hits for very little"
+      },
+      {
+        "id": "goblin",
+        "name": "Goblin",
+        "zones": [
+          2,
+          3,
+          4
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.75,
+        "sizes": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "poison",
+          "fire",
+          "lightning"
+        ],
+        "stats": {
+          "str": 1.29,
+          "agi": 1.18,
+          "vit": 0.97,
+          "dex": 0.97,
+          "int": 0.65,
+          "wis": 0.86,
+          "lck": 1.08
+        },
+        "trait": "the first species that carries gear, so it is where the weapon part of the drop table starts · the only lineage legal on all three bodies"
+      },
+      {
+        "id": "slime",
+        "name": "Slime",
+        "zones": [
+          3,
+          4,
+          5
+        ],
+        "carries_weapon": false,
+        "line": "front",
+        "damage": "magic",
+        "accuracy_mult": 0.05,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "fire",
+          "lightning",
+          "cold"
+        ],
+        "stats": {
+          "str": 0.73,
+          "agi": 0.63,
+          "vit": 1.46,
+          "dex": 0.73,
+          "int": 1.15,
+          "wis": 1.25,
+          "lck": 1.04
+        },
+        "trait": "the magic accuracy floor - dodge answers it completely, and Element damage is what kills it quickly"
+      },
+      {
+        "id": "bandit",
+        "name": "Bandit",
+        "zones": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.75,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "fire",
+          "lightning",
+          "cold"
+        ],
+        "stats": {
+          "str": 1.13,
+          "agi": 1.03,
+          "vit": 0.93,
+          "dex": 1.13,
+          "int": 0.72,
+          "wis": 1.03,
+          "lck": 1.03
+        },
+        "trait": "the human - mid accuracy, mid everything, and the only species that drops weapons as a rule rather than by luck"
+      },
+      {
+        "id": "spider",
+        "name": "Spider",
+        "zones": [
+          4,
+          5,
+          6
+        ],
+        "carries_weapon": false,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.5,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "lightning",
+          "cold"
+        ],
+        "stats": {
+          "str": 0.72,
+          "agi": 1.34,
+          "vit": 0.82,
+          "dex": 1.24,
+          "int": 0.82,
+          "wis": 0.93,
+          "lck": 1.13
+        },
+        "trait": "the poison species - stacks a status instead of landing damage, so it ignores armour-based tanking"
+      },
+      {
+        "id": "wolf",
+        "name": "Wolf",
+        "zones": [
+          5,
+          6,
+          7
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 1,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "cold",
+          "lightning",
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.13,
+          "agi": 1.34,
+          "vit": 0.93,
+          "dex": 1.03,
+          "int": 0.62,
+          "wis": 0.93,
+          "lck": 1.03
+        },
+        "trait": "full accuracy on a fast body - dodge is close to worthless against it, which is what makes it the mid-game check on a pure-Agi build"
+      },
+      {
+        "id": "orc",
+        "name": "Orc",
+        "zones": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.75,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "cold",
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.48,
+          "agi": 1.06,
+          "vit": 1.27,
+          "dex": 0.74,
+          "int": 0.53,
+          "wis": 0.95,
+          "lck": 0.95
+        },
+        "trait": "the honest strength body - second-highest Str, so it is the species that makes bleed and armour matter"
+      },
+      {
+        "id": "troll",
+        "name": "Troll",
+        "zones": [
+          6,
+          7,
+          8
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.5,
+        "sizes": [
+          "large"
+        ],
+        "element_bias": [
+          "cold",
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.38,
+          "agi": 0.85,
+          "vit": 1.48,
+          "dex": 0.74,
+          "int": 0.64,
+          "wis": 0.95,
+          "lck": 0.95
+        },
+        "trait": "a Large wall with no damage trick - the species that teaches a player to bring aoe"
+      },
+      {
+        "id": "elf",
+        "name": "Elf",
+        "zones": [
+          7,
+          8,
+          9
+        ],
+        "carries_weapon": true,
+        "line": "stand-off",
+        "damage": "mixed",
+        "accuracy_mult": 1,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "chaos",
+          "cold",
+          "poison"
+        ],
+        "stats": {
+          "str": 0.86,
+          "agi": 1.15,
+          "vit": 0.77,
+          "dex": 1.25,
+          "int": 1.05,
+          "wis": 0.96,
+          "lck": 0.96
+        },
+        "trait": "accurate and long-ranged - the species that punishes a build with no reach"
+      },
+      {
+        "id": "demonic",
+        "name": "Demon",
+        "zones": [
+          7,
+          8,
+          9
+        ],
+        "carries_weapon": true,
+        "line": "stand-off",
+        "damage": "mixed",
+        "accuracy_mult": 0.75,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "chaos",
+          "cold",
+          "poison"
+        ],
+        "stats": {
+          "str": 1.17,
+          "agi": 0.97,
+          "vit": 1.07,
+          "dex": 0.87,
+          "int": 1.17,
+          "wis": 0.87,
+          "lck": 0.87
+        },
+        "trait": "the only species that hits both ways at once, so Alignment and res cannot be prepared for one Element"
+      },
+      {
+        "id": "golem",
+        "name": "Golem",
+        "zones": [
+          6,
+          7,
+          8
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.25,
+        "sizes": [
+          "large"
+        ],
+        "element_bias": [
+          "lightning",
+          "cold",
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.7,
+          "agi": 0.6,
+          "vit": 1.55,
+          "dex": 0.75,
+          "int": 0.65,
+          "wis": 1.1,
+          "lck": 0.65
+        },
+        "trait": "the armour wall - highest Str and Vit in the game behind the second-worst accuracy, so it is the species that makes K_ARMOUR real and chill's Armour cut worth pressing"
+      },
+      {
+        "id": "knight",
+        "name": "Knight",
+        "zones": [
+          8,
+          9
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.25,
+        "sizes": [
+          "large"
+        ],
+        "element_bias": [
+          "cold",
+          "poison",
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.29,
+          "agi": 0.75,
+          "vit": 1.51,
+          "dex": 0.86,
+          "int": 0.65,
+          "wis": 1.08,
+          "lck": 0.86
+        },
+        "trait": "armoured and inaccurate - the late-game answer to a dodge build, and the species that finally gives chill's Armour cut a target"
+      },
+      {
+        "id": "drake",
+        "name": "Drake",
+        "zones": [
+          8,
+          9
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "mixed",
+        "accuracy_mult": 1,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "cold",
+          "poison"
+        ],
+        "stats": {
+          "str": 1.25,
+          "agi": 0.96,
+          "vit": 1.05,
+          "dex": 0.86,
+          "int": 1.15,
+          "wis": 0.86,
+          "lck": 0.86
+        },
+        "trait": "the zone-9 wall - high accuracy, high Str, high Int and a Large body, so no single defensive layer answers it"
+      },
+      {
+        "id": "seraph",
+        "name": "Seraph",
+        "zones": [
+          9
+        ],
+        "carries_weapon": true,
+        "line": "stand-off",
+        "damage": "magic",
+        "accuracy_mult": 0.5,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "poison",
+          "chaos"
+        ],
+        "stats": {
+          "str": 0.59,
+          "agi": 0.79,
+          "vit": 0.99,
+          "dex": 1.08,
+          "int": 1.38,
+          "wis": 1.18,
+          "lck": 0.99
+        },
+        "trait": "the late caster - huge Element damage behind a Medium body, which is the hardest thing in the game to kill inside a group"
+      }
+    ],
+    "species_rules": [
+      "A species is a MULTIPLY vector on the same stat block a player has, so total mob power stays put and mob_HP keeps deriving from player DPS. Check X19 fails any species whose multipliers do not average 1.00.",
+      "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the dodge Cap 80 question answerable: Cap 80 is reachable against the x0.05 species (Husk · Slime) and close to worthless against the x1.00 ones (Wolf · Elf · Drake), so no single mob accuracy number can close C1 - the species mix does.",
+      "innate Element is rolled on spawn and is NOT part of the species. element_bias only tilts the roll inside the zone's own 1-2 Elements, so players still have to prepare res in advance (world.md).",
+      "A species that carries a weapon is the only kind a weapon-slot piece can come from; every species still drops from the non-weapon slots, so the 8% base drop rate and the loot.md funnel are untouched by this flag. Rat · Husk · Slime · Spider are the weaponless lineages, which is why goblin (zone 2) is where the weapon part of the drop table starts.",
+      "A species is not zone-locked. The same species in two zones is the same species at a higher level, never a reskinned one.",
+      "Mob evasion is the species Dex line, not a level number: `stat_c(level) x species.dex x K_EVASION x body-class evasion`. K_EVASION 0.5 is set so the average species on a Medium body reproduces the retired `level x 1` curve (101 vs 100 at level 100), so this is a derivation, not a rebalance - and it is the same K the player's own Evasion rating uses, because a mob runs the player's math (X21)."
+    ]
+  },
+  "bleed": {
+    "curse_id": "curse.lacerate",
+    "curse_cd_sec": 14,
+    "curse_duration_sec": 10,
+    "uptime_pct": 71,
+    "stacks": false,
+    "refreshes": true,
+    "affected_by_armour": false,
+    "can_crit": false,
+    "is_element": false,
+    "mitigations": "none — bleed has no counter stat in the game; heal and Energy Shield only shorten the race (D-015)",
+    "mob_side": "decided (D-067) — bleed is a DoT, so it lands on mobs in full from our Lacerate. The reverse is a mob skill: the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict bleed as their signature, delivered as a DoT slice of their already-priced mob_PS, not extra power (combat.md §5b)",
+    "note": "PoE bleed: physical damage over time, does not stack, a new application refreshes the duration, base duration 5 sec, base total 70% of the inflicting hit's physical damage, unaffected by armour, cannot crit. bleed_dps = K_BLEED x physical_per_hit / bleed_time_sec, so it does not scale with attack speed — slow heavy hits are the build."
+  },
+  "level_gain": {
+    "hp_per_level": 40,
+    "mp_per_level": 16,
+    "hp_pct_mod_slots": 1,
+    "res_mod_items": 3,
+    "cdr_mod_items": 11,
+    "cdr_buff_pct": 0
+  },
   "xp": {
     "per_kill_mob_level": 10,
     "elite_mult": 3,
     "boss_mult": 15,
     "step": 5,
-    "kills_anchors": { "1": 14, "10": 70, "30": 174, "50": 495, "90": 1473, "100": 1735 },
+    "kills_anchors": {
+      "1": 20,
+      "10": 101,
+      "30": 251,
+      "50": 713,
+      "90": 2121,
+      "100": 2498
+    },
     "hours_tolerance": 0.5,
     "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) interpolates linearly between the anchors · hours(L) = kills(L) ÷ the band's kills/hr (980 low / 1385 mid / 1800 high). tools/timeline.js derives the 5-level-step table in world.md from this."
   },
-
   "mod_max": {
-    "phys_flat_main_hand": 80, "phys_pct_main_hand": 16, "crit_chance_main_hand": 8,
-    "crit_damage_mod_pct": 120, "aspd_pct": 25, "accuracy_pct": 25, "res_pct_per_item": 30,
-    "cdr_pct_per_item": 25, "dodge_flat_t1": 15, "align_pct_per_item": 5, "hp_pct_per_item": 16,
-    "mana_pct_per_item": 16
+    "phys_flat_main_hand": 80,
+    "phys_pct_main_hand": 16,
+    "crit_pct_main_hand": 8,
+    "magic_flat_main_hand": 80,
+    "magic_pct_main_hand": 16,
+    "crit_damage_mod_pct": 120,
+    "aspd_pct": 25,
+    "accuracy_pct": 25,
+    "res_pct_per_item": 30,
+    "cdr_pct_per_item": 25,
+    "armour_flat_t1": 40,
+    "evasion_flat_t1": 30,
+    "energy_shield_flat_t1": 60,
+    "align_pct_per_item": 5,
+    "hp_pct_per_item": 16,
+    "mana_pct_per_item": 16,
+    "max_energy_shield_pct": 16,
+    "life_regen_pct": 15,
+    "mana_regen_pct": 25,
+    "all_resistance_pct": 20,
+    "armour_pct": 16,
+    "evasion_pct": 16,
+    "life_regen_flat": 31,
+    "mana_regen_flat": 31,
+    "perfect_dodge_pct": 3,
+    "status_resistance_pct": 25
   },
-
-  "caps": { "crit_chance": 100, "dodge_chance": 90, "perfect_dodge": 5, "alignment": 50, "elem_res": 75, "cdr": 50, "aspd": 300, "accuracy": null, "weight_overload": 0.50 },
-
+  "mod_weights": {
+    "note": "Effective drop weight of every Mod line = role weight x value(X) (equipment-slot-pools.md). tools/loot.js is the only consumer and the weight table printed in equipment-slot-pools.md is generated from these rows, so a weight can never be typed twice. `weight` is one number, or [low, mid, high] for the early-game Flat group whose weight falls with Item quality.",
+    "role_weights": {
+      "primary": 1,
+      "secondary": 0.5,
+      "stat_mod": 1,
+      "gear_mod": 1
+    },
+    "flat_group": [
+      "max_hp_flat",
+      "max_mana_flat",
+      "physical_power_flat",
+      "magic_power_flat"
+    ],
+    "flat_group_note": "The 0.5 group is the early-game line: at level 10 it is 1/3 of power, at level 100 it is 1%. Drops full of Flat lines naturally stop being upgrades as the player moves up zones, which is what makes crafting the answer rather than luck (equipment-slot-pools.md). These four ids are also what F11 counts as a Flat line — Stat Mod flat, Dodge flat and the three Gear Mods are Flats by name but not part of this group.",
+    "rows": [
+      {
+        "label": "Max HP %",
+        "ids": [
+          "max_hp"
+        ],
+        "v100": "+16% EHP",
+        "early": "+7%",
+        "weight": 0.8,
+        "why": "Strongest defense line → slightly rarer by design"
+      },
+      {
+        "label": "Physical/Magic power %",
+        "ids": [
+          "physical_power",
+          "magic_power"
+        ],
+        "v100": "+16% DPS",
+        "early": "+7%",
+        "weight": 0.8,
+        "why": "Same on the attack side"
+      },
+      {
+        "label": "Critical damage %",
+        "ids": [
+          "critical_damage"
+        ],
+        "v100": "+22% DPS (at 18.5% crit)",
+        "early": "+5%",
+        "weight": 0.7,
+        "why": "Strongest line in the table · must be a target, not an accident · **rises once the crit pool passes 100, because overflow crit chance also lands here (formula-offense.md section 3) — the 0.7 is the no-overflow value"
+      },
+      {
+        "label": "Attack speed %",
+        "ids": [
+          "attack_speed"
+        ],
+        "v100": "+16.5% DPS",
+        "early": "+12%",
+        "weight": 1,
+        "why": ""
+      },
+      {
+        "label": "Elemental resistance %",
+        "ids": [
+          "elemental_resistance"
+        ],
+        "v100": "+8.3% EHP",
+        "early": "+1.6%",
+        "weight": 1,
+        "why": "Element builds hunt repeats, so no reduction"
+      },
+      {
+        "label": "Critical chance %",
+        "ids": [
+          "critical_chance"
+        ],
+        "v100": "+7.9% DPS",
+        "early": "+9%",
+        "weight": 1,
+        "why": ""
+      },
+      {
+        "label": "Accuracy %",
+        "ids": [
+          "accuracy"
+        ],
+        "v100": "+4.2% DPS",
+        "early": "+3%",
+        "weight": 1.2,
+        "why": "Cheap but lifts the 80% hit floor · frequent filler"
+      },
+      {
+        "label": "Stat Mod flat",
+        "ids": [
+          "stat_mod_flat"
+        ],
+        "v100": "+3.1% (on a maxed stat) · **+11.9%** (on an uninvested stat)",
+        "early": "+5.5%",
+        "weight": 1,
+        "why": "Stat Mod flat rolls on every item, so an uninvested stat is always reachable — and it is now the only Core stat line"
+      },
+      {
+        "label": "Elemental alignment %",
+        "ids": [
+          "elemental_alignment"
+        ],
+        "v100": "+5 points of Cap 50 (= +10% Element damage)",
+        "early": "+5%",
+        "weight": 1,
+        "why": "Element builds only"
+      },
+      {
+        "label": "Cooldown reduction %",
+        "ids": [
+          "cooldown_reduction"
+        ],
+        "v100": "+6.1 CDR points ≈ +1.9% DPS",
+        "early": "+4%",
+        "weight": 0.6,
+        "why": "Whole skill list is worth only +7.7% DPS (skill-pool.md) → CDR is truly a secondary line"
+      },
+      {
+        "label": "Max HP flat",
+        "ids": [
+          "max_hp_flat"
+        ],
+        "v100": "+1.0% EHP",
+        "early": "+2.1%",
+        "weight": [
+          0.5,
+          0.4,
+          0.25
+        ],
+        "why": "Dies off late-game · weight differs by quality tier (low 0.5 · mid 0.4 · high 0.25)"
+      },
+      {
+        "label": "Max Mana flat",
+        "ids": [
+          "max_mana_flat"
+        ],
+        "v100": "+2.9% of pool · no EHP",
+        "early": "+8%",
+        "weight": [
+          0.5,
+          0.4,
+          0.25
+        ],
+        "why": "Matters only while the pool is still small"
+      },
+      {
+        "label": "Max Mana %",
+        "ids": [
+          "max_mana"
+        ],
+        "v100": "+16% of pool · auras **reserve a fixed %**, so a bigger pool leaves a bigger usable pool after reserving",
+        "early": "+8%",
+        "weight": 0.8,
+        "why": "Cast builds channel longer · aura builds like this line"
+      },
+      {
+        "label": "Physical/Magic power flat",
+        "ids": [
+          "physical_power_flat",
+          "magic_power_flat"
+        ],
+        "v100": "+2.0% DPS",
+        "early": "+2.9%",
+        "weight": [
+          0.5,
+          0.4,
+          0.25
+        ],
+        "why": "Same as Max HP Flat — an early-game line"
+      },
+      {
+        "label": "Elemental power flat / %",
+        "ids": [
+          "elemental_power_flat",
+          "elemental_power"
+        ],
+        "v100": "~21% of a hit after the Alignment gate",
+        "early": "—",
+        "weight": 1,
+        "why": "Element builds required"
+      },
+      {
+        "label": "Armour / Evasion / Energy Shield flat",
+        "ids": [
+          "armour_flat",
+          "evasion_flat",
+          "energy_shield_flat"
+        ],
+        "v100": "per Base school",
+        "early": "—",
+        "weight": 1,
+        "why": "The Gear Mod is the Base's own school line (item-base.md), so it rolls at Primary weight on the five armour slots; the three Gear Mod weights were missing before the loot sim and are set here"
+      },
+      {
+        "label": "Max Energy Shield %",
+        "ids": [
+          "max_energy_shield_pct"
+        ],
+        "v100": "+16% of the shield pool",
+        "early": "+7%",
+        "weight": 0.8,
+        "why": "The Int build’s scaling defensive line, same shape as the Max HP % and Max Mana % it sits beside"
+      },
+      {
+        "label": "Life Regeneration %",
+        "ids": [
+          "life_regen_pct"
+        ],
+        "v100": "+15% of the Vit-derived regen line · 816 Vit × 0.25 = 204/sec, so +30.6/sec and 13% off Push downtime",
+        "early": "+5%",
+        "weight": 1,
+        "why": "Recovery, not a pool — it cannot raise the ceiling, so it is the defensive line that never breaks an HP Cap, and the only one that shortens the walk back to camp (checks.md D9)"
+      },
+      {
+        "label": "Mana Regeneration %",
+        "ids": [
+          "mana_regen_pct"
+        ],
+        "v100": "+25% of the Int-derived regen line · 816 Int × 0.15 = 122.4/sec, so +30.6/sec of cast sustain",
+        "early": "+10%",
+        "weight": 1,
+        "why": "Mana is the real casting bottleneck as designed (skill-pool-system.md), so this buys uptime with the bar full rather than more damage per press"
+      },
+      {
+        "label": "All Resistance %",
+        "ids": [
+          "all_resistance_pct"
+        ],
+        "v100": "+11.1% EHP across all five Elements at once · 20% off the Elemental half of a 50/50 hit",
+        "early": "+2%",
+        "weight": 0.7,
+        "why": "Weaker per Element than Elemental resistance % (top 20 vs 30) precisely because it covers all five, and it lands on the ring, amulet and cape slots that carry no resistance today — rarer by design"
+      },
+      {
+        "label": "Armour %",
+        "ids": [
+          "armour_pct"
+        ],
+        "v100": "+3.7 points of cut on a zone-9 physical half (41.7% -> 45.4% at full Str, no flat)",
+        "early": "+2.2 points",
+        "weight": 0.8,
+        "why": "A PoE ratio cuts less of a bigger number, so a % on Armour is a modest line by construction (D-022 · X22 holds the cut inside 10-40%) — same rarity as Max HP %"
+      },
+      {
+        "label": "Evasion %",
+        "ids": [
+          "evasion_pct"
+        ],
+        "v100": "+2.2% evasion on the Dex line (105 -> 122 at Dex 210)",
+        "early": "+1.3%",
+        "weight": 0.8,
+        "why": "Evasion is a rating fed straight into the entropy roll, so it scales cleanly where Armour does not"
+      },
+      {
+        "label": "Life Regeneration flat",
+        "ids": [
+          "life_regen_flat"
+        ],
+        "v100": "+31/sec on top of 204/sec (816 Vit x 0.25) = +15%",
+        "early": "a level-1 build has 3/sec, so +31 more than doubles it",
+        "weight": [
+          0.5,
+          0.4,
+          0.25
+        ],
+        "why": "Dies off late-game exactly like Max HP Flat — weight differs by quality tier (low 0.5 · mid 0.4 · high 0.25)"
+      },
+      {
+        "label": "Mana Regeneration flat",
+        "ids": [
+          "mana_regen_flat"
+        ],
+        "v100": "+31/sec on top of 122/sec (816 Int x 0.15) = +25%",
+        "early": "a level-1 build has 1.8/sec",
+        "weight": [
+          0.5,
+          0.4,
+          0.25
+        ],
+        "why": "Same early-game shape as Life Regeneration flat; the flat form carries the first zones where the % form has nothing to multiply"
+      },
+      {
+        "label": "Perfect dodge %",
+        "ids": [
+          "perfect_dodge_pct"
+        ],
+        "v100": "scales the Lck line, so it is worth most below the Lck 633 Cap point",
+        "early": "Lck 12 sits at 0.63%, where +3% is a 5.8x multiplier on the chance",
+        "weight": 0.7,
+        "why": "The Cap binds at Lck 633, so this line is dead on a maxed Lck build and decisive on a low one — the same shape as Dodge % (0.7), which is also a multiplier on a low rate"
+      },
+      {
+        "label": "Status Alignment resistance %",
+        "ids": [
+          "status_resistance_pct"
+        ],
+        "v100": "cuts the 20% status proc to 15% — the gap between status applications goes 2.3 sec -> 3.3 sec",
+        "early": "same ratio, fewer absolute hits to proc on",
+        "weight": 0.7,
+        "why": "The status proc is 20% per landed hit and there is no other answer to it on gear (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other \"answers something niche\" defensive rows"
+      }
+    ]
+  },
+  "energy_shield": {
+    "delay_sec": 5,
+    "recover_sec": 40,
+    "player_only": true,
+    "chaos_bypasses": true,
+    "note": "Energy Shield is the caster's second pool: pool = Int x K_INT_ES, recharge = Int x K_INT_ESREGEN once delay_sec have passed without a hit, and the full pool comes back in exactly recover_sec (40), the same shape the mana pool was tuned to and about 2.4x faster than a Vit build recovers HP. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it (D-010)."
+  },
+  "caps": {
+    "crit_chance": null,
+    "evasion": 80,
+    "perfect_dodge": 25,
+    "alignment": 50,
+    "elem_res": 75,
+    "cdr": 80,
+    "aspd": 500,
+    "accuracy": null,
+    "weight_overload": 0.5,
+    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together (D-112). `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright."
+  },
   "weapons": [
-    { "name": "dagger", "weapon_aspd": 1.5 },
-    { "name": "one-handed sword / axe", "weapon_aspd": 1.2 },
-    { "name": "bow / crossbow", "weapon_aspd": 1.1 },
-    { "name": "mace / wand / rod", "weapon_aspd": 1.0 },
-    { "name": "staff / spear", "weapon_aspd": 0.85 },
-    { "name": "two-handed sword / axe", "weapon_aspd": 0.7 }
+    {
+      "name": "dagger",
+      "weapon_aspd": 1.5
+    },
+    {
+      "name": "one-handed sword / axe",
+      "weapon_aspd": 1.2
+    },
+    {
+      "name": "bow / crossbow",
+      "weapon_aspd": 1.1
+    },
+    {
+      "name": "mace / wand / rod",
+      "weapon_aspd": 1
+    },
+    {
+      "name": "staff / spear",
+      "weapon_aspd": 0.85
+    },
+    {
+      "name": "two-handed sword / axe",
+      "weapon_aspd": 0.7
+    }
   ],
-
+  "herbs": {
+    "mid_chance": 0.02,
+    "high_chance": 0.03,
+    "bundle_min": 1,
+    "bundle_max": 3,
+    "note": "A herb bundle drops on its own roll, separate from gear and stones. farm.md prints these; F13 in checks.md is generated from here."
+  },
+  "farm": {
+    "note": "Farming is the game's ONE life skill — Melvor's Farming, the farm discipline only (no fishing · mining · woodcutting). It is a real leveled track: plant a seed on a plot, wait the growth timer, harvest for Farming XP plus herbs. Provisioning ONLY — it yields the herbs potions are crafted from, never gear · Mods · combat DPS — so it grants no power and needs no mob_HP fold (AGENT.md §5 · H1). The level curve is the same sqrt(xp/divisor)+1 shape as weapon Mastery (equipment-weapon.md) and runs parallel to it, separate from character XP. A8 ruling · D-068.",
+    "plots": {
+      "base": 3,
+      "shop_deeds": 2,
+      "max": 5
+    },
+    "growth_hours": 4,
+    "yield_per_harvest": 3,
+    "seed_cost_herbs": 1,
+    "xp_per_harvest": 20,
+    "level_divisor": 100,
+    "level_cap": 20,
+    "tier_unlock_level": {
+      "low": 1,
+      "mid": 6,
+      "high": 11
+    },
+    "offline_cap_hours": 12,
+    "taps_per_day": 2
+  },
+  "potions": {
+    "note": "Single home for the potion ladder farm.md prints (A8 · D-068). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.js) and move no mob_HP · kills/hr · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
+    "shared_cooldown_sec": 30,
+    "auto_use_default": {
+      "hp_pct": 30,
+      "mana_pct": 25
+    },
+    "max_uses_per_fight": 3,
+    "boss_suppressed": true,
+    "weight": 2,
+    "hp_base_pct": 10,
+    "hp_step_pct": 10,
+    "mana_base_pct": 15,
+    "mana_step_pct": 10,
+    "craft": {
+      "low": {
+        "herbs": 3,
+        "reroll_value_stones": 1
+      },
+      "mid": {
+        "herbs": 5,
+        "reroll_value_stones": 2
+      },
+      "high": {
+        "herbs": 8,
+        "reroll_value_stones": 4
+      }
+    },
+    "condensed": {
+      "effect_mult": 10,
+      "cost_bottles": 10,
+      "cost_reroll_value_stones": 4,
+      "weight": 12,
+      "weight_loose": 20
+    },
+    "list": [
+      {
+        "name": "Red Draught",
+        "pool": "hp",
+        "tier": "low",
+        "index": 1
+      },
+      {
+        "name": "Yellow Draught",
+        "pool": "hp",
+        "tier": "mid",
+        "index": 2
+      },
+      {
+        "name": "White Draught",
+        "pool": "hp",
+        "tier": "high",
+        "index": 3
+      },
+      {
+        "name": "Sky Draught",
+        "pool": "mana",
+        "tier": "low",
+        "index": 1
+      },
+      {
+        "name": "Blue Draught",
+        "pool": "mana",
+        "tier": "mid",
+        "index": 2
+      },
+      {
+        "name": "Deep Blue Draught",
+        "pool": "mana",
+        "tier": "high",
+        "index": 3
+      }
+    ]
+  },
+  "presets": {
+    "note": "Loadout presets (`skill-pool.md` Preset · `skill-pool-system.md` rule 12 · save.md Skills). Six sets can be stored; the game selects one automatically by zone, and a Push returns the player to the main preset while cooldowns already counting keep counting. The count and the reset rule live here so the client and the docs read one number.",
+    "sets": 6,
+    "main_index": 0,
+    "auto_select_by_zone": true,
+    "cooldowns_persist_on_push": true,
+    "skill_xp_is_account_wide": true
+  },
+  "skill_drop": {
+    "boss": 0.35,
+    "elite": 0.08,
+    "normal": 0.001,
+    "note": "A skill piece is its own drop stream, separate from gear and stones. Rates are per kill and are the only place they are written; skill-pool-system.md prints them."
+  },
+  "skill_xp": {
+    "xp_per_kill": 1,
+    "xp_per_step": 400,
+    "level_cap": 20,
+    "note": "Skill level is earned the PoE way: every kill awards 1 XP to each skill that is in the list (attack, curse, heal) or open (aura) at that moment, and 400 XP buys one step up to the Cap of 20. So maxing one skill takes 8,000 kills of using it - about 4.4 hours in the high band, 5.8 in mid, 8.2 in low (loot.md section 2) - and it never depends on how often the skill happened to fire, on mana, or on list length. This replaces the old cube-root curve, which needed ~6.86M presses to reach 20 and was therefore unreachable."
+  },
   "build": {
     "reference_split": "Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%",
-    "hit_chance_pct": 80, "crit_chance_pct": 18.5, "dagger_capped_at_300": true
+    "hit_chance_pct": 80,
+    "crit_chance_pct": 18.5,
+    "dagger_capped_at_500": false,
+    "heal_pool_mult": 2.09,
+    "heal_pool_mult_note": "One round of the heal skills, as a multiple of Max HP: Greater Heal 45% + Heal 8%/sec x 8 sec (64%) = 109% => x2.09. Read by tools/survival.js for the boss 'with heal' column (SV6 gate); the heal skills in skills.json must sum to this number."
   },
-
+  "global": {
+    "damage_mult": 1,
+    "defend_mult": 1,
+    "note": "The two umbrella multipliers reserved for future sources. `global damage` multiplies outgoing damage once, after weak / Element counter / crit; `global defend` is the incoming step-7 `damage_taken_mult` bucket (combat.md section 2). Both start at x1.00 and no source grants either yet — a future skill or aura feeds one bucket, so the two never stack as separate multipliers. `global speed` (Haste) is the third reserved term: it scales the whole clock (cooldowns and final attack speed). **Player-only:** global speed affects the player alone and no mob ever carries Haste, even when mobs get their own skill lists."
+  },
   "loot": {
     "base_drop_chance": 0.08,
+    "filter": {
+      "upgrade_margin_pct": 10,
+      "note": "The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. At 10% the simulation reproduces the keep-rates this design has published all along (2.2% / 1.2% / 0.7% / 0.3% of drops); at 0% it reports roughly 1.5x that, and the printed sensitivity line shows all three. tools/loot.js measures the keep-rates; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.",
+      "rules": {
+        "default_min_rarity": "any",
+        "default_keep_missing_element": true,
+        "note": "loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot."
+      }
+    },
     "ttk_per_mob_sec": 1,
     "group_spawn_sec": 4,
     "bands": {
-      "low": { "group_mobs": 1.5, "kills_per_hr_published": 980, "lck_level": 30, "upgrades_per_hr": 2 },
-      "mid": { "group_mobs": 2.5, "kills_per_hr_published": 1385, "lck_level": 60, "upgrades_per_hr": 3 },
-      "high": { "group_mobs": 4, "kills_per_hr_published": 1800, "lck_level": 90, "upgrades_per_hr": 2 },
-      "high_full_lck": { "group_mobs": 4, "kills_per_hr_published": 1800, "lck_level": "ceiling", "upgrades_per_hr": 4 }
+      "low": {
+        "group_mobs": 1.5,
+        "kills_per_hr_published": 980,
+        "lck_level": 30,
+        "upgrades_per_hr": 3
+      },
+      "mid": {
+        "group_mobs": 2.5,
+        "kills_per_hr_published": 1385,
+        "lck_level": 60,
+        "upgrades_per_hr": 3
+      },
+      "high": {
+        "group_mobs": 4,
+        "kills_per_hr_published": 1800,
+        "lck_level": 90,
+        "upgrades_per_hr": 3
+      },
+      "high_full_lck": {
+        "group_mobs": 4,
+        "kills_per_hr_published": 1800,
+        "lck_level": "ceiling",
+        "upgrades_per_hr": 3
+      }
     },
-    "elite_spawn_chance": 0.005, "elite_tier_stones": 2,
-    "boss_per_hour": 4, "boss_tier_stones": 3,
-    "timeline_checkpoints_hr": { "level_10": 0.5, "level_30": 3.1, "level_60": 12.6, "level_90": 31.2, "level_100": 40.2 },
-    "push_hr_levels_91_100": 9.0,
+    "elite_spawn_chance": 0.2,
+    "elite_tier_stones": 0.05,
+    "elite_add_stone_chance": 0.00625,
+    "boss_per_hour": 4,
+    "boss_tier_stones": 3,
+    "boss_add_stones": 1,
+    "quality_stone_sources": {
+      "note": "crafting.md prices the +1..+15 ladder as 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 Quality Stones and says the source shifts monsters → elites → bosses by step (steps 1-5 · 6-10 · 11-15). These are the income side of that same split: the per-hour figures and the hours a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.",
+      "monster_quality_chance": 0.01,
+      "elite_quality_chance": 0.25,
+      "boss_quality_stones": 24
+    },
+    "repair_stone_sources": {
+      "note": "crafting.md: Repair stone comes from elites and bosses only, one per revive.",
+      "elite_repair_chance": 0.05,
+      "boss_repair_stones": 1
+    },
+    "corrupt_stone_sources": {
+      "note": "crafting.md: Corrupt stone is boss only and the rarest stone, one use per piece.",
+      "boss_corrupt_chance": 0.25
+    },
+    "timeline_checkpoints_hr": {
+      "level_10": 0.5,
+      "level_30": 3.1,
+      "level_60": 12.6,
+      "level_90": 31.2,
+      "level_100": 40.2
+    },
+    "push_hr_levels_91_100": 9,
     "kill_rate_tolerance": 0.01
   },
-
+  "road": {
+    "links": [
+      "Eastgate ↔ Millbrook",
+      "Millbrook ↔ Ashfall",
+      "Ashfall ↔ Ironrow",
+      "Ironrow ↔ Wolf Cross",
+      "Wolf Cross ↔ Highspire",
+      "Highspire ↔ Bonegate",
+      "Bonegate ↔ Frosthold",
+      "Frosthold ↔ Vermolch"
+    ],
+    "trip_min": 5,
+    "encounters_per_min": 1,
+    "encounters": {
+      "ambush": {
+        "weight": 60,
+        "mobs": "2-3 from the lower zone cast, at the player level clamped into that range",
+        "resolve": "normal combat (mob-roster.md numbers)",
+        "win": "normal 8% drop roll + a 3 gold purse",
+        "loss": "Push as usual, the trip is forfeit and the purse is lost"
+      },
+      "caravan": {
+        "weight": 25,
+        "mobs": "1 Large from the higher zone cast + 2 Small from the lower",
+        "resolve": "normal combat",
+        "win": "Standing only, no gold",
+        "loss": "Standing 0 and the trip ends"
+      },
+      "pedlar": {
+        "weight": 15,
+        "mobs": "none",
+        "resolve": "a shop line: information for gold (which Collector piece is next, the pedlar refresh)",
+        "win": "gold sink only",
+        "loss": "n/a"
+      }
+    },
+    "purse_gold": 3,
+    "purse_once_per_link_per_day": true,
+    "standing_per_trip_kills": 15,
+    "note": "The Road is opt-in and online only. A trip is 5 real minutes and carries 5 encounters (1 per Road minute). C+D stay a content choice, not an income choice: the purse pays at most 24 gold a day (8 links x 3 gold, once per link per day) against a junk-sell mint of 'thousands', and Standing is granted in kill-equivalents far below the kills the trip forfeits. Road pays no stones and AFK never runs on it.",
+    "forfeit_kills": 120
+  },
+  "inventory": {
+    "adventure_slots": 50,
+    "character_slots": 30,
+    "stack_size": {
+      "stone": 999,
+      "herb": 100,
+      "potion": 100
+    },
+    "unit_weight": {
+      "stone": 0,
+      "herb": 0.1,
+      "potion": 0.1
+    },
+    "gold_uses_slot": false,
+    "offline_cap_hr": 12,
+    "overflow": "stop_pickup",
+    "note": "Adventure bag (the temporary inventory) = 50 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 30 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). This replaces the D-037 100-slot auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
+  },
+  "rarity": {
+    "note": "Rarity answers Mod count only (item-rarity.md · glossary rule 2). The counts and the crafted ceilings are written here once; the client's Add craft reads them and never infers a number from the Rarity name.",
+    "floor_ceiling": {
+      "note": "item-rarity.md 'Item Quality vs Drop Level': each drop source defines a floor and a ceiling. Offline results are limited to the zone floor (save.md · loot.md section 7).",
+      "low": {
+        "floor": "low",
+        "ceiling": "low"
+      },
+      "mid": {
+        "floor": "low",
+        "ceiling": "mid"
+      },
+      "high": {
+        "floor": "mid",
+        "ceiling": "high"
+      }
+    },
+    "Common": {
+      "dropped": [
+        2,
+        3
+      ],
+      "crafted_max": 3
+    },
+    "Rare": {
+      "dropped": [
+        3,
+        5
+      ],
+      "crafted_max": 7
+    },
+    "drop_chance": {
+      "Common": 0.82,
+      "Rare": 0.18
+    },
+    "mods_added_cap": 2,
+    "add_stones_per_fill": [
+      1,
+      2
+    ],
+    "stat_mod_slots": 2,
+    "legacy_slots": 2
+  },
+  "salvage": {
+    "note": "loot.md section 5 · checks.md F15: a luck-protection milestone, one Reroll tier stone per 500 gear pieces salvaged (dissolved by the bag filter). The client counts the pieces so the milestone is real rather than implied.",
+    "pieces_per_tier_stone": 500
+  },
+  "save": {
+    "note": "save.md item 5: 3 walking snapshots guarding file corruption only, never wrong decisions (item 3). Triggers are level up, a successful Ascend or Refine, and every 10 minutes of play. A restore rewinds the whole account, so the shared Mastery is rebuilt from the surviving slot files rather than kept from after the craft.",
+    "snapshot_slots": 3,
+    "snapshot_interval_min": 10,
+    "snapshot_triggers": [
+      "level",
+      "ascend",
+      "refine"
+    ]
+  },
+  "junk": {
+    "stack": 999,
+    "unit_weight": 0,
+    "rarities": {
+      "common": {
+        "sell_gold": 1,
+        "drop_chance_per_kill": 0.2305556
+      },
+      "uncommon": {
+        "sell_gold": 5,
+        "drop_chance_per_kill": 0.0461111
+      },
+      "rare": {
+        "sell_gold": 25,
+        "drop_chance_per_kill": 0.0092222
+      }
+    },
+    "by_species": {
+      "rat": {
+        "name": "Rat Tail",
+        "rarity": "common"
+      },
+      "husk": {
+        "name": "Husk Shell",
+        "rarity": "common"
+      },
+      "goblin": {
+        "name": "Goblin Ear",
+        "rarity": "common"
+      },
+      "slime": {
+        "name": "Slime Jelly",
+        "rarity": "common"
+      },
+      "bandit": {
+        "name": "Bandit Token",
+        "rarity": "common"
+      },
+      "spider": {
+        "name": "Spider Silk",
+        "rarity": "common"
+      },
+      "wolf": {
+        "name": "Wolf Fang",
+        "rarity": "uncommon"
+      },
+      "orc": {
+        "name": "Orc Tusk",
+        "rarity": "uncommon"
+      },
+      "troll": {
+        "name": "Troll Hide",
+        "rarity": "uncommon"
+      },
+      "elf": {
+        "name": "Elf Dust",
+        "rarity": "uncommon"
+      },
+      "demonic": {
+        "name": "Demon Horn",
+        "rarity": "uncommon"
+      },
+      "golem": {
+        "name": "Golem Shard",
+        "rarity": "rare"
+      },
+      "knight": {
+        "name": "Knight Emblem",
+        "rarity": "rare"
+      },
+      "drake": {
+        "name": "Drake Scale",
+        "rarity": "rare"
+      },
+      "seraph": {
+        "name": "Seraph Feather",
+        "rarity": "rare"
+      }
+    },
+    "note": "RO-style mob junk: a fourth drop stream, one flavoured item per species, sold to the Settlement Counterhand for gold. Each rarity's drop_chance_per_kill is set to junk_per_kill / sell_gold, so a kill of any species has the same expected gold (the F3 junk line per kill) and the junk line stays 416/hr whatever the species mix - common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
+  },
+  "aoe": {
+    "per_target_pct": 60,
+    "target_cap": 3,
+    "mana_mult": 1.5,
+    "note": "The AoE rule: an AoE skill deals 60% damage to each target hit, hits at most 3 targets, and costs 1.5x mana. Damage per mana is 0.40x at 1 target, 0.80x at 2, 1.20x at the Cap. Which 3 targets it hits is the reach queue (mob.reach), not a fixed set."
+  },
   "craft": {
     "reroll_value_stones_per_use": 8,
     "refine_stones_per_use": 8,
-    "ascend_add_stones": 1,
+    "remove_stones_per_use": 1,
+    "ascend_add_stones": 8,
     "ascend_tier_stones": 8,
-    "refine_slots_per_item": 2.5,
+    "refine_slots_per_item": 1,
     "refine_steps": 2,
     "ascend_items_per_set": 12,
-    "polish_casts_per_full_set": 100
+    "polish_casts_per_full_set": 100,
+    "upgrade_cap": 15,
+    "upgrade_success_endpoints": {
+      "safe_to": 4,
+      "mid": [
+        90,
+        60
+      ],
+      "high": [
+        50,
+        20
+      ]
+    },
+    "upgrade_costs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      9,
+      11,
+      13,
+      15,
+      18,
+      21,
+      24,
+      27,
+      30
+    ],
+    "upgrade_breaks_from": 11,
+    "protection_start": 5,
+    "repair_stones": 1,
+    "corrupt_outcomes": [
+      {
+        "weight": 25,
+        "kind": "nothing"
+      },
+      {
+        "weight": 20,
+        "kind": "reroll_values"
+      },
+      {
+        "weight": 15,
+        "kind": "add_mod"
+      },
+      {
+        "weight": 15,
+        "kind": "remove_mod"
+      },
+      {
+        "weight": 10,
+        "kind": "reroll_element"
+      },
+      {
+        "weight": 10,
+        "kind": "gear_mod_up",
+        "steps": 2
+      },
+      {
+        "weight": 5,
+        "kind": "quality_down"
+      }
+    ],
+    "gear_mod_per_level": 2,
+    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.js` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.js --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.js` holds the G5 boss gate against a fully upgraded set — which is how checks.md H1 pays for the uplift now that D-103 measured `mob_HP` as already inside the pacing (it moves nothing there).",
+    "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing · 20% reroll values inside the current Tiers · 15% +1 Mod (crafted max and Core slot cap respected) · 15% remove one non-legacy Mod · 10% reroll Element (the only Element change in the game) · 10% Gear Mod +2 · 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
+    "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe · +5 to +10 90% down to 60% and a fail drops one level · +11 to +15 50% down to 20% and a fail breaks the piece · protection 5 per piece from birth, each would-be break spends one and drops a level · Repair stone revives at the pre-break level and refills protection · costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality Stones · online only"
   },
-
   "town_shared": {
     "gold_per_junk_piece": 1,
     "round_rate_to_decimals": 1,
     "craft_progress_intent_sec": 40,
-    "pool_regen_tolerance": 1.0
+    "pool_regen_tolerance": 1
   },
-
   "f_rows_carried": [
-    { "id": "F4", "value": "hr1 ~30 → hr2-4 2-7 → after that 0-5 · total 0.7-2.2% of drops", "expression": "measured — loot.md section 3 · owned by the keep-rate sim, not by this engine", "status": "measured" },
-    { "id": "F9", "value": "elite / boss only · rate pending rebalance", "expression": "Add mod stone/hr", "status": "pending" },
-    { "id": "F10", "value": "~0.8 (pending)", "expression": "1 Add + 8 tier stones = Ascend/hr", "status": "pending" },
-    { "id": "F11", "value": "0.15 (was 0.28) · keep-rate unchanged (1.01→1.02%)", "expression": "Flat line per item (high zone after 0.25 weighting)", "status": "measured" },
-    { "id": "F12", "value": "boss 1.4 + elite 1.4 + normal 1.8 = 4.6", "expression": "skill/hr · skill-pool.md drop chances", "status": "carried" },
-    { "id": "F13", "value": "2% per kill mid zones · 3% high zones (farm.md) · exact rate pending rebalance", "expression": "herb bundles/hr", "status": "pending" },
-    { "id": "F14", "value": "max 3 uses per fight · 30 sec shared cooldown · suppressed on bosses", "expression": "potion sustain bound", "status": "rule" },
-    { "id": "F15", "value": "1 Reroll tier stone per 500 salvages (~+2.7% of F7)", "expression": "salvage milestone bound", "status": "rule" }
-  ]
+    {
+      "id": "F4",
+      "value": "hr1 30.2 → hr2-4 8.3 → after that 5.3 (low band) · keep-rate 2.35% low · 1.36% mid · 0.72% high · 0.23% high + full_lck",
+      "expression": "measured — tools/loot.js, the seven roll steps in loot.md section 1",
+      "status": "measured"
+    },
+    {
+      "id": "F11",
+      "value": "0.29 Flat lines per high-zone drop (2.77 lines per item) · the four early-game Flats thin out as Item quality rises",
+      "expression": "Flat line per drop (high zone, after the 0.25 early-game weighting)",
+      "status": "measured"
+    },
+    {
+      "id": "F12",
+      "value": "boss 1.4 + elite 1.4 + normal 1.8 = 4.6",
+      "expression": "skill/hr · skill-pool.md drop chances",
+      "status": "carried"
+    },
+    {
+      "id": "F14",
+      "value": "max 3 uses per fight · 30 sec shared cooldown · suppressed on bosses",
+      "expression": "potion sustain bound",
+      "status": "rule"
+    },
+    {
+      "id": "F15",
+      "value": "1 Reroll tier stone per 500 salvages (~+2.7% of F7)",
+      "expression": "salvage milestone bound",
+      "status": "rule"
+    }
+  ],
+  "elements": {
+    "note": "5 Elements. `counter` is attack row vs target column; chaos is the only one with no counter (1.15 everywhere, itself included), and fire<->cold plus lightning<->poison are the 0.60 pairs. The K values printed in elements.md come from K and status above - do not retype them.",
+    "order": [
+      "fire",
+      "cold",
+      "lightning",
+      "poison",
+      "chaos"
+    ],
+    "status_of": {
+      "fire": "burn",
+      "cold": "chill",
+      "lightning": "shock",
+      "poison": "poison",
+      "chaos": "mark"
+    },
+    "mechanic": {
+      "fire": "burn per second",
+      "cold": "slow target attack speed",
+      "lightning": "short interrupt",
+      "poison": "stacking layers, never expires alone",
+      "chaos": "long hits that grow stronger"
+    },
+    "counter": {
+      "fire": {
+        "fire": 1,
+        "cold": 0.6,
+        "lightning": 1.1,
+        "poison": 1.2,
+        "chaos": 1
+      },
+      "cold": {
+        "fire": 0.6,
+        "cold": 1,
+        "lightning": 1.1,
+        "poison": 1,
+        "chaos": 1
+      },
+      "lightning": {
+        "fire": 1.1,
+        "cold": 1.1,
+        "lightning": 1,
+        "poison": 0.6,
+        "chaos": 1
+      },
+      "poison": {
+        "fire": 1.2,
+        "cold": 1,
+        "lightning": 0.6,
+        "poison": 1,
+        "chaos": 1
+      },
+      "chaos": {
+        "fire": 1.15,
+        "cold": 1.15,
+        "lightning": 1.15,
+        "poison": 1.15,
+        "chaos": 1.15
+      }
+    },
+    "weak_mult": 1.5,
+    "align_cap": 50
+  },
+  "opening": {
+    "note": "Minute one. Everything the game hands the player before they touch anything, so a client can create a playable character from one read. The starting weapon is deliberately the worst roll in the table: the mob-health curve already assumes a level-1 character is holding one, and a free tier-1 weapon would be more than twice the damage the curve pays for.",
+    "settlement": "Eastgate",
+    "settlement_zone": 1,
+    "level": 1,
+    "gold": 0,
+    "stones": {},
+    "gear": [
+      {
+        "slot": "main hand",
+        "base": "one-handed sword",
+        "quality": "low",
+        "tier": 3,
+        "mods": {
+          "Physical power flat": 15
+        },
+        "note": "the worst roll in the table - this is what the curve already assumes at level 1"
+      }
+    ],
+    "skills": [],
+    "skills_note": "No starting skill on purpose. The mob-health curve gives a level-1 character 0.3% skill power, so a free attack skill would hand out several times what the mobs are priced against. The first skill is the first boss drop, which is also the first time the skill axis becomes visible.",
+    "first_rule": {
+      "source": "Guild counter, Eastgate",
+      "type": "hunt",
+      "objective": "kill 5 in zone 1",
+      "why": "the task board already exists and pays stones only, so the first instruction costs no new system and no power outside the loot funnel - its reward sits inside the task income bound tasks.md already sets",
+      "completes_on": "5 kills in zone 1",
+      "reward": "the standard hunt payout (Reroll value stones), unmodified",
+      "exit": "once the first gear drop lands the task board stops being the tutorial and the player moves to the zone loop"
+    },
+    "no_death": "the player cannot be killed by the opening: zone-1 mobs take minutes to kill a level-1 character, and Push returns them to camp at full HP"
+  },
+  "doc_prose_lines_max": 1390,
+  "doc_prose": {
+    "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
+    "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",
+    "lines_max": 1390,
+    "lines_now": 1368,
+    "gate": "L9 fails when the count rises above lines_max. Lower the cap as lines are fixed.",
+    "exempt": "harness/decisions.md, harness/todo.md, harness/handoff.md, harness/HARNESS.md, and any line marked lint:allow",
+    "baseline_note": "Baseline measured on 2026-10-04 with every doc present. skill-pool.md was restored from git mid-pass and its prose legitimately raised the count from 1370 to 1390, which is the gate working: the cap may only fall, and every fix must lower it here."
+  }
 }

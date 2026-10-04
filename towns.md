@@ -67,7 +67,7 @@ Zone levels, group sizes and quality ceilings stay in `world.md`; this adds a pl
 
 | Zone | Level | Settlement | Capital | Innate Element | Base bias (flavor until re-simulated) | NPCs |
 |---|---|---|---|---|---|---|
-| 1 | 1-10 | Eastgate | — | fire / neutral | cloth | Counterhand · Porter · Waypoint keeper |
+| 1 | 1-10 | Eastgate | — | fire | cloth | Counterhand · Porter · Waypoint keeper |
 | 2 | 11-20 | Millbrook | — | poison | cloth / light | Counterhand · Porter · Waypoint keeper · Herbalist |
 | 3 | 21-30 | Ashfall | **low capital** | fire | light (Evasion) | full set + Collector |
 | 4 | 31-40 | Ironrow | — | lightning | light / mail | Counterhand · Porter · Waypoint keeper · Armourer |
@@ -127,6 +127,27 @@ Prices are in **gold**, written as minutes of full-sell income (`economy.md`: 1 
 | **D Road events** | on a Road trip: caravan escort, traveling pedlar, ambush — one encounter per Road minute | gold · Standing · cosmetic stock the towns do not carry | total ≤ the value of an equal hour spent farming, measured against F1/F5 · pays **no stones**, so boss and elite gates (G5, F7-F10) keep their monopoly on power |
 
 - **C+D are a content choice, not an income choice.** A Road hour forfeits 1,800 kills for at most a few percent of that value, and that trade must be stated in the UI before the player steps onto the Road. Its purpose is the thing farming cannot give: the isekai travel beat, the encounter, the merchant who only travels.
+
+### What the Road actually is
+
+Generated from `engine.json` `road` — edit the data, run `node tools/check.js --write`. The mint bound and the Standing rate are guarded by **X36**, so the Road cannot become a second income faucet.
+
+<!-- BEGIN GENERATED:road-rules -->
+| Road element | Value |
+|---|---|
+| Links (a chain, in zone order) | Eastgate ↔ Millbrook   ·   Millbrook ↔ Ashfall   ·   Ashfall ↔ Ironrow   ·   Ironrow ↔ Wolf Cross   ·   Wolf Cross ↔ Highspire   ·   Highspire ↔ Bonegate   ·   Bonegate ↔ Frosthold   ·   Frosthold ↔ Vermolch |
+| Trip length · encounters | 5 real minutes · 5 encounters (1 per Road minute) |
+| After the first visit | the Waypoint is free and instant; opening a link costs the carriage price in `towns.md` section 5 |
+
+| Encounter | Weight | Mobs | Resolution | Win · loss |
+|---|---|---|---|---|
+| ambush | 60% | 2-3 from the lower zone cast, at the player level clamped into that range | normal combat (mob-roster.md numbers) | normal 8% drop roll + a 3 gold purse · loss: Push as usual, the trip is forfeit and the purse is lost |
+| caravan | 25% | 1 Large from the higher zone cast + 2 Small from the lower | normal combat | Standing only, no gold · loss: Standing 0 and the trip ends |
+| pedlar | 15% | none | a shop line: information for gold (which Collector piece is next, the pedlar refresh) | gold sink only · loss: n/a |
+
+The purse pays 3 gold once per link per day, so the Road can never mint more than **24 gold/day**, while one 6-hour farming session mints thousands by selling junk — Road gold is a rounding error, which is what "C+D are a content choice, not an income choice" has to mean. Standing is granted in kill-equivalents (**15** per completed trip), under a fifth of what the same 5 minutes would earn hunting (**X36**). Losing forfeits roughly 120 kills of progress and the purse. Road fights pay no stones, and AFK never runs on a Road: a closed client auto-completes the trip (`save.md`).
+<!-- END GENERATED:road-rules -->
+
 - **Offline safety** — if the game closes mid-Road, the trip auto-completes at the destination and the character is parked in a zone before the offline clock starts. AFK income rules (`concept.md`, loot.md section 7) therefore never have to describe a character who is "travelling", and the 12-hour Cap keeps its current meaning.
 - Camp/Push is unchanged: a Push still returns the character to the Camp of the current zone (`combat.md` section 4).
 
@@ -174,10 +195,7 @@ Prices are in **gold**, written as minutes of full-sell income (`economy.md`: 1 
 
 **Still open:**
 
-- Base bias per settlement — needs the `loot.md` section 3 keep-rate re-run; the 5-step check list is `towns-stalls.md` section 8 (`checks.md` T15). Until then the column is flavour and no number may be written into it.
-- The F9 and F13 lines that the Armourer floor and the pouch ladder depend on (`towns-stalls.md` section 9).
-- Whether a Collector set can be finished without opening the filter — a rule question for `loot.md` section 4, and `towns-ui.md` section 6 assumes the reject flag exists.
-- Whether gold carries across the 3 character slots (`save.md`) — default no, and the UI reads it per character.
-- Whether Capitals are visible on the map before their level requirement, i.e. does the map tease the next band (`towns-ui.md` section 12 item 1).
+- The F9 and F13 lines that the Armourer floor and the pouch ladder depend on (`towns-stalls.md` section 9). F13 (herb bundles/hr) is derived from `engine.json` `herbs` and the pouch ladder prices off it — a measurement for `harness/todo.md` section B, not a new rule.
+- Whether Capitals are visible on the map before their level requirement, i.e. does the map tease the next band (`towns-ui.md` section 12 item 1). **Owner decision — a UI preference, no number depends on it.**
 
 (End of file)

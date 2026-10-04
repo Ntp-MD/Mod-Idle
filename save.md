@@ -9,12 +9,17 @@ import crafting.md
 
 | Category | Items |
 |---|---|
-| Character | Level · allocated stat points · equipped items · weight |
+| Character | Level · equipped items · weight — no stat points are stored, because no rule allocates them (`formula.md` §1 derives every Core stat from level and gear, and `harness/decisions.md` D-042 defers per-skill stat assignment to after release) |
 | Progress | Unlocked zones · current target · wave |
-| Town *(towns.md · doors chosen)* | Visited settlements · open Road/Waypoint links · Standing per settlement (kill counter, not a spendable pool) · owned house, plot deeds, pouch tier, stash tabs, **bag category slots and the potion carrier slot** · **bought filter preset slots** · Curio pedlar stock + refresh day · Collector set progress + which pieces were turned in · Collector hint line bought or not · per-slot **sell-or-dissolve** choice |
+| Town *(towns.md · doors chosen)* | Visited settlements · open Road/Waypoint links · Standing per settlement (kill counter, not a spendable pool) · owned house, plot deeds, pouch tier, stash tabs, **bag category slots and the potion carrier slot** · **bought filter preset slots** · Curio pedlar stock + refresh day · Collector set progress + which pieces were turned in · Collector hint line bought or not · per-slot **filter thresholds** |
 | Bag | All items with Item quality, Tier, Element, every Mod slot, Legacy mod flags (slots 1-2), `mods_added 0-2`, `refine_lv +0-15`, `broken` flag, `protection_left 0-5`, `corrupted` flag |
 | Craft | All 7 stones (Add mod / Reroll value / Reroll tier / Remove mod / Quality / Repair / Corrupt) · **gold count** (single-medium mint, economy.md) · history of most recently crafted items |
 | Provision | Herb counts by tier · potion counts by type and tier · farm plots (planted tier + ready time each) · potion auto config (per-type toggle + threshold) · owned plot deeds and pouch tier |
+| Skills | The six loadout presets and the order they are cycled in (`skill-pool-system.md`) · per-skill XP so a swap does not reset progress |
+| Tasks | Guild board state (which task is active per slot) · the daily-skip timers (`tasks.md`) |
+| Salvage | The dissolve counter, since a tier stone is owed every 500 salvages (`checks.md` F15) |
+| Mode | Whether the character is in **Adventure** or **Settlement** (`glossary.md`), whether they are on AFK or active, and the offline-start timestamp, so a session resumes mid-cycle instead of restarting |
+| Boss clock | The per-character boss spawn clock. It does **not** accrue while away — bosses are an online gate (`combat.md` section 7) |
 | Time | Total play time · real-time recovery cycle |
 | Settings | Bag filter · automation rules |
 
@@ -24,7 +29,7 @@ import crafting.md
 - **Store the Element of the item** — must store it as a separate value, not converted into a res value, because crafting must not change Element
 - **Store target and attack queue** — if the player leaves the game and returns, the game must know where to resume, not restart
 - **Offline time** — if present, must guard against cheating by not allowing time to advance beyond reality · Cap at **12 hours** (concept.md) · Offline results are calculated as AFK: same drops but Item quality limited to the zone floor, and no boss income (loot.md section 7)
-- **Bag filter thresholds** — must store per slot, because they determine what becomes a Reroll value stone (loot.md section 4) · Includes the list of "missing Element res" that the filter uses to keep items
+- **Bag filter thresholds** — must store per slot, because they determine what becomes a Reroll value stone (loot.md section 4); junk is always kept and sold at the Counterhand. Includes the list of "missing Element res" that the filter uses to keep items
 - **Reroll baseline** — must store "highest value that slot ever had" separately from the current value, because the new rule is Reroll must never roll lower than before (crafting.md)
 - **Craft count per item** — store `mods_added 0-2`, `refine_lv +0-15`, `protection_left 0-5`, and `broken` per piece. Add is capped at 2 fills (net counting); refine stops at +15; protection never refills except via Repair stone.
 
@@ -37,7 +42,8 @@ import crafting.md
 - **Automatic backup** — 3 walking snapshots · Triggers = level up / successful Ascend or Refine / every 10 minutes of play · Goal is protection against "file corruption", not against "wrong decisions" (see item 3)
 
 - **How time is counted against cheating** — store `accumulated elapsed` per session as monotonic (device boot clock), then add real-clock deltas only for periods *greater than zero*, capped at 12 hours (concept.md) · If real-clock is detected moving backward = count as 0 hours offline, no compensation income · Offline results are calculated as AFK: same drops, but Item quality limited to the zone floor, and no boss income (loot.md section 7) → no incentive to fake time, because 12 hours of gains are only zone-floor items
-- **Must store boss spawn timestamps** — boss spawns every 15 minutes per zone (G5). If the next-due spawn time is not stored, on return the player could trigger bosses too frequently until core income (2.4/hour · F9) overflows → full-set Ascend becomes cheaper than the designed 15 hours (E7)
+- **Must store both bags** — the adventure bag's contents (gear; arrival order is display only now) and the character bag's stack counts (stones 999/slot, herbs and potions 100/slot, gold separate). There is no overflow conversion any more, so nothing is auto-lost; the filter's default medium (stone or gold) still decides what a rejected piece becomes (`loot.md` section 4 · **X34**).
+- **Must store boss spawn timestamps** — bosses spawn every 15 minutes **per character**, not per zone (G5 · the 4/hour in loot.md and checks.md F7). If the next-due spawn time is not stored, on return the player could trigger bosses too frequently until core income (2.4/hour · F9) overflows → full-set Ascend becomes cheaper than the designed 15 hours (E7)
 
 # Unresolved items
 

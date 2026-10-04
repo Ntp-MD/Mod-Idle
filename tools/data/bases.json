@@ -1,0 +1,553 @@
+{
+ "note": "The Base frames per slot, imported from item-base.md by tools/bases.js --write. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; school is the Gear Mod the frame carries. weapons and weapon_pools come from equipment-weapon.md and equipment-slot-weapon.md. tools/loot.js and the client both read this file, and `node tools/bases.js --checks` gates it against the docs so none of them can drift.",
+ "roll_rule": "Bases roll equally inside their slot (item-base.md \"Base Rolling\"); a dual-wield off hand weapon uses that weapon type weight x 0.8.",
+ "quality_weight_multiplier": 1.3,
+ "mastery": {
+  "xp_per_kill": 4,
+  "level_divisor": 100,
+  "level_cap": 20,
+  "weight_discount_per_level_pct": 1,
+  "weight_discount_cap_pct": 20,
+  "skill_bonus_from_level": 5,
+  "skill_bonus_per_level_pct": 0.5,
+  "skill_bonus_cap_pct": 8,
+  "drop_bonus_per_type_pct": 1,
+  "drop_bonus_level_required": 10
+ },
+ "slots": [
+  "helmet",
+  "chest",
+  "pant",
+  "boots",
+  "belt",
+  "gloves",
+  "ring",
+  "amulet",
+  "cape",
+  "off hand"
+ ],
+ "bases": [
+  {
+   "name": "coif",
+   "weight": 30,
+   "primary": [
+    "max_hp_flat"
+   ],
+   "secondary": [
+    "elemental_resistance"
+   ],
+   "slot": "helmet",
+   "school": "evasion_flat"
+  },
+  {
+   "name": "barbute",
+   "weight": 45,
+   "primary": [
+    "max_hp_flat",
+    "max_hp"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "life_regen_pct"
+   ],
+   "slot": "helmet",
+   "school": "armour_flat"
+  },
+  {
+   "name": "circlet",
+   "weight": 18,
+   "primary": [
+    "max_mana",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "mana_regen_pct"
+   ],
+   "slot": "helmet",
+   "school": "energy_shield_flat"
+  },
+  {
+   "name": "mail",
+   "weight": 60,
+   "primary": [
+    "max_hp"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "max_hp_flat"
+   ],
+   "slot": "chest",
+   "school": "evasion_flat"
+  },
+  {
+   "name": "plate",
+   "weight": 85,
+   "primary": [
+    "max_hp_flat",
+    "max_hp"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "life_regen_pct"
+   ],
+   "slot": "chest",
+   "school": "armour_flat"
+  },
+  {
+   "name": "vestments",
+   "weight": 28,
+   "primary": [
+    "max_mana",
+    "max_mana_flat"
+   ],
+   "secondary": [
+    "cooldown_reduction",
+    "mana_regen_pct"
+   ],
+   "slot": "chest",
+   "school": "energy_shield_flat"
+  },
+  {
+   "name": "greaves",
+   "weight": 50,
+   "primary": [],
+   "secondary": [
+    "max_hp_flat"
+   ],
+   "slot": "pant",
+   "school": "evasion_flat"
+  },
+  {
+   "name": "cuisses",
+   "weight": 70,
+   "primary": [
+    "max_hp_flat",
+    "max_hp"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "life_regen_pct"
+   ],
+   "slot": "pant",
+   "school": "armour_flat"
+  },
+  {
+   "name": "wrap",
+   "weight": 25,
+   "primary": [
+    "cooldown_reduction",
+    "max_mana_flat"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "mana_regen_pct"
+   ],
+   "slot": "pant",
+   "school": "energy_shield_flat"
+  },
+  {
+   "name": "striders",
+   "weight": 35,
+   "primary": [],
+   "secondary": [
+    "cooldown_reduction"
+   ],
+   "slot": "boots",
+   "school": "evasion_flat"
+  },
+  {
+   "name": "sabatons",
+   "weight": 55,
+   "primary": [
+    "max_hp_flat",
+    "max_hp"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "life_regen_pct"
+   ],
+   "slot": "boots",
+   "school": "armour_flat"
+  },
+  {
+   "name": "soft boots",
+   "weight": 30,
+   "primary": [
+    "max_mana_flat",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "max_energy_shield_pct"
+   ],
+   "slot": "boots",
+   "school": "energy_shield_flat"
+  },
+  {
+   "name": "girdle",
+   "weight": 40,
+   "primary": [
+    "max_hp_flat",
+    "max_hp"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "life_regen_pct"
+   ],
+   "slot": "belt",
+   "school": null
+  },
+  {
+   "name": "sash",
+   "weight": 20,
+   "primary": [
+    "max_mana",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "elemental_resistance",
+    "mana_regen_pct"
+   ],
+   "slot": "belt",
+   "school": null
+  },
+  {
+   "name": "clasp",
+   "weight": 28,
+   "primary": [
+    "elemental_resistance",
+    "max_hp_flat"
+   ],
+   "secondary": [],
+   "slot": "belt",
+   "school": null
+  },
+  {
+   "name": "gauntlets",
+   "weight": 45,
+   "primary": [
+    "max_hp"
+   ],
+   "secondary": [
+    "elemental_alignment",
+    "life_regen_pct"
+   ],
+   "slot": "gloves",
+   "school": "armour_flat"
+  },
+  {
+   "name": "wraps",
+   "weight": 20,
+   "primary": [
+    "elemental_alignment",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "max_mana_flat"
+   ],
+   "slot": "gloves",
+   "school": null
+  },
+  {
+   "name": "gloves",
+   "weight": 25,
+   "primary": [],
+   "secondary": [
+    "elemental_alignment"
+   ],
+   "slot": "gloves",
+   "school": "evasion_flat"
+  },
+  {
+   "name": "band",
+   "weight": 10,
+   "primary": [
+    "elemental_alignment",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "max_hp",
+    "all_resistance_pct"
+   ],
+   "slot": "ring",
+   "school": null
+  },
+  {
+   "name": "signet",
+   "weight": 14,
+   "primary": [
+    "max_mana",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "max_hp",
+    "max_energy_shield_pct"
+   ],
+   "slot": "ring",
+   "school": null
+  },
+  {
+   "name": "pendant",
+   "weight": 12,
+   "primary": [
+    "elemental_alignment",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "max_hp",
+    "all_resistance_pct"
+   ],
+   "slot": "amulet",
+   "school": null
+  },
+  {
+   "name": "talisman",
+   "weight": 20,
+   "primary": [
+    "elemental_alignment",
+    "max_mana_flat"
+   ],
+   "secondary": [
+    "cooldown_reduction",
+    "max_energy_shield_pct"
+   ],
+   "slot": "amulet",
+   "school": null
+  },
+  {
+   "name": "cloak",
+   "weight": 20,
+   "primary": [
+    "elemental_resistance"
+   ],
+   "secondary": [
+    "cooldown_reduction",
+    "all_resistance_pct"
+   ],
+   "slot": "cape",
+   "school": null
+  },
+  {
+   "name": "mantle",
+   "weight": 32,
+   "primary": [
+    "max_hp_flat",
+    "elemental_resistance"
+   ],
+   "secondary": [
+    "max_mana_flat",
+    "all_resistance_pct"
+   ],
+   "slot": "cape",
+   "school": null
+  },
+  {
+   "name": "buckler",
+   "weight": 25,
+   "primary": [
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "max_hp_flat"
+   ],
+   "slot": "off hand",
+   "school": null
+  },
+  {
+   "name": "kite shield",
+   "weight": 55,
+   "primary": [
+    "max_hp_flat",
+    "max_hp"
+   ],
+   "secondary": [],
+   "slot": "off hand",
+   "school": null
+  },
+  {
+   "name": "tome",
+   "weight": 30,
+   "primary": [
+    "max_mana",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "max_mana_flat",
+    "elemental_alignment"
+   ],
+   "slot": "off hand",
+   "school": null
+  }
+ ],
+ "weapons": [
+  {
+   "name": "one-handed sword",
+   "hands": "Single",
+   "group": "melee",
+   "damage": "physical",
+   "weapon_aspd": 1.2,
+   "weapon_mult": 1,
+   "dual_wield": true,
+   "weight": 35
+  },
+  {
+   "name": "one-handed axe",
+   "hands": "Single",
+   "group": "melee",
+   "damage": "physical",
+   "weapon_aspd": 1.2,
+   "weapon_mult": 1,
+   "dual_wield": true,
+   "weight": 40
+  },
+  {
+   "name": "dagger",
+   "hands": "Single",
+   "group": "melee",
+   "damage": "physical",
+   "weapon_aspd": 1.5,
+   "weapon_mult": 0.8,
+   "dual_wield": true,
+   "weight": 25
+  },
+  {
+   "name": "mace",
+   "hands": "Single",
+   "group": "melee",
+   "damage": "physical",
+   "weapon_aspd": 1,
+   "weapon_mult": 1.2,
+   "dual_wield": false,
+   "weight": 45
+  },
+  {
+   "name": "rod",
+   "hands": "Single",
+   "group": "magic",
+   "damage": "magic",
+   "weapon_aspd": 1,
+   "weapon_mult": 1.2,
+   "dual_wield": false,
+   "weight": 25
+  },
+  {
+   "name": "wand",
+   "hands": "Single",
+   "group": "magic",
+   "damage": "magic",
+   "weapon_aspd": 1,
+   "weapon_mult": 1.2,
+   "dual_wield": false,
+   "weight": 25
+  },
+  {
+   "name": "staff",
+   "hands": "Two",
+   "group": "magic",
+   "damage": "magic",
+   "weapon_aspd": 0.85,
+   "weapon_mult": 1.41,
+   "dual_wield": false,
+   "weight": 60
+  },
+  {
+   "name": "spear",
+   "hands": "Two",
+   "group": "melee",
+   "damage": "physical",
+   "weapon_aspd": 0.85,
+   "weapon_mult": 1.41,
+   "dual_wield": false,
+   "weight": 70
+  },
+  {
+   "name": "two-handed sword",
+   "hands": "Two",
+   "group": "melee",
+   "damage": "physical",
+   "weapon_aspd": 0.7,
+   "weapon_mult": 1.71,
+   "dual_wield": false,
+   "weight": 75
+  },
+  {
+   "name": "two-handed axe",
+   "hands": "Two",
+   "group": "melee",
+   "damage": "physical",
+   "weapon_aspd": 0.7,
+   "weapon_mult": 1.71,
+   "dual_wield": false,
+   "weight": 85
+  },
+  {
+   "name": "bow",
+   "hands": "Two (range)",
+   "group": "ranged",
+   "damage": "physical",
+   "weapon_aspd": 1.1,
+   "weapon_mult": 1.09,
+   "dual_wield": false,
+   "weight": 50
+  },
+  {
+   "name": "crossbow",
+   "hands": "Two (range)",
+   "group": "ranged",
+   "damage": "physical",
+   "weapon_aspd": 1.1,
+   "weapon_mult": 1.09,
+   "dual_wield": false,
+   "weight": 60
+  }
+ ],
+ "dual_wield_weight_mult": 0.8,
+ "weapon_pools": {
+  "main hand": {
+   "Primary": [
+    "physical_power_flat",
+    "physical_power",
+    "critical_chance",
+    "critical_damage"
+   ],
+   "Secondary": [
+    "attack_speed",
+    "accuracy"
+   ],
+   "Stat Mod": [
+    "stat_mod_flat"
+   ],
+   "Blocked": [
+    "max_hp",
+    "cooldown_reduction",
+    "elemental_resistance"
+   ],
+   "Weapon": [],
+   "sword / axe / dagger / spear / bow / crossbow": [
+    "physical_power_flat"
+   ],
+   "rod / wand / staff": [
+    "magic_power_flat",
+    "magic_power"
+   ],
+   "all types": [
+    "elemental_power_flat"
+   ]
+  },
+  "off hand": {
+   "Shield": [
+    "max_hp_flat",
+    "max_hp"
+   ],
+   "Book": [
+    "max_mana_flat",
+    "max_mana",
+    "cooldown_reduction"
+   ],
+   "Dual-wield weapon": [],
+   "Stat Mod": [
+    "stat_mod_flat"
+   ]
+  }
+ }
+}

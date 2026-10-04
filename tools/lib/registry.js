@@ -25,7 +25,7 @@ const num = (label, x) => ['num', label, x];
 const str = (label, x) => ['str', label, x];
 const txt = (label, x) => ['text', label, x];
 
-const ELEMENTS = ['neutral', 'fire', 'cold', 'lightning', 'poison', 'chaos'];
+const ELEMENTS = ['fire', 'cold', 'lightning', 'poison', 'chaos'];
 const LADDERS = ['stash_tab', 'herb_pouch', 'plot_deed', 'house', null];
 
 const specs = {
@@ -38,8 +38,7 @@ const specs = {
       stat: { kind: 'constmap', group: 'Stat model', label: 'Stat growth', fields: {
         base: ['int', 'Base stat at level 1'], per_level: ['int', 'Stat per level'],
         level_cap: ['int', 'Player level cap'], mob_level_cap: ['int', 'Mob level cap'],
-        item_slots: ['int', 'Equipment slots'], core_flat_max: ['int', 'Core stat flat per Mod'],
-        core_pct_max: ['int', 'Core stat % per Mod'], split_items: ['int', 'Items per stat in the reference split'],
+        item_slots: ['int', 'Equipment slots'], core_flat_max: ['int', 'Stat Mod flat per Mod'], split_items: ['int', 'Items per stat in the reference split'],
       } },
       level_gain: { kind: 'constmap', group: 'Stat model', label: 'Level gain', fields: {
         hp_per_level: ['int', 'HP per level'], mp_per_level: ['int', 'Mana per level'],
@@ -49,7 +48,8 @@ const specs = {
       K: { kind: 'constmap', group: 'Stat model', label: 'K coefficients', fields: {} },
       caps: { kind: 'constmap', group: 'Stat model', label: 'Caps', note: 'null means uncapped.', fields: {
         crit_chance: ['num', 'Crit chance', { unit: '%', nullable: true }],
-        dodge_chance: ['num', 'Dodge chance', { unit: '%', nullable: true }],
+        evasion: ['num', 'Evasion', { unit: '%', nullable: true }],
+
         perfect_dodge: ['num', 'Perfect dodge', { unit: '%', nullable: true }],
         alignment: ['num', 'Alignment', { unit: '%', nullable: true }],
         elem_res: ['num', 'Element resistance', { unit: '%', nullable: true }],
@@ -67,7 +67,7 @@ const specs = {
         reference_split: txt('Reference split'),
         hit_chance_pct: num('Hit chance', { unit: '%' }),
         crit_chance_pct: num('Crit chance', { unit: '%' }),
-        dagger_capped_at_300: ['bool', 'Dagger reaches Aspd Cap'],
+        dagger_capped_at_500: ['bool', 'Dagger reaches Aspd Cap'],
       } },
       loot: { kind: 'constmap', group: 'Loot', label: 'Loot model', fields: {
         base_drop_chance: num('Base drop chance', { min: 0, max: 1 }),

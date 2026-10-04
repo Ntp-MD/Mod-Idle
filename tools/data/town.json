@@ -2,194 +2,820 @@
   "meta": {
     "title": "Town economy source data — the only place a town number is written by hand",
     "unit": "m = one minute of full-sell income in the band where the purchase matters",
-    "derived_fields": ["gold price", "gold per minute", "junk per hour", "Standing kill thresholds", "lifetime supply", "demand ratio", "skip-token day ceiling", "repair floor"],
-    "sources": ["checks.md E1-E5", "checks.md F1-F7", "economy.md gold supply", "loot.md section 2", "loot.md section 4", "towns.md sections 4-7", "farm.md", "tasks.md", "item-base.md"],
+    "derived_fields": [
+      "gold price",
+      "gold per minute",
+      "junk per hour",
+      "Standing kill thresholds",
+      "lifetime supply",
+      "demand ratio",
+      "skip-token day ceiling",
+      "repair floor"
+    ],
+    "sources": [
+      "checks.md E1-E5",
+      "checks.md F1-F7",
+      "economy.md gold supply",
+      "loot.md section 2",
+      "loot.md section 4",
+      "towns.md sections 4-7",
+      "farm.md",
+      "tasks.md",
+      "item-base.md"
+    ],
     "targets": {
-      "towns-stalls.md": ["price-unit", "supply", "one-time", "repeatable", "npc-matrix", "stock", "standing", "collector", "base-bias", "pending"],
-      "checks.md": ["group-T"]
+      "towns-stalls.md": [
+        "price-unit",
+        "supply",
+        "one-time",
+        "repeatable",
+        "npc-matrix",
+        "stock",
+        "standing",
+        "collector",
+        "base-bias",
+        "pending"
+      ],
+      "checks.md": [
+        "group-T"
+      ]
     }
   },
-
-  "engine_source": "tools/data/engine.json — read through tools/lib/engine.js · this file stores no band, drop, kill or stone number",
-
   "npcs": [
-    { "id": "counterhand", "name": "Counterhand", "kind": "information", "rule": "every settlement" },
-    { "id": "steward", "name": "Steward", "kind": "space", "rule": "capitals only" },
-    { "id": "porter", "name": "Porter", "kind": "space", "rule": "every settlement" },
-    { "id": "guild_clerk", "name": "Guild clerk", "kind": "time", "rule": "capitals only" },
-    { "id": "armourer", "name": "Armourer", "kind": "time", "rule": "capitals + Ironrow · Bonegate · Frosthold (Siege Armourer)" },
-    { "id": "waypoint_keeper", "name": "Waypoint keeper", "kind": "time", "rule": "every settlement" },
-    { "id": "collector", "name": "Collector", "kind": "space/appearance", "rule": "the three set towns: Ashfall · Bonegate · Vermolch" },
-    { "id": "curio_pedlar", "name": "Curio pedlar", "kind": "appearance", "rule": "Highspire + Vermolch only" },
-    { "id": "herbalist", "name": "Herbalist", "kind": "space", "rule": "Millbrook + capitals" },
-    { "id": "furrier", "name": "Furrier", "kind": "space/appearance", "rule": "Wolf Cross only" }
+    {
+      "id": "counterhand",
+      "name": "Counterhand",
+      "kind": "information",
+      "rule": "every settlement"
+    },
+    {
+      "id": "steward",
+      "name": "Steward",
+      "kind": "space",
+      "rule": "capitals only"
+    },
+    {
+      "id": "porter",
+      "name": "Porter",
+      "kind": "space",
+      "rule": "every settlement"
+    },
+    {
+      "id": "guild_clerk",
+      "name": "Guild clerk",
+      "kind": "time",
+      "rule": "capitals only"
+    },
+    {
+      "id": "armourer",
+      "name": "Armourer",
+      "kind": "time",
+      "rule": "capitals + Ironrow · Bonegate · Frosthold (Siege Armourer)"
+    },
+    {
+      "id": "waypoint_keeper",
+      "name": "Waypoint keeper",
+      "kind": "time",
+      "rule": "every settlement"
+    },
+    {
+      "id": "collector",
+      "name": "Collector",
+      "kind": "space/appearance",
+      "rule": "the three set towns: Ashfall · Bonegate · Vermolch"
+    },
+    {
+      "id": "curio_pedlar",
+      "name": "Curio pedlar",
+      "kind": "appearance",
+      "rule": "Highspire + Vermolch only"
+    },
+    {
+      "id": "herbalist",
+      "name": "Herbalist",
+      "kind": "space",
+      "rule": "Millbrook + capitals"
+    },
+    {
+      "id": "furrier",
+      "name": "Furrier",
+      "kind": "space/appearance",
+      "rule": "Wolf Cross only"
+    }
   ],
-
   "settlements": [
     {
-      "id": "eastgate", "name": "Eastgate", "zone": 1, "band": "low", "capital": null,
-      "innate": ["neutral", "fire"], "base_bias_flavor": "cloth", "budget_hr": 0.5,
-      "npcs": ["counterhand", "porter", "waypoint_keeper"],
+      "id": "eastgate",
+      "name": "Eastgate",
+      "zone": 1,
+      "band": "low",
+      "capital": null,
+      "innate": [
+        "fire"
+      ],
+      "base_bias_flavor": "cloth",
+      "budget_hr": 0.5,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
       "start": true,
-      "stock": ["bag_slot", "stash_tab_1", "waypoint_reanchor", "filter_preset"]
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
     },
     {
-      "id": "millbrook", "name": "Millbrook", "zone": 2, "band": "low", "capital": null,
-      "innate": ["poison"], "base_bias_flavor": "cloth / light", "budget_hr": 0.8,
-      "npcs": ["counterhand", "porter", "waypoint_keeper", "herbalist"],
-      "stock": ["herb_pouch_ii", "bag_slot", "road_link", "filter_preset"]
+      "id": "millbrook",
+      "name": "Millbrook",
+      "zone": 2,
+      "band": "low",
+      "capital": null,
+      "innate": [
+        "poison"
+      ],
+      "base_bias_flavor": "cloth / light",
+      "budget_hr": 0.8,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "herb_pouch_ii",
+        "bag_slot",
+        "road_link",
+        "filter_preset"
+      ]
     },
     {
-      "id": "ashfall", "name": "Ashfall", "zone": 3, "band": "low", "capital": "low",
-      "innate": ["fire"], "base_bias_flavor": "light (Evasion)", "budget_hr": 1.8,
-      "npcs": ["counterhand", "steward", "porter", "guild_clerk", "armourer", "waypoint_keeper", "collector", "herbalist"],
-      "stock": ["house_ashfall", "plot_deed_4", "militia", "collector_hint", "stash_tab_1", "road_link", "repair", "filter_preset"]
+      "id": "ashfall",
+      "name": "Ashfall",
+      "zone": 3,
+      "band": "low",
+      "capital": "low",
+      "innate": [
+        "fire"
+      ],
+      "base_bias_flavor": "light (Evasion)",
+      "budget_hr": 1.8,
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "collector",
+        "herbalist"
+      ],
+      "stock": [
+        "house_ashfall",
+        "plot_deed_4",
+        "militia",
+        "collector_hint",
+        "stash_tab_1",
+        "road_link",
+        "repair",
+        "filter_preset"
+      ]
     },
     {
-      "id": "ironrow", "name": "Ironrow", "zone": 4, "band": "mid", "capital": null,
-      "innate": ["lightning"], "base_bias_flavor": "light / mail", "budget_hr": 2.2,
-      "npcs": ["counterhand", "porter", "waypoint_keeper", "armourer"],
+      "id": "ironrow",
+      "name": "Ironrow",
+      "zone": 4,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "lightning"
+      ],
+      "base_bias_flavor": "light / mail",
+      "budget_hr": 2.2,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "armourer"
+      ],
       "armourer_discount_m": 12,
-      "stock": ["repair_ironrow", "stash_tab_1", "road_link", "potion_carrier_slot"]
+      "stock": [
+        "repair_ironrow",
+        "stash_tab_1",
+        "road_link",
+        "potion_carrier_slot"
+      ]
     },
     {
-      "id": "wolf_cross", "name": "Wolf Cross", "zone": 5, "band": "mid", "capital": null,
-      "innate": ["cold"], "base_bias_flavor": "light", "budget_hr": 3.0,
-      "npcs": ["counterhand", "porter", "waypoint_keeper", "furrier"],
-      "stock": ["bag_slot", "banner_coldres", "stash_tab_1", "road_link", "waypoint_reanchor"]
+      "id": "wolf_cross",
+      "name": "Wolf Cross",
+      "zone": 5,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "cold"
+      ],
+      "base_bias_flavor": "light",
+      "budget_hr": 3,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "furrier"
+      ],
+      "stock": [
+        "bag_slot",
+        "banner_coldres",
+        "stash_tab_1",
+        "road_link",
+        "waypoint_reanchor"
+      ]
     },
     {
-      "id": "highspire", "name": "Highspire", "zone": 6, "band": "mid", "capital": "mid",
-      "innate": ["cold", "lightning"], "base_bias_flavor": "mail", "budget_hr": 4.3,
-      "npcs": ["counterhand", "steward", "porter", "guild_clerk", "armourer", "waypoint_keeper", "curio_pedlar", "herbalist"],
-      "stock": ["house_highspire", "plot_deed_5", "pedlar_rotation", "stash_tab_1", "road_link", "repair", "filter_preset"]
+      "id": "highspire",
+      "name": "Highspire",
+      "zone": 6,
+      "band": "mid",
+      "capital": "mid",
+      "innate": [
+        "cold",
+        "lightning"
+      ],
+      "base_bias_flavor": "mail",
+      "budget_hr": 4.3,
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "curio_pedlar",
+        "herbalist"
+      ],
+      "stock": [
+        "house_highspire",
+        "plot_deed_5",
+        "pedlar_rotation",
+        "stash_tab_1",
+        "road_link",
+        "repair",
+        "filter_preset"
+      ]
     },
     {
-      "id": "bonegate", "name": "Bonegate", "zone": 7, "band": "high", "capital": null,
-      "innate": ["chaos"], "base_bias_flavor": "heavy (Armour)", "budget_hr": 5.0,
-      "npcs": ["counterhand", "porter", "waypoint_keeper", "collector", "armourer"],
-      "stock": ["reliquary", "collector_hint", "stash_tab_1", "road_link", "repair", "filter_preset"]
+      "id": "bonegate",
+      "name": "Bonegate",
+      "zone": 7,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "chaos"
+      ],
+      "base_bias_flavor": "heavy (Armour)",
+      "budget_hr": 5,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "collector",
+        "armourer"
+      ],
+      "stock": [
+        "reliquary",
+        "collector_hint",
+        "stash_tab_1",
+        "road_link",
+        "repair",
+        "filter_preset"
+      ]
     },
     {
-      "id": "frosthold", "name": "Frosthold", "zone": 8, "band": "high", "capital": null,
-      "innate": ["cold"], "base_bias_flavor": "heavy", "budget_hr": 6.0,
-      "npcs": ["counterhand", "porter", "waypoint_keeper", "armourer"],
+      "id": "frosthold",
+      "name": "Frosthold",
+      "zone": 8,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "cold"
+      ],
+      "base_bias_flavor": "heavy",
+      "budget_hr": 6,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "armourer"
+      ],
       "armourer_variant": "Siege Armourer",
-      "stock": ["repair", "tint_heavy", "stash_tab_1", "road_link", "waypoint_reanchor"]
+      "stock": [
+        "repair",
+        "tint_heavy",
+        "stash_tab_1",
+        "road_link",
+        "waypoint_reanchor"
+      ]
     },
     {
-      "id": "vermolch", "name": "Vermolch", "zone": 9, "band": "high", "capital": "high",
-      "innate": ["poison", "chaos"], "base_bias_flavor": "heavy · cloth (glass endgame)",
-      "budget_hr": 16.6, "budget_note": "7.6 hr of zone 9 inside the high band + 9.0 hr of the level 91-100 push, which also farms zone 9",
-      "npcs": ["counterhand", "steward", "porter", "guild_clerk", "armourer", "waypoint_keeper", "collector", "curio_pedlar", "herbalist"],
-      "stock": ["house_vermolch", "garden_of_ash", "collector_hint", "prestige_title", "pedlar_rotation", "stash_tab_1", "road_link", "repair", "filter_preset"]
+      "id": "vermolch",
+      "name": "Vermolch",
+      "zone": 9,
+      "band": "high",
+      "capital": "high",
+      "innate": [
+        "poison",
+        "chaos"
+      ],
+      "base_bias_flavor": "heavy · cloth (glass endgame)",
+      "budget_hr": 16.6,
+      "budget_note": "7.6 hr of zone 9 inside the high band + 9.0 hr of the level 91-100 push, which also farms zone 9",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "collector",
+        "curio_pedlar",
+        "herbalist"
+      ],
+      "stock": [
+        "house_vermolch",
+        "garden_of_ash",
+        "collector_hint",
+        "prestige_title",
+        "pedlar_rotation",
+        "stash_tab_1",
+        "road_link",
+        "repair",
+        "filter_preset"
+      ]
     }
   ],
-
   "one_time": [
-    { "id": "road_link", "item": "Road link (first visit to a settlement)", "npc": "waypoint_keeper", "kind": "time", "m": 20, "charge": "by_settlement_band", "qty_by_band": { "low": 2, "mid": 3, "high": 3 }, "ladder": null, "note": "8 links · travel mode B · Eastgate is free" },
-    { "id": "stash_tab_1", "item": "Stash tab 1", "npc": "porter", "kind": "space", "m": 60, "charge_band": "high", "qty": 1, "ladder": "stash_tab", "discount": { "settlement": "eastgate", "m": 30 }, "note": "no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 30 m teaching price" },
-    { "id": "stash_tab_2", "item": "Stash tab 2", "npc": "porter", "kind": "space", "m": 90, "charge_band": "high", "qty": 1, "ladder": "stash_tab", "note": "" },
-    { "id": "stash_tab_3", "item": "Stash tab 3", "npc": "porter", "kind": "space", "m": 130, "charge_band": "high", "qty": 1, "ladder": "stash_tab", "note": "" },
-    { "id": "stash_tab_4", "item": "Stash tab 4", "npc": "porter", "kind": "space", "m": 180, "charge_band": "high", "qty": 1, "ladder": "stash_tab", "note": "" },
-    { "id": "stash_tab_5", "item": "Stash tab 5", "npc": "porter", "kind": "space", "m": 240, "charge_band": "high", "qty": 1, "ladder": "stash_tab", "note": "" },
-    { "id": "stash_tab_6", "item": "Stash tab 6", "npc": "porter", "kind": "space", "m": 300, "charge_band": "high", "qty": 1, "ladder": "stash_tab", "note": "Cap 6 tabs" },
-    { "id": "herb_pouch_ii", "item": "Herb pouch II", "npc": "porter", "kind": "space", "m": 60, "charge_band": "mid", "qty": 1, "ladder": "herb_pouch", "note": "raises the herb stack ceiling (farm.md)" },
-    { "id": "herb_pouch_iii", "item": "Herb pouch III", "npc": "porter", "kind": "space", "m": 240, "charge_band": "high", "qty": 1, "ladder": "herb_pouch", "note": "" },
-    { "id": "bag_slot", "item": "Bag category slot (herbs / stones / gear display)", "npc": "porter", "kind": "space", "m": 45, "charge_band": "low", "qty": 3, "ladder": null, "display_only": true, "note": "display and sorting only · sells no stone, no gear" },
-    { "id": "plot_deed_4", "item": "Plot deed 4", "npc": "steward", "kind": "space", "m": 180, "charge_band": "mid", "qty": 1, "ladder": "plot_deed", "note": "4th farm plot (farm.md)" },
-    { "id": "plot_deed_5", "item": "Plot deed 5", "npc": "steward", "kind": "space", "m": 540, "charge_band": "high", "qty": 1, "ladder": "plot_deed", "note": "5th plot · the most expensive non-cosmetic line" },
-    { "id": "house_ashfall", "item": "House · Ashfall", "npc": "steward", "kind": "space", "m": 120, "charge_band": "low", "qty": 1, "ladder": "house", "note": "2 stash tabs + 1 farm plot + Waypoint anchor, no combat effect" },
-    { "id": "house_highspire", "item": "House · Highspire", "npc": "steward", "kind": "space", "m": 240, "charge_band": "mid", "qty": 1, "ladder": "house", "note": "" },
-    { "id": "house_vermolch", "item": "House · Vermolch", "npc": "steward", "kind": "space", "m": 360, "charge_band": "high", "qty": 1, "ladder": "house", "note": "" },
-    { "id": "filter_preset", "item": "Saved filter preset slot (extra)", "npc": "counterhand", "kind": "information", "m": 30, "charge": "one_per_band", "qty": 3, "ladder": null, "note": "preset switching is a concept.md reason-to-open" },
-    { "id": "potion_carrier_slot", "item": "Potion carrier slot (belt display)", "npc": "armourer", "kind": "space", "m": 40, "charge_band": "mid", "qty": 1, "ladder": null, "display_only": true, "note": "display only · the carrier pays the weight tax in formula.md section 11 · sells no potion" }
+    {
+      "id": "road_link",
+      "item": "Road link (first visit to a settlement)",
+      "npc": "waypoint_keeper",
+      "kind": "time",
+      "m": 20,
+      "charge": "by_settlement_band",
+      "qty_by_band": {
+        "low": 2,
+        "mid": 3,
+        "high": 3
+      },
+      "ladder": null,
+      "note": "8 links · travel mode B · Eastgate is free"
+    },
+    {
+      "id": "stash_tab_1",
+      "item": "Stash tab 1",
+      "npc": "porter",
+      "kind": "space",
+      "m": 60,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "discount": {
+        "settlement": "eastgate",
+        "m": 30
+      },
+      "note": "no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 30 m teaching price"
+    },
+    {
+      "id": "stash_tab_2",
+      "item": "Stash tab 2",
+      "npc": "porter",
+      "kind": "space",
+      "m": 90,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": ""
+    },
+    {
+      "id": "stash_tab_3",
+      "item": "Stash tab 3",
+      "npc": "porter",
+      "kind": "space",
+      "m": 130,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": ""
+    },
+    {
+      "id": "stash_tab_4",
+      "item": "Stash tab 4",
+      "npc": "porter",
+      "kind": "space",
+      "m": 180,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": ""
+    },
+    {
+      "id": "stash_tab_5",
+      "item": "Stash tab 5",
+      "npc": "porter",
+      "kind": "space",
+      "m": 240,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": ""
+    },
+    {
+      "id": "stash_tab_6",
+      "item": "Stash tab 6",
+      "npc": "porter",
+      "kind": "space",
+      "m": 300,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": "Cap 6 tabs"
+    },
+    {
+      "id": "herb_pouch_ii",
+      "item": "Herb pouch II",
+      "npc": "porter",
+      "kind": "space",
+      "m": 60,
+      "charge_band": "mid",
+      "qty": 1,
+      "ladder": "herb_pouch",
+      "note": "one more slot in the character bag (`inventory.character_slots` is the base)",
+      "character_slot_grant": 1
+    },
+    {
+      "id": "herb_pouch_iii",
+      "item": "Herb pouch III",
+      "npc": "porter",
+      "kind": "space",
+      "m": 240,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "herb_pouch",
+      "note": "one more slot in the character bag (`inventory.character_slots` is the base)",
+      "character_slot_grant": 1
+    },
+    {
+      "id": "bag_slot",
+      "item": "Bag category slot (herbs / stones / gear display)",
+      "npc": "porter",
+      "kind": "space",
+      "m": 45,
+      "charge_band": "low",
+      "qty": 3,
+      "ladder": null,
+      "display_only": true,
+      "note": "display and sorting only · sells no stone, no gear"
+    },
+    {
+      "id": "plot_deed_4",
+      "item": "Plot deed 4",
+      "npc": "steward",
+      "kind": "space",
+      "m": 180,
+      "charge_band": "mid",
+      "qty": 1,
+      "ladder": "plot_deed",
+      "note": "4th farm plot (farm.md)"
+    },
+    {
+      "id": "plot_deed_5",
+      "item": "Plot deed 5",
+      "npc": "steward",
+      "kind": "space",
+      "m": 540,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "plot_deed",
+      "note": "5th plot · the most expensive non-cosmetic line"
+    },
+    {
+      "id": "house_ashfall",
+      "item": "House · Ashfall",
+      "npc": "steward",
+      "kind": "space",
+      "m": 120,
+      "charge_band": "low",
+      "qty": 1,
+      "ladder": "house",
+      "note": "2 stash tabs + 1 farm plot + Waypoint anchor, no combat effect"
+    },
+    {
+      "id": "house_highspire",
+      "item": "House · Highspire",
+      "npc": "steward",
+      "kind": "space",
+      "m": 240,
+      "charge_band": "mid",
+      "qty": 1,
+      "ladder": "house",
+      "note": ""
+    },
+    {
+      "id": "house_vermolch",
+      "item": "House · Vermolch",
+      "npc": "steward",
+      "kind": "space",
+      "m": 360,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "house",
+      "note": ""
+    },
+    {
+      "id": "filter_preset",
+      "item": "Saved filter preset slot (extra)",
+      "npc": "counterhand",
+      "kind": "information",
+      "m": 30,
+      "charge": "one_per_band",
+      "qty": 3,
+      "ladder": null,
+      "note": "preset switching is a concept.md reason-to-open"
+    },
+    {
+      "id": "potion_carrier_slot",
+      "item": "Potion carrier slot (belt display)",
+      "npc": "armourer",
+      "kind": "space",
+      "m": 40,
+      "charge_band": "mid",
+      "qty": 1,
+      "ladder": null,
+      "display_only": true,
+      "note": "display only · the carrier pays the weight tax in formula.md section 11 · sells no potion"
+    }
   ],
-
   "repeatable": [
-    { "id": "skip_token", "item": "Task skip token", "npc": "guild_clerk", "kind": "time", "m": 8, "charge_band": "high", "per_day_cap": 3, "note": "1 per task slot per day on top of the free skip in tasks.md · 3/day = 24 m/day" },
-    { "id": "repair", "item": "Armourer repair (clears Broken, refills protection to 5)", "npc": "armourer", "kind": "time", "m": 14, "charge_band": "high", "note": "must stay above the elite time that earns 1 Reroll tier stone · re-check at F9" },
-    { "id": "repair_ironrow", "item": "Armourer repair at Ironrow", "npc": "armourer", "kind": "time", "m": 12, "charge_band": "high", "note": "the armourer town discount, and only there · still above the tier-stone floor" },
-    { "id": "pedlar_rotation", "item": "Curio pedlar stock: banner · Base tint · title", "npc": "curio_pedlar", "kind": "appearance", "m_min": 30, "m_max": 120, "charge_band": "high", "per_day_cap": 3, "note": "3 slots per real day · appearance only" },
-    { "id": "prestige_title", "item": "Prestige title line (per quality band)", "npc": "curio_pedlar", "kind": "appearance", "m": 300, "charge_band": "high", "note": "the only intentionally expensive line" },
-    { "id": "waypoint_reanchor", "item": "Waypoint re-anchor (move the free return point)", "npc": "waypoint_keeper", "kind": "time", "m": 6, "charge_band": "high", "note": "cosmetic convenience · never gates a zone" },
-    { "id": "banner_coldres", "item": "Coldres banner (settlement cosmetic)", "npc": "furrier", "kind": "appearance", "m": 90, "charge_band": "mid", "note": "one per settlement · Wolf Cross only" },
-    { "id": "tint_heavy", "item": "Heavy-school Base tint", "npc": "armourer", "kind": "appearance", "m": 45, "charge_band": "high", "note": "stocked only by the Siege Armourer at Frosthold · appearance only" },
-    { "id": "collector_hint", "item": "Collector set hint (prints which school the set wants)", "npc": "collector", "kind": "information", "m": 15, "charge_band": "high", "note": "information only · pays no item and sells no piece" }
+    {
+      "id": "skip_token",
+      "item": "Task skip token",
+      "npc": "guild_clerk",
+      "kind": "time",
+      "m": 8,
+      "charge_band": "high",
+      "per_day_cap": 3,
+      "note": "1 per task slot per day on top of the free skip in tasks.md · 3/day = 24 m/day"
+    },
+    {
+      "id": "repair",
+      "item": "Armourer repair (clears Broken, refills protection to 5)",
+      "npc": "armourer",
+      "kind": "time",
+      "m": 14,
+      "charge_band": "high",
+      "note": "must stay above the elite time that earns 1 Reroll tier stone · re-check at F9"
+    },
+    {
+      "id": "repair_ironrow",
+      "item": "Armourer repair at Ironrow",
+      "npc": "armourer",
+      "kind": "time",
+      "m": 12,
+      "charge_band": "high",
+      "note": "the armourer town discount, and only there · still above the tier-stone floor"
+    },
+    {
+      "id": "pedlar_rotation",
+      "item": "Curio pedlar stock: banner · Base tint · title",
+      "npc": "curio_pedlar",
+      "kind": "appearance",
+      "m_min": 30,
+      "m_max": 120,
+      "charge_band": "high",
+      "per_day_cap": 3,
+      "note": "3 slots per real day · appearance only"
+    },
+    {
+      "id": "prestige_title",
+      "item": "Prestige title line (per quality band)",
+      "npc": "curio_pedlar",
+      "kind": "appearance",
+      "m": 300,
+      "charge_band": "high",
+      "note": "the only intentionally expensive line"
+    },
+    {
+      "id": "waypoint_reanchor",
+      "item": "Waypoint re-anchor (move the free return point)",
+      "npc": "waypoint_keeper",
+      "kind": "time",
+      "m": 6,
+      "charge_band": "high",
+      "note": "cosmetic convenience · never gates a zone"
+    },
+    {
+      "id": "banner_coldres",
+      "item": "Coldres banner (settlement cosmetic)",
+      "npc": "furrier",
+      "kind": "appearance",
+      "m": 90,
+      "charge_band": "mid",
+      "note": "one per settlement · Wolf Cross only"
+    },
+    {
+      "id": "tint_heavy",
+      "item": "Heavy-school Base tint",
+      "npc": "armourer",
+      "kind": "appearance",
+      "m": 45,
+      "charge_band": "high",
+      "note": "stocked only by the Siege Armourer at Frosthold · appearance only"
+    },
+    {
+      "id": "collector_hint",
+      "item": "Collector set hint (prints which school the set wants)",
+      "npc": "collector",
+      "kind": "information",
+      "m": 15,
+      "charge_band": "high",
+      "note": "information only · pays no item and sells no piece"
+    }
   ],
-
   "essentials": [
-    { "id": "road_link", "qty_by_band": { "low": 2, "mid": 2 } },
-    { "id": "stash_tab_1", "use_discount": true },
-    { "id": "stash_tab_2" },
-    { "id": "herb_pouch_ii" },
-    { "id": "plot_deed_4" }
+    {
+      "id": "road_link",
+      "qty_by_band": {
+        "low": 2,
+        "mid": 2
+      }
+    },
+    {
+      "id": "stash_tab_1",
+      "use_discount": true
+    },
+    {
+      "id": "stash_tab_2"
+    },
+    {
+      "id": "herb_pouch_ii"
+    },
+    {
+      "id": "plot_deed_4"
+    }
   ],
-
   "standing": {
     "tiers": [
-      { "name": "I", "share": 0.30, "unlocks": "that stall's second stock line" },
-      { "name": "II", "share": 0.75, "unlocks": "the Collector set slots of that settlement" },
-      { "name": "III", "share": 1.40, "unlocks": "the cosmetic / tip line (banner · title · preset slot)" }
+      {
+        "name": "I",
+        "share": 0.3,
+        "unlocks": "that stall's second stock line"
+      },
+      {
+        "name": "II",
+        "share": 0.75,
+        "unlocks": "the Collector set slots of that settlement"
+      },
+      {
+        "name": "III",
+        "share": 1.4,
+        "unlocks": "the cosmetic / tip line (banner · title · preset slot)"
+      }
     ],
     "earnt_from": "kills in that settlement's own zone (F1), plus tasks and boss kills there — both are extra progress on top of these thresholds, never a substitute for them",
-    "grants": ["vendor stock lines", "Collector set slots", "map knowledge", "saved filter presets", "titles"],
-    "never_grants": ["any stat", "any Mod value", "any stone", "anything mob_HP reads"]
+    "grants": [
+      "vendor stock lines",
+      "Collector set slots",
+      "map knowledge",
+      "saved filter presets",
+      "titles"
+    ],
+    "never_grants": [
+      "any stat",
+      "any Mod value",
+      "any stone",
+      "anything mob_HP reads"
+    ]
   },
-
   "collector_sets": [
     {
-      "id": "militia", "name": "Militia", "settlement": "ashfall", "school": "light",
-      "pieces": ["coif (helmet)", "mail (chest)", "striders (boots)"], "quality": "any",
-      "reward": "banner + 1 saved filter preset slot", "pays_gold": false,
+      "id": "militia",
+      "name": "Militia",
+      "settlement": "ashfall",
+      "school": "light",
+      "pieces": [
+        "coif (helmet)",
+        "mail (chest)",
+        "striders (boots)"
+      ],
+      "quality": "any",
+      "reward": "banner + 1 saved filter preset slot",
+      "pays_gold": false,
       "rule": "pieces are consumed, so the sink runs before the filter ever dissolves them"
     },
     {
-      "id": "reliquary", "name": "Reliquary", "settlement": "bonegate", "school": "heavy",
-      "pieces": ["barbute (helmet)", "plate (chest)", "cuisses (pant)"], "quality": "any",
-      "reward": "stash tab (bypasses the one-time price ladder, once per character)", "pays_gold": false,
+      "id": "reliquary",
+      "name": "Reliquary",
+      "settlement": "bonegate",
+      "school": "heavy",
+      "pieces": [
+        "barbute (helmet)",
+        "plate (chest)",
+        "cuisses (pant)"
+      ],
+      "quality": "any",
+      "reward": "stash tab (bypasses the one-time price ladder, once per character)",
+      "pays_gold": false,
       "rule": "must be filter-rejected pieces, or the sink competes with keep decisions"
     },
     {
-      "id": "garden_of_ash", "name": "Garden of Ash", "settlement": "vermolch", "school": "cloth",
-      "pieces": ["circlet (helmet)", "vestments (chest)", "wrap (pant)"], "quality": "high",
-      "reward": "prestige title", "pays_gold": false,
+      "id": "garden_of_ash",
+      "name": "Garden of Ash",
+      "settlement": "vermolch",
+      "school": "cloth",
+      "pieces": [
+        "circlet (helmet)",
+        "vestments (chest)",
+        "wrap (pant)"
+      ],
+      "quality": "high",
+      "reward": "prestige title",
+      "pays_gold": false,
       "rule": "the high-quality requirement makes it an endgame demand, not a side quest"
     }
   ],
-
   "base_bias": {
-    "status": "pending",
-    "column_meaning": "which Base school a zone's mobs flavour, not a weight anyone can yet buy",
+    "status": "decided",
+    "decision": "ship even-weighted (harness/todo.md A9 · D-071)",
+    "column_meaning": "which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.",
     "checks": [
-      "Add a Base weight column to loot.md section 1 step 2 (currently \"equal roll among all frames of that slot\").",
-      "Re-run the loot.md section 3 keep-rate simulation — the 2.2% / 1.2% / 0.7% numbers and the \"1 in ~30-60 drops\" line in item-base.md both move.",
-      "Confirm F3 drops/hour is unmoved: bias is a redistribution between frames of the same slot, never a change in drop count.",
-      "Confirm the three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) are all still reachable — no settlement may make one school unobtainable.",
-      "Only then decide whether a build must travel for a frame — if yes, that is a progression gate by geography and must be argued against world.md \"unlock by level\" first."
+      "Ruled even-weighted: loot.md section 1 step 2 stays \"equal roll among all frames of that slot\" — no Base weight column is added, and the tools/loot.js frame_weight path stays a what-if only.",
+      "The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable — even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises.",
+      "No build must travel for a frame: frames roll equally everywhere, so Base bias is never a progression gate and world.md \"unlock by level\" is untouched."
     ],
-    "forbidden_until_closed": ["numeric per-settlement Base weights", "any stock line that is the only source of a frame", "any gold price that buys frame odds"]
+    "forbidden_until_closed": [
+      "numeric per-settlement Base weights (ruled out, not merely pending)",
+      "any stock line that is the only source of a frame",
+      "any gold price that buys frame odds"
+    ],
+    "closed_checks": [
+      "Re-run the keep-rate simulation: tools/loot.js measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) — the owner chose NOT to pay that cost and to ship even.",
+      "F3 drops/hour is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops/hour comes from base_drop_chance x Lck, so no weight can change drop count."
+    ]
   },
-
+  "task_sizing": {
+    "status": "provisional · owner-veto-able · recorded in harness/decisions.md as D-076",
+    "why": "tasks.md leaves N and the reward count to the rebalance pass, but the client needs a number to run on, so the sizing lives here as data instead of being typed into code",
+    "hunt_n_anchor": 5,
+    "hunt_n_rule": "N = round(hunt_n_anchor × the zone group upper bound ÷ 2) — the anchor is engine.json opening.first_rule (kill 5 in zone 1, group 1-2), and N scales with zone group size as tasks.md requires",
+    "elite_n": 3,
+    "elite_n_rule": "N = 2-4 per tasks.md; the middle of the published range",
+    "reward_minutes_of_band_income": 15,
+    "reward_rule": "a Hunt pays Reroll value stones and an Elite hunt pays Reroll tier stones, each sized at reward_minutes_of_band_income of that band's own stone income (engine.stonesForMinutes)",
+    "boss_reward": { "remove": 1, "reroll_tier": 4 },
+    "boss_reward_rule": "winner's choice, exactly as tasks.md writes it",
+    "refill_sec": 3600,
+    "slots": 3,
+    "free_skip_per_day": 1
+  },
   "pending": [
-    { "number": "F9 (Add mod stone rate)", "breaks": "Armourer repair floor (repeatable table)", "status": "open" },
-    { "number": "F13 (herb bundle rate)", "breaks": "Herbalist + pouch ladder demand", "status": "open" },
-    { "number": "Per-level XP table", "breaks": "Standing budgets — the kill counts here sit on interpolated band splits", "status": "open" },
-    { "number": "Task reward sizing (tasks.md rebalance)", "breaks": "skip-token m price vs the ≤10% bound", "status": "open" },
-    { "number": "Reroll/Refine price rebalance", "breaks": "the opportunity-cost line in the price unit block", "status": "open" },
-    { "number": "loot.md section 3 keep-rate re-simulation", "breaks": "Base bias column (flavour only until done)", "status": "open" }
+    {
+      "number": "Task reward sizing (tasks.md rebalance)",
+      "breaks": "skip-token m price vs the ≤10% bound",
+      "status": "open"
+    },
+    {
+      "number": "Reroll/Refine price rebalance",
+      "breaks": "the opportunity-cost line in the price unit block",
+      "status": "open"
+    }
   ],
-
   "invariants": {
-    "essentials_max_share_of_lifetime_supply": 0.20,
-    "onetime_demand_max_multiple_of_lifetime_supply": 1.50,
+    "essentials_max_share_of_lifetime_supply": 0.2,
+    "onetime_demand_max_multiple_of_lifetime_supply": 1.5,
     "road_link_max_m": 20,
     "road_trip_max_real_minutes": 5,
     "skip_token_max_per_day": 3,
     "skip_token_max_m_per_day": 24,
-    "allowed_kinds": ["space", "time", "information", "appearance", "space/appearance"],
-    "banned_power_nouns": ["gear", "Mod", "potion", "stone", "Reroll", "Refine", "Ascend", "weapon"],
+    "allowed_kinds": [
+      "space",
+      "time",
+      "information",
+      "appearance",
+      "space/appearance"
+    ],
+    "banned_power_nouns": [
+      "gear",
+      "Mod",
+      "potion",
+      "stone",
+      "Reroll",
+      "Refine",
+      "Ascend",
+      "weapon"
+    ],
     "standing_min_tiers": 3,
-    "chase_tier_min_share": 1.0
+    "chase_tier_min_share": 1
   }
 }

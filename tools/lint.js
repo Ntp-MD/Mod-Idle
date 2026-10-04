@@ -14,6 +14,8 @@
  *   L4  no deprecated term outside its allow-list (aliases.json)
  *   L5  every "N <type> skills" heading matches skills.json
  *   L6  every generated block has a balanced BEGIN/END marker pair
+ *   L7  a roster doc does not restate a generated skill/aura value outside markers
+ *   L8  the glossary abbreviation set is closed and 1:1, and every entry is used
  */
 
 const fs = require('fs');
@@ -24,7 +26,9 @@ const ALIASES = JSON.parse(G.read('tools/data/aliases.json'));
 
 const RESERVED_NONFILES = new Set(['skill.md', 'skills.md', 'SKILL.md']); // AGENT.md forbids creating these
 
-const DOCS = fs.readdirSync(G.ROOT).filter((f) => f.endsWith('.md')).sort();
+// Docs live at the root and under `harness/`, which holds the agent ops and the open-work
+// queue. Keys are the path from the repo root so a doc can be named as `harness/todo.md`.
+const DOCS = G.listDocs();
 const TEXT = {};
 for (const f of DOCS) TEXT[f] = fs.readFileSync(path.join(G.ROOT, f), 'utf8');
 const lineCount = (f) => TEXT[f].split(/\r?\n/).length;
@@ -48,17 +52,20 @@ const add = (id, ok, detail, status) => out.push({ id, ok, detail, status });
 // ---------------------------------------------------------------- L2 / L3 md refs
 
 {
-  const refRe = /`([A-Za-z0-9-]+\.md)(?::(\d+))?`/g;
+  // an optional folder prefix, because the agent ops and the open-work queue live under `harness/`
+  const refRe = /`(harness\/(?:handoff\/|state\/)?)?([A-Za-z0-9-]+\.md)(?::(\d+))?`/g;
   const missing = new Set();
   const drifted = [];
   for (const f of DOCS) {
     let m;
     while ((m = refRe.exec(TEXT[f]))) {
-      const target = m[1];
+      const target = (m[1] || '') + m[2];
       if (RESERVED_NONFILES.has(target)) continue;
-      if (!TEXT[target]) { missing.add(`${f} → ${target}`); continue; }
-      if (m[2]) {
-        const n = Number(m[2]);
+      // `in`, not a truthiness test: an empty doc is still a real file, and reading one as
+      // "missing" would make every reference to it look like a broken wire
+      if (!(target in TEXT)) { missing.add(`${f} → ${target}`); continue; }
+      if (m[3]) {
+        const n = Number(m[3]);
         if (n > lineCount(target)) drifted.push(`${f} → ${target}:${n} (file has ${lineCount(target)})`);
       }
     }
@@ -72,11 +79,13 @@ const add = (id, ok, detail, status) => out.push({ id, ok, detail, status });
 
 {
   const hits = [];
+  const LOG_DOC = /(^|\/)decisions\.md$/; // the log records a term as it was at decision time
+  const NOTE_DOC = /(^|\/)draft-patch\.md$/; // owner note-only until the owner asks for the write (D-043)
   for (const t of ALIASES.terms) {
     const allow = new Set(t.allow_in || []);
     const re = new RegExp(`\\b${t.old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
     for (const f of DOCS) {
-      if (allow.has(f)) continue;
+      if (LOG_DOC.test(f) || NOTE_DOC.test(f) || allow.has(f)) continue;
       TEXT[f].split(/\r?\n/).forEach((line, i) => {
         if (re.test(line)) hits.push(`${f}:${i + 1} "${t.old}" → use "${t.new}"`);
       });
@@ -123,7 +132,7 @@ const add = (id, ok, detail, status) => out.push({ id, ok, detail, status });
   // markers a line may explain *why* a value sits where it does, but it must not
   // quote a signed percentage that the named skill's data does not contain —
   // that is a copy which can silently drift (the bug this guard exists for).
-  const rosterDocs = DOCS.filter((f) => f !== 'decisions.md'); // the log quotes values as they were at decision time
+  const rosterDocs = DOCS.filter((f) => !/(^|\/)decisions\.md$/.test(f) && !/(^|\/)draft-patch\.md$/.test(f)); // the log quotes values as they were at decision time; the draft patch is note-only (D-043)
   // a sign counts only when it is not the hyphen inside a range like "20-30%"
   const signedPct = (s) => (String(s || '').replace(/[−–—]/g, '-').replace(/\s+/g, ' ').match(/(?<![\d])[+\-]\s?\d+(?:\.\d+)?\s?%/g) || [])
     .map((t) => t.replace(/\s+/g, ''));
@@ -147,6 +156,55 @@ const add = (id, ok, detail, status) => out.push({ id, ok, detail, status });
     });
   }
   add('L7', hits.length === 0, `roster docs do not restate a generated skill/aura value outside markers${hits.length ? ' · ' + hits.slice(0, 10).join(' · ') + (hits.length > 10 ? ' …' : '') : ''}`);
+}
+
+// ---------------------------------------------------------------- L8 abbreviation set
+
+{
+  // glossary.md owns the closed set. L8 enforces the properties of a *closed* set:
+  // one abbreviation per term, one term per abbreviation, and every abbreviation is
+  // actually used somewhere (a doc or a tool) — an unused row is a dead rule that will
+  // drift. A rejected spelling belongs in aliases.json, guarded by L4.
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const section = (TEXT['glossary.md'] || '').split(/^#\s+Abbreviations\s*$/m)[1] || '';
+  const body = section.split(/^#\s+/m)[0];
+  const rows = body.split(/\r?\n/)
+    .filter((l) => /^\|/.test(l) && !/^\|\s*-{2,}/.test(l) && !/^\|\s*Term\s*\|/i.test(l))
+    .map((l) => l.split('|').slice(1, -1).map((c) => c.replace(/[*`]/g, '').trim()))
+    .filter((c) => c[0] && c[1]);
+
+  const strip = (s) => String(s).replace(/\[[^\]]*\]/g, '').replace(/\([^)]*\)/g, '');
+  const pairs = rows.map((c) => ({ term: c[0], abbrev: strip(c[1]).trim() })).filter((r) => r.abbrev);
+  const bad = [];
+
+  const byAbbrev = new Map(), byTerm = new Map();
+  for (const r of pairs) {
+    const ka = r.abbrev.toLowerCase(), kt = r.term.toLowerCase();
+    if (byAbbrev.has(ka)) bad.push(`${r.abbrev} maps both "${byAbbrev.get(ka)}" and "${r.term}"`);
+    else byAbbrev.set(ka, r.term);
+    if (byTerm.has(kt) && byTerm.get(kt) !== r.abbrev) bad.push(`${r.term} maps both ${byTerm.get(kt)} and ${r.abbrev}`);
+    else byTerm.set(kt, r.abbrev);
+  }
+
+  // a tool file is any .js under tools/, so a code-only abbreviation (mp · ev) still counts
+  const toolFiles = [];
+  (function walk(d) {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (e.isDirectory()) walk(path.join(d, e.name));
+      else if (/\.js$/.test(e.name)) toolFiles.push(fs.readFileSync(path.join(d, e.name), 'utf8'));
+    }
+  })(path.join(G.ROOT, 'tools'));
+  const toolText = toolFiles.join('\n');
+  const docsMinusGlossary = DOCS.filter((f) => f !== 'glossary.md');
+
+  for (const r of pairs) {
+    const re = new RegExp('\\b' + esc(r.abbrev) + '\\b');
+    const usedDoc = docsMinusGlossary.some((f) => re.test(TEXT[f]));
+    const usedTool = re.test(toolText);
+    if (!usedDoc && !usedTool) bad.push(`${r.abbrev} ("${r.term}") is listed but used nowhere — an unused abbreviation is a dead rule`);
+  }
+
+  add('L8', bad.length === 0, `the abbreviation set is closed and 1:1 (${pairs.length} rows)${bad.length ? ' · ' + bad.join(' · ') : ''}`);
 }
 
 // ---------------------------------------------------------------- cli

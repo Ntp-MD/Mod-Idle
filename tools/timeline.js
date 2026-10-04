@@ -31,8 +31,17 @@ function kills(level) {
   return X.kills_anchors[ANCHORS[ANCHORS.length - 1]];
 }
 
+// Every kill is not a plain mob: one in five rolls elite (×3 XP) and the boss clock adds
+// ×15 kills at 4/hr. Ignoring those made the timeline wrong the moment the elite rate moved
+// from 0.5% to 20% — the game would finish a third early. `xp_per_kill` is the tuning knob
+// that holds the published hours while the multipliers are paid honestly.
+const xpMult = (kph) => {
+  const elite = L.elite_spawn_chance;
+  const bossShare = L.boss_per_hour / kph;
+  return (1 - elite - bossShare) + elite * X.elite_mult + bossShare * X.boss_mult;
+};
 const xpToNext = (level) => kills(level) * X.per_kill_mob_level * Math.min(level, CAP);
-const hoursIn = (level) => kills(level) / killsHr(level);
+const hoursIn = (level) => kills(level) / xpMult(killsHr(level)) / killsHr(level);
 
 function model() {
   const levels = [];
@@ -91,7 +100,21 @@ function block() {
   ].join('\n');
 }
 
-const WRITERS = [{ file: 'world.md', key: 'xp-table', render: block }];
+function formulaBlock() {
+  const parts = ANCHORS.map((lv) => `${Math.round(kills(lv)).toLocaleString('en-US')} (L${lv})`);
+  return [
+    '```',
+    `xp per kill   = ${X.per_kill_mob_level} × mob level (normal) · ×${X.elite_mult} elite · ×${X.boss_mult} boss`,
+    `xp to next level     = ${X.step}-level-step table (generated below from the kills anchors)`,
+    `kills per level       = ${parts.join(' · ')}`,
+    '```',
+  ].join('\n');
+}
+
+const WRITERS = [
+  { file: 'world.md', key: 'xp-formula', render: formulaBlock },
+  { file: 'world.md', key: 'xp-table', render: block },
+];
 const arg = process.argv[2];
 const m = model();
 

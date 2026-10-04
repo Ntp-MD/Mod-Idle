@@ -34,7 +34,7 @@ const CAGES = [
 ];
 
 const CATEGORIES = [
-  ['Start here', ['handoff.md', 'AGENT.md', 'concept.md', 'glossary.md', 'decisions.md', 'tasks.md']],
+  ['Start here', ['AGENT.md', 'harness/todo.md', 'concept.md', 'glossary.md', 'harness/decisions.md', 'tasks.md']],
   ['Character & stats', ['core-stats.md', 'character-sheet.md', 'formula.md', 'formula-offense.md', 'formula-defense.md', 'formula-utility.md', 'elements.md']],
   ['Items & mods', ['mod-pool.md', 'item-base.md', 'item-rarity.md', 'item-list.md', 'equipment-slot.md', 'equipment-slot-armor.md', 'equipment-slot-pools.md', 'equipment-slot-weapon.md', 'equipment-weapon.md']],
   ['Skills', ['skill-pool.md', 'skill-pool-attack.md', 'skill-pool-buff.md', 'skill-pool-curse.md', 'skill-pool-aura-heal.md', 'skill-pool-system.md', 'skill-tree.md', 'skill-tree-impact.md', 'skill-tree-stream.md', 'skill-tree-control.md', 'skill-tree-keystone.md']],
@@ -58,7 +58,7 @@ function stat(key) {
 }
 
 function docFiles() {
-  return fs.readdirSync(ROOT).filter((f) => f.endsWith('.md')).sort();
+  return require('./generated').listDocs();
 }
 
 function fingerprint() {

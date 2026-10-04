@@ -20,7 +20,7 @@ The item system splits into 2 axes, per terms in glossary.md.
 | Rare | 3-5 | 7 (Add mod stone ×2, net counting) | 18% |
 
 - A 4-mod drop adds to 6; a 5-mod drop adds to 7. Net counting: removing a non-legacy mod frees the slot again. Per-item `mods_added 0-2` stored in save.md.
-- Slots 6-7 never roll Core stat Flat/% if the item already holds its 2 Core slots (equipment-slot-pools.md).
+- Slots 6-7 never roll Stat Mod Flat/% if the item already holds its 2 Stat Mod slots (equipment-slot-pools.md).
 
 - Chance numbers are set in loot.md section 1 · Mod count does **not** change the strength of each Mod value (see next section).
 - Tiers inside Item quality roll with weights **T3 50% · T2 33% · T1 17%** — T1 touches 17% so dropped items feel "almost good" often but "best" is never free. Otherwise Refine would have nothing to do.
@@ -56,7 +56,7 @@ Each drop source defines 2 things — **ceiling** and **floor**.
 Actual level numbers do not exist yet. Waiting for the zone and monster system. For now use the 3 levels above.
 
 > **Closed**: boss forces Item quality = **zone ceiling** (floor = ceiling) and is fightable only while online.
-> Result as intended: gives players reason to hunt bosses · And normal monsters still matter because they flow *quantity* (Reroll value stones), not *quality level* — loot.md measures 98.9% of drops are not upgrades, so normal monsters serve as crafting sources, not boss competitors.
+> Result as intended: gives players reason to hunt bosses · And normal monsters still matter because they flow *quantity* (Reroll value stones), not *quality level* — the measured keep-rate in `loot.md` section 3 leaves 99.2% of high-zone drops as crafting currency rather than upgrades, so normal monsters serve as crafting sources, not boss competitors.
 
 > **Closed**: high Item quality can occur without tying to level — via **Ascend**, which raises Item quality above the drop-source ceiling (crafting.md fixed).
 > Reason this must be allowed: if Ascend stayed capped by zone, the Item quality axis would become a renamed monster level, as feared · The shifted cost is the Core from bosses (active only) instead.
@@ -75,9 +75,8 @@ From the old table tying Tier to Rarity, these 2 pieces could swap places · Now
 
 # Waiting Items
 
-- **Crafting system** — Drafted in crafting.md · Still needs price details and crafting currency sources.
-- **Third Rarity level** — Waits for crafting, because it must tie into crafting mechanics, not just add bonus Mods.
-- **Item Base** — Not yet decided whether the same weapon type can have different Bases, and its effect on craftable Mod count.
+The only genuinely open item here is now the A10 consequence (weapon Base frame enumeration → `harness/todo.md` B6); the crafting and third-Rarity waits were both resolved.
+
 - **Crafting and res** — Decided that **Element cannot be locked**. See crafting.md.
 
 (End of file - total 80 lines)

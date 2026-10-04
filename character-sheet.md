@@ -14,6 +14,8 @@ Values shown on the character screen, calculated from formula.md.
 | Attack speed | Hits per second |
 | Weight | Carried / Max capacity · If over, show lost `% aspd` after it, e.g. `566 / 420 (aspd −35%)` |
 
+> Energy Shield sits **above** HP while the character has a pool. Attack speed is read as hits per second, and Weight shows `carried / capacity` with the aspd it costs when over, exactly as the row says. On the playable screen these four are the bar row above the fight (`harness/decisions.md` D-107).
+
 # Core Stats
 
 Shows all 7 stats with a breakdown of their sources.
@@ -47,19 +49,19 @@ Physical power   715        ( 125 × 5 + 37 ) × 1.08
 | Physical power | number | |
 | Magic power | number | |
 | Elemental power | number | Must pass Alignment before dealing damage |
-| Critical chance | % | Show Cap 100 too (Cap from stats alone 48.8%) |
-| Critical damage | % | Show physical / magic separately |
+| Critical chance | % | **No Cap shown** — chance is held at 100 and the excess is added to crit damage, so show `chance` and `overflow` separately |
+| Critical damage | % | Physical only — magic and Elements never crit |
 | Dodge | % | Show Cap **90** too (opposed by mob accuracy) |
-| Attack speed | hits/sec | Show Cap 300% = 3 hits/sec too |
-| Cooldown reduction | % | Show Cap 50 too |
+| Attack speed | hits/sec | Show Cap 500% = 5 hits/sec too (the 0.2 sec floor between hits) |
+| Cooldown reduction | % | Show Cap 80 too |
 | Accuracy | number | **No Cap shown** — the 2,000 Cap was removed; the ratio formula never reaches 100% by itself |
 | Elemental Alignment | % | Show Cap **50** too · Shared with all statuses (no separate status Alignment remains) |
-| Perfect dodge | % | Show Cap 5 too |
+| Perfect dodge | % | **No Cap shown** — show the bare chance (the ratio limits it at 30%) |
 | Drop chance | multiplier | Shown as `×9.2`, not % — `drop_rate` is a multiplier of base drop chance |
 | HP regen | /sec | |
 | Mana regen | /sec | |
 
-**Every capped value is shown as `value / Cap`** e.g. `Crit chance 42% / 100%` so players do not invest further with no effect.
+**Every capped value is shown as `value / Cap`** e.g. `Dodge chance 42% / 90%` so players do not invest further with no effect. Critical chance is not one of them — it has no Cap, so show it as a bare number plus the crit damage it spills into.
 
 # Elemental
 
@@ -89,19 +91,19 @@ The example below is a **level 31 character wearing all mid-Item quality Rare ge
 Attack speed      1.5 /sec      (aspd 154 = 1.2 × (100 + (125−12)×0.25))
 Physical power    715          ( (125 × 5 + 37) × 1.08 )
 Magic power       0            (Int not yet invested — show 0, do not hide)
-Critical chance   10% / 100%   (Lck 125 × 0.05 + Mod 4)
-Critical damage   152% / 100%  (physical / magic)
+Critical chance   10%           (Lck 125 × 0.05 + Mod 4% · no Cap · no overflow yet)
+Critical damage   152%          (physical only)
 ```
 
 ## Defense
 
 ```
-Max HP            3,910        HP regen   31/sec
+Max HP            3,914        HP regen   31/sec
 Max Mana          816          Mana regen 13/sec
-Dodge             24% / 60%    (rate 125×0.15 + 12 = 31 → 31/131)
+Dodge             24% / 90%    (rate 125×0.15 + 12 = 31 → 31/131)
 Accuracy          135
 Elem alignment    8% / 50%
-Perfect dodge     1% / 5%
+Perfect dodge     1% (no Cap · the ratio limits it at 30%)
 ```
 
 - Verify each number: `stat_c(31) = 12 + 2×30 = 72` · Vit 125 → `HP = (125×20 + 40×30) × 1.06 = 3,914` · Int 84 → `mana = 84×4 + 16×30 = 816` · regen `= 84×0.15 = 12.6`
@@ -134,26 +136,25 @@ All 4 original items now have values in formula.md.
 
 1. **Status resistance** — Merged into Vit Elemental res. No separate status res remains.
 2. **Weight capacity** — `K_STR_WEIGHT` = 2 per 1 Str.
-3. **Drop chance / Perfect dodge** — Drop is a multiplier `1 + Lck × 0.01` (9.2× at Lck 816) · Perfect dodge = `Lck × 0.01` with Cap 5% (old K of 0.005 could never reach Cap).
+3. **Drop chance / Perfect dodge** — Drop is a multiplier `1 + Lck × 0.01` (9.2× at Lck 816) · Perfect dodge is a ratio on the same Lck line (rate `Lck × 0.03`, `K_PDOGE` 57 → 30% at Lck 816) clamped by **Cap 25**, which binds at Lck 633.
 4. **Base stat per level** — Base 12 at level 1 and +2 per level, allowing `(Base · level · gear)` display.
 
-# Still Missing
+# Where the Sheet Sits on the Main Screen
 
-1. ~~**Item weight source**~~ **Closed** — Per-slot table + weapon types in mod-pool.md · Item quality multipliers 0.8/1.0/1.3 · Limit = Str × 2 and excess cuts aspd (formula.md section 11).
-2. ~~**Damage taken by player**~~ **Closed** — combat.md section 3 sets `mob damage/sec = DPS_typical ÷ 27` and section 6 has a "survive/not-survive" table per build · The Defense panel thus has a real baseline for "how many seconds can be taken".
-3. ~~**Weight slot must have units**~~ **Closed** — Shown as `used / capacity` with trailing `% aspd lost` (see main 4-slot table above).
-4. ~~**Effective level of each displayed stat**~~ **Closed** — Single-stat ceiling at level 100 is 816 (= 12 pieces × Flat 25 then × 12 pieces × 5%). Fully back-calculated in the formula.md section 0 table.
+The screen holds four regions, all visible at once: the combat scene with the four-row bar above it, the character sheet, the carried inventory and the temporary inventory the hunt fills (`harness/decisions.md` D-107).
 
-# One Slot Left
-
-- ~~**Item Base**~~ **Closed in item-base.md** — Every slot has 2-3 frames (mail / plate / vestments etc.) defining weight + which Mod is emphasized · Item tooltips should therefore show a "frame · weight" line above the Mod list, because it explains why two pieces in the same slot look different.
+- **Worn gear is a grid of twelve slots, and the positions are fixed** — an empty slot is drawn as an empty slot, because a player reads the shape of what is missing. Hovering a worn slot opens its detail card, which says it is the piece being worn.
+- **Every other line is text, with the Cap shown as `value / Cap`** — the recommendation in "How to Show Caps" above, since this column is narrow.
+- **The gate figure lives under the sheet**, read off the mob curve the same way the fight rolls it, never typed here.
+- Nothing on the sheet is a number the client owns: every value is the shared engine's, and the twelve-slot grid equips only through the detail card's button (D-089).
 
 # Display Rules to Follow
 
 - Always show maximum (max) numbers, not uncalculated values, e.g. Max HP rather than current HP.
 - Zero values are still shown, never hidden — players must see their Int is 0 because magic power has no investment yet.
 - At most 1 decimal place, and round down, never up.
-- Always show Caps for crit / dodge / perfect dodge / cdr / aspd / Alignment / elem res · **Accuracy has no Cap anymore**, so show it as a bare number.
+- Always show Caps for dodge / perfect dodge / cdr / aspd / Alignment / elem res · **Accuracy and Critical chance have no Cap**, so show them as bare numbers — for crit, show the overflow going into crit damage instead of a Cap.
 - No separate status Alignment or status resistance remain. Use Elemental Alignment instead.
+- **Mastery shows on the weapon panel, not the main panel** — `Mastery <lvl>/20 · weight −<lvl>%` (weight is −1% per level, Cap −20% at L20 · `equipment-weapon.md`), e.g. `Mastery 14/20 · weight -14%`. It is a per-weapon side track, not a build-calculation stat, so it never clutters the twelve-item main read.
 
 (End of file - total 157 lines)

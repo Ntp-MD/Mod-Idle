@@ -5,6 +5,8 @@
   },
   "terms": [
     { "old": "Affix", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename" },
-    { "old": "Attribute", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename (do not use for item mods)" }
+    { "old": "Attribute", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename (do not use for item mods)" },
+    { "old": "pdef", "new": "Armour", "note": "there is no second physical-defence stat — Armour is the Str line (AGENT.md section 5)" },
+    { "old": "mdef", "new": "Elemental resistance", "note": "there is no magic-defence stat — the res-able half is Elemental resistance (combat.md section 2)" }
   ]
 }

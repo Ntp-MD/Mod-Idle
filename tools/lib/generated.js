@@ -20,20 +20,47 @@ const begin = (k) => `<!-- BEGIN GENERATED:${k} -->`;
 const end = (k) => `<!-- END GENERATED:${k} -->`;
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/**
+ * A body is always rendered with `\n`, but the docs are also written by the owner's editor and half
+ * of them are CRLF through. So a block is written in the file's own ending and compared ignoring
+ * endings — otherwise a CRLF doc reports every one of its generated blocks stale for a reason that is
+ * only line endings, and `--write` leaves the file mixed.
+ */
+const eolOf = (text) => (((text.match(/\r\n/g) || []).length) > ((text.match(/(?<!\r)\n/g) || []).length) ? '\r\n' : '\n');
+const toEol = (text, eol) => text.replace(/\r\n/g, '\n').split('\n').join(eol);
+const bare = (s) => s.replace(/\r\n/g, '\n').trim();
+
 function replaceBlock(text, key, body) {
   const re = new RegExp(escapeRe(begin(key)) + '[\\s\\S]*?' + escapeRe(end(key)));
   if (!re.test(text)) return { text, found: false };
-  return { text: text.replace(re, `${begin(key)}\n${body}\n${end(key)}`), found: true };
+  return { text: text.replace(re, () => toEol(`${begin(key)}\n${body}\n${end(key)}`, eolOf(text))), found: true };
 }
 
 function blockState(text, key, body) {
   const m = text.match(new RegExp(escapeRe(begin(key)) + '([\\s\\S]*?)' + escapeRe(end(key))));
   if (!m) return 'missing';
-  return m[1].trim() === body.trim() ? 'current' : 'stale';
+  return bare(m[1]) === bare(body) ? 'current' : 'stale';
 }
 
 function read(file) {
   return fs.readFileSync(path.join(ROOT, file), 'utf8');
+}
+
+/** Every markdown doc in the repo, keyed by its path from the root
+ *  (`harness/todo.md`). The agent ops and the open-work queue live under
+ *  `harness/`, so a flat root listing is not enough. */
+const DOC_DIRS = ['', 'harness'];
+
+function listDocs() {
+  const out = [];
+  for (const dir of DOC_DIRS) {
+    const abs = path.join(ROOT, dir);
+    if (!fs.existsSync(abs)) continue;
+    for (const f of fs.readdirSync(abs)) {
+      if (f.endsWith('.md')) out.push(dir ? dir + '/' + f : f);
+    }
+  }
+  return out.sort();
 }
 
 function write(file, text) {
@@ -77,4 +104,4 @@ function checkAll(writers) {
   return out;
 }
 
-module.exports = { ROOT, begin, end, replaceBlock, blockState, read, write, writeAll, checkAll };
+module.exports = { ROOT, begin, end, replaceBlock, blockState, read, write, writeAll, checkAll, listDocs };
