@@ -117,10 +117,9 @@ export function mobSwing(
     return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   }
   // Block is its own layer, rolled after perfect dodge and evasion (D-123 · formula-defense.md): the
-  // shield's Base Mod line, bounded by `caps.block`, and a blocked hit is deleted outright.
-  if (c.block > 0 && rng() * 100 < c.block) {
-    return { blocked: 'block', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
-  }
+  // shield's Base Mod line (open-ended, no Cap). A blocked hit is NOT deleted — it is cut by a FLAT
+  // `armour / 10` (owner ruling), so a shield thins a hit rather than erasing it (applied below).
+  const blockedBy = c.block > 0 && rng() * 100 < c.block ? 'block' : null;
 
   // a mob's swing is sized by its priced damage per second, at its own clock rate
   const rawHit = (mob.ps * psMult(curse)) / mob.hitsPerSec;
@@ -134,6 +133,8 @@ export function mobSwing(
   // step 7 is the damage_taken bucket: the global one from `engine.json`, times whatever the
   // skills up right now add to it (Berserker takes more, Iron Will takes less)
   let damage = (physical + elemental) * E.global.defend_mult * (c.damageTaken ?? 1);
+  // a blocked hit is cut by a flat `armour / 10` (owner ruling, provisional): mitigation thins it
+  if (blockedBy) damage = Math.max(0, damage - c.armour / 10);
 
   // Energy Absorb converts a share of the hit into Energy Shield and negates that share outright,
   // whether or not the shield has room — a press on a full shield is still a real defence (D-121)
@@ -150,7 +151,7 @@ export function mobSwing(
     toEs = Math.min(damage, pool);
     damage -= toEs;
   }
-  return { blocked: null, toHp: damage, toEs, absorbed, raw: rawHit };
+  return { blocked: blockedBy, toHp: damage, toEs, absorbed, raw: rawHit };
 }
 
 /**

@@ -21,13 +21,13 @@ Every price is anchored to a number in `checks.md` groups E/F, and nothing here 
 <!-- BEGIN GENERATED:price-unit -->
 ```
 gold per sold junk piece        = 1                       (economy.md · loot.md section 4)
-drops/hour per band             = 133 low · 255 mid · 418 high · 914 high+full Lck   (loot.md section 2 · F3)
+drops/hour per band             = 104 low · 171 mid · 253 high · 768 high+full Lck   (loot.md section 2 · F3)
 upgrades/hour from drops        = 3 low · 3 mid · 3 high · 3 high+full Lck   (F4)
-junk/hour = drops - upgrades    = 130 low · 252 mid · 415 high · 911 high+full Lck
+junk/hour = drops - upgrades    = 101 low · 168 mid · 250 high · 765 high+full Lck
 1 m  = 1 minute of full-sell income in that band
-gold per 1 m                    = 2.2 low · 4.2 mid · 6.9 high · 15.2 high+full Lck
+gold per 1 m                    = 1.7 low · 2.8 mid · 4.2 high · 12.8 high+full Lck
 kills/hour per band (F1)        = 980 low · 1,385 mid · 1,800 high
-opportunity cost of 1 gold      = 1 Reroll value stone forgone = 1/52 hour of Reroll capacity ≈ 1.15 min of craft progress (F6 · E8)
+opportunity cost of 1 gold      = 1 Reroll value stone forgone = 1/31 hour of Reroll capacity ≈ 1.15 min of craft progress (F6 · E8)
 
 band hours (low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (91-100) = 9.0)  (checks.md E1-E5)
 ```
@@ -42,12 +42,12 @@ band hours (low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (
 <!-- BEGIN GENERATED:supply -->
 ```
 band hours                      = low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (91-100) = 9.0
-lifetime junk pieces            = 3.1×130 + 9.5×252 + 18.6×415 + 9.0×415 = 14,251
-max lifetime gold (sell everything, no Lck)              = 14,251
-one-time stall demand (section 3, all 9 places)          = 18,664 gold = 1.31x the max
-essentials only (road link · stash tab 1 · stash tab 2 · herb pouch ii · plot deed 4) = 1,951 = 13.7% of the max
-full-Lck ceiling over the 27.6 high-band hours               = 25,144 gold (= ×2.20 of the 11,454 a no-Lck run earns there · ceiling ×2.2)
-stones forgone by selling everything                     = 14,251 ÷ 8 = 1,781 Reroll casts ≈ 17.8 full-set polishes (E8)
+lifetime junk pieces            = 3.1×101 + 9.5×168 + 18.6×250 + 9.0×250 = 8,809
+max lifetime gold (sell everything, no Lck)              = 8,809
+one-time stall demand (section 3, all 9 places)          = 12,178 gold = 1.38x the max
+essentials only (road link · stash tab 1 · stash tab 2 · herb pouch ii · plot deed 4) = 1,281 = 14.5% of the max
+full-Lck ceiling over the 27.6 high-band hours               = 21,114 gold (= ×3.06 of the 6,900 a no-Lck run earns there · ceiling ×3.06)
+stones forgone by selling everything                     = 8,809 ÷ 8 = 1,101 Reroll casts ≈ 11.0 full-set polishes (E8)
 repeatable demand (section 4)                            = absorbs whatever the one-time list does not, no ceiling
 ```
 <!-- END GENERATED:supply -->
@@ -61,25 +61,25 @@ repeatable demand (section 4)                            = absorbs whatever the 
 <!-- BEGIN GENERATED:one-time -->
 | Item | Sold by | Kind | m | gold @low | gold @mid | gold @high | Charged at | Qty | Gold in the demand total | Note |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Road link (first visit to a settlement) | Waypoint keeper | time | 20 | 44 | 84 | 138 | the band of each destination | 2 low + 3 mid + 3 high | 754 | 8 links · travel mode B · Eastgate is free |
-| Stash tab 1 | Porter | space | 60 | 132 | 252 | 414 | high band | 1 | 414 | no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 30 m teaching price |
-| Stash tab 2 | Porter | space | 90 | 198 | 378 | 621 | high band | 1 | 621 |  |
-| Stash tab 3 | Porter | space | 130 | 286 | 546 | 897 | high band | 1 | 897 |  |
-| Stash tab 4 | Porter | space | 180 | 396 | 756 | 1,242 | high band | 1 | 1,242 |  |
-| Stash tab 5 | Porter | space | 240 | 528 | 1,008 | 1,656 | high band | 1 | 1,656 |  |
-| Stash tab 6 | Porter | space | 300 | 660 | 1,260 | 2,070 | high band | 1 | 2,070 | Cap 6 tabs |
-| Herb pouch II | Porter | space | 60 | 132 | 252 | 414 | mid band | 1 | 252 | one more slot in the character bag (`inventory.character_slots` is the base) |
-| Herb pouch III | Porter | space | 240 | 528 | 1,008 | 1,656 | high band | 1 | 1,656 | one more slot in the character bag (`inventory.character_slots` is the base) |
-| Bag category slot (herbs / stones / gear display) | Porter | space | 45 | 99 | 189 | 311 | low band | 3 | 297 | display and sorting only · sells no stone, no gear |
-| Plot deed 4 | Steward | space | 180 | 396 | 756 | 1,242 | mid band | 1 | 756 | 4th farm plot (farm.md) |
-| Plot deed 5 | Steward | space | 540 | 1,188 | 2,268 | 3,726 | high band | 1 | 3,726 | 5th plot · the most expensive non-cosmetic line |
-| House · Ashfall | Steward | space | 120 | 264 | 504 | 828 | low band | 1 | 264 | 2 stash tabs + 1 farm plot + Waypoint anchor, no combat effect |
-| House · Highspire | Steward | space | 240 | 528 | 1,008 | 1,656 | mid band | 1 | 1,008 |  |
-| House · Vermolch | Steward | space | 360 | 792 | 1,512 | 2,484 | high band | 1 | 2,484 |  |
-| Saved filter preset slot (extra) | Counterhand | information | 30 | 66 | 126 | 207 | one per band | 3 | 399 | preset switching is a concept.md reason-to-open |
-| Potion carrier slot (belt display) | Armourer | space | 40 | 88 | 168 | 276 | mid band | 1 | 168 | display only · the carrier pays the weight tax in formula.md section 11 · sells no potion |
+| Road link (first visit to a settlement) | Waypoint keeper | time | 20 | 34 | 56 | 84 | the band of each destination | 5 low + 5 mid + 7 high | 1,038 | 17 links · travel mode B · Eastgate is free |
+| Stash tab 1 | Porter | space | 60 | 102 | 168 | 252 | high band | 1 | 252 | no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 30 m teaching price |
+| Stash tab 2 | Porter | space | 90 | 153 | 252 | 378 | high band | 1 | 378 |  |
+| Stash tab 3 | Porter | space | 130 | 221 | 364 | 546 | high band | 1 | 546 |  |
+| Stash tab 4 | Porter | space | 180 | 306 | 504 | 756 | high band | 1 | 756 |  |
+| Stash tab 5 | Porter | space | 240 | 408 | 672 | 1,008 | high band | 1 | 1,008 |  |
+| Stash tab 6 | Porter | space | 300 | 510 | 840 | 1,260 | high band | 1 | 1,260 | Cap 6 tabs |
+| Herb pouch II | Porter | space | 60 | 102 | 168 | 252 | mid band | 1 | 168 | one more slot in the character bag (`inventory.character_slots` is the base) |
+| Herb pouch III | Porter | space | 240 | 408 | 672 | 1,008 | high band | 1 | 1,008 | one more slot in the character bag (`inventory.character_slots` is the base) |
+| Bag category slot (herbs / stones / gear display) | Porter | space | 45 | 77 | 126 | 189 | low band | 3 | 231 | display and sorting only · sells no stone, no gear |
+| Plot deed 4 | Steward | space | 180 | 306 | 504 | 756 | mid band | 1 | 504 | 4th farm plot (farm.md) |
+| Plot deed 5 | Steward | space | 540 | 918 | 1,512 | 2,268 | high band | 1 | 2,268 | 5th plot · the most expensive non-cosmetic line |
+| House · Ashfall | Steward | space | 120 | 204 | 336 | 504 | low band | 1 | 204 | 2 stash tabs + 1 farm plot + Waypoint anchor, no combat effect |
+| House · Highspire | Steward | space | 240 | 408 | 672 | 1,008 | mid band | 1 | 672 |  |
+| House · Vermolch | Steward | space | 360 | 612 | 1,008 | 1,512 | high band | 1 | 1,512 |  |
+| Saved filter preset slot (extra) | Counterhand | information | 30 | 51 | 84 | 126 | one per band | 3 | 261 | preset switching is a concept.md reason-to-open |
+| Potion carrier slot (belt display) | Armourer | space | 40 | 68 | 112 | 168 | mid band | 1 | 112 | display only · the carrier pays the weight tax in formula.md section 11 · sells no potion |
 
-Total one-time demand = **18,664 gold** (see section 2).
+Total one-time demand = **12,178 gold** (see section 2).
 
 <!-- END GENERATED:one-time -->
 
@@ -93,17 +93,17 @@ Total one-time demand = **18,664 gold** (see section 2).
 <!-- BEGIN GENERATED:repeatable -->
 | Item | Sold by | Kind | m | Gold | Bound | Note |
 |---|---|---|---|---|---|---|
-| Task skip token | Guild clerk | time | 8 | 55 (high) | 3 per real day | 1 per task slot per day on top of the free skip in tasks.md · 3/day = 24 m/day |
-| Armourer repair (clears Broken, refills protection to 5) | Armourer | time | 14 | 97 (high) | repeatable | must stay above the elite time that earns 1 Reroll tier stone · re-check at F9 |
-| Armourer repair at Ironrow | Armourer | time | 12 | 83 (high) | repeatable | the armourer town discount, and only there · still above the tier-stone floor |
-| Curio pedlar stock: banner · Base tint · title | Curio pedlar | appearance | 30-120 | 207-828 (high) | 3 per real day | 3 slots per real day · appearance only |
-| Prestige title line (per quality band) | Curio pedlar | appearance | 300 | 2,070 (high) | repeatable | the only intentionally expensive line |
-| Waypoint re-anchor (move the free return point) | Waypoint keeper | time | 6 | 41 (high) | repeatable | cosmetic convenience · never gates a zone |
-| Coldres banner (settlement cosmetic) | Furrier | appearance | 90 | 378 (mid) | repeatable | one per settlement · Wolf Cross only |
-| Heavy-school Base tint | Armourer | appearance | 45 | 311 (high) | repeatable | stocked only by the Siege Armourer at Frosthold · appearance only |
-| Collector set hint (prints which school the set wants) | Collector | information | 15 | 104 (high) | repeatable | information only · pays no item and sells no piece |
+| Task skip token | Guild clerk | time | 8 | 34 (high) | 3 per real day | 1 per task slot per day on top of the free skip in tasks.md · 3/day = 24 m/day |
+| Armourer repair (clears Broken, refills protection to 5) | Armourer | time | 14 | 59 (high) | repeatable | must stay above the elite time that earns 1 Reroll tier stone · re-check at F9 |
+| Armourer repair at Ironrow | Armourer | time | 12 | 50 (high) | repeatable | the armourer town discount, and only there · still above the tier-stone floor |
+| Curio pedlar stock: banner · Base tint · title | Curio pedlar | appearance | 30-120 | 126-504 (high) | 3 per real day | 3 slots per real day · appearance only |
+| Prestige title line (per quality band) | Curio pedlar | appearance | 300 | 1,260 (high) | repeatable | the only intentionally expensive line |
+| Waypoint re-anchor (move the free return point) | Waypoint keeper | time | 6 | 25 (high) | repeatable | cosmetic convenience · never gates a zone |
+| Coldres banner (settlement cosmetic) | Furrier | appearance | 90 | 252 (mid) | repeatable | one per settlement · Wolf Cross only |
+| Heavy-school Base tint | Armourer | appearance | 45 | 189 (high) | repeatable | stocked only by the Siege Armourer at Frosthold · appearance only |
+| Collector set hint (prints which school the set wants) | Collector | information | 15 | 63 (high) | repeatable | information only · pays no item and sells no piece |
 
-Skip-token ceiling = 8 m × 3/day = **24 m/day** = 166 gold/day in the high band.
+Skip-token ceiling = 8 m × 3/day = **24 m/day** = 101 gold/day in the high band.
 
 <!-- END GENERATED:repeatable -->
 
@@ -127,7 +127,16 @@ Skip-token ceiling = 8 m × 3/day = **24 m/day** = 166 gold/day in the high band
 | **Bonegate** | 7 | high | — | ✓ | · | ✓ | · | ✓ | ✓ | ✓ | · | · | · |
 | **Frosthold** | 8 | high | — | ✓ | · | ✓ | · | ✓ | ✓ | · | · | · | · |
 | **Vermolch** | 9 | high | high | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | · |
-| **Present in** |  |  |  | 9/9 | 3/9 | 9/9 | 3/9 | 6/9 | 9/9 | 3/9 | 2/9 | 4/9 | 1/9 |
+| **Thornwake** | 10 | low | — | ✓ | · | ✓ | · | · | ✓ | · | · | · | · |
+| **Greyfen** | 11 | low | — | ✓ | · | ✓ | · | · | ✓ | · | · | · | · |
+| **Saltmarrow** | 12 | low | low | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | · | · | ✓ | · |
+| **Emberhold** | 13 | mid | — | ✓ | · | ✓ | · | · | ✓ | · | · | · | · |
+| **Duskmoor** | 14 | mid | — | ✓ | · | ✓ | · | · | ✓ | · | · | · | · |
+| **Nettlecrag** | 15 | mid | mid | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | · | · | ✓ | · |
+| **Blackwater Reach** | 16 | high | — | ✓ | · | ✓ | · | · | ✓ | · | · | · | · |
+| **Wyrmback** | 17 | high | — | ✓ | · | ✓ | · | · | ✓ | · | · | · | · |
+| **The Pale Spire** | 18 | high | high | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | · | · | ✓ | · |
+| **Present in** |  |  |  | 18/9 | 6/9 | 18/9 | 6/9 | 9/9 | 18/9 | 3/9 | 2/9 | 7/9 | 1/9 |
 
 Presence rules:
 - **Counterhand** — every settlement · sells information
@@ -148,15 +157,24 @@ Presence rules:
 <!-- BEGIN GENERATED:stock -->
 | Settlement | Zone · band | Capital | NPCs | Stock lines (prices in sections 3-4) | Base bias (flavour) | Standing tiers (kills) |
 |---|---|---|---|---|---|---|
-| **Eastgate** | 1 · low | — | Counterhand · Porter · Waypoint keeper | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | cloth | 147 / 368 / 686 |
-| **Millbrook** | 2 · low | — | Counterhand · Porter · Waypoint keeper · Herbalist | Herb pouch II · Bag category slot · Road link · Saved filter preset slot | cloth / light | 235 / 588 / 1,098 |
-| **Ashfall** | 3 · low | low | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Collector · Herbalist | House · Ashfall · Plot deed 4 · Collector set **Militia** (light school) · Collector set hint · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot | light (Evasion) | 529 / 1,323 / 2,470 |
-| **Ironrow** | 4 · mid | — | Counterhand · Porter · Waypoint keeper · Armourer | Armourer repair at Ironrow · Stash tab 1 · Road link · Potion carrier slot | light / Ring Mail | 914 / 2,285 / 4,266 |
-| **Wolf Cross** | 5 · mid | — | Counterhand · Porter · Waypoint keeper · Furrier | Bag category slot · Coldres banner · Stash tab 1 · Road link · Waypoint re-anchor | light | 1,247 / 3,116 / 5,817 |
-| **Highspire** | 6 · mid | mid | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Curio pedlar · Herbalist | House · Highspire · Plot deed 5 · Curio pedlar stock: banner · Base tint · title · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot | Ring Mail | 1,787 / 4,467 / 8,338 |
-| **Bonegate** | 7 · high | — | Counterhand · Porter · Waypoint keeper · Collector · Armourer | Collector set **Reliquary** (heavy school) · Collector set hint · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot | heavy (Armour) | 2,700 / 6,750 / 12,600 |
-| **Frosthold** | 8 · high | — | Counterhand · Porter · Waypoint keeper · Armourer (=Siege Armourer) | Armourer repair · Heavy-school Base tint · Stash tab 1 · Road link · Waypoint re-anchor | heavy | 3,240 / 8,100 / 15,120 |
-| **Vermolch** | 9 · high | high | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Collector · Curio pedlar · Herbalist | House · Vermolch · Collector set **Garden of Ash** (cloth school) · Collector set hint · Prestige title line · Curio pedlar stock: banner · Base tint · title · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot | heavy · cloth (glass endgame) | 8,964 / 22,410 / 41,832 |
+| **Eastgate** | 1 · low | — | Counterhand · Porter · Waypoint keeper | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | cloth | 118 / 294 / 549 |
+| **Millbrook** | 2 · low | — | Counterhand · Porter · Waypoint keeper · Herbalist | Herb pouch II · Bag category slot · Road link · Saved filter preset slot | cloth / light | 294 / 735 / 1,372 |
+| **Ashfall** | 3 · low | low | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Collector · Herbalist | House · Ashfall · Plot deed 4 · Collector set **Militia** (light school) · Collector set hint · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot | light (Evasion) | 441 / 1,103 / 2,058 |
+| **Ironrow** | 4 · mid | — | Counterhand · Porter · Waypoint keeper · Armourer | Armourer repair at Ironrow · Stash tab 1 · Road link · Potion carrier slot | light / Ring Mail | 789 / 1,974 / 3,684 |
+| **Wolf Cross** | 5 · mid | — | Counterhand · Porter · Waypoint keeper · Furrier | Bag category slot · Coldres banner · Stash tab 1 · Road link · Waypoint re-anchor | light | 1,288 / 3,220 / 6,011 |
+| **Highspire** | 6 · mid | mid | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Herbalist · Curio pedlar | House · Highspire · Plot deed 5 · Curio pedlar stock: banner · Base tint · title · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot | Ring Mail | 1,870 / 4,674 / 8,726 |
+| **Bonegate** | 7 · high | — | Counterhand · Porter · Waypoint keeper · Collector · Armourer | Collector set **Reliquary** (heavy school) · Collector set hint · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot | heavy (Armour) | 2,646 / 6,615 / 12,348 |
+| **Frosthold** | 8 · high | — | Counterhand · Porter · Waypoint keeper · Armourer (=Siege Armourer) | Armourer repair · Heavy-school Base tint · Stash tab 1 · Road link · Waypoint re-anchor | heavy | 3,402 / 8,505 / 15,876 |
+| **Vermolch** | 9 · high | high | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Collector · Curio pedlar · Herbalist | House · Vermolch · Collector set **Garden of Ash** (cloth school) · Collector set hint · Prestige title line · Curio pedlar stock: banner · Base tint · title · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot | heavy · cloth (glass endgame) | 4,104 / 10,260 / 19,152 |
+| **Thornwake** | 10 · low | — | Counterhand · Porter · Waypoint keeper | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | wet lowland | 2,646 / 6,615 / 12,348 |
+| **Greyfen** | 11 · low | — | Counterhand · Porter · Waypoint keeper | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | wet lowland | 3,087 / 7,718 / 14,406 |
+| **Saltmarrow** | 12 · low | low | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Herbalist | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | salt flats | 3,557 / 8,894 / 16,601 |
+| **Emberhold** | 13 · mid | — | Counterhand · Porter · Waypoint keeper | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | slag and foundry heat | 5,734 / 14,335 / 26,758 |
+| **Duskmoor** | 14 · mid | — | Counterhand · Porter · Waypoint keeper | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | open moor | 6,482 / 16,205 / 30,248 |
+| **Nettlecrag** | 15 · mid | mid | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Herbalist | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | thorn country | 7,230 / 18,074 / 33,739 |
+| **Blackwater Reach** | 16 · high | — | Counterhand · Porter · Waypoint keeper | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | drowned river mouth | 10,422 / 26,055 / 48,636 |
+| **Wyrmback** | 17 · high | — | Counterhand · Porter · Waypoint keeper | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | wyrm breeding ground | 11,448 / 28,620 / 53,424 |
+| **The Pale Spire** | 18 · high | high | Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Herbalist | Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot | the pale spire | 26,298 / 65,745 / 122,724 |
 
 <!-- END GENERATED:stock -->
 
@@ -171,15 +189,24 @@ Standing accrues from kills in that settlement's own zone (`towns.md` section 6)
 <!-- BEGIN GENERATED:standing -->
 | Settlement | Band | Zone budget (hr) | Tier I 30% | Tier II 75% | Tier III 140% |
 |---|---|---|---|---|---|
-| **Eastgate** | low (980 kills/hr) | 0.5 | 0.15 hr · **147 kills** | 0.38 hr · **368 kills** | 0.70 hr · **686 kills** |
-| **Millbrook** | low (980 kills/hr) | 0.8 | 0.24 hr · **235 kills** | 0.60 hr · **588 kills** | 1.12 hr · **1,098 kills** |
-| **Ashfall** | low (980 kills/hr) | 1.8 | 0.54 hr · **529 kills** | 1.35 hr · **1,323 kills** | 2.52 hr · **2,470 kills** |
-| **Ironrow** | mid (1,385 kills/hr) | 2.2 | 0.66 hr · **914 kills** | 1.65 hr · **2,285 kills** | 3.08 hr · **4,266 kills** |
-| **Wolf Cross** | mid (1,385 kills/hr) | 3.0 | 0.90 hr · **1,247 kills** | 2.25 hr · **3,116 kills** | 4.20 hr · **5,817 kills** |
-| **Highspire** | mid (1,385 kills/hr) | 4.3 | 1.29 hr · **1,787 kills** | 3.22 hr · **4,467 kills** | 6.02 hr · **8,338 kills** |
-| **Bonegate** | high (1,800 kills/hr) | 5.0 | 1.50 hr · **2,700 kills** | 3.75 hr · **6,750 kills** | 7.00 hr · **12,600 kills** |
-| **Frosthold** | high (1,800 kills/hr) | 6.0 | 1.80 hr · **3,240 kills** | 4.50 hr · **8,100 kills** | 8.40 hr · **15,120 kills** |
-| **Vermolch** | high (1,800 kills/hr) | 16.6 | 4.98 hr · **8,964 kills** | 12.45 hr · **22,410 kills** | 23.24 hr · **41,832 kills** |
+| **Eastgate** | low (980 kills/hr) | 0.4 | 0.12 hr · **118 kills** | 0.30 hr · **294 kills** | 0.56 hr · **549 kills** |
+| **Millbrook** | low (980 kills/hr) | 1.0 | 0.30 hr · **294 kills** | 0.75 hr · **735 kills** | 1.40 hr · **1,372 kills** |
+| **Ashfall** | low (980 kills/hr) | 1.5 | 0.45 hr · **441 kills** | 1.13 hr · **1,103 kills** | 2.10 hr · **2,058 kills** |
+| **Ironrow** | mid (1,385 kills/hr) | 1.9 | 0.57 hr · **789 kills** | 1.42 hr · **1,974 kills** | 2.66 hr · **3,684 kills** |
+| **Wolf Cross** | mid (1,385 kills/hr) | 3.1 | 0.93 hr · **1,288 kills** | 2.33 hr · **3,220 kills** | 4.34 hr · **6,011 kills** |
+| **Highspire** | mid (1,385 kills/hr) | 4.5 | 1.35 hr · **1,870 kills** | 3.38 hr · **4,674 kills** | 6.30 hr · **8,726 kills** |
+| **Bonegate** | high (1,800 kills/hr) | 4.9 | 1.47 hr · **2,646 kills** | 3.68 hr · **6,615 kills** | 6.86 hr · **12,348 kills** |
+| **Frosthold** | high (1,800 kills/hr) | 6.3 | 1.89 hr · **3,402 kills** | 4.72 hr · **8,505 kills** | 8.82 hr · **15,876 kills** |
+| **Vermolch** | high (1,800 kills/hr) | 7.6 | 2.28 hr · **4,104 kills** | 5.70 hr · **10,260 kills** | 10.64 hr · **19,152 kills** |
+| **Thornwake** | low (980 kills/hr) | 9.0 | 2.70 hr · **2,646 kills** | 6.75 hr · **6,615 kills** | 12.60 hr · **12,348 kills** |
+| **Greyfen** | low (980 kills/hr) | 10.5 | 3.15 hr · **3,087 kills** | 7.88 hr · **7,718 kills** | 14.70 hr · **14,406 kills** |
+| **Saltmarrow** | low (980 kills/hr) | 12.1 | 3.63 hr · **3,557 kills** | 9.07 hr · **8,894 kills** | 16.94 hr · **16,601 kills** |
+| **Emberhold** | mid (1,385 kills/hr) | 13.8 | 4.14 hr · **5,734 kills** | 10.35 hr · **14,335 kills** | 19.32 hr · **26,758 kills** |
+| **Duskmoor** | mid (1,385 kills/hr) | 15.6 | 4.68 hr · **6,482 kills** | 11.70 hr · **16,205 kills** | 21.84 hr · **30,248 kills** |
+| **Nettlecrag** | mid (1,385 kills/hr) | 17.4 | 5.22 hr · **7,230 kills** | 13.05 hr · **18,074 kills** | 24.36 hr · **33,739 kills** |
+| **Blackwater Reach** | high (1,800 kills/hr) | 19.3 | 5.79 hr · **10,422 kills** | 14.48 hr · **26,055 kills** | 27.02 hr · **48,636 kills** |
+| **Wyrmback** | high (1,800 kills/hr) | 21.2 | 6.36 hr · **11,448 kills** | 15.90 hr · **28,620 kills** | 29.68 hr · **53,424 kills** |
+| **The Pale Spire** | high (1,800 kills/hr) | 48.7 | 14.61 hr · **26,298 kills** | 36.53 hr · **65,745 kills** | 68.18 hr · **122,724 kills** |
 
 Kill counts = `zone budget hr × tier share × F1 kills/hour of that band` (980 low · 1,385 mid · 1,800 high), rounded.
 - **Tier I** = 30% of that settlement's zone budget → that stall's second stock line.

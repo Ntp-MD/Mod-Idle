@@ -18,29 +18,28 @@ built. **Do not copy the cage results in here** — `verify.ts` prints them live
 
 ## A · waiting on the owner
 
-- **World scale — 18 zones · 180 levels** (`owner/travel-route-combat.md` sections 9-10). The four travel
-  deltas shipped (D-133 · D-134); this one did **not**. It is a numeric-base rebalance, not a travel feature: it
-  replaces the hand-typed zone-edge anchors with a derived curve, so `mob_HP` and everything measured off it move —
-  the X37 anchors, `world.md`, the loot bands, the town budgets and the published timeline (`checks.md` E5). It also carries a fork the
-  owner file states both ways: section 10.1 keeps zones 1-9 and their bands untouched, section 10.6 stretches every
-  band to 60 levels. Costing sits in the owner file (§9 power table · §10.6 the 36 anchors "cannot be typed by hand").
-  Answer by digit which side of the fork, then it is a build. Sub-items once the fork is chosen: new settlements and
-  their stalls (`town.json`), a named boss per new zone, species re-spread with the X23 per-zone floor held, the
-  derived zone-edge curve plus its anchors in `engine/`, X23/X26 re-proved over the new zone count, and a
-  `world.md` regeneration.
-- **MP3 mod band skew — one red client test.** `game/tests/craft.test.ts` "Refine pushes one Tier up and stops dead
-  at T1" throws `no value range for mod "elemental_alignment"` out of `engine/loot.ts` `rangeOf`. The `mods.json`
-  band for that line does not cover every quality/Tier cell the Refine path can ask for. It is **not** a travel
-  regression and predates D-133/D-134 — it is MP3, left pending on purpose because re-cutting a band moves the
-  craft timeline (`harness/decisions.md` · `checks.md` stones). Every other client test is green.
-- **Client Road and Map screens — build or leave sim-only?** `towns-ui.md` §2 and §9 specify the Map page, the
-  Circuit editor and the Road dialogs, and `tools/map.ts` now writes the overlay, but no Svelte component exists:
-  the Road was sim-only before this work and still is. The owner file's build list for the travel deltas covered
-  `game/src/sim` and `save.md`, not UI, so this is a scope call rather than a missing piece.
+- **World scale — 18 zones · 180 levels** (`owner/travel-route-combat.md` sections 9-10). **Built, and the
+  curve was NOT rebalanced** — the owner's 10.6 ladder rule was rejected in favour of holding the published
+  numbers: zones 1-9 keep their exact anchors, and zones 10-18 are computed by holding the gear factor flat at
+  its level-90 measured value (`mob.curve.extend`), so mob_HP(180) lands at 25,741 against the owner's ~25,700
+  projection. Level cap 190 · spawn cap 180 · timeline reaches 198.8 hr with levels 1-100 unmoved. Ships:
+  18 zones, 18 bosses, 18 settlements with a capital every three zones, 21 road links, the species re-spread
+  over 18 zones, and the map overlay. **Open:** three survival gates are red because the larger cap changes what
+  the old floor prices were calibrated against — see B.
+- **Circuit expedition objective — needs a reward-mint ruling.** A goal on a multi-settlement circuit
+  (finish a lap with no Push) wants a reward, and the parked idea specified gold and stones. A gold bonus
+  would exceed the published 24 gold/day Road purse cap (D-133 · G6-G9 · E5); a stone bonus would be a new
+  stone source. Blocked until the owner rules whether the cap may rise or the reward is non-material (a
+  completion log). The objective itself is cheap once that is decided — `advanceLeg` already counts laps.
 
 ## B · mine to build
 
-- (none — nothing is half-built. `node tools/verify.ts` is green; the client suite is green except the MP3 item above.)
+- **Three survival gates are red at the new cap, and both fixes are owner calls.** `SV2` wants the tank build to
+  beat glass by at least 1.5x, but a full Vit spread now gives only 1.42x: the flat per-level HP term
+  (`hp_per_level × 189`) outweighs the Vit K term, so stat investment matters proportionally less the longer
+  the game runs. Raising `K_VIT_HP` 20 → 29 restores 1.5x and is real player power; lowering the floor to 1.4
+  accepts that Vit is a thinner lever at the endgame. `SV6`/`SV7` are the G5 boss gate and now report 0-of-4
+  builds Pushed, where the published answer expects some to fail — the same cause, the boss no longer threatens.
 
 ## C · housekeeping that must not rot
 
@@ -51,3 +50,7 @@ built. **Do not copy the cage results in here** — `verify.ts` prints them live
 - **`A-refine` now carries a context regex.** It shares its digits with the drop-rate multiplier at the stat
   ceiling, so it reads only lines that are about refining, a set or a piece. Widen the pattern, never the cap, if
   another unrelated figure collides with it.
+
+## Post-release · deliberately not tracked
+
+- Client Road/Map cosmetics beyond the shipped Map page and Circuit editor — waypoint and link dialogs, richer map markers.

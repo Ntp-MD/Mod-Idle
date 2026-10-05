@@ -83,6 +83,16 @@ async function get(key: string): Promise<string | null> {
   }
 }
 
+/** Client-only preferences (not part of a save slot): number format and the offline-report toggle. */
+export interface ClientSettings { numberFormat: 'plain' | 'short'; offlineReport: boolean; }
+export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true };
+export async function readSettings(): Promise<ClientSettings> {
+  const raw = await get('settings');
+  if (!raw) return { ...DEFAULT_SETTINGS };
+  try { return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) }; } catch { return { ...DEFAULT_SETTINGS }; }
+}
+export async function writeSettings(s: ClientSettings): Promise<void> { await put('settings', JSON.stringify(s)); }
+
 /** Account-wide Mastery is the shared truth: the best value any slot reached wins. */
 export function mergeMastery(account: Account, state: GameState, slot = 'current'): Account {
   for (const [weapon, xp] of Object.entries(state.mastery)) {
@@ -253,7 +263,13 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.junkByRarity) s.junkByRarity = {};
   if (!s.town) s.town = newTown();
   if (!s.farm) s.farm = newFarm();
+  // a farm saved before the automation block existed gets it off; the player opts in
+  if (s.farm && !s.farm.autoFarm) { s.farm.autoFarm = { plant: false, harvest: false, brew: false }; s.farm.lastAutoFarmAt = -9999; }
+  // an older character auto-allocates its points (the idle default); manual is the opt-out (D-141)
+  if (s.player && s.player.autoSpend == null) s.player.autoSpend = true;
   if (!s.stash) s.stash = [];
+  // an older save auto-dissolves nothing; the player opts in
+  if (!s.autoDissolveRarity) s.autoDissolveRarity = 'off';
   if (!s.purseDay) s.purseDay = {};
   if (!s.chestDay) s.chestDay = {};
   // a Road saved before the Circuit existed is a one-off trip: no loop, no chest ledger entry

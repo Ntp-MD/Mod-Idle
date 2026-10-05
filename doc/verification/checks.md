@@ -59,14 +59,14 @@ Every id in this project is a **row label**, not jargon — this is the decoder.
 <!-- BEGIN GENERATED:group-A -->
 | id | Must hold | Expression | Value |
 |---|---|---|---|
-| A1 | stat at level 1 | `12 + 2×0` | 12 |
-| A2 | stat at level 100 no gear | `12 + 2×99` | 210 |
-| A3 | single-stat ceiling | `210 + 25×13` | **535** |
-| A4 | two-stat split ceiling | `6 items + 6 items` = `210 + 25×6` | 373 / 373 |
-| A5 | no % term reinstated | `(210 + 25×13) × 1.0` | 535 → **never revert to this** because all K values are set on 535 |
+| A1 | stat at level 1 | `12 + undefined×0` | 12 |
+| A2 | stat at level 100 no gear | `12 + undefined×189` | 83 |
+| A3 | single-stat ceiling | `83 + 25×13` | **433** |
+| A4 | two-stat split ceiling | `6 items + 6 items` = `83 + 25×6` | 271 / 271 |
+| A5 | no % term reinstated | `(83 + 25×13) × 1.0` | 433 → **never revert to this** because all K values are set on 433 |
 | A6 | item count origin | 13 worn slots (12 + main hand) · from equipment-slot.md | 13 |
 
-Source: `node tools/check.ts` · stat line = `stat_c = 12 + 2 × (level − 1)` (formula.md) · the Flat maximum from mod-pool.md (Stat Mod flat 25 · Stat Mod % is retired, D-114, so A3 is a flat-only sum) · slot count from equipment-slot.md.
+Source: `node tools/check.ts` · stat line = `stat_c = 12 + undefined × (level − 1)` (formula.md) · the Flat maximum from mod-pool.md (Stat Mod flat 25 · Stat Mod % is retired, D-114, so A3 is a flat-only sum) · slot count from equipment-slot.md.
 
 <!-- END GENERATED:group-A -->
 
@@ -75,26 +75,26 @@ Source: `node tools/check.ts` · stat line = `stat_c = 12 + 2 × (level − 1)` 
 <!-- BEGIN GENERATED:group-B -->
 | id | Value | Expression | Result |
 |---|---|---|---|
-| B1 | Physical / Magic power | `(535×5 + 80) × 1.16` | **3,196** |
-| B2 | Max HP (Vit build) | `(535×20 + 3,960) × 1.16` | 17,354 |
-| B3 | Max Mana | `535×4 + 1,584` | 3,824 |
-| B4 | Mana regen | `535×0.18` | 96/sec |
-| B5 | **pool ÷ regen** | `3,824 ÷ 96.3` | **39.7 sec** (intent = 40) |
-| B6 | Crit chance (no Flat) | `535×0.05 + 8% Mod` | 34.8% |
-| B6b | Crit chance Cap → overflow | `min(34.8, 100)` | 34.8% chance · overflow 0.0% → crit damage 220% |
-| B7 | Elem res raw | `535×0.05` | 26.8% |
-| B8 | Elem res + 3 Mod items | `26.8 × (1 + 30×3)%` | 50.8 (hard ceiling 75) |
-| B9 | Alignment raw | `535×0.05` | 26.8% |
-| B10 | CDR raw | `535×0.03` | 16.1% |
-| B11 | CDR + 4 Mod + BO | `16.1 × (1 + 25×11 + 0)%` | 60.2 (hard ceiling 80) |
-| B12 | Accuracy | `535×1.5×1.25` | 1,003 |
-| B13 | Weight capacity | `535×2` | 2,070 |
-| B14 | Drop multiplier | `1 + 535×0.01` | 6.35x |
-| B15 | Energy Shield pool (Int build) | `535×4` | **2,140** · 25.3% of the same build's 8,460 HP |
-| B16 | ES recharge · full recovery | `535×0.1/sec · after 3 sec without a hit` | 53.5/sec → **40.0 sec** for the whole pool · pool ÷ regen held by **X25** |
+| B1 | Physical / Magic power | `(433×5 + 80) × 1.16` | **2,607** |
+| B2 | Max HP (Vit build) | `(433×20 + 7,560) × 1.16` | 19,173 |
+| B3 | Max Mana | `433×4 + 3,024` | 4,858 |
+| B4 | Mana regen | `433×0.18` | 78/sec |
+| B5 | **pool ÷ regen** | `4,858 ÷ 78.0` | **62.3 sec** (intent = 40) |
+| B6 | Crit chance (no Flat) | `433×0.05 + 8% Mod` | 29.7% |
+| B6b | Crit chance Cap → overflow | `min(29.7, 100)` | 29.7% chance · overflow 0.0% → crit damage 220% |
+| B7 | Elem res raw | `433×0.05` | 21.7% |
+| B8 | Elem res + 3 Mod items | `21.7 × (1 + 30×3)%` | 41.2 (hard ceiling 75) |
+| B9 | Alignment raw | `433×0.05` | 21.7% |
+| B10 | CDR raw | `433×0.03` | 13.0% |
+| B11 | CDR + 4 Mod + BO | `13.0 × (1 + 25×11 + 0)%` | 48.8 (hard ceiling 80) |
+| B12 | Accuracy | `433×1.5×1.25` | 813 |
+| B13 | Weight capacity | `433×2` | 1,867 |
+| B14 | Drop multiplier | `1 + 433×0.01` | 5.33x |
+| B15 | Energy Shield pool (Int build) | `433×4` | **1,734** · 17.3% of the same build's 10,029 HP |
+| B16 | ES recharge · full recovery | `433×0.1/sec · after 3 sec without a hit` | 43.3/sec → **40.0 sec** for the whole pool · pool ÷ regen held by **X25** |
 
-Every row is the single-stat ceiling (535) plus the one Mod slot that can roll that line (mod-pool.md maxima · equipment-slot.md slot rules).
-B5 is the row K_INT_MREGEN was retuned for: 39.7 sec against the 40 sec intent (tolerance ±1 sec).
+Every row is the single-stat ceiling (433) plus the one Mod slot that can roll that line (mod-pool.md maxima · equipment-slot.md slot rules).
+B5 is the row K_INT_MREGEN was retuned for: 62.3 sec against the 40 sec intent (tolerance ±1 sec).
 
 <!-- END GENERATED:group-B -->
 
@@ -104,16 +104,16 @@ B5 is the row K_INT_MREGEN was retuned for: 39.7 sec against the 40 sec intent (
 | id | Cap | Reachable path | Value at that point |
 |---|---|---|---|
 | C1 | Evasion 80% | Dex rating ÷ (rating + that mob's accuracy), then + Agi ÷ 30 points, capped together · the same opposed shape the mob side dodges with (X20) | **reachable** ✓ |
-| C2 | (compare) Dex 373 + 1 Flat item vs the floor lineage | rating = 373×0.5 + 30 = 216, + Agi 373 ÷ 30 | 80.0% vs Husk · does not hit Cap ✓ |
-| C3 | aspd 500 | sword 1.2 + 25% Mod → Agi = 1,179 | **1,179** (ceiling 535) ✓ |
+| C2 | (compare) Dex 271 + 1 Flat item vs the floor lineage | rating = 271×0.5 + 30 = 165, + Agi 271 ÷ 30 | 80.0% vs Husk · does not hit Cap ✓ |
+| C3 | aspd 500 | sword 1.2 + 25% Mod → Agi = 1,179 | **1,179** (ceiling 433) ✓ |
 | C4 | aspd 500 | dagger 1.5 + 25% Mod | 845 ✓ · staff/2h unreachable by intent |
-| C5 | Perfect dodge 21 | ratio: Lck 535 × 0.03 = rate 16.1 ÷ (rate + 57) = 22.0% · the Cap binds first · reached at Lck 506 | **21%** at the Cap · reachable at Lck 506 (under the 535 ceiling) ✓ |
-| C6 | Alignment 50 · hard ceiling | Dex 535 (26.8) + amulet + gloves (+5 +5) | 36.8 — the build tops out under the Cap (D-124) |
-| C7 | Elem res 75 · hard ceiling | Vit 535 + 3 res items | 50.8 — the build tops out under the Cap (D-124) |
-| C8 | CDR 80 · hard ceiling | Wis 535 + 11 CDR items + BO | 60.2 — the build tops out under the Cap (D-124) |
-| C9 | Crit (no Cap) | Lck 535 + 8% Mod + buff | 34.8% from stats alone · anything over 100 becomes crit damage (B6b) ✓ |
-| C10 | stun 15 | Alignment reach 36.8 × 0.3 = 11.0 + the mace's Chance to stun % line | 15 ✓ via the mace Base Mod, the only source past the Alignment reach (D-123 · D-124) |
-| C11 | Accuracy | no Cap · `acc/(acc+E)` forbids 100% itself | 1,003 → 91.0% ✓ |
+| C5 | Perfect dodge 21 | ratio: Lck 433 × 0.03 = rate 13.0 ÷ (rate + 57) = 18.6% · the Cap binds first · reached at Lck 506 | **21%** at the Cap · reachable at Lck 506 (under the 433 ceiling) ✓ |
+| C6 | Alignment null · hard ceiling | Dex 433 (21.7) + amulet + gloves (+5 +5) | 31.7 — the build tops out under the Cap (D-124) |
+| C7 | Elem res 75 · hard ceiling | Vit 433 + 3 res items | 41.2 — the build tops out under the Cap (D-124) |
+| C8 | CDR 80 · hard ceiling | Wis 433 + 11 CDR items + BO | 48.8 — the build tops out under the Cap (D-124) |
+| C9 | Crit (no Cap) | Lck 433 + 8% Mod + buff | 29.7% from stats alone · anything over 100 becomes crit damage (B6b) ✓ |
+| C10 | stun null | Alignment reach 31.7 × 0.3 = 9.5 + the mace's Chance to stun % line | null ✓ via the mace Base Mod, the only source past the Alignment reach (D-123 · D-124) |
+| C11 | Accuracy | no Cap · `acc/(acc+E)` forbids 100% itself | 813 → 94.1% ✓ |
 
 H3 rule: every Cap states whether it is a build target or a hard ceiling. A build-target Cap must bind (the build reaches it); a hard-ceiling Cap must not (the build tops out under it) — `alignment`, `elem_res` and `cdr` are hard ceilings by D-124, and evasion was closed by putting it on the opposed form the mob side already uses, so X20 can prove it both ways.
 Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.aspd} ÷ weapon_aspd` minus the 100 baseline and the 25% Mod, divided by ${K.K_AGI_ASPD} per Agi, plus the level-1 Base of 12.
@@ -124,8 +124,8 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 
 | id | Must hold | Value |
 |---|---|---|
-| D1 | `mob_HP(L) = typical_gear_DPS(L) x (1 + 0.0034 L)` - the skill list is the only power multiplier that folds into this line (H1) · **there is no passive tree**, so nothing else multiplies here · the curve is anchored at every zone edge and interpolated inside the zone, so every level 1-90 has an HP (**X37**) | L1 120 · L10 629 · L30 1,824 · L60 5,293 · L90 **10,709 (highest level a mob can spawn)** · L100 11,901 *(theoretical - the spawn cap is 90)* · zone edges in `world.md` · per-entry numbers in `mob-roster.md` |
-| D2 | `mob_PS = typical_gear_DPS ÷ 27` (**not** `mob_HP ÷ 27`) | L30 61 · L60 163 · L90 **304 (highest a mob can spawn)** · L100 329 *(theoretical)* · elite ×4 · boss ×16 (D-048) |
+| D1 | `mob_HP(L) = typical_gear_DPS(L) x (1 + 0.0034 L)` - the skill list is the only power multiplier that folds into this line (H1) · **there is no passive tree**, so nothing else multiplies here · the curve is anchored at every zone edge and interpolated inside the zone, so every level 1-180 has an HP (**X37**) | L1 120 · L10 629 · L30 1,824 · L60 5,293 · L90 10,709 · L180 **25,741 (highest level a mob can spawn)** · L190 27,704 *(theoretical - the spawn cap is 180)* · zone edges in `world.md` · per-entry numbers in `mob-roster.md` |
+| D2 | `mob_PS = typical_gear_DPS ÷ 27` (**not** `mob_HP ÷ 27`) | L30 61 · L60 163 · L90 304 · L180 **591 (highest a mob can spawn)** · L190 623 *(theoretical)* · elite ×4 · boss ×16 (D-048) |
 | D3 | TTK of on-level players | 1.0 sec ✓ (by D1 definition) |
 | D4 | TTK on-level gear + skill list | `11,901 ÷ (8,881 × 1.34)` = **1.00 sec** (T1 gear + full skill list; there is no passive tree, so this is the only build ceiling) |
 | D5 | TTK T1 gear *without* skill (fresh zone entrant) | `11,901 ÷ 8,881` = **the skill multiplier, read as seconds** — mob_HP is priced for a player who already holds the list · at the spawn cap 90 it is `10,709 ÷ 8,881` = 1.21 sec |
@@ -175,29 +175,29 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 | id | Value | Expression |
 |---|---|---|
 | F1 | kills/hr | `3600 ÷ (group × 1 sec clear + 4 sec spawn) × group` = 1,800 high · 1,385 mid · 980 low |
-| F2 | drops per kill | `8% × (1 + Lck×0.01)` = 13.6% (L30) · 18.4% (L60) · 23.2% (L90) · 50.8% (full Lck 535) |
-| F3 | drops/hr | `kills/hr × F2` = **418** (L90) · 255 (L60) · 133 (L30) · 914 (full Lck) |
-| F4 | upgrades/hr | `measured — tools/loot.ts, the seven roll steps in loot.md section 1` = hr1 28.1 → hr2-4 5.0 → after that 3.3 (low band) · keep-rate 1.95% low · 1.21% mid · 0.67% high · 0.31% high + full_lck |
-| F5 | Reroll value stone/hr | `junk × 1 = drops − upgrades` = **415** |
-| F6 | Reroll value uses/hr | `415 ÷ 8` = **52** |
+| F2 | drops per kill | `8% × (1 + Lck×0.01)` = 10.6% (L30) · 12.3% (L60) · 14.0% (L90) · 42.7% (full Lck 433) |
+| F3 | drops/hr | `kills/hr × F2` = **253** (L90) · 171 (L60) · 104 (L30) · 768 (full Lck) |
+| F4 | upgrades/hr | `measured — tools/loot.ts, the seven roll steps in loot.md section 1` = hr1 27.8 → hr2-4 6.6 → after that 2.5 (low band) · keep-rate 1.98% low · 1.22% mid · 0.66% high · 0.24% high + full_lck |
+| F5 | Reroll value stone/hr | `junk × 1 = drops − upgrades` = **250** |
+| F6 | Reroll value uses/hr | `250 ÷ 8` = **31** |
 | F7 | Reroll tier stone/hr | `elite 18 (20% of kills ×0.05) + boss 12 (4 ×3)` = 30 |
 | F8 | Refine/hr | `30 ÷ 8` = **3.75** |
 | F9 | Add mod stone/hr | `elite 2.25 (20% of kills × 0.625% chance) + boss 4 (4 ×1)` = **6.25** |
 | F10 | Ascend/hr | `min(F9 ÷ 8 Add, F7 ÷ 8 tier) — the scarcer stone sets the pace` = **0.78** · full 12-piece set **15.4 hr** (Add alone 1.9 hr · tier stones alone 6.4 hr → tier stones bind) |
 | F13 | herb bundles/hr | `separate roll · 2.00% per kill mid · 3.00% high · bundle of 1-3 zone-tier herbs` = mid band **27.70/hr** · high band **54.00/hr** |
 | F16 | Refine full set | `12 pieces × 1 slots × 2 steps = 24 casts ÷ 3.75` = **6.4 hr** (checks.md E6) |
-| F17 | Full-set polish | `100 casts ÷ 52` = **1.92 hr** (checks.md E8) |
-| F18 | gold per minute of full-sell income | `junk/hr ÷ 60` = 2.2 low · 4.2 mid · 6.9 high · 15.2 full Lck (towns-stalls.md §1) |
-| F19 | full-Lck income ceiling over the no-Lck line | `911 ÷ 415` = **×2.20** — the only place Lck may multiply income (G8) |
+| F17 | Full-set polish | `100 casts ÷ 31` = **3.23 hr** (checks.md E8) |
+| F18 | gold per minute of full-sell income | `junk/hr ÷ 60` = 1.7 low · 2.8 mid · 4.2 high · 12.8 full Lck (towns-stalls.md §1) |
+| F19 | full-Lck income ceiling over the no-Lck line | `765 ÷ 250` = **×3.06** — the only place Lck may multiply income (G8) |
 | F20 | Quality Stone/hr | `monster 18 (1% of kills) + elite 90 (1 in 5 × 25%) + boss 96 (4 ×24)` = **204** |
 | F21 | Upgrade full set | `1 + 2 + 3 + 4 + 5 + 7 + 9 + 11 + 13 + 15 + 18 + 21 + 24 + 27 + 30 = 190 per piece × 12 pieces = 2280 stones ÷ F20` = **11.2 hr** for a full +15 set · the steps 11-15 third alone, hunted only from bosses, is **15.0 hr** (crafting.md "sources shift monsters → elites → bosses by step") |
 | F22 | Repair and Corrupt stone/hr | `Repair: elite 18 (1 in 5 × 5%) + boss 4 · Corrupt: boss 4 × 25% chance` = Repair **22/hr** · Corrupt **1.0/hr** — the rarest stone, so one gamble per piece costs about an hour and a full 12-piece set of gambles is 12 hr (crafting.md §Corrupt) |
-| F11 | 0.30 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises | Flat line per drop (high zone, after the 0.25 early-game weighting) · status **measured** |
+| F11 | 0.28 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises | Flat line per drop (high zone, after the 0.25 early-game weighting) · status **measured** |
 | F12 | boss 1.4 + elite 1.4 + normal 1.8 = 4.6 | skill/hr · skill-pool.md drop chances · status **carried** |
 | F14 | max 3 uses per fight · 30 sec shared cooldown · suppressed on bosses | potion sustain bound · status **rule** |
 | F15 | 1 Reroll tier stone per 500 salvages (~+2.7% of F7) | salvage milestone bound · status **rule** |
 
-Derived from: group spawn 4 sec · 1 sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = 12 + 2×(L−1)) · Base drop 8% (formula-utility.md section 10) · prices 8/8 stones (crafting.md).
+Derived from: group spawn 4 sec · 1 sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = 12 + undefined×(L−1)) · Base drop 8% (formula-utility.md section 10) · prices 8/8 stones (crafting.md).
 F4 · F11 are **simulation output** (loot.md section 3) and F13 is unset — this cage does not invent it, it only refuses to let a derived row drift.
 
 <!-- END GENERATED:group-F -->
@@ -223,15 +223,15 @@ Every row is computed by `node tools/town.ts` from `tools/data/town.json`; the t
 <!-- BEGIN GENERATED:group-T -->
 | id | Must hold | Expression | Value |
 |---|---|---|---|
-| T1 | gold is minted by the sell choice, plus one bounded exception: the Road purse (G2 · G6 · X36) | `1 gold per sold junk piece · Road ceiling 24 gold/day, never stones, never AFK` | 1 |
-| T2 | the price unit is real income, not a feeling | `junk/hr ÷ 60, per band` | 2.2 low · 4.2 mid · 6.9 high · 15.2 high+full Lck gold per 1 m |
-| T3 | lifetime gold supply is the junk line, not a new faucet | `3.1×130 + 9.5×252 + 18.6×415 + 9.0×415` | 14,251 gold |
-| T4 | one-time stall demand ≤ 1.50× the supply — a funnel, not a wall | `Σ 17 one-time lines at their charge band` | 18,664 = 1.31× ✓ |
-| T5 | essentials ≤ 20% of the supply while ~80%+ still dissolves | `4 Road links · tab 1 at Eastgate · tab 2 · pouch II · deed 4` | 1,951 = 13.7% ✓ |
-| T6 | selling everything is a craft decision, priced in craft | `14,251 ÷ 8 stones · ÷ 100 casts per full polish` | 1,781 Reroll casts ≈ 17.8 full-set polishes forgone |
-| T7 | the full-Lck advantage stops at the junk line (G8) | `27.6 high-band hr × 911 vs × 415` | 25,144 vs 11,454 gold = ×2.20 against the ×2.2 ceiling ✓ |
+| T1 | gold is minted by the sell choice, plus one bounded exception: the Road purse (G2 · G6 · X36) | `1 gold per sold junk piece · Road ceiling 51 gold/day, never stones, never AFK` | 1 |
+| T2 | the price unit is real income, not a feeling | `junk/hr ÷ 60, per band` | 1.7 low · 2.8 mid · 4.2 high · 12.8 high+full Lck gold per 1 m |
+| T3 | lifetime gold supply is the junk line, not a new faucet | `3.1×101 + 9.5×168 + 18.6×250 + 9.0×250` | 8,809 gold |
+| T4 | one-time stall demand ≤ 1.50× the supply — a funnel, not a wall | `Σ 17 one-time lines at their charge band` | 12,178 = 1.38× ✓ |
+| T5 | essentials ≤ 20% of the supply while ~80%+ still dissolves | `4 Road links · tab 1 at Eastgate · tab 2 · pouch II · deed 4` | 1,281 = 14.5% ✓ |
+| T6 | selling everything is a craft decision, priced in craft | `8,809 ÷ 8 stones · ÷ 100 casts per full polish` | 1,101 Reroll casts ≈ 11.0 full-set polishes forgone |
+| T7 | the full-Lck advantage stops at the junk line (G8) | `27.6 high-band hr × 765 vs × 250` | 21,114 vs 6,900 gold = ×3.06 against the ×3.06 ceiling ✓ |
 | T8 | every stall line is space · time · information · appearance only (G7) | `kind tag on all 26 lines · power nouns need an explicit display_only flag` | 26 lines, 0 power lines ✓ |
-| T9 | travel never gates content and never beats farming (G9) | `8 links × 20 m one-time · Road trip ≤ 5 real min` | 754 gold = 5.3% of supply ✓ |
+| T9 | travel never gates content and never beats farming (G9) | `8 links × 20 m one-time · Road trip ≤ 5 real min` | 1,038 gold = 11.8% of supply ✓ |
 | T10 | Armourer repair costs more than the elite time it replaces (D2 service class) | `60 ÷ 18 tier stones/hr = 3.33 m floor · F9 re-checked in T10b` | 14 m · 12 m at Ironrow ✓ |
 | T11 | skip tokens stay inside the tasks.md bound | `8 m × 3/day` | 24 m/day ✓ (payouts untouched) |
 | T12 | Standing has 3 tiers per settlement and is counted from F1 kills | `budget hr × tier share × band kills/hr` | see table T-S below, 27 thresholds ✓ |
@@ -240,21 +240,30 @@ Every row is computed by `node tools/town.ts` from `tools/data/town.json`; the t
 | T15 | Base bias is permanent flavour — ruled even-weighted, so it may never carry a number | `loot.md section 1 step 2 + section 3` | status = decided · 3 guards · 0 numeric weights |
 | T16 | price ladders are monotonic, so no later tier is cheaper | `stash_tab 60-300 m · herb_pouch 60-240 m · plot_deed 180-540 m · house 120-360 m` | ✓ |
 | T17 | this file owns no kill rate: income is loot.md unchanged | `F1 = 980 / 1,385 / 1,800 kills/hr` | mob_HP and the 40.2 hr timeline unmoved ✓ (H1) |
-| T18 | no band number is retyped here — town prices divide the engine junk line by 60 | `tools/lib/engine.ts (engine.json) → junk/hr per band, then loot.md section 2 read back` | F1 1800 · F3 418 · F5 415 · 17 loot.md numbers read back equal ✓ |
+| T18 | no band number is retyped here — town prices divide the engine junk line by 60 | `tools/lib/engine.ts (engine.json) → junk/hr per band, then loot.md section 2 read back` | F1 1800 · F3 253 · F5 250 · 17 loot.md numbers read back equal ✓ |
 
 ## T-S · Standing thresholds in kills (the numbers T12 reads)
 
 | id | Settlement | Band | Budget hr | Tier I kills | Tier II kills | Tier III kills |
 |---|---|---|---|---|---|---|
-| eastgate | Eastgate | low | 0.5 | 147 | 368 | 686 |
-| millbrook | Millbrook | low | 0.8 | 235 | 588 | 1,098 |
-| ashfall | Ashfall | low | 1.8 | 529 | 1,323 | 2,470 |
-| ironrow | Ironrow | mid | 2.2 | 914 | 2,285 | 4,266 |
-| wolf_cross | Wolf Cross | mid | 3.0 | 1,247 | 3,116 | 5,817 |
-| highspire | Highspire | mid | 4.3 | 1,787 | 4,467 | 8,338 |
-| bonegate | Bonegate | high | 5.0 | 2,700 | 6,750 | 12,600 |
-| frosthold | Frosthold | high | 6.0 | 3,240 | 8,100 | 15,120 |
-| vermolch | Vermolch | high | 16.6 | 8,964 | 22,410 | 41,832 |
+| eastgate | Eastgate | low | 0.4 | 118 | 294 | 549 |
+| millbrook | Millbrook | low | 1.0 | 294 | 735 | 1,372 |
+| ashfall | Ashfall | low | 1.5 | 441 | 1,103 | 2,058 |
+| ironrow | Ironrow | mid | 1.9 | 789 | 1,974 | 3,684 |
+| wolf_cross | Wolf Cross | mid | 3.1 | 1,288 | 3,220 | 6,011 |
+| highspire | Highspire | mid | 4.5 | 1,870 | 4,674 | 8,726 |
+| bonegate | Bonegate | high | 4.9 | 2,646 | 6,615 | 12,348 |
+| frosthold | Frosthold | high | 6.3 | 3,402 | 8,505 | 15,876 |
+| vermolch | Vermolch | high | 7.6 | 4,104 | 10,260 | 19,152 |
+| thornwake | Thornwake | low | 9.0 | 2,646 | 6,615 | 12,348 |
+| greyfen | Greyfen | low | 10.5 | 3,087 | 7,718 | 14,406 |
+| saltmarrow | Saltmarrow | low | 12.1 | 3,557 | 8,894 | 16,601 |
+| emberhold | Emberhold | mid | 13.8 | 5,734 | 14,335 | 26,758 |
+| duskmoor | Duskmoor | mid | 15.6 | 6,482 | 16,205 | 30,248 |
+| nettlecrag | Nettlecrag | mid | 17.4 | 7,230 | 18,074 | 33,739 |
+| blackwater_reach | Blackwater Reach | high | 19.3 | 10,422 | 26,055 | 48,636 |
+| wyrmback | Wyrmback | high | 21.2 | 11,448 | 28,620 | 53,424 |
+| the_pale_spire | The Pale Spire | high | 48.7 | 26,298 | 65,745 | 122,724 |
 
 Source: `node tools/town.ts --checks` · data in `tools/data/town.json` · prices, stock and ladders in `towns-stalls.md`.
 

@@ -1,0 +1,10 @@
+{
+  "label": "delete town:pending:ZZ probe",
+  "ts": "2026-10-02T07-02-41-185Z",
+  "files": [
+    "tools/data/town.json",
+    "checks.md",
+    "towns-stalls.md"
+  ],
+  "kept": true
+}

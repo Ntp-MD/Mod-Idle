@@ -144,6 +144,18 @@ export function usableMana(c: Character, s: SkillState): number {
   return c.maxMana * (1 - reservedPct(s) / 100);
 }
 
+/**
+ * What a row costs for this character right now, so a flat row shows the units it actually charges
+ * rather than the base it was quoted at (D-136). A percentage row is left as the row states it.
+ */
+export function manaNow(c: Character, s: SkillState, id: string, aoe = false): string {
+  const skill = sm.byId[id];
+  const spec = sm.manaSpec(skill);
+  if (!spec || spec.kind === 'pct') return skill.mana || '';
+  const cost = sm.manaCostOf(skill, { skillLevel: skillLevel(s, id), maxMana: c.maxMana, usableMana: usableMana(c, s), aoe });
+  return `${skill.mana} · ${Math.round(cost)} now`;
+}
+
 /** Grant a skill drop: a new skill, or a duplicate that feeds that skill's own ladder. */
 export function grantSkill(s: SkillState, rng: () => number): { id: string; duplicate: boolean } | null {
   const pool = sm.all().filter((k: any) => k.type !== 'aura' || true);
@@ -182,7 +194,8 @@ export interface CastReport {
   id: string;
   name: string;
   damage: number;
-  manaPct: number;
+  manaKind: 'pct' | 'flat' | null;
+  manaValue: number | null;
   manaCost: number;
   targets: number;
   heal?: { secLeft: number; pctPerSec: number };
@@ -230,9 +243,9 @@ export function effectsActive(sk: SkillState) {
 /** The stat a skill scales on is the finished hit it multiplies (D-070), so no `scale` lookup remains. */
 
 /** "3/1" → 3 targets when the group is big enough, else 1 (`skill-pool-attack.md` targets column).
- *  The AoE rule is 60% per target, Cap 3, mana ×1.5 (skill-pool.md). */
+ *  The AoE rule is 60% per target, Cap 3, mana ×1.5 (`skill-pool.md`) — the cost multiplier is
+ *  read from `engine.json` `aoe.mana_mult` inside `manaCostOf`, not repeated here (D-136). */
 const AOE_PCT_PER_EXTRA_TARGET = 0.6;
-const AOE_MANA_MULT = 1.5;
 
 function targetCount(skill: any, group: Mob[]): number {
   const cap = Number(String(skill.targets || '1').split('/')[0]) || 1;
@@ -257,9 +270,11 @@ export function castOnce(
   for (const id of s.list) {
     if (!id || (s.cd[id] || 0) > 0) continue;
     const skill = sm.byId[id];
-    const mp = sm.manaPct(skill) || 0;
     const aoe = targetCount(skill, group) > 1;
-    const cost = pool * (mp / 100) * (aoe ? AOE_MANA_MULT : 1);
+    const ms = sm.manaSpec(skill);
+    const cost = sm.manaCostOf(skill, {
+      skillLevel: skillLevel(s, id), maxMana: c.maxMana, usableMana: pool, aoe,
+    });
     if (cost > mana) continue;
 
     s.cd[id] = skillCd(s, id, c.cdr);
@@ -268,7 +283,7 @@ export function castOnce(
     if (skill.type === 'heal') {
       const h = healOf(skill);
       return {
-        id, name: skill.name, damage: 0, manaPct: mp, manaCost: spent, targets: 0,
+        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0,
         heal: h?.heal, instantHealPct: h?.instantHealPct,
         cleansesSelf: hasRule(skill, 'cleanses_status'),
       };
@@ -282,7 +297,7 @@ export function castOnce(
           base.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'dodge_charges_per_levels', 1)))
         : undefined;
       return {
-        id, name: skill.name, damage: 0, manaPct: mp, manaCost: spent, targets: 0, charges,
+        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, charges,
         cleansesSelf: hasRule(skill, 'cleanses_on_cast'),
       };
     }
@@ -292,7 +307,7 @@ export function castOnce(
       const hit = rng() <= eng.hitChance(c.accuracy, mob.evasion);
       const writes = (skill.effects || []).some((e: any) => e.subject === 'target');
       return {
-        id, name: skill.name, damage: 0, manaPct: mp, manaCost: spent, targets: hit ? 1 : 0,
+        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: hit ? 1 : 0,
         curseOn: hit && writes ? mob.id : null,
       };
     }
@@ -378,8 +393,14 @@ export function castOnce(
       if (everyTarget || i === 0) spendOn(t);
     }
     void statuses;
+    // a press that opens a self window (Reap) folds the row onto the character sheet for its own
+    // duration, on the same `buffUp` clock a toggled buff runs on — the window is the row's own
+    // `duration`, and the rule word is what keeps an ordinary press from opening one
+    if (hasRule(skill, 'self_window')) {
+      s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
+    }
     return {
-      id, name: skill.name, damage: dmg, manaPct: mp, manaCost: spent, targets: landed, crit, dealt,
+      id, name: skill.name, damage: dmg, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: landed, crit, dealt,
     };
   }
   return null;

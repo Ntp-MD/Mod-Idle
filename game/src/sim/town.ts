@@ -178,6 +178,35 @@ export function withdraw(state: GameState, tab: number, index: number): { ok: bo
   return { ok: true };
 }
 
+/** Bulk deposit: high index first so the splice indices stay valid; a locked piece is left behind. */
+export function depositMany(state: GameState, indices: number[], tab: number): number {
+  if (tab >= stashTabCount(state)) return 0;
+  let moved = 0;
+  for (const i of [...indices].sort((a, b) => b - a)) {
+    const item = state.bag[i];
+    if (!item || item.locked) continue;
+    while (state.stash.length <= tab) state.stash.push([]);
+    state.stash[tab].unshift(item);
+    state.bag.splice(i, 1);
+    moved++;
+  }
+  return moved;
+}
+
+/** Bulk withdraw: stop at a full adventure bag; a locked piece stays where it is. */
+export function withdrawMany(state: GameState, tab: number, indices: number[]): number {
+  let moved = 0;
+  for (const i of [...indices].sort((a, b) => b - a)) {
+    const item = state.stash[tab]?.[i];
+    if (!item || item.locked) continue;
+    if (state.bag.length >= E.inventory.adventure_slots) break;
+    state.bag.unshift(item);
+    state.stash[tab].splice(i, 1);
+    moved++;
+  }
+  return moved;
+}
+
 /** Kills feed the board the moment they match the slot's kind and zone. */
 export function progressTasks(state: GameState, mobKind: string, zone: number) {
   for (const task of state.town.tasks) {

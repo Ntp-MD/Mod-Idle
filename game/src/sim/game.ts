@@ -3,7 +3,9 @@ import { buildCharacter, openingGear, SLOT_COUNT } from './player';
 import { playerSwing, mobSwing, rollStatus, dotDamage, type Statuses, type StatusName } from './combat';
 import { rollDrop } from './drop';
 import { newTown, progressTasks, tickTown, huntN } from './town';
-import { newFarm, rollHerbs, maybeDrink } from './farm';
+import { STAT_KEYS, type StatKey } from '../engine/client';
+import { huntReweight } from '../../../engine/loot.ts';
+import { newFarm, rollHerbs, maybeDrink, maybeFarm, farm } from './farm';
 import {
   road, encounterZones, encounterSizes, payPurse, claimChest, openArrival, grantTripStanding, endTrip,
   advanceLeg, skipLeg, settlementZone,
@@ -24,6 +26,7 @@ import {
 } from './mobStatus';
 import {
   newSkillState, tickSkills, castOnce, paySkillXp, grantSkill, buffNeedsRecast, skillCd, usableMana, buffRuleUp,
+  skillLevel,
 } from './skills';
 import type { GameState, Mob, Item, RoadTrip } from './types';
 import { mulberry32, pick, intBetween, pickBand } from '../engine/client-helpers';
@@ -52,17 +55,39 @@ export function carried(s: GameState) {
   return { potions: bottles, condensed, herbs };
 }
 
+/** A fresh character has spent no points (D-141): the sheet starts empty and grants on level-up. */
+const ZERO_POINTS = (): Record<StatKey, number> =>
+  Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Record<StatKey, number>;
+
+/**
+ * Spend every banked stat point evenly over the 7 Core stats — the REFERENCE allocation the published
+ * numbers (and `mob_HP`) are priced against (D-141). Headless runs and tests call this so the character
+ * they measure is the reference build; the client player allocates by hand instead.
+ */
+export function spendReference(s: GameState): void {
+  const p = s.player;
+  if (p.statPoints <= 0) return;
+  const per = Math.floor(p.statPoints / STAT_KEYS.length);
+  let left = p.statPoints;
+  for (const k of STAT_KEYS) { p.points[k] += per; left -= per; }
+  for (const k of STAT_KEYS) { if (left <= 0) break; p.points[k] += 1; left--; }
+  p.statPoints = 0;
+}
+
 export function newGame(seed = 20260101): GameState {
   const gear = openingGear();
   const level = E.opening.level as number;
-  const c = buildCharacter(level, gear);
+  const c = buildCharacter(level, gear, {}, 0, undefined, ZERO_POINTS());
   const s: GameState = {
     seed,
     rngState: seed,
     player: {
       level,
       xp: 0,
-      stats: c.core,
+      points: ZERO_POINTS(),
+      statPoints: 0,
+      autoSpend: true,
+      treePoints: 0,
       hp: c.maxHp,
       mana: c.maxMana,
       es: c.es,
@@ -86,6 +111,8 @@ export function newGame(seed = 20260101): GameState {
     pedlar: { day: 0, minutes: [], bought: 0 },
     filter: newFilter(),
     travel: 'stay',
+    autoDissolveRarity: 'off',
+    huntOrder: {},
     goal: newGoal(),
     curses: newCurses(),
     mobStatus: newMobStatusStore(),
@@ -130,9 +157,23 @@ export function newGame(seed = 20260101): GameState {
 }
 
 /** A mob at the player's level, clamped into the zone (engine.json mob.level_rule). */
+// The species cast and the boss row per zone are fixed data, so index them once instead of filtering
+// on every spawn (a spawn happens many times per tick through the offline catch-up).
+const _speciesByZone = new Map<number, any[]>();
+const speciesInZone = (zoneId: number): any[] => {
+  let pool = _speciesByZone.get(zoneId);
+  if (!pool) { pool = E.mob.species.filter((sp: any) => sp.zones.includes(zoneId)); _speciesByZone.set(zoneId, pool); }
+  return pool;
+};
+const _bossByZone = new Map<number, any>();
+const bossInZone = (zoneId: number): any => {
+  if (!_bossByZone.has(zoneId)) _bossByZone.set(zoneId, E.mob.bosses.find((b: any) => b.zone === zoneId) || null);
+  return _bossByZone.get(zoneId);
+};
+
 function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string): Mob {
   const z = eng.zoneById(zoneId);
-  const speciesPool = E.mob.species.filter((sp: any) => sp.zones.includes(zoneId));
+  const speciesPool = speciesInZone(zoneId);
   let body = 'medium';
   let species = pick(rng, speciesPool);
   if (bodyHint) {
@@ -140,7 +181,7 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     species = pick(rng, able.length ? able : speciesPool);
     body = bodyHint;
   } else if (kind === 'boss') {
-    const boss = E.mob.bosses.find((b: any) => b.zone === zoneId)!;
+    const boss = bossInZone(zoneId)!;
     species = E.mob.species.find((sp: any) => sp.id === boss.species)!;
     body = 'boss';
   } else if (kind === 'elite') {
@@ -165,7 +206,7 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   return {
     id: `${zoneId}_${species.id}_${body}_${Math.floor(rng() * 1e9)}`,
     species: species.name,
-    kind: kind === 'boss' ? `Boss · ${(E.mob.bosses.find((b: any) => b.zone === zoneId) || { name: 'Boss' }).name}` : kind === 'elite' ? 'Elite' : size.name,
+    kind: kind === 'boss' ? `Boss · ${(bossInZone(zoneId) || { name: 'Boss' }).name}` : kind === 'elite' ? 'Elite' : size.name,
     zone: zoneId,
     level: lv,
     hp,
@@ -195,7 +236,7 @@ function swapWeakestKept(s: GameState, item: Item, score: number): boolean {
   let worst = -1;
   let worstScore = Infinity;
   s.bag.forEach((held, i) => {
-    if (held.slot !== item.slot || held.heldFor) return;
+    if (held.slot !== item.slot || held.heldFor || held.locked) return;
     const v = loot.score({ ...held, q: held.q ?? 0 });
     if (v < worstScore) { worstScore = v; worst = i; }
   });
@@ -248,6 +289,11 @@ function awardDrop(s: GameState, rng: () => number, band: string, q: number | un
     )
     : { keep: true, reason: 'filter off', score: loot.score({ ...item, q: item.q ?? 0 }) };
   const set = wants(s, item);
+  // a client auto-dissolve floor: stones only, never gold (the two mints are untouched by AGENT §5).
+  // A set-wanted or player-locked piece is spared; the collector sink below runs first.
+  const belowFloor = !!s.autoDissolveRarity && s.autoDissolveRarity !== 'off'
+    && !item.locked
+    && ['Common', 'Rare'].indexOf(item.rarity) <= ['Common', 'Rare'].indexOf(s.autoDissolveRarity);
   if (set) {
     // the Collector sink runs before the filter dissolves a piece the set wants
     if (s.bag.length < E.inventory.adventure_slots) {
@@ -255,6 +301,8 @@ function awardDrop(s: GameState, rng: () => number, band: string, q: number | un
       s.bag.unshift(item);
       push(s, `Held for the ${set.name} set · ${item.base} (${item.slot})`);
     }
+  } else if (belowFloor) {
+    dissolve(s);
   } else if (verdict.keep) {
     // nothing equips itself (owner ruling, D-089): a keep is a decision waiting in the bag, which
     // is what makes "every piece needs a decision" true. The filter's comparison is still against
@@ -286,7 +334,10 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   while (s.player.level < E.stat.level_cap && s.player.xp >= eng.xpToNext(s.player.level)) {
     s.player.xp -= eng.xpToNext(s.player.level);
     s.player.level++;
-    push(s, `Level ${s.player.level} — every Core stat is now ${eng.statAt(s.player.level).toFixed(0)}`);
+    const per = s.player.level >= E.stat.paragon_from ? E.stat.paragon_points_per_level : E.stat.points_per_level;
+    s.player.statPoints += per;
+    s.player.treePoints += E.stat.tree_points_per_level;
+    push(s, `Level ${s.player.level} — +${per} stat points, +${E.stat.tree_points_per_level} tree point${E.stat.tree_points_per_level === 1 ? '' : 's'}`);
     markSnapshot(s, 'level');
   }
   const band = BAND_OF_QUALITY(eng.zoneById(mob.zone).quality);
@@ -304,18 +355,30 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   // Mastery adds quantity the same way Lck does, and only a twelfth as strongly (equipment-weapon.md)
   // offline results are AFK: same drops, quality limited to the zone floor, no boss income
   const q = online ? undefined : eng.qualityIndexOf(eng.floorOf(band));
-  if (rng() < Math.min(1, eng.dropChance(band) * dropMultiplier(s))) {
+  // Hunt Order: lean the three collectible streams toward the zone's chosen category by shifting
+  // probability mass between them, never raising the total, so drops/hr and the timeline are unmoved.
+  // 'none' is the identity, so the measured bands are untouched unless the player opts in.
+  const order = (s.huntOrder?.[mob.zone] || 'none') as 'none' | 'gear' | 'herb' | 'junk';
+  const junkRows = Object.entries(E.junk.rarities as Record<string, any>);
+  const pJunkBase = junkRows.reduce((a, [, r]: any) => a + r.drop_chance_per_kill, 0);
+  const hw = huntReweight({
+    gear: Math.min(1, eng.dropChance(band) * dropMultiplier(s)),
+    herb: farm.herbChance(band),
+    junk: pJunkBase,
+  }, order, E.loot.hunt_order.shift_pct);
+  if (rng() < hw.gear) {
     awardDrop(s, rng, band, q, c.weaponAspd);
   }
-  for (const [rarity, r] of Object.entries(E.junk.rarities as Record<string, any>)) {
+  const junkScale = pJunkBase > 0 ? hw.junk / pJunkBase : 1;
+  for (const [rarity, r] of junkRows) {
     // junk is kept and sold by hand at the Counterhand — it is a gold mint, not a gold drip
-    if (rng() < r.drop_chance_per_kill) {
+    if (rng() < r.drop_chance_per_kill * junkScale) {
       // junk occupies a slot like any other carried stack; a bag full of it stops the pickup
       if (addTo(s, s.junkByRarity, rarity, 'stone', 1)) s.counters.junk++;
     }
   }
   progressTasks(s, mob.kind, mob.zone);
-  rollHerbs(s, rng, band, band);
+  rollHerbs(s, rng, band, band, hw.herb);
   if (mob.kind === 'Elite') {
     // the elite stone lines in engine.json are expected values per kill, so the roll keeps them whole
     if (rng() < L.elite_tier_stones) addTo(s, s.counters.stones, 'tier', 'stone', 1);
@@ -407,7 +470,13 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   const rng = mulberry32(s.rngState++);
   s.clockSec++;
   s.counters.playSec++;
-  const c = buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills));
+  // the active-skill effect fold changes only on cast/toggle, so compute it once per tick and reuse
+  // it for the character sheet and the per-mob aura lines (previously folded again on every swing)
+  // the idle default spends this tick's level points before the pool is clamped, so the sheet the
+  // pool is read against already includes them (D-141); manual players bank and spend by hand.
+  if (s.player.autoSpend && s.player.statPoints > 0) spendReference(s);
+  const effects = effectsActive(s.skills);
+  const c = buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effects, s.player.points);
   // a pool is bounded by what it is: never below nothing, never above what the sheet says it holds.
   // The bars read these straight, so an unbounded value here is what shows as a negative number there.
   s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
@@ -521,10 +590,11 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
 
   /** Everything one mob carries: curse lines (conditional ones only while their status holds),
    *  the statuses we inflicted, and the target-side lines an aura writes on everything in range. */
+  const auraTarget = modsFromAuraFold(effects.target || {});
   const mobMods = (mobId: string) => combineMods(
     combineMods(modsOn(s.curses, mobId, (cond) => holdsCondition(s.mobStatus, mobId, cond)),
       targetMods(statusModsOn(s.mobStatus, mobId))),
-    modsFromAuraFold(effectsActive(s.skills).target || {}),
+    auraTarget,
   );
 
   // player clock
@@ -564,7 +634,9 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   for (const id of Object.keys(s.skills.buffs)) {
     if (!buffNeedsRecast(s.skills, id)) continue;
     const skill = sm.byId[id];
-    const cost = usableMana(c, s.skills) * ((sm.manaPct(skill) || 0) / 100);
+    const cost = sm.manaCostOf(skill, {
+      skillLevel: skillLevel(s.skills, id), maxMana: c.maxMana, usableMana: usableMana(c, s.skills), aoe: false,
+    });
     if (cost > s.player.mana) continue;
     s.player.mana -= cost;
     s.skills.cd[id] = skillCd(s.skills, id, c.cdr);
@@ -641,10 +713,13 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       if (r.toHp > 0) {
         s.player.hp -= r.toHp;
         if (!buffRuleUp(s.skills, 'es_recharge_immediate')) s.player.esIdleSec = 0;
-        const elemHalf = (mob.ps / mob.hitsPerSec) * eng.damageSplit(mob.damage)[1];
-        // Holy Veil: no Element debuff or bleed can be applied while it is up (`buff.holy_veil`)
-        const st = immune ? null : rollStatus(rng, mob, elemHalf, statuses, c.statusResist);
-        if (st) push(s, `${mob.species} inflicts ${st}`);
+        // a blocked hit lands thinned but carries NO status: the shield deflected the effect, so no
+        // proc rolls on it (owner ruling · D-141). Holy Veil still blocks every Element debuff/bleed.
+        if (r.blocked !== 'block') {
+          const elemHalf = (mob.ps / mob.hitsPerSec) * eng.damageSplit(mob.damage)[1];
+          const st = immune ? null : rollStatus(rng, mob, elemHalf, statuses, c.statusResist);
+          if (st) push(s, `${mob.species} inflicts ${st}`);
+        }
       }
     }
   }
@@ -668,8 +743,9 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   const rechargeNow = buffRuleUp(s.skills, 'es_recharge_immediate');
   if (rechargeNow || s.player.esIdleSec >= E.energy_shield.delay_sec) s.player.es = Math.min(c.es, s.player.es + c.esRegen);
 
-  tickCurses(s.curses, new Set(s.group.map((m) => m.id)));
-  forgetMobStatus(s.mobStatus, new Set(s.group.map((m) => m.id)));
+  const groupIds = new Set(s.group.map((m) => m.id));
+  tickCurses(s.curses, groupIds);
+  forgetMobStatus(s.mobStatus, groupIds);
   for (const key of Object.keys(statuses) as (keyof Statuses)[]) {
     const st = statuses[key]!;
     st.secLeft--;
@@ -679,6 +755,9 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
 
   const drank = maybeDrink(s, c, s.group.some((m) => m.kind.startsWith('Boss')));
   if (drank) push(s, `${drank.name} restores ${eng.fmt(drank.amount)} ${drank.pool} (shared ${E.potions.shared_cooldown_sec}s cooldown)`);
+
+  // the farm's own automation, the twin of the potion path (parking: "Auto plant, harvest and brew")
+  for (const line of maybeFarm(s)) push(s, line);
 
   if (s.player.hp <= 0) {
     // HP reaches 0 → Push, never death (combat.md §4)
@@ -708,13 +787,39 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
 }
 
 /** Offline catch-up: run the same tick over the elapsed seconds, capped by the save rule. */
-export function catchUp(s: GameState, statuses: Statuses, elapsedSec: number) {
+function catchUpPlan(elapsedSec: number) {
   // the Road now runs while away: a Circuit plays out the rest of its lap on the untilted base
   // table and parks the character, which is why an away period no longer ends a trip (D-133)
   const cap = E.inventory.offline_cap_hr * 3600;
   const secs = Math.max(0, Math.min(Math.floor(elapsedSec), cap));
-  for (let i = 0; i < secs; i++) tick(s, statuses, { online: false });
-  return { simulated: secs, capped: elapsedSec > cap };
+  return { secs, capped: elapsedSec > cap };
+}
+
+/** The tick loop both catch-up paths share — one order of ticks, so the numbers cannot diverge. */
+function runTicks(s: GameState, statuses: Statuses, from: number, to: number) {
+  for (let i = from; i < to; i++) tick(s, statuses, { online: false });
+}
+
+/** Synchronous catch-up — tests and any non-UI caller. */
+export function catchUp(s: GameState, statuses: Statuses, elapsedSec: number) {
+  const { secs, capped } = catchUpPlan(elapsedSec);
+  runTicks(s, statuses, 0, secs);
+  return { simulated: secs, capped };
+}
+
+/**
+ * The UI's catch-up: the same ticks in the same order, yielded in slices so a save left for a day
+ * (up to 43,200 ticks) cannot freeze first paint. The numbers are identical to `catchUp`.
+ */
+export async function catchUpAsync(s: GameState, statuses: Statuses, elapsedSec: number) {
+  const { secs, capped } = catchUpPlan(elapsedSec);
+  const SLICE = 2000;
+  for (let i = 0; i < secs; i += SLICE) {
+    const end = Math.min(i + SLICE, secs);
+    runTicks(s, statuses, i, end);
+    if (end < secs) await new Promise((r) => setTimeout(r, 0));
+  }
+  return { simulated: secs, capped };
 }
 
 export const equippedCount = (s: GameState) => s.gear.filter(Boolean).length;

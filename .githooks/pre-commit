@@ -1,9 +1,18 @@
 #!/bin/sh
-# ModWorld pre-commit: run every cage + the cross-file linter.
+# ModWorld pre-commit: run every cage + the cross-file linter, then prove every
+# committed generated file still matches its writer.
 # Enable once with:  git config core.hooksPath .githooks
+
 node --experimental-strip-types --disable-warning=ExperimentalWarning tools/verify.ts || {
   echo ""
   echo "pre-commit blocked: a cage or the doc linter failed."
   echo "Fix the numbers/data, run 'npm run verify', and commit again."
+  exit 1
+}
+
+node --experimental-strip-types --disable-warning=ExperimentalWarning tools/check-generated.ts || {
+  echo ""
+  echo "pre-commit blocked: a committed generated file does not match its writer."
+  echo "Regenerate with 'node tools/build.ts', then commit again."
   exit 1
 }

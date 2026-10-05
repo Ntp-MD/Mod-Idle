@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span><span class="chip ">rows <b>11</b></span></span>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span><span class="chip ">rows <b>11</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -84,13 +84,13 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="data-engine-stat.html">Stat growth (8)</a>
 <a href="data-engine-level_gain.html">Level gain (10)</a>
 <a href="data-engine-K.html">K coefficients (31)</a>
-<a href="data-engine-caps.html">Caps (10)</a>
-<a href="data-engine-mod_max.html">Mod maxima (26)</a>
+<a href="data-engine-caps.html">Caps (14)</a>
+<a href="data-engine-mod_max.html">Mod maxima (30)</a>
 <a href="data-engine-weapons.html">Weapon types (6)</a>
 <a href="data-engine-build.html">Reference build (6)</a>
 <a href="data-engine-loot.html" aria-current="page">Loot model (11)</a>
 <a href="data-engine-loot-bands.html">Band parameters (4)</a>
-<a href="data-engine-loot-timeline_checkpoints_hr.html">Timeline checkpoints (5)</a>
+<a href="data-engine-loot-timeline_checkpoints_hr.html">Timeline checkpoints (9)</a>
 <a href="data-engine-f_rows_carried.html">Hand-carried F rows (5)</a>
 <a href="data-engine-craft.html">Craft costs (19)</a>
 <a href="data-engine-town_shared.html">Shared town constants (4)</a>
@@ -154,14 +154,36 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>base_drop_chance</code></td><td>Base drop chance</td><td><code>0.08</code></td><td><a href="rec-engine-loot-base-drop-chance.html">edit</a></td></tr><tr><td><code>ttk_per_mob_sec</code></td><td>Seconds to kill one mob</td><td><code>1</code></td><td><a href="rec-engine-loot-ttk-per-mob-sec.html">edit</a></td></tr><tr><td><code>group_spawn_sec</code></td><td>Group spawn interval <span class="dim">(sec)</span></td><td><code>4</code></td><td><a href="rec-engine-loot-group-spawn-sec.html">edit</a></td></tr><tr><td><code>elite_spawn_chance</code></td><td>Elite spawn chance</td><td><code>0.2</code></td><td><a href="rec-engine-loot-elite-spawn-chance.html">edit</a></td></tr><tr><td><code>elite_tier_stones</code></td><td>Tier stones per elite</td><td><code>0.05</code></td><td><a href="rec-engine-loot-elite-tier-stones.html">edit</a></td></tr><tr><td><code>elite_add_stone_chance</code></td><td>Elite add stone chance</td><td><code>0.00625</code></td><td><a href="rec-engine-loot-elite-add-stone-chance.html">edit</a></td></tr><tr><td><code>boss_per_hour</code></td><td>Boss kills per hour</td><td><code>4</code></td><td><a href="rec-engine-loot-boss-per-hour.html">edit</a></td></tr><tr><td><code>boss_tier_stones</code></td><td>Tier stones per boss</td><td><code>3</code></td><td><a href="rec-engine-loot-boss-tier-stones.html">edit</a></td></tr><tr><td><code>boss_add_stones</code></td><td>Boss add stones</td><td><code>1</code></td><td><a href="rec-engine-loot-boss-add-stones.html">edit</a></td></tr><tr><td><code>push_hr_levels_91_100</code></td><td>Hours of the level 91-100 push</td><td><code>9</code></td><td><a href="rec-engine-loot-push-hr-levels-91-100.html">edit</a></td></tr><tr><td><code>kill_rate_tolerance</code></td><td>Kill-rate tolerance</td><td><code>0.01</code></td><td><a href="rec-engine-loot-kill-rate-tolerance.html">edit</a></td></tr></tbody></table></div></section>
 
 <section><h2>Raw JSON of this collection</h2><pre class="code">{
+  &quot;hunt_order&quot;: {
+    &quot;note&quot;: &quot;A zone's Hunt Order leans the three collectible streams — gear, herbs, junk — toward one of them by redistributing probability mass, never raising the total expected drops/kill, so drops/hr and the timeline stay put. Stones ride the elite/boss lines and are not a category. 'none' is the identity, so the measured bands are untouched by default.&quot;,
+    &quot;shift_pct&quot;: 25,
+    &quot;categories&quot;: [
+      &quot;gear&quot;,
+      &quot;herb&quot;,
+      &quot;junk&quot;
+    ]
+  },
   &quot;base_drop_chance&quot;: 0.08,
   &quot;filter&quot;: {
     &quot;upgrade_margin_pct&quot;: 10,
     &quot;note&quot;: &quot;The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. At 10% the simulation reproduces the keep-rates this design has published all along (2.2% / 1.2% / 0.7% / 0.3% of drops); at 0% it reports roughly 1.5x that, and the printed sensitivity line shows all three. tools/loot.ts measures the keep-rates; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.&quot;,
     &quot;rules&quot;: {
+      &quot;default_enabled&quot;: false,
       &quot;default_min_rarity&quot;: &quot;any&quot;,
       &quot;default_keep_missing_element&quot;: true,
-      &quot;note&quot;: &quot;loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot.&quot;
+      &quot;note&quot;: &quot;loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default (D-122): a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept.&quot;
+    }
+  },
+  &quot;base_mod&quot;: {
+    &quot;note&quot;: &quot;Line 1 of every item (D-123). Armour slots lock the Base's own defence type and gain a chance of the next ones on the same line; weapons force every Mod in their parenthesised list; belt / ring / amulet roll line 1 from the slot's Legacy pool. `hybrid_chance` is [second type, third type] per drop, and `value_scale` is what each Mod on the line is multiplied by once the count is known - more Mods is strictly better but sublinear (100% / 140% / 165%), so a three-way line is never the OP pick. item-base.md owns the pools; this block owns only the two rules.&quot;,
+    &quot;hybrid_chance&quot;: [
+      0.3,
+      0.1
+    ],
+    &quot;value_scale&quot;: {
+      &quot;1&quot;: 1,
+      &quot;2&quot;: 0.7,
+      &quot;3&quot;: 0.55
     }
   },
   &quot;ttk_per_mob_sec&quot;: 1,
@@ -177,7 +199,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;group_mobs&quot;: 2.5,
       &quot;kills_per_hr_published&quot;: 1385,
       &quot;lck_level&quot;: 60,
-      &quot;upgrades_per_hr&quot;: 4
+      &quot;upgrades_per_hr&quot;: 3
     },
     &quot;high&quot;: {
       &quot;group_mobs&quot;: 4,
@@ -218,7 +240,11 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;level_30&quot;: 3.1,
     &quot;level_60&quot;: 12.6,
     &quot;level_90&quot;: 31.2,
-    &quot;level_100&quot;: 40.2
+    &quot;level_100&quot;: 40.2,
+    &quot;level_120&quot;: 62.9,
+    &quot;level_150&quot;: 109.7,
+    &quot;level_180&quot;: 173.4,
+    &quot;level_190&quot;: 198.8
   },
   &quot;push_hr_levels_91_100&quot;: 9,
   &quot;kill_rate_tolerance&quot;: 0.01

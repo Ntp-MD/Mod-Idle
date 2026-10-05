@@ -190,7 +190,13 @@ export interface MobElite {
   evasion: number;
 }
 
+export interface MobStatCfg {
+  base: number;
+  per_level: number;
+}
+
 export interface MobCfg {
+  stat: MobStatCfg;
   zones: MobZone[];
   species: MobSpecies[];
   sizes: MobSize[];
@@ -378,7 +384,19 @@ export interface SkillRow {
 }
 
 export interface SkillsData {
-  meta: { formula?: { level_step_pct?: number; cast_reference?: { cdr_pct: number; ladder_pct: number } }; reservation: { max_pct: number } };
+  meta: {
+    formula?: {
+      level_step_pct?: number;
+      /** A flat mana cost climbs on this step per skill level (D-136). */
+      mana_level_step_pct?: number;
+      /** How much of the pool's growth a flat cost takes on (D-136). */
+      mana_pool_exponent?: number;
+      /** Which character level the reference pool is derived at (D-136). */
+      mana_reference_level?: number;
+      cast_reference?: { cdr_pct: number; ladder_pct: number };
+    };
+    reservation: { max_pct: number };
+  };
   skills: SkillRow[];
   reserve_tiers: Record<string, { pct: number }>;
 }

@@ -75,12 +75,18 @@ describe('Reroll', () => {
 
 describe('Refine and Randomize', () => {
   it('Refine pushes one Tier up and stops dead at T1', () => {
-    let item = piece(4);
-    item = { ...item, lines: item.lines.map((l) => ({ ...l, slice: 2 })) };
-    const r = made(craft.refine(item, craft.UNTOUCHABLE, mulberry32(1)));
+    // Not every Mod publishes Tiers — `mods.json` gives `elemental_alignment` and
+    // `perfect_dodge_pct` one slice per Item quality band, so no roll can put them above slice 0.
+    // Refine reads the slot's own slice count, so the fixture must stand a line that publishes them.
+    const rolled = piece(4);
+    const slot = rolled.lines.findIndex((l, i) => i >= craft.UNTOUCHABLE && loot.sliceCount(l.id, rolled.q) >= 2);
+    expect(slot).toBeGreaterThanOrEqual(craft.UNTOUCHABLE);
+    const atWorst = (lines: Item['lines']) => lines.map((l) => ({ ...l, slice: Math.max(0, loot.sliceCount(l.id, rolled.q) - 1) }));
+    const item = { ...rolled, lines: atWorst(rolled.lines) };
+    const r = made(craft.refine(item, slot, mulberry32(1)));
     expect(r.ok).toBe(true);
-    expect(r.item.lines[craft.UNTOUCHABLE].slice).toBe(1);
-    const again = refused(craft.refine({ ...item, lines: item.lines.map((l) => ({ ...l, slice: 0 })) }, craft.UNTOUCHABLE, mulberry32(1)));
+    expect(r.item.lines[slot].slice).toBe(item.lines[slot].slice - 1);
+    const again = refused(craft.refine({ ...item, lines: item.lines.map((l) => ({ ...l, slice: 0 })) }, slot, mulberry32(1)));
     expect(again.ok).toBe(false);
     expect(again.why).toMatch(/already T1/);
   });

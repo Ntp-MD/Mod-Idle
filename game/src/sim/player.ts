@@ -1,4 +1,4 @@
-import { eng, loot, E, STAT_KEYS, BASES } from '../engine/client';
+import { eng, loot, E, STAT_KEYS, BASES, BASE_BY_NAME } from '../engine/client';
 import { mastery, weaponByName } from './mastery';
 import { weaponWeightOf } from './drop';
 import type { Item, ModLine } from './types';
@@ -74,7 +74,7 @@ export function sumLines(gear: (Item | null)[]): Lines {
     // the Gear Mod is the piece's own inherent line and its school comes from the Base, not from a
     // roll (`item-base.md` · D-104); a Base with no school — every weapon, belt, ring, amulet, cape,
     // off hand — has nothing for +N to raise
-    const school = (BASES.bases.find((b: any) => b.name === item.base) as any)?.school;
+    const school = BASE_BY_NAME.get(item.base)?.school;
     if (item.gearMod && school && FLAT_LINE[school]) acc[FLAT_LINE[school]] += item.gearMod;
     for (const line of item.lines) {
       // a Base Mod line carries its extra Mods on the same line (`item-base.md` · D-123), so each part
@@ -151,7 +151,7 @@ export interface Character {
   globalSpeed: number;
   /** The multiplier a buff puts on incoming damage (Berserker takes more, Iron Will less). */
   damageTaken: number;
-  /** % cut on the 20% status proc — the owner's Status Alignment resistance Mod line. */
+  /** % cut on the status proc AND crowd control (stun/stop) — the Status Alignment resistance Mod. */
   statusResist: number;
   /** % of just-dealt damage recovered on a landed hit; 0 unless a skill grants it. */
   leechPct: number;
@@ -203,11 +203,16 @@ export function buildCharacter(
   carried: Carried = {},
   heldMasteryLevel = 0,
   effects: EffectFold = { add: {}, mult: {} },
+  points?: Record<StatKey, number>,
 ): Character {
   const lines = sumLines(gear);
   const core = {} as Record<StatKey, number>;
+  // With no allocation given, fall back to the REFERENCE even-split line — the build every published
+  // number and every test is measured against. The client passes the player's own `points` (D-141).
+  const refPts = eng.pointsAt(level) / STAT_KEYS.length;
   for (const k of STAT_KEYS) {
-    core[k] = (eng.statAt(level) + lines.statBy[k].flat) * (1 + lines.statBy[k].pct / 100);
+    const spent = points ? (points[k] ?? 0) : refPts;
+    core[k] = (eng.statOf(spent) + lines.statBy[k].flat) * (1 + lines.statBy[k].pct / 100);
   }
   const mainHand = gear.find((g) => g && g.slot === 'main hand') || null;
   // a weapon's Element is a stored line on the piece, not a property of the weapon types:
@@ -305,9 +310,9 @@ export function buildCharacter(
     /** What the skills currently up add to incoming damage — a buff can make you hurt more. */
     damageTaken: m(effects, 'damage_taken'),
     /**
-     * Cut on the status proc, % (the owner's Status Alignment resistance line). It reads against
-     * the 20% per landed hit in combat.md §5 — the one gear answer to statuses, since Holy veil
-     * is a timed buff rather than a line.
+     * Cut on the status proc AND crowd control, % (the Status Alignment resistance line). It reads
+     * against the 20% per landed hit in combat.md §5 and the stun/stop those carry (§5b) — the one
+     * gear answer to being debuffed or locked out, since Holy veil is a timed buff, not a line.
      */
     statusResist: lines.statusResPct,
     cdr: eng.cdrOf(core.wis, lines.cdrPct),

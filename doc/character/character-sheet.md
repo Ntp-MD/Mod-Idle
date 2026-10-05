@@ -54,7 +54,7 @@ Physical power   715        ( 125 × 5 + 37 ) × 1.08
 | Attack speed | hits/sec | Show Cap 500% = 5 hits/sec too (the 0.2 sec floor between hits) |
 | Cooldown reduction | % | Show the Cap too |
 | Accuracy | number | **No Cap shown** — the 2,000 Cap was removed; the ratio formula never reaches 100% by itself |
-| Elemental Alignment | % | Show the Cap too · Shared with all statuses (no separate status Alignment remains) |
+| Elemental Alignment | % | **No Cap** (owner ruling) · Shared with all statuses (no separate status Alignment remains) |
 | Perfect dodge | % | Show the Cap too — it caps the Lck ratio, and the generated Cap table in formula.md prints whether a build reaches it |
 | Drop chance | multiplier | Shown as `×9.2`, not % — `drop_rate` is a multiplier of base drop chance |
 | HP regen | /sec | |
@@ -154,7 +154,7 @@ The screen holds four regions, all visible at once: the combat scene with the th
 - Always show maximum (max) numbers, not uncalculated values, e.g. Max HP rather than current HP.
 - Zero values are still shown, never hidden — players must see their Int is 0 because magic power has no investment yet.
 - At most 1 decimal place, and round down, never up.
-- Always show Caps for Evasion / perfect dodge / cdr / aspd / Alignment / elem res · **Accuracy and Critical chance have no Cap**, so show them as bare numbers — for crit, show the overflow going into crit damage instead of a Cap.
+- Always show Caps for Evasion / perfect dodge / cdr / aspd / elem res · **Accuracy, Critical chance and Elemental Alignment have no Cap**, so show them as bare numbers — for crit, show the overflow going into crit damage instead of a Cap.
 - No separate status Alignment or status resistance remain. Use Elemental Alignment instead.
 - **Mastery shows on the weapon panel, not the main panel** — `Mastery <lvl>/20 · weight −<lvl>%` (weight is −1% per level, Cap −20% at L20 · `equipment-weapon.md`), e.g. `Mastery 14/20 · weight -14%`. It is a per-weapon side track, not a build-calculation stat, so it never clutters the twelve-item main read.
 

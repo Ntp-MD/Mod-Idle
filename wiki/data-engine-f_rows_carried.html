@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span><span class="chip ">rows <b>5</b></span></span>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span><span class="chip ">rows <b>5</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -84,13 +84,13 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="data-engine-stat.html">Stat growth (8)</a>
 <a href="data-engine-level_gain.html">Level gain (10)</a>
 <a href="data-engine-K.html">K coefficients (31)</a>
-<a href="data-engine-caps.html">Caps (10)</a>
-<a href="data-engine-mod_max.html">Mod maxima (26)</a>
+<a href="data-engine-caps.html">Caps (14)</a>
+<a href="data-engine-mod_max.html">Mod maxima (30)</a>
 <a href="data-engine-weapons.html">Weapon types (6)</a>
 <a href="data-engine-build.html">Reference build (6)</a>
 <a href="data-engine-loot.html">Loot model (11)</a>
 <a href="data-engine-loot-bands.html">Band parameters (4)</a>
-<a href="data-engine-loot-timeline_checkpoints_hr.html">Timeline checkpoints (5)</a>
+<a href="data-engine-loot-timeline_checkpoints_hr.html">Timeline checkpoints (9)</a>
 <a href="data-engine-f_rows_carried.html" aria-current="page">Hand-carried F rows (5)</a>
 <a href="data-engine-craft.html">Craft costs (19)</a>
 <a href="data-engine-town_shared.html">Shared town constants (4)</a>
@@ -151,7 +151,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>Hand-carried F rows</h1><p class="hint">Rows the engine does not compute yet; they are read back against the prose.</p>
 <dl class="kv"><dt>path</dt><dd><code>tools/data/engine.json → f_rows_carried</code></dd><dt>kind</dt><dd><code>records</code> · id field <code>id</code></dd><dt>rows</dt><dd>5</dd><dt>written by</dt><dd><code>tools/check.ts --write</code> · <code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-core-stats.html">core-stats.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
-<div class="tw"><table class=""><thead><tr><th>Row id</th><th>Value</th><th>Status</th><th>Expression</th><th></th></tr></thead><tbody><tr><td><a href="rec-engine-f_rows_carried-f4.html">F4</a></td><td>hr1 28.7 → hr2-4 9.4 → after that 5.7 (low band) · keep-rate 2.35% low · 1.40% mid · 0.75% high …</td><td>measured</td><td>measured — tools/loot.ts, the seven roll steps in loot.md section 1</td><td><a href="rec-engine-f_rows_carried-f4.html">open</a></td></tr><tr><td><a href="rec-engine-f_rows_carried-f11.html">F11</a></td><td>0.31 Flat lines per high-zone drop (2.75 lines per item) · the four early-game Flats thin out as…</td><td>measured</td><td>Flat line per drop (high zone, after the 0.25 early-game weighting)</td><td><a href="rec-engine-f_rows_carried-f11.html">open</a></td></tr><tr><td><a href="rec-engine-f_rows_carried-f12.html">F12</a></td><td>boss 1.4 + elite 1.4 + normal 1.8 = 4.6</td><td>carried</td><td>skill/hr · skill-pool.md drop chances</td><td><a href="rec-engine-f_rows_carried-f12.html">open</a></td></tr><tr><td><a href="rec-engine-f_rows_carried-f14.html">F14</a></td><td>max 3 uses per fight · 30 sec shared cooldown · suppressed on bosses</td><td>rule</td><td>potion sustain bound</td><td><a href="rec-engine-f_rows_carried-f14.html">open</a></td></tr><tr><td><a href="rec-engine-f_rows_carried-f15.html">F15</a></td><td>1 Reroll tier stone per 500 salvages (~+2.7% of F7)</td><td>rule</td><td>salvage milestone bound</td><td><a href="rec-engine-f_rows_carried-f15.html">open</a></td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>Row id</th><th>Value</th><th>Status</th><th>Expression</th><th></th></tr></thead><tbody><tr><td><a href="rec-engine-f_rows_carried-f4.html">F4</a></td><td>hr1 27.8 → hr2-4 6.6 → after that 2.5 (low band) · keep-rate 1.98% low · 1.22% mid · 0.66% high …</td><td>measured</td><td>measured — tools/loot.ts, the seven roll steps in loot.md section 1</td><td><a href="rec-engine-f_rows_carried-f4.html">open</a></td></tr><tr><td><a href="rec-engine-f_rows_carried-f11.html">F11</a></td><td>0.28 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as…</td><td>measured</td><td>Flat line per drop (high zone, after the 0.25 early-game weighting)</td><td><a href="rec-engine-f_rows_carried-f11.html">open</a></td></tr><tr><td><a href="rec-engine-f_rows_carried-f12.html">F12</a></td><td>boss 1.4 + elite 1.4 + normal 1.8 = 4.6</td><td>carried</td><td>skill/hr · skill-pool.md drop chances</td><td><a href="rec-engine-f_rows_carried-f12.html">open</a></td></tr><tr><td><a href="rec-engine-f_rows_carried-f14.html">F14</a></td><td>max 3 uses per fight · 30 sec shared cooldown · suppressed on bosses</td><td>rule</td><td>potion sustain bound</td><td><a href="rec-engine-f_rows_carried-f14.html">open</a></td></tr><tr><td><a href="rec-engine-f_rows_carried-f15.html">F15</a></td><td>1 Reroll tier stone per 500 salvages (~+2.7% of F7)</td><td>rule</td><td>salvage milestone bound</td><td><a href="rec-engine-f_rows_carried-f15.html">open</a></td></tr></tbody></table></div></section>
 <section id="add"><h2>Add a row</h2><p class="hint">Validated, written to <code>tools/data/engine.json</code>, then re-run through the writers and both cages. A cage failure rolls the write back from a snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="f_rows_carried"><input type="hidden" name="id" value="">
 <div class="f"><label for="f-id">id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value=""></div></div>
@@ -163,13 +163,13 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h2>Raw JSON of this collection</h2><pre class="code">[
   {
     &quot;id&quot;: &quot;F4&quot;,
-    &quot;value&quot;: &quot;hr1 28.7 → hr2-4 9.4 → after that 5.7 (low band) · keep-rate 2.35% low · 1.40% mid · 0.75% high · 0.36% high + full_lck&quot;,
+    &quot;value&quot;: &quot;hr1 27.8 → hr2-4 6.6 → after that 2.5 (low band) · keep-rate 1.98% low · 1.22% mid · 0.66% high · 0.24% high + full_lck&quot;,
     &quot;expression&quot;: &quot;measured — tools/loot.ts, the seven roll steps in loot.md section 1&quot;,
     &quot;status&quot;: &quot;measured&quot;
   },
   {
     &quot;id&quot;: &quot;F11&quot;,
-    &quot;value&quot;: &quot;0.31 Flat lines per high-zone drop (2.75 lines per item) · the four early-game Flats thin out as Item quality rises&quot;,
+    &quot;value&quot;: &quot;0.28 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises&quot;,
     &quot;expression&quot;: &quot;Flat line per drop (high zone, after the 0.25 early-game weighting)&quot;,
     &quot;status&quot;: &quot;measured&quot;
   },

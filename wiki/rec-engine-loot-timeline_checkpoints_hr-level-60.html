@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -86,6 +86,10 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="rec-engine-loot-timeline_checkpoints_hr-level-60.html" aria-current="page">level_60</a>
 <a href="rec-engine-loot-timeline_checkpoints_hr-level-90.html">level_90</a>
 <a href="rec-engine-loot-timeline_checkpoints_hr-level-100.html">level_100</a>
+<a href="rec-engine-loot-timeline_checkpoints_hr-level-120.html">level_120</a>
+<a href="rec-engine-loot-timeline_checkpoints_hr-level-150.html">level_150</a>
+<a href="rec-engine-loot-timeline_checkpoints_hr-level-180.html">level_180</a>
+<a href="rec-engine-loot-timeline_checkpoints_hr-level-190.html">level_190</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
@@ -143,7 +147,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>level_60</h1>
 <p class="hint">One row of <code>tools/data/engine.json</code> → <code>loot.timeline_checkpoints_hr</code>. Stat model · K values · Mod maxima · loot model · craft prices · timeline. Changing a number here re-prices every town line and rewrites checks.md groups A · B · C · F.</p>
-<dl class="kv"><dt>path</dt><dd><code>loot.timeline_checkpoints_hr.level_60</code></dd><dt>collection</dt><dd><a href="data-engine-loot-timeline_checkpoints_hr.html">Timeline checkpoints</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>5</dd></dl>
+<dl class="kv"><dt>path</dt><dd><code>loot.timeline_checkpoints_hr.level_60</code></dd><dt>collection</dt><dd><a href="data-engine-loot-timeline_checkpoints_hr.html">Timeline checkpoints</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>9</dd></dl>
 <div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Level 60</td><td><code>12.6</code></td><td><code>num</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="loot.timeline_checkpoints_hr"><input type="hidden" name="id" value="level_60">
@@ -151,7 +155,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="loot.timeline_checkpoints_hr"><input type="hidden" name="id" value="level_60"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
-<section><h2>Numbers this feeds</h2><table class=""><thead><tr><th>what</th><th>expression</th><th>value</th><th>checks row</th></tr></thead><tbody><tr><td>kills/hr</td><td><code>3600 ÷ (group × 1 + 4) × group</code></td><td><code>980 · 1,385 · 1,800 · 1,800</code></td><td><a href="checks.html">F1</a></td></tr><tr><td>drops/hr</td><td><code>kills × 8% × (1 + Lck×0.01)</code></td><td><code>133 · 255 · 418 · 878</code></td><td><a href="checks.html">F3</a></td></tr><tr><td>junk → stones &amp; gold</td><td><code>drops − upgrades</code></td><td><code>130 · 251 · 415 · 875 per hour</code></td><td><a href="checks.html">F5 · G2</a></td></tr><tr><td>Reroll tier stones/hr</td><td><code>elite 18 + boss 12</code></td><td><code>30</code></td><td><a href="checks.html">F7</a></td></tr><tr><td>gold per income-minute</td><td><code>junk/hr ÷ 60</code></td><td><code>2.2 · 4.2 · 6.9 · 14.6</code></td><td><a href="checks.html">F18 · T2</a></td></tr><tr><td>game length</td><td><code>E1-E5 timeline checkpoints</code></td><td><code>40.2 hr to level 100</code></td><td><a href="checks.html">E5</a></td></tr></tbody></table></section>
+<section><h2>Numbers this feeds</h2><table class=""><thead><tr><th>what</th><th>expression</th><th>value</th><th>checks row</th></tr></thead><tbody><tr><td>kills/hr</td><td><code>3600 ÷ (group × 1 + 4) × group</code></td><td><code>980 · 1,385 · 1,800 · 1,800</code></td><td><a href="checks.html">F1</a></td></tr><tr><td>drops/hr</td><td><code>kills × 8% × (1 + Lck×0.01)</code></td><td><code>133 · 255 · 418 · 1,174</code></td><td><a href="checks.html">F3</a></td></tr><tr><td>junk → stones &amp; gold</td><td><code>drops − upgrades</code></td><td><code>130 · 252 · 415 · 1,171 per hour</code></td><td><a href="checks.html">F5 · G2</a></td></tr><tr><td>Reroll tier stones/hr</td><td><code>elite 18 + boss 12</code></td><td><code>30</code></td><td><a href="checks.html">F7</a></td></tr><tr><td>gold per income-minute</td><td><code>junk/hr ÷ 60</code></td><td><code>2.2 · 4.2 · 6.9 · 19.5</code></td><td><a href="checks.html">F18 · T2</a></td></tr><tr><td>game length</td><td><code>E1-E5 timeline checkpoints</code></td><td><code>40.2 hr to level 100</code></td><td><a href="checks.html">E5</a></td></tr></tbody></table></section>
 <section><h2>Mentioned in the specs</h2><p class="hint">No document names this row yet. If that is wrong, the spec is missing a line — not the data.</p></section>
 
 <section><h2>Raw JSON</h2><pre class="code">{

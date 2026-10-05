@@ -5,7 +5,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { newGame, tick } from '../src/sim/game';
 import {
   newSkillState, grantSkill, castOnce, skillCd, skillLevel, ladderOf, reservedPct, usableMana,
-  ACTIVE_SLOTS,
+  effectsActive, tickSkills, ACTIVE_SLOTS,
 } from '../src/sim/skills';
 import { mulberry32 } from '../src/engine/client-helpers';
 
@@ -91,6 +91,85 @@ describe('the casting rule from skill-pool.md', () => {
     s.auras['aura.clarity'] = true;
     expect(reservedPct(s)).toBe(E ? sm.reservePct('cheap') : 0);
     expect(usableMana(c, s)).toBeCloseTo(c.maxMana * (1 - sm.reservePct('cheap') / 100), 6);
+  });
+});
+
+describe('the two mana cost forms (D-136)', () => {
+  const flat = { id: 'test.flat', type: 'attack', mana: '14 flat', cd: 6 } as any;
+  const cap = E.skill_xp.level_cap;
+  const c = buildCharacter(100, emptyGear());
+
+  it('a flat row is never free, and a missing unit is loud', () => {
+    expect(sm.manaSpec(flat)).toEqual({ kind: 'flat', value: 14 });
+    expect(sm.manaSpec({ id: 'test.bare', mana: '14' } as any)).toBe(null);
+    expect(sm.manaCostOf(flat, { maxMana: sm.MANA_REF_POOL, usableMana: sm.MANA_REF_POOL })).toBeGreaterThan(0);
+    expect(() => sm.manaCostOf({ id: 'test.bare', mana: '14' } as any, { maxMana: 148, usableMana: 148 })).toThrow();
+    expect(() => sm.manaCostOf({ id: 'test.none', type: 'attack' } as any, { maxMana: 148, usableMana: 148 })).toThrow();
+  });
+
+  it('the level ramp and the pool term compose', () => {
+    const at = (level: number, pool: number) =>
+      sm.manaCostOf(flat, { skillLevel: level, maxMana: pool, usableMana: pool });
+    const levelFactor = 1 + ((cap - 1) * sm.MANA_LEVEL_STEP) / 100;
+    const poolFactor = Math.pow(c.maxMana / sm.MANA_REF_POOL, sm.MANA_POOL_EXPONENT);
+    expect(at(1, sm.MANA_REF_POOL)).toBeCloseTo(14, 9);
+    expect(at(cap, c.maxMana) / at(1, sm.MANA_REF_POOL)).toBeCloseTo(levelFactor * poolFactor, 6);
+    // the two terms are independent: the level term moves with no pool change, and the reverse
+    expect(at(cap, sm.MANA_REF_POOL) / at(1, sm.MANA_REF_POOL)).toBeCloseTo(levelFactor, 9);
+    expect(at(1, c.maxMana) / at(1, sm.MANA_REF_POOL)).toBeCloseTo(poolFactor, 9);
+    expect(cageModel.MANA_REF_POOL).toBe(sm.MANA_REF_POOL);
+    expect(cageModel.MANA_LEVEL_STEP).toBe(sm.MANA_LEVEL_STEP);
+  });
+
+  it('every % row still charges the usable pool it always did', () => {
+    for (const skill of sm.all().filter((k: any) => (sm.manaSpec(k) || { kind: '' }).kind === 'pct')) {
+      const spec = sm.manaSpec(skill)!;
+      const usable = c.maxMana * (1 - sm.reservePct('mid') / 100);
+      expect(sm.manaCostOf(skill, { maxMana: c.maxMana, usableMana: usable })).toBeCloseTo(usable * spec.value / 100, 9);
+      expect(sm.manaCostOf(skill, { maxMana: c.maxMana, usableMana: usable, aoe: true }))
+        .toBeCloseTo(usable * spec.value / 100 * E.aoe.mana_mult, 9);
+    }
+  });
+
+  it('an aura reserves the bar but never discounts the price', () => {
+    const s = newSkillState();
+    const before = sm.manaCostOf(flat, { skillLevel: 1, maxMana: c.maxMana, usableMana: usableMana(c, s) });
+    s.owned['aura.clarity'] = 0;
+    s.auras['aura.clarity'] = true;
+    const after = sm.manaCostOf(flat, { skillLevel: 1, maxMana: c.maxMana, usableMana: usableMana(c, s) });
+    expect(after).toBe(before);
+    expect(usableMana(c, s)).toBeLessThan(c.maxMana);
+  });
+});
+
+describe('a press can open its own timed window (Reap)', () => {
+  const c = buildCharacter(100, emptyGear());
+
+  it('the window folds the row onto the sheet and lapses on its own duration', () => {
+    const s = newSkillState();
+    s.owned['attack.reap'] = 0;
+    s.list[0] = 'attack.reap';
+    const mob = { hp: 1e9, evasion: 0, dodgeRate: 0 } as any;
+    const rng = mulberry32(5);
+    const before = effectsActive(s);
+    expect(before.add.leech || 0).toBe(0);
+    castOnce(s, c, c.maxMana, [mob], {}, rng);
+    const dur = Number(String(sm.byId['attack.reap'].duration).match(/\d+/)?.[0] || 0);
+    expect(s.buffUp['attack.reap']).toBe(dur);
+    const during = effectsActive(s);
+    expect(during.add.leech).toBe(25);
+    expect(during.mult.physical_power).toBeCloseTo(1.1, 9);
+    for (let i = 0; i < dur; i++) tickSkills(s, 1);
+    expect(s.buffUp['attack.reap']).toBe(0);
+    expect(effectsActive(s).add.leech || 0).toBe(0);
+  });
+
+  it('a row without the rule word opens no window', () => {
+    const s = newSkillState();
+    s.owned['attack.cleave'] = 0;
+    s.list[0] = 'attack.cleave';
+    castOnce(s, c, c.maxMana, [{ hp: 1e9, evasion: 0, dodgeRate: 0 } as any], {}, mulberry32(5));
+    expect(s.buffUp['attack.cleave']).toBeUndefined();
   });
 });
 

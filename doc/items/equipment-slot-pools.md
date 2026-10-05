@@ -100,7 +100,7 @@ Which Mod can appear on which slot, read out of every Base row in `item-base.md`
 | Cooldown reduction % | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
 | Critical chance % | yes | - | - | - | - | - | - | - | - | - | - | - |
 | Critical damage % | yes | - | - | - | - | - | - | - | - | - | - | - |
-| Elemental alignment % | - | yes | - | - | - | - | - | yes | yes | yes | yes | - |
+| Elemental alignment % | - | yes | yes | - | - | - | - | yes | yes | yes | yes | - |
 | Elemental power % | yes | - | - | - | - | - | - | - | - | - | - | - |
 | Elemental power flat | yes | - | - | - | - | - | - | - | - | - | - | - |
 | Elemental resistance % | - | - | yes | yes | yes | yes | yes | - | - | - | yes | yes |
@@ -112,13 +112,13 @@ Which Mod can appear on which slot, read out of every Base row in `item-base.md`
 | Mana Regeneration flat | - | yes | - | - | - | - | - | - | - | - | - | - |
 | Max Energy Shield % | - | - | yes | yes | yes | yes | - | yes | yes | yes | - | yes |
 | Max HP % | - | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | - |
-| Max HP flat | - | yes | yes | yes | yes | yes | yes | - | - | - | - | yes |
+| Max HP flat | - | yes | yes | yes | yes | yes | yes | yes | - | - | - | yes |
 | Max Mana % | - | yes | yes | yes | - | - | yes | - | yes | - | yes | yes |
 | Max Mana flat | yes | yes | - | yes | yes | yes | - | yes | - | yes | - | yes |
 | Physical power % | yes | - | - | - | - | - | - | - | - | - | - | - |
 | Physical power flat | yes | - | - | - | - | - | - | - | - | - | - | - |
-| Armour flat | yes | - | yes | yes | yes | yes | - | yes | - | - | - | - |
-| Energy Shield flat | - | - | yes | yes | yes | yes | - | yes | - | - | - | - |
+| Armour flat | yes | - | yes | yes | yes | yes | - | yes | - | - | - | yes |
+| Energy Shield flat | - | - | yes | yes | yes | yes | - | yes | - | - | - | yes |
 | Evasion flat | - | - | yes | yes | yes | yes | yes | yes | - | - | - | - |
 <!-- END GENERATED:mod-matrix -->
 
@@ -169,7 +169,7 @@ role: Primary = 1.0 · Secondary = 0.5 · Stat Mod = 1.0 (per remaining slot)
 | Life Regeneration flat | +31/sec on top of 128/sec (Vit 510 x 0.25) = +24% | a level-1 build has 3/sec, so +31 more than doubles it | **.50 / .40 / .25** | Dies off late-game exactly like Max HP Flat — weight differs by quality tier (low 0.5 · mid 0.4 · high 0.25) |
 | Mana Regeneration flat | +31/sec on top of 92/sec (Int 510 x 0.18) = +34% | a level-1 build has 1.8/sec | **.50 / .40 / .25** | Same early-game shape as Life Regeneration flat; the flat form carries the first zones where the % form has nothing to multiply |
 | Perfect dodge % | scales the Lck line, so it is worth most on a build that has not finished the line | a level-1 Lck sits at under 1%, where +3% is a large multiplier on the chance | **0.7** | The Cap binds near the top of the maxed Lck ratio, so this line is worth least on a maxed-Lck piece and decisive on a low one — the same shape as an % line on any other low rate. It is also defined but not offered: no Base pool in bases.json rolls it, so today it is a drop-weight row and nothing more (harness/todo.md). |
-| Status Alignment resistance % | cuts the 20% status proc to 15% — the gap between status applications goes 2.3 sec -> 3.3 sec | same ratio, fewer absolute hits to proc on | **0.7** | The status proc is 20% per landed hit and there is no other answer to it on gear (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other "answers something niche" defensive rows |
+| Status Alignment resistance % | cuts the 20% status proc to 15% and cuts crowd control (stun/stop) too — the gap between status applications goes 2.3 sec -> 3.3 sec | same ratio, fewer absolute hits to proc on | **0.7** | The status proc is 20% per landed hit and there is no other gear answer to it — or to the crowd control statuses carry — (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other "answers something niche" defensive rows |
 | Chance to bleed % | a second bleed source beside Lacerate's own 40% while the curse is up (formula-offense.md section 4) | bleed is a fixed fraction of one physical hit, so the line is worth the same at every level - only the hit behind it grows | **0.7** | A weapon-only line (one-handed and two-handed axes, D-123). It is the always-on answer to the bleed slot Lacerate already owns, so it prices like the other "answers something niche" rows; bleed is physical DoT with no Element tag and cannot crit, so the line adds reliability rather than a new multiplier |
 | Chance to stun % | runs beside the lightning-Alignment stun path, which is the one that carries the Cap (elements.md section 6) | stun is a fixed 1 sec stop, so the line is worth the same at every level | **0.7** | A weapon-only line (mace, D-123). Stun stops the target clock for 1 sec - attacks and regen - and the Alignment path already prices that window, so the gear source is priced against it and the alignment Cap still binds on the lightning side |
 | Block chance % | the second avoidance layer (D-123): a blocked hit is deleted outright, the same shape as perfect dodge | the Cap binds near the top of the shield's own ladder, so the line is worth most while the shield is still low | **0.7** | Shield offhand only, and line 1 rather than a random roll, so the layer cannot spread onto every slot. Weighted like the other defensive answers; formula-defense.md prints the roll order and X43 proves the Cap is reachable from the shield alone |

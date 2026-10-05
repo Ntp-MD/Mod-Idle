@@ -26,16 +26,60 @@ import type { EngineData, SkillRow, SkillsData } from './types.ts';
 export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const F = (SKILLS.meta && SKILLS.meta.formula) || {};
   const LEVEL_STEP = F.level_step_pct != null ? F.level_step_pct : 1.5;
+  /** A flat mana cost climbs on its own step, steeper than the damage ramp (D-136). */
+  const MANA_LEVEL_STEP = F.mana_level_step_pct != null ? F.mana_level_step_pct : 5;
+  /** How much of the pool's growth a flat cost takes on, so Int and Max Mana gear still price it. */
+  const MANA_POOL_EXPONENT = F.mana_pool_exponent != null ? F.mana_pool_exponent : 0.5;
+  /**
+   * The pool a flat cost is quoted against — the level-1 caster's own pool, derived from the same
+   * terms `maxManaOf` builds it from, so it cannot drift from the pool model (D-136).
+   */
+  const MANA_REF_POOL = E.level_gain.mana_base
+    + E.stat.base * E.K.K_INT_MP;
+  const MANA_REF_LEVEL = F.mana_reference_level != null ? F.mana_reference_level : 1;
   const CAST_REF = F.cast_reference || { cdr_pct: 50, ladder_pct: 30 };
   const SX = E.skill_xp;
 
   const byId: Record<string, SkillRow> = {};
   for (const s of SKILLS.skills) byId[s.id] = s;
 
-  /** "10% (AoE ×1.5)" → 10. */
-  function manaPct(skill: SkillRow) {
-    const m = String(skill.mana || '').match(/(\d+(?:\.\d+)?)\s*%/);
-    return m ? Number(m[1]) : null;
+  /** A mana cost in either of its two forms: `10% (AoE ×1.5)` → pct 10 · `14 flat` → flat 14. */
+  const MANA_UNITS = { pct: '%', flat: 'flat' } as const;
+  type ManaKind = keyof typeof MANA_UNITS;
+
+  /**
+   * The unit is part of the number and the match is anchored, so a bare `14` or a missing field is
+   * a parse failure rather than a zero — a cost that silently reads as 0 would make the skill free
+   * (D-136). `tools/lib/roster.ts` S15 is the other half of the guard.
+   */
+  function manaSpec(skill: SkillRow): { kind: ManaKind; value: number } | null {
+    const m = String(skill.mana == null ? '' : skill.mana).match(/^(\d+(?:\.\d+)?)\s*(%|flat)(?![A-Za-z])/);
+    if (!m) return null;
+    return { kind: (m[2] === '%' ? 'pct' : 'flat') as ManaKind, value: Number(m[1]) };
+  }
+
+  /**
+   * What the row costs right now, in absolute pool units. A percentage charges the usable pool and
+   * is unchanged from before D-136; a flat row charges its own units, grown by skill level on
+   * `MANA_LEVEL_STEP` and by the pool's growth on `MANA_POOL_EXPONENT`, so Int and Max Mana gear
+   * raise the price instead of only widening the bar. Auras reserve a share of the pool but never
+   * discount a cost, so the pool-growth term reads `maxMana`, not `usableMana`.
+   */
+  function manaCostOf(
+    skill: SkillRow,
+    { skillLevel = 1, maxMana, usableMana, aoe = false }:
+      { skillLevel?: number; maxMana: number; usableMana?: number; aoe?: boolean },
+  ) {
+    const spec = manaSpec(skill);
+    if (!spec) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable mana cost: ${JSON.stringify(skill.mana)}`);
+    const aoeMult = aoe ? (E.aoe ? E.aoe.mana_mult : 1.5) : 1;
+    if (spec.kind === 'pct') {
+      const base = usableMana != null ? usableMana : maxMana;
+      return (base * spec.value / 100) * aoeMult;
+    }
+    const byLevel = 1 + Math.max(0, skillLevel - 1) * MANA_LEVEL_STEP / 100;
+    const byPool = Math.pow(maxMana / MANA_REF_POOL, MANA_POOL_EXPONENT);
+    return spec.value * byLevel * byPool * aoeMult;
   }
 
   /**
@@ -114,12 +158,15 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     const ladder = opts.ladderPct != null ? opts.ladderPct : CAST_REF.ladder_pct;
     const ec = effCd(skill.cd!, cdr, ladder);
     const pps = ec > 0 ? 1 / ec : null;
-    const mp = manaPct(skill);
+    const ms = manaSpec(skill);
+    const mp = ms && ms.kind === 'pct' ? ms.value : null;
     return {
       skill,
       cd: skill.cd,
       effCd: ec,
       pressesPerSec: pps,
+      manaKind: ms ? ms.kind : null,
+      manaValue: ms ? ms.value : null,
       manaPct: mp,
       manaPerSecPct: pps != null && mp != null ? pps * mp : null,
       damage: opts.phys != null || opts.magic != null ? perPress(skill, opts) : null,
@@ -186,7 +233,9 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
    * and `tools/lib/roster.ts` S14 fails if a row invents a word nothing spends.
    */
   const EFFECT_RULES = ['ignores_dodge', 'every_target', 'guaranteed_status', 'bypasses_control_cap',
-    'status_immunity', 'cleanses_on_cast', 'es_recharge_immediate', 'cleanses_status'];
+    'status_immunity', 'cleanses_on_cast', 'es_recharge_immediate', 'cleanses_status',
+    // a press that folds its own row onto the character sheet for the row's `duration` (Reap)
+    'self_window'];
   /** Rows whose mechanic is already carried by another column, so no number is missing. */
   const MODELLED_BY = ['targets', 'element'];
   /**
@@ -197,10 +246,11 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
 
   return {
     SKILLS, byId, LEVEL_STEP, CAST_REF, LADDER, CONVERSION, WEAPON_GROUPS,
+    MANA_LEVEL_STEP, MANA_POOL_EXPONENT, MANA_REF_POOL, MANA_REF_LEVEL, MANA_UNITS,
     aggregateEffects, EFFECT_STATS, EFFECT_OPS, EFFECT_SUBJECTS, EFFECT_CONDITIONS, EFFECT_RULES, MODELLED_BY,
     PRESETS, presetCount, mainPreset,
     LADDER_MAX_DUPLICATES, RESERVATION_LIMIT, GROUP_BONUS,
-    manaPct, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
+    manaSpec, manaCostOf, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
     weaponGroupOf, groupBonus, masteryBonus, row, reservePct,
     all: () => SKILLS.skills,
     of: (type: string) => SKILLS.skills.filter((s) => s.type === type),

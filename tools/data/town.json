@@ -114,7 +114,7 @@
         "fire"
       ],
       "base_bias_flavor": "cloth",
-      "budget_hr": 0.5,
+      "budget_hr": 0.4,
       "npcs": [
         "counterhand",
         "porter",
@@ -138,7 +138,7 @@
         "poison"
       ],
       "base_bias_flavor": "cloth / light",
-      "budget_hr": 0.8,
+      "budget_hr": 1,
       "npcs": [
         "counterhand",
         "porter",
@@ -162,7 +162,7 @@
         "fire"
       ],
       "base_bias_flavor": "light (Evasion)",
-      "budget_hr": 1.8,
+      "budget_hr": 1.5,
       "npcs": [
         "counterhand",
         "steward",
@@ -194,7 +194,7 @@
         "lightning"
       ],
       "base_bias_flavor": "light / Ring Mail",
-      "budget_hr": 2.2,
+      "budget_hr": 1.9,
       "npcs": [
         "counterhand",
         "porter",
@@ -219,7 +219,7 @@
         "cold"
       ],
       "base_bias_flavor": "light",
-      "budget_hr": 3,
+      "budget_hr": 3.1,
       "npcs": [
         "counterhand",
         "porter",
@@ -245,7 +245,7 @@
         "lightning"
       ],
       "base_bias_flavor": "Ring Mail",
-      "budget_hr": 4.3,
+      "budget_hr": 4.5,
       "npcs": [
         "counterhand",
         "steward",
@@ -253,8 +253,8 @@
         "guild_clerk",
         "armourer",
         "waypoint_keeper",
-        "curio_pedlar",
-        "herbalist"
+        "herbalist",
+        "curio_pedlar"
       ],
       "stock": [
         "house_highspire",
@@ -276,7 +276,7 @@
         "chaos"
       ],
       "base_bias_flavor": "heavy (Armour)",
-      "budget_hr": 5,
+      "budget_hr": 4.9,
       "npcs": [
         "counterhand",
         "porter",
@@ -303,7 +303,7 @@
         "cold"
       ],
       "base_bias_flavor": "heavy",
-      "budget_hr": 6,
+      "budget_hr": 6.3,
       "npcs": [
         "counterhand",
         "porter",
@@ -330,7 +330,7 @@
         "chaos"
       ],
       "base_bias_flavor": "heavy · cloth (glass endgame)",
-      "budget_hr": 16.6,
+      "budget_hr": 7.6,
       "budget_note": "7.6 hr of zone 9 inside the high band + 9.0 hr of the level 91-100 push, which also farms zone 9",
       "npcs": [
         "counterhand",
@@ -354,6 +354,231 @@
         "repair",
         "filter_preset"
       ]
+    },
+    {
+      "id": "thornwake",
+      "name": "Thornwake",
+      "zone": 10,
+      "band": "low",
+      "capital": null,
+      "innate": [
+        "poison"
+      ],
+      "base_bias_flavor": "wet lowland",
+      "budget_hr": 9,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "greyfen",
+      "name": "Greyfen",
+      "zone": 11,
+      "band": "low",
+      "capital": null,
+      "innate": [
+        "poison",
+        "chaos"
+      ],
+      "base_bias_flavor": "wet lowland",
+      "budget_hr": 10.5,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "saltmarrow",
+      "name": "Saltmarrow",
+      "zone": 12,
+      "band": "low",
+      "capital": "low",
+      "innate": [
+        "chaos"
+      ],
+      "base_bias_flavor": "salt flats",
+      "budget_hr": 12.1,
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "emberhold",
+      "name": "Emberhold",
+      "zone": 13,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "fire"
+      ],
+      "base_bias_flavor": "slag and foundry heat",
+      "budget_hr": 13.8,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "duskmoor",
+      "name": "Duskmoor",
+      "zone": 14,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "cold",
+        "chaos"
+      ],
+      "base_bias_flavor": "open moor",
+      "budget_hr": 15.6,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "nettlecrag",
+      "name": "Nettlecrag",
+      "zone": 15,
+      "band": "mid",
+      "capital": "mid",
+      "innate": [
+        "chaos",
+        "poison"
+      ],
+      "base_bias_flavor": "thorn country",
+      "budget_hr": 17.4,
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "blackwater_reach",
+      "name": "Blackwater Reach",
+      "zone": 16,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "poison"
+      ],
+      "base_bias_flavor": "drowned river mouth",
+      "budget_hr": 19.3,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "wyrmback",
+      "name": "Wyrmback",
+      "zone": 17,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "fire",
+        "cold"
+      ],
+      "base_bias_flavor": "wyrm breeding ground",
+      "budget_hr": 21.2,
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "the_pale_spire",
+      "name": "The Pale Spire",
+      "zone": 18,
+      "band": "high",
+      "capital": "high",
+      "innate": [
+        "chaos",
+        "poison"
+      ],
+      "base_bias_flavor": "the pale spire",
+      "budget_hr": 48.7,
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "waypoint_reanchor",
+        "filter_preset"
+      ],
+      "budget_note": "The last settlement also carries the push band past the spawn cap (levels 181-190), which is where the pre-18-zone world put those hours on Vermolch."
     }
   ],
   "one_time": [
@@ -365,12 +590,12 @@
       "m": 20,
       "charge": "by_settlement_band",
       "qty_by_band": {
-        "low": 2,
-        "mid": 3,
-        "high": 3
+        "low": 5,
+        "mid": 5,
+        "high": 7
       },
       "ladder": null,
-      "note": "8 links · travel mode B · Eastgate is free"
+      "note": "17 links · travel mode B · Eastgate is free"
     },
     {
       "id": "stash_tab_1",
@@ -773,7 +998,10 @@
     "elite_n_rule": "N = 2-4 per tasks.md; the middle of the published range",
     "reward_minutes_of_band_income": 15,
     "reward_rule": "a Hunt pays Reroll value stones and an Elite hunt pays Reroll tier stones, each sized at reward_minutes_of_band_income of that band's own stone income (engine.stonesForMinutes)",
-    "boss_reward": { "remove": 1, "reroll_tier": 4 },
+    "boss_reward": {
+      "remove": 1,
+      "reroll_tier": 4
+    },
     "boss_reward_rule": "winner's choice, exactly as tasks.md writes it",
     "refill_sec": 3600,
     "slots": 3,

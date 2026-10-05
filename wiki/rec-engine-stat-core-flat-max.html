@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -154,7 +154,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="stat"><input type="hidden" name="id" value="core_flat_max"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
-<section><h2>Numbers this feeds</h2><table class=""><thead><tr><th>what</th><th>expression</th><th>value</th><th>checks row</th></tr></thead><tbody><tr><td>stat_c line</td><td><code>12 + 2 × (level − 1)</code></td><td><code>L1 12 · L100 210</code></td><td><a href="checks.html">engine.json stat</a></td></tr><tr><td>single-stat ceiling</td><td><code>210 + 25×12</code></td><td><code>510</code></td><td><a href="checks.html">engine.json · A3</a></td></tr></tbody></table></section>
+<section><h2>Numbers this feeds</h2><table class=""><thead><tr><th>what</th><th>expression</th><th>value</th><th>checks row</th></tr></thead><tbody><tr><td>stat_c line</td><td><code>12 + 2 × (level − 1)</code></td><td><code>L1 12 · L100 390</code></td><td><a href="checks.html">engine.json stat</a></td></tr><tr><td>single-stat ceiling</td><td><code>390 + 25×13</code></td><td><code>715</code></td><td><a href="checks.html">engine.json · A3</a></td></tr></tbody></table></section>
 <section><h2>Mentioned in the specs</h2><table class=""><thead><tr><th>document</th><th>under heading</th><th>matched as</th><th>hits</th></tr></thead><tbody><tr><td><a href="doc-formula-utility.html#h-11-weight">formula-utility.md</a></td><td>11. Weight</td><td><code>core_flat_max</code></td><td>1</td></tr></tbody></table></section>
 
 <section><h2>Raw JSON</h2><pre class="code">{

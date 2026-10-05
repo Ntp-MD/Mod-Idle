@@ -66,7 +66,7 @@ Registry lives in item-list.md section 1; the table below is the usage view.
 | Stone | Effect | Source |
 |---|---|---|
 | Add mod stone | Fill one empty slot up to the Rarity crafted max (net counting) · 1st fill costs 1, 2nd fill on the same item costs 2 | Elite / boss only |
-| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (415/hour → ~52 uses/hour) |
+| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (250/hour → ~31 uses/hour) |
 | Reroll tier stone | Reroll Tier + value of one slot with drop weights (T3 50 / T2 33 / T1 17), may roll lower · Mod name and Element unchanged · **1 per randomize, 8 per deterministic Refine (+1 tier)** | High-level monsters, elites, bosses (30/hour → ~3.75 Refines/hour) |
 | Remove mod stone | Remove one random non-legacy mod (slots 3+, Legacy mod slots 1-2 immune) | Elite / boss |
 | Quality Stone | Attempt +1 (section below) · **tiered cost** (section below) | Steps 1-5 monsters · 6-10 elites · 11-15 bosses |
@@ -136,7 +136,7 @@ energy shield     = second pool ahead of HP · Int x K_INT_ES · chaos bypasses 
 <!-- BEGIN GENERATED:craft-set -->
 | Tier | Price | Actual casts/hour at high zone | Meaning |
 |---|---|---|---|
-| Reroll value | 8 Reroll value stones | ~52 | Cheap, can spam · Keeps values inside the same Tier |
+| Reroll value | 8 Reroll value stones | ~31 | Cheap, can spam · Keeps values inside the same Tier |
 | Refine | 8 Reroll tier stones | ~3.75 | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |
 | Ascend | 8 Add mod stones + 8 Reroll tier stones | ~0.78 | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |
 | Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to Rarity crafted max (net counting) |

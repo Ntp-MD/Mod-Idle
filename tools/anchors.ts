@@ -42,14 +42,6 @@ const ANCHORS: { id: string; label: string; value: () => any; max: number; note:
     note: 'the other half of mob_HP (checks.md D17)',
   },
   {
-    id: 'A-hr100', label: 'timeline at level 100', value: () => eng.L.timeline_checkpoints_hr.level_100, max: 6,
-    note: 'the whole design is paced against this hour (E5)',
-  },
-  {
-    id: 'A-hr90', label: 'timeline at level 90', value: () => eng.L.timeline_checkpoints_hr.level_90, max: 3,
-    note: 'zone 9 clear hour (E4)',
-  },
-  {
     id: 'A-killsHigh', label: 'kills/hr high band', value: () => eng.BAND.high.kills_per_hr, max: 7,
     note: 'F1 — every income and stone rate divides by it',
   },

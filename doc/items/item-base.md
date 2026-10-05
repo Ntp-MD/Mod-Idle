@@ -63,6 +63,10 @@ The last two rows are the off hand's families: a Shield frame (Buckler · Kite S
 | Hood | 30 | Evasion % · Max HP flat | Elemental resistance % |
 | Sallet | 45 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
 | Circlet | 18 | Max Mana % · Cooldown reduction % | Elemental resistance % · Mana Regeneration % |
+| Crown | 55 | Armour % · Evasion % · Max Energy Shield % | Armour flat · Energy Shield flat |
+| Knight's Helm | 42 | Armour % · Evasion % | Armour flat · Elemental resistance % |
+| Hunter's Hood | 22 | Evasion % · Max Energy Shield % | Elemental alignment % · Evasion flat |
+
 
 ## chest
 
@@ -71,6 +75,10 @@ The last two rows are the off hand's families: a Shield frame (Buckler · Kite S
 | Ring Mail | 60 | Evasion % · Max HP % | Elemental resistance % · Max HP flat |
 | Plate Vest | 85 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
 | Vestment | 28 | Max Mana % · Max Mana flat | Cooldown reduction % · Mana Regeneration % |
+| Regalia | 72 | Armour % · Evasion % · Max Energy Shield % | Armour flat · Energy Shield flat |
+| Shadow Coat | 34 | Max Energy Shield % · Evasion % | Energy Shield flat · Elemental resistance % |
+| Mail Coat | 68 | Armour % · Evasion % | Armour flat · Max HP flat |
+
 
 ## pant
 
@@ -79,6 +87,10 @@ The last two rows are the off hand's families: a Shield frame (Buckler · Kite S
 | Breeches | 50 | Evasion flat · Evasion % | Max HP flat |
 | Cuisses | 70 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
 | Legwraps | 25 | Cooldown reduction % · Max Mana flat | Elemental resistance % · Mana Regeneration % |
+| Astral Robes | 48 | Armour % · Evasion % · Max Energy Shield % | Energy Shield flat · Evasion flat |
+| Sentinel's Greaves | 62 | Armour % · Evasion % | Armour flat · Max HP flat |
+| Dancer's Leggings | 27 | Max Energy Shield % · Cooldown reduction % | Energy Shield flat · Evasion flat |
+
 
 ## boots
 
@@ -87,6 +99,10 @@ The last two rows are the off hand's families: a Shield frame (Buckler · Kite S
 | Strapped Boots | 35 | Evasion flat · Evasion % | Cooldown reduction % |
 | Plated Greaves | 55 | Max HP flat · Max HP % | Elemental resistance % · Life Regeneration % |
 | Silk Slippers | 30 | Max Mana flat · Cooldown reduction % | Evasion % · Max Energy Shield % |
+| Striders of the Dawn | 44 | Armour % · Evasion % · Max Energy Shield % | Armour flat · Energy Shield flat |
+| Warden's Sabatons | 58 | Armour % · Evasion % | Armour flat · Max HP flat |
+| Scout's Treads | 31 | Max Energy Shield % · Evasion % | Cooldown reduction % · Evasion flat |
+
 
 ## belt
 
@@ -103,6 +119,10 @@ The last two rows are the off hand's families: a Shield frame (Buckler · Kite S
 | Iron Gauntlets | 45 | Max HP % · Evasion flat | Elemental alignment % · Life Regeneration % |
 | Silk Wraps | 20 | Elemental alignment % · Cooldown reduction % | Max Mana flat |
 | Nimble Mitts | 25 | Evasion % · Evasion flat | Elemental alignment % |
+| Handwrought Reliquary | 46 | Armour % · Evasion % · Max Energy Shield % | Armour flat · Energy Shield flat |
+| Vanguard's Gauntlets | 50 | Armour % · Evasion % | Max HP flat · Armour flat |
+| Ranger's Gloves | 24 | Max Energy Shield % · Evasion % | Elemental alignment % · Cooldown reduction % |
+
 
 ## ring (each ring picks independently)
 
@@ -133,6 +153,10 @@ The last two rows are the off hand's families: a Shield frame (Buckler · Kite S
 | Traveler's Cloak | 20 | Evasion % · Elemental resistance % | Cooldown reduction % · All Resistance % |
 | Heavy Mantle | 32 | Max HP flat · Elemental resistance % | Max Mana flat · All Resistance % |
 | Silk Drape | 22 | Max Mana % · Elemental resistance % | Mana Regeneration % · All Resistance % |
+| Mantle of the Bulwark | 64 | Armour % · Evasion % · Max Energy Shield % | Armour flat · Energy Shield flat |
+| Astral Shroud | 26 | Max Energy Shield % · Evasion % | Energy Shield flat · Mana Regeneration % |
+| Bulwark Cape | 38 | Armour % · Evasion % | Max HP flat · Elemental resistance % |
+
 
 ## off hand
 
@@ -150,7 +174,7 @@ The off hand's two families: **Shield** (Buckler · Kite Shield) carries the blo
 
 # Gear Mod school per Base (PoE)
 
-Heavy Bases (Sallet · Plate Vest · Cuisses · Plated Greaves · Iron Gauntlets · Heavy Mantle) carry Armour · light Bases (Hood · Ring Mail · Breeches · Strapped Boots · Nimble Mitts · Traveler's Cloak) carry Evasion · cloth Bases (Circlet · Vestment · Legwraps · Silk Slippers · Silk Wraps · Silk Drape) carry Energy Shield. Only helmet, chest, pant, boots, and gloves roll the Gear Mod — belt, rings, amulet, and off hand roll none of it, and the cape carries its defence type on the Base Mod line alone (D-123), because the Quality-Stone ladder belongs to the five slots above. Each +1 from Quality Stone raises that Gear Mod. Formulas live in crafting.md; the ladder's reachable value is published as `craft.gear_mod_per_level` and bounded by that school's own T1 ceiling in `mod_max`, which **X42** recomputes and **SV7** survives at the boss.
+Heavy Bases (Sallet · Plate Vest · Cuisses · Plated Greaves · Iron Gauntlets · Heavy Mantle · Knight's Helm · Mail Coat · Sentinel's Greaves · Warden's Sabatons · Vanguard's Gauntlets) carry Armour · light Bases (Hood · Ring Mail · Breeches · Strapped Boots · Nimble Mitts · Traveler's Cloak · Hunter's Hood · Jerkin · Scout's Treads · Ranger's Gloves) carry Evasion · cloth Bases (Circlet · Vestment · Legwraps · Silk Slippers · Silk Wraps · Silk Drape · Shadow Coat · Dancer's Leggings) carry Energy Shield. The three-way Bases (Crown · Regalia · Astral Robes · Striders of the Dawn · Handwrought Reliquary · Mantle of the Bulwark · Bulwark Cape · Astral Shroud) take the school of the heaviest type they carry, so a Quality Stone always has something to push: Armour for the armour-bearing frames, Evasion for the rest. Only helmet, chest, pant, boots, and gloves roll the Gear Mod — belt, rings, amulet, and off hand roll none of it, and the cape carries its defence type on the Base Mod line alone (D-123), because the Quality-Stone ladder belongs to the five slots above. Each +1 from Quality Stone raises that Gear Mod. Formulas live in crafting.md; the ladder's reachable value is published as `craft.gear_mod_per_level` and bounded by that school's own T1 ceiling in `mod_max`, which **X42** recomputes and **SV7** survives at the boss.
 
 # Three Paths Bases Actually Create (measured)
 

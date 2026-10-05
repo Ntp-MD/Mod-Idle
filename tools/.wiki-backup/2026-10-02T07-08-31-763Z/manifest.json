@@ -1,0 +1,10 @@
+{
+  "label": "town:repeatable:waypoint_reanchor",
+  "ts": "2026-10-02T07-08-31-763Z",
+  "files": [
+    "tools/data/town.json",
+    "checks.md",
+    "towns-stalls.md"
+  ],
+  "kept": true
+}

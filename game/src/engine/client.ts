@@ -23,3 +23,9 @@ export const sm: any = createSkillModel(SKILLS, E);
 
 export const STAT_KEYS = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'] as const;
 export type StatKey = (typeof STAT_KEYS)[number];
+
+// Name → row indexes, built once. `sumLines`, `weaponByName` and `spawnMob` otherwise linear-scan
+// these on every tick (and every tick again through the offline catch-up), so the Maps keep those
+// lookups O(1) instead of O(gear × bases).
+export const BASE_BY_NAME: Map<string, any> = new Map((basesJson as any).bases.map((b: any) => [b.name, b]));
+export const WEAPON_BY_NAME: Map<string, any> = new Map((basesJson as any).weapons.map((w: any) => [w.name, w]));

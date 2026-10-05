@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -156,7 +156,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h1>Road link (first visit to a settlement)</h1>
 <p class="hint">One row of <code>tools/data/town.json</code> → <code>one_time</code>. Prices · rosters · stock · Standing shares · Collector sets. The only place a town number is written by hand. tools/town.ts --write rebuilds towns-stalls.md and checks.md group T from it.</p>
 <dl class="kv"><dt>path</dt><dd><code>one_time[road_link]</code></dd><dt>collection</dt><dd><a href="data-town-one_time.html">One-time lines</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>17</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>road_link</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Item</td><td><code>Road link (first visit to a settlement)</code></td><td><code>str</code></td><td>—</td></tr><tr><td>NPC</td><td><code>waypoint_keeper</code></td><td><code>ref</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Kind</td><td><code>time</code></td><td><code>enum</code><span class="dim"> → invariants.allowed_kinds</span></td><td>—</td></tr><tr><td>Price <span class="dim">(m)</span></td><td><code>20</code></td><td><code>num</code></td><td>—</td></tr><tr><td>Charge rule</td><td><code>by_settlement_band</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Charged in band</td><td><code></code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Quantity</td><td><code></code></td><td><code>int</code></td><td>—</td></tr><tr><td>Quantity by band</td><td><code>{&quot;low&quot;:2,&quot;mid&quot;:3,&quot;high&quot;:3}</code></td><td><code>map</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Price ladder</td><td><code>null</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Discount</td><td><code></code></td><td><code>map</code></td><td>—</td></tr><tr><td>Display only</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Uses a discount</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Note</td><td><code>8 links · travel mode B · Eastgate is free</code></td><td><code>text</code></td><td>—</td></tr><tr><td>Character slot grant</td><td><code></code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>road_link</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Item</td><td><code>Road link (first visit to a settlement)</code></td><td><code>str</code></td><td>—</td></tr><tr><td>NPC</td><td><code>waypoint_keeper</code></td><td><code>ref</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Kind</td><td><code>time</code></td><td><code>enum</code><span class="dim"> → invariants.allowed_kinds</span></td><td>—</td></tr><tr><td>Price <span class="dim">(m)</span></td><td><code>20</code></td><td><code>num</code></td><td>—</td></tr><tr><td>Charge rule</td><td><code>by_settlement_band</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Charged in band</td><td><code></code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Quantity</td><td><code></code></td><td><code>int</code></td><td>—</td></tr><tr><td>Quantity by band</td><td><code>{&quot;low&quot;:5,&quot;mid&quot;:5,&quot;high&quot;:7}</code></td><td><code>map</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Price ladder</td><td><code>null</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Discount</td><td><code></code></td><td><code>map</code></td><td>—</td></tr><tr><td>Display only</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Uses a discount</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Note</td><td><code>17 links · travel mode B · Eastgate is free</code></td><td><code>text</code></td><td>—</td></tr><tr><td>Character slot grant</td><td><code></code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="one_time"><input type="hidden" name="id" value="road_link">
 <div class="f"><label for="f-id">id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value="road_link" pattern="^[a-z][a-z0-9_]*$"></div></div>
@@ -168,15 +168,15 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><label for="f-charge-band">Charged in band</label><div><input id="f-charge-band" type="text" name="charge_band" value="" list="f-charge-band-dl" placeholder="one of engine:loot.bands"><datalist id="f-charge-band-dl"></datalist></div></div>
 <div class="f"><label for="f-qty">Quantity</label><div><input id="f-qty" type="text" inputmode="decimal" name="qty" value=""></div></div>
 <div class="f"><label for="f-qty-by-band">Quantity by band</label><div><textarea id="f-qty-by-band" name="qty_by_band" spellcheck="false">{
- &quot;low&quot;: 2,
- &quot;mid&quot;: 3,
- &quot;high&quot;: 3
+ &quot;low&quot;: 5,
+ &quot;mid&quot;: 5,
+ &quot;high&quot;: 7
 }</textarea></div></div>
 <div class="f"><label for="f-ladder">Price ladder</label><div><input id="f-ladder" type="text" name="ladder" value="{}" list="f-ladder-dl" placeholder="stash_tab | herb_pouch | plot_deed | house | "><datalist id="f-ladder-dl"><option value="stash_tab"></option><option value="herb_pouch"></option><option value="plot_deed"></option><option value="house"></option><option value=""></option></datalist></div></div>
 <div class="f"><label for="f-discount">Discount</label><div><textarea id="f-discount" name="discount" spellcheck="false"></textarea></div></div>
 <div class="f"><label for="f-display-only">Display only</label><div><select id="f-display-only" name="display_only"><option>true</option><option>false</option></select></div></div>
 <div class="f"><label for="f-use-discount">Uses a discount</label><div><select id="f-use-discount" name="use_discount"><option>true</option><option>false</option></select></div></div>
-<div class="f"><label for="f-note">Note</label><div><textarea id="f-note" name="note">8 links · travel mode B · Eastgate is free</textarea></div></div>
+<div class="f"><label for="f-note">Note</label><div><textarea id="f-note" name="note">17 links · travel mode B · Eastgate is free</textarea></div></div>
 <div class="f"><label for="f-character-slot-grant">Character slot grant<small>inferred from the JSON on disk</small></label><div><input id="f-character-slot-grant" type="text" inputmode="decimal" name="character_slot_grant" value=""></div></div>
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
@@ -192,12 +192,12 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   &quot;m&quot;: 20,
   &quot;charge&quot;: &quot;by_settlement_band&quot;,
   &quot;qty_by_band&quot;: {
-    &quot;low&quot;: 2,
-    &quot;mid&quot;: 3,
-    &quot;high&quot;: 3
+    &quot;low&quot;: 5,
+    &quot;mid&quot;: 5,
+    &quot;high&quot;: 7
   },
   &quot;ladder&quot;: null,
-  &quot;note&quot;: &quot;8 links · travel mode B · Eastgate is free&quot;
+  &quot;note&quot;: &quot;17 links · travel mode B · Eastgate is free&quot;
 }</pre></section>
 </div>
 </main>

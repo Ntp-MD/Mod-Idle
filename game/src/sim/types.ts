@@ -47,6 +47,8 @@ export interface Item {
   baselines?: Record<number, number>;
   /** A Collector set this piece is being held for, instead of dissolved at the filter. */
   heldFor?: string;
+  /** Player-locked: bulk deposit/withdraw, the bag swap and auto-dissolve all skip it. */
+  locked?: boolean;
   /** +1..+15 from the Quality Stone ladder (`crafting.md`). */
   upgrade_lv?: number;
   /** Would-be breaks this piece can still absorb; Repair refills it (`craft.protection_start`). */
@@ -95,7 +97,14 @@ export type SnapshotReason = string;
 export interface Player {
   level: number;
   xp: number;
-  stats: Record<StatKey, number>;
+  /** Points allocated into each Core stat: `stat = base + points x point_value` (D-141). */
+  points: Record<StatKey, number>;
+  /** Stat points banked from levels, not yet spent. */
+  statPoints: number;
+  /** When true, level points are auto-spent evenly (the reference build) — the idle default. */
+  autoSpend: boolean;
+  /** Banked passive-tree points (the tree is empty; a point grants nothing yet). */
+  treePoints: number;
   hp: number;
   mana: number;
   es: number;
@@ -217,6 +226,16 @@ export interface GameState {
   filter: FilterState;
   /** 'stay' keeps hunting this zone; 'forward' moves on once its own level band is behind. */
   travel: 'stay' | 'forward';
+  /**
+   * Auto-dissolve any drop whose Rarity is at or below this floor ('off' = never, D-122 spirit).
+   * A client rule that dissolves into Reroll stones — never gold, so the two mints are untouched.
+   */
+  autoDissolveRarity?: 'off' | 'Common' | 'Rare';
+  /**
+   * Per-zone Hunt Order: the collectible stream a zone leans on (`engine.json loot.hunt_order`).
+   * Absent zone = 'none'. It shifts drop weights, never the total, so no published number moves.
+   */
+  huntOrder?: Record<number, 'gear' | 'herb' | 'junk'>;
   /** The completion gate: the final zone's boss, one spawn, no Push (`concept.md`). */
   goal: GoalState;
   /** Curse lines currently written on a mob, keyed by that spawn's id (`skill-pool.md`). */

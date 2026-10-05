@@ -76,6 +76,55 @@
    "family": null
   },
   {
+   "name": "Crown",
+   "weight": 55,
+   "primary": [
+    "armour_pct",
+    "evasion_pct",
+    "max_energy_shield_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "energy_shield_flat"
+   ],
+   "slot": "helmet",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Knight's Helm",
+   "weight": 42,
+   "primary": [
+    "armour_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "elemental_resistance"
+   ],
+   "slot": "helmet",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Hunter's Hood",
+   "weight": 22,
+   "primary": [
+    "evasion_pct",
+    "max_energy_shield_pct"
+   ],
+   "secondary": [
+    "elemental_alignment",
+    "evasion_flat"
+   ],
+   "slot": "helmet",
+   "defence": "evasion_pct",
+   "school": "evasion_flat",
+   "family": null
+  },
+  {
    "name": "Ring Mail",
    "weight": 60,
    "primary": [
@@ -124,6 +173,55 @@
    "family": null
   },
   {
+   "name": "Regalia",
+   "weight": 72,
+   "primary": [
+    "armour_pct",
+    "evasion_pct",
+    "max_energy_shield_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "energy_shield_flat"
+   ],
+   "slot": "chest",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Shadow Coat",
+   "weight": 34,
+   "primary": [
+    "max_energy_shield_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "energy_shield_flat",
+    "elemental_resistance"
+   ],
+   "slot": "chest",
+   "defence": "max_energy_shield_pct",
+   "school": "energy_shield_flat",
+   "family": null
+  },
+  {
+   "name": "Mail Coat",
+   "weight": 68,
+   "primary": [
+    "armour_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "max_hp_flat"
+   ],
+   "slot": "chest",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
    "name": "Breeches",
    "weight": 50,
    "primary": [
@@ -164,6 +262,55 @@
    "secondary": [
     "elemental_resistance",
     "mana_regen_pct"
+   ],
+   "slot": "pant",
+   "defence": "max_energy_shield_pct",
+   "school": "energy_shield_flat",
+   "family": null
+  },
+  {
+   "name": "Astral Robes",
+   "weight": 48,
+   "primary": [
+    "armour_pct",
+    "evasion_pct",
+    "max_energy_shield_pct"
+   ],
+   "secondary": [
+    "energy_shield_flat",
+    "evasion_flat"
+   ],
+   "slot": "pant",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Sentinel's Greaves",
+   "weight": 62,
+   "primary": [
+    "armour_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "max_hp_flat"
+   ],
+   "slot": "pant",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Dancer's Leggings",
+   "weight": 27,
+   "primary": [
+    "max_energy_shield_pct",
+    "cooldown_reduction"
+   ],
+   "secondary": [
+    "energy_shield_flat",
+    "evasion_flat"
    ],
    "slot": "pant",
    "defence": "max_energy_shield_pct",
@@ -215,6 +362,55 @@
    "slot": "boots",
    "defence": "max_energy_shield_pct",
    "school": "energy_shield_flat",
+   "family": null
+  },
+  {
+   "name": "Striders of the Dawn",
+   "weight": 44,
+   "primary": [
+    "armour_pct",
+    "evasion_pct",
+    "max_energy_shield_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "energy_shield_flat"
+   ],
+   "slot": "boots",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Warden's Sabatons",
+   "weight": 58,
+   "primary": [
+    "armour_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "max_hp_flat"
+   ],
+   "slot": "boots",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Scout's Treads",
+   "weight": 31,
+   "primary": [
+    "max_energy_shield_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "cooldown_reduction",
+    "evasion_flat"
+   ],
+   "slot": "boots",
+   "defence": "evasion_pct",
+   "school": "evasion_flat",
    "family": null
   },
   {
@@ -304,6 +500,55 @@
    ],
    "secondary": [
     "elemental_alignment"
+   ],
+   "slot": "gloves",
+   "defence": "evasion_pct",
+   "school": "evasion_flat",
+   "family": null
+  },
+  {
+   "name": "Handwrought Reliquary",
+   "weight": 46,
+   "primary": [
+    "armour_pct",
+    "evasion_pct",
+    "max_energy_shield_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "energy_shield_flat"
+   ],
+   "slot": "gloves",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Vanguard's Gauntlets",
+   "weight": 50,
+   "primary": [
+    "armour_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "max_hp_flat",
+    "armour_flat"
+   ],
+   "slot": "gloves",
+   "defence": "armour_pct",
+   "school": "armour_flat",
+   "family": null
+  },
+  {
+   "name": "Ranger's Gloves",
+   "weight": 24,
+   "primary": [
+    "max_energy_shield_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "elemental_alignment",
+    "cooldown_reduction"
    ],
    "slot": "gloves",
    "defence": "evasion_pct",
@@ -467,6 +712,55 @@
    ],
    "slot": "cape",
    "defence": "max_energy_shield_pct",
+   "school": null,
+   "family": null
+  },
+  {
+   "name": "Mantle of the Bulwark",
+   "weight": 64,
+   "primary": [
+    "armour_pct",
+    "evasion_pct",
+    "max_energy_shield_pct"
+   ],
+   "secondary": [
+    "armour_flat",
+    "energy_shield_flat"
+   ],
+   "slot": "cape",
+   "defence": "armour_pct",
+   "school": null,
+   "family": null
+  },
+  {
+   "name": "Astral Shroud",
+   "weight": 26,
+   "primary": [
+    "max_energy_shield_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "energy_shield_flat",
+    "mana_regen_pct"
+   ],
+   "slot": "cape",
+   "defence": "armour_pct",
+   "school": null,
+   "family": null
+  },
+  {
+   "name": "Bulwark Cape",
+   "weight": 38,
+   "primary": [
+    "armour_pct",
+    "evasion_pct"
+   ],
+   "secondary": [
+    "max_hp_flat",
+    "elemental_resistance"
+   ],
+   "slot": "cape",
+   "defence": "armour_pct",
    "school": null,
    "family": null
   },

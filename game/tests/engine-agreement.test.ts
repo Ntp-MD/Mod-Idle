@@ -27,18 +27,22 @@ describe('game and cages run one engine', () => {
 });
 
 describe('published anchors the docs quote', () => {
-  it('single-stat ceiling and the naked level-100 stat', () => {
-    // flat-only since Core Stat % was retired (D-114), plus the earring as a 13th worn item (D-131):
-    // 210 + 25 x 13
-    expect(eng.CEIL).toBe(535);
-    expect(eng.statAt(100)).toBe(210);
+  it('the single-stat ceiling and the naked stat at the level cap', () => {
+    // flat-only since Core Stat % was retired (D-114), plus the earring as a 13th worn item (D-131).
+    // Both terms are read from the data so a change of world size moves the identity, not a literal.
+    const cap = eng.S.level_cap;
+    expect(eng.CEIL).toBeCloseTo(eng.statAt(cap) + E.stat.core_flat_max * E.stat.item_slots, 2);
+    // statAt is the REFERENCE even-split line now: base + points(cap)/7 (D-141).
+    expect(eng.statAt(cap)).toBeCloseTo(E.stat.base + eng.pointsAt(cap) / 7, 6);
   });
 
   it('mob_HP is anchored at the zone edges and the level cap', () => {
-    expect(eng.mobHpAt(1)).toBe(E.mob.zones[0].hp[0]);
-    expect(eng.mobHpAt(10)).toBe(E.mob.zones[0].hp[1]);
-    expect(eng.mobHpAt(90)).toBe(E.mob.zones[8].hp[1]);
-    expect(eng.mobHpAt(100)).toBe(E.mob.curve.hp_at_player_level_cap);
+    // the first, last and cap zone are read off the list, so 18 zones and 9 zones both hold
+    const first = E.mob.zones[0], last = E.mob.zones[E.mob.zones.length - 1];
+    expect(eng.mobHpAt(first.levels[0])).toBe(first.hp[0]);
+    expect(eng.mobHpAt(first.levels[1])).toBe(first.hp[1]);
+    expect(eng.mobHpAt(last.levels[1])).toBe(last.hp[1]);
+    expect(eng.mobHpAt(E.stat.level_cap)).toBeCloseTo(E.mob.curve.hp_at_player_level_cap, 6);
   });
 
   it('a level 1 sword swings 1.2 times per second (formula.md K_AGI_ASPD)', () => {
@@ -55,9 +59,9 @@ describe('published anchors the docs quote', () => {
     expect(eng.armourReduce(eng.DERIVED.armour_ceil, eng.DERIVED.armour_ceil)).toBeCloseTo(1 / 6, 6);
   });
 
-  it('the XP curve is kills × 10 × mob level, capped at 90', () => {
+  it('the XP curve is kills × 10 × mob level, capped at the spawn cap', () => {
     expect(eng.xpToNext(10)).toBe(101 * 10 * 10);
-    expect(eng.xpToNext(100)).toBe(2498 * 10 * 90);
+    expect(eng.xpToNext(E.stat.level_cap)).toBe(6768 * 10 * E.stat.mob_level_cap);
   });
 });
 

@@ -38,10 +38,10 @@ Set from combat.md (TTK ≈ 1 sec per kill) + new-group spawn time **4 seconds p
 <!-- BEGIN GENERATED:loot-bands -->
 | Zone | Average group | Cycle | kills/hour | Lck at that level | drops/hour |
 |---|---|---|---|---|---|
-| low (1-30) | 1.5 mobs | 5.5 sec | 980 | 70 (L30) → ×1.70 | 133 |
-| mid (31-60) | 2.5 mobs | 6.5 sec | 1,385 | 130 (L60) → ×2.30 | 255 |
-| high (61-90) | 4 mobs | 8.0 sec | 1,800 | 190 (L90) → ×2.90 | 418 |
-| high + full Lck | 4 mobs | 8.0 sec | 1,800 | 535 → ×6.35 | **914** |
+| low (1-30) | 1.5 mobs | 5.5 sec | 980 | 33 (L30) → ×1.33 | 104 |
+| mid (31-60) | 2.5 mobs | 6.5 sec | 1,385 | 54 (L60) → ×1.54 | 171 |
+| high (61-90) | 4 mobs | 8.0 sec | 1,800 | 76 (L90) → ×1.76 | 253 |
+| high + full Lck | 4 mobs | 8.0 sec | 1,800 | 433 → ×5.33 | **768** |
 <!-- END GENERATED:loot-bands -->
 
 - **Base drop chance = 8% per kill** for gear, multiplied by `drop_rate = (1 + Lck×0.01) × (1 + mastery_collection/100)` (formula.md section 10)
@@ -57,27 +57,27 @@ Simulated 14 hours per zone, with the player keeping only items better than the 
 <!-- BEGIN GENERATED:loot-sim -->
 | Zone | Hour 1 | 2 | 3 | 4 | 6 | 12 | Total upgrades | Keep-rate of drops | Upgrades/hr | Avg score per equipped piece |
 |---|---|---|---|---|---|---|---|---|---|---|
-| low | 28.08 | 3.00 | 1.42 | 0.58 | 0.33 | 0.08 | 36 | **1.95%** | 2.60 | 2.77 |
-| mid | 32.83 | 3.83 | 1.58 | 0.92 | 0.67 | 0.17 | 43 | **1.21%** | 3.10 | 4.43 |
-| high | 31.92 | 2.92 | 1.50 | 0.75 | 0.25 | 0.00 | 39 | **0.67%** | 2.80 | 6.12 |
-| high + full_lck | 35.25 | 1.92 | 0.67 | 0.67 | 0.17 | 0.08 | 40 | **0.31%** | 2.88 | 6.18 |
+| low | 26.92 | 3.08 | 2.08 | 1.67 | 0.42 | 0.08 | 36 | **2.50%** | 2.60 | 2.76 |
+| mid | 32.25 | 4.00 | 2.58 | 0.92 | 0.67 | 0.17 | 43 | **1.80%** | 3.08 | 4.40 |
+| high | 30.00 | 3.08 | 1.75 | 0.67 | 0.50 | 0.42 | 38 | **1.08%** | 2.73 | 6.14 |
+| high + full_lck | 34.83 | 1.92 | 0.58 | 0.67 | 0.25 | 0.08 | 39 | **0.36%** | 2.80 | 6.20 |
 
 Measured by `node tools/loot.ts --sim` · 14 hours per band x 12 seeds, drop rate and Lck from `engine.json` `loot`, Mod ranges from `mods.json`, Mod weights from `engine.json` `mod_weights`, Base frames and the Gear Mod school from `item-base.md`.
 
 **An item scores the sum of `weight(line) x value / Total` over its own Mod lines, and the filter keeps it when it outscores the piece equipped in the same slot — that is the operational reading of "better on at least 1 axis" (loot.md section 4). A second, weaker keep reason survives: Elemental lines of an Element the player has no resistance for are always kept, so hunting a new Element still pays.**
 
-- Flat lines per drop: 0.407 (low) · 0.385 (mid) · 0.300 (high) · 0.299 (high + full_lck) — the four early-game Flat lines are weighted 0.5 / 0.4 / 0.25 by Item quality, so they thin out exactly as the player leaves the early zones (F11)
-- Mod lines per item: 5.36 · 5.36 · 5.36 · 5.36 · Element-hunt keeps: 1.3 · 1.4 · 1.2 · 1.2
-- Keep-rate spread across seeds: ±0.24% (low) · ±0.12% (mid) · ±0.06% (high) · ±0.02% (high + full_lck) — the row above is the mean, not a single lucky run
+- Flat lines per drop: 0.384 (low) · 0.361 (mid) · 0.286 (high) · 0.286 (high + full_lck) — the four early-game Flat lines are weighted 0.5 / 0.4 / 0.25 by Item quality, so they thin out exactly as the player leaves the early zones (F11)
+- Mod lines per item: 5.35 · 5.36 · 5.36 · 5.36 · Element-hunt keeps: 1.8 · 1.5 · 1.3 · 1.3
+- Keep-rate spread across seeds: ±0.26% (low) · ±0.22% (mid) · ±0.12% (high) · ±0.04% (high + full_lck) — the row above is the mean, not a single lucky run
 
 **Swap margin sensitivity** — the filter keeps a drop only when it beats the equipped piece by more than `loot.filter.upgrade_margin_pct` = 10% (a 2% gain is a reroll, not a decision):
 
 | Zone | 0% (any gain counts) | set margin | 2x margin |
 |---|---|---|---|
-| low | 3.42% | **1.95%** | 1.57% |
-| mid | 2.23% | **1.21%** | 1.00% |
-| high | 1.32% | **0.67%** | 0.53% |
-| high + full_lck | 0.67% | **0.31%** | 0.24% |
+| low | 4.82% | **2.50%** | 2.01% |
+| mid | 3.21% | **1.80%** | 1.58% |
+| high | 2.12% | **1.08%** | 0.88% |
+| high + full_lck | 0.77% | **0.36%** | 0.29% |
 
 The published keep-rates for this design (2.2% / 1.2% / 0.7% / 0.3% of drops) sit on the set-margin column, which is the evidence that the filter always meant this and the earlier numbers were measured the same way.
 
@@ -85,9 +85,9 @@ The published keep-rates for this design (2.2% / 1.2% / 0.7% / 0.3% of drops) si
 
 | Scenario | Keep-rate | Upgrades/hr | Avg score |
 |---|---|---|---|
-| no bias (equal frames, published rule) | 0.67% | 2.80 | 6.12 |
-| a soldier town (armored frames x2.5, cloth x0.4) | 0.66% | 2.77 | 6.08 |
-| the same town inverted (cloth x2.5, armored x0.4) | 0.69% | 2.90 | 6.12 |
+| no bias (equal frames, published rule) | 1.08% | 2.73 | 6.14 |
+| a soldier town (armored frames x2.5, cloth x0.4) | 1.10% | 2.79 | 6.09 |
+| the same town inverted (cloth x2.5, armored x0.4) | 1.12% | 2.84 | 6.13 |
 
 A settlement that rolls one school more often does move the measured rows, so a Base weight is not free — which is why `town.json` carries no frame weight while the status is pending. The pipeline above is bias-ready: add `frame_weight` and re-run.
 <!-- END GENERATED:loot-sim -->
@@ -123,7 +123,7 @@ Salvage milestones (luck protection, bounded): every 500 salvaged gear pieces gr
 
 | Stone | Source per hour (high zone · no Lck) | Used for | Price per use |
 |---|---|---|---|
-| Reroll value stone | 415 (every junk piece = 1) | Reroll value | **8** → ~52 times/hour |
+| Reroll value stone | 250 (every junk piece = 1) | Reroll value | **8** → ~31 times/hour |
 | Reroll tier stone | elite 18 (20% of kills × 5%) + boss 12 (4 ×3) = 30 | Reroll tier / Refine | **1 / 8** → ~3.75 Refines/hour |
 | Add mod stone | elite / boss only (6.25/hour · F9) | Add / Ascend | **8 Add + 8 tier** (2nd Add fill is 2) → 0.78 Ascends/hour · 15.4 hr for a full 12-piece set (X30) |
 | Quality Stone | monsters → elites → bosses by step | Upgrade | tiered: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 |

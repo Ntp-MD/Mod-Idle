@@ -68,7 +68,7 @@ If mana insufficient → skip that one, try the next
 **Decision 1 (applied): these auras replace the old 6.** Reading the new list as additive would put two different auras under `Clarity` and `Grace`, because both names already existed with a different effect — so the old roster (Aura of Might · Aura of Grace · Aura of Fury · Aura of Clarity · Aura of Dread · Aura of Frost) is treated as **replaced**. The old Clarity role (a skill-mana-cost reduction) is **dropped, not moved**: it was the only sink that let a player fund skills 5-6 beyond what regen covers, and nothing in the new 12 replaces it.
 
 <!-- BEGIN GENERATED:aura-roster -->
-| Aura | Kind | reserve | At pool 3,824 | Effect at skill level 20 |
+| Aura | Kind | reserve | At pool 4,857.72 | Effect at skill level 20 |
 |---|---|---|---|---|
 | Wraith of Fury | self | cheap 8% | 290 | aspd +12% |
 | Clarity | self | cheap 8% | 290 | mana regen +25% |

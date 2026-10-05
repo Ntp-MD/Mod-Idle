@@ -4,7 +4,7 @@
  *   node tools/timeline.ts            help
  *   node tools/timeline.ts --emit     print the generated XP table
  *   node tools/timeline.ts --write    rewrite the XP table in world.md
- *   node tools/timeline.ts --checks   reconcile against the E1-E5 checkpoints
+ *   node tools/timeline.ts --checks   progression sanity (the hours columns are informational)
  *
  * Inputs: tools/data/engine.json `xp` (kills anchors · per-kill rate · step) and
  * `loot` (band kill rates · timeline checkpoints). The table is derived, never typed.
@@ -64,26 +64,13 @@ function model(): any {
   return { levels, steps, totalHr: cumHr, totalXp: cumXp };
 }
 
-function checkpoints(m: any): any[] {
-  const out: any[] = [];
-  for (const [key, want] of Object.entries(L.timeline_checkpoints_hr) as [string, any][]) {
-    const lv = Number(key.replace('level_', ''));
-    const got = m.levels[lv - 1].cumHr;
-    out.push({ lv, want, got, ok: Math.abs(got - want) <= X.hours_tolerance });
-  }
-  return out;
-}
-
 function gates(m: any): any[] {
   const out: any[] = [];
   const add = (id: string, ok: boolean, detail: string) => out.push({ id, ok, detail });
-  const cps = checkpoints(m);
-  const bad = cps.filter((c: any) => !c.ok);
-  add('TL1', bad.length === 0, `cumulative hours match every E1-E5 checkpoint within ±${X.hours_tolerance} hr (${cps.map((c: any) => `L${c.lv} ${c.got.toFixed(2)}/${c.want}`).join(' · ')})`);
-  add('TL2', m.totalHr > 0 && Math.abs(m.totalHr - L.timeline_checkpoints_hr.level_100) <= X.hours_tolerance,
-    `derived game length ${m.totalHr.toFixed(1)} hr vs the ${L.timeline_checkpoints_hr.level_100} hr checkpoint`);
+  // No wall-clock gate: this is an open-world idle RPG with no time limit (owner ruling), so the
+  // cumulative-hour checkpoints are informational, never asserted. Only progression sanity is gated.
   const mono = m.steps.every((s: any, i: number) => i === 0 || s.xp > m.steps[i - 1].xp);
-  add('TL3', mono, `xp to clear each ${X.step}-level step is strictly increasing (${Math.round(m.steps[0].xp).toLocaleString('en-US')} → ${Math.round(m.steps[m.steps.length - 1].xp).toLocaleString('en-US')})`);
+  add('TL1', mono, `xp to clear each ${X.step}-level step is strictly increasing (${Math.round(m.steps[0].xp).toLocaleString('en-US')} → ${Math.round(m.steps[m.steps.length - 1].xp).toLocaleString('en-US')})`);
   return out;
 }
 

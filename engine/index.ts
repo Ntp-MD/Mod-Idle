@@ -32,19 +32,30 @@ export function createEngine(E: EngineData) {
   const ES = E.energy_shield;
   const CAP = E.caps;
 
-  // ---- core stat line: every stat is the same Base + per-level ramp (core-stats.md)
+  // ---- core stat line: levels grant POINTS, and `statAt` is the reference even-split line (D-141)
 
-  const statAt = (level: number) => S.base + S.per_level * (level - 1);
-  // a stat fed by `n` items, each carrying one Stat Mod flat + one Stat Mod %
+  const REF_STATS = 7;
+  /** Stat points earned by a level: `5 x (min(L,100)-1) + 2 x max(0, min(L,190)-100)` (D-141). */
+  const pointsAt = (level: number) =>
+    S.points_per_level * (Math.min(level, S.paragon_from - 1) - 1)
+    + S.paragon_points_per_level * Math.max(0, Math.min(level, S.level_cap) - (S.paragon_from - 1));
+  const treePointsAt = (level: number) => Math.max(0, Math.min(level, S.level_cap) - 1) * S.tree_points_per_level;
+  /** A stat's value from the points spent into it: `base + points x point_value`. */
+  const statOf = (points: number) => S.base + points * S.point_value;
+  /** The REFERENCE build: a level's points split evenly over the 7 stats. Every published number
+   *  (and mob_HP) is priced against THIS line, not the player's own allocation. */
+  const statAt = (level: number) => statOf(pointsAt(level) / REF_STATS);
   const statWithItems = (n: number) => statAt(S.level_cap) + S.core_flat_max * n;
   const ceilStat = (items: number, split: boolean) => {
     const n = split ? items / 2 : items;
     return statAt(S.level_cap) + S.core_flat_max * n;
   };
 
-  const CEIL = Math.round(ceilStat(S.item_slots, false) * 100) / 100;   // thirteen items on one stat
+  const CEIL = Math.round(ceilStat(S.item_slots, false) * 100) / 100;   // reference line, thirteen items on one stat
   const SPLIT = Math.round(ceilStat(S.item_slots, true) * 10) / 10;      // thirteen items split two ways
-  const FORCED_SPLIT = (statAt(S.level_cap) + S.core_flat_max * S.item_slots) * 1; // 535
+  const FORCED_SPLIT = (statAt(S.level_cap) + S.core_flat_max * S.item_slots) * 1;
+  /** The ceiling the K values are actually set on: ALL points AND all items in one stat (D-141). */
+  const FOCUSED_CEIL = Math.round((statOf(pointsAt(S.level_cap)) + S.core_flat_max * S.item_slots) * 100) / 100;
 
   // ---- derived ceilings (cages group B)
 
@@ -85,10 +96,18 @@ export function createEngine(E: EngineData) {
 
   // ---- mob evasion: the species Dex line, not a level number (D-019 · D1 step 1)
 
+  // A mob's own stat block (`mob.stat`), deliberately NOT the player's line. It is FLAT now (D-141):
+  // one base the species vector multiplies, no level term, so two mobs of a level can be nothing alike.
+  const MSTAT = E.mob.stat;
+  const mobStat = () => MSTAT.base;
+
   // the zone's average body factor: mob_HP(L) is the zone's AVERAGE mob, so group entries divide by it
   const sizeById = (id: string): MobSize | undefined => E.mob.sizes.find((x) => x.id === id);
   const sizeOr1 = (id: string): MobSize => sizeById(id) || { id, name: id, hp: 1, ps: 1, evasion: 1 };
+  const zoneBodyFactorCache = new Map<number, number>();
   function zoneBodyFactor(zoneId: number) {
+    const cached = zoneBodyFactorCache.get(zoneId);
+    if (cached !== undefined) return cached;
     const cast = E.mob.species.filter((sp) => sp.zones.includes(zoneId));
     let w = 0, sum = 0;
     for (const sp of cast) for (const sid of sp.sizes) {
@@ -96,11 +115,14 @@ export function createEngine(E: EngineData) {
       if (!weight) continue;
       w += weight; sum += weight * sizeOr1(sid).hp;
     }
-    return w ? sum / w : 1;
+    const factor = w ? sum / w : 1;
+    zoneBodyFactorCache.set(zoneId, factor);
+    return factor;
   }
 
   const sizeMult = (id: string) => (id === 'elite' ? E.mob.elite.evasion : (sizeOr1(id).evasion));
-  const mobEvasion = (level: number, dexMult = 1, body = 'medium') => statAt(level) * dexMult * K.K_EVASION * sizeMult(body);
+  const mobEvasion = (level: number, dexMult = 1, body = 'medium') =>
+    Math.min(CAP.evasion, mobStat() * dexMult * K.K_EVASION * sizeMult(body));
   const MEAN_SPECIES_DEX = E.mob.species.reduce((t, r) => t + r.stats.dex, 0) / E.mob.species.length;
   // The reference mob is the mean species vector on a Medium body — a real average of the roster,
   // not an imaginary x1.00 lineage. It is what every published hit-chance anchor is measured against.
@@ -207,11 +229,13 @@ export function createEngine(E: EngineData) {
   const mobPsAt = (Lv: number) => typicalDpsAt(Lv) / K.mob_damage_divisor;
 
   // a mob accuracy is its own Dex line (D-019): stat_c x species.dex x K_DEX_ACC x accuracy tier
-  const mobAcc = (Lv: number, dexMult: number, tier: number) => statAt(Lv) * dexMult * K.K_DEX_ACC * tier;
+  const mobAcc = (Lv: number, dexMult: number, tier: number) => mobStat() * dexMult * K.K_DEX_ACC * tier;
   // A mob's own dodge is contested by the accuracy of the player attacking it, the same opposed shape X20 uses
   // for the player side. Reference attacker = a same-level player with no Dex investment.
   const refAttackerAcc = (Lv: number) => statAt(Lv) * K.K_DEX_ACC * (1 + M.accuracy_pct / 100);
-  const mobDodge = (agiRate: number, Lv: number) => (agiRate / (agiRate + refAttackerAcc(Lv))) * 100;
+  // The dodge roll itself stays a chance bounded by 100: no build and no mob can make itself
+  // untouchable, which is the same rule as the Evasion Cap one line up.
+  const mobDodge = (agiRate: number, Lv: number) => Math.min(100, (agiRate / (agiRate + refAttackerAcc(Lv))) * 100);
   const damageSplit = (tag: string) => E.mob.damage_split[tag];
 
   DERIVED.zone9_boss_physical = mobPs(zoneById(9)!.hp[1], 90) * sizeOr1('boss').ps / 2;
@@ -280,10 +304,10 @@ export function createEngine(E: EngineData) {
   /**
    * Block is its own avoidance layer (D-123 · it overrules D-112's "one avoidance layer" for the
    * block path only; evasion keeps its Cap). It is a flat percentage the shield's Base Mod line
-   * prints, rolled last in the incoming order, and bounded by `caps.block` — which the shield's own
-   * T1 line plus the quality ladder reaches, so the Cap is a ceiling rather than a wall (X43).
+   * prints, rolled last in the incoming order, OPEN-ENDED (no Cap, owner ruling). A blocked hit is
+   * NOT deleted — it is cut by a flat `armour / 10` (owner ruling, provisional; applied in mobSwing).
    */
-  const blockChance = (pct: number) => Math.min(CAP.block, Math.max(0, pct || 0));
+  const blockChance = (pct: number) => Math.max(0, pct || 0);   // no Cap (owner ruling)
   /**
    * Armour penetration is a cut on the mob's armour ratio, taken where that ratio is built (the
    * crossbow's Base Mod line). It cannot take the cut below zero, so over-penetration is wasted
@@ -292,11 +316,10 @@ export function createEngine(E: EngineData) {
   const armourPenCut = (pct: number) => Math.min(1, Math.max(0, (pct || 0) / 100));
   /**
    * Chance to stun = the lightning line `elements.md` publishes (Alignment × K_STUN_PER_ALIGN) plus
-   * the mace's `Chance to stun %` gear line, held by `caps.stun` (C10). Alignment alone lands at
-   * 10.5, so the Cap only binds once gear adds its points.
+   * the mace's `Chance to stun %` gear line. OPEN-ENDED — no Cap (owner ruling); the two sources sum.
    */
   const stunChanceFrom = (alignment: number, gearPct = 0) =>
-    Math.min(CAP.stun, alignment * K.K_STUN_PER_ALIGN + (gearPct || 0));
+    Math.max(0, alignment * K.K_STUN_PER_ALIGN + (gearPct || 0));   // no Cap (owner ruling)
   /**
    * Chance to bleed = the axe's `Chance to bleed %` line, plus Lacerate's published proc
    * (`K_BLEED_CHANCE`) while that curse is up. It is a probability, so it is bounded at 100%.
@@ -317,7 +340,9 @@ export function createEngine(E: EngineData) {
   const cdrOf = (wis: number, pctTotal = 0) => Math.min(CAP.cdr, (wis * K.K_WIS_CDR) * (1 + pctTotal / 100));
   // the trailing multiplier is where a skill that scales the finished stat lands (Warcry's
   // "alignment and Elemental resistance x1.20"); the Cap still applies after it
-  const alignmentOf = (dex: number, flat = 0, mult = 1) => Math.min(CAP.alignment, (dex * K.K_DEX_ALIGN + flat) * mult);
+  // Elemental Alignment has NO Cap (owner ruling): it is the Dex-derived status gate and Element
+  // multiplier, left open-ended. The defensive `Status Alignment resistance %` is a separate Mod line.
+  const alignmentOf = (dex: number, flat = 0, mult = 1) => (dex * K.K_DEX_ALIGN + flat) * mult;
   const resistanceOf = (vit: number, pct = 0, mult = 1) => Math.min(CAP.elem_res, vit * K.K_VIT_RES * (1 + pct / 100) * mult);
   const weightCapacityOf = (str: number) => LG.weight_base + str * K.K_STR_WEIGHT;
 
@@ -464,7 +489,7 @@ export function createEngine(E: EngineData) {
     const out: any[] = [];
     for (const z of ZONES) {
       const [lFrom, lTo] = z.levels;
-      const edge = statAt(lTo);
+      const edge = mobStat();
       const psEdge = mobPs(z.hp[1], lTo);
       for (const sp of E.mob.species) {
         if (!sp.zones.includes(z.id)) continue;
@@ -480,7 +505,7 @@ export function createEngine(E: EngineData) {
             ev: edge * sp.stats.dex * K.K_EVASION * size.evasion,
             armour: edge * sp.stats.str * K.K_ARMOUR,
             res: edge * sp.stats.vit * K.K_VIT_RES,
-            align: Math.min(CAP.alignment, edge * sp.stats.dex * K.K_DEX_ALIGN),
+            align: edge * sp.stats.dex * K.K_DEX_ALIGN,
             crit: edge * sp.stats.lck * K.K_LCK_CRIT,
             dodge: mobDodge(edge * sp.stats.agi * K.K_MOB_DODGE, lTo),
             damage: sp.damage,
@@ -498,7 +523,7 @@ export function createEngine(E: EngineData) {
             ev: edge * sp.stats.dex * K.K_EVASION * el.evasion,
             armour: edge * sp.stats.str * K.K_ARMOUR,
             res: edge * sp.stats.vit * K.K_VIT_RES,
-            align: Math.min(CAP.alignment, edge * sp.stats.dex * K.K_DEX_ALIGN), crit: edge * sp.stats.lck * K.K_LCK_CRIT,
+            align: edge * sp.stats.dex * K.K_DEX_ALIGN, crit: edge * sp.stats.lck * K.K_LCK_CRIT,
             dodge: mobDodge(edge * sp.stats.agi * K.K_MOB_DODGE, lTo),
             damage: sp.damage,
             xpFrom: X.per_kill_mob_level * lFrom * X.elite_mult, xpTo: X.per_kill_mob_level * lTo * X.elite_mult, group: 'alone',
@@ -517,7 +542,7 @@ export function createEngine(E: EngineData) {
         ev: edge * bs.stats.dex * K.K_EVASION * bz.evasion,
         armour: edge * bs.stats.str * K.K_ARMOUR,
         res: edge * bs.stats.vit * K.K_VIT_RES,
-        align: Math.min(CAP.alignment, edge * bs.stats.dex * K.K_DEX_ALIGN), crit: edge * bs.stats.lck * K.K_LCK_CRIT,
+        align: edge * bs.stats.dex * K.K_DEX_ALIGN, crit: edge * bs.stats.lck * K.K_LCK_CRIT,
         dodge: mobDodge(edge * bs.stats.agi * K.K_MOB_DODGE, lTo),
         damage: bs.damage,
         xpFrom: X.per_kill_mob_level * lFrom * X.boss_mult, xpTo: X.per_kill_mob_level * lTo * X.boss_mult, group: 'alone',
@@ -547,17 +572,19 @@ export function createEngine(E: EngineData) {
       hp, ps,
       acc: mobAcc(lv, sp.stats.dex, sp.accuracy_mult),
       evasion: mobEvasion(lv, sp.stats.dex, size.id),
-      armour: armourOf(statAt(lv) * sp.stats.str),
-      res: statAt(lv) * sp.stats.vit * K.K_VIT_RES,
-      dodgeRate: statAt(lv) * sp.stats.agi * K.K_MOB_DODGE,
+      // the mob's own FLAT stat line, and the same Cap the player obeys on every percentage it carries
+      armour: armourOf(mobStat() * sp.stats.str),
+      res: Math.min(CAP.elem_res, mobStat() * sp.stats.vit * K.K_VIT_RES),
+      align: mobStat() * sp.stats.dex * K.K_DEX_ALIGN,
+      dodgeRate: mobStat() * sp.stats.agi * K.K_MOB_DODGE,
       xp: xpPerKill(lv),
     };
   }
 
   return {
     E, S, K, M, LG, L, C, TS, ES, CAP, CURVE, X,
-    BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, DERIVED, REF, WEAPONS, STONE, LCK_BOUND,
-    statAt, statWithItems, ceilStat,
+    BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, REF, WEAPONS, STONE, LCK_BOUND,
+    statAt, statWithItems, ceilStat, pointsAt, treePointsAt, statOf,
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
     ZONES, zoneById, finalZoneId, winTarget, sizeById, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,

@@ -36,6 +36,33 @@ export function weightedPick(rng: Rng, entries: { id: string; w: number }[]) {
   return entries[entries.length - 1].id;
 }
 
+/**
+ * Hunt Order (owner-approved rule, `loot.hunt_order`). Redistributes probability MASS among the three
+ * collectible streams — gear, herbs, junk — toward the chosen one: the lean stream's share rises while
+ * the total expected drops/kill is preserved by renormalizing, so drops/hr and the timeline do not
+ * move. `order === 'none'` is the identity, so the measured bands are untouched by default. Stones ride
+ * the elite/boss lines and are not a category.
+ */
+export function huntReweight(
+  p: { gear: number; herb: number; junk: number },
+  order: 'none' | 'gear' | 'herb' | 'junk',
+  shiftPct: number,
+): { gear: number; herb: number; junk: number } {
+  if (order === 'none') return { ...p };
+  const total = p.gear + p.herb + p.junk;
+  if (!(total > 0)) return { ...p };
+  const s = shiftPct / 100;
+  const f = (k: 'gear' | 'herb' | 'junk') => (k === order ? 1 + s : 1 - s);
+  const scaled = p.gear * f('gear') + p.herb * f('herb') + p.junk * f('junk');
+  const norm = total / scaled; // renormalize → Σ stays exactly `total`
+  const clamp = (x: number) => Math.max(0, Math.min(1, x));
+  return {
+    gear: clamp(p.gear * f('gear') * norm),
+    herb: clamp(p.herb * f('herb') * norm),
+    junk: clamp(p.junk * f('junk') * norm),
+  };
+}
+
 export function createLoot(E: EngineData, MODS: ModsData) {
   // The earring is appended last (index 12) on purpose: the doll grid, `element.test.ts` and the
   // gear array address the other slots by position, so appending keeps every existing index stable

@@ -97,13 +97,19 @@
   },
   "stat": {
     "base": 12,
-    "per_level": 2,
-    "level_cap": 100,
-    "mob_level_cap": 90,
+    "level_cap": 190,
+    "mob_level_cap": 180,
     "item_slots": 13,
     "core_flat_max": 25,
     "split_items": 6,
-    "note": "`core_pct_max` is gone (owner ruling, D-112): Core Stat is Flat only. The single-stat ceiling is now `stat_c + core_flat_max x 13` = 535, not 816 — every K value, Cap and anchor that was set on 816 moves with it. The 13th slot is the earring accessory (D-131); its power is booked as D34 debt rather than landed in `mob_HP` (H1), so no zone HP, kill rate or timeline number moves."
+    "points_per_level": 5,
+    "point_value": 1,
+    "paragon_from": 101,
+    "paragon_points_per_level": 2,
+    "tree_points_per_level": 1,
+    "reference_build": "split",
+    "respec_cost": 0,
+    "note": "Stats are SPENT, not granted (owner ruling D-141). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190) and 1 tree point, and `stat = base + points x point_value`. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat)."
   },
   "K": {
     "K_STR": 5,
@@ -182,8 +188,13 @@
     "stat_block": "every mob gets the same 7-stat block as a player: stat_c = 12 + 2 x (level - 1) per stat, then each species multiplies it (world.md Monsters)",
     "curve": {
       "skill_per_level": 0.0034,
-      "hp_at_player_level_cap": 11901,
-      "note": "No passive skill tree exists (tools/data/tree.json is an empty shell), so mob_HP(L) = typical_gear_DPS(L) x (1 + skill_per_level x L) and mob_PS(L) = typical_gear_DPS(L) / mob_damage_divisor. skill_per_level is the only power multiplier left; any future power source is multiplied in here in the same commit that adds it. mob_HP(L) is anchored at every zone edge in mob.zones and interpolated linearly between them; levels above the spawn cap (90) run to hp_at_player_level_cap (11901 = the published theoretical mob_HP(100)). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt · checks.md X37)."
+      "hp_at_player_level_cap": 27704.261545901503,
+      "note": "No passive skill tree exists (tools/data/tree.json is an empty shell), so mob_HP(L) = stat_c(L) x (1 + skill_per_level x L) x g(L) and mob_PS(L) = mob_HP(L) / mob_damage_divisor. g(L) is the gear-progression factor; above the level-90 edge it is held flat (curve.extend). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt - checks.md X37).",
+      "extend": {
+        "from_level": 90,
+        "gear_factor": 43.15708874022729,
+        "rule": "mob_HP(L) = stat_c(L) x skill(L) x gear_factor for every zone edge above `from_level`. The gear factor is the one already measured at the level-90 published edge and then held flat: gear stops improving while levels do not, so HP past zone 9 rises on the stat line and the skill multiplier alone. Zones 1-9 keep their published anchors untouched — this only computes the edges that did not exist. Seeding from the last published edge is what keeps the line continuous, and it lands the zone-18 edge within a fraction of a percent of the owner projection."
+      }
     },
     "zones": [
       {
@@ -340,6 +351,164 @@
           "chaos"
         ],
         "group": "3-5"
+      },
+      {
+        "id": 10,
+        "name": "Thornwake",
+        "levels": [
+          91,
+          100
+        ],
+        "hp": [
+          10849.899263319094,
+          12144.404771499958
+        ],
+        "quality": "low",
+        "elements": [
+          "poison"
+        ],
+        "group": "1-2"
+      },
+      {
+        "id": 11,
+        "name": "Greyfen",
+        "levels": [
+          101,
+          110
+        ],
+        "hp": [
+          12291.173398887722,
+          13638.50318368663
+        ],
+        "quality": "low",
+        "elements": [
+          "poison",
+          "chaos"
+        ],
+        "group": "1-2"
+      },
+      {
+        "id": 12,
+        "name": "Saltmarrow",
+        "levels": [
+          111,
+          120
+        ],
+        "hp": [
+          13791.141175143064,
+          15191.295236560005
+        ],
+        "quality": "low",
+        "elements": [
+          "chaos"
+        ],
+        "group": "1-2"
+      },
+      {
+        "id": 13,
+        "name": "Emberhold",
+        "levels": [
+          121,
+          130
+        ],
+        "hp": [
+          15349.802592085112,
+          16802.78093012009
+        ],
+        "quality": "mid (floor = low)",
+        "elements": [
+          "fire"
+        ],
+        "group": "2-3"
+      },
+      {
+        "id": 14,
+        "name": "Duskmoor",
+        "levels": [
+          131,
+          140
+        ],
+        "hp": [
+          16967.15764971387,
+          18472.960264366888
+        ],
+        "quality": "mid (floor = low)",
+        "elements": [
+          "cold",
+          "chaos"
+        ],
+        "group": "2-3"
+      },
+      {
+        "id": 15,
+        "name": "Nettlecrag",
+        "levels": [
+          141,
+          150
+        ],
+        "hp": [
+          18643.206348029336,
+          20201.833239300395
+        ],
+        "quality": "mid (floor = low)",
+        "elements": [
+          "chaos",
+          "poison"
+        ],
+        "group": "2-3"
+      },
+      {
+        "id": 16,
+        "name": "Blackwater Reach",
+        "levels": [
+          151,
+          160
+        ],
+        "hp": [
+          20377.948687031512,
+          21989.399854920608
+        ],
+        "quality": "high (floor = mid)",
+        "elements": [
+          "poison"
+        ],
+        "group": "3-5"
+      },
+      {
+        "id": 17,
+        "name": "Wyrmback",
+        "levels": [
+          161,
+          170
+        ],
+        "hp": [
+          22171.384666720398,
+          23835.660111227528
+        ],
+        "quality": "high (floor = mid)",
+        "elements": [
+          "fire",
+          "cold"
+        ],
+        "group": "3-5"
+      },
+      {
+        "id": 18,
+        "name": "The Pale Spire",
+        "levels": [
+          171,
+          180
+        ],
+        "hp": [
+          24023.51428709599,
+          25740.614008221164
+        ],
+        "quality": "high (floor = mid)",
+        "elements": [
+          "chaos",
+          "poison"
+        ],
+        "group": "3-5"
       }
     ],
     "damage_split": {
@@ -436,6 +605,51 @@
         "zone": 9,
         "name": "Vermolch Ninefold Choir",
         "species": "seraph"
+      },
+      {
+        "zone": 10,
+        "name": "The Rootcoil",
+        "species": "drake"
+      },
+      {
+        "zone": 11,
+        "name": "Greyfen Broodmother",
+        "species": "demonic"
+      },
+      {
+        "zone": 12,
+        "name": "The Salt Tyrant",
+        "species": "elf"
+      },
+      {
+        "zone": 13,
+        "name": "Emberhold Slagheart",
+        "species": "goblin"
+      },
+      {
+        "zone": 14,
+        "name": "Duskmoor Stalkers",
+        "species": "wolf"
+      },
+      {
+        "zone": 15,
+        "name": "The Nettle Hag",
+        "species": "demonic"
+      },
+      {
+        "zone": 16,
+        "name": "The Drowned Choir",
+        "species": "husk"
+      },
+      {
+        "zone": 17,
+        "name": "Wyrmback Sovereign",
+        "species": "drake"
+      },
+      {
+        "zone": 18,
+        "name": "Pale Spire Silence",
+        "species": "seraph"
       }
     ],
     "sizes": [
@@ -491,9 +705,12 @@
         "id": "rat",
         "name": "Rat",
         "zones": [
-          1,
           2,
-          3
+          3,
+          9,
+          10,
+          11,
+          13
         ],
         "carries_weapon": false,
         "line": "front",
@@ -523,9 +740,11 @@
         "name": "Husk",
         "zones": [
           1,
-          2,
-          3,
-          4
+          6,
+          9,
+          10,
+          11,
+          16
         ],
         "carries_weapon": false,
         "line": "front",
@@ -555,9 +774,12 @@
         "id": "goblin",
         "name": "Goblin",
         "zones": [
+          1,
           2,
           3,
-          4
+          4,
+          13,
+          16
         ],
         "carries_weapon": true,
         "line": "front",
@@ -588,9 +810,12 @@
         "id": "slime",
         "name": "Slime",
         "zones": [
-          3,
-          4,
-          5
+          1,
+          5,
+          6,
+          8,
+          14,
+          17
         ],
         "carries_weapon": false,
         "line": "front",
@@ -623,7 +848,9 @@
           3,
           4,
           5,
-          6
+          8,
+          14,
+          17
         ],
         "carries_weapon": true,
         "line": "front",
@@ -655,7 +882,10 @@
         "zones": [
           4,
           5,
-          6
+          6,
+          8,
+          14,
+          17
         ],
         "carries_weapon": false,
         "line": "front",
@@ -684,9 +914,12 @@
         "id": "wolf",
         "name": "Wolf",
         "zones": [
-          5,
-          6,
-          7
+          7,
+          9,
+          12,
+          14,
+          15,
+          18
         ],
         "carries_weapon": true,
         "line": "front",
@@ -698,7 +931,6 @@
         ],
         "element_bias": [
           "cold",
-          "lightning",
           "chaos"
         ],
         "stats": {
@@ -716,10 +948,12 @@
         "id": "orc",
         "name": "Orc",
         "zones": [
-          5,
           6,
           7,
-          8
+          11,
+          12,
+          15,
+          18
         ],
         "carries_weapon": true,
         "line": "front",
@@ -750,7 +984,10 @@
         "zones": [
           6,
           7,
-          8
+          8,
+          12,
+          15,
+          18
         ],
         "carries_weapon": true,
         "line": "front",
@@ -778,9 +1015,12 @@
         "id": "elf",
         "name": "Elf",
         "zones": [
+          2,
           7,
-          8,
-          9
+          10,
+          12,
+          15,
+          16
         ],
         "carries_weapon": true,
         "line": "stand-off",
@@ -792,7 +1032,6 @@
         ],
         "element_bias": [
           "chaos",
-          "cold",
           "poison"
         ],
         "stats": {
@@ -810,9 +1049,12 @@
         "id": "demonic",
         "name": "Demon",
         "zones": [
+          2,
+          5,
           7,
-          8,
-          9
+          11,
+          12,
+          15
         ],
         "carries_weapon": true,
         "line": "stand-off",
@@ -842,9 +1084,12 @@
         "id": "golem",
         "name": "Golem",
         "zones": [
-          6,
-          7,
-          8
+          4,
+          5,
+          8,
+          9,
+          11,
+          18
         ],
         "carries_weapon": true,
         "line": "front",
@@ -874,7 +1119,11 @@
         "name": "Knight",
         "zones": [
           8,
-          9
+          10,
+          14,
+          16,
+          17,
+          18
         ],
         "carries_weapon": true,
         "line": "front",
@@ -903,8 +1152,12 @@
         "id": "drake",
         "name": "Drake",
         "zones": [
-          8,
-          9
+          2,
+          5,
+          6,
+          10,
+          16,
+          17
         ],
         "carries_weapon": true,
         "line": "front",
@@ -933,7 +1186,12 @@
         "id": "seraph",
         "name": "Seraph",
         "zones": [
-          9
+          7,
+          9,
+          10,
+          11,
+          12,
+          18
         ],
         "carries_weapon": true,
         "line": "stand-off",
@@ -966,7 +1224,17 @@
       "A species that carries a weapon is the only kind a weapon-slot piece can come from; every species still drops from the non-weapon slots, so the 8% base drop rate and the loot.md funnel are untouched by this flag. Rat · Husk · Slime · Spider are the weaponless lineages, which is why goblin (zone 2) is where the weapon part of the drop table starts.",
       "A species is not zone-locked. The same species in two zones is the same species at a higher level, never a reskinned one.",
       "Mob evasion is the species Dex line, not a level number: `stat_c(level) x species.dex x K_EVASION x body-class evasion`. K_EVASION 0.5 is set so the average species on a Medium body reproduces the retired `level x 1` curve (101 vs 100 at level 100), so this is a derivation, not a rebalance - and it is the same K the player's own Evasion rating uses, because a mob runs the player's math (X21)."
-    ]
+    ],
+    "stat": {
+      "base": 108.43,
+      "note": "A mob's stat block is FLAT (owner ruling D-141): one base the species vector multiplies, with no level term. Every mob stat - accuracy, Evasion, Armour, Elemental resistance, dodge - reads from HERE through the species multiplier, never from the player stat, so two mobs of the same level can be nothing alike and difficulty lives on mob_HP / mob_PS and the species vector alone. Every one of them still ends at the same Cap the player obeys (`caps`). The base is set so the reference build's opposed hit-chance (X20) holds on the player's even-split reference line; re-derive it from the X20/X22/X24/X25 bands if that line moves."
+    },
+    "field_labels": {
+      "note": "The field label is the species name, lowercase, plus a tier suffix; a named boss reads its own name instead of its species. Colour is a client concern - the data carries no hex value. Body class stays in the roster table, never on the field.",
+      "normal": { "source": "species", "suffix": "" },
+      "elite": { "source": "species", "suffix": "(Elite)" },
+      "boss": { "source": "name", "suffix": "(Boss)" }
+    }
   },
   "bleed": {
     "curse_id": "curse.lacerate",
@@ -1005,10 +1273,16 @@
       "30": 251,
       "50": 713,
       "90": 2121,
-      "100": 2498
+      "100": 2498,
+      "110": 2896,
+      "120": 3315,
+      "140": 4212,
+      "160": 5183,
+      "180": 6223,
+      "190": 6768
     },
     "hours_tolerance": 0.5,
-    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) interpolates linearly between the anchors · hours(L) = kills(L) ÷ the band's kills/hr (980 low / 1385 mid / 1800 high). tools/timeline.ts derives the 5-level-step table in world.md from this."
+    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) interpolates linearly between the anchors · the anchors past level 100 continue the fitted L^1.55 growth measured from the last two published anchors, so the level 1-100 timeline is unchanged · hours(L) divides by the band kills/hr (980 low / 1385 mid / 1800 high), and the low/mid/high pattern repeats every 30 levels so the second half of the world keeps the same pacing shape. tools/timeline.ts derives the table in world.md from this."
   },
   "mod_max": {
     "phys_flat_main_hand": 80,
@@ -1348,10 +1622,10 @@
         "ids": [
           "status_resistance_pct"
         ],
-        "v100": "cuts the 20% status proc to 15% — the gap between status applications goes 2.3 sec -> 3.3 sec",
+        "v100": "cuts the 20% status proc to 15% and cuts crowd control (stun/stop) too — the gap between status applications goes 2.3 sec -> 3.3 sec",
         "early": "same ratio, fewer absolute hits to proc on",
         "weight": 0.7,
-        "why": "The status proc is 20% per landed hit and there is no other answer to it on gear (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other \"answers something niche\" defensive rows"
+        "why": "The status proc is 20% per landed hit and there is no other gear answer to it — or to the crowd control statuses carry — (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other \"answers something niche\" defensive rows"
       },
       {
         "label": "Chance to bleed %",
@@ -1406,17 +1680,17 @@
     "crit_chance": null,
     "evasion": 80,
     "perfect_dodge": 21,
-    "alignment": 50,
+    "alignment": null,
     "elem_res": 75,
     "cdr": 80,
     "aspd": 500,
     "accuracy": null,
     "weight_overload": 0.5,
-    "block": 50,
-    "block_note": "`block` is the second avoidance layer (D-123): a blocked hit is deleted outright, the same shape as perfect dodge, and the roll runs after perfect dodge and evasion. It is fed by the Shield offhand's line 1 only, so the Cap is reached by the shield's own ladder rather than by a build the player cannot assemble; formula-defense.md prints the order and X43 is the reachability gate.",
-    "stun": 15,
-    "stun_note": "`stun` bounds the lightning stun chance (elements.md lightning · C10): `Alignment × K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. Alignment alone reaches 10.5, so the Cap binds only once gear adds its points — the mace's line 1 is the published source (D-123), and X43 proves the reach.",
-    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together (D-112). `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright, and it binds on the Lck ratio alone — the `Perfect dodge %` line is defined in mods.json but no Base pool in bases.json offers it, so nothing lifts that ratio today. **`elem_res` (75), `alignment` (50) and `cdr` (80) are hard ceilings, not build targets** (D-124): a maxed single-stat build reaches only 48.45 / 35.5 / 57.375, so each Cap sits above its own build by intent, the same shape as the aspd Cap (500). The player keeps the build's real value instead of a cut, which is new power booked on checks.md D34. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
+    "block": null,
+    "block_note": "`block` is the second avoidance layer (D-123): a blocked hit is cut by a flat `armour / 10` (owner ruling, provisional) rather than deleted, and the roll runs after perfect dodge and evasion. It is fed by the Shield offhand's line 1 only. **No Cap (owner ruling):** the block chance keeps climbing with the shield's own Mod line. formula-defense.md prints the order.",
+    "stun": null,
+    "stun_note": "`stun` is the lightning stun chance (elements.md lightning · C10): `Alignment × K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. **No Cap (owner ruling):** the two sources sum and the chance keeps climbing; the mace's line 1 is the published gear source (D-123).",
+    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together (D-112). `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright, and it binds on the Lck ratio alone — the `Perfect dodge %` line is defined in mods.json but no Base pool in bases.json offers it, so nothing lifts that ratio today. **`elem_res` (75) and `cdr` (80) are hard ceilings, not build targets** (D-124): a maxed single-stat build reaches only 48.45 / 57.375, so each Cap sits above its own build by intent, the same shape as the aspd Cap (500). **`alignment` has NO Cap (owner ruling):** the Dex-derived Elemental Alignment is an open-ended status gate and Element multiplier, and the defensive `Status Alignment resistance %` is a Mod line with its own range and no Cap. The player keeps the build's real value instead of a cut, which is new power booked on checks.md D34. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
   },
   "weapons": [
     {
@@ -1580,6 +1854,15 @@
     "note": "The two umbrella multipliers reserved for future sources. `global damage` multiplies outgoing damage once, after weak / Element counter / crit; `global defend` is the incoming step-7 `damage_taken_mult` bucket (combat.md section 2). Both start at x1.00 and no source grants either yet — a future skill or aura feeds one bucket, so the two never stack as separate multipliers. `global speed` (Haste) is the third reserved term: it scales the whole clock (cooldowns and final attack speed). **Player-only:** global speed affects the player alone and no mob ever carries Haste, even when mobs get their own skill lists."
   },
   "loot": {
+    "hunt_order": {
+      "note": "A zone's Hunt Order leans the three collectible streams — gear, herbs, junk — toward one of them by redistributing probability mass, never raising the total expected drops/kill, so drops/hr and the timeline stay put. Stones ride the elite/boss lines and are not a category. 'none' is the identity, so the measured bands are untouched by default.",
+      "shift_pct": 25,
+      "categories": [
+        "gear",
+        "herb",
+        "junk"
+      ]
+    },
     "base_drop_chance": 0.08,
     "filter": {
       "upgrade_margin_pct": 10,
@@ -1657,34 +1940,241 @@
       "level_30": 3.1,
       "level_60": 12.6,
       "level_90": 31.2,
-      "level_100": 40.2
+      "level_100": 40.2,
+      "level_120": 62.9,
+      "level_150": 109.7,
+      "level_180": 173.4,
+      "level_190": 198.8
     },
     "push_hr_levels_91_100": 9,
     "kill_rate_tolerance": 0.01
   },
   "road": {
     "links": [
-      { "a": "Eastgate", "b": "Millbrook", "zoneA": 1, "zoneB": 2, "kind": "ladder", "terrain": "river", "trip_min": 5 },
-      { "a": "Millbrook", "b": "Ashfall", "zoneA": 2, "zoneB": 3, "kind": "ladder", "terrain": "forest", "trip_min": 5 },
-      { "a": "Ashfall", "b": "Ironrow", "zoneA": 3, "zoneB": 4, "kind": "ladder", "terrain": "road", "trip_min": 5 },
-      { "a": "Ironrow", "b": "Wolf Cross", "zoneA": 4, "zoneB": 5, "kind": "ladder", "terrain": "mountain", "trip_min": 5 },
-      { "a": "Wolf Cross", "b": "Highspire", "zoneA": 5, "zoneB": 6, "kind": "ladder", "terrain": "moor", "trip_min": 5 },
-      { "a": "Highspire", "b": "Bonegate", "zoneA": 6, "zoneB": 7, "kind": "ladder", "terrain": "mountain", "trip_min": 5 },
-      { "a": "Bonegate", "b": "Frosthold", "zoneA": 7, "zoneB": 8, "kind": "ladder", "terrain": "forest", "trip_min": 5 },
-      { "a": "Frosthold", "b": "Vermolch", "zoneA": 8, "zoneB": 9, "kind": "ladder", "terrain": "river", "trip_min": 5 },
-      { "a": "Eastgate", "b": "Ashfall", "zoneA": 1, "zoneB": 3, "kind": "branch", "terrain": "mountain", "trip_min": 8 },
-      { "a": "Highspire", "b": "Frosthold", "zoneA": 6, "zoneB": 8, "kind": "branch", "terrain": "mountain", "trip_min": 8 },
-      { "a": "Wolf Cross", "b": "Bonegate", "zoneA": 5, "zoneB": 7, "kind": "branch", "terrain": "river", "trip_min": 12 }
+      {
+        "a": "Eastgate",
+        "b": "Millbrook",
+        "zoneA": 1,
+        "zoneB": 2,
+        "kind": "ladder",
+        "terrain": "forest",
+        "trip_min": 5
+      },
+      {
+        "a": "Millbrook",
+        "b": "Ashfall",
+        "zoneA": 2,
+        "zoneB": 3,
+        "kind": "ladder",
+        "terrain": "road",
+        "trip_min": 5
+      },
+      {
+        "a": "Ashfall",
+        "b": "Ironrow",
+        "zoneA": 3,
+        "zoneB": 4,
+        "kind": "ladder",
+        "terrain": "river",
+        "trip_min": 5
+      },
+      {
+        "a": "Ironrow",
+        "b": "Wolf Cross",
+        "zoneA": 4,
+        "zoneB": 5,
+        "kind": "ladder",
+        "terrain": "forest",
+        "trip_min": 5
+      },
+      {
+        "a": "Wolf Cross",
+        "b": "Highspire",
+        "zoneA": 5,
+        "zoneB": 6,
+        "kind": "ladder",
+        "terrain": "road",
+        "trip_min": 5
+      },
+      {
+        "a": "Highspire",
+        "b": "Bonegate",
+        "zoneA": 6,
+        "zoneB": 7,
+        "kind": "ladder",
+        "terrain": "river",
+        "trip_min": 5
+      },
+      {
+        "a": "Bonegate",
+        "b": "Frosthold",
+        "zoneA": 7,
+        "zoneB": 8,
+        "kind": "ladder",
+        "terrain": "forest",
+        "trip_min": 5
+      },
+      {
+        "a": "Frosthold",
+        "b": "Vermolch",
+        "zoneA": 8,
+        "zoneB": 9,
+        "kind": "ladder",
+        "terrain": "road",
+        "trip_min": 5
+      },
+      {
+        "a": "Vermolch",
+        "b": "Thornwake",
+        "zoneA": 9,
+        "zoneB": 10,
+        "kind": "ladder",
+        "terrain": "river",
+        "trip_min": 5
+      },
+      {
+        "a": "Thornwake",
+        "b": "Greyfen",
+        "zoneA": 10,
+        "zoneB": 11,
+        "kind": "ladder",
+        "terrain": "forest",
+        "trip_min": 5
+      },
+      {
+        "a": "Greyfen",
+        "b": "Saltmarrow",
+        "zoneA": 11,
+        "zoneB": 12,
+        "kind": "ladder",
+        "terrain": "road",
+        "trip_min": 5
+      },
+      {
+        "a": "Saltmarrow",
+        "b": "Emberhold",
+        "zoneA": 12,
+        "zoneB": 13,
+        "kind": "ladder",
+        "terrain": "river",
+        "trip_min": 5
+      },
+      {
+        "a": "Emberhold",
+        "b": "Duskmoor",
+        "zoneA": 13,
+        "zoneB": 14,
+        "kind": "ladder",
+        "terrain": "forest",
+        "trip_min": 5
+      },
+      {
+        "a": "Duskmoor",
+        "b": "Nettlecrag",
+        "zoneA": 14,
+        "zoneB": 15,
+        "kind": "ladder",
+        "terrain": "road",
+        "trip_min": 5
+      },
+      {
+        "a": "Nettlecrag",
+        "b": "Blackwater Reach",
+        "zoneA": 15,
+        "zoneB": 16,
+        "kind": "ladder",
+        "terrain": "river",
+        "trip_min": 5
+      },
+      {
+        "a": "Blackwater Reach",
+        "b": "Wyrmback",
+        "zoneA": 16,
+        "zoneB": 17,
+        "kind": "ladder",
+        "terrain": "forest",
+        "trip_min": 5
+      },
+      {
+        "a": "Wyrmback",
+        "b": "The Pale Spire",
+        "zoneA": 17,
+        "zoneB": 18,
+        "kind": "ladder",
+        "terrain": "road",
+        "trip_min": 5
+      },
+      {
+        "a": "Ashfall",
+        "b": "Wolf Cross",
+        "zoneA": 3,
+        "zoneB": 5,
+        "kind": "branch",
+        "terrain": "mountain",
+        "trip_min": 8
+      },
+      {
+        "a": "Highspire",
+        "b": "Frosthold",
+        "zoneA": 6,
+        "zoneB": 8,
+        "kind": "branch",
+        "terrain": "mountain",
+        "trip_min": 8
+      },
+      {
+        "a": "Thornwake",
+        "b": "Saltmarrow",
+        "zoneA": 10,
+        "zoneB": 12,
+        "kind": "branch",
+        "terrain": "mountain",
+        "trip_min": 8
+      },
+      {
+        "a": "Nettlecrag",
+        "b": "Wyrmback",
+        "zoneA": 15,
+        "zoneB": 17,
+        "kind": "branch",
+        "terrain": "mountain",
+        "trip_min": 8
+      }
     ],
     "link_rule": "A ladder link joins consecutive settlements and pays the purse. A branch link joins zone i to zone i+2: two of them are the mountain shortcut over a pass (8 min, 2 minutes cheaper than walking both ladder legs), and one is the 12-minute river detour, slower than the long way but safer and richer in trade. Every link carries its own zone pair — nothing reads zone order from an array index.",
     "trip_min": 5,
     "encounters_per_min": 1,
     "terrain": {
-      "road": { "ambush": 48, "caravan": 28, "pedlar": 16, "chest": 8 },
-      "river": { "ambush": 45, "caravan": 30, "pedlar": 15, "chest": 10 },
-      "forest": { "ambush": 61, "caravan": 19, "pedlar": 9, "chest": 11 },
-      "mountain": { "ambush": 70, "caravan": 15, "pedlar": 7, "chest": 8 },
-      "moor": { "ambush": 46, "caravan": 28, "pedlar": 13, "chest": 13 }
+      "road": {
+        "ambush": 48,
+        "caravan": 28,
+        "pedlar": 16,
+        "chest": 8
+      },
+      "river": {
+        "ambush": 45,
+        "caravan": 30,
+        "pedlar": 15,
+        "chest": 10
+      },
+      "forest": {
+        "ambush": 61,
+        "caravan": 19,
+        "pedlar": 9,
+        "chest": 11
+      },
+      "mountain": {
+        "ambush": 70,
+        "caravan": 15,
+        "pedlar": 7,
+        "chest": 8
+      },
+      "moor": {
+        "ambush": 46,
+        "caravan": 28,
+        "pedlar": 13,
+        "chest": 13
+      }
     },
     "terrain_rule": "Each terrain row holds absolute points that sum to 100, and no kind may reach 0 (ambush 45-70 · caravan 16-30 · pedlar 6-16 · chest 8-12) — a zero-ambush route would be free progress, which is a skip rather than a shortcut. Terrain tilts the encounter table; it is a mechanic, not decoration. Online encounters roll the link's own terrain row; offline rolls the base table, untilted.",
     "encounters": {
@@ -1727,7 +2217,7 @@
       "editable_in": "settlement"
     },
     "standing_per_trip_kills": 15,
-    "note": "The Road is opt-in. A ladder leg is 5 real minutes and carries 5 encounters (1 per Road minute); a branch leg is 8 (mountain shortcut) or 12 (river detour). C+D stay a content choice, not an income choice: only the 8 ladder links pay the purse, so the mint stays at most 24 gold a day (8 x 3 gold, once per link per day) against a junk-sell mint of 'thousands'; branch links pay no purse and grant Standing only where they arrive. Road pays no stones. A Circuit — an ordered list of links a player loops — does run offline (section 6 and D-133), rolling the untilted base table.",
+    "note": "The Road is opt-in. A ladder leg is 5 real minutes and carries 5 encounters (1 per Road minute); a branch leg is 8 (mountain shortcut) or 12 (river detour). C+D stay a content choice, not an income choice: only the 17 ladder links pay the purse, so the mint stays at most 51 gold a day (17 x 3 gold, once per link per day) against a junk-sell mint of thousands; branch links pay no purse and grant Standing only where they arrive. Road pays no stones. A Circuit — an ordered list of links a player loops — does run offline (section 6 and D-133), rolling the untilted base table.",
     "forfeit_kills": 120
   },
   "inventory": {
@@ -1975,13 +2465,13 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "hr1 28.1 → hr2-4 5.0 → after that 3.3 (low band) · keep-rate 1.95% low · 1.21% mid · 0.67% high · 0.31% high + full_lck",
+      "value": "hr1 27.8 → hr2-4 6.6 → after that 2.5 (low band) · keep-rate 1.98% low · 1.22% mid · 0.66% high · 0.24% high + full_lck",
       "expression": "measured — tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
     {
       "id": "F11",
-      "value": "0.30 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises",
+      "value": "0.28 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises",
       "expression": "Flat line per drop (high zone, after the 0.25 early-game weighting)",
       "status": "measured"
     },
@@ -2099,7 +2589,7 @@
     },
     "no_death": "the player cannot be killed by the opening: zone-1 mobs take minutes to kill a level-1 character, and Push returns them to camp at full HP"
   },
-  "doc_prose_lines_max": 1349,
+  "doc_prose_lines_max": 1348,
   "doc_prose": {
     "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
     "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",

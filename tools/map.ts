@@ -3,10 +3,10 @@
  * Map layer — the generated overlay of the settlement map (`tools/data/map.json`).
  *
  *   node tools/map.ts            help
- *   node tools/map.ts --write    write the overlay SVG (art/svg/ui-map-overlay.svg)
+ *   node tools/map.ts --write    write the overlay SVG (art/svg/map/map-overlay.svg)
  *   node tools/map.ts --checks   run M1-M7, exit 1 on FAIL
  *
- * The hand-drawn terrain background lives in `art/svg/ui-map-terrain.svg` and is not written here. This tool writes
+ * The hand-drawn terrain background lives in `art/svg/map/map-terrain.svg` and is not written here. This tool writes
  * only what is derived: link paths from node positions, terrain glyphs at their anchor, node marks
  * and an empty travel-marker group the client fills in. Node coordinates are **presentation only** —
  * the simulation reads node and link ids and nothing else, which M7 enforces (X33 · X47).
@@ -20,7 +20,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const MAP = readJson(path.join(ROOT, 'tools/data/map.json'));
 const E = readJson(path.join(ROOT, 'tools/data/engine.json'));
 const TOWN = readJson(path.join(ROOT, 'tools/data/town.json'));
-const OUT = path.join(ROOT, 'art/svg/ui-map-overlay.svg');
+const OUT = path.join(ROOT, 'art/svg/map/map-overlay.svg');
 
 const settlementIds = TOWN.settlements.map((s) => s.id);
 const engineLinks = E.road.links.map((l) => ({ id: `${l.zoneA}-${l.zoneB}`, a: l.a, b: l.b, terrain: l.terrain }));
@@ -133,6 +133,6 @@ if (args.includes('--checks')) {
   write();
 } else {
   console.log('map.ts — the generated settlement-map overlay');
-  console.log('  --write    write art/svg/ui-map-overlay.svg from tools/data/map.json');
+  console.log('  --write    write art/svg/map/map-overlay.svg from tools/data/map.json');
   console.log('  --checks   run M1-M7 (nodes, links, terrain, anchors, the presentation-only rule)');
 }

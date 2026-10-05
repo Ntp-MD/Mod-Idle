@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import { eng, E, sm, TOWN } from './engine/client';
   import { buildCharacter } from './sim/player';
-  import { newGame, tick, push, catchUp, carried, heldWeaponName } from './sim/game';
-  import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS } from './sim/skills';
-  import { modsOn, psMult } from './sim/curse';
+  import { newGame, tick, push, catchUpAsync, carried, heldWeaponName } from './sim/game';
+  import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow } from './sim/skills';
+  import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
   import { slotsUsed, slotsAvailable, pouchSlots, bagStacks } from './sim/slots';
   import SlotGrid from './ui/SlotGrid.svelte';
@@ -15,24 +15,27 @@
   } from './sim/town';
   import { craft, doCraft, stoneNames, stoneName, lineName, lineTier, type CraftOp, type Where } from './sim/craft';
   import { farm, farmLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
-  import { stashTabCount, deposit, withdraw } from './sim/town';
-  import { road, startTrip, linkReachable, purseReady, linkLabel } from './sim/road';
-  import { masteryLabel, dropBonusPct, masteryLevel } from './sim/mastery';
+  import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
+  import { road, startTrip, linkReachable, purseReady, linkLabel, startCircuit, stopCircuit, circuitValid } from './sim/road';
+  import { masteryLabel, dropBonusPct, masteryLevel, WEAPONS } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
   import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
   import { mulberry32 } from './engine/client-helpers';
-  import { writeSave, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, type SlotName, type Snapshot } from './state/save';
+  import { writeSave, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
   import { FILTER_SLOTS, RARITY_CHOICES, ruleFor, setRule, describeRule } from './sim/filter';
   import { equipFromBag, gearModOf } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
   import { target as goalTarget, describe as describeGoal } from './sim/goal';
   import { elementIcon, mobIcon, skillIcon } from './icon';
-  import type { GameState } from './sim/types';
+  // the settlement map: hand-drawn terrain under the generated overlay (both presentation-only)
+  import mapTerrain from '../../art/svg/map/map-terrain.svg?url';
+  import mapOverlay from '../../art/svg/map/map-overlay.svg?url';
+  import type { GameState, Item } from './sim/types';
   import type { StatKey } from './engine/client';
   import type { Statuses } from './sim/combat';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
-  const TABS = ['main', 'skills', 'town', 'farm', 'zones', 'save'] as const;
+  const TABS = ['main', 'skills', 'town', 'map', 'farm', 'zones', 'save'] as const;
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
   let gameState = $state<GameState>(newGame());
@@ -41,7 +44,29 @@
   let tab: 'main' | 'skills' | 'town' | 'farm' | 'zones' | 'save' = $state('main');
   let saveNote = $state('');
 
-  let c = $derived(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills)));
+  /** The away-window report (parking: "Offline report on return"), filled on mount catch-up + Load. */
+  let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; laps: number; quality: string } | null>(null);
+
+  /** A small counter snapshot so the report diffs the away window instead of showing lifetime totals. */
+  function snapCounters(s: GameState) {
+    return {
+      kills: s.counters.kills, drops: s.counters.drops, junk: s.counters.junk, gold: s.counters.gold,
+      stones: Object.values(s.counters.stones).reduce((a, b) => a + b, 0),
+      level: s.player.level, laps: s.road?.laps ?? 0, quality: eng.zoneById(s.zone).quality,
+    };
+  }
+  type Snap = ReturnType<typeof snapCounters>;
+  function buildAwayReport(before: Snap, mins: number, secs: number, capped: boolean) {
+    const a = snapCounters(gameState);
+    return {
+      mins, secs, capped,
+      kills: a.kills - before.kills, drops: a.drops - before.drops, junk: a.junk - before.junk,
+      gold: a.gold - before.gold, stones: a.stones - before.stones, levels: a.level - before.level,
+      laps: a.laps - before.laps, quality: a.quality,
+    };
+  }
+
+  let c = $derived(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points));
   let zone = $derived(eng.zoneById(gameState.zone));
   let minutes = $derived(Math.floor(gameState.counters.playSec / 60));
   let kph = $derived(gameState.counters.playSec > 0 ? (gameState.counters.kills / gameState.counters.playSec) * 3600 : 0);
@@ -65,23 +90,83 @@
       .filter(Boolean) as SlotEntry[],
   );
 
+  let settings = $state<ClientSettings>({ ...DEFAULT_SETTINGS });
+  function setSetting<K extends keyof ClientSettings>(k: K, v: ClientSettings[K]) {
+    settings[k] = v;
+    void writeSettings(settings);
+  }
+  /** Number display respects the Settings choice; `short` uses compact notation (12.3k). */
+  function fmtNum(n: number): string {
+    return settings.numberFormat === 'short'
+      ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+      : Math.round(n).toLocaleString('en-US');
+  }
+
+  /** The current zone's Hunt Order; 'none' removes the lean. Shifts between streams, never the total. */
+  function setHuntOrder(v: 'gear' | 'herb' | 'junk' | 'none') {
+    if (!gameState.huntOrder) gameState.huntOrder = {};
+    if (v === 'none') delete gameState.huntOrder[gameState.zone];
+    else gameState.huntOrder[gameState.zone] = v;
+    gameState = { ...gameState };
+  }
+
+  /** Spend or refund stat points. Takes effect on the next tick, so the sheet works mid-combat (D-141). */
+  function allocate(k: StatKey, delta: number) {
+    const p = gameState.player;
+    if (delta > 0) {
+      const n = Math.min(delta, p.statPoints);
+      if (n <= 0) return;
+      p.points[k] += n; p.statPoints -= n;
+    } else {
+      const n = Math.min(-delta, p.points[k]);
+      if (n <= 0) return;
+      p.points[k] -= n; p.statPoints += n;
+    }
+    gameState = { ...gameState };
+  }
+  /** Free Respec — town only (the button is on the town panel). Hands every allocated point back. */
+  function respec() {
+    const p = gameState.player;
+    let total = 0;
+    for (const k of STATS) { total += p.points[k]; p.points[k] = 0; }
+    p.statPoints += total;
+    gameState = { ...gameState };
+  }
+
+  /** §11 field label: species lowercase + tier suffix; a named boss reads its own name; no body class. */
+  function fieldLabel(m: { species: string; kind: string }): string {
+    if (m.kind.startsWith('Boss')) return `${m.kind.replace(/^Boss · /, '')}(Boss)`;
+    if (m.kind === 'Elite') return `${m.species.toLowerCase()}(Elite)`;
+    return m.species.toLowerCase();
+  }
+
   function step() {
-    const next = { ...gameState };
-    tick(next, statuses);
-    gameState = next;
+    // `tick` mutates the state in place. `gameState` is a deep `$state` proxy, so its fine-grained
+    // signals fire on their own — no need to clone the whole root and reassign, which used to
+    // invalidate every `$derived` (bag sorts, character rebuild) once a second on an idle tick.
+    tick(gameState, statuses);
   }
 
   onMount(() => {
-    // monotonic clock: catch up on the time between sessions, capped by the save rule
-    const away = (Date.now() - (gameState.lastSavedAt || Date.now())) / 1000;
-    if (away > 5 && away < 7 * 24 * 3600) {
-      const r = catchUp(gameState, statuses, away);
-      push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated${r.capped ? ' (capped at the offline limit)' : ''}`);
-      gameState = { ...gameState };
-    }
-    loadSnaps();
-    const timer = setInterval(() => { if (running) step(); }, 1000);
-    return () => clearInterval(timer);
+    let timer: ReturnType<typeof setInterval> | null = null;
+    let disposed = false;
+    (async () => {
+      settings = await readSettings();
+      // monotonic clock: catch up on the time between sessions, capped by the save rule. The catch-up
+      // yields between slices so a long absence cannot block first paint.
+      const away = (Date.now() - (gameState.lastSavedAt || Date.now())) / 1000;
+      if (away > 5 && away < 7 * 24 * 3600) {
+        const before = snapCounters(gameState);
+        const r = await catchUpAsync(gameState, statuses, away);
+        awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped) : null;
+        push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated${r.capped ? ' (capped at the offline limit)' : ''}`);
+        gameState = { ...gameState };
+      }
+      loadSnaps();
+      // the clock is armed only after the catch-up, so a slice boundary cannot add an extra tick
+      if (!disposed) timer = setInterval(() => { if (running) step(); }, 1000);
+    })();
+    return () => { disposed = true; if (timer) clearInterval(timer); };
   });
 
   function equip(index: number) {
@@ -145,7 +230,9 @@
     statuses = {};
     gameState = { ...s };
     const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
-    const r = catchUp(gameState, statuses, away);
+    const before = snapCounters(gameState);
+    const r = await catchUpAsync(gameState, statuses, away);
+    awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped) : null;
     saveNote = `Loaded ${slot} — ${r.simulated} sec caught up`;
     gameState = { ...gameState };
   }
@@ -278,6 +365,42 @@
     gameState = { ...gameState };
   }
 
+  function doDepositAll(tab: number) {
+    const n = depositMany(gameState, gameState.bag.map((_, i) => i), tab);
+    townNote = n ? `Deposited ${n} piece${n === 1 ? '' : 's'} into tab ${tab + 1}` : 'Nothing to deposit — every piece is locked or the bag is empty';
+    gameState = { ...gameState };
+  }
+
+  function doWithdrawAll(tab: number) {
+    const n = withdrawMany(gameState, tab, (gameState.stash[tab] || []).map((_, i) => i));
+    townNote = n ? `Withdrew ${n} piece${n === 1 ? '' : 's'} from tab ${tab + 1}` : 'Nothing to withdraw — every piece is locked';
+    gameState = { ...gameState };
+  }
+
+  /** A locked piece is skipped by bulk deposit/withdraw, the bag swap and auto-dissolve. */
+  function toggleLock(item: Item) {
+    item.locked = !item.locked;
+    gameState = { ...gameState };
+  }
+
+  /** The Circuit editor's working list, validated against the Road rules before it can start. */
+  let circuitDraft = $state<number[]>([]);
+  const draftCheck = $derived(circuitValid(gameState, circuitDraft));
+  function toggleCircuitLink(i: number) {
+    circuitDraft = circuitDraft.includes(i) ? circuitDraft.filter((x) => x !== i) : [...circuitDraft, i];
+  }
+  function doStartCircuit() {
+    const r = startCircuit(gameState, circuitDraft);
+    townNote = r.ok ? 'Circuit set — the Road will loop it until stopped' : `Circuit refused: ${r.why}`;
+    if (r.ok) circuitDraft = [];
+    gameState = { ...gameState };
+  }
+  function doStopCircuit() {
+    const r = stopCircuit(gameState);
+    townNote = r.ok ? 'Circuit cleared' : `Cannot stop: ${r.why}`;
+    gameState = { ...gameState };
+  }
+
   function doTrip(i: number) {
     const r = startTrip(gameState, i);
     townNote = r.ok ? `Walking ${linkLabel(i)} · ${road.R.trip_min} min, ${road.encountersPerTrip} encounters` : `Cannot start: ${r.why}`;
@@ -389,14 +512,22 @@
   <div class="main">
     <section class="panel region scene">
       <h2>Combat scene · {zone.name}</h2>
+      {#if awayReport}
+        <div style="display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;border:1px solid #8a7048;border-radius:6px;padding:.4rem .6rem;margin:.3rem 0;font-size:.85rem">
+          <button onclick={() => (awayReport = null)} aria-label="Dismiss" style="background:none;border:none;cursor:pointer;color:inherit">✕</button>
+          <strong>Welcome back</strong>
+          <span>away {awayReport.mins} min · {awayReport.secs} sec simulated{awayReport.capped ? ' (capped at the offline limit)' : ''}</span>
+          <span>+{fmtNum(awayReport.kills)} kills · {fmtNum(awayReport.drops)} items · {fmtNum(awayReport.stones)} stones · {fmtNum(awayReport.junk)} junk · {fmtNum(awayReport.gold)} gold{awayReport.levels ? ` · +${awayReport.levels} level${awayReport.levels > 1 ? 's' : ''}` : ''}{awayReport.laps ? ` · ${awayReport.laps} road lap${awayReport.laps > 1 ? 's' : ''}` : ''} · quality floor {awayReport.quality}</span>
+        </div>
+      {/if}
     <div class="bars">
       <!-- character-sheet.md: Energy Shield sits above HP while it is present -->
       {#if c.es > 0}
         <label>Energy Shield <progress class="es" max={c.es} value={gameState.player.es}></progress> {Math.round(gameState.player.es)} / {Math.round(c.es)}</label>
       {/if}
-      <label>HP <progress class="hp" max={c.maxHp} value={gameState.player.hp}></progress> {Math.round(gameState.player.hp)} / {Math.round(c.maxHp)} (+{c.hpRegen.toFixed(0)}/sec)</label>
-      <label>Mana <progress class="mana" max={c.maxMana} value={gameState.player.mana}></progress> {Math.round(gameState.player.mana)} / {Math.round(c.maxMana)}</label>
-      <label>XP <progress class="xp" max={eng.xpToNext(gameState.player.level)} value={gameState.player.xp}></progress> {gameState.player.xp} / {Math.round(eng.xpToNext(gameState.player.level))}</label>
+      <label>HP <progress class="hp" max={c.maxHp} value={gameState.player.hp}></progress> {fmtNum(gameState.player.hp)} / {fmtNum(c.maxHp)} (+{c.hpRegen.toFixed(0)}/sec)</label>
+      <label>Mana <progress class="mana" max={c.maxMana} value={gameState.player.mana}></progress> {fmtNum(gameState.player.mana)} / {fmtNum(c.maxMana)}</label>
+      <label>XP <progress class="xp" max={eng.xpToNext(gameState.player.level)} value={gameState.player.xp}></progress> {fmtNum(gameState.player.xp)} / {fmtNum(eng.xpToNext(gameState.player.level))}</label>
       <!-- character-sheet.md's main panel: HP, Mana and Attack speed are the three always shown; Weight lives on the character bag panel (D-126) -->
       <span>Attack speed {c.hitsPerSec.toFixed(2)} hits/sec <small>(Cap {E.caps.aspd})</small></span>
     </div>
@@ -422,6 +553,15 @@
       </label>
     </p>
     <p class="state">
+      <label class="travel">Hunt order
+        <button class={(gameState.huntOrder?.[gameState.zone] || 'none') === 'none' ? 'active' : ''} onclick={() => setHuntOrder('none')}>balanced</button>
+        <button class={gameState.huntOrder?.[gameState.zone] === 'gear' ? 'active' : ''} onclick={() => setHuntOrder('gear')}>gear</button>
+        <button class={gameState.huntOrder?.[gameState.zone] === 'herb' ? 'active' : ''} onclick={() => setHuntOrder('herb')}>herbs</button>
+        <button class={gameState.huntOrder?.[gameState.zone] === 'junk' ? 'active' : ''} onclick={() => setHuntOrder('junk')}>junk</button>
+        <small>Lean this zone's drops toward one stream. It moves weight between gear, herbs and junk — never the total, so nothing the timeline is priced on shifts. Stones are not a category.</small>
+      </label>
+    </p>
+    <p class="state">
       {#if gameState.phase === 'camp'}Pushed — recovering at camp for {gameState.campSec} sec. No death, no loss: time is the only cost.{:else}Fighting · {c.hitsPerSec.toFixed(2)} hits/sec with {c.weaponName}, {c.weaponElement ? `carrying ${c.weaponElement}` : 'carrying no Element'}{/if}
     </p>
     <table>
@@ -430,8 +570,7 @@
         {#each gameState.group as m}
           <tr>
             <td>
-              <span class="mob-name"><img src={mobIcon(m.species)} alt="" aria-hidden="true" />{m.species}</span><br />
-              <small>{m.kind}</small>
+              <span class="mob-name" class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}><img src={mobIcon(m.species)} alt="" aria-hidden="true" />{fieldLabel(m)}</span>
             </td>
             <td>{m.kind}</td>
             <td><span class="mobbar" style={'width:' + bar(m.hp, m.hpMax)}></span> {Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</td>
@@ -467,10 +606,20 @@
       <h3>Worn ({gameState.gear.filter(Boolean).length} / {E.stat.item_slots}) — hover a slot on the body to read it</h3>
       <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="doll" />
 
+      <p><small>Levels grant <b>points</b>, not stats: unspent <b>{gameState.player.statPoints}</b> · tree points banked <b>{gameState.player.treePoints}</b>. <label><input type="checkbox" checked={gameState.player.autoSpend} onchange={() => { gameState.player.autoSpend = !gameState.player.autoSpend; gameState = { ...gameState }; }} /> auto-allocate evenly (idle default)</label> — turn it off to bank points and spend them by hand. Respec is free, at the town Counterhand.</small></p>
       <table class="stats">
         <tbody>
           {#each STATS as k}
-            <tr><td>{k.toUpperCase()}</td><td>{c.core[k].toFixed(1)}</td></tr>
+            <tr>
+              <td>{k.toUpperCase()}</td>
+              <td>{c.core[k].toFixed(1)}</td>
+              <td>
+                <button onclick={() => allocate(k, -1)} disabled={gameState.player.autoSpend || !gameState.player.points[k]}>−</button>
+                <button onclick={() => allocate(k, 1)} disabled={gameState.player.autoSpend || gameState.player.statPoints <= 0}>+</button>
+                <button onclick={() => allocate(k, gameState.player.statPoints)} disabled={gameState.player.autoSpend || gameState.player.statPoints <= 0}>Max</button>
+                <small> {gameState.player.points[k]} pts</small>
+              </td>
+            </tr>
           {/each}
           <tr><td>Weapon</td><td>{c.weaponName} · {masteryLabel(c.weaponMastery)} · drop bonus {dropBonusPct(gameState)}%</td></tr>
           <tr><td>Attack speed</td><td>{c.aspd.toFixed(1)} aspd · {c.hitsPerSec.toFixed(2)} hits/sec (Cap {E.caps.aspd})</td></tr>
@@ -583,7 +732,7 @@
       </button>
     </div>
     <p><small>{skillNote || `Six sets are stored and the game picks one by zone. A Push brings the Main set back, and a skill already counting its cooldown keeps counting.`}</small></p>
-    <p><small>The game presses the first slot whose cooldown is ready and whose mana fits the usable pool. You only arrange the order. Reserved by auras: {reserved}% of the pool, so {Math.round(c.maxMana * (1 - reserved / 100))} mana stays usable.</small></p>
+    <p><small>The game presses the first slot whose cooldown is ready and whose mana fits the usable pool. You only arrange the order. A percentage skill charges that share of the usable pool; a flat skill charges its own units, which grow with its level and with the pool. Reserved by auras: {reserved}% of the pool, so {Math.round(c.maxMana * (1 - reserved / 100))} mana stays usable.</small></p>
     <table>
       <thead><tr><th>#</th><th>Skill</th><th>Level</th><th>cd → eff</th><th>Mana</th><th>Next in</th><th>Place</th></tr></thead>
       <tbody>
@@ -596,8 +745,8 @@
             </td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
             <td>{k && id ? `${k.cd}s → ${skillCd(gameState.skills, id, c.cdr).toFixed(2)}s` : ''}</td>
-            <td>{k ? k.mana : ''}</td>
-            <td>{id ? `${(gameState.skills.cd[id] || 0).toFixed(1)}s` : ''}</td>
+            <td>{k && id ? manaNow(c, gameState.skills, id) : ''}</td>
+            <td>{id ? `${(gameState.skills.cd[id] || 0).toFixed(1)}s${(gameState.skills.buffUp[id] || 0) > 0 ? ` · window ${gameState.skills.buffUp[id]}s` : ''}` : ''}</td>
             <td>
               <select value={id || ''} onchange={(e) => setSlot(i, (e.target as HTMLSelectElement).value)}>
                 <option value="">empty</option>
@@ -626,7 +775,7 @@
     </table>
     <h3>Buff track (re-presses itself, takes no slot)</h3>
     {#each ownedBuffs as k}
-      <label><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.duration} on / {k.cd}s cd · {k.mana} · {effectLine(k) || k.effect}</label><br />
+      <label><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.duration} on / {k.cd}s cd · {manaNow(c, gameState.skills, k.id)} · {effectLine(k) || k.effect}</label><br />
     {:else}
       <p><small>None owned.</small></p>
     {/each}
@@ -637,6 +786,31 @@
     {:else}
       <p><small>None owned.</small></p>
     {/each}
+
+    <h3>Mastery ladder · the whole roster</h3>
+    <p><small>Only the held weapon earns XP (4 a kill), but the account keeps the best value any slot reached. The fight panel shows just the held one; this is every weapon.</small></p>
+    <table>
+      <thead><tr><th>Weapon</th><th>Mastery</th><th>Drop bonus</th></tr></thead>
+      <tbody>
+        {#each WEAPONS as w}
+          {@const lv = masteryLevel(gameState, w.name)}
+          <tr>
+            <td>{w.name}</td>
+            <td>{masteryLabel(lv)}</td>
+            <td>{lv >= 5 ? `+${((lv - 4) * 0.5).toFixed(1)}%` : '—'}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+
+    <h3>Curable curses · target-side lines a press can put on a mob</h3>
+    <ul>
+      {#each curableRows() as k}
+        <li>{k.name} · {effectLine(k) || k.effect}</li>
+      {:else}
+        <li><small>None.</small></li>
+      {/each}
+    </ul>
   </section>
 {/if}
 
@@ -649,6 +823,10 @@
     <p>Gold {gameState.counters.gold.toFixed(1)} · junk unsold {junkTotal} ({Object.entries(gameState.junkByRarity).map(([r, n]) => `${r} ${n}`).join(' · ') || 'none'}) · stones {stonesLine()}</p>
     <button onclick={doSell} disabled={junkTotal === 0}>Sell all junk here</button>
     <p><small>Junk sells for its rarity price and nothing else mints gold except a Road event. Rejected gear dissolved for Reroll value stones instead — the two media never mix.</small></p>
+
+    <h3>Respec · free</h3>
+    <p><small>Hand every allocated stat point back and re-spend them. Free, and only here in a settlement — this game has no death, so a locked build would be a worse punishment than a lost fight.</small></p>
+    <button onclick={respec} disabled={!STATS.some((k) => gameState.player.points[k])}>Respec — refund all points</button>
 
     <h3>Standing</h3>
     <p>Tier {standingTier(gameState, town.id)} / {TOWN.standing.tiers.length} · {(standingShare(gameState, town.id) * 100).toFixed(1)}% of the {town.budget_hr} hr of zone {town.zone} kills that Tier I asks for. Standing buys stock lines, set slots and cosmetics — never a stat, a Mod, a stone or anything mob_HP reads.</p>
@@ -670,6 +848,7 @@
         {/each}
       </tbody>
     </table>
+    <p><small>Curio pedlar — today's rolled prices {gameState.pedlar.minutes.join(' / ')} minutes, {gameState.pedlar.bought} of {gameState.pedlar.minutes.length} bought; restocks at the next game day.</small></p>
 
     <h3>Guild board · {gameState.town.tasks.length} slots</h3>
     <table>
@@ -711,7 +890,9 @@
       {#each Array(tabs) as _, t}
         <div class="tab">
           <b>Tab {t + 1}</b>
+          <button onclick={() => doWithdrawAll(t)}>Withdraw all unlocked</button>
           {#each gameState.stash[t] || [] as item, i}
+            <button class={item.locked ? 'active' : ''} onclick={() => toggleLock(item)} title="Lock / unlock this piece">{item.locked ? 'unlock' : 'lock'}</button>
             <button onclick={() => doWithdraw(t, i)}>{item.base} ({item.quality} {item.tier})</button>
           {:else}
             <span class="dim"> empty</span>
@@ -720,8 +901,10 @@
       {/each}
     {/if}
     {#if gameState.bag.length}
-      <p><small>Deposit from the bag: {gameState.bag.length} / {E.inventory.adventure_slots} carried.</small></p>
-      {#each gameState.bag.slice(0, 6) as item, i}
+      <p><small>Deposit from the bag: {gameState.bag.length} / {E.inventory.adventure_slots} carried. A locked piece stays.</small></p>
+      <button onclick={() => doDepositAll(0)}>Deposit all unlocked → tab 1</button>
+      {#each gameState.bag as item, i}
+        <button class={item.locked ? 'active' : ''} onclick={() => toggleLock(item)} title="Lock / unlock this piece">{item.locked ? 'unlock' : 'lock'}</button>
         <button onclick={() => doDeposit(i, 0)}>{item.base} → tab 1</button>
       {/each}
     {/if}
@@ -765,8 +948,16 @@
           {/each}
         </tbody>
       </table>
+      {#if !gameState.collector.done[colSet.id]}
+        <p><small>Still hunting: {colSet.parsed.filter((p: any) => heldCount(gameState, colSet.id, p.name) === 0).map((p: any) => `${p.name} (${p.slot})`).join(' · ') || 'every piece is in hand — turn it in.'} Frames roll even-weighted across the whole world, so the target is the {colSet.quality} quality and the {colSet.school} school, not one zone.</small></p>
+      {/if}
       <button onclick={doTurnIn} disabled={!setUnlocked(gameState, colSet) || gameState.collector.done[colSet.id]}>turn in the set</button>
       <p><small>Reward: {colSet.reward} · {colSet.rule} · the Collector pays no gold and no Mod anywhere (T14).</small></p>
+    {/if}
+
+    {#if gameState.grants.filter_presets || gameState.grants.titles.length || gameState.grants.banners.length}
+      <h3>Collector grants</h3>
+      <p><small>{gameState.grants.filter_presets} extra filter preset{gameState.grants.filter_presets === 1 ? '' : 's'} · {stashTabCount(gameState)} stash tabs{gameState.grants.titles.length ? ` · titles: ${gameState.grants.titles.join(', ')}` : ''}{gameState.grants.banners.length ? ` · banners: ${gameState.grants.banners.join(', ')}` : ''}.</small></p>
     {/if}
 
     <h3>Crafting bench · paid in stones, never gold</h3>
@@ -876,6 +1067,10 @@
     <label><input type="checkbox" checked={gameState.farm.autoUse.mana} onchange={() => { gameState.farm.autoUse.mana = !gameState.farm.autoUse.mana; gameState = { ...gameState }; }} /> Mana line below
       <input type="number" value={gameState.farm.threshold.mana} min="1" max="99" onchange={(e) => { gameState.farm.threshold.mana = Number((e.target as HTMLInputElement).value); gameState = { ...gameState }; }} />%
     </label>
+    <h3>Auto-farm</h3>
+    <label><input type="checkbox" checked={gameState.farm.autoFarm.harvest} onchange={() => { gameState.farm.autoFarm.harvest = !gameState.farm.autoFarm.harvest; gameState = { ...gameState }; }} /> Auto-harvest ready plots</label>
+    <label><input type="checkbox" checked={gameState.farm.autoFarm.plant} onchange={() => { gameState.farm.autoFarm.plant = !gameState.farm.autoFarm.plant; gameState = { ...gameState }; }} /> Auto-plant empty plots (uses one herb as the seed)</label>
+    <label><input type="checkbox" checked={gameState.farm.autoFarm.brew} onchange={() => { gameState.farm.autoFarm.brew = !gameState.farm.autoFarm.brew; gameState = { ...gameState }; }} /> Auto-brew affordable draughts</label>
     <p><small>Shared cooldown {farm.P.shared_cooldown_sec} sec · {farm.P.max_uses_per_fight} uses a fight · {farm.P.boss_suppressed ? 'suppressed entirely on bosses' : ''} · a condensed bottle is {farm.P.condensed.effect_mult}× and weighs {farm.P.condensed.weight} against {farm.P.weight} loose.</small></p>
     <p>{farmNote}</p>
   </section>
@@ -905,6 +1100,33 @@
       </tbody>
     </table>
     <p><small>A mob spawns at your level clamped into its zone, so these HP figures are the two ends of a linear curve the engine interpolates between.</small></p>
+  </section>
+{/if}
+
+{#if tab === 'map'}
+  <section class="panel">
+    <h2>Map</h2>
+    <p><small>The terrain background is hand-drawn; the overlay (nodes, links, terrain glyphs) is generated by <code>node tools/map.ts --write</code> from the map data file. Coordinates are presentation only — the simulation reads ids (X33 · M7).</small></p>
+    <div class="map-frame">
+      <img src={mapTerrain} alt="Terrain" />
+      <img src={mapOverlay} alt="Settlements, roads and terrain features" />
+    </div>
+
+    <h3>Circuit · the Road on a loop</h3>
+    {#if gameState.road?.circuit.length}
+      <p><small>Walking a {gameState.road.circuit.length}-link Circuit · lap {gameState.road.laps} · leg {gameState.road.legIndex + 1} of {gameState.road.circuit.length}.</small></p>
+      <button onclick={doStopCircuit}>Stop the Circuit</button>
+    {:else}
+      <p><small>Stand in a settlement, pick links in order, and the Road will loop them — the Circuit must start where you stand and each link must meet the next. {draftCheck.ok ? 'Ready to start.' : (draftCheck.why ? draftCheck.why : 'Pick at least one link.')}</small></p>
+      <div>
+        {#each E.road.links as _l, i}
+          <button class={circuitDraft.includes(i) ? 'active' : ''} onclick={() => toggleCircuitLink(i)}>{linkLabel(i)}</button>
+        {/each}
+      </div>
+      <button onclick={doStartCircuit} disabled={!draftCheck.ok}>Start the Circuit ({circuitDraft.length} link{circuitDraft.length === 1 ? '' : 's'})</button>
+      {#if circuitDraft.length}<button onclick={() => (circuitDraft = [])}>Clear</button>{/if}
+    {/if}
+    <p>{townNote}</p>
   </section>
 {/if}
 
@@ -939,6 +1161,24 @@
       </tbody>
     </table>
     <p>{snapNote}</p>
+
+    <h2>Settings</h2>
+    <p><small>Client-only and shared by all three slots — these never enter a save file, and no `engine.json` constant is shadowed here. Automation lives with what it drives: potion auto-use and auto-farm on the Farm tab, the bag filter on the Main tab, presets on the Skills tab.</small></p>
+    <label>Number format
+      <select value={settings.numberFormat} onchange={(e) => setSetting('numberFormat', (e.target as HTMLSelectElement).value as 'plain' | 'short')}>
+        <option value="plain">plain — 12,345</option>
+        <option value="short">short — 12.3k</option>
+      </select>
+    </label>
+    <label><input type="checkbox" checked={settings.offlineReport} onchange={(e) => setSetting('offlineReport', (e.target as HTMLInputElement).checked)} /> Show the welcome-back report after an away period</label>
+    <label>Auto-dissolve drops at or below
+      <select value={gameState.autoDissolveRarity ?? 'off'} onchange={(e) => { gameState.autoDissolveRarity = (e.target as HTMLSelectElement).value as 'off' | 'Common' | 'Rare'; gameState = { ...gameState }; }}>
+        <option value="off">off — keep every drop for a decision</option>
+        <option value="Common">Common — dissolve Common into Reroll stones</option>
+        <option value="Rare">Rare — dissolve Common and Rare</option>
+      </select>
+    </label>
+    <p><small>Auto-dissolve turns a piece into Reroll stones, never gold — the Counterhand is still the only place junk becomes gold. A locked or Collector-held piece is spared.</small></p>
   </section>
 {/if}
 
@@ -948,6 +1188,10 @@
   .meta { color: var(--dim); }
   button.active { border-color: var(--good); color: var(--good); }
   .panel { padding: .8rem; }
+  /* the map: the generated overlay sits exactly on top of the hand-drawn terrain */
+  .map-frame { position: relative; max-width: 900px; }
+  .map-frame img { width: 100%; display: block; }
+  .map-frame img + img { position: absolute; inset: 0; }
 
   /* the main screen: the fight on top of the two bags, the sheet as a sidebar that stays put */
   .main {
@@ -1004,6 +1248,8 @@
   .mobbar { display: inline-block; height: 8px; background: var(--hp); margin-right: .4rem; vertical-align: middle; }
   .mob-name, .element-label, .skill-label { display: inline-flex; align-items: center; gap: .35rem; }
   .mob-name img { width: 1.25rem; height: 1.25rem; object-fit: contain; }
+  .mob-name.elite { color: #b98cff; }
+  .mob-name.boss { color: #ff6b6b; }
   .element-list { display: flex; flex-wrap: wrap; gap: .25rem .5rem; }
   .element-label { font-size: .72rem; }
   .element-label img, .skill-label img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex: none; }

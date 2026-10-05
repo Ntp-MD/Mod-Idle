@@ -210,12 +210,18 @@ function measureBand(band: any, opts: any = {}) {
   };
 }
 
-const ALL = () => BAND_KEYS.map((b: any) => measureBand(b));
+// The measurement is pure and CPU-heavy (a Monte Carlo over seeds), and `--checks` reads it twice —
+// once for the gates and once when the writer renders the block. Memoize so the sim runs once per
+// process while both readers see the identical rows.
+let _all: any[] | undefined;
+const ALL = () => (_all ??= BAND_KEYS.map((b: any) => measureBand(b)));
 
 // ---------------------------------------------------------------- the Base-bias experiment (T15)
 
 /** towns.md section 4 wants per-settlement Base weights. This is what a weight would cost. */
+let _bias: any[] | undefined;
 function biasExperiment() {
+  if (_bias) return _bias;
   const school = (b: any) => (SCHOOL[b] === 'armour_flat' ? 'armored' : SCHOOL[b] === 'evasion_flat' ? 'balanced' : 'cloth');
   const scenarios = [
     { label: 'no bias (equal frames, published rule)', bias: null },
@@ -228,10 +234,10 @@ function biasExperiment() {
       bias: { frame_weight: (b: any) => (school(b.name) === 'cloth' ? 2.5 : school(b.name) === 'armored' ? 0.4 : 1) },
     },
   ];
-  return scenarios.map((s: any) => {
+  return (_bias = scenarios.map((s: any) => {
     const m = measureBand('high', { bias: s.bias, trials: TRIALS });
     return { label: s.label, keepRate: m.keepRate, perHr: m.perHr, avgScore: m.avgScore };
-  });
+  }));
 }
 
 // ---------------------------------------------------------------- generated block
@@ -332,6 +338,8 @@ function sync() {
 
 // ---------------------------------------------------------------- gates
 
+import { huntReweight } from '../engine/loot.ts';
+
 function gates(rows: any, bias: any) {
   const out: any[] = [];
   const add = (id: any, ok: any, detail: any) => out.push({ id, ok, detail });
@@ -391,6 +399,19 @@ function gates(rows: any, bias: any) {
   const carried = (id: any) => (E.f_rows_carried.find((r: any) => r.id === id) || {}).value || '';
   add('LT13', carried('F4').includes(rows[2].keepRate.toFixed(2)) && carried('F11').includes(rows[2].flatPerDrop.toFixed(2)),
     `F4 and F11 print this run's numbers (${carried('F4').slice(0, 28)}… / ${carried('F11').slice(0, 20)}…) — run \`node tools/loot.ts --sync\` if this FAILs`);
+
+  // Hunt Order (owner rule): 'none' is the identity and every lean conserves the total expected
+  // drops/kill, so a zone's leaned weights can never raise the drop rate the timeline is priced on.
+  const HO = L.hunt_order || { shift_pct: 0, categories: [] };
+  const sample = { gear: 0.08, herb: 0.17, junk: 0.3 };
+  const sum = (x: any) => x.gear + x.herb + x.junk;
+  const none = huntReweight(sample, 'none', HO.shift_pct);
+  const identity = none.gear === sample.gear && none.herb === sample.herb && none.junk === sample.junk;
+  const leans = HO.categories.map((c: any) => ({ c, r: huntReweight(sample, c, HO.shift_pct) }));
+  const conserved = leans.every(({ r }: any) => Math.abs(sum(r) - sum(sample)) < 1e-9);
+  const leaning = leans.every(({ c, r }: any) => r[c] > sample[c]);
+  add('LT14', identity && conserved && leaning && leans.length === 3,
+    `Hunt Order: 'none' is the identity, each lean raises its own stream, and every lean conserves ${sum(sample).toFixed(2)} expected drops/kill across gear · herb · junk${!identity ? ' · NONE NOT IDENTITY' : ''}${!conserved ? ' · TOTAL NOT CONSERVED' : ''}${!leaning ? ' · LEAN NOT RAISED' : ''}${leans.length !== 3 ? ' · CATEGORIES != 3' : ''}`);
 
   return out;
 }

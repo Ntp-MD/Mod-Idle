@@ -75,12 +75,14 @@ function calc() {
   const build = flags.build != null ? String(flags.build) : 'glass';
   const ref = M.referenceBases()[build] || M.referenceBases().glass;
   console.log(`# Skill workshop — ${build} reference (basis phys ${Math.round(ref.phys)} · basis magic ${Math.round(M.basisOf({ basis: 'magic' } as any, ref))}) · skill level ${level} · CDR ${cdrPct}% · ladder ${ladderPct}%`);
-  console.log(`# press = final_pct × basis × (1 + (level−1)×${M.LEVEL_STEP}%) · mana%/s = presses/sec × mana%`);
+  const pool = flags.pool != null ? Number(flags.pool) : M.MANA_REF_POOL;
+  console.log(`# press = final_pct × basis × (1 + (level−1)×${M.LEVEL_STEP}%) · mana = the row's own cost at pool ${Math.round(pool)}, and mana/s = presses/sec × that cost`);
   console.log('');
-  const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'mana%', 'mana%/s', 'dmg/press'];
+  const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'mana', 'mana/s', 'dmg/press'];
   const rows = byType('attack').map((s: any) => {
     const r = M.row(s, { ...ref, cdrPct, ladderPct, level });
-    return [s.name, s.basis, `${s.cd}`, r.effCd.toFixed(2), r.pressesPerSec!.toFixed(2), r.manaPct != null ? `${r.manaPct}%` : '—', r.manaPerSecPct != null ? `${r.manaPerSecPct.toFixed(2)}%` : '—', r.damage != null ? fmt(Math.round(r.damage)) : '—'];
+    const cost = M.manaCostOf(s, { skillLevel: level, maxMana: pool, usableMana: pool, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
+    return [s.name, s.basis, `${s.cd}`, r.effCd.toFixed(2), r.pressesPerSec!.toFixed(2), `${s.mana} → ${fmt(Math.round(cost))}`, fmt(Math.round(r.pressesPerSec! * cost)), r.damage != null ? fmt(Math.round(r.damage)) : '—'];
   });
   const widths = head.map((h, i) => Math.max(h.length, ...rows.map((r: any) => String(r[i]).length)));
   const line = (r: any) => r.map((c: any, i: any) => String(c).padEnd(widths[i])).join('  ');

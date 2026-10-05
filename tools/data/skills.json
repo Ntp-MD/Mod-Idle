@@ -34,11 +34,14 @@
     },
     "formula": {
       "level_step_pct": 1.5,
+      "mana_level_step_pct": 5,
+      "mana_pool_exponent": 0.5,
+      "mana_reference_level": 1,
       "cast_reference": {
         "cdr_pct": 50,
         "ladder_pct": 30
       },
-      "note": "press = final_pct × basis × (1 + (skill_level − 1) × level_step_pct/100) · basis phys = the caster's finished physical hit · basis magic = their magic + Element × Alignment/100 (D-070 · B5). `final_pct` is the level-1 fraction, so a fresh skill presses exactly what its row states. Read by tools/lib/skillmodel.ts for the --calc workshop, the attack-table press column and the client's casts."
+      "note": "press = final_pct × basis × (1 + (skill_level − 1) × level_step_pct/100) · basis phys = the caster's finished physical hit · basis magic = their magic + Element × Alignment/100 (D-070 · B5). `final_pct` is the level-1 fraction, so a fresh skill presses exactly what its row states. Read by tools/lib/skillmodel.ts for the --calc workshop, the attack-table press column and the client's casts. A mana cost is written in one of two forms and the unit is part of it: `N%` charges N% of the usable pool, `N flat` charges N absolute units (D-136). A flat cost is the price at skill level 1 and grows on `mana_level_step_pct` per skill level, steeper than the damage ramp so a maxed rotation costs more, and on `(pool / reference pool)^mana_pool_exponent`, so Int and Max Mana gear still set the price. The reference pool is derived at `mana_reference_level`, never typed here."
     }
   },
   "reserve_tiers": {
@@ -128,7 +131,7 @@
       "basis": "phys",
       "final_pct": 140.483,
       "targets": "1/1",
-      "effect": "Stops target attacks 1 sec (uses no chance, so does not hit the 15% stun Cap)",
+      "effect": "Stops target attacks 1 sec (a flat stop, not a rolled stun chance)",
       "effects": [
         {
           "stat": "stop_sec",
@@ -317,6 +320,37 @@
       ]
     },
     {
+      "id": "attack.reap",
+      "name": "Reap",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 9,
+      "mana": "14 flat",
+      "basis": "phys",
+      "final_pct": 140.483,
+      "targets": "1/1",
+      "effect": "Leech +25% and physical power x1.10 for 6 sec · the window opens on the press and rides the skill's own duration",
+      "duration": "6 sec",
+      "effects": [
+        {
+          "stat": "leech",
+          "op": "add_pct",
+          "value": 25,
+          "subject": "self"
+        },
+        {
+          "stat": "physical_power",
+          "op": "mult",
+          "value": 1.1,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "self_window"
+      ]
+    },
+    {
       "id": "attack.arcane_bolt",
       "name": "Arcane Bolt",
       "type": "attack",
@@ -428,6 +462,322 @@
           "value": 100,
           "subject": "self"
         }
+      ]
+    },
+    {
+      "id": "attack.bloodletting",
+      "name": "Bloodletting",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 11,
+      "mana": "16 flat",
+      "basis": "phys",
+      "final_pct": 142.836,
+      "targets": "1/1",
+      "effect": "Instant heal 6% Max HP and leech +15% on the press",
+      "effects": [
+        {
+          "stat": "heal_instant",
+          "op": "add_pct",
+          "value": 6,
+          "subject": "self"
+        },
+        {
+          "stat": "leech",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "attack.pierce_the_veil",
+      "name": "Pierce the Veil",
+      "type": "attack",
+      "group": "ranged",
+      "element": "physical",
+      "cd": 7,
+      "mana": "12 flat",
+      "basis": "phys",
+      "final_pct": 138.129,
+      "targets": "1/1",
+      "effect": "This hit does not roll dodge and strips the target's Elemental resistance -15% for 8 sec",
+      "duration": "8 sec",
+      "effects": [
+        {
+          "stat": "mob_elemental_resistance_pct",
+          "op": "add_pct",
+          "value": -15,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "ignores_dodge"
+      ]
+    },
+    {
+      "id": "attack.widow_strike",
+      "name": "Widow Strike",
+      "type": "attack",
+      "group": "ranged",
+      "element": "physical",
+      "cd": 10,
+      "mana": "14 flat",
+      "basis": "phys",
+      "final_pct": 135.776,
+      "targets": "1/1",
+      "effect": "A chilled target takes +25% Elemental damage for 8 sec",
+      "duration": "8 sec",
+      "effects": [
+        {
+          "stat": "mob_elemental_damage_taken_pct",
+          "op": "add_pct",
+          "value": 25,
+          "subject": "target",
+          "condition": "chilled"
+        }
+      ]
+    },
+    {
+      "id": "attack.volley_of_blades",
+      "name": "Volley of Blades",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 12,
+      "mana": "20 flat (AoE ×1.5)",
+      "basis": "phys",
+      "final_pct": 145.19,
+      "targets": "3/5",
+      "effect": "5 hits at 30% each = 150% of one basis · per-hit procs fire 5 times",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 5,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 30,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "attack.impale",
+      "name": "Impale",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 8,
+      "mana": "14 flat",
+      "basis": "phys",
+      "final_pct": 142.836,
+      "targets": "1/3",
+      "effect": "3 hits at 50% each = 150% of one basis · per-hit procs fire 3 times",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 50,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "attack.echo_strike",
+      "name": "Echo Strike",
+      "type": "attack",
+      "group": "all",
+      "element": "physical",
+      "cd": 8,
+      "mana": "13 flat",
+      "basis": "phys",
+      "final_pct": 140.483,
+      "targets": "1/2",
+      "effect": "2 hits at 60% each = 120% of one basis · per-hit procs fire 2 times",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 60,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "attack.momentum",
+      "name": "Momentum",
+      "type": "attack",
+      "group": "ranged",
+      "element": "physical",
+      "cd": 9,
+      "mana": "12 flat",
+      "basis": "phys",
+      "final_pct": 138.129,
+      "targets": "1/1",
+      "effect": "Attack speed +20% for 6 sec · the speed buff rides the press",
+      "duration": "6 sec",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": 20,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "self_window"
+      ]
+    },
+    {
+      "id": "attack.plague_spit",
+      "name": "Plague Spit",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 9,
+      "mana": "16 flat",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "1/1",
+      "effect": "Applies 4 poison stacks and +40% bleed chance to the target",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 4,
+          "subject": "target"
+        },
+        {
+          "stat": "bleed_chance",
+          "op": "add_pct",
+          "value": 40,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.thunderhead",
+      "name": "Thunderhead",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 9,
+      "mana": "16 flat (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "3/1",
+      "effect": "Stops every target 1 sec and shocks all of them",
+      "effects": [
+        {
+          "stat": "stop_sec",
+          "op": "add_pct",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.glacial_nail",
+      "name": "Glacial Nail",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 10,
+      "mana": "15 flat",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "3/1",
+      "effect": "Stops every target 1 sec and chills all of them",
+      "effects": [
+        {
+          "stat": "stop_sec",
+          "op": "add_pct",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.reality_rift",
+      "name": "Reality Rift",
+      "type": "attack",
+      "group": "magic",
+      "element": "chaos",
+      "cd": 12,
+      "mana": "18 flat",
+      "basis": "magic",
+      "final_pct": 103.191,
+      "targets": "1/1",
+      "effect": "This hit pierces 100% of the target's Elemental res and the curse spreads to 2 neighbours",
+      "effects": [
+        {
+          "stat": "resistance_pierce_pct",
+          "op": "add_flat",
+          "value": 100,
+          "subject": "self"
+        },
+        {
+          "stat": "spread_targets",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.arcane_surge",
+      "name": "Arcane Surge",
+      "type": "attack",
+      "group": "magic",
+      "element": "follow",
+      "cd": 8,
+      "mana": "14 flat",
+      "basis": "magic",
+      "final_pct": 102.319,
+      "targets": "1/1",
+      "effect": "Mana regen +25% and attack speed +15% for 6 sec · both buffs ride the press",
+      "duration": "6 sec",
+      "effects": [
+        {
+          "stat": "mana_regen",
+          "op": "add_pct",
+          "value": 25,
+          "subject": "self"
+        },
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "self_window"
       ]
     },
     {

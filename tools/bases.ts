@@ -69,8 +69,11 @@ function parseSchools(): Record<string, any> {
   const line = text.split(/\r?\n/).find((l: string) => /carry\s+(Armour|Evasion|Energy Shield)/i.test(l));
   const out: Record<string, any> = {};
   if (!line) return out;
-  for (const m of line.matchAll(/(Heavy|light|cloth) Bases \(([^)]*)\) carry (Armour|Evasion|Energy Shield)/gi)) {
-    const id = idOf(m[3]);
+  // verb is `carry` for the three families and `take the school of the heaviest type ...:`
+  // for the three-way frames. The gap stops at the next open paren, not at a full stop,
+  // because a Base name may contain one.
+  for (const m of line.matchAll(/(Heavy|light|cloth|three-way) Bases?\s*\(([^)]*)\)([^(]*?)(?:carry|take the school of the heaviest type[^()]*?:)\s*(Armour|Evasion|Energy Shield)/gi)) {
+    const id = idOf(m[4]);
     for (const b of m[2].split('·')) out[clean(b)] = id;
   }
   return out;

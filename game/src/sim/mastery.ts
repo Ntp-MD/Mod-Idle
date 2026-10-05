@@ -1,4 +1,4 @@
-import { BASES } from '../engine/client';
+import { BASES, WEAPON_BY_NAME } from '../engine/client';
 import { createMastery } from '../../../engine/mastery.ts';
 import type { GameState } from './types';
 
@@ -6,8 +6,9 @@ import type { GameState } from './types';
 export const mastery: any = createMastery(BASES);
 
 export const WEAPONS: any[] = BASES.weapons;
+/** Exact name first (O(1)); the fuzzy `includes` fallback stays for a Base name carrying a suffix. */
 export const weaponByName = (name: string) =>
-  WEAPONS.find((w) => name === w.name) || WEAPONS.find((w) => String(name || '').toLowerCase().includes(w.name)) || null;
+  WEAPON_BY_NAME.get(name) || WEAPONS.find((w) => String(name || '').toLowerCase().includes(w.name)) || null;
 
 /** A bare hand has no type to keep XP, so it holds mastery 0 like any weapon nobody uses. */
 export function masteryLevel(state: GameState, weaponName: string | null): number {

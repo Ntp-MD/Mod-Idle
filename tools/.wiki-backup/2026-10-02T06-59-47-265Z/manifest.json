@@ -1,0 +1,10 @@
+{
+  "label": "town:pending:new",
+  "ts": "2026-10-02T06-59-47-265Z",
+  "files": [
+    "tools/data/town.json",
+    "checks.md",
+    "towns-stalls.md"
+  ],
+  "kept": true
+}

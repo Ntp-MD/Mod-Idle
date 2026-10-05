@@ -11,17 +11,18 @@ import { mulberry32 } from '../src/engine/client-helpers';
 const R = E.road;
 
 describe('the Road model is the shared one', () => {
-  it('eight ladder links and three branches; only the ladder links pay the purse', () => {
+  it('every settlement is joined, and only the ladder links pay the purse', () => {
     const ladder = road.links.filter((l: any) => l.kind === 'ladder');
     const branch = road.links.filter((l: any) => l.kind === 'branch');
-    expect(ladder.length).toBe(8);
-    expect(branch.length).toBe(3);
+    // one ladder link per settlement boundary, so the chain always reaches the last zone
+    expect(ladder.length).toBe(E.mob.zones.length - 1);
+    expect(branch.length).toBe(road.links.length - ladder.length);
     expect(road.links.length).toBe(R.links.length);
     expect(road.tripSecFor(0)).toBe(R.links[0].trip_min * 60);
     expect(road.encountersFor(0)).toBe(R.links[0].trip_min * R.encounters_per_min);
     expect(road.totalWeight).toBe(100);
     // the mint cap counts the ladder links only, so a branch link cannot raise it
-    expect(road.purseCapPerDay).toBe(8 * R.purse_gold);
+    expect(road.purseCapPerDay).toBe(ladder.length * R.purse_gold);
     branch.forEach((l: any) => expect(road.purseGoldFor(l.index)).toBe(0));
     ladder.forEach((l: any) => expect(road.purseGoldFor(l.index)).toBe(R.purse_gold));
   });

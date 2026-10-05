@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import * as eng from './lib/engine.ts';
-import { begin, end, replaceBlock, blockState, writeAll, resolveDoc } from './lib/generated.ts';
+import { begin, end, blockState, writeAll, resolveDoc } from './lib/generated.ts';
 import type { Writer } from './lib/types.ts';
 
 /**
@@ -286,8 +286,12 @@ function runChecks() {
     && close(E.bands.high.band_hours, cp.level_90 - cp.level_60)
     && close(E.push_hr_levels_91_100, cp.level_100 - cp.level_90),
     `band hours ${[E.bands.low.band_hours, E.bands.mid.band_hours, E.bands.high.band_hours, E.push_hr_levels_91_100].join(' / ')} = E1-E5 deltas`);
-  add('T3b', close(DATA.settlements.reduce((s: any, x: any) => s + x.budget_hr, 0), cp.level_100),
-    `Σ 9 settlement budgets = ${DATA.settlements.reduce((s: any, x: any) => s + x.budget_hr, 0)} hr = ${cp.level_100} hr timeline`);
+  // The sum of every settlement's budget is the whole run, so it reconciles against the last
+  // published checkpoint rather than a fixed level — the world has grown past the level it names.
+  const budgetSum = DATA.settlements.reduce((s: any, x: any) => s + x.budget_hr, 0);
+  const lastCp = Math.max(...Object.entries(cp).map(([k, v]: any) => Number(k.replace('level_', ''))));
+  add('T3b', close(budgetSum, cp[`level_${lastCp}`]),
+    `Σ ${DATA.settlements.length} settlement budgets = ${budgetSum} hr = ${cp[`level_${lastCp}`]} hr timeline at level ${lastCp}`);
   add('T2', BANDS.every((b, i) => i === 0 || rate(b) > rate(BANDS[i - 1])),
     `gold per 1 m rises with the band: ${BANDS.map((b) => rate(b)).join(' < ')}`);
   add('T7', Math.abs(junk('high_full_lck') / junk('high') - E.towns_gold_rate_multiplier_bound) < 0.05,

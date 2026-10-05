@@ -1,0 +1,10 @@
+{
+  "label": "delete town:pending:ZZ test row",
+  "ts": "2026-10-02T06-59-47-994Z",
+  "files": [
+    "tools/data/town.json",
+    "checks.md",
+    "towns-stalls.md"
+  ],
+  "kept": true
+}

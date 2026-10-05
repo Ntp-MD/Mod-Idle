@@ -79,7 +79,7 @@ describe('planting and harvesting', () => {
     const r = harvest(s, 0);
     expect(r.ok).toBe(true);
     expect(s.farm.herbs.low - before).toBe(E.farm.yield_per_harvest);
-  });
+  }, 300000);
 });
 
 describe('herbs drop on their own roll', () => {

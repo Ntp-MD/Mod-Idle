@@ -91,7 +91,7 @@ const GENERIC_RULES: any[] = [
   { file: 'crafting.md', label: 'crafting.md tier stones → Refines/hour', re: /\((\d+)\/hour → ~([\d.]+) Refines\/hour\)/, pick: [1, 2], expect: [STONE.tier_stones_per_hr, STONE.refines_per_hr] },
   { file: 'crafting.md', label: 'crafting.md Refine full-set hours', re: /2 steps = (\d+) casts[^)]*\) ≈ ([\d.]+) hours/, pick: [1, 2], expect: [STONE.refine_casts_full_set, r1(STONE.refine_hours_full_set)] },
   { file: 'formula.md', label: 'formula.md single-stat ceiling', re: /single-stat ceiling \| \*\*([\d,]+)\*\*/, pick: 1, expect: Math.round(CEIL) },
-  { file: 'formula.md', label: 'formula.md stat at level 100 no gear', re: /Level 100 \(no gear\)[^|]*\|[^|]*every stat = (\d+)/, pick: 1, expect: statAt(100) },
+  { file: 'formula.md', label: 'formula.md stat at the level cap, no gear', re: /Level \d+ \(no gear\)[^|]*\|[^|]*every stat = (\d+)/, pick: 1, expect: Math.round(statAt(S.level_cap)) },
   { file: 'formula.md', label: 'formula.md Str 13 physical power', re: /Str 13-item build \| Physical power ([\d,]+)/, pick: 1, expect: Math.round(DERIVED.phys) },
   { file: 'formula.md', label: 'formula.md K_AGI_ASPD', re: /\| K_AGI_ASPD \| ([\d.]+)/, pick: 1, expect: K.K_AGI_ASPD },
   { file: 'formula.md', label: 'formula.md K_INT_MREGEN', re: /\| K_INT_MREGEN \| \*\*([\d.]+)\*\*/, pick: 1, expect: K.K_INT_MREGEN },
@@ -112,7 +112,7 @@ const GENERIC_RULES: any[] = [
   // rather than typed: a re-based ceiling moves the pattern instead of silently breaking the match.
   { file: 'formula-utility.md', label: 'formula-utility.md weight capacity', re: new RegExp('Str ' + Math.round(CEIL) + ' carries ([\\d,]+)'), pick: 1, expect: Math.round(DERIVED.weight) },
   { file: 'formula-utility.md', label: 'formula-utility.md drop multiplier', re: new RegExp('Lck ' + Math.round(CEIL) + ' gives ([\\d.]+)x'), pick: 1, expect: r1(DERIVED.drop_mult) },
-  { file: 'formula-defense.md', label: 'formula-defense.md level_gain_hp', re: /level_gain_hp` = 40 × \(level − 1\) → at level 100 gives ([\d,]+)/, pick: 1, expect: LG.hp_per_level * (S.level_cap - 1) },
+  { file: 'formula-defense.md', label: 'formula-defense.md level_gain_hp', re: new RegExp('level_gain_hp` = ' + LG.hp_per_level + ' × \\(level − 1\\) → at level ' + S.level_cap + ' gives ([\\d,]+)'), pick: 1, expect: LG.hp_per_level * (S.level_cap - 1) },
   { file: 'formula-defense.md', label: 'formula-defense.md pool ÷ regen', re: /pool ÷ regen\s*=\s*([\d,]+) ÷ (\d+) = ([\d.]+) seconds/, pick: [1, 3], expect: [Math.round(DERIVED.mana), r1(DERIVED.pool_regen_sec)] },
   { file: 'core-stats.md', label: 'core-stats.md Evasion Cap', re: /Evasion - % Cap (\d+)/, pick: 1, expect: E.caps.evasion },
   { file: 'core-stats.md', label: 'core-stats.md aspd Cap', re: /Cap (\d+) \(= 5 hits\/sec/, pick: 1, expect: E.caps.aspd },

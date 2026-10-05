@@ -5,9 +5,6 @@
  *   <!-- BEGIN GENERATED:key -->  …  <!-- END GENERATED:key -->
  * The writer rewrites the body; --checks fails when the body is stale, which is
  * what stops a hand-edit between the markers from silently drifting.
- *
- * tools/check.ts and tools/town.ts keep their own copy of these helpers (they
- * predate this module); new cages use this one so there is a single definition.
  */
 
 import fs from 'node:fs';

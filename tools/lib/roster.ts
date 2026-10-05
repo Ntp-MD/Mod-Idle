@@ -148,6 +148,55 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     ` (${SKILLS.filter((s) => (s.rules || []).length).length} with a rule, ${SKILLS.filter((s) => s.modelled_by).length} carried by another column)` +
     `${badRule.length ? ' · UNKNOWN: ' + badRule.join(', ') : ''}${onlyProse.length ? ' · PROSE ONLY: ' + onlyProse.join(', ') : ''}`);
 
+  // D-136: a mana cost is one string carrying its own unit — `N%` of the usable pool or `N flat`
+  // units — and the unit is mandatory, because a cost that reads as 0 would make the skill free.
+  const paidRows = SKILLS.filter((s) => s.type !== 'aura');
+  const unreadable = paidRows.filter((s) => !SM13.manaSpec(s)).map((s) => s.id);
+  const bothUnits = paidRows.filter((s) => /%/.test(String(s.mana || '')) && /flat/.test(String(s.mana || ''))).map((s) => s.id);
+  const freeAtCap = paidRows.filter((s) => {
+    const ms = SM13.manaSpec(s);
+    if (!ms || ms.kind !== 'flat') return false;
+    return !(SM13.manaCostOf(s, { skillLevel: 1, maxMana: SM13.MANA_REF_POOL, usableMana: SM13.MANA_REF_POOL }) > 0
+      && SM13.manaCostOf(s, { skillLevel: SX.level_cap, maxMana: SM13.MANA_REF_POOL, usableMana: SM13.MANA_REF_POOL }) > 0);
+  }).map((s) => s.id);
+  const flatRows = paidRows.filter((s) => (SM13.manaSpec(s) || { kind: '' }).kind === 'flat');
+  // the two branches must answer for their own unit: a % row priced through the flat branch (or the
+  // reverse) is the silent way this model goes wrong, so the resolver is checked against its own form
+  const swapped = paidRows.filter((s) => {
+    const ms = SM13.manaSpec(s);
+    if (!ms) return false;
+    const got = SM13.manaCostOf(s, { maxMana: 1000, usableMana: 1000 });
+    return ms.kind === 'pct' ? Math.abs(got - 1000 * ms.value / 100) > 1e-9 : got <= ms.value;
+  }).map((s) => s.id);
+  add('S15', unreadable.length === 0 && bothUnits.length === 0 && freeAtCap.length === 0 && swapped.length === 0,
+    `${paidRows.length} paid rows carry a readable cost — ${paidRows.length - flatRows.length} % of the usable pool, ${flatRows.length} flat units` +
+    (flatRows.length ? ` · every flat row is quoted against the level-${(DATA.meta.formula || {}).mana_reference_level ?? 1} pool of ${fmt(SM13.MANA_REF_POOL)}` : '') +
+    `${unreadable.length ? ' · NO READABLE COST: ' + unreadable.join(', ') : ''}` +
+    `${bothUnits.length ? ' · BOTH UNITS: ' + bothUnits.join(', ') : ''}` +
+    `${freeAtCap.length ? ' · FREE AT THE CAP: ' + freeAtCap.join(', ') : ''}` +
+    `${swapped.length ? ' · PRICED THROUGH THE WRONG FORM: ' + swapped.join(', ') : ''}`);
+
+  // D-136: S10 bands the damage ramp only. A flat cost has its own, steeper step and a pool-growth
+  // term, and the ratio the two make at the cap is the number the design stands on.
+  const F = DATA.meta.formula || {};
+  const costStep = SM13.MANA_LEVEL_STEP, dmgStep = SM13.LEVEL_STEP, poolExp = SM13.MANA_POOL_EXPONENT;
+  const atCap = (step: number) => 1 + (SX.level_cap - 1) * step / 100;
+  const ratio = atCap(costStep) / atCap(dmgStep);
+  add('S16', costStep > dmgStep && poolExp > 0 && poolExp <= 1,
+    `a flat cost climbs ${costStep}% a skill level against the damage ramp's ${dmgStep}%, so a maxed rotation is ×${ratio.toFixed(2)} the mana-hungry of a fresh one` +
+    ` · the pool term is (pool / ${fmt(SM13.MANA_REF_POOL)})^${poolExp}` +
+    `${costStep <= dmgStep ? ' · NOT STEEPER THAN THE DAMAGE RAMP' : ''}${poolExp <= 0 || poolExp > 1 ? ' · EXPONENT OUTSIDE (0, 1]' : ''}`);
+
+  // D-136: the `(AoE ×n)` suffix is decoration the client never reads — the sim derives AoE from the
+  // target count — so a suffix that disagrees with the data is a second source for the multiplier.
+  const badAoe = paidRows.filter((s) => {
+    const m = String(s.mana || '').match(/AoE\s*[×x]\s*(\d+(?:\.\d+)?)/i);
+    return m && Number(m[1]) !== EN.E.aoe.mana_mult;
+  }).map((s) => `${s.id}:${(String(s.mana || '').match(/AoE\s*[×x]\s*(\d+(?:\.\d+)?)/i) || [])[1]}`);
+  add('S17', badAoe.length === 0,
+    `every (AoE ×n) suffix in a mana cost states the data's own ${EN.E.aoe.mana_mult} mana multiplier` +
+    `${badAoe.length ? ' · DISAGREES: ' + badAoe.join(', ') : ''}`);
+
   return out;
 }
 

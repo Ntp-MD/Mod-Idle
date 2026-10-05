@@ -13,10 +13,11 @@
 
 import * as R from './lib/roster.ts';
 import * as G from './lib/generated.ts';
+import * as eng from './lib/engine.ts';
 import { CONVERSION, LADDER } from './lib/skillmodel.ts';
 import type { Writer } from './lib/types.ts';
 
-const ZONES = 9;
+const ZONES = eng.E.mob.zones.length;  // the data owns the world size, never a typed 9
 const DROP_PER_HR = 4.6;      // loot.md F12 · boss 1.4 + elite 1.4 + normal 1.8
 const GAME_HOURS = 40;        // checks.md E5 · 40.2 hr rounded for the funnel
 const TARGETS = 4;            // checks.md D20 · four full targets

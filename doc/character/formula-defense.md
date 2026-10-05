@@ -23,11 +23,11 @@ evasion_chance = min(evasion_chance, 80)
 <!-- BEGIN GENERATED:evasion-table -->
 | build | Dex + Agi | Evasion flat | Dex rating | Agi points | Evasion |
 |---|---|---|---|---|---|
-| Full Dex + Agi 12 items + boots/gloves T1 | 535 | 15 + 15 | 298 | +17.8 | **67.7%** |
-| Dex + Agi 6 items + 1 T1 item | 360 | 15 + 15 | 210 | +12 | **53.3%** |
-| No investment + 1 low-Quality item | 210 | 6 | 111 | +7 | **34.1%** |
+| Full Dex + Agi 12 items + boots/gloves T1 | 433 | 15 + 15 | 247 | +14.4 | **76%** |
+| Dex + Agi 6 items + 1 T1 item | 258 | 15 + 15 | 159 | +8.6 | **59.4%** |
+| No investment + 1 low-Quality item | 108 | 6 | 60 | +3.6 | **31.7%** |
 
-Evasion is one line (D-112): the Dex rating is rolled against the reference attacker (mean species · Medium body · accuracy tier ×1 · level 100 accuracy 299) as `1 − acc ÷ (acc + rating)`, then Agi adds **30 Agi per point** and the Cap 80 binds the sum — so this is a snapshot against an average mob, not a fixed Cap point.
+Evasion is one line (D-112): the Dex rating is rolled against the reference attacker (mean species · Medium body · accuracy tier ×1 · level 190 accuracy 154) as `1 − acc ÷ (acc + rating)`, then Agi adds **30 Agi per point** and the Cap 80 binds the sum — so this is a snapshot against an average mob, not a fixed Cap point.
 <!-- END GENERATED:evasion-table -->
 
 - Evasion uses a ratio, not direct addition, because excessive avoidance would make attacks never land and break the meta.
@@ -48,11 +48,12 @@ perfect_dodge      = min(perfect_dodge, caps.perfect_dodge)
 # 4b. Block
 
 ```
-block_chance = min(caps.block, the shield's Block chance % line)   rolled last of the avoidance layers
+block_chance = the shield's Block chance % line   rolled last of the avoidance layers (no Cap, owner ruling)
+blocked_hit  = max(0, the mitigated hit − armour / 10)   the shield's flat cut, NOT a deletion
 ```
 
-- **Block is its own avoidance layer**: it overrules the one-avoidance-layer rule for the block path only — Evasion keeps its own Cap — and block is a separate roll that happens after perfect dodge and evasion. A blocked hit is deleted outright, before the physical/Element split, exactly like a dodge.
-- The only source is the **shield's Base Mod line** (Buckler · Kite Shield): `block_chance` is the first line on those frames and never rolls on any other slot. `caps.block` in `engine.json` is a ceiling rather than a wall — the shield's own line at its top Tier and quality just reaches it, which the block gate proves (the same reachability rule every Cap carries).
+- **Block is its own avoidance layer**: it overrules the one-avoidance-layer rule for the block path only — Evasion keeps its own Cap — and block is a separate roll that happens after perfect dodge and evasion. A blocked hit is **not** deleted: it is cut by a flat `armour / 10` (owner ruling, provisional), so a shield thins a hit rather than erasing it. The cut lands after mitigation, so it is a flat reduction on the resolved number. A blocked hit carries **no status** — the shield deflects the effect, so no status proc rolls on it.
+- The only source is the **shield's Base Mod line** (Buckler · Kite Shield): `block_chance` is the first line on those frames and never rolls on any other slot. It is **open-ended** (owner ruling) — there is no `caps.block`; the shield's own line and its quality ladder are the only limit.
 - **Why a flat percentage, not a rating**: block is a shield's discrete "this one did not land", not a stat that grows with investment the way Evasion does. It is bought by wearing a shield and by the stone ladder on that one line, so it cannot be stacked from many slots the way Armour or Evasion can.
 - **It is folded into `mob_HP` as debt, not as a silent buff**: a blocked hit is damage that never landed, so the survival tables price it as new defensive power and the checks file's debt line names it.
 
@@ -68,14 +69,15 @@ mana_regen = int * K_INT_MREGEN * (1 + mregen_pct/100)
 
 - `K_VIT_HP` = 20 · `K_VIT_REGEN` = 0.25 · `hp_base` = 300 → Vit 510 gives 10,200 raw HP (14,460 once the per-level term and base are added) and 128/sec regen.
 - `K_INT_MP` = 4 · `K_INT_MREGEN` = **0.18** (was 0.2) · `mana_base` = 100 → Int 510 gives 2,040 raw mana (3,724 once the per-level term and base are added) and 92/sec regen.
-- `level_gain_hp` = 40 × (level − 1) → at level 100 gives 3,960 (the old text wrote 4,000, which overcounted by one level).
+- `level_gain_hp` = 40 × (level − 1) → at level 190 gives 7,560 (the old text wrote 4,000, which overcounted by one level).
 - `level_gain_mp` = 16 × (level − 1) → at level 100 gives 1,584.
 
 <!-- BEGIN GENERATED:hp-mana-block -->
 ```
-Max HP   level 100 · full Vit 12 items + 1 Max HP % slot = (10,700 + 3,960) × 1.16 = 17,354
-Max Mana level 100 · full Int                            = (2,140 + 1,584)          = 3,824
-pool ÷ regen                                              = 3,824 ÷ 96 = 39.7 seconds
+Max HP   level 100 · full Vit 12 items + 1 Max HP % slot = (8,669 + 7,560) × 1.16 = 19,173
+Max Mana level 100 · full Int                            = (1,734 + 3,024)          = 4,858
+pool ÷ regen                                              = 4,858 ÷ 78 = 62.3 seconds
+flat-cost reference pool (level 1) = mana_base 100 + stat 12 × K_INT_MP 4 = 148 — the pool a `N flat` cost is quoted against, and it climbs 5% a skill level and on (pool ÷ reference)^0.5 (D-136)
 ```
 <!-- END GENERATED:hp-mana-block -->
 
@@ -106,10 +108,10 @@ cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)
 ```
 
 - `K_WIS_CDR` = 0.03 · Wis 510 gives 15.3%.
-- Cap **80** is a **hard ceiling** (D-124): Wis 535 + 11 Mod items reaches `16.1 × 3.75 = **60.2**`, which sits *under* the Cap, so the Cap never binds and no build is cut (X11). The old Cap 55 was a build target set on the same K; at the 535 ceiling the owner raised the ceiling to 80 rather than the K, so 80 is now a line the build stays below (D-114 · formula.md section 0a).
+- Cap **80** is a **hard ceiling** (D-124): Wis 108 + 11 Mod items reaches `13 × 3.75 = **48.8**`, which sits *below* the Cap, so a full CDR build stays under it (X11). The old Cap 55 was a build target set on the same K; the owner raised the ceiling to 80 rather than the K, and at the reference stat line the reach sits below it so the Cap is a hard ceiling (D-114 · formula.md section 0a).
 - **There is no `cdr_flat`** — CDR is % only (see mod-pool.md). The old formula added a slot that does not exist.
 - `cdr_pct_total` pools every source into one line — today that means only the Mod `Cooldown reduction %` (max 25 per item). A future buff may add to the same pool, but no Cap is allowed to *depend* on one: the Cap must be reachable from items alone.
-- Path to the ceiling must be checkable without a buff: Wis 535 + 11 Mod items (every slot but the main hand) = `16.1 × 3.75 = **60.2**` → under Cap 80 (D-124) · 10 items = 56.2 · 9 items = 52.2 · Wis alone = 16.1.
+- Path to the ceiling must be checkable without a buff: Wis 108 + 11 Mod items (every slot but the main hand) = `13 × 3.75 = **48.8**` → below Cap 80 (D-124) · 10 items = 45.5 · 9 items = 42.3 · Wis alone = 13.
   This keeps the original intent that CDR requires multi-item investment and that Wis alone is never enough — and the full set is the build's maximum, which the ceiling now sits above rather than at.
 - **Wis is deliberately the only stat with a single benefit.** Every other stat gives power plus one utility (Str power + weight, Agi speed + Evasion points, Vit HP + regen, Int power + mana, Dex accuracy + evasion + alignment, Lck crit + perfect dodge + drop), but cooldown reduction is a **pacing** stat, not a power stat: it changes how often the list can be pressed, never what a press is worth. A second benefit would have to be a new stat — effect duration, or a mana reserve — and both are larger systems than the gap they would fill, so the sheet keeps Wis single on purpose (D-016).
 

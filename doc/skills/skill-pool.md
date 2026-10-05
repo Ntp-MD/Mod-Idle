@@ -10,25 +10,25 @@ import skill-pool-system.md
 The core rule is that a skill must change **what you do**, not just add numbers. If it is only numbers, it should be an Mod instead
 
 # Detail files
-- skill-pool-attack.md — attack skills (Cleave..Void Lance)
+- skill-pool-attack.md — attack skills (Cleave..Arcane Surge)
 - skill-pool-buff.md — buff skills (roster cleared for redesign)
 - skill-pool-curse.md — curse skills + attach rule (Weaken..Pandemonium)
 - skill-pool-aura-heal.md — Reservation + heals + auras + baseline
 - skill-pool-system.md — combat clock + AoE + passives→keystones + acquisition + ladder + level + open numbers
 
 <!-- BEGIN GENERATED:skill-count -->
-# Skill count = 52
+# Skill count = 65
 
 | Type | Count | Controlled by |
 |---|---|---|
-| **attack** | 18 | Order list · cd + mana |
+| **attack** | 31 | Order list · cd + mana |
 | **buff** | 7 | Timed self-buff - own cd and duration, never persists between fights |
 | **curse** | 11 | Attached to target · Uses same hit_chance as attacks |
 | **heal** | 3 | Same list (key on bosses) |
 | **aura** | 13 | Player-managed set · **Reserves Max Mana** |
-| **total** | **52** | Roster mid-redesign · buff + aura set not final |
+| **total** | **65** | Roster mid-redesign · buff + aura set not final |
 
-> **Counts are provisional.** The buff roster was cleared for a redesign and rebuilt, and the aura set was resized (`skill-pool-aura-heal.md` · Decision 1), which leaves tree nodes in `skill-tree-*.md` referencing skills that no longer exist (`checks.md` D19 will fail until those nodes are rewritten). If `Retribution` is also removed from the attack table, attack drops 18 → 17 and the total lands at **51**.
+> **Counts are provisional.** The buff roster was cleared for a redesign and rebuilt, and the aura set was resized (`skill-pool-aura-heal.md` · Decision 1), which leaves tree nodes in `skill-tree-*.md` referencing skills that no longer exist (`checks.md` D19 will fail until those nodes are rewritten). If `Retribution` is also removed from the attack table, attack drops 31 → 30 and the total lands at **64**.
 <!-- END GENERATED:skill-count -->
 
 # Skill frame
@@ -37,13 +37,13 @@ The core rule is that a skill must change **what you do**, not just add numbers.
 |---|---|
 | Element / type | physical · magic · fire · cold · lightning · poison · chaos · none |
 | Base Cooldown | 4-12 seconds · aura has no cooldown |
-| Mana cost | **% of Max Mana** — skills pay on press · auras **reserve** a % of pool |
+| Mana cost | **% of Max Mana** or **flat units** — the row states which · skills pay on press · auras **reserve** a % of pool |
 | Scales with stat | Str / Int / Dex / Agi / Wis / Lck |
 | Weapon group | Usable with all weapons · Matching group grants bonus |
 | Ladder | Reduces cooldown from duplicate skills |
 | Skill level | Gains XP from use, maximum equals character level |
 
-**Mana cost is % rather than a number** because a fixed number would be unusable early and irrelevant late. Percent keeps balance equal at all levels and gives `Max Mana %` meaning
+**A mana cost is written in one of two forms and the unit is part of it**: `%` charges that share of the usable pool, `flat` charges its own units. Both are read by the same resolver in `engine/skills.ts` (`manaSpec` → `manaCostOf`), which throws on a row whose unit is missing — a cost that parsed as nothing would make the skill free (D-136). **A flat cost is quoted at skill level 1 against the level-1 reference pool**, then grows on two terms the data owns: a per-level step steeper than the press ramp, and a power of the pool's own growth, so Int and `Max Mana` gear keep setting the price instead of only widening the bar. The keys are `skills.json` `meta.formula` and the reference pool is derived, never typed. The unit travels into every roster table because the tables print the row's own string; `tools/skills.ts --calc` prints what each row charges for a pool you pass.
 **"Weapon power" in the skill table = character phys/magic power** from formula.md sections 1-2, not the power value of the weapon piece (this game has no Base power per weapon type · decided in formula.md).
 - **A press is one percentage of the hit the build already deals**, taken from the finished physical hit or the magic hit plus Element — the full form and its level ramp live in `skill-pool-system.md`, and `tools/skills.ts` prints every row's measured press. The old `stat × K_stat × stat% + power × power%` split is retired (D-070 · D-097): a skill inherits gear and globals rather than dipping into the stats a second time.
 - **Cooldown calculation order**

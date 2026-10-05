@@ -15,10 +15,11 @@ import * as reg from './registry.ts';
 import { keyNumbers } from './numbers.ts';
 import { listDocs, resolveDoc } from './generated.ts';
 import { build } from './engine.ts';
+import { withNodeFlags } from './node.ts';
 
 // Cages are spawned as child node processes and load engine/*.ts; the flag has to be in
 // the child env. execFileSync inherits process.env, so setting it here covers runNode.
-process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, '--experimental-strip-types', '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' ');
+process.env.NODE_OPTIONS = withNodeFlags(process.env.NODE_OPTIONS);
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const DATA_FILES: Record<string, string> = {

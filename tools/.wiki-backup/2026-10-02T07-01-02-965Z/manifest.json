@@ -1,0 +1,11 @@
+{
+  "label": "engine:K:K_STR",
+  "ts": "2026-10-02T07-01-02-965Z",
+  "files": [
+    "tools/data/engine.json",
+    "checks.md",
+    "towns-stalls.md"
+  ],
+  "kept": true,
+  "restored": "2026-10-02T07:01:03.240Z"
+}

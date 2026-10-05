@@ -19,10 +19,11 @@ import { keyNumbers } from './lib/numbers.ts';
 import * as R from './lib/roster.ts';
 import * as SM from './lib/skillmodel.ts';
 import * as G from './lib/generated.ts';
+import { withNodeFlags } from './lib/node.ts';
 
 // The cages report.ts runs load engine/*.ts; execFileSync inherits process.env, so the
 // flag set here reaches every spawned cage.
-process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, '--experimental-strip-types', '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' ');
+process.env.NODE_OPTIONS = withNodeFlags(process.env.NODE_OPTIONS);
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const OUT = path.join(ROOT, 'dashboard.html');
@@ -234,13 +235,20 @@ sections.push({
     + '</tbody></table>',
 });
 
-const workshopSkills = R.byType('attack').map((s) => ({
-  name: s.name, group: s.group, cd: s.cd, manaPct: SM.manaPct(s), basis: s.basis, finalPct: s.final_pct,
-}));
+const workshopSkills = R.byType('attack').map((s) => {
+  const ms = SM.manaSpec(s);
+  return {
+    name: s.name, group: s.group, cd: s.cd, mana: s.mana,
+    manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null,
+    basis: s.basis, finalPct: s.final_pct,
+  };
+});
 const workshopRef = SM.referenceBases().glass;
 const workshopConst = {
   LEVEL_STEP: SM.LEVEL_STEP, phys: workshopRef.phys, magic: workshopRef.magic,
   elem: workshopRef.elem, align: workshopRef.align,
+  MANA_LEVEL_STEP: SM.MANA_LEVEL_STEP, MANA_POOL_EXPONENT: SM.MANA_POOL_EXPONENT,
+  MANA_REF_POOL: SM.MANA_REF_POOL,
 };
 
 sections.push({
@@ -255,8 +263,9 @@ sections.push({
 <label>skill level <input id="ws-level" type="number" value="20" min="1" max="20" style="width:70px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
 <label>CDR % <input id="ws-cdr" type="number" value="50" style="width:70px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
 <label>ladder % <input id="ws-ladder" type="number" value="30" style="width:70px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
+<label>mana pool <input id="ws-pool" type="number" value="${Math.round(SM.MANA_REF_POOL)}" style="width:90px;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px"></label>
 </div>
-<table class="num" id="ws-table"><thead><tr><th>Skill</th><th>Group</th><th>basis</th><th>final_pct</th><th>cd</th><th>eff cd</th><th>press/s</th><th>mana%</th><th>mana%/s</th><th>dmg/press</th></tr></thead><tbody></tbody></table>
+<table class="num" id="ws-table"><thead><tr><th>Skill</th><th>Group</th><th>basis</th><th>final_pct</th><th>cd</th><th>eff cd</th><th>press/s</th><th>mana cost</th><th>mana/s</th><th>dmg/press</th></tr></thead><tbody></tbody></table>
 <script>
 (function(){
 var S = ${JSON.stringify(workshopSkills)};
@@ -264,7 +273,7 @@ var C = ${JSON.stringify(workshopConst)};
 function v(id){return Number(document.getElementById(id).value)||0;}
 function fmt(n){return Math.round(n).toLocaleString('en-US');}
 function calc(){
-  var phys=v('ws-phys'),magic=v('ws-magic'),elem=v('ws-elem'),align=v('ws-align'),level=v('ws-level'),cdr=v('ws-cdr'),lad=v('ws-ladder');
+  var phys=v('ws-phys'),magic=v('ws-magic'),elem=v('ws-elem'),align=v('ws-align'),level=v('ws-level'),cdr=v('ws-cdr'),lad=v('ws-ladder'),pool=v('ws-pool');
   var body='';
   for(var i=0;i<S.length;i++){
     var s=S[i];
@@ -272,11 +281,14 @@ function calc(){
     var pps=ec>0?1/ec:0;
     var basis=s.basis==='magic' ? magic + elem*align/100 : phys;
     var dmg=s.finalPct/100*basis*(1+Math.max(0,level-1)*C.LEVEL_STEP/100);
-    body+='<tr><td>'+s.name+'</td><td>'+s.group+'</td><td>'+s.basis+'</td><td>'+s.finalPct+'%</td><td>'+s.cd+'</td><td>'+ec.toFixed(2)+'</td><td>'+pps.toFixed(2)+'</td><td>'+(s.manaPct!=null?s.manaPct+'%':'—')+'</td><td>'+(s.manaPct!=null?(pps*s.manaPct).toFixed(2)+'%':'—')+'</td><td>'+fmt(dmg)+'</td></tr>';
+    var cost=null;
+    if(s.manaKind==='pct') cost=pool*s.manaValue/100;
+    else if(s.manaKind==='flat') cost=s.manaValue*(1+Math.max(0,level-1)*C.MANA_LEVEL_STEP/100)*Math.pow(pool/C.MANA_REF_POOL,C.MANA_POOL_EXPONENT);
+    body+='<tr><td>'+s.name+'</td><td>'+s.group+'</td><td>'+s.basis+'</td><td>'+s.finalPct+'%</td><td>'+s.cd+'</td><td>'+ec.toFixed(2)+'</td><td>'+pps.toFixed(2)+'</td><td>'+(cost!=null?fmt(cost):'—')+'</td><td>'+(cost!=null?(pps*cost).toFixed(2):'—')+'</td><td>'+fmt(dmg)+'</td></tr>';
   }
   document.getElementById('ws-table').getElementsByTagName('tbody')[0].innerHTML=body;
 }
-['ws-phys','ws-magic','ws-elem','ws-align','ws-level','ws-cdr','ws-ladder'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',calc);});
+['ws-phys','ws-magic','ws-elem','ws-align','ws-level','ws-cdr','ws-ladder','ws-pool'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',calc);});
 calc();
 })();
 </script>`,

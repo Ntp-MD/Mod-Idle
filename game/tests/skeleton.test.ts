@@ -109,14 +109,15 @@ describe('block is its own avoidance layer (D-123 · D-112 exception)', () => {
     return gear;
   };
 
-  it('the shield line feeds the sheet, bounded by the Cap', () => {
+  it('the shield line feeds the sheet, uncapped (owner ruling)', () => {
     const c = buildCharacter(60, gearWith(shield(25)));
     expect(c.block).toBe(25);
-    expect(buildCharacter(60, gearWith(shield(999))).block).toBe(E.caps.block);
+    // no Cap: a huge shield line is not clipped
+    expect(buildCharacter(60, gearWith(shield(999))).block).toBe(999);
     expect(buildCharacter(60, emptyGear()).block).toBe(0);
   });
 
-  it('a blocked hit is deleted outright, after perfect dodge and evasion', () => {
+  it('a blocked hit is thinned by a flat armour / 10, not deleted (owner ruling)', () => {
     const c = buildCharacter(60, gearWith(shield(100)));
     // an accurate mob keeps the evasion roll near zero, so a draw between that and the block
     // chance lands on the block layer and nowhere else
@@ -126,7 +127,8 @@ describe('block is its own avoidance layer (D-123 · D-112 exception)', () => {
     const draw = (ev + c.block) / 200;
     const r = mobSwing(() => draw, c, mob, {} as any);
     expect(r.blocked).toBe('block');
-    expect(r.toHp).toBe(0);
+    // the hit still lands, cut by the flat `armour / 10` — a shield thins it, it does not erase it
+    expect(r.toHp).toBeGreaterThan(0);
     expect(r.absorbed).toBe(0);
   });
 

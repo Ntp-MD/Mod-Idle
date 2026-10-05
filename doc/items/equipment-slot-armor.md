@@ -13,29 +13,29 @@ The Stat Mod line (`Stat Mod flat`) rolls on every item, and the Gear Mod line (
 ## helmet
 | Role | Mods (union of every helmet Base in item-base.md) |
 |---|---|
-| Primary | Evasion % · Max HP flat · Max HP % · Max Mana % · Cooldown reduction % |
-| Secondary | Elemental resistance % · Life Regeneration % · Mana Regeneration % |
+| Primary | Evasion % · Max HP flat · Max HP % · Max Mana % · Cooldown reduction % · Armour % · Max Energy Shield % |
+| Secondary | Elemental resistance % · Life Regeneration % · Mana Regeneration % · Armour flat · Energy Shield flat · Elemental alignment % · Evasion flat |
 | Stat Mod | Stat Mod flat · All stats flat (every item) |
 | Gear Mod | Armour flat · Evasion flat · Energy Shield flat (the school is set by the Base) |
 ## chest
 | Role | Mods (union of every chest Base in item-base.md) |
 |---|---|
-| Primary | Evasion % · Max HP % · Max HP flat · Max Mana % · Max Mana flat |
-| Secondary | Elemental resistance % · Max HP flat · Life Regeneration % · Cooldown reduction % · Mana Regeneration % |
+| Primary | Evasion % · Max HP % · Max HP flat · Max Mana % · Max Mana flat · Armour % · Max Energy Shield % |
+| Secondary | Elemental resistance % · Max HP flat · Life Regeneration % · Cooldown reduction % · Mana Regeneration % · Armour flat · Energy Shield flat |
 | Stat Mod | Stat Mod flat · All stats flat (every item) |
 | Gear Mod | Armour flat · Evasion flat · Energy Shield flat (the school is set by the Base) |
 ## pant
 | Role | Mods (union of every pant Base in item-base.md) |
 |---|---|
-| Primary | Evasion flat · Evasion % · Max HP flat · Max HP % · Cooldown reduction % · Max Mana flat |
-| Secondary | Max HP flat · Elemental resistance % · Life Regeneration % · Mana Regeneration % |
+| Primary | Evasion flat · Evasion % · Max HP flat · Max HP % · Cooldown reduction % · Max Mana flat · Armour % · Max Energy Shield % |
+| Secondary | Max HP flat · Elemental resistance % · Life Regeneration % · Mana Regeneration % · Energy Shield flat · Evasion flat · Armour flat |
 | Stat Mod | Stat Mod flat · All stats flat (every item) |
 | Gear Mod | Armour flat · Evasion flat · Energy Shield flat (the school is set by the Base) |
 ## boots
 | Role | Mods (union of every boots Base in item-base.md) |
 |---|---|
-| Primary | Evasion flat · Evasion % · Max HP flat · Max HP % · Max Mana flat · Cooldown reduction % |
-| Secondary | Cooldown reduction % · Elemental resistance % · Life Regeneration % · Evasion % · Max Energy Shield % |
+| Primary | Evasion flat · Evasion % · Max HP flat · Max HP % · Max Mana flat · Cooldown reduction % · Armour % · Max Energy Shield % |
+| Secondary | Cooldown reduction % · Elemental resistance % · Life Regeneration % · Evasion % · Max Energy Shield % · Armour flat · Energy Shield flat · Max HP flat · Evasion flat |
 | Stat Mod | Stat Mod flat · All stats flat (every item) |
 | Gear Mod | Armour flat · Evasion flat · Energy Shield flat (the school is set by the Base) |
 ## belt
@@ -47,8 +47,8 @@ The Stat Mod line (`Stat Mod flat`) rolls on every item, and the Gear Mod line (
 ## gloves
 | Role | Mods (union of every gloves Base in item-base.md) |
 |---|---|
-| Primary | Max HP % · Evasion flat · Elemental alignment % · Cooldown reduction % · Evasion % |
-| Secondary | Elemental alignment % · Life Regeneration % · Max Mana flat |
+| Primary | Max HP % · Evasion flat · Elemental alignment % · Cooldown reduction % · Evasion % · Armour % · Max Energy Shield % |
+| Secondary | Elemental alignment % · Life Regeneration % · Max Mana flat · Armour flat · Energy Shield flat · Max HP flat · Cooldown reduction % |
 | Stat Mod | Stat Mod flat · All stats flat (every item) |
 | Gear Mod | Armour flat · Evasion flat · Energy Shield flat (the school is set by the Base) |
 ## ring
@@ -72,8 +72,8 @@ The Stat Mod line (`Stat Mod flat`) rolls on every item, and the Gear Mod line (
 ## cape
 | Role | Mods (union of every cape Base in item-base.md) |
 |---|---|
-| Primary | Evasion % · Elemental resistance % · Max HP flat · Max Mana % |
-| Secondary | Cooldown reduction % · All Resistance % · Max Mana flat · Mana Regeneration % |
+| Primary | Evasion % · Elemental resistance % · Max HP flat · Max Mana % · Armour % · Max Energy Shield % |
+| Secondary | Cooldown reduction % · All Resistance % · Max Mana flat · Mana Regeneration % · Armour flat · Energy Shield flat · Max HP flat · Elemental resistance % |
 | Stat Mod | Stat Mod flat · All stats flat (every item) |
 <!-- END GENERATED:slot-pools -->
 

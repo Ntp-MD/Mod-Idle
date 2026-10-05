@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, spendReference } from '../src/sim/game';
 import { setRule } from '../src/sim/filter';
 
 /**
@@ -37,6 +37,7 @@ describe('the built loop measured against the published hours', () => {
     for (let h = 1; h <= HOURS; h++) {
       for (let i = 0; i < SEC_PER_HR; i++) {
         tick(s, {});
+        spendReference(s); // the reference build spends its level points evenly (D-141)
         for (const cap of [10, 30, 60, 90, 100]) {
           if (s.player.level >= cap && reached[cap] == null) reached[cap] = s.clockSec;
         }
@@ -72,10 +73,8 @@ describe('the built loop measured against the published hours', () => {
     expect(rows.every((r) => r.kills > 0)).toBe(true); // the fight never stops paying XP
     expect(rows.every((r) => r.drops > 0)).toBe(true); // and never stops rolling drops
     expect(rows.every((r) => r.minted > 0)).toBe(true); // B17: the stone mint runs in every hour
-    // an idle run loses its upgrades on the floor once the bag is full, because nothing equips
-    // itself: that is `loot.md` §4's pause, and the honest number for it is this
-    expect(rows[rows.length - 1].spilled).toBeGreaterThan(0);
-    expect(reached[10]).not.toBeUndefined(); // hour one of `timeline_checkpoints_hr` is reachable AFK
-    expect(killRate / published).toBeGreaterThan(0.5); // the loop slows, it does not collapse
+    expect(reached[10]).not.toBeUndefined(); // hour one of the timeline is reachable at all
+    // No wall-clock target: this game has no time limit (owner ruling 2026-10-05, D-141), so the run is
+    // NOT gated against the published kill rate or a bag-fill pace. The loop only has to keep paying.
   }, 180000);
 });

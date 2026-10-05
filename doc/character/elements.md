@@ -144,7 +144,7 @@ armour_mult = 1 - K_CHILL_ARMOUR_CUT              K_CHILL_ARMOUR_CUT = 0.25
 ## Lightning — shock
 
 ```
-stun_chance = elem_align * K_LIGHTNING_STUN + the mace's Chance to stun % line   Cap 15
+stun_chance = elem_align * K_LIGHTNING_STUN + the mace's Chance to stun % line   no Cap
 stun_time   = 1 sec
 shock_aspd  = 20%                                Cap 20
 shock_align_cut = 20%   applied to our own elem_align against this target
@@ -152,8 +152,8 @@ shock_align_cut = 20%   applied to our own elem_align against this target
 
 - Stun queues the target attack sequence. During stun it stops attacking and stops regen.
 - Rolls once per attack, not per damage instance.
-- **The stun Cap is `Alignment × K_STUN_PER_ALIGN` = 35 × 0.30 = 10.5%** (C10 prints 11) — at the old K 0.15 a ceiling Alignment of 50 reached only 7.5%, so the K was raised to 0.30 and the Cap now sits exactly where a full Alignment build lands (Dex 510 + amulet + gloves).
-- **The mace adds a second source**: its Base Mod line carries `Chance to stun %`, forced with the frame, so a mace build reaches the `caps.stun` Cap that Alignment alone cannot. The two sources sum, and the Cap binds — the gear line is the only way past the Alignment ceiling.
+- **The stun chance has no Cap (owner ruling):** it is `Alignment × K_STUN_PER_ALIGN` plus the mace's line, and both keep climbing. `K_STUN_PER_ALIGN` is 0.30, so a full Alignment build lands near 9.5% on its own (C10 prints it) — the mace's `Chance to stun %` adds on top with no ceiling.
+- **The mace adds a second source**: its Base Mod line carries `Chance to stun %`, forced with the frame. The two sources sum, and with no Cap the mace line is headroom on top of Alignment rather than the only way past a ceiling.
 - Values a real Element build sees: Dex 328 + amulet + gloves → Alignment 26.4% → 7.9% stun per attack.
 - **Shock also cuts the target's attack speed by 20%** (its own Cap 20, separate from chill's). Shock does not stack, so this is a flat 20% while it is up.
 - **Shock also cuts our own Alignment against that target by 20%** — the debuff is applied to the *target's* tolerance, not to our stat: `elem_align_used = elem_align × 0.80` for every further status we try to put on that target.
@@ -242,7 +242,7 @@ dot_total = min(dot_total, elem_aligned_damage * 1.5)
 | K_POISON | 0.08 | poison per stack · 10 stacks = 0.80 |
 | K_CHAOS_DMG | 0.01 | +dmg per mark stack · 25 stacks = +25% damage |
 | K_CHAOS_LEECH | 0.002 | lifesteal per mark stack · 25 stacks = 0.05% |
-| K_LIGHTNING_STUN | 0.30 | stun chance per Alignment · the Alignment reach lands at 11.0%, so the mace's Chance to stun % line is what reaches the Cap 15% (D-123 · D-124 · X43) |
+| K_LIGHTNING_STUN | 0.30 | stun chance per Alignment · the Alignment reach lands at 9.5%, and the mace's Chance to stun % line adds to it — no Cap (owner ruling · D-123) |
 | K_BLEED | 0.70 | bleed total as a fraction of the inflicting physical hit · physical DoT, not an Element — see formula-offense.md section 4 |
 | bleed_time_sec | 5 | PoE base bleed duration · bleed does not stack |
 | K_BLEED_CHANCE | 0.40 | chance per landed physical hit while `Lacerate` is up (curse, 10 sec ÷ 14 sec = 71% uptime) |

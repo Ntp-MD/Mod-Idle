@@ -199,7 +199,7 @@ const specs: Record<string, any> = {
         group: ['enum', 'Weapon group', { options: R.WEAPON_GROUPS.concat(['all', '']) }],
         element: str('Element / tag'),
         cd: ['num', 'Cooldown', { unit: 'sec' }],
-        mana: str('Mana cost'),
+        mana: str('Mana cost', { pattern: '^(\\d+(?:\\.\\d+)?)\\s*(%|flat)(?![A-Za-z]).*$' }),
         scale: str('Scaling stat'),
         targets: str('Targets / hits'),
         effect: txt('Effect'),

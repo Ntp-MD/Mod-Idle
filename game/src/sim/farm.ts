@@ -24,6 +24,10 @@ export interface FarmState {
   threshold: { hp: number; mana: number };
   lastDrinkAt: number;
   usesThisFight: number;
+  /** Client-side automation: plant empty plots, harvest what is ready, brew at a slow cadence. */
+  autoFarm: { plant: boolean; harvest: boolean; brew: boolean };
+  /** The last time an auto-brew ran, so brewing cannot fire every tick. */
+  lastAutoFarmAt: number;
 }
 
 export function newFarm(): FarmState {
@@ -37,6 +41,8 @@ export function newFarm(): FarmState {
     threshold: { hp: farm.P.auto_use_default.hp_pct, mana: farm.P.auto_use_default.mana_pct },
     lastDrinkAt: -9999,
     usesThisFight: 0,
+    autoFarm: { plant: false, harvest: false, brew: false },
+    lastAutoFarmAt: -9999,
   };
 }
 
@@ -147,9 +153,53 @@ export function maybeDrink(state: GameState, c: Character, mobIsBoss: boolean): 
   return { name: potion.name, pool, amount };
 }
 
-/** Herb bundles ride their own roll, separate from gear and stones (`engine.json` `herbs`). */
-export function rollHerbs(state: GameState, rng: () => number, band: string, zoneTier: string): number {
-  if (rng() >= farm.herbChance(band)) return 0;
+/** Client-side brew cadence: a potion at most once every this many seconds while auto-brew is on. */
+const AUTO_BREW_COOLDOWN_SEC = 30;
+
+/**
+ * The twin of `maybeDrink` for the rest of the track: harvest every ready plot, plant empty plots with
+ * the best tier the seed store can afford, and brew one affordable draught at a slow cadence. Driven
+ * entirely by the existing plot / herb / stone state — it prices nothing new and touches no rate.
+ */
+export function maybeFarm(state: GameState): string[] {
+  const f = state.farm;
+  if (!f.autoFarm) return [];
+  const out: string[] = [];
+  if (f.autoFarm.harvest) {
+    for (let i = 0; i < plotCount(state); i++) {
+      const plot = f.plots[i];
+      if (plot?.tier && state.clockSec >= plot.readyAt) {
+        const r = harvest(state, i);
+        if (r.ok) out.push(`Auto-harvest · ${plot.tier} +${r.herbs} herbs`);
+      }
+    }
+  }
+  if (f.autoFarm.plant) {
+    const level = farmLevel(state);
+    const seed = farm.seedCostHerbs || 0;
+    const best = [...farm.TIERS].reverse().find((t: string) => farm.canGrow(level, t) && (f.herbs[t] || 0) >= seed);
+    if (best) {
+      for (let i = 0; i < plotCount(state); i++) {
+        if (!f.plots[i]?.tier) {
+          const r = plant(state, i, best);
+          if (r.ok) out.push(`Auto-plant · ${best} in plot ${i + 1}`);
+        }
+      }
+    }
+  }
+  if (f.autoFarm.brew && state.clockSec - f.lastAutoFarmAt >= AUTO_BREW_COOLDOWN_SEC) {
+    for (const p of farm.P.list) {
+      const r = craftPotion(state, p.name);
+      if (r.ok) { out.push(`Auto-brew · ${p.name}`); f.lastAutoFarmAt = state.clockSec; break; }
+    }
+  }
+  return out;
+}
+
+/** Herb bundles ride their own roll, separate from gear and stones (`engine.json` `herbs`). A Hunt
+ *  Order may hand in an already-reweighted chance so the three collectible streams stay balanced. */
+export function rollHerbs(state: GameState, rng: () => number, band: string, zoneTier: string, chance?: number): number {
+  if (rng() >= (chance ?? farm.herbChance(band))) return 0;
   const bundle = farm.H.bundle_min + Math.floor(rng() * (farm.H.bundle_max - farm.H.bundle_min + 1));
   // a bundle the bag cannot hold is left where it fell: herbs never dissolve into stones
   return addTo(state, state.farm.herbs, zoneTier, 'herb', bundle);

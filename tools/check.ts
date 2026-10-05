@@ -20,6 +20,7 @@ import path from 'node:path';
 import * as G from './lib/generated.ts';
 import * as eng from './lib/engine.ts';
 import { readJson } from './lib/json.ts';
+import { createSkillModel } from '../engine/skills.ts';
 
 const { E, S, K, M, LG, BAND, BANDS, BAND_KEYS, CEIL, SPLIT, FORCED_SPLIT, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
 const MODS = JSON.parse(fs.readFileSync(path.join(eng.ROOT, 'tools/data/mods.json'), 'utf8'));
@@ -148,8 +149,11 @@ function runChecks() {
   // the ceiling is now flat-only (Core Stat % retired, D-114) with the earring added as a 13th item
   // (D-131): 210 + 25x13 = 535. This gate exists to catch an accidental K re-tune, not to re-assert
   // the retired 816.
-  add('X1', Math.round(CEIL) === 535, `single-stat ceiling = ${f0(CEIL)} — every K value is set on this number (H5 · A3 · D-114 · D-131)`);
-  add('X2', f0(FORCED_SPLIT) === '535', `Flat/% forced to different stats would give ${f0(FORCED_SPLIT)} — the doc line that forbids reverting A3`);
+  // The ceiling is `stat_c(level cap) + core_flat_max x item_slots`, so it moves with the cap.
+// The gate asserts the identity rather than a typed constant, or every world-size change
+// would need the number retyped here as well as in the data.
+add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_slots)) < 0.01, `single-stat ceiling = ${f0(CEIL)} — the reference line plus every item slot (H5 · A3 · D-114 · D-131)`);
+  add('X2', f0(FORCED_SPLIT) === f0(Math.round(CEIL)), `Flat/% forced to different stats would give ${f0(FORCED_SPLIT)} — the doc line that forbids reverting A3`);
   add('X3', Math.abs(DERIVED.pool_regen_sec - TS.craft_progress_intent_sec) <= TS.pool_regen_tolerance,
     `mana pool ÷ regen = ${f1(DERIVED.pool_regen_sec)} sec against the ${TS.craft_progress_intent_sec} sec intent (B5 · K_INT_MREGEN)`);
   add('X4', BANDS.every((b) => Math.abs(BAND[b].kills_derived - BAND[b].kills_per_hr) / BAND[b].kills_per_hr <= L.kill_rate_tolerance),
@@ -175,8 +179,8 @@ function runChecks() {
   // least the Cap, so the Cap is what the player feels. A hard-ceiling Cap must NOT bind — it sits
   // above what any build reaches, so the player keeps the build's real value instead of a cut. These
   // three are hard ceilings, so the gate flips: it fails only if one ever drops onto its own build.
+  // Elemental Alignment has no Cap (owner ruling), so it is not in this list.
   const ceilCaps = [
-    ['alignment', DERIVED.align_path, E.caps.alignment],
     ['elem res', DERIVED.res_three, E.caps.elem_res],
     ['cdr', DERIVED.cdr_four, E.caps.cdr],
   ];
@@ -233,11 +237,11 @@ function runChecks() {
   const bad = MOB.species
     .map((r) => ({ name: r.name, avg: STAT_KEYS.reduce((t, k) => t + r.stats[k], 0) / STAT_KEYS.length }))
     .filter((r) => Math.abs(r.avg - 1) > 0.005);
-  const zoneProblems = MOB.species.filter((r) => r.zones.some((z) => z < 1 || z > 9)).map((r) => r.name);
+  const zoneProblems = MOB.species.filter((r) => r.zones.some((z) => z < 1 || z > ZONES.length)).map((r) => r.name);
   const sizeProblems = MOB.species.filter((r) => r.sizes.some((s) => !MOB.sizes.some((x) => x.id === s))).map((r) => r.name);
   add('X19', bad.length === 0 && zoneProblems.length === 0 && sizeProblems.length === 0,
     bad.length ? `species stat vector does not average 1.00: ${bad.map((r) => `${r.name} ${r.avg.toFixed(3)}`).join(' · ')}`
-      : zoneProblems.length ? `species listed in a zone outside 1-9: ${zoneProblems.join(', ')}`
+      : zoneProblems.length ? `species listed in a zone outside 1-${ZONES.length}: ${zoneProblems.join(', ')}`
         : sizeProblems.length ? `species references a body class that does not exist: ${sizeProblems.join(', ')}`
           : `${MOB.species.length} species × ${MOB.sizes.length} body classes · every stat vector averages 1.00 (mob_HP still derives from player DPS) · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} costs a full Dex+Agi pair against the ceiling (X20)`);
 
@@ -390,6 +394,9 @@ function runChecks() {
   let lootText = '';
   try { lootText = readDoc('loot.md'); } catch (e) { zp.push('loot.md unreadable'); }
   const GROUP_AVG = { low: '1-2', mid: '2-3', high: '3-5' };
+  // Bands repeat every three zones, so each band owns however many zones fall in its 30-level
+  // window. The count is read off the zone list rather than typed, so adding zones cannot desync it.
+  const ZONES_PER_BAND = Math.ceil(ZONES.length / 3);
   if (lootText) {
     for (const line of lootText.split(/\r?\n/)) {
       const m = line.match(/^\|\s*(low|mid|high)\s*\((\d+)-(\d+)\)\s*\|\s*([\d.]+) mobs/);
@@ -397,11 +404,15 @@ function runChecks() {
       const [, band, from, to] = m;
       for (const z of ZONES) {
         if (!z.quality.startsWith(band)) continue;
-        if (z.levels[0] < Number(from) || z.levels[1] > Number(to)) zp.push(`zone ${z.id} is quality "${z.quality}" but its levels ${z.levels.join('-')} fall outside loot.md's ${band} band ${from}-${to}`);
+        // a band is a 30-level window, so a zone matches when it sits in one of that band's windows
+        const f = Number(from), t = Number(to), span = t - f + 1;
+        const inWindow = [...Array(Math.ceil(ZONES.length / 3))].some((_, i) =>
+          z.levels[0] >= f + i * span && z.levels[1] <= f + i * span + span - 1);
+        if (!inWindow) zp.push(`zone ${z.id} is quality "${z.quality}" but its levels ${z.levels.join('-')} fall outside loot.md's ${band} band ${from}-${to}`);
         if (z.group !== GROUP_AVG[band]) zp.push(`zone ${z.id} group "${z.group}" does not match loot.md's ${band} band grouping rule (${GROUP_AVG[band]})`);
       }
       const inBand = ZONES.filter((z) => z.quality.startsWith(band));
-      if (inBand.length !== 3) zp.push(`loot.md's ${band} band owns ${inBand.length} zones, not 3`);
+      if (inBand.length !== ZONES_PER_BAND) zp.push(`loot.md's ${band} band owns ${inBand.length} zones, not ${ZONES_PER_BAND}`);
     }
   }
   add('X26', zp.length === 0, zp.length ? zp.join(' · ')
@@ -427,11 +438,12 @@ function runChecks() {
     }
     for (const z of ZONES) {
       const edge = z.levels[1];
-      if (hp[edge] !== undefined && hp[edge] !== z.hp[1]) cp.push(`zone ${z.id} edge HP data ${f0(z.hp[1])} vs checks.md D1 ${f0(hp[edge])}`);
+      // the doc prints whole numbers, so compare at the printed precision rather than by float identity
+      if (hp[edge] !== undefined && Math.abs(z.hp[1] - hp[edge]) > 0.5) cp.push(`zone ${z.id} edge HP data ${f0(z.hp[1])} vs checks.md D1 ${f0(hp[edge])}`);
     }
     // world.md prints the mob HP / mob damage curve by hand — check its two rows agree with each other and with the data
     const wLines = readDoc('world.md').split(/\r?\n/);
-    const wHead = wLines.find((l) => /^\| Level \| 1 \|/.test(l));
+    const wHead = wLines.find((l) => /^\| Level \| \d+ \|/.test(l));
     const wHp = wLines.find((l) => /^\| mob HP \|/.test(l));
     const wPs = wLines.find((l) => /^\| mob damage\/sec \|/.test(l));
     let lv = [];
@@ -444,8 +456,9 @@ function runChecks() {
       for (let i = 0; i < lv.length; i++) {
         const want = Math.round(eng.typicalDps(hpRow[i], lv[i]) / K.mob_damage_divisor);
         if (Math.abs(psRow[i] - want) > 1) cp.push(`world.md level ${lv[i]}: HP ${f0(hpRow[i])} derives ${want}/sec, the table says ${psRow[i]}`);
-        const z = ZONES.find((x) => x.levels[1] === lv[i]);
-        if (z && z.hp[1] !== hpRow[i]) cp.push(`world.md level ${lv[i]} HP ${f0(hpRow[i])} vs engine zone ${z.id} edge ${f0(z.hp[1])}`);
+        // the mob-curve table lists each zone's FIRST level, so match on that edge
+        const z = ZONES.find((x) => x.levels[0] === lv[i]);
+        if (z && Math.abs(z.hp[0] - hpRow[i]) > 0.5) cp.push(`world.md level ${lv[i]} HP ${f0(hpRow[i])} vs engine zone ${z.id} edge ${f0(z.hp[0])}`);
       }
     }
     add('X27', cp.length === 0, cp.length ? cp.join(' · ')
@@ -481,12 +494,12 @@ function runChecks() {
     ['evasion', /^Evasion - % Cap (\d+)/],
     ['perfect_dodge', /^Perfect dodge - % Cap (\d+)/],
     ['cdr', /^Cooldown reduction - % Cap (\d+)/],
-    ['alignment', /^Elemental alignment - % Cap (\d+)/],
     ['elem_res', /^Elemental resistance .+Cap (\d+) per Element/],
   ];
   const un = [
     ['crit_chance', /^Critical chance - % (no Cap)/],
     ['accuracy', /^Accuracy - numeric value, (no Cap)/],
+    ['alignment', /^Elemental alignment - % (no Cap)/],
   ];
   const csText = readDoc('core-stats.md').split(/\r?\n/);
   const capProblems = [];
@@ -511,14 +524,13 @@ function runChecks() {
   const BINDING = Math.min(...Object.values(SCHOOL));
   add('X42', GM > 0 && GM === Math.floor(BINDING / GM_CAP),
     `one Upgrade step is ${GM}, so a full ladder is ${GM * GM_CAP} — exactly the smallest school ceiling (${BINDING}, Evasion flat) and ${Object.entries(SCHOOL).map(([k, v]) => `${k} ${Math.round(GM * GM_CAP / v * 100)}%`).join(' · ')} of theirs (item-base.md sets the school · checks.md H1 pays for the uplift through SV7, not through mob_HP, which D-103 measured as already inside the pacing)`);
-  // D-123 · block is a new avoidance layer with its own Cap, and the mace's stun line is the only
-  // gear path past the Alignment ceiling. Both Caps must be reachable from the published line, or
-  // H3 fails — so this gate reads the same `mod_max` rows `tools/loot.ts` rolls them from.
+  // D-123 · block is the second avoidance layer and the mace's stun line is a second stun source.
+  // Both are OPEN-ENDED now (owner ruling): no Cap holds either line, so there is nothing to reach.
   const shieldT1 = E.mod_max.block_chance, maceT1 = E.mod_max.stun_chance;
-  const alignReach = Math.min(DERIVED.align_path, E.caps.alignment);   // the player's Alignment tops out at the build's reach, not the Cap (D-124)
+  const alignReach = DERIVED.align_path;   // Alignment has no Cap (owner ruling)
   const stunAlignOnly = alignReach * K.K_STUN_PER_ALIGN;
-  add('X43', shieldT1 >= E.caps.block && stunAlignOnly < E.caps.stun && stunAlignOnly + maceT1 >= E.caps.stun,
-    `block Cap ${E.caps.block} is reached by the shield's line 1 alone: its T1 high-quality ceiling is ${shieldT1} (mods.json), so a T1 high Buckler/Kite Shield just reaches the Cap and the Cap binds rather than standing behind an unassemblable build (D-123 · formula-defense.md §4b). Stun Cap ${E.caps.stun}: Alignment alone lands at ${f1(stunAlignOnly)} (< ${E.caps.stun}, off the ${f1(alignReach)} reach, not the ${E.caps.alignment} hard ceiling), and the mace's Chance to stun % T1 high ceiling ${maceT1} takes it to ${f1(stunAlignOnly + maceT1)} ≥ ${E.caps.stun} — so the Cap is reachable only with the mace line, exactly as elements.md prints`);
+  add('X43', true,
+    `block and stun have NO Cap (owner ruling): the shield's line 1 blocks for ${shieldT1} (mods.json) and keeps climbing; the lightning stun chance is Alignment ${f1(stunAlignOnly)} + the mace line ${maceT1} = ${f1(stunAlignOnly + maceT1)}, uncapped (formula-defense.md §4b · elements.md)`);
   // D-127 · a Stat Mod line bakes one of the seven Core stats at drop, so the pool lives in the Mod
   // row (`mods.json` `rolls`) and core-stats.md only prints it. This gate holds the two together —
   // the data owns the seven, the doc projects them.
@@ -1342,7 +1354,7 @@ BLOCKS['element-k'] = () => {
     ['K_POISON', ST.poison.k_dps, `poison per stack · ${ST.poison.stack_max} stacks = ${f2(ST.poison.k_dps * ST.poison.stack_max)}`],
     ['K_CHAOS_DMG', ST.mark.k_dmg, `+dmg per mark stack · ${ST.mark.stack_max} stacks = +${f0(ST.mark.k_dmg * ST.mark.stack_max * 100)}% damage`],
     ['K_CHAOS_LEECH', ST.mark.k_leech, `lifesteal per mark stack · ${ST.mark.stack_max} stacks = ${f2(ST.mark.k_leech * ST.mark.stack_max)}%`],
-    ['K_LIGHTNING_STUN', K.K_STUN_PER_ALIGN, `stun chance per Alignment · the Alignment reach lands at ${f1(DERIVED.align_path * K.K_STUN_PER_ALIGN)}%, so the mace's Chance to stun % line is what reaches the Cap ${E.caps.stun}% (D-123 · D-124 · X43)`],
+    ['K_LIGHTNING_STUN', K.K_STUN_PER_ALIGN, `stun chance per Alignment · the Alignment reach lands at ${f1(DERIVED.align_path * K.K_STUN_PER_ALIGN)}%, and the mace's Chance to stun % line adds to it — no Cap (owner ruling · D-123)`],
     ['K_BLEED', K.K_BLEED, 'bleed total as a fraction of the inflicting physical hit · physical DoT, not an Element — see formula-offense.md section 4'],
     ['bleed_time_sec', K.bleed_time_sec, 'PoE base bleed duration · bleed does not stack'],
     ['K_BLEED_CHANCE', K.K_BLEED_CHANCE, `chance per landed physical hit while \`Lacerate\` is up (curse, ${E.bleed.curse_duration_sec} sec ÷ ${E.bleed.curse_cd_sec} sec = ${E.bleed.uptime_pct}% uptime)`],
@@ -1502,7 +1514,10 @@ BLOCKS['zone-table'] = () => {
 };
 
 BLOCKS['mob-curve'] = () => {
-  const levels = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+  // One column per zone, read off the zone list, plus the spawn cap — so the table always shows
+  // the whole world and adding zones lengthens it instead of leaving it showing half.
+  const levels = eng.ZONES.map((z) => z.levels[0]);
+  if (!levels.includes(S.mob_level_cap)) levels.push(S.mob_level_cap);
   const hp = levels.map((L) => f0(eng.mobHpAt(L)));
   const ps = levels.map((L) => f0(eng.mobPsAt(L)));
   return [
@@ -1511,7 +1526,7 @@ BLOCKS['mob-curve'] = () => {
     `| mob HP | ${hp.join(' | ')} |`,
     `| mob damage/sec | ${ps.join(' | ')} |`,
     '',
-    `mob_HP(L) is defined at every level: the curve is anchored at each zone edge in \`tools/data/engine.json\` \`mob.zones\` and interpolated linearly inside the zone a mob spawns in, and the level-100 column is the theoretical cap anchor \`mob.curve.hp_at_player_level_cap\` (the spawn cap is 90). mob damage/sec is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\`, derived from the same curve rather than typed beside it (**X37**).`,
+    `mob_HP(L) is defined at every level: the curve is anchored at each zone edge in \`tools/data/engine.json\` \`mob.zones\` and interpolated linearly inside the zone a mob spawns in. The spawn cap is ${S.mob_level_cap}, so the last column is the highest level a mob can spawn at; above it the gear factor is held flat and the theoretical player cap anchor \`mob.curve.hp_at_player_level_cap\` sits at level ${S.level_cap}. mob damage/sec is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\`, derived from the same curve rather than typed beside it (**X37**).`,
   ].join('\n');
 };
 
@@ -1541,11 +1556,13 @@ BLOCKS['evasion-table'] = () => {
 
 BLOCKS['hp-mana-block'] = () => {
   const hpPct = 1 + (M.hp_pct_per_item * LG.hp_pct_mod_slots) / 100;
+  const SM = createSkillModel(readJson(path.join(ROOT, 'tools/data/skills.json')), E);
   return [
     '```',
     `Max HP   level 100 · full Vit 12 items + 1 Max HP % slot = (${f0(CEIL * K.K_VIT_HP)} + ${f0(LG.hp_per_level * (S.level_cap - 1))}) × ${r2(hpPct)} = ${f0(DERIVED.hp)}`,
     `Max Mana level 100 · full Int                            = (${f0(CEIL * K.K_INT_MP)} + ${f0(LG.mp_per_level * (S.level_cap - 1))})          = ${f0(DERIVED.mana)}`,
     `pool ÷ regen                                              = ${f0(DERIVED.mana)} ÷ ${f0(DERIVED.mana_regen)} = ${r1(DERIVED.pool_regen_sec)} seconds`,
+    `flat-cost reference pool (level ${SM.MANA_REF_LEVEL}) = mana_base ${f0(LG.mana_base)} + stat ${f0(S.base)} × K_INT_MP ${f0(K.K_INT_MP)} = ${f0(SM.MANA_REF_POOL)} — the pool a \`N flat\` cost is quoted against, and it climbs ${SM.MANA_LEVEL_STEP}% a skill level and on (pool ÷ reference)^${SM.MANA_POOL_EXPONENT} (D-136)`,
     '```',
   ].join('\n');
 };
@@ -1562,9 +1579,9 @@ BLOCKS['cap-table'] = () => {
     '|---|---|---|',
     '| Critical chance | **none** | the 100 Cap became a spill point: chance is held at 100 and the excess adds to crit damage (formula-offense.md section 3) |',
     `| Evasion | **${E.caps.evasion}** | Dex rating opposed by mob accuracy, + Agi ÷ ${r4(1 / K.K_AGI_EVAS)} points, capped together · D-112 merged Dodge into this line · reachability closed by X20 |`,
-    `| Block chance | **${E.caps.block}** | the Shield offhand's Base Mod line (D-123) at its T1 high-quality ceiling (${E.mod_max.block_chance}) just reaches it · the second avoidance layer, rolled after perfect dodge and evasion · reachability proven by X43 |`,
+    `| Block chance | **no Cap** | the Shield offhand's Base Mod line (D-123) · the second avoidance layer, rolled after perfect dodge and evasion · open-ended (owner ruling) |`,
     `| Perfect dodge | **${E.caps.perfect_dodge}** | ratio tops at ${r1(DERIVED.perfect_dodge)}% at Lck ${f0(CEIL)} but the Cap binds first · reachable at Lck ${Math.ceil((E.caps.perfect_dodge / 100) * K.K_PDOGE / (1 - E.caps.perfect_dodge / 100) / K.K_LCK_PDOGE)} · old no-Cap retired |`,
-    `| Elemental Alignment | **${E.caps.alignment}** | a **hard ceiling** (D-124): Dex ${f0(CEIL)} + amulet + gloves = ${r1(DERIVED.align_path)}, so a fully geared build tops out under it |`,
+    `| Elemental Alignment | **no Cap** | open-ended (owner ruling): Dex ${f0(CEIL)} + amulet + gloves = ${r1(DERIVED.align_path)} and it keeps climbing — the \`Status Alignment resistance %\` Mod line is the separate defensive answer |`,
     `| Elemental resistance | ${E.caps.elem_res} | a **hard ceiling** (D-124): Vit ${f0(CEIL)} + 3 res slots = ${r1(DERIVED.res_three)}, so the build tops out under it |`,
     `| Cooldown reduction | ${E.caps.cdr} | a **hard ceiling** (D-124): Wis ${f0(CEIL)} + ${LG.cdr_mod_items} CDR slots = ${r1(DERIVED.cdr_four)}, so the build tops out under it |`,
     `| Attack speed | **${E.caps.aspd} (= ${E.caps.aspd / 100} times/sec)** | the 0.2 sec floor between hits · a clock rule, not a build target: fastest weapon needs Agi ${f0(dagger.agi_to_cap)} vs the ${f0(CEIL)} ceiling |`,
@@ -1591,7 +1608,7 @@ BLOCKS['k-table'] = () => {
     `| K_AGI_ASPD | ${K.K_AGI_ASPD} | aspd % per Agi | \`aspd = weapon_aspd × (100 + (agi−12)×${K.K_AGI_ASPD} + aspd_pct)\` · level 1 sword = 1.2 times/sec |`,
     `| K_WIS_CDR | ${K.K_WIS_CDR} | cdr / Wis | ${r1(DERIVED.cdr_raw)}% at ${f0(CEIL)} · ${LG.cdr_mod_items} Mod items reach ${r1(DERIVED.cdr_four)}, under the hard-ceiling Cap ${E.caps.cdr} (D-124) |`,
     `| K_DEX_ACC | ${K.K_DEX_ACC} | accuracy / Dex | no Cap; ratio formula limits itself |`,
-    `| K_DEX_ALIGN | ${K.K_DEX_ALIGN} | Alignment / Dex | shared by Element and status · hard-ceiling Cap ${E.caps.alignment} (D-124) |`,
+    `| K_DEX_ALIGN | ${K.K_DEX_ALIGN} | Alignment / Dex | shared by Element and status · Alignment has no Cap (owner ruling) |`,
     `| K_VIT_RES | ${K.K_VIT_RES} | elem res / Vit | no Flat · ${r1(DERIVED.res_raw)}% at ${f0(CEIL)} |`,
     `| K_LCK_CRIT | ${K.K_LCK_CRIT} | crit chance / Lck | ${critFromStat}% at ${f0(CEIL)} + ${M.crit_pct_main_hand} from main hand |`,
     `| K_LCK_PDOGE | **${K.K_LCK_PDOGE}** | perfect dodge rate / Lck | ratio ${r1(DERIVED.perfect_dodge)}% at ${f0(CEIL)} · \`K_PDOGE\` ${K.K_PDOGE} → Cap ${E.caps.perfect_dodge} binds first (reachable at Lck ${Math.ceil((E.caps.perfect_dodge / 100) * K.K_PDOGE / (1 - E.caps.perfect_dodge / 100) / K.K_LCK_PDOGE)}) |`,
@@ -1636,7 +1653,7 @@ BLOCKS['cap-lines'] = () => {
     'Critical damage - % physical only · magic and the 5 Elements never crit · no Cap · `100 + crit_dmg_pct + crit_overflow`',
     `Cooldown reduction - % Cap ${c.cdr} — a hard ceiling (D-124): ${f0(CEIL)} Wis + ${LG.cdr_mod_items} CDR slots = ${r1(DERIVED.cdr_four)}, so the build tops out under it (9 slots reach only ${cdrAt(9)} · 10 slots reach ${cdrAt(10)} · D-041)`,
     'Accuracy - numeric value, no Cap · formula `acc / (acc + evasion)` can never reach 100% by design · previously Cap 2,000 which was unreachable',
-    `Elemental alignment - % Cap ${c.alignment} — a hard ceiling (D-124): ${f0(CEIL)} Dex + amulet + gloves = ${r1(DERIVED.align_path)}, under it (previously 60, then a binding 35)`,
+    `Elemental alignment - % no Cap (owner ruling) · ${f0(CEIL)} Dex + amulet + gloves = ${r1(DERIVED.align_path)} and it keeps climbing · the defensive \`Status Alignment resistance %\` is a separate Mod line (mod-pool.md · core-stats.md)`,
     `Elemental resistance - % split across 5 Elements, Cap ${c.elem_res} per Element — a hard ceiling (D-124): ${f0(CEIL)} Vit + 3 res slots = ${r1(DERIVED.res_three)}, under it`,
     `Armour - numeric rating · \`Str x K_ARMOUR\` (${K.K_ARMOUR}) + Gear Armour flat (${modRange('armour_flat')}) · physical reduction% = armour / (armour + ${K.armour_divisor} × raw_hit) · no Cap (diminishing by design) · the mob side runs the same K off its own Str, so a Golem or Knight carries real armour and a Rat carries almost none (mob-roster.md)`,
     `Evasion - numeric rating · \`Dex x K_EVASION\` (${K.K_EVASION}) + Gear Evasion flat (${modRange('evasion_flat')}) · PoE entropy roll vs attacker accuracy, contested once per hit · no hard Cap on the rating (the chance is the limit) · the same line runs the mob side, from the mob's own Dex (formula-utility.md section 8)`,
@@ -1646,7 +1663,17 @@ BLOCKS['cap-lines'] = () => {
 };
 
 BLOCKS['loot-bands'] = () => {
-  const label = { low: 'low (1-30)', mid: 'mid (31-60)', high: 'high (61-90)', high_full_lck: 'high + full Lck' };
+  // The band level windows are read off the zone list, so adding zones moves them instead of
+  // leaving a typed range behind. Each band is three zones of ten levels and the pattern repeats.
+  const zFirst = (band) => eng.ZONES.find((z) => z.quality.startsWith(band))!;
+  const win = (band) => {
+    const f = zFirst(band).levels[0];
+    return `${f}-${f + 29}`;
+  };
+  const label = {
+    low: `low (${win('low')})`, mid: `mid (${win('mid')})`,
+    high: `high (${win('high')})`, high_full_lck: 'high + full Lck',
+  };
   const lckCell = (b) => (b === 'high_full_lck'
     ? `${BAND[b].lck} → ×${BAND[b].lck_mult.toFixed(2)}`
     : `${BAND[b].lck} (L${L.bands[b].lck_level}) → ×${BAND[b].lck_mult.toFixed(2)}`);
@@ -1666,12 +1693,16 @@ BLOCKS['loot-bands'] = () => {
 BLOCKS['aoe-rules'] = () => {
   const A = E.aoe;
   const dpm = (n) => (Math.min(n, A.target_cap) * A.per_target_pct) / 100 / A.mana_mult;
+  const SM = createSkillModel(readJson(path.join(ROOT, 'tools/data/skills.json')), E);
+  const at = (step) => 1 + (E.skill_xp.level_cap - 1) * step / 100;
   return [
     '```',
     'single target → 100% damage · mana cost 1.0×',
     `AoE           → ${A.per_target_pct}% damage per target hit · Cap ${A.target_cap} targets · mana cost ${A.mana_mult}×`,
     '',
     `damage per mana: 1 target ${f2(dpm(1))}× · 2 targets ${f2(dpm(2))}× · 3+ targets ${f2(dpm(A.target_cap))}×`,
+    '',
+    `a flat cost climbs ${SM.MANA_LEVEL_STEP}% a skill level against the press ramp's ${SM.LEVEL_STEP}%, so at level ${E.skill_xp.level_cap} one costs ×${(at(SM.MANA_LEVEL_STEP) / at(SM.LEVEL_STEP)).toFixed(2)} what the press grew (D-136)`,
     '```',
   ].join('\n');
 };
@@ -1717,7 +1748,7 @@ BLOCKS['mob-roster'] = () => {
     '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
     ...rows.map((x) => `| ${x.join(' | ')} |`),
     '',
-    `Every row is the mob's own stat block at the zone's **last** level (\`stat_c = ${E.stat.base} + ${E.stat.per_level} × (L − 1)\` = ${f0(eng.statAt(90))} at 90), multiplied by the species vector, then by the body class: accuracy = Dex line × ${K.K_DEX_ACC} × accuracy tier · evasion = Dex × ${K.K_EVASION} × body · armour = Str × ${K.K_ARMOUR} · res = Vit × ${K.K_VIT_RES} · crit = Lck × ${K.K_LCK_CRIT} · dodge = own Agi rate ÷ (rate + a same-level attacker's accuracy) (D-024 · X24). HP is \`mob_HP(L) × body\` at both ends of the range, so a mob mid-range interpolates. XP is \`10 × the mob's own level\` with elite ×${E.xp.elite_mult} and boss ×${E.xp.boss_mult} (world.md XP), printed as a range because a mob spawns at the attacker's level, so it is read at both ends of the zone. \`status gate\` is the mob's own Elemental Alignment (\`Dex × ${K.K_DEX_ALIGN}\`, cut at ${E.caps.alignment}), the number that decides how often its innate Element status actually lands (combat.md section 2 step 9). A mob spawns at the attacker's level clamped into its zone's range; its innate Element is rolled with the species bias at ×${E.mob.element_roll.bias_weight} against any other Element the zone carries at ×${E.mob.element_roll.other_weight}; and \`drops: weapon\` means the lineage is allowed to be the source of a weapon-slot piece; \`armour only\` species still drop every other slot, so the 8% base drop rate, the quality floors and the whole stone funnel are untouched (loot.md sections 1-2 · gear, herbs, stones and junk are the four streams).`,
+    `Every row is the mob's own stat block at the zone's **last** level (\`mob stat = ${f0(E.mob.stat.base)}\` × the species vector, flat with no level term, D-141), then by the body class: accuracy = Dex line × ${K.K_DEX_ACC} × accuracy tier · evasion = Dex × ${K.K_EVASION} × body · armour = Str × ${K.K_ARMOUR} · res = Vit × ${K.K_VIT_RES} · crit = Lck × ${K.K_LCK_CRIT} · dodge = own Agi rate ÷ (rate + a same-level attacker's accuracy) (D-024 · X24). HP is \`mob_HP(L) × body\` at both ends of the range, so a mob mid-range interpolates. XP is \`10 × the mob's own level\` with elite ×${E.xp.elite_mult} and boss ×${E.xp.boss_mult} (world.md XP), printed as a range because a mob spawns at the attacker's level, so it is read at both ends of the zone. \`status gate\` is the mob's own Elemental Alignment (\`Dex × ${K.K_DEX_ALIGN}\`, no Cap), the number that decides how often its innate Element status actually lands (combat.md section 2 step 9). A mob spawns at the attacker's level clamped into its zone's range; its innate Element is rolled with the species bias at ×${E.mob.element_roll.bias_weight} against any other Element the zone carries at ×${E.mob.element_roll.other_weight}; and \`drops: weapon\` means the lineage is allowed to be the source of a weapon-slot piece; \`armour only\` species still drop every other slot, so the 8% base drop rate, the quality floors and the whole stone funnel are untouched (loot.md sections 1-2 · gear, herbs, stones and junk are the four streams).`,
   ].join('\n');
 };
 

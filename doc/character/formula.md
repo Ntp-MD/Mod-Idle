@@ -28,10 +28,10 @@ All numbers here are designed to pass this check — if any number change breaks
 | Reference point | Value | Calculated from |
 |---|---|---|
 | Level 1 | every stat = 12 · sword attacks 1.2 times/sec | `stat_c` + section 7 |
-| Level 100 (no gear) | every stat = 210 | `12 + 2 × 99` |
-| Level 100 · single-stat ceiling | **535** | `(210 + 25×13 items)` · no Core Stat % term (D-114) |
-| Level 100 · split two stats evenly | 372 each | 6 items + 6 items |
-| Level 100 · Str 13-item build | Physical power 3,196 · 2.10 times/sec | `(535×5 + 80) × 1.16` |
+| Level 190 (no gear) | every stat = 108 | `12 + 675 ÷ 7` |
+| Level 190 · single-stat ceiling | **433** | `(108.4 + 25×13 items)` · no Core Stat % term (D-114) |
+| Level 190 · split two stats evenly | 532 each | 6 items + 6 items |
+| Level 190 · Str 13-item build | Physical power 2,607 · 2.10 times/sec | `(433×5 + 80) × 1.16` |
 | Expected DPS at level 100 (max build) | **7,518 per second** | includes 80% hit and 1.12 average crit · there is no passive tree (D-046) |
 | Time to kill level 100 mob | on-level geared players — **1.00 sec**, the D1 anchor holds at ceiling 535 (see section 0a) |
 
@@ -93,25 +93,25 @@ Every row uses sword (`weapon_aspd` 1.2 · weapon_mult 1.0) · reference mob eva
 <!-- BEGIN GENERATED:k-table -->
 | K | Value | Unit | Note |
 |---|---|---|---|
-| K_STR | 5 | phys / Str | Str 535 → 2,675 · main driver of Str |
+| K_STR | 5 | phys / Str | Str 433 → 2,167 · main driver of Str |
 | K_INT | 5 | magic / Int | main driver of Int |
 | K_ELEM | 4 | elem / Int | lower than Int because it must pass Alignment first |
-| K_VIT_HP | 20 | hp / Vit | Vit 535 → 10,700 raw |
-| K_VIT_REGEN | 0.25 | hp regen / Vit | 134/sec at 535 |
+| K_VIT_HP | 20 | hp / Vit | Vit 433 → 8,669 raw |
+| K_VIT_REGEN | 0.25 | hp regen / Vit | 108/sec at 433 |
 | K_INT_MP | 4 | mana / Int | set to keep mana a constraint, see section 5 |
 | K_INT_MREGEN | **0.18** | mana regen / Int | old 0.2 gave pool/regen 29.7 sec against 40 sec intent |
-| K_INT_ES | 4 | Energy Shield / Int | Int 535 = 2,140 shield = 25.3% of that build''s 8,460 HP (X25) |
-| K_INT_ESREGEN | 0.1 | ES recharge / Int | 53.5/sec · 3 sec delay · whole pool back in 40 sec |
+| K_INT_ES | 4 | Energy Shield / Int | Int 433 = 1,734 shield = 17.3% of that build''s 10,029 HP (X25) |
+| K_INT_ESREGEN | 0.1 | ES recharge / Int | 43.3/sec · 3 sec delay · whole pool back in 40 sec |
 | K_AGI_EVAS | 0.0333 | Evasion points / Agi | **30 Agi = 1 point** (owner ruling, D-112) · the mob side keeps K_MOB_DODGE for its own thin dodge (D-024) |
 | K_AGI_ASPD | 0.25 | aspd % per Agi | `aspd = weapon_aspd × (100 + (agi−12)×0.25 + aspd_pct)` · level 1 sword = 1.2 times/sec |
-| K_WIS_CDR | 0.03 | cdr / Wis | 16.1% at 535 · 11 Mod items reach 60.2, under the hard-ceiling Cap 80 (D-124) |
+| K_WIS_CDR | 0.03 | cdr / Wis | 13% at 433 · 11 Mod items reach 48.8, under the hard-ceiling Cap 80 (D-124) |
 | K_DEX_ACC | 1.5 | accuracy / Dex | no Cap; ratio formula limits itself |
-| K_DEX_ALIGN | 0.05 | Alignment / Dex | shared by Element and status · hard-ceiling Cap 50 (D-124) |
-| K_VIT_RES | 0.05 | elem res / Vit | no Flat · 26.8% at 535 |
-| K_LCK_CRIT | 0.05 | crit chance / Lck | 26.8% at 535 + 8 from main hand |
-| K_LCK_PDOGE | **0.03** | perfect dodge rate / Lck | ratio 22% at 535 · `K_PDOGE` 57 → Cap 21 binds first (reachable at Lck 506) |
-| K_LCK_DROP | 0.01 | drop rate multiplier / Lck | 6.4x at 535 · Base drop still separate |
-| K_STR_WEIGHT | 2 | weight / Str | 2,070 at Str 535 · overweight cuts aspd up to -50% (section 11) |
+| K_DEX_ALIGN | 0.05 | Alignment / Dex | shared by Element and status · Alignment has no Cap (owner ruling) |
+| K_VIT_RES | 0.05 | elem res / Vit | no Flat · 21.7% at 433 |
+| K_LCK_CRIT | 0.05 | crit chance / Lck | 21.7% at 433 + 8 from main hand |
+| K_LCK_PDOGE | **0.03** | perfect dodge rate / Lck | ratio 18.6% at 433 · `K_PDOGE` 57 → Cap 21 binds first (reachable at Lck 506) |
+| K_LCK_DROP | 0.01 | drop rate multiplier / Lck | 5.3x at 433 · Base drop still separate |
+| K_STR_WEIGHT | 2 | weight / Str | 1,867 at Str 433 · overweight cuts aspd up to -50% (section 11) |
 | K_dodge | **retired** | — | the flat divisor is gone: Evasion is a ratio plus Agi points (D-112) |
 | K_EVASION | 0.5 | evasion / Dex | same line both sides: mob evasion = `stat_c × species.dex × 0.5 × body`, player evasion = `Dex × 0.5` (+ Gear Evasion flat 6-30) · replaces the old `mob evasion = level × 1` stand-in, which made a Slime and an Elf equally hard to hit |
 | weapon_aspd | 0.7-1.5 | Base times/sec of weapon | multiplies whole parenthesis in section 7, not only the Agi term |
@@ -125,13 +125,13 @@ Every row uses sword (`weapon_aspd` 1.2 · weapon_mult 1.0) · reference mob eva
 |---|---|---|
 | Critical chance | **none** | the 100 Cap became a spill point: chance is held at 100 and the excess adds to crit damage (formula-offense.md section 3) |
 | Evasion | **80** | Dex rating opposed by mob accuracy, + Agi ÷ 30 points, capped together · D-112 merged Dodge into this line · reachability closed by X20 |
-| Block chance | **50** | the Shield offhand's Base Mod line (D-123) at its T1 high-quality ceiling (50) just reaches it · the second avoidance layer, rolled after perfect dodge and evasion · reachability proven by X43 |
-| Perfect dodge | **21** | ratio tops at 22% at Lck 535 but the Cap binds first · reachable at Lck 506 · old no-Cap retired |
-| Elemental Alignment | **50** | a **hard ceiling** (D-124): Dex 535 + amulet + gloves = 36.8, so a fully geared build tops out under it |
-| Elemental resistance | 75 | a **hard ceiling** (D-124): Vit 535 + 3 res slots = 50.8, so the build tops out under it |
-| Cooldown reduction | 80 | a **hard ceiling** (D-124): Wis 535 + 11 CDR slots = 60.2, so the build tops out under it |
-| Attack speed | **500 (= 5 times/sec)** | the 0.2 sec floor between hits · a clock rule, not a build target: fastest weapon needs Agi 845 vs the 535 ceiling |
-| Accuracy | ~~2,000~~ **removed** | ratio formula already forbids 100%; calculable ceiling 1,003 never hit old Cap |
+| Block chance | **no Cap** | the Shield offhand's Base Mod line (D-123) · the second avoidance layer, rolled after perfect dodge and evasion · open-ended (owner ruling) |
+| Perfect dodge | **21** | ratio tops at 18.6% at Lck 433 but the Cap binds first · reachable at Lck 506 · old no-Cap retired |
+| Elemental Alignment | **no Cap** | open-ended (owner ruling): Dex 433 + amulet + gloves = 31.7 and it keeps climbing — the `Status Alignment resistance %` Mod line is the separate defensive answer |
+| Elemental resistance | 75 | a **hard ceiling** (D-124): Vit 433 + 3 res slots = 41.2, so the build tops out under it |
+| Cooldown reduction | 80 | a **hard ceiling** (D-124): Wis 433 + 11 CDR slots = 48.8, so the build tops out under it |
+| Attack speed | **500 (= 5 times/sec)** | the 0.2 sec floor between hits · a clock rule, not a build target: fastest weapon needs Agi 845 vs the 433 ceiling |
+| Accuracy | ~~2,000~~ **removed** | ratio formula already forbids 100%; calculable ceiling 813 never hit old Cap |
 <!-- END GENERATED:cap-table -->
 
 All Caps must live together in one file, otherwise each system will set its own and collide.
