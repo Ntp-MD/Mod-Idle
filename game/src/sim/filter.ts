@@ -11,6 +11,8 @@ import type { GameState } from './types';
  */
 
 export interface SlotRule {
+  /** Off by default (D-122): an off slot keeps every drop and dissolves nothing. */
+  enabled: boolean;
   /** Keep a drop only when it outscores the piece worn in that slot by more than this. */
   margin_pct: number;
   /** `any` keeps both Rarities; a named Rarity dissolves every lower one regardless of score. */
@@ -31,6 +33,7 @@ export const FILTER_SLOTS: string[] = [...new Set((loot.SLOTS as string[]).map(S
 export const RARITY_CHOICES: string[] = ['any', ...(loot.RARITY as any[]).map((r) => String(r.name))];
 
 const DEFAULT_RULE: SlotRule = {
+  enabled: E.loot.filter.rules.default_enabled,
   margin_pct: E.loot.filter.upgrade_margin_pct,
   min_rarity: E.loot.filter.rules.default_min_rarity,
   keep_missing_element: E.loot.filter.rules.default_keep_missing_element,
@@ -68,6 +71,7 @@ export const coveredElements = (s: GameState): Set<string> => loot.notYetFound(s
 
 /** How the bench should phrase one slot's rule, using only words the design already uses. */
 export function describeRule(rule: SlotRule): string {
+  if (!rule.enabled) return 'filter off — every drop is kept';
   const parts = [`+${rule.margin_pct}% to keep`];
   if (rule.min_rarity !== 'any') parts.push(`${rule.min_rarity} only`);
   if (!rule.keep_missing_element) parts.push('an unknown Element does not count');

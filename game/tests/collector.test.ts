@@ -20,19 +20,19 @@ describe('the three sets are the ones town.json names', () => {
     const militia = col.setAt('ashfall');
     const reliquary = col.setAt('bonegate');
     const garden = col.setAt('vermolch');
-    expect(col.matches(militia, piece('coif', 'helmet'))).toBe(true);
-    expect(col.matches(militia, piece('barbute', 'helmet'))).toBe(false);
-    expect(col.matches(militia, piece('coif', 'chest'))).toBe(false);
-    expect(col.matches(reliquary, piece('plate', 'chest'))).toBe(true);
-    expect(col.matches(garden, piece('circlet', 'helmet', 'low'))).toBe(false);
-    expect(col.matches(garden, piece('circlet', 'helmet', 'high'))).toBe(true);
+    expect(col.matches(militia, piece('Hood', 'helmet'))).toBe(true);
+    expect(col.matches(militia, piece('Sallet', 'helmet'))).toBe(false);
+    expect(col.matches(militia, piece('Hood', 'chest'))).toBe(false);
+    expect(col.matches(reliquary, piece('Plate Vest', 'chest'))).toBe(true);
+    expect(col.matches(garden, piece('Circlet', 'helmet', 'low'))).toBe(false);
+    expect(col.matches(garden, piece('Circlet', 'helmet', 'high'))).toBe(true);
   });
 
   it('a finished set stops wanting pieces', () => {
     const s = newGame(3);
-    expect(wants(s, piece('coif', 'helmet'))?.id).toBe('militia');
+    expect(wants(s, piece('Hood', 'helmet'))?.id).toBe('militia');
     s.collector.done.militia = true;
-    expect(wants(s, piece('coif', 'helmet'))).toBe(null);
+    expect(wants(s, piece('Hood', 'helmet'))).toBe(null);
   });
 });
 
@@ -54,11 +54,11 @@ describe('turning a set in', () => {
     const before = stashTabCount(s);
     const gold = s.counters.gold;
     s.bag.unshift(
-      { ...piece('barbute', 'helmet'), heldFor: 'reliquary' },
-      { ...piece('plate', 'chest'), heldFor: 'reliquary' },
-      { ...piece('cuisses', 'pant'), heldFor: 'reliquary' },
+      { ...piece('Sallet', 'helmet'), heldFor: 'reliquary' },
+      { ...piece('Plate Vest', 'chest'), heldFor: 'reliquary' },
+      { ...piece('Cuisses', 'pant'), heldFor: 'reliquary' },
     );
-    expect(heldCount(s, 'reliquary', 'plate')).toBe(1);
+    expect(heldCount(s, 'reliquary', 'Plate Vest')).toBe(1);
     const r = turnIn(s, 'bonegate');
     expect(r.ok).toBe(true);
     expect(s.bag.length).toBe(0);
@@ -72,9 +72,9 @@ describe('turning a set in', () => {
     const s = newGame(6);
     const gate = TOWN.settlements.find((x: any) => x.id === 'ashfall');
     s.counters.zoneKills[gate.zone] = Math.ceil(eng.BAND.low.kills_per_hr * gate.budget_hr * TOWN.standing.tiers[1].share);
-    s.bag.unshift({ ...piece('coif', 'helmet'), heldFor: 'militia' });
+    s.bag.unshift({ ...piece('Hood', 'helmet'), heldFor: 'militia' });
     expect(turnIn(s, 'ashfall').ok).toBe(false);
-    s.bag.unshift({ ...piece('mail', 'chest'), heldFor: 'militia' }, { ...piece('striders', 'boots'), heldFor: 'militia' });
+    s.bag.unshift({ ...piece('Ring Mail', 'chest'), heldFor: 'militia' }, { ...piece('Strapped Boots', 'boots'), heldFor: 'militia' });
     expect(turnIn(s, 'ashfall').ok).toBe(true);
     expect(turnIn(s, 'ashfall').why).toMatch(/already turned in/);
     expect(s.grants.banners.length).toBe(1);
@@ -86,10 +86,10 @@ describe('turning a set in', () => {
     const gate = TOWN.settlements.find((x: any) => x.id === 'ashfall');
     s.counters.zoneKills[gate.zone] = Math.ceil(eng.BAND.low.kills_per_hr * gate.budget_hr * TOWN.standing.tiers[1].share);
     s.town.owned.push('stash_tab_1');
-    s.bag.unshift({ ...piece('coif', 'helmet'), heldFor: 'militia' });
+    s.bag.unshift({ ...piece('Hood', 'helmet'), heldFor: 'militia' });
     s.stash[0] = [
-      { ...piece('mail', 'chest'), heldFor: 'militia' },
-      { ...piece('striders', 'boots'), heldFor: 'militia' },
+      { ...piece('Ring Mail', 'chest'), heldFor: 'militia' },
+      { ...piece('Strapped Boots', 'boots'), heldFor: 'militia' },
     ];
     expect(turnIn(s, 'ashfall').ok).toBe(true);
     expect(s.stash[0].length).toBe(0);

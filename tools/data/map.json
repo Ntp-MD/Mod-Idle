@@ -1,0 +1,41 @@
+{
+  "view": { "w": 1200, "h": 720 },
+  "note": "Presentation only (X33 · X47). Node and link ids are the simulator's; the x/y coordinates are the illustrator's and nothing under engine/ or game/src/ may read this file. A path is derived from the two node positions by tools/map.ts, and a terrain's weights are read from engine.json `road.terrain` — neither is copied here. `anchor` names a link id (`link:<zoneA>-<zoneB>`) or a node id.",
+  "nodes": [
+    { "id": "eastgate", "x": 110, "y": 520 },
+    { "id": "millbrook", "x": 240, "y": 430 },
+    { "id": "ashfall", "x": 370, "y": 350 },
+    { "id": "ironrow", "x": 500, "y": 400 },
+    { "id": "wolf_cross", "x": 610, "y": 310 },
+    { "id": "highspire", "x": 730, "y": 380 },
+    { "id": "bonegate", "x": 850, "y": 300 },
+    { "id": "frosthold", "x": 970, "y": 200 },
+    { "id": "vermolch", "x": 1090, "y": 120 }
+  ],
+  "links": [
+    { "id": "1-2", "a": "eastgate", "b": "millbrook", "terrain": "river" },
+    { "id": "2-3", "a": "millbrook", "b": "ashfall", "terrain": "forest" },
+    { "id": "3-4", "a": "ashfall", "b": "ironrow", "terrain": "road" },
+    { "id": "4-5", "a": "ironrow", "b": "wolf_cross", "terrain": "mountain" },
+    { "id": "5-6", "a": "wolf_cross", "b": "highspire", "terrain": "moor" },
+    { "id": "6-7", "a": "highspire", "b": "bonegate", "terrain": "mountain" },
+    { "id": "7-8", "a": "bonegate", "b": "frosthold", "terrain": "forest" },
+    { "id": "8-9", "a": "frosthold", "b": "vermolch", "terrain": "river" },
+    { "id": "1-3", "a": "eastgate", "b": "ashfall", "terrain": "mountain" },
+    { "id": "6-8", "a": "highspire", "b": "frosthold", "terrain": "mountain" },
+    { "id": "5-7", "a": "wolf_cross", "b": "bonegate", "terrain": "river" }
+  ],
+  "terrain": [
+    { "id": "eastgate-marsh", "kind": "river", "anchor": "link:1-2" },
+    { "id": "millbrook-woods", "kind": "forest", "anchor": "link:2-3" },
+    { "id": "kings-road", "kind": "road", "anchor": "link:3-4" },
+    { "id": "ironrow-pass", "kind": "mountain", "anchor": "link:4-5" },
+    { "id": "wolf-moor", "kind": "moor", "anchor": "link:5-6" },
+    { "id": "bonegate-heights", "kind": "mountain", "anchor": "link:6-7" },
+    { "id": "frosthold-woods", "kind": "forest", "anchor": "link:7-8" },
+    { "id": "vermolch-river", "kind": "river", "anchor": "link:8-9" },
+    { "id": "ashfall-slopes", "kind": "mountain", "anchor": "ashfall" },
+    { "id": "highspire-overlook", "kind": "mountain", "anchor": "link:6-8" },
+    { "id": "wolf-cross-ford", "kind": "river", "anchor": "link:5-7" }
+  ]
+}

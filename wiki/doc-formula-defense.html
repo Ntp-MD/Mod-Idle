@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Formulas — Defense · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-formulas-defense">Formulas — Defense</a>
+<a href="#h-4-evasion">4. Evasion</a>
+<a href="#h-5-hp-mana-energy-shield">5. HP / Mana / Energy Shield</a>
+<a href="#h-6-cooldown-reduction">6. Cooldown reduction</a>
+<a href="#h-9-alignment-and-elemental-resistance">9. Alignment and Elemental resistance</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html" aria-current="page">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">Character &amp; stats</a><span class="sep">/</span><span>formula-defense.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>Formulas — Defense</h1>
+<dl class="kv"><dt>file</dt><dd><code>formula-defense.md</code> · 124 lines · 1,825 words · written 2026-10-04T12:44:42Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-equipment-slot.html">equipment-slot.md</a> · <a href="doc-elements.html">elements.md</a></dd><dt>imported by</dt><dd><a href="doc-formula.html">formula.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a> · <a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../formula-defense.md">formula-defense.md</a></dd></dl>
+
+<h2 id="h-formulas-defense">Formulas — Defense</h2>
+<p>import core-stats.md import mod-pool.md import equipment-slot.md import elements.md</p>
+<p>Symbols: <code>x</code> = value from build · <code>x_c</code> = value from Core stat · <code>x_f</code> = value from Mod Flat · <code>x_p</code> = value from Mod %</p>
+<h2 id="h-4-evasion">4. Evasion</h2>
+<pre class="code">evasion_rating = (dex * K_EVASION + evasion_flat) * (1 + evasion_pct/100)
+agi_points     = agi * K_AGI_EVAS                       # 30 Agi = 1 percentage point
+evasion_chance = (1 - mob_accuracy / (mob_accuracy + evasion_rating)) * 100 + agi_points
+evasion_chance = min(evasion_chance, 80)</pre>
+<ul><li>Evasion is <strong>one avoidance layer</strong> (D-112): the two retired avoidance Mod lines are now the <code>Evasion flat</code> / <code>Evasion %</code> pair, and Dex plus Agi are capped together rather than racing each other for a second Cap. The Mod ranges live in mod-pool.md's generated table.</li><li><code>K_EVASION</code> = 0.5 · <code>K_AGI_EVAS</code> = 1/30 · Cap is <strong>80% evasion chance</strong>, opposed by that mob's accuracy rather than a flat divisor — the same shape the mob side dodges with. <strong>X20</strong> proves it: reachable against the inaccurate lineages, out of reach against the accurate ones. <code>K_dodge</code> (the old flat 100) is deleted — it could not express that.</li><li>Reason for the opposed form: under a flat model two avoidance items reach the rate Cap with no stat investment, so avoidance is an on/off switch instead of a stat that grows gradually. Under the opposed roll every Dex point buys chance and Agi adds the points on top, so how much lands depends on what is attacking.</li></ul>
+<table><thead><tr><th>build</th><th>Dex + Agi</th><th>Evasion flat</th><th>Dex rating</th><th>Agi points</th><th>Evasion</th></tr></thead><tbody><tr><td>Full Dex + Agi 12 items + boots/gloves T1</td><td>510</td><td>15 + 15</td><td>285</td><td>+17</td><td><strong>65.8%</strong></td></tr><tr><td>Dex + Agi 6 items + 1 T1 item</td><td>360</td><td>15 + 15</td><td>210</td><td>+12</td><td><strong>53.3%</strong></td></tr><tr><td>No investment + 1 low-Quality item</td><td>210</td><td>6</td><td>111</td><td>+7</td><td><strong>34.1%</strong></td></tr></tbody></table>
+<p>Evasion is one line (D-112): the Dex rating is rolled against the reference attacker (mean species · Medium body · accuracy tier ×1 · level 100 accuracy 299) as <code>1 − acc ÷ (acc + rating)</code>, then Agi adds <strong>30 Agi per point</strong> and the Cap 80 binds the sum — so this is a snapshot against an average mob, not a fixed Cap point. &lt;!-- END GENERATED:evasion-table --&gt;</p>
+<ul><li>Evasion uses a ratio, not direct addition, because excessive avoidance would make attacks never land and break the meta.</li><li>Against a given attacker, more Dex and more Agi both buy avoidance until the Cap; past it Agi only helps attack speed and Dex only helps accuracy and Alignment.</li><li>Evasion exists to receive mob groups · read the chance off the generated table above for the mob actually being fought (see world.md)</li></ul>
+<pre class="code">perfect_dodge_rate = lck * K_LCK_PDOGE
+perfect_dodge      = perfect_dodge_rate / (perfect_dodge_rate + K_PDOGE)
+perfect_dodge      = min(perfect_dodge, caps.perfect_dodge)</pre>
+<ul><li>Perfect dodge is separate from Evasion because it removes the hit outright instead of contesting it.</li><li><code>K_LCK_PDOGE</code> = <strong>0.03</strong> · <code>K_PDOGE</code> = <strong>57</strong> · the Cap is <code>engine.json</code> <code>caps.perfect_dodge</code>, printed with its reachability in the generated Cap table in formula.md. It sits just under the top the maxed Lck ratio reaches, so the Cap binds rather than standing behind a Lck build nobody can assemble (D-114 re-based it with the other four).</li><li>A Cap on the Lck ratio keeps a pure-Lck build from becoming a permanent second health bar. The ratio is what <em>how much Lck you wore</em> decides; the Cap is the point where the game stops paying for the last of it.</li><li><strong>Perfect dodge is not opposed</strong> — when it triggers the hit is removed outright (D-009 3c) — so it is the answer to DoT ticks and to unconditional effects that Evasion cannot contest.</li></ul>
+<h2 id="h-5-hp-mana-energy-shield">5. HP / Mana / Energy Shield</h2>
+<pre class="code">max_hp   = (hp_base + vit * K_VIT_HP + level_gain_hp) * (1 + hp_pct/100)
+hp_regen = vit * K_VIT_REGEN * (1 + hp_regen_pct/100)
+
+max_mana   = (mana_base + int * K_INT_MP + level_gain_mp) * (1 + mp_pct/100)
+mana_regen = int * K_INT_MREGEN * (1 + mregen_pct/100)</pre>
+<ul><li><code>K_VIT_HP</code> = 20 · <code>K_VIT_REGEN</code> = 0.25 · <code>hp_base</code> = 300 → Vit 510 gives 10,200 raw HP (14,460 once the per-level term and base are added) and 128/sec regen.</li><li><code>K_INT_MP</code> = 4 · <code>K_INT_MREGEN</code> = <strong>0.18</strong> (was 0.2) · <code>mana_base</code> = 100 → Int 510 gives 2,040 raw mana (3,724 once the per-level term and base are added) and 92/sec regen.</li><li><code>level_gain_hp</code> = 40 × (level − 1) → at level 100 gives 3,960 (the old text wrote 4,000, which overcounted by one level).</li><li><code>level_gain_mp</code> = 16 × (level − 1) → at level 100 gives 1,584.</li></ul>
+<pre class="code">Max HP   level 100 · full Vit 12 items + 1 Max HP % slot = (10,200 + 3,960) × 1.16 = 16,774
+Max Mana level 100 · full Int                            = (2,040 + 1,584)          = 3,724
+pool ÷ regen                                              = 3,724 ÷ 92 = 40.6 seconds</pre>
+<blockquote><p><strong><code>K_INT_MREGEN</code> was 0.2 → 0.15 → 0.18</strong> — the stated intent was &quot;about 40 seconds per full mana pool.&quot; At 0.2 the actual ratio was 29.7 seconds · mana was therefore almost 40% larger than intended and made skills nearly free to spam. At 0.18 it is 40.6 seconds, matching intent · enough to keep pressing skills while still reserving a slice for auras. Players must choose how much of the pool to reserve as aura and how much to leave usable for skills (see skill-pool-aura-heal.md · reservation tiers at pool 3,724).</p></blockquote>
+<pre class="code">max_es   = int * K_INT_ES          (+ Gear Energy Shield flat · 12-60)
+es_regen = int * K_INT_ESREGEN     starts after es_delay without a hit
+es_delay = 5 sec</pre>
+<ul><li><code>K_INT_ES</code> = 4 · <code>K_INT_ESREGEN</code> = 0.10 · Int 510 gives a <strong>2,040</strong> shield recharging at <strong>51/sec</strong>, so the whole pool is back in <strong>40.0 sec</strong> of not being hit — the same full-pool span the mana line was tuned to (B5) and about 2.4x faster than a Vit build recovers its HP.</li><li><strong>The shield is 40.0% of the same Int build's 8,160 HP</strong>, which is the ratio <strong>X25</strong> holds between 30% and 45%: enough that a caster trades raw HP for a rechargeable buffer, not enough to make it two health bars.</li><li><strong>Order matters</strong> — armour (combat.md step 5) and Elemental res (step 6) shrink the number that then drains ES, and only the remainder reaches HP (D-010). Chaos skips the shield entirely and hits HP.</li><li><strong>Delay is the whole cost of the layer</strong>: 5 sec without a hit is long compared to a 1-sec trash clock, so ES refills <em>between</em> groups, not during a boss. That is what keeps the boss gate a pool-times-time question (combat.md section 7) instead of a heal loop.</li><li><strong>Player-only.</strong> Mobs have an Int line but no shield, because their survivability is already anchored on <code>mob_HP</code> — a second pool would count the same anchor twice (checks.md H1).</li></ul>
+<h2 id="h-6-cooldown-reduction">6. Cooldown reduction</h2>
+<pre class="code">cdr = (wis * K_WIS_CDR) * (1 + cdr_pct_total/100)
+cdr = min(cdr, 55)
+
+cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)</pre>
+<ul><li><code>K_WIS_CDR</code> = 0.03 · Wis 510 gives 15.3%.</li><li>Cap <strong>55</strong> is set on the 510 ceiling: Wis 510 + 11 Mod items reaches <code>15.3 × 3.75 = <strong>57.4</strong></code>, so the full set crosses the Cap and the Cap binds (X11 · D-041). The old Cap 80 was set on the retired 816 ceiling, where a full CDR set reached 91.8; at 510 no build reaches 80, so it was rebased with the other caps rather than the K being raised (D-114 · formula.md section 0a).</li><li><strong>There is no <code>cdr_flat</code></strong> — CDR is % only (see mod-pool.md). The old formula added a slot that does not exist.</li><li><code>cdr_pct_total</code> pools every source into one line — today that means only the Mod <code>Cooldown reduction %</code> (max 25 per item). A future buff may add to the same pool, but no Cap is allowed to <em>depend</em> on one: the Cap must be reachable from items alone.</li><li>Path to Cap must be checkable without a buff: Wis 510 + 11 Mod items (every slot but the main hand) = <code>15.3 × 3.75 = <strong>57.4</strong></code> → crosses the Cap 55 ✓ · 10 items = 51.8 (just under) · 9 items = 46.2 · Wis alone = 15.3.</li></ul>
+<p>  This keeps the original intent that CDR requires multi-item investment and that Wis alone is never enough — and it makes the full set the smallest count that reaches the Cap, which is what &quot;a full set just reaches the Cap&quot; now means.</p>
+<ul><li><strong>Wis is deliberately the only stat with a single benefit.</strong> Every other stat gives power plus one utility (Str power + weight, Agi speed + Evasion points, Vit HP + regen, Int power + mana, Dex accuracy + evasion + alignment, Lck crit + perfect dodge + drop), but cooldown reduction is a <strong>pacing</strong> stat, not a power stat: it changes how often the list can be pressed, never what a press is worth. A second benefit would have to be a new stat — effect duration, or a mana reserve — and both are larger systems than the gap they would fill, so the sheet keeps Wis single on purpose (D-016).</li></ul>
+<h2 id="h-9-alignment-and-elemental-resistance">9. Alignment and Elemental resistance</h2>
+<pre class="code">elem_align   = dex * K_DEX_ALIGN + elem_align_flat
+elem_align   = min(elem_align, 35)
+
+res_c        = vit * K_VIT_RES
+elem_res_x   = res_c * (1 + elem_res_pct_x/100)
+elem_res_x   = min(elem_res_x, 45)
+
+status_align = dex * K_DEX_ALIGN     same value as elem_align</pre>
+<ul><li><code>K_DEX_ALIGN</code> = 0.05 · Dex 510 gives 25.5% + the two Alignment slots on defensive items (amulet and gloves, +5 each) = 35.5% → Cap <strong>35</strong> (X11).</li><li><code>K_VIT_RES</code> = 0.05 · Vit 510 gives 25.5% before Mod multiplication.</li><li>Merged away the old <code>status_res</code> once given by Str. No stat gives status res besides this.</li><li><strong>Cap 45 is reached by Vit 510 + 3 res items.</strong> <code>25.5 × (1 + 30+30+30)% = 48.5 → cut to 45</code>. The old Cap 75 was set on the retired 816 ceiling (<code>40.8 × 1.9 = 77.5</code>) and no 510 build reaches it, so it was rebased with the other caps (D-114).</li></ul>
+<p>  Resistance remains a per-item purchase with real effect, not free from Vit alone.</p>
+<ul><li><strong>Cap 35 is the number the two Alignment slots actually reach.</strong> Dex 510 gives 25.5%, and the only two Alignment slots (amulet and gloves, +5 +5) take it to <strong>35.5%</strong>, so the Cap binds just under a full Alignment build. The old Cap 60 was set on the retired 816 ceiling and was never reachable; lowering the Cap was chosen over expanding the Alignment slot to the cape, because it does not touch slot pools.</li></ul>
+<nav class="pager"><a href="doc-formula-offense.html">← formula-offense.md</a><a href="index.html">Character &amp; stats</a><a href="doc-formula-utility.html">formula-utility.md →</a></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

@@ -33,10 +33,11 @@ describe('a drop carries its Element as a stored value', () => {
 });
 
 describe('the bag filter reads per-slot thresholds', () => {
-  it('starts every slot on the published swap margin, with no Rarity floor', () => {
+  it('starts every slot off, with the published margin ready when it is turned on', () => {
     const f = newFilter();
     for (const slot of FILTER_SLOTS) {
       const r = ruleFor(f, slot);
+      expect(r.enabled).toBe(false); // D-122: no slot filters until the player turns it on
       expect(r.margin_pct).toBe(E.loot.filter.upgrade_margin_pct);
       expect(r.min_rarity).toBe(E.loot.filter.rules.default_min_rarity);
       expect(r.keep_missing_element).toBe(true);
@@ -81,6 +82,7 @@ describe('the bag filter reads per-slot thresholds', () => {
     expect(missing.elements).toContain('fire');
     expect(missing.slots).not.toContain('helmet');
     expect(missing.slots).toContain('chest');
+    setRule(s.filter, 'helmet', { enabled: true });
     expect(describeRule(ruleFor(s.filter, 'helmet'))).toMatch(/\+10% to keep/);
   });
 
@@ -170,7 +172,7 @@ describe('three walking snapshots', () => {
     expect(after.mastery.sword).toBe(400);
   });
 
-  it('takes a level-up snapshot while the sim runs, and keeps the save on version 3', async () => {
+  it('takes a level-up snapshot while the sim runs, and keeps the save on version 4', async () => {
     const s = newGame(25);
     s.player.xp = eng.xpToNext(1) * 3;
     let ticks = 0;
@@ -178,7 +180,7 @@ describe('three walking snapshots', () => {
     if (s.player.level > 1) expect(s.pendingSnapshot).toBe('level');
     await writeSave('slot2', s);
     expect(JSON.parse((globalThis as any).localStorage.getItem('modworld:slot2')!).version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(3);
+    expect(SCHEMA_VERSION).toBe(7);
     const round = importJson(exportJson(s));
     expect(round.filter).toBeTruthy();
     expect(round.pendingSnapshot).toBe(null);

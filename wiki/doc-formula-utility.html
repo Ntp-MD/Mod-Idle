@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Formulas — Utility · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-formulas-utility">Formulas — Utility</a>
+<a href="#h-7-attack-speed">7. Attack speed</a>
+<a href="#h-8-accuracy">8. Accuracy</a>
+<a href="#h-10-drop-chance">10. Drop chance</a>
+<a href="#h-11-weight">11. Weight</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html" aria-current="page">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">Character &amp; stats</a><span class="sep">/</span><span>formula-utility.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>Formulas — Utility</h1>
+<dl class="kv"><dt>file</dt><dd><code>formula-utility.md</code> · 124 lines · 1,885 words · written 2026-10-04T12:44:42Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a></dd><dt>imported by</dt><dd><a href="doc-formula.html">formula.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a> · <a href="doc-formula.html">formula.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-world.html">world.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../formula-utility.md">formula-utility.md</a></dd></dl>
+
+<h2 id="h-formulas-utility">Formulas — Utility</h2>
+<p>import core-stats.md import mod-pool.md import item-base.md import equipment-weapon.md</p>
+<p>Symbols: <code>x</code> = value from build · <code>x_c</code> = value from Core stat · <code>x_f</code> = value from Mod Flat · <code>x_p</code> = value from Mod %</p>
+<h2 id="h-7-attack-speed">7. Attack speed</h2>
+<pre class="code">aspd     = weapon_aspd × (100 + (agi − 12) × K_AGI_ASPD + aspd_pct)
+aspd     = min(aspd, 500)
+hits/sec = aspd / 100
+dps      = dmg_per_hit × hits/sec</pre>
+<ul><li><code>K_AGI_ASPD</code> = 0.25 per 1 Agi · <code>100</code> is the level 1 baseline · <code>− 12</code> is the level 1 Base stat, not double-counted.</li><li><strong>The old formula <code>aspd = agi × 0.25 × weapon_aspd</code> did not work at level 1</strong> — Agi 12 gives aspd = 3.6, meaning one hit every 28 seconds · an idle game that waits half a minute per punch dies in the first minute.</li></ul>
+<p>  In this new model at level 1 (no gear) sword attacks 1.2 times/sec and dagger 1.5 times/sec, matching what weapon_aspd always stated as the weapon &quot;Base times/sec.&quot;</p>
+<ul><li><strong>There is no <code>aspd_flat</code></strong> — aspd Mod is % only (see mod-pool.md). The old formula added a slot that does not exist.</li><li>Old <code>interval</code> was written as <code>base_interval × 100 / aspd</code> without stating units · changed to <code>hits/sec = aspd/100</code> to match what players see.</li><li><strong>Cap 500 = 5 times/sec</strong> for all weapons · aspd is a percentage, not a hit count · 5 times/sec is the 0.2 sec floor between hits, a clock rule rather than a build target: no weapon reaches it at the Agi ceiling, because <code>K_AGI_ASPD</code> is set so the fastest weapon needs Agi 845 and the ceiling is 510.</li></ul>
+<table><thead><tr><th>Weapon</th><th>weapon_aspd (Base times/sec)</th><th>weapon_mult</th><th>Agi to hit Cap 500 (with 25% Mod)</th></tr></thead><tbody><tr><td>dagger</td><td>1.5</td><td>0.80</td><td>845 · cannot hit</td></tr><tr><td>one-handed sword / axe</td><td>1.2</td><td>1.00</td><td>1,179 · cannot hit</td></tr><tr><td>bow / crossbow</td><td>1.1</td><td>1.09</td><td>1,330 · cannot hit</td></tr><tr><td>mace / wand / rod</td><td>1</td><td>1.20</td><td>1,512 · cannot hit</td></tr><tr><td>staff / spear</td><td>0.85</td><td>1.41</td><td>1,865 · cannot hit</td></tr><tr><td>two-handed sword / axe</td><td>0.7</td><td>1.71</td><td>2,369 · cannot hit</td></tr></tbody></table>
+<ul><li><code>weapon_aspd</code> multiplies the whole parenthesis (not only the Agi term) so level 1 can still attack and slow weapons stay slower.</li><li>weapon_mult = <code>1.2 / weapon_aspd</code> equalizes DPS across weapon types while nobody hits Cap · <code>weapon_aspd</code> cancels out of <code>power × times/sec</code>, so every type lands on the same Expected DPS at equal stats (the Str 12 row of the section 0 table · <strong>X14</strong>).</li><li><strong>Side effect to know</strong>: Agi never reaches the Cap point, so no Agi is wasted on this axis (dagger would need Agi 845) · see build conclusions in section 0.</li></ul>
+<h2 id="h-8-accuracy">8. Accuracy</h2>
+<pre class="code">accuracy   = (dex * K_DEX_ACC) * (1 + accuracy_pct/100)
+evasion    = stat_c(mob_level) × species.dex × K_EVASION × body_class
+hit_chance = accuracy / (accuracy + evasion)</pre>
+<ul><li><code>K_DEX_ACC</code> = 1.5 · Dex 510 gives 765, multiplied by <code>Accuracy %</code> Mod max 25 on main hand = <strong>956</strong> at ceiling.</li><li><code>K_EVASION</code> = 0.5 · the same K the player's own Evasion rating uses, because a mob runs the player's stat block (D-019). The value is chosen so the average species on a Medium body lands back on the retired <code>level × 1</code> curve, so this is a derivation, not a rebalance — <strong>X21</strong> fails if it stops being true.</li><li><strong>There is no <code>accuracy_flat</code></strong> — Accuracy Mod is % only (see mod-pool.md), same missing-slot issue as aspd.</li><li><strong>Removed <code>accuracy_cap</code> 2,000</strong> — the ratio formula already limits itself (approaches 100% but never reaches it), and the calculable ceiling 956 never came near 2,000, so the old Cap guarded nothing except making numbers look reasoned.</li><li><strong>Mob evasion left <code>level × 1</code>.</strong> That curve was a stand-in for &quot;evasion grows with the mob's own Dex&quot;, and once D-019 gave every species a Dex line the stand-in became wrong: it made a Slime and an Elf equally hard to hit at the same level. Body class already moved the number the other way (Small ×1.10 · Large and Elite ×0.90), so size now divides evasion, not just HP.</li><li>The older value, <code>level 100 = 600</code>, was set on the assumption Dex = 890 — no build has ever reached that, and the real ceiling is now 510 (D-114).</li></ul>
+<table><thead><tr><th>Dex from items</th><th>Dex</th><th>accuracy</th><th>hit vs easiest species</th><th>hit vs reference mob</th><th>hit vs hardest species</th></tr></thead><tbody><tr><td>none (level only)</td><td>210</td><td>394</td><td>83.7%</td><td>79.8%</td><td>75.0%</td></tr><tr><td>Dex 1 item</td><td>235</td><td>441</td><td>85.2%</td><td>81.6%</td><td>77.0%</td></tr><tr><td>Dex 2 items</td><td>260</td><td>488</td><td>86.4%</td><td>83.0%</td><td>78.8%</td></tr><tr><td>Full Dex 12 items</td><td>510</td><td>956</td><td>92.6%</td><td>90.6%</td><td>87.9%</td></tr></tbody></table>
+<p>Evasion is now the species Dex line (<code>stat_c × species.dex × K_EVASION 0.5 × body</code>), so hit chance answers <em>what</em> is being hit, not just the level. The reference mob is the <strong>mean species vector on a Medium body</strong> (99.5 evasion at level 100) — a real average of the 15 lineages, not an imaginary ×1.00 one. Easiest = Slime (Dex ×0.73 · 77) · hardest = Elf (Dex ×1.25 · 131).</p>
+<p>The reference is set on the mean so the anchor does not move: <code>stat_c × 0.5</code> at the roster mean is 99.5 evasion, against the retired <code>level × 1</code> curve of 100. The published hit chances therefore hold as they were — 80% with no Dex, 90.6% at the accuracy ceiling — and everything derived from them (the DPS anchor row in formula.md section 0, mob_HP, the E1-E5 hour checkpoints) is untouched. What changed is only <em>who</em> sits above and below the reference: the species spread runs 77-131 evasion, and a body class multiplies it again (Small ×1.1 · Large and Elite ×0.9).</p>
+<p><strong>Same line, pointed at the player</strong> — mob accuracy against the player's own Evasion rating (<code>Dex × 0.5</code> + Gear Evasion flat 6-30):</p>
+<table><thead><tr><th>mob accuracy tier</th><th>species</th><th>mob accuracy</th><th>mob hits a Dex 0-item player</th><th>mob hits a Full-Dex player</th></tr></thead><tbody><tr><td>×0.05</td><td>Husk · Slime</td><td>12</td><td>10.4%</td><td>4.6%</td></tr><tr><td>×0.25</td><td>Golem · Knight</td><td>63</td><td>37.6%</td><td>19.9%</td></tr><tr><td>×0.50</td><td>Spider · Troll · Seraph</td><td>161</td><td>60.5%</td><td>38.7%</td></tr><tr><td>×0.75</td><td>Rat · Goblin · Bandit · Orc · Demon</td><td>230</td><td>68.6%</td><td>47.4%</td></tr><tr><td>×1.00</td><td>Wolf · Elf · Drake</td><td>330</td><td>75.8%</td><td>56.4%</td></tr></tbody></table>
+<p>K_DEX_ACC 1.5 against K_EVASION 0.5 is a 3:1 ratio, so equal Dex on both sides lands the attacker at 75.0%. The defensive line is deliberately the weaker one per point, so one stat alone cannot approach untouchable, and this roll sits at step 2 of the incoming order — behind perfect dodge, ahead of every mitigation (combat.md section 2). &lt;!-- END GENERATED:hit-chance --&gt;</p>
+<ul><li><strong>Mobs dodge too</strong> — the second avoidance layer on the same stat block: <code>own Agi rate ÷ (rate + the attacking player's accuracy)</code>, the opposed shape X20 already uses on the player side (D-024). It is <em>not</em> folded into <code>hit_chance</code> above, which is the evasion layer only, so a fast weapon with low per-hit damage loses both rolls more often than a slow one. The band is guarded by <strong>X24</strong> and the per-entry numbers are generated in <code><a href="doc-mob-roster.html">mob-roster.md</a></code>.</li><li>Accuracy is Offensive and can only roll on main hand, while Dex from Core stat still counts toward accuracy normally.</li></ul>
+<h2 id="h-10-drop-chance">10. Drop chance</h2>
+<pre class="code">drop_rate = (1 + lck * K_LCK_DROP) × (1 + mastery_collection/100)</pre>
+<ul><li><code>K_LCK_DROP</code> = 0.01 · Lck 510 gives 6.1x.</li><li><strong><code>drop_rate</code> is a multiplier, not a probability</strong> — Base drop chance is set at <strong>8% per kill</strong> (loot.md section 2) → no Lck at level 100 gives 24.8% · Lck 510 gives 48.8%.</li></ul>
+<p>  This number is tied to craft currency prices and boss skill chances (loot.md · crafting.md · economy.md all closed).</p>
+<ul><li><code>mastery_collection</code> = number of weapon types with Mastery ≥ 10 → <strong>+1% per type, max +12%</strong> (equipment-weapon.md) · does not touch DPS at all, so it moves only item income, not power.</li><li>Lck affects drops, so Lck must not become the stat that is good at everything and outshines the rest — Lck gives crit, perfect dodge, and drops all three, so every K must stay low.</li></ul>
+<p>  From the DPS table in section 0: moving 2 items from Str to Lck at the same Agi (Str 8 / Agi 4 → Str 6 / Agi 4 / Lck 2) drops DPS from 6,877 to <strong>6,231 (−9.4%)</strong> in exchange for crit 10.5% → 13.0% — at the retired 816 ceiling the same move cost 22% DPS. The ceiling drop made Lck roughly half as expensive, so the guard this rule was written to set up is held by the G8 ×2.11 junk-line bound (<strong>X7</strong>) instead of by the DPS penalty alone.</p>
+<h2 id="h-11-weight">11. Weight</h2>
+<pre class="code">weight_capacity = weight_base + str * K_STR_WEIGHT
+weight_used     = sum of 12 items (weight table in mod-pool.md) + carried potions × 2 each (condensed × 12) · farm.md
+encumbrance     = min( (weight_used − weight_capacity) / weight_capacity , 0.50 )
+aspd            = aspd × (1 − encumbrance)</pre>
+<ul><li><code>K_STR_WEIGHT</code> = 2 · <code>weight_base</code> = 1,000 · Str 510 carries 2,020 · no Str at all (Str = 210 from levels only) carries 1,420.</li><li><strong>No slot lock</strong> — overweight does not forbid equipping, but <em>slows attacks</em> up to -50% aspd.</li></ul>
+<p>  Rejected alternative: &quot;cannot equip if overweight&quot;, which in an idle game becomes a closed gate on just-dropped loot and forces auto-unequip during AFK.</p>
+<ul><li>The game uses the same unit shown on items (weight unit) and displays <code>used / capacity</code> per character-sheet.md rules.</li></ul>
+<table><thead><tr><th>Worn set at high quality (item-base.md)</th><th>High weight</th><th>No Str (1416)</th><th>Str 2 items (1516)</th><th>Str 6 items (1716)</th></tr></thead><tbody><tr><td>cloth/glass (circlet · vestments · wrap · soft boots · sash · wraps · band ×2 · pendant · cloak)</td><td>326</td><td>0%</td><td>0%</td><td>0%</td></tr><tr><td>balanced (coif · mail · greaves · striders · clasp · gloves · band ×2 · pendant · cloak)</td><td>473</td><td>0%</td><td>0%</td><td>0%</td></tr><tr><td>armored (barbute · plate · cuisses · sabatons · girdle · gauntlets · signet ×2 · talisman · mantle)</td><td>710</td><td>0%</td><td>0%</td><td>0%</td></tr></tbody></table>
+<p>Capacity is <code>weight_base</code> plus Str × <code>K_STR_WEIGHT</code> at level 99 with no investment (208 → 1416), then <code>core_flat_max</code> flat per slot spent on Str: 2 items (1516) and 6 items (1716) — Core Stat has no % line any more (D-114). The tax is the engine’s own <code>encumbranceOf</code>, capped at 50%. &lt;!-- END GENERATED:weight-tax --&gt;</p>
+<ul><li><strong>The tax does not bind on the printed sets.</strong> The <code>weight_base</code> line sits above the heaviest printed set in every Str column, so none of them is encumbered — the figures are printed above from <code>tools/data/bases.json</code>, and a heavier Base weight moves them without a doc edit.</li><li>Weight is a natural cost of better gear because the Quality multiplier in <code>engine.json</code> applies to weight too, not only to stat values — once per Item quality band, the same rule <code>weightAtQuality</code> uses for a single item.</li><li><strong>Effect on the build table in section 0</strong>: all DPS numbers assume no encumbrance, and at <code>weight_base</code> 1,000 no printed set is encumbered, so the table reads directly.</li></ul>
+<nav class="pager"><a href="doc-formula-defense.html">← formula-defense.md</a><a href="index.html">Character &amp; stats</a><a href="doc-elements.html">elements.md →</a></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

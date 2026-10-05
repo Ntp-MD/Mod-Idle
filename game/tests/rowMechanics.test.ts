@@ -4,7 +4,7 @@ import { E, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { mobSwing, playerSwing } from '../src/sim/combat';
-import { newSkillState, castOnce, effectsActive, hasRule } from '../src/sim/skills';
+import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct } from '../src/sim/skills';
 import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/mobStatus';
 import { newCurses, applyCurse, spreadOnDeath, lineValue } from '../src/sim/curse';
 import { newGame, tick } from '../src/sim/game';
@@ -246,6 +246,29 @@ describe('the support rows that change the character', () => {
     }
     expect(rechargedWhileHit).toBe(true);
     void fold;
+  }, 180000);
+
+  it('Energy Absorb ramps its share from base to Cap and negates it even on a full shield', () => {
+    expect(valueOf('buff.energy_absorb', 'es_absorb_pct')).toBe(15);
+    expect(valueOf('buff.energy_absorb', 'es_absorb_cap')).toBe(30);
+    // the helper ramps linearly off the buff's own skill level, base at level 1 to Cap at 20
+    const s = newSkillState();
+    s.buffUp['buff.energy_absorb'] = 3;
+    s.xp['buff.energy_absorb'] = 0;
+    expect(esAbsorbPct(s)).toBeCloseTo(15, 6);
+    s.xp['buff.energy_absorb'] = 8000;
+    expect(esAbsorbPct(s)).toBeCloseTo(30, 6);
+    expect(esAbsorbPct(newSkillState())).toBe(0); // off, nothing is absorbed
+
+    // a hit far larger than the pool, against a full shield: the absorbed share is removed from HP
+    // whether or not the shield has room (D-121) — the press is a real defence even when ES is full
+    const c = buildCharacter(60, emptyGear());
+    const m = mob({ ps: 50000 });
+    const plain = mobSwing(mulberry32(4), c, m, {}, NO, c.es, 0);
+    const absorbing = mobSwing(mulberry32(4), c, m, {}, NO, c.es, 15);
+    expect(absorbing.absorbed).toBeGreaterThan(0);
+    expect(absorbing.toHp).toBeLessThan(plain.toHp);
+    expect(plain.toHp + plain.toEs).toBeCloseTo(absorbing.toHp + absorbing.toEs + absorbing.absorbed, 6);
   }, 180000);
 });
 

@@ -7,7 +7,7 @@ import { newGame, tick, heldWeaponName } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 
 const require = createRequire(import.meta.url);
-const basesCage = require('../../tools/bases.js');
+const basesCage = require('../../tools/bases.ts');
 
 describe('the Mastery curve is the published one', () => {
   it('the kill anchors in equipment-weapon.md land on the right levels', () => {
@@ -34,14 +34,14 @@ describe('the Mastery curve is the published one', () => {
     expect(mastery.skillBonus(20)).toBeCloseTo(1.08, 6);
   });
 
-  it('the drop bonus counts types at L10 or better, to 12%', () => {
+  it('the drop bonus counts types at L10 or better, to 11%', () => {
     const s = newGame(3);
     expect(dropBonusPct(s)).toBe(0);
     for (const w of WEAPONS) s.mastery[w.name] = mastery.xpForLevel(10);
-    expect(dropBonusPct(s)).toBe(12);
-    expect(mastery.MAX_DROP_BONUS).toBe(12);
-    s.mastery[WEAPONS[0].name] = mastery.xpForLevel(9);
     expect(dropBonusPct(s)).toBe(11);
+    expect(mastery.MAX_DROP_BONUS).toBe(11);
+    s.mastery[WEAPONS[0].name] = mastery.xpForLevel(9);
+    expect(dropBonusPct(s)).toBe(10);
   });
 });
 
@@ -70,13 +70,13 @@ describe('the held weapon is the only one that levels', () => {
   });
 
   it('weapon types come from the doc table, not a client list', () => {
-    expect(WEAPONS.length).toBe(12);
+    expect(WEAPONS.length).toBe(11);
     expect(weaponByName('one-handed sword / axe')?.name).toBe('one-handed sword');
     expect(weaponByName('dagger')?.group).toBe('melee');
     expect(weaponByName('staff')?.damage).toBe('magic');
     expect(WEAPONS.filter((w) => w.group === 'melee').length).toBe(7);
     expect(WEAPONS.filter((w) => w.group === 'ranged').length).toBe(2);
-    expect(WEAPONS.filter((w) => w.group === 'magic').length).toBe(3);
+    expect(WEAPONS.filter((w) => w.group === 'magic').length).toBe(2);
   });
 });
 
@@ -89,7 +89,9 @@ describe('weapon drops obey the union pool', () => {
       const item = rollDrop(rng, 'high', 1.2);
       if (item.slot !== 'main hand') continue;
       seen++;
-      for (const line of item.lines) expect(blocked.has(line.id)).toBe(false);
+      // line 1 is the frame's own implicit — a wand carries Cooldown reduction there even though the
+      // random pool blocks it (item-base.md · D-123); lines 2-7 must stay inside the pool
+      for (const line of item.lines.slice(1)) expect(blocked.has(line.id)).toBe(false);
       const w = weaponByName(item.base)!;
       const magicLines = item.lines.filter((l) => l.id.startsWith('magic_power'));
       const physLines = item.lines.filter((l) => l.id.startsWith('physical_power'));

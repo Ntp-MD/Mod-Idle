@@ -9,7 +9,7 @@ import { newGame, tick } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 
 const require = createRequire(import.meta.url);
-const cage = require('../../tools/lib/engine.js');
+const cage = require('../../tools/lib/engine.ts');
 
 describe('the farm curve is the generated one in farm.md', () => {
   it('levels on the Mastery sqrt curve and caps at 20', () => {

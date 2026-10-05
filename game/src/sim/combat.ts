@@ -63,8 +63,9 @@ export function playerSwing(
   }
   // step 5-6 (D-099 · B8): the mob answers each half with the line written against it — its own
   // Armour on everything that is not Element, its own Elemental resistance on the Element half.
-  // Crit sizes the hit before the armour ratio, the same way the incoming order does.
-  let damage = eng.mitigateMobHit(mob, nonElement, elemDamage, curse.armourCut, curse.resistCut) * takenMult(curse);
+  // A crossbow's `Armour penetration %` line (D-123) joins the same cut a curse writes, so the two
+  // add and the ratio cannot fall below zero. Crit sizes the hit before the armour ratio.
+  let damage = eng.mitigateMobHit(mob, nonElement, elemDamage, curse.armourCut + eng.armourPenCut(c.armourPen), curse.resistCut) * takenMult(curse);
   damage *= E.global.damage_mult;
   mob.hp -= damage;
   // Leech is a share of just-dealt damage, never a flat drip: the mark on the target pays it
@@ -104,14 +105,21 @@ export function mobSwing(
   curse: CurseMods = NO_CURSE,
   /** the shield actually standing right now; defaults to the sheet's pool for a caller that has one */
   liveEs: number = c.es,
-): { blocked: string | null; toHp: number; toEs: number; raw: number } {
-  if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, raw: 0 };
-  if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, raw: 0 };
+  /** Energy Absorb: the share of the hit converted to Energy Shield while the buff is up (D-121) */
+  absorbPct = 0,
+): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number } {
+  if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
+  if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   const acc = mob.acc * accMult(curse);
   // Evasion is one layer (D-112): the Dex rating rolls against this mob's accuracy, Agi adds
   // its points on top, and the pair is capped together. A blocked hit is gone entirely.
   if (rng() * 100 < eng.evasionChance(c.evasion, c.evasionFromAgi, acc)) {
-    return { blocked: 'evasion', toHp: 0, toEs: 0, raw: 0 };
+    return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
+  }
+  // Block is its own layer, rolled after perfect dodge and evasion (D-123 · formula-defense.md): the
+  // shield's Base Mod line, bounded by `caps.block`, and a blocked hit is deleted outright.
+  if (c.block > 0 && rng() * 100 < c.block) {
+    return { blocked: 'block', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   }
 
   // a mob's swing is sized by its priced damage per second, at its own clock rate
@@ -127,6 +135,11 @@ export function mobSwing(
   // skills up right now add to it (Berserker takes more, Iron Will takes less)
   let damage = (physical + elemental) * E.global.defend_mult * (c.damageTaken ?? 1);
 
+  // Energy Absorb converts a share of the hit into Energy Shield and negates that share outright,
+  // whether or not the shield has room — a press on a full shield is still a real defence (D-121)
+  const absorbed = absorbPct > 0 ? damage * (Math.min(100, Math.max(0, absorbPct)) / 100) : 0;
+  damage -= absorbed;
+
   let toEs = 0;
   if (mob.innate.includes('chaos')) {
     // chaos bypasses Energy Shield and hits HP directly (D-026)
@@ -137,7 +150,7 @@ export function mobSwing(
     toEs = Math.min(damage, pool);
     damage -= toEs;
   }
-  return { blocked: null, toHp: damage, toEs, raw: rawHit };
+  return { blocked: null, toHp: damage, toEs, absorbed, raw: rawHit };
 }
 
 /**

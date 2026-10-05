@@ -193,7 +193,7 @@
       "innate": [
         "lightning"
       ],
-      "base_bias_flavor": "light / mail",
+      "base_bias_flavor": "light / Ring Mail",
       "budget_hr": 2.2,
       "npcs": [
         "counterhand",
@@ -244,7 +244,7 @@
         "cold",
         "lightning"
       ],
-      "base_bias_flavor": "mail",
+      "base_bias_flavor": "Ring Mail",
       "budget_hr": 4.3,
       "npcs": [
         "counterhand",
@@ -705,9 +705,9 @@
       "settlement": "ashfall",
       "school": "light",
       "pieces": [
-        "coif (helmet)",
-        "mail (chest)",
-        "striders (boots)"
+        "Hood (helmet)",
+        "Ring Mail (chest)",
+        "Strapped Boots (boots)"
       ],
       "quality": "any",
       "reward": "banner + 1 saved filter preset slot",
@@ -720,9 +720,9 @@
       "settlement": "bonegate",
       "school": "heavy",
       "pieces": [
-        "barbute (helmet)",
-        "plate (chest)",
-        "cuisses (pant)"
+        "Sallet (helmet)",
+        "Plate Vest (chest)",
+        "Cuisses (pant)"
       ],
       "quality": "any",
       "reward": "stash tab (bypasses the one-time price ladder, once per character)",
@@ -735,9 +735,9 @@
       "settlement": "vermolch",
       "school": "cloth",
       "pieces": [
-        "circlet (helmet)",
-        "vestments (chest)",
-        "wrap (pant)"
+        "Circlet (helmet)",
+        "Vestment (chest)",
+        "Legwraps (pant)"
       ],
       "quality": "high",
       "reward": "prestige title",
@@ -750,7 +750,7 @@
     "decision": "ship even-weighted (harness/todo.md A9 · D-071)",
     "column_meaning": "which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.",
     "checks": [
-      "Ruled even-weighted: loot.md section 1 step 2 stays \"equal roll among all frames of that slot\" — no Base weight column is added, and the tools/loot.js frame_weight path stays a what-if only.",
+      "Ruled even-weighted: loot.md section 1 step 2 stays \"equal roll among all frames of that slot\" — no Base weight column is added, and the tools/loot.ts frame_weight path stays a what-if only.",
       "The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable — even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises.",
       "No build must travel for a frame: frames roll equally everywhere, so Base bias is never a progression gate and world.md \"unlock by level\" is untouched."
     ],
@@ -760,7 +760,7 @@
       "any gold price that buys frame odds"
     ],
     "closed_checks": [
-      "Re-run the keep-rate simulation: tools/loot.js measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) — the owner chose NOT to pay that cost and to ship even.",
+      "Re-run the keep-rate simulation: tools/loot.ts measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) — the owner chose NOT to pay that cost and to ship even.",
       "F3 drops/hour is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops/hour comes from base_drop_chance x Lck, so no weight can change drop count."
     ]
   },

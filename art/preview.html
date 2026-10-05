@@ -1,0 +1,488 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ModWorld â€” Icon Atlas</title>
+  <style>
+    :root {
+      --size: 40px;
+      --gap: 12px;
+      --bg: #14161a;
+      --panel: #1c2027;
+      --line: #303640;
+      --text: #d8dee9;
+      --dim: #929bab;
+      --icon: #ffffff;
+      color-scheme: dark;
+    }
+    body.light {
+      --bg: #f2f0ea;
+      --panel: #faf9f5;
+      --line: #d8d5cd;
+      --text: #22252b;
+      --dim: #656a73;
+      --icon: #292d34;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 30px clamp(18px, 4vw, 56px) 72px;
+      background: var(--bg);
+      color: var(--text);
+      font: 13px/1.5 "Segoe UI", system-ui, sans-serif;
+      transition: background-color 180ms ease, color 180ms ease;
+    }
+    header { max-width: 1280px; margin: 0 auto 22px; }
+    h1 { margin: 0; font-size: 24px; line-height: 1.15; letter-spacing: -.025em; }
+    .sub { margin: 8px 0 0; color: var(--dim); }
+    .bar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      max-width: 1280px;
+      margin: 0 auto 26px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg);
+    }
+    button, input {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+    }
+    button { padding: 5px 10px; cursor: pointer; }
+    button:hover { border-color: var(--dim); }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--icon); outline-offset: 2px; }
+    button.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .space { width: 6px; }
+    .tints { display: flex; gap: 7px; align-items: center; }
+    .tints button {
+      position: relative;
+      width: 40px;
+      min-width: 40px;
+      min-height: 40px;
+      height: 40px;
+      padding: 0;
+      border-color: transparent;
+      background: transparent;
+    }
+    .tints button::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      background: var(--swatch);
+    }
+    .tints button.on::before { outline: 2px solid var(--text); outline-offset: 3px; }
+    input[type="search"] { width: min(230px, 40vw); padding: 5px 10px; }
+    .count { margin-left: auto; color: var(--dim); font-variant-numeric: tabular-nums; }
+    main { max-width: 1280px; margin: 0 auto; }
+    section { margin: 30px 0 0; }
+    h2 {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 12px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: .015em;
+    }
+    h2 span { color: var(--dim); font-size: 11px; font-weight: 400; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(102px, 1fr)); gap: var(--gap); }
+    figure {
+      position: relative;
+      min-height: 96px;
+      margin: 0;
+      padding: 13px 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--panel) 42%, transparent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: border-color 140ms ease, background-color 140ms ease;
+    }
+    figure:hover { border-color: var(--dim); background: var(--panel); }
+    button.favorite {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 30px;
+      min-width: 30px;
+      min-height: 30px;
+      height: 30px;
+      padding: 3px;
+      border-color: transparent;
+      background: color-mix(in srgb, var(--panel) 84%, transparent);
+    }
+    button.favorite:hover { border-color: var(--dim); }
+    button.favorite[aria-pressed="true"] {
+      border-color: #b58a1e;
+      background: color-mix(in srgb, #f2c14e 18%, var(--panel));
+    }
+    button.favorite img { display: block; width: 17px; height: 17px; }
+    body.light button.favorite img { filter: brightness(0) saturate(100%) opacity(.78); }
+    .favorite-status { max-width: 1280px; margin: -14px auto 12px; color: var(--dim); font-size: 11px; }
+    .favorites-empty { margin: 0 0 12px; color: var(--dim); font-size: 11px; }
+    .favorite-export {
+      display: block;
+      width: min(720px, 92vw);
+      min-height: 120px;
+      margin: 0 auto 24px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--panel);
+      color: var(--text);
+      font: 11px/1.45 ui-monospace, Consolas, monospace;
+    }
+    .favorite-export[hidden] { display: none; }
+    .glyph {
+      display: block;
+      flex: none;
+      width: var(--size);
+      height: var(--size);
+      color: var(--icon);
+    }
+    .glyph svg { display: block; width: 100%; height: 100%; }
+    .glyph.asset img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    body.light .glyph.asset img { filter: brightness(0) saturate(100%) opacity(.84); }
+    figcaption {
+      min-height: 2.4em;
+      color: var(--dim);
+      font-size: 10px;
+      line-height: 1.2;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+    figure.hide, section.hide { display: none; }
+    @media (max-width: 620px) {
+      body { padding: 22px 16px 48px; }
+      .bar { top: 0; }
+      .count { width: 100%; margin-left: 0; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+      figure { min-height: 88px; padding-inline: 5px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ModWorld icon atlas</h1>
+    <p class="sub">Browse the full icon library. Click a star to favorite an icon, then copy or download the file list for collection.</p>
+  </header>
+  <div class="bar">
+    <button data-size="16" aria-label="Preview icons at 16 pixels" aria-pressed="false">16</button>
+    <button data-size="24" aria-label="Preview icons at 24 pixels" aria-pressed="false">24</button>
+    <button data-size="32" aria-label="Preview icons at 32 pixels" aria-pressed="false">32</button>
+    <button data-size="40" class="on" aria-label="Preview icons at 40 pixels" aria-pressed="true">40</button>
+    <button data-size="56" aria-label="Preview icons at 56 pixels" aria-pressed="false">56</button>
+    <button data-size="80" aria-label="Preview icons at 80 pixels" aria-pressed="false">80</button>
+    <span class="space" aria-hidden="true"></span>
+    <button id="theme" aria-pressed="false">light mode</button>
+    <span class="space" aria-hidden="true"></span>
+    <div class="tints" id="tints" role="group" aria-label="Icon tint preview">
+      <button data-color="theme" class="on" style="--swatch:var(--icon)" aria-label="Theme default tint" aria-pressed="true"></button>
+      <button data-color="#e2572b" style="--swatch:#e2572b" aria-label="Fire tint" aria-pressed="false"></button>
+      <button data-color="#4aa8d8" style="--swatch:#4aa8d8" aria-label="Cold tint" aria-pressed="false"></button>
+      <button data-color="#f0c33c" style="--swatch:#f0c33c" aria-label="Lightning tint" aria-pressed="false"></button>
+      <button data-color="#7fbf4a" style="--swatch:#7fbf4a" aria-label="Poison tint" aria-pressed="false"></button>
+      <button data-color="#b05fd6" style="--swatch:#b05fd6" aria-label="Chaos tint" aria-pressed="false"></button>
+      <button data-color="#f2c14e" style="--swatch:#f2c14e" aria-label="Rare-item tint" aria-pressed="false"></button>
+    </div>
+    <span class="space" aria-hidden="true"></span>
+    <input type="search" id="filter" placeholder="Filter icons" aria-label="Filter icons by name or group">
+    <span class="count" id="count" aria-live="polite"></span>
+    <button id="favorite-filter" type="button" aria-pressed="false">Favorites (0)</button>
+    <button id="copy-favorites" type="button" disabled>Copy file list</button>
+    <button id="download-favorites" type="button" disabled>Download list</button>
+    <button id="clear-favorites" type="button" disabled>Clear favorites</button>
+  </div>
+  <p id="favorite-status" class="favorite-status" aria-live="polite"></p>
+  <textarea id="favorite-export" class="favorite-export" aria-label="Favorite icon file paths" readonly hidden></textarea>
+  <main id="gallery"></main>
+
+  <script src="./icon-catalog.js"></script>
+  <script src="./selected-icon-catalog.js"></script>
+  <script src="./1x1-catalog.js"></script>
+  <script>
+    const root = document.documentElement;
+    const body = document.body;
+    const gallery = document.getElementById('gallery');
+    const groups = [
+      ...window.MODWORLD_ICON_CATALOG,
+      ...window.MODWORLD_SELECTED_ICON_CATALOG,
+      ...window.MODWORLD_1X1_ICON_CATALOG,
+    ];
+    const total = groups.reduce((sum, group) => sum + group.items.length, 0);
+    const favoriteStorageKey = 'modworld-icon-favorites-v1';
+    const favoriteKeys = (() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(favoriteStorageKey) || '[]');
+        return new Set(Array.isArray(saved) ? saved.filter((key) => typeof key === 'string') : []);
+      } catch {
+        return new Set();
+      }
+    })();
+    const favoriteItems = new Map();
+    const favoriteCards = new Map();
+    const favoriteSection = document.createElement('section');
+    const favoriteHeading = document.createElement('h2');
+    const favoriteTitle = document.createElement('span');
+    favoriteTitle.textContent = 'Favorite';
+    const favoriteCountLabel = document.createElement('span');
+    favoriteCountLabel.textContent = String(favoriteKeys.size);
+    favoriteHeading.append(favoriteTitle, favoriteCountLabel);
+    const favoriteEmpty = document.createElement('p');
+    favoriteEmpty.className = 'favorites-empty';
+    favoriteEmpty.textContent = 'Click the star on any icon to pin it here.';
+    const favoriteGrid = document.createElement('div');
+    favoriteGrid.className = 'grid';
+    favoriteSection.append(favoriteHeading, favoriteEmpty, favoriteGrid);
+    gallery.append(favoriteSection);
+    const parameters = new URLSearchParams(window.location.search);
+    const lightPreview = parameters.get('theme') === 'light';
+    if (lightPreview) {
+      body.classList.add('light');
+      document.getElementById('theme').textContent = 'dark mode';
+      document.getElementById('theme').setAttribute('aria-pressed', 'true');
+    }
+
+    for (const group of groups) {
+      const section = document.createElement('section');
+      const heading = document.createElement('h2');
+      const title = document.createElement('span');
+      title.textContent = group.name;
+      const quantity = document.createElement('span');
+      quantity.textContent = String(group.items.length);
+      heading.append(title, quantity);
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+
+      for (const item of group.items) {
+        const originalOrder = grid.children.length;
+        const card = document.createElement('figure');
+        card.dataset.name = item.name;
+        card.dataset.group = group.name;
+        card.dataset.sourceOrder = String(originalOrder);
+        const favoriteKey = `${group.name}|${item.path || item.name}`;
+        card.dataset.favoriteKey = favoriteKey;
+        favoriteItems.set(favoriteKey, { name: item.name, group: group.name, path: item.path || '' });
+        const glyph = document.createElement('span');
+        const useFileAsset = item.asset || item.path?.startsWith('svg/icons-gear');
+        glyph.className = useFileAsset ? 'glyph asset' : 'glyph';
+        glyph.setAttribute('aria-hidden', 'true');
+        if (useFileAsset) {
+          const image = document.createElement('img');
+          image.src = `./${item.path}`;
+          image.alt = '';
+          image.loading = 'lazy';
+          image.decoding = 'async';
+          glyph.append(image);
+        } else {
+          glyph.innerHTML = item.svg;
+        }
+        const label = document.createElement('figcaption');
+        label.textContent = item.name.replaceAll('-', ' ');
+        const favorite = document.createElement('button');
+        favorite.type = 'button';
+        favorite.className = 'favorite';
+        favorite.setAttribute('aria-pressed', String(favoriteKeys.has(favoriteKey)));
+        favorite.setAttribute('aria-label', `${favoriteKeys.has(favoriteKey) ? 'Remove' : 'Add'} ${item.name} ${favoriteKeys.has(favoriteKey) ? 'from' : 'to'} favorites`);
+        const favoriteGlyph = document.createElement('img');
+        favoriteGlyph.src = `./svg/1x1-lorc-${favoriteKeys.has(favoriteKey) ? 'beveled-star' : 'flat-star'}.svg`;
+        favoriteGlyph.alt = '';
+        favoriteGlyph.setAttribute('aria-hidden', 'true');
+        favorite.append(favoriteGlyph);
+        favorite.addEventListener('click', () => {
+          if (favoriteKeys.has(favoriteKey)) favoriteKeys.delete(favoriteKey);
+          else favoriteKeys.add(favoriteKey);
+          saveFavorites();
+          updateFavoriteControls(favoriteKey);
+          updateFilter();
+        });
+        card.append(glyph, label, favorite);
+        grid.append(card);
+        favoriteCards.set(favoriteKey, { card, grid, order: originalOrder });
+      }
+
+      section.append(heading, grid);
+      gallery.append(section);
+    }
+
+    const cards = [...document.querySelectorAll('figure')];
+    const count = document.getElementById('count');
+    const filter = document.getElementById('filter');
+    const favoriteFilter = document.getElementById('favorite-filter');
+    const copyFavorites = document.getElementById('copy-favorites');
+    const downloadFavorites = document.getElementById('download-favorites');
+    const clearFavorites = document.getElementById('clear-favorites');
+    const favoriteStatus = document.getElementById('favorite-status');
+    const favoriteExport = document.getElementById('favorite-export');
+    let showFavorites = false;
+    const sizeButtons = [...document.querySelectorAll('[data-size]')];
+    const requestedSize = parameters.get('size');
+    if (sizeButtons.some((button) => button.dataset.size === requestedSize)) {
+      root.style.setProperty('--size', `${requestedSize}px`);
+      sizeButtons.forEach((button) => {
+        const selected = button.dataset.size === requestedSize;
+        button.classList.toggle('on', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+    filter.value = parameters.get('filter') || '';
+    for (const key of favoriteKeys) {
+      if (!favoriteItems.has(key)) favoriteKeys.delete(key);
+    }
+    const saveFavorites = () => {
+      try {
+        localStorage.setItem(favoriteStorageKey, JSON.stringify([...favoriteKeys]));
+      } catch {
+        favoriteStatus.textContent = 'Browser storage is unavailable; download or copy your list to keep it.';
+      }
+    };
+    const favoriteList = () => [...favoriteKeys]
+      .map((key) => favoriteItems.get(key))
+      .filter(Boolean);
+    const updateFavoriteControls = (changedKey = null) => {
+      for (const card of cards) {
+        const key = card.dataset.favoriteKey;
+        if (changedKey && key !== changedKey) continue;
+        const selected = favoriteKeys.has(key);
+        const button = card.querySelector('.favorite');
+        button.setAttribute('aria-pressed', String(selected));
+        button.setAttribute('aria-label', `${selected ? 'Remove' : 'Add'} ${card.dataset.name} ${selected ? 'from' : 'to'} favorites`);
+        button.querySelector('img').src = `./svg/1x1-lorc-${selected ? 'beveled-star' : 'flat-star'}.svg`;
+        const record = favoriteCards.get(key);
+        if (favoriteKeys.has(key)) {
+          if (record.card.parentElement !== favoriteGrid) favoriteGrid.append(record.card);
+        } else if (record.card.parentElement !== record.grid) {
+          const before = [...record.grid.children]
+            .filter((sibling) => sibling !== record.card)
+            .find((sibling) => Number(sibling.dataset.sourceOrder) > record.order) ?? null;
+          record.grid.insertBefore(record.card, before);
+        }
+      }
+      favoriteFilter.textContent = `${showFavorites ? 'Show all' : 'Favorites'} (${favoriteKeys.size})`;
+      favoriteFilter.setAttribute('aria-pressed', String(showFavorites));
+      copyFavorites.disabled = favoriteKeys.size === 0;
+      downloadFavorites.disabled = favoriteKeys.size === 0;
+      clearFavorites.disabled = favoriteKeys.size === 0;
+      favoriteCountLabel.textContent = String(favoriteKeys.size);
+      favoriteEmpty.hidden = favoriteKeys.size > 0;
+    };
+    const updateFilter = () => {
+      const query = filter.value.trim().toLowerCase();
+      let shown = 0;
+      for (const card of cards) {
+        const matchesQuery = !query || `${card.dataset.name} ${card.dataset.group}`.toLowerCase().includes(query);
+        const matchesFavorites = !showFavorites || favoriteKeys.has(card.dataset.favoriteKey);
+        const match = matchesQuery && matchesFavorites;
+        card.classList.toggle('hide', !match);
+        if (match) shown += 1;
+      }
+      for (const section of document.querySelectorAll('main section')) {
+        if (section === favoriteSection) {
+          const hasVisibleFavorite = [...favoriteGrid.children].some((card) => !card.classList.contains('hide'));
+          section.classList.toggle('hide', favoriteKeys.size > 0 && !hasVisibleFavorite);
+        } else {
+          section.classList.toggle('hide', !section.querySelector('figure:not(.hide)'));
+        }
+      }
+      count.textContent = showFavorites ? `${shown} of ${favoriteKeys.size} favorites` : `${shown} of ${total} icons`;
+    };
+
+    favoriteFilter.addEventListener('click', () => {
+      showFavorites = !showFavorites;
+      updateFavoriteControls();
+      updateFilter();
+    });
+    copyFavorites.addEventListener('click', async () => {
+      const paths = favoriteList().map((item) => item.path).filter(Boolean).join('\n');
+      try {
+        await navigator.clipboard.writeText(paths);
+        favoriteStatus.textContent = `Copied ${favoriteKeys.size} file paths. Paste them here and I can collect the SVGs into art/fav-icon.`;
+      } catch {
+        favoriteExport.hidden = false;
+        favoriteExport.value = paths;
+        favoriteExport.focus();
+        favoriteExport.select();
+        favoriteStatus.textContent = 'Clipboard access is blocked; the file list is selected below for copying.';
+      }
+    });
+    downloadFavorites.addEventListener('click', () => {
+      const manifest = {
+        assets: favoriteList(),
+      };
+      const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'fav-icon-selection.json';
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      favoriteStatus.textContent = `Downloaded ${favoriteKeys.size} paths. Move the JSON into art/fav-icon and tell me when it is ready.`;
+    });
+    clearFavorites.addEventListener('click', () => {
+      favoriteKeys.clear();
+      favoriteExport.hidden = true;
+      favoriteExport.value = '';
+      saveFavorites();
+      favoriteStatus.textContent = 'Favorites cleared.';
+      updateFavoriteControls();
+      updateFilter();
+    });
+    updateFavoriteControls();
+
+    sizeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        sizeButtons.forEach((item) => {
+          const selected = item === button;
+          item.classList.toggle('on', selected);
+          item.setAttribute('aria-pressed', String(selected));
+        });
+        root.style.setProperty('--size', `${button.dataset.size}px`);
+      });
+    });
+    document.getElementById('theme').addEventListener('click', (event) => {
+      const isLight = body.classList.toggle('light');
+      event.currentTarget.textContent = isLight ? 'dark mode' : 'light mode';
+      event.currentTarget.setAttribute('aria-pressed', String(isLight));
+      const selectedTint = document.querySelector('#tints button.on');
+      if (selectedTint?.dataset.color === 'theme') root.style.setProperty('--icon', isLight ? '#292d34' : '#ffffff');
+    });
+    document.querySelectorAll('#tints button').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('#tints button').forEach((item) => {
+          const selected = item === button;
+          item.classList.toggle('on', selected);
+          item.setAttribute('aria-pressed', String(selected));
+        });
+        const color = button.dataset.color === 'theme'
+          ? (body.classList.contains('light') ? '#292d34' : '#ffffff')
+          : button.dataset.color;
+        root.style.setProperty('--icon', color);
+      });
+    });
+    filter.addEventListener('input', updateFilter);
+    updateFilter();
+  </script>
+</body>
+</html>

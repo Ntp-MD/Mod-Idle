@@ -1,5 +1,5 @@
 import { BASES } from '../engine/client';
-import { createMastery } from '../../../engine/mastery.js';
+import { createMastery } from '../../../engine/mastery.ts';
 import type { GameState } from './types';
 
 /** The Mastery model is shared with the cage data — `bases.json` carries the constants. */

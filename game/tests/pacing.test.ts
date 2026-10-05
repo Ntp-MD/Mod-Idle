@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
 import { newGame, tick } from '../src/sim/game';
+import { setRule } from '../src/sim/filter';
 
 /**
  * The client's own pacing, measured against the hours `engine.json` publishes.
@@ -9,7 +10,7 @@ import { newGame, tick } from '../src/sim/game';
  * promise `loot.md` §4 makes of an AFK run: a piece the filter rejects converts on the spot, so the
  * Reroll value mint must keep paying **every hour**, including after the adventure bag fills and
  * pickups pause. That stall was `harness/todo.md` B17, and it cleared once a kept upgrade went
- * straight onto the character the way `tools/loot.js` has always modelled a keep.
+ * straight onto the character the way `tools/loot.ts` has always modelled a keep.
  *
  * The kill rate is printed, not gated tight: the band's published figure assumes the Lck investment
  * and the zone progression that a single-zone, no-travel, no-click run does neither.
@@ -22,6 +23,10 @@ interface Hour { hour: number; level: number; kills: number; drops: number; mint
 describe('the built loop measured against the published hours', () => {
   it('keeps minting crafting stones every hour, and prints where it differs from the design', () => {
     const s = newGame(20260104);
+    // the filter is OFF by default (D-122), so this test turns every slot on to gate the published
+    // promise: once a slot filters, a rejected piece dissolves on the spot and the Reroll value mint
+    // must keep paying every hour, including after the adventure bag fills and pickups pause
+    setRule(s.filter, 'all', { enabled: true });
     const L = E.loot;
     const published = L.bands.low.kills_per_hr_published;
     const reached: Record<number, number> = {};

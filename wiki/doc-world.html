@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>World · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-world">World</a>
+<a href="#h-level">Level</a>
+<a href="#h-zones-and-levels-decided">Zones and Levels (Decided)</a>
+<a href="#h-properties-per-zone">· Properties Per Zone</a>
+<a href="#h-full-game-timeline-all-numbers-calculated-from-loot-md-kill-rates-crafting-md-crafting-mastery">Full Game Timeline (All Numbers Calculated From loot.md Kill Rates + crafting.md Crafting + Mastery)</a>
+<a href="#h-mob-hp-formula-per-level-replaces-placeholder-line">Mob HP Formula Per Level (Replaces Placeholder Line)</a>
+<a href="#h-monsters">Monsters</a>
+<a href="#h-species-and-body-class">· Species and body class</a>
+<a href="#h-what-the-species-actually-produce">· What the species actually produce</a>
+<a href="#h-mob-groups">Mob Groups</a>
+<a href="#h-attack-order">· Attack Order</a>
+<a href="#h-mobs-attack-together">· Mobs Attack Together</a>
+<a href="#h-aoe-range">· AoE Range</a>
+<a href="#h-drops">Drops</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html" aria-current="page">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">World &amp; towns</a><span class="sep">/</span><span>world.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>World</h1>
+<dl class="kv"><dt>file</dt><dd><code>world.md</code> · 297 lines · 4,117 words · written 2026-10-04T12:44:44Z</dd><dt>category</dt><dd>World &amp; towns</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-formula.html">formula.md</a> · <a href="doc-item-rarity.html">item-rarity.md</a> · <a href="doc-elements.html">elements.md</a> · <a href="doc-combat.html">combat.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-combat.html">combat.md</a> · <a href="doc-concept.html">concept.md</a> · <a href="doc-farm.html">farm.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a> · <a href="doc-skill-pool-system.html">skill-pool-system.md</a> · <a href="doc-tasks.html">tasks.md</a> · <a href="doc-towns-stalls.html">towns-stalls.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-combat.html">combat.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-towns-stalls.html">towns-stalls.md</a> · <a href="doc-towns-ui.html">towns-ui.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd><code>zone-table</code> <span class="tag gen">tools/town.ts</span> · <code>xp-formula</code> <span class="tag gen">tools/town.ts</span> · <code>xp-table</code> <span class="tag gen">tools/town.ts</span> · <code>mob-curve</code> <span class="tag gen">tools/town.ts</span> · <code>mob-sheet</code> <span class="tag gen">tools/town.ts</span> · <code>mob-stats</code> <span class="tag gen">tools/town.ts</span></dd><dt>raw</dt><dd><a href="../world.md">world.md</a></dd></dl>
+<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
+<h2 id="h-world">World</h2>
+<p>import glossary.md import formula.md import item-rarity.md import elements.md import combat.md import mob-roster.md</p>
+<p><strong>Spec complete</strong> — the zone table, mob curve, XP table and mob sheet are generated from <code>tools/data/engine.json</code>; edit the data, not the tables.</p>
+<h2 id="h-level">Level</h2>
+<table><thead><tr><th>Level range</th><th>Dropped Item quality</th></tr></thead><tbody><tr><td>1-30</td><td>low</td></tr><tr><td>31-60</td><td>mid</td></tr><tr><td>61-90</td><td>high</td></tr></tbody></table>
+<ul><li>Item level = level of dropping mob.</li><li>Level ranges currently match Item quality 1:1 because there is still no drop source outside levels.</li></ul>
+<p>  If kept this way, the Item quality axis duplicates levels. Be careful (see item-rarity.md).</p>
+<h2 id="h-zones-and-levels-decided">Zones and Levels (Decided)</h2>
+<p><strong>9 zones · 10 levels per zone · 1 boss per zone.</strong></p>
+<table><thead><tr><th>Zone</th><th>Settlement · Levels</th><th>Dropped Quality ceiling</th><th>mob HP (zone edge)</th><th>innate Elements</th><th>Mobs per group</th><th>Boss</th><th>roster entries</th></tr></thead><tbody><tr><td>1</td><td>Eastgate · 1-10</td><td>low</td><td>120 → 629</td><td>fire</td><td>1-2</td><td>Eastgate Emberling (Husk)</td><td>6</td></tr><tr><td>2</td><td>Millbrook · 11-20</td><td>low</td><td>730 → 1,305</td><td>poison</td><td>1-2</td><td>Millbrook Tallyman (Goblin)</td><td>10</td></tr><tr><td>3</td><td>Ashfall · 21-30</td><td>low</td><td>1,436 → 1,824</td><td>fire</td><td>1-2</td><td>Ashfall Chieftain (Rat)</td><td>14</td></tr><tr><td>4</td><td>Ironrow · 31-40</td><td>mid (floor = low)</td><td>3,546 → 4,033</td><td>lightning</td><td>2-3</td><td>Ironrow Warden (Bandit)</td><td>14</td></tr><tr><td>5</td><td>Wolf Cross · 41-50</td><td>mid</td><td>4,090 → 4,632</td><td>cold</td><td>2-3</td><td>The Bloated Shepherd (Slime)</td><td>12</td></tr><tr><td>6</td><td>Highspire · 51-60</td><td>mid</td><td>4,696 → 5,293</td><td>cold · lightning</td><td>2-3</td><td>Highspire Herald (Troll)</td><td>14</td></tr><tr><td>7</td><td>Bonegate · 61-70</td><td>high (floor = mid)</td><td>7,739 → 8,587</td><td>chaos</td><td>3-5</td><td>Bonegate Tyrant (Orc)</td><td>16</td></tr><tr><td>8</td><td>Frosthold · 71-80</td><td>high</td><td>8,685 → 9,605</td><td>cold</td><td>3-5</td><td>Frosthold Siege-Marshal (Knight)</td><td>19</td></tr><tr><td>9</td><td>Vermolch · 81-90</td><td>high</td><td>9,712 → 10,709</td><td>poison · chaos</td><td>3-5</td><td>Vermolch Ninefold Choir (Seraph)</td><td>15</td></tr></tbody></table>
+<p>HP columns are <code>mob_HP(L)</code> at the zone's first and last level (checks.md D1) · the boss row is the zone's own <code>mob_HP × 15 / damage × 4</code> carrier species (combat.md section 7). <code><a href="doc-mob-roster.html">mob-roster.md</a></code> expands every one of these into the per-species, per-body entries a build reads from. &lt;!-- END GENERATED:zone-table --&gt;</p>
+<h3 id="h-properties-per-zone">Properties Per Zone</h3>
+<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody><tr><td>Zone level · group size · Quality ceiling · innate Elements · boss</td><td>the generated table above — one row per zone, no second home</td></tr><tr><td>Elite spawn chance</td><td><strong>1 in 5 kills</strong> (<code>engine.json</code> <code>loot.elite_spawn_chance</code>) · always single · each drops a Reroll tier stone <strong>5%</strong> of the time · the main tier-stone source (loot.md section 5)</td></tr><tr><td>Boss spawn chance</td><td><strong>1 per 15 min per character</strong> (4/hour) · only attackable while online</td></tr><tr><td>New group spawn time</td><td>4 sec after clearing the previous group · constant across zones</td></tr><tr><td>Species per zone</td><td>every legal zone × species × body entry is listed with its numbers in <code><a href="doc-mob-roster.html">mob-roster.md</a></code> · <strong>X23</strong> fails a zone with fewer than 5 entries or a boss that does not live there</td></tr></tbody></table>
+<ul><li><strong>Zone unlock by level, not by boss</strong> · zone i boss spawns when player level ≥ that zone, and grants <em>Quality ceiling</em> + craft currency + skill (concept.md).</li><li><strong>Dropped Quality ceiling in zone i unlocks after beating zone i−1 boss</strong> (zone 1 unlocked immediately) · reason: granting full ceiling on zone entry removes the need to fight bosses · and making bosses a hard progress gate would permanently wall builds that lose to bosses.</li><li><strong>Losing to a boss = losing that spawn</strong> (boss retreats, full HP, must wait for next 15 min cycle) · full rules + which build wins at which zone in combat.md section 7.</li><li><strong>Levels 91-100 have no new zone and nothing new to unlock</strong> · they are more of the same zone-9 band (as stated in concept.md and formula.md section 0).</li></ul>
+<h2 id="h-full-game-timeline-all-numbers-calculated-from-loot-md-kill-rates-crafting-md-crafting-mastery">Full Game Timeline (All Numbers Calculated From loot.md Kill Rates + crafting.md Crafting + Mastery)</h2>
+<table><thead><tr><th>Point</th><th>Cumulative time</th></tr></thead><tbody><tr><td>Level 10</td><td>0.5 hr</td></tr><tr><td>Level 30</td><td>3.1 hr</td></tr><tr><td>Level 60</td><td>12.6 hr</td></tr><tr><td><strong>Level 90 (zone end)</strong></td><td><strong>31.2 hr</strong></td></tr><tr><td>Level 100</td><td>40.2 hr</td></tr><tr><td>Finished crafted set (24 Refine + 12 Ascend pieces)</td><td>~22 hr of crafting, overlapping the last zones (Refine 6.4 hr + Ascend 15.4 hr · E6 · E7)</td></tr><tr><td>Mastery 12 types to L10 (+12% drop)</td><td>13.5 hr</td></tr><tr><td>Mastery 12 types to L20</td><td>60 hr</td></tr></tbody></table>
+<pre class="code">xp per kill   = 10 × mob level (normal) · ×3 elite · ×15 boss
+xp to next level     = 5-level-step table (generated below from the kills anchors)
+kills per level       = 20 (L1) · 101 (L10) · 251 (L30) · 713 (L50) · 2,121 (L90) · 2,498 (L100)</pre>
+<ul><li><strong>The elite and boss multipliers are paid in the model.</strong> One kill in five rolls elite (×3 XP) and the boss clock adds ×15 at 4/hr, so the average kill is worth ~1.44× a plain mob; the kills-per-level anchors are scaled to hold the published E1-E5 hours. Ignoring them would have finished the game about a third early the moment the elite rate moved from 0.5% to 20%.</li></ul>
+<p><strong>XP per 5-level step</strong> — generated by <code>node tools/timeline.ts</code> from <code>engine.json</code> <code>xp</code> (anchors + band rates); do not hand-type:</p>
+<p>Derived from <code>xp_to_next(L) = kills(L) × 10 × min(L, 90)</code> with the kills anchors and band rates in <code>engine.json</code>.</p>
+<table><thead><tr><th>Levels</th><th>XP to clear the step</th><th>Cumulative XP</th><th>Cumulative hr</th></tr></thead><tbody><tr><td>1-5</td><td>6,600</td><td>6,600</td><td>0.1</td></tr><tr><td>6-10</td><td>34,100</td><td>40,700</td><td>0.4</td></tr><tr><td>11-15</td><td>81,025</td><td>121,725</td><td>0.9</td></tr><tr><td>16-20</td><td>145,650</td><td>267,375</td><td>1.4</td></tr><tr><td>21-25</td><td>229,025</td><td>496,400</td><td>2.1</td></tr><tr><td>26-30</td><td>331,150</td><td>827,550</td><td>2.9</td></tr><tr><td>31-35</td><td>530,805</td><td>1,358,355</td><td>3.7</td></tr><tr><td>36-40</td><td>830,330</td><td>2,188,685</td><td>4.8</td></tr><tr><td>41-45</td><td>1,187,605</td><td>3,376,290</td><td>6.2</td></tr><tr><td>46-50</td><td>1,602,630</td><td>4,978,920</td><td>7.9</td></tr><tr><td>51-55</td><td>2,172,810</td><td>7,151,730</td><td>9.9</td></tr><tr><td>56-60</td><td>2,887,860</td><td>10,039,590</td><td>12.4</td></tr><tr><td>61-65</td><td>3,690,910</td><td>13,730,500</td><td>14.7</td></tr><tr><td>66-70</td><td>4,581,960</td><td>18,312,460</td><td>17.3</td></tr><tr><td>71-75</td><td>5,561,010</td><td>23,873,470</td><td>20.3</td></tr><tr><td>76-80</td><td>6,628,060</td><td>30,501,530</td><td>23.6</td></tr><tr><td>81-85</td><td>7,783,110</td><td>38,284,640</td><td>27.2</td></tr><tr><td>86-90</td><td>9,026,160</td><td>47,310,800</td><td>31.2</td></tr><tr><td>91-95</td><td>10,053,450</td><td>57,364,250</td><td>35.5</td></tr><tr><td>96-100</td><td>10,901,700</td><td>68,265,950</td><td>40.2</td></tr></tbody></table>
+<ul><li>This game <strong>ends at about 40 hours of real play</strong> (AFK counts as half a Quality tier) · at 1 hr/day = about 6 weeks; at 3 hr/day = 2 weeks.</li><li>This number decides the &quot;many zones or deep zones&quot; question: at 40 hr and 9 zones → average 4.5 hr/zone, matching the luck stream measured in loot.md (dry in the first 2-3 hr, rest is crafting) · to add zones, <em>reduce</em> craft time per zone, not increase level time.</li><li><strong>Conflict to decide (from the 40 hr number)</strong>: the 32-duplicate random skill ladder = ~300 hr, 7x longer than the whole game · this 40 hr number is the evidence that it must be fixed (see skill-pool.md open items).</li></ul>
+<h2 id="h-mob-hp-formula-per-level-replaces-placeholder-line">Mob HP Formula Per Level (Replaces Placeholder Line)</h2>
+<pre class="code">mob_HP(L)     = typical_gear_DPS(L) × (1 + 0.0034 × L)   ·   anchored at every zone edge, linear in between
+                typical_gear_DPS(L) = mob_HP(L) ÷ (1 + 0.0034 × L)   (read back out, never typed)
+item count = min(12, ceil(L/2))   → L1 = 1 item · L24+ full 12   (the gear the curve was priced against)
+no tree multiplier      (the passive tree is empty - see skill-tree.md)
+skill multiplier   = 1 + 0.0034 × L      → ×1.30 at L90 · ×1.34 at L100 (skill-pool-system.md section &quot;Press per skill&quot;)
+mob_damage(L)  = typical_gear_DPS(L) / 27 per second  (split by the species damage tag · D-030 · combat.md)
+
+&gt; **Why the damage line is not set from mob_HP** - mob_PS is `typical_gear_DPS / 27`, a fraction of the player's own output, not a share of the mob's HP. `mob_HP` carries only the skill multiplier.</pre>
+<table><thead><tr><th>Level</th><th>1</th><th>10</th><th>20</th><th>30</th><th>40</th><th>50</th><th>60</th><th>70</th><th>80</th><th>90</th><th>100</th></tr></thead><tbody><tr><td>mob HP</td><td>120</td><td>629</td><td>1,305</td><td>1,824</td><td>4,033</td><td>4,632</td><td>5,293</td><td>8,587</td><td>9,605</td><td>10,709</td><td>11,901</td></tr><tr><td>mob damage/sec</td><td>4</td><td>23</td><td>45</td><td>61</td><td>131</td><td>147</td><td>163</td><td>257</td><td>280</td><td>304</td><td>329</td></tr></tbody></table>
+<p>mob_HP(L) is defined at every level: the curve is anchored at each zone edge in <code>tools/data/engine.json</code> <code>mob.zones</code> and interpolated linearly inside the zone a mob spawns in, and the level-100 column is the theoretical cap anchor <code>mob.curve.hp_at_player_level_cap</code> (the spawn cap is 90). mob damage/sec is <code>typical_gear_DPS(L) ÷ 27</code>, derived from the same curve rather than typed beside it (<strong>X37</strong>). &lt;!-- END GENERATED:mob-curve --&gt;</p>
+<ul><li><strong>TTK = 1 sec for on-level gear players</strong> · full T1 gear kills in 0.9 sec · fresh zone entrants with no gear take 2-6 sec (level 1 = ~2 sec, not 16 sec).</li><li>This line replaces the old text stating &quot;HP is set by level&quot; with no formula · and gives combat.md usable per-level numbers.</li><li>Elite and boss multipliers live in <code>engine.json</code> <code>mob.sizes</code> + <code>mob.elite</code>; combat.md section 6-7 is generated from them by <code>node tools/survival.ts</code>.</li></ul>
+<ul><li>One zone should have 1-2 common innate Elements so players have reason to hunt matching res items.</li><li>If one zone has all Elements equally, players must guard all 5 Elements, which is too expensive for a single zone.</li></ul>
+<h2 id="h-monsters">Monsters</h2>
+<h3 id="h-species-and-body-class">Species and body class</h3>
+<p>A mob is three independent things: a <strong>species</strong>, a <strong>body class</strong>, and an <strong>innate Element</strong> rolled on spawn. Species and body class come from <code>tools/data/engine.json</code> <code>mob</code>; innate Element stays a spawn roll, so the three axes never collapse into one. <strong>This table is generated</strong> — edit the data, not this file.</p>
+<p><strong>15 species</strong>, each legal on 1-3 of the three farming bodies (Small · Medium · Large): Goblin is the only lineage legal on all three, and Golem · Troll · Knight are the only Large-only ones. Multiplied over the zones each species is placed in, plus Elite and the nine named bosses, that gives the full spawnable list — every entry with its numbers resolved in <strong><code><a href="doc-mob-roster.html">mob-roster.md</a></code></strong>, which is what a build reads. The entry count and the per-zone spread are printed by <strong>X23</strong>, so no number here needs restating.</p>
+<table><thead><tr><th>Species</th><th>Zones</th><th>Damage</th><th>accuracy</th><th>Body classes</th><th>str · agi · vit · dex · int · wis · lck</th></tr></thead><tbody><tr><td>Rat</td><td>1 · 2 · 3</td><td>physical</td><td>×0.75</td><td>Small · Medium</td><td>0.84 · 1.46 · 0.73 · 1.15 · 0.63 · 0.84 · 1.36</td></tr><tr><td>Husk</td><td>1 · 2 · 3 · 4</td><td>physical</td><td>×0.05</td><td>Medium · Large</td><td>1.17 · 0.70 · 1.63 · 0.82 · 0.70 · 1.05 · 0.93</td></tr><tr><td>Goblin</td><td>2 · 3 · 4</td><td>physical</td><td>×0.75</td><td>Small · Medium · Large</td><td>1.29 · 1.18 · 0.97 · 0.97 · 0.65 · 0.86 · 1.08</td></tr><tr><td>Slime</td><td>3 · 4 · 5</td><td>magic</td><td>×0.05</td><td>Small · Medium</td><td>0.73 · 0.63 · 1.46 · 0.73 · 1.15 · 1.25 · 1.04</td></tr><tr><td>Bandit</td><td>3 · 4 · 5 · 6</td><td>physical</td><td>×0.75</td><td>Small · Medium</td><td>1.13 · 1.03 · 0.93 · 1.13 · 0.72 · 1.03 · 1.03</td></tr><tr><td>Spider</td><td>4 · 5 · 6</td><td>physical</td><td>×0.50</td><td>Small · Medium</td><td>0.72 · 1.34 · 0.82 · 1.24 · 0.82 · 0.93 · 1.13</td></tr><tr><td>Wolf</td><td>5 · 6 · 7</td><td>physical</td><td>×1.00</td><td>Small · Medium</td><td>1.13 · 1.34 · 0.93 · 1.03 · 0.62 · 0.93 · 1.03</td></tr><tr><td>Orc</td><td>5 · 6 · 7 · 8</td><td>physical</td><td>×0.75</td><td>Medium · Large</td><td>1.48 · 1.06 · 1.27 · 0.74 · 0.53 · 0.95 · 0.95</td></tr><tr><td>Troll</td><td>6 · 7 · 8</td><td>physical</td><td>×0.50</td><td>Large</td><td>1.38 · 0.85 · 1.48 · 0.74 · 0.64 · 0.95 · 0.95</td></tr><tr><td>Elf</td><td>7 · 8 · 9</td><td>mixed</td><td>×1.00</td><td>Medium · Large</td><td>0.86 · 1.15 · 0.77 · 1.25 · 1.05 · 0.96 · 0.96</td></tr><tr><td>Demon</td><td>7 · 8 · 9</td><td>mixed</td><td>×0.75</td><td>Medium · Large</td><td>1.17 · 0.97 · 1.07 · 0.87 · 1.17 · 0.87 · 0.87</td></tr><tr><td>Golem</td><td>6 · 7 · 8</td><td>physical</td><td>×0.25</td><td>Large</td><td>1.70 · 0.60 · 1.55 · 0.75 · 0.65 · 1.10 · 0.65</td></tr><tr><td>Knight</td><td>8 · 9</td><td>physical</td><td>×0.25</td><td>Large</td><td>1.29 · 0.75 · 1.51 · 0.86 · 0.65 · 1.08 · 0.86</td></tr><tr><td>Drake</td><td>8 · 9</td><td>mixed</td><td>×1.00</td><td>Medium · Large</td><td>1.25 · 0.96 · 1.05 · 0.86 · 1.15 · 0.86 · 0.86</td></tr><tr><td>Seraph</td><td>9</td><td>magic</td><td>×0.50</td><td>Medium · Large</td><td>0.59 · 0.79 · 0.99 · 1.08 · 1.38 · 1.18 · 0.99</td></tr></tbody></table>
+<table><thead><tr><th>Body class</th><th>HP</th><th>PS</th><th>evasion</th><th>Grouping</th></tr></thead><tbody><tr><td>Small</td><td>×0.70</td><td>×0.70</td><td>×1.10</td><td>up to 5</td></tr><tr><td>Medium</td><td>×1.00</td><td>×1.00</td><td>×1.00</td><td>up to 5</td></tr><tr><td>Large</td><td>×1.70</td><td>×1.35</td><td>×0.90</td><td>alone</td></tr><tr><td>Boss</td><td>×15.00</td><td>×16.00</td><td>×1.00</td><td>alone</td></tr><tr><td>Elite</td><td>×6.00</td><td>×4.00</td><td>×0.90</td><td>alone</td></tr></tbody></table>
+<ul><li><strong>The player has no class.</strong> Species is a creature lineage (Rat · Husk · Drake), not a job, and nothing about it is available to the player.</li><li><strong>A species is a multiply vector on the player's own stat block.</strong> Every mob starts from <code>stat_c</code> per stat, then the species multiplies it. Check <strong>X19</strong> fails any species whose seven multipliers do not average 1.00, so no species can quietly be stronger overall than <code>mob_HP</code> was derived against.</li><li><strong><code>accuracy</code> is the load-bearing column.</strong> Mob accuracy is the shared <code>stat_c × K_DEX_ACC</code> scaled by the species multiplier. Against a ×0.25 species (Husk · Slime · Knight) the Evasion <strong>Cap 80 is reachable</strong>; against a ×1.00 species (Wolf · Elf · Drake) full Dex only reaches the low thirties. That is why no single mob accuracy number could ever close <code><a href="doc-checks.html">checks.md</a></code> C1 — the species mix does, and Evasion becomes a build that works <em>against some things</em>.</li><li><strong><code>element_bias</code> only tilts the roll</strong> inside the zone's own 1-2 Elements. It never adds an Element, so res still has to be prepared in advance.</li><li><strong>Four card sizes, copied from Ragnarok</strong> (Small · Medium · Large · Boss). <strong>Elite is a rarity flag, not a fifth size</strong>: an Elite is always a Large body and carries its own numbers, so two multipliers never stack.</li><li>Size raises HP faster than PS, so a Large body is a longer fight rather than a harder hit — which is what makes Small the farming body and Large the roadblock.</li><li><strong>Mob crit is now possible.</strong> Lck flows into crit through the same K values as a player, so the incoming order in <code><a href="doc-combat.html">combat.md</a></code> §2 needs a crit step it did not have before this sheet existed.</li></ul>
+<h3 id="h-what-the-species-actually-produce">What the species actually produce</h3>
+<p>Mobs are not a separate math. A species multiplies the same stat block a player has, and then the <strong>player's own K values</strong> run over it unchanged.</p>
+<table><thead><tr><th>Species</th><th>HP × (Vit)</th><th>PS × (Str)</th><th>accuracy</th><th>evasion</th><th>armour</th><th>res</th><th>crit</th><th>dodge</th></tr></thead><tbody><tr><td>Rat</td><td>×0.73</td><td>×0.84</td><td>272</td><td>121</td><td>353</td><td>7.7%</td><td>14.3%</td><td>10.5%</td></tr><tr><td>Husk</td><td>×1.63</td><td>×1.17</td><td>13</td><td>86</td><td>491</td><td>17.1%</td><td>9.8%</td><td>5.3%</td></tr><tr><td>Goblin</td><td>×0.97</td><td>×1.29</td><td>229</td><td>102</td><td>542</td><td>10.2%</td><td>11.3%</td><td>8.6%</td></tr><tr><td>Slime</td><td>×1.46</td><td>×0.73</td><td>11</td><td>77</td><td>307</td><td>15.3%</td><td>10.9%</td><td>4.8%</td></tr><tr><td>Bandit</td><td>×0.93</td><td>×1.13</td><td>267</td><td>119</td><td>475</td><td>9.8%</td><td>10.8%</td><td>7.6%</td></tr><tr><td>Spider</td><td>×0.82</td><td>×0.72</td><td>195</td><td>130</td><td>302</td><td>8.6%</td><td>11.9%</td><td>9.7%</td></tr><tr><td>Wolf</td><td>×0.93</td><td>×1.13</td><td>324</td><td>108</td><td>475</td><td>9.8%</td><td>10.8%</td><td>9.7%</td></tr><tr><td>Orc</td><td>×1.27</td><td>×1.48</td><td>175</td><td>78</td><td>622</td><td>13.3%</td><td>10.0%</td><td>7.8%</td></tr><tr><td>Troll</td><td>×1.48</td><td>×1.38</td><td>117</td><td>78</td><td>580</td><td>15.5%</td><td>10.0%</td><td>6.4%</td></tr><tr><td>Elf</td><td>×0.77</td><td>×0.86</td><td>394</td><td>131</td><td>361</td><td>8.1%</td><td>10.1%</td><td>8.4%</td></tr><tr><td>Demon</td><td>×1.07</td><td>×1.17</td><td>206</td><td>91</td><td>491</td><td>11.2%</td><td>9.1%</td><td>7.2%</td></tr><tr><td>Golem</td><td>×1.55</td><td>×1.70</td><td>59</td><td>79</td><td>714</td><td>16.3%</td><td>6.8%</td><td>4.6%</td></tr><tr><td>Knight</td><td>×1.51</td><td>×1.29</td><td>68</td><td>90</td><td>542</td><td>15.9%</td><td>9.0%</td><td>5.7%</td></tr><tr><td>Drake</td><td>×1.05</td><td>×1.25</td><td>271</td><td>90</td><td>525</td><td>11.0%</td><td>9.0%</td><td>7.1%</td></tr><tr><td>Seraph</td><td>×0.99</td><td>×0.59</td><td>170</td><td>113</td><td>248</td><td>10.4%</td><td>10.4%</td><td>5.9%</td></tr></tbody></table>
+<p>Every column is the player's own formula at level 100 (stat block 210 per stat): accuracy = Dex × 1.5 × accuracy tier · <strong>evasion = Dex × 0.5</strong> (the Medium-body line · a Small body multiplies it ×1.1, Large and Elite ×0.9) · <strong>armour = Str × 2</strong> (the same line the player uses · D-022 · it is what chill's 25% cut acts on) · res = Vit × 0.05 · crit = Lck × 0.05 · dodge = <code>own Agi rate ÷ (rate + a same-level attacker's accuracy)</code> (D-024). Mobs are not a separate math — they are the same math with a multiply vector on the stat block. Energy Shield is the one player line a mob does not have (player-only · D-026). &lt;!-- END GENERATED:mob-stats --&gt;</p>
+<ul><li><strong>Mob crit is real</strong> — 8% to 14% from the mob's own Lck line, and the incoming order now has the step it needed (<code><a href="doc-combat.html">combat.md</a></code> §2 step 4b · ×2.0, the no-Mod base).</li><li><strong>Mob res is low, 8% to 17%.</strong> That answers the open question of what the player's res is for: not for mob res, which nobody can out-race, but for the Element counter table and the Element half of every hit.</li><li><strong>Mob dodge is the mirror of ours</strong> — the mob's own Agi rate contested by <em>the accuracy of the player hitting it</em>, the same opposed shape X20 uses on the player side (D-024). It is a thin layer: every roster entry lands in the single-digit band, so a mob's Agi never becomes the answer to a build (<strong>X24</strong> keeps it there). The per-entry number is the <code>dodge</code> column of <code><a href="doc-mob-roster.html">mob-roster.md</a></code> and of the table above.</li><li><strong>Mob evasion is the species Dex line</strong> (<code>stat_c × species.dex × K_EVASION × body class</code>), which is why the sheet above carries an <code>evasion</code> column. The reference mob — mean species on a Medium body — is where every published hit chance is measured, and it lands on the same number the retired <code>level × 1</code> curve gave, so no DPS or mob_HP anchor had to be re-tuned (<code><a href="doc-formula-utility.html">formula-utility.md</a></code> section 8 · guard <strong>X21</strong>).</li><li><strong>Armour is in this table</strong> (<code>K_ARMOUR</code> 2 on the mob's Str line · D-022), so a Golem or Knight genuinely blunts a fast weapon and a Rat blunts nothing. <strong>Energy Shield is deliberately not here</strong> — the shield is a player-only line (D-026), because a mob's survivability is already the <code>mob_HP</code> anchor and a second pool would count it twice.</li></ul>
+<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody><tr><td>Level</td><td>1-90 (player ceiling is 100 · levels 91-100 are more of the same zone-9 band)</td></tr><tr><td>HP</td><td><code>DPS of on-level gear player x 1 sec x skill multiplier</code></td></tr><tr><td>innate Element</td><td>1 Element, rolled on spawn · takes ×1.5 damage from that Element</td></tr><tr><td>Core stats</td><td>Same 7-stat block as players (<code>stat_c = 12 + 2 × (L − 1)</code>, no Flat/% from equipment) · feeds accuracy, res, crit, aspd via the same K values · Full mob sheet with per-level table follows in the rebalance pass (P1-1)</td></tr><tr><td>evasion</td><td><code>stat_c(level) × species.dex × K_EVASION × body class</code> · the reference mob is the mean species on a Medium body, and its number is generated in <code><a href="doc-formula-utility.html">formula-utility.md</a></code> section 8 · per-species numbers in the sheet above and <code><a href="doc-mob-roster.html">mob-roster.md</a></code></td></tr><tr><td>Return damage</td><td><code>typical DPS ÷ 27</code> per second (L100 = 329) · the species tag divides it: physical mobs are the whole armour half, magic mobs the whole res half, mixed mobs 50/50 by their innate Element (D-030 · combat.md section 3 · the <code>phys/elem</code> column of mob-roster.md)</td></tr><tr><td>drop table</td><td>item table that mob drops</td></tr><tr><td>Weapon used</td><td>affects weight and drops</td></tr></tbody></table>
+<ul><li>Old evasion was written as level 100 = 600, calculated on the assumption players have Dex 890 · true ceiling is 510 and no build stacks all 12 items on Dex.</li></ul>
+<p>  At 600, no-Dex players get 40% hit chance in a game that attacks all day · so it changed to <code>level × 1</code>, which keeps hit chance constant across levels because both sides grow linearly (80% with no Dex, 94% with full Dex).   <code>level × 1</code> was always a stand-in for &quot;evasion grows with the mob's own Dex&quot;. Once every species carried a Dex line (D-019) the stand-in became wrong twice over: it made a Slime and an Elf equally hard to hit, and it ignored the body class that already carried its own evasion multiplier. Both are now derived from the same K the player uses.</p>
+<ul><li>Mob HP derives from DPS in formula.md section 0 · at level 100 it is set from <em>on-level</em> gear players (8,881 DPS), not from a full-gear player, so a fully geared character clears faster than the anchor · the inter-level line uses <code>item count = min(12, ceil(L/2))</code> (combat.md section 3).</li></ul>
+<ul><li>HP is the single value setting game speed. It must be set from expected player DPS, not set-then-tuned.</li><li>Mob innate Element is rolled on spawn, not fixed, so players cannot fully predict and must prepare res in advance.</li></ul>
+<h2 id="h-mob-groups">Mob Groups</h2>
+<p><strong>Mobs come in groups, not one by one</strong> — this is why AoE skills have value, and why single-target attacks alone are not enough.</p>
+<table><thead><tr><th>Level range</th><th>Mobs per group</th></tr></thead><tbody><tr><td>1-30</td><td>1-2</td></tr><tr><td>31-60</td><td>2-3</td></tr><tr><td>61-90</td><td>3-5</td></tr><tr><td>boss</td><td>always 1</td></tr></tbody></table>
+<ul><li>Numbers are ranges, rolled on every zone entry. Players always meet different groups.</li><li><strong>Max 3 engage at once</strong> — in larger groups, mobs 4-5 queue · this rule is part of the AFK promise: with 3 engaging, the generated <code>survival-group</code> table in combat.md section 6 costs no build more than 3.3% of pool, so nobody is pushed while idle; with 5 engaging the cost scales by roughly 5/3 and every build is pushed. The numbers in sections 6 and 7 depend on this rule alone. <strong>This is also the definition of &quot;nearby&quot; for auras and debuffs: 3 mobs</strong> (D-009 7a · skill-pool-system.md).</li><li>Elite and boss have no companions, always single.</li><li>Higher level ranges mean larger groups, requiring group answers from early game.</li></ul>
+<h3 id="h-attack-order">Attack Order</h3>
+<p><strong>Always hit the lowest-HP target first.</strong></p>
+<ul><li>This clears groups faster because it fastest reduces the number of targets still hitting back.</li><li>This gives Execute and Overkill much more value because the lowest-HP target is the one to finish.</li><li>Players choose nothing; the game assigns it · no fiddly focus-target rules.</li></ul>
+<h3 id="h-mobs-attack-together">Mobs Attack Together</h3>
+<p><strong>All units in the group attack in the same round</strong>, not taking turns one by one.</p>
+<ul><li><strong>Max 3 engage at once</strong> (section &quot;Mob Groups&quot;), so a group of 5 fields 3 attackers per round, not 5. A 5-mob group therefore deals 3 hits per round to the player — the cost of killing slowly.</li><li><strong>Evasion rolls separately per unit</strong> · 25% Evasion against 3 attackers ≈ 2.25 hits taken per round.</li><li>This is why Evasion, Max HP, and Vit matter even for heavy-attack players.</li><li>AoE is therefore not free: if kills are not fast enough, the remaining targets keep firing back. Under the decided AoE rule (60% per target · Cap 3 · mana ×1.5 · <code><a href="doc-skill-pool-system.html">skill-pool-system.md</a></code>), a group of 5 dies in 3.75 sec instead of 4.50 — 1.20× faster — while it costs 0.40-0.80× damage per mana against 1-2 small mobs, so the trade is real.</li><li>The measured pool cost per group is the generated <code>survival-group</code> table in combat.md section 6, not a hand number.</li></ul>
+<h3 id="h-aoe-range">AoE Range</h3>
+<table><thead><tr><th>Value</th><th>Example</th></tr></thead><tbody><tr><td>Attack skill AoE range</td><td>hits up to 3 units of the group queue, chosen by reach (melee fans from the front slot, stand-off picks any 3) · there is no tile distance · combat.md section 2b</td></tr><tr><td>Aura range</td><td>always while aura is on, no time range limit</td></tr></tbody></table>
+<ul><li>Same range everywhere for simplicity · multiple ranges require clear player notice first.</li></ul>
+<h2 id="h-drops">Drops</h2>
+<table><thead><tr><th>Type</th><th>Item quality</th><th>Gained when</th></tr></thead><tbody><tr><td>Normal mobs</td><td>per level ceiling</td><td>every unit</td></tr><tr><td>Elite mobs</td><td>floor while AFK · floor +1 tier only while online</td><td>rare</td></tr><tr><td>Boss</td><td>floor equals ceiling</td><td>very rare</td></tr><tr><td>Bag</td><td>per level ceiling</td><td>rare</td></tr><tr><td><strong>skill</strong></td><td>no Quality level</td><td>high bosses · very low normal mobs · mid elite</td></tr></tbody></table>
+<ul><li><strong>Normal mobs can still drop low Quality in mid-Quality zones</strong> under floor/ceiling rules.</li><li>Boss forces Quality to ceiling, i.e. pays the highest Quality that zone can drop.</li><li>Craft currency drops per mob drop table (see crafting.md).</li><li>Skills have no Item quality · drops are new skills or duplicates to upgrade tiers (see skill-pool.md).</li></ul>
+<nav class="pager"><span></span><a href="index.html">World &amp; towns</a><a href="doc-mob-roster.html">mob-roster.md →</a></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

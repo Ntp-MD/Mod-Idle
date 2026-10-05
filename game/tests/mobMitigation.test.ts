@@ -105,7 +105,7 @@ describe('a mob answers the half of the hit its line is written against', () => 
     };
     expect(stepMob(store, 'm1')).toBe(100);
     const armoured = mob({ armour: 9000, res: 60 });
-    const got = applyBleed(() => 0, store, armoured.id, 1000);
+    const got = applyBleed(() => 0, store, armoured.id, 1000, 1);
     expect(got).toBe(true);
     expect(stepMob(store, armoured.id)).toBeCloseTo((1000 * (E.K as any).K_BLEED) / (E.K as any).bleed_time_sec, 6);
   });

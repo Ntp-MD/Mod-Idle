@@ -1,6 +1,6 @@
 {
   "meta": {
-    "note": "Skill roster source of truth. tools/skills.js --write regenerates the roster tables in skill-pool*.md; --checks runs the mechanic gate (checks.md D18). Edit here, never hand-edit between the GENERATED markers.",
+    "note": "Skill roster source of truth. tools/skills.ts --write regenerates the roster tables in skill-pool*.md; --checks runs the mechanic gate (checks.md D18). Edit here, never hand-edit between the GENERATED markers.",
     "types": [
       "attack",
       "buff",
@@ -10,7 +10,7 @@
     ],
     "type_meta": {
       "attack": "Order list · cd + mana",
-      "buff": "Timed self-buff - 10 sec, 15 sec cd, never persists between fights",
+      "buff": "Timed self-buff - own cd and duration, never persists between fights",
       "curse": "Attached to target · Uses same hit_chance as attacks",
       "heal": "Same list (key on bosses)",
       "aura": "Player-managed set · **Reserves Max Mana**"
@@ -38,7 +38,7 @@
         "cdr_pct": 50,
         "ladder_pct": 30
       },
-      "note": "press = final_pct × basis × (1 + (skill_level − 1) × level_step_pct/100) · basis phys = the caster's finished physical hit · basis magic = their magic + Element × Alignment/100 (D-070 · B5). `final_pct` is the level-1 fraction, so a fresh skill presses exactly what its row states. Read by tools/lib/skillmodel.js for the --calc workshop, the attack-table press column and the client's casts."
+      "note": "press = final_pct × basis × (1 + (skill_level − 1) × level_step_pct/100) · basis phys = the caster's finished physical hit · basis magic = their magic + Element × Alignment/100 (D-070 · B5). `final_pct` is the level-1 fraction, so a fresh skill presses exactly what its row states. Read by tools/lib/skillmodel.ts for the --calc workshop, the attack-table press column and the client's casts."
     }
   },
   "reserve_tiers": {
@@ -558,6 +558,29 @@
       "effect": "Forces Energy Shield to start recharging immediately (ignores the 5 sec delay) and the recharge is not interrupted by hits while up",
       "rules": [
         "es_recharge_immediate"
+      ]
+    },
+    {
+      "id": "buff.energy_absorb",
+      "name": "Energy Absorb",
+      "type": "buff",
+      "cd": 20,
+      "mana": "12%",
+      "duration": "3 sec",
+      "effect": "Converts 15% of every incoming hit into Energy Shield at skill level 1, rising to 30% at level 20, and that share is negated from HP either way while up",
+      "effects": [
+        {
+          "stat": "es_absorb_pct",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self"
+        },
+        {
+          "stat": "es_absorb_cap",
+          "op": "add_pct",
+          "value": 30,
+          "subject": "self"
+        }
       ]
     },
     {

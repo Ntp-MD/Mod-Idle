@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, loot } from '../src/engine/client';
-import { createCraft } from '../../engine/craft.js';
+import { createCraft } from '../../engine/craft.ts';
 import { rollDrop } from '../src/sim/drop';
 import { doCraft, stoneNames, craft as clientCraft } from '../src/sim/craft';
 import { newGame, tick } from '../src/sim/game';
@@ -47,21 +47,29 @@ describe('bench prices are the ones crafting.md prints', () => {
 describe('Reroll', () => {
   it('never rolls below the value it already holds, and stays inside the same Tier', () => {
     const item = piece(3);
-    const line = item.lines[0];
+    const line = item.lines[craft.UNTOUCHABLE];
     const [lo, hi] = loot.rangeOf(line.id, item.q, line.slice);
     let current = item;
     for (let s = 0; s < 200; s++) {
-      const r = made(craft.reroll(current, 0, mulberry32(s)));
+      const r = made(craft.reroll(current, craft.UNTOUCHABLE, mulberry32(s)));
       expect(r.ok).toBe(true);
-      const next = r.item.lines[0];
-      expect(next.value).toBeGreaterThanOrEqual(current.lines[0].value);
+      const next = r.item.lines[craft.UNTOUCHABLE];
+      expect(next.value).toBeGreaterThanOrEqual(current.lines[craft.UNTOUCHABLE].value);
       expect(next.value).toBeGreaterThanOrEqual(lo);
       expect(next.value).toBeLessThanOrEqual(hi);
       expect(next.slice).toBe(line.slice);
       current = r.item;
     }
     // climbing is bounded: after enough casts the line sits at the top of its slice
-    expect(current.lines[0].value).toBe(hi);
+    expect(current.lines[craft.UNTOUCHABLE].value).toBe(hi);
+  });
+
+  it('refuses to touch the Base Mod or the Legacy pair', () => {
+    const item = piece(3);
+    for (let i = 0; i < craft.UNTOUCHABLE; i++) {
+      const r = refused(craft.reroll(item, i, mulberry32(1)));
+      expect(r.why).toMatch(/cannot be changed/);
+    }
   });
 });
 
@@ -69,10 +77,10 @@ describe('Refine and Randomize', () => {
   it('Refine pushes one Tier up and stops dead at T1', () => {
     let item = piece(4);
     item = { ...item, lines: item.lines.map((l) => ({ ...l, slice: 2 })) };
-    const r = made(craft.refine(item, 0, mulberry32(1)));
+    const r = made(craft.refine(item, craft.UNTOUCHABLE, mulberry32(1)));
     expect(r.ok).toBe(true);
-    expect(r.item.lines[0].slice).toBe(1);
-    const again = refused(craft.refine({ ...item, lines: item.lines.map((l) => ({ ...l, slice: 0 })) }, 0, mulberry32(1)));
+    expect(r.item.lines[craft.UNTOUCHABLE].slice).toBe(1);
+    const again = refused(craft.refine({ ...item, lines: item.lines.map((l) => ({ ...l, slice: 0 })) }, craft.UNTOUCHABLE, mulberry32(1)));
     expect(again.ok).toBe(false);
     expect(again.why).toMatch(/already T1/);
   });
@@ -80,7 +88,7 @@ describe('Refine and Randomize', () => {
   it('the 1-stone roll may land anywhere in the published Tier weights, including lower', () => {
     const item = { ...piece(5), lines: piece(5).lines.map((l) => ({ ...l, slice: 0 })) };
     const seen = new Set<number>();
-    for (let s = 0; s < 60; s++) seen.add(made(craft.randomize(item, 0, mulberry32(s))).item.lines[0].slice);
+    for (let s = 0; s < 60; s++) seen.add(made(craft.randomize(item, craft.UNTOUCHABLE, mulberry32(s))).item.lines[craft.UNTOUCHABLE].slice);
     expect(seen.size).toBeGreaterThan(1);
   });
 });
@@ -110,19 +118,30 @@ describe('Ascend', () => {
 });
 
 describe('Remove', () => {
-  it('never touches the two Legacy slots', () => {
+  it('never touches the Base Mod or the Legacy pair', () => {
     for (let s = 0; s < 40; s++) {
-      const item = { ...piece(8), lines: [{ id: 'stat_mod_flat', value: 20, slice: 2 }, { id: 'physical_power_flat', value: 70, slice: 2 }, { id: 'attack_speed', value: 20, slice: 2 }] };
+      const item = { ...piece(8), lines: [
+        { id: 'physical_power_flat', value: 70, slice: 2 }, // Base Mod
+        { id: 'attack_speed', value: 20, slice: 2 },        // Legacy 1
+        { id: 'max_hp_flat', value: 40, slice: 2 },         // Legacy 2
+        { id: 'stat_mod_flat', value: 20, slice: 2 },       // Random
+        { id: 'armour_flat', value: 12, slice: 2 },         // Random
+      ] };
       const r = made(craft.remove(item, mulberry32(s)));
       expect(r.ok).toBe(true);
-      expect(r.changed.index).toBeGreaterThanOrEqual(craft.LEGACY_SLOTS);
-      expect(r.item.lines[0].value).toBe(20);
-      expect(r.item.lines[1].value).toBe(70);
+      expect(r.changed.index).toBeGreaterThanOrEqual(craft.UNTOUCHABLE);
+      expect(r.item.lines[0].value).toBe(70);
+      expect(r.item.lines[1].value).toBe(20);
+      expect(r.item.lines[2].value).toBe(40);
     }
   });
 
-  it('refuses a piece that only has Legacy mods left', () => {
-    const item = { ...piece(9), lines: [{ id: 'stat_mod_flat', value: 10, slice: 2 }, { id: 'physical_power_flat', value: 20, slice: 2 }] };
+  it('refuses a piece that has only the Base Mod and Legacy pair left', () => {
+    const item = { ...piece(9), lines: [
+      { id: 'physical_power_flat', value: 70, slice: 2 },
+      { id: 'attack_speed', value: 20, slice: 2 },
+      { id: 'max_hp_flat', value: 40, slice: 2 },
+    ] };
     expect(craft.remove(item, mulberry32(1)).ok).toBe(false);
   });
 });
@@ -161,13 +180,15 @@ describe('Add mod stone', () => {
     expect(seen.size).toBeGreaterThan(0);
   });
 
-  it('a Common stops at 3 Mods and takes at most two Add stones', () => {
-    const full = { ...piece(23), rarity: 'Common', lines: [
-      { id: 'stat_mod_flat', value: 9, slice: 2 }, { id: 'max_hp_flat', value: 40, slice: 2 }, { id: 'armour_flat', value: 12, slice: 2 },
-    ] };
-    const atMax = refused(craft.add(full, ['evasion_flat'], mulberry32(1)));
-    expect(atMax.ok).toBe(false);
-    expect(String(atMax.why)).toMatch(/stops at 3 Mods/);
+  it('a Common stops at the same crafted ceiling and takes at most two Add stones', () => {
+    const atCeiling = refused(craft.add({ ...piece(23), rarity: 'Common', lines: [
+      { id: 'physical_power_flat', value: 70, slice: 2 }, { id: 'attack_speed', value: 20, slice: 2 },
+      { id: 'max_hp_flat', value: 40, slice: 2 }, { id: 'armour_flat', value: 12, slice: 2 },
+      { id: 'evasion_flat', value: 10, slice: 2 }, { id: 'stat_mod_flat', value: 9, slice: 2 },
+      { id: 'cooldown_reduction', value: 8, slice: 2 },
+    ] }, ['elemental_power_flat'], mulberry32(1)));
+    expect(atCeiling.ok).toBe(false);
+    expect(String(atCeiling.why)).toMatch(/stops at 7 Mods/);
     const base = { ...piece(23), rarity: 'Common', lines: [{ id: 'stat_mod_flat', value: 9, slice: 2 }] };
     const first = made(craft.add(base, ['max_hp_flat', 'armour_flat'], mulberry32(1)));
     expect(first.ok).toBe(true);
@@ -176,6 +197,8 @@ describe('Add mod stone', () => {
     const third = refused(craft.add(second.item, ['max_hp_flat', 'armour_flat'], mulberry32(3)));
     expect(third.ok).toBe(false);
     expect(String(third.why)).toMatch(/2 Add stones/);
+    // the stone count is the cap, not the line count — the piece still has room to the ceiling
+    expect(second.item.lines.length).toBeLessThan(E.rarity.Common.crafted_max);
   });
 
   // Stat Mod % was retired with Core Stat % (D-114), so `stat_mod_flat` is the only Stat Mod line a
@@ -216,15 +239,15 @@ describe('the bench in the game', () => {
     const s = newGame(21);
     s.counters.stones.reroll_value = 0;
     s.bag.unshift(piece(11));
-    const denied = refused(doCraft(s, 'bag', 0, 'reroll', 0, mulberry32(1)));
+    const denied = refused(doCraft(s, 'bag', 0, 'reroll', craft.UNTOUCHABLE, mulberry32(1)));
     expect(denied.ok).toBe(false);
     expect(String(denied.why)).toMatch(/needs/);
     s.counters.stones.reroll_value = 8;
-    const before = s.bag[0].lines[0].value;
-    const ok = doCraft(s, 'bag', 0, 'reroll', 0, mulberry32(1));
+    const before = s.bag[0].lines[craft.UNTOUCHABLE].value;
+    const ok = doCraft(s, 'bag', 0, 'reroll', craft.UNTOUCHABLE, mulberry32(1));
     expect(ok.ok).toBe(true);
     expect(s.counters.stones.reroll_value).toBe(0);
-    expect(s.bag[0].lines[0].value).toBeGreaterThanOrEqual(before);
+    expect(s.bag[0].lines[craft.UNTOUCHABLE].value).toBeGreaterThanOrEqual(before);
   });
 
   it('has nothing locked and nothing left owing — the ladder is bounded by the line it raises', () => {

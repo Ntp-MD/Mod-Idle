@@ -207,10 +207,10 @@ describe('the stack rows and the status curses reach the status store', () => {
     expect((E.K as any).K_BLEED_CHANCE * 100).toBe(valueOf('curse.lacerate', 'bleed_chance'));
     const store = newMobStatusStore();
     let applied = 0;
-    for (let i = 0; i < 50; i++) if (applyBleed(mulberry32(i), store, 'm1', 1000)) applied++;
+    for (let i = 0; i < 50; i++) if (applyBleed(mulberry32(i), store, 'm1', 1000, (E.K as any).K_BLEED_CHANCE)) applied++;
     expect(store.m1.statuses.bleed!.perSec).toBeCloseTo((1000 * (E.K as any).K_BLEED) / (E.K as any).bleed_time_sec, 6);
     // a weaker hit cannot shorten the bleed a stronger one already started
-    applyBleed(() => 0, store, 'm1', 10);
+    applyBleed(() => 0, store, 'm1', 10, 1);
     expect(store.m1.statuses.bleed!.perSec).toBeCloseTo((1000 * (E.K as any).K_BLEED) / (E.K as any).bleed_time_sec, 6);
     expect(applied).toBeGreaterThan(0);
   });

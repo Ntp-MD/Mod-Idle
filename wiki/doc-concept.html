@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Concept · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-concept">Concept</a>
+<a href="#h-main-decision-no-resource-skills">Main Decision: No Resource Skills</a>
+<a href="#h-core-loop">Core Loop</a>
+<a href="#h-active-vs-afk">Active vs AFK</a>
+<a href="#h-game-breadth-replacing-skills">Game Breadth Replacing Skills</a>
+<a href="#h-build">Build</a>
+<a href="#h-why-play-this-instead-of-melvor">Why Play This Instead of Melvor</a>
+<a href="#h-failure-points">Failure Points</a>
+<a href="#h-minute-one">Minute One</a>
+<a href="#h-not-yet-defined">Not Yet Defined</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html" aria-current="page">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">Start here</a><span class="sep">/</span><span>concept.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>Concept</h1>
+<dl class="kv"><dt>file</dt><dd><code>concept.md</code> · 162 lines · 2,313 words · written 2026-10-04T12:44:42Z</dd><dt>category</dt><dd>Start here</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-world.html">world.md</a> · <a href="doc-skill-pool.html">skill-pool.md</a> · <a href="doc-item-rarity.html">item-rarity.md</a> · <a href="doc-crafting.html">crafting.md</a></dd><dt>imported by</dt><dd><a href="doc-towns.html">towns.md</a></dd><dt>quoted by</dt><dd><a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-towns-stalls.html">towns-stalls.md</a> · <a href="doc-towns-ui.html">towns-ui.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd><code>opening</code> <span class="tag gen">tools/town.ts</span></dd><dt>raw</dt><dd><a href="../concept.md">concept.md</a></dd></dl>
+<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
+<h2 id="h-concept">Concept</h2>
+<p>import glossary.md import world.md import skill-pool.md import item-rarity.md import crafting.md</p>
+<p>Uses the Melvor Idle frame, but deliberately diverges from it.</p>
+<p><strong>One line</strong> — Grind monsters and assemble a build from dropped items. Every drop forces a keep-or-trash decision.</p>
+<h2 id="h-main-decision-no-resource-skills">Main Decision: No Resource Skills</h2>
+<p>Melvor has ~20 skills (gather/find/craft/cook). This game has only <strong>combat</strong>.</p>
+<table><thead><tr><th>Reason</th><th></th></tr></thead><tbody><tr><td>Every non-combat skill becomes a clicker the player ignores</td><td>The more skills there are, the more upkeep must be checked</td></tr><tr><td>If wood gathering existed, every drop would become mere material</td><td>Loot excitement would disappear</td></tr><tr><td>Depth should live in items, not in skill count</td><td>This game already offers mod × quality × tier × element × crafting decisions</td></tr></tbody></table>
+<p><strong>Cost to accept</strong> — While AFK the player has nothing else to switch to. This is not fixed by adding skills, but by making <strong>combat meaningful enough to repeat long-term</strong>. See Rarity.</p>
+<blockquote><p><strong>Narrow exception (farm.md): a 3-plot herb farm exists as timers only — no levels, no XP, no skill.</strong> It costs 2 taps a day, outputs potion herbs only, never gear or power. It does not reopen the skill-count question above: nothing here levels, nothing here is upkeep-gated, and potions never heal on bosses.</p></blockquote>
+<h2 id="h-core-loop">Core Loop</h2>
+<pre class="code">Select zone → Fight monsters → Gain XP + items + crafting currency → Decide equip/craft → Next zone</pre>
+<ul><li>The same loop, in place names (<code><a href="doc-towns.html">towns.md</a></code>): arrive at a settlement → sell or dissolve the junk at its counter → use the stalls and the bench → take the Waypoint to the next zone. Settlements add no clicks to automate and no power.</li></ul>
+<table><thead><tr><th>Layer</th><th>What it is</th><th>What it unlocks</th></tr></thead><tbody><tr><td><strong>Zone</strong></td><td>Levels 1-90 divided into bands (see world.md)</td><td>Higher-level monsters · Item quality ceiling rises</td></tr><tr><td><strong>Build</strong></td><td>11-slot set + weapon</td><td>Attack speed · What can be resisted</td></tr><tr><td><strong>Weapon Mastery</strong></td><td>Separate XP per weapon type</td><td>Lighter equipped weapon + stronger skills of that weapon · Account-wide +drop_rate</td></tr><tr><td><strong>Boss</strong></td><td>Special monster fightable at every level</td><td>Quality ceiling of that zone · Crafting currency</td></tr></tbody></table>
+<h2 id="h-active-vs-afk">Active vs AFK</h2>
+<p>This is the most important design decision in this game. If designed wrong, the game dies on day two.</p>
+<table><thead><tr><th></th><th>Active</th><th>AFK</th></tr></thead><tbody><tr><td>What the player does</td><td>Select zone · Order skills in list · Enable aura · Switch preset</td><td>Do nothing</td></tr><tr><td>Loot</td><td>Full</td><td>Full</td></tr><tr><td>Item quality</td><td>Floor–ceiling</td><td>Floor only · No high-quality items from AFK</td></tr><tr><td>Boss</td><td>Yes</td><td>No</td></tr><tr><td>Efficiency per hour</td><td>100%</td><td>40-50%</td></tr></tbody></table>
+<p><strong>Decision rule</strong> — The player must gain something from staying in the game that closing the game does not give.</p>
+<p>Three items currently planned:</p>
+<ol><li><strong>Quality ceiling</strong> — AFK drops only floor quality of the zone. High-quality items require being online or coming from crafting.</li><li><strong>Skill ordering and aura</strong> — Unlimited list length. The more skills known, the better the ordering, and auras reserve a share of Max Mana that the player manages directly (total may not reach 100%), so the player reads the aura budget up front instead of recalculating it while fighting.</li><li><strong>Boss</strong> — The only place high-quality items drop without crafting · And the only place to get duplicates for upgrading skills.</li></ol>
+<blockquote><p><strong>Closed with numbers</strong> (loot.md section 7): AFK kill rate is <strong>identical at 100%</strong> · Same drop count · <strong>Full XP</strong> (intentional) · Only 2 real differences are ① Drop quality is <em>zone floor only</em> ② Reroll tier stones are only 18 of 30 per hour (no boss) and Add mod stones = 0 (boss-bonus XP excluded too, P1-3) → the second half of the crafting engine is fully online. Combined, gear progress while AFK stays around <strong>40-50%</strong> as intended, without cutting kill rate · And <strong>AFK grants full XP</strong> because cutting both XP and quality would make closing the game feel like unmeasurable waste. Risk from these numbers: AFK is not <em>slower</em>, it is <em>shallower</em> · The game must keep &quot;zone floor&quot; progressing, otherwise the first night offline will feel empty.</p></blockquote>
+<blockquote><p><strong>Closed</strong>: offline cap = <strong>12 hours</strong> · Reason from numbers in loot.md: 12 hours = about twice a full-set Refine pass (6.4 hr · E6) and matches &quot;1 work day&quot; · Lower than this, players returning every morning will feel closing the game meant nothing · Higher than this, there is nothing urging a return. Offline gains match the table in this section: same drops but <strong>quality is zone floor only</strong> · No boss → no Add mod stones and no boss share of Reroll tier stones → the second half of the crafting engine is fully active (loot.md section 7).</p></blockquote>
+<h2 id="h-game-breadth-replacing-skills">Game Breadth Replacing Skills</h2>
+<p>This game has no resource skills, but offers multiple parallel paths without click-switching.</p>
+<table><thead><tr><th>Path</th><th>What it is</th></tr></thead><tbody><tr><td><strong>12 weapon types</strong></td><td>sword / axe / dagger / mace / spear / bow / crossbow / staff / rod / wand / two-handed sword / two-handed axe · Each type uses a different skill set (see equipment-weapon.md)</td></tr><tr><td><strong>5 Elements</strong></td><td>Each Element has different status and counter pairs · Must consider which monster Element will be faced</td></tr><tr><td><strong>Combat skills</strong></td><td>Unlimited list, runs in order · Auras reserve Max Mana, player-managed · count and split in <code><a href="doc-skill-pool.html">skill-pool.md</a></code></td></tr><tr><td><strong>Quality × Tier</strong></td><td>A single item can compete on multiple axes</td></tr><tr><td><strong>3 crafting commands</strong></td><td>Fix dropped items to fit the build</td></tr></tbody></table>
+<p><strong>Weapon Mastery</strong> — Each weapon type has its own XP, levels 1-20. Bonuses have 2 layers: <strong>while-equipped layer</strong> (that weapon is lighter + skills of that weapon are stronger) and <strong>account-wide layer</strong> (+drop_rate per type reaching L10). This lets players try swapping weapons to farm Mastery without ever leaving combat — because &quot;collected&quot; items count as permanent account bonuses. Unlike Melvor, where skills must be swapped to farm XP — here only equipped items are swapped · And AFK still farms Mastery at full rate (formula + timeline in equipment-weapon.md).</p>
+<blockquote><p><strong>Closed in equipment-weapon.md</strong>: Mastery levels 1-20 per weapon type · XP from the character XP kill stream (4/kill, no hit term · D-065) · L10 takes 1.13 hours at level 90. All 12 types account-wide = 13.5 hours. Bonuses = <strong>weapon weight −1%/level</strong> (while equipped) · <strong>skill damage +0.5%/level from L5</strong> (while equipped) · <strong>drop_rate +1% per type at L10 or above</strong> (account-wide, max +12%). Reason for no damage bonus: all weapon types are already tuned to equal DPS (<code>weapon_mult = 1.2 / weapon_aspd</code> · proven equal across all 12 types by <strong>X14</strong>). If Mastery granted damage, one weapon type would stay best forever and the &quot;reason to try swapping weapons&quot; would die · AFK still farms Mastery at full rate because it counts purely from kills.</p></blockquote>
+<h2 id="h-build">Build</h2>
+<p>From the system in <code><a href="doc-formula.html">formula.md</a></code> where all 7 stats use the same scale, builds are not separated by stat weighting but by <strong>where Mods are invested</strong>.</p>
+<table><thead><tr><th>Build</th><th>Weapon</th><th>Defensive pieces focus</th><th>What to watch</th></tr></thead><tbody><tr><td>physical burst</td><td>sword / axe</td><td>Max HP %</td><td>crit chance + crit damage on main hand</td></tr><tr><td>magic burst</td><td>staff / rod / wand</td><td>Max Mana % · CDR %</td><td>Magic power + Alignment</td></tr><tr><td>fast hit</td><td>dagger / bow</td><td>Evasion flat · Evasion %</td><td>Attack speed % · Core stat Agi</td></tr><tr><td>elemental dot</td><td>any with Element</td><td>Elemental res of the used Element</td><td>Alignment + burn/poison</td></tr><tr><td>evasion tank</td><td>shield / mace</td><td>Evasion + Max HP</td><td>Core stat Vit + Agi</td></tr><tr><td>loot</td><td>anything</td><td>anything</td><td>Core stat Lck · drop rate</td></tr></tbody></table>
+<ul><li>Every build uses Core stats from all pieces; they differ in which one is stacked.</li><li>Lck is the only stat helping both DPS (crit) and loot (drop), so it is the most valuable long-term build. Must be watched so it does not dominate.</li><li><strong>Decided (P0-2): &quot;fast hit&quot; stays as a hit-count build, not a DPS race.</strong> The big-hit build outscores it on raw damage per bag and nothing in the K set changes that; its value comes from <strong>swing count</strong> — more procs per second, more chill uptime, and Riposte's Evasion-scaling damage as its boss path. The numeric rebalance this line deferred to the mob-sheet pass has now run on geared characters (<strong>D-106</strong>): the same bag spent two ways leaves the hit-count build behind on damage but carrying <strong>more</strong> of it through a swing or something a swing left behind, so the identity holds and no number moved. The DoT leg is <strong>not</strong> this build's — burn and poison are the payload of the poison build, which spends its slots on the curse lines, so the hit-count identity does not lean on a status budget it does not own.</li></ul>
+<blockquote><p><strong>Fixed</strong>: Wis previously had no outlet because there were no skills. Now <code><a href="doc-skill-pool.html">skill-pool.md</a></code> has skills that actually use CDR. Str/Int/Dex/Agi/Lck are stats that scale skills, so CDR values now have uses for every stat.</p></blockquote>
+<h2 id="h-why-play-this-instead-of-melvor">Why Play This Instead of Melvor</h2>
+<table><thead><tr><th></th><th>Melvor</th><th>This game</th></tr></thead><tbody><tr><td>Item depth</td><td>Items are tier + fixed craft values</td><td>mod × Item quality × tier × Element</td></tr><tr><td>Elements</td><td>None</td><td>5 Elements with counters · Every zone has a native Element</td></tr><tr><td>Equipment slots</td><td>10 slots differing only by name</td><td>11 slots genuinely different, because Offensive comes from weapons only</td></tr><tr><td>Crafting</td><td>Craft by fixed recipe, inflexible</td><td>3 commands: raise quality / raise slot / change slot</td></tr><tr><td>Skill count</td><td>~20</td><td>Combat skills only in this count (count and split in <code><a href="doc-skill-pool.html">skill-pool.md</a></code> · the old passives became tree keystones) · the one life skill, Farming, is a separate provisioning track (<code><a href="doc-farm.html">farm.md</a></code>), not in the combat roster</td></tr><tr><td>What must be clicked</td><td>Swap across 20 things</td><td>Select zone and order the list</td></tr></tbody></table>
+<h2 id="h-failure-points">Failure Points</h2>
+<ol><li><strong>Numbers offer nothing to watch except loot</strong> — If the player sits in a zone with no progress, the game bores by day three. Answered by the task board (tasks.md): 3 visible slots with daily progress, plus the skill upgrade ladder.</li><li><strong>1 Offensive slot may be too narrow</strong> — crit, attack speed, accuracy live on main hand alone (see <code><a href="doc-equipment-slot.html">equipment-slot.md</a></code>). If every build feels identical in play, this rule must be relaxed.</li><li><strong>Random skill drops may frustrate players</strong> — If bosses do not drop often enough, players will never get wanted skills no matter how long they play · Drop chances must be reviewed first.</li><li><strong>Crafting may devalue dropped loot</strong> — If raising tier to T1 is easy, good items equal common items. See open questions in <code><a href="doc-crafting.html">crafting.md</a></code>.</li><li><strong>Monster skills and the status mirror — Closed in <code><a href="doc-combat.html">combat.md</a></code> §5b (D-067)</strong> — mobs add skills by body tier (Small/Medium 0, Large and Elite 1, Boss 1-2) and every skill only re-times its priced <code>mob_PS</code>, so <code>mob_HP</code>, kills/hour and the timeline never move. Player statuses mirror three ways: DoT and damage-shaping debuffs land on mobs in full (our curses have real targets because monsters keep their own clocks), and control is Cap-bounded — a mob takes the ≤15% stun and the per-status aspd cuts but can never be locked, so no fight is stun-locked and no boss loses its clock. Innate Element stays every mob's baseline: its status still hits us at 20% per landed hit — chill lowers aspd · shock stops attacks+regen · burn/poison are DoT.</li></ol>
+<h2 id="h-minute-one">Minute One</h2>
+<p><strong>A client builds the starting character from one read of <code>engine.json</code> <code>opening</code>.</strong> Nothing below is hand-typed — the table is generated, and five opening checks hold it against the mob curve.</p>
+<table><thead><tr><th></th><th>Given</th><th>Why</th></tr></thead><tbody><tr><td>Settlement</td><td><strong>Eastgate</strong> (zone 1, levels 1-10)</td><td>the zone the player opens in</td></tr><tr><td>Level</td><td><strong>1</strong> · 12 each stat · 540 Max HP · 3.0 regen/sec</td><td>level-1 baseline, no gear</td></tr><tr><td>Gear</td><td><strong>1 item</strong>: one-handed sword, low quality T3, Physical power flat +15</td><td>the floor of the low-quality table</td></tr><tr><td>Skills</td><td><strong>none</strong></td><td>the first skill is the first boss drop</td></tr><tr><td>Gold / stones</td><td><strong>0 / 0</strong></td><td>minute one buys nothing</td></tr><tr><td>First rule</td><td><strong>kill 5 in zone 1</strong> (from the Guild counter, Eastgate)</td><td>the task board already exists and pays stones only</td></tr></tbody></table>
+<p><strong>First fight, measured:</strong> a level-1 character kills a zone-1 mob in <strong>1.3 sec</strong> as the curve prices it, and in <strong>1.3 sec</strong> as a character actually carrying the 35-weight sword swings it (§11 takes 0% of aspd against a 1,024 capacity · survives <strong>378 sec</strong> of the mob's return damage). Numbers come from the same engine the cages use, so the opening cannot drift away from the mob curve it is priced against. &lt;!-- END GENERATED:opening --&gt;</p>
+<ul><li><strong>Why the starting weapon is the worst roll in the table.</strong> The mob-health curve already prices a</li></ul>
+<p>  level-1 zone-1 mob against a character holding one weapon, so a top-tier free weapon would pay out   more damage than the curve allows. The floor of the low-quality table is what the curve expects.</p>
+<ul><li><strong>Why there is no starting skill.</strong> The curve gives a level-1 character almost no skill power, so</li></ul>
+<p>  a free attack skill would be power the mobs are not priced against. The first skill is the first   boss drop, which is also the first moment the skill axis becomes visible.</p>
+<ul><li><strong>Why the first rule is a hunt task.</strong> The task board already exists and pays stones only, so the</li></ul>
+<p>  opening instruction costs no new system and no power outside the loot funnel.</p>
+<h2 id="h-not-yet-defined">Not Yet Defined</h2>
+<ul><li><strong>Win condition — Decided</strong> · Completion = <strong>kill the zone 9 boss (level 90, HP 160,635) within a single spawn without being Pushed</strong> · A truly measurable number from combat.md §6/§7 and <code>node tools/survival.ts</code> (<strong>SV6</strong>): without heal all four builds are Pushed, and one heal round (pool ×2.09) clears it for the two themes that spend their items on surviving — <code>mix</code> and <code>tank</code> — so it is not a gate requiring new items, but a gate requiring <em>heal casts</em>, which is what separates active play from AFK as G5 promised · The glass and Evasion themes are the two that cannot finish without allocating slots to health · <strong>After completion = continued improvement loop, no prestige</strong>: levels 91-100 are the item-quality push in zone 9 (world.md) · Remaining goals are timed — Ascend full 12 pieces ~15 hours (E7) · Refine full set ~16 hours (E6) · Mastery 12 types to L20 ~60 hours · Full skill ranks for 2-4 skills ~24 hours/skill (E11).</li><li><strong>Short-form content</strong> — 9 bosses (1 per zone) per new zone numbers · <strong>Achievements are cut</strong> (D-009 7c) · Elite set at 1 in 5 kills (D-041 · <code>engine.json</code> <code>elite_spawn_chance</code>).</li></ul>
+<p>(End of file - total 135 lines)</p>
+<nav class="pager"><a href="doc-harness/todo.html">← harness/todo.md</a><a href="index.html">Start here</a><a href="doc-glossary.html">glossary.md →</a></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

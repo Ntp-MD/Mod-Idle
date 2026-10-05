@@ -13,83 +13,73 @@ terminology bans, and the doc layout. Neither restates the other.
 
 1. `AGENT.md` — project rules. Read first.
 2. This file — how to work.
-3. `harness/handoff.md` — the live slot: what is being worked on right now. Read at task start.
-4. `glossary.md` — shared language. Read when a term is load-bearing; patch it when one locks.
+3. `glossary.md` — shared language. Read when a term is load-bearing; patch it when one locks.
+4. `harness/todo.md` — the single work file: what is open, and what is in flight right now. Read at
+   task start.
 5. `harness/decisions.md` — what was ruled and why. **Only when the user asks about a past decision.**
-6. `harness/todo.md` — the open-work queue. Read when picking what to do next.
 
 Never read `harness/decisions.md` to decide the current task; it is history, not instruction.
 
+Design docs live under `doc/<layer>/` (see `AGENT.md` §4); they are addressed by bare name
+(`glossary.md`), so the files above are found at `doc/start/glossary.md` etc.
+
 ## Verify routing
 
-**`node tools/verify.js` is the only verify entry point** and it is pre-authorised. Run it after
+**`node tools/verify.ts` is the only verify entry point** and it is pre-authorised. Run it after
 any edit, fix what your change broke, rerun without asking. Do not run it to "check whether it is
 worth running" — it always is.
 
-It runs ten cages in order: engine, town, skills, tree, ladder, timeline, survival, inventory, anchor, doc
-lint. The last one is the referential-integrity pass over the markdown — it is what catches a file you
-moved or a name you retyped.
+It runs twelve cages in order: engine (`check`), town, skills, tree, ladder, loot, bases, timeline,
+survival, inventory, anchor, and doc lint. The last one is the referential-integrity pass over the
+markdown — it is what catches a file you moved or a name you retyped.
 
-Rebuild the views after a doc edit: `node tools/report.js` (dashboard) and `node tools/wiki.js build`.
+Rebuild the views after a doc edit: `node tools/report.ts` (dashboard) and `node tools/wiki.ts build`.
 The writer that owns a generated block is the `--write` flag of that block's cage.
 
-**One command for the whole build:** `node tools/build.js` runs every writer, then `verify`, then both views
+**One command for the whole build:** `node tools/build.ts` runs every writer, then `verify`, then both views
 and stops at the first failure (`--check` skips the writers and only verifies + rebuilds). Use it unless you
 are fixing one specific cage.
 
 **Mid-task re-anchor:** after roughly eight file edits, or after any context cutoff, re-read
-`harness/handoff.md`. If the Mission no longer matches what you are doing, fix the slot
-before editing again.
+`harness/todo.md`. If the open work no longer matches what you are doing, fix the file before editing
+again.
 
-## The live slot
+## The work file
 
-`harness/handoff.md` is the **single live slot** for the task in flight. Never a second
-one per topic. Four headers, never deleted:
+`harness/todo.md` is the **single work file** — there is no second slot and no per-topic scratch
+file. It holds two things and nothing else:
 
-| Header | Holds |
-|---|---|
-| Mission | what this task is, in one paragraph |
-| Plan | the steps, each tickable |
-| Blockers | what is stopping progress, or `- (none)` |
-| Hand-off Note | the next agent starts here |
+- **Open work** — what is not built yet, split by who can close it.
+- **One line naming what is post-release** and deliberately not tracked.
 
-- Update it after every meaningful step: a user order, a context shift, a root cause, a landed choice.
-- Slot writes are silent — do not narrate them.
-- **Finish:** tick every Plan box, log the entry in `harness/decisions.md`, then clear the slot back to the
-  empty shape. **A task is not done while the slot is stale.**
-- A parked task (moved to post-release, or waiting on an owner ruling) is cleared from the slot and
-  left in `harness/todo.md` — not left to rot in the slot.
+The shape of the repo, where the numbers live, and the standing rules are `AGENT.md`'s job
+(§0 project phase · §4 structure), not the work file's — the work file names work and nothing else.
+
+Write it silently after a meaningful step: a user order, a context shift, a root cause, a landed
+choice. Do not narrate the write.
+
+## Clearing the slate
+
+**When work is done, the line is deleted — not ticked, not struck through, not summarised as
+"recently closed".** A work file that accumulates finished items stops being a work file: it becomes
+a changelog nobody reads, and the next session has to wade through it to find the three things still
+open.
+
+- **The record of what was done lives in `harness/decisions.md`**, with the gate that holds it. That
+  is the one place a finished thing is allowed to still exist.
+- **Never write a closing paragraph in place of deleting the line.** A tidy summary of completed work
+  is the same clutter in nicer clothes.
+- A parked task (moved to post-release, or waiting on an owner ruling) is a single line under the
+  post-release note — never left to rot in the open list.
+- If a line turns out to be already true when you re-read it, delete it on the spot.
 
 ## Tooling
 
 Use the tool that answers the question instead of editing a doc to find out.
 
-- **See a value's effect without editing docs** — `node tools/skills.js --calc --stat N --power N --level N --cdr N --ladder N` prints dmg/press · eff cd · presses/sec · mana%/s for every attack skill, and `node tools/report.js` carries the same as a live "Skill workshop" section. Both read `tools/lib/skillmodel.js`.
-- **Edit data through the wiki editor** when a form is faster than the JSON — `node tools/wiki.js serve --open` (loopback only) renders every `tools/data/*.json` collection as a validated form, then runs the writers + every cage + lint and rolls back on failure. Direct JSON edits work too.
-- **Rename a skill or aura** — change the `name` in `skills.json`, add `"Old Name": "New Name"` to its `renames` map, then run `node tools/tree.js --write`; the node `Enables` cells update themselves. `tools/tree.js --checks` reports any cell still on an old name as PENDING until you do. Never retype the name into a doc.
-
-## The queue and the slot are different things
-
-`harness/handoff.md` is one task in flight. `harness/todo.md` is every task not yet
-built. Do not move backlog items into the slot until they are actually started — the slot is not a
-todo list, it is a resume point.
-
-## The queue works exactly like the slot
-
-**Both files are emptied the same way: when the work is done, the line is deleted, not ticked.**
-A queue that accumulates finished items stops being a queue — it becomes a changelog nobody reads,
-and the next session has to wade through it to find the three things still open. That is the same
-failure the slot has, and it gets the same answer.
-
-- **Never leave a done item in the queue.** Not ticked, not struck through, not summarised as
-  "recently closed". Gone.
-- **The record of what was done lives in `harness/decisions.md`**, with the gate that holds it. That is the
-  one place a finished thing is allowed to still exist.
-- **Never write a closing paragraph in place of deleting the line.** A tidy summary of completed work
-  is the same clutter in nicer clothes.
-- The only things that stay are: open work, standing rules, and one line naming what is post-release
-  and deliberately not tracked.
-- If a line turns out to be already true when you re-read it, delete it on the spot (see C3).
+- **See a value's effect without editing docs** — `node tools/skills.ts --calc --stat N --power N --level N --cdr N --ladder N` prints dmg/press · eff cd · presses/sec · mana%/s for every attack skill, and `node tools/report.ts` carries the same as a live "Skill workshop" section. Both read `tools/lib/skillmodel.ts`.
+- **Edit data through the wiki editor** when a form is faster than the JSON — `node tools/wiki.ts serve --open` (loopback only) renders every `tools/data/*.json` collection as a validated form, then runs the writers + every cage + lint and rolls back on failure. Direct JSON edits work too.
+- **Rename a skill or aura** — change the `name` in `skills.json`, add `"Old Name": "New Name"` to its `renames` map, then run `node tools/tree.ts --write`; the node `Enables` cells update themselves. `tools/tree.ts --checks` reports any cell still on an old name as PENDING until you do. Never retype the name into a doc.
 
 ## History
 
@@ -137,5 +127,5 @@ than three files in.
 
 **Never create a second home for a fact that already has one.** If a number lives in
 `tools/data/`, the writer prints it; a second document restating it is a defect, not a convenience.
-The same goes for a glossary, a decision log, and a work queue — one each, and this repo has already
+The same goes for a glossary, a decision log, and a work file — one each, and this repo has already
 deleted the duplicates that used to exist.

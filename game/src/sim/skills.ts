@@ -31,7 +31,7 @@ export function newSkillState(): SkillState {
 export const skillLevel = (s: SkillState, id: string) => sm.skillLevel(s.xp[id] || 0);
 export const ladderOf = (s: SkillState, id: string) => sm.ladderPct(s.owned[id] || 0);
 
-/** A row's mechanic word — each one is in `engine/skills.js` `EFFECT_RULES` and has a reader here. */
+/** A row's mechanic word — each one is in `engine/skills.ts` `EFFECT_RULES` and has a reader here. */
 export const hasRule = (skill: any, rule: string): boolean => ((skill?.rules || []) as string[]).includes(rule);
 
 /** One named magnitude off the row, with a default when the row does not state it. */
@@ -62,6 +62,7 @@ export const EFFECT_LABEL: Record<string, string> = {
   armour: 'armour', energy_shield: 'Energy Shield', physical_power: 'physical power',
   elemental_alignment: 'elemental alignment', elemental_resistance: 'elemental resistance',
   damage_taken: 'damage taken', heal_per_sec: 'heal per second', heal_instant: 'instant heal',
+  es_absorb_pct: 'damage absorbed to Energy Shield', es_absorb_cap: 'damage absorbed to Energy Shield (Cap)',
   // the target-side lines a curse writes
   damage_dealt: 'damage dealt', accuracy: 'accuracy', crit_chance: 'crit chance',
 };
@@ -86,6 +87,24 @@ export function effectLine(skill: any): string {
 /** A buff whose row carries this mechanic word is currently on its clock (D-102). */
 export function buffRuleUp(sk: SkillState, rule: string): boolean {
   return Object.entries(sk.buffUp).some(([id, left]) => left > 0 && hasRule(sm.byId[id], rule));
+}
+
+/**
+ * Energy Absorb (D-121): the share of an incoming hit the buff turns into Energy Shield right now,
+ * ramped linearly from its level-1 base to its Cap across the skill levels. Zero when it is off.
+ */
+export function esAbsorbPct(sk: SkillState): number {
+  const cap = E.skill_xp.level_cap;
+  for (const [id, left] of Object.entries(sk.buffUp)) {
+    if (left <= 0) continue;
+    const row = sm.byId[id];
+    const base = (row?.effects || []).find((e: any) => e.stat === 'es_absorb_pct');
+    if (!base) continue;
+    const top = (row.effects || []).find((e: any) => e.stat === 'es_absorb_cap');
+    const t = cap > 1 ? (skillLevel(sk, id) - 1) / (cap - 1) : 0;
+    return base.value + ((top ? top.value : base.value) - base.value) * Math.min(1, Math.max(0, t));
+  }
+  return 0;
 }
 
 /** The rows in the toggle track that this character owns, in roster order. */

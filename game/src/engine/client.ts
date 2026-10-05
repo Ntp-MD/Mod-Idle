@@ -6,9 +6,9 @@ import modsJson from '../../../tools/data/mods.json';
 import skillsJson from '../../../tools/data/skills.json';
 import townJson from '../../../tools/data/town.json';
 import basesJson from '../../../tools/data/bases.json';
-import { createEngine } from '../../../engine/index.js';
-import { createLoot } from '../../../engine/loot.js';
-import { createSkillModel } from '../../../engine/skills.js';
+import { createEngine } from '../../../engine/index.ts';
+import { createLoot } from '../../../engine/loot.ts';
+import { createSkillModel } from '../../../engine/skills.ts';
 
 export const E = engineJson as any;
 export const MODS = modsJson as any;

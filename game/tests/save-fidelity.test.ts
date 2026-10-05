@@ -4,6 +4,7 @@ import { newGame, tick, catchUp } from '../src/sim/game';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { craft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
+import { setRule } from '../src/sim/filter';
 import { exportJson, importJson, migrate, newAccount, mergeMastery, SCHEMA_VERSION } from '../src/state/save';
 import { mulberry32 } from '../src/engine/client-helpers';
 
@@ -48,6 +49,7 @@ describe('the salvage milestone (checks.md F15)', () => {
   it('owes one Reroll tier stone per 500 pieces dissolved', () => {
     const s = newGame(45);
     s.player.level = 90;
+    setRule(s.filter, 'all', { enabled: true }); // the filter ships off (D-122), so nothing would dissolve until it is armed
     // wear a full high-quality set so nearly every drop is a rejection
     s.gear = emptyGear().map((_, i) => {
       const item = rollDrop(mulberry32(100 + i), 'high', 1.2);
@@ -65,16 +67,16 @@ describe('the Reroll baseline survives a downgrade (save.md)', () => {
   it('remembers the highest value the slot ever held', () => {
     let item = rollDrop(mulberry32(51), 'low', 1.2);
     item = { ...item, rarity: 'Rare', q: 0, quality: 'low', lines: item.lines.map((l) => ({ ...l, slice: 1 })) };
-    const up = craft.reroll(item, 0, mulberry32(3));
+    const up = craft.reroll(item, craft.UNTOUCHABLE, mulberry32(3));
     expect(up.ok).toBe(true);
-    const baseline = up.item.lines[0].value;
+    const baseline = up.item.lines[craft.UNTOUCHABLE].value;
     // the 1-stone randomize may land lower; the baseline must not forget
-    const down = craft.randomize({ ...up.item, lines: up.item.lines.map((l: any) => ({ ...l, value: 1 })) }, 0, mulberry32(4));
+    const down = craft.randomize({ ...up.item, lines: up.item.lines.map((l: any) => ({ ...l, value: 1 })) }, craft.UNTOUCHABLE, mulberry32(4));
     expect(down.ok).toBe(true);
-    const again = craft.reroll(down.item, 0, mulberry32(5));
+    const again = craft.reroll(down.item, craft.UNTOUCHABLE, mulberry32(5));
     expect(again.ok).toBe(true);
-    expect(again.item.lines[0].value).toBeGreaterThanOrEqual(baseline);
-    expect(again.item.baselines[0]).toBeGreaterThanOrEqual(baseline);
+    expect(again.item.lines[craft.UNTOUCHABLE].value).toBeGreaterThanOrEqual(baseline);
+    expect(again.item.baselines[craft.UNTOUCHABLE]).toBeGreaterThanOrEqual(baseline);
   });
 });
 

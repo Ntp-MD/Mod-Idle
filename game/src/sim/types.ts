@@ -1,5 +1,10 @@
 import type { StatKey } from '../engine/client';
 
+export interface ModExtra {
+  id: string;
+  value: number;
+}
+
 export interface ModLine {
   id: string;
   value: number;
@@ -11,10 +16,16 @@ export interface ModLine {
    */
   element?: string | null;
   /**
-   * The Core stat a `stat_mod_flat` line feeds, chosen on the detail card. Only that line carries it
-   * (`sim/gear.ts` sets it as the piece is built, and D-114 left it the sole Stat Mod line).
+   * The Core stat a `stat_mod_flat` line feeds, rolled at drop and baked into the line the way a
+   * PoE implicit carries its own stat (D-127). Only that line carries it — its `all_stat_flat` sibling
+   * feeds all seven at once and bakes nothing (D-129); the pool is `mods.json` `stat_mod_flat.rolls`.
    */
   stat?: StatKey;
+  /**
+   * The further Mods a Base Mod line carries on the same line (`item-base.md` · D-123): line 1 rolls
+   * 1-3 Mods onto one line, its own `value` for the first and one entry here for each of the rest.
+   */
+  extra?: ModExtra[];
 }
 
 /** One worn or bagged piece. Rarity = Mod count, quality = value range, Tier = sub-range. */
@@ -154,7 +165,14 @@ export interface TownState {
   skipDay: number;
 }
 
-/** One trip on the Road: 5 minutes, 5 encounters, a bounded purse at the end. */
+/**
+ * One leg on the Road, plus the Circuit it belongs to.
+ *
+ * A one-off trip (the first walk to a settlement) is the degenerate case: `circuit` is empty. A
+ * Circuit is an ordered list of links the player has chosen to walk in a loop; `legIndex` points at
+ * the link being walked now and `laps` counts completed loops. A Push skips the current leg instead
+ * of ending the Circuit, and a closed client plays out the legs of the current lap before parking.
+ */
 export interface RoadTrip {
   linkIndex: number;
   settlementFrom: string;
@@ -164,6 +182,11 @@ export interface RoadTrip {
   nextEncounterSec: number;
   encountersLeft: number;
   pursePaid: boolean;
+  chestPaid: boolean;
+  /** Empty for a one-off trip; otherwise the ordered link indices of the Circuit. */
+  circuit: number[];
+  legIndex: number;
+  laps: number;
 }
 
 export interface GameState {
@@ -175,6 +198,8 @@ export interface GameState {
   stash: Item[][];
   road: RoadTrip | null;
   purseDay: Record<string, number>;
+  /** The chest's own once-per-link-per-day ledger, the same shape as the purse (`engine.json` road). */
+  chestDay: Record<string, number>;
   skills: SkillState;
   healUp: HealBuff | null;
   junkByRarity: Record<string, number>;

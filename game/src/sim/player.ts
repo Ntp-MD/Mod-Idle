@@ -26,6 +26,11 @@ const PCT_LINE: Record<string, string> = {
   evasion_pct: 'evasionPct',
   perfect_dodge_pct: 'pdodgePct',
   status_resistance_pct: 'statusResPct',
+  // the four line-1 Base Mods (item-base.md · D-123): block, penetration and the two chances
+  block_chance: 'blockPct',
+  armour_pen: 'armourPenPct',
+  bleed_chance: 'bleedChancePct',
+  stun_chance: 'stunChancePct',
 };
 const FLAT_LINE: Record<string, string> = {
   physical_power_flat: 'physFlat',
@@ -72,10 +77,16 @@ export function sumLines(gear: (Item | null)[]): Lines {
     const school = (BASES.bases.find((b: any) => b.name === item.base) as any)?.school;
     if (item.gearMod && school && FLAT_LINE[school]) acc[FLAT_LINE[school]] += item.gearMod;
     for (const line of item.lines) {
-      const stat = (line as any).stat as StatKey | undefined;
-      if (line.id === 'stat_mod_flat' && stat) acc.statBy[stat].flat += line.value;
-            else if (PCT_LINE[line.id]) acc[PCT_LINE[line.id]] += line.value;
-      else if (FLAT_LINE[line.id]) acc[FLAT_LINE[line.id]] += line.value;
+      // a Base Mod line carries its extra Mods on the same line (`item-base.md` · D-123), so each part
+      // feeds its own bucket
+      for (const part of [line, ...((line.extra as any[]) || [])]) {
+        const stat = (part as any).stat as StatKey | undefined;
+        if (part.id === 'stat_mod_flat' && stat) acc.statBy[stat].flat += part.value;
+        // the all-stats sibling lifts every Core stat by the one value it rolled (D-129)
+        else if (part.id === 'all_stat_flat') for (const k of STAT_KEYS) acc.statBy[k].flat += part.value;
+        else if (PCT_LINE[part.id]) acc[PCT_LINE[part.id]] += part.value;
+        else if (FLAT_LINE[part.id]) acc[FLAT_LINE[part.id]] += part.value;
+      }
       // and an Elemental line also feeds its own Element's pool, the way a PoE item carries one
       // element per added-damage line (owner ruling, D-089)
       if (line.element && (line.id === 'elemental_power_flat' || line.id === 'elemental_power')) {
@@ -124,6 +135,14 @@ export interface Character {
   critChance: number;
   critDmg: number;
   perfectDodge: number;
+  /** The shield's own avoidance layer (D-123): a blocked hit is deleted outright. */
+  block: number;
+  /** Cut on the mob's armour ratio, from the crossbow's Base Mod line (D-123). */
+  armourPen: number;
+  /** Chance to bleed on a landed hit, from the axe's Base Mod line (D-123). */
+  bleedChance: number;
+  /** Chance to stun on a landed hit, Alignment × K_STUN_PER_ALIGN + the mace's line (D-123 · C10). */
+  stunChance: number;
   alignment: number;
   resistance: number;
   /** Extra percentage points of resistance against one named Element (Trinity Form · D-102). */
@@ -167,7 +186,7 @@ export function weightOfCarry(gear: (Item | null)[], carried: Carried = {}, held
  * The whole character sheet, built with the shared engine and nothing else.
  * A Stat Mod feeds its stat as flat then %, the same shape `ceilStat` uses for the 816 ceiling.
  */
-/** The additive / multiplicative shape `engine/skills.js` `aggregateEffects` returns. */
+/** The additive / multiplicative shape `engine/skills.ts` `aggregateEffects` returns. */
 export interface EffectFold {
   add: Record<string, number>;
   mult: Record<string, number>;
@@ -191,7 +210,7 @@ export function buildCharacter(
     core[k] = (eng.statAt(level) + lines.statBy[k].flat) * (1 + lines.statBy[k].pct / 100);
   }
   const mainHand = gear.find((g) => g && g.slot === 'main hand') || null;
-  // a weapon's Element is a stored line on the piece, not a property of the 12 types:
+  // a weapon's Element is a stored line on the piece, not a property of the weapon types:
   // `equipment-weapon.md` carries no Element column, and `crafting.md` forbids locking one
   const weaponElement = mainHand ? (mainHand.lines.find((l) => l.element)?.element ?? null) : null;
   // the K_ELEM base belongs to the piece's own Element; each added line belongs to the Element it
@@ -222,7 +241,7 @@ export function buildCharacter(
     if (!key.startsWith('elemental_resistance:')) continue;
     resByElement[key.split(':')[1]] = (resByElement[key.split(':')[1]] || 0) + v;
   }
-  // the 12 weapon types carry their own aspd; the merged rows in engine.json are an aspd band
+  // the weapon types carry their own aspd; the merged rows in engine.json are an aspd band
   const weaponAspd = mainHand
     ? (weaponByName(mainHand.base)?.weapon_aspd ?? mainHand.weaponAspd ?? 1.2)
     : 1.2;
@@ -231,6 +250,8 @@ export function buildCharacter(
   const aspd = eng.aspdOf(core.agi, weaponAspd, lines.aspdPct + a(effects, 'attack_speed'))
     * m(effects, 'attack_speed') * (1 - burden);
   const critPool = eng.critPool(core.lck, lines.critPct);
+  // Alignment gates the mob-side status and feeds the mace's stun chance, so it is computed once
+  const alignment = eng.alignmentOf(core.dex, lines.alignPct + a(effects, 'elemental_alignment'), m(effects, 'elemental_alignment'));
 
   return {
     level,
@@ -267,7 +288,11 @@ export function buildCharacter(
     critChance: eng.critChanceOf(critPool),
     critDmg: eng.critDmgOf(critPool, lines.critDmgPct),
     perfectDodge: eng.perfectDodgeChance(core.lck, lines.pdodgePct),
-    alignment: eng.alignmentOf(core.dex, lines.alignPct + a(effects, 'elemental_alignment'), m(effects, 'elemental_alignment')),
+    block: eng.blockChance(lines.blockPct),
+    armourPen: lines.armourPenPct,
+    bleedChance: lines.bleedChancePct,
+    stunChance: eng.stunChanceFrom(alignment, lines.stunChancePct),
+    alignment,
     // All Resistance lifts every Element at once, so it joins the same line the per-Element Mods feed
     // and the one Cap still binds the total (D-110)
     resistance: eng.resistanceOf(core.vit, lines.resPct + lines.allResPct, m(effects, 'elemental_resistance')),
@@ -294,7 +319,7 @@ export function buildCharacter(
   };
 }
 
-/** mods.json display name → Mod id, the same lookup tools/loot.js uses. */
+/** mods.json display name → Mod id, the same lookup tools/loot.ts uses. */
 export function modIdByName(name: string): string {
   const n = name.trim().toLowerCase();
   const hit = Object.keys(loot.NAME_OF).find((id: string) => {

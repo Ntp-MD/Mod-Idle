@@ -4,19 +4,22 @@ import { playerSwing, mobSwing, rollStatus, dotDamage, type Statuses, type Statu
 import { rollDrop } from './drop';
 import { newTown, progressTasks, tickTown, huntN } from './town';
 import { newFarm, rollHerbs, maybeDrink } from './farm';
-import { road, encounterZones, encounterSizes, payPurse, grantTripStanding, endTrip } from './road';
+import {
+  road, encounterZones, encounterSizes, payPurse, claimChest, openArrival, grantTripStanding, endTrip,
+  advanceLeg, skipLeg, settlementZone,
+} from './road';
 import { weaponByName, masteryLevel, payMastery, dropMultiplier } from './mastery';
 import { newPresets, switchPreset, autoSelect } from './presets';
 import { newCollector, newGrants, wants, col } from './collector';
 import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from './filter';
 import { addTo } from './slots';
 import { settlementOfZone } from './town';
-import { effectsActive } from './skills';
+import { effectsActive, esAbsorbPct } from './skills';
 import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newCurses, modsOn, applyCurse, tickCurses, combineMods, lineValue, modsFromAuraFold, spreadOnDeath } from './curse';
 import {
-  newMobStatusStore, applyElement, applyBleed, stepMob, holdPoison, forgetDead as forgetMobStatus,
+  newMobStatusStore, applyElement, applyBleed, stunMob, stepMob, holdPoison, forgetDead as forgetMobStatus,
   modsOn as statusModsOn, targetMods, holdsCondition,
 } from './mobStatus';
 import {
@@ -71,6 +74,7 @@ export function newGame(seed = 20260101): GameState {
     stash: [],
     road: null,
     purseDay: {},
+    chestDay: {},
     skills: newSkillState(),
     healUp: null,
     junkByRarity: Object.fromEntries(Object.keys(E.junk.rarities).map((r) => [r, 0])),
@@ -212,6 +216,65 @@ function dissolve(s: GameState): void {
   }
 }
 
+/**
+ * One gear roll through the bag filter. A mob kill, a Road chest and any future item source use this
+ * same path, so "what the filter keeps" can never mean two different things.
+ */
+function awardDrop(s: GameState, rng: () => number, band: string, q: number | undefined, weaponAspd: number): void {
+  const item = rollDrop(rng, band, weaponAspd, q);
+  s.counters.drops++;
+  // the bag filter keeps a drop only when it outscores the piece worn in that slot by more than
+  // noise; anything else dissolves for 1 Reroll value stone, never for gold (loot.md §4)
+  // the bar is the best piece the character holds for that slot, worn or waiting in the bag: a
+  // keep that nobody has worn yet still has to beat what is already on offer, or the bag fills
+  // with near-duplicates of a decision already made (`loot.md` §4, read with no auto-pick)
+  const bestForSlot = (pool: (Item | null)[]) => pool
+    .filter((g): g is Item => g !== null && g.slot === item.slot)
+    .map((g) => loot.score({ ...g, q: g.q ?? 0 }))
+    .reduce((m, v) => Math.max(m, v), -1);
+  const wornScore = Math.max(
+    bestForSlot(s.gear as (Item | null)[]),
+    bestForSlot(s.bag),
+  );
+  // the filter is OFF by default (D-122): a slot the player has not turned on keeps every drop
+  // and dissolves nothing, so the player opts in per slot before a piece is ever thrown away.
+  // Only an enabled slot runs the published rule — a piece that fails it dissolves for 1 Reroll
+  // value stone (always kept), never for gold (`loot.md` §4).
+  const rule = ruleFor(s.filter, item.slot);
+  const verdict = rule.enabled
+    ? loot.keepsDrop(
+      { ...item, q: item.q ?? 0 }, wornScore < 0 ? undefined : wornScore, coveredElements(s),
+      L.filter.upgrade_margin_pct / 100, rule,
+    )
+    : { keep: true, reason: 'filter off', score: loot.score({ ...item, q: item.q ?? 0 }) };
+  const set = wants(s, item);
+  if (set) {
+    // the Collector sink runs before the filter dissolves a piece the set wants
+    if (s.bag.length < E.inventory.adventure_slots) {
+      item.heldFor = set.id;
+      s.bag.unshift(item);
+      push(s, `Held for the ${set.name} set · ${item.base} (${item.slot})`);
+    }
+  } else if (verdict.keep) {
+    // nothing equips itself (owner ruling, D-089): a keep is a decision waiting in the bag, which
+    // is what makes "every piece needs a decision" true. The filter's comparison is still against
+    // the piece actually worn, so an idle character that never chooses keeps seeing keeps.
+    if (s.bag.length < E.inventory.adventure_slots) {
+      s.bag.unshift(item);
+      push(s, `Drop kept (${verdict.reason}): ${item.rarity} ${item.quality} ${item.tier} ${item.base} (${item.slot})`);
+    } else if (verdict.reason === 'upgrade' && swapWeakestKept(s, item, verdict.score)) {
+      // the bag keeps the best decision per slot instead of the first fifty arrivals: a piece that
+      // beat the bar replaces the piece it beat, and the loser dissolves for its one stone. The
+      // character still wears nothing it was not told to wear (owner ruling, D-089).
+    } else {
+      // overflow is stop_pickup: a full bag picks up nothing and deletes nothing
+      s.counters.overflow = (s.counters.overflow || 0) + 1;
+    }
+  } else {
+    dissolve(s);
+  }
+}
+
 function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>) {
   const online = s.online !== false;
   // Pandemonium: the lines this mob was carrying jump to the neighbours its row names (D-102)
@@ -242,51 +305,7 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   // offline results are AFK: same drops, quality limited to the zone floor, no boss income
   const q = online ? undefined : eng.qualityIndexOf(eng.floorOf(band));
   if (rng() < Math.min(1, eng.dropChance(band) * dropMultiplier(s))) {
-    const item = rollDrop(rng, band, c.weaponAspd, q);
-    s.counters.drops++;
-    // the bag filter keeps a drop only when it outscores the piece worn in that slot by more than
-    // noise; anything else dissolves for 1 Reroll value stone, never for gold (loot.md §4)
-    // the bar is the best piece the character holds for that slot, worn or waiting in the bag: a
-    // keep that nobody has worn yet still has to beat what is already on offer, or the bag fills
-    // with near-duplicates of a decision already made (`loot.md` §4, read with no auto-pick)
-    const bestForSlot = (pool: (Item | null)[]) => pool
-      .filter((g): g is Item => g !== null && g.slot === item.slot)
-      .map((g) => loot.score({ ...g, q: g.q ?? 0 }))
-      .reduce((m, v) => Math.max(m, v), -1);
-    const wornScore = Math.max(
-      bestForSlot(s.gear as (Item | null)[]),
-      bestForSlot(s.bag),
-    );
-    const verdict = loot.keepsDrop(
-      { ...item, q: item.q ?? 0 }, wornScore < 0 ? undefined : wornScore, coveredElements(s),
-      L.filter.upgrade_margin_pct / 100, ruleFor(s.filter, item.slot),
-    );
-    const set = wants(s, item);
-    if (set) {
-      // the Collector sink runs before the filter dissolves a piece the set wants
-      if (s.bag.length < E.inventory.adventure_slots) {
-        item.heldFor = set.id;
-        s.bag.unshift(item);
-        push(s, `Held for the ${set.name} set · ${item.base} (${item.slot})`);
-      }
-    } else if (verdict.keep) {
-      // nothing equips itself (owner ruling, D-089): a keep is a decision waiting in the bag, which
-      // is what makes "every piece needs a decision" true. The filter's comparison is still against
-      // the piece actually worn, so an idle character that never chooses keeps seeing keeps.
-      if (s.bag.length < E.inventory.adventure_slots) {
-        s.bag.unshift(item);
-        push(s, `Drop kept (${verdict.reason}): ${item.rarity} ${item.quality} ${item.tier} ${item.base} (${item.slot})`);
-      } else if (verdict.reason === 'upgrade' && swapWeakestKept(s, item, verdict.score)) {
-        // the bag keeps the best decision per slot instead of the first fifty arrivals: a piece that
-        // beat the bar replaces the piece it beat, and the loser dissolves for its one stone. The
-        // character still wears nothing it was not told to wear (owner ruling, D-089).
-      } else {
-        // overflow is stop_pickup: a full bag picks up nothing and deletes nothing
-        s.counters.overflow = (s.counters.overflow || 0) + 1;
-      }
-    } else {
-      dissolve(s);
-    }
+    awardDrop(s, rng, band, q, c.weaponAspd);
   }
   for (const [rarity, r] of Object.entries(E.junk.rarities as Record<string, any>)) {
     // junk is kept and sold by hand at the Counterhand — it is a gold mint, not a gold drip
@@ -318,12 +337,17 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   }
 }
 
-/** A Road encounter: the link's two zone casts supply the mobs, per `engine.json` `road`. */
-function spawnEncounter(s: GameState, trip: RoadTrip, rng: () => number) {
-  const kind = road.rollEncounter(rng);
+/**
+ * A Road encounter: the link's two zone casts supply the mobs, per `engine.json` `road`.
+ * Online the roll uses the link's own terrain row; offline it uses the untilted base table, so an
+ * away period can never be routed into the heaviest-ambush terrain and paid out at the tilted rate.
+ */
+function spawnEncounter(s: GameState, trip: RoadTrip, rng: () => number, online: boolean, weaponAspd: number) {
+  const l = road.links[trip.linkIndex];
+  const kind = road.rollEncounter(rng, online ? l.terrain : null);
   trip.nextEncounterSec = s.clockSec + road.encounterGapSec;
   trip.kind = kind.id;
-  if (!kind.hasMobs) { resolveEncounter(s, trip, rng); return; }
+  if (!kind.hasMobs) { resolveEncounter(s, trip, rng, weaponAspd); return; }
   const zones = encounterZones(trip.linkIndex);
   const sizes = encounterSizes(kind.id, rng);
   const mobs: any[] = [];
@@ -331,22 +355,32 @@ function spawnEncounter(s: GameState, trip: RoadTrip, rng: () => number) {
   for (let i = 0; i < sizes.large; i++) mobs.push(spawnMob(rng, zones.higher, s.player.level, 'normal', 'large'));
   s.group = mobs;
   s.spawnIn = road.encounterGapSec;
-  push(s, `Road · ${kind.id} on ${road.links[trip.linkIndex].text}`);
+  push(s, `Road · ${kind.id} on ${l.text} (${l.terrain})`);
 }
 
-function resolveEncounter(s: GameState, trip: RoadTrip, rng: () => number) {
+function resolveEncounter(s: GameState, trip: RoadTrip, rng: () => number, weaponAspd: number) {
   const kind = trip.kind;
   trip.kind = null;
   trip.encountersLeft = Math.max(0, trip.encountersLeft - 1);
+  const link = road.links[trip.linkIndex];
   if (kind === 'ambush') {
     const gold = payPurse(s);
     push(s, gold ? `Ambush cleared · purse +${gold} gold` : 'Ambush cleared · this link already paid its purse today');
   } else if (kind === 'caravan') {
     push(s, 'Caravan beaten · Standing only, no gold');
+  } else if (kind === 'chest') {
+    if (!claimChest(s)) {
+      push(s, 'A chest already opened on this link today');
+    } else {
+      // the chest pays Item quality up to the DESTINATION zone's ceiling, and pays no crafting stones
+      const dest = settlementZone(trip.settlementTo) ?? s.zone;
+      const band = BAND_OF_QUALITY(eng.zoneById(dest).quality);
+      awardDrop(s, rng, band, eng.qualityIndexOf(eng.ceilingOf(band)), weaponAspd);
+      push(s, `Chest opened on ${link.text} · one Item at the ${band} ceiling, no stones`);
+    }
   } else {
     push(s, 'A pedlar offers information for gold · nothing bought');
   }
-  void rng;
 }
 
 export function push(s: GameState, text: string) {
@@ -420,18 +454,33 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     return s;
   }
 
-  // The Road is opt-in and online only: while a trip runs, no ambient zone group appears
+  // While a leg runs, no ambient zone group appears: the Road replaces zone farming for its minutes.
   if (s.road) {
     const trip = s.road;
     trip.secLeft--;
     if (!s.group.length) {
-      if (trip.kind) resolveEncounter(s, trip, rng);
+      if (trip.kind) resolveEncounter(s, trip, rng, c.weaponAspd);
       if (trip.encountersLeft <= 0) {
+        openArrival(s, trip);
         grantTripStanding(s, trip);
-        push(s, `Road trip over · ${road.encountersPerTrip} encounters in ${E.road.trip_min} min of walking`);
-        endTrip(s, 'complete');
+        const link = road.links[trip.linkIndex];
+        if (trip.circuit.length) {
+          const wraps = (trip.legIndex + 1) % trip.circuit.length === 0;
+          if (!online && wraps) {
+            // a closed client plays out the rest of the lap, then parks the character and lets
+            // ordinary offline idling resume (`save.md` · section 5)
+            push(s, `Circuit lap done in the away period · parked at ${s.town.waypoint}`);
+            endTrip(s, 'complete');
+          } else {
+            advanceLeg(s, trip);
+            push(s, `Circuit leg done (${link.text}) · on to ${road.links[s.road!.linkIndex].text}`);
+          }
+        } else {
+          push(s, `Road trip over · ${road.encountersFor(trip.linkIndex)} encounters in ${link.trip_min} min of walking`);
+          endTrip(s, 'complete');
+        }
       } else if (s.clockSec >= trip.nextEncounterSec) {
-        spawnEncounter(s, trip, rng);
+        spawnEncounter(s, trip, rng, online, c.weaponAspd);
       }
     }
   }
@@ -492,9 +541,12 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       for (const el of Object.keys(c.elemByElement)) {
         if (el && (c.elemByElement as any)[el] > 0) applyElement(rng, s.mobStatus, target.id, el, c, alignedPerSec);
       }
-      // Lacerate's line is the gate; the 40% itself is `K.K_BLEED_CHANCE`, which is where the formula
-      // says the bleed chance lives (formula-offense.md §4). Bleed comes off the physical half only.
-      if (c.phys > 0 && lineValue(s.curses, target.id, 'bleed_chance') > 0) applyBleed(rng, s.mobStatus, target.id, c.phys);
+      // the axe's own `Chance to bleed %` line plus Lacerate's published proc (D-123); bleed comes
+      // off the physical half only
+      const bleedPct = eng.bleedChanceFrom(lineValue(s.curses, target.id, 'bleed_chance') > 0, c.bleedChance);
+      if (c.phys > 0 && bleedPct > 0) applyBleed(rng, s.mobStatus, target.id, c.phys, bleedPct / 100);
+      // the mace's `Chance to stun %` line, charged to the same control budget shock obeys (D-123)
+      if (c.stunChance > 0) stunMob(rng, s.mobStatus, target.id, c.stunChance);
       if (r.leech) s.player.hp = Math.min(c.maxHp, s.player.hp + r.leech);
       credit(s, 'swing', r.damage);
       if (r.crit) push(s, `Crit for ${eng.fmt(r.damage)} (${target.species})`);
@@ -570,6 +622,8 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
 
   // mob clocks
   const immune = buffRuleUp(s.skills, 'status_immunity');
+  // Energy Absorb turns a share of every landed hit into Energy Shield and negates it outright (D-121)
+  const absorbPct = esAbsorbPct(s.skills);
   for (const mob of engaging) {
     const tm = mobMods(mob.id);
     mob.atkTimer += mob.hitsPerSec * Math.max(0, 1 + tm.attackSpeed / 100);
@@ -581,7 +635,8 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
         s.player.charges!--;
         continue;
       }
-      const r = mobSwing(rng, c, mob, statuses, tm, s.player.es);
+      const r = mobSwing(rng, c, mob, statuses, tm, s.player.es, absorbPct);
+      if (r.absorbed > 0) s.player.es = Math.min(c.es, s.player.es + r.absorbed);
       if (r.toEs > 0) { s.player.es -= r.toEs; if (!buffRuleUp(s.skills, 'es_recharge_immediate')) s.player.esIdleSec = 0; }
       if (r.toHp > 0) {
         s.player.hp -= r.toHp;
@@ -635,8 +690,16 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     // a Push returns the main preset, but cooldowns already counting keep counting (§rule 12)
     if (switchPreset(s, sm.mainPreset)) push(s, `Back on the ${s.presets[sm.mainPreset].name} preset · running cooldowns kept`);
     if (s.road) {
-      push(s, `Trip forfeit · the purse is lost and ${E.road.forfeit_kills} kills of Standing are given up`);
-      endTrip(s, 'forfeit');
+      const trip = s.road;
+      if (trip.circuit.length) {
+        // a Push inside a Circuit skips the rest of the leg and the Circuit carries on (section 5);
+        // ending it here is what would let a repeated Push loop forever
+        skipLeg(s, trip);
+        push(s, 'Push on the Road · the rest of this leg is skipped, the Circuit carries on');
+      } else {
+        push(s, `Trip forfeit · the purse is lost and ${E.road.forfeit_kills} kills of Standing are given up`);
+        endTrip(s, 'forfeit');
+      }
     }
     push(s, `Pushed — ${s.campSec} sec at camp (${eng.fmt(c.maxHp)} HP ÷ ${eng.fmt(c.hpRegen * 8)}/sec)`);
   }
@@ -646,8 +709,8 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
 
 /** Offline catch-up: run the same tick over the elapsed seconds, capped by the save rule. */
 export function catchUp(s: GameState, statuses: Statuses, elapsedSec: number) {
-  // the Road is online only, so an away period ends any trip rather than running it
-  if (s.road) endTrip(s, 'forfeit');
+  // the Road now runs while away: a Circuit plays out the rest of its lap on the untilted base
+  // table and parks the character, which is why an away period no longer ends a trip (D-133)
   const cap = E.inventory.offline_cap_hr * 3600;
   const secs = Math.max(0, Math.min(Math.floor(elapsedSec), cap));
   for (let i = 0; i < secs; i++) tick(s, statuses, { online: false });

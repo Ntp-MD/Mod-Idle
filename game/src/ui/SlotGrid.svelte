@@ -1,9 +1,24 @@
 <script lang="ts">
   import { lineName } from '../sim/craft';
+  import { loot } from '../engine/client';
   import { SORT_LABELS, type SlotEntry, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
-  import type { StatKey } from '../engine/client';
   import type { Item } from '../sim/types';
+
+  /**
+   * The equipment panel's fixed grid (owner layout, D-128): three columns by five rows around where a
+   * body would stand, but no body is drawn — the empty cells are simply gaps. One `grid-area` per
+   * canonical slot, addressed by name (`loot.SLOTS` order) rather than array index. The blank corners
+   * are not rendered at all; they are the `.` cells the template leaves empty. The earring fills the
+   * cell beside the belt (D-131), so only the two bottom corners stay blank.
+   */
+  const DOLL_LAYOUT: { area: string; slot: number }[] = [
+    { area: 'cape', slot: 9 }, { area: 'helmet', slot: 0 }, { area: 'amulet', slot: 8 },
+    { area: 'main', slot: 10 }, { area: 'chest', slot: 1 }, { area: 'off', slot: 11 },
+    { area: 'gloves', slot: 5 }, { area: 'belt', slot: 4 }, { area: 'earring', slot: 12 },
+    { area: 'ringa', slot: 6 }, { area: 'pant', slot: 2 }, { area: 'ringb', slot: 7 },
+    { area: 'boots', slot: 3 },
+  ];
 
   /**
    * A bag drawn as slots — the Melvor shape, where one square is one thing and the grid *is* the
@@ -12,17 +27,18 @@
    * (`ItemDetail.svelte`) and the card's own Equip button is the only way a piece gets worn, which is
    * the owner's rule rather than a convenience (`harness/decisions.md` D-089).
    */
-  let { entries, capacity, mode = 'grid', onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, onstat = null, fixed = false, empty = 'Empty.' }: {
+  let { entries, capacity, mode = 'grid', layout = 'grid', onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, fixed = false, empty = 'Empty.' }: {
     entries: SlotEntry[];
     capacity: number;
     mode?: 'grid' | 'list';
+    /** `doll` draws the fixed equipment panel on the five-row slot grid (no body, D-128) */
+    layout?: 'grid' | 'doll';
     onmode?: ((m: 'grid' | 'list') => void) | null;
     sort?: SortKey;
     onsort?: ((k: SortKey) => void) | null;
     /** the piece worn in a given slot, which is what the card compares against */
     wornOf: (slot: string) => Item | null;
     onequip?: ((index: number) => void) | null;
-    onstat?: ((index: number, stat: StatKey) => void) | null;
     /** an equipment panel keeps its positions: one tile per slot, always, sorted or not */
     fixed?: boolean;
     empty?: string;
@@ -38,6 +54,32 @@
       return Array.from({ length: capacity }, (_, pos) => byIndex.get(pos) ?? null);
     }
     return [...entries, ...Array.from({ length: Math.max(0, capacity - entries.length) }, () => null)];
+  });
+
+  /**
+   * The doll addresses slots by name, not array index — the gear array is not slot-ordered (the
+   * opening sword sits at index 0, not the main-hand index) and the two rings share the name `ring`,
+   * so each entry claims the first still-free canonical slot that names it.
+   */
+  const dollCells = $derived.by(() => {
+    const slots = loot.SLOTS as string[];
+    const used = new Set<number>();
+    const out: (SlotEntry | null)[] = Array.from({ length: slots.length }, () => null);
+    for (const e of entries) {
+      const i = slots.findIndex((s, k) => s === e.slot && !used.has(k));
+      if (i >= 0) { used.add(i); out[i] = e; }
+    }
+    return out;
+  });
+
+  /** One cell per shown position: `area` places it on the doll grid, `slot` names an empty cell. */
+  type Cell = { area: string | null; slot: number | null; entry: SlotEntry | null };
+
+  const shown: Cell[] = $derived.by(() => {
+    if (layout === 'doll') {
+      return DOLL_LAYOUT.map(({ area, slot }) => ({ area, slot, entry: dollCells[slot] ?? null }));
+    }
+    return cells.map((entry) => ({ area: null, slot: null, entry }));
   });
 
   function open(el: HTMLElement, entry: SlotEntry) {
@@ -78,28 +120,31 @@
 </div>
 
 {#if mode === 'grid'}
-  <div class="grid">
-    {#each cells as entry, pos (pos)}
-      {#if entry}
+  <div class={layout === 'doll' ? 'doll' : 'grid'}>
+    {#each shown as cell, pos (pos)}
+      {#if cell.entry}
         <button
           class="slot"
-          class:gear={entry.kind === 'gear' || entry.kind === 'worn'}
-          class:stack={entry.kind === 'stack'}
-          class:rare={entry.item && entry.item.rarity !== 'Common'}
-          class:held={Boolean(entry.heldFor)}
-          class:worn={entry.kind === 'worn'}
-          data-glyph={entry.glyph}
-          onmouseenter={(e) => open(e.currentTarget, entry)}
-          onfocus={(e) => open(e.currentTarget, entry)}
+          style={cell.area ? `grid-area:${cell.area}` : ''}
+          class:gear={cell.entry.kind === 'gear' || cell.entry.kind === 'worn'}
+          class:stack={cell.entry.kind === 'stack'}
+          class:rare={cell.entry.item && cell.entry.item.rarity !== 'Common'}
+          class:held={Boolean(cell.entry.heldFor)}
+          class:worn={cell.entry.kind === 'worn'}
+          onmouseenter={(e) => open(e.currentTarget, cell.entry!)}
+          onfocus={(e) => open(e.currentTarget, cell.entry!)}
           onmouseleave={scheduleClose}
-          onclick={(e) => open(e.currentTarget, entry)}
-          aria-label={entry.kind === 'stack' ? `${entry.title} ×${entry.count}` : entry.title}
+          onclick={(e) => open(e.currentTarget, cell.entry!)}
+          aria-label={cell.entry.kind === 'stack' ? `${cell.entry.title} ×${cell.entry.count}` : cell.entry.title}
         >
-          {#if entry.count}<span class="count">{entry.count}</span>{/if}
-          {#if entry.item && (entry.item.upgrade_lv || 0) > 0}<span class="plus">+{entry.item.upgrade_lv}</span>{/if}
+          <img class="slot-icon" src={cell.entry.icon} alt="" aria-hidden="true" />
+          {#if cell.entry.count}<span class="count">{cell.entry.count}</span>{/if}
+          {#if cell.entry.item && (cell.entry.item.upgrade_lv || 0) > 0}<span class="plus">+{cell.entry.item.upgrade_lv}</span>{/if}
         </button>
       {:else}
-        <span class="slot empty" aria-hidden="true"></span>
+        <span class="slot empty" style={cell.area ? `grid-area:${cell.area}` : ''} aria-hidden="true">
+          {#if cell.slot != null}<span class="slotname">{loot.SLOTS[cell.slot]}</span>{/if}
+        </span>
       {/if}
     {/each}
   </div>
@@ -111,7 +156,7 @@
         <tr>
           <td>{entry.slot || entry.stack?.group || '—'}</td>
           <td>
-            <b>{entry.title}</b>
+            <b class="list-title"><img src={entry.icon} alt="" aria-hidden="true" />{entry.title}</b>
             {#if entry.count !== undefined}<span class="dim"> ×{entry.count}</span>{/if}
             <br /><small class="dim">{entry.sub}</small>
           </td>
@@ -142,7 +187,6 @@
         worn={wornOf(pinned.item.slot)}
         wornHere={pinned.kind === 'worn'}
         onequip={onequip ? () => { onequip(pinned.index); hover = null; } : null}
-        onstat={onstat ? (s: StatKey) => onstat(pinned.index, s) : null}
       />
     {:else}
       <div class="plain">
@@ -161,6 +205,23 @@
   .bar button { padding: .15rem .4rem; font-size: .72rem; }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.7rem, 1fr)); gap: .25rem; }
+
+  /* The equipment panel: three columns by five rows, no body drawn — the `.` cells are the blanks. */
+  .doll {
+    display: grid;
+    grid-template-columns: repeat(3, 4.4rem);
+    grid-template-rows: repeat(5, auto);
+    grid-template-areas:
+      "cape    helmet  amulet"
+      "main    chest   off"
+      "gloves  belt    earring"
+      "ringa   pant    ringb"
+      ".       boots   .";
+    gap: .3rem;
+    width: fit-content;
+    margin: 0 auto .6rem;
+  }
+
   .slot {
     position: relative;
     aspect-ratio: 1 / 1;
@@ -172,26 +233,24 @@
   .slot.rare { border-color: var(--xp); }
   .slot.worn { box-shadow: inset 0 0 0 1px #2f3a4d; background: #1b2029; }
   .slot.held { border-style: dashed; border-color: var(--good); }
-  .slot.empty { background: #12151b; border-style: dotted; cursor: default; }
-  .slot.gear::before, .slot.stack::before {
-    content: '';
+  .slot.empty { display: flex; align-items: center; justify-content: center; background: #12151b; border-style: dotted; cursor: default; }
+  .slotname { font-size: .5rem; color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 .12rem; }
+  .slot-icon {
     position: absolute;
-    inset: 22%;
-    background: var(--dim);
-    opacity: .6;
+    inset: 17%;
+    width: 66%;
+    height: 66%;
+    object-fit: contain;
+    opacity: .92;
+    pointer-events: none;
   }
-  .slot[data-glyph='weapon']::before { clip-path: polygon(50% 0, 68% 38%, 58% 100%, 42% 100%, 32% 38%); }
-  .slot[data-glyph='armour']::before { clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%); }
-  .slot[data-glyph='jewellery']::before { clip-path: circle(40% at 50% 50%); }
-  .slot[data-glyph='stone']::before { clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
-  .slot[data-glyph='herb']::before { clip-path: polygon(50% 0, 100% 45%, 72% 100%, 28% 100%, 0 45%); }
-  .slot[data-glyph='draught']::before { clip-path: polygon(38% 0, 62% 0, 62% 26%, 100% 62%, 100% 100%, 0 100%, 0 62%, 38% 26%); }
-  .slot[data-glyph='junk']::before { clip-path: polygon(12% 0, 100% 22%, 82% 100%, 0 76%); }
-  .count, .plus { position: absolute; font-size: .6rem; line-height: 1; }
+  .count, .plus { position: absolute; z-index: 1; font-size: .6rem; line-height: 1; }
   .count { right: .15rem; bottom: .1rem; }
   .plus { left: .15rem; bottom: .1rem; color: var(--xp); }
 
   .list td, .list th { font-size: .78rem; }
+  .list-title { display: inline-flex; align-items: center; gap: .4rem; }
+  .list-title img { width: 1.2rem; height: 1.2rem; object-fit: contain; }
   .dim { color: var(--dim); }
 
   .pop { position: fixed; z-index: 40; }

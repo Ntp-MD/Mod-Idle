@@ -8,7 +8,7 @@ import {
 import { newGame, tick } from '../src/sim/game';
 
 const require = createRequire(import.meta.url);
-const cage = require('../../tools/lib/engine.js');
+const cage = require('../../tools/lib/engine.ts');
 
 describe('prices are minutes of income, not typed gold', () => {
   it('the client rate equals the cage rate', () => {

@@ -26,6 +26,7 @@
   import { equipFromBag, gearModOf } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
   import { target as goalTarget, describe as describeGoal } from './sim/goal';
+  import { elementIcon, mobIcon, skillIcon } from './icon';
   import type { GameState } from './sim/types';
   import type { StatKey } from './engine/client';
   import type { Statuses } from './sim/combat';
@@ -87,14 +88,6 @@
     // the rule lives in `sim/gear.ts`, where the tests can reach it too; this copy only makes the
     // panel re-read the gameState the verb mutated in place
     equipFromBag(gameState, index);
-    gameState = { ...gameState };
-  }
-
-  /** The stat a piece's Stat Mod feeds — the choice a build is made of, taken from the detail card. */
-  function chooseStatAt(index: number, stat: StatKey) {
-    const item = gameState.bag[index];
-    if (!item) return;
-    (item as any).chosenStat = stat;
     gameState = { ...gameState };
   }
 
@@ -399,14 +392,25 @@
     <div class="bars">
       <!-- character-sheet.md: Energy Shield sits above HP while it is present -->
       {#if c.es > 0}
-        <label>Energy Shield <progress max={c.es} value={gameState.player.es}></progress> {Math.round(gameState.player.es)} / {Math.round(c.es)}</label>
+        <label>Energy Shield <progress class="es" max={c.es} value={gameState.player.es}></progress> {Math.round(gameState.player.es)} / {Math.round(c.es)}</label>
       {/if}
-      <label>HP <progress max={c.maxHp} value={gameState.player.hp}></progress> {Math.round(gameState.player.hp)} / {Math.round(c.maxHp)} (+{c.hpRegen.toFixed(0)}/sec)</label>
-      <label>Mana <progress max={c.maxMana} value={gameState.player.mana}></progress> {Math.round(gameState.player.mana)} / {Math.round(c.maxMana)}</label>
-      <label>XP <progress max={eng.xpToNext(gameState.player.level)} value={gameState.player.xp}></progress> {gameState.player.xp} / {Math.round(eng.xpToNext(gameState.player.level))}</label>
-      <!-- character-sheet.md's main panel: HP, Mana, Attack speed and Weight are the four always shown -->
+      <label>HP <progress class="hp" max={c.maxHp} value={gameState.player.hp}></progress> {Math.round(gameState.player.hp)} / {Math.round(c.maxHp)} (+{c.hpRegen.toFixed(0)}/sec)</label>
+      <label>Mana <progress class="mana" max={c.maxMana} value={gameState.player.mana}></progress> {Math.round(gameState.player.mana)} / {Math.round(c.maxMana)}</label>
+      <label>XP <progress class="xp" max={eng.xpToNext(gameState.player.level)} value={gameState.player.xp}></progress> {gameState.player.xp} / {Math.round(eng.xpToNext(gameState.player.level))}</label>
+      <!-- character-sheet.md's main panel: HP, Mana and Attack speed are the three always shown; Weight lives on the character bag panel (D-126) -->
       <span>Attack speed {c.hitsPerSec.toFixed(2)} hits/sec <small>(Cap {E.caps.aspd})</small></span>
-      <span>Weight {c.weightUsed.toFixed(0)} / {Math.round(c.weightCap)} <small>{c.encumbrance > 0 ? `aspd ${(c.encumbrance * -100).toFixed(0)}%` : 'no tax'}</small></span>
+    </div>
+    <!-- the skill bar, read-only on the fight panel (D-130): arranging the order stays on the Skills tab -->
+    <div class="skill-strip" role="list" aria-label="Skill bar">
+      {#each gameState.skills.list as id, i}
+        {@const k = id ? sm.byId[id] : null}
+        <span class="skill-slot" class:empty={!id || !k} role="listitem" title={`Slot ${i + 1}${id && k ? ': ' + k.name : ': empty'}`}>
+          {#if id && k}
+            <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span>
+            <small class:ready={(gameState.skills.cd[id] || 0) <= 0}>{(gameState.skills.cd[id] || 0) <= 0 ? 'ready' : `${(gameState.skills.cd[id] || 0).toFixed(1)}s`}</small>
+          {/if}
+        </span>
+      {/each}
     </div>
     <p class="state">
       <label class="travel">Hunt zone
@@ -425,13 +429,22 @@
       <tbody>
         {#each gameState.group as m}
           <tr>
-            <td>{m.species}<br /><small>{m.kind}</small></td>
+            <td>
+              <span class="mob-name"><img src={mobIcon(m.species)} alt="" aria-hidden="true" />{m.species}</span><br />
+              <small>{m.kind}</small>
+            </td>
             <td>{m.kind}</td>
             <td><span class="mobbar" style={'width:' + bar(m.hp, m.hpMax)}></span> {Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</td>
             <td>{(m.ps * psMult(modsOn(gameState.curses, m.id))).toFixed(1)}</td>
             <td>{(eng.hitChance(c.accuracy, m.evasion) * 100).toFixed(1)}%</td>
             <td>{eng.dodgeChance(m.dodgeRate, c.accuracy).toFixed(1)}%</td>
-            <td>{m.innate.join(', ')}</td>
+            <td>
+              <span class="element-list">
+                {#each m.innate as element}
+                  <span class="element-label"><img src={elementIcon(element)} alt="" aria-hidden="true" />{element}</span>
+                {/each}
+              </span>
+            </td>
             <td>{[curseWords(m.id), statusWords(m.id)].filter(Boolean).join(' | ') || '—'}</td>
           </tr>
         {:else}
@@ -451,8 +464,8 @@
 
     <section class="panel region sheet">
       <h2>Character sheet · level {gameState.player.level}</h2>
-      <h3>Worn ({gameState.gear.filter(Boolean).length} / {E.stat.item_slots}) — hover a slot to read it</h3>
-      <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed />
+      <h3>Worn ({gameState.gear.filter(Boolean).length} / {E.stat.item_slots}) — hover a slot on the body to read it</h3>
+      <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="doll" />
 
       <table class="stats">
         <tbody>
@@ -503,27 +516,27 @@
         onsort={(k) => (tempSort = k)}
         wornOf={wornOf}
         onequip={equip}
-        onstat={chooseStatAt}
         empty="Nothing yet — kills still drop, and the bag filter is the zone upgrade rate."
       />
 
       <details class="filter">
         <summary>Bag filter — what this run keeps</summary>
-        <p><small>Every slot decides for itself. A piece that fails its slot's rule turns into 1 Reroll value stone on the spot — nothing is deleted.</small></p>
+        <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. Turn a slot on and a piece that fails its rule turns into 1 Reroll value stone on the spot (stones are always kept, never discarded) — nothing is deleted.</small></p>
         <table>
-          <thead><tr><th>Slot</th><th>Keep when it beats the worn piece by</th><th>Rarity floor</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
+          <thead><tr><th>Slot</th><th>Filter</th><th>Keep when it beats the worn piece by</th><th>Rarity floor</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
           <tbody>
             {#each FILTER_SLOTS as slot}
               {@const r = ruleFor(gameState.filter, slot)}
               <tr>
                 <td>{slot}</td>
-                <td><input type="number" min="0" step="1" value={r.margin_pct} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
+                <td><input type="checkbox" checked={r.enabled} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
+                <td><input type="number" min="0" step="1" value={r.margin_pct} disabled={!r.enabled} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
                 <td>
-                  <select onchange={(e) => editRule(slot, { min_rarity: (e.target as HTMLSelectElement).value })}>
+                  <select disabled={!r.enabled} onchange={(e) => editRule(slot, { min_rarity: (e.target as HTMLSelectElement).value })}>
                     {#each RARITY_CHOICES as k}<option value={k} selected={r.min_rarity === k}>{k === 'any' ? 'any Rarity' : k}</option>{/each}
                   </select>
                 </td>
-                <td><input type="checkbox" checked={r.keep_missing_element} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
+                <td><input type="checkbox" checked={r.keep_missing_element} disabled={!r.enabled} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
                 <td>{describeRule(r)}</td>
               </tr>
             {/each}
@@ -535,6 +548,7 @@
 
     <section class="panel region inv">
       <h2>Inventory · character bag ({slotsUsed(gameState)} / {slotsAvailable(gameState)} slots)</h2>
+      <p class="weight">Weight <b>{c.weightUsed.toFixed(0)}</b> / {Math.round(c.weightCap)} <small>{c.encumbrance > 0 ? `· aspd ${(c.encumbrance * -100).toFixed(0)}%` : '· no tax'}</small></p>
       <SlotGrid
         entries={invEntries}
         capacity={slotsAvailable(gameState)}
@@ -577,7 +591,9 @@
           {@const k = id ? sm.byId[id] : null}
           <tr>
             <td>{i + 1}</td>
-            <td>{k ? k.name : '—'}</td>
+            <td>
+              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span>{:else}—{/if}
+            </td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
             <td>{k && id ? `${k.cd}s → ${skillCd(gameState.skills, id, c.cdr).toFixed(2)}s` : ''}</td>
             <td>{k ? k.mana : ''}</td>
@@ -599,7 +615,7 @@
         {#each Object.keys(gameState.skills.owned) as id}
           {@const k = sm.byId[id]}
           <tr>
-            <td>{k.name}</td><td>{k.type}</td><td>{gameState.skills.owned[id]}</td>
+            <td><span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></td><td>{k.type}</td><td>{gameState.skills.owned[id]}</td>
             <td>{ladderOf(gameState.skills, id)}% cd</td>
             <td>{k.effect || (k.final_pct != null ? `${pct2(k.final_pct)}% of its ${k.basis} hit` : k.reserve) || ''}</td>
           </tr>
@@ -610,14 +626,14 @@
     </table>
     <h3>Buff track (re-presses itself, takes no slot)</h3>
     {#each ownedBuffs as k}
-      <label><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /> {k.name} · {k.duration} on / {k.cd}s cd · {k.mana} · {effectLine(k) || k.effect}</label><br />
+      <label><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.duration} on / {k.cd}s cd · {k.mana} · {effectLine(k) || k.effect}</label><br />
     {:else}
       <p><small>None owned.</small></p>
     {/each}
     <p><small>Reserved {reservedPct(gameState.skills)}% of Max Mana · the block is {sm.RESERVATION_LIMIT}%. Up right now: {describeFold(effectsActive(gameState.skills)) || 'nothing — no aura is on and no buff is counting'}.</small></p>
     <h3>Aura set (reserves Max Mana, may not reserve all of it)</h3>
     {#each ownedAuras as k}
-      <label><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /> {k.name} · {k.reserve} ({sm.reservePct(k.reserve)}%) · {effectLine(k) || k.effect}</label><br />
+      <label><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.reserve} ({sm.reservePct(k.reserve)}%) · {effectLine(k) || k.effect}</label><br />
     {:else}
       <p><small>None owned.</small></p>
     {/each}
@@ -784,7 +800,7 @@
         </tbody>
       </table>
       <button onclick={() => runCraft('ascend', 0)}>Ascend piece · {stoneNames('ascend').add} Add + {stoneNames('ascend').tier} tier stones</button>
-      <button onclick={() => runCraft('add', 0)}>Add a Mod · {stoneNames('add', benchItem).add} Add stone ({benchItem.mods_added || 0}/2 used)</button>
+      <button onclick={() => runCraft('add', 0)}>Add a Mod · {stoneNames('add', benchItem).add} Add stone ({benchItem.mods_added || 0}/{E.rarity.mods_added_cap} used)</button>
       <button onclick={() => runCraft('remove', 0)}>Remove a non-legacy mod · {stoneNames('remove').remove} Remove stone</button>
       <button onclick={() => runCraft('upgrade', 0)}>
         Upgrade to +{Math.min((benchItem.upgrade_lv || 0) + 1, craft.C.upgrade_cap)} · {stoneNames('upgrade', benchItem).quality} Quality Stone · {upgradeChance()}% chance
@@ -961,11 +977,34 @@
 
   .bars { display: grid; gap: .3rem; margin-bottom: .6rem; }
   .bars label, .bars span { display: flex; align-items: center; gap: .5rem; }
-  progress { width: 220px; height: 10px; }
-  progress::-webkit-progress-bar { background: var(--line); }
+  /* the read-only skill bar on the fight panel (D-130) */
+  .skill-strip { display: flex; flex-wrap: wrap; gap: .3rem .5rem; margin-bottom: .6rem; }
+  .skill-slot { display: inline-flex; align-items: center; gap: .35rem; padding: .15rem .4rem; border: 1px solid var(--line); border-radius: 4px; font-size: .72rem; }
+  .skill-slot.empty { min-width: 2.6rem; min-height: 1.5rem; border-style: dashed; opacity: .5; }
+  .skill-slot small { color: var(--dim); }
+  .skill-slot small.ready { color: var(--mana); }
+  .weight { margin: 0 0 .5rem; }
+  .weight small { color: var(--dim); }
+  progress { width: 220px; height: 10px; border: 0; border-radius: 3px; overflow: hidden; }
+  progress::-webkit-progress-bar { background: var(--line); border-radius: 3px; }
+  progress::-webkit-progress-value { border-radius: 3px; }
+  progress::-moz-progress-bar { border-radius: 3px; }
+  progress.hp::-webkit-progress-value { background: var(--hp); }
+  progress.hp::-moz-progress-bar { background: var(--hp); }
+  progress.mana::-webkit-progress-value { background: var(--mana); }
+  progress.mana::-moz-progress-bar { background: var(--mana); }
+  progress.es::-webkit-progress-value { background: var(--es); }
+  progress.es::-moz-progress-bar { background: var(--es); }
+  progress.xp::-webkit-progress-value { background: var(--xp); }
+  progress.xp::-moz-progress-bar { background: var(--xp); }
   .state { color: var(--dim); }
   .warn { color: var(--hp); }
   .log { margin: .6rem 0; max-height: 190px; overflow: auto; font-size: 12px; color: var(--dim); }
   .log .t { color: var(--mob); margin-right: .4rem; }
   .mobbar { display: inline-block; height: 8px; background: var(--hp); margin-right: .4rem; vertical-align: middle; }
+  .mob-name, .element-label, .skill-label { display: inline-flex; align-items: center; gap: .35rem; }
+  .mob-name img { width: 1.25rem; height: 1.25rem; object-fit: contain; }
+  .element-list { display: flex; flex-wrap: wrap; gap: .25rem .5rem; }
+  .element-label { font-size: .72rem; }
+  .element-label img, .skill-label img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex: none; }
 </style>

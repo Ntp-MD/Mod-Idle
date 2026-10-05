@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Item Base · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-item-base">Item Base</a>
+<a href="#h-base-table-per-slot">Base Table per Slot</a>
+<a href="#h-helmet">· helmet</a>
+<a href="#h-chest">· chest</a>
+<a href="#h-pant">· pant</a>
+<a href="#h-boots">· boots</a>
+<a href="#h-belt">· belt</a>
+<a href="#h-gloves">· gloves</a>
+<a href="#h-ring-each-ring-picks-independently">· ring (each ring picks independently)</a>
+<a href="#h-amulet">· amulet</a>
+<a href="#h-cape">· cape</a>
+<a href="#h-off-hand">· off hand</a>
+<a href="#h-gear-mod-school-per-base-poe">Gear Mod school per Base (PoE)</a>
+<a href="#h-three-paths-bases-actually-create-measured">Three Paths Bases Actually Create (measured)</a>
+<a href="#h-base-rolling">Base Rolling</a>
+<a href="#h-what-this-file-unlocks-for-other-systems">What This File Unlocks for Other Systems</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html" aria-current="page">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">Items &amp; mods</a><span class="sep">/</span><span>item-base.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>Item Base</h1>
+<dl class="kv"><dt>file</dt><dd><code>item-base.md</code> · 140 lines · 1,229 words · written 2026-10-04T11:36:51Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-equipment-slot.html">equipment-slot.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-item-rarity.html">item-rarity.md</a> · <a href="doc-formula.html">formula.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a> · <a href="doc-formula-utility.html">formula-utility.md</a> · <a href="doc-item-list.html">item-list.md</a> · <a href="doc-towns-stalls.html">towns-stalls.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a> · <a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-towns-stalls.html">towns-stalls.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../item-base.md">item-base.md</a></dd></dl>
+
+<h2 id="h-item-base">Item Base</h2>
+<p>import glossary.md import equipment-slot.md import mod-pool.md import item-rarity.md import formula.md</p>
+<p><strong>Base = the frame of an item in one slot</strong> · one slot holds 2-3 frames · the gap every spec file previously marked as &quot;not yet designed&quot;</p>
+<p>A Base does two things, and <strong>is intentionally allowed to do nothing else</strong></p>
+<table><thead><tr><th>Base determines</th><th>Base does not determine</th></tr></thead><tbody><tr><td><strong>Weight</strong> (differing weights make the Str capacity matter)</td><td>Mod count → belongs to Rarity (glossary rule 2)</td></tr><tr><td><strong>Which Mod is Primary / Secondary</strong> on that item</td><td>Rolled value per slot → belongs to quality + Tier</td></tr><tr><td></td><td>Item home Element → belongs to the Mod pool only</td></tr></tbody></table>
+<blockquote><p>Reason Bases must not touch Mod count: if both Rarity and Base set Mod count, two axes collapse into one, and players cannot tell whether an item is &quot;rare&quot; or &quot;a heavy frame&quot;.</p></blockquote>
+<h2 id="h-base-table-per-slot">Base Table per Slot</h2>
+<h3 id="h-helmet">helmet</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>coif</td><td>30</td><td>Evasion % · Max HP flat</td><td>Elemental resistance %</td></tr><tr><td>barbute</td><td>45</td><td>Max HP flat · Max HP %</td><td>Elemental resistance % · Life Regeneration %</td></tr><tr><td>circlet</td><td>18</td><td>Max Mana % · Cooldown reduction %</td><td>Elemental resistance % · Mana Regeneration %</td></tr></tbody></table>
+<h3 id="h-chest">chest</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>mail</td><td>60</td><td>Evasion % · Max HP %</td><td>Elemental resistance % · Max HP flat</td></tr><tr><td>plate</td><td>85</td><td>Max HP flat · Max HP %</td><td>Elemental resistance % · Life Regeneration %</td></tr><tr><td>vestments</td><td>28</td><td>Max Mana % · Max Mana flat</td><td>Cooldown reduction % · Mana Regeneration %</td></tr></tbody></table>
+<h3 id="h-pant">pant</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>greaves</td><td>50</td><td>Evasion flat · Evasion %</td><td>Max HP flat</td></tr><tr><td>cuisses</td><td>70</td><td>Max HP flat · Max HP %</td><td>Elemental resistance % · Life Regeneration %</td></tr><tr><td>wrap</td><td>25</td><td>Cooldown reduction % · Max Mana flat</td><td>Elemental resistance % · Mana Regeneration %</td></tr></tbody></table>
+<h3 id="h-boots">boots</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>striders</td><td>35</td><td>Evasion flat · Evasion %</td><td>Cooldown reduction %</td></tr><tr><td>sabatons</td><td>55</td><td>Max HP flat · Max HP %</td><td>Elemental resistance % · Life Regeneration %</td></tr><tr><td>soft boots</td><td>30</td><td>Max Mana flat · Cooldown reduction %</td><td>Evasion % · Max Energy Shield %</td></tr></tbody></table>
+<h3 id="h-belt">belt</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>girdle</td><td>40</td><td>Max HP flat · Max HP %</td><td>Elemental resistance % · Life Regeneration %</td></tr><tr><td>sash</td><td>20</td><td>Max Mana % · Cooldown reduction %</td><td>Elemental resistance % · Mana Regeneration %</td></tr><tr><td>clasp</td><td>28</td><td>Elemental resistance % · Max HP flat</td><td>Evasion flat</td></tr></tbody></table>
+<h3 id="h-gloves">gloves</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>gauntlets</td><td>45</td><td>Max HP % · Evasion flat</td><td>Elemental alignment % · Life Regeneration %</td></tr><tr><td>wraps</td><td>20</td><td>Elemental alignment % · Cooldown reduction %</td><td>Max Mana flat</td></tr><tr><td>gloves</td><td>25</td><td>Evasion % · Evasion flat</td><td>Elemental alignment %</td></tr></tbody></table>
+<h3 id="h-ring-each-ring-picks-independently">ring (each ring picks independently)</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>band</td><td>10</td><td>Elemental alignment % · Cooldown reduction %</td><td>Max HP % · All Resistance %</td></tr><tr><td>signet</td><td>14</td><td>Max Mana % · Cooldown reduction %</td><td>Max HP % · Max Energy Shield %</td></tr></tbody></table>
+<h3 id="h-amulet">amulet</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>pendant</td><td>12</td><td>Elemental alignment % · Cooldown reduction %</td><td>Max HP % · All Resistance %</td></tr><tr><td>talisman</td><td>20</td><td>Elemental alignment % · Max Mana flat</td><td>Cooldown reduction % · Max Energy Shield %</td></tr></tbody></table>
+<h3 id="h-cape">cape</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>cloak</td><td>20</td><td>Evasion % · Elemental resistance %</td><td>Cooldown reduction % · All Resistance %</td></tr><tr><td>mantle</td><td>32</td><td>Max HP flat · Elemental resistance %</td><td>Max Mana flat · All Resistance %</td></tr></tbody></table>
+<h3 id="h-off-hand">off hand</h3>
+<table><thead><tr><th>Base</th><th>Weight</th><th>Primary</th><th>Secondary</th></tr></thead><tbody><tr><td>buckler</td><td>25</td><td>Evasion % · Cooldown reduction %</td><td>Max HP flat</td></tr><tr><td>kite shield</td><td>55</td><td>Max HP flat · Max HP %</td><td>Evasion %</td></tr><tr><td>tome</td><td>30</td><td>Max Mana % · Cooldown reduction %</td><td>Max Mana flat · Elemental alignment %</td></tr></tbody></table>
+<ul><li>Main-hand weapons: <strong>ruled that a weapon type MAY carry more than one Base</strong> (A10 · D-072) — the old &quot;the weapon type is already its Base&quot; (12 types in equipment-weapon.md, each with its own weight + weapon_aspd + pool) is lifted, so the same type can ship as frame variants. The concrete Base frames per type and their effect on the craftable-Mod count are enumerate-and-cage work now tracked in <code>harness/todo.md</code> section B, not invented here.</li><li>Dual-wield (off hand is a weapon) uses that weapon type weight x 0.8</li></ul>
+<h2 id="h-gear-mod-school-per-base-poe">Gear Mod school per Base (PoE)</h2>
+<p>Heavy Bases (barbute · plate · cuisses · sabatons · gauntlets) carry Armour · light Bases (coif · mail · greaves · striders · gloves) carry Evasion · cloth Bases (circlet · vestments · wrap · soft boots) carry Energy Shield. Only helmet, chest, pant, boots, and gloves roll Armour / Evasion / Energy Shield as main Mods — belt, rings, amulet, cape, and off hand roll none of the three. Each +1 from Quality Stone raises that Gear Mod. Formulas live in crafting.md; the ladder's reachable value is published as <code>craft.gear_mod_per_level</code> and bounded by that school's own T1 ceiling in <code>mod_max</code>, which <strong>X42</strong> recomputes and <strong>SV7</strong> survives at the boss.</p>
+<h2 id="h-three-paths-bases-actually-create-measured">Three Paths Bases Actually Create (measured)</h2>
+<table><thead><tr><th>Chosen path</th><th>Combined total (low quality)</th><th>Full set (mid quality)</th><th>Full set (high quality)</th><th>Aspd tax with no Str investment</th></tr></thead><tbody><tr><td>cloth/glass (circlet · vestments · wrap · soft boots · sash · wraps · band ×2 · pendant · cloak)</td><td>193</td><td>251</td><td>326</td><td>0%</td></tr><tr><td>balanced (coif · mail · greaves · striders · clasp · gloves · band ×2 · pendant · cloak)</td><td>280</td><td>364</td><td>473</td><td>0%</td></tr><tr><td>armored (barbute · plate · cuisses · sabatons · girdle · gauntlets · signet ×2 · talisman · mantle)</td><td>420</td><td>546</td><td>710</td><td>0%</td></tr></tbody></table>
+<p>Printed by <code>node tools/bases.ts --blocks</code> from <code>tools/data/bases.json</code>. Mid and high apply <code>quality_weight_multiplier</code> (×1.3) per Item quality band, the same way <code>weightAtQuality</code> applies it to a single item. The held weapon is not folded into these sets: it weighs 25 to 85 at Base weight (<code><a href="doc-equipment-weapon.html">equipment-weapon.md</a></code> · D-101), the same ×-quality multiplier applies, and an off-hand weapon counts ×0.8 of its own type (<code><a href="doc-mod-pool.html">mod-pool.md</a></code>). &lt;!-- END GENERATED:three-paths --&gt;</p>
+<ul><li>This is what gives <strong>Str a real second job</strong> without locking anything: heavy armor is not a ban, it is a bill</li><li>The reverse is true as well: glass builds in cloth spend zero slots on Str → the fast-hit / burst gap flagged in combat.md and loot.md <strong>is lighter than feared</strong>, because no-Str builds are no longer taxed automatically when they choose light gear</li><li>The -50% tax hitting the Cap means an armored build with no Str does not die, only slows — while still tanking well. That is what that build chose</li></ul>
+<h2 id="h-base-rolling">Base Rolling</h2>
+<ul><li><strong>Bases roll equally inside their slot</strong> (helmet 1/3 · chest 1/3 · ring 1/2 · weapon by dropped type)</li><li>Consequence to be aware of: the chance of the <em>right</em> frame is 1/#Base for that slot · multiplied by Rarity (18% Rare) and Tier (17% T1), a truly on-spec item is 1 in ~30-60 drops → this is the job of <strong>Reroll/Refine/Ascend, not luck</strong> (loot.md)</li></ul>
+<h2 id="h-what-this-file-unlocks-for-other-systems">What This File Unlocks for Other Systems</h2>
+<table><thead><tr><th>File</th><th>Gap closed</th></tr></thead><tbody><tr><td>mod-pool.md</td><td>Per-slot weight table → becomes per-<em>Base</em> weight</td></tr><tr><td>formula.md section 11</td><td>The penalty numbers are the ones printed above (cloth pays nothing, the heavy paths pay up to the Cap)</td></tr><tr><td>equipment-slot.md</td><td>Per-slot Primary/Secondary → moved here per Base · the old notes 2 (Evasion Flat on only 2 slots) and 3 (Alignment on only 2 slots) are <strong>retired</strong>: the union pools now give Evasion Flat 4 slots, and <strong>Elemental alignment and Elemental resistance are separated onto disjoint slot families</strong> (alignment · gloves · ring · amulet · off hand; resistance · helmet · chest · pant · boots · belt · cape) so an Element build never trades survival against the line that gates its status and scales its Element damage — see the generated Mod availability table in equipment-slot-pools.md</td></tr><tr><td>item-rarity.md</td><td>Third-Rarity (Unique) <strong>cut</strong> (D-009 5c) — Rarity stays two levels; Base frame + Mods carry identity</td></tr><tr><td>crafting.md</td><td>Open question &quot;item Base&quot; in the missing-slots list → now answered · <strong>per-item craft-attempt ceiling: none</strong> (D-009 5b) — structural ceilings (Refine T1 · Ascend high quality) already bound it</td></tr><tr><td>loot.md section 1</td><td>Roll order gains a &quot;pick Base&quot; step before Primary/Secondary</td></tr></tbody></table>
+<p>(End of file - total 130 lines)</p>
+<nav class="pager"><a href="doc-mod-pool.html">← mod-pool.md</a><a href="index.html">Items &amp; mods</a><a href="doc-item-rarity.html">item-rarity.md →</a></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

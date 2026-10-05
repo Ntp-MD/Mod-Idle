@@ -4,13 +4,19 @@
   "private": true,
   "description": "ModWorld: design specs and cages in the root, the playable client in game/, the shared math in engine/.",
   "scripts": {
-    "verify": "node tools/verify.js",
-    "report": "node tools/report.js",
-    "skills": "node tools/skills.js",
-    "tree": "node tools/tree.js",
-    "lint": "node tools/lint.js",
+    "verify": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/verify.ts",
+    "report": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/report.ts",
+    "skills": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/skills.ts",
+    "tree": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/tree.ts",
+    "map": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/map.ts",
+    "lint": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/lint.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "dev": "npm --prefix game run dev",
     "build": "npm --prefix game run build",
     "test": "npm --prefix game run test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.7.3"
   }
 }

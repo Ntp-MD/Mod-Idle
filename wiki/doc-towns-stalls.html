@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Town Stalls — prices, stock, Standing, Collector · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-town-stalls-prices-stock-standing-collector">Town Stalls — prices, stock, Standing, Collector</a>
+<a href="#h-1-price-unit-derived-not-invented">1. Price unit (derived, not invented)</a>
+<a href="#h-2-lifetime-gold-supply-and-the-demand-check">2. Lifetime gold supply and the demand check</a>
+<a href="#h-3-one-time-purchases">3. One-time purchases</a>
+<a href="#h-4-repeatable-purchases">4. Repeatable purchases</a>
+<a href="#h-5-per-settlement-detail-9-settlements">5. Per-settlement detail — 9 settlements</a>
+<a href="#h-5-1-npc-roster">· 5.1 NPC roster</a>
+<a href="#h-5-2-stock-standing-and-base-flavour-per-settlement">· 5.2 Stock, Standing and Base flavour per settlement</a>
+<a href="#h-6-standing-tiers">6. Standing tiers</a>
+<a href="#h-7-collector-sets">7. Collector sets</a>
+<a href="#h-8-base-bias-per-settlement-check-list-not-numbers">8. Base bias per settlement — check list, not numbers</a>
+<a href="#h-9-what-must-be-re-checked-when-other-numbers-land">9. What must be re-checked when other numbers land</a>
+<a href="#h-10-how-this-file-is-generated-data-driven-development">10. How this file is generated (data-driven development)</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html" aria-current="page">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">World &amp; towns</a><span class="sep">/</span><span>towns-stalls.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>Town Stalls — prices, stock, Standing, Collector</h1>
+<dl class="kv"><dt>file</dt><dd><code>towns-stalls.md</code> · 266 lines · 3,753 words · written 2026-10-04T12:44:42Z</dd><dt>category</dt><dd>World &amp; towns</dd><dt>imports</dt><dd><a href="doc-towns.html">towns.md</a> · <a href="doc-towns-ui.html">towns-ui.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-economy.html">economy.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-farm.html">farm.md</a> · <a href="doc-tasks.html">tasks.md</a> · <a href="doc-world.html">world.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-checks.html">checks.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-towns-ui.html">towns-ui.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-economy.html">economy.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-tasks.html">tasks.md</a> · <a href="doc-towns-ui.html">towns-ui.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd><code>price-unit</code> <span class="tag gen">tools/town.ts</span> · <code>supply</code> <span class="tag gen">tools/town.ts</span> · <code>one-time</code> <span class="tag gen">tools/town.ts</span> · <code>repeatable</code> <span class="tag gen">tools/town.ts</span> · <code>npc-matrix</code> <span class="tag gen">tools/town.ts</span> · <code>stock</code> <span class="tag gen">tools/town.ts</span> · <code>standing</code> <span class="tag gen">tools/town.ts</span> · <code>collector</code> <span class="tag gen">tools/town.ts</span> · <code>base-bias</code> <span class="tag gen">tools/town.ts</span> · <code>pending</code> <span class="tag gen">tools/town.ts</span></dd><dt>raw</dt><dd><a href="../towns-stalls.md">towns-stalls.md</a></dd></dl>
+<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
+<h2 id="h-town-stalls-prices-stock-standing-collector">Town Stalls — prices, stock, Standing, Collector</h2>
+<p>import towns.md import towns-ui.md import glossary.md import economy.md import loot.md import crafting.md import farm.md import tasks.md import world.md import item-base.md import checks.md</p>
+<p>Detail file for <code><a href="doc-towns.html">towns.md</a></code>. Every table in this file is <strong>generated</strong> from <code>tools/data/town.json</code> by <code>node tools/town.ts --write</code> — do not hand-type a price, a stock line, a roster tick or a kill threshold here. Edit the data, then run <code>node tools/town.ts --checks</code> (section 10).</p>
+<p>Every price is anchored to a number in <code><a href="doc-checks.html">checks.md</a></code> groups E/F, and nothing here grants a stat, so no <code>mob_HP</code> term changes (<code><a href="doc-checks.html">checks.md</a></code> H1).</p>
+<h2 id="h-1-price-unit-derived-not-invented">1. Price unit (derived, not invented)</h2>
+<pre class="code">gold per sold junk piece        = 1                       (economy.md · loot.md section 4)
+drops/hour per band             = 133 low · 255 mid · 418 high · 878 high+full Lck   (loot.md section 2 · F3)
+upgrades/hour from drops        = 3 low · 4 mid · 3 high · 3 high+full Lck   (F4)
+junk/hour = drops - upgrades    = 130 low · 251 mid · 415 high · 875 high+full Lck
+1 m  = 1 minute of full-sell income in that band
+gold per 1 m                    = 2.2 low · 4.2 mid · 6.9 high · 14.6 high+full Lck
+kills/hour per band (F1)        = 980 low · 1,385 mid · 1,800 high
+opportunity cost of 1 gold      = 1 Reroll value stone forgone = 1/52 hour of Reroll capacity ≈ 1.15 min of craft progress (F6 · E8)
+
+band hours (low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (91-100) = 9.0)  (checks.md E1-E5)</pre>
+<ul><li>Prices are <strong>fixed in gold</strong>; <code>m</code> is the readable anchor, gold is the charge. A price is set in the band where the purchase actually matters, which is why each row states its charge band.</li><li>Default for every piece stays <strong>dissolve</strong>, so the crafting engine keeps its designed 415 stones/hour unless the player deliberately redirects a piece to gold (<code><a href="doc-loot.html">loot.md</a></code> section 4 · <code><a href="doc-checks.html">checks.md</a></code> G2).</li><li>The opportunity cost of one gold is a <em>Reroll value stone</em>, not a fraction of a second of progress: <code><a href="doc-economy.html">economy.md</a></code> single-medium rule.</li></ul>
+<h2 id="h-2-lifetime-gold-supply-and-the-demand-check">2. Lifetime gold supply and the demand check</h2>
+<pre class="code">band hours                      = low z1-3 = 3.1 hr · mid z4-6 = 9.5 · high z7-9 = 18.6 · z9 push (91-100) = 9.0
+lifetime junk pieces            = 3.1×130 + 9.5×251 + 18.6×415 + 9.0×415 = 14,242
+max lifetime gold (sell everything, no Lck)              = 14,242
+one-time stall demand (section 3, all 9 places)          = 18,664 gold = 1.31x the max
+essentials only (road link · stash tab 1 · stash tab 2 · herb pouch ii · plot deed 4) = 1,951 = 13.7% of the max
+full-Lck ceiling over the 27.6 high-band hours               = 24,150 gold (= ×2.11 of the 11,454 a no-Lck run earns there · ceiling ×2.11)
+stones forgone by selling everything                     = 14,242 ÷ 8 = 1,780 Reroll casts ≈ 17.8 full-set polishes (E8)
+repeatable demand (section 4)                            = absorbs whatever the one-time list does not, no ceiling</pre>
+<ul><li>The list is <strong>a funnel, not a wall</strong>: the essentials are affordable while still dissolving ~85% of junk, and the full one-time list is only closable by a build that sells most of its loot and gives up Reroll polish.</li><li>A full-Lck player raises the junk line ×2.11 (<code><a href="doc-loot.html">loot.md</a></code> section 3 conclusion 2), so the tail is reachable <em>for that build</em> — exactly Lck's designed identity as the loot/craft stat. Guard: <code><a href="doc-checks.html">checks.md</a></code> G8 + T7.</li><li>Repeatables (section 4) absorb whatever the one-time list does not, which is the problem <code><a href="doc-economy.html">economy.md</a></code> states: one-time purchases alone would leave the medium dead by hour 20.</li></ul>
+<h2 id="h-3-one-time-purchases">3. One-time purchases</h2>
+<table><thead><tr><th>Item</th><th>Sold by</th><th>Kind</th><th>m</th><th>gold @low</th><th>gold @mid</th><th>gold @high</th><th>Charged at</th><th>Qty</th><th>Gold in the demand total</th><th>Note</th></tr></thead><tbody><tr><td>Road link (first visit to a settlement)</td><td>Waypoint keeper</td><td>time</td><td>20</td><td>44</td><td>84</td><td>138</td><td>the band of each destination</td><td>2 low + 3 mid + 3 high</td><td>754</td><td>8 links · travel mode B · Eastgate is free</td></tr><tr><td>Stash tab 1</td><td>Porter</td><td>space</td><td>60</td><td>132</td><td>252</td><td>414</td><td>high band</td><td>1</td><td>414</td><td>no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 30 m teaching price</td></tr><tr><td>Stash tab 2</td><td>Porter</td><td>space</td><td>90</td><td>198</td><td>378</td><td>621</td><td>high band</td><td>1</td><td>621</td><td></td></tr><tr><td>Stash tab 3</td><td>Porter</td><td>space</td><td>130</td><td>286</td><td>546</td><td>897</td><td>high band</td><td>1</td><td>897</td><td></td></tr><tr><td>Stash tab 4</td><td>Porter</td><td>space</td><td>180</td><td>396</td><td>756</td><td>1,242</td><td>high band</td><td>1</td><td>1,242</td><td></td></tr><tr><td>Stash tab 5</td><td>Porter</td><td>space</td><td>240</td><td>528</td><td>1,008</td><td>1,656</td><td>high band</td><td>1</td><td>1,656</td><td></td></tr><tr><td>Stash tab 6</td><td>Porter</td><td>space</td><td>300</td><td>660</td><td>1,260</td><td>2,070</td><td>high band</td><td>1</td><td>2,070</td><td>Cap 6 tabs</td></tr><tr><td>Herb pouch II</td><td>Porter</td><td>space</td><td>60</td><td>132</td><td>252</td><td>414</td><td>mid band</td><td>1</td><td>252</td><td>one more slot in the character bag (<code>inventory.character_slots</code> is the base)</td></tr><tr><td>Herb pouch III</td><td>Porter</td><td>space</td><td>240</td><td>528</td><td>1,008</td><td>1,656</td><td>high band</td><td>1</td><td>1,656</td><td>one more slot in the character bag (<code>inventory.character_slots</code> is the base)</td></tr><tr><td>Bag category slot (herbs / stones / gear display)</td><td>Porter</td><td>space</td><td>45</td><td>99</td><td>189</td><td>311</td><td>low band</td><td>3</td><td>297</td><td>display and sorting only · sells no stone, no gear</td></tr><tr><td>Plot deed 4</td><td>Steward</td><td>space</td><td>180</td><td>396</td><td>756</td><td>1,242</td><td>mid band</td><td>1</td><td>756</td><td>4th farm plot (farm.md)</td></tr><tr><td>Plot deed 5</td><td>Steward</td><td>space</td><td>540</td><td>1,188</td><td>2,268</td><td>3,726</td><td>high band</td><td>1</td><td>3,726</td><td>5th plot · the most expensive non-cosmetic line</td></tr><tr><td>House · Ashfall</td><td>Steward</td><td>space</td><td>120</td><td>264</td><td>504</td><td>828</td><td>low band</td><td>1</td><td>264</td><td>2 stash tabs + 1 farm plot + Waypoint anchor, no combat effect</td></tr><tr><td>House · Highspire</td><td>Steward</td><td>space</td><td>240</td><td>528</td><td>1,008</td><td>1,656</td><td>mid band</td><td>1</td><td>1,008</td><td></td></tr><tr><td>House · Vermolch</td><td>Steward</td><td>space</td><td>360</td><td>792</td><td>1,512</td><td>2,484</td><td>high band</td><td>1</td><td>2,484</td><td></td></tr><tr><td>Saved filter preset slot (extra)</td><td>Counterhand</td><td>information</td><td>30</td><td>66</td><td>126</td><td>207</td><td>one per band</td><td>3</td><td>399</td><td>preset switching is a concept.md reason-to-open</td></tr><tr><td>Potion carrier slot (belt display)</td><td>Armourer</td><td>space</td><td>40</td><td>88</td><td>168</td><td>276</td><td>mid band</td><td>1</td><td>168</td><td>display only · the carrier pays the weight tax in formula.md section 11 · sells no potion</td></tr></tbody></table>
+<p>Total one-time demand = <strong>18,664 gold</strong> (see section 2).</p>
+<ul><li>A house grants <strong>no combat effect of any kind</strong>: it does not touch Push downtime (<code><a href="doc-combat.html">combat.md</a></code> section 4 · D9), gives no buff, no slot, no regen. It is storage + a Waypoint anchor, which is the whole BDO house argument.</li><li>Nothing in this table is required to reach level 100 or to kill the zone 9 boss. That is the test that keeps gold off the power path (<code><a href="doc-checks.html">checks.md</a></code> G7).</li><li>The Eastgate teaching price for the first stash tab is the only discount in the game; it exists so the first Porter visit teaches the storage ladder instead of taxing it.</li><li>Line count and the demand total are checked as T4; the essentials subset as T5.</li></ul>
+<h2 id="h-4-repeatable-purchases">4. Repeatable purchases</h2>
+<table><thead><tr><th>Item</th><th>Sold by</th><th>Kind</th><th>m</th><th>Gold</th><th>Bound</th><th>Note</th></tr></thead><tbody><tr><td>Task skip token</td><td>Guild clerk</td><td>time</td><td>8</td><td>55 (high)</td><td>3 per real day</td><td>1 per task slot per day on top of the free skip in tasks.md · 3/day = 24 m/day</td></tr><tr><td>Armourer repair (clears Broken, refills protection to 5)</td><td>Armourer</td><td>time</td><td>14</td><td>97 (high)</td><td>repeatable</td><td>must stay above the elite time that earns 1 Reroll tier stone · re-check at F9</td></tr><tr><td>Armourer repair at Ironrow</td><td>Armourer</td><td>time</td><td>12</td><td>83 (high)</td><td>repeatable</td><td>the armourer town discount, and only there · still above the tier-stone floor</td></tr><tr><td>Curio pedlar stock: banner · Base tint · title</td><td>Curio pedlar</td><td>appearance</td><td>30-120</td><td>207-828 (high)</td><td>3 per real day</td><td>3 slots per real day · appearance only</td></tr><tr><td>Prestige title line (per quality band)</td><td>Curio pedlar</td><td>appearance</td><td>300</td><td>2,070 (high)</td><td>repeatable</td><td>the only intentionally expensive line</td></tr><tr><td>Waypoint re-anchor (move the free return point)</td><td>Waypoint keeper</td><td>time</td><td>6</td><td>41 (high)</td><td>repeatable</td><td>cosmetic convenience · never gates a zone</td></tr><tr><td>Coldres banner (settlement cosmetic)</td><td>Furrier</td><td>appearance</td><td>90</td><td>378 (mid)</td><td>repeatable</td><td>one per settlement · Wolf Cross only</td></tr><tr><td>Heavy-school Base tint</td><td>Armourer</td><td>appearance</td><td>45</td><td>311 (high)</td><td>repeatable</td><td>stocked only by the Siege Armourer at Frosthold · appearance only</td></tr><tr><td>Collector set hint (prints which school the set wants)</td><td>Collector</td><td>information</td><td>15</td><td>104 (high)</td><td>repeatable</td><td>information only · pays no item and sells no piece</td></tr></tbody></table>
+<p>Skip-token ceiling = 8 m × 3/day = <strong>24 m/day</strong> = 166 gold/day in the high band.</p>
+<ul><li>Repair is the only <strong>D2 service class</strong> line: it converts a rare-stone dependency into gold, so it must never be cheaper than hunting the stone. The floor in <code><a href="doc-checks.html">checks.md</a></code> T10 is proven against F7 (18 Reroll tier stones/hour → 3.33 min of elite hunting per stone) and re-proven in T10b against F9 (6.25 Add mod stones/hour → 9.60 min per stone) — repair at 14 m and the Ironrow discount at 12 m both clear the larger floor.</li><li>Ironrow's 12 m repair is the cheapest service in the game and the only settlement-specific price, which is what &quot;the armourer town&quot; is allowed to mean.</li><li>Pedlar rotation refreshes <strong>per real day</strong>, not on the 12-hour offline clock (<code><a href="doc-save.html">save.md</a></code>): a refresh the player can sleep into would not be a reason to return.</li></ul>
+<h2 id="h-5-per-settlement-detail-9-settlements">5. Per-settlement detail — 9 settlements</h2>
+<h3 id="h-5-1-npc-roster">5.1 NPC roster</h3>
+<table><thead><tr><th>Settlement</th><th>Zone</th><th>Band</th><th>Capital</th><th>Counterhand</th><th>Steward</th><th>Porter</th><th>Guild clerk</th><th>Armourer</th><th>Waypoint keeper</th><th>Collector</th><th>Curio pedlar</th><th>Herbalist</th><th>Furrier</th></tr></thead><tbody><tr><td><strong>Eastgate</strong></td><td>1</td><td>low</td><td>—</td><td>✓</td><td>·</td><td>✓</td><td>·</td><td>·</td><td>✓</td><td>·</td><td>·</td><td>·</td><td>·</td></tr><tr><td><strong>Millbrook</strong></td><td>2</td><td>low</td><td>—</td><td>✓</td><td>·</td><td>✓</td><td>·</td><td>·</td><td>✓</td><td>·</td><td>·</td><td>✓</td><td>·</td></tr><tr><td><strong>Ashfall</strong></td><td>3</td><td>low</td><td>low</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>·</td><td>✓</td><td>·</td></tr><tr><td><strong>Ironrow</strong></td><td>4</td><td>mid</td><td>—</td><td>✓</td><td>·</td><td>✓</td><td>·</td><td>✓</td><td>✓</td><td>·</td><td>·</td><td>·</td><td>·</td></tr><tr><td><strong>Wolf Cross</strong></td><td>5</td><td>mid</td><td>—</td><td>✓</td><td>·</td><td>✓</td><td>·</td><td>·</td><td>✓</td><td>·</td><td>·</td><td>·</td><td>✓</td></tr><tr><td><strong>Highspire</strong></td><td>6</td><td>mid</td><td>mid</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>·</td><td>✓</td><td>✓</td><td>·</td></tr><tr><td><strong>Bonegate</strong></td><td>7</td><td>high</td><td>—</td><td>✓</td><td>·</td><td>✓</td><td>·</td><td>✓</td><td>✓</td><td>✓</td><td>·</td><td>·</td><td>·</td></tr><tr><td><strong>Frosthold</strong></td><td>8</td><td>high</td><td>—</td><td>✓</td><td>·</td><td>✓</td><td>·</td><td>✓</td><td>✓</td><td>·</td><td>·</td><td>·</td><td>·</td></tr><tr><td><strong>Vermolch</strong></td><td>9</td><td>high</td><td>high</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>·</td></tr><tr><td><strong>Present in</strong></td><td></td><td></td><td></td><td>9/9</td><td>3/9</td><td>9/9</td><td>3/9</td><td>6/9</td><td>9/9</td><td>3/9</td><td>2/9</td><td>4/9</td><td>1/9</td></tr></tbody></table>
+<p>Presence rules:</p>
+<ul><li><strong>Counterhand</strong> — every settlement · sells information</li><li><strong>Steward</strong> — capitals only · sells space</li><li><strong>Porter</strong> — every settlement · sells space</li><li><strong>Guild clerk</strong> — capitals only · sells time</li><li><strong>Armourer</strong> — capitals + Ironrow · Bonegate · Frosthold (Siege Armourer) · sells time</li><li><strong>Waypoint keeper</strong> — every settlement · sells time</li><li><strong>Collector</strong> — the three set towns: Ashfall · Bonegate · Vermolch · sells space/appearance</li><li><strong>Curio pedlar</strong> — Highspire + Vermolch only · sells appearance</li><li><strong>Herbalist</strong> — Millbrook + capitals · sells space</li><li><strong>Furrier</strong> — Wolf Cross only · sells space/appearance</li></ul>
+<h3 id="h-5-2-stock-standing-and-base-flavour-per-settlement">5.2 Stock, Standing and Base flavour per settlement</h3>
+<table><thead><tr><th>Settlement</th><th>Zone · band</th><th>Capital</th><th>NPCs</th><th>Stock lines (prices in sections 3-4)</th><th>Base bias (flavour)</th><th>Standing tiers (kills)</th></tr></thead><tbody><tr><td><strong>Eastgate</strong></td><td>1 · low</td><td>—</td><td>Counterhand · Porter · Waypoint keeper</td><td>Bag category slot · Stash tab 1 · Waypoint re-anchor · Saved filter preset slot</td><td>cloth</td><td>147 / 368 / 686</td></tr><tr><td><strong>Millbrook</strong></td><td>2 · low</td><td>—</td><td>Counterhand · Porter · Waypoint keeper · Herbalist</td><td>Herb pouch II · Bag category slot · Road link · Saved filter preset slot</td><td>cloth / light</td><td>235 / 588 / 1,098</td></tr><tr><td><strong>Ashfall</strong></td><td>3 · low</td><td>low</td><td>Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Collector · Herbalist</td><td>House · Ashfall · Plot deed 4 · Collector set <strong>Militia</strong> (light school) · Collector set hint · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot</td><td>light (Evasion)</td><td>529 / 1,323 / 2,470</td></tr><tr><td><strong>Ironrow</strong></td><td>4 · mid</td><td>—</td><td>Counterhand · Porter · Waypoint keeper · Armourer</td><td>Armourer repair at Ironrow · Stash tab 1 · Road link · Potion carrier slot</td><td>light / mail</td><td>914 / 2,285 / 4,266</td></tr><tr><td><strong>Wolf Cross</strong></td><td>5 · mid</td><td>—</td><td>Counterhand · Porter · Waypoint keeper · Furrier</td><td>Bag category slot · Coldres banner · Stash tab 1 · Road link · Waypoint re-anchor</td><td>light</td><td>1,247 / 3,116 / 5,817</td></tr><tr><td><strong>Highspire</strong></td><td>6 · mid</td><td>mid</td><td>Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Curio pedlar · Herbalist</td><td>House · Highspire · Plot deed 5 · Curio pedlar stock: banner · Base tint · title · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot</td><td>mail</td><td>1,787 / 4,467 / 8,338</td></tr><tr><td><strong>Bonegate</strong></td><td>7 · high</td><td>—</td><td>Counterhand · Porter · Waypoint keeper · Collector · Armourer</td><td>Collector set <strong>Reliquary</strong> (heavy school) · Collector set hint · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot</td><td>heavy (Armour)</td><td>2,700 / 6,750 / 12,600</td></tr><tr><td><strong>Frosthold</strong></td><td>8 · high</td><td>—</td><td>Counterhand · Porter · Waypoint keeper · Armourer (=Siege Armourer)</td><td>Armourer repair · Heavy-school Base tint · Stash tab 1 · Road link · Waypoint re-anchor</td><td>heavy</td><td>3,240 / 8,100 / 15,120</td></tr><tr><td><strong>Vermolch</strong></td><td>9 · high</td><td>high</td><td>Counterhand · Steward · Porter · Guild clerk · Armourer · Waypoint keeper · Collector · Curio pedlar · Herbalist</td><td>House · Vermolch · Collector set <strong>Garden of Ash</strong> (cloth school) · Collector set hint · Prestige title line · Curio pedlar stock: banner · Base tint · title · Stash tab 1 · Road link · Armourer repair · Saved filter preset slot</td><td>heavy · cloth (glass endgame)</td><td>8,964 / 22,410 / 41,832</td></tr></tbody></table>
+<ul><li><strong>Specialisation rule:</strong> any line sold in exactly one place must be convenience or cosmetic, never the only source of something a build needs. That would re-gate progression by geography, which <code><a href="doc-world.html">world.md</a></code> refuses (unlock by level only).</li><li>The Base-bias column is <strong>permanent flavour</strong> (A9 · ruled even-weighted): it says which school a zone reads like, never which frame drops more often, and no numeric weight may be added.</li><li>Standing kill counts in the last column are the same numbers as section 6, repeated here so one row per settlement is enough to run the town.</li></ul>
+<h2 id="h-6-standing-tiers">6. Standing tiers</h2>
+<p>Standing accrues from kills in that settlement's own zone (<code><a href="doc-towns.html">towns.md</a></code> section 6), so its thresholds are a share of that zone's designed time budget, converted through F1 kills/hour.</p>
+<table><thead><tr><th>Settlement</th><th>Band</th><th>Zone budget (hr)</th><th>Tier I 30%</th><th>Tier II 75%</th><th>Tier III 140%</th></tr></thead><tbody><tr><td><strong>Eastgate</strong></td><td>low (980 kills/hr)</td><td>0.5</td><td>0.15 hr · <strong>147 kills</strong></td><td>0.38 hr · <strong>368 kills</strong></td><td>0.70 hr · <strong>686 kills</strong></td></tr><tr><td><strong>Millbrook</strong></td><td>low (980 kills/hr)</td><td>0.8</td><td>0.24 hr · <strong>235 kills</strong></td><td>0.60 hr · <strong>588 kills</strong></td><td>1.12 hr · <strong>1,098 kills</strong></td></tr><tr><td><strong>Ashfall</strong></td><td>low (980 kills/hr)</td><td>1.8</td><td>0.54 hr · <strong>529 kills</strong></td><td>1.35 hr · <strong>1,323 kills</strong></td><td>2.52 hr · <strong>2,470 kills</strong></td></tr><tr><td><strong>Ironrow</strong></td><td>mid (1,385 kills/hr)</td><td>2.2</td><td>0.66 hr · <strong>914 kills</strong></td><td>1.65 hr · <strong>2,285 kills</strong></td><td>3.08 hr · <strong>4,266 kills</strong></td></tr><tr><td><strong>Wolf Cross</strong></td><td>mid (1,385 kills/hr)</td><td>3.0</td><td>0.90 hr · <strong>1,247 kills</strong></td><td>2.25 hr · <strong>3,116 kills</strong></td><td>4.20 hr · <strong>5,817 kills</strong></td></tr><tr><td><strong>Highspire</strong></td><td>mid (1,385 kills/hr)</td><td>4.3</td><td>1.29 hr · <strong>1,787 kills</strong></td><td>3.22 hr · <strong>4,467 kills</strong></td><td>6.02 hr · <strong>8,338 kills</strong></td></tr><tr><td><strong>Bonegate</strong></td><td>high (1,800 kills/hr)</td><td>5.0</td><td>1.50 hr · <strong>2,700 kills</strong></td><td>3.75 hr · <strong>6,750 kills</strong></td><td>7.00 hr · <strong>12,600 kills</strong></td></tr><tr><td><strong>Frosthold</strong></td><td>high (1,800 kills/hr)</td><td>6.0</td><td>1.80 hr · <strong>3,240 kills</strong></td><td>4.50 hr · <strong>8,100 kills</strong></td><td>8.40 hr · <strong>15,120 kills</strong></td></tr><tr><td><strong>Vermolch</strong></td><td>high (1,800 kills/hr)</td><td>16.6</td><td>4.98 hr · <strong>8,964 kills</strong></td><td>12.45 hr · <strong>22,410 kills</strong></td><td>23.24 hr · <strong>41,832 kills</strong></td></tr></tbody></table>
+<p>Kill counts = <code>zone budget hr × tier share × F1 kills/hour of that band</code> (980 low · 1,385 mid · 1,800 high), rounded.</p>
+<ul><li><strong>Tier I</strong> = 30% of that settlement's zone budget → that stall's second stock line.</li><li><strong>Tier II</strong> = 75% of that settlement's zone budget → the Collector set slots of that settlement.</li><li><strong>Tier III</strong> = 140% of that settlement's zone budget → the cosmetic / tip line (banner · title · preset slot).</li></ul>
+<ul><li>Zone budgets come from <code><a href="doc-checks.html">checks.md</a></code> E1-E5 (3.1 hr through zone 3 · 12.6 through 6 · 31.2 through 9 · 40.2 at level 100). The <strong>split inside each band is interpolated</strong> in <code>tools/data/town.json</code> and is replaced by the per-level XP table when that table is written (section 9).</li><li>Tier III sits above 100% of the designed budget, i.e. a <strong>chase, not a formality</strong>: it asks for stay-behind farming in that zone. It is never a fake threshold because a zone never closes — levels 91-100 already farm zone 9, and Vermolch's budget is its 7.6 hr band share plus the 9.0 hr push (<code><a href="doc-concept.html">concept.md</a></code> keeps the post-completion loop open · <code><a href="doc-checks.html">checks.md</a></code> H3).</li><li>Tasks and boss kills in that zone add Standing on top, so these kill counts are the floor for a pure-farming path, never a substitute requirement.</li><li><strong>No tier unlocks a stat or a stone</strong> (<code><a href="doc-checks.html">checks.md</a></code> T12b).</li></ul>
+<h2 id="h-7-collector-sets">7. Collector sets</h2>
+<p>Turn in named pieces at the Collector; the payment is the item itself (cosmetic, stash tab, or preset slot), never gold and never a Mod (<code><a href="doc-economy.html">economy.md</a></code> · <code><a href="doc-checks.html">checks.md</a></code> G6 · T14).</p>
+<table><thead><tr><th>Set</th><th>Where</th><th>School</th><th>Turn in</th><th>Quality</th><th>Reward</th><th>Gold paid</th><th>Rule</th></tr></thead><tbody><tr><td><strong>Militia</strong></td><td>Ashfall</td><td>light</td><td>coif (helmet) · mail (chest) · striders (boots)</td><td>any</td><td>banner + 1 saved filter preset slot</td><td>no</td><td>pieces are consumed, so the sink runs before the filter ever dissolves them</td></tr><tr><td><strong>Reliquary</strong></td><td>Bonegate</td><td>heavy</td><td>barbute (helmet) · plate (chest) · cuisses (pant)</td><td>any</td><td>stash tab (bypasses the one-time price ladder, once per character)</td><td>no</td><td>must be filter-rejected pieces, or the sink competes with keep decisions</td></tr><tr><td><strong>Garden of Ash</strong></td><td>Vermolch</td><td>cloth</td><td>circlet (helmet) · vestments (chest) · wrap (pant)</td><td>high</td><td>prestige title</td><td>no</td><td>the high-quality requirement makes it an endgame demand, not a side quest</td></tr></tbody></table>
+<ul><li>The three sets map onto the three Base schools in <code><a href="doc-item-base.html">item-base.md</a></code> (light / heavy / cloth → Evasion / Armour / Energy Shield), so a set is a <em>school</em> test, not a new item family.</li><li>Set progress is stored (<code><a href="doc-save.html">save.md</a></code> town row) and is per character.</li><li>Whether a set can be finished without opening the filter is <strong>decided — yes, from drops alone</strong> (D-073), so the filter is a convenience and not priced or required here.</li></ul>
+<h2 id="h-8-base-bias-per-settlement-check-list-not-numbers">8. Base bias per settlement — check list, not numbers</h2>
+<p>Status: <strong>decided</strong> (ship even-weighted (harness/todo.md A9 · D-071)) — the column above is which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.</p>
+<ol><li>Ruled even-weighted: loot.md section 1 step 2 stays &quot;equal roll among all frames of that slot&quot; — no Base weight column is added, and the tools/loot.ts frame_weight path stays a what-if only.</li><li>The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable — even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises.</li><li>No build must travel for a frame: frames roll equally everywhere, so Base bias is never a progression gate and world.md &quot;unlock by level&quot; is untouched.</li></ol>
+<p>Never written (the ruling forbids it, not merely a pending gate):</p>
+<ul><li>numeric per-settlement Base weights (ruled out, not merely pending)</li><li>any stock line that is the only source of a frame</li><li>any gold price that buys frame odds</li></ul>
+<h2 id="h-9-what-must-be-re-checked-when-other-numbers-land">9. What must be re-checked when other numbers land</h2>
+<table><thead><tr><th>Pending number</th><th>Line it moves</th><th>Status</th></tr></thead><tbody><tr><td>Task reward sizing (tasks.md rebalance)</td><td>skip-token m price vs the ≤10% bound</td><td>open</td></tr><tr><td>Reroll/Refine price rebalance</td><td>the opportunity-cost line in the price unit block</td><td>open</td></tr></tbody></table>
+<h2 id="h-10-how-this-file-is-generated-data-driven-development">10. How this file is generated (data-driven development)</h2>
+<table><thead><tr><th>Step</th><th>Command</th><th>Result</th></tr></thead><tbody><tr><td>Change a price, a roster, a stock line, a budget or a tier share</td><td>edit <code>tools/data/town.json</code></td><td>the only hand-written town numbers live there</td></tr><tr><td>Change a band number (kills · drops · upgrades · junk · stone prices · timeline hours)</td><td>edit <code>tools/data/engine.json</code></td><td><strong>not stored here</strong> — <code>tools/lib/engine.ts</code> feeds both cages, so a gold price and an F3 drop rate cannot drift apart</td></tr><tr><td>Rebuild every table in this file + <code><a href="doc-checks.html">checks.md</a></code> groups A · B · C · F · T</td><td><code>node tools/check.ts --write</code> then <code>node tools/town.ts --write</code></td><td>generated blocks replaced between their markers</td></tr><tr><td>Run the cage</td><td><code>node tools/check.ts --checks</code> · <code>node tools/town.ts --checks</code></td><td>60 engine rows + 22 town rows, exit 1 on FAIL <strong>or</strong> on a doc block that no longer matches the data</td></tr><tr><td>Print the blocks without touching files</td><td><code>node tools/town.ts --emit</code> · <code>node tools/check.ts --emit</code></td><td>for review</td></tr></tbody></table>
+<p>What the cage refuses (<code>--checks</code> rows, mirrored in <code><a href="doc-checks.html">checks.md</a></code> group T):</p>
+<ul><li>a stall line whose kind is not space · time · information · appearance, or whose name contains a power noun (gear · Mod · potion · stone · Reroll · Refine · Ascend · weapon) without an explicit <code>display_only</code> flag → <strong>T8</strong> (<code><a href="doc-checks.html">checks.md</a></code> G7)</li><li>a Collector set paying gold → <strong>T14</strong> · Standing granting a stat or stone → <strong>T12b</strong></li><li>a one-time demand above 1.50× the lifetime supply, or an essentials basket above 20% → <strong>T4 · T5</strong></li><li>a Road link above 20 m, or a link count that does not equal the number of non-start settlements → <strong>T9</strong> (G9)</li><li>a repair price at or below the elite time of one Reroll tier stone → <strong>T10</strong></li><li>a skip-token cap above 3/day or 24 m/day → <strong>T11</strong></li><li>a price ladder that is not monotonic → <strong>T16</strong></li><li>a numeric Base weight in the data (ruled even-weighted, so any weight violates A9 · D-071) → <strong>T15</strong></li><li>band hours that no longer sum to the E1-E5 timeline, or settlement budgets that no longer sum to 40.2 hr → <strong>T3a · T3b</strong></li><li>a kill rate that differs from loot.md section 2 → <strong>T17</strong> (H1)</li><li>an engine number in the data file that no longer matches what <code><a href="doc-loot.html">loot.md</a></code> section 2 and the prose formula files publish → <strong>T18</strong> + <code>tools/check.ts</code> read-back. This row already earned its keep twice: the high-band drop rate was written as 421 in <code><a href="doc-loot.html">loot.md</a></code> · <code><a href="doc-combat.html">combat.md</a></code> · <code><a href="doc-formula.html">formula.md</a></code> while F3 derives 1,800 × 23.2% = <strong>418</strong>, and the low band read 135 with <code>Lck 72 → ×1.72</code> while <code>stat_c(30) = 70</code> gives <strong>133</strong> with ×1.70 (<code>stat_c(90) = 190</code> → ×2.90 → 418 ✓). All three docs were corrected, the Refine rate went from &quot;~3.8&quot; to the exact <strong>3.75</strong> the price pair gives, and no gold price moved: 133 − 2 = 131 junk/hour still prices a minute at 2.2 gold</li><li>a generated table containing <code>undefined</code> or <code>NaN</code> → the template-leak scan in both cages</li><li>a stock line naming an NPC that is not present in that settlement, or an NPC placement that breaks the presence rules → <strong>T-S · T-R</strong></li></ul>
+<p>(End of file)</p>
+<nav class="pager"><a href="doc-towns.html">← towns.md</a><a href="index.html">World &amp; towns</a><a href="doc-towns-ui.html">towns-ui.md →</a></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

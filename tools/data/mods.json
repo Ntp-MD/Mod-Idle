@@ -1,5 +1,5 @@
 {
-  "note": "Mod value ranges, lifted out of mod-pool.md so the table is generated rather than typed. `min`/`max` is the Total column; `bands` is [low, mid, high] quality, each holding its Tier slices worst-to-best. Eight mods have quality bands that are not equal widths (see check.js MP3) — the numbers are as published, deliberately unbalanced, because re-cutting them would move loot income and the 40.2 hr timeline.",
+  "note": "Mod value ranges, lifted out of mod-pool.md so the table is generated rather than typed. `min`/`max` is the Total column; `bands` is [low, mid, high] quality, each holding its Tier slices worst-to-best. Eight mods have quality bands that are not equal widths (see check.ts MP3) — the numbers are as published, deliberately unbalanced, because re-cutting them would move loot income and the 40.2 hr timeline.",
   "quality_bands": [
     "low",
     "mid",
@@ -1099,6 +1099,15 @@
       "min": 5,
       "max": 25,
       "pct": false,
+      "rolls": [
+        "str",
+        "vit",
+        "dex",
+        "agi",
+        "wis",
+        "int",
+        "lck"
+      ],
       "bands": [
         [
           [
@@ -1140,6 +1149,46 @@
           [
             24,
             25
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "all_stat_flat",
+      "name": "All stats flat",
+      "group": "Stat Mod",
+      "min": 8,
+      "max": 15,
+      "pct": false,
+      "bands": [
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            10
+          ]
+        ],
+        [
+          [
+            11,
+            12
+          ],
+          [
+            13,
+            13
+          ]
+        ],
+        [
+          [
+            14,
+            14
+          ],
+          [
+            15,
+            15
           ]
         ]
       ]
@@ -1340,6 +1389,166 @@
           [
             28,
             30
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "bleed_chance",
+      "name": "Chance to bleed %",
+      "group": "Combat",
+      "min": 10,
+      "max": 20,
+      "pct": true,
+      "bands": [
+        [
+          [
+            10,
+            11
+          ],
+          [
+            12,
+            13
+          ]
+        ],
+        [
+          [
+            14,
+            15
+          ],
+          [
+            16,
+            17
+          ]
+        ],
+        [
+          [
+            18,
+            19
+          ],
+          [
+            20,
+            20
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "stun_chance",
+      "name": "Chance to stun %",
+      "group": "Combat",
+      "min": 10,
+      "max": 20,
+      "pct": true,
+      "bands": [
+        [
+          [
+            10,
+            11
+          ],
+          [
+            12,
+            13
+          ]
+        ],
+        [
+          [
+            14,
+            15
+          ],
+          [
+            16,
+            17
+          ]
+        ],
+        [
+          [
+            18,
+            19
+          ],
+          [
+            20,
+            20
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "block_chance",
+      "name": "Block chance %",
+      "group": "Defensive",
+      "min": 10,
+      "max": 50,
+      "pct": true,
+      "bands": [
+        [
+          [
+            10,
+            16
+          ],
+          [
+            17,
+            21
+          ]
+        ],
+        [
+          [
+            22,
+            28
+          ],
+          [
+            29,
+            35
+          ]
+        ],
+        [
+          [
+            36,
+            43
+          ],
+          [
+            44,
+            50
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "armour_pen",
+      "name": "Armour penetration %",
+      "group": "Combat",
+      "min": 5,
+      "max": 15,
+      "pct": true,
+      "bands": [
+        [
+          [
+            5,
+            6
+          ],
+          [
+            7,
+            8
+          ]
+        ],
+        [
+          [
+            9,
+            10
+          ],
+          [
+            11,
+            12
+          ]
+        ],
+        [
+          [
+            13,
+            14
+          ],
+          [
+            15,
+            15
           ]
         ]
       ]

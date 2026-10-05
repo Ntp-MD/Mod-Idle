@@ -1,13 +1,13 @@
 # Generated views and writer snapshots — never hand-edited, always rebuildable.
 
-# Static wiki tree: node tools/wiki.js build
-wiki/
+# Static wiki tree: node tools/wiki.ts build
 
-# Dashboard snapshot: node tools/report.js
-dashboard.html
 
-# Pre-write snapshots taken by the wiki editor: tools/lib/store.js
-tools/.wiki-backup/
+# Dashboard snapshot: node tools/report.ts
+
+
+# Pre-write snapshots taken by the wiki editor: tools/lib/store.ts
+
 
 # Local browser-automation logs
 .playwright-mcp/
@@ -15,8 +15,7 @@ tools/.wiki-backup/
 # Owner-private idea parking - local only, never synced, never read by agents
 # unless the owner assigns the exact file path in chat.
 # owner/
-art/
-owner/
+
 
 # Installed dependencies and build output for the client
 node_modules/

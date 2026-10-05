@@ -1,16 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
-import { eng, E, BASES } from '../src/engine/client';
+import { eng, E, BASES, loot } from '../src/engine/client';
 import { rollDrop } from '../src/sim/drop';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { mulberry32 } from '../src/engine/client-helpers';
 
 const require = createRequire(import.meta.url);
-const basesCage = require('../../tools/bases.js');
+const basesCage = require('../../tools/bases.ts');
 
 const PATHS: Record<string, string[]> = {
-  cloth: ['circlet', 'vestments', 'wrap', 'soft boots', 'sash', 'wraps', 'band', 'band', 'pendant', 'cloak'],
-  armored: ['barbute', 'plate', 'cuisses', 'sabatons', 'girdle', 'gauntlets', 'signet', 'signet', 'talisman', 'mantle'],
+  cloth: ['Circlet', 'Vestment', 'Legwraps', 'Silk Slippers', 'Silk Sash', 'Silk Wraps', 'Iron Band', 'Iron Band', 'Jade Amulet', 'Silver Hoop', "Traveler's Cloak"],
+  armored: ['Sallet', 'Plate Vest', 'Cuisses', 'Plated Greaves', 'War Belt', 'Iron Gauntlets', 'Moonstone Signet', 'Moonstone Signet', 'Onyx Talisman', 'Onyx Drop', 'Heavy Mantle'],
 };
 
 const weightOf = (names: string[]) => names.reduce((t, n) => t + (BASES.bases.find((b: any) => b.name === n)?.weight || 0), 0);
@@ -35,8 +35,8 @@ describe('bases.json is the mirror the cage gates', () => {
   });
 
   it('reproduces two of the three published path weights exactly', () => {
-    expect(weightOf(PATHS.cloth)).toBe(193);
-    expect(weightOf(PATHS.armored)).toBe(420);
+    expect(weightOf(PATHS.cloth)).toBe(205);
+    expect(weightOf(PATHS.armored)).toBe(442);
   });
 });
 
@@ -72,19 +72,28 @@ describe('the weight tax from formula-utility.md section 11', () => {
 describe('drops are built from the Base table', () => {
   it('every piece names a real frame for its slot and carries only lines that frame may roll', () => {
     const rng = mulberry32(20260104);
+    const weaponNames = BASES.weapons.map((w: any) => w.name);
     for (let i = 0; i < 400; i++) {
       const item = rollDrop(rng, ['low', 'mid', 'high'][i % 3], 1.2);
-      if (item.slot === 'main hand' || item.slot === 'off hand') {
-        expect(BASES.weapons.map((w: any) => w.name)).toContain(item.base);
-      } else {
-        const frame = BASES.bases.find((b: any) => b.name === item.base);
-        expect(frame?.slot).toBe(item.slot);
-        const allowed = new Set([...(frame?.primary || []), ...(frame?.secondary || []), frame?.school].filter(Boolean));
-        for (const line of item.lines) {
-          expect(allowed.has(line.id) || line.id === 'stat_mod_flat' || line.id === 'stat_mod').toBe(true);
-        }
-        expect(item.weight).toBeGreaterThan(0);
+      if (weaponNames.includes(item.base)) {
+        // a weapon — main hand, or a dual-wielded off hand — forces its own line-1 Mods
+        expect(item.lines.length).toBeGreaterThan(0);
+        continue;
       }
+      const frame = BASES.bases.find((b: any) => b.name === item.base);
+      expect(frame?.slot).toBe(item.slot);
+      // line 1 draws off the frame, but lines 2-7 draw the whole slot union (item-base.md · D-123);
+      // an off-hand frame's Base Mod pair is its own line-1 pool, so it is allowed too
+      const allowed = new Set([
+        ...loot.poolFor(BASES, item.slot, frame, null).map((e: any) => e.id),
+        ...(BASES.base_mod?.off_hand?.[frame?.family] || []),
+      ]);
+      for (const line of item.lines) {
+        for (const id of [line.id, ...((line.extra || []).map((x: any) => x.id))]) {
+          expect(allowed.has(id) || id === 'stat_mod').toBe(true);
+        }
+      }
+      expect(item.weight).toBeGreaterThan(0);
     }
   });
 

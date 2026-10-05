@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Skills · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-skills">Skills</a>
+<a href="#h-detail-files">Detail files</a>
+<a href="#h-skill-count-52">Skill count = 52</a>
+<a href="#h-skill-frame">Skill frame</a>
+<a href="#h-weapon-groups">Weapon groups</a>
+<a href="#h-how-to-equip-skills">How to equip skills</a>
+<a href="#h-active-list">· Active list</a>
+<a href="#h-aura">· Aura</a>
+<a href="#h-buff">· Buff</a>
+<a href="#h-preset">· Preset</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html" aria-current="page">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">Skills</a><span class="sep">/</span><span>skill-pool.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>Skills</h1>
+<dl class="kv"><dt>file</dt><dd><code>skill-pool.md</code> · 96 lines · 1,007 words · written 2026-10-04T12:44:43Z</dd><dt>category</dt><dd>Skills</dd><dt>imports</dt><dd><a href="doc-skill-pool-attack.html">skill-pool-attack.md</a> · <a href="doc-skill-pool-buff.html">skill-pool-buff.md</a> · <a href="doc-skill-pool-curse.html">skill-pool-curse.md</a> · <a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a> · <a href="doc-skill-pool-system.html">skill-pool-system.md</a></dd><dt>imported by</dt><dd><a href="doc-combat.html">combat.md</a> · <a href="doc-concept.html">concept.md</a> · <a href="doc-skill-pool-attack.html">skill-pool-attack.md</a> · <a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a> · <a href="doc-skill-pool-buff.html">skill-pool-buff.md</a> · <a href="doc-skill-pool-curse.html">skill-pool-curse.md</a> · <a href="doc-skill-tree-control.html">skill-tree-control.md</a> · <a href="doc-skill-tree-impact.html">skill-tree-impact.md</a> · <a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a> · <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a> · <a href="doc-skill-tree.html">skill-tree.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-concept.html">concept.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-skill-pool-system.html">skill-pool-system.md</a> · <a href="doc-skill-tree.html">skill-tree.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd><code>skill-count</code> <span class="tag gen">tools/skills.ts</span></dd><dt>raw</dt><dd><a href="../skill-pool.md">skill-pool.md</a></dd></dl>
+<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
+<h2 id="h-skills">Skills</h2>
+<p>import skill-pool-attack.md import skill-pool-buff.md import skill-pool-curse.md import skill-pool-aura-heal.md import skill-pool-system.md</p>
+<p><strong>First draft</strong> — skills divide into 3 types: <strong>active</strong> (has cooldown, costs mana) · <strong>aura</strong> (persistent, reserves Max Mana) · <strong>passive</strong> (takes no slot, costs no mana) The core rule is that a skill must change <strong>what you do</strong>, not just add numbers. If it is only numbers, it should be an Mod instead</p>
+<h2 id="h-detail-files">Detail files</h2>
+<ul><li>skill-pool-attack.md — attack skills (Cleave..Void Lance)</li><li>skill-pool-buff.md — buff skills (roster cleared for redesign)</li><li>skill-pool-curse.md — curse skills + attach rule (Weaken..Pandemonium)</li><li>skill-pool-aura-heal.md — Reservation + heals + auras + baseline</li><li>skill-pool-system.md — combat clock + AoE + passives→keystones + acquisition + ladder + level + open numbers</li></ul>
+<h2 id="h-skill-count-52">Skill count = 52</h2>
+<table><thead><tr><th>Type</th><th>Count</th><th>Controlled by</th></tr></thead><tbody><tr><td><strong>attack</strong></td><td>18</td><td>Order list · cd + mana</td></tr><tr><td><strong>buff</strong></td><td>7</td><td>Timed self-buff - own cd and duration, never persists between fights</td></tr><tr><td><strong>curse</strong></td><td>11</td><td>Attached to target · Uses same hit_chance as attacks</td></tr><tr><td><strong>heal</strong></td><td>3</td><td>Same list (key on bosses)</td></tr><tr><td><strong>aura</strong></td><td>13</td><td>Player-managed set · <strong>Reserves Max Mana</strong></td></tr><tr><td><strong>total</strong></td><td><strong>52</strong></td><td>Roster mid-redesign · buff + aura set not final</td></tr></tbody></table>
+<blockquote><p><strong>Counts are provisional.</strong> The buff roster was cleared for a redesign and rebuilt, and the aura set was resized (<code><a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></code> · Decision 1), which leaves tree nodes in <code>skill-tree-*.md</code> referencing skills that no longer exist (<code><a href="doc-checks.html">checks.md</a></code> D19 will fail until those nodes are rewritten). If <code>Retribution</code> is also removed from the attack table, attack drops 18 → 17 and the total lands at <strong>51</strong>.</p></blockquote>
+<h2 id="h-skill-frame">Skill frame</h2>
+<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody><tr><td>Element / type</td><td>physical · magic · fire · cold · lightning · poison · chaos · none</td></tr><tr><td>Base Cooldown</td><td>4-12 seconds · aura has no cooldown</td></tr><tr><td>Mana cost</td><td><strong>% of Max Mana</strong> — skills pay on press · auras <strong>reserve</strong> a % of pool</td></tr><tr><td>Scales with stat</td><td>Str / Int / Dex / Agi / Wis / Lck</td></tr><tr><td>Weapon group</td><td>Usable with all weapons · Matching group grants bonus</td></tr><tr><td>Ladder</td><td>Reduces cooldown from duplicate skills</td></tr><tr><td>Skill level</td><td>Gains XP from use, maximum equals character level</td></tr></tbody></table>
+<p><strong>Mana cost is % rather than a number</strong> because a fixed number would be unusable early and irrelevant late. Percent keeps balance equal at all levels and gives <code>Max Mana %</code> meaning <strong>&quot;Weapon power&quot; in the skill table = character phys/magic power</strong> from formula.md sections 1-2, not the power value of the weapon piece (this game has no Base power per weapon type · decided in formula.md).</p>
+<ul><li><strong>A press is one percentage of the hit the build already deals</strong>, taken from the finished physical hit or the magic hit plus Element — the full form and its level ramp live in <code><a href="doc-skill-pool-system.html">skill-pool-system.md</a></code>, and <code>tools/skills.ts</code> prints every row's measured press. The old <code>stat × K_stat × stat% + power × power%</code> split is retired (D-070 · D-097): a skill inherits gear and globals rather than dipping into the stats a second time.</li><li><strong>Cooldown calculation order</strong></li></ul>
+<pre class="code">cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)</pre>
+<ul><li>Ladder always applies before CDR, so CDR still matters at full ladder</li></ul>
+<h2 id="h-weapon-groups">Weapon groups</h2>
+<p><strong>Skills fit all weapons</strong>, then grant a bonus if the weapon matches the group</p>
+<table><thead><tr><th>Group</th><th>Weapons</th><th>Bonus</th></tr></thead><tbody><tr><td>melee</td><td>sword · axe · dagger · mace · spear · two-handed sword · two-handed axe (7 types)</td><td>skill damage +25%</td></tr><tr><td>ranged</td><td>bow · crossbow (2 types)</td><td>skill damage +25%</td></tr><tr><td>magic</td><td>rod · wand · staff (3 types) + book in off hand</td><td>skill damage +25%</td></tr></tbody></table>
+<ul><li><strong>Dagger moved from ranged back to melee</strong> · The old weapon-types file mislabeled a heading as &quot;Ranged (one-handed)&quot; even though the list was sword/axe/knife, so the table dragged dagger into ranged · Now follows equipment-weapon.md (12 types · melee 7 / ranged 2 / magic 3)</li><li><strong>Mastery stacks on top of the group bonus</strong>: held weapon gains +0.5% skill damage per Mastery level from L5 (maximum +8%) · Counted <em>after</em> this +25% group bonus (equipment-weapon.md) · And it is a bonus specific to &quot;which weapon is held&quot;, not making any weapon type permanently better</li></ul>
+<p><strong>Why a bonus, not a requirement</strong> — if matching weapons were required to equip, a sword player would never see dagger skills even when dropped. Dropped items would become unusable. With this design no skill is dead, but players are still pulled toward weapon choice</p>
+<h2 id="h-how-to-equip-skills">How to equip skills</h2>
+<p><strong>Max 20 actives in the list</strong>. Equip up to 20 owned actives · The game runs by <strong>placed order</strong></p>
+<h3 id="h-active-list">Active list</h3>
+<table><thead><tr><th>Position in list</th><th>Meaning</th></tr></thead><tbody><tr><td>Top</td><td>Used first</td></tr><tr><td>Lower</td><td>Used when upper ones are unavailable</td></tr></tbody></table>
+<ul><li>The game cycles top to bottom, using the first skill with <strong>cd ready and enough mana</strong></li><li>No complex conditions · No manual presses · Players only arrange order</li></ul>
+<h3 id="h-aura">Aura</h3>
+<p><strong>Not in the list, kept separately</strong> because aura is not an action but a persistent state</p>
+<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody><tr><td>Cost</td><td><strong>Reserved % of Max Mana</strong> — unusable by skills while the aura is open</td></tr><tr><td>Limit</td><td><strong>The player chooses the set; total reserved mana may not reach 100% of the pool</strong> — no other cap</td></tr><tr><td>Switch</td><td><strong>Player-managed.</strong> The player opens and closes auras; the system only blocks a selection that would reserve 100%</td></tr></tbody></table>
+<ul><li>The player manages the set directly — there is no automatic top-down opening and no 45% Cap</li><li>Because a reservation is static, the player can read the whole aura budget before pressing anything — unlike the old drain table, where auras opened and closed live against regen</li><li><strong>The old &quot;open while mana ≥ 25%&quot; rule is deleted.</strong> Full rules in <code><a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></code></li></ul>
+<h3 id="h-buff">Buff</h3>
+<p><strong>In the list like active</strong>, but with an extra switch</p>
+<table><thead><tr><th>Switch</th><th>Default</th><th>Effect</th></tr></thead><tbody><tr><td>Re-use when expired</td><td>On</td><td>Game re-presses immediately when the buff expires, without counting as a press round</td></tr></tbody></table>
+<ul><li>Turning this switch off = press once and hold without re-pressing, so it does not consume mana repeatedly</li><li>Without this switch, the game would burn CDR and mana on buffs that have not expired, wasting the queue</li></ul>
+<h3 id="h-preset">Preset</h3>
+<p><strong>6 sets can be stored</strong>, with automatic selection per zone</p>
+<ul><li>On Push (HP depleted · see combat.md), return to the main preset</li><li>In an idle game players swap builds often; arranging one by one each time would waste time</li></ul>
+<nav class="pager"><span></span><a href="index.html">Skills</a><a href="doc-skill-pool-attack.html">skill-pool-attack.md →</a></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

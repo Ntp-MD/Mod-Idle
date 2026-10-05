@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Rules — ModWorld · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-agent-rules-modworld">Agent Rules — ModWorld</a>
+<a href="#h-0-project-phase-building">· 0. Project Phase — Building</a>
+<a href="#h-1-language-english-only">· 1. Language — English Only</a>
+<a href="#h-2-terminology-use-fixed-words">· 2. Terminology — Use Fixed Words</a>
+<a href="#h-3-numbers-are-source-of-truth">· 3. Numbers Are Source of Truth</a>
+<a href="#h-4-file-structure-rules">· 4. File Structure Rules</a>
+<a href="#h-5-what-not-to-do">· 5. What Not To Do</a>
+<a href="#h-6-git-replace-all-only">· 6. Git — replace all only</a>
+<a href="#h-7-working-mode-the-owner-proposes-the-agent-adapts">· 7. Working mode — the owner proposes, the agent adapts</a>
+<a href="#h-8-response-style">· 8. Response Style</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html" aria-current="page">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">Start here</a><span class="sep">/</span><span>AGENT.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>Agent Rules — ModWorld</h1>
+<dl class="kv"><dt>file</dt><dd><code>AGENT.md</code> · 126 lines · 2,972 words · written 2026-10-04T12:05:28Z</dd><dt>category</dt><dd>Start here</dd><dt>imports</dt><dd>—</dd><dt>imported by</dt><dd><a href="doc-Techstack.html">Techstack.md</a> · <a href="doc-harness/todo.html">harness/todo.md</a></dd><dt>quoted by</dt><dd><a href="doc-Techstack.html">Techstack.md</a> · <a href="doc-formula-offense.html">formula-offense.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../AGENT.md">AGENT.md</a></dd></dl>
+
+<h2 id="h-agent-rules-modworld">Agent Rules — ModWorld</h2>
+<p>This file controls how all agents work in this project: the build phase, the fixed terminology, the number discipline, the doc layout, the git model, and the working contract between the owner and the agent.</p>
+<h3 id="h-0-project-phase-building">0. Project Phase — Building</h3>
+<ul><li>We are in <strong>BUILD phase, coding has started</strong>. The playable client lives in <code>game/</code> (Vite · Svelte · TypeScript) and the shared math lives in <code>engine/</code>. The <code>.md</code> specs remain the design; <code>tools/data/*.json</code> remains the numeric source.</li><li><strong>The freeze is in effect</strong> (it took effect at the first code commit): no file renames, no term renames, no new power systems without folding into <code>mob_HP</code> (see <code><a href="doc-checks.html">checks.md</a></code> H1). Structural changes that would move a published number go through the data + its writer, then the cages.</li><li><strong>What we are building:</strong> an idle loot game (Melvor Idle style: a combat core loop plus <strong>one Farming life skill</strong> for provisioning, <code><a href="doc-farm.html">farm.md</a></code> — no other resource skills). Core loop: pick settlement → pick zone → kill mobs → get XP + items + crafting currency → equip/craft → next zone. No death (Push instead). Two media kept strictly apart: 7 crafting stones (power) + gold minted by selling mob junk at the town Counterhand (convenience/services/cosmetics in <code><a href="doc-towns.html">towns.md</a></code> stalls). No player trading. 9 zones × 10 levels across 3 capitals + 6 towns, 12 item slots, the skill roster (mid-redesign), 5 Elements, and a <strong>finished mob side</strong>: 15 species across 4 body classes (Small · Medium · Large · Boss; only Small and Medium form groups) placed over the 9 zones, plus Elite and 9 named bosses — every entry generated in <code><a href="doc-mob-roster.html">mob-roster.md</a></code>.</li><li>When the user says &quot;change it&quot; in Thai, apply the rename/refactor across ALL files immediately and verify with grep (zero old-term matches), then report the file count changed.</li></ul>
+<h3 id="h-1-language-english-only">1. Language — English Only</h3>
+<ul><li>ALL file content MUST be written in English only.</li><li>NEVER write Thai text in any <code>.md</code> file, code comment, tooltip, UI string, or document.</li><li>NEVER mix Thai and English in the same file.</li><li>When the user writes in Thai, still respond in conversation as normal, but all FILE OUTPUT must be English.</li><li>If existing file content contains Thai, translate it to English when editing that file.</li><li>Translate Thai prose to clear, concise technical English. Keep game terms untranslated (see section 2), keep all numbers, formulas, table values, and code identifiers unchanged, and keep tone factual and direct with no extra lore or flavor.</li><li>Keep tables, formulas, and code blocks intact when you translate. Translate only the prose around them.</li></ul>
+<h3 id="h-2-terminology-use-fixed-words">2. Terminology — Use Fixed Words</h3>
+<p>Use these exact terms everywhere. Do not use synonyms:</p>
+<ul><li>Rarity / Item quality / Tier (see <code><a href="doc-glossary.html">glossary.md</a></code>)</li><li>Mod / Flat / % / Core stat</li><li>Offensive / Defensive</li><li>Element (fire / cold / lightning / poison / chaos)</li><li>Counter element / Weak / Innate element</li><li>Cap / Alignment / Physical power / Magic power</li><li>K value (e.g. <code>K_STR</code>)</li><li>Mastery / Base / DoT / Leech / Push</li><li>Reroll / Refine / Ascend</li><li>No death (use <code>push</code>, never <code>death</code> unless quoting history)</li></ul>
+<p>Forbidden substitutions are listed in <code><a href="doc-glossary.html">glossary.md</a></code> — follow that table strictly.</p>
+<ul><li><strong>One item answers 3 separate questions</strong>: Rarity = Mod count, Item quality = value range, Tier = sub-range. Never mix them.</li><li>Do not use <code>Affix</code> or <code>Attribute</code> for item Mods — use <code>Mod</code> (see <code><a href="doc-mod-pool.html">mod-pool.md</a></code>, <code><a href="doc-glossary.html">glossary.md</a></code>).</li></ul>
+<h3 id="h-3-numbers-are-source-of-truth">3. Numbers Are Source of Truth</h3>
+<ul><li><strong>One number, one home.</strong> Every range, K value, Cap, cost and rate lives in <code>tools/data/</code> and is printed into the docs by a writer. If a number is not in the data, say so — never estimate it and never type it into a second document. <strong>The direction is one way (D-113): the data owns the number and the doc is its projection.</strong> A gate may not read a value back out of a doc to compare it against the engine — that makes the doc a second source and lets the two disagree. <code>X15</code> used to parse <code><a href="doc-mod-pool.html">mod-pool.md</a></code>'s Total column and is the example of what that costs; it now reads <code>mods.json</code>.</li><li><strong>Prose may not carry a number (D-113).</strong> A number outside a <code>BEGIN GENERATED</code> marker has no writer, so it cannot move when the data moves and nothing detects it going stale. Prose names the <strong>key</strong> (<code>Int x K_INT_ES</code>) and never the value. Gate <strong>L9</strong> counts the lines that break this and fails when the count rises above <code>engine.json</code> <code>doc_prose_lines_max</code>. The cap is a debt to lower, not a target: <strong>lower it in the same pass that fixes lines</strong>, because a rule whose own text moves the count is not a rule.</li><li><strong>NEVER invent a number from feeling.</strong> Change the data, run that file's writer, then read the row it printed.</li><li><strong>Every generated block has exactly one writer.</strong> For a table inside a <code>.md</code> file that writer is the <code>--write</code> flag of a cage in <code>tools/verify.ts</code>; the generated views have their own builders (<code>tools/report.ts</code> for <code>dashboard.html</code>, <code>tools/wiki.ts build</code> for <code>wiki/</code>). Never hand-edit between the <code>&lt;!-- BEGIN GENERATED:* --&gt;</code> markers, never delete a marker pair, never add a place where a number is typed by hand.</li><li><strong>Prose explains, it does not repeat.</strong> The text around a generated table says <em>why</em> a value sits where it does and points at the row. <code>tools/lint.ts</code> L7 fails when a line names a skill or aura and quotes a signed percentage its data does not contain (<code>lint:allow</code> is the escape hatch; <code>harness/decisions.md</code> is exempt as a historical log).</li><li><strong>A derived number quoted in prose is a copy, and copies must not multiply</strong> (<code>tools/anchors.ts</code>). Each derived anchor carries a cap equal to today's copy count, so <strong>A2</strong> fails the moment one is added — lowering a cap is how you record deleting one. <code>node tools/anchors.ts --report</code> prints the total and every location; never type either. Write the rule once in the file that owns it and have the others cite it.</li><li><strong>A skill rename is a data edit, never a doc edit</strong> — the <code>name</code> in <code>skills.json</code> plus a <code>&quot;renames&quot;</code> entry, and the writer updates every doc that names it. Never retype a skill name into a doc; <code>harness/HARNESS.md</code> has the procedure.</li><li><strong>Never hand-type a skill count.</strong> The <code># N &lt;type&gt; skills</code> headings and the count table are <strong>generated</strong> by <code>node tools/skills.ts --write</code> from <code>skills.json</code>; a stale block fails the cage and lint L5 still reads the heading. Add or remove a skill in the data and run the writer — do not touch a count in prose.</li><li><strong>Every Cap must document whether it is reachable</strong> (see the Cap table in <code><a href="doc-formula.html">formula.md</a></code>). A Cap that cannot be reached is not a power limit, it is a number that misleads players into thinking they can still progress.</li></ul>
+<h3 id="h-4-file-structure-rules">4. File Structure Rules</h3>
+<ul><li>Keep <code>import &lt;file&gt;.md</code> lines at the top of each file. Do not remove them.</li><li><strong>Design docs live under <code>doc/&lt;layer&gt;/</code></strong>, one shelf per layer: <code>doc/start</code>, <code>doc/character</code>, <code>doc/items</code>, <code>doc/skills</code>, <code>doc/combat</code>, <code>doc/world</code>, <code>doc/economy</code>, <code>doc/verification</code>. The folder is a shelf, <strong>not part of a doc's name</strong>: <code>import</code>, prose `<code> </code>&lt;file&gt;.md<code> </code><code> citations and every cage read stay <strong>bare</strong> (</code>item-base.md<code>, never </code>doc/items/item-base.md<code>), and </code>tools/lib/generated.ts<code> </code>resolveDoc<code> maps the bare name to its path. </code>AGENT.md<code> stays at the root and </code>harness/<code> keeps its prefix (</code>harness/todo.md`).</li><li><strong>Numeric sources live in <code>tools/data/</code></strong> — one file per domain, each the single home of its numbers:</li><li><code>engine.json</code> — stat model · K values · caps · loot · mod weights · craft · status · herbs · farm · potions · skill drop · mob species/zones/bosses · elements · timeline</li><li><code>mods.json</code> — mod value ranges + quality bands</li><li><code>town.json</code> — prices · rosters · stock · Standing</li><li><code>skills.json</code> — roster · reserve tiers · formula · renames</li><li><code>tree.json</code> — empty shell (there is no passive tree); <code>tools/tree.ts</code> is the cage that holds it that way</li><li><code>bases.json</code> — Base frames per slot · weight · Primary / Secondary pools · Gear Mod school (<code>node tools/bases.ts --write</code> imports, <code>--checks</code> gates)</li><li><code>aliases.json</code> — deprecated terms</li><li><strong>The cages</strong> run by <code>node tools/verify.ts</code> (the single verify entry point): <code>check</code> (engine) · <code>town</code> · <code>skills</code> · <code>tree</code> · <code>ladder</code> · <code>loot</code> · <code>bases</code> · <code>timeline</code> · <code>survival</code> · <code>inventory</code> · <code>anchors</code> · <code>lint</code> (doc referential integrity). Shared readers: <code>tools/lib/engine.ts</code> (numbers) · <code>roster.ts</code> · <code>skillmodel.ts</code> · <code>generated.ts</code> · <code>registry.ts</code> · <code>state.ts</code>.</li><li><strong>Every derived table sits between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers.</strong> Never hand-edit between them — edit the data, run that block's writer (the <code>--write</code> flag of its cage), then run <code>verify</code>. <strong>Rebuild the views after a doc edit:</strong> <code>node tools/report.ts</code> (dashboard.html) and <code>node tools/wiki.ts build</code> (wiki/).</li><li><strong>A ruled question has one home, and it is <code>harness/decisions.md</code>.</strong> Reasoning that explains why a number or a rule looks the way it does belongs there with its guard; open work belongs in <code>harness/todo.md</code>; the mechanics of both files belong to <code>harness/HARNESS.md</code>. Do not restate a ruling inside a design doc.</li><li><strong>Index + detail pattern</strong>: <code><a href="doc-skill-pool.html">skill-pool.md</a></code>, <code><a href="doc-formula.html">formula.md</a></code>, <code><a href="doc-skill-tree.html">skill-tree.md</a></code>, <code><a href="doc-equipment-slot.html">equipment-slot.md</a></code>, <code><a href="doc-towns.html">towns.md</a></code> are indexes. Details live in:</li><li><code><a href="doc-skill-pool-attack.html">skill-pool-attack.md</a></code>, <code><a href="doc-skill-pool-buff.html">skill-pool-buff.md</a></code>, <code><a href="doc-skill-pool-curse.html">skill-pool-curse.md</a></code>, <code><a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></code>, <code><a href="doc-skill-pool-system.html">skill-pool-system.md</a></code></li><li><code><a href="doc-formula-offense.html">formula-offense.md</a></code>, <code><a href="doc-formula-defense.html">formula-defense.md</a></code>, <code><a href="doc-formula-utility.html">formula-utility.md</a></code></li><li><code><a href="doc-skill-tree.html">skill-tree.md</a></code> and its four detail shells are empty on purpose - do not fill them in</li><li><code><a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a></code>, <code><a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a></code>, <code><a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a></code></li><li><code><a href="doc-towns-stalls.html">towns-stalls.md</a></code> (generated price/stock/Standing/Collector tables) and <code><a href="doc-towns-ui.html">towns-ui.md</a></code> (the settlement screens) — both details of the <code><a href="doc-towns.html">towns.md</a></code> index</li><li><code><a href="doc-mob-roster.html">mob-roster.md</a></code> — the generated spawn list behind the <code><a href="doc-world.html">world.md</a></code> Monsters section (zone cast · every species × body entry with resolved numbers)</li></ul>
+<p>  Edit details in the split file, keep the index summary in sync.</p>
+<ul><li>Preserve file names in lowercase with hyphens (e.g. <code><a href="doc-mod-pool.html">mod-pool.md</a></code>).</li><li>NEVER create <code>skill.md</code>, <code>skills.md</code>, <code>SKILL.md</code>, or <code>.opencode/skills/</code> patterns for game content — those names are reserved for agentic agent skills and will be auto-loaded as agent instructions. Game skill data lives in <code>skill-pool-<em>.md</code> and <code>skill-tree-</em>.md</code> only.</li><li>The owner folder (local only, git-ignored) is private idea parking. Never read, list, glob, grep, quote, or import anything under it unless the owner assigns the exact file path in chat. It is outside the cages by design: the linter only scans root and harness docs, so nothing there ever becomes system truth on its own.</li><li><code>harness/draft-patch.md</code> is the owner's empty draft slot (D-043). Its content was moved to owner-private parking by owner approval, so the slot ships empty and stays empty. Never park numbers in it and never read numbers out of it; the anchors cage and lint L4/L7 skip it by name, so nothing placed there can become system truth on its own.</li></ul>
+<h3 id="h-5-what-not-to-do">5. What Not To Do</h3>
+<ul><li>Do NOT add new systems that grant power without folding them into <code>mob_HP</code> (see <code><a href="doc-checks.html">checks.md</a></code> H1).</li><li>Do NOT give per-weapon DPS bonuses via mastery (see <code><a href="doc-equipment-weapon.html">equipment-weapon.md</a></code>).</li><li>Do NOT create new caps that are unreachable.</li><li>Do NOT use the bare word <code>quality</code> for Rarity, or <code>tier</code> where the term is Item quality — the fixed words in section 2 are the only names these three things have.</li><li>Do NOT add a second armour/def reduction stat beside the Armour rating, and do NOT add a separate <strong>status align</strong> stat — one Alignment stat and one Armour rating are the whole model. <strong>Status resistance is no longer banned (owner ruling 2026-10-04 · D-111):</strong> <code>Status Alignment resistance %</code> is a Mod line, a % cut on the 20% status proc in <code><a href="doc-combat.html">combat.md</a></code> §5, read at the <code>rollStatus</code> call. It is a Mod line and nothing else — there is no Core stat behind it and it must not become one.</li><li>Do NOT add tiles, movement speed, aggro radius or any coordinate model — near and far are the <strong>reach queue</strong> in <code><a href="doc-combat.html">combat.md</a></code> section 2b (<strong>X33</strong>), and that is the whole positional system.</li><li>Do NOT add player-to-player selling or trading (no server · <code><a href="doc-save.html">save.md</a></code>).</li><li><strong>Currency and shops now exist</strong> (amended with the towns layer, <code><a href="doc-economy.html">economy.md</a></code> + <code><a href="doc-towns.html">towns.md</a></code>): gold has exactly two mints — mob junk sold at the Counterhand (Ragnarok-style, <code><a href="doc-loot.html">loot.md</a></code> section 4), and bounded Road events — and NPC stalls buy space/time/information/appearance only. Do NOT let gold buy gear, Mods, potions, crafting stones, or any <code>mob_HP</code>-relevant service, and do NOT add a gold↔stone exchange or a third mint — these are the guards that keep the published timeline (<code><a href="doc-checks.html">checks.md</a></code> E5) and G6-G9 true.</li><li>Do NOT add a <strong>food / cooked-meal buff layer</strong>. Provisioning is herbs → potions only (<code><a href="doc-farm.html">farm.md</a></code>); the timed-buff roster (<code><a href="doc-skill-pool-buff.html">skill-pool-buff.md</a></code>) is the whole buff layer, and a second one would be complexity the game does not need.</li><li><strong>Farming is the only life skill and grants no power</strong> (owner ruling 2026-10-03 · D-068). It is a leveled provisioning track (<code><a href="doc-farm.html">farm.md</a></code> · <code>engine.json</code> <code>farm</code>) — plant → grow → harvest for Farming XP and herbs. Because it only yields potion ingredients and never gear · Mods · DPS · stats, it is exempt from the mob_HP fold in the first bullet of this section, and no future pass should let a Farming level buy combat power or a second resource skill.</li></ul>
+<h3 id="h-6-git-replace-all-only">6. Git — replace all only</h3>
+<p><strong>This project syncs by replacing, never by merging.</strong> Both directions overwrite whole.</p>
+<ul><li><strong>The working tree is the only truth while working.</strong> Read the current <code>.md</code> / <code>tools/data/*.json</code> files to learn what the design says. To judge <em>what the design says</em>, do NOT use <code>git diff</code>, <code>git status</code> or <code>git log</code> — uncommitted edits are the normal working state and carry no meaning, and a commit being absent says nothing about whether the content is finished. <code>harness/todo.md</code> + file recency is the state report; git history is only an archive of decisions that were deleted from the docs. (<code>git status</code> earns its place only at the sync gate below, never as a design check.)</li><li><strong>No worktrees, no task branches, no second checkout.</strong> The work is the files on disk, in the one working tree, and it ships as one replace-all push. Do NOT <code>git worktree add</code>, do NOT clone or copy the repo to a scratch directory to work in, and do NOT park a task on its own branch — a second copy of the tree is a second place for the design to live, the two always disagree, and the losing copy is the one somebody later reads. Edit in place, run <code>node tools/verify.ts</code>, then push the whole thing with <code>--force-with-lease</code>.</li><li><strong>Pull = replace local with remote.</strong> <code>git fetch</code> then <code>git reset --hard &lt;remote&gt;/&lt;branch&gt;</code> (e.g. <code>origin/master</code>). Do NOT use <code>git pull</code> (it merges), do NOT rebase, do NOT hand-resolve conflicts. Local commits that are not on the remote are discarded by design.</li><li><strong>Push = replace remote with local.</strong> <code>git push --force-with-lease</code> (preferred) or <code>git push --force</code>. Never a normal merge-push, never a PR merge.</li><li><strong>No merge commits, no partial merges.</strong> If the two sides disagree, one side is dropped whole — there is no three-way merge in this repo.</li><li><strong>Git is used at exactly two moments:</strong> (a) before a replace-all sync, run <code>git status</code> (working tree must be clean) and <code>node tools/verify.ts</code>, because replacing throws away whatever it overwrites; (b) committing/pushing, and only when the user asks. Never commit or push on your own initiative.</li><li>Never commit secrets, and never force-push a branch you have not just verified.</li></ul>
+<h3 id="h-7-working-mode-the-owner-proposes-the-agent-adapts">7. Working mode — the owner proposes, the agent adapts</h3>
+<p>Recorded at the owner's request (2026-10-03). This is the contract between the owner and any agent working here.</p>
+<ul><li><strong>The owner is the source of design intent.</strong> Ideas arrive from the owner, often as a goal rather than a finished spec. The agent's job is to <strong>adapt</strong> the idea into the existing model — find the shape that fits the current rules, data and cages — then land it. Do not wait for a fully specified spec before starting.</li><li><strong>The agent may, and should, argue.</strong> If an idea conflicts with a frozen rule (<code>section 5</code>), breaks a cage, double-counts an anchor, or has a shape that fits the design better, say so plainly, give the reason, and offer the alternative. Disagreement is expected input, not refusal. The owner can always override, and a veto is a normal follow-up.</li><li><strong>Propose, then implement.</strong> For a reversible in-repo choice, pick the approach that fits best, implement it, and record it as veto-able in <code>harness/decisions.md</code>. Reserve questions for a genuine fork that changes what the game <em>is</em>, for something irreversible, or for a number that cannot be derived. Never invent a number from feeling (<code>section 3</code>).</li><li><strong>Do not cargo-cult.</strong> This project is deliberately not a template and does not follow another game's conventions by default. When a stock pattern does not fit, say why and fit the design instead.</li><li><strong>Originality is the point.</strong> The owner's framing: this game is built to satisfy the owner's own requirements and the owner believes the design has no precedent. Treat that as a standing reason to look for the shape no existing idle game uses, not for the safe one.</li></ul>
+<h3 id="h-8-response-style">8. Response Style</h3>
+<p>How an agent talks to the owner. Applies to every reply, not just big tasks.</p>
+<ul><li><strong>Be extremely concise.</strong> Prefer tool calls and execution over conversational explanation.</li><li>Do not explain reasoning or narrate actions. Do not repeat the request back.</li><li>Do not give progress updates unless blocked; if a status line is unavoidable, keep it to one short sentence.</li><li>After completing a task report only: <strong>what changed · tests/checks run · any remaining issue</strong>.</li><li>Keep the final response under 5 bullet points.</li></ul>
+<nav class="pager"><span></span><a href="index.html">Start here</a><a href="doc-harness/todo.html">harness/todo.md →</a></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

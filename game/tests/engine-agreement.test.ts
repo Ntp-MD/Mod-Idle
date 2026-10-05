@@ -4,11 +4,11 @@ import { eng, E, BASES } from '../src/engine/client';
 import { buildCharacter, openingGear } from '../src/sim/player';
 import { newGame, tick, catchUp } from '../src/sim/game';
 
-// The cages load tools/lib/engine.js, which is a bridge over the same engine/index.js the client
+// The cages load tools/lib/engine.ts, which is a bridge over the same engine/index.ts the client
 // calls. Requiring it here proves the client and the cages resolve to one module and one data file
 // — the promise Techstack.md "The one rule" makes.
 const require = createRequire(import.meta.url);
-const cage = require('../../tools/lib/engine.js');
+const cage = require('../../tools/lib/engine.ts');
 
 describe('game and cages run one engine', () => {
   it('resolves the same derived ceilings', () => {
@@ -28,8 +28,9 @@ describe('game and cages run one engine', () => {
 
 describe('published anchors the docs quote', () => {
   it('single-stat ceiling and the naked level-100 stat', () => {
-    // flat-only since Core Stat % was retired (D-114): 210 + 25 x 12
-    expect(eng.CEIL).toBe(510);
+    // flat-only since Core Stat % was retired (D-114), plus the earring as a 13th worn item (D-131):
+    // 210 + 25 x 13
+    expect(eng.CEIL).toBe(535);
     expect(eng.statAt(100)).toBe(210);
   });
 

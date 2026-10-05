@@ -1,4 +1,5 @@
 import { loot } from '../engine/client';
+import { gearIcon, stackIcon } from '../icon';
 import type { Item } from '../sim/types';
 import type { BagStack } from '../sim/slots';
 
@@ -20,8 +21,7 @@ export interface SlotEntry {
   sub: string;
   item?: Item;
   stack?: BagStack;
-  /** which silhouette the tile draws */
-  glyph: 'weapon' | 'armour' | 'jewellery' | 'stone' | 'herb' | 'draught' | 'junk';
+  icon: string;
   rarityRank: number;
   qualityRank: number;
   score: number;
@@ -43,16 +43,6 @@ const rankOf = (order: string[], value?: string) => {
   return i < 0 ? -1 : i;
 };
 
-/** Slot families decide the tile shape; the names come from the roll's own slot list. */
-const WEAPONS = ['main hand', 'off hand'];
-const JEWELLERY = ['ring', 'amulet', 'belt', 'cape'];
-function glyphFor(slot: string, group?: string): SlotEntry['glyph'] {
-  if (WEAPONS.includes(slot)) return 'weapon';
-  if (JEWELLERY.includes(slot)) return 'jewellery';
-  if (slot) return 'armour';
-  return group === 'stones' ? 'stone' : group === 'herbs' ? 'herb' : group === 'draughts' || group === 'condensed' ? 'draught' : 'junk';
-}
-
 export function gearEntry(item: Item, index: number): SlotEntry {
   return {
     index,
@@ -60,7 +50,7 @@ export function gearEntry(item: Item, index: number): SlotEntry {
     title: item.base,
     sub: `${item.rarity} · ${item.quality} · ${item.tier}`,
     item,
-    glyph: glyphFor(item.slot),
+    icon: gearIcon(item),
     rarityRank: rankOf(RARITY_ORDER, item.rarity),
     qualityRank: rankOf(QUALITY_ORDER, item.quality),
     score: loot.score({ ...item, q: item.q ?? 0 }),
@@ -76,7 +66,7 @@ export function stackEntry(stack: BagStack, index: number): SlotEntry {
     title: stack.name,
     sub: stack.group,
     stack,
-    glyph: glyphFor('', stack.group),
+    icon: stackIcon(stack.group, stack.name),
     rarityRank: -1,
     qualityRank: -1,
     score: stack.count,

@@ -167,7 +167,7 @@ describe('bleed is physical, does not stack, and ignores attack speed', () => {
     const c = charWith(null, 0);
     const store = newMobStatusStore();
     let applied = 0;
-    for (let i = 0; i < 200; i++) if (applyBleed(mulberry32(i), store, 'm1', c.phys)) applied++;
+    for (let i = 0; i < 200; i++) if (applyBleed(mulberry32(i), store, 'm1', c.phys, K.K_BLEED_CHANCE)) applied++;
     expect(applied).toBeGreaterThan(200 * K.K_BLEED_CHANCE * 0.7);
     const l = store.m1.statuses.bleed!;
     expect(l.stacks).toBe(1);

@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cage results · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html" aria-current="page">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><span>Cage results</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<section><h1>Cage results</h1><p class="hint">Every cage was executed here with <code>--checks</code> at 2026-10-04 12:44:53Z: invariants inside the data plus a read-back of every prose file. A <span class="bad">FAIL</span> means a document publishes a number the math does not produce; a <span class="warn">PENDING</span> row is a number the cages refuse to invent. Re-run manually with <code>node tools/verify.ts</code>.</p>
+<div class="tw"><table class=""><thead><tr><th>cage</th><th>script</th><th>writes</th><th>pass</th><th>fail</th><th>pending</th><th>docs exit</th></tr></thead><tbody><tr><td>engine cage</td><td><a href="../tools/check.ts">tools/check.ts</a></td><td>engine.json → checks.md groups A · B · C · F</td><td><span class="ok">102</span></td><td><span class="">0</span></td><td><span class="warn">1</span></td><td><span class="ok">0</span></td></tr><tr><td>town cage</td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>engine.json + town.json → towns-stalls.md + checks.md group T</td><td><span class="ok">22</span></td><td><span class="">0</span></td><td><span class="warn">0</span></td><td><span class="ok">0</span></td></tr><tr><td>skills cage</td><td><a href="../tools/skills.ts">tools/skills.ts</a></td><td>skills.json → skill-pool*.md roster tables + counts</td><td><span class="ok">14</span></td><td><span class="">0</span></td><td><span class="warn">0</span></td><td><span class="ok">0</span></td></tr><tr><td>tree cage</td><td><a href="../tools/tree.ts">tools/tree.ts</a></td><td>tree.json + node tables → skill-tree.md summary + D19 refs</td><td><span class="ok">8</span></td><td><span class="">0</span></td><td><span class="warn">0</span></td><td><span class="ok">0</span></td></tr><tr><td>ladder cage</td><td><a href="../tools/ladder.ts">tools/ladder.ts</a></td><td>roster × drop rate → D20/E11 duplicate economy</td><td><span class="ok">5</span></td><td><span class="">0</span></td><td><span class="warn">0</span></td><td><span class="ok">0</span></td></tr><tr><td>timeline cage</td><td><a href="../tools/timeline.ts">tools/timeline.ts</a></td><td>engine.json xp → world.md 5-level-step table</td><td><span class="ok">3</span></td><td><span class="">0</span></td><td><span class="warn">0</span></td><td><span class="ok">0</span></td></tr><tr><td>doc lint</td><td><a href="../tools/lint.ts">tools/lint.ts</a></td><td>cross-file references · counts · deprecated terms</td><td><span class="ok">8</span></td><td><span class="">0</span></td><td><span class="warn">0</span></td><td><span class="ok">0</span></td></tr></tbody></table></div></section>
+<section><h2>engine cage · tools/check.ts <span class="ok">PASS</span></h2><pre class="code">template leaks: none · every generated cell holds a number or a word
+doc blocks: checks.md groups group-A · group-B · group-C · group-F match the engine
+103/103 PASS · 0 FAIL</pre><div class="tw"><table class=""><thead><tr><th>id</th><th>status</th><th>detail</th></tr></thead><tbody><tr><td><code>X1</code></td><td><span class="status-pass">PASS</span></td><td>single-stat ceiling = 510 — every K value is set on this number (H5 · A3 · D-114)</td></tr><tr><td><code>X2</code></td><td><span class="status-pass">PASS</span></td><td>Flat/% forced to different stats would give 510 — the doc line that forbids reverting A3</td></tr><tr><td><code>X3</code></td><td><span class="status-pass">PASS</span></td><td>mana pool ÷ regen = 40.6 sec against the 40 sec intent (B5 · K_INT_MREGEN)</td></tr><tr><td><code>X4</code></td><td><span class="status-pass">PASS</span></td><td>kill rates derived from group size + spawn time within 1%: 982/980 low · 1385/1385 mid · 1800/1800 high</td></tr><tr><td><code>X5</code></td><td><span class="status-pass">PASS</span></td><td>F3 = F1 × F2 for all four rows: 133 low · 255 mid · 418 high · 878 full Lck</td></tr><tr><td><code>X6</code></td><td><span class="status-pass">PASS</span></td><td>junk = drops − upgrades everywhere, so gold and stones share one ceiling (G2 · G8)</td></tr><tr><td><code>X7</code></td><td><span class="status-pass">PASS</span></td><td>full-Lck junk line ×2.11 — the bound G8 and towns-stalls T7 quote</td></tr><tr><td><code>X8</code></td><td><span class="status-pass">PASS</span></td><td>stone flow: elite 18 + boss 12 = 30 tier stones/hr · 415 junk ÷ 8 = 52 Reroll uses/hr (F6 · F7)</td></tr><tr><td><code>X9</code></td><td><span class="status-pass">PASS</span></td><td>Refine full set = 24 casts ÷ 3.8/hr = 6.4 hr, and checks.md E6 prints 6.4 hr — Tier belongs to the piece (D-033), so a cast moves the whole item one step</td></tr><tr><td><code>X10</code></td><td><span class="status-pass">PASS</span></td><td>full-set polish = 1.92 hr (E8 · the opportunity cost one gold is priced against)</td></tr><tr><td><code>X11</code></td><td><span class="status-pass">PASS</span></td><td>proven-reachable caps: alignment 35.5 ≥ 35 · elem res 48.4 ≥ 45 · cdr 57.4 ≥ 55</td></tr><tr><td><code>X12</code></td><td><span class="status-pass">PASS</span></td><td>crit has no Cap (the 100 Cap became a spill point): stats alone = 33.5% &lt; 100, so overflow is 0.0 today and only buffs/skills can push past it (C9 · formula-offense.md)</td></tr><tr><td><code>X13</code></td><td><span class="status-pass">PASS</span></td><td>aspd Cap 500 (= 5 times/sec, the 0.2 sec floor) is out of reach for every weapon at the Agi ceiling: dagger 845 · one-handed sword / axe 1,179 · bow / crossbow 1,330 · mace / wand / rod 1,512 · staff / spear 1,865 · two-handed sword / axe 2,369 vs ceiling 510 — the Cap is a clock rule, not a build target, and K_AGI_ASPD stays at 0.25 so no weapon crowds it</td></tr><tr><td><code>X14</code></td><td><span class="status-pass">PASS</span></td><td>weapon_mult = 1.2 ÷ weapon_aspd for all 6 rows (D10 · equal DPS across 12 types)</td></tr><tr><td><code>X15</code></td><td><span class="status-pass">PASS</span></td><td>24 Mod maxima read out of `mods.json` and equal the engine — the data owns the number, mod-pool.md only prints it (D-113)</td></tr><tr><td><code>X16</code></td><td><span class="status-pass">PASS</span></td><td>Base drop 8%/kill · drop_rate = 1 + Lck×0.01 (formula-utility.md section 10 · nothing else mints items)</td></tr><tr><td><code>X19</code></td><td><span class="status-pass">PASS</span></td><td>15 species × 4 body classes · every stat vector averages 1.00 (mob_HP still derives from player DPS) · accuracy spans ×0.05-×1.00, so the Evasion Cap 80 costs a full Dex+Agi pair against the ceiling (X20)</td></tr><tr><td><code>X20</code></td><td><span class="status-pass">PASS</span></td><td>Evasion Cap 80 is reachable against the accuracy floor (Husk accuracy ×0.05 → 80.0% at Dex+Agi 510) and is NOT free against the ceiling (Wolf accuracy ×1 → 66.3% maxed, 51.3% at a Dex/Agi 360 build) — a maxed build caps against anything, so what X20 now proves is that the Cap costs the whole Dex+Agi pair rather than being reachable by accident</td></tr><tr><td><code>X21</code></td><td><span class="status-pass">PASS</span></td><td>mob evasion = stat_c × species.dex × K_EVASION 0.5 × body · reference (mean species, Medium body) 99.5 at level 100 vs the retired level×1 curve 100, so the published hit anchors hold (80% no-Dex · 90.6% at the accuracy ceiling) · species spread 77-131 keeps a 0-item player at 75.0-83.7% hit · a Full-Dex player still eats 55.3% of the top accuracy tier before Evasion</td></tr><tr><td><code>X22</code></td><td><span class="status-pass">PASS</span></td><td>armour = Str × 2 both sides · reduction = armour ÷ (armour + 5 × raw physical) · Str 510 = 1,020 armour cuts the zone-9 boss physical hit 7.7% and a zone-9 trash hit 57.3% · the hardest mob armour (578 · Golem at 80) costs a max physical hit only 3.7%</td></tr><tr><td><code>X23</code></td><td><span class="status-pass">PASS</span></td><td>120 roster rows from 15 species × 3 body classes + 28 Elite + 9 named bosses · every zone 6+ entries and exactly one boss · every species Element bias exists in a zone it actually lives in · zone entry counts 1:6 2:10 3:14 4:14 5:12 6:14 7:16 8:19 9:15</td></tr><tr><td><code>X24</code></td><td><span class="status-pass">PASS</span></td><td>mob dodge runs 4.6-10.5% against a same-level attacker — it must stay a thin layer (2-25%) so a mob's own Agi never becomes the answer to a build</td></tr><tr><td><code>X25</code></td><td><span class="status-pass">PASS</span></td><td>Energy Shield = Int × 4 (2,040 at the ceiling) · recharges Int × 0.1/sec (51.0) after 5 sec without a hit · full pool in 40.0 sec · exactly 24.1% of the same Int build's 8,460 HP · **player-only** so mob_HP stays the single survivability anchor</td></tr><tr><td><code>X26</code></td><td><span class="status-pass">PASS</span></td><td>zone identity has one source — towns.md section 4 (9 settlement rows: name · level range · innate Element) and loot.md section 2 (3 quality bands: level range · group average) both read back equal to engine.json mob.zones · this is the map↔resource↔mob seam that previously had no guard</td></tr><tr><td><code>X27</code></td><td><span class="status-pass">PASS</span></td><td>mob damage is derived from mob HP, not typed beside it — checks.md D1's 6 HP anchors invert through the skill multiplier ÷ 27 to exactly D2's damage anchors (L30 61 · L60 163 · L90 304 · L100 329), every zone edge in engine.json equals the D1 row, and world.md's generated 11-point curve (levels 1 · 10 · 20 · 30 · 40 · 50 · 60 · 70 · 80 · 90 · 100) agrees with itself</td></tr><tr><td><code>X37</code></td><td><span class="status-pass">PASS</span></td><td>mob_HP(L) is anchored at every zone edge and linearly interpolated inside a zone, so every level 1-100 has a value (120 → 11,901, strictly rising) · mob_PS(L) is `typical_gear_DPS(L) ÷ 27` off the same line · the D1 anchors (1 · 10 · 30 · 60 · 90 · 100) read back equal</td></tr><tr><td><code>X28</code></td><td><span class="status-pass">PASS</span></td><td>every Cap has one home — core-stats.md's 5 capped lines and 3 &quot;no Cap&quot; lines equal engine.json caps exactly (aspd=500 · evasion=80 · perfect_dodge=21 · cdr=55 · alignment=35 · elem_res=45) · this is the guard that would have caught the CDR 50 → 45 move</td></tr><tr><td><code>X42</code></td><td><span class="status-pass">PASS</span></td><td>one Upgrade step is 2, so a full ladder is 30 — exactly the smallest school ceiling (30, Evasion flat) and Armour flat 75% · Evasion flat 100% · Energy Shield flat 50% of theirs (item-base.md sets the school · checks.md H1 pays for the uplift through SV7, not through mob_HP, which D-103 measured as already inside the pacing)</td></tr><tr><td><code>X41</code></td><td><span class="status-pass">PASS</span></td><td>Quality 204/hr · Repair 22/hr · Corrupt 1/hr — a full +15 set is 11.2 hr against Ascend's 15.4 hr and one gamble costs about an hour, while the flow the prices were set against still reads junk 415/hr (F5) and tier stones 30/hr (F7)</td></tr><tr><td><code>X30</code></td><td><span class="status-pass">PASS</span></td><td>Ascend is priced by the engine at 0.78/hr, so a full 12-piece set takes 15.4 hr — inside the ~15 hr the design sells (E7 · concept.md). Add stones (6.25/hr) are the binding cost at 8 per Ascend, not tier stones (30/hr would allow 3.75)</td></tr><tr><td><code>X31</code></td><td><span class="status-pass">PASS</span></td><td>every species damage tag resolves to a real split (physical 10 · magic 2 · mixed 3) · physical is the whole armour-able half (Knight · Golem · Troll answered by Armour and chill), magic is the whole res-able half (Slime · Seraph only reachable through res), mixed keeps the old 50/50</td></tr><tr><td><code>X32</code></td><td><span class="status-pass">PASS</span></td><td>every zone's body mix averages exactly the published mob_HP(90) anchor (spawn weights Small 3 · Medium 2 · Large 1) · Large entries run 195% of the anchor and Small 60%, so body class changes what a fight feels like without touching kills/hour, drops/hour, stone flow or the timeline</td></tr><tr><td><code>X33</code></td><td><span class="status-pass">PASS</span></td><td>reach is the whole positional model (no tiles, no movement): 13 weapons mapped to 3 bands · 15 species all carry a line (12 front · 3 stand-off) · stand-off lineages start in zone 7, so zones 1-6 cost a melee build nothing and the worst case is 8.7% of the cycle in zone 9 (the 12% ceiling)</td></tr><tr><td><code>X34</code></td><td><span class="status-pass">PASS</span></td><td>adventure bag 50 slots (kept gear only) fills in ~16.7 hr at the high band's measured 3 upgrades/hr · character bag 30 slots holds consumables (stone 999/slot = 2.4 hr of value stones, herb/potion 100/slot) with gold taking no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + craft are Settlement-only (loot.md §4 · D-056)</td></tr><tr><td><code>X39</code></td><td><span class="status-pass">PASS</span></td><td>mob junk is gold's primary mint: 15 species items over 3 rarities (common 1g · uncommon 5g · rare 25g) · each rarity's chance = the line / its sell, so expected gold is 0.23/kill for any species and the junk line stays 415/hr · stacks 999/slot, weightless</td></tr><tr><td><code>X40</code></td><td><span class="status-pass">PASS</span></td><td>the AoE rule is data: 60% per target · Cap 3 · mana ×1.5 → damage per mana 0.40× / 0.80× / 1.20×, so AoE loses at 1 target and wins at the Cap (skill-pool-system.md)</td></tr><tr><td><code>X36</code></td><td><span class="status-pass">PASS</span></td><td>Road is a closed design: 8 chain links over consecutive settlements only · 5 min per trip × 1 encounter/min · weights ambush 60% · caravan 25% · pedlar 15% with mobs + resolve + win + loss on each · purse capped at 24 gold/day = 1.0% of a 6-hour junk mint · Standing 15 kill-equivalents against the 81.7 kills a trip costs · no stones, never AFK</td></tr><tr><td><code>X17</code></td><td><span class="status-pass">PASS</span></td><td>accuracy has no Cap (the 2,000 Cap was removed) · the ratio formula limits itself at 90.6%</td></tr><tr><td><code>OP1</code></td><td><span class="status-pass">PASS</span></td><td>the opening settlement &quot;Eastgate&quot; is a real zone (zone 1, levels 1-10)</td></tr><tr><td><code>OP0</code></td><td><span class="status-pass">PASS</span></td><td>the starting weapon &quot;one-handed sword&quot; resolves to one-handed sword / axe (1.2 hits/sec)</td></tr><tr><td><code>OP2</code></td><td><span class="status-pass">PASS</span></td><td>the starting weapon gives +15 physical, and the worst low-quality Tier is 15-21 — so it is the floor of the table, not a gift. A level-1 mob dies in 1.3 sec</td></tr><tr><td><code>OP3</code></td><td><span class="status-pass">PASS</span></td><td>a level-1 character survives 378 sec against a zone-1 mob — the opening cannot kill the player</td></tr><tr><td><code>OP4</code></td><td><span class="status-pass">PASS</span></td><td>no starting skill — the mob curve gives a level-1 character 0.3% skill power, so a free skill would be power outside the priced curve</td></tr><tr><td><code>OP5</code></td><td><span class="status-pass">PASS</span></td><td>the opening hands over no currency, so minute one cannot buy past a gate the design has not opened</td></tr><tr><td><code>OP6</code></td><td><span class="status-pass">PASS</span></td><td>the opening weapon weighs 35 against a 1,024 level-1 capacity, so section 11 takes 0.0% of aspd — the lightest main hand in the table (25) fits under the weight_base line, so the opening character carries it untaxed (harness/todo.md A12 closed)</td></tr><tr><td><code>MP1</code></td><td><span class="status-pass">PASS</span></td><td>every mod range covers its Total exactly — no gap, overlap or mixed Tier count</td></tr><tr><td><code>MP2</code></td><td><span class="status-pass">PASS</span></td><td>31 unique mod ids · 0 pending line(s) (none)</td></tr><tr><td><code>MP3</code></td><td><span class="status-pending">PENDING</span></td><td>every mod splits its 3 quality bands within x1.35 · SKEWED: Accuracy % 8/9/4 x2.25 · Attack speed % 8/9/4 x2.25 · Critical chance % 3/2/3 x1.50 · Cooldown reduction % 8/9/4 x2.25 · Life Regeneration flat 8/10/12 x1.50 · Mana Regeneration flat 8/10/12 x1.50 · Max Mana flat 26/45/50 x1.92 · Elemental alignment % 2/2/1 x2.00</td></tr><tr><td><code>X18</code></td><td><span class="status-pass">PASS</span></td><td>Mod matrix holds 26 named lines, all of them real Mod lines · 10 Offensive lines stay on weapons only · Gear Mod stays on the 5 armour slots · Stat Mod on all 11 slots</td></tr><tr><td><code>L9</code></td><td><span class="status-pass">PASS</span></td><td>prose carries no numbers: 1349 line(s) still do, cap 1349 (under by 0) · first: AGENT.md:5, AGENT.md:9, AGENT.md:12, AGENT.md:19, AGENT.md:22, AGENT.md:39</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md F5 junk line [0] — doc 415 · engine 415</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>crafting.md junk/hour → Reroll uses [0] — doc 415 · engine 415</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>crafting.md junk/hour → Reroll uses [1] — doc 52 · engine 52</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>crafting.md tier stones → Refines/hour [0] — doc 30 · engine 30</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>crafting.md tier stones → Refines/hour [1] — doc 3.75 · engine 3.75</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>crafting.md Refine full-set hours [0] — doc 24 · engine 24</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>crafting.md Refine full-set hours [1] — doc 6.4 · engine 6.4</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula.md single-stat ceiling [0] — doc 510 · engine 510</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula.md stat at level 100 no gear [0] — doc 210 · engine 210</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula.md Str 12 physical power [0] — doc 3051 · engine 3051</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula.md K_AGI_ASPD [0] — doc 0.25 · engine 0.25</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula.md K_INT_MREGEN [0] — doc 0.18 · engine 0.18</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-utility.md dagger Cap Agi [0] — doc 845 · engine 845</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-utility.md sword Cap Agi [0] — doc 1179 · engine 1179</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-defense.md CDR path to Cap (11 items) [0] — doc 15.3 · engine 15.3</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-defense.md CDR path to Cap (11 items) [1] — doc 3.75 · engine 3.75</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-defense.md CDR path to Cap (11 items) [2] — doc 57.4 · engine 57.4</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-utility.md accuracy ceiling [0] — doc 956 · engine 956</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula.md K_EVASION row [0] — doc 0.5 · engine 0.5</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md Evasion K [0] — doc 0.5 · engine 0.5</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md Armour K and divisor [0] — doc 2 · engine 2</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md Armour K and divisor [1] — doc 5 · engine 5</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md Energy Shield line [0] — doc 4 · engine 4</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md Energy Shield line [1] — doc 5 · engine 5</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>combat.md ES recharge delay [0] — doc 5 · engine 5</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>crafting.md ES recharge delay [0] — doc 5 · engine 5</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>concept.md zone-9 boss HP [0] — doc 160635 · engine 160635</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-utility.md weight capacity [0] — doc 2020 · engine 2020</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-utility.md drop multiplier [0] — doc 6.1 · engine 6.1</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-defense.md level_gain_hp [0] — doc 3960 · engine 3960</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-defense.md pool ÷ regen [0] — doc 3724 · engine 3724</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>formula-defense.md pool ÷ regen [1] — doc 40.6 · engine 40.6</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md Evasion Cap [0] — doc 80 · engine 80</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md aspd Cap [0] — doc 500 · engine 500</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md res Cap [0] — doc 45 · engine 45</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>core-stats.md perfect dodge Cap [0] — doc 21 · engine 21</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>checks.md F2 L90 drop chance [0] — doc 23.2 · engine 23.2</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 low kills/hr — doc 980 · engine 980</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 low drops/hr — doc 133 · engine 133</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 low Lck at that level — doc 70 · engine 70</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 low Lck multiplier — doc 1.7 · engine 1.7</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 mid kills/hr — doc 1385 · engine 1385</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 mid drops/hr — doc 255 · engine 255</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 mid Lck at that level — doc 130 · engine 130</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 mid Lck multiplier — doc 2.3 · engine 2.3</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 high kills/hr — doc 1800 · engine 1800</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 high drops/hr — doc 418 · engine 418</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 high Lck at that level — doc 190 · engine 190</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 high Lck multiplier — doc 2.9 · engine 2.9</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 high_full_lck kills/hr — doc 1800 · engine 1800</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 high_full_lck drops/hr — doc 878 · engine 878</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 high_full_lck Lck at that level — doc 510 · engine 510</td></tr><tr><td><code>RB</code></td><td><span class="status-pass">PASS</span></td><td>loot.md §2 high_full_lck Lck multiplier — doc 6.1 · engine 6.1</td></tr></tbody></table></div></section><section><h2>town cage · tools/town.ts <span class="ok">PASS</span></h2><pre class="code">template leaks: none · every generated cell holds a number or a word
+doc blocks: all generated tables in towns-stalls.md + checks.md match this data
+22/22 PASS · 0 PENDING · 0 FAIL</pre><div class="tw"><table class=""><thead><tr><th>id</th><th>status</th><th>detail</th></tr></thead><tbody><tr><td><code>T3a</code></td><td><span class="status-pass">PASS</span></td><td>band hours 3.1 / 9.5 / 18.6 / 9 = E1-E5 deltas</td></tr><tr><td><code>T3b</code></td><td><span class="status-pass">PASS</span></td><td>Σ 9 settlement budgets = 40.2 hr = 40.2 hr timeline</td></tr><tr><td><code>T2</code></td><td><span class="status-pass">PASS</span></td><td>gold per 1 m rises with the band: 2.2 &lt; 4.2 &lt; 6.9</td></tr><tr><td><code>T7</code></td><td><span class="status-pass">PASS</span></td><td>full-Lck junk ×2.11 against the ×2.11 ceiling</td></tr><tr><td><code>T3</code></td><td><span class="status-pass">PASS</span></td><td>lifetime supply 14,242 gold</td></tr><tr><td><code>T4</code></td><td><span class="status-pass">PASS</span></td><td>one-time demand 18,664 = 1.31× supply (limit 1.50×)</td></tr><tr><td><code>T5</code></td><td><span class="status-pass">PASS</span></td><td>essentials 1,951 = 13.7% of supply (limit 20%)</td></tr><tr><td><code>T8</code></td><td><span class="status-pass">PASS</span></td><td>26 lines, all tagged space/time/information/appearance</td></tr><tr><td><code>T9</code></td><td><span class="status-pass">PASS</span></td><td>Road link 20 m ≤ 20 m · 8 links = 8 non-start settlements · 754 gold total</td></tr><tr><td><code>T10</code></td><td><span class="status-pass">PASS</span></td><td>repair 14 m / 12 m &gt; 3.33 m per Reroll tier stone (F7 elite 18/hr)</td></tr><tr><td><code>T10b</code></td><td><span class="status-pass">PASS</span></td><td>with F9 landed, repair 14 m / 12 m &gt; 9.60 m per Add mod stone (F9 6.25/hr) — the same floor still holds against the stone Ascend needs, so the Add rate never makes repair a bad deal</td></tr><tr><td><code>T11</code></td><td><span class="status-pass">PASS</span></td><td>skip token 8 m × 3/day = 24 m/day (caps 24 m)</td></tr><tr><td><code>T12</code></td><td><span class="status-pass">PASS</span></td><td>3 tiers × 9 settlements = 27 thresholds, all from F1 kills/hr and monotonic</td></tr><tr><td><code>T13</code></td><td><span class="status-pass">PASS</span></td><td>Tier III = 140% of budget &gt; 100% on all 9 → a chase, not a formality</td></tr><tr><td><code>T12b</code></td><td><span class="status-pass">PASS</span></td><td>Standing grants only vendor stock lines · Collector set slots · map knowledge · saved filter presets · titles and never any stat · any Mod value · any stone · anything mob_HP reads</td></tr><tr><td><code>T14</code></td><td><span class="status-pass">PASS</span></td><td>3 sets, 3 schools (light/heavy/cloth), 0 gold paid</td></tr><tr><td><code>T15</code></td><td><span class="status-pass">PASS</span></td><td>status decided (even-weighted) · 0 numeric weights in data · 3 guards — any weight added here would break the ruling</td></tr><tr><td><code>T16</code></td><td><span class="status-pass">PASS</span></td><td>4 ladders monotonic: stash_tab 60-300 m · herb_pouch 60-240 m · plot_deed 180-540 m · house 120-360 m</td></tr><tr><td><code>T17</code></td><td><span class="status-pass">PASS</span></td><td>F1 980 / 1385 / 1800 kills/hr copied from loot.md section 2 · this tool changes no kill rate</td></tr><tr><td><code>T18</code></td><td><span class="status-pass">PASS</span></td><td>checks.md F1 undefined · F3 undefined · F5 undefined and loot.md section 2 rows all equal the data engine</td></tr><tr><td><code>T-R</code></td><td><span class="status-pass">PASS</span></td><td>9 rosters match the presence rules · Collector in Ashfall/Bonegate/Vermolch · pedlar in Highspire/Vermolch</td></tr><tr><td><code>T-S</code></td><td><span class="status-pass">PASS</span></td><td>every stock line resolves to a priced line (or a Collector set) sold by an NPC actually present</td></tr></tbody></table></div></section><section><h2>skills cage · tools/skills.ts <span class="ok">PASS</span></h2><pre class="code">14/14 gate PASS · 0 block(s) not current · 0 FAIL</pre><div class="tw"><table class=""><thead><tr><th>id</th><th>status</th><th>detail</th></tr></thead><tbody><tr><td><code>S1</code></td><td><span class="status-pass">PASS</span></td><td>unique skill ids (52 records)</td></tr><tr><td><code>S2</code></td><td><span class="status-pass">PASS</span></td><td>unique skill names</td></tr><tr><td><code>S3</code></td><td><span class="status-pass">PASS</span></td><td>every skill has a known type (attack · buff · curse · heal · aura)</td></tr><tr><td><code>S4</code></td><td><span class="status-pass">PASS</span></td><td>every attack skill names a weapon group or &quot;all&quot;</td></tr><tr><td><code>S5</code></td><td><span class="status-pass">PASS</span></td><td>every Element has an attack skill (physical · fire · cold · lightning · poison · chaos)</td></tr><tr><td><code>S6</code></td><td><span class="status-pass">PASS</span></td><td>every weapon group has at least 4 attack skills (melee 6 · ranged 4 · magic 6)</td></tr><tr><td><code>S7</code></td><td><span class="status-pass">PASS</span></td><td>no skill effect references mob armour or mob mana</td></tr><tr><td><code>S8</code></td><td><span class="status-pass">PASS</span></td><td>every aura reserve is a known tier or null (TBD)</td></tr><tr><td><code>S9</code></td><td><span class="status-pass">PASS</span></td><td>the full aura set reserves 157% of the pool against the 100% block — the set can never all run at once, so the player must choose (informational)</td></tr><tr><td><code>S10</code></td><td><span class="status-pass">PASS</span></td><td>skill level is earned per kill (1 XP) at 400 XP a step to Cap 20 = **1.28** · 7,600 kills to max = low 7.8 hr · mid 5.5 hr · high 4.2 hr · every aura carries a reserve tier</td></tr><tr><td><code>S11</code></td><td><span class="status-pass">PASS</span></td><td>44 of 52 rows carry numeric effects (18 of them target-side), and each value is printed in its own effect sentence</td></tr><tr><td><code>S12</code></td><td><span class="status-pass">PASS</span></td><td>8 rows state a mechanic rather than a magnitude (8 carry a rule word, 3 more are carried whole by another column) — every one of them is spent in the client, so no row is left as prose (informational)</td></tr><tr><td><code>S13</code></td><td><span class="status-pass">PASS</span></td><td>18 attack rows press off a basis and a stated percentage · reference bases: glass phys 3,051 · caster magic 3,265 (magic 3,051 + elem 2,040 × align 10.5%)</td></tr><tr><td><code>S14</code></td><td><span class="status-pass">PASS</span></td><td>52 rows all state their strength as effects, a mechanic word from the closed set (8 with a rule, 3 carried by another column)</td></tr></tbody></table></div></section><section><h2>tree cage · tools/tree.ts <span class="ok">PASS</span></h2><pre class="code">8/8 gate PASS · 0 block(s) not current · 0 FAIL</pre><div class="tw"><table class=""><thead><tr><th>id</th><th>status</th><th>detail</th></tr></thead><tbody><tr><td><code>T1</code></td><td><span class="status-pass">PASS</span></td><td>unique keystone ids (0 keystones)</td></tr><tr><td><code>T2</code></td><td><span class="status-pass">PASS</span></td><td>every keystone pair names a real keystone</td></tr><tr><td><code>T3</code></td><td><span class="status-pass">PASS</span></td><td>every keystone names a real branch</td></tr><tr><td><code>T7</code></td><td><span class="status-pass">PASS</span></td><td>legal tree band is x1.00 (worst ) to x1.00 (best ), so the x1.85 mob_HP baseline sits inside it</td></tr><tr><td><code>T8</code></td><td><span class="status-pass">PASS</span></td><td>every keystone carries the rule and the worked calculation its table prints</td></tr><tr><td><code>T4</code></td><td><span class="status-pass">PASS</span></td><td>parsed node/limb counts match every declared header</td></tr><tr><td><code>T5</code></td><td><span class="status-pass">PASS</span></td><td>every &quot;Enables&quot; cell resolves to a real skill or keystone</td></tr><tr><td><code>T6</code></td><td><span class="status-pass">PASS</span></td><td>the tree is buildable from the tables: 3 branches × 5 limbs × ≥4 nodes = 0 minors, and tier = position within its own limb (hub → branch gateway → limb gateway → node 1..N)</td></tr></tbody></table></div></section><section><h2>ladder cage · tools/ladder.ts <span class="ok">PASS</span></h2><pre class="code">5/5 gate PASS · 0 block(s) not current · 0 FAIL</pre><div class="tw"><table class=""><thead><tr><th>id</th><th>status</th><th>detail</th></tr></thead><tbody><tr><td><code>LD1</code></td><td><span class="status-pass">PASS</span></td><td>ladder reaches −30% at step 6 for 12 duplicates total</td></tr><tr><td><code>LD2</code></td><td><span class="status-pass">PASS</span></td><td>cooldown reduction is strictly increasing per step</td></tr><tr><td><code>LD3</code></td><td><span class="status-pass">PASS</span></td><td>roster 52 ÷ 9 zones = 5.8 skills per zone pool</td></tr><tr><td><code>LD4</code></td><td><span class="status-pass">PASS</span></td><td>4 maxed targets = 96 pieces = 52% of the 184-piece funnel = 20.9 hr</td></tr><tr><td><code>LD5</code></td><td><span class="status-pass">PASS</span></td><td>the other 48 skills split 88 pieces → 1.83 each (≥1 required by D20)</td></tr></tbody></table></div></section><section><h2>timeline cage · tools/timeline.ts <span class="ok">PASS</span></h2><pre class="code">3/3 gate PASS · 0 block(s) not current · 0 FAIL</pre><div class="tw"><table class=""><thead><tr><th>id</th><th>status</th><th>detail</th></tr></thead><tbody><tr><td><code>TL1</code></td><td><span class="status-pass">PASS</span></td><td>cumulative hours match every E1-E5 checkpoint within ±0.5 hr (L10 0.42/0.5 · L30 2.94/3.1 · L60 12.43/12.6 · L90 31.19/31.2 · L100 40.23/40.2)</td></tr><tr><td><code>TL2</code></td><td><span class="status-pass">PASS</span></td><td>derived game length 40.2 hr vs the 40.2 hr checkpoint</td></tr><tr><td><code>TL3</code></td><td><span class="status-pass">PASS</span></td><td>xp to clear each 5-level step is strictly increasing (6,600 → 10,901,700)</td></tr></tbody></table></div></section><section><h2>doc lint · tools/lint.ts <span class="ok">PASS</span></h2><pre class="code">8/8 lint PASS · 0 FAIL</pre><div class="tw"><table class=""><thead><tr><th>id</th><th>status</th><th>detail</th></tr></thead><tbody><tr><td><code>L1</code></td><td><span class="status-pass">PASS</span></td><td>every import resolves to a real file</td></tr><tr><td><code>L2</code></td><td><span class="status-pass">PASS</span></td><td>every `file.md` reference resolves</td></tr><tr><td><code>L3</code></td><td><span class="status-pass">PASS</span></td><td>every `file.md:line` citation is inside its file</td></tr><tr><td><code>L4</code></td><td><span class="status-pass">PASS</span></td><td>no deprecated term outside its allow-list (6 tracked)</td></tr><tr><td><code>L5</code></td><td><span class="status-pass">PASS</span></td><td>every skill-count heading matches skills.json</td></tr><tr><td><code>L6</code></td><td><span class="status-pass">PASS</span></td><td>every generated block has a balanced marker pair</td></tr><tr><td><code>L7</code></td><td><span class="status-pass">PASS</span></td><td>roster docs do not restate a generated skill/aura value outside markers</td></tr><tr><td><code>L8</code></td><td><span class="status-pass">PASS</span></td><td>the abbreviation set is closed and 1:1 (15 rows)</td></tr></tbody></table></div></section>
+<section><h2>Generated blocks on disk</h2><p class="hint">Between the markers in these files there is nothing but tool output.</p></section>
+<div class="tw"><table class=""><thead><tr><th>file</th><th>block</th><th>owner</th><th>lines</th></tr></thead><tbody><tr><td><a href="doc-checks.html">checks.md</a></td><td><code>group-A</code></td><td><a href="../tools/check.ts">tools/check.ts</a></td><td>11</td></tr><tr><td><a href="doc-checks.html">checks.md</a></td><td><code>group-B</code></td><td><a href="../tools/check.ts">tools/check.ts</a></td><td>23</td></tr><tr><td><a href="doc-checks.html">checks.md</a></td><td><code>group-C</code></td><td><a href="../tools/check.ts">tools/check.ts</a></td><td>17</td></tr><tr><td><a href="doc-checks.html">checks.md</a></td><td><code>group-F</code></td><td><a href="../tools/check.ts">tools/check.ts</a></td><td>28</td></tr><tr><td><a href="doc-checks.html">checks.md</a></td><td><code>group-T</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>37</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>reach-table</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>7</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>push-table</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>6</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>mob-status</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>10</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>build-defs</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>6</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>survival-mob</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>8</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>survival-group</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>8</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>survival-elite</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>8</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>survival-boss</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>8</td></tr><tr><td><a href="doc-combat.html">combat.md</a></td><td><code>survival-boss-zones</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>40</td></tr><tr><td><a href="doc-concept.html">concept.md</a></td><td><code>opening</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>10</td></tr><tr><td><a href="doc-crafting.html">crafting.md</a></td><td><code>craft-set</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>13</td></tr><tr><td><a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a></td><td><code>slot-pools</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>59</td></tr><tr><td><a href="doc-farm.html">farm.md</a></td><td><code>farm-model</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>9</td></tr><tr><td><a href="doc-farm.html">farm.md</a></td><td><code>potion-table</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>11</td></tr><tr><td><a href="doc-loot.html">loot.md</a></td><td><code>loot-bands</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>6</td></tr><tr><td><a href="doc-loot.html">loot.md</a></td><td><code>loot-sim</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>35</td></tr><tr><td><a href="doc-mob-roster.html">mob-roster.md</a></td><td><code>zone-cast</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>11</td></tr><tr><td><a href="doc-mob-roster.html">mob-roster.md</a></td><td><code>mob-roster</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>124</td></tr><tr><td><a href="doc-skill-pool-attack.html">skill-pool-attack.md</a></td><td><code>attack-heading</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>1</td></tr><tr><td><a href="doc-skill-pool-attack.html">skill-pool-attack.md</a></td><td><code>attack-roster</code></td><td><a href="../tools/skills.ts">tools/skills.ts</a></td><td>24</td></tr><tr><td><a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></td><td><code>heal-heading</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>1</td></tr><tr><td><a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></td><td><code>heal-roster</code></td><td><a href="../tools/skills.ts">tools/skills.ts</a></td><td>5</td></tr><tr><td><a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></td><td><code>aura-heading</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>1</td></tr><tr><td><a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></td><td><code>aura-roster</code></td><td><a href="../tools/skills.ts">tools/skills.ts</a></td><td>15</td></tr><tr><td><a href="doc-skill-pool-curse.html">skill-pool-curse.md</a></td><td><code>curse-heading</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>1</td></tr><tr><td><a href="doc-skill-pool-curse.html">skill-pool-curse.md</a></td><td><code>curse-roster</code></td><td><a href="../tools/skills.ts">tools/skills.ts</a></td><td>13</td></tr><tr><td><a href="doc-skill-pool-system.html">skill-pool-system.md</a></td><td><code>aoe-rules</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>6</td></tr><tr><td><a href="doc-skill-pool-system.html">skill-pool-system.md</a></td><td><code>ladder-math</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>8</td></tr><tr><td><a href="doc-skill-pool-system.html">skill-pool-system.md</a></td><td><code>skill-drop</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>7</td></tr><tr><td><a href="doc-skill-pool.html">skill-pool.md</a></td><td><code>skill-count</code></td><td><a href="../tools/skills.ts">tools/skills.ts</a></td><td>12</td></tr><tr><td><a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a></td><td><code>keystone-original</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>2</td></tr><tr><td><a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a></td><td><code>keystone-new</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>8</td></tr><tr><td><a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a></td><td><code>keystone-pairs</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>2</td></tr><tr><td><a href="doc-skill-tree.html">skill-tree.md</a></td><td><code>tree-summary</code></td><td><a href="../tools/tree.ts">tools/tree.ts</a></td><td>5</td></tr><tr><td><a href="doc-skill-tree.html">skill-tree.md</a></td><td><code>tree-layout</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>4</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>price-unit</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>12</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>supply</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>10</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>one-time</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>22</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>repeatable</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>14</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>npc-matrix</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>25</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>stock</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>12</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>standing</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>17</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>collector</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>6</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>base-bias</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>11</td></tr><tr><td><a href="doc-towns-stalls.html">towns-stalls.md</a></td><td><code>pending</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>5</td></tr><tr><td><a href="doc-towns.html">towns.md</a></td><td><code>road-rules</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>13</td></tr><tr><td><a href="doc-world.html">world.md</a></td><td><code>zone-table</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>13</td></tr><tr><td><a href="doc-world.html">world.md</a></td><td><code>xp-formula</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>5</td></tr><tr><td><a href="doc-world.html">world.md</a></td><td><code>xp-table</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>24</td></tr><tr><td><a href="doc-world.html">world.md</a></td><td><code>mob-curve</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>6</td></tr><tr><td><a href="doc-world.html">world.md</a></td><td><code>mob-sheet</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>25</td></tr><tr><td><a href="doc-world.html">world.md</a></td><td><code>mob-stats</code></td><td><a href="../tools/town.ts">tools/town.ts</a></td><td>19</td></tr></tbody></table></div>
+<section><h2>Raw cage output</h2><p><button type="button" data-toggle="raw-0">tools/check.ts --checks</button></p><pre class="code hide" id="raw-0">X1   PASS     single-stat ceiling = 510 — every K value is set on this number (H5 · A3 · D-114)
+X2   PASS     Flat/% forced to different stats would give 510 — the doc line that forbids reverting A3
+X3   PASS     mana pool ÷ regen = 40.6 sec against the 40 sec intent (B5 · K_INT_MREGEN)
+X4   PASS     kill rates derived from group size + spawn time within 1%: 982/980 low · 1385/1385 mid · 1800/1800 high
+X5   PASS     F3 = F1 × F2 for all four rows: 133 low · 255 mid · 418 high · 878 full Lck
+X6   PASS     junk = drops − upgrades everywhere, so gold and stones share one ceiling (G2 · G8)
+X7   PASS     full-Lck junk line ×2.11 — the bound G8 and towns-stalls T7 quote
+X8   PASS     stone flow: elite 18 + boss 12 = 30 tier stones/hr · 415 junk ÷ 8 = 52 Reroll uses/hr (F6 · F7)
+X9   PASS     Refine full set = 24 casts ÷ 3.8/hr = 6.4 hr, and checks.md E6 prints 6.4 hr — Tier belongs to the piece (D-033), so a cast moves the whole item one step
+X10  PASS     full-set polish = 1.92 hr (E8 · the opportunity cost one gold is priced against)
+X11  PASS     proven-reachable caps: alignment 35.5 ≥ 35 · elem res 48.4 ≥ 45 · cdr 57.4 ≥ 55
+X12  PASS     crit has no Cap (the 100 Cap became a spill point): stats alone = 33.5% &lt; 100, so overflow is 0.0 today and only buffs/skills can push past it (C9 · formula-offense.md)
+X13  PASS     aspd Cap 500 (= 5 times/sec, the 0.2 sec floor) is out of reach for every weapon at the Agi ceiling: dagger 845 · one-handed sword / axe 1,179 · bow / crossbow 1,330 · mace / wand / rod 1,512 · staff / spear 1,865 · two-handed sword / axe 2,369 vs ceiling 510 — the Cap is a clock rule, not a build target, and K_AGI_ASPD stays at 0.25 so no weapon crowds it
+X14  PASS     weapon_mult = 1.2 ÷ weapon_aspd for all 6 rows (D10 · equal DPS across 12 types)
+X15  PASS     24 Mod maxima read out of `mods.json` and equal the engine — the data owns the number, mod-pool.md only prints it (D-113)
+X16  PASS     Base drop 8%/kill · drop_rate = 1 + Lck×0.01 (formula-utility.md section 10 · nothing else mints items)
+X19  PASS     15 species × 4 body classes · every stat vector averages 1.00 (mob_HP still derives from player DPS) · accuracy spans ×0.05-×1.00, so the Evasion Cap 80 costs a full Dex+Agi pair against the ceiling (X20)
+X20  PASS     Evasion Cap 80 is reachable against the accuracy floor (Husk accuracy ×0.05 → 80.0% at Dex+Agi 510) and is NOT free against the ceiling (Wolf accuracy ×1 → 66.3% maxed, 51.3% at a Dex/Agi 360 build) — a maxed build caps against anything, so what X20 now proves is that the Cap costs the whole Dex+Agi pair rather than being reachable by accident
+X21  PASS     mob evasion = stat_c × species.dex × K_EVASION 0.5 × body · reference (mean species, Medium body) 99.5 at level 100 vs the retired level×1 curve 100, so the published hit anchors hold (80% no-Dex · 90.6% at the accuracy ceiling) · species spread 77-131 keeps a 0-item player at 75.0-83.7% hit · a Full-Dex player still eats 55.3% of the top accuracy tier before Evasion
+X22  PASS     armour = Str × 2 both sides · reduction = armour ÷ (armour + 5 × raw physical) · Str 510 = 1,020 armour cuts the zone-9 boss physical hit 7.7% and a zone-9 trash hit 57.3% · the hardest mob armour (578 · Golem at 80) costs a max physical hit only 3.7%
+X23  PASS     120 roster rows from 15 species × 3 body classes + 28 Elite + 9 named bosses · every zone 6+ entries and exactly one boss · every species Element bias exists in a zone it actually lives in · zone entry counts 1:6 2:10 3:14 4:14 5:12 6:14 7:16 8:19 9:15
+X24  PASS     mob dodge runs 4.6-10.5% against a same-level attacker — it must stay a thin layer (2-25%) so a mob's own Agi never becomes the answer to a build
+X25  PASS     Energy Shield = Int × 4 (2,040 at the ceiling) · recharges Int × 0.1/sec (51.0) after 5 sec without a hit · full pool in 40.0 sec · exactly 24.1% of the same Int build's 8,460 HP · **player-only** so mob_HP stays the single survivability anchor
+X26  PASS     zone identity has one source — towns.md section 4 (9 settlement rows: name · level range · innate Element) and loot.md section 2 (3 quality bands: level range · group average) both read back equal to engine.json mob.zones · this is the map↔resource↔mob seam that previously had no guard
+X27  PASS     mob damage is derived from mob HP, not typed beside it — checks.md D1's 6 HP anchors invert through the skill multiplier ÷ 27 to exactly D2's damage anchors (L30 61 · L60 163 · L90 304 · L100 329), every zone edge in engine.json equals the D1 row, and world.md's generated 11-point curve (levels 1 · 10 · 20 · 30 · 40 · 50 · 60 · 70 · 80 · 90 · 100) agrees with itself
+X37  PASS     mob_HP(L) is anchored at every zone edge and linearly interpolated inside a zone, so every level 1-100 has a value (120 → 11,901, strictly rising) · mob_PS(L) is `typical_gear_DPS(L) ÷ 27` off the same line · the D1 anchors (1 · 10 · 30 · 60 · 90 · 100) read back equal
+X28  PASS     every Cap has one home — core-stats.md's 5 capped lines and 3 &quot;no Cap&quot; lines equal engine.json caps exactly (aspd=500 · evasion=80 · perfect_dodge=21 · cdr=55 · alignment=35 · elem_res=45) · this is the guard that would have caught the CDR 50 → 45 move
+X42  PASS     one Upgrade step is 2, so a full ladder is 30 — exactly the smallest school ceiling (30, Evasion flat) and Armour flat 75% · Evasion flat 100% · Energy Shield flat 50% of theirs (item-base.md sets the school · checks.md H1 pays for the uplift through SV7, not through mob_HP, which D-103 measured as already inside the pacing)
+X41  PASS     Quality 204/hr · Repair 22/hr · Corrupt 1/hr — a full +15 set is 11.2 hr against Ascend's 15.4 hr and one gamble costs about an hour, while the flow the prices were set against still reads junk 415/hr (F5) and tier stones 30/hr (F7)
+X30  PASS     Ascend is priced by the engine at 0.78/hr, so a full 12-piece set takes 15.4 hr — inside the ~15 hr the design sells (E7 · concept.md). Add stones (6.25/hr) are the binding cost at 8 per Ascend, not tier stones (30/hr would allow 3.75)
+X31  PASS     every species damage tag resolves to a real split (physical 10 · magic 2 · mixed 3) · physical is the whole armour-able half (Knight · Golem · Troll answered by Armour and chill), magic is the whole res-able half (Slime · Seraph only reachable through res), mixed keeps the old 50/50
+X32  PASS     every zone's body mix averages exactly the published mob_HP(90) anchor (spawn weights Small 3 · Medium 2 · Large 1) · Large entries run 195% of the anchor and Small 60%, so body class changes what a fight feels like without touching kills/hour, drops/hour, stone flow or the timeline
+X33  PASS     reach is the whole positional model (no tiles, no movement): 13 weapons mapped to 3 bands · 15 species all carry a line (12 front · 3 stand-off) · stand-off lineages start in zone 7, so zones 1-6 cost a melee build nothing and the worst case is 8.7% of the cycle in zone 9 (the 12% ceiling)
+X34  PASS     adventure bag 50 slots (kept gear only) fills in ~16.7 hr at the high band's measured 3 upgrades/hr · character bag 30 slots holds consumables (stone 999/slot = 2.4 hr of value stones, herb/potion 100/slot) with gold taking no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + craft are Settlement-only (loot.md §4 · D-056)
+X39  PASS     mob junk is gold's primary mint: 15 species items over 3 rarities (common 1g · uncommon 5g · rare 25g) · each rarity's chance = the line / its sell, so expected gold is 0.23/kill for any species and the junk line stays 415/hr · stacks 999/slot, weightless
+X40  PASS     the AoE rule is data: 60% per target · Cap 3 · mana ×1.5 → damage per mana 0.40× / 0.80× / 1.20×, so AoE loses at 1 target and wins at the Cap (skill-pool-system.md)
+X36  PASS     Road is a closed design: 8 chain links over consecutive settlements only · 5 min per trip × 1 encounter/min · weights ambush 60% · caravan 25% · pedlar 15% with mobs + resolve + win + loss on each · purse capped at 24 gold/day = 1.0% of a 6-hour junk mint · Standing 15 kill-equivalents against the 81.7 kills a trip costs · no stones, never AFK
+X17  PASS     accuracy has no Cap (the 2,000 Cap was removed) · the ratio formula limits itself at 90.6%
+OP1  PASS     the opening settlement &quot;Eastgate&quot; is a real zone (zone 1, levels 1-10)
+OP0  PASS     the starting weapon &quot;one-handed sword&quot; resolves to one-handed sword / axe (1.2 hits/sec)
+OP2  PASS     the starting weapon gives +15 physical, and the worst low-quality Tier is 15-21 — so it is the floor of the table, not a gift. A level-1 mob dies in 1.3 sec
+OP3  PASS     a level-1 character survives 378 sec against a zone-1 mob — the opening cannot kill the player
+OP4  PASS     no starting skill — the mob curve gives a level-1 character 0.3% skill power, so a free skill would be power outside the priced curve
+OP5  PASS     the opening hands over no currency, so minute one cannot buy past a gate the design has not opened
+OP6  PASS     the opening weapon weighs 35 against a 1,024 level-1 capacity, so section 11 takes 0.0% of aspd — the lightest main hand in the table (25) fits under the weight_base line, so the opening character carries it untaxed (harness/todo.md A12 closed)
+MP1  PASS     every mod range covers its Total exactly — no gap, overlap or mixed Tier count
+MP2  PASS     31 unique mod ids · 0 pending line(s) (none)
+MP3  PENDING  every mod splits its 3 quality bands within x1.35 · SKEWED: Accuracy % 8/9/4 x2.25 · Attack speed % 8/9/4 x2.25 · Critical chance % 3/2/3 x1.50 · Cooldown reduction % 8/9/4 x2.25 · Life Regeneration flat 8/10/12 x1.50 · Mana Regeneration flat 8/10/12 x1.50 · Max Mana flat 26/45/50 x1.92 · Elemental alignment % 2/2/1 x2.00
+X18  PASS     Mod matrix holds 26 named lines, all of them real Mod lines · 10 Offensive lines stay on weapons only · Gear Mod stays on the 5 armour slots · Stat Mod on all 11 slots
+L9   PASS     prose carries no numbers: 1349 line(s) still do, cap 1349 (under by 0) · first: AGENT.md:5, AGENT.md:9, AGENT.md:12, AGENT.md:19, AGENT.md:22, AGENT.md:39
+RB   PASS     loot.md F5 junk line [0] — doc 415 · engine 415
+RB   PASS     crafting.md junk/hour → Reroll uses [0] — doc 415 · engine 415
+RB   PASS     crafting.md junk/hour → Reroll uses [1] — doc 52 · engine 52
+RB   PASS     crafting.md tier stones → Refines/hour [0] — doc 30 · engine 30
+RB   PASS     crafting.md tier stones → Refines/hour [1] — doc 3.75 · engine 3.75
+RB   PASS     crafting.md Refine full-set hours [0] — doc 24 · engine 24
+RB   PASS     crafting.md Refine full-set hours [1] — doc 6.4 · engine 6.4
+RB   PASS     formula.md single-stat ceiling [0] — doc 510 · engine 510
+RB   PASS     formula.md stat at level 100 no gear [0] — doc 210 · engine 210
+RB   PASS     formula.md Str 12 physical power [0] — doc 3051 · engine 3051
+RB   PASS     formula.md K_AGI_ASPD [0] — doc 0.25 · engine 0.25
+RB   PASS     formula.md K_INT_MREGEN [0] — doc 0.18 · engine 0.18
+RB   PASS     formula-utility.md dagger Cap Agi [0] — doc 845 · engine 845
+RB   PASS     formula-utility.md sword Cap Agi [0] — doc 1179 · engine 1179
+RB   PASS     formula-defense.md CDR path to Cap (11 items) [0] — doc 15.3 · engine 15.3
+RB   PASS     formula-defense.md CDR path to Cap (11 items) [1] — doc 3.75 · engine 3.75
+RB   PASS     formula-defense.md CDR path to Cap (11 items) [2] — doc 57.4 · engine 57.4
+RB   PASS     formula-utility.md accuracy ceiling [0] — doc 956 · engine 956
+RB   PASS     formula.md K_EVASION row [0] — doc 0.5 · engine 0.5
+RB   PASS     core-stats.md Evasion K [0] — doc 0.5 · engine 0.5
+RB   PASS     core-stats.md Armour K and divisor [0] — doc 2 · engine 2
+RB   PASS     core-stats.md Armour K and divisor [1] — doc 5 · engine 5
+RB   PASS     core-stats.md Energy Shield line [0] — doc 4 · engine 4
+RB   PASS     core-stats.md Energy Shield line [1] — doc 5 · engine 5
+RB   PASS     combat.md ES recharge delay [0] — doc 5 · engine 5
+RB   PASS     crafting.md ES recharge delay [0] — doc 5 · engine 5
+RB   PASS     concept.md zone-9 boss HP [0] — doc 160635 · engine 160635
+RB   PASS     formula-utility.md weight capacity [0] — doc 2020 · engine 2020
+RB   PASS     formula-utility.md drop multiplier [0] — doc 6.1 · engine 6.1
+RB   PASS     formula-defense.md level_gain_hp [0] — doc 3960 · engine 3960
+RB   PASS     formula-defense.md pool ÷ regen [0] — doc 3724 · engine 3724
+RB   PASS     formula-defense.md pool ÷ regen [1] — doc 40.6 · engine 40.6
+RB   PASS     core-stats.md Evasion Cap [0] — doc 80 · engine 80
+RB   PASS     core-stats.md aspd Cap [0] — doc 500 · engine 500
+RB   PASS     core-stats.md res Cap [0] — doc 45 · engine 45
+RB   PASS     core-stats.md perfect dodge Cap [0] — doc 21 · engine 21
+RB   PASS     checks.md F2 L90 drop chance [0] — doc 23.2 · engine 23.2
+RB   PASS     loot.md §2 low kills/hr — doc 980 · engine 980
+RB   PASS     loot.md §2 low drops/hr — doc 133 · engine 133
+RB   PASS     loot.md §2 low Lck at that level — doc 70 · engine 70
+RB   PASS     loot.md §2 low Lck multiplier — doc 1.7 · engine 1.7
+RB   PASS     loot.md §2 mid kills/hr — doc 1385 · engine 1385
+RB   PASS     loot.md §2 mid drops/hr — doc 255 · engine 255
+RB   PASS     loot.md §2 mid Lck at that level — doc 130 · engine 130
+RB   PASS     loot.md §2 mid Lck multiplier — doc 2.3 · engine 2.3
+RB   PASS     loot.md §2 high kills/hr — doc 1800 · engine 1800
+RB   PASS     loot.md §2 high drops/hr — doc 418 · engine 418
+RB   PASS     loot.md §2 high Lck at that level — doc 190 · engine 190
+RB   PASS     loot.md §2 high Lck multiplier — doc 2.9 · engine 2.9
+RB   PASS     loot.md §2 high_full_lck kills/hr — doc 1800 · engine 1800
+RB   PASS     loot.md §2 high_full_lck drops/hr — doc 878 · engine 878
+RB   PASS     loot.md §2 high_full_lck Lck at that level — doc 510 · engine 510
+RB   PASS     loot.md §2 high_full_lck Lck multiplier — doc 6.1 · engine 6.1
+
+template leaks: none · every generated cell holds a number or a word
+doc blocks: checks.md groups group-A · group-B · group-C · group-F match the engine
+
+103/103 PASS · 0 FAIL
+</pre><p><button type="button" data-toggle="raw-1">tools/town.ts --checks</button></p><pre class="code hide" id="raw-1">T3a   PASS     band hours 3.1 / 9.5 / 18.6 / 9 = E1-E5 deltas
+T3b   PASS     Σ 9 settlement budgets = 40.2 hr = 40.2 hr timeline
+T2    PASS     gold per 1 m rises with the band: 2.2 &lt; 4.2 &lt; 6.9
+T7    PASS     full-Lck junk ×2.11 against the ×2.11 ceiling
+T3    PASS     lifetime supply 14,242 gold
+T4    PASS     one-time demand 18,664 = 1.31× supply (limit 1.50×)
+T5    PASS     essentials 1,951 = 13.7% of supply (limit 20%)
+T8    PASS     26 lines, all tagged space/time/information/appearance
+T9    PASS     Road link 20 m ≤ 20 m · 8 links = 8 non-start settlements · 754 gold total
+T10   PASS     repair 14 m / 12 m &gt; 3.33 m per Reroll tier stone (F7 elite 18/hr)
+T10b  PASS     with F9 landed, repair 14 m / 12 m &gt; 9.60 m per Add mod stone (F9 6.25/hr) — the same floor still holds against the stone Ascend needs, so the Add rate never makes repair a bad deal
+T11   PASS     skip token 8 m × 3/day = 24 m/day (caps 24 m)
+T12   PASS     3 tiers × 9 settlements = 27 thresholds, all from F1 kills/hr and monotonic
+T13   PASS     Tier III = 140% of budget &gt; 100% on all 9 → a chase, not a formality
+T12b  PASS     Standing grants only vendor stock lines · Collector set slots · map knowledge · saved filter presets · titles and never any stat · any Mod value · any stone · anything mob_HP reads
+T14   PASS     3 sets, 3 schools (light/heavy/cloth), 0 gold paid
+T15   PASS     status decided (even-weighted) · 0 numeric weights in data · 3 guards — any weight added here would break the ruling
+T16   PASS     4 ladders monotonic: stash_tab 60-300 m · herb_pouch 60-240 m · plot_deed 180-540 m · house 120-360 m
+T17   PASS     F1 980 / 1385 / 1800 kills/hr copied from loot.md section 2 · this tool changes no kill rate
+T18   PASS     checks.md F1 undefined · F3 undefined · F5 undefined and loot.md section 2 rows all equal the data engine
+T-R   PASS     9 rosters match the presence rules · Collector in Ashfall/Bonegate/Vermolch · pedlar in Highspire/Vermolch
+T-S   PASS     every stock line resolves to a priced line (or a Collector set) sold by an NPC actually present
+
+template leaks: none · every generated cell holds a number or a word
+doc blocks: all generated tables in towns-stalls.md + checks.md match this data
+
+22/22 PASS · 0 PENDING · 0 FAIL
+</pre><p><button type="button" data-toggle="raw-2">tools/skills.ts --checks</button></p><pre class="code hide" id="raw-2">S1   PASS   unique skill ids (52 records)
+S2   PASS   unique skill names
+S3   PASS   every skill has a known type (attack · buff · curse · heal · aura)
+S4   PASS   every attack skill names a weapon group or &quot;all&quot;
+S5   PASS   every Element has an attack skill (physical · fire · cold · lightning · poison · chaos)
+S6   PASS   every weapon group has at least 4 attack skills (melee 6 · ranged 4 · magic 6)
+S7   PASS   no skill effect references mob armour or mob mana
+S8   PASS   every aura reserve is a known tier or null (TBD)
+S9   PASS   the full aura set reserves 157% of the pool against the 100% block — the set can never all run at once, so the player must choose (informational)
+S10  PASS   skill level is earned per kill (1 XP) at 400 XP a step to Cap 20 = **1.28** · 7,600 kills to max = low 7.8 hr · mid 5.5 hr · high 4.2 hr · every aura carries a reserve tier
+S11  PASS   44 of 52 rows carry numeric effects (18 of them target-side), and each value is printed in its own effect sentence
+S12  PASS   8 rows state a mechanic rather than a magnitude (8 carry a rule word, 3 more are carried whole by another column) — every one of them is spent in the client, so no row is left as prose (informational)
+S13  PASS   18 attack rows press off a basis and a stated percentage · reference bases: glass phys 3,051 · caster magic 3,265 (magic 3,051 + elem 2,040 × align 10.5%)
+S14  PASS   52 rows all state their strength as effects, a mechanic word from the closed set (8 with a rule, 3 carried by another column)
+
+PASS   block skill-count · skill-pool.md (current)
+PASS   block attack-heading · skill-pool-attack.md (current)
+PASS   block attack-roster · skill-pool-attack.md (current)
+PASS   block curse-heading · skill-pool-curse.md (current)
+PASS   block curse-roster · skill-pool-curse.md (current)
+PASS   block buff-heading · skill-pool-buff.md (current)
+PASS   block buff-roster · skill-pool-buff.md (current)
+PASS   block heal-heading · skill-pool-aura-heal.md (current)
+PASS   block heal-roster · skill-pool-aura-heal.md (current)
+PASS   block aura-heading · skill-pool-aura-heal.md (current)
+PASS   block aura-roster · skill-pool-aura-heal.md (current)
+
+14/14 gate PASS · 0 block(s) not current · 0 FAIL
+</pre><p><button type="button" data-toggle="raw-3">tools/tree.ts --checks</button></p><pre class="code hide" id="raw-3">T1   PASS     unique keystone ids (0 keystones)
+T2   PASS     every keystone pair names a real keystone
+T3   PASS     every keystone names a real branch
+T7   PASS     legal tree band is x1.00 (worst ) to x1.00 (best ), so the x1.85 mob_HP baseline sits inside it
+T8   PASS     every keystone carries the rule and the worked calculation its table prints
+T4   PASS     parsed node/limb counts match every declared header
+T5   PASS     every &quot;Enables&quot; cell resolves to a real skill or keystone
+T6   PASS     the tree is buildable from the tables: 3 branches × 5 limbs × ≥4 nodes = 0 minors, and tier = position within its own limb (hub → branch gateway → limb gateway → node 1..N)
+
+PASS   block tree-summary · skill-tree.md (current)
+PASS   block tree-layout · skill-tree.md (current)
+PASS   block keystone-original · skill-tree-keystone.md (current)
+PASS   block keystone-new · skill-tree-keystone.md (current)
+PASS   block keystone-pairs · skill-tree-keystone.md (current)
+
+8/8 gate PASS · 0 block(s) not current · 0 FAIL
+</pre><p><button type="button" data-toggle="raw-4">tools/ladder.ts --checks</button></p><pre class="code hide" id="raw-4">LD1   PASS   ladder reaches −30% at step 6 for 12 duplicates total
+LD2   PASS   cooldown reduction is strictly increasing per step
+LD3   PASS   roster 52 ÷ 9 zones = 5.8 skills per zone pool
+LD4   PASS   4 maxed targets = 96 pieces = 52% of the 184-piece funnel = 20.9 hr
+LD5   PASS   the other 48 skills split 88 pieces → 1.83 each (≥1 required by D20)
+
+PASS   block ladder-math · skill-pool-system.md (current)
+
+5/5 gate PASS · 0 block(s) not current · 0 FAIL
+</pre><p><button type="button" data-toggle="raw-5">tools/timeline.ts --checks</button></p><pre class="code hide" id="raw-5">TL1   PASS   cumulative hours match every E1-E5 checkpoint within ±0.5 hr (L10 0.42/0.5 · L30 2.94/3.1 · L60 12.43/12.6 · L90 31.19/31.2 · L100 40.23/40.2)
+TL2   PASS   derived game length 40.2 hr vs the 40.2 hr checkpoint
+TL3   PASS   xp to clear each 5-level step is strictly increasing (6,600 → 10,901,700)
+
+PASS   block xp-formula · world.md (current)
+PASS   block xp-table · world.md (current)
+
+3/3 gate PASS · 0 block(s) not current · 0 FAIL
+</pre><p><button type="button" data-toggle="raw-6">tools/lint.ts --checks</button></p><pre class="code hide" id="raw-6">L1   PASS     every import resolves to a real file
+L2   PASS     every `file.md` reference resolves
+L3   PASS     every `file.md:line` citation is inside its file
+L4   PASS     no deprecated term outside its allow-list (6 tracked)
+L5   PASS     every skill-count heading matches skills.json
+L6   PASS     every generated block has a balanced marker pair
+L7   PASS     roster docs do not restate a generated skill/aura value outside markers
+L8   PASS     the abbreviation set is closed and 1:1 (15 rows)
+
+8/8 lint PASS · 0 FAIL
+</pre></section>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

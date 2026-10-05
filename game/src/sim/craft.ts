@@ -1,5 +1,5 @@
 import { E, loot, MODS, BASES } from '../engine/client';
-import { createCraft, QUALITY_STEPS } from '../../../engine/craft.js';
+import { createCraft, QUALITY_STEPS } from '../../../engine/craft.ts';
 import { mark as markSnapshot } from './snapshot';
 import type { GameState, Item } from './types';
 
@@ -13,26 +13,14 @@ export type CraftOp = 'reroll' | 'refine' | 'randomize' | 'ascend' | 'remove' | 
 export type Where = 'gear' | 'bag';
 
 /**
- * The Base pool a piece may draw from: the frame's Primary/Secondary lines (plus its Gear Mod for
- * the five armour slots that carry one) for a body piece, the weapon union pool for a hand.
+ * The pool a piece may draw from on lines 2-7 (item-base.md · D-123): the slot's union of Bases plus
+ * the lines the slot adds on its own. One list for the whole piece — `loot.poolFor` owns it, so the
+ * bench and the drop roll cannot disagree about what a Base may carry.
  */
 export function poolOf(item: Item): string[] {
-  const frame = BASES.bases.find((b: any) => b.name === item.base && b.slot === item.slot);
-  if (frame) {
-    const pool = [...frame.primary, ...frame.secondary];
-    if (frame.school && loot.GEAR_MOD_SLOTS.includes(frame.slot)) pool.push(frame.school);
-    pool.push('stat_mod_flat');
-    return pool;
-  }
-  const weapon = BASES.weapons.find((w: any) => item.base.includes(w.name));
-  if (weapon) {
-    const wp = BASES.weapon_pools['main hand'];
-    const physical = weapon.damage !== 'magic';
-    const primary = physical ? wp.Primary : ['magic_power_flat', 'magic_power', 'critical_chance', 'critical_damage'];
-    return [...primary, ...wp.Secondary, 'elemental_power_flat', 'stat_mod_flat'];
-  }
-  const offhand = BASES.weapon_pools['off hand'][item.base === 'shield' ? 'Shield' : item.base === 'book' ? 'Book' : 'Shield'];
-  return [...(offhand || []), 'stat_mod_flat'];
+  const frame = BASES.bases.find((b: any) => b.name === item.base && b.slot === item.slot) || null;
+  const weapon = frame ? null : BASES.weapons.find((w: any) => item.base === w.name) || null;
+  return loot.poolFor(BASES, item.slot, frame, weapon).map((e: any) => e.id);
 }
 
 export interface CraftResult { ok: boolean; why?: string; item?: Item; note?: string }

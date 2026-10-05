@@ -9,7 +9,7 @@ import type { Item } from '../src/sim/types';
  *
  * Before this only the two types `mod-pool.md` named carried any weight, so every other weapon read
  * as weightless — the encumbrance tax missed exactly the builds it exists to bite (a two-handed axe
- * costs more to lift than a wand). The column lives in `equipment-weapon.md`, `tools/bases.js` imports
+ * costs more to lift than a wand). The column lives in `equipment-weapon.md`, `tools/bases.ts` imports
  * it into `bases.json`, and the client reads it from there, so nothing below is a second copy.
  */
 
@@ -39,7 +39,7 @@ describe('the held weapon weighs its type', () => {
       expect(weaponWeightOf(w.name)).toBe(w.weight);
       expect(w.weight).toBeGreaterThan(0);
     }
-    expect(weaponWeightOf('wand')).toBe(weaponWeightOf('rod'));
+    expect(weaponWeightOf('wand')).toBe(Math.min(...(BASES.weapons as any[]).map((w) => w.weight)));
     expect(weaponWeightOf('two-handed axe')).toBeGreaterThan(weaponWeightOf('two-handed sword'));
     expect(weaponWeightOf('two-handed sword')).toBeGreaterThan(weaponWeightOf('mace'));
   });

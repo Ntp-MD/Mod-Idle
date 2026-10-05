@@ -1,5 +1,5 @@
 import { E } from '../engine/client';
-import { createFarm } from '../../../engine/farm.js';
+import { createFarm } from '../../../engine/farm.ts';
 import type { GameState } from './types';
 import type { Character } from './player';
 import { addTo, fits } from './slots';

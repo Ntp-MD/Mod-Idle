@@ -13,5 +13,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    // The tests load the cages (tools/lib/engine.ts → engine/*.ts) through `createRequire`, so each
+    // worker needs Node's native type stripping. execArgv is passed to every spawned worker process.
+    poolOptions: {
+      forks: { execArgv: ['--experimental-strip-types', '--disable-warning=ExperimentalWarning'] },
+    },
   },
 });

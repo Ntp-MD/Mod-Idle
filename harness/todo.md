@@ -1,53 +1,53 @@
-า# Todo
+# Todo
 
 import AGENT.md
 import harness/HARNESS.md
 import checks.md
 import harness/decisions.md
 
-Work list, split by **who can close it**. Nothing here restates a number — every line points at the file that owns it, so a decision lands in one home (`checks.md` holds the promises, `harness/decisions.md` records what was already ruled and why).
+The **single work file**: only what is *not built yet*. Nothing here restates a number — every line
+points at the file that owns it, so a decision lands in one home (`checks.md` holds the promises,
+`harness/decisions.md` records what was already ruled and why). **When work is done the line is
+deleted, not ticked.** Open items are split by who can close them: **A** waiting on the owner ·
+**B** mine to build · **C** housekeeping that must not rot.
 
-`node tools/verify.js` green is the state of everything already built; this file is only what is *not* built. **Do not copy the cage results in here** — `verify.js` prints them live and a typed copy goes stale.
+`node tools/verify.ts` green is the state of everything already built; this file is only what is *not*
+built. **Do not copy the cage results in here** — `verify.ts` prints them live and a typed copy goes stale.
 
-# What this repo is
+# Open work
 
-Building now, first slice running. An idle loot game (Melvor-style: a combat core loop plus one Farming life skill): 9 zones × 10 levels, 12 item slots, the skill roster, 5 Elements, no death (Push instead). **The mob side is finished** — 15 species × 4 body classes across the 9 zones with Elite and 9 named bosses = 120 generated entries in `mob-roster.md`, each stat block resolved. All content is `.md`; every number is driven by JSON under `tools/data/` and projected into the docs by a writer. The client (`game/`) and the cages both call `engine/`, so no formula has a second home.
+## A · waiting on the owner
 
-**Git is replace-all only** (`AGENT.md` §6): pull = `git fetch` + `git reset --hard`, push = `--force-with-lease`. Never merge.
+- **World scale — 18 zones · 180 levels** (`owner/travel-route-combat.md` sections 9-10). The four travel
+  deltas shipped (D-133 · D-134); this one did **not**. It is a numeric-base rebalance, not a travel feature: it
+  replaces the hand-typed zone-edge anchors with a derived curve, so `mob_HP` and everything measured off it move —
+  the X37 anchors, `world.md`, the loot bands, the town budgets and the published timeline (`checks.md` E5). It also carries a fork the
+  owner file states both ways: section 10.1 keeps zones 1-9 and their bands untouched, section 10.6 stretches every
+  band to 60 levels. Costing sits in the owner file (§9 power table · §10.6 the 36 anchors "cannot be typed by hand").
+  Answer by digit which side of the fork, then it is a build. Sub-items once the fork is chosen: new settlements and
+  their stalls (`town.json`), a named boss per new zone, species re-spread with the X23 per-zone floor held, the
+  derived zone-edge curve plus its anchors in `engine/`, X23/X26 re-proved over the new zone count, and a
+  `world.md` regeneration.
+- **MP3 mod band skew — one red client test.** `game/tests/craft.test.ts` "Refine pushes one Tier up and stops dead
+  at T1" throws `no value range for mod "elemental_alignment"` out of `engine/loot.ts` `rangeOf`. The `mods.json`
+  band for that line does not cover every quality/Tier cell the Refine path can ask for. It is **not** a travel
+  regression and predates D-133/D-134 — it is MP3, left pending on purpose because re-cutting a band moves the
+  craft timeline (`harness/decisions.md` · `checks.md` stones). Every other client test is green.
+- **Client Road and Map screens — build or leave sim-only?** `towns-ui.md` §2 and §9 specify the Map page, the
+  Circuit editor and the Road dialogs, and `tools/map.ts` now writes the overlay, but no Svelte component exists:
+  the Road was sim-only before this work and still is. The owner file's build list for the travel deltas covered
+  `game/src/sim` and `save.md`, not UI, so this is a scope call rather than a missing piece.
 
-# Where the numbers live
+## B · mine to build
 
-```
-tools/data/engine.json   stat · K · caps · loot · mod_weights · craft · status · herbs · farm · potions · skill_drop · mob species/zones/bosses · elements · timeline
-tools/data/mods.json     24 mod value ranges + quality bands
-tools/data/town.json     prices · rosters · stock · Standing
-tools/data/skills.json   roster · reserve tiers · formula · renames
-tools/data/tree.json     empty shell (D-046 - there is no passive tree); `tools/tree.js` is the cage that holds it that way
-tools/data/bases.json    Base frames per slot · weight · Primary / Secondary pools · Gear Mod school (`node tools/bases.js --write` imports, `--checks` gates)
-tools/data/aliases.json  deprecated terms
-```
+- (none — nothing is half-built. `node tools/verify.ts` is green; the client suite is green except the MP3 item above.)
 
-Every derived table sits between `<!-- BEGIN GENERATED:key -->` markers. Never hand-edit between them — edit the data, run that file's writer, run `verify`. Shared readers: `tools/lib/engine.js` (numbers) · `roster.js` · `skillmodel.js` · `generated.js` · `registry.js` · `state.js`.
+## C · housekeeping that must not rot
 
-**The cages** (12, all run by `verify.js`): `check` (engine) · `town` · `skills` · `tree` · `ladder` · `loot` · `bases` · `timeline` · `survival` · `inventory` · `anchors` · `lint`.
-
-**Rebuild the views after a doc edit:** `node tools/report.js` (dashboard.html) and `node tools/wiki.js build` (wiki/). The writer that owns a generated block is the `--write` flag of that block's cage.
-
-# A · Waiting on the owner
-
-**Coding-readiness gate — every A-ruling is now landed; there are no owner decisions left open before the first code commit (`AGENT.md` §0 freeze).** A1-A10 landed earlier (**A9** Base frame-weight → even-weighted, D-071 · **A10** weapon Bases → a type may carry multiple Bases, D-072 · the two UI preferences D-073 / D-074), and the last two are answered: **A11** — `concept.md` P0-2's hit-count promise was re-worded so the identity is **swing count · chill uptime · Riposte's Evasion-scaling damage**, with the DoT leg handed to the poison build, so no curve value was re-priced (D-106 measured the identity holding on geared characters). **A12** — the starting character's `weight_base` (D-115) lifts the level-1 capacity clear of every main hand, so minute one carries its own sword untaxed and OP6 prints 0%.
-
-- [x] **A12 · minute one could not carry its own starting weapon — closed (D-115).** The owner set a starting-character base of `weight_base` 1,000 added to the Str bonus, so the level-1 capacity is 1,024 and the opening 35-weight sword is carried untaxed — the cage prints 0% (**OP6**) and `concept.md`'s Minute One block reads the same first-kill time priced and carried. The dial the line named was the Base stat; the owner chose it directly rather than through `K_STR_WEIGHT`.
-
-# B · No decision needed — mine to build
-
-**The audit is done; the two sizing follow-ups from the D-112 / D-114 re-base are now closed (D-116).** Every audit line the queue carried has run and is recorded in `harness/decisions.md` — B1 (D-103) · B3 (D-106) · B4 (D-105) · B5 (D-097) · B8 (D-099) · B9 (D-102) · B10 (D-104) · B13 (D-101) · B21 (D-100) — and the one question that pass surfaced is A11 in the section above, answered there. **What the method was, so it can be re-run rather than re-invented:** the client holds no number of its own, it imports `engine/` and `tools/data/*.json`, so a value that moves is moved in the data and every cage and the client follow it in the same commit. The geared driver is `game/tests/gearedB1.test.ts` (walk the Road → dress the bag through the Equip verb → measure the bar empty against the bar full), damage is credited by source in `counters.damageBy`, and `node tools/verify.js` re-checks the whole set.
-
-- [x] **B23 · `Grace`'s Evasion flat — re-priced onto the 80% fraction (D-116).** D-112 merged `Dodge` into `Evasion` after the aura had been sized against the old range, leaving it below the share of the item ceiling `Iron Guard` and `Energy Guard` keep; it now reads the same 80% of `evasion_flat`'s own ceiling, and the skills writer re-printed the value. The §Sizing note in `skill-pool-aura-heal.md` states the fraction instead of an open item.
-- [x] **B24 · the `Perfect dodge %` band — derivation re-stated (D-116).** D-111 derived `1-3` as 10% of `caps.perfect_dodge` (then 25); D-114 re-based that Cap to 21. The band stays `1-3` because a three-quality-band mod with one Tier slice per band spans at least three points (MP1), so the derivation is restated as `top = ceil(10% of the Cap)`, which reproduces the shipped band from Cap 21 with no data change.
-
-**Post-release, not tracked:** levels 91-100 and per-skill stat assignment (D-042). The game ships with the level-70-90 zone-9 band as its endgame; nothing after level 100 is designed here.
-
-# C · Housekeeping that must not rot
-
-- [x] **C1 · `npm run check` is green (D-117).** The gate's findings were real and are closed: the `GameState.travel` duplicate, the town panel capturing the zone it opened on, and the always-true save-test assertion. The test files narrow the craft union with typed helpers (`made`/`refused`/`isMade`) rather than a loose JSDoc. `src/App.svelte`'s untyped-runes failure was **not** the plugin version — the registry has no newer `svelte-check`/`svelte`, and the cause is sveltejs/svelte#13715: a top-level `let state` makes svelte2tsx read every `$state` as the phantom `$state` store. Renaming the binding to `gameState` (the documented workaround) cleared it, alongside the stale `Dodge`/`perfect dodge` rows. `noEmit: true` clears the 8 `allowJs` overwrite warnings. **0 errors, 0 warnings.**
+- **Two ratchets now sit at their ceiling.** `L9` (prose carries no numbers) is at its cap with zero headroom, so
+  the next doc line that puts a digit in prose outside a generated block fails `node tools/lint.ts`. `A-hr100` is at
+  its copy cap in `tools/anchors.ts`. Deleting a stale quote lowers the cap in the same pass; a new copy must not be
+  added.
+- **`A-refine` now carries a context regex.** It shares its digits with the drop-rate multiplier at the stat
+  ceiling, so it reads only lines that are about refining, a set or a piece. Widen the pattern, never the cap, if
+  another unrelated figure collides with it.

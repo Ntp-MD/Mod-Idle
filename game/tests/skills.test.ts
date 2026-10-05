@@ -10,13 +10,13 @@ import {
 import { mulberry32 } from '../src/engine/client-helpers';
 
 const require = createRequire(import.meta.url);
-const cageModel = require('../../tools/lib/skillmodel.js');
+const cageModel = require('../../tools/lib/skillmodel.ts');
 
 const REF = { ...cageModel.referenceBases().glass, level: 20 };
 const RAMP = 1 + ((REF.level - 1) * sm.LEVEL_STEP) / 100;
 
 describe('the client skill calculator is the cage skill calculator', () => {
-  it('per-press and effective cooldown match tools/skills.js --calc', () => {
+  it('per-press and effective cooldown match tools/skills.ts --calc', () => {
     const cleave = sm.byId['attack.cleave'] as any;
     // press = the row's own fraction of the reference build's finished hit, whose physical line the
     // engine cage already publishes (checks.md B1) — so this pins the number, not just the shape

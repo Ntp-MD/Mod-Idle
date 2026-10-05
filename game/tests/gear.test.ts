@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { BASES } from '../src/engine/client';
+import { BASES, STAT_KEYS } from '../src/engine/client';
 import { newGame, tick, equippedCount } from '../src/sim/game';
-import { equipFromBag, gearModOf, statChoiceOf } from '../src/sim/gear';
+import { equipFromBag, gearModOf } from '../src/sim/gear';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { craft as clientCraft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
@@ -35,23 +35,47 @@ describe('equipping from the bag', () => {
     expect(s.bag.findIndex((b) => b.base === item.base)).toBe(-1);
   });
 
-  it('feeds a Stat Mod the stat the player chose, and Str when nobody chose', () => {
+  it('carries the Core stat its Stat Mod rolled at drop, and wearing never changes it', () => {
     let withStatMod: Item | null = null;
     for (let seed = 1; seed <= 200 && !withStatMod; seed++) {
       const p = rolled(seed);
-      if (p.lines.some((l) => l.id === 'stat_mod_flat' || l.id === 'stat_mod')) withStatMod = p;
+      if (p.lines.some((l) => l.id === 'stat_mod_flat')) withStatMod = p;
     }
     if (!withStatMod) throw new Error('no rolled piece carried a Stat Mod line — the roll changed');
     const item = withStatMod;
+    const line = item.lines.find((l) => l.id === 'stat_mod_flat')!;
+    expect(STAT_KEYS).toContain(line.stat); // the stat is baked at drop, one of the seven (D-127)
     const s = newGame(72);
     s.bag.unshift(item);
-    expect(statChoiceOf(item)).toBe('str'); // the default a piece nobody chose for lands on
-
-    (item as any).chosenStat = 'int';
     expect(equipFromBag(s, 0).ok).toBe(true);
     const wornLine = s.gear.filter(Boolean)
-      .flatMap((g) => g!.lines).find((l) => l.id === 'stat_mod_flat' || l.id === 'stat_mod');
-    expect(wornLine!.stat).toBe('int');
+      .flatMap((g) => g!.lines).find((l) => l.id === 'stat_mod_flat')!;
+    expect(wornLine.stat).toBe(line.stat); // wearing is not a decision about the stat anymore
+  });
+
+  it('lifts every Core stat by its one value when the Stat Mod is the all-stats line', () => {
+    const chest = BASES.bases.find((b: any) => b.slot === 'chest') as any;
+    const item: Item = {
+      slot: 'chest', base: chest.name, rarity: 'Common', quality: 'mid', tier: 'T2', q: 1,
+      lines: [{ id: 'all_stat_flat', value: 12, slice: 1 }],
+    } as Item;
+    const bare = buildCharacter(50, emptyGear());
+    const worn = emptyGear();
+    worn[1] = item; // chest is slot 1 in loot.SLOTS order
+    const withIt = buildCharacter(50, worn);
+    for (const k of STAT_KEYS) expect(withIt.core[k] - bare.core[k]).toBe(12);
+  });
+
+  it('never rolls two Stat Mod lines onto one piece — the slot holds the family to one (D-129)', () => {
+    const family = new Set(['stat_mod_flat', 'all_stat_flat']);
+    let sawAllStats = false;
+    for (let seed = 1; seed <= 800; seed++) {
+      const p = rolled(seed);
+      const ids = new Set(p.lines.flatMap((l) => [l.id, ...((l.extra || []).map((x) => x.id))]));
+      expect([...ids].filter((id) => family.has(id)).length).toBeLessThanOrEqual(1);
+      if (ids.has('all_stat_flat')) sawAllStats = true;
+    }
+    expect(sawAllStats).toBe(true); // the new line really reaches a drop, not just the table
   });
 
   it('never happens by itself while the character is hunting', () => {

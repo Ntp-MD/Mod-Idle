@@ -1,5 +1,5 @@
 import { TOWN, BASES } from '../engine/client';
-import { createCollector } from '../../../engine/collector.js';
+import { createCollector } from '../../../engine/collector.ts';
 import { standingTier } from './town';
 import type { GameState } from './types';
 import type { Item } from './types';

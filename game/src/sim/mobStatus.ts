@@ -125,6 +125,24 @@ export function stopMob(store: MobStatusStore, mobId: string, sec: number, bypas
 }
 
 /**
+ * A proc-based stun — the mace's `Chance to stun %` line (D-123). A landed hit rolls the chance and
+ * a landed stun stops the mob for `shock.stop_sec`, paid out of the same 15% control budget shock
+ * obeys, so a gear stun can never lock a fight (combat.md §5b · D-102).
+ */
+export function stunMob(rng: () => number, store: MobStatusStore, mobId: string, chancePct: number): boolean {
+  if (chancePct <= 0 || rng() * 100 >= chancePct) return false;
+  const m = mark(store, mobId);
+  const cfg = S.shock;
+  if (m.stoppedSec + cfg.stop_sec > CONTROL_BOUND * m.elapsedSec && m.stoppedSec > 0) return false;
+  const l = line(m, 'shock');
+  l.stacks = 1;
+  l.perSec = 0;
+  l.secLeft = Math.max(l.secLeft, cfg.stop_sec);
+  m.stoppedSec += cfg.stop_sec;
+  return true;
+}
+
+/**
  * A row that names a stack count ("Applies 3 poison stacks", "full 3 burn stacks in one press")
  * writes that many stacks directly: no Alignment roll and no proc, because the row *is* the
  * application. The per-stack damage is still the caster's aligned Elemental damage per second.
@@ -154,15 +172,18 @@ export function holdPoison(store: MobStatusStore, mobId: string, sec: number): v
 
 /**
  * Bleed is a physical DoT that does not stack: a new application refreshes the five seconds and, if
- * the hit was stronger, keeps the higher value (formula-offense.md §4).
+ * the hit was stronger, keeps the higher value (formula-offense.md §4). `chance` is the caller's
+ * roll (0..1) — the axe's `Chance to bleed %` line plus Lacerate's proc (`D-123`), not a constant
+ * read here, so the gear line actually moves the proc.
  */
 export function applyBleed(
   rng: () => number,
   store: MobStatusStore,
   mobId: string,
   physicalPerHit: number,
+  chance: number,
 ): boolean {
-  if (rng() >= K.K_BLEED_CHANCE) return false;
+  if (rng() >= chance) return false;
   const m = mark(store, mobId);
   const l = line(m, 'bleed');
   l.stacks = 1;
@@ -274,7 +295,7 @@ export const statusLabel = (name: string): string =>
   ({ burn: 'burning', chill: 'chilled', shock: 'shocked', poison: 'poisoned', mark: 'marked', bleed: 'bleeding' }[name] || name);
 
 /**
- * The condition words a skill row may name (`engine/skills.js` `EFFECT_CONDITIONS`) → the status that
+ * The condition words a skill row may name (`engine/skills.ts` `EFFECT_CONDITIONS`) → the status that
  * writes them. Every word of the closed set is here, so a conditional line can never key on a state
  * nothing inflicts; the effects test walks the set and fails if a word has no reader.
  */

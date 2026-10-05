@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elements · ModWorld wiki</title>
+<style>
+:root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code{font:.92em/1.5 var(--mono);background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:.05em .3em;word-break:break-word}
+pre.code{font:.85rem/1.5 var(--mono);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;overflow:auto;color:#cfe3f7;white-space:pre-wrap}
+header.top{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.97);border-bottom:1px solid var(--line);padding:9px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font:.95rem/1 var(--mono);font-weight:600}.brand b{color:var(--accent)}
+.stamp{color:var(--muted);font:.74rem/1.2 var(--mono)}
+#q{flex:1;min-width:190px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:.88rem var(--mono)}
+#q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font:.74rem/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--panel);white-space:nowrap;color:var(--muted)}.chip b{font-weight:600;color:var(--fg)}.chip.ok b{color:var(--ok)}.chip.bad b{color:var(--bad)}.chip.warn b{color:var(--warn)}a.chip:hover{border-color:var(--accent)}
+.pill{font:.72rem/1 var(--mono);border-radius:999px;padding:6px 9px;border:1px solid var(--line);color:var(--muted)}.pill.live{border-color:#2f4a3a;color:#9adfae;background:#132018}.pill.off{color:var(--warn);border-color:#4a3d22}
+main{display:grid;grid-template-columns:226px minmax(0,1fr);gap:22px;padding:18px 16px 70px;max-width:1580px;margin:0 auto}
+@media(max-width:920px){main{grid-template-columns:1fr}nav.side{position:static;max-height:none}}
+nav.side{position:sticky;top:66px;align-self:start;max-height:calc(100vh - 84px);overflow:auto;font-size:.86rem;padding-right:4px}
+nav.side h4{margin:14px 0 4px;font:.68rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+nav.side a{display:block;color:var(--muted);padding:3px 8px;border-left:2px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.side a:hover,nav.side a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);text-decoration:none}
+.crumbs{font:.76rem var(--mono);color:var(--dim);margin-bottom:10px}.crumbs .sep{margin:0 6px}
+section{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin:0 0 20px;min-width:0}
+article.doc{padding:0;background:transparent;border:none}
+article.doc>section,article.doc>h1{background:transparent;border:none;padding:0;margin:0 0 14px}
+article.doc>h2,article.doc>h3,article.doc>h4,article.doc>p,article.doc>table,article.doc>ul,article.doc>ol,article.doc>pre,article.doc>blockquote,article.doc>hr{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin:0 0 14px;overflow:auto}
+article.doc>h2{font-size:1.02rem;background:var(--panel-2)}article.doc>h3{font-size:.95rem;border:none;background:transparent;padding:6px 0 0}article.doc>h4{border:none;background:transparent;padding:4px 0 0}
+.tw{overflow-x:auto;max-width:100%;padding-bottom:2px}
+h1{font-size:1.32rem;margin:0 0 8px}h2{font-size:1.06rem;margin:0 0 8px}h3{font-size:.97rem;margin:16px 0 4px}
+.hint{color:var(--muted);font-size:.87rem;margin:.3em 0 1em}.dim{color:var(--dim)}
+table{border-collapse:collapse;width:100%;font:.85rem/1.45 var(--mono);margin:.4em 0 1em}th,td{border-bottom:1px solid var(--line-2);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--panel-2)}tbody tr:hover{background:#161d28}
+.num td:first-child{color:var(--accent)}
+.tag{font:.7rem/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--muted);margin-left:6px;white-space:nowrap}.tag.gen{border-color:#2f4a3a;color:#9adfae;background:#132018}.tag.src{border-color:#3b3355;color:#c3b2ee}
+.status-pass,.ok{color:var(--ok)}.status-fail,.bad{color:var(--bad)}.status-pending,.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:.94rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;font-size:.88rem;margin:.4em 0 1em}.kv dt{color:var(--muted);font:.8rem/1.6 var(--mono)}.kv dd{margin:0}
+ul.plain{list-style:none;padding:0;margin:0}ul.plain li{padding:2px 0}
+ul.two{columns:2;column-gap:26px;font-size:.86rem}@media(max-width:760px){ul.two{columns:1}}
+form.rec{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--panel-2);margin:10px 0}
+form.rec .f{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin-bottom:8px;align-items:start}@media(max-width:700px){form.rec .f{grid-template-columns:1fr}}
+form.rec label{font:.78rem/1.4 var(--mono);color:var(--muted);padding-top:6px}form.rec label small{display:block;color:var(--dim)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:.86rem var(--mono);width:100%}
+textarea{min-height:62px;resize:vertical}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,#q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:#1c2634;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:.82rem var(--mono);cursor:pointer}button:hover{border-color:var(--accent)}button.warn{border-color:#5a2f34;color:#ffb3b8}
+label.chk{display:inline-flex;gap:6px;align-items:center;font:.78rem var(--mono);color:var(--muted)}label.chk input{width:auto}
+.result{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;display:none;white-space:pre-wrap}.result.show{display:block}.result.good{background:#122019;border:1px solid #2f4a3a;color:#b7e9c4}.result.err{background:#20131a;border:1px solid #5a2f3a;color:#ffc3cb}.result pre{margin:6px 0 0;white-space:pre-wrap;font:.8rem/1.45 var(--mono);max-height:260px;overflow:auto}
+.banner{border:1px solid #4a3d22;background:#1d1710;color:#e6caa0;border-radius:10px;padding:10px 12px;font-size:.86rem;margin-bottom:16px}
+.pager{display:flex;justify-content:space-between;gap:10px;font:.85rem var(--mono);margin:18px 0}
+.hide{display:none!important}.inline{display:contents}
+svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);font:11px var(--mono)}svg .edge{stroke:var(--dim);stroke-width:1.2;fill:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top,nav.side{position:static}section,article{border:none}}
+</style>
+</head>
+<body>
+<header class="top">
+<span class="brand"><b>ModWorld</b> wiki</span>
+<span class="stamp">rendered 2026-10-04 12:44:55Z · static build</span>
+<form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
+<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>288</b></span><span class="chip ok">checks <b>162/0/1</b></span><span class="chip ">generated blocks <b>57</b></span></span>
+<span class="pill off" id="pill" data-live="0">static copy</span>
+<span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
+</header>
+<main>
+<nav class="side" aria-label="Wiki">
+<h4>Wiki</h4>
+<a href="index.html">Home</a>
+<a href="data.html">Data files</a>
+<a href="numbers.html">Derived numbers</a>
+<a href="checks.html">Cage results</a>
+<a href="pending.html">Open &amp; pending</a>
+<a href="graph.html">Graphs</a>
+<a href="xref.html">Cross-references</a>
+<a href="az.html">Index A–Z</a>
+<a href="edit.html">Editor</a>
+<a href="about.html">About</a>
+<h4>On this page</h4>
+<a href="#h-elements">Elements</a>
+<a href="#h-1-the-5-elements">1. The 5 Elements</a>
+<a href="#h-2-elemental-power">2. Elemental power</a>
+<a href="#h-real-numbers-of-an-element-build-measured-from-current-mod-tables">· Real Numbers of an Element Build (Measured From Current Mod Tables)</a>
+<a href="#h-3-element-counter-pairs">3. Element Counter Pairs</a>
+<a href="#h-4-elemental-resistance">4. Elemental resistance</a>
+<a href="#h-5-status-per-element">5. Status Per Element</a>
+<a href="#h-fire-burn">· Fire — burn</a>
+<a href="#h-cold-chill">· Cold — chill</a>
+<a href="#h-lightning-shock">· Lightning — shock</a>
+<a href="#h-poison-poison-stack">· Poison — poison stack</a>
+<a href="#h-chaos-mark">· Chaos — mark</a>
+<a href="#h-6-global-dot-cap">6. Global DoT Cap</a>
+<a href="#h-7-element-mod">7. Element Mod</a>
+<a href="#h-8-display">8. Display</a>
+<a href="#h-summary-of-element-system-k-values">Summary of Element System K Values</a>
+<h4>Spec files</h4>
+<a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-Techstack.html">Techstack.md</a>
+<a href="doc-character-sheet.html">character-sheet.md</a>
+<a href="doc-checks.html">checks.md</a>
+<a href="doc-combat.html">combat.md</a>
+<a href="doc-concept.html">concept.md</a>
+<a href="doc-core-stats.html">core-stats.md</a>
+<a href="doc-crafting.html">crafting.md</a>
+<a href="doc-economy.html">economy.md</a>
+<a href="doc-elements.html" aria-current="page">elements.md</a>
+<a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a>
+<a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a>
+<a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a>
+<a href="doc-equipment-slot.html">equipment-slot.md</a>
+<a href="doc-equipment-weapon.html">equipment-weapon.md</a>
+<a href="doc-farm.html">farm.md</a>
+<a href="doc-formula-defense.html">formula-defense.md</a>
+<a href="doc-formula-offense.html">formula-offense.md</a>
+<a href="doc-formula-utility.html">formula-utility.md</a>
+<a href="doc-formula.html">formula.md</a>
+<a href="doc-glossary.html">glossary.md</a>
+<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
+<a href="doc-harness/decisions.html">harness/decisions.md</a>
+<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
+<a href="doc-harness/todo.html">harness/todo.md</a>
+<a href="doc-item-base.html">item-base.md</a>
+<a href="doc-item-list.html">item-list.md</a>
+<a href="doc-item-rarity.html">item-rarity.md</a>
+<a href="doc-loot.html">loot.md</a>
+<a href="doc-mob-roster.html">mob-roster.md</a>
+<a href="doc-mod-pool.html">mod-pool.md</a>
+<a href="doc-save.html">save.md</a>
+<a href="doc-skill-pool-attack.html">skill-pool-attack.md</a>
+<a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a>
+<a href="doc-skill-pool-buff.html">skill-pool-buff.md</a>
+<a href="doc-skill-pool-curse.html">skill-pool-curse.md</a>
+<a href="doc-skill-pool-system.html">skill-pool-system.md</a>
+<a href="doc-skill-pool.html">skill-pool.md</a>
+<a href="doc-skill-tree-control.html">skill-tree-control.md</a>
+<a href="doc-skill-tree-impact.html">skill-tree-impact.md</a>
+<a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a>
+<a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
+<a href="doc-skill-tree.html">skill-tree.md</a>
+<a href="doc-tasks.html">tasks.md</a>
+<a href="doc-towns-stalls.html">towns-stalls.md</a>
+<a href="doc-towns-ui.html">towns-ui.md</a>
+<a href="doc-towns.html">towns.md</a>
+<a href="doc-world.html">world.md</a>
+</nav>
+<div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="index.html">Character &amp; stats</a><span class="sep">/</span><span>elements.md</span></nav>
+<div id="filter-count" class="hint"></div>
+
+
+<article class="doc">
+<h1>Elements</h1>
+<dl class="kv"><dt>file</dt><dd><code>elements.md</code> · 250 lines · 2,841 words · written 2026-10-04T12:44:42Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-formula.html">formula.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-equipment-slot.html">equipment-slot.md</a></dd><dt>imported by</dt><dd><a href="doc-combat.html">combat.md</a> · <a href="doc-formula-defense.html">formula-defense.md</a> · <a href="doc-formula-offense.html">formula-offense.md</a> · <a href="doc-formula.html">formula.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-world.html">world.md</a></dd><dt>quoted by</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a> · <a href="doc-towns-ui.html">towns-ui.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../elements.md">elements.md</a></dd></dl>
+
+<h2 id="h-elements">Elements</h2>
+<p>import core-stats.md import formula.md import mod-pool.md import equipment-slot.md</p>
+<p>5 Elements — fire · cold · lightning · poison · chaos. They serve as the third damage path beside physical and magic.</p>
+<p><strong>Bleeding is not on this list.</strong> It is a physical damage-over-time status copied from Path of Exile, with no Element tag, no Elemental resistance and no row in the counter-pair table — its rules live in <code><a href="doc-formula-offense.html">formula-offense.md</a></code> section 4.</p>
+<h2 id="h-1-the-5-elements">1. The 5 Elements</h2>
+<table><thead><tr><th>Element</th><th>Core mechanic</th><th>Status left</th></tr></thead><tbody><tr><td>fire</td><td>burn per second</td><td>burn</td></tr><tr><td>cold</td><td>slow target attack speed</td><td>chill</td></tr><tr><td>lightning</td><td>short interrupt</td><td>shock</td></tr><tr><td>poison</td><td>stacking layers, never expires alone</td><td>poison</td></tr><tr><td>chaos</td><td>long hits that grow stronger</td><td>mark</td></tr></tbody></table>
+<ul><li>One item can roll only one of 5 Elements. Two Elements on one item are forbidden.</li><li>Element is only a damage tag; power numbers are still calculated as their own path.</li><li>All Elements use the same power formula set; they differ in multiplier, status, and counter pair.</li></ul>
+<h2 id="h-2-elemental-power">2. Elemental power</h2>
+<pre class="code">elem       = (int * K_ELEM + elem_flat) * (1 + elem_pct/100) * weapon_mult
+elem_align = dex * K_DEX_ALIGN + elem_align_flat
+elem_align = min(elem_align, 50)
+elem_aligned_damage = elem * elem_align/100
+
+dmg_per_hit = phys + magic + elem
+dps         = dmg_per_hit * (aspd / 100)
+status_gate = roll vs elem_align applies only to status application, never to elem damage</pre>
+<ul><li>Uses <strong>Int</strong> as the main driver because Elemental belongs to the magic family — no new stat needed.</li><li><code>K_ELEM</code> = 4, slightly lower than <code>K_INT</code> = 5, because Element builds must still invest Dex for status output.</li><li>Uses Dex to confirm statuses, the same value as status Alignment. No separate new stat.</li><li><strong>The direct hit lands in full and is never scaled by Alignment</strong> (<code>dmg_per_hit</code> above uses raw <code>elem</code>) — that is the P0-1 decision.</li><li><strong>The status it inflicts is scaled by Alignment.</strong> <code>elem_aligned_damage</code> is what burn and poison are computed from, so Alignment pays twice: once as the gate that lets a status land at all, and once as the multiplier on that status's damage. Reason: a status that is only gated would not care how much Element damage the build has, which would make the Element stat itself stop mattering after the gate is passed.</li><li><strong>Neither Element damage nor magic damage crits.</strong> Crit belongs to physical hits alone (formula-offense.md section 3), so lightning's timing role is never swallowed by a crit that was going to happen anyway.</li></ul>
+<h3 id="h-real-numbers-of-an-element-build-measured-from-current-mod-tables">Real Numbers of an Element Build (Measured From Current Mod Tables)</h3>
+<p>Build with Int 6 items / Dex 3 items / 2 Alignment slots at level 100:</p>
+<table><thead><tr><th>Value</th><th>Result</th></tr></thead><tbody><tr><td>Magic power</td><td>2,807</td></tr><tr><td>Raw Elemental power</td><td>2,207</td></tr><tr><td>Elemental Alignment</td><td>26.4% (gates status only)</td></tr><tr><td><strong>Full Element damage</strong></td><td><strong>2,207</strong> = 79% added over magic power</td></tr><tr><td>burn 5 stacks (K_FIRE_BURN 0.30)</td><td>875 per second</td></tr><tr><td>poison 10 stacks (K_POISON 0.08)</td><td>466 per second</td></tr><tr><td>both together</td><td>1,341 → <strong>cut to 875</strong> by the global DoT Cap (1.5× of 583 aligned damage) · five burn stacks alone already fill the whole budget</td></tr><tr><td>burn at 5 stacks</td><td>target HP regen <strong>−50%</strong> (10% per stack)</td></tr></tbody></table>
+<ul><li><strong>Decided (P0-1 option A): the Element hit lands in full; Alignment scales the status it inflicts, and also gates whether that status lands.</strong> The Int6/Dex3 example rises from ~6,180 to ~8,000 total per-hit output before DoT.</li><li>Rebalance pending: <code>mob_HP</code> must fold ~10-15% uplift (checks.md D1/D17), and Stream gating nodes (Tuned Rod / Two Tongues) shift to status-output duty. Tables below keep old DoT K values until the rebalance pass.</li></ul>
+<h2 id="h-3-element-counter-pairs">3. Element Counter Pairs</h2>
+<table><thead><tr><th>Attack ↓ / Target →</th><th>Fire</th><th>Cold</th><th>Lightning</th><th>Poison</th><th>Chaos</th></tr></thead><tbody><tr><td>Fire</td><td>1.00</td><td>0.60</td><td>1.10</td><td>1.20</td><td>1.00</td></tr><tr><td>Cold</td><td>0.60</td><td>1.00</td><td>1.10</td><td>1.00</td><td>1.00</td></tr><tr><td>Lightning</td><td>1.10</td><td>1.10</td><td>1.00</td><td>0.60</td><td>1.00</td></tr><tr><td>Poison</td><td>1.20</td><td>1.00</td><td>0.60</td><td>1.00</td><td>1.00</td></tr><tr><td>Chaos</td><td>1.15</td><td>1.15</td><td>1.15</td><td>1.15</td><td>1.15</td></tr></tbody></table>
+<ul><li><strong>Chaos</strong> gets 1.15 against all Elements including itself. It is the only Element with no counter.</li><li><strong>Fire ↔ Cold</strong> and <strong>Lightning ↔ Poison</strong> are counter pairs at 0.60.</li><li>Status icons show the Element of the damage instance. No full name needed.</li></ul>
+<p><strong>Monsters</strong> — each has 1 innate Element.</p>
+<pre class="code">weak_mult = 1.5   if our Element matches the monster innate Element</pre>
+<h2 id="h-4-elemental-resistance">4. Elemental resistance</h2>
+<pre class="code">res_c       = vit * K_VIT_RES                     K_VIT_RES = 0.05
+elem_res_x  = res_c * (1 + elem_res_pct_x/100)
+elem_res_x  = min(elem_res_x, 75)
+
+incoming = base * (1 - elem_res_x/100) * Element counter</pre>
+<ul><li>Uses <strong>Vit</strong> to give raw res for all 5 Elements.</li><li><strong>Res has no Flat</strong> — the only slotable Mod is <code>Elemental resistance %</code> acting as a multiplier.</li><li><strong>Auras feed the same pool.</strong> <code>Trinity Form</code> grants an Elemental resistance % that joins <code>elem_res_pct_x</code> exactly like a gear roll — no separate aura stat and no flat (D-009 3b). <code>Elemental Fury</code> applies the same form on the target side as a reduction.</li><li>Merged away the old <code>status_res</code> (once given by Str), leaving Elemental res only.</li><li>Res is split per Element, not one value. The character sheet must show all 5 values.</li><li><strong>Vit 510 (true ceiling) gives 25.5% raw</strong>, not 44.5% as previously written · the old number was calculated from stat 890, which no build can actually reach.</li></ul>
+<p>  To hit Cap 45 requires <code>25.5 × (1 + 30+30+30)% = 48.5 → cut to 45</code>, i.e. 3 res slots · two slots give 40.8%, just under the Cap · Cap 45 is therefore still reachable and still fair (D-114).</p>
+<h2 id="h-5-status-per-element">5. Status Per Element</h2>
+<p><strong>Every status in this section lives two ways</strong> — we apply it to targets, and mobs apply it to us · values when on the player (20% proc chance per hit · chill/shock halved) are in combat.md section 5.</p>
+<h3 id="h-fire-burn">Fire — burn</h3>
+<pre class="code">burn_dps  = elem_aligned_damage * K_FIRE_BURN     K_FIRE_BURN = 0.30
+burn_time = 5 sec
+burn_stack_max = 5
+
+regen_mult = 1 - burn_stacks * K_BURN_REGEN_CUT   K_BURN_REGEN_CUT = 0.10</pre>
+<ul><li>Ticks per second. Does not crit and is not contested by Evasion — Perfect dodge still deletes a tick.</li><li>Re-hitting with the same Element weapon resets duration; it does not extend the old duration.</li><li>Max 5 stacks. Excess stacks reset the oldest stack instead of dropping.</li><li><strong>Burn also cuts HP regen, by 10% of it per stack.</strong> Five stacks is <strong>−50% HP regen</strong>, which is the whole effect: a build at 10 regen/sec is left at 5. There is no separate Cap because the stack count is the Cap.</li><li>Reason this is the strongest Element debuff in the game: <code>hp_regen</code> is not a side stat. It is the tank's endurance (<code><a href="doc-combat.html">combat.md</a></code> §4 sets Push downtime to <code>Max HP ÷ (hp_regen × 8)</code>) and field rule 2 makes tanks survive bosses <em>because</em> regen keeps working during the fight. Burn is the Element that reaches into that and turns it off.</li><li>This is the sustained version of what shock already did for one second — shock stops regen outright for 1 sec, burn takes half of it away for 5.</li><li>Value 0.30 makes full 5 stacks equal <strong>1.50 of Element damage per second</strong>, which is exactly the global DoT Cap. Five burn stacks therefore fill the whole DoT budget on their own and leave poison no room (§6).</li></ul>
+<h3 id="h-cold-chill">Cold — chill</h3>
+<pre class="code">aspd_mult = 1 - chill_pct/100      chill_pct Cap 20
+acc_mult  = 1 - chill_acc/100      chill_acc Cap 30
+chill_time = 3 sec
+armour_mult = 1 - K_CHILL_ARMOUR_CUT              K_CHILL_ARMOUR_CUT = 0.25</pre>
+<ul><li>Reduces attack speed = fewer hits, not lower damage. The target must be prevented from barely attacking.</li><li>The Cap 20 governs <strong>chill alone</strong> — it exists so chill by itself cannot suppress a target's damage. Aura <code>Rimbo Form</code> pays reservation to stack on top of it, so a chilled target under that aura can reach <strong>−35%</strong> total aspd (D-009 3a).</li><li>Also reduces accuracy one more layer, because accuracy-focused players gain a special temporary edge.</li><li><strong>Chill also cuts the target's Armour by 25%</strong> (<code>armour_mult = 0.75</code>). Armour is what reduces the physical half of a hit (<code><a href="doc-combat.html">combat.md</a></code> §2), so this is the Element answer to a tanky target.</li></ul>
+<p>  <strong>It has a target now</strong>: every mob carries Armour off its own Str line (<code>K_ARMOUR</code> 2 · the <code>armour</code> column of <code><a href="doc-mob-roster.html">mob-roster.md</a></code>), so chill cuts a real number on Golem · Knight · Troll · Orc and is worth almost nothing against a Rat. The rule is written now so it is correct the moment D1 gives mobs Armour — until then it is a line with no numbers behind it, and it must be re-verified in the same pass that introduces mob Armour.</p>
+<h3 id="h-lightning-shock">Lightning — shock</h3>
+<pre class="code">stun_chance = elem_align * K_LIGHTNING_STUN     K_LIGHTNING_STUN = 0.30   Cap 15
+stun_time   = 1 sec
+shock_aspd  = 20%                                Cap 20
+shock_align_cut = 20%   applied to our own elem_align against this target</pre>
+<ul><li>Stun queues the target attack sequence. During stun it stops attacking and stops regen.</li><li>Rolls once per attack, not per damage instance.</li><li><strong>The stun Cap is <code>Alignment × K_STUN_PER_ALIGN</code> = 35 × 0.30 = 10.5%</strong> (C10 prints 11) — at the old K 0.15 a ceiling Alignment of 50 reached only 7.5%, so the K was raised to 0.30 and the Cap now sits exactly where a full Alignment build lands (Dex 510 + amulet + gloves).</li><li>Values a real Element build sees: Dex 328 + amulet + gloves → Alignment 26.4% → 7.9% stun per attack.</li><li><strong>Shock also cuts the target's attack speed by 20%</strong> (its own Cap 20, separate from chill's). Shock does not stack, so this is a flat 20% while it is up.</li><li><strong>Shock also cuts our own Alignment against that target by 20%</strong> — the debuff is applied to the <em>target's</em> tolerance, not to our stat: <code>elem_align_used = elem_align × 0.80</code> for every further status we try to put on that target.</li><li><strong>That is what turns shock from a debuff into a choice.</strong> Shock is the only Element that fights our own Element: the more shock we land, the harder burn, chill, poison and mark are to apply to the same target. Time control and sustained status compete for the same target instead of stacking.</li><li>Worst case to watch at balance audit: chill, shock and <code>Rimbo Form</code> can be up at the same time, and each Cap governs its own status, so the target's attack speed can fall by more than any single number here. Nothing sums them today; if that proves too strong, the fix is one shared attack-speed Cap, not smaller numbers.</li></ul>
+<h3 id="h-poison-poison-stack">Poison — poison stack</h3>
+<pre class="code">poison_dps_per_stack = elem_aligned_damage * K_POISON    K_POISON = 0.08
+poison_stack_max = 10
+poison_decay = lose 1 stack every 8 sec</pre>
+<ul><li>Does not vanish immediately when firing stops, in exchange for lower damage per piece than fire.</li><li>DoT is not contested by Evasion and does not crit, preventing targets from falsely missing and losing out.</li><li>Stacks persist across weapon swaps because they live on the target, not on the item.</li><li>Value 0.08 makes full 10 stacks equal 0.80 of Element damage per second, slightly below burn.</li></ul>
+<h3 id="h-chaos-mark">Chaos — mark</h3>
+<pre class="code">chaos_stack_max = 25
+stack_gain      = landed chaos hit that is not a Weak, gated by elem_align like every other status
+dmg_mult = 1 + chaos_stack * K_CHAOS_DMG          K_CHAOS_DMG   = 0.01
+leech    = chaos_stack * K_CHAOS_LEECH            K_CHAOS_LEECH = 0.002
+mark_decay = lose 1 stack per second after 5 sec without firing</pre>
+<ul><li>Sustained fire on one target gives max damage, in exchange for resetting on target switch.</li><li>Value 0.01 makes full 25 stacks +25% damage, not large enough to swallow crit.</li><li>Leech is % of just-dealt damage. Value 0.002 gives 5% at full 25 stacks but must not exceed the per-second Max HP limit.</li><li>In idle firing continuously at the same target, mark reaches full 25 stacks by itself.</li><li><strong>Mark is the one status with no damage term of its own.</strong> Every other Element's status converts the hit into a number (<code>elem_aligned_damage × K</code>); mark instead multiplies the hit it rides on. So Alignment enters mark exactly once, as the application gate, and there is no <code>elem_aligned_damage</code> term here. Reason: mark is the payoff for staying on one target, and letting Alignment scale it too would make the strongest stack payoff the one least about commitment.</li></ul>
+<h2 id="h-6-global-dot-cap">6. Global DoT Cap</h2>
+<pre class="code">dot_total = burn + poison
+dot_total = min(dot_total, elem_aligned_damage * 1.5)</pre>
+<ul><li>All DoT combined must not exceed <strong>1.5x</strong> of confirmed Element damage per second.</li><li>Without this Cap, two-Element DoT would stack to 1.7x, exceeding direct hits during burn windows.</li><li><strong>Five burn stacks reach the Cap exactly</strong> (5 × 0.30 = 1.50), so a maxed fire build spends its whole DoT budget on burn and poison contributes nothing until burn drops a stack. That is the intended reading: the Cap is not a safety net that never binds, it is the wall a full fire build runs into.</li><li>This Cap is the single point where all Element DoT meet; other differences fade one by one.</li><li>Bleed is outside this Cap on purpose. It is physical, it does not stack, and its budget is <code>0.70 × physical_per_hit ÷ 5 sec</code> (formula-offense.md §4).</li></ul>
+<h2 id="h-7-element-mod">7. Element Mod</h2>
+<table><thead><tr><th>Mod</th><th>Group</th><th>Value range</th></tr></thead><tbody><tr><td>Elemental power Flat</td><td>Offensive — main hand (half weight in dual wield)</td><td>12-64</td></tr><tr><td>Elemental power %</td><td>Offensive — main hand</td><td>3-14%</td></tr><tr><td>Elemental resistance %</td><td>Defensive — other items</td><td>15-30%</td></tr><tr><td>Elemental Alignment %</td><td>Defensive — other items</td><td>1-5%</td></tr></tbody></table>
+<ul><li>Split by the Offensive/Defensive rule in equipment-slot.md — main hand rolls Element power, other items roll resistance.</li><li><strong>Elemental resistance % is always Defensive, for all Elements</strong>, never Offensive even when matching the weapon Element.</li><li>Res has no Flat, only %; power has both Flat and %.</li><li><strong>Defensive items roll their own Element, not tied to the weapon</strong> — because if tied to the weapon, players must pick a weapon first then hunt matching defensive items, making most items unusable.</li><li><strong>Dual-wield off hand is a second weapon</strong>, so it is the exception to the rule. It gets Elemental power but Primary weight is halved.</li><li>Elemental power ranges are slightly lower than phys/magic (12-64 instead of 15-80) because they must pass another Alignment layer.</li><li>Per-Element Tier tables are in mod-pool.md.</li></ul>
+<h2 id="h-8-display">8. Display</h2>
+<ul><li>Character sheet shows Elemental power and Elemental res for all 5 Elements.</li><li>Statuses lingering on targets show as Element icon + remaining time. No full name needed.</li><li>Capped values display as <code>value / Cap</code> like other stats in character-sheet.md.</li><li>Element counter multipliers are hidden from players. No display needed; only the changed numbers show when hitting an Element.</li><li>The total DoT bar shows when hitting the global DoT Cap, so over-Element hits are visible.</li></ul>
+<h2 id="h-summary-of-element-system-k-values">Summary of Element System K Values</h2>
+<table><thead><tr><th>K</th><th>Value</th><th>Note</th></tr></thead><tbody><tr><td>K_ELEM</td><td>4</td><td>elem / Int · lower than K_INT because it must pass Alignment</td></tr><tr><td>K_VIT_RES</td><td>0.05</td><td>elem res / Vit · no Flat</td></tr><tr><td>K_FIRE_BURN</td><td>0.30</td><td>burn per stack · max 5 stacks = 1.50, exactly the global DoT Cap</td></tr><tr><td>K_BURN_REGEN_CUT</td><td>0.10</td><td>HP regen cut per burn stack · 5 stacks = −50%, no separate Cap</td></tr><tr><td>K_CHILL_ARMOUR_CUT</td><td>0.25</td><td>target Armour × 0.75 · bites the lineages that carry Armour (D-022)</td></tr><tr><td>shock_aspd_pct</td><td>20</td><td>target attack speed · own Cap 20 · adds to chill, which has its own Cap 20</td></tr><tr><td>shock_align_cut</td><td>0.20</td><td>our <code>elem_align</code> × 0.80 against a shocked target · shock is the only status that fights our own</td></tr><tr><td>K_POISON</td><td>0.08</td><td>poison per stack · 10 stacks = 0.80</td></tr><tr><td>K_CHAOS_DMG</td><td>0.01</td><td>+dmg per mark stack · 25 stacks = +25% damage</td></tr><tr><td>K_CHAOS_LEECH</td><td>0.002</td><td>lifesteal per mark stack · 25 stacks = 0.05%</td></tr><tr><td>K_LIGHTNING_STUN</td><td>0.30</td><td>stun chance per Alignment (0.15 could never reach Cap 11%)</td></tr><tr><td>K_BLEED</td><td>0.70</td><td>bleed total as a fraction of the inflicting physical hit · physical DoT, not an Element — see formula-offense.md section 4</td></tr><tr><td>bleed_time_sec</td><td>5</td><td>PoE base bleed duration · bleed does not stack</td></tr><tr><td>K_BLEED_CHANCE</td><td>0.40</td><td>chance per landed physical hit while <code>Lacerate</code> is up (curse, 10 sec ÷ 14 sec = 71% uptime)</td></tr><tr><td>global DoT Cap</td><td>1.50</td><td>burn + poison combined, as a multiple of confirmed Element damage per second</td></tr></tbody></table>
+<nav class="pager"><a href="doc-formula-utility.html">← formula-utility.md</a><a href="index.html">Character &amp; stats</a><span></span></nav>
+
+</article>
+</div>
+</main>
+<script>
+
+(function(){
+  function boxNear(el){
+    var p=el.closest('section')||document.body;
+    var b=p.querySelector('.result');
+    if(!b){b=document.createElement('div');b.className='result';el.after(b);}
+    return b;
+  }
+  function say(el,msg,cls){var b=boxNear(el);b.className='result show '+(cls||'');b.textContent=msg;}
+  var q=document.getElementById('q');
+  function apply(){
+    if(!q)return;
+    var t=(q.value||'').toLowerCase().trim();
+    document.querySelectorAll('main section, main article.doc > h2, nav.side a').forEach(function(s){
+      if(!t){s.classList.remove('hide');return;}
+      s.classList.toggle('hide', s.textContent.toLowerCase().indexOf(t)<0);
+    });
+    var n=document.getElementById('filter-count');
+    if(n){var k=document.querySelectorAll('main section:not(.hide)').length;n.textContent=t?('matching sections: '+k):'';}
+  }
+  if(q){
+    q.addEventListener('input',apply);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+      if(e.key==='Escape'&&document.activeElement===q){q.value='';apply();q.blur();}
+    });
+  }
+  var pill=document.getElementById('pill');
+  if(pill&&pill.dataset.live==='1'&&window.EventSource){
+    var es=new EventSource('/events');
+    es.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data);}catch(e){return;}
+      if(m.type==='change'){pill.textContent='live · '+m.stamp;location.reload();}
+    };
+    es.onerror=function(){pill.textContent='server stopped';pill.classList.add('off');};
+  }
+  document.querySelectorAll('form[data-api]').forEach(function(f){
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(location.protocol==='file:'){
+        say(f,'Static build: forms cannot write. Run  node tools/wiki.ts serve  and open the printed address.','err');
+        return;
+      }
+      var body={};
+      new FormData(f).forEach(function(v,k){body[k]=(k==='revertOnFail')?(v?'1':'') : v;});
+      if(!f.querySelector('[name=revertOnFail]'))body.revertOnFail='1';
+      say(f,'writing, running the writers and both cages…','');
+      fetch(f.dataset.api,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};}).catch(function(){return{ok:r.ok,j:{message:'not json: HTTP '+r.status}};});})
+        .then(function(r){show(r.j,r.ok);})
+        .catch(function(err){say(f,'request failed: '+err.message,'err');});
+      function show(j,ok){
+        var lines=(j.log||[]).map(function(l){return (l.ok?'ok   ':'FAIL ')+l.step+(l.ok?'':' · exit '+l.code);}).join('\n');
+        var errs=(j.errors||[]).map(function(e){return '· '+(e.field?e.field+': ':'')+e.msg;}).join('\n');
+        var b=boxNear(f);
+        if(ok&&!(j.errors&&j.errors.length)&&j.ok!==false){
+          b.className='result show good';
+          b.textContent=(j.message||'Written and the cages passed.')+(lines?'\n'+lines:'')+'\nreloading…';
+          setTimeout(function(){location.reload();},800);
+          return;
+        }
+        b.className='result show err';
+        b.textContent=(j.reverted?'Rejected and rolled back. ':'Rejected. ')+(j.message||'')+
+          (errs?'\n\n'+errs:'')+(lines?'\n\n'+lines:'')+
+          (j.log&&j.log.length?'\n\n'+((j.log[j.log.length-1]||{}).out||''):'');
+      }
+    });
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var t=document.getElementById(btn.dataset.toggle);
+      if(t)t.classList.toggle('hide');
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

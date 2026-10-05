@@ -2,8 +2,8 @@
   "meta": {
     "title": "Engine source data — stat model, K values, caps, loot model, craft prices",
     "read_by": [
-      "tools/check.js",
-      "tools/town.js"
+      "tools/check.ts",
+      "tools/town.ts"
     ],
     "sources": [
       "mod-pool.md",
@@ -100,10 +100,10 @@
     "per_level": 2,
     "level_cap": 100,
     "mob_level_cap": 90,
-    "item_slots": 12,
+    "item_slots": 13,
     "core_flat_max": 25,
     "split_items": 6,
-    "note": "`core_pct_max` is gone (owner ruling, D-112): Core Stat is Flat only. The single-stat ceiling is now `stat_c + core_flat_max x 12` = 510, not 816 — every K value, Cap and anchor that was set on 816 moves with it."
+    "note": "`core_pct_max` is gone (owner ruling, D-112): Core Stat is Flat only. The single-stat ceiling is now `stat_c + core_flat_max x 13` = 535, not 816 — every K value, Cap and anchor that was set on 816 moves with it. The 13th slot is the earring accessory (D-131); its power is booked as D34 debt rather than landed in `mob_HP` (H1), so no zone HP, kill rate or timeline number moves."
   },
   "K": {
     "K_STR": 5,
@@ -183,7 +183,7 @@
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 11901,
-      "note": "No passive skill tree exists (tools/data/tree.json is an empty shell), so mob_HP(L) = typical_gear_DPS(L) x (1 + skill_per_level x L) and mob_PS(L) = typical_gear_DPS(L) / mob_damage_divisor. skill_per_level is the only power multiplier left; any future power source is multiplied in here in the same commit that adds it. mob_HP(L) is anchored at every zone edge in mob.zones and interpolated linearly between them; levels above the spawn cap (90) run to hp_at_player_level_cap (11901 = the published theoretical mob_HP(100)). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.js mobHpAt · checks.md X37)."
+      "note": "No passive skill tree exists (tools/data/tree.json is an empty shell), so mob_HP(L) = typical_gear_DPS(L) x (1 + skill_per_level x L) and mob_PS(L) = typical_gear_DPS(L) / mob_damage_divisor. skill_per_level is the only power multiplier left; any future power source is multiplied in here in the same commit that adds it. mob_HP(L) is anchored at every zone edge in mob.zones and interpolated linearly between them; levels above the spawn cap (90) run to hp_at_player_level_cap (11901 = the published theoretical mob_HP(100)). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt · checks.md X37)."
     },
     "zones": [
       {
@@ -374,7 +374,6 @@
         "bow": 3,
         "crossbow": 3,
         "staff": 3,
-        "rod": 3,
         "wand": 3,
         "book": 3
       },
@@ -1009,7 +1008,7 @@
       "100": 2498
     },
     "hours_tolerance": 0.5,
-    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) interpolates linearly between the anchors · hours(L) = kills(L) ÷ the band's kills/hr (980 low / 1385 mid / 1800 high). tools/timeline.js derives the 5-level-step table in world.md from this."
+    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) interpolates linearly between the anchors · hours(L) = kills(L) ÷ the band's kills/hr (980 low / 1385 mid / 1800 high). tools/timeline.ts derives the 5-level-step table in world.md from this."
   },
   "mod_max": {
     "phys_flat_main_hand": 80,
@@ -1037,10 +1036,14 @@
     "life_regen_flat": 31,
     "mana_regen_flat": 31,
     "perfect_dodge_pct": 3,
-    "status_resistance_pct": 25
+    "status_resistance_pct": 25,
+    "bleed_chance": 20,
+    "stun_chance": 20,
+    "block_chance": 50,
+    "armour_pen": 15
   },
   "mod_weights": {
-    "note": "Effective drop weight of every Mod line = role weight x value(X) (equipment-slot-pools.md). tools/loot.js is the only consumer and the weight table printed in equipment-slot-pools.md is generated from these rows, so a weight can never be typed twice. `weight` is one number, or [low, mid, high] for the early-game Flat group whose weight falls with Item quality.",
+    "note": "Effective drop weight of every Mod line = role weight x value(X) (equipment-slot-pools.md). tools/loot.ts is the only consumer and the weight table printed in equipment-slot-pools.md is generated from these rows, so a weight can never be typed twice. `weight` is one number, or [low, mid, high] for the early-game Flat group whose weight falls with Item quality.",
     "role_weights": {
       "primary": 1,
       "secondary": 0.5,
@@ -1134,7 +1137,17 @@
         "v100": "+3.1% (on a maxed stat) · **+11.9%** (on an uninvested stat)",
         "early": "+5.5%",
         "weight": 1,
-        "why": "Stat Mod flat rolls on every item, so an uninvested stat is always reachable — and it is now the only Core stat line"
+        "why": "Stat Mod flat rolls on every item, so an uninvested stat is always reachable — the single-stat half of the Stat Mod slot"
+      },
+      {
+        "label": "All stats flat",
+        "ids": [
+          "all_stat_flat"
+        ],
+        "v100": "+96% of a fresh build's uninvested stat line, and it thins toward the flat ceiling as the stats fill",
+        "early": "+11%",
+        "weight": 0.5,
+        "why": "A PoE-style all-attributes line: one roll lifts all seven Core stats at once (D-129), so it is weighted rarer than the single-stat Stat Mod flat it shares the slot with"
       },
       {
         "label": "Elemental alignment %",
@@ -1339,27 +1352,71 @@
         "early": "same ratio, fewer absolute hits to proc on",
         "weight": 0.7,
         "why": "The status proc is 20% per landed hit and there is no other answer to it on gear (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other \"answers something niche\" defensive rows"
+      },
+      {
+        "label": "Chance to bleed %",
+        "ids": [
+          "bleed_chance"
+        ],
+        "v100": "a second bleed source beside Lacerate's own 40% while the curse is up (formula-offense.md section 4)",
+        "early": "bleed is a fixed fraction of one physical hit, so the line is worth the same at every level - only the hit behind it grows",
+        "weight": 0.7,
+        "why": "A weapon-only line (one-handed and two-handed axes, D-123). It is the always-on answer to the bleed slot Lacerate already owns, so it prices like the other \"answers something niche\" rows; bleed is physical DoT with no Element tag and cannot crit, so the line adds reliability rather than a new multiplier"
+      },
+      {
+        "label": "Chance to stun %",
+        "ids": [
+          "stun_chance"
+        ],
+        "v100": "runs beside the lightning-Alignment stun path, which is the one that carries the Cap (elements.md section 6)",
+        "early": "stun is a fixed 1 sec stop, so the line is worth the same at every level",
+        "weight": 0.7,
+        "why": "A weapon-only line (mace, D-123). Stun stops the target clock for 1 sec - attacks and regen - and the Alignment path already prices that window, so the gear source is priced against it and the alignment Cap still binds on the lightning side"
+      },
+      {
+        "label": "Block chance %",
+        "ids": [
+          "block_chance"
+        ],
+        "v100": "the second avoidance layer (D-123): a blocked hit is deleted outright, the same shape as perfect dodge",
+        "early": "the Cap binds near the top of the shield's own ladder, so the line is worth most while the shield is still low",
+        "weight": 0.7,
+        "why": "Shield offhand only, and line 1 rather than a random roll, so the layer cannot spread onto every slot. Weighted like the other defensive answers; formula-defense.md prints the roll order and X43 proves the Cap is reachable from the shield alone"
+      },
+      {
+        "label": "Armour penetration %",
+        "ids": [
+          "armour_pen"
+        ],
+        "v100": "cuts the mob's armour ratio, which only matters where the roster's armour is high enough to bite",
+        "early": "the first zones' armour is small, so the line reads as near-zero there and grows into its value",
+        "weight": 0.7,
+        "why": "Crossbow only, line 1 (D-123). It is a cut on the mob-side armour ratio, not a new damage multiplier, so it prices against the armour it removes; the mob roster's armour column is what decides where it pays"
       }
     ]
   },
   "energy_shield": {
-    "delay_sec": 5,
+    "delay_sec": 3,
     "recover_sec": 40,
     "player_only": true,
     "chaos_bypasses": true,
-    "note": "Energy Shield is the caster's second pool: pool = Int x K_INT_ES, recharge = Int x K_INT_ESREGEN once delay_sec have passed without a hit, and the full pool comes back in exactly recover_sec (40), the same shape the mana pool was tuned to and about 2.4x faster than a Vit build recovers HP. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it (D-010)."
+    "note": "Energy Shield is the caster's second pool: pool = Int x K_INT_ES, recharge = Int x K_INT_ESREGEN once delay_sec (3) have passed without a hit, and the full pool comes back in exactly recover_sec (40), the same shape the mana pool was tuned to and about 2.4x faster than a Vit build recovers HP. The 3 sec delay is the owner's ruling (D-124): it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it (D-010)."
   },
   "caps": {
     "crit_chance": null,
     "evasion": 80,
     "perfect_dodge": 21,
-    "alignment": 35,
-    "elem_res": 45,
-    "cdr": 55,
+    "alignment": 50,
+    "elem_res": 75,
+    "cdr": 80,
     "aspd": 500,
     "accuracy": null,
     "weight_overload": 0.5,
-    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together (D-112). `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright. `alignment`, `elem_res`, `cdr` and `perfect_dodge` were re-based to the flat-only stat ceiling when Core Stat % was removed (D-114): each sits just under what a real build actually reaches, so every one of them binds instead of standing behind a build no player can assemble. `perfect_dodge` in particular binds on the Lck ratio alone — the `Perfect dodge %` line is defined in mods.json but no Base pool in bases.json offers it, so nothing lifts that ratio today. **X11** is the gate that proves reachability for the three Mod-driven lines, and it fails the moment a Cap drifts above its own build."
+    "block": 50,
+    "block_note": "`block` is the second avoidance layer (D-123): a blocked hit is deleted outright, the same shape as perfect dodge, and the roll runs after perfect dodge and evasion. It is fed by the Shield offhand's line 1 only, so the Cap is reached by the shield's own ladder rather than by a build the player cannot assemble; formula-defense.md prints the order and X43 is the reachability gate.",
+    "stun": 15,
+    "stun_note": "`stun` bounds the lightning stun chance (elements.md lightning · C10): `Alignment × K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. Alignment alone reaches 10.5, so the Cap binds only once gear adds its points — the mace's line 1 is the published source (D-123), and X43 proves the reach.",
+    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together (D-112). `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright, and it binds on the Lck ratio alone — the `Perfect dodge %` line is defined in mods.json but no Base pool in bases.json offers it, so nothing lifts that ratio today. **`elem_res` (75), `alignment` (50) and `cdr` (80) are hard ceilings, not build targets** (D-124): a maxed single-stat build reaches only 48.45 / 35.5 / 57.375, so each Cap sits above its own build by intent, the same shape as the aspd Cap (500). The player keeps the build's real value instead of a cut, which is new power booked on checks.md D34. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
   },
   "weapons": [
     {
@@ -1375,7 +1432,7 @@
       "weapon_aspd": 1.1
     },
     {
-      "name": "mace / wand / rod",
+      "name": "mace / wand",
       "weapon_aspd": 1
     },
     {
@@ -1416,7 +1473,7 @@
     "taps_per_day": 2
   },
   "potions": {
-    "note": "Single home for the potion ladder farm.md prints (A8 · D-068). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.js) and move no mob_HP · kills/hr · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
+    "note": "Single home for the potion ladder farm.md prints (A8 · D-068). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · kills/hr · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
     "shared_cooldown_sec": 30,
     "auto_use_default": {
       "hp_pct": 30,
@@ -1515,7 +1572,7 @@
     "crit_chance_pct": 18.5,
     "dagger_capped_at_500": false,
     "heal_pool_mult": 2.09,
-    "heal_pool_mult_note": "One round of the heal skills, as a multiple of Max HP: Greater Heal 45% + Heal 8%/sec x 8 sec (64%) = 109% => x2.09. Read by tools/survival.js for the boss 'with heal' column (SV6 gate); the heal skills in skills.json must sum to this number."
+    "heal_pool_mult_note": "One round of the heal skills, as a multiple of Max HP: Greater Heal 45% + Heal 8%/sec x 8 sec (64%) = 109% => x2.09. Read by tools/survival.ts for the boss 'with heal' column (SV6 gate); the heal skills in skills.json must sum to this number."
   },
   "global": {
     "damage_mult": 1,
@@ -1526,11 +1583,24 @@
     "base_drop_chance": 0.08,
     "filter": {
       "upgrade_margin_pct": 10,
-      "note": "The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. At 10% the simulation reproduces the keep-rates this design has published all along (2.2% / 1.2% / 0.7% / 0.3% of drops); at 0% it reports roughly 1.5x that, and the printed sensitivity line shows all three. tools/loot.js measures the keep-rates; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.",
+      "note": "The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. At 10% the simulation reproduces the keep-rates this design has published all along (2.2% / 1.2% / 0.7% / 0.3% of drops); at 0% it reports roughly 1.5x that, and the printed sensitivity line shows all three. tools/loot.ts measures the keep-rates; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.",
       "rules": {
+        "default_enabled": false,
         "default_min_rarity": "any",
         "default_keep_missing_element": true,
-        "note": "loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot."
+        "note": "loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default (D-122): a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept."
+      }
+    },
+    "base_mod": {
+      "note": "Line 1 of every item (D-123). Armour slots lock the Base's own defence type and gain a chance of the next ones on the same line; weapons force every Mod in their parenthesised list; belt / ring / amulet roll line 1 from the slot's Legacy pool. `hybrid_chance` is [second type, third type] per drop, and `value_scale` is what each Mod on the line is multiplied by once the count is known - more Mods is strictly better but sublinear (100% / 140% / 165%), so a three-way line is never the OP pick. item-base.md owns the pools; this block owns only the two rules.",
+      "hybrid_chance": [
+        0.3,
+        0.1
+      ],
+      "value_scale": {
+        "1": 1,
+        "2": 0.7,
+        "3": 0.55
       }
     },
     "ttk_per_mob_sec": 1,
@@ -1546,7 +1616,7 @@
         "group_mobs": 2.5,
         "kills_per_hr_published": 1385,
         "lck_level": 60,
-        "upgrades_per_hr": 4
+        "upgrades_per_hr": 3
       },
       "high": {
         "group_mobs": 4,
@@ -1594,49 +1664,75 @@
   },
   "road": {
     "links": [
-      "Eastgate ↔ Millbrook",
-      "Millbrook ↔ Ashfall",
-      "Ashfall ↔ Ironrow",
-      "Ironrow ↔ Wolf Cross",
-      "Wolf Cross ↔ Highspire",
-      "Highspire ↔ Bonegate",
-      "Bonegate ↔ Frosthold",
-      "Frosthold ↔ Vermolch"
+      { "a": "Eastgate", "b": "Millbrook", "zoneA": 1, "zoneB": 2, "kind": "ladder", "terrain": "river", "trip_min": 5 },
+      { "a": "Millbrook", "b": "Ashfall", "zoneA": 2, "zoneB": 3, "kind": "ladder", "terrain": "forest", "trip_min": 5 },
+      { "a": "Ashfall", "b": "Ironrow", "zoneA": 3, "zoneB": 4, "kind": "ladder", "terrain": "road", "trip_min": 5 },
+      { "a": "Ironrow", "b": "Wolf Cross", "zoneA": 4, "zoneB": 5, "kind": "ladder", "terrain": "mountain", "trip_min": 5 },
+      { "a": "Wolf Cross", "b": "Highspire", "zoneA": 5, "zoneB": 6, "kind": "ladder", "terrain": "moor", "trip_min": 5 },
+      { "a": "Highspire", "b": "Bonegate", "zoneA": 6, "zoneB": 7, "kind": "ladder", "terrain": "mountain", "trip_min": 5 },
+      { "a": "Bonegate", "b": "Frosthold", "zoneA": 7, "zoneB": 8, "kind": "ladder", "terrain": "forest", "trip_min": 5 },
+      { "a": "Frosthold", "b": "Vermolch", "zoneA": 8, "zoneB": 9, "kind": "ladder", "terrain": "river", "trip_min": 5 },
+      { "a": "Eastgate", "b": "Ashfall", "zoneA": 1, "zoneB": 3, "kind": "branch", "terrain": "mountain", "trip_min": 8 },
+      { "a": "Highspire", "b": "Frosthold", "zoneA": 6, "zoneB": 8, "kind": "branch", "terrain": "mountain", "trip_min": 8 },
+      { "a": "Wolf Cross", "b": "Bonegate", "zoneA": 5, "zoneB": 7, "kind": "branch", "terrain": "river", "trip_min": 12 }
     ],
+    "link_rule": "A ladder link joins consecutive settlements and pays the purse. A branch link joins zone i to zone i+2: two of them are the mountain shortcut over a pass (8 min, 2 minutes cheaper than walking both ladder legs), and one is the 12-minute river detour, slower than the long way but safer and richer in trade. Every link carries its own zone pair — nothing reads zone order from an array index.",
     "trip_min": 5,
     "encounters_per_min": 1,
+    "terrain": {
+      "road": { "ambush": 48, "caravan": 28, "pedlar": 16, "chest": 8 },
+      "river": { "ambush": 45, "caravan": 30, "pedlar": 15, "chest": 10 },
+      "forest": { "ambush": 61, "caravan": 19, "pedlar": 9, "chest": 11 },
+      "mountain": { "ambush": 70, "caravan": 15, "pedlar": 7, "chest": 8 },
+      "moor": { "ambush": 46, "caravan": 28, "pedlar": 13, "chest": 13 }
+    },
+    "terrain_rule": "Each terrain row holds absolute points that sum to 100, and no kind may reach 0 (ambush 45-70 · caravan 16-30 · pedlar 6-16 · chest 8-12) — a zero-ambush route would be free progress, which is a skip rather than a shortcut. Terrain tilts the encounter table; it is a mechanic, not decoration. Online encounters roll the link's own terrain row; offline rolls the base table, untilted.",
     "encounters": {
       "ambush": {
-        "weight": 60,
+        "weight": 54,
         "mobs": "2-3 from the lower zone cast, at the player level clamped into that range",
         "resolve": "normal combat (mob-roster.md numbers)",
         "win": "normal 8% drop roll + a 3 gold purse",
-        "loss": "Push as usual, the trip is forfeit and the purse is lost"
+        "loss": "Push as usual, the leg is forfeit and the purse is lost"
       },
       "caravan": {
-        "weight": 25,
+        "weight": 24,
         "mobs": "1 Large from the higher zone cast + 2 Small from the lower",
         "resolve": "normal combat",
         "win": "Standing only, no gold",
-        "loss": "Standing 0 and the trip ends"
+        "loss": "Standing 0 and the leg ends"
       },
       "pedlar": {
-        "weight": 15,
+        "weight": 12,
         "mobs": "none",
         "resolve": "a shop line: information for gold (which Collector piece is next, the pedlar refresh)",
         "win": "gold sink only",
         "loss": "n/a"
+      },
+      "chest": {
+        "weight": 10,
+        "mobs": "none",
+        "resolve": "a locked chest: opened for one Item roll, no fight",
+        "win": "one Item at the destination zone's quality ceiling",
+        "loss": "n/a"
       }
     },
+    "base_rule": "`encounters[].weight` IS the base table (54/24/12/10, the plain average of the five terrain rows) and it is what an offline session rolls, so an away period can never route into the heaviest-ambush terrain and pay out at full rate. A chest is capped once per link per day, the same shape as the purse; it pays no crafting stones, so G5's tier-stone monopoly stays with Elite and boss.",
     "purse_gold": 3,
     "purse_once_per_link_per_day": true,
+    "chest_once_per_link_per_day": true,
+    "circuit": {
+      "push_skips_leg": true,
+      "offline_resolves": true,
+      "editable_in": "settlement"
+    },
     "standing_per_trip_kills": 15,
-    "note": "The Road is opt-in and online only. A trip is 5 real minutes and carries 5 encounters (1 per Road minute). C+D stay a content choice, not an income choice: the purse pays at most 24 gold a day (8 links x 3 gold, once per link per day) against a junk-sell mint of 'thousands', and Standing is granted in kill-equivalents far below the kills the trip forfeits. Road pays no stones and AFK never runs on it.",
+    "note": "The Road is opt-in. A ladder leg is 5 real minutes and carries 5 encounters (1 per Road minute); a branch leg is 8 (mountain shortcut) or 12 (river detour). C+D stay a content choice, not an income choice: only the 8 ladder links pay the purse, so the mint stays at most 24 gold a day (8 x 3 gold, once per link per day) against a junk-sell mint of 'thousands'; branch links pay no purse and grant Standing only where they arrive. Road pays no stones. A Circuit — an ordered list of links a player loops — does run offline (section 6 and D-133), rolling the untilted base table.",
     "forfeit_kills": 120
   },
   "inventory": {
-    "adventure_slots": 50,
-    "character_slots": 30,
+    "adventure_slots": 100,
+    "character_slots": 50,
     "stack_size": {
       "stone": 999,
       "herb": 100,
@@ -1650,10 +1746,10 @@
     "gold_uses_slot": false,
     "offline_cap_hr": 12,
     "overflow": "stop_pickup",
-    "note": "Adventure bag (the temporary inventory) = 50 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 30 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). This replaces the D-037 100-slot auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
+    "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the D-037 auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
   },
   "rarity": {
-    "note": "Rarity answers Mod count only (item-rarity.md · glossary rule 2). The counts and the crafted ceilings are written here once; the client's Add craft reads them and never infers a number from the Rarity name.",
+    "note": "Rarity answers Mod count only (item-rarity.md · glossary rule 2). The counts and the crafted ceilings are written here once; the client's Add craft reads them and never infers a number from the Rarity name. D-123: on the 7-line skeleton the count is `dropped_random` - how many of the 4 Random lines arrive rolled at drop - while line 1 (Base Mod) and lines 2-3 (Legacy) are always present.",
     "floor_ceiling": {
       "note": "item-rarity.md 'Item Quality vs Drop Level': each drop source defines a floor and a ceiling. Offline results are limited to the zone floor (save.md · loot.md section 7).",
       "low": {
@@ -1670,17 +1766,11 @@
       }
     },
     "Common": {
-      "dropped": [
-        2,
-        3
-      ],
-      "crafted_max": 3
+      "dropped_random": 2,
+      "crafted_max": 7
     },
     "Rare": {
-      "dropped": [
-        3,
-        5
-      ],
+      "dropped_random": 4,
       "crafted_max": 7
     },
     "drop_chance": {
@@ -1693,7 +1783,9 @@
       2
     ],
     "stat_mod_slots": 2,
-    "legacy_slots": 2
+    "legacy_slots": 2,
+    "base_mod_slots": 1,
+    "skeleton_note": "Every item is 7 lines: line 1 the Base Mod (unremovable, part of the frame), lines 2-3 Legacy (unremovable), lines 4-7 Random (craftable). Rarity fills the Random half at drop: dropped_random says how many of the 4 arrive rolled, and crafted_max is the total ceiling for both Rarities, so a Common's mods_added_cap is exactly the gap to 7. `base_mod_slots` is the unremovable floor's other half - the craft verbs refuse index < base_mod_slots + legacy_slots."
   },
   "salvage": {
     "note": "loot.md section 5 · checks.md F15: a luck-protection milestone, one Reroll tier stone per 500 gear pieces salvaged (dissolved by the bag filter). The client counts the pieces so the milestone is real rather than implied.",
@@ -1870,7 +1962,7 @@
       }
     ],
     "gear_mod_per_level": 2,
-    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.js` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.js --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.js` holds the G5 boss gate against a fully upgraded set — which is how checks.md H1 pays for the uplift now that D-103 measured `mob_HP` as already inside the pacing (it moves nothing there).",
+    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.ts --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.ts` holds the G5 boss gate against a fully upgraded set — which is how checks.md H1 pays for the uplift now that D-103 measured `mob_HP` as already inside the pacing (it moves nothing there).",
     "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing · 20% reroll values inside the current Tiers · 15% +1 Mod (crafted max and Core slot cap respected) · 15% remove one non-legacy Mod · 10% reroll Element (the only Element change in the game) · 10% Gear Mod +2 · 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
     "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe · +5 to +10 90% down to 60% and a fail drops one level · +11 to +15 50% down to 20% and a fail breaks the piece · protection 5 per piece from birth, each would-be break spends one and drops a level · Repair stone revives at the pre-break level and refills protection · costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality Stones · online only"
   },
@@ -1883,13 +1975,13 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "hr1 28.7 → hr2-4 9.4 → after that 5.7 (low band) · keep-rate 2.35% low · 1.40% mid · 0.75% high · 0.36% high + full_lck",
-      "expression": "measured — tools/loot.js, the seven roll steps in loot.md section 1",
+      "value": "hr1 28.1 → hr2-4 5.0 → after that 3.3 (low band) · keep-rate 1.95% low · 1.21% mid · 0.67% high · 0.31% high + full_lck",
+      "expression": "measured — tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
     {
       "id": "F11",
-      "value": "0.31 Flat lines per high-zone drop (2.75 lines per item) · the four early-game Flats thin out as Item quality rises",
+      "value": "0.30 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises",
       "expression": "Flat line per drop (high zone, after the 0.25 early-game weighting)",
       "status": "measured"
     },
@@ -2014,7 +2106,7 @@
     "lines_max": 1349,
     "lines_now": 1349,
     "gate": "L9 fails when the count rises above lines_max. Lower the cap as lines are fixed.",
-    "exempt": "harness/decisions.md, harness/todo.md, harness/handoff.md, harness/HARNESS.md, and any line marked lint:allow",
+    "exempt": "harness/decisions.md, harness/todo.md, harness/HARNESS.md, and any line marked lint:allow",
     "baseline_note": "Baseline measured on 2026-10-04 with every doc present. skill-pool.md was restored from git mid-pass and its prose legitimately raised the count from 1370 to 1390, which is the gate working: the cap may only fall, and every fix must lower it here."
   }
 }
