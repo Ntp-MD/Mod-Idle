@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -83,10 +83,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h4>On this page</h4>
 <a href="#h-todo">Todo</a>
 <a href="#h-open-work">Open work</a>
-<a href="#h-a-waiting-on-the-owner">· A · waiting on the owner</a>
-<a href="#h-b-mine-to-build">· B · mine to build</a>
 <a href="#h-c-housekeeping-that-must-not-rot">· C · housekeeping that must not rot</a>
-<a href="#h-post-release-deliberately-not-tracked">· Post-release · deliberately not tracked</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
@@ -110,8 +107,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html" aria-current="page">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -144,28 +139,15 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Todo</h1>
-<dl class="kv"><dt>file</dt><dd><code>harness/todo.md</code> · 57 lines · 635 words · written 2026-10-05T09:11:09Z</dd><dt>category</dt><dd>Start here</dd><dt>imports</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a></dd><dt>imported by</dt><dd>—</dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-item-rarity.html">item-rarity.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../harness/todo.md">harness/todo.md</a></dd></dl>
+<dl class="kv"><dt>file</dt><dd><code>harness/todo.md</code> · 19 lines · 129 words · written 2026-10-06T01:06:43Z</dd><dt>category</dt><dd>Start here</dd><dt>imports</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a> · <a href="doc-checks.html">checks.md</a></dd><dt>imported by</dt><dd>—</dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../harness/todo.md">harness/todo.md</a></dd></dl>
 
 <h2 id="h-todo">Todo</h2>
-<p>import AGENT.md import harness/HARNESS.md import checks.md import harness/decisions.md</p>
-<p>The <strong>single work file</strong>: only what is <em>not built yet</em>. Nothing here restates a number — every line points at the file that owns it, so a decision lands in one home (<code><a href="doc-checks.html">checks.md</a></code> holds the promises, <code>harness/decisions.md</code> records what was already ruled and why). <strong>When work is done the line is deleted, not ticked.</strong> Open items are split by who can close them: <strong>A</strong> waiting on the owner · <strong>B</strong> mine to build · <strong>C</strong> housekeeping that must not rot.</p>
-<p><code>node tools/verify.ts</code> green is the state of everything already built; this file is only what is <em>not</em> built. <strong>Do not copy the cage results in here</strong> — <code>verify.ts</code> prints them live and a typed copy goes stale.</p>
+<p>import AGENT.md import harness/HARNESS.md import checks.md</p>
+<p>The <strong>single work file</strong>: only what is <em>not built yet</em>, split by who can close it — <strong>A</strong> waiting on the owner · <strong>B</strong> mine to build · <strong>C</strong> housekeeping that must not rot. <strong>When work is done the line is deleted, not ticked.</strong> <code>node tools/verify.ts</code> green is the state of everything already built, so never copy a cage result in here.</p>
 <h2 id="h-open-work">Open work</h2>
-<h3 id="h-a-waiting-on-the-owner">A · waiting on the owner</h3>
-<ul><li><strong>World scale — 18 zones · 180 levels</strong> (<code>owner/travel-route-combat.md</code> sections 9-10). **Built, and the</li></ul>
-<p>  curve was NOT rebalanced<strong> — the owner's 10.6 ladder rule was rejected in favour of holding the published   numbers: zones 1-9 keep their exact anchors, and zones 10-18 are computed by holding the gear factor flat at   its level-90 measured value (<code>mob.curve.extend</code>), so mob_HP(180) lands at 25,741 against the owner's ~25,700   projection. Level cap 190 · spawn cap 180 · timeline reaches 198.8 hr with levels 1-100 unmoved. Ships:   18 zones, 18 bosses, 18 settlements with a capital every three zones, 21 road links, the species re-spread   over 18 zones, and the map overlay. </strong>Open:** three survival gates are red because the larger cap changes what   the old floor prices were calibrated against — see B.</p>
-<ul><li><strong>Circuit expedition objective — needs a reward-mint ruling.</strong> A goal on a multi-settlement circuit</li></ul>
-<p>  (finish a lap with no Push) wants a reward, and the parked idea specified gold and stones. A gold bonus   would exceed the published 24 gold/day Road purse cap (D-133 · G6-G9 · E5); a stone bonus would be a new   stone source. Blocked until the owner rules whether the cap may rise or the reward is non-material (a   completion log). The objective itself is cheap once that is decided — <code>advanceLeg</code> already counts laps.</p>
-<h3 id="h-b-mine-to-build">B · mine to build</h3>
-<ul><li><strong>Three survival gates are red at the new cap, and both fixes are owner calls.</strong> <code>SV2</code> wants the tank build to</li></ul>
-<p>  beat glass by at least 1.5x, but a full Vit spread now gives only 1.42x: the flat per-level HP term   (<code>hp_per_level × 189</code>) outweighs the Vit K term, so stat investment matters proportionally less the longer   the game runs. Raising <code>K_VIT_HP</code> 20 → 29 restores 1.5x and is real player power; lowering the floor to 1.4   accepts that Vit is a thinner lever at the endgame. <code>SV6</code>/<code>SV7</code> are the G5 boss gate and now report 0-of-4   builds Pushed, where the published answer expects some to fail — the same cause, the boss no longer threatens.</p>
 <h3 id="h-c-housekeeping-that-must-not-rot">C · housekeeping that must not rot</h3>
-<ul><li><strong>Two ratchets now sit at their ceiling.</strong> <code>L9</code> (prose carries no numbers) is at its cap with zero headroom, so</li></ul>
-<p>  the next doc line that puts a digit in prose outside a generated block fails <code>node tools/lint.ts</code>. <code>A-hr100</code> is at   its copy cap in <code>tools/anchors.ts</code>. Deleting a stale quote lowers the cap in the same pass; a new copy must not be   added.</p>
-<ul><li><strong><code>A-refine</code> now carries a context regex.</strong> It shares its digits with the drop-rate multiplier at the stat</li></ul>
-<p>  ceiling, so it reads only lines that are about refining, a set or a piece. Widen the pattern, never the cap, if   another unrelated figure collides with it.</p>
-<h3 id="h-post-release-deliberately-not-tracked">Post-release · deliberately not tracked</h3>
-<ul><li>Client Road/Map cosmetics beyond the shipped Map page and Circuit editor — waypoint and link dialogs, richer map markers.</li></ul>
+<ul><li><strong><code>L9</code> sits exactly on its cap</strong> (<code>tools/data/engine.json</code> <code>doc_prose_lines_max</code>), so it has zero</li></ul>
+<p>  headroom: the next doc line that puts any digit in prose fails <code>verify.ts</code>. The cap may only fall,   never rise — lower it in the same pass that fixes lines.</p>
 <nav class="pager"><a href="doc-AGENT.html">← AGENT.md</a><a href="index.html">Start here</a><a href="doc-concept.html">concept.md →</a></nav>
 
 </article>

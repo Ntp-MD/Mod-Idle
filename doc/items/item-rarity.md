@@ -19,13 +19,13 @@ The item system splits into 2 axes, per terms in glossary.md.
 | Common | 5 (Base + 2 Legacy + 2 Random) | 7 (Add mod stone ×2) | 82% |
 | Rare | 7 (Base + 2 Legacy + 4 Random) | 7 | 18% |
 
-- The seven-line skeleton is fixed (item-base.md · D-123): the first line is the Base Mod and the next two the Legacy pair, both unremovable, so Rarity fills only the Random lines. Crafted max is the full seven for both, so a Common's `mods_added_cap` is exactly the gap to a full item. Net counting: removing a Random line frees the slot again. Per-item `mods_added` range stored in save.md.
+- The seven-line skeleton is fixed (item-base.md): the first line is the Base Mod and the next two the Legacy pair, both unremovable, so Rarity fills only the Random lines. Crafted max is the full seven for both, so a Common's `mods_added_cap` is exactly the gap to a full item. Net counting: removing a Random line frees the slot again. Per-item `mods_added` range stored in save.md.
 - Random lines never roll Stat Mod Flat once the item already holds its one Stat Mod line; the stat it feeds is rolled at drop (equipment-slot-pools.md).
 
 - Chance numbers are set in loot.md section 1 · Mod count does **not** change the strength of each Mod value (see next section).
 - Tiers inside Item quality roll with weights **T3 50% · T2 33% · T1 17%** — T1 touches 17% so dropped items feel "almost good" often but "best" is never free. Otherwise Refine would have nothing to do.
 
-- **No third Rarity level.** The old "Unique" idea (a craft-only special Base with a fixed Mod count) is **cut** (D-009 5c): Rarity stays two levels, and item identity is carried by Base frame + Mods + quality + Tier instead.
+- **No third Rarity level.** The old "Unique" idea (a craft-only special Base with a fixed Mod count) is **cut**: Rarity stays two levels, and item identity is carried by Base frame + Mods + quality + Tier instead.
 
 # Item Quality — Value Range
 
@@ -75,7 +75,7 @@ Both carry their frame's Base Mod and the Legacy pair underneath the Random line
 
 # Waiting Items
 
-The only genuinely open item here is now the A10 consequence (weapon Base frame enumeration → `harness/todo.md` B6); the crafting and third-Rarity waits were both resolved.
+The A10 consequence is closed — every weapon type now carries its frames in `item-base.md`'s frames table, gated by `bases.ts` — and the crafting and third-Rarity waits were both resolved.
 
 - **Crafting and res** — Decided that **Element cannot be locked**. See crafting.md.
 

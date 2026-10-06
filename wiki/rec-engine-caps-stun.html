@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -118,8 +118,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -153,18 +151,18 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h1>stun</h1>
 <p class="hint">One row of <code>tools/data/engine.json</code> → <code>caps</code>. Stat model · K values · Mod maxima · loot model · craft prices · timeline. Changing a number here re-prices every town line and rewrites checks.md groups A · B · C · F.</p>
 <dl class="kv"><dt>path</dt><dd><code>caps.stun</code></dd><dt>collection</dt><dd><a href="data-engine-caps.html">Caps</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>14</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Stun</td><td><code>15</code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Stun</td><td><code>null</code></td><td><code>str</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="caps"><input type="hidden" name="id" value="stun">
-<div class="f"><label for="f-stun">Stun<small>inferred from the JSON on disk</small></label><div><input id="f-stun" type="text" inputmode="decimal" name="stun" value="15"></div></div>
+<div class="f"><label for="f-stun">Stun<small>inferred from the JSON on disk</small></label><div><input id="f-stun" type="text" inputmode="decimal" name="stun" value="{}"></div></div>
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="caps"><input type="hidden" name="id" value="stun"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
 
-<section><h2>Mentioned in the specs</h2><table class=""><thead><tr><th>document</th><th>under heading</th><th>matched as</th><th>hits</th></tr></thead><tbody><tr><td><a href="doc-checks.html#h-c-every-cap-must-be-reachable">checks.md</a></td><td>C · Every Cap Must Be Reachable</td><td><code>stun</code></td><td>3</td></tr><tr><td><a href="doc-combat.html#h-1-attack-clock">combat.md</a></td><td>1. Attack Clock</td><td><code>stun</code></td><td>3</td></tr><tr><td><a href="doc-concept.html#h-failure-points">concept.md</a></td><td>Failure Points</td><td><code>stun</code></td><td>2</td></tr><tr><td><a href="doc-elements.html#h-lightning-shock">elements.md</a></td><td>Lightning — shock</td><td><code>stun</code></td><td>14</td></tr><tr><td><a href="doc-equipment-slot-pools.html#h-mod-availability-by-slot">equipment-slot-pools.md</a></td><td>Mod Availability by Slot</td><td><code>stun</code></td><td>5</td></tr><tr><td><a href="doc-equipment-slot-weapon.html#h-main-hand">equipment-slot-weapon.md</a></td><td>main hand</td><td><code>stun</code></td><td>3</td></tr><tr><td><a href="doc-harness/decisions.html#h-decisions">harness/decisions.md</a></td><td>Decisions</td><td><code>stun</code></td><td>15</td></tr><tr><td><a href="doc-item-base.html#h-line-1-base-mod-the-frame-s-own-line">item-base.md</a></td><td>Line 1 · Base Mod (the frame's own line)</td><td><code>stun</code></td><td>1</td></tr><tr><td><a href="doc-mod-pool.html#h-combat">mod-pool.md</a></td><td>Combat</td><td><code>stun</code></td><td>1</td></tr><tr><td><a href="doc-skill-pool-attack.html#h-31-attack-skills">skill-pool-attack.md</a></td><td>31 attack skills</td><td><code>stun</code></td><td>2</td></tr><tr><td><a href="doc-skill-pool-system.html#h-how-skills-and-normal-attacks-work-together">skill-pool-system.md</a></td><td>How skills and normal attacks work together</td><td><code>stun</code></td><td>1</td></tr></tbody></table></section>
+<section><h2>Mentioned in the specs</h2><table class=""><thead><tr><th>document</th><th>under heading</th><th>matched as</th><th>hits</th></tr></thead><tbody><tr><td><a href="doc-checks.html#h-c-every-cap-must-be-reachable">checks.md</a></td><td>C · Every Cap Must Be Reachable</td><td><code>stun</code></td><td>3</td></tr><tr><td><a href="doc-combat.html#h-1-attack-clock">combat.md</a></td><td>1. Attack Clock</td><td><code>stun</code></td><td>6</td></tr><tr><td><a href="doc-concept.html#h-failure-points">concept.md</a></td><td>Failure Points</td><td><code>stun</code></td><td>2</td></tr><tr><td><a href="doc-core-stats.html#h-core-stats">core-stats.md</a></td><td>Core Stats</td><td><code>stun</code></td><td>2</td></tr><tr><td><a href="doc-elements.html#h-lightning-shock">elements.md</a></td><td>Lightning — shock</td><td><code>stun</code></td><td>15</td></tr><tr><td><a href="doc-equipment-slot-pools.html#h-mod-availability-by-slot">equipment-slot-pools.md</a></td><td>Mod Availability by Slot</td><td><code>stun</code></td><td>6</td></tr><tr><td><a href="doc-equipment-slot-weapon.html#h-main-hand">equipment-slot-weapon.md</a></td><td>main hand</td><td><code>stun</code></td><td>3</td></tr><tr><td><a href="doc-equipment-weapon.html#h-frames-what-a-weapon-type-drops-as">equipment-weapon.md</a></td><td>Frames — what a weapon type drops as</td><td><code>stun</code></td><td>1</td></tr><tr><td><a href="doc-formula.html#h-summary-of-set-k-values">formula.md</a></td><td>Summary of Set K Values</td><td><code>stun</code></td><td>2</td></tr><tr><td><a href="doc-item-base.html#h-line-1-base-mod-the-frame-s-own-line">item-base.md</a></td><td>Line 1 · Base Mod (the frame's own line)</td><td><code>stun</code></td><td>2</td></tr><tr><td><a href="doc-mod-pool.html#h-combat">mod-pool.md</a></td><td>Combat</td><td><code>stun</code></td><td>1</td></tr><tr><td><a href="doc-skill-pool-attack.html#h-39-attack-skills">skill-pool-attack.md</a></td><td>39 attack skills</td><td><code>stun</code></td><td>2</td></tr><tr><td><a href="doc-skill-pool-system.html#h-how-skills-and-normal-attacks-work-together">skill-pool-system.md</a></td><td>How skills and normal attacks work together</td><td><code>stun</code></td><td>1</td></tr></tbody></table></section>
 
 <section><h2>Raw JSON</h2><pre class="code">{
-  &quot;stun&quot;: 15
+  &quot;stun&quot;: null
 }</pre></section>
 </div>
 </main>

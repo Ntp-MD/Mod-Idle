@@ -1,5 +1,5 @@
 /**
- * Weapon Mastery — the level-independent side track (`equipment-weapon.md` · D-065).
+ * Weapon Mastery — the level-independent side track (`equipment-weapon.md`).
  *
  * Mastery is earned per kill by the weapon actually held, and it pays in weight and drop rate only.
  * It never touches damage, because all weapon types are already tuned to equal DPS — a damage bonus

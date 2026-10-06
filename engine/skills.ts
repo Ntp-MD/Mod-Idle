@@ -26,13 +26,13 @@ import type { EngineData, SkillRow, SkillsData } from './types.ts';
 export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const F = (SKILLS.meta && SKILLS.meta.formula) || {};
   const LEVEL_STEP = F.level_step_pct != null ? F.level_step_pct : 1.5;
-  /** A flat mana cost climbs on its own step, steeper than the damage ramp (D-136). */
+  /** A flat mana cost climbs on its own step, steeper than the damage ramp. */
   const MANA_LEVEL_STEP = F.mana_level_step_pct != null ? F.mana_level_step_pct : 5;
   /** How much of the pool's growth a flat cost takes on, so Int and Max Mana gear still price it. */
   const MANA_POOL_EXPONENT = F.mana_pool_exponent != null ? F.mana_pool_exponent : 0.5;
   /**
    * The pool a flat cost is quoted against — the level-1 caster's own pool, derived from the same
-   * terms `maxManaOf` builds it from, so it cannot drift from the pool model (D-136).
+   * terms `maxManaOf` builds it from, so it cannot drift from the pool model.
    */
   const MANA_REF_POOL = E.level_gain.mana_base
     + E.stat.base * E.K.K_INT_MP;
@@ -50,7 +50,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   /**
    * The unit is part of the number and the match is anchored, so a bare `14` or a missing field is
    * a parse failure rather than a zero — a cost that silently reads as 0 would make the skill free
-   * (D-136). `tools/lib/roster.ts` S15 is the other half of the guard.
+   *. `tools/lib/roster.ts` S15 is the other half of the guard.
    */
   function manaSpec(skill: SkillRow): { kind: ManaKind; value: number } | null {
     const m = String(skill.mana == null ? '' : skill.mana).match(/^(\d+(?:\.\d+)?)\s*(%|flat)(?![A-Za-z])/);
@@ -60,7 +60,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
 
   /**
    * What the row costs right now, in absolute pool units. A percentage charges the usable pool and
-   * is unchanged from before D-136; a flat row charges its own units, grown by skill level on
+   * is unchanged from before; a flat row charges its own units, grown by skill level on
    * `MANA_LEVEL_STEP` and by the pool's growth on `MANA_POOL_EXPONENT`, so Int and Max Mana gear
    * raise the price instead of only widening the bar. Auras reserve a share of the pool but never
    * discount a cost, so the pool-growth term reads `maxMana`, not `usableMana`.
@@ -83,7 +83,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   }
 
   /**
-   * The finished hit a press multiplies (D-070 · B5): two bases only, and Element folds into the
+   * The finished hit a press multiplies (B5): two bases only, and Element folds into the
    * magic one rather than becoming a third.
    */
   function basisOf(skill: SkillRow, { phys, magic, elem, align }: { phys?: number; magic?: number; elem?: number; align?: number }) {
@@ -93,7 +93,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   /**
    * press = final_pct × basis(built from the caller's own lines) × (1 + (skill_level − 1) × 1.5%).
    * `final_pct` is the level-1 fraction the row states, so a fresh skill presses exactly what its
-   * row says and the level ramp is the only growth (D-070: K_SKILL and the stat/power split are gone).
+   * row says and the level ramp is the only growth (: K_SKILL and the stat/power split are gone).
    */
   function perPress(skill: SkillRow, { phys, magic, elem, align, level }: { phys?: number; magic?: number; elem?: number; align?: number; level?: number }) {
     if (skill.final_pct == null || skill.basis == null) return null;
@@ -101,7 +101,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     return (skill.final_pct / 100) * basis * (1 + Math.max(0, (level || 1) - 1) * LEVEL_STEP / 100);
   }
 
-  /** A phys-basis press can crit; a magic-basis one cannot (D-070 pin 1). */
+  /** A phys-basis press can crit; a magic-basis one cannot (pin 1). */
   const critsOnBasis = (skill: SkillRow) => skill.basis !== 'magic';
 
   /** cooldown = base_cd × (1 − ladder/100) × (1 − cdr/100) — ladder always applies first. */
@@ -215,12 +215,12 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     'physical_power', 'elemental_alignment', 'elemental_resistance', 'damage_taken', 'heal_per_sec', 'heal_instant',
     // the target-side set: what a curse writes on the mob it lands on
     'damage_dealt', 'accuracy', 'crit_chance',
-    // what the per-Element pool (D-090) and the status store (D-094) made expressible
-    'leech', 'elemental_power', 'burn_stacks', 'poison_stacks', 'bleed_chance', 'poison_hold_sec',
+    // what the per-Element pool and the status store made expressible
+    'leech', 'elemental_power', 'burn_stacks', 'poison_stacks', 'mark_stacks', 'bleed_chance', 'poison_hold_sec',
     'execute_threshold_pct', 'execute_damage', 'damage_per_evasion_pct', 'resistance_pierce_pct', 'global_speed',
-    // a strip of the mob's own Elemental resistance, in percentage points (B8 · D-099)
+    // a strip of the mob's own Elemental resistance, in percentage points (B8)
     'mob_elemental_resistance_pct',
-    // D-102 (B9 close-out): the magnitudes the last prose rows state
+    // (B9 close-out): the magnitudes the last prose rows state
     'mob_elemental_damage_taken_pct', 'hits', 'hit_pct', 'stop_sec',
     'missing_hp_pct_for_max', 'damage_at_missing_hp', 'dodge_charges', 'dodge_charges_per_levels',
     'dodge_charges_cap', 'spread_targets',
@@ -254,5 +254,11 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     weaponGroupOf, groupBonus, masteryBonus, row, reservePct,
     all: () => SKILLS.skills,
     of: (type: string) => SKILLS.skills.filter((s) => s.type === type),
+    /**
+     * The attack ladder's floor: the weakest attack row in the roster. A magic weapon's basic attack
+     * is a `bolt` worth exactly this, so the filler a caster falls back on is the roster's own floor
+     * rather than a number typed beside it (HugePatch §14c).
+     */
+    ladderFloorPct: () => Math.min(...SKILLS.skills.filter((s) => s.type === 'attack' && typeof s.final_pct === 'number').map((s) => s.final_pct as number)),
   };
 }

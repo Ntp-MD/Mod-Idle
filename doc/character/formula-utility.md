@@ -42,43 +42,43 @@ dps      = dmg_per_hit × hits/sec
 
 ```
 accuracy   = (dex * K_DEX_ACC) * (1 + accuracy_pct/100)
-evasion    = stat_c(mob_level) × species.dex × K_EVASION × body_class
+evasion    = mob.stat × species.dex × K_EVASION × body_class
 hit_chance = accuracy / (accuracy + evasion)
 ```
 
 - `K_DEX_ACC` = 1.5 · Dex 433 gives 650, multiplied by `Accuracy %` Mod max 25 on main hand = **813** at ceiling.
-- `K_EVASION` = 0.5 · the same K the player's own Evasion rating uses, because a mob runs the player's stat block (D-019). The value is chosen so the average species on a Medium body lands back on the retired `level × 1` curve, so this is a derivation, not a rebalance — **X21** fails if it stops being true.
+- `K_EVASION` = 0.5 · the same K the player's own Evasion rating uses, because the two sides meet on one opposed roll. The value is chosen so the mean species on a Medium body lands on the published reference mob, so this is a derivation, not a rebalance — **X21** fails if it stops being true.
 - **There is no `accuracy_flat`** — Accuracy Mod is % only (see mod-pool.md), same missing-slot issue as aspd.
 - **Removed `accuracy_cap` 2,000** — the ratio formula already limits itself (approaches 100% but never reaches it), and the calculable ceiling 956 never came near 2,000, so the old Cap guarded nothing except making numbers look reasoned.
-- **Mob evasion left `level × 1`.** That curve was a stand-in for "evasion grows with the mob's own Dex", and once D-019 gave every species a Dex line the stand-in became wrong: it made a Slime and an Elf equally hard to hit at the same level. Body class already moved the number the other way (Small ×1.10 · Large and Elite ×0.90), so size now divides evasion, not just HP.
-- The older value, `level 100 = 600`, was set on the assumption Dex = 890 — no build has ever reached that, and the real ceiling is now 510 (D-114).
+- **Mob evasion left `level × 1`.** That curve was a stand-in for "evasion grows with the mob's own Dex", and once gave every species a Dex line the stand-in became wrong: it made a Slime and an Elf equally hard to hit at the same level. Body class already moved the number the other way (Small ×1.10 · Large and Elite ×0.90), so size now divides evasion, not just HP.
+- The older value, `level 100 = 600`, was set on the assumption Dex = 890 — no build has ever reached that, and the real ceiling is now 510.
 
 <!-- BEGIN GENERATED:hit-chance -->
 | Dex from items | Dex | accuracy | hit vs easiest species | hit vs reference mob | hit vs hardest species |
 |---|---|---|---|---|---|
-| none (level only) | 108 | 203 | 83.7% | 79.8% | 75.0% |
-| Dex 1 item | 133 | 250 | 86.3% | 83.0% | 78.7% |
-| Dex 2 items | 158 | 297 | 88.2% | 85.3% | 81.4% |
-| Full Dex 13 items | 433 | 813 | 95.4% | 94.1% | 92.3% |
+| none (level only) | 108 | 203 | 83.7% | 80.5% | 75.0% |
+| Dex 1 item | 133 | 250 | 86.3% | 83.6% | 78.7% |
+| Dex 2 items | 158 | 297 | 88.2% | 85.8% | 81.4% |
+| Full Dex 13 items | 433 | 813 | 95.4% | 94.3% | 92.3% |
 
-Evasion is now the species Dex line (`stat_c × species.dex × K_EVASION 0.5 × body`), so hit chance answers *what* is being hit, not just the level. The reference mob is the **mean species vector on a Medium body** (51.4 evasion at level 190) — a real average of the 15 lineages, not an imaginary ×1.00 one. Easiest = Slime (Dex ×0.73 · 40) · hardest = Elf (Dex ×1.25 · 68).
+Evasion is now the species Dex line (`stat_c × species.dex × K_EVASION 0.5 × body`), so hit chance answers *what* is being hit, not just the level. The reference mob is the **mean species vector on a Medium body** (49.1 evasion at level 190) — a real average of the 22 lineages, not an imaginary ×1.00 one. Easiest = Slime (Dex ×0.73 · 40) · hardest = Elf (Dex ×1.25 · 68).
 
-The reference is set on the mean so the anchor does not move: `stat_c × 0.5` at the roster mean is 51.4 evasion, against the retired `level × 1` curve of 190. The published hit chances therefore hold as they were — 80% with no Dex, 94.1% at the accuracy ceiling — and everything derived from them (the DPS anchor row in formula.md section 0, mob_HP, the E1-E5 hour checkpoints) is untouched. What changed is only *who* sits above and below the reference: the species spread runs 40-68 evasion, and a body class multiplies it again (Small ×1.1 · Large and Elite ×0.9).
+The reference is set on the mean so the anchor does not move: `stat_c × 0.5` at the roster mean is 49.1 evasion, against the retired `level × 1` curve of 190. The published hit chances therefore hold as they were — 81% with no Dex, 94.3% at the accuracy ceiling — and everything derived from them (the DPS anchor row in formula.md section 0, mob_HP, the E1-E5 hour checkpoints) is untouched. What changed is only *who* sits above and below the reference: the species spread runs 40-68 evasion, and a body class multiplies it again (Small ×1.1 · Large and Elite ×0.9).
 
 **Same line, pointed at the player** — mob accuracy against the player's own Evasion rating (`Dex × 0.5` + Gear Evasion flat 6-30):
 
 | mob accuracy tier | species | mob accuracy | mob hits a Dex 0-item player | mob hits a Full-Dex player |
 |---|---|---|---|---|
-| ×0.05 | Husk · Slime | 6 | 10.4% | 2.8% |
-| ×0.25 | Golem · Knight | 33 | 37.6% | 13.1% |
-| ×0.50 | Spider · Troll · Seraph | 83 | 60.5% | 27.7% |
-| ×0.75 | Rat · Goblin · Bandit · Orc · Demon | 119 | 68.6% | 35.4% |
-| ×1.00 | Wolf · Elf · Drake | 170 | 75.8% | 44.0% |
+| ×0.05 | Slime | 6 | 9.9% | 2.7% |
+| ×0.25 | Skeleton · Mummy · Golem · Treant · Giant | 31 | 36.7% | 12.7% |
+| ×0.50 | Kobold · Ogre · Troll · Spider · Dryad | 81 | 59.8% | 27.1% |
+| ×0.75 | Goblin · Orc · Minotaur · Vampire · Demon · Human · Lizardman | 112 | 67.3% | 34.0% |
+| ×1.00 | Wolf · Dragon · Elf · Werewolf | 162 | 74.9% | 42.8% |
 
 K_DEX_ACC 1.5 against K_EVASION 0.5 is a 3:1 ratio, so equal Dex on both sides lands the attacker at 75.0%. The defensive line is deliberately the weaker one per point, so one stat alone cannot approach untouchable, and this roll sits at step 2 of the incoming order — behind perfect dodge, ahead of every mitigation (combat.md section 2).
 <!-- END GENERATED:hit-chance -->
 
-- **Mobs dodge too** — the second avoidance layer on the same stat block: `own Agi rate ÷ (rate + the attacking player's accuracy)`, the opposed shape X20 already uses on the player side (D-024). It is *not* folded into `hit_chance` above, which is the evasion layer only, so a fast weapon with low per-hit damage loses both rolls more often than a slow one. The band is guarded by **X24** and the per-entry numbers are generated in `mob-roster.md`.
+- **Mobs dodge too** — the second avoidance layer on the same stat block: `own Agi rate ÷ (rate + the attacking player's accuracy)`, the opposed shape X20 already uses on the player side. It is *not* folded into `hit_chance` above, which is the evasion layer only, so a fast weapon with low per-hit damage loses both rolls more often than a slow one. The band is guarded by **X24** and the per-entry numbers are generated in `mob-roster.md`.
 - Accuracy is Offensive and can only roll on main hand, while Dex from Core stat still counts toward accuracy normally.
 
 # 10. Drop chance
@@ -109,13 +109,13 @@ aspd            = aspd × (1 − encumbrance)
 - The game uses the same unit shown on items (weight unit) and displays `used / capacity` per character-sheet.md rules.
 
 <!-- BEGIN GENERATED:weight-tax -->
-| Worn set at high quality (item-base.md) | High weight | No Str (1776) | Str 2 items (1876) | Str 6 items (2076) |
+| Worn set at high quality (item-base.md) | High weight | No Str (1216) | Str 2 items (1316) | Str 6 items (1516) |
 |---|---|---|---|---|
 | cloth/glass (Circlet · Vestment · Legwraps · Silk Slippers · Silk Sash · Silk Wraps · Iron Band ×2 · Jade Amulet · Silver Hoop · Traveler's Cloak) | 346 | 0% | 0% | 0% |
 | balanced (Hood · Ring Mail · Breeches · Strapped Boots · Chain Clasp · Nimble Mitts · Iron Band ×2 · Jade Amulet · Jade Stud · Traveler's Cloak) | 500 | 0% | 0% | 0% |
 | armored (Sallet · Plate Vest · Cuisses · Plated Greaves · War Belt · Iron Gauntlets · Moonstone Signet ×2 · Onyx Talisman · Onyx Drop · Heavy Mantle) | 747 | 0% | 0% | 0% |
 
-Capacity is `weight_base` plus Str × `K_STR_WEIGHT` at level 189 with no investment (388 → 1776), then `core_flat_max` flat per slot spent on Str: 2 items (1876) and 6 items (2076) — Core Stat has no % line any more (D-114). The tax is the engine’s own `encumbranceOf`, capped at 50%.
+Capacity is `weight_base` plus Str × `K_STR_WEIGHT` at level 189 with no investment (108.14285714285714 → 1216), then `core_flat_max` flat per slot spent on Str: 2 items (1316) and 6 items (1516) — Core Stat has no % line any more. The tax is the engine’s own `encumbranceOf`, capped at 50%.
 <!-- END GENERATED:weight-tax -->
 
 - **The tax does not bind on the printed sets.** The `weight_base` line sits above the heaviest printed set in every Str column, so none of them is encumbered — the figures are printed above from `tools/data/bases.json`, and a heavier Base weight moves them without a doc edit.

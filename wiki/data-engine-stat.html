@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span><span class="chip ">rows <b>8</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span><span class="chip ">rows <b>14</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -81,9 +81,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="edit.html">Editor</a>
 <a href="about.html">About</a>
 <h4>Collections</h4>
-<a href="data-engine-stat.html" aria-current="page">Stat growth (8)</a>
+<a href="data-engine-stat.html" aria-current="page">Stat growth (14)</a>
 <a href="data-engine-level_gain.html">Level gain (10)</a>
-<a href="data-engine-K.html">K coefficients (31)</a>
+<a href="data-engine-K.html">K coefficients (32)</a>
 <a href="data-engine-caps.html">Caps (14)</a>
 <a href="data-engine-mod_max.html">Mod maxima (30)</a>
 <a href="data-engine-weapons.html">Weapon types (6)</a>
@@ -117,8 +117,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -150,18 +148,24 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 
 <section><h1>Stat growth</h1>
-<dl class="kv"><dt>path</dt><dd><code>tools/data/engine.json → stat</code></dd><dt>kind</dt><dd><code>constmap</code></dd><dt>rows</dt><dd>8</dd><dt>written by</dt><dd><code>tools/check.ts --write</code> · <code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-core-stats.html">core-stats.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
-<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>base</code></td><td>Base stat at level 1</td><td><code>12</code></td><td><a href="rec-engine-stat-base.html">edit</a></td></tr><tr><td><code>per_level</code></td><td>Stat per level</td><td><code>2</code></td><td><a href="rec-engine-stat-per-level.html">edit</a></td></tr><tr><td><code>level_cap</code></td><td>Player level cap</td><td><code>190</code></td><td><a href="rec-engine-stat-level-cap.html">edit</a></td></tr><tr><td><code>mob_level_cap</code></td><td>Mob level cap</td><td><code>180</code></td><td><a href="rec-engine-stat-mob-level-cap.html">edit</a></td></tr><tr><td><code>item_slots</code></td><td>Equipment slots</td><td><code>13</code></td><td><a href="rec-engine-stat-item-slots.html">edit</a></td></tr><tr><td><code>core_flat_max</code></td><td>Stat Mod flat per Mod</td><td><code>25</code></td><td><a href="rec-engine-stat-core-flat-max.html">edit</a></td></tr><tr><td><code>split_items</code></td><td>Items per stat in the reference split</td><td><code>6</code></td><td><a href="rec-engine-stat-split-items.html">edit</a></td></tr><tr><td><code>note</code></td><td>Note</td><td><code>`core_pct_max` is gone (owner ruling, D-112): Core Stat is Flat only. The single-stat ceiling is `stat_c + core_flat_max x 13` = 535 at the level-100 cap and 715 at the level-190 cap, not 816 - every K value, Cap and anchor that was set on 816 moves with it. The 13th slot is the earring accessory (D-131); its power is booked as D34 debt rather than landed in `mob_HP` (H1), so no zone HP, kill rate or timeline number moves.</code></td><td><a href="rec-engine-stat-note.html">edit</a></td></tr></tbody></table></div></section>
+<dl class="kv"><dt>path</dt><dd><code>tools/data/engine.json → stat</code></dd><dt>kind</dt><dd><code>constmap</code></dd><dt>rows</dt><dd>14</dd><dt>written by</dt><dd><code>tools/check.ts --write</code> · <code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-core-stats.html">core-stats.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
+<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>base</code></td><td>Base stat at level 1</td><td><code>12</code></td><td><a href="rec-engine-stat-base.html">edit</a></td></tr><tr><td><code>level_cap</code></td><td>Player level cap</td><td><code>190</code></td><td><a href="rec-engine-stat-level-cap.html">edit</a></td></tr><tr><td><code>mob_level_cap</code></td><td>Mob level cap</td><td><code>180</code></td><td><a href="rec-engine-stat-mob-level-cap.html">edit</a></td></tr><tr><td><code>item_slots</code></td><td>Equipment slots</td><td><code>13</code></td><td><a href="rec-engine-stat-item-slots.html">edit</a></td></tr><tr><td><code>core_flat_max</code></td><td>Stat Mod flat per Mod</td><td><code>25</code></td><td><a href="rec-engine-stat-core-flat-max.html">edit</a></td></tr><tr><td><code>split_items</code></td><td>Items per stat in the reference split</td><td><code>6</code></td><td><a href="rec-engine-stat-split-items.html">edit</a></td></tr><tr><td><code>points_per_level</code></td><td>Stat points per level (2-100)</td><td><code>5</code></td><td><a href="rec-engine-stat-points-per-level.html">edit</a></td></tr><tr><td><code>point_value</code></td><td>Stat gained per point</td><td><code>1</code></td><td><a href="rec-engine-stat-point-value.html">edit</a></td></tr><tr><td><code>paragon_from</code></td><td>First Paragon level</td><td><code>101</code></td><td><a href="rec-engine-stat-paragon-from.html">edit</a></td></tr><tr><td><code>paragon_points_per_level</code></td><td>Stat points per Paragon level</td><td><code>2</code></td><td><a href="rec-engine-stat-paragon-points-per-level.html">edit</a></td></tr><tr><td><code>tree_points_per_level</code></td><td>Tree points per level</td><td><code>1</code></td><td><a href="rec-engine-stat-tree-points-per-level.html">edit</a></td></tr><tr><td><code>reference_build</code></td><td>Reference build</td><td><code>split</code></td><td><a href="rec-engine-stat-reference-build.html">edit</a></td></tr><tr><td><code>respec_cost</code></td><td>Respec cost</td><td><code>0</code></td><td><a href="rec-engine-stat-respec-cost.html">edit</a></td></tr><tr><td><code>note</code></td><td>Note</td><td><code>Stats are SPENT, not granted (owner ruling). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190) and 1 tree point, and `stat = base + points x point_value`. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat).</code></td><td><a href="rec-engine-stat-note.html">edit</a></td></tr></tbody></table></div></section>
 
 <section><h2>Raw JSON of this collection</h2><pre class="code">{
   &quot;base&quot;: 12,
-  &quot;per_level&quot;: 2,
   &quot;level_cap&quot;: 190,
   &quot;mob_level_cap&quot;: 180,
   &quot;item_slots&quot;: 13,
   &quot;core_flat_max&quot;: 25,
   &quot;split_items&quot;: 6,
-  &quot;note&quot;: &quot;`core_pct_max` is gone (owner ruling, D-112): Core Stat is Flat only. The single-stat ceiling is `stat_c + core_flat_max x 13` = 535 at the level-100 cap and 715 at the level-190 cap, not 816 - every K value, Cap and anchor that was set on 816 moves with it. The 13th slot is the earring accessory (D-131); its power is booked as D34 debt rather than landed in `mob_HP` (H1), so no zone HP, kill rate or timeline number moves.&quot;
+  &quot;points_per_level&quot;: 5,
+  &quot;point_value&quot;: 1,
+  &quot;paragon_from&quot;: 101,
+  &quot;paragon_points_per_level&quot;: 2,
+  &quot;tree_points_per_level&quot;: 1,
+  &quot;reference_build&quot;: &quot;split&quot;,
+  &quot;respec_cost&quot;: 0,
+  &quot;note&quot;: &quot;Stats are SPENT, not granted (owner ruling). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190) and 1 tree point, and `stat = base + points x point_value`. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat).&quot;
 }</pre><p><a href="../tools/data/engine.json">tools/data/engine.json</a> · <a href="edit.html">snapshots</a></p></section>
 </div>
 </main>

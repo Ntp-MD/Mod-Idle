@@ -18,8 +18,15 @@ import { CONVERSION, LADDER } from './lib/skillmodel.ts';
 import type { Writer } from './lib/types.ts';
 
 const ZONES = eng.E.mob.zones.length;  // the data owns the world size, never a typed 9
-const DROP_PER_HR = 4.6;      // loot.md F12 · boss 1.4 + elite 1.4 + normal 1.8
-const GAME_HOURS = 40;        // checks.md E5 · 40.2 hr rounded for the funnel
+// the F12 rate and the E5 game length are DERIVED, never copied: the skill-drop rate is the same sum
+// `skill-drop` prints, and the funnel's length is the published level-100 checkpoint
+const L = eng.E.loot as any, SD = eng.E.skill_drop as any;
+const KPH = L.bands.high.kills_per_hr_published;
+const ELITES = KPH * L.elite_spawn_chance;
+const DROP_PER_HR = ELITES * SD.elite + L.boss_per_hour * SD.boss + KPH * (1 - L.elite_spawn_chance) * SD.normal;
+// the completion checkpoint (E5) — the levels past it are the post-completion loop, so the funnel is
+// the supply the ladder is measured against up to completion, not to the level cap
+const GAME_HOURS = eng.E.loot.timeline_checkpoints_hr.level_100;
 const TARGETS = 4;            // checks.md D20 · four full targets
 
 function model() {
@@ -70,10 +77,10 @@ function block() {
     '|---|---|',
     `| roster | ${m.total} skills |`,
     `| pool per zone | ${m.total} ÷ ${ZONES} = **${m.poolPerZone.toFixed(1)}** |`,
-    `| funnel | ${DROP_PER_HR}/hr × ${GAME_HOURS} hr = **${m.funnel} pieces** |`,
+    `| funnel | ${DROP_PER_HR.toFixed(2)}/hr × ${GAME_HOURS} hr = **${Math.round(m.funnel)} pieces** |`,
     `| ladder to max one skill | ${m.dupToMax} duplicates = **${m.piecesPerMax} pieces** via the ${CONVERSION}:1 conversion |`,
     `| ${TARGETS} maxed targets | **${m.fourMaxed} pieces = ${m.pctOfFunnel.toFixed(0)}% of funnel = ${m.hours.toFixed(1)} hr** |`,
-    `| remaining ${m.offTargets} skills | ${m.offPieces} pieces → **${m.offAvg.toFixed(2)} each** |`,
+    `| remaining ${m.offTargets} skills | ${Math.round(m.offPieces)} pieces → **${m.offAvg.toFixed(2)} each** |`,
   ].join('\n');
 }
 

@@ -9,7 +9,7 @@ import crafting.md
 
 | Category | Items |
 |---|---|
-| Character | Level · equipped items · weight — no stat points are stored, because no rule allocates them (`formula.md` §1 derives every Core stat from level and gear, and `harness/decisions.md` D-042 defers per-skill stat assignment to after release) |
+| Character | Level · the points allocated per Core stat, the unspent stat points, and the banked tree points (a Core stat is spent, not derived from level — · `formula.md` section 0) · equipped items · weight (defers per-skill stat assignment to after release) |
 | Progress | Unlocked zones · current target · wave |
 | Town *(towns.md · doors chosen)* | Visited settlements · open Road/Waypoint links · Standing per settlement (kill counter, not a spendable pool) · owned house, plot deeds, pouch tier, stash tabs, **bag category slots and the potion carrier slot** · **bought filter preset slots** · Curio pedlar stock + refresh day · Collector set progress + which pieces were turned in · Collector hint line bought or not · per-slot **filter thresholds** |
 | Road *(towns.md · engine.json road)* | The leg being walked: its link, kind, terrain, seconds left and encounters left · the Circuit's ordered link list, its leg index and completed laps · the once-per-link-per-day ledgers for the purse and the chest |

@@ -109,7 +109,7 @@
     "tree_points_per_level": 1,
     "reference_build": "split",
     "respec_cost": 0,
-    "note": "Stats are SPENT, not granted (owner ruling D-141). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190) and 1 tree point, and `stat = base + points x point_value`. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat)."
+    "note": "Stats are SPENT, not granted (owner ruling). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190) and 1 tree point, and `stat = base + points x point_value`. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat)."
   },
   "K": {
     "K_STR": 5,
@@ -118,12 +118,13 @@
     "K_VIT_HP": 20,
     "K_VIT_REGEN": 0.25,
     "K_INT_MP": 4,
-    "K_INT_MREGEN": 0.18,
+    "K_INT_MREGEN": 0.28,
     "K_AGI_ASPD": 0.25,
     "K_WIS_CDR": 0.03,
     "K_DEX_ACC": 1.5,
     "K_DEX_ALIGN": 0.05,
     "K_VIT_RES": 0.05,
+    "K_VIT_STUNREC": 0.1154,
     "K_LCK_CRIT": 0.05,
     "K_LCK_PDOGE": 0.03,
     "K_LCK_DROP": 0.01,
@@ -181,11 +182,11 @@
     "dot_cap": 1.5,
     "dot_cap_note": "burn + poison combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches it exactly at 5 stacks x 0.30, so a maxed fire build fills the whole budget on its own",
     "proc_chance": 0.2,
-    "mob_side": "decided (D-067) — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action but DO take the game's existing Cap-bounded proc (stun ≤15%, chill/shock/Cripple aspd cut under their own Caps), the same symmetric numbers a mob inflicts on us, so no fight can be stun-locked. No mob resist stat (AGENT.md §5). combat.md §5b"
+    "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action but DO take the game's existing Cap-bounded proc (stun ≤15%, chill/shock/Cripple aspd cut under their own Caps), the same symmetric numbers a mob inflicts on us, so no fight can be stun-locked. No mob resist stat (AGENT.md §5). combat.md §5b"
   },
   "mob": {
     "note": "Species (not classes - the player has no class) and body classes, copied from Ragnarok Online: a species is a stat-multiply vector plus an accuracy tier plus a damage type, and a body class is one of the four card sizes. innate Element stays a separate spawn roll (world.md) so the three axes never collapse into one.",
-    "stat_block": "every mob gets the same 7-stat block as a player: stat_c = 12 + 2 x (level - 1) per stat, then each species multiplies it (world.md Monsters)",
+    "stat_block": "every mob carries ONE flat 7-stat block (mob.stat.base) that the species vector multiplies; there is no level term. Accuracy, Evasion, Armour, Elemental resistance, alignment, crit and dodge all read from that flat base through the species vector and the body class, so two mobs of the same level can be nothing alike and a zone differs only in mob_HP and mob_PS (world.md Monsters)",
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
@@ -200,6 +201,7 @@
       {
         "id": 1,
         "name": "Eastgate",
+        "region": "pinewood road",
         "levels": [
           1,
           10
@@ -212,11 +214,68 @@
         "elements": [
           "fire"
         ],
-        "group": "1-2"
+        "group": "1-2",
+        "subzones": [
+          {
+            "name": "Open Grassland",
+            "environment": "grassland",
+            "element": "fire",
+            "races": [
+              "goblin",
+              "wolf"
+            ],
+            "normal": [
+              "Sneak Goblin",
+              "Raider Goblin",
+              "Tinker Goblin",
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf"
+            ],
+            "elite": "Shaman Goblin"
+          },
+          {
+            "name": "Village Outskirts",
+            "environment": "village",
+            "element": "fire",
+            "races": [
+              "orc",
+              "human"
+            ],
+            "normal": [
+              "Raider Orc",
+              "Shaman Orc",
+              "Berserker Orc",
+              "Ranger",
+              "Warrior",
+              "Knight"
+            ],
+            "elite": "Juggernaut Orc"
+          },
+          {
+            "name": "Raider Camp",
+            "environment": "camp",
+            "element": "fire",
+            "races": [
+              "wolf",
+              "goblin"
+            ],
+            "normal": [
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf",
+              "Sneak Goblin",
+              "Raider Goblin",
+              "Tinker Goblin"
+            ],
+            "elite": "Shaman Goblin"
+          }
+        ]
       },
       {
         "id": 2,
         "name": "Millbrook",
+        "region": "slow water",
         "levels": [
           11,
           20
@@ -229,11 +288,68 @@
         "elements": [
           "poison"
         ],
-        "group": "1-2"
+        "group": "1-2",
+        "subzones": [
+          {
+            "name": "Fog Thicket",
+            "environment": "fog",
+            "element": "poison",
+            "races": [
+              "goblin",
+              "wolf"
+            ],
+            "normal": [
+              "Sneak Goblin",
+              "Raider Goblin",
+              "Tinker Goblin",
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf"
+            ],
+            "elite": "Shaman Goblin"
+          },
+          {
+            "name": "Dark Grove",
+            "environment": "dark forest",
+            "element": "poison",
+            "races": [
+              "spider",
+              "werewolf"
+            ],
+            "normal": [
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider",
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf"
+            ],
+            "elite": "Alpha Werewolf"
+          },
+          {
+            "name": "Spider Hollow",
+            "environment": "hollow",
+            "element": "poison",
+            "races": [
+              "wolf",
+              "goblin"
+            ],
+            "normal": [
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf",
+              "Sneak Goblin",
+              "Raider Goblin",
+              "Tinker Goblin"
+            ],
+            "elite": "Shaman Goblin"
+          }
+        ]
       },
       {
         "id": 3,
         "name": "Ashfall",
+        "region": "ash fields",
         "levels": [
           21,
           30
@@ -246,11 +362,68 @@
         "elements": [
           "fire"
         ],
-        "group": "1-2"
+        "group": "1-2",
+        "subzones": [
+          {
+            "name": "Glimmer Grove",
+            "environment": "grove",
+            "element": "fire",
+            "races": [
+              "treant",
+              "werewolf"
+            ],
+            "normal": [
+              "Young Treant",
+              "Thorn Treant",
+              "Rotting Treant",
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf"
+            ],
+            "elite": "Ancient Treant"
+          },
+          {
+            "name": "Elder Rootway",
+            "environment": "rootway",
+            "element": "fire",
+            "races": [
+              "elf",
+              "dryad"
+            ],
+            "normal": [
+              "Wood Elf",
+              "High Elf",
+              "Moon Elf",
+              "Forest Dryad",
+              "Flower Dryad",
+              "Thorn Dryad"
+            ],
+            "elite": "Dark Elf"
+          },
+          {
+            "name": "Moonlit Glade",
+            "environment": "glade",
+            "element": "fire",
+            "races": [
+              "werewolf",
+              "treant"
+            ],
+            "normal": [
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf",
+              "Young Treant",
+              "Thorn Treant",
+              "Rotting Treant"
+            ],
+            "elite": "Alpha Werewolf"
+          }
+        ]
       },
       {
         "id": 4,
         "name": "Ironrow",
+        "region": "storm terrace",
         "levels": [
           31,
           40
@@ -263,11 +436,68 @@
         "elements": [
           "lightning"
         ],
-        "group": "2-3"
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Glimmer Grove",
+            "environment": "grove",
+            "element": "lightning",
+            "races": [
+              "treant",
+              "werewolf"
+            ],
+            "normal": [
+              "Young Treant",
+              "Thorn Treant",
+              "Rotting Treant",
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf"
+            ],
+            "elite": "Ancient Treant"
+          },
+          {
+            "name": "Elder Rootway",
+            "environment": "rootway",
+            "element": "lightning",
+            "races": [
+              "elf",
+              "dryad"
+            ],
+            "normal": [
+              "Wood Elf",
+              "High Elf",
+              "Moon Elf",
+              "Forest Dryad",
+              "Flower Dryad",
+              "Thorn Dryad"
+            ],
+            "elite": "Dark Elf"
+          },
+          {
+            "name": "Moonlit Glade",
+            "environment": "glade",
+            "element": "lightning",
+            "races": [
+              "werewolf",
+              "treant"
+            ],
+            "normal": [
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf",
+              "Young Treant",
+              "Thorn Treant",
+              "Rotting Treant"
+            ],
+            "elite": "Alpha Werewolf"
+          }
+        ]
       },
       {
         "id": 5,
         "name": "Wolf Cross",
+        "region": "wolf country",
         "levels": [
           41,
           50
@@ -280,11 +510,68 @@
         "elements": [
           "cold"
         ],
-        "group": "2-3"
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Murky Swamp",
+            "environment": "swamp",
+            "element": "cold",
+            "races": [
+              "troll",
+              "spider"
+            ],
+            "normal": [
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll",
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider"
+            ],
+            "elite": "Stone Troll"
+          },
+          {
+            "name": "Mud Flats",
+            "environment": "mud",
+            "element": "cold",
+            "races": [
+              "slime",
+              "lizardman"
+            ],
+            "normal": [
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime",
+              "Hunter Lizardman",
+              "Warrior Lizardman",
+              "Scale Knight"
+            ],
+            "elite": "Shaman Lizardman"
+          },
+          {
+            "name": "Poison Fen",
+            "environment": "poison fen",
+            "element": "cold",
+            "races": [
+              "spider",
+              "troll"
+            ],
+            "normal": [
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider",
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll"
+            ],
+            "elite": "Stone Troll"
+          }
+        ]
       },
       {
         "id": 6,
         "name": "Highspire",
+        "region": "high crags",
         "levels": [
           51,
           60
@@ -298,11 +585,68 @@
           "cold",
           "lightning"
         ],
-        "group": "2-3"
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Mountain Slopes",
+            "environment": "mountain",
+            "element": "cold",
+            "races": [
+              "orc",
+              "dragon"
+            ],
+            "normal": [
+              "Raider Orc",
+              "Shaman Orc",
+              "Berserker Orc",
+              "Wyrmling",
+              "Drake",
+              "Wyvern"
+            ],
+            "elite": "Juggernaut Orc"
+          },
+          {
+            "name": "Cliff Holds",
+            "environment": "cliff",
+            "element": "lightning",
+            "races": [
+              "ogre",
+              "giant"
+            ],
+            "normal": [
+              "Brute Ogre",
+              "Butcher Ogre",
+              "Swamp Ogre",
+              "Hill Giant",
+              "Stone Giant",
+              "Frost Giant"
+            ],
+            "elite": "Mage Ogre"
+          },
+          {
+            "name": "Dragon Peak",
+            "environment": "peak",
+            "element": "cold",
+            "races": [
+              "dragon",
+              "orc"
+            ],
+            "normal": [
+              "Wyrmling",
+              "Drake",
+              "Wyvern",
+              "Raider Orc",
+              "Shaman Orc",
+              "Berserker Orc"
+            ],
+            "elite": "Elder Dragon"
+          }
+        ]
       },
       {
         "id": 7,
         "name": "Bonegate",
+        "region": "the bone gate",
         "levels": [
           61,
           70
@@ -315,11 +659,68 @@
         "elements": [
           "chaos"
         ],
-        "group": "3-5"
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Tunnels",
+            "environment": "tunnels",
+            "element": "chaos",
+            "races": [
+              "kobold",
+              "minotaur"
+            ],
+            "normal": [
+              "Miner Kobold",
+              "Trapper Kobold",
+              "Tinker Kobold",
+              "Warrior Minotaur",
+              "Berserker Minotaur",
+              "Guardian Minotaur"
+            ],
+            "elite": "Blood Minotaur"
+          },
+          {
+            "name": "Deep Warrens",
+            "environment": "warrens",
+            "element": "chaos",
+            "races": [
+              "troll",
+              "spider"
+            ],
+            "normal": [
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll",
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider"
+            ],
+            "elite": "Stone Troll"
+          },
+          {
+            "name": "Sunken Vault",
+            "environment": "vault",
+            "element": "chaos",
+            "races": [
+              "minotaur",
+              "golem"
+            ],
+            "normal": [
+              "Warrior Minotaur",
+              "Berserker Minotaur",
+              "Guardian Minotaur",
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem"
+            ],
+            "elite": "Blood Minotaur"
+          }
+        ]
       },
       {
         "id": 8,
         "name": "Frosthold",
+        "region": "frost hold",
         "levels": [
           71,
           80
@@ -332,11 +733,68 @@
         "elements": [
           "cold"
         ],
-        "group": "3-5"
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Ash Fields",
+            "environment": "volcano",
+            "element": "cold",
+            "races": [
+              "ogre",
+              "golem"
+            ],
+            "normal": [
+              "Brute Ogre",
+              "Butcher Ogre",
+              "Swamp Ogre",
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem"
+            ],
+            "elite": "Mage Ogre"
+          },
+          {
+            "name": "Slag Pit",
+            "environment": "lava",
+            "element": "cold",
+            "races": [
+              "demon",
+              "dragon"
+            ],
+            "normal": [
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Wyrmling",
+              "Drake",
+              "Wyvern"
+            ],
+            "elite": "Demon Knight"
+          },
+          {
+            "name": "Caldera",
+            "environment": "caldera",
+            "element": "cold",
+            "races": [
+              "golem",
+              "ogre"
+            ],
+            "normal": [
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem",
+              "Brute Ogre",
+              "Butcher Ogre",
+              "Swamp Ogre"
+            ],
+            "elite": "Crystal Golem"
+          }
+        ]
       },
       {
         "id": 9,
         "name": "Vermolch",
+        "region": "the vermolch mire",
         "levels": [
           81,
           90
@@ -350,11 +808,68 @@
           "poison",
           "chaos"
         ],
-        "group": "3-5"
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Snowfield",
+            "environment": "snow",
+            "element": "poison",
+            "races": [
+              "troll",
+              "dragon"
+            ],
+            "normal": [
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll",
+              "Wyrmling",
+              "Drake",
+              "Wyvern"
+            ],
+            "elite": "Stone Troll"
+          },
+          {
+            "name": "Glacier Shelf",
+            "environment": "ice",
+            "element": "chaos",
+            "races": [
+              "wolf",
+              "giant"
+            ],
+            "normal": [
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf",
+              "Hill Giant",
+              "Stone Giant",
+              "Frost Giant"
+            ],
+            "elite": "Fire Giant"
+          },
+          {
+            "name": "Rime Hollow",
+            "environment": "rime",
+            "element": "poison",
+            "races": [
+              "dragon",
+              "troll"
+            ],
+            "normal": [
+              "Wyrmling",
+              "Drake",
+              "Wyvern",
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll"
+            ],
+            "elite": "Elder Dragon"
+          }
+        ]
       },
       {
         "id": 10,
         "name": "Thornwake",
+        "region": "wet lowland",
         "levels": [
           91,
           100
@@ -367,11 +882,68 @@
         "elements": [
           "poison"
         ],
-        "group": "1-2"
+        "group": "1-2",
+        "subzones": [
+          {
+            "name": "Snowfield",
+            "environment": "snow",
+            "element": "poison",
+            "races": [
+              "troll",
+              "dragon"
+            ],
+            "normal": [
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll",
+              "Wyrmling",
+              "Drake",
+              "Wyvern"
+            ],
+            "elite": "Stone Troll"
+          },
+          {
+            "name": "Glacier Shelf",
+            "environment": "ice",
+            "element": "poison",
+            "races": [
+              "wolf",
+              "giant"
+            ],
+            "normal": [
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf",
+              "Hill Giant",
+              "Stone Giant",
+              "Frost Giant"
+            ],
+            "elite": "Fire Giant"
+          },
+          {
+            "name": "Rime Hollow",
+            "environment": "rime",
+            "element": "poison",
+            "races": [
+              "dragon",
+              "troll"
+            ],
+            "normal": [
+              "Wyrmling",
+              "Drake",
+              "Wyvern",
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll"
+            ],
+            "elite": "Elder Dragon"
+          }
+        ]
       },
       {
         "id": 11,
         "name": "Greyfen",
+        "region": "wet lowland",
         "levels": [
           101,
           110
@@ -385,11 +957,68 @@
           "poison",
           "chaos"
         ],
-        "group": "1-2"
+        "group": "1-2",
+        "subzones": [
+          {
+            "name": "Dune Sea",
+            "environment": "dunes",
+            "element": "poison",
+            "races": [
+              "orc",
+              "demon"
+            ],
+            "normal": [
+              "Raider Orc",
+              "Shaman Orc",
+              "Berserker Orc",
+              "Imp",
+              "Demon Mage",
+              "Demon Brute"
+            ],
+            "elite": "Juggernaut Orc"
+          },
+          {
+            "name": "Sunken Tombs",
+            "environment": "tombs",
+            "element": "chaos",
+            "races": [
+              "mummy",
+              "lizardman"
+            ],
+            "normal": [
+              "Warrior Mummy",
+              "Priest Mummy",
+              "Cursed Mummy",
+              "Hunter Lizardman",
+              "Warrior Lizardman",
+              "Scale Knight"
+            ],
+            "elite": "Royal Mummy"
+          },
+          {
+            "name": "Scorch Mesa",
+            "environment": "mesa",
+            "element": "poison",
+            "races": [
+              "demon",
+              "orc"
+            ],
+            "normal": [
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Raider Orc",
+              "Shaman Orc",
+              "Berserker Orc"
+            ],
+            "elite": "Demon Knight"
+          }
+        ]
       },
       {
         "id": 12,
         "name": "Saltmarrow",
+        "region": "salt flats",
         "levels": [
           111,
           120
@@ -402,11 +1031,68 @@
         "elements": [
           "chaos"
         ],
-        "group": "1-2"
+        "group": "1-2",
+        "subzones": [
+          {
+            "name": "Outer Court",
+            "environment": "court",
+            "element": "chaos",
+            "races": [
+              "skeleton",
+              "vampire"
+            ],
+            "normal": [
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton",
+              "Blood Vampire",
+              "Noble Vampire",
+              "Vampire Knight"
+            ],
+            "elite": "Mage Skeleton"
+          },
+          {
+            "name": "Burial Gallery",
+            "environment": "gallery",
+            "element": "chaos",
+            "races": [
+              "mummy",
+              "skeleton"
+            ],
+            "normal": [
+              "Warrior Mummy",
+              "Priest Mummy",
+              "Cursed Mummy",
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton"
+            ],
+            "elite": "Royal Mummy"
+          },
+          {
+            "name": "Inner Sanctum",
+            "environment": "sanctum",
+            "element": "chaos",
+            "races": [
+              "vampire",
+              "mummy"
+            ],
+            "normal": [
+              "Blood Vampire",
+              "Noble Vampire",
+              "Vampire Knight",
+              "Warrior Mummy",
+              "Priest Mummy",
+              "Cursed Mummy"
+            ],
+            "elite": "Vampire Lord"
+          }
+        ]
       },
       {
         "id": 13,
         "name": "Emberhold",
+        "region": "slag and foundry heat",
         "levels": [
           121,
           130
@@ -419,11 +1105,68 @@
         "elements": [
           "fire"
         ],
-        "group": "2-3"
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Fallen Gate",
+            "environment": "gate",
+            "element": "fire",
+            "races": [
+              "skeleton",
+              "demon"
+            ],
+            "normal": [
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton",
+              "Imp",
+              "Demon Mage",
+              "Demon Brute"
+            ],
+            "elite": "Mage Skeleton"
+          },
+          {
+            "name": "Market Ruins",
+            "environment": "market",
+            "element": "fire",
+            "races": [
+              "vampire",
+              "human"
+            ],
+            "normal": [
+              "Blood Vampire",
+              "Noble Vampire",
+              "Vampire Knight",
+              "Ranger",
+              "Warrior",
+              "Knight"
+            ],
+            "elite": "Vampire Lord"
+          },
+          {
+            "name": "Noble Quarter",
+            "environment": "quarter",
+            "element": "fire",
+            "races": [
+              "demon",
+              "skeleton"
+            ],
+            "normal": [
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton"
+            ],
+            "elite": "Demon Knight"
+          }
+        ]
       },
       {
         "id": 14,
         "name": "Duskmoor",
+        "region": "open moor",
         "levels": [
           131,
           140
@@ -437,11 +1180,68 @@
           "cold",
           "chaos"
         ],
-        "group": "2-3"
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Blight Field",
+            "environment": "blight",
+            "element": "cold",
+            "races": [
+              "skeleton",
+              "demon"
+            ],
+            "normal": [
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton",
+              "Imp",
+              "Demon Mage",
+              "Demon Brute"
+            ],
+            "elite": "Mage Skeleton"
+          },
+          {
+            "name": "Howling Waste",
+            "environment": "waste",
+            "element": "chaos",
+            "races": [
+              "vampire",
+              "werewolf"
+            ],
+            "normal": [
+              "Blood Vampire",
+              "Noble Vampire",
+              "Vampire Knight",
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf"
+            ],
+            "elite": "Vampire Lord"
+          },
+          {
+            "name": "Rift Scar",
+            "environment": "rift",
+            "element": "cold",
+            "races": [
+              "demon",
+              "skeleton"
+            ],
+            "normal": [
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton"
+            ],
+            "elite": "Demon Knight"
+          }
+        ]
       },
       {
         "id": 15,
         "name": "Nettlecrag",
+        "region": "thorn country",
         "levels": [
           141,
           150
@@ -455,11 +1255,68 @@
           "chaos",
           "poison"
         ],
-        "group": "2-3"
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Bone Stair",
+            "environment": "stair",
+            "element": "chaos",
+            "races": [
+              "demon",
+              "golem"
+            ],
+            "normal": [
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem"
+            ],
+            "elite": "Demon Knight"
+          },
+          {
+            "name": "Molten Deeps",
+            "environment": "deeps",
+            "element": "poison",
+            "races": [
+              "slime",
+              "demon"
+            ],
+            "normal": [
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime",
+              "Imp",
+              "Demon Mage",
+              "Demon Brute"
+            ],
+            "elite": "Demon Knight"
+          },
+          {
+            "name": "Throne Abyss",
+            "environment": "abyss",
+            "element": "chaos",
+            "races": [
+              "golem",
+              "slime"
+            ],
+            "normal": [
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem",
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime"
+            ],
+            "elite": "Crystal Golem"
+          }
+        ]
       },
       {
         "id": 16,
         "name": "Blackwater Reach",
+        "region": "drowned river mouth",
         "levels": [
           151,
           160
@@ -472,11 +1329,68 @@
         "elements": [
           "poison"
         ],
-        "group": "3-5"
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Bone Stair",
+            "environment": "stair",
+            "element": "poison",
+            "races": [
+              "demon",
+              "golem"
+            ],
+            "normal": [
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem"
+            ],
+            "elite": "Demon Knight"
+          },
+          {
+            "name": "Molten Deeps",
+            "environment": "deeps",
+            "element": "poison",
+            "races": [
+              "slime",
+              "demon"
+            ],
+            "normal": [
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime",
+              "Imp",
+              "Demon Mage",
+              "Demon Brute"
+            ],
+            "elite": "Demon Knight"
+          },
+          {
+            "name": "Throne Abyss",
+            "environment": "abyss",
+            "element": "poison",
+            "races": [
+              "golem",
+              "slime"
+            ],
+            "normal": [
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem",
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime"
+            ],
+            "elite": "Crystal Golem"
+          }
+        ]
       },
       {
         "id": 17,
         "name": "Wyrmback",
+        "region": "wyrm breeding ground",
         "levels": [
           161,
           170
@@ -490,11 +1404,68 @@
           "fire",
           "cold"
         ],
-        "group": "3-5"
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Tideflats",
+            "environment": "coast",
+            "element": "fire",
+            "races": [
+              "ogre",
+              "spider"
+            ],
+            "normal": [
+              "Brute Ogre",
+              "Butcher Ogre",
+              "Swamp Ogre",
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider"
+            ],
+            "elite": "Mage Ogre"
+          },
+          {
+            "name": "Salt Cliffs",
+            "environment": "cliffs",
+            "element": "cold",
+            "races": [
+              "slime",
+              "lizardman"
+            ],
+            "normal": [
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime",
+              "Hunter Lizardman",
+              "Warrior Lizardman",
+              "Scale Knight"
+            ],
+            "elite": "Shaman Lizardman"
+          },
+          {
+            "name": "Sunken Reef",
+            "environment": "sea",
+            "element": "fire",
+            "races": [
+              "spider",
+              "ogre"
+            ],
+            "normal": [
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider",
+              "Brute Ogre",
+              "Butcher Ogre",
+              "Swamp Ogre"
+            ],
+            "elite": "Mage Ogre"
+          }
+        ]
       },
       {
         "id": 18,
         "name": "The Pale Spire",
+        "region": "the pale bloom",
         "levels": [
           171,
           180
@@ -508,7 +1479,63 @@
           "chaos",
           "poison"
         ],
-        "group": "3-5"
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Outer Colonnade",
+            "environment": "ruins",
+            "element": "chaos",
+            "races": [
+              "golem",
+              "human"
+            ],
+            "normal": [
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem",
+              "Ranger",
+              "Warrior",
+              "Knight"
+            ],
+            "elite": "Crystal Golem"
+          },
+          {
+            "name": "Hall of Wardens",
+            "environment": "temple",
+            "element": "poison",
+            "races": [
+              "dragon",
+              "elf"
+            ],
+            "normal": [
+              "Wyrmling",
+              "Drake",
+              "Wyvern",
+              "Wood Elf",
+              "High Elf",
+              "Moon Elf"
+            ],
+            "elite": "Elder Dragon"
+          },
+          {
+            "name": "Sanctum Depths",
+            "environment": "depths",
+            "element": "chaos",
+            "races": [
+              "human",
+              "golem"
+            ],
+            "normal": [
+              "Ranger",
+              "Warrior",
+              "Knight",
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem"
+            ],
+            "elite": "Mage"
+          }
+        ]
       }
     ],
     "damage_split": {
@@ -524,7 +1551,7 @@
         0.5,
         0.5
       ],
-      "note": "a species tag decides how its hit is divided: physical is entirely the armour-able half, magic is entirely the res-able half, mixed is the old 50/50. This is what makes the tag a rule instead of decoration (D-030): Knight and Golem are answered by Armour and chill, Seraph and Slime only by Elemental resistance."
+      "note": "a species tag decides how its hit is divided: physical is entirely the armour-able half, magic is entirely the res-able half, mixed is the old 50/50. This is what makes the tag a rule instead of decoration: Treant and Golem are answered by Armour and chill, Slime and Dryad only by Elemental resistance."
     },
     "reach": {
       "bands": {
@@ -546,110 +1573,110 @@
         "wand": 3,
         "book": 3
       },
-      "rules": "A group is a queue ordered front line first. A weapon's reach is how many queue slots it may hit: 1 = the front slot only, 2 = front and second, 3 = any slot in the group. Only the front slot swings at the player; a stand-off mob shoots or casts from where it stands and still counts inside the 3-attacker cap. If the front slot dies while stand-off mobs live, a reach-1 attack waits one engage cycle (1 sec) for the group to close; reach 2 and 3 keep pressing. AoE keeps its rules (60% per target · Cap 3 · mana ×1.5) and only changes which 3: melee fans from the front, stand-off picks any 3. There are no tiles, no movement speed and no coordinates — reach is the whole positional model, and it replaces the stray 'within 3 tiles' wording (D-032)."
+      "rules": "A group is a queue ordered front line first. A weapon's reach is how many queue slots it may hit: 1 = the front slot only, 2 = front and second, 3 = any slot in the group. Only the front slot swings at the player; a stand-off mob shoots or casts from where it stands and still counts inside the 3-attacker cap. If the front slot dies while stand-off mobs live, a reach-1 attack waits one engage cycle (1 sec) for the group to close; reach 2 and 3 keep pressing. AoE keeps its rules (60% per target · Cap 3 · mana ×1.5) and only changes which 3: melee fans from the front, stand-off picks any 3. There are no tiles, no movement speed and no coordinates — reach is the whole positional model, and it replaces the stray 'within 3 tiles' wording."
     },
     "spawn_weights": {
       "small": 3,
       "medium": 2,
       "large": 1,
-      "note": "how often each farming body shows up in a group. Every zone spends its encounter budget once: the published mob_HP(L) curve is the zone AVERAGE mob, so each group entry divides its body multiplier by the weighted average of the bodies that zone can field. A Large mob is tougher and rarer, a Small mob cheaper and common, and kills per hour, drops per hour, the stone funnel and the 40.2 hour timeline never move (D-031)."
+      "note": "how often each farming body shows up in a group. Every zone spends its encounter budget once: the published mob_HP(L) curve is the zone AVERAGE mob, so each group entry divides its body multiplier by the weighted average of the bodies that zone can field. A Large mob is tougher and rarer, a Small mob cheaper and common, and kills per hour, drops per hour, the stone funnel and the 40.2 hour timeline never move."
     },
     "element_roll": {
       "bias_weight": 3,
       "other_weight": 1,
       "note": "innate Element is rolled on spawn inside the zone's own Elements: every Element in the species element_bias weighs 3, any other Element the zone carries weighs 1. A one-Element zone is therefore always that Element, and a two-Element zone lands on the species bias about 3 of every 4 rolls."
     },
-    "level_rule": "a mob spawns at the attacking player's level clamped into its zone's range, so mob_HP is read at that level between the two ends printed in mob-roster.md (checks.md D1). Levels 91-100 keep fighting zone 9 at level 90.",
+    "level_rule": "a mob spawns at the attacking player's level clamped into its zone's range, so mob_HP is read at that level between the two ends printed in mob-roster.md (checks.md D1), and a player past a zone's last level keeps fighting that zone at its own edge.",
     "bosses": [
       {
         "zone": 1,
-        "name": "Eastgate Emberling",
-        "species": "husk"
+        "name": "Goblin King",
+        "species": "goblin"
       },
       {
         "zone": 2,
-        "name": "Millbrook Tallyman",
-        "species": "goblin"
+        "name": "Broodmother",
+        "species": "spider"
       },
       {
         "zone": 3,
-        "name": "Ashfall Chieftain",
-        "species": "rat"
+        "name": "Treant Elder",
+        "species": "treant"
       },
       {
         "zone": 4,
-        "name": "Ironrow Warden",
-        "species": "bandit"
-      },
-      {
-        "zone": 5,
-        "name": "The Bloated Shepherd",
-        "species": "slime"
-      },
-      {
-        "zone": 6,
-        "name": "Highspire Herald",
-        "species": "troll"
-      },
-      {
-        "zone": 7,
-        "name": "Bonegate Tyrant",
-        "species": "orc"
-      },
-      {
-        "zone": 8,
-        "name": "Frosthold Siege-Marshal",
-        "species": "knight"
-      },
-      {
-        "zone": 9,
-        "name": "Vermolch Ninefold Choir",
-        "species": "seraph"
-      },
-      {
-        "zone": 10,
-        "name": "The Rootcoil",
-        "species": "drake"
-      },
-      {
-        "zone": 11,
-        "name": "Greyfen Broodmother",
-        "species": "demonic"
-      },
-      {
-        "zone": 12,
-        "name": "The Salt Tyrant",
+        "name": "Elven Archmage",
         "species": "elf"
       },
       {
-        "zone": 13,
-        "name": "Emberhold Slagheart",
-        "species": "goblin"
+        "zone": 5,
+        "name": "Elder Troll",
+        "species": "troll"
       },
       {
-        "zone": 14,
-        "name": "Duskmoor Stalkers",
+        "zone": 6,
+        "name": "Warlord Orc",
+        "species": "orc"
+      },
+      {
+        "zone": 7,
+        "name": "Hoarder Kobold",
+        "species": "kobold"
+      },
+      {
+        "zone": 8,
+        "name": "Ogre King",
+        "species": "ogre"
+      },
+      {
+        "zone": 9,
+        "name": "Wolf King",
         "species": "wolf"
       },
       {
+        "zone": 10,
+        "name": "Ancient Dragon",
+        "species": "dragon"
+      },
+      {
+        "zone": 11,
+        "name": "Mummy Lord",
+        "species": "mummy"
+      },
+      {
+        "zone": 12,
+        "name": "Bone Colossus",
+        "species": "skeleton"
+      },
+      {
+        "zone": 13,
+        "name": "Ancient Vampire",
+        "species": "vampire"
+      },
+      {
+        "zone": 14,
+        "name": "Archdemon",
+        "species": "demon"
+      },
+      {
         "zone": 15,
-        "name": "The Nettle Hag",
-        "species": "demonic"
+        "name": "Slime King",
+        "species": "slime"
       },
       {
         "zone": 16,
-        "name": "The Drowned Choir",
-        "species": "husk"
+        "name": "Colossus",
+        "species": "golem"
       },
       {
         "zone": 17,
-        "name": "Wyrmback Sovereign",
-        "species": "drake"
+        "name": "Lizardman Chief",
+        "species": "lizardman"
       },
       {
         "zone": 18,
-        "name": "Pale Spire Silence",
-        "species": "seraph"
+        "name": "Paladin",
+        "species": "human"
       }
     ],
     "sizes": [
@@ -681,9 +1708,11 @@
         "id": "boss",
         "name": "Boss",
         "hp": 15,
-        "ps": 16,
+        "ps": 18,
         "evasion": 1,
-        "group": "alone"
+        "group": "alone",
+        "reads_as": "large",
+        "reads_as_note": "A boss is not a size, it is a species that happens to be huge: it declares which of the three body classes a weapon's `size_mult` reads it as (- HugePatch section 12). Default Large; a boss may override it on its own entry."
       }
     ],
     "elite": {
@@ -702,84 +1731,15 @@
     ],
     "species": [
       {
-        "id": "rat",
-        "name": "Rat",
-        "zones": [
-          2,
-          3,
-          9,
-          10,
-          11,
-          13
-        ],
-        "carries_weapon": false,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.75,
-        "sizes": [
-          "small",
-          "medium"
-        ],
-        "element_bias": [
-          "fire",
-          "poison"
-        ],
-        "stats": {
-          "str": 0.84,
-          "agi": 1.46,
-          "vit": 0.73,
-          "dex": 1.15,
-          "int": 0.63,
-          "wis": 0.84,
-          "lck": 1.36
-        },
-        "trait": "the trash mob - fastest body in the game, dies to any aoe, arrives in the biggest groups"
-      },
-      {
-        "id": "husk",
-        "name": "Husk",
-        "zones": [
-          1,
-          6,
-          9,
-          10,
-          11,
-          16
-        ],
-        "carries_weapon": false,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.05,
-        "sizes": [
-          "medium",
-          "large"
-        ],
-        "element_bias": [
-          "fire",
-          "poison",
-          "lightning"
-        ],
-        "stats": {
-          "str": 1.17,
-          "agi": 0.7,
-          "vit": 1.63,
-          "dex": 0.82,
-          "int": 0.7,
-          "wis": 1.05,
-          "lck": 0.93
-        },
-        "trait": "the accuracy floor - Evasion Cap 80 is reachable against this and nothing else, and it hits for very little"
-      },
-      {
         "id": "goblin",
         "name": "Goblin",
         "zones": [
           1,
-          2,
-          3,
-          4,
-          13,
-          16
+          2
+        ],
+        "habitat": [
+          "pinewood road",
+          "slow water"
         ],
         "carries_weapon": true,
         "line": "front",
@@ -792,8 +1752,7 @@
         ],
         "element_bias": [
           "poison",
-          "fire",
-          "lightning"
+          "fire"
         ],
         "stats": {
           "str": 1.29,
@@ -804,156 +1763,21 @@
           "wis": 0.86,
           "lck": 1.08
         },
-        "trait": "the first species that carries gear, so it is where the weapon part of the drop table starts · the only lineage legal on all three bodies"
-      },
-      {
-        "id": "slime",
-        "name": "Slime",
-        "zones": [
-          1,
-          5,
-          6,
-          8,
-          14,
-          17
-        ],
-        "carries_weapon": false,
-        "line": "front",
-        "damage": "magic",
-        "accuracy_mult": 0.05,
-        "sizes": [
-          "small",
-          "medium"
-        ],
-        "element_bias": [
-          "fire",
-          "lightning",
-          "cold"
-        ],
-        "stats": {
-          "str": 0.73,
-          "agi": 0.63,
-          "vit": 1.46,
-          "dex": 0.73,
-          "int": 1.15,
-          "wis": 1.25,
-          "lck": 1.04
-        },
-        "trait": "the magic accuracy floor - Evasion answers it completely, and Element damage is what kills it quickly"
-      },
-      {
-        "id": "bandit",
-        "name": "Bandit",
-        "zones": [
-          3,
-          4,
-          5,
-          8,
-          14,
-          17
-        ],
-        "carries_weapon": true,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.75,
-        "sizes": [
-          "small",
-          "medium"
-        ],
-        "element_bias": [
-          "fire",
-          "lightning",
-          "cold"
-        ],
-        "stats": {
-          "str": 1.13,
-          "agi": 1.03,
-          "vit": 0.93,
-          "dex": 1.13,
-          "int": 0.72,
-          "wis": 1.03,
-          "lck": 1.03
-        },
-        "trait": "the human - mid accuracy, mid everything, and the only species that drops weapons as a rule rather than by luck"
-      },
-      {
-        "id": "spider",
-        "name": "Spider",
-        "zones": [
-          4,
-          5,
-          6,
-          8,
-          14,
-          17
-        ],
-        "carries_weapon": false,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.5,
-        "sizes": [
-          "small",
-          "medium"
-        ],
-        "element_bias": [
-          "lightning",
-          "cold"
-        ],
-        "stats": {
-          "str": 0.72,
-          "agi": 1.34,
-          "vit": 0.82,
-          "dex": 1.24,
-          "int": 0.82,
-          "wis": 0.93,
-          "lck": 1.13
-        },
-        "trait": "the poison species - stacks a status instead of landing damage, so it ignores armour-based tanking"
-      },
-      {
-        "id": "wolf",
-        "name": "Wolf",
-        "zones": [
-          7,
-          9,
-          12,
-          14,
-          15,
-          18
-        ],
-        "carries_weapon": true,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 1,
-        "sizes": [
-          "small",
-          "medium"
-        ],
-        "element_bias": [
-          "cold",
-          "chaos"
-        ],
-        "stats": {
-          "str": 1.13,
-          "agi": 1.34,
-          "vit": 0.93,
-          "dex": 1.03,
-          "int": 0.62,
-          "wis": 0.93,
-          "lck": 1.03
-        },
-        "trait": "full accuracy on a fast body - Evasion is close to worthless against it, which is what makes it the mid-game check on a pure-Agi build"
+        "humanoid": true,
+        "trait": "farm trash - the cheapest body in the game, and the first weapon-carrier a player meets"
       },
       {
         "id": "orc",
         "name": "Orc",
         "zones": [
+          1,
           6,
-          7,
-          11,
-          12,
-          15,
-          18
+          11
+        ],
+        "habitat": [
+          "pinewood road",
+          "high crags",
+          "wet lowland"
         ],
         "carries_weapon": true,
         "line": "front",
@@ -965,7 +1789,8 @@
         ],
         "element_bias": [
           "cold",
-          "chaos"
+          "chaos",
+          "fire"
         ],
         "stats": {
           "str": 1.48,
@@ -976,18 +1801,89 @@
           "wis": 0.95,
           "lck": 0.95
         },
-        "trait": "the honest strength body - second-highest Str, so it is the species that makes bleed and armour matter"
+        "humanoid": true,
+        "trait": "armour wall - real armour and heavy res, paid for with the worst accuracy on the road"
+      },
+      {
+        "id": "kobold",
+        "name": "Kobold",
+        "zones": [
+          7
+        ],
+        "habitat": [
+          "the bone gate"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.5,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.07,
+          "agi": 1.32,
+          "vit": 0.85,
+          "dex": 1.06,
+          "int": 0.64,
+          "wis": 0.85,
+          "lck": 1.22
+        },
+        "trait": "evasive vermin - quick and looting, killed by Element damage"
+      },
+      {
+        "id": "ogre",
+        "name": "Ogre",
+        "zones": [
+          6,
+          8,
+          17
+        ],
+        "habitat": [
+          "high crags",
+          "frost hold",
+          "wyrm breeding ground"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.5,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "cold"
+        ],
+        "stats": {
+          "str": 1.43,
+          "agi": 0.96,
+          "vit": 1.38,
+          "dex": 0.74,
+          "int": 0.59,
+          "wis": 0.95,
+          "lck": 0.95
+        },
+        "trait": "armour wall - slow and heavy, dodged outright by a Dex build"
       },
       {
         "id": "troll",
         "name": "Troll",
         "zones": [
-          6,
+          5,
           7,
-          8,
-          12,
-          15,
-          18
+          9,
+          10
+        ],
+        "habitat": [
+          "wolf country",
+          "the bone gate",
+          "the vermolch mire",
+          "wet lowland"
         ],
         "carries_weapon": true,
         "line": "front",
@@ -998,7 +1894,8 @@
         ],
         "element_bias": [
           "cold",
-          "chaos"
+          "chaos",
+          "poison"
         ],
         "stats": {
           "str": 1.38,
@@ -1009,52 +1906,164 @@
           "wis": 0.95,
           "lck": 0.95
         },
-        "trait": "a Large wall with no damage trick - the species that teaches a player to bring aoe"
+        "trait": "armour wall, all alone - every farming body is Large, so there is never a soft version to farm"
       },
       {
-        "id": "elf",
-        "name": "Elf",
+        "id": "minotaur",
+        "name": "Minotaur",
         "zones": [
-          2,
-          7,
-          10,
+          7
+        ],
+        "habitat": [
+          "the bone gate"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.75,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.37,
+          "agi": 1.01,
+          "vit": 1.16,
+          "dex": 0.8,
+          "int": 0.84,
+          "wis": 0.91,
+          "lck": 0.91
+        },
+        "trait": "the labyrinth bruiser - a balanced vector with no hole to exploit"
+      },
+      {
+        "id": "skeleton",
+        "name": "Skeleton",
+        "zones": [
           12,
-          15,
-          16
+          13,
+          14
+        ],
+        "habitat": [
+          "salt flats",
+          "slag and foundry heat",
+          "open moor"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.25,
+        "sizes": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "chaos",
+          "fire"
+        ],
+        "stats": {
+          "str": 1.23,
+          "agi": 0.73,
+          "vit": 1.57,
+          "dex": 0.84,
+          "int": 0.68,
+          "wis": 1.07,
+          "lck": 0.9
+        },
+        "trait": "slow caster floor - the accuracy is a joke and the res is not"
+      },
+      {
+        "id": "mummy",
+        "name": "Mummy",
+        "zones": [
+          11,
+          12
+        ],
+        "habitat": [
+          "wet lowland",
+          "salt flats"
+        ],
+        "carries_weapon": true,
+        "line": "stand-off",
+        "damage": "physical",
+        "accuracy_mult": 0.25,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "poison",
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.28,
+          "agi": 0.78,
+          "vit": 1.56,
+          "dex": 0.78,
+          "int": 0.67,
+          "wis": 1,
+          "lck": 0.94
+        },
+        "trait": "slow caster floor - fires from the second line and shrugs off Element damage"
+      },
+      {
+        "id": "vampire",
+        "name": "Vampire",
+        "zones": [
+          12,
+          13,
+          14
+        ],
+        "habitat": [
+          "salt flats",
+          "slag and foundry heat",
+          "open moor"
         ],
         "carries_weapon": true,
         "line": "stand-off",
         "damage": "mixed",
-        "accuracy_mult": 1,
+        "accuracy_mult": 0.75,
         "sizes": [
           "medium",
           "large"
         ],
         "element_bias": [
           "chaos",
-          "poison"
+          "fire"
         ],
         "stats": {
-          "str": 0.86,
-          "agi": 1.15,
-          "vit": 0.77,
-          "dex": 1.25,
-          "int": 1.05,
-          "wis": 0.96,
-          "lck": 0.96
+          "str": 1.15,
+          "agi": 1.16,
+          "vit": 1,
+          "dex": 0.95,
+          "int": 0.9,
+          "wis": 0.9,
+          "lck": 0.95
         },
-        "trait": "accurate and long-ranged - the species that punishes a build with no reach"
+        "trait": "the mixed threat - half its hit is armour-able and half res-able, so neither answer is complete"
       },
       {
-        "id": "demonic",
+        "id": "demon",
         "name": "Demon",
         "zones": [
-          2,
-          5,
-          7,
+          8,
           11,
-          12,
-          15
+          13,
+          14,
+          15,
+          16
+        ],
+        "habitat": [
+          "frost hold",
+          "wet lowland",
+          "slag and foundry heat",
+          "open moor",
+          "thorn country",
+          "drowned river mouth"
         ],
         "carries_weapon": true,
         "line": "stand-off",
@@ -1067,6 +2076,7 @@
         "element_bias": [
           "chaos",
           "cold",
+          "fire",
           "poison"
         ],
         "stats": {
@@ -1078,18 +2088,142 @@
           "wis": 0.87,
           "lck": 0.87
         },
-        "trait": "the only species that hits both ways at once, so Alignment and res cannot be prepared for one Element"
+        "trait": "the mixed caster - Int-heavy, so its Element half is the part that hurts"
+      },
+      {
+        "id": "slime",
+        "name": "Slime",
+        "zones": [
+          5,
+          15,
+          16,
+          17
+        ],
+        "habitat": [
+          "wolf country",
+          "thorn country",
+          "drowned river mouth",
+          "wyrm breeding ground"
+        ],
+        "carries_weapon": false,
+        "line": "front",
+        "damage": "magic",
+        "accuracy_mult": 0.05,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "fire",
+          "cold",
+          "chaos",
+          "poison"
+        ],
+        "stats": {
+          "str": 0.73,
+          "agi": 0.63,
+          "vit": 1.46,
+          "dex": 0.73,
+          "int": 1.15,
+          "wis": 1.25,
+          "lck": 1.04
+        },
+        "trait": "slow caster floor - magic only, so Elemental resistance is the whole answer and Armour answers nothing"
+      },
+      {
+        "id": "spider",
+        "name": "Spider",
+        "zones": [
+          2,
+          5,
+          7,
+          17
+        ],
+        "habitat": [
+          "slow water",
+          "wolf country",
+          "the bone gate",
+          "wyrm breeding ground"
+        ],
+        "carries_weapon": false,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.5,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "cold",
+          "poison",
+          "chaos"
+        ],
+        "stats": {
+          "str": 0.72,
+          "agi": 1.34,
+          "vit": 0.82,
+          "dex": 1.24,
+          "int": 0.82,
+          "wis": 0.93,
+          "lck": 1.13
+        },
+        "trait": "evasive vermin - hard to hit, dies to any AoE"
+      },
+      {
+        "id": "wolf",
+        "name": "Wolf",
+        "zones": [
+          1,
+          2,
+          9,
+          10
+        ],
+        "habitat": [
+          "pinewood road",
+          "slow water",
+          "the vermolch mire",
+          "wet lowland"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 1,
+        "sizes": [
+          "small",
+          "medium"
+        ],
+        "element_bias": [
+          "chaos",
+          "fire",
+          "poison"
+        ],
+        "stats": {
+          "str": 1.13,
+          "agi": 1.34,
+          "vit": 0.93,
+          "dex": 1.03,
+          "int": 0.62,
+          "wis": 0.93,
+          "lck": 1.03
+        },
+        "trait": "accurate striker - Evasion is worthless against it"
       },
       {
         "id": "golem",
         "name": "Golem",
         "zones": [
-          4,
-          5,
+          7,
           8,
-          9,
-          11,
+          15,
+          16,
           18
+        ],
+        "habitat": [
+          "the bone gate",
+          "frost hold",
+          "thorn country",
+          "drowned river mouth",
+          "the pale bloom"
         ],
         "carries_weapon": true,
         "line": "front",
@@ -1099,9 +2233,9 @@
           "large"
         ],
         "element_bias": [
-          "lightning",
           "cold",
-          "chaos"
+          "chaos",
+          "poison"
         ],
         "stats": {
           "str": 1.7,
@@ -1112,55 +2246,27 @@
           "wis": 1.1,
           "lck": 0.65
         },
-        "trait": "the armour wall - highest Str and Vit in the game behind the second-worst accuracy, so it is the species that makes K_ARMOUR real and chill's Armour cut worth pressing"
+        "trait": "armour wall, all alone - the strongest armour line in the game and no soft body to farm"
       },
       {
-        "id": "knight",
-        "name": "Knight",
+        "id": "dragon",
+        "name": "Dragon",
         "zones": [
+          6,
           8,
+          9,
           10,
-          14,
-          16,
-          17,
           18
         ],
-        "carries_weapon": true,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.25,
-        "sizes": [
-          "large"
-        ],
-        "element_bias": [
-          "cold",
-          "poison",
-          "chaos"
-        ],
-        "stats": {
-          "str": 1.29,
-          "agi": 0.75,
-          "vit": 1.51,
-          "dex": 0.86,
-          "int": 0.65,
-          "wis": 1.08,
-          "lck": 0.86
-        },
-        "trait": "armoured and inaccurate - the late-game answer to an Evasion build, and the species that finally gives chill's Armour cut a target"
-      },
-      {
-        "id": "drake",
-        "name": "Drake",
-        "zones": [
-          2,
-          5,
-          6,
-          10,
-          16,
-          17
+        "habitat": [
+          "high crags",
+          "frost hold",
+          "the vermolch mire",
+          "wet lowland",
+          "the pale bloom"
         ],
         "carries_weapon": true,
-        "line": "front",
+        "line": "stand-off",
         "damage": "mixed",
         "accuracy_mult": 1,
         "sizes": [
@@ -1172,28 +2278,250 @@
           "poison"
         ],
         "stats": {
-          "str": 1.25,
-          "agi": 0.96,
-          "vit": 1.05,
-          "dex": 0.86,
-          "int": 1.15,
-          "wis": 0.86,
-          "lck": 0.86
+          "str": 1.48,
+          "agi": 0.78,
+          "vit": 1.3,
+          "dex": 0.81,
+          "int": 0.9,
+          "wis": 0.98,
+          "lck": 0.76
         },
-        "trait": "the zone-9 wall - high accuracy, high Str, high Int and a Large body, so no single defensive layer answers it"
+        "trait": "accurate striker - the mixed hit at full accuracy is the whole fight"
       },
       {
-        "id": "seraph",
-        "name": "Seraph",
+        "id": "treant",
+        "name": "Treant",
         "zones": [
-          7,
-          9,
-          10,
-          11,
-          12,
-          18
+          3,
+          4
+        ],
+        "habitat": [
+          "ash fields",
+          "storm terrace"
         ],
         "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.25,
+        "sizes": [
+          "large"
+        ],
+        "element_bias": [
+          "fire",
+          "lightning"
+        ],
+        "stats": {
+          "str": 1.54,
+          "agi": 0.73,
+          "vit": 1.52,
+          "dex": 0.75,
+          "int": 0.65,
+          "wis": 1.03,
+          "lck": 0.8
+        },
+        "trait": "armour wall, all alone - heavy and rooted, and it never comes in a soft body"
+      },
+      {
+        "id": "human",
+        "name": "Human",
+        "zones": [
+          1,
+          13,
+          18
+        ],
+        "habitat": [
+          "pinewood road",
+          "slag and foundry heat",
+          "the pale bloom"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.75,
+        "sizes": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "fire",
+          "chaos"
+        ],
+        "stats": {
+          "str": 1.13,
+          "agi": 1.03,
+          "vit": 0.93,
+          "dex": 1.13,
+          "int": 0.72,
+          "wis": 1.03,
+          "lck": 1.03
+        },
+        "humanoid": true,
+        "trait": "accurate striker and status pressure - the militia lineage, and the potion-carrier"
+      },
+      {
+        "id": "lizardman",
+        "name": "Lizardman",
+        "zones": [
+          5,
+          11,
+          17
+        ],
+        "habitat": [
+          "wolf country",
+          "wet lowland",
+          "wyrm breeding ground"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.75,
+        "sizes": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "cold",
+          "poison"
+        ],
+        "stats": {
+          "str": 1.16,
+          "agi": 1.26,
+          "vit": 1,
+          "dex": 0.95,
+          "int": 0.58,
+          "wis": 0.9,
+          "lck": 1.16
+        },
+        "trait": "the swamp hunter - quick, lucky and unremarkable, which is its own kind of easy"
+      },
+      {
+        "id": "elf",
+        "name": "Elf",
+        "zones": [
+          3,
+          4,
+          18
+        ],
+        "habitat": [
+          "ash fields",
+          "storm terrace",
+          "the pale bloom"
+        ],
+        "carries_weapon": true,
+        "line": "stand-off",
+        "damage": "mixed",
+        "accuracy_mult": 1,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "chaos",
+          "poison",
+          "fire",
+          "lightning"
+        ],
+        "stats": {
+          "str": 0.86,
+          "agi": 1.15,
+          "vit": 0.77,
+          "dex": 1.25,
+          "int": 1.05,
+          "wis": 0.96,
+          "lck": 0.96
+        },
+        "humanoid": true,
+        "trait": "accurate striker, evasive and status pressure - the complete caster line, and the hardest to hit"
+      },
+      {
+        "id": "giant",
+        "name": "Giant",
+        "zones": [
+          6,
+          9,
+          10
+        ],
+        "habitat": [
+          "high crags",
+          "the vermolch mire",
+          "wet lowland"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 0.25,
+        "sizes": [
+          "large"
+        ],
+        "element_bias": [
+          "cold",
+          "poison"
+        ],
+        "stats": {
+          "str": 1.59,
+          "agi": 0.83,
+          "vit": 1.41,
+          "dex": 0.75,
+          "int": 0.59,
+          "wis": 1.03,
+          "lck": 0.8
+        },
+        "trait": "armour wall, all alone - the heaviest body that still swings from the front"
+      },
+      {
+        "id": "werewolf",
+        "name": "Werewolf",
+        "zones": [
+          2,
+          3,
+          4,
+          14
+        ],
+        "habitat": [
+          "slow water",
+          "ash fields",
+          "storm terrace",
+          "open moor"
+        ],
+        "carries_weapon": true,
+        "line": "front",
+        "damage": "physical",
+        "accuracy_mult": 1,
+        "sizes": [
+          "medium",
+          "large"
+        ],
+        "element_bias": [
+          "poison",
+          "fire",
+          "lightning",
+          "cold"
+        ],
+        "stats": {
+          "str": 1.31,
+          "agi": 1.2,
+          "vit": 1.1,
+          "dex": 0.89,
+          "int": 0.58,
+          "wis": 0.94,
+          "lck": 0.99
+        },
+        "trait": "accurate striker - a Wolf that hits harder and can take a hit back"
+      },
+      {
+        "id": "dryad",
+        "name": "Dryad",
+        "zones": [
+          3,
+          4
+        ],
+        "habitat": [
+          "ash fields",
+          "storm terrace"
+        ],
+        "carries_weapon": false,
         "line": "stand-off",
         "damage": "magic",
         "accuracy_mult": 0.5,
@@ -1202,39 +2530,216 @@
           "large"
         ],
         "element_bias": [
-          "poison",
-          "chaos"
+          "fire",
+          "lightning"
         ],
         "stats": {
-          "str": 0.59,
-          "agi": 0.79,
-          "vit": 0.99,
-          "dex": 1.08,
-          "int": 1.38,
-          "wis": 1.18,
-          "lck": 0.99
+          "str": 0.73,
+          "agi": 0.97,
+          "vit": 0.88,
+          "dex": 1.17,
+          "int": 1.22,
+          "wis": 1.07,
+          "lck": 0.98
         },
-        "trait": "the late caster - huge Element damage behind a Medium body, which is the hardest thing in the game to kill inside a group"
+        "trait": "evasive vermin and status pressure - magic only, so resistance is the answer"
       }
     ],
     "species_rules": [
       "A species is a MULTIPLY vector on the same stat block a player has, so total mob power stays put and mob_HP keeps deriving from player DPS. Check X19 fails any species whose multipliers do not average 1.00.",
-      "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the Evasion Cap 80 question answerable: Cap 80 is reachable against the x0.05 species (Husk · Slime) and close to worthless against the x1.00 ones (Wolf · Elf · Drake), so no single mob accuracy number can close C1 - the species mix does.",
+      "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the Evasion Cap 80 question answerable: Cap 80 is reachable against the x0.05 species (Slime) and close to worthless against the x1.00 ones (Wolf · Elf · Dragon), so no single mob accuracy number can close C1 - the species mix does.",
       "innate Element is rolled on spawn and is NOT part of the species. element_bias only tilts the roll inside the zone's own 1-2 Elements, so players still have to prepare res in advance (world.md).",
-      "A species that carries a weapon is the only kind a weapon-slot piece can come from; every species still drops from the non-weapon slots, so the 8% base drop rate and the loot.md funnel are untouched by this flag. Rat · Husk · Slime · Spider are the weaponless lineages, which is why goblin (zone 2) is where the weapon part of the drop table starts.",
+      "A species that carries a weapon is the only kind a weapon-slot piece can come from; every species still drops from the non-weapon slots, so the 8% base drop rate and the loot.md funnel are untouched by this flag. Slime · Spider · Dryad are the weaponless lineages, which is why goblin (zone 1) is where the weapon part of the drop table starts.",
       "A species is not zone-locked. The same species in two zones is the same species at a higher level, never a reskinned one.",
-      "Mob evasion is the species Dex line, not a level number: `stat_c(level) x species.dex x K_EVASION x body-class evasion`. K_EVASION 0.5 is set so the average species on a Medium body reproduces the retired `level x 1` curve (101 vs 100 at level 100), so this is a derivation, not a rebalance - and it is the same K the player's own Evasion rating uses, because a mob runs the player's math (X21)."
+      "A species may appear only where its `habitat` allows. `habitat` is the region list it may live in (the geography layer the zone `region` names) and `zones` is where it currently does, so `zones` must be a subset of the regions those zones carry. Check X52 fails a species placed outside its habitat, a habitat naming a region no zone has, or a region no species claims. Re-placing a species is a `habitat`/`zones` data edit, never a roster rewrite, and it moves no price.",
+      "Mob evasion is the species Dex line, not a level number: `stat_c(level) x species.dex x K_EVASION x body-class evasion`. K_EVASION 0.5 is set so the average species on a Medium body reproduces the retired `level x 1` curve (101 vs 100 at level 100), so this is a derivation, not a rebalance - and it is the same K the player's own Evasion rating uses, because a mob runs the player's math (X21).",
+      "A race carries a variant ladder and each live zone carries sub-zones. The five variants fill the five tier slots in order - Small · Medium · Large · Elite · Boss - so the field label is the variant name rather than the species name plus a suffix, and a named boss reads its own name. A sub-zone is what a spawn table rolls against: it names its Environment, one Element chosen from the zone's own set, the two races that live there and the Elite that may roll, and the zone cast is the union of its three sub-zones.",
+      "A proposed zone layout that re-zones the world is a new world, not a mob pass: the zone set is the shipped eighteen with its place regions (X51), and where a race lives is a habitat-legal data edit (X52). A species sheet therefore lands inside the existing zones — its races, variant ladders, sub-zones and bosses — and a sub-zone carries one of its zone's own Elements, never a new one."
     ],
     "stat": {
       "base": 108.43,
-      "note": "A mob's stat block is FLAT (owner ruling D-141): one base the species vector multiplies, with no level term. Every mob stat - accuracy, Evasion, Armour, Elemental resistance, dodge - reads from HERE through the species multiplier, never from the player stat, so two mobs of the same level can be nothing alike and difficulty lives on mob_HP / mob_PS and the species vector alone. Every one of them still ends at the same Cap the player obeys (`caps`). The base is set so the reference build's opposed hit-chance (X20) holds on the player's even-split reference line; re-derive it from the X20/X22/X24/X25 bands if that line moves."
+      "note": "A mob's stat block is FLAT (owner ruling): one base the species vector multiplies, with no level term. Every mob stat - accuracy, Evasion, Armour, Elemental resistance, dodge - reads from HERE through the species multiplier, never from the player stat, so two mobs of the same level can be nothing alike and difficulty lives on mob_HP / mob_PS and the species vector alone. Every one of them still ends at the same Cap the player obeys (`caps`). The base is set so the reference build's opposed hit-chance (X20) holds on the player's even-split reference line; re-derive it from the X20/X22/X24/X25 bands if that line moves."
     },
     "field_labels": {
-      "note": "The field label is the species name, lowercase, plus a tier suffix; a named boss reads its own name instead of its species. Colour is a client concern - the data carries no hex value. Body class stays in the roster table, never on the field.",
-      "normal": { "source": "species", "suffix": "" },
-      "elite": { "source": "species", "suffix": "(Elite)" },
-      "boss": { "source": "name", "suffix": "(Boss)" }
-    }
+      "note": "The field label is the variant name the body tier lands on (small · medium · large · elite), and a named boss reads its own name instead of its variant. Colour is a client concern - the data carries no hex value. Body class stays in the roster table, never on the field.",
+      "normal": {
+        "source": "species",
+        "suffix": ""
+      },
+      "elite": {
+        "source": "species",
+        "suffix": "(Elite)"
+      },
+      "boss": {
+        "source": "name",
+        "suffix": "(Boss)"
+      }
+    },
+    "variants": {
+      "goblin": [
+        "Sneak Goblin",
+        "Raider Goblin",
+        "Tinker Goblin",
+        "Shaman Goblin",
+        "Goblin King"
+      ],
+      "orc": [
+        "Raider Orc",
+        "Shaman Orc",
+        "Berserker Orc",
+        "Juggernaut Orc",
+        "Warlord Orc"
+      ],
+      "kobold": [
+        "Miner Kobold",
+        "Trapper Kobold",
+        "Tinker Kobold",
+        "Drake Kobold",
+        "Hoarder Kobold"
+      ],
+      "ogre": [
+        "Brute Ogre",
+        "Butcher Ogre",
+        "Swamp Ogre",
+        "Mage Ogre",
+        "Ogre King"
+      ],
+      "troll": [
+        "Cave Troll",
+        "Forest Troll",
+        "Swamp Troll",
+        "Stone Troll",
+        "Elder Troll"
+      ],
+      "minotaur": [
+        "Warrior Minotaur",
+        "Berserker Minotaur",
+        "Guardian Minotaur",
+        "Blood Minotaur",
+        "Minotaur King"
+      ],
+      "skeleton": [
+        "Warrior Skeleton",
+        "Archer Skeleton",
+        "Knight Skeleton",
+        "Mage Skeleton",
+        "Bone Colossus"
+      ],
+      "mummy": [
+        "Warrior Mummy",
+        "Priest Mummy",
+        "Cursed Mummy",
+        "Royal Mummy",
+        "Mummy Lord"
+      ],
+      "vampire": [
+        "Blood Vampire",
+        "Noble Vampire",
+        "Vampire Knight",
+        "Vampire Lord",
+        "Ancient Vampire"
+      ],
+      "demon": [
+        "Imp",
+        "Demon Mage",
+        "Demon Brute",
+        "Demon Knight",
+        "Archdemon"
+      ],
+      "slime": [
+        "Splitter Slime",
+        "Acid Slime",
+        "Devourer Slime",
+        "Mimic Slime",
+        "Slime King"
+      ],
+      "spider": [
+        "Cave Spider",
+        "Hunter Spider",
+        "Web Spider",
+        "Venom Spider",
+        "Broodmother"
+      ],
+      "wolf": [
+        "Hunting Wolf",
+        "Dire Wolf",
+        "Shadow Wolf",
+        "Alpha Wolf",
+        "Wolf King"
+      ],
+      "golem": [
+        "Stone Golem",
+        "Iron Golem",
+        "Guardian Golem",
+        "Crystal Golem",
+        "Colossus"
+      ],
+      "dragon": [
+        "Wyrmling",
+        "Drake",
+        "Wyvern",
+        "Elder Dragon",
+        "Ancient Dragon"
+      ],
+      "treant": [
+        "Young Treant",
+        "Thorn Treant",
+        "Rotting Treant",
+        "Ancient Treant",
+        "Treant Elder"
+      ],
+      "human": [
+        "Ranger",
+        "Warrior",
+        "Knight",
+        "Mage",
+        "Paladin"
+      ],
+      "lizardman": [
+        "Hunter Lizardman",
+        "Warrior Lizardman",
+        "Scale Knight",
+        "Shaman Lizardman",
+        "Lizardman Chief"
+      ],
+      "elf": [
+        "Wood Elf",
+        "High Elf",
+        "Moon Elf",
+        "Dark Elf",
+        "Elven Archmage"
+      ],
+      "giant": [
+        "Hill Giant",
+        "Stone Giant",
+        "Frost Giant",
+        "Fire Giant",
+        "Storm Giant"
+      ],
+      "werewolf": [
+        "Wolfman",
+        "Dire Werewolf",
+        "Blood Werewolf",
+        "Alpha Werewolf",
+        "Werewolf Lord"
+      ],
+      "dryad": [
+        "Forest Dryad",
+        "Flower Dryad",
+        "Thorn Dryad",
+        "Corrupted Dryad",
+        "Ancient Dryad"
+      ]
+    },
+    "deprecated_species": {
+      "rat": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them",
+      "husk": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them",
+      "bandit": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them",
+      "knight": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them",
+      "drake": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them",
+      "seraph": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them"
+    },
+    "species_target": 22
   },
   "bleed": {
     "curse_id": "curse.lacerate",
@@ -1246,8 +2751,8 @@
     "affected_by_armour": false,
     "can_crit": false,
     "is_element": false,
-    "mitigations": "none — bleed has no counter stat in the game; heal and Energy Shield only shorten the race (D-015)",
-    "mob_side": "decided (D-067) — bleed is a DoT, so it lands on mobs in full from our Lacerate. The reverse is a mob skill: the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict bleed as their signature, delivered as a DoT slice of their already-priced mob_PS, not extra power (combat.md §5b)",
+    "mitigations": "none — bleed has no counter stat in the game; heal and Energy Shield only shorten the race ",
+    "mob_side": "decided — bleed is a DoT, so it lands on mobs in full from our Lacerate. The reverse is a mob skill: the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict bleed as their signature, delivered as a DoT slice of their already-priced mob_PS, not extra power (combat.md §5b)",
     "note": "PoE bleed: physical damage over time, does not stack, a new application refreshes the duration, base duration 5 sec, base total 70% of the inflicting hit's physical damage, unaffected by armour, cannot crit. bleed_dps = K_BLEED x physical_per_hit / bleed_time_sec, so it does not scale with attack speed — slow heavy hits are the build."
   },
   "level_gain": {
@@ -1260,7 +2765,7 @@
     "res_mod_items": 3,
     "cdr_mod_items": 11,
     "cdr_buff_pct": 0,
-    "base_note": "The flat base each pool starts from before its Core stat is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term · Max Mana = mana_base + Int x K_INT_MP + level term · weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening 35-weight sword is carried untaxed — this closes harness/todo.md A12."
+    "base_note": "The flat base each pool starts from before its Core stat is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term · Max Mana = mana_base + Int x K_INT_MP + level term · weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening 35-weight sword is carried untaxed."
   },
   "xp": {
     "per_kill_mob_level": 10,
@@ -1421,7 +2926,7 @@
         "v100": "+96% of a fresh build's uninvested stat line, and it thins toward the flat ceiling as the stats fill",
         "early": "+11%",
         "weight": 0.5,
-        "why": "A PoE-style all-attributes line: one roll lifts all seven Core stats at once (D-129), so it is weighted rarer than the single-stat Stat Mod flat it shares the slot with"
+        "why": "A PoE-style all-attributes line: one roll lifts all seven Core stats at once, so it is weighted rarer than the single-stat Stat Mod flat it shares the slot with"
       },
       {
         "label": "Elemental alignment %",
@@ -1567,7 +3072,7 @@
         "v100": "+3.7 points of cut on a zone-9 physical half (41.7% -> 45.4% at full Str, no flat)",
         "early": "+2.2 points",
         "weight": 0.8,
-        "why": "A PoE ratio cuts less of a bigger number, so a % on Armour is a modest line by construction (D-022 · X22 holds the cut inside 10-40%) — same rarity as Max HP %"
+        "why": "A PoE ratio cuts less of a bigger number, so a % on Armour is a modest line by construction (X22 holds the cut inside 10-40%) — same rarity as Max HP %"
       },
       {
         "label": "Evasion %",
@@ -1615,7 +3120,7 @@
         "v100": "scales the Lck line, so it is worth most on a build that has not finished the line",
         "early": "a level-1 Lck sits at under 1%, where +3% is a large multiplier on the chance",
         "weight": 0.7,
-        "why": "The Cap binds near the top of the maxed Lck ratio, so this line is worth least on a maxed-Lck piece and decisive on a low one — the same shape as an % line on any other low rate. It is also defined but not offered: no Base pool in bases.json rolls it, so today it is a drop-weight row and nothing more (harness/todo.md)."
+        "why": "The Cap binds near the top of the maxed Lck ratio, so this line is worth least on a maxed-Lck piece and decisive on a low one — the same shape as an % line on any other low rate. It is also defined but not offered: no Base pool in bases.json rolls it, so today it is a drop-weight row and nothing more."
       },
       {
         "label": "Status Alignment resistance %",
@@ -1635,7 +3140,7 @@
         "v100": "a second bleed source beside Lacerate's own 40% while the curse is up (formula-offense.md section 4)",
         "early": "bleed is a fixed fraction of one physical hit, so the line is worth the same at every level - only the hit behind it grows",
         "weight": 0.7,
-        "why": "A weapon-only line (one-handed and two-handed axes, D-123). It is the always-on answer to the bleed slot Lacerate already owns, so it prices like the other \"answers something niche\" rows; bleed is physical DoT with no Element tag and cannot crit, so the line adds reliability rather than a new multiplier"
+        "why": "A weapon-only line (one-handed and two-handed axes). It is the always-on answer to the bleed slot Lacerate already owns, so it prices like the other \"answers something niche\" rows; bleed is physical DoT with no Element tag and cannot crit, so the line adds reliability rather than a new multiplier"
       },
       {
         "label": "Chance to stun %",
@@ -1645,14 +3150,14 @@
         "v100": "runs beside the lightning-Alignment stun path, which is the one that carries the Cap (elements.md section 6)",
         "early": "stun is a fixed 1 sec stop, so the line is worth the same at every level",
         "weight": 0.7,
-        "why": "A weapon-only line (mace, D-123). Stun stops the target clock for 1 sec - attacks and regen - and the Alignment path already prices that window, so the gear source is priced against it and the alignment Cap still binds on the lightning side"
+        "why": "A weapon-only line (mace). Stun stops the target clock for 1 sec - attacks and regen - and the Alignment path already prices that window, so the gear source is priced against it and the alignment Cap still binds on the lightning side"
       },
       {
         "label": "Block chance %",
         "ids": [
           "block_chance"
         ],
-        "v100": "the second avoidance layer (D-123): a blocked hit is deleted outright, the same shape as perfect dodge",
+        "v100": "the second avoidance layer: a blocked hit is deleted outright, the same shape as perfect dodge",
         "early": "the Cap binds near the top of the shield's own ladder, so the line is worth most while the shield is still low",
         "weight": 0.7,
         "why": "Shield offhand only, and line 1 rather than a random roll, so the layer cannot spread onto every slot. Weighted like the other defensive answers; formula-defense.md prints the roll order and X43 proves the Cap is reachable from the shield alone"
@@ -1665,7 +3170,7 @@
         "v100": "cuts the mob's armour ratio, which only matters where the roster's armour is high enough to bite",
         "early": "the first zones' armour is small, so the line reads as near-zero there and grows into its value",
         "weight": 0.7,
-        "why": "Crossbow only, line 1 (D-123). It is a cut on the mob-side armour ratio, not a new damage multiplier, so it prices against the armour it removes; the mob roster's armour column is what decides where it pays"
+        "why": "Crossbow only, line 1. It is a cut on the mob-side armour ratio, not a new damage multiplier, so it prices against the armour it removes; the mob roster's armour column is what decides where it pays"
       }
     ]
   },
@@ -1674,7 +3179,7 @@
     "recover_sec": 40,
     "player_only": true,
     "chaos_bypasses": true,
-    "note": "Energy Shield is the caster's second pool: pool = Int x K_INT_ES, recharge = Int x K_INT_ESREGEN once delay_sec (3) have passed without a hit, and the full pool comes back in exactly recover_sec (40), the same shape the mana pool was tuned to and about 2.4x faster than a Vit build recovers HP. The 3 sec delay is the owner's ruling (D-124): it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it (D-010)."
+    "note": "Energy Shield is the caster's second pool: pool = Int x K_INT_ES, recharge = Int x K_INT_ESREGEN once delay_sec (3) have passed without a hit, and the full pool comes back in exactly recover_sec (40), the same shape the mana pool was tuned to and about 2.4x faster than a Vit build recovers HP. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it."
   },
   "caps": {
     "crit_chance": null,
@@ -1687,10 +3192,10 @@
     "accuracy": null,
     "weight_overload": 0.5,
     "block": null,
-    "block_note": "`block` is the second avoidance layer (D-123): a blocked hit is cut by a flat `armour / 10` (owner ruling, provisional) rather than deleted, and the roll runs after perfect dodge and evasion. It is fed by the Shield offhand's line 1 only. **No Cap (owner ruling):** the block chance keeps climbing with the shield's own Mod line. formula-defense.md prints the order.",
+    "block_note": "`block` is the second avoidance layer: a blocked hit is cut by a flat `armour / 10` (owner ruling, provisional) rather than deleted, and the roll runs after perfect dodge and evasion. It is fed by the Shield offhand's line 1 only. **No Cap (owner ruling):** the block chance keeps climbing with the shield's own Mod line. formula-defense.md prints the order.",
     "stun": null,
-    "stun_note": "`stun` is the lightning stun chance (elements.md lightning · C10): `Alignment × K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. **No Cap (owner ruling):** the two sources sum and the chance keeps climbing; the mace's line 1 is the published gear source (D-123).",
-    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together (D-112). `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright, and it binds on the Lck ratio alone — the `Perfect dodge %` line is defined in mods.json but no Base pool in bases.json offers it, so nothing lifts that ratio today. **`elem_res` (75) and `cdr` (80) are hard ceilings, not build targets** (D-124): a maxed single-stat build reaches only 48.45 / 57.375, so each Cap sits above its own build by intent, the same shape as the aspd Cap (500). **`alignment` has NO Cap (owner ruling):** the Dex-derived Elemental Alignment is an open-ended status gate and Element multiplier, and the defensive `Status Alignment resistance %` is a Mod line with its own range and no Cap. The player keeps the build's real value instead of a cut, which is new power booked on checks.md D34. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
+    "stun_note": "`stun` is the lightning stun chance (elements.md lightning · C10): `Alignment × K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. **No Cap (owner ruling):** the two sources sum and the chance keeps climbing; the mace's line 1 is the published gear source.",
+    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together. `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright, and it binds on the Lck ratio alone — the `Perfect dodge %` line is defined in mods.json but no Base pool in bases.json offers it, so nothing lifts that ratio today. **`elem_res` (75) and `cdr` (80) are hard ceilings, not build targets**: a maxed single-stat build reaches only 48.45 / 57.375, so each Cap sits above its own build by intent, the same shape as the aspd Cap (500). **`alignment` has NO Cap (owner ruling):** the Dex-derived Elemental Alignment is an open-ended status gate and Element multiplier, and the defensive `Status Alignment resistance %` is a Mod line with its own range and no Cap. The player keeps the build's real value instead of a cut, which is new power booked on checks.md D34. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
   },
   "weapons": [
     {
@@ -1718,6 +3223,66 @@
       "weapon_aspd": 0.7
     }
   ],
+  "weapon_size_mult": {
+    "note": "Weapon x body class (HugePatch section 12): the shape of a fight, not a stat. One multiplier on the PHYSICAL share of an outgoing hit, applied after mitigation, so it never scales the armour cut; the weapon's own swing always carries its row (a staff's swing included), a physical attack skill carries it too, and a magic-damage skill is exempt. Three columns, not four: a boss is not a size, it declares which column it reads (mob.sizes[].reads_as, overridable per boss). The one-handed sword is the flat reference row, which is what keeps every zone price still. Every row keys a weapon NAME from bases.json's 12; a row left flat is one this pass has not derived an opinion for yet.",
+    "ladder": {
+      "one-handed sword": {
+        "small": 1,
+        "medium": 1,
+        "large": 1
+      },
+      "one-handed axe": {
+        "small": 1,
+        "medium": 1,
+        "large": 1
+      },
+      "dagger": {
+        "small": 1.25,
+        "medium": 0.9,
+        "large": 0.75
+      },
+      "mace": {
+        "small": 0.75,
+        "medium": 0.9,
+        "large": 1.25
+      },
+      "wand": {
+        "small": 0.75,
+        "medium": 0.9,
+        "large": 1.25
+      },
+      "staff": {
+        "small": 0.75,
+        "medium": 0.9,
+        "large": 1.25
+      },
+      "spear": {
+        "small": 1.25,
+        "medium": 0.9,
+        "large": 0.75
+      },
+      "two-handed sword": {
+        "small": 0.75,
+        "medium": 0.9,
+        "large": 1.25
+      },
+      "two-handed axe": {
+        "small": 0.75,
+        "medium": 0.9,
+        "large": 1.25
+      },
+      "bow": {
+        "small": 1.25,
+        "medium": 0.9,
+        "large": 0.75
+      },
+      "crossbow": {
+        "small": 0.75,
+        "medium": 0.9,
+        "large": 1.25
+      }
+    }
+  },
   "herbs": {
     "mid_chance": 0.02,
     "high_chance": 0.03,
@@ -1726,7 +3291,7 @@
     "note": "A herb bundle drops on its own roll, separate from gear and stones. farm.md prints these; F13 in checks.md is generated from here."
   },
   "farm": {
-    "note": "Farming is the game's ONE life skill — Melvor's Farming, the farm discipline only (no fishing · mining · woodcutting). It is a real leveled track: plant a seed on a plot, wait the growth timer, harvest for Farming XP plus herbs. Provisioning ONLY — it yields the herbs potions are crafted from, never gear · Mods · combat DPS — so it grants no power and needs no mob_HP fold (AGENT.md §5 · H1). The level curve is the same sqrt(xp/divisor)+1 shape as weapon Mastery (equipment-weapon.md) and runs parallel to it, separate from character XP. A8 ruling · D-068.",
+    "note": "Farming is the game's ONE life skill — Melvor's Farming, the farm discipline only (no fishing · mining · woodcutting). It is a real leveled track: plant a seed on a plot, wait the growth timer, harvest for Farming XP plus herbs. Provisioning ONLY — it yields the herbs potions are crafted from, never gear · Mods · combat DPS — so it grants no power and needs no mob_HP fold (AGENT.md §5 · H1). The level curve is the same sqrt(xp/divisor)+1 shape as weapon Mastery (equipment-weapon.md) and runs parallel to it, separate from character XP. A8 ruling.",
     "plots": {
       "base": 3,
       "shop_deeds": 2,
@@ -1747,7 +3312,7 @@
     "taps_per_day": 2
   },
   "potions": {
-    "note": "Single home for the potion ladder farm.md prints (A8 · D-068). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · kills/hr · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
+    "note": "Single home for the potion ladder farm.md prints (A8). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · kills/hr · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
     "shared_cooldown_sec": 30,
     "auto_use_default": {
       "hp_pct": 30,
@@ -1842,7 +3407,7 @@
   },
   "build": {
     "reference_split": "Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%",
-    "hit_chance_pct": 80,
+    "hit_chance_pct": 81,
     "crit_chance_pct": 18.5,
     "dagger_capped_at_500": false,
     "heal_pool_mult": 2.09,
@@ -1871,11 +3436,11 @@
         "default_enabled": false,
         "default_min_rarity": "any",
         "default_keep_missing_element": true,
-        "note": "loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default (D-122): a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept."
+        "note": "loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default: a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept."
       }
     },
     "base_mod": {
-      "note": "Line 1 of every item (D-123). Armour slots lock the Base's own defence type and gain a chance of the next ones on the same line; weapons force every Mod in their parenthesised list; belt / ring / amulet roll line 1 from the slot's Legacy pool. `hybrid_chance` is [second type, third type] per drop, and `value_scale` is what each Mod on the line is multiplied by once the count is known - more Mods is strictly better but sublinear (100% / 140% / 165%), so a three-way line is never the OP pick. item-base.md owns the pools; this block owns only the two rules.",
+      "note": "Line 1 of every item. Armour slots lock the Base's own defence type and gain a chance of the next ones on the same line; weapons force every Mod in their parenthesised list; belt / ring / amulet roll line 1 from the slot's Legacy pool. `hybrid_chance` is [second type, third type] per drop, and `value_scale` is what each Mod on the line is multiplied by once the count is known - more Mods is strictly better but sublinear (100% / 140% / 165%), so a three-way line is never the OP pick. item-base.md owns the pools; this block owns only the two rules.",
       "hybrid_chance": [
         0.3,
         0.1
@@ -1886,30 +3451,30 @@
         "3": 0.55
       }
     },
-    "ttk_per_mob_sec": 1,
+    "ttk_per_mob_sec": 5.107,
     "group_spawn_sec": 4,
     "bands": {
       "low": {
         "group_mobs": 1.5,
-        "kills_per_hr_published": 980,
+        "kills_per_hr_published": 463,
         "lck_level": 30,
         "upgrades_per_hr": 3
       },
       "mid": {
         "group_mobs": 2.5,
-        "kills_per_hr_published": 1385,
+        "kills_per_hr_published": 537,
         "lck_level": 60,
         "upgrades_per_hr": 3
       },
       "high": {
         "group_mobs": 4,
-        "kills_per_hr_published": 1800,
+        "kills_per_hr_published": 589,
         "lck_level": 90,
         "upgrades_per_hr": 3
       },
       "high_full_lck": {
         "group_mobs": 4,
-        "kills_per_hr_published": 1800,
+        "kills_per_hr_published": 589,
         "lck_level": "ceiling",
         "upgrades_per_hr": 3
       }
@@ -1936,17 +3501,17 @@
       "boss_corrupt_chance": 0.25
     },
     "timeline_checkpoints_hr": {
-      "level_10": 0.5,
-      "level_30": 3.1,
-      "level_60": 12.6,
-      "level_90": 31.2,
-      "level_100": 40.2,
-      "level_120": 62.9,
-      "level_150": 109.7,
-      "level_180": 173.4,
-      "level_190": 198.8
+      "level_10": 0.9,
+      "level_30": 6,
+      "level_60": 29.4,
+      "level_90": 84.3,
+      "level_100": 110.7,
+      "level_120": 177.1,
+      "level_150": 313.9,
+      "level_180": 500.4,
+      "level_190": 574.5
     },
-    "push_hr_levels_91_100": 9,
+    "push_hr_levels_91_100": 26.4,
     "kill_rate_tolerance": 0.01
   },
   "road": {
@@ -2208,7 +3773,7 @@
       }
     },
     "base_rule": "`encounters[].weight` IS the base table (54/24/12/10, the plain average of the five terrain rows) and it is what an offline session rolls, so an away period can never route into the heaviest-ambush terrain and pay out at full rate. A chest is capped once per link per day, the same shape as the purse; it pays no crafting stones, so G5's tier-stone monopoly stays with Elite and boss.",
-    "purse_gold": 3,
+    "purse_gold": 1,
     "purse_once_per_link_per_day": true,
     "chest_once_per_link_per_day": true,
     "circuit": {
@@ -2216,8 +3781,8 @@
       "offline_resolves": true,
       "editable_in": "settlement"
     },
-    "standing_per_trip_kills": 15,
-    "note": "The Road is opt-in. A ladder leg is 5 real minutes and carries 5 encounters (1 per Road minute); a branch leg is 8 (mountain shortcut) or 12 (river detour). C+D stay a content choice, not an income choice: only the 17 ladder links pay the purse, so the mint stays at most 51 gold a day (17 x 3 gold, once per link per day) against a junk-sell mint of thousands; branch links pay no purse and grant Standing only where they arrive. Road pays no stones. A Circuit — an ordered list of links a player loops — does run offline (section 6 and D-133), rolling the untilted base table.",
+    "standing_per_trip_kills": 7,
+    "note": "The Road is opt-in. A ladder leg is 5 real minutes and carries 5 encounters (1 per Road minute); a branch leg is 8 (mountain shortcut) or 12 (river detour). C+D stay a content choice, not an income choice: only the 17 ladder links pay the purse, so the mint stays at most 51 gold a day (17 x 3 gold, once per link per day) against a junk-sell mint of thousands; branch links pay no purse and grant Standing only where they arrive. Road pays no stones. A Circuit — an ordered list of links a player loops — does run offline (section 6 and), rolling the untilted base table.",
     "forfeit_kills": 120
   },
   "inventory": {
@@ -2236,10 +3801,10 @@
     "gold_uses_slot": false,
     "offline_cap_hr": 12,
     "overflow": "stop_pickup",
-    "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the D-037 auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
+    "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
   },
   "rarity": {
-    "note": "Rarity answers Mod count only (item-rarity.md · glossary rule 2). The counts and the crafted ceilings are written here once; the client's Add craft reads them and never infers a number from the Rarity name. D-123: on the 7-line skeleton the count is `dropped_random` - how many of the 4 Random lines arrive rolled at drop - while line 1 (Base Mod) and lines 2-3 (Legacy) are always present.",
+    "note": "Rarity answers Mod count only (item-rarity.md · glossary rule 2). The counts and the crafted ceilings are written here once; the client's Add craft reads them and never infers a number from the Rarity name.: on the 7-line skeleton the count is `dropped_random` - how many of the 4 Random lines arrive rolled at drop - while line 1 (Base Mod) and lines 2-3 (Legacy) are always present.",
     "floor_ceiling": {
       "note": "item-rarity.md 'Item Quality vs Drop Level': each drop source defines a floor and a ceiling. Offline results are limited to the zone floor (save.md · loot.md section 7).",
       "low": {
@@ -2297,36 +3862,24 @@
     "rarities": {
       "common": {
         "sell_gold": 1,
-        "drop_chance_per_kill": 0.2305556
+        "drop_chance_per_kill": 0.1341256
       },
       "uncommon": {
         "sell_gold": 5,
-        "drop_chance_per_kill": 0.0461111
+        "drop_chance_per_kill": 0.0268251
       },
       "rare": {
         "sell_gold": 25,
-        "drop_chance_per_kill": 0.0092222
+        "drop_chance_per_kill": 0.005365
       }
     },
     "by_species": {
-      "rat": {
-        "name": "Rat Tail",
-        "rarity": "common"
-      },
-      "husk": {
-        "name": "Husk Shell",
-        "rarity": "common"
-      },
       "goblin": {
         "name": "Goblin Ear",
         "rarity": "common"
       },
       "slime": {
         "name": "Slime Jelly",
-        "rarity": "common"
-      },
-      "bandit": {
-        "name": "Bandit Token",
         "rarity": "common"
       },
       "spider": {
@@ -2349,28 +3902,68 @@
         "name": "Elf Dust",
         "rarity": "uncommon"
       },
-      "demonic": {
-        "name": "Demon Horn",
-        "rarity": "uncommon"
-      },
       "golem": {
         "name": "Golem Shard",
         "rarity": "rare"
       },
-      "knight": {
-        "name": "Knight Emblem",
+      "kobold": {
+        "name": "Kobold Candle",
+        "rarity": "common"
+      },
+      "skeleton": {
+        "name": "Skeleton Bone",
+        "rarity": "common"
+      },
+      "human": {
+        "name": "Militia Badge",
+        "rarity": "common"
+      },
+      "lizardman": {
+        "name": "Lizardman Scale",
+        "rarity": "common"
+      },
+      "mummy": {
+        "name": "Mummy Bandage",
+        "rarity": "uncommon"
+      },
+      "treant": {
+        "name": "Treant Bark",
+        "rarity": "uncommon"
+      },
+      "giant": {
+        "name": "Giant Knuckle",
+        "rarity": "uncommon"
+      },
+      "dryad": {
+        "name": "Dryad Blossom",
+        "rarity": "uncommon"
+      },
+      "ogre": {
+        "name": "Ogre Tooth",
+        "rarity": "uncommon"
+      },
+      "demon": {
+        "name": "Demon Horn",
+        "rarity": "uncommon"
+      },
+      "minotaur": {
+        "name": "Minotaur Horn",
         "rarity": "rare"
       },
-      "drake": {
-        "name": "Drake Scale",
+      "vampire": {
+        "name": "Vampire Fang",
         "rarity": "rare"
       },
-      "seraph": {
-        "name": "Seraph Feather",
+      "dragon": {
+        "name": "Dragon Scale",
+        "rarity": "rare"
+      },
+      "werewolf": {
+        "name": "Werewolf Claw",
         "rarity": "rare"
       }
     },
-    "note": "RO-style mob junk: a fourth drop stream, one flavoured item per species, sold to the Settlement Counterhand for gold. Each rarity's drop_chance_per_kill is set to junk_per_kill / sell_gold, so a kill of any species has the same expected gold (the F3 junk line per kill) and the junk line stays 416/hr whatever the species mix - common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
+    "note": "RO-style mob junk: a fourth drop stream, one flavoured item per species, sold to the Settlement Counterhand for gold. Each rarity's drop_chance_per_kill is set to junk_per_kill / sell_gold, so a kill of any species has the same expected gold (the F3 junk line per kill) and the expected gold per kill is flat whatever the species mix, so the F3 junk line holds - common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
   },
   "aoe": {
     "per_target_pct": 60,
@@ -2452,7 +4045,7 @@
       }
     ],
     "gear_mod_per_level": 2,
-    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.ts --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.ts` holds the G5 boss gate against a fully upgraded set — which is how checks.md H1 pays for the uplift now that D-103 measured `mob_HP` as already inside the pacing (it moves nothing there).",
+    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.ts --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.ts` holds the G5 boss gate against a fully upgraded set — which is how checks.md H1 pays for the uplift now that measured `mob_HP` as already inside the pacing (it moves nothing there).",
     "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing · 20% reroll values inside the current Tiers · 15% +1 Mod (crafted max and Core slot cap respected) · 15% remove one non-legacy Mod · 10% reroll Element (the only Element change in the game) · 10% Gear Mod +2 · 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
     "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe · +5 to +10 90% down to 60% and a fail drops one level · +11 to +15 50% down to 20% and a fail breaks the piece · protection 5 per piece from birth, each would-be break spends one and drops a level · Repair stone revives at the pre-break level and refills protection · costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality Stones · online only"
   },
@@ -2465,13 +4058,13 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "hr1 27.8 → hr2-4 6.6 → after that 2.5 (low band) · keep-rate 1.98% low · 1.22% mid · 0.66% high · 0.24% high + full_lck",
+      "value": "hr1 21.4 → hr2-4 8.4 → after that 5.2 (low band) · keep-rate 5.10% low · 4.39% mid · 3.11% high · 1.08% high + full_lck",
       "expression": "measured — tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
     {
       "id": "F11",
-      "value": "0.28 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises",
+      "value": "0.29 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises",
       "expression": "Flat line per drop (high zone, after the 0.25 early-game weighting)",
       "status": "measured"
     },
@@ -2589,14 +4182,14 @@
     },
     "no_death": "the player cannot be killed by the opening: zone-1 mobs take minutes to kill a level-1 character, and Push returns them to camp at full HP"
   },
-  "doc_prose_lines_max": 1348,
+  "doc_prose_lines_max": 1291,
   "doc_prose": {
     "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
     "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",
-    "lines_max": 1349,
-    "lines_now": 1349,
+    "lines_max": 1298,
+    "lines_now": 1298,
     "gate": "L9 fails when the count rises above lines_max. Lower the cap as lines are fixed.",
-    "exempt": "harness/decisions.md, harness/todo.md, harness/HARNESS.md, and any line marked lint:allow",
+    "exempt": "harness/todo.md, harness/HARNESS.md, and any line marked lint:allow",
     "baseline_note": "Baseline measured on 2026-10-04 with every doc present. skill-pool.md was restored from git mid-pass and its prose legitimately raised the count from 1370 to 1390, which is the gate working: the cap may only fall, and every fix must lower it here."
   }
 }

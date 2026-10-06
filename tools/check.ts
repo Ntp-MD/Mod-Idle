@@ -44,14 +44,14 @@ const BLOCKS = {};
 BLOCKS['group-A'] = () => [
   '| id | Must hold | Expression | Value |',
   '|---|---|---|---|',
-  `| A1 | stat at level 1 | \`${S.base} + ${S.per_level}×0\` | ${f0(eng.statAt(1))} |`,
-  `| A2 | stat at level 100 no gear | \`${S.base} + ${S.per_level}×${S.level_cap - 1}\` | ${f0(eng.statAt(100))} |`,
-  `| A3 | single-stat ceiling | \`${f0(eng.statAt(100))} + ${S.core_flat_max}×${S.item_slots}\` | **${f0(CEIL)}** |`,
-  `| A4 | two-stat split ceiling | \`${S.split_items} items + ${S.split_items} items\` = \`${f0(eng.statAt(100))} + ${S.core_flat_max}×${S.split_items}\` | ${f0(SPLIT)} / ${f0(SPLIT)} |`,
-  `| A5 | no % term reinstated | \`(${f0(eng.statAt(100))} + ${S.core_flat_max}×${S.item_slots}) × 1.0\` | ${f0(FORCED_SPLIT)} → **never revert to this** because all K values are set on ${f0(CEIL)} |`,
+  `| A1 | stat at level 1 | \`${S.base} + ${S.point_value} × (${f0(eng.pointsAt(1))} ÷ 7)\` | ${f0(eng.statAt(1))} |`,
+  `| A2 | stat at the level cap, no gear | \`${S.base} + ${S.point_value} × (${f0(eng.pointsAt(S.level_cap))} ÷ 7)\` | ${f0(eng.statAt(S.level_cap))} |`,
+  `| A3 | single-stat ceiling | \`${f0(eng.statAt(S.level_cap))} + ${S.core_flat_max}×${S.item_slots}\` | **${f0(CEIL)}** |`,
+  `| A4 | two-stat split ceiling | \`${S.split_items} items + ${S.split_items} items\` = \`${f0(eng.statAt(S.level_cap))} + ${S.core_flat_max}×${S.split_items}\` | ${f0(SPLIT)} / ${f0(SPLIT)} |`,
+  `| A5 | no % term reinstated | \`(${f0(eng.statAt(S.level_cap))} + ${S.core_flat_max}×${S.item_slots}) × 1.0\` | ${f0(FORCED_SPLIT)} → **never revert to this** because all K values are set on ${f0(CEIL)} |`,
   `| A6 | item count origin | ${S.item_slots} worn slots (12 + main hand) · from equipment-slot.md | ${S.item_slots} |`,
   '',
-  `Source: \`node tools/check.ts\` · stat line = \`stat_c = ${S.base} + ${S.per_level} × (level − 1)\` (formula.md) · the Flat maximum from mod-pool.md (Stat Mod flat ${S.core_flat_max} · Stat Mod % is retired, D-114, so A3 is a flat-only sum) · slot count from equipment-slot.md.`,
+  `Source: \`node tools/check.ts\` · stat line = \`stat_c = ${S.base} + ${S.point_value} × (points ÷ 7)\` (formula.md) · the Flat maximum from mod-pool.md (Stat Mod flat ${S.core_flat_max} · Stat Mod % is retired, so A3 is a flat-only sum) · slot count from equipment-slot.md.`,
   ''
 ].join('\n');
 
@@ -86,7 +86,7 @@ BLOCKS['group-C'] = () => {
   const sword = WEAPONS[1], dagger = WEAPONS[0];
   const pdCapFrac = cap('perfect_dodge') / 100;
   const pdCapLck = Math.ceil(pdCapFrac * K.K_PDOGE / (1 - pdCapFrac) / K.K_LCK_PDOGE);
-  // Evasion is one layer (D-112): the Dex rating runs the entropy roll against that mob's
+  // Evasion is one layer: the Dex rating runs the entropy roll against that mob's
   // accuracy, then Agi adds points (30 Agi = 1) and the Cap 80 binds the sum.
   const evFloor = E.mob.species.reduce((a, b) => (b.accuracy_mult < a.accuracy_mult ? b : a));
   const c2rating = SPLIT * K.K_EVASION + M.evasion_flat_t1;
@@ -97,16 +97,16 @@ BLOCKS['group-C'] = () => {
     ['C3', `aspd ${cap('aspd')}`, `sword ${sword.weapon_aspd} + ${M.aspd_pct}% Mod → Agi = ${f0(sword.agi_to_cap)}`, `**${f0(sword.agi_to_cap)}** (ceiling ${f0(CEIL)}) ✓`],
     ['C4', `aspd ${cap('aspd')}`, `dagger ${dagger.weapon_aspd} + ${M.aspd_pct}% Mod`, `${f0(dagger.agi_to_cap)} ✓ · staff/2h unreachable by intent`],
     ['C5', `Perfect dodge ${cap('perfect_dodge')}`, `ratio: Lck ${f0(CEIL)} × ${K.K_LCK_PDOGE} = rate ${f1(DERIVED.pdogge_rate)} ÷ (rate + ${K.K_PDOGE}) = ${f1(DERIVED.perfect_dodge)}% · the Cap binds first · reached at Lck ${f0(pdCapLck)}`, `**${cap('perfect_dodge')}%** at the Cap · reachable at Lck ${f0(pdCapLck)} (under the ${f0(CEIL)} ceiling) ✓`],
-    ['C6', `Alignment ${cap('alignment')} · hard ceiling`, `Dex ${f0(CEIL)} (${f1(DERIVED.align_raw)}) + amulet + gloves (+${M.align_pct_per_item} +${M.align_pct_per_item})`, `${f1(DERIVED.align_path)} — the build tops out under the Cap (D-124)`],
-    ['C7', `Elem res ${cap('elem_res')} · hard ceiling`, `Vit ${f0(CEIL)} + ${LG.res_mod_items} res items`, `${f1(DERIVED.res_three)} — the build tops out under the Cap (D-124)`],
-    ['C8', `CDR ${cap('cdr')} · hard ceiling`, `Wis ${f0(CEIL)} + ${LG.cdr_mod_items} CDR items + BO`, `${f1(DERIVED.cdr_four)} — the build tops out under the Cap (D-124)`],
+    ['C6', `Alignment ${cap('alignment')} · hard ceiling`, `Dex ${f0(CEIL)} (${f1(DERIVED.align_raw)}) + amulet + gloves (+${M.align_pct_per_item} +${M.align_pct_per_item})`, `${f1(DERIVED.align_path)} — the build tops out under the Cap `],
+    ['C7', `Elem res ${cap('elem_res')} · hard ceiling`, `Vit ${f0(CEIL)} + ${LG.res_mod_items} res items`, `${f1(DERIVED.res_three)} — the build tops out under the Cap `],
+    ['C8', `CDR ${cap('cdr')} · hard ceiling`, `Wis ${f0(CEIL)} + ${LG.cdr_mod_items} CDR items + BO`, `${f1(DERIVED.cdr_four)} — the build tops out under the Cap `],
     ['C9', 'Crit (no Cap)', `Lck ${f0(CEIL)} + ${M.crit_pct_main_hand}% Mod + buff`, `${f1(DERIVED.crit)}% from stats alone · anything over ${K.K_CRIT_CAP} becomes crit damage (B6b) ✓`],
-    ['C10', `stun ${cap('stun')}`, `Alignment reach ${f1(DERIVED.align_path)} × ${K.K_STUN_PER_ALIGN} = ${f1(DERIVED.align_path * K.K_STUN_PER_ALIGN)} + the mace's Chance to stun % line`, `${cap('stun')} ✓ via the mace Base Mod, the only source past the Alignment reach (D-123 · D-124)`],
+    ['C10', `stun ${cap('stun')}`, `Alignment reach ${f1(DERIVED.align_path)} × ${K.K_STUN_PER_ALIGN} = ${f1(DERIVED.align_path * K.K_STUN_PER_ALIGN)} + the mace's Chance to stun % line`, `${cap('stun')} ✓ via the mace Base Mod, the only source past the Alignment reach `],
     ['C11', 'Accuracy', 'no Cap · `acc/(acc+E)` forbids 100% itself', `${f0(DERIVED.accuracy)} → ${f1(DERIVED.hit_chance * 100)}% ✓`],
   ];
   return ['| id | Cap | Reachable path | Value at that point |', '|---|---|---|---|',
     ...rows.map((r) => `| ${r[0]} | ${r[1]} | ${r[2]} | ${r[3]} |`), '',
-    'H3 rule: every Cap states whether it is a build target or a hard ceiling. A build-target Cap must bind (the build reaches it); a hard-ceiling Cap must not (the build tops out under it) — `alignment`, `elem_res` and `cdr` are hard ceilings by D-124, and evasion was closed by putting it on the opposed form the mob side already uses, so X20 can prove it both ways.',
+    'H3 rule: every Cap states whether it is a build target or a hard ceiling. A build-target Cap must bind (the build reaches it); a hard-ceiling Cap must not (the build tops out under it) — `alignment`, `elem_res` and `cdr` are hard ceilings, and evasion was closed by putting it on the opposed form the mob side already uses, so X20 can prove it both ways.',
     'Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.aspd} ÷ weapon_aspd` minus the 100 baseline and the 25% Mod, divided by ${K.K_AGI_ASPD} per Agi, plus the level-1 Base of 12.', ''].join('\n');
 };
 
@@ -136,7 +136,7 @@ BLOCKS['group-F'] = () => {
   return ['| id | Value | Expression |', '|---|---|---|',
     ...rows.map((r) => `| ${r[0]} | ${r[1]} | \`${r[2]}\` = ${r[3]} |`),
     ...carried, '',
-    `Derived from: group spawn ${L.group_spawn_sec} sec · ${L.ttk_per_mob_sec} sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = ${S.base} + ${S.per_level}×(L−1)) · Base drop ${L.base_drop_chance * 100}% (formula-utility.md section 10) · prices ${C.reroll_value_stones_per_use}/${C.refine_stones_per_use} stones (crafting.md).`,
+    `Derived from: group spawn ${L.group_spawn_sec} sec · ${L.ttk_per_mob_sec} sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = ${S.base} + ${S.point_value}×(points ÷ 7)) · Base drop ${L.base_drop_chance * 100}% (formula-utility.md section 10) · prices ${C.reroll_value_stones_per_use}/${C.refine_stones_per_use} stones (crafting.md).`,
     `F4 · F11 are **simulation output** (loot.md section 3) and F13 is unset — this cage does not invent it, it only refuses to let a derived row drift.`, ''].join('\n');
 };
 
@@ -146,13 +146,13 @@ function runChecks() {
   const out = [];
   const add = (id, ok, detail) => out.push({ id, ok, detail });
 
-  // the ceiling is now flat-only (Core Stat % retired, D-114) with the earring added as a 13th item
-  // (D-131): 210 + 25x13 = 535. This gate exists to catch an accidental K re-tune, not to re-assert
+  // the ceiling is now flat-only (Core Stat % retired) with the earring added as a 13th item
+  //: 210 + 25x13 = 535. This gate exists to catch an accidental K re-tune, not to re-assert
   // the retired 816.
   // The ceiling is `stat_c(level cap) + core_flat_max x item_slots`, so it moves with the cap.
 // The gate asserts the identity rather than a typed constant, or every world-size change
 // would need the number retyped here as well as in the data.
-add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_slots)) < 0.01, `single-stat ceiling = ${f0(CEIL)} — the reference line plus every item slot (H5 · A3 · D-114 · D-131)`);
+add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_slots)) < 0.01, `single-stat ceiling = ${f0(CEIL)} — the reference line plus every item slot (H5 · A3)`);
   add('X2', f0(FORCED_SPLIT) === f0(Math.round(CEIL)), `Flat/% forced to different stats would give ${f0(FORCED_SPLIT)} — the doc line that forbids reverting A3`);
   add('X3', Math.abs(DERIVED.pool_regen_sec - TS.craft_progress_intent_sec) <= TS.pool_regen_tolerance,
     `mana pool ÷ regen = ${f1(DERIVED.pool_regen_sec)} sec against the ${TS.craft_progress_intent_sec} sec intent (B5 · K_INT_MREGEN)`);
@@ -163,19 +163,20 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   add('X6', BANDS.every((b) => BAND[b].junk_per_hr === BAND[b].drops_per_hr - BAND[b].upgrades_per_hr),
     `junk = drops − upgrades everywhere, so gold and stones share one ceiling (G2 · G8)`);
   // The full-Lck junk multiple is a derived anchor: `CEIL × K_LCK_DROP` is the whole lever, so
-  // dropping the stat ceiling to 510 (D-114) moved 3.16 → 2.11, and adding the earring as a 13th
-  // item (D-131) moved it to 2.20. Like X1 this literal is a canary against an accidental K re-tune,
-  // and the docs print the derived value, not this number.
-  add('X7', Math.abs(LCK_BOUND - 2.2) < 0.02, `full-Lck junk line ×${f2(LCK_BOUND)} — the bound G8 and towns-stalls T7 quote`);
-  add('X8', STONE.tier_stones_per_hr === 18 + 12 && STONE.reroll_uses_per_hr === 52,
+  // dropping the stat ceiling to 510 moved 3.16 → 2.11, adding the earring as a 13th
+  // item moved it to 2.20, and the re-base (kill rates ×1/3 and the level-90 Lck
+  // line 190 → 76) moved it to the value below. Like X1 this literal is a canary against an
+  // accidental K re-tune, and the docs print the derived value, not this number.
+  add('X7', Math.abs(LCK_BOUND - 3.15) < 0.02, `full-Lck junk line ×${f2(LCK_BOUND)} — the bound G8 and towns-stalls T7 quote`);
+  add('X8', STONE.tier_stones_per_hr === 6 + 12 && STONE.reroll_uses_per_hr === 10,
     `stone flow: elite 18 + boss 12 = ${STONE.tier_stones_per_hr} tier stones/hr · ${f0(BAND.high.junk_per_hr)} junk ÷ ${C.reroll_value_stones_per_use} = ${STONE.reroll_uses_per_hr} Reroll uses/hr (F6 · F7)`);
   const e6Lines = readDoc('checks.md').split(/\r?\n/);
   const e6row = e6Lines.find((l) => l.startsWith('| E6 |')) || '';
   const e6 = Number((e6row.match(/([\d.]+) hr/) || [0, NaN])[1]);
-  add('X9', Math.abs(e6 - STONE.refine_hours_full_set) <= 0.1, `Refine full set = ${STONE.refine_casts_full_set} casts ÷ ${f1(STONE.refines_per_hr)}/hr = ${f1(STONE.refine_hours_full_set)} hr, and checks.md E6 prints ${e6} hr — Tier belongs to the piece (D-033), so a cast moves the whole item one step`);
-  add('X10', STONE.polish_hours_full_set <= 2, `full-set polish = ${f2(STONE.polish_hours_full_set)} hr (E8 · the opportunity cost one gold is priced against)`);
+  add('X9', Math.abs(e6 - STONE.refine_hours_full_set) <= 0.1, `Refine full set = ${STONE.refine_casts_full_set} casts ÷ ${f1(STONE.refines_per_hr)}/hr = ${f1(STONE.refine_hours_full_set)} hr, and checks.md E6 prints ${e6} hr — Tier belongs to the piece, so a cast moves the whole item one step`);
+  add('X10', STONE.polish_hours_full_set <= 10.5, `full-set polish = ${f2(STONE.polish_hours_full_set)} hr (E8 · the opportunity cost one gold is priced against)`);
 
-  // Cap reachability, split by kind (D-124). A build-target Cap must bind — the build reaches at
+  // Cap reachability, split by kind. A build-target Cap must bind — the build reaches at
   // least the Cap, so the Cap is what the player feels. A hard-ceiling Cap must NOT bind — it sits
   // above what any build reaches, so the player keeps the build's real value instead of a cut. These
   // three are hard ceilings, so the gate flips: it fails only if one ever drops onto its own build.
@@ -186,7 +187,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   ];
   const nowBinding = ceilCaps.filter(([, v, c2]) => v > c2);
   add('X11', nowBinding.length === 0,
-    `hard-ceiling caps stay above their build (D-124): ${ceilCaps.map(([n, v, c2]) => `${n} reach ${f1(v)} < cap ${c2}`).join(' · ')}${nowBinding.length ? ' · NOW BINDING: ' + nowBinding.map((r) => r[0]).join(',') : ''}`);
+    `hard-ceiling caps stay above their build: ${ceilCaps.map(([n, v, c2]) => `${n} reach ${f1(v)} < cap ${c2}`).join(' · ')}${nowBinding.length ? ' · NOW BINDING: ' + nowBinding.map((r) => r[0]).join(','): ''}`);
   add('X12', DERIVED.crit <= K.K_CRIT_CAP && E.caps.crit_chance === null,
     `crit has no Cap (the 100 Cap became a spill point): stats alone = ${f1(DERIVED.crit)}% < ${K.K_CRIT_CAP}, so overflow is ${f1(DERIVED.crit_overflow)} today and only buffs/skills can push past it (C9 · formula-offense.md)`);
   const capped = WEAPONS.filter((w) => !w.reachable).map((w) => w.name);
@@ -195,9 +196,118 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   add('X14', WEAPONS.every((w) => Math.abs(w.weapon_mult - 1.2 / w.weapon_aspd) < 0.005),
     `weapon_mult = 1.2 ÷ weapon_aspd for all 6 rows (D10 · equal DPS across every weapon type)`);
 
+  // §12 · the weapon × body-class ladder. The reference weapon must be flat across the three body
+  // classes (that is what keeps every zone price still), every row must carry all three columns, and
+  // a boss has to declare a real body class to read as. A non-flat row must be monotone, so the
+  // sheet can print "favours Small, disfavours Large" without a chart.
+  const weaponSizeProblems = [];
+  const REF_WEAPON = 'one-handed sword';
+  const weaponRows = (Object.entries((E.weapon_size_mult || {}).ladder || {}) as any[]).map(([name, l]) => ({ name, size_mult: l }));
+  const bodyLabels = ['small', 'medium', 'large'];
+  if (!weaponRows.length) weaponSizeProblems.push('bases.json has no weapon rows');
+  for (const w of weaponRows) {
+    const l = w.size_mult;
+    if (!l || bodyLabels.some((b) => !(typeof l[b] === 'number' && l[b] > 0))) { weaponSizeProblems.push(`${w.name}: size_mult is missing a positive small/medium/large column`); continue; }
+    if (bodyLabels.every((b) => l[b] === 1) === false && !(Math.max(l.small, l.medium, l.large) >= l.medium && l.medium >= Math.min(l.small, l.medium, l.large))) {
+      weaponSizeProblems.push(`${w.name}: ladder is not monotone (${l.small}/${l.medium}/${l.large})`);
+    }
+  }
+  const refRow = weaponRows.find((w) => w.name === REF_WEAPON);
+  if (!refRow || bodyLabels.some((b) => refRow.size_mult?.[b] !== 1)) weaponSizeProblems.push(`${REF_WEAPON} is not the flat reference row`);
+  const nonFlat = weaponRows.filter((w) => bodyLabels.some((b) => w.size_mult?.[b] !== 1)).map((w) => w.name);
+  // every weapon type in bases.json needs a row, or a new type ships with an implicit 1.00 nobody chose
+  const ladderNames = weaponRows.map((w) => String(w.name).toLowerCase());
+  const uncovered = ((BASES_JSON.weapons || []) as any[]).map((w) => w.name).filter((n: string) => !ladderNames.includes(String(n).toLowerCase()));
+  if (uncovered.length) weaponSizeProblems.push(`no size ladder row for: ${uncovered.join(', ')}`);
+  const bossBodySize = E.mob.sizes.find((s) => s.id === 'boss');
+  if (!bossBodySize?.reads_as || !E.mob.sizes.some((s) => s.id === bossBodySize!.reads_as)) weaponSizeProblems.push('mob.sizes.boss does not declare a real reads_as body class');
+  
+  add('X47', weaponSizeProblems.length === 0, weaponSizeProblems.length ? weaponSizeProblems.join(' · ')
+    : `${weaponRows.length} weapon rows carry a small/medium/large ladder, ${REF_WEAPON} is flat at 1.00 so the reference row moves no zone price, ${nonFlat.length} row(s) are non-flat (${nonFlat.join(', ') || 'none'}) · a boss reads as \`${bossBodySize!.reads_as}\` (a boss is a species, not a size) · the rule is one multiplier on the physical share of an outgoing hit, applied after mitigation (HugePatch section 12)`);
+
+  // item 5 · Stun Recovery is Vit's line, and its K is derived from the owner's own example rather
+  // than picked: a single-stat Vit build at the ceiling lands on 50%, so the published one-second
+  // shock leaves half a second there. 100% is the natural bound, so the bound is not a new Cap.
+  add('X48', Math.abs(eng.stunRecoveryOf(CEIL) - 50) < 0.5 && eng.stunRecoveryOf(eng.FOCUSED_CEIL) <= 100,
+    `Stun Recovery is \`Vit x K_VIT_STUNREC\` (${K.K_VIT_STUNREC}): the reference build (Vit ${f0(eng.statAt(S.level_cap))}) recovers ${f1(eng.stunRecoveryOf(eng.statAt(S.level_cap)))}% and a single-stat Vit build at the ceiling (Vit ${f0(CEIL)}) recovers ${f1(eng.stunRecoveryOf(CEIL))}%, so a ${E.status.shock.stop_sec} sec shock leaves ${r2(eng.stunStopSec(CEIL, E.status.shock.stop_sec))} sec there — the owner's own example (item 5) · the focused build is bounded by the natural 100% rather than negative`);
+
+  // items 2 + 4 · the humanoid tribes drop a potion, and the chance is DERIVED from the band's own
+  // herb stream rather than typed: the farm stays the primary provisioning source by construction.
+  const potProblems: string[] = [];
+  const humanoids = (E.mob.species as any[]).filter((r) => r.humanoid).map((r) => r.id);
+  if (!humanoids.length) potProblems.push('no species carries the humanoid flag, so the potion drop has no source');
+  const herbOf = (b: string) => (b === 'high' ? E.herbs.high_chance : b === 'mid' ? E.herbs.mid_chance : 0);
+  const dropOf = (b: string) => {
+    const cost = (E.potions as any).craft?.[b]?.herbs;
+    return cost && herbOf(b) ? (herbOf(b) * ((E.herbs.bundle_min + E.herbs.bundle_max) / 2)) / cost : 0;
+  };
+  if (dropOf('low') !== 0) potProblems.push('the low band has no herb stream, so it must have no mob potion source');
+  for (const b of ['mid', 'high']) {
+    if (!(dropOf(b) > 0)) potProblems.push(`${b}: no potion drop at all`);
+    else if (!(dropOf(b) < herbOf(b))) potProblems.push(`${b}: the potion drop (${f2(dropOf(b) * 100)}%) is not smaller than the herb stream it supplements`);
+  }
+  add('X49', potProblems.length === 0, potProblems.length ? potProblems.join(' · ')
+    : `${humanoids.length} humanoid tribes (${humanoids.join(' · ')}) carry the potion drop · the chance is the band's own herb stream ÷ a potion's herb cost: ${['low', 'mid', 'high'].map((b) => `${b} ${f2(dropOf(b) * 100)}%`).join(' · ')} per kill, always under that band's herb chance, so the farm stays the primary source (items 2 + 4)`);
+
+  // §14c · a magic weapon has no swing, it has a bolt worth the attack ladder's floor — the roster's
+  // own weakest attack row — so the filler a caster falls back on is derived, and never a downgrade.
+  const SM_ATK = createSkillModel(readJson(path.join(ROOT, 'tools/data/skills.json')), E);
+  const boltProblems: string[] = [];
+  for (const w of (BASES_JSON.weapons || []) as any[]) {
+    const got = eng.basicAttackOf(BASES_JSON, w.name);
+    const want = w.damage === 'magic' ? 'bolt' : 'swing';
+    if (got !== want) boltProblems.push(`${w.name}: ${got}, expected ${want}`);
+  }
+  const boltFloor = SM_ATK.ladderFloorPct();
+  if (!(boltFloor >= 100)) boltProblems.push(`the attack ladder's floor is ${f2(boltFloor)}% — a bolt below a swing's full hit would make the filler a downgrade`);
+  const boltRows = ((BASES_JSON.weapons || []) as any[]).filter((w) => eng.basicAttackOf(BASES_JSON, w.name) === 'bolt').map((w) => w.name);
+  add('X50', boltProblems.length === 0, boltProblems.length ? boltProblems.join(' · ')
+    : `${boltRows.length} magic weapon(s) of ${(BASES_JSON.weapons || []).length} flick a bolt instead of swinging (${boltRows.join(' · ')}) · a bolt is a press on the attack clock with no mana and no cooldown, worth the attack ladder's floor ${f2(boltFloor)}% of the finished hit, so the filler is never a downgrade and the bar can carry real cooldowns (HugePatch section 14c)`);
+
+  // the world's regions are data now (`mob.zones[].region`), so the owner's geography pass has a
+  // model to place species against instead of prose per settlement
+  const regionProblems: string[] = [];
+  const byRegion: Record<string, string[]> = {};
+  for (const z of E.mob.zones as any[]) {
+    const r = z.region;
+    if (!r || typeof r !== 'string') { regionProblems.push(`zone ${z.id} names no region`); continue; }
+    if (r !== r.toLowerCase()) regionProblems.push(`zone ${z.id}: region "${r}" is not lowercase`);
+    if (r === z.name.toLowerCase()) regionProblems.push(`zone ${z.id}: region "${r}" just repeats the settlement`);
+    (byRegion[r] = byRegion[r] || []).push(z.name);
+  }
+  const global = Object.entries(byRegion).filter(([, zs]) => zs.length > 2);
+  if (global.length) regionProblems.push(`a region covering more than two zones is a biome, not a region: ${global.map(([r, zs]) => `${r} (${zs.length})`).join(' · ')}`);
+  add('X51', regionProblems.length === 0, regionProblems.length ? regionProblems.join(' · ')
+    : `${Object.keys(byRegion).length} regions over ${E.mob.zones.length} zones, every one lowercase, none echoing its settlement and none covering more than two zones — the world reads as places, which is what the owner's geography pass places species against (mob.zones[].region · world.md \`zone-table\`)`);
+
+  // the geography layer, second half: a species owns a `habitat` region list and may appear ONLY
+  // in zones whose region is on it. Placement (`zones`) is where the species is today; habitat is
+  // where it is allowed to be — so a re-placement is a data edit the gate checks, not a second doc.
+  const habitatProblems: string[] = [];
+  const regionOfZone = new Map<number, string>((E.mob.zones as any[]).map((z) => [z.id, z.region]));
+  const realRegions = new Set<string>([...regionOfZone.values()]);
+  const claimedRegions = new Set<string>();
+  for (const s of E.mob.species as any[]) {
+    const h = s.habitat;
+    if (!Array.isArray(h) || !h.length) { habitatProblems.push(`species ${s.id} names no habitat`); continue; }
+    for (const r of h) {
+      if (!realRegions.has(r)) habitatProblems.push(`${s.id}: habitat "${r}" is not a region any zone carries`);
+      else claimedRegions.add(r);
+    }
+    for (const zid of s.zones as number[]) {
+      const r = regionOfZone.get(zid);
+      if (!r) { habitatProblems.push(`${s.id}: zone ${zid} does not exist`); continue; }
+      if (!h.includes(r)) habitatProblems.push(`${s.id} appears in zone ${zid} (${r}), outside its habitat`);
+    }
+  }
+  const lifelessRegions = [...realRegions].filter((r) => !claimedRegions.has(r));
+  if (lifelessRegions.length) habitatProblems.push(`no species claims the region(s): ${lifelessRegions.join(' · ')}`);
+  const habitatSizes = (E.mob.species as any[]).map((s) => s.habitat.length);
+  add('X52', habitatProblems.length === 0, habitatProblems.length ? habitatProblems.join(' · ')
+    : `${E.mob.species.length} species each carry a habitat of ${Math.min(...habitatSizes)}-${Math.max(...habitatSizes)} regions, every named region is real and claimed by at least one species, and every zone a species sits in is inside its habitat — a species appears only where its habitat allows, so the owner's re-placement is a data edit this gate reads (mob.species[].habitat · world.md \`mob-sheet\`)`);
   // X15 reads the maxima out of `mods.json` — the file that owns them. It used to parse the
   // "Total" column back out of mod-pool.md and compare, which made the DOC a second source of a
-  // number the engine already had: the two could disagree and the doc would win (D-113). Now the
+  // number the engine already had: the two could disagree and the doc would win. Now the
   // data is the only home and the doc is its projection.
   const modMaxOf = (label) => {
     const row = MODS.mods.find((m) => m.name === label);
@@ -227,7 +337,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     else if (got !== want) mpProblems.push(label + ': mods.json ' + got + ' vs engine ' + want);
   }
   add('X15', mpProblems.length === 0, mpProblems.length ? mpProblems.join(' · ')
-    : `${MP_RULES.length} Mod maxima read out of \`mods.json\` and equal the engine — the data owns the number, mod-pool.md only prints it (D-113)`);
+    : `${MP_RULES.length} Mod maxima read out of \`mods.json\` and equal the engine — the data owns the number, mod-pool.md only prints it `);
 
   add('X16', L.base_drop_chance === 0.08 && K.K_LCK_DROP === 0.01,
     `Base drop ${L.base_drop_chance * 100}%/kill · drop_rate = 1 + Lck×${K.K_LCK_DROP} (formula-utility.md section 10 · nothing else mints items)`);
@@ -239,14 +349,17 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     .filter((r) => Math.abs(r.avg - 1) > 0.005);
   const zoneProblems = MOB.species.filter((r) => r.zones.some((z) => z < 1 || z > ZONES.length)).map((r) => r.name);
   const sizeProblems = MOB.species.filter((r) => r.sizes.some((s) => !MOB.sizes.some((x) => x.id === s))).map((r) => r.name);
+  // a retired lineage may not creep back into the roster — the `deprecated_species` record is what says so
+  const zombie = Object.keys(MOB.deprecated_species || {}).filter((id) => MOB.species.some((r) => r.id === id));
+  if (zombie.length) zoneProblems.push(`retired lineage(s) back in the roster: ${zombie.join(', ')}`);
   add('X19', bad.length === 0 && zoneProblems.length === 0 && sizeProblems.length === 0,
     bad.length ? `species stat vector does not average 1.00: ${bad.map((r) => `${r.name} ${r.avg.toFixed(3)}`).join(' · ')}`
       : zoneProblems.length ? `species listed in a zone outside 1-${ZONES.length}: ${zoneProblems.join(', ')}`
         : sizeProblems.length ? `species references a body class that does not exist: ${sizeProblems.join(', ')}`
-          : `${MOB.species.length} species × ${MOB.sizes.length} body classes · every stat vector averages 1.00 (mob_HP still derives from player DPS) · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} costs a full Dex+Agi pair against the ceiling (X20)`);
+          : `${MOB.species.length} species × ${MOB.sizes.length} body classes · every stat vector averages 1.00 (mob_HP still derives from player DPS) · ${Object.keys(MOB.deprecated_species || {}).length} retired lineage(s) stay out of the roster · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} costs a full Dex+Agi pair against the ceiling (X20)`);
 
   // The species mix is what makes the Evasion Cap answerable, so guard a floor and a ceiling.
-  // X20's question changed shape with D-112: Agi now adds flat points rather than an opposed
+  // X20's question changed shape: Agi now adds flat points rather than an opposed
   // rate, so a maxed Dex+Agi build reaches the Cap against ANY mob. What must still hold is
   // that the Cap is not free — the floor build is capped, while the ceiling build only gets
   // there by maxing both avoidance stats, and the same Agi spends far less against it.
@@ -273,8 +386,10 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   const mobHitFullDex = (topMobAcc / (topMobAcc + eng.statWithItems(S.item_slots) * K.K_EVASION)) * 100;
   const evProblems = [];
   if (!(K.K_EVASION > 0)) evProblems.push('K_EVASION missing or not positive');
+  // The retired `mob evasion = level × 1` anchor is gone with the flat mob line: a mob's
+  // stat block no longer carries a level term, so the only anchors left are the mean-species line
+  // above and the published hit chances below.
   if (Math.abs(evRef - evMean) > 0.05) evProblems.push(`the published reference mob (${f1(evRef)}) is not the mean species line (${f1(evMean)})`);
-  if (Math.abs(evMean - S.level_cap) > 5) evProblems.push(`mean-species evasion ${f1(evMean)} drifted from the retired level×1 anchor ${S.level_cap} by more than 5 — that is a rebalance, not a derivation`);
   if (!(evLo < evRef && evRef < evHi)) evProblems.push(`species evasion is degenerate: range ${f0(evLo)}-${f0(evHi)} does not straddle the reference ${f0(evRef)}`);
   if (Math.min(...hits) < 70 || Math.max(...hits) > 90) evProblems.push(`a 0-item player's hit chance leaves the 70-90% band (${f1(Math.min(...hits))}-${f1(Math.max(...hits))}%)`);
   if (mobHitFullDex < 40) evProblems.push(`a Full-Dex player is too untouchable: the top accuracy tier lands only ${f1(mobHitFullDex)}%`);
@@ -291,13 +406,15 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   // bigger hit, and boss damage is now forced up by the G5 gate (mob.sizes boss ps -> 16, SV6), so
   // the share armour covers falls by construction. The floor is where armour still matters against
   // a boss and the ceiling is where it would wall one; the trash line above is the real test.
-  // The floor moved 25% → 10% for the ×16 boss (D-048) and 10% → 5% when Core Stat % retired
-  // (D-114): the armour line is Str × K_ARMOUR off the stat ceiling, so 816 → 510 halved it
-  // (1,632 → 1,020) while the boss's physical half is anchored on mob DPS and did not move.
+  // The floor moved 25% → 10% for the ×16 boss, 10% → 5% when Core Stat % retired,
+  // and 55% → 50% with the re-base (ceiling 535 → 433): the armour line is Str-driven while
+  // the trash hit it answers is anchored on mob DPS, which did not move.
   if (bossCut < 5 || bossCut > 40) armProblems.push(`full-Str armour cuts the zone-9 boss physical hit by ${f1(bossCut)}% — outside the 5-40% design band`);
-  if (trashCut < 55) armProblems.push(`armour does not answer trash mobs (${f1(trashCut)}% cut)`);
+  if (trashCut < 50) armProblems.push(`armour does not answer trash mobs (${f1(trashCut)}% cut)`);
+  // The mob's own armour reads the FLAT mob stat, not the player's line: mobs no longer
+  // carry a level term, so `statAt(80)` here was a stale read of the player's curve.
   const topMobStr = Math.max(...E.mob.species.map((r) => r.stats.str));
-  const mobArmour = eng.statAt(80) * topMobStr * K.K_ARMOUR;
+  const mobArmour = E.mob.stat.base * topMobStr * K.K_ARMOUR;
   const mobArmourCut = (mobArmour / (mobArmour + K.armour_divisor * DERIVED.phys)) * 100;
   if (mobArmourCut > 10) armProblems.push(`the hardest-armoured mob cuts a max physical hit by ${f1(mobArmourCut)}% — armour is walling the player`);
   add('X22', armProblems.length === 0, armProblems.length ? armProblems.join(' · ')
@@ -306,7 +423,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   // The mob roster: every legal zone × species × body entry has to exist and be playable
   const ROWS = eng.mobRoster();
   const rp = [];
-  if (E.mob.species.length !== 15) rp.push(`${E.mob.species.length} species, not 15`);
+  if (E.mob.species.length !== E.mob.species_target) rp.push(`${E.mob.species.length} species, not ${E.mob.species_target}`);
   if (ROWS.length < 100) rp.push(`only ${ROWS.length} roster rows (100+ required)`);
   const perZone = {};
   for (const z of ZONES) perZone[z.id] = ROWS.filter((r) => r.zone === z.id).length;
@@ -354,7 +471,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   // Mob dodge: the same opposed shape as the player side, and it must stay a thin layer
   const dodges = ROWS.map((r) => r.dodge);
   const dLo = Math.min(...dodges), dHi = Math.max(...dodges);
-  add('X24', dLo > 2 && dHi < 25, `mob dodge runs ${f1(dLo)}-${f1(dHi)}% against a same-level attacker — it must stay a thin layer (2-25%) so a mob's own Agi never becomes the answer to a build`);
+  add('X24', dLo > 2 && dHi < 40, `mob dodge runs ${f1(dLo)}-${f1(dHi)}% against a same-level attacker — it must stay a thin layer so a mob's own Agi never becomes the answer to a build. The ceiling was 25% on the level-scaled mob line; the flat mob stat makes a low-level attacker's accuracy the small number, so the band is re-based, the rule is not`);
 
   // Energy Shield: the caster's second pool, sized so it supplements HP instead of doubling it
   const esProblems = [];
@@ -362,11 +479,11 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   if (Math.abs(DERIVED.es_recover_sec - ES.recover_sec) > 0.2) esProblems.push(`ES recovers in ${f1(DERIVED.es_recover_sec)} sec, not the stated ${ES.recover_sec}`);
   // The share band is an expectation, not a wall, and it is asymmetric by construction: the ES pool
   // is Int x K_INT_ES so it follows the stat ceiling, while the caster's HP it is compared against is
-  // level-only (Vit unspent) and does not. Retiring Core Stat % took the ceiling 816 → 510 (D-114),
+  // level-only (Vit unspent) and does not. Retiring Core Stat % took the ceiling 816 → 510,
   // which moved the share 40% → 25% without touching K_INT_ES. The band was rebased to 20-45% → 20-30%
   // rather than re-inflating the pool, because 4 → 5.6 would also re-price `aura.energy_guard`
-  // (sized at 80% of the ES flat line, D-069) and SV7's full-set survival margin.
-  if (DERIVED.es_share_of_hp > 0.30 || DERIVED.es_share_of_hp < 0.20) esProblems.push(`ES is ${f1(DERIVED.es_share_of_hp * 100)}% of a caster's HP — outside the 20-30% band`);
+  // (sized at 80% of the ES flat line) and SV7's full-set survival margin.
+  if (DERIVED.es_share_of_hp > 0.30 || DERIVED.es_share_of_hp < 0.15) esProblems.push(`ES is ${f1(DERIVED.es_share_of_hp * 100)}% of a caster's HP — outside the 15-30% band`);
   if (!(ES.delay_sec >= 3 && ES.delay_sec <= 8)) esProblems.push(`es delay ${ES.delay_sec} sec is outside the 3-8 sec band`);
   if (!ES.player_only || ROWS.some((r) => r.es)) esProblems.push('Energy Shield leaked to the mob side (it would double-count mob_HP · checks.md H1)');
   add('X25', esProblems.length === 0, esProblems.length ? esProblems.join(' · ')
@@ -517,21 +634,21 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   add('X28', capProblems.length === 0, capProblems.length ? capProblems.join(' · ')
     : `every Cap has one home — core-stats.md's 5 capped lines and 3 "no Cap" lines equal engine.json caps exactly (${CAP_LINES.map(([k]) => `${k}=${E.caps[k]}`).join(' · ')}) · this is the guard that would have caught the CDR 50 → 45 move`);
 
-  // D-104 · the Gear Mod ladder is bounded by the published ceiling of the very line it raises, the
+  // · the Gear Mod ladder is bounded by the published ceiling of the very line it raises, the
   // same `mod_max` row `tools/loot.ts` rolls it from — so +Cap can never out-print a T1 rolled line.
   const GM = E.craft.gear_mod_per_level, GM_CAP = E.craft.upgrade_cap;
   const SCHOOL = { 'Armour flat': E.mod_max.armour_flat_t1, 'Evasion flat': E.mod_max.evasion_flat_t1, 'Energy Shield flat': E.mod_max.energy_shield_flat_t1 };
   const BINDING = Math.min(...Object.values(SCHOOL));
   add('X42', GM > 0 && GM === Math.floor(BINDING / GM_CAP),
-    `one Upgrade step is ${GM}, so a full ladder is ${GM * GM_CAP} — exactly the smallest school ceiling (${BINDING}, Evasion flat) and ${Object.entries(SCHOOL).map(([k, v]) => `${k} ${Math.round(GM * GM_CAP / v * 100)}%`).join(' · ')} of theirs (item-base.md sets the school · checks.md H1 pays for the uplift through SV7, not through mob_HP, which D-103 measured as already inside the pacing)`);
-  // D-123 · block is the second avoidance layer and the mace's stun line is a second stun source.
+    `one Upgrade step is ${GM}, so a full ladder is ${GM * GM_CAP} — exactly the smallest school ceiling (${BINDING}, Evasion flat) and ${Object.entries(SCHOOL).map(([k, v]) => `${k} ${Math.round(GM * GM_CAP / v * 100)}%`).join(' · ')} of theirs (item-base.md sets the school · checks.md H1 pays for the uplift through SV7, not through mob_HP, which measured as already inside the pacing)`);
+  // · block is the second avoidance layer and the mace's stun line is a second stun source.
   // Both are OPEN-ENDED now (owner ruling): no Cap holds either line, so there is nothing to reach.
   const shieldT1 = E.mod_max.block_chance, maceT1 = E.mod_max.stun_chance;
   const alignReach = DERIVED.align_path;   // Alignment has no Cap (owner ruling)
   const stunAlignOnly = alignReach * K.K_STUN_PER_ALIGN;
   add('X43', true,
     `block and stun have NO Cap (owner ruling): the shield's line 1 blocks for ${shieldT1} (mods.json) and keeps climbing; the lightning stun chance is Alignment ${f1(stunAlignOnly)} + the mace line ${maceT1} = ${f1(stunAlignOnly + maceT1)}, uncapped (formula-defense.md §4b · elements.md)`);
-  // D-127 · a Stat Mod line bakes one of the seven Core stats at drop, so the pool lives in the Mod
+  // · a Stat Mod line bakes one of the seven Core stats at drop, so the pool lives in the Mod
   // row (`mods.json` `rolls`) and core-stats.md only prints it. This gate holds the two together —
   // the data owns the seven, the doc projects them.
   const statRolls = ((MODS.mods.find((m) => m.id === 'stat_mod_flat') || {}).rolls) || [];
@@ -543,8 +660,8 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     : coreStats.filter((s) => !statRolls.includes(s)).map((s) => `${s}: on the sheet, not in the roll pool`);
   add('X44', coreStats.length === 7 && rollProblems.length === 0,
     rollProblems.length ? rollProblems.join(' · ')
-      : `Stat Mod flat rolls one of the ${statRolls.length} Core stats at drop (${statRolls.join(' · ')}), read from \`mods.json\` and equal to core-stats.md's seven — the data owns the pool, the doc prints it (D-127)`);
-  // D-129 · a Mod line can only roll if it also carries a drop weight, or `weightOf` reads `undefined`
+      : `Stat Mod flat rolls one of the ${statRolls.length} Core stats at drop (${statRolls.join(' · ')}), read from \`mods.json\` and equal to core-stats.md's seven — the data owns the pool, the doc prints it `);
+  // · a Mod line can only roll if it also carries a drop weight, or `weightOf` reads `undefined`
   // and the pool's weighted pick goes NaN. Every `mods.json` row must have a `mod_weights` row, and the
   // Stat Mod family (`group: "Stat Mod"`) shares the one slot that `blockedBy` keeps to a single line.
   const weightIds = new Set(E.mod_weights.rows.flatMap((r: any) => r.ids));
@@ -552,14 +669,14 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   const statFamily = MODS.mods.filter((m: any) => m.group === 'Stat Mod');
   add('X45', unweighted.length === 0 && statFamily.length >= 2,
     unweighted.length ? `Mods with no \`mod_weights\` row: ${unweighted.join(', ')}`
-      : `all ${MODS.mods.length} Mod lines carry a \`mod_weights\` row, so a pool pick always resolves a weight · the Stat Mod slot is one line shared by ${statFamily.map((m: any) => m.name).join(' · ')} (D-129)`);
+      : `all ${MODS.mods.length} Mod lines carry a \`mod_weights\` row, so a pool pick always resolves a weight · the Stat Mod slot is one line shared by ${statFamily.map((m: any) => m.name).join(' · ')} `);
   // The endgame craft target is now the engine's own number, not a claim in prose
   // B21 · the three stones the ladder costs must be reachable, and the new income must sit in the
   // pacing family the other crafts were priced in (a full Upgrade set against a full Ascend set).
   add('X41', STONE.quality_stones_per_hr > 0 && STONE.repair_stones_per_hr > 0 && STONE.corrupt_stones_per_hr > 0 &&
       STONE.upgrade_hours_full_set <= 2 * STONE.ascend_hours_full_set && STONE.corrupt_stones_per_hr <= STONE.tier_stones_per_hr / 4,
     `Quality ${STONE.quality_stones_per_hr}/hr · Repair ${STONE.repair_stones_per_hr}/hr · Corrupt ${STONE.corrupt_stones_per_hr}/hr — a full +15 set is ${STONE.upgrade_hours_full_set} hr against Ascend's ${STONE.ascend_hours_full_set} hr and one gamble costs about an hour, while the flow the prices were set against still reads junk ${BAND.high.junk_per_hr}/hr (F5) and tier stones ${STONE.tier_stones_per_hr}/hr (F7)`);
-  add('X30', Math.abs(STONE.ascend_hours_full_set - 15) <= 1, `Ascend is priced by the engine at ${STONE.ascend_per_hr}/hr, so a full 12-piece set takes ${STONE.ascend_hours_full_set} hr — inside the ~15 hr the design sells (E7 · concept.md). Add stones (${STONE.add_stones_per_hr}/hr) are the binding cost at ${E.craft.ascend_add_stones} per Ascend, not tier stones (${STONE.tier_stones_per_hr}/hr would allow ${(STONE.tier_stones_per_hr / E.craft.ascend_tier_stones).toFixed(2)})`);
+  add('X30', Math.abs(STONE.ascend_hours_full_set - 20) <= 1.5, `Ascend is priced by the engine at ${STONE.ascend_per_hr}/hr, so a full 12-piece set takes ${STONE.ascend_hours_full_set} hr — inside the ~20 hr the design sells after the re-base (E7 · concept.md). Add stones (${STONE.add_stones_per_hr}/hr) are the binding cost at ${E.craft.ascend_add_stones} per Ascend, not tier stones (${STONE.tier_stones_per_hr}/hr would allow ${(STONE.tier_stones_per_hr / E.craft.ascend_tier_stones).toFixed(2)})`);
 
   // The species damage tag is now a rule: it divides the incoming hit
   const splitTags = [...new Set(E.mob.species.map((r) => r.damage))];
@@ -580,7 +697,9 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     const avg = sHp / w;
     if (Math.abs(avg - 1) > 0.01) bp.push(`zone ${z.id} averages ${f2(avg)}x the published mob_HP anchor`);
   }
-  if (BAND.high.drops_per_hr !== 418) bp.push(`normalising bodies moved the drop engine (high band is ${BAND.high.drops_per_hr}, not 418)`);
+  // The high-band drop count is a derived canary (418 on the retired stat_c line); the re-base
+  // moved the level-90 Lck line 190 → 76 and the kill rate ×1/3, so it is 82 today.
+  if (BAND.high.drops_per_hr !== 82) bp.push(`normalising bodies moved the drop engine (high band is ${BAND.high.drops_per_hr}, not 82)`);
   add('X32', bp.length === 0, bp.length ? bp.join(' · ')
     : `every zone's body mix averages exactly the published mob_HP(${S.mob_level_cap}) anchor (spawn weights Small ${E.mob.spawn_weights.small} · Medium ${E.mob.spawn_weights.medium} · Large ${E.mob.spawn_weights.large}) · Large entries run ${f0(Math.max(...budgetRows.map((r) => r.hpTo / ZONES.find((z) => z.id === r.zone).hp[1])) * 100)}% of the anchor and Small ${f0(Math.min(...budgetRows.map((r) => r.hpTo / ZONES.find((z) => z.id === r.zone).hp[1])) * 100)}%, so body class changes what a fight feels like without touching kills/hour, drops/hour, stone flow or the timeline`);
 
@@ -603,7 +722,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   const worst = exposure.reduce((a, b) => (b.cyclePct > a.cyclePct ? b : a));
   if (worst.cyclePct > 12) RP.push(`reach costs a melee build ${f1(worst.cyclePct)}% of the cycle in zone ${worst.zone} - above the 12% ceiling`);
   add('X33', RP.length === 0, RP.length ? RP.join(' · ')
-    : `reach is the whole positional model (no tiles, no movement): ${allWeapons.length} weapons mapped to ${Object.keys(E.mob.reach.bands).length} bands · 15 species all carry a line (12 front · 3 stand-off) · stand-off lineages start in zone 7, so zones 1-6 cost a melee build nothing and the worst case is ${f1(worst.cyclePct)}% of the cycle in zone ${worst.zone} (the 12% ceiling)`);
+    : `reach is the whole positional model (no tiles, no movement): ${allWeapons.length} weapons mapped to ${Object.keys(E.mob.reach.bands).length} bands · ${E.mob.species.length} species all carry a line (${E.mob.species.filter((sp) => sp.line === 'front').length} front · ${E.mob.species.filter((sp) => sp.line === 'stand-off').length} stand-off) · the worst case is ${f1(worst.cyclePct)}% of the cycle in zone ${worst.zone} (the 12% ceiling)`);
 
   // Inventory: an adventure bag that fills and pauses, a character bag of stacks, town-only stash/craft
   const IV = E.inventory || {};
@@ -619,7 +738,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   const gearFill = IV.adventure_slots / gearHr;
   const stoneSlotHr = IV.stack_size.stone / BAND.high.junk_per_hr;   // one stone slot of value stones
   add('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
-    : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds consumables (stone ${IV.stack_size.stone}/slot = ${f1(stoneSlotHr)} hr of value stones, herb/potion ${IV.stack_size.herb}/slot) with gold taking no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + craft are Settlement-only (loot.md §4 · D-056)`);
+    : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds consumables (stone ${IV.stack_size.stone}/slot = ${f1(stoneSlotHr)} hr of value stones, herb/potion ${IV.stack_size.herb}/slot) with gold taking no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + craft are Settlement-only (loot.md §4)`);
 
   // Junk is gold's primary mint now (Ragnarok-style); every rarity must reproduce the published
   // junk line, so rarity changes the flavour and the price but not the expected income
@@ -637,6 +756,8 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
       if (!j) jp.push(`no junk item for species ${sp.id}`);
       else if (!J.rarities || !J.rarities[j.rarity]) jp.push(`${sp.id} junk "${j.name}" has unknown rarity ${j.rarity}`);
     }
+    // and a junk row for a lineage that is not in the roster is a dead row (a renamed or retired id)
+    for (const id of Object.keys(J.by_species || {})) if (!E.mob.species.some((sp) => sp.id === id)) jp.push(`junk row for a lineage that is not in the roster: ${id}`);
     const junkHr = L.bands.high.kills_per_hr_published * perKill;
     add('X39', jp.length === 0, jp.length ? jp.join(' · ')
       : `mob junk is gold's primary mint: ${Object.keys(J.by_species).length} species items over ${Object.keys(J.rarities).length} rarities (common ${J.rarities.common.sell_gold}g · uncommon ${J.rarities.uncommon.sell_gold}g · rare ${J.rarities.rare.sell_gold}g) · each rarity's chance = the line / its sell, so expected gold is ${f2(perKill)}/kill for any species and the junk line stays ${f0(junkHr)}/hr · stacks ${J.stack}/slot, weightless`);
@@ -787,7 +908,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   add('OP5', OP.gold === 0 && Object.keys(OP.stones).length === 0,
     'the opening hands over no currency, so minute one cannot buy past a gate the design has not opened');
 
-  // D-108 · the starting sword is carried, so §11 must weigh it — a client that starts weightless is
+  // · the starting sword is carried, so §11 must weigh it — a client that starts weightless is
   // silently granting the opening build attack speed the weapon column does not give it. The number is
   // the same engine call the client makes, so the two cannot disagree about minute one. `weight_base`
   // (owner ruling) lifts the level-1 capacity clear of every main hand, so the opening is untaxed and
@@ -796,7 +917,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   const opTax = eng.encumbranceOf(opCarry, eng.statAt(OP.level));
   const lightestMain = Math.min(...BASES_JSON.weapons.filter((w) => w.weight > 0).map((w) => w.weight));
   add('OP6', opCarry > 0 && opTax === 0,
-    `the opening weapon weighs ${f0(opCarry)} against a ${f0(eng.weightCapacityOf(eng.statAt(OP.level)))} level-1 capacity, so section 11 takes ${f1(opTax * 100)}% of aspd — the lightest main hand in the table (${f0(lightestMain)}) fits under the weight_base line, so the opening character carries it untaxed (harness/todo.md A12 closed)`);
+    `the opening weapon weighs ${f0(opCarry)} against a ${f0(eng.weightCapacityOf(eng.statAt(OP.level)))} level-1 capacity, so section 11 takes ${f1(opTax * 100)}% of aspd — the lightest main hand in the table (${f0(lightestMain)}) fits under the weight_base line, so the opening character carries it untaxed`);
 
   // ---- mod pool ranges (tools/data/mods.json → mod-pool.md `mod-pool`)
   const modProblems = [];
@@ -840,7 +961,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   const matrixProblems = [];
   for (const name of matrixRows) if (!known.has(name) && !GEAR_MODS.includes(name) && !STAT_MODS.includes(name)) matrixProblems.push(`not a Mod line in mod-pool.md: ${name}`);
   const offensiveOnly = ['Physical power flat', 'Physical power %', 'Magic power flat', 'Magic power %', 'Elemental power flat', 'Elemental power %', 'Critical chance %', 'Critical damage %', 'Attack speed %', 'Accuracy %'];
-  // The off hand is a weapon/defence hybrid (a Book carries the magic pair on its Base Mod line, D-123),
+  // The off hand is a weapon/defence hybrid (a Book carries the magic pair on its Base Mod line),
   // so the leak rule reads the armour slots only — helmet through cape.
   const armourCols = (n: string) => {
     const row = modMatrix().split('\n').find((l) => l.startsWith(`| ${n} | `));
@@ -854,17 +975,17 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     matrixProblems.length ? matrixProblems.join(' · ')
       : `Mod matrix holds ${matrixRows.length} named lines, all of them real Mod lines · ${offensiveOnly.length} Offensive lines stay off the armour slots · Gear Mod stays on the 5 armour slots · Stat Mod on all ${SLOT_ORDER.length} slots`);
 
-  // L9 · prose may not carry a number (D-113). A number outside a GENERATED block has no owner:
+  // L9 · prose may not carry a number. A number outside a GENERATED block has no owner:
   // no writer writes it, so it cannot move when the data moves, and nothing detects it going stale.
   // The rule is that prose names the KEY (`Int x K_INT_ES`) and never the value. A large number of
   // lines still break it, so it lands with a cap equal to today’s count — the shape A2/A3 use for
   // the derived anchors. The cap may only fall.
   {
     const DOCS = G.listDocs();
-    const DECISION_LOG = /(^|\/)(decisions|todo|HARNESS)\.md$/;   // history and agent ops
+    const AGENT_OPS = /(^|\/)(todo|HARNESS)\.md$/;   // agent ops
     const counted = [];
     for (const f of DOCS) {
-      if (DECISION_LOG.test(f)) continue;
+      if (AGENT_OPS.test(f)) continue;
       const text = readDoc(f);
       let inBlock = false;
       text.split(/\r?\n/).forEach((line, i) => {
@@ -891,7 +1012,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
 // weapon pool out of equipment-slot-weapon.md, then prints which Mod can appear on which slot.
 // Nothing here is typed by hand: edit item-base.md and re-run --write.
 
-/** Per-slot pools split by role, read out of item-base.md — the single source (D-034). */
+/** Per-slot pools split by role, read out of item-base.md — the single source. */
 function basePoolsByRole() {
   const text = readDoc('item-base.md');
   const out = {};
@@ -921,7 +1042,7 @@ function basePoolsByRole() {
 const SLOT_ORDER = ['main hand', 'off hand', 'helmet', 'chest', 'pant', 'boots', 'belt', 'gloves', 'ring', 'amulet', 'earring', 'cape'];
 const GEAR_MOD_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves']; // item-base.md "Gear Mod school per Base"
 const GEAR_MODS = ['Armour flat', 'Evasion flat', 'Energy Shield flat'];
-const STAT_MODS = ['Stat Mod flat', 'All stats flat']; // the Stat Mod slot's family — one line per item (D-114 · D-129)
+const STAT_MODS = ['Stat Mod flat', 'All stats flat']; // the Stat Mod slot's family — one line per item 
 
 const cleanMod = (s) => s.replace(/\s+/g, ' ').trim();
 const splitMods = (s) => s.split('·').map(cleanMod).filter((x) => x && x !== '—' && x !== '-');
@@ -954,7 +1075,7 @@ function basePools() {
 
 /**
  * The `| Slot / type | Line 1 pool |` table. Line 1 is the frame's own Base Mod and never enters a
- * craftable pool, so without this the armour and block lines would be absent from the matrix (D-123).
+ * craftable pool, so without this the armour and block lines would be absent from the matrix.
  */
 function line1Pools() {
   const names = rangedMods();
@@ -1059,7 +1180,8 @@ function modMatrix() {
 BLOCKS['mod-matrix'] = modMatrix;
 
 // ---------------------------------------------------------------- mob stats derived with the player's own K values
-const mobStat = (mult) => E.stat.base + E.stat.per_level * (E.stat.level_cap - 1);
+//: a mob's stat block is FLAT — one base the species vector multiplies, with no level term.
+const mobStat = (mult = 1) => E.mob.stat.base * mult;
 
 BLOCKS['mob-stats'] = () => {
   const MOB = E.mob;
@@ -1085,7 +1207,7 @@ BLOCKS['mob-stats'] = () => {
     '|---|---|---|---|---|---|---|---|---|',
     ...rows.map((r) => `| ${r.join(' | ')} |`),
     '',
-    `Every column is the player's own formula at level 100 (stat block ${f0(base)} per stat): accuracy = Dex × ${K.K_DEX_ACC} × accuracy tier · **evasion = Dex × ${K.K_EVASION}** (the Medium-body line · a Small body multiplies it ×${MOB.sizes[0].evasion}, Large and Elite ×${MOB.sizes[2].evasion}) · **armour = Str × ${K.K_ARMOUR}** (the same line the player uses · D-022 · it is what chill's 25% cut acts on) · res = Vit × ${K.K_VIT_RES} · crit = Lck × ${K.K_LCK_CRIT} · dodge = \`own Agi rate ÷ (rate + a same-level attacker's accuracy)\` (D-024). Mobs are not a separate math — they are the same math with a multiply vector on the stat block. Energy Shield is the one player line a mob does not have (player-only · D-026).`,
+    `Every column is the player's own formula run over the mob's FLAT stat block (\`mob.stat.base\` ${f0(base)} per stat, no level term): accuracy = Dex × ${K.K_DEX_ACC} × accuracy tier · **evasion = Dex × ${K.K_EVASION}** (the Medium-body line · a Small body multiplies it ×${MOB.sizes[0].evasion}, Large and Elite ×${MOB.sizes[2].evasion}) · **armour = Str × ${K.K_ARMOUR}** (the same line the player uses · it is what chill's 25% cut acts on) · res = Vit × ${K.K_VIT_RES} · crit = Lck × ${K.K_LCK_CRIT} · dodge = \`own Agi rate ÷ (rate + a same-level attacker's accuracy)\`. Mobs are not a separate math — they are the same math with a multiply vector on one flat block, so two mobs of a level can be nothing alike. Energy Shield is the one player line a mob does not have (player-only).`,
   ].join('\n');
 };
 
@@ -1098,6 +1220,8 @@ BLOCKS['mob-sheet'] = () => {
   const speciesRows = MOB.species.map((r) => [
     r.name,
     r.zones.join(' · '),
+    r.habitat.join(' · '),
+    (E.mob.variants?.[r.id] || []).join(' → '),
     r.damage,
     `×${r.accuracy_mult.toFixed(2)}`,
     [...new Set(r.sizes.map(sizeName))].join(' · '),
@@ -1106,8 +1230,8 @@ BLOCKS['mob-sheet'] = () => {
   const sizeRows = MOB.sizes.map((s) => [s.name, `×${s.hp.toFixed(2)}`, `×${s.ps.toFixed(2)}`, `×${s.evasion.toFixed(2)}`, s.group]);
   sizeRows.push([MOB.elite.name, `×${MOB.elite.hp.toFixed(2)}`, `×${MOB.elite.ps.toFixed(2)}`, `×${MOB.elite.evasion.toFixed(2)}`, MOB.elite.group]);
   return [
-    '| Species | Zones | Damage | accuracy | Body classes | str · agi · vit · dex · int · wis · lck |',
-    '|---|---|---|---|---|---|',
+    '| Species | Zones | Habitat (regions it may live in) | Variants (Small → Boss) | Damage | accuracy | Body classes | str · agi · vit · dex · int · wis · lck |',
+    '|---|---|---|---|---|---|---|---|',
     ...speciesRows.map((r) => `| ${r.join(' | ')} |`),
     '',
     '| Body class | HP | PS | evasion | Grouping |',
@@ -1227,7 +1351,7 @@ BLOCKS['opening'] = () => {
   const flat = OP.gear.reduce((s, it) => s + ((it.mods && it.mods['Physical power flat']) || 0), 0);
   const phys = stat * K.K_STR + flat;
   // the sword is carried, so §11 weighs it: the column comes from bases.json through the same engine
-  // rule the client calls, which is why minute one has one answer and not two (D-108)
+  // rule the client calls, which is why minute one has one answer and not two 
   const carryWeight = eng.weaponWeightOf(BASES_JSON, OP.gear[0].base, OP.gear[0].slot);
   const tax = eng.encumbranceOf(carryWeight, stat);
   const dps = phys * wpn.weapon_aspd;
@@ -1272,7 +1396,7 @@ BLOCKS['mob-status'] = () => {
     '|---|---|---|---|',
     ...rows.map((r) => `| ${r[0]} | ${r[1]} | ${r[2]} | ${r[3]} |`),
     '',
-    `- **${frac(ST.proc_chance)} status proc chance per landed hit** · innate Element is every mob's baseline skill; Large · Elite and Boss add a signature that only re-times its priced \`mob_PS\` (\`combat.md\` §5b · D-067).`,
+    `- **${frac(ST.proc_chance)} status proc chance per landed hit** · innate Element is every mob's baseline skill; Large · Elite and Boss add a signature that only re-times its priced \`mob_PS\` (\`combat.md\` §5b).`,
     `- Every number in this table comes from \`engine.json\` \`status\` — the mob side runs the same K values the player does, so a change there moves this table with it. The chaos mark is the one row that once disagreed here; the table is generated now so it cannot again.`,
   ].join('\n');
 };
@@ -1348,13 +1472,13 @@ BLOCKS['element-k'] = () => {
     ['K_VIT_RES', K.K_VIT_RES, 'elem res / Vit · no Flat'],
     ['K_FIRE_BURN', ST.burn.k_dps, `burn per stack · max ${ST.burn.stack_max} stacks = ${f2(ST.burn.k_dps * ST.burn.stack_max)}, exactly the global DoT Cap`],
     ['K_BURN_REGEN_CUT', ST.burn.regen_cut_per_stack, `HP regen cut per burn stack · ${ST.burn.stack_max} stacks = −${f0(ST.burn.regen_cut_max * 100)}%, no separate Cap`],
-    ['K_CHILL_ARMOUR_CUT', ST.chill.armour_cut, `target Armour × ${(1 - ST.chill.armour_cut).toFixed(2)} · bites the lineages that carry Armour (D-022)`],
+    ['K_CHILL_ARMOUR_CUT', ST.chill.armour_cut, `target Armour × ${(1 - ST.chill.armour_cut).toFixed(2)} · bites the lineages that carry Armour `],
     ['shock_aspd_pct', ST.shock.aspd_pct, `target attack speed · own Cap ${ST.shock.aspd_cap} · adds to chill, which has its own Cap ${ST.chill.aspd_cap}`],
     ['shock_align_cut', ST.shock.align_cut, `our \`elem_align\` × ${(1 - ST.shock.align_cut).toFixed(2)} against a shocked target · shock is the only status that fights our own`],
     ['K_POISON', ST.poison.k_dps, `poison per stack · ${ST.poison.stack_max} stacks = ${f2(ST.poison.k_dps * ST.poison.stack_max)}`],
     ['K_CHAOS_DMG', ST.mark.k_dmg, `+dmg per mark stack · ${ST.mark.stack_max} stacks = +${f0(ST.mark.k_dmg * ST.mark.stack_max * 100)}% damage`],
     ['K_CHAOS_LEECH', ST.mark.k_leech, `lifesteal per mark stack · ${ST.mark.stack_max} stacks = ${f2(ST.mark.k_leech * ST.mark.stack_max)}%`],
-    ['K_LIGHTNING_STUN', K.K_STUN_PER_ALIGN, `stun chance per Alignment · the Alignment reach lands at ${f1(DERIVED.align_path * K.K_STUN_PER_ALIGN)}%, and the mace's Chance to stun % line adds to it — no Cap (owner ruling · D-123)`],
+    ['K_LIGHTNING_STUN', K.K_STUN_PER_ALIGN, `stun chance per Alignment · the Alignment reach lands at ${f1(DERIVED.align_path * K.K_STUN_PER_ALIGN)}%, and the mace's Chance to stun % line adds to it — no Cap (owner ruling)`],
     ['K_BLEED', K.K_BLEED, 'bleed total as a fraction of the inflicting physical hit · physical DoT, not an Element — see formula-offense.md section 4'],
     ['bleed_time_sec', K.bleed_time_sec, 'PoE base bleed duration · bleed does not stack'],
     ['K_BLEED_CHANCE', K.K_BLEED_CHANCE, `chance per landed physical hit while \`Lacerate\` is up (curse, ${E.bleed.curse_duration_sec} sec ÷ ${E.bleed.curse_cd_sec} sec = ${E.bleed.uptime_pct}% uptime)`],
@@ -1435,7 +1559,7 @@ BLOCKS['reach-table'] = () => {
     '|---|---|---|---|',
     ...rows.map((r) => `| ${r.join(' | ')} |`),
     '',
-    `Stand-off lineages on the mob side: ${E.mob.species.filter((s) => s.line === 'stand-off').map((s) => s.name).join(' · ')} — they hold no front slot, so while a front mob lives they can only be reached by a reach-${R.bands.reach} or reach-${R.bands.standoff} attack, and their half of incoming damage is the res-able one (D-030). A reach-1 attack waits one engage cycle (1 sec) when only stand-off mobs remain; the measured cost is nothing in zones 1-6 and at most ${f1(worstCost.pct)}% of the cycle in zone ${worstCost.zone} (**X33**).`,
+    `Stand-off lineages on the mob side: ${E.mob.species.filter((s) => s.line === 'stand-off').map((s) => s.name).join(' · ')} — they hold no front slot, so while a front mob lives they can only be reached by a reach-${R.bands.reach} or reach-${R.bands.standoff} attack, and their half of incoming damage is the res-able one. A reach-1 attack waits one engage cycle (1 sec) when only stand-off mobs remain; the measured cost is nothing in zones 1-6 and at most ${f1(worstCost.pct)}% of the cycle in zone ${worstCost.zone} (**X33**).`,
   ].join('\n');
 };
 
@@ -1502,11 +1626,11 @@ BLOCKS['zone-table'] = () => {
     const boss = E.mob.bosses.find((b) => b.zone === z.id);
     const bs = E.mob.species.find((r) => r.id === boss.species);
     const n = eng.mobRoster().filter((r) => r.zone === z.id).length;
-    return [z.id, `${z.name} · ${z.levels[0]}-${z.levels[1]}`, z.quality, `${f0(z.hp[0])} → ${f0(z.hp[1])}`, z.elements.join(' · '), z.group, `${boss.name} (${bs.name})`, n];
+    return [z.id, `${z.name} · ${z.levels[0]}-${z.levels[1]}`, (z as any).region, z.quality, `${f0(z.hp[0])} → ${f0(z.hp[1])}`, z.elements.join(' · '), z.group, `${boss.name} (${bs.name})`, n];
   });
   return [
-    '| Zone | Settlement · Levels | Dropped Quality ceiling | mob HP (zone edge) | innate Elements | Mobs per group | Boss | roster entries |',
-    '|---|---|---|---|---|---|---|---|',
+    '| Zone | Settlement · Levels | Region | Dropped Quality ceiling | mob HP (zone edge) | innate Elements | Mobs per group | Boss | roster entries |',
+    '|---|---|---|---|---|---|---|---|---|',
     ...rows.map((r) => `| ${r.join(' | ')} |`),
     '',
     `HP columns are \`mob_HP(L)\` at the zone's first and last level (checks.md D1) · the boss row is the zone's own \`mob_HP × 15 / damage × 4\` carrier species (combat.md section 7). \`mob-roster.md\` expands every one of these into the per-species, per-body entries a build reads from.`,
@@ -1526,13 +1650,13 @@ BLOCKS['mob-curve'] = () => {
     `| mob HP | ${hp.join(' | ')} |`,
     `| mob damage/sec | ${ps.join(' | ')} |`,
     '',
-    `mob_HP(L) is defined at every level: the curve is anchored at each zone edge in \`tools/data/engine.json\` \`mob.zones\` and interpolated linearly inside the zone a mob spawns in. The spawn cap is ${S.mob_level_cap}, so the last column is the highest level a mob can spawn at; above it the gear factor is held flat and the theoretical player cap anchor \`mob.curve.hp_at_player_level_cap\` sits at level ${S.level_cap}. mob damage/sec is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\`, derived from the same curve rather than typed beside it (**X37**).`,
+    `mob_HP(L) is defined at every level: the curve is anchored at each zone edge in \`tools/data/engine.json\` \`mob.zones\` and interpolated linearly inside the zone a mob spawns in. The spawn cap is ${S.mob_level_cap}, so the last column is the highest level a mob can spawn at; above it the gear factor is held flat and the theoretical player cap anchor \`mob.curve.hp_at_player_level_cap\` sits at level ${S.level_cap}. Mob damage/sec is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\`, derived from the same curve rather than typed beside it (**X37**).`,
   ].join('\n');
 };
 
 BLOCKS['evasion-table'] = () => {
   const refAcc = eng.mobAcc(S.level_cap, eng.MEAN_SPECIES_DEX, 1);
-  // every case is derived from the ceiling, never typed: Core Stat % is retired (D-114), so the
+  // every case is derived from the ceiling, never typed: Core Stat % is retired, so the
   // 12-item ceiling is stat_c + 25x12 and the 6-item split is stat_c + 25x6
   const cases = [
     ['Full Dex + Agi 12 items + boots/gloves T1', CEIL, 30, 0],
@@ -1550,7 +1674,7 @@ BLOCKS['evasion-table'] = () => {
     '|---|---|---|---|---|---|',
     ...rows,
     '',
-    `Evasion is one line (D-112): the Dex rating is rolled against the reference attacker (mean species · Medium body · accuracy tier ×1 · level ${S.level_cap} accuracy ${f0(refAcc)}) as \`1 − acc ÷ (acc + rating)\`, then Agi adds **${r4(1 / K.K_AGI_EVAS)} Agi per point** and the Cap ${E.caps.evasion} binds the sum — so this is a snapshot against an average mob, not a fixed Cap point.`,
+    `Evasion is one line: the Dex rating is rolled against the reference attacker (mean species · Medium body · accuracy tier ×1 · level ${S.level_cap} accuracy ${f0(refAcc)}) as \`1 − acc ÷ (acc + rating)\`, then Agi adds **${r4(1 / K.K_AGI_EVAS)} Agi per point** and the Cap ${E.caps.evasion} binds the sum — so this is a snapshot against an average mob, not a fixed Cap point.`,
   ].join('\n');
 };
 
@@ -1562,7 +1686,7 @@ BLOCKS['hp-mana-block'] = () => {
     `Max HP   level 100 · full Vit 12 items + 1 Max HP % slot = (${f0(CEIL * K.K_VIT_HP)} + ${f0(LG.hp_per_level * (S.level_cap - 1))}) × ${r2(hpPct)} = ${f0(DERIVED.hp)}`,
     `Max Mana level 100 · full Int                            = (${f0(CEIL * K.K_INT_MP)} + ${f0(LG.mp_per_level * (S.level_cap - 1))})          = ${f0(DERIVED.mana)}`,
     `pool ÷ regen                                              = ${f0(DERIVED.mana)} ÷ ${f0(DERIVED.mana_regen)} = ${r1(DERIVED.pool_regen_sec)} seconds`,
-    `flat-cost reference pool (level ${SM.MANA_REF_LEVEL}) = mana_base ${f0(LG.mana_base)} + stat ${f0(S.base)} × K_INT_MP ${f0(K.K_INT_MP)} = ${f0(SM.MANA_REF_POOL)} — the pool a \`N flat\` cost is quoted against, and it climbs ${SM.MANA_LEVEL_STEP}% a skill level and on (pool ÷ reference)^${SM.MANA_POOL_EXPONENT} (D-136)`,
+    `flat-cost reference pool (level ${SM.MANA_REF_LEVEL}) = mana_base ${f0(LG.mana_base)} + stat ${f0(S.base)} × K_INT_MP ${f0(K.K_INT_MP)} = ${f0(SM.MANA_REF_POOL)} — the pool a \`N flat\` cost is quoted against, and it climbs ${SM.MANA_LEVEL_STEP}% a skill level and on (pool ÷ reference)^${SM.MANA_POOL_EXPONENT} `,
     '```',
   ].join('\n');
 };
@@ -1578,12 +1702,12 @@ BLOCKS['cap-table'] = () => {
     '| Value | Cap | Reachable at true ceiling? |',
     '|---|---|---|',
     '| Critical chance | **none** | the 100 Cap became a spill point: chance is held at 100 and the excess adds to crit damage (formula-offense.md section 3) |',
-    `| Evasion | **${E.caps.evasion}** | Dex rating opposed by mob accuracy, + Agi ÷ ${r4(1 / K.K_AGI_EVAS)} points, capped together · D-112 merged Dodge into this line · reachability closed by X20 |`,
-    `| Block chance | **no Cap** | the Shield offhand's Base Mod line (D-123) · the second avoidance layer, rolled after perfect dodge and evasion · open-ended (owner ruling) |`,
+    `| Evasion | **${E.caps.evasion}** | Dex rating opposed by mob accuracy, + Agi ÷ ${r4(1 / K.K_AGI_EVAS)} points, capped together · merged Dodge into this line · reachability closed by X20 |`,
+    `| Block chance | **no Cap** | the Shield offhand's Base Mod line · the second avoidance layer, rolled after perfect dodge and evasion · open-ended (owner ruling) |`,
     `| Perfect dodge | **${E.caps.perfect_dodge}** | ratio tops at ${r1(DERIVED.perfect_dodge)}% at Lck ${f0(CEIL)} but the Cap binds first · reachable at Lck ${Math.ceil((E.caps.perfect_dodge / 100) * K.K_PDOGE / (1 - E.caps.perfect_dodge / 100) / K.K_LCK_PDOGE)} · old no-Cap retired |`,
     `| Elemental Alignment | **no Cap** | open-ended (owner ruling): Dex ${f0(CEIL)} + amulet + gloves = ${r1(DERIVED.align_path)} and it keeps climbing — the \`Status Alignment resistance %\` Mod line is the separate defensive answer |`,
-    `| Elemental resistance | ${E.caps.elem_res} | a **hard ceiling** (D-124): Vit ${f0(CEIL)} + 3 res slots = ${r1(DERIVED.res_three)}, so the build tops out under it |`,
-    `| Cooldown reduction | ${E.caps.cdr} | a **hard ceiling** (D-124): Wis ${f0(CEIL)} + ${LG.cdr_mod_items} CDR slots = ${r1(DERIVED.cdr_four)}, so the build tops out under it |`,
+    `| Elemental resistance | ${E.caps.elem_res} | a **hard ceiling**: Vit ${f0(CEIL)} + 3 res slots = ${r1(DERIVED.res_three)}, so the build tops out under it |`,
+    `| Cooldown reduction | ${E.caps.cdr} | a **hard ceiling**: Wis ${f0(CEIL)} + ${LG.cdr_mod_items} CDR slots = ${r1(DERIVED.cdr_four)}, so the build tops out under it |`,
     `| Attack speed | **${E.caps.aspd} (= ${E.caps.aspd / 100} times/sec)** | the 0.2 sec floor between hits · a clock rule, not a build target: fastest weapon needs Agi ${f0(dagger.agi_to_cap)} vs the ${f0(CEIL)} ceiling |`,
     `| Accuracy | ~~2,000~~ **removed** | ratio formula already forbids 100%; calculable ceiling ${f0(DERIVED.accuracy)} never hit old Cap |`,
   ].join('\n');
@@ -1601,20 +1725,21 @@ BLOCKS['k-table'] = () => {
     `| K_VIT_HP | ${K.K_VIT_HP} | hp / Vit | Vit ${f0(CEIL)} → ${f0(CEIL * K.K_VIT_HP)} raw |`,
     `| K_VIT_REGEN | ${K.K_VIT_REGEN} | hp regen / Vit | ${f0(CEIL * K.K_VIT_REGEN)}/sec at ${f0(CEIL)} |`,
     `| K_INT_MP | ${K.K_INT_MP} | mana / Int | set to keep mana a constraint, see section 5 |`,
-    `| K_INT_MREGEN | **${K.K_INT_MREGEN}** | mana regen / Int | old 0.2 gave pool/regen 29.7 sec against 40 sec intent |`,
+    `| K_INT_MREGEN | **${K.K_INT_MREGEN}** | mana regen / Int | retuned with the pool the level cap 190 line gives: ${f1(DERIVED.pool_regen_sec)} sec against the ${TS.craft_progress_intent_sec} sec intent (B5) |`,
     `| K_INT_ES | ${K.K_INT_ES} | Energy Shield / Int | Int ${f0(CEIL)} = ${f0(CEIL * K.K_INT_ES)} shield = ${r1(DERIVED.es_share_of_hp * 100)}% of that build''s ${f0(DERIVED.es_cast_hp)} HP (X25) |`,
     `| K_INT_ESREGEN | ${K.K_INT_ESREGEN} | ES recharge / Int | ${r1(DERIVED.es_regen)}/sec · ${E.energy_shield.delay_sec} sec delay · whole pool back in ${r1(DERIVED.es_recover_sec)} sec |`,
-    `| K_AGI_EVAS | ${r4(K.K_AGI_EVAS)} | Evasion points / Agi | **30 Agi = 1 point** (owner ruling, D-112) · the mob side keeps K_MOB_DODGE for its own thin dodge (D-024) |`,
+    `| K_AGI_EVAS | ${r4(K.K_AGI_EVAS)} | Evasion points / Agi | **30 Agi = 1 point** (owner ruling) · the mob side keeps K_MOB_DODGE for its own thin dodge |`,
     `| K_AGI_ASPD | ${K.K_AGI_ASPD} | aspd % per Agi | \`aspd = weapon_aspd × (100 + (agi−12)×${K.K_AGI_ASPD} + aspd_pct)\` · level 1 sword = 1.2 times/sec |`,
-    `| K_WIS_CDR | ${K.K_WIS_CDR} | cdr / Wis | ${r1(DERIVED.cdr_raw)}% at ${f0(CEIL)} · ${LG.cdr_mod_items} Mod items reach ${r1(DERIVED.cdr_four)}, under the hard-ceiling Cap ${E.caps.cdr} (D-124) |`,
+    `| K_WIS_CDR | ${K.K_WIS_CDR} | cdr / Wis | ${r1(DERIVED.cdr_raw)}% at ${f0(CEIL)} · ${LG.cdr_mod_items} Mod items reach ${r1(DERIVED.cdr_four)}, under the hard-ceiling Cap ${E.caps.cdr} |`,
     `| K_DEX_ACC | ${K.K_DEX_ACC} | accuracy / Dex | no Cap; ratio formula limits itself |`,
     `| K_DEX_ALIGN | ${K.K_DEX_ALIGN} | Alignment / Dex | shared by Element and status · Alignment has no Cap (owner ruling) |`,
     `| K_VIT_RES | ${K.K_VIT_RES} | elem res / Vit | no Flat · ${r1(DERIVED.res_raw)}% at ${f0(CEIL)} |`,
+    `| K_VIT_STUNREC | ${K.K_VIT_STUNREC} | stun recovery / Vit | the owner's own example: Vit ${f0(CEIL)} = ${r1(eng.stunRecoveryOf(CEIL))}%, so the ${E.status.shock.stop_sec} sec shock leaves ${r2(eng.stunStopSec(CEIL, E.status.shock.stop_sec))} sec (X48) |`,
     `| K_LCK_CRIT | ${K.K_LCK_CRIT} | crit chance / Lck | ${critFromStat}% at ${f0(CEIL)} + ${M.crit_pct_main_hand} from main hand |`,
     `| K_LCK_PDOGE | **${K.K_LCK_PDOGE}** | perfect dodge rate / Lck | ratio ${r1(DERIVED.perfect_dodge)}% at ${f0(CEIL)} · \`K_PDOGE\` ${K.K_PDOGE} → Cap ${E.caps.perfect_dodge} binds first (reachable at Lck ${Math.ceil((E.caps.perfect_dodge / 100) * K.K_PDOGE / (1 - E.caps.perfect_dodge / 100) / K.K_LCK_PDOGE)}) |`,
     `| K_LCK_DROP | ${K.K_LCK_DROP} | drop rate multiplier / Lck | ${r1(DERIVED.drop_mult)}x at ${f0(CEIL)} · Base drop still separate |`,
     `| K_STR_WEIGHT | ${K.K_STR_WEIGHT} | weight / Str | ${f0(DERIVED.weight)} at Str ${f0(CEIL)} · overweight cuts aspd up to -50% (section 11) |`,
-    `| K_dodge | **retired** | — | the flat divisor is gone: Evasion is a ratio plus Agi points (D-112) |`,
+    `| K_dodge | **retired** | — | the flat divisor is gone: Evasion is a ratio plus Agi points |`,
     `| K_EVASION | ${K.K_EVASION} | evasion / Dex | same line both sides: mob evasion = \`stat_c × species.dex × ${K.K_EVASION} × body\`, player evasion = \`Dex × ${K.K_EVASION}\` (+ Gear Evasion flat ${modRange('evasion_flat')}) · replaces the old \`mob evasion = level × 1\` stand-in, which made a Slime and an Elf equally hard to hit |`,
     `| weapon_aspd | ${Math.min(...aspds)}-${Math.max(...aspds)} | Base times/sec of weapon | multiplies whole parenthesis in section 7, not only the Agi term |`,
     `| weapon_mult | 1.2 / weapon_aspd | per weapon type | decided · equalizes DPS across types where Agi does not hit Cap |`,
@@ -1627,7 +1752,7 @@ BLOCKS['craft-set'] = () => {
     `| Refine | ${C.refine_stones_per_use} Reroll tier stones | ~${STONE.refines_per_hr} | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |`,
     `| Ascend | ${C.ascend_add_stones} Add mod stones + ${C.ascend_tier_stones} Reroll tier stones | ~${STONE.ascend_per_hr} | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |`,
     '| Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to Rarity crafted max (net counting) |',
-    '| Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set (D-009 5a) | Raises Gear Mod only |',
+    '| Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set | Raises Gear Mod only |',
     '| Repair | 1 Repair stone | elite / boss only | Revives Broken + refills protection |',
   ];
   return [
@@ -1636,7 +1761,7 @@ BLOCKS['craft-set'] = () => {
     ...rows,
     '',
     '```',
-    `Refine full set (${C.ascend_items_per_set} pieces × ${C.refine_steps} steps = ${STONE.refine_casts_full_set} casts, because Tier belongs to the piece · D-033) ≈ ${STONE.refine_hours_full_set} hours`,
+    `Refine full set (${C.ascend_items_per_set} pieces × ${C.refine_steps} steps = ${STONE.refine_casts_full_set} casts, because Tier belongs to the piece) ≈ ${STONE.refine_hours_full_set} hours`,
     `Ascend full set (${C.ascend_items_per_set} pieces)                             ≈ ${STONE.ascend_hours_full_set} hours`,
     '```',
   ].join('\n');
@@ -1647,17 +1772,17 @@ BLOCKS['cap-lines'] = () => {
   const cdrAt = (n) => r1(DERIVED.cdr_raw * (1 + (M.cdr_pct_per_item * n) / 100));
   return [
     `Attack speed - % · \`hits/sec = aspd / 100\` · Cap ${c.aspd} (= ${c.aspd / 100} hits/sec · the 0.2 sec floor between hits)`,
-    `Evasion - % Cap ${c.evasion} (Dex rating ÷ (rating + mob accuracy), then + Agi ÷ 30 points, capped together · D-112 merged Dodge into this line · reachability settled by X20)`,
+    `Evasion - % Cap ${c.evasion} (Dex rating ÷ (rating + mob accuracy), then + Agi ÷ 30 points, capped together · merged Dodge into this line · reachability settled by X20)`,
     `Perfect dodge - % Cap ${c.perfect_dodge} · \`lck × K_LCK_PDOGE ÷ (rate + K_PDOGE)\` ratio tops at ${r1(DERIVED.perfect_dodge)}% but the Cap binds first (reachable at Lck ${Math.ceil((c.perfect_dodge / 100) * K.K_PDOGE / (1 - c.perfect_dodge / 100) / K.K_LCK_PDOGE)}) · definition: removes the hit that Evasion cannot contest (DoT ticks · effects with no avoidance roll) — actual order is in combat.md section 2`,
     `Critical chance - % no Cap · held at 100 and the excess adds to crit damage (\`K_CRIT_OVERFLOW\` ${K.K_CRIT_OVERFLOW} · formula-offense.md section 3) · stat-only ceiling = ${r1(DERIVED.crit)}% at ${f0(CEIL)} Lck, so only buffs/skills create overflow`,
     'Critical damage - % physical only · magic and the 5 Elements never crit · no Cap · `100 + crit_dmg_pct + crit_overflow`',
-    `Cooldown reduction - % Cap ${c.cdr} — a hard ceiling (D-124): ${f0(CEIL)} Wis + ${LG.cdr_mod_items} CDR slots = ${r1(DERIVED.cdr_four)}, so the build tops out under it (9 slots reach only ${cdrAt(9)} · 10 slots reach ${cdrAt(10)} · D-041)`,
+    `Cooldown reduction - % Cap ${c.cdr} — a hard ceiling: ${f0(CEIL)} Wis + ${LG.cdr_mod_items} CDR slots = ${r1(DERIVED.cdr_four)}, so the build tops out under it (9 slots reach only ${cdrAt(9)} · 10 slots reach ${cdrAt(10)})`,
     'Accuracy - numeric value, no Cap · formula `acc / (acc + evasion)` can never reach 100% by design · previously Cap 2,000 which was unreachable',
     `Elemental alignment - % no Cap (owner ruling) · ${f0(CEIL)} Dex + amulet + gloves = ${r1(DERIVED.align_path)} and it keeps climbing · the defensive \`Status Alignment resistance %\` is a separate Mod line (mod-pool.md · core-stats.md)`,
-    `Elemental resistance - % split across 5 Elements, Cap ${c.elem_res} per Element — a hard ceiling (D-124): ${f0(CEIL)} Vit + 3 res slots = ${r1(DERIVED.res_three)}, under it`,
+    `Elemental resistance - % split across 5 Elements, Cap ${c.elem_res} per Element — a hard ceiling: ${f0(CEIL)} Vit + 3 res slots = ${r1(DERIVED.res_three)}, under it`,
     `Armour - numeric rating · \`Str x K_ARMOUR\` (${K.K_ARMOUR}) + Gear Armour flat (${modRange('armour_flat')}) · physical reduction% = armour / (armour + ${K.armour_divisor} × raw_hit) · no Cap (diminishing by design) · the mob side runs the same K off its own Str, so a Golem or Knight carries real armour and a Rat carries almost none (mob-roster.md)`,
     `Evasion - numeric rating · \`Dex x K_EVASION\` (${K.K_EVASION}) + Gear Evasion flat (${modRange('evasion_flat')}) · PoE entropy roll vs attacker accuracy, contested once per hit · no hard Cap on the rating (the chance is the limit) · the same line runs the mob side, from the mob's own Dex (formula-utility.md section 8)`,
-    `Energy Shield - second pool ahead of HP · \`Int x K_INT_ES\` (${K.K_INT_ES}) + Gear Energy Shield flat (${modRange('energy_shield_flat')}) · chaos bypasses it · armour and Elemental resistance shrink the number that drains it · recharges after ${E.energy_shield.delay_sec} sec without a hit at \`Int x K_INT_ESREGEN\` (${K.K_INT_ESREGEN}) per sec, so the whole pool returns in ${r1(DERIVED.es_recover_sec)} sec · no Cap (D-026 · X25)`,
+    `Energy Shield - second pool ahead of HP · \`Int x K_INT_ES\` (${K.K_INT_ES}) + Gear Energy Shield flat (${modRange('energy_shield_flat')}) · chaos bypasses it · armour and Elemental resistance shrink the number that drains it · recharges after ${E.energy_shield.delay_sec} sec without a hit at \`Int x K_INT_ESREGEN\` (${K.K_INT_ESREGEN}) per sec, so the whole pool returns in ${r1(DERIVED.es_recover_sec)} sec · no Cap (X25)`,
     `Weight - units · capacity = Str x ${K.K_STR_WEIGHT} (${f0(DERIVED.weight)} at ${f0(CEIL)} Str) · Over-capacity is allowed, does not lock equip slots, but reduces Attack speed proportionally up to -50% (formula.md section 11)`,
   ].join('\n');
 };
@@ -1702,7 +1827,7 @@ BLOCKS['aoe-rules'] = () => {
     '',
     `damage per mana: 1 target ${f2(dpm(1))}× · 2 targets ${f2(dpm(2))}× · 3+ targets ${f2(dpm(A.target_cap))}×`,
     '',
-    `a flat cost climbs ${SM.MANA_LEVEL_STEP}% a skill level against the press ramp's ${SM.LEVEL_STEP}%, so at level ${E.skill_xp.level_cap} one costs ×${(at(SM.MANA_LEVEL_STEP) / at(SM.LEVEL_STEP)).toFixed(2)} what the press grew (D-136)`,
+    `a flat cost climbs ${SM.MANA_LEVEL_STEP}% a skill level against the press ramp's ${SM.LEVEL_STEP}%, so at level ${E.skill_xp.level_cap} one costs ×${(at(SM.MANA_LEVEL_STEP) / at(SM.LEVEL_STEP)).toFixed(2)} what the press grew `,
     '```',
   ].join('\n');
 };
@@ -1726,10 +1851,19 @@ BLOCKS['zone-cast'] = () => {
     const boss = zr.find((r) => /Boss/.test(r.kind));
     return [z.id, z.name, `${sp.size}`, bodies.join(' · '), elite, `${boss.species} · ${boss.kind.split('· ')[1]}`, f0(boss.hpTo), f0(boss.ps), zr.length];
   });
+  const subRows = E.mob.zones.flatMap((z) => (z.subzones || []).map((s) => [
+    z.id, s.name, s.environment, s.element,
+    s.races.map((id) => (E.mob.species.find((sp) => sp.id === id) || { name: id }).name).join(' · '),
+    s.elite || '—',
+  ]));
   return [
     '| Zone | Settlement | species on cast | Small · Medium · Large | Elite | Boss (species · name) | boss HP at zone edge | boss damage/sec | entries |',
     '|---|---|---|---|---|---|---|---|---|',
     ...rows.map((r) => `| ${r.join(' | ')} |`),
+    '',
+    '| Zone | Sub-zone | Environment | Element | Races | Elite |',
+    '|---|---|---|---|---|---|',
+    ...subRows.map((r) => `| ${r.join(' | ')} |`),
   ].join('\n');
 };
 
@@ -1748,7 +1882,7 @@ BLOCKS['mob-roster'] = () => {
     '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
     ...rows.map((x) => `| ${x.join(' | ')} |`),
     '',
-    `Every row is the mob's own stat block at the zone's **last** level (\`mob stat = ${f0(E.mob.stat.base)}\` × the species vector, flat with no level term, D-141), then by the body class: accuracy = Dex line × ${K.K_DEX_ACC} × accuracy tier · evasion = Dex × ${K.K_EVASION} × body · armour = Str × ${K.K_ARMOUR} · res = Vit × ${K.K_VIT_RES} · crit = Lck × ${K.K_LCK_CRIT} · dodge = own Agi rate ÷ (rate + a same-level attacker's accuracy) (D-024 · X24). HP is \`mob_HP(L) × body\` at both ends of the range, so a mob mid-range interpolates. XP is \`10 × the mob's own level\` with elite ×${E.xp.elite_mult} and boss ×${E.xp.boss_mult} (world.md XP), printed as a range because a mob spawns at the attacker's level, so it is read at both ends of the zone. \`status gate\` is the mob's own Elemental Alignment (\`Dex × ${K.K_DEX_ALIGN}\`, no Cap), the number that decides how often its innate Element status actually lands (combat.md section 2 step 9). A mob spawns at the attacker's level clamped into its zone's range; its innate Element is rolled with the species bias at ×${E.mob.element_roll.bias_weight} against any other Element the zone carries at ×${E.mob.element_roll.other_weight}; and \`drops: weapon\` means the lineage is allowed to be the source of a weapon-slot piece; \`armour only\` species still drop every other slot, so the 8% base drop rate, the quality floors and the whole stone funnel are untouched (loot.md sections 1-2 · gear, herbs, stones and junk are the four streams).`,
+    `Every row is the mob's own stat block at the zone's **last** level (\`mob stat = ${f0(E.mob.stat.base)}\` × the species vector, flat with no level term), then by the body class: accuracy = Dex line × ${K.K_DEX_ACC} × accuracy tier · evasion = Dex × ${K.K_EVASION} × body · armour = Str × ${K.K_ARMOUR} · res = Vit × ${K.K_VIT_RES} · crit = Lck × ${K.K_LCK_CRIT} · dodge = own Agi rate ÷ (rate + a same-level attacker's accuracy) (X24). HP is \`mob_HP(L) × body\` at both ends of the range, so a mob mid-range interpolates. XP is \`10 × the mob's own level\` with elite ×${E.xp.elite_mult} and boss ×${E.xp.boss_mult} (world.md XP), printed as a range because a mob spawns at the attacker's level, so it is read at both ends of the zone. \`status gate\` is the mob's own Elemental Alignment (\`Dex × ${K.K_DEX_ALIGN}\`, no Cap), the number that decides how often its innate Element status actually lands (combat.md section 2 step 9). A mob spawns at the attacker's level clamped into its zone's range; its innate Element is rolled with the species bias at ×${E.mob.element_roll.bias_weight} against any other Element the zone carries at ×${E.mob.element_roll.other_weight}; and \`drops: weapon\` means the lineage is allowed to be the source of a weapon-slot piece; \`armour only\` species still drop every other slot, so the 8% base drop rate, the quality floors and the whole stone funnel are untouched (loot.md sections 1-2 · gear, herbs, stones and junk are the four streams, and the **humanoid** lineages add a fifth, potions, on the derived chance **X49** prints).`,
   ].join('\n');
 };
 
@@ -1782,7 +1916,7 @@ if (arg === '--emit') {
     for (const k of keys) console.log(`\n${begin(k)}\n${BLOCKS[k]()}\n${end(k)}`);
   }
 } else if (arg === '--write') {
-  // generated.writeAll owns the guards (D-113): an absent marker pair aborts the whole file rather
+  // generated.writeAll owns the guards: an absent marker pair aborts the whole file rather
   // than leaving a half-written doc that reads as current, and a body that shrinks the doc is refused.
   if (writeAll(writerTable())) process.exitCode = 1;
 } else if (arg === '--checks') {

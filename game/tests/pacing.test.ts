@@ -6,10 +6,10 @@ import { setRule } from '../src/sim/filter';
 /**
  * The client's own pacing, measured against the hours `engine.json` publishes.
  *
- * This is not the balance audit (`harness/decisions.md` D-103) and it changes no number. It gates the one
+ * This is not the balance audit and it changes no number. It gates the one
  * promise `loot.md` §4 makes of an AFK run: a piece the filter rejects converts on the spot, so the
  * Reroll value mint must keep paying **every hour**, including after the adventure bag fills and
- * pickups pause. That stall was `harness/todo.md` B17, and it cleared once a kept upgrade went
+ * pickups pause. That stall cleared once a kept upgrade went
  * straight onto the character the way `tools/loot.ts` has always modelled a keep.
  *
  * The kill rate is printed, not gated tight: the band's published figure assumes the Lck investment
@@ -23,7 +23,7 @@ interface Hour { hour: number; level: number; kills: number; drops: number; mint
 describe('the built loop measured against the published hours', () => {
   it('keeps minting crafting stones every hour, and prints where it differs from the design', () => {
     const s = newGame(20260104);
-    // the filter is OFF by default (D-122), so this test turns every slot on to gate the published
+    // the filter is OFF by default, so this test turns every slot on to gate the published
     // promise: once a slot filters, a rejected piece dissolves on the spot and the Reroll value mint
     // must keep paying every hour, including after the adventure bag fills and pickups pause
     setRule(s.filter, 'all', { enabled: true });
@@ -37,7 +37,7 @@ describe('the built loop measured against the published hours', () => {
     for (let h = 1; h <= HOURS; h++) {
       for (let i = 0; i < SEC_PER_HR; i++) {
         tick(s, {});
-        spendReference(s); // the reference build spends its level points evenly (D-141)
+        spendReference(s); // the reference build spends its level points evenly 
         for (const cap of [10, 30, 60, 90, 100]) {
           if (s.player.level >= cap && reached[cap] == null) reached[cap] = s.clockSec;
         }
@@ -74,7 +74,7 @@ describe('the built loop measured against the published hours', () => {
     expect(rows.every((r) => r.drops > 0)).toBe(true); // and never stops rolling drops
     expect(rows.every((r) => r.minted > 0)).toBe(true); // B17: the stone mint runs in every hour
     expect(reached[10]).not.toBeUndefined(); // hour one of the timeline is reachable at all
-    // No wall-clock target: this game has no time limit (owner ruling 2026-10-05, D-141), so the run is
+    // No wall-clock target: this game has no time limit (owner ruling 2026-10-05), so the run is
     // NOT gated against the published kill rate or a bag-fill pace. The loop only has to keep paying.
   }, 180000);
 });

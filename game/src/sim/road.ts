@@ -76,6 +76,9 @@ function setupLeg(state: GameState, index: number, fromId?: string): RoadTrip {
     circuit: [],
     legIndex: 0,
     laps: 0,
+    // every fresh leg starts the clean-lap clock at the Push counter as it stands, so a lap that
+    // never moved it counts as clean when the loop wraps (`advanceLeg`)
+    pushesAtLapStart: state.counters.pushes,
   };
 }
 
@@ -202,7 +205,14 @@ export function grantTripStanding(state: GameState, trip: RoadTrip) {
 export function advanceLeg(state: GameState, trip: RoadTrip): 'next' | 'done' {
   if (!trip.circuit.length) return 'done';
   const next = (trip.legIndex + 1) % trip.circuit.length;
-  const laps = trip.laps + (next === 0 ? 1 : 0);
+  const wrapped = next === 0;
+  // the Circuit objective: a lap closed without a Push is recorded as a completion. Non-material on
+  // purpose — the Road's gold is capped by G6-G9 and a stone would be a new source, so the reward is
+  // the log line; the mint bounds bar a paid reward, so nothing further is owed.
+  if (wrapped && state.counters.pushes === (trip.pushesAtLapStart ?? state.counters.pushes)) {
+    state.counters.cleanLaps = (state.counters.cleanLaps || 0) + 1;
+  }
+  const laps = trip.laps + (wrapped ? 1 : 0);
   const fresh = setupLeg(state, trip.circuit[next], trip.settlementTo);
   fresh.circuit = trip.circuit;
   fresh.legIndex = next;

@@ -8,13 +8,13 @@
   /**
    * The detail card a slot shows on hover. The whole card is a projection: every value and every name
    * comes out of the rolled line and `mods.json`, so it cannot drift from the drop the player is
-   * reading (`harness/decisions.md` D-113, D-132). A line prints as `<value> <plain words>` — no plus
+   * reading. A line prints as `<value> <plain words>` — no plus
    * sign, no Tier chip, no Mod-book name — and the two fixed kinds are told apart by colour alone:
    * the Base Mod red, the Legacy pair yellow, the editable Mods plain.
    *
    * The skeleton reads top to bottom (`item-base.md`): line 1 is the Base Mod the frame owns, lines
    * 2-3 the Legacy pair, lines 4-7 the Mods the stones may edit. The decision itself is the Equip
-   * button, never an automatic swap (D-089): gold comes from junk sold by hand, and a rejected piece
+   * button, never an automatic swap: gold comes from junk sold by hand, and a rejected piece
    * turns into a stone instead (`economy.md` · `loot.md` §4).
    */
   let { item, worn = null, onequip = null, wornHere = false }: {
@@ -130,7 +130,7 @@
   .lines { list-style: none; margin: 0 0 .3rem; padding: 0; }
   .lines li { padding: .05rem 0; font-variant-numeric: tabular-nums; }
   .lines li.fixed { border-bottom: 1px solid #1b2029; }
-  /* the two fixed kinds read by colour alone: Base Mod red, Legacy pair yellow (D-132) */
+  /* the two fixed kinds read by colour alone: Base Mod red, Legacy pair yellow */
   .line.base { color: var(--hp); }
   .line.legacy { color: var(--xp); }
   .gear { margin: .3rem 0; display: flex; gap: .35rem; align-items: baseline; }

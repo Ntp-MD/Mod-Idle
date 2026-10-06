@@ -10,25 +10,25 @@ import skill-pool-system.md
 The core rule is that a skill must change **what you do**, not just add numbers. If it is only numbers, it should be an Mod instead
 
 # Detail files
-- skill-pool-attack.md — attack skills (Cleave..Arcane Surge)
+- skill-pool-attack.md — attack skills (Fireball..Pierce the Veil)
 - skill-pool-buff.md — buff skills (roster cleared for redesign)
 - skill-pool-curse.md — curse skills + attach rule (Weaken..Pandemonium)
 - skill-pool-aura-heal.md — Reservation + heals + auras + baseline
 - skill-pool-system.md — combat clock + AoE + passives→keystones + acquisition + ladder + level + open numbers
 
 <!-- BEGIN GENERATED:skill-count -->
-# Skill count = 65
+# Skill count = 74
 
 | Type | Count | Controlled by |
 |---|---|---|
-| **attack** | 31 | Order list · cd + mana |
-| **buff** | 7 | Timed self-buff - own cd and duration, never persists between fights |
+| **attack** | 39 | Order list · cd + mana |
+| **buff** | 8 | Timed self-buff - own cd and duration, never persists between fights |
 | **curse** | 11 | Attached to target · Uses same hit_chance as attacks |
 | **heal** | 3 | Same list (key on bosses) |
 | **aura** | 13 | Player-managed set · **Reserves Max Mana** |
-| **total** | **65** | Roster mid-redesign · buff + aura set not final |
+| **total** | **74** | Attack set picked · buff + aura carried from the live roster |
 
-> **Counts are provisional.** The buff roster was cleared for a redesign and rebuilt, and the aura set was resized (`skill-pool-aura-heal.md` · Decision 1), which leaves tree nodes in `skill-tree-*.md` referencing skills that no longer exist (`checks.md` D19 will fail until those nodes are rewritten). If `Retribution` is also removed from the attack table, attack drops 31 → 30 and the total lands at **64**.
+> **The attack roster is the picked set.** The Elemental rows replaced the retired attacks and the physical block is carried from the live roster, so `skill-pool-attack.md` prints the roster's own count. The buff, curse, heal and aura rows are unchanged.
 <!-- END GENERATED:skill-count -->
 
 # Skill frame
@@ -43,9 +43,9 @@ The core rule is that a skill must change **what you do**, not just add numbers.
 | Ladder | Reduces cooldown from duplicate skills |
 | Skill level | Gains XP from use, maximum equals character level |
 
-**A mana cost is written in one of two forms and the unit is part of it**: `%` charges that share of the usable pool, `flat` charges its own units. Both are read by the same resolver in `engine/skills.ts` (`manaSpec` → `manaCostOf`), which throws on a row whose unit is missing — a cost that parsed as nothing would make the skill free (D-136). **A flat cost is quoted at skill level 1 against the level-1 reference pool**, then grows on two terms the data owns: a per-level step steeper than the press ramp, and a power of the pool's own growth, so Int and `Max Mana` gear keep setting the price instead of only widening the bar. The keys are `skills.json` `meta.formula` and the reference pool is derived, never typed. The unit travels into every roster table because the tables print the row's own string; `tools/skills.ts --calc` prints what each row charges for a pool you pass.
+**A mana cost is written in one of two forms and the unit is part of it**: `%` charges that share of the usable pool, `flat` charges its own units. Both are read by the same resolver in `engine/skills.ts` (`manaSpec` → `manaCostOf`), which throws on a row whose unit is missing — a cost that parsed as nothing would make the skill free. **A flat cost is quoted at skill level 1 against the level-1 reference pool**, then grows on two terms the data owns: a per-level step steeper than the press ramp, and a power of the pool's own growth, so Int and `Max Mana` gear keep setting the price instead of only widening the bar. The keys are `skills.json` `meta.formula` and the reference pool is derived, never typed. The unit travels into every roster table because the tables print the row's own string; `tools/skills.ts --calc` prints what each row charges for a pool you pass.
 **"Weapon power" in the skill table = character phys/magic power** from formula.md sections 1-2, not the power value of the weapon piece (this game has no Base power per weapon type · decided in formula.md).
-- **A press is one percentage of the hit the build already deals**, taken from the finished physical hit or the magic hit plus Element — the full form and its level ramp live in `skill-pool-system.md`, and `tools/skills.ts` prints every row's measured press. The old `stat × K_stat × stat% + power × power%` split is retired (D-070 · D-097): a skill inherits gear and globals rather than dipping into the stats a second time.
+- **A press is one percentage of the hit the build already deals**, taken from the finished physical hit or the magic hit plus Element — the full form and its level ramp live in `skill-pool-system.md`, and `tools/skills.ts` prints every row's measured press. The old `stat × K_stat × stat% + power × power%` split is retired: a skill inherits gear and globals rather than dipping into the stats a second time.
 - **Cooldown calculation order**
 ```
 cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)

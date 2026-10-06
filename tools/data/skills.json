@@ -41,7 +41,7 @@
         "cdr_pct": 50,
         "ladder_pct": 30
       },
-      "note": "press = final_pct × basis × (1 + (skill_level − 1) × level_step_pct/100) · basis phys = the caster's finished physical hit · basis magic = their magic + Element × Alignment/100 (D-070 · B5). `final_pct` is the level-1 fraction, so a fresh skill presses exactly what its row states. Read by tools/lib/skillmodel.ts for the --calc workshop, the attack-table press column and the client's casts. A mana cost is written in one of two forms and the unit is part of it: `N%` charges N% of the usable pool, `N flat` charges N absolute units (D-136). A flat cost is the price at skill level 1 and grows on `mana_level_step_pct` per skill level, steeper than the damage ramp so a maxed rotation costs more, and on `(pool / reference pool)^mana_pool_exponent`, so Int and Max Mana gear still set the price. The reference pool is derived at `mana_reference_level`, never typed here."
+      "note": "press = final_pct × basis × (1 + (skill_level − 1) × level_step_pct/100) · basis phys = the caster's finished physical hit · basis magic = their magic + Element × Alignment/100 (B5). `final_pct` is the level-1 fraction, so a fresh skill presses exactly what its row states. Read by tools/lib/skillmodel.ts for the --calc workshop, the attack-table press column and the client's casts. A mana cost is written in one of two forms and the unit is part of it: `N%` charges N% of the usable pool, `N flat` charges N absolute units. A flat cost is the price at skill level 1 and grows on `mana_level_step_pct` per skill level, steeper than the damage ramp so a maxed rotation costs more, and on `(pool / reference pool)^mana_pool_exponent`, so Int and Max Mana gear still set the price. The reference pool is derived at `mana_reference_level`, never typed here."
     }
   },
   "reserve_tiers": {
@@ -63,6 +63,568 @@
     }
   },
   "skills": [
+    {
+      "id": "attack.arcane_pulse",
+      "name": "Arcane Pulse",
+      "type": "attack",
+      "group": "magic",
+      "element": "follow",
+      "cd": 0,
+      "mana": "8%",
+      "basis": "magic",
+      "final_pct": 103.191,
+      "targets": "1/1",
+      "effect": "Uses the weapon Element · the caster's core press: no timer of its own, so mana and the beat are what gate it",
+      "modelled_by": "element"
+    },
+    {
+      "id": "attack.fireball",
+      "name": "Fireball",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 6,
+      "mana": "14%",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "1/1",
+      "effect": "Single target · applies 2 burn stacks",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.flame_bolt",
+      "name": "Flame Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 5,
+      "mana": "11%",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "1/1",
+      "effect": "Fast cheap fire bolt · 1 burn stack",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.firestorm",
+      "name": "Firestorm",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 13,
+      "mana": "21 flat (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "3/1",
+      "effect": "AoE firestorm · 1 burn stack to all hit",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.meteor",
+      "name": "Meteor",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 14,
+      "mana": "22 flat (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "3/1",
+      "effect": "Heavy AoE slam · 2 burn stacks to all hit",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.flame_wisp",
+      "name": "Flame Wisp",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 9,
+      "mana": "15%",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "1/1",
+      "effect": "Single target · 3 burn stacks",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.scorch",
+      "name": "Scorch Ray",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 7,
+      "mana": "14%",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "1/1",
+      "effect": "Heavy single hit · 2 burn stacks",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.frost_bolt",
+      "name": "Frost Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 5,
+      "mana": "11%",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "1/1",
+      "effect": "Fast cold bolt · 1 chill",
+      "rules": [
+        "guaranteed_status"
+      ]
+    },
+    {
+      "id": "attack.ice_shard",
+      "name": "Ice Shard",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 6,
+      "mana": "13%",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "1/1",
+      "effect": "Single target · 1 chill",
+      "rules": [
+        "guaranteed_status"
+      ]
+    },
+    {
+      "id": "attack.ice_lance",
+      "name": "Ice Lance",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 8,
+      "mana": "14%",
+      "basis": "magic",
+      "final_pct": 103.191,
+      "targets": "1/2",
+      "effect": "2 hits at 55% each · chills the target",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 55,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "guaranteed_status"
+      ]
+    },
+    {
+      "id": "attack.blizzard",
+      "name": "Blizzard",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 13,
+      "mana": "20 flat (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "3/1",
+      "effect": "AoE storm · chills all hit",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.frozen_orb",
+      "name": "Frozen Orb",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 10,
+      "mana": "16 flat (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "3/1",
+      "effect": "Orb that chills all it touches",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.frostbite",
+      "name": "Frostbite",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 8,
+      "mana": "14%",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "1/1",
+      "effect": "+25% damage if the target is already chilled",
+      "duration": "8 sec",
+      "effects": [
+        {
+          "stat": "mob_elemental_damage_taken_pct",
+          "op": "add_pct",
+          "value": 25,
+          "subject": "target",
+          "condition": "chilled"
+        }
+      ]
+    },
+    {
+      "id": "attack.chain_lightning",
+      "name": "Chain Lightning",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 9,
+      "mana": "16% (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "3/1",
+      "effect": "Arcs to 3 targets · shocks all hit",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.lightning_bolt",
+      "name": "Lightning Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 5,
+      "mana": "12%",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "1/1",
+      "effect": "Fast single bolt · 1 shock",
+      "rules": [
+        "guaranteed_status"
+      ]
+    },
+    {
+      "id": "attack.spark",
+      "name": "Spark",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 4,
+      "mana": "9%",
+      "basis": "magic",
+      "final_pct": 103.191,
+      "targets": "1/1",
+      "effect": "Cheapest fastest press · 1 shock",
+      "rules": [
+        "guaranteed_status"
+      ]
+    },
+    {
+      "id": "attack.thunder_strike",
+      "name": "Thunder Strike",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 11,
+      "mana": "18 flat",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "1/1",
+      "effect": "Heavy single hit · shocks the target (shock carries the 1 sec interrupt)",
+      "rules": [
+        "guaranteed_status"
+      ]
+    },
+    {
+      "id": "attack.storm_call",
+      "name": "Storm Call",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 14,
+      "mana": "22 flat (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "3/1",
+      "effect": "Big AoE storm · shocks all hit",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.static_field",
+      "name": "Static Field",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 10,
+      "mana": "15% (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 104.063,
+      "targets": "3/1",
+      "effect": "Field around self · shocks all hit",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.poison_bolt",
+      "name": "Poison Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 6,
+      "mana": "13%",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "1/1",
+      "effect": "Single target · 2 poison stacks",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.venom_spray",
+      "name": "Venom Spray",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 9,
+      "mana": "16% (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "3/1",
+      "effect": "Spray · 1 poison stack to all hit",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.acid_arrow",
+      "name": "Acid Arrow",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 7,
+      "mana": "14%",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "1/1",
+      "effect": "Single target · 3 poison stacks",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.toxic_cloud",
+      "name": "Toxic Cloud",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 12,
+      "mana": "19 flat (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "3/1",
+      "effect": "Lingering cloud · 2 poison stacks to all hit",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.blight",
+      "name": "Blight",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 10,
+      "mana": "15 flat",
+      "basis": "magic",
+      "final_pct": 105.806,
+      "targets": "1/1",
+      "effect": "Heavy poison press · 4 poison stacks",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 4,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.chaos_bolt",
+      "name": "Chaos Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "chaos",
+      "cd": 6,
+      "mana": "13%",
+      "basis": "magic",
+      "final_pct": 103.191,
+      "targets": "1/1",
+      "effect": "Single target · 1 mark stack",
+      "effects": [
+        {
+          "stat": "mark_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "attack.void_blast",
+      "name": "Void Blast",
+      "type": "attack",
+      "group": "magic",
+      "element": "chaos",
+      "cd": 9,
+      "mana": "16% (AoE ×1.5)",
+      "basis": "magic",
+      "final_pct": 103.191,
+      "targets": "3/1",
+      "effect": "AoE blast · applies 1 mark stack to all hit",
+      "effects": [
+        {
+          "stat": "mark_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ]
+    },
+    {
+      "id": "attack.nether_orb",
+      "name": "Nether Orb",
+      "type": "attack",
+      "group": "magic",
+      "element": "chaos",
+      "cd": 12,
+      "mana": "19 flat",
+      "basis": "magic",
+      "final_pct": 103.191,
+      "targets": "1/1",
+      "effect": "This hit pierces 100% of the target's Elemental res",
+      "effects": [
+        {
+          "stat": "resistance_pierce_pct",
+          "op": "add_flat",
+          "value": 100,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "attack.entropy",
+      "name": "Entropy",
+      "type": "attack",
+      "group": "magic",
+      "element": "chaos",
+      "cd": 10,
+      "mana": "15 flat",
+      "basis": "magic",
+      "final_pct": 103.191,
+      "targets": "1/1",
+      "effect": "Heavy press · applies 5 mark stacks",
+      "effects": [
+        {
+          "stat": "mark_stacks",
+          "op": "add_flat",
+          "value": 5,
+          "subject": "target"
+        }
+      ]
+    },
     {
       "id": "attack.cleave",
       "name": "Cleave",
@@ -155,88 +717,70 @@
       "basis": "phys",
       "final_pct": 142.836,
       "targets": "1/1",
-      "effect": "Applies 3 poison stacks (melee that feeds DoT)",
+      "effect": "Guarantees bleeding on the hit (100% bleed chance · bleed does not stack, a new hit refreshes its 5 sec)",
       "effects": [
         {
-          "stat": "poison_stacks",
-          "op": "add_flat",
-          "value": 3,
+          "stat": "bleed_chance",
+          "op": "add_pct",
+          "value": 100,
           "subject": "target"
         }
       ]
     },
     {
-      "id": "attack.riposte",
-      "name": "Riposte",
+      "id": "attack.reap",
+      "name": "Reap",
       "type": "attack",
       "group": "melee",
       "element": "physical",
       "cd": 9,
-      "mana": "14%",
-      "basis": "phys",
-      "final_pct": 138.129,
-      "targets": "1/1",
-      "effect": "Damage +3% per 1% player Evasion chance (Cap +120%) · Gives Evasion builds a boss path",
-      "effects": [
-        {
-          "stat": "damage_per_evasion_pct",
-          "op": "add_pct",
-          "value": 3,
-          "cap": 120,
-          "subject": "self"
-        }
-      ]
-    },
-    {
-      "id": "attack.execute",
-      "name": "Execute",
-      "type": "attack",
-      "group": "all",
-      "element": "physical",
-      "cd": 14,
-      "mana": "18%",
+      "mana": "14 flat",
       "basis": "phys",
       "final_pct": 140.483,
       "targets": "1/1",
-      "effect": "x2 if target HP below 20%",
+      "effect": "Leech +25% and physical power x1.10 for 6 sec · the window opens on the press and rides the skill's own duration",
+      "duration": "6 sec",
       "effects": [
         {
-          "stat": "execute_threshold_pct",
-          "op": "add_flat",
-          "value": 20,
+          "stat": "leech",
+          "op": "add_pct",
+          "value": 25,
           "subject": "self"
         },
         {
-          "stat": "execute_damage",
+          "stat": "physical_power",
           "op": "mult",
-          "value": 2,
+          "value": 1.1,
           "subject": "self"
         }
+      ],
+      "rules": [
+        "self_window"
       ]
     },
     {
-      "id": "attack.retribution",
-      "name": "Retribution",
+      "id": "attack.bloodletting",
+      "name": "Bloodletting",
       "type": "attack",
-      "group": "all",
+      "group": "melee",
       "element": "physical",
       "cd": 11,
-      "mana": "16%",
+      "mana": "16 flat",
       "basis": "phys",
-      "final_pct": 140.483,
+      "final_pct": 142.836,
       "targets": "1/1",
-      "effect": "Damage grows with lost HP (maximum x2 at 50% HP) · Tank tool on bosses",
+      "effect": "Instant heal 6% Max HP and leech +15% on the press",
       "effects": [
         {
-          "stat": "missing_hp_pct_for_max",
-          "op": "add_flat",
-          "value": 50,
+          "stat": "heal_instant",
+          "op": "add_pct",
+          "value": 6,
           "subject": "self"
         },
         {
-          "stat": "damage_at_missing_hp",
-          "op": "mult",
-          "value": 2,
+          "stat": "leech",
+          "op": "add_pct",
+          "value": 15,
           "subject": "self"
         }
       ]
@@ -256,20 +800,6 @@
       "rules": [
         "ignores_dodge"
       ]
-    },
-    {
-      "id": "attack.volley",
-      "name": "Volley",
-      "type": "attack",
-      "group": "ranged",
-      "element": "physical",
-      "cd": 8,
-      "mana": "14% (AoE ×1.5)",
-      "basis": "phys",
-      "final_pct": 142.836,
-      "targets": "3/1",
-      "effect": "Arrow spread hits all in range",
-      "modelled_by": "targets"
     },
     {
       "id": "attack.arrow_shower",
@@ -320,178 +850,6 @@
       ]
     },
     {
-      "id": "attack.reap",
-      "name": "Reap",
-      "type": "attack",
-      "group": "melee",
-      "element": "physical",
-      "cd": 9,
-      "mana": "14 flat",
-      "basis": "phys",
-      "final_pct": 140.483,
-      "targets": "1/1",
-      "effect": "Leech +25% and physical power x1.10 for 6 sec · the window opens on the press and rides the skill's own duration",
-      "duration": "6 sec",
-      "effects": [
-        {
-          "stat": "leech",
-          "op": "add_pct",
-          "value": 25,
-          "subject": "self"
-        },
-        {
-          "stat": "physical_power",
-          "op": "mult",
-          "value": 1.1,
-          "subject": "self"
-        }
-      ],
-      "rules": [
-        "self_window"
-      ]
-    },
-    {
-      "id": "attack.arcane_bolt",
-      "name": "Arcane Bolt",
-      "type": "attack",
-      "group": "magic",
-      "element": "follow",
-      "cd": 5,
-      "mana": "12%",
-      "basis": "magic",
-      "final_pct": 102.319,
-      "targets": "1/1",
-      "effect": "Uses weapon Element · Hits at all ranges",
-      "modelled_by": "element"
-    },
-    {
-      "id": "attack.flame_lash",
-      "name": "Flame Lash",
-      "type": "attack",
-      "group": "magic",
-      "element": "fire",
-      "cd": 6,
-      "mana": "13%",
-      "basis": "magic",
-      "final_pct": 104.063,
-      "targets": "1/2",
-      "effect": "Fire · Applies full 3 burn stacks in one press (fills the missing fire-skill slot)",
-      "effects": [
-        {
-          "stat": "burn_stacks",
-          "op": "add_flat",
-          "value": 3,
-          "subject": "target"
-        }
-      ]
-    },
-    {
-      "id": "attack.chain_spark",
-      "name": "Chain Spark",
-      "type": "attack",
-      "group": "magic",
-      "element": "lightning",
-      "cd": 8,
-      "mana": "15% (AoE ×1.5)",
-      "basis": "magic",
-      "final_pct": 104.063,
-      "targets": "3/1",
-      "effect": "Lightning · Shocks all hit",
-      "rules": [
-        "guaranteed_status",
-        "every_target"
-      ]
-    },
-    {
-      "id": "attack.frost_nova",
-      "name": "Frost Nova",
-      "type": "attack",
-      "group": "magic",
-      "element": "cold",
-      "cd": 9,
-      "mana": "16% (AoE ×1.5)",
-      "basis": "magic",
-      "final_pct": 104.063,
-      "targets": "3/1",
-      "effect": "Cold around self · Chills all",
-      "rules": [
-        "guaranteed_status",
-        "every_target"
-      ]
-    },
-    {
-      "id": "attack.toxic_spray",
-      "name": "Toxic Spray",
-      "type": "attack",
-      "group": "magic",
-      "element": "poison",
-      "cd": 12,
-      "mana": "20% (AoE ×1.5)",
-      "basis": "magic",
-      "final_pct": 105.806,
-      "targets": "3/1",
-      "effect": "2 poison stacks to all in range",
-      "effects": [
-        {
-          "stat": "poison_stacks",
-          "op": "add_flat",
-          "value": 2,
-          "subject": "target"
-        }
-      ],
-      "rules": [
-        "every_target"
-      ]
-    },
-    {
-      "id": "attack.void_lance",
-      "name": "Void Lance",
-      "type": "attack",
-      "group": "magic",
-      "element": "chaos",
-      "cd": 11,
-      "mana": "17%",
-      "basis": "magic",
-      "final_pct": 103.191,
-      "targets": "1/1",
-      "effect": "Chaos · Pierces 100% of target Elemental res on this hit (answer to res-required zones)",
-      "effects": [
-        {
-          "stat": "resistance_pierce_pct",
-          "op": "add_flat",
-          "value": 100,
-          "subject": "self"
-        }
-      ]
-    },
-    {
-      "id": "attack.bloodletting",
-      "name": "Bloodletting",
-      "type": "attack",
-      "group": "melee",
-      "element": "physical",
-      "cd": 11,
-      "mana": "16 flat",
-      "basis": "phys",
-      "final_pct": 142.836,
-      "targets": "1/1",
-      "effect": "Instant heal 6% Max HP and leech +15% on the press",
-      "effects": [
-        {
-          "stat": "heal_instant",
-          "op": "add_pct",
-          "value": 6,
-          "subject": "self"
-        },
-        {
-          "stat": "leech",
-          "op": "add_pct",
-          "value": 15,
-          "subject": "self"
-        }
-      ]
-    },
-    {
       "id": "attack.pierce_the_veil",
       "name": "Pierce the Veil",
       "type": "attack",
@@ -514,270 +872,6 @@
       ],
       "rules": [
         "ignores_dodge"
-      ]
-    },
-    {
-      "id": "attack.widow_strike",
-      "name": "Widow Strike",
-      "type": "attack",
-      "group": "ranged",
-      "element": "physical",
-      "cd": 10,
-      "mana": "14 flat",
-      "basis": "phys",
-      "final_pct": 135.776,
-      "targets": "1/1",
-      "effect": "A chilled target takes +25% Elemental damage for 8 sec",
-      "duration": "8 sec",
-      "effects": [
-        {
-          "stat": "mob_elemental_damage_taken_pct",
-          "op": "add_pct",
-          "value": 25,
-          "subject": "target",
-          "condition": "chilled"
-        }
-      ]
-    },
-    {
-      "id": "attack.volley_of_blades",
-      "name": "Volley of Blades",
-      "type": "attack",
-      "group": "melee",
-      "element": "physical",
-      "cd": 12,
-      "mana": "20 flat (AoE ×1.5)",
-      "basis": "phys",
-      "final_pct": 145.19,
-      "targets": "3/5",
-      "effect": "5 hits at 30% each = 150% of one basis · per-hit procs fire 5 times",
-      "effects": [
-        {
-          "stat": "hits",
-          "op": "add_flat",
-          "value": 5,
-          "subject": "self"
-        },
-        {
-          "stat": "hit_pct",
-          "op": "add_pct",
-          "value": 30,
-          "subject": "self"
-        }
-      ]
-    },
-    {
-      "id": "attack.impale",
-      "name": "Impale",
-      "type": "attack",
-      "group": "melee",
-      "element": "physical",
-      "cd": 8,
-      "mana": "14 flat",
-      "basis": "phys",
-      "final_pct": 142.836,
-      "targets": "1/3",
-      "effect": "3 hits at 50% each = 150% of one basis · per-hit procs fire 3 times",
-      "effects": [
-        {
-          "stat": "hits",
-          "op": "add_flat",
-          "value": 3,
-          "subject": "self"
-        },
-        {
-          "stat": "hit_pct",
-          "op": "add_pct",
-          "value": 50,
-          "subject": "self"
-        }
-      ]
-    },
-    {
-      "id": "attack.echo_strike",
-      "name": "Echo Strike",
-      "type": "attack",
-      "group": "all",
-      "element": "physical",
-      "cd": 8,
-      "mana": "13 flat",
-      "basis": "phys",
-      "final_pct": 140.483,
-      "targets": "1/2",
-      "effect": "2 hits at 60% each = 120% of one basis · per-hit procs fire 2 times",
-      "effects": [
-        {
-          "stat": "hits",
-          "op": "add_flat",
-          "value": 2,
-          "subject": "self"
-        },
-        {
-          "stat": "hit_pct",
-          "op": "add_pct",
-          "value": 60,
-          "subject": "self"
-        }
-      ]
-    },
-    {
-      "id": "attack.momentum",
-      "name": "Momentum",
-      "type": "attack",
-      "group": "ranged",
-      "element": "physical",
-      "cd": 9,
-      "mana": "12 flat",
-      "basis": "phys",
-      "final_pct": 138.129,
-      "targets": "1/1",
-      "effect": "Attack speed +20% for 6 sec · the speed buff rides the press",
-      "duration": "6 sec",
-      "effects": [
-        {
-          "stat": "attack_speed",
-          "op": "add_pct",
-          "value": 20,
-          "subject": "self"
-        }
-      ],
-      "rules": [
-        "self_window"
-      ]
-    },
-    {
-      "id": "attack.plague_spit",
-      "name": "Plague Spit",
-      "type": "attack",
-      "group": "magic",
-      "element": "poison",
-      "cd": 9,
-      "mana": "16 flat",
-      "basis": "magic",
-      "final_pct": 105.806,
-      "targets": "1/1",
-      "effect": "Applies 4 poison stacks and +40% bleed chance to the target",
-      "effects": [
-        {
-          "stat": "poison_stacks",
-          "op": "add_flat",
-          "value": 4,
-          "subject": "target"
-        },
-        {
-          "stat": "bleed_chance",
-          "op": "add_pct",
-          "value": 40,
-          "subject": "target"
-        }
-      ]
-    },
-    {
-      "id": "attack.thunderhead",
-      "name": "Thunderhead",
-      "type": "attack",
-      "group": "magic",
-      "element": "lightning",
-      "cd": 9,
-      "mana": "16 flat (AoE ×1.5)",
-      "basis": "magic",
-      "final_pct": 104.063,
-      "targets": "3/1",
-      "effect": "Stops every target 1 sec and shocks all of them",
-      "effects": [
-        {
-          "stat": "stop_sec",
-          "op": "add_pct",
-          "value": 1,
-          "subject": "target"
-        }
-      ],
-      "rules": [
-        "guaranteed_status",
-        "every_target"
-      ]
-    },
-    {
-      "id": "attack.glacial_nail",
-      "name": "Glacial Nail",
-      "type": "attack",
-      "group": "magic",
-      "element": "cold",
-      "cd": 10,
-      "mana": "15 flat",
-      "basis": "magic",
-      "final_pct": 104.063,
-      "targets": "3/1",
-      "effect": "Stops every target 1 sec and chills all of them",
-      "effects": [
-        {
-          "stat": "stop_sec",
-          "op": "add_pct",
-          "value": 1,
-          "subject": "target"
-        }
-      ],
-      "rules": [
-        "guaranteed_status",
-        "every_target"
-      ]
-    },
-    {
-      "id": "attack.reality_rift",
-      "name": "Reality Rift",
-      "type": "attack",
-      "group": "magic",
-      "element": "chaos",
-      "cd": 12,
-      "mana": "18 flat",
-      "basis": "magic",
-      "final_pct": 103.191,
-      "targets": "1/1",
-      "effect": "This hit pierces 100% of the target's Elemental res and the curse spreads to 2 neighbours",
-      "effects": [
-        {
-          "stat": "resistance_pierce_pct",
-          "op": "add_flat",
-          "value": 100,
-          "subject": "self"
-        },
-        {
-          "stat": "spread_targets",
-          "op": "add_flat",
-          "value": 2,
-          "subject": "target"
-        }
-      ]
-    },
-    {
-      "id": "attack.arcane_surge",
-      "name": "Arcane Surge",
-      "type": "attack",
-      "group": "magic",
-      "element": "follow",
-      "cd": 8,
-      "mana": "14 flat",
-      "basis": "magic",
-      "final_pct": 102.319,
-      "targets": "1/1",
-      "effect": "Mana regen +25% and attack speed +15% for 6 sec · both buffs ride the press",
-      "duration": "6 sec",
-      "effects": [
-        {
-          "stat": "mana_regen",
-          "op": "add_pct",
-          "value": 25,
-          "subject": "self"
-        },
-        {
-          "stat": "attack_speed",
-          "op": "add_pct",
-          "value": 15,
-          "subject": "self"
-        }
-      ],
-      "rules": [
-        "self_window"
       ]
     },
     {
@@ -934,6 +1028,24 @@
       ]
     },
     {
+      "id": "buff.flame_guard",
+      "name": "Flame Guard",
+      "type": "buff",
+      "element": "fire",
+      "cd": 16,
+      "mana": "12%",
+      "duration": "8 sec",
+      "effect": "Grants a flat 350 Energy Shield pool that soaks damage while the guard is up",
+      "effects": [
+        {
+          "stat": "energy_shield",
+          "op": "add_flat",
+          "value": 350,
+          "subject": "self"
+        }
+      ]
+    },
+    {
       "id": "curse.weaken",
       "name": "Weaken",
       "type": "curse",
@@ -1042,7 +1154,7 @@
       "cd": 16,
       "mana": "15%",
       "duration": "10 sec",
-      "effect": "Target Execute threshold shifts from 20% to 35% · Finisher skills/keystones trigger more often",
+      "effect": "Target's execute threshold shifts to 35% · finisher presses and keystones trigger more often",
       "effects": [
         {
           "stat": "execute_threshold_pct",
@@ -1315,7 +1427,7 @@
       "type": "aura",
       "kind": "debuff",
       "reserve": "mid",
-      "effect": "nearby mob aspd −15% (stacks with chill; total may reach −35% · D-009 3a)",
+      "effect": "nearby mob aspd −15% (stacks with chill; total may reach −35%)",
       "effects": [
         {
           "stat": "attack_speed",
@@ -1419,12 +1531,32 @@
     }
   ],
   "deprecated": {
-    "Aura of Might": "removed in the 6→12 aura redesign (harness/decisions.md D-002)",
-    "Aura of Grace": "removed in the 6→12 aura redesign (harness/decisions.md D-002)",
-    "Aura of Fury": "removed in the 6→12 aura redesign (harness/decisions.md D-002)",
-    "Aura of Clarity": "removed in the 6→12 aura redesign (harness/decisions.md D-002); role dropped, not moved",
-    "Aura of Dread": "removed in the 6→12 aura redesign (harness/decisions.md D-002)",
-    "Aura of Frost": "removed in the 6→12 aura redesign (harness/decisions.md D-002); replaced by Herald of Frost"
+    "Aura of Might": "removed in the 6→12 aura redesign ",
+    "Aura of Grace": "removed in the 6→12 aura redesign ",
+    "Aura of Fury": "removed in the 6→12 aura redesign ",
+    "Aura of Clarity": "removed in the 6→12 aura redesign; role dropped, not moved",
+    "Aura of Dread": "removed in the 6→12 aura redesign ",
+    "Aura of Frost": "removed in the 6→12 aura redesign; replaced by Herald of Frost",
+    "Riposte": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Execute": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Retribution": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Volley": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Arcane Bolt": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Flame Lash": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Chain Spark": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Frost Nova": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Toxic Spray": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Void Lance": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Widow Strike": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Volley of Blades": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Impale": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Echo Strike": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Momentum": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Plague Spit": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Thunderhead": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Glacial Nail": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Reality Rift": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Arcane Surge": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now"
   },
   "renames": {
     "War Cry": "Warcry",

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { eng, E, sm, TOWN } from './engine/client';
+  import { eng, E, sm, TOWN, BASES } from './engine/client';
   import { buildCharacter } from './sim/player';
   import { newGame, tick, push, catchUpAsync, carried, heldWeaponName } from './sim/game';
-  import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow } from './sim/skills';
+  import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
   import { slotsUsed, slotsAvailable, pouchSlots, bagStacks } from './sim/slots';
@@ -27,6 +27,7 @@
   import { SAVE_CFG } from './sim/snapshot';
   import { target as goalTarget, describe as describeGoal } from './sim/goal';
   import { elementIcon, mobIcon, skillIcon } from './icon';
+  import { bossMark } from './icon';
   // the settlement map: hand-drawn terrain under the generated overlay (both presentation-only)
   import mapTerrain from '../../art/svg/map/map-terrain.svg?url';
   import mapOverlay from '../../art/svg/map/map-overlay.svg?url';
@@ -110,7 +111,7 @@
     gameState = { ...gameState };
   }
 
-  /** Spend or refund stat points. Takes effect on the next tick, so the sheet works mid-combat (D-141). */
+  /** Spend or refund stat points. Takes effect on the next tick, so the sheet works mid-combat. */
   function allocate(k: StatKey, delta: number) {
     const p = gameState.player;
     if (delta > 0) {
@@ -133,11 +134,14 @@
     gameState = { ...gameState };
   }
 
-  /** §11 field label: species lowercase + tier suffix; a named boss reads its own name; no body class. */
-  function fieldLabel(m: { species: string; kind: string }): string {
-    if (m.kind.startsWith('Boss')) return `${m.kind.replace(/^Boss · /, '')}(Boss)`;
-    if (m.kind === 'Elite') return `${m.species.toLowerCase()}(Elite)`;
-    return m.species.toLowerCase();
+  /** §11 field label: the variant the body tier lands on; a named boss reads its own name; no body class. */
+  function fieldLabel(m: { species: string; speciesId?: string; kind: string }): string {
+    const fl = E.mob.field_labels;
+    if (m.kind.startsWith('Boss')) return `${m.kind.replace(/^Boss · /, '')}${fl.boss.suffix}`;
+    const tier = ({ Small: 0, Medium: 1, Large: 2, Elite: 3 } as Record<string, number>)[m.kind];
+    const ladder = m.speciesId ? (E.mob.variants as Record<string, string[]>)[m.speciesId] : null;
+    if (ladder && tier != null) return ladder[tier];
+    return `${m.species.toLowerCase()}${m.kind === 'Elite' ? fl.elite.suffix : fl.normal.suffix}`;
   }
 
   function step() {
@@ -450,6 +454,43 @@
     gameState = { ...gameState };
   }
 
+  /** §14: the per-slot switch, and the one shared condition list every `conditional` slot reads. */
+  function setMode(id: string, mode: string) {
+    gameState.skills.mode[id] = mode as any;
+    gameState = { ...gameState };
+  }
+
+  function setConditions(patch: { boss?: boolean; hpBelowPct?: number; statusMissing?: string[] }) {
+    gameState.skills.conditions = { ...gameState.skills.conditions, ...patch };
+    gameState = { ...gameState };
+  }
+
+  /** §14c: a magic weapon has no swing, it flicks a bolt worth the attack ladder's floor. */
+  const basicAttack = $derived(eng.basicAttackOf(BASES, c.weaponName));
+  const boltPct = $derived(sm.ladderFloorPct());
+  // a plain concatenation, not a template literal: Svelte's markup parser ends the expression at
+  // the first brace it meets inside one
+  const basicAttackLine = $derived(basicAttack === 'bolt'
+    ? " · a press on the attack clock, no mana, worth " + boltPct.toFixed(0) + "% of your spell hit (the attack ladder's floor)"
+    : " · the weapon's own swing");
+
+  /** What is on the player right now, in words — a stopped attack needs an explanation on screen. */
+  const activeStatusWords = $derived(
+    Object.entries(statuses)
+      .filter(([, st]: any) => st && (st.secLeft || 0) > 0)
+      .map(([name, st]: any) => `${name}${st.stacks > 1 ? ` ×${st.stacks}` : ''} ${Math.ceil(st.secLeft)}s`)
+      .join(' · '),
+  );
+
+  /** One flag per Element status a row can apply (the five `elements.status_of` names)… */
+  const statusFlags = $derived(Object.values((E.elements as any).status_of || {}) as string[]);
+  /** …and one per curse row, keyed by the row's own id — the two kinds share the one list (§14). */
+  const curseFlags = $derived(sm.of('curse') as any[]);
+  function toggleStatusMissing(name: string) {
+    const now = gameState.skills.conditions.statusMissing || [];
+    setConditions({ statusMissing: now.includes(name) ? now.filter((n) => n !== name) : [...now, name] });
+  }
+
   /** What a curse has written on one mob, in words and with the seconds left on each line. */
   function curseWords(id: string): string {
     const lines = gameState.curses[id];
@@ -527,11 +568,14 @@
       {/if}
       <label>HP <progress class="hp" max={c.maxHp} value={gameState.player.hp}></progress> {fmtNum(gameState.player.hp)} / {fmtNum(c.maxHp)} (+{c.hpRegen.toFixed(0)}/sec)</label>
       <label>Mana <progress class="mana" max={c.maxMana} value={gameState.player.mana}></progress> {fmtNum(gameState.player.mana)} / {fmtNum(c.maxMana)}</label>
+      {#if activeStatusWords}
+        <p class="statuses"><small>On you: {activeStatusWords}</small></p>
+      {/if}
       <label>XP <progress class="xp" max={eng.xpToNext(gameState.player.level)} value={gameState.player.xp}></progress> {fmtNum(gameState.player.xp)} / {fmtNum(eng.xpToNext(gameState.player.level))}</label>
-      <!-- character-sheet.md's main panel: HP, Mana and Attack speed are the three always shown; Weight lives on the character bag panel (D-126) -->
+      <!-- character-sheet.md's main panel: HP, Mana and Attack speed are the three always shown; Weight lives on the character bag panel -->
       <span>Attack speed {c.hitsPerSec.toFixed(2)} hits/sec <small>(Cap {E.caps.aspd})</small></span>
     </div>
-    <!-- the skill bar, read-only on the fight panel (D-130): arranging the order stays on the Skills tab -->
+    <!-- the skill bar, read-only on the fight panel: arranging the order stays on the Skills tab -->
     <div class="skill-strip" role="list" aria-label="Skill bar">
       {#each gameState.skills.list as id, i}
         {@const k = id ? sm.byId[id] : null}
@@ -570,7 +614,7 @@
         {#each gameState.group as m}
           <tr>
             <td>
-              <span class="mob-name" class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}><img src={mobIcon(m.species)} alt="" aria-hidden="true" />{fieldLabel(m)}</span>
+              <span class="mob-name" class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}><img src={mobIcon(m.species)} alt="" aria-hidden="true" />{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</span>
             </td>
             <td>{m.kind}</td>
             <td><span class="mobbar" style={'width:' + bar(m.hp, m.hpMax)}></span> {Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</td>
@@ -631,6 +675,8 @@
           <tr><td>Perfect dodge</td><td>{c.perfectDodge.toFixed(1)}% → Cap {E.caps.perfect_dodge}%</td></tr>
           <tr><td>Crit</td><td>{c.critChance.toFixed(1)}% chance · {c.critDmg.toFixed(0)}% damage</td></tr>
           <tr><td>Resistance</td><td>{c.resistance.toFixed(1)}% (Cap {E.caps.elem_res})</td></tr>
+          <tr><td>Basic attack</td><td>{basicAttack}{basicAttackLine}</td></tr>
+          <tr><td>Stun Recovery</td><td>{c.stunRecovery.toFixed(1)}% of a shock's stop — Vit buys it back, so a {E.status.shock.stop_sec} sec stun leaves {(E.status.shock.stop_sec * (1 - c.stunRecovery / 100)).toFixed(2)} sec</td></tr>
           <tr><td>Alignment</td><td>{c.alignment.toFixed(1)}% (Cap {E.caps.alignment})</td></tr>
           <tr><td>Cooldown reduction</td><td>{c.cdr.toFixed(1)}% (Cap {E.caps.cdr})</td></tr>
           <tr><td>Energy Shield</td><td>{Math.round(c.es)} · recharges {c.esRegen.toFixed(1)}/sec after {E.energy_shield.delay_sec} sec</td></tr>
@@ -733,8 +779,15 @@
     </div>
     <p><small>{skillNote || `Six sets are stored and the game picks one by zone. A Push brings the Main set back, and a skill already counting its cooldown keeps counting.`}</small></p>
     <p><small>The game presses the first slot whose cooldown is ready and whose mana fits the usable pool. You only arrange the order. A percentage skill charges that share of the usable pool; a flat skill charges its own units, which grow with its level and with the pool. Reserved by auras: {reserved}% of the pool, so {Math.round(c.maxMana * (1 - reserved / 100))} mana stays usable.</small></p>
+    <p><small>Each slot picks <b>when</b> it may fire: <b>always</b> (cast whenever it is ready), <b>conditional</b> (only while one of the shared conditions below holds), or <b>never</b> (silenced). The list is shared by every conditional slot, so a new condition is one entry, never free text.</small></p>
+    <p><small>Conditional slots fire:
+      <label><input type="checkbox" checked={gameState.skills.conditions.boss} onchange={(e) => setConditions({ boss: (e.target as HTMLInputElement).checked })} /> against a boss</label> ·
+      <label><input type="checkbox" checked={gameState.skills.conditions.hpBelowPct > 0} onchange={(e) => setConditions({ hpBelowPct: (e.target as HTMLInputElement).checked ? 50 : 0 })} /> while HP is under</label>
+      <input type="number" min="0" max="100" value={gameState.skills.conditions.hpBelowPct} onchange={(e) => setConditions({ hpBelowPct: Number((e.target as HTMLInputElement).value) })} />% of the pool ·
+      {#each statusFlags as st}<label><input type="checkbox" checked={(gameState.skills.conditions.statusMissing || []).includes(st)} onchange={() => toggleStatusMissing(st)} /> while the target has no {st}</label>{' '}{/each}
+      {#each curseFlags as cf}<label><input type="checkbox" checked={(gameState.skills.conditions.statusMissing || []).includes(cf.id)} onchange={() => toggleStatusMissing(cf.id)} /> while {cf.name} is not on it</label>{' '}{/each}</small></p>
     <table>
-      <thead><tr><th>#</th><th>Skill</th><th>Level</th><th>cd → eff</th><th>Mana</th><th>Next in</th><th>Place</th></tr></thead>
+      <thead><tr><th>#</th><th>Skill</th><th>Worth</th><th>Level</th><th>cd → eff</th><th>Mana</th><th>Next in</th><th>When</th><th>Place</th></tr></thead>
       <tbody>
         {#each gameState.skills.list as id, i}
           {@const k = id ? sm.byId[id] : null}
@@ -743,10 +796,20 @@
             <td>
               {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span>{:else}—{/if}
             </td>
+            <td>{k && id ? (k.final_pct ? `${Math.round(k.final_pct)}% of your ${k.basis === 'magic' ? 'spell hit' : 'weapon hit'}` : k.type) : ''}</td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
             <td>{k && id ? `${k.cd}s → ${skillCd(gameState.skills, id, c.cdr).toFixed(2)}s` : ''}</td>
             <td>{k && id ? manaNow(c, gameState.skills, id) : ''}</td>
             <td>{id ? `${(gameState.skills.cd[id] || 0).toFixed(1)}s${(gameState.skills.buffUp[id] || 0) > 0 ? ` · window ${gameState.skills.buffUp[id]}s` : ''}` : ''}</td>
+            <td>
+              {#if id}
+                <select value={modeOf(gameState.skills, id)} onchange={(e) => setMode(id, (e.target as HTMLSelectElement).value)}>
+                  <option value="always">always</option>
+                  <option value="conditional">conditional</option>
+                  <option value="never">never</option>
+                </select>
+              {:else}—{/if}
+            </td>
             <td>
               <select value={id || ''} onchange={(e) => setSlot(i, (e.target as HTMLSelectElement).value)}>
                 <option value="">empty</option>
@@ -1082,7 +1145,7 @@
   <section class="panel">
     <h2>Zones</h2>
     <table>
-      <thead><tr><th>Zone</th><th>Levels</th><th>mob_HP</th><th>Quality</th><th>Elements</th><th>Group</th><th></th></tr></thead>
+      <thead><tr><th>Zone</th><th>Levels</th><th>mob_HP</th><th>Quality</th><th>Elements</th><th>Group</th><th>Sub-zones</th><th></th></tr></thead>
       <tbody>
         {#each E.mob.zones as z}
           <tr>
@@ -1092,6 +1155,7 @@
             <td>{z.quality}</td>
             <td>{z.elements.join(', ')}</td>
             <td>{z.group}</td>
+            <td>{(z.subzones || []).map((s) => s.name).join(' · ')}</td>
             <td><button onclick={() => goToZone(z.id)} disabled={z.id === gameState.zone || !gameState.town.visited.includes(settlementOfZone(z.id)?.id)}>
               {z.id === gameState.zone ? 'here' : gameState.town.visited.includes(settlementOfZone(z.id)?.id) ? 'walk' : 'not opened'}
             </button></td>
@@ -1127,6 +1191,7 @@
       {#if circuitDraft.length}<button onclick={() => (circuitDraft = [])}>Clear</button>{/if}
     {/if}
     <p>{townNote}</p>
+    <p><small><b>Clean laps</b> — {gameState.counters.cleanLaps || 0}. A lap is clean when it closes with no Push anywhere on it. That completion is logged and nothing is paid for it: the Road's gold is capped and a stone reward would be a new source.</small></p>
   </section>
 {/if}
 
@@ -1221,7 +1286,7 @@
 
   .bars { display: grid; gap: .3rem; margin-bottom: .6rem; }
   .bars label, .bars span { display: flex; align-items: center; gap: .5rem; }
-  /* the read-only skill bar on the fight panel (D-130) */
+  /* the read-only skill bar on the fight panel */
   .skill-strip { display: flex; flex-wrap: wrap; gap: .3rem .5rem; margin-bottom: .6rem; }
   .skill-slot { display: inline-flex; align-items: center; gap: .35rem; padding: .15rem .4rem; border: 1px solid var(--line); border-radius: 4px; font-size: .72rem; }
   .skill-slot.empty { min-width: 2.6rem; min-height: 1.5rem; border-style: dashed; opacity: .5; }
@@ -1250,6 +1315,7 @@
   .mob-name img { width: 1.25rem; height: 1.25rem; object-fit: contain; }
   .mob-name.elite { color: #b98cff; }
   .mob-name.boss { color: #ff6b6b; }
+  .mob-name .tier-mark { width: 1rem; height: 1rem; margin-left: .15rem; }
   .element-list { display: flex; flex-wrap: wrap; gap: .25rem .5rem; }
   .element-label { font-size: .72rem; }
   .element-label img, .skill-label img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex: none; }

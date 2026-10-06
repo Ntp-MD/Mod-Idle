@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { E, eng, loot } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import { rollDrop } from '../src/sim/drop';
 import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS, RARITY_CHOICES } from '../src/sim/filter';
 import { mark, reason, arm, SAVE_CFG } from '../src/sim/snapshot';
@@ -37,7 +37,7 @@ describe('the bag filter reads per-slot thresholds', () => {
     const f = newFilter();
     for (const slot of FILTER_SLOTS) {
       const r = ruleFor(f, slot);
-      expect(r.enabled).toBe(false); // D-122: no slot filters until the player turns it on
+      expect(r.enabled).toBe(false); //: no slot filters until the player turns it on
       expect(r.margin_pct).toBe(E.loot.filter.upgrade_margin_pct);
       expect(r.min_rarity).toBe(E.loot.filter.rules.default_min_rarity);
       expect(r.keep_missing_element).toBe(true);
@@ -88,7 +88,7 @@ describe('the bag filter reads per-slot thresholds', () => {
 
   it('runs on the live state during a fight without throwing', () => {
     const s = newGame(12);
-    s.player.level = 70;
+    setLevel(s, 70);
     setRule(s.filter, 'helmet', { min_rarity: 'Rare', margin_pct: 40 });
     for (let i = 0; i < 400; i++) tick(s, {});
     expect(s.counters.drops).toBeGreaterThan(0);
@@ -150,7 +150,7 @@ describe('three walking snapshots', () => {
     await writeSave('slot1', s);
     const before = (await listSnapshots('slot1'))[0];
 
-    s.player.level = 90;
+    setLevel(s, 90);
     s.counters.gold += 5000;
     s.counters.stones.reroll_value = 800;
     s.mastery = { sword: 900 };

@@ -207,7 +207,7 @@ describe('Add mod stone', () => {
     expect(second.item.lines.length).toBeLessThan(E.rarity.Common.crafted_max);
   });
 
-  // Stat Mod % was retired with Core Stat % (D-114), so `stat_mod_flat` is the only Stat Mod line a
+  // Stat Mod % was retired with Core Stat %, so `stat_mod_flat` is the only Stat Mod line a
   // piece can hold — and once it holds that one, the stone must never offer it again.
   it('a piece stops offering a Stat Mod once it holds the one', () => {
     const lines = [
@@ -261,6 +261,6 @@ describe('the bench in the game', () => {
     expect(craft.PENDING_POWER).toEqual({});
     const ceilings = [E.mod_max.armour_flat_t1, E.mod_max.evasion_flat_t1, E.mod_max.energy_shield_flat_t1];
     const full = craft.C.gear_mod_per_level * craft.C.upgrade_cap;
-    expect(full).toBe(Math.min(...ceilings)); // D-104 · gate X42 says the same thing from the data side
+    expect(full).toBe(Math.min(...ceilings)); // · gate X42 says the same thing from the data side
   });
 });

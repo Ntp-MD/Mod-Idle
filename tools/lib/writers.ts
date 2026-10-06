@@ -15,6 +15,7 @@ export const WRITERS: [string, string[]][] = [
   ['loot.ts', ['--write']],
   ['timeline.ts', ['--write']],
   ['survival.ts', ['--write']],
+  ['bases.ts', ['--blocks']],
 ];
 
 /**

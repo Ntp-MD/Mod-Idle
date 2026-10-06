@@ -34,9 +34,9 @@ function countBlock() {
     '| Type | Count | Controlled by |',
     '|---|---|---|',
     ...rows,
-    `| **total** | **${total()}** | Roster mid-redesign · buff + aura set not final |`,
+    `| **total** | **${total()}** | Attack set picked · buff + aura carried from the live roster |`,
     '',
-    `> **Counts are provisional.** The buff roster was cleared for a redesign and rebuilt, and the aura set was resized (\`skill-pool-aura-heal.md\` · Decision 1), which leaves tree nodes in \`skill-tree-*.md\` referencing skills that no longer exist (\`checks.md\` D19 will fail until those nodes are rewritten). If \`Retribution\` is also removed from the attack table, attack drops ${count('attack')} → ${count('attack') - 1} and the total lands at **${total() - 1}**.`,
+    `> **The attack roster is the picked set.** The Elemental rows replaced the retired attacks and the physical block is carried from the live roster, so \`skill-pool-attack.md\` prints the roster's own count. The buff, curse, heal and aura rows are unchanged.`,
   ].join('\n');
 }
 
@@ -47,7 +47,7 @@ function attackRoster() {
     const r = M.row(s, { cdrPct: M.CAST_REF.cdr_pct, ladderPct: M.CAST_REF.ladder_pct });
     const glass = fmt(Math.round(M.pressOn(s, 'glass', L)));
     const caster = fmt(Math.round(M.pressOn(s, 'caster', L)));
-    return `| ${s.name} | ${s.group} | ${elementLabel(s.element)} | ${s.cd} sec | ${r.effCd.toFixed(2)} sec | ${r.pressesPerSec!.toFixed(2)} | ${s.mana} | ${s.basis} · ${pct2(s.final_pct)}% | ${s.targets} | ${glass} / ${caster} | ${s.effect} |`;
+    return `| ${s.name} | ${s.group} | ${elementLabel(s.element)} | ${s.cd} sec | ${r.effCd.toFixed(2)} sec | ${r.pressesPerSec == null ? 'the beat' : r.pressesPerSec.toFixed(2)} | ${s.mana} | ${s.basis} · ${pct2(s.final_pct)}% | ${s.targets} | ${glass} / ${caster} | ${s.effect} |`;
   });
   const B = M.referenceBases();
   return [
@@ -55,7 +55,7 @@ function attackRoster() {
     '|---|---|---|---|---|---|---|---|---|---|---|',
     ...rows,
     '',
-    `press = final_pct × basis × (1 + (skill_level − 1) × ${M.LEVEL_STEP}%) at skill level ${L} (D-070 · B5) — the two columns are the same press read on the two published reference builds:`,
+    `press = final_pct × basis × (1 + (skill_level − 1) × ${M.LEVEL_STEP}%) at skill level ${L} (B5) — the two columns are the same press read on the two published reference builds:`,
     `glass = Str 12 · basis phys ${fmt(Math.round(B.glass.phys))} · caster = Int 12 · basis magic ${fmt(Math.round(B.caster.magic))} + elem ${fmt(B.caster.elem)} × Alignment ${B.caster.align}% (${fmt(Math.round(B.caster.elem * B.caster.align / 100))}) = ${fmt(Math.round(M.basisOf({ basis: 'magic' } as any, B.caster)))}.`,
     `A phys-basis press can crit and a magic-basis one cannot, so neither column includes crit (formula.md section 0's DPS row does).`,
   ].join('\n');
@@ -82,7 +82,10 @@ function calc() {
   const rows = byType('attack').map((s: any) => {
     const r = M.row(s, { ...ref, cdrPct, ladderPct, level });
     const cost = M.manaCostOf(s, { skillLevel: level, maxMana: pool, usableMana: pool, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
-    return [s.name, s.basis, `${s.cd}`, r.effCd.toFixed(2), r.pressesPerSec!.toFixed(2), `${s.mana} → ${fmt(Math.round(cost))}`, fmt(Math.round(r.pressesPerSec! * cost)), r.damage != null ? fmt(Math.round(r.damage)) : '—'];
+    // a row with no timer of its own has no cooldown-derived rate: its beat is the attack clock
+    const rate = r.pressesPerSec == null ? 'the beat' : r.pressesPerSec.toFixed(2);
+    const perSec = r.pressesPerSec == null ? '—' : fmt(Math.round(r.pressesPerSec * cost));
+    return [s.name, s.basis, `${s.cd}`, r.effCd.toFixed(2), rate, `${s.mana} → ${fmt(Math.round(cost))}`, perSec, r.damage != null ? fmt(Math.round(r.damage)) : '—'];
   });
   const widths = head.map((h, i) => Math.max(h.length, ...rows.map((r: any) => String(r[i]).length)));
   const line = (r: any) => r.map((c: any, i: any) => String(c).padEnd(widths[i])).join('  ');

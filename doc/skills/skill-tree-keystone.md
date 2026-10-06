@@ -15,7 +15,7 @@ The tables the cage parsed are gone; 	ools/tree.js reports zero nodes and 	ools/
 | Keystone | Branch | Rule | Calculated value | Conflicting pair |
 |---|---|---|---|---|
 
-**Pool accounting check** — 0 units = 0 original (mean NaN%) + 0 new (mean NaN%) → **whole-pool mean NaN%**
+**Pool accounting check** — 0 units = 0 original (mean 0.0%) + 0 new (mean 0.0%) → **whole-pool mean 0.0%**
 - The multiplier **sums** the picks, so a typical path of 6 at 14.2% is ×1.85 — that is the `mob_HP` baseline
 - Best *legal* picks =  → sum **0.0%** → tree **×1.00** (the ceiling `mob_HP` does not cover)
 - Worst *legal* picks =  → sum **0.0%** → tree **×1.00**

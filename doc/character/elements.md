@@ -98,11 +98,10 @@ incoming = base * (1 - elem_res_x/100) * Element counter
 
 - Uses **Vit** to give raw res for all 5 Elements.
 - **Res has no Flat** — the only slotable Mod is `Elemental resistance %` acting as a multiplier.
-- **Auras feed the same pool.** `Trinity Form` grants an Elemental resistance % that joins `elem_res_pct_x` exactly like a gear roll — no separate aura stat and no flat (D-009 3b). `Elemental Fury` applies the same form on the target side as a reduction.
+- **Auras feed the same pool.** `Trinity Form` grants an Elemental resistance % that joins `elem_res_pct_x` exactly like a gear roll — no separate aura stat and no flat. `Elemental Fury` applies the same form on the target side as a reduction.
 - Merged away the old `status_res` (once given by Str), leaving Elemental res only.
 - Res is split per Element, not one value. The character sheet must show all 5 values.
-- **Vit 510 (true ceiling) gives 25.5% raw**, not 44.5% as previously written · the old number was calculated from stat 890, which no build can actually reach.
-  Cap 75 is now a **hard ceiling** (D-124): Vit 510 + 3 res slots tops out at `25.5 × (1 + 30+30+30)% = 48.5`, under the ceiling, so no build is clipped · two slots give 40.8% · the ceiling sits above what the slots reach rather than at it (D-114).
+- **The Vit line sets raw resistance**, and the reach sits far below the Cap: three resistance slots top out under the hard ceiling, so no build is clipped, and two slots land lower still. The ceiling sits above what the slots reach rather than at it.
 
 # 5. Status Per Element
 
@@ -136,7 +135,7 @@ armour_mult = 1 - K_CHILL_ARMOUR_CUT              K_CHILL_ARMOUR_CUT = 0.25
 ```
 
 - Reduces attack speed = fewer hits, not lower damage. The target must be prevented from barely attacking.
-- The Cap 20 governs **chill alone** — it exists so chill by itself cannot suppress a target's damage. Aura `Rimbo Form` pays reservation to stack on top of it, so a chilled target under that aura can reach **−35%** total aspd (D-009 3a).
+- The Cap 20 governs **chill alone** — it exists so chill by itself cannot suppress a target's damage. Aura `Rimbo Form` pays reservation to stack on top of it, so a chilled target under that aura can reach **−35%** total aspd.
 - Also reduces accuracy one more layer, because accuracy-focused players gain a special temporary edge.
 - **Chill also cuts the target's Armour by 25%** (`armour_mult = 0.75`). Armour is what reduces the physical half of a hit (`combat.md` §2), so this is the Element answer to a tanky target.
   **It has a target now**: every mob carries Armour off its own Str line (`K_ARMOUR` 2 · the `armour` column of `mob-roster.md`), so chill cuts a real number on Golem · Knight · Troll · Orc and is worth almost nothing against a Rat. The rule is written now so it is correct the moment D1 gives mobs Armour — until then it is a line with no numbers behind it, and it must be re-verified in the same pass that introduces mob Armour.
@@ -236,13 +235,13 @@ dot_total = min(dot_total, elem_aligned_damage * 1.5)
 | K_VIT_RES | 0.05 | elem res / Vit · no Flat |
 | K_FIRE_BURN | 0.30 | burn per stack · max 5 stacks = 1.50, exactly the global DoT Cap |
 | K_BURN_REGEN_CUT | 0.10 | HP regen cut per burn stack · 5 stacks = −50%, no separate Cap |
-| K_CHILL_ARMOUR_CUT | 0.25 | target Armour × 0.75 · bites the lineages that carry Armour (D-022) |
+| K_CHILL_ARMOUR_CUT | 0.25 | target Armour × 0.75 · bites the lineages that carry Armour  |
 | shock_aspd_pct | 20 | target attack speed · own Cap 20 · adds to chill, which has its own Cap 20 |
 | shock_align_cut | 0.20 | our `elem_align` × 0.80 against a shocked target · shock is the only status that fights our own |
 | K_POISON | 0.08 | poison per stack · 10 stacks = 0.80 |
 | K_CHAOS_DMG | 0.01 | +dmg per mark stack · 25 stacks = +25% damage |
 | K_CHAOS_LEECH | 0.002 | lifesteal per mark stack · 25 stacks = 0.05% |
-| K_LIGHTNING_STUN | 0.30 | stun chance per Alignment · the Alignment reach lands at 9.5%, and the mace's Chance to stun % line adds to it — no Cap (owner ruling · D-123) |
+| K_LIGHTNING_STUN | 0.30 | stun chance per Alignment · the Alignment reach lands at 9.5%, and the mace's Chance to stun % line adds to it — no Cap (owner ruling) |
 | K_BLEED | 0.70 | bleed total as a fraction of the inflicting physical hit · physical DoT, not an Element — see formula-offense.md section 4 |
 | bleed_time_sec | 5 | PoE base bleed duration · bleed does not stack |
 | K_BLEED_CHANCE | 0.40 | chance per landed physical hit while `Lacerate` is up (curse, 10 sec ÷ 14 sec = 71% uptime) |

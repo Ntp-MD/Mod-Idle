@@ -77,8 +77,6 @@ const add = (id: any, ok: any, detail: any, status?: any) => out.push({ id, ok, 
 
 {
   const hits: any[] = [];
-  const LOG_DOC = /(^|\/)decisions\.md$/; // the log records a term as it was at decision time
-  const NOTE_DOC = /(^|\/)draft-patch\.md$/; // owner note-only until the owner asks for the write (D-043)
   for (const t of ALIASES.terms) {
     const allow = new Set(t.allow_in || []);
     // a trailing `%` is not a word character, so the closing \b would never match; only
@@ -89,7 +87,7 @@ const add = (id: any, ok: any, detail: any, status?: any) => out.push({ id, ok, 
     const guard = (t.not_prefix || []).map((p: any) => `(?<!${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} )`).join('');
     const re = new RegExp(`${guard}\\b${t.old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${tail}`, 'i');
     for (const f of DOCS) {
-      if (LOG_DOC.test(f) || NOTE_DOC.test(f) || allow.has(f)) continue;
+      if (allow.has(f)) continue;
       TEXT[f].split(/\r?\n/).forEach((line, i) => {
         if (re.test(line)) hits.push(`${f}:${i + 1} "${t.old}" → use "${t.new}"`);
       });
@@ -136,7 +134,6 @@ const add = (id: any, ok: any, detail: any, status?: any) => out.push({ id, ok, 
   // markers a line may explain *why* a value sits where it does, but it must not
   // quote a signed percentage that the named skill's data does not contain —
   // that is a copy which can silently drift (the bug this guard exists for).
-  const rosterDocs = DOCS.filter((f) => !/(^|\/)decisions\.md$/.test(f) && !/(^|\/)draft-patch\.md$/.test(f)); // the log quotes values as they were at decision time; the draft patch is note-only (D-043)
   // a sign counts only when it is not the hyphen inside a range like "20-30%"
   const signedPct = (s: any) => (String(s || '').replace(/[−–—]/g, '-').replace(/\s+/g, ' ').match(/(?<![\d])[+\-]\s?\d+(?:\.\d+)?\s?%/g) || [])
     .map((t) => t.replace(/\s+/g, ''));
@@ -144,7 +141,7 @@ const add = (id: any, ok: any, detail: any, status?: any) => out.push({ id, ok, 
   const names = R.SKILLS.map((s: any) => s.name).sort((a: any, b: any) => b.length - a.length);
   const nameRe = new Map(names.map((n: any) => [n, new RegExp('\\b' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b')]));
   const hits: any[] = [];
-  for (const f of rosterDocs) {
+  for (const f of DOCS) {
     const lines = TEXT[f].split(/\r?\n/);
     let inBlock = false;
     lines.forEach((l, i) => {

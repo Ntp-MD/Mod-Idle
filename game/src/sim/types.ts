@@ -17,12 +17,12 @@ export interface ModLine {
   element?: string | null;
   /**
    * The Core stat a `stat_mod_flat` line feeds, rolled at drop and baked into the line the way a
-   * PoE implicit carries its own stat (D-127). Only that line carries it — its `all_stat_flat` sibling
-   * feeds all seven at once and bakes nothing (D-129); the pool is `mods.json` `stat_mod_flat.rolls`.
+   * PoE implicit carries its own stat. Only that line carries it — its `all_stat_flat` sibling
+   * feeds all seven at once and bakes nothing; the pool is `mods.json` `stat_mod_flat.rolls`.
    */
   stat?: StatKey;
   /**
-   * The further Mods a Base Mod line carries on the same line (`item-base.md` · D-123): line 1 rolls
+   * The further Mods a Base Mod line carries on the same line (`item-base.md`): line 1 rolls
    * 1-3 Mods onto one line, its own `value` for the first and one entry here for each of the rest.
    */
   extra?: ModExtra[];
@@ -64,16 +64,22 @@ export interface Item {
 export interface Mob {
   id: string;
   species: string;
+  /** The lineage's own id, so a per-species rule reads one flag rather than matching a name. */
+  speciesId?: string;
+  /** The sub-zone this spawn rolled into: its own race pair and one of the zone's own Elements. */
+  subzone?: string;
   kind: string;
+  /** Which body-class column a weapon's `size_mult` reads this mob as (a boss declares its own). */
+  readsAs?: string;
   zone: number;
   level: number;
   hp: number;
   hpMax: number;
   ps: number;
   acc: number;
-  /** The mob's own evasion rating our accuracy rolls against (D-112): `mob_evasion = Dex × K_EVASION`. */
+  /** The mob's own evasion rating our accuracy rolls against: `mob_evasion = Dex × K_EVASION`. */
   evasion: number;
-  /** A mob dodging our swing runs its own thin opposed roll off its Agi (D-024 · X24). */
+  /** A mob dodging our swing runs its own thin opposed roll off its Agi (X24). */
   dodgeRate: number;
   armour: number;
   res: number;
@@ -97,7 +103,7 @@ export type SnapshotReason = string;
 export interface Player {
   level: number;
   xp: number;
-  /** Points allocated into each Core stat: `stat = base + points x point_value` (D-141). */
+  /** Points allocated into each Core stat: `stat = base + points x point_value`. */
   points: Record<StatKey, number>;
   /** Stat points banked from levels, not yet spent. */
   statPoints: number;
@@ -109,7 +115,7 @@ export interface Player {
   mana: number;
   es: number;
   esIdleSec: number;
-  /** Ghost Dance's perfect-dodge charges: each one deletes an incoming hit outright (D-102). */
+  /** Ghost Dance's perfect-dodge charges: each one deletes an incoming hit outright. */
   charges?: number;
   atkTimer: number;
 }
@@ -121,6 +127,8 @@ export interface Counters {
   drops: number;
   /** Gear pieces dissolved by the bag filter; every 500 owes one Reroll tier stone (F15). */
   salvaged?: number;
+  /** Circuit laps walked end to end without a Push. The completion log's own evidence, no mint. */
+  cleanLaps?: number;
   /** Every point of damage the character dealt, so a DPS figure is state-backed, not inferred. */
   damage?: number;
   /** The same damage split by what dealt it — the swing, a press, or a status ticking over time. */
@@ -196,6 +204,8 @@ export interface RoadTrip {
   circuit: number[];
   legIndex: number;
   laps: number;
+  /** The Push counter when the CURRENT lap began — a clean lap is one that never moved it. */
+  pushesAtLapStart?: number;
 }
 
 export interface GameState {
@@ -227,7 +237,7 @@ export interface GameState {
   /** 'stay' keeps hunting this zone; 'forward' moves on once its own level band is behind. */
   travel: 'stay' | 'forward';
   /**
-   * Auto-dissolve any drop whose Rarity is at or below this floor ('off' = never, D-122 spirit).
+   * Auto-dissolve any drop whose Rarity is at or below this floor ('off' = never, spirit).
    * A client rule that dissolves into Reroll stones — never gold, so the two mints are untouched.
    */
   autoDissolveRarity?: 'off' | 'Common' | 'Rare';
@@ -240,7 +250,7 @@ export interface GameState {
   goal: GoalState;
   /** Curse lines currently written on a mob, keyed by that spawn's id (`skill-pool.md`). */
   curses: CurseStore;
-  /** Burn · poison · chill · shock · mark · bleed we have put on a mob (`status.mob_side`, D-067). */
+  /** Burn · poison · chill · shock · mark · bleed we have put on a mob (`status.mob_side`). */
   mobStatus: MobStatusStore;
   /** Why a snapshot is owed right now (`save.md` item 5), or null when none is pending. */
   pendingSnapshot: SnapshotReason | null;

@@ -10,7 +10,7 @@ import equipment-slot.md
 The crafting system has a single duty: **let players reach high Item quality without fighting high-level zones**.
 If crafting does not serve this duty, the item Item quality axis separated from monster level becomes a redundant name.
 
-**Crafting is Settlement-only** — the bench lives in a settlement (`towns.md`), so the player must leave Adventure and return to craft and to deposit the adventure bag into the stash. A long run therefore ends in a trip home (`loot.md` section 4 · D-056).
+**Crafting is Settlement-only** — the bench lives in a settlement (`towns.md`), so the player must leave Adventure and return to craft and to deposit the adventure bag into the stash. A long run therefore ends in a trip home (`loot.md` section 4).
 
 # 3 Crafting Tiers
 
@@ -35,7 +35,7 @@ Each tier upgrades one step at a time, and each step uses different crafting cur
 3. **Mod identity changes only via the Remove + Add combo** — Remove mod stone deletes one random non-legacy mod (slots 1-2 are Legacy mod and can never be hit); Add mod stone then fills the freed slot from the Base pool. Direct rename in place is forbidden.
 4. **Cannot skip Item quality steps** — Ascend moves one step at a time only. Skipping would need a finer currency-level system.
 5. **Reroll tier stone is the only craft allowed to roll lower.** Reroll value stone never rolls below the old value; Refine never steps down.
-6. **Add mod stone never offers a Mod line the item already has.** One item holds each Mod line at most once, and with the `Stat Mod %` sibling retired (D-114) there is no flat+% pairing left (mod-pool.md). The Add always rolls from the Base Primary/Secondary pool and is never chosen by the player — the stone draws, it does not ask.
+6. **Add mod stone never offers a Mod line the item already has.** One item holds each Mod line at most once, and with the `Stat Mod %` sibling retired there is no flat+% pairing left (mod-pool.md). The Add always rolls from the Base Primary/Secondary pool and is never chosen by the player — the stone draws, it does not ask.
    Reason: a chosen-mod Add would make Add mod stone a guaranteed line instead of a gamble, and the whole crafting duty here is "raise Item quality by luck you paid for", not "buy a specific stat".
 
 # Crafting Stones
@@ -66,8 +66,8 @@ Registry lives in item-list.md section 1; the table below is the usage view.
 | Stone | Effect | Source |
 |---|---|---|
 | Add mod stone | Fill one empty slot up to the Rarity crafted max (net counting) · 1st fill costs 1, 2nd fill on the same item costs 2 | Elite / boss only |
-| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (250/hour → ~31 uses/hour) |
-| Reroll tier stone | Reroll Tier + value of one slot with drop weights (T3 50 / T2 33 / T1 17), may roll lower · Mod name and Element unchanged · **1 per randomize, 8 per deterministic Refine (+1 tier)** | High-level monsters, elites, bosses (30/hour → ~3.75 Refines/hour) |
+| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (79/hour → ~10 uses/hour) |
+| Reroll tier stone | Reroll Tier + value of one slot with drop weights (T3 50 / T2 33 / T1 17), may roll lower · Mod name and Element unchanged · **1 per randomize, 8 per deterministic Refine (+1 tier)** | High-level monsters, elites, bosses (18/hour → ~2.25 Refines/hour) |
 | Remove mod stone | Remove one random non-legacy mod (slots 3+, Legacy mod slots 1-2 immune) | Elite / boss |
 | Quality Stone | Attempt +1 (section below) · **tiered cost** (section below) | Steps 1-5 monsters · 6-10 elites · 11-15 bosses |
 | Repair stone | Revive one Broken piece at its pre-break level and refill protection to 5 | Elite / boss only |
@@ -83,12 +83,12 @@ protection   5 per piece from birth · each would-be break consumes 1 instead an
 cost          steps +1..+5   = 1/2/3/4/5 Quality Stones
               steps +6..+10  = 7/9/11/13/15
               steps +11..+15 = 18/21/24/27/30
-              source shifts 1-5 monsters · 6-10 elites · 11-15 bosses (D-009 5a)
+              source shifts 1-5 monsters · 6-10 elites · 11-15 bosses 
 ```
 
 - Refining runs only while online (like bosses). AFK never refines, so nothing breaks offline.
 - Each +1 raises only the piece Gear Mod (next section) by `craft.gear_mod_per_level`, whose value is the published ceiling of the very line it raises: a full +15 ladder lands exactly on the smallest of the three school ceilings, so no upgraded piece can out-print a T1 rolled line (**X42** reads both numbers out of `engine.json` and `mod_max`). Rolled Mod values are never touched by Quality Stone.
-- The uplift is paid for at the encounter, not at `mob_HP`: gate **SV7** re-runs the level-cap boss against a full +15 set and the G5 promise still holds (D-103 measured `mob_HP` as already inside the published pacing, so nothing may move there).
+- The uplift is paid for at the encounter, not at `mob_HP`: gate **SV7** re-runs the level-cap boss against a full +15 set and the G5 promise still holds (measured `mob_HP` as already inside the published pacing, so nothing may move there).
 
 # Corrupt (Vaal style, one use per piece)
 
@@ -112,10 +112,10 @@ Bases map to one school: heavy (Sallet · Plate Vest · Cuisses · Plated Greave
 ```
 armour reduction% = armour / (armour + 5 × raw_hit)   physical half only
 evasion           = PoE entropy roll vs mob accuracy, contested once per hit (combat.md section 2)
-energy shield     = second pool ahead of HP · Int x K_INT_ES · chaos bypasses · recharges after 3 sec without a hit (D-026)
+energy shield = second pool ahead of HP · Int x K_INT_ES · chaos bypasses · recharges after 3 sec without a hit 
 ```
 
-- Evasion is the only avoidance layer (D-112): the retired Dodge lines feed this one roll, and its Cap is proven reachable by **X20** rather than asserted.
+- Evasion is the only avoidance layer: the retired Dodge lines feed this one roll, and its Cap is proven reachable by **X20** rather than asserted.
 
 # Item Quality Sources — Summary
 
@@ -136,16 +136,16 @@ energy shield     = second pool ahead of HP · Int x K_INT_ES · chaos bypasses 
 <!-- BEGIN GENERATED:craft-set -->
 | Tier | Price | Actual casts/hour at high zone | Meaning |
 |---|---|---|---|
-| Reroll value | 8 Reroll value stones | ~31 | Cheap, can spam · Keeps values inside the same Tier |
-| Refine | 8 Reroll tier stones | ~3.75 | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |
-| Ascend | 8 Add mod stones + 8 Reroll tier stones | ~0.78 | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |
+| Reroll value | 8 Reroll value stones | ~10 | Cheap, can spam · Keeps values inside the same Tier |
+| Refine | 8 Reroll tier stones | ~2.25 | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |
+| Ascend | 8 Add mod stones + 8 Reroll tier stones | ~0.59 | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |
 | Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to Rarity crafted max (net counting) |
-| Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set (D-009 5a) | Raises Gear Mod only |
+| Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set | Raises Gear Mod only |
 | Repair | 1 Repair stone | elite / boss only | Revives Broken + refills protection |
 
 ```
-Refine full set (12 pieces × 2 steps = 24 casts, because Tier belongs to the piece · D-033) ≈ 6.4 hours
-Ascend full set (12 pieces)                             ≈ 15.4 hours
+Refine full set (12 pieces × 2 steps = 24 casts, because Tier belongs to the piece) ≈ 10.7 hours
+Ascend full set (12 pieces)                             ≈ 20.3 hours
 ```
 <!-- END GENERATED:craft-set -->
 
@@ -153,9 +153,9 @@ Ascend full set (12 pieces)                             ≈ 15.4 hours
 
 - **Crafting currency prices and sources** → Table above, tied to drops/hour and elite/boss spawn chances in loot.md.
 - **Preventing Reroll from ruining items** → **Decided: Reroll cannot roll below the old value** (keep the slot maximum as baseline · Reroll climbs or stays equal).
-  The old option was "confirm every click", which at ~52 casts/hour is fiddly work to click all day in an idle game · Passive protection needs no clicks at all.
+  The old option was "confirm every click", which at ~10 casts/hour is fiddly work to click all day in an idle game · Passive protection needs no clicks at all.
   Accepted cost: Reroll looks "one-way climbing" and thus less exciting — compensated by letting Refine/Ascend carry the real quality pulls.
-- **Cross-level stone crafting** → Not yet done, and not needed now, because Reroll tier stone flow at 3.8 casts/hour already covers 60 casts for a full set.
+- **Cross-level stone crafting** → Not yet done, and not needed now, because Reroll tier stone flow at 2.25 casts/hour already covers 60 casts for a full set.
 
 ## Polish vs Tier Jump (measured from real T1 ranges in mod-pool.md)
 
@@ -164,10 +164,10 @@ T1 ranges differ per line: `%` spans 1-2 points · crit damage 12 · **Max HP Fl
 ```
 1 Reroll on a mid-value line → moves ≈ half of the T1 range
 Average across all lines ≈ 4.9 points · Full 12-piece set × ~3 mods ≈ 100 casts to fully polish
-At 52 casts/hour = about 2 hours per set
+At 10 casts/hour = about 10 hours per set
 ```
 
-- **Reroll is cheap and fast by design** because its real duty is "fix bad rolls", not climbing power · The slow ones are Refine (16 hours/set) and Ascend (15 hours/set), which are the true *tier movers*.
+- **Reroll is cheap and fast by design** because its real duty is "fix bad rolls", not climbing power · The slow ones are Refine (10.7 hours/set) and Ascend (20.3 hours/set), which are the true *tier movers*.
 - **Measured shape problem**: lines with the widest T1 ranges (Max HP Flat 19 · Max Mana Flat 20) are the least valuable late-game lines (+1% and +0%) → meaning *polishing looks most effective in the most worthless mods*.
   **Mitigated (without squeezing ranges)**: equipment-slot.md weights Flat lines at 0.5/0.4/0.25 by Item quality tier → at high zones the chance a Reroll lands on a Flat line drops from ~8% to ~4.4% of all mods · Flat ranges in mod-pool.md stay unchanged (they are still needed early-game: Max HP Flat 90 = +2.1% EHP at level 10 vs +1.0% at 100 — lines designed to *expire*).
 

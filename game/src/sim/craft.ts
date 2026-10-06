@@ -13,7 +13,7 @@ export type CraftOp = 'reroll' | 'refine' | 'randomize' | 'ascend' | 'remove' | 
 export type Where = 'gear' | 'bag';
 
 /**
- * The pool a piece may draw from on lines 2-7 (item-base.md · D-123): the slot's union of Bases plus
+ * The pool a piece may draw from on lines 2-7 (item-base.md): the slot's union of Bases plus
  * the lines the slot adds on its own. One list for the whole piece — `loot.poolFor` owns it, so the
  * bench and the drop roll cannot disagree about what a Base may carry.
  */
@@ -25,7 +25,7 @@ export function poolOf(item: Item): string[] {
 
 export interface CraftResult { ok: boolean; why?: string; item?: Item; note?: string }
 
-/** Every craft in the game is Settlement-only (`crafting.md` · D-056). */
+/** Every craft in the game is Settlement-only (`crafting.md`). */
 export function atSettlement(state: GameState): boolean {
   return Boolean(state.town.visited.includes(state.town.waypoint)) && state.phase !== 'camp';
 }

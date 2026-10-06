@@ -11,8 +11,9 @@ const f2 = (x: any): string => Number(x).toFixed(2);
 function keyNumbers(eng: any): any[] {
   const band = (fn: (b: any) => string): string => eng.BAND_KEYS.map((b: string) => fn(eng.BAND[b])).join(' · ');
   return [
-    { what: 'stat_c line', expr: `${eng.S.base} + ${eng.S.per_level} × (level − 1)`, value: `L1 ${eng.statAt(1)} · L100 ${eng.statAt(eng.S.level_cap)}`, row: 'engine.json stat', src: 'stat' },
-    { what: 'single-stat ceiling', expr: `${eng.statAt(eng.S.level_cap)} + ${eng.S.core_flat_max}×${eng.S.item_slots}`, value: f0(eng.CEIL), row: 'engine.json · A3', src: 'stat' },
+    { what: 'stat_c line', expr: `${eng.S.base} + ${eng.S.point_value} × (points ÷ 7)`, value: `L1 ${eng.statAt(1)} · L${eng.S.level_cap} ${eng.statAt(eng.S.level_cap)}`, row: 'engine.json stat', src: 'stat' },
+    { what: 'single-stat ceiling (reference build)', expr: `${eng.statAt(eng.S.level_cap)} + ${eng.S.core_flat_max}×${eng.S.item_slots}`, value: f0(eng.CEIL), row: 'engine.json · A3', src: 'stat' },
+    { what: 'focused stat ceiling (all points + items on one stat)', expr: `${eng.S.base} + ${f0(eng.pointsAt(eng.S.level_cap))}×${eng.S.point_value} + ${eng.S.core_flat_max}×${eng.S.item_slots}`, value: f0(eng.FOCUSED_CEIL), row: 'engine.json · ', src: 'stat' },
     { what: 'Physical / Magic power', expr: `(${f0(eng.CEIL)}×${eng.K.K_STR} + ${eng.M.phys_flat_main_hand}) × ${f2(1 + eng.M.phys_pct_main_hand / 100)}`, value: f0(eng.DERIVED.phys), row: 'B1', src: 'K' },
     { what: 'Max HP (Vit)', expr: `(${f0(eng.CEIL)}×${eng.K.K_VIT_HP} + ${f0(eng.LG.hp_per_level * (eng.S.level_cap - 1))}) × ${f2(1 + eng.M.hp_pct_per_item * eng.LG.hp_pct_mod_slots / 100)}`, value: f0(eng.DERIVED.hp), row: 'B2', src: 'K' },
     { what: 'mana pool ÷ regen', expr: `${f0(eng.DERIVED.mana)} ÷ ${f1(eng.DERIVED.mana_regen)}`, value: `${f1(eng.DERIVED.pool_regen_sec)} sec (intent 40)`, row: 'B5', src: 'K' },

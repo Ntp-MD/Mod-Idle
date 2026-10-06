@@ -1,10 +1,10 @@
-import { E } from '../engine/client';
+import { E, eng } from '../engine/client';
 import type { Character } from './player';
 import type { CurseMods } from './curse';
 
 /**
  * Statuses the player puts on a mob — the rule `engine.json` `status.mob_side` already decided
- * (D-067): DoT lands in full, damage-shaping debuffs land, control is bounded and never a lockout,
+ *: DoT lands in full, damage-shaping debuffs land, control is bounded and never a lockout,
  * and mobs have no resist stat. Every constant is read from `engine.json` `status` · `K` ·
  * `elements`; none of them is retyped here.
  *
@@ -75,7 +75,7 @@ export function applyElement(
 /**
  * Write one status on the mob. Split out so a row that says the status lands ("Shocks all hit")
  * can skip the Alignment roll and the 20% proc without skipping anything else: the control budget
- * still applies, because that is a rule about the mob, not about how the status arrived (D-102).
+ * still applies, because that is a rule about the mob, not about how the status arrived.
  */
 export function placeStatus(
   store: MobStatusStore,
@@ -113,7 +113,7 @@ export function placeStatus(
 
 /**
  * A stop that names its own length and no chance (Shield Bash's row says so), so it is not charged
- * against the 15% control budget — that bound is what proc-based stuns obey (D-102 · combat.md §5b).
+ * against the 15% control budget — that bound is what proc-based stuns obey (combat.md §5b).
  */
 export function stopMob(store: MobStatusStore, mobId: string, sec: number, bypassBudget = false): void {
   const m = mark(store, mobId);
@@ -125,9 +125,9 @@ export function stopMob(store: MobStatusStore, mobId: string, sec: number, bypas
 }
 
 /**
- * A proc-based stun — the mace's `Chance to stun %` line (D-123). A landed hit rolls the chance and
+ * A proc-based stun — the mace's `Chance to stun %` line. A landed hit rolls the chance and
  * a landed stun stops the mob for `shock.stop_sec`, paid out of the same 15% control budget shock
- * obeys, so a gear stun can never lock a fight (combat.md §5b · D-102).
+ * obeys, so a gear stun can never lock a fight (combat.md §5b).
  */
 export function stunMob(rng: () => number, store: MobStatusStore, mobId: string, chancePct: number): boolean {
   if (chancePct <= 0 || rng() * 100 >= chancePct) return false;
@@ -173,7 +173,7 @@ export function holdPoison(store: MobStatusStore, mobId: string, sec: number): v
 /**
  * Bleed is a physical DoT that does not stack: a new application refreshes the five seconds and, if
  * the hit was stronger, keeps the higher value (formula-offense.md §4). `chance` is the caller's
- * roll (0..1) — the axe's `Chance to bleed %` line plus Lacerate's proc (`D-123`), not a constant
+ * roll (0..1) — the axe's `Chance to bleed %` line plus Lacerate's proc (``), not a constant
  * read here, so the gear line actually moves the proc.
  */
 export function applyBleed(
@@ -311,4 +311,29 @@ export function holdsCondition(store: MobStatusStore, mobId: string, condition: 
   if (!l) return false;
   // burn/poison/mark run on their own clocks — stack lines decay by count, timed lines by seconds
   return name === 'poison' || name === 'mark' ? l.stacks > 0 : l.secLeft > 0;
+}
+
+/**
+ * The three riders a swing carries — the weapon Elemental status proc, its bleed chance and the
+ * mace's stun (). §14: a press takes the swing's tick inside a rotation, so it
+ * has to carry them too, or a caster silently stops applying status the moment the bar fills. The
+ * swing and every landing attack press call this one function, so the two cannot drift.
+ */
+export function applyWeaponRiders(
+  rng: () => number,
+  c: Character,
+  store: MobStatusStore,
+  mobId: string,
+  lacerateUp: boolean,
+  bonusBleedPct = 0,
+): void {
+  const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
+  for (const el of Object.keys(c.elemByElement)) {
+    if (el && (c.elemByElement as any)[el] > 0) applyElement(rng, store, mobId, el, c, alignedPerSec);
+  }
+  // a row of its own may add a bleed chance on the target it lands on (Puncture guarantees it), so the
+  // press's own sentence reaches the same roll the gear and Lacerate feed
+  const bleedPct = eng.bleedChanceFrom(lacerateUp, c.bleedChance + (bonusBleedPct || 0));
+  if (c.phys > 0 && bleedPct > 0) applyBleed(rng, store, mobId, c.phys, bleedPct / 100);
+  if (c.stunChance > 0) stunMob(rng, store, mobId, c.stunChance);
 }

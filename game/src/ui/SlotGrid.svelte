@@ -6,11 +6,11 @@
   import type { Item } from '../sim/types';
 
   /**
-   * The equipment panel's fixed grid (owner layout, D-128): three columns by five rows around where a
+   * The equipment panel's fixed grid (owner layout): three columns by five rows around where a
    * body would stand, but no body is drawn — the empty cells are simply gaps. One `grid-area` per
    * canonical slot, addressed by name (`loot.SLOTS` order) rather than array index. The blank corners
    * are not rendered at all; they are the `.` cells the template leaves empty. The earring fills the
-   * cell beside the belt (D-131), so only the two bottom corners stay blank.
+   * cell beside the belt, so only the two bottom corners stay blank.
    */
   const DOLL_LAYOUT: { area: string; slot: number }[] = [
     { area: 'cape', slot: 9 }, { area: 'helmet', slot: 0 }, { area: 'amulet', slot: 8 },
@@ -25,13 +25,13 @@
    * inventory. Two modes because a hunt wants the grid and a decision wants the words, and a sort bar
    * because fifty pieces have dropped since the last trip. Hovering a slot opens the detail card
    * (`ItemDetail.svelte`) and the card's own Equip button is the only way a piece gets worn, which is
-   * the owner's rule rather than a convenience (`harness/decisions.md` D-089).
+   * the owner's rule rather than a convenience.
    */
   let { entries, capacity, mode = 'grid', layout = 'grid', onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, fixed = false, empty = 'Empty.' }: {
     entries: SlotEntry[];
     capacity: number;
     mode?: 'grid' | 'list';
-    /** `doll` draws the fixed equipment panel on the five-row slot grid (no body, D-128) */
+    /** `doll` draws the fixed equipment panel on the five-row slot grid (no body) */
     layout?: 'grid' | 'doll';
     onmode?: ((m: 'grid' | 'list') => void) | null;
     sort?: SortKey;

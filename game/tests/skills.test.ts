@@ -21,8 +21,8 @@ describe('the client skill calculator is the cage skill calculator', () => {
     // press = the row's own fraction of the reference build's finished hit, whose physical line the
     // engine cage already publishes (checks.md B1) — so this pins the number, not just the shape
     expect(sm.perPress(cleave, REF)).toBeCloseTo((cleave.final_pct / 100) * eng.DERIVED.phys * RAMP, 2);
-    // a magic-basis row folds Element into the basis instead of the physical line (D-070)
-    const bolt = sm.byId['attack.arcane_bolt'] as any;
+    // a magic-basis row folds Element into the basis instead of the physical line 
+    const bolt = sm.byId['attack.chaos_bolt'] as any;
     const magicBasis = REF.magic + REF.elem * (REF.align / 100);
     expect(sm.perPress(bolt, REF)).toBeCloseTo((bolt.final_pct / 100) * magicBasis * RAMP, 2);
     expect(sm.critsOnBasis(cleave)).toBe(true);
@@ -94,7 +94,7 @@ describe('the casting rule from skill-pool.md', () => {
   });
 });
 
-describe('the two mana cost forms (D-136)', () => {
+describe('the two mana cost forms ', () => {
   const flat = { id: 'test.flat', type: 'attack', mana: '14 flat', cd: 6 } as any;
   const cap = E.skill_xp.level_cap;
   const c = buildCharacter(100, emptyGear());
@@ -195,7 +195,9 @@ describe('skills in the live loop', () => {
 
   it('a long enough run drops at least one skill through the real rate', () => {
     const game = newGame(20260103);
-    for (let i = 0; i < 6000; i++) tick(game, {});
+    // the rate is per kill (0.1% normal, 8% elite, 35% boss), so "long enough" scales with the kill
+    // rate — which the re-base cut ~3x. 24,000 sec keeps the expected drop count well clear of 0.
+    for (let i = 0; i < 24000; i++) tick(game, {});
     // the log is a 60-line window, so the proof is the ledger, not the last page of text
     expect(Object.keys(game.skills.owned).length).toBeGreaterThan(0);
     expect(game.skills.list.filter(Boolean).length).toBeGreaterThan(0);

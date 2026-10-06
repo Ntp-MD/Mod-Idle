@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { sm, E } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { newSkillState, effectsActive, toggleTrack, effectLine, describeFold } from '../src/sim/skills';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import { eng } from '../src/engine/client';
 
 const row = (id: string) => sm.byId[id];
@@ -157,7 +157,7 @@ describe('the toggle track', () => {
 describe('heals read their own number', () => {
   it('Greater Heal restores once what its row states, not a per-second drip', () => {
     const s = newGame(52);
-    s.player.level = 60;
+    setLevel(s, 60);
     s.zone = 5;
     s.skills.owned['heal.greater_heal'] = 1;
     s.skills.list[0] = 'heal.greater_heal';

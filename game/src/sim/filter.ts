@@ -11,7 +11,7 @@ import type { GameState } from './types';
  */
 
 export interface SlotRule {
-  /** Off by default (D-122): an off slot keeps every drop and dissolves nothing. */
+  /** Off by default: an off slot keeps every drop and dissolves nothing. */
   enabled: boolean;
   /** Keep a drop only when it outscores the piece worn in that slot by more than this. */
   margin_pct: number;

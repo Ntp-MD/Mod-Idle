@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { E } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import { craft } from '../src/sim/craft';
 
 /**
- * B21 · the three stones the craft ladder costs have an income now (harness/todo.md B21 · D-100).
+ * The three stones the craft ladder costs have an income now.
  *
  * `crafting.md` priced Upgrade / Repair / Corrupt while `loot.md` §5 paid for none of them, so a
  * player could never run the bench. The rates are `engine.json` `loot.*_stone_sources`; every figure
@@ -22,7 +22,7 @@ const piece = (over: any = {}) => ({
 
 function hunt(hours: number, level: number, zone: number, online: boolean, seed: number) {
   const s = newGame(seed);
-  s.player.level = level;
+  setLevel(s, level);
   s.zone = zone;
   for (let i = 0; i < 3600 * hours; i++) tick(s, {}, { online });
   expect(s.counters.kills).toBeGreaterThan(0);

@@ -11,7 +11,7 @@ import type { GameState, Mob } from '../src/sim/types';
 /**
  * Mana and Energy Shield are pools, so their floor is nothing and their ceiling is what the sheet
  * says they hold. A bar reading `-12` is not a rounding to hide: it meant a swing had spent a shield
- * that was already half gone (D-109).
+ * that was already half gone.
  */
 const mob = (): Mob => ({
   id: 'm1', species: 'Rat', zone: 1, level: 90, kind: 'normal', hp: 1e9, hpMax: 1e9,
@@ -21,7 +21,7 @@ const mob = (): Mob => ({
 
 /** The same sheet the tick builds, so "above its maximum" means above what the game itself allows. */
 const sheetOf = (s: GameState) => buildCharacter(
-  s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills),
+  s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills), s.player.points,
 );
 
 describe('a pool spends only what stands in it', () => {

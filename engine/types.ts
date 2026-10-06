@@ -13,12 +13,18 @@ export type Rng = () => number;
 
 export interface StatCfg {
   base: number;
-  per_level: number;
   level_cap: number;
   mob_level_cap: number;
   item_slots: number;
   core_flat_max: number;
   split_items: number;
+  points_per_level: number;
+  point_value: number;
+  paragon_from: number;
+  paragon_points_per_level: number;
+  tree_points_per_level: number;
+  reference_build: string;
+  respec_cost: number;
   note: string;
 }
 
@@ -33,9 +39,9 @@ export interface Caps {
   evasion: number;
   perfect_dodge: number;
   weight_overload: number;
-  /** The second avoidance layer — a blocked hit is deleted outright (D-123). */
+  /** The second avoidance layer — a blocked hit is deleted outright. */
   block: number;
-  /** The lightning stun chance Cap, elements.md — fed by Alignment plus the gear line (D-123). */
+  /** The lightning stun chance Cap, elements.md — fed by Alignment plus the gear line. */
   stun: number;
 }
 
@@ -98,7 +104,7 @@ export interface LootCfg {
   quality_stone_sources: StoneSource;
   repair_stone_sources: StoneSource;
   corrupt_stone_sources: StoneSource;
-  /** Line 1's hybrid chance and value scale (D-123). */
+  /** Line 1's hybrid chance and value scale. */
   base_mod: BaseModCfg;
 }
 
@@ -152,11 +158,16 @@ export interface MobSpecies {
   id: string;
   name: string;
   zones: number[];
+  /** The regions this species may live in — its `zones` must be a subset (X52). */
+  habitat: string[];
   sizes: string[];
   element_bias: string[];
   carries_weapon: boolean;
   accuracy_mult: number;
   damage: unknown;
+  /** A humanoid lineage is the only source of the potion drop (X49). */
+  humanoid?: boolean;
+  trait?: string;
   stats: { str: number; dex: number; int: number; vit: number; agi: number; lck: number };
 }
 
@@ -166,15 +177,36 @@ export interface MobSize {
   hp: number;
   ps: number;
   evasion: number;
+  group?: string;
+  /** A boss is not a size — it declares which body class a weapon's `size_mult` reads it as. */
+  reads_as?: string;
+}
+
+/** Weapon × body class (HugePatch §12): one row per weapon NAME, three body-class columns. */
+export interface WeaponSizeMultCfg {
+  note?: string;
+  ladder: Record<string, { small: number; medium: number; large: number }>;
+}
+
+export interface MobSubzone {
+  name: string;
+  environment: string;
+  element: string;
+  races: string[];
+  normal: string[];
+  elite: string | null;
 }
 
 export interface MobZone {
   id: number;
   name: string;
+  region?: string;
   levels: [number, number];
   hp: [number, number];
   elements: string[];
   group: string;
+  /** What a spawn table rolls against: the zone cast is the union of its sub-zones. */
+  subzones?: MobSubzone[];
 }
 
 export interface MobBoss {
@@ -192,19 +224,39 @@ export interface MobElite {
 
 export interface MobStatCfg {
   base: number;
-  per_level: number;
+  note: string;
+}
+
+/** One field-label tier: where the word comes from (`species` | `name`) and the suffix appended. */
+export interface FieldLabelRule {
+  source: string;
+  suffix: string;
+}
+
+/** The three field-label rows the roster doc and the client share (no colour — that is client-only). */
+export interface FieldLabelsCfg {
+  note: string;
+  normal: FieldLabelRule;
+  elite: FieldLabelRule;
+  boss: FieldLabelRule;
 }
 
 export interface MobCfg {
   stat: MobStatCfg;
   zones: MobZone[];
   species: MobSpecies[];
+  /** The published roster size — X23 fails when the species list drifts from it. */
+  species_target?: number;
+  /** The five names a race's variant ladder carries, Small → Boss (the field labels). */
+  variants?: Record<string, string[]>;
+  deprecated_species?: Record<string, string>;
   sizes: MobSize[];
   bosses: MobBoss[];
   elite: MobElite;
   curve: CurveCfg;
   spawn_weights: Record<string, number>;
   damage_split: Record<string, number>;
+  field_labels: FieldLabelsCfg;
 }
 
 export interface WeaponCfg {
@@ -213,7 +265,7 @@ export interface WeaponCfg {
 }
 
 export interface RarityRow {
-  /** How many of the Random lines (4-7) arrive rolled at drop — the rest are empty slots (D-123). */
+  /** How many of the Random lines (4-7) arrive rolled at drop — the rest are empty slots. */
   dropped_random: number;
   crafted_max: number;
 }
@@ -227,12 +279,12 @@ export interface RarityCfg {
   add_stones_per_fill: number[];
   stat_mod_slots: number;
   legacy_slots: number;
-  /** Line 1 — the Base Mod slot, unremovable like the Legacy pair (D-123). */
+  /** Line 1 — the Base Mod slot, unremovable like the Legacy pair. */
   base_mod_slots: number;
   note?: string;
 }
 
-/** Line 1's own rules (`engine.json` `loot.base_mod` · item-base.md · D-123). */
+/** Line 1's own rules (`engine.json` `loot.base_mod` · item-base.md). */
 export interface BaseModCfg {
   /** Chance the line gains the 2nd and 3rd defence Mod, in order (armour slots only). */
   hybrid_chance: number[];
@@ -306,6 +358,9 @@ export interface HerbsCfg {
   low_chance: number;
   mid_chance: number;
   high_chance: number;
+  /** A bundle rolls between these two, so the average is what the potion-drop derivation divides by. */
+  bundle_min: number;
+  bundle_max: number;
 }
 
 export interface PotionsCfg {
@@ -387,11 +442,11 @@ export interface SkillsData {
   meta: {
     formula?: {
       level_step_pct?: number;
-      /** A flat mana cost climbs on this step per skill level (D-136). */
+      /** A flat mana cost climbs on this step per skill level. */
       mana_level_step_pct?: number;
-      /** How much of the pool's growth a flat cost takes on (D-136). */
+      /** How much of the pool's growth a flat cost takes on. */
       mana_pool_exponent?: number;
-      /** Which character level the reference pool is derived at (D-136). */
+      /** Which character level the reference pool is derived at. */
       mana_reference_level?: number;
       cast_reference?: { cdr_pct: number; ladder_pct: number };
     };
@@ -415,7 +470,7 @@ export interface BaseRow {
 
 export interface BasesData {
   bases: BaseRow[];
-  weapons?: { name: string; weight: number }[];
+  weapons?: { name: string; weight: number; damage?: string; group?: string; size_mult?: { small: number; medium: number; large: number } }[];
   dual_wield_weight_mult?: number;
   mastery: Record<string, number>;
 }

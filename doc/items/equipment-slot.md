@@ -32,7 +32,7 @@ import equipment-slot-weapon.md
 
 Pool roles: **Primary** rolls often (1.0) · **Secondary** rolls less often (0.5) · **Blocked** never rolls · **Offensive** only on weapons · **Defensive** only off-weapon · **Stat Mod** rolls everywhere (1.0).
 
-- **Stat Mod (every item):** Stat Mod flat (5-25 by quality, str / vit / dex / agi / wis / int / lck) · max 1 slot per item — the `Stat Mod %` sibling is retired (D-114) · weight 1.0 · full rules see equipment-slot-pools.md
+- **Stat Mod (every item):** Stat Mod flat (5-25 by quality, str / vit / dex / agi / wis / int / lck) · max 1 slot per item — the `Stat Mod %` sibling is retired · weight 1.0 · full rules see equipment-slot-pools.md
 - **Defensive Pool (all except main hand):** Max HP flat · Max HP % · Max Mana flat · Max Mana % · Evasion flat · Evasion % · Cooldown reduction % · Elemental resistance % · Elemental alignment % · Armour flat · Energy Shield flat · Life / Mana Regeneration · Max Energy Shield % · Status Alignment resistance % (ranges in mod-pool.md's generated table · the three Gear Mod schools are helmet/chest/pant/boots/gloves only)
 - **Offensive Pool (main hand + dual-wield off hand):** Physical power 15-80 / 3-16% · Magic power 15-80 / 3-16% · Elemental power 12-64 / 3-14% · Critical chance 1-8% · Critical damage 12-120% (physical only) · Attack speed 5-25% · Accuracy 5-25% · Str / Int 5-25 / 1-5%
 - **Weights:** Effective weight = role weight x Mod value · Primary 1.0 · Secondary 0.5 · Stat Mod 1.0 · per-Mod values (0.25-1.2, e.g. Max HP % 0.8, crit damage 0.7, CDR 0.6) see equipment-slot-pools.md

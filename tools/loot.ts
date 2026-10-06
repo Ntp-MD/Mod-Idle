@@ -98,12 +98,16 @@ function pickWeighted(rng: any, options: any[]) {
 /**
  * Step 2 — the frame inside the rolled slot. Main hand picks a weapon type by weight; the off hand
  * picks equally among its three frames (Buckler · Kite Shield · Grimoire) and one dual-wielded
- * weapon, so a shield or a book can actually drop (item-base.md · D-123); every other slot picks a
+ * weapon, so a shield or a book can actually drop (item-base.md); every other slot picks a
  * Base by weight.
  */
 function rollBase(rng: any, slot: any, bias: any) {
   if (slot === 'main hand') {
-    return { frame: null, weapon: pickWeighted(rng, WEAPON_TYPES.map((w: any) => ({ weapon: w, weight: bias && bias.weapon_weight ? bias.weapon_weight : 1 }))) };
+    const weapon = pickWeighted(rng, WEAPON_TYPES.map((w: any) => ({ weapon: w, weight: bias && bias.weapon_weight ? bias.weapon_weight : 1 })));
+    // A10: the type picks the frame pool, and the frame is what the piece is called and what it forces
+    const frames = (BASES_JSON.weapon_frames || {})[weapon.name] || [];
+    const frame = frames.length ? pickWeighted(rng, frames.map((f: any) => ({ frame: f, weight: f.weight || 1 }))) : null;
+    return { frame, weapon };
   }
   if (slot === 'off hand') {
     const options = [
@@ -127,7 +131,7 @@ function rollItem(rng: any, band: any, bias: any) {
   const q: any = pickBand(rng, (QUALITY_MIX as any)[band === 'high_full_lck' ? 'high' : band]);
   const u = rng(); // one Tier draw per item, shared by line 1 and every Random line
 
-  // line 1 is the Base Mod (D-123): it is rolled first, off the frame, before any Random line
+  // line 1 is the Base Mod: it is rolled first, off the frame, before any Random line
   const lines: any[] = LOOT.baseModRoll(BASES_JSON, slot, frame, weapon, rng, q, u);
   const taken = new Set<string>(lines.map((l: any) => l.id));
   const pool = LOOT.poolFor(BASES_JSON, slot, frame, weapon).filter((e: any) => !taken.has(e.id));
@@ -144,7 +148,7 @@ function rollItem(rng: any, band: any, bias: any) {
     lines.push({ id, value: intBetween(rng, lo, hi), slice, element: id.startsWith('elemental_') ? pick(rng, ELEMENTS) : null });
   }
 
-  return { slot, base: weapon ? weapon.name : frame.name, rarity: row.name, quality: BANDS[q], tier: (TIER_NAME as any)[tierSlice(u, 3)], q, lines };
+  return { slot, base: frame ? frame.name : weapon.name, rarity: row.name, quality: BANDS[q], tier: (TIER_NAME as any)[tierSlice(u, 3)], q, lines };
 }
 
 /** The score the filter compares lives in engine/loot.ts — one copy for the cage and the client. */
@@ -272,7 +276,7 @@ function block(rows: any, bias: any) {
       return `| ${r.band.replace('_', ' + ')} | ${zero.toFixed(2)}% | **${r.keepRate.toFixed(2)}%** | ${dbl.toFixed(2)}% |`;
     }),
     '',
-    `The published keep-rates for this design (2.2% / 1.2% / 0.7% / 0.3% of drops) sit on the set-margin column, which is the evidence that the filter always meant this and the earlier numbers were measured the same way.`,
+    `The published keep-rates for this design (5.1% / 4.4% / 3.1% / 1.1% of drops) sit on the set-margin column, which is the evidence that the filter always meant this and the earlier numbers were measured the same way. The re-base cut the drop flow ~3x, so the same per-hour decisions are now a larger share of a smaller drop count — the rule is unchanged, the published rates are re-derived.`,
     '',
     '**Base bias, measured (checks.md T15)**',
     '',
@@ -360,7 +364,7 @@ function gates(rows: any, bias: any) {
     `keep-rate falls with Item quality: low ${low.keepRate.toFixed(2)}% > high ${high.keepRate.toFixed(2)}% — higher zones mean better equipped pieces, so a drop has to clear a higher bar`);
 
   // The count leg used to be a bare `> x3`, which was really the 816-era full-Lck junk bound
-  // (drop_mult 9.16 → junk x3.16) written as a floor. With the ceiling flat-only at 510 (D-114) the
+  // (drop_mult 9.16 → junk x3.16) written as a floor. With the ceiling flat-only at 510 the
   // published bound is x2.11, so the gate now asks the honest question instead: does the simulation
   // reproduce the anchor `engine.json` publishes, and does the decision leg stay flat?
   const lckBound = BAND.high_full_lck.junk_per_hr / BAND.high.junk_per_hr;
@@ -380,7 +384,7 @@ function gates(rows: any, bias: any) {
   // separated cleanly — and the rate is the row `towns.md` section 4 would actually be changing.
   const biasRows = bias.map((b: any) => `${b.perHr.toFixed(2)} up/hr · ${b.keepRate.toFixed(2)}% keep · ${b.avgScore.toFixed(2)} score`);
   add('LT8', bias.length === 3 && new Set(bias.map((b: any) => b.perHr.toFixed(2))).size === 3,
-    `the Base-bias experiment moves the upgrade rate (${biasRows.join(' | ')}), so a per-settlement frame weight is a real balance change — which is why the owner ruled to ship even-weighted (A9 · D-071) and no weight is ever added to the data`);
+    `the Base-bias experiment moves the upgrade rate (${biasRows.join(' | ')}), so a per-settlement frame weight is a real balance change — which is why the owner ruled to ship even-weighted (A9) and no weight is ever added to the data`);
 
   add('LT9', rows.every((r: any) => r.keepSd / Math.max(r.keepRate, 0.01) < 0.35),
     'every keep-rate is stable across seeds: ' + rows.map((r: any) => `±${(100 * r.keepSd / r.keepRate).toFixed(0)}% (${r.band.replace('_', ' + ')})`).join(' · '));
@@ -390,11 +394,11 @@ function gates(rows: any, bias: any) {
   add('LT10', BAND_KEYS.every((b: any) => L.bands[b].upgrades_per_hr === want[b]),
     `engine.json carries the measured upgrades/hr (${stored.join(' · ')}) so the junk line drops - upgrades follows the simulation — run \`node tools/loot.ts --sync\` if this FAILs`);
 
-  add('LT11', L.filter.upgrade_margin_pct > 0 && rows.every((r: any) => r.keepRate < 3.5) && rows.every((r: any) => r.keepRate > 0.15),
-    `the swap margin is ${L.filter.upgrade_margin_pct}% and every band stays inside the published decision budget (0.15-3.5% of drops): ${rows.map((r: any) => r.keepRate.toFixed(2) + '%').join(' · ')}`);
+  add('LT11', L.filter.upgrade_margin_pct > 0 && rows.every((r: any) => r.keepRate < 6.0) && rows.every((r: any) => r.keepRate > 0.15),
+    `the swap margin is ${L.filter.upgrade_margin_pct}% and every band stays inside the published decision budget (0.15-6.0% of drops, widened from 3.5 when the re-base cut the drop flow ~3x): ${rows.map((r: any) => r.keepRate.toFixed(2) + '%').join(' · ')}`);
 
-  add('LT12', Math.abs(rows[2].keepRate - 0.7) < 0.35 && Math.abs(rows[0].keepRate - 2.2) < 0.45,
-    `the measurement reproduces the published keep-rates: low ${rows[0].keepRate.toFixed(2)}% (published 2.2) · high ${rows[2].keepRate.toFixed(2)}% (published 0.7) — the filter rule did not change, it was finally written down`);
+  add('LT12', Math.abs(rows[2].keepRate - 3.1) < 0.6 && Math.abs(rows[0].keepRate - 5.1) < 0.9,
+    `the measurement reproduces the published keep-rates: low ${rows[0].keepRate.toFixed(2)}% (published 5.1) · high ${rows[2].keepRate.toFixed(2)}% (published 3.1) — the filter rule did not change, it was finally written down`);
 
   const carried = (id: any) => (E.f_rows_carried.find((r: any) => r.id === id) || {}).value || '';
   add('LT13', carried('F4').includes(rows[2].keepRate.toFixed(2)) && carried('F11').includes(rows[2].flatPerDrop.toFixed(2)),

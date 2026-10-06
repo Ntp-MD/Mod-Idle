@@ -124,6 +124,9 @@ export function mobIcon(species: string): string {
   return mobBySpecies[species.toLowerCase()] ?? skull;
 }
 
+/** The mark a boss field label carries (§11): the same dread-skull the junk stream uses. */
+export const bossMark = skull;
+
 export function elementIcon(element: string): string {
   return elementByName[element.toLowerCase()] ?? broadSword;
 }

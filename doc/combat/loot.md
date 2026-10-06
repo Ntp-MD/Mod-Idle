@@ -21,7 +21,7 @@ This file is the engine of the core loop ("keep killing monsters and assemble a 
               low zone   = low 100%
               mid zone   = low 55% · mid 45%
               high zone  = mid 40% · high 60%   (no low, P2-1 option A)
-6 tier     · Per ITEM (one roll for the piece): T3 50% · T2 33% · T1 17% (D-033)
+6 tier · Per ITEM (one roll for the piece): T3 50% · T2 33% · T1 17% 
 7 value    · Uniform within that Tier range of the already-locked Item quality
 ```
 
@@ -38,10 +38,10 @@ Set from combat.md (TTK ≈ 1 sec per kill) + new-group spawn time **4 seconds p
 <!-- BEGIN GENERATED:loot-bands -->
 | Zone | Average group | Cycle | kills/hour | Lck at that level | drops/hour |
 |---|---|---|---|---|---|
-| low (1-30) | 1.5 mobs | 5.5 sec | 980 | 33 (L30) → ×1.33 | 104 |
-| mid (31-60) | 2.5 mobs | 6.5 sec | 1,385 | 54 (L60) → ×1.54 | 171 |
-| high (61-90) | 4 mobs | 8.0 sec | 1,800 | 76 (L90) → ×1.76 | 253 |
-| high + full Lck | 4 mobs | 8.0 sec | 1,800 | 433 → ×5.33 | **768** |
+| low (1-30) | 1.5 mobs | 11.7 sec | 463 | 33 (L30) → ×1.33 | 49 |
+| mid (31-60) | 2.5 mobs | 16.8 sec | 537 | 54 (L60) → ×1.54 | 66 |
+| high (61-90) | 4 mobs | 24.4 sec | 589 | 76 (L90) → ×1.76 | 82 |
+| high + full Lck | 4 mobs | 24.4 sec | 589 | 433 → ×5.33 | **252** |
 <!-- END GENERATED:loot-bands -->
 
 - **Base drop chance = 8% per kill** for gear, multiplied by `drop_rate = (1 + Lck×0.01) × (1 + mastery_collection/100)` (formula.md section 10)
@@ -57,37 +57,37 @@ Simulated 14 hours per zone, with the player keeping only items better than the 
 <!-- BEGIN GENERATED:loot-sim -->
 | Zone | Hour 1 | 2 | 3 | 4 | 6 | 12 | Total upgrades | Keep-rate of drops | Upgrades/hr | Avg score per equipped piece |
 |---|---|---|---|---|---|---|---|---|---|---|
-| low | 26.92 | 3.08 | 2.08 | 1.67 | 0.42 | 0.08 | 36 | **2.50%** | 2.60 | 2.76 |
-| mid | 32.25 | 4.00 | 2.58 | 0.92 | 0.67 | 0.17 | 43 | **1.80%** | 3.08 | 4.40 |
-| high | 30.00 | 3.08 | 1.75 | 0.67 | 0.50 | 0.42 | 38 | **1.08%** | 2.73 | 6.14 |
-| high + full_lck | 34.83 | 1.92 | 0.58 | 0.67 | 0.25 | 0.08 | 39 | **0.36%** | 2.80 | 6.20 |
+| low | 21.42 | 4.75 | 2.33 | 1.33 | 1.25 | 0.25 | 35 | **5.10%** | 2.50 | 2.72 |
+| mid | 24.42 | 5.92 | 2.92 | 1.33 | 0.92 | 0.08 | 41 | **4.39%** | 2.90 | 4.28 |
+| high | 23.92 | 4.17 | 1.75 | 1.67 | 0.58 | 0.17 | 36 | **3.11%** | 2.55 | 5.99 |
+| high + full_lck | 30.00 | 3.00 | 1.75 | 0.67 | 0.58 | 0.33 | 38 | **1.08%** | 2.73 | 6.14 |
 
 Measured by `node tools/loot.ts --sim` · 14 hours per band x 12 seeds, drop rate and Lck from `engine.json` `loot`, Mod ranges from `mods.json`, Mod weights from `engine.json` `mod_weights`, Base frames and the Gear Mod school from `item-base.md`.
 
 **An item scores the sum of `weight(line) x value / Total` over its own Mod lines, and the filter keeps it when it outscores the piece equipped in the same slot — that is the operational reading of "better on at least 1 axis" (loot.md section 4). A second, weaker keep reason survives: Elemental lines of an Element the player has no resistance for are always kept, so hunting a new Element still pays.**
 
-- Flat lines per drop: 0.384 (low) · 0.361 (mid) · 0.286 (high) · 0.286 (high + full_lck) — the four early-game Flat lines are weighted 0.5 / 0.4 / 0.25 by Item quality, so they thin out exactly as the player leaves the early zones (F11)
-- Mod lines per item: 5.35 · 5.36 · 5.36 · 5.36 · Element-hunt keeps: 1.8 · 1.5 · 1.3 · 1.3
-- Keep-rate spread across seeds: ±0.26% (low) · ±0.22% (mid) · ±0.12% (high) · ±0.04% (high + full_lck) — the row above is the mean, not a single lucky run
+- Flat lines per drop: 0.388 (low) · 0.364 (mid) · 0.290 (high) · 0.286 (high + full_lck) — the four early-game Flat lines are weighted 0.5 / 0.4 / 0.25 by Item quality, so they thin out exactly as the player leaves the early zones (F11)
+- Mod lines per item: 5.36 · 5.35 · 5.36 · 5.36 · Element-hunt keeps: 1.8 · 1.5 · 1.3 · 1.3
+- Keep-rate spread across seeds: ±0.60% (low) · ±0.60% (mid) · ±0.35% (high) · ±0.12% (high + full_lck) — the row above is the mean, not a single lucky run
 
 **Swap margin sensitivity** — the filter keeps a drop only when it beats the equipped piece by more than `loot.filter.upgrade_margin_pct` = 10% (a 2% gain is a reroll, not a decision):
 
 | Zone | 0% (any gain counts) | set margin | 2x margin |
 |---|---|---|---|
-| low | 4.82% | **2.50%** | 2.01% |
-| mid | 3.21% | **1.80%** | 1.58% |
-| high | 2.12% | **1.08%** | 0.88% |
-| high + full_lck | 0.77% | **0.36%** | 0.29% |
+| low | 8.45% | **5.10%** | 4.15% |
+| mid | 6.98% | **4.39%** | 4.06% |
+| high | 5.47% | **3.11%** | 2.64% |
+| high + full_lck | 2.13% | **1.08%** | 0.88% |
 
-The published keep-rates for this design (2.2% / 1.2% / 0.7% / 0.3% of drops) sit on the set-margin column, which is the evidence that the filter always meant this and the earlier numbers were measured the same way.
+The published keep-rates for this design (5.1% / 4.4% / 3.1% / 1.1% of drops) sit on the set-margin column, which is the evidence that the filter always meant this and the earlier numbers were measured the same way. The re-base cut the drop flow ~3x, so the same per-hour decisions are now a larger share of a smaller drop count — the rule is unchanged, the published rates are re-derived.
 
 **Base bias, measured (checks.md T15)**
 
 | Scenario | Keep-rate | Upgrades/hr | Avg score |
 |---|---|---|---|
-| no bias (equal frames, published rule) | 1.08% | 2.73 | 6.14 |
-| a soldier town (armored frames x2.5, cloth x0.4) | 1.10% | 2.79 | 6.09 |
-| the same town inverted (cloth x2.5, armored x0.4) | 1.12% | 2.84 | 6.13 |
+| no bias (equal frames, published rule) | 3.11% | 2.55 | 5.99 |
+| a soldier town (armored frames x2.5, cloth x0.4) | 3.25% | 2.67 | 5.99 |
+| the same town inverted (cloth x2.5, armored x0.4) | 3.28% | 2.69 | 6.00 |
 
 A settlement that rolls one school more often does move the measured rows, so a Base weight is not free — which is why `town.json` carries no frame weight while the status is pending. The pipeline above is bias-ready: add `frame_weight` and re-run.
 <!-- END GENERATED:loot-sim -->
@@ -102,7 +102,7 @@ A settlement that rolls one school more often does move the measured rows, so a 
 
 ```
 Bag filter — ships OFF: an off slot keeps every gear drop and dissolves nothing, so a fresh
-character loses nothing until they arm a slot (harness/decisions.md)
+character loses nothing until they arm a slot
 Keep (show to player) = better than the equipped piece in the same slot on at least 1 axis:
   · Higher Item quality · Or higher Tier on any slot · Or Elemental res of an Element the player lacks · Or a skill not yet in the collection
 Keep always = herbs, junk and stones (never dissolve)
@@ -117,26 +117,26 @@ Salvage milestones (luck protection, bounded): every 500 salvaged gear pieces gr
 - **The character bag is 50 slots of carried consumables** — stones stack 999/slot and are **weightless**, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot — so only herb/potion stacks can cut aspd (formula.md section 11). The permanent **stash** is town storage, organisation only, bought with gold (`towns.md` section 5) → capacity is convenience, never power.
 - **Junk is gold's primary mint** (Ragnarok-style): a species-flavoured item drops on a separate roll, stacks 999/slot, is weightless, and is sold to the Settlement Counterhand. Junk has three rarities — **common · uncommon · rare** — and each rarity's drop chance is the junk line divided by its sell value, so a rare junk item is both rarer and dearer while the expected gold per kill stays flat. That keeps high-band junk income equal to the published junk line, so town prices do not move. Road events are the only other mint (`checks.md` G6); no source pays both media (`economy.md`)
 - save.md must store: per-slot filter thresholds · And the list of "Elements/slots the player has not yet found", because it is a filter condition
-- **How the two bags are shown** (`harness/decisions.md` D-107): both are grids of slots on the main screen, one square per slot — the adventure bag is the **temporary inventory** the hunt fills, and the character bag beside it carries the consumables. The order is the player's choice (as it dropped · by slot · by Rarity · by strength · by name), and the panel switches between grid slots and an item list when the words matter more than the shape. Hovering a slot opens that piece's detail card — its lines with their Tiers, the Core stat a Stat Mod line rolled at drop, what it weighs, and how it compares with the piece worn in the same slot. The card's **Equip** button is the only way anything gets worn: the filter keeps pieces, it never chooses them (D-089).
+- **How the two bags are shown**: both are grids of slots on the main screen, one square per slot — the adventure bag is the **temporary inventory** the hunt fills, and the character bag beside it carries the consumables. The order is the player's choice (as it dropped · by slot · by Rarity · by strength · by name), and the panel switches between grid slots and an item list when the words matter more than the shape. Hovering a slot opens that piece's detail card — its lines with their Tiers, the Core stat a Stat Mod line rolled at drop, what it weighs, and how it compares with the piece worn in the same slot. The card's **Equip** button is the only way anything gets worn: the filter keeps pieces, it never chooses them.
 
 # 5. Stone income and prices (set from the numbers in sections 2-3)
 
 | Stone | Source per hour (high zone · no Lck) | Used for | Price per use |
 |---|---|---|---|
-| Reroll value stone | 250 (every junk piece = 1) | Reroll value | **8** → ~31 times/hour |
-| Reroll tier stone | elite 18 (20% of kills × 5%) + boss 12 (4 ×3) = 30 | Reroll tier / Refine | **1 / 8** → ~3.75 Refines/hour |
-| Add mod stone | elite / boss only (6.25/hour · F9) | Add / Ascend | **8 Add + 8 tier** (2nd Add fill is 2) → 0.78 Ascends/hour · 15.4 hr for a full 12-piece set (X30) |
+| Reroll value stone | 79 (every junk piece = 1) | Reroll value | **8** → ~10 times/hour |
+| Reroll tier stone | elite 6 (20% of kills × 5%) + boss 12 (4 ×3) = 18 | Reroll tier / Refine | **1 / 8** → ~2.25 Refines/hour |
+| Add mod stone | elite / boss only (4.74/hour · F9) | Add / Ascend | **8 Add + 8 tier** (2nd Add fill is 2) → 0.59 Ascends/hour · 20.3 hr for a full 12-piece set (X30) |
 | Quality Stone | monsters → elites → bosses by step | Upgrade | tiered: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 |
 | Repair stone | elite / boss only | Repair | **1** |
 | Corrupt stone | boss only, rarest stone | Corrupt | **1** |
 
-**The last three rows now have an income.** Their rates are `engine.json` `loot.quality_stone_sources`, `repair_stone_sources` and `corrupt_stone_sources`, set so that each third of the Quality ladder is paid by the source `crafting.md` names for it, and every per-hour figure and every hour count comes out of `checks.md` **F20-F22** — they are not typed in this file, because a rate written twice is a rate that drifts (D-100 · `harness/todo.md` B21).
+**The last three rows now have an income.** Their rates are `engine.json` `loot.quality_stone_sources`, `repair_stone_sources` and `corrupt_stone_sources`, set so that each third of the Quality ladder is paid by the source `crafting.md` names for it, and every per-hour figure and every hour count comes out of `checks.md` **F20-F22** — they are not typed in this file, because a rate written twice is a rate that drifts.
 
 Checkable timelines:
 
 ```
-Refine full 12-piece set (2 steps per piece · Tier is per item · D-033) ≈ 6.4 hours
-Ascend full 12-piece set ≈ 15 hours  (and only for items whose floor Item quality is below the zone ceiling)
+Refine full 12-piece set (2 steps per piece · Tier is per item) ≈ 10.7 hours
+Ascend full 12-piece set ≈ 20 hours  (and only for items whose floor Item quality is below the zone ceiling)
 Skill 1 unit to full ladder 32 duplicates ≈ 23 boss hours (35% per kill)
 ```
 
@@ -171,7 +171,7 @@ Skill 1 unit to full ladder 32 duplicates ≈ 23 boss hours (35% per kill)
 
 - **Which numbers this file owns vs what is computed**: `node tools/check.ts --checks` derives F1 · F2 · F3 · F5 · F6 · F7 · F8 · F9 · F10 (and the gold-per-minute line F18) from `tools/data/engine.json`, and it reads the section 2 table back out of this file — so a row here that stops matching the engine is a FAIL, not a note. **F4 and F11 are simulation output**, and `tools/loot.ts` is the simulation: it measures both, hands them back into `engine.json` (`--sync`), and gates that the stored copy still matches the run (LT10 · LT13). F13 is derived from `engine.json` `herbs`.
 - **Add mod stones come from the same two sources as tier stones, at a lower rate** — elites carry a 25% chance each, bosses drop 1 every time, which gives 6.25/hour against 30/hour for tier stones. Ascend costs 1 Add + 8 tier stones per piece, so the **tier stones bind** (16 hr for a full 12-piece set against 1.9 hr on Add stones alone) and Add stones only pace piece-by-piece.
-- **Elite spawn chance 1 in 5, each a mini-boss event (HP ×6 / damage ×4)** — with 40x more elites in the pool, the tier-stone yield per elite dropped from 2 to a 5% chance so total supply still reads F7 (decided D-041; supersedes P2-2).
-- **Zone count closed** — 9 zones × 10 levels with the 40.2 hr timeline (`world.md`); the 3 Item-quality steps in section 2 are the band view, not the zone count.
+- **Elite spawn chance 1 in 5, each a mini-boss event (HP ×6 / damage ×4)** — with 40x more elites in the pool, the tier-stone yield per elite dropped from 2 to a 5% chance so total supply still reads F7 (decided; supersedes P2-2).
+- **Zone count closed** — 18 zones × 10 levels with the level-100 checkpoint at 110.7 hr (`world.md` · `checks.md` E1-E5); the 3 Item-quality steps in section 2 are the band view, not the zone count.
 - **Drop Item quality spreads per the formula in section 1 item 4 (decided P2-1)** — high zone carries no low (mid 40% / high 60%). The section 3 measurement is run **with** that spread, so this line is closed rather than pending.
 

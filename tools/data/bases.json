@@ -1,5 +1,5 @@
 {
- "note": "The Base frames per slot, imported from item-base.md by tools/bases.ts --write. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks (D-123); school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. base_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, legacy_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the Shield / Book families. weapons and weapon_pools come from equipment-weapon.md and equipment-slot-weapon.md. tools/loot.ts and the client both read this file, and `node tools/bases.ts --checks` gates it against the docs so none of them can drift.",
+ "note": "The Base frames per slot, imported from item-base.md by tools/bases.ts --write. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks; school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. base_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, legacy_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the Shield / Book families. weapons and weapon_pools come from equipment-weapon.md and equipment-slot-weapon.md. weapon_frames is the A10 list per weapon type (from the Frames table in item-base.md), which the loot roll reads at step 2. tools/loot.ts and the client both read this file, and `node tools/bases.ts --checks` gates it against the docs so none of them can drift.",
  "roll_rule": "Bases roll equally inside their slot (item-base.md \"Base Rolling\"); a dual-wield off hand weapon uses that weapon type weight x 0.8.",
  "quality_weight_multiplier": 1.3,
  "mastery": {
@@ -1053,5 +1053,204 @@
     "stat_mod_flat"
    ]
   }
+ },
+ "weapon_frames": {
+  "one-handed sword": [
+   {
+    "name": "Arming Sword",
+    "base_mod": [
+     "physical_power_flat",
+     "attack_speed"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Longsword",
+    "base_mod": [
+     "physical_power_flat",
+     "accuracy"
+    ],
+    "weight": 1
+   }
+  ],
+  "one-handed axe": [
+   {
+    "name": "Splitting Axe",
+    "base_mod": [
+     "physical_power_flat",
+     "bleed_chance"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Cleaver",
+    "base_mod": [
+     "physical_power_flat",
+     "critical_chance"
+    ],
+    "weight": 1
+   }
+  ],
+  "dagger": [
+   {
+    "name": "Dirk",
+    "base_mod": [
+     "physical_power_flat",
+     "critical_chance"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Stiletto",
+    "base_mod": [
+     "critical_chance",
+     "attack_speed"
+    ],
+    "weight": 1
+   }
+  ],
+  "mace": [
+   {
+    "name": "Warhammer",
+    "base_mod": [
+     "physical_power_flat",
+     "stun_chance"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Cudgel",
+    "base_mod": [
+     "physical_power_flat",
+     "critical_damage"
+    ],
+    "weight": 1
+   }
+  ],
+  "wand": [
+   {
+    "name": "Bone Wand",
+    "base_mod": [
+     "magic_power_flat",
+     "cooldown_reduction"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Crystal Wand",
+    "base_mod": [
+     "magic_power_flat",
+     "elemental_power_flat"
+    ],
+    "weight": 1
+   }
+  ],
+  "staff": [
+   {
+    "name": "Battle Staff",
+    "base_mod": [
+     "magic_power_flat",
+     "max_mana_flat"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Runed Staff",
+    "base_mod": [
+     "magic_power_flat",
+     "elemental_alignment"
+    ],
+    "weight": 1
+   }
+  ],
+  "spear": [
+   {
+    "name": "Pike",
+    "base_mod": [
+     "physical_power_flat",
+     "accuracy"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Partisan",
+    "base_mod": [
+     "physical_power_flat",
+     "attack_speed"
+    ],
+    "weight": 1
+   }
+  ],
+  "two-handed sword": [
+   {
+    "name": "Greatsword",
+    "base_mod": [
+     "physical_power_flat"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Flamberge",
+    "base_mod": [
+     "physical_power_flat",
+     "critical_damage"
+    ],
+    "weight": 1
+   }
+  ],
+  "two-handed axe": [
+   {
+    "name": "Battle Axe",
+    "base_mod": [
+     "physical_power_flat",
+     "bleed_chance"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Halberd",
+    "base_mod": [
+     "physical_power_flat",
+     "accuracy"
+    ],
+    "weight": 1
+   }
+  ],
+  "bow": [
+   {
+    "name": "Longbow",
+    "base_mod": [
+     "physical_power_flat",
+     "accuracy"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Recurve Bow",
+    "base_mod": [
+     "physical_power_flat",
+     "attack_speed"
+    ],
+    "weight": 1
+   }
+  ],
+  "crossbow": [
+   {
+    "name": "Arbalest",
+    "base_mod": [
+     "physical_power_flat",
+     "armour_pen"
+    ],
+    "weight": 1
+   },
+   {
+    "name": "Hand Crossbow",
+    "base_mod": [
+     "physical_power_flat",
+     "critical_chance"
+    ],
+    "weight": 1
+   }
+  ]
  }
 }

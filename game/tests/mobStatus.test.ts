@@ -8,7 +8,7 @@ import { combineMods, newCurses, applyCurse } from '../src/sim/curse';
 import { playerSwing, mobSwing } from '../src/sim/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Item, Mob } from '../src/sim/types';
 
@@ -103,7 +103,7 @@ describe('control is bounded, never a lockout', () => {
 
   it('shock stops the clock but cannot hold it stopped', () => {
     const c = charWith('lightning', 100);
-    // one mob over a long fight: shock may hold, but only 15% of the seconds it is alive (D-067)
+    // one mob over a long fight: shock may hold, but only 15% of the seconds it is alive 
     const store = newMobStatusStore();
     const SECONDS = 200;
     let sawStopped = false;
@@ -195,7 +195,7 @@ describe('the store forgets a mob that left, and the sim runs the whole path', (
 
   it('a fire weapon in the sim sets burn on what it hits and the mob dies faster', () => {
     const s = newGame(101);
-    s.player.level = 60;
+    setLevel(s, 60);
     s.zone = 3; // a fire zone: our own fire Element is not countered there
     s.gear = emptyGear();
     s.gear[10] = {
@@ -210,6 +210,6 @@ describe('the store forgets a mob that left, and the sim runs the whole path', (
     }
     expect(sawStatus).toBe(true);
     expect(s.counters.kills).toBeGreaterThan(0);
-    expect(sm.byId['attack.flame_lash'].effect).toMatch(/burn/);
+    expect(sm.byId['attack.flame_wisp'].effect).toMatch(/burn/);
   });
 });

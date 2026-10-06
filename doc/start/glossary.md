@@ -76,7 +76,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Mod** | One rolled stat line on an item, read as `name value (Tier)` — e.g. `Physical power flat 45 (T2)`. |
 | **Flat** | A value added straight into the stat before any % modifier runs. `Str flat 24` adds 24 to Str. |
 | **%** | A multiplier applied to the finished stat. `Str % 5` makes the whole Str total 5% larger. Flat lands first, then % multiplies it. |
-| **Stat Mod** | The Mods that are neither Offensive nor Defensive — `Stat Mod flat`, rolling any of the 7 Core stats. It rolls on **every** item and no slot blocks it; the `Stat Mod %` sibling is retired (D-114). |
+| **Stat Mod** | The Mods that are neither Offensive nor Defensive — `Stat Mod flat`, rolling any of the 7 Core stats. It rolls on **every** item and no slot blocks it; the `Stat Mod %` sibling is retired. |
 | **Offensive** | Attack-side Mods. Roll on weapon slots only. |
 | **Defensive** | Defence-side Mods. Roll on the 10 non-weapon slots only. |
 | **Base Mod** | The first line of a dropped item — the frame's own line, rolled from the slot's Base-Mod pool. Unremovable: the craft verbs never touch it (item-base.md). |
@@ -152,7 +152,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **character bag** | The 50-slot bag of carried consumables: stones stack 999/slot and are **weightless**, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. |
 | **stash** | Town storage, organisation only, bought with gold (`towns.md`). Never grants power and never auto-converts. |
 | **herb** | A plant drop, consumed rather than equipped or sold. Always kept by the filter — it never dissolves. Its rate feeds the herbalist's demand and the pouch ladder. |
-| **junk** | A flavoured drop from each species (Rat Tail, Golem Shard…), always kept, stacks 999/slot and is **weightless**, and is sold to the Settlement Counterhand for gold — gold's primary mint (Ragnarok-style). Has three rarities (common · uncommon · rare): rarer junk is dearer and drops less often, so expected gold per kill is flat. Not gear, not a stone. |
+| **junk** | A flavoured drop from each species (Slime Jelly, Golem Shard…), always kept, stacks 999/slot and is **weightless**, and is sold to the Settlement Counterhand for gold — gold's primary mint (Ragnarok-style). Has three rarities (common · uncommon · rare): rarer junk is dearer and drops less often, so expected gold per kill is flat. Not gear, not a stone. |
 
 # Town and Economy
 
@@ -174,8 +174,8 @@ Three consequences worth remembering, because most defensive confusion comes fro
 
 | Term | Meaning |
 |---|---|
-| **species** | A creature lineage (Rat · Husk · Drake). Decides a stat multiplier vector, an accuracy tier and a damage type. **Not** a class, and not zone-locked: the same species at a higher level is the same species. |
-| **body class** | The four mob sizes — Small · Medium · Large · Boss (`engine.json` `mob.sizes`). Decides HP, damage-taking and evasion multipliers and whether it can appear in a group: only Small and Medium form groups, Large and Boss appear alone. **Elite is not a body class** — it is a rarity flag forced onto a Large body. |
+| **species** | A creature lineage (Goblin · Golem · Elf). Decides a stat multiplier vector, an accuracy tier and a damage type. **Not** a class, and not zone-locked: the same species at a higher level is the same species. |
+| **body class** | The four mob sizes — Small · Medium · Large · Boss (`engine.json` `mob.sizes`). Decides HP, damage-taking and evasion multipliers and whether it can appear in a group: only Small and Medium form groups, Large and Boss appear alone. It is also the axis a weapon's size ladder reads: each weapon type carries a Small/Medium/Large multiplier on the physical share of its hit, and a Boss declares which of the three columns it reads. **Elite is not a body class** — it is a rarity flag forced onto a Large body. |
 | **Base school** | The three armour families a Base can belong to - light (Evasion), heavy (Armour), cloth (Energy Shield). It decides the Gear Mod a piece carries, and it is what a Collector set is built from. |
 | **weapon group** | The three families a weapon belongs to - melee, ranged, magic. It decides which attack skills can use the weapon and which stat the weapon scales. A dagger is melee, not ranged. |
 | **Elite** | A rarity flag on a Large body, not a fifth size. Spawns as its own event and drops its own stone. |

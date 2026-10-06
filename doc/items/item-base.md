@@ -20,7 +20,7 @@ A Base does two things, and **is intentionally allowed to do nothing else**
 
 # Line 1 · Base Mod (the frame's own line)
 
-Every item is **seven lines**, and the first one belongs to the frame (D-123):
+Every item is **seven lines**, and the first one belongs to the frame:
 
 | Line | Kind | Removable | Comes from |
 |---|---|---|---|
@@ -168,13 +168,42 @@ The last two rows are the off hand's families: a Shield frame (Buckler · Kite S
 
 The off hand's two families: **Shield** (Buckler · Kite Shield) carries the block line, **Book** (Grimoire) carries the magic pair — the two rows of the Line 1 table above name each family's Mods.
 
-- Main-hand weapons: **ruled that a weapon type MAY carry more than one Base** (A10 · D-072) — the old "the weapon type is already its Base" is lifted, so the same type can ship as frame variants. The concrete Base frames per type and their effect on the craftable-Mod count are enumerate-and-cage work now tracked in `harness/todo.md` section B, not invented here.
-- **`rod` is removed from every list** (D-123): the magic main hand is wand and staff, and the off hand carries the Book. The weapon table is eleven types (`equipment-weapon.md`).
+- Main-hand weapons: **ruled that a weapon type MAY carry more than one Base** (A10) — the old "the weapon type is already its Base" is lifted, so the same type can ship as frame variants. The frames are enumerated below: the loot roll picks the type and then the frame inside it, so the frame is what the piece is called and what it forces — which is why two frames of one type differ in their craftable-Mod count. **The first frame of every type carries exactly the lines that type forced before the frames existed**, so no measured loot number moved (`bases.ts` BS9).
+- **`rod` is removed from every list**: the magic main hand is wand and staff, and the off hand carries the Book. The weapon table is eleven types (`equipment-weapon.md`).
 - Dual-wield (off hand is a weapon) uses that weapon type weight x 0.8
+
+## Frames per weapon type
+
+| Type | Frame | Forced Base-Mod lines |
+|---|---|---|
+| one-handed sword | Arming Sword | physical_power_flat · attack_speed |
+| one-handed sword | Longsword | physical_power_flat · accuracy |
+| one-handed axe | Splitting Axe | physical_power_flat · bleed_chance |
+| one-handed axe | Cleaver | physical_power_flat · critical_chance |
+| dagger | Dirk | physical_power_flat · critical_chance |
+| dagger | Stiletto | critical_chance · attack_speed |
+| mace | Warhammer | physical_power_flat · stun_chance |
+| mace | Cudgel | physical_power_flat · critical_damage |
+| wand | Bone Wand | magic_power_flat · cooldown_reduction |
+| wand | Crystal Wand | magic_power_flat · elemental_power_flat |
+| staff | Battle Staff | magic_power_flat · max_mana_flat |
+| staff | Runed Staff | magic_power_flat · elemental_alignment |
+| spear | Pike | physical_power_flat · accuracy |
+| spear | Partisan | physical_power_flat · attack_speed |
+| two-handed sword | Greatsword | physical_power_flat |
+| two-handed sword | Flamberge | physical_power_flat · critical_damage |
+| two-handed axe | Battle Axe | physical_power_flat · bleed_chance |
+| two-handed axe | Halberd | physical_power_flat · accuracy |
+| bow | Longbow | physical_power_flat · accuracy |
+| bow | Recurve Bow | physical_power_flat · attack_speed |
+| crossbow | Arbalest | physical_power_flat · armour_pen |
+| crossbow | Hand Crossbow | physical_power_flat · critical_chance |
+
+A type's frames roll **equally**, like every other Base inside its slot, and the **reference frame** is the first row — so a frame list widens a type without moving what the ladder already priced. Every frame line must be a real Mod and the reference row must match the type's live forced pair, or the bases gate fails. `bases.ts --write` imports this table into `bases.json` `weapon_frames`, and both the drop roll and `equipment-weapon.md`'s frame table read it from there.
 
 # Gear Mod school per Base (PoE)
 
-Heavy Bases (Sallet · Plate Vest · Cuisses · Plated Greaves · Iron Gauntlets · Heavy Mantle · Knight's Helm · Mail Coat · Sentinel's Greaves · Warden's Sabatons · Vanguard's Gauntlets) carry Armour · light Bases (Hood · Ring Mail · Breeches · Strapped Boots · Nimble Mitts · Traveler's Cloak · Hunter's Hood · Jerkin · Scout's Treads · Ranger's Gloves) carry Evasion · cloth Bases (Circlet · Vestment · Legwraps · Silk Slippers · Silk Wraps · Silk Drape · Shadow Coat · Dancer's Leggings) carry Energy Shield. The three-way Bases (Crown · Regalia · Astral Robes · Striders of the Dawn · Handwrought Reliquary · Mantle of the Bulwark · Bulwark Cape · Astral Shroud) take the school of the heaviest type they carry, so a Quality Stone always has something to push: Armour for the armour-bearing frames, Evasion for the rest. Only helmet, chest, pant, boots, and gloves roll the Gear Mod — belt, rings, amulet, and off hand roll none of it, and the cape carries its defence type on the Base Mod line alone (D-123), because the Quality-Stone ladder belongs to the five slots above. Each +1 from Quality Stone raises that Gear Mod. Formulas live in crafting.md; the ladder's reachable value is published as `craft.gear_mod_per_level` and bounded by that school's own T1 ceiling in `mod_max`, which **X42** recomputes and **SV7** survives at the boss.
+Heavy Bases (Sallet · Plate Vest · Cuisses · Plated Greaves · Iron Gauntlets · Heavy Mantle · Knight's Helm · Mail Coat · Sentinel's Greaves · Warden's Sabatons · Vanguard's Gauntlets) carry Armour · light Bases (Hood · Ring Mail · Breeches · Strapped Boots · Nimble Mitts · Traveler's Cloak · Hunter's Hood · Jerkin · Scout's Treads · Ranger's Gloves) carry Evasion · cloth Bases (Circlet · Vestment · Legwraps · Silk Slippers · Silk Wraps · Silk Drape · Shadow Coat · Dancer's Leggings) carry Energy Shield. The three-way Bases (Crown · Regalia · Astral Robes · Striders of the Dawn · Handwrought Reliquary · Mantle of the Bulwark · Bulwark Cape · Astral Shroud) take the school of the heaviest type they carry, so a Quality Stone always has something to push: Armour for the armour-bearing frames, Evasion for the rest. Only helmet, chest, pant, boots, and gloves roll the Gear Mod — belt, rings, amulet, and off hand roll none of it, and the cape carries its defence type on the Base Mod line alone, because the Quality-Stone ladder belongs to the five slots above. Each +1 from Quality Stone raises that Gear Mod. Formulas live in crafting.md; the ladder's reachable value is published as `craft.gear_mod_per_level` and bounded by that school's own T1 ceiling in `mod_max`, which **X42** recomputes and **SV7** survives at the boss.
 
 # Three Paths Bases Actually Create (measured)
 
@@ -185,7 +214,7 @@ Heavy Bases (Sallet · Plate Vest · Cuisses · Plated Greaves · Iron Gauntlets
 | balanced (Hood · Ring Mail · Breeches · Strapped Boots · Chain Clasp · Nimble Mitts · Iron Band ×2 · Jade Amulet · Jade Stud · Traveler's Cloak) | 296 | 385 | 500 | 0% |
 | armored (Sallet · Plate Vest · Cuisses · Plated Greaves · War Belt · Iron Gauntlets · Moonstone Signet ×2 · Onyx Talisman · Onyx Drop · Heavy Mantle) | 442 | 575 | 747 | 0% |
 
-Printed by `node tools/bases.ts --blocks` from `tools/data/bases.json`. Mid and high apply `quality_weight_multiplier` (×1.3) per Item quality band, the same way `weightAtQuality` applies it to a single item. The held weapon is not folded into these sets: it weighs 25 to 85 at Base weight (`equipment-weapon.md` · D-101), the same ×-quality multiplier applies, and an off-hand weapon counts ×0.8 of its own type (`mod-pool.md`).
+Printed by `node tools/bases.ts --blocks` from `tools/data/bases.json`. Mid and high apply `quality_weight_multiplier` (×1.3) per Item quality band, the same way `weightAtQuality` applies it to a single item. The held weapon is not folded into these sets: it weighs 25 to 85 at Base weight (`equipment-weapon.md`), the same ×-quality multiplier applies, and an off-hand weapon counts ×0.8 of its own type (`mod-pool.md`).
 <!-- END GENERATED:three-paths -->
 
 - This is what gives **Str a real second job** without locking anything: heavy armor is not a ban, it is a bill
@@ -204,7 +233,7 @@ Printed by `node tools/bases.ts --blocks` from `tools/data/bases.json`. Mid and 
 | mod-pool.md | Per-slot weight table → becomes per-*Base* weight |
 | formula.md section 11 | The penalty numbers are the ones printed above (cloth pays nothing, the heavy paths pay up to the Cap) |
 | equipment-slot.md | Per-slot Primary/Secondary → moved here per Base · the old notes 2 (Evasion Flat on only 2 slots) and 3 (Alignment on only 2 slots) are **retired**: the union pools now give Evasion Flat 4 slots, and **Elemental alignment and Elemental resistance are separated onto disjoint slot families** (alignment · gloves · ring · amulet · off hand; resistance · helmet · chest · pant · boots · belt · cape) so an Element build never trades survival against the line that gates its status and scales its Element damage — see the generated Mod availability table in equipment-slot-pools.md |
-| item-rarity.md | Third-Rarity (Unique) **cut** (D-009 5c) — Rarity stays two levels; Base frame + Mods carry identity |
-| crafting.md | Open question "item Base" in the missing-slots list → now answered · **per-item craft-attempt ceiling: none** (D-009 5b) — structural ceilings (Refine T1 · Ascend high quality) already bound it |
+| item-rarity.md | Third-Rarity (Unique) **cut** — Rarity stays two levels; Base frame + Mods carry identity |
+| crafting.md | Open question "item Base" in the missing-slots list → now answered · **per-item craft-attempt ceiling: none** — structural ceilings (Refine T1 · Ascend high quality) already bound it |
 | loot.md section 1 | Roll order gains a "pick Base" step before Primary/Secondary |
 

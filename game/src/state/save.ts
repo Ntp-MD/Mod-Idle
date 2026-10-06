@@ -14,9 +14,9 @@ import { E, BASES, loot } from '../engine/client';
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
 // converted — a converted save could carry a Reroll baseline or craft counter that never existed.
-// v4 is the 7-line skeleton: a v3 item is re-stamped, not discarded (D-123). v5 bakes the Core stat
-// onto every Stat Mod line, so a v4 piece keeps the stat its player chose (D-127). v6 grows the worn
-// set to a thirteenth slot, the earring (D-131), so a v5 gear array is padded back to full length.
+// v4 is the 7-line skeleton: a v3 item is re-stamped, not discarded. v5 bakes the Core stat
+// onto every Stat Mod line, so a v4 piece keeps the stat its player chose. v6 grows the worn
+// set to a thirteenth slot, the earring, so a v5 gear array is padded back to full length.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
@@ -209,7 +209,7 @@ export async function readSave(slot: SlotName): Promise<GameState | null> {
 
 /**
  * A v3 item predates the 7-line skeleton, so it gains the Base Mod its frame forces and keeps every
- * line it had — the old Legacy pair slides to lines 2-3 (`D-123`). The line is built at the lowest
+ * line it had — the old Legacy pair slides to lines 2-3 (``). The line is built at the lowest
  * Tier and lowest value of the piece's quality band with no RNG, so two loads of one save agree to
  * the digit. A frame the rename left unmatched simply keeps its lines, with no Base Mod.
  */
@@ -223,7 +223,7 @@ function restampItem(item: any): void {
 }
 
 /**
- * A v4 item predates the stat roll (D-127): its Stat Mod line was told which Core stat to feed by the
+ * A v4 item predates the stat roll: its Stat Mod line was told which Core stat to feed by the
  * player (`item.chosenStat`), and the line itself carried none. This bakes that choice onto the line,
  * or the piece's own first stat when nobody chose, so a migrated save keeps exactly the numbers it had
  * and every later Stat Mod line names its own stat the way a fresh drop does.
@@ -250,12 +250,17 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     for (const tab of s.stash || []) for (const item of tab || []) restatItem(item);
   }
   if (fromVersion < 6 && Array.isArray(s.gear)) {
-    // the earring is a thirteenth worn slot (D-131), so a v5 save's twelve-long gear array is
+    // the earring is a thirteenth worn slot, so a v5 save's twelve-long gear array is
     // padded with the empty slots a fresh character has; the piece already worn keeps its index
     const n = E.stat.item_slots as number;
     while (s.gear.length < n) s.gear.push(null);
   }
   if (!s.skills) s.skills = newSkillState();
+  // a save from before §14 has no per-slot mode and no shared condition list: default them, so the
+  // rotation keeps behaving exactly as it did (`always`) until the player changes something
+  if (!s.skills.mode) s.skills.mode = {};
+  if (!s.skills.conditions) s.skills.conditions = { boss: false, hpBelowPct: 0, statusMissing: [] };
+  if (!Array.isArray(s.skills.conditions.statusMissing)) s.skills.conditions.statusMissing = [];
   if (!s.healUp) s.healUp = null;
   if (!s.spawnIn && s.spawnIn !== 0) s.spawnIn = 0;
   if (!s.counters.zoneKills) s.counters.zoneKills = {};
@@ -265,7 +270,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.farm) s.farm = newFarm();
   // a farm saved before the automation block existed gets it off; the player opts in
   if (s.farm && !s.farm.autoFarm) { s.farm.autoFarm = { plant: false, harvest: false, brew: false }; s.farm.lastAutoFarmAt = -9999; }
-  // an older character auto-allocates its points (the idle default); manual is the opt-out (D-141)
+  // an older character auto-allocates its points (the idle default); manual is the opt-out 
   if (s.player && s.player.autoSpend == null) s.player.autoSpend = true;
   if (!s.stash) s.stash = [];
   // an older save auto-dissolves nothing; the player opts in

@@ -6,7 +6,7 @@ import type { Item, ModLine } from './types';
  * slot → Base (frame, weight) → Rarity (how many of the 7 lines are filled) → Item quality
  * (value range) → Tier (sub-range) → value.
  *
- * The skeleton is seven lines (item-base.md · D-123): line 1 is the Base Mod, lines 2-3 the Legacy
+ * The skeleton is seven lines (item-base.md): line 1 is the Base Mod, lines 2-3 the Legacy
  * pair, lines 4-7 the Random lines a Rarity fills at drop. The Base tables come from
  * `tools/data/bases.json`, which `node tools/bases.ts --checks` gates against `item-base.md`, so the
  * game rolls from the same frame list the loot simulation scores.
@@ -14,10 +14,10 @@ import type { Item, ModLine } from './types';
 
 /**
  * Weapon weight is a column in `equipment-weapon.md`, imported into `bases.json` by
- * `tools/bases.ts --write` (B13 · D-101) — every type carries one, so no weapon reads as weightless,
+ * `tools/bases.ts --write` (B13) — every type carries one, so no weapon reads as weightless,
  * and an off-hand weapon counts ×`dual_wield_weight_mult` of its own type (`mod-pool.md`). The rule
  * itself lives in `engine/index.ts`, because the cages have to weigh the opening character's sword
- * exactly the way the client does (D-108); this is the client's call site.
+ * exactly the way the client does; this is the client's call site.
  */
 export const weaponWeightOf = (name: string, slot = 'main hand'): number =>
   eng.weaponWeightOf(BASES, name, slot);
@@ -33,7 +33,7 @@ function pickWeighted(rng: () => number, options: any[]): any {
 }
 
 /**
- * Step 2 — the frame inside the rolled slot (loot.md §1 · item-base.md · D-123). Main hand picks a
+ * Step 2 — the frame inside the rolled slot (loot.md §1 · item-base.md). Main hand picks a
  * weapon type by weight; the off hand picks equally among its three frames (Buckler · Kite Shield ·
  * Grimoire) and one dual-wielded weapon, so a shield or a book can actually drop; every other slot
  * picks a Base by weight.
@@ -66,7 +66,7 @@ export function rollDrop(rng: () => number, band: string, _weaponAspd?: number, 
     : loot.pickBand(rng, loot.QUALITY_MIX[band === 'high_full_lck' ? 'high' : band]);
   const u = rng(); // one Tier draw per item, shared by line 1 and every Random line
 
-  // line 1 is the Base Mod (D-123): it is rolled first, off the frame, before any Random line
+  // line 1 is the Base Mod: it is rolled first, off the frame, before any Random line
   const lines: ModLine[] = loot.baseModRoll(BASES, slot, frame, weapon, rng, q, u);
   const taken = new Set<string>(lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
   const pool = loot.poolFor(BASES, slot, frame, weapon).filter((e: any) => !taken.has(e.id));
@@ -81,7 +81,7 @@ export function rollDrop(rng: () => number, band: string, _weaponAspd?: number, 
     const slice = loot.tierSlice(u, loot.sliceCount(id, q));
     const [lo, hi] = loot.rangeOf(id, q, slice);
     // a Stat Mod bakes the Core stat it feeds here, at drop, the way a PoE implicit carries its own
-    // stat; every other id leaves `stat` undefined (`mods.json` `rolls`, D-127)
+    // stat; every other id leaves `stat` undefined (`mods.json` `rolls`)
     const stat = loot.statOf(id, rng);
     // an Elemental line always carries its Element: it is a stored value, never derived from a
     // resistance number, because crafting must not change it (item-rarity.md · save.md)

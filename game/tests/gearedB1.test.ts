@@ -10,7 +10,7 @@ import type { StatKey } from '../src/engine/client';
 import type { GameState, Item } from '../src/sim/types';
 
 /**
- * B1 · the measurement the fold was taken from, and the reason it came out as none (D-103 · checks.md D4/D17).
+ * B1 · the measurement the fold was taken from, and the reason it came out as none (checks.md D4/D17).
  *
  * `mob_HP(L) = typical_gear_DPS(L) × (1 + skill_per_level × L)` says how much of a level-L mob's HP
  * is paid for by the skill list rather than by the gear. `skillShare.test.ts` measures the list on a
@@ -31,7 +31,9 @@ import type { GameState, Item } from '../src/sim/types';
 const CHECKPOINTS = [30, 60, 90];
 const WINDOW_SEC = 600;
 const HOUR = 3600;
-const RUN_CAP_HR = 48;
+// The run cap is a safety net, never a target: adding a skill row dilutes the duplicate ladder (fresh
+// drops spread over a bigger pool), so the loop levels a little slower and the cap needs the headroom.
+const RUN_CAP_HR = 60;
 
 const clone = (s: GameState) => JSON.parse(JSON.stringify(s)) as GameState;
 const barRows = (s: GameState) => s.skills.list.filter(Boolean).length
@@ -51,7 +53,7 @@ interface Theme {
 
 const FAST: Theme = {
   label: 'fast hit — Agi · aspd · the statuses a hit leaves behind',
-  bar: ['attack.riposte', 'attack.flame_lash', 'attack.frost_nova', 'attack.chain_spark',
+  bar: ['attack.flame_wisp', 'attack.frost_bolt', 'attack.spark', 'attack.chain_lightning',
     'attack.puncture', 'attack.elemental_break', 'attack.whirlwind'],
   prefer: ['attack_speed', 'accuracy', 'elemental_power_flat', 'elemental_power', 'elemental_alignment',
     'dodge_flat', 'cooldown_reduction'],
@@ -60,7 +62,7 @@ const FAST: Theme = {
 
 const HEAVY: Theme = {
   label: 'big hit — Str · one heavy press',
-  bar: ['attack.cleave', 'attack.headshot', 'attack.piercing_shot', 'attack.execute', 'attack.retribution'],
+  bar: ['attack.cleave', 'attack.headshot', 'attack.piercing_shot', 'attack.pierce_the_veil', 'attack.shield_bash'],
   prefer: ['physical_power', 'physical_power_flat', 'critical_chance', 'critical_damage', 'accuracy'],
   stat: 'str',
 };
@@ -99,7 +101,7 @@ function atCap(s: GameState) {
  * The decision an idle run never makes: wear the best piece the bag holds in each slot, and leave a
  * slot alone when the candidate is weaker than what it already wears. It goes through the same verb
  * the Equip button calls, so the sheet is built by the game's own rules rather than a test typing
- * numbers into it (`harness/decisions.md` D-089 keeps this off the AFK path). With a theme, a piece
+ * numbers into it (keeps this off the AFK path). With a theme, a piece
  * that carries one of its lines wins the slot first, and the piece's Stat Mod is told that stat —
  * which is the player's own choice, made through the same field the panel writes.
  */
@@ -125,7 +127,7 @@ function dressUp(s: GameState, t?: Theme) {
       if (pick < 0) continue;
       for (const l of s.bag[pick].lines) {
         // the rebuild spends the Stat Mod on the stat its theme buys, the way a player would hold a
-        // piece whose rolled stat is the one the build wants (D-127 — the stat is baked at drop now)
+        // piece whose rolled stat is the one the build wants (— the stat is baked at drop now)
         if (l.id === 'stat_mod_flat') l.stat = t.stat;
       }
       if (equipFromBag(s, pick).ok) worn++;
@@ -152,7 +154,7 @@ function dressUp(s: GameState, t?: Theme) {
 
 /**
  * A player who has outgrown the zone walks to the next one, because the Road is the only thing that
- * opens a settlement (`world.md` reach queue · D-089). `travel: 'forward'` alone cannot do it: it
+ * opens a settlement (`world.md` reach queue). `travel: 'forward'` alone cannot do it: it
  * walks between settlements already opened, and the next one is by definition not open yet.
  */
 function walkOnward(s: GameState): boolean {
@@ -171,7 +173,7 @@ function walkOnward(s: GameState): boolean {
 /** One hunt, from the opening minute to the first checkpoint reached — the gear is whatever fell. */
 function huntTo(level: number, seed = 20261004): { s: GameState; hours: number } {
   const s = newGame(seed);
-  // the filter ships off (D-122), so this run arms it to reproduce the design's published keep-rate;
+  // the filter ships off, so this run arms it to reproduce the design's published keep-rate;
   // a bag kept with the filter off fills and pauses, which is not the character the curve prices
   setRule(s.filter, 'all', { enabled: true });
   s.travel = 'forward';
@@ -198,7 +200,7 @@ function withBar(s: GameState, t: Theme) {
 describe('the fold measured on gear the loop actually produced', () => {
   it('levels to every checkpoint with its own drops, then prints gear-only dps and the list share', () => {
     const s = newGame(20261004);
-    setRule(s.filter, 'all', { enabled: true }); // the filter ships off (D-122); arm it to keep the published rate
+    setRule(s.filter, 'all', { enabled: true }); // the filter ships off; arm it to keep the published rate
     s.travel = 'forward';
     const rows: string[] = [];
     const seen: number[] = [];
@@ -244,7 +246,7 @@ describe('the fold measured on gear the loop actually produced', () => {
       + rows.map((r) => '  ' + r.replace(/\n/g, '\n  ')).join('\n'));
 
     expect(seen).toEqual(CHECKPOINTS); // the run must reach them, or the reading is not the design's
-    // The list is never dead weight at real gear. The 7-line skeleton (D-123) put more lines on every
+    // The list is never dead weight at real gear. The 7-line skeleton put more lines on every
     // drop than the fold was anchored against, so the L30 share sits just under 1 instead of the old
     // >1 — that uplift is unpriced player power, and `checks.md` D34 carries the debt (H1).
     expect(shares.every((x) => x > 0.9)).toBe(true);

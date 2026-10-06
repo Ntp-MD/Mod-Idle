@@ -4,7 +4,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { mobSwing, playerSwing } from '../src/sim/combat';
 import { newCurses, applyCurse, modsOn, tickCurses, psMult, accMult, takenMult, NO_CURSE, curableRows } from '../src/sim/curse';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import type { Mob } from '../src/sim/types';
 
 const row = (id: string) => sm.byId[id];
@@ -49,11 +49,11 @@ describe('a curse writes its own row onto the mob', () => {
     expect(accMult(modsOn(cursed('curse.blinding_mark'), 'mob-1'))).toBe(1 + valueOf('curse.blinding_mark', 'accuracy') / 100);
     expect(takenMult(modsOn(cursed('curse.expose'), 'mob-1'))).toBe(1 + valueOf('curse.expose', 'damage_taken') / 100);
     // the count is read from the roster, not typed: any curse whose row states a target number is in.
-    // An attack that states a target number (Puncture, Flame Lash) writes stacks through the mob's
+    // An attack that states a target number (Puncture, Flame Wisp) writes stacks through the mob's
     // status store instead, so it is not in the list the panel offers to cure.
     expect(curableRows().length).toBe(
       sm.all().filter((s: any) => s.type === 'curse' && (s.effects || []).some((e: any) => e.subject === 'target')).length);
-    expect(curableRows().length).toBeGreaterThan(5); // the status curses joined them (D-096)
+    expect(curableRows().length).toBeGreaterThan(5); // the status curses joined them 
   });
 });
 
@@ -128,7 +128,7 @@ describe('the clock runs out', () => {
 
   it('the sim attaches a landed curse and its log says so', () => {
     const s = newGame(61);
-    s.player.level = 50;
+    setLevel(s, 50);
     s.zone = 4;
     s.skills.owned['curse.weaken'] = 1;
     s.skills.list[0] = 'curse.weaken';

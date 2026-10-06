@@ -63,7 +63,7 @@ const BUILDS = [
   { id: 'mix', split: { str: 7, vit: 3, agi: 3 }, themes: THEMES.mix },
   { id: 'tank', split: { vit: 13 }, themes: THEMES.tank },
   { id: 'evasion', split: { agi: 13 }, themes: THEMES.evasion },
-  // Evasion reads Dex, so the evasion build carries a Dex leg alongside its Agi (D-112)
+  // Evasion reads Dex, so the evasion build carries a Dex leg alongside its Agi 
 ];
 
 const SLOT_MOD_ROLLS: Record<string, any> = {
@@ -103,7 +103,7 @@ function build(b: any, L = S.level_cap, gearMod = 0): any {
   const res = (vit * K.K_VIT_RES) * (1 + resPct);
   const cdr = (agi * 0) + 0;
   // the Gear Mod is a second copy of the theme's own defensive line at the upgrade value
-  // (`item-base.md` · D-104); Energy Shield is a pool this table does not spend and Evasion is not
+  // (`item-base.md`); Energy Shield is a pool this table does not spend and Evasion is not
   // modelled here at all, so only the Armour school can raise this gate
   const evRating = dex * K.K_EVASION + evFlat + (evPct / 100) * (dex * K.K_EVASION + evFlat);
   const evAgi = agi / (1 / K.K_AGI_EVAS);
@@ -111,7 +111,7 @@ function build(b: any, L = S.level_cap, gearMod = 0): any {
   return { b, str, vit, dex, agi, hp, regen, res, cdr, evRating, evAgi, armour, hpPct, resPct, cdrPct, manaPct, esFlat };
 }
 
-// Evasion: the Dex rating rolls against that mob's accuracy, then Agi adds points (D-112)
+// Evasion: the Dex rating rolls against that mob's accuracy, then Agi adds points 
 const evasionVs = (r: any, mobAcc: any) => eng.evasionChance(r.evRating, r.evAgi, mobAcc);
 
 // ---------------------------------------------------------------- engagements
@@ -252,7 +252,7 @@ function gates() {
   add('SV1', bad.length === 0, `every build has a positive pool, regen and Evasion rating${bad.length ? ' · ' + bad.map((r: any) => r.b.id).join(', ') : ''}`);
 
   const tanks = built.find((r: any) => r.b.id === 'tank'), glass = built.find((r: any) => r.b.id === 'glass');
-  // D-114 removed the per-item Core Stat % multiplier, so the widest pool separation the table can
+  // removed the per-item Core Stat % multiplier, so the widest pool separation the table can
   // have is now fully determined: a full Vit spread against a build that spent its twelve items on
   // another stat, over the shared per-level term. The old `> 2x` band was priced while the %
   // multiplier still existed and no build can reach it any more, so the gate measures the separation
@@ -276,7 +276,7 @@ function gates() {
 
   // The G5 promise lives here: at the level cap the boss must Push the AFK builds, and a heal round
   // must open the door for the themes that spend their items on surviving. Which themes pass is
-  // published, not just how many: D-112 folded Dodge into one capped Evasion line and D-114 removed
+  // published, not just how many: folded Dodge into one capped Evasion line and removed
   // the Core Stat % multiplier, so a heal round now buys the two defensive themes and not the glass
   // build. That is the honest shape of the answer — a damage theme does not out-heal a boss — and a
   // bare count would let any other pair flip and still read as PASS.
@@ -285,7 +285,7 @@ function gates() {
   const pass = healed(bossRows);
   add('SV6', pushed >= 3 && sameSet(pass, HEAL_PASS), `the G5 boss gate holds at level ${S.level_cap}: ${pushed}/4 builds Pushed without heal, and one heal round (×${HEAL_MULT}) clears it for ${pass.join(', ') || 'nobody'} — AFK cannot beat the boss and the themes that cast heal can${wrongTheme(pass)}`);
 
-  // D-104 · the Upgrade ladder is a bounded line, and the bound has to hold against the boss as well:
+  // · the Upgrade ladder is a bounded line, and the bound has to hold against the boss as well:
   // every Gear Mod slot at +Cap is one more copy of the theme's own defensive line at the published
   // per-step value, and that is what checks.md H1 asks to be paid for.
   const gmSlots = (SLOT_MOD_ROLLS['Armour flat'] || []).length;
@@ -300,7 +300,7 @@ function gates() {
     `a full ${gmSlots}-slot Gear Mod set at +${E.craft.upgrade_cap} is +${GM_FULL} Armour on the heavy theme (${f1(tankUp.e.pct)}% of pool against the bare ${f1(bareTank.e.pct)}%) and the G5 promise still holds: ${pushedUp}/4 builds Pushed without heal, and the heal round still clears it for ${passUp.join(', ') || 'nobody'}${wrongTheme(passUp)}`);
 
   // B4 · mob skills are a re-timing of the priced `mob_PS`, never extra power (`combat.md` §5b ·
-  // D-067), so the shape that matters is how much of the pool one second of that damage can take.
+  //), so the shape that matters is how much of the pool one second of that damage can take.
   // No mob skill list exists yet to name a window, so the cage bounds the window instead of guessing
   // one: an AFK-reachable mob must not be able to spend two seconds of its own budget in one instant
   // and still empty the pool — the same promise SV4 makes about the average.

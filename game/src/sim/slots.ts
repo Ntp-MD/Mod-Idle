@@ -7,7 +7,7 @@ import type { GameState } from './types';
  * slot at all (`glossary.md` · `loot.md` §4 · `engine.json` `inventory`).
  *
  * Until now the client counted every one of those media as an unbounded number, so the bag existed
- * on paper only (`harness/todo.md` B15). Nothing here adds a number: the caps, the slot count and the
+ * on paper only until this module. Nothing here adds a number: the caps, the slot count and the
  * overflow verb all come from `inventory`, and the verb is the one the doc already chose —
  * `stop_pickup` — so a grant that would not fit is simply not made, and is never converted into a
  * different medium or deleted.
@@ -97,7 +97,7 @@ export const fits = (state: GameState, bucket: Record<string, number>, key: stri
   return slotsFor(before + amount, cap) - slotsFor(before, cap) <= slotsFree(state);
 };
 
-/** Extra character-bag slots the Porter's pouch lines sold — each is a `space` line (D-092). */
+/** Extra character-bag slots the Porter's pouch lines sold — each is a `space` line. */
 export function pouchSlots(state: GameState): number {
   const owned = (state.town && state.town.owned) || [];
   let granted = 0;

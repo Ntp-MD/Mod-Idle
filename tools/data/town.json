@@ -114,7 +114,7 @@
         "fire"
       ],
       "base_bias_flavor": "cloth",
-      "budget_hr": 0.4,
+      "budget_hr": 1.2,
       "npcs": [
         "counterhand",
         "porter",
@@ -138,7 +138,7 @@
         "poison"
       ],
       "base_bias_flavor": "cloth / light",
-      "budget_hr": 1,
+      "budget_hr": 2.9,
       "npcs": [
         "counterhand",
         "porter",
@@ -162,7 +162,7 @@
         "fire"
       ],
       "base_bias_flavor": "light (Evasion)",
-      "budget_hr": 1.5,
+      "budget_hr": 4.3,
       "npcs": [
         "counterhand",
         "steward",
@@ -194,7 +194,7 @@
         "lightning"
       ],
       "base_bias_flavor": "light / Ring Mail",
-      "budget_hr": 1.9,
+      "budget_hr": 5.5,
       "npcs": [
         "counterhand",
         "porter",
@@ -219,7 +219,7 @@
         "cold"
       ],
       "base_bias_flavor": "light",
-      "budget_hr": 3.1,
+      "budget_hr": 9,
       "npcs": [
         "counterhand",
         "porter",
@@ -245,7 +245,7 @@
         "lightning"
       ],
       "base_bias_flavor": "Ring Mail",
-      "budget_hr": 4.5,
+      "budget_hr": 13,
       "npcs": [
         "counterhand",
         "steward",
@@ -276,7 +276,7 @@
         "chaos"
       ],
       "base_bias_flavor": "heavy (Armour)",
-      "budget_hr": 4.9,
+      "budget_hr": 14.2,
       "npcs": [
         "counterhand",
         "porter",
@@ -303,7 +303,7 @@
         "cold"
       ],
       "base_bias_flavor": "heavy",
-      "budget_hr": 6.3,
+      "budget_hr": 18.2,
       "npcs": [
         "counterhand",
         "porter",
@@ -330,8 +330,8 @@
         "chaos"
       ],
       "base_bias_flavor": "heavy · cloth (glass endgame)",
-      "budget_hr": 7.6,
-      "budget_note": "7.6 hr of zone 9 inside the high band + 9.0 hr of the level 91-100 push, which also farms zone 9",
+      "budget_hr": 22,
+      "budget_note": "22.0 hr of zone 9 inside the high band + 26.0 hr of the level 91-100 push, which also farms zone 9",
       "npcs": [
         "counterhand",
         "steward",
@@ -365,7 +365,7 @@
         "poison"
       ],
       "base_bias_flavor": "wet lowland",
-      "budget_hr": 9,
+      "budget_hr": 26,
       "npcs": [
         "counterhand",
         "porter",
@@ -389,7 +389,7 @@
         "chaos"
       ],
       "base_bias_flavor": "wet lowland",
-      "budget_hr": 10.5,
+      "budget_hr": 30.3,
       "npcs": [
         "counterhand",
         "porter",
@@ -412,7 +412,7 @@
         "chaos"
       ],
       "base_bias_flavor": "salt flats",
-      "budget_hr": 12.1,
+      "budget_hr": 35,
       "npcs": [
         "counterhand",
         "steward",
@@ -439,7 +439,7 @@
         "fire"
       ],
       "base_bias_flavor": "slag and foundry heat",
-      "budget_hr": 13.8,
+      "budget_hr": 39.9,
       "npcs": [
         "counterhand",
         "porter",
@@ -463,7 +463,7 @@
         "chaos"
       ],
       "base_bias_flavor": "open moor",
-      "budget_hr": 15.6,
+      "budget_hr": 45.1,
       "npcs": [
         "counterhand",
         "porter",
@@ -487,7 +487,7 @@
         "poison"
       ],
       "base_bias_flavor": "thorn country",
-      "budget_hr": 17.4,
+      "budget_hr": 50.3,
       "npcs": [
         "counterhand",
         "steward",
@@ -514,7 +514,7 @@
         "poison"
       ],
       "base_bias_flavor": "drowned river mouth",
-      "budget_hr": 19.3,
+      "budget_hr": 55.8,
       "npcs": [
         "counterhand",
         "porter",
@@ -538,7 +538,7 @@
         "cold"
       ],
       "base_bias_flavor": "wyrm breeding ground",
-      "budget_hr": 21.2,
+      "budget_hr": 61.3,
       "npcs": [
         "counterhand",
         "porter",
@@ -562,7 +562,7 @@
         "poison"
       ],
       "base_bias_flavor": "the pale spire",
-      "budget_hr": 48.7,
+      "budget_hr": 140.5,
       "npcs": [
         "counterhand",
         "steward",
@@ -798,7 +798,7 @@
       "item": "Armourer repair (clears Broken, refills protection to 5)",
       "npc": "armourer",
       "kind": "time",
-      "m": 14,
+      "m": 16,
       "charge_band": "high",
       "note": "must stay above the elite time that earns 1 Reroll tier stone · re-check at F9"
     },
@@ -807,7 +807,7 @@
       "item": "Armourer repair at Ironrow",
       "npc": "armourer",
       "kind": "time",
-      "m": 12,
+      "m": 14,
       "charge_band": "high",
       "note": "the armourer town discount, and only there · still above the tier-stone floor"
     },
@@ -972,7 +972,7 @@
   ],
   "base_bias": {
     "status": "decided",
-    "decision": "ship even-weighted (harness/todo.md A9 · D-071)",
+    "decision": "ship even-weighted (checks.md T15)",
     "column_meaning": "which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.",
     "checks": [
       "Ruled even-weighted: loot.md section 1 step 2 stays \"equal roll among all frames of that slot\" — no Base weight column is added, and the tools/loot.ts frame_weight path stays a what-if only.",
@@ -990,7 +990,7 @@
     ]
   },
   "task_sizing": {
-    "status": "provisional · owner-veto-able · recorded in harness/decisions.md as D-076",
+    "status": "provisional · owner-veto-able · ",
     "why": "tasks.md leaves N and the reward count to the rebalance pass, but the client needs a number to run on, so the sizing lives here as data instead of being typed into code",
     "hunt_n_anchor": 5,
     "hunt_n_rule": "N = round(hunt_n_anchor × the zone group upper bound ÷ 2) — the anchor is engine.json opening.first_rule (kill 5 in zone 1, group 1-2), and N scales with zone group size as tasks.md requires",

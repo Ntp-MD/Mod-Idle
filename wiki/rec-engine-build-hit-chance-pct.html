@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -110,8 +110,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -145,10 +143,10 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h1>hit_chance_pct</h1>
 <p class="hint">One row of <code>tools/data/engine.json</code> → <code>build</code>. Stat model · K values · Mod maxima · loot model · craft prices · timeline. Changing a number here re-prices every town line and rewrites checks.md groups A · B · C · F.</p>
 <dl class="kv"><dt>path</dt><dd><code>build.hit_chance_pct</code></dd><dt>collection</dt><dd><a href="data-engine-build.html">Reference build</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>6</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Hit chance <span class="dim">(%)</span></td><td><code>80</code></td><td><code>num</code></td><td>—</td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Hit chance <span class="dim">(%)</span></td><td><code>81</code></td><td><code>num</code></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="build"><input type="hidden" name="id" value="hit_chance_pct">
-<div class="f"><label for="f-hit-chance-pct">Hit chance <span class="dim">(%)</span></label><div><input id="f-hit-chance-pct" type="text" inputmode="decimal" name="hit_chance_pct" value="80"></div></div>
+<div class="f"><label for="f-hit-chance-pct">Hit chance <span class="dim">(%)</span></label><div><input id="f-hit-chance-pct" type="text" inputmode="decimal" name="hit_chance_pct" value="81"></div></div>
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="build"><input type="hidden" name="id" value="hit_chance_pct"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
@@ -156,7 +154,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h2>Mentioned in the specs</h2><p class="hint">No document names this row yet. If that is wrong, the spec is missing a line — not the data.</p></section>
 
 <section><h2>Raw JSON</h2><pre class="code">{
-  &quot;hit_chance_pct&quot;: 80
+  &quot;hit_chance_pct&quot;: 81
 }</pre></section>
 </div>
 </main>

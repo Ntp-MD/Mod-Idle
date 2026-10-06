@@ -5,7 +5,7 @@ import {
   claimChest, chestReady, encounterSizes, encounterZones, linkLabel,
 } from '../src/sim/road';
 import { stashTabCount, deposit, withdraw, buy } from '../src/sim/town';
-import { newGame, tick, catchUp } from '../src/sim/game';
+import { newGame, tick, catchUp, setLevel } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 
 const R = E.road;
@@ -85,7 +85,7 @@ describe('starting a trip', () => {
 
   it('walking the Road opens the settlement at the far end', () => {
     const s = newGame(19);
-    s.player.level = 60;
+    setLevel(s, 60);
     startTrip(s, 0);
     let guard = 0;
     while (s.road && guard++ < 1200) tick(s, {});
@@ -107,7 +107,7 @@ describe('starting a trip', () => {
   it('a one-off trip left alone while away resolves itself instead of forfeiting', () => {
     const s = newGame(13);
     s.town.visited.push('millbrook');
-    s.player.level = 60;
+    setLevel(s, 60);
     startTrip(s, 0);
     const r = catchUp(s, {}, 600);
     expect(s.road).toBe(null);            // the trip finished, it was not forfeited
@@ -131,7 +131,7 @@ describe('the Circuit', () => {
   it('a Push skips the leg instead of ending the Circuit', () => {
     const s = newGame(22);
     s.town.visited.push('millbrook');
-    s.player.level = 60;
+    setLevel(s, 60);
     expect(startCircuit(s, [0]).ok).toBe(true);
     s.player.hp = -100000;
     tick(s, {});
@@ -143,7 +143,7 @@ describe('the Circuit', () => {
   it('stops mid-leg by letting the current leg finish, and clears at a settlement', () => {
     const s = newGame(25);
     s.town.visited.push('millbrook');
-    s.player.level = 60;
+    setLevel(s, 60);
     startCircuit(s, [0]);
     expect(stopCircuit(s).ok).toBe(true);
     expect(s.road).not.toBe(null);          // mid-leg: it becomes a one-off trip, not a dropped character
@@ -157,7 +157,7 @@ describe('the Circuit', () => {
   it('an away period plays out the rest of the lap, then parks the character', () => {
     const s = newGame(23);
     s.town.visited.push('millbrook');
-    s.player.level = 60;
+    setLevel(s, 60);
     expect(startCircuit(s, [0]).ok).toBe(true);
     catchUp(s, {}, 600);
     expect(s.road).toBe(null);
@@ -171,7 +171,7 @@ describe('the Road cannot become a faucet', () => {
   it('a whole away period on a Circuit still cannot out-earn the purse cap', () => {
     const s = newGame(26);
     s.town.visited.push('millbrook');
-    s.player.level = 60;
+    setLevel(s, 60);
     startCircuit(s, [0]);
     const stones = JSON.stringify(s.counters.stones);
     catchUp(s, {}, 12 * 3600);
@@ -209,7 +209,7 @@ describe('a trip that finishes', () => {
   it('clears its encounters, pays the purse once, and grants Standing at the far end', () => {
     const s = newGame(14);
     s.town.visited.push('millbrook');
-    s.player.level = 60;
+    setLevel(s, 60);
     const destZone = TOWN.settlements[1].zone;
     const before = s.counters.zoneKills[destZone] || 0;
     startTrip(s, 0);
@@ -231,7 +231,7 @@ describe('a trip that finishes', () => {
   it('pays no stones at all', () => {
     const s = newGame(15);
     s.town.visited.push('millbrook');
-    s.player.level = 60;
+    setLevel(s, 60);
     const stones = JSON.stringify(s.counters.stones);
     startTrip(s, 0);
     let guard = 0;
@@ -275,5 +275,34 @@ describe('the stash', () => {
     const s = newGame(18);
     s.bag.unshift({ slot: 'chest', base: 'mail', rarity: 'Common', quality: 'low', tier: 'T1', lines: [], q: 0, weight: 60 });
     expect(deposit(s, 0, 0).ok).toBe(false);
+  });
+});
+
+describe('the Circuit objective', () => {
+  it('a lap walked with no Push is recorded and logged — non-material, no gold, no stone', () => {
+    const s = newGame(23);
+    s.town.visited.push('millbrook');
+    setLevel(s, 60);
+    expect(startCircuit(s, [0]).ok).toBe(true);
+    expect(s.counters.cleanLaps || 0).toBe(0);
+    const stones = JSON.stringify(s.counters.stones);
+    // stop the moment the lap closes, so the line is still inside the log's short window
+    for (let i = 0; i < 700 && (s.counters.cleanLaps || 0) === 0; i++) tick(s, {});
+    expect(s.counters.cleanLaps).toBeGreaterThanOrEqual(1);
+    expect(s.log.some((l) => /clean lap/.test(l.text))).toBe(true);
+    // the reward IS the log line: the Road's gold is capped by G6-G9 and a stone would be a new
+    // source, so a clean lap mints nothing
+    expect(JSON.stringify(s.counters.stones)).toBe(stones);
+  });
+
+  it('a Push during the lap voids it', () => {
+    const s = newGame(23);
+    s.town.visited.push('millbrook');
+    setLevel(s, 60);
+    expect(startCircuit(s, [0]).ok).toBe(true);
+    s.counters.pushes += 1;               // the lap clock started before this Push
+    catchUp(s, {}, 600);
+    expect(s.counters.cleanLaps || 0).toBe(0);
+    expect(s.log.some((l) => /clean lap/.test(l.text))).toBe(false);
   });
 });

@@ -242,7 +242,7 @@ function keystoneBudget() {
   const K = TREE.keystones;
   const orig = K.filter((k: any) => k.origin === 'original');
   const fresh = K.filter((k: any) => k.origin !== 'original');
-  const mean = (a: any) => (a.reduce((s: any, k: any) => s + k.value, 0) / a.length).toFixed(1);
+  const mean = (a: any) => (a.length ? a.reduce((s: any, k: any) => s + k.value, 0) / a.length : 0).toFixed(1);
   // the tree multiplier sums the picks, it does not average them (6 x 14.2% = x1.85)
   const mul = (picks: any) => (1 + picks.reduce((s: any, k: any) => s + k.value, 0) / 100).toFixed(2);
   const sum = (picks: any) => (picks.reduce((s: any, k: any) => s + k.value, 0)).toFixed(1);

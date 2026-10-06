@@ -6,7 +6,7 @@
  *
  * Source: tools/data/engine.json `inventory`, read through tools/lib/engine.ts so the
  * loot rates and the weight K cannot disagree with the rest of the engine.
- * Model (D-056): adventure bag = 100 slots of kept gear (full pauses pickups, nothing
+ * Model: adventure bag = 100 slots of kept gear (full pauses pickups, nothing
  * auto-converts); character bag = 50 slots of carried consumables (stone 999/slot,
  * herb/potion 100/slot, gold no slot); both weight-counted; stash + craft town-only.
  */
@@ -66,7 +66,7 @@ function gates(): any[] {
 }
 
 function emit(): void {
-  console.log(`inventory model (engine.json inventory · D-056)`);
+  console.log(`inventory model (engine.json inventory)`);
   console.log('');
   console.log(`adventure bag : ${IV.adventure_slots} slots · kept gear 1/slot · fills ~${f1(GEAR_FILL_HR)} hr at high band (${KEEP_HR} upgrades/hr)`);
   console.log(`character bag : ${IV.character_slots} slots · stone ${IV.stack_size.stone}/slot (~${f1(SLOT_HR.stone)} hr) · herb ${IV.stack_size.herb}/slot (~${f1(SLOT_HR.herb)} hr) · potion ${IV.stack_size.potion}/slot · gold no slot`);

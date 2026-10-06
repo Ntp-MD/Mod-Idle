@@ -15,7 +15,7 @@ import equipment-slot.md
 | Stat Mod | Stat Mod flat (every item) |
 | Blocked | Max HP · Evasion · Cooldown reduction · Elemental resistance |
 
-- **`Critical damage %` is physical only** — a magic weapon can roll it, but magic damage never uses it, so a caster buys physical crit gear that does nothing for it. That is the intended shape: crit is the physical payoff (formula-offense.md section 3 · D-017).
+- **`Critical damage %` is physical only** — a magic weapon can roll it, but magic damage never uses it, so a caster buys physical crit gear that does nothing for it. That is the intended shape: crit is the physical payoff (formula-offense.md section 3).
 
 **By weapon type (see equipment-weapon.md)**
 
@@ -28,7 +28,7 @@ import equipment-slot.md
 | wand / staff | Magic power Flat · Magic power % instead of Physical |
 | all types | Elemental power Flat always secondary, because every weapon has a home Element |
 
-- **The three special lines are Base Mod lines** — bleed on axe · stun on mace · penetration on crossbow (item-base.md · D-123). They arrive with the frame, forced, and never roll as Random lines.
+- **The three special lines are Base Mod lines** — bleed on axe · stun on mace · penetration on crossbow (item-base.md). They arrive with the frame, forced, and never roll as Random lines.
 
 - **There are no per-stat Mods.** `Str flat` / `Int flat` and their % partners are not separate Mods: every stat on every item arrives through Stat Mod (equipment-slot-pools.md). The Stat Mod's own stat is rolled at drop, from all seven, so a weapon type changes *which* Mods it offers, not which stat its Stat Mod feeds.
 
@@ -42,7 +42,7 @@ import equipment-slot.md
 | Stat Mod | Stat Mod flat (every item) |
 
 - Shield and book are Defensive items by rule
-- **`Block chance %` is the shield's Base Mod line** (D-123) — forced with the frame on line 1 and never in a craftable pool, so no Random copy can exist (the Add stone dedups against line 1); no other slot ever rolls it. The row stays in the Shield pool so the Mod matrix still shows it on the off hand
+- **`Block chance %` is the shield's Base Mod line** — forced with the frame on line 1 and never in a craftable pool, so no Random copy can exist (the Add stone dedups against line 1); no other slot ever rolls it. The row stays in the Shield pool so the Mod matrix still shows it on the off hand
 - **Dual-wield is the sole exception to the rule** because it is a second weapon, so it gets Element damage and power at half weight
 - Dual-wield works only with one-handed weapons flagged dual-wieldable
 

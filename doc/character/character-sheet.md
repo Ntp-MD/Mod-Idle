@@ -13,11 +13,11 @@ Values shown on the character screen, calculated from formula.md.
 | Mana | Current value / Maximum value |
 | Attack speed | Hits per second |
 
-> Energy Shield sits **above** HP while the character has a pool, and Attack speed is read as hits per second. On the playable screen these three are the bar row above the fight (`harness/decisions.md` D-107). **Weight moved to the character bag panel** (D-126), where `carried / capacity` with the aspd it costs when over sits beside the stacks that actually carry it: `566 / 420 (aspd −35%)`.
+> Energy Shield sits **above** HP while the character has a pool, and Attack speed is read as hits per second. On the playable screen these three are the bar row above the fight. **Weight moved to the character bag panel**, where `carried / capacity` with the aspd it costs when over sits beside the stacks that actually carry it: `566 / 420 (aspd −35%)`.
 
 # Core Stats
 
-Shows all 7 stats with a breakdown of their sources.
+Shows all 7 stats with a breakdown of their sources. A Core stat is **spent, not granted**, so the panel carries an allocation row per stat — a `+` / `−` / `Max` control, the unspent stat-point counter and the banked tree-point counter — plus a toggle that auto-allocates the level's points evenly (the idle default). Spending is instant and works mid-combat. `core-stats.md` names the line; `formula.md` section 0 carries the reference and focused values.
 
 | Stat | What it gives | Show calculated values too? |
 |---|---|---|
@@ -50,7 +50,7 @@ Physical power   715        ( 125 × 5 + 37 ) × 1.08
 | Elemental power | number | Must pass Alignment before dealing damage |
 | Critical chance | % | **No Cap shown** — chance is held at 100 and the excess is added to crit damage, so show `chance` and `overflow` separately |
 | Critical damage | % | Physical only — magic and Elements never crit |
-| Evasion | % | Show the Cap too — one Cap binds the Dex rating and the Agi points together (D-112), and the chance is opposed by that mob accuracy |
+| Evasion | % | Show the Cap too — one Cap binds the Dex rating and the Agi points together, and the chance is opposed by that mob accuracy |
 | Attack speed | hits/sec | Show Cap 500% = 5 hits/sec too (the 0.2 sec floor between hits) |
 | Cooldown reduction | % | Show the Cap too |
 | Accuracy | number | **No Cap shown** — the 2,000 Cap was removed; the ratio formula never reaches 100% by itself |
@@ -106,7 +106,7 @@ Perfect dodge     1% / 21%    (ratio on the Lck line · the Cap binds at Lck 506
 ```
 
 - Verify each number: `stat_c(31) = 12 + 2×30 = 72` · Vit 125 → `HP = (125×20 + 40×30) × 1.06 = 3,914` · Int 84 → `mana = 84×4 + 16×30 = 816` · regen `= 84×0.18 = 15.1`
-- Old numbers in this file (`2.4 /sec · power 1,450 · HP 4,200 · avoidance 28% / 75% · Accuracy 340 / 2,000`) were tied to the old formula and Cap set already fixed in formula.md, so both were rewritten.
+- The worked example above is tied to the current formula and Cap set; superseded example numbers are not kept here.
 
 # How to Show Caps
 
@@ -136,18 +136,19 @@ All 4 original items now have values in formula.md.
 1. **Status resistance** — Merged into Vit Elemental res. No separate status res remains.
 2. **Weight capacity** — `K_STR_WEIGHT` = 2 per 1 Str.
 3. **Drop chance / Perfect dodge** — Drop is a multiplier `1 + Lck × 0.01` (6.1× at Lck 510) · Perfect dodge is a ratio on the same Lck line (rate `Lck × 0.03`, `K_PDOGE` 57 → 21.2% at Lck 510) clamped by **Cap 21**, which binds at Lck 506.
-4. **Base stat per level** — Base 12 at level 1 and +2 per level, allowing `(Base · level · gear)` display.
+4. **Base stat per level** — Base 12 at level 1 and a banked **stat point** per level (5, or 2 in Paragon) the player spends 1:1 into any Core stat, so the sheet shows `(Base · points · gear)` and an unspent counter.
 
 # Where the Sheet Sits on the Main Screen
 
-The screen holds four regions, all visible at once: the combat scene with the three-row bar above it, the character sheet, the carried inventory and the temporary inventory the hunt fills (`harness/decisions.md` D-107).
+The screen holds four regions, all visible at once: the combat scene with the three-row bar above it, the character sheet, the carried inventory and the temporary inventory the hunt fills.
 
 - **Worn gear is a fixed five-row slot grid, in the shape the owner drew it** — cape · helmet · amulet across the top, main hand · chest · off hand below, then gloves · belt, then ring · pant · ring, and boots alone at the bottom with a blank either side. No body is drawn: the blanks are simply gaps. Each slot keeps its fixed position and an empty one is drawn as an empty slot labelled with its name, because a player reads the shape of what is missing. Hovering a worn slot opens its detail card, which says it is the piece being worn.
 - **Every other line is text, with the Cap shown as `value / Cap`** — the recommendation in "How to Show Caps" above, since this column is narrow.
-- **Weight shows on the character bag panel, not the fight bar** (D-126) — `carried / capacity`, with the aspd it costs when over, sits beside the stacks that carry it, since only carried consumables (and gear) weigh.
+- **Weight shows on the character bag panel, not the fight bar** — `carried / capacity`, with the aspd it costs when over, sits beside the stacks that carry it, since only carried consumables (and gear) weigh.
 - **The gate figure lives under the sheet**, read off the mob curve the same way the fight rolls it, never typed here.
-- Nothing on the sheet is a number the client owns: every value is the shared engine's, and the equipment grid equips only through the detail card's button (D-089).
-- **The skill bar shows on the fight panel too, read-only** — the ordered fifteen-slot strip hangs under the HP / Mana row so a cooldown is readable while hunting; arranging the order stays on the Skills tab (`harness/decisions.md`, the skill-bar entry).
+- Nothing on the sheet is a number the client owns: every value is the shared engine's, and the equipment grid equips only through the detail card's button.
+- **The skill bar shows on the fight panel too, read-only** — the ordered fifteen-slot strip hangs under the HP / Mana row so a cooldown is readable while hunting; arranging the order stays on the Skills tab.
+- **The level's points are allocated on the sheet, and re-spent at the town desk** — the `+` / `−` / `Max` row with the unspent and tree-point counters sits with the Core Stats table so it is reachable mid-fight; Respec is a settlement service on the town panel, never on the sheet, because a field refund would let a build switch inside a fight.
 
 # Display Rules to Follow
 

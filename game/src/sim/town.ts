@@ -158,7 +158,7 @@ export function stashTabCount(state: GameState): number {
   return Math.min(6, bought + houses + granted);
 }
 
-/** Deposit and withdraw only happen at a settlement (`inventory.note` · D-056). */
+/** Deposit and withdraw only happen at a settlement (`inventory.note`). */
 export function deposit(state: GameState, bagIndex: number, tab: number): { ok: boolean; why?: string } {
   if (tab >= stashTabCount(state)) return { ok: false, why: 'that tab is not bought yet' };
   const item = state.bag[bagIndex];

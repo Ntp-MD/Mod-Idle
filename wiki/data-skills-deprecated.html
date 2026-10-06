@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span><span class="chip ">rows <b>6</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span><span class="chip ">rows <b>26</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -81,9 +81,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="edit.html">Editor</a>
 <a href="about.html">About</a>
 <h4>Collections</h4>
-<a href="data-skills-skills.html">Skills (65)</a>
+<a href="data-skills-skills.html">Skills (74)</a>
 <a href="data-skills-reserve_tiers.html">Reserve tiers (4)</a>
-<a href="data-skills-deprecated.html" aria-current="page">Deprecated names (6)</a>
+<a href="data-skills-deprecated.html" aria-current="page">Deprecated names (26)</a>
 <a href="data-skills-renames.html">Renames (old → new) (3)</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
@@ -108,8 +108,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -141,16 +139,36 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 
 <section><h1>Deprecated names</h1>
-<dl class="kv"><dt>path</dt><dd><code>tools/data/skills.json → deprecated</code></dd><dt>kind</dt><dd><code>constmap</code></dd><dt>rows</dt><dd>6</dd><dt>written by</dt><dd><code>tools/skills.ts --write</code></dd><dt>spec</dt><dd><a href="doc-skill-pool.html">skill-pool.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
-<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>Aura of Might</code></td><td>Aura of Might</td><td><code>removed in the 6→12 aura redesign (harness/decisions.md D-002)</code></td><td><a href="rec-skills-deprecated-aura-of-might.html">edit</a></td></tr><tr><td><code>Aura of Grace</code></td><td>Aura of Grace</td><td><code>removed in the 6→12 aura redesign (harness/decisions.md D-002)</code></td><td><a href="rec-skills-deprecated-aura-of-grace.html">edit</a></td></tr><tr><td><code>Aura of Fury</code></td><td>Aura of Fury</td><td><code>removed in the 6→12 aura redesign (harness/decisions.md D-002)</code></td><td><a href="rec-skills-deprecated-aura-of-fury.html">edit</a></td></tr><tr><td><code>Aura of Clarity</code></td><td>Aura of Clarity</td><td><code>removed in the 6→12 aura redesign (harness/decisions.md D-002); role dropped, not moved</code></td><td><a href="rec-skills-deprecated-aura-of-clarity.html">edit</a></td></tr><tr><td><code>Aura of Dread</code></td><td>Aura of Dread</td><td><code>removed in the 6→12 aura redesign (harness/decisions.md D-002)</code></td><td><a href="rec-skills-deprecated-aura-of-dread.html">edit</a></td></tr><tr><td><code>Aura of Frost</code></td><td>Aura of Frost</td><td><code>removed in the 6→12 aura redesign (harness/decisions.md D-002); replaced by Herald of Frost</code></td><td><a href="rec-skills-deprecated-aura-of-frost.html">edit</a></td></tr></tbody></table></div></section>
+<dl class="kv"><dt>path</dt><dd><code>tools/data/skills.json → deprecated</code></dd><dt>kind</dt><dd><code>constmap</code></dd><dt>rows</dt><dd>26</dd><dt>written by</dt><dd><code>tools/skills.ts --write</code></dd><dt>spec</dt><dd><a href="doc-skill-pool.html">skill-pool.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
+<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>Aura of Might</code></td><td>Aura of Might</td><td><code>removed in the 6→12 aura redesign </code></td><td><a href="rec-skills-deprecated-aura-of-might.html">edit</a></td></tr><tr><td><code>Aura of Grace</code></td><td>Aura of Grace</td><td><code>removed in the 6→12 aura redesign </code></td><td><a href="rec-skills-deprecated-aura-of-grace.html">edit</a></td></tr><tr><td><code>Aura of Fury</code></td><td>Aura of Fury</td><td><code>removed in the 6→12 aura redesign </code></td><td><a href="rec-skills-deprecated-aura-of-fury.html">edit</a></td></tr><tr><td><code>Aura of Clarity</code></td><td>Aura of Clarity</td><td><code>removed in the 6→12 aura redesign; role dropped, not moved</code></td><td><a href="rec-skills-deprecated-aura-of-clarity.html">edit</a></td></tr><tr><td><code>Aura of Dread</code></td><td>Aura of Dread</td><td><code>removed in the 6→12 aura redesign </code></td><td><a href="rec-skills-deprecated-aura-of-dread.html">edit</a></td></tr><tr><td><code>Aura of Frost</code></td><td>Aura of Frost</td><td><code>removed in the 6→12 aura redesign; replaced by Herald of Frost</code></td><td><a href="rec-skills-deprecated-aura-of-frost.html">edit</a></td></tr><tr><td><code>Riposte</code></td><td>Riposte</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-riposte.html">edit</a></td></tr><tr><td><code>Execute</code></td><td>Execute</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-execute.html">edit</a></td></tr><tr><td><code>Retribution</code></td><td>Retribution</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-retribution.html">edit</a></td></tr><tr><td><code>Volley</code></td><td>Volley</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-volley.html">edit</a></td></tr><tr><td><code>Arcane Bolt</code></td><td>Arcane Bolt</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-arcane-bolt.html">edit</a></td></tr><tr><td><code>Flame Lash</code></td><td>Flame Lash</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-flame-lash.html">edit</a></td></tr><tr><td><code>Chain Spark</code></td><td>Chain Spark</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-chain-spark.html">edit</a></td></tr><tr><td><code>Frost Nova</code></td><td>Frost Nova</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-frost-nova.html">edit</a></td></tr><tr><td><code>Toxic Spray</code></td><td>Toxic Spray</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-toxic-spray.html">edit</a></td></tr><tr><td><code>Void Lance</code></td><td>Void Lance</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-void-lance.html">edit</a></td></tr><tr><td><code>Widow Strike</code></td><td>Widow Strike</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-widow-strike.html">edit</a></td></tr><tr><td><code>Volley of Blades</code></td><td>Volley of Blades</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-volley-of-blades.html">edit</a></td></tr><tr><td><code>Impale</code></td><td>Impale</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-impale.html">edit</a></td></tr><tr><td><code>Echo Strike</code></td><td>Echo Strike</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-echo-strike.html">edit</a></td></tr><tr><td><code>Momentum</code></td><td>Momentum</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-momentum.html">edit</a></td></tr><tr><td><code>Plague Spit</code></td><td>Plague Spit</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-plague-spit.html">edit</a></td></tr><tr><td><code>Thunderhead</code></td><td>Thunderhead</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-thunderhead.html">edit</a></td></tr><tr><td><code>Glacial Nail</code></td><td>Glacial Nail</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-glacial-nail.html">edit</a></td></tr><tr><td><code>Reality Rift</code></td><td>Reality Rift</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-reality-rift.html">edit</a></td></tr><tr><td><code>Arcane Surge</code></td><td>Arcane Surge</td><td><code>retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now</code></td><td><a href="rec-skills-deprecated-arcane-surge.html">edit</a></td></tr></tbody></table></div></section>
 
 <section><h2>Raw JSON of this collection</h2><pre class="code">{
-  &quot;Aura of Might&quot;: &quot;removed in the 6→12 aura redesign (harness/decisions.md D-002)&quot;,
-  &quot;Aura of Grace&quot;: &quot;removed in the 6→12 aura redesign (harness/decisions.md D-002)&quot;,
-  &quot;Aura of Fury&quot;: &quot;removed in the 6→12 aura redesign (harness/decisions.md D-002)&quot;,
-  &quot;Aura of Clarity&quot;: &quot;removed in the 6→12 aura redesign (harness/decisions.md D-002); role dropped, not moved&quot;,
-  &quot;Aura of Dread&quot;: &quot;removed in the 6→12 aura redesign (harness/decisions.md D-002)&quot;,
-  &quot;Aura of Frost&quot;: &quot;removed in the 6→12 aura redesign (harness/decisions.md D-002); replaced by Herald of Frost&quot;
+  &quot;Aura of Might&quot;: &quot;removed in the 6→12 aura redesign &quot;,
+  &quot;Aura of Grace&quot;: &quot;removed in the 6→12 aura redesign &quot;,
+  &quot;Aura of Fury&quot;: &quot;removed in the 6→12 aura redesign &quot;,
+  &quot;Aura of Clarity&quot;: &quot;removed in the 6→12 aura redesign; role dropped, not moved&quot;,
+  &quot;Aura of Dread&quot;: &quot;removed in the 6→12 aura redesign &quot;,
+  &quot;Aura of Frost&quot;: &quot;removed in the 6→12 aura redesign; replaced by Herald of Frost&quot;,
+  &quot;Riposte&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Execute&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Retribution&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Volley&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Arcane Bolt&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Flame Lash&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Chain Spark&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Frost Nova&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Toxic Spray&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Void Lance&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Widow Strike&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Volley of Blades&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Impale&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Echo Strike&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Momentum&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Plague Spit&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Thunderhead&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Glacial Nail&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Reality Rift&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;,
+  &quot;Arcane Surge&quot;: &quot;retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now&quot;
 }</pre><p><a href="../tools/data/skills.json">tools/data/skills.json</a> · <a href="edit.html">snapshots</a></p></section>
 </div>
 </main>

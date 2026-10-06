@@ -71,7 +71,7 @@ crit_dmg = 100 + crit_dmg_pct + crit_overflow
 - Because stats alone reach 33.5%, overflow is 0 until buffs and skills push the pool past 100 — the payoff belongs to crit-stacking builds, not to the Lck ceiling.
 - Crit damage may exceed 100. No Cap needed.
 - **Crit does not apply to Element damage** (see elements.md)
-- **Crit is physical only.** Magic damage does not crit and neither do the 5 Elements, so `Critical damage %` is a single line with no magic counterpart. Reason: crit is the physical build's payoff, and giving magic the same multiplier would make the physical/magic weapon choice (equipment-weapon.md) cosmetic — every weapon would want the same crit gear (D-017).
+- **Crit is physical only.** Magic damage does not crit and neither do the 5 Elements, so `Critical damage %` is a single line with no magic counterpart. Reason: crit is the physical build's payoff, and giving magic the same multiplier would make the physical/magic weapon choice (equipment-weapon.md) cosmetic — every weapon would want the same crit gear.
 - `Critical chance %` has no Flat counterpart, on Mods or from Lck — the stat is a percentage end to end (mod-pool.md).
 
 ```
@@ -99,7 +99,7 @@ bleed_dps   = bleed_total / bleed_time_sec          bleed_time_sec = 5
 - **Bleed does not stack.** A target carries one bleed; a new application refreshes its duration and, if the new hit was stronger, replaces the stored damage with the higher value. There is no stack count anywhere in this file.
 - **Armour does not reduce bleed** (PoE rule, same rule that keeps armour away from burn and poison in combat.md §2). Armour still helps indirectly, because it lowers the physical hit that inflicts the bleed.
 - **Bleed is not a hit**, so nothing that works on hits touches it: not Evasion, not perfect dodge, not accuracy.
-- **Nothing in the game mitigates bleed.** PoE answers it with immunity flasks, % physical mitigation that covers degeneration, ailment damage reduction, faster ailment damage and reduced duration — none of those five exist here. There is no Elemental resistance against it and no status resistance. The only answers are **heal and Energy Shield**, which shorten the time bleed has to run (D-015).
+- **Nothing in the game mitigates bleed.** PoE answers it with immunity flasks, % physical mitigation that covers degeneration, ailment damage reduction, faster ailment damage and reduced duration — none of those five exist here. There is no Elemental resistance against it and no status resistance. The only answers are **heal and Energy Shield**, which shorten the time bleed has to run.
 - `bleed_dps` **does not scale with attack speed.** It is a fixed fraction of one hit's physical damage spread over 5 sec, so a fast build only procs it more reliably while a slow build has larger bites. **Slow heavy hits are the bleed build** — the opposite of the poison build, which wants to sit at 10 stacks.
 
 ## Where bleed comes from
@@ -108,8 +108,8 @@ bleed_dps   = bleed_total / bleed_time_sec          bleed_time_sec = 5
 
 - Curse uptime = 10 ÷ 14 = **71%**, so bleed is a partial-uptime damage source, not a constant.
 - At 1.2 hits/sec and 40% per hit, the expected gap between applications is ~2.1 sec against a 5 sec bleed — continuous while the curse is up, and it drains away during the 4 sec it is down.
-- **Mob side is ruled (D-067).** Bleed is a DoT, so it lands on mobs in full from our `Lacerate`; in the other direction the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict it as their signature skill — a DoT slice of their already-priced `mob_PS`, not extra power (`combat.md` §5b).
+- **Mob side is ruled.** Bleed is a DoT, so it lands on mobs in full from our `Lacerate`; in the other direction the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict it as their signature skill — a DoT slice of their already-priced `mob_PS`, not extra power (`combat.md` §5b).
 
 ## Folding into mob_HP
 
-Bleed is new power, so per `AGENT.md` §5 it must be folded into `mob_HP` (checks.md H1) before the timeline can be trusted. The uplift to fold is the expected value of the table above across the uptime and hit-rate band, and it is **deferred to the balance audit** (D-012): the policy is that an overpowered player is answered by stronger mobs, not by nerfing player stats.
+Bleed is new power, so per `AGENT.md` §5 it must be folded into `mob_HP` (checks.md H1) before the timeline can be trusted. The uplift to fold is the expected value of the table above across the uptime and hit-rate band, and it is **deferred to the balance audit**: the policy is that an overpowered player is answered by stronger mobs, not by nerfing player stats.

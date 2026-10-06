@@ -82,7 +82,7 @@ describe('drops are built from the Base table', () => {
       }
       const frame = BASES.bases.find((b: any) => b.name === item.base);
       expect(frame?.slot).toBe(item.slot);
-      // line 1 draws off the frame, but lines 2-7 draw the whole slot union (item-base.md · D-123);
+      // line 1 draws off the frame, but lines 2-7 draw the whole slot union (item-base.md);
       // an off-hand frame's Base Mod pair is its own line-1 pool, so it is allowed too
       const allowed = new Set([
         ...loot.poolFor(BASES, item.slot, frame, null).map((e: any) => e.id),

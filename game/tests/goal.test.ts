@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import { newGoal, target, describe as describeGoal, onSpawn, onKill, watch } from '../src/sim/goal';
 import { migrate, SCHEMA_VERSION } from '../src/state/save';
 import type { Mob } from '../src/sim/types';
@@ -74,7 +74,7 @@ describe('the gate arms on the right spawn', () => {
 describe('the gate closes in the live loop', () => {
   it('arms on a real boss spawn and logs the completion when it dies to the player', () => {
     const s = newGame(35);
-    s.player.level = target().level;
+    setLevel(s, target().level);
     s.zone = target().zone;
     s.bossDueAt = s.clockSec + 1; // 0 reads as "no clock stored yet", so the due time is explicit
     let guard = 0;

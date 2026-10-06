@@ -80,7 +80,7 @@ function parseSchools(): Record<string, any> {
 }
 
 /**
- * The Line 1 pool per slot and weapon type, from the table under `# Line 1 · Base Mod` (D-123).
+ * The Line 1 pool per slot and weapon type, from the table under `# Line 1 · Base Mod`.
  * Armour slots list their three defence Mods (the Base's own type is the locked one, read off the
  * schools sentence); weapons list every Mod the type forces; belt / ring / amulet carry the marker
  * `pool`, meaning "roll line 1 from the slot's own Legacy pool".
@@ -138,7 +138,7 @@ function parseOffHandFamilies(): Record<string, any> {
 /** The 11 weapon types from equipment-weapon.md, and the off-hand-only items below that table. */
 /**
  * The off-hand mass rule lives in `mod-pool.md`'s weight line: "dual-wield counts x0.8". Read, not
- * retyped, so the sentence is the one home for the number (B13 · D-101).
+ * retyped, so the sentence is the one home for the number (B13).
  */
 function parseDualWieldMult(): number {
   const text = G.read('mod-pool.md');
@@ -208,6 +208,21 @@ function defencePctOf(flatId: any): any {
   return line1Pools().defence.find((id: string) => clean(NAME_OF[id] || '').toLowerCase().includes(word)) || null;
 }
 
+/** The frame list per weapon type, from the A10 table in item-base.md — the doc owns it, the data mirrors it. */
+function parseFrames(): Record<string, any[]> {
+  const text = G.read(DOC);
+  const section = (text.split(/^## Frames per weapon type\s*$/m)[1] || '').split(/^#\s+/m)[0];
+  const out: Record<string, any[]> = {};
+  for (const line of section.split(/\r?\n/)) {
+    if (!/^\|/.test(line) || /^\|\s*-{2,}/.test(line) || /^\|\s*Type\s*\|/i.test(line)) continue;
+    const c = line.split('|').slice(1, -1).map(clean);
+    if (c.length < 3 || !c[0] || !c[1]) continue;
+    // a frame rolls EQUALLY inside its type, exactly as a Base does inside its slot (roll_rule)
+    (out[c[0]] = out[c[0]] || []).push({ name: c[1], base_mod: splitMods(c[2]), weight: 1 });
+  }
+  return out;
+}
+
 function build(): any {
   const bySlot = parseDoc();
   const schools = parseSchools();
@@ -216,14 +231,14 @@ function build(): any {
   for (const [slot, rows] of Object.entries(bySlot)) {
     for (const r of rows) {
       const school = schools[r.name] || null;          // the flat Gear Mod the frame's school carries
-      const defence = defencePctOf(school);            // the % line line 1 locks (D-123)
-      // the cape carries a defence type on its Base Mod line but no Gear Mod ladder (D-123): the
+      const defence = defencePctOf(school); // the % line line 1 locks 
+      // the cape carries a defence type on its Base Mod line but no Gear Mod ladder: the
       // Quality-Stone ladder belongs to the five slots engine/loot.ts GEAR_MOD_SLOTS names
       bases.push({ ...r, slot, defence, school: slot === 'cape' ? null : school, family: families[r.name] || null });
     }
   }
   return {
-    note: 'The Base frames per slot, imported from item-base.md by tools/bases.ts --write. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks (D-123); school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. base_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, legacy_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the Shield / Book families. weapons and weapon_pools come from equipment-weapon.md and equipment-slot-weapon.md. tools/loot.ts and the client both read this file, and `node tools/bases.ts --checks` gates it against the docs so none of them can drift.',
+    note: 'The Base frames per slot, imported from item-base.md by tools/bases.ts --write. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks; school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. base_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, legacy_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the Shield / Book families. weapons and weapon_pools come from equipment-weapon.md and equipment-slot-weapon.md. weapon_frames is the A10 list per weapon type (from the Frames table in item-base.md), which the loot roll reads at step 2. tools/loot.ts and the client both read this file, and `node tools/bases.ts --checks` gates it against the docs so none of them can drift.',
     roll_rule: 'Bases roll equally inside their slot (item-base.md "Base Rolling"); a dual-wield off hand weapon uses that weapon type weight x 0.8.',
     quality_weight_multiplier: 1.3,
     mastery: {
@@ -243,9 +258,10 @@ function build(): any {
     base_mod: line1Pools(),
     weapons: parseWeapons(),
     // mod-pool.md states the off hand's mass rule ("dual-wield counts x0.8") in one sentence; this
-    // reads it out as a number so the client never types the 0.8 beside it (B13 · D-101)
+    // reads it out as a number so the client never types the 0.8 beside it (B13)
     dual_wield_weight_mult: parseDualWieldMult(),
     weapon_pools: parseWeaponPools(),
+    weapon_frames: parseFrames(),
   };
 }
 
@@ -263,7 +279,7 @@ const PATHS = [
 const weightOf = (bases: any[], names: any[]): number => names.reduce((t: number, n: any) => t + (bases.find((b: any) => b.name === n)?.weight || 0), 0);
 
 /**
- * BS3 / BS4 are properties of the printed tables now (harness/todo.md B12 resolved by D-093): the
+ * BS3 / BS4 are properties of the printed tables now: the
  * "Three Paths" numbers were hand-typed in prose and did not follow from the Base weights in the same
  * file, so both tables are generated from `tools/data/bases.json` and the gates check ordering and
  * growth instead of matching a typed copy.
@@ -313,7 +329,7 @@ function renderPaths(kind: string): string {
       ...sets.map((s) => '| ' + s.p.name + ' (' + s.p.gear + ') | ' + s.high
         + ' | ' + taxOf(s.high, C.strNone) + ' | ' + taxOf(s.high, C.strTwo) + ' | ' + taxOf(s.high, C.strSix) + ' |'),
       '',
-      'Capacity is `weight_base` plus Str \u00d7 `K_STR_WEIGHT` at level ' + C.level + ' with no investment (' + C.strNone + ' \u2192 ' + C.none + '), then `core_flat_max` flat per slot spent on Str: 2 items (' + C.two + ') and 6 items (' + C.six + ') \u2014 Core Stat has no % line any more (D-114). The tax is the engine\u2019s own `encumbranceOf`, capped at ' + Math.round(C.capPct * 100) + '%.',
+      'Capacity is `weight_base` plus Str \u00d7 `K_STR_WEIGHT` at level ' + C.level + ' with no investment (' + C.strNone + ' \u2192 ' + C.none + '), then `core_flat_max` flat per slot spent on Str: 2 items (' + C.two + ') and 6 items (' + C.six + ') \u2014 Core Stat has no % line any more. The tax is the engine\u2019s own `encumbranceOf`, capped at ' + Math.round(C.capPct * 100) + '%.',
     ].join('\n');
   }
   return [
@@ -321,13 +337,53 @@ function renderPaths(kind: string): string {
     '|---|---|---|---|---|',
     ...sets.map((s) => '| ' + s.p.name + ' (' + s.p.gear + ') | ' + s.base + ' | ' + s.mid + ' | ' + s.high + ' | ' + taxOf(s.high, C.strNone) + ' |'),
     '',
-    'Printed by `node tools/bases.ts --blocks` from `tools/data/bases.json`. Mid and high apply `quality_weight_multiplier` (\u00d7' + mult + ') per Item quality band, the same way `weightAtQuality` applies it to a single item. The held weapon is not folded into these sets: it weighs ' + Math.min(...data.weapons.map((x: any) => x.weight)) + ' to ' + Math.max(...data.weapons.map((x: any) => x.weight)) + ' at Base weight (`equipment-weapon.md` \u00b7 D-101), the same \u00d7-quality multiplier applies, and an off-hand weapon counts \u00d7' + data.dual_wield_weight_mult + ' of its own type (`mod-pool.md`).',
+    'Printed by `node tools/bases.ts --blocks` from `tools/data/bases.json`. Mid and high apply `quality_weight_multiplier` (\u00d7' + mult + ') per Item quality band, the same way `weightAtQuality` applies it to a single item. The held weapon is not folded into these sets: it weighs ' + Math.min(...data.weapons.map((x: any) => x.weight)) + ' to ' + Math.max(...data.weapons.map((x: any) => x.weight)) + ' at Base weight (`equipment-weapon.md`), the same \u00d7-quality multiplier applies, and an off-hand weapon counts \u00d7' + data.dual_wield_weight_mult + ' of its own type (`mod-pool.md`).',
+  ].join('\n');
+}
+
+/**
+ * Weapon × body class (HugePatch §12): the ladder `engine.json weapon_size_mult` carries, printed
+ * where the weapon families are documented. `X47` gates the same rows, so the table cannot drift.
+ */
+function renderSizeLadder() {
+  const engine: any = readJson(path.join(import.meta.dirname, 'data', 'engine.json'));
+  const ladder: Record<string, any> = (engine.weapon_size_mult || {}).ladder || {};
+  const rows = Object.entries(ladder).map(([name, l]) => {
+    const fav = l.small > l.medium ? 'Small' : l.large > l.medium ? 'Large' : '—';
+    return `| ${name} | ${Number(l.small).toFixed(2)} | ${Number(l.medium).toFixed(2)} | ${Number(l.large).toFixed(2)} | ${fav} |`;
+  });
+  return [
+    '| Weapon | Small | Medium | Large | Favours |',
+    '|---|---|---|---|---|',
+    ...rows,
+    '',
+    'One multiplier on the **physical share** of an outgoing hit, applied **after** mitigation so it never scales the armour ratio: the weapon\'s own swing always carries its row (a staff\'s swing included), a physical attack skill carries it too, and a **magic-damage skill is exempt**. A boss is not a size — it declares which column it reads (`mob.sizes` `reads_as`, Large by default). The one-handed sword is flat at 1.00, so the reference row moves no zone price. **How the rows are derived, with no magnitude typed by hand:** the *direction* comes from each weapon\'s own line and the rules the design already states — heavy single-target press and armour penetration answer a Large body, accuracy and long reach answer a Small one, and magic answers Large through the Element half that already bypasses armour — and the *magnitude* is the owner\'s own dagger ladder (`1.25 / 0.90 / 0.75`), reused as-is for a Small-favouring row and pointed the other way for a Large-favouring one. A row the weapon has no opinion about (the one-handed axe, whose line is bleed and answers no body) stays flat. **A magic weapon is the related case `weapon.basic_attack` names:** it has no swing, it flicks a **bolt** — a press on the attack clock with no mana and no cooldown, worth the attack ladder\'s floor instead of a swing\'s full hit — read off the weapon\'s own `damage` line, so a wand cannot be a bolt in one file and a swing in another (**X50** · `wand` · `staff`). `engine.json` `weapon_size_mult` is the home, and this is the weapon type\'s own rule — not a Mastery bonus, so `AGENT.md` §5\'s per-weapon DPS ban is untouched.',
+  ].join('\n');
+}
+
+/**
+ * The frame list a weapon type drops as (A10). `item-base.md` states the rule and `bases.json`
+ * `weapon_frames` owns it, so the table is a projection and cannot drift from the roll.
+ */
+function renderWeaponFrames() {
+  const data: any = readJson(path.join(import.meta.dirname, 'data', 'bases.json'));
+  const frames: Record<string, any> = data.weapon_frames || {};
+  const rows = Object.entries(frames).flatMap(([type, list]) =>
+    (list as any[]).map((f, i) => `| ${type} | ${f.name} | ${(f.base_mod || []).join(' · ')} |${i === 0 ? ' **reference** |' : ' |'}`));
+  return [
+    '| Weapon type | Frame | Base-Mod lines it forces | |',
+    '|---|---|---|---|',
+    ...rows,
+    '',
+    'Step 2 of the loot roll picks the **type** and then the **frame** inside it, so a type ships as frame variants: the frame is what the piece is called and what it forces, which is why two frames of one type differ in their craftable-Mod count. A type\'s frames roll **equally**, like a Base inside its slot. The **reference frame** of every type carries exactly the lines its type forced before the frame list existed, so the published behaviour has a named home and no measured loot number moved (A10 · `item-base.md` · `bases.ts` BS9).',
   ].join('\n');
 }
 
 const WRITERS: Writer[] = [
   { file: 'item-base.md', key: 'three-paths', render: () => renderPaths('paths') },
   { file: 'formula-utility.md', key: 'weight-tax', render: () => renderPaths('tax') },
+  { file: 'equipment-weapon.md', key: 'size-ladder', render: renderSizeLadder },
+  { file: 'equipment-weapon.md', key: 'weapon-frames', render: renderWeaponFrames },
 ];
 function checks(): any[] {
   const out: any[] = [];
@@ -371,12 +427,29 @@ function checks(): any[] {
   const statedCap = (G.read('equipment-weapon.md').match(/\+(\d+)% \((\d+) types\)/) || []);
   add('BS8', capPct === Number(statedCap[1]) && weapons.length === Number(statedCap[2]) ? 'pass' : 'fail',
     `the account-wide Mastery drop bonus tops out at ${weapons.length} × ${M.drop_bonus_per_type_pct}% = ${capPct}% (equipment-weapon.md states +${statedCap[1]}% across ${statedCap[2]} types)`);
-  // B6 · B7 (harness/todo.md): a weapon type MAY carry several Bases (D-072), but no variant list has
-  // been written yet, so the shipped frames are the types themselves. This gate fails the moment a
-  // frame list appears without being read by the drop roll, which is how the variants must land.
-  add('BS9', (current.weapon_frames || []).length === 0 && weapons.length === statedCount ? 'pass' : 'fail',
-    `${weapons.length} weapon types are the frames in play · no variant list defined yet (D-072 permits one, and it would have to reach bases.json before the roll)`);
-  // B13 · D-101: the weight column exists, every type carries one, and the two endpoints are the
+  // A10: every weapon type carries a frame list. The FIRST frame of each type is exactly the live
+  // forced pair, so the published behaviour has a named home, and every frame names Base-Mod lines
+  // that exist in `mods.json`. This replaced the old "no variant list defined yet" guard.
+  const KNOWN_MOD_IDS = new Set((MODS.mods || []).map((m: any) => m.id));
+  const FRAMES = current.weapon_frames || {};
+  const frameProblems: string[] = [];
+  for (const w of weapons) {
+    const list = FRAMES[w.name];
+    if (!Array.isArray(list) || !list.length) { frameProblems.push(`${w.name} has no frame list`); continue; }
+    if (JSON.stringify(list[0].base_mod) !== JSON.stringify((current.base_mod?.weapons || {})[w.name])) frameProblems.push(`${w.name}: the first frame is not the live forced pair`);
+    for (const f of list) {
+      if (!(f.weight > 0)) frameProblems.push(`${w.name}/${f.name} carries no weight`);
+      if (!(f.base_mod || []).length) frameProblems.push(`${w.name}/${f.name} forces no line`);
+      for (const id of f.base_mod || []) if (!KNOWN_MOD_IDS.has(id)) frameProblems.push(`${w.name}/${f.name}: unknown line ${id}`);
+      if (list.filter((x: any) => x.name === f.name).length > 1) frameProblems.push(`${w.name} names ${f.name} twice`);
+    }
+  }
+  for (const t of Object.keys(FRAMES)) if (!weapons.some((w: any) => w.name === t)) frameProblems.push(`a frame list for an unknown type ${t}`);
+  const frameCount = Object.values(FRAMES).flat().length;
+  add('BS9', frameProblems.length === 0 && weapons.length === statedCount ? 'pass' : 'fail',
+    frameProblems.length ? frameProblems.join(' · ')
+      : `${weapons.length} weapon types each carry ${Math.min(...Object.values(FRAMES).map((l: any) => l.length))}-${Math.max(...Object.values(FRAMES).map((l: any) => l.length))} frames (${frameCount} in all), the first frame of every type is its live forced pair, and every frame line is a real Mod (A10 · item-base.md)`);
+  // B13: the weight column exists, every type carries one, and the two endpoints are the
   // range `mod-pool.md` states out of its own mouth — read back from that sentence, never retyped here.
   const stated = (G.read('mod-pool.md').match(/weight by type \((\w+) (\d+) → ([a-z -]+) (\d+)\)/) || []);
   const noWeight = weapons.filter((w: any) => !(w.weight > 0));

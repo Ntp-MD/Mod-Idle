@@ -26,7 +26,7 @@ const PCT_LINE: Record<string, string> = {
   evasion_pct: 'evasionPct',
   perfect_dodge_pct: 'pdodgePct',
   status_resistance_pct: 'statusResPct',
-  // the four line-1 Base Mods (item-base.md · D-123): block, penetration and the two chances
+  // the four line-1 Base Mods (item-base.md): block, penetration and the two chances
   block_chance: 'blockPct',
   armour_pen: 'armourPenPct',
   bleed_chance: 'bleedChancePct',
@@ -72,23 +72,23 @@ export function sumLines(gear: (Item | null)[]): Lines {
     // a Broken piece is kept but counts as nothing: unequippable, stats 0, still at its level
     if (!item || item.broken) continue;
     // the Gear Mod is the piece's own inherent line and its school comes from the Base, not from a
-    // roll (`item-base.md` · D-104); a Base with no school — every weapon, belt, ring, amulet, cape,
+    // roll (`item-base.md`); a Base with no school — every weapon, belt, ring, amulet, cape,
     // off hand — has nothing for +N to raise
     const school = BASE_BY_NAME.get(item.base)?.school;
     if (item.gearMod && school && FLAT_LINE[school]) acc[FLAT_LINE[school]] += item.gearMod;
     for (const line of item.lines) {
-      // a Base Mod line carries its extra Mods on the same line (`item-base.md` · D-123), so each part
+      // a Base Mod line carries its extra Mods on the same line (`item-base.md`), so each part
       // feeds its own bucket
       for (const part of [line, ...((line.extra as any[]) || [])]) {
         const stat = (part as any).stat as StatKey | undefined;
         if (part.id === 'stat_mod_flat' && stat) acc.statBy[stat].flat += part.value;
-        // the all-stats sibling lifts every Core stat by the one value it rolled (D-129)
+        // the all-stats sibling lifts every Core stat by the one value it rolled 
         else if (part.id === 'all_stat_flat') for (const k of STAT_KEYS) acc.statBy[k].flat += part.value;
         else if (PCT_LINE[part.id]) acc[PCT_LINE[part.id]] += part.value;
         else if (FLAT_LINE[part.id]) acc[FLAT_LINE[part.id]] += part.value;
       }
       // and an Elemental line also feeds its own Element's pool, the way a PoE item carries one
-      // element per added-damage line (owner ruling, D-089)
+      // element per added-damage line (owner ruling)
       if (line.element && (line.id === 'elemental_power_flat' || line.id === 'elemental_power')) {
         const bucket = acc.elemBy[line.element] || (acc.elemBy[line.element] = { flat: 0, pct: 0 });
         if (line.id === 'elemental_power_flat') bucket.flat += line.value;
@@ -114,7 +114,7 @@ export interface Character {
   /** Elemental power per Element, from the lines that carry one. Empty when nothing does. */
   elemByElement: Record<string, number>;
   accuracy: number;
-  /** The Dex half of Evasion, as a rating — rolled against whichever mob is attacking (D-112). */
+  /** The Dex half of Evasion, as a rating — rolled against whichever mob is attacking. */
   evasion: number;
   /** Agi's half of Evasion, in percentage points added after that roll (30 Agi = 1). */
   evasionFromAgi: number;
@@ -135,19 +135,21 @@ export interface Character {
   critChance: number;
   critDmg: number;
   perfectDodge: number;
-  /** The shield's own avoidance layer (D-123): a blocked hit is deleted outright. */
+  /** The shield's own avoidance layer: a blocked hit is deleted outright. */
   block: number;
-  /** Cut on the mob's armour ratio, from the crossbow's Base Mod line (D-123). */
+  /** Cut on the mob's armour ratio, from the crossbow's Base Mod line. */
   armourPen: number;
-  /** Chance to bleed on a landed hit, from the axe's Base Mod line (D-123). */
+  /** Chance to bleed on a landed hit, from the axe's Base Mod line. */
   bleedChance: number;
-  /** Chance to stun on a landed hit, Alignment × K_STUN_PER_ALIGN + the mace's line (D-123 · C10). */
+  /** Chance to stun on a landed hit, Alignment × K_STUN_PER_ALIGN + the mace's line (C10). */
   stunChance: number;
   alignment: number;
   resistance: number;
-  /** Extra percentage points of resistance against one named Element (Trinity Form · D-102). */
+  /** Vit's Stun Recovery: the share of a shock's stop it buys back (item 5 · `K_VIT_STUNREC`). */
+  stunRecovery: number;
+  /** Extra percentage points of resistance against one named Element (Trinity Form). */
   resByElement: Record<string, number>;
-  /** A post-cap multiplier on the character's own clock — Haste, and nothing else (D-102). */
+  /** A post-cap multiplier on the character's own clock — Haste, and nothing else. */
   globalSpeed: number;
   /** The multiplier a buff puts on incoming damage (Berserker takes more, Iron Will less). */
   damageTaken: number;
@@ -208,7 +210,7 @@ export function buildCharacter(
   const lines = sumLines(gear);
   const core = {} as Record<StatKey, number>;
   // With no allocation given, fall back to the REFERENCE even-split line — the build every published
-  // number and every test is measured against. The client passes the player's own `points` (D-141).
+  // number and every test is measured against. The client passes the player's own `points`.
   const refPts = eng.pointsAt(level) / STAT_KEYS.length;
   for (const k of STAT_KEYS) {
     const spent = points ? (points[k] ?? 0) : refPts;
@@ -221,7 +223,7 @@ export function buildCharacter(
   // the K_ELEM base belongs to the piece's own Element; each added line belongs to the Element it
   // carries, so a two-Element weapon is split and a one-Element one reads exactly as it did before
   const elemFromGear = (core.int * E.K.K_ELEM + lines.elemFlat) * (1 + lines.elemPct / 100);
-  // a Herald adds flat damage of one named Element *on top of* what the gear already carries (D-096),
+  // a Herald adds flat damage of one named Element *on top of* what the gear already carries,
   // so it joins that Element's pool, lifts the total, and leaves every other pool as it was
   const herald: Record<string, number> = {};
   for (const [key, v] of Object.entries(effects.add || {})) {
@@ -240,7 +242,7 @@ export function buildCharacter(
   if (elemFromGear - named !== 0) elemByElement[''] = elemFromGear - named;
   for (const [el, v] of Object.entries(herald)) elemByElement[el] = (elemByElement[el] || 0) + v;
   // Trinity Form names the Elements it hardens against, so each one gets its own resistance line
-  // (D-090's per-Element pools, spent on the incoming half by element · D-102)
+  // (per-Element pools, spent on the incoming half by element)
   const resByElement: Record<string, number> = {};
   for (const [key, v] of Object.entries(effects.add || {})) {
     if (!key.startsWith('elemental_resistance:')) continue;
@@ -299,9 +301,10 @@ export function buildCharacter(
     stunChance: eng.stunChanceFrom(alignment, lines.stunChancePct),
     alignment,
     // All Resistance lifts every Element at once, so it joins the same line the per-Element Mods feed
-    // and the one Cap still binds the total (D-110)
+    // and the one Cap still binds the total 
     resistance: eng.resistanceOf(core.vit, lines.resPct + lines.allResPct, m(effects, 'elemental_resistance')),
-    /** Extra resistance against one named Element, from an aura that names it (D-102). */
+    stunRecovery: eng.stunRecoveryOf(core.vit),
+    /** Extra resistance against one named Element, from an aura that names it. */
     resByElement,
     /** Haste's post-cap clock multiplier on cooldowns; attack speed carries its own share. */
     globalSpeed: m(effects, 'global_speed'),

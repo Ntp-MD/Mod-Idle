@@ -8,7 +8,7 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import type { Item } from '../src/sim/types';
 
 /**
- * The 7-line skeleton (`item-base.md` · D-123): line 1 is the Base Mod, lines 2-3 the unremovable
+ * The 7-line skeleton (`item-base.md`): line 1 is the Base Mod, lines 2-3 the unremovable
  * Legacy pair, lines 4-7 the Random lines a Rarity fills at drop. These tests pin the shape, the
  * one-line/1-3-Mod rule with its value scale, the armour hybrid chance, and the two new avoidance
  * readings the skeleton added — block and armour penetration.
@@ -97,7 +97,7 @@ describe('line 1 carries 1-3 Mods on one line, scaled', () => {
   });
 });
 
-describe('block is its own avoidance layer (D-123 · D-112 exception)', () => {
+describe('block is its own avoidance layer (exception)', () => {
   const shield = (pct: number): Item => ({
     slot: 'off hand', base: 'Buckler', rarity: 'Rare', quality: 'high', tier: 'T1', q: 2,
     lines: [{ id: 'block_chance', value: pct, slice: 0 }],
@@ -139,7 +139,7 @@ describe('block is its own avoidance layer (D-123 · D-112 exception)', () => {
   });
 });
 
-describe('armour penetration cuts the mob armour ratio (D-123)', () => {
+describe('armour penetration cuts the mob armour ratio ', () => {
   it('the crossbow line lands on the sheet as a fraction', () => {
     const line = loot.baseModRoll(BASES, 'main hand', null, weaponNamed('crossbow'), () => 0, 1, 0);
     expect(line[0].extra[0].id).toBe('armour_pen');

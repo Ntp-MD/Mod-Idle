@@ -16,6 +16,9 @@ export interface Preset {
   list: (string | null)[];
   buffs: Record<string, boolean>;
   auras: Record<string, boolean>;
+  /** §14: the per-slot Always / Conditional / Never switch rides the set, so six sets are six
+   *  rotations. The shared condition list does not — it is one list for the whole character. */
+  mode: Record<string, string>;
   zones: number[];
 }
 
@@ -25,6 +28,7 @@ export function newPresets(): Preset[] {
     list: new Array(ACTIVE_SLOTS).fill(null),
     buffs: {},
     auras: {},
+    mode: {},
     zones: [],
   }));
 }
@@ -35,6 +39,7 @@ export function storePreset(state: GameState) {
   p.list = [...state.skills.list];
   p.buffs = { ...state.skills.buffs };
   p.auras = { ...state.skills.auras };
+  p.mode = { ...(state.skills.mode || {}) };
 }
 
 /** Load a preset into the live loadout. Cooldowns and XP are deliberately untouched. */
@@ -46,6 +51,7 @@ export function switchPreset(state: GameState, index: number): boolean {
   state.skills.list = [...p.list];
   state.skills.buffs = { ...p.buffs };
   state.skills.auras = { ...p.auras };
+  state.skills.mode = { ...(p.mode || {}) };
   return true;
 }
 

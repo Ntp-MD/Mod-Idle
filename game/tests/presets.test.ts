@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { E, sm } from '../src/engine/client';
 import { newPresets, storePreset, switchPreset, bindZone, autoSelect } from '../src/sim/presets';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 
 describe('six sets, one of them main', () => {
   it('comes straight from engine.json', () => {
@@ -33,7 +33,7 @@ describe('six sets, one of them main', () => {
 
   it('a Push brings the Main set back and keeps running cooldowns', () => {
     const s = newGame(5);
-    s.player.level = 60;
+    setLevel(s, 60);
     s.skills.list[0] = 'attack.cleave';
     s.skills.owned['attack.cleave'] = 0;
     storePreset(s);

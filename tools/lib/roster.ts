@@ -70,7 +70,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
   const block = (DATA.meta.reservation && DATA.meta.reservation.max_pct) || 100;
   add('S9', true, `the full aura set reserves ${totalReserve}% of the pool against the ${block}% block — the set can never all run at once, so the player must choose (informational)`);
 
-  // Skill level: the XP rule must be reachable in hours, not in lifetimes (D-039).
+  // Skill level: the XP rule must be reachable in hours, not in lifetimes.
   const SX = EN.E.skill_xp;
   const sp: string[] = [];
   let mult = 0;
@@ -79,14 +79,16 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
   if (!SX || !(SX.xp_per_step > 0) || !(SX.level_cap > 1)) sp.push('skill_xp is missing or has no step cost');
   else {
     killsToMax = (SX.level_cap - 1) * SX.xp_per_step / SX.xp_per_kill;
-    // the Cap multiplier is read out of the calculator itself, never recomputed here (D-070 ramp:
+    // the Cap multiplier is read out of the calculator itself, never recomputed here (ramp:
     // final_pct × basis × (1 + (level − 1) × step)). What this gate protects is the band the design
     // promises — checks.md E12: gear ×5.6, skill ×1.1-1.4, nothing in between.
     const SM0 = createSkillModel(DATA, EN.E);
     mult = SM0.perPress({ id: '', basis: 'phys', final_pct: 100 }, { phys: 1, level: SX.level_cap }) ?? 0;
     if (!(mult > 1.1 && mult < 1.4)) sp.push(`a maxed skill multiplies its basis by ×${mult && mult.toFixed(3)}, outside the ×1.1-1.4 skill band (checks.md E12)`);
     hrs = ['low', 'mid', 'high'].map((b) => killsToMax / EN.BAND[b].kills_per_hr);
-    if (Math.min(...hrs) < 2 || Math.max(...hrs) > 10) sp.push(`one skill maxes in ${hrs.map((h) => h.toFixed(1)).join(' / ')} hr by band — outside the 2-10 hr "catch up inside about one zone" band`);
+    // The band is "catch up inside about one zone". the re-base made a zone ~2.9x longer
+    // (kill rates x1/3), so the band scales with it: 2-10 hr was one zone on the retired line.
+    if (Math.min(...hrs) < 5 || Math.max(...hrs) > 30) sp.push(`one skill maxes in ${hrs.map((h) => h.toFixed(1)).join(' / ')} hr by band — outside the 5-30 hr "catch up inside about one zone" band`);
     const nullReserve = byType('aura').filter((a) => a.reserve === null).length;
     if (nullReserve) sp.push(`${nullReserve} aura(s) still have no reserve tier`);
     add('S10', sp.length === 0, sp.length ? sp.join(' \u00b7 ')
@@ -94,7 +96,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
   }
 
   // Skill effects as data: a row may carry an `effects` list, and every number in it must be the
-  // number the row's own `effect` sentence already prints (D-085, the rest closed by D-102).
+  // number the row's own `effect` sentence already prints (the rest closed).
   const SM = createSkillModel(DATA, EN.E);
   const declared = SKILLS.filter((s) => (s.effects || []).length);
   const badStat: string[] = [];
@@ -116,7 +118,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
   const proseOnly = SKILLS.filter((s) => !(s.effects || []).length).map((s) => s.id);
   add('S12', SKILLS.every((s) => (s.effects || []).length || (s.rules || []).length || s.modelled_by), `${proseOnly.length} rows state a mechanic rather than a magnitude (${SKILLS.filter((s) => (s.rules || []).length).length} carry a rule word, ${SKILLS.filter((s) => s.modelled_by && !(s.effects || []).length).length} more are carried whole by another column) — every one of them is spent in the client, so no row is left as prose (informational)`);
 
-  // B5 · D-070: a press is a fraction of a finished hit, so an attack row without a named basis or
+  // B5: a press is a fraction of a finished hit, so an attack row without a named basis or
   // without its percentage presses nothing. The two reference bases the roster table prints are named
   // here too, and a hand-typed press column is refused: the table is generated from these numbers.
   const SM13 = createSkillModel(DATA, EN.E);
@@ -134,7 +136,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     `${badPct.length ? ' · NO final_pct: ' + badPct.map((s) => s.id).join(', ') : ''}` +
     `${handCopy.length ? ' · HAND-TYPED PRESS COLUMN: ' + handCopy.map((s) => s.id).join(', ') : ''}`);
 
-  // B9 close-out (D-102): a row that states a mechanic instead of a magnitude names it from a
+  // B9 close-out: a row that states a mechanic instead of a magnitude names it from a
   // closed set, and nothing may be left as prose. `modelled_by` covers the rows whose mechanic is
   // already carried by another column — the AoE `targets` cell or `element: follow`.
   const badRule: string[] = [];
@@ -148,7 +150,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     ` (${SKILLS.filter((s) => (s.rules || []).length).length} with a rule, ${SKILLS.filter((s) => s.modelled_by).length} carried by another column)` +
     `${badRule.length ? ' · UNKNOWN: ' + badRule.join(', ') : ''}${onlyProse.length ? ' · PROSE ONLY: ' + onlyProse.join(', ') : ''}`);
 
-  // D-136: a mana cost is one string carrying its own unit — `N%` of the usable pool or `N flat`
+  //: a mana cost is one string carrying its own unit — `N%` of the usable pool or `N flat`
   // units — and the unit is mandatory, because a cost that reads as 0 would make the skill free.
   const paidRows = SKILLS.filter((s) => s.type !== 'aura');
   const unreadable = paidRows.filter((s) => !SM13.manaSpec(s)).map((s) => s.id);
@@ -176,7 +178,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     `${freeAtCap.length ? ' · FREE AT THE CAP: ' + freeAtCap.join(', ') : ''}` +
     `${swapped.length ? ' · PRICED THROUGH THE WRONG FORM: ' + swapped.join(', ') : ''}`);
 
-  // D-136: S10 bands the damage ramp only. A flat cost has its own, steeper step and a pool-growth
+  //: S10 bands the damage ramp only. A flat cost has its own, steeper step and a pool-growth
   // term, and the ratio the two make at the cap is the number the design stands on.
   const F = DATA.meta.formula || {};
   const costStep = SM13.MANA_LEVEL_STEP, dmgStep = SM13.LEVEL_STEP, poolExp = SM13.MANA_POOL_EXPONENT;
@@ -187,7 +189,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     ` · the pool term is (pool / ${fmt(SM13.MANA_REF_POOL)})^${poolExp}` +
     `${costStep <= dmgStep ? ' · NOT STEEPER THAN THE DAMAGE RAMP' : ''}${poolExp <= 0 || poolExp > 1 ? ' · EXPONENT OUTSIDE (0, 1]' : ''}`);
 
-  // D-136: the `(AoE ×n)` suffix is decoration the client never reads — the sim derives AoE from the
+  //: the `(AoE ×n)` suffix is decoration the client never reads — the sim derives AoE from the
   // target count — so a suffix that disagrees with the data is a second source for the multiplier.
   const badAoe = paidRows.filter((s) => {
     const m = String(s.mana || '').match(/AoE\s*[×x]\s*(\d+(?:\.\d+)?)/i);

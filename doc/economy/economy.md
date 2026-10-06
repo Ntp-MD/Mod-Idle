@@ -44,7 +44,7 @@ full-Lck ceiling (F3 878 drops/hr)   = ~875 gold/hour
 
 # Why gold must have repeatable sinks
 
-Most town purchases are one-time (stash tab, house, deed, pouch tier), so gold demand would die within the last ~20 hours of the 40.2-hour game. The sink list must therefore contain *repeatable* lines, and only these kinds:
+Most town purchases are one-time (stash tab, house, deed, pouch tier), so gold demand would die within the last ~20 hours of the level-100 run. The sink list must therefore contain *repeatable* lines, and only these kinds:
 
 | Repeatable sink | What it costs | Why it is safe |
 |---|---|---|
@@ -65,7 +65,7 @@ Most town purchases are one-time (stash tab, house, deed, pouch tier), so gold d
 
 - **Exact price per line — closed**: every stall line is priced in minutes of full-sell income in `towns-stalls.md` sections 3-4, generated from `tools/data/town.json` and caged as `checks.md` group T. F9/F13 still move two of those rows (`towns-stalls.md` section 9).
 - **Whether Collector turn-ins pay gold or the item directly — closed**: the item only, never gold, so gold keeps exactly two mints (`checks.md` G6 · T14).
-- **Whether road events pay gold — closed**: yes, bounded. The Road is one of the two gold mints (section "Gold" above), paid as a 3-gold purse once per link per day = a 24 gold/day ceiling ≈ 1% of a farming session, and it pays no stones (`towns.md` section 7 · D-040 · `checks.md` X36).
+- **Whether road events pay gold — closed**: yes, bounded. The Road is one of the two gold mints (section "Gold" above), paid as a 3-gold purse once per link per day = a 24 gold/day ceiling ≈ 1% of a farming session, and it pays no stones (`towns.md` section 7 · `checks.md` X36).
 - **Whether gold carries over across the 3 character slots — closed**: no, per character. `save.md` lists gold among the per-character fields (level · stats · bag · currencies · zone progress), while only Mastery · dex · drop_rate · filter presets · play time are account-wide — so Standing, settlements and gold all read per character.
 
 All four questions this file raised are now answered; nothing here is left open.

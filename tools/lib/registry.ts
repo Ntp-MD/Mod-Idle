@@ -35,9 +35,13 @@ const specs: Record<string, any> = {
     note: 'Stat model · K values · Mod maxima · loot model · craft prices · timeline. Changing a number here re-prices every town line and rewrites checks.md groups A · B · C · F.',
     collections: {
       stat: { kind: 'constmap', group: 'Stat model', label: 'Stat growth', fields: {
-        base: ['int', 'Base stat at level 1'], per_level: ['int', 'Stat per level'],
-        level_cap: ['int', 'Player level cap'], mob_level_cap: ['int', 'Mob level cap'],
-        item_slots: ['int', 'Equipment slots'], core_flat_max: ['int', 'Stat Mod flat per Mod'], split_items: ['int', 'Items per stat in the reference split'],
+        base: ['int', 'Base stat at level 1'], level_cap: ['int', 'Player level cap'],
+        mob_level_cap: ['int', 'Mob level cap'], item_slots: ['int', 'Equipment slots'],
+        core_flat_max: ['int', 'Stat Mod flat per Mod'], split_items: ['int', 'Items per stat in the reference split'],
+        points_per_level: ['int', 'Stat points per level (2-100)'], point_value: ['num', 'Stat gained per point'],
+        paragon_from: ['int', 'First Paragon level'], paragon_points_per_level: ['int', 'Stat points per Paragon level'],
+        tree_points_per_level: ['int', 'Tree points per level'], reference_build: ['text', 'Reference build'],
+        respec_cost: ['int', 'Respec cost'],
       } },
       level_gain: { kind: 'constmap', group: 'Stat model', label: 'Level gain', fields: {
         hp_per_level: ['int', 'HP per level'], mp_per_level: ['int', 'Mana per level'],

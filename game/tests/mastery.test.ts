@@ -90,7 +90,7 @@ describe('weapon drops obey the union pool', () => {
       if (item.slot !== 'main hand') continue;
       seen++;
       // line 1 is the frame's own implicit — a wand carries Cooldown reduction there even though the
-      // random pool blocks it (item-base.md · D-123); lines 2-7 must stay inside the pool
+      // random pool blocks it (item-base.md); lines 2-7 must stay inside the pool
       for (const line of item.lines.slice(1)) expect(blocked.has(line.id)).toBe(false);
       const w = weaponByName(item.base)!;
       const magicLines = item.lines.filter((l) => l.id.startsWith('magic_power'));

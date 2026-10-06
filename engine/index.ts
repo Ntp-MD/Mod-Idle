@@ -32,10 +32,10 @@ export function createEngine(E: EngineData) {
   const ES = E.energy_shield;
   const CAP = E.caps;
 
-  // ---- core stat line: levels grant POINTS, and `statAt` is the reference even-split line (D-141)
+  // ---- core stat line: levels grant POINTS, and `statAt` is the reference even-split line 
 
   const REF_STATS = 7;
-  /** Stat points earned by a level: `5 x (min(L,100)-1) + 2 x max(0, min(L,190)-100)` (D-141). */
+  /** Stat points earned by a level: `5 x (min(L,100)-1) + 2 x max(0, min(L,190)-100)`. */
   const pointsAt = (level: number) =>
     S.points_per_level * (Math.min(level, S.paragon_from - 1) - 1)
     + S.paragon_points_per_level * Math.max(0, Math.min(level, S.level_cap) - (S.paragon_from - 1));
@@ -54,7 +54,7 @@ export function createEngine(E: EngineData) {
   const CEIL = Math.round(ceilStat(S.item_slots, false) * 100) / 100;   // reference line, thirteen items on one stat
   const SPLIT = Math.round(ceilStat(S.item_slots, true) * 10) / 10;      // thirteen items split two ways
   const FORCED_SPLIT = (statAt(S.level_cap) + S.core_flat_max * S.item_slots) * 1;
-  /** The ceiling the K values are actually set on: ALL points AND all items in one stat (D-141). */
+  /** The ceiling the K values are actually set on: ALL points AND all items in one stat. */
   const FOCUSED_CEIL = Math.round((statOf(pointsAt(S.level_cap)) + S.core_flat_max * S.item_slots) * 100) / 100;
 
   // ---- derived ceilings (cages group B)
@@ -77,7 +77,7 @@ export function createEngine(E: EngineData) {
   };
   DERIVED.pool_regen_sec = DERIVED.mana / DERIVED.mana_regen;
 
-  // ---- the two reference builds a skill press is printed against (formula.md section 0 · D-070)
+  // ---- the two reference builds a skill press is printed against (formula.md section 0)
   // The same shape the published glass row uses: 13 items in one Core stat, the other stats at
   // level-only 210, sword `weapon_mult` 1.0, and the main hand's two Mod slots spent on that build's
   // power line. `basis magic` is the magic line plus the Element line through Alignment, because a
@@ -94,9 +94,9 @@ export function createEngine(E: EngineData) {
     },
   };
 
-  // ---- mob evasion: the species Dex line, not a level number (D-019 · D1 step 1)
+  // ---- mob evasion: the species Dex line, not a level number (D1 step 1)
 
-  // A mob's own stat block (`mob.stat`), deliberately NOT the player's line. It is FLAT now (D-141):
+  // A mob's own stat block (`mob.stat`), deliberately NOT the player's line. It is FLAT now:
   // one base the species vector multiplies, no level term, so two mobs of a level can be nothing alike.
   const MSTAT = E.mob.stat;
   const mobStat = () => MSTAT.base;
@@ -139,7 +139,7 @@ export function createEngine(E: EngineData) {
   DERIVED.armour_ceil = armourOf(CEIL);
 
   /**
-   * What a mob's own defences remove from one of our hits (D-099 · B8). The mob carries an Armour line
+   * What a mob's own defences remove from one of our hits (B8). The mob carries an Armour line
    * from its Str and an Elemental resistance from its Vit in `mob-roster.md`, so the two halves of our
    * hit are answered separately, exactly as the incoming order answers theirs: the non-Element part
    * (physical and spell) meets the same PoE armour ratio, and only the Element part meets resistance.
@@ -154,7 +154,7 @@ export function createEngine(E: EngineData) {
   const mobResCut = (res: number) => (res > 0 ? Math.min(CAP.elem_res, res) / 100 : 0);
   /**
    * `resOffset` is in percentage points and comes from the lines that strip a target's resistance —
-   * Sunder, Elemental Fury, or a pierce on the hit itself (Void Lance). It cannot take the line below
+   * Sunder, Elemental Fury, or a pierce on the hit itself (Nether Orb). It cannot take the line below
    * zero, so a −20 on a mob sitting at 9.5% opens it fully rather than amplifying damage.
    */
   function mitigateMobHit(mob: any, nonElement: number, element: number, armourCutFraction = 0, resOffset = 0) {
@@ -165,7 +165,7 @@ export function createEngine(E: EngineData) {
     );
   }
 
-  // ---- Energy Shield: the caster's second pool (D-026)
+  // ---- Energy Shield: the caster's second pool 
   DERIVED.es_pool = CEIL * K.K_INT_ES;
   DERIVED.es_regen = CEIL * K.K_INT_ESREGEN;
   DERIVED.es_recover_sec = DERIVED.es_pool / DERIVED.es_regen;
@@ -228,7 +228,7 @@ export function createEngine(E: EngineData) {
   const typicalDpsAt = (Lv: number) => mobHpAt(Lv) / skillF(Lv);
   const mobPsAt = (Lv: number) => typicalDpsAt(Lv) / K.mob_damage_divisor;
 
-  // a mob accuracy is its own Dex line (D-019): stat_c x species.dex x K_DEX_ACC x accuracy tier
+  // a mob accuracy is its own Dex line: stat_c x species.dex x K_DEX_ACC x accuracy tier
   const mobAcc = (Lv: number, dexMult: number, tier: number) => mobStat() * dexMult * K.K_DEX_ACC * tier;
   // A mob's own dodge is contested by the accuracy of the player attacking it, the same opposed shape X20 uses
   // for the player side. Reference attacker = a same-level player with no Dex investment.
@@ -279,7 +279,7 @@ export function createEngine(E: EngineData) {
   const physOf = (str: number, flat: number, pct: number, weaponAspd: number) => (str * K.K_STR + flat) * (1 + pct / 100) * weaponMult(weaponAspd);
   const magicOf = (int: number, flat: number, pct: number, weaponAspd: number) => (int * K.K_INT + flat) * (1 + pct / 100) * weaponMult(weaponAspd);
 
-  // Evasion is ONE layer (D-112). The Dex rating runs the PoE entropy roll against the
+  // Evasion is ONE layer. The Dex rating runs the PoE entropy roll against the
   // attacker's accuracy; Agi then adds flat percentage points on top — 30 Agi = 1 point —
   // and the Cap 80 binds the sum, so an accurate mob still decides how much of it lands.
   const evasionChance = (rating: number, agiPoints = 0, attackerAccuracy = 1) => {
@@ -290,7 +290,7 @@ export function createEngine(E: EngineData) {
   const evasionRating = (dex: number, flat = 0, pct = 0) => (dex * K.K_EVASION + flat) * (1 + pct / 100);
   /** Agi's share, in percentage points — 30 Agi = 1 (K_AGI_EVAS = 1/30). */
   const agilityEvasion = (agi: number) => agi * K.K_AGI_EVAS;
-  // a mob dodging our swing keeps its own thin opposed roll off its Agi (D-024 · X24).
+  // a mob dodging our swing keeps its own thin opposed roll off its Agi (X24).
   // `K_MOB_DODGE` is the mob-side K only — the player's Agi buys Evasion points above.
   const dodgeRate = (agi: number) => agi * K.K_MOB_DODGE;
   const dodgeChance = (rate: number, attackerAccuracy: number) => (rate / (rate + attackerAccuracy)) * 100;
@@ -302,7 +302,7 @@ export function createEngine(E: EngineData) {
   };
 
   /**
-   * Block is its own avoidance layer (D-123 · it overrules D-112's "one avoidance layer" for the
+   * Block is its own avoidance layer (it overrules "one avoidance layer" for the
    * block path only; evasion keeps its Cap). It is a flat percentage the shield's Base Mod line
    * prints, rolled last in the incoming order, OPEN-ENDED (no Cap, owner ruling). A blocked hit is
    * NOT deleted — it is cut by a flat `armour / 10` (owner ruling, provisional; applied in mobSwing).
@@ -331,6 +331,42 @@ export function createEngine(E: EngineData) {
   const critChanceOf = (pool: number) => Math.min(pool, K.K_CRIT_CAP);
   const critDmgOf = (pool: number, dmgPct = 0) => 100 + dmgPct + (pool - critChanceOf(pool)) * K.K_CRIT_OVERFLOW;
 
+  // ---- the two published reference builds, and the TTK the loot engine is priced at 
+  // The REFERENCE build is the even split the whole design is written against: every stat gets the
+  // level-cap reference line plus its share of the 13 items (points / 7, items / 7). The FOCUSED
+  // build puts every point AND every item in one stat. Both swing the reference weapon with no skill
+  // list. `loot.ttk_per_mob_sec` in the data is `REFERENCE.ttk`: mob_HP at the anchor level divided by
+  // the reference DPS times the skill multiplier, so the kill rates, the loot bands and the timeline
+  // follow the build the docs actually publish instead of a retired ceiling.
+  const REF_WEAPON = E.weapons.find((w) => /one-handed/.test(w.name)) || E.weapons[0];
+  const buildLine = (stat: number, weaponAspd: number) => {
+    const phys = physOf(stat, M.phys_flat_main_hand, M.phys_pct_main_hand, weaponAspd);
+    const aspd = aspdOf(stat, weaponAspd, M.aspd_pct);
+    const pool = critPool(stat);
+    const crit = critChanceOf(pool);
+    const critDmg = critDmgOf(pool, M.crit_damage_mod_pct);
+    const hit = hitVs(stat, MOB_EVASION_REF) / 100;
+    const dps = phys * (aspd / 100) * hit * (1 + (crit / 100) * (critDmg / 100 - 1));
+    return { stat, phys, aspd, crit, critDmg, hit, dps };
+  };
+  const REF_STAT = statAt(S.level_cap) + (S.core_flat_max * S.item_slots) / REF_STATS;
+  const FOCUS_STAT = statOf(pointsAt(S.level_cap)) + S.core_flat_max * S.item_slots;
+  const REF_LINE = buildLine(REF_STAT, REF_WEAPON.weapon_aspd);
+  const FOCUS_LINE = buildLine(FOCUS_STAT, REF_WEAPON.weapon_aspd);
+  const ANCHOR_LEVEL = 100;
+  const REFERENCE = {
+    weapon: REF_WEAPON.name,
+    anchorLevel: ANCHOR_LEVEL,
+    stat: REF_STAT,
+    focusedStat: FOCUS_STAT,
+    line: REF_LINE,
+    focused: FOCUS_LINE,
+    dpsWithSkill: REF_LINE.dps * skillF(ANCHOR_LEVEL),
+    ttk: mobHpAt(ANCHOR_LEVEL) / (REF_LINE.dps * skillF(ANCHOR_LEVEL)),
+    focusedTtk: mobHpAt(ANCHOR_LEVEL) / (FOCUS_LINE.dps * skillF(ANCHOR_LEVEL)),
+  };
+
+
   const maxHpOf = (vit: number, level: number, pct = 0, flat = 0) => (LG.hp_base + vit * K.K_VIT_HP + LG.hp_per_level * (level - 1) + flat) * (1 + pct / 100);
   const hpRegenOf = (vit: number, pct = 0, flat = 0) => vit * K.K_VIT_REGEN * (1 + pct / 100) + flat;
   const maxManaOf = (int: number, level: number, pct = 0, flat = 0) => (LG.mana_base + int * K.K_INT_MP + LG.mp_per_level * (level - 1) + flat) * (1 + pct / 100);
@@ -344,6 +380,16 @@ export function createEngine(E: EngineData) {
   // multiplier, left open-ended. The defensive `Status Alignment resistance %` is a separate Mod line.
   const alignmentOf = (dex: number, flat = 0, mult = 1) => (dex * K.K_DEX_ALIGN + flat) * mult;
   const resistanceOf = (vit: number, pct = 0, mult = 1) => Math.min(CAP.elem_res, vit * K.K_VIT_RES * (1 + pct / 100) * mult);
+  /**
+   * Stun Recovery (the owner's `owner/idea-gameplay.md` item 5): Vit buys back part of a shock's stop,
+   * so a 1 sec stun with 50% recovery leaves half a second. `K_VIT_STUNREC` is derived from that very
+   * example rather than picked — it is set so a single-stat Vit build at the ceiling lands on 50%,
+   * which leaves the reference build (Vit at the level-only line) on ~12%. 100% is the natural bound:
+   * recovery cannot take more than the whole duration.
+   */
+  const stunRecoveryOf = (vit: number) => Math.min(100, Math.max(0, vit * K.K_VIT_STUNREC));
+  /** The stop a shock actually costs: the published `status.shock.stop_sec`, cut by the recovery. */
+  const stunStopSec = (vit: number, stopSec: number) => stopSec * (1 - stunRecoveryOf(vit) / 100);
   const weightCapacityOf = (str: number) => LG.weight_base + str * K.K_STR_WEIGHT;
 
   // ---- carried weight (formula-utility.md §11): the tax is a slowdown, never a slot lock
@@ -363,7 +409,7 @@ export function createEngine(E: EngineData) {
    * What a held weapon weighs: the column `equipment-weapon.md` publishes, imported into
    * `bases.json`, with the off-hand rule `mod-pool.md` states (×`dual_wield_weight_mult` of its own
    * type). The table is passed in because `engine/` holds rules, not a second copy of the data —
-   * the client and the cages call this one function (D-101 · D-108).
+   * the client and the cages call this one function.
    */
   const weaponWeightOf = (bases: BasesData | undefined, name: string, slot = 'main hand') => {
     const w = (bases?.weapons || []).find((x) => String(x.name).toLowerCase() === String(name || '').toLowerCase());
@@ -371,7 +417,42 @@ export function createEngine(E: EngineData) {
     return slot === 'off hand' ? w.weight * (bases!.dual_wield_weight_mult ?? 1) : w.weight;
   };
 
-  // ---- drop-source floor and ceiling (item-rarity.md · save.md offline rule)
+  /**
+   * Weapon × body class (HugePatch section 12): the shape of the fight, not a stat. Each
+   * weapon carries a three-column ladder in `bases.json` — one favoured size, one disfavoured, flat
+   * where the weapon has no opinion — and the sword sits at 1.00 across all three so the reference row
+   * moves no zone price. A boss is not a size: it declares which column it reads (`mob.sizes.boss.
+   * reads_as`, overridable per boss). The table is passed in because `engine/` holds rules, not a
+   * second copy of the data.
+   */
+  const sizeMultOf = (ladder: Record<string, any> | undefined, weaponName: string, bodyLabel: string) => {
+    const want = String(weaponName || '').toLowerCase();
+    const key = Object.keys(ladder || {}).find((k) => k.toLowerCase() === want);
+    const m = key ? (ladder as any)[key]?.[bodyLabel] : undefined;
+    return typeof m === 'number' && m > 0 ? m : 1;
+  };
+  /**
+   * `weapon.basic_attack` (HugePatch §14c): **a magic weapon has no swing, it has a bolt.** Read off
+   * the weapon's own damage line rather than a second field, so a wand cannot be a bolt in one file
+   * and a swing in another. The bolt is a press on the ATTACK clock — no mana, no cooldown — worth the
+   * attack ladder's floor (`ladderFloorPct`), so a caster never idles on an empty bar and the bar can
+   * carry real cooldowns instead of being padded with filler rows.
+   */
+  const basicAttackOf = (bases: BasesData | undefined, weaponName: string) => {
+    const w = (bases?.weapons || []).find((x) => String(x.name).toLowerCase() === String(weaponName || '').toLowerCase());
+    return w && (w as any).damage === 'magic' ? 'bolt' : 'swing';
+  };
+
+  /**
+   * Apply that ladder to an already-mitigated hit. Only the **physical share** of the hit moves: a
+   * caster's spells are not the weapon arguing with a body, so magic damage is exempt and a staff's
+   * own swing is not. It lands AFTER mitigation on purpose — putting it before the armour ratio would
+   * multiply the cut as well and collapse a disfavoured weapon to about a third.
+   */
+  const applySizeMult = (mitigated: number, physShare: number, sizeMult: number) =>
+    mitigated * (1 - Math.min(1, Math.max(0, physShare)) * (1 - sizeMult));
+
+
   const QUALITY_INDEX: Record<string, number> = { low: 0, mid: 1, high: 2 };
   const floorOf = (band: string) => (E.rarity.floor_ceiling[band] || { floor: 'low' }).floor;
   const ceilingOf = (band: string) => (E.rarity.floor_ceiling[band] || { ceiling: 'low' }).ceiling;
@@ -385,14 +466,18 @@ export function createEngine(E: EngineData) {
 
   const BAND: Record<string, any> = {};
   for (const b of BAND_KEYS) {
-    const drops = Math.round(L.bands[b].kills_per_hr_published * dropChance(b));
+    // F3 is derived from the ROUNDED F2 the doc prints, so the published table closes: kills/hr ×
+    // the printed drop chance is the drops/hr to the last digit. Reading the raw chance instead let
+    // a 0.05% rounding flip a kill x chance product by one and broke X5 (re-base).
+    const dropPct = r1(dropChance(b) * 100);
+    const drops = Math.round(L.bands[b].kills_per_hr_published * (dropPct / 100));
     BAND[b] = {
       kills_per_hr: L.bands[b].kills_per_hr_published,
       kills_derived: Math.round(killsDerived(b)),
       group_mobs: L.bands[b].group_mobs,
       lck: Math.round(lckOf(b)),
       lck_mult: r2(1 + lckOf(b) * K.K_LCK_DROP),
-      drop_chance_pct: r1(dropChance(b) * 100),
+      drop_chance_pct: dropPct,
       drops_per_hr: drops,
       upgrades_per_hr: L.bands[b].upgrades_per_hr,
       junk_per_hr: drops - L.bands[b].upgrades_per_hr,
@@ -410,7 +495,7 @@ export function createEngine(E: EngineData) {
   const tierStonesPerHr = (band: string) => Math.round(L.bands[band].kills_per_hr_published * L.elite_spawn_chance * L.elite_tier_stones) + L.boss_per_hour * L.boss_tier_stones;
   const addStonesPerHr = (band: string) => r2(L.bands[band].kills_per_hr_published * L.elite_spawn_chance * L.elite_add_stone_chance + L.boss_per_hour * L.boss_add_stones);
 
-  // ---- the three craft stones the ladder costs but the loot table did not pay (harness/todo.md B21 · D-100)
+  // ---- the three craft stones the ladder costs but the loot table did not pay
   // crafting.md says Quality Stone comes "monsters → elites → bosses by step", Repair "elite / boss
   // only" and Corrupt "boss only, rarest"; the rates live in `loot.*_stone_sources` and every hour
   // figure below is divided out of them, so the doc never holds a second copy of one.
@@ -567,7 +652,8 @@ export function createEngine(E: EngineData) {
     const ps = mobPsAt(lv) * size.ps / bf;
     return {
       speciesId: sp.id, species: sp.name, zone: zoneId, zoneName: z.name, level: lv,
-      body: size.id, kind: size.name, innate: sp.element_bias.filter((e) => z.elements.includes(e)),
+      body: size.id, kind: size.name, readsAs: size.reads_as || size.id,
+      innate: sp.element_bias.filter((e) => z.elements.includes(e)),
       weapon: sp.carries_weapon, damage: sp.damage, accuracy_mult: sp.accuracy_mult,
       hp, ps,
       acc: mobAcc(lv, sp.stats.dex, sp.accuracy_mult),
@@ -583,7 +669,7 @@ export function createEngine(E: EngineData) {
 
   return {
     E, S, K, M, LG, L, C, TS, ES, CAP, CURVE, X,
-    BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, REF, WEAPONS, STONE, LCK_BOUND,
+    BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND,
     statAt, statWithItems, ceilStat, pointsAt, treePointsAt, statOf,
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
@@ -595,9 +681,9 @@ export function createEngine(E: EngineData) {
     dodgeRate, dodgeChance, perfectDodgeChance, blockChance, armourPenCut, stunChanceFrom, bleedChanceFrom,
     critPool, critChanceOf, critDmgOf,
     maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf, esRegenOf, cdrOf,
-    alignmentOf, resistanceOf, weightCapacityOf, encumbranceOf, aspdEncumbered, weightAtQuality,
+    alignmentOf, resistanceOf, stunRecoveryOf, stunStopSec, weightCapacityOf, encumbranceOf, aspdEncumbered, weightAtQuality,
     armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, agiForCap,
-    weaponWeightOf,
+    weaponWeightOf, sizeMultOf, applySizeMult, basicAttackOf,
     // loot + xp
     lckOf, dropChance, killsDerived, goldPerMinute, killsToLevel, xpToNext, xpPerKill,
     floorOf, ceilingOf, qualityIndexOf,

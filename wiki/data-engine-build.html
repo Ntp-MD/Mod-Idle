@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span><span class="chip ">rows <b>6</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span><span class="chip ">rows <b>6</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -81,9 +81,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="edit.html">Editor</a>
 <a href="about.html">About</a>
 <h4>Collections</h4>
-<a href="data-engine-stat.html">Stat growth (8)</a>
+<a href="data-engine-stat.html">Stat growth (14)</a>
 <a href="data-engine-level_gain.html">Level gain (10)</a>
-<a href="data-engine-K.html">K coefficients (31)</a>
+<a href="data-engine-K.html">K coefficients (32)</a>
 <a href="data-engine-caps.html">Caps (14)</a>
 <a href="data-engine-mod_max.html">Mod maxima (30)</a>
 <a href="data-engine-weapons.html">Weapon types (6)</a>
@@ -117,8 +117,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -151,11 +149,11 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>Reference build</h1>
 <dl class="kv"><dt>path</dt><dd><code>tools/data/engine.json → build</code></dd><dt>kind</dt><dd><code>constmap</code></dd><dt>rows</dt><dd>6</dd><dt>written by</dt><dd><code>tools/check.ts --write</code> · <code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-core-stats.html">core-stats.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
-<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>reference_split</code></td><td>Reference split</td><td><code>Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%</code></td><td><a href="rec-engine-build-reference-split.html">edit</a></td></tr><tr><td><code>hit_chance_pct</code></td><td>Hit chance <span class="dim">(%)</span></td><td><code>80</code></td><td><a href="rec-engine-build-hit-chance-pct.html">edit</a></td></tr><tr><td><code>crit_chance_pct</code></td><td>Crit chance <span class="dim">(%)</span></td><td><code>18.5</code></td><td><a href="rec-engine-build-crit-chance-pct.html">edit</a></td></tr><tr><td><code>dagger_capped_at_500</code></td><td>Dagger reaches Aspd Cap</td><td><code>false</code></td><td><a href="rec-engine-build-dagger-capped-at-500.html">edit</a></td></tr><tr><td><code>heal_pool_mult</code></td><td>Heal pool mult</td><td><code>2.09</code></td><td><a href="rec-engine-build-heal-pool-mult.html">edit</a></td></tr><tr><td><code>heal_pool_mult_note</code></td><td>Heal pool mult note</td><td><code>One round of the heal skills, as a multiple of Max HP: Greater Heal 45% + Heal 8%/sec x 8 sec (64%) = 109% =&gt; x2.09. Read by tools/survival.ts for the boss 'with heal' column (SV6 gate); the heal skills in skills.json must sum to this number.</code></td><td><a href="rec-engine-build-heal-pool-mult-note.html">edit</a></td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>reference_split</code></td><td>Reference split</td><td><code>Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%</code></td><td><a href="rec-engine-build-reference-split.html">edit</a></td></tr><tr><td><code>hit_chance_pct</code></td><td>Hit chance <span class="dim">(%)</span></td><td><code>81</code></td><td><a href="rec-engine-build-hit-chance-pct.html">edit</a></td></tr><tr><td><code>crit_chance_pct</code></td><td>Crit chance <span class="dim">(%)</span></td><td><code>18.5</code></td><td><a href="rec-engine-build-crit-chance-pct.html">edit</a></td></tr><tr><td><code>dagger_capped_at_500</code></td><td>Dagger reaches Aspd Cap</td><td><code>false</code></td><td><a href="rec-engine-build-dagger-capped-at-500.html">edit</a></td></tr><tr><td><code>heal_pool_mult</code></td><td>Heal pool mult</td><td><code>2.09</code></td><td><a href="rec-engine-build-heal-pool-mult.html">edit</a></td></tr><tr><td><code>heal_pool_mult_note</code></td><td>Heal pool mult note</td><td><code>One round of the heal skills, as a multiple of Max HP: Greater Heal 45% + Heal 8%/sec x 8 sec (64%) = 109% =&gt; x2.09. Read by tools/survival.ts for the boss 'with heal' column (SV6 gate); the heal skills in skills.json must sum to this number.</code></td><td><a href="rec-engine-build-heal-pool-mult-note.html">edit</a></td></tr></tbody></table></div></section>
 
 <section><h2>Raw JSON of this collection</h2><pre class="code">{
   &quot;reference_split&quot;: &quot;Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%&quot;,
-  &quot;hit_chance_pct&quot;: 80,
+  &quot;hit_chance_pct&quot;: 81,
   &quot;crit_chance_pct&quot;: 18.5,
   &quot;dagger_capped_at_500&quot;: false,
   &quot;heal_pool_mult&quot;: 2.09,

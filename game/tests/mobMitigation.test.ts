@@ -22,7 +22,7 @@ function castPress(id: string, c: ReturnType<typeof buildCharacter>, target: Mob
 }
 
 /**
- * B8 · the mob's own defences (D-099).
+ * B8 · the mob's own defences.
  *
  * `mob-roster.md` prints an Armour line from each species' Str and an Elemental resistance from its
  * Vit, and combat.md §2 did not use either — so those two lines were decorative and Chill's armour cut
@@ -146,15 +146,15 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     expect(stripped).toBeCloseTo(opened, 6);
   });
 
-  it('Void Lance walks through resistance on its own press', () => {
+  it('Nether Orb walks through resistance on its own press', () => {
     const c = fireCaster();
     const resisted = mob({ res: 60 });
-    const lanceDamage = castPress('attack.void_lance', c, resisted);
-    const boltDamage = castPress('attack.arcane_bolt', c, mob({ id: 'm2', res: 60 }));
-    // the two rows press 103.191% and 102.319% of the same basis; only the lance ignores the 60
-    const scaled = boltDamage * (valueOf('attack.void_lance', 'resistance_pierce_pct') > 0
-      ? sm.byId['attack.void_lance'].final_pct / sm.byId['attack.arcane_bolt'].final_pct : 1);
-    expect(lanceDamage).toBeGreaterThan(scaled);
+    const orbDamage = castPress('attack.nether_orb', c, resisted);
+    const boltDamage = castPress('attack.chaos_bolt', c, mob({ id: 'm2', res: 60 }));
+    // the two rows press the same 103.191% of the same basis; only the orb ignores the 60
+    const scaled = boltDamage * (valueOf('attack.nether_orb', 'resistance_pierce_pct') > 0
+      ? sm.byId['attack.nether_orb'].final_pct / sm.byId['attack.chaos_bolt'].final_pct : 1);
+    expect(orbDamage).toBeGreaterThan(scaled);
   });
 
   it('an aura writes its strip on every mob, and stops when it is taken off', () => {

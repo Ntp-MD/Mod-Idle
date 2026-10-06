@@ -31,8 +31,8 @@ const eng = createEngine(E);
 const ROAD = createRoad(E);
 
 const {
-  S, K, M, LG, L, C, TS, ES, CAP, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT,
-  DERIVED, REF, WEAPONS, STONE, LCK_BOUND, statAt, goldPerMinute, agiForCap, statWithItems,
+  S, K, M, LG, L, C, TS, ES, CAP, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
+  DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap, statWithItems,
   mobEvasion, sizeMult, playerAccuracy, hitVs, hitChance, MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION,
   armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt,
   typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, sizeById, mobAcc, mobDodge,
@@ -41,7 +41,8 @@ const {
   evasionChance, evasionRating, agilityEvasion,
   critPool, critChanceOf, critDmgOf, maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf,
   esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext,
-  encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf,
+  encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf, sizeMultOf, applySizeMult,
+  stunRecoveryOf, stunStopSec, basicAttackOf,
   xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForMinutes, taskPayout,
 } = eng;
 
@@ -167,15 +168,16 @@ function runReadBack(): any[] {
 }
 
 export {
-  ROOT, E, S, K, M, LG, L, C, TS, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT,
-  DERIVED, REF, ES, WEAPONS, STONE, LCK_BOUND, statAt, goldPerMinute, agiForCap,
-  statWithItems, mobEvasion, sizeMult, playerAccuracy, hitVs, MEAN_SPECIES_DEX, SPECIES_EVASION,
+  ROOT, E, S, K, M, LG, L, C, TS, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
+  DERIVED, REF, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap,
+  statWithItems, mobEvasion, sizeMult, playerAccuracy, hitVs, MEAN_SPECIES_DEX, SPECIES_EVASION, MOB_EVASION_REF,
   armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt, typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, mobAcc, mobDodge, refAttackerAcc, mobRoster,
   engineForTown, runReadBack, GENERIC_RULES, fmt, r1, r2, build, ROAD,
   aspdOf, hitsPerSec, weaponMult, physOf, magicOf, dodgeRate, dodgeChance, perfectDodgeChance,
   evasionChance, evasionRating, agilityEvasion,
   critPool, critChanceOf, critDmgOf, maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf,
   esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext,
-  encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf,
+  encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf, sizeMultOf, applySizeMult,
+  stunRecoveryOf, stunStopSec, basicAttackOf,
   xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForMinutes, taskPayout, shared,
 };

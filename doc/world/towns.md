@@ -36,15 +36,15 @@ import towns-ui.md
 | **Melvor Idle** | ~20 skills, area lists, clue/trail content, shared bank | settlement as hub (stash, bench, one click to a zone) · trail/Collector turn-in as a reason to travel | any skill gate on entry (combat only · `concept.md`) |
 | **Path of Exile** | town hubs per act, one service per NPC, waypoint network, master vendors, divination-card turn-in | Waypoints · one NPC = one service, never a general store · Collector set turn-in · town as the place where all services concentrate | quest gating that blocks zone access (zones unlock by level only · `world.md`) |
 | **Black Desert** | town reputation → vendor stock and worker slots · houses with storage · weight · camps | Standing that unlocks stock · house = stash + plot + waypoint anchor · weight system already lives in `formula.md` section 11 | workers, node managers, life skills, market buy-orders, player trading — all resource-skill or economy systems (`concept.md`, `economy.md`) |
-| **Isekai anime** | guild registration, receptionist, request board, town as safe place, each town's merchants stock different goods, carriage between cities, "bring the materials to town" | 3 capitals + 6 towns over zones 1-9 · per-town specialty goods · Guild board = `tasks.md` · registration = Standing tiers · sell-or-dissolve at the counter is the "bring it back to town" loop | an NPC selling the hero a shortcut — no gear, no Mods, no potions, no stones |
+| **Isekai anime** | guild registration, receptionist, request board, town as safe place, each town's merchants stock different goods, carriage between cities, "bring the materials to town" | 6 capitals + 12 towns over zones 1-18 · per-town specialty goods · Guild board = `tasks.md` · registration = Standing tiers · sell-or-dissolve at the counter is the "bring it back to town" loop | an NPC selling the hero a shortcut — no gear, no Mods, no potions, no stones |
 
 # 2. Vocabulary
 
 | Term | Meaning |
 |---|---|
 | **Settlement** | One named place holding services and NPCs. Never holds combat. |
-| **Capital** | A settlement serving one quality band (low / mid / high) with the full service set. 3 total. |
-| **Zone** | The combat area attached to a settlement. The 9 zones of `world.md` are unchanged — a settlement never replaces a zone. |
+| **Capital** | A settlement serving one quality band (low / mid / high) with the full service set. 6 total. |
+| **Zone** | The combat area attached to a settlement. The 18 zones of `world.md` are unchanged — a settlement never replaces a zone. |
 | **Road** | The link between two settlements. Travel only; content on it exists only in opt-in mode (section 7). |
 | **Waypoint** | A Road made instant by having visited its settlement once. |
 | **Camp** | The Push rest location only (`combat.md` section 4) = the settlement owning the current zone. Not a general word for base. |
@@ -61,7 +61,7 @@ travel that consumes real time  →  may never be mandatory
                                  →  may never be the state the character is in while offline
 ```
 
-# 4. Map — 9 zones onto 3 capitals and 6 towns
+# 4. Map — 18 zones onto 6 capitals and 12 towns
 
 Zone levels, group sizes and quality ceilings stay in `world.md`; this adds a place and a specialty. Element identity follows the `world.md` rule "one zone has 1-2 common innate Elements", which is also the reason to buy res from the right town (`elements.md`: res must be prepared from the zone played).
 
@@ -159,7 +159,7 @@ Each row sums to 100 and none reaches 0 — a zero-ambush route is a skip, not a
 | pedlar | 12% | road 16 · river 15 · forest 9 · mountain 7 · moor 13 | none | gold sink only · loss: n/a |
 | chest | 10% | road 8 · river 10 · forest 11 · mountain 8 · moor 13 | none | one Item at the destination zone's quality ceiling · loss: n/a |
 
-The base column is the plain average of the terrain rows and is what an **offline** session rolls, so the tilt can never be farmed while away. The purse pays **3 gold on a ladder link only**, once per link per day, so the Road can never mint more than **51 gold/day** while one 6-hour farming session mints thousands by selling junk — Road gold is a rounding error, which is what "C+D are a content choice, not an income choice" has to mean. A chest pays one Item at the destination zone's ceiling, is capped once per link per day, and pays **no crafting stones**. Standing is granted in kill-equivalents (**15** per completed leg), under a fifth of what the same minutes would earn hunting (**X36**). Losing a one-off trip forfeits roughly 120 kills of progress and the purse; a Push inside a Circuit simply skips the leg.
+The base column is the plain average of the terrain rows and is what an **offline** session rolls, so the tilt can never be farmed while away. The purse pays **1 gold on a ladder link only**, once per link per day, so the Road can never mint more than **17 gold/day** while one 6-hour farming session mints thousands by selling junk — Road gold is a rounding error, which is what "C+D are a content choice, not an income choice" has to mean. A chest pays one Item at the destination zone's ceiling, is capped once per link per day, and pays **no crafting stones**. Standing is granted in kill-equivalents (**7** per completed leg), under a fifth of what the same minutes would earn hunting (**X36**). Losing a one-off trip forfeits roughly 120 kills of progress and the purse; a Push inside a Circuit simply skips the leg.
 <!-- END GENERATED:road-rules -->
 
 - **Offline on the Road** — if the game closes mid-Circuit, the rest of that lap plays out on the **untilted base table** and the character is then parked in a zone, where ordinary offline idling resumes. The base table is what bounds the mint: routing a Circuit through the heaviest-ambush terrain cannot be paid at the tilted rate while the player is away. A one-off trip left alone resolves itself rather than forfeiting; only an active Push forfeits one.
@@ -209,7 +209,7 @@ The base column is the plain average of the terrain rows and is what an **offlin
 
 **Still open:**
 
-- The F9 and F13 lines that the Armourer floor and the pouch ladder depend on (`towns-stalls.md` section 9). F13 (herb bundles/hr) is derived from `engine.json` `herbs` and the pouch ladder prices off it — a measurement for `harness/todo.md` section B, not a new rule.
+- The F9 and F13 lines that the Armourer floor and the pouch ladder depend on (`towns-stalls.md` section 9). F13 (herb bundles/hr) is derived from `engine.json` `herbs` and the pouch ladder prices off it — a measurement `towns-stalls.md` section 9 prints, not a new rule.
 - Whether Capitals are visible on the map before their level requirement, i.e. does the map tease the next band (`towns-ui.md` section 12 item 1). **Owner decision — a UI preference, no number depends on it.**
 
 (End of file)

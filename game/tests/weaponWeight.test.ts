@@ -5,7 +5,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import type { Item } from '../src/sim/types';
 
 /**
- * B13 · a main-hand weapon weighs what its type says (harness/todo.md B13 · D-101).
+ * A main-hand weapon weighs what its type says.
  *
  * Before this only the two types `mod-pool.md` named carried any weight, so every other weapon read
  * as weightless — the encumbrance tax missed exactly the builds it exists to bite (a two-handed axe

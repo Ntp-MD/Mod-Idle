@@ -74,7 +74,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     return from + ((to - from) * (step - first)) / (last - first);
   }
 
-  // The skeleton's unremovable head (D-123 · item-base.md): line 1 is the Base Mod and lines 2-3 the
+  // The skeleton's unremovable head (item-base.md): line 1 is the Base Mod and lines 2-3 the
   // Legacy pair, so the floor every line-editing verb refuses to cross is base_mod_slots + legacy_slots.
   const BASE_MOD_SLOTS = E.rarity.base_mod_slots || 1;
   const LEGACY_SLOTS = E.rarity.legacy_slots || 2;
@@ -179,7 +179,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
    * Add mod stone: fill the next empty line from the Base pool. The stone draws, it does not ask —
    * the player never picks the line (crafting.md rule 6), and the same line never appears twice.
    * The Stat Mod slot holds one line, so a piece that already carries one blocks every sibling
-   * (`stat_mod_flat` and `all_stat_flat` cannot sit on the same piece — equipment-slot-pools.md · D-129).
+   * (`stat_mod_flat` and `all_stat_flat` cannot sit on the same piece — equipment-slot-pools.md).
    */
   function add(item: any, pool: string[], rng: Rng, opts: { ignoreAddCap?: boolean } = {}): any {
     const g = guard(item, 'add');
@@ -200,7 +200,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const id = loot.weightedPick(rng, free.map((m) => ({ id: m, w: loot.weightOf(m, item.q) })));
     const slice = loot.tierSlice(rng(), loot.sliceCount(id, item.q));
     const [lo, hi] = loot.rangeOf(id, item.q, slice);
-    // a Stat Mod stone bakes the Core stat too, the same way a drop does (D-127): the piece's own
+    // a Stat Mod stone bakes the Core stat too, the same way a drop does: the piece's own
     // line carries which stat it feeds, so an added Stat Mod is as specific as a rolled one
     const stat = loot.statOf(id, rng);
     const line = { id, value: lo + Math.floor(rng() * (hi - lo + 1)), slice, ...(stat ? { stat } : {}) };
@@ -314,7 +314,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
   /**
    * What one Upgrade step adds to the piece's Gear Mod. `craft.gear_mod_per_level` is bounded by the
    * published line ceiling — the same `mod_max` line `tools/loot.ts` rolls the Gear Mod from — so a
-   * full ladder cannot pass one T1 line on the piece (D-104 · gate LD7).
+   * full ladder cannot pass one T1 line on the piece (gate LD7).
    */
   const stepOf = (item: any, n: number) => (C.gear_mod_per_level || 0) * n;
 

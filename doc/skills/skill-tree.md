@@ -3,7 +3,7 @@
 import glossary.md
 import skill-pool.md
 
-**This game has no passive skill tree.** The tree was cleared because the fundamentals were still moving, and it is kept here as an empty shell so the decision, the fold point and the cage all survive.
+**This game has no passive skill tree.** The tree was cleared because the fundamentals were still moving, and it is kept here as an empty shell so the decision, the fold point and the cage all survive. A level now grants a **tree point that is banked** — but the tree still holds no content, so a banked point grants nothing until it lands. This amends "no passive tree" ruling: the points exist, the tree does not.
 
 ## Why it went
 
@@ -23,7 +23,7 @@ Worse, it was load-bearing in the one place that must not wobble: the tree multi
 
 1. **The core loop is stable** — gear, crafting, Push and the mob curve are no longer being re-tuned.
 2. **The replacement is not a node graph** — if the answer is "which skills and which aura set", that belongs to the skill list and skill level, not to a second grid (`skill-pool.md` · `skill-pool-system.md`).
-3. **Its power is folded into `mob_HP` in the same commit that adds it.** A power source that is not inside the mob price moves the game speed, and the 40-hour timeline stops being true.
+3. **Its power is folded into `mob_HP` in the same commit that adds it.** A power source that is not inside the mob price moves the game speed, and the 574.5 hr timeline stops being true.
 4. **No document quotes a tree multiplier while this file is empty.** `tools/anchors.ts` and the cages treat any such number as a copy.
 
 ## Shape (empty)

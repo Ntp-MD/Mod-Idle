@@ -5,7 +5,7 @@ import { rollDrop } from './drop';
 import { newTown, progressTasks, tickTown, huntN } from './town';
 import { STAT_KEYS, type StatKey } from '../engine/client';
 import { huntReweight } from '../../../engine/loot.ts';
-import { newFarm, rollHerbs, maybeDrink, maybeFarm, farm } from './farm';
+import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm } from './farm';
 import {
   road, encounterZones, encounterSizes, payPurse, claimChest, openArrival, grantTripStanding, endTrip,
   advanceLeg, skipLeg, settlementZone,
@@ -21,7 +21,7 @@ import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newCurses, modsOn, applyCurse, tickCurses, combineMods, lineValue, modsFromAuraFold, spreadOnDeath } from './curse';
 import {
-  newMobStatusStore, applyElement, applyBleed, stunMob, stepMob, holdPoison, forgetDead as forgetMobStatus,
+  newMobStatusStore, applyWeaponRiders, stepMob, holdPoison, forgetDead as forgetMobStatus,
   modsOn as statusModsOn, targetMods, holdsCondition,
 } from './mobStatus';
 import {
@@ -55,13 +55,13 @@ export function carried(s: GameState) {
   return { potions: bottles, condensed, herbs };
 }
 
-/** A fresh character has spent no points (D-141): the sheet starts empty and grants on level-up. */
+/** A fresh character has spent no points: the sheet starts empty and grants on level-up. */
 const ZERO_POINTS = (): Record<StatKey, number> =>
   Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Record<StatKey, number>;
 
 /**
  * Spend every banked stat point evenly over the 7 Core stats — the REFERENCE allocation the published
- * numbers (and `mob_HP`) are priced against (D-141). Headless runs and tests call this so the character
+ * numbers (and `mob_HP`) are priced against. Headless runs and tests call this so the character
  * they measure is the reference build; the client player allocates by hand instead.
  */
 export function spendReference(s: GameState): void {
@@ -72,6 +72,18 @@ export function spendReference(s: GameState): void {
   for (const k of STAT_KEYS) { p.points[k] += per; left -= per; }
   for (const k of STAT_KEYS) { if (left <= 0) break; p.points[k] += 1; left--; }
   p.statPoints = 0;
+}
+
+/**
+ * Jump a headless character to `level` with exactly the stat points that level grants, spent evenly.
+ * a level grants points rather than stats, so a test that assigns `.level` alone leaves
+ * the character at its level-1 line; this is the test-facing form of the level-up path in `tick`.
+ */
+export function setLevel(s: GameState, level: number): void {
+  s.player.level = level;
+  const spent = STAT_KEYS.reduce((a, k) => a + s.player.points[k], 0);
+  s.player.statPoints = Math.max(0, eng.pointsAt(level) - spent);
+  spendReference(s);
 }
 
 export function newGame(seed = 20260101): GameState {
@@ -173,7 +185,11 @@ const bossInZone = (zoneId: number): any => {
 
 function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string): Mob {
   const z = eng.zoneById(zoneId);
-  const speciesPool = speciesInZone(zoneId);
+  const zonePool = speciesInZone(zoneId);
+  // a sub-zone is what a spawn table rolls against: it names its own race pair and one Element from the
+  // zone's set, and the cast a normal or Elite spawn draws from is that pair (the boss is zone-level)
+  const sub = kind !== 'boss' && z.subzones && z.subzones.length ? z.subzones[Math.floor(rng() * z.subzones.length)] : null;
+  const speciesPool = sub ? zonePool.filter((sp: any) => sub.races.includes(sp.id)) : zonePool;
   let body = 'medium';
   let species = pick(rng, speciesPool);
   if (bodyHint) {
@@ -199,19 +215,24 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   const bf = eng.zoneBodyFactor(zoneId);
   const hp = kind === 'boss' ? eng.mobHpAt(lv) * size.hp : kind === 'elite' ? eng.mobHpAt(lv) * E.mob.elite.hp : base.hp;
   const ps = kind === 'boss' ? eng.mobPsAt(lv) * size.ps : kind === 'elite' ? eng.mobPsAt(lv) * E.mob.elite.ps : base.ps;
-  // innate Element rolls inside the zone's own Elements, species bias weighing 3 (mob.element_roll)
+  // innate Element rolls inside the sub-zone's own Element, or the zone's Elements when a spawn has
+  // no sub-zone; the species bias still weighs 3 (mob.element_roll)
   const bias = species.element_bias.filter((e: string) => z.elements.includes(e));
-  const entries: [string, number][] = z.elements.map((e: string) => [e, bias.includes(e) ? E.mob.element_roll.bias_weight : E.mob.element_roll.other_weight]);
+  const rollElems: string[] = sub ? [sub.element] : z.elements;
+  const entries: [string, number][] = rollElems.map((e: string) => [e, bias.includes(e) ? E.mob.element_roll.bias_weight : E.mob.element_roll.other_weight]);
   const innate = [pickBand(rng, entries)];
   return {
     id: `${zoneId}_${species.id}_${body}_${Math.floor(rng() * 1e9)}`,
     species: species.name,
+    speciesId: species.id,
     kind: kind === 'boss' ? `Boss · ${(bossInZone(zoneId) || { name: 'Boss' }).name}` : kind === 'elite' ? 'Elite' : size.name,
     zone: zoneId,
     level: lv,
     hp,
     hpMax: hp,
     ps,
+    subzone: sub ? sub.name : undefined,
+    readsAs: base.readsAs,
     acc: base.acc,
     evasion: kind === 'elite' ? eng.mobEvasion(lv, species.stats.dex, 'elite') : base.evasion,
     dodgeRate: base.dodgeRate,
@@ -277,7 +298,7 @@ function awardDrop(s: GameState, rng: () => number, band: string, q: number | un
     bestForSlot(s.gear as (Item | null)[]),
     bestForSlot(s.bag),
   );
-  // the filter is OFF by default (D-122): a slot the player has not turned on keeps every drop
+  // the filter is OFF by default: a slot the player has not turned on keeps every drop
   // and dissolves nothing, so the player opts in per slot before a piece is ever thrown away.
   // Only an enabled slot runs the published rule — a piece that fails it dissolves for 1 Reroll
   // value stone (always kept), never for gold (`loot.md` §4).
@@ -304,7 +325,7 @@ function awardDrop(s: GameState, rng: () => number, band: string, q: number | un
   } else if (belowFloor) {
     dissolve(s);
   } else if (verdict.keep) {
-    // nothing equips itself (owner ruling, D-089): a keep is a decision waiting in the bag, which
+    // nothing equips itself (owner ruling): a keep is a decision waiting in the bag, which
     // is what makes "every piece needs a decision" true. The filter's comparison is still against
     // the piece actually worn, so an idle character that never chooses keeps seeing keeps.
     if (s.bag.length < E.inventory.adventure_slots) {
@@ -313,7 +334,7 @@ function awardDrop(s: GameState, rng: () => number, band: string, q: number | un
     } else if (verdict.reason === 'upgrade' && swapWeakestKept(s, item, verdict.score)) {
       // the bag keeps the best decision per slot instead of the first fifty arrivals: a piece that
       // beat the bar replaces the piece it beat, and the loser dissolves for its one stone. The
-      // character still wears nothing it was not told to wear (owner ruling, D-089).
+      // character still wears nothing it was not told to wear (owner ruling).
     } else {
       // overflow is stop_pickup: a full bag picks up nothing and deletes nothing
       s.counters.overflow = (s.counters.overflow || 0) + 1;
@@ -325,7 +346,7 @@ function awardDrop(s: GameState, rng: () => number, band: string, q: number | un
 
 function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>) {
   const online = s.online !== false;
-  // Pandemonium: the lines this mob was carrying jump to the neighbours its row names (D-102)
+  // Pandemonium: the lines this mob was carrying jump to the neighbours its row names 
   const caught = spreadOnDeath(s.curses, mob.id, s.group.map((m) => m.id));
   if (caught) push(s, `${sm.byId['curse.pandemonium'].name} spreads to ${caught} nearby`);
   s.counters.kills++;
@@ -379,6 +400,9 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   }
   progressTasks(s, mob.kind, mob.zone);
   rollHerbs(s, rng, band, band, hw.herb);
+  // the humanoid tribes drop a potion on their own roll (items 2 + 4); an ordinary lineage does not
+  const dropsPotion = !!E.mob.species.find((sp: any) => sp.id === (mob as any).speciesId)?.humanoid;
+  if (dropsPotion && rollPotion(s, rng, band, true)) push(s, `A humanoid drops a potion`);
   if (mob.kind === 'Elite') {
     // the elite stone lines in engine.json are expected values per kill, so the roll keeps them whole
     if (rng() < L.elite_tier_stones) addTo(s, s.counters.stones, 'tier', 'stone', 1);
@@ -473,7 +497,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // the active-skill effect fold changes only on cast/toggle, so compute it once per tick and reuse
   // it for the character sheet and the per-mob aura lines (previously folded again on every swing)
   // the idle default spends this tick's level points before the pool is clamped, so the sheet the
-  // pool is read against already includes them (D-141); manual players bank and spend by hand.
+  // pool is read against already includes them; manual players bank and spend by hand.
   if (s.player.autoSpend && s.player.statPoints > 0) spendReference(s);
   const effects = effectsActive(s.skills);
   const c = buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effects, s.player.points);
@@ -541,8 +565,12 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
             push(s, `Circuit lap done in the away period · parked at ${s.town.waypoint}`);
             endTrip(s, 'complete');
           } else {
+            const cleanBefore = s.counters.cleanLaps || 0;
             advanceLeg(s, trip);
             push(s, `Circuit leg done (${link.text}) · on to ${road.links[s.road!.linkIndex].text}`);
+            // the Circuit objective: a lap closed with no Push is a completion, logged and never
+            // paid — the Road's gold is capped by G6-G9 and a stone would be a new source
+            if ((s.counters.cleanLaps || 0) > cleanBefore) push(s, `Circuit lap complete with no Push — clean lap ${s.counters.cleanLaps}`);
           }
         } else {
           push(s, `Road trip over · ${road.encountersFor(trip.linkIndex)} encounters in ${link.trip_min} min of walking`);
@@ -597,26 +625,21 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     auraTarget,
   );
 
-  // player clock
-  s.player.atkTimer += c.hitsPerSec;
-  while (s.player.atkTimer >= 1 && front) {
+  // player clock. A shocked player is STOPPED for the second — the symmetric half of what we do to a
+  // mob, where `modsOn` reads the same status into `stopped` and the mob's swing is blocked. The
+  // attack clock does not advance, so the second is lost rather than banked ($14 · item 5).
+  const stunned = (statuses.shock?.secLeft || 0) > 0;
+  if (!stunned) s.player.atkTimer += c.hitsPerSec;
+  while (s.player.atkTimer >= 1 && front && !stunned) {
     s.player.atkTimer -= 1;
     const target = s.group[0];
     if (!target) break;
     const tm = mobMods(target.id);
     const r = playerSwing(rng, c, target, c.weaponElement, tm);
     if (r.landed) {
-      // every Elemental line the weapon carries tries its own Element's status (D-067 · D-090)
-      const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
-      for (const el of Object.keys(c.elemByElement)) {
-        if (el && (c.elemByElement as any)[el] > 0) applyElement(rng, s.mobStatus, target.id, el, c, alignedPerSec);
-      }
-      // the axe's own `Chance to bleed %` line plus Lacerate's published proc (D-123); bleed comes
-      // off the physical half only
-      const bleedPct = eng.bleedChanceFrom(lineValue(s.curses, target.id, 'bleed_chance') > 0, c.bleedChance);
-      if (c.phys > 0 && bleedPct > 0) applyBleed(rng, s.mobStatus, target.id, c.phys, bleedPct / 100);
-      // the mace's `Chance to stun %` line, charged to the same control budget shock obeys (D-123)
-      if (c.stunChance > 0) stunMob(rng, s.mobStatus, target.id, c.stunChance);
+      // the weapon's own riders — Element status, bleed and stun — on the swing's own hit, and on a
+      // landing press too (§14), through one function so the two cannot drift
+      applyWeaponRiders(rng, c, s.mobStatus, target.id, lineValue(s.curses, target.id, 'bleed_chance') > 0);
       if (r.leech) s.player.hp = Math.min(c.maxHp, s.player.hp + r.leech);
       credit(s, 'swing', r.damage);
       if (r.crit) push(s, `Crit for ${eng.fmt(r.damage)} (${target.species})`);
@@ -629,7 +652,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   }
 
   // the rotation casts the first ready, affordable slot top-down — no manual presses.
-  // Haste is a post-cap multiplier on this clock, which is why it reaches tickSkills at all (D-102)
+  // Haste is a post-cap multiplier on this clock, which is why it reaches tickSkills at all 
   tickSkills(s.skills, c.globalSpeed);
   for (const id of Object.keys(s.skills.buffs)) {
     if (!buffNeedsRecast(s.skills, id)) continue;
@@ -642,9 +665,10 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     s.skills.cd[id] = skillCd(s.skills, id, c.cdr);
     s.skills.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 10);
   }
-  const cast = castOnce(s.skills, c, s.player.mana, s.group, statuses, rng, {
+  const cast = stunned ? null : castOnce(s.skills, c, s.player.mana, s.group, statuses, rng, {
     mobStatus: s.mobStatus, curses: s.curses,
     missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
+    isBoss: !!s.group[0] && String(s.group[0].kind).startsWith('Boss'),
   });
   if (cast) {
     s.player.mana = Math.max(0, s.player.mana - cast.manaCost);
@@ -694,14 +718,14 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
 
   // mob clocks
   const immune = buffRuleUp(s.skills, 'status_immunity');
-  // Energy Absorb turns a share of every landed hit into Energy Shield and negates it outright (D-121)
+  // Energy Absorb turns a share of every landed hit into Energy Shield and negates it outright 
   const absorbPct = esAbsorbPct(s.skills);
   for (const mob of engaging) {
     const tm = mobMods(mob.id);
     mob.atkTimer += mob.hitsPerSec * Math.max(0, 1 + tm.attackSpeed / 100);
     while (mob.atkTimer >= 1) {
       mob.atkTimer -= 1;
-      // a Ghost Dance charge deletes the hit outright and is not opposed (D-102): it goes before the
+      // a Ghost Dance charge deletes the hit outright and is not opposed: it goes before the
       // rolls, which is the whole difference between it and Dodge
       if ((s.player.charges || 0) > 0) {
         s.player.charges!--;
@@ -714,10 +738,10 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
         s.player.hp -= r.toHp;
         if (!buffRuleUp(s.skills, 'es_recharge_immediate')) s.player.esIdleSec = 0;
         // a blocked hit lands thinned but carries NO status: the shield deflected the effect, so no
-        // proc rolls on it (owner ruling · D-141). Holy Veil still blocks every Element debuff/bleed.
+        // proc rolls on it (owner ruling). Holy Veil still blocks every Element debuff/bleed.
         if (r.blocked !== 'block') {
           const elemHalf = (mob.ps / mob.hitsPerSec) * eng.damageSplit(mob.damage)[1];
-          const st = immune ? null : rollStatus(rng, mob, elemHalf, statuses, c.statusResist);
+          const st = immune ? null : rollStatus(rng, mob, elemHalf, statuses, c.statusResist, c.stunRecovery);
           if (st) push(s, `${mob.species} inflicts ${st}`);
         }
       }
@@ -732,12 +756,15 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   }
   const dot = dotDamage(c, statuses);
   // a charge also stops a DoT tick — the row says it deletes "unconditional effects", which is what
-  // a burn tick is: nothing rolls for it (`buff.ghost_dance` · D-102)
+  // a burn tick is: nothing rolls for it (`buff.ghost_dance`)
   if (dot > 0 && (s.player.charges || 0) > 0) s.player.charges!--;
   else if (dot > 0) s.player.hp -= dot;
   const burnCut = statuses.burn ? Math.min(E.status.burn.regen_cut_max, statuses.burn.stacks * E.status.burn.regen_cut_per_stack) : 0;
-  s.player.hp = Math.min(c.maxHp, s.player.hp + c.hpRegen * (1 - burnCut));
-  s.player.mana = Math.min(c.maxMana, s.player.mana + c.manaRegen);
+  // `combat.md` §5 reads shock as "attacks stop + regen stops", so the stop covers the pools too.
+  // The Energy Shield recharge is left alone on purpose: it is a shield, not regen, and its own
+  // `delay_sec` rule already governs it.
+  s.player.hp = Math.min(c.maxHp, s.player.hp + (stunned ? 0 : c.hpRegen * (1 - burnCut)));
+  s.player.mana = Math.min(c.maxMana, s.player.mana + (stunned ? 0 : c.manaRegen));
   s.player.esIdleSec++;
   // Magia Drive forces the recharge: the delay is ignored and a hit does not interrupt it
   const rechargeNow = buffRuleUp(s.skills, 'es_recharge_immediate');
@@ -783,13 +810,26 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     push(s, `Pushed — ${s.campSec} sec at camp (${eng.fmt(c.maxHp)} HP ÷ ${eng.fmt(c.hpRegen * 8)}/sec)`);
   }
   void band;
+  clampPools(s);
   return s;
+}
+
+/**
+ * Re-read the pools against the sheet the tick ended on. A tick can move a pool's ceiling after the
+ * opening clamp — equipping a piece drops the `Max Mana %` line it replaced, a spent point raises
+ * Int — so the bar is bounded again here, otherwise it reads above what the character now holds.
+ */
+function clampPools(s: GameState): void {
+  const c = buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills), s.player.points);
+  s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
+  s.player.es = Math.min(Math.max(0, s.player.es), c.es);
+  s.player.hp = Math.min(s.player.hp, c.maxHp);
 }
 
 /** Offline catch-up: run the same tick over the elapsed seconds, capped by the save rule. */
 function catchUpPlan(elapsedSec: number) {
   // the Road now runs while away: a Circuit plays out the rest of its lap on the untilted base
-  // table and parks the character, which is why an away period no longer ends a trip (D-133)
+  // table and parks the character, which is why an away period no longer ends a trip 
   const cap = E.inventory.offline_cap_hr * 3600;
   const secs = Math.max(0, Math.min(Math.floor(elapsedSec), cap));
   return { secs, capped: elapsedSec > cap };

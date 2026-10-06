@@ -12,7 +12,7 @@ import type { Item } from '../src/sim/types';
  * Wearing a piece, as one verb (`game/src/sim/gear.ts`).
  *
  * It used to live inside `App.svelte`, which meant no test could reach the rule and the loop could
- * not be dressed for the balance measurement (D-103). These three are what the panel's Equip button
+ * not be dressed for the balance measurement. These three are what the panel's Equip button
  * is allowed to do — and the third is what it is never allowed to do on its own.
  */
 const rolled = (seed: number, band = 'high'): Item => rollDrop(mulberry32(seed), band, 1.2) as Item;
@@ -44,7 +44,7 @@ describe('equipping from the bag', () => {
     if (!withStatMod) throw new Error('no rolled piece carried a Stat Mod line — the roll changed');
     const item = withStatMod;
     const line = item.lines.find((l) => l.id === 'stat_mod_flat')!;
-    expect(STAT_KEYS).toContain(line.stat); // the stat is baked at drop, one of the seven (D-127)
+    expect(STAT_KEYS).toContain(line.stat); // the stat is baked at drop, one of the seven 
     const s = newGame(72);
     s.bag.unshift(item);
     expect(equipFromBag(s, 0).ok).toBe(true);
@@ -66,7 +66,7 @@ describe('equipping from the bag', () => {
     for (const k of STAT_KEYS) expect(withIt.core[k] - bare.core[k]).toBe(12);
   });
 
-  it('never rolls two Stat Mod lines onto one piece — the slot holds the family to one (D-129)', () => {
+  it('never rolls two Stat Mod lines onto one piece — the slot holds the family to one ', () => {
     const family = new Set(['stat_mod_flat', 'all_stat_flat']);
     let sawAllStats = false;
     for (let seed = 1; seed <= 800; seed++) {
@@ -82,7 +82,7 @@ describe('equipping from the bag', () => {
     const s = newGame(73);
     const atStart = equippedCount(s);
     for (let i = 0; i < 1800; i++) tick(s, {}, { online: true });
-    // a bag full of kept pieces is the design working (loot.md §4 · D-089), not a bug to fix here
+    // a bag full of kept pieces is the design working (loot.md §4), not a bug to fix here
     expect(equippedCount(s)).toBe(atStart);
   });
 
@@ -101,9 +101,9 @@ describe('equipping from the bag', () => {
     const uplifted = buildCharacter(100, [...maxed, ...emptyGear().slice(2)]);
 
     // one ladder reaches the whole ceiling of the smaller school (X42), so +15 Evasion is that line
-    expect(uplifted.evasion - bare.evasion).toBe(clientCraft.C.gear_mod_per_level * clientCraft.C.upgrade_cap);
+    expect(uplifted.evasion - bare.evasion).toBeCloseTo(clientCraft.C.gear_mod_per_level * clientCraft.C.upgrade_cap, 9);
     // and the heavy piece's uplift is Armour, which the sheet folds after its Str term
-    expect(uplifted.armour - bare.armour).toBe(clientCraft.C.gear_mod_per_level * clientCraft.C.upgrade_cap);
+    expect(uplifted.armour - bare.armour).toBeCloseTo(clientCraft.C.gear_mod_per_level * clientCraft.C.upgrade_cap, 9);
     // a Base with no school has nothing to raise
     expect(gearModOf(piece({ slot: 'ring', name: 'band' })).value).toBe(0);
   });

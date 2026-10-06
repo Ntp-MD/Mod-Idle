@@ -16,9 +16,6 @@ terminology bans, and the doc layout. Neither restates the other.
 3. `glossary.md` — shared language. Read when a term is load-bearing; patch it when one locks.
 4. `harness/todo.md` — the single work file: what is open, and what is in flight right now. Read at
    task start.
-5. `harness/decisions.md` — what was ruled and why. **Only when the user asks about a past decision.**
-
-Never read `harness/decisions.md` to decide the current task; it is history, not instruction.
 
 Design docs live under `doc/<layer>/` (see `AGENT.md` §4); they are addressed by bare name
 (`glossary.md`), so the files above are found at `doc/start/glossary.md` etc.
@@ -65,8 +62,6 @@ choice. Do not narrate the write.
 a changelog nobody reads, and the next session has to wade through it to find the three things still
 open.
 
-- **The record of what was done lives in `harness/decisions.md`**, with the gate that holds it. That
-  is the one place a finished thing is allowed to still exist.
 - **Never write a closing paragraph in place of deleting the line.** A tidy summary of completed work
   is the same clutter in nicer clothes.
 - A parked task (moved to post-release, or waiting on an owner ruling) is a single line under the
@@ -80,22 +75,6 @@ Use the tool that answers the question instead of editing a doc to find out.
 - **See a value's effect without editing docs** — `node tools/skills.ts --calc --stat N --power N --level N --cdr N --ladder N` prints dmg/press · eff cd · presses/sec · mana%/s for every attack skill, and `node tools/report.ts` carries the same as a live "Skill workshop" section. Both read `tools/lib/skillmodel.ts`.
 - **Edit data through the wiki editor** when a form is faster than the JSON — `node tools/wiki.ts serve --open` (loopback only) renders every `tools/data/*.json` collection as a validated form, then runs the writers + every cage + lint and rolls back on failure. Direct JSON edits work too.
 - **Rename a skill or aura** — change the `name` in `skills.json`, add `"Old Name": "New Name"` to its `renames` map, then run `node tools/tree.ts --write`; the node `Enables` cells update themselves. `tools/tree.ts --checks` reports any cell still on an old name as PENDING until you do. Never retype the name into a doc.
-
-## History
-
-`harness/decisions.md` is the log. One entry per finished thing, newest first, shaped:
-
-```
-| D-0NN | applied | what was decided, and the numbers that moved | the files that carry it |
-```
-
-Rules:
-
-- Log when done, never in advance. Not questions asked, not audits that changed nothing, not parked ideas.
-- A direction decision is part of its entry, not a separate file. There is no second decision log.
-- Routine fixes and refactors are not logged. If a change is not worth remembering, do not record it.
-- A rule that closes a queue line must be logged with the gate that enforces it — a ruling with no
-  guard is a comment, not a decision.
 
 ## Report format
 
@@ -127,5 +106,5 @@ than three files in.
 
 **Never create a second home for a fact that already has one.** If a number lives in
 `tools/data/`, the writer prints it; a second document restating it is a defect, not a convenience.
-The same goes for a glossary, a decision log, and a work file — one each, and this repo has already
+The same goes for a glossary and a work file — one each, and this repo has already
 deleted the duplicates that used to exist.

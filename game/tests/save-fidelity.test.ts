@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { newGame, tick, catchUp } from '../src/sim/game';
+import { newGame, tick, catchUp, setLevel } from '../src/sim/game';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { craft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
@@ -11,7 +11,7 @@ import { mulberry32 } from '../src/engine/client-helpers';
 describe('offline time is AFK, not a second play session', () => {
   it('never spawns a boss while the player is away', () => {
     const s = newGame(41);
-    s.player.level = 60;
+    setLevel(s, 60);
     const r = catchUp(s, {}, 3600 * 3);
     expect(r.simulated).toBe(10800);
     expect(s.log.some((l) => /Boss spawn/.test(l.text))).toBe(false);
@@ -20,14 +20,14 @@ describe('offline time is AFK, not a second play session', () => {
 
   it('a boss does spawn on the same clock while online', () => {
     const s = newGame(42);
-    s.player.level = 60;
+    setLevel(s, 60);
     for (let i = 0; i < 1000; i++) tick(s, {});
     expect(s.log.some((l) => /Boss spawn/.test(l.text))).toBe(true);
   });
 
   it('limits offline drop quality to the zone floor', () => {
     const s = newGame(43);
-    s.player.level = 80;
+    setLevel(s, 80);
     s.zone = 9;
     for (let i = 0; i < 4000; i++) tick(s, {}, { online: false });
     expect(s.bag.length).toBeGreaterThan(0);
@@ -38,7 +38,7 @@ describe('offline time is AFK, not a second play session', () => {
 
   it('the same zone online can still roll above the floor', () => {
     const s = newGame(44);
-    s.player.level = 80;
+    setLevel(s, 80);
     s.zone = 9;
     for (let i = 0; i < 4000; i++) tick(s, {}, { online: true });
     expect(s.bag.some((item) => item.quality === 'high')).toBe(true);
@@ -48,8 +48,8 @@ describe('offline time is AFK, not a second play session', () => {
 describe('the salvage milestone (checks.md F15)', () => {
   it('owes one Reroll tier stone per 500 pieces dissolved', () => {
     const s = newGame(45);
-    s.player.level = 90;
-    setRule(s.filter, 'all', { enabled: true }); // the filter ships off (D-122), so nothing would dissolve until it is armed
+    setLevel(s, 90);
+    setRule(s.filter, 'all', { enabled: true }); // the filter ships off, so nothing would dissolve until it is armed
     // wear a full high-quality set so nearly every drop is a rejection
     s.gear = emptyGear().map((_, i) => {
       const item = rollDrop(mulberry32(100 + i), 'high', 1.2);

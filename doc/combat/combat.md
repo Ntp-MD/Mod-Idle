@@ -32,7 +32,8 @@ Evasion / res reduce incoming damage
 | Status (chill/shock/mark) | counts down in real time on target |
 
 - A real idle game must run continuously, not in turns · world.md already states "all units in the group attack in the same round", which in this model means every unit has its own timer running together.
-- `shock` stops the target clock for 1 sec (attacks stop + regen stops) — the reason lightning stun matters when we are the ones hit.
+- `shock` stops the target clock for 1 sec (attacks stop + regen stops) — the reason lightning stun matters when we are the ones hit. **Vit buys part of that second back**: `Stun Recovery = Vit x K_VIT_STUNREC`, a single-stat Vit build at the ceiling recovering half of it, so a maxed build is stopped half a second instead of one (`K_VIT_STUNREC` · **X48**).
+- **A skill press is a second clock, not a replacement for the swing.** The swing keeps running on its own timer while a press counts down its own cooldown, so a rotation casts **beside** the attack clock, never inside it — the two meet in the same tick and neither consumes the other. The alternative shape, a press that spends the next swing, does not hold, and the client already runs this one (`game/src/sim/game.ts`: the swing loop and the rotation cast share a tick). A press whose timer is absent (`cd` zero) carries no clock of its own and therefore rides the attack clock instead of adding a second one (the cooldown-reduction section of `formula-defense.md`).
 
 # 2. Damage Order, Player Side
 
@@ -40,23 +41,23 @@ Evasion / res reduce incoming damage
 
 ```
 1  hit_chance  = accuracy / (accuracy + mob evasion)   mob evasion is a Dex line on its own stat block (formula-utility.md §8)
-2  crit?       = crit_chance → ×(1 + crit_dmg/100 − 1)   physical only · magic and the 5 Elements do not crit (D-017)
+2 crit? = crit_chance → ×(1 + crit_dmg/100 − 1) physical only · magic and the 5 Elements do not crit 
 3  weak?       = ×1.5 if weapon Element matches mob innate Element
 4  Element counter  = elements.md table
-5  mob armour  = armour / (armour + 5 × the non-Element part)   the mob's own Str line, the same PoE ratio that answers its hit on us (D-099) · cut by our Armour penetration % (crossbow Base Mod, D-123)
-6  mob res     = Elemental resistance of that Element            the mob's own Vit line, held by the same Cap 75 ours is (D-099)
+5 mob armour = armour / (armour + 5 × the non-Element part) the mob's own Str line, the same PoE ratio that answers its hit on us · cut by our Armour penetration % (crossbow Base Mod)
+6 mob res = Elemental resistance of that Element the mob's own Vit line, held by the same Cap 75 ours is 
 7  bleed       = physical hits may inflict bleed, which is physical DoT and no Element (formula-offense.md §4)
 8  subtract from mob HP
 ```
 
-**Steps 5-6 are the mirror of the incoming order, and they are what makes the two lines `mob-roster.md` prints per species real** (B8 · D-099). The non-Element part of our hit — physical **and** spell — meets the mob's Armour; only the Element part meets its resistance. A Chill line cuts that Armour by `status.chill.armour_cut` before the ratio is taken, which is where the debuff finally spends itself, and the crossbow's Armour penetration % cuts the same ratio by its own fraction (over-penetration is wasted, never an amplifier — D-123). DoT is deliberately outside both steps: `status.mob_side` says burn, poison and bleed land in full, and formula-offense.md §4 says armour does not reduce bleed. A mob has no *mitigation* stat of its own beyond these two — no evasion double-dip, no damage reduction — and mobs have no resistance to status at all (D-067).
+**Steps 5-6 are the mirror of the incoming order, and they are what makes the two lines `mob-roster.md` prints per species real** (B8). The non-Element part of our hit — physical **and** spell — meets the mob's Armour; only the Element part meets its resistance. A Chill line cuts that Armour by `status.chill.armour_cut` before the ratio is taken, which is where the debuff finally spends itself, and the crossbow's Armour penetration % cuts the same ratio by its own fraction (over-penetration is wasted, never an amplifier —). DoT is deliberately outside both steps: `status.mob_side` says burn, poison and bleed land in full, and formula-offense.md §4 says armour does not reduce bleed. A mob has no *mitigation* stat of its own beyond these two — no evasion double-dip, no damage reduction — and mobs have no resistance to status at all.
 
-**Incoming (mobs hit us)** — PoE layer order: roll to miss, then every mitigation, then the pools (D-010).
+**Incoming (mobs hit us)** — PoE layer order: roll to miss, then every mitigation, then the pools.
 
 ```
 1  perfect_dodge  (Capped by engine.json caps.perfect_dodge)   pass = nothing happens · this is the only path that blocks "undodgeable" effects
-2  evasion        (Cap 80%)   Dex rating rolled against this mob's accuracy, then + Agi ÷ 30 points, capped together (D-112)
-3  block          the shield's Base Mod line, rolled after evasion · pass = the hit is cut by a flat armour / 10 (formula-defense.md, the block section)
+2 evasion (Cap 80%) Dex rating rolled against this mob's accuracy, then + Agi ÷ 30 points, capped together 
+3  block          the shield's Base Mod line, rolled after evasion, on a hit carrying a PHYSICAL half only · pass = the hit is cut by a flat armour / 10, capped by that half (formula-defense.md, the block section)
 4  damage split   = 50% physical + 50% Element by mob innate Element
 5  armour         = armour / (armour + 5 × raw_physical) reduces the physical half only (PoE formula)
 6  Elemental resistance of that Element (Cap 75) → reduces the Element half
@@ -67,7 +68,7 @@ Evasion / res reduce incoming damage
 ```
 
 - **Perfect dodge is one roll and it answers everything** — it deletes the whole hit before the physical/Element split, so a magic-only species (Seraph · Slime) dies to it exactly like a physical one. That is what makes it the undodgeable answer, and why nothing else in this list is ordered ahead of it.
-- **Block is a second avoidance layer, and the only exception to the one-avoidance-layer rule.** It is a flat percentage the shield's Base Mod line prints, open-ended (no Cap · owner ruling), rolled after perfect dodge and evasion; a blocked hit is **not** deleted — it is cut by a flat `armour / 10` (owner ruling, provisional), so a shield thins a hit **and carries no status** (the shield deflects the effect). Evasion keeps its own Cap — only the block path is exempted.
+- **Block is a second avoidance layer, and the only exception to the one-avoidance-layer rule.** It is a flat percentage the shield's Base Mod line prints, open-ended (no Cap · owner ruling), rolled after perfect dodge and evasion; a blocked hit is **not** deleted — it is cut by a flat `armour / 10` (owner ruling, provisional), so a shield thins a hit **and carries no status** (the shield deflects the effect). **It answers a physical hit only** (owner ruling): a pure-Element swing cannot be blocked, and the flat cut is capped by the physical half, so a shield never thins a spell. Evasion keeps its own Cap — only the block path is exempted.
 - **Step 7 is the only multiplier that runs after every mitigation layer and before the pools.** Armour, res, Evasion, block and perfect dodge each *remove* something; `damage_taken_mult` *scales what survived them*. That is why `Berserker` and `Iron Will` are exact opposites on the same line, and why Energy Shield at step 8 absorbs the multiplied number rather than the clean one.
 - **No separate `def` stat.** Damage reduction is armour on the physical half and Elemental res on the Element half; Evasion and perfect dodge remove the hit instead of reducing it. HP and Energy Shield are receivers, not reducers.
 - **Two umbrella multipliers are reserved, both ×1.00 today.** `global damage` multiplies outgoing damage once, after weak / Element counter / crit; `global defend` is this step-6 `damage_taken_mult` bucket. A future skill or aura feeds one bucket, so the two never stack as separate multipliers (`engine.json` `global`). `global speed` is a third reserved term: it scales the whole clock — cooldowns tick 15% faster (applied after the CDR Cap, so it is a post-cap speed multiplier) and final attack speed is ×1.15, still clamped by the 500 aspd Cap (`skill-pool-aura-heal.md`). **Player-only:** global speed affects the player alone; no mob ever carries Haste, even once mobs get their own skill lists.
@@ -85,7 +86,7 @@ in this game: the front slot hits the first 3 attackers and everything behind wa
 | reach | 2 | front and second slot | spear · two-handed sword · two-handed axe |
 | standoff | 3 | any slot in the group | bow · crossbow · staff · wand · book |
 
-Stand-off lineages on the mob side: Elf · Demon · Seraph — they hold no front slot, so while a front mob lives they can only be reached by a reach-2 or reach-3 attack, and their half of incoming damage is the res-able one (D-030). A reach-1 attack waits one engage cycle (1 sec) when only stand-off mobs remain; the measured cost is nothing in zones 1-6 and at most 6.3% of the cycle in zone 7 (**X33**).
+Stand-off lineages on the mob side: Mummy · Vampire · Demon · Dragon · Elf · Dryad — they hold no front slot, so while a front mob lives they can only be reached by a reach-2 or reach-3 attack, and their half of incoming damage is the res-able one. A reach-1 attack waits one engage cycle (1 sec) when only stand-off mobs remain; the measured cost is nothing in zones 1-6 and at most 10.9% of the cycle in zone 3 (**X33**).
 <!-- END GENERATED:reach-table -->
 
 # 3. Mob Stats Per Level
@@ -104,7 +105,7 @@ mob_acc     = no roll · mobs always swing · our side uses Evasion only
 ```
 
 - The per-level curve, its HP anchors and the derived damage line are the generated `mob-curve` block in `world.md` (**X37**) — never typed here. The body-class and species multipliers (Normal · Elite · Boss · Small · Medium · Large) are the generated `mob-sheet` / `mob-stats` blocks in `world.md`.
-- **TTK = 1 sec for on-level gear players** by the D1 definition · full T1 gear kills faster and a naked zone entrant slower (checks.md D3-D5). The curve already carries the skill multiplier; there is no tree factor (D-046).
+- **TTK = 1 sec for on-level gear players** by the D1 definition · full T1 gear kills faster and a naked zone entrant slower (checks.md D3-D5). The curve already carries the skill multiplier; there is no tree factor.
 
 # 4. `Push` — Mechanism Replacing Death
 
@@ -142,22 +143,22 @@ Uses all rules and numbers from elements.md, but the player is the target.
 | poison | poison | `elem_half × 0.08` per stack, max 10 · loses 1 stack/8 sec | res · perfect dodge |
 | chaos | its own mark | its damage +1% per stack, max 25 stacks = **+25%** · +5.00% leech at full · decays 5 sec after firing stops | res · target switching |
 
-- **20% status proc chance per landed hit** · innate Element is every mob's baseline skill; Large · Elite and Boss add a signature that only re-times its priced `mob_PS` (`combat.md` §5b · D-067).
+- **20% status proc chance per landed hit** · innate Element is every mob's baseline skill; Large · Elite and Boss add a signature that only re-times its priced `mob_PS` (`combat.md` §5b).
 - Every number in this table comes from `engine.json` `status` — the mob side runs the same K values the player does, so a change there moves this table with it. The chaos mark is the one row that once disagreed here; the table is generated now so it cannot again.
 <!-- END GENERATED:mob-status -->
 
 - `elem_half` = the Element half of calculated per-hit damage (section 2 item 3).
-- **20% status proc chance per landed hit** · innate Element is every mob's baseline skill; Large · Elite and Boss add a signature that only re-times its priced `mob_PS` (section 5b · D-067).
+- **20% status proc chance per landed hit** · innate Element is every mob's baseline skill; Large · Elite and Boss add a signature that only re-times its priced `mob_PS` (section 5b).
 - Every number in this table comes from `engine.json` `status` — the mob side runs the same K values the player does, so a change there moves this table with it. The chaos mark is the one row that once disagreed here; the table is generated now so it cannot again.
 - **Healing skills have clear work from this table** — the magnitudes are in `skill-pool-aura-heal.md`; the point is that a status is answered by regen and by deleting the tick, not by mitigation.
 
 # 5b. Mob Skills and the Status Mirror
 
-Two questions the mob side left open (`formula-offense.md` kept the door open): do mobs get skills, and do the statuses we inflict mirror onto them. Both are ruled (D-067).
+Two questions the mob side left open (`formula-offense.md` kept the door open): do mobs get skills, and do the statuses we inflict mirror onto them. Both are ruled.
 
-**Mob skills are a re-timing of `mob_PS`, never extra power.** A mob skill moves the same priced damage around the fight — a burst then a gap — it does not raise the average damage per second. `mob_PS = typical_gear_DPS ÷ 27` and the `mob_HP` curve are untouched, so kills/hour, drops/hour and the published timeline do not move (H1 · checks.md E5). `tools/survival.ts` keeps modeling mob incoming as the steady average, which is exactly what a re-timing leaves behind; a future cage may model the burst shape, but no number changes until it does. No mob carries `global speed` / `Haste` (D-061) and mobs get no new stat (AGENT.md §5 — no second resist, no mob Armour line beyond the Str one they already carry).
+**Mob skills are a re-timing of `mob_PS`, never extra power.** A mob skill moves the same priced damage around the fight — a burst then a gap — it does not raise the average damage per second. `mob_PS = typical_gear_DPS ÷ 27` and the `mob_HP` curve are untouched, so kills/hour, drops/hour and the published timeline do not move (H1 · checks.md E5). `tools/survival.ts` keeps modeling mob incoming as the steady average, which is exactly what a re-timing leaves behind; a future cage may model the burst shape, but no number changes until it does. No mob carries `global speed` / `Haste` and mobs get no new stat (AGENT.md §5 — no second resist, no mob Armour line beyond the Str one they already carry).
 
-**Organization — skills follow the body, not the species** (D-009 7b extended):
+**Organization — skills follow the body, not the species** (extended):
 
 | Body | Skills | What it is |
 |---|---|---|
@@ -180,14 +181,14 @@ The signature is picked from what the species already means: the high-Str physic
 
 > Rerun with `node tools/survival.ts` (gates SV1-SV8). The old hand-run tables are gone: they predated full Element damage, the opposed Evasion formula and the Elite multipliers, and they were labelled as tool output while no tool existed.
 
-**Build definitions** — 12 worn items, every one carrying Stat Mod flat at high-quality T1; each theme then spends the slots its theme needs on the defensive Mods those slots are allowed to roll (`equipment-slot-pools.md` mod-matrix); the main hand holds the T1 offensive line (power Flat 80 / power % 16 / aspd 25% / crit 8%). There is no passive tree (D-046), so the skill list is the only multiplier above gear. This table is generated by `node tools/survival.ts` — never hand-typed.
+**Build definitions** — 12 worn items, every one carrying Stat Mod flat at high-quality T1; each theme then spends the slots its theme needs on the defensive Mods those slots are allowed to roll (`equipment-slot-pools.md` mod-matrix); the main hand holds the T1 offensive line (power Flat 80 / power % 16 / aspd 25% / crit 8%). There is no passive tree, so the skill list is the only multiplier above gear. This table is generated by `node tools/survival.ts` — never hand-typed.
 
 <!-- BEGIN GENERATED:build-defs -->
 | build | 13-item split | Str | Vit | Dex | Agi | Max HP | regen/sec | Evasion | res |
 |---|---|---|---|---|---|---|---|---|---|---|
-| glass | Str 13 | 433 | 108 | 108 | 108 | **23,738** | 27 | 29.6% | 5.4% |
-| mix | Str 7 / Vit 3 / Agi 3 | 283 | 183 | 108 | 183 | **27,398** | 46 | 32.1% | 33.9% |
-| tank | Vit 13 | 108 | 433 | 108 | 108 | **39,598** | 108 | 29.6% | 75.0% |
+| glass | Str 13 | 433 | 108 | 108 | 108 | **23,738** | 27 | 30.5% | 5.4% |
+| mix | Str 7 / Vit 3 / Agi 3 | 283 | 183 | 108 | 183 | **27,398** | 46 | 33.0% | 33.9% |
+| tank | Vit 13 | 108 | 433 | 108 | 108 | **39,598** | 108 | 30.5% | 75.0% |
 | evasion | Agi 13 | 108 | 108 | 108 | 433 | **9,729** | 27 | 80.0% | 20.1% |
 <!-- END GENERATED:build-defs -->
 
@@ -205,9 +206,9 @@ The signature is picked from what the species already means: the high-Str physic
 
 | build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |
 |---|---|---|---|---|---|---|---|---|---|---|
-| glass | 433 | 108 | 108 | 108 | **23,738** | 27 | 29.6% | 5.4% | 66 | 0.2% | 1.3 sec |
-| mix | 283 | 183 | 108 | 183 | **27,398** | 46 | 32.1% | 33.9% | 56 | 0.1% | 1.8 sec |
-| tank | 108 | 433 | 108 | 108 | **39,598** | 108 | 29.6% | 75.0% | 25 | 0.0% | 5.4 sec |
+| glass | 433 | 108 | 108 | 108 | **23,738** | 27 | 30.5% | 5.4% | 65 | 0.2% | 1.3 sec |
+| mix | 283 | 183 | 108 | 183 | **27,398** | 46 | 33.0% | 33.9% | 55 | 0.1% | 1.8 sec |
+| tank | 108 | 433 | 108 | 108 | **39,598** | 108 | 30.5% | 75.0% | 25 | 0.0% | 5.4 sec |
 | evasion | 108 | 108 | 108 | 433 | **9,729** | 27 | 80.0% | 20.1% | 28 | 0.0% | 3.5 sec |
 <!-- END GENERATED:survival-mob -->
 
@@ -218,9 +219,9 @@ The signature is picked from what the species already means: the high-Str physic
 
 | build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |
 |---|---|---|---|---|---|---|---|---|---|---|
-| glass | 433 | 108 | 108 | 108 | **23,738** | 27 | 29.6% | 5.4% | 197 | 1.0% | 1.3 sec |
-| mix | 283 | 183 | 108 | 183 | **27,398** | 46 | 32.1% | 33.9% | 167 | 0.8% | 1.8 sec |
-| tank | 108 | 433 | 108 | 108 | **39,598** | 108 | 29.6% | 75.0% | 75 | 0.0% | 5.4 sec |
+| glass | 433 | 108 | 108 | 108 | **23,738** | 27 | 30.5% | 5.4% | 195 | 0.9% | 1.3 sec |
+| mix | 283 | 183 | 108 | 183 | **27,398** | 46 | 33.0% | 33.9% | 165 | 0.8% | 1.8 sec |
+| tank | 108 | 433 | 108 | 108 | **39,598** | 108 | 30.5% | 75.0% | 74 | 0.0% | 5.4 sec |
 | evasion | 108 | 108 | 108 | 433 | **9,729** | 27 | 80.0% | 20.1% | 85 | 2.1% | 3.5 sec |
 <!-- END GENERATED:survival-group -->
 
@@ -231,9 +232,9 @@ The signature is picked from what the species already means: the high-Str physic
 
 | build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |
 |---|---|---|---|---|---|---|---|---|---|---|
-| glass | 433 | 108 | 108 | 108 | **23,738** | 27 | 29.6% | 5.4% | 472 | 15.1% | 8.1 sec |
-| mix | 283 | 183 | 108 | 183 | **27,398** | 46 | 32.1% | 33.9% | 350 | 12.1% | 10.9 sec |
-| tank | 108 | 433 | 108 | 108 | **39,598** | 108 | 29.6% | 75.0% | 145 | 2.9% | 32.2 sec |
+| glass | 433 | 108 | 108 | 108 | **23,738** | 27 | 30.5% | 5.4% | 466 | 14.9% | 8.1 sec |
+| mix | 283 | 183 | 108 | 183 | **27,398** | 46 | 33.0% | 33.9% | 345 | 12.0% | 10.9 sec |
+| tank | 108 | 433 | 108 | 108 | **39,598** | 108 | 30.5% | 75.0% | 143 | 2.8% | 32.2 sec |
 | evasion | 108 | 108 | 108 | 433 | **9,729** | 27 | 80.0% | 20.1% | 141 | 24.5% | 20.8 sec |
 <!-- END GENERATED:survival-elite -->
 
@@ -244,13 +245,13 @@ The signature is picked from what the species already means: the high-Str physic
 
 | build | Str | Vit | Dex | Agi | Max HP | regen/sec | evasion | res | taken/sec | pool used | time |
 |---|---|---|---|---|---|---|---|---|---|---|
-| glass | 433 | 108 | 108 | 108 | **23,738** | 27 | 29.6% | 5.4% | 2,354 | 197.4% | 20.1 sec → **Push** |
-| mix | 283 | 183 | 108 | 183 | **27,398** | 46 | 32.1% | 33.9% | 1,633 | 158.4% | 27.4 sec → **Push** |
-| tank | 108 | 433 | 108 | 108 | **39,598** | 108 | 29.6% | 75.0% | 650 | 110.1% | 80.5 sec → **Push** |
-| evasion | 108 | 108 | 108 | 433 | **9,729** | 27 | 80.0% | 20.1% | 603 | 308.3% | 52.1 sec → **Push** |
+| glass | 433 | 108 | 108 | 108 | **23,738** | 27 | 30.5% | 5.4% | 2,640 | 221.6% | 20.1 sec → **Push** |
+| mix | 283 | 183 | 108 | 183 | **27,398** | 46 | 33.0% | 33.9% | 1,824 | 177.6% | 27.4 sec → **Push** |
+| tank | 108 | 433 | 108 | 108 | **39,598** | 108 | 30.5% | 75.0% | 726 | 125.5% | 80.5 sec → **Push** |
+| evasion | 108 | 108 | 108 | 433 | **9,729** | 27 | 80.0% | 20.1% | 680 | 349.6% | 52.1 sec → **Push** |
 <!-- END GENERATED:survival-boss -->
 
-heal = one round, `engine.json` `build.heal_pool_mult` · boss damage set at **×16** of mob PS (reason below item 2 + section 7).
+heal = one round, `engine.json` `build.heal_pool_mult` · boss damage set at **×18** of mob PS (reason below item 2 + section 7).
 
 Reading:
 
@@ -270,87 +271,87 @@ Potions = suppressed by boss aura (farm.md) — bosses are won with casted heals
 
 The "loss forfeits the spawn" rule is what gives the numbers below meaning: if continuous retries were allowed, bosses would be just long mobs because Push costs only a fraction of the 900 sec spawn cycle.
 
-**Why boss damage is ×16, not the old ×4** — this is a rule change by evidence, not taste. `tools/survival.ts` prices the boss against the level-100 zone-9 fight, and two facts set the number: without heal most builds must be Pushed, or "AFK cannot kill bosses" (checks.md G5) is false; and with one heal round the boss stays a heal gate rather than a damage gate. At the old ×4 most builds killed the boss while idle; ×16 restores the promise, and **SV6** now gates both halves.
+**Why boss damage is ×18, not the old ×4** — this is a rule change by evidence, not taste. `tools/survival.ts` prices the boss against the level-cap zone-9 fight, and two facts set the number: without heal most builds must be Pushed, or "AFK cannot kill bosses" (checks.md G5) is false; and with one heal round the boss stays a heal gate rather than a damage gate. At the old ×4 most builds killed the boss while idle; ×16 restored the promise, and the re-base moved the build lines enough that the same promise needs ×18. **SV6** gates both halves.
 
 Every table in §6 and §7 is generated by `node tools/survival.ts` (field rules: max 3 mobs engage · regen works during combat · single-target · heal = one round of the heal skills).
 
 <!-- BEGIN GENERATED:survival-boss-zones -->
-**Boss at every zone edge** (player at that zone's level · boss damage ×16 · heal = pool ×2.09)
+**Boss at every zone edge** (player at that zone's level · boss damage ×18 · heal = pool ×2.09)
 
 | Zone (level) | boss HP | build | fight time | no heal | with heal |
 |---|---|---|---|---|---|
-| 1 (10) | 9,435 | glass | 2.8 sec | 29% | 14% |
-| 1 (10) | 9,435 | mix | 4.3 sec | 13% | 6% |
-| 1 (10) | 9,435 | tank | 52.1 sec | 3% | 2% |
-| 1 (10) | 9,435 | evasion | 31.8 sec | **394% Push** | **189% Push** |
-| 2 (20) | 19,575 | glass | 5.4 sec | 81% | 39% |
-| 2 (20) | 19,575 | mix | 8.3 sec | 49% | 24% |
-| 2 (20) | 19,575 | tank | 74.4 sec | 46% | 22% |
-| 2 (20) | 19,575 | evasion | 45.6 sec | **639% Push** | **306% Push** |
-| 3 (30) | 27,360 | glass | 7.1 sec | **106% Push** | 51% |
-| 3 (30) | 27,360 | mix | 10.7 sec | 74% | 35% |
-| 3 (30) | 27,360 | tank | 77.7 sec | 68% | 33% |
-| 3 (30) | 27,360 | evasion | 47.9 sec | **610% Push** | **292% Push** |
-| 4 (40) | 60,495 | glass | 14.7 sec | **402% Push** | **193% Push** |
-| 4 (40) | 60,495 | mix | 21.9 sec | **296% Push** | **141% Push** |
-| 4 (40) | 60,495 | tank | 135.0 sec | **297% Push** | **142% Push** |
-| 4 (40) | 60,495 | evasion | 83.6 sec | **1,721% Push** | **823% Push** |
-| 5 (50) | 69,480 | glass | 15.9 sec | **387% Push** | **185% Push** |
-| 5 (50) | 69,480 | mix | 23.4 sec | **298% Push** | **142% Push** |
-| 5 (50) | 69,480 | tank | 126.0 sec | **275% Push** | **132% Push** |
-| 5 (50) | 69,480 | evasion | 78.4 sec | **1,391% Push** | **666% Push** |
-| 6 (60) | 79,395 | glass | 17.1 sec | **382% Push** | **183% Push** |
-| 6 (60) | 79,395 | mix | 24.9 sec | **302% Push** | **144% Push** |
-| 6 (60) | 79,395 | tank | 119.8 sec | **259% Push** | **124% Push** |
-| 6 (60) | 79,395 | evasion | 74.9 sec | **1,183% Push** | **566% Push** |
-| 7 (70) | 128,805 | glass | 26.2 sec | **807% Push** | **386% Push** |
-| 7 (70) | 128,805 | mix | 37.6 sec | **642% Push** | **307% Push** |
-| 7 (70) | 128,805 | tank | 164.8 sec | **534% Push** | **256% Push** |
-| 7 (70) | 128,805 | evasion | 103.6 sec | **2,147% Push** | **1,027% Push** |
-| 8 (80) | 144,075 | glass | 27.6 sec | **798% Push** | **382% Push** |
-| 8 (80) | 144,075 | mix | 39.3 sec | **639% Push** | **306% Push** |
-| 8 (80) | 144,075 | tank | 158.7 sec | **497% Push** | **238% Push** |
-| 8 (80) | 144,075 | evasion | 100.2 sec | **1,892% Push** | **905% Push** |
-| 9 (90) | 160,635 | glass | 29.1 sec | **797% Push** | **381% Push** |
-| 9 (90) | 160,635 | mix | 41.0 sec | **639% Push** | **306% Push** |
-| 9 (90) | 160,635 | tank | 154.0 sec | **464% Push** | **222% Push** |
-| 9 (90) | 160,635 | evasion | 97.7 sec | **1,700% Push** | **813% Push** |
-| 10 (100) | 182,166 | glass | 31.2 sec | **835% Push** | **400% Push** |
-| 10 (100) | 182,166 | mix | 43.6 sec | **667% Push** | **319% Push** |
-| 10 (100) | 182,166 | tank | 153.6 sec | **464% Push** | **222% Push** |
-| 10 (100) | 182,166 | evasion | 97.9 sec | **1,616% Push** | **773% Push** |
-| 11 (110) | 204,578 | glass | 33.7 sec | **911% Push** | **436% Push** |
-| 11 (110) | 204,578 | mix | 47.0 sec | **730% Push** | **350% Push** |
-| 11 (110) | 204,578 | tank | 161.8 sec | **516% Push** | **247% Push** |
-| 11 (110) | 204,578 | evasion | 103.3 sec | **1,695% Push** | **811% Push** |
-| 12 (120) | 227,869 | glass | 36.2 sec | **983% Push** | **470% Push** |
-| 12 (120) | 227,869 | mix | 50.3 sec | **791% Push** | **378% Push** |
-| 12 (120) | 227,869 | tank | 169.3 sec | **567% Push** | **271% Push** |
-| 12 (120) | 227,869 | evasion | 108.3 sec | **1,762% Push** | **843% Push** |
-| 13 (130) | 252,042 | glass | 38.7 sec | **1,052% Push** | **503% Push** |
-| 13 (130) | 252,042 | mix | 53.5 sec | **848% Push** | **406% Push** |
-| 13 (130) | 252,042 | tank | 176.3 sec | **615% Push** | **294% Push** |
-| 13 (130) | 252,042 | evasion | 112.9 sec | **1,818% Push** | **870% Push** |
-| 14 (140) | 277,094 | glass | 41.0 sec | **1,117% Push** | **535% Push** |
-| 14 (140) | 277,094 | mix | 56.6 sec | **901% Push** | **431% Push** |
-| 14 (140) | 277,094 | tank | 182.7 sec | **660% Push** | **316% Push** |
-| 14 (140) | 277,094 | evasion | 117.2 sec | **1,873% Push** | **896% Push** |
-| 15 (150) | 303,027 | glass | 43.4 sec | **1,180% Push** | **565% Push** |
-| 15 (150) | 303,027 | mix | 59.6 sec | **951% Push** | **455% Push** |
-| 15 (150) | 303,027 | tank | 188.6 sec | **703% Push** | **336% Push** |
-| 15 (150) | 303,027 | evasion | 121.3 sec | **1,940% Push** | **928% Push** |
-| 16 (160) | 329,841 | glass | 45.6 sec | **1,240% Push** | **593% Push** |
-| 16 (160) | 329,841 | mix | 62.5 sec | **997% Push** | **477% Push** |
-| 16 (160) | 329,841 | tank | 194.1 sec | **744% Push** | **356% Push** |
-| 16 (160) | 329,841 | evasion | 125.0 sec | **2,001% Push** | **958% Push** |
-| 17 (170) | 357,535 | glass | 47.8 sec | **1,296% Push** | **620% Push** |
-| 17 (170) | 357,535 | mix | 65.4 sec | **1,040% Push** | **498% Push** |
-| 17 (170) | 357,535 | tank | 199.2 sec | **782% Push** | **374% Push** |
-| 17 (170) | 357,535 | evasion | 128.5 sec | **2,057% Push** | **984% Push** |
-| 18 (180) | 386,109 | glass | 50.0 sec | **1,350% Push** | **646% Push** |
-| 18 (180) | 386,109 | mix | 68.1 sec | **1,081% Push** | **517% Push** |
-| 18 (180) | 386,109 | tank | 203.9 sec | **817% Push** | **391% Push** |
-| 18 (180) | 386,109 | evasion | 131.7 sec | **2,107% Push** | **1,008% Push** |
+| 1 (10) | 9,435 | glass | 2.8 sec | 35% | 17% |
+| 1 (10) | 9,435 | mix | 4.3 sec | 16% | 8% |
+| 1 (10) | 9,435 | tank | 52.1 sec | 8% | 4% |
+| 1 (10) | 9,435 | evasion | 31.8 sec | **431% Push** | **206% Push** |
+| 2 (20) | 19,575 | glass | 5.4 sec | 94% | 45% |
+| 2 (20) | 19,575 | mix | 8.3 sec | 57% | 27% |
+| 2 (20) | 19,575 | tank | 74.4 sec | 57% | 27% |
+| 2 (20) | 19,575 | evasion | 45.6 sec | **695% Push** | **333% Push** |
+| 3 (30) | 27,360 | glass | 7.1 sec | **122% Push** | 58% |
+| 3 (30) | 27,360 | mix | 10.7 sec | 84% | 40% |
+| 3 (30) | 27,360 | tank | 77.7 sec | 82% | 39% |
+| 3 (30) | 27,360 | evasion | 47.9 sec | **662% Push** | **317% Push** |
+| 4 (40) | 60,495 | glass | 14.7 sec | **457% Push** | **219% Push** |
+| 4 (40) | 60,495 | mix | 21.9 sec | **334% Push** | **160% Push** |
+| 4 (40) | 60,495 | tank | 135.0 sec | **341% Push** | **163% Push** |
+| 4 (40) | 60,495 | evasion | 83.6 sec | **1,863% Push** | **891% Push** |
+| 5 (50) | 69,480 | glass | 15.9 sec | **438% Push** | **210% Push** |
+| 5 (50) | 69,480 | mix | 23.4 sec | **336% Push** | **161% Push** |
+| 5 (50) | 69,480 | tank | 126.0 sec | **315% Push** | **151% Push** |
+| 5 (50) | 69,480 | evasion | 78.4 sec | **1,505% Push** | **720% Push** |
+| 6 (60) | 79,395 | glass | 17.1 sec | **432% Push** | **207% Push** |
+| 6 (60) | 79,395 | mix | 24.9 sec | **340% Push** | **163% Push** |
+| 6 (60) | 79,395 | tank | 119.8 sec | **296% Push** | **142% Push** |
+| 6 (60) | 79,395 | evasion | 74.9 sec | **1,278% Push** | **612% Push** |
+| 7 (70) | 128,805 | glass | 26.2 sec | **908% Push** | **435% Push** |
+| 7 (70) | 128,805 | mix | 37.6 sec | **721% Push** | **345% Push** |
+| 7 (70) | 128,805 | tank | 164.8 sec | **606% Push** | **290% Push** |
+| 7 (70) | 128,805 | evasion | 103.6 sec | **2,315% Push** | **1,108% Push** |
+| 8 (80) | 144,075 | glass | 27.6 sec | **897% Push** | **429% Push** |
+| 8 (80) | 144,075 | mix | 39.3 sec | **717% Push** | **343% Push** |
+| 8 (80) | 144,075 | tank | 158.7 sec | **563% Push** | **269% Push** |
+| 8 (80) | 144,075 | evasion | 100.2 sec | **2,037% Push** | **975% Push** |
+| 9 (90) | 160,635 | glass | 29.1 sec | **895% Push** | **428% Push** |
+| 9 (90) | 160,635 | mix | 41.0 sec | **716% Push** | **342% Push** |
+| 9 (90) | 160,635 | tank | 154.0 sec | **526% Push** | **252% Push** |
+| 9 (90) | 160,635 | evasion | 97.7 sec | **1,829% Push** | **875% Push** |
+| 10 (100) | 182,166 | glass | 31.2 sec | **937% Push** | **448% Push** |
+| 10 (100) | 182,166 | mix | 43.6 sec | **747% Push** | **357% Push** |
+| 10 (100) | 182,166 | tank | 153.6 sec | **524% Push** | **251% Push** |
+| 10 (100) | 182,166 | evasion | 97.9 sec | **1,735% Push** | **830% Push** |
+| 11 (110) | 204,578 | glass | 33.7 sec | **1,021% Push** | **488% Push** |
+| 11 (110) | 204,578 | mix | 47.0 sec | **817% Push** | **391% Push** |
+| 11 (110) | 204,578 | tank | 161.8 sec | **583% Push** | **279% Push** |
+| 11 (110) | 204,578 | evasion | 103.3 sec | **1,839% Push** | **880% Push** |
+| 12 (120) | 227,869 | glass | 36.2 sec | **1,101% Push** | **527% Push** |
+| 12 (120) | 227,869 | mix | 50.3 sec | **884% Push** | **423% Push** |
+| 12 (120) | 227,869 | tank | 169.3 sec | **639% Push** | **306% Push** |
+| 12 (120) | 227,869 | evasion | 108.3 sec | **1,940% Push** | **928% Push** |
+| 13 (130) | 252,042 | glass | 38.7 sec | **1,177% Push** | **563% Push** |
+| 13 (130) | 252,042 | mix | 53.5 sec | **947% Push** | **453% Push** |
+| 13 (130) | 252,042 | tank | 176.3 sec | **692% Push** | **331% Push** |
+| 13 (130) | 252,042 | evasion | 112.9 sec | **2,031% Push** | **972% Push** |
+| 14 (140) | 277,094 | glass | 41.0 sec | **1,250% Push** | **598% Push** |
+| 14 (140) | 277,094 | mix | 56.6 sec | **1,006% Push** | **481% Push** |
+| 14 (140) | 277,094 | tank | 182.7 sec | **743% Push** | **355% Push** |
+| 14 (140) | 277,094 | evasion | 117.2 sec | **2,114% Push** | **1,012% Push** |
+| 15 (150) | 303,027 | glass | 43.4 sec | **1,319% Push** | **631% Push** |
+| 15 (150) | 303,027 | mix | 59.6 sec | **1,061% Push** | **508% Push** |
+| 15 (150) | 303,027 | tank | 188.6 sec | **790% Push** | **378% Push** |
+| 15 (150) | 303,027 | evasion | 121.3 sec | **2,190% Push** | **1,048% Push** |
+| 16 (160) | 329,841 | glass | 45.6 sec | **1,385% Push** | **663% Push** |
+| 16 (160) | 329,841 | mix | 62.5 sec | **1,113% Push** | **532% Push** |
+| 16 (160) | 329,841 | tank | 194.1 sec | **835% Push** | **400% Push** |
+| 16 (160) | 329,841 | evasion | 125.0 sec | **2,259% Push** | **1,081% Push** |
+| 17 (170) | 357,535 | glass | 47.8 sec | **1,448% Push** | **693% Push** |
+| 17 (170) | 357,535 | mix | 65.4 sec | **1,161% Push** | **555% Push** |
+| 17 (170) | 357,535 | tank | 199.2 sec | **877% Push** | **420% Push** |
+| 17 (170) | 357,535 | evasion | 128.5 sec | **2,321% Push** | **1,111% Push** |
+| 18 (180) | 386,109 | glass | 50.0 sec | **1,507% Push** | **721% Push** |
+| 18 (180) | 386,109 | mix | 68.1 sec | **1,205% Push** | **576% Push** |
+| 18 (180) | 386,109 | tank | 203.9 sec | **916% Push** | **438% Push** |
+| 18 (180) | 386,109 | evasion | 131.7 sec | **2,378% Push** | **1,138% Push** |
 <!-- END GENERATED:survival-boss-zones -->
 
 Reading:
@@ -358,7 +359,7 @@ Reading:
 1. **Boss is an endurance + time gate, not a DPS gate** — read the fight times off the generated table above: a boss stretches the fight long enough that regen cannot close the gap on its own, which is why the no-heal column is a Push at the top of the game.
 2. **Heal is the button that wins bosses** — one heal round turns the top-zone Pushes into passes, so an idle (AFK) player forfeits the spawn every 15 min. That is exactly the crafting.md intent that the second half of crafting is active play, and **SV6** holds it.
 3. **Clear difficulty ladder** — read it off the table: the early zones barely threaten, the middle starts filtering, and the top zone is the wall, so the boss HP multiplier needs no per-zone lowering.
-4. **Pure Evasion is the weakest build at a boss** — it carries the smallest pool and the slowest kill, so the generated table keeps it Pushed even with heal · the evidence-backed fix is to split items to Vit (the owner confirmed this is intended, D-041 A7) · links to the "can fast hit be a build" fork in checks.md group I.
+4. **Pure Evasion is the weakest build at a boss** — it carries the smallest pool and the slowest kill, so the generated table keeps it Pushed even with heal · the evidence-backed fix is to split items to Vit (the owner confirmed this is intended, A7) · links to the "can fast hit be a build" fork in checks.md group I.
 5. **Tank wins but slowest, at the smallest pool cost** — the measured trade-off is fast = must press heal, slow = safe.
 
 # 8. Gaps This File Still Cannot Close (With Reasons)

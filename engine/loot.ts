@@ -4,7 +4,7 @@
  *
  * Rarity = Mod count · Item quality = value range · Tier = sub-range (AGENT.md §2 — never mix them).
  * The Bases a slot may carry are still parsed from `item-base.md` on the cage side; the client
- * rolls only the Mod lines that `mods.json` owns (harness/todo.md B6 will move the Bases into data).
+ * rolls only the Mod lines that `mods.json` owns.
  */
 
 import type { EngineData, ModsData, Rng } from './types.ts';
@@ -66,11 +66,11 @@ export function huntReweight(
 export function createLoot(E: EngineData, MODS: ModsData) {
   // The earring is appended last (index 12) on purpose: the doll grid, `element.test.ts` and the
   // gear array address the other slots by position, so appending keeps every existing index stable
-  // (D-131 — the order is cosmetic in the filter panel only).
+  // (— the order is cosmetic in the filter panel only).
   const SLOTS = ['helmet', 'chest', 'pant', 'boots', 'belt', 'gloves', 'ring', 'ring', 'amulet', 'cape', 'main hand', 'off hand', 'earring'];
   const GEAR_MOD_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves'];
   const GEAR_MODS = ['armour_flat', 'evasion_flat', 'energy_shield_flat'];
-  // Rarity is the line count (loot.md §1 · item-rarity.md · D-123). Every piece carries line 1
+  // Rarity is the line count (loot.md §1 · item-rarity.md). Every piece carries line 1
   // (Base Mod) and the Legacy pair; `dropped_random` says how many of the 4 Random lines arrive
   // rolled, and `crafted_max` is the ceiling both Rarities share.
   const RARITY = Object.keys(E.rarity.drop_chance).map((name) => {
@@ -113,11 +113,11 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   const FLAT_GROUP = new Set(E.mod_weights.flat_group);
   const ELEMENTS = E.elements.order;
 
-  // ---- the rollable pool and line 1 (item-base.md · D-123)
+  // ---- the rollable pool and line 1 (item-base.md)
 
   const STAT_ID = 'stat_mod_flat';
   // The Stat Mod slot (item-base.md · equipment-slot-pools.md): one line, and the piece may hold it as
-  // a single Core stat (`stat_mod_flat`, D-127) or as all seven at once (`all_stat_flat`, D-129). The
+  // a single Core stat (`stat_mod_flat`) or as all seven at once (`all_stat_flat`). The
   // family is every `group: "Stat Mod"` row in `mods.json`, so a third sibling would join it with no
   // code change; the slot holds exactly one of them (`blockedBy` below).
   const STAT_IDS: string[] = MODS.mods.filter((m) => m.group === 'Stat Mod').map((m) => m.id);
@@ -143,7 +143,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * The piece's rollable pool (D-123): the slot's union of Bases plus the lines the slot adds on its
+   * The piece's rollable pool: the slot's union of Bases plus the lines the slot adds on its
    * own. Lines 2-7 all draw from this one list — the frame's own Primary keeps role 1.0 and
    * everything it does not own enters at 0.5, so the frame still steers the roll. A main-hand weapon
    * draws its type's pool (the physical / magic split) and a dual-wield off hand the same at half
@@ -180,7 +180,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
 
   /**
    * Ids the pool must drop because the piece already holds a family member whose slot allows only one
-   * (D-129): the Stat Mod slot is a single line, so once any `STAT_IDS` id is taken every sibling is
+   *: the Stat Mod slot is a single line, so once any `STAT_IDS` id is taken every sibling is
    * blocked. A no-op for every mod outside the family. Callers spread the result over `taken`.
    */
   function blockedBy(taken: Set<string>): Set<string> {
@@ -190,7 +190,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * Line 1 — the Base Mod (item-base.md · D-123). Armour slots lock the frame's own defence type and
+   * Line 1 — the Base Mod (item-base.md). Armour slots lock the frame's own defence type and
    * roll `hybrid_chance` for the next ones, in the pool's own order; a weapon forces every Mod its
    * type lists; an off-hand frame carries its family's pair; belt / ring / amulet draw one from the
    * slot's pool. The line shares one budget: one Mod keeps its roll, two take `value_scale` for 2,
@@ -203,8 +203,9 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
     if (weapon) {
-      // a weapon (main hand, or a dual-wielded off hand) forces every Mod its own type lists
-      for (const id of (BASES?.base_mod?.weapons?.[weapon.name] || [])) ids.push(id);
+      // a weapon (main hand, or a dual-wielded off hand) forces every Mod its own type lists — and a
+      // main hand carries a FRAME (A10), whose own list wins over its type's when it has one
+      for (const id of (frame?.base_mod || BASES?.base_mod?.weapons?.[weapon.name] || [])) ids.push(id);
     } else if (ARMOUR_SLOTS.includes(slot) && frame?.defence) {
       ids.push(frame.defence);
       const others = (BASES?.base_mod?.defence || []).filter((id: string) => id !== frame.defence);
@@ -242,7 +243,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * Line 1 at its floor, for a piece restored from a pre-skeleton save (D-123). The same Mods a fresh
+   * Line 1 at its floor, for a piece restored from a pre-skeleton save. The same Mods a fresh
    * roll would force, but at the lowest Tier and lowest value of the quality band and with no RNG at
    * all, so two loads of one save agree to the digit. Still one line, the extra Mods in `extra`.
    */
@@ -271,7 +272,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     let s = 0;
     for (const l of item.lines) {
       s += weightOf(l.id, item.q) * (l.value / MAX_OF[l.id]);
-      // a Base Mod line's extra Mods are part of the same line and count too (D-123)
+      // a Base Mod line's extra Mods are part of the same line and count too 
       for (const x of (l.extra || [])) s += weightOf(x.id, item.q) * (x.value / MAX_OF[x.id]);
     }
     return s;
@@ -324,7 +325,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
    * The Core stat a `stat_mod_flat` line bakes at drop — `undefined` for every Mod with no `rolls`,
    * so a caller can spread it straight onto the line it is building. The pool is the Mod row's own
    * `rolls` (`mods.json`), one home for the seven (checks.md X44). `all_stat_flat` feeds all seven at
-   * once instead of one, so it carries no `rolls` and bakes nothing (D-129).
+   * once instead of one, so it carries no `rolls` and bakes nothing.
    */
   const statOf = (id: string, rng: Rng): string | undefined => {
     const rolls = STAT_ROLLS_OF[id];

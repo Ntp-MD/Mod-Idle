@@ -6,7 +6,7 @@ import type { GameState, Item } from './types';
 /**
  * Wearing a piece.
  *
- * This is the player's decision and nothing else (`harness/decisions.md` D-089 — no auto-pick), so
+ * This is the player's decision and nothing else (— no auto-pick), so
  * the idle loop never calls it: a kept drop waits in the bag until someone chooses. It lives here
  * rather than in the panel because the rule it enforces — one piece per slot, the displaced one back
  * into the bag — is sim behaviour the tests must reach, and stat-bearing logic is kept out of a
@@ -14,7 +14,7 @@ import type { GameState, Item } from './types';
  */
 
 /** Which line a piece's +N feeds, and how much it has added so far. Weapons and the jewellery slots
- * have no school, so they have nothing to raise (`item-base.md` · D-104). */
+ * have no school, so they have nothing to raise (`item-base.md`). */
 export function gearModOf(item: Item): { stat: string | null; value: number } {
   const school = (BASES.bases.find((b: any) => b.name === item.base) as any)?.school || null;
   return { stat: school, value: school ? item.gearMod || 0 : 0 };
@@ -30,7 +30,7 @@ export function equipFromBag(s: GameState, bagIndex: number): { ok: boolean; why
   const at = slotIndex >= 0 ? slotIndex : gear.findIndex((g) => g === null);
   if (at < 0) return { ok: false, why: 'no empty slot left to wear it in' };
   const prev = gear[at];
-  // a Stat Mod line already carries its own Core stat, baked at drop (D-127), so wearing changes
+  // a Stat Mod line already carries its own Core stat, baked at drop, so wearing changes
   // nothing about it — the piece is worn exactly as it was rolled
   gear[at] = { ...item };
   s.bag.splice(bagIndex, 1);

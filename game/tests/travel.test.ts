@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import { settlementOfZone } from '../src/sim/town';
 
 describe('the stay / move on switch', () => {
@@ -10,7 +10,7 @@ describe('the stay / move on switch', () => {
 
   it('does not move a character that is over level in the opening zone', () => {
     const s = newGame(82);
-    s.player.level = 60;
+    setLevel(s, 60);
     for (let i = 0; i < 60; i++) tick(s, {});
     expect(s.zone).toBe(E.opening.settlement_zone);
     expect(s.log.some((l) => /Moving on/.test(l.text))).toBe(false);
@@ -18,7 +18,7 @@ describe('the stay / move on switch', () => {
 
   it('walks on to the next opened settlement once this zone band is behind', () => {
     const s = newGame(83);
-    s.player.level = 60;
+    setLevel(s, 60);
     s.travel = 'forward';
     // nothing opened yet but the start, so there is nowhere to go
     for (let i = 0; i < 30; i++) tick(s, {});
@@ -34,7 +34,7 @@ describe('the stay / move on switch', () => {
   it('never moves on in a zone whose band it has not passed', () => {
     const s = newGame(84);
     const first = eng.ZONES[0];
-    s.player.level = first.levels[1]; // exactly at the top, not past it
+    setLevel(s, first.levels[1]); // exactly at the top, not past it
     s.travel = 'forward';
     s.town.visited = eng.ZONES.slice(0, 3).map((z: any) => settlementOfZone(z.id)!.id);
     for (let i = 0; i < 30; i++) tick(s, {});

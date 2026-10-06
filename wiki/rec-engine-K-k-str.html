@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -93,6 +93,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="rec-engine-K-k-dex-acc.html">K_DEX_ACC</a>
 <a href="rec-engine-K-k-dex-align.html">K_DEX_ALIGN</a>
 <a href="rec-engine-K-k-vit-res.html">K_VIT_RES</a>
+<a href="rec-engine-K-k-vit-stunrec.html">K_VIT_STUNREC</a>
 <a href="rec-engine-K-k-lck-crit.html">K_LCK_CRIT</a>
 <a href="rec-engine-K-k-lck-pdoge.html">K_LCK_PDOGE</a>
 <a href="rec-engine-K-k-lck-drop.html">K_LCK_DROP</a>
@@ -135,8 +136,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -169,7 +168,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>K_STR</h1>
 <p class="hint">One row of <code>tools/data/engine.json</code> → <code>K</code>. Stat model · K values · Mod maxima · loot model · craft prices · timeline. Changing a number here re-prices every town line and rewrites checks.md groups A · B · C · F.</p>
-<dl class="kv"><dt>path</dt><dd><code>K.K_STR</code></dd><dt>collection</dt><dd><a href="data-engine-K.html">K coefficients</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>31</dd></dl>
+<dl class="kv"><dt>path</dt><dd><code>K.K_STR</code></dd><dt>collection</dt><dd><a href="data-engine-K.html">K coefficients</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>32</dd></dl>
 <div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>K STR</td><td><code>5</code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="K"><input type="hidden" name="id" value="K_STR">
@@ -177,8 +176,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="K"><input type="hidden" name="id" value="K_STR"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
-<section><h2>Numbers this feeds</h2><table class=""><thead><tr><th>what</th><th>expression</th><th>value</th><th>checks row</th></tr></thead><tbody><tr><td>Physical / Magic power</td><td><code>(715×5 + 80) × 1.16</code></td><td><code>4,240</code></td><td><a href="checks.html">B1</a></td></tr><tr><td>Max HP (Vit)</td><td><code>(715×20 + 7,560) × 1.16</code></td><td><code>25,706</code></td><td><a href="checks.html">B2</a></td></tr><tr><td>mana pool ÷ regen</td><td><code>5,984 ÷ 128.7</code></td><td><code>46.5 sec (intent 40)</code></td><td><a href="checks.html">B5</a></td></tr><tr><td>accuracy ceiling</td><td><code>715 × 1.5 × 1.25</code></td><td><code>1,341</code></td><td><a href="checks.html">B12</a></td></tr><tr><td>drop multiplier</td><td><code>1 + 715 × 0.01</code></td><td><code>8.15x</code></td><td><a href="checks.html">B14</a></td></tr><tr><td>full-Lck income ceiling</td><td><code>1,171 ÷ 415</code></td><td><code>×2.82 (G8 · T7)</code></td><td><a href="checks.html">T7</a></td></tr></tbody></table></section>
-<section><h2>Mentioned in the specs</h2><table class=""><thead><tr><th>document</th><th>under heading</th><th>matched as</th><th>hits</th></tr></thead><tbody><tr><td><a href="doc-AGENT.html#h-2-terminology-use-fixed-words">AGENT.md</a></td><td>2. Terminology — Use Fixed Words</td><td><code>K_STR</code></td><td>1</td></tr><tr><td><a href="doc-character-sheet.html#h-slots-previously-missing-but-now-have-formulas">character-sheet.md</a></td><td>Slots Previously Missing But Now Have Formulas</td><td><code>K_STR</code></td><td>1</td></tr><tr><td><a href="doc-formula-offense.html#h-1-physical-power">formula-offense.md</a></td><td>1. Physical power</td><td><code>K_STR</code></td><td>4</td></tr><tr><td><a href="doc-formula-utility.html#h-11-weight">formula-utility.md</a></td><td>11. Weight</td><td><code>K_STR</code></td><td>3</td></tr><tr><td><a href="doc-formula.html#h-summary-of-set-k-values">formula.md</a></td><td>Summary of Set K Values</td><td><code>K_STR</code></td><td>2</td></tr><tr><td><a href="doc-glossary.html#h-stats-and-formulas">glossary.md</a></td><td>Stats and Formulas</td><td><code>K_STR</code></td><td>2</td></tr><tr><td><a href="doc-harness/decisions.html#h-decisions">harness/decisions.md</a></td><td>Decisions</td><td><code>K_STR</code></td><td>3</td></tr></tbody></table></section>
+<section><h2>Numbers this feeds</h2><table class=""><thead><tr><th>what</th><th>expression</th><th>value</th><th>checks row</th></tr></thead><tbody><tr><td>Physical / Magic power</td><td><code>(433×5 + 80) × 1.16</code></td><td><code>2,607</code></td><td><a href="checks.html">B1</a></td></tr><tr><td>Max HP (Vit)</td><td><code>(433×20 + 7,560) × 1.16</code></td><td><code>19,173</code></td><td><a href="checks.html">B2</a></td></tr><tr><td>mana pool ÷ regen</td><td><code>4,858 ÷ 121.4</code></td><td><code>40.0 sec (intent 40)</code></td><td><a href="checks.html">B5</a></td></tr><tr><td>accuracy ceiling</td><td><code>433 × 1.5 × 1.25</code></td><td><code>813</code></td><td><a href="checks.html">B12</a></td></tr><tr><td>drop multiplier</td><td><code>1 + 433 × 0.01</code></td><td><code>5.33x</code></td><td><a href="checks.html">B14</a></td></tr><tr><td>full-Lck income ceiling</td><td><code>249 ÷ 79</code></td><td><code>×3.15 (G8 · T7)</code></td><td><a href="checks.html">T7</a></td></tr></tbody></table></section>
+<section><h2>Mentioned in the specs</h2><table class=""><thead><tr><th>document</th><th>under heading</th><th>matched as</th><th>hits</th></tr></thead><tbody><tr><td><a href="doc-AGENT.html#h-2-terminology-use-fixed-words">AGENT.md</a></td><td>2. Terminology — Use Fixed Words</td><td><code>K_STR</code></td><td>1</td></tr><tr><td><a href="doc-character-sheet.html#h-slots-previously-missing-but-now-have-formulas">character-sheet.md</a></td><td>Slots Previously Missing But Now Have Formulas</td><td><code>K_STR</code></td><td>1</td></tr><tr><td><a href="doc-formula-offense.html#h-1-physical-power">formula-offense.md</a></td><td>1. Physical power</td><td><code>K_STR</code></td><td>4</td></tr><tr><td><a href="doc-formula-utility.html#h-11-weight">formula-utility.md</a></td><td>11. Weight</td><td><code>K_STR</code></td><td>3</td></tr><tr><td><a href="doc-formula.html#h-summary-of-set-k-values">formula.md</a></td><td>Summary of Set K Values</td><td><code>K_STR</code></td><td>2</td></tr><tr><td><a href="doc-glossary.html#h-stats-and-formulas">glossary.md</a></td><td>Stats and Formulas</td><td><code>K_STR</code></td><td>2</td></tr></tbody></table></section>
 
 <section><h2>Raw JSON</h2><pre class="code">{
   &quot;K_STR&quot;: 5

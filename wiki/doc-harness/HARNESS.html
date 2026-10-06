@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -87,7 +87,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="#h-the-work-file">· The work file</a>
 <a href="#h-clearing-the-slate">· Clearing the slate</a>
 <a href="#h-tooling">· Tooling</a>
-<a href="#h-history">· History</a>
 <a href="#h-report-format">· Report format</a>
 <a href="#h-decisions-and-asking">· Decisions and asking</a>
 <a href="#h-scope">· Scope</a>
@@ -115,8 +114,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html" aria-current="page">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -149,7 +146,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Harness</h1>
-<dl class="kv"><dt>file</dt><dd><code>harness/HARNESS.md</code> · 132 lines · 1,238 words · written 2026-10-05T02:17:56Z</dd><dt>category</dt><dd>Unsorted</dd><dt>imports</dt><dd>—</dd><dt>imported by</dt><dd><a href="doc-harness/todo.html">harness/todo.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-harness/decisions.html">harness/decisions.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../harness/HARNESS.md">harness/HARNESS.md</a></dd></dl>
+<dl class="kv"><dt>file</dt><dd><code>harness/HARNESS.md</code> · 111 lines · 1,056 words · written 2026-10-05T15:27:18Z</dd><dt>category</dt><dd>Unsorted</dd><dt>imports</dt><dd>—</dd><dt>imported by</dt><dd><a href="doc-harness/todo.html">harness/todo.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../harness/HARNESS.md">harness/HARNESS.md</a></dd></dl>
 
 <h2 id="h-harness">Harness</h2>
 <p>Agent operating rules for this repo. Adapted from the Continental-Idle harness; the shape is borrowed, the values are ours.</p>
@@ -158,8 +155,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h3 id="h-read-chain">Read chain</h3>
 <ol><li><code>AGENT.md</code> — project rules. Read first.</li><li>This file — how to work.</li><li><code><a href="doc-glossary.html">glossary.md</a></code> — shared language. Read when a term is load-bearing; patch it when one locks.</li><li><code>harness/todo.md</code> — the single work file: what is open, and what is in flight right now. Read at</li></ol>
 <p>   task start.</p>
-<ol><li><code>harness/decisions.md</code> — what was ruled and why. <strong>Only when the user asks about a past decision.</strong></li></ol>
-<p>Never read <code>harness/decisions.md</code> to decide the current task; it is history, not instruction.</p>
 <p>Design docs live under <code>doc/&lt;layer&gt;/</code> (see <code>AGENT.md</code> §4); they are addressed by bare name (<code><a href="doc-glossary.html">glossary.md</a></code>), so the files above are found at <code>doc/start/glossary.md</code> etc.</p>
 <h3 id="h-verify-routing">Verify routing</h3>
 <p><strong><code>node tools/verify.ts</code> is the only verify entry point</strong> and it is pre-authorised. Run it after any edit, fix what your change broke, rerun without asking. Do not run it to &quot;check whether it is worth running&quot; — it always is.</p>
@@ -174,8 +169,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <p>Write it silently after a meaningful step: a user order, a context shift, a root cause, a landed choice. Do not narrate the write.</p>
 <h3 id="h-clearing-the-slate">Clearing the slate</h3>
 <p><strong>When work is done, the line is deleted — not ticked, not struck through, not summarised as &quot;recently closed&quot;.</strong> A work file that accumulates finished items stops being a work file: it becomes a changelog nobody reads, and the next session has to wade through it to find the three things still open.</p>
-<ul><li><strong>The record of what was done lives in <code>harness/decisions.md</code></strong>, with the gate that holds it. That</li></ul>
-<p>  is the one place a finished thing is allowed to still exist.</p>
 <ul><li><strong>Never write a closing paragraph in place of deleting the line.</strong> A tidy summary of completed work</li></ul>
 <p>  is the same clutter in nicer clothes.</p>
 <ul><li>A parked task (moved to post-release, or waiting on an owner ruling) is a single line under the</li></ul>
@@ -184,12 +177,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h3 id="h-tooling">Tooling</h3>
 <p>Use the tool that answers the question instead of editing a doc to find out.</p>
 <ul><li><strong>See a value's effect without editing docs</strong> — <code>node tools/skills.ts --calc --stat N --power N --level N --cdr N --ladder N</code> prints dmg/press · eff cd · presses/sec · mana%/s for every attack skill, and <code>node tools/report.ts</code> carries the same as a live &quot;Skill workshop&quot; section. Both read <code>tools/lib/skillmodel.ts</code>.</li><li><strong>Edit data through the wiki editor</strong> when a form is faster than the JSON — <code>node tools/wiki.ts serve --open</code> (loopback only) renders every <code>tools/data/*.json</code> collection as a validated form, then runs the writers + every cage + lint and rolls back on failure. Direct JSON edits work too.</li><li><strong>Rename a skill or aura</strong> — change the <code>name</code> in <code>skills.json</code>, add <code>&quot;Old Name&quot;: &quot;New Name&quot;</code> to its <code>renames</code> map, then run <code>node tools/tree.ts --write</code>; the node <code>Enables</code> cells update themselves. <code>tools/tree.ts --checks</code> reports any cell still on an old name as PENDING until you do. Never retype the name into a doc.</li></ul>
-<h3 id="h-history">History</h3>
-<p><code>harness/decisions.md</code> is the log. One entry per finished thing, newest first, shaped:</p>
-<pre class="code">| D-0NN | applied | what was decided, and the numbers that moved | the files that carry it |</pre>
-<p>Rules:</p>
-<ul><li>Log when done, never in advance. Not questions asked, not audits that changed nothing, not parked ideas.</li><li>A direction decision is part of its entry, not a separate file. There is no second decision log.</li><li>Routine fixes and refactors are not logged. If a change is not worth remembering, do not record it.</li><li>A rule that closes a queue line must be logged with the gate that enforces it — a ruling with no</li></ul>
-<p>  guard is a comment, not a decision.</p>
 <h3 id="h-report-format">Report format</h3>
 <p>Verdict line first: <code>&lt;task&gt; — DONE | PARTIAL | BLOCKED (&lt;n&gt;/&lt;total&gt;)</code>. Then Changed / Decisions / Gaps (<code>(none)</code> when empty) / Verify with the exact command and its result. Every item carries a status tag so &quot;did it change?&quot; is never inferred. No tables. Audits are read-only and say so.</p>
 <h3 id="h-decisions-and-asking">Decisions and asking</h3>
@@ -205,7 +192,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <p>Fix what was asked. Unrequested cleanup is a separate ask, even when it is obviously right — this repo has spent a session collapsing duplicate data on purpose, and doing that uninvited is the same mistake in the other direction.</p>
 <p>If the requested change turns out to be much larger than it looked, say so before starting rather than three files in.</p>
 <h3 id="h-zero-duplication">Zero duplication</h3>
-<p><strong>Never create a second home for a fact that already has one.</strong> If a number lives in <code>tools/data/</code>, the writer prints it; a second document restating it is a defect, not a convenience. The same goes for a glossary, a decision log, and a work file — one each, and this repo has already deleted the duplicates that used to exist.</p>
+<p><strong>Never create a second home for a fact that already has one.</strong> If a number lives in <code>tools/data/</code>, the writer prints it; a second document restating it is a defect, not a convenience. The same goes for a glossary and a work file — one each, and this repo has already deleted the duplicates that used to exist.</p>
 <nav class="pager"><span></span><a href="index.html">Unsorted</a><span></span></nav>
 
 </article>

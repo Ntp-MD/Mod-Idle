@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-05 09:11:30Z · static build</span>
+<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>48</b></span><span class="chip ">data rows <b>322</b></span><span class="chip bad">checks <b>163/6/1</b></span><span class="chip ">generated blocks <b>1</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -110,8 +110,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
 <a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/decisions.html">harness/decisions.md</a>
-<a href="doc-harness/draft-patch.html">harness/draft-patch.md</a>
 <a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
@@ -144,7 +142,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Item Rarity &amp; Quality</h1>
-<dl class="kv"><dt>file</dt><dd><code>item-rarity.md</code> · 82 lines · 759 words · written 2026-10-05T02:17:55Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a></dd><dt>imported by</dt><dd><a href="doc-concept.html">concept.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-economy.html">economy.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-save.html">save.md</a> · <a href="doc-world.html">world.md</a></dd><dt>quoted by</dt><dd><a href="doc-harness/decisions.html">harness/decisions.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../item-rarity.md">item-rarity.md</a></dd></dl>
+<dl class="kv"><dt>file</dt><dd><code>item-rarity.md</code> · 82 lines · 760 words · written 2026-10-06T00:55:45Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a></dd><dt>imported by</dt><dd><a href="doc-concept.html">concept.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-economy.html">economy.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-save.html">save.md</a> · <a href="doc-world.html">world.md</a></dd><dt>quoted by</dt><dd>—</dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../item-rarity.md">item-rarity.md</a></dd></dl>
 
 <h2 id="h-item-rarity-quality">Item Rarity &amp; Quality</h2>
 <p>import glossary.md import mod-pool.md</p>
@@ -153,9 +151,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <blockquote><p>Rarity has no effect on rolled values at all. It affects only Mod count. A high-Item quality Common must be stronger than a low-Item quality Rare.</p></blockquote>
 <h2 id="h-rarity-mod-count">Rarity — Mod Count</h2>
 <table><thead><tr><th>Rarity</th><th>Dropped lines</th><th>Crafted max</th><th>Drop chance</th></tr></thead><tbody><tr><td>Common</td><td>5 (Base + 2 Legacy + 2 Random)</td><td>7 (Add mod stone ×2)</td><td>82%</td></tr><tr><td>Rare</td><td>7 (Base + 2 Legacy + 4 Random)</td><td>7</td><td>18%</td></tr></tbody></table>
-<ul><li>The seven-line skeleton is fixed (item-base.md · D-123): the first line is the Base Mod and the next two the Legacy pair, both unremovable, so Rarity fills only the Random lines. Crafted max is the full seven for both, so a Common's <code>mods_added_cap</code> is exactly the gap to a full item. Net counting: removing a Random line frees the slot again. Per-item <code>mods_added</code> range stored in save.md.</li><li>Random lines never roll Stat Mod Flat once the item already holds its one Stat Mod line; the stat it feeds is rolled at drop (equipment-slot-pools.md).</li></ul>
+<ul><li>The seven-line skeleton is fixed (item-base.md): the first line is the Base Mod and the next two the Legacy pair, both unremovable, so Rarity fills only the Random lines. Crafted max is the full seven for both, so a Common's <code>mods_added_cap</code> is exactly the gap to a full item. Net counting: removing a Random line frees the slot again. Per-item <code>mods_added</code> range stored in save.md.</li><li>Random lines never roll Stat Mod Flat once the item already holds its one Stat Mod line; the stat it feeds is rolled at drop (equipment-slot-pools.md).</li></ul>
 <ul><li>Chance numbers are set in loot.md section 1 · Mod count does <strong>not</strong> change the strength of each Mod value (see next section).</li><li>Tiers inside Item quality roll with weights <strong>T3 50% · T2 33% · T1 17%</strong> — T1 touches 17% so dropped items feel &quot;almost good&quot; often but &quot;best&quot; is never free. Otherwise Refine would have nothing to do.</li></ul>
-<ul><li><strong>No third Rarity level.</strong> The old &quot;Unique&quot; idea (a craft-only special Base with a fixed Mod count) is <strong>cut</strong> (D-009 5c): Rarity stays two levels, and item identity is carried by Base frame + Mods + quality + Tier instead.</li></ul>
+<ul><li><strong>No third Rarity level.</strong> The old &quot;Unique&quot; idea (a craft-only special Base with a fixed Mod count) is <strong>cut</strong>: Rarity stays two levels, and item identity is carried by Base frame + Mods + quality + Tier instead.</li></ul>
 <h2 id="h-item-quality-value-range">Item Quality — Value Range</h2>
 <table><thead><tr><th>Item quality</th><th>Applies to which value range</th></tr></thead><tbody><tr><td>Low</td><td>Lowest range of every mod</td></tr><tr><td>Mid</td><td>Middle range of every mod</td></tr><tr><td>High</td><td>Highest range of every mod</td></tr></tbody></table>
 <ul><li>Item quality is a single value for the whole item. Every slot rolls from the same Item quality range set.</li><li>Per-mod range tables live in mod-pool.md.</li><li>Item quality comes from the <strong>level of the drop source</strong>, where level acts as a ceiling, not a fixed value.</li></ul>
@@ -174,7 +172,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   elem res % 30 (T1) Element Fire</pre>
 <p>Both carry their frame's Base Mod and the Legacy pair underneath the Random lines shown, so a Rare prints seven lines and a Common five. From the old table tying Tier to Rarity, these 2 pieces could swap places · Now they order directly by stronger level.</p>
 <h2 id="h-waiting-items">Waiting Items</h2>
-<p>The only genuinely open item here is now the A10 consequence (weapon Base frame enumeration → <code>harness/todo.md</code> B6); the crafting and third-Rarity waits were both resolved.</p>
+<p>The A10 consequence is closed — every weapon type now carries its frames in <code><a href="doc-item-base.html">item-base.md</a></code>'s frames table, gated by <code>bases.ts</code> — and the crafting and third-Rarity waits were both resolved.</p>
 <ul><li><strong>Crafting and res</strong> — Decided that <strong>Element cannot be locked</strong>. See crafting.md.</li></ul>
 <nav class="pager"><a href="doc-item-base.html">← item-base.md</a><a href="index.html">Items &amp; mods</a><a href="doc-item-list.html">item-list.md →</a></nav>
 

@@ -351,7 +351,7 @@ function runChecks() {
     && new Set(DATA.collector_sets.map((c: any) => c.school)).size === 3,
     `${DATA.collector_sets.length} sets, ${new Set(DATA.collector_sets.map((c: any) => c.school)).size} schools (light/heavy/cloth), 0 gold paid`);
 
-  // T15 — Base bias gate: ruled even-weighted (A9 · D-071), so the column must never carry a numeric weight.
+  // T15 — Base bias gate: ruled even-weighted (checks.md T15), so the column must never carry a numeric weight.
   const weighted = DATA.settlements.filter((s: any) => s.base_bias_weight != null);
   add('T15', DATA.base_bias.status === 'decided' && weighted.length === 0,
     `status ${DATA.base_bias.status} (even-weighted) · ${weighted.length} numeric weights in data · ${DATA.base_bias.checks.length} guards — any weight added here would break the ruling`);
@@ -368,13 +368,13 @@ function runChecks() {
 
   // T17 — no income invented here
   const kph = BANDS.map((b) => E.bands[b].kills_per_hr);
-  add('T17', kph.join() === '980,1385,1800', `F1 ${kph.join(' / ')} kills/hr copied from loot.md section 2 · this tool changes no kill rate`);
+  add('T17', kph.join() === '463,537,589', `F1 ${kph.join(' / ')} kills/hr copied from loot.md section 2 · this tool changes no kill rate`);
 
   // T18 — this data file must read the same engine the loot docs publish
   const dc = docCheck();
   add('T18', dc.problems.length === 0, dc.problems.length
     ? dc.problems.join(' · ')
-    : `checks.md F1 ${dc.d.f1_kills} · F3 ${dc.d.f3_drops} · F5 ${dc.d.f5_junk} and loot.md section 2 rows all equal the data engine`);
+    : `checks.md F1 ${dc.d.f1} · F3 ${dc.d.f3} · F5 ${dc.d.f5} and loot.md section 2 rows all equal the data engine`);
 
   // roster consistency
   const setTownIds = DATA.collector_sets.map((c: any) => c.settlement);
@@ -445,7 +445,7 @@ if (arg === '--emit') {
     for (const k of keys) console.log(`\n${begin(k)}\n${BLOCKS[k]()}${end(k)}`);
   }
 } else if (arg === '--write') {
-  // generated.writeAll owns the guards (D-113): this file used to write a doc whose markers were
+  // generated.writeAll owns the guards: this file used to write a doc whose markers were
   // gone, which is how a generated table ends up half-present and reads as current.
   if (writeAll(writerTable())) process.exitCode = 1;
 } else if (arg === '--checks' || arg === '--verify') {

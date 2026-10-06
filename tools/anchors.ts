@@ -59,7 +59,7 @@ const ANCHORS: { id: string; label: string; value: () => any; max: number; note:
     // to it (`Lck 535 gives 6.4x`). Only a line that is about refining, a set, or a piece is a copy
     // of this anchor — the rest is a different number that happens to print the same digits.
     context: /\b(refine|set|piece|hours?|E6|F16)\b/i,
-    note: 'Tier belongs to the piece, so a cast moves a whole item (D-033 · E6)',
+    note: 'Tier belongs to the piece, so a cast moves a whole item (E6)',
   },
   {
     id: 'A-roster', label: 'skill roster size', value: () => R.total(), max: 1,
@@ -76,14 +76,8 @@ const ANCHORS: { id: string; label: string; value: () => any; max: number; note:
 // ---------------------------------------------------------------- doc scan
 
 // every doc in the repo, not just the root — a copy of an anchor parked under `harness/`
-// would otherwise slip past the count entirely. The decision log is excluded by suffix, not by
-// path, so moving it inside `harness/` cannot quietly turn it back into counted prose.
-const LOG_DOC = /(^|\/)decisions\.md$/;
-// Owner-note docs are never system truth: the decision log records terms as
-// they were at decision time, and the draft patch is note-only until the owner
-// asks for the write (D-043).
-const NOTE_DOC = /(^|\/)draft-patch\.md$/;
-const DOCS = G.listDocs().filter((f) => !LOG_DOC.test(f) && !NOTE_DOC.test(f));
+// would otherwise slip past the count entirely.
+const DOCS = G.listDocs();
 
 // A number matches if the doc prints it as a standalone token, with or without
 // thousands separators and trailing ".0".

@@ -12,7 +12,9 @@ import { sm } from '../engine/client';
  * add, because they are separate lines.
  */
 
-export type CurseLine = { stat: string; value: number; secLeft: number; condition?: string };
+export type CurseLine = { stat: string; value: number; secLeft: number; condition?: string;
+  /** The row that wrote it — the `status missing` condition reads this to know if THAT curse is up. */
+  from?: string };
 
 export type CurseLines = Record<string, CurseLine>;
 
@@ -32,11 +34,11 @@ export interface CurseMods {
   leechPct: number;
   /** Shock has this target's clock stopped for the second. */
   stopped: boolean;
-  /** Chill's armour cut, as a fraction of the mob's own Armour line (D-099). */
+  /** Chill's armour cut, as a fraction of the mob's own Armour line. */
   armourCut: number;
-  /** A resistance strip in percentage points, negative as the row states it (Sunder · D-099). */
+  /** A resistance strip in percentage points, negative as the row states it (Sunder). */
   resistCut: number;
-  /** Elemental Break: this target takes more of the Element half, in percentage points (D-102). */
+  /** Elemental Break: this target takes more of the Element half, in percentage points. */
   elemTakenPct: number;
 }
 
@@ -75,7 +77,7 @@ export function applyCurse(store: CurseStore, mobId: string, skill: any): number
   if (!lines.length) return 0;
   const sec = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
   const mine = store[mobId] || (store[mobId] = {});
-  for (const e of lines) mine[lineKey(e)] = { stat: e.stat, value: e.value, secLeft: sec, condition: e.condition };
+  for (const e of lines) mine[lineKey(e)] = { stat: e.stat, value: e.value, secLeft: sec, condition: e.condition, from: skill.id };
   return sec;
 }
 
@@ -103,9 +105,9 @@ export function modsOn(store: CurseStore, mobId: string, present: (condition: st
     accuracy: v('accuracy'),
     damageTaken: v('damage_taken'),
     critChance: v('crit_chance'),
-    // a strip of the mob's own Elemental resistance, in percentage points (Sunder · D-099)
+    // a strip of the mob's own Elemental resistance, in percentage points (Sunder)
     resistCut: v('mob_elemental_resistance_pct'),
-    // and a line that makes it take more of the Element half (Elemental Break · D-102)
+    // and a line that makes it take more of the Element half (Elemental Break)
     elemTakenPct: v('mob_elemental_damage_taken_pct'),
   };
 }
@@ -113,7 +115,7 @@ export function modsOn(store: CurseStore, mobId: string, present: (condition: st
 /**
  * The target-side lines an aura carries, in the shape the mob mods read. An aura writes on everything
  * in range rather than on one mob it landed on, so Rimbo Form's slow and Elemental Fury's resistance
- * strip reach the fight through here (D-099).
+ * strip reach the fight through here.
  */
 export function modsFromAuraFold(target: { add?: Record<string, number> }): Partial<CurseMods> {
   const a = target.add || {};
@@ -154,7 +156,7 @@ export const curableRows = () => sm.of('curse').filter((s: any) => (s.effects ||
 
 /**
  * Pandemonium: when a cursed target dies, the lines it was carrying go to the neighbours its row
- * names, each with the duration it still had left (D-102). The count is read off the mob's own curse
+ * names, each with the duration it still had left. The count is read off the mob's own curse
  * line at the moment of death, so no cast state has to remember it. Returns how many caught it.
  */
 export function spreadOnDeath(store: CurseStore, mobId: string, neighbours: string[]): number {

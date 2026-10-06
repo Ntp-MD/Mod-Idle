@@ -64,7 +64,7 @@ export function plant(state: GameState, index: number, tier: string): { ok: bool
   const plot = state.farm.plots[index];
   if (plot.tier && state.clockSec < plot.readyAt) return { ok: false, why: 'still growing' };
   // a seed is one herb of the tier being planted (`farm.md` "plant 1 seed → harvest 3"), which makes
-  // the cycle 3-for-1 rather than 3-for-0 and closes harness/todo.md B11 without pricing anything new
+  // the cycle 3-for-1 rather than 3-for-0, without pricing anything new
   const seedCost = farm.seedCostHerbs;
   if (seedCost && (state.farm.herbs[tier] || 0) < seedCost) {
     return { ok: false, why: `planting ${tier} needs ${seedCost} ${tier} herb as the seed` };
@@ -72,7 +72,7 @@ export function plant(state: GameState, index: number, tier: string): { ok: bool
   if (seedCost) state.farm.herbs[tier] -= seedCost;
   plot.tier = tier;
   plot.plantedAt = state.clockSec;
-  // no seed is priced or dropped anywhere in the design (harness/todo.md B11), so planting costs time only
+  // no seed is priced or dropped anywhere in the design, so planting costs time only
   plot.readyAt = state.clockSec + farm.growthSec;
   return { ok: true };
 }
@@ -198,6 +198,19 @@ export function maybeFarm(state: GameState): string[] {
 
 /** Herb bundles ride their own roll, separate from gear and stones (`engine.json` `herbs`). A Hunt
  *  Order may hand in an already-reweighted chance so the three collectible streams stay balanced. */
+/**
+ * A potion drop rides its own roll, exactly as the herb stream does. Only the humanoid tribes carry
+ * it, the tier follows the zone's quality band, and the pool is an even coin between hp and mp. A
+ * bottle the bag cannot hold is left where it fell, never converted — the same rule as an herb.
+ */
+export function rollPotion(state: GameState, rng: () => number, band: string, humanoid: boolean): string | null {
+  if (!humanoid || rng() >= farm.potionDropChance(band)) return null;
+  const pool = rng() < 0.5 ? 'hp' : 'mp';
+  const potion = farm.P.list.find((p: any) => p.pool === pool && p.tier === band);
+  if (!potion) return null;
+  return addTo(state, state.farm.potions, potion.name, 'potion', 1) ? potion.name : null;
+}
+
 export function rollHerbs(state: GameState, rng: () => number, band: string, zoneTier: string, chance?: number): number {
   if (rng() >= (chance ?? farm.herbChance(band))) return 0;
   const bundle = farm.H.bundle_min + Math.floor(rng() * (farm.H.bundle_max - farm.H.bundle_min + 1));

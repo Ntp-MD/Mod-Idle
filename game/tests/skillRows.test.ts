@@ -6,12 +6,12 @@ import { playerSwing } from '../src/sim/combat';
 import { newSkillState, castOnce, effectsActive, type CastEnv } from '../src/sim/skills';
 import { newCurses, applyCurse, modsOn, lineValue } from '../src/sim/curse';
 import { newMobStatusStore, stepMob, holdsCondition, CONDITION_OF, applyBleed } from '../src/sim/mobStatus';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
 
 /**
- * The rows D-096 turned from prose into numbers: each must move the fight by the amount its own
+ * The rows turned from prose into numbers: each must move the fight by the amount its own
  * sentence states. Nothing here types a magnitude — every expected figure is read out of
  * `skills.json`, so a spend that drifts from its text fails this file and a text that drifts from
  * its data fails cage gate S11.
@@ -108,60 +108,21 @@ describe('Berserker pays for its own speed', () => {
   });
 });
 
-describe('Riposte and Execute spend their own sentences', () => {
-  it('Riposte adds 3% per 1% of our Evasion chance and stops at the Cap the row states', () => {
-    const per = row('attack.riposte').effects.find((e: any) => e.stat === 'damage_per_evasion_pct');
-    const caster = (chance: number) => ({ ...buildCharacter(90, emptyGear()), evasionChance: chance } as Character);
-    const dmg = (chance: number) => castDamage('attack.riposte', caster(chance), mob({ id: `e${chance}` }));
-    expect(dmg(20) / dmg(5)).toBeCloseTo((100 + 20 * per.value) / (100 + 5 * per.value), 6);
-    // 80% Evasion would be +240%, but the row caps the bonus at +120%, so the Cap binds from 40% on
-    expect(dmg(40) / dmg(20)).toBeCloseTo((100 + per.cap) / (100 + 20 * per.value), 6);
-    expect(dmg(80) / dmg(40)).toBeCloseTo(1, 6);
-  });
-
-  it('Execute doubles under its threshold and not above it', () => {
-    const threshold = valueOf('attack.execute', 'execute_threshold_pct');
-    const times = valueOf('attack.execute', 'execute_damage');
-    const c = buildCharacter(90, emptyGear());
-    const above = castDamage('attack.execute', c, mob({ hp: 1000, hpMax: 1000 })); // 100% left
-    const justAbove = castDamage('attack.execute', c, mob({ id: 'm2', hp: 1000 * (threshold + 1) / 100, hpMax: 1000 }));
-    const below = castDamage('attack.execute', c, mob({ id: 'm3', hp: 1000 * (threshold - 1) / 100, hpMax: 1000 }));
-    expect(justAbove).toBeCloseTo(above, 6);
-    expect(below / above).toBeCloseTo(times, 6);
-  });
-
-  it('Mark of the Executioner moves the threshold on the mob it landed on', () => {
-    const threshold = valueOf('attack.execute', 'execute_threshold_pct');
-    const shifted = valueOf('curse.mark_of_the_executioner', 'execute_threshold_pct');
-    const c = buildCharacter(90, emptyGear());
-    // a target between the two numbers: a finisher only once the curse has spoken
-    const hp = 1000 * (threshold + shifted) / 2 / 100;
-    const plain = castDamage('attack.execute', c, mob({ id: 'a', hp, hpMax: 1000 }));
-    const store = newCurses();
-    applyCurse(store, 'b', row('curse.mark_of_the_executioner'));
-    const marked = castDamage('attack.execute', c, mob({ id: 'b', hp, hpMax: 1000 }), { curses: store });
-    expect(shifted).toBeGreaterThan(threshold);
-    expect(marked / plain).toBeCloseTo(valueOf('attack.execute', 'execute_damage'), 6);
-    expect(lineValue(store, 'b', 'execute_threshold_pct')).toBe(shifted);
-  });
-});
-
 describe('the stack rows and the status curses reach the status store', () => {
-  it('Puncture and Flame Lash write the stacks their rows name onto the mob they hit', () => {
+  it('Puncture guarantees the bleed its row names, and Flame Wisp writes its stacks', () => {
     const c = buildCharacter(90, emptyGear());
-    const aligned = c.elem * (c.alignment / 100) * c.hitsPerSec;
     const store = newMobStatusStore();
     const target = mob();
     castDamage('attack.puncture', c, target, { mobStatus: store });
-    const poison = store[target.id].statuses.poison!;
-    expect(poison.stacks).toBe(valueOf('attack.puncture', 'poison_stacks'));
-    expect(poison.perSec).toBeCloseTo(aligned * S.poison.k_dps, 6);
+    // the row states +100% bleed chance on the target, so the rider lands on the one press
+    expect(valueOf('attack.puncture', 'bleed_chance')).toBe(100);
+    expect(store[target.id].statuses.bleed!.perSec).toBeGreaterThan(0);
 
     const fireStore = newMobStatusStore();
     const burned = mob({ id: 'm2' });
-    castDamage('attack.flame_lash', c, burned, { mobStatus: fireStore });
+    castDamage('attack.flame_wisp', c, burned, { mobStatus: fireStore });
     const burn = fireStore.m2.statuses.burn!;
-    expect(burn.stacks).toBe(Math.min(S.burn.stack_max, valueOf('attack.flame_lash', 'burn_stacks')));
+    expect(burn.stacks).toBe(Math.min(S.burn.stack_max, valueOf('attack.flame_wisp', 'burn_stacks')));
     expect(burn.secLeft).toBe(S.burn.time_sec);
   });
 
@@ -221,7 +182,7 @@ describe('the stack rows and the status curses reach the status store', () => {
 
   it('the sim spends a landed curse on the status store, not only on the curse store', () => {
     const s = newGame(96);
-    s.player.level = 50;
+    setLevel(s, 50);
     s.zone = 4;
     s.skills.owned['curse.venom_bind'] = 1;
     s.skills.list[0] = 'curse.venom_bind';

@@ -23,29 +23,29 @@ import mob-roster.md
 
 # Zones and Levels (Decided)
 
-**9 zones · 10 levels per zone · 1 boss per zone.**
+**18 zones · 10 levels per zone · 1 boss per zone.**
 
 <!-- BEGIN GENERATED:zone-table -->
-| Zone | Settlement · Levels | Dropped Quality ceiling | mob HP (zone edge) | innate Elements | Mobs per group | Boss | roster entries |
-|---|---|---|---|---|---|---|---|
-| 1 | Eastgate · 1-10 | low | 120 → 629 | fire | 1-2 | Eastgate Emberling (Husk) | 10 |
-| 2 | Millbrook · 11-20 | low | 730 → 1,305 | poison | 1-2 | Millbrook Tallyman (Goblin) | 16 |
-| 3 | Ashfall · 21-30 | low | 1,436 → 1,824 | fire | 1-2 | Ashfall Chieftain (Rat) | 9 |
-| 4 | Ironrow · 31-40 | mid (floor = low) | 3,546 → 4,033 | lightning | 2-3 | Ironrow Warden (Bandit) | 11 |
-| 5 | Wolf Cross · 41-50 | mid | 4,090 → 4,632 | cold | 2-3 | The Bloated Shepherd (Slime) | 15 |
-| 6 | Highspire · 51-60 | mid | 4,696 → 5,293 | cold · lightning | 2-3 | Highspire Herald (Troll) | 16 |
-| 7 | Bonegate · 61-70 | high (floor = mid) | 7,739 → 8,587 | chaos | 3-5 | Bonegate Tyrant (Orc) | 17 |
-| 8 | Frosthold · 71-80 | high | 8,685 → 9,605 | cold | 3-5 | Frosthold Siege-Marshal (Knight) | 13 |
-| 9 | Vermolch · 81-90 | high | 9,712 → 10,709 | poison · chaos | 3-5 | Vermolch Ninefold Choir (Seraph) | 13 |
-| 10 | Thornwake · 91-100 | low | 10,850 → 12,144 | poison | 1-2 | The Rootcoil (Drake) | 17 |
-| 11 | Greyfen · 101-110 | low | 12,291 → 13,639 | poison · chaos | 1-2 | Greyfen Broodmother (Demon) | 17 |
-| 12 | Saltmarrow · 111-120 | low | 13,791 → 15,191 | chaos | 1-2 | The Salt Tyrant (Elf) | 17 |
-| 13 | Emberhold · 121-130 | mid (floor = low) | 15,350 → 16,803 | fire | 2-3 | Emberhold Slagheart (Goblin) | 7 |
-| 14 | Duskmoor · 131-140 | mid (floor = low) | 16,967 → 18,473 | cold · chaos | 2-3 | Duskmoor Stalkers (Wolf) | 11 |
-| 15 | Nettlecrag · 141-150 | mid (floor = low) | 18,643 → 20,202 | chaos · poison | 2-3 | The Nettle Hag (Demon) | 14 |
-| 16 | Blackwater Reach · 151-160 | high (floor = mid) | 20,378 → 21,989 | poison | 3-5 | The Drowned Choir (Husk) | 16 |
-| 17 | Wyrmback · 161-170 | high (floor = mid) | 22,171 → 23,836 | fire · cold | 3-5 | Wyrmback Sovereign (Drake) | 12 |
-| 18 | The Pale Spire · 171-180 | high (floor = mid) | 24,024 → 25,741 | chaos · poison | 3-5 | Pale Spire Silence (Seraph) | 15 |
+| Zone | Settlement · Levels | Region | Dropped Quality ceiling | mob HP (zone edge) | innate Elements | Mobs per group | Boss | roster entries |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Eastgate · 1-10 | pinewood road | low | 120 → 629 | fire | 1-2 | Goblin King (Goblin) | 14 |
+| 2 | Millbrook · 11-20 | slow water | low | 730 → 1,305 | poison | 1-2 | Broodmother (Spider) | 12 |
+| 3 | Ashfall · 21-30 | ash fields | low | 1,436 → 1,824 | fire | 1-2 | Treant Elder (Treant) | 12 |
+| 4 | Ironrow · 31-40 | storm terrace | mid (floor = low) | 3,546 → 4,033 | lightning | 2-3 | Elven Archmage (Elf) | 12 |
+| 5 | Wolf Cross · 41-50 | wolf country | mid | 4,090 → 4,632 | cold | 2-3 | Elder Troll (Troll) | 11 |
+| 6 | Highspire · 51-60 | high crags | mid | 4,696 → 5,293 | cold · lightning | 2-3 | Warlord Orc (Orc) | 12 |
+| 7 | Bonegate · 61-70 | the bone gate | high (floor = mid) | 7,739 → 8,587 | chaos | 3-5 | Hoarder Kobold (Kobold) | 12 |
+| 8 | Frosthold · 71-80 | frost hold | high | 8,685 → 9,605 | cold | 3-5 | Ogre King (Ogre) | 12 |
+| 9 | Vermolch · 81-90 | the vermolch mire | high | 9,712 → 10,709 | poison · chaos | 3-5 | Wolf King (Wolf) | 10 |
+| 10 | Thornwake · 91-100 | wet lowland | low | 10,850 → 12,144 | poison | 1-2 | Ancient Dragon (Dragon) | 10 |
+| 11 | Greyfen · 101-110 | wet lowland | low | 12,291 → 13,639 | poison · chaos | 1-2 | Mummy Lord (Mummy) | 14 |
+| 12 | Saltmarrow · 111-120 | salt flats | low | 13,791 → 15,191 | chaos | 1-2 | Bone Colossus (Skeleton) | 11 |
+| 13 | Emberhold · 121-130 | slag and foundry heat | mid (floor = low) | 15,350 → 16,803 | fire | 2-3 | Ancient Vampire (Vampire) | 15 |
+| 14 | Duskmoor · 131-140 | open moor | mid (floor = low) | 16,967 → 18,473 | cold · chaos | 2-3 | Archdemon (Demon) | 14 |
+| 15 | Nettlecrag · 141-150 | thorn country | mid (floor = low) | 18,643 → 20,202 | chaos · poison | 2-3 | Slime King (Slime) | 8 |
+| 16 | Blackwater Reach · 151-160 | drowned river mouth | high (floor = mid) | 20,378 → 21,989 | poison | 3-5 | Colossus (Golem) | 8 |
+| 17 | Wyrmback · 161-170 | wyrm breeding ground | high (floor = mid) | 22,171 → 23,836 | fire · cold | 3-5 | Lizardman Chief (Lizardman) | 12 |
+| 18 | The Pale Spire · 171-180 | the pale bloom | high (floor = mid) | 24,024 → 25,741 | chaos · poison | 3-5 | Paladin (Human) | 13 |
 
 HP columns are `mob_HP(L)` at the zone's first and last level (checks.md D1) · the boss row is the zone's own `mob_HP × 15 / damage × 4` carrier species (combat.md section 7). `mob-roster.md` expands every one of these into the per-species, per-body entries a build reads from.
 <!-- END GENERATED:zone-table -->
@@ -63,20 +63,14 @@ HP columns are `mob_HP(L)` at the zone's first and last level (checks.md D1) · 
 - **Zone unlock by level, not by boss** · zone i boss spawns when player level ≥ that zone, and grants *Quality ceiling* + craft currency + skill (concept.md).
 - **Dropped Quality ceiling in zone i unlocks after beating zone i−1 boss** (zone 1 unlocked immediately) · reason: granting full ceiling on zone entry removes the need to fight bosses · and making bosses a hard progress gate would permanently wall builds that lose to bosses.
 - **Losing to a boss = losing that spawn** (boss retreats, full HP, must wait for next 15 min cycle) · full rules + which build wins at which zone in combat.md section 7.
-- **Levels 91-100 have no new zone and nothing new to unlock** · they are more of the same zone-9 band (as stated in concept.md and formula.md section 0).
+- **A player past a zone's last level still fights that zone at its edge** · the spawn clamp is the zone's own range, so the world's last zones stay the farm for a character at the level cap (as stated in `concept.md` and `formula.md` section 0a).
 
-# Full Game Timeline (All Numbers Calculated From loot.md Kill Rates + crafting.md Crafting + Mastery)
+# Full Game Timeline
 
-| Point | Cumulative time |
-|---|---|
-| Level 10 | 0.5 hr |
-| Level 30 | 3.1 hr |
-| Level 60 | 12.6 hr |
-| **Level 90 (zone end)** | **31.2 hr** |
-| Level 100 | 40.2 hr |
-| Finished crafted set (24 Refine + 12 Ascend pieces) | ~22 hr of crafting, overlapping the last zones (Refine 6.4 hr + Ascend 15.4 hr · E6 · E7) |
-| Mastery 11 types to L10 (+11% drop) | 12.4 hr |
-| Mastery 11 types to L20 | 55 hr |
+Generated, never typed: the 5-level-step table below is written by `tools/timeline.ts` from `engine.json` `xp`, and the
+checkpoints it reconciles against are `checks.md` E1-E5. A hand-typed copy of the same hours used to sit here, and it
+went stale the moment the re-base moved the funnel, so it is deliberately gone — read the generated table below, or the
+E-rows in `checks.md`.
 
 <!-- BEGIN GENERATED:xp-formula -->
 ```
@@ -94,49 +88,49 @@ Derived from `xp_to_next(L) = kills(L) × 10 × min(L, 180)` with the kills anch
 
 | Levels | XP to clear the step | Cumulative XP | Cumulative hr |
 |---|---|---|---|
-| 1-5 | 6,600 | 6,600 | 0.1 |
-| 6-10 | 34,100 | 40,700 | 0.4 |
-| 11-15 | 81,025 | 121,725 | 0.9 |
-| 16-20 | 145,650 | 267,375 | 1.4 |
-| 21-25 | 229,025 | 496,400 | 2.1 |
-| 26-30 | 331,150 | 827,550 | 2.9 |
-| 31-35 | 530,805 | 1,358,355 | 3.7 |
-| 36-40 | 830,330 | 2,188,685 | 4.8 |
-| 41-45 | 1,187,605 | 3,376,290 | 6.2 |
-| 46-50 | 1,602,630 | 4,978,920 | 7.9 |
-| 51-55 | 2,172,810 | 7,151,730 | 9.9 |
-| 56-60 | 2,887,860 | 10,039,590 | 12.4 |
-| 61-65 | 3,690,910 | 13,730,500 | 14.7 |
-| 66-70 | 4,581,960 | 18,312,460 | 17.3 |
-| 71-75 | 5,561,010 | 23,873,470 | 20.3 |
-| 76-80 | 6,628,060 | 30,501,530 | 23.6 |
-| 81-85 | 7,783,110 | 38,284,640 | 27.2 |
-| 86-90 | 9,026,160 | 47,310,800 | 31.2 |
-| 91-95 | 10,392,335 | 57,703,135 | 35.5 |
-| 96-100 | 11,874,510 | 69,577,645 | 40.2 |
-| 101-105 | 13,483,590 | 83,061,235 | 45.3 |
-| 106-110 | 15,212,540 | 98,273,775 | 50.8 |
-| 111-115 | 17,076,795 | 115,350,570 | 56.6 |
-| 116-120 | 19,068,270 | 134,418,840 | 62.9 |
-| 121-125 | 21,219,218 | 155,638,058 | 69.6 |
-| 126-130 | 23,516,805 | 179,154,863 | 76.7 |
-| 131-135 | 25,926,518 | 205,081,380 | 84.3 |
-| 136-140 | 28,448,355 | 233,529,735 | 92.3 |
-| 141-145 | 31,162,053 | 264,691,788 | 100.8 |
-| 146-150 | 34,047,815 | 298,739,603 | 109.7 |
-| 151-155 | 37,054,953 | 335,794,555 | 119.1 |
-| 156-160 | 40,183,465 | 375,978,020 | 129.0 |
-| 161-165 | 43,518,050 | 419,496,070 | 139.3 |
-| 166-170 | 47,036,800 | 466,532,870 | 150.2 |
-| 171-175 | 50,685,550 | 517,218,420 | 161.6 |
-| 176-180 | 54,464,300 | 571,682,720 | 173.4 |
-| 181-185 | 57,478,500 | 629,161,220 | 185.8 |
-| 186-190 | 59,931,000 | 689,092,220 | 198.8 |
+| 1-5 | 6,600 | 6,600 | 0.3 |
+| 6-10 | 34,100 | 40,700 | 0.9 |
+| 11-15 | 81,025 | 121,725 | 1.7 |
+| 16-20 | 145,650 | 267,375 | 2.9 |
+| 21-25 | 229,025 | 496,400 | 4.3 |
+| 26-30 | 331,150 | 827,550 | 6.0 |
+| 31-35 | 530,805 | 1,358,355 | 7.9 |
+| 36-40 | 830,330 | 2,188,685 | 10.6 |
+| 41-45 | 1,187,605 | 3,376,290 | 14.1 |
+| 46-50 | 1,602,630 | 4,978,920 | 18.2 |
+| 51-55 | 2,172,810 | 7,151,730 | 23.3 |
+| 56-60 | 2,887,860 | 10,039,590 | 29.4 |
+| 61-65 | 3,690,910 | 13,730,500 | 36.1 |
+| 66-70 | 4,581,960 | 18,312,460 | 43.7 |
+| 71-75 | 5,561,010 | 23,873,470 | 52.3 |
+| 76-80 | 6,628,060 | 30,501,530 | 62.0 |
+| 81-85 | 7,783,110 | 38,284,640 | 72.6 |
+| 86-90 | 9,026,160 | 47,310,800 | 84.3 |
+| 91-95 | 10,392,335 | 57,703,135 | 97.0 |
+| 96-100 | 11,874,510 | 69,577,645 | 110.7 |
+| 101-105 | 13,483,590 | 83,061,235 | 125.6 |
+| 106-110 | 15,212,540 | 98,273,775 | 141.6 |
+| 111-115 | 17,076,795 | 115,350,570 | 158.7 |
+| 116-120 | 19,068,270 | 134,418,840 | 177.1 |
+| 121-125 | 21,219,218 | 155,638,058 | 196.7 |
+| 126-130 | 23,516,805 | 179,154,863 | 217.5 |
+| 131-135 | 25,926,518 | 205,081,380 | 239.7 |
+| 136-140 | 28,448,355 | 233,529,735 | 263.1 |
+| 141-145 | 31,162,053 | 264,691,788 | 287.8 |
+| 146-150 | 34,047,815 | 298,739,603 | 313.9 |
+| 151-155 | 37,054,953 | 335,794,555 | 341.4 |
+| 156-160 | 40,183,465 | 375,978,020 | 370.3 |
+| 161-165 | 43,518,050 | 419,496,070 | 400.6 |
+| 166-170 | 47,036,800 | 466,532,870 | 432.4 |
+| 171-175 | 50,685,550 | 517,218,420 | 465.7 |
+| 176-180 | 54,464,300 | 571,682,720 | 500.4 |
+| 181-185 | 57,478,500 | 629,161,220 | 536.7 |
+| 186-190 | 59,931,000 | 689,092,220 | 574.5 |
 <!-- END GENERATED:xp-table -->
 
-- This game **ends at about 40 hours of real play** (AFK counts as half a Quality tier) · at 1 hr/day = about 6 weeks; at 3 hr/day = 2 weeks.
-- This number decides the "many zones or deep zones" question: at 40 hr and 9 zones → average 4.5 hr/zone, matching the luck stream measured in loot.md (dry in the first 2-3 hr, rest is crafting) · to add zones, *reduce* craft time per zone, not increase level time.
-- **Conflict to decide (from the 40 hr number)**: the 32-duplicate random skill ladder = ~300 hr, 7x longer than the whole game · this 40 hr number is the evidence that it must be fixed (see skill-pool.md open items).
+- The run's published checkpoints are the **E-series** (level 100 at 110.7 hr, on to the level cap at 574.5 hr), and they are **informational**: play-length is not a design constraint, so nothing here is tuned to a target number of hours.
+- That settles the "many zones or deep zones" question: 18 zones of 10 levels each, with each zone's share of the timeline read off the `checks.md` E-series · to add another zone later, *reduce* the craft time per zone, never the level time.
+- **Closed with the ladder re-cut**: the old 32-duplicate random ladder asked ~300 hr against the line of the day, and the live ladder (12 duplicates + the 2:1 conversion, generated by `ladder.ts`) is the fix, so no open conflict is left here.
 
 # Mob HP Formula Per Level (Replaces Placeholder Line)
 
@@ -146,7 +140,7 @@ mob_HP(L)     = typical_gear_DPS(L) × (1 + 0.0034 × L)   ·   anchored at ever
 item count = min(12, ceil(L/2))   → L1 = 1 item · L24+ full 12   (the gear the curve was priced against)
 no tree multiplier      (the passive tree is empty - see skill-tree.md)
 skill multiplier   = 1 + 0.0034 × L      → ×1.30 at L90 · ×1.34 at L100 (skill-pool-system.md section "Press per skill")
-mob_damage(L)  = typical_gear_DPS(L) / 27 per second  (split by the species damage tag · D-030 · combat.md)
+mob_damage(L) = typical_gear_DPS(L) / 27 per second (split by the species damage tag · combat.md)
 
 > **Why the damage line is not set from mob_HP** - mob_PS is `typical_gear_DPS / 27`, a fraction of the player's own output, not a share of the mob's HP. `mob_HP` carries only the skill multiplier.
 ```
@@ -157,7 +151,7 @@ mob_damage(L)  = typical_gear_DPS(L) / 27 per second  (split by the species dama
 | mob HP | 120 | 730 | 1,436 | 3,546 | 4,090 | 4,696 | 7,739 | 8,685 | 9,712 | 10,850 | 12,291 | 13,791 | 15,350 | 16,967 | 18,643 | 20,378 | 22,171 | 24,024 | 25,741 |
 | mob damage/sec | 4 | 26 | 50 | 119 | 133 | 148 | 237 | 259 | 282 | 307 | 339 | 371 | 403 | 435 | 467 | 499 | 531 | 563 | 591 |
 
-mob_HP(L) is defined at every level: the curve is anchored at each zone edge in `tools/data/engine.json` `mob.zones` and interpolated linearly inside the zone a mob spawns in. The spawn cap is 180, so the last column is the highest level a mob can spawn at; above it the gear factor is held flat and the theoretical player cap anchor `mob.curve.hp_at_player_level_cap` sits at level 190. mob damage/sec is `typical_gear_DPS(L) ÷ 27`, derived from the same curve rather than typed beside it (**X37**).
+mob_HP(L) is defined at every level: the curve is anchored at each zone edge in `tools/data/engine.json` `mob.zones` and interpolated linearly inside the zone a mob spawns in. The spawn cap is 180, so the last column is the highest level a mob can spawn at; above it the gear factor is held flat and the theoretical player cap anchor `mob.curve.hp_at_player_level_cap` sits at level 190. Mob damage/sec is `typical_gear_DPS(L) ÷ 27`, derived from the same curve rather than typed beside it (**X37**).
 <!-- END GENERATED:mob-curve -->
 
 - **TTK = 1 sec for on-level gear players** · full T1 gear kills in 0.9 sec · fresh zone entrants with no gear take 2-6 sec (level 1 = ~2 sec, not 16 sec).
@@ -175,39 +169,46 @@ mob_HP(L) is defined at every level: the curve is anchored at each zone edge in 
 
 A mob is three independent things: a **species**, a **body class**, and an **innate Element** rolled on spawn. Species and body class come from `tools/data/engine.json` `mob`; innate Element stays a spawn roll, so the three axes never collapse into one. **This table is generated** — edit the data, not this file.
 
-**15 species**, each legal on 1-3 of the three farming bodies (Small · Medium · Large): Goblin is the only lineage legal on all three, and Golem · Troll · Knight are the only Large-only ones. Multiplied over the zones each species is placed in, plus Elite and the nine named bosses, that gives the full spawnable list — every entry with its numbers resolved in **`mob-roster.md`**, which is what a build reads. The entry count and the per-zone spread are printed by **X23**, so no number here needs restating.
+**22 species**, each legal on 1-3 of the three farming bodies (Small · Medium · Large): Goblin · Skeleton · Human · Lizardman are legal on all three, and Troll · Golem · Treant · Giant are the only Large-only ones. Multiplied over the zones each species is placed in, plus Elite and the eighteen named bosses, that gives the full spawnable list — every entry with its numbers resolved in **`mob-roster.md`**, which is what a build reads. The entry count and the per-zone spread are printed by **X23**, so no number here needs restating.
 
 <!-- BEGIN GENERATED:mob-sheet -->
-| Species | Zones | Damage | accuracy | Body classes | str · agi · vit · dex · int · wis · lck |
-|---|---|---|---|---|---|
-| Rat | 2 · 3 · 9 · 10 · 11 · 13 | physical | ×0.75 | Small · Medium | 0.84 · 1.46 · 0.73 · 1.15 · 0.63 · 0.84 · 1.36 |
-| Husk | 1 · 6 · 9 · 10 · 11 · 16 | physical | ×0.05 | Medium · Large | 1.17 · 0.70 · 1.63 · 0.82 · 0.70 · 1.05 · 0.93 |
-| Goblin | 1 · 2 · 3 · 4 · 13 · 16 | physical | ×0.75 | Small · Medium · Large | 1.29 · 1.18 · 0.97 · 0.97 · 0.65 · 0.86 · 1.08 |
-| Slime | 1 · 5 · 6 · 8 · 14 · 17 | magic | ×0.05 | Small · Medium | 0.73 · 0.63 · 1.46 · 0.73 · 1.15 · 1.25 · 1.04 |
-| Bandit | 3 · 4 · 5 · 8 · 14 · 17 | physical | ×0.75 | Small · Medium | 1.13 · 1.03 · 0.93 · 1.13 · 0.72 · 1.03 · 1.03 |
-| Spider | 4 · 5 · 6 · 8 · 14 · 17 | physical | ×0.50 | Small · Medium | 0.72 · 1.34 · 0.82 · 1.24 · 0.82 · 0.93 · 1.13 |
-| Wolf | 7 · 9 · 12 · 14 · 15 · 18 | physical | ×1.00 | Small · Medium | 1.13 · 1.34 · 0.93 · 1.03 · 0.62 · 0.93 · 1.03 |
-| Orc | 6 · 7 · 11 · 12 · 15 · 18 | physical | ×0.75 | Medium · Large | 1.48 · 1.06 · 1.27 · 0.74 · 0.53 · 0.95 · 0.95 |
-| Troll | 6 · 7 · 8 · 12 · 15 · 18 | physical | ×0.50 | Large | 1.38 · 0.85 · 1.48 · 0.74 · 0.64 · 0.95 · 0.95 |
-| Elf | 2 · 7 · 10 · 12 · 15 · 16 | mixed | ×1.00 | Medium · Large | 0.86 · 1.15 · 0.77 · 1.25 · 1.05 · 0.96 · 0.96 |
-| Demon | 2 · 5 · 7 · 11 · 12 · 15 | mixed | ×0.75 | Medium · Large | 1.17 · 0.97 · 1.07 · 0.87 · 1.17 · 0.87 · 0.87 |
-| Golem | 4 · 5 · 8 · 9 · 11 · 18 | physical | ×0.25 | Large | 1.70 · 0.60 · 1.55 · 0.75 · 0.65 · 1.10 · 0.65 |
-| Knight | 8 · 10 · 14 · 16 · 17 · 18 | physical | ×0.25 | Large | 1.29 · 0.75 · 1.51 · 0.86 · 0.65 · 1.08 · 0.86 |
-| Drake | 2 · 5 · 6 · 10 · 16 · 17 | mixed | ×1.00 | Medium · Large | 1.25 · 0.96 · 1.05 · 0.86 · 1.15 · 0.86 · 0.86 |
-| Seraph | 7 · 9 · 10 · 11 · 12 · 18 | magic | ×0.50 | Medium · Large | 0.59 · 0.79 · 0.99 · 1.08 · 1.38 · 1.18 · 0.99 |
+| Species | Zones | Habitat (regions it may live in) | Variants (Small → Boss) | Damage | accuracy | Body classes | str · agi · vit · dex · int · wis · lck |
+|---|---|---|---|---|---|---|---|
+| Goblin | 1 · 2 | pinewood road · slow water | Sneak Goblin → Raider Goblin → Tinker Goblin → Shaman Goblin → Goblin King | physical | ×0.75 | Small · Medium · Large | 1.29 · 1.18 · 0.97 · 0.97 · 0.65 · 0.86 · 1.08 |
+| Orc | 1 · 6 · 11 | pinewood road · high crags · wet lowland | Raider Orc → Shaman Orc → Berserker Orc → Juggernaut Orc → Warlord Orc | physical | ×0.75 | Medium · Large | 1.48 · 1.06 · 1.27 · 0.74 · 0.53 · 0.95 · 0.95 |
+| Kobold | 7 | the bone gate | Miner Kobold → Trapper Kobold → Tinker Kobold → Drake Kobold → Hoarder Kobold | physical | ×0.50 | Small · Medium | 1.07 · 1.32 · 0.85 · 1.06 · 0.64 · 0.85 · 1.22 |
+| Ogre | 6 · 8 · 17 | high crags · frost hold · wyrm breeding ground | Brute Ogre → Butcher Ogre → Swamp Ogre → Mage Ogre → Ogre King | physical | ×0.50 | Medium · Large | 1.43 · 0.96 · 1.38 · 0.74 · 0.59 · 0.95 · 0.95 |
+| Troll | 5 · 7 · 9 · 10 | wolf country · the bone gate · the vermolch mire · wet lowland | Cave Troll → Forest Troll → Swamp Troll → Stone Troll → Elder Troll | physical | ×0.50 | Large | 1.38 · 0.85 · 1.48 · 0.74 · 0.64 · 0.95 · 0.95 |
+| Minotaur | 7 | the bone gate | Warrior Minotaur → Berserker Minotaur → Guardian Minotaur → Blood Minotaur → Minotaur King | physical | ×0.75 | Medium · Large | 1.37 · 1.01 · 1.16 · 0.80 · 0.84 · 0.91 · 0.91 |
+| Skeleton | 12 · 13 · 14 | salt flats · slag and foundry heat · open moor | Warrior Skeleton → Archer Skeleton → Knight Skeleton → Mage Skeleton → Bone Colossus | physical | ×0.25 | Small · Medium · Large | 1.23 · 0.73 · 1.57 · 0.84 · 0.68 · 1.07 · 0.90 |
+| Mummy | 11 · 12 | wet lowland · salt flats | Warrior Mummy → Priest Mummy → Cursed Mummy → Royal Mummy → Mummy Lord | physical | ×0.25 | Medium · Large | 1.28 · 0.78 · 1.56 · 0.78 · 0.67 · 1.00 · 0.94 |
+| Vampire | 12 · 13 · 14 | salt flats · slag and foundry heat · open moor | Blood Vampire → Noble Vampire → Vampire Knight → Vampire Lord → Ancient Vampire | mixed | ×0.75 | Medium · Large | 1.15 · 1.16 · 1.00 · 0.95 · 0.90 · 0.90 · 0.95 |
+| Demon | 8 · 11 · 13 · 14 · 15 · 16 | frost hold · wet lowland · slag and foundry heat · open moor · thorn country · drowned river mouth | Imp → Demon Mage → Demon Brute → Demon Knight → Archdemon | mixed | ×0.75 | Medium · Large | 1.17 · 0.97 · 1.07 · 0.87 · 1.17 · 0.87 · 0.87 |
+| Slime | 5 · 15 · 16 · 17 | wolf country · thorn country · drowned river mouth · wyrm breeding ground | Splitter Slime → Acid Slime → Devourer Slime → Mimic Slime → Slime King | magic | ×0.05 | Small · Medium | 0.73 · 0.63 · 1.46 · 0.73 · 1.15 · 1.25 · 1.04 |
+| Spider | 2 · 5 · 7 · 17 | slow water · wolf country · the bone gate · wyrm breeding ground | Cave Spider → Hunter Spider → Web Spider → Venom Spider → Broodmother | physical | ×0.50 | Small · Medium | 0.72 · 1.34 · 0.82 · 1.24 · 0.82 · 0.93 · 1.13 |
+| Wolf | 1 · 2 · 9 · 10 | pinewood road · slow water · the vermolch mire · wet lowland | Hunting Wolf → Dire Wolf → Shadow Wolf → Alpha Wolf → Wolf King | physical | ×1.00 | Small · Medium | 1.13 · 1.34 · 0.93 · 1.03 · 0.62 · 0.93 · 1.03 |
+| Golem | 7 · 8 · 15 · 16 · 18 | the bone gate · frost hold · thorn country · drowned river mouth · the pale bloom | Stone Golem → Iron Golem → Guardian Golem → Crystal Golem → Colossus | physical | ×0.25 | Large | 1.70 · 0.60 · 1.55 · 0.75 · 0.65 · 1.10 · 0.65 |
+| Dragon | 6 · 8 · 9 · 10 · 18 | high crags · frost hold · the vermolch mire · wet lowland · the pale bloom | Wyrmling → Drake → Wyvern → Elder Dragon → Ancient Dragon | mixed | ×1.00 | Medium · Large | 1.48 · 0.78 · 1.30 · 0.81 · 0.90 · 0.98 · 0.76 |
+| Treant | 3 · 4 | ash fields · storm terrace | Young Treant → Thorn Treant → Rotting Treant → Ancient Treant → Treant Elder | physical | ×0.25 | Large | 1.54 · 0.73 · 1.52 · 0.75 · 0.65 · 1.03 · 0.80 |
+| Human | 1 · 13 · 18 | pinewood road · slag and foundry heat · the pale bloom | Ranger → Warrior → Knight → Mage → Paladin | physical | ×0.75 | Small · Medium · Large | 1.13 · 1.03 · 0.93 · 1.13 · 0.72 · 1.03 · 1.03 |
+| Lizardman | 5 · 11 · 17 | wolf country · wet lowland · wyrm breeding ground | Hunter Lizardman → Warrior Lizardman → Scale Knight → Shaman Lizardman → Lizardman Chief | physical | ×0.75 | Small · Medium · Large | 1.16 · 1.26 · 1.00 · 0.95 · 0.58 · 0.90 · 1.16 |
+| Elf | 3 · 4 · 18 | ash fields · storm terrace · the pale bloom | Wood Elf → High Elf → Moon Elf → Dark Elf → Elven Archmage | mixed | ×1.00 | Medium · Large | 0.86 · 1.15 · 0.77 · 1.25 · 1.05 · 0.96 · 0.96 |
+| Giant | 6 · 9 · 10 | high crags · the vermolch mire · wet lowland | Hill Giant → Stone Giant → Frost Giant → Fire Giant → Storm Giant | physical | ×0.25 | Large | 1.59 · 0.83 · 1.41 · 0.75 · 0.59 · 1.03 · 0.80 |
+| Werewolf | 2 · 3 · 4 · 14 | slow water · ash fields · storm terrace · open moor | Wolfman → Dire Werewolf → Blood Werewolf → Alpha Werewolf → Werewolf Lord | physical | ×1.00 | Medium · Large | 1.31 · 1.20 · 1.10 · 0.89 · 0.58 · 0.94 · 0.99 |
+| Dryad | 3 · 4 | ash fields · storm terrace | Forest Dryad → Flower Dryad → Thorn Dryad → Corrupted Dryad → Ancient Dryad | magic | ×0.50 | Medium · Large | 0.73 · 0.97 · 0.88 · 1.17 · 1.22 · 1.07 · 0.98 |
 
 | Body class | HP | PS | evasion | Grouping |
 |---|---|---|---|---|
 | Small | ×0.70 | ×0.70 | ×1.10 | up to 5 |
 | Medium | ×1.00 | ×1.00 | ×1.00 | up to 5 |
 | Large | ×1.70 | ×1.35 | ×0.90 | alone |
-| Boss | ×15.00 | ×16.00 | ×1.00 | alone |
+| Boss | ×15.00 | ×18.00 | ×1.00 | alone |
 | Elite | ×6.00 | ×4.00 | ×0.90 | alone |
 <!-- END GENERATED:mob-sheet -->
 
-- **The player has no class.** Species is a creature lineage (Rat · Husk · Drake), not a job, and nothing about it is available to the player.
-- **A species is a multiply vector on the player's own stat block.** Every mob starts from `stat_c` per stat, then the species multiplies it. Check **X19** fails any species whose seven multipliers do not average 1.00, so no species can quietly be stronger overall than `mob_HP` was derived against.
-- **`accuracy` is the load-bearing column.** Mob accuracy is the shared `stat_c × K_DEX_ACC` scaled by the species multiplier. Against a ×0.25 species (Husk · Slime · Knight) the Evasion **Cap 80 is reachable**; against a ×1.00 species (Wolf · Elf · Drake) full Dex only reaches the low thirties. That is why no single mob accuracy number could ever close `checks.md` C1 — the species mix does, and Evasion becomes a build that works *against some things*.
+- **The player has no class.** Species is a creature lineage (Goblin · Golem · Elf), not a job, and nothing about it is available to the player.
+- **A species is a multiply vector on the mob's own flat stat block**. A mob's block is one base per stat with no level term; the species vector rides on it and the body class carries its own multipliers on top. Check **X19** fails any species whose seven multipliers do not average 1.00, so no species can quietly be stronger overall than `mob_HP` was derived against.
+- **`accuracy` is the load-bearing column.** Mob accuracy is `K_DEX_ACC` run over the flat stat block, scaled by the species Dex multiplier and the accuracy tier. Against a low-accuracy species the Evasion **Cap is reachable**; against the top tier full Dex only reaches the low thirties. That is why no single mob accuracy number could ever close `checks.md` C1 — the species mix does, and Evasion becomes a build that works *against some things*.
 - **`element_bias` only tilts the roll** inside the zone's own 1-2 Elements. It never adds an Element, so res still has to be prepared in advance.
 - **Four card sizes, copied from Ragnarok** (Small · Medium · Large · Boss). **Elite is a rarity flag, not a fifth size**: an Elite is always a Large body and carries its own numbers, so two multipliers never stack.
 - Size raises HP faster than PS, so a Large body is a longer fight rather than a harder hit — which is what makes Small the farming body and Large the roadblock.
@@ -215,51 +216,56 @@ A mob is three independent things: a **species**, a **body class**, and an **inn
 
 ## What the species actually produce
 
-Mobs are not a separate math. A species multiplies the same stat block a player has, and then the **player's own K values** run over it unchanged.
+Mobs are not a separate math. The species vector and body class multiply the mob's own flat stat block, and then the **same K values the player obeys** run over it unchanged.
 
 <!-- BEGIN GENERATED:mob-stats -->
 | Species | HP × (Vit) | PS × (Str) | accuracy | evasion | armour | res | crit | dodge |
 |---|---|---|---|---|---|---|---|---|
-| Rat | ×0.73 | ×0.84 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Husk | ×1.63 | ×1.17 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Goblin | ×0.97 | ×1.29 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Slime | ×1.46 | ×0.73 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Bandit | ×0.93 | ×1.13 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Spider | ×0.82 | ×0.72 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Wolf | ×0.93 | ×1.13 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Orc | ×1.27 | ×1.48 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Troll | ×1.48 | ×1.38 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Elf | ×0.77 | ×0.86 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Demon | ×1.07 | ×1.17 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Golem | ×1.55 | ×1.70 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Knight | ×1.51 | ×1.29 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Drake | ×1.05 | ×1.25 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
-| Seraph | ×0.99 | ×0.59 | NaN | NaN | NaN | NaN% | NaN% | NaN% |
+| Goblin | ×0.97 | ×1.29 | 118 | 53 | 280 | 5.3% | 5.9% | 8.6% |
+| Orc | ×1.27 | ×1.48 | 90 | 40 | 321 | 6.9% | 5.2% | 7.8% |
+| Kobold | ×0.85 | ×1.07 | 86 | 57 | 232 | 4.6% | 6.6% | 9.6% |
+| Ogre | ×1.38 | ×1.43 | 60 | 40 | 310 | 7.5% | 5.2% | 7.1% |
+| Troll | ×1.48 | ×1.38 | 60 | 40 | 299 | 8.0% | 5.2% | 6.4% |
+| Minotaur | ×1.16 | ×1.37 | 98 | 43 | 297 | 6.3% | 4.9% | 7.5% |
+| Skeleton | ×1.57 | ×1.23 | 34 | 46 | 267 | 8.5% | 4.9% | 5.5% |
+| Mummy | ×1.56 | ×1.28 | 32 | 42 | 278 | 8.5% | 5.1% | 5.9% |
+| Vampire | ×1.00 | ×1.15 | 116 | 52 | 249 | 5.4% | 5.2% | 8.5% |
+| Demon | ×1.07 | ×1.17 | 106 | 47 | 254 | 5.8% | 4.7% | 7.2% |
+| Slime | ×1.46 | ×0.73 | 6 | 40 | 158 | 7.9% | 5.6% | 4.8% |
+| Spider | ×0.82 | ×0.72 | 101 | 67 | 156 | 4.4% | 6.1% | 9.7% |
+| Wolf | ×0.93 | ×1.13 | 168 | 56 | 245 | 5.0% | 5.6% | 9.7% |
+| Golem | ×1.55 | ×1.70 | 30 | 41 | 369 | 8.4% | 3.5% | 4.6% |
+| Dragon | ×1.30 | ×1.48 | 132 | 44 | 321 | 7.0% | 4.1% | 5.9% |
+| Treant | ×1.52 | ×1.54 | 30 | 41 | 334 | 8.2% | 4.3% | 5.5% |
+| Human | ×0.93 | ×1.13 | 138 | 61 | 245 | 5.0% | 5.6% | 7.6% |
+| Lizardman | ×1.00 | ×1.16 | 116 | 52 | 252 | 5.4% | 6.3% | 9.2% |
+| Elf | ×0.77 | ×0.86 | 203 | 68 | 186 | 4.2% | 5.2% | 8.4% |
+| Giant | ×1.41 | ×1.59 | 30 | 41 | 345 | 7.6% | 4.3% | 6.2% |
+| Werewolf | ×1.10 | ×1.31 | 145 | 48 | 284 | 6.0% | 5.4% | 8.8% |
+| Dryad | ×0.88 | ×0.73 | 95 | 63 | 158 | 4.8% | 5.3% | 7.2% |
 
-Every column is the player's own formula at level 100 (stat block NaN per stat): accuracy = Dex × 1.5 × accuracy tier · **evasion = Dex × 0.5** (the Medium-body line · a Small body multiplies it ×1.1, Large and Elite ×0.9) · **armour = Str × 2** (the same line the player uses · D-022 · it is what chill's 25% cut acts on) · res = Vit × 0.05 · crit = Lck × 0.05 · dodge = `own Agi rate ÷ (rate + a same-level attacker's accuracy)` (D-024). Mobs are not a separate math — they are the same math with a multiply vector on the stat block. Energy Shield is the one player line a mob does not have (player-only · D-026).
+Every column is the player's own formula run over the mob's FLAT stat block (`mob.stat.base` 108 per stat, no level term): accuracy = Dex × 1.5 × accuracy tier · **evasion = Dex × 0.5** (the Medium-body line · a Small body multiplies it ×1.1, Large and Elite ×0.9) · **armour = Str × 2** (the same line the player uses · it is what chill's 25% cut acts on) · res = Vit × 0.05 · crit = Lck × 0.05 · dodge = `own Agi rate ÷ (rate + a same-level attacker's accuracy)`. Mobs are not a separate math — they are the same math with a multiply vector on one flat block, so two mobs of a level can be nothing alike. Energy Shield is the one player line a mob does not have (player-only).
 <!-- END GENERATED:mob-stats -->
 
 - **Mob crit is real** — 8% to 14% from the mob's own Lck line, and the incoming order now has the step it needed (`combat.md` §2 step 4b · ×2.0, the no-Mod base).
 - **Mob res is low, 8% to 17%.** That answers the open question of what the player's res is for: not for mob res, which nobody can out-race, but for the Element counter table and the Element half of every hit.
-- **Mob dodge is the mirror of ours** — the mob's own Agi rate contested by *the accuracy of the player hitting it*, the same opposed shape X20 uses on the player side (D-024). It is a thin layer: every roster entry lands in the single-digit band, so a mob's Agi never becomes the answer to a build (**X24** keeps it there). The per-entry number is the `dodge` column of `mob-roster.md` and of the table above.
-- **Mob evasion is the species Dex line** (`stat_c × species.dex × K_EVASION × body class`), which is why the sheet above carries an `evasion` column. The reference mob — mean species on a Medium body — is where every published hit chance is measured, and it lands on the same number the retired `level × 1` curve gave, so no DPS or mob_HP anchor had to be re-tuned (`formula-utility.md` section 8 · guard **X21**).
-- **Armour is in this table** (`K_ARMOUR` 2 on the mob's Str line · D-022), so a Golem or Knight genuinely blunts a fast weapon and a Rat blunts nothing. **Energy Shield is deliberately not here** — the shield is a player-only line (D-026), because a mob's survivability is already the `mob_HP` anchor and a second pool would count it twice.
+- **Mob dodge is the mirror of ours** — the mob's own Agi rate contested by *the accuracy of the player hitting it*, the same opposed shape X20 uses on the player side. It is a thin layer: every roster entry lands in the single-digit band, so a mob's Agi never becomes the answer to a build (**X24** keeps it there). The per-entry number is the `dodge` column of `mob-roster.md` and of the table above.
+- **Mob evasion is the species Dex line** (`flat stat block × species.dex × K_EVASION × body class`), which is why the sheet above carries an `evasion` column. The reference mob — mean species on a Medium body — is where every published hit chance is measured (`formula-utility.md` section 8 · guard **X21**).
+- **Armour is in this table** (the same `K_ARMOUR` on the mob's Str line), so a Golem or Knight genuinely blunts a fast weapon and a Rat blunts nothing. **Energy Shield is deliberately not here** — the shield is a player-only line, because a mob's survivability is already the `mob_HP` anchor and a second pool would count it twice.
 
 | Property | Value |
 |---|---|
-| Level | 1-90 (player ceiling is 100 · levels 91-100 are more of the same zone-9 band) |
+| Level | a readout only — it drives `mob_HP` · `mob_PS` · XP and the spawn clamp, and never the stat block |
 | HP | `DPS of on-level gear player x 1 sec x skill multiplier` |
 | innate Element | 1 Element, rolled on spawn · takes ×1.5 damage from that Element |
-| Core stats | Same 7-stat block as players (`stat_c = 12 + 2 × (L − 1)`, no Flat/% from equipment) · feeds accuracy, res, crit, aspd via the same K values · Full mob sheet with per-level table follows in the rebalance pass (P1-1) |
-| evasion | `stat_c(level) × species.dex × K_EVASION × body class` · the reference mob is the mean species on a Medium body, and its number is generated in `formula-utility.md` section 8 · per-species numbers in the sheet above and `mob-roster.md` |
-| Return damage | `typical DPS ÷ 27` per second (L100 = 329) · the species tag divides it: physical mobs are the whole armour half, magic mobs the whole res half, mixed mobs 50/50 by their innate Element (D-030 · combat.md section 3 · the `phys/elem` column of mob-roster.md) |
+| Core stats | one flat block (`mob.stat`), no level term and no equipment, multiplied by the species vector and body class · feeds accuracy · res · crit · aspd via the same K values |
+| evasion | the species Dex multiplier over the flat stat block × `K_EVASION` × body class · the reference mob is the mean species on a Medium body, generated in `formula-utility.md` section 8 · per-species numbers in the sheet above and `mob-roster.md` |
+| Return damage | `typical DPS ÷ 27` per second (L100 = 329) · the species tag divides it: physical mobs are the whole armour half, magic mobs the whole res half, mixed mobs 50/50 by their innate Element (combat.md section 3 · the `phys/elem` column of mob-roster.md) |
 | drop table | item table that mob drops |
 | Weapon used | affects weight and drops |
 
-- Old evasion was written as level 100 = 600, calculated on the assumption players have Dex 890 · true ceiling is 510 and no build stacks all 12 items on Dex.
-  At 600, no-Dex players get 40% hit chance in a game that attacks all day · so it changed to `level × 1`, which keeps hit chance constant across levels because both sides grow linearly (80% with no Dex, 94% with full Dex).
-  `level × 1` was always a stand-in for "evasion grows with the mob's own Dex". Once every species carried a Dex line (D-019) the stand-in became wrong twice over: it made a Slime and an Elf equally hard to hit, and it ignored the body class that already carried its own evasion multiplier. Both are now derived from the same K the player uses.
-- Mob HP derives from DPS in formula.md section 0 · at level 100 it is set from *on-level* gear players (8,881 DPS), not from a full-gear player, so a fully geared character clears faster than the anchor · the inter-level line uses `item count = min(12, ceil(L/2))` (combat.md section 3).
+- Old evasion was a level number; once every species carried a Dex line and the mob stat block went flat it became the species Dex line the player's own `K_EVASION` runs over.
+- Mob HP derives from DPS in `formula.md` section 0 · it is set from *on-level* gear players, not from a full-gear player, so a fully geared character clears faster than the anchor · the inter-level line interpolates between the zone anchors.
 
 - HP is the single value setting game speed. It must be set from expected player DPS, not set-then-tuned.
 - Mob innate Element is rolled on spawn, not fixed, so players cannot fully predict and must prepare res in advance.
@@ -276,7 +282,7 @@ Every column is the player's own formula at level 100 (stat block NaN per stat):
 | boss | always 1 |
 
 - Numbers are ranges, rolled on every zone entry. Players always meet different groups.
-- **Max 3 engage at once** — in larger groups, mobs 4-5 queue · this rule is part of the AFK promise: with 3 engaging, the generated `survival-group` table in combat.md section 6 costs no build more than 3.3% of pool, so nobody is pushed while idle; with 5 engaging the cost scales by roughly 5/3 and every build is pushed. The numbers in sections 6 and 7 depend on this rule alone. **This is also the definition of "nearby" for auras and debuffs: 3 mobs** (D-009 7a · skill-pool-system.md).
+- **Max 3 engage at once** — in larger groups, mobs 4-5 queue · this rule is part of the AFK promise: with 3 engaging, the generated `survival-group` table in combat.md section 6 costs no build more than 3.3% of pool, so nobody is pushed while idle; with 5 engaging the cost scales by roughly 5/3 and every build is pushed. The numbers in sections 6 and 7 depend on this rule alone. **This is also the definition of "nearby" for auras and debuffs: 3 mobs** (skill-pool-system.md).
 - Elite and boss have no companions, always single.
 - Higher level ranges mean larger groups, requiring group answers from early game.
 
@@ -285,7 +291,7 @@ Every column is the player's own formula at level 100 (stat block NaN per stat):
 **Always hit the lowest-HP target first.**
 
 - This clears groups faster because it fastest reduces the number of targets still hitting back.
-- This gives Execute and Overkill much more value because the lowest-HP target is the one to finish.
+- This gives the execute curse and Overkill much more value because the lowest-HP target is the one to finish.
 - Players choose nothing; the game assigns it · no fiddly focus-target rules.
 
 ## Mobs Attack Together

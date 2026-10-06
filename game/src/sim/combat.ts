@@ -1,4 +1,4 @@
-import { eng, E } from '../engine/client';
+import { eng, E, sm, BASES } from '../engine/client';
 import type { Character } from './player';
 import type { Mob } from './types';
 import type { CurseMods } from './curse';
@@ -17,8 +17,8 @@ export interface HitReport {
 
 /**
  * One player swing, in combat.md §2 outgoing order:
- * hit roll → mob dodge (opposed) → crit (physical half only, D-017) → weak/Element counter
- * → the mob's own Armour and Elemental resistance (D-099) → damage_taken → subtract from mob HP.
+ * hit roll → mob dodge (opposed) → crit (physical half only) → weak/Element counter
+ * → the mob's own Armour and Elemental resistance → damage_taken → subtract from mob HP.
  * A weapon Element line is what enables steps 3-4; until a Base carries one the counter multiplier
  * is 1, and nothing is invented in its place.
  */
@@ -35,9 +35,9 @@ export function playerSwing(
 
   // formula-offense §3: dmg_per_hit = phys + magic + elem × elem_align/100
   // combat.md §2 steps 3-4 are Element-on-Element, so weak and the counter table scale the Elemental
-  // share only — physical is answered by Armour and the Elements by resistance (D-030), never by
+  // share only — physical is answered by Armour and the Elements by resistance, never by
   // each other. A cursed target still takes more of the whole hit (Expose).
-  // each Element pool is countered on its own (PoE reading, D-089): a fire-and-cold weapon hitting a
+  // each Element pool is countered on its own (PoE reading): a fire-and-cold weapon hitting a
   // fire monster gets the ×1.5 weak line on the fire part and the 0.60 pair on the cold part, and a
   // pool that no line names is left exactly as strong as it always was
   let elemDamage = 0;
@@ -51,21 +51,28 @@ export function playerSwing(
   } else {
     elemDamage = c.elem * (c.alignment / 100);
   }
-  // Elemental Break makes the target take more of the Element half specifically (D-102)
+  // Elemental Break makes the target take more of the Element half specifically 
   elemDamage *= 1 + (curse.elemTakenPct || 0) / 100;
   let nonElement = c.phys + c.magic;
 
   let crit = false;
   if (c.phys > 0 && rng() * 100 < c.critChance + curse.critChance) {
-    // crit multiplies the physical half only: magic and the 5 Elements never crit (D-017)
+    // crit multiplies the physical half only: magic and the 5 Elements never crit 
     nonElement = nonElement - c.phys + c.phys * (c.critDmg / 100);
     crit = true;
   }
-  // step 5-6 (D-099 · B8): the mob answers each half with the line written against it — its own
+  // step 5-6 (B8): the mob answers each half with the line written against it — its own
   // Armour on everything that is not Element, its own Elemental resistance on the Element half.
-  // A crossbow's `Armour penetration %` line (D-123) joins the same cut a curse writes, so the two
+  // A crossbow's `Armour penetration %` line joins the same cut a curse writes, so the two
   // add and the ratio cannot fall below zero. Crit sizes the hit before the armour ratio.
   let damage = eng.mitigateMobHit(mob, nonElement, elemDamage, curse.armourCut + eng.armourPenCut(c.armourPen), curse.resistCut) * takenMult(curse);
+  // §12 weapon × body class: a SWING is the weapon's own argument with a body, so all 12 weapons
+  // carry their `size_mult` row here — including a staff's, whose swing is magic damage. It lands
+  // after mitigation so the ladder never scales the armour cut, and a magic-damage SKILL is exempt
+  // (`skillHit` applies it only on a physical basis).
+  damage = eng.applySizeMult(damage, 1, eng.sizeMultOf(E.weapon_size_mult?.ladder, c.weaponName, (mob as any).readsAs || 'medium'));
+  // §14c: a magic weapon has no swing — it flicks a bolt, worth the attack ladder's floor
+  if (eng.basicAttackOf(BASES, c.weaponName) === 'bolt') damage *= sm.ladderFloorPct() / 100;
   damage *= E.global.damage_mult;
   mob.hp -= damage;
   // Leech is a share of just-dealt damage, never a flat drip: the mark on the target pays it
@@ -105,25 +112,27 @@ export function mobSwing(
   curse: CurseMods = NO_CURSE,
   /** the shield actually standing right now; defaults to the sheet's pool for a caller that has one */
   liveEs: number = c.es,
-  /** Energy Absorb: the share of the hit converted to Energy Shield while the buff is up (D-121) */
+  /** Energy Absorb: the share of the hit converted to Energy Shield while the buff is up */
   absorbPct = 0,
 ): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number } {
   if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   const acc = mob.acc * accMult(curse);
-  // Evasion is one layer (D-112): the Dex rating rolls against this mob's accuracy, Agi adds
+  // Evasion is one layer: the Dex rating rolls against this mob's accuracy, Agi adds
   // its points on top, and the pair is capped together. A blocked hit is gone entirely.
   if (rng() * 100 < eng.evasionChance(c.evasion, c.evasionFromAgi, acc)) {
     return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   }
-  // Block is its own layer, rolled after perfect dodge and evasion (D-123 · formula-defense.md): the
-  // shield's Base Mod line (open-ended, no Cap). A blocked hit is NOT deleted — it is cut by a FLAT
-  // `armour / 10` (owner ruling), so a shield thins a hit rather than erasing it (applied below).
-  const blockedBy = c.block > 0 && rng() * 100 < c.block ? 'block' : null;
+  // Block is its own layer, rolled after perfect dodge and evasion (formula-defense.md): the
+  // shield's Base Mod line (open-ended, no Cap). It answers a PHYSICAL hit only (owner ruling): a
+  // shield argues with a blade, not with a spell, so a pure-Element swing cannot be blocked at all.
+  // A blocked hit is NOT deleted — it is cut by a FLAT `armour / 10`, and the cut comes off the
+  // physical half alone, capped by it (applied below).
 
   // a mob's swing is sized by its priced damage per second, at its own clock rate
   const rawHit = (mob.ps * psMult(curse)) / mob.hitsPerSec;
   const [physShare, elemShare] = eng.damageSplit(mob.damage);
+  const blockedBy = physShare > 0 && c.block > 0 && rng() * 100 < c.block ? 'block' : null;
   const armourCut = eng.armourReduce(statuses.chill ? c.armour * (1 - E.status.chill.armour_cut) : c.armour, rawHit * physShare);
   const physical = rawHit * physShare * (1 - armourCut);
   // an aura may harden against one named Element (Trinity Form), and the Cap still binds the total
@@ -132,18 +141,21 @@ export function mobSwing(
   const elemental = rawHit * elemShare * (1 - res / 100);
   // step 7 is the damage_taken bucket: the global one from `engine.json`, times whatever the
   // skills up right now add to it (Berserker takes more, Iron Will takes less)
-  let damage = (physical + elemental) * E.global.defend_mult * (c.damageTaken ?? 1);
-  // a blocked hit is cut by a flat `armour / 10` (owner ruling, provisional): mitigation thins it
-  if (blockedBy) damage = Math.max(0, damage - c.armour / 10);
+  const hardened = E.global.defend_mult * (c.damageTaken ?? 1);
+  const physFinal = physical * hardened;
+  let damage = physFinal + elemental * hardened;
+  // a blocked PHYSICAL hit is cut by a flat `armour / 10` (owner ruling, provisional); the cut can
+  // never take more than the physical half, so an Element-heavy swing is not thinned by a shield
+  if (blockedBy) damage = Math.max(0, damage - Math.min(c.armour / 10, physFinal));
 
   // Energy Absorb converts a share of the hit into Energy Shield and negates that share outright,
-  // whether or not the shield has room — a press on a full shield is still a real defence (D-121)
+  // whether or not the shield has room — a press on a full shield is still a real defence 
   const absorbed = absorbPct > 0 ? damage * (Math.min(100, Math.max(0, absorbPct)) / 100) : 0;
   damage -= absorbed;
 
   let toEs = 0;
   if (mob.innate.includes('chaos')) {
-    // chaos bypasses Energy Shield and hits HP directly (D-026)
+    // chaos bypasses Energy Shield and hits HP directly 
   } else {
     // the pool that is *left* absorbs, not the pool the sheet says the build has: reading the maximum
     // lets one swing spend a shield that is half recharged twice over, and the number goes negative
@@ -165,6 +177,8 @@ export function rollStatus(
   elemHalf: number,
   statuses: Statuses,
   statusResist = 0,
+  /** Vit's Stun Recovery (item 5): it buys part of a shock's stop back before the clock is set. */
+  stunRecovery = 0,
 ): StatusName | null {
   const el = mob.innate[0];
   if (!el) return null;
@@ -188,7 +202,11 @@ export function rollStatus(
     s.secLeft = cfg.decay_sec;
   } else {
     s.stacks = 1;
-    s.secLeft = name === 'chill' ? cfg.time_sec : 1;
+    // chill counts down the status's own clock; shock is a STOP, and its length is the config's own
+    // `stop_sec` (the mob side pays its stop out of the same field) — one home, no typed second
+    s.secLeft = name === 'chill' ? cfg.time_sec
+      : name === 'shock' ? cfg.stop_sec * (1 - Math.min(100, Math.max(0, stunRecovery)) / 100)
+        : 1;
     s.perSec = 0;
   }
   return name;

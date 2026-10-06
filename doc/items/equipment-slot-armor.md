@@ -5,7 +5,7 @@ import item-base.md
 import equipment-slot.md
 import equipment-slot-pools.md
 
-> **Union pools per armor slot.** `item-base.md` is the only source: each Base lists its own Primary/Secondary lines, and a slot's pool below is the union of that slot's Bases. **This table is generated** — edit the Bases, run `node tools/check.ts --write`, never type a pool here (D-034). A dropped piece still rolls one Base, so it carries only that Base's lines, not the whole union.
+> **Union pools per armor slot.** `item-base.md` is the only source: each Base lists its own Primary/Secondary lines, and a slot's pool below is the union of that slot's Bases. **This table is generated** — edit the Bases, run `node tools/check.ts --write`, never type a pool here. A dropped piece still rolls one Base, so it carries only that Base's lines, not the whole union.
 
 The Stat Mod line (`Stat Mod flat`) rolls on every item, and the Gear Mod line (`Armour flat` on heavy · `Evasion flat` on light · `Energy Shield flat` on cloth) is set by the Base's school — both are spelled out in `equipment-slot-pools.md` and guarded by **X18**, so no line below can name a Mod that does not exist in `mod-pool.md`.
 
@@ -82,7 +82,7 @@ The Stat Mod line (`Stat Mod flat`) rolls on every item, and the Gear Mod line (
 - **helmet** — the piece equipped first, so it is where an immediate effect is felt.
 - **chest** — defines survivability; Max HP % weighs most here because it multiplies both raw HP and HP from Core stat.
 - **pant** — the second body of a set, carrying Evasion without the boot's premium.
-- **boots** — the densest avoidance piece: `Evasion flat` and `Evasion %` both roll here, and the Agi that the Core stat supplies is the other half of the same line (D-112).
+- **boots** — the densest avoidance piece: `Evasion flat` and `Evasion %` both roll here, and the Agi that the Core stat supplies is the other half of the same line.
 - **belt** — a secondary chest: same shape, but CDR instead of mana as the second line.
 - **gloves** — grip. Attack speed must come from Core stat Agi instead, which is why gloves never carry `Attack speed %`.
 - **ring ×2** — shifted from crit to res and CDR, so an Element player hunts the same Element twice and pushes res piece by piece.

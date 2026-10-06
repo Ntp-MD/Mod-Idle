@@ -7,12 +7,12 @@ import { mobSwing, playerSwing } from '../src/sim/combat';
 import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct } from '../src/sim/skills';
 import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/mobStatus';
 import { newCurses, applyCurse, spreadOnDeath, lineValue } from '../src/sim/curse';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, setLevel } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
 
 /**
- * D-102 · the last nineteen roster rows.
+ * · the last nineteen roster rows.
  *
  * Each one states either a magnitude (`effects`) or a mechanic word (`rules`), and this file is the
  * proof that the client spends it: a row whose word nothing reads fails here, and a rule word that
@@ -51,7 +51,7 @@ describe('the attack rows that press differently', () => {
     expect(dealt('attack.whirlwind')).toBeCloseTo(onePress('attack.whirlwind') * 3, 4);
     expect(dealt('attack.arrow_shower')).toBeCloseTo(onePress('attack.arrow_shower') * 3 * 0.4, 4);
     // a row without the line presses once
-    expect(dealt('attack.execute')).toBeCloseTo(onePress('attack.execute'), 4);
+    expect(dealt('attack.cleave')).toBeCloseTo(onePress('attack.cleave'), 4);
   });
 
   it('Piercing Shot is not dodged, and Cleave is', () => {
@@ -63,39 +63,25 @@ describe('the attack rows that press differently', () => {
     expect(hasRule(row('attack.piercing_shot'), 'ignores_dodge')).toBe(true);
   });
 
-  it('Retribution grows with the HP the row names, to its own maximum', () => {
-    const at = (missing: number) => {
-      const t = mob({ id: `t${missing}` });
-      return cast('attack.retribution', c, [t], { missingHpPct: missing })!.dealt!;
-    };
-    const full = at(0);
-    const half = at(valueOf('attack.retribution', 'missing_hp_pct_for_max') / 2);
-    const max = at(valueOf('attack.retribution', 'missing_hp_pct_for_max'));
-    const beyond = at(100);
-    expect(half / full).toBeGreaterThan(1);
-    expect(max / full).toBeCloseTo(valueOf('attack.retribution', 'damage_at_missing_hp'), 6);
-    expect(beyond).toBeCloseTo(max, 6); // the row's number is where the growth stops
-  });
-
-  it('Chain Spark shocks everything it reaches, with no Alignment gate', () => {
+  it('Chain Lightning shocks everything it reaches, with no Alignment gate', () => {
     const zeroAlign = { ...c, alignment: 0 } as Character;
     const store = newMobStatusStore();
     const group = [mob({ id: 'a' }), mob({ id: 'b' }), mob({ id: 'c' })];
-    const castResult = cast('attack.chain_spark', zeroAlign, group, { mobStatus: store }, 11);
+    const castResult = cast('attack.chain_lightning', zeroAlign, group, { mobStatus: store }, 11);
     expect(castResult?.targets).toBeGreaterThan(1); // "all hit", and the row's own AoE reached them
     const shocked = group.filter((t) => holdsCondition(store, t.id, 'shocked'));
     expect(shocked.length).toBe(castResult?.targets);
     // with no Alignment the ordinary proc path could not have done this
     const plain = newMobStatusStore();
-    cast('attack.arcane_bolt', zeroAlign, [mob({ id: 'z' })], { mobStatus: plain }, 11);
+    cast('attack.piercing_shot', zeroAlign, [mob({ id: 'z' })], { mobStatus: plain }, 11);
     expect(Object.keys(plain).length).toBeLessThanOrEqual(1);
     expect(Object.keys(plain.z?.statuses || {}).length).toBe(0);
   });
 
-  it('Toxic Spray lays its stacks on every target, not only the front one', () => {
+  it('Toxic Cloud lays its stacks on every target, not only the front one', () => {
     const store = newMobStatusStore();
     const group = [mob({ id: 'a' }), mob({ id: 'b' })];
-    cast('attack.toxic_spray', c, group, { mobStatus: store }, 5);
+    cast('attack.toxic_cloud', c, group, { mobStatus: store }, 5);
     for (const t of group) {
       expect(store[t.id]?.statuses.poison?.stacks ?? 0).toBeGreaterThan(0);
     }
@@ -183,7 +169,7 @@ describe('the support rows that change the character', () => {
 
   it('the sim spends a charge before the rolls, and Holy Veil keeps statuses off entirely', () => {
     const s = newGame(99);
-    s.player.level = 30;
+    setLevel(s, 30);
     s.zone = 3;
     s.skills.owned['buff.ghost_dance'] = 0;
     s.skills.xp['buff.ghost_dance'] = 8000;
@@ -200,7 +186,7 @@ describe('the support rows that change the character', () => {
 
   it('Cleanse clears what is on the character and pays its own share of the pool', () => {
     const s = newGame(100);
-    s.player.level = 60;
+    setLevel(s, 60);
     s.zone = 5;
     const c0 = buildCharacter(s.player.level, s.gear, {}, 0);
     s.player.hp = 1;
@@ -230,7 +216,7 @@ describe('the support rows that change the character', () => {
     expect(Object.keys(fold.add).length + Object.keys(fold.mult).length).toBe(0); // pure mechanic row
     expect(hasRule(row('buff.magia_drive'), 'es_recharge_immediate')).toBe(true);
     const s = newGame(101);
-    s.player.level = 60;
+    setLevel(s, 60);
     s.zone = 5;
     s.skills.owned['buff.magia_drive'] = 0;
     s.skills.xp['buff.magia_drive'] = 8000;
@@ -261,7 +247,7 @@ describe('the support rows that change the character', () => {
     expect(esAbsorbPct(newSkillState())).toBe(0); // off, nothing is absorbed
 
     // a hit far larger than the pool, against a full shield: the absorbed share is removed from HP
-    // whether or not the shield has room (D-121) — the press is a real defence even when ES is full
+    // whether or not the shield has room — the press is a real defence even when ES is full
     const c = buildCharacter(60, emptyGear());
     const m = mob({ ps: 50000 });
     const plain = mobSwing(mulberry32(4), c, m, {}, NO, c.es, 0);

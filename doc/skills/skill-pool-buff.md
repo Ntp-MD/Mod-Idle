@@ -1,5 +1,5 @@
 <!-- BEGIN GENERATED:buff-heading -->
-# 7 buff skills
+# 8 buff skills
 <!-- END GENERATED:buff-heading -->
 
 import glossary.md
@@ -15,11 +15,12 @@ import skill-pool.md
 | Ghost Dance | 15 sec | 10% | 10 sec | Grants perfect dodge charges: 3 at skill level 1, +1 every 5 levels up to 7 at level 20 · each charge deletes one incoming hit outright and is not opposed (stops DoT ticks and unconditional effects) |
 | Magia Drive | 20 sec | 12% | 8 sec | Forces Energy Shield to start recharging immediately (ignores the 5 sec delay) and the recharge is not interrupted by hits while up |
 | Energy Absorb | 20 sec | 12% | 3 sec | Converts 15% of every incoming hit into Energy Shield at skill level 1, rising to 30% at level 20, and that share is negated from HP either way while up |
+| Flame Guard | 16 sec | 12% | 8 sec | Grants a flat 350 Energy Shield pool that soaks damage while the guard is up |
 <!-- END GENERATED:buff-roster -->
 
-> The previous 14-name buff set was cleared for a redesign (`harness/decisions.md` D-009). These seven replace it. Every one is a **timed self-buff**: none reserves mana — only auras reserve — and none persists between fights.
+> The previous 14-name buff set was cleared for a redesign. These seven replace it. Every one is a **timed self-buff**: none reserves mana — only auras reserve — and none persists between fights.
 >
-> **How the seven divide the job.** Warcry and Berserker buy output and pay for it differently — Warcry is flat and safe, Berserker is the fastest thing in the list and makes every hit you take worse. Iron Will is the only buff that touches Armour, and the only defensive multiplier besides Berserker's downside. Holy veil is the only one that touches the Element layer, and it is the answer to a hole the Elements opened: per D-018 they take HP regen, Armour, attack speed and your own Alignment away, and Elemental resistance never answered any of it because res only ever covered the Element **half** of a hit. Ghost Dance is the perfect-dodge answer — charges that delete a hit outright, so it stops what Evasion and res cannot (DoT ticks, unconditional effects). Magia Drive is the Energy Shield answer — it deletes the 5-sec recharge delay and keeps the shield filling through a fight, so the caster's second pool becomes a sustained layer for its window instead of a between-groups top-up. Energy Absorb is the shield's other half: it turns a share of every hit straight into Energy Shield and negates that share either way, so a press on a full shield is still a real defence, and its ramp carries from its level-one share to double at the Cap.
+> **How the seven divide the job.** Warcry and Berserker buy output and pay for it differently — Warcry is flat and safe, Berserker is the fastest thing in the list and makes every hit you take worse. Iron Will is the only buff that touches Armour, and the only defensive multiplier besides Berserker's downside. Holy veil is the only one that touches the Element layer, and it is the answer to a hole the Elements opened: they take HP regen, Armour, attack speed and your own Alignment away, and Elemental resistance never answered any of it because res only ever covered the Element **half** of a hit. Ghost Dance is the perfect-dodge answer — charges that delete a hit outright, so it stops what Evasion and res cannot (DoT ticks, unconditional effects). Magia Drive is the Energy Shield answer — it deletes the 5-sec recharge delay and keeps the shield filling through a fight, so the caster's second pool becomes a sustained layer for its window instead of a between-groups top-up. Energy Absorb is the shield's other half: it turns a share of every hit straight into Energy Shield and negates that share either way, so a press on a full shield is still a real defence, and its ramp carries from its level-one share to double at the Cap.
 >
 > **`damage taken` is a real modifier, not a phrase.** It multiplies incoming damage after armour and res have resolved (`combat.md` §2), so `Berserker` and `Iron Will` are exact opposites on the same line: ×1.15 and ×0.90 against the same hit.
 >

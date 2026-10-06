@@ -2,7 +2,7 @@
  * The provisioning track — Farm and Potion, both read out of `engine.json`.
  *
  * Farming is the game's one life skill and it grants no power: its whole output is the herb a
- * potion is crafted from, which is why it sits outside the `mob_HP` fold (`AGENT.md` §5 · D-068).
+ * potion is crafted from, which is why it sits outside the `mob_HP` fold (`AGENT.md` §5).
  * Potions are a bounded convenience: shared cooldown, a per-fight cap, and nothing works on a boss.
  */
 
@@ -26,6 +26,18 @@ export function createFarm(E: EngineData) {
 
   /** Herb bundles roll on their own line: mid zones 2%, high zones 3%, 1-3 of the zone's tier. */
   const herbChance = (band: string) => (band === 'high' ? H.high_chance : band === 'mid' ? H.mid_chance : 0);
+  /**
+   * The humanoid tribes drop a potion on their own roll (the owner's potion-tribe items). The chance
+   * is DERIVED, never typed: the band's own herb stream (its chance x the average bundle) divided by
+   * that band's potion herb cost, so a humanoid kill is worth the provisioning of the herb bundle an
+   * ordinary kill would have dropped. The farm stays the primary source and the mobs supplement it;
+   * a band with no herb stream at all (low) therefore has no mob potion source either.
+   */
+  const potionDropChance = (band: string) => {
+    const cost = (P.craft as any)[band]?.herbs;
+    if (!cost) return 0;
+    return (herbChance(band) * ((H.bundle_min + H.bundle_max) / 2)) / cost;
+  };
 
   /** A draught's effect is `base + step × (index − 1)` percent of its pool. */
   function potionEffect(potion: PotionsCfg['list'][number]) {
@@ -56,7 +68,7 @@ export function createFarm(E: EngineData) {
 
   return {
     F, P, H, TIERS, farmLevel, farmXpForLevel, canGrow, growthSec, plotsMax,
-    herbChance, potionEffect, potionByName, bestPotion, craftCost, condensedCost, fightLimits,
+    herbChance, potionDropChance, potionEffect, potionByName, bestPotion, craftCost, condensedCost, fightLimits,
     yieldPerHarvest: F.yield_per_harvest,
     /** A seed is one herb of the tier being planted (farm.md's own cycle). */
     seedCostHerbs: F.seed_cost_herbs,

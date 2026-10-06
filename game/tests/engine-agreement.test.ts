@@ -28,11 +28,11 @@ describe('game and cages run one engine', () => {
 
 describe('published anchors the docs quote', () => {
   it('the single-stat ceiling and the naked stat at the level cap', () => {
-    // flat-only since Core Stat % was retired (D-114), plus the earring as a 13th worn item (D-131).
+    // flat-only since Core Stat % was retired, plus the earring as a 13th worn item.
     // Both terms are read from the data so a change of world size moves the identity, not a literal.
     const cap = eng.S.level_cap;
     expect(eng.CEIL).toBeCloseTo(eng.statAt(cap) + E.stat.core_flat_max * E.stat.item_slots, 2);
-    // statAt is the REFERENCE even-split line now: base + points(cap)/7 (D-141).
+    // statAt is the REFERENCE even-split line now: base + points(cap)/7.
     expect(eng.statAt(cap)).toBeCloseTo(E.stat.base + eng.pointsAt(cap) / 7, 6);
   });
 
@@ -82,7 +82,7 @@ describe('the opening character is the designed minute one', () => {
     const c = buildCharacter(s.player.level, s.gear);
     const held = s.gear.find((g) => g && g.slot === 'main hand')!;
     // the same three engine calls the cage makes — if the client and the cage ever disagree about the
-    // opening swing, this fails before a doc can print a speed the game cannot produce (D-108)
+    // opening swing, this fails before a doc can print a speed the game cannot produce 
     expect(c.weightUsed).toBe(eng.weaponWeightOf(BASES, held.base, held.slot));
     expect(c.weightCap).toBe(eng.weightCapacityOf(c.core.str));
     expect(c.encumbrance).toBe(eng.encumbranceOf(c.weightUsed, c.core.str));
