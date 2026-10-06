@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Skill Tree — empty · ModWorld wiki</title>
+<title>Skill Tree · ModWorld wiki</title>
 <style>
 :root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -81,13 +81,13 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="edit.html">Editor</a>
 <a href="about.html">About</a>
 <h4>On this page</h4>
-<a href="#h-skill-tree-empty">Skill Tree — empty</a>
-<a href="#h-why-it-went">· Why it went</a>
-<a href="#h-what-is-left-and-what-it-is-for">· What is left, and what it is for</a>
-<a href="#h-what-must-be-true-before-anything-is-added-back">· What must be true before anything is added back</a>
-<a href="#h-shape-empty">· Shape (empty)</a>
+<a href="#h-skill-tree">Skill Tree</a>
+<a href="#h-shape">· Shape</a>
+<a href="#h-why-the-old-tree-went">· Why the old tree went</a>
+<a href="#h-still-open">· Still open</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -108,8 +108,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -129,6 +127,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html" aria-current="page">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -140,26 +139,22 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 
 <article class="doc">
-<h1>Skill Tree — empty</h1>
-<dl class="kv"><dt>file</dt><dd><code>skill-tree.md</code> · 51 lines · 578 words · written 2026-10-06T01:07:51Z</dd><dt>category</dt><dd>Skills</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-skill-pool.html">skill-pool.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-skill-pool-system.html">skill-pool-system.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd><code>tree-summary</code> <span class="tag gen">tools/tree.ts</span> · <code>tree-layout</code> <span class="tag gen">tools/town.ts</span></dd><dt>raw</dt><dd><a href="../skill-tree.md">skill-tree.md</a></dd></dl>
-<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
-<h2 id="h-skill-tree-empty">Skill Tree — empty</h2>
+<h1>Skill Tree</h1>
+<dl class="kv"><dt>file</dt><dd><code>skill-tree.md</code> · 35 lines · 587 words · written 2026-10-06T10:49:42Z</dd><dt>category</dt><dd>Skills</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-skill-pool.html">skill-pool.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-skill-pool-system.html">skill-pool-system.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-skill-tree-control.html">skill-tree-control.md</a> · <a href="doc-skill-tree-impact.html">skill-tree-impact.md</a> · <a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a> · <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../skill-tree.md">skill-tree.md</a></dd></dl>
+
+<h2 id="h-skill-tree">Skill Tree</h2>
 <p>import glossary.md import skill-pool.md</p>
-<p><strong>This game has no passive skill tree.</strong> The tree was cleared because the fundamentals were still moving, and it is kept here as an empty shell so the decision, the fold point and the cage all survive. A level now grants a <strong>tree point that is banked</strong> — but the tree still holds no content, so a banked point grants nothing until it lands. This amends &quot;no passive tree&quot; ruling: the points exist, the tree does not.</p>
-<h3 id="h-why-it-went">Why it went</h3>
-<p>The design that was removed was not a node graph. Its own budget said so: 100 points per level, of which <strong>82 bought rules that granted no numbers at all</strong> — hit-counting tweaks, duration clauses, stack-cap changes — and <strong>all</strong> of the power sat in 18 keystones costing 3 points each. That is a keystone picker with connective tissue, and it duplicated the question the skill list already asks: <em>what do I press?</em></p>
-<p>Worse, it was load-bearing in the one place that must not wobble: the tree multiplier was folded into <code>mob_HP</code>, so the price of every mob in the game was set against power the player could only get from a system whose shape was about to change again.</p>
-<h3 id="h-what-is-left-and-what-it-is-for">What is left, and what it is for</h3>
-<table><thead><tr><th>Kept</th><th>Why</th></tr></thead><tbody><tr><td><code>tools/data/tree.json</code> (empty)</td><td>the fold point: any future power source must be multiplied into <code>mob_HP</code>, and this is where that factor is declared</td></tr><tr><td><code>tools/tree.ts</code> + its slot in <code>verify.js</code></td><td>the cage that will validate whatever replaces this</td></tr><tr><td>these four files</td><td>one home for the decision, so the next session does not re-invent a tree and re-derive its numbers from scratch</td></tr></tbody></table>
-<h3 id="h-what-must-be-true-before-anything-is-added-back">What must be true before anything is added back</h3>
-<ol><li><strong>The core loop is stable</strong> — gear, crafting, Push and the mob curve are no longer being re-tuned.</li><li><strong>The replacement is not a node graph</strong> — if the answer is &quot;which skills and which aura set&quot;, that belongs to the skill list and skill level, not to a second grid (<code><a href="doc-skill-pool.html">skill-pool.md</a></code> · <code><a href="doc-skill-pool-system.html">skill-pool-system.md</a></code>).</li><li><strong>Its power is folded into <code>mob_HP</code> in the same commit that adds it.</strong> A power source that is not inside the mob price moves the game speed, and the 574.5 hr timeline stops being true.</li><li><strong>No document quotes a tree multiplier while this file is empty.</strong> <code>tools/anchors.ts</code> and the cages treat any such number as a copy.</li></ol>
-<h3 id="h-shape-empty">Shape (empty)</h3>
-<table><thead><tr><th>Branch</th><th>File</th><th>Minor declared</th><th>Minor parsed</th><th>Limbs parsed</th><th>Keystones</th><th>Dangling refs</th></tr></thead><tbody><tr><td><strong>total</strong></td><td>3 files</td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr></tbody></table>
-<blockquote><p>Every node &quot;Enables&quot; cell resolves to a real skill or keystone. <code><a href="doc-checks.html">checks.md</a></code> D19 reference check passes.</p></blockquote>
-<table><thead><tr><th>Branch</th><th>Limb (order from the hub)</th><th>Nodes</th><th>Tiers it can hold</th><th>Spoke keystone</th></tr></thead><tbody></tbody></table>
-<p>Pathing, so a client guesses nothing: <strong>hub → branch gateway → limb gateway → nodes in table order</strong>. A node is purchasable once the node before it in the same limb is owned; tier is distance from the hub, exactly as this file already describes it. The keystone column is the paired-spoke assignment, cycled per branch — a keystone is reachable through two limbs, never one (T2). &lt;!-- END GENERATED:tree-layout --&gt;</p>
-<p>Detail files, all empty and kept for the same reason:</p>
-<ul><li><code><a href="doc-skill-tree-impact.html">skill-tree-impact.md</a></code></li><li><code><a href="doc-skill-tree-stream.html">skill-tree-stream.md</a></code></li><li><code><a href="doc-skill-tree-control.html">skill-tree-control.md</a></code></li><li><code><a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a></code></li></ul>
+<p><strong>The tree is back, redesigned from scratch</strong> (owner ask). Three branches — <strong>impact</strong> (offence), <strong>stream</strong> (sustain and Core stats), <strong>control</strong> (defence) — <strong>twenty-one nodes each, three ranks per node, one point per rank</strong>: the tree holds sixty-three nodes and a hundred and eighty-nine ranks, and <code>treePointsAt(level_cap)</code> spends them exactly — a level grants a point and a point buys a rank.</p>
+<p><strong>Every node pays a number.</strong> A node grants one <strong>real line</strong> from <code>mods.json</code> at a fraction of that line's own maximum — a shallow node's rank 3 is a tenth of its line's own maximum and a deep node's is a fifth (the ranks below step down from there), so a fully bought tree is worth about two thirds of a gear set and a deep node is always the stronger buy of its line — so nothing here is a rule with no number in it, which is exactly what the removed tree was: 82 of its 100 points bought rules and <strong>all</strong> the power sat in 18 keystones. <strong>There are no keystones</strong> in this tree.</p>
+<p><strong>Pathing is one chain per branch.</strong> Node <em>k</em> needs node <em>k−1</em> owned; node 1 is free. No hub, no limbs, no tiers beyond a node's position in its own chain.</p>
+<p><strong>Respec is free</strong>, at the town Counterhand, exactly like the Core stat points: the tree is the player's build to express (<code>AGENT.md</code> D11), so taking it back costs nothing.</p>
+<h3 id="h-shape">Shape</h3>
+<table><thead><tr><th>Branch</th><th>What it buys</th><th>Nodes</th><th>Ranks</th><th>Points</th><th>Chain</th></tr></thead><tbody><tr><td><strong>impact</strong></td><td>offence lines — power, crit, penetration, accuracy, attack speed, stun, bleed</td><td>21</td><td>63</td><td>63</td><td>node k needs node k-1</td></tr><tr><td><strong>control</strong></td><td>defence lines — armour, evasion, block, resistance, HP, Energy Shield, cooldown</td><td>21</td><td>63</td><td>63</td><td>node k needs node k-1</td></tr><tr><td><strong>stream</strong></td><td>sustain and Core stats — mana, regeneration, Energy Shield regen, Stat Mod</td><td>21</td><td>63</td><td>63</td><td>node k needs node k-1</td></tr><tr><td><strong>total</strong></td><td>every node pays a number</td><td><strong>63</strong></td><td><strong>189</strong></td><td><strong>189</strong></td><td>3 chains</td></tr></tbody></table>
+<p>The three chains are the three branch files: <code><a href="doc-skill-tree-impact.html">skill-tree-impact.md</a></code>, <code><a href="doc-skill-tree-stream.html">skill-tree-stream.md</a></code>, <code><a href="doc-skill-tree-control.html">skill-tree-control.md</a></code> — each prints its own 21-node table, derived by <code>node tools/tree.ts --write</code> from the spec in <code>tools/data/tree.json</code> and the line maxima in <code>mods.json</code>. Nothing in those tables is typed by hand.</p>
+<h3 id="h-why-the-old-tree-went">Why the old tree went</h3>
+<p>The removed design was not a node graph. Its own budget said so: 100 points, of which <strong>82 bought rules that granted no numbers at all</strong> — hit-counting tweaks, duration clauses, stack-cap changes — and <strong>all</strong> the power sat in 18 keystones costing 3 points each. That is a keystone picker with connective tissue, and it duplicated the question the skill list already asks: <em>what do I press?</em> It was also load-bearing in the one place that must not wobble — its multiplier was folded into <code>mob_HP</code>, so the price of every mob was set against a system whose shape was about to change again.</p>
+<h3 id="h-still-open">Still open</h3>
+<ul><li><strong>The <code>mob_HP</code> fold</strong> — the tree is not folded into the mob price yet (owner ruling: content and plumbing first). When it is, its power has to be booked inside the curve, and <code>tools/tree.ts</code> is the point where that factor is declared.</li><li><strong>Balance against the mob price</strong> — the scale is stated (a tenth / a fifth of a line at rank 3, two thirds of a gear set for the whole tree) but nothing has measured it against <code>mob_HP</code>, because the fold is open.</li></ul>
 <nav class="pager"><a href="doc-skill-pool-system.html">← skill-pool-system.md</a><a href="index.html">Skills</a><a href="doc-skill-tree-impact.html">skill-tree-impact.md →</a></nav>
 
 </article>

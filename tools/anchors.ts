@@ -42,19 +42,19 @@ const ANCHORS: { id: string; label: string; value: () => any; max: number; note:
     note: 'the other half of mob_HP (checks.md D17)',
   },
   {
-    id: 'A-killsHigh', label: 'kills/hr high band', value: () => eng.BAND.high.kills_per_hr, max: 7,
+    id: 'A-killsHigh', label: 'kills/hr high band', value: () => eng.BAND.high.kills_derived, max: 7,
     note: 'F1 — every income and stone rate divides by it',
   },
   {
-    id: 'A-killsMid', label: 'kills/hr mid band', value: () => eng.BAND.mid.kills_per_hr, max: 0,
+    id: 'A-killsMid', label: 'kills/hr mid band', value: () => eng.BAND.mid.kills_derived, max: 0,
     note: 'F1',
   },
   {
-    id: 'A-killsLow', label: 'kills/hr low band', value: () => eng.BAND.low.kills_per_hr, max: 0,
+    id: 'A-killsLow', label: 'kills/hr low band', value: () => eng.BAND.low.kills_derived, max: 0,
     note: 'F1',
   },
   {
-    id: 'A-refine', label: 'Refine full-set hours', value: () => eng.STONE.refine_hours_full_set, max: 4,
+    id: 'A-refine', label: 'Refine full-set tier stones', value: () => eng.STONE.refine_casts_full_set * eng.E.craft.refine_stones_per_use, max: 4,
     // `6.4` is not unique to Refine hours: the drop-rate multiplier at the stat ceiling also rounds
     // to it (`Lck 535 gives 6.4x`). Only a line that is about refining, a set, or a piece is a copy
     // of this anchor — the rest is a different number that happens to print the same digits.
@@ -75,8 +75,8 @@ const ANCHORS: { id: string; label: string; value: () => any; max: number; note:
 
 // ---------------------------------------------------------------- doc scan
 
-// every doc in the repo, not just the root — a copy of an anchor parked under `harness/`
-// would otherwise slip past the count entirely.
+// every doc in the repo, not just the root — a copy of an anchor parked in any
+// doc would otherwise slip past the count entirely.
 const DOCS = G.listDocs();
 
 // A number matches if the doc prints it as a standalone token, with or without

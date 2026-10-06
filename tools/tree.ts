@@ -1,342 +1,140 @@
 /**
- * Tree cage — the wiring between the skill tree and the skill roster.
+ * Passive-tree cage — the 63-node / 189-rank tree in `tools/data/tree.json`.
  *
  *   node tools/tree.ts            help
- *   node tools/tree.ts --emit     print the generated summary block
- *   node tools/tree.ts --write    apply skills.json `renames` to the node "Enables"
- *                                 cells, then rewrite the summary in skill-tree.md
- *   node tools/tree.ts --checks   parse the node tables, validate every "Enables"
- *                                 cell against skills.json + tree.json, fail on a
- *                                 stale summary (checks.md D19)
+ *   node tools/tree.ts --emit     print every generated block
+ *   node tools/tree.ts --write    rewrite those blocks in skill-tree*.md
+ *   node tools/tree.ts --checks   shape, values, pathing and the point identity
  *
- * The 122 minor nodes are prose tables in skill-tree-*.md; this tool does not own
- * their text, it owns the *links*. To rename a skill: change its name in
- * skills.json, add `old: new` to skills.json `renames`, then `--write` — the node
- * cells update themselves, so the md is never hand-edited for a rename.
+ * The data holds a SPEC, not a node list: three branches, each a list of lines and a tier rule. This
+ * cage derives the nodes (id · line · the three rank values · its prerequisite) from that spec and the
+ * line maxima in `mods.json`, prints the tables, and gates the derivation — so a node can never be a
+ * rule with no number in it, which is exactly what the removed tree was (82 of its 100 points bought
+ * rules, and all the power sat in 18 keystones). No keystones here: every node pays a number.
  */
 
-import * as R from './lib/roster.ts';
+import fs from 'node:fs';
+import path from 'node:path';
 import * as G from './lib/generated.ts';
+import * as eng from './lib/engine.ts';
+import { createTree } from '../engine/tree.ts';
+import { readJson } from './lib/json.ts';
 import type { Writer } from './lib/types.ts';
 
-const TREE = JSON.parse(G.read('tools/data/tree.json'));
+const TREE = readJson(path.join(import.meta.dirname, 'data', 'tree.json'));
+const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
+const maxOf = (id: string) => Number((MODS.mods.find((m: any) => m.id === id) || {}).max ?? 0);
+const COST = TREE.point_cost_per_rank;
+const RANKS = 3;
+const SHALLOW_NODES = 14;
 
-const KEYSTONE_NAMES = new Set(TREE.keystones.map((k: any) => k.name));
-const SKILL_NAMES = new Set(R.allNames());
-const KNOWN = new Set([...SKILL_NAMES, ...KEYSTONE_NAMES]);
-const PENDING_REFS = new Set(TREE.pending_refs || []);
-const RENAMES = R.RENAMES || {};
-const RENAME_KEYS = Object.keys(RENAMES);
+/** The nodes are the SHARED derivation (`engine/tree.ts`) — the cage and the client read one object. */
+const TREE_MODEL = createTree(TREE, MODS);
 
-// ---------------------------------------------------------------- parser
-
-const BRANCH_RE = /^###\s+(.+?)\s+branch\s+—\s+(\d+)\s+minor in\s+(\d+)\s+limbs/;
-const LIMB_RE = /^\*\*(.+?)\s+limb\*\*\s+\((\d+)\s+nodes/;
-
-function parseBranch(file: string) {
-  const lines = G.read(file).split(/\r?\n/);
-  const out: Record<string, any> = { file, branchName: null, minorsDeclared: null, limbsDeclared: null, limbs: [], nodes: [] };
-  let limb: any = null;
-  for (const line of lines) {
-    let m = line.match(BRANCH_RE);
-    if (m) { out.branchName = m[1]; out.minorsDeclared = Number(m[2]); out.limbsDeclared = Number(m[3]); continue; }
-    m = line.match(LIMB_RE);
-    if (m) { limb = { name: m[1], declared: Number(m[2]), parsed: 0 }; out.limbs.push(limb); continue; }
-    if (!/^\|/.test(line)) continue;
-    const cells = line.replace(/^\|/, '').replace(/\|\s*$/, '').split('|').map((c: any) => c.trim());
-    if (cells.length < 4 || !/^\d+$/.test(cells[0])) continue; // header / separator
-    const node = { tier: Number(cells[0]), name: cells[1], rule: cells[2], enables: cells[3], limb: limb ? limb.name : null, file };
-    out.nodes.push(node);
-    if (limb) limb.parsed++;
-  }
-  return out;
-}
-
-function cleanRef(cell: any) {
-  return String(cell).replace(/\*\*/g, '').trim();
-}
-
-function isIntentionalEmpty(cell: any) {
-  const c = cleanRef(cell);
-  return c === '' || /^[—–-]/.test(c);
-}
-
-function resolveRef(cell: any) {
-  const c = cleanRef(cell);
-  if (isIntentionalEmpty(cell)) return { ok: true, empty: true, names: [], bad: [], renamed: [] };
-  const parts = c.split(/\s*[·/]\s*/).map((x: any) => x.trim()).filter(Boolean);
-  const bad: any[] = [];
-  const renamed: any[] = [];
-  for (const p of parts) {
-    if (KNOWN.has(p)) continue;
-    if (RENAMES[p]) { renamed.push({ from: p, to: RENAMES[p] }); continue; }
-    bad.push(p);
-  }
-  return { ok: bad.length === 0 && renamed.length === 0, empty: false, names: parts, bad, renamed };
-}
-
-const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-/** Rewrite any node "Enables" cell that names a skill recorded in skills.json `renames`. */
-function applyRenames(file: string) {
-  if (!RENAME_KEYS.length) return 0;
-  const lines = G.read(file).split(/\r?\n/);
-  let changed = 0;
-  for (let i = 0; i < lines.length; i++) {
-    if (!/^\|/.test(lines[i])) continue;
-    const raw = lines[i].replace(/^\|/, '').replace(/\|\s*$/, '').split('|');
-    if (raw.length < 4 || !/^\d+$/.test(raw[0].trim())) continue;
-    const before = raw[3];
-    let after = before;
-    for (const [from, to] of Object.entries(RENAMES)) after = after.replace(new RegExp('\\b' + escapeRe(from) + '\\b', 'g'), to);
-    if (after !== before) { raw[3] = after; lines[i] = '|' + raw.join('|') + '|'; changed++; }
-  }
-  if (changed) G.write(file, lines.join('\n'));
-  return changed;
-}
+const NODES = TREE_MODEL.nodes;
+const BRANCHES = Object.keys(TREE.branches);
+const perBranch = (b: string) => NODES.filter((n) => n.branch === b);
+const ranksTotal = NODES.reduce((s, n) => s + n.ranks, 0);
+const pointsAtCap = eng.treePointsAt(eng.S.level_cap);
 
 // ---------------------------------------------------------------- gates
 
-function analyze() {
-  const branches = TREE.branches.map((b: any) => {
-    const parsed = parseBranch(b.file);
-    const dangling: any[] = [];
-    const renamed: any[] = [];
-    for (const n of parsed.nodes) {
-      const r = resolveRef(n.enables);
-      if (r.bad.length) dangling.push({ node: n.name, ref: n.enables, bad: r.bad });
-      if (r.renamed.length) renamed.push({ node: n.name, from: r.renamed.map((x: any) => x.from).join('/'), to: r.renamed.map((x: any) => x.to).join('/') });
-    }
-    return { ...b, parsed, dangling, renamed };
-  });
-  return branches;
-}
-
-function gates(branches: any) {
+function gates(): any[] {
   const out: any[] = [];
-  const add = (id: any, ok: any, detail: any) => out.push({ id, ok, detail });
-
-  const ids = TREE.keystones.map((k: any) => k.id);
-  add('T1', ids.length === new Set(ids).size, `unique keystone ids (${ids.length} keystones)`);
-
-  const names = new Set(TREE.keystones.map((k: any) => k.name));
-  const badPair = TREE.keystones.filter((k: any) => !names.has(k.pair)).map((k: any) => k.name);
-  add('T2', badPair.length === 0, `every keystone pair names a real keystone${badPair.length ? ' · BAD: ' + badPair.join(', ') : ''}`);
-
-  const branchIds = new Set(TREE.branches.map((b: any) => b.id));
-  const badBranch = TREE.keystones.filter((k: any) => !branchIds.has(k.branch)).map((k: any) => k.name);
-  add('T3', badBranch.length === 0, `every keystone names a real branch${badBranch.length ? ' · BAD: ' + badBranch.join(', ') : ''}`);
-
-  // the tree multiplier SUMS a typical path of 6, and mob_HP is built on x1.85 — so the
-  // band has to straddle that. A new keystone that pushes every legal path past it is a
-  // mob_HP problem, not a node problem (skill-tree.md section 3).
-  const KB: any = keystoneBudget();
-  add('T7', TREE.keystones.length === 0 || (KB.bestMul >= 1.85 && KB.worstMul < 1.85),
-    `legal tree band is x${KB.worstMul} (worst ${KB.worstVals.join('/')}) to x${KB.bestMul} (best ${KB.bestVals.join('/')}), so the x1.85 mob_HP baseline sits inside it`);
-
-  const missingCalc = TREE.keystones.filter((k: any) => k.origin !== 'original' && !k.calc).map((k: any) => k.name);
-  const missingRule = TREE.keystones.filter((k: any) => k.rule === undefined).map((k: any) => k.name);
-  add('T8', missingCalc.length === 0 && missingRule.length === 0,
-    `every keystone carries the rule and the worked calculation its table prints${missingRule.length ? ' · no rule: ' + missingRule.join(', ') : ''}${missingCalc.length ? ' · no calc: ' + missingCalc.join(', ') : ''}`);
-
-  const mismatched: any[] = [];
-  for (const b of branches) {
-    if (b.parsed.nodes.length !== b.minors) mismatched.push(`${b.name} minors ${b.parsed.nodes.length}≠${b.minors}`);
-    if (b.parsed.limbs.length !== b.limbs) mismatched.push(`${b.name} limbs ${b.parsed.limbs.length}≠${b.limbs}`);
-    for (const l of b.parsed.limbs) if (l.parsed !== l.declared) mismatched.push(`${b.name}/${l.name} ${l.parsed}≠${l.declared}`);
-  }
-  add('T4', mismatched.length === 0, `parsed node/limb counts match every declared header${mismatched.length ? ' · ' + mismatched.join(' · ') : ''}`);
-
-  const dangling = branches.flatMap((b: any) => b.dangling.map((d: any) => ({ branch: b.name, node: d.node, ref: d.ref, bad: d.bad })));
-  const renamed = branches.flatMap((b: any) => b.renamed.map((d: any) => ({ branch: b.name, ...d })));
-  const unexpected = dangling.filter((d: any) => d.bad.some((n: any) => !PENDING_REFS.has(n)));
-  const pending = dangling.length - unexpected.length;
-  if (unexpected.length) {
-    add('T5', false, `"Enables" cell(s) point at unknown skills · ${unexpected.length} UNEXPECTED: ` + unexpected.slice(0, 12).map((d: any) => `${d.branch}/${d.node}→${d.ref}`).join(' · ') + (unexpected.length > 12 ? ' …' : ''));
-  } else if (renamed.length) {
-    out.push({ id: 'T5', ok: true, status: 'PENDING', detail: `${renamed.length} "Enables" cell(s) use a renamed skill (recorded in skills.json renames) — run \`node tools/tree.ts --write\` to update them: ` + renamed.slice(0, 8).map((d: any) => `${d.branch}/${d.node} ${d.from}→${d.to}`).join(' · ') });
-  } else if (pending) {
-    out.push({ id: 'T5', ok: true, status: 'PENDING', detail: `${pending} "Enables" cell(s) point at the cleared buff set (waived in tree.json pending_refs, tracked by D19) — no unexpected dangling reference` });
-  } else {
-    add('T5', true, 'every "Enables" cell resolves to a real skill or keystone');
-  }
-
-  // The tree has to be buildable: a fixed shape, derived from the tables, not invented per node.
-  const shape: any[] = [];
-  for (const b of branches) {
-    if (b.parsed.limbs.length !== 5) shape.push(`${b.name} has ${b.parsed.limbs.length} limbs, not the 5 the shape needs`);
-    for (const l of b.parsed.limbs) if (l.parsed < 4) shape.push(`${b.name}/${l.name} has only ${l.parsed} nodes (a spoke needs 4+)`);
-  }
-  const totalMinors = branches.reduce((t: any, b: any) => t + b.parsed.nodes.length, 0);
-  if (totalMinors > 0 && totalMinors !== 122) shape.push(totalMinors + ' minor nodes parsed, not the 122 the removed tree declared');
-  add('T6', shape.length === 0, shape.length ? shape.join(' · ')
-    : `the tree is buildable from the tables: 3 branches × 5 limbs × ≥4 nodes = ${totalMinors} minors, and tier = position within its own limb (hub → branch gateway → limb gateway → node 1..N)`);
-
+  const add = (id: string, ok: boolean, detail: string) => out.push({ id, ok, detail });
+  const per = BRANCHES.map((b) => perBranch(b).length);
+  add('T1', BRANCHES.length === 3 && per.every((n) => n === 21) && NODES.length === 63,
+    `${BRANCHES.length} branches (${BRANCHES.join(' · ')}), ${per.join('/')} nodes each = ${NODES.length} nodes, ${RANKS} ranks each = ${ranksTotal} ranks`);
+  const badLine = NODES.filter((n) => !(n.max > 0));
+  add('T2', badLine.length === 0,
+    badLine.length ? `node(s) name a line mods.json does not carry: ${badLine.map((n) => `${n.id} ${n.line}`).join(' · ')}`
+      : `every one of the ${NODES.length} nodes names a real mods.json line, so a node always pays a number the game already reads`);
+  const flat = NODES.filter((n) => !(n.values[0] >= 1) || !(n.values[1] >= n.values[0]) || !(n.values[2] >= n.values[1]));
+  add('T3', flat.length === 0,
+    flat.length ? `node(s) whose ranks do not rise: ${flat.map((n) => `${n.id} ${n.values.join('/')}`).join(' · ')}`
+      : `every node grants at least 1 at rank 1 and never less at a higher rank (${NODES[0].values.join('/')} is the first ladder)`);
+  const drift = NODES.filter((n) => {
+    const mult: number[] = TREE.rank_tiers[n.tier];
+    let prev = 0;
+    return mult.some((m, i) => { const v = Math.max(1, Math.round(n.max * m), prev); prev = v; return v !== n.values[i]; });
+  });
+  add('T4', drift.length === 0,
+    drift.length ? `node(s) whose values are not the stated rule (line max x the tier multiplier): ${drift.map((n) => n.id).join(' · ')}`
+      : `every value is the line's own maximum x its tier multiplier (shallow ${TREE.rank_tiers.shallow.map((m: number) => `${Math.round(m * 1000) / 10}%`).join('/')} · deep ${TREE.rank_tiers.deep.map((m: number) => `${Math.round(m * 1000) / 10}%`).join('/')}), floored at 1 — nothing is typed twice`);
+  const chain = NODES.filter((n) => (n.index === 1 ? n.needs !== null : n.needs !== `${n.branch}.${n.index - 1}`));
+  add('T5', chain.length === 0,
+    chain.length ? `node(s) with a broken chain: ${chain.map((n) => n.id).join(' · ')}`
+      : `each branch is one chain: node 1 is free, node k needs node k-1 (${BRANCHES.map((b) => `${b} 1→${perBranch(b).length}`).join(' · ')})`);
+  add('T6', ranksTotal * COST === pointsAtCap,
+    `${NODES.length} nodes x ${RANKS} ranks x ${COST} point = ${ranksTotal * COST} points, and treePointsAt(level ${eng.S.level_cap}) grants ${pointsAtCap} — a level buys exactly one rank, and the tree spends every point the cap hands out`);
+  add('T7', NODES.every((n) => n.line && n.values.length === RANKS),
+    'no keystones and no rule-only nodes: every node carries a line and its three values, so the whole tree is numbers (the removed tree put 100% of its power in 18 keystones)');
+  const weak = NODES.filter((n) => {
+    if (n.tier !== 'deep') return false;
+    const shallow = NODES.find((s) => s.branch === n.branch && s.line === n.line && s.tier === 'shallow');
+    return shallow && n.values[2] <= shallow.values[2];
+  });
+  add('T8', weak.length === 0,
+    weak.length ? `deep node(s) that are not stronger than their shallow twin: ${weak.map((n) => n.id).join(' · ')}`
+      : `every repeated line is strictly stronger at its deep node than at its shallow one, so a longer chain is never a worse buy`);
   return out;
 }
 
-// ---------------------------------------------------------------- summary block
+// ---------------------------------------------------------------- blocks
 
-function summaryBlock(branches: any) {
-  const rows = branches.map((b: any) => {
-    const keys = TREE.keystones.filter((k: any) => k.branch === b.id).length;
-    return `| ${b.name} | \`${b.file}\` | ${b.minors} | ${b.parsed.nodes.length} | ${b.parsed.limbs.length} | ${keys} | ${b.dangling.length} |`;
-  });
-  const tot = {
-    minors: branches.reduce((s: any, b: any) => s + b.minors, 0),
-    parsed: branches.reduce((s: any, b: any) => s + b.parsed.nodes.length, 0),
-    limbs: branches.reduce((s: any, b: any) => s + b.parsed.limbs.length, 0),
-    keys: TREE.keystones.length,
-    dangling: branches.reduce((s: any, b: any) => s + b.dangling.length, 0),
-  };
-  const dangling = branches.flatMap((b: any) => b.dangling.map((d: any) => `${b.name} · ${d.node} → ${cleanRef(d.ref)}`));
+function summaryBlock() {
   return [
-    '| Branch | File | Minor declared | Minor parsed | Limbs parsed | Keystones | Dangling refs |',
+    '| Branch | What it buys | Nodes | Ranks | Points | Chain |',
+    '|---|---|---|---|---|---|',
+    ...BRANCHES.map((b) => {
+      const nodes = perBranch(b);
+      const what = { impact: 'offence lines — power, crit, penetration, accuracy, attack speed, stun, bleed', control: 'defence lines — armour, evasion, block, resistance, HP, Energy Shield, cooldown', stream: 'sustain and Core stats — mana, regeneration, Energy Shield regen, Stat Mod' }[b] || '';
+      return `| **${b}** | ${what} | ${nodes.length} | ${nodes.length * RANKS} | ${nodes.length * RANKS * COST} | node k needs node k-1 |`;
+    }),
+    `| **total** | every node pays a number | **${NODES.length}** | **${ranksTotal}** | **${ranksTotal * COST}** | 3 chains |`,
+  ].join('\n');
+}
+
+function branchBlock(branch: string) {
+  const nodes = perBranch(branch);
+  return [
+    '| Node | Line | Rank 1 | Rank 2 | Rank 3 | Line max | Needs |',
     '|---|---|---|---|---|---|---|',
-    ...rows,
-    `| **total** | 3 files | **${tot.minors}** | **${tot.parsed}** | **${tot.limbs}** | **${tot.keys}** | **${tot.dangling}** |`,
+    ...nodes.map((n) => `| ${n.id} | ${n.line} | ${n.values[0]} | ${n.values[1]} | ${n.values[2]} | ${n.max} | ${n.needs || '—'} |`),
     '',
-    tot.dangling
-      ? `> **${tot.dangling} dangling "Enables" references** — a node points at a skill that no longer exists in \`skills.json\` (mostly the cleared buff set). \`checks.md\` D19 stays FAIL until these nodes are rewritten. Full list: ${dangling.slice(0, 20).join(' · ')}${dangling.length > 20 ? ' …' : ''}`
-      : '> Every node "Enables" cell resolves to a real skill or keystone. `checks.md` D19 reference check passes.',
+    `${nodes.length} nodes, ${nodes.length * RANKS} ranks, ${nodes.length * RANKS * COST} points. The first ${SHALLOW_NODES} nodes are shallow (${TREE.rank_tiers.shallow.join('/')}% of the line's own maximum per rank), the last ${nodes.length - SHALLOW_NODES} are deep (${TREE.rank_tiers.deep.join('/')}%) — so a deeper node of the same line is always the stronger buy.`,
   ].join('\n');
 }
-
-function layoutBlock(branches: any) {
-  const rows: any[] = [];
-  for (const br of branches) {
-    const keys = TREE.keystones.filter((k: any) => k.branch === br.id);
-    br.parsed.limbs.forEach((l: any, i: any) => {
-      const key = keys.length ? keys[i % keys.length].name : '—';
-      rows.push(`| ${br.name} | ${i + 1} · ${l.name} | ${l.parsed} | 1-${l.parsed} | ${key} |`);
-    });
-  }
-  return [
-    '| Branch | Limb (order from the hub) | Nodes | Tiers it can hold | Spoke keystone |',
-    '|---|---|---|---|---|',
-    ...rows,
-    '',
-    'Pathing, so a client guesses nothing: **hub → branch gateway → limb gateway → nodes in table order**. A node is purchasable once the node before it in the same limb is owned; tier is distance from the hub, exactly as this file already describes it. The keystone column is the paired-spoke assignment, cycled per branch — a keystone is reachable through two limbs, never one (T2).',
-  ].join('\n');
-}
-
-// ---------------------------------------------------------------- keystone tables
-
-const BRANCH_LABEL: Record<string, string> = { impact: 'Impact', stream: 'Stream', control: 'Control' };
-
-/** One pick per exclusive pair: walk `order` and take a keystone, claiming its whole pair
- *  so the partner is skipped. Returns every legal pick, not just the first 6. */
-function legalPicks(order: any) {
-  const claimed = new Set();
-  const picks: any[] = [];
-  for (const k of order) {
-    if (claimed.has(k.name) || claimed.has(k.pair)) continue;
-    claimed.add(k.name);
-    claimed.add(k.pair);
-    picks.push(k);
-  }
-  return picks;
-}
-
-function keystoneBudget() {
-  const K = TREE.keystones;
-  const orig = K.filter((k: any) => k.origin === 'original');
-  const fresh = K.filter((k: any) => k.origin !== 'original');
-  const mean = (a: any) => (a.length ? a.reduce((s: any, k: any) => s + k.value, 0) / a.length : 0).toFixed(1);
-  // the tree multiplier sums the picks, it does not average them (6 x 14.2% = x1.85)
-  const mul = (picks: any) => (1 + picks.reduce((s: any, k: any) => s + k.value, 0) / 100).toFixed(2);
-  const sum = (picks: any) => (picks.reduce((s: any, k: any) => s + k.value, 0)).toFixed(1);
-  const best = legalPicks([...K].sort((a: any, b: any) => b.value - a.value)).slice(0, 6);
-  const worst = legalPicks([...K].sort((a: any, b: any) => a.value - b.value)).slice(0, 6);
-  return {
-    origMean: mean(orig), freshMean: mean(fresh), poolMean: mean(K),
-    bestVals: best.map((k: any) => k.value), bestSum: sum(best), bestMul: mul(best),
-    worstVals: worst.map((k: any) => k.value), worstSum: sum(worst), worstMul: mul(worst),
-    pairs: new Set(K.map((k: any) => k.pair)).size,
-  };
-}
-
-function keystoneOriginalBlock() {
-  return [
-    '| Original | Branch | Measured value (%) | Notes |',
-    '|---|---|---|---|',
-    ...TREE.keystones.filter((k: any) => k.origin === 'original').map((k: any) => {
-      const label = k.rule ? `${k.name} (${k.rule})` : k.name;
-      const v = k.value === 0 ? '0% DPS' : (k.value % 1 ? `+${k.value}%` : `+${k.value}%`);
-      return `| ${label} | ${BRANCH_LABEL[k.branch]} | ${k.value >= 20 ? `**${v}**` : v} | ${k.note || ''} |`;
-    }),
-  ].join('\n');
-}
-
-function keystoneNewBlock() {
-  const B = keystoneBudget();
-  return [
-    '| Keystone | Branch | Rule | Calculated value | Conflicting pair |',
-    '|---|---|---|---|---|',
-    ...TREE.keystones.filter((k: any) => k.origin !== 'original').map((k: any) => {
-      const v = k.value === 0 ? '**0% DPS**' : `**+${k.value}%**`;
-      const extra = k.pair_note ? ` · ${k.pair_note}` : '';
-      return `| ${k.name} | ${BRANCH_LABEL[k.branch]} | ${k.rule} | ${v} · ${k.calc}${extra} | ${k.pair} |`;
-    }),
-    '',
-    `**Pool accounting check** — ${TREE.keystones.length} units = ${TREE.keystones.filter((k: any) => k.origin === 'original').length} original (mean ${B.origMean}%) + ${TREE.keystones.filter((k: any) => k.origin !== 'original').length} new (mean ${B.freshMean}%) → **whole-pool mean ${B.poolMean}%**`,
-    `- The multiplier **sums** the picks, so a typical path of 6 at 14.2% is ×1.85 — that is the \`mob_HP\` baseline`,
-    `- Best *legal* picks = ${B.bestVals.join('/')} → sum **${B.bestSum}%** → tree **×${B.bestMul}** (the ceiling \`mob_HP\` does not cover)`,
-    `- Worst *legal* picks = ${B.worstVals.join('/')} → sum **${B.worstSum}%** → tree **×${B.worstMul}**`,
-    `- **${B.pairs} exclusive pairs**, one pick each (T2) — this is what controls the band width`,
-  ].join('\n');
-}
-
-function keystonePairBlock() {
-  return [
-    '| Pair | Why they truly cut each other (not paired by branch) |',
-    '|---|---|',
-    ...TREE.keystones.filter((k: any) => k.pair_reason).map((k: any) => `| ${k.name} ↔ ${k.pair} | ${k.pair_reason} |`),
-  ].join('\n');
-}
-
-// ---------------------------------------------------------------- writers
 
 const WRITERS: Writer[] = [
-  { file: 'skill-tree.md', key: 'tree-summary', render: () => summaryBlock(analyze()) },
-  { file: 'skill-tree.md', key: 'tree-layout', render: () => layoutBlock(analyze()) },
-  { file: 'skill-tree-keystone.md', key: 'keystone-original', render: keystoneOriginalBlock },
-  { file: 'skill-tree-keystone.md', key: 'keystone-new', render: keystoneNewBlock },
-  { file: 'skill-tree-keystone.md', key: 'keystone-pairs', render: keystonePairBlock },
+  { file: 'skill-tree.md', key: 'tree-summary', render: summaryBlock },
+  { file: 'skill-tree-impact.md', key: 'tree-impact', render: () => branchBlock('impact') },
+  { file: 'skill-tree-stream.md', key: 'tree-stream', render: () => branchBlock('stream') },
+  { file: 'skill-tree-control.md', key: 'tree-control', render: () => branchBlock('control') },
 ];
 
 // ---------------------------------------------------------------- cli
 
 const arg = process.argv[2];
-const branches = analyze();
-
 if (arg === '--emit') {
   for (const w of WRITERS) console.log(`\n===== ${w.file} :: ${w.key} =====\n${w.render()}`);
 } else if (arg === '--write') {
-  let renamed = 0;
-  for (const b of TREE.branches) renamed += applyRenames(b.file);
-  if (renamed) console.log(`updated ${renamed} "Enables" cell(s) from skills.json renames`);
   const missing = G.writeAll(WRITERS);
   if (missing) process.exitCode = 1;
 } else if (arg === '--checks') {
-  const rows = gates(branches);
-  for (const r of rows) console.log(`${r.id.padEnd(3)}  ${(r.status || (r.ok ? 'PASS' : 'FAIL')).padEnd(7)}  ${r.detail}`);
-
+  const rows = gates();
+  for (const r of rows) console.log(`${r.id.padEnd(3)}  ${(r.ok ? 'PASS' : 'FAIL').padEnd(5)}  ${r.detail}`);
   const states = G.checkAll(WRITERS);
-  const stale = states.filter((s: any) => s.state !== 'current');
   console.log('');
   for (const s of states) console.log(`${s.state === 'current' ? 'PASS ' : 'FAIL '}  block ${s.key} · ${s.file} (${s.state})`);
-
-  const gateFails = rows.filter((r: any) => !r.ok).length;
-  const fails = gateFails + stale.length;
-  const passed = rows.filter((r: any) => r.ok).length;
-  console.log(`\n${passed}/${rows.length} gate PASS · ${stale.length} block(s) not current · ${fails} FAIL`);
+  const fails = rows.filter((r) => !r.ok).length + states.filter((s) => s.state !== 'current').length;
+  console.log(`\n${rows.filter((r) => r.ok).length}/${rows.length} gate PASS · ${states.filter((s) => s.state !== 'current').length} block(s) not current · ${fails} FAIL`);
   if (fails) process.exitCode = 1;
 } else {
-  console.log(`tree cage — data: tools/data/tree.json + the node tables in skill-tree-*.md
+  console.log(`tree cage — data: tools/data/tree.json (the spec) + mods.json (the line maxima)
 
-  node tools/tree.ts --emit     print the generated summary block
-  node tools/tree.ts --write    rewrite the summary in skill-tree.md
-  node tools/tree.ts --checks   validate node counts + every "Enables" reference (D19)
+  node tools/tree.ts --emit     print every generated block
+  node tools/tree.ts --write    rewrite them in skill-tree*.md
+  node tools/tree.ts --checks   shape, values, pathing and the point identity
 `);
 }

@@ -15,7 +15,8 @@ describe('the win gate is read off the data, not typed', () => {
     const t = target();
     expect(t.zone).toBe(last.id);
     expect(t.level).toBe(last.levels[1]);
-    expect(t.hp).toBe(eng.mobHpAt(last.levels[1]) * eng.sizeById('boss').hp);
+    // the same curve the spawn reads, so the number the player reads is the number the fight rolls
+    expect(eng.mobHpAt(t.level) * eng.sizeById('boss').hp).toBeCloseTo(t.hp, 6);
     expect(describeGoal()).toContain(t.name);
   });
 

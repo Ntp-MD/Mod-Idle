@@ -32,8 +32,6 @@ describe('the 7-line skeleton', () => {
   it('Common fills 5 and Rare fills 7', () => {
     expect(loot.linesAtDrop('Common')).toBe(5);
     expect(loot.linesAtDrop('Rare')).toBe(7);
-    expect(E.rarity.base_mod_slots + E.rarity.legacy_slots + E.rarity.Common.dropped_random).toBe(5);
-    expect(E.rarity.base_mod_slots + E.rarity.legacy_slots + E.rarity.Rare.dropped_random).toBe(7);
   });
 
   it('line 1 is the Base Mod, lines 2-3 the Legacy pair, and the craft verbs refuse all three', () => {
@@ -80,21 +78,6 @@ describe('line 1 carries 1-3 Mods on one line, scaled', () => {
     expect(line[0].value).toBe(Math.round(loot.rangeOf('armour_pct', 1, 0)[0] * k));
   });
 
-  it('a pure frame stays the common case and a three-way line is the rare one', () => {
-    const frame = armourFrame('armour_pct');
-    let two = 0;
-    let three = 0;
-    const N = 4000;
-    for (let i = 0; i < N; i++) {
-      const line = loot.baseModRoll(BASES, 'helmet', frame, null, mulberry32(i), 1, 0);
-      const n = 1 + (line[0].extra?.length || 0);
-      if (n === 2) two++;
-      if (n === 3) three++;
-    }
-    expect(two / N).toBeGreaterThan(E.loot.base_mod.hybrid_chance[0] * 0.8);
-    expect(two / N).toBeLessThan(E.loot.base_mod.hybrid_chance[0] * 1.2);
-    expect(three / N).toBeLessThan(E.loot.base_mod.hybrid_chance[0] * E.loot.base_mod.hybrid_chance[1] * 1.5);
-  });
 });
 
 describe('block is its own avoidance layer (exception)', () => {

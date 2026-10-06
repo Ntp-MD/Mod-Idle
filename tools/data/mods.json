@@ -841,6 +841,46 @@
       ]
     },
     {
+      "id": "energy_shield_regen",
+      "name": "Energy Shield Regeneration %",
+      "group": "Defensive",
+      "min": 12,
+      "max": 30,
+      "pct": true,
+      "bands": [
+        [
+          [
+            12,
+            14
+          ],
+          [
+            15,
+            17
+          ]
+        ],
+        [
+          [
+            18,
+            20
+          ],
+          [
+            21,
+            23
+          ]
+        ],
+        [
+          [
+            24,
+            26
+          ],
+          [
+            27,
+            30
+          ]
+        ]
+      ]
+    },
+    {
       "id": "max_hp",
       "name": "Max HP %",
       "group": "Defensive",

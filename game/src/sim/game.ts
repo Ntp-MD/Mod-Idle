@@ -1,4 +1,4 @@
-import { eng, E, sm, loot, TOWN } from '../engine/client';
+import { eng, E, sm, loot, TOWN, tree } from '../engine/client';
 import { buildCharacter, openingGear, SLOT_COUNT } from './player';
 import { playerSwing, mobSwing, rollStatus, dotDamage, type Statuses, type StatusName } from './combat';
 import { rollDrop } from './drop';
@@ -83,6 +83,9 @@ export function setLevel(s: GameState, level: number): void {
   s.player.level = level;
   const spent = STAT_KEYS.reduce((a, k) => a + s.player.points[k], 0);
   s.player.statPoints = Math.max(0, eng.pointsAt(level) - spent);
+  // the same shortcut has to bank the tree points the level is worth, or a character placed at a level
+  // holds none and the tree cannot be touched at all
+  s.player.treePoints = Math.max(0, eng.treePointsAt(level) - tree.pointsSpent(s.player.treeRanks));
   spendReference(s);
 }
 
@@ -100,6 +103,7 @@ export function newGame(seed = 20260101): GameState {
       statPoints: 0,
       autoSpend: true,
       treePoints: 0,
+      treeRanks: {},
       hp: c.maxHp,
       mana: c.maxMana,
       es: c.es,
@@ -114,7 +118,7 @@ export function newGame(seed = 20260101): GameState {
     chestDay: {},
     skills: newSkillState(),
     healUp: null,
-    junkByRarity: Object.fromEntries(Object.keys(E.junk.rarities).map((r) => [r, 0])),
+    junk: {},
     mastery: {},
     presets: newPresets(),
     activePreset: 0,
@@ -125,6 +129,7 @@ export function newGame(seed = 20260101): GameState {
     travel: 'stay',
     autoDissolveRarity: 'off',
     huntOrder: {},
+    zoneFocus: {},
     goal: newGoal(),
     curses: newCurses(),
     mobStatus: newMobStatusStore(),
@@ -183,12 +188,26 @@ const bossInZone = (zoneId: number): any => {
   return _bossByZone.get(zoneId);
 };
 
-function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string): Mob {
+/**
+ * What one spawn's ladder name pays: its row in `mob.variant_drops`, which owns both the junk item
+ * (with its rarity) and the stream the mob leans. A spawn whose name carries no row — or a variant
+ * table read before the name was rolled — drops no junk, which is why the caller guards on `null`.
+ */
+function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | 'herb' | 'junk' | 'none' } | null {
+  if (!mob || !mob.variant) return null;
+  return (((E.mob as any).variant_drops || {})[mob.variant]) || null;
+}
+
+function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, focus?: string): Mob {
   const z = eng.zoneById(zoneId);
   const zonePool = speciesInZone(zoneId);
   // a sub-zone is what a spawn table rolls against: it names its own race pair and one Element from the
-  // zone's set, and the cast a normal or Elite spawn draws from is that pair (the boss is zone-level)
-  const sub = kind !== 'boss' && z.subzones && z.subzones.length ? z.subzones[Math.floor(rng() * z.subzones.length)] : null;
+  // zone's set, and the cast a normal or Elite spawn draws from is that pair (the boss is zone-level).
+  // `focus` is the player's chosen hunting ground (`zoneFocus`); with none set the zone's own cast rolls.
+  const subs = z.subzones || [];
+  const sub = kind !== 'boss' && subs.length
+    ? (subs.find((x: any) => x.name === focus) || subs[Math.floor(rng() * subs.length)])
+    : null;
   const speciesPool = sub ? zonePool.filter((sp: any) => sub.races.includes(sp.id)) : zonePool;
   let body = 'medium';
   let species = pick(rng, speciesPool);
@@ -201,8 +220,14 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     species = E.mob.species.find((sp: any) => sp.id === boss.species)!;
     body = 'boss';
   } else if (kind === 'elite') {
-    // an Elite is always forced to the Large body (engine.json mob.elite.note)
-    species = pick(rng, speciesPool.filter((sp: any) => sp.sizes.includes('large')));
+    // an Elite is always forced to the Large body (engine.json mob.elite.note), and its NAME is the
+    // sub-zone's declared elite — the cast the bestiary promises is the cast that spawns, so an elite
+    // pays the junk of the variant it shows rather than of whatever large body the roll landed on
+    const declared = sub ? sub.elite : null;
+    const owner = declared
+      ? (E.mob.species as any[]).find((sp: any) => ((((E.mob as any).variants || {})[sp.id] || []) as string[])[3] === declared)
+      : null;
+    species = owner || pick(rng, speciesPool.filter((sp: any) => sp.sizes.includes('large')));
     body = 'large';
   } else {
     const groupable = speciesPool.filter((sp: any) => sp.sizes.includes('small') || sp.sizes.includes('medium'));
@@ -221,10 +246,18 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   const rollElems: string[] = sub ? [sub.element] : z.elements;
   const entries: [string, number][] = rollElems.map((e: string) => [e, bias.includes(e) ? E.mob.element_roll.bias_weight : E.mob.element_roll.other_weight]);
   const innate = [pickBand(rng, entries)];
+  // the ladder name is its own roll over the species' three normal rungs (Elite and Boss take the fourth
+  // and fifth), and it is what the drop table reads: `mob.variant_drops` keys on this name. Drawn last
+  // on purpose — every field above keeps the random stream it had, so a variant is purely additive.
+  const ladder = (((E.mob as any).variants || {})[species.id] || []) as string[];
+  const variant = kind === 'boss' ? ladder[4]
+    : kind === 'elite' ? (sub?.elite || ladder[3])
+      : pick(rng, ladder.slice(0, 3));
   return {
     id: `${zoneId}_${species.id}_${body}_${Math.floor(rng() * 1e9)}`,
     species: species.name,
     speciesId: species.id,
+    variant,
     kind: kind === 'boss' ? `Boss · ${(bossInZone(zoneId) || { name: 'Boss' }).name}` : kind === 'elite' ? 'Elite' : size.name,
     zone: zoneId,
     level: lv,
@@ -238,6 +271,7 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     dodgeRate: base.dodgeRate,
     armour: base.armour,
     res: base.res,
+    resByElement: base.resByElement,
     damage: species.damage,
     innate,
     xp: kind === 'elite' ? base.xp * E.xp.elite_mult : kind === 'boss' ? base.xp * E.xp.boss_mult : base.xp,
@@ -376,10 +410,12 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   // Mastery adds quantity the same way Lck does, and only a twelfth as strongly (equipment-weapon.md)
   // offline results are AFK: same drops, quality limited to the zone floor, no boss income
   const q = online ? undefined : eng.qualityIndexOf(eng.floorOf(band));
-  // Hunt Order: lean the three collectible streams toward the zone's chosen category by shifting
-  // probability mass between them, never raising the total, so drops/hr and the timeline are unmoved.
-  // 'none' is the identity, so the measured bands are untouched unless the player opts in.
-  const order = (s.huntOrder?.[mob.zone] || 'none') as 'none' | 'gear' | 'herb' | 'junk';
+  // Hunt Order: lean the three collectible streams toward a category by shifting probability mass
+  // between them, never raising the total, so drops/hr and the timeline are unmoved. The mob's own
+  // variant supplies the lean (`mob.variant_drops`) and the player's per-zone order overrides it;
+  // 'none' is the identity, so a variant marked 'none' behaves exactly as the balanced case.
+  const vdrop = variantDrop(mob);
+  const order = (s.huntOrder?.[mob.zone] || (vdrop ? vdrop.lean : 'none')) as 'none' | 'gear' | 'herb' | 'junk';
   const junkRows = Object.entries(E.junk.rarities as Record<string, any>);
   const pJunkBase = junkRows.reduce((a, [, r]: any) => a + r.drop_chance_per_kill, 0);
   const hw = huntReweight({
@@ -391,11 +427,18 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     awardDrop(s, rng, band, q, c.weaponAspd);
   }
   const junkScale = pJunkBase > 0 ? hw.junk / pJunkBase : 1;
-  for (const [rarity, r] of junkRows) {
-    // junk is kept and sold by hand at the Counterhand — it is a gold mint, not a gold drip
-    if (rng() < r.drop_chance_per_kill * junkScale) {
+  // junk is kept and sold by hand at the Counterhand — it is a gold mint, not a gold drip. The item is
+  // the variant's own, and only that variant's rarity rolls, so the kill pays one item at its price.
+  // one draw per rarity, exactly as this stream always rolled, so every other roll in the tick keeps
+  // the sequence it had — but only the variant's OWN rarity can pay. The item is therefore the
+  // variant's, while the expected gold is still the line: chance × sell is flat by rarity (X39).
+  if (vdrop) {
+    for (const [rarity, r] of junkRows) {
+      const pays = rarity === vdrop.rarity;
       // junk occupies a slot like any other carried stack; a bag full of it stops the pickup
-      if (addTo(s, s.junkByRarity, rarity, 'stone', 1)) s.counters.junk++;
+      if (rng() < (pays ? r.drop_chance_per_kill * junkScale : 0)) {
+        if (addTo(s, s.junk, vdrop.item, 'stone', 1)) s.counters.junk++;
+      }
     }
   }
   progressTasks(s, mob.kind, mob.zone);
@@ -500,7 +543,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // pool is read against already includes them; manual players bank and spend by hand.
   if (s.player.autoSpend && s.player.statPoints > 0) spendReference(s);
   const effects = effectsActive(s.skills);
-  const c = buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effects, s.player.points);
+  const c = buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effects, s.player.points, s.player.treeRanks);
   // a pool is bounded by what it is: never below nothing, never above what the sheet says it holds.
   // The bars read these straight, so an unbounded value here is what shows as a negative number there.
   s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
@@ -513,15 +556,21 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       minutes: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarPrice(rng())),
     };
   }
-  // the owner's travel switch: 'forward' walks on through settlements already opened, using the
+  // the owner's travel switch: 'forward' climbs through settlements already opened, using the
   // zone's own level band as the only condition (`mob.zones.levels`) — no new number, and it is not
-  // Road travel, so it does not touch the Road being opt-in and online only
+  // Road travel, so it does not touch the Road being opt-in and online only.
+  // Forward Mode is a chapter ladder (owner ask): win the zone (its band is behind you) and the walk
+  // moves on; a Push sends the character back to the last zone it held (below) and this same rule
+  // refuses to re-enter the zone it was chased out of until a level has been gained against it.
   if (s.travel === 'forward') {
     const here = eng.zoneById(s.zone);
     if (s.player.level > here.levels[1]) {
       const next = eng.ZONES.find((z: any) => z.id > here.id
         && s.town.visited.includes(settlementOfZone(z.id)?.id || ''));
-      if (next) {
+      const blocked = next && next.id === s.forwardBlockedZone
+        && s.player.level <= (s.forwardBlockedLevel ?? 0);
+      if (next && !blocked) {
+        s.forwardSafe = here.id; // the zone just left is the floor a Push falls back to
         s.zone = next.id;
         s.group = [];
         s.spawnIn = 0;
@@ -593,11 +642,14 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     // one out early.
     if (online && !s.bossDueAt) s.bossDueAt = s.clockSec + BOSS_EVERY_SEC;
     const wantBoss = online && s.bossDueAt !== undefined && s.clockSec >= s.bossDueAt;
+    // the player's hunting ground for this zone rides every spawn, so a chosen sub-zone is the cast
+    // (race pair + Element) that actually spawns; Elite and Boss ignore it, being zone-level
+    const focus = s.zoneFocus?.[s.zone];
     s.group = wantBoss
       ? [spawnMob(rng, s.zone, s.player.level, 'boss')]
       : wantElite
-        ? [spawnMob(rng, s.zone, s.player.level, 'elite')]
-        : Array.from({ length: groupSize }, () => spawnMob(rng, s.zone, s.player.level, 'normal'));
+        ? [spawnMob(rng, s.zone, s.player.level, 'elite', undefined, focus)]
+        : Array.from({ length: groupSize }, () => spawnMob(rng, s.zone, s.player.level, 'normal', undefined, focus));
     // the queue is front line first, so a reach-1 attack always has the front slot (combat.md §2b)
     s.group.sort((m) => (m.line === 'front' ? -1 : 1));
     s.spawnIn = L.group_spawn_sec;
@@ -793,6 +845,9 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     s.campSec = Math.max(1, Math.ceil(c.maxHp / (c.hpRegen * 8)));
     s.counters.pushes++;
     s.group = [];
+    // a Push on a Road trip is the Road's own business (forfeit or skip the leg), so the Forward
+    // Mode zone ladder below stands down while one is running — the two travel systems stay apart
+    const onRoad = !!s.road;
     // a Push returns the main preset, but cooldowns already counting keep counting (§rule 12)
     if (switchPreset(s, sm.mainPreset)) push(s, `Back on the ${s.presets[sm.mainPreset].name} preset · running cooldowns kept`);
     if (s.road) {
@@ -808,6 +863,19 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       }
     }
     push(s, `Pushed — ${s.campSec} sec at camp (${eng.fmt(c.maxHp)} HP ÷ ${eng.fmt(c.hpRegen * 8)}/sec)`);
+    // Forward Mode's fallback: a Push in a zone above the floor means this chapter is not survivable
+    // yet, so the walk drops back to the last zone held and refuses to climb back until one level is
+    // gained (owner ask). No new number: the gate is a level, the zone is `forwardSafe`.
+    if (!onRoad && s.travel === 'forward' && s.forwardSafe != null && s.forwardSafe < s.zone) {
+      const from = eng.zoneById(s.zone);
+      const back = eng.zoneById(s.forwardSafe);
+      s.forwardBlockedZone = s.zone;
+      s.forwardBlockedLevel = s.player.level;
+      s.zone = s.forwardSafe;
+      s.spawnIn = 0;
+      s.lastAutoZone = -1;
+      push(s, `Pushed in ${from.name} — falling back to ${back.name}, the last zone held; the climb resumes at level ${s.player.level + 1}`);
+    }
   }
   void band;
   clampPools(s);
@@ -820,7 +888,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
  * Int — so the bar is bounded again here, otherwise it reads above what the character now holds.
  */
 function clampPools(s: GameState): void {
-  const c = buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills), s.player.points);
+  const c = buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills), s.player.points, s.player.treeRanks);
   s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
   s.player.es = Math.min(Math.max(0, s.player.es), c.es);
   s.player.hp = Math.min(s.player.hp, c.maxHp);
@@ -840,10 +908,21 @@ function runTicks(s: GameState, statuses: Statuses, from: number, to: number) {
   for (let i = from; i < to; i++) tick(s, statuses, { online: false });
 }
 
+/**
+ * The boss clock is an online gate (`save.md`): away time must not accrue toward it. The stored
+ * `bossDueAt` is absolute `clockSec`, so the away ticks that advanced `clockSec` would otherwise
+ * satisfy it the instant the player returns and hand out a free boss. Shift the due time by exactly
+ * the seconds simulated, which keeps the remaining online time unchanged.
+ */
+function pauseBossClock(s: GameState, secs: number): void {
+  if (s.bossDueAt !== undefined) s.bossDueAt += secs;
+}
+
 /** Synchronous catch-up — tests and any non-UI caller. */
 export function catchUp(s: GameState, statuses: Statuses, elapsedSec: number) {
   const { secs, capped } = catchUpPlan(elapsedSec);
   runTicks(s, statuses, 0, secs);
+  pauseBossClock(s, secs);
   return { simulated: secs, capped };
 }
 
@@ -859,6 +938,7 @@ export async function catchUpAsync(s: GameState, statuses: Statuses, elapsedSec:
     runTicks(s, statuses, i, end);
     if (end < secs) await new Promise((r) => setTimeout(r, 0));
   }
+  pauseBossClock(s, secs);
   return { simulated: secs, capped };
 }
 

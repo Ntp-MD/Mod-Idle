@@ -65,8 +65,10 @@ export function createEngine(E: EngineData) {
     mana: LG.mana_base + CEIL * K.K_INT_MP + LG.mp_per_level * (S.level_cap - 1),
     mana_regen: CEIL * K.K_INT_MREGEN,
     crit: CEIL * K.K_LCK_CRIT + M.crit_pct_main_hand,
-    res_raw: CEIL * K.K_VIT_RES,
-    res_three: CEIL * K.K_VIT_RES * (1 + (M.res_pct_per_item * LG.res_mod_items) / 100),
+    // Elemental resistance is a gear line (owner ruling): no Core stat feeds it, so the raw row
+    // is zero by construction and everything the build can hold comes off the Mod items.
+    res_raw: 0,
+    res_three: M.res_pct_per_item * LG.res_mod_items,
     align_raw: CEIL * K.K_DEX_ALIGN,
     align_path: CEIL * K.K_DEX_ALIGN + M.align_pct_per_item * 2,
     cdr_raw: CEIL * K.K_WIS_CDR,
@@ -102,6 +104,14 @@ export function createEngine(E: EngineData) {
   const mobStat = () => MSTAT.base;
 
   // the zone's average body factor: mob_HP(L) is the zone's AVERAGE mob, so group entries divide by it
+  const speciesById = (id: string): any | undefined => (E.mob.species as any[]).find((x) => x.id === id);
+  /**
+   * The zone cast derived from the single source (`mob.species[].zones`): every species id
+   * placed in the zone, sorted. `mob.zones[].subzones[].races` is presentation only and must
+   * read back equal to this list (cage X53) — runtime code reads this, never the subzones.
+   */
+  const racesInZone = (zoneId: number): string[] =>
+    (E.mob.species as any[]).filter((sp) => (sp.zones || []).includes(zoneId)).map((sp) => sp.id).sort();
   const sizeById = (id: string): MobSize | undefined => E.mob.sizes.find((x) => x.id === id);
   const sizeOr1 = (id: string): MobSize => sizeById(id) || { id, name: id, hp: 1, ps: 1, evasion: 1 };
   const zoneBodyFactorCache = new Map<number, number>();
@@ -156,19 +166,29 @@ export function createEngine(E: EngineData) {
    * `resOffset` is in percentage points and comes from the lines that strip a target's resistance —
    * Sunder, Elemental Fury, or a pierce on the hit itself (Nether Orb). It cannot take the line below
    * zero, so a −20 on a mob sitting at 9.5% opens it fully rather than amplifying damage.
+   *
+   * `element` is the Element half of the hit. A number uses the mob's headline `res`; a per-Element
+   * map uses `mob.resByElement` (the race profile, X54) so a race that shrugs fire and fears cold
+   * answers a fire-and-cold swing on each pool separately.
    */
-  function mitigateMobHit(mob: any, nonElement: number, element: number, armourCutFraction = 0, resOffset = 0) {
-    const res = Math.max(0, (mob.res || 0) + resOffset);
-    return (
-      nonElement * (1 - mobArmourCut(mob.armour, nonElement, armourCutFraction)) +
-      element * (1 - mobResCut(res))
-    );
+  function mitigateMobHit(mob: any, nonElement: number, element: number | Record<string, number>, armourCutFraction = 0, resOffset = 0) {
+    const non = nonElement * (1 - mobArmourCut(mob.armour, nonElement, armourCutFraction));
+    if (typeof element === 'number') {
+      const res = Math.max(0, (mob.res || 0) + resOffset);
+      return non + element * (1 - mobResCut(res));
+    }
+    let el = 0;
+    for (const [name, dmg] of Object.entries(element)) {
+      const base = (mob.resByElement && mob.resByElement[name] != null) ? mob.resByElement[name] : (mob.res || 0);
+      el += dmg * (1 - mobResCut(Math.max(0, base + resOffset)));
+    }
+    return non + el;
   }
 
-  // ---- Energy Shield: the caster's second pool 
-  DERIVED.es_pool = CEIL * K.K_INT_ES;
-  DERIVED.es_regen = CEIL * K.K_INT_ESREGEN;
-  DERIVED.es_recover_sec = DERIVED.es_pool / DERIVED.es_regen;
+  // ---- Energy Shield: the caster's second pool, worn on gear rather than spent from a stat
+  DERIVED.es_pool = M.energy_shield_flat_t1 * (1 + M.max_energy_shield_pct / 100);
+  DERIVED.es_regen = DERIVED.es_pool * ES.regen_pct / 100;
+  DERIVED.es_recover_sec = 100 / ES.regen_pct;
   DERIVED.es_cast_hp = LG.hp_base + statAt(S.level_cap) * K.K_VIT_HP + LG.hp_per_level * (S.level_cap - 1);
   DERIVED.es_share_of_hp = DERIVED.es_pool / DERIVED.es_cast_hp;
 
@@ -238,6 +258,19 @@ export function createEngine(E: EngineData) {
   const mobDodge = (agiRate: number, Lv: number) => Math.min(100, (agiRate / (agiRate + refAttackerAcc(Lv))) * 100);
   const damageSplit = (tag: string) => E.mob.damage_split[tag];
 
+  // ---- race resistance: each species tilts its Vit line by Element (mob.resist_rules · X54).
+  // The five multipliers average 1.00, so the published res column stays the Vit line and the
+  // profile only decides which Element a build should bring against a given race.
+  const speciesResMult = (sp: any, el: string) => (sp.resist ? (sp.resist[el] ?? 1) : 1);
+  /** The headline res (the mean of the profile) - the number the roster's res column prints. */
+  const mobResOf = (sp: any) => Math.min(CAP.elem_res, mobStat() * sp.stats.vit * K.K_MOB_RES);
+  /** Per-Element res: the profile applied before the same Cap the player obeys. */
+  const mobResByElementOf = (sp: any) => {
+    const out: Record<string, number> = {};
+    for (const el of E.elements.order) out[el] = Math.min(CAP.elem_res, mobStat() * sp.stats.vit * K.K_MOB_RES * speciesResMult(sp, el));
+    return out;
+  };
+
   DERIVED.zone9_boss_physical = mobPs(zoneById(9)!.hp[1], 90) * sizeOr1('boss').ps / 2;
   DERIVED.armour_vs_zone9_boss = armourReduce(DERIVED.armour_ceil, DERIVED.zone9_boss_physical);
   DERIVED.armour_vs_zone9_trash = armourReduce(DERIVED.armour_ceil, mobPs(zoneById(9)!.hp[1], 90) / 2);
@@ -271,9 +304,14 @@ export function createEngine(E: EngineData) {
   }));
 
   // aspd = weapon_aspd × (100 + (agi − Base) × K_AGI_ASPD + aspd_pct) · hits/sec = aspd / 100
+  // The Cap is a CLOCK rule (core-stats.md · formula.md): it binds the FINAL figure, so it is
+  // applied LAST — after the aspd Mod band inside the parentheses, after a multiplicative aspd
+  // buff, and after the weight tax — by `capAspd` at the character sheet. No build passes
+  // `CAP.aspd` (~5 hits/sec), which is what makes Haste's ×1.15 clamp instead of stack past it.
   const aspdOf = (agi: number, weaponAspd: number, aspdPct = 0) =>
-    Math.min(CAP.aspd, weaponAspd * (100 + (agi - S.base) * K.K_AGI_ASPD + aspdPct));
-  const hitsPerSec = (aspd: number) => aspd / 100;
+    weaponAspd * (100 + (agi - S.base) * K.K_AGI_ASPD + aspdPct);
+  const capAspd = (aspd: number) => Math.min(CAP.aspd, aspd);
+  const hitsPerSec = (aspd: number) => capAspd(aspd) / 100;
 
   const weaponMult = (weaponAspd: number) => 1.2 / weaponAspd;
   const physOf = (str: number, flat: number, pct: number, weaponAspd: number) => (str * K.K_STR + flat) * (1 + pct / 100) * weaponMult(weaponAspd);
@@ -341,7 +379,7 @@ export function createEngine(E: EngineData) {
   const REF_WEAPON = E.weapons.find((w) => /one-handed/.test(w.name)) || E.weapons[0];
   const buildLine = (stat: number, weaponAspd: number) => {
     const phys = physOf(stat, M.phys_flat_main_hand, M.phys_pct_main_hand, weaponAspd);
-    const aspd = aspdOf(stat, weaponAspd, M.aspd_pct);
+    const aspd = capAspd(aspdOf(stat, weaponAspd, M.aspd_pct));
     const pool = critPool(stat);
     const crit = critChanceOf(pool);
     const critDmg = critDmgOf(pool, M.crit_damage_mod_pct);
@@ -371,15 +409,19 @@ export function createEngine(E: EngineData) {
   const hpRegenOf = (vit: number, pct = 0, flat = 0) => vit * K.K_VIT_REGEN * (1 + pct / 100) + flat;
   const maxManaOf = (int: number, level: number, pct = 0, flat = 0) => (LG.mana_base + int * K.K_INT_MP + LG.mp_per_level * (level - 1) + flat) * (1 + pct / 100);
   const manaRegenOf = (int: number, pct = 0, flat = 0) => int * K.K_INT_MREGEN * (1 + pct / 100) + flat;
-  const maxEsOf = (int: number, flat = 0, pct = 0) => (int * K.K_INT_ES + flat) * (1 + pct / 100);
-  const esRegenOf = (int: number) => int * K.K_INT_ESREGEN;
+  // Energy Shield is a gear pool (owner ruling): the Mod rows are the whole of it, and the regen is
+  // `regen_pct`% of the max pool per second, which an `es_regen` skill, Mod or passive amplifies.
+  const maxEsOf = (flat = 0, pct = 0) => flat * (1 + pct / 100);
+  const esRegenOf = (pool: number, ampPct = 0) => pool * (ES.regen_pct / 100) * (1 + ampPct / 100);
   const cdrOf = (wis: number, pctTotal = 0) => Math.min(CAP.cdr, (wis * K.K_WIS_CDR) * (1 + pctTotal / 100));
   // the trailing multiplier is where a skill that scales the finished stat lands (Warcry's
   // "alignment and Elemental resistance x1.20"); the Cap still applies after it
   // Elemental Alignment has NO Cap (owner ruling): it is the Dex-derived status gate and Element
   // multiplier, left open-ended. The defensive `Status Alignment resistance %` is a separate Mod line.
   const alignmentOf = (dex: number, flat = 0, mult = 1) => (dex * K.K_DEX_ALIGN + flat) * mult;
-  const resistanceOf = (vit: number, pct = 0, mult = 1) => Math.min(CAP.elem_res, vit * K.K_VIT_RES * (1 + pct / 100) * mult);
+  // Elemental resistance is a gear line (owner ruling): no Core stat feeds it, so the Mod rows
+  // are the whole of it and the Cap is the only thing that stops it.
+  const resistanceOf = (pct = 0, mult = 1) => Math.min(CAP.elem_res, pct * mult);
   /**
    * Stun Recovery (the owner's `owner/idea-gameplay.md` item 5): Vit buys back part of a shock's stop,
    * so a 1 sec stun with 50% recovery leaves half a second. `K_VIT_STUNREC` is derived from that very
@@ -400,7 +442,7 @@ export function createEngine(E: EngineData) {
     return Math.min(CAP.weight_overload, Math.max(0, (weightUsed - cap) / cap));
   };
   const aspdEncumbered = (agi: number, weaponAspd: number, aspdPct: number, weightUsed: number, str: number) =>
-    aspdOf(agi, weaponAspd, aspdPct) * (1 - encumbranceOf(weightUsed, str));
+    capAspd(aspdOf(agi, weaponAspd, aspdPct) * (1 - encumbranceOf(weightUsed, str)));
   // Item quality weighs more too: the same ×1.3 the doc applies to values (bases.json carries the
   // multiplier next to the Base weights, so it is passed in rather than repeated here).
   const weightAtQuality = (baseWeight: number, q: number, mult: number) => baseWeight * Math.pow(mult, q);
@@ -464,16 +506,38 @@ export function createEngine(E: EngineData) {
   const dropChance = (band: string) => L.base_drop_chance * (1 + lckOf(band) * K.K_LCK_DROP);
   const killsDerived = (band: string) => (3600 / (L.bands[band].group_mobs * L.ttk_per_mob_sec + L.group_spawn_sec)) * L.bands[band].group_mobs;
 
+  // ---- XP (world.md § Levelling · the same curve tools/timeline.ts publishes)
+
+  const X = E.xp;
+  const ANCHORS = Object.keys(X.kills_anchors).map(Number).sort((a, b) => a - b);
+  function killsToLevel(level: number) {
+    if (X.kills_anchors[level] != null) return X.kills_anchors[level];
+    for (const [a, b] of ANCHORS.slice(0, -1).map((lv, i) => [lv, ANCHORS[i + 1]])) {
+      if (level > a && level < b) return X.kills_anchors[a] + (X.kills_anchors[b] - X.kills_anchors[a]) * (level - a) / (b - a);
+    }
+    return X.kills_anchors[ANCHORS[ANCHORS.length - 1]];
+  }
+  // The plateau: past `plateau_from` the bar is one flat XP value, the step out of `plateau_step_at`.
+  // The bar a player watches is XP, so that is where the plateau is stated — and the kills it takes at
+  // those levels are derived from it, because a higher level pays more per kill.
+  const plateauXp = () => { const at = X.plateau_step_at ?? S.mob_level_cap; return killsToLevel(at) * X.per_kill_mob_level * Math.min(at, S.mob_level_cap); };
+  const onPlateau = (level: number) => X.plateau_from != null && level >= X.plateau_from;
+  const xpToNext = (level: number) => (onPlateau(level) ? plateauXp() : killsToLevel(level) * X.per_kill_mob_level * Math.min(level, S.mob_level_cap));
+  const xpPerKill = (mobLevel: number) => X.per_kill_mob_level * mobLevel;
+
   const BAND: Record<string, any> = {};
   for (const b of BAND_KEYS) {
     // F3 is derived from the ROUNDED F2 the doc prints, so the published table closes: kills/hr ×
     // the printed drop chance is the drops/hr to the last digit. Reading the raw chance instead let
     // a 0.05% rounding flip a kill x chance product by one and broke X5 (re-base).
     const dropPct = r1(dropChance(b) * 100);
-    const drops = Math.round(L.bands[b].kills_per_hr_published * (dropPct / 100));
+    // kills/hr is DERIVED from the cycle (TTK per mob, the group it fields, the gap between groups),
+    // never published: the design states what a kill pays, not what an hour holds (AGENT.md — no time
+    // limit, no play-length target). Every figure below is the same number it always was.
+    const kph = Math.round(killsDerived(b));
+    const drops = Math.round(kph * (dropPct / 100));
     BAND[b] = {
-      kills_per_hr: L.bands[b].kills_per_hr_published,
-      kills_derived: Math.round(killsDerived(b)),
+      kills_derived: kph,
       group_mobs: L.bands[b].group_mobs,
       lck: Math.round(lckOf(b)),
       lck_mult: r2(1 + lckOf(b) * K.K_LCK_DROP),
@@ -481,19 +545,62 @@ export function createEngine(E: EngineData) {
       drops_per_hr: drops,
       upgrades_per_hr: L.bands[b].upgrades_per_hr,
       junk_per_hr: drops - L.bands[b].upgrades_per_hr,
-      band_hours: b === 'high_full_lck' ? 0 : undefined,
+      band_kills: b === 'high_full_lck' ? 0 : undefined,
     };
   }
-  BAND.low.band_hours = L.timeline_checkpoints_hr.level_30;
-  BAND.mid.band_hours = r1(L.timeline_checkpoints_hr.level_60 - L.timeline_checkpoints_hr.level_30);
-  BAND.high.band_hours = r1(L.timeline_checkpoints_hr.level_90 - L.timeline_checkpoints_hr.level_60);
+  // ---- the progression checkpoints, DERIVED from the XP curve (`xp.kills_anchors`)
+  // One home: the curve owns how many kills a level costs, and every checkpoint is that curve's own
+  // integral — a level's cost divided by what the cast of that level actually pays (an elite is worth
+  // `elite_mult` and the boss clock adds its share). Nothing here is typed a second time, so a curve
+  // re-shape moves the checkpoints, the bands and the town budgets together.
+  const CHECKPOINT_LEVELS = [10, 30, 60, 90, 100, 120, 150, 180, 190];
+  const bandOfLevel = (lv: number) => (lv <= 30 ? 'low' : lv <= 60 ? 'mid' : 'high');
+  const xpMix = (kph: number) => {
+    const elite = L.elite_spawn_chance;
+    const bossShare = L.boss_per_hour / kph;
+    return (1 - elite - bossShare) + elite * X.elite_mult + bossShare * X.boss_mult;
+  };
+  const CHECKPOINTS_KILLS: Record<string, number> = {};
+  {
+    // A checkpoint is the XP it takes to REACH that level, so it sums the steps into 1..L-1 — the step
+    // out of the checkpoint itself is post-completion work and belongs to no checkpoint.
+    let cum = 0;
+    for (let lv = 1; lv <= S.level_cap; lv++) {
+      if (CHECKPOINT_LEVELS.includes(lv)) CHECKPOINTS_KILLS[`level_${lv}`] = Math.round(cum);
+      cum += (xpToNext(lv) / (X.per_kill_mob_level * Math.min(lv, S.mob_level_cap))) / xpMix(BAND[bandOfLevel(lv)].kills_derived);
+    }
+  }
+  // a band is a COUNT of kills between two checkpoints, never a stretch of hours: how long a band
+  // takes is the player's own pace (AGENT.md — no time limit, no play-length target).
+  BAND.low.band_kills = CHECKPOINTS_KILLS.level_30;
+  BAND.mid.band_kills = CHECKPOINTS_KILLS.level_60 - CHECKPOINTS_KILLS.level_30;
+  BAND.high.band_kills = CHECKPOINTS_KILLS.level_90 - CHECKPOINTS_KILLS.level_60;
+  const PUSH_KILLS_91_100 = CHECKPOINTS_KILLS.level_100 - CHECKPOINTS_KILLS.level_90;
+  // ---- a settlement's budget, DERIVED from the same curve
+  // Every settlement owns one zone, a zone is ten levels, and the last one also absorbs the stretch
+  // past the eighteenth zone up to the level cap — so the budgets ARE the run's slices and they sum to
+  // the completion total by construction. Nothing is typed twice: a curve re-shape moves them.
+  const SETTLEMENT_BUDGET_KILLS: Record<number, number> = {};
+  {
+    const span = (z: number): [number, number] => [10 * (z - 1) + 1, z === ZONES.length ? S.level_cap : 10 * z];
+    for (const z of ZONES) {
+      const [from, to] = span(z.id);
+      // the slice is the cost of its own levels: the steps INTO from..to, same convention as a checkpoint
+      let cum = 0;
+      for (let lv = from; lv <= to; lv++) {
+        if (lv - 1 < 1) continue; // level 1 is where the run starts: there is no step into it
+        cum += (xpToNext(lv - 1) / (X.per_kill_mob_level * Math.min(lv - 1, S.mob_level_cap))) / xpMix(BAND[bandOfLevel(lv - 1)].kills_derived);
+      }
+      SETTLEMENT_BUDGET_KILLS[z.id] = Math.round(cum);
+    }
+  }
 
   const goldPerMinute = (b: string) => Math.round((BAND[b].junk_per_hr / 60) * Math.pow(10, TS.round_rate_to_decimals)) / Math.pow(10, TS.round_rate_to_decimals);
 
   // Stone income per hour, by band — the same three expressions the STONE block prints for high.
   const rerollValueStonesPerHr = (band: string) => Math.round(BAND[band].junk_per_hr / C.reroll_value_stones_per_use);
-  const tierStonesPerHr = (band: string) => Math.round(L.bands[band].kills_per_hr_published * L.elite_spawn_chance * L.elite_tier_stones) + L.boss_per_hour * L.boss_tier_stones;
-  const addStonesPerHr = (band: string) => r2(L.bands[band].kills_per_hr_published * L.elite_spawn_chance * L.elite_add_stone_chance + L.boss_per_hour * L.boss_add_stones);
+  const tierStonesPerHr = (band: string) => Math.round(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_tier_stones) + L.boss_per_hour * L.boss_tier_stones;
+  const addStonesPerHr = (band: string) => r2(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance + L.boss_per_hour * L.boss_add_stones);
 
   // ---- the three craft stones the ladder costs but the loot table did not pay
   // crafting.md says Quality Stone comes "monsters → elites → bosses by step", Repair "elite / boss
@@ -501,12 +608,12 @@ export function createEngine(E: EngineData) {
   // figure below is divided out of them, so the doc never holds a second copy of one.
   const QS = L.quality_stone_sources, RS = L.repair_stone_sources, CS = L.corrupt_stone_sources;
   const qualityStonesPerHr = (band: string) => r2(
-    BAND[band].kills_per_hr * QS.monster_quality_chance! +
-    BAND[band].kills_per_hr * L.elite_spawn_chance * QS.elite_quality_chance! +
+    BAND[band].kills_derived * QS.monster_quality_chance! +
+    BAND[band].kills_derived * L.elite_spawn_chance * QS.elite_quality_chance! +
     L.boss_per_hour * QS.boss_quality_stones!,
   );
   const repairStonesPerHr = (band: string) => r2(
-    BAND[band].kills_per_hr * L.elite_spawn_chance * RS.elite_repair_chance! +
+    BAND[band].kills_derived * L.elite_spawn_chance * RS.elite_repair_chance! +
     L.boss_per_hour * RS.boss_repair_stones!,
   );
   const corruptStonesPerHr = (band: string) => r2(L.boss_per_hour * CS.boss_corrupt_chance!);
@@ -554,20 +661,6 @@ export function createEngine(E: EngineData) {
     return { reroll_value: Math.round(s.reroll_value), tier: Math.round(s.tier), add: Math.round(s.add) };
   };
 
-  // ---- XP (world.md § Levelling · the same curve tools/timeline.ts publishes)
-
-  const X = E.xp;
-  const ANCHORS = Object.keys(X.kills_anchors).map(Number).sort((a, b) => a - b);
-  function killsToLevel(level: number) {
-    if (X.kills_anchors[level] != null) return X.kills_anchors[level];
-    for (const [a, b] of ANCHORS.slice(0, -1).map((lv, i) => [lv, ANCHORS[i + 1]])) {
-      if (level > a && level < b) return X.kills_anchors[a] + (X.kills_anchors[b] - X.kills_anchors[a]) * (level - a) / (b - a);
-    }
-    return X.kills_anchors[ANCHORS[ANCHORS.length - 1]];
-  }
-  const xpToNext = (level: number) => killsToLevel(level) * X.per_kill_mob_level * Math.min(level, S.mob_level_cap);
-  const xpPerKill = (mobLevel: number) => X.per_kill_mob_level * mobLevel;
-
   // ---- the full mob roster: every legal zone × species × body entry, plus Elite and Boss
 
   function mobRoster() {
@@ -589,7 +682,7 @@ export function createEngine(E: EngineData) {
             acc: mobAcc(lTo, sp.stats.dex, sp.accuracy_mult),
             ev: edge * sp.stats.dex * K.K_EVASION * size.evasion,
             armour: edge * sp.stats.str * K.K_ARMOUR,
-            res: edge * sp.stats.vit * K.K_VIT_RES,
+            res: edge * sp.stats.vit * K.K_MOB_RES, resist: sp.resist,
             align: edge * sp.stats.dex * K.K_DEX_ALIGN,
             crit: edge * sp.stats.lck * K.K_LCK_CRIT,
             dodge: mobDodge(edge * sp.stats.agi * K.K_MOB_DODGE, lTo),
@@ -607,7 +700,7 @@ export function createEngine(E: EngineData) {
             acc: mobAcc(lTo, sp.stats.dex, sp.accuracy_mult),
             ev: edge * sp.stats.dex * K.K_EVASION * el.evasion,
             armour: edge * sp.stats.str * K.K_ARMOUR,
-            res: edge * sp.stats.vit * K.K_VIT_RES,
+            res: edge * sp.stats.vit * K.K_MOB_RES, resist: sp.resist,
             align: edge * sp.stats.dex * K.K_DEX_ALIGN, crit: edge * sp.stats.lck * K.K_LCK_CRIT,
             dodge: mobDodge(edge * sp.stats.agi * K.K_MOB_DODGE, lTo),
             damage: sp.damage,
@@ -626,7 +719,7 @@ export function createEngine(E: EngineData) {
         acc: mobAcc(lTo, bs.stats.dex, bs.accuracy_mult),
         ev: edge * bs.stats.dex * K.K_EVASION * bz.evasion,
         armour: edge * bs.stats.str * K.K_ARMOUR,
-        res: edge * bs.stats.vit * K.K_VIT_RES,
+        res: edge * bs.stats.vit * K.K_MOB_RES, resist: bs.resist,
         align: edge * bs.stats.dex * K.K_DEX_ALIGN, crit: edge * bs.stats.lck * K.K_LCK_CRIT,
         dodge: mobDodge(edge * bs.stats.agi * K.K_MOB_DODGE, lTo),
         damage: bs.damage,
@@ -660,7 +753,9 @@ export function createEngine(E: EngineData) {
       evasion: mobEvasion(lv, sp.stats.dex, size.id),
       // the mob's own FLAT stat line, and the same Cap the player obeys on every percentage it carries
       armour: armourOf(mobStat() * sp.stats.str),
-      res: Math.min(CAP.elem_res, mobStat() * sp.stats.vit * K.K_VIT_RES),
+      res: mobResOf(sp),
+      resByElement: mobResByElementOf(sp),
+      resist: sp.resist,
       align: mobStat() * sp.stats.dex * K.K_DEX_ALIGN,
       dodgeRate: mobStat() * sp.stats.agi * K.K_MOB_DODGE,
       xp: xpPerKill(lv),
@@ -673,11 +768,12 @@ export function createEngine(E: EngineData) {
     statAt, statWithItems, ceilStat, pointsAt, treePointsAt, statOf,
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
-    ZONES, zoneById, finalZoneId, winTarget, sizeById, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
+    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
+    speciesResMult, mobResOf, mobResByElementOf,
   evasionChance, evasionRating, agilityEvasion,
     MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION, sizeMult, damageSplit, mobRoster, spawnAt,
     // player lines
-    aspdOf, hitsPerSec, weaponMult, physOf, magicOf, playerAccuracy, hitVs, hitChance,
+    aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, playerAccuracy, hitVs, hitChance,
     dodgeRate, dodgeChance, perfectDodgeChance, blockChance, armourPenCut, stunChanceFrom, bleedChanceFrom,
     critPool, critChanceOf, critDmgOf,
     maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf, esRegenOf, cdrOf,
@@ -685,7 +781,7 @@ export function createEngine(E: EngineData) {
     armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, agiForCap,
     weaponWeightOf, sizeMultOf, applySizeMult, basicAttackOf,
     // loot + xp
-    lckOf, dropChance, killsDerived, goldPerMinute, killsToLevel, xpToNext, xpPerKill,
+    lckOf, dropChance, killsDerived, goldPerMinute, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
     floorOf, ceilingOf, qualityIndexOf,
     rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr,
     stonesForMinutes, taskPayout,

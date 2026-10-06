@@ -52,6 +52,18 @@ export function plotCount(state: GameState): number {
   return Math.min(farm.plotsMax, farm.F.plots.base + deeds);
 }
 
+/**
+ * The plot track grows with the Steward's deeds, but the array is only ever built at the base size
+ * and nothing pushed the bought slots. Pad it up to the owned count on access, so plot 4/5 exist as
+ * real slots instead of reading `undefined` (which crashed `plant` the moment a deed was bought).
+ */
+export function ensurePlots(state: GameState): Plot[] {
+  const plots = state.farm.plots;
+  const want = plotCount(state);
+  while (plots.length < want) plots.push({ tier: null, plantedAt: 0, readyAt: 0 });
+  return plots;
+}
+
 export function farmLevel(state: GameState): number {
   return farm.farmLevel(state.farm.xp);
 }
@@ -61,7 +73,7 @@ export function plant(state: GameState, index: number, tier: string): { ok: bool
   if (!farm.canGrow(farmLevel(state), tier)) {
     return { ok: false, why: `Farming ${farm.F.tier_unlock_level[tier]} unlocks ${tier} herbs` };
   }
-  const plot = state.farm.plots[index];
+  const plot = ensurePlots(state)[index];
   if (plot.tier && state.clockSec < plot.readyAt) return { ok: false, why: 'still growing' };
   // a seed is one herb of the tier being planted (`farm.md` "plant 1 seed → harvest 3"), which makes
   // the cycle 3-for-1 rather than 3-for-0, without pricing anything new
@@ -78,7 +90,7 @@ export function plant(state: GameState, index: number, tier: string): { ok: bool
 }
 
 export function harvest(state: GameState, index: number): { ok: boolean; why?: string; herbs?: number; xp?: number } {
-  const plot = state.farm.plots[index];
+  const plot = ensurePlots(state)[index];
   if (!plot?.tier) return { ok: false, why: 'nothing planted' };
   if (state.clockSec < plot.readyAt) return { ok: false, why: `ready in ${Math.ceil((plot.readyAt - state.clockSec) / 3600 * 10) / 10} h` };
   const tier = plot.tier;
@@ -164,6 +176,7 @@ const AUTO_BREW_COOLDOWN_SEC = 30;
 export function maybeFarm(state: GameState): string[] {
   const f = state.farm;
   if (!f.autoFarm) return [];
+  ensurePlots(state);
   const out: string[] = [];
   if (f.autoFarm.harvest) {
     for (let i = 0; i < plotCount(state); i++) {

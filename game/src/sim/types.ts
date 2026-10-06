@@ -68,6 +68,11 @@ export interface Mob {
   speciesId?: string;
   /** The sub-zone this spawn rolled into: its own race pair and one of the zone's own Elements. */
   subzone?: string;
+  /**
+   * The ladder name this spawn rolled (`mob.variants` → `mob.variant_drops`). It owns both the junk
+   * item the mob pays and the stream it leans, so two mobs of one species are not one drop table.
+   */
+  variant?: string;
   kind: string;
   /** Which body-class column a weapon's `size_mult` reads this mob as (a boss declares its own). */
   readsAs?: string;
@@ -83,6 +88,8 @@ export interface Mob {
   dodgeRate: number;
   armour: number;
   res: number;
+  /** Per-Element res from the race profile (X54); the Element half of a swing or skill press reads this. */
+  resByElement?: Record<string, number>;
   damage: 'physical' | 'magic' | 'mixed';
   innate: string[];
   xp: number;
@@ -109,8 +116,10 @@ export interface Player {
   statPoints: number;
   /** When true, level points are auto-spent evenly (the reference build) — the idle default. */
   autoSpend: boolean;
-  /** Banked passive-tree points (the tree is empty; a point grants nothing yet). */
+  /** Banked passive-tree points. */
   treePoints: number;
+  /** Bought ranks, keyed by node id (`impact.1` … `control.21`) — 0-3 each, `engine/tree.ts` owns the nodes. */
+  treeRanks?: Record<string, number>;
   hp: number;
   mana: number;
   es: number;
@@ -221,7 +230,8 @@ export interface GameState {
   chestDay: Record<string, number>;
   skills: SkillState;
   healUp: HealBuff | null;
-  junkByRarity: Record<string, number>;
+  /** Unsold junk, keyed by the variant item's own name (`mob.variant_drops`). */
+  junk: Record<string, number>;
   /** Weapon-type Mastery XP, the held weapon's own track (`equipment-weapon.md`). */
   mastery: Record<string, number>;
   /** The six loadout sets (`engine.json` `presets`). */
@@ -234,8 +244,17 @@ export interface GameState {
   lastAutoZone?: number;
   /** Per-slot bag filter thresholds and the "not yet found" keep-list (`loot.md` §4 · `save.md`). */
   filter: FilterState;
-  /** 'stay' keeps hunting this zone; 'forward' moves on once its own level band is behind. */
+  /** 'stay' keeps hunting this zone; 'forward' climbs once its own level band is behind. */
   travel: 'stay' | 'forward';
+  /**
+   * Forward Mode's safe floor: the zone the character last held (the one it advanced out of). A
+   * Push returns here — the ladder's own answer to "this chapter is not survivable yet".
+   */
+  forwardSafe?: number;
+  /** The zone a Push chased the character out of, and the level it happened at. */
+  forwardBlockedZone?: number;
+  /** Forward Mode may not re-enter `forwardBlockedZone` until it has gained a level against this. */
+  forwardBlockedLevel?: number;
   /**
    * Auto-dissolve any drop whose Rarity is at or below this floor ('off' = never, spirit).
    * A client rule that dissolves into Reroll stones — never gold, so the two mints are untouched.
@@ -246,6 +265,11 @@ export interface GameState {
    * Absent zone = 'none'. It shifts drop weights, never the total, so no published number moves.
    */
   huntOrder?: Record<number, 'gear' | 'herb' | 'junk'>;
+  /**
+   * Per-zone hunting ground: the sub-zone NAME a spawn is rolled inside, so the player farms the race
+   * pair and the Element they chose. Absent = no preference, and a spawn rolls the zone's own cast.
+   */
+  zoneFocus?: Record<number, string>;
   /** The completion gate: the final zone's boss, one spawn, no Push (`concept.md`). */
   goal: GoalState;
   /** Curse lines currently written on a mob, keyed by that spawn's id (`skill-pool.md`). */

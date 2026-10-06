@@ -43,14 +43,14 @@ describe('turning a set in', () => {
     const set = col.setAt('bonegate');
     expect(setUnlocked(s, set)).toBe(false);
     expect(turnIn(s, 'bonegate').ok).toBe(false);
-    s.counters.zoneKills[gate.zone] = Math.ceil(eng.BAND.high.kills_per_hr * gate.budget_hr * TOWN.standing.tiers[1].share);
+    s.counters.zoneKills[gate.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[gate.zone] * TOWN.standing.tiers[1].share);
     expect(setUnlocked(s, set)).toBe(true);
   });
 
   it('consumes one held piece per line and pays the item itself', () => {
     const s = newGame(5);
     const gate = TOWN.settlements.find((x: any) => x.id === 'bonegate');
-    s.counters.zoneKills[gate.zone] = Math.ceil(eng.BAND.high.kills_per_hr * gate.budget_hr * TOWN.standing.tiers[1].share);
+    s.counters.zoneKills[gate.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[gate.zone] * TOWN.standing.tiers[1].share);
     const before = stashTabCount(s);
     const gold = s.counters.gold;
     s.bag.unshift(
@@ -71,7 +71,7 @@ describe('turning a set in', () => {
   it('happens once per character, and a missing piece is refused', () => {
     const s = newGame(6);
     const gate = TOWN.settlements.find((x: any) => x.id === 'ashfall');
-    s.counters.zoneKills[gate.zone] = Math.ceil(eng.BAND.low.kills_per_hr * gate.budget_hr * TOWN.standing.tiers[1].share);
+    s.counters.zoneKills[gate.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[gate.zone] * TOWN.standing.tiers[1].share);
     s.bag.unshift({ ...piece('Hood', 'helmet'), heldFor: 'militia' });
     expect(turnIn(s, 'ashfall').ok).toBe(false);
     s.bag.unshift({ ...piece('Ring Mail', 'chest'), heldFor: 'militia' }, { ...piece('Strapped Boots', 'boots'), heldFor: 'militia' });
@@ -84,7 +84,7 @@ describe('turning a set in', () => {
   it('reads held pieces from the stash as well as the bag', () => {
     const s = newGame(7);
     const gate = TOWN.settlements.find((x: any) => x.id === 'ashfall');
-    s.counters.zoneKills[gate.zone] = Math.ceil(eng.BAND.low.kills_per_hr * gate.budget_hr * TOWN.standing.tiers[1].share);
+    s.counters.zoneKills[gate.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[gate.zone] * TOWN.standing.tiers[1].share);
     s.town.owned.push('stash_tab_1');
     s.bag.unshift({ ...piece('Hood', 'helmet'), heldFor: 'militia' });
     s.stash[0] = [

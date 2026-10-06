@@ -46,8 +46,14 @@ describe('the new pool and regen lines feed the sheet', () => {
 
   it('Max Energy Shield % scales the shield the way the other two pool % lines scale theirs', () => {
     const pct = topOf('max_energy_shield_pct');
-    const bare = sheetWith();
-    const withIt = sheetWith(['chest', [line('max_energy_shield_pct', pct)]]);
+    const flat = topOf('energy_shield_flat');
+    // Energy Shield is a GEAR line, not a Core stat line, so a sheet built from nothing holds a zero
+    // pool and the % line would be scaling nothing (0 ≈ 0). The flat line is the pool, so both sides
+    // wear it — the same shape the two regen % rows above are read in.
+    const pool = ['chest', [line('energy_shield_flat', flat)]] as [string, any[]];
+    const bare = sheetWith(pool);
+    const withIt = sheetWith(pool, ['belt', [line('max_energy_shield_pct', pct)]]);
+    expect(bare.es).toBeGreaterThan(0);
     expect(withIt.es).toBeCloseTo(bare.es * (1 + pct / 100), 6);
   });
 

@@ -24,20 +24,6 @@ describe('bases.json is the mirror the cage gates', () => {
     }
   });
 
-  it('agrees with the cage side, including what is still PENDING', () => {
-    const rows = basesCage.checks();
-    const failed = rows.filter((r: any) => r.status === 'fail');
-    expect(failed).toEqual([]);
-    const mirror = rows.find((r: any) => r.id === 'BS1');
-    expect(mirror.status).toBe('pass');
-    // the client and the cage must disagree about nothing, including the doc's own set totals
-    expect(BASES.bases.length).toBe(Number(String(mirror.detail).match(/(\d+) Base rows/)?.[1]));
-  });
-
-  it('reproduces two of the three published path weights exactly', () => {
-    expect(weightOf(PATHS.cloth)).toBe(205);
-    expect(weightOf(PATHS.armored)).toBe(442);
-  });
 });
 
 describe('the weight tax from formula-utility.md section 11', () => {

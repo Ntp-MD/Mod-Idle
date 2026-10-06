@@ -32,12 +32,12 @@ All numbers here are designed to pass this check — if any number change breaks
 | Level 190 · single-stat ceiling | **433** (focused: 1,012) | `(108.4 + 25×13 items)` · reference points with every item on one stat · the focused build spends every point there too |
 | Level 190 · split two stats evenly | 271 each | 6 + 7 items (`SPLIT`) |
 | Level 190 · Str 13-item build | Physical power 2,607 · 1.79 times/sec | `(433×5 + 80) × 1.16`, Agi at the level-only 108 |
-| Expected DPS at level 100 (max build) | **3,965 per second** | includes 80% hit and 1.16 average crit · there is no passive tree |
+| Expected DPS at level 100 (max build) | **3,965 per second** | includes 80% hit and 1.16 average crit · the passive tree is not folded into this line yet (owner ruling) |
 | Time to kill level 100 mob | the **reference** build — **5.11 sec** · the focused build 0.22 sec (see section 0a) |
 
 ## 0a. Which ruling prices this line
 
-Two rulings reshaped the Core stat line: the Core Stat % term was retired, then automatic per-level growth was replaced by **spent stat points** (the point economy in `core-stats.md`). This file prices the current line only — the **reference** build, the level's points split evenly across the seven stats, is what every published number and `mob_HP` are measured against, and the **focused** build puts every point in one stat, printed beside it. The re-base is registered here: the reference build reads 1,775 DPS (2,378 with the skill list) against the retired all-stats-390 character's 21,058, so the level-100 mob's TTK is **5.11 sec**; `loot.ttk_per_mob_sec`, the three `kills_per_hr_published` figures, every loot band, the craft hour rows and the E1-E5 checkpoints all re-derived from it, `mob_HP` did not move, and the ENERGY-share, mob-dodge and armour-vs-trash bands were re-based with their rules unchanged. The funnel's new length is the honest consequence of that TTK and stands: play-length is not a design constraint, so `xp.kills_anchors` keeps the published line and no compensating cut is applied to it.
+Two rulings reshaped the Core stat line: the Core Stat % term was retired, then automatic per-level growth was replaced by **spent stat points** (the point economy in `core-stats.md`). This file prices the current line only — the **reference** build, the level's points split evenly across the seven stats, is what every published number and `mob_HP` are measured against, and the **focused** build puts every point in one stat, printed beside it. The re-base is registered here: the reference build reads 1,775 DPS (2,378 with the skill list) against the retired all-stats-390 character's 21,058, so the level-100 mob's TTK is **5.11 sec**; `loot.ttk_per_mob_sec`, the three `kills_per_hr_published` figures, every loot band, the craft count rows and the E1-E5 checkpoints all re-derived from it, `mob_HP` did not move, and the ENERGY-share, mob-dodge and armour-vs-trash bands were re-based with their rules unchanged. The funnel's new length is the honest consequence of that TTK and stands: play-length is not a design constraint, so `xp.kills_anchors` keeps the published line and no compensating cut is applied to it.
 
 **All 7 stats use the same formula**, and under allocation that describes the reference build rather than the player's only option. A Core stat is `stat.base + points × stat.point_value` — no multiply step is left to get the order wrong.
 
@@ -59,7 +59,7 @@ Every row uses sword (`weapon_aspd` 1.2 · weapon_mult 1.0) · reference mob eva
 - The spread is **2.27x** (3,745 down to 1,650) on the reference line, because 108 base Agi buys aspd far below the 500 Cap while Str has no Cap — every item on the measured stat wins, and the split pays for its freedom.
 - **The winner inverted again.** The 510 line made the 50/50 split best and all-Str worst; at the lower reference line Agi no longer competes, so **all-Str is best and all-Agi worst**, and the 50/50 split is a middle row. That is the same shape the 816 line had, for the same reason (Agi cannot reach the Cap).
 - Effect on the attack-speed fantasy sold in concept.md: a "fast hit" build now has to earn its place from hit-count value (procs · Sonic Blow · Flurry · chill · DoT ticks), because on aggregate it loses to the heavy split — the same trade the focused row below makes explicit.
-- Base mob HP is **not** set from the top row · it is set from `DPS of on-level gear` times the skill-list multiplier. On that line the reference build reads 1,775 (2,378 with the skill list), so the level-100 mob takes **5.11 sec** — the TTK the kill rates, the loot bands and the catch-up timeline are all written at (section 0a · `checks.md` D3-D5).
+- Base mob HP is **not** set from the top row · it is set from `DPS of on-level gear` times the skill-list multiplier. On that line the reference build reads 1,775 (2,378 with the skill list), so the level-100 mob takes **5.11 sec** — the TTK the kill rates, the loot bands and the catch-up budget are all written at (section 0a · `checks.md` D3-D5).
 
 # Summary of Set K Values
 
@@ -73,14 +73,14 @@ Every row uses sword (`weapon_aspd` 1.2 · weapon_mult 1.0) · reference mob eva
 | K_VIT_REGEN | 0.25 | hp regen / Vit | 108/sec at 433 |
 | K_INT_MP | 4 | mana / Int | set to keep mana a constraint, see section 5 |
 | K_INT_MREGEN | **0.28** | mana regen / Int | retuned with the pool the level cap 190 line gives: 40.0 sec against the 40 sec intent (B5) |
-| K_INT_ES | 4 | Energy Shield / Int | Int 433 = 1,734 shield = 17.3% of that build''s 10,029 HP (X25) |
-| K_INT_ESREGEN | 0.1 | ES recharge / Int | 43.3/sec · 3 sec delay · whole pool back in 40 sec |
+| K_INT_ES | **retired** | — | Energy Shield left Int (owner ruling); the pool is the Gear Energy Shield flat + Max Energy Shield % (X25) |
+| K_INT_ESREGEN | **retired** | — | the regen is `energy_shield.regen_pct` (3%/sec of the pool) plus any `es_regen` skill, Mod or passive — a Core stat would have made the shield a build axis the owner took out |
 | K_AGI_EVAS | 0.0333 | Evasion points / Agi | **30 Agi = 1 point** (owner ruling) · the mob side keeps K_MOB_DODGE for its own thin dodge |
 | K_AGI_ASPD | 0.25 | aspd % per Agi | `aspd = weapon_aspd × (100 + (agi−12)×0.25 + aspd_pct)` · level 1 sword = 1.2 times/sec |
 | K_WIS_CDR | 0.03 | cdr / Wis | 13% at 433 · 11 Mod items reach 48.8, under the hard-ceiling Cap 80 |
 | K_DEX_ACC | 1.5 | accuracy / Dex | no Cap; ratio formula limits itself |
 | K_DEX_ALIGN | 0.05 | Alignment / Dex | shared by Element and status · Alignment has no Cap (owner ruling) |
-| K_VIT_RES | 0.05 | elem res / Vit | no Flat · 21.7% at 433 |
+| K_MOB_RES | 0.05 | elem res / mob | **mob side only** — no Core stat feeds player Elemental resistance any more (owner ruling); the same value keeps all 22 species where they were |
 | K_VIT_STUNREC | 0.1154 | stun recovery / Vit | the owner's own example: Vit 433 = 50%, so the 1 sec shock leaves 0.5 sec (X48) |
 | K_LCK_CRIT | 0.05 | crit chance / Lck | 21.7% at 433 + 8 from main hand |
 | K_LCK_PDOGE | **0.03** | perfect dodge rate / Lck | ratio 18.6% at 433 · `K_PDOGE` 57 → Cap 21 binds first (reachable at Lck 506) |
@@ -102,9 +102,9 @@ Every row uses sword (`weapon_aspd` 1.2 · weapon_mult 1.0) · reference mob eva
 | Block chance | **no Cap** | the Shield offhand's Base Mod line · the second avoidance layer, rolled after perfect dodge and evasion · open-ended (owner ruling) |
 | Perfect dodge | **21** | ratio tops at 18.6% at Lck 433 but the Cap binds first · reachable at Lck 506 · old no-Cap retired |
 | Elemental Alignment | **no Cap** | open-ended (owner ruling): Dex 433 + amulet + gloves = 31.7 and it keeps climbing — the `Status Alignment resistance %` Mod line is the separate defensive answer |
-| Elemental resistance | 75 | a **hard ceiling**: Vit 433 + 3 res slots = 41.2, so the build tops out under it |
+| Elemental resistance | 75 | gear-only (owner ruling) — no Core stat feeds it, so the Cap **binds**: 3 res slots at the max roll reach 90 and stop at the Cap |
 | Cooldown reduction | 80 | a **hard ceiling**: Wis 433 + 11 CDR slots = 48.8, so the build tops out under it |
-| Attack speed | **500 (= 5 times/sec)** | the 0.2 sec floor between hits · a clock rule, not a build target: fastest weapon needs Agi 845 vs the 433 ceiling |
+| Attack speed | **500 (= 5 times/sec)** | the 0.2 sec floor between hits · a clock rule, not a build target: fastest weapon needs Agi 845 vs the 433 ceiling · applied LAST, after the aspd Mod band, an aspd buff and the weight tax |
 | Accuracy | ~~2,000~~ **removed** | ratio formula already forbids 100%; calculable ceiling 813 never hit old Cap |
 <!-- END GENERATED:cap-table -->
 

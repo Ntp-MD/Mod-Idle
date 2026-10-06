@@ -4,10 +4,12 @@
  *   node tools/timeline.ts            help
  *   node tools/timeline.ts --emit     print the generated XP table
  *   node tools/timeline.ts --write    rewrite the XP table in world.md
- *   node tools/timeline.ts --checks   progression sanity (the hours columns are informational)
+ *   node tools/timeline.ts --checks   progression sanity
  *
- * Inputs: tools/data/engine.json `xp` (kills anchors · per-kill rate · step) and
- * `loot` (band kill rates · timeline checkpoints). The table is derived, never typed.
+ * Inputs: tools/data/engine.json `xp` (kills anchors · per-kill rate · step). The table is derived,
+ * never typed, and it is measured in **kills** — a state the player holds, never in hours: this game
+ * has no time limit and no play-length target (owner ruling), so no table here may print how long a
+ * milestone "takes".
  */
 
 import * as G from './lib/generated.ts';
@@ -19,8 +21,6 @@ const L = E.loot;
 
 const ANCHORS = Object.keys(X.kills_anchors).map(Number).sort((a: number, b: number) => a - b);
 const CAP = E.stat.mob_level_cap;
-const BAND_KILLS = { low: L.bands.low.kills_per_hr_published, mid: L.bands.mid.kills_per_hr_published, high: L.bands.high.kills_per_hr_published };
-const killsHr = (level: number) => (level <= 30 ? BAND_KILLS.low : level <= 60 ? BAND_KILLS.mid : BAND_KILLS.high);
 
 function kills(level: number): number {
   if (X.kills_anchors[level] != null) return X.kills_anchors[level];
@@ -31,25 +31,20 @@ function kills(level: number): number {
   return X.kills_anchors[ANCHORS[ANCHORS.length - 1]];
 }
 
-// Every kill is not a plain mob: one in five rolls elite (×3 XP) and the boss clock adds
-// ×15 kills at 4/hr. Ignoring those made the timeline wrong the moment the elite rate moved
-// from 0.5% to 20% — the game would finish a third early. `xp_per_kill` is the tuning knob
-// that holds the published hours while the multipliers are paid honestly.
-const xpMult = (kph: number) => {
-  const elite = L.elite_spawn_chance;
-  const bossShare = L.boss_per_hour / kph;
-  return (1 - elite - bossShare) + elite * X.elite_mult + bossShare * X.boss_mult;
-};
-const xpToNext = (level: number) => kills(level) * X.per_kill_mob_level * Math.min(level, CAP);
-const hoursIn = (level: number) => kills(level) / xpMult(killsHr(level)) / killsHr(level);
+// XP is read per kill, and a kill is not always a plain mob: one in five rolls elite (×3 XP) and the
+// boss clock pays ×15. The anchors in `xp.kills_anchors` are the plain-mob count to clear a level, so
+// the table below prints that count and the XP it is worth — never the hours it would take to earn it.
+const onPlateau = (level: number) => X.plateau_from != null && level >= X.plateau_from;
+const plateauXp = () => kills(X.plateau_step_at) * X.per_kill_mob_level * Math.min(X.plateau_step_at, CAP);
+const xpToNext = (level: number) => (onPlateau(level) ? plateauXp() : kills(level) * X.per_kill_mob_level * Math.min(level, CAP));
 
 function model(): any {
   const levels: any[] = [];
-  let cumXp = 0, cumHr = 0;
+  let cumXp = 0, cumKills = 0;
   for (let lv = 1; lv <= E.stat.level_cap; lv++) {
-    const xp = xpToNext(lv), hr = hoursIn(lv);
-    cumXp += xp; cumHr += hr;
-    levels.push({ lv, xp, hr, cumXp, cumHr });
+    const xp = xpToNext(lv), k = xp / (X.per_kill_mob_level * Math.min(lv, CAP));
+    cumXp += xp; cumKills += k;
+    levels.push({ lv, xp, k, cumXp, cumKills });
   }
   const steps: any[] = [];
   for (let start = 1; start <= E.stat.level_cap; start += X.step) {
@@ -57,32 +52,40 @@ function model(): any {
     steps.push({
       from: start, to: block[block.length - 1].lv,
       xp: block.reduce((s: number, b: any) => s + b.xp, 0),
+      kills: block.reduce((s: number, b: any) => s + b.k, 0),
       cumXp: block[block.length - 1].cumXp,
-      cumHr: block[block.length - 1].cumHr,
+      cumKills: block[block.length - 1].cumKills,
     });
   }
-  return { levels, steps, totalHr: cumHr, totalXp: cumXp };
+  return { levels, steps, totalKills: cumKills, totalXp: cumXp };
 }
 
 function gates(m: any): any[] {
   const out: any[] = [];
   const add = (id: string, ok: boolean, detail: string) => out.push({ id, ok, detail });
-  // No wall-clock gate: this is an open-world idle RPG with no time limit (owner ruling), so the
-  // cumulative-hour checkpoints are informational, never asserted. Only progression sanity is gated.
-  const mono = m.steps.every((s: any, i: number) => i === 0 || s.xp > m.steps[i - 1].xp);
-  add('TL1', mono, `xp to clear each ${X.step}-level step is strictly increasing (${Math.round(m.steps[0].xp).toLocaleString('en-US')} → ${Math.round(m.steps[m.steps.length - 1].xp).toLocaleString('en-US')})`);
+  // No wall-clock gate and no clock column: this is an open-world idle RPG with no time limit (owner
+  // ruling), so progression is read in kills — a state the player holds. The sanity rule is the shape
+  // the owner set: the bar climbs to the completion checkpoint and then holds FLAT.
+  const COMPLETION = 100;
+  const up = m.steps.filter((s: any) => s.to <= COMPLETION);
+  const tail = m.steps.filter((s: any) => s.from > COMPLETION);
+  const rising = up.every((s: any, i: number) => i === 0 || s.xp > up[i - 1].xp);
+  const flatTail = tail.every((s: any) => Math.abs(s.xp - tail[0].xp) < 1e-6);
+  const plateau = X.plateau_from != null && X.plateau_step_at != null && X.plateau_from > X.plateau_step_at;
+  add('TL1', rising && flatTail && plateau,
+    `the bar climbs to the completion checkpoint (xp per ${X.step}-level step ${Math.round(up[0].xp).toLocaleString('en-US')} → ${Math.round(up[up.length - 1].xp).toLocaleString('en-US')} through level ${COMPLETION}) and then holds FLAT: every step past ${COMPLETION} costs the same ${Math.round(tail[0].xp).toLocaleString('en-US')} XP, the 89 → 90 size, so the post-completion loop is a plateau and not a wall${rising ? '' : ' · THE CLIMB IS NOT RISING'}${flatTail ? '' : ' · THE TAIL IS NOT FLAT'}${plateau ? '' : ' · NO PLATEAU IS DECLARED'}`);
   return out;
 }
 
 function block(): string {
   const m = model();
   const rows = m.steps.map((s: any) =>
-    `| ${s.from}-${s.to} | ${Math.round(s.xp).toLocaleString('en-US')} | ${Math.round(s.cumXp).toLocaleString('en-US')} | ${s.cumHr.toFixed(1)} |`);
+    `| ${s.from}-${s.to} | ${Math.round(s.xp).toLocaleString('en-US')} | ${Math.round(s.cumXp).toLocaleString('en-US')} | ${Math.round(s.kills).toLocaleString('en-US')} | ${Math.round(s.cumKills).toLocaleString('en-US')} |`);
   return [
-    `Derived from \`xp_to_next(L) = kills(L) × ${X.per_kill_mob_level} × min(L, ${CAP})\` with the kills anchors and band rates in \`engine.json\`.`,
+    `Derived from \`xp_to_next(L) = kills(L) × ${X.per_kill_mob_level} × min(L, ${CAP})\` with the kills anchors in \`engine.json\`. The unit is kills, not hours: how long a step takes is the player's own pace (\`AGENT.md\`).`,
     '',
-    '| Levels | XP to clear the step | Cumulative XP | Cumulative hr |',
-    '|---|---|---|---|',
+    '| Levels | XP to clear the step | Cumulative XP | Kills to clear the step | Cumulative kills |',
+    '|---|---|---|---|---|',
     ...rows,
   ].join('\n');
 }
@@ -125,6 +128,6 @@ if (arg === '--emit') {
 
   node tools/timeline.ts --emit     print the generated XP table
   node tools/timeline.ts --write    rewrite the XP table in world.md
-  node tools/timeline.ts --checks   reconcile against E1-E5 checkpoints
+  node tools/timeline.ts --checks   progression sanity
 `);
 }

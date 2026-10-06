@@ -89,7 +89,7 @@ weak_mult = 1.5   if our Element matches the monster innate Element
 # 4. Elemental resistance
 
 ```
-res_c       = vit * K_VIT_RES                     K_VIT_RES = 0.05
+res_c       = vit * K_MOB_RES                     K_MOB_RES = 0.05
 elem_res_x  = res_c * (1 + elem_res_pct_x/100)
 elem_res_x  = min(elem_res_x, 75)
 
@@ -232,7 +232,7 @@ dot_total = min(dot_total, elem_aligned_damage * 1.5)
 | K | Value | Note |
 |---|---|---|
 | K_ELEM | 4 | elem / Int · lower than K_INT because it must pass Alignment |
-| K_VIT_RES | 0.05 | elem res / Vit · no Flat |
+| K_MOB_RES | 0.05 | elem res / Vit · no Flat |
 | K_FIRE_BURN | 0.30 | burn per stack · max 5 stacks = 1.50, exactly the global DoT Cap |
 | K_BURN_REGEN_CUT | 0.10 | HP regen cut per burn stack · 5 stacks = −50%, no separate Cap |
 | K_CHILL_ARMOUR_CUT | 0.25 | target Armour × 0.75 · bites the lineages that carry Armour  |

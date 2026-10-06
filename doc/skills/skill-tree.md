@@ -1,50 +1,34 @@
-# Skill Tree — empty
+# Skill Tree
 
 import glossary.md
 import skill-pool.md
 
-**This game has no passive skill tree.** The tree was cleared because the fundamentals were still moving, and it is kept here as an empty shell so the decision, the fold point and the cage all survive. A level now grants a **tree point that is banked** — but the tree still holds no content, so a banked point grants nothing until it lands. This amends "no passive tree" ruling: the points exist, the tree does not.
+**The tree is back, redesigned from scratch** (owner ask). Three branches — **impact** (offence), **stream** (sustain and Core stats), **control** (defence) — **twenty-one nodes each, three ranks per node, one point per rank**: the tree holds sixty-three nodes and a hundred and eighty-nine ranks, and `treePointsAt(level_cap)` spends them exactly — a level grants a point and a point buys a rank.
 
-## Why it went
+**Every node pays a number.** A node grants one **real line** from `mods.json` at a fraction of that line's own maximum — a shallow node's rank 3 is a tenth of its line's own maximum and a deep node's is a fifth (the ranks below step down from there), so a fully bought tree is worth about two thirds of a gear set and a deep node is always the stronger buy of its line — so nothing here is a rule with no number in it, which is exactly what the removed tree was: 82 of its 100 points bought rules and **all** the power sat in 18 keystones. **There are no keystones** in this tree.
 
-The design that was removed was not a node graph. Its own budget said so: 100 points per level, of which **82 bought rules that granted no numbers at all** — hit-counting tweaks, duration clauses, stack-cap changes — and **all** of the power sat in 18 keystones costing 3 points each. That is a keystone picker with connective tissue, and it duplicated the question the skill list already asks: *what do I press?*
+**Pathing is one chain per branch.** Node *k* needs node *k−1* owned; node 1 is free. No hub, no limbs, no tiers beyond a node's position in its own chain.
 
-Worse, it was load-bearing in the one place that must not wobble: the tree multiplier was folded into `mob_HP`, so the price of every mob in the game was set against power the player could only get from a system whose shape was about to change again.
+**Respec is free**, at the town Counterhand, exactly like the Core stat points: the tree is the player's build to express (`AGENT.md` D11), so taking it back costs nothing.
 
-## What is left, and what it is for
-
-| Kept | Why |
-|---|---|
-| `tools/data/tree.json` (empty) | the fold point: any future power source must be multiplied into `mob_HP`, and this is where that factor is declared |
-| `tools/tree.ts` + its slot in `verify.js` | the cage that will validate whatever replaces this |
-| these four files | one home for the decision, so the next session does not re-invent a tree and re-derive its numbers from scratch |
-
-## What must be true before anything is added back
-
-1. **The core loop is stable** — gear, crafting, Push and the mob curve are no longer being re-tuned.
-2. **The replacement is not a node graph** — if the answer is "which skills and which aura set", that belongs to the skill list and skill level, not to a second grid (`skill-pool.md` · `skill-pool-system.md`).
-3. **Its power is folded into `mob_HP` in the same commit that adds it.** A power source that is not inside the mob price moves the game speed, and the 574.5 hr timeline stops being true.
-4. **No document quotes a tree multiplier while this file is empty.** `tools/anchors.ts` and the cages treat any such number as a copy.
-
-## Shape (empty)
+## Shape
 
 <!-- BEGIN GENERATED:tree-summary -->
-| Branch | File | Minor declared | Minor parsed | Limbs parsed | Keystones | Dangling refs |
-|---|---|---|---|---|---|---|
-| **total** | 3 files | **0** | **0** | **0** | **0** | **0** |
-
-> Every node "Enables" cell resolves to a real skill or keystone. `checks.md` D19 reference check passes.
+| Branch | What it buys | Nodes | Ranks | Points | Chain |
+|---|---|---|---|---|---|
+| **impact** | offence lines — power, crit, penetration, accuracy, attack speed, stun, bleed | 21 | 63 | 63 | node k needs node k-1 |
+| **control** | defence lines — armour, evasion, block, resistance, HP, Energy Shield, cooldown | 21 | 63 | 63 | node k needs node k-1 |
+| **stream** | sustain and Core stats — mana, regeneration, Energy Shield regen, Stat Mod | 21 | 63 | 63 | node k needs node k-1 |
+| **total** | every node pays a number | **63** | **189** | **189** | 3 chains |
 <!-- END GENERATED:tree-summary -->
 
-<!-- BEGIN GENERATED:tree-layout -->
-| Branch | Limb (order from the hub) | Nodes | Tiers it can hold | Spoke keystone |
-|---|---|---|---|---|
+The three chains are the three branch files: `skill-tree-impact.md`, `skill-tree-stream.md`, `skill-tree-control.md` — each prints its own 21-node table, derived by `node tools/tree.ts --write` from the spec in `tools/data/tree.json` and the line maxima in `mods.json`. Nothing in those tables is typed by hand.
 
-Pathing, so a client guesses nothing: **hub → branch gateway → limb gateway → nodes in table order**. A node is purchasable once the node before it in the same limb is owned; tier is distance from the hub, exactly as this file already describes it. The keystone column is the paired-spoke assignment, cycled per branch — a keystone is reachable through two limbs, never one (T2).
-<!-- END GENERATED:tree-layout -->
+## Why the old tree went
 
-Detail files, all empty and kept for the same reason:
-- `skill-tree-impact.md`
-- `skill-tree-stream.md`
-- `skill-tree-control.md`
-- `skill-tree-keystone.md`
+The removed design was not a node graph. Its own budget said so: 100 points, of which **82 bought rules that granted no numbers at all** — hit-counting tweaks, duration clauses, stack-cap changes — and **all** the power sat in 18 keystones costing 3 points each. That is a keystone picker with connective tissue, and it duplicated the question the skill list already asks: *what do I press?* It was also load-bearing in the one place that must not wobble — its multiplier was folded into `mob_HP`, so the price of every mob was set against a system whose shape was about to change again.
+
+## Still open
+
+- **The `mob_HP` fold** — the tree is not folded into the mob price yet (owner ruling: content and plumbing first). When it is, its power has to be booked inside the curve, and `tools/tree.ts` is the point where that factor is declared.
+- **Balance against the mob price** — the scale is stated (a tenth / a fifth of a line at rank 3, two thirds of a gear set for the whole tree) but nothing has measured it against `mob_HP`, because the fold is open.

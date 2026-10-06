@@ -112,4 +112,4 @@ bleed_dps   = bleed_total / bleed_time_sec          bleed_time_sec = 5
 
 ## Folding into mob_HP
 
-Bleed is new power, so per `AGENT.md` §5 it must be folded into `mob_HP` (checks.md H1) before the timeline can be trusted. The uplift to fold is the expected value of the table above across the uptime and hit-rate band, and it is **deferred to the balance audit**: the policy is that an overpowered player is answered by stronger mobs, not by nerfing player stats.
+Bleed is new power, so per `AGENT.md` §5 it must be folded into `mob_HP` (checks.md H1) before the fold can be trusted. The uplift to fold is the expected value of the table above across the uptime and hit-rate band, and it is **deferred to the balance audit**: the policy is that an overpowered player is answered by stronger mobs, not by nerfing player stats.

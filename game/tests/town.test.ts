@@ -39,15 +39,21 @@ describe('gold stays the convenience medium', () => {
 
   it('junk is kept, not auto-sold, and pays its rarity price at the Counterhand', () => {
     const s = newGame(77);
-    for (let i = 0; i < 400; i++) tick(s, {});
-    const pieces = Object.values(s.junkByRarity).reduce((a: number, b: number) => a + b, 0);
+    // one roll per kill at the variant's own rarity, so a low zone pays junk on about 1 kill in 20 —
+    // run until the first piece lands rather than for a fixed window that can miss it
+    const total = () => Object.values(s.junk).reduce((a: number, b: number) => a + b, 0);
+    for (let i = 0; i < 20000 && total() === 0; i++) tick(s, {});
+    const pieces = total();
     expect(pieces).toBeGreaterThan(0);
     const goldBefore = s.counters.gold;
     const r = sellJunk(s);
+    // each item is priced at its own rarity, and the item's rarity is the variant row's own
+    const rarityOf: Record<string, string> = {};
+    for (const row of Object.values(E.mob.variant_drops)) rarityOf[row.item] = row.rarity;
     let expectGold = 0;
-    for (const [rarity, count] of Object.entries(s.junkByRarity)) expectGold += count * E.junk.rarities[rarity].sell_gold;
+    for (const [item, count] of Object.entries(s.junk)) expectGold += count * E.junk.rarities[rarityOf[item]].sell_gold;
     expect(r.gold).toBe(s.counters.gold - goldBefore + expectGold);
-    expect(Object.values(s.junkByRarity).reduce((a: number, b: number) => a + b, 0)).toBe(0);
+    expect(Object.values(s.junk).reduce((a: number, b: number) => a + b, 0)).toBe(0);
   });
 
   it('a purchase cannot be made without the gold and cannot be made twice past its qty', () => {
@@ -116,11 +122,13 @@ describe('the road is bounded and travel follows the links', () => {
 
   it('standing is earned by kills in that settlement zone and never grants power', () => {
     const s = newGame();
-    const budget = eng.BAND.low.kills_per_hr * settlementById('eastgate').budget_hr;
+    const budget = eng.SETTLEMENT_BUDGET_KILLS[1];
     s.counters.zoneKills[1] = Math.round(budget);
     expect(standingShare(s, 'eastgate')).toBeCloseTo(1, 1);
     expect(standingTier(s, 'eastgate')).toBe(2);          // Tier III asks for 1.4 of the budget
-    s.counters.zoneKills[1] = Math.round(budget * 1.4);
+    // the budget is already a count of kills, so the tier's own threshold is the state to set —
+    // rounded up, because a tier is reached AT its threshold and rounding down misses it by a kill
+    s.counters.zoneKills[1] = Math.ceil(budget * 1.4);
     expect(standingTier(s, 'eastgate')).toBe(3);
     expect(TOWN.standing.never_grants).toContain('any stat');
   });
@@ -175,7 +183,8 @@ describe('the bag filter is the same rule the loot cage runs', () => {
   it('a full bag stops pickup rather than deleting gear (engine.json inventory.overflow)', () => {
     const s = newGame(9);
     s.bag = new Array(E.inventory.adventure_slots).fill({ slot: 'chest', base: 'chest', rarity: 'Common', quality: 'low', tier: 'T1', lines: [], q: 0 });
-    for (let i = 0; i < 600; i++) tick(s, {});
+    // tick until the paused-pickup run has rolled a drop, never for a guessed window (AGENT.md)
+    for (let i = 0; i < 40000 && s.counters.drops === 0; i++) tick(s, {});
     expect(s.counters.drops).toBeGreaterThan(0);
     expect(s.bag.length).toBe(E.inventory.adventure_slots);
   });

@@ -92,7 +92,7 @@ drop_rate = (1 + lck * K_LCK_DROP) × (1 + mastery_collection/100)
   This number is tied to craft currency prices and boss skill chances (loot.md · crafting.md · economy.md all closed).
 - `mastery_collection` = number of weapon types with Mastery ≥ 10 → **+1% per type, max +11%** (equipment-weapon.md) · does not touch DPS at all, so it moves only item income, not power.
 - Lck affects drops, so Lck must not become the stat that is good at everything and outshines the rest — Lck gives crit, perfect dodge, and drops all three, so every K must stay low.
-  From the DPS table in section 0: moving 2 items from Str to Lck at the same Agi (Str 8 / Agi 4 → Str 6 / Agi 4 / Lck 2) drops DPS from 6,877 to **6,231 (−9.4%)** in exchange for crit 10.5% → 13.0% — at the retired 816 ceiling the same move cost 22% DPS. The ceiling drop made Lck roughly half as expensive, so the guard this rule was written to set up is held by the G8 ×2.11 junk-line bound (**X7**) instead of by the DPS penalty alone.
+  From the DPS table in section 0: moving 2 items from Str to Lck at the same Agi (Str 8 / Agi 4 → Str 6 / Agi 4 / Lck 2) drops DPS from 6,877 to **6,231 (−9.4%)** in exchange for crit 10.5% → 13.0% — at the retired 816 ceiling the same move cost 22% DPS. The ceiling drop made Lck roughly half as expensive, so the guard this rule was written to set up is held by the G8 ×3.15 junk-line bound (**X7**) instead of by the DPS penalty alone.
 
 # 11. Weight
 

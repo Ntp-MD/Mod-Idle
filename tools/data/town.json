@@ -114,7 +114,6 @@
         "fire"
       ],
       "base_bias_flavor": "cloth",
-      "budget_hr": 1.2,
       "npcs": [
         "counterhand",
         "porter",
@@ -138,7 +137,6 @@
         "poison"
       ],
       "base_bias_flavor": "cloth / light",
-      "budget_hr": 2.9,
       "npcs": [
         "counterhand",
         "porter",
@@ -162,7 +160,6 @@
         "fire"
       ],
       "base_bias_flavor": "light (Evasion)",
-      "budget_hr": 4.3,
       "npcs": [
         "counterhand",
         "steward",
@@ -194,7 +191,6 @@
         "lightning"
       ],
       "base_bias_flavor": "light / Ring Mail",
-      "budget_hr": 5.5,
       "npcs": [
         "counterhand",
         "porter",
@@ -219,7 +215,6 @@
         "cold"
       ],
       "base_bias_flavor": "light",
-      "budget_hr": 9,
       "npcs": [
         "counterhand",
         "porter",
@@ -245,7 +240,6 @@
         "lightning"
       ],
       "base_bias_flavor": "Ring Mail",
-      "budget_hr": 13,
       "npcs": [
         "counterhand",
         "steward",
@@ -276,7 +270,6 @@
         "chaos"
       ],
       "base_bias_flavor": "heavy (Armour)",
-      "budget_hr": 14.2,
       "npcs": [
         "counterhand",
         "porter",
@@ -303,7 +296,6 @@
         "cold"
       ],
       "base_bias_flavor": "heavy",
-      "budget_hr": 18.2,
       "npcs": [
         "counterhand",
         "porter",
@@ -330,7 +322,6 @@
         "chaos"
       ],
       "base_bias_flavor": "heavy · cloth (glass endgame)",
-      "budget_hr": 22,
       "budget_note": "22.0 hr of zone 9 inside the high band + 26.0 hr of the level 91-100 push, which also farms zone 9",
       "npcs": [
         "counterhand",
@@ -365,7 +356,6 @@
         "poison"
       ],
       "base_bias_flavor": "wet lowland",
-      "budget_hr": 26,
       "npcs": [
         "counterhand",
         "porter",
@@ -389,7 +379,6 @@
         "chaos"
       ],
       "base_bias_flavor": "wet lowland",
-      "budget_hr": 30.3,
       "npcs": [
         "counterhand",
         "porter",
@@ -412,7 +401,6 @@
         "chaos"
       ],
       "base_bias_flavor": "salt flats",
-      "budget_hr": 35,
       "npcs": [
         "counterhand",
         "steward",
@@ -439,7 +427,6 @@
         "fire"
       ],
       "base_bias_flavor": "slag and foundry heat",
-      "budget_hr": 39.9,
       "npcs": [
         "counterhand",
         "porter",
@@ -463,7 +450,6 @@
         "chaos"
       ],
       "base_bias_flavor": "open moor",
-      "budget_hr": 45.1,
       "npcs": [
         "counterhand",
         "porter",
@@ -487,7 +473,6 @@
         "poison"
       ],
       "base_bias_flavor": "thorn country",
-      "budget_hr": 50.3,
       "npcs": [
         "counterhand",
         "steward",
@@ -514,7 +499,6 @@
         "poison"
       ],
       "base_bias_flavor": "drowned river mouth",
-      "budget_hr": 55.8,
       "npcs": [
         "counterhand",
         "porter",
@@ -538,7 +522,6 @@
         "cold"
       ],
       "base_bias_flavor": "wyrm breeding ground",
-      "budget_hr": 61.3,
       "npcs": [
         "counterhand",
         "porter",
@@ -562,7 +545,6 @@
         "poison"
       ],
       "base_bias_flavor": "the pale spire",
-      "budget_hr": 140.5,
       "npcs": [
         "counterhand",
         "steward",

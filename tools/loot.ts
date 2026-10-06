@@ -411,9 +411,9 @@ function gates(rows: any, bias: any) {
   const sum = (x: any) => x.gear + x.herb + x.junk;
   const none = huntReweight(sample, 'none', HO.shift_pct);
   const identity = none.gear === sample.gear && none.herb === sample.herb && none.junk === sample.junk;
-  const leans = HO.categories.map((c: any) => ({ c, r: huntReweight(sample, c, HO.shift_pct) }));
+  const leans = HO.categories.map((c: 'gear' | 'herb' | 'junk') => ({ c, r: huntReweight(sample, c, HO.shift_pct) }));
   const conserved = leans.every(({ r }: any) => Math.abs(sum(r) - sum(sample)) < 1e-9);
-  const leaning = leans.every(({ c, r }: any) => r[c] > sample[c]);
+  const leaning = leans.every(({ c, r }: { c: 'gear' | 'herb' | 'junk'; r: { gear: number; herb: number; junk: number } }) => r[c] > sample[c]);
   add('LT14', identity && conserved && leaning && leans.length === 3,
     `Hunt Order: 'none' is the identity, each lean raises its own stream, and every lean conserves ${sum(sample).toFixed(2)} expected drops/kill across gear · herb · junk${!identity ? ' · NONE NOT IDENTITY' : ''}${!conserved ? ' · TOTAL NOT CONSERVED' : ''}${!leaning ? ' · LEAN NOT RAISED' : ''}${leans.length !== 3 ? ' · CATEGORIES != 3' : ''}`);
 

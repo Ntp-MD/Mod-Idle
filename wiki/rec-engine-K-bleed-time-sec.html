@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -92,7 +92,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="rec-engine-K-k-wis-cdr.html">K_WIS_CDR</a>
 <a href="rec-engine-K-k-dex-acc.html">K_DEX_ACC</a>
 <a href="rec-engine-K-k-dex-align.html">K_DEX_ALIGN</a>
-<a href="rec-engine-K-k-vit-res.html">K_VIT_RES</a>
+<a href="rec-engine-K-k-mob-res.html">K_MOB_RES</a>
 <a href="rec-engine-K-k-vit-stunrec.html">K_VIT_STUNREC</a>
 <a href="rec-engine-K-k-lck-crit.html">K_LCK_CRIT</a>
 <a href="rec-engine-K-k-lck-pdoge.html">K_LCK_PDOGE</a>
@@ -106,8 +106,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="rec-engine-K-k-armour.html">K_ARMOUR</a>
 <a href="rec-engine-K-armour-divisor.html">armour_divisor</a>
 <a href="rec-engine-K-mob-damage-divisor.html">mob_damage_divisor</a>
-<a href="rec-engine-K-k-int-es.html">K_INT_ES</a>
-<a href="rec-engine-K-k-int-esregen.html">K_INT_ESREGEN</a>
 <a href="rec-engine-K-k-bleed.html">K_BLEED</a>
 <a href="rec-engine-K-k-bleed-chance.html">K_BLEED_CHANCE</a>
 <a href="rec-engine-K-bleed-time-sec.html" aria-current="page">bleed_time_sec</a>
@@ -115,6 +113,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="rec-engine-K-k-mob-dodge.html">K_MOB_DODGE</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -135,8 +134,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -156,6 +153,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -168,7 +166,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>bleed_time_sec</h1>
 <p class="hint">One row of <code>tools/data/engine.json</code> → <code>K</code>. Stat model · K values · Mod maxima · loot model · craft prices · timeline. Changing a number here re-prices every town line and rewrites checks.md groups A · B · C · F.</p>
-<dl class="kv"><dt>path</dt><dd><code>K.bleed_time_sec</code></dd><dt>collection</dt><dd><a href="data-engine-K.html">K coefficients</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>32</dd></dl>
+<dl class="kv"><dt>path</dt><dd><code>K.bleed_time_sec</code></dd><dt>collection</dt><dd><a href="data-engine-K.html">K coefficients</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>30</dd></dl>
 <div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Bleed time sec</td><td><code>5</code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="K"><input type="hidden" name="id" value="bleed_time_sec">

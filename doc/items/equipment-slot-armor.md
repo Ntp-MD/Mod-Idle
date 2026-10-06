@@ -85,7 +85,7 @@ The Stat Mod line (`Stat Mod flat`) rolls on every item, and the Gear Mod line (
 - **boots** — the densest avoidance piece: `Evasion flat` and `Evasion %` both roll here, and the Agi that the Core stat supplies is the other half of the same line.
 - **belt** — a secondary chest: same shape, but CDR instead of mana as the second line.
 - **gloves** — grip. Attack speed must come from Core stat Agi instead, which is why gloves never carry `Attack speed %`.
-- **ring ×2** — shifted from crit to res and CDR, so an Element player hunts the same Element twice and pushes res piece by piece.
+- **ring** — shifted from crit to res and CDR, so an Element player hunts the same Element twice and pushes res piece by piece.
 - **amulet** — the piece that confirms Elements the most, paired with a main hand that deals Element damage.
 - **cape** — the escape slot: res plus Evasion, with CDR and mana behind them.
 

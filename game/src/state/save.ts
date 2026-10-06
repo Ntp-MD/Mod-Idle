@@ -106,7 +106,14 @@ export function mergeMastery(account: Account, state: GameState, slot = 'current
 }
 
 export function applyAccount(account: Account, state: GameState): GameState {
-  state.mastery = { ...account.mastery };
+  // The account record is the shared truth, but it is a derived file: if it is missing or will not
+  // parse, `readAccount` hands back an empty one. Overwriting the slot's Mastery with that would
+  // zero every weapon the moment the record is lost, so keep the higher of the two per weapon —
+  // the same rule `mergeMastery` uses across the three slots.
+  state.mastery = state.mastery || {};
+  for (const [weapon, xp] of Object.entries(account.mastery || {})) {
+    state.mastery[weapon] = Math.max(state.mastery[weapon] || 0, xp);
+  }
   return state;
 }
 
@@ -265,7 +272,22 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.spawnIn && s.spawnIn !== 0) s.spawnIn = 0;
   if (!s.counters.zoneKills) s.counters.zoneKills = {};
   if (!s.counters.stones) s.counters.stones = {};
-  if (!s.junkByRarity) s.junkByRarity = {};
+  if (!s.junk) s.junk = {};
+  // a save from before the tree existed holds no ranks; the points it banked are still there
+  if (s.player && !s.player.treeRanks) s.player.treeRanks = {};
+  // junk used to be carried per RARITY; the item is per variant now, so a pre-variant stack is moved
+  // onto one item of its own rarity. Every rarity is worth the same gold per kill by construction, so
+  // the move is value-exact — nothing is deleted and no gold is minted (`junk.rarities` · X39).
+  if (s.junkByRarity) {
+    const firstOfRarity: Record<string, string> = {};
+    for (const r of Object.values((E.mob as any).variant_drops || {}) as any[]) firstOfRarity[r.rarity] = firstOfRarity[r.rarity] || r.item;
+    for (const [rarity, count] of Object.entries(s.junkByRarity)) {
+      const item = firstOfRarity[rarity];
+      if (item && count) s.junk[item] = (s.junk[item] || 0) + Number(count);
+    }
+    delete (s as any).junkByRarity;
+  }
+  if (!s.zoneFocus) s.zoneFocus = {};
   if (!s.town) s.town = newTown();
   if (!s.farm) s.farm = newFarm();
   // a farm saved before the automation block existed gets it off; the player opts in
@@ -285,6 +307,10 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     if (s.road.chestPaid == null) s.road.chestPaid = false;
   }
   if (!s.mastery) s.mastery = {};
+  // a save written before the field existed has no wall-clock stamp, which the offline catch-up
+  // reads: without it the whole away period is silently skipped. Default to "now" (no phantom
+  // offline credited) so the field is always present.
+  if (s.lastSavedAt == null) s.lastSavedAt = Date.now();
   if (!s.presets) s.presets = newPresets();
   if (s.activePreset == null) s.activePreset = 0;
   if (!s.collector) s.collector = newCollector();

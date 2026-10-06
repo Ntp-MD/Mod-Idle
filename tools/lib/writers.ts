@@ -16,6 +16,7 @@ export const WRITERS: [string, string[]][] = [
   ['timeline.ts', ['--write']],
   ['survival.ts', ['--write']],
   ['bases.ts', ['--blocks']],
+  ['map.ts', ['--write']],
 ];
 
 /**
@@ -38,5 +39,8 @@ export const CAGES: { label: string; script: string; args: string[] }[] = [
   { label: 'inventory cage', script: 'tools/inventory.ts', args: ['--checks'] },
   { label: 'anchor cage', script: 'tools/anchors.ts', args: ['--checks'] },
   { label: 'map cage', script: 'tools/map.ts', args: ['--checks'] },
+  // the generated-file guard: re-runs every writer in a temp copy and diffs the committed docs, so a
+  // hand-edit between the generated markers cannot hide behind `build.ts --check` never regenerating
+  { label: 'generated guard', script: 'tools/check-generated.ts', args: [] },
   { label: 'doc lint', script: 'tools/lint.ts', args: [] },
 ];

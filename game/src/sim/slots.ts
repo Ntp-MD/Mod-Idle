@@ -26,7 +26,7 @@ const BUCKETS: { read: (s: GameState) => Record<string, number>; cap: string; la
   { read: (s) => s.farm.herbs, cap: 'herb', label: 'herbs' },
   { read: (s) => s.farm.potions, cap: 'potion', label: 'draughts' },
   { read: (s) => s.farm.condensed, cap: 'potion', label: 'condensed' },
-  { read: (s) => s.junkByRarity, cap: 'stone', label: 'junk' },
+  { read: (s) => s.junk, cap: 'stone', label: 'junk' },
 ];
 
 const slotsFor = (count: number, cap: number) => Math.ceil(Math.max(0, count) / cap);

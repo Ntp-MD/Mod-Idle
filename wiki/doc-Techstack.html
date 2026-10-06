@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -89,6 +89,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="#h-not-used">Not used</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html" aria-current="page">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -109,8 +110,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -130,6 +129,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -142,7 +142,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Tech Stack</h1>
-<dl class="kv"><dt>file</dt><dd><code>Techstack.md</code> · 57 lines · 535 words · written 2026-10-05T15:27:18Z</dd><dt>category</dt><dd>Start here</dd><dt>imports</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-save.html">save.md</a></dd><dt>imported by</dt><dd>—</dd><dt>quoted by</dt><dd>—</dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../Techstack.md">Techstack.md</a></dd></dl>
+<dl class="kv"><dt>file</dt><dd><code>Techstack.md</code> · 57 lines · 535 words · written 2026-10-06T05:26:56Z</dd><dt>category</dt><dd>Start here</dd><dt>imports</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-save.html">save.md</a></dd><dt>imported by</dt><dd>—</dd><dt>quoted by</dt><dd>—</dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../Techstack.md">Techstack.md</a></dd></dl>
 
 <h2 id="h-tech-stack">Tech Stack</h2>
 <p>import AGENT.md import save.md</p>
@@ -150,7 +150,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h2 id="h-the-one-rule-that-matters-most">The one rule that matters most</h2>
 <p>The game and the cages must run the <strong>same engine math</strong>. Today the numbers live in <code>tools/data/*.json</code> and the math in <code>tools/lib/engine.ts</code>. The game imports the same JSON and calls the same functions — it never copies a formula. When a formula is needed on both sides it is extracted into one shared module that both import, so a cage and the game can never disagree. A second copy of a formula is the same defect as a second copy of a number (<code>AGENT.md</code> section 3).</p>
 <h2 id="h-stack">Stack</h2>
-<table><thead><tr><th>Layer</th><th>Pick</th><th>Why</th></tr></thead><tbody><tr><td>Language</td><td>TypeScript</td><td>The data model is large (12 slots, Mod / Item quality / Tier, 5 Elements, the full mob roster); types catch the drift this repo already fights</td></tr><tr><td>Build</td><td>Vite</td><td>Fast dev server, static output, no backend</td></tr><tr><td>UI</td><td>Svelte</td><td>Small bundle, low boilerplate for a panel-heavy idle UI (React or Solid are fine if preferred)</td></tr><tr><td>State</td><td>Svelte stores / a small reducer</td><td>No Redux-class dependency</td></tr><tr><td>Persistence</td><td>IndexedDB, localStorage fallback</td><td>Local only, 3 slots, JSON export/import (<code><a href="doc-save.html">save.md</a></code>)</td></tr><tr><td>Simulation</td><td>Fixed 1-second tick + offline catch-up</td><td>The idle loop; offline uses a monotonic clock and the 12-hour cap (<code><a href="doc-save.html">save.md</a></code>)</td></tr><tr><td>RNG</td><td>Seeded</td><td>Offline results are reproducible and a save cannot be rerolled for a better outcome</td></tr><tr><td>Tests</td><td>Vitest</td><td>Reuses the cage logic</td></tr><tr><td>Deploy</td><td>Static host (GitHub Pages / Netlify)</td><td>Replace-all git already fits this; add a PWA manifest to play offline</td></tr></tbody></table>
+<table><thead><tr><th>Layer</th><th>Pick</th><th>Why</th></tr></thead><tbody><tr><td>Language</td><td>TypeScript</td><td>The data model is large (13 slots, Mod / Item quality / Tier, 5 Elements, the full mob roster); types catch the drift this repo already fights</td></tr><tr><td>Build</td><td>Vite</td><td>Fast dev server, static output, no backend</td></tr><tr><td>UI</td><td>Svelte</td><td>Small bundle, low boilerplate for a panel-heavy idle UI (React or Solid are fine if preferred)</td></tr><tr><td>State</td><td>Svelte stores / a small reducer</td><td>No Redux-class dependency</td></tr><tr><td>Persistence</td><td>IndexedDB, localStorage fallback</td><td>Local only, 3 slots, JSON export/import (<code><a href="doc-save.html">save.md</a></code>)</td></tr><tr><td>Simulation</td><td>Fixed 1-second tick + offline catch-up</td><td>The idle loop; offline uses a monotonic clock and the 12-hour cap (<code><a href="doc-save.html">save.md</a></code>)</td></tr><tr><td>RNG</td><td>Seeded</td><td>Offline results are reproducible and a save cannot be rerolled for a better outcome</td></tr><tr><td>Tests</td><td>Vitest</td><td>Reuses the cage logic</td></tr><tr><td>Deploy</td><td>Static host (GitHub Pages / Netlify)</td><td>Replace-all git already fits this; add a PWA manifest to play offline</td></tr></tbody></table>
 <p>TypeScript runs with <strong>Node native type stripping — no build step, no runtime dependency</strong>. <code>engine/</code>, <code>tools/</code>, and <code>game/</code> are all <code>.ts</code>; Node (and Vite) strip the types at load, so the cages and the client keep running the <em>same source files</em>. <code>npm run typecheck</code> (<code>tsc --noEmit</code>) is a dev-only checker that never emits.</p>
 <h2 id="h-layout-landed">Layout — landed</h2>
 <pre class="code">engine/                the shared math, one home: index.ts (createEngine) · loot.ts (createLoot + rng)

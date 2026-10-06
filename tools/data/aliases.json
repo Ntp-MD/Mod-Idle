@@ -9,6 +9,7 @@
     { "old": "pdef", "new": "Armour", "note": "there is no second physical-defence stat — Armour is the Str line (AGENT.md section 5)" },
     { "old": "mdef", "new": "Elemental resistance", "note": "there is no magic-defence stat — the res-able half is Elemental resistance (combat.md section 2)" },
     { "old": "Dodge flat", "new": "Evasion flat", "not_prefix": ["Perfect", "mob"], "note": " merged the two avoidance lines into one capped Evasion rating" },
-    { "old": "Dodge %", "new": "Evasion %", "not_prefix": ["Perfect", "mob"], "note": " merged the two avoidance lines into one capped Evasion rating; `Perfect dodge %` stays a live term, so the guard skips it" }
+    { "old": "Dodge %", "new": "Evasion %", "not_prefix": ["Perfect", "mob"], "note": " merged the two avoidance lines into one capped Evasion rating; `Perfect dodge %` stays a live term, so the guard skips it" },
+    { "old": "Int x K_INT_ES", "new": "Gear Energy Shield flat + Max Energy Shield %", "note": "K_INT_ES retired (owner ruling): the shield is a gear pool, not an Int line" }
   ]
 }

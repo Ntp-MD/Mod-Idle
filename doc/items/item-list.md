@@ -18,7 +18,7 @@ Stones are the only **power** media. No Dust, no cluster dust, no Core. Max stac
 | Stone | Effect | Rules | Price | Source |
 |---|---|---|---|---|
 | Add mod stone | Fill one empty slot up to the Rarity crafted max | Net counting (`mods_added 0-2`) · 1st fill 1 stone, 2nd fill 2 stones · Common to 3, Rare to 7 · slots 6-7 never Core if 2 Core slots present · new Mod rolls from the Base pool at the piece quality/tier | 1 (2nd fill 2) | Elite / boss only |
-| Reroll value stone | Reroll value inside the same Tier | Never lower than before · Mod name, Tier, and Element unchanged | 8 per use (~52/hour) | Every junk dissolve = 1 |
+| Reroll value stone | Reroll value inside the same Tier | Never lower than before · Mod name, Tier, and Element unchanged | 8 per use (~10/hour) | Every junk dissolve = 1 |
 | Reroll tier stone | Reroll Tier + value of one slot (T3 50 / T2 33 / T1 17) | May roll lower · Mod name and Element unchanged · 8 stones buy one deterministic Refine (+1 tier) | 1 per randomize · 8 per Refine (~3.75/hour) | High-level monsters, elites, bosses |
 | Remove mod stone | Remove one random non-legacy Mod | Slots 1-2 are Legacy mod and immune · target pool is slots 3+ | 1 per use | Elite / boss |
 | Quality Stone | Attempt +1 (to +15) | +1-4 100% · +5-10 90-20% fail drops 1 level · +11-15 50-20% fail breaks · protection 5 per piece · online only · raises Gear Mod only, never Mod values | N stones for +N | Steps 1-5 monsters · 6-10 elites · 11-15 bosses |

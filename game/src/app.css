@@ -40,3 +40,52 @@ button:hover { border-color: var(--dim); }
 table { border-collapse: collapse; width: 100%; }
 th, td { text-align: left; padding: .2rem .4rem; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
 th { color: var(--dim); font-weight: 500; }
+
+/* The settlement map. The overlay is inlined via {@html}, so these selectors live in the global
+   stylesheet: Svelte would prune them from a component's scoped <style>. The pin and the dash are
+   toggled by id (data-node / data-link) — no coordinate is read by the client (X33 · M7 · M10).
+   The sheet is a hex field: one hex per sub-zone, roads and labels carrying the readability, so the
+   ground is pale and the route is the highest contrast on the page. */
+.map-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map-frame svg .hex { stroke: #6a6647; stroke-width: 1.2; stroke-opacity: .38; }
+.map-frame svg .hex.pod { stroke: #4a4429; stroke-width: 1.8; stroke-opacity: .6; }
+.map-frame svg .hex.pod[data-node]:not([data-sub]) { stroke: #2f2b18; stroke-width: 3.4; stroke-opacity: .85; }
+.map-frame svg .river-band { stroke: #79b4cf; stroke-opacity: .55; stroke-linecap: round; stroke-linejoin: round; }
+.map-frame svg .region { font-size: 26px; letter-spacing: 2px; fill: #f4ecd8; stroke: #3b3322; stroke-width: 2.6; paint-order: stroke; text-anchor: middle; font-weight: 700; opacity: .9; }
+.map-frame svg .subzone { font-size: 11px; letter-spacing: .1px; fill: #f6f0e0; stroke: #342e1f; stroke-width: 2.2; paint-order: stroke; }
+/* the terrain glyphs are soft kind-coloured washes (never solid marks on the sketch) */
+.map-frame svg .terrain { stroke-width: 1.2; stroke-opacity: .32; fill-opacity: .34; }
+.map-frame svg .terrain-road { fill: #cbb583; }
+.map-frame svg .terrain-river { fill: #8cc0d8; }
+.map-frame svg .terrain-forest { fill: #7fa46a; }
+.map-frame svg .terrain-mountain { fill: #b3b0a6; }
+.map-frame svg .terrain-moor { fill: #bcb184; }
+/* a landmark is a mark on the field, smaller than a settlement, so the route still leads the eye */
+.map-frame svg .watermark circle { fill: #2f2a1c; stroke: none; }
+.map-frame svg .watermark circle.halo { fill: none; stroke: #f4ecd8; stroke-width: 1.6; stroke-opacity: .8; }
+.map-frame svg .node circle { fill: #fdfaf0; stroke: #35301f; stroke-width: 2.5; }
+.map-frame svg .node.capital circle { stroke-width: 4.5; }
+.map-frame svg .node .place { font-size: 17px; fill: #f6f0e0; stroke: #2c2718; stroke-width: 3.4; paint-order: stroke; font-weight: 700; }
+.map-frame svg .node .caption { font-size: 13px; fill: #f6f0e0; stroke: #2c2718; stroke-width: 3; paint-order: stroke; }
+.map-frame svg .node .caption .place { font-size: 20px; font-weight: 700; }
+.map-frame svg .node .caption tspan:not(.place) { fill: #efe6cf; font-size: 12px; }
+.map-frame svg .grid-line { stroke: rgba(255,250,235,.22); stroke-width: 1; stroke-dasharray: 5 7; }
+.map-frame svg .pin { display: none; }
+.map-frame svg .pin circle:first-child { fill: rgba(40,220,150,.26); stroke: #2ee59a; stroke-width: 4; }
+.map-frame svg .pin circle:last-child { fill: #2ee59a; }
+.map-frame svg .pin.here, .map-frame svg .pin.target { display: inline; }
+.map-frame svg .pin.target circle:first-child { fill: rgba(240,80,70,.26); stroke: #ff6b5c; }
+.map-frame svg .pin.target circle:last-child { fill: #ff6b5c; }
+.map-frame svg .dash { display: none; }
+.map-frame svg .dash.traveling { display: inline; fill: none; stroke: #ffd166; stroke-width: 7; stroke-linecap: round; stroke-dasharray: 14 16; animation: mapdash 1s linear infinite; }
+@keyframes mapdash { to { stroke-dashoffset: -30; } }
+
+/* The passive tree: three chains side by side, one row per node with its three rank pips. */
+.tree-branches { display: flex; gap: 1rem; flex-wrap: wrap; }
+.tree-branch { flex: 1 1 18rem; min-width: 16rem; }
+.tree-branch h3 { margin: 0.2rem 0; text-transform: capitalize; }
+.tree-node { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; }
+.tree-name { flex: 1 1 auto; opacity: 0.85; }
+.tree-pips { display: flex; gap: 0.2rem; }
+.pip { min-width: 1.6rem; text-align: center; opacity: 0.35; border: 1px solid currentColor; border-radius: 3px; }
+.pip.on { opacity: 1; font-weight: 600; }

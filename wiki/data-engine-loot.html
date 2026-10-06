@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span><span class="chip ">rows <b>11</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span><span class="chip ">rows <b>10</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -83,19 +83,19 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h4>Collections</h4>
 <a href="data-engine-stat.html">Stat growth (14)</a>
 <a href="data-engine-level_gain.html">Level gain (10)</a>
-<a href="data-engine-K.html">K coefficients (32)</a>
+<a href="data-engine-K.html">K coefficients (30)</a>
 <a href="data-engine-caps.html">Caps (14)</a>
 <a href="data-engine-mod_max.html">Mod maxima (30)</a>
 <a href="data-engine-weapons.html">Weapon types (6)</a>
 <a href="data-engine-build.html">Reference build (6)</a>
-<a href="data-engine-loot.html" aria-current="page">Loot model (11)</a>
+<a href="data-engine-loot.html" aria-current="page">Loot model (10)</a>
 <a href="data-engine-loot-bands.html">Band parameters (4)</a>
-<a href="data-engine-loot-timeline_checkpoints_hr.html">Timeline checkpoints (9)</a>
 <a href="data-engine-f_rows_carried.html">Hand-carried F rows (5)</a>
 <a href="data-engine-craft.html">Craft costs (19)</a>
 <a href="data-engine-town_shared.html">Shared town constants (4)</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -116,8 +116,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -137,6 +135,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -148,8 +147,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 
 <section><h1>Loot model</h1>
-<dl class="kv"><dt>path</dt><dd><code>tools/data/engine.json → loot</code></dd><dt>kind</dt><dd><code>constmap</code></dd><dt>rows</dt><dd>11</dd><dt>written by</dt><dd><code>tools/check.ts --write</code> · <code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-core-stats.html">core-stats.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
-<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>base_drop_chance</code></td><td>Base drop chance</td><td><code>0.08</code></td><td><a href="rec-engine-loot-base-drop-chance.html">edit</a></td></tr><tr><td><code>ttk_per_mob_sec</code></td><td>Seconds to kill one mob</td><td><code>5.107</code></td><td><a href="rec-engine-loot-ttk-per-mob-sec.html">edit</a></td></tr><tr><td><code>group_spawn_sec</code></td><td>Group spawn interval <span class="dim">(sec)</span></td><td><code>4</code></td><td><a href="rec-engine-loot-group-spawn-sec.html">edit</a></td></tr><tr><td><code>elite_spawn_chance</code></td><td>Elite spawn chance</td><td><code>0.2</code></td><td><a href="rec-engine-loot-elite-spawn-chance.html">edit</a></td></tr><tr><td><code>elite_tier_stones</code></td><td>Tier stones per elite</td><td><code>0.05</code></td><td><a href="rec-engine-loot-elite-tier-stones.html">edit</a></td></tr><tr><td><code>elite_add_stone_chance</code></td><td>Elite add stone chance</td><td><code>0.00625</code></td><td><a href="rec-engine-loot-elite-add-stone-chance.html">edit</a></td></tr><tr><td><code>boss_per_hour</code></td><td>Boss kills per hour</td><td><code>4</code></td><td><a href="rec-engine-loot-boss-per-hour.html">edit</a></td></tr><tr><td><code>boss_tier_stones</code></td><td>Tier stones per boss</td><td><code>3</code></td><td><a href="rec-engine-loot-boss-tier-stones.html">edit</a></td></tr><tr><td><code>boss_add_stones</code></td><td>Boss add stones</td><td><code>1</code></td><td><a href="rec-engine-loot-boss-add-stones.html">edit</a></td></tr><tr><td><code>push_hr_levels_91_100</code></td><td>Hours of the level 91-100 push</td><td><code>26.4</code></td><td><a href="rec-engine-loot-push-hr-levels-91-100.html">edit</a></td></tr><tr><td><code>kill_rate_tolerance</code></td><td>Kill-rate tolerance</td><td><code>0.01</code></td><td><a href="rec-engine-loot-kill-rate-tolerance.html">edit</a></td></tr></tbody></table></div></section>
+<dl class="kv"><dt>path</dt><dd><code>tools/data/engine.json → loot</code></dd><dt>kind</dt><dd><code>constmap</code></dd><dt>rows</dt><dd>10</dd><dt>written by</dt><dd><code>tools/check.ts --write</code> · <code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-core-stats.html">core-stats.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
+<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>base_drop_chance</code></td><td>Base drop chance</td><td><code>0.08</code></td><td><a href="rec-engine-loot-base-drop-chance.html">edit</a></td></tr><tr><td><code>ttk_per_mob_sec</code></td><td>Seconds to kill one mob</td><td><code>5.107</code></td><td><a href="rec-engine-loot-ttk-per-mob-sec.html">edit</a></td></tr><tr><td><code>group_spawn_sec</code></td><td>Group spawn interval <span class="dim">(sec)</span></td><td><code>4</code></td><td><a href="rec-engine-loot-group-spawn-sec.html">edit</a></td></tr><tr><td><code>elite_spawn_chance</code></td><td>Elite spawn chance</td><td><code>0.2</code></td><td><a href="rec-engine-loot-elite-spawn-chance.html">edit</a></td></tr><tr><td><code>elite_tier_stones</code></td><td>Tier stones per elite</td><td><code>0.05</code></td><td><a href="rec-engine-loot-elite-tier-stones.html">edit</a></td></tr><tr><td><code>elite_add_stone_chance</code></td><td>Elite add stone chance</td><td><code>0.00625</code></td><td><a href="rec-engine-loot-elite-add-stone-chance.html">edit</a></td></tr><tr><td><code>boss_per_hour</code></td><td>Boss kills per hour</td><td><code>4</code></td><td><a href="rec-engine-loot-boss-per-hour.html">edit</a></td></tr><tr><td><code>boss_tier_stones</code></td><td>Tier stones per boss</td><td><code>3</code></td><td><a href="rec-engine-loot-boss-tier-stones.html">edit</a></td></tr><tr><td><code>boss_add_stones</code></td><td>Boss add stones</td><td><code>1</code></td><td><a href="rec-engine-loot-boss-add-stones.html">edit</a></td></tr><tr><td><code>kill_rate_tolerance</code></td><td>Kill-rate tolerance</td><td><code>0.01</code></td><td><a href="rec-engine-loot-kill-rate-tolerance.html">edit</a></td></tr></tbody></table></div></section>
 
 <section><h2>Raw JSON of this collection</h2><pre class="code">{
   &quot;hunt_order&quot;: {
@@ -189,25 +188,21 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   &quot;bands&quot;: {
     &quot;low&quot;: {
       &quot;group_mobs&quot;: 1.5,
-      &quot;kills_per_hr_published&quot;: 463,
       &quot;lck_level&quot;: 30,
       &quot;upgrades_per_hr&quot;: 3
     },
     &quot;mid&quot;: {
       &quot;group_mobs&quot;: 2.5,
-      &quot;kills_per_hr_published&quot;: 537,
       &quot;lck_level&quot;: 60,
       &quot;upgrades_per_hr&quot;: 3
     },
     &quot;high&quot;: {
       &quot;group_mobs&quot;: 4,
-      &quot;kills_per_hr_published&quot;: 589,
       &quot;lck_level&quot;: 90,
       &quot;upgrades_per_hr&quot;: 3
     },
     &quot;high_full_lck&quot;: {
       &quot;group_mobs&quot;: 4,
-      &quot;kills_per_hr_published&quot;: 589,
       &quot;lck_level&quot;: &quot;ceiling&quot;,
       &quot;upgrades_per_hr&quot;: 3
     }
@@ -233,18 +228,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;note&quot;: &quot;crafting.md: Corrupt stone is boss only and the rarest stone, one use per piece.&quot;,
     &quot;boss_corrupt_chance&quot;: 0.25
   },
-  &quot;timeline_checkpoints_hr&quot;: {
-    &quot;level_10&quot;: 0.9,
-    &quot;level_30&quot;: 6,
-    &quot;level_60&quot;: 29.4,
-    &quot;level_90&quot;: 84.3,
-    &quot;level_100&quot;: 110.7,
-    &quot;level_120&quot;: 177.1,
-    &quot;level_150&quot;: 313.9,
-    &quot;level_180&quot;: 500.4,
-    &quot;level_190&quot;: 574.5
-  },
-  &quot;push_hr_levels_91_100&quot;: 26.4,
   &quot;kill_rate_tolerance&quot;: 0.01
 }</pre><p><a href="../tools/data/engine.json">tools/data/engine.json</a> · <a href="edit.html">snapshots</a></p></section>
 </div>

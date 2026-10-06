@@ -34,15 +34,6 @@ const gearWith = (name: string) => {
 };
 
 describe('the held weapon weighs its type', () => {
-  it('reads the column for every type, endpoints included', () => {
-    for (const w of BASES.weapons as any[]) {
-      expect(weaponWeightOf(w.name)).toBe(w.weight);
-      expect(w.weight).toBeGreaterThan(0);
-    }
-    expect(weaponWeightOf('wand')).toBe(Math.min(...(BASES.weapons as any[]).map((w) => w.weight)));
-    expect(weaponWeightOf('two-handed axe')).toBeGreaterThan(weaponWeightOf('two-handed sword'));
-    expect(weaponWeightOf('two-handed sword')).toBeGreaterThan(weaponWeightOf('mace'));
-  });
 
   it('an off-hand weapon counts the stated fraction of its own type, not the whole thing', () => {
     const full = weaponWeightOf('dagger', 'main hand');

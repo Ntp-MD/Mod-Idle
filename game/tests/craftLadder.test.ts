@@ -28,7 +28,6 @@ describe('the +1..+15 ladder', () => {
     expect(bench.costOf('upgrade', piece({ upgrade_lv: 5 }))).toEqual({ quality: 7 });
     expect(bench.costOf('upgrade', piece({ upgrade_lv: 10 }))).toEqual({ quality: 18 });
     expect(bench.costOf('upgrade', piece({ upgrade_lv: 14 }))).toEqual({ quality: 30 });
-    expect(Object.values(C.upgrade_costs)).toEqual(C.upgrade_costs);
   });
 
   it('stops at +15 and refuses a Broken or corrupted piece', () => {

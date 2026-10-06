@@ -11,6 +11,13 @@ import type { GameState, TaskSlot, TownState } from './types';
  */
 
 const TS = TOWN.task_sizing;
+
+/** Item name → the rarity it was paid at, straight off `mob.variant_drops` (the table that owns both). */
+const JUNK_RARITY: Record<string, string> = (() => {
+  const out: Record<string, string> = {};
+  for (const r of Object.values((E.mob as any).variant_drops || {}) as any[]) out[r.item] = r.rarity;
+  return out;
+})();
 export const ALL_ROWS: any[] = [...TOWN.one_time, ...TOWN.repeatable];
 export const rowById = (id: string) => ALL_ROWS.find((r) => r.id === id);
 export const settlementById = (id: string) => TOWN.settlements.find((s: any) => s.id === id);
@@ -51,7 +58,8 @@ export function newTown(): TownState {
 /** Standing is earned by kills in that settlement's own zone (`town.json` standing.earnt_from). */
 export function standingShare(state: GameState, settlementId: string): number {
   const s = settlementById(settlementId);
-  const budget = eng.BAND[s.band].kills_per_hr * s.budget_hr;
+  // the budget is the curve's own slice for that zone, so Standing is read straight off it
+  const budget = eng.SETTLEMENT_BUDGET_KILLS[s.zone];
   return budget > 0 ? (state.counters.zoneKills[s.zone] || 0) / budget : 0;
 }
 
@@ -113,11 +121,15 @@ export function buy(state: GameState, settlementId: string, rowId: string): BuyR
 /** Junk is sold by hand at the Counterhand — the only gold mint besides the Road (`economy.md`). */
 export function sellJunk(state: GameState): { pieces: number; gold: number } {
   let pieces = 0, gold = 0;
-  for (const [rarity, count] of Object.entries(state.junkByRarity)) {
+  for (const [item, count] of Object.entries(state.junk)) {
     if (!count) continue;
+    // the item's own rarity sets the price, and every rarity is worth the same gold per kill, so
+    // which variant dropped the stack never changes what the Counterhand pays
+    const rarity = JUNK_RARITY[item];
+    const price = rarity ? ((E.junk.rarities as any)[rarity] || {}).sell_gold || 0 : 0;
     pieces += count;
-    gold += count * (E.junk.rarities[rarity] as any).sell_gold;
-    state.junkByRarity[rarity] = 0;
+    gold += count * price;
+    state.junk[item] = 0;
   }
   state.counters.gold += gold;
   return { pieces, gold };

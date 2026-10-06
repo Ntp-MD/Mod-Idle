@@ -58,6 +58,8 @@ export interface ModMax {
   res_pct_per_item: number;
   cdr_pct_per_item: number;
   align_pct_per_item: number;
+  energy_shield_flat_t1: number;
+  max_energy_shield_pct: number;
 }
 
 export interface LevelGain {
@@ -73,7 +75,6 @@ export interface LevelGain {
 }
 
 export interface LootBand {
-  kills_per_hr_published: number;
   group_mobs: number;
   upgrades_per_hr: number;
   lck_level: number | 'ceiling';
@@ -99,8 +100,6 @@ export interface LootCfg {
   boss_per_hour: number;
   boss_tier_stones: number;
   boss_add_stones: number;
-  timeline_checkpoints_hr: Record<string, number>;
-  push_hr_levels_91_100: number;
   quality_stone_sources: StoneSource;
   repair_stone_sources: StoneSource;
   corrupt_stone_sources: StoneSource;
@@ -137,6 +136,8 @@ export interface TownShared {
 
 export interface EnergyShieldCfg {
   delay_sec: number;
+  /** Base regen as a percent of the max pool per second; an `es_regen` line amplifies it. */
+  regen_pct: number;
 }
 
 export interface XpCfg {
@@ -145,7 +146,9 @@ export interface XpCfg {
   elite_mult: number;
   boss_mult: number;
   step: number;
-  hours_tolerance: number;
+  /** The level the flat XP bar starts at, and the level whose step out of it sets that bar. */
+  plateau_from?: number;
+  plateau_step_at?: number;
   note: string;
 }
 
@@ -168,6 +171,11 @@ export interface MobSpecies {
   /** A humanoid lineage is the only source of the potion drop (X49). */
   humanoid?: boolean;
   trait?: string;
+  /**
+   * Per-Element resistance multipliers on the Vit line (X54). One Element resists (x1.3-1.5) and one
+   * is a weakness (x0.5-0.7); the five always average x1.00 so the headline res is unchanged.
+   */
+  resist?: Record<string, number>;
   stats: { str: number; dex: number; int: number; vit: number; agi: number; lck: number };
 }
 
@@ -233,6 +241,17 @@ export interface FieldLabelRule {
   suffix: string;
 }
 
+/**
+ * One variant's drop identity (`mob.variant_drops`, keyed by the variant name `mob.variants` owns).
+ * `item`/`rarity` are the junk it pays instead of a species-wide item; `lean` is the collectible
+ * stream it tilts toward, applied through `huntReweight` so the total expected drops/kill is conserved.
+ */
+export interface VariantDrop {
+  item: string;
+  rarity: string;
+  lean: 'gear' | 'herb' | 'junk' | 'none';
+}
+
 /** The three field-label rows the roster doc and the client share (no colour — that is client-only). */
 export interface FieldLabelsCfg {
   note: string;
@@ -249,6 +268,8 @@ export interface MobCfg {
   species_target?: number;
   /** The five names a race's variant ladder carries, Small → Boss (the field labels). */
   variants?: Record<string, string[]>;
+  /** What each of those names drops: its own junk item and the stream it leans (`X56`). */
+  variant_drops?: Record<string, VariantDrop>;
   deprecated_species?: Record<string, string>;
   sizes: MobSize[];
   bosses: MobBoss[];

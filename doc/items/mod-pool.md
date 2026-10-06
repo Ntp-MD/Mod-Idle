@@ -37,6 +37,7 @@ import elements.md
 | Mana Regeneration flat | 2-31 | 2-5 / 6-9 | 10-14 / 15-19 | 20-25 / 26-31 |
 | Mana Regeneration % | 10-25% | 10-11 / 12-14 | 15-16 / 17-19 | 20-22 / 23-25 |
 | Max Energy Shield % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
+| Energy Shield Regeneration % | 12-30% | 12-14 / 15-17 | 18-20 / 21-23 | 24-26 / 27-30 |
 | Max HP % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
 | Max HP flat | 40-200 | 40-55 / 56-72 / 73-90 | 91-108 / 109-126 / 127-145 | 146-163 / 164-181 / 182-200 |
 | Max Mana % | 3-16% | 3-5 / 6-7 | 8-9 / 10-11 | 12-14 / 15-16 |
@@ -63,7 +64,7 @@ import elements.md
 | Elemental resistance % | 15-30% | 15-17 / 18-19 | 20-22 / 23-24 | 25-27 / 28-30 |
 <!-- END GENERATED:mod-pool -->
 
-- All 5 Elements use the same ranges, no split table needed
+- All Elements use the same ranges, no split table needed
 - **Elemental power ranges slightly below phys/magic** because Elemental damage must pass through an Alignment check first
 - Res is Defensive, so it never rolls on main hand (see equipment-slot.md)
 - Res has no Flat — raw res comes from Vit only, Mods add percentage multipliers
@@ -74,11 +75,11 @@ import elements.md
 
 **Weight is not a rolled value** · Every item carries weight from its *Base* (the frame of its slot), multiplied by quality
 
-- Quality multipliers: **low x0.8 · mid x1.0 · high x1.3** — better items are heavier · a cost players read directly from the item number, with no hidden rule
+- Quality multipliers: **low x1.0 · mid x1.3 · high x1.69** — the `quality_weight_multiplier` (1.3) applied per band, so a low piece is its Base weight, mid is x1.3 and high is x1.3² — better items are heavier · a cost players read directly from the item number, with no hidden rule
 - **Per-Base weight table is in item-base.md** · one slot has several frames (chest = Ring Mail 60 / Plate Vest 85 / Vestment 28). This is why weight becomes a *choice*, not a forced slot number
 - Main-hand weapons use weight by type (wand 25 → two-handed axe 85) · dual-wield counts x0.8
-- Full 12-item set: cloth ≈ **248 / 322** · balanced ≈ **390 / 507** · armored ≈ **505 / 657** (first pair mid quality · second pair high quality)
-- Carry capacity = Str x 2 (420 with no Str investment · 1,020 at the full-Str ceiling) · exceeding it cuts Attack speed up to -50% → full rule is in formula.md section 11
+- Full 11-item set: cloth ≈ **267 / 346** · balanced ≈ **385 / 500** · armored ≈ **575 / 747** (first pair mid quality · second pair high quality)
+- Carry capacity = weight_base (1,000) + Str × 2 (1,217 at the level-only 108 Str · 1,867 at the 433 ceiling) · exceeding it cuts Attack speed up to -50% → full rule is in formula.md section 11
 
 # Roll Examples
 

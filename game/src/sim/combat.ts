@@ -39,20 +39,24 @@ export function playerSwing(
   // each other. A cursed target still takes more of the whole hit (Expose).
   // each Element pool is countered on its own (PoE reading): a fire-and-cold weapon hitting a
   // fire monster gets the ×1.5 weak line on the fire part and the 0.60 pair on the cold part, and a
-  // pool that no line names is left exactly as strong as it always was
+  // pool that no line names is left exactly as strong as it always was. The pools are kept split so
+  // the race's per-Element res (X54) answers each one on its own line.
+  const elemByElement: Record<string, number> = {};
   let elemDamage = 0;
   const pools = Object.entries(c.elemByElement);
+  const elemTaken = 1 + (curse.elemTakenPct || 0) / 100;
   if (pools.length && mob.innate.length) {
     for (const [el, pool] of pools) {
       const mult = (el === mob.innate[0] && el !== NO_COUNTER_ELEMENT ? E.elements.weak_mult : 1)
         * counterMult(el, mob.innate[0]);
-      elemDamage += pool * (c.alignment / 100) * mult;
+      const dmg = pool * (c.alignment / 100) * mult * elemTaken;
+      elemByElement[el] = dmg;
+      elemDamage += dmg;
     }
   } else {
-    elemDamage = c.elem * (c.alignment / 100);
+    elemDamage = c.elem * (c.alignment / 100) * elemTaken;
+    if (elemDamage > 0 && mob.innate.length) elemByElement[mob.innate[0]] = elemDamage;
   }
-  // Elemental Break makes the target take more of the Element half specifically 
-  elemDamage *= 1 + (curse.elemTakenPct || 0) / 100;
   let nonElement = c.phys + c.magic;
 
   let crit = false;
@@ -65,7 +69,7 @@ export function playerSwing(
   // Armour on everything that is not Element, its own Elemental resistance on the Element half.
   // A crossbow's `Armour penetration %` line joins the same cut a curse writes, so the two
   // add and the ratio cannot fall below zero. Crit sizes the hit before the armour ratio.
-  let damage = eng.mitigateMobHit(mob, nonElement, elemDamage, curse.armourCut + eng.armourPenCut(c.armourPen), curse.resistCut) * takenMult(curse);
+  let damage = eng.mitigateMobHit(mob, nonElement, Object.keys(elemByElement).length ? elemByElement : elemDamage, curse.armourCut + eng.armourPenCut(c.armourPen), curse.resistCut) * takenMult(curse);
   // §12 weapon × body class: a SWING is the weapon's own argument with a body, so all 12 weapons
   // carry their `size_mult` row here — including a staff's, whose swing is magic damage. It lands
   // after mitigation so the ladder never scales the armour cut, and a magic-damage SKILL is exempt

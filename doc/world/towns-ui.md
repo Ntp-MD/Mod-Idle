@@ -53,7 +53,7 @@ Default path per session, which is the `concept.md` core loop with place names: 
 | Circuit | the ordered links of the loop, editable **only** on this page while standing in a settlement | `save.md` Road state |
 | Road preview | shown **before** stepping onto a Road, see section 9 | `towns.md` section 7 |
 
-**Two layers.** The terrain background is a hand-drawn file in `art/svg/ui-map-terrain.svg` (a map is a different scale and a different style from the icon libraries, so it reuses neither). Nodes, link paths, terrain glyphs and the travel marker are a generated overlay written by `node tools/map.ts --write` from `tools/data/map.json`. **Node coordinates are presentation only**: the simulation reads node and link ids and nothing else, which the map cage's **M7** enforces. Fog extends the same rule to art — terrain is always drawn, node detail is not.
+**Two layers.** The backdrop is a hand-drawn file in `art/svg/map/map-terrain.svg` — the off-field grey and the paper the field is cut out of (a map is a different scale and a different style from the icon libraries, so it reuses neither). The field itself is a generated overlay written by `node tools/map.ts --write` from `tools/data/map.json`: a pointy-top hex lattice where **a settlement is a cluster of hexes — its own plus one per sub-zone**, so every place the player can fight in owns a block of its own and is named inside it. Biome tones, the river band, the named regions, terrain washes, landmark marks and the travel marker all come from the same writer; there is no road layer, because the sheet shows places rather than routes. The sheet spirals outward from its centre, so the starting capital sits in the middle and the level bands climb toward the rim. **Node coordinates are presentation only**: the simulation reads node and link ids and nothing else, which the map cage's **M7** enforces. Fog extends the same rule to art — terrain is always drawn, node detail is not.
 
 - Unvisited nodes are shown **by name with no detail** — the map never hides that a place exists, it only hides what it sells.
 - A capital node whose level range the player has not reached is drawn greyed with its real requirement (`Level 51-60`), never removed: zone unlock is by level only (`world.md`).
@@ -95,9 +95,9 @@ your rules convert ~212 pieces/hour here → 212 stones  ·  or 212 gold  ·  ne
 
 | Element | Rule |
 |---|---|
-| Default | **filter off** on every new slot — a fresh character keeps everything until the player arms a slot; an armed slot then **dissolves**, so the crafting engine keeps its designed 416 stones/hour |
+| Default | **filter off** on every new slot — a fresh character keeps everything until the player arms a slot; an armed slot then **dissolves**, so the crafting engine keeps its designed 79 stones/hour |
 | Medium choice | per slot, stored per character (`save.md`) |
-| Warning | switching a slot to sell shows the forgone Reroll capacity: 1 gold = 1 stone = 1/52 hour of Reroll (`checks.md` T6) |
+| Warning | switching a slot to sell shows the forgone Reroll capacity: 1 gold = 1 stone = 1/80 of a full-set polish (`checks.md` T6) |
 | Preset slots | 3 by default, one extra per purchase (`towns-stalls.md` section 3) · preset switching is a reason-to-open (`concept.md`) |
 | Herb line | herbs never dissolve (`loot.md` section 4), so the sell switch is absent for them |
 | Map knowledge | the Counterhand also prints the settlement's filter tip at Tier III — information, never a stat |
@@ -147,7 +147,7 @@ earned: 6,110 zone kills · 520 tasks · 40 boss kills
 next unlocks: Collector set slots · nothing else
 ```
 
-- The bar counts **kills**, matching how the thresholds are defined (`towns-stalls.md` section 6 · F1 1,800 kills/hr high band).
+- The bar counts **kills**, matching how the thresholds are defined (`towns-stalls.md` section 6 · F1 589 kills/hr high band).
 - Sources are itemised so the player sees that tasks and bosses are extra progress on the same bar, never a separate currency.
 - Standing is never spendable, never shared across the 3 character slots (`save.md`), and the panel states what the next tier unlocks in the words of section 6: stock, set slots, map knowledge, presets, titles.
 - Tier III exceeding the zone's own budget is displayed as a **chase** (`12,600 / 9,000 budget`), never as a bug.
@@ -157,7 +157,7 @@ next unlocks: Collector set slots · nothing else
 | Action | Dialog must state |
 |---|---|
 | Link a Road (carriage) | `138 g · 20 m · one-time` · "after this, travel is free and instant" |
-| Walk the Road (mode C) | `5 min (ladder) / 8–12 min (branch)` · `forfeits ≈ 120 kills at 1,800/hr` · `pays Standing + gold, no stones` · confirm required |
+| Walk the Road (mode C) | `5 min (ladder) / 8–12 min (branch)` · `forfeits ≈ 49 kills at 589/hr` · `pays Standing + gold, no stones` · confirm required |
 | Set a Circuit | the ordered links, the terrain of each, and the same two units a stall price uses · editable only here, never mid-leg |
 | Road event (mode D) | what it pays, in the same two units as a stall price · never a stone · a chest is capped once per link per day |
 | Push mid-Circuit | `skips the rest of this leg · the Circuit carries on` — never "forfeit" while a Circuit runs |

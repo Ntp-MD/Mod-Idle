@@ -13,7 +13,7 @@ Values shown on the character screen, calculated from formula.md.
 | Mana | Current value / Maximum value |
 | Attack speed | Hits per second |
 
-> Energy Shield sits **above** HP while the character has a pool, and Attack speed is read as hits per second. On the playable screen these three are the bar row above the fight. **Weight moved to the character bag panel**, where `carried / capacity` with the aspd it costs when over sits beside the stacks that actually carry it: `566 / 420 (aspd −35%)`.
+> Energy Shield sits **above** HP while the character has a pool, and Attack speed is read as hits per second. On the playable screen these three are the bar row above the fight. **Weight moved to the character bag panel**, where `carried / capacity` with the aspd it costs when over sits beside the stacks that actually carry it: `1,400 / 1,217 (aspd −15%)`.
 
 # Core Stats
 
@@ -22,12 +22,14 @@ Shows all 7 stats with a breakdown of their sources. A Core stat is **spent, not
 | Stat | What it gives | Show calculated values too? |
 |---|---|---|
 | Str | Physical power, Weight, Armour | Physical power, Weight capacity, Armour |
-| Vit | HP, HP regen, all 5 Elemental resistances | Max HP, HP regen, all 5 Elemental res |
+| Vit | HP, HP regen, Stun Recovery | Max HP, HP regen, Stun Recovery |
 | Dex | Accuracy, Elemental Alignment, Evasion | Accuracy, Elemental Alignment %, Evasion |
 | Agi | Attack speed, Evasion points | Attack speed, Evasion |
 | Wis | Cooldown reduction | CDR % |
-| Int | Magic power, Mana regen, Elemental power, Energy Shield | Magic power, Mana regen, Elemental power, Energy Shield |
+| Int | Magic power, Mana regen, Elemental power, Mana | Magic power, Mana regen, Elemental power, Max Mana |
 | Lck | Critical chance, Drop chance, Perfect dodge | All 3 values |
+
+Elemental resistance and Energy Shield come off gear, not off a Core stat, so they appear on this sheet from the Mod rows rather than from the allocation panel (owner ruling · `core-stats.md`).
 
 **Show in 3 separate parts** so players see where each number comes from.
 
@@ -87,25 +89,25 @@ The example below is a **level 31 character wearing all mid-Item quality Rare ge
 ## Offense
 
 ```
-Attack speed      1.5 /sec      (aspd 154 = 1.2 × (100 + (125−12)×0.25))
-Physical power    715          ( (125 × 5 + 37) × 1.08 )
+Attack speed      1.26 /sec     (aspd 126 = 1.2 × (100 + (33−12)×0.25))
+Physical power    220          ( (33 × 5 + 37) × 1.08 )
 Magic power       0            (Int not yet invested — show 0, do not hide)
-Critical chance   10%           (Lck 125 × 0.05 + Mod 4% · no Cap · no overflow yet)
+Critical chance   5.7%          (Lck 33 × 0.05 + Mod 4% · no Cap · no overflow yet)
 Critical damage   152%          (physical only)
 ```
 
 ## Defense
 
 ```
-Max HP            3,914        HP regen   31/sec
-Max Mana          816          Mana regen 15/sec
-Evasion           39% / 80%    (Dex 125 × 0.5 + gear 12 = rating 74 → 74 ÷ (74 + mob accuracy 135) = 35% + Agi 125 ÷ 30 = 4 points)
+Max HP            2,299        HP regen   8/sec
+Max Mana          714          Mana regen 9.4/sec
+Evasion           19% / 80%    (Dex 33 × 0.5 + gear 12 = rating 29 → 29 ÷ (29 + mob accuracy 135) = 18% + Agi 33 ÷ 30 = 1 point)
 Accuracy          135
-Elem alignment    8% / 35%
-Perfect dodge     1% / 21%    (ratio on the Lck line · the Cap binds at Lck 506)
+Elem alignment    1.7% / 35%
+Perfect dodge     1.7% / 21%   (ratio on the Lck line · the Cap binds at Lck 506)
 ```
 
-- Verify each number: `stat_c(31) = 12 + 2×30 = 72` · Vit 125 → `HP = (125×20 + 40×30) × 1.06 = 3,914` · Int 84 → `mana = 84×4 + 16×30 = 816` · regen `= 84×0.18 = 15.1`
+- Verify each number: the level-31 reference line `stat = 12 + points ÷ 7 = 12 + 150 ÷ 7 = 33` · Vit 33 → `HP = (hp_base 300 + 33×20 + 40×30) × 1.06 = 2,299` · Int 33 → `mana = mana_base 100 + 33×4 + 16×30 = 714` · mana regen `= 33×0.28 = 9.4`
 - The worked example above is tied to the current formula and Cap set; superseded example numbers are not kept here.
 
 # How to Show Caps
@@ -157,5 +159,5 @@ The screen holds four regions, all visible at once: the combat scene with the th
 - At most 1 decimal place, and round down, never up.
 - Always show Caps for Evasion / perfect dodge / cdr / aspd / elem res · **Accuracy, Critical chance and Elemental Alignment have no Cap**, so show them as bare numbers — for crit, show the overflow going into crit damage instead of a Cap.
 - No separate status Alignment or status resistance remain. Use Elemental Alignment instead.
-- **Mastery shows on the weapon panel, not the main panel** — `Mastery <lvl>/20 · weight −<lvl>%` (weight is −1% per level, Cap −20% at L20 · `equipment-weapon.md`), e.g. `Mastery 14/20 · weight -14%`. It is a per-weapon side track, not a build-calculation stat, so it never clutters the twelve-item main read.
+- **Mastery shows on the weapon panel, not the main panel** — `Mastery <lvl>/20 · weight −<lvl>%` (weight is −1% per level, Cap −20% at L20 · `equipment-weapon.md`), e.g. `Mastery 14/20 · weight -14%`. It is a per-weapon side track, not a build-calculation stat, so it never clutters the thirteen-item main read.
 

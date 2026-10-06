@@ -152,7 +152,8 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **character bag** | The 50-slot bag of carried consumables: stones stack 999/slot and are **weightless**, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. |
 | **stash** | Town storage, organisation only, bought with gold (`towns.md`). Never grants power and never auto-converts. |
 | **herb** | A plant drop, consumed rather than equipped or sold. Always kept by the filter — it never dissolves. Its rate feeds the herbalist's demand and the pouch ladder. |
-| **junk** | A flavoured drop from each species (Slime Jelly, Golem Shard…), always kept, stacks 999/slot and is **weightless**, and is sold to the Settlement Counterhand for gold — gold's primary mint (Ragnarok-style). Has three rarities (common · uncommon · rare): rarer junk is dearer and drops less often, so expected gold per kill is flat. Not gear, not a stone. |
+| **junk** | A flavoured drop from each **variant** (a Goblin pays an Ear at Sneak, Bile at Raider, a Cog at Tinker, a Charm at Shaman and a Crown at the King), always kept, stacks 999/slot and is **weightless**, and is sold to the Settlement Counterhand for gold — gold's primary mint (Ragnarok-style). Has three rarities (common · uncommon · rare): rarer junk is dearer and drops less often, so expected gold per kill is flat and rarity buys frequency, not income. Not gear, not a stone. |
+| **variant** | One rung of a species' named ladder (`mob.variants`): the three normal rungs plus Elite and Boss. A variant owns its own junk item and the collectible stream it **leans**, so the name is a drop identity. Each zone is three **sub-zones** — a race pair plus an Element — and the player's chosen sub-zone (`zoneFocus`) is the hunting ground a spawn rolls inside. |
 
 # Town and Economy
 

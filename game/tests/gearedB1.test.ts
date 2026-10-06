@@ -251,7 +251,7 @@ describe('the fold measured on gear the loop actually produced', () => {
     // >1 — that uplift is unpriced player power, and `checks.md` D34 carries the debt (H1).
     expect(shares.every((x) => x > 0.9)).toBe(true);
     expect(shares[shares.length - 1]).toBeGreaterThan(1); // and it is a real multiplier once levelled
-  }, 300000);
+  }, 120000);
 
   it('leaves the fast-hit build its own value: the damage comes from hits, not from one big press', () => {
     const { s, hours } = huntTo(90);
@@ -294,5 +294,5 @@ describe('the fold measured on gear the loop actually produced', () => {
     expect(fast.hitBornePct).toBeGreaterThan(heavy.hitBornePct);
     expect(fast.m.dps).toBeGreaterThan(0);
     expect(heavy.m.dps).toBeGreaterThan(0);
-  }, 300000);
+  }, 120000);
 });

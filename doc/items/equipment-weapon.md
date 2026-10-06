@@ -112,11 +112,11 @@ mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 ## Timeline for the whole account (measured at level 90 · using one weapon continuously)
 
 ```
-11 types to L10  = 12.4 hours  → at this point +11% drop_rate permanently
-11 types to L20  = 55 hours    → this is true endgame, not reached in the first week
+11 types to L10  = 124,000 Mastery XP  → at this point +11% drop_rate permanently
+11 types to L20  = 550,000 Mastery XP → this is the long tail, and nothing rushes it
 ```
 
-- The hours come straight from the kill table above ×11, so lower zones simply take longer because the band fields fewer kills — the track is now read entirely off the kill rate, not attack speed · Therefore Mastery is a "parallel track" that walks early game then accelerates as the kill rate climbs
+- The XP comes straight from the kill table above ×11, so a lower band simply pays it slower because the band fields fewer kills — the track is now read entirely off the kill rate, not attack speed · Therefore Mastery is a "parallel track" that walks early game then accelerates as the kill rate climbs
 - **AFK earns full Mastery** because it counts purely from kills, unrelated to boss or Item quality · It is the only system in the game that progresses fully while closed — intentionally, so low-playtime players have their own progress track
 
 ## Measured side effects (Mastery L20 on weight tax)
@@ -124,11 +124,11 @@ mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 No table here: the set weights and their taxes are printed once, from `tools/data/bases.json`, in the generated block in `formula-utility.md` section 11 (`node tools/bases.ts --blocks`). Mastery acts on the **held weapon** only — it discounts that weapon's weight by up to 20% — and the weight it discounts is the **weight** column above, per type (B13), so the size of the saving scales with the type you are holding and this file states the number exactly once.
 
 - Mastery **is not a shortcut past Str** — an armored build without Str still hits the tax Cap; the discount applies to one weapon line out of eleven
-- Drop effect: no-Lck players get 418 → 464 pieces/hour (+11%) · Full Lck 878 → 975/hour — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
+- Drop effect: no-Lck players get 82 → 91 pieces/hour (+11%) · Full Lck 252 → 280/hour — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
 
 # Display
 
-- **Mastery on the character sheet — settled**: it shows on the **weapon panel**, not the main panel, as `Mastery <lvl>/20 · weight −<pct>` (e.g. `Mastery 14/20 · weight -14%`), because Mastery is a per-weapon side track and is not a stat used in build calculation. The main panel stays the twelve-item build read; weapon Mastery is a panel-local line. (Landed in `character-sheet.md` Display Rules.)
+- **Mastery on the character sheet — settled**: it shows on the **weapon panel**, not the main panel, as `Mastery <lvl>/20 · weight −<pct>` (e.g. `Mastery 14/20 · weight -14%`), because Mastery is a per-weapon side track and is not a stat used in build calculation. The main panel stays the thirteen-item build read; weapon Mastery is a panel-local line. (Landed in `character-sheet.md` Display Rules.)
 
 > **Closes the original question in concept.md**: "Mastery has no formula yet — what is the per-level bonus, and will all 11 weapon types be equally worthwhile?" → Answered: bonus = weight + drop_rate and skill damage only for the held weapon · All types are equally worthwhile because DPS is never touched
 

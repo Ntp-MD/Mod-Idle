@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { eng, E, sm, TOWN, BASES } from './engine/client';
+  import { eng, E, sm, TOWN, BASES, tree } from './engine/client';
   import { buildCharacter } from './sim/player';
   import { newGame, tick, push, catchUpAsync, carried, heldWeaponName } from './sim/game';
   import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf } from './sim/skills';
@@ -16,6 +16,7 @@
   import { craft, doCraft, stoneNames, stoneName, lineName, lineTier, type CraftOp, type Where } from './sim/craft';
   import { farm, farmLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
   import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
+import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
   import { road, startTrip, linkReachable, purseReady, linkLabel, startCircuit, stopCircuit, circuitValid } from './sim/road';
   import { masteryLabel, dropBonusPct, masteryLevel, WEAPONS } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
@@ -30,7 +31,9 @@
   import { bossMark } from './icon';
   // the settlement map: hand-drawn terrain under the generated overlay (both presentation-only)
   import mapTerrain from '../../art/svg/map/map-terrain.svg?url';
-  import mapOverlay from '../../art/svg/map/map-overlay.svg?url';
+  // the overlay is inlined so the travel pin and dash can be toggled by id — the client reads no
+  // coordinate, only settlement/link ids it already holds (X33 · M7 · M10)
+  import mapOverlayRaw from '../../art/svg/map/map-overlay.svg?raw';
   import type { GameState, Item } from './sim/types';
   import type { StatKey } from './engine/client';
   import type { Statuses } from './sim/combat';
@@ -103,11 +106,23 @@
       : Math.round(n).toLocaleString('en-US');
   }
 
-  /** The current zone's Hunt Order; 'none' removes the lean. Shifts between streams, never the total. */
+  /**
+   * The current zone's Hunt Order; clearing it hands the lean back to the mob: every variant carries
+   * its own lean (`mob.variant_drops`), and the three normal rungs cycle gear · herb · junk. Either
+   * way the lean only shifts weight between the streams, never the total.
+   */
   function setHuntOrder(v: 'gear' | 'herb' | 'junk' | 'none') {
     if (!gameState.huntOrder) gameState.huntOrder = {};
     if (v === 'none') delete gameState.huntOrder[gameState.zone];
     else gameState.huntOrder[gameState.zone] = v;
+    gameState = { ...gameState };
+  }
+
+  /** The current zone's hunting ground: which sub-zone a spawn rolls inside. Empty = the whole cast. */
+  function setZoneFocus(name: string) {
+    if (!gameState.zoneFocus) gameState.zoneFocus = {};
+    if (!name) delete gameState.zoneFocus[gameState.zone];
+    else gameState.zoneFocus[gameState.zone] = name;
     gameState = { ...gameState };
   }
 
@@ -125,6 +140,17 @@
     }
     gameState = { ...gameState };
   }
+  /** Buy one rank of a passive-tree node; the verdict explains a refusal in the button's title. */
+  function doSpendTree(nodeId: string) {
+    const r = spendTreePoint(gameState, nodeId);
+    if (r.ok) gameState = { ...gameState };
+    return r;
+  }
+  /** The tree respec is free too, and it lives with the stat respec on the town panel. */
+  function doRespecTree() {
+    respecTree(gameState);
+    gameState = { ...gameState };
+  }
   /** Free Respec — town only (the button is on the town panel). Hands every allocated point back. */
   function respec() {
     const p = gameState.player;
@@ -134,14 +160,17 @@
     gameState = { ...gameState };
   }
 
-  /** §11 field label: the variant the body tier lands on; a named boss reads its own name; no body class. */
-  function fieldLabel(m: { species: string; speciesId?: string; kind: string }): string {
+  /**
+   * §11 field label: the ladder rung this spawn rolled (`mob.variants`), which is what its drop table
+   * keys on — a body tier no longer implies the name, since the three normal rungs are their own roll
+   * and a two-body species would otherwise never field one of them. A named boss reads its own name.
+   */
+  function fieldLabel(m: { species: string; speciesId?: string; kind: string; variant?: string }): string {
     const fl = E.mob.field_labels;
     if (m.kind.startsWith('Boss')) return `${m.kind.replace(/^Boss · /, '')}${fl.boss.suffix}`;
-    const tier = ({ Small: 0, Medium: 1, Large: 2, Elite: 3 } as Record<string, number>)[m.kind];
+    if (m.variant) return m.variant;
     const ladder = m.speciesId ? (E.mob.variants as Record<string, string[]>)[m.speciesId] : null;
-    if (ladder && tier != null) return ladder[tier];
-    return `${m.species.toLowerCase()}${m.kind === 'Elite' ? fl.elite.suffix : fl.normal.suffix}`;
+    return ladder ? ladder[0] : `${m.species.toLowerCase()}${m.kind === 'Elite' ? fl.elite.suffix : fl.normal.suffix}`;
   }
 
   function step() {
@@ -151,9 +180,18 @@
     tick(gameState, statuses);
   }
 
+  /** How often the game writes itself back to the last-used slot while it is running. */
+  const AUTOSAVE_SEC = 30;
+
   onMount(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
+    let autosaveTimer: ReturnType<typeof setInterval> | null = null;
     let disposed = false;
+    // best-effort flush: the away stamp is refreshed so closing the tab loses at most the last slice,
+    // and a reload right after cannot count the same absence twice. IndexedDB may not finish inside
+    // `beforeunload`, so the interval save is the one that actually bounds the loss.
+    const flush = () => { if (lastSlot) void doSave(lastSlot, true); };
+    const onHide = () => { if (document.visibilityState === 'hidden') flush(); };
     (async () => {
       settings = await readSettings();
       // monotonic clock: catch up on the time between sessions, capped by the save rule. The catch-up
@@ -166,11 +204,25 @@
         push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated${r.capped ? ' (capped at the offline limit)' : ''}`);
         gameState = { ...gameState };
       }
+      // the away window is spent: stamp the clock now, so the next save (timer or manual) does not
+      // credit the same absence a second time
+      gameState.lastSavedAt = Date.now();
       loadSnaps();
       // the clock is armed only after the catch-up, so a slice boundary cannot add an extra tick
-      if (!disposed) timer = setInterval(() => { if (running) step(); }, 1000);
+      if (!disposed) {
+        timer = setInterval(() => { if (running) step(); }, 1000);
+        autosaveTimer = setInterval(flush, AUTOSAVE_SEC * 1000);
+        document.addEventListener('visibilitychange', onHide);
+        window.addEventListener('beforeunload', flush);
+      }
     })();
-    return () => { disposed = true; if (timer) clearInterval(timer); };
+    return () => {
+      disposed = true;
+      if (timer) clearInterval(timer);
+      if (autosaveTimer) clearInterval(autosaveTimer);
+      document.removeEventListener('visibilitychange', onHide);
+      window.removeEventListener('beforeunload', flush);
+    };
   });
 
   function equip(index: number) {
@@ -194,12 +246,21 @@
     gameState = { ...gameState };
   }
 
-  async function doSave(slot: SlotName) {
+  /** The slot the player last saved or loaded. Null until they choose, so a fresh in-memory game
+   *  never silently autosaves over an existing file. */
+  let lastSlot = $state<SlotName | null>(null);
+
+  async function doSave(slot: SlotName, quiet = false) {
+    // stamp the wall clock before the write, so the next session's away window starts here (and a
+    // reload before the next save cannot count the same absence twice)
     gameState.lastSavedAt = Date.now();
     await writeSave(slot, gameState); // one write may also take a snapshot and arm the next timer
-    gameState = { ...gameState };
-    saveNote = `Saved to ${slot}`;
-    if (slot === snapSlot) await loadSnaps();
+    lastSlot = slot;
+    if (!quiet) {
+      gameState = { ...gameState };
+      saveNote = `Saved to ${slot}`;
+      if (slot === snapSlot) await loadSnaps();
+    }
   }
 
   let snaps: Snapshot[] = $state([]);
@@ -237,6 +298,9 @@
     const before = snapCounters(gameState);
     const r = await catchUpAsync(gameState, statuses, away);
     awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped) : null;
+    // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
+    lastSlot = slot;
+    gameState.lastSavedAt = Date.now();
     saveNote = `Loaded ${slot} — ${r.simulated} sec caught up`;
     gameState = { ...gameState };
   }
@@ -273,8 +337,27 @@
   // leave it showing the town the character walked away from
   const townId = $derived(settlementOfZone(gameState.zone)?.id || 'eastgate');
   const town = $derived(settlementById(townId));
+  // The map overlay with the travel pin/dash toggled by id: the pin sits on the settlement you
+  // stand in, the dash lights the link you are walking, and the destination pin is marked while a
+  // trip runs. No coordinate is read here — only settlement and link ids the client already holds.
+  const mapMarkup = $derived.by(() => {
+    let s = mapOverlayRaw.replace(/^<\?xml[^>]*\?>\s*/, '');
+    s = s.replace(`<g class="pin" data-node="${townId}"`, `<g class="pin here" data-node="${townId}"`);
+    const trip = gameState.road;
+    if (trip) {
+      const l = E.road.links[trip.linkIndex];
+      if (l) s = s.replace(`<path class="dash" data-link="${l.zoneA}-${l.zoneB}"`, `<path class="dash traveling" data-link="${l.zoneA}-${l.zoneB}"`);
+      if (trip.settlementTo && trip.settlementTo !== townId) s = s.replace(`<g class="pin" data-node="${trip.settlementTo}"`, `<g class="pin target" data-node="${trip.settlementTo}"`);
+    }
+    return s;
+  });
   const townStock = $derived(stockOf(town?.id));
-  const junkTotal = $derived(Object.values(gameState.junkByRarity).reduce((a: number, b: number) => a + b, 0));
+  const junkTotal = $derived(Object.values(gameState.junk).reduce((a: number, b: number) => a + b, 0));
+  /** Unsold junk as "item ×count", biggest stack first — the record of which variants were farmed. */
+  const junkLines = $derived(Object.entries(gameState.junk)
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([item, n]) => `${item} ×${n}`));
 
   function doSell() {
     const r = sellJunk(gameState);
@@ -298,6 +381,8 @@
     const s = settlementById(id);
     if (!canTravel(gameState, id)) { saveNote = 'No road link to that settlement yet'; return; }
     if (!gameState.town.visited.includes(id)) gameState.town.visited.push(id);
+    // a manual jump is the new floor: a later Push in Forward Mode falls back to the zone just left
+    gameState.forwardSafe = gameState.zone;
     gameState.zone = s.zone;
     gameState.group = [];
     gameState.town.waypoint = id;
@@ -512,8 +597,8 @@
     gameState.travel = mode;
     gameState = { ...gameState };
     push(gameState, mode === 'forward'
-      ? 'Hunting will move on by itself through settlements already opened'
-      : 'Hunting stays in this zone until you travel');
+      ? 'Climbing: the walk moves on through settlements already opened, and falls back to the last zone held when a Push lands'
+      : 'Staying: you farm this zone until you travel yourself');
     gameState = { ...gameState };
   }
 
@@ -590,19 +675,28 @@
     <p class="state">
       <label class="travel">Hunt zone
         <button class={gameState.travel === 'stay' ? 'active' : ''} onclick={() => setTravel('stay')}>stay here</button>
-        <button class={gameState.travel === 'forward' ? 'active' : ''} onclick={() => setTravel('forward')}>move on when this zone is behind me</button>
+        <button class={gameState.travel === 'forward' ? 'active' : ''} onclick={() => setTravel('forward')}>climb forward</button>
         <small>{gameState.travel === 'forward'
-          ? `walks on to the next settlement you have already opened, once level ${zone.levels[1] + 1} is reached`
+          ? `climbs: walks on to the next settlement you have already opened once level ${zone.levels[1] + 1} is reached, and a Push sends you back to the last zone you held — the climb resumes one level later`
           : 'stays in this zone however high you get — you choose when to travel'}</small>
       </label>
     </p>
     <p class="state">
       <label class="travel">Hunt order
-        <button class={(gameState.huntOrder?.[gameState.zone] || 'none') === 'none' ? 'active' : ''} onclick={() => setHuntOrder('none')}>balanced</button>
+        <button class={gameState.huntOrder?.[gameState.zone] === undefined ? 'active' : ''} onclick={() => setHuntOrder('none')}>by variant</button>
         <button class={gameState.huntOrder?.[gameState.zone] === 'gear' ? 'active' : ''} onclick={() => setHuntOrder('gear')}>gear</button>
         <button class={gameState.huntOrder?.[gameState.zone] === 'herb' ? 'active' : ''} onclick={() => setHuntOrder('herb')}>herbs</button>
         <button class={gameState.huntOrder?.[gameState.zone] === 'junk' ? 'active' : ''} onclick={() => setHuntOrder('junk')}>junk</button>
-        <small>Lean this zone's drops toward one stream. It moves weight between gear, herbs and junk — never the total, so nothing the timeline is priced on shifts. Stones are not a category.</small>
+        <small>By variant: each mob leans the stream its own ladder rung leans, and the three normal rungs cycle gear · herb · junk. Picking a stream overrides every variant in the zone. Either way it moves weight between gear, herbs and junk — never the total, so nothing the timeline is priced on shifts. Stones are not a category.</small>
+      </label>
+      <label class="travel">Hunting ground
+        <select onchange={(e) => setZoneFocus((e.target as HTMLSelectElement).value)}>
+          <option value="" selected={!gameState.zoneFocus?.[gameState.zone]}>the whole cast</option>
+          {#each (eng.zoneById(gameState.zone).subzones || []) as sub}
+            <option value={sub.name} selected={gameState.zoneFocus?.[gameState.zone] === sub.name}>{sub.name} · {sub.element} · {sub.races.join(' + ')}</option>
+          {/each}
+        </select>
+        <small>Pick a sub-zone and every spawn rolls inside it, so the race pair and the Element you fight are the ones you chose — and with them the junk their variants pay. Elite and Boss stay zone-level.</small>
       </label>
     </p>
     <p class="state">
@@ -679,7 +773,7 @@
           <tr><td>Stun Recovery</td><td>{c.stunRecovery.toFixed(1)}% of a shock's stop — Vit buys it back, so a {E.status.shock.stop_sec} sec stun leaves {(E.status.shock.stop_sec * (1 - c.stunRecovery / 100)).toFixed(2)} sec</td></tr>
           <tr><td>Alignment</td><td>{c.alignment.toFixed(1)}% (Cap {E.caps.alignment})</td></tr>
           <tr><td>Cooldown reduction</td><td>{c.cdr.toFixed(1)}% (Cap {E.caps.cdr})</td></tr>
-          <tr><td>Energy Shield</td><td>{Math.round(c.es)} · recharges {c.esRegen.toFixed(1)}/sec after {E.energy_shield.delay_sec} sec</td></tr>
+          <tr><td>Energy Shield</td><td>{Math.round(c.es)} · regens {c.esRegen.toFixed(1)}/sec after {E.energy_shield.delay_sec} sec ({E.energy_shield.regen_pct}% of the pool, amplified by an es_regen line)</td></tr>
           <tr><td>Weight</td><td>{c.weightUsed.toFixed(0)} used / {Math.round(c.weightCap)} capacity{c.encumbrance > 0 ? ` · aspd ${(c.encumbrance * -100).toFixed(0)}%` : ' · no tax'}</td></tr>
         </tbody>
       </table>
@@ -874,6 +968,30 @@
         <li><small>None.</small></li>
       {/each}
     </ul>
+
+    <h2>Passive tree · {treePointsFree(gameState)} banked · {treePointsSpent(gameState)} spent</h2>
+    <p><small>A level banks one point and one point buys one rank; a node's rank 1 needs the node before it in its own chain, and every node pays a line at a number. Respec is free, at the town Counterhand.</small></p>
+    <div class="tree-branches">
+      {#each tree.branches as branch}
+        <div class="tree-branch">
+          <h3>{branch}</h3>
+          {#each tree.nodes.filter((n: any) => n.branch === branch) as node}
+            <div class="tree-node">
+              <span class="tree-name">{node.id} · {node.line}</span>
+              <span class="tree-pips">
+                {#each [1, 2, 3] as r}
+                  <span class="pip" class:on={(gameState.player.treeRanks?.[node.id] || 0) >= r}>{node.values[r - 1]}</span>
+                {/each}
+              </span>
+              <button
+                title={canSpendTree(gameState, node.id).why || `buy rank ${(gameState.player.treeRanks?.[node.id] || 0) + 1}`}
+                disabled={!canSpendTree(gameState, node.id).ok}
+                onclick={() => doSpendTree(node.id)}>+</button>
+            </div>
+          {/each}
+        </div>
+      {/each}
+    </div>
   </section>
 {/if}
 
@@ -883,16 +1001,17 @@
     <p><small>Innate Element {town.innate.join(' / ')} · Base bias flavour {town.base_bias_flavor} · NPCs here: {town.npcs.map((n: string) => npcOf(n).name).join(' · ')}</small></p>
 
     <h3>Counterhand · the gold mint</h3>
-    <p>Gold {gameState.counters.gold.toFixed(1)} · junk unsold {junkTotal} ({Object.entries(gameState.junkByRarity).map(([r, n]) => `${r} ${n}`).join(' · ') || 'none'}) · stones {stonesLine()}</p>
+    <p>Gold {gameState.counters.gold.toFixed(1)} · junk unsold {junkTotal} ({junkLines.join(' · ') || 'none'}) · stones {stonesLine()}</p>
     <button onclick={doSell} disabled={junkTotal === 0}>Sell all junk here</button>
     <p><small>Junk sells for its rarity price and nothing else mints gold except a Road event. Rejected gear dissolved for Reroll value stones instead — the two media never mix.</small></p>
 
     <h3>Respec · free</h3>
     <p><small>Hand every allocated stat point back and re-spend them. Free, and only here in a settlement — this game has no death, so a locked build would be a worse punishment than a lost fight.</small></p>
-    <button onclick={respec} disabled={!STATS.some((k) => gameState.player.points[k])}>Respec — refund all points</button>
+    <button onclick={respec} disabled={!STATS.some((k) => gameState.player.points[k])}>Respec — refund all stat points</button>
+    <button onclick={doRespecTree} disabled={!treePointsSpent(gameState)}>Respec the tree — refund {treePointsSpent(gameState)} point{treePointsSpent(gameState) === 1 ? '' : 's'}</button>
 
     <h3>Standing</h3>
-    <p>Tier {standingTier(gameState, town.id)} / {TOWN.standing.tiers.length} · {(standingShare(gameState, town.id) * 100).toFixed(1)}% of the {town.budget_hr} hr of zone {town.zone} kills that Tier I asks for. Standing buys stock lines, set slots and cosmetics — never a stat, a Mod, a stone or anything mob_HP reads.</p>
+    <p>Tier {standingTier(gameState, town.id)} / {TOWN.standing.tiers.length} · {(standingShare(gameState, town.id) * 100).toFixed(1)}% of the {eng.SETTLEMENT_BUDGET_KILLS[town.zone].toLocaleString('en-US')} kills in zone {town.zone} that Tier I asks for. Standing buys stock lines, set slots and cosmetics — never a stat, a Mod, a stone or anything mob_HP reads.</p>
 
     <h3>Stall stock</h3>
     <table>
@@ -1170,11 +1289,16 @@
 {#if tab === 'map'}
   <section class="panel">
     <h2>Map</h2>
-    <p><small>The terrain background is hand-drawn; the overlay (nodes, links, terrain glyphs) is generated by <code>node tools/map.ts --write</code> from the map data file. Coordinates are presentation only — the simulation reads ids (X33 · M7).</small></p>
+    <p><small>The backdrop is hand-drawn; the overlay is generated by <code>node tools/map.ts --write</code> — a hex field where <b>each settlement is a cluster: its own hex plus one hex per sub-zone</b>, every sub-zone named inside the hex it owns, then the biome tones, the river, the named regions, the terrain washes, the landmark marks and the travel pin. The sheet spirals outward, so the first capital sits in the middle and the level bands climb toward the rim; there are no drawn routes — it shows places. Coordinates are presentation only — the client toggles the pin and dash by id (X33 · M7 · M10).</small></p>
     <div class="map-frame">
       <img src={mapTerrain} alt="Terrain" />
-      <img src={mapOverlay} alt="Settlements, roads and terrain features" />
+      {@html mapMarkup}
     </div>
+    {#if gameState.road}
+      <p><small>Walking <b>{linkLabel(gameState.road.linkIndex)}</b> — the amber dash on the map. {gameState.road.secLeft}s left · {gameState.road.encountersLeft} encounter{gameState.road.encountersLeft === 1 ? '' : 's'} to go{gameState.road.kind ? ` · ${gameState.road.kind} in progress` : ''}.</small></p>
+    {:else}
+      <p><small>The green pin marks the settlement you stand in. Walk a Road link (below) and the amber dash animates from the pin to the destination.</small></p>
+    {/if}
 
     <h3>Circuit · the Road on a loop</h3>
     {#if gameState.road?.circuit.length}
@@ -1253,10 +1377,9 @@
   .meta { color: var(--dim); }
   button.active { border-color: var(--good); color: var(--good); }
   .panel { padding: .8rem; }
-  /* the map: the generated overlay sits exactly on top of the hand-drawn terrain */
+  /* the map: layout only — the overlay is inlined via {@html}, so its own styling lives in app.css */
   .map-frame { position: relative; max-width: 900px; }
   .map-frame img { width: 100%; display: block; }
-  .map-frame img + img { position: absolute; inset: 0; }
 
   /* the main screen: the fight on top of the two bags, the sheet as a sidebar that stays put */
   .main {

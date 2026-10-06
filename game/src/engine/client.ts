@@ -6,20 +6,25 @@ import modsJson from '../../../tools/data/mods.json';
 import skillsJson from '../../../tools/data/skills.json';
 import townJson from '../../../tools/data/town.json';
 import basesJson from '../../../tools/data/bases.json';
+import treeJson from '../../../tools/data/tree.json';
 import { createEngine } from '../../../engine/index.ts';
 import { createLoot } from '../../../engine/loot.ts';
 import { createSkillModel } from '../../../engine/skills.ts';
+import { createTree } from '../../../engine/tree.ts';
 
 export const E = engineJson as any;
 export const MODS = modsJson as any;
 export const SKILLS = skillsJson as any;
 export const TOWN = townJson as any;
 export const BASES = basesJson as any;
+export const TREE_SPEC = treeJson as any;
 
 /** The shared math, instantiated once. Every formula in the game comes out of this object. */
 export const eng: any = createEngine(E);
 export const loot: any = createLoot(E, MODS);
 export const sm: any = createSkillModel(SKILLS, E);
+/** The passive tree, derived once from its spec — the same object the tree cage gates. */
+export const tree: any = createTree(TREE_SPEC, MODS);
 
 export const STAT_KEYS = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'] as const;
 export type StatKey = (typeof STAT_KEYS)[number];

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 import { E } from '../src/engine/client';
 import {
-  farm, newFarm, plant, harvest, plotCount, craftPotion, condense, maybeDrink, rollHerbs, farmLevel,
+  farm, newFarm, plant, harvest, plotCount, craftPotion, condense, maybeDrink, maybeFarm, rollHerbs, farmLevel,
 } from '../src/sim/farm';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { newGame, tick } from '../src/sim/game';
@@ -70,6 +70,29 @@ describe('planting and harvesting', () => {
     expect(farmLevel(s)).toBe(1);
   });
 
+  it('grows into the deed plots 4 and 5 instead of crashing on an undefined slot', () => {
+    // the base array is three long; buying the Steward's deeds used to leave plots[3]/[4] undefined,
+    // so plant() threw and an auto-plant tick froze the game. The track must grow to the owned count.
+    const s = newGame(98);
+    s.town.owned.push('plot_deed_4', 'plot_deed_5');
+    s.farm.herbs.low = 10;
+    expect(plant(s, 3, 'low').ok).toBe(true);
+    expect(plant(s, 4, 'low').ok).toBe(true);
+    expect(s.farm.plots.length).toBe(E.farm.plots.max);
+    expect(s.farm.plots[3].tier).toBe('low');
+    expect(s.farm.plots[4].tier).toBe('low');
+  });
+
+  it('auto-plant fills every owned plot without throwing', () => {
+    const s = newGame(99);
+    s.town.owned.push('plot_deed_4', 'plot_deed_5');
+    s.farm.herbs.low = 10;
+    s.farm.autoFarm.plant = true;
+    expect(() => maybeFarm(s)).not.toThrow();
+    expect(plotCount(s)).toBe(E.farm.plots.max);
+    expect(s.farm.plots.filter((p) => p.tier).length).toBe(E.farm.plots.max);
+  });
+
   it('grows while the player is away, inside the offline cap', () => {
     const s = newGame(6);
     s.farm.herbs.low = E.farm.seed_cost_herbs;
@@ -79,7 +102,7 @@ describe('planting and harvesting', () => {
     const r = harvest(s, 0);
     expect(r.ok).toBe(true);
     expect(s.farm.herbs.low - before).toBe(E.farm.yield_per_harvest);
-  }, 300000);
+  }, 30000);
 });
 
 describe('herbs drop on their own roll', () => {

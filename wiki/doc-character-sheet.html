@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -96,6 +96,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="#h-display-rules-to-follow">Display Rules to Follow</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html" aria-current="page">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -116,8 +117,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -137,6 +136,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -149,17 +149,18 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Character Sheet</h1>
-<dl class="kv"><dt>file</dt><dd><code>character-sheet.md</code> · 162 lines · 1,655 words · written 2026-10-05T15:28:18Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-formula.html">formula.md</a></dd><dt>imported by</dt><dd><a href="doc-towns-ui.html">towns-ui.md</a></dd><dt>quoted by</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a> · <a href="doc-towns-ui.html">towns-ui.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../character-sheet.md">character-sheet.md</a></dd></dl>
+<dl class="kv"><dt>file</dt><dd><code>character-sheet.md</code> · 164 lines · 1,704 words · written 2026-10-06T05:40:27Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-formula.html">formula.md</a></dd><dt>imported by</dt><dd><a href="doc-towns-ui.html">towns-ui.md</a></dd><dt>quoted by</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a> · <a href="doc-towns-ui.html">towns-ui.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../character-sheet.md">character-sheet.md</a></dd></dl>
 
 <h2 id="h-character-sheet">Character Sheet</h2>
 <p>import core-stats.md import formula.md</p>
 <p>Values shown on the character screen, calculated from formula.md.</p>
 <h2 id="h-main-panel-3-slots">Main Panel: 3 Slots</h2>
 <table><thead><tr><th>Slot</th><th>What is shown</th></tr></thead><tbody><tr><td>HP</td><td>Current value / Maximum value (Energy Shield shown above HP while present)</td></tr><tr><td>Mana</td><td>Current value / Maximum value</td></tr><tr><td>Attack speed</td><td>Hits per second</td></tr></tbody></table>
-<blockquote><p>Energy Shield sits <strong>above</strong> HP while the character has a pool, and Attack speed is read as hits per second. On the playable screen these three are the bar row above the fight. <strong>Weight moved to the character bag panel</strong>, where <code>carried / capacity</code> with the aspd it costs when over sits beside the stacks that actually carry it: <code>566 / 420 (aspd −35%)</code>.</p></blockquote>
+<blockquote><p>Energy Shield sits <strong>above</strong> HP while the character has a pool, and Attack speed is read as hits per second. On the playable screen these three are the bar row above the fight. <strong>Weight moved to the character bag panel</strong>, where <code>carried / capacity</code> with the aspd it costs when over sits beside the stacks that actually carry it: <code>1,400 / 1,217 (aspd −15%)</code>.</p></blockquote>
 <h2 id="h-core-stats">Core Stats</h2>
 <p>Shows all 7 stats with a breakdown of their sources. A Core stat is <strong>spent, not granted</strong>, so the panel carries an allocation row per stat — a <code>+</code> / <code>−</code> / <code>Max</code> control, the unspent stat-point counter and the banked tree-point counter — plus a toggle that auto-allocates the level's points evenly (the idle default). Spending is instant and works mid-combat. <code><a href="doc-core-stats.html">core-stats.md</a></code> names the line; <code><a href="doc-formula.html">formula.md</a></code> section 0 carries the reference and focused values.</p>
-<table><thead><tr><th>Stat</th><th>What it gives</th><th>Show calculated values too?</th></tr></thead><tbody><tr><td>Str</td><td>Physical power, Weight, Armour</td><td>Physical power, Weight capacity, Armour</td></tr><tr><td>Vit</td><td>HP, HP regen, all 5 Elemental resistances</td><td>Max HP, HP regen, all 5 Elemental res</td></tr><tr><td>Dex</td><td>Accuracy, Elemental Alignment, Evasion</td><td>Accuracy, Elemental Alignment %, Evasion</td></tr><tr><td>Agi</td><td>Attack speed, Evasion points</td><td>Attack speed, Evasion</td></tr><tr><td>Wis</td><td>Cooldown reduction</td><td>CDR %</td></tr><tr><td>Int</td><td>Magic power, Mana regen, Elemental power, Energy Shield</td><td>Magic power, Mana regen, Elemental power, Energy Shield</td></tr><tr><td>Lck</td><td>Critical chance, Drop chance, Perfect dodge</td><td>All 3 values</td></tr></tbody></table>
+<table><thead><tr><th>Stat</th><th>What it gives</th><th>Show calculated values too?</th></tr></thead><tbody><tr><td>Str</td><td>Physical power, Weight, Armour</td><td>Physical power, Weight capacity, Armour</td></tr><tr><td>Vit</td><td>HP, HP regen, Stun Recovery</td><td>Max HP, HP regen, Stun Recovery</td></tr><tr><td>Dex</td><td>Accuracy, Elemental Alignment, Evasion</td><td>Accuracy, Elemental Alignment %, Evasion</td></tr><tr><td>Agi</td><td>Attack speed, Evasion points</td><td>Attack speed, Evasion</td></tr><tr><td>Wis</td><td>Cooldown reduction</td><td>CDR %</td></tr><tr><td>Int</td><td>Magic power, Mana regen, Elemental power, Mana</td><td>Magic power, Mana regen, Elemental power, Max Mana</td></tr><tr><td>Lck</td><td>Critical chance, Drop chance, Perfect dodge</td><td>All 3 values</td></tr></tbody></table>
+<p>Elemental resistance and Energy Shield come off gear, not off a Core stat, so they appear on this sheet from the Mod rows rather than from the allocation panel (owner ruling · <code><a href="doc-core-stats.html">core-stats.md</a></code>).</p>
 <p><strong>Show in 3 separate parts</strong> so players see where each number comes from.</p>
 <pre class="code">Str              125        ( base 12 + level 60 + gear 45 ) × 1.07
 Physical power   715        ( 125 × 5 + 37 ) × 1.08</pre>
@@ -181,19 +182,19 @@ Elemental alignment    44% / 35%</pre>
 <h2 id="h-offensive-defensive-split">Offensive / Defensive Split</h2>
 <p>The example below is a <strong>level 31 character wearing all mid-Item quality Rare gear</strong>, calculated from formula.md (not hypothetical numbers).</p>
 <h3 id="h-offense">Offense</h3>
-<pre class="code">Attack speed      1.5 /sec      (aspd 154 = 1.2 × (100 + (125−12)×0.25))
-Physical power    715          ( (125 × 5 + 37) × 1.08 )
+<pre class="code">Attack speed      1.26 /sec     (aspd 126 = 1.2 × (100 + (33−12)×0.25))
+Physical power    220          ( (33 × 5 + 37) × 1.08 )
 Magic power       0            (Int not yet invested — show 0, do not hide)
-Critical chance   10%           (Lck 125 × 0.05 + Mod 4% · no Cap · no overflow yet)
+Critical chance   5.7%          (Lck 33 × 0.05 + Mod 4% · no Cap · no overflow yet)
 Critical damage   152%          (physical only)</pre>
 <h3 id="h-defense">Defense</h3>
-<pre class="code">Max HP            3,914        HP regen   31/sec
-Max Mana          816          Mana regen 15/sec
-Evasion           39% / 80%    (Dex 125 × 0.5 + gear 12 = rating 74 → 74 ÷ (74 + mob accuracy 135) = 35% + Agi 125 ÷ 30 = 4 points)
+<pre class="code">Max HP            2,299        HP regen   8/sec
+Max Mana          714          Mana regen 9.4/sec
+Evasion           19% / 80%    (Dex 33 × 0.5 + gear 12 = rating 29 → 29 ÷ (29 + mob accuracy 135) = 18% + Agi 33 ÷ 30 = 1 point)
 Accuracy          135
-Elem alignment    8% / 35%
-Perfect dodge     1% / 21%    (ratio on the Lck line · the Cap binds at Lck 506)</pre>
-<ul><li>Verify each number: <code>stat_c(31) = 12 + 2×30 = 72</code> · Vit 125 → <code>HP = (125×20 + 40×30) × 1.06 = 3,914</code> · Int 84 → <code>mana = 84×4 + 16×30 = 816</code> · regen <code>= 84×0.18 = 15.1</code></li><li>The worked example above is tied to the current formula and Cap set; superseded example numbers are not kept here.</li></ul>
+Elem alignment    1.7% / 35%
+Perfect dodge     1.7% / 21%   (ratio on the Lck line · the Cap binds at Lck 506)</pre>
+<ul><li>Verify each number: the level-31 reference line <code>stat = 12 + points ÷ 7 = 12 + 150 ÷ 7 = 33</code> · Vit 33 → <code>HP = (hp_base 300 + 33×20 + 40×30) × 1.06 = 2,299</code> · Int 33 → <code>mana = mana_base 100 + 33×4 + 16×30 = 714</code> · mana regen <code>= 33×0.28 = 9.4</code></li><li>The worked example above is tied to the current formula and Cap set; superseded example numbers are not kept here.</li></ul>
 <h2 id="h-how-to-show-caps">How to Show Caps</h2>
 <p>3 options.</p>
 <table><thead><tr><th>Method</th><th>Advantage</th><th>Disadvantage</th></tr></thead><tbody><tr><td>Text <code>42% / 100%</code></td><td>Clearest and compact</td><td>Clutters tables</td></tr><tr><td>Progress bar</td><td>Visual</td><td>Takes space</td></tr><tr><td>Color + lock icon</td><td>Pretty</td><td>Harder to understand</td></tr></tbody></table>
@@ -207,7 +208,7 @@ Perfect dodge     1% / 21%    (ratio on the Lck line · the Cap binds at Lck 506
 <p>The screen holds four regions, all visible at once: the combat scene with the three-row bar above it, the character sheet, the carried inventory and the temporary inventory the hunt fills.</p>
 <ul><li><strong>Worn gear is a fixed five-row slot grid, in the shape the owner drew it</strong> — cape · helmet · amulet across the top, main hand · chest · off hand below, then gloves · belt, then ring · pant · ring, and boots alone at the bottom with a blank either side. No body is drawn: the blanks are simply gaps. Each slot keeps its fixed position and an empty one is drawn as an empty slot labelled with its name, because a player reads the shape of what is missing. Hovering a worn slot opens its detail card, which says it is the piece being worn.</li><li><strong>Every other line is text, with the Cap shown as <code>value / Cap</code></strong> — the recommendation in &quot;How to Show Caps&quot; above, since this column is narrow.</li><li><strong>Weight shows on the character bag panel, not the fight bar</strong> — <code>carried / capacity</code>, with the aspd it costs when over, sits beside the stacks that carry it, since only carried consumables (and gear) weigh.</li><li><strong>The gate figure lives under the sheet</strong>, read off the mob curve the same way the fight rolls it, never typed here.</li><li>Nothing on the sheet is a number the client owns: every value is the shared engine's, and the equipment grid equips only through the detail card's button.</li><li><strong>The skill bar shows on the fight panel too, read-only</strong> — the ordered fifteen-slot strip hangs under the HP / Mana row so a cooldown is readable while hunting; arranging the order stays on the Skills tab.</li><li><strong>The level's points are allocated on the sheet, and re-spent at the town desk</strong> — the <code>+</code> / <code>−</code> / <code>Max</code> row with the unspent and tree-point counters sits with the Core Stats table so it is reachable mid-fight; Respec is a settlement service on the town panel, never on the sheet, because a field refund would let a build switch inside a fight.</li></ul>
 <h2 id="h-display-rules-to-follow">Display Rules to Follow</h2>
-<ul><li>Always show maximum (max) numbers, not uncalculated values, e.g. Max HP rather than current HP.</li><li>Zero values are still shown, never hidden — players must see their Int is 0 because magic power has no investment yet.</li><li>At most 1 decimal place, and round down, never up.</li><li>Always show Caps for Evasion / perfect dodge / cdr / aspd / elem res · <strong>Accuracy, Critical chance and Elemental Alignment have no Cap</strong>, so show them as bare numbers — for crit, show the overflow going into crit damage instead of a Cap.</li><li>No separate status Alignment or status resistance remain. Use Elemental Alignment instead.</li><li><strong>Mastery shows on the weapon panel, not the main panel</strong> — <code>Mastery &lt;lvl&gt;/20 · weight −&lt;lvl&gt;%</code> (weight is −1% per level, Cap −20% at L20 · <code><a href="doc-equipment-weapon.html">equipment-weapon.md</a></code>), e.g. <code>Mastery 14/20 · weight -14%</code>. It is a per-weapon side track, not a build-calculation stat, so it never clutters the twelve-item main read.</li></ul>
+<ul><li>Always show maximum (max) numbers, not uncalculated values, e.g. Max HP rather than current HP.</li><li>Zero values are still shown, never hidden — players must see their Int is 0 because magic power has no investment yet.</li><li>At most 1 decimal place, and round down, never up.</li><li>Always show Caps for Evasion / perfect dodge / cdr / aspd / elem res · <strong>Accuracy, Critical chance and Elemental Alignment have no Cap</strong>, so show them as bare numbers — for crit, show the overflow going into crit damage instead of a Cap.</li><li>No separate status Alignment or status resistance remain. Use Elemental Alignment instead.</li><li><strong>Mastery shows on the weapon panel, not the main panel</strong> — <code>Mastery &lt;lvl&gt;/20 · weight −&lt;lvl&gt;%</code> (weight is −1% per level, Cap −20% at L20 · <code><a href="doc-equipment-weapon.html">equipment-weapon.md</a></code>), e.g. <code>Mastery 14/20 · weight -14%</code>. It is a per-weapon side track, not a build-calculation stat, so it never clutters the thirteen-item main read.</li></ul>
 <nav class="pager"><a href="doc-core-stats.html">← core-stats.md</a><a href="index.html">Character &amp; stats</a><a href="doc-formula.html">formula.md →</a></nav>
 
 </article>

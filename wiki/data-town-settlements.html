@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span><span class="chip ">rows <b>18</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span><span class="chip ">rows <b>18</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -94,6 +94,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="data-town-invariants.html">Invariants (guards) (10)</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -114,8 +115,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -135,6 +134,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -147,7 +147,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>Settlements</h1>
 <dl class="kv"><dt>path</dt><dd><code>tools/data/town.json → settlements</code></dd><dt>kind</dt><dd><code>records</code> · id field <code>id</code></dd><dt>rows</dt><dd>18</dd><dt>written by</dt><dd><code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-towns.html">towns.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
-<div class="tw"><table class=""><thead><tr><th>id</th><th>Name</th><th>Zone</th><th>Band</th><th>Capital of</th><th>Budget</th><th>Innate elements</th><th></th></tr></thead><tbody><tr><td><a href="rec-town-settlements-eastgate.html">eastgate</a></td><td>Eastgate</td><td>1</td><td>low</td><td>null</td><td>1.2</td><td>fire</td><td><a href="rec-town-settlements-eastgate.html">open</a></td></tr><tr><td><a href="rec-town-settlements-millbrook.html">millbrook</a></td><td>Millbrook</td><td>2</td><td>low</td><td>null</td><td>2.9</td><td>poison</td><td><a href="rec-town-settlements-millbrook.html">open</a></td></tr><tr><td><a href="rec-town-settlements-ashfall.html">ashfall</a></td><td>Ashfall</td><td>3</td><td>low</td><td>low</td><td>4.3</td><td>fire</td><td><a href="rec-town-settlements-ashfall.html">open</a></td></tr><tr><td><a href="rec-town-settlements-ironrow.html">ironrow</a></td><td>Ironrow</td><td>4</td><td>mid</td><td>null</td><td>5.5</td><td>lightning</td><td><a href="rec-town-settlements-ironrow.html">open</a></td></tr><tr><td><a href="rec-town-settlements-wolf-cross.html">wolf_cross</a></td><td>Wolf Cross</td><td>5</td><td>mid</td><td>null</td><td>9</td><td>cold</td><td><a href="rec-town-settlements-wolf-cross.html">open</a></td></tr><tr><td><a href="rec-town-settlements-highspire.html">highspire</a></td><td>Highspire</td><td>6</td><td>mid</td><td>mid</td><td>13</td><td>cold · lightning</td><td><a href="rec-town-settlements-highspire.html">open</a></td></tr><tr><td><a href="rec-town-settlements-bonegate.html">bonegate</a></td><td>Bonegate</td><td>7</td><td>high</td><td>null</td><td>14.2</td><td>chaos</td><td><a href="rec-town-settlements-bonegate.html">open</a></td></tr><tr><td><a href="rec-town-settlements-frosthold.html">frosthold</a></td><td>Frosthold</td><td>8</td><td>high</td><td>null</td><td>18.2</td><td>cold</td><td><a href="rec-town-settlements-frosthold.html">open</a></td></tr><tr><td><a href="rec-town-settlements-vermolch.html">vermolch</a></td><td>Vermolch</td><td>9</td><td>high</td><td>high</td><td>22</td><td>poison · chaos</td><td><a href="rec-town-settlements-vermolch.html">open</a></td></tr><tr><td><a href="rec-town-settlements-thornwake.html">thornwake</a></td><td>Thornwake</td><td>10</td><td>low</td><td>null</td><td>26</td><td>poison</td><td><a href="rec-town-settlements-thornwake.html">open</a></td></tr><tr><td><a href="rec-town-settlements-greyfen.html">greyfen</a></td><td>Greyfen</td><td>11</td><td>low</td><td>null</td><td>30.3</td><td>poison · chaos</td><td><a href="rec-town-settlements-greyfen.html">open</a></td></tr><tr><td><a href="rec-town-settlements-saltmarrow.html">saltmarrow</a></td><td>Saltmarrow</td><td>12</td><td>low</td><td>low</td><td>35</td><td>chaos</td><td><a href="rec-town-settlements-saltmarrow.html">open</a></td></tr><tr><td><a href="rec-town-settlements-emberhold.html">emberhold</a></td><td>Emberhold</td><td>13</td><td>mid</td><td>null</td><td>39.9</td><td>fire</td><td><a href="rec-town-settlements-emberhold.html">open</a></td></tr><tr><td><a href="rec-town-settlements-duskmoor.html">duskmoor</a></td><td>Duskmoor</td><td>14</td><td>mid</td><td>null</td><td>45.1</td><td>cold · chaos</td><td><a href="rec-town-settlements-duskmoor.html">open</a></td></tr><tr><td><a href="rec-town-settlements-nettlecrag.html">nettlecrag</a></td><td>Nettlecrag</td><td>15</td><td>mid</td><td>mid</td><td>50.3</td><td>chaos · poison</td><td><a href="rec-town-settlements-nettlecrag.html">open</a></td></tr><tr><td><a href="rec-town-settlements-blackwater-reach.html">blackwater_reach</a></td><td>Blackwater Reach</td><td>16</td><td>high</td><td>null</td><td>55.8</td><td>poison</td><td><a href="rec-town-settlements-blackwater-reach.html">open</a></td></tr><tr><td><a href="rec-town-settlements-wyrmback.html">wyrmback</a></td><td>Wyrmback</td><td>17</td><td>high</td><td>null</td><td>61.3</td><td>fire · cold</td><td><a href="rec-town-settlements-wyrmback.html">open</a></td></tr><tr><td><a href="rec-town-settlements-the-pale-spire.html">the_pale_spire</a></td><td>The Pale Spire</td><td>18</td><td>high</td><td>high</td><td>140.5</td><td>chaos · poison</td><td><a href="rec-town-settlements-the-pale-spire.html">open</a></td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>id</th><th>Name</th><th>Zone</th><th>Band</th><th>Capital of</th><th>Innate elements</th><th>Base bias (flavour)</th><th></th></tr></thead><tbody><tr><td><a href="rec-town-settlements-eastgate.html">eastgate</a></td><td>Eastgate</td><td>1</td><td>low</td><td>null</td><td>fire</td><td>cloth</td><td><a href="rec-town-settlements-eastgate.html">open</a></td></tr><tr><td><a href="rec-town-settlements-millbrook.html">millbrook</a></td><td>Millbrook</td><td>2</td><td>low</td><td>null</td><td>poison</td><td>cloth / light</td><td><a href="rec-town-settlements-millbrook.html">open</a></td></tr><tr><td><a href="rec-town-settlements-ashfall.html">ashfall</a></td><td>Ashfall</td><td>3</td><td>low</td><td>low</td><td>fire</td><td>light (Evasion)</td><td><a href="rec-town-settlements-ashfall.html">open</a></td></tr><tr><td><a href="rec-town-settlements-ironrow.html">ironrow</a></td><td>Ironrow</td><td>4</td><td>mid</td><td>null</td><td>lightning</td><td>light / Ring Mail</td><td><a href="rec-town-settlements-ironrow.html">open</a></td></tr><tr><td><a href="rec-town-settlements-wolf-cross.html">wolf_cross</a></td><td>Wolf Cross</td><td>5</td><td>mid</td><td>null</td><td>cold</td><td>light</td><td><a href="rec-town-settlements-wolf-cross.html">open</a></td></tr><tr><td><a href="rec-town-settlements-highspire.html">highspire</a></td><td>Highspire</td><td>6</td><td>mid</td><td>mid</td><td>cold · lightning</td><td>Ring Mail</td><td><a href="rec-town-settlements-highspire.html">open</a></td></tr><tr><td><a href="rec-town-settlements-bonegate.html">bonegate</a></td><td>Bonegate</td><td>7</td><td>high</td><td>null</td><td>chaos</td><td>heavy (Armour)</td><td><a href="rec-town-settlements-bonegate.html">open</a></td></tr><tr><td><a href="rec-town-settlements-frosthold.html">frosthold</a></td><td>Frosthold</td><td>8</td><td>high</td><td>null</td><td>cold</td><td>heavy</td><td><a href="rec-town-settlements-frosthold.html">open</a></td></tr><tr><td><a href="rec-town-settlements-vermolch.html">vermolch</a></td><td>Vermolch</td><td>9</td><td>high</td><td>high</td><td>poison · chaos</td><td>heavy · cloth (glass endgame)</td><td><a href="rec-town-settlements-vermolch.html">open</a></td></tr><tr><td><a href="rec-town-settlements-thornwake.html">thornwake</a></td><td>Thornwake</td><td>10</td><td>low</td><td>null</td><td>poison</td><td>wet lowland</td><td><a href="rec-town-settlements-thornwake.html">open</a></td></tr><tr><td><a href="rec-town-settlements-greyfen.html">greyfen</a></td><td>Greyfen</td><td>11</td><td>low</td><td>null</td><td>poison · chaos</td><td>wet lowland</td><td><a href="rec-town-settlements-greyfen.html">open</a></td></tr><tr><td><a href="rec-town-settlements-saltmarrow.html">saltmarrow</a></td><td>Saltmarrow</td><td>12</td><td>low</td><td>low</td><td>chaos</td><td>salt flats</td><td><a href="rec-town-settlements-saltmarrow.html">open</a></td></tr><tr><td><a href="rec-town-settlements-emberhold.html">emberhold</a></td><td>Emberhold</td><td>13</td><td>mid</td><td>null</td><td>fire</td><td>slag and foundry heat</td><td><a href="rec-town-settlements-emberhold.html">open</a></td></tr><tr><td><a href="rec-town-settlements-duskmoor.html">duskmoor</a></td><td>Duskmoor</td><td>14</td><td>mid</td><td>null</td><td>cold · chaos</td><td>open moor</td><td><a href="rec-town-settlements-duskmoor.html">open</a></td></tr><tr><td><a href="rec-town-settlements-nettlecrag.html">nettlecrag</a></td><td>Nettlecrag</td><td>15</td><td>mid</td><td>mid</td><td>chaos · poison</td><td>thorn country</td><td><a href="rec-town-settlements-nettlecrag.html">open</a></td></tr><tr><td><a href="rec-town-settlements-blackwater-reach.html">blackwater_reach</a></td><td>Blackwater Reach</td><td>16</td><td>high</td><td>null</td><td>poison</td><td>drowned river mouth</td><td><a href="rec-town-settlements-blackwater-reach.html">open</a></td></tr><tr><td><a href="rec-town-settlements-wyrmback.html">wyrmback</a></td><td>Wyrmback</td><td>17</td><td>high</td><td>null</td><td>fire · cold</td><td>wyrm breeding ground</td><td><a href="rec-town-settlements-wyrmback.html">open</a></td></tr><tr><td><a href="rec-town-settlements-the-pale-spire.html">the_pale_spire</a></td><td>The Pale Spire</td><td>18</td><td>high</td><td>high</td><td>chaos · poison</td><td>the pale spire</td><td><a href="rec-town-settlements-the-pale-spire.html">open</a></td></tr></tbody></table></div></section>
 <section id="add"><h2>Add a row</h2><p class="hint">Validated, written to <code>tools/data/town.json</code>, then re-run through the writers and both cages. A cage failure rolls the write back from a snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="settlements"><input type="hidden" name="id" value="">
 <div class="f"><label for="f-id">id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value=""></div></div>
@@ -155,7 +155,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><label for="f-zone">Zone</label><div><input id="f-zone" type="text" inputmode="decimal" name="zone" value="" min="1" max="9"></div></div>
 <div class="f"><label for="f-band">Band</label><div><input id="f-band" type="text" name="band" value="" list="f-band-dl" placeholder="one of engine:loot.bands"><datalist id="f-band-dl"></datalist></div></div>
 <div class="f"><label for="f-capital">Capital of</label><div><input id="f-capital" type="text" name="capital" value="" list="f-capital-dl" placeholder="low | mid | high | "><datalist id="f-capital-dl"><option value="low"></option><option value="mid"></option><option value="high"></option><option value=""></option></datalist></div></div>
-<div class="f"><label for="f-budget-hr">Budget <span class="dim">(hr)</span></label><div><input id="f-budget-hr" type="text" inputmode="decimal" name="budget_hr" value="" min="0"></div></div>
 <div class="f"><label for="f-innate">Innate elements</label><div><textarea id="f-innate" name="innate" spellcheck="false"></textarea></div></div>
 <div class="f"><label for="f-base-bias-flavor">Base bias (flavour)</label><div><input id="f-base-bias-flavor" type="text" inputmode="decimal" name="base_bias_flavor" value=""></div></div>
 <div class="f"><label for="f-budget-note">Budget note</label><div><textarea id="f-budget-note" name="budget_note"></textarea></div></div>
@@ -177,7 +176,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;fire&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;cloth&quot;,
-    &quot;budget_hr&quot;: 1.2,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -201,7 +199,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;poison&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;cloth / light&quot;,
-    &quot;budget_hr&quot;: 2.9,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -225,7 +222,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;fire&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;light (Evasion)&quot;,
-    &quot;budget_hr&quot;: 4.3,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;steward&quot;,
@@ -257,7 +253,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;lightning&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;light / Ring Mail&quot;,
-    &quot;budget_hr&quot;: 5.5,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -282,7 +277,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;cold&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;light&quot;,
-    &quot;budget_hr&quot;: 9,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -308,7 +302,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;lightning&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;Ring Mail&quot;,
-    &quot;budget_hr&quot;: 13,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;steward&quot;,
@@ -339,7 +332,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;chaos&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;heavy (Armour)&quot;,
-    &quot;budget_hr&quot;: 14.2,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -366,7 +358,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;cold&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;heavy&quot;,
-    &quot;budget_hr&quot;: 18.2,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -393,7 +384,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;chaos&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;heavy · cloth (glass endgame)&quot;,
-    &quot;budget_hr&quot;: 22,
     &quot;budget_note&quot;: &quot;22.0 hr of zone 9 inside the high band + 26.0 hr of the level 91-100 push, which also farms zone 9&quot;,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
@@ -428,7 +418,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;poison&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;wet lowland&quot;,
-    &quot;budget_hr&quot;: 26,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -452,7 +441,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;chaos&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;wet lowland&quot;,
-    &quot;budget_hr&quot;: 30.3,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -475,7 +463,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;chaos&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;salt flats&quot;,
-    &quot;budget_hr&quot;: 35,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;steward&quot;,
@@ -502,7 +489,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;fire&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;slag and foundry heat&quot;,
-    &quot;budget_hr&quot;: 39.9,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -526,7 +512,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;chaos&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;open moor&quot;,
-    &quot;budget_hr&quot;: 45.1,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -550,7 +535,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;poison&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;thorn country&quot;,
-    &quot;budget_hr&quot;: 50.3,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;steward&quot;,
@@ -577,7 +561,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;poison&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;drowned river mouth&quot;,
-    &quot;budget_hr&quot;: 55.8,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -601,7 +584,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;cold&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;wyrm breeding ground&quot;,
-    &quot;budget_hr&quot;: 61.3,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -625,7 +607,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;poison&quot;
     ],
     &quot;base_bias_flavor&quot;: &quot;the pale spire&quot;,
-    &quot;budget_hr&quot;: 140.5,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;steward&quot;,

@@ -1,65 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  The settlement map's terrain layer — HAND-DRAWN, the owner's to redraw.
-  This is a first sketch, not a generated file: `tools/map.ts` writes the overlay (nodes, links,
-  terrain glyphs, the travel marker) as a separate layer on top of this one. Nothing here is read by
-  the simulation, and no coordinate below reaches `engine/` or `game/src/` (owner/travel-route-combat.md
-  section 8 · X33 · X47).
-  A terrain feature is drawn once per row that appears on a link, so the sketch covers all five:
-  road · river · forest · mountain · moor.
+  The settlement map's backdrop — HAND-DRAWN, the owner's to redraw.
+  `tools/map.ts` writes the overlay on top of this one: the hex field (a cluster per settlement — the
+  settlement's own hex plus one per sub-zone), the biome tones, the river band, the named regions,
+  the terrain washes, the landmark marks and the travel marker. There is no road layer: the map shows
+  places, not routes. Nothing here is read by the simulation, and no coordinate reaches `engine/` or
+  `game/src/` (X33 · X47 · M7).
+  Two layers only: the neutral grey off-field the hex field is cut out of, and the warm paper the
+  playable shape sits on. No terrain — the field's ground is the hex fill.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1200" width="2000" height="1200">
   <defs>
-    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#dce9f2"/><stop offset="1" stop-color="#b9d2e4"/>
-    </linearGradient>
+    <radialGradient id="paper" cx="0.5" cy="0.46" r="0.72">
+      <stop offset="0" stop-color="#efe7cf"/>
+      <stop offset="0.72" stop-color="#e4d9bb"/>
+      <stop offset="1" stop-color="#d6c8a4"/>
+    </radialGradient>
+    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>
+    </filter>
   </defs>
 
-  <!-- the eastern sea, off Eastgate (zone 1) -->
-  <path d="M 0 640 C 120 620 240 660 360 700 L 360 720 L 0 720 Z" fill="url(#sea)"/>
+  <!-- the off-field: the sheet is not the world, so everything the field does not cover reads as table -->
+  <rect width="2000" height="1200" fill="#8d9095"/>
+  <rect width="2000" height="1200" fill="#7c7f85" opacity="0.5" filter="url(#paperGrain)"/>
 
-  <!-- the river that the chain follows: the Eastgate marsh and the Vermolch river -->
-  <path d="M 60 560 C 180 500 300 470 430 480 C 560 490 640 420 760 400 C 880 380 1000 300 1180 240"
-        fill="none" stroke="#7fb2d9" stroke-width="14" stroke-linecap="round"/>
-  <path d="M 60 560 C 180 500 300 470 430 480 C 560 490 640 420 760 400 C 880 380 1000 300 1180 240"
-        fill="none" stroke="#a9d0ea" stroke-width="6" stroke-linecap="round"/>
-
-  <!-- the King's Road across the mid band (zone 3 to zone 4) -->
-  <path d="M 370 350 C 420 370 460 385 500 400" fill="none" stroke="#c9b18a" stroke-width="10" stroke-linecap="round"/>
-
-  <!-- mountain ridges: the Ironrow pass and the Bonegate heights -->
-  <g fill="#b9b2a6" stroke="#8d8578" stroke-width="3">
-    <path d="M 470 470 L 510 390 L 545 470 Z"/>
-    <path d="M 530 480 L 575 395 L 615 480 Z"/>
-    <path d="M 810 360 L 852 280 L 895 360 Z"/>
-    <path d="M 870 350 L 910 275 L 950 350 Z"/>
-    <path d="M 300 290 L 340 215 L 385 290 Z"/>
-  </g>
-  <g fill="#e8e4dc">
-    <path d="M 505 405 L 510 390 L 516 405 Z"/>
-    <path d="M 847 297 L 852 280 L 858 297 Z"/>
-    <path d="M 335 232 L 340 215 L 346 232 Z"/>
-  </g>
-
-  <!-- forests: Millbrook woods and the Frosthold woods -->
-  <g fill="#7d9d6b" stroke="#5f7d50" stroke-width="2">
-    <circle cx="255" cy="470" r="26"/><circle cx="300" cy="500" r="30"/><circle cx="230" cy="520" r="22"/>
-    <circle cx="925" cy="215" r="28"/><circle cx="975" cy="255" r="26"/><circle cx="1010" cy="195" r="22"/>
-    <circle cx="330" cy="430" r="18"/>
-  </g>
-
-  <!-- the moor between Wolf Cross and Highspire: open and quiet, a place things get buried -->
-  <g fill="#cbbf95" opacity="0.85">
-    <ellipse cx="655" cy="345" rx="95" ry="46"/>
-    <ellipse cx="710" cy="300" rx="60" ry="28" opacity="0.7"/>
-  </g>
-  <g stroke="#a89b70" stroke-width="2" fill="none" opacity="0.8">
-    <path d="M 590 350 l 14 -8"/><path d="M 700 370 l 16 -9"/><path d="M 660 300 l 12 -7"/>
-  </g>
-
-  <!-- the Ashfall slopes, the shortest way over the pass to zone 3 -->
-  <g fill="#a89e90" stroke="#877d6e" stroke-width="2" opacity="0.9">
-    <path d="M 360 285 L 390 235 L 425 285 Z"/>
-    <path d="M 405 280 L 440 222 L 470 280 Z" opacity="0.85"/>
-  </g>
+  <!-- the paper the hex field is cut out of -->
+  <path d="M 50 380 C 50 175 225 50 450 50 L 1550 50 C 1775 50 1950 175 1950 380
+           L 1950 820 C 1950 1025 1775 1150 1550 1150 L 450 1150 C 225 1150 50 1025 50 820 Z"
+        fill="url(#paper)"/>
+  <path d="M 50 380 C 50 175 225 50 450 50 L 1550 50 C 1775 50 1950 175 1950 380
+           L 1950 820 C 1950 1025 1775 1150 1550 1150 L 450 1150 C 225 1150 50 1025 50 820 Z"
+        fill="none" stroke="#b9a983" stroke-width="4" opacity="0.7"/>
+  <path d="M 50 380 C 50 175 225 50 450 50 L 1550 50 C 1775 50 1950 175 1950 380
+           L 1950 820 C 1950 1025 1775 1150 1550 1150 L 450 1150 C 225 1150 50 1025 50 820 Z"
+        fill="none" stroke="#efe7cf" stroke-width="1.4" opacity="0.5" transform="translate(8 8)"/>
 </svg>

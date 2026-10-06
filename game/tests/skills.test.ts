@@ -188,18 +188,21 @@ describe('skills in the live loop', () => {
     const game = newGame(999);
     game.skills.owned['attack.cleave'] = 0;
     game.skills.list[0] = 'attack.cleave';
-    for (let i = 0; i < 400; i++) tick(game, {});
+    for (let i = 0; i < 20000 && !game.skills.xp['attack.cleave']; i++) tick(game, {});
     expect(game.skills.xp['attack.cleave']).toBeGreaterThan(0);
     expect(game.counters.kills).toBeGreaterThan(0);
   });
 
   it('a long enough run drops at least one skill through the real rate', () => {
     const game = newGame(20260103);
-    // the rate is per kill (0.1% normal, 8% elite, 35% boss), so "long enough" scales with the kill
-    // rate — which the re-base cut ~3x. 24,000 sec keeps the expected drop count well clear of 0.
-    for (let i = 0; i < 24000; i++) tick(game, {});
+    // the rate is per kill (0.1% normal, 8% elite, 35% boss), so a fixed window is a coin flip on the
+    // kill rate rather than a premise. Tick until a piece lands; the bound is a hang guard.
+    // tick to the state BOTH assertions read: a piece owned AND a bar slot filled (the loop slots a
+    // freshly owned skill on its next pass, so stopping at the drop alone reads an empty bar)
+    const slotted = () => Object.keys(game.skills.owned).length > 0 && game.skills.list.filter(Boolean).length > 0;
+    for (let i = 0; i < 200000 && !slotted(); i++) tick(game, {});
     // the log is a 60-line window, so the proof is the ledger, not the last page of text
     expect(Object.keys(game.skills.owned).length).toBeGreaterThan(0);
     expect(game.skills.list.filter(Boolean).length).toBeGreaterThan(0);
-  });
+  }, 30000);
 });

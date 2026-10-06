@@ -2,6 +2,7 @@ import { eng, loot, E, STAT_KEYS, BASES, BASE_BY_NAME } from '../engine/client';
 import { mastery, weaponByName } from './mastery';
 import { weaponWeightOf } from './drop';
 import type { Item, ModLine } from './types';
+import { tree } from '../engine/client';
 import type { StatKey } from '../engine/client';
 
 /** Mod id → the character line it feeds. The ids are the mods.json rows; nothing is typed here. */
@@ -15,6 +16,7 @@ const PCT_LINE: Record<string, string> = {
   max_hp: 'hpPct',
   max_mana: 'manaPct',
   max_energy_shield_pct: 'esPct',
+  energy_shield_regen: 'esRegenPct',
   life_regen_pct: 'hpRegenPct',
   mana_regen_pct: 'manaRegenPct',
   elemental_power: 'elemPct',
@@ -62,12 +64,20 @@ export function emptyGear(): (Item | null)[] {
   return new Array(SLOT_COUNT).fill(null);
 }
 
-export function sumLines(gear: (Item | null)[]): Lines {
+export function sumLines(gear: (Item | null)[], extra?: { id: string; value: number; stat?: string }[]): Lines {
   const acc: Lines = { statBy: {} } as Lines;
   for (const key of Object.values(PCT_LINE)) acc[key] = 0;
   for (const key of Object.values(FLAT_LINE)) acc[key] = 0;
   acc.elemBy = {} as Record<string, { flat: number; pct: number }>;
   for (const k of STAT_KEYS) acc.statBy[k] = { flat: 0, pct: 0 };
+  // the passive tree is a second line source (`engine/tree.ts`): it feeds the same buckets gear does,
+  // so a bought rank moves the same number the piece would have
+  for (const part of extra || []) {
+    if (part.id === 'all_stat_flat') for (const k of STAT_KEYS) acc.statBy[k].flat += part.value;
+    else if (part.id === 'stat_mod_flat' && part.stat) acc.statBy[part.stat as StatKey].flat += part.value;
+    else if (PCT_LINE[part.id]) acc[PCT_LINE[part.id]] += part.value;
+    else if (FLAT_LINE[part.id]) acc[FLAT_LINE[part.id]] += part.value;
+  }
   for (const item of gear) {
     // a Broken piece is kept but counts as nothing: unequippable, stats 0, still at its level
     if (!item || item.broken) continue;
@@ -206,8 +216,9 @@ export function buildCharacter(
   heldMasteryLevel = 0,
   effects: EffectFold = { add: {}, mult: {} },
   points?: Record<StatKey, number>,
+  treeRanks?: Record<string, number>,
 ): Character {
-  const lines = sumLines(gear);
+  const lines = sumLines(gear, tree ? tree.linesOf(treeRanks) : undefined);
   const core = {} as Record<StatKey, number>;
   // With no allocation given, fall back to the REFERENCE even-split line — the build every published
   // number and every test is measured against. The client passes the player's own `points`.
@@ -254,8 +265,12 @@ export function buildCharacter(
     : 1.2;
   const used = weightOfCarry(gear, carried, heldMasteryLevel);
   const burden = eng.encumbranceOf(used, core.str);
-  const aspd = eng.aspdOf(core.agi, weaponAspd, lines.aspdPct + a(effects, 'attack_speed'))
-    * m(effects, 'attack_speed') * (1 - burden);
+  // the Cap is applied LAST (core-stats.md · formula.md): after the aspd Mod band inside the
+  // formula, after a multiplicative aspd buff (Haste's ×1.15) and after the weight tax — so no
+  // build passes 5 hits/sec, which is the clock rule the whole game is priced against
+  const aspd = eng.capAspd(
+    eng.aspdOf(core.agi, weaponAspd, lines.aspdPct + a(effects, 'attack_speed'))
+    * m(effects, 'attack_speed') * (1 - burden));
   const critPool = eng.critPool(core.lck, lines.critPct);
   // Alignment gates the mob-side status and feeds the mace's stun chance, so it is computed once
   const alignment = eng.alignmentOf(core.dex, lines.alignPct + a(effects, 'elemental_alignment'), m(effects, 'elemental_alignment'));
@@ -283,8 +298,10 @@ export function buildCharacter(
     ),
     armour: (eng.armourOf(core.str) + lines.armourFlat + a(effects, 'armour')) * m(effects, 'armour')
       * (1 + lines.armourPct / 100),
-    es: eng.maxEsOf(core.int, lines.esFlat + a(effects, 'energy_shield'), lines.esPct),
-    esRegen: eng.esRegenOf(core.int),
+    es: eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct),
+    // ES regen is `regen_pct`% of the max pool per second; a Mod line or an `es_regen` skill/passive
+    // amplifies it, both feeding the one `ampPct` argument the engine already carries.
+    esRegen: eng.esRegenOf(eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct), lines.esRegenPct + a(effects, 'es_regen')),
     maxHp: eng.maxHpOf(core.vit, level, lines.hpPct, lines.hpFlat),
     // the regen lines multiply the stat's own regen — the engine already carries the % argument, so
     // a buff and a Mod line feed the same formula rather than each doing their own arithmetic
@@ -302,7 +319,7 @@ export function buildCharacter(
     alignment,
     // All Resistance lifts every Element at once, so it joins the same line the per-Element Mods feed
     // and the one Cap still binds the total 
-    resistance: eng.resistanceOf(core.vit, lines.resPct + lines.allResPct, m(effects, 'elemental_resistance')),
+    resistance: eng.resistanceOf(lines.resPct + lines.allResPct, m(effects, 'elemental_resistance')),
     stunRecovery: eng.stunRecoveryOf(core.vit),
     /** Extra resistance against one named Element, from an aura that names it. */
     resByElement,

@@ -13,7 +13,7 @@ The game and the cages must run the **same engine math**. Today the numbers live
 
 | Layer | Pick | Why |
 |---|---|---|
-| Language | TypeScript | The data model is large (12 slots, Mod / Item quality / Tier, 5 Elements, the full mob roster); types catch the drift this repo already fights |
+| Language | TypeScript | The data model is large (13 slots, Mod / Item quality / Tier, 5 Elements, the full mob roster); types catch the drift this repo already fights |
 | Build | Vite | Fast dev server, static output, no backend |
 | UI | Svelte | Small bundle, low boilerplate for a panel-heavy idle UI (React or Solid are fine if preferred) |
 | State | Svelte stores / a small reducer | No Redux-class dependency |

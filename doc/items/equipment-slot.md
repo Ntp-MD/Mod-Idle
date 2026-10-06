@@ -57,7 +57,7 @@ Pool roles: **Primary** rolls often (1.0) · **Secondary** rolls less often (0.5
 
 The per-slot lines above are a summary; **item-base.md is the source** for which Base rolls which pool (`node tools/bases.ts --write` imports it and the **BS** gates read it back), so a slot disagreement is fixed in that doc, never here.
 
-**Rules:** Weapon items roll only Offensive · other 10 slots roll only Defensive · Stat Mod rolls everywhere · Elemental resistance is always Defensive · full rules + coverage see equipment-slot-weapon.md
+**Rules:** Weapon items roll only Offensive · other slots roll only Defensive · Stat Mod rolls everywhere · Elemental resistance is always Defensive · full rules + coverage see equipment-slot-weapon.md
 
 Coverage: Str/physical + Int/magic → main hand + Core stat everywhere · Vit/tank → chest · pant · belt · Agi/Evasion → boots · gloves · cape · helmet · Crit → main hand + Lck everywhere · Wis/CDR → amulet · cape · ring · belt · boots · Dex/accuracy → main hand + Dex everywhere · Element → main hand damage + Defensive res · Mana → amulet · boots · cape.
 

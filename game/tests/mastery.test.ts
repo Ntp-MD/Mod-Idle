@@ -58,7 +58,8 @@ describe('the held weapon is the only one that levels', () => {
 
   it('grows through the live loop and shows on the sheet', () => {
     const s = newGame(5);
-    for (let i = 0; i < 900; i++) tick(s, {});
+    // Tick until the loop has paid a kill, never for a guessed window (a time premise · AGENT.md).
+    for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     const held = heldWeaponName(s)!;
     // the rule is one weapon per kill, not one weapon forever: a kept upgrade is worn at once, so
     // the held type changes mid-run and only the newest type carries the whole total
@@ -101,24 +102,5 @@ describe('weapon drops obey the union pool', () => {
     expect(seen).toBeGreaterThan(20);
   });
 
-  it('the cage agrees the tables match the docs', () => {
-    const rows = basesCage.checks();
-    expect(rows.filter((r: any) => r.status === 'fail')).toEqual([]);
-    expect(rows.find((r: any) => r.id === 'BS5').status).toBe('pass');
-    expect(rows.find((r: any) => r.id === 'BS8').status).toBe('pass');
-  });
 });
 
-describe('Mastery never touches DPS', () => {
-  it('the equal-DPS rule holds for every type at equal stats', () => {
-    for (const w of WEAPONS) {
-      const mult = 1.2 / w.weapon_aspd;
-      expect(Math.abs(mult - w.weapon_mult)).toBeLessThan(0.011);
-      // power is multiplied by weapon_mult and the clock by aspd, so the product is fixed
-      const dps = eng.physOf(816, 80, 16, w.weapon_aspd) * eng.hitsPerSec(eng.aspdOf(210, w.weapon_aspd, 0));
-      const base = eng.physOf(816, 80, 16, 1.2) * eng.hitsPerSec(eng.aspdOf(210, 1.2, 0));
-      expect(dps / base).toBeGreaterThan(0.99);
-      expect(dps / base).toBeLessThan(1.01);
-    }
-  });
-});

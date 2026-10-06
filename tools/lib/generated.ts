@@ -39,18 +39,16 @@ function blockState(text: string, key: string, body: string): string {
 }
 
 /**
- * Doc addresses. Design specs live under `doc/<layer>/`, agent ops and the
- * open-work queue under `harness/`, and `AGENT.md` stays at the root.
+ * Doc addresses. Design specs live under `doc/<layer>/`; the agent-facing docs
+ * (`AGENT.md`, `todo.md`) sit at the root.
  *
  * A doc's key is its **bare file name** (the `doc/<layer>/` folder is a shelf,
  * not part of the identity), so every `import x.md`, `G.read('x.md')` argument
- * and prose `` `x.md` `` reference stays short. Harness docs keep the
- * `harness/` prefix so the two namespaces cannot collide. `resolveDoc(key)`
+ * and prose `` `x.md` `` reference stays short. `resolveDoc(key)`
  * maps a key to its repo-relative path; non-doc paths (e.g.
  * `tools/data/engine.json`) pass through untouched.
  */
 const DOC_TREE = 'doc';
-const HARNESS = 'harness';
 
 const isDocName = (name: string): boolean => name.endsWith('.md');
 
@@ -70,7 +68,6 @@ function docIndex(): Map<string, string> {
   const map = new Map<string, string>();
   for (const f of fs.readdirSync(ROOT)) if (isDocName(f)) map.set(f, f);
   walkDocs(DOC_TREE, '', map);
-  walkDocs(HARNESS, `${HARNESS}/`, map);
   return map;
 }
 

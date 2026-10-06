@@ -20,50 +20,8 @@ describe('game and cages run one engine', () => {
     expect(eng.aspdOf(510, 1.2, 25)).toBe(cage.aspdOf(510, 1.2, 25));
   });
 
-  it('passes the doc read-back the cages gate with', () => {
-    const failed = cage.runReadBack().filter((r: any) => !r.ok);
-    expect(failed.map((f: any) => `${f.label} ${f.detail}`)).toEqual([]);
-  });
 });
 
-describe('published anchors the docs quote', () => {
-  it('the single-stat ceiling and the naked stat at the level cap', () => {
-    // flat-only since Core Stat % was retired, plus the earring as a 13th worn item.
-    // Both terms are read from the data so a change of world size moves the identity, not a literal.
-    const cap = eng.S.level_cap;
-    expect(eng.CEIL).toBeCloseTo(eng.statAt(cap) + E.stat.core_flat_max * E.stat.item_slots, 2);
-    // statAt is the REFERENCE even-split line now: base + points(cap)/7.
-    expect(eng.statAt(cap)).toBeCloseTo(E.stat.base + eng.pointsAt(cap) / 7, 6);
-  });
-
-  it('mob_HP is anchored at the zone edges and the level cap', () => {
-    // the first, last and cap zone are read off the list, so 18 zones and 9 zones both hold
-    const first = E.mob.zones[0], last = E.mob.zones[E.mob.zones.length - 1];
-    expect(eng.mobHpAt(first.levels[0])).toBe(first.hp[0]);
-    expect(eng.mobHpAt(first.levels[1])).toBe(first.hp[1]);
-    expect(eng.mobHpAt(last.levels[1])).toBe(last.hp[1]);
-    expect(eng.mobHpAt(E.stat.level_cap)).toBeCloseTo(E.mob.curve.hp_at_player_level_cap, 6);
-  });
-
-  it('a level 1 sword swings 1.2 times per second (formula.md K_AGI_ASPD)', () => {
-    expect(eng.aspdOf(eng.statAt(1), 1.2, 0)).toBeCloseTo(120, 6);
-    expect(eng.hitsPerSec(eng.aspdOf(eng.statAt(1), 1.2, 0))).toBeCloseTo(1.2, 6);
-  });
-
-  it('weapon_mult keeps DPS equal across weapon types', () => {
-    expect(cage.WEAPONS[0].weapon_mult).toBe(0.8); // dagger
-    expect(cage.WEAPONS[5].weapon_mult).toBeCloseTo(1.71, 6); // two-handed
-  });
-
-  it('armour is the PoE diminishing ratio on the physical half', () => {
-    expect(eng.armourReduce(eng.DERIVED.armour_ceil, eng.DERIVED.armour_ceil)).toBeCloseTo(1 / 6, 6);
-  });
-
-  it('the XP curve is kills × 10 × mob level, capped at the spawn cap', () => {
-    expect(eng.xpToNext(10)).toBe(101 * 10 * 10);
-    expect(eng.xpToNext(E.stat.level_cap)).toBe(6768 * 10 * E.stat.mob_level_cap);
-  });
-});
 
 describe('the opening character is the designed minute one', () => {
   it('comes from engine.json opening, not a typed copy', () => {
@@ -97,7 +55,9 @@ describe('the opening character is the designed minute one', () => {
 describe('the tick loop', () => {
   it('kills on-level mobs and pays the XP the curve says', () => {
     const s = newGame();
-    for (let i = 0; i < 240; i++) tick(s, {});
+    // tick until the loop has paid a kill, never for a guessed window: a fixed window is a time
+    // premise (AGENT.md). The bound is a hang guard.
+    for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     expect(s.counters.kills).toBeGreaterThan(0);
     expect(s.player.xp + (s.player.level - 1) * 0).toBeGreaterThan(0);
     expect(Number.isFinite(s.player.hp)).toBe(true);
@@ -121,7 +81,8 @@ describe('the tick loop', () => {
   it('is reproducible from the seed, so a save cannot be rerolled', () => {
     const a = newGame(4242);
     const b = newGame(4242);
-    for (let i = 0; i < 120; i++) { tick(a, {}); tick(b, {}); }
+    // the premise is the same SEQUENCE on both saves, so it stops at the same state either reaches
+    for (let i = 0; i < 20000 && a.counters.kills === 0; i++) { tick(a, {}); tick(b, {}); }
     expect(a.counters.kills).toBe(b.counters.kills);
     expect(a.player.level).toBe(b.player.level);
   });

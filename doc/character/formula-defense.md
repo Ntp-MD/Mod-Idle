@@ -68,7 +68,7 @@ mana_regen = int * K_INT_MREGEN * (1 + mregen_pct/100)
 ```
 
 - `K_VIT_HP` = 20 · `K_VIT_REGEN` = 0.25 · `hp_base` = 300 → Vit 510 gives 10,200 raw HP (14,460 once the per-level term and base are added) and 128/sec regen.
-- `K_INT_MP` = 4 · `K_INT_MREGEN` = **0.18** (was 0.2) · `mana_base` = 100 → Int 510 gives 2,040 raw mana (3,724 once the per-level term and base are added) and 92/sec regen.
+- `K_INT_MP` = 4 · `K_INT_MREGEN` = **0.28** (was 0.18) · `mana_base` = 100 → Int 510 gives 2,040 raw mana (3,724 once the per-level term and base are added) and 142.8/sec regen.
 - `level_gain_hp` = 40 × (level − 1) → at level 190 gives 7,560 (the old text wrote 4,000, which overcounted by one level).
 - `level_gain_mp` = 16 × (level − 1) → at level 100 gives 1,584.
 
@@ -81,21 +81,22 @@ flat-cost reference pool (level 1) = mana_base 100 + stat 12 × K_INT_MP 4 = 148
 ```
 <!-- END GENERATED:hp-mana-block -->
 
-> **`K_INT_MREGEN` was 0.2 → 0.15 → 0.18** — the stated intent was "about 40 seconds per full mana pool."
+> **`K_INT_MREGEN` was 0.2 → 0.15 → 0.18 → 0.28** — the stated intent was "about 40 seconds per full mana pool."
 > At 0.2 the actual ratio was 29.7 seconds · mana was therefore almost 40% larger than intended and made skills nearly free to spam.
-> At 0.18 it is 40.6 seconds, matching intent · enough to keep pressing skills while still reserving a slice for auras.
+> At 0.28 it is 40.0 seconds, matching intent · enough to keep pressing skills while still reserving a slice for auras.
 > Players must choose how much of the pool to reserve as aura and how much to leave usable for skills (see skill-pool-aura-heal.md · reservation tiers at pool 3,724).
 
 ```
-max_es   = int * K_INT_ES          (+ Gear Energy Shield flat · 12-60)
-es_regen = int * K_INT_ESREGEN     starts after es_delay without a hit
-es_delay = 3 sec
+es_pool  = energy_shield_flat x (1 + max_energy_shield_pct/100)
+es_regen = es_pool x regen_pct/100, amplified by an es_regen skill, Mod or passive
+es_delay = delay_sec
 ```
 
-- `K_INT_ES` = 4 · `K_INT_ESREGEN` = 0.10 · Int 510 gives a **2,040** shield recharging at **51/sec**, so the whole pool is back in **40.0 sec** of not being hit — the same full-pool span the mana line was tuned to (B5) and about 2.4x faster than a Vit build recovers its HP.
-- **The shield is 40.0% of the same Int build's 8,160 HP**, which is the ratio **X25** holds between 30% and 45%: enough that a caster trades raw HP for a rechargeable buffer, not enough to make it two health bars.
+- The pool is a **gear line** (`energy_shield_flat` · `max_energy_shield_pct`): no Core stat feeds it, so `K_INT_ES` retired.
+- Regen is `regen_pct` percent of the max pool per second, and the base rate alone returns the whole pool in the reciprocal of `regen_pct` seconds — the same full-pool span the mana line was tuned to. The live rate is the generated B16 row in the K table.
+- `es_regen` amplifies that rate — from a skill, a Mod (`energy_shield_regen`) or a passive — and it scales the **rate**, never the pool, so it cannot raise the shield's ceiling (X25).
 - **Order matters** — armour (combat.md step 5) and Elemental res (step 6) shrink the number that then drains ES, and only the remainder reaches HP. Chaos skips the shield entirely and hits HP.
-- **Delay is the whole cost of the layer**: 3 sec without a hit is still long compared to a 1-sec trash clock, so ES refills *between* groups, not during a boss. That is what keeps the boss gate a pool-times-time question (combat.md section 7) instead of a heal loop.
+- **Delay is the whole cost of the layer**: `delay_sec` without a hit is still long compared to the trash clock, so ES refills *between* groups, not during a boss. That is what keeps the boss gate a pool-times-time question (combat.md section 7) instead of a heal loop.
 - **Player-only.** Mobs have an Int line but no shield, because their survivability is already anchored on `mob_HP` — a second pool would count the same anchor twice (checks.md H1).
 
 
@@ -121,7 +122,7 @@ cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)
 elem_align   = dex * K_DEX_ALIGN + elem_align_flat
 elem_align   = min(elem_align, 50)
 
-res_c        = vit * K_VIT_RES
+res_c        = vit * K_MOB_RES
 elem_res_x   = res_c * (1 + elem_res_pct_x/100)
 elem_res_x   = min(elem_res_x, 75)
 
@@ -129,7 +130,7 @@ status_align = dex * K_DEX_ALIGN     same value as elem_align
 ```
 
 - `K_DEX_ALIGN` = 0.05 · Dex 510 gives 25.5% + the two Alignment slots on defensive items (amulet and gloves, +5 each) = 35.5% → Cap **50**, a **hard ceiling** the build stays under (X11).
-- `K_VIT_RES` = 0.05 · Vit 510 gives 25.5% before Mod multiplication.
+- `K_MOB_RES` = 0.05 · Vit 510 gives 25.5% before Mod multiplication.
 - Merged away the old `status_res` once given by Str. No stat gives status res besides this.
 - **Cap 75 is a hard ceiling**: Vit 510 + 3 res items tops out at `25.5 × (1 + 30+30+30)% = 48.5`, under the ceiling, so no build is cut. The old Cap 45 was the build target on the same figures; the owner raised the ceiling to 75 to match the intent that resistance is a per-item purchase with real effect, so the purchase is never clipped.
   Resistance remains a per-item purchase with real effect, not free from Vit alone.

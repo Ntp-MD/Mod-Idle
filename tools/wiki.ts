@@ -153,7 +153,7 @@ function serve() {
     const msg = `data: ${JSON.stringify({ type: 'change', stamp: new Date().toISOString().slice(11, 19) })}\n\n`;
     for (const res of clients) { try { res.write(msg); } catch (e) { clients.delete(res); } }
   };
-  const watchTargets = [ROOT, path.join(ROOT, 'doc'), path.join(ROOT, 'harness'), path.join(ROOT, 'tools', 'data')];
+  const watchTargets = [ROOT, path.join(ROOT, 'doc'), path.join(ROOT, 'tools', 'data')];
   for (const dir of watchTargets) {
     try {
       fs.watch(dir, { persistent: false, recursive: true }, (ev: any, name: any) => {

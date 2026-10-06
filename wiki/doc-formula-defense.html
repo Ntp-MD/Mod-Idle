@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -89,6 +89,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="#h-9-alignment-and-elemental-resistance">9. Alignment and Elemental resistance</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -109,8 +110,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -130,6 +129,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -142,8 +142,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Formulas — Defense</h1>
-<dl class="kv"><dt>file</dt><dd><code>formula-defense.md</code> · 137 lines · 2,287 words · written 2026-10-06T01:07:50Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-equipment-slot.html">equipment-slot.md</a> · <a href="doc-elements.html">elements.md</a></dd><dt>imported by</dt><dd><a href="doc-formula.html">formula.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-combat.html">combat.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a> · <a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></dd><dt>generated blocks</dt><dd><code>evasion-table</code> <span class="tag gen">tools/town.ts</span> · <code>hp-mana-block</code> <span class="tag gen">tools/town.ts</span></dd><dt>raw</dt><dd><a href="../formula-defense.md">formula-defense.md</a></dd></dl>
-<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
+<dl class="kv"><dt>file</dt><dd><code>formula-defense.md</code> · 138 lines · 2,300 words · written 2026-10-06T10:49:40Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-equipment-slot.html">equipment-slot.md</a> · <a href="doc-elements.html">elements.md</a></dd><dt>imported by</dt><dd><a href="doc-formula.html">formula.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-combat.html">combat.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a> · <a href="doc-skill-pool-aura-heal.html">skill-pool-aura-heal.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../formula-defense.md">formula-defense.md</a></dd></dl>
+
 <h2 id="h-formulas-defense">Formulas — Defense</h2>
 <p>import core-stats.md import mod-pool.md import equipment-slot.md import elements.md</p>
 <p>Symbols: <code>x</code> = value from build · <code>x_c</code> = value from Core stat · <code>x_f</code> = value from Mod Flat · <code>x_p</code> = value from Mod %</p>
@@ -170,16 +170,16 @@ hp_regen = vit * K_VIT_REGEN * (1 + hp_regen_pct/100)
 
 max_mana   = (mana_base + int * K_INT_MP + level_gain_mp) * (1 + mp_pct/100)
 mana_regen = int * K_INT_MREGEN * (1 + mregen_pct/100)</pre>
-<ul><li><code>K_VIT_HP</code> = 20 · <code>K_VIT_REGEN</code> = 0.25 · <code>hp_base</code> = 300 → Vit 510 gives 10,200 raw HP (14,460 once the per-level term and base are added) and 128/sec regen.</li><li><code>K_INT_MP</code> = 4 · <code>K_INT_MREGEN</code> = <strong>0.18</strong> (was 0.2) · <code>mana_base</code> = 100 → Int 510 gives 2,040 raw mana (3,724 once the per-level term and base are added) and 92/sec regen.</li><li><code>level_gain_hp</code> = 40 × (level − 1) → at level 190 gives 7,560 (the old text wrote 4,000, which overcounted by one level).</li><li><code>level_gain_mp</code> = 16 × (level − 1) → at level 100 gives 1,584.</li></ul>
+<ul><li><code>K_VIT_HP</code> = 20 · <code>K_VIT_REGEN</code> = 0.25 · <code>hp_base</code> = 300 → Vit 510 gives 10,200 raw HP (14,460 once the per-level term and base are added) and 128/sec regen.</li><li><code>K_INT_MP</code> = 4 · <code>K_INT_MREGEN</code> = <strong>0.28</strong> (was 0.18) · <code>mana_base</code> = 100 → Int 510 gives 2,040 raw mana (3,724 once the per-level term and base are added) and 142.8/sec regen.</li><li><code>level_gain_hp</code> = 40 × (level − 1) → at level 190 gives 7,560 (the old text wrote 4,000, which overcounted by one level).</li><li><code>level_gain_mp</code> = 16 × (level − 1) → at level 100 gives 1,584.</li></ul>
 <pre class="code">Max HP   level 100 · full Vit 12 items + 1 Max HP % slot = (8,669 + 7,560) × 1.16 = 19,173
 Max Mana level 100 · full Int                            = (1,734 + 3,024)          = 4,858
 pool ÷ regen                                              = 4,858 ÷ 121 = 40 seconds
 flat-cost reference pool (level 1) = mana_base 100 + stat 12 × K_INT_MP 4 = 148 — the pool a `N flat` cost is quoted against, and it climbs 5% a skill level and on (pool ÷ reference)^0.5 </pre>
-<blockquote><p><strong><code>K_INT_MREGEN</code> was 0.2 → 0.15 → 0.18</strong> — the stated intent was &quot;about 40 seconds per full mana pool.&quot; At 0.2 the actual ratio was 29.7 seconds · mana was therefore almost 40% larger than intended and made skills nearly free to spam. At 0.18 it is 40.6 seconds, matching intent · enough to keep pressing skills while still reserving a slice for auras. Players must choose how much of the pool to reserve as aura and how much to leave usable for skills (see skill-pool-aura-heal.md · reservation tiers at pool 3,724).</p></blockquote>
-<pre class="code">max_es   = int * K_INT_ES          (+ Gear Energy Shield flat · 12-60)
-es_regen = int * K_INT_ESREGEN     starts after es_delay without a hit
-es_delay = 3 sec</pre>
-<ul><li><code>K_INT_ES</code> = 4 · <code>K_INT_ESREGEN</code> = 0.10 · Int 510 gives a <strong>2,040</strong> shield recharging at <strong>51/sec</strong>, so the whole pool is back in <strong>40.0 sec</strong> of not being hit — the same full-pool span the mana line was tuned to (B5) and about 2.4x faster than a Vit build recovers its HP.</li><li><strong>The shield is 40.0% of the same Int build's 8,160 HP</strong>, which is the ratio <strong>X25</strong> holds between 30% and 45%: enough that a caster trades raw HP for a rechargeable buffer, not enough to make it two health bars.</li><li><strong>Order matters</strong> — armour (combat.md step 5) and Elemental res (step 6) shrink the number that then drains ES, and only the remainder reaches HP. Chaos skips the shield entirely and hits HP.</li><li><strong>Delay is the whole cost of the layer</strong>: 3 sec without a hit is still long compared to a 1-sec trash clock, so ES refills <em>between</em> groups, not during a boss. That is what keeps the boss gate a pool-times-time question (combat.md section 7) instead of a heal loop.</li><li><strong>Player-only.</strong> Mobs have an Int line but no shield, because their survivability is already anchored on <code>mob_HP</code> — a second pool would count the same anchor twice (checks.md H1).</li></ul>
+<blockquote><p><strong><code>K_INT_MREGEN</code> was 0.2 → 0.15 → 0.18 → 0.28</strong> — the stated intent was &quot;about 40 seconds per full mana pool.&quot; At 0.2 the actual ratio was 29.7 seconds · mana was therefore almost 40% larger than intended and made skills nearly free to spam. At 0.28 it is 40.0 seconds, matching intent · enough to keep pressing skills while still reserving a slice for auras. Players must choose how much of the pool to reserve as aura and how much to leave usable for skills (see skill-pool-aura-heal.md · reservation tiers at pool 3,724).</p></blockquote>
+<pre class="code">es_pool  = energy_shield_flat x (1 + max_energy_shield_pct/100)
+es_regen = es_pool x regen_pct/100, amplified by an es_regen skill, Mod or passive
+es_delay = delay_sec</pre>
+<ul><li>The pool is a <strong>gear line</strong> (<code>energy_shield_flat</code> · <code>max_energy_shield_pct</code>): no Core stat feeds it, so <code>K_INT_ES</code> retired.</li><li>Regen is <code>regen_pct</code> percent of the max pool per second, and the base rate alone returns the whole pool in the reciprocal of <code>regen_pct</code> seconds — the same full-pool span the mana line was tuned to. The live rate is the generated B16 row in the K table.</li><li><code>es_regen</code> amplifies that rate — from a skill, a Mod (<code>energy_shield_regen</code>) or a passive — and it scales the <strong>rate</strong>, never the pool, so it cannot raise the shield's ceiling (X25).</li><li><strong>Order matters</strong> — armour (combat.md step 5) and Elemental res (step 6) shrink the number that then drains ES, and only the remainder reaches HP. Chaos skips the shield entirely and hits HP.</li><li><strong>Delay is the whole cost of the layer</strong>: <code>delay_sec</code> without a hit is still long compared to the trash clock, so ES refills <em>between</em> groups, not during a boss. That is what keeps the boss gate a pool-times-time question (combat.md section 7) instead of a heal loop.</li><li><strong>Player-only.</strong> Mobs have an Int line but no shield, because their survivability is already anchored on <code>mob_HP</code> — a second pool would count the same anchor twice (checks.md H1).</li></ul>
 <h2 id="h-6-cooldown-reduction">6. Cooldown reduction</h2>
 <pre class="code">cdr = (wis * K_WIS_CDR) * (1 + cdr_pct_total/100)
 cdr = min(cdr, 80)
@@ -192,12 +192,12 @@ cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)</pre>
 <pre class="code">elem_align   = dex * K_DEX_ALIGN + elem_align_flat
 elem_align   = min(elem_align, 50)
 
-res_c        = vit * K_VIT_RES
+res_c        = vit * K_MOB_RES
 elem_res_x   = res_c * (1 + elem_res_pct_x/100)
 elem_res_x   = min(elem_res_x, 75)
 
 status_align = dex * K_DEX_ALIGN     same value as elem_align</pre>
-<ul><li><code>K_DEX_ALIGN</code> = 0.05 · Dex 510 gives 25.5% + the two Alignment slots on defensive items (amulet and gloves, +5 each) = 35.5% → Cap <strong>50</strong>, a <strong>hard ceiling</strong> the build stays under (X11).</li><li><code>K_VIT_RES</code> = 0.05 · Vit 510 gives 25.5% before Mod multiplication.</li><li>Merged away the old <code>status_res</code> once given by Str. No stat gives status res besides this.</li><li><strong>Cap 75 is a hard ceiling</strong>: Vit 510 + 3 res items tops out at <code>25.5 × (1 + 30+30+30)% = 48.5</code>, under the ceiling, so no build is cut. The old Cap 45 was the build target on the same figures; the owner raised the ceiling to 75 to match the intent that resistance is a per-item purchase with real effect, so the purchase is never clipped.</li></ul>
+<ul><li><code>K_DEX_ALIGN</code> = 0.05 · Dex 510 gives 25.5% + the two Alignment slots on defensive items (amulet and gloves, +5 each) = 35.5% → Cap <strong>50</strong>, a <strong>hard ceiling</strong> the build stays under (X11).</li><li><code>K_MOB_RES</code> = 0.05 · Vit 510 gives 25.5% before Mod multiplication.</li><li>Merged away the old <code>status_res</code> once given by Str. No stat gives status res besides this.</li><li><strong>Cap 75 is a hard ceiling</strong>: Vit 510 + 3 res items tops out at <code>25.5 × (1 + 30+30+30)% = 48.5</code>, under the ceiling, so no build is cut. The old Cap 45 was the build target on the same figures; the owner raised the ceiling to 75 to match the intent that resistance is a per-item purchase with real effect, so the purchase is never clipped.</li></ul>
 <p>  Resistance remains a per-item purchase with real effect, not free from Vit alone.</p>
 <ul><li><strong>Cap 50 is a hard ceiling</strong> the two Alignment slots stay under. Dex 510 gives 25.5%, and the only two Alignment slots (amulet and gloves, +5 +5) take it to <strong>35.5%</strong>, so the ceiling is set above a full Alignment build rather than at it. The old Cap 35 was the build target the slots just reached; the owner raised it to 50, and no expansion of the Alignment slot to the cape was needed because the ceiling no longer has to be a slot-pool number.</li></ul>
 <nav class="pager"><a href="doc-formula-offense.html">← formula-offense.md</a><a href="index.html">Character &amp; stats</a><a href="doc-formula-utility.html">formula-utility.md →</a></nav>

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { E, eng, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { buildCharacter, emptyGear } from '../src/sim/player';
+import { poolGear } from './sheetFixture';
 import { playerSwing } from '../src/sim/combat';
 import { newMobStatusStore, stepMob, applyBleed, modsOn, targetMods } from '../src/sim/mobStatus';
 import { NO_CURSE, applyCurse, newCurses, modsFromAuraFold, modsOn as curseModsOn } from '../src/sim/curse';
@@ -168,8 +169,10 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     const sk2 = newSkillState();
     sk2.auras['aura.elemental_fury'] = true;
     sk2.auras['aura.rimbo_form'] = true;
-    const bare = buildCharacter(40, emptyGear());
-    const withAuras = buildCharacter(40, emptyGear(), {}, 0, effectsActive(sk2));
+    // a sheet wearing the gear line that carries resistance, or the equality below is 0 === 0
+    const bare = buildCharacter(40, poolGear());
+    const withAuras = buildCharacter(40, poolGear(), {}, 0, effectsActive(sk2));
+    expect(bare.resistance).toBeGreaterThan(0);
     expect(withAuras.resistance).toBe(bare.resistance);
     expect(withAuras.aspd).toBeCloseTo(bare.aspd, 10);
     expect(modsFromAuraFold(effectsActive(sk2).target || {}).attackSpeed).toBe(-15);

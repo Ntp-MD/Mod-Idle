@@ -6,7 +6,7 @@ import skill-pool-curse.md
 import skill-pool-aura-heal.md
 import skill-pool-system.md
 
-**First draft** — skills divide into 3 types: **active** (has cooldown, costs mana) · **aura** (persistent, reserves Max Mana) · **passive** (takes no slot, costs no mana)
+**First draft** — skills divide into **active** (has cooldown, costs mana) · **aura** (persistent, reserves Max Mana) · **passive** (takes no slot, costs no mana)
 The core rule is that a skill must change **what you do**, not just add numbers. If it is only numbers, it should be an Mod instead
 
 # Detail files
@@ -59,19 +59,35 @@ cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)
 | melee | sword · axe · dagger · mace · spear · two-handed sword · two-handed axe (7 types) | skill damage +25% |
 | ranged | bow · crossbow (2 types) | skill damage +25% |
 | magic | wand · staff (2 types) + book in off hand | skill damage +25% |
-- **Dagger moved from ranged back to melee** · The old weapon-types file mislabeled a heading as "Ranged (one-handed)" even though the list was sword/axe/knife, so the table dragged dagger into ranged · Now follows equipment-weapon.md (11 types · melee 7 / ranged 2 / magic 2)
+- **Dagger moved from ranged back to melee** · The old weapon-types file mislabeled a heading as "Ranged (one-handed)" even though the list was sword/axe/knife, so the table dragged dagger into ranged · Now follows equipment-weapon.md
 - **Mastery stacks on top of the group bonus**: held weapon gains +0.5% skill damage per Mastery level from L5 (maximum +8%) · Counted *after* this +25% group bonus (equipment-weapon.md) · And it is a bonus specific to "which weapon is held", not making any weapon type permanently better
 **Why a bonus, not a requirement** — if matching weapons were required to equip, a sword player would never see dagger skills even when dropped. Dropped items would become unusable. With this design no skill is dead, but players are still pulled toward weapon choice
 
 # How to equip skills
-**Max 20 actives in the list**. Equip up to 20 owned actives · The game runs by **placed order**
+**Max 15 actives in the list**. Equip up to 15 owned actives · The game runs by **placed order** · The slot count is owned by `ACTIVE_SLOTS` in the client, not by this file
 ## Active list
 | Position in list | Meaning |
 |---|---|
 | Top | Used first |
 | Lower | Used when upper ones are unavailable |
-- The game cycles top to bottom, using the first skill with **cd ready and enough mana**
-- No complex conditions · No manual presses · Players only arrange order
+- The game cycles top to bottom, using the first slot that is **cd ready, has enough mana, and is allowed to fire this tick** by its own mode
+- No manual presses · Players only arrange order and pick each slot's **when**
+## When a slot may fire
+Every slot carries one mode
+| Mode | Meaning |
+|---|---|
+| always | Cast whenever the slot is ready — the default, and what "cast when ready" has always meant |
+| never | Silenced — the row keeps its place and keeps counting its cooldown, but never fires |
+| conditional | Fires only while one of the shared conditions below holds |
+- **The condition list is one list, shared by every conditional slot** — never free text per skill, so a new condition is a single entry every row can draw on rather than a per-skill field
+| Condition | Fires the conditional rows while |
+|---|---|
+| boss | The front target is a Boss |
+| hpBelowPct | The character is under that share of its pool (unset = off) |
+| statusMissing | The target is not carrying a status the row applies — read off the roster, so a row's Element and curse flags are derived from the row itself rather than typed per skill |
+- The legs **OR** together · one holding is enough
+- **Why a heal row wants `conditional`** — an `always` heal fires on cooldown whatever the pool is, so it spends its whole mana cost into a full pool and takes the damage that mana would have paid for. Gating it on `hpBelowPct` is what makes one rotation hold in both a clean fight and a bad one
+- A conditional slot with no leg enabled never fires, which parks a row without spending the `never` mode
 ## Aura
 **Not in the list, kept separately** because aura is not an action but a persistent state
 | Property | Value |
@@ -79,7 +95,7 @@ cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)
 | Cost | **Reserved % of Max Mana** — unusable by skills while the aura is open |
 | Limit | **The player chooses the set; total reserved mana may not reach 100% of the pool** — no other cap |
 | Switch | **Player-managed.** The player opens and closes auras; the system only blocks a selection that would reserve 100% |
-- The player manages the set directly — there is no automatic top-down opening and no 45% Cap
+- The player manages the set directly — there is no automatic top-down opening and no such cap
 - Because a reservation is static, the player can read the whole aura budget before pressing anything — unlike the old drain table, where auras opened and closed live against regen
 - **The old "open while mana ≥ 25%" rule is deleted.** Full rules in `skill-pool-aura-heal.md`
 ## Buff
@@ -93,3 +109,5 @@ cooldown = base_cooldown * (1 - ladder/100) * (1 - cdr/100)
 **6 sets can be stored**, with automatic selection per zone
 - On Push (HP depleted · see combat.md), return to the main preset
 - In an idle game players swap builds often; arranging one by one each time would waste time
+- **A set carries its slot order *and* each slot's mode** — so "heal always" and "heal only when low" are two different builds in the same six, not one setting the player re-ticks on every swap
+- **The condition list does not ride a set** — it is one list for the whole character, because it states what the character is like right now (low HP, a boss, a missing status), which is a property of the fight rather than of the rotation

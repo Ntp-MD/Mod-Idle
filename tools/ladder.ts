@@ -21,18 +21,20 @@ const ZONES = eng.E.mob.zones.length;  // the data owns the world size, never a 
 // the F12 rate and the E5 game length are DERIVED, never copied: the skill-drop rate is the same sum
 // `skill-drop` prints, and the funnel's length is the published level-100 checkpoint
 const L = eng.E.loot as any, SD = eng.E.skill_drop as any;
-const KPH = L.bands.high.kills_per_hr_published;
+const KPH = eng.BAND.high.kills_derived;
 const ELITES = KPH * L.elite_spawn_chance;
 const DROP_PER_HR = ELITES * SD.elite + L.boss_per_hour * SD.boss + KPH * (1 - L.elite_spawn_chance) * SD.normal;
 // the completion checkpoint (E5) — the levels past it are the post-completion loop, so the funnel is
-// the supply the ladder is measured against up to completion, not to the level cap
-const GAME_HOURS = eng.E.loot.timeline_checkpoints_hr.level_100;
+// the supply the ladder is measured against up to completion, not to the level cap. It is a COUNT of
+// kills, never a stretch of hours: how long the run takes is the player's own pace (AGENT.md).
+const GAME_KILLS = eng.CHECKPOINTS_KILLS.level_100;
+const DROP_PER_KILL = DROP_PER_HR / KPH;
 const TARGETS = 4;            // checks.md D20 · four full targets
 
 function model() {
   const total = R.total();
   const poolPerZone = total / ZONES;
-  const funnel = DROP_PER_HR * GAME_HOURS;
+  const funnel = DROP_PER_KILL * GAME_KILLS;
   const dupToMax = LADDER.reduce((s: any, l: any) => s + l.cost, 0);
   const piecesPerMax = dupToMax * CONVERSION;
   const fourMaxed = TARGETS * piecesPerMax;
@@ -42,7 +44,7 @@ function model() {
   return {
     total, poolPerZone, funnel, dupToMax, piecesPerMax, fourMaxed,
     pctOfFunnel: (fourMaxed / funnel) * 100,
-    hours: fourMaxed / DROP_PER_HR,
+    kills: fourMaxed / DROP_PER_KILL,
     offTargets, offPieces, offAvg,
   };
 }
@@ -62,7 +64,7 @@ function gates(m: any) {
     `roster ${m.total} ÷ ${ZONES} zones = ${m.poolPerZone.toFixed(1)} skills per zone pool`);
 
   add('LD4', m.fourMaxed <= m.funnel,
-    `4 maxed targets = ${m.fourMaxed} pieces = ${m.pctOfFunnel.toFixed(0)}% of the ${m.funnel}-piece funnel = ${m.hours.toFixed(1)} hr`);
+    `4 maxed targets = ${m.fourMaxed} pieces = ${m.pctOfFunnel.toFixed(0)}% of the ${m.funnel}-piece funnel = ${Math.round(m.kills).toLocaleString('en-US')} kills`);
 
   add('LD5', m.offAvg >= 1,
     `the other ${m.offTargets} skills split ${m.offPieces} pieces → ${m.offAvg.toFixed(2)} each (≥1 required by D20)`);
@@ -77,9 +79,9 @@ function block() {
     '|---|---|',
     `| roster | ${m.total} skills |`,
     `| pool per zone | ${m.total} ÷ ${ZONES} = **${m.poolPerZone.toFixed(1)}** |`,
-    `| funnel | ${DROP_PER_HR.toFixed(2)}/hr × ${GAME_HOURS} hr = **${Math.round(m.funnel)} pieces** |`,
+    `| funnel | ${DROP_PER_KILL.toFixed(4)}/kill × ${GAME_KILLS.toLocaleString('en-US')} kills = **${Math.round(m.funnel)} pieces** |`,
     `| ladder to max one skill | ${m.dupToMax} duplicates = **${m.piecesPerMax} pieces** via the ${CONVERSION}:1 conversion |`,
-    `| ${TARGETS} maxed targets | **${m.fourMaxed} pieces = ${m.pctOfFunnel.toFixed(0)}% of funnel = ${m.hours.toFixed(1)} hr** |`,
+    `| ${TARGETS} maxed targets | **${m.fourMaxed} pieces = ${m.pctOfFunnel.toFixed(0)}% of funnel = ${Math.round(m.kills).toLocaleString('en-US')} kills** |`,
     `| remaining ${m.offTargets} skills | ${Math.round(m.offPieces)} pieces → **${m.offAvg.toFixed(2)} each** |`,
   ].join('\n');
 }

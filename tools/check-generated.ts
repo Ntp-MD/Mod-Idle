@@ -27,7 +27,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 // What a writer can read: the tools, the shared engine, the design docs and the
 // data. The private owner/ folder, git and the client's build output are kept
 // out — a copy is a throwaway, not a second home for the design.
-const COPY = ['tools', 'engine', 'doc', 'harness', 'package.json', 'tsconfig.json'];
+const COPY = ['tools', 'engine', 'doc', 'package.json', 'tsconfig.json'];
 const SKIP = new Set(['.wiki-backup', 'node_modules', '.git']);
 
 function copyInto(src: string, dst: string): void {

@@ -81,8 +81,11 @@ describe('equipping from the bag', () => {
   it('never happens by itself while the character is hunting', () => {
     const s = newGame(73);
     const atStart = equippedCount(s);
-    for (let i = 0; i < 1800; i++) tick(s, {}, { online: true });
+    // hunt until the loop has actually banked a piece, so the reading is taken on a live bag rather
+    // than after a guessed window (a time premise · AGENT.md)
+    for (let i = 0; i < 40000 && s.bag.length === 0; i++) tick(s, {}, { online: true });
     // a bag full of kept pieces is the design working (loot.md §4), not a bug to fix here
+    expect(s.bag.length).toBeGreaterThan(0);
     expect(equippedCount(s)).toBe(atStart);
   });
 

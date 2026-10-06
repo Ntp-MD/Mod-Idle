@@ -24,8 +24,8 @@ const ALIASES = JSON.parse(G.read('tools/data/aliases.json'));
 
 const RESERVED_NONFILES = new Set(['skill.md', 'skills.md', 'SKILL.md']); // AGENT.md forbids creating these
 
-// Docs live at the root and under `harness/`, which holds the agent ops and the open-work
-// queue. Keys are the path from the repo root so a doc can be named as `harness/todo.md`.
+// Docs live at the root (`AGENT.md`, `todo.md`) and under `doc/<layer>/`. Keys are the path from
+// the repo root so a doc can be named as `todo.md`.
 const DOCS = G.listDocs();
 const TEXT: Record<string, string> = {};
 for (const f of DOCS) TEXT[f] = fs.readFileSync(path.join(G.ROOT, G.resolveDoc(f)), 'utf8');
@@ -50,26 +50,28 @@ const add = (id: any, ok: any, detail: any, status?: any) => out.push({ id, ok, 
 // ---------------------------------------------------------------- L2 / L3 md refs
 
 {
-  // an optional folder prefix, because the agent ops and the open-work queue live under `harness/`
-  const refRe = /`(harness\/(?:handoff\/|state\/)?)?([A-Za-z0-9-]+\.md)(?::(\d+))?`/g;
+  const refRe = /`([A-Za-z0-9-]+\.md)(?::(\d+))?`/g;
   const missing = new Set<string>();
   const drifted: any[] = [];
   for (const f of DOCS) {
     let m: any;
     while ((m = refRe.exec(TEXT[f]))) {
-      const target = (m[1] || '') + m[2];
+      const target = m[1];
       if (RESERVED_NONFILES.has(target)) continue;
       // `in`, not a truthiness test: an empty doc is still a real file, and reading one as
       // "missing" would make every reference to it look like a broken wire
       if (!(target in TEXT)) { missing.add(`${f} → ${target}`); continue; }
-      if (m[3]) {
-        const n = Number(m[3]);
+      if (m[2]) {
+        const n = Number(m[2]);
         if (n > lineCount(target)) drifted.push(`${f} → ${target}:${n} (file has ${lineCount(target)})`);
       }
     }
   }
   add('L2', missing.size === 0, `every \`file.md\` reference resolves${missing.size ? ' · MISSING: ' + [...missing].slice(0, 12).join(' · ') : ''}`);
-  if (drifted.length) add('L3', true, `${drifted.length} \`file.md:line\` citation(s) point past the end of the file (line drift, not a broken wire) · ` + drifted.slice(0, 8).join(' · ') + (drifted.length > 8 ? ' …' : ''), 'PENDING');
+  // L3 is a real gate, not a permanent PASS: a `file.md:line` citation that points past the end of
+  // the file is a broken wire (the line it names no longer exists), so it FAILS. It still cannot tell
+  // whether an in-range citation points at the *right* line — that needs a human or a semantic check.
+  if (drifted.length) add('L3', false, `${drifted.length} \`file.md:line\` citation(s) point past the end of the file · ` + drifted.slice(0, 8).join(' · ') + (drifted.length > 8 ? ' …' : ''));
   else add('L3', true, 'every `file.md:line` citation is inside its file');
 }
 
@@ -206,6 +208,36 @@ const add = (id: any, ok: any, detail: any, status?: any) => out.push({ id, ok, 
   }
 
   add('L8', bad.length === 0, `the abbreviation set is closed and 1:1 (${pairs.length} rows)${bad.length ? ' · ' + bad.join(' · ') : ''}`);
+}
+
+// L9 — the client test suite may not carry a time premise. This game has no time limit and no
+// play-length target (AGENT.md), so a test that ticks the sim for a fixed window and then asserts
+// something happened is a coin flip on the roll it is waiting for, and it is what made the suite
+// cost minutes. A hang guard is allowed: a bound is only a premise when no state condition sits
+// beside it (`&& ...`). A statistical loop that never ticks the sim is not a window at all.
+// `lint:allow` on the line, or on the line above, is the escape hatch — the same one L7 carries.
+{
+  const bad: string[] = [];
+  const testDir = path.join(G.ROOT, 'game', 'tests');
+  const files: string[] = fs.existsSync(testDir)
+    ? fs.readdirSync(testDir, { withFileTypes: true }).filter((e: any) => e.isFile() && e.name.endsWith('.ts')).map((e: any) => e.name)
+    : [];
+  let windows = 0;
+  for (const f of files) {
+    const body = fs.readFileSync(path.join(testDir, f), 'utf8').split(/\r?\n/);
+    for (let i = 0; i < body.length; i++) {
+      const allowed = /lint:allow/.test(body[i]) || /lint:allow/.test(body[i - 1] || '');
+      const win = body[i].match(/for \((?:const|let) (\w+) = 0; \1 < (\d{3,})([^)]*)\)/);
+      if (win && !allowed && !/&&|\|\|/.test(win[3]) && /tick\(/.test(body.slice(i, i + 4).join(' '))) {
+        windows++;
+        bad.push(`${f}:${i + 1} ticks the sim for a fixed ${win[2]} with no state condition`);
+      }
+      const to = body[i].match(/\}, (\d{6,})\);/);
+      if (to && Number(to[1]) >= 180000 && !allowed) bad.push(`${f}:${i + 1} carries a ${Number(to[1]) / 1000}s timeout`);
+    }
+  }
+  add('L9', bad.length === 0,
+    `the client tests carry no time premise: ${files.length} file(s) scanned, ${windows} fixed tick window(s) with no state condition, and no timeout at or above 180s${bad.length ? ' · ' + bad.slice(0, 6).join(' · ') : ''}`);
 }
 
 // ---------------------------------------------------------------- cli

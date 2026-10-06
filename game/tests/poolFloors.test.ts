@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildCharacter, emptyGear, type Character } from '../src/sim/player';
+import { poolGear } from './sheetFixture';
 import { mobSwing } from '../src/sim/combat';
 import { NO_CURSE } from '../src/sim/curse';
 import { newGame, tick, carried, heldWeaponName } from '../src/sim/game';
@@ -26,7 +27,8 @@ const sheetOf = (s: GameState) => buildCharacter(
 
 describe('a pool spends only what stands in it', () => {
   it('one swing cannot spend more Energy Shield than is left', () => {
-    const c = buildCharacter(90, emptyGear());
+    // the shield is a gear line, so the sheet under test wears the piece that carries it
+    const c = buildCharacter(90, poolGear());
     expect(c.es).toBeGreaterThan(0);
     // This test is about the split, so the swing has to land: the Evasion layer is zeroed rather
     // than hunting a seed that happens to get past it.
@@ -51,7 +53,10 @@ describe('a pool spends only what stands in it', () => {
     let minEs = Infinity;
     let minMana = Infinity;
     let bad: string | null = null;
-    for (let i = 0; i < 3000 && !bad; i++) {
+    // Tick until a pool has actually been spent, never for a fixed window: the gate has to see a
+    // spent pool to prove anything, and "3,000 sec" was a time premise (AGENT.md). The bound is a
+    // hang guard.
+    for (let i = 0; i < 60000 && !bad && Math.max(esSpent, manaSpent) === 0; i++) {
       tick(s, {}, { online: true });
       const c = sheetOf(s);
       minEs = Math.min(minEs, s.player.es);
@@ -69,5 +74,5 @@ describe('a pool spends only what stands in it', () => {
     expect(bad).toBeNull();
     // the run has to actually spend a pool, or the gate proves nothing
     expect(Math.max(esSpent, manaSpent)).toBeGreaterThan(0);
-  }, 180000);
+  }, 60000);
 });

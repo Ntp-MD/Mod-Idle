@@ -72,7 +72,9 @@
       ],
       "mob-roster.md": [
         "zone-cast",
-        "mob-roster"
+        "mob-roster",
+        "race-drop",
+        "race-resist"
       ],
       "elements.md": [
         "element-k",
@@ -123,7 +125,7 @@
     "K_WIS_CDR": 0.03,
     "K_DEX_ACC": 1.5,
     "K_DEX_ALIGN": 0.05,
-    "K_VIT_RES": 0.05,
+    "K_MOB_RES": 0.05,
     "K_VIT_STUNREC": 0.1154,
     "K_LCK_CRIT": 0.05,
     "K_LCK_PDOGE": 0.03,
@@ -137,8 +139,6 @@
     "K_ARMOUR": 2,
     "armour_divisor": 5,
     "mob_damage_divisor": 27,
-    "K_INT_ES": 4,
-    "K_INT_ESREGEN": 0.1,
     "K_BLEED": 0.7,
     "K_BLEED_CHANCE": 0.4,
     "bleed_time_sec": 5,
@@ -190,7 +190,7 @@
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
-      "note": "No passive skill tree exists (tools/data/tree.json is an empty shell), so mob_HP(L) = stat_c(L) x (1 + skill_per_level x L) x g(L) and mob_PS(L) = mob_HP(L) / mob_damage_divisor. g(L) is the gear-progression factor; above the level-90 edge it is held flat (curve.extend). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt - checks.md X37).",
+      "note": "The passive tree exists (tools/data/tree.json: three branches, 63 nodes) but is NOT folded into this curve yet (owner ruling), so mob_HP(L) = stat_c(L) x (1 + skill_per_level x L) x g(L) and mob_PS(L) = mob_HP(L) / mob_damage_divisor. g(L) is the gear-progression factor; above the level-90 edge it is held flat (curve.extend). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt - checks.md X37).",
       "extend": {
         "from_level": 90,
         "gear_factor": 43.15708874022729,
@@ -1764,7 +1764,14 @@
           "lck": 1.08
         },
         "humanoid": true,
-        "trait": "farm trash - the cheapest body in the game, and the first weapon-carrier a player meets"
+        "trait": "farm trash - the cheapest body in the game, and the first weapon-carrier a player meets",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1,
+          "lightning": 1,
+          "poison": 1.4,
+          "chaos": 1
+        }
       },
       {
         "id": "orc",
@@ -1802,7 +1809,14 @@
           "lck": 0.95
         },
         "humanoid": true,
-        "trait": "armour wall - real armour and heavy res, paid for with the worst accuracy on the road"
+        "trait": "armour wall - real armour and heavy res, paid for with the worst accuracy on the road",
+        "resist": {
+          "fire": 1.4,
+          "cold": 0.6,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1
+        }
       },
       {
         "id": "kobold",
@@ -1833,7 +1847,14 @@
           "wis": 0.85,
           "lck": 1.22
         },
-        "trait": "evasive vermin - quick and looting, killed by Element damage"
+        "trait": "evasive vermin - quick and looting, killed by Element damage",
+        "resist": {
+          "fire": 1.4,
+          "cold": 0.6,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1
+        }
       },
       {
         "id": "ogre",
@@ -1868,7 +1889,14 @@
           "wis": 0.95,
           "lck": 0.95
         },
-        "trait": "armour wall - slow and heavy, dodged outright by a Dex build"
+        "trait": "armour wall - slow and heavy, dodged outright by a Dex build",
+        "resist": {
+          "fire": 1,
+          "cold": 1,
+          "lightning": 0.6,
+          "poison": 1,
+          "chaos": 1.4
+        }
       },
       {
         "id": "troll",
@@ -1906,7 +1934,14 @@
           "wis": 0.95,
           "lck": 0.95
         },
-        "trait": "armour wall, all alone - every farming body is Large, so there is never a soft version to farm"
+        "trait": "armour wall, all alone - every farming body is Large, so there is never a soft version to farm",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1,
+          "lightning": 1,
+          "poison": 1.4,
+          "chaos": 1
+        }
       },
       {
         "id": "minotaur",
@@ -1937,7 +1972,14 @@
           "wis": 0.91,
           "lck": 0.91
         },
-        "trait": "the labyrinth bruiser - a balanced vector with no hole to exploit"
+        "trait": "the labyrinth bruiser - a balanced vector with no hole to exploit",
+        "resist": {
+          "fire": 1,
+          "cold": 1,
+          "lightning": 1.4,
+          "poison": 0.6,
+          "chaos": 1
+        }
       },
       {
         "id": "skeleton",
@@ -1974,7 +2016,14 @@
           "wis": 1.07,
           "lck": 0.9
         },
-        "trait": "slow caster floor - the accuracy is a joke and the res is not"
+        "trait": "slow caster floor - the accuracy is a joke and the res is not",
+        "resist": {
+          "fire": 1,
+          "cold": 1,
+          "lightning": 0.5,
+          "poison": 1,
+          "chaos": 1.5
+        }
       },
       {
         "id": "mummy",
@@ -2008,7 +2057,14 @@
           "wis": 1,
           "lck": 0.94
         },
-        "trait": "slow caster floor - fires from the second line and shrugs off Element damage"
+        "trait": "slow caster floor - fires from the second line and shrugs off Element damage",
+        "resist": {
+          "fire": 0.5,
+          "cold": 1,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1.5
+        }
       },
       {
         "id": "vampire",
@@ -2044,7 +2100,14 @@
           "wis": 0.9,
           "lck": 0.95
         },
-        "trait": "the mixed threat - half its hit is armour-able and half res-able, so neither answer is complete"
+        "trait": "the mixed threat - half its hit is armour-able and half res-able, so neither answer is complete",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1.4
+        }
       },
       {
         "id": "demon",
@@ -2088,7 +2151,14 @@
           "wis": 0.87,
           "lck": 0.87
         },
-        "trait": "the mixed caster - Int-heavy, so its Element half is the part that hurts"
+        "trait": "the mixed caster - Int-heavy, so its Element half is the part that hurts",
+        "resist": {
+          "fire": 1.5,
+          "cold": 0.5,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1
+        }
       },
       {
         "id": "slime",
@@ -2128,7 +2198,14 @@
           "wis": 1.25,
           "lck": 1.04
         },
-        "trait": "slow caster floor - magic only, so Elemental resistance is the whole answer and Armour answers nothing"
+        "trait": "slow caster floor - magic only, so Elemental resistance is the whole answer and Armour answers nothing",
+        "resist": {
+          "fire": 1,
+          "cold": 1,
+          "lightning": 0.5,
+          "poison": 1.5,
+          "chaos": 1
+        }
       },
       {
         "id": "spider",
@@ -2167,7 +2244,14 @@
           "wis": 0.93,
           "lck": 1.13
         },
-        "trait": "evasive vermin - hard to hit, dies to any AoE"
+        "trait": "evasive vermin - hard to hit, dies to any AoE",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1,
+          "lightning": 1,
+          "poison": 1.4,
+          "chaos": 1
+        }
       },
       {
         "id": "wolf",
@@ -2206,7 +2290,14 @@
           "wis": 0.93,
           "lck": 1.03
         },
-        "trait": "accurate striker - Evasion is worthless against it"
+        "trait": "accurate striker - Evasion is worthless against it",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1.4,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1
+        }
       },
       {
         "id": "golem",
@@ -2246,7 +2337,14 @@
           "wis": 1.1,
           "lck": 0.65
         },
-        "trait": "armour wall, all alone - the strongest armour line in the game and no soft body to farm"
+        "trait": "armour wall, all alone - the strongest armour line in the game and no soft body to farm",
+        "resist": {
+          "fire": 1,
+          "cold": 1,
+          "lightning": 1.5,
+          "poison": 1,
+          "chaos": 0.5
+        }
       },
       {
         "id": "dragon",
@@ -2286,7 +2384,14 @@
           "wis": 0.98,
           "lck": 0.76
         },
-        "trait": "accurate striker - the mixed hit at full accuracy is the whole fight"
+        "trait": "accurate striker - the mixed hit at full accuracy is the whole fight",
+        "resist": {
+          "fire": 1.5,
+          "cold": 0.5,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1
+        }
       },
       {
         "id": "treant",
@@ -2319,7 +2424,14 @@
           "wis": 1.03,
           "lck": 0.8
         },
-        "trait": "armour wall, all alone - heavy and rooted, and it never comes in a soft body"
+        "trait": "armour wall, all alone - heavy and rooted, and it never comes in a soft body",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1,
+          "lightning": 1,
+          "poison": 1.4,
+          "chaos": 1
+        }
       },
       {
         "id": "human",
@@ -2357,7 +2469,14 @@
           "lck": 1.03
         },
         "humanoid": true,
-        "trait": "accurate striker and status pressure - the militia lineage, and the potion-carrier"
+        "trait": "accurate striker and status pressure - the militia lineage, and the potion-carrier",
+        "resist": {
+          "fire": 1,
+          "cold": 1,
+          "lightning": 0.7,
+          "poison": 1,
+          "chaos": 1.3
+        }
       },
       {
         "id": "lizardman",
@@ -2394,7 +2513,14 @@
           "wis": 0.9,
           "lck": 1.16
         },
-        "trait": "the swamp hunter - quick, lucky and unremarkable, which is its own kind of easy"
+        "trait": "the swamp hunter - quick, lucky and unremarkable, which is its own kind of easy",
+        "resist": {
+          "fire": 1.4,
+          "cold": 0.6,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1
+        }
       },
       {
         "id": "elf",
@@ -2433,7 +2559,14 @@
           "lck": 0.96
         },
         "humanoid": true,
-        "trait": "accurate striker, evasive and status pressure - the complete caster line, and the hardest to hit"
+        "trait": "accurate striker, evasive and status pressure - the complete caster line, and the hardest to hit",
+        "resist": {
+          "fire": 1,
+          "cold": 1,
+          "lightning": 1.4,
+          "poison": 1,
+          "chaos": 0.6
+        }
       },
       {
         "id": "giant",
@@ -2468,7 +2601,14 @@
           "wis": 1.03,
           "lck": 0.8
         },
-        "trait": "armour wall, all alone - the heaviest body that still swings from the front"
+        "trait": "armour wall, all alone - the heaviest body that still swings from the front",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1.4,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1
+        }
       },
       {
         "id": "werewolf",
@@ -2508,7 +2648,14 @@
           "wis": 0.94,
           "lck": 0.99
         },
-        "trait": "accurate striker - a Wolf that hits harder and can take a hit back"
+        "trait": "accurate striker - a Wolf that hits harder and can take a hit back",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1.4,
+          "lightning": 1,
+          "poison": 1,
+          "chaos": 1
+        }
       },
       {
         "id": "dryad",
@@ -2542,7 +2689,14 @@
           "wis": 1.07,
           "lck": 0.98
         },
-        "trait": "evasive vermin and status pressure - magic only, so resistance is the answer"
+        "trait": "evasive vermin and status pressure - magic only, so resistance is the answer",
+        "resist": {
+          "fire": 0.6,
+          "cold": 1,
+          "lightning": 1,
+          "poison": 1.4,
+          "chaos": 1
+        }
       }
     ],
     "species_rules": [
@@ -2731,6 +2885,514 @@
         "Ancient Dryad"
       ]
     },
+    "variant_drops_note": "The drop identity of one variant NAME (mob.variants owns the names; this table owns what each name drops). `item`/`rarity` are the junk stream the variant pays instead of the species-wide item, and `lean` is the collectible stream that variant tilts toward, applied through huntReweight so the total expected drops/kill is conserved - the three normal variants of every species cycle gear · herb · junk, so a zone's aggregate stays balanced and only the per-kill mix moves. `none` is the identity, which is what Elite and Boss carry: they already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a variant between rarities never moves gold/kill.",
+    "variant_drops": {
+      "Sneak Goblin": {
+        "item": "Goblin Ear",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Raider Goblin": {
+        "item": "Goblin Bile",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Tinker Goblin": {
+        "item": "Goblin Cog",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Shaman Goblin": {
+        "item": "Goblin Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Goblin King": {
+        "item": "Goblin Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Raider Orc": {
+        "item": "Orc Warpaint",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Shaman Orc": {
+        "item": "Orc Tusk",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Berserker Orc": {
+        "item": "Orc Skull",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Juggernaut Orc": {
+        "item": "Orc Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Warlord Orc": {
+        "item": "Orc Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Miner Kobold": {
+        "item": "Kobold Candle",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Trapper Kobold": {
+        "item": "Kobold Wire",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Tinker Kobold": {
+        "item": "Kobold Vault Key",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Hoarder Kobold": {
+        "item": "Kobold Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Brute Ogre": {
+        "item": "Ogre Nail",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Butcher Ogre": {
+        "item": "Ogre Tooth",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Swamp Ogre": {
+        "item": "Ogre Heartstone",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Mage Ogre": {
+        "item": "Ogre Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Ogre King": {
+        "item": "Ogre Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Cave Troll": {
+        "item": "Troll Nail",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Forest Troll": {
+        "item": "Troll Hide",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Swamp Troll": {
+        "item": "Troll Heartstone",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Stone Troll": {
+        "item": "Troll Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Elder Troll": {
+        "item": "Troll Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Warrior Minotaur": {
+        "item": "Minotaur Hoof",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Berserker Minotaur": {
+        "item": "Minotaur Chain",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Guardian Minotaur": {
+        "item": "Minotaur Horn",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Blood Minotaur": {
+        "item": "Minotaur Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Warrior Skeleton": {
+        "item": "Skeleton Bone",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Archer Skeleton": {
+        "item": "Skeleton Marrow",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Knight Skeleton": {
+        "item": "Skeleton Sigil",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Mage Skeleton": {
+        "item": "Skeleton Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Bone Colossus": {
+        "item": "Skeleton Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Warrior Mummy": {
+        "item": "Mummy Dust",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Priest Mummy": {
+        "item": "Mummy Bandage",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Cursed Mummy": {
+        "item": "Mummy Glyph",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Royal Mummy": {
+        "item": "Mummy Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Mummy Lord": {
+        "item": "Mummy Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Blood Vampire": {
+        "item": "Vampire Ash",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Noble Vampire": {
+        "item": "Vampire Signet",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Vampire Knight": {
+        "item": "Vampire Fang",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Vampire Lord": {
+        "item": "Vampire Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Ancient Vampire": {
+        "item": "Vampire Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Imp": {
+        "item": "Demon Ash",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Demon Mage": {
+        "item": "Demon Horn",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Demon Brute": {
+        "item": "Demon Sigil",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Demon Knight": {
+        "item": "Demon Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Archdemon": {
+        "item": "Demon Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Splitter Slime": {
+        "item": "Slime Jelly",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Acid Slime": {
+        "item": "Slime Gland",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Devourer Slime": {
+        "item": "Slime Core",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Slime King": {
+        "item": "Slime Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Cave Spider": {
+        "item": "Spider Silk",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Hunter Spider": {
+        "item": "Spider Fang",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Web Spider": {
+        "item": "Spider Spinneret",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Broodmother": {
+        "item": "Spider Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Hunting Wolf": {
+        "item": "Wolf Pelt",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Dire Wolf": {
+        "item": "Wolf Fang",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Shadow Wolf": {
+        "item": "Wolf Alpha Claw",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Wolf King": {
+        "item": "Wolf Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Stone Golem": {
+        "item": "Golem Grit",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Iron Golem": {
+        "item": "Golem Wire",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Guardian Golem": {
+        "item": "Golem Shard",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Crystal Golem": {
+        "item": "Golem Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Colossus": {
+        "item": "Golem Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Wyrmling": {
+        "item": "Dragon Claw",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Drake": {
+        "item": "Dragon Ichor",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Wyvern": {
+        "item": "Dragon Scale",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Elder Dragon": {
+        "item": "Dragon Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Ancient Dragon": {
+        "item": "Dragon Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Young Treant": {
+        "item": "Treant Twig",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Thorn Treant": {
+        "item": "Treant Bark",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Rotting Treant": {
+        "item": "Treant Heartwood",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Ancient Treant": {
+        "item": "Treant Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Treant Elder": {
+        "item": "Treant Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Ranger": {
+        "item": "Militia Badge",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Warrior": {
+        "item": "Veteran Seal",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Knight": {
+        "item": "Knight Crest",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Mage": {
+        "item": "Temple Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Paladin": {
+        "item": "Paladin Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Hunter Lizardman": {
+        "item": "Lizardman Scale",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Warrior Lizardman": {
+        "item": "Lizardman Talon",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Scale Knight": {
+        "item": "Lizardman Crest",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Shaman Lizardman": {
+        "item": "Lizardman Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Lizardman Chief": {
+        "item": "Lizardman Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Wood Elf": {
+        "item": "Elf Quill",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "High Elf": {
+        "item": "Elf Dust",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Moon Elf": {
+        "item": "Elf Runestone",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Dark Elf": {
+        "item": "Elf Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Elven Archmage": {
+        "item": "Elf Crown",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Hill Giant": {
+        "item": "Giant Sinew",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Stone Giant": {
+        "item": "Giant Knuckle",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Frost Giant": {
+        "item": "Giant Runestone",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Fire Giant": {
+        "item": "Giant Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Wolfman": {
+        "item": "Werewolf Pelt",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Dire Werewolf": {
+        "item": "Werewolf Fang",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Blood Werewolf": {
+        "item": "Werewolf Claw",
+        "rarity": "rare",
+        "lean": "junk"
+      },
+      "Alpha Werewolf": {
+        "item": "Werewolf Charm",
+        "rarity": "rare",
+        "lean": "none"
+      },
+      "Forest Dryad": {
+        "item": "Dryad Sap",
+        "rarity": "common",
+        "lean": "gear"
+      },
+      "Flower Dryad": {
+        "item": "Dryad Blossom",
+        "rarity": "uncommon",
+        "lean": "herb"
+      },
+      "Thorn Dryad": {
+        "item": "Dryad Heartwood",
+        "rarity": "rare",
+        "lean": "junk"
+      }
+    },
     "deprecated_species": {
       "rat": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them",
       "husk": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them",
@@ -2739,7 +3401,14 @@
       "drake": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them",
       "seraph": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them"
     },
-    "species_target": 22
+    "species_target": 22,
+    "resist_rules": [
+      "Every species carries a resist profile: one Element it resists (x1.3-1.5 on its Vit line) and one it is weak to (x0.5-0.7), the other three at x1.00. The five multipliers always average x1.00, so the published res column (the Vit line) is unchanged and the profile only tilts it by Element (X26).",
+      "A race resists what it is made of and is weak to what answers it - a Dragon shrugs fire and fears cold, a Skeleton shrugs chaos and fears lightning - so which Element a build brings changes with the zone cast, not only with the counter table.",
+      "The profile multiplies the mob Vit line before the Cap, so a resist never lifts a mob past the same Elemental resistance Cap the player obeys."
+    ],
+    "skills_enabled": false,
+    "skills_note": "Mobs carry NO skills in the current build. A species trait and its damage tag are the whole of its behaviour until the skill/mechanics system lands; no species entry carries a skill field, and X27 fails if one appears while skills_enabled is false."
   },
   "bleed": {
     "curse_id": "curse.lacerate",
@@ -2774,20 +3443,49 @@
     "step": 5,
     "kills_anchors": {
       "1": 20,
-      "10": 101,
-      "30": 251,
-      "50": 713,
-      "90": 2121,
-      "100": 2498,
-      "110": 2896,
-      "120": 3315,
-      "140": 4212,
-      "160": 5183,
-      "180": 6223,
-      "190": 6768
+      "5": 41,
+      "10": 67,
+      "11": 71,
+      "15": 92,
+      "20": 115,
+      "21": 121,
+      "25": 141,
+      "30": 197,
+      "31": 207,
+      "35": 248,
+      "40": 322,
+      "41": 334,
+      "45": 386,
+      "50": 486,
+      "51": 504,
+      "55": 581,
+      "60": 717,
+      "61": 741,
+      "65": 840,
+      "70": 1147,
+      "71": 1178,
+      "75": 1319,
+      "80": 1562,
+      "81": 1610,
+      "85": 1818,
+      "86": 1863,
+      "87": 1907,
+      "88": 1952,
+      "89": 1995,
+      "90": 2169,
+      "91": 2304,
+      "92": 2430,
+      "93": 2685,
+      "94": 2933,
+      "95": 3360,
+      "96": 3732,
+      "97": 3962,
+      "98": 4757,
+      "99": 7063
     },
-    "hours_tolerance": 0.5,
-    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) interpolates linearly between the anchors · the anchors past level 100 continue the fitted L^1.55 growth measured from the last two published anchors, so the level 1-100 timeline is unchanged · hours(L) divides by the band kills/hr (980 low / 1385 mid / 1800 high), and the low/mid/high pattern repeats every 30 levels so the second half of the world keeps the same pacing shape. tools/timeline.ts derives the table in world.md from this."
+    "plateau_from": 100,
+    "plateau_step_at": 89,
+    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) is the RAGNAROK curve: the classic base-EXP table of RO (1-99) applied in log space and rescaled so level 1 costs 20 kills and the completion checkpoint (level 100) lands on its published 63,231, with the last two steps set by the owner rule — the step INTO 100 is 1.5× the step into 99 in XP — so the cliff ends on one final push, which keeps RO's signature — a step at every 10-level boundary and a steeper final decade — at this game's scale. The anchors are one per level through the cliff (85-100) and at each boundary, so the steps survive interpolation. Past `plateau_from` (100, the completion level) the XP bar is FLAT and holds the XP of the step out of `plateau_step_at` (89 → 90, the last step before RO's own cliff): completing the 91-100 push lowers the bar, and the post-completion loop is a plateau the player paces, never a wall. The progression checkpoints derive from this curve in engine/index.ts (CHECKPOINTS_KILLS), so a re-shape moves the bands and the town budgets with it. tools/timeline.ts derives the table in world.md from this."
   },
   "mod_max": {
     "phys_flat_main_hand": 80,
@@ -3035,6 +3733,16 @@
         "why": "The Int build’s scaling defensive line, same shape as the Max HP % and Max Mana % it sits beside"
       },
       {
+        "label": "Energy Shield Regeneration %",
+        "ids": [
+          "energy_shield_regen"
+        ],
+        "v100": "+30% of the shield's regen rate",
+        "early": "+12%",
+        "weight": 0.8,
+        "why": "Amplifies the base ES regen (`energy_shield.regen_pct`) the way Life Regeneration % amplifies the Vit line — a rate line, never a pool line, so it cannot raise the shield's ceiling (checks.md X25)"
+      },
+      {
         "label": "Life Regeneration %",
         "ids": [
           "life_regen_pct"
@@ -3049,7 +3757,7 @@
         "ids": [
           "mana_regen_pct"
         ],
-        "v100": "+25% of the Int-derived regen line · Int 510 × 0.18 = 91.8/sec, so +23.0/sec of cast sustain",
+        "v100": "+25% of the Int-derived regen line · Int 510 × 0.28 = 142.8/sec, so +35.7/sec of cast sustain",
         "early": "+10%",
         "weight": 1,
         "why": "Mana is the real casting bottleneck as designed (skill-pool-system.md), so this buys uptime with the bar full rather than more damage per press"
@@ -3103,7 +3811,7 @@
         "ids": [
           "mana_regen_flat"
         ],
-        "v100": "+31/sec on top of 92/sec (Int 510 x 0.18) = +34%",
+        "v100": "+31/sec on top of 143/sec (Int 510 × 0.28) = +22%",
         "early": "a level-1 build has 1.8/sec",
         "weight": [
           0.5,
@@ -3176,10 +3884,10 @@
   },
   "energy_shield": {
     "delay_sec": 3,
-    "recover_sec": 40,
+    "regen_pct": 3,
     "player_only": true,
     "chaos_bypasses": true,
-    "note": "Energy Shield is the caster's second pool: pool = Int x K_INT_ES, recharge = Int x K_INT_ESREGEN once delay_sec (3) have passed without a hit, and the full pool comes back in exactly recover_sec (40), the same shape the mana pool was tuned to and about 2.4x faster than a Vit build recovers HP. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it."
+    "note": "Elemental resistance and Energy Shield are GEAR lines, not Core stat lines (owner ruling): no Core stat feeds either, so `K_MOB_RES` belongs to the mob stat vector alone and the player reads both off the Mod rows. Energy Shield is the caster's second pool: pool = `energy_shield_flat` x (1 + `max_energy_shield_pct`/100). Regen is `regen_pct` (3) percent of the max pool per second once `delay_sec` (3) have passed without a hit, so the base rate alone returns the whole pool in 100 / `regen_pct` sec - the same full-pool span the mana pool was tuned to. Regen is amplified by an `es_regen` line from a skill, Mod or passive: rate x (1 + `es_regen`/100), and that is the only way it moves. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it."
   },
   "caps": {
     "crit_chance": null,
@@ -3410,8 +4118,8 @@
     "hit_chance_pct": 81,
     "crit_chance_pct": 18.5,
     "dagger_capped_at_500": false,
-    "heal_pool_mult": 2.09,
-    "heal_pool_mult_note": "One round of the heal skills, as a multiple of Max HP: Greater Heal 45% + Heal 8%/sec x 8 sec (64%) = 109% => x2.09. Read by tools/survival.ts for the boss 'with heal' column (SV6 gate); the heal skills in skills.json must sum to this number."
+    "heal_pool_mult": 2.4,
+    "heal_pool_mult_note": "One round of the heal skills, as a multiple of Max HP: Greater Heal 60% + Heal 10%/sec x 8 sec (80%) = 140% => x2.40. Read by tools/survival.ts for the boss 'with heal' column (SV6 gate); the heal skills in skills.json must sum to this number. Retuned from x2.09 when the survival cage's weapon was corrected to the one-handed sword (the old dagger was 25% too fast, so every boss Push was understated): at x2.40 one round still clears the boss for the two themes that spend items on surviving (mix, tank) and not for glass or evasion."
   },
   "global": {
     "damage_mult": 1,
@@ -3456,25 +4164,21 @@
     "bands": {
       "low": {
         "group_mobs": 1.5,
-        "kills_per_hr_published": 463,
         "lck_level": 30,
         "upgrades_per_hr": 3
       },
       "mid": {
         "group_mobs": 2.5,
-        "kills_per_hr_published": 537,
         "lck_level": 60,
         "upgrades_per_hr": 3
       },
       "high": {
         "group_mobs": 4,
-        "kills_per_hr_published": 589,
         "lck_level": 90,
         "upgrades_per_hr": 3
       },
       "high_full_lck": {
         "group_mobs": 4,
-        "kills_per_hr_published": 589,
         "lck_level": "ceiling",
         "upgrades_per_hr": 3
       }
@@ -3500,18 +4204,6 @@
       "note": "crafting.md: Corrupt stone is boss only and the rarest stone, one use per piece.",
       "boss_corrupt_chance": 0.25
     },
-    "timeline_checkpoints_hr": {
-      "level_10": 0.9,
-      "level_30": 6,
-      "level_60": 29.4,
-      "level_90": 84.3,
-      "level_100": 110.7,
-      "level_120": 177.1,
-      "level_150": 313.9,
-      "level_180": 500.4,
-      "level_190": 574.5
-    },
-    "push_hr_levels_91_100": 26.4,
     "kill_rate_tolerance": 0.01
   },
   "road": {
@@ -3873,97 +4565,7 @@
         "drop_chance_per_kill": 0.005365
       }
     },
-    "by_species": {
-      "goblin": {
-        "name": "Goblin Ear",
-        "rarity": "common"
-      },
-      "slime": {
-        "name": "Slime Jelly",
-        "rarity": "common"
-      },
-      "spider": {
-        "name": "Spider Silk",
-        "rarity": "common"
-      },
-      "wolf": {
-        "name": "Wolf Fang",
-        "rarity": "uncommon"
-      },
-      "orc": {
-        "name": "Orc Tusk",
-        "rarity": "uncommon"
-      },
-      "troll": {
-        "name": "Troll Hide",
-        "rarity": "uncommon"
-      },
-      "elf": {
-        "name": "Elf Dust",
-        "rarity": "uncommon"
-      },
-      "golem": {
-        "name": "Golem Shard",
-        "rarity": "rare"
-      },
-      "kobold": {
-        "name": "Kobold Candle",
-        "rarity": "common"
-      },
-      "skeleton": {
-        "name": "Skeleton Bone",
-        "rarity": "common"
-      },
-      "human": {
-        "name": "Militia Badge",
-        "rarity": "common"
-      },
-      "lizardman": {
-        "name": "Lizardman Scale",
-        "rarity": "common"
-      },
-      "mummy": {
-        "name": "Mummy Bandage",
-        "rarity": "uncommon"
-      },
-      "treant": {
-        "name": "Treant Bark",
-        "rarity": "uncommon"
-      },
-      "giant": {
-        "name": "Giant Knuckle",
-        "rarity": "uncommon"
-      },
-      "dryad": {
-        "name": "Dryad Blossom",
-        "rarity": "uncommon"
-      },
-      "ogre": {
-        "name": "Ogre Tooth",
-        "rarity": "uncommon"
-      },
-      "demon": {
-        "name": "Demon Horn",
-        "rarity": "uncommon"
-      },
-      "minotaur": {
-        "name": "Minotaur Horn",
-        "rarity": "rare"
-      },
-      "vampire": {
-        "name": "Vampire Fang",
-        "rarity": "rare"
-      },
-      "dragon": {
-        "name": "Dragon Scale",
-        "rarity": "rare"
-      },
-      "werewolf": {
-        "name": "Werewolf Claw",
-        "rarity": "rare"
-      }
-    },
-    "note": "RO-style mob junk: a fourth drop stream, one flavoured item per species, sold to the Settlement Counterhand for gold. Each rarity's drop_chance_per_kill is set to junk_per_kill / sell_gold, so a kill of any species has the same expected gold (the F3 junk line per kill) and the expected gold per kill is flat whatever the species mix, so the F3 junk line holds - common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
+    "note": "RO-style mob junk: a fourth drop stream, sold to the Settlement Counterhand for gold. The ITEM is per variant, not per race - `mob.variant_drops` owns which variant pays which item at which rarity - and this block owns only the mechanics the rarities are: each rarity's drop_chance_per_kill is set to junk_per_kill / sell_gold, so a kill of any variant has the same expected gold (the F3 junk line per kill) whatever the species or variant mix, and a variant moving between rarities cannot move gold/kill. A variant's rarity therefore buys drop frequency, not income: common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat - which is also the bag-pressure trade a variant picks. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
   },
   "aoe": {
     "per_target_pct": 60,
@@ -4182,14 +4784,14 @@
     },
     "no_death": "the player cannot be killed by the opening: zone-1 mobs take minutes to kill a level-1 character, and Push returns them to camp at full HP"
   },
-  "doc_prose_lines_max": 1291,
+  "doc_prose_lines_max": 1266,
   "doc_prose": {
     "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
     "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",
     "lines_max": 1298,
-    "lines_now": 1298,
+    "lines_now": 1269,
     "gate": "L9 fails when the count rises above lines_max. Lower the cap as lines are fixed.",
-    "exempt": "harness/todo.md, harness/HARNESS.md, and any line marked lint:allow",
+    "exempt": "todo.md, and any line marked lint:allow",
     "baseline_note": "Baseline measured on 2026-10-04 with every doc present. skill-pool.md was restored from git mid-pass and its prose legitimately raised the count from 1370 to 1390, which is the gate working: the cap may only fall, and every fix must lower it here."
   }
 }

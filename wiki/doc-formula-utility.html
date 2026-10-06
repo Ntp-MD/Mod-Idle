@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -88,6 +88,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="#h-11-weight">11. Weight</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -108,8 +109,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html" aria-current="page">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -129,6 +128,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -141,8 +141,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Formulas — Utility</h1>
-<dl class="kv"><dt>file</dt><dd><code>formula-utility.md</code> · 124 lines · 1,908 words · written 2026-10-06T01:07:52Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a></dd><dt>imported by</dt><dd><a href="doc-formula.html">formula.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a> · <a href="doc-formula.html">formula.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-world.html">world.md</a></dd><dt>generated blocks</dt><dd><code>weapon-cap</code> <span class="tag gen">tools/town.ts</span> · <code>hit-chance</code> <span class="tag gen">tools/town.ts</span> · <code>weight-tax</code> <span class="tag gen">tools/town.ts</span></dd><dt>raw</dt><dd><a href="../formula-utility.md">formula-utility.md</a></dd></dl>
-<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
+<dl class="kv"><dt>file</dt><dd><code>formula-utility.md</code> · 124 lines · 1,908 words · written 2026-10-06T10:49:45Z</dd><dt>category</dt><dd>Character &amp; stats</dd><dt>imports</dt><dd><a href="doc-core-stats.html">core-stats.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a></dd><dt>imported by</dt><dd><a href="doc-formula.html">formula.md</a> · <a href="doc-mob-roster.html">mob-roster.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a> · <a href="doc-formula.html">formula.md</a> · <a href="doc-glossary.html">glossary.md</a> · <a href="doc-world.html">world.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../formula-utility.md">formula-utility.md</a></dd></dl>
+
 <h2 id="h-formulas-utility">Formulas — Utility</h2>
 <p>import core-stats.md import mod-pool.md import item-base.md import equipment-weapon.md</p>
 <p>Symbols: <code>x</code> = value from build · <code>x_c</code> = value from Core stat · <code>x_f</code> = value from Mod Flat · <code>x_p</code> = value from Mod %</p>
@@ -173,7 +173,7 @@ hit_chance = accuracy / (accuracy + evasion)</pre>
 <ul><li><code>K_LCK_DROP</code> = 0.01 · Lck 433 gives 5.3x.</li><li><strong><code>drop_rate</code> is a multiplier, not a probability</strong> — Base drop chance is set at <strong>8% per kill</strong> (loot.md section 2) → no Lck at level 100 gives 24.8% · Lck 535 gives 50.8%.</li></ul>
 <p>  This number is tied to craft currency prices and boss skill chances (loot.md · crafting.md · economy.md all closed).</p>
 <ul><li><code>mastery_collection</code> = number of weapon types with Mastery ≥ 10 → <strong>+1% per type, max +11%</strong> (equipment-weapon.md) · does not touch DPS at all, so it moves only item income, not power.</li><li>Lck affects drops, so Lck must not become the stat that is good at everything and outshines the rest — Lck gives crit, perfect dodge, and drops all three, so every K must stay low.</li></ul>
-<p>  From the DPS table in section 0: moving 2 items from Str to Lck at the same Agi (Str 8 / Agi 4 → Str 6 / Agi 4 / Lck 2) drops DPS from 6,877 to <strong>6,231 (−9.4%)</strong> in exchange for crit 10.5% → 13.0% — at the retired 816 ceiling the same move cost 22% DPS. The ceiling drop made Lck roughly half as expensive, so the guard this rule was written to set up is held by the G8 ×2.11 junk-line bound (<strong>X7</strong>) instead of by the DPS penalty alone.</p>
+<p>  From the DPS table in section 0: moving 2 items from Str to Lck at the same Agi (Str 8 / Agi 4 → Str 6 / Agi 4 / Lck 2) drops DPS from 6,877 to <strong>6,231 (−9.4%)</strong> in exchange for crit 10.5% → 13.0% — at the retired 816 ceiling the same move cost 22% DPS. The ceiling drop made Lck roughly half as expensive, so the guard this rule was written to set up is held by the G8 ×3.15 junk-line bound (<strong>X7</strong>) instead of by the DPS penalty alone.</p>
 <h2 id="h-11-weight">11. Weight</h2>
 <pre class="code">weight_capacity = weight_base + str * K_STR_WEIGHT
 weight_used     = sum of 12 items (weight table in mod-pool.md) + carried potions × 2 each (condensed × 12) · farm.md

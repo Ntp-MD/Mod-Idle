@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -93,6 +93,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="#h-display">Display</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -113,8 +114,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -134,6 +133,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -146,8 +146,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Weapon types</h1>
-<dl class="kv"><dt>file</dt><dd><code>equipment-weapon.md</code> · 135 lines · 2,047 words · written 2026-10-06T01:07:52Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd>—</dd><dt>imported by</dt><dd><a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a> · <a href="doc-formula-utility.html">formula-utility.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-character-sheet.html">character-sheet.md</a> · <a href="doc-item-base.html">item-base.md</a></dd><dt>generated blocks</dt><dd><code>size-ladder</code> <span class="tag gen">tools/town.ts</span> · <code>weapon-frames</code> <span class="tag gen">tools/town.ts</span></dd><dt>raw</dt><dd><a href="../equipment-weapon.md">equipment-weapon.md</a></dd></dl>
-<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
+<dl class="kv"><dt>file</dt><dd><code>equipment-weapon.md</code> · 135 lines · 2,051 words · written 2026-10-06T10:49:45Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd>—</dd><dt>imported by</dt><dd><a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a> · <a href="doc-formula-utility.html">formula-utility.md</a></dd><dt>quoted by</dt><dd><a href="doc-DECISIONS.html">DECISIONS.md</a> · <a href="doc-character-sheet.html">character-sheet.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-todo.html">todo.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../equipment-weapon.md">equipment-weapon.md</a></dd></dl>
+
 <h2 id="h-weapon-types">Weapon types</h2>
 <p>Weapons have <strong>11 types</strong> · concept.md originally stated 10 types because it counted two-handed as one type and had no mace · <strong><code>rod</code> is removed</strong>, so the magic main hand is wand and staff and the off hand carries the Book. The <code>weapon_aspd</code> / <code>weapon_mult</code> numbers are the same set calculated in formula.md sections 1 and 7</p>
 <table><thead><tr><th>Weapon</th><th>Hands</th><th>Skill group</th><th>Damage type</th><th>weapon_aspd (Base hits/sec)</th><th>weapon_mult</th><th>dual-wield</th><th>weight</th></tr></thead><tbody><tr><td>one-handed sword</td><td>Single</td><td>melee</td><td>physical</td><td>1.2</td><td>1.00</td><td>Yes</td><td>35</td></tr><tr><td>one-handed axe</td><td>Single</td><td>melee</td><td>physical</td><td>1.2</td><td>1.00</td><td>Yes</td><td>40</td></tr><tr><td>dagger</td><td>Single</td><td>melee</td><td>physical</td><td>1.5</td><td>0.80</td><td>Yes</td><td>25</td></tr><tr><td>mace</td><td>Single</td><td>melee</td><td>physical</td><td>1.0</td><td>1.20</td><td>No</td><td>45</td></tr><tr><td>wand</td><td>Single</td><td>magic</td><td>magic</td><td>1.0</td><td>1.20</td><td>No</td><td>25</td></tr><tr><td>staff</td><td>Two</td><td>magic</td><td>magic</td><td>0.85</td><td>1.41</td><td>—</td><td>60</td></tr><tr><td>spear</td><td>Two</td><td>melee</td><td>physical</td><td>0.85</td><td>1.41</td><td>—</td><td>70</td></tr><tr><td>two-handed sword</td><td>Two</td><td>melee</td><td>physical</td><td>0.7</td><td>1.71</td><td>—</td><td>75</td></tr><tr><td>two-handed axe</td><td>Two</td><td>melee</td><td>physical</td><td>0.7</td><td>1.71</td><td>—</td><td>85</td></tr><tr><td>bow</td><td>Two (range)</td><td>ranged</td><td>physical</td><td>1.1</td><td>1.09</td><td>—</td><td>50</td></tr><tr><td>crossbow</td><td>Two (range)</td><td>ranged</td><td>physical</td><td>1.1</td><td>1.09</td><td>—</td><td>60</td></tr></tbody></table>
@@ -172,14 +172,14 @@ mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20</pre>
 <table><thead><tr><th>Layer</th><th>Effect</th><th>Maximum</th></tr></thead><tbody><tr><td><strong>While held</strong> (that weapon type)</td><td>Held weapon weight <strong>-1% per level</strong> · And skills used with this weapon deal <strong>+0.5% per level from L5</strong></td><td>-20% weight · +8% skill damage</td></tr><tr><td><strong>Account-wide</strong></td><td>Every weapon type with Mastery ≥ 10 → <strong>+1% of drop_rate</strong>, summed across types</td><td>+11% (11 types)</td></tr></tbody></table>
 <p><strong>Why Mastery grants no +damage</strong>: all weapon types are already tuned to equal DPS (<code>weapon_mult = 1.2 / weapon_aspd</code> · proven equal at equal stats by <strong>X14</strong>). If Mastery granted damage, a single weapon type would be &quot;better&quot; permanently, and the reason Mastery exists (to encourage weapon swapping) would die immediately · Both bonus layers are therefore in the dimensions of <em>weight</em> and <em>drop rate</em>, which do not shift any number in formula.md section 0</p>
 <h3 id="h-timeline-for-the-whole-account-measured-at-level-90-using-one-weapon-continuously">Timeline for the whole account (measured at level 90 · using one weapon continuously)</h3>
-<pre class="code">11 types to L10  = 12.4 hours  → at this point +11% drop_rate permanently
-11 types to L20  = 55 hours    → this is true endgame, not reached in the first week</pre>
-<ul><li>The hours come straight from the kill table above ×11, so lower zones simply take longer because the band fields fewer kills — the track is now read entirely off the kill rate, not attack speed · Therefore Mastery is a &quot;parallel track&quot; that walks early game then accelerates as the kill rate climbs</li><li><strong>AFK earns full Mastery</strong> because it counts purely from kills, unrelated to boss or Item quality · It is the only system in the game that progresses fully while closed — intentionally, so low-playtime players have their own progress track</li></ul>
+<pre class="code">11 types to L10  = 124,000 Mastery XP  → at this point +11% drop_rate permanently
+11 types to L20  = 550,000 Mastery XP → this is the long tail, and nothing rushes it</pre>
+<ul><li>The XP comes straight from the kill table above ×11, so a lower band simply pays it slower because the band fields fewer kills — the track is now read entirely off the kill rate, not attack speed · Therefore Mastery is a &quot;parallel track&quot; that walks early game then accelerates as the kill rate climbs</li><li><strong>AFK earns full Mastery</strong> because it counts purely from kills, unrelated to boss or Item quality · It is the only system in the game that progresses fully while closed — intentionally, so low-playtime players have their own progress track</li></ul>
 <h3 id="h-measured-side-effects-mastery-l20-on-weight-tax">Measured side effects (Mastery L20 on weight tax)</h3>
 <p>No table here: the set weights and their taxes are printed once, from <code>tools/data/bases.json</code>, in the generated block in <code><a href="doc-formula-utility.html">formula-utility.md</a></code> section 11 (<code>node tools/bases.ts --blocks</code>). Mastery acts on the <strong>held weapon</strong> only — it discounts that weapon's weight by up to 20% — and the weight it discounts is the <strong>weight</strong> column above, per type (B13), so the size of the saving scales with the type you are holding and this file states the number exactly once.</p>
-<ul><li>Mastery <strong>is not a shortcut past Str</strong> — an armored build without Str still hits the tax Cap; the discount applies to one weapon line out of eleven</li><li>Drop effect: no-Lck players get 418 → 464 pieces/hour (+11%) · Full Lck 878 → 975/hour — Mastery adds <em>quantity</em> the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md</li></ul>
+<ul><li>Mastery <strong>is not a shortcut past Str</strong> — an armored build without Str still hits the tax Cap; the discount applies to one weapon line out of eleven</li><li>Drop effect: no-Lck players get 82 → 91 pieces/hour (+11%) · Full Lck 252 → 280/hour — Mastery adds <em>quantity</em> the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md</li></ul>
 <h2 id="h-display">Display</h2>
-<ul><li><strong>Mastery on the character sheet — settled</strong>: it shows on the <strong>weapon panel</strong>, not the main panel, as <code>Mastery &lt;lvl&gt;/20 · weight −&lt;pct&gt;</code> (e.g. <code>Mastery 14/20 · weight -14%</code>), because Mastery is a per-weapon side track and is not a stat used in build calculation. The main panel stays the twelve-item build read; weapon Mastery is a panel-local line. (Landed in <code><a href="doc-character-sheet.html">character-sheet.md</a></code> Display Rules.)</li></ul>
+<ul><li><strong>Mastery on the character sheet — settled</strong>: it shows on the <strong>weapon panel</strong>, not the main panel, as <code>Mastery &lt;lvl&gt;/20 · weight −&lt;pct&gt;</code> (e.g. <code>Mastery 14/20 · weight -14%</code>), because Mastery is a per-weapon side track and is not a stat used in build calculation. The main panel stays the thirteen-item build read; weapon Mastery is a panel-local line. (Landed in <code><a href="doc-character-sheet.html">character-sheet.md</a></code> Display Rules.)</li></ul>
 <blockquote><p><strong>Closes the original question in concept.md</strong>: &quot;Mastery has no formula yet — what is the per-level bonus, and will all 11 weapon types be equally worthwhile?&quot; → Answered: bonus = weight + drop_rate and skill damage only for the held weapon · All types are equally worthwhile because DPS is never touched</p></blockquote>
 <nav class="pager"><a href="doc-equipment-slot-weapon.html">← equipment-slot-weapon.md</a><a href="index.html">Items &amp; mods</a><span></span></nav>
 

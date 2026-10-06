@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -89,6 +89,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="#h-notes-remaining-gaps">Notes / Remaining Gaps</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -109,8 +110,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -130,6 +129,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -142,7 +142,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Equipment Slots</h1>
-<dl class="kv"><dt>file</dt><dd><code>equipment-slot.md</code> · 69 lines · 835 words · written 2026-10-05T15:28:18Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a> · <a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a> · <a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-elements.html">elements.md</a> · <a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a> · <a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a> · <a href="doc-formula-defense.html">formula-defense.md</a> · <a href="doc-formula-offense.html">formula-offense.md</a> · <a href="doc-formula.html">formula.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-item-list.html">item-list.md</a> · <a href="doc-loot.html">loot.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-concept.html">concept.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-glossary.html">glossary.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../equipment-slot.md">equipment-slot.md</a></dd></dl>
+<dl class="kv"><dt>file</dt><dd><code>equipment-slot.md</code> · 69 lines · 834 words · written 2026-10-06T03:39:28Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a> · <a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a> · <a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-elements.html">elements.md</a> · <a href="doc-equipment-slot-armor.html">equipment-slot-armor.md</a> · <a href="doc-equipment-slot-weapon.html">equipment-slot-weapon.md</a> · <a href="doc-formula-defense.html">formula-defense.md</a> · <a href="doc-formula-offense.html">formula-offense.md</a> · <a href="doc-formula.html">formula.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-item-list.html">item-list.md</a> · <a href="doc-loot.html">loot.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-concept.html">concept.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-glossary.html">glossary.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../equipment-slot.md">equipment-slot.md</a></dd></dl>
 
 <h2 id="h-equipment-slots">Equipment Slots</h2>
 <p>import equipment-slot-pools.md import equipment-slot-armor.md import equipment-slot-weapon.md</p>
@@ -158,7 +158,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h2 id="h-slot-index">Slot index</h2>
 <table><thead><tr><th>Slot</th><th>Pool</th><th>Detail</th></tr></thead><tbody><tr><td>helmet</td><td>Max HP flat · Max HP % / Evasion % · Max Mana % · CDR · res · Life / Mana Regen</td><td>see equipment-slot-armor.md</td></tr><tr><td>chest</td><td>Max HP % · Max HP flat / res · Max Mana % · Life / Mana Regen · CDR · Evasion %</td><td>see equipment-slot-armor.md</td></tr><tr><td>pant</td><td>Evasion flat · Max HP flat · Max HP % / res · Max Mana flat · Life / Mana Regen · CDR</td><td>see equipment-slot-armor.md</td></tr><tr><td>boots</td><td>Evasion flat · Evasion % · Max HP flat · Max Mana flat / CDR · res · Max Energy Shield %</td><td>see equipment-slot-armor.md</td></tr><tr><td>belt</td><td>Max HP flat · Max HP % / CDR · res · Life / Mana Regen · Evasion flat</td><td>see equipment-slot-armor.md</td></tr><tr><td>gloves</td><td>Evasion flat · Max HP % · Alignment / Alignment · Life Regen · Max Mana flat · CDR · Evasion %</td><td>see equipment-slot-armor.md</td></tr><tr><td>ring x2</td><td>res · CDR / Max HP % · Max Mana % · Alignment</td><td>see equipment-slot-armor.md</td></tr><tr><td>amulet</td><td>res · Alignment / Max Mana flat · CDR · Max HP %</td><td>see equipment-slot-armor.md</td></tr><tr><td>cape</td><td>res · Evasion % / CDR · Max Mana % · Max HP flat</td><td>see equipment-slot-armor.md</td></tr><tr><td>main hand</td><td>Offensive only, Blocked: Max HP · Evasion · CDR · res</td><td>see equipment-slot-weapon.md</td></tr><tr><td>off hand</td><td>Shield (HP · Evasion) / Book (Mana · CDR) / Dual-wield (main-hand pool, half Primary weight)</td><td>see equipment-slot-weapon.md</td></tr></tbody></table>
 <p>The per-slot lines above are a summary; <strong>item-base.md is the source</strong> for which Base rolls which pool (<code>node tools/bases.ts --write</code> imports it and the <strong>BS</strong> gates read it back), so a slot disagreement is fixed in that doc, never here.</p>
-<p><strong>Rules:</strong> Weapon items roll only Offensive · other 10 slots roll only Defensive · Stat Mod rolls everywhere · Elemental resistance is always Defensive · full rules + coverage see equipment-slot-weapon.md</p>
+<p><strong>Rules:</strong> Weapon items roll only Offensive · other slots roll only Defensive · Stat Mod rolls everywhere · Elemental resistance is always Defensive · full rules + coverage see equipment-slot-weapon.md</p>
 <p>Coverage: Str/physical + Int/magic → main hand + Core stat everywhere · Vit/tank → chest · pant · belt · Agi/Evasion → boots · gloves · cape · helmet · Crit → main hand + Lck everywhere · Wis/CDR → amulet · cape · ring · belt · boots · Dex/accuracy → main hand + Dex everywhere · Element → main hand damage + Defensive res · Mana → amulet · boots · cape.</p>
 <h2 id="h-notes-remaining-gaps">Notes / Remaining Gaps</h2>
 <ul><li><strong>Defensive items have no Vit % / Vit Flat in-pool</strong> — tank players rely on Core stat Vit alone. If tank feels too heavy, add it back to the pool</li><li><strong>The Evasion Cap is proven, not asserted</strong> — X20 checks it against the accuracy floor and ceiling lineages and <strong>X11</strong> refuses a Cap that no build can reach; the reach path is the Dex rating plus Agi points, so half a set is never enough on its own</li><li><strong>Flat-line weight shifts by quality tier</strong>: 0.5 (low) · 0.4 (mid) · 0.25 (high) — because their marginal value falls from +2.1% to +1.0% (Max HP) while % lines stay flat · measured: Flat lines per high-zone drop fall from 0.28 to 0.15 (-46%) and total keep-rate barely moves (1.01% → 1.02%) → crafting currency prices in crafting.md stay valid without edits</li></ul>

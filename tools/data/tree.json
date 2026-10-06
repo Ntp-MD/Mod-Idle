@@ -1,9 +1,538 @@
 {
   "meta": {
-    "note": "The game has no passive skill tree. It was cleared because the fundamentals were still moving: 82 of its 100 points bought rules that granted no numbers, so every point of DPS sat in 18 keystones and the tree was a keystone picker with connective tissue rather than a node graph. Kept as an empty shell so the mob_HP fold point and the cage survive for whatever replaces it. Nothing here grants power, and no document may quote a tree multiplier while this file is empty.",
-    "node_columns": ["Tier", "Node", "Changed rule", "Enables"]
+    "note": "The passive tree. SHAPE: three branches - impact (offence), control (defence), stream (sustain and Core stats) - 21 nodes each, three ranks per node, one point per rank, so the tree holds 63 nodes and 189 ranks and treePointsAt(level_cap) spends it exactly: a level banks one point and one point buys one rank. PATHING: a chain per branch - node k+1 needs node k owned; no hub, no limbs, and NO KEYSTONES (the removed tree put all its power in 18 of them; here every node pays a number). VALUES: a node grants one real line from mods.json as a fraction of that line's own maximum - a shallow node's rank 3 is a tenth of the line's max, a deep node's is a fifth, and the ranks below step down - so a fully bought tree is worth about two thirds of a gear set (63 nodes, deep ones at twice a shallow one) and a deep node of the same line is always the stronger buy. The scale is a stated rule, not a measured one: the mob_HP fold is deliberately open (owner ruling), so nothing here is balanced against the mob price yet.",
+    "node_columns": [
+      "Node",
+      "Line",
+      "Rank 1",
+      "Rank 2",
+      "Rank 3",
+      "Needs"
+    ]
   },
-  "pending_refs": [],
-  "branches": [],
-  "keystones": []
+  "point_cost_per_rank": 1,
+  "rank_tiers": {
+    "shallow": [
+      0.03333333333333333,
+      0.06666666666666667,
+      0.1
+    ],
+    "deep": [
+      0.06666666666666667,
+      0.13333333333333333,
+      0.2
+    ]
+  },
+  "branches": {
+    "impact": [
+      {
+        "line": "physical_power_flat",
+        "values": [
+          4,
+          8,
+          12
+        ]
+      },
+      {
+        "line": "physical_power",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "accuracy",
+        "values": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "line": "attack_speed",
+        "values": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "line": "critical_chance",
+        "values": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "line": "critical_damage",
+        "values": [
+          6,
+          12,
+          18
+        ]
+      },
+      {
+        "line": "armour_pen",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "bleed_chance",
+        "values": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "line": "stun_chance",
+        "values": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "line": "magic_power_flat",
+        "values": [
+          4,
+          8,
+          12
+        ]
+      },
+      {
+        "line": "magic_power",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "elemental_power_flat",
+        "values": [
+          3,
+          6,
+          10
+        ]
+      },
+      {
+        "line": "elemental_power",
+        "values": [
+          1,
+          1,
+          2
+        ]
+      },
+      {
+        "line": "elemental_alignment",
+        "values": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "line": "physical_power_flat",
+        "values": [
+          8,
+          16,
+          24
+        ]
+      },
+      {
+        "line": "physical_power",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "critical_chance",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "critical_damage",
+        "values": [
+          12,
+          24,
+          36
+        ]
+      },
+      {
+        "line": "magic_power",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "elemental_power",
+        "values": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "line": "armour_pen",
+        "values": [
+          1,
+          1,
+          2
+        ]
+      }
+    ],
+    "control": [
+      {
+        "line": "armour_flat",
+        "values": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "line": "armour_pct",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "evasion_flat",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "evasion_pct",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "block_chance",
+        "values": [
+          3,
+          5,
+          8
+        ]
+      },
+      {
+        "line": "elemental_resistance",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "all_resistance_pct",
+        "values": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "line": "status_resistance_pct",
+        "values": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "line": "max_hp_flat",
+        "values": [
+          10,
+          20,
+          30
+        ]
+      },
+      {
+        "line": "max_hp",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "energy_shield_flat",
+        "values": [
+          3,
+          6,
+          9
+        ]
+      },
+      {
+        "line": "max_energy_shield_pct",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "life_regen_flat",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "cooldown_reduction",
+        "values": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "line": "armour_flat",
+        "values": [
+          4,
+          8,
+          12
+        ]
+      },
+      {
+        "line": "evasion_flat",
+        "values": [
+          3,
+          6,
+          9
+        ]
+      },
+      {
+        "line": "max_hp_flat",
+        "values": [
+          20,
+          40,
+          60
+        ]
+      },
+      {
+        "line": "energy_shield_flat",
+        "values": [
+          6,
+          12,
+          18
+        ]
+      },
+      {
+        "line": "perfect_dodge_pct",
+        "values": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "line": "all_resistance_pct",
+        "values": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "line": "max_hp",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      }
+    ],
+    "stream": [
+      {
+        "line": "max_mana_flat",
+        "values": [
+          7,
+          14,
+          21
+        ]
+      },
+      {
+        "line": "mana_regen_flat",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "mana_regen_pct",
+        "values": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "line": "max_mana",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "energy_shield_regen",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "life_regen_pct",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "all_stat_flat",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "all_stat_flat",
+        "values": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "line": "max_mana_flat",
+        "values": [
+          7,
+          14,
+          21
+        ]
+      },
+      {
+        "line": "mana_regen_flat",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "mana_regen_pct",
+        "values": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "line": "max_mana",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "energy_shield_regen",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "life_regen_pct",
+        "values": [
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "line": "all_stat_flat",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "all_stat_flat",
+        "values": [
+          3,
+          5,
+          8
+        ]
+      },
+      {
+        "line": "max_mana",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "mana_regen_pct",
+        "values": [
+          3,
+          5,
+          8
+        ]
+      },
+      {
+        "line": "life_regen_pct",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "all_stat_flat",
+        "values": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "line": "all_stat_flat",
+        "values": [
+          3,
+          5,
+          8
+        ]
+      }
+    ]
+  }
 }

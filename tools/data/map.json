@@ -1,284 +1,123 @@
 {
   "view": {
-    "w": 1200,
-    "h": 720
+    "w": 2000,
+    "h": 1200
   },
-  "note": "Presentation only (X33 · X47). Node and link ids are the simulator's; the x/y coordinates are the illustrator's and nothing under engine/ or game/src/ may read this file. A path is derived from the two node positions by tools/map.ts, and a terrain's weights are read from engine.json `road.terrain` — neither is copied here. `anchor` names a link id (`link:<zoneA>-<zoneB>`) or a node id.",
+  "note": "Presentation only (X33 · X47). Node and link ids are the simulator's; the x/y coordinates are the illustrator's and nothing under engine/ or game/src/ may read this file. A node's x/y is the CENTROID of its three-hex pod: `hex.size` is the hex circumradius, and the writer lays the pod out from the centroid. A path is derived from the two node positions by tools/map.ts, and a terrain's weights are read from engine.json `road.terrain` — neither is copied here. `anchor` names a link id (`link:<zoneA>-<zoneB>`) or a node id.",
+  "grid": {
+    "cols": 5,
+    "rows": 5,
+    "note": "A 5x5 presentation grid drawn over the view at low opacity. It is a framing device only - the simulation reads node and link ids, never a cell (X33)."
+  },
+  "hex": {
+    "size": 34,
+    "note": "Pointy-top hex lattice. A settlement is a cluster of four hexes: its own hex plus one hex per sub-zone, fanned outward from the sheet's centre so the cluster points the way the map reads. The layout spirals outward from that centre: the starting capital sits in the middle and the level bands climb toward the rim, so distance from the middle IS difficulty. Hexes further out take the tone of the nearest settlement."
+  },
+  "field": {
+    "tone": "#c2c69c",
+    "note": "The neutral tone a hex far from any settlement takes. The playable shape is the hex field; the hand-drawn terrain behind it is the off-field grey and the paper."
+  },
+  "tones": [
+    { "zone": 1, "tone": "#cdcb8f" },
+    { "zone": 2, "tone": "#a9bb84" },
+    { "zone": 3, "tone": "#bfae74" },
+    { "zone": 4, "tone": "#b0a795" },
+    { "zone": 5, "tone": "#a8ab86" },
+    { "zone": 6, "tone": "#b9bcc0" },
+    { "zone": 7, "tone": "#a89a92" },
+    { "zone": 8, "tone": "#b6ae9c" },
+    { "zone": 9, "tone": "#cdd6dd" },
+    { "zone": 10, "tone": "#c6d2da" },
+    { "zone": 11, "tone": "#d8c79a" },
+    { "zone": 12, "tone": "#c9bda4" },
+    { "zone": 13, "tone": "#d1a877" },
+    { "zone": 14, "tone": "#b9a6a0" },
+    { "zone": 15, "tone": "#cbb79c" },
+    { "zone": 16, "tone": "#bfae8e" },
+    { "zone": 17, "tone": "#bfc4b8" },
+    { "zone": 18, "tone": "#ded9cc" }
+  ],
+  "region": {
+    "note": "A named span of the sheet, printed as letterspaced serif caps across the hexes it covers. Every zone belongs to exactly one region (M12)."
+  },
+  "regions": [
+    { "name": "Eastgate Vale", "zones": [1, 2], "at": [560, 400] },
+    { "name": "Ashfall Wood", "zones": [3, 4], "at": [1080, 660] },
+    { "name": "Wolfmoor", "zones": [5], "at": [1470, 690] },
+    { "name": "Highspire Peaks", "zones": [6, 7, 8], "at": [700, 1010] },
+    { "name": "Frosthold Snows", "zones": [9, 10], "at": [860, 170] },
+    { "name": "Greyfen Waste", "zones": [11, 12], "at": [1880, 590] },
+    { "name": "Emberhold Ruins", "zones": [13, 14], "at": [1250, 1080] },
+    { "name": "Nettlecrag Deeps", "zones": [15, 16], "at": [230, 300] },
+    { "name": "Wyrmback Shore", "zones": [17], "at": [1340, 130] },
+    { "name": "The Pale Sanctum", "zones": [18], "at": [1870, 790] }
+  ],
+  "river": {
+    "note": "One continuous band, hand-shaped, crossing the sheet from the top edge to the bottom edge on the diagonal that separates the two halves. Presentation only.",
+    "width": 15,
+    "points": [[460, 1000], [460, 880], [496, 762], [600, 682], [720, 612], [850, 556], [990, 520], [1130, 500], [1270, 490], [1420, 478], [1610, 468]]
+  },
   "nodes": [
-    {
-      "id": "eastgate",
-      "x": 110,
-      "y": 520
-    },
-    {
-      "id": "millbrook",
-      "x": 240,
-      "y": 430
-    },
-    {
-      "id": "ashfall",
-      "x": 370,
-      "y": 350
-    },
-    {
-      "id": "ironrow",
-      "x": 500,
-      "y": 400
-    },
-    {
-      "id": "wolf_cross",
-      "x": 610,
-      "y": 310
-    },
-    {
-      "id": "highspire",
-      "x": 730,
-      "y": 380
-    },
-    {
-      "id": "bonegate",
-      "x": 850,
-      "y": 300
-    },
-    {
-      "id": "frosthold",
-      "x": 970,
-      "y": 200
-    },
-    {
-      "id": "vermolch",
-      "x": 1090,
-      "y": 120
-    },
-    {
-      "id": "thornwake",
-      "x": 1120,
-      "y": 240
-    },
-    {
-      "id": "greyfen",
-      "x": 1120,
-      "y": 360
-    },
-    {
-      "id": "saltmarrow",
-      "x": 1120,
-      "y": 480
-    },
-    {
-      "id": "emberhold",
-      "x": 1120,
-      "y": 600
-    },
-    {
-      "id": "duskmoor",
-      "x": 990,
-      "y": 640
-    },
-    {
-      "id": "nettlecrag",
-      "x": 860,
-      "y": 660
-    },
-    {
-      "id": "blackwater_reach",
-      "x": 730,
-      "y": 650
-    },
-    {
-      "id": "wyrmback",
-      "x": 600,
-      "y": 670
-    },
-    {
-      "id": "the_pale_spire",
-      "x": 450,
-      "y": 690
-    }
+    { "id": "eastgate", "x": 1000, "y": 600 },
+    { "id": "millbrook", "x": 750, "y": 565 },
+    { "id": "ashfall", "x": 901, "y": 456 },
+    { "id": "ironrow", "x": 1185, "y": 461 },
+    { "id": "wolf_cross", "x": 1353, "y": 600 },
+    { "id": "highspire", "x": 1221, "y": 766 },
+    { "id": "bonegate", "x": 858, "y": 806 },
+    { "id": "frosthold", "x": 568, "y": 661 },
+    { "id": "vermolch", "x": 634, "y": 438 },
+    { "id": "thornwake", "x": 1044, "y": 333 },
+    { "id": "greyfen", "x": 1468, "y": 458 },
+    { "id": "saltmarrow", "x": 1519, "y": 727 },
+    { "id": "emberhold", "x": 1105, "y": 913 },
+    { "id": "duskmoor", "x": 551, "y": 836 },
+    { "id": "nettlecrag", "x": 344, "y": 539 },
+    { "id": "blackwater_reach", "x": 705, "y": 267 },
+    { "id": "wyrmback", "x": 1364, "y": 268 },
+    { "id": "the_pale_spire", "x": 1757, "y": 565 }
   ],
   "links": [
-    {
-      "id": "1-2",
-      "a": "eastgate",
-      "b": "millbrook",
-      "terrain": "forest"
-    },
-    {
-      "id": "2-3",
-      "a": "millbrook",
-      "b": "ashfall",
-      "terrain": "road"
-    },
-    {
-      "id": "3-4",
-      "a": "ashfall",
-      "b": "ironrow",
-      "terrain": "river"
-    },
-    {
-      "id": "4-5",
-      "a": "ironrow",
-      "b": "wolf_cross",
-      "terrain": "forest"
-    },
-    {
-      "id": "5-6",
-      "a": "wolf_cross",
-      "b": "highspire",
-      "terrain": "road"
-    },
-    {
-      "id": "6-7",
-      "a": "highspire",
-      "b": "bonegate",
-      "terrain": "river"
-    },
-    {
-      "id": "7-8",
-      "a": "bonegate",
-      "b": "frosthold",
-      "terrain": "forest"
-    },
-    {
-      "id": "8-9",
-      "a": "frosthold",
-      "b": "vermolch",
-      "terrain": "road"
-    },
-    {
-      "id": "9-10",
-      "a": "vermolch",
-      "b": "thornwake",
-      "terrain": "river"
-    },
-    {
-      "id": "10-11",
-      "a": "thornwake",
-      "b": "greyfen",
-      "terrain": "forest"
-    },
-    {
-      "id": "11-12",
-      "a": "greyfen",
-      "b": "saltmarrow",
-      "terrain": "road"
-    },
-    {
-      "id": "12-13",
-      "a": "saltmarrow",
-      "b": "emberhold",
-      "terrain": "river"
-    },
-    {
-      "id": "13-14",
-      "a": "emberhold",
-      "b": "duskmoor",
-      "terrain": "forest"
-    },
-    {
-      "id": "14-15",
-      "a": "duskmoor",
-      "b": "nettlecrag",
-      "terrain": "road"
-    },
-    {
-      "id": "15-16",
-      "a": "nettlecrag",
-      "b": "blackwater_reach",
-      "terrain": "river"
-    },
-    {
-      "id": "16-17",
-      "a": "blackwater_reach",
-      "b": "wyrmback",
-      "terrain": "forest"
-    },
-    {
-      "id": "17-18",
-      "a": "wyrmback",
-      "b": "the_pale_spire",
-      "terrain": "road"
-    },
-    {
-      "id": "3-5",
-      "a": "ashfall",
-      "b": "wolf_cross",
-      "terrain": "mountain"
-    },
-    {
-      "id": "6-8",
-      "a": "highspire",
-      "b": "frosthold",
-      "terrain": "mountain"
-    },
-    {
-      "id": "10-12",
-      "a": "thornwake",
-      "b": "saltmarrow",
-      "terrain": "mountain"
-    },
-    {
-      "id": "15-17",
-      "a": "nettlecrag",
-      "b": "wyrmback",
-      "terrain": "mountain"
-    }
+    { "id": "1-2", "a": "eastgate", "b": "millbrook", "terrain": "forest" },
+    { "id": "2-3", "a": "millbrook", "b": "ashfall", "terrain": "road" },
+    { "id": "3-4", "a": "ashfall", "b": "ironrow", "terrain": "river" },
+    { "id": "4-5", "a": "ironrow", "b": "wolf_cross", "terrain": "forest" },
+    { "id": "5-6", "a": "wolf_cross", "b": "highspire", "terrain": "road" },
+    { "id": "6-7", "a": "highspire", "b": "bonegate", "terrain": "river" },
+    { "id": "7-8", "a": "bonegate", "b": "frosthold", "terrain": "forest" },
+    { "id": "8-9", "a": "frosthold", "b": "vermolch", "terrain": "road" },
+    { "id": "9-10", "a": "vermolch", "b": "thornwake", "terrain": "river" },
+    { "id": "10-11", "a": "thornwake", "b": "greyfen", "terrain": "forest" },
+    { "id": "11-12", "a": "greyfen", "b": "saltmarrow", "terrain": "road" },
+    { "id": "12-13", "a": "saltmarrow", "b": "emberhold", "terrain": "river" },
+    { "id": "13-14", "a": "emberhold", "b": "duskmoor", "terrain": "forest" },
+    { "id": "14-15", "a": "duskmoor", "b": "nettlecrag", "terrain": "road" },
+    { "id": "15-16", "a": "nettlecrag", "b": "blackwater_reach", "terrain": "river" },
+    { "id": "16-17", "a": "blackwater_reach", "b": "wyrmback", "terrain": "forest" },
+    { "id": "17-18", "a": "wyrmback", "b": "the_pale_spire", "terrain": "road" },
+    { "id": "3-5", "a": "ashfall", "b": "wolf_cross", "terrain": "mountain" },
+    { "id": "6-8", "a": "highspire", "b": "frosthold", "terrain": "mountain" },
+    { "id": "10-12", "a": "thornwake", "b": "saltmarrow", "terrain": "mountain" },
+    { "id": "15-17", "a": "nettlecrag", "b": "wyrmback", "terrain": "mountain" }
   ],
   "terrain": [
-    {
-      "id": "eastgate-marsh",
-      "kind": "river",
-      "anchor": "link:1-2"
-    },
-    {
-      "id": "millbrook-woods",
-      "kind": "forest",
-      "anchor": "link:2-3"
-    },
-    {
-      "id": "kings-road",
-      "kind": "road",
-      "anchor": "link:3-4"
-    },
-    {
-      "id": "ironrow-pass",
-      "kind": "mountain",
-      "anchor": "link:4-5"
-    },
-    {
-      "id": "wolf-moor",
-      "kind": "moor",
-      "anchor": "link:5-6"
-    },
-    {
-      "id": "bonegate-heights",
-      "kind": "mountain",
-      "anchor": "link:6-7"
-    },
-    {
-      "id": "frosthold-woods",
-      "kind": "forest",
-      "anchor": "link:7-8"
-    },
-    {
-      "id": "vermolch-river",
-      "kind": "river",
-      "anchor": "link:8-9"
-    },
-    {
-      "id": "ashfall-slopes",
-      "kind": "mountain",
-      "anchor": "ashfall"
-    },
-    {
-      "id": "highspire-overlook",
-      "kind": "mountain",
-      "anchor": "link:6-8"
-    },
-    {
-      "id": "wolf-cross-ford",
-      "kind": "river",
-      "anchor": "link:5-6"
-    }
+    { "id": "eastgate-marsh", "kind": "river", "anchor": "link:1-2" },
+    { "id": "millbrook-woods", "kind": "forest", "anchor": "link:2-3" },
+    { "id": "kings-road", "kind": "road", "anchor": "link:3-4" },
+    { "id": "ironrow-pass", "kind": "mountain", "anchor": "link:4-5" },
+    { "id": "wolf-moor", "kind": "moor", "anchor": "link:5-6" },
+    { "id": "bonegate-heights", "kind": "mountain", "anchor": "link:6-7" },
+    { "id": "frosthold-woods", "kind": "forest", "anchor": "link:7-8" },
+    { "id": "vermolch-river", "kind": "river", "anchor": "link:8-9" },
+    { "id": "ashfall-slopes", "kind": "mountain", "anchor": "ashfall" },
+    { "id": "highspire-overlook", "kind": "mountain", "anchor": "link:6-8" },
+    { "id": "wolf-cross-ford", "kind": "river", "anchor": "link:5-6" }
+  ],
+  "watermarks": [
+    { "id": "eastgate-castle", "kind": "castle", "anchor": "eastgate", "label": "Eastgate Castle" },
+    { "id": "highspire-keep", "kind": "castle", "anchor": "highspire", "label": "Highspire Keep" },
+    { "id": "pale-spire", "kind": "tower", "anchor": "the_pale_spire", "label": "The Pale Spire" },
+    { "id": "wolf-moor-lake", "kind": "lake", "anchor": "link:5-6", "label": "Wolf Moor" },
+    { "id": "bonegate-ruins", "kind": "ruins", "anchor": "bonegate", "label": "Bonegate Ruins" }
   ]
 }

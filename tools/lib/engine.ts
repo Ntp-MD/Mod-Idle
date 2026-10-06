@@ -35,12 +35,12 @@ const {
   DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap, statWithItems,
   mobEvasion, sizeMult, playerAccuracy, hitVs, hitChance, MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION,
   armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt,
-  typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, sizeById, mobAcc, mobDodge,
-  refAttackerAcc, mobRoster, finalZoneId, winTarget, lckOf, dropChance, killsDerived, r1, r2, fmt,
-  aspdOf, hitsPerSec, weaponMult, physOf, magicOf, dodgeRate, dodgeChance, perfectDodgeChance,
+  typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, mobAcc, mobDodge,
+  refAttackerAcc, mobRoster, mobResOf, speciesResMult, mobResByElementOf, lckOf, dropChance, killsDerived, r1, r2, fmt,
+  aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, dodgeRate, dodgeChance, perfectDodgeChance,
   evasionChance, evasionRating, agilityEvasion,
   critPool, critChanceOf, critDmgOf, maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf,
-  esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext,
+  esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS, treePointsAt,
   encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf, sizeMultOf, applySizeMult,
   stunRecoveryOf, stunStopSec, basicAttackOf,
   xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForMinutes, taskPayout,
@@ -62,22 +62,23 @@ function engineForTown(townEngine: any): any {
   const bands: Record<string, any> = {};
   for (const b of BAND_KEYS) {
     bands[b] = {
-      kills_per_hr: BAND[b].kills_per_hr,
+      kills_per_hr: BAND[b].kills_derived,
       drops_per_hr: BAND[b].drops_per_hr,
       upgrades_per_hr: BAND[b].upgrades_per_hr,
-      band_hours: b === 'high_full_lck' ? 0 : BAND[b].band_hours,
+      band_kills: b === 'high_full_lck' ? 0 : BAND[b].band_kills,
     };
   }
   return Object.assign({}, townEngine, {
     bands,
     gold_per_junk_piece: TS.gold_per_junk_piece,
     round_rate_to_decimals: TS.round_rate_to_decimals,
-    checkpoints_hr: L.timeline_checkpoints_hr,
-    push_hr_levels_91_100: L.push_hr_levels_91_100,
+    checkpoints_kills: eng.CHECKPOINTS_KILLS,
+    budget_kills: (zone: number) => SETTLEMENT_BUDGET_KILLS[zone],
+    push_kills_91_100: eng.PUSH_KILLS_91_100,
     reroll_value_stones_per_hour: STONE.reroll_uses_per_hr,
     reroll_stones_per_cast: C.reroll_value_stones_per_use,
     reroll_casts_per_full_set_polish: C.polish_casts_per_full_set,
-    elite_reroll_tier_stones_per_hr: Math.round(L.bands.high.kills_per_hr_published * L.elite_spawn_chance * L.elite_tier_stones),
+    elite_reroll_tier_stones_per_hr: Math.round(BAND.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones),
     add_mod_stones_per_hr: STONE.add_stones_per_hr,
     ascend_stones_per_piece: C.ascend_add_stones + C.ascend_tier_stones,
     towns_gold_rate_multiplier_bound: LCK_BOUND,
@@ -90,7 +91,6 @@ const GENERIC_RULES: any[] = [
   { file: 'loot.md', label: 'loot.md F5 junk line', re: /\|\s*Reroll value stone\s*\|\s*([\d,]+)\s*\(/, pick: 1, expect: BAND.high.junk_per_hr },
   { file: 'crafting.md', label: 'crafting.md junk/hour → Reroll uses', re: /\((\d+)\/hour → ~(\d+) uses\/hour\)/, pick: [1, 2], expect: [BAND.high.junk_per_hr, STONE.reroll_uses_per_hr] },
   { file: 'crafting.md', label: 'crafting.md tier stones → Refines/hour', re: /\((\d+)\/hour → ~([\d.]+) Refines\/hour\)/, pick: [1, 2], expect: [STONE.tier_stones_per_hr, STONE.refines_per_hr] },
-  { file: 'crafting.md', label: 'crafting.md Refine full-set hours', re: /2 steps = (\d+) casts[^)]*\) ≈ ([\d.]+) hours/, pick: [1, 2], expect: [STONE.refine_casts_full_set, r1(STONE.refine_hours_full_set)] },
   { file: 'formula.md', label: 'formula.md single-stat ceiling', re: /single-stat ceiling \| \*\*([\d,]+)\*\*/, pick: 1, expect: Math.round(CEIL) },
   { file: 'formula.md', label: 'formula.md stat at the level cap, no gear', re: /Level \d+ \(no gear\)[^|]*\|[^|]*every stat = (\d+)/, pick: 1, expect: Math.round(statAt(S.level_cap)) },
   { file: 'formula.md', label: 'formula.md Str 13 physical power', re: /Str 13-item build \| Physical power ([\d,]+)/, pick: 1, expect: Math.round(DERIVED.phys) },
@@ -103,9 +103,9 @@ const GENERIC_RULES: any[] = [
   { file: 'formula.md', label: 'formula.md K_EVASION row', re: /\| K_EVASION \| ([\d.]+) \|/, pick: 1, expect: K.K_EVASION },
   { file: 'core-stats.md', label: 'core-stats.md Evasion K', re: /Dex x K_EVASION` \(([\d.]+)\)/, pick: 1, expect: K.K_EVASION },
   { file: 'core-stats.md', label: 'core-stats.md Armour K and divisor', re: /`Str x K_ARMOUR` \(([\d.]+)\)[\s\S]{0,160}?armour \+ (\d+) × raw_hit/, pick: [1, 2], expect: [K.K_ARMOUR, K.armour_divisor] },
-  { file: 'core-stats.md', label: 'core-stats.md Energy Shield line', re: /`Int x K_INT_ES` \((\d+)\)[\s\S]{0,200}?recharges after (\d+) sec/, pick: [1, 2], expect: [K.K_INT_ES, E.energy_shield.delay_sec] },
+  { file: 'core-stats.md', label: 'core-stats.md Energy Shield line', re: /Energy Shield - second pool ahead of HP[\s\S]{0,400}?after (\d+) sec without a hit/, pick: 1, expect: E.energy_shield.delay_sec },
   { file: 'combat.md', label: 'combat.md ES recharge delay', re: /Energy Shield takes the mitigated damage before HP \(chaos bypasses\) · recharges after (\d+) sec/, pick: 1, expect: E.energy_shield.delay_sec },
-  { file: 'crafting.md', label: 'crafting.md ES recharge delay', re: /energy shield\s+= second pool ahead of HP [\u00b7]+ Int x K_INT_ES [\u00b7]+ chaos bypasses [\u00b7]+ recharges after (\d+) sec/, pick: 1, expect: E.energy_shield.delay_sec },
+  { file: 'crafting.md', label: 'crafting.md ES recharge delay', re: /energy shield\s+= second pool ahead of HP [\u00b7]+ [^\n]*?chaos bypasses [\u00b7]+ recharges after (\d+) sec/, pick: 1, expect: E.energy_shield.delay_sec },
 
 
   { file: 'concept.md', label: 'concept.md zone-9 boss HP', re: /zone 9 boss \(level 90, HP ([\d,]+)\)/, pick: 1, expect: Math.round(E.mob.zones[8].hp[1] * E.mob.sizes.find((s) => s.id === 'boss')!.hp) },
@@ -120,6 +120,17 @@ const GENERIC_RULES: any[] = [
   { file: 'core-stats.md', label: 'core-stats.md res Cap', re: /Cap (\d+) per Element/, pick: 1, expect: E.caps.elem_res },
   { file: 'core-stats.md', label: 'core-stats.md perfect dodge Cap', re: /Perfect dodge - % Cap (\d+)/, pick: 1, expect: E.caps.perfect_dodge },
   { file: 'checks.md', label: 'checks.md F2 L90 drop chance', re: /([\d.]+)% \(L90\)/, pick: 1, expect: BAND.high.drop_chance_pct },
+  // Ungated prose read-backs: the economy / item docs quote engine rates in hand-written lines no
+  // writer owns, so they drifted silently under the F1/F3 re-base and the K_INT_MREGEN retune. These
+  // pin the few that matter back to the engine, so the same drift fails the cage instead of hiding.
+  { file: 'economy.md', label: 'economy.md junk/hr', re: /mob junk\/hour \(high zone, no Lck\)\s+= (\d+)/, pick: 1, expect: BAND.high.junk_per_hr },
+  { file: 'economy.md', label: 'economy.md gold/min', re: /max gold\/hour\s+= (\d+)\s+→ ([\d.]+) gold per minute/, pick: [1, 2], expect: [BAND.high.junk_per_hr, goldPerMinute('high')] },
+  { file: 'item-list.md', label: 'item-list.md reroll use rate', re: /8 per use \(~(\d+)\/hour\)/, pick: 1, expect: rerollValueStonesPerHr('high') },
+  { file: 'formula-defense.md', label: 'formula-defense.md K_INT_MREGEN', re: /K_INT_MREGEN` = \*\*([\d.]+)\*\*/, pick: 1, expect: K.K_INT_MREGEN },
+  { file: 'elements.md', label: 'elements.md K_ELEM', re: /\| K_ELEM \| (\d+) \|/, pick: 1, expect: K.K_ELEM },
+  { file: 'elements.md', label: 'elements.md K_MOB_RES', re: /\| K_MOB_RES \| ([\d.]+) \|/, pick: 1, expect: K.K_MOB_RES },
+  { file: 'core-stats.md', label: 'core-stats.md weight capacity', re: /capacity = weight_base \(1,000\) \+ Str x 2 \(([\d,]+) at 433 Str\)/, pick: 1, expect: Math.round(DERIVED.weight) },
+  { file: 'mod-pool.md', label: 'mod-pool.md weight capacity', re: /1,217 at the level-only 108 Str · ([\d,]+) at the 433 ceiling/, pick: 1, expect: Math.round(DERIVED.weight) },
 ];
 
 function readDoc(file: string): string { return fs.readFileSync(path.join(ROOT, resolveDoc(file)), 'utf8'); }
@@ -135,7 +146,7 @@ function readLootTable(): any[] {
     if (!line) { out.push({ ok: false, label: `loot.md section 2 ${band} row`, detail: 'row not found' }); continue; }
     const cells = line.split('|').map((c) => c.trim());
     const checks: any[][] = [
-      ['kills/hr', cellNum(cells[4]), BAND[band].kills_per_hr],
+      ['kills/hr', cellNum(cells[4]), BAND[band].kills_derived],
       ['drops/hr', cellNum(cells[6]), BAND[band].drops_per_hr],
     ];
     const lckCell = cells[5].match(/(\d+)\s*\(?(?:L\d+)?\)?\s*→\s*×([\d.]+)/) || cells[5].match(/(\d+).*×([\d.]+)/);
@@ -171,12 +182,13 @@ export {
   ROOT, E, S, K, M, LG, L, C, TS, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
   DERIVED, REF, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap,
   statWithItems, mobEvasion, sizeMult, playerAccuracy, hitVs, MEAN_SPECIES_DEX, SPECIES_EVASION, MOB_EVASION_REF,
-  armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt, typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, mobAcc, mobDodge, refAttackerAcc, mobRoster,
+  armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt, typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, mobAcc, mobDodge, refAttackerAcc, mobRoster,
+  mobResOf, speciesResMult, mobResByElementOf,
   engineForTown, runReadBack, GENERIC_RULES, fmt, r1, r2, build, ROAD,
-  aspdOf, hitsPerSec, weaponMult, physOf, magicOf, dodgeRate, dodgeChance, perfectDodgeChance,
+  aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, dodgeRate, dodgeChance, perfectDodgeChance,
   evasionChance, evasionRating, agilityEvasion,
   critPool, critChanceOf, critDmgOf, maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf,
-  esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext,
+  esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS, treePointsAt,
   encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf, sizeMultOf, applySizeMult,
   stunRecoveryOf, stunStopSec, basicAttackOf,
   xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForMinutes, taskPayout, shared,

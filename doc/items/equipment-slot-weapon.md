@@ -48,7 +48,7 @@ import equipment-slot.md
 
 # Offensive / Defensive Rules
 
-**Weapon items roll only Offensive Mods · all other 10 slots roll only Defensive Mods**
+**Weapon items roll only Offensive Mods · all other slots roll only Defensive Mods**
 
 | Group | Members |
 |---|---|

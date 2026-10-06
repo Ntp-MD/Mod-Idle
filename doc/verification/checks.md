@@ -81,16 +81,16 @@ Source: `node tools/check.ts` · stat line = `stat_c = 12 + 1 × (points ÷ 7)` 
 | B5 | **pool ÷ regen** | `4,858 ÷ 121.4` | **40.0 sec** (intent = 40) |
 | B6 | Crit chance (no Flat) | `433×0.05 + 8% Mod` | 29.7% |
 | B6b | Crit chance Cap → overflow | `min(29.7, 100)` | 29.7% chance · overflow 0.0% → crit damage 220% |
-| B7 | Elem res raw | `433×0.05` | 21.7% |
-| B8 | Elem res + 3 Mod items | `21.7 × (1 + 30×3)%` | 41.2 (hard ceiling 75) |
+| B7 | Elem res · no Core stat | `gear only (owner ruling) — no K row feeds it` | 0.0% raw |
+| B8 | Elem res from 3 Mod items | `30×3 (all gear)` | 90.0 (Cap 75) |
 | B9 | Alignment raw | `433×0.05` | 21.7% |
 | B10 | CDR raw | `433×0.03` | 13.0% |
 | B11 | CDR + 4 Mod + BO | `13.0 × (1 + 25×11 + 0)%` | 48.8 (hard ceiling 80) |
 | B12 | Accuracy | `433×1.5×1.25` | 813 |
-| B13 | Weight capacity | `433×2` | 1,867 |
+| B13 | Weight capacity | `1,000 + 433×2` | 1,867 |
 | B14 | Drop multiplier | `1 + 433×0.01` | 5.33x |
-| B15 | Energy Shield pool (Int build) | `433×4` | **1,734** · 17.3% of the same build's 10,029 HP |
-| B16 | ES recharge · full recovery | `433×0.1/sec · after 3 sec without a hit` | 43.3/sec → **40.0 sec** for the whole pool · pool ÷ regen held by **X25** |
+| B15 | Energy Shield pool (gear) | `60 × (1 + 16/100)` | **70** · 0.7% of a caster build's 10,029 HP |
+| B16 | ES regen · full recovery | `3% of the pool per sec · after 3 sec without a hit` | 2.1/sec → **33.3 sec** for the whole pool from the base rate · an `es_regen` skill, Mod or passive amplifies the rate (X25) |
 
 Every row is the single-stat ceiling (433) plus the one Mod slot that can roll that line (mod-pool.md maxima · equipment-slot.md slot rules).
 B5 is the row K_INT_MREGEN was retuned for: 40.0 sec against the 40 sec intent (tolerance ±1 sec).
@@ -108,7 +108,7 @@ B5 is the row K_INT_MREGEN was retuned for: 40.0 sec against the 40 sec intent (
 | C4 | aspd 500 | dagger 1.5 + 25% Mod | 845 ✓ · staff/2h unreachable by intent |
 | C5 | Perfect dodge 21 | ratio: Lck 433 × 0.03 = rate 13.0 ÷ (rate + 57) = 18.6% · the Cap binds first · reached at Lck 506 | **21%** at the Cap · reachable at Lck 506 (under the 433 ceiling) ✓ |
 | C6 | Alignment null · hard ceiling | Dex 433 (21.7) + amulet + gloves (+5 +5) | 31.7 — the build tops out under the Cap  |
-| C7 | Elem res 75 · hard ceiling | Vit 433 + 3 res items | 41.2 — the build tops out under the Cap  |
+| C7 | Elem res 75 · binding Cap | 3 res items at the max roll · gear only, no Core stat | 90.0 — the build reaches past the Cap, so it **binds**  |
 | C8 | CDR 80 · hard ceiling | Wis 433 + 11 CDR items + BO | 48.8 — the build tops out under the Cap  |
 | C9 | Crit (no Cap) | Lck 433 + 8% Mod + buff | 29.7% from stats alone · anything over 100 becomes crit damage (B6b) ✓ |
 | C10 | stun null | Alignment reach 31.7 × 0.3 = 9.5 + the mace's Chance to stun % line | null ✓ via the mace Base Mod, the only source past the Alignment reach  |
@@ -123,23 +123,23 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 
 | id | Must hold | Value |
 |---|---|---|
-| D1 | `mob_HP(L) = typical_gear_DPS(L) x (1 + 0.0034 L)` - the skill list is the only power multiplier that folds into this line (H1) · **there is no passive tree**, so nothing else multiplies here · the curve is anchored at every zone edge and interpolated inside the zone, so every level 1-180 has an HP (**X37**) | L1 120 · L10 629 · L30 1,824 · L60 5,293 · L90 10,709 · L180 **25,741 (highest level a mob can spawn)** · L190 27,704 *(theoretical - the spawn cap is 180)* · zone edges in `world.md` · per-entry numbers in `mob-roster.md` |
+| D1 | `mob_HP(L) = typical_gear_DPS(L) x (1 + 0.0034 L)` - the skill list is the only power multiplier that folds into this line (H1) · the passive tree **exists but is not folded in yet** (owner ruling), so nothing else multiplies here · the curve is anchored at every zone edge and interpolated inside the zone, so every level 1-180 has an HP (**X37**) | L1 120 · L10 629 · L30 1,824 · L60 5,293 · L90 10,709 · L180 **25,741 (highest level a mob can spawn)** · L190 27,704 *(theoretical - the spawn cap is 180)* · zone edges in `world.md` · per-entry numbers in `mob-roster.md` |
 | D2 | `mob_PS = typical_gear_DPS ÷ 27` (**not** `mob_HP ÷ 27`) | L30 61 · L60 163 · L90 304 · L180 **591 (highest a mob can spawn)** · L190 623 *(theoretical)* · elite ×4 · boss ×18 (re-derived by SV6) |
 | D3 | TTK of on-level players | **5.11 sec** at the level-100 anchor — the reference build's own clear time; the retired 1.00 sec was the all-stats-390 character the curve was first priced against |
 | D4 | TTK on-level gear + skill list | `12,144 ÷ (1,775 × 1.34)` = **5.11 sec** — the reference build is the even split (points ÷ 7, the 13 items following the allocation, sword, no tree) · the **focused** build (every point and every item in one stat, `FOCUSED_CEIL`) clears the same mob in **0.22 sec**, so the split is the published row and the focus is what lands on the old pacing |
 | D5 | TTK T1 gear *without* skill (fresh zone entrant) | `12,144 ÷ 1,775` = **6.84 sec** — the reference build's raw clear time; mob_HP is priced for a player who already holds the list |
 | D6 | groups of 5 Push no build at matching level | the generated `survival-group` block in `combat.md` §6 (no build is Pushed at L100) · **single condition is the "max 3 engage at once" rule (world.md · D13)** · `node tools/survival.ts` |
 | D7 | on-level boss (×15 HP / **×18 damage**) at the level cap without heal | printed live in the `survival-boss` block of `combat.md` §6 — every build is Pushed, no theme clears it standing still · `SV6` |
-| D8 | heal = Greater Heal 45% + Heal 64% → pool **×2.09** (`engine.json` `build.heal_pool_mult`) | one round turns the §6 boss Pushes into passes for the two themes that spend their items on surviving (`mix` · `tank`), while the glass and Evasion themes stay Pushed even with heal · the boss is a press-to-play gate, not a damage gate · `SV6` names the pair |
+| D8 | heal = Greater Heal 60% + Heal 10%/sec × 8 sec (80%) → pool **×2.40** (`engine.json` `build.heal_pool_mult`) | one round turns the §6 boss Pushes into passes for the two themes that spend their items on surviving (`mix` · `tank`), while the glass and Evasion themes stay Pushed even with heal · the boss is a press-to-play gate, not a damage gate · `SV6` names the pair |
 | D12 | elite (×6 HP / ×4 damage) is a mini-boss, not a group · generated by `tools/survival.ts` (block `survival-elite`), no longer hand-typed |
 | D13 | "max 3 mobs engage" rule props the AFK promise | if removed, 5 attackers replace 3 and the group cost scales by roughly 5/3; the measured cost under the rule is the generated `survival-group` block |
 | D14 | boss must gate active play as G5 promises — **run from `tools/survival.ts`, gated by SV6** | the boss damage multiplier is forced by the promise, not freely chosen: it must Push all four builds without heal and let exactly the two surviving themes pass with one heal round — SV6/SV7 assert *which* themes pass, not just how many. The value that does both is **×18** (`engine.json` `mob.sizes` boss `ps`); it was ×16 before the re-base moved the build lines |
 | D18 | roster passes mechanic gate — **PASSES via `node tools/skills.ts --checks`** | every Element has an attack skill · every weapon group has at least 4 · buff is a timed self-buff (10 sec on / 15 sec cd) · no skill references mob armour or mob mana · the live per-type counts are the generated block in `skill-pool.md`, never typed here · **skill share columns are stale under reservation and need a rerun** |
 | D22 | **armour is one Str line on both sides** — every number in this row is printed by `node tools/check.ts --checks` (**X22**) | `K_ARMOUR` · reduction `armour ÷ (armour + K_armour_divisor × raw physical)` · no Cap. Guard: **X22** holds the full-Str cut of a zone-9 boss's *physical half* inside its design band, requires armour to keep answering trash mobs, and forbids any mob's own armour walling a max physical hit. The band's trash floor has moved three times for a stated reason: down when boss damage was raised for the G5 gate — a PoE ratio cuts less of a bigger hit — again when Core Stat % retired, because the armour line is Str-driven and the boss's physical half is anchored on mob DPS, which did not move, and again with the re-base (ceiling 535 → 433) |
 | D23 | **the mob roster is complete** — generated by `mobRoster()` and checked by **X23** · `mob-roster.md` is the output | 22 species × 4 body classes (Small · Medium · Large · Boss) over the 18 zones, three sub-zones each, plus Elite and one named boss per zone. Guard: at least 5 entries per zone, the boss species must actually live in its zone, and a species may not bias an Element none of its zones carry |
-| D26 | **Energy Shield is a timed second pool, player-only** — printed by **X25** | `K_INT_ES` · `K_INT_ESREGEN` · `energy_shield.delay_sec` · full pool in `energy_shield.recover_sec` · guard: **X25** holds the shield inside its share band (15-30%) of the same Int build's HP, so it supplements HP instead of doubling it, and forbids any leak to the mob side (H1). The share fell when Core Stat % retired and again with the re-base, because the pool is Int-driven and follows the stat ceiling while the level-only HP it is compared against does not |
+| D26 | **Energy Shield is a timed second pool, player-only** — printed by **X25** | `energy_shield_flat` · `max_energy_shield_pct` · `energy_shield.delay_sec` (3) · full pool in `energy_shield.recover_sec` (40) · guard: **X25** holds a real pool, the exact clock, and player-only (H1); the share (0.7% of the level-only caster HP from one max item, higher summed across items) is reported, not gated, until a rebalance re-prices the gear range |
 | D24 | **a mob dodges the way we do** — generated and checked by **X24** | `dodge = own Agi rate ÷ (own rate + attacker accuracy)` · guard: every roster entry between 2% and 40%, so mob Agi stays flavour and never a second wall. The old 25% ceiling was set on the level-scaled mob line; the flat mob stat makes a low-level attacker's accuracy the small number, so the band was re-based with the rule unchanged |
-| D30 | **Ascend is priced by the engine at the hour the design sells** — **X30** | 8 Add mod stones + 8 Reroll tier stones per Ascend, so Add stones bind and a full 12-piece set lands near the promised ~20 hr after the re-base (F10 · E7) |
+| D30 | **Ascend is priced by the engine at the hour the design sells** — **X30** | 8 Add mod stones + 8 Reroll tier stones per Ascend, so Add stones bind and a full 12-piece set costs the 96 Add + 96 Reroll tier stones the ladder promises (F10 · E7) |
 | D31 | **body class may not move the funnel** — **X32** | `mob_HP(L)` is the zone average; group entries divide by the zone's weighted body factor (spawn weights Small 3 · Medium 2 · Large 1), so kills/hour, drops/hour and the timeline hold by construction |
 | D32 | **the species damage tag is a rule** — **X31** | physical = the whole armour-able half, magic = the whole res-able half, mixed = 50/50 by innate Element |
 | D33 | **near and far is a queue, not a map** — **X33** | reach bands (melee 1 · reach 2 · stand-off 3) over a front-line-first queue; the cost to a reach-1 build is measured and must stay under 12% of the cycle |
@@ -151,20 +151,22 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 | D10 | all weapons equal DPS **against the Medium reference body** | `weapon_mult = 1.2 ÷ weapon_aspd` · `weapon_aspd` cancels out of `power × times/sec`, so all 11 types land on the same Expected DPS at equal stats ✓ (**X14**) · adds the weapon × body-class ladder on top, which is flat on Medium for every type except the dagger (0.90), and the sword is flat on all three |
 | D11 | AoE is a real choice, not free (**closed** · skill-pool.md AoE section) | new rule 60% per target · Cap 3 targets · mana ×1.5 → damage per mana = 0.40x (1 target) / 0.80x (2) / **1.20x (3+)** · groups of 5 faster by 1.20x (3.75 sec instead of 4.50) but bosses 2.5x longer = 312% of pool = Push · the AoE table is generated (`skill-pool-system.md`, block `aoe-rules`) |
 
-# E · Timeline (All From D1 + Kill Rates)
+# E · Progression (All From D1 + Kill Rates)
 
-| id | Checkpoint | Cumulative hr |
+Every row is a **state**, never a duration: this is an open-world idle RPG with no time limit and no play-length target (owner ruling · `AGENT.md`), so a checkpoint is a level, a kill count, or a count of craft actions. How long any of it takes is the player's own pace, so nothing here — and nothing that reads it — may state a time to finish.
+
+| id | Checkpoint | Reached at |
 |---|---|---|
-| E1 | Level 10 | 0.9 |
-| E2 | Level 30 (end zone 3) | 6.0 |
-| E3 | Level 60 (end zone 6) | 29.4 |
-| E4 | Level 90 (end zone 9) | **84.3** |
-| E5 | Level 100 | **110.7** |
-| E6 | Full-set Refine (24 times @ 2.25/hr · Tier is per item) | 10.7 hr |
-| E7 | Full-set Ascend (12 items @ 0.59/hr) | 20.3 hr |
-| E8 | Full-set polish with Reroll (~100 times @ 10/hr) | ~10 hr |
-| E9 | Mastery 1 type to L10 / to L20 | 3.5 hr / 15.3 hr (at L90) · kill-based, tied to the XP curve (equipment-weapon.md) |
-| E10 | Mastery 11 types to L10 | 37.9 hr = +11% permanent drop |
+| E1 | Level 10 | 242 kills |
+| E2 | Level 30 (end zone 3) | 1,777 kills |
+| E3 | Level 60 (end zone 6) | 9,843 kills |
+| E4 | Level 90 (end zone 9) | 36,356 kills |
+| E5 | Level 100 (the completion checkpoint) | **60,031 kills** |
+| E6 | Full-set Refine (2 steps per piece · Tier is per item) | 24 casts · 192 Reroll tier stones |
+| E7 | Full-set Ascend (12 items) | 96 Add + 96 Reroll tier stones |
+| E8 | Full-set polish with Reroll | 100 casts · 800 Reroll value stones |
+| E9 | Mastery 1 type to L10 / to L20 | kill-based, tied to the XP curve (equipment-weapon.md) |
+| E10 | Mastery 11 types to L10 | kill-based = +11% permanent drop |
 | E11 | skill ladder — **generated by `node tools/ladder.ts --checks`** (block `ladder-math` in `skill-pool-system.md`) | the generated block prints the funnel, the 4-target share, the per-skill average and the zone pool; never typed here |
 | E12 | Power magnitude order | gear x5.6 - skill x1.1-1.4 - there is no third multiplier between them |
 
@@ -184,8 +186,8 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 | F9 | Add mod stone/hr | `elite 0.74 (20% of kills × 0.625% chance) + boss 4 (4 ×1)` = **4.74** |
 | F10 | Ascend/hr | `min(F9 ÷ 8 Add, F7 ÷ 8 tier) — the scarcer stone sets the pace` = **0.59** · full 12-piece set **20.3 hr** (Add alone 2.5 hr · tier stones alone 10.7 hr → tier stones bind) |
 | F13 | herb bundles/hr | `separate roll · 2.00% per kill mid · 3.00% high · bundle of 1-3 zone-tier herbs` = mid band **10.74/hr** · high band **17.67/hr** |
-| F16 | Refine full set | `12 pieces × 1 slots × 2 steps = 24 casts ÷ 2.25` = **10.7 hr** (checks.md E6) |
-| F17 | Full-set polish | `100 casts ÷ 10` = **10.00 hr** (checks.md E8) |
+| F16 | Refine full set | `12 pieces × 1 slots × 2 steps = 24 casts` = **24 casts** · 192 Reroll tier stones (checks.md E6) |
+| F17 | Full-set polish | `100 casts at 8 stones` = **100 casts** · 800 Reroll value stones (checks.md E8) |
 | F18 | gold per minute of full-sell income | `junk/hr ÷ 60` = 0.8 low · 1.1 mid · 1.3 high · 4.2 full Lck (towns-stalls.md §1) |
 | F19 | full-Lck income ceiling over the no-Lck line | `249 ÷ 79` = **×3.15** — the only place Lck may multiply income (G8) |
 | F20 | Quality Stone/hr | `monster 6 (1% of kills) + elite 29 (1 in 5 × 25%) + boss 96 (4 ×24)` = **131** |
@@ -224,45 +226,45 @@ Every row is computed by `node tools/town.ts` from `tools/data/town.json`; the t
 |---|---|---|---|
 | T1 | gold is minted by the sell choice, plus one bounded exception: the Road purse (G2 · G6 · X36) | `1 gold per sold junk piece · Road ceiling 17 gold/day, never stones, never AFK` | 1 |
 | T2 | the price unit is real income, not a feeling | `junk/hr ÷ 60, per band` | 0.8 low · 1.1 mid · 1.3 high · 4.2 high+full Lck gold per 1 m |
-| T3 | lifetime gold supply is the junk line, not a new faucet | `6.0×46 + 23.4×63 + 54.9×79 + 26.4×79` | 8,173 gold |
-| T4 | one-time stall demand ≤ 1.50× the supply — a funnel, not a wall | `Σ 17 one-time lines at their charge band` | 4,026 = 0.49× ✓ |
-| T5 | essentials ≤ 20% of the supply while ~80%+ still dissolves | `4 Road links · tab 1 at Eastgate · tab 2 · pouch II · deed 4` | 481 = 5.9% ✓ |
-| T6 | selling everything is a craft decision, priced in craft | `8,173 ÷ 8 stones · ÷ 100 casts per full polish` | 1,022 Reroll casts ≈ 10.2 full-set polishes forgone |
-| T7 | the full-Lck advantage stops at the junk line (G8) | `81.3 high-band hr × 249 vs × 79` | 20,244 vs 6,423 gold = ×3.15 against the ×3.15 ceiling ✓ |
+| T3 | lifetime gold supply is the junk line, not a new faucet | `1,777×0.0994 + 8,066×0.1173 + 50,188×0.1341` | 7,854 gold |
+| T4 | one-time stall demand ≤ 1.50× the supply — a funnel, not a wall | `Σ 17 one-time lines at their charge band` | 4,026 = 0.51× ✓ |
+| T5 | essentials ≤ 20% of the supply while ~80%+ still dissolves | `4 Road links · tab 1 at Eastgate · tab 2 · pouch II · deed 4` | 481 = 6.1% ✓ |
+| T6 | selling everything is a craft decision, priced in craft | `7,854 ÷ 8 stones · ÷ 100 casts per full polish` | 982 Reroll casts ≈ 9.8 full-set polishes forgone |
+| T7 | the full-Lck advantage stops at the junk line (G8) | `50,188 high-band kills × 0 vs × 0` | 21,217 vs 6,731 gold = ×3.15 against the ×3.15 ceiling ✓ |
 | T8 | every stall line is space · time · information · appearance only (G7) | `kind tag on all 26 lines · power nouns need an explicit display_only flag` | 26 lines, 0 power lines ✓ |
-| T9 | travel never gates content and never beats farming (G9) | `8 links × 20 m one-time · Road trip ≤ 5 real min` | 372 gold = 4.6% of supply ✓ |
+| T9 | travel never gates content and never beats farming (G9) | `8 links × 20 m one-time · Road trip ≤ 5 real min` | 372 gold = 4.7% of supply ✓ |
 | T10 | Armourer repair costs more than the elite time it replaces (D2 service class) | `60 ÷ 6 tier stones/hr = 10.00 m floor · F9 re-checked in T10b` | 16 m · 14 m at Ironrow ✓ |
 | T11 | skip tokens stay inside the tasks.md bound | `8 m × 3/day` | 24 m/day ✓ (payouts untouched) |
-| T12 | Standing has 3 tiers per settlement and is counted from F1 kills | `budget hr × tier share × band kills/hr` | see table T-S below, 27 thresholds ✓ |
+| T12 | Standing has 3 tiers per settlement and is counted from F1 kills | `budget kills × tier share` | see table T-S below, 27 thresholds ✓ |
 | T13 | Tier III is a chase, never a formality | `tier III share ≥ 1 × the zone budget` | 1.4 on all 9 ✓ |
 | T14 | Collector sets pay items, never gold (G6) | `pays_gold flag on 3 sets` | 0 gold ✓ |
 | T15 | Base bias is permanent flavour — ruled even-weighted, so it may never carry a number | `loot.md section 1 step 2 + section 3` | status = decided · 3 guards · 0 numeric weights |
 | T16 | price ladders are monotonic, so no later tier is cheaper | `stash_tab 60-300 m · herb_pouch 60-240 m · plot_deed 180-540 m · house 120-360 m` | ✓ |
-| T17 | this file owns no kill rate: income is loot.md unchanged | `F1 = 463 / 537 / 589 kills/hr` | mob_HP and the 40.2 hr timeline unmoved ✓ (H1) |
+| T17 | this file owns no kill rate: income is loot.md unchanged | `F1 = 463 / 537 / 589 kills/hr` | mob_HP and the published kill rates unmoved ✓ (H1) |
 | T18 | no band number is retyped here — town prices divide the engine junk line by 60 | `tools/lib/engine.ts (engine.json) → junk/hr per band, then loot.md section 2 read back` | F1 589 · F3 82 · F5 79 · 17 loot.md numbers read back equal ✓ |
 
 ## T-S · Standing thresholds in kills (the numbers T12 reads)
 
-| id | Settlement | Band | Budget hr | Tier I kills | Tier II kills | Tier III kills |
+| id | Settlement | Band | Budget kills | Tier I kills | Tier II kills | Tier III kills |
 |---|---|---|---|---|---|---|
-| eastgate | Eastgate | low | 1.2 | 167 | 417 | 778 |
-| millbrook | Millbrook | low | 2.9 | 403 | 1,007 | 1,880 |
-| ashfall | Ashfall | low | 4.3 | 597 | 1,493 | 2,787 |
-| ironrow | Ironrow | mid | 5.5 | 886 | 2,215 | 4,135 |
-| wolf_cross | Wolf Cross | mid | 9.0 | 1,450 | 3,625 | 6,766 |
-| highspire | Highspire | mid | 13.0 | 2,094 | 5,236 | 9,773 |
-| bonegate | Bonegate | high | 14.2 | 2,509 | 6,273 | 11,709 |
-| frosthold | Frosthold | high | 18.2 | 3,216 | 8,040 | 15,008 |
-| vermolch | Vermolch | high | 22.0 | 3,887 | 9,719 | 18,141 |
-| thornwake | Thornwake | low | 26.0 | 3,611 | 9,029 | 16,853 |
-| greyfen | Greyfen | low | 30.3 | 4,209 | 10,522 | 19,640 |
-| saltmarrow | Saltmarrow | low | 35.0 | 4,862 | 12,154 | 22,687 |
-| emberhold | Emberhold | mid | 39.9 | 6,428 | 16,070 | 29,997 |
-| duskmoor | Duskmoor | mid | 45.1 | 7,266 | 18,164 | 33,906 |
-| nettlecrag | Nettlecrag | mid | 50.3 | 8,103 | 20,258 | 37,816 |
-| blackwater_reach | Blackwater Reach | high | 55.8 | 9,860 | 24,650 | 46,013 |
-| wyrmback | Wyrmback | high | 61.3 | 10,832 | 27,079 | 50,548 |
-| the_pale_spire | The Pale Spire | high | 140.5 | 24,826 | 62,066 | 115,856 |
+| eastgate | Eastgate | low | 242 | 73 | 182 | 339 |
+| millbrook | Millbrook | low | 584 | 175 | 438 | 818 |
+| ashfall | Ashfall | low | 951 | 285 | 713 | 1,331 |
+| ironrow | Ironrow | mid | 1,644 | 493 | 1,233 | 2,302 |
+| wolf_cross | Wolf Cross | mid | 2,570 | 771 | 1,928 | 3,598 |
+| highspire | Highspire | mid | 3,852 | 1,156 | 2,889 | 5,393 |
+| bonegate | Bonegate | high | 5,778 | 1,733 | 4,334 | 8,089 |
+| frosthold | Frosthold | high | 8,797 | 2,639 | 6,598 | 12,316 |
+| vermolch | Vermolch | high | 11,939 | 3,582 | 8,954 | 16,715 |
+| thornwake | Thornwake | low | 23,674 | 7,102 | 17,756 | 33,144 |
+| greyfen | Greyfen | low | 11,373 | 3,412 | 8,530 | 15,922 |
+| saltmarrow | Saltmarrow | low | 10,379 | 3,114 | 7,784 | 14,531 |
+| emberhold | Emberhold | mid | 9,544 | 2,863 | 7,158 | 13,362 |
+| duskmoor | Duskmoor | mid | 8,834 | 2,650 | 6,626 | 12,368 |
+| nettlecrag | Nettlecrag | mid | 8,222 | 2,467 | 6,167 | 11,511 |
+| blackwater_reach | Blackwater Reach | high | 7,689 | 2,307 | 5,767 | 10,765 |
+| wyrmback | Wyrmback | high | 7,222 | 2,167 | 5,417 | 10,111 |
+| the_pale_spire | The Pale Spire | high | 13,405 | 4,022 | 10,054 | 18,767 |
 
 Source: `node tools/town.ts --checks` · data in `tools/data/town.json` · prices, stock and ladders in `towns-stalls.md`.
 

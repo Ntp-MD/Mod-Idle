@@ -31,9 +31,9 @@ Pool assignment criteria
 - One item rolls **at most 1 Stat Mod line**, drawn from the family `mods.json` marks `group: Stat Mod`: either a single Core stat, whose stat is baked at drop the way a PoE implicit carries its own, or the all-stats sibling that lifts all seven at once (X44 · X45). The `Stat Mod %` sibling is retired, so both the flat + % pairing and the same-stat pairing are gone
 - Weights: Primary 1.0 · Secondary 0.5 · Stat Mod 1.0 (equal to Primary on every item) — then multiplied by `value(mod)` from the per-Mod weight section
 - If an item already has that stat in Primary/Secondary, e.g. main hand has Str Flat, that counts as its Stat Mod slot. Never roll the same slot twice
-- Per-item ceiling is one Flat slot at the T1 top of its range; the twelve worn items together are the single-stat ceiling printed in formula.md section 0
+- Per-item ceiling is one Flat slot at the T1 top of its range; the thirteen worn items together are the single-stat ceiling printed in formula.md section 0
 - **Slots 6-7 (Add mod stone) never roll Stat Mod flat while the item already holds its Stat Mod slot.** Added mods roll from the Base Primary/Secondary pool at the item quality/tier of the piece.
-- **Stat Mod is the only path for all 7 stats from every item** because the Offensive/Defensive rule closes direct Str/Int/Dex/Agi/Wis Mods on main hand
+- **Stat Mod is the only path for all stats from every item** because the Offensive/Defensive rule closes direct Str/Int/Dex/Agi/Wis Mods on main hand
 - Defensive items have no Vit % / Vit Flat in-pool. Vit must come through Stat Mod only
 
 # Defensive Pool
@@ -54,6 +54,7 @@ Defense-side Mods covering every item outside main hand. Only Primary vs Seconda
 | Mana Regeneration flat | 2-31 |
 | Mana Regeneration % | 10-25% |
 | Max Energy Shield % | 3-16% |
+| Energy Shield Regeneration % | 12-30% |
 | Max HP % | 3-16% |
 | Max HP flat | 40-200 |
 | Max Mana % | 3-16% |
@@ -138,7 +139,7 @@ P(select Mod X from this Base) = role(X) x value(X) / Σ(role x value)
 role: Primary = 1.0 · Secondary = 0.5 · Stat Mod = 1.0 (per remaining slot)
 ```
 
-`value(X)` is set from **one measured marginal-value line** (calculated from formula.md formulas at a 12-item maxed-stat build), not from feeling.
+`value(X)` is set from **one measured marginal-value line** (calculated from formula.md formulas at a maxed-stat build), not from feeling.
 
 <!-- BEGIN GENERATED:mod-weights -->
 | Mod | Value at level 100 | Early-game value (level 10 - low quality) | weight | Reason |
@@ -161,13 +162,14 @@ role: Primary = 1.0 · Secondary = 0.5 · Stat Mod = 1.0 (per remaining slot)
 | Elemental power flat / % | ~21% of a hit after the Alignment gate | — | **1.0** | Element builds required |
 | Armour / Evasion / Energy Shield flat | per Base school | — | **1.0** | The Gear Mod is the Base's own school line (item-base.md), so it rolls at Primary weight on the five armour slots; the three Gear Mod weights were missing before the loot sim and are set here |
 | Max Energy Shield % | +16% of the shield pool | +7% | **0.8** | The Int build’s scaling defensive line, same shape as the Max HP % and Max Mana % it sits beside |
+| Energy Shield Regeneration % | +30% of the shield's regen rate | +12% | **0.8** | Amplifies the base ES regen (`energy_shield.regen_pct`) the way Life Regeneration % amplifies the Vit line — a rate line, never a pool line, so it cannot raise the shield's ceiling (checks.md X25) |
 | Life Regeneration % | +15% of the Vit-derived regen line · Vit 510 × 0.25 = 127.5/sec, so +19.1/sec and 13% off Push downtime | +5% | **1.0** | Recovery, not a pool — it cannot raise the ceiling, so it is the defensive line that never breaks an HP Cap, and the only one that shortens the walk back to camp (checks.md D9) |
-| Mana Regeneration % | +25% of the Int-derived regen line · Int 510 × 0.18 = 91.8/sec, so +23.0/sec of cast sustain | +10% | **1.0** | Mana is the real casting bottleneck as designed (skill-pool-system.md), so this buys uptime with the bar full rather than more damage per press |
+| Mana Regeneration % | +25% of the Int-derived regen line · Int 510 × 0.28 = 142.8/sec, so +35.7/sec of cast sustain | +10% | **1.0** | Mana is the real casting bottleneck as designed (skill-pool-system.md), so this buys uptime with the bar full rather than more damage per press |
 | All Resistance % | +11.1% EHP across all five Elements at once · 20% off the Elemental half of a 50/50 hit | +2% | **0.7** | Weaker per Element than Elemental resistance % (top 20 vs 30) precisely because it covers all five, and it lands on the ring, amulet and cape slots that carry no resistance today — rarer by design |
 | Armour % | +3.7 points of cut on a zone-9 physical half (41.7% -> 45.4% at full Str, no flat) | +2.2 points | **0.8** | A PoE ratio cuts less of a bigger number, so a % on Armour is a modest line by construction (X22 holds the cut inside 10-40%) — same rarity as Max HP % |
 | Evasion % | +2.2% evasion on the Dex line (105 -> 122 at Dex 210) | +1.3% | **0.8** | Evasion is a rating fed straight into the entropy roll, so it scales cleanly where Armour does not |
 | Life Regeneration flat | +31/sec on top of 128/sec (Vit 510 x 0.25) = +24% | a level-1 build has 3/sec, so +31 more than doubles it | **.50 / .40 / .25** | Dies off late-game exactly like Max HP Flat — weight differs by quality tier (low 0.5 · mid 0.4 · high 0.25) |
-| Mana Regeneration flat | +31/sec on top of 92/sec (Int 510 x 0.18) = +34% | a level-1 build has 1.8/sec | **.50 / .40 / .25** | Same early-game shape as Life Regeneration flat; the flat form carries the first zones where the % form has nothing to multiply |
+| Mana Regeneration flat | +31/sec on top of 143/sec (Int 510 × 0.28) = +22% | a level-1 build has 1.8/sec | **.50 / .40 / .25** | Same early-game shape as Life Regeneration flat; the flat form carries the first zones where the % form has nothing to multiply |
 | Perfect dodge % | scales the Lck line, so it is worth most on a build that has not finished the line | a level-1 Lck sits at under 1%, where +3% is a large multiplier on the chance | **0.7** | The Cap binds near the top of the maxed Lck ratio, so this line is worth least on a maxed-Lck piece and decisive on a low one — the same shape as an % line on any other low rate. It is also defined but not offered: no Base pool in bases.json rolls it, so today it is a drop-weight row and nothing more. |
 | Status Alignment resistance % | cuts the 20% status proc to 15% and cuts crowd control (stun/stop) too — the gap between status applications goes 2.3 sec -> 3.3 sec | same ratio, fewer absolute hits to proc on | **0.7** | The status proc is 20% per landed hit and there is no other gear answer to it — or to the crowd control statuses carry — (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other "answers something niche" defensive rows |
 | Chance to bleed % | a second bleed source beside Lacerate's own 40% while the curse is up (formula-offense.md section 4) | bleed is a fixed fraction of one physical hit, so the line is worth the same at every level - only the hit behind it grows | **0.7** | A weapon-only line (one-handed and two-handed axes). It is the always-on answer to the bleed slot Lacerate already owns, so it prices like the other "answers something niche" rows; bleed is physical DoT with no Element tag and cannot crit, so the line adds reliability rather than a new multiplier |

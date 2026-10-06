@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -88,6 +88,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="#h-slot-coverage-check">Slot Coverage Check</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -108,8 +109,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -129,6 +128,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -141,7 +141,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Weapon Slots</h1>
-<dl class="kv"><dt>file</dt><dd><code>equipment-slot-weapon.md</code> · 80 lines · 710 words · written 2026-10-05T15:28:18Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a> · <a href="doc-equipment-slot.html">equipment-slot.md</a></dd><dt>imported by</dt><dd><a href="doc-equipment-slot.html">equipment-slot.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../equipment-slot-weapon.md">equipment-slot-weapon.md</a></dd></dl>
+<dl class="kv"><dt>file</dt><dd><code>equipment-slot-weapon.md</code> · 80 lines · 709 words · written 2026-10-06T03:39:35Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-equipment-weapon.html">equipment-weapon.md</a> · <a href="doc-equipment-slot.html">equipment-slot.md</a></dd><dt>imported by</dt><dd><a href="doc-equipment-slot.html">equipment-slot.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-equipment-slot-pools.html">equipment-slot-pools.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../equipment-slot-weapon.md">equipment-slot-weapon.md</a></dd></dl>
 
 <h2 id="h-weapon-slots">Weapon Slots</h2>
 <p>import glossary.md import equipment-weapon.md import equipment-slot.md</p>
@@ -157,7 +157,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <table><thead><tr><th>Role</th><th>Mod</th></tr></thead><tbody><tr><td>Shield</td><td>Max HP flat · Max HP % · Evasion % · Block chance %</td></tr><tr><td>Book</td><td>Max Mana flat · Max Mana % · Cooldown reduction %</td></tr><tr><td>Dual-wield weapon</td><td>Same pool as main hand but Primary weight halved</td></tr><tr><td>Stat Mod</td><td>Stat Mod flat (every item)</td></tr></tbody></table>
 <ul><li>Shield and book are Defensive items by rule</li><li><strong><code>Block chance %</code> is the shield's Base Mod line</strong> — forced with the frame on line 1 and never in a craftable pool, so no Random copy can exist (the Add stone dedups against line 1); no other slot ever rolls it. The row stays in the Shield pool so the Mod matrix still shows it on the off hand</li><li><strong>Dual-wield is the sole exception to the rule</strong> because it is a second weapon, so it gets Element damage and power at half weight</li><li>Dual-wield works only with one-handed weapons flagged dual-wieldable</li></ul>
 <h2 id="h-offensive-defensive-rules">Offensive / Defensive Rules</h2>
-<p><strong>Weapon items roll only Offensive Mods · all other 10 slots roll only Defensive Mods</strong></p>
+<p><strong>Weapon items roll only Offensive Mods · all other slots roll only Defensive Mods</strong></p>
 <table><thead><tr><th>Group</th><th>Members</th></tr></thead><tbody><tr><td>Offensive</td><td>Power Flat/% of every type · Critical chance % · Critical damage % · Attack speed % · Accuracy % · Str %/Flat · Int %/Flat · Chance to bleed % · Chance to stun % · Armour penetration %</td></tr><tr><td>Defensive</td><td>Max HP Flat/% · Max Mana Flat/% · Evasion Flat/% · Cooldown reduction % · Elemental resistance % · Elemental alignment % · Block chance %</td></tr><tr><td>Stat Mod</td><td>Assigned to neither group, accepted equally by every item per the Stat Mod section</td></tr></tbody></table>
 <ul><li>Main hand is the only Offensive slot, except off hand while dual-wielding</li><li><strong>Elemental resistance always counts as Defensive, for every Element.</strong> It never becomes Offensive even if the player matches the weapon Element</li><li>Cooldown reduction counts as Defensive because it controls pacing, not damage · traded against no slot gaining extra crit</li><li>Stat Mod counts as neither group because it already rolls on every item</li></ul>
 <h2 id="h-slot-coverage-check">Slot Coverage Check</h2>

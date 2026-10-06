@@ -9,7 +9,7 @@ import combat.md
 import save.md
 import checks.md
 
-Melvor-flavored provisioning without reopening the locked doors: **Farming is the game's one life skill** — a real leveled track (`farm` in `engine.json`) — but it grants **no combat power**, no potion healing on bosses (boss aura suppresses), and no gold↔stone exchange (the shop takes gold, crafting keeps the 7 stones · `economy.md`). The **humanoid** tribes drop a bottle of their own accord, at a chance derived from the herb stream itself (`X49`), so the mobs supplement the farm and never replace it. All flows are bounded and the loot funnel and the timeline never move (checks.md H1).
+Melvor-flavored provisioning without reopening the locked doors: **Farming is the game's one life skill** — a real leveled track (`farm` in `engine.json`) — but it grants **no combat power**, no potion healing on bosses (boss aura suppresses), and no gold↔stone exchange (the shop takes gold, crafting keeps stones · `economy.md`). The **humanoid** tribes drop a bottle of their own accord, at a chance derived from the herb stream itself (`X49`), so the mobs supplement the farm and never replace it. All flows are bounded and the loot funnel and the published counts never move (checks.md H1).
 
 **No food buffs.** Provisioning is herbs → potions only; there is no food or cooked-meal buff layer. The timed-buff roster is already the buff layer (`skill-pool-buff.md`), so food would be a second one and the game is complex enough without it.
 
@@ -59,7 +59,7 @@ The effect of every draught is a % of its pool, domiciled in `engine.json` `poti
 - Weight counts toward `weight_used` (formula.md section 11): potion carriers pay the same Str tax as heavy armor. This replaces RO's zeny spam limit alongside the rules below.
 - Auto-use is configurable per line (HP line / Mana line): on/off toggle plus threshold slider (defaults HP < 30%, mana < 25%). Auto-use always drinks the best available tier first.
 - Uses are drawn from inventory and gated by the cooldown and per-fight cap in the block above. **No cleanse potion exists**: cleansing stays on Cleanse (skill-pool).
-- Threshold plus short normal-fight durations bound AFK abuse: potions almost never trigger in 1-sec farm kills — which is exactly why they are **not** modeled in `tools/survival.ts` and move no survival or timeline number (the 2026-10-03 survival re-run confirms SV1-SV6 hold).
+- Threshold plus short normal-fight durations bound AFK abuse: potions almost never trigger in 1-sec farm kills — which is exactly why they are **not** modeled in `tools/survival.ts` and move no survival or progression number (the 2026-10-03 survival re-run confirms SV1-SV6 hold).
 - **Boss aura suppresses all potions.** Bosses are won with casted heals only (combat.md section 7).
 
 # Shop (gold-priced)

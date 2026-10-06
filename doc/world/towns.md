@@ -53,7 +53,7 @@ import towns-ui.md
 
 # 3. What travel may never cost
 
-Kills are the whole economy: F1 1,800 kills/hour and F3 418 drops/hour assume the player fights every second they are in a zone. So the invariant for every travel mode in section 7 is:
+Kills are the whole economy: F1 589 kills/hour and F3 82 drops/hour assume the player fights every second they are in a zone. So the invariant for every travel mode in section 7 is:
 
 ```
 travel that consumes real time  →  may never be mandatory
@@ -87,7 +87,7 @@ Zone levels, group sizes and quality ceilings stay in `world.md`; this adds a pl
 
 # 5. NPC roster — differentiated by inventory, bounded by purchase kind
 
-Prices are in **gold**, written as minutes of full-sell income (`economy.md`: 1 junk sold = 1 gold, 6.9 gold per minute in the high band). The exact price of every line below is in `towns-stalls.md` sections 3-4, generated from `tools/data/town.json`.
+Prices are in **gold**, written as minutes of full-sell income (`economy.md`: 1 junk sold = 1 gold, 1.3 gold per minute in the high band). The exact price of every line below is in `towns-stalls.md` sections 3-4, generated from `tools/data/town.json`.
 
 | NPC | Where | Sells / does | Kind | Price anchor | Why it is not power |
 |---|---|---|---|---|---|
@@ -126,7 +126,7 @@ Prices are in **gold**, written as minutes of full-sell income (`economy.md`: 1 
 | **C Road time** | opt-in: walk the Road, or loop a Circuit, instead of the Waypoint, a few real minutes per leg | Standing in the settlement each leg arrives at | ladder leg 5 min, branch leg 8 or 12 · a Circuit runs offline (its current lap only) · never required for anything |
 | **D Road events** | on a Road leg: ambush, caravan escort, traveling pedlar, a chest — one encounter per Road minute, from the link's own terrain table | gold (ladder links) · Standing · one Item from a chest · cosmetic stock the towns do not carry | total ≤ the value of an equal hour spent farming, measured against F1/F5 · pays **no stones**, so boss and elite gates (G5, F7-F10) keep their monopoly on power · the chest is capped once per link per day |
 
-- **C+D are a content choice, not an income choice.** A Road hour forfeits 1,800 kills for at most a few percent of that value, and that trade must be stated in the UI before the player steps onto the Road. Its purpose is the thing farming cannot give: the isekai travel beat, the encounter, the merchant who only travels.
+- **C+D are a content choice, not an income choice.** A Road hour forfeits 589 kills for at most a few percent of that value, and that trade must be stated in the UI before the player steps onto the Road. Its purpose is the thing farming cannot give: the isekai travel beat, the encounter, the merchant who only travels.
 
 ### What the Road actually is
 
@@ -173,7 +173,7 @@ The base column is the plain average of the terrain rows and is what an **offlin
 | `concept.md` Active vs AFK | AFK keeps fighting · offline 12 h · quality floor only | a Circuit's current lap runs offline on the base table, then parks (section 7) | **Compatible, no table change** |
 | `concept.md` no resource skills | only combat levels | no settlement level, no gathering, Standing counts kills | **Compatible** |
 | `world.md` zone unlock | by level, not by boss or place | a settlement can never gate a zone | **Compatible** |
-| `loot.md` F1-F3 | 1,800 kills/hr, 418 drops/hr | modes A/B cost zero time; C/D are opt-in and pay less | **Compatible** |
+| `loot.md` F1-F3 | 589 kills/hr, 82 drops/hr | modes A/B cost zero time; C/D are opt-in and pay less | **Compatible** |
 | `loot.md` F5-F10 | stone income = stone spend | gold takes all convenience purchases, so it no longer competes with craft prices at all | **Cleaner than before** |
 | `loot.md` section 4 | rejected piece → 1 Reroll value stone instantly, no Bag Cap | now → 1 stone **or** 1 gold, chosen per filter rule, default dissolve | **Rule change, small** |
 | `loot.md` section 1 step 2 | Base rolls equally in slot | per-settlement Base bias is the unused hook | **Needs re-simulation first** |

@@ -3,7 +3,7 @@
 import glossary.md
 import mod-pool.md
 
-The item system splits into 2 axes, per terms in glossary.md.
+The item system splits into axes, per terms in glossary.md.
 
 - **Rarity** answers "how many Mods"
 - **Item quality** answers "what value range each Mod rolls"
@@ -41,7 +41,7 @@ The item system splits into 2 axes, per terms in glossary.md.
 
 # Item Quality vs Drop Level
 
-Each drop source defines 2 things — **ceiling** and **floor**.
+Each drop source defines a **ceiling** and a **floor**.
 
 | Drop source level | Floor | Ceiling |
 |---|---|---|
@@ -71,7 +71,7 @@ Rare · High quality · 4 Random lines     Common · Low quality · 2 Random lin
   elem res % 30 (T1) Element Fire
 ```
 
-Both carry their frame's Base Mod and the Legacy pair underneath the Random lines shown, so a Rare prints seven lines and a Common five. From the old table tying Tier to Rarity, these 2 pieces could swap places · Now they order directly by stronger level.
+Both carry their frame's Base Mod and the Legacy pair underneath the Random lines shown, so a Rare prints seven lines and a Common five. From the old table tying Tier to Rarity, these pieces could swap places · Now they order directly by stronger level.
 
 # Waiting Items
 

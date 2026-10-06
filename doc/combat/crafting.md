@@ -112,7 +112,7 @@ Bases map to one school: heavy (Sallet · Plate Vest · Cuisses · Plated Greave
 ```
 armour reduction% = armour / (armour + 5 × raw_hit)   physical half only
 evasion           = PoE entropy roll vs mob accuracy, contested once per hit (combat.md section 2)
-energy shield = second pool ahead of HP · Int x K_INT_ES · chaos bypasses · recharges after 3 sec without a hit 
+energy shield = second pool ahead of HP · Gear Energy Shield flat + Max Energy Shield % · chaos bypasses · recharges after 3 sec without a hit 
 ```
 
 - Evasion is the only avoidance layer: the retired Dodge lines feed this one roll, and its Cap is proven reachable by **X20** rather than asserted.
@@ -144,7 +144,7 @@ energy shield = second pool ahead of HP · Int x K_INT_ES · chaos bypasses · r
 | Repair | 1 Repair stone | elite / boss only | Revives Broken + refills protection |
 
 ```
-Refine full set (12 pieces × 2 steps = 24 casts, because Tier belongs to the piece) ≈ 10.7 hours
+Refine full set (12 pieces × 2 steps = 24 casts, because Tier belongs to the piece) = 192 Reroll tier stones
 Ascend full set (12 pieces)                             ≈ 20.3 hours
 ```
 <!-- END GENERATED:craft-set -->
@@ -167,7 +167,7 @@ Average across all lines ≈ 4.9 points · Full 12-piece set × ~3 mods ≈ 100 
 At 10 casts/hour = about 10 hours per set
 ```
 
-- **Reroll is cheap and fast by design** because its real duty is "fix bad rolls", not climbing power · The slow ones are Refine (10.7 hours/set) and Ascend (20.3 hours/set), which are the true *tier movers*.
+- **Reroll is cheap and fast by design** because its real duty is "fix bad rolls", not climbing power · The expensive ones are Refine (24 casts/set) and Ascend (96 Add + 96 Reroll tier stones/set), which are the true *tier movers*. Neither row states how long a set takes: that is the player's own pace (`AGENT.md`).
 - **Measured shape problem**: lines with the widest T1 ranges (Max HP Flat 19 · Max Mana Flat 20) are the least valuable late-game lines (+1% and +0%) → meaning *polishing looks most effective in the most worthless mods*.
   **Mitigated (without squeezing ranges)**: equipment-slot.md weights Flat lines at 0.5/0.4/0.25 by Item quality tier → at high zones the chance a Reroll lands on a Flat line drops from ~8% to ~4.4% of all mods · Flat ranges in mod-pool.md stay unchanged (they are still needed early-game: Max HP Flat 90 = +2.1% EHP at level 10 vs +1.0% at 100 — lines designed to *expire*).
 

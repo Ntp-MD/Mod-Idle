@@ -51,7 +51,6 @@ describe('a weapon meets a body class (§12)', () => {
   it('a boss reads the class it declares, and an unknown class falls back to flat', () => {
     // the table has three columns, not four: a boss is a species that declares which one it reads
     expect(eng.spawnAt(9, 90, 'boss').readsAs).toBe('large');
-    expect(landed('mace', 'large')).toBeCloseTo(landed('mace', 'large'), 9);
     // "boss" is not a column, so it must not silently become a bonus — it reads the identity
     const ladder = (E as any).weapon_size_mult.ladder;
     expect(eng.sizeMultOf(ladder, 'mace', 'large')).toBeCloseTo(1.25, 9);

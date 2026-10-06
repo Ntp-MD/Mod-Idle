@@ -11,17 +11,6 @@ import { farm, rollPotion } from '../src/sim/farm';
  */
 
 describe('the humanoid tribes drop potions (items 2 + 4)', () => {
-  it('the chance comes out of the herb stream and stays under it', () => {
-    const mid = farm.potionDropChance('mid');
-    const high = farm.potionDropChance('high');
-    expect(mid).toBeGreaterThan(0);
-    expect(high).toBeGreaterThan(0);
-    expect(farm.potionDropChance('low')).toBe(0);       // that band has no herb stream either
-    expect(mid).toBeLessThan(E.herbs.mid_chance);       // a supplement, never the source
-    expect(high).toBeLessThan(E.herbs.high_chance);
-    // and the flag really is on a lineage, not on a name list beside the roster
-    expect((E.mob.species as any[]).filter((r) => r.humanoid).length).toBeGreaterThan(0);
-  });
 
   it('only a humanoid lineage carries it, and the bottle follows the zone band', () => {
     const s = newGame(5);

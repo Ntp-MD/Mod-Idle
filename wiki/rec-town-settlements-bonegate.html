@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 01:07:59Z · static build</span>
+<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>358</b></span><span class="chip ok">checks <b>173/0/1</b></span><span class="chip ">generated blocks <b>78</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -101,6 +101,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="rec-town-settlements-the-pale-spire.html">the_pale_spire</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
+<a href="doc-DECISIONS.html">DECISIONS.md</a>
 <a href="doc-Techstack.html">Techstack.md</a>
 <a href="doc-character-sheet.html">character-sheet.md</a>
 <a href="doc-checks.html">checks.md</a>
@@ -121,8 +122,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-formula-utility.html">formula-utility.md</a>
 <a href="doc-formula.html">formula.md</a>
 <a href="doc-glossary.html">glossary.md</a>
-<a href="doc-harness/HARNESS.html">harness/HARNESS.md</a>
-<a href="doc-harness/todo.html">harness/todo.md</a>
 <a href="doc-item-base.html">item-base.md</a>
 <a href="doc-item-list.html">item-list.md</a>
 <a href="doc-item-rarity.html">item-rarity.md</a>
@@ -142,6 +141,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a>
 <a href="doc-skill-tree.html">skill-tree.md</a>
 <a href="doc-tasks.html">tasks.md</a>
+<a href="doc-todo.html">todo.md</a>
 <a href="doc-towns-stalls.html">towns-stalls.md</a>
 <a href="doc-towns-ui.html">towns-ui.md</a>
 <a href="doc-towns.html">towns.md</a>
@@ -155,7 +155,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h1>Bonegate</h1>
 <p class="hint">One row of <code>tools/data/town.json</code> → <code>settlements</code>. Prices · rosters · stock · Standing shares · Collector sets. The only place a town number is written by hand. tools/town.ts --write rebuilds towns-stalls.md and checks.md group T from it.</p>
 <dl class="kv"><dt>path</dt><dd><code>settlements[bonegate]</code></dd><dt>collection</dt><dd><a href="data-town-settlements.html">Settlements</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>18</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>bonegate</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Name</td><td><code>Bonegate</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Zone</td><td><code>7</code></td><td><code>int</code></td><td>—</td></tr><tr><td>Band</td><td><code>high</code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Capital of</td><td><code>null</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Budget <span class="dim">(hr)</span></td><td><code>14.2</code></td><td><code>num</code></td><td>—</td></tr><tr><td>Innate elements</td><td><code>chaos</code></td><td><code>list</code></td><td>—</td></tr><tr><td>Base bias (flavour)</td><td><code>heavy (Armour)</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Budget note</td><td><code></code></td><td><code>text</code></td><td>—</td></tr><tr><td>NPCs</td><td><code>counterhand · porter · waypoint_keeper · collector · armourer</code></td><td><code>list</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Stock lines</td><td><code>reliquary · collector_hint · stash_tab_1 · road_link · repair · filter_preset</code></td><td><code>list</code><span class="dim"> → stock</span></td><td>—</td></tr><tr><td>Starting settlement</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Armourer discount <span class="dim">(m)</span></td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Armourer variant</td><td><code></code></td><td><code>str</code></td><td>—</td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>bonegate</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Name</td><td><code>Bonegate</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Zone</td><td><code>7</code></td><td><code>int</code></td><td>—</td></tr><tr><td>Band</td><td><code>high</code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Capital of</td><td><code>null</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Innate elements</td><td><code>chaos</code></td><td><code>list</code></td><td>—</td></tr><tr><td>Base bias (flavour)</td><td><code>heavy (Armour)</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Budget note</td><td><code></code></td><td><code>text</code></td><td>—</td></tr><tr><td>NPCs</td><td><code>counterhand · porter · waypoint_keeper · collector · armourer</code></td><td><code>list</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Stock lines</td><td><code>reliquary · collector_hint · stash_tab_1 · road_link · repair · filter_preset</code></td><td><code>list</code><span class="dim"> → stock</span></td><td>—</td></tr><tr><td>Starting settlement</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Armourer discount <span class="dim">(m)</span></td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Armourer variant</td><td><code></code></td><td><code>str</code></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="settlements"><input type="hidden" name="id" value="bonegate">
 <div class="f"><label for="f-id">id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value="bonegate" pattern="^[a-z][a-z0-9_]*$"></div></div>
@@ -163,7 +163,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><label for="f-zone">Zone</label><div><input id="f-zone" type="text" inputmode="decimal" name="zone" value="7" min="1" max="9"></div></div>
 <div class="f"><label for="f-band">Band</label><div><input id="f-band" type="text" name="band" value="high" list="f-band-dl" placeholder="one of engine:loot.bands"><datalist id="f-band-dl"></datalist></div></div>
 <div class="f"><label for="f-capital">Capital of</label><div><input id="f-capital" type="text" name="capital" value="{}" list="f-capital-dl" placeholder="low | mid | high | "><datalist id="f-capital-dl"><option value="low"></option><option value="mid"></option><option value="high"></option><option value=""></option></datalist></div></div>
-<div class="f"><label for="f-budget-hr">Budget <span class="dim">(hr)</span></label><div><input id="f-budget-hr" type="text" inputmode="decimal" name="budget_hr" value="14.2" min="0"></div></div>
 <div class="f"><label for="f-innate">Innate elements</label><div><textarea id="f-innate" name="innate" spellcheck="false">[&quot;chaos&quot;]</textarea></div></div>
 <div class="f"><label for="f-base-bias-flavor">Base bias (flavour)</label><div><input id="f-base-bias-flavor" type="text" inputmode="decimal" name="base_bias_flavor" value="heavy (Armour)"></div></div>
 <div class="f"><label for="f-budget-note">Budget note</label><div><textarea id="f-budget-note" name="budget_note"></textarea></div></div>
@@ -188,7 +187,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;chaos&quot;
   ],
   &quot;base_bias_flavor&quot;: &quot;heavy (Armour)&quot;,
-  &quot;budget_hr&quot;: 14.2,
   &quot;npcs&quot;: [
     &quot;counterhand&quot;,
     &quot;porter&quot;,

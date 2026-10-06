@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { E, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { buildCharacter, emptyGear } from '../src/sim/player';
+import { poolGear } from './sheetFixture';
 import { mobSwing, playerSwing } from '../src/sim/combat';
 import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct } from '../src/sim/skills';
 import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/mobStatus';
@@ -182,7 +183,7 @@ describe('the support rows that change the character', () => {
     // the charges were spent absorbing hits the sheet would otherwise have taken
     expect(s.player.charges! < valueOf('buff.ghost_dance', 'dodge_charges_cap')).toBe(true);
     expect(s.player.hp).toBeGreaterThanOrEqual(Math.min(before, s.player.hp));
-  }, 180000);
+  }, 30000);
 
   it('Cleanse clears what is on the character and pays its own share of the pool', () => {
     const s = newGame(100);
@@ -209,7 +210,7 @@ describe('the support rows that change the character', () => {
     expect(s.player.hp).toBeGreaterThan(1);
     expect(cleansed || hasRule(row('heal.cleanse'), 'cleanses_status')).toBe(true);
     expect(valueOf('heal.cleanse', 'heal_instant')).toBe(8);
-  }, 180000);
+  }, 30000);
 
   it('Magia Drive restarts the shield without waiting out the delay', () => {
     const fold = sm.aggregateEffects([row('buff.magia_drive')]);
@@ -218,6 +219,9 @@ describe('the support rows that change the character', () => {
     const s = newGame(101);
     setLevel(s, 60);
     s.zone = 5;
+    // the shield is a gear line, so the character under test wears the piece that carries it — a
+    // recharge test on a zero pool can never read a recharge
+    s.gear = poolGear();
     s.skills.owned['buff.magia_drive'] = 0;
     s.skills.xp['buff.magia_drive'] = 8000;
     s.skills.list[0] = 'buff.magia_drive';
@@ -232,7 +236,7 @@ describe('the support rows that change the character', () => {
     }
     expect(rechargedWhileHit).toBe(true);
     void fold;
-  }, 180000);
+  }, 30000);
 
   it('Energy Absorb ramps its share from base to Cap and negates it even on a full shield', () => {
     expect(valueOf('buff.energy_absorb', 'es_absorb_pct')).toBe(15);
@@ -255,7 +259,7 @@ describe('the support rows that change the character', () => {
     expect(absorbing.absorbed).toBeGreaterThan(0);
     expect(absorbing.toHp).toBeLessThan(plain.toHp);
     expect(plain.toHp + plain.toEs).toBeCloseTo(absorbing.toHp + absorbing.toEs + absorbing.absorbed, 6);
-  }, 180000);
+  }, 30000);
 });
 
 describe('the curse rows that act on other mobs', () => {

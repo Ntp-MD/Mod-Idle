@@ -81,16 +81,13 @@ const specs: Record<string, any> = {
         elite_tier_stones: ['int', 'Tier stones per elite'],
         boss_per_hour: ['int', 'Boss kills per hour'],
         boss_tier_stones: ['int', 'Tier stones per boss'],
-        push_hr_levels_91_100: num('Hours of the level 91-100 push'),
         kill_rate_tolerance: num('Kill-rate tolerance', { min: 0, max: 1 }),
       } },
-      'loot.bands': { kind: 'recordmap', group: 'Loot', label: 'Band parameters', idField: '$key', columns: ['$key', 'group_mobs', 'kills_per_hr_published', 'lck_level', 'upgrades_per_hr'], fields: {
+      'loot.bands': { kind: 'recordmap', group: 'Loot', label: 'Band parameters', idField: '$key', columns: ['$key', 'group_mobs', 'lck_level', 'upgrades_per_hr'], fields: {
         group_mobs: num('Mobs per group', { min: 0.1 }),
-        kills_per_hr_published: ['int', 'Kills/hr published in loot.md'],
         lck_level: ['int', 'Luck level', { nullable: true, pattern: '^(ceiling|\\d+)$', help: 'Integer level, or the word "ceiling".' }],
         upgrades_per_hr: ['int', 'Upgrades kept per hour'],
       } },
-      'loot.timeline_checkpoints_hr': { kind: 'constmap', group: 'Loot', label: 'Timeline checkpoints', fields: {}, unit: 'hr' },
       'loot.bands.$add': { hidden: true },
       f_rows_carried: { kind: 'records', group: 'Engine', label: 'Hand-carried F rows', idField: 'id', columns: ['id', 'value', 'status'], note: 'Rows the engine does not compute yet; they are read back against the prose.', fields: {
         id: str('Row id', { pattern: '^[A-Z]\\d+$' }),
@@ -127,13 +124,13 @@ const specs: Record<string, any> = {
         id: str('id', { pattern: '^[a-z][a-z0-9_]*$' }), name: str('Name'),
         kind: ['enum', 'Kind', { ref: 'invariants.allowed_kinds' }], rule: txt('Where it appears'),
       } },
-      settlements: { kind: 'records', group: 'Cast', label: 'Settlements', idField: 'id', columns: ['id', 'name', 'zone', 'band', 'capital', 'budget_hr'], fields: {
+      settlements: { kind: 'records', group: 'Cast', label: 'Settlements', idField: 'id', columns: ['id', 'name', 'zone', 'band', 'capital'], fields: {
         id: str('id', { pattern: '^[a-z][a-z0-9_]*$' }), name: str('Name'),
         zone: ['int', 'Zone', { min: 1, max: 9 }],
         band: ['enum', 'Band', { ref: 'engine:loot.bands' }],
         capital: ['enum', 'Capital of', { options: ['low', 'mid', 'high', ''], nullable: true }],
         innate: ['list', 'Innate elements', { options: ELEMENTS }],
-        base_bias_flavor: str('Base bias (flavour)'), budget_hr: num('Budget', { unit: 'hr', min: 0 }),
+        base_bias_flavor: str('Base bias (flavour)'),
         budget_note: txt('Budget note'),
         npcs: ['list', 'NPCs', { ref: 'npcs' }],
         stock: ['list', 'Stock lines', { ref: 'stock' }],

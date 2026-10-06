@@ -30,21 +30,21 @@ import checks.md
 
 ```
 gold per junk piece sold          = 1
-mob junk/hour (high zone, no Lck)    = 415      (kills/hr x a flat expected gold per kill; rarity sets the price, not the income)
-max gold/hour                        = 415  → 6.9 gold per minute of income
-opportunity cost of 1 gold           = 1 Reroll value stone forgone = 1/52 of an hour of Reroll capacity ≈ 1.15 min of craft progress
-full-Lck ceiling (F3 878 drops/hr)   = ~875 gold/hour
+mob junk/hour (high zone, no Lck)    = 79       (kills/hr x a flat expected gold per kill; rarity sets the price, not the income)
+max gold/hour                        = 79   → 1.3 gold per minute of income
+opportunity cost of 1 gold           = 1 Reroll value stone forgone = 1/10 of an hour of Reroll capacity ≈ 6 min of craft progress
+full-Lck ceiling (F3 252 drops/hr)   = ~249 gold/hour
 ```
 
 - These four lines are **computed, not typed**: `tools/data/engine.json` → `tools/lib/engine.ts` → `node tools/check.ts --checks` (rows X5-X8) and `node tools/town.ts --checks` (T2-T7). Changing a drop rate therefore moves the gold prices in `towns-stalls.md` automatically.
 
 - Every price in this project is therefore written as **"minutes of full-sell income"**, the same unit `tasks.md` uses. A 30-minute item costs ~210 gold and 30 minutes of Reroll progress, and that second number is the real price.
-- Junk is kept by the filter automatically and sold manually at the Counterhand, so the crafting engine (E6/E7/E8 timelines) keeps its designed stone income while gold tracks the same kill count.
-- Accepted imbalance: an Lck build mints up to ×2.11 more gold per hour. Legal **only while** gold has no power sink. Guard row: checks.md G8.
+- Junk is kept by the filter automatically and sold manually at the Counterhand, so the crafting engine (E6/E7/E8, the counts those rows state) keeps its designed stone income while gold tracks the same kill count.
+- Accepted imbalance: an Lck build mints up to ×3.15 more gold per hour. Legal **only while** gold has no power sink. Guard row: checks.md G8.
 
 # Why gold must have repeatable sinks
 
-Most town purchases are one-time (stash tab, house, deed, pouch tier), so gold demand would die within the last ~20 hours of the level-100 run. The sink list must therefore contain *repeatable* lines, and only these kinds:
+Most town purchases are one-time (stash tab, house, deed, pouch tier), so gold demand would die inside the level-100 run's last stretch. The sink list must therefore contain *repeatable* lines, and only these kinds:
 
 | Repeatable sink | What it costs | Why it is safe |
 |---|---|---|

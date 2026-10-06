@@ -72,7 +72,7 @@
       "cd": 0,
       "mana": "8%",
       "basis": "magic",
-      "final_pct": 103.191,
+      "final_pct": 103,
       "targets": "1/1",
       "effect": "Uses the weapon Element · the caster's core press: no timer of its own, so mana and the beat are what gate it",
       "modelled_by": "element"
@@ -86,7 +86,7 @@
       "cd": 6,
       "mana": "14%",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "1/1",
       "effect": "Single target · applies 2 burn stacks",
       "effects": [
@@ -107,7 +107,7 @@
       "cd": 5,
       "mana": "11%",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "1/1",
       "effect": "Fast cheap fire bolt · 1 burn stack",
       "effects": [
@@ -128,7 +128,7 @@
       "cd": 13,
       "mana": "21 flat (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "3/1",
       "effect": "AoE firestorm · 1 burn stack to all hit",
       "effects": [
@@ -152,7 +152,7 @@
       "cd": 14,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "3/1",
       "effect": "Heavy AoE slam · 2 burn stacks to all hit",
       "effects": [
@@ -176,7 +176,7 @@
       "cd": 9,
       "mana": "15%",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "1/1",
       "effect": "Single target · 3 burn stacks",
       "effects": [
@@ -197,7 +197,7 @@
       "cd": 7,
       "mana": "14%",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "1/1",
       "effect": "Heavy single hit · 2 burn stacks",
       "effects": [
@@ -218,7 +218,7 @@
       "cd": 5,
       "mana": "11%",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "1/1",
       "effect": "Fast cold bolt · 1 chill",
       "rules": [
@@ -234,7 +234,7 @@
       "cd": 6,
       "mana": "13%",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "1/1",
       "effect": "Single target · 1 chill",
       "rules": [
@@ -250,7 +250,7 @@
       "cd": 8,
       "mana": "14%",
       "basis": "magic",
-      "final_pct": 103.191,
+      "final_pct": 103,
       "targets": "1/2",
       "effect": "2 hits at 55% each · chills the target",
       "effects": [
@@ -280,7 +280,7 @@
       "cd": 13,
       "mana": "20 flat (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "3/1",
       "effect": "AoE storm · chills all hit",
       "rules": [
@@ -297,7 +297,7 @@
       "cd": 10,
       "mana": "16 flat (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "3/1",
       "effect": "Orb that chills all it touches",
       "rules": [
@@ -314,7 +314,7 @@
       "cd": 8,
       "mana": "14%",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "1/1",
       "effect": "+25% damage if the target is already chilled",
       "duration": "8 sec",
@@ -337,7 +337,7 @@
       "cd": 9,
       "mana": "16% (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "3/1",
       "effect": "Arcs to 3 targets · shocks all hit",
       "rules": [
@@ -354,7 +354,7 @@
       "cd": 5,
       "mana": "12%",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "1/1",
       "effect": "Fast single bolt · 1 shock",
       "rules": [
@@ -370,7 +370,7 @@
       "cd": 4,
       "mana": "9%",
       "basis": "magic",
-      "final_pct": 103.191,
+      "final_pct": 103,
       "targets": "1/1",
       "effect": "Cheapest fastest press · 1 shock",
       "rules": [
@@ -386,7 +386,7 @@
       "cd": 11,
       "mana": "18 flat",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "1/1",
       "effect": "Heavy single hit · shocks the target (shock carries the 1 sec interrupt)",
       "rules": [
@@ -402,7 +402,7 @@
       "cd": 14,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "3/1",
       "effect": "Big AoE storm · shocks all hit",
       "rules": [
@@ -419,7 +419,7 @@
       "cd": 10,
       "mana": "15% (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 104.063,
+      "final_pct": 104,
       "targets": "3/1",
       "effect": "Field around self · shocks all hit",
       "rules": [
@@ -436,7 +436,7 @@
       "cd": 6,
       "mana": "13%",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "1/1",
       "effect": "Single target · 2 poison stacks",
       "effects": [
@@ -457,7 +457,7 @@
       "cd": 9,
       "mana": "16% (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "3/1",
       "effect": "Spray · 1 poison stack to all hit",
       "effects": [
@@ -481,7 +481,7 @@
       "cd": 7,
       "mana": "14%",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "1/1",
       "effect": "Single target · 3 poison stacks",
       "effects": [
@@ -502,7 +502,7 @@
       "cd": 12,
       "mana": "19 flat (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "3/1",
       "effect": "Lingering cloud · 2 poison stacks to all hit",
       "effects": [
@@ -526,7 +526,7 @@
       "cd": 10,
       "mana": "15 flat",
       "basis": "magic",
-      "final_pct": 105.806,
+      "final_pct": 106,
       "targets": "1/1",
       "effect": "Heavy poison press · 4 poison stacks",
       "effects": [
@@ -547,7 +547,7 @@
       "cd": 6,
       "mana": "13%",
       "basis": "magic",
-      "final_pct": 103.191,
+      "final_pct": 103,
       "targets": "1/1",
       "effect": "Single target · 1 mark stack",
       "effects": [
@@ -568,7 +568,7 @@
       "cd": 9,
       "mana": "16% (AoE ×1.5)",
       "basis": "magic",
-      "final_pct": 103.191,
+      "final_pct": 103,
       "targets": "3/1",
       "effect": "AoE blast · applies 1 mark stack to all hit",
       "effects": [
@@ -592,7 +592,7 @@
       "cd": 12,
       "mana": "19 flat",
       "basis": "magic",
-      "final_pct": 103.191,
+      "final_pct": 103,
       "targets": "1/1",
       "effect": "This hit pierces 100% of the target's Elemental res",
       "effects": [
@@ -613,7 +613,7 @@
       "cd": 10,
       "mana": "15 flat",
       "basis": "magic",
-      "final_pct": 103.191,
+      "final_pct": 103,
       "targets": "1/1",
       "effect": "Heavy press · applies 5 mark stacks",
       "effects": [
@@ -634,7 +634,7 @@
       "cd": 6,
       "mana": "10% (AoE ×1.5)",
       "basis": "phys",
-      "final_pct": 142.836,
+      "final_pct": 143,
       "targets": "3/1",
       "effect": "Swing around, hits all in range",
       "modelled_by": "targets"
@@ -648,7 +648,7 @@
       "cd": 10,
       "mana": "18%",
       "basis": "phys",
-      "final_pct": 135.776,
+      "final_pct": 136,
       "targets": "1/1",
       "effect": "Heavy hit + target takes +15% Element damage 8 sec (replaces Guard Break, which referenced a nonexistent system)",
       "duration": "8 sec",
@@ -670,7 +670,7 @@
       "cd": 9,
       "mana": "15% (AoE ×1.5)",
       "basis": "phys",
-      "final_pct": 145.19,
+      "final_pct": 145,
       "targets": "3/3",
       "effect": "Spin 3 rounds, 1 hit per target per round · Per-target hit count = proc engine",
       "effects": [
@@ -691,7 +691,7 @@
       "cd": 8,
       "mana": "12%",
       "basis": "phys",
-      "final_pct": 140.483,
+      "final_pct": 140,
       "targets": "1/1",
       "effect": "Stops target attacks 1 sec (a flat stop, not a rolled stun chance)",
       "effects": [
@@ -715,7 +715,7 @@
       "cd": 7,
       "mana": "12%",
       "basis": "phys",
-      "final_pct": 142.836,
+      "final_pct": 143,
       "targets": "1/1",
       "effect": "Guarantees bleeding on the hit (100% bleed chance · bleed does not stack, a new hit refreshes its 5 sec)",
       "effects": [
@@ -736,7 +736,7 @@
       "cd": 9,
       "mana": "14 flat",
       "basis": "phys",
-      "final_pct": 140.483,
+      "final_pct": 140,
       "targets": "1/1",
       "effect": "Leech +25% and physical power x1.10 for 6 sec · the window opens on the press and rides the skill's own duration",
       "duration": "6 sec",
@@ -767,7 +767,7 @@
       "cd": 11,
       "mana": "16 flat",
       "basis": "phys",
-      "final_pct": 142.836,
+      "final_pct": 143,
       "targets": "1/1",
       "effect": "Instant heal 6% Max HP and leech +15% on the press",
       "effects": [
@@ -794,7 +794,7 @@
       "cd": 6,
       "mana": "10%",
       "basis": "phys",
-      "final_pct": 145.19,
+      "final_pct": 145,
       "targets": "1/1",
       "effect": "Single target · This hit does not roll dodge",
       "rules": [
@@ -810,7 +810,7 @@
       "cd": 7,
       "mana": "13%",
       "basis": "phys",
-      "final_pct": 140.483,
+      "final_pct": 140,
       "targets": "1/3",
       "effect": "3 arrows, 40% each, 120% total of formula · Per-hit procs fire 3 times",
       "effects": [
@@ -837,7 +837,7 @@
       "cd": 12,
       "mana": "16%",
       "basis": "phys",
-      "final_pct": 138.129,
+      "final_pct": 138,
       "targets": "1/1",
       "effect": "This hit +25% crit chance · Burst window for crit builds",
       "effects": [
@@ -858,7 +858,7 @@
       "cd": 7,
       "mana": "12 flat",
       "basis": "phys",
-      "final_pct": 138.129,
+      "final_pct": 138,
       "targets": "1/1",
       "effect": "This hit does not roll dodge and strips the target's Elemental resistance -15% for 8 sec",
       "duration": "8 sec",
@@ -1240,12 +1240,12 @@
       "cd": 20,
       "mana": "20%",
       "duration": "8 sec",
-      "effect": "Restores 8% Max HP per second 8 sec (= +64% pool in long fights)",
+      "effect": "Restores 10% Max HP per second 8 sec (= +80% pool in long fights)",
       "effects": [
         {
           "stat": "heal_per_sec",
           "op": "add_pct",
-          "value": 8
+          "value": 10
         }
       ]
     },
@@ -1256,12 +1256,12 @@
       "cd": 40,
       "mana": "25%",
       "duration": "Instant",
-      "effect": "Restores 45% Max HP instantly · Covers last-moment windows",
+      "effect": "Restores 60% Max HP instantly · Covers last-moment windows",
       "effects": [
         {
           "stat": "heal_instant",
           "op": "add_pct",
-          "value": 45
+          "value": 60
         }
       ]
     },

@@ -98,16 +98,20 @@ function build(b: any, L = S.level_cap, gearMod = 0): any {
   const armourFlat = per['Armour flat'] ? per['Armour flat'].count * M.armour_flat_t1 : 0;
   const esFlat = per['Energy Shield flat'] ? per['Energy Shield flat'].count * M.energy_shield_flat_t1 : 0;
 
-  const hp = (vit * K.K_VIT_HP + LG.hp_per_level * (L - 1)) * (1 + hpPct);
-  const regen = vit * K.K_VIT_REGEN * (1 + (per['Max HP %'] ? 0 : 0));
-  const res = (vit * K.K_VIT_RES) * (1 + resPct);
-  const cdr = (agi * 0) + 0;
+  // Every defensive line is the shared engine's own formula (engine/index.ts), the same one
+  // game/src/sim/player.ts builds the live character with — so a change to a K or a base moves the
+  // cage and the game together. Hand-rolled copies here were where the two silently diverged.
+  const hp = eng.maxHpOf(vit, L, hpPct * 100);
+  const regen = eng.hpRegenOf(vit);
+  const res = (vit * K.K_MOB_RES) * (1 + resPct);
+  // CDR is Wis-fed (`cdrOf`); these builds spend no Wis, so the Mod line is the only input
+  const cdr = eng.cdrOf(0, cdrPct * 100);
   // the Gear Mod is a second copy of the theme's own defensive line at the upgrade value
   // (`item-base.md`); Energy Shield is a pool this table does not spend and Evasion is not
   // modelled here at all, so only the Armour school can raise this gate
-  const evRating = dex * K.K_EVASION + evFlat + (evPct / 100) * (dex * K.K_EVASION + evFlat);
-  const evAgi = agi / (1 / K.K_AGI_EVAS);
-  const armour = str * K.K_ARMOUR + armourFlat + (armourFlat ? gearMod : 0);
+  const evRating = eng.evasionRating(dex, evFlat, evPct);
+  const evAgi = eng.agilityEvasion(agi);
+  const armour = eng.armourOf(str) + armourFlat + (armourFlat ? gearMod : 0);
   return { b, str, vit, dex, agi, hp, regen, res, cdr, evRating, evAgi, armour, hpPct, resPct, cdrPct, manaPct, esFlat };
 }
 
@@ -165,9 +169,14 @@ function zoneEncounter(r: any, dps: any, mobHp: any, L: any, kind: any) {
 // DPS from the offense chain: physical power x hits/sec, with this build's own Str and Agi,
 // then the skill multiplier that mob_HP already folds in (there is no passive tree).
 function dpsOf(r: any, L = S.level_cap) {
-  const sword = E.weapons.find((w: any) => w.id === 'sword') || E.weapons[0];
-  const phys = r.str * K.K_STR;
-  const aspd = (sword.weapon_aspd * (100 + (r.agi - S.base) * K.K_AGI_ASPD + M.aspd_pct)) / 100;
+  // engine.json weapons carry `name`, not `id`: matching on `id` silently failed and fell back to
+  // E.weapons[0] (the dagger), pricing every kill time below at dagger speed. Match the one-handed
+  // sword the same way the engine's own REFERENCE build does.
+  const weapon = E.weapons.find((w: any) => /one-handed/.test(w.name)) || E.weapons[0];
+  // the shared offense chain: physical power (includes the weapon's `1.2 / aspd` multiplier) ×
+  // hits/sec, at this build's own Str and Agi, then the skill multiplier `mob_HP` already folds in
+  const phys = r.str * K.K_STR * eng.weaponMult(weapon.weapon_aspd);
+  const aspd = eng.hitsPerSec(eng.aspdOf(r.agi, weapon.weapon_aspd, M.aspd_pct));
   return phys * aspd * eng.skillF(L);
 }
 
@@ -228,10 +237,10 @@ function pushTable() {
 const SECTIONS: any[] = [
   { key: 'build-defs', title: 'Build definitions', render: buildDefs },
   { key: 'push-table', title: 'Push downtime', render: pushTable },
-  { key: 'survival-mob', title: 'Level 100 · one mob', kind: 'normal' },
-  { key: 'survival-group', title: 'Level 100 · a group of 5 (3 engage at once)', kind: 'group' },
-  { key: 'survival-elite', title: 'Level 100 · an elite', kind: 'elite' },
-  { key: 'survival-boss', title: 'Level 100 · the zone-9 boss', kind: 'boss' },
+  { key: 'survival-mob', title: `Level ${S.level_cap} · one mob`, kind: 'normal' },
+  { key: 'survival-group', title: `Level ${S.level_cap} · a group of 5 (3 engage at once)`, kind: 'group' },
+  { key: 'survival-elite', title: `Level ${S.level_cap} · an elite`, kind: 'elite' },
+  { key: 'survival-boss', title: `Level ${S.level_cap} · the zone-9 boss`, kind: 'boss' },
   { key: 'survival-boss-zones', title: 'Boss at every zone edge', render: zoneBossBlock },
 ];
 
@@ -253,7 +262,7 @@ function gates() {
 
   const tanks = built.find((r: any) => r.b.id === 'tank'), glass = built.find((r: any) => r.b.id === 'glass');
   // removed the per-item Core Stat % multiplier, so the widest pool separation the table can
-  // have is now fully determined: a full Vit spread against a build that spent its twelve items on
+  // have is now fully determined: a full Vit spread against a build that spent its thirteen items on
   // another stat, over the shared per-level term. The old `> 2x` band was priced while the %
   // multiplier still existed and no build can reach it any more, so the gate measures the separation
   // against the ceiling the data actually allows rather than against a margin from the retired 816.

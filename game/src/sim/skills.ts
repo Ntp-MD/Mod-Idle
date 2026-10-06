@@ -467,6 +467,9 @@ export function castOnce(
     // the Element share of a magic-basis press is the part the mob's resistance answers, and a
     // row that names a pierce removes that share of the mob's own line for this press only (Nether Orb)
     const magicBasis = skill.basis === 'magic' ? c.magic + c.elem * (c.alignment / 100) : 0;
+    // the character's own Element mix, so a press's Element share can be split the way a swing's pools are
+    const elemPools = Object.entries(c.elemByElement);
+    const elemPoolTotal = elemPools.reduce((a, [, v]) => a + v, 0);
     const pierce = effects.find((e) => e.stat === 'resistance_pierce_pct');
     // the row's own bleed feed: a target-side `bleed_chance` it guarantees on the mob it lands on
     const rowBleedPct = effects
@@ -481,7 +484,17 @@ export function castOnce(
       const cut = env.mobStatus ? (targetMods(mobModsOn(env.mobStatus, t.id)).armourCut || 0) : 0;
       const stripped = env.curses ? lineValue(env.curses, t.id, 'mob_elemental_resistance_pct') : 0;
       const pierced = pierce ? -((t.res || 0) * (pierce.value / 100)) : 0;
-      const mitigated0 = eng.mitigateMobHit(t, share - elemPart, elemPart, cut, stripped + pierced);
+      // the press's Element share meets the race's per-Element res (X54) exactly as a swing's does:
+      // the share is split by the character's own Element mix, or by the mob's innate when the build
+      // carries no named pool, so a race that shrugs fire and fears cold answers each pool on its own.
+      let elemArg: number | Record<string, number> = elemPart;
+      if (elemPart > 0) {
+        const byEl: Record<string, number> = {};
+        if (elemPoolTotal > 0) for (const [el, pool] of elemPools) byEl[el] = elemPart * (pool / elemPoolTotal);
+        else if (t.innate && t.innate.length) byEl[t.innate[0]] = elemPart;
+        if (Object.keys(byEl).length) elemArg = byEl;
+      }
+      const mitigated0 = eng.mitigateMobHit(t, share - elemPart, elemArg, cut, stripped + pierced);
       // §12: a PHYSICAL press is the weapon arguing with a body too, so it carries the size ladder;
       // a magic-damage press is exempt (the caster's spell is not the weapon's own swing).
       const mitigated = skill.basis === 'phys'

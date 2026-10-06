@@ -6,7 +6,7 @@ import formula-utility.md
 import loot.md
 import elements.md
 
-The complete mob list, generated from `tools/data/engine.json` (`mob.zones` · `mob.species` · `mob.bosses` · `K`). Every entry a build can spawn is here: **22 species × 4 body classes across 18 zones**, plus Elite and the eighteen zone bosses. Nothing about mobs needs designing after this file — the only open mob questions are listed at the bottom.
+The complete mob list, generated from `tools/data/engine.json` (`mob.zones` · `mob.species` · `mob.bosses` · `K`). Every entry a build can spawn is here: the species × body roster across the zones, plus Elite and the zone bosses. Nothing about mobs needs designing after this file — the only open mob questions are listed at the bottom.
 
 **How to read a row** — one row is one spawnable mob type: an `id` a save can store, the zone and level range it lives in, and its numbers produced by the *player's own formulas* run over its own stat block. HP is given at both ends of the zone's range because `mob_HP(L)` is the curve, so a mob at a middle level interpolates between the two.
 
@@ -315,6 +315,151 @@ The complete mob list, generated from `tools/data/engine.json` (`mob.zones` · `
 Every row is the mob's own stat block at the zone's **last** level (`mob stat = 108` × the species vector, flat with no level term), then by the body class: accuracy = Dex line × 1.5 × accuracy tier · evasion = Dex × 0.5 × body · armour = Str × 2 · res = Vit × 0.05 · crit = Lck × 0.05 · dodge = own Agi rate ÷ (rate + a same-level attacker's accuracy) (X24). HP is `mob_HP(L) × body` at both ends of the range, so a mob mid-range interpolates. XP is `10 × the mob's own level` with elite ×3 and boss ×15 (world.md XP), printed as a range because a mob spawns at the attacker's level, so it is read at both ends of the zone. `status gate` is the mob's own Elemental Alignment (`Dex × 0.05`, no Cap), the number that decides how often its innate Element status actually lands (combat.md section 2 step 9). A mob spawns at the attacker's level clamped into its zone's range; its innate Element is rolled with the species bias at ×3 against any other Element the zone carries at ×1; and `drops: weapon` means the lineage is allowed to be the source of a weapon-slot piece; `armour only` species still drop every other slot, so the 8% base drop rate, the quality floors and the whole stone funnel are untouched (loot.md sections 1-2 · gear, herbs, stones and junk are the four streams, and the **humanoid** lineages add a fifth, potions, on the derived chance **X49** prints).
 <!-- END GENERATED:mob-roster -->
 
+# Variant Drop Sheets
+
+The junk stream is **variant**-bound: each rung of a ladder drops its own item, and the rung's rarity sets both the sell price and the per-kill chance — so rarity moves how often the junk falls, never how much gold a kill is worth. Only a rung the cast can actually field appears here: a normal rung is cast in some sub-zone, an Elite rung is the elite some sub-zone declares, and a Boss rung belongs to a species that owns a boss — a name nothing can spawn would be an item the Counterhand advertises and nothing ever pays. Every variant also carries a **lean**, the collectible stream it tilts toward, and the three normal rungs of a ladder cycle gear · herb · junk so the mix averages back to the balanced case. Gear, herbs and stones are the shared streams every variant pays, and a humanoid lineage adds the potion stream (loot.md).
+
+<!-- BEGIN GENERATED:race-drop -->
+| Variant | Species | junk drop | rarity | sell gold | junk per kill | lean | potion (humanoid) | gear stream | damage tag |
+|---|---|---|---|---|---|---|---|---|---|
+| Sneak Goblin | Goblin | Goblin Ear | common | 1 | 13.4% | gear | yes | weapon | physical |
+| Raider Goblin | Goblin | Goblin Bile | uncommon | 5 | 2.7% | herb | yes | weapon | physical |
+| Tinker Goblin | Goblin | Goblin Cog | rare | 25 | 0.5% | junk | yes | weapon | physical |
+| Shaman Goblin | Goblin | Goblin Charm | rare | 25 | 0.5% | none | yes | weapon | physical |
+| Goblin King | Goblin | Goblin Crown | rare | 25 | 0.5% | none | yes | weapon | physical |
+| Raider Orc | Orc | Orc Warpaint | common | 1 | 13.4% | gear | yes | weapon | physical |
+| Shaman Orc | Orc | Orc Tusk | uncommon | 5 | 2.7% | herb | yes | weapon | physical |
+| Berserker Orc | Orc | Orc Skull | rare | 25 | 0.5% | junk | yes | weapon | physical |
+| Juggernaut Orc | Orc | Orc Charm | rare | 25 | 0.5% | none | yes | weapon | physical |
+| Warlord Orc | Orc | Orc Crown | rare | 25 | 0.5% | none | yes | weapon | physical |
+| Miner Kobold | Kobold | Kobold Candle | common | 1 | 13.4% | gear | — | weapon | physical |
+| Trapper Kobold | Kobold | Kobold Wire | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Tinker Kobold | Kobold | Kobold Vault Key | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Hoarder Kobold | Kobold | Kobold Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Brute Ogre | Ogre | Ogre Nail | common | 1 | 13.4% | gear | — | weapon | physical |
+| Butcher Ogre | Ogre | Ogre Tooth | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Swamp Ogre | Ogre | Ogre Heartstone | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Mage Ogre | Ogre | Ogre Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Ogre King | Ogre | Ogre Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Cave Troll | Troll | Troll Nail | common | 1 | 13.4% | gear | — | weapon | physical |
+| Forest Troll | Troll | Troll Hide | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Swamp Troll | Troll | Troll Heartstone | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Stone Troll | Troll | Troll Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Elder Troll | Troll | Troll Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Warrior Minotaur | Minotaur | Minotaur Hoof | common | 1 | 13.4% | gear | — | weapon | physical |
+| Berserker Minotaur | Minotaur | Minotaur Chain | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Guardian Minotaur | Minotaur | Minotaur Horn | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Blood Minotaur | Minotaur | Minotaur Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Warrior Skeleton | Skeleton | Skeleton Bone | common | 1 | 13.4% | gear | — | weapon | physical |
+| Archer Skeleton | Skeleton | Skeleton Marrow | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Knight Skeleton | Skeleton | Skeleton Sigil | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Mage Skeleton | Skeleton | Skeleton Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Bone Colossus | Skeleton | Skeleton Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Warrior Mummy | Mummy | Mummy Dust | common | 1 | 13.4% | gear | — | weapon | physical |
+| Priest Mummy | Mummy | Mummy Bandage | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Cursed Mummy | Mummy | Mummy Glyph | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Royal Mummy | Mummy | Mummy Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Mummy Lord | Mummy | Mummy Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Blood Vampire | Vampire | Vampire Ash | common | 1 | 13.4% | gear | — | weapon | mixed |
+| Noble Vampire | Vampire | Vampire Signet | uncommon | 5 | 2.7% | herb | — | weapon | mixed |
+| Vampire Knight | Vampire | Vampire Fang | rare | 25 | 0.5% | junk | — | weapon | mixed |
+| Vampire Lord | Vampire | Vampire Charm | rare | 25 | 0.5% | none | — | weapon | mixed |
+| Ancient Vampire | Vampire | Vampire Crown | rare | 25 | 0.5% | none | — | weapon | mixed |
+| Imp | Demon | Demon Ash | common | 1 | 13.4% | gear | — | weapon | mixed |
+| Demon Mage | Demon | Demon Horn | uncommon | 5 | 2.7% | herb | — | weapon | mixed |
+| Demon Brute | Demon | Demon Sigil | rare | 25 | 0.5% | junk | — | weapon | mixed |
+| Demon Knight | Demon | Demon Charm | rare | 25 | 0.5% | none | — | weapon | mixed |
+| Archdemon | Demon | Demon Crown | rare | 25 | 0.5% | none | — | weapon | mixed |
+| Splitter Slime | Slime | Slime Jelly | common | 1 | 13.4% | gear | — | armour only | magic |
+| Acid Slime | Slime | Slime Gland | uncommon | 5 | 2.7% | herb | — | armour only | magic |
+| Devourer Slime | Slime | Slime Core | rare | 25 | 0.5% | junk | — | armour only | magic |
+| Slime King | Slime | Slime Crown | rare | 25 | 0.5% | none | — | armour only | magic |
+| Cave Spider | Spider | Spider Silk | common | 1 | 13.4% | gear | — | armour only | physical |
+| Hunter Spider | Spider | Spider Fang | uncommon | 5 | 2.7% | herb | — | armour only | physical |
+| Web Spider | Spider | Spider Spinneret | rare | 25 | 0.5% | junk | — | armour only | physical |
+| Broodmother | Spider | Spider Crown | rare | 25 | 0.5% | none | — | armour only | physical |
+| Hunting Wolf | Wolf | Wolf Pelt | common | 1 | 13.4% | gear | — | weapon | physical |
+| Dire Wolf | Wolf | Wolf Fang | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Shadow Wolf | Wolf | Wolf Alpha Claw | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Wolf King | Wolf | Wolf Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Stone Golem | Golem | Golem Grit | common | 1 | 13.4% | gear | — | weapon | physical |
+| Iron Golem | Golem | Golem Wire | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Guardian Golem | Golem | Golem Shard | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Crystal Golem | Golem | Golem Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Colossus | Golem | Golem Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Wyrmling | Dragon | Dragon Claw | common | 1 | 13.4% | gear | — | weapon | mixed |
+| Drake | Dragon | Dragon Ichor | uncommon | 5 | 2.7% | herb | — | weapon | mixed |
+| Wyvern | Dragon | Dragon Scale | rare | 25 | 0.5% | junk | — | weapon | mixed |
+| Elder Dragon | Dragon | Dragon Charm | rare | 25 | 0.5% | none | — | weapon | mixed |
+| Ancient Dragon | Dragon | Dragon Crown | rare | 25 | 0.5% | none | — | weapon | mixed |
+| Young Treant | Treant | Treant Twig | common | 1 | 13.4% | gear | — | weapon | physical |
+| Thorn Treant | Treant | Treant Bark | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Rotting Treant | Treant | Treant Heartwood | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Ancient Treant | Treant | Treant Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Treant Elder | Treant | Treant Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Ranger | Human | Militia Badge | common | 1 | 13.4% | gear | yes | weapon | physical |
+| Warrior | Human | Veteran Seal | uncommon | 5 | 2.7% | herb | yes | weapon | physical |
+| Knight | Human | Knight Crest | rare | 25 | 0.5% | junk | yes | weapon | physical |
+| Mage | Human | Temple Charm | rare | 25 | 0.5% | none | yes | weapon | physical |
+| Paladin | Human | Paladin Crown | rare | 25 | 0.5% | none | yes | weapon | physical |
+| Hunter Lizardman | Lizardman | Lizardman Scale | common | 1 | 13.4% | gear | — | weapon | physical |
+| Warrior Lizardman | Lizardman | Lizardman Talon | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Scale Knight | Lizardman | Lizardman Crest | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Shaman Lizardman | Lizardman | Lizardman Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Lizardman Chief | Lizardman | Lizardman Crown | rare | 25 | 0.5% | none | — | weapon | physical |
+| Wood Elf | Elf | Elf Quill | common | 1 | 13.4% | gear | yes | weapon | mixed |
+| High Elf | Elf | Elf Dust | uncommon | 5 | 2.7% | herb | yes | weapon | mixed |
+| Moon Elf | Elf | Elf Runestone | rare | 25 | 0.5% | junk | yes | weapon | mixed |
+| Dark Elf | Elf | Elf Charm | rare | 25 | 0.5% | none | yes | weapon | mixed |
+| Elven Archmage | Elf | Elf Crown | rare | 25 | 0.5% | none | yes | weapon | mixed |
+| Hill Giant | Giant | Giant Sinew | common | 1 | 13.4% | gear | — | weapon | physical |
+| Stone Giant | Giant | Giant Knuckle | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Frost Giant | Giant | Giant Runestone | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Fire Giant | Giant | Giant Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Wolfman | Werewolf | Werewolf Pelt | common | 1 | 13.4% | gear | — | weapon | physical |
+| Dire Werewolf | Werewolf | Werewolf Fang | uncommon | 5 | 2.7% | herb | — | weapon | physical |
+| Blood Werewolf | Werewolf | Werewolf Claw | rare | 25 | 0.5% | junk | — | weapon | physical |
+| Alpha Werewolf | Werewolf | Werewolf Charm | rare | 25 | 0.5% | none | — | weapon | physical |
+| Forest Dryad | Dryad | Dryad Sap | common | 1 | 13.4% | gear | — | armour only | magic |
+| Flower Dryad | Dryad | Dryad Blossom | uncommon | 5 | 2.7% | herb | — | armour only | magic |
+| Thorn Dryad | Dryad | Dryad Heartwood | rare | 25 | 0.5% | junk | — | armour only | magic |
+
+Every variant drops its own junk, and the five rungs of a ladder read as one family — a Goblin pays an Ear at Sneak, Bile at Raider, a Cog at Tinker, a Charm at Shaman and a Crown at the King — so a Counterhand visit tells the player which **variants** they farmed, not only which races. **Rarity buys frequency, never income**: each rarity's per-kill chance is the junk line divided by its own sell price (`junk.rarities`), so a variant's expected gold per kill is the same whatever rung it sits on, and a rarer rung simply drops less often for more gold — which is a bag-pressure trade, since junk stacks 999/slot. Rarity is bound to the variant, not to the level, so the same mob never changes what it pays as the player levels. The **lean** column is the collectible stream that variant tilts toward, applied through `huntReweight` (**X56**): the three normal rungs of every ladder cycle gear · herb · junk, so a zone's aggregate mix stays the identity and only the per-kill mix moves, while **Elite** and **Boss** carry `none` because they already pay their own stone lines. Only a rung the cast can field carries a row at all — a rung nothing spawns is an item nothing pays (**X39**). A **humanoid** lineage adds the potion stream (X49) and a **weapon-carrier** lineage is the only source of weapon-slot gear; gear, herbs and stones are the shared streams every variant pays (loot.md sections 1-2).
+<!-- END GENERATED:race-drop -->
+
+# Race Resistance
+
+Every race's res is its own Vit line tilted by Element — it resists what it is made of and is weak to what answers it. The five multipliers average x1.00, so the headline res is unchanged and the profile only decides which Element a build should bring to a zone.
+
+<!-- BEGIN GENERATED:race-resist -->
+| Race | fire | cold | lightning | poison | chaos | headline res |
+|---|---|---|---|---|---|---|
+| Goblin | 0.60 ↓ | 1.00 | 1.00 | 1.40 ↑ | 1.00 | 5.3% |
+| Orc | 1.40 ↑ | 0.60 ↓ | 1.00 | 1.00 | 1.00 | 6.9% |
+| Kobold | 1.40 ↑ | 0.60 ↓ | 1.00 | 1.00 | 1.00 | 4.6% |
+| Ogre | 1.00 | 1.00 | 0.60 ↓ | 1.00 | 1.40 ↑ | 7.5% |
+| Troll | 0.60 ↓ | 1.00 | 1.00 | 1.40 ↑ | 1.00 | 8.0% |
+| Minotaur | 1.00 | 1.00 | 1.40 ↑ | 0.60 ↓ | 1.00 | 6.3% |
+| Skeleton | 1.00 | 1.00 | 0.50 ↓ | 1.00 | 1.50 ↑ | 8.5% |
+| Mummy | 0.50 ↓ | 1.00 | 1.00 | 1.00 | 1.50 ↑ | 8.5% |
+| Vampire | 0.60 ↓ | 1.00 | 1.00 | 1.00 | 1.40 ↑ | 5.4% |
+| Demon | 1.50 ↑ | 0.50 ↓ | 1.00 | 1.00 | 1.00 | 5.8% |
+| Slime | 1.00 | 1.00 | 0.50 ↓ | 1.50 ↑ | 1.00 | 7.9% |
+| Spider | 0.60 ↓ | 1.00 | 1.00 | 1.40 ↑ | 1.00 | 4.4% |
+| Wolf | 0.60 ↓ | 1.40 ↑ | 1.00 | 1.00 | 1.00 | 5.0% |
+| Golem | 1.00 | 1.00 | 1.50 ↑ | 1.00 | 0.50 ↓ | 8.4% |
+| Dragon | 1.50 ↑ | 0.50 ↓ | 1.00 | 1.00 | 1.00 | 7.0% |
+| Treant | 0.60 ↓ | 1.00 | 1.00 | 1.40 ↑ | 1.00 | 8.2% |
+| Human | 1.00 | 1.00 | 0.70 ↓ | 1.00 | 1.30 ↑ | 5.0% |
+| Lizardman | 1.40 ↑ | 0.60 ↓ | 1.00 | 1.00 | 1.00 | 5.4% |
+| Elf | 1.00 | 1.00 | 1.40 ↑ | 1.00 | 0.60 ↓ | 4.2% |
+| Giant | 0.60 ↓ | 1.40 ↑ | 1.00 | 1.00 | 1.00 | 7.6% |
+| Werewolf | 0.60 ↓ | 1.40 ↑ | 1.00 | 1.00 | 1.00 | 6.0% |
+| Dryad | 0.60 ↓ | 1.00 | 1.00 | 1.40 ↑ | 1.00 | 4.8% |
+
+Each race's res is its own Vit line (the **headline res** column) tilted by Element: ↑ resists that Element at x1.3-1.5, ↓ is weak to it at x0.5-0.7, and the other three sit at x1.00. The five multipliers always average x1.00 (**X54**), so the headline is the mean and the profile only decides which Element a build should bring to a zone — a Dragon shrugs fire and fears cold, a Skeleton shrugs chaos and fears lightning. The profile multiplies before the same Elemental resistance Cap the player obeys, and the mob's **innate Element** roll (its own bias) is a separate axis.
+<!-- END GENERATED:race-resist -->
+
 # Rules the Roster Runs On
 
 - **HP**: `mob_HP(L) x body.hp` - `mob_HP(L) = typical_gear_DPS(L) x (1 + 0.0034 x L)` (skill list only; the passive tree is empty) - `body.hp` and every per-entry number below are one home, this line only names the formula
@@ -335,5 +480,5 @@ Every row is the mob's own stat block at the zone's **last** level (`mob stat = 
 
 - **Player-side Evasion closed** — the player's line runs the same opposed form (`formula-defense.md` section 4: `rating ÷ (rating + mob_accuracy)`, plus Agi ÷ 30 points) and its table is generated, so the flat `K_dodge` divisor is gone.
 - **Mob skills** (`combat.md` §5b): skills follow the body tier — Small/Medium 0 (innate Element only), Large and Elite 1, Boss 1-2 — and each skill re-times the mob's priced `mob_PS` instead of adding power, so `mob_HP` and the timeline are untouched. The species table is the input: the physical lineages carry bleed, the casters lean on their innate status. Nothing here blocks shipping without it.
-- **Gear Armour / Evasion / Energy Shield flat ranges** are set (`mod-pool.md`, from `tools/data/mods.json`: Armour 8-40 · Evasion 6-30 · Energy Shield 12-60) — each is a share of its own stat line.
+- **Gear Armour / Evasion / Energy Shield flat ranges** are set in `mod-pool.md` from `tools/data/mods.json` — each is a share of its own stat line.
 - **`tools/survival.ts`** generates combat.md section 6-7 and gates them; it is run by `tools/verify.ts`.

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { sm, E } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
+import { poolGear } from './sheetFixture';
 import { newSkillState, effectsActive, toggleTrack, effectLine, describeFold } from '../src/sim/skills';
 import { newGame, tick, setLevel } from '../src/sim/game';
 import { eng } from '../src/engine/client';
@@ -30,44 +31,41 @@ describe('effect values come from the roster, and the fold is shared', () => {
 });
 
 describe('the sheet moves when a skill is up', () => {
-  const base = () => buildCharacter(40, emptyGear());
+  const base = () => buildCharacter(40, poolGear());
 
   it('each row changes the stat its own sentence names, by the amount it names', () => {
     const b = base();
-    const fury = buildCharacter(40, emptyGear(), {}, 0, effectsOf('aura.wraith_of_fury'));
+    const fury = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.wraith_of_fury'));
     // the buff's number reaches the shared aspd formula, whose own cap then decides the result
     expect(fury.aspd).toBeCloseTo(
       eng.aspdOf(b.core.agi, b.weaponAspd, row('aura.wraith_of_fury').effects[0].value) * (1 - b.encumbrance), 6);
 
-    const guard = buildCharacter(40, emptyGear(), {}, 0, effectsOf('aura.iron_guard'));
+    const guard = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.iron_guard'));
     expect(guard.armour - b.armour).toBe(row('aura.iron_guard').effects[0].value);
 
-    const energy = buildCharacter(40, emptyGear(), {}, 0, effectsOf('aura.energy_guard'));
+    const energy = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.energy_guard'));
     expect(energy.es - b.es).toBe(row('aura.energy_guard').effects[0].value);
 
-    const grace = buildCharacter(40, emptyGear(), {}, 0, effectsOf('aura.grace'));
+    const grace = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.grace'));
     expect(grace.evasion - b.evasion).toBe(row('aura.grace').effects[0].value);
 
-    const vit = buildCharacter(40, emptyGear(), {}, 0, effectsOf('aura.vitality'));
+    const vit = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.vitality'));
     expect(vit.hpRegen / b.hpRegen).toBeCloseTo(1 + row('aura.vitality').effects[0].value / 100, 6);
 
-    const war = buildCharacter(40, emptyGear(), {}, 0, effectsOf('buff.warcry'));
+    const war = buildCharacter(40, poolGear(), {}, 0, effectsOf('buff.warcry'));
     expect(war.phys / b.phys).toBeCloseTo(row('buff.warcry').effects[0].value, 6);
     expect(war.resistance / b.resistance).toBeCloseTo(row('buff.warcry').effects[2].value, 6);
   });
 
   it('damage taken is a multiplier on the incoming side, and Iron Will lowers it', () => {
     const will = effectsOf('buff.iron_will');
-    const c = buildCharacter(40, emptyGear(), {}, 0, will);
+    const c = buildCharacter(40, poolGear(), {}, 0, will);
     expect(c.damageTaken).toBeCloseTo(row('buff.iron_will').effects[1].value, 10);
-    const s = newGame(51);
-    s.group = [];
-    const before = buildCharacter(40, emptyGear());
-    const withWill = buildCharacter(40, emptyGear(), {}, 0, will);
+    const before = buildCharacter(40, poolGear());
+    const withWill = buildCharacter(40, poolGear(), {}, 0, will);
     // the same mob swing against the same sheet lands cheaper with the buff up
     expect(withWill.armour).toBeGreaterThan(before.armour);
     expect(c.damageTaken).toBeLessThan(1);
-    void s;
   });
 });
 
