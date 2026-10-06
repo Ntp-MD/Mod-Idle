@@ -1,6 +1,0 @@
-- mob แต่ละเผ่าจะมีขยะที่ relate กับเผ่าตัวเองเช่น หมาป่าก็จะได้ขยะเป็นเคี้ยว
-- เพิ่มโอกาสให้ mob บางชนิด drop ขวดยา hp mp
-- adjust ให้ mob เกิดในภูมิภาคที่เกี่ยวข้องยกตัวอย่าง ragnarok ที่พวกจระเข้จะเกิดใน zone ทะเลหรือที่ราบลุ่มเป็นน้ำ แปลว่าเราต้องออกแบบ map , zone , region ให้อิงจาก animate fantasy เช่น Tensei shitara Slime Datta Ken หรือเกม rpg หลายๆเกม
-- เพิ่ม mob เผ่ามนุษย์ ที่จะ drop drop ขวดยา hp mp
-- เพิ่ม Stun Recovery แบบ poe สมมติสั้น 1s เรามี stun recovery 50% แปลว่าเราโดนหยุด แค่ 0.5s แล้วก็ Combat ต่อไป
-- block กันแค่ phisical damage hit
