@@ -21,20 +21,20 @@ Every price is anchored to a number in `checks.md` groups E/F, and nothing here 
 <!-- BEGIN GENERATED:price-unit -->
 ```
 gold per sold junk piece        = 1                       (economy.md · loot.md section 4)
-drops/hour per band             = 49 low · 66 mid · 82 high · 252 high+full Lck   (loot.md section 2 · F3)
-upgrades/hour from drops        = 3 low · 3 mid · 3 high · 3 high+full Lck   (F4)
-junk/hour = drops - upgrades    = 46 low · 63 mid · 79 high · 249 high+full Lck
-1 m  = 1 minute of full-sell income in that band
-gold per 1 m                    = 0.8 low · 1.1 mid · 1.3 high · 4.2 high+full Lck
-kills/hour per band (F1)        = 463 low · 537 mid · 589 high
-opportunity cost of 1 gold      = 1 Reroll value stone forgone = 1/10 hour of Reroll capacity ≈ 1.15 min of craft progress (F6 · E8)
+drops per kill per band         = 0.1058 low · 0.1229 mid · 0.1392 high · 0.4278 high+full Lck   (loot.md section 2 · F3)
+upgrades per kill from drops    = 0.0065 low · 0.0056 mid · 0.0051 high · 0.0051 high+full Lck   (F4)
+junk per kill = drops − upgrades = 0.0994 low · 0.1173 mid · 0.1341 high · 0.4228 high+full Lck
+1 k  = one kill of full-sell income in that band
+gold per 1 k                    = 0.0994 low · 0.1173 mid · 0.1341 high · 0.4228 high+full Lck
+kills per band (F1)             = 463 low · 537 mid · 589 high
+opportunity cost of 1 gold      = 1 Reroll value stone forgone (F6 · E8)
 
 band kills (low z1-3 = 1,777 kills · mid z4-6 = 8,066 · high z7-9 = 26,513 · z9 push (91-100) = 23,675)  (checks.md E1-E5)
 ```
 <!-- END GENERATED:price-unit -->
 
 - Prices are **fixed in gold**; `m` is the readable anchor, gold is the charge. A price is set in the band where the purchase actually matters, which is why each row states its charge band.
-- Default for every piece stays **dissolve** *once a slot is armed*, so the crafting engine keeps its designed 79 stones/hour; the filter ships off, so a fresh character keeps everything until the player turns slots on, and an armed reject then dissolves for a stone unless the player redirects it to gold (`loot.md` section 4 · `checks.md` G2).
+- Default for every piece stays **dissolve** *once a slot is armed*, so the crafting engine keeps its designed 134.1 stones per 1,000 kills; the filter ships off, so a fresh character keeps everything until the player turns slots on, and an armed reject then dissolves for a stone unless the player redirects it to gold (`loot.md` section 4 · `checks.md` G2).
 - The opportunity cost of one gold is a *Reroll value stone*, not a fraction of a second of progress: `economy.md` single-medium rule.
 
 # 2. Lifetime gold supply and the demand check
@@ -44,8 +44,8 @@ band kills (low z1-3 = 1,777 kills · mid z4-6 = 8,066 · high z7-9 = 26,513 · 
 band kills                      = low z1-3 = 1,777 kills · mid z4-6 = 8,066 · high z7-9 = 26,513 · z9 push (91-100) = 23,675
 lifetime junk pieces            = 1,777×0.0994 + 8,066×0.1173 + 50,188×0.1341 = 7,854
 max lifetime gold (sell everything, no Lck)              = 7,854
-one-time stall demand (section 3, all 9 places)          = 4,026 gold = 0.51x the max
-essentials only (road link · stash tab 1 · stash tab 2 · herb pouch ii · plot deed 4) = 481 = 6.1% of the max
+one-time stall demand (section 3, all 9 places)          = 4,018 gold = 0.51x the max
+essentials only (road link · stash tab 1 · stash tab 2 · herb pouch ii · plot deed 4) = 466 = 5.9% of the max
 full-Lck ceiling over the 50,188 high-band kills               = 21,217 gold (= ×3.15 of the 6,731 a no-Lck run earns there · ceiling ×3.15)
 stones forgone by selling everything                     = 7,854 ÷ 8 = 982 Reroll casts ≈ 9.8 full-set polishes (E8)
 repeatable demand (section 4)                            = absorbs whatever the one-time list does not, no ceiling
@@ -59,27 +59,27 @@ repeatable demand (section 4)                            = absorbs whatever the 
 # 3. One-time purchases
 
 <!-- BEGIN GENERATED:one-time -->
-| Item | Sold by | Kind | m | gold @low | gold @mid | gold @high | Charged at | Qty | Gold in the demand total | Note |
+| Item | Sold by | Kind | k | gold @low | gold @mid | gold @high | Charged at | Qty | Gold in the demand total | Note |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Road link (first visit to a settlement) | Waypoint keeper | time | 20 | 16 | 22 | 26 | the band of each destination | 5 low + 5 mid + 7 high | 372 | 17 links · travel mode B · Eastgate is free |
-| Stash tab 1 | Porter | space | 60 | 48 | 66 | 78 | high band | 1 | 78 | no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 30 m teaching price |
-| Stash tab 2 | Porter | space | 90 | 72 | 99 | 117 | high band | 1 | 117 |  |
-| Stash tab 3 | Porter | space | 130 | 104 | 143 | 169 | high band | 1 | 169 |  |
-| Stash tab 4 | Porter | space | 180 | 144 | 198 | 234 | high band | 1 | 234 |  |
-| Stash tab 5 | Porter | space | 240 | 192 | 264 | 312 | high band | 1 | 312 |  |
-| Stash tab 6 | Porter | space | 300 | 240 | 330 | 390 | high band | 1 | 390 | Cap 6 tabs |
-| Herb pouch II | Porter | space | 60 | 48 | 66 | 78 | mid band | 1 | 66 | one more slot in the character bag (`inventory.character_slots` is the base) |
-| Herb pouch III | Porter | space | 240 | 192 | 264 | 312 | high band | 1 | 312 | one more slot in the character bag (`inventory.character_slots` is the base) |
-| Bag category slot (herbs / stones / gear display) | Porter | space | 45 | 36 | 50 | 59 | low band | 3 | 108 | display and sorting only · sells no stone, no gear |
-| Plot deed 4 | Steward | space | 180 | 144 | 198 | 234 | mid band | 1 | 198 | 4th farm plot (farm.md) |
-| Plot deed 5 | Steward | space | 540 | 432 | 594 | 702 | high band | 1 | 702 | 5th plot · the most expensive non-cosmetic line |
-| House · Ashfall | Steward | space | 120 | 96 | 132 | 156 | low band | 1 | 96 | 2 stash tabs + 1 farm plot + Waypoint anchor, no combat effect |
-| House · Highspire | Steward | space | 240 | 192 | 264 | 312 | mid band | 1 | 264 |  |
-| House · Vermolch | Steward | space | 360 | 288 | 396 | 468 | high band | 1 | 468 |  |
-| Saved filter preset slot (extra) | Counterhand | information | 30 | 24 | 33 | 39 | one per band | 3 | 96 | preset switching is a concept.md reason-to-open |
-| Potion carrier slot (belt display) | Armourer | space | 40 | 32 | 44 | 52 | mid band | 1 | 44 | display only · the carrier pays the weight tax in formula.md section 11 · sells no potion |
+| Road link (first visit to a settlement) | Waypoint keeper | time | 154.3333/179/196.3333 | 15 | 21 | 26 | the band of each destination | 5 low + 5 mid + 7 high | 362 | 17 links · travel mode B · Eastgate is free |
+| Stash tab 1 | Porter | space | 589 | 59 | 69 | 79 | high band | 1 | 79 | no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 231.5 k teaching price |
+| Stash tab 2 | Porter | space | 883.5 | 88 | 104 | 119 | high band | 1 | 119 |  |
+| Stash tab 3 | Porter | space | 1276.1667 | 127 | 150 | 171 | high band | 1 | 171 |  |
+| Stash tab 4 | Porter | space | 1767 | 176 | 207 | 237 | high band | 1 | 237 |  |
+| Stash tab 5 | Porter | space | 2356 | 234 | 276 | 316 | high band | 1 | 316 |  |
+| Stash tab 6 | Porter | space | 2945 | 293 | 346 | 395 | high band | 1 | 395 | Cap 6 tabs |
+| Herb pouch II | Porter | space | 537 | 53 | 63 | 72 | mid band | 1 | 63 | one more slot in the character bag (`inventory.character_slots` is the base) |
+| Herb pouch III | Porter | space | 2356 | 234 | 276 | 316 | high band | 1 | 316 | one more slot in the character bag (`inventory.character_slots` is the base) |
+| Bag category slot (herbs / stones / gear display) | Porter | space | 347.25 | 35 | 41 | 47 | low band | 3 | 105 | display and sorting only · sells no stone, no gear |
+| Plot deed 4 | Steward | space | 1611 | 160 | 189 | 216 | mid band | 1 | 189 | 4th farm plot (farm.md) |
+| Plot deed 5 | Steward | space | 5301 | 527 | 622 | 711 | high band | 1 | 711 | 5th plot · the most expensive non-cosmetic line |
+| House · Ashfall | Steward | space | 926 | 92 | 109 | 124 | low band | 1 | 92 | 2 stash tabs + 1 farm plot + Waypoint anchor, no combat effect |
+| House · Highspire | Steward | space | 2148 | 213 | 252 | 288 | mid band | 1 | 252 |  |
+| House · Vermolch | Steward | space | 3534 | 351 | 415 | 474 | high band | 1 | 474 |  |
+| Saved filter preset slot (extra) | Counterhand | information | 231.5/268.5/294.5 | 23 | 32 | 40 | one per band | 3 | 95 | preset switching is a concept.md reason-to-open |
+| Potion carrier slot (belt display) | Armourer | space | 358 | 36 | 42 | 48 | mid band | 1 | 42 | display only · the carrier pays the weight tax in formula.md section 11 · sells no potion |
 
-Total one-time demand = **4,026 gold** (see section 2).
+Total one-time demand = **4,018 gold** (see section 2).
 
 <!-- END GENERATED:one-time -->
 
@@ -91,24 +91,24 @@ Total one-time demand = **4,026 gold** (see section 2).
 # 4. Repeatable purchases
 
 <!-- BEGIN GENERATED:repeatable -->
-| Item | Sold by | Kind | m | Gold | Bound | Note |
+| Item | Sold by | Kind | k | Gold | Bound | Note |
 |---|---|---|---|---|---|---|
-| Task skip token | Guild clerk | time | 8 | 10 (high) | 3 per real day | 1 per task slot per day on top of the free skip in tasks.md · 3/day = 24 m/day |
-| Armourer repair (clears Broken, refills protection to 5) | Armourer | time | 16 | 21 (high) | repeatable | must stay above the elite time that earns 1 Reroll tier stone · re-check at F9 |
-| Armourer repair at Ironrow | Armourer | time | 14 | 18 (high) | repeatable | the armourer town discount, and only there · still above the tier-stone floor |
-| Curio pedlar stock: banner · Base tint · title | Curio pedlar | appearance | 30-120 | 39-156 (high) | 3 per real day | 3 slots per real day · appearance only |
-| Prestige title line (per quality band) | Curio pedlar | appearance | 300 | 390 (high) | repeatable | the only intentionally expensive line |
-| Waypoint re-anchor (move the free return point) | Waypoint keeper | time | 6 | 8 (high) | repeatable | cosmetic convenience · never gates a zone |
-| Coldres banner (settlement cosmetic) | Furrier | appearance | 90 | 99 (mid) | repeatable | one per settlement · Wolf Cross only |
-| Heavy-school Base tint | Armourer | appearance | 45 | 59 (high) | repeatable | stocked only by the Siege Armourer at Frosthold · appearance only |
-| Collector set hint (prints which school the set wants) | Collector | information | 15 | 20 (high) | repeatable | information only · pays no item and sells no piece |
+| Task skip token | Guild clerk | time | 78.5333 | 11 (high) | 3 per real day | 1 per task slot per day on top of the free skip in tasks.md · 3/day = 235.6 k/day |
+| Armourer repair (clears Broken, refills protection to 5) | Armourer | time | 157.0667 | 21 (high) | repeatable | must stay above the elite time that earns 1 Reroll tier stone · re-check at F9 |
+| Armourer repair at Ironrow | Armourer | time | 137.4333 | 18 (high) | repeatable | the armourer town discount, and only there · still above the tier-stone floor |
+| Curio pedlar stock: banner · Base tint · title | Curio pedlar | appearance | 294.5-1178 | 40-158 (high) | 3 per real day | 3 slots per real day · appearance only |
+| Prestige title line (per quality band) | Curio pedlar | appearance | 2945 | 395 (high) | repeatable | the only intentionally expensive line |
+| Waypoint re-anchor (move the free return point) | Waypoint keeper | time | 58.9 | 8 (high) | repeatable | cosmetic convenience · never gates a zone |
+| Coldres banner (settlement cosmetic) | Furrier | appearance | 805.5 | 95 (mid) | repeatable | one per settlement · Wolf Cross only |
+| Heavy-school Base tint | Armourer | appearance | 441.75 | 59 (high) | repeatable | stocked only by the Siege Armourer at Frosthold · appearance only |
+| Collector set hint (prints which school the set wants) | Collector | information | 147.25 | 20 (high) | repeatable | information only · pays no item and sells no piece |
 
-Skip-token ceiling = 8 m × 3/day = **24 m/day** = 31 gold/day in the high band.
+Skip-token ceiling = 78.5333 k × 3/day = **235.6 k/day** = 32 gold/day in the high band.
 
 <!-- END GENERATED:repeatable -->
 
-- Repair is the only **D2 service class** line: it converts a rare-stone dependency into gold, so it must never be cheaper than hunting the stone. The floor in `checks.md` T10 is proven against F7 (18 Reroll tier stones/hour → 3.33 min of elite hunting per stone) and re-proven in T10b against F9 (6.25 Add mod stones/hour → 9.60 min per stone) — repair at 14 m and the Ironrow discount at 12 m both clear the larger floor.
-- Ironrow's 12 m repair is the cheapest service in the game and the only settlement-specific price, which is what "the armourer town" is allowed to mean.
+- Repair is the only **D2 service class** line: it converts a rare-stone dependency into gold, so it must never be cheaper than hunting the stone. The floor in `checks.md` T10 is proven against F7 (30.6 Reroll tier stones per 1,000 kills → 32.7 kills of elite hunting per stone) and re-proven in T10b against F9 (8.05 Add mod stones per 1,000 kills → 124.3 kills per stone) — repair at 157.1 k and the Ironrow discount at 137.4 k both clear the larger floor.
+- Ironrow's 137.4 k repair is the cheapest service in the game and the only settlement-specific price, which is what "the armourer town" is allowed to mean.
 - Pedlar rotation refreshes **per real day**, not on the 12-hour offline clock (`save.md`): a refresh the player can sleep into would not be a reason to return.
 
 # 5. Per-settlement detail — 9 settlements
@@ -184,29 +184,29 @@ Presence rules:
 
 # 6. Standing tiers
 
-Standing accrues from kills in that settlement's own zone (`towns.md` section 6), so its thresholds are a share of that zone's designed time budget, converted through F1 kills/hour.
+Standing accrues from kills in that settlement's own zone (`towns.md` section 6), so its thresholds are a share of that zone's designed kill budget, read from F1's kill counts.
 
 <!-- BEGIN GENERATED:standing -->
 | Settlement | Band | Zone budget (kills) | Tier I 30% | Tier II 75% | Tier III 140% |
 |---|---|---|---|---|---|
-| **Eastgate** | low (463 kills/hr) | 242 | **73 kills** | **182 kills** | **339 kills** |
-| **Millbrook** | low (463 kills/hr) | 584 | **175 kills** | **438 kills** | **818 kills** |
-| **Ashfall** | low (463 kills/hr) | 951 | **285 kills** | **713 kills** | **1,331 kills** |
-| **Ironrow** | mid (537 kills/hr) | 1,644 | **493 kills** | **1,233 kills** | **2,302 kills** |
-| **Wolf Cross** | mid (537 kills/hr) | 2,570 | **771 kills** | **1,928 kills** | **3,598 kills** |
-| **Highspire** | mid (537 kills/hr) | 3,852 | **1,156 kills** | **2,889 kills** | **5,393 kills** |
-| **Bonegate** | high (589 kills/hr) | 5,778 | **1,733 kills** | **4,334 kills** | **8,089 kills** |
-| **Frosthold** | high (589 kills/hr) | 8,797 | **2,639 kills** | **6,598 kills** | **12,316 kills** |
-| **Vermolch** | high (589 kills/hr) | 11,939 | **3,582 kills** | **8,954 kills** | **16,715 kills** |
-| **Thornwake** | low (463 kills/hr) | 23,674 | **7,102 kills** | **17,756 kills** | **33,144 kills** |
-| **Greyfen** | low (463 kills/hr) | 11,373 | **3,412 kills** | **8,530 kills** | **15,922 kills** |
-| **Saltmarrow** | low (463 kills/hr) | 10,379 | **3,114 kills** | **7,784 kills** | **14,531 kills** |
-| **Emberhold** | mid (537 kills/hr) | 9,544 | **2,863 kills** | **7,158 kills** | **13,362 kills** |
-| **Duskmoor** | mid (537 kills/hr) | 8,834 | **2,650 kills** | **6,626 kills** | **12,368 kills** |
-| **Nettlecrag** | mid (537 kills/hr) | 8,222 | **2,467 kills** | **6,167 kills** | **11,511 kills** |
-| **Blackwater Reach** | high (589 kills/hr) | 7,689 | **2,307 kills** | **5,767 kills** | **10,765 kills** |
-| **Wyrmback** | high (589 kills/hr) | 7,222 | **2,167 kills** | **5,417 kills** | **10,111 kills** |
-| **The Pale Spire** | high (589 kills/hr) | 13,405 | **4,022 kills** | **10,054 kills** | **18,767 kills** |
+| **Eastgate** | low | 242 | **73 kills** | **182 kills** | **339 kills** |
+| **Millbrook** | low | 584 | **175 kills** | **438 kills** | **818 kills** |
+| **Ashfall** | low | 951 | **285 kills** | **713 kills** | **1,331 kills** |
+| **Ironrow** | mid | 1,644 | **493 kills** | **1,233 kills** | **2,302 kills** |
+| **Wolf Cross** | mid | 2,570 | **771 kills** | **1,928 kills** | **3,598 kills** |
+| **Highspire** | mid | 3,852 | **1,156 kills** | **2,889 kills** | **5,393 kills** |
+| **Bonegate** | high | 5,778 | **1,733 kills** | **4,334 kills** | **8,089 kills** |
+| **Frosthold** | high | 8,797 | **2,639 kills** | **6,598 kills** | **12,316 kills** |
+| **Vermolch** | high | 11,939 | **3,582 kills** | **8,954 kills** | **16,715 kills** |
+| **Thornwake** | low | 23,674 | **7,102 kills** | **17,756 kills** | **33,144 kills** |
+| **Greyfen** | low | 11,373 | **3,412 kills** | **8,530 kills** | **15,922 kills** |
+| **Saltmarrow** | low | 10,379 | **3,114 kills** | **7,784 kills** | **14,531 kills** |
+| **Emberhold** | mid | 9,544 | **2,863 kills** | **7,158 kills** | **13,362 kills** |
+| **Duskmoor** | mid | 8,834 | **2,650 kills** | **6,626 kills** | **12,368 kills** |
+| **Nettlecrag** | mid | 8,222 | **2,467 kills** | **6,167 kills** | **11,511 kills** |
+| **Blackwater Reach** | high | 7,689 | **2,307 kills** | **5,767 kills** | **10,765 kills** |
+| **Wyrmback** | high | 7,222 | **2,167 kills** | **5,417 kills** | **10,111 kills** |
+| **The Pale Spire** | high | 13,405 | **4,022 kills** | **10,054 kills** | **18,767 kills** |
 
 Kill counts = `zone budget kills × tier share`, rounded. A budget is a count of kills its band pays, so a threshold is a state the player banks — never a stretch of hours (`AGENT.md`).
 - **Tier I** = 30% of that settlement's zone budget → that stall's second stock line.
@@ -278,14 +278,14 @@ What the cage refuses (`--checks` rows, mirrored in `checks.md` group T):
 - a stall line whose kind is not space · time · information · appearance, or whose name contains a power noun (gear · Mod · potion · stone · Reroll · Refine · Ascend · weapon) without an explicit `display_only` flag → **T8** (`checks.md` G7)
 - a Collector set paying gold → **T14** · Standing granting a stat or stone → **T12b**
 - a one-time demand above 1.50× the lifetime supply, or an essentials basket above 20% → **T4 · T5**
-- a Road link above 20 m, or a link count that does not equal the number of non-start settlements → **T9** (G9)
+- a Road link above 196.3 k, or a link count that does not equal the number of non-start settlements → **T9** (G9)
 - a repair price at or below the elite time of one Reroll tier stone → **T10**
-- a skip-token cap above 3/day or 24 m/day → **T11**
+- a skip-token cap above 3/day or 235.6 k/day → **T11**
 - a price ladder that is not monotonic → **T16**
 - a numeric Base weight in the data (ruled even-weighted, so any weight violates A9) → **T15**
 - band kills that no longer match the E1-E5 deltas, or zone slices that no longer cover the whole run → **T3a · T3b**
 - a kill rate that differs from loot.md section 2 → **T17** (H1)
-- an engine number in the data file that no longer matches what `loot.md` section 2 and the prose formula files publish → **T18** + `tools/check.ts` read-back. This row already earned its keep twice: the high-band drop rate was written as 421 in `loot.md` · `combat.md` · `formula.md` while F3 derives 589 × 14% = **82**, and the low band's Lck line read ×1.72 while the low band's own Lck 33 gives ×1.33. All three docs were corrected, the Refine rate went from "~3.8" to the exact **3.75** the price pair gives, and no gold price moved: 49 − 3 = 46 junk/hour still prices a minute at 0.8 gold
+- an engine number in the data file that no longer matches what `loot.md` section 2 and the prose formula files publish → **T18** + `tools/check.ts` read-back. This row already earned its keep twice: the high-band drop rate was written as 421 in `loot.md` · `combat.md` · `formula.md` while F3 derives 589 × 14% = **82**, and the low band's Lck line read ×1.72 while the low band's own Lck 33 gives ×1.33. All three docs were corrected, the Refine rate went from "~3.8" to the exact **3.75** the price pair gives, and no gold price moved: the 49 − 3 = 46 junk line still prices 1 k at 0.0994 gold (low band)
 - a generated table containing `undefined` or `NaN` → the template-leak scan in both cages
 - a stock line naming an NPC that is not present in that settlement, or an NPC placement that breaks the presence rules → **T-S · T-R**
 

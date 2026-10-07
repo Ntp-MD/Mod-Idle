@@ -66,8 +66,8 @@ Registry lives in item-list.md section 1; the table below is the usage view.
 | Stone | Effect | Source |
 |---|---|---|
 | Add mod stone | Fill one empty slot up to the Rarity crafted max (net counting) · 1st fill costs 1, 2nd fill on the same item costs 2 | Elite / boss only |
-| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (79/hour → ~10 uses/hour) |
-| Reroll tier stone | Reroll Tier + value of one slot with drop weights (T3 50 / T2 33 / T1 17), may roll lower · Mod name and Element unchanged · **1 per randomize, 8 per deterministic Refine (+1 tier)** | High-level monsters, elites, bosses (18/hour → ~2.25 Refines/hour) |
+| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (134.1/1,000 kills → ~17.0 uses/1,000 kills) |
+| Reroll tier stone | Reroll Tier + value of one slot with drop weights (T3 50 / T2 33 / T1 17), may roll lower · Mod name and Element unchanged · **1 per randomize, 8 per deterministic Refine (+1 tier)** | High-level monsters, elites, bosses (30.6/1,000 kills → ~3.8 Refines/1,000 kills) |
 | Remove mod stone | Remove one random non-legacy mod (slots 3+, Legacy mod slots 1-2 immune) | Elite / boss |
 | Quality Stone | Attempt +1 (section below) · **tiered cost** (section below) | Steps 1-5 monsters · 6-10 elites · 11-15 bosses |
 | Repair stone | Revive one Broken piece at its pre-break level and refill protection to 5 | Elite / boss only |
@@ -134,28 +134,28 @@ energy shield = second pool ahead of HP · Gear Energy Shield flat + Max Energy 
 # Set Numbers (source: loot.md section 5)
 
 <!-- BEGIN GENERATED:craft-set -->
-| Tier | Price | Actual casts/hour at high zone | Meaning |
+| Tier | Price | Casts per 1,000 kills at high zone | Meaning |
 |---|---|---|---|
-| Reroll value | 8 Reroll value stones | ~10 | Cheap, can spam · Keeps values inside the same Tier |
-| Refine | 8 Reroll tier stones | ~2.25 | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |
-| Ascend | 8 Add mod stones + 8 Reroll tier stones | ~0.59 | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |
+| Reroll value | 8 Reroll value stones | ~17 | Cheap, can spam · Keeps values inside the same Tier |
+| Refine | 8 Reroll tier stones | ~3.8 | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |
+| Ascend | 8 Add mod stones + 8 Reroll tier stones | ~1 | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |
 | Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to Rarity crafted max (net counting) |
 | Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set | Raises Gear Mod only |
 | Repair | 1 Repair stone | elite / boss only | Revives Broken + refills protection |
 
 ```
 Refine full set (12 pieces × 2 steps = 24 casts, because Tier belongs to the piece) = 192 Reroll tier stones
-Ascend full set (12 pieces)                             ≈ 20.3 hours
+Ascend full set (12 pieces)                             ≈ 11,957 kills
 ```
 <!-- END GENERATED:craft-set -->
 
 # Closed
 
-- **Crafting currency prices and sources** → Table above, tied to drops/hour and elite/boss spawn chances in loot.md.
+- **Crafting currency prices and sources** → Table above, tied to drops per kill and elite/boss spawn chances in loot.md.
 - **Preventing Reroll from ruining items** → **Decided: Reroll cannot roll below the old value** (keep the slot maximum as baseline · Reroll climbs or stays equal).
-  The old option was "confirm every click", which at ~10 casts/hour is fiddly work to click all day in an idle game · Passive protection needs no clicks at all.
+  The old option was "confirm every click", which at ~17 casts per 1,000 kills is fiddly work to click all day in an idle game · Passive protection needs no clicks at all.
   Accepted cost: Reroll looks "one-way climbing" and thus less exciting — compensated by letting Refine/Ascend carry the real quality pulls.
-- **Cross-level stone crafting** → Not yet done, and not needed now, because Reroll tier stone flow at 2.25 casts/hour already covers 60 casts for a full set.
+- **Cross-level stone crafting** → Not yet done, and not needed now, because Reroll tier stone flow at ~3.8 Refines per 1,000 kills already covers 60 casts for a full set.
 
 ## Polish vs Tier Jump (measured from real T1 ranges in mod-pool.md)
 
@@ -164,7 +164,7 @@ T1 ranges differ per line: `%` spans 1-2 points · crit damage 12 · **Max HP Fl
 ```
 1 Reroll on a mid-value line → moves ≈ half of the T1 range
 Average across all lines ≈ 4.9 points · Full 12-piece set × ~3 mods ≈ 100 casts to fully polish
-At 10 casts/hour = about 10 hours per set
+At ~17 casts per 1,000 kills = about 5,900 kills per set
 ```
 
 - **Reroll is cheap and fast by design** because its real duty is "fix bad rolls", not climbing power · The expensive ones are Refine (24 casts/set) and Ascend (96 Add + 96 Reroll tier stones/set), which are the true *tier movers*. Neither row states how long a set takes: that is the player's own pace (`AGENT.md`).

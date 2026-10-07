@@ -595,7 +595,10 @@ export function createEngine(E: EngineData) {
     }
   }
 
-  const goldPerMinute = (b: string) => Math.round((BAND[b].junk_per_hr / 60) * Math.pow(10, TS.round_rate_to_decimals)) / Math.pow(10, TS.round_rate_to_decimals);
+  // The price unit is one kill, so its worth is the junk a kill pays (gold a piece), not a slice of
+  // the clock: gold/kill = junk/kill, and it is exact because every stall price is held to the same
+  // gold it always had (AGENT.md · D12 — a price is never quoted in minutes).
+  const goldPerKill = (b: string) => BAND[b].junk_per_hr / BAND[b].kills_derived;
 
   // Stone income per hour, by band — the same three expressions the STONE block prints for high.
   const rerollValueStonesPerHr = (band: string) => Math.round(BAND[band].junk_per_hr / C.reroll_value_stones_per_use);
@@ -649,15 +652,15 @@ export function createEngine(E: EngineData) {
 
   const LCK_BOUND = r2(BAND.high_full_lck.junk_per_hr / BAND.high.junk_per_hr);
 
-  /** A task pays a slice of the band's own stone income (`tasks.md` "~15 min of §5 income"). */
-  const stonesForMinutes = (band: string, minutes: number) => ({
-    reroll_value: r2(rerollValueStonesPerHr(band) * minutes / 60),
-    tier: r2(tierStonesPerHr(band) * minutes / 60),
-    add: r2(addStonesPerHr(band) * minutes / 60),
+  /** A task pays a slice of the band's own stone income, sized in kills (`tasks.md`). */
+  const stonesForKills = (band: string, kills: number) => ({
+    reroll_value: r2(rerollValueStonesPerHr(band) * kills / BAND[band].kills_derived),
+    tier: r2(tierStonesPerHr(band) * kills / BAND[band].kills_derived),
+    add: r2(addStonesPerHr(band) * kills / BAND[band].kills_derived),
   });
-  // A payout is handed over by hand, so it is whole stones; the hourly rates above stay expected values.
-  const taskPayout = (band: string, minutes: number) => {
-    const s = stonesForMinutes(band, minutes);
+  // A payout is handed over by hand, so it is whole stones; the per-kill rates above stay expected values.
+  const taskPayout = (band: string, kills: number) => {
+    const s = stonesForKills(band, kills);
     return { reroll_value: Math.round(s.reroll_value), tier: Math.round(s.tier), add: Math.round(s.add) };
   };
 
@@ -781,10 +784,10 @@ export function createEngine(E: EngineData) {
     armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, agiForCap,
     weaponWeightOf, sizeMultOf, applySizeMult, basicAttackOf,
     // loot + xp
-    lckOf, dropChance, killsDerived, goldPerMinute, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
+    lckOf, dropChance, killsDerived, goldPerKill, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
     floorOf, ceilingOf, qualityIndexOf,
     rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr,
-    stonesForMinutes, taskPayout,
+    stonesForKills, taskPayout,
     // formatting
     r1, r2, fmt,
   };

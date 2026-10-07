@@ -258,9 +258,9 @@ function numbersPage(state: any, mode: any): any {
   const body = `
 <section><h1>Derived numbers</h1>${hint('Computed by <code>tools/lib/engine.ts</code> from <code>tools/data/engine.json</code> while this page was being built. This is what the cages compare the prose against, so it is the fastest way to see what a data edit moves.')}</section>
 <section>${tbl(['what', 'expression', 'value', 'checks row', 'source'], state.numbers.map((n) => [esc(n.what), code(n.expr), code(n.value), `<a href="${R.checks}">${esc(n.row)}</a>`, `<a href="${R.coll('engine', n.src || 'stat')}">${esc(n.src || 'stat')}</a>`]))}</section>
-<section><h2>Band math</h2>${tbl(['band', 'mobs per group', 'kills/hr', 'drops/hr', 'junk/hr', 'gold per income-minute'], eng.BAND_KEYS.map((k) => {
+<section><h2>Band math</h2>${tbl(['band', 'mobs per group', 'kills per band', 'drops per 1,000 kills', 'junk per 1,000 kills', 'gold per kill'], eng.BAND_KEYS.map((k) => {
   const b = eng.BAND[k];
-  return [code(k), b.group_mobs, code(Math.round(b.kills_per_hr).toLocaleString('en-US')), code(Math.round(b.drops_per_hr).toLocaleString('en-US')), code(Math.round(b.junk_per_hr).toLocaleString('en-US')), code(eng.goldPerMinute(k))];
+  return [code(k), b.group_mobs, code(Math.round(b.kills_per_hr).toLocaleString('en-US')), code(Math.round(b.drops_per_hr / b.kills_per_hr * 1000).toLocaleString('en-US')), code(Math.round(b.junk_per_hr / b.kills_per_hr * 1000).toLocaleString('en-US')), code(eng.goldPerKill(k).toFixed(4))];
 }))}<p>${Object.keys(eng.BAND).map((k) => `<a href="${R.record('engine', 'loot.bands', k)}">${esc(k)}</a>`).join(' · ')}</p></section>
 <section><h2>Weapon math</h2>${tbl(['weapon', 'weapon_aspd', 'weapon_mult', 'Agi to Aspd Cap', 'reachable'], eng.WEAPONS.map((w) => [`<a href="${R.record('engine', 'weapons', w.name)}">${esc(w.name)}</a>`, code(w.weapon_aspd), code(w.weapon_mult), code(w.agi_to_cap), w.reachable ? '<span class="ok">yes</span>' : '<span class="warn">no — by intent</span>']))}<p class="hint">weapon_mult is derived, never stored: DPS equality is the rule (<code>checks.md</code> X14 · D10).</p></section>
 <section><h2>engine.js exports</h2>${tbl(['export', 'value'], ['CEIL', 'SPLIT', 'FORCED_SPLIT', 'LCK_BOUND', 'BANDS', 'STONE', 'DERIVED'].map((k) => [code(k), code(JSON.stringify(eng[k]).slice(0, 700))]))}</section>`;

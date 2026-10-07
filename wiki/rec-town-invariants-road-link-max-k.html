@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>road_link_max_m · ModWorld wiki</title>
+<title>road_link_max_k · ModWorld wiki</title>
 <style>
 :root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
+<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -83,14 +83,14 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h4>Invariants (guards)</h4>
 <a href="rec-town-invariants-essentials-max-share-of-lifetime-supply.html">essentials_max_share_of_lifetime_supply</a>
 <a href="rec-town-invariants-onetime-demand-max-multiple-of-lifetime-supply.html">onetime_demand_max_multiple_of_lifetime_supply</a>
-<a href="rec-town-invariants-road-link-max-m.html" aria-current="page">road_link_max_m</a>
 <a href="rec-town-invariants-road-trip-max-real-minutes.html">road_trip_max_real_minutes</a>
 <a href="rec-town-invariants-skip-token-max-per-day.html">skip_token_max_per_day</a>
-<a href="rec-town-invariants-skip-token-max-m-per-day.html">skip_token_max_m_per_day</a>
 <a href="rec-town-invariants-allowed-kinds.html">allowed_kinds</a>
 <a href="rec-town-invariants-banned-power-nouns.html">banned_power_nouns</a>
 <a href="rec-town-invariants-standing-min-tiers.html">standing_min_tiers</a>
 <a href="rec-town-invariants-chase-tier-min-share.html">chase_tier_min_share</a>
+<a href="rec-town-invariants-road-link-max-k.html" aria-current="page">road_link_max_k</a>
+<a href="rec-town-invariants-skip-token-max-k-per-day.html">skip_token_max_k_per_day</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
 <a href="doc-DECISIONS.html">DECISIONS.md</a>
@@ -140,25 +140,25 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="doc-world.html">world.md</a>
 </nav>
 <div>
-<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="data.html">tools/data/town.json</a><span class="sep">/</span><a href="data-town-invariants.html">invariants</a><span class="sep">/</span><span>road_link_max_m</span></nav>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Wiki</a><span class="sep">/</span><a href="data.html">tools/data/town.json</a><span class="sep">/</span><a href="data-town-invariants.html">invariants</a><span class="sep">/</span><span>road_link_max_k</span></nav>
 <div id="filter-count" class="hint"></div>
 
 
-<section><h1>road_link_max_m</h1>
+<section><h1>road_link_max_k</h1>
 <p class="hint">One row of <code>tools/data/town.json</code> → <code>invariants</code>. Prices · rosters · stock · Standing shares · Collector sets. The only place a town number is written by hand. tools/town.ts --write rebuilds towns-stalls.md and checks.md group T from it.</p>
-<dl class="kv"><dt>path</dt><dd><code>invariants.road_link_max_m</code></dd><dt>collection</dt><dd><a href="data-town-invariants.html">Invariants (guards)</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>10</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Road link max m</td><td><code>20</code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
+<dl class="kv"><dt>path</dt><dd><code>invariants.road_link_max_k</code></dd><dt>collection</dt><dd><a href="data-town-invariants.html">Invariants (guards)</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>10</dd></dl>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Road link max k</td><td><code>196.3333</code></td><td><code>num</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
-<input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="invariants"><input type="hidden" name="id" value="road_link_max_m">
-<div class="f"><label for="f-road-link-max-m">Road link max m<small>inferred from the JSON on disk</small></label><div><input id="f-road-link-max-m" type="text" inputmode="decimal" name="road_link_max_m" value="20"></div></div>
+<input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="invariants"><input type="hidden" name="id" value="road_link_max_k">
+<div class="f"><label for="f-road-link-max-k">Road link max k<small>inferred from the JSON on disk</small></label><div><input id="f-road-link-max-k" type="text" inputmode="decimal" name="road_link_max_k" value="196.3333"></div></div>
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
-<form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="invariants"><input type="hidden" name="id" value="road_link_max_m"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
+<form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="invariants"><input type="hidden" name="id" value="road_link_max_k"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
 
 <section><h2>Mentioned in the specs</h2><p class="hint">No document names this row yet. If that is wrong, the spec is missing a line — not the data.</p></section>
 
 <section><h2>Raw JSON</h2><pre class="code">{
-  &quot;road_link_max_m&quot;: 20
+  &quot;road_link_max_k&quot;: 196.3333
 }</pre></section>
 </div>
 </main>

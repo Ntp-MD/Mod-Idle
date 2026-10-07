@@ -140,7 +140,7 @@ Agi-per-Cap rows are the same line as formula-utility.md section 7: `${E.caps.as
 | D26 | **Energy Shield is a timed second pool, player-only** — printed by **X25** | `energy_shield_flat` · `max_energy_shield_pct` · `energy_shield.delay_sec` (3) · full pool in `energy_shield.recover_sec` (40) · guard: **X25** holds a real pool, the exact clock, and player-only (H1); the share (0.7% of the level-only caster HP from one max item, higher summed across items) is reported, not gated, until a rebalance re-prices the gear range |
 | D24 | **a mob dodges the way we do** — generated and checked by **X24** | `dodge = own Agi rate ÷ (own rate + attacker accuracy)` · guard: every roster entry between 2% and 40%, so mob Agi stays flavour and never a second wall. The old 25% ceiling was set on the level-scaled mob line; the flat mob stat makes a low-level attacker's accuracy the small number, so the band was re-based with the rule unchanged |
 | D30 | **Ascend is priced by the engine at the hour the design sells** — **X30** | 8 Add mod stones + 8 Reroll tier stones per Ascend, so Add stones bind and a full 12-piece set costs the 96 Add + 96 Reroll tier stones the ladder promises (F10 · E7) |
-| D31 | **body class may not move the funnel** — **X32** | `mob_HP(L)` is the zone average; group entries divide by the zone's weighted body factor (spawn weights Small 3 · Medium 2 · Large 1), so kills/hour, drops/hour and the timeline hold by construction |
+| D31 | **body class may not move the funnel** — **X32** | `mob_HP(L)` is the zone average; group entries divide by the zone's weighted body factor (spawn weights Small 3 · Medium 2 · Large 1), so the kill count, the drop count and the timeline hold by construction |
 | D32 | **the species damage tag is a rule** — **X31** | physical = the whole armour-able half, magic = the whole res-able half, mixed = 50/50 by innate Element |
 | D33 | **near and far is a queue, not a map** — **X33** | reach bands (melee 1 · reach 2 · stand-off 3) over a front-line-first queue; the cost to a reach-1 build is measured and must stay under 12% of the cycle |
 | D34 | **the seven buffs and the Haste aura are folded by measurement, not by a new multiplier** — closed | Warcry / Berserker / Iron Will / Holy veil / Ghost Dance / Magia Drive / Energy Absorb are timed self-buffs the player spends a slot on; `Haste` is an aura that reserves 25% and multiplies cooldowns (post-Cap) and final aspd by ×1.15. The uplift to price is the expected value across each uptime: physical x1.15 + align/res x1.20 (Warcry), aspd x1.20 + leech + damage taken x1.15 (Berserker), Armour x1.20 + damage taken x0.90 (Iron Will), debuff immunity (Holy veil), N deleted hits (Ghost Dance), continuous ES refill (Magia Drive), a share of every hit negated and banked as Energy Shield (Energy Absorb), and the clock itself (Haste). `checks.md` H1 forbids landing them unfolded — and they no longer are: `game/tests/gearedB1.test.ts` runs the whole bar, these rows included, against the same geared character with nothing slotted, so their share is inside the measured list multiplier rather than added to it by hand. ** extends this debt to four more sources**: the block layer, armour penetration, chance to bleed and chance to stun arrive with the item skeleton's Base Mod line, and they are folded the same way — by measurement on the gear the loop actually produced, never by moving `mob_HP`. ** extends it once more**: the three caps raised to 75 / 50 / 80 as hard ceilings and the Energy Shield delay cut 5→3 sec are player power the build now keeps (res 48.45 / align 35.5 / cdr 57.375, a sooner refill), priced the same way — never by moving `mob_HP`. ** extends it again**: `All stats flat` is a second Stat Mod line that lifts all seven Core stats at once, so the flat-only 510 ceiling must absorb it — booked here and folded by the same geared measurement, never by moving `mob_HP` |
@@ -175,30 +175,30 @@ Every row is a **state**, never a duration: this is an open-world idle RPG with 
 <!-- BEGIN GENERATED:group-F -->
 | id | Value | Expression |
 |---|---|---|
-| F1 | kills/hr | `3600 ÷ (group × 5.107 sec clear + 4 sec spawn) × group` = 589 high · 537 mid · 463 low |
+| F1 | kills per band | `3600 ÷ (group × 5.107 sec clear + 4 sec spawn) × group` = 589 high · 537 mid · 463 low |
 | F2 | drops per kill | `8% × (1 + Lck×0.01)` = 10.6% (L30) · 12.3% (L60) · 14.0% (L90) · 42.7% (full Lck 433) |
-| F3 | drops/hr | `kills/hr × F2` = **82** (L90) · 66 (L60) · 49 (L30) · 252 (full Lck) |
-| F4 | upgrades/hr | `measured — tools/loot.ts, the seven roll steps in loot.md section 1` = hr1 21.4 → hr2-4 8.4 → after that 5.2 (low band) · keep-rate 5.10% low · 4.39% mid · 3.11% high · 1.08% high + full_lck |
-| F5 | Reroll value stone/hr | `junk × 1 = drops − upgrades` = **79** |
-| F6 | Reroll value uses/hr | `79 ÷ 8` = **10** |
-| F7 | Reroll tier stone/hr | `elite 6 (20% of kills ×0.05) + boss 12 (4 ×3)` = 18 |
-| F8 | Refine/hr | `18 ÷ 8` = **2.25** |
-| F9 | Add mod stone/hr | `elite 0.74 (20% of kills × 0.625% chance) + boss 4 (4 ×1)` = **4.74** |
-| F10 | Ascend/hr | `min(F9 ÷ 8 Add, F7 ÷ 8 tier) — the scarcer stone sets the pace` = **0.59** · full 12-piece set **20.3 hr** (Add alone 2.5 hr · tier stones alone 10.7 hr → tier stones bind) |
-| F13 | herb bundles/hr | `separate roll · 2.00% per kill mid · 3.00% high · bundle of 1-3 zone-tier herbs` = mid band **10.74/hr** · high band **17.67/hr** |
+| F3 | drops per 1,000 kills | `kills × F2` = **139** (L90) · 123 (L60) · 106 (L30) · 428 (full Lck) |
+| F4 | upgrades per 1,000 kills | `measured — tools/loot.ts, the seven roll steps in loot.md section 1` = first 100 drops 22.8 → drops 101-400 7.4 → after that 4.8 (low band) · keep-rate 5.10% low · 4.39% mid · 3.11% high · 1.08% high + full_lck |
+| F5 | Reroll value stones per 1,000 kills | `junk × 1 = drops − upgrades` = **134** |
+| F6 | Reroll value uses per 1,000 kills | `134 ÷ 8` = **17** |
+| F7 | Reroll tier stones per 1,000 kills | `elite 10 (20% of kills ×0.05) + boss 20 (4 ×3)` = **31** |
+| F8 | Refines per 1,000 kills | `31 ÷ 8` = **4** |
+| F9 | Add mod stones per 1,000 kills | `elite 1 (20% of kills × 0.625% chance) + boss 7 (4 ×1)` = **8** |
+| F10 | Ascends per 1,000 kills | `min(F9 ÷ 8 Add, F7 ÷ 8 tier) — the scarcer stone sets the pace` = **1** · full 12-piece set **11,957 kills** (Add alone 1,473 · tier stones alone 6,302 → tier stones bind) |
+| F13 | herb bundles per 1,000 kills | `separate roll · 2.00% per kill mid · 3.00% high · bundle of 1-3 zone-tier herbs` = mid band **20** · high band **30** |
 | F16 | Refine full set | `12 pieces × 1 slots × 2 steps = 24 casts` = **24 casts** · 192 Reroll tier stones (checks.md E6) |
 | F17 | Full-set polish | `100 casts at 8 stones` = **100 casts** · 800 Reroll value stones (checks.md E8) |
-| F18 | gold per minute of full-sell income | `junk/hr ÷ 60` = 0.8 low · 1.1 mid · 1.3 high · 4.2 full Lck (towns-stalls.md §1) |
+| F18 | gold per kill of full-sell income | `junk per kill × 1` = 0.0994 low · 0.1173 mid · 0.1341 high · 0.4228 full Lck (towns-stalls.md §1) |
 | F19 | full-Lck income ceiling over the no-Lck line | `249 ÷ 79` = **×3.15** — the only place Lck may multiply income (G8) |
-| F20 | Quality Stone/hr | `monster 6 (1% of kills) + elite 29 (1 in 5 × 25%) + boss 96 (4 ×24)` = **131** |
-| F21 | Upgrade full set | `1 + 2 + 3 + 4 + 5 + 7 + 9 + 11 + 13 + 15 + 18 + 21 + 24 + 27 + 30 = 190 per piece × 12 pieces = 2280 stones ÷ F20` = **17.4 hr** for a full +15 set · the steps 11-15 third alone, hunted only from bosses, is **15.0 hr** (crafting.md "sources shift monsters → elites → bosses by step") |
-| F22 | Repair and Corrupt stone/hr | `Repair: elite 6 (1 in 5 × 5%) + boss 4 · Corrupt: boss 4 × 25% chance` = Repair **10/hr** · Corrupt **1.0/hr** — the rarest stone, so one gamble per piece costs about an hour and a full 12-piece set of gambles is 12 hr (crafting.md §Corrupt) |
+| F20 | Quality stones per 1,000 kills | `monster 10 (1% of kills) + elite 50 (1 in 5 × 25%) + boss 163 (4 ×24)` = **223** |
+| F21 | Upgrade full set | `1 + 2 + 3 + 4 + 5 + 7 + 9 + 11 + 13 + 15 + 18 + 21 + 24 + 27 + 30 = 190 per piece × 12 pieces = 2280 stones ÷ F20` = **10,249 kills** for a full +15 set · the steps 11-15 third alone, hunted only from bosses, is **8,835 kills** (crafting.md "sources shift monsters → elites → bosses by step") |
+| F22 | Repair and Corrupt stones per 1,000 kills | `Repair: elite 10 (1 in 5 × 5%) + boss 7 · Corrupt: boss 4 × 25% chance` = Repair **17** · Corrupt **2** per 1,000 kills — the rarest stone, so one gamble per piece costs about 589 kills and a full 12-piece set of gambles is 12 × that (crafting.md §Corrupt) |
 | F11 | 0.29 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises | Flat line per drop (high zone, after the 0.25 early-game weighting) · status **measured** |
-| F12 | boss 1.4 + elite 1.4 + normal 1.8 = 4.6 | skill/hr · skill-pool.md drop chances · status **carried** |
+| F12 | boss 2.4 + elite 2.4 + normal 3.1 = 7.8 | skills per 1,000 kills · skill-pool.md drop chances · status **carried** |
 | F14 | max 3 uses per fight · 30 sec shared cooldown · suppressed on bosses | potion sustain bound · status **rule** |
 | F15 | 1 Reroll tier stone per 500 salvages (~+2.7% of F7) | salvage milestone bound · status **rule** |
 
-Derived from: group spawn 4 sec · 5.107 sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = 12 + 1×(points ÷ 7)) · Base drop 8% (formula-utility.md section 10) · prices 8/8 stones (crafting.md).
+Derived from: group spawn 4 sec · 5.107 sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = 12 + 1×(points ÷ 7)) · Base drop 8% (formula-utility.md section 10) · prices 8/8 stones (crafting.md). A band is a kill count, so every row is stated per 1,000 kills — never per hour.
 F4 · F11 are **simulation output** (loot.md section 3) and F13 is unset — this cage does not invent it, it only refuses to let a derived row drift.
 
 <!-- END GENERATED:group-F -->
@@ -214,8 +214,10 @@ F4 · F11 are **simulation output** (loot.md section 3) and F13 is unset — thi
 | G5 | boss 15 min each · AFK cannot kill bosses → second half of crafting is active |
 | G6 | Gold has exactly two mints: **mob junk sold at the Counterhand** (loot.md section 4) · Road events, bounded by G9. Task payouts stay stones, Collector pays the item · no source pays both media |
 | G7 | Gold never buys power: no gear, no Mods, no potions, no stones, no `mob_HP`-relevant service (towns.md section 0 · H1) |
-| G8 | Gold income ceiling = the junk line (mob junk sold): ~79/hour high zone (F3-F5), ~249/hour at full Lck · legal only while G7 holds · an Lck build's gold advantage must never convert into craft advantage |
-| G9 | Every Road/travel purchase pays no stones · road event income ≤ the value of an equal hour spent farming (F1/F5) · AFK never runs on a Road (towns.md section 7) |
+| G8 | Gold income ceiling = the junk line (mob junk sold): ~134.1 per 1,000 kills high zone (F3-F5), ~422.7 per 1,000 kills at full Lck · legal only while G7 holds · an Lck build's gold advantage must never convert into craft advantage |
+| G9 | Every Road/travel purchase pays no stones · road event income ≤ the value of the same kill count spent farming (F1/F5) · AFK never runs on a Road (towns.md section 7) |
+| G10 | **The walk moves the ruler and nothing else** — printed by **X36**, gated again as **M13/M14** on the sheet | `road.walk.block_sec` x `road.walk.encounter_gap_blocks` x `encounters_per_min` = a minute, and every link's own `trip_min` is a whole number of blocks — so a leg is as long and as eventful as it always was and no published rate moved · **M15**: a block touches only its own two neighbours and the settlements at its link's ends, so nothing can be reached without walking there. The map shows places, not routes: no link dash and no walk block is drawn, so a block's progress is read from the HUD and the Road panel |
+| G11 | **A route is a walk and a checkpoint is the only skip** — **X36** · the walk rules in `towns.md` | plotting lays the shortest chain of links from where you stand to where you chose and walks it link by link; a Circuit is the same list with the loop set · a checkpoint warp costs the carriage price once per link (T9) and is free after, so walking is never mandatory and never the cheaper option · a plotted route is never resolved while the client is closed, while a Circuit still plays out its lap on the untilted base table (**X46**) |
 
 # T · Town Economy (gold prices · stock · Standing · demand)
 
@@ -225,23 +227,23 @@ Every row is computed by `node tools/town.ts` from `tools/data/town.json`; the t
 | id | Must hold | Expression | Value |
 |---|---|---|---|
 | T1 | gold is minted by the sell choice, plus one bounded exception: the Road purse (G2 · G6 · X36) | `1 gold per sold junk piece · Road ceiling 17 gold/day, never stones, never AFK` | 1 |
-| T2 | the price unit is real income, not a feeling | `junk/hr ÷ 60, per band` | 0.8 low · 1.1 mid · 1.3 high · 4.2 high+full Lck gold per 1 m |
+| T2 | the price unit is a kill’s worth of real loot, not a feeling | `junk per kill, per band` | 0.0994 low · 0.1173 mid · 0.1341 high · 0.4228 high+full Lck gold per 1 k |
 | T3 | lifetime gold supply is the junk line, not a new faucet | `1,777×0.0994 + 8,066×0.1173 + 50,188×0.1341` | 7,854 gold |
-| T4 | one-time stall demand ≤ 1.50× the supply — a funnel, not a wall | `Σ 17 one-time lines at their charge band` | 4,026 = 0.51× ✓ |
-| T5 | essentials ≤ 20% of the supply while ~80%+ still dissolves | `4 Road links · tab 1 at Eastgate · tab 2 · pouch II · deed 4` | 481 = 6.1% ✓ |
+| T4 | one-time stall demand ≤ 1.50× the supply — a funnel, not a wall | `Σ 17 one-time lines at their charge band` | 4,018 = 0.51× ✓ |
+| T5 | essentials ≤ 20% of the supply while ~80%+ still dissolves | `4 Road links · tab 1 at Eastgate · tab 2 · pouch II · deed 4` | 466 = 5.9% ✓ |
 | T6 | selling everything is a craft decision, priced in craft | `7,854 ÷ 8 stones · ÷ 100 casts per full polish` | 982 Reroll casts ≈ 9.8 full-set polishes forgone |
 | T7 | the full-Lck advantage stops at the junk line (G8) | `50,188 high-band kills × 0 vs × 0` | 21,217 vs 6,731 gold = ×3.15 against the ×3.15 ceiling ✓ |
 | T8 | every stall line is space · time · information · appearance only (G7) | `kind tag on all 26 lines · power nouns need an explicit display_only flag` | 26 lines, 0 power lines ✓ |
-| T9 | travel never gates content and never beats farming (G9) | `8 links × 20 m one-time · Road trip ≤ 5 real min` | 372 gold = 4.7% of supply ✓ |
-| T10 | Armourer repair costs more than the elite time it replaces (D2 service class) | `60 ÷ 6 tier stones/hr = 10.00 m floor · F9 re-checked in T10b` | 16 m · 14 m at Ironrow ✓ |
-| T11 | skip tokens stay inside the tasks.md bound | `8 m × 3/day` | 24 m/day ✓ (payouts untouched) |
+| T9 | travel never gates content and never beats farming (G9) | `8 links × 196.3333 k one-time · Road trip ≤ 5 real min` | 362 gold = 4.6% of supply ✓ |
+| T10 | Armourer repair costs more than the elite time it replaces (D2 service class) | `589 kills ÷ 6 tier stones = 98.2 kills per Reroll tier stone floor · F9 re-checked in T10b` | 157.0667 k · 137.4333 k at Ironrow ✓ |
+| T11 | skip tokens stay inside the tasks.md bound | `78.5333 k × 3/day` | 235.6 k/day ✓ (payouts untouched) |
 | T12 | Standing has 3 tiers per settlement and is counted from F1 kills | `budget kills × tier share` | see table T-S below, 27 thresholds ✓ |
 | T13 | Tier III is a chase, never a formality | `tier III share ≥ 1 × the zone budget` | 1.4 on all 9 ✓ |
 | T14 | Collector sets pay items, never gold (G6) | `pays_gold flag on 3 sets` | 0 gold ✓ |
 | T15 | Base bias is permanent flavour — ruled even-weighted, so it may never carry a number | `loot.md section 1 step 2 + section 3` | status = decided · 3 guards · 0 numeric weights |
-| T16 | price ladders are monotonic, so no later tier is cheaper | `stash_tab 60-300 m · herb_pouch 60-240 m · plot_deed 180-540 m · house 120-360 m` | ✓ |
-| T17 | this file owns no kill rate: income is loot.md unchanged | `F1 = 463 / 537 / 589 kills/hr` | mob_HP and the published kill rates unmoved ✓ (H1) |
-| T18 | no band number is retyped here — town prices divide the engine junk line by 60 | `tools/lib/engine.ts (engine.json) → junk/hr per band, then loot.md section 2 read back` | F1 589 · F3 82 · F5 79 · 17 loot.md numbers read back equal ✓ |
+| T16 | price ladders are monotonic, so no later tier is cheaper | `stash_tab 589-2945 k · herb_pouch 537-2356 k · plot_deed 1611-5301 k · house 926-3534 k` | ✓ |
+| T17 | this file owns no kill count: income is loot.md unchanged | `F1 = 463 / 537 / 589 kills per band` | mob_HP and the published kill counts unmoved ✓ (H1) |
+| T18 | no band number is retyped here — town prices read the engine junk line per kill | `tools/lib/engine.ts (engine.json) → junk per kill per band, then loot.md section 2 read back` | F1 589 · F3 82 · F5 79 · 17 loot.md numbers read back equal ✓ |
 
 ## T-S · Standing thresholds in kills (the numbers T12 reads)
 

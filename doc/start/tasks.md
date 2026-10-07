@@ -15,7 +15,7 @@ Task board: the daily direction layer. Answers concept.md failure point 1 (nothi
 # Board
 
 - 3 task slots. An empty slot offers a new task immediately; a finished or skipped slot refills after 1 hour.
-- 1 free skip per day per slot; further skips are bought at the Guild counter in **gold** (towns.md section 5 · 8 m per token, 3 per day ceiling, `towns-stalls.md` section 4), not in stones.
+- 1 free skip per day per slot; further skips are bought at the Guild counter in **gold** (towns.md section 5 · 78.5 k per token, 3 per day ceiling, `towns-stalls.md` section 4), not in stones.
 - Task pool is level-gated: only zones at or below the player zone.
 
 # Task types

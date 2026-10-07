@@ -190,7 +190,7 @@
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
-      "note": "The passive tree exists (tools/data/tree.json: three branches, 63 nodes) but is NOT folded into this curve yet (owner ruling), so mob_HP(L) = stat_c(L) x (1 + skill_per_level x L) x g(L) and mob_PS(L) = mob_HP(L) / mob_damage_divisor. g(L) is the gear-progression factor; above the level-90 edge it is held flat (curve.extend). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt - checks.md X37).",
+      "note": "The passive tree exists (tools/data/tree.json: three branches, 63 nodes) and is DELIBERATELY outside this curve (owner ruling, permanent): the published rates are the empty-tree baseline, so mob_HP(L) = stat_c(L) x (1 + skill_per_level x L) x g(L) and mob_PS(L) = mob_HP(L) / mob_damage_divisor. The tree is a player-side bonus the curve never prices - not a second power system to fold, and its scale is stated by rule (tree.json meta), not measured. g(L) is the gear-progression factor; above the level-90 edge it is held flat (curve.extend). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt - checks.md X37).",
       "extend": {
         "from_level": 90,
         "gear_factor": 43.15708874022729,
@@ -439,7 +439,7 @@
         "group": "2-3",
         "subzones": [
           {
-            "name": "Glimmer Grove",
+            "name": "Storm Grove",
             "environment": "grove",
             "element": "lightning",
             "races": [
@@ -457,7 +457,7 @@
             "elite": "Ancient Treant"
           },
           {
-            "name": "Elder Rootway",
+            "name": "Arc Rootway",
             "environment": "rootway",
             "element": "lightning",
             "races": [
@@ -475,7 +475,7 @@
             "elite": "Dark Elf"
           },
           {
-            "name": "Moonlit Glade",
+            "name": "Thunder Glade",
             "environment": "glade",
             "element": "lightning",
             "races": [
@@ -885,7 +885,7 @@
         "group": "1-2",
         "subzones": [
           {
-            "name": "Snowfield",
+            "name": "White Waste",
             "environment": "snow",
             "element": "poison",
             "races": [
@@ -903,7 +903,7 @@
             "elite": "Stone Troll"
           },
           {
-            "name": "Glacier Shelf",
+            "name": "Glacier Teeth",
             "environment": "ice",
             "element": "poison",
             "races": [
@@ -921,7 +921,7 @@
             "elite": "Fire Giant"
           },
           {
-            "name": "Rime Hollow",
+            "name": "Rimewind Hollow",
             "environment": "rime",
             "element": "poison",
             "races": [
@@ -1332,7 +1332,7 @@
         "group": "3-5",
         "subzones": [
           {
-            "name": "Bone Stair",
+            "name": "Marrow Stair",
             "environment": "stair",
             "element": "poison",
             "races": [
@@ -1350,7 +1350,7 @@
             "elite": "Demon Knight"
           },
           {
-            "name": "Molten Deeps",
+            "name": "Seeping Deeps",
             "environment": "deeps",
             "element": "poison",
             "races": [
@@ -1368,7 +1368,7 @@
             "elite": "Demon Knight"
           },
           {
-            "name": "Throne Abyss",
+            "name": "Drowned Abyss",
             "environment": "abyss",
             "element": "poison",
             "races": [
@@ -4398,9 +4398,18 @@
         "trip_min": 8
       }
     ],
-    "link_rule": "A ladder link joins consecutive settlements and pays the purse. A branch link joins zone i to zone i+2: two of them are the mountain shortcut over a pass (8 min, 2 minutes cheaper than walking both ladder legs), and one is the 12-minute river detour, slower than the long way but safer and richer in trade. Every link carries its own zone pair — nothing reads zone order from an array index.",
+    "link_rule": "A ladder link joins consecutive settlements and pays the purse. A branch link joins zone i to zone i+2: all four are the mountain shortcut over a pass, which carries you past the settlement in between on one leg instead of two. Every link carries its own zone pair — nothing reads zone order from an array index.",
     "trip_min": 5,
     "encounters_per_min": 1,
+    "walk": {
+      "note": "The walk is the Road counted in blocks rather than minutes (owner ask). A block is the unit of distance and `block_sec` is how long one takes; every link's own `trip_min` is re-expressed as a whole number of blocks, so nothing about a leg's length changes - only what it is measured in. A block is named `<zoneA>-<zoneB>#<n>`, which is the link id the map already uses plus the block's own position on it, so no coordinate is ever involved and the simulation cannot know where the sheet draws it.",
+      "block_sec": 10,
+      "encounter_gap_blocks": 6,
+      "rule": "`block_sec` x `encounter_gap_blocks` x `encounters_per_min` must be 60, and `trip_min` x 60 must divide by `block_sec`. That is the whole contract of the walk: a leg lasts exactly as long and carries exactly as many encounters as it did before, so the Road's published cadence, its mint bounds and every kill rate behind them (H1) do not move - only the ruler changed. An encounter fires as the character crosses INTO the block at each gap, from the link's own terrain row, which is what 'encounters happen between blocks' means.",
+      "adjacency_rule": "A block touches only the block before it and the block after it on the same link; the first block touches the settlement the leg left and the last block touches the settlement it reaches. There is no other edge in the walk, so a character can never stand somewhere it did not walk to, and no route may hop a block - plotting draws the path, it never jumps it.",
+      "checkpoint_rule": "A settlement is a checkpoint, and warping to one is the only way to skip ground in the world. It costs the carriage price once per link (`towns.md` section 7 mode B, checks.md T9) and is free and instant for every visit after that, so walking is never mandatory and never the cheaper option - the Waypoint stays the default and the walk stays a content choice (G9).",
+      "route_rule": "A plotted route is the shortest chain of links from the settlement you stand in to the settlement you chose, each link meeting the next at a settlement it shares with it. It is walked link by link and block by block and ends where it was aimed. A Circuit is the same shape with `loop` set, so the two are one structure and one validator. Offline a loop plays out the rest of its lap on the untilted base table, but a plotted route never resolves itself while the client is closed: the character is parked and the route is gone."
+    },
     "terrain": {
       "road": {
         "ambush": 48,
@@ -4439,7 +4448,7 @@
         "weight": 54,
         "mobs": "2-3 from the lower zone cast, at the player level clamped into that range",
         "resolve": "normal combat (mob-roster.md numbers)",
-        "win": "normal 8% drop roll + a 3 gold purse",
+        "win": "normal 8% drop roll + the link's purse",
         "loss": "Push as usual, the leg is forfeit and the purse is lost"
       },
       "caravan": {
@@ -4474,7 +4483,7 @@
       "editable_in": "settlement"
     },
     "standing_per_trip_kills": 7,
-    "note": "The Road is opt-in. A ladder leg is 5 real minutes and carries 5 encounters (1 per Road minute); a branch leg is 8 (mountain shortcut) or 12 (river detour). C+D stay a content choice, not an income choice: only the 17 ladder links pay the purse, so the mint stays at most 51 gold a day (17 x 3 gold, once per link per day) against a junk-sell mint of thousands; branch links pay no purse and grant Standing only where they arrive. Road pays no stones. A Circuit — an ordered list of links a player loops — does run offline (section 6 and), rolling the untilted base table.",
+    "note": "The Road is opt-in. A ladder leg is 5 real minutes and carries 5 encounters (1 per Road minute); a branch leg is 8 (the mountain shortcut over a pass). Both are walked in blocks - `walk.block_sec` per block, so a ladder leg is 30 blocks and a branch leg 48, and an encounter fires on the way into every `walk.encounter_gap_blocks`-th block. C+D stay a content choice, not an income choice: only the 17 ladder links pay the purse, so the mint stays at most 17 gold a day (17 x `purse_gold`, once per link per day) against a junk-sell mint of thousands; branch links pay no purse and grant Standing only where they arrive. Road pays no stones. A Circuit - an ordered list of links a player loops - does run offline (section 6 and), rolling the untilted base table; a plotted route never does.",
     "forfeit_kills": 120
   },
   "inventory": {
@@ -4660,7 +4669,7 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "hr1 21.4 → hr2-4 8.4 → after that 5.2 (low band) · keep-rate 5.10% low · 4.39% mid · 3.11% high · 1.08% high + full_lck",
+      "value": "first 100 drops 22.8 → drops 101-400 7.4 → after that 4.8 (low band) · keep-rate 5.10% low · 4.39% mid · 3.11% high · 1.08% high + full_lck",
       "expression": "measured — tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
@@ -4672,8 +4681,8 @@
     },
     {
       "id": "F12",
-      "value": "boss 1.4 + elite 1.4 + normal 1.8 = 4.6",
-      "expression": "skill/hr · skill-pool.md drop chances",
+      "value": "boss 2.4 + elite 2.4 + normal 3.1 = 7.8",
+      "expression": "skills per 1,000 kills · skill-pool.md drop chances",
       "status": "carried"
     },
     {
@@ -4784,7 +4793,7 @@
     },
     "no_death": "the player cannot be killed by the opening: zone-1 mobs take minutes to kill a level-1 character, and Push returns them to camp at full HP"
   },
-  "doc_prose_lines_max": 1266,
+  "doc_prose_lines_max": 1263,
   "doc_prose": {
     "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
     "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",

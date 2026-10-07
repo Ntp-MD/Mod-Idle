@@ -204,12 +204,12 @@
   .spacer { flex: 1; }
   .bar button { padding: .15rem .4rem; font-size: .72rem; }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.7rem, 1fr)); gap: .25rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr)); gap: .25rem; align-content: start; }
 
   /* The equipment panel: three columns by five rows, no body drawn — the `.` cells are the blanks. */
   .doll {
     display: grid;
-    grid-template-columns: repeat(3, 4.4rem);
+    grid-template-columns: repeat(3, 3.3rem);
     grid-template-rows: repeat(5, auto);
     grid-template-areas:
       "cape    helmet  amulet"
@@ -217,7 +217,7 @@
       "gloves  belt    earring"
       "ringa   pant    ringb"
       ".       boots   .";
-    gap: .3rem;
+    gap: .25rem;
     width: fit-content;
     margin: 0 auto .6rem;
   }
@@ -226,14 +226,14 @@
     position: relative;
     aspect-ratio: 1 / 1;
     padding: 0;
-    background: #171b22;
+    background: var(--bg-2);
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: var(--r-xs);
   }
   .slot.rare { border-color: var(--xp); }
-  .slot.worn { box-shadow: inset 0 0 0 1px #2f3a4d; background: #1b2029; }
+  .slot.worn { box-shadow: inset 0 0 0 1px #2f3a4d; background: var(--panel-2); }
   .slot.held { border-style: dashed; border-color: var(--good); }
-  .slot.empty { display: flex; align-items: center; justify-content: center; background: #12151b; border-style: dotted; cursor: default; }
+  .slot.empty { display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .18); border-style: dotted; cursor: default; }
   .slotname { font-size: .5rem; color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 .12rem; }
   .slot-icon {
     position: absolute;

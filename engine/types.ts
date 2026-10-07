@@ -346,11 +346,22 @@ export interface RoadLinkCfg {
   trip_min: number;
 }
 
+export interface RoadWalkCfg {
+  note: string;
+  block_sec: number;
+  encounter_gap_blocks: number;
+  rule: string;
+  adjacency_rule: string;
+  checkpoint_rule: string;
+  route_rule: string;
+}
+
 export interface RoadCfg {
   links: RoadLinkCfg[];
   link_rule: string;
   trip_min: number;
   encounters_per_min: number;
+  walk: RoadWalkCfg;
   terrain: Record<string, Record<string, number>>;
   terrain_rule: string;
   encounters: Record<string, { weight: number; mobs: string; resolve: unknown; win: unknown; loss: unknown }>;

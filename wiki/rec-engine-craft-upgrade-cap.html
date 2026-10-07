@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
+<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -163,7 +163,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="craft"><input type="hidden" name="id" value="upgrade_cap"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
-<section><h2>Numbers this feeds</h2><table class=""><thead><tr><th>what</th><th>expression</th><th>value</th><th>checks row</th></tr></thead><tbody><tr><td>Reroll uses/hr</td><td><code>79 ÷ 8</code></td><td><code>10</code></td><td><a href="checks.html">F6</a></td></tr><tr><td>Refine/hr · full set</td><td><code>30 ÷ 8 · 24 casts</code></td><td><code>3.75/hr · 24 casts</code></td><td><a href="checks.html">F8 · E6</a></td></tr><tr><td>full-set polish</td><td><code>100 casts at 8 stones</code></td><td><code>800 Reroll value stones</code></td><td><a href="checks.html">F17 · E8</a></td></tr></tbody></table></section>
+<section><h2>Numbers this feeds</h2><table class=""><thead><tr><th>what</th><th>expression</th><th>value</th><th>checks row</th></tr></thead><tbody><tr><td>Reroll uses per 1,000 kills</td><td><code>NaN ÷ 8</code></td><td><code>NaN</code></td><td><a href="checks.html">F6</a></td></tr><tr><td>Refines per 1,000 kills · full set</td><td><code>30 ÷ 8 · 24 casts</code></td><td><code>NaN · 24 casts</code></td><td><a href="checks.html">F8 · E6</a></td></tr><tr><td>full-set polish</td><td><code>100 casts at 8 stones</code></td><td><code>800 Reroll value stones</code></td><td><a href="checks.html">F17 · E8</a></td></tr></tbody></table></section>
 <section><h2>Mentioned in the specs</h2><p class="hint">No document names this row yet. If that is wrong, the spec is missing a line — not the data.</p></section>
 
 <section><h2>Raw JSON</h2><pre class="code">{

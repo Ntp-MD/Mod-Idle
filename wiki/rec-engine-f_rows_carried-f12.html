@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
+<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -142,13 +142,13 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h1>F12</h1>
 <p class="hint">One row of <code>tools/data/engine.json</code> → <code>f_rows_carried</code>. Stat model · K values · Mod maxima · loot model · craft prices · timeline. Changing a number here re-prices every town line and rewrites checks.md groups A · B · C · F.</p>
 <dl class="kv"><dt>path</dt><dd><code>f_rows_carried[F12]</code></dd><dt>collection</dt><dd><a href="data-engine-f_rows_carried.html">Hand-carried F rows</a></dd><dt>written by</dt><dd><code>tools/check.ts</code> · <code>tools/town.ts</code></dd><dt>rows around it</dt><dd>5</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Row id</td><td><code>F12</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Value</td><td><code>boss 1.4 + elite 1.4 + normal 1.8 = 4.6</code></td><td><code>text</code></td><td>—</td></tr><tr><td>Status</td><td><code>carried</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Expression</td><td><code>skill/hr · skill-pool.md drop chances</code></td><td><code>text</code></td><td>—</td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Row id</td><td><code>F12</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Value</td><td><code>boss 2.4 + elite 2.4 + normal 3.1 = 7.8</code></td><td><code>text</code></td><td>—</td></tr><tr><td>Status</td><td><code>carried</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Expression</td><td><code>skills per 1,000 kills · skill-pool.md drop chances</code></td><td><code>text</code></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="f_rows_carried"><input type="hidden" name="id" value="F12">
 <div class="f"><label for="f-id">Row id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value="F12" pattern="^[A-Z]\d+$"></div></div>
-<div class="f"><label for="f-value">Value</label><div><textarea id="f-value" name="value">boss 1.4 + elite 1.4 + normal 1.8 = 4.6</textarea></div></div>
+<div class="f"><label for="f-value">Value</label><div><textarea id="f-value" name="value">boss 2.4 + elite 2.4 + normal 3.1 = 7.8</textarea></div></div>
 <div class="f"><label for="f-status">Status</label><div><input id="f-status" type="text" name="status" value="carried" list="f-status-dl" placeholder="carried | measured | pending | rule"><datalist id="f-status-dl"><option value="carried"></option><option value="measured"></option><option value="pending"></option><option value="rule"></option></datalist></div></div>
-<div class="f"><label for="f-expression">Expression</label><div><textarea id="f-expression" name="expression">skill/hr · skill-pool.md drop chances</textarea></div></div>
+<div class="f"><label for="f-expression">Expression</label><div><textarea id="f-expression" name="expression">skills per 1,000 kills · skill-pool.md drop chances</textarea></div></div>
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="engine"><input type="hidden" name="coll" value="f_rows_carried"><input type="hidden" name="id" value="F12"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
@@ -157,8 +157,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h2>Raw JSON</h2><pre class="code">{
   &quot;id&quot;: &quot;F12&quot;,
-  &quot;value&quot;: &quot;boss 1.4 + elite 1.4 + normal 1.8 = 4.6&quot;,
-  &quot;expression&quot;: &quot;skill/hr · skill-pool.md drop chances&quot;,
+  &quot;value&quot;: &quot;boss 2.4 + elite 2.4 + normal 3.1 = 7.8&quot;,
+  &quot;expression&quot;: &quot;skills per 1,000 kills · skill-pool.md drop chances&quot;,
   &quot;status&quot;: &quot;carried&quot;
 }</pre></section>
 </div>

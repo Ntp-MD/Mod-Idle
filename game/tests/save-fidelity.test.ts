@@ -118,7 +118,7 @@ describe('the save schema and the account', () => {
     const m = migrate(bare);
     expect(m.presets.length).toBe(E.presets.sets);
     expect(m.grants.stash_tabs).toBe(0);
-    expect(m.pedlar.minutes).toEqual([]);
+    expect(m.pedlar.kills).toEqual([]);
     expect(m.collector.done).toEqual({});
   });
 

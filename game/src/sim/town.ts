@@ -2,9 +2,9 @@ import { eng, E, TOWN } from '../engine/client';
 import type { GameState, TaskSlot, TownState } from './types';
 
 /**
- * The settlement layer. Every price here is "minutes of full-sell income" converted through the
- * shared engine's `goldPerMinute`, so a drop-rate change moves the stall prices in the client the
- * same moment it moves them in `towns-stalls.md` (`economy.md` · checks.md T2-T7).
+ * The settlement layer. Every price here is "kills of full-sell income" converted through the shared
+ * engine's `goldPerKill`, so a drop-rate change moves the stall prices in the client the same moment
+ * it moves them in `towns-stalls.md` (`economy.md` · checks.md T2-T7).
  *
  * Gold buys space, time, information and appearance only — never gear, Mods, potions or stones
  * (`AGENT.md` §5), and the purchase list is filtered to the kinds `town.json` `invariants` allows.
@@ -28,22 +28,25 @@ export const stockOf = (settlementId: string) =>
 
 export const startSettlement = () => (TOWN.settlements.find((s: any) => s.start) || TOWN.settlements[0]).id;
 
-/** The `m` a row charges at this settlement, honouring the teaching discount where one exists. */
-export function priceMinutes(row: any, settlementId: string, state?: GameState): number {
+/** The `k` a row charges at this settlement, honouring the teaching discount where one exists. */
+export function priceKills(row: any, settlementId: string, state?: GameState): number {
   const s = settlementById(settlementId);
-  if (row.discount && row.discount.settlement === s.id) return row.discount.m;
+  if (row.discount && row.discount.settlement === s.id) return row.discount.k;
   // the pedlar's stock is a fresh roll of three slots each real day, priced inside its band
-  if (row.id === 'pedlar_rotation' && state?.pedlar?.minutes?.length) {
-    return state.pedlar.minutes[Math.min(state.pedlar.bought, state.pedlar.minutes.length - 1)];
+  if (row.id === 'pedlar_rotation' && state?.pedlar?.kills?.length) {
+    return state.pedlar.kills[Math.min(state.pedlar.bought, state.pedlar.kills.length - 1)];
   }
-  return row.m != null ? row.m : row.m_min;
+  const band = row.charge_band || s.band;
+  if (row.k != null) return row.k;
+  // a per-destination or per-band line carries a kill ladder, one per band
+  return row.k_by_band ? row.k_by_band[band] : row.k_min;
 }
 
-/** Gold = minutes of that band's full-sell junk income. */
+/** Gold = kills × that band's gold per kill (one kill's full-sell junk income). */
 export function priceGold(row: any, settlementId: string, state?: GameState): number {
   const s = settlementById(settlementId);
   const band = row.charge_band || s.band;
-  return Math.round(priceMinutes(row, settlementId, state) * eng.goldPerMinute(band) * 100) / 100;
+  return Math.round(priceKills(row, settlementId, state) * eng.goldPerKill(band) * 100) / 100;
 }
 
 export function newTown(): TownState {
@@ -143,7 +146,7 @@ export function huntN(zone: number): number {
 }
 
 export function taskReward(kind: string, band: string): { stone: string; count: number } {
-  const pay = eng.taskPayout(band, TS.reward_minutes_of_band_income);
+  const pay = eng.taskPayout(band, TS.reward_k_per_band[band]);
   if (kind === 'elite') return { stone: 'tier', count: pay.tier };
   if (kind === 'boss') return { stone: 'remove', count: TS.boss_reward.remove };
   return { stone: 'reroll_value', count: pay.reroll_value };

@@ -124,7 +124,7 @@ export function newGame(seed = 20260101): GameState {
     activePreset: 0,
     collector: newCollector(),
     grants: newGrants(),
-    pedlar: { day: 0, minutes: [], bought: 0 },
+    pedlar: { day: 0, kills: [], bought: 0 },
     filter: newFilter(),
     travel: 'stay',
     autoDissolveRarity: 'off',
@@ -165,7 +165,7 @@ export function newGame(seed = 20260101): GameState {
     n: huntN(zone),
     progress: 0,
     stone: 'reroll_value',
-    count: eng.taskPayout('low', TOWN.task_sizing.reward_minutes_of_band_income).reroll_value,
+    count: eng.taskPayout('low', TOWN.task_sizing.reward_k_per_band.low).reroll_value,
     claimed: false,
     offeredAt: 0,
   };
@@ -475,7 +475,6 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
 function spawnEncounter(s: GameState, trip: RoadTrip, rng: () => number, online: boolean, weaponAspd: number) {
   const l = road.links[trip.linkIndex];
   const kind = road.rollEncounter(rng, online ? l.terrain : null);
-  trip.nextEncounterSec = s.clockSec + road.encounterGapSec;
   trip.kind = kind.id;
   if (!kind.hasMobs) { resolveEncounter(s, trip, rng, weaponAspd); return; }
   const zones = encounterZones(trip.linkIndex);
@@ -484,8 +483,8 @@ function spawnEncounter(s: GameState, trip: RoadTrip, rng: () => number, online:
   for (let i = 0; i < sizes.small; i++) mobs.push(spawnMob(rng, zones.lower, s.player.level, 'normal', 'small'));
   for (let i = 0; i < sizes.large; i++) mobs.push(spawnMob(rng, zones.higher, s.player.level, 'normal', 'large'));
   s.group = mobs;
-  s.spawnIn = road.encounterGapSec;
-  push(s, `Road · ${kind.id} on ${l.text} (${l.terrain})`);
+  s.spawnIn = road.blockSec;
+  push(s, `Block ${trip.blockIndex} of ${trip.blocks} · ${kind.id} on ${l.text} (${l.terrain})`);
 }
 
 function resolveEncounter(s: GameState, trip: RoadTrip, rng: () => number, weaponAspd: number) {
@@ -549,11 +548,11 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
   s.player.es = Math.min(Math.max(0, s.player.es), c.es);
   const day = Math.floor(s.clockSec / 86400);
-  if (s.pedlar.day !== day || !s.pedlar.minutes.length) {
+  if (s.pedlar.day !== day || !s.pedlar.kills.length) {
     s.pedlar = {
       day,
       bought: 0,
-      minutes: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarPrice(rng())),
+      kills: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarKills(rng())),
     };
   }
   // the owner's travel switch: 'forward' climbs through settlements already opened, using the
@@ -599,42 +598,58 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // While a leg runs, no ambient zone group appears: the Road replaces zone farming for its minutes.
   if (s.road) {
     const trip = s.road;
+    // the walk itself: one block at a time, and the encounter rides on the way INTO the block that
+    // ends each gap (`engine.json` road.walk). The clock does not pause for a fight — a leg is its
+    // own blocks at `block_sec`, so the same length and the same encounter count as before it was
+    // counted in blocks. Only the arrival waits, so the character is never dropped mid-fight.
     trip.secLeft--;
+    const entered = trip.secLeft <= 0;
+    if (entered) { trip.blockIndex++; trip.secLeft = road.blockSec; }
     if (!s.group.length) {
       if (trip.kind) resolveEncounter(s, trip, rng, c.weaponAspd);
-      if (trip.encountersLeft <= 0) {
+      if (trip.blockIndex >= trip.blocks) {
         openArrival(s, trip);
         grantTripStanding(s, trip);
         const link = road.links[trip.linkIndex];
-        if (trip.circuit.length) {
-          const wraps = (trip.legIndex + 1) % trip.circuit.length === 0;
+        if (trip.loop || trip.route.length > 1) {
+          const wraps = trip.loop && (trip.legIndex + 1) % trip.route.length === 0;
           if (!online && wraps) {
             // a closed client plays out the rest of the lap, then parks the character and lets
-            // ordinary offline idling resume (`save.md` · section 5)
+            // ordinary offline idling resume (`save.md` · section 5). A plotted route is never
+            // resolved while away: it is dropped and the character stands where the walk stopped.
             push(s, `Circuit lap done in the away period · parked at ${s.town.waypoint}`);
             endTrip(s, 'complete');
           } else {
             const cleanBefore = s.counters.cleanLaps || 0;
-            advanceLeg(s, trip);
-            push(s, `Circuit leg done (${link.text}) · on to ${road.links[s.road!.linkIndex].text}`);
-            // the Circuit objective: a lap closed with no Push is a completion, logged and never
-            // paid — the Road's gold is capped by G6-G9 and a stone would be a new source
-            if ((s.counters.cleanLaps || 0) > cleanBefore) push(s, `Circuit lap complete with no Push — clean lap ${s.counters.cleanLaps}`);
+            // a plotted route ends where it was aimed, so the last leg returns 'done' and the walk
+            // is over; a Circuit always has a next leg and wraps instead
+            if (advanceLeg(s, trip) === 'done') {
+              push(s, `Route arrived · ${trip.blocks} blocks of ${link.text} walked block by block`);
+              endTrip(s, 'complete');
+            } else {
+              push(s, `Leg done (${link.text}) · on to ${road.links[s.road!.linkIndex].text}`);
+              // the Circuit objective: a lap closed with no Push is a completion, logged and never
+              // paid — the Road's gold is capped by G6-G9 and a stone would be a new source
+              if ((s.counters.cleanLaps || 0) > cleanBefore) push(s, `Circuit lap complete with no Push — clean lap ${s.counters.cleanLaps}`);
+            }
           }
         } else {
-          push(s, `Road trip over · ${road.encountersFor(trip.linkIndex)} encounters in ${link.trip_min} min of walking`);
+          push(s, trip.route.length > 1
+            ? `Route arrived · ${road.encountersFor(trip.linkIndex)} encounters over ${trip.blocks} blocks on ${link.text}`
+            : `Road trip over · ${road.encountersFor(trip.linkIndex)} encounters in ${link.trip_min} min of walking`);
           endTrip(s, 'complete');
         }
-      } else if (s.clockSec >= trip.nextEncounterSec) {
+      } else if (!trip.kind && trip.encountersLeft > 0 && entered
+        && trip.blockIndex % road.encounterGapBlocks === 0) {
         spawnEncounter(s, trip, rng, online, c.weaponAspd);
       }
     }
   }
 
-  const band = BAND_OF_QUALITY(eng.zoneById(s.zone).quality);
-  const [loGroup, hiGroup] = (eng.zoneById(s.zone).group as string).split('-').map(Number);
-  const groupSize = intBetween(rng, loGroup || 1, hiGroup || loGroup || 1);
-  if (!s.group.length && !s.road) s.spawnIn--;
+const band = BAND_OF_QUALITY(eng.zoneById(s.zone).quality);
+    const [loGroup, hiGroup] = (eng.zoneById(s.zone).group as string).split('-').map(Number);
+    const groupSize = intBetween(rng, loGroup || 1, hiGroup || loGroup || 1);
+    if (!s.group.length && !s.road) s.spawnIn--;
   if (!s.group.length && !s.road && s.spawnIn <= 0) {
     const wantElite = rng() < L.elite_spawn_chance;
     // the boss clock is a stored due time, per character, and it does not accrue while away
@@ -852,15 +867,22 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     if (switchPreset(s, sm.mainPreset)) push(s, `Back on the ${s.presets[sm.mainPreset].name} preset · running cooldowns kept`);
     if (s.road) {
       const trip = s.road;
-      if (trip.circuit.length) {
-        // a Push inside a Circuit skips the rest of the leg and the Circuit carries on (section 5);
-        // ending it here is what would let a repeated Push loop forever
-        skipLeg(s, trip);
-        push(s, 'Push on the Road · the rest of this leg is skipped, the Circuit carries on');
+      // a Push skips the rest of the block chain it is on instead of ending the walk (section 5);
+      // ending it here is what would let a repeated Push loop forever. A one-off trip forfeits, and
+      // so does the last leg of a plotted route that has nowhere left to go.
+      if (trip.loop || trip.route.length > 1) {
+        if (skipLeg(s, trip) === 'forfeit') {
+          push(s, `Trip forfeit · the purse is lost and ${E.road.forfeit_kills} kills of Standing are given up`);
+          endTrip(s, 'forfeit');
+        } else {
+          push(s, 'Push on the Road · the rest of this leg is skipped, the walk carries on');
+        }
       } else {
         push(s, `Trip forfeit · the purse is lost and ${E.road.forfeit_kills} kills of Standing are given up`);
         endTrip(s, 'forfeit');
       }
+      // the camp branch returns before the walk, so the block clock is already held still here; the
+      // group is cleared above, and a walk that survived is picked up again when the camp ends
     }
     push(s, `Pushed — ${s.campSec} sec at camp (${eng.fmt(c.maxHp)} HP ÷ ${eng.fmt(c.hpRegen * 8)}/sec)`);
     // Forward Mode's fallback: a Push in a zone above the floor means this chapter is not survivable

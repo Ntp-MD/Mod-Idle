@@ -150,7 +150,7 @@ The screen holds four regions, all visible at once: the combat scene with the th
 - **The gate figure lives under the sheet**, read off the mob curve the same way the fight rolls it, never typed here.
 - Nothing on the sheet is a number the client owns: every value is the shared engine's, and the equipment grid equips only through the detail card's button.
 - **The skill bar shows on the fight panel too, read-only** — the ordered fifteen-slot strip hangs under the HP / Mana row so a cooldown is readable while hunting; arranging the order stays on the Skills tab.
-- **The level's points are allocated on the sheet, and re-spent at the town desk** — the `+` / `−` / `Max` row with the unspent and tree-point counters sits with the Core Stats table so it is reachable mid-fight; Respec is a settlement service on the town panel, never on the sheet, because a field refund would let a build switch inside a fight.
+- **The level's points are allocated on the sheet, and re-spent from the selected settlement on the Map** — the `+` / `−` / `Max` row with the unspent and tree-point counters sits with the Core Stats table so it is reachable mid-fight; Respec is a settlement service in the Map's town detail, never on the sheet, because a field refund would let a build switch inside a fight.
 
 # Display Rules to Follow
 

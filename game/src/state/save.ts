@@ -299,12 +299,30 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.autoDissolveRarity) s.autoDissolveRarity = 'off';
   if (!s.purseDay) s.purseDay = {};
   if (!s.chestDay) s.chestDay = {};
-  // a Road saved before the Circuit existed is a one-off trip: no loop, no chest ledger entry
+  // A Road saved before the block walk has one `secLeft` for the whole leg and an optional
+  // `circuit` array. Re-express that progress as a block and the unified route/loop shape.
   if (s.road) {
-    if (!Array.isArray(s.road.circuit)) s.road.circuit = [];
-    if (s.road.legIndex == null) s.road.legIndex = 0;
-    if (s.road.laps == null) s.road.laps = 0;
-    if (s.road.chestPaid == null) s.road.chestPaid = false;
+    const trip = s.road as any;
+    const oldCircuit: number[] = Array.isArray(trip.circuit) ? trip.circuit : [];
+    if (!Array.isArray(trip.route) || !trip.route.length) trip.route = oldCircuit.length ? [...oldCircuit] : [trip.linkIndex];
+    if (typeof trip.loop !== 'boolean') trip.loop = oldCircuit.length > 0;
+    if (trip.destination === undefined) trip.destination = trip.loop ? null : trip.settlementTo;
+    if (trip.legIndex == null) trip.legIndex = 0;
+    if (trip.laps == null) trip.laps = 0;
+    if (trip.chestPaid == null) trip.chestPaid = false;
+    const link = E.road.links[trip.linkIndex];
+    const blockSec = E.road.walk.block_sec;
+    const totalSec = (link?.trip_min ?? E.road.trip_min) * 60;
+    if (!Number.isFinite(trip.blocks)) trip.blocks = totalSec / blockSec;
+    if (!Number.isFinite(trip.blockIndex)) {
+      const elapsed = Math.max(0, Math.min(totalSec, totalSec - (Number.isFinite(trip.secLeft) ? trip.secLeft : totalSec)));
+      trip.blockIndex = Math.min(trip.blocks, Math.floor(elapsed / blockSec));
+      const withinBlock = elapsed % blockSec;
+      trip.secLeft = elapsed >= totalSec ? 0 : withinBlock === 0 ? blockSec : blockSec - withinBlock;
+    } else if (!Number.isFinite(trip.secLeft)) {
+      trip.secLeft = blockSec;
+    }
+    delete trip.circuit;
   }
   if (!s.mastery) s.mastery = {};
   // a save written before the field existed has no wall-clock stamp, which the offline catch-up
@@ -315,7 +333,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (s.activePreset == null) s.activePreset = 0;
   if (!s.collector) s.collector = newCollector();
   if (!s.grants) s.grants = newGrants();
-  if (!s.pedlar) s.pedlar = { day: 0, minutes: [], bought: 0 };
+  // the pedlar's roll was priced in minutes before the kill denominate: an old roll is dropped and
+  // re-rolled on the next tick rather than carried with the wrong unit
+  if (!s.pedlar || !Array.isArray((s.pedlar as any).kills)) s.pedlar = { day: 0, kills: [], bought: 0 };
   if (!s.filter) s.filter = newFilter();
   if (s.travel !== 'forward') s.travel = 'stay';
   if (!s.goal) s.goal = newGoal();

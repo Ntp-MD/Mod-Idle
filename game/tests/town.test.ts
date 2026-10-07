@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 import { eng, E, TOWN, loot } from '../src/engine/client';
 import {
-  rowById, priceGold, priceMinutes, stockOf, settlementById, sellJunk, canBuy, buy, huntN,
+  rowById, priceGold, priceKills, stockOf, settlementById, sellJunk, canBuy, buy, huntN,
   claimTask, newTown, standingShare, standingTier, canTravel, ROAD_LINKS,
 } from '../src/sim/town';
 import { newGame, tick } from '../src/sim/game';
@@ -10,22 +10,23 @@ import { newGame, tick } from '../src/sim/game';
 const require = createRequire(import.meta.url);
 const cage = require('../../tools/lib/engine.ts');
 
-describe('prices are minutes of income, not typed gold', () => {
+describe('prices are kills of income, not typed gold', () => {
   it('the client rate equals the cage rate', () => {
     for (const band of ['low', 'mid', 'high']) {
-      expect(eng.goldPerMinute(band)).toBe(cage.goldPerMinute(band));
+      expect(eng.goldPerKill(band)).toBe(cage.goldPerKill(band));
     }
   });
 
-  it('a Road link costs its 20 minutes at the charging band', () => {
+  it('a Road link costs its kills at the destination band', () => {
     const row = rowById('road_link');
-    expect(priceMinutes(row, 'millbrook')).toBe(20);
-    expect(priceGold(row, 'millbrook')).toBeCloseTo(20 * eng.goldPerMinute(row.charge_band || 'low'), 2);
+    const band = settlementById('millbrook').band;
+    expect(priceKills(row, 'millbrook')).toBe(row.k_by_band[band]);
+    expect(priceGold(row, 'millbrook')).toBeCloseTo(row.k_by_band[band] * eng.goldPerKill(band), 2);
   });
 
   it('Eastgate sells the first stash tab at the teaching price', () => {
-    expect(priceMinutes(rowById('stash_tab_1'), 'eastgate')).toBe(30);
-    expect(priceMinutes(rowById('stash_tab_1'), 'ashfall')).toBe(60);
+    expect(priceKills(rowById('stash_tab_1'), 'eastgate')).toBe(231.5);
+    expect(priceKills(rowById('stash_tab_1'), 'ashfall')).toBe(589);
   });
 });
 
@@ -88,7 +89,7 @@ describe('the Guild board', () => {
     const s = newGame();
     const task = s.town.tasks[0]!;
     expect(task.stone).toBe('reroll_value');
-    expect(task.count).toBe(eng.taskPayout('low', TOWN.task_sizing.reward_minutes_of_band_income).reroll_value);
+    expect(task.count).toBe(eng.taskPayout('low', TOWN.task_sizing.reward_k_per_band.low).reroll_value);
     expect(Number.isInteger(task.count)).toBe(true);
     task.progress = task.n;
     s.clockSec = 10;
@@ -139,12 +140,12 @@ describe('the Curio pedlar rotates its stock', () => {
     const s = newGame(31);
     for (let i = 0; i < 5; i++) tick(s, {});
     const row = rowById('pedlar_rotation');
-    expect(s.pedlar.minutes.length).toBe(row.per_day_cap);
-    for (const m of s.pedlar.minutes) {
-      expect(m).toBeGreaterThanOrEqual(row.m_min);
-      expect(m).toBeLessThanOrEqual(row.m_max);
+    expect(s.pedlar.kills.length).toBe(row.per_day_cap);
+    for (const k of s.pedlar.kills) {
+      expect(k).toBeGreaterThanOrEqual(Math.round(row.k_min));
+      expect(k).toBeLessThanOrEqual(Math.round(row.k_max));
     }
-    expect(priceMinutes(row, 'highspire', s)).toBe(s.pedlar.minutes[0]);
+    expect(priceKills(row, 'highspire', s)).toBe(s.pedlar.kills[0]);
   });
 
   it('sells at most three slots a day and the price walks up the stock', () => {
@@ -153,7 +154,7 @@ describe('the Curio pedlar rotates its stock', () => {
     s.counters.gold = 100000;
     const seen: number[] = [];
     for (let i = 0; i < 3; i++) {
-      seen.push(priceMinutes(rowById('pedlar_rotation'), 'highspire', s));
+      seen.push(priceKills(rowById('pedlar_rotation'), 'highspire', s));
       expect(buy(s, 'highspire', 'pedlar_rotation').ok).toBe(true);
     }
     expect(new Set(seen).size).toBeGreaterThan(0);

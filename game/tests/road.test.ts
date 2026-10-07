@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { E, TOWN } from '../src/engine/client';
 import {
   road, startTrip, startCircuit, stopCircuit, circuitValid, linkReachable, purseReady, payPurse,
-  claimChest, chestReady, encounterSizes, encounterZones, linkLabel,
+  claimChest, chestReady, encounterSizes, encounterZones, linkLabel, plotRoute, routePreview,
+  normaliseTrip, routeBlockIds, currentBlock,
 } from '../src/sim/road';
 import { stashTabCount, deposit, withdraw, buy } from '../src/sim/town';
 import { newGame, tick, catchUp, setLevel } from '../src/sim/game';
@@ -136,8 +137,12 @@ describe('the Circuit', () => {
     s.player.hp = -100000;
     tick(s, {});
     expect(s.counters.pushes).toBe(1);
-    expect(s.road).not.toBe(null);                          // a one-off trip would have forfeited here
-    expect(s.log.some((l) => /Circuit carries on/.test(l.text))).toBe(true);
+    // the leg is skipped and the loop walks on, so the character is still on the Road — a one-off
+    // trip would have forfeited, and a character at camp is never on one
+    expect(s.phase).toBe('camp');
+    expect(s.road).not.toBe(null);
+    expect(s.road!.loop).toBe(true);
+    expect(s.log.some((l) => /the walk carries on/.test(l.text))).toBe(true);
   });
 
   it('stops mid-leg by letting the current leg finish, and clears at a settlement', () => {
@@ -146,8 +151,9 @@ describe('the Circuit', () => {
     setLevel(s, 60);
     startCircuit(s, [0]);
     expect(stopCircuit(s).ok).toBe(true);
-    expect(s.road).not.toBe(null);          // mid-leg: it becomes a one-off trip, not a dropped character
-    expect(s.road!.circuit.length).toBe(0);
+    expect(s.road).not.toBe(null);          // mid-leg: the current leg still finishes
+    expect(s.road!.loop).toBe(false);        // and it is now a plotted route, not a loop
+    expect(s.road!.route.length).toBe(1);
     s.road = null;
     expect(stopCircuit(s).ok).toBe(true);
     expect(startTrip(s, 0).ok).toBe(true);
@@ -216,7 +222,7 @@ describe('a trip that finishes', () => {
     let guard = 0;
     while (s.road && guard++ < 1200) tick(s, {});
     expect(s.road).toBe(null);
-    expect(s.log.some((l) => /Road ·/.test(l.text))).toBe(true);
+    expect(s.log.some((l) => /·/.test(l.text) && /ambush|caravan|pedlar|chest/.test(l.text))).toBe(true);
     expect(s.counters.zoneKills[destZone] - before).toBeGreaterThanOrEqual(R.standing_per_trip_kills);
     expect(s.counters.gold).toBeGreaterThanOrEqual(0);
     // the purse is once per link per day, and only an ambush pays it
@@ -239,6 +245,130 @@ describe('a trip that finishes', () => {
     // stones may move from dissolves and elite rolls in the same window, but no Road line pays them
     expect(road.KINDS.every((k: any) => !/stone/i.test(k.win))).toBe(true);
     expect(stones).toBeTruthy();
+  });
+});
+
+describe('the block walk', () => {
+  it('a leg is a whole number of blocks, and it is as long and as eventful as it always was', () => {
+    for (const l of road.links) {
+      expect(Number.isInteger(l.blocks)).toBe(true);
+      expect(l.blocks * road.blockSec / 60).toBeCloseTo(l.trip_min, 6);
+      // the ruler changed, nothing else: the same encounters ride the same gap
+      expect(l.blocks / road.encounterGapBlocks).toBe(road.encountersFor(l.index));
+    }
+    expect(road.blockSec * road.encounterGapBlocks * R.encounters_per_min).toBe(60);
+  });
+
+  it('the world is the links and nothing else — every block is named once and touches only its own', () => {
+    const ids = new Set(road.blocks.map((b: any) => b.id));
+    expect(ids.size).toBe(road.blocks.length);
+    expect(road.blocks.length).toBe(road.links.reduce((t: number, l: any) => t + l.blocks, 0));
+    expect(road.chainIsWalkable).toBe(true);
+    for (const b of road.blocks) {
+      const want = (b.n > 0 ? 1 : 0) + (b.n < b.total - 1 ? 1 : 0);
+      const ns = road.neighboursOf(b.linkIndex, b.n);
+      expect(ns.length).toBe(want);
+      // no edge leaves the link, so no route can ever step between two blocks that do not touch
+      expect(ns.every((id: string) => road.blockById.get(id).linkIndex === b.linkIndex)).toBe(true);
+      // the ends of a chain are the settlements the leg runs between, and nothing else is a door
+      if (b.n === 0) expect(road.blocksAtSettlement(b.from)).toContain(b.id);
+      else expect(road.blocksAtSettlement(b.from)).not.toContain(b.id);
+      if (b.n === b.total - 1) expect(b.to).not.toBe(b.from);
+    }
+  });
+
+  it('a block carries no coordinate — the simulation only ever names one', () => {
+    const b = road.blocks[0];
+    expect(Object.keys(b).sort()).toEqual(['from', 'id', 'linkIndex', 'n', 'terrain', 'to', 'total']);
+    expect(b.id).toBe(`${road.links[b.linkIndex].id}#${b.n}`);
+  });
+
+  it('every settlement pair plots a route, and each one is a walk that ends where it was aimed', () => {
+    const names = E.mob.zones.map((z: any) => z.name);
+    for (const from of names) {
+      for (const to of names) {
+        const r = road.routeLinks(from, to);
+        expect(r).not.toBe(null);
+        if (from === to) { expect(r).toEqual([]); continue; }
+        let at = from;
+        for (const i of r!) {
+          const l = road.links[i];
+          expect([l.a, l.b]).toContain(at);       // every link is entered at an end it shares
+          at = l.a === at ? l.b : l.a;
+        }
+        expect(at).toBe(to);
+      }
+    }
+  });
+
+  it('plotting lays the whole chain down at once and walking it advances a block at a time', () => {
+    const s = newGame(31);
+    setLevel(s, 60);
+    s.town.visited.push('millbrook', 'ashfall');
+    const preview = routePreview(s, 'ashfall');
+    expect(preview).not.toBe(null);
+    expect(preview!.links).toBe(2);
+    expect(preview!.blocks).toBe(road.blocksFor(0) + road.blocksFor(1));
+    const r = plotRoute(s, 'ashfall');
+    expect(r.ok).toBe(true);
+    expect(s.road!.route.length).toBe(2);
+    expect(s.road!.loop).toBe(false);              // a plotted route ends; it does not repeat
+    expect(s.road!.destination).toBe('ashfall');
+    expect(s.road!.blockIndex).toBe(0);
+    expect(routeBlockIds(s.road!)).toHaveLength(preview!.blocks);
+    expect(currentBlock(s)).toBe(road.blockId(s.road!.linkIndex, 0));
+
+    // one block is `block_sec` ticks, and the walk never stands still while it is running
+    let guard = 0;
+    while (s.road && guard++ < 4000) tick(s, {});
+    expect(s.road).toBe(null);
+    expect(s.zone).toBe(TOWN.settlements.find((x: any) => x.id === 'ashfall').zone);
+    expect(guard).toBeLessThanOrEqual(preview!.blocks * (road.blockSec + 1) + 1200);
+  });
+
+  it('a far zone can be plotted through unopened settlements without skipping any link', () => {
+    const s = newGame(34);
+    const start = TOWN.settlements.find((x: any) => x.start)!;
+    const far = TOWN.settlements[TOWN.settlements.length - 1];
+    expect(s.town.visited).toEqual([start.id]);
+    const result = plotRoute(s, far.id);
+    expect(result.ok).toBe(true);
+    expect(result.route!.length).toBeGreaterThan(1);
+    expect(linkReachable(s, result.route![0])).toBe(true);
+    expect(result.route!.slice(1).some((i) => !linkReachable(s, i))).toBe(true);
+    expect(s.road!.destination).toBe(far.id);
+    expect(s.town.visited).toEqual([start.id]); // later settlements open only as each leg arrives
+  });
+
+  it('a plotted route is never resolved while the client is closed', () => {
+    const s = newGame(32);
+    setLevel(s, 60);
+    s.town.visited.push('millbrook', 'ashfall');
+    expect(plotRoute(s, 'ashfall').ok).toBe(true);
+    catchUp(s, {}, 900);
+    expect(s.road).toBe(null);
+    expect(s.log.some((l) => /parked|Route arrived/.test(l.text))).toBe(true);
+  });
+
+  it('a save written before the walk is filled in rather than refused', () => {
+    const s = newGame(33);
+    s.town.visited.push('millbrook');
+    startTrip(s, 0);
+    // the shape the client used to write: a leg, no block, and the old circuit list
+    const legacy: any = { ...s.road, blockIndex: undefined, blocks: undefined, route: undefined, loop: undefined, destination: undefined, circuit: [] };
+    delete legacy.secLeft;
+    s.road = legacy;
+    normaliseTrip(s);
+    expect(s.road!.route).toEqual([0]);
+    expect(s.road!.loop).toBe(false);
+    expect(s.road!.blocks).toBe(road.blocksFor(0));
+    expect(s.road!.blockIndex).toBe(0);
+    expect(s.road!.secLeft).toBe(road.blockSec);
+    // and the walk completes from the restored shape
+    let guard = 0;
+    while (s.road && guard++ < 1200) tick(s, {});
+    expect(s.road).toBe(null);
+    expect(s.town.visited).toContain('millbrook');
   });
 });
 
@@ -287,7 +417,7 @@ describe('the Circuit objective', () => {
     expect(s.counters.cleanLaps || 0).toBe(0);
     const stones = JSON.stringify(s.counters.stones);
     // stop the moment the lap closes, so the line is still inside the log's short window
-    for (let i = 0; i < 700 && (s.counters.cleanLaps || 0) === 0; i++) tick(s, {});
+    for (let i = 0; i < 900 && (s.counters.cleanLaps || 0) === 0; i++) tick(s, {});
     expect(s.counters.cleanLaps).toBeGreaterThanOrEqual(1);
     expect(s.log.some((l) => /clean lap/.test(l.text))).toBe(true);
     // the reward IS the log line: the Road's gold is capped by G6-G9 and a stone would be a new

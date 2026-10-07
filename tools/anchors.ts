@@ -42,7 +42,7 @@ const ANCHORS: { id: string; label: string; value: () => any; max: number; note:
     note: 'the other half of mob_HP (checks.md D17)',
   },
   {
-    id: 'A-killsHigh', label: 'kills/hr high band', value: () => eng.BAND.high.kills_derived, max: 7,
+    id: 'A-killsHigh', label: 'kills/hr high band', value: () => eng.BAND.high.kills_derived, max: 6,
     note: 'F1 — every income and stone rate divides by it',
   },
   {
@@ -54,7 +54,7 @@ const ANCHORS: { id: string; label: string; value: () => any; max: number; note:
     note: 'F1',
   },
   {
-    id: 'A-refine', label: 'Refine full-set tier stones', value: () => eng.STONE.refine_casts_full_set * eng.E.craft.refine_stones_per_use, max: 4,
+    id: 'A-refine', label: 'Refine full-set tier stones', value: () => eng.STONE.refine_casts_full_set * eng.E.craft.refine_stones_per_use, max: 2,
     // `6.4` is not unique to Refine hours: the drop-rate multiplier at the stat ceiling also rounds
     // to it (`Lck 535 gives 6.4x`). Only a line that is about refining, a set, or a piece is a copy
     // of this anchor — the rest is a different number that happens to print the same digits.

@@ -91,7 +91,7 @@ mastery_xp   = 4 per 1 kill (counts only the held weapon)
 mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 ```
 
-**Tied to the character XP formula ** · the *same kill* that pays character XP pays Mastery XP, so the two tracks read one kill stream and the whole table below divides by the band kills/hr that `xp` already uses (loot.md section 2 · checks.md F1) · the old "1 per hit" half is retired: the character XP formula has no hit term, and no file ever set a hits/hour anchor for it, so keeping it would leave Mastery paced off an un-owned number instead of the kill curve · Mastery stays a *fixed per-kill* value and deliberately does **not** scale with mob level — that would make it a second copy of the level curve and break its role as the level-independent parallel side-track H2 requires
+**Tied to the character XP formula ** · the *same kill* that pays character XP pays Mastery XP, so the two tracks read one kill stream and the whole table below divides by the band's own kill count that `xp` already uses (loot.md section 2 · checks.md F1) · the old "1 per hit" half is retired: the character XP formula has no hit term, and no file ever set a hits/hour anchor for it, so keeping it would leave Mastery paced off an un-owned number instead of the kill curve · Mastery stays a *fixed per-kill* value and deliberately does **not** scale with mob level — that would make it a second copy of the level curve and break its role as the level-independent parallel side-track H2 requires
 
 | Level | Cumulative xp | Kills to reach | Hours at level 90 (high-band kill rate) |
 |---|---|---|---|
@@ -124,7 +124,7 @@ mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 No table here: the set weights and their taxes are printed once, from `tools/data/bases.json`, in the generated block in `formula-utility.md` section 11 (`node tools/bases.ts --blocks`). Mastery acts on the **held weapon** only — it discounts that weapon's weight by up to 20% — and the weight it discounts is the **weight** column above, per type (B13), so the size of the saving scales with the type you are holding and this file states the number exactly once.
 
 - Mastery **is not a shortcut past Str** — an armored build without Str still hits the tax Cap; the discount applies to one weapon line out of eleven
-- Drop effect: no-Lck players get 82 → 91 pieces/hour (+11%) · Full Lck 252 → 280/hour — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
+- Drop effect: no-Lck players get 139 → 154 drops per 1,000 kills (+11%) · Full Lck 428 → 475 — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
 
 # Display
 

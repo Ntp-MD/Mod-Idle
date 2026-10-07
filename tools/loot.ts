@@ -38,7 +38,8 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 
 // ---------------------------------------------------------------- inputs
 
-const HOURS = 14;          // loot.md section 3 — "Simulated 14 hours per zone"
+const SAMPLE = 14;         // the sample is 14 x a band's own drop line — a count of drops, not a clock
+const BUCKETS = 12;        // the sample is cut into twelve, so decision frequency is read per drop
 const TRIALS = 12;         // seeds averaged per band, so a single run cannot decide a number
 const SEED0 = 20260101;    // fixed, so a cage run is reproducible
 
@@ -156,16 +157,15 @@ function rollItem(rng: any, band: any, bias: any) {
 // ---------------------------------------------------------------- one 14-hour run in one band
 
 function runBand(band: any, seed: any, opts: any = {}) {
-  const hours = opts.hours || HOURS;
   const dropsPerHr = BAND[band].drops_per_hr;
+  const sample = opts.drops || Math.round(dropsPerHr * SAMPLE);
   const rng = mulberry32(seed);
   const equipped: Record<string, any> = {};         // slot → score
   const haveElement = new Set<string>();
-  const hourUp = new Array(hours).fill(0);
+  const dropUp = new Array(BUCKETS).fill(0);
   let drops = 0, upgrades = 0, elementKeeps = 0, flatLines = 0, itemLines = 0;
 
-  const totalDrops = Math.round(dropsPerHr * hours);
-  for (let i = 0; i < totalDrops; i++) {
+  for (let i = 0; i < sample; i++) {
     const item = rollItem(rng, band, opts.bias);
     drops++;
     for (const l of item.lines) { itemLines++; if (FLAT_GROUP.has(l.id)) flatLines++; }
@@ -173,7 +173,8 @@ function runBand(band: any, seed: any, opts: any = {}) {
     const verdict = LOOT.keepsDrop(item, equipped[item.slot], haveElement, margin);
     if (verdict.keep) {
       upgrades++;
-      hourUp[Math.min(hours - 1, Math.floor(i / dropsPerHr))]++;
+      // decision frequency falls as the build gets equipped, so the buckets are read by DROP index
+      dropUp[Math.min(BUCKETS - 1, Math.floor((i / sample) * BUCKETS))]++;
       for (const l of item.lines) if (l.element) haveElement.add(l.element);
       if (verdict.reason === 'upgrade') equipped[item.slot] = verdict.score;
       else elementKeeps++;
@@ -181,14 +182,16 @@ function runBand(band: any, seed: any, opts: any = {}) {
   }
 
   const scores = Object.values(equipped);
+  const keepRate = (upgrades / Math.max(1, drops)) * 100;
   return {
-    drops, upgrades, elementKeeps,
-    keepRate: (upgrades / drops) * 100,
-    perHr: upgrades / hours,
+    drops, upgrades, elementKeeps, keepRate,
+    // the keep rate is a drop fact, so the per-hour figure is derived for the tool's own arithmetic
+    // only (engine.json `upgrades_per_hr`); it is never the published denominator (D12)
+    perHr: (keepRate / 100) * dropsPerHr,
     avgScore: scores.reduce((s: any, x: any) => s + x, 0) / Math.max(1, scores.length),
     flatPerDrop: flatLines / Math.max(1, drops),
     linesPerItem: itemLines / Math.max(1, drops),
-    hourUp,
+    dropUp,
   };
 }
 
@@ -210,7 +213,7 @@ function measureBand(band: any, opts: any = {}) {
     flatPerDrop: avg((r: any) => r.flatPerDrop),
     linesPerItem: avg((r: any) => r.linesPerItem),
     elementKeeps: avg((r: any) => r.elementKeeps),
-    hourUp: (() => { const out: any[] = []; for (let h = 0; h < HOURS; h++) out.push(avg((r: any) => r.hourUp[h])); return out; })(),
+    dropUp: (() => { const out: any[] = []; for (let h = 0; h < BUCKETS; h++) out.push(avg((r: any) => r.dropUp[h])); return out; })(),
   };
 }
 
@@ -251,14 +254,17 @@ const scoring = 'An item scores the sum of `weight(line) x value / Total` over i
 function block(rows: any, bias: any) {
   const n = (x: any, d = 2) => x.toFixed(d);
   return [
-    '| Zone | Hour 1 | 2 | 3 | 4 | 6 | 12 | Total upgrades | Keep-rate of drops | Upgrades/hr | Avg score per equipped piece |',
+    '| Zone | 1st 100 drops | 2nd 100 | 3rd 100 | 4th 100 | 5th-6th | 7th-12th | Total upgrades | Keep-rate of drops | Upgrades per 1,000 kills | Avg score per equipped piece |',
     '|---|---|---|---|---|---|---|---|---|---|---|',
     ...rows.map((r: any) => {
-      const at = (h: any) => n(r.hourUp[h - 1]);
-      return `| ${r.band.replace('_', ' + ')} | ${at(1)} | ${at(2)} | ${at(3)} | ${at(4)} | ${at(6)} | ${at(12)} | ${n(r.upgrades, 0)} | **${n(r.keepRate)}%** | ${n(r.perHr)} | ${n(r.avgScore)} |`;
+      const at = (b: any) => n(r.dropUp[b]);
+      const mid = n(r.dropUp[4] + r.dropUp[5]);
+      const tail = n(r.dropUp.slice(6).reduce((a: number, b: number) => a + b, 0));
+      const per1k = n((r.perHr / BAND[r.band].kills_derived) * 1000);
+      return `| ${r.band.replace('_', ' + ')} | ${at(0)} | ${at(1)} | ${at(2)} | ${at(3)} | ${mid} | ${tail} | ${n(r.upgrades, 0)} | **${n(r.keepRate)}%** | ${per1k} | ${n(r.avgScore)} |`;
     }),
     '',
-    `Measured by \`node tools/loot.ts --sim\` · ${HOURS} hours per band x ${TRIALS} seeds, drop rate and Lck from \`engine.json\` \`loot\`, Mod ranges from \`mods.json\`, Mod weights from \`engine.json\` \`mod_weights\`, Base frames and the Gear Mod school from \`item-base.md\`.`,
+    `Measured by \`node tools/loot.ts --sim\` · each band's own fixed drop sample x ${TRIALS} seeds, drop rate and Lck from \`engine.json\` \`loot\`, Mod ranges from \`mods.json\`, Mod weights from \`engine.json\` \`mod_weights\`, Base frames and the Gear Mod school from \`item-base.md\`.`,
     '',
     `**${scoring}**`,
     '',
@@ -280,9 +286,9 @@ function block(rows: any, bias: any) {
     '',
     '**Base bias, measured (checks.md T15)**',
     '',
-    '| Scenario | Keep-rate | Upgrades/hr | Avg score |',
+    '| Scenario | Keep-rate | Upgrades per 1,000 kills | Avg score |',
     '|---|---|---|---|',
-    ...bias.map((b: any) => `| ${b.label} | ${b.keepRate.toFixed(2)}% | ${b.perHr.toFixed(2)} | ${b.avgScore.toFixed(2)} |`),
+    ...bias.map((b: any) => `| ${b.label} | ${b.keepRate.toFixed(2)}% | ${((b.perHr / BAND.high.kills_derived) * 1000).toFixed(1)} | ${b.avgScore.toFixed(2)} |`),
     '',
     'A settlement that rolls one school more often does move the measured rows, so a Base weight is not free — which is why `town.json` carries no frame weight while the status is pending. The pipeline above is bias-ready: add `frame_weight` and re-run.',
   ].join('\n');
@@ -315,7 +321,7 @@ function sync() {
   }
   // the junk rarities divide the same junk line by their sell value, so they move with it.
   // BAND was built before the write, so read the freshly measured upgrades, not the stored ones.
-  const perKill = (BAND.high.drops_per_hr - want.high) / BAND.high.kills_per_hr;
+  const perKill = (BAND.high.drops_per_hr - want.high) / BAND.high.kills_derived;
   for (const [rarity, r] of Object.entries<any>(E.junk.rarities)) {
     const value = Number((perKill / r.sell_gold).toFixed(7));
     const re = new RegExp(`("${rarity}":\\s*\\{[^}]*?"drop_chance_per_kill":\\s*)([\\d.]+)`);
@@ -327,7 +333,7 @@ function sync() {
   const rows = ALL();
   const low = rows.find((r: any) => r.band === 'low')!;
   const high = rows.find((r: any) => r.band === 'high')!;
-  const f4 = `hr1 ${low.hourUp[0].toFixed(1)} → hr2-4 ${(low.hourUp[1] + low.hourUp[2] + low.hourUp[3]).toFixed(1)} → after that ${low.hourUp.slice(4).reduce((a: any, b: any) => a + b, 0).toFixed(1)} (low band) · keep-rate ${rows.map((r: any) => `${r.keepRate.toFixed(2)}% ${r.band.replace('_', ' + ')}`).join(' · ')}`;
+  const f4 = `first 100 drops ${low.dropUp[0].toFixed(1)} → drops 101-400 ${(low.dropUp[1] + low.dropUp[2] + low.dropUp[3]).toFixed(1)} → after that ${low.dropUp.slice(4).reduce((a: any, b: any) => a + b, 0).toFixed(1)} (low band) · keep-rate ${rows.map((r: any) => `${r.keepRate.toFixed(2)}% ${r.band.replace('_', ' + ')}`).join(' · ')}`;
   const f11 = `${high.flatPerDrop.toFixed(2)} Flat lines per high-zone drop (${high.linesPerItem.toFixed(2)} lines per item) · the four early-game Flats thin out as Item quality rises`;
   for (const [id, value] of [['F4', f4], ['F11', f11]]) {
     // whitespace-tolerant: engine.json is pretty-printed JSON, and a row may sit on one line or four
@@ -357,8 +363,8 @@ function gates(rows: any, bias: any) {
   add('LT2', rows.every((r: any) => r.upgrades > 0 && r.keepRate > 0 && r.keepRate < 100),
     'every band produces upgrades, and none of them is every drop — the "98.9% of drops are not upgrades" claim needs a real number, not a slogan');
 
-  add('LT3', low.hourUp[0] > low.hourUp[3] && low.hourUp[3] >= low.hourUp[11],
-    `decision frequency falls inside a band: hour 1 ${low.hourUp[0].toFixed(1)} → hour 4 ${low.hourUp[3].toFixed(1)} → hour 12 ${low.hourUp[11].toFixed(1)} (low)`);
+  add('LT3', low.dropUp[0] > low.dropUp[3] && low.dropUp[3] >= low.dropUp[11],
+    `decision frequency falls as the build fills: first 100 drops ${low.dropUp[0].toFixed(1)} → 4th hundred ${low.dropUp[3].toFixed(1)} → last hundred ${low.dropUp[11].toFixed(1)} (low)`);
 
   add('LT4', low.keepRate > high.keepRate,
     `keep-rate falls with Item quality: low ${low.keepRate.toFixed(2)}% > high ${high.keepRate.toFixed(2)}% — higher zones mean better equipped pieces, so a drop has to clear a higher bar`);
@@ -459,8 +465,8 @@ if (arg === '--emit') {
       r.linesPerItem.toFixed(2).padStart(12)
     );
   }
-  console.log('\nhour buckets (upgrades):');
-  for (const r of rows) console.log(r.band.padEnd(15) + 'hr1 ' + r.hourUp[0].toFixed(1) + ' · hr2-4 ' + (r.hourUp[1] + r.hourUp[2] + r.hourUp[3]).toFixed(1) + ' · hr5-12 ' + r.hourUp.slice(4, 12).reduce((a: any, b: any) => a + b, 0).toFixed(1));
+  console.log('\ndrop buckets (upgrades):');
+  for (const r of rows) console.log(r.band.padEnd(15) + '1st 100 ' + r.dropUp[0].toFixed(1) + ' · 2nd-4th ' + (r.dropUp[1] + r.dropUp[2] + r.dropUp[3]).toFixed(1) + ' · 5th-12th ' + r.dropUp.slice(4, 12).reduce((a: any, b: any) => a + b, 0).toFixed(1));
   console.log('\nbase bias:');
   for (const b of biasExperiment()) console.log('  ' + b.label.padEnd(48) + ' keep ' + b.keepRate.toFixed(2) + '%  up/hr ' + b.perHr.toFixed(2) + '  score ' + b.avgScore.toFixed(2));
 } else {

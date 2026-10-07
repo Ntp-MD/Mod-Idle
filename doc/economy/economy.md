@@ -22,7 +22,7 @@ import checks.md
 # The 3 original questions, now answered
 
 1. **Where does gold come from** — from a *clock*, but one the same drops already set: **mob junk** (Ragnarok-style, `loot.md` section 4) drops on a separate roll and is sold at the Counterhand. Gear the filter rejects dissolves for 1 Reroll value stone, not gold, so the two media mint from different items and never compete for one piece.
-   Why this is not the "gold is a DPS multiplier" trap the first draft warned about: junk drops scale with kills exactly as gear drops do, so killing faster raises both media together — it does not create a gold-only faucet. And because gold buys no power, DPS cannot be laundered into power through gold; it can only be converted into convenience. The power bottleneck stays where it was (Reroll tier / Add mod stones, elite 1-in-5 and boss 4/hour — F7-F10).
+   Why this is not the "gold is a DPS multiplier" trap the first draft warned about: junk drops scale with kills exactly as gear drops do, so killing faster raises both media together — it does not create a gold-only faucet. And because gold buys no power, DPS cannot be laundered into power through gold; it can only be converted into convenience. The power bottleneck stays where it was (Reroll tier / Add mod stones, elite 1-in-5 and boss 6.8 per 1,000 kills — F7-F10).
 2. **Is there a shop** — yes, and it now obeys the condition this file set back then: it sells what never drops. Nine settlements × differentiated NPC stalls, inventory in `towns.md` sections 4-5.
 3. **Is there player-to-player selling** — still **no**. Reasons unchanged: no server (save.md), no time to stay listed, and with gold in the game a player-to-player market would be the one leak that turns gold into power.
 
@@ -30,17 +30,17 @@ import checks.md
 
 ```
 gold per junk piece sold          = 1
-mob junk/hour (high zone, no Lck)    = 79       (kills/hr x a flat expected gold per kill; rarity sets the price, not the income)
-max gold/hour                        = 79   → 1.3 gold per minute of income
-opportunity cost of 1 gold           = 1 Reroll value stone forgone = 1/10 of an hour of Reroll capacity ≈ 6 min of craft progress
-full-Lck ceiling (F3 252 drops/hr)   = ~249 gold/hour
+mob junk per kill (high zone, no Lck)  = 0.1341   (a flat expected gold a kill; rarity sets the price, not the count)
+max gold per kill                      = 0.1341 gold of income
+opportunity cost of 1 gold             = 1 Reroll value stone forgone ≈ 0.0170 uses of Reroll capacity
+full-Lck ceiling (F3 427.8 drops per 1,000 kills) = ~0.4227 gold per kill
 ```
 
 - These four lines are **computed, not typed**: `tools/data/engine.json` → `tools/lib/engine.ts` → `node tools/check.ts --checks` (rows X5-X8) and `node tools/town.ts --checks` (T2-T7). Changing a drop rate therefore moves the gold prices in `towns-stalls.md` automatically.
 
-- Every price in this project is therefore written as **"minutes of full-sell income"**, the same unit `tasks.md` uses. A 30-minute item costs ~210 gold and 30 minutes of Reroll progress, and that second number is the real price.
+- Every price in this project is therefore written as **kills of full-sell income**, the same unit the tasks pay in: the gold column stays, and the kills that earn it are the real price — never a stretch of the clock (`AGENT.md` · D12).
 - Junk is kept by the filter automatically and sold manually at the Counterhand, so the crafting engine (E6/E7/E8, the counts those rows state) keeps its designed stone income while gold tracks the same kill count.
-- Accepted imbalance: an Lck build mints up to ×3.15 more gold per hour. Legal **only while** gold has no power sink. Guard row: checks.md G8.
+- Accepted imbalance: an Lck build mints up to ×3.15 more gold per kill. Legal **only while** gold has no power sink. Guard row: checks.md G8.
 
 # Why gold must have repeatable sinks
 
@@ -65,7 +65,7 @@ Most town purchases are one-time (stash tab, house, deed, pouch tier), so gold d
 
 - **Exact price per line — closed**: every stall line is priced in minutes of full-sell income in `towns-stalls.md` sections 3-4, generated from `tools/data/town.json` and caged as `checks.md` group T. F9/F13 still move two of those rows (`towns-stalls.md` section 9).
 - **Whether Collector turn-ins pay gold or the item directly — closed**: the item only, never gold, so gold keeps exactly two mints (`checks.md` G6 · T14).
-- **Whether road events pay gold — closed**: yes, bounded. The Road is one of the two gold mints (section "Gold" above), paid as a 3-gold purse once per link per day = a 24 gold/day ceiling ≈ 1% of a farming session, and it pays no stones (`towns.md` section 7 · `checks.md` X36).
+- **Whether road events pay gold — closed**: yes, bounded. The Road is one of the two gold mints (section "Gold" above), paid as the `road.purse_gold` purse once per link per day = the `road.purseCapPerDay` gold/day ceiling the ladder links allow, a few percent of a farming session, and it pays no stones (`towns.md` section 7 · `checks.md` X36).
 - **Whether gold carries over across the 3 character slots — closed**: no, per character. `save.md` lists gold among the per-character fields (level · stats · bag · currencies · zone progress), while only Mastery · dex · drop_rate · filter presets · play time are account-wide — so Standing, settlements and gold all read per character.
 
 All four questions this file raised are now answered; nothing here is left open.

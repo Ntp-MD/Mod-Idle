@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 10:50:34Z · static build</span>
+<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>185/0/1</b></span><span class="chip ">generated blocks <b>0</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -154,14 +154,14 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h1>Bag category slot (herbs / stones / gear display)</h1>
 <p class="hint">One row of <code>tools/data/town.json</code> → <code>one_time</code>. Prices · rosters · stock · Standing shares · Collector sets. The only place a town number is written by hand. tools/town.ts --write rebuilds towns-stalls.md and checks.md group T from it.</p>
 <dl class="kv"><dt>path</dt><dd><code>one_time[bag_slot]</code></dd><dt>collection</dt><dd><a href="data-town-one_time.html">One-time lines</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>17</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>bag_slot</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Item</td><td><code>Bag category slot (herbs / stones / gear display)</code></td><td><code>str</code></td><td>—</td></tr><tr><td>NPC</td><td><code>porter</code></td><td><code>ref</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Kind</td><td><code>space</code></td><td><code>enum</code><span class="dim"> → invariants.allowed_kinds</span></td><td>—</td></tr><tr><td>Price <span class="dim">(m)</span></td><td><code>45</code></td><td><code>num</code></td><td>—</td></tr><tr><td>Charge rule</td><td><code></code></td><td><code>str</code></td><td>—</td></tr><tr><td>Charged in band</td><td><code>low</code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Quantity</td><td><code>3</code></td><td><code>int</code></td><td>—</td></tr><tr><td>Quantity by band</td><td><code></code></td><td><code>map</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Price ladder</td><td><code>null</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Discount</td><td><code></code></td><td><code>map</code></td><td>—</td></tr><tr><td>Display only</td><td><code>true</code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Uses a discount</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Note</td><td><code>display and sorting only · sells no stone, no gear</code></td><td><code>text</code></td><td>—</td></tr><tr><td>Character slot grant</td><td><code></code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>bag_slot</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Item</td><td><code>Bag category slot (herbs / stones / gear display)</code></td><td><code>str</code></td><td>—</td></tr><tr><td>NPC</td><td><code>porter</code></td><td><code>ref</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Kind</td><td><code>space</code></td><td><code>enum</code><span class="dim"> → invariants.allowed_kinds</span></td><td>—</td></tr><tr><td>Price <span class="dim">(m)</span></td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Charge rule</td><td><code></code></td><td><code>str</code></td><td>—</td></tr><tr><td>Charged in band</td><td><code>low</code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Quantity</td><td><code>3</code></td><td><code>int</code></td><td>—</td></tr><tr><td>Quantity by band</td><td><code></code></td><td><code>map</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Price ladder</td><td><code>null</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Discount</td><td><code></code></td><td><code>map</code></td><td>—</td></tr><tr><td>Display only</td><td><code>true</code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Uses a discount</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Note</td><td><code>display and sorting only · sells no stone, no gear</code></td><td><code>text</code></td><td>—</td></tr><tr><td>K by band</td><td><code></code></td><td><code>map</code><span class="tag ">inferred</span></td><td>—</td></tr><tr><td>K</td><td><code>347.25</code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr><tr><td>Character slot grant</td><td><code></code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="one_time"><input type="hidden" name="id" value="bag_slot">
 <div class="f"><label for="f-id">id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value="bag_slot" pattern="^[a-z][a-z0-9_]*$"></div></div>
 <div class="f"><label for="f-item">Item</label><div><input id="f-item" type="text" inputmode="decimal" name="item" value="Bag category slot (herbs / stones / gear display)"></div></div>
 <div class="f"><label for="f-npc">NPC</label><div><input id="f-npc" type="text" name="npc" value="porter" list="f-npc-dl" placeholder="one of npcs"><datalist id="f-npc-dl"></datalist></div></div>
 <div class="f"><label for="f-kind">Kind</label><div><input id="f-kind" type="text" name="kind" value="space" list="f-kind-dl" placeholder="one of invariants.allowed_kinds"><datalist id="f-kind-dl"></datalist></div></div>
-<div class="f"><label for="f-m">Price <span class="dim">(m)</span></label><div><input id="f-m" type="text" inputmode="decimal" name="m" value="45" min="0"></div></div>
+<div class="f"><label for="f-m">Price <span class="dim">(m)</span></label><div><input id="f-m" type="text" inputmode="decimal" name="m" value="" min="0"></div></div>
 <div class="f"><label for="f-charge">Charge rule</label><div><input id="f-charge" type="text" inputmode="decimal" name="charge" value=""></div></div>
 <div class="f"><label for="f-charge-band">Charged in band</label><div><input id="f-charge-band" type="text" name="charge_band" value="low" list="f-charge-band-dl" placeholder="one of engine:loot.bands"><datalist id="f-charge-band-dl"></datalist></div></div>
 <div class="f"><label for="f-qty">Quantity</label><div><input id="f-qty" type="text" inputmode="decimal" name="qty" value="3"></div></div>
@@ -171,6 +171,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><label for="f-display-only">Display only</label><div><select id="f-display-only" name="display_only"><option selected>true</option><option>false</option></select></div></div>
 <div class="f"><label for="f-use-discount">Uses a discount</label><div><select id="f-use-discount" name="use_discount"><option>true</option><option>false</option></select></div></div>
 <div class="f"><label for="f-note">Note</label><div><textarea id="f-note" name="note">display and sorting only · sells no stone, no gear</textarea></div></div>
+<div class="f"><label for="f-k-by-band">K by band<small>inferred from the JSON on disk</small></label><div><textarea id="f-k-by-band" name="k_by_band" spellcheck="false"></textarea></div></div>
+<div class="f"><label for="f-k">K<small>inferred from the JSON on disk</small></label><div><input id="f-k" type="text" inputmode="decimal" name="k" value="347.25"></div></div>
 <div class="f"><label for="f-character-slot-grant">Character slot grant<small>inferred from the JSON on disk</small></label><div><input id="f-character-slot-grant" type="text" inputmode="decimal" name="character_slot_grant" value=""></div></div>
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
@@ -183,12 +185,12 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   &quot;item&quot;: &quot;Bag category slot (herbs / stones / gear display)&quot;,
   &quot;npc&quot;: &quot;porter&quot;,
   &quot;kind&quot;: &quot;space&quot;,
-  &quot;m&quot;: 45,
   &quot;charge_band&quot;: &quot;low&quot;,
   &quot;qty&quot;: 3,
   &quot;ladder&quot;: null,
   &quot;display_only&quot;: true,
-  &quot;note&quot;: &quot;display and sorting only · sells no stone, no gear&quot;
+  &quot;note&quot;: &quot;display and sorting only · sells no stone, no gear&quot;,
+  &quot;k&quot;: 347.25
 }</pre></section>
 </div>
 </main>

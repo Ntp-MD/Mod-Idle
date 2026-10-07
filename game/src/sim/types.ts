@@ -192,25 +192,33 @@ export interface TownState {
 }
 
 /**
- * One leg on the Road, plus the Circuit it belongs to.
+ * One leg on the Road, plus the route it belongs to, plus the block being walked right now.
  *
- * A one-off trip (the first walk to a settlement) is the degenerate case: `circuit` is empty. A
- * Circuit is an ordered list of links the player has chosen to walk in a loop; `legIndex` points at
- * the link being walked now and `laps` counts completed loops. A Push skips the current leg instead
- * of ending the Circuit, and a closed client plays out the legs of the current lap before parking.
+ * A one-off trip (the first walk to a settlement) is the degenerate case: `route` is one link. A
+ * plotted route is the shortest chain of links to a chosen settlement and `loop` is false, so it
+ * ends where it was aimed. A Circuit is the same shape with `loop` set, so it repeats until
+ * stopped. A Push skips the current leg instead of ending either one, and a closed client plays out
+ * a loop's remaining laps before parking — never a plotted route.
  */
 export interface RoadTrip {
   linkIndex: number;
   settlementFrom: string;
   settlementTo: string;
   kind: string | null;
+  /** Seconds left on the block being walked — the whole block, never a leg's worth. */
   secLeft: number;
-  nextEncounterSec: number;
+  /** Which block of the current link the character is on, and how many the link has. */
+  blockIndex: number;
+  blocks: number;
   encountersLeft: number;
   pursePaid: boolean;
   chestPaid: boolean;
-  /** Empty for a one-off trip; otherwise the ordered link indices of the Circuit. */
-  circuit: number[];
+  /** The ordered link indices being walked; one link for a one-off trip. */
+  route: number[];
+  /** True for a Circuit (it repeats until stopped), false for a plotted route (it ends). */
+  loop: boolean;
+  /** The settlement the route was aimed at, which a loop has no answer for. */
+  destination: string | null;
   legIndex: number;
   laps: number;
   /** The Push counter when the CURRENT lap began — a clean lap is one that never moved it. */
@@ -240,7 +248,7 @@ export interface GameState {
   collector: { done: Record<string, boolean>; hints: Record<string, boolean> };
   grants: { filter_presets: number; stash_tabs: number; titles: string[]; banners: string[] };
   /** The Curio pedlar restocks three appearance slots a real day, priced inside its band. */
-  pedlar: { day: number; minutes: number[]; bought: number };
+  pedlar: { day: number; kills: number[]; bought: number };
   lastAutoZone?: number;
   /** Per-slot bag filter thresholds and the "not yet found" keep-list (`loot.md` §4 · `save.md`). */
   filter: FilterState;

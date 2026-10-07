@@ -47,9 +47,9 @@ The complete mob list, generated from `tools/data/engine.json` (`mob.zones` · `
 | 3 | Glimmer Grove | grove | fire | Treant · Werewolf | Ancient Treant |
 | 3 | Elder Rootway | rootway | fire | Elf · Dryad | Dark Elf |
 | 3 | Moonlit Glade | glade | fire | Werewolf · Treant | Alpha Werewolf |
-| 4 | Glimmer Grove | grove | lightning | Treant · Werewolf | Ancient Treant |
-| 4 | Elder Rootway | rootway | lightning | Elf · Dryad | Dark Elf |
-| 4 | Moonlit Glade | glade | lightning | Werewolf · Treant | Alpha Werewolf |
+| 4 | Storm Grove | grove | lightning | Treant · Werewolf | Ancient Treant |
+| 4 | Arc Rootway | rootway | lightning | Elf · Dryad | Dark Elf |
+| 4 | Thunder Glade | glade | lightning | Werewolf · Treant | Alpha Werewolf |
 | 5 | Murky Swamp | swamp | cold | Troll · Spider | Stone Troll |
 | 5 | Mud Flats | mud | cold | Slime · Lizardman | Shaman Lizardman |
 | 5 | Poison Fen | poison fen | cold | Spider · Troll | Stone Troll |
@@ -65,9 +65,9 @@ The complete mob list, generated from `tools/data/engine.json` (`mob.zones` · `
 | 9 | Snowfield | snow | poison | Troll · Dragon | Stone Troll |
 | 9 | Glacier Shelf | ice | chaos | Wolf · Giant | Fire Giant |
 | 9 | Rime Hollow | rime | poison | Dragon · Troll | Elder Dragon |
-| 10 | Snowfield | snow | poison | Troll · Dragon | Stone Troll |
-| 10 | Glacier Shelf | ice | poison | Wolf · Giant | Fire Giant |
-| 10 | Rime Hollow | rime | poison | Dragon · Troll | Elder Dragon |
+| 10 | White Waste | snow | poison | Troll · Dragon | Stone Troll |
+| 10 | Glacier Teeth | ice | poison | Wolf · Giant | Fire Giant |
+| 10 | Rimewind Hollow | rime | poison | Dragon · Troll | Elder Dragon |
 | 11 | Dune Sea | dunes | poison | Orc · Demon | Juggernaut Orc |
 | 11 | Sunken Tombs | tombs | chaos | Mummy · Lizardman | Royal Mummy |
 | 11 | Scorch Mesa | mesa | poison | Demon · Orc | Demon Knight |
@@ -83,9 +83,9 @@ The complete mob list, generated from `tools/data/engine.json` (`mob.zones` · `
 | 15 | Bone Stair | stair | chaos | Demon · Golem | Demon Knight |
 | 15 | Molten Deeps | deeps | poison | Slime · Demon | Demon Knight |
 | 15 | Throne Abyss | abyss | chaos | Golem · Slime | Crystal Golem |
-| 16 | Bone Stair | stair | poison | Demon · Golem | Demon Knight |
-| 16 | Molten Deeps | deeps | poison | Slime · Demon | Demon Knight |
-| 16 | Throne Abyss | abyss | poison | Golem · Slime | Crystal Golem |
+| 16 | Marrow Stair | stair | poison | Demon · Golem | Demon Knight |
+| 16 | Seeping Deeps | deeps | poison | Slime · Demon | Demon Knight |
+| 16 | Drowned Abyss | abyss | poison | Golem · Slime | Crystal Golem |
 | 17 | Tideflats | coast | fire | Ogre · Spider | Mage Ogre |
 | 17 | Salt Cliffs | cliffs | cold | Slime · Lizardman | Shaman Lizardman |
 | 17 | Sunken Reef | sea | fire | Spider · Ogre | Mage Ogre |

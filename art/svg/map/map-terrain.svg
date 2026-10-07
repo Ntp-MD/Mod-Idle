@@ -1,40 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  The settlement map's backdrop — HAND-DRAWN, the owner's to redraw.
-  `tools/map.ts` writes the overlay on top of this one: the hex field (a cluster per settlement — the
-  settlement's own hex plus one per sub-zone), the biome tones, the river band, the named regions,
-  the terrain washes, the landmark marks and the travel marker. There is no road layer: the map shows
-  places, not routes. Nothing here is read by the simulation, and no coordinate reaches `engine/` or
-  `game/src/` (X33 · X47 · M7).
-  Two layers only: the neutral grey off-field the hex field is cut out of, and the warm paper the
-  playable shape sits on. No terrain — the field's ground is the hex fill.
+  The settlement map's backdrop — the plate the hex field sits on. It carries no geography of its own:
+  `tools/map.ts` writes the whole field over it, so this file is only the surface the field is cut into.
+  Nothing here is read by the simulation, and no coordinate reaches `engine/` or `game/src/`
+  (X33 · X47 · M7 · M9).
+
+  Two rules keep the sheet clean, and both matter more than any ornament:
+
+  1. **No raster.** No filter, no <img>, no width/height on the root — an SVG filter or a bitmap-backed
+     image is rasterised once and then scaled, which is the one thing that would pixelate as the player
+     zooms. Everything here is geometry and gradient, so the plate stays sharp at any zoom.
+  2. **No decoration.** A flat surface, one hairline edge, one very soft lift toward the centre. The
+     hex field is the map; anything drawn here competes with it. The sheet is dark so it reads as the
+     same material as the rest of the client's panels, not as a picture of a different world.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1200" width="2000" height="1200">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1200" preserveAspectRatio="none">
   <defs>
-    <radialGradient id="paper" cx="0.5" cy="0.46" r="0.72">
-      <stop offset="0" stop-color="#efe7cf"/>
-      <stop offset="0.72" stop-color="#e4d9bb"/>
-      <stop offset="1" stop-color="#d6c8a4"/>
+    <!-- the lift toward the middle: wide and weak, so the plate has depth without a visible hotspot -->
+    <radialGradient id="plate" cx="0.5" cy="0.44" r="0.78">
+      <stop offset="0" stop-color="#161b24"/>
+      <stop offset="0.7" stop-color="#12161d"/>
+      <stop offset="1" stop-color="#0f131a"/>
     </radialGradient>
-    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="n"/>
-      <feColorMatrix in="n" type="saturate" values="0"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>
-    </filter>
+    <!-- the plate's own shadow on the void behind it, so the edge reads as a cut rather than a border -->
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3546"/>
+      <stop offset="1" stop-color="#1b2230"/>
+    </linearGradient>
   </defs>
 
-  <!-- the off-field: the sheet is not the world, so everything the field does not cover reads as table -->
-  <rect width="2000" height="1200" fill="#8d9095"/>
-  <rect width="2000" height="1200" fill="#7c7f85" opacity="0.5" filter="url(#paperGrain)"/>
+  <!-- the void: everything the field does not cover is outside the world, and reads as nothing at all -->
+  <rect width="2000" height="1200" fill="#0a0d12"/>
 
-  <!-- the paper the hex field is cut out of -->
-  <path d="M 50 380 C 50 175 225 50 450 50 L 1550 50 C 1775 50 1950 175 1950 380
-           L 1950 820 C 1950 1025 1775 1150 1550 1150 L 450 1150 C 225 1150 50 1025 50 820 Z"
-        fill="url(#paper)"/>
-  <path d="M 50 380 C 50 175 225 50 450 50 L 1550 50 C 1775 50 1950 175 1950 380
-           L 1950 820 C 1950 1025 1775 1150 1550 1150 L 450 1150 C 225 1150 50 1025 50 820 Z"
-        fill="none" stroke="#b9a983" stroke-width="4" opacity="0.7"/>
-  <path d="M 50 380 C 50 175 225 50 450 50 L 1550 50 C 1775 50 1950 175 1950 380
-           L 1950 820 C 1950 1025 1775 1150 1550 1150 L 450 1150 C 225 1150 50 1025 50 820 Z"
-        fill="none" stroke="#efe7cf" stroke-width="1.4" opacity="0.5" transform="translate(8 8)"/>
+  <!-- the plate. One rounded shape, a hairline edge, and the soft centre lift. Nothing else. -->
+  <path d="M 96 384 C 96 196 258 76 464 76 L 1536 76 C 1742 76 1904 196 1904 384
+           L 1904 816 C 1904 1004 1742 1124 1536 1124 L 464 1124 C 258 1124 96 1004 96 816 Z"
+        fill="url(#plate)"/>
+  <path d="M 96 384 C 96 196 258 76 464 76 L 1536 76 C 1742 76 1904 196 1904 384
+           L 1904 816 C 1904 1004 1742 1124 1536 1124 L 464 1124 C 258 1124 96 1004 96 816 Z"
+        fill="none" stroke="url(#edge)" stroke-width="2"/>
 </svg>

@@ -113,31 +113,35 @@ BLOCKS['group-C'] = () => {
 
 BLOCKS['group-F'] = () => {
   const b = BAND;
+  // A row's rate, re-expressed per 1,000 kills: the denominator is a kill count, never a stretch of
+  // the clock (AGENT.md — no time limit; D12 — never the published source). Ascend/polish full-set
+  // waits are stated in kills for the same reason.
+  const p1k = (v: any, band: string = 'high') => f0(Math.round(v / BAND[band].kills_derived * 1000));
   const rows = [
-    ['F1', 'kills/hr', `3600 ÷ (group × ${L.ttk_per_mob_sec} sec clear + ${L.group_spawn_sec} sec spawn) × group`, `${f0(b.high.kills_derived)} high · ${f0(b.mid.kills_derived)} mid · ${f0(b.low.kills_derived)} low`],
+    ['F1', 'kills per band', `3600 ÷ (group × ${L.ttk_per_mob_sec} sec clear + ${L.group_spawn_sec} sec spawn) × group`, `${f0(b.high.kills_derived)} high · ${f0(b.mid.kills_derived)} mid · ${f0(b.low.kills_derived)} low`],
     ['F2', 'drops per kill', `${L.base_drop_chance * 100}% × (1 + Lck×${K.K_LCK_DROP})`, `${f1(b.low.drop_chance_pct)}% (L${L.bands.low.lck_level}) · ${f1(b.mid.drop_chance_pct)}% (L${L.bands.mid.lck_level}) · ${f1(b.high.drop_chance_pct)}% (L${L.bands.high.lck_level}) · ${f1(b.high_full_lck.drop_chance_pct)}% (full Lck ${f0(CEIL)})`],
-    ['F3', 'drops/hr', `kills/hr × F2`, `**${f0(b.high.drops_per_hr)}** (L90) · ${f0(b.mid.drops_per_hr)} (L60) · ${f0(b.low.drops_per_hr)} (L30) · ${f0(b.high_full_lck.drops_per_hr)} (full Lck)`],
-    ['F4', 'upgrades/hr', E.f_rows_carried.find((r) => r.id === 'F4').expression, E.f_rows_carried.find((r) => r.id === 'F4').value],
-    ['F5', 'Reroll value stone/hr', `junk × ${TS.gold_per_junk_piece} = drops − upgrades`, `**${f0(b.high.junk_per_hr)}**`],
-    ['F6', 'Reroll value uses/hr', `${f0(b.high.junk_per_hr)} ÷ ${C.reroll_value_stones_per_use}`, `**${f0(STONE.reroll_uses_per_hr)}**`],
-    ['F7', 'Reroll tier stone/hr', `elite ${f0(b.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones)} (${L.elite_spawn_chance * 100}% of kills ×${L.elite_tier_stones}) + boss ${f0(L.boss_per_hour * L.boss_tier_stones)} (${L.boss_per_hour} ×${L.boss_tier_stones})`, `${f0(STONE.tier_stones_per_hr)}`],
-    ['F8', 'Refine/hr', `${f0(STONE.tier_stones_per_hr)} ÷ ${C.refine_stones_per_use}`, `**${STONE.refines_per_hr.toFixed(2)}**`],
-    ['F9', 'Add mod stone/hr', `elite ${f2(b.high.kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance)} (${L.elite_spawn_chance * 100}% of kills × ${L.elite_add_stone_chance * 100}% chance) + boss ${f0(L.boss_per_hour * L.boss_add_stones)} (${L.boss_per_hour} ×${L.boss_add_stones})`, `**${STONE.add_stones_per_hr.toFixed(2)}**`],
-    ['F10', 'Ascend/hr', `min(F9 ÷ ${C.ascend_add_stones} Add, F7 ÷ ${C.ascend_tier_stones} tier) — the scarcer stone sets the pace`, `**${STONE.ascend_per_hr.toFixed(2)}** · full 12-piece set **${STONE.ascend_hours_full_set} hr** (Add alone ${STONE.add_hours_full_set} hr · tier stones alone ${STONE.tier_hours_full_set} hr → tier stones bind)`],
-    ['F13', 'herb bundles/hr', `separate roll · ${f2(E.herbs.mid_chance * 100)}% per kill mid · ${f2(E.herbs.high_chance * 100)}% high · bundle of ${E.herbs.bundle_min}-${E.herbs.bundle_max} zone-tier herbs`, `mid band **${f2(BAND.mid.kills_derived * E.herbs.mid_chance)}/hr** · high band **${f2(BAND.high.kills_derived * E.herbs.high_chance)}/hr**`],
+    ['F3', 'drops per 1,000 kills', `kills × F2`, `**${p1k(b.high.drops_per_hr)}** (L90) · ${p1k(b.mid.drops_per_hr, 'mid')} (L60) · ${p1k(b.low.drops_per_hr, 'low')} (L30) · ${p1k(b.high_full_lck.drops_per_hr)} (full Lck)`],
+    ['F4', 'upgrades per 1,000 kills', E.f_rows_carried.find((r) => r.id === 'F4').expression, E.f_rows_carried.find((r) => r.id === 'F4').value],
+    ['F5', 'Reroll value stones per 1,000 kills', `junk × ${TS.gold_per_junk_piece} = drops − upgrades`, `**${p1k(b.high.junk_per_hr)}**`],
+    ['F6', 'Reroll value uses per 1,000 kills', `${p1k(b.high.junk_per_hr)} ÷ ${C.reroll_value_stones_per_use}`, `**${p1k(STONE.reroll_uses_per_hr)}**`],
+    ['F7', 'Reroll tier stones per 1,000 kills', `elite ${p1k(b.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones)} (${L.elite_spawn_chance * 100}% of kills ×${L.elite_tier_stones}) + boss ${p1k(L.boss_per_hour * L.boss_tier_stones)} (${L.boss_per_hour} ×${L.boss_tier_stones})`, `**${p1k(STONE.tier_stones_per_hr)}**`],
+    ['F8', 'Refines per 1,000 kills', `${p1k(STONE.tier_stones_per_hr)} ÷ ${C.refine_stones_per_use}`, `**${p1k(STONE.refines_per_hr)}**`],
+    ['F9', 'Add mod stones per 1,000 kills', `elite ${p1k(b.high.kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance)} (${L.elite_spawn_chance * 100}% of kills × ${L.elite_add_stone_chance * 100}% chance) + boss ${p1k(L.boss_per_hour * L.boss_add_stones)} (${L.boss_per_hour} ×${L.boss_add_stones})`, `**${p1k(STONE.add_stones_per_hr)}**`],
+    ['F10', 'Ascends per 1,000 kills', `min(F9 ÷ ${C.ascend_add_stones} Add, F7 ÷ ${C.ascend_tier_stones} tier) — the scarcer stone sets the pace`, `**${p1k(STONE.ascend_per_hr)}** · full 12-piece set **${f0(STONE.ascend_hours_full_set * b.high.kills_derived)} kills** (Add alone ${f0(STONE.add_hours_full_set * b.high.kills_derived)} · tier stones alone ${f0(STONE.tier_hours_full_set * b.high.kills_derived)} → tier stones bind)`],
+    ['F13', 'herb bundles per 1,000 kills', `separate roll · ${f2(E.herbs.mid_chance * 100)}% per kill mid · ${f2(E.herbs.high_chance * 100)}% high · bundle of ${E.herbs.bundle_min}-${E.herbs.bundle_max} zone-tier herbs`, `mid band **${p1k(BAND.mid.kills_derived * E.herbs.mid_chance, 'mid')}** · high band **${p1k(BAND.high.kills_derived * E.herbs.high_chance)}**`],
     ['F16', 'Refine full set', `${C.ascend_items_per_set} pieces × ${C.refine_slots_per_item} slots × ${C.refine_steps} steps = ${STONE.refine_casts_full_set} casts`, `**${STONE.refine_casts_full_set} casts** · ${STONE.refine_casts_full_set * C.refine_stones_per_use} Reroll tier stones (checks.md E6)`],
     ['F17', 'Full-set polish', `${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones`, `**${C.polish_casts_per_full_set} casts** · ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Reroll value stones (checks.md E8)`],
-    ['F18', 'gold per minute of full-sell income', `junk/hr ÷ 60`, `${eng.goldPerMinute('low')} low · ${eng.goldPerMinute('mid')} mid · ${eng.goldPerMinute('high')} high · ${eng.goldPerMinute('high_full_lck')} full Lck (towns-stalls.md §1)`],
+    ['F18', 'gold per kill of full-sell income', `junk per kill × ${TS.gold_per_junk_piece}`, `${eng.goldPerKill('low').toFixed(4)} low · ${eng.goldPerKill('mid').toFixed(4)} mid · ${eng.goldPerKill('high').toFixed(4)} high · ${eng.goldPerKill('high_full_lck').toFixed(4)} full Lck (towns-stalls.md §1)`],
     ['F19', 'full-Lck income ceiling over the no-Lck line', `${f0(b.high_full_lck.junk_per_hr)} ÷ ${f0(b.high.junk_per_hr)}`, `**×${f2(LCK_BOUND)}** — the only place Lck may multiply income (G8)`],
-    ['F20', 'Quality Stone/hr', `monster ${f0(b.high.kills_derived * L.quality_stone_sources.monster_quality_chance)} (${L.quality_stone_sources.monster_quality_chance * 100}% of kills) + elite ${f0(b.high.kills_derived * L.elite_spawn_chance * L.quality_stone_sources.elite_quality_chance)} (1 in 5 × ${L.quality_stone_sources.elite_quality_chance * 100}%) + boss ${f0(L.boss_per_hour * L.quality_stone_sources.boss_quality_stones)} (${L.boss_per_hour} ×${L.quality_stone_sources.boss_quality_stones})`, `**${f0(STONE.quality_stones_per_hr)}**`],
-    ['F21', 'Upgrade full set', `${C.upgrade_costs.join(' + ')} = ${STONE.upgrade_stones_per_piece} per piece × ${C.ascend_items_per_set} pieces = ${STONE.upgrade_stones_full_set} stones ÷ F20`, `**${f1(STONE.upgrade_hours_full_set)} hr** for a full +15 set · the steps ${C.upgrade_breaks_from}-15 third alone, hunted only from bosses, is **${f1(STONE.upgrade_boss_third_hours)} hr** (crafting.md "sources shift monsters → elites → bosses by step")`],
-    ['F22', 'Repair and Corrupt stone/hr', `Repair: elite ${f0(b.high.kills_derived * L.elite_spawn_chance * L.repair_stone_sources.elite_repair_chance)} (1 in 5 × ${L.repair_stone_sources.elite_repair_chance * 100}%) + boss ${f0(L.boss_per_hour * L.repair_stone_sources.boss_repair_stones)} · Corrupt: boss ${L.boss_per_hour} × ${L.corrupt_stone_sources.boss_corrupt_chance * 100}% chance`, `Repair **${f0(STONE.repair_stones_per_hr)}/hr** · Corrupt **${f1(STONE.corrupt_stones_per_hr)}/hr** — the rarest stone, so one gamble per piece costs about an hour and a full ${STONE.corrupt_gambles_full_set}-piece set of gambles is ${STONE.corrupt_gambles_full_set} hr (crafting.md §Corrupt)`],
+    ['F20', 'Quality stones per 1,000 kills', `monster ${p1k(b.high.kills_derived * L.quality_stone_sources.monster_quality_chance)} (${L.quality_stone_sources.monster_quality_chance * 100}% of kills) + elite ${p1k(b.high.kills_derived * L.elite_spawn_chance * L.quality_stone_sources.elite_quality_chance)} (1 in 5 × ${L.quality_stone_sources.elite_quality_chance * 100}%) + boss ${p1k(L.boss_per_hour * L.quality_stone_sources.boss_quality_stones)} (${L.boss_per_hour} ×${L.quality_stone_sources.boss_quality_stones})`, `**${p1k(STONE.quality_stones_per_hr)}**`],
+    ['F21', 'Upgrade full set', `${C.upgrade_costs.join(' + ')} = ${STONE.upgrade_stones_per_piece} per piece × ${C.ascend_items_per_set} pieces = ${STONE.upgrade_stones_full_set} stones ÷ F20`, `**${f0(STONE.upgrade_hours_full_set * b.high.kills_derived)} kills** for a full +15 set · the steps ${C.upgrade_breaks_from}-15 third alone, hunted only from bosses, is **${f0(STONE.upgrade_boss_third_hours * b.high.kills_derived)} kills** (crafting.md "sources shift monsters → elites → bosses by step")`],
+    ['F22', 'Repair and Corrupt stones per 1,000 kills', `Repair: elite ${p1k(b.high.kills_derived * L.elite_spawn_chance * L.repair_stone_sources.elite_repair_chance)} (1 in 5 × ${L.repair_stone_sources.elite_repair_chance * 100}%) + boss ${p1k(L.boss_per_hour * L.repair_stone_sources.boss_repair_stones)} · Corrupt: boss ${L.boss_per_hour} × ${L.corrupt_stone_sources.boss_corrupt_chance * 100}% chance`, `Repair **${p1k(STONE.repair_stones_per_hr)}** · Corrupt **${p1k(STONE.corrupt_stones_per_hr)}** per 1,000 kills — the rarest stone, so one gamble per piece costs about ${f0(b.high.kills_derived / STONE.corrupt_stones_per_hr)} kills and a full ${STONE.corrupt_gambles_full_set}-piece set of gambles is ${STONE.corrupt_gambles_full_set} × that (crafting.md §Corrupt)`],
   ];
   const carried = E.f_rows_carried.filter((r) => !['F4'].includes(r.id)).map((r) => `| ${r.id} | ${r.value} | ${r.expression} · status **${r.status}** |`);
   return ['| id | Value | Expression |', '|---|---|---|',
     ...rows.map((r) => `| ${r[0]} | ${r[1]} | \`${r[2]}\` = ${r[3]} |`),
     ...carried, '',
-    `Derived from: group spawn ${L.group_spawn_sec} sec · ${L.ttk_per_mob_sec} sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = ${S.base} + ${S.point_value}×(points ÷ 7)) · Base drop ${L.base_drop_chance * 100}% (formula-utility.md section 10) · prices ${C.reroll_value_stones_per_use}/${C.refine_stones_per_use} stones (crafting.md).`,
+    `Derived from: group spawn ${L.group_spawn_sec} sec · ${L.ttk_per_mob_sec} sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = ${S.base} + ${S.point_value}×(points ÷ 7)) · Base drop ${L.base_drop_chance * 100}% (formula-utility.md section 10) · prices ${C.reroll_value_stones_per_use}/${C.refine_stones_per_use} stones (crafting.md). A band is a kill count, so every row is stated per 1,000 kills — never per hour.`,
     `F4 · F11 are **simulation output** (loot.md section 3) and F13 is unset — this cage does not invent it, it only refuses to let a derived row drift.`, ''].join('\n');
 };
 
@@ -1009,16 +1013,77 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   }
 
   const roadPurse = ladder.length * ROAD.purse_gold;
-  const roadJunk = eng.goldPerMinute('high') * 60 * 6;
-  if (roadPurse / roadJunk > 0.05) roadP.push(`Road mints ${roadPurse} gold/day = ${f1(roadPurse / roadJunk * 100)}% of a 6-hour junk mint, over the 5% bound`);
+  const roadJunk = eng.goldPerKill('high') * 6 * BAND.high.kills_derived;
+  if (roadPurse / roadJunk > 0.05) roadP.push(`Road mints ${roadPurse} gold/day = ${f1(roadPurse / roadJunk * 100)}% of the junk ${f0(6 * BAND.high.kills_derived)} high-band kills pay, over the 5% bound`);
   for (const l of branch) {
     const idx = ROAD.links.indexOf(l);
     if (eng.ROAD.purseGoldFor(idx) !== 0) roadP.push(`branch link ${l.a} ↔ ${l.b} pays a purse — branch links pay none`);
   }
   const roadTrip = Math.min(...['low', 'mid', 'high'].map((b) => (ROAD.trip_min * BAND[b].kills_derived) / 60));
   if (ROAD.standing_per_trip_kills / roadTrip > 0.2) roadP.push(`a trip pays ${ROAD.standing_per_trip_kills} kill-equivalents of Standing but costs ${f1(roadTrip)} kills of hunting time`);
+
+  // the walk is the same Road counted in blocks (`road.walk`), so the contract is that nothing about a
+  // leg changed: same length, same encounters, same adjacency. Four things could break that and each
+  // has its own refusal. `ROAD` above is the data; `RW` is the shared model that derives the blocks.
+  const RW = eng.ROAD;
+  const WALK = ROAD.walk || {};
+  if (!(WALK.block_sec > 0)) roadP.push(`walk.block_sec is ${WALK.block_sec}, not a length of walk`);
+  if (WALK.block_sec * WALK.encounter_gap_blocks * ROAD.encounters_per_min !== 60) {
+    roadP.push(`the walk is ${WALK.block_sec}s x ${WALK.encounter_gap_blocks} blocks x ${ROAD.encounters_per_min}/min, which is not a minute — the walk moved the Road's cadence`);
+  }
+  if (!(WALK.encounter_gap_blocks > 0)) roadP.push('walk.encounter_gap_blocks must be positive, or no encounter ever fires');
+  const walkBlocks = RW.blocks || [];
+  if (!walkBlocks.length) roadP.push('the walk owns no blocks — a road with no blocks is a road with no walking');
+  const walkEncTotal = walkBlocks.reduce((t, b) => t + 1 / WALK.encounter_gap_blocks, 0);
+  const roadEncTotal = ROAD.links.reduce((t, l) => t + eng.ROAD.encountersFor(ROAD.links.indexOf(l)), 0);
+  if (Math.abs(walkEncTotal - roadEncTotal) > 0.001) {
+    roadP.push(`walking the whole graph fires ${f1(walkEncTotal)} encounters and walking the same links leg by leg fires ${f1(roadEncTotal)} — the walk must not add or drop one`);
+  }
+  for (const l of ROAD.links) {
+    const idx = ROAD.links.indexOf(l);
+    if (!Number.isInteger(RW.links[idx].blocks)) roadP.push(`${RW.links[idx].id}: ${l.trip_min} min is ${RW.links[idx].blocks} blocks, not a whole number`);
+    if (Math.abs(RW.links[idx].blocks * WALK.block_sec / 60 - l.trip_min) > 0.001) {
+      roadP.push(`${RW.links[idx].id}: ${RW.links[idx].blocks} blocks x ${WALK.block_sec}s is not ${l.trip_min} min — a leg changed length`);
+    }
+    if (RW.blocksFor(idx) / WALK.encounter_gap_blocks !== eng.ROAD.encountersFor(idx)) {
+      roadP.push(`${RW.links[idx].id}: the walk fires ${RW.blocksFor(idx) / WALK.encounter_gap_blocks} encounters, the leg promised ${eng.ROAD.encountersFor(idx)}`);
+    }
+  }
+  if (!RW.chainIsWalkable) roadP.push('a link\'s blocks do not form a chain — a walk could skip ground');
+  {
+    const ids = new Set(walkBlocks.map((b) => b.id));
+    if (ids.size !== walkBlocks.length) roadP.push(`${walkBlocks.length - ids.size} block id(s) collide, so two blocks share a name`);
+    for (const b of walkBlocks) {
+      if (b.id !== `${RW.links[b.linkIndex].id}#${b.n}`) { roadP.push(`block ${b.id} is not named after its own link`); break; }
+      const deg = (b.n > 0 ? 1 : 0) + (b.n < b.total - 1 ? 1 : 0);
+      const ns = RW.neighboursOf(b.linkIndex, b.n);
+      if (ns.length !== deg || ns.some((id) => RW.blockById.get(id)?.linkIndex !== b.linkIndex)) {
+        roadP.push(`block ${b.id} touches ${ns.length} block(s) instead of the ${deg} its position allows`);
+        break;
+      }
+    }
+    // the checkpoint: warping is the only skip, and it costs the carriage price once per link
+    if (!/checkpoint/.test(WALK.checkpoint_rule || '')) roadP.push('walk.checkpoint_rule does not say what a warp costs');
+  }
+  // a route is a walk: consecutive links meet at a settlement and the last link reaches the target
+  const settlementNames = eng.ZONES.map((z) => z.name);
+  for (const a of settlementNames) {
+    for (const b of settlementNames) {
+      if (a === b) continue;
+      const r = RW.routeLinks(a, b);
+      if (r === null) { roadP.push(`no route walks from ${a} to ${b} — the graph is not connected`); continue; }
+      if (!r.length) continue;
+      let at = a;
+      for (const i of r) {
+        const l = RW.links[i];
+        if (l.a !== at && l.b !== at) { roadP.push(`a route from ${a} to ${b} enters ${l.id} at neither end`); break; }
+        at = l.a === at ? l.b : l.a;
+      }
+      if (at !== b) roadP.push(`a route from ${a} to ${b} ends at ${at}`);
+    }
+  }
   add('X36', roadP.length === 0, roadP.length ? roadP.join(' · ')
-    : `Road is a closed design: ${ladder.length} ladder + ${branch.length} branch links (every link carries its own zone pair) · ${ROAD.trip_min} min per ladder leg × ${ROAD.encounters_per_min} encounter/min · base weights ${roadEnc.map((e) => `${e[0]} ${e[1].weight}%`).join(' · ')} = the average of the ${tIds.length} terrain rows · chest capped ${ROAD.chest_once_per_link_per_day ? 'once per link per day' : 'NOT CAPPED'} and pays no stones · purse capped at ${roadPurse} gold/day = ${f1((roadPurse / roadJunk) * 100)}% of a 6-hour junk mint · Standing ${ROAD.standing_per_trip_kills} kill-equivalents against the ${f1(roadTrip)} kills a trip costs`);
+    : `Road is a closed design: ${ladder.length} ladder + ${branch.length} branch links (every link carries its own zone pair) · walked in blocks, ${WALK.block_sec}s x ${WALK.encounter_gap_blocks} = one ${f0(60 / ROAD.encounters_per_min)}s encounter gap, so a ${ROAD.trip_min} min leg is ${RW.blocksFor(0)} blocks and still ${eng.ROAD.encountersFor(0)} encounters · base weights ${roadEnc.map((e) => `${e[0]} ${e[1].weight}%`).join(' · ')} = the average of the ${tIds.length} terrain rows · chest capped ${ROAD.chest_once_per_link_per_day ? 'once per link per day' : 'NOT CAPPED'} and pays no stones · purse capped at ${roadPurse} gold/day = ${f1((roadPurse / roadJunk) * 100)}% of a 6-hour junk mint · Standing ${ROAD.standing_per_trip_kills} kill-equivalents against the ${f1(roadTrip)} kills a trip costs · ${walkBlocks.length} blocks, each touching only its own neighbours, and every settlement pair routes`);
 
   // X46 · the Circuit and the offline split. A Circuit is an ordered list of links the character
   // loops; a Push skips the current leg instead of ending it, and offline rolls the base table.
@@ -1496,18 +1561,20 @@ BLOCKS['skill-drop'] = () => {
   const SD = E.skill_drop;
   const kph = BAND.high.kills_derived;
   const elites = kph * L.elite_spawn_chance;
-  const perHour = elites * SD.elite + L.boss_per_hour * SD.boss + kph * (1 - L.elite_spawn_chance) * SD.normal;
+  // sample size is a count of kills, never an hour: 1,000 kills is the denominator (D12)
+  const perK = elites * SD.elite + L.boss_per_hour * SD.boss + kph * (1 - L.elite_spawn_chance) * SD.normal;
+  const k1k = (v: any) => f1((v / kph) * 1000);
   const rows = [
-    ['Boss (single, always online-only)', f1(SD.boss * 100) + '% per boss kill', f1(L.boss_per_hour) + '/hr', f1(L.boss_per_hour * SD.boss * 100) / 100 + '/hr'],
-    ['Elite (1 in ' + Math.round(1 / L.elite_spawn_chance) + ' kills)', f1(SD.elite * 100) + '% per elite kill', f0(elites) + '/hr', f2(elites * SD.elite) + '/hr'],
-    ['Normal mob', f2(SD.normal * 100) + '% per kill', f0(kph) + '/hr', f1(kph * (1 - L.elite_spawn_chance) * SD.normal) + '/hr'],
+    ['Boss (single, always online-only)', f1(SD.boss * 100) + '% per boss kill', k1k(L.boss_per_hour) + ' per 1,000 kills', k1k(L.boss_per_hour * SD.boss) + ' per 1,000 kills'],
+    ['Elite (1 in ' + Math.round(1 / L.elite_spawn_chance) + ' kills)', f1(SD.elite * 100) + '% per elite kill', k1k(elites) + ' per 1,000 kills', k1k(elites * SD.elite) + ' per 1,000 kills'],
+    ['Normal mob', f2(SD.normal * 100) + '% per kill', k1k(kph * (1 - L.elite_spawn_chance)) + ' per 1,000 kills', k1k(kph * (1 - L.elite_spawn_chance) * SD.normal) + ' per 1,000 kills'],
   ];
   return [
-    '| Source | Rate | High-band volume | Skills/hr |',
+    '| Source | Rate | Volume per 1,000 kills | Skills per 1,000 kills |',
     '|---|---|---|---|',
     ...rows.map((r) => `| ${r.join(' | ')} |`),
     '',
-    `**${f2(perHour)} skills per hour** in the high band (boss ${f2(L.boss_per_hour * SD.boss)} + elite ${f2(elites * SD.elite)} + normal ${f2(kph * (1 - L.elite_spawn_chance) * SD.normal)}) — the rare item the whole skill list is gated on. Every number above comes from engine.json; the rates were previously quoted in this file and stored nowhere, so nothing could check them.`,
+    `**${k1k(perK)} skills per 1,000 kills** in the high band (boss ${k1k(L.boss_per_hour * SD.boss)} + elite ${k1k(elites * SD.elite)} + normal ${k1k(kph * (1 - L.elite_spawn_chance) * SD.normal)}) — the rare item the whole skill list is gated on. Every number above comes from engine.json and is stated per 1,000 kills; the rates were previously quoted in this file and stored nowhere, so nothing could check them.`,
   ].join('\n');
 };
 
@@ -1763,18 +1830,21 @@ BLOCKS['road-rules'] = () => {
   const ladder = R.links.filter((l) => l.kind === 'ladder');
   const branch = R.links.filter((l) => l.kind === 'branch');
   const dailyPurse = R.purseCapPerDay;
-  const linkRow = (l) => `**${l.text}** · ${l.kind} · ${l.terrain} · ${l.trip_min} min${l.paysPurse ? '' : ' · no purse'}`;
+  const linkRow = (l) => `**${l.text}** · ${l.kind} · ${l.terrain} · ${l.trip_min} min = ${l.blocks} blocks${l.paysPurse ? '' : ' · no purse'}`;
   const rows = Object.entries(RD.encounters).map(([k, v]) =>
     `| ${k} | ${v.weight}% | ${tIds.map((t) => `${t} ${RD.terrain[t][k]}`).join(' · ')} | ${v.mobs} | ${v.win} · loss: ${v.loss} |`);
+  const W = RD.walk;
   return [
     '| Road element | Value |',
     '|---|---|',
-    `| Ladder links (${ladder.length}, 5 min, pays the purse) | ${ladder.map(linkRow).join(' · ')} |`,
+    `| Ladder links (${ladder.length}, ${ladder[0]?.trip_min ?? RD.trip_min} min, pays the purse) | ${ladder.map(linkRow).join(' · ')} |`,
     `| Branch links (${branch.length}, no purse) | ${branch.map(linkRow).join(' · ')} |`,
     `| Trip length · encounters | a link runs for its own \`trip_min\` · ${RD.encounters_per_min} encounter per Road minute |`,
-    `| Circuit | an ordered list of links that repeats until stopped; a single trip is the one-link case. A Push skips the rest of the leg — it never ends the Circuit. Editable only while standing in a settlement, never while travelling |`,
-    `| Offline | the Circuit plays out the rest of its lap on the **untilted base table**, then parks the character in a zone before normal idling resumes — an away period can never be routed into ambush country |`,
-    '| After the first visit | the Waypoint is free and instant; opening a link costs the carriage price in `towns.md` section 5 |',
+    `| The block walk | a link is walked **one block at a time**, \`walk.block_sec\` to the block, so a \`trip_min\` leg is \`trip_min x 60 / walk.block_sec\` blocks (**M13** · **M14**) · an encounter fires on the way into every \`walk.encounter_gap_blocks\`-th block, which is the same ${RD.encounters_per_min}-per-Road-minute cadence the leg always had |`,
+    `| Adjacency | a block touches only the block before it and the block after it on its own link; the first touches the settlement the leg left and the last the settlement it reaches. There is no other edge in the walk, so a character can never be somewhere it did not walk to (**M15** · **X36**) |`,
+    `| Route | pick any settlement and the shortest chain of links to it is plotted and walked link by link. A Circuit is the same list with \`loop\` set — one structure, one validator |`,
+    `| Offline | a Circuit plays out the rest of its lap on the **untilted base table**, then parks the character in a zone before normal idling resumes — an away period can never be routed into ambush country. A plotted route is never resolved while away: it is dropped and the character stands where the walk stopped |`,
+    '| Checkpoint | a settlement is a checkpoint and warping to one is the only way to skip ground: it costs the carriage price **once per link** and is free and instant for every visit after that, so walking is never mandatory and never the cheaper option (**G9** · **T9**) |',
     '',
     '| Terrain | ambush | caravan | pedlar | chest |',
     '|---|---|---|---|---|',
@@ -1786,7 +1856,7 @@ BLOCKS['road-rules'] = () => {
     '|---|---|---|---|---|',
     ...rows,
     '',
-    `The base column is the plain average of the terrain rows and is what an **offline** session rolls, so the tilt can never be farmed while away. The purse pays **${RD.purse_gold} gold on a ladder link only**, once per link per day, so the Road can never mint more than **${dailyPurse} gold/day** while one 6-hour farming session mints thousands by selling junk — Road gold is a rounding error, which is what "C+D are a content choice, not an income choice" has to mean. A chest pays one Item at the destination zone's ceiling, is capped once per link per day, and pays **no crafting stones**. Standing is granted in kill-equivalents (**${RD.standing_per_trip_kills}** per completed leg), under a fifth of what the same minutes would earn hunting (**X36**). Losing a one-off trip forfeits roughly ${RD.forfeit_kills} kills of progress and the purse; a Push inside a Circuit simply skips the leg.`,
+    `The base column is the plain average of the terrain rows and is what an **offline** session rolls, so the tilt can never be farmed while away. The purse pays **${RD.purse_gold} gold on a ladder link only**, once per link per day, so the Road can never mint more than **${dailyPurse} gold/day** while one 6-hour farming session mints thousands by selling junk — Road gold is a rounding error, which is what "C+D are a content choice, not an income choice" has to mean. A chest pays one Item at the destination zone's ceiling, is capped once per link per day, and pays **no crafting stones**. Standing is granted in kill-equivalents (**${RD.standing_per_trip_kills}** per completed leg), under a fifth of what the same minutes would earn hunting (**X36**). Losing a one-off trip forfeits roughly ${RD.forfeit_kills} kills of progress and the purse; a Push mid-walk skips the rest of the leg. The walk changes the ruler and nothing else: \`walk.block_sec\` x \`walk.encounter_gap_blocks\` x \`encounters_per_min\` is a minute, so a leg is as long and as eventful as it always was, and **${R.blocks.length}** blocks are all that the world added.`,
   ].join('\n');
 };
 
@@ -1916,22 +1986,24 @@ BLOCKS['k-table'] = () => {
 };
 
 BLOCKS['craft-set'] = () => {
+  // Per 1,000 kills, never per hour: a cast is paid by loot the build earns (D12).
+  const p1k = (v: any) => r1((v / BAND.high.kills_derived) * 1000);
   const rows = [
-    `| Reroll value | ${C.reroll_value_stones_per_use} Reroll value stones | ~${STONE.reroll_uses_per_hr} | Cheap, can spam · Keeps values inside the same Tier |`,
-    `| Refine | ${C.refine_stones_per_use} Reroll tier stones | ~${STONE.refines_per_hr} | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |`,
-    `| Ascend | ${C.ascend_add_stones} Add mod stones + ${C.ascend_tier_stones} Reroll tier stones | ~${STONE.ascend_per_hr} | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |`,
+    `| Reroll value | ${C.reroll_value_stones_per_use} Reroll value stones | ~${p1k(STONE.reroll_uses_per_hr)} | Cheap, can spam · Keeps values inside the same Tier |`,
+    `| Refine | ${C.refine_stones_per_use} Reroll tier stones | ~${p1k(STONE.refines_per_hr)} | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |`,
+    `| Ascend | ${C.ascend_add_stones} Add mod stones + ${C.ascend_tier_stones} Reroll tier stones | ~${p1k(STONE.ascend_per_hr)} | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |`,
     '| Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to Rarity crafted max (net counting) |',
     '| Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set | Raises Gear Mod only |',
     '| Repair | 1 Repair stone | elite / boss only | Revives Broken + refills protection |',
   ];
   return [
-    '| Tier | Price | Actual casts/hour at high zone | Meaning |',
+    '| Tier | Price | Casts per 1,000 kills at high zone | Meaning |',
     '|---|---|---|---|',
     ...rows,
     '',
     '```',
     `Refine full set (${C.ascend_items_per_set} pieces × ${C.refine_steps} steps = ${STONE.refine_casts_full_set} casts, because Tier belongs to the piece) = ${STONE.refine_casts_full_set * C.refine_stones_per_use} Reroll tier stones`,
-    `Ascend full set (${C.ascend_items_per_set} pieces)                             ≈ ${STONE.ascend_hours_full_set} hours`,
+    `Ascend full set (${C.ascend_items_per_set} pieces)                             ≈ ${f0(Math.round(STONE.ascend_hours_full_set * BAND.high.kills_derived))} kills`,
     '```',
   ].join('\n');
 };
@@ -1971,14 +2043,17 @@ BLOCKS['loot-bands'] = () => {
   const lckCell = (b) => (b === 'high_full_lck'
     ? `${BAND[b].lck} → ×${BAND[b].lck_mult.toFixed(2)}`
     : `${BAND[b].lck} (L${L.bands[b].lck_level}) → ×${BAND[b].lck_mult.toFixed(2)}`);
+  // The bands are counts of kills, not stretches of the clock: a kill rate is a tool's own
+  // arithmetic (D12), so the published band table states the kill count and what 1,000 kills pay.
+  const per1k = (b) => Math.round((BAND[b].drops_per_hr / BAND[b].kills_derived) * 1000);
   const rows = BAND_KEYS.map((b) => {
     const grp = BAND[b].group_mobs;
     const cycle = (grp * L.ttk_per_mob_sec + L.group_spawn_sec).toFixed(1);
-    const drops = b === 'high_full_lck' ? `**${f0(BAND[b].drops_per_hr)}**` : f0(BAND[b].drops_per_hr);
+    const drops = b === 'high_full_lck' ? `**${f0(per1k(b))}**` : f0(per1k(b));
     return `| ${label[b]} | ${grp} mobs | ${cycle} sec | ${f0(BAND[b].kills_derived)} | ${lckCell(b)} | ${drops} |`;
   });
   return [
-    '| Zone | Average group | Cycle | kills/hour | Lck at that level | drops/hour |',
+    '| Zone | Average group | Cycle | kills per band | Lck at that level | drops per 1,000 kills |',
     '|---|---|---|---|---|---|',
     ...rows,
   ].join('\n');

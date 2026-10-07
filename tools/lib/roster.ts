@@ -70,12 +70,13 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
   const block = (DATA.meta.reservation && DATA.meta.reservation.max_pct) || 100;
   add('S9', true, `the full aura set reserves ${totalReserve}% of the pool against the ${block}% block — the set can never all run at once, so the player must choose (informational)`);
 
-  // Skill level: the XP rule must be reachable in hours, not in lifetimes.
+  // Skill level: the XP rule must be reachable inside about one zone — a count of kills, never a
+  // stretch of the clock (`AGENT.md` — no time limit, no play-length target).
   const SX = EN.E.skill_xp;
   const sp: string[] = [];
   let mult = 0;
   let killsToMax = 0;
-  let hrs: number[] = [];
+  let zoneRatio = 0;
   if (!SX || !(SX.xp_per_step > 0) || !(SX.level_cap > 1)) sp.push('skill_xp is missing or has no step cost');
   else {
     killsToMax = (SX.level_cap - 1) * SX.xp_per_step / SX.xp_per_kill;
@@ -85,14 +86,16 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     const SM0 = createSkillModel(DATA, EN.E);
     mult = SM0.perPress({ id: '', basis: 'phys', final_pct: 100 }, { phys: 1, level: SX.level_cap }) ?? 0;
     if (!(mult > 1.1 && mult < 1.4)) sp.push(`a maxed skill multiplies its basis by ×${mult && mult.toFixed(3)}, outside the ×1.1-1.4 skill band (checks.md E12)`);
-    hrs = ['low', 'mid', 'high'].map((b) => killsToMax / EN.BAND[b].kills_per_hr);
-    // The band is "catch up inside about one zone". the re-base made a zone ~2.9x longer
-    // (kill rates x1/3), so the band scales with it: 2-10 hr was one zone on the retired line.
-    if (Math.min(...hrs) < 5 || Math.max(...hrs) > 30) sp.push(`one skill maxes in ${hrs.map((h) => h.toFixed(1)).join(' / ')} hr by band — outside the 5-30 hr "catch up inside about one zone" band`);
+    // The band is "catch up inside about one zone", and a zone is its own kill budget — so a skill's
+    // whole ladder is measured against what a settlement's zone pays, never against an hour.
+    const budgets: number[] = Object.values(EN.SETTLEMENT_BUDGET_KILLS);
+    const avgBudget = budgets.reduce((a: number, b: number) => a + b, 0) / budgets.length;
+    zoneRatio = killsToMax / avgBudget;
+    if (zoneRatio < 0.5 || zoneRatio > 2) sp.push(`one skill maxes in ${killsToMax.toLocaleString('en-US')} kills = ×${zoneRatio.toFixed(2)} an average zone's budget — outside the 0.5-2× "catch up inside about one zone" band`);
     const nullReserve = byType('aura').filter((a) => a.reserve === null).length;
     if (nullReserve) sp.push(`${nullReserve} aura(s) still have no reserve tier`);
     add('S10', sp.length === 0, sp.length ? sp.join(' \u00b7 ')
-      : `skill level is earned per kill (${SX.xp_per_kill} XP) at ${SX.xp_per_step} XP a step to Cap ${SX.level_cap} = **${mult.toFixed(2)}** \u00b7 ${killsToMax.toLocaleString('en-US')} kills to max = ${hrs.map((h, i) => `${['low', 'mid', 'high'][i]} ${h.toFixed(1)} hr`).join(' \u00b7 ')} \u00b7 every aura carries a reserve tier`);
+      : `skill level is earned per kill (${SX.xp_per_kill} XP) at ${SX.xp_per_step} XP a step to Cap ${SX.level_cap} = **${mult.toFixed(2)}** \u00b7 ${killsToMax.toLocaleString('en-US')} kills to max = ×${zoneRatio.toFixed(2)} an average zone's budget \u00b7 every aura carries a reserve tier`);
   }
 
   // Skill effects as data: a row may carry an `effects` list, and every number in it must be the
