@@ -3,13 +3,13 @@ import type { Item, ModLine } from './types';
 
 /**
  * A dropped piece, rolled with the same primitives tools/loot.ts runs (loot.md §1):
- * slot → Base (frame, weight) → Rarity (how many of the 7 lines are filled) → Item quality
- * (value range) → Tier (sub-range) → value.
+ * slot → Base (frame, weight) → the item's level (the value window) → the third of the window the roll
+ * lands in → value.
  *
- * The skeleton is seven lines (item-base.md): line 1 is the Base Mod, lines 2-3 the Legacy
- * pair, lines 4-7 the Random lines a Rarity fills at drop. The Base tables come from
- * `tools/data/bases.json`, which `node tools/bases.ts --checks` gates against `item-base.md`, so the
- * game rolls from the same frame list the loot simulation scores.
+ * The skeleton is seven lines (item-base.md): line 1 is the Base Mod, lines 2-3 the Legacy pair, lines
+ * 4-5 the Random lines every drop fills (`item_level.line_count`) and lines 6-7 the two the Add craft
+ * owns. The Base tables come from `tools/data/bases.json`, which `node tools/bases.ts --checks` gates
+ * against `item-base.md`, so the game rolls from the same frame list the loot simulation scores.
  */
 
 /**
@@ -54,23 +54,21 @@ function rollBase(rng: () => number, slot: string): { frame?: any; weapon?: any 
   return { frame: pickWeighted(rng, basesFor(slot).map((b: any) => ({ value: b, weight: 1 }))).value };
 }
 
-export function rollDrop(rng: () => number, band: string, _weaponAspd?: number, forceQuality?: number): Item {
+export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponAspd?: number): Item {
   const slot = loot.pick(rng, loot.SLOTS);
   const chosen = rollBase(rng, slot);
   const frame = chosen.frame || null;
   const weapon = chosen.weapon || null;
-  const rarity = loot.pickBand(rng, loot.RARITY.map((r: any) => [r.name, r.chance]));
-  const rarityRow = loot.RARITY.find((r: any) => r.name === rarity)!;
-  // offline results are AFK: same drops, but Item quality limited to the zone floor (save.md)
-  const q = forceQuality != null ? forceQuality
-    : loot.pickBand(rng, loot.QUALITY_MIX[band === 'high_full_lck' ? 'high' : band]);
+  // the band is what the drop source declares — the weight half and the label; the level is what the
+  // window's floor and ceiling are read at (`item-rarity.md`)
+  const q = eng.qualityIndexOf(band);
   const u = rng(); // one Tier draw per item, shared by line 1 and every Random line
 
   // line 1 is the Base Mod: it is rolled first, off the frame, before any Random line
-  const lines: ModLine[] = loot.baseModRoll(BASES, slot, frame, weapon, rng, q, u);
+  const lines: ModLine[] = loot.baseModRoll(BASES, slot, frame, weapon, rng, ilvl, q, u);
   const taken = new Set<string>(lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
   const pool = loot.poolFor(BASES, slot, frame, weapon).filter((e: any) => !taken.has(e.id));
-  const target = loot.linesAtDrop(rarityRow.name);
+  const target = loot.linesAtDrop();
 
   while (lines.length < target) {
     const blocked = loot.blockedBy(taken);
@@ -78,8 +76,8 @@ export function rollDrop(rng: () => number, band: string, _weaponAspd?: number, 
     if (!remaining.length) break; // an off hand simply publishes fewer lines (item-base.md)
     const id = loot.weightedPick(rng, remaining.map((e: any) => ({ id: e.id, w: e.role * loot.weightOf(e.id, q) })));
     taken.add(id);
-    const slice = loot.tierSlice(u, loot.sliceCount(id, q));
-    const [lo, hi] = loot.rangeOf(id, q, slice);
+    const slice = loot.tierSlice(u);
+    const [lo, hi] = loot.rangeOf(id, ilvl, q, slice);
     // a Stat Mod bakes the Core stat it feeds here, at drop, the way a PoE implicit carries its own
     // stat; every other id leaves `stat` undefined (`mods.json` `rolls`)
     const stat = loot.statOf(id, rng);
@@ -99,10 +97,10 @@ export function rollDrop(rng: () => number, band: string, _weaponAspd?: number, 
   return {
     slot,
     base: weapon ? String(weapon.name) : frame!.name,
+    ilvl,
     weaponAspd: slot === 'main hand' && weapon ? weapon.weapon_aspd : undefined,
-    rarity: rarityRow.name,
     quality: loot.BAND_LABEL[q],
-    tier: loot.TIER_NAME[loot.tierSlice(u, 3)],
+    tier: loot.TIER_NAME[loot.tierSlice(u)],
     lines,
     q,
     weight: eng.weightAtQuality(baseWeight, q, BASES.quality_weight_multiplier),

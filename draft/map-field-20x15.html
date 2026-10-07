@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>Map Field · 20 x 15 · 300 hex</title>
+<style>
+  :root{
+    --paper:#f2eee2; --ink:#282419; --muted:#7b7261; --rule:#d9d1bd;
+    --field:#c2c69c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:15px/1.55 "Inter","Segoe UI",system-ui,-apple-system,sans-serif}
+  .wrap{max-width:1240px;margin:0 auto;padding:34px 28px 64px}
+  header{border-bottom:1px solid var(--rule);padding-bottom:18px;margin-bottom:24px}
+  h1{font-size:27px;margin:0 0 6px;letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:13.5px;font-style:italic}
+  .sheet{border:1px solid var(--rule);background:#faf8f0;border-radius:3px;padding:6px}
+  .sheet svg{display:block;width:100%;height:auto}
+  h2{font-size:14px;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);
+     margin:32px 0 10px;font-weight:600}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);font-weight:600}
+  td.n{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+  code{background:#e9e3d4;padding:1px 5px;border-radius:2px;font-size:13px}
+  .views{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:14px 0 0;
+    font-size:13px;color:var(--muted)}
+  .views label{display:flex;gap:6px;align-items:center;cursor:pointer}
+  .views input[type=range]{width:170px;accent-color:#8d8474}
+  .views b,#read{color:var(--ink);font-variant-numeric:tabular-nums}
+  .views a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule)}
+  .views a:hover{color:var(--ink)}
+  #read{font-size:12.5px}
+  .legend{display:flex;flex-wrap:wrap;gap:7px 16px;align-items:center;margin:12px 0 0;
+    font-size:12.5px;color:var(--muted)}
+  .legend i{display:inline-block;width:13px;height:13px;border:1px solid #8d8474;border-radius:2px;
+    vertical-align:-2px;margin-right:5px}
+  .legend .ramp{display:inline-block;width:200px;height:13px;border:1px solid #8d8474;
+    border-radius:2px;vertical-align:-2px;margin:0 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Map Field · 20 × 15</h1>
+  <div class="sub">300 hex drawn at <span id="ratio">…</span> — 18 towns spread around the centre.
+  Only the hexes touching a town carry a mob zone; a hex with no zone takes the terrain of the
+  nearest town, blended toward the paper. Cell ids are a toggle, because they are reference marks.</div>
+</header>
+
+<div class="sheet">
+<svg id="m" role="img" aria-label="pointy-top hex field, 20 columns by 15 rows, with 18 towns"></svg>
+</div>
+
+<div class="views">
+  <span>layout</span>
+  <a href="?layout=organic-a" target="_blank">organic a</a>
+  <a href="?layout=organic-b" target="_blank">organic b</a>
+  <a href="?layout=organic-c" target="_blank">organic c</a>
+  <a href="?layout=organic-d" target="_blank">organic d</a>
+  <b id="which"></b>
+</div>
+<div class="views">
+  <label><input type="radio" name="view" value="terrain" checked> terrain</label>
+  <label><input type="radio" name="view" value="band"> level band</label>
+  <label><input type="radio" name="view" value="level"> level gate</label>
+  <label>player level <input type="range" id="lv" min="1" max="180" step="1" value="45"><b id="lvout">45</b></label>
+  <label><input type="checkbox" id="walk"> walk graph</label>
+  <label><input type="checkbox" id="ids"> cell ids</label>
+  <span id="read"></span>
+</div>
+<div class="legend" id="legend"></div>
+
+<h2>Field</h2>
+<table>
+  <tr><th>#</th><th>what</th><th>value</th></tr>
+  <tr><td class="n">1</td><td>columns × rows</td><td class="n">20 × 15</td></tr>
+  <tr><td class="n">2</td><td>hex drawn</td><td class="n" id="cells">…</td></tr>
+  <tr><td class="n">3</td><td>hex radius <code>R</code></td><td class="n">34 px</td></tr>
+  <tr><td class="n">4</td><td>gap between hexes</td><td class="n">5 px</td></tr>
+  <tr><td class="n">5</td><td>viewBox</td><td class="n" id="view">…</td></tr>
+  <tr><td class="n">6</td><td>viewBox ratio</td><td class="n" id="ratio2">…</td></tr>
+  <tr><td class="n">7</td><td>towns placed</td><td class="n">18</td></tr>
+  <tr><td class="n">8</td><td>sub-zones (named, town-adjacent)</td><td class="n" id="zones">…</td></tr>
+  <tr><td class="n">9</td><td>wild zones (ring 1, named after their town)</td><td class="n" id="wilds">…</td></tr>
+  <tr><td class="n">10</td><td>hex beyond ring 1 (no zone yet)</td><td class="n" id="bare">…</td></tr>
+</table>
+
+</div>
+
+<script>
+(function(){
+  const NS = "http://www.w3.org/2000/svg";
+  const R = 34, SQ3 = Math.sqrt(3);
+  // the field is laid out on R, but each hex is drawn smaller so neighbours leave GAP
+  // of bare paper between their edges: two pointy-top neighbours sit SQ3*R apart and
+  // each reaches SQ3*r/2 past its own centre, so r = R - GAP/SQ3
+  const GAP = 5, HEX_R = R - GAP / SQ3;
+  const PX = ([q,r]) => [SQ3*(q + r/2)*R, 1.5*r*R];
+  const key = (q,r) => q+','+r;
+  const hd = (a,b) => { const dq=a[0]-b[0], dr=a[1]-b[1];
+    return (Math.abs(dq)+Math.abs(dr)+Math.abs(dq+dr))/2; };
+  const el = (t,a) => { const e = document.createElementNS(NS,t);
+    for (const k in a) e.setAttribute(k,a[k]); return e; };
+  const svg = document.getElementById("m");
+
+  // ---- 1 · the bare lattice: 20 columns of 15 rows, recentred so one cell sits on (0,0) ----
+  const COLS = 20, ROWS = 15;
+  const raw = [];
+  for (let row = 0; row < ROWS; row++)
+    for (let col = 0; col < COLS; col++)
+      raw.push({ q: col - ((row - (row & 1)) >> 1), r: row, row, col });
+  let sx = 0, sy = 0;
+  for (const c of raw){ const [x,y] = PX([c.q,c.r]); sx += x; sy += y; }
+  sx /= raw.length; sy /= raw.length;
+  let centre = raw[0], bd = Infinity;
+  for (const c of raw){ const [x,y] = PX([c.q,c.r]);
+    const d = (x-sx)*(x-sx) + (y-sy)*(y-sy); if (d < bd){ bd = d; centre = c; } }
+  const q0 = centre.q, r0 = centre.r;
+  const CELLS = raw.map(c => [c.q-q0, c.r-r0]);
+  const inField = new Set(CELLS.map(c => key(c[0], c[1])));
+  // cell id: row letter + col number, so A1 A2 … O20 reads off the sheet
+  const CELLID = new Map();
+  raw.forEach(c => CELLID.set(key(c.q-q0, c.r-r0),
+    String.fromCharCode(65 + c.row) + (c.col + 1)));
+  // reading order of the cells, so anything numbered per town lists A1 first
+  const CELLORD = new Map();
+  raw.forEach(c => CELLORD.set(key(c.q-q0, c.r-r0), c.row * 100 + c.col));
+
+  // ---- 2 · towns, spread around the centre ----
+  // farthest-point sampling: each new town goes as far as possible from every
+  // town already placed, so the set spreads instead of clustering.
+  const DIRS = [[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]];
+  // Four candidate town layouts, same 18 towns each — coordinates only, pick one.
+  // Every layout spins its pods: the three sub-zone picks start at a different side per
+  // town, because one fan direction for all 18 towns is most of what makes a sheet read
+  // as a pattern instead of a map. The coordinates are searched by draft/propose-layout.mjs,
+  // which keeps the set spread and punishes towns that line up.
+  const LAYOUTS = {
+    "organic-a": { towns:[
+      { n:"Eastgate", q:0, r:0 },
+      { n:"Millbrook", q:-7, r:-1 },
+      { n:"Thornwake", q:8, r:-5 },
+      { n:"Ironrow", q:-6, r:1 },
+      { n:"Ashfall", q:5, r:6 },
+      { n:"Wolf Cross", q:0, r:-6 },
+      { n:"Highspire", q:4, r:-4 },
+      { n:"Wyrmback", q:-9, r:2 },
+      { n:"Saltmarrow", q:2, r:4 },
+      { n:"Frosthold", q:-3, r:2 },
+      { n:"Greyfen", q:-6, r:5 },
+      { n:"Nettlecrag", q:-2, r:-3 },
+      { n:"Vermolch", q:-2, r:5 },
+      { n:"Bonegate", q:-3, r:-5 },
+      { n:"Blackwater Reach", q:1, r:-3 },
+      { n:"Duskmoor", q:8, r:-1 },
+      { n:"The Pale Spire", q:4, r:0 },
+      { n:"Emberhold", q:10, r:-4 }
+    ] },
+    "organic-b": { towns:[
+      { n:"Eastgate", q:0, r:0 },
+      { n:"Millbrook", q:-5, r:-1 },
+      { n:"Thornwake", q:7, r:-1 },
+      { n:"Ironrow", q:-10, r:6 },
+      { n:"Ashfall", q:4, r:6 },
+      { n:"Wolf Cross", q:-2, r:-2 },
+      { n:"Highspire", q:4, r:-3 },
+      { n:"Wyrmback", q:-4, r:-4 },
+      { n:"Saltmarrow", q:3, r:0 },
+      { n:"Frosthold", q:-3, r:4 },
+      { n:"Greyfen", q:0, r:5 },
+      { n:"Nettlecrag", q:-3, r:1 },
+      { n:"Vermolch", q:3, r:4 },
+      { n:"Bonegate", q:-7, r:-2 },
+      { n:"Blackwater Reach", q:1, r:-6 },
+      { n:"Duskmoor", q:11, r:-5 },
+      { n:"The Pale Spire", q:4, r:-6 },
+      { n:"Emberhold", q:6, r:2 }
+    ] },
+    "organic-c": { towns:[
+      { n:"Eastgate", q:0, r:0 },
+      { n:"Millbrook", q:-6, r:-1 },
+      { n:"Thornwake", q:10, r:-6 },
+      { n:"Ironrow", q:-11, r:5 },
+      { n:"Ashfall", q:6, r:5 },
+      { n:"Wolf Cross", q:-3, r:-5 },
+      { n:"Highspire", q:6, r:-5 },
+      { n:"Wyrmback", q:-9, r:2 },
+      { n:"Saltmarrow", q:4, r:1 },
+      { n:"Frosthold", q:-3, r:3 },
+      { n:"Greyfen", q:0, r:3 },
+      { n:"Nettlecrag", q:-1, r:-2 },
+      { n:"Vermolch", q:1, r:6 },
+      { n:"Bonegate", q:-6, r:-4 },
+      { n:"Blackwater Reach", q:2, r:-6 },
+      { n:"Duskmoor", q:11, r:-4 },
+      { n:"The Pale Spire", q:3, r:-2 },
+      { n:"Emberhold", q:8, r:-3 }
+    ] },
+    "organic-d": { towns:[
+      { n:"Eastgate", q:0, r:0 },
+      { n:"Millbrook", q:-7, r:-2 },
+      { n:"Thornwake", q:10, r:-6 },
+      { n:"Ironrow", q:-10, r:4 },
+      { n:"Ashfall", q:6, r:4 },
+      { n:"Wolf Cross", q:-2, r:-1 },
+      { n:"Highspire", q:1, r:-3 },
+      { n:"Wyrmback", q:-9, r:1 },
+      { n:"Saltmarrow", q:4, r:-2 },
+      { n:"Frosthold", q:-6, r:5 },
+      { n:"Greyfen", q:2, r:2 },
+      { n:"Nettlecrag", q:-7, r:2 },
+      { n:"Vermolch", q:-1, r:6 },
+      { n:"Bonegate", q:-1, r:-5 },
+      { n:"Blackwater Reach", q:4, r:-6 },
+      { n:"Duskmoor", q:7, r:-4 },
+      { n:"The Pale Spire", q:5, r:0 },
+      { n:"Emberhold", q:9, r:-3 }
+    ] }
+  };
+  const wanted = new URLSearchParams(location.search).get("layout");
+  const picked = LAYOUTS[wanted] || LAYOUTS["organic-d"];
+  const T = picked.towns.map(t => ({ ...t }));
+  document.getElementById("which").textContent =
+    "· now: " + (LAYOUTS[wanted] ? wanted : "organic-d (chosen)");
+
+  // ---- 3 · mob zones: only the hexes touching a town ----
+  // ring 1 around a town. each town claims 3 of its six neighbours as named
+  // sub-zones, outermost side first, so a zone sits on the town's far side; the
+  // other sides of the town are wild zones. nothing beyond ring 1 is placed yet.
+  const TOWNSET = new Set(T.map(t => key(t.q, t.r)));
+  const owner = new Map();          // cell -> { kind:'town'|'sub', i, j }
+  T.forEach((t, i) => owner.set(key(t.q, t.r), { kind:'town', i }));
+  T.forEach((t, i) => {
+    // outward sides first, then the three picks start at a different side per town, so
+    // the 18 pods do not all fan the same way
+    const order = DIRS
+      .map(d => ({ d, out: hd([t.q+d[0], t.r+d[1]], [0,0]) }))
+      .sort((a,b) => b.out - a.out).map(s => s.d);
+    const start = i % 6;
+    const cand = order.slice(start).concat(order.slice(0, start))
+      .filter(d => inField.has(key(t.q+d[0], t.r+d[1]))
+               && !TOWNSET.has(key(t.q+d[0], t.r+d[1]))
+               && !owner.has(key(t.q+d[0], t.r+d[1])));
+    t.subs_ = cand.slice(0,3).map(d => [t.q+d[0], t.r+d[1]]);
+    t.subs_.forEach((c, j) => owner.set(key(c[0],c[1]), { kind:'sub', i, j }));
+  });
+  // the remaining sides of every town become wild zones, so all six sides of a
+  // town are mob zones; a hex touching two towns goes to the first town listed
+  const wild = new Map();           // cell -> town index whose side it sits on
+  const wildShared = [];
+  T.forEach((t, i) => {
+    DIRS.forEach(d => {
+      const k = key(t.q+d[0], t.r+d[1]);
+      if (!inField.has(k) || TOWNSET.has(k) || owner.has(k)) return;
+      if (wild.has(k)) { wildShared.push(k); return; }
+      wild.set(k, i);
+    });
+  });
+  // a wild zone is named after the town it rings, numbered by cell order so the
+  // names hold still: Wolf Cross 1 … Wolf Cross 3 — the same names
+  // draft/map-zones.json lists, which is where gameplay will grow into them
+  const wildName = new Map();       // cell -> "Wolf Cross 2"
+  T.forEach((t, i) => {
+    CELLS.filter(c => wild.get(key(c[0], c[1])) === i)
+      .sort((a, b) => CELLORD.get(key(a[0], a[1])) - CELLORD.get(key(b[0], b[1])))
+      .forEach((c, n) => wildName.set(key(c[0], c[1]), t.n + " " + (n + 1)));
+  });
+  // verify: every sub-zone touches its own town, and nothing is double-claimed
+  const seen = new Set();
+  let short = [], clashes = [];
+  T.forEach((t, i) => {
+    if (t.subs_.length !== 3) short.push(t.n + ' (' + t.subs_.length + ')');
+    t.subs_.forEach(c => {
+      const k = key(c[0], c[1]);
+      if (hd(c, [t.q, t.r]) !== 1) clashes.push(t.n + ' → ' + CELLID.get(k) + ' not adjacent');
+      if (seen.has(k)) clashes.push(k + ' claimed twice');
+      seen.add(k);
+      if (TOWNSET.has(k)) clashes.push(k + ' is a town hex');
+    });
+  });
+  // verify: every wild zone sits on a side of its owning town
+  wild.forEach((i, k) => {
+    const [q, r] = k.split(',').map(Number);
+    if (hd([q, r], [T[i].q, T[i].r]) !== 1) clashes.push(k + ' not a side of ' + T[i].n);
+    if (owner.has(k)) clashes.push(k + ' already owned');
+  });
+  console.log('sub-zones placed:', seen.size, '/', T.length * 3);
+  console.log('wild zones placed:', wild.size, '(ring 1 only)');
+  if (wildShared.length) console.log('hexes on two towns, given to the first:',
+    wildShared.map(k => CELLID.get(k)).join(', '));
+  if (short.length)   console.log('towns short of 3 sub-zones:', short.join(', '));
+  if (clashes.length) console.log('clashes:', clashes.join(' · '));
+  console.log('hexes left bare:', CELLS.length - T.length - seen.size - wild.size);
+
+  // ---- 4 · draw, one polygon per cell ----
+  function hexPts(cx, cy, r){
+    const p = [];
+    for (let k = 0; k < 6; k++){
+      const a = Math.PI/180 * (60*k - 30);
+      p.push((cx + r*Math.cos(a)).toFixed(1) + "," + (cy + r*Math.sin(a)).toFixed(1));
+    }
+    return p.join(" ");
+  }
+  // terrain colours, pastel — a town and its sub-zones are coloured; a wild zone
+  // is the muted fill, a hex past ring 1 has no zone yet and stays uncoloured
+  const TERRAIN = {
+    water:"#cfe4ea", marsh:"#d6e3d4", grass:"#e2e8cd", forest:"#d2e0cd",
+    rock:"#e3ddd4",   snow:"#eef1f3", moor:"#e0e4cf",  waste:"#eae4d6",
+    ash:"#e7ddd8",    salt:"#eae6dc", village:"#efe6d2", camp:"#e8dfc8",
+    town:"#d8d2c4",   wild:"#e5dfd1"
+  };
+  const SUBTERRAIN = [
+    ["grass","village","camp" ], ["forest","forest","marsh"],
+    ["forest","marsh","marsh" ], ["grass","ash","marsh"    ],
+    ["ash","ash","ash"        ], ["moor","marsh","snow"    ],
+    ["rock","rock","rock"     ], ["water","ash","snow"     ],
+    ["salt","water","salt"    ], ["snow","snow","snow"     ],
+    ["waste","waste","waste"  ], ["forest","forest","rock" ],
+    ["marsh","ash","marsh"    ], ["rock","rock","rock"     ],
+    ["water","water","water"  ], ["moor","moor","waste"    ],
+    ["rock","rock","rock"     ], ["ash","ash","ash"        ]
+  ];
+  T.forEach((t, i) => { t.subterrain = SUBTERRAIN[i]; });
+  // sub-zone names, same town order and slot order as SUBTERRAIN — the page's own copy of the
+  // content, which the revamp rewrites (names may repeat across towns, nothing forbids it)
+  const SUBNAME = [
+    ["Open Grassland",  "Village Outskirts","Raider Camp"    ],
+    ["Fog Thicket",     "Dark Grove",       "Spider Hollow"  ],
+    ["Thornwood",       "Wallow Pools",     "Sallow Fen"     ],
+    ["Stormwrights",    "Ironwrights",      "Wet Commons"    ],
+    ["Cinder Slope",    "Ashen Ridge",      "Sootfield"      ],
+    ["Wolfmoor",        "Coldwater Rise",   "Frostfen"       ],
+    ["Mountain Slopes", "Cliff Holds",      "Dragon Peak"    ],
+    ["Wyrm Roost",      "Ember Shoal",      "Rimescale Nest" ],
+    ["Saltpans",        "Brine Shallows",   "Pale Flats"     ],
+    ["Glacier Shelf",   "Rime Hollow",      "Snowfield"      ],
+    ["Dune Sea",        "Sunken Tombs",     "Scorch Mesa"    ],
+    ["Thorn Stair",     "Bramble Deep",     "Chasm Ledge"    ],
+    ["Rotmire",         "Cinderfen",        "Worm Warrens"   ],
+    ["Ossuary Stair",   "Deep Warrens",     "Sunken Vault"   ],
+    ["Drowned Mouth",   "Black Silt",       "Sunken Wharf"   ],
+    ["Blightfield",     "Howling Waste",    "Rift Scar"      ],
+    ["Outer Colonnade", "Hall of Wardens",  "Sanctum Depths" ],
+    ["Slag Pit",        "Foundry Row",      "Caldera Rim"    ]
+  ];
+  T.forEach((t, i) => { t.subname = SUBNAME[i]; });
+  // The ladder follows the layout instead of a fixed list: bands run out from the start, so a
+  // town's band is its distance rank from Eastgate, ties broken by name. Bands are ten wide,
+  // 1-10 … 171-180, one step per rank, so the ramp reads as one band per ring of distance.
+  const BANDW = 10;
+  [...T.keys()]
+    .sort((a, b) => hd([T[a].q, T[a].r], [0, 0]) - hd([T[b].q, T[b].r], [0, 0])
+      || T[a].n.localeCompare(T[b].n))
+    .forEach((i, rank) => { T[i].rank = rank; });
+  T.forEach((t) => { t.levels = (t.rank * BANDW + 1) + "-" + (t.rank + 1) * BANDW; });
+  // the tone a town spreads over the hexes around it: the terrain most of its
+  // sub-zones stand on, ties going to the first
+  T.forEach((t) => {
+    const count = {};
+    for (const k of t.subterrain) count[k] = (count[k] || 0) + 1;
+    t.terrain = t.subterrain.reduce((best, k) => (count[k] > count[best] ? k : best), t.subterrain[0]);
+  });
+  // blend a colour toward the sheet, so a hex that carries no zone stays a backdrop
+  const SHEET = "#faf8f0";
+  const toward = (hex, t) => {
+    const a = parseInt(hex.slice(1), 16), b = parseInt(SHEET.slice(1), 16);
+    return "#" + [16, 8, 0].map(sh => {
+      const x = (a >> sh) & 255, y = (b >> sh) & 255;
+      return Math.round(x + (y - x) * t).toString(16).padStart(2, "0");
+    }).join("");
+  };
+
+  // a name inside a hex: wrap it to the hex width, at most 3 lines
+  function wrap(text, max){
+    const lines = [];
+    let line = "";
+    for (const w of text.split(" ")){
+      if (line && (line + " " + w).length > max){ lines.push(line); line = w; }
+      else line = line ? line + " " + w : w;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  const gHex = el("g", { id:"field" });
+  const shapes = [];                 // one per cell, so a view change can repaint it
+  // a hex with no zone takes the tone of the nearest settlement (tools/data/map.json, `hex`),
+  // and the further out it sits the thinner that tone is laid on: blended toward the paper on
+  // a ramp from the closest such hex to the furthest
+  const bareTone = new Map();        // cell -> { tone, d } nearest town's terrain, its distance
+  let bMin = Infinity, bMax = 0;
+  for (const c of CELLS){
+    const k = key(c[0], c[1]);
+    if (owner.has(k) || wild.has(k)) continue;
+    const near = T.reduce((best, t) => {
+      const d = hd([c[0], c[1]], [t.q, t.r]);
+      return d < best.d ? { d, t } : best;
+    }, { d: Infinity, t: T[0] });
+    bareTone.set(k, { tone: TERRAIN[near.t.terrain], d: near.d });
+    bMin = Math.min(bMin, near.d);
+    bMax = Math.max(bMax, near.d);
+  }
+  const toneFade = (d) =>
+    bMax === bMin ? 0.4 : 0.18 + 0.62 * (d - bMin) / (bMax - bMin);   // 0.18 near → 0.80 far
+  for (const c of CELLS){
+    const k = key(c[0], c[1]);
+    const o = owner.get(k);
+    const [x,y] = PX(c);
+    let fill = "none";
+    if (o){
+      if (o.kind === 'town') fill = TERRAIN.town;
+      else                   fill = TERRAIN[T[o.i].subterrain[o.j]];
+    } else if (wild.has(k)){
+      fill = TERRAIN.wild;                   // wild = a side of a town with no sub-zone yet
+    } else {
+      const b = bareTone.get(k);
+      fill = toward(b.tone, toneFade(b.d));
+    }
+    const poly = el("polygon", { points: hexPts(x, y, HEX_R), fill,
+      stroke:"#8d8474", "stroke-width":1, "stroke-linejoin":"round" });
+    gHex.appendChild(poly);
+    // level = the band rank of the town the zone belongs to, or null for a hex with no zone
+    shapes.push({ poly, fill, level: o ? T[o.i].rank : (wild.has(k) ? T[wild.get(k)].rank : null) });
+  }
+  svg.appendChild(gHex);
+
+  // ---- 3b · walk graph: the hops between towns, labelled in blocks (hex distance) ----
+  // the field's own graph, derived — shortest hops that connect all 18 towns, as a
+  // walker would use them; a block is one hex of walking (engine.json road.graph_rule)
+  const dist = (a, b) => hd([T[a].q, T[a].r], [T[b].q, T[b].r]);
+  const inTree = new Set([0]);
+  const WALK = [];
+  while (inTree.size < T.length){
+    let best = null;
+    for (const a of inTree)
+      for (let b = 0; b < T.length; b++){
+        if (inTree.has(b)) continue;
+        const d = dist(a, b);
+        if (!best || d < best.d) best = { a, b, d };
+      }
+    WALK.push(best);
+    inTree.add(best.b);
+  }
+  const WALKBLK = WALK.reduce((n, w) => n + w.d, 0);
+  const gWalk = el("g", { id:"walk" });
+  gWalk.style.display = "none";       // toggled by the walk-graph box, so keep it a style
+  for (const w of WALK){
+    const [ax, ay] = PX([T[w.a].q, T[w.a].r]), [bx, by] = PX([T[w.b].q, T[w.b].r]);
+    gWalk.appendChild(el("line", { x1:ax.toFixed(1), y1:ay.toFixed(1), x2:bx.toFixed(1), y2:by.toFixed(1),
+      stroke:"#a08b5f", "stroke-width":1.5 }));
+    const label = el("text", { x:((ax+bx)/2).toFixed(1), y:((ay+by)/2 - 4).toFixed(1),
+      "text-anchor":"middle", "dominant-baseline":"central", fill:"#8a7846",
+      "font-size":7, "font-weight":600, "font-family":"Inter, Segoe UI, sans-serif" });
+    label.textContent = w.d + " blk";
+    gWalk.appendChild(label);
+  }
+  svg.appendChild(gWalk);
+
+  // cell ids live in their own group: they are reference marks, so they start hidden
+  const gIds = el("g", { id:"ids" });
+  gIds.style.display = "none";
+
+  // ---- 4 · towns: house glyph from art/svg/building/house.svg, then name + id ----
+  // the glyph is inlined (32-unit stroked square scaled into the hex) so the page
+  // stays one file — no fetch, and it still reads the same opened over file://
+  const defs = el("defs", {});
+  const glyph = el("g", { id:"icon-town", fill:"none", stroke:"#4d2210", "stroke-width":2.1,
+    "stroke-linecap":"round", "stroke-linejoin":"round" });
+  ["M3 15 16 4l13 11M6 13v15h20V13M12 28v-9h8v9", "M9 15h3M20 15h3", "M16 4V2"]
+    .forEach(d => glyph.appendChild(el("path", { d })));
+  defs.appendChild(glyph);
+  svg.appendChild(defs);
+
+  const gTown = el("g", { id:"town" });
+  T.forEach((t) => {
+    const [x, y] = PX([t.q, t.r]);
+    // the town's own hex is already drawn and stroked with the rest of the field, so this
+    // group adds the icon and the two labels only — a second polygon would double the border
+    // icon above, then name and id stacked, so all three stay inside the hex;
+    // the icon sits lower than the hex's widest point now that the hex is smaller
+    gTown.appendChild(el("use", { href:"#icon-town",
+      transform: "translate(" + (x-6.8).toFixed(1) + "," + (y-18).toFixed(1) + ") scale(0.42)" }));
+    const label = el("text", { x: x.toFixed(1), y: (y+4).toFixed(1),
+      "text-anchor":"middle", "dominant-baseline":"central",
+      fill:"#4d2210", "font-size":9, "font-weight":600, "font-family":"Inter, Segoe UI, sans-serif" });
+    label.textContent = t.n;
+    gTown.appendChild(label);
+    const id = el("text", { x: x.toFixed(1), y: (y+14).toFixed(1),
+      "text-anchor":"middle", "dominant-baseline":"central",
+      fill:"#8d8474", "font-size":6.5, "font-family":"Inter, Segoe UI, sans-serif" });
+    id.textContent = CELLID.get(key(t.q, t.r));
+    gIds.appendChild(id);
+  });
+  svg.appendChild(gTown);
+
+  // ---- 5 · labels: zone names inside their hex; cell ids in the `ids` group ----
+  const gText = el("g", { id:"labels" });
+  const text = (x, y, size, fill, weight, s, g) => {
+    const t = el("text", { x: x.toFixed(1), y: y.toFixed(1),
+      "text-anchor":"middle", "dominant-baseline":"central",
+      fill, "font-size":size, "font-weight":weight,
+      "font-family":"Inter, Segoe UI, sans-serif" });
+    t.textContent = s;
+    (g || gText).appendChild(t);
+  };
+  for (const c of CELLS){
+    const k = key(c[0], c[1]);
+    if (TOWNSET.has(k)) continue;      // town hexes print their id with the name
+    const o = owner.get(k);
+    const [x, y] = PX(c);
+    if (o){                            // sub-zone: name, level band, cell id
+      const lines = wrap(T[o.i].subname[o.j], 12);
+      const lh = 8.4, top = y - ((lines.length - 1) * lh) / 2 - 9;
+      lines.forEach((ln, n) => text(x, top + n*lh, 7.5, "#453f31", 600, ln));
+      text(x, y + 13, 6.5, "#7a6a4e", 500, "Lv " + T[o.i].levels);
+      text(x, y + 22, 6.5, "#b0a794", 400, CELLID.get(k), gIds);
+    } else if (wild.has(k)){           // wild zone: name it too, same three lines
+      const lines = wrap(wildName.get(k), 12);
+      const lh = 8.4, top = y - ((lines.length - 1) * lh) / 2 - 9;
+      lines.forEach((ln, n) => text(x, top + n*lh, 7.5, "#5c564a", 600, ln));
+      text(x, y + 13, 6.5, "#7a6a4e", 500, "Lv " + T[wild.get(k)].levels);
+      text(x, y + 22, 6.5, "#b0a794", 400, CELLID.get(k), gIds);
+    } else {
+      text(x, y, 8, "#a39a89", 400, CELLID.get(k), gIds);
+    }
+  }
+  svg.appendChild(gText);
+  svg.appendChild(gIds);
+
+  // ---- 5b · the three views: terrain · level band ramp · level gate ----
+  // band rank -> colour runs pale green (1-10) to deep red (171-180), so the ramp shows at a
+  // glance that the ladder now climbs outward by construction
+  const BANDLO = Array.from({ length: T.length }, (_, r) => r * BANDW + 1);
+  const ramp = (t) => "hsl(" + Math.round(94 - 82*t) + " 44% " + Math.round(81 - 17*t) + "%)";
+  const LOCKED = "#f7f4ec";
+  let mode = "terrain", playerLevel = 45;
+  let liveZones = 0;
+
+  function paint(){
+    for (const s of shapes){
+      if (mode === "terrain"){ s.poly.setAttribute("fill", s.fill); continue; }
+      if (s.level === null){ s.poly.setAttribute("fill", "none"); continue; }  // no zone yet
+      const live = mode === "band" || playerLevel >= BANDLO[s.level];
+      s.poly.setAttribute("fill", live ? ramp(s.level / (T.length - 1)) : LOCKED);
+    }
+    liveZones = new Set(shapes.filter(s => s.level !== null && playerLevel >= BANDLO[s.level])
+      .map(s => s.level)).size;
+    read();
+  }
+
+  function read(){
+    const bit = mode === "terrain"
+      ? "terrain view"
+      : mode === "band"
+        ? "band view · " + T.length + " zones by distance rank, 1-10 → 171-180"
+        : "level " + playerLevel + " · " + liveZones + " of " + T.length + " zones live";
+    document.getElementById("read").textContent =
+      bit + " · walk " + WALK.length + " stretches / " + WALKBLK + " blocks";
+  }
+
+  // the legend: the terrain keys the sub-zones use, the two zone kinds, the ramp
+  const legend = document.getElementById("legend");
+  const swatch = (label, colour, box) => {
+    const span = document.createElement("span");
+    const i = document.createElement("i");
+    if (box) i.className = box; else i.style.background = colour;
+    span.appendChild(i);
+    span.appendChild(document.createTextNode(label));
+    legend.appendChild(span);
+  };
+  for (const key of ["water","marsh","grass","forest","rock","snow","moor","waste","ash","salt","village","camp"])
+    swatch(key, TERRAIN[key]);
+  swatch("wild zone", TERRAIN.wild);
+  swatch("town", TERRAIN.town);
+  swatch("no zone · nearest town's terrain", toward("#c2c69c", 0.45));
+  const note = document.createElement("span");
+  note.textContent = "a hex with no zone carries its nearest town's terrain, laid on thinner the " +
+    "further out it sits (blocks " + bMin + "-" + bMax + ")";
+  legend.appendChild(note);
+  const rampBox = document.createElement("span");
+  rampBox.appendChild(document.createTextNode("1-10 "));
+  const bar = document.createElement("i");
+  bar.className = "ramp";
+  bar.style.background = "linear-gradient(90deg," +
+    Array.from({length:18}, (_, i) => ramp(i/17)).join(",") + ")";
+  rampBox.appendChild(bar);
+  rampBox.appendChild(document.createTextNode(" 171-180"));
+  legend.appendChild(rampBox);
+
+  document.querySelectorAll("input[name=view]").forEach(r =>
+    r.addEventListener("change", () => { mode = r.value; paint(); }));
+  const lv = document.getElementById("lv"), lvout = document.getElementById("lvout");
+  lv.addEventListener("input", () => {
+    playerLevel = +lv.value;
+    lvout.textContent = lv.value;
+    paint();
+  });
+  const walkBox = document.getElementById("walk");
+  walkBox.addEventListener("change", () => {
+    gWalk.style.display = walkBox.checked ? "" : "none";
+    read();
+  });
+  const idBox = document.getElementById("ids");
+  idBox.addEventListener("change", () => { gIds.style.display = idBox.checked ? "" : "none"; });
+  paint();
+
+  // ---- 6 · fit the view to the field, honouring the real hex extent ----
+  // a pointy-top hex overhangs its centroid by R vertically and sqrt(3)*R/2 horizontally,
+  // so a flat padding would crop the rim and skew the ratio
+  const xs = CELLS.map(c=>PX(c)[0]), ys = CELLS.map(c=>PX(c)[1]);
+  // padding stays at 1px so the viewBox ratio equals the generated field ratio
+  const padX = SQ3*R/2 + 1, padY = R + 1;
+  const vx = Math.min(...xs) - padX, vy = Math.min(...ys) - padY;
+  const vw = Math.max(...xs) + padX - vx, vh = Math.max(...ys) + padY - vy;
+  svg.setAttribute("viewBox",
+    vx.toFixed(1)+" "+vy.toFixed(1)+" "+vw.toFixed(1)+" "+vh.toFixed(1));
+
+  const ratio = (vw/vh).toFixed(4);
+  const view = Math.round(vw) + " × " + Math.round(vh) + " px";
+  document.getElementById("cells").textContent = CELLS.length;
+  document.getElementById("zones").textContent = seen.size;
+  document.getElementById("wilds").textContent = wild.size;
+  document.getElementById("bare").textContent = CELLS.length - T.length - seen.size - wild.size;
+  document.getElementById("view").textContent = view;
+  document.getElementById("ratio").textContent = ratio + " (" + Math.round(vw) + "×" + Math.round(vh) + ")";
+  document.getElementById("ratio2").textContent = ratio;
+  console.log("cells", CELLS.length, "· towns", T.length, "· sub-zones", seen.size,
+    "· wild zones", wild.size, "· viewBox", view, "· ratio", ratio);
+})();
+</script>
+</body>
+</html>

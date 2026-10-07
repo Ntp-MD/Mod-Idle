@@ -28,16 +28,18 @@ export interface ModLine {
   extra?: ModExtra[];
 }
 
-/** One worn or bagged piece. Rarity = Mod count, quality = value range, Tier = sub-range. */
+/** One worn or bagged piece. Its level answers the value window; the band label rides along for weights. */
 export interface Item {
   slot: string;
   base: string;
+  /** The level the piece dropped at. It is the one axis its values ride (`item-rarity.md`). */
+  ilvl: number;
   weaponAspd?: number;
-  rarity: string;
+  /** The band the drop source declared (`low` · `mid` · `high`) — the weight and label half. */
   quality: string;
   tier: string;
   lines: ModLine[];
-  /** The Item quality band index, which is what the filter's score reads. */
+  /** The band's index, which is what the filter's score and the weight tables read. */
   q?: number;
   /** Carried weight in the unit items show: the Base frame's weight at this quality. */
   weight?: number;
@@ -136,8 +138,6 @@ export interface Counters {
   drops: number;
   /** Gear pieces dissolved by the bag filter; every 500 owes one Reroll tier stone (F15). */
   salvaged?: number;
-  /** Circuit laps walked end to end without a Push. The completion log's own evidence, no mint. */
-  cleanLaps?: number;
   /** Every point of damage the character dealt, so a DPS figure is state-backed, not inferred. */
   damage?: number;
   /** The same damage split by what dealt it — the swing, a press, or a status ticking over time. */
@@ -170,7 +170,7 @@ export interface HealBuff {
 
 /** A task slot on the Guild board (`tasks.md`). */
 export interface TaskSlot {
-  kind: 'hunt' | 'elite' | 'boss';
+  kind: 'elite' | 'boss';
   zone: number;
   n: number;
   progress: number;
@@ -184,7 +184,6 @@ export interface TownState {
   visited: string[];
   owned: string[];
   waypoint: string;
-  linksBought: number;
   tasks: (TaskSlot | null)[];
   refillAt: number[];
   skipsToday: number;
@@ -192,37 +191,20 @@ export interface TownState {
 }
 
 /**
- * One leg on the Road, plus the route it belongs to, plus the block being walked right now.
+ * One walk on foot, counted in blocks.
  *
- * A one-off trip (the first walk to a settlement) is the degenerate case: `route` is one link. A
- * plotted route is the shortest chain of links to a chosen settlement and `loop` is false, so it
- * ends where it was aimed. A Circuit is the same shape with `loop` set, so it repeats until
- * stopped. A Push skips the current leg instead of ending either one, and a closed client plays out
- * a loop's remaining laps before parking — never a plotted route.
+ * `blocksTotal` is the hex distance between the two settlements and `secLeft` is the time left on
+ * the block being crossed. Every block crossed rolls one encounter chance. A Push is the ordinary
+ * Push: the character rests at the camp of the zone it was ambushed in and walks back in on the
+ * block it was ambushed on, so `blocksLeft` never moves for it.
  */
-export interface RoadTrip {
-  linkIndex: number;
-  settlementFrom: string;
-  settlementTo: string;
-  kind: string | null;
-  /** Seconds left on the block being walked — the whole block, never a leg's worth. */
+export interface Walk {
+  from: string;
+  to: string;
+  blocksTotal: number;
+  blocksLeft: number;
   secLeft: number;
-  /** Which block of the current link the character is on, and how many the link has. */
-  blockIndex: number;
-  blocks: number;
-  encountersLeft: number;
-  pursePaid: boolean;
-  chestPaid: boolean;
-  /** The ordered link indices being walked; one link for a one-off trip. */
-  route: number[];
-  /** True for a Circuit (it repeats until stopped), false for a plotted route (it ends). */
-  loop: boolean;
-  /** The settlement the route was aimed at, which a loop has no answer for. */
-  destination: string | null;
-  legIndex: number;
-  laps: number;
-  /** The Push counter when the CURRENT lap began — a clean lap is one that never moved it. */
-  pushesAtLapStart?: number;
+  blocksWalked: number;
 }
 
 export interface GameState {
@@ -232,10 +214,7 @@ export interface GameState {
   gear: (Item | null)[];
   bag: Item[];
   stash: Item[][];
-  road: RoadTrip | null;
-  purseDay: Record<string, number>;
-  /** The chest's own once-per-link-per-day ledger, the same shape as the purse (`engine.json` road). */
-  chestDay: Record<string, number>;
+  walk: Walk | null;
   skills: SkillState;
   healUp: HealBuff | null;
   /** Unsold junk, keyed by the variant item's own name (`mob.variant_drops`). */
@@ -248,7 +227,7 @@ export interface GameState {
   collector: { done: Record<string, boolean>; hints: Record<string, boolean> };
   grants: { filter_presets: number; stash_tabs: number; titles: string[]; banners: string[] };
   /** The Curio pedlar restocks three appearance slots a real day, priced inside its band. */
-  pedlar: { day: number; kills: number[]; bought: number };
+  pedlar: { day: number; minutes: number[]; bought: number };
   lastAutoZone?: number;
   /** Per-slot bag filter thresholds and the "not yet found" keep-list (`loot.md` §4 · `save.md`). */
   filter: FilterState;
@@ -264,20 +243,11 @@ export interface GameState {
   /** Forward Mode may not re-enter `forwardBlockedZone` until it has gained a level against this. */
   forwardBlockedLevel?: number;
   /**
-   * Auto-dissolve any drop whose Rarity is at or below this floor ('off' = never, spirit).
-   * A client rule that dissolves into Reroll stones — never gold, so the two mints are untouched.
+   * Auto-dissolve any drop below this item level (0 = never, the default: every drop waits for a
+   * decision). A client rule that dissolves into Reroll stones — never gold, so the two mints are
+   * untouched.
    */
-  autoDissolveRarity?: 'off' | 'Common' | 'Rare';
-  /**
-   * Per-zone Hunt Order: the collectible stream a zone leans on (`engine.json loot.hunt_order`).
-   * Absent zone = 'none'. It shifts drop weights, never the total, so no published number moves.
-   */
-  huntOrder?: Record<number, 'gear' | 'herb' | 'junk'>;
-  /**
-   * Per-zone hunting ground: the sub-zone NAME a spawn is rolled inside, so the player farms the race
-   * pair and the Element they chose. Absent = no preference, and a spawn rolls the zone's own cast.
-   */
-  zoneFocus?: Record<number, string>;
+  autoDissolveLevel?: number;
   /** The completion gate: the final zone's boss, one spawn, no Push (`concept.md`). */
   goal: GoalState;
   /** Curse lines currently written on a mob, keyed by that spawn's id (`skill-pool.md`). */

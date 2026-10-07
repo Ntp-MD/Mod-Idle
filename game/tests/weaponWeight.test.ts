@@ -22,7 +22,7 @@ const axeIn = (): (Item | null)[] => {
 function weaponPiece(name: string, slot = 'main hand'): Item {
   const w = (BASES.weapons as any[]).find((x) => x.name === name);
   return {
-    slot, base: name, rarity: 'Common', quality: 'low', tier: 'T3', q: 0,
+    slot, base: name, ilvl: 1, quality: 'low', tier: 'T3', q: 0,
     weaponAspd: w.weapon_aspd, weight: weaponWeightOf(name, slot), lines: [],
   } as unknown as Item;
 }

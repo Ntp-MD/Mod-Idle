@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { E, eng, loot } from '../src/engine/client';
 import { newGame, tick, setLevel } from '../src/sim/game';
 import { rollDrop } from '../src/sim/drop';
-import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS, RARITY_CHOICES } from '../src/sim/filter';
+import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS } from '../src/sim/filter';
 import { mark, reason, arm, SAVE_CFG } from '../src/sim/snapshot';
 import { mulberry32 } from '../src/engine/client-helpers';
 import {
@@ -11,7 +11,7 @@ import {
 import type { Item } from '../src/sim/types';
 
 const piece = (over: Partial<Item>): Item => ({
-  slot: 'helmet', base: 'coif', rarity: 'Common', quality: 'low', tier: 'T3', lines: [], q: 0, ...over,
+  slot: 'helmet', base: 'coif', ilvl: 1, quality: 'low', tier: 'T3', lines: [], q: 0, ...over,
 });
 
 describe('a drop carries its Element as a stored value', () => {
@@ -19,7 +19,7 @@ describe('a drop carries its Element as a stored value', () => {
     const rng = mulberry32(7);
     let elemental = 0;
     for (let i = 0; i < 400; i++) {
-      for (const l of rollDrop(rng, 'high').lines) {
+      for (const l of rollDrop(rng, 'high', 61).lines) {
         if (l.id.startsWith('elemental_')) {
           expect(E.elements.order).toContain(l.element);
           elemental++;
@@ -39,10 +39,8 @@ describe('the bag filter reads per-slot thresholds', () => {
       const r = ruleFor(f, slot);
       expect(r.enabled).toBe(false); //: no slot filters until the player turns it on
       expect(r.margin_pct).toBe(E.loot.filter.upgrade_margin_pct);
-      expect(r.min_rarity).toBe(E.loot.filter.rules.default_min_rarity);
       expect(r.keep_missing_element).toBe(true);
     }
-    expect(RARITY_CHOICES[0]).toBe('any');
   });
 
   it('a raised margin dissolves the piece the default keeps, and only on that slot', () => {
@@ -53,15 +51,6 @@ describe('the bag filter reads per-slot thresholds', () => {
     const margin = E.loot.filter.upgrade_margin_pct / 100;
     expect(loot.keepsDrop(better, wornScore, new Set(), margin, ruleFor(f, 'helmet')).keep).toBe(false);
     expect(loot.keepsDrop(better, wornScore, new Set(), margin, ruleFor(f, 'chest')).keep).toBe(true);
-  });
-
-  it('a Rarity floor drops a Common even when it is a straight upgrade', () => {
-    const f = newFilter();
-    setRule(f, 'ring', { min_rarity: 'Rare' });
-    const common = piece({ slot: 'ring', rarity: 'Common', lines: [{ id: 'max_hp_flat', value: 200, slice: 0 }] });
-    const verdict = loot.keepsDrop(common, 0, new Set(), 0.1, ruleFor(f, 'ring'));
-    expect(verdict.keep).toBe(false);
-    expect(verdict.reason).toBe('threshold');
   });
 
   it('keeps an Element the player cannot resist, and stops once one is worn', () => {
@@ -80,8 +69,11 @@ describe('the bag filter reads per-slot thresholds', () => {
     const missing = refresh(s);
     expect(missing.elements).not.toContain('cold');
     expect(missing.elements).toContain('fire');
+    // minute one is dressed in the junk set, so there is no hole to report; the list exists for a slot
+    // the player strips — which is what this makes
     expect(missing.slots).not.toContain('helmet');
-    expect(missing.slots).toContain('chest');
+    s.gear[loot.SLOTS.indexOf('chest')] = null;
+    expect(refresh(s).slots).toContain('chest');
     setRule(s.filter, 'helmet', { enabled: true });
     expect(describeRule(ruleFor(s.filter, 'helmet'))).toMatch(/\+10% to keep/);
   });
@@ -89,7 +81,7 @@ describe('the bag filter reads per-slot thresholds', () => {
   it('runs on the live state during a fight without throwing', () => {
     const s = newGame(12);
     setLevel(s, 70);
-    setRule(s.filter, 'helmet', { min_rarity: 'Rare', margin_pct: 40 });
+    setRule(s.filter, 'helmet', { margin_pct: 40 });
     // Tick until the state under test exists, never for a guessed window: a fixed window is a time
     // premise (AGENT.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.
     for (let i = 0; i < 40000 && s.counters.drops === 0; i++) tick(s, {});
@@ -174,7 +166,7 @@ describe('three walking snapshots', () => {
     expect(after.mastery.sword).toBe(400);
   });
 
-  it('takes a level-up snapshot while the sim runs, and keeps the save on version 4', async () => {
+  it('takes a level-up snapshot while the sim runs, and keeps the save on the current version', async () => {
     const s = newGame(25);
     s.player.xp = eng.xpToNext(1) * 3;
     let ticks = 0;
@@ -182,7 +174,7 @@ describe('three walking snapshots', () => {
     if (s.player.level > 1) expect(s.pendingSnapshot).toBe('level');
     await writeSave('slot2', s);
     expect(JSON.parse((globalThis as any).localStorage.getItem('modworld:slot2')!).version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(7);
+    expect(SCHEMA_VERSION).toBe(10);
     const round = importJson(exportJson(s));
     expect(round.filter).toBeTruthy();
     expect(round.pendingSnapshot).toBe(null);

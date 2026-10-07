@@ -16,7 +16,7 @@ const C = E.craft as any;
 const bench: any = craft;
 
 const piece = (over: any = {}) => ({
-  slot: 'helmet', base: 'coif', rarity: 'Common', quality: 'low', tier: 'T3', q: 0,
+  slot: 'helmet', base: 'coif', ilvl: 1, quality: 'low', tier: 'T3', q: 0,
   lines: [{ id: 'armour_flat', value: 20, slice: 2 }], ...over,
 });
 
@@ -47,8 +47,9 @@ describe('Quality, Repair and Corrupt stone are minted by hunting', () => {
     expect(s.counters.stones.quality || 0).toBeGreaterThan(0);
     expect(s.counters.stones.repair || 0).toBeGreaterThan(0);
     expect(s.counters.stones.corrupt || 0).toBeGreaterThan(0);
-    // the boss line is 24 whole stones a kill, so it dominates the pool at four bosses an hour
-    const fromBoss = L.boss_per_hour * L.quality_stone_sources.boss_quality_stones * 4;
+    // the boss line is 24 whole stones a kill, so it dominates the pool at four bosses an hour — measured
+    // over the run the test itself produced, never over a fixed window it might not have reached
+    const fromBoss = L.boss_per_hour * L.quality_stone_sources.boss_quality_stones * (s.clockSec / 3600);
     expect(s.counters.stones.quality).toBeGreaterThan(fromBoss * 0.4);
   }, 60000);
 

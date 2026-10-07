@@ -6,23 +6,22 @@ The shared language of the design. Every spec file uses these words with exactly
 
 # The 3 Layers of an Item
 
-One item answers 3 separate questions. They are separate on purpose: collapsing any two of them makes an item unreadable.
+One item answers two separate questions. They are separate on purpose: collapsing them makes an item unreadable.
 
 | Layer | Answers | Decided by | Not decided by |
 |---|---|---|---|
-| **Rarity** | how many Mods the item has | drop roll (Common / Rare) | anything about the values inside them |
-| **Item quality** | which value range every Mod on it rolls in | the drop source, with level as a ceiling | Rarity |
-| **Tier** | which sub-range inside that range | Item quality alone — one item has one Tier set, shared by all its Mods | the individual Mod |
+| **Item level** | which value range every Mod on it rolls in | the drop source's level | Mod count, which is fixed |
+| **Tier** | which third of that window the roll landed in | the roll alone — one item has one Tier set, shared by all its Mods | the individual Mod |
 
 ```
-Common · mid quality
+mid band · level 45
   ├── T3  Physical power flat  37-43
   ├── T2  Str flat             15-16
   └── T1  Evasion %            10-11
 ```
 
-- **Rarity never touches a rolled value.** A high-quality Common must beat a low-quality Rare, or Rarity would be the more important axis.
-- **Item quality is one value for the whole item.** Every Mod rolls from the same range set — a Mod cannot borrow another Mod's quality.
+- **The line count never touches a rolled value.** Every drop carries the same lines, so two pieces at one level differ only by where their rolls landed.
+- **The window is one window for the whole item.** Every line reads the same level and band — a Mod cannot borrow another Mod's level.
 - **Tier is a property of the item, not of a Mod.** Two Mods on one item are always inside the same sub-range set.
 
 # Attack and Defend Layers
@@ -70,9 +69,9 @@ Three consequences worth remembering, because most defensive confusion comes fro
 
 | Term | Meaning |
 |---|---|
-| **Rarity** | How many Mods an item carries: Common or Rare. A crafted item may reach the Rare maximum. **Not** a quality measure. |
-| **Item quality** | low / mid / high — the value range every Mod on the item rolls in, comparable to Path of Exile item level. **Not** how good the item feels; it is a range. |
-| **Tier** | The sub-range inside a quality. T1 is the best. **Not** an item level, **not** per-Mod. |
+| **Item level** | The level a piece dropped at — the one axis its values ride. **Not** a Mod count: every drop carries the same lines. |
+| **Band** | low / mid / high — the label the drop source's zone already carries. It still decides weight and the task and town bands; the values come from the item level. |
+| **Tier** | The third of the window a roll landed in. T1 is the best and the rarest. **Not** the item level, **not** per-Mod. |
 | **Mod** | One rolled stat line on an item, read as `name value (Tier)` — e.g. `Physical power flat 45 (T2)`. |
 | **Flat** | A value added straight into the stat before any % modifier runs. `Str flat 24` adds 24 to Str. |
 | **%** | A multiplier applied to the finished stat. `Str % 5` makes the whole Str total 5% larger. Flat lands first, then % multiplies it. |
@@ -83,7 +82,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Legacy mod** | Lines 2-3 of a dropped item, fixed at drop. The Remove mod stone can never target them, and a Random line (lines 4-7) is never legacy. |
 | **Gear Mod** | A piece's own inherent defence value — Armour, Evasion or Energy Shield, decided by its Base school. Raised only by a Quality Stone. **Never** a Mod: Reroll, Refine, Remove and Add cannot touch it, and it is always shown on its own top line, never inside the Mod list. |
 | **Base** | The frame of one slot (`Ring Mail` / `Plate Vest` / `Vestment`). Decides **weight** and **which Mods are Primary or Secondary**. Decides nothing else — not Mod count (that is Rarity), not rolled values (that is quality + Tier). |
-| **Quality floor / ceiling** | The lowest and highest Item quality one drop source is allowed to emit. A ceiling still rolls the whole range below it; best is never guaranteed. |
+| **Level floor** | The first level of a band — which is what an away window (offline) is limited to. The window above it is the band's own ceiling. |
 | **Weight** | Carried by the item from its Base, multiplied by quality. **Not a rolled value.** |
 | **Capacity** | How much weight a build can carry, set by Str. Going over does not lock slots — it cuts Attack speed, up to a limit (`formula.md` section 11). |
 
@@ -153,7 +152,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **stash** | Town storage, organisation only, bought with gold (`towns.md`). Never grants power and never auto-converts. |
 | **herb** | A plant drop, consumed rather than equipped or sold. Always kept by the filter — it never dissolves. Its rate feeds the herbalist's demand and the pouch ladder. |
 | **junk** | A flavoured drop from each **variant** (a Goblin pays an Ear at Sneak, Bile at Raider, a Cog at Tinker, a Charm at Shaman and a Crown at the King), always kept, stacks 999/slot and is **weightless**, and is sold to the Settlement Counterhand for gold — gold's primary mint (Ragnarok-style). Has three rarities (common · uncommon · rare): rarer junk is dearer and drops less often, so expected gold per kill is flat and rarity buys frequency, not income. Not gear, not a stone. |
-| **variant** | One rung of a species' named ladder (`mob.variants`): the three normal rungs plus Elite and Boss. A variant owns its own junk item and the collectible stream it **leans**, so the name is a drop identity. Each zone is three **sub-zones** — a race pair plus an Element — and the player's chosen sub-zone (`zoneFocus`) is the hunting ground a spawn rolls inside. |
+| **variant** | One rung of a species' named ladder (`mob.variants`): the three normal rungs plus Elite and Boss. A variant owns its own junk item and the collectible stream it **leans**, so the name is a drop identity. Each zone is three **sub-zones** — a race pair plus an Element — and a spawn rolls inside one of them, so the cast fought is the zone's own. |
 
 # Town and Economy
 
@@ -163,10 +162,11 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Adventure / Settlement** | The two states. **Adventure** = in a zone: combat, loot, the adventure bag fills; no crafting and no deposit. **Settlement** = in a settlement: deposit, stash, craft, restock; no combat. Neither is the same as AFK/active — a character can be AFK in either state. |
 | **Capital** | A settlement serving one quality band with the full service set. Three in total. |
 | **Zone** | The combat area attached to a settlement, always the `world.md` zone 1-9. A settlement never replaces a zone. |
-| **Road** | The link between two settlements. Travel only, and its content exists only in opt-in mode. |
-| **Waypoint** | A Road made instant after visiting its settlement once. |
+| **Block** | One hex of the world lattice. Walking is counted in blocks, and the blocks between two settlements are their hex distance. |
+| **Walk** | Crossing blocks to reach a settlement. Every block costs seconds and rolls one chance of an ambush. |
+| **Waypoint** | A settlement opened by arriving on foot: after that a warp there is free and instant. |
 | **Standing** | A per-settlement unlock counter earned from the flows that already exist. **Never spendable, never a currency, never grants a stat.** |
-| **Gold** | The quality-of-life medium, minted by **exactly two** things: selling a filter-rejected piece, and a bounded Road event. Buys space, time, information and appearance — never power. |
+| **Gold** | The quality-of-life medium, minted by **one** thing: selling a filter-rejected piece. Buys space, time, information and appearance — never power. |
 | **Collector set** | A named bundle of gear pieces a settlement wants handed in, one per Base school. The reward is a convenience — a banner, a stash tab, a title — never power, and some sets are paid for in gold. |
 | **Reservation** | An aura holding back a share of Max Mana. Nothing drains per second; the player opens the set, and total reservation may not reach the whole pool. |
 | **reserve tier** | The share of the pool one aura holds back (`skill-pool-aura-heal.md`). Only auras reserve — no other skill does. |
@@ -209,7 +209,7 @@ A **closed set**. An abbreviation is the *same term shortened*, never a second n
 | Do not write | Write instead |
 |---|---|
 | item Tier | Item quality |
-| quality | Rarity |
+| Rarity · quality | item level |
 | status resistance | elemental resistance |
 | status alignment | elemental alignment |
 | Attack speed (times/sec) | Attack speed (%) — aspd is a percentage and its Cap lives in `engine.json` |
@@ -222,10 +222,10 @@ A **closed set**. An abbreviation is the *same term shortened*, never a second n
 # Rules That Must Not Be Broken
 
 1. **Never say Tier means Item quality** — Tier is the sub-range, quality is the large range.
-2. **Never tie value ranges to Rarity** — a high-quality Common must be able to beat a low-quality Rare.
-3. **Never let Mods on one item pull from different range sets** — one item, one quality, one Tier set.
-4. **Never swap `quality` and `Rarity`.**
-5. **Tier is not required on every Mod** — when a range is too narrow to split readably, drop the Tier and keep the three quality levels.
+2. **Never tie a value range to the line count** — the count is fixed, so one level's pieces are decided by where their rolls landed.
+3. **Never let Mods on one item pull from different range sets** — one item, one level, one Tier set.
+4. **Never swap the item level and the band.**
+5. **Tier is not required on every Mod** — when a window is too narrow to split readably, drop the Tier and keep the window's own range.
 6. **One source pays one medium** — a piece yields a Reroll value stone *or* gold, never both, and no gold↔stone exchange exists anywhere.
 7. **Gold never buys power** — space, time, information and appearance only. Gear, Mods, potions and stones are not for sale at any NPC.
 8. **Never type a derived number into a second document** — it lives in `tools/data/`, a writer prints it, and `tools/anchors.ts` fails when a copy multiplies.

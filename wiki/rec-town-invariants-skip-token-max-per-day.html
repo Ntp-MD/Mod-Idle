@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -83,14 +83,12 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h4>Invariants (guards)</h4>
 <a href="rec-town-invariants-essentials-max-share-of-lifetime-supply.html">essentials_max_share_of_lifetime_supply</a>
 <a href="rec-town-invariants-onetime-demand-max-multiple-of-lifetime-supply.html">onetime_demand_max_multiple_of_lifetime_supply</a>
-<a href="rec-town-invariants-road-trip-max-real-minutes.html">road_trip_max_real_minutes</a>
 <a href="rec-town-invariants-skip-token-max-per-day.html" aria-current="page">skip_token_max_per_day</a>
+<a href="rec-town-invariants-skip-token-max-gold-per-day.html">skip_token_max_gold_per_day</a>
 <a href="rec-town-invariants-allowed-kinds.html">allowed_kinds</a>
 <a href="rec-town-invariants-banned-power-nouns.html">banned_power_nouns</a>
 <a href="rec-town-invariants-standing-min-tiers.html">standing_min_tiers</a>
 <a href="rec-town-invariants-chase-tier-min-share.html">chase_tier_min_share</a>
-<a href="rec-town-invariants-road-link-max-k.html">road_link_max_k</a>
-<a href="rec-town-invariants-skip-token-max-k-per-day.html">skip_token_max_k_per_day</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
 <a href="doc-DECISIONS.html">DECISIONS.md</a>
@@ -146,7 +144,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>skip_token_max_per_day</h1>
 <p class="hint">One row of <code>tools/data/town.json</code> → <code>invariants</code>. Prices · rosters · stock · Standing shares · Collector sets. The only place a town number is written by hand. tools/town.ts --write rebuilds towns-stalls.md and checks.md group T from it.</p>
-<dl class="kv"><dt>path</dt><dd><code>invariants.skip_token_max_per_day</code></dd><dt>collection</dt><dd><a href="data-town-invariants.html">Invariants (guards)</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>10</dd></dl>
+<dl class="kv"><dt>path</dt><dd><code>invariants.skip_token_max_per_day</code></dd><dt>collection</dt><dd><a href="data-town-invariants.html">Invariants (guards)</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>8</dd></dl>
 <div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>Skip token max per day</td><td><code>3</code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="invariants"><input type="hidden" name="id" value="skip_token_max_per_day">

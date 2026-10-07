@@ -1,10 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { E, eng, loot, sm } from '../src/engine/client';
+import { E, eng, loot, sm, TOWN } from '../src/engine/client';
 import { newGame, tick } from '../src/sim/game';
 import { equipFromBag } from '../src/sim/gear';
 import { setRule } from '../src/sim/filter';
-import { linkReachable, startTrip, road } from '../src/sim/road';
-import { settlementById } from '../src/sim/town';
+import { startWalk } from '../src/sim/road';
 import { ACTIVE_SLOTS } from '../src/sim/skills';
 import type { StatKey } from '../src/engine/client';
 import type { GameState, Item } from '../src/sim/types';
@@ -153,19 +152,17 @@ function dressUp(s: GameState, t?: Theme) {
 }
 
 /**
- * A player who has outgrown the zone walks to the next one, because the Road is the only thing that
- * opens a settlement (`world.md` reach queue). `travel: 'forward'` alone cannot do it: it
+ * A player who has outgrown the zone walks to the next one, because walking on foot is the only
+ * thing that opens a settlement (`world.md` reach queue). `travel: 'forward'` alone cannot do it: it
  * walks between settlements already opened, and the next one is by definition not open yet.
  */
 function walkOnward(s: GameState): boolean {
   const here = eng.zoneById(s.zone);
-  if (s.player.level <= here.levels[here.levels.length - 1] || s.road || s.phase === 'camp') return false;
-  for (let i = 0; i < road.links.length; i++) {
-    if (!linkReachable(s, i)) continue;
-    if (!startTrip(s, i).ok) continue;
-    const dest = settlementById(s.road!.settlementTo);
-    if (dest && dest.zone > s.zone) return true;
-    s.road = null; // that link runs back down the map; try the next one
+  if (s.player.level <= here.levels[here.levels.length - 1] || s.walk || s.phase === 'camp') return false;
+  for (const dest of TOWN.settlements) {
+    if (dest.zone <= s.zone) continue;
+    if (!startWalk(s, s.town.waypoint, dest.id).ok) continue;
+    return true;                                    // every pair of settlements is walkable
   }
   return false;
 }

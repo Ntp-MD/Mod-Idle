@@ -31,7 +31,7 @@ Each tier upgrades one step at a time, and each step uses different crafting cur
 1. **Element cannot be locked** — Reroll and Refine can change values but cannot change Element.
    Reason: if crafting could change Element, players would reach near-Cap res in every Element and Element choice would disappear from the whole system.
    Element is therefore the **only thing left to luck** on items.
-2. **Mod count grows only via Add mod stone, up to the Rarity crafted max** — Common to 3, Rare to 7 (net counting, `mods_added 0-2` per item). No other craft touches count. Dropped Rare never exceeds 5.
+2. **Mod count grows only via Add mod stone, up to the crafted ceiling** — five lines at drop to the full seven (net counting, `mods_added 0-2` per item). No other craft touches count.
 3. **Mod identity changes only via the Remove + Add combo** — Remove mod stone deletes one random non-legacy mod (slots 1-2 are Legacy mod and can never be hit); Add mod stone then fills the freed slot from the Base pool. Direct rename in place is forbidden.
 4. **Cannot skip Item quality steps** — Ascend moves one step at a time only. Skipping would need a finer currency-level system.
 5. **Reroll tier stone is the only craft allowed to roll lower.** Reroll value stone never rolls below the old value; Refine never steps down.
@@ -65,9 +65,9 @@ Registry lives in item-list.md section 1; the table below is the usage view.
 
 | Stone | Effect | Source |
 |---|---|---|
-| Add mod stone | Fill one empty slot up to the Rarity crafted max (net counting) · 1st fill costs 1, 2nd fill on the same item costs 2 | Elite / boss only |
-| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (134.1/1,000 kills → ~17.0 uses/1,000 kills) |
-| Reroll tier stone | Reroll Tier + value of one slot with drop weights (T3 50 / T2 33 / T1 17), may roll lower · Mod name and Element unchanged · **1 per randomize, 8 per deterministic Refine (+1 tier)** | High-level monsters, elites, bosses (30.6/1,000 kills → ~3.8 Refines/1,000 kills) |
+| Add mod stone | Fill one empty slot up to the crafted ceiling (net counting) · 1st fill costs 1, 2nd fill on the same item costs 2 | Elite / boss only |
+| Reroll value stone | Reroll value inside the same Tier, never lower · **8 per use** | Every monster, large amounts (0.136 per kill → ~0.017 uses per kill) |
+| Reroll tier stone | Reroll Tier + value of one slot with drop weights (T3 50 / T2 33 / T1 17), may roll lower · Mod name and Element unchanged · **1 per randomize, 8 per deterministic Refine (+1 tier)** | High-level monsters, elites, bosses (0.031 per kill → ~0.0038 Refines per kill) |
 | Remove mod stone | Remove one random non-legacy mod (slots 3+, Legacy mod slots 1-2 immune) | Elite / boss |
 | Quality Stone | Attempt +1 (section below) · **tiered cost** (section below) | Steps 1-5 monsters · 6-10 elites · 11-15 bosses |
 | Repair stone | Revive one Broken piece at its pre-break level and refill protection to 5 | Elite / boss only |
@@ -96,7 +96,7 @@ cost          steps +1..+5   = 1/2/3/4/5 Quality Stones
 |---|---|
 | 25% | Corrupted only, nothing changes |
 | 20% | Reroll all values inside current Tiers |
-| 15% | +1 Mod (respects Rarity crafted max and the Core slot cap) |
+| 15% | +1 Mod (respects the crafted ceiling and the Core slot cap) |
 | 15% | Remove 1 random non-legacy Mod |
 | 10% | Reroll Element (the only Element change in the game) |
 | 10% | Gear Mod +2 |
@@ -134,7 +134,7 @@ energy shield = second pool ahead of HP · Gear Energy Shield flat + Max Energy 
 # Set Numbers (source: loot.md section 5)
 
 <!-- BEGIN GENERATED:craft-set -->
-| Tier | Price | Casts per 1,000 kills at high zone | Meaning |
+| Tier | Price | Actual casts per 1,000 kills at the high zone | Meaning |
 |---|---|---|---|
 | Reroll value | 8 Reroll value stones | ~17 | Cheap, can spam · Keeps values inside the same Tier |
 | Refine | 8 Reroll tier stones | ~3.8 | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |
@@ -155,7 +155,7 @@ Ascend full set (12 pieces)                             ≈ 11,957 kills
 - **Preventing Reroll from ruining items** → **Decided: Reroll cannot roll below the old value** (keep the slot maximum as baseline · Reroll climbs or stays equal).
   The old option was "confirm every click", which at ~17 casts per 1,000 kills is fiddly work to click all day in an idle game · Passive protection needs no clicks at all.
   Accepted cost: Reroll looks "one-way climbing" and thus less exciting — compensated by letting Refine/Ascend carry the real quality pulls.
-- **Cross-level stone crafting** → Not yet done, and not needed now, because Reroll tier stone flow at ~3.8 Refines per 1,000 kills already covers 60 casts for a full set.
+- **Cross-level stone crafting** → Not yet done, and not needed now, because Reroll tier stone flow at 3.8 casts per 1,000 kills already covers 60 casts for a full set.
 
 ## Polish vs Tier Jump (measured from real T1 ranges in mod-pool.md)
 
@@ -164,7 +164,7 @@ T1 ranges differ per line: `%` spans 1-2 points · crit damage 12 · **Max HP Fl
 ```
 1 Reroll on a mid-value line → moves ≈ half of the T1 range
 Average across all lines ≈ 4.9 points · Full 12-piece set × ~3 mods ≈ 100 casts to fully polish
-At ~17 casts per 1,000 kills = about 5,900 kills per set
+At 17 casts per 1,000 kills = about 5,900 kills per set
 ```
 
 - **Reroll is cheap and fast by design** because its real duty is "fix bad rolls", not climbing power · The expensive ones are Refine (24 casts/set) and Ascend (96 Add + 96 Reroll tier stones/set), which are the true *tier movers*. Neither row states how long a set takes: that is the player's own pace (`AGENT.md`).

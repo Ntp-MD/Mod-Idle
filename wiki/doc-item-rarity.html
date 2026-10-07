@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Item Rarity &amp; Quality · ModWorld wiki</title>
+<title>Item Level · ModWorld wiki</title>
 <style>
 :root{--bg:#0d1117;--panel:#12171f;--panel-2:#171d27;--line:#272e3a;--line-2:#1d2430;--fg:#e6edf3;--muted:#9aa5b1;--dim:#6e7885;--ok:#4ac26b;--bad:#f2636b;--warn:#d7a54a;--accent:#6cb8ff;--mono:"Fira Code",ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;--sans:"Fira Sans",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}html{scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -81,11 +81,12 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="edit.html">Editor</a>
 <a href="about.html">About</a>
 <h4>On this page</h4>
-<a href="#h-item-rarity-quality">Item Rarity &amp; Quality</a>
-<a href="#h-rarity-mod-count">Rarity — Mod Count</a>
-<a href="#h-item-quality-value-range">Item Quality — Value Range</a>
-<a href="#h-item-quality-vs-drop-level">Item Quality vs Drop Level</a>
-<a href="#h-comparison-example">Comparison Example</a>
+<a href="#h-item-level">Item Level</a>
+<a href="#h-the-window">The window</a>
+<a href="#h-the-roll-inside-the-window">The roll inside the window</a>
+<a href="#h-the-level-vs-the-drop-source">The level vs the drop source</a>
+<a href="#h-ascend-refine-add">Ascend, Refine, Add</a>
+<a href="#h-what-the-axis-buys">What the axis buys</a>
 <a href="#h-waiting-items">Waiting Items</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
@@ -141,39 +142,57 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 
 <article class="doc">
-<h1>Item Rarity &amp; Quality</h1>
-<dl class="kv"><dt>file</dt><dd><code>item-rarity.md</code> · 82 lines · 758 words · written 2026-10-06T11:41:40Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a></dd><dt>imported by</dt><dd><a href="doc-concept.html">concept.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-economy.html">economy.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-save.html">save.md</a> · <a href="doc-world.html">world.md</a></dd><dt>quoted by</dt><dd>—</dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../item-rarity.md">item-rarity.md</a></dd></dl>
+<h1>Item Level</h1>
+<dl class="kv"><dt>file</dt><dd><code>item-rarity.md</code> · 99 lines · 945 words · written 2026-10-07T10:43:18Z</dd><dt>category</dt><dd>Items &amp; mods</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-mod-pool.html">mod-pool.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-save.html">save.md</a></dd><dt>imported by</dt><dd><a href="doc-concept.html">concept.md</a> · <a href="doc-crafting.html">crafting.md</a> · <a href="doc-economy.html">economy.md</a> · <a href="doc-item-base.html">item-base.md</a> · <a href="doc-loot.html">loot.md</a> · <a href="doc-save.html">save.md</a> · <a href="doc-world.html">world.md</a></dd><dt>quoted by</dt><dd><a href="doc-item-base.html">item-base.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../item-rarity.md">item-rarity.md</a></dd></dl>
 
-<h2 id="h-item-rarity-quality">Item Rarity &amp; Quality</h2>
-<p>import glossary.md import mod-pool.md</p>
-<p>The item system splits into axes, per terms in glossary.md.</p>
-<ul><li><strong>Rarity</strong> answers &quot;how many Mods&quot;</li><li><strong>Item quality</strong> answers &quot;what value range each Mod rolls&quot;</li><li><strong>Tier</strong> is a sub-range inside Item quality, not a third axis.</li></ul>
-<blockquote><p>Rarity has no effect on rolled values at all. It affects only Mod count. A high-Item quality Common must be stronger than a low-Item quality Rare.</p></blockquote>
-<h2 id="h-rarity-mod-count">Rarity — Mod Count</h2>
-<table><thead><tr><th>Rarity</th><th>Dropped lines</th><th>Crafted max</th><th>Drop chance</th></tr></thead><tbody><tr><td>Common</td><td>5 (Base + 2 Legacy + 2 Random)</td><td>7 (Add mod stone ×2)</td><td>82%</td></tr><tr><td>Rare</td><td>7 (Base + 2 Legacy + 4 Random)</td><td>7</td><td>18%</td></tr></tbody></table>
-<ul><li>The seven-line skeleton is fixed (item-base.md): the first line is the Base Mod and the next two the Legacy pair, both unremovable, so Rarity fills only the Random lines. Crafted max is the full seven for both, so a Common's <code>mods_added_cap</code> is exactly the gap to a full item. Net counting: removing a Random line frees the slot again. Per-item <code>mods_added</code> range stored in save.md.</li><li>Random lines never roll Stat Mod Flat once the item already holds its one Stat Mod line; the stat it feeds is rolled at drop (equipment-slot-pools.md).</li></ul>
-<ul><li>Chance numbers are set in loot.md section 1 · Mod count does <strong>not</strong> change the strength of each Mod value (see next section).</li><li>Tiers inside Item quality roll with weights <strong>T3 50% · T2 33% · T1 17%</strong> — T1 touches 17% so dropped items feel &quot;almost good&quot; often but &quot;best&quot; is never free. Otherwise Refine would have nothing to do.</li></ul>
-<ul><li><strong>No third Rarity level.</strong> The old &quot;Unique&quot; idea (a craft-only special Base with a fixed Mod count) is <strong>cut</strong>: Rarity stays two levels, and item identity is carried by Base frame + Mods + quality + Tier instead.</li></ul>
-<h2 id="h-item-quality-value-range">Item Quality — Value Range</h2>
-<table><thead><tr><th>Item quality</th><th>Applies to which value range</th></tr></thead><tbody><tr><td>Low</td><td>Lowest range of every mod</td></tr><tr><td>Mid</td><td>Middle range of every mod</td></tr><tr><td>High</td><td>Highest range of every mod</td></tr></tbody></table>
-<ul><li>Item quality is a single value for the whole item. Every slot rolls from the same Item quality range set.</li><li>Per-mod range tables live in mod-pool.md.</li><li>Item quality comes from the <strong>level of the drop source</strong>, where level acts as a ceiling, not a fixed value.</li></ul>
-<h2 id="h-item-quality-vs-drop-level">Item Quality vs Drop Level</h2>
-<p>Each drop source defines a <strong>ceiling</strong> and a <strong>floor</strong>.</p>
-<table><thead><tr><th>Drop source level</th><th>Floor</th><th>Ceiling</th></tr></thead><tbody><tr><td>Low</td><td>Low</td><td>Low</td></tr><tr><td>Mid</td><td>Low</td><td>Mid</td></tr><tr><td>High</td><td>Mid</td><td>High</td></tr></tbody></table>
-<ul><li><strong>Ceiling</strong> — Items from this source can request at most this Item quality · Can roll T1, but can also roll T3. Best roll is never forced.</li><li><strong>Floor</strong> — Items from this source never fall below this · Prevents long play sessions still dropping repeated junk.</li><li>Compare to Path of Exile ilvl — high-level items can roll T1 but it is not guaranteed.</li></ul>
-<p>Actual level numbers do not exist yet. Waiting for the zone and monster system. For now use the 3 levels above.</p>
-<blockquote><p><strong>Closed</strong>: boss forces Item quality = <strong>zone ceiling</strong> (floor = ceiling) and is fightable only while online. Result as intended: gives players reason to hunt bosses · And normal monsters still matter because they flow <em>quantity</em> (Reroll value stones), not <em>quality level</em> — the measured keep-rate in <code><a href="doc-loot.html">loot.md</a></code> section 3 leaves 99.2% of high-zone drops as crafting currency rather than upgrades, so normal monsters serve as crafting sources, not boss competitors.</p></blockquote>
-<blockquote><p><strong>Closed</strong>: high Item quality can occur without tying to level — via <strong>Ascend</strong>, which raises Item quality above the drop-source ceiling (crafting.md fixed). Reason this must be allowed: if Ascend stayed capped by zone, the Item quality axis would become a renamed monster level, as feared · The shifted cost is the Core from bosses (active only) instead.</p></blockquote>
-<h2 id="h-comparison-example">Comparison Example</h2>
-<pre class="code">Rare · High quality · 4 Random lines     Common · Low quality · 2 Random lines
-  power Flat 78 (T1)              power Flat 15 (T3)
-  crit %     8  (T1)              Evasion %  4 (T2)
-  str Flat   24 (T1)              str Flat    5 (T3)
-  elem res % 30 (T1) Element Fire</pre>
-<p>Both carry their frame's Base Mod and the Legacy pair underneath the Random lines shown, so a Rare prints seven lines and a Common five. From the old table tying Tier to Rarity, these pieces could swap places · Now they order directly by stronger level.</p>
+<h2 id="h-item-level">Item Level</h2>
+<p>import glossary.md import mod-pool.md import item-base.md import crafting.md import loot.md import save.md</p>
+<p>An item has <strong>one axis of strength: its level</strong> (<code>ilvl</code>), stamped at drop by the source that paid it. Rarity — the old &quot;how many Mods&quot; axis — is <strong>gone</strong>, and Item quality as a separate axis is gone with it: the two names described one story (the drop source's level), so the level answers it directly.</p>
+<ul><li><strong>The line count is fixed.</strong> Every drop arrives with the same lines: the Base Mod, the Legacy pair and</li></ul>
+<p>  the two Random lines the Add craft owns (<code>item_level.line_count</code>). A drop is never &quot;a lucky seven&quot;.</p>
+<ul><li><strong>The level answers the value range.</strong> Each Mod line has a <strong>window</strong> that climbs with the level, and</li></ul>
+<p>  the roll inside it decides what the line is worth.</p>
+<ul><li><strong>The band label rides along</strong> (<code>low</code> · <code>mid</code> · <code>high</code>), read off the zone the drop came from. It still</li></ul>
+<p>  drives the things that were always banded — item weight, the flat-group weight step, task and town bands   — so nothing measured against a band moves. Only the <em>values</em> became continuous.</p>
+<ul><li><strong>Tier</strong> (<code>T1</code> · <code>T2</code> · <code>T3</code>) is which third of the window the roll landed in, not a third axis.</li></ul>
+<h2 id="h-the-window">The window</h2>
+<p>For one Mod at one level, inside one band:</p>
+<table><thead><tr><th></th><th>Rule</th></tr></thead><tbody><tr><td>Ceiling</td><td>the band's own top — the last slice of that band's ladder in <code>mods.json</code></td></tr><tr><td>Floor</td><td>climbs from <strong>the band below</strong> (the first band's floor is its own)</td></tr><tr><td>Inside</td><td>a uniform roll in one third of the window</td></tr></tbody></table>
+<ul><li>The band ladders in <code>mods.json</code> are the <strong>anchors</strong> of the window — the same tables the old value axis</li></ul>
+<p>  read, reinterpreted as a curve over the level. No table was re-written to make the axis continuous.</p>
+<ul><li>A level past its band's span <strong>clamps</strong> to the band's own window. That is what keeps the later loops</li></ul>
+<p>  honest: a low-band zone at a high level still drops a low-band piece, exactly as its zone label says.</p>
+<ul><li>The <strong>floor climbs with the level</strong> (owner ruling): a mid-band piece starts able to roll the low band's</li></ul>
+<p>  floor and ends above it. Long play still cannot be handed repeated junk, because the floor it can roll   never falls — but a high-level piece <em>can</em> still come out at the bottom of its own window.</p>
+<h2 id="h-the-roll-inside-the-window">The roll inside the window</h2>
+<table><thead><tr><th>Where the roll lands</th><th>Share</th><th>Name</th></tr></thead><tbody><tr><td>Top third</td><td>17%</td><td><strong>T1</strong></td></tr><tr><td>Middle third</td><td>33%</td><td><strong>T2</strong></td></tr><tr><td>Bottom third</td><td>50%</td><td><strong>T3</strong></td></tr></tbody></table>
+<ul><li><strong>Best is never free</strong>: the top third is the rarest outcome at every level, so a high-level drop is a</li></ul>
+<p>  chance and not a formality. This is the property the published weights always meant to carry   (<code><a href="doc-mod-pool.html">mod-pool.md</a></code> owns the skew bound).</p>
+<ul><li>The thirds are uniform for every Mod, so the skew is one rule rather than a per-Mod ladder — and</li></ul>
+<p>  <code>Refine</code> moves a line up exactly one third (<code><a href="doc-crafting.html">crafting.md</a></code>).</p>
+<h2 id="h-the-level-vs-the-drop-source">The level vs the drop source</h2>
+<table><thead><tr><th>Drop source</th><th>Level the piece is stamped with</th><th>Band</th></tr></thead><tbody><tr><td>a mob</td><td>the mob's own level</td><td>the zone's own label</td></tr><tr><td>an away window (offline)</td><td>the band's first level</td><td>the zone's own label</td></tr></tbody></table>
+<ul><li><strong>Offline is the floor of the band</strong>, which is the old &quot;quality limited to the zone floor&quot; rule said in</li></ul>
+<p>  the new terms (<code><a href="doc-save.html">save.md</a></code> · <code><a href="doc-loot.html">loot.md</a></code> section 7): the away window rolls nothing above the first level of   the band the character was fighting in.</p>
+<ul><li><strong>The band comes from the zone label, never from the level.</strong> <code>mob.zones</code> already declares it</li></ul>
+<p>  (<code>low</code> · <code>mid (floor = low)</code> · <code>high (floor = mid)</code>), and the later loops depend on it: the level rises   past the first loop while the band restarts, which a pure level rule would silently &quot;fix&quot; into a   stronger band.</p>
+<ul><li>The floor/ceiling annotations the zone labels still carry are <strong>vestigial</strong>: the window's floor is now</li></ul>
+<p>  the band ladder's own rule, so <code>mid (floor = low)</code> and <code>mid</code> produce the same window.</p>
+<h2 id="h-ascend-refine-add">Ascend, Refine, Add</h2>
+<ul><li><strong>Ascend</strong> raises the piece one band <strong>and</strong> its level one span, so the window moves up a band without</li></ul>
+<p>  re-rolling what the player already has. Cleared by the boss Core, exactly as before — an item's band can   exceed the zone it came from.</p>
+<ul><li><strong>Refine</strong> moves one line up one third of its window — the same step the old Tier ladder made.</li><li><strong>Add</strong> fills one of the two Random lines every drop leaves open, so its price and its cap</li></ul>
+<p>  (<code>mods_added_cap</code>) are unchanged by the axis: the gap it fills is now every piece's gap rather than one   Rarity's.</p>
+<h2 id="h-what-the-axis-buys">What the axis buys</h2>
+<ul><li><strong>A reason to keep hunting inside a band.</strong> Values climb with the level, the roll inside the window is</li></ul>
+<p>  skewed low, and the band follows the zone — so a drop can always be a real decision, which <code><a href="doc-loot.html">loot.md</a></code>   section 3 names as the thing a zone otherwise loses.</p>
+<ul><li><strong>One axis to price.</strong> Weight, task bands, town bands and the flat-group weight step read the band; the</li></ul>
+<p>  values read the level. There is no second axis to reconcile, and no &quot;high-quality Common vs low-quality   Rare&quot; paradox to explain.</p>
 <h2 id="h-waiting-items">Waiting Items</h2>
-<p>The A10 consequence is closed — every weapon type now carries its frames in <code><a href="doc-item-base.html">item-base.md</a></code>'s frames table, gated by <code>bases.ts</code> — and the crafting and third-Rarity waits were both resolved.</p>
-<ul><li><strong>Crafting and res</strong> — Decided that <strong>Element cannot be locked</strong>. See crafting.md.</li></ul>
+<ul><li><strong>The mod ladders stay as they are.</strong> They are the anchors the window interpolates between, and the</li></ul>
+<p>  per-band tables <code>mods.json</code> publishes are the numbers every other file already reads; collapsing them to   one min/max pair per Mod is not planned.</p>
+<ul><li><strong>Crafting and res</strong> — Decided that <strong>Element cannot be locked</strong>. See crafting.md.</li><li>The A10 consequence is closed: every weapon type carries its frames in <code><a href="doc-item-base.html">item-base.md</a></code>'s frames table,</li></ul>
+<p>  gated by <code>bases.ts</code>.</p>
 <nav class="pager"><a href="doc-item-base.html">← item-base.md</a><a href="index.html">Items &amp; mods</a><a href="doc-item-list.html">item-list.md →</a></nav>
 
 </article>

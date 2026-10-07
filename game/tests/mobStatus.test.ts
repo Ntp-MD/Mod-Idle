@@ -18,7 +18,7 @@ const K = E.K as any;
 const charWith = (element: string | null, alignment: number): Character => {
   const gear = emptyGear();
   gear[10] = {
-    slot: 'main hand', base: 'one-handed sword', rarity: 'Rare', quality: 'high', tier: 'T1',
+    slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'high', tier: 'T1',
     weaponAspd: 1.2, q: 2,
     lines: element ? [{ id: 'elemental_power_flat', value: 400, slice: 0, element }] : [],
   } as unknown as Item;
@@ -199,7 +199,7 @@ describe('the store forgets a mob that left, and the sim runs the whole path', (
     s.zone = 3; // a fire zone: our own fire Element is not countered there
     s.gear = emptyGear();
     s.gear[10] = {
-      slot: 'main hand', base: 'one-handed sword', rarity: 'Rare', quality: 'high', tier: 'T1',
+      slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'high', tier: 'T1',
       weaponAspd: 1.2, q: 2, lines: [{ id: 'elemental_power_flat', value: 900, slice: 0, element: 'fire' }],
     } as unknown as Item;
     let guard = 0;

@@ -15,13 +15,13 @@ import type { Item } from '../src/sim/types';
  * not be dressed for the balance measurement. These three are what the panel's Equip button
  * is allowed to do — and the third is what it is never allowed to do on its own.
  */
-const rolled = (seed: number, band = 'high'): Item => rollDrop(mulberry32(seed), band, 1.2) as Item;
+const rolled = (seed: number, band = 'high'): Item => rollDrop(mulberry32(seed), band, 61) as Item;
 
 describe('equipping from the bag', () => {
   it('wears a piece in its own slot and sends the displaced one back to the front of the bag', () => {
     const s = newGame(71);
     const held = equippedCount(s);
-    const item = rolled(3);
+    const item = { ...rolled(3), ilvl: 99 }; // a level no start-set piece has, so the bag search is exact
     const worn = s.gear.find((g) => g && g.slot === item.slot) || null;
     s.bag.unshift(item);
 
@@ -32,7 +32,7 @@ describe('equipping from the bag', () => {
     expect(equippedCount(s)).toBe(held + (worn ? 0 : 1));
     // the piece it replaced is a decision waiting again, not a piece that vanished
     if (worn) expect(s.bag[0]!.base).toBe(worn.base);
-    expect(s.bag.findIndex((b) => b.base === item.base)).toBe(-1);
+    expect(s.bag.some((b) => b && b.ilvl === 99)).toBe(false);
   });
 
   it('carries the Core stat its Stat Mod rolled at drop, and wearing never changes it', () => {
@@ -56,7 +56,7 @@ describe('equipping from the bag', () => {
   it('lifts every Core stat by its one value when the Stat Mod is the all-stats line', () => {
     const chest = BASES.bases.find((b: any) => b.slot === 'chest') as any;
     const item: Item = {
-      slot: 'chest', base: chest.name, rarity: 'Common', quality: 'mid', tier: 'T2', q: 1,
+      slot: 'chest', base: chest.name, ilvl: 1, quality: 'mid', tier: 'T2', q: 1,
       lines: [{ id: 'all_stat_flat', value: 12, slice: 1 }],
     } as Item;
     const bare = buildCharacter(50, emptyGear());
@@ -94,7 +94,7 @@ describe('equipping from the bag', () => {
     const heavy = BASES.bases.find((b: any) => b.school === 'armour_flat') as any;
     if (!light || !heavy) throw new Error('bases.json lost a Gear Mod school');
     const piece = (frame: any): Item => ({
-      slot: frame.slot, base: frame.name, rarity: 'Common', quality: 'high', tier: 'T1', q: 3,
+      slot: frame.slot, base: frame.name, ilvl: 1, quality: 'high', tier: 'T1', q: 3,
       level: 100, lines: [],
     } as Item);
 

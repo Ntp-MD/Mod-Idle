@@ -15,8 +15,8 @@ This file is the mechanism that makes that statement actually calculable.
 Evasion / res reduce incoming damage
   → less Push
     → less wasted time
-      → the kill count does not drop
-        → the drops those kills pay do not drop
+      → kph does not drop
+        → items do not drop
 ```
 
 # 1. Attack Clock
@@ -86,7 +86,7 @@ in this game: the front slot hits the first 3 attackers and everything behind wa
 | reach | 2 | front and second slot | spear · two-handed sword · two-handed axe |
 | standoff | 3 | any slot in the group | bow · crossbow · staff · wand · book |
 
-Stand-off lineages on the mob side: Mummy · Vampire · Demon · Dragon · Elf · Dryad — they hold no front slot, so while a front mob lives they can only be reached by a reach-2 or reach-3 attack, and their half of incoming damage is the res-able one. A reach-1 attack waits one engage cycle (1 sec) when only stand-off mobs remain; the measured cost is nothing in zones 1-6 and at most 10.9% of the cycle in zone 3 (**X33**).
+Stand-off lineages on the mob side: Mummy · Vampire · Demon · Dragon · Elf · Dryad — they hold no front slot, so while a front mob lives they can only be reached by a reach-2 or reach-3 attack, and their half of incoming damage is the res-able one. A reach-1 attack waits one engage cycle (1 sec) when only stand-off mobs remain; the measured cost is nothing in zones 1-6 and at most 7.7% of the cycle in zone 5 (**X33**).
 <!-- END GENERATED:reach-table -->
 
 # 3. Mob Stats Per Level
@@ -156,7 +156,7 @@ Uses all rules and numbers from elements.md, but the player is the target.
 
 Two questions the mob side left open (`formula-offense.md` kept the door open): do mobs get skills, and do the statuses we inflict mirror onto them. Both are ruled.
 
-**Mob skills are a re-timing of `mob_PS`, never extra power.** A mob skill moves the same priced damage around the fight — a burst then a gap — it does not raise the average damage per second. `mob_PS = typical_gear_DPS ÷ 27` and the `mob_HP` curve are untouched, so the kill count, the drop count and the published timeline do not move (H1 · checks.md E5). `tools/survival.ts` keeps modeling mob incoming as the steady average, which is exactly what a re-timing leaves behind; a future cage may model the burst shape, but no number changes until it does. No mob carries `global speed` / `Haste` and mobs get no new stat (AGENT.md §5 — no second resist, no mob Armour line beyond the Str one they already carry).
+**Mob skills are a re-timing of `mob_PS`, never extra power.** A mob skill moves the same priced damage around the fight — a burst then a gap — it does not raise the average damage per second. `mob_PS = typical_gear_DPS ÷ 27` and the `mob_HP` curve are untouched, so the drop line and the published timeline do not move (H1 · checks.md E5). `tools/survival.ts` keeps modeling mob incoming as the steady average, which is exactly what a re-timing leaves behind; a future cage may model the burst shape, but no number changes until it does. No mob carries `global speed` / `Haste` and mobs get no new stat (AGENT.md §5 — no second resist, no mob Armour line beyond the Str one they already carry).
 
 **Organization — skills follow the body, not the species** (extended):
 

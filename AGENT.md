@@ -63,7 +63,7 @@ Forbidden substitutions are listed in `glossary.md` — follow that table strict
   - `mods.json` — mod value ranges + quality bands
   - `town.json` — prices · rosters · stock · Standing
   - `skills.json` — roster · reserve tiers · formula · renames
-  - `tree.json` — the passive tree's spec (three branches, twenty-one nodes each, three ranks per node); `tools/tree.ts` derives the nodes, prints their tables and gates the shape. Its power is **not** folded into `mob_HP` yet (owner ruling: open)
+  - `tree.json` — the passive tree's spec (three branches, twenty-one nodes each, three ranks per node); `tools/tree.ts` derives the nodes, prints their tables and gates the shape. Its power is deliberately **not** folded into `mob_HP` (owner ruling: the published rates are the empty-tree baseline, permanently)
   - `bases.json` — Base frames per slot · weight · Primary / Secondary pools · Gear Mod school (`node tools/bases.ts --write` imports, `--checks` gates)
   - `aliases.json` — deprecated terms
 - **`node tools/verify.ts` is the single verify entry point** — the cage list, the shared readers and the order they run in are named in the Verify routing part of the How we work section, so a new cage is added there and not here. Shared readers, for reference: `tools/lib/engine.ts` (numbers) · `roster.ts` · `skillmodel.ts` · `generated.ts` · `registry.ts` · `state.ts`.

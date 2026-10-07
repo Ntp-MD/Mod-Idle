@@ -258,9 +258,9 @@ function numbersPage(state: any, mode: any): any {
   const body = `
 <section><h1>Derived numbers</h1>${hint('Computed by <code>tools/lib/engine.ts</code> from <code>tools/data/engine.json</code> while this page was being built. This is what the cages compare the prose against, so it is the fastest way to see what a data edit moves.')}</section>
 <section>${tbl(['what', 'expression', 'value', 'checks row', 'source'], state.numbers.map((n) => [esc(n.what), code(n.expr), code(n.value), `<a href="${R.checks}">${esc(n.row)}</a>`, `<a href="${R.coll('engine', n.src || 'stat')}">${esc(n.src || 'stat')}</a>`]))}</section>
-<section><h2>Band math</h2>${tbl(['band', 'mobs per group', 'kills per band', 'drops per 1,000 kills', 'junk per 1,000 kills', 'gold per kill'], eng.BAND_KEYS.map((k) => {
+<section><h2>Band math</h2>${tbl(['band', 'mobs per group', 'drops per kill', 'junk per kill (gold)', 'Lck at the band top', 'Lck multiplier'], eng.BAND_KEYS.map((k) => {
   const b = eng.BAND[k];
-  return [code(k), b.group_mobs, code(Math.round(b.kills_per_hr).toLocaleString('en-US')), code(Math.round(b.drops_per_hr / b.kills_per_hr * 1000).toLocaleString('en-US')), code(Math.round(b.junk_per_hr / b.kills_per_hr * 1000).toLocaleString('en-US')), code(eng.goldPerKill(k).toFixed(4))];
+  return [code(k), b.group_mobs, code((b.drop_chance_pct / 100).toFixed(4)), code((b.junk_per_hr / b.kills_derived).toFixed(4)), code(b.lck), code('×' + b.lck_mult.toFixed(2))];
 }))}<p>${Object.keys(eng.BAND).map((k) => `<a href="${R.record('engine', 'loot.bands', k)}">${esc(k)}</a>`).join(' · ')}</p></section>
 <section><h2>Weapon math</h2>${tbl(['weapon', 'weapon_aspd', 'weapon_mult', 'Agi to Aspd Cap', 'reachable'], eng.WEAPONS.map((w) => [`<a href="${R.record('engine', 'weapons', w.name)}">${esc(w.name)}</a>`, code(w.weapon_aspd), code(w.weapon_mult), code(w.agi_to_cap), w.reachable ? '<span class="ok">yes</span>' : '<span class="warn">no — by intent</span>']))}<p class="hint">weapon_mult is derived, never stored: DPS equality is the rule (<code>checks.md</code> X14 · D10).</p></section>
 <section><h2>engine.js exports</h2>${tbl(['export', 'value'], ['CEIL', 'SPLIT', 'FORCED_SPLIT', 'LCK_BOUND', 'BANDS', 'STONE', 'DERIVED'].map((k) => [code(k), code(JSON.stringify(eng[k]).slice(0, 700))]))}</section>`;
@@ -365,7 +365,7 @@ function editPage(state: any, mode: any): any {
 <li>Only <code>tools/data/engine.json</code>, <code>tools/data/town.json</code> and the design <code>*.md</code> files are writable; every other path is refused and the server binds to 127.0.0.1.</li>
 <li>A prose save that changes text between <code>BEGIN GENERATED</code> markers is refused — the markers belong to <code>tools/check.ts</code> and <code>tools/town.ts</code>.</li>
 <li>Values are typed before writing: numbers stay numbers, enums must be one of the allowed options, references (<code>npc</code>, <code>stock</code>, <code>settlement</code>, band names) must resolve to a real row.</li>
-<li>Price guards from <code>town.json → invariants</code> are checked in the browser-free validator: Road link ceiling, skip-token daily cap, stall lines that would sell gear/Mods/potions/stones.</li>
+<li>Price guards from <code>town.json → invariants</code> are checked in the browser-free validator: skip-token daily cap, a travel line sneaking back in, and stall lines that would sell gear/Mods/potions/stones.</li>
 <li>After the write, both cages must exit 0 or the whole change is rolled back from the snapshot in <code>tools/.wiki-backup/</code>.</li>
 </ul></section>
 <section><h2>What to edit</h2><div class="tw">${tbl(['data file', 'collection', 'rows', 'kind', ''], Object.entries(state.collections).flatMap(([k, cols]) => cols.map((c) => [code(state.data[k].file), `<a href="${R.coll(k, c.path)}">${esc(c.label)}</a>`, c.items.length, code(c.kind), c.kind === 'constmap' ? `<a href="${R.coll(k, c.path)}">set a value</a>` : `<a href="${R.coll(k, c.path)}#add">add row</a>`])))}</div></section>

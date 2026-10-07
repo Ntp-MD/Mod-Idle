@@ -110,7 +110,7 @@ describe('the attack rows that press differently', () => {
     expect(row('attack.elemental_break').duration).toBe('8 sec');
     const gear = emptyGear();
     gear[10] = {
-      slot: 'main hand', base: 'one-handed sword', rarity: 'Rare', quality: 'high', tier: 'T1',
+      slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'high', tier: 'T1',
       weaponAspd: 1.2, q: 2, lines: [{ id: 'elemental_power_flat', value: 4000, slice: 0, element: 'fire' }],
     } as any;
     const elem = { ...buildCharacter(90, gear), alignment: 100 } as Character;

@@ -27,12 +27,12 @@ const E = readJson<EngineData>(ENGINE_JSON);
 // "The one rule"). Only doc read-back and the town packaging live on this side.
 const { createEngine } = shared;
 const eng = createEngine(E);
-/** The Road model the cages read: link graph, terrain tilt, the purse cap and the Chest cap. */
+/** The walk model the cages read: the hex graph, the block time and the encounter chance. */
 const ROAD = createRoad(E);
 
 const {
   S, K, M, LG, L, C, TS, ES, CAP, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
-  DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerKill, agiForCap, statWithItems,
+  DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap, statWithItems,
   mobEvasion, sizeMult, playerAccuracy, hitVs, hitChance, MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION,
   armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt,
   typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, mobAcc, mobDodge,
@@ -43,7 +43,7 @@ const {
   esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS, treePointsAt,
   encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf, sizeMultOf, applySizeMult,
   stunRecoveryOf, stunStopSec, basicAttackOf,
-  xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForKills, taskPayout,
+  xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForMinutes, taskPayout,
 } = eng;
 
 /**
@@ -82,20 +82,17 @@ function engineForTown(townEngine: any): any {
     add_mod_stones_per_hr: STONE.add_stones_per_hr,
     ascend_stones_per_piece: C.ascend_add_stones + C.ascend_tier_stones,
     towns_gold_rate_multiplier_bound: LCK_BOUND,
-    gold_per_kill: { low: goldPerKill('low'), mid: goldPerKill('mid'), high: goldPerKill('high'), high_full_lck: goldPerKill('high_full_lck') },
+    gold_per_minute: { low: goldPerMinute('low'), mid: goldPerMinute('mid'), high: goldPerMinute('high'), high_full_lck: goldPerMinute('high_full_lck') },
+    // the walk's own shape, so T9 prints the block time and the encounter chance rather than a copy
+    road: { block_sec: E.road.block_sec, encounter_chance_pct: E.road.encounter_chance_pct },
   });
 }
 
 // ---- doc read-back: the numbers the prose files publish must equal the math
-const r4 = (x: number) => Math.round(x * 1e4) / 1e4;
-/** A per-hour engine rate, re-expressed per kill — the only denominator a doc may publish (D12). */
-const perKill = (perHr: number, band = 'high') => r4(perHr / BAND[band].kills_derived);
-/** The same rate per 1,000 kills, the table form: readable counts, still no clock in the denominator. */
-const per1k = (perHr: number, band = 'high') => r1((perHr / BAND[band].kills_derived) * 1000);
 const GENERIC_RULES: any[] = [
-  { file: 'loot.md', label: 'loot.md F5 junk line', re: /\|\s*Reroll value stone\s*\|\s*([\d.]+) per 1,000 kills/, pick: 1, expect: per1k(BAND.high.junk_per_hr) },
-  { file: 'crafting.md', label: 'crafting.md junk per 1,000 kills → Reroll uses', re: /\(([\d.]+)\/1,000 kills → ~([\d.]+) uses\/1,000 kills\)/, pick: [1, 2], expect: [per1k(BAND.high.junk_per_hr), per1k(STONE.reroll_uses_per_hr)] },
-  { file: 'crafting.md', label: 'crafting.md tier stones → Refines per 1,000 kills', re: /\(([\d.]+)\/1,000 kills → ~([\d.]+) Refines\/1,000 kills\)/, pick: [1, 2], expect: [per1k(STONE.tier_stones_per_hr), per1k(STONE.refines_per_hr)] },
+  { file: 'loot.md', label: 'loot.md F5 junk line', re: /\|\s*Reroll value stone\s*\|\s*([\d.]+)\s*\(/, pick: 1, expect: Number((BAND.high.junk_per_hr / BAND.high.kills_derived).toFixed(3)) },
+  { file: 'crafting.md', label: 'crafting.md junk per kill → Reroll uses', re: /\(([\d.]+) per kill → ~([\d.]+) uses per kill\)/, pick: [1, 2], expect: [Number((BAND.high.junk_per_hr / BAND.high.kills_derived).toFixed(3)), Number((STONE.reroll_uses_per_hr / BAND.high.kills_derived).toFixed(3))] },
+  { file: 'crafting.md', label: 'crafting.md tier stones → Refines per kill', re: /\(([\d.]+) per kill → ~([\d.]+) Refines per kill\)/, pick: [1, 2], expect: [Number((STONE.tier_stones_per_hr / BAND.high.kills_derived).toFixed(3)), Number((STONE.refines_per_hr / BAND.high.kills_derived).toFixed(4))] },
   { file: 'formula.md', label: 'formula.md single-stat ceiling', re: /single-stat ceiling \| \*\*([\d,]+)\*\*/, pick: 1, expect: Math.round(CEIL) },
   { file: 'formula.md', label: 'formula.md stat at the level cap, no gear', re: /Level \d+ \(no gear\)[^|]*\|[^|]*every stat = (\d+)/, pick: 1, expect: Math.round(statAt(S.level_cap)) },
   { file: 'formula.md', label: 'formula.md Str 13 physical power', re: /Str 13-item build \| Physical power ([\d,]+)/, pick: 1, expect: Math.round(DERIVED.phys) },
@@ -128,9 +125,9 @@ const GENERIC_RULES: any[] = [
   // Ungated prose read-backs: the economy / item docs quote engine rates in hand-written lines no
   // writer owns, so they drifted silently under the F1/F3 re-base and the K_INT_MREGEN retune. These
   // pin the few that matter back to the engine, so the same drift fails the cage instead of hiding.
-  { file: 'economy.md', label: 'economy.md junk per kill', re: /mob junk per kill \(high zone, no Lck\)\s+= ([\d.]+)/, pick: 1, expect: perKill(BAND.high.junk_per_hr) },
-  { file: 'economy.md', label: 'economy.md gold per kill', re: /max gold per kill\s+= ([\d.]+) gold of income/, pick: 1, expect: perKill(BAND.high.junk_per_hr) },
-  { file: 'item-list.md', label: 'item-list.md reroll use rate', re: /8 per use \(~([\d.]+) per 1,000 kills\)/, pick: 1, expect: per1k(rerollValueStonesPerHr('high')) },
+  { file: 'economy.md', label: 'economy.md junk per kill', re: /mob junk per kill \(high zone, no Lck\)\s+= ([\d.]+)/, pick: 1, expect: Number((BAND.high.junk_per_hr / BAND.high.kills_derived).toFixed(3)) },
+  { file: 'economy.md', label: 'economy.md gold per kill', re: /max gold per kill\s+= ([\d.]+)/, pick: 1, expect: Number((BAND.high.junk_per_hr / BAND.high.kills_derived).toFixed(3)) },
+  { file: 'item-list.md', label: 'item-list.md reroll use rate', re: /8 per use \(~([\d.]+) per kill\)/, pick: 1, expect: Number((rerollValueStonesPerHr('high') / BAND.high.kills_derived).toFixed(3)) },
   { file: 'formula-defense.md', label: 'formula-defense.md K_INT_MREGEN', re: /K_INT_MREGEN` = \*\*([\d.]+)\*\*/, pick: 1, expect: K.K_INT_MREGEN },
   { file: 'elements.md', label: 'elements.md K_ELEM', re: /\| K_ELEM \| (\d+) \|/, pick: 1, expect: K.K_ELEM },
   { file: 'elements.md', label: 'elements.md K_MOB_RES', re: /\| K_MOB_RES \| ([\d.]+) \|/, pick: 1, expect: K.K_MOB_RES },
@@ -151,8 +148,8 @@ function readLootTable(): any[] {
     if (!line) { out.push({ ok: false, label: `loot.md section 2 ${band} row`, detail: 'row not found' }); continue; }
     const cells = line.split('|').map((c) => c.trim());
     const checks: any[][] = [
-      ['kills per band', cellNum(cells[4]), BAND[band].kills_derived],
-      ['drops per 1,000 kills', cellNum(cells[6]), Math.round((BAND[band].drops_per_hr / BAND[band].kills_derived) * 1000)],
+      ['drops per kill', cellNum(cells[4]), Number((BAND[band].drops_per_hr / BAND[band].kills_derived).toFixed(4))],
+      ['junk per kill', cellNum(cells[6]), Number((BAND[band].junk_per_hr / BAND[band].kills_derived).toFixed(4))],
     ];
     const lckCell = cells[5].match(/(\d+)\s*\(?(?:L\d+)?\)?\s*→\s*×([\d.]+)/) || cells[5].match(/(\d+).*×([\d.]+)/);
     if (lckCell) {
@@ -185,7 +182,7 @@ function runReadBack(): any[] {
 
 export {
   ROOT, E, S, K, M, LG, L, C, TS, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
-  DERIVED, REF, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerKill, agiForCap,
+  DERIVED, REF, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap,
   statWithItems, mobEvasion, sizeMult, playerAccuracy, hitVs, MEAN_SPECIES_DEX, SPECIES_EVASION, MOB_EVASION_REF,
   armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt, typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, mobAcc, mobDodge, refAttackerAcc, mobRoster,
   mobResOf, speciesResMult, mobResByElementOf,
@@ -196,5 +193,5 @@ export {
   esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS, treePointsAt,
   encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf, sizeMultOf, applySizeMult,
   stunRecoveryOf, stunStopSec, basicAttackOf,
-  xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForKills, taskPayout, shared,
+  xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForMinutes, taskPayout, shared,
 };

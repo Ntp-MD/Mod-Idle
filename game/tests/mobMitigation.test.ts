@@ -65,7 +65,7 @@ describe('a mob answers the half of the hit its line is written against', () => 
   it('Elemental resistance cuts the Element half only', () => {
     const gear = emptyGear();
     gear[10] = {
-      slot: 'main hand', base: 'one-handed sword', rarity: 'Rare', quality: 'high', tier: 'T1',
+      slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'high', tier: 'T1',
       weaponAspd: 1.2, q: 2, lines: [{ id: 'elemental_power_flat', value: 4000, slice: 0, element: 'fire' }],
     } as unknown as Item;
     const c = { ...buildCharacter(90, gear), alignment: 100 } as ReturnType<typeof buildCharacter>;
@@ -116,7 +116,7 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
   const fireCaster = () => {
     const gear = emptyGear();
     gear[10] = {
-      slot: 'main hand', base: 'one-handed sword', rarity: 'Rare', quality: 'high', tier: 'T1',
+      slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'high', tier: 'T1',
       weaponAspd: 1.2, q: 2, lines: [{ id: 'elemental_power_flat', value: 4000, slice: 0, element: 'fire' }],
     } as unknown as Item;
     return { ...buildCharacter(90, gear), alignment: 100 } as ReturnType<typeof buildCharacter>;

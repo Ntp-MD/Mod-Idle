@@ -190,7 +190,7 @@
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
-      "note": "The passive tree exists (tools/data/tree.json: three branches, 63 nodes) and is DELIBERATELY outside this curve (owner ruling, permanent): the published rates are the empty-tree baseline, so mob_HP(L) = stat_c(L) x (1 + skill_per_level x L) x g(L) and mob_PS(L) = mob_HP(L) / mob_damage_divisor. The tree is a player-side bonus the curve never prices - not a second power system to fold, and its scale is stated by rule (tree.json meta), not measured. g(L) is the gear-progression factor; above the level-90 edge it is held flat (curve.extend). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt - checks.md X37).",
+      "note": "The passive tree exists (tools/data/tree.json: three branches, 63 nodes) and has no effect on this line (owner ruling): it is deliberately not folded in, and the published rates are the empty-tree baseline. So mob_HP(L) = stat_c(L) x (1 + skill_per_level x L) x g(L) and mob_PS(L) = mob_HP(L) / mob_damage_divisor. g(L) is the gear-progression factor; above the level-90 edge it is held flat (curve.extend). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt - checks.md X37).",
       "extend": {
         "from_level": 90,
         "gear_factor": 43.15708874022729,
@@ -274,8 +274,8 @@
       },
       {
         "id": 2,
-        "name": "Millbrook",
-        "region": "slow water",
+        "name": "Highspire",
+        "region": "high crags",
         "levels": [
           11,
           20
@@ -286,306 +286,10 @@
         ],
         "quality": "low",
         "elements": [
-          "poison"
-        ],
-        "group": "1-2",
-        "subzones": [
-          {
-            "name": "Fog Thicket",
-            "environment": "fog",
-            "element": "poison",
-            "races": [
-              "goblin",
-              "wolf"
-            ],
-            "normal": [
-              "Sneak Goblin",
-              "Raider Goblin",
-              "Tinker Goblin",
-              "Hunting Wolf",
-              "Dire Wolf",
-              "Shadow Wolf"
-            ],
-            "elite": "Shaman Goblin"
-          },
-          {
-            "name": "Dark Grove",
-            "environment": "dark forest",
-            "element": "poison",
-            "races": [
-              "spider",
-              "werewolf"
-            ],
-            "normal": [
-              "Cave Spider",
-              "Hunter Spider",
-              "Web Spider",
-              "Wolfman",
-              "Dire Werewolf",
-              "Blood Werewolf"
-            ],
-            "elite": "Alpha Werewolf"
-          },
-          {
-            "name": "Spider Hollow",
-            "environment": "hollow",
-            "element": "poison",
-            "races": [
-              "wolf",
-              "goblin"
-            ],
-            "normal": [
-              "Hunting Wolf",
-              "Dire Wolf",
-              "Shadow Wolf",
-              "Sneak Goblin",
-              "Raider Goblin",
-              "Tinker Goblin"
-            ],
-            "elite": "Shaman Goblin"
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "name": "Ashfall",
-        "region": "ash fields",
-        "levels": [
-          21,
-          30
-        ],
-        "hp": [
-          1436,
-          1824
-        ],
-        "quality": "low",
-        "elements": [
-          "fire"
-        ],
-        "group": "1-2",
-        "subzones": [
-          {
-            "name": "Glimmer Grove",
-            "environment": "grove",
-            "element": "fire",
-            "races": [
-              "treant",
-              "werewolf"
-            ],
-            "normal": [
-              "Young Treant",
-              "Thorn Treant",
-              "Rotting Treant",
-              "Wolfman",
-              "Dire Werewolf",
-              "Blood Werewolf"
-            ],
-            "elite": "Ancient Treant"
-          },
-          {
-            "name": "Elder Rootway",
-            "environment": "rootway",
-            "element": "fire",
-            "races": [
-              "elf",
-              "dryad"
-            ],
-            "normal": [
-              "Wood Elf",
-              "High Elf",
-              "Moon Elf",
-              "Forest Dryad",
-              "Flower Dryad",
-              "Thorn Dryad"
-            ],
-            "elite": "Dark Elf"
-          },
-          {
-            "name": "Moonlit Glade",
-            "environment": "glade",
-            "element": "fire",
-            "races": [
-              "werewolf",
-              "treant"
-            ],
-            "normal": [
-              "Wolfman",
-              "Dire Werewolf",
-              "Blood Werewolf",
-              "Young Treant",
-              "Thorn Treant",
-              "Rotting Treant"
-            ],
-            "elite": "Alpha Werewolf"
-          }
-        ]
-      },
-      {
-        "id": 4,
-        "name": "Ironrow",
-        "region": "storm terrace",
-        "levels": [
-          31,
-          40
-        ],
-        "hp": [
-          3546,
-          4033
-        ],
-        "quality": "mid (floor = low)",
-        "elements": [
-          "lightning"
-        ],
-        "group": "2-3",
-        "subzones": [
-          {
-            "name": "Storm Grove",
-            "environment": "grove",
-            "element": "lightning",
-            "races": [
-              "treant",
-              "werewolf"
-            ],
-            "normal": [
-              "Young Treant",
-              "Thorn Treant",
-              "Rotting Treant",
-              "Wolfman",
-              "Dire Werewolf",
-              "Blood Werewolf"
-            ],
-            "elite": "Ancient Treant"
-          },
-          {
-            "name": "Arc Rootway",
-            "environment": "rootway",
-            "element": "lightning",
-            "races": [
-              "elf",
-              "dryad"
-            ],
-            "normal": [
-              "Wood Elf",
-              "High Elf",
-              "Moon Elf",
-              "Forest Dryad",
-              "Flower Dryad",
-              "Thorn Dryad"
-            ],
-            "elite": "Dark Elf"
-          },
-          {
-            "name": "Thunder Glade",
-            "environment": "glade",
-            "element": "lightning",
-            "races": [
-              "werewolf",
-              "treant"
-            ],
-            "normal": [
-              "Wolfman",
-              "Dire Werewolf",
-              "Blood Werewolf",
-              "Young Treant",
-              "Thorn Treant",
-              "Rotting Treant"
-            ],
-            "elite": "Alpha Werewolf"
-          }
-        ]
-      },
-      {
-        "id": 5,
-        "name": "Wolf Cross",
-        "region": "wolf country",
-        "levels": [
-          41,
-          50
-        ],
-        "hp": [
-          4090,
-          4632
-        ],
-        "quality": "mid",
-        "elements": [
-          "cold"
-        ],
-        "group": "2-3",
-        "subzones": [
-          {
-            "name": "Murky Swamp",
-            "environment": "swamp",
-            "element": "cold",
-            "races": [
-              "troll",
-              "spider"
-            ],
-            "normal": [
-              "Cave Troll",
-              "Forest Troll",
-              "Swamp Troll",
-              "Cave Spider",
-              "Hunter Spider",
-              "Web Spider"
-            ],
-            "elite": "Stone Troll"
-          },
-          {
-            "name": "Mud Flats",
-            "environment": "mud",
-            "element": "cold",
-            "races": [
-              "slime",
-              "lizardman"
-            ],
-            "normal": [
-              "Splitter Slime",
-              "Acid Slime",
-              "Devourer Slime",
-              "Hunter Lizardman",
-              "Warrior Lizardman",
-              "Scale Knight"
-            ],
-            "elite": "Shaman Lizardman"
-          },
-          {
-            "name": "Poison Fen",
-            "environment": "poison fen",
-            "element": "cold",
-            "races": [
-              "spider",
-              "troll"
-            ],
-            "normal": [
-              "Cave Spider",
-              "Hunter Spider",
-              "Web Spider",
-              "Cave Troll",
-              "Forest Troll",
-              "Swamp Troll"
-            ],
-            "elite": "Stone Troll"
-          }
-        ]
-      },
-      {
-        "id": 6,
-        "name": "Highspire",
-        "region": "high crags",
-        "levels": [
-          51,
-          60
-        ],
-        "hp": [
-          4696,
-          5293
-        ],
-        "quality": "mid",
-        "elements": [
           "cold",
           "lightning"
         ],
-        "group": "2-3",
+        "group": "1-2",
         "subzones": [
           {
             "name": "Mountain Slopes",
@@ -644,9 +348,307 @@
         ]
       },
       {
+        "id": 3,
+        "name": "Wolf Cross",
+        "region": "wolf country",
+        "levels": [
+          21,
+          30
+        ],
+        "hp": [
+          1436,
+          1824
+        ],
+        "quality": "low",
+        "elements": [
+          "cold"
+        ],
+        "group": "1-2",
+        "subzones": [
+          {
+            "name": "Murky Swamp",
+            "environment": "swamp",
+            "element": "cold",
+            "races": [
+              "troll",
+              "spider"
+            ],
+            "normal": [
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll",
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider"
+            ],
+            "elite": "Stone Troll"
+          },
+          {
+            "name": "Mud Flats",
+            "environment": "mud",
+            "element": "cold",
+            "races": [
+              "slime",
+              "lizardman"
+            ],
+            "normal": [
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime",
+              "Hunter Lizardman",
+              "Warrior Lizardman",
+              "Scale Knight"
+            ],
+            "elite": "Shaman Lizardman"
+          },
+          {
+            "name": "Poison Fen",
+            "environment": "poison fen",
+            "element": "cold",
+            "races": [
+              "spider",
+              "troll"
+            ],
+            "normal": [
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider",
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll"
+            ],
+            "elite": "Stone Troll"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Greyfen",
+        "region": "wet lowland",
+        "levels": [
+          31,
+          40
+        ],
+        "hp": [
+          3546,
+          4033
+        ],
+        "quality": "mid (floor = low)",
+        "elements": [
+          "poison",
+          "chaos"
+        ],
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Dune Sea",
+            "environment": "dunes",
+            "element": "poison",
+            "races": [
+              "orc",
+              "demon"
+            ],
+            "normal": [
+              "Raider Orc",
+              "Shaman Orc",
+              "Berserker Orc",
+              "Imp",
+              "Demon Mage",
+              "Demon Brute"
+            ],
+            "elite": "Juggernaut Orc"
+          },
+          {
+            "name": "Sunken Tombs",
+            "environment": "tombs",
+            "element": "chaos",
+            "races": [
+              "mummy",
+              "lizardman"
+            ],
+            "normal": [
+              "Warrior Mummy",
+              "Priest Mummy",
+              "Cursed Mummy",
+              "Hunter Lizardman",
+              "Warrior Lizardman",
+              "Scale Knight"
+            ],
+            "elite": "Royal Mummy"
+          },
+          {
+            "name": "Scorch Mesa",
+            "environment": "mesa",
+            "element": "poison",
+            "races": [
+              "demon",
+              "orc"
+            ],
+            "normal": [
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Raider Orc",
+              "Shaman Orc",
+              "Berserker Orc"
+            ],
+            "elite": "Demon Knight"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "name": "Saltmarrow",
+        "region": "salt flats",
+        "levels": [
+          41,
+          50
+        ],
+        "hp": [
+          4090,
+          4632
+        ],
+        "quality": "mid",
+        "elements": [
+          "chaos"
+        ],
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Outer Court",
+            "environment": "court",
+            "element": "chaos",
+            "races": [
+              "skeleton",
+              "vampire"
+            ],
+            "normal": [
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton",
+              "Blood Vampire",
+              "Noble Vampire",
+              "Vampire Knight"
+            ],
+            "elite": "Mage Skeleton"
+          },
+          {
+            "name": "Burial Gallery",
+            "environment": "gallery",
+            "element": "chaos",
+            "races": [
+              "mummy",
+              "skeleton"
+            ],
+            "normal": [
+              "Warrior Mummy",
+              "Priest Mummy",
+              "Cursed Mummy",
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton"
+            ],
+            "elite": "Royal Mummy"
+          },
+          {
+            "name": "Inner Sanctum",
+            "environment": "sanctum",
+            "element": "chaos",
+            "races": [
+              "vampire",
+              "mummy"
+            ],
+            "normal": [
+              "Blood Vampire",
+              "Noble Vampire",
+              "Vampire Knight",
+              "Warrior Mummy",
+              "Priest Mummy",
+              "Cursed Mummy"
+            ],
+            "elite": "Vampire Lord"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "The Pale Spire",
+        "region": "the pale bloom",
+        "levels": [
+          51,
+          60
+        ],
+        "hp": [
+          4696,
+          5293
+        ],
+        "quality": "mid",
+        "elements": [
+          "chaos",
+          "poison"
+        ],
+        "group": "2-3",
+        "subzones": [
+          {
+            "name": "Outer Colonnade",
+            "environment": "ruins",
+            "element": "chaos",
+            "races": [
+              "golem",
+              "human"
+            ],
+            "normal": [
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem",
+              "Ranger",
+              "Warrior",
+              "Knight"
+            ],
+            "elite": "Crystal Golem"
+          },
+          {
+            "name": "Hall of Wardens",
+            "environment": "temple",
+            "element": "poison",
+            "races": [
+              "dragon",
+              "elf"
+            ],
+            "normal": [
+              "Wyrmling",
+              "Drake",
+              "Wyvern",
+              "Wood Elf",
+              "High Elf",
+              "Moon Elf"
+            ],
+            "elite": "Elder Dragon"
+          },
+          {
+            "name": "Sanctum Depths",
+            "environment": "depths",
+            "element": "chaos",
+            "races": [
+              "human",
+              "golem"
+            ],
+            "normal": [
+              "Ranger",
+              "Warrior",
+              "Knight",
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem"
+            ],
+            "elite": "Mage"
+          }
+        ]
+      },
+      {
         "id": 7,
-        "name": "Bonegate",
-        "region": "the bone gate",
+        "name": "Blackwater Reach",
+        "region": "drowned river mouth",
         "levels": [
           61,
           70
@@ -656,6 +658,80 @@
           8587
         ],
         "quality": "high (floor = mid)",
+        "elements": [
+          "poison"
+        ],
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Drowned Stair",
+            "environment": "stair",
+            "element": "poison",
+            "races": [
+              "demon",
+              "golem"
+            ],
+            "normal": [
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem"
+            ],
+            "elite": "Demon Knight"
+          },
+          {
+            "name": "Silt Deeps",
+            "environment": "deeps",
+            "element": "poison",
+            "races": [
+              "slime",
+              "demon"
+            ],
+            "normal": [
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime",
+              "Imp",
+              "Demon Mage",
+              "Demon Brute"
+            ],
+            "elite": "Demon Knight"
+          },
+          {
+            "name": "Flooded Abyss",
+            "environment": "abyss",
+            "element": "poison",
+            "races": [
+              "golem",
+              "slime"
+            ],
+            "normal": [
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem",
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime"
+            ],
+            "elite": "Crystal Golem"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "name": "Bonegate",
+        "region": "the bone gate",
+        "levels": [
+          71,
+          80
+        ],
+        "hp": [
+          8685,
+          9605
+        ],
+        "quality": "high",
         "elements": [
           "chaos"
         ],
@@ -718,16 +794,16 @@
         ]
       },
       {
-        "id": 8,
+        "id": 9,
         "name": "Frosthold",
         "region": "frost hold",
         "levels": [
-          71,
-          80
+          81,
+          90
         ],
         "hp": [
-          8685,
-          9605
+          9712,
+          10709
         ],
         "quality": "high",
         "elements": [
@@ -792,23 +868,23 @@
         ]
       },
       {
-        "id": 9,
+        "id": 10,
         "name": "Vermolch",
         "region": "the vermolch mire",
         "levels": [
-          81,
-          90
+          91,
+          100
         ],
         "hp": [
-          9712,
-          10709
+          10849.899263319094,
+          12144.404771499958
         ],
-        "quality": "high",
+        "quality": "low",
         "elements": [
           "poison",
           "chaos"
         ],
-        "group": "3-5",
+        "group": "1-2",
         "subzones": [
           {
             "name": "Snowfield",
@@ -867,83 +943,9 @@
         ]
       },
       {
-        "id": 10,
-        "name": "Thornwake",
-        "region": "wet lowland",
-        "levels": [
-          91,
-          100
-        ],
-        "hp": [
-          10849.899263319094,
-          12144.404771499958
-        ],
-        "quality": "low",
-        "elements": [
-          "poison"
-        ],
-        "group": "1-2",
-        "subzones": [
-          {
-            "name": "White Waste",
-            "environment": "snow",
-            "element": "poison",
-            "races": [
-              "troll",
-              "dragon"
-            ],
-            "normal": [
-              "Cave Troll",
-              "Forest Troll",
-              "Swamp Troll",
-              "Wyrmling",
-              "Drake",
-              "Wyvern"
-            ],
-            "elite": "Stone Troll"
-          },
-          {
-            "name": "Glacier Teeth",
-            "environment": "ice",
-            "element": "poison",
-            "races": [
-              "wolf",
-              "giant"
-            ],
-            "normal": [
-              "Hunting Wolf",
-              "Dire Wolf",
-              "Shadow Wolf",
-              "Hill Giant",
-              "Stone Giant",
-              "Frost Giant"
-            ],
-            "elite": "Fire Giant"
-          },
-          {
-            "name": "Rimewind Hollow",
-            "environment": "rime",
-            "element": "poison",
-            "races": [
-              "dragon",
-              "troll"
-            ],
-            "normal": [
-              "Wyrmling",
-              "Drake",
-              "Wyvern",
-              "Cave Troll",
-              "Forest Troll",
-              "Swamp Troll"
-            ],
-            "elite": "Elder Dragon"
-          }
-        ]
-      },
-      {
         "id": 11,
-        "name": "Greyfen",
-        "region": "wet lowland",
+        "name": "Duskmoor",
+        "region": "open moor",
         "levels": [
           101,
           110
@@ -954,62 +956,62 @@
         ],
         "quality": "low",
         "elements": [
-          "poison",
+          "cold",
           "chaos"
         ],
         "group": "1-2",
         "subzones": [
           {
-            "name": "Dune Sea",
-            "environment": "dunes",
-            "element": "poison",
+            "name": "Blight Field",
+            "environment": "blight",
+            "element": "cold",
             "races": [
-              "orc",
+              "skeleton",
               "demon"
             ],
             "normal": [
-              "Raider Orc",
-              "Shaman Orc",
-              "Berserker Orc",
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton",
               "Imp",
               "Demon Mage",
               "Demon Brute"
             ],
-            "elite": "Juggernaut Orc"
+            "elite": "Mage Skeleton"
           },
           {
-            "name": "Sunken Tombs",
-            "environment": "tombs",
+            "name": "Howling Waste",
+            "environment": "waste",
             "element": "chaos",
             "races": [
-              "mummy",
-              "lizardman"
+              "vampire",
+              "werewolf"
             ],
             "normal": [
-              "Warrior Mummy",
-              "Priest Mummy",
-              "Cursed Mummy",
-              "Hunter Lizardman",
-              "Warrior Lizardman",
-              "Scale Knight"
+              "Blood Vampire",
+              "Noble Vampire",
+              "Vampire Knight",
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf"
             ],
-            "elite": "Royal Mummy"
+            "elite": "Vampire Lord"
           },
           {
-            "name": "Scorch Mesa",
-            "environment": "mesa",
-            "element": "poison",
+            "name": "Rift Scar",
+            "environment": "rift",
+            "element": "cold",
             "races": [
               "demon",
-              "orc"
+              "skeleton"
             ],
             "normal": [
               "Imp",
               "Demon Mage",
               "Demon Brute",
-              "Raider Orc",
-              "Shaman Orc",
-              "Berserker Orc"
+              "Warrior Skeleton",
+              "Archer Skeleton",
+              "Knight Skeleton"
             ],
             "elite": "Demon Knight"
           }
@@ -1017,8 +1019,8 @@
       },
       {
         "id": 12,
-        "name": "Saltmarrow",
-        "region": "salt flats",
+        "name": "Nettlecrag",
+        "region": "thorn country",
         "levels": [
           111,
           120
@@ -1029,63 +1031,64 @@
         ],
         "quality": "low",
         "elements": [
-          "chaos"
+          "chaos",
+          "poison"
         ],
         "group": "1-2",
         "subzones": [
           {
-            "name": "Outer Court",
-            "environment": "court",
+            "name": "Bone Stair",
+            "environment": "stair",
             "element": "chaos",
             "races": [
-              "skeleton",
-              "vampire"
+              "demon",
+              "golem"
             ],
             "normal": [
-              "Warrior Skeleton",
-              "Archer Skeleton",
-              "Knight Skeleton",
-              "Blood Vampire",
-              "Noble Vampire",
-              "Vampire Knight"
+              "Imp",
+              "Demon Mage",
+              "Demon Brute",
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem"
             ],
-            "elite": "Mage Skeleton"
+            "elite": "Demon Knight"
           },
           {
-            "name": "Burial Gallery",
-            "environment": "gallery",
-            "element": "chaos",
+            "name": "Molten Deeps",
+            "environment": "deeps",
+            "element": "poison",
             "races": [
-              "mummy",
-              "skeleton"
+              "slime",
+              "demon"
             ],
             "normal": [
-              "Warrior Mummy",
-              "Priest Mummy",
-              "Cursed Mummy",
-              "Warrior Skeleton",
-              "Archer Skeleton",
-              "Knight Skeleton"
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime",
+              "Imp",
+              "Demon Mage",
+              "Demon Brute"
             ],
-            "elite": "Royal Mummy"
+            "elite": "Demon Knight"
           },
           {
-            "name": "Inner Sanctum",
-            "environment": "sanctum",
+            "name": "Throne Abyss",
+            "environment": "abyss",
             "element": "chaos",
             "races": [
-              "vampire",
-              "mummy"
+              "golem",
+              "slime"
             ],
             "normal": [
-              "Blood Vampire",
-              "Noble Vampire",
-              "Vampire Knight",
-              "Warrior Mummy",
-              "Priest Mummy",
-              "Cursed Mummy"
+              "Stone Golem",
+              "Iron Golem",
+              "Guardian Golem",
+              "Splitter Slime",
+              "Acid Slime",
+              "Devourer Slime"
             ],
-            "elite": "Vampire Lord"
+            "elite": "Crystal Golem"
           }
         ]
       },
@@ -1165,8 +1168,8 @@
       },
       {
         "id": 14,
-        "name": "Duskmoor",
-        "region": "open moor",
+        "name": "Millbrook",
+        "region": "slow water",
         "levels": [
           131,
           140
@@ -1177,71 +1180,70 @@
         ],
         "quality": "mid (floor = low)",
         "elements": [
-          "cold",
-          "chaos"
+          "poison"
         ],
         "group": "2-3",
         "subzones": [
           {
-            "name": "Blight Field",
-            "environment": "blight",
-            "element": "cold",
+            "name": "Fog Thicket",
+            "environment": "fog",
+            "element": "poison",
             "races": [
-              "skeleton",
-              "demon"
+              "goblin",
+              "wolf"
             ],
             "normal": [
-              "Warrior Skeleton",
-              "Archer Skeleton",
-              "Knight Skeleton",
-              "Imp",
-              "Demon Mage",
-              "Demon Brute"
+              "Sneak Goblin",
+              "Raider Goblin",
+              "Tinker Goblin",
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf"
             ],
-            "elite": "Mage Skeleton"
+            "elite": "Shaman Goblin"
           },
           {
-            "name": "Howling Waste",
-            "environment": "waste",
-            "element": "chaos",
+            "name": "Dark Grove",
+            "environment": "dark forest",
+            "element": "poison",
             "races": [
-              "vampire",
+              "spider",
               "werewolf"
             ],
             "normal": [
-              "Blood Vampire",
-              "Noble Vampire",
-              "Vampire Knight",
+              "Cave Spider",
+              "Hunter Spider",
+              "Web Spider",
               "Wolfman",
               "Dire Werewolf",
               "Blood Werewolf"
             ],
-            "elite": "Vampire Lord"
+            "elite": "Alpha Werewolf"
           },
           {
-            "name": "Rift Scar",
-            "environment": "rift",
-            "element": "cold",
+            "name": "Spider Hollow",
+            "environment": "hollow",
+            "element": "poison",
             "races": [
-              "demon",
-              "skeleton"
+              "wolf",
+              "goblin"
             ],
             "normal": [
-              "Imp",
-              "Demon Mage",
-              "Demon Brute",
-              "Warrior Skeleton",
-              "Archer Skeleton",
-              "Knight Skeleton"
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf",
+              "Sneak Goblin",
+              "Raider Goblin",
+              "Tinker Goblin"
             ],
-            "elite": "Demon Knight"
+            "elite": "Shaman Goblin"
           }
         ]
       },
       {
         "id": 15,
-        "name": "Nettlecrag",
-        "region": "thorn country",
+        "name": "Wyrmback",
+        "region": "wyrm breeding ground",
         "levels": [
           141,
           150
@@ -1252,159 +1254,10 @@
         ],
         "quality": "mid (floor = low)",
         "elements": [
-          "chaos",
-          "poison"
-        ],
-        "group": "2-3",
-        "subzones": [
-          {
-            "name": "Bone Stair",
-            "environment": "stair",
-            "element": "chaos",
-            "races": [
-              "demon",
-              "golem"
-            ],
-            "normal": [
-              "Imp",
-              "Demon Mage",
-              "Demon Brute",
-              "Stone Golem",
-              "Iron Golem",
-              "Guardian Golem"
-            ],
-            "elite": "Demon Knight"
-          },
-          {
-            "name": "Molten Deeps",
-            "environment": "deeps",
-            "element": "poison",
-            "races": [
-              "slime",
-              "demon"
-            ],
-            "normal": [
-              "Splitter Slime",
-              "Acid Slime",
-              "Devourer Slime",
-              "Imp",
-              "Demon Mage",
-              "Demon Brute"
-            ],
-            "elite": "Demon Knight"
-          },
-          {
-            "name": "Throne Abyss",
-            "environment": "abyss",
-            "element": "chaos",
-            "races": [
-              "golem",
-              "slime"
-            ],
-            "normal": [
-              "Stone Golem",
-              "Iron Golem",
-              "Guardian Golem",
-              "Splitter Slime",
-              "Acid Slime",
-              "Devourer Slime"
-            ],
-            "elite": "Crystal Golem"
-          }
-        ]
-      },
-      {
-        "id": 16,
-        "name": "Blackwater Reach",
-        "region": "drowned river mouth",
-        "levels": [
-          151,
-          160
-        ],
-        "hp": [
-          20377.948687031512,
-          21989.399854920608
-        ],
-        "quality": "high (floor = mid)",
-        "elements": [
-          "poison"
-        ],
-        "group": "3-5",
-        "subzones": [
-          {
-            "name": "Marrow Stair",
-            "environment": "stair",
-            "element": "poison",
-            "races": [
-              "demon",
-              "golem"
-            ],
-            "normal": [
-              "Imp",
-              "Demon Mage",
-              "Demon Brute",
-              "Stone Golem",
-              "Iron Golem",
-              "Guardian Golem"
-            ],
-            "elite": "Demon Knight"
-          },
-          {
-            "name": "Seeping Deeps",
-            "environment": "deeps",
-            "element": "poison",
-            "races": [
-              "slime",
-              "demon"
-            ],
-            "normal": [
-              "Splitter Slime",
-              "Acid Slime",
-              "Devourer Slime",
-              "Imp",
-              "Demon Mage",
-              "Demon Brute"
-            ],
-            "elite": "Demon Knight"
-          },
-          {
-            "name": "Drowned Abyss",
-            "environment": "abyss",
-            "element": "poison",
-            "races": [
-              "golem",
-              "slime"
-            ],
-            "normal": [
-              "Stone Golem",
-              "Iron Golem",
-              "Guardian Golem",
-              "Splitter Slime",
-              "Acid Slime",
-              "Devourer Slime"
-            ],
-            "elite": "Crystal Golem"
-          }
-        ]
-      },
-      {
-        "id": 17,
-        "name": "Wyrmback",
-        "region": "wyrm breeding ground",
-        "levels": [
-          161,
-          170
-        ],
-        "hp": [
-          22171.384666720398,
-          23835.660111227528
-        ],
-        "quality": "high (floor = mid)",
-        "elements": [
           "fire",
           "cold"
         ],
-        "group": "3-5",
+        "group": "2-3",
         "subzones": [
           {
             "name": "Tideflats",
@@ -1463,9 +1316,157 @@
         ]
       },
       {
+        "id": 16,
+        "name": "Ashfall",
+        "region": "ash fields",
+        "levels": [
+          151,
+          160
+        ],
+        "hp": [
+          20377.948687031512,
+          21989.399854920608
+        ],
+        "quality": "high (floor = mid)",
+        "elements": [
+          "fire"
+        ],
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Glimmer Grove",
+            "environment": "grove",
+            "element": "fire",
+            "races": [
+              "treant",
+              "werewolf"
+            ],
+            "normal": [
+              "Young Treant",
+              "Thorn Treant",
+              "Rotting Treant",
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf"
+            ],
+            "elite": "Ancient Treant"
+          },
+          {
+            "name": "Elder Rootway",
+            "environment": "rootway",
+            "element": "fire",
+            "races": [
+              "elf",
+              "dryad"
+            ],
+            "normal": [
+              "Wood Elf",
+              "High Elf",
+              "Moon Elf",
+              "Forest Dryad",
+              "Flower Dryad",
+              "Thorn Dryad"
+            ],
+            "elite": "Dark Elf"
+          },
+          {
+            "name": "Moonlit Glade",
+            "environment": "glade",
+            "element": "fire",
+            "races": [
+              "werewolf",
+              "treant"
+            ],
+            "normal": [
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf",
+              "Young Treant",
+              "Thorn Treant",
+              "Rotting Treant"
+            ],
+            "elite": "Alpha Werewolf"
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "name": "Ironrow",
+        "region": "storm terrace",
+        "levels": [
+          161,
+          170
+        ],
+        "hp": [
+          22171.384666720398,
+          23835.660111227528
+        ],
+        "quality": "high (floor = mid)",
+        "elements": [
+          "lightning"
+        ],
+        "group": "3-5",
+        "subzones": [
+          {
+            "name": "Stormbreak Grove",
+            "environment": "grove",
+            "element": "lightning",
+            "races": [
+              "treant",
+              "werewolf"
+            ],
+            "normal": [
+              "Young Treant",
+              "Thorn Treant",
+              "Rotting Treant",
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf"
+            ],
+            "elite": "Ancient Treant"
+          },
+          {
+            "name": "Charged Rootway",
+            "environment": "rootway",
+            "element": "lightning",
+            "races": [
+              "elf",
+              "dryad"
+            ],
+            "normal": [
+              "Wood Elf",
+              "High Elf",
+              "Moon Elf",
+              "Forest Dryad",
+              "Flower Dryad",
+              "Thorn Dryad"
+            ],
+            "elite": "Dark Elf"
+          },
+          {
+            "name": "Thunder Glade",
+            "environment": "glade",
+            "element": "lightning",
+            "races": [
+              "werewolf",
+              "treant"
+            ],
+            "normal": [
+              "Wolfman",
+              "Dire Werewolf",
+              "Blood Werewolf",
+              "Young Treant",
+              "Thorn Treant",
+              "Rotting Treant"
+            ],
+            "elite": "Alpha Werewolf"
+          }
+        ]
+      },
+      {
         "id": 18,
-        "name": "The Pale Spire",
-        "region": "the pale bloom",
+        "name": "Thornwake",
+        "region": "wet lowland",
         "levels": [
           171,
           180
@@ -1476,64 +1477,63 @@
         ],
         "quality": "high (floor = mid)",
         "elements": [
-          "chaos",
           "poison"
         ],
         "group": "3-5",
         "subzones": [
           {
-            "name": "Outer Colonnade",
-            "environment": "ruins",
-            "element": "chaos",
+            "name": "Frozen Fen",
+            "environment": "snow",
+            "element": "poison",
             "races": [
-              "golem",
-              "human"
+              "troll",
+              "dragon"
             ],
             "normal": [
-              "Stone Golem",
-              "Iron Golem",
-              "Guardian Golem",
-              "Ranger",
-              "Warrior",
-              "Knight"
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll",
+              "Wyrmling",
+              "Drake",
+              "Wyvern"
             ],
-            "elite": "Crystal Golem"
+            "elite": "Stone Troll"
           },
           {
-            "name": "Hall of Wardens",
-            "environment": "temple",
+            "name": "Icebreak Shelf",
+            "environment": "ice",
+            "element": "poison",
+            "races": [
+              "wolf",
+              "giant"
+            ],
+            "normal": [
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf",
+              "Hill Giant",
+              "Stone Giant",
+              "Frost Giant"
+            ],
+            "elite": "Fire Giant"
+          },
+          {
+            "name": "Rime Bog",
+            "environment": "rime",
             "element": "poison",
             "races": [
               "dragon",
-              "elf"
+              "troll"
             ],
             "normal": [
               "Wyrmling",
               "Drake",
               "Wyvern",
-              "Wood Elf",
-              "High Elf",
-              "Moon Elf"
+              "Cave Troll",
+              "Forest Troll",
+              "Swamp Troll"
             ],
             "elite": "Elder Dragon"
-          },
-          {
-            "name": "Sanctum Depths",
-            "environment": "depths",
-            "element": "chaos",
-            "races": [
-              "human",
-              "golem"
-            ],
-            "normal": [
-              "Ranger",
-              "Warrior",
-              "Knight",
-              "Stone Golem",
-              "Iron Golem",
-              "Guardian Golem"
-            ],
-            "elite": "Mage"
           }
         ]
       }
@@ -1579,7 +1579,7 @@
       "small": 3,
       "medium": 2,
       "large": 1,
-      "note": "how often each farming body shows up in a group. Every zone spends its encounter budget once: the published mob_HP(L) curve is the zone AVERAGE mob, so each group entry divides its body multiplier by the weighted average of the bodies that zone can field. A Large mob is tougher and rarer, a Small mob cheaper and common, and kills per hour, drops per hour, the stone funnel and the 40.2 hour timeline never move."
+      "note": "how often each farming body shows up in a group. Every zone spends its encounter budget once: the published mob_HP(L) curve is the zone AVERAGE mob, so each group entry divides its body multiplier by the weighted average of the bodies that zone can field. A Large mob is tougher and rarer, a Small mob cheaper and common, and the drop line, the stone funnel and the timeline never move."
     },
     "element_roll": {
       "bias_weight": 3,
@@ -1594,57 +1594,57 @@
         "species": "goblin"
       },
       {
-        "zone": 2,
+        "zone": 14,
         "name": "Broodmother",
         "species": "spider"
       },
       {
-        "zone": 3,
+        "zone": 16,
         "name": "Treant Elder",
         "species": "treant"
       },
       {
-        "zone": 4,
+        "zone": 17,
         "name": "Elven Archmage",
         "species": "elf"
       },
       {
-        "zone": 5,
+        "zone": 3,
         "name": "Elder Troll",
         "species": "troll"
       },
       {
-        "zone": 6,
+        "zone": 2,
         "name": "Warlord Orc",
         "species": "orc"
       },
       {
-        "zone": 7,
+        "zone": 8,
         "name": "Hoarder Kobold",
         "species": "kobold"
       },
       {
-        "zone": 8,
+        "zone": 9,
         "name": "Ogre King",
         "species": "ogre"
       },
       {
-        "zone": 9,
+        "zone": 10,
         "name": "Wolf King",
         "species": "wolf"
       },
       {
-        "zone": 10,
+        "zone": 18,
         "name": "Ancient Dragon",
         "species": "dragon"
       },
       {
-        "zone": 11,
+        "zone": 4,
         "name": "Mummy Lord",
         "species": "mummy"
       },
       {
-        "zone": 12,
+        "zone": 5,
         "name": "Bone Colossus",
         "species": "skeleton"
       },
@@ -1654,27 +1654,27 @@
         "species": "vampire"
       },
       {
-        "zone": 14,
+        "zone": 11,
         "name": "Archdemon",
         "species": "demon"
       },
       {
-        "zone": 15,
+        "zone": 12,
         "name": "Slime King",
         "species": "slime"
       },
       {
-        "zone": 16,
+        "zone": 7,
         "name": "Colossus",
         "species": "golem"
       },
       {
-        "zone": 17,
+        "zone": 15,
         "name": "Lizardman Chief",
         "species": "lizardman"
       },
       {
-        "zone": 18,
+        "zone": 6,
         "name": "Paladin",
         "species": "human"
       }
@@ -1735,7 +1735,7 @@
         "name": "Goblin",
         "zones": [
           1,
-          2
+          14
         ],
         "habitat": [
           "pinewood road",
@@ -1778,8 +1778,8 @@
         "name": "Orc",
         "zones": [
           1,
-          6,
-          11
+          2,
+          4
         ],
         "habitat": [
           "pinewood road",
@@ -1822,7 +1822,7 @@
         "id": "kobold",
         "name": "Kobold",
         "zones": [
-          7
+          8
         ],
         "habitat": [
           "the bone gate"
@@ -1860,9 +1860,9 @@
         "id": "ogre",
         "name": "Ogre",
         "zones": [
-          6,
-          8,
-          17
+          2,
+          9,
+          15
         ],
         "habitat": [
           "high crags",
@@ -1902,10 +1902,10 @@
         "id": "troll",
         "name": "Troll",
         "zones": [
-          5,
-          7,
-          9,
-          10
+          3,
+          8,
+          10,
+          18
         ],
         "habitat": [
           "wolf country",
@@ -1947,7 +1947,7 @@
         "id": "minotaur",
         "name": "Minotaur",
         "zones": [
-          7
+          8
         ],
         "habitat": [
           "the bone gate"
@@ -1985,9 +1985,9 @@
         "id": "skeleton",
         "name": "Skeleton",
         "zones": [
-          12,
-          13,
-          14
+          5,
+          11,
+          13
         ],
         "habitat": [
           "salt flats",
@@ -2029,8 +2029,8 @@
         "id": "mummy",
         "name": "Mummy",
         "zones": [
-          11,
-          12
+          4,
+          5
         ],
         "habitat": [
           "wet lowland",
@@ -2070,9 +2070,9 @@
         "id": "vampire",
         "name": "Vampire",
         "zones": [
-          12,
-          13,
-          14
+          5,
+          11,
+          13
         ],
         "habitat": [
           "salt flats",
@@ -2113,12 +2113,12 @@
         "id": "demon",
         "name": "Demon",
         "zones": [
-          8,
+          4,
+          7,
+          9,
           11,
-          13,
-          14,
-          15,
-          16
+          12,
+          13
         ],
         "habitat": [
           "frost hold",
@@ -2164,10 +2164,10 @@
         "id": "slime",
         "name": "Slime",
         "zones": [
-          5,
-          15,
-          16,
-          17
+          3,
+          7,
+          12,
+          15
         ],
         "habitat": [
           "wolf country",
@@ -2211,10 +2211,10 @@
         "id": "spider",
         "name": "Spider",
         "zones": [
-          2,
-          5,
-          7,
-          17
+          3,
+          8,
+          14,
+          15
         ],
         "habitat": [
           "slow water",
@@ -2258,9 +2258,9 @@
         "name": "Wolf",
         "zones": [
           1,
-          2,
-          9,
-          10
+          10,
+          14,
+          18
         ],
         "habitat": [
           "pinewood road",
@@ -2303,11 +2303,11 @@
         "id": "golem",
         "name": "Golem",
         "zones": [
+          6,
           7,
           8,
-          15,
-          16,
-          18
+          9,
+          12
         ],
         "habitat": [
           "the bone gate",
@@ -2350,8 +2350,8 @@
         "id": "dragon",
         "name": "Dragon",
         "zones": [
+          2,
           6,
-          8,
           9,
           10,
           18
@@ -2397,8 +2397,8 @@
         "id": "treant",
         "name": "Treant",
         "zones": [
-          3,
-          4
+          16,
+          17
         ],
         "habitat": [
           "ash fields",
@@ -2438,8 +2438,8 @@
         "name": "Human",
         "zones": [
           1,
-          13,
-          18
+          6,
+          13
         ],
         "habitat": [
           "pinewood road",
@@ -2482,9 +2482,9 @@
         "id": "lizardman",
         "name": "Lizardman",
         "zones": [
-          5,
-          11,
-          17
+          3,
+          4,
+          15
         ],
         "habitat": [
           "wolf country",
@@ -2526,9 +2526,9 @@
         "id": "elf",
         "name": "Elf",
         "zones": [
-          3,
-          4,
-          18
+          6,
+          16,
+          17
         ],
         "habitat": [
           "ash fields",
@@ -2572,9 +2572,9 @@
         "id": "giant",
         "name": "Giant",
         "zones": [
-          6,
-          9,
-          10
+          2,
+          10,
+          18
         ],
         "habitat": [
           "high crags",
@@ -2614,10 +2614,10 @@
         "id": "werewolf",
         "name": "Werewolf",
         "zones": [
-          2,
-          3,
-          4,
-          14
+          11,
+          14,
+          16,
+          17
         ],
         "habitat": [
           "slow water",
@@ -2661,8 +2661,8 @@
         "id": "dryad",
         "name": "Dryad",
         "zones": [
-          3,
-          4
+          16,
+          17
         ],
         "habitat": [
           "ash fields",
@@ -2885,7 +2885,7 @@
         "Ancient Dryad"
       ]
     },
-    "variant_drops_note": "The drop identity of one variant NAME (mob.variants owns the names; this table owns what each name drops). `item`/`rarity` are the junk stream the variant pays instead of the species-wide item, and `lean` is the collectible stream that variant tilts toward, applied through huntReweight so the total expected drops/kill is conserved - the three normal variants of every species cycle gear · herb · junk, so a zone's aggregate stays balanced and only the per-kill mix moves. `none` is the identity, which is what Elite and Boss carry: they already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a variant between rarities never moves gold/kill.",
+    "variant_drops_note": "The drop identity of one variant NAME (mob.variants owns the names; this table owns what each name drops). `item`/`rarity` are the junk stream the variant pays instead of the species-wide item, and `lean` is the collectible stream that variant tilts toward, applied through leanReweight so the total expected drops/kill is conserved - the three normal variants of every species cycle gear · herb · junk, so a zone's aggregate stays balanced and only the per-kill mix moves. `none` is the identity, which is what Elite and Boss carry: they already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a variant between rarities never moves gold/kill.",
     "variant_drops": {
       "Sneak Goblin": {
         "item": "Goblin Ear",
@@ -3434,7 +3434,7 @@
     "res_mod_items": 3,
     "cdr_mod_items": 11,
     "cdr_buff_pct": 0,
-    "base_note": "The flat base each pool starts from before its Core stat is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term · Max Mana = mana_base + Int x K_INT_MP + level term · weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening 35-weight sword is carried untaxed."
+    "base_note": "The flat base each pool starts from before its Core stat is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term · Max Mana = mana_base + Int x K_INT_MP + level term · weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening set - the sword at 35 and the junk frames at 230 - is carried untaxed."
   },
   "xp": {
     "per_kill_mob_level": 10,
@@ -4020,7 +4020,7 @@
     "taps_per_day": 2
   },
   "potions": {
-    "note": "Single home for the potion ladder farm.md prints (A8). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · kills/hr · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
+    "note": "Single home for the potion ladder farm.md prints (A8). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · drop line · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
     "shared_cooldown_sec": 30,
     "auto_use_default": {
       "hp_pct": 30,
@@ -4111,7 +4111,7 @@
     "xp_per_kill": 1,
     "xp_per_step": 400,
     "level_cap": 20,
-    "note": "Skill level is earned the PoE way: every kill awards 1 XP to each skill that is in the list (attack, curse, heal) or open (aura) at that moment, and 400 XP buys one step up to the Cap of 20. So maxing one skill takes 8,000 kills of using it - about 4.4 hours in the high band, 5.8 in mid, 8.2 in low (loot.md section 2) - and it never depends on how often the skill happened to fire, on mana, or on list length. This replaces the old cube-root curve, which needed ~6.86M presses to reach 20 and was therefore unreachable."
+    "note": "Skill level is earned the PoE way: every kill awards 1 XP to each skill that is in the list (attack, curse, heal) or open (aura) at that moment, and 400 XP buys one step up to the Cap of 20. So maxing one skill takes 7,600 kills of using it (loot.md section 2) - and it never depends on how often the skill happened to fire, on mana, or on list length. This replaces the old cube-root curve, which needed ~6.86M presses to reach 20 and was therefore unreachable."
   },
   "build": {
     "reference_split": "Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%",
@@ -4127,8 +4127,8 @@
     "note": "The two umbrella multipliers reserved for future sources. `global damage` multiplies outgoing damage once, after weak / Element counter / crit; `global defend` is the incoming step-7 `damage_taken_mult` bucket (combat.md section 2). Both start at x1.00 and no source grants either yet — a future skill or aura feeds one bucket, so the two never stack as separate multipliers. `global speed` (Haste) is the third reserved term: it scales the whole clock (cooldowns and final attack speed). **Player-only:** global speed affects the player alone and no mob ever carries Haste, even when mobs get their own skill lists."
   },
   "loot": {
-    "hunt_order": {
-      "note": "A zone's Hunt Order leans the three collectible streams — gear, herbs, junk — toward one of them by redistributing probability mass, never raising the total expected drops/kill, so drops/hr and the timeline stay put. Stones ride the elite/boss lines and are not a category. 'none' is the identity, so the measured bands are untouched by default.",
+    "variant_lean": {
+      "note": "A variant's lean tilts the three collectible streams — gear, herbs, junk — toward one of them by redistributing probability mass, never raising the total expected drops/kill, so the drop line and the timeline stay put. The variant row owns it (`mob.variant_drops` `lean`) and nothing overrides it: the player used to have a per-zone Hunt Order on top, and that control is gone. Stones ride the elite/boss lines and are not a category. 'none' is the identity, so a variant that carries none behaves exactly as the balanced case.",
       "shift_pct": 25,
       "categories": [
         "gear",
@@ -4139,12 +4139,11 @@
     "base_drop_chance": 0.08,
     "filter": {
       "upgrade_margin_pct": 10,
-      "note": "The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. At 10% the simulation reproduces the keep-rates this design has published all along (2.2% / 1.2% / 0.7% / 0.3% of drops); at 0% it reports roughly 1.5x that, and the printed sensitivity line shows all three. tools/loot.ts measures the keep-rates; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.",
+      "note": "The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. tools/loot.ts measures the keep-rates that margin produces and loot.md publishes them; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.",
       "rules": {
         "default_enabled": false,
-        "default_min_rarity": "any",
         "default_keep_missing_element": true,
-        "note": "loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default: a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept."
+        "note": "loot.md section 4 names the configurable conditions: the upgrade margin and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default: a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept. The old keep-only-Rare condition died with Rarity: an item's level is a continuous number now, so 'better than what I wear' is the whole question."
       }
     },
     "base_mod": {
@@ -4175,7 +4174,7 @@
       "high": {
         "group_mobs": 4,
         "lck_level": 90,
-        "upgrades_per_hr": 3
+        "upgrades_per_hr": 2
       },
       "high_full_lck": {
         "group_mobs": 4,
@@ -4190,7 +4189,7 @@
     "boss_tier_stones": 3,
     "boss_add_stones": 1,
     "quality_stone_sources": {
-      "note": "crafting.md prices the +1..+15 ladder as 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 Quality Stones and says the source shifts monsters → elites → bosses by step (steps 1-5 · 6-10 · 11-15). These are the income side of that same split: the per-hour figures and the hours a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.",
+      "note": "crafting.md prices the +1..+15 ladder as 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 Quality Stones and says the source shifts monsters → elites → bosses by step (steps 1-5 · 6-10 · 11-15). These are the income side of that same split: the per-kill figures and the kills a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.",
       "monster_quality_chance": 0.01,
       "elite_quality_chance": 0.25,
       "boss_quality_stones": 24
@@ -4207,284 +4206,105 @@
     "kill_rate_tolerance": 0.01
   },
   "road": {
-    "links": [
+    "note": "Travel is walking. The world is a pointy-top hex lattice and a settlement owns its own hex; a settlement pair is joined by the hexes between them, so a walk is a count of blocks and never a link with a price. Every block costs `block_sec` and rolls one encounter chance. An encounter is an ordinary mob group from the lower of the two zones, fought with the ordinary rules, and it pays the ordinary drop roll and nothing else: no gold purse, no chest, no Standing, no crafting stones. Gold and junk come from killing mobs, so walking can never mint (`economy.md`). A settlement's Waypoint unlocks the first time the character arrives there on foot, and then warps to any unlocked settlement free and instantly; a Waystone will be a second destination kind on the same rule. The Road's old ladder and branch links, its trip minutes, its terrain tilt table, its encounter kinds, the purse, the chest, the Circuit and the Standing-per-leg are all gone with this shape, and none of them comes back: `encounter_chance_pct` is the retired one-encounter-a-minute rate written in blocks rather than a number chosen by hand, and a branch link has no meaning when the block count IS the distance - a pass would need its own shorter hex path in the lattice.",
+    "graph_rule": "A node is one settlement's own hex in axial coordinates on the pointy-top lattice. Blocks between two nodes are their hex distance, computed from those coordinates and never typed, so a walk's length is derived. Every pair of settlements is walkable - there is no edge list and no route to buy - and a waypoint covers the distance for free once both ends have been walked to.",
+    "block_sec": 10,
+    "encounter_chance_pct": 16.6667,
+    "encounter_rule": "Every block walked rolls one encounter chance. A block that rolls nothing is silent. An encounter that fires is a real mob group drawn from the lower of the two zones the walk joins, at the player level clamped into that zone's range and at that zone's own group size, fought with the ordinary combat and drop rules: it pays the ordinary drop roll and nothing else.",
+    "push_rule": "A Push on the walk is the ordinary Push. The character is pushed to the camp that owns the zone it was ambushed in, rests there, and walks back in on the block it was ambushed on. A Push never ends a walk and never gives back a block.",
+    "waypoint_rule": "Arriving at a settlement on foot unlocks its Waypoint, once, and it costs nothing. A Waypoint warps to any unlocked settlement free and instantly, and it never gates a zone: a settlement you have not walked to is reached by walking. A Waystone will be a second destination kind that a Waypoint may also target.",
+    "nodes": [
       {
-        "a": "Eastgate",
-        "b": "Millbrook",
-        "zoneA": 1,
-        "zoneB": 2,
-        "kind": "ladder",
-        "terrain": "forest",
-        "trip_min": 5
+        "id": "eastgate",
+        "q": 17,
+        "r": 11
       },
       {
-        "a": "Millbrook",
-        "b": "Ashfall",
-        "zoneA": 2,
-        "zoneB": 3,
-        "kind": "ladder",
-        "terrain": "road",
-        "trip_min": 5
+        "id": "millbrook",
+        "q": 13,
+        "r": 11
       },
       {
-        "a": "Ashfall",
-        "b": "Ironrow",
-        "zoneA": 3,
-        "zoneB": 4,
-        "kind": "ladder",
-        "terrain": "river",
-        "trip_min": 5
+        "id": "ashfall",
+        "q": 15,
+        "r": 9
       },
       {
-        "a": "Ironrow",
-        "b": "Wolf Cross",
-        "zoneA": 4,
-        "zoneB": 5,
-        "kind": "ladder",
-        "terrain": "forest",
-        "trip_min": 5
+        "id": "ironrow",
+        "q": 20,
+        "r": 9
       },
       {
-        "a": "Wolf Cross",
-        "b": "Highspire",
-        "zoneA": 5,
-        "zoneB": 6,
-        "kind": "ladder",
-        "terrain": "road",
-        "trip_min": 5
+        "id": "wolf_cross",
+        "q": 23,
+        "r": 11
       },
       {
-        "a": "Highspire",
-        "b": "Bonegate",
-        "zoneA": 6,
-        "zoneB": 7,
-        "kind": "ladder",
-        "terrain": "river",
-        "trip_min": 5
+        "id": "highspire",
+        "q": 21,
+        "r": 15
       },
       {
-        "a": "Bonegate",
-        "b": "Frosthold",
-        "zoneA": 7,
-        "zoneB": 8,
-        "kind": "ladder",
-        "terrain": "forest",
-        "trip_min": 5
+        "id": "bonegate",
+        "q": 15,
+        "r": 15
       },
       {
-        "a": "Frosthold",
-        "b": "Vermolch",
-        "zoneA": 8,
-        "zoneB": 9,
-        "kind": "ladder",
-        "terrain": "road",
-        "trip_min": 5
+        "id": "frosthold",
+        "q": 10,
+        "r": 13
       },
       {
-        "a": "Vermolch",
-        "b": "Thornwake",
-        "zoneA": 9,
-        "zoneB": 10,
-        "kind": "ladder",
-        "terrain": "river",
-        "trip_min": 5
+        "id": "vermolch",
+        "q": 11,
+        "r": 8
       },
       {
-        "a": "Thornwake",
-        "b": "Greyfen",
-        "zoneA": 10,
-        "zoneB": 11,
-        "kind": "ladder",
-        "terrain": "forest",
-        "trip_min": 5
+        "id": "thornwake",
+        "q": 18,
+        "r": 6
       },
       {
-        "a": "Greyfen",
-        "b": "Saltmarrow",
-        "zoneA": 11,
-        "zoneB": 12,
-        "kind": "ladder",
-        "terrain": "road",
-        "trip_min": 5
+        "id": "greyfen",
+        "q": 25,
+        "r": 9
       },
       {
-        "a": "Saltmarrow",
-        "b": "Emberhold",
-        "zoneA": 12,
-        "zoneB": 13,
-        "kind": "ladder",
-        "terrain": "river",
-        "trip_min": 5
+        "id": "saltmarrow",
+        "q": 26,
+        "r": 14
       },
       {
-        "a": "Emberhold",
-        "b": "Duskmoor",
-        "zoneA": 13,
-        "zoneB": 14,
-        "kind": "ladder",
-        "terrain": "forest",
-        "trip_min": 5
+        "id": "emberhold",
+        "q": 19,
+        "r": 18
       },
       {
-        "a": "Duskmoor",
-        "b": "Nettlecrag",
-        "zoneA": 14,
-        "zoneB": 15,
-        "kind": "ladder",
-        "terrain": "road",
-        "trip_min": 5
+        "id": "duskmoor",
+        "q": 9,
+        "r": 16
       },
       {
-        "a": "Nettlecrag",
-        "b": "Blackwater Reach",
-        "zoneA": 15,
-        "zoneB": 16,
-        "kind": "ladder",
-        "terrain": "river",
-        "trip_min": 5
+        "id": "nettlecrag",
+        "q": 6,
+        "r": 10
       },
       {
-        "a": "Blackwater Reach",
-        "b": "Wyrmback",
-        "zoneA": 16,
-        "zoneB": 17,
-        "kind": "ladder",
-        "terrain": "forest",
-        "trip_min": 5
+        "id": "blackwater_reach",
+        "q": 12,
+        "r": 5
       },
       {
-        "a": "Wyrmback",
-        "b": "The Pale Spire",
-        "zoneA": 17,
-        "zoneB": 18,
-        "kind": "ladder",
-        "terrain": "road",
-        "trip_min": 5
+        "id": "wyrmback",
+        "q": 23,
+        "r": 5
       },
       {
-        "a": "Ashfall",
-        "b": "Wolf Cross",
-        "zoneA": 3,
-        "zoneB": 5,
-        "kind": "branch",
-        "terrain": "mountain",
-        "trip_min": 8
-      },
-      {
-        "a": "Highspire",
-        "b": "Frosthold",
-        "zoneA": 6,
-        "zoneB": 8,
-        "kind": "branch",
-        "terrain": "mountain",
-        "trip_min": 8
-      },
-      {
-        "a": "Thornwake",
-        "b": "Saltmarrow",
-        "zoneA": 10,
-        "zoneB": 12,
-        "kind": "branch",
-        "terrain": "mountain",
-        "trip_min": 8
-      },
-      {
-        "a": "Nettlecrag",
-        "b": "Wyrmback",
-        "zoneA": 15,
-        "zoneB": 17,
-        "kind": "branch",
-        "terrain": "mountain",
-        "trip_min": 8
+        "id": "the_pale_spire",
+        "q": 30,
+        "r": 11
       }
-    ],
-    "link_rule": "A ladder link joins consecutive settlements and pays the purse. A branch link joins zone i to zone i+2: all four are the mountain shortcut over a pass, which carries you past the settlement in between on one leg instead of two. Every link carries its own zone pair — nothing reads zone order from an array index.",
-    "trip_min": 5,
-    "encounters_per_min": 1,
-    "walk": {
-      "note": "The walk is the Road counted in blocks rather than minutes (owner ask). A block is the unit of distance and `block_sec` is how long one takes; every link's own `trip_min` is re-expressed as a whole number of blocks, so nothing about a leg's length changes - only what it is measured in. A block is named `<zoneA>-<zoneB>#<n>`, which is the link id the map already uses plus the block's own position on it, so no coordinate is ever involved and the simulation cannot know where the sheet draws it.",
-      "block_sec": 10,
-      "encounter_gap_blocks": 6,
-      "rule": "`block_sec` x `encounter_gap_blocks` x `encounters_per_min` must be 60, and `trip_min` x 60 must divide by `block_sec`. That is the whole contract of the walk: a leg lasts exactly as long and carries exactly as many encounters as it did before, so the Road's published cadence, its mint bounds and every kill rate behind them (H1) do not move - only the ruler changed. An encounter fires as the character crosses INTO the block at each gap, from the link's own terrain row, which is what 'encounters happen between blocks' means.",
-      "adjacency_rule": "A block touches only the block before it and the block after it on the same link; the first block touches the settlement the leg left and the last block touches the settlement it reaches. There is no other edge in the walk, so a character can never stand somewhere it did not walk to, and no route may hop a block - plotting draws the path, it never jumps it.",
-      "checkpoint_rule": "A settlement is a checkpoint, and warping to one is the only way to skip ground in the world. It costs the carriage price once per link (`towns.md` section 7 mode B, checks.md T9) and is free and instant for every visit after that, so walking is never mandatory and never the cheaper option - the Waypoint stays the default and the walk stays a content choice (G9).",
-      "route_rule": "A plotted route is the shortest chain of links from the settlement you stand in to the settlement you chose, each link meeting the next at a settlement it shares with it. It is walked link by link and block by block and ends where it was aimed. A Circuit is the same shape with `loop` set, so the two are one structure and one validator. Offline a loop plays out the rest of its lap on the untilted base table, but a plotted route never resolves itself while the client is closed: the character is parked and the route is gone."
-    },
-    "terrain": {
-      "road": {
-        "ambush": 48,
-        "caravan": 28,
-        "pedlar": 16,
-        "chest": 8
-      },
-      "river": {
-        "ambush": 45,
-        "caravan": 30,
-        "pedlar": 15,
-        "chest": 10
-      },
-      "forest": {
-        "ambush": 61,
-        "caravan": 19,
-        "pedlar": 9,
-        "chest": 11
-      },
-      "mountain": {
-        "ambush": 70,
-        "caravan": 15,
-        "pedlar": 7,
-        "chest": 8
-      },
-      "moor": {
-        "ambush": 46,
-        "caravan": 28,
-        "pedlar": 13,
-        "chest": 13
-      }
-    },
-    "terrain_rule": "Each terrain row holds absolute points that sum to 100, and no kind may reach 0 (ambush 45-70 · caravan 16-30 · pedlar 6-16 · chest 8-12) — a zero-ambush route would be free progress, which is a skip rather than a shortcut. Terrain tilts the encounter table; it is a mechanic, not decoration. Online encounters roll the link's own terrain row; offline rolls the base table, untilted.",
-    "encounters": {
-      "ambush": {
-        "weight": 54,
-        "mobs": "2-3 from the lower zone cast, at the player level clamped into that range",
-        "resolve": "normal combat (mob-roster.md numbers)",
-        "win": "normal 8% drop roll + the link's purse",
-        "loss": "Push as usual, the leg is forfeit and the purse is lost"
-      },
-      "caravan": {
-        "weight": 24,
-        "mobs": "1 Large from the higher zone cast + 2 Small from the lower",
-        "resolve": "normal combat",
-        "win": "Standing only, no gold",
-        "loss": "Standing 0 and the leg ends"
-      },
-      "pedlar": {
-        "weight": 12,
-        "mobs": "none",
-        "resolve": "a shop line: information for gold (which Collector piece is next, the pedlar refresh)",
-        "win": "gold sink only",
-        "loss": "n/a"
-      },
-      "chest": {
-        "weight": 10,
-        "mobs": "none",
-        "resolve": "a locked chest: opened for one Item roll, no fight",
-        "win": "one Item at the destination zone's quality ceiling",
-        "loss": "n/a"
-      }
-    },
-    "base_rule": "`encounters[].weight` IS the base table (54/24/12/10, the plain average of the five terrain rows) and it is what an offline session rolls, so an away period can never route into the heaviest-ambush terrain and pay out at full rate. A chest is capped once per link per day, the same shape as the purse; it pays no crafting stones, so G5's tier-stone monopoly stays with Elite and boss.",
-    "purse_gold": 1,
-    "purse_once_per_link_per_day": true,
-    "chest_once_per_link_per_day": true,
-    "circuit": {
-      "push_skips_leg": true,
-      "offline_resolves": true,
-      "editable_in": "settlement"
-    },
-    "standing_per_trip_kills": 7,
-    "note": "The Road is opt-in. A ladder leg is 5 real minutes and carries 5 encounters (1 per Road minute); a branch leg is 8 (the mountain shortcut over a pass). Both are walked in blocks - `walk.block_sec` per block, so a ladder leg is 30 blocks and a branch leg 48, and an encounter fires on the way into every `walk.encounter_gap_blocks`-th block. C+D stay a content choice, not an income choice: only the 17 ladder links pay the purse, so the mint stays at most 17 gold a day (17 x `purse_gold`, once per link per day) against a junk-sell mint of thousands; branch links pay no purse and grant Standing only where they arrive. Road pays no stones. A Circuit - an ordered list of links a player loops - does run offline (section 6 and), rolling the untilted base table; a plotted route never does.",
-    "forfeit_kills": 120
+    ]
   },
   "inventory": {
     "adventure_slots": 100,
@@ -4504,35 +4324,28 @@
     "overflow": "stop_pickup",
     "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
   },
-  "rarity": {
-    "note": "Rarity answers Mod count only (item-rarity.md · glossary rule 2). The counts and the crafted ceilings are written here once; the client's Add craft reads them and never infers a number from the Rarity name.: on the 7-line skeleton the count is `dropped_random` - how many of the 4 Random lines arrive rolled at drop - while line 1 (Base Mod) and lines 2-3 (Legacy) are always present.",
-    "floor_ceiling": {
-      "note": "item-rarity.md 'Item Quality vs Drop Level': each drop source defines a floor and a ceiling. Offline results are limited to the zone floor (save.md · loot.md section 7).",
-      "low": {
-        "floor": "low",
-        "ceiling": "low"
+  "item_level": {
+    "note": "The one axis an item's strength rides (item-level.md). Rarity - the old Mod-count axis - is gone: every drop arrives with the same line count, and the value a Mod line rolls is a window that climbs with the item's level. The window's floor climbs from the band below (so a mid-band piece starts able to roll the low band's floor and ends above it), the ceiling is the band's own top, and the roll lands in one of the window's thirds - the top third is the rarest, so a high-level drop is a chance and not a formality.",
+    "line_count": 5,
+    "spans": [
+      {
+        "band": "low",
+        "from": 1,
+        "to": 30
       },
-      "mid": {
-        "floor": "low",
-        "ceiling": "mid"
+      {
+        "band": "mid",
+        "from": 31,
+        "to": 60
       },
-      "high": {
-        "floor": "mid",
-        "ceiling": "high"
+      {
+        "band": "high",
+        "from": 61,
+        "to": 90
       }
-    },
-    "Common": {
-      "dropped_random": 2,
-      "crafted_max": 7
-    },
-    "Rare": {
-      "dropped_random": 4,
-      "crafted_max": 7
-    },
-    "drop_chance": {
-      "Common": 0.82,
-      "Rare": 0.18
-    },
+    ],
+    "ascend_levels": 30,
+    "crafted_max": 7,
     "mods_added_cap": 2,
     "add_stones_per_fill": [
       1,
@@ -4541,7 +4354,9 @@
     "stat_mod_slots": 2,
     "legacy_slots": 2,
     "base_mod_slots": 1,
-    "skeleton_note": "Every item is 7 lines: line 1 the Base Mod (unremovable, part of the frame), lines 2-3 Legacy (unremovable), lines 4-7 Random (craftable). Rarity fills the Random half at drop: dropped_random says how many of the 4 arrive rolled, and crafted_max is the total ceiling for both Rarities, so a Common's mods_added_cap is exactly the gap to 7. `base_mod_slots` is the unremovable floor's other half - the craft verbs refuse index < base_mod_slots + legacy_slots."
+    "span_note": "The spans are the first loop's own level ranges - what the zone labels already say (low zones read 1-30, mid 31-60, high 61-90). A level past its band's span clamps to the band's own range, which is what keeps the later loops honest: a low-band zone at level 91 drops a low-band piece at the top of the low window, exactly as the zone label intends.",
+    "ascend_note": "Ascend raises the piece one band and shifts its level by one span, so the window moves up a band without re-rolling the line - the same move the old quality step made, now expressed on the level. The value equals a span's length and is gated against it.",
+    "skeleton_note": "Every item is 7 lines: line 1 the Base Mod (unremovable, part of the frame), lines 2-3 Legacy (unremovable), lines 4-7 Random (craftable). `line_count` is how many arrive rolled at drop - the same five for every piece, so Add mod's `mods_added_cap` is exactly the gap to crafted_max on every drop rather than only on one Rarity. `base_mod_slots` is the unremovable floor's other half - the craft verbs refuse index < base_mod_slots + legacy_slots."
   },
   "salvage": {
     "note": "loot.md section 5 · checks.md F15: a luck-protection milestone, one Reroll tier stone per 500 gear pieces salvaged (dissolved by the bag filter). The client counts the pieces so the milestone is real rather than implied.",
@@ -4563,15 +4378,15 @@
     "rarities": {
       "common": {
         "sell_gold": 1,
-        "drop_chance_per_kill": 0.1341256
+        "drop_chance_per_kill": 0.1358234
       },
       "uncommon": {
         "sell_gold": 5,
-        "drop_chance_per_kill": 0.0268251
+        "drop_chance_per_kill": 0.0271647
       },
       "rare": {
         "sell_gold": 25,
-        "drop_chance_per_kill": 0.005365
+        "drop_chance_per_kill": 0.0054329
       }
     },
     "note": "RO-style mob junk: a fourth drop stream, sold to the Settlement Counterhand for gold. The ITEM is per variant, not per race - `mob.variant_drops` owns which variant pays which item at which rarity - and this block owns only the mechanics the rarities are: each rarity's drop_chance_per_kill is set to junk_per_kill / sell_gold, so a kill of any variant has the same expected gold (the F3 junk line per kill) whatever the species or variant mix, and a variant moving between rarities cannot move gold/kill. A variant's rarity therefore buys drop frequency, not income: common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat - which is also the bag-pressure trade a variant picks. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
@@ -4669,20 +4484,20 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "first 100 drops 22.8 → drops 101-400 7.4 → after that 4.8 (low band) · keep-rate 5.10% low · 4.39% mid · 3.11% high · 1.08% high + full_lck",
+      "value": "first 1/14 of drops 21.8 → 2/14-4/14 9.6 → after that 6.0 (low band) · keep-rate 5.44% low · 3.88% mid · 2.95% high · 1.03% high + full_lck",
       "expression": "measured — tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
     {
       "id": "F11",
-      "value": "0.29 Flat lines per high-zone drop (5.36 lines per item) · the four early-game Flats thin out as Item quality rises",
+      "value": "0.22 Flat lines per high-zone drop (5.00 lines per item) · the four early-game Flats thin out as Item quality rises",
       "expression": "Flat line per drop (high zone, after the 0.25 early-game weighting)",
       "status": "measured"
     },
     {
       "id": "F12",
-      "value": "boss 2.4 + elite 2.4 + normal 3.1 = 7.8",
-      "expression": "skills per 1,000 kills · skill-pool.md drop chances",
+      "value": "boss 2.4 + elite 16.0 + normal 0.8 = 19.2 per 1,000 kills",
+      "expression": "skill per 1,000 kills · skill-pool.md drop chances",
       "status": "carried"
     },
     {
@@ -4762,38 +4577,43 @@
     "align_cap": 50
   },
   "opening": {
-    "note": "Minute one. Everything the game hands the player before they touch anything, so a client can create a playable character from one read. The starting weapon is deliberately the worst roll in the table: the mob-health curve already assumes a level-1 character is holding one, and a free tier-1 weapon would be more than twice the damage the curve pays for.",
+    "note": "Minute one. Everything the game hands the player before they touch anything, so a client can create a playable character from one read. The set is hand-authored junk, not a drop: one line per slot, so no Legacy pair and no craftable Mod is involved, and the loot roll can never produce it. Every line is derived by the client, never typed here - `openingGear()` calls the same `loot.baseModAtFloor` a pre-skeleton save restore uses - so the frame per slot is the data's whole job and no number can drift. The main hand is the worst roll in the table the mob-health curve already assumes at level 1; a free top-tier weapon would pay more damage than the curve allows.",
     "settlement": "Eastgate",
     "settlement_zone": 1,
     "level": 1,
     "gold": 0,
     "stones": {},
     "gear": [
-      {
-        "slot": "main hand",
-        "base": "one-handed sword",
-        "quality": "low",
-        "tier": 3,
-        "mods": {
-          "Physical power flat": 15
-        },
-        "note": "the worst roll in the table - this is what the curve already assumes at level 1"
-      }
+      { "slot": "main hand", "base": "one-handed sword", "quality": "low", "tier": 3 },
+      { "slot": "helmet", "base": "Circlet", "quality": "low", "tier": 3 },
+      { "slot": "chest", "base": "Vestment", "quality": "low", "tier": 3 },
+      { "slot": "pant", "base": "Legwraps", "quality": "low", "tier": 3 },
+      { "slot": "boots", "base": "Silk Slippers", "quality": "low", "tier": 3 },
+      { "slot": "gloves", "base": "Silk Wraps", "quality": "low", "tier": 3 },
+      { "slot": "belt", "base": "Silk Sash", "quality": "low", "tier": 3 },
+      { "slot": "ring", "base": "Iron Band", "quality": "low", "tier": 3 },
+      { "slot": "ring", "base": "Iron Band", "quality": "low", "tier": 3 },
+      { "slot": "amulet", "base": "Jade Amulet", "quality": "low", "tier": 3 },
+      { "slot": "earring", "base": "Silver Hoop", "quality": "low", "tier": 3 },
+      { "slot": "cape", "base": "Traveler's Cloak", "quality": "low", "tier": 3 },
+      { "slot": "off hand", "base": "Buckler", "quality": "low", "tier": 3 }
     ],
+    "gear_note": "The whole set, one piece per slot, and the lightest frame of every slot: it dresses the character at minute one without handing over a point of attack power. The frames' Base Mods are defence and utility only (Energy Shield %, Max HP flat, Evasion %, Elemental alignment %, Block %) and the one weapon pair is the sword's own floor line, so the priced clock - mob_HP, the drop line, the timeline, the XP ladder - cannot move. The off hand is a Buckler on purpose: a Grimoire's Base Mod is Magic power flat, which is attack power the curve does not pay for.",
+    "gear_rule": "main hand names a weapon TYPE (what a drop records as its base); every other slot names a Base frame from bases.json. The order here is the hand's own listing, not the SLOTS order - a client places each piece at its own slot, and the two ring entries take the two ring slots.",
     "skills": [],
     "skills_note": "No starting skill on purpose. The mob-health curve gives a level-1 character 0.3% skill power, so a free attack skill would hand out several times what the mobs are priced against. The first skill is the first boss drop, which is also the first time the skill axis becomes visible.",
     "first_rule": {
       "source": "Guild counter, Eastgate",
-      "type": "hunt",
-      "objective": "kill 5 in zone 1",
-      "why": "the task board already exists and pays stones only, so the first instruction costs no new system and no power outside the loot funnel - its reward sits inside the task income bound tasks.md already sets",
-      "completes_on": "5 kills in zone 1",
-      "reward": "the standard hunt payout (Reroll value stones), unmodified",
+      "type": "elite",
+      "objective": "the Guild's first Elite task, in the opening zone",
+      "why": "the task board already exists and pays stones only, so the first instruction costs no new system and no power outside the loot funnel - its reward sits inside the task income bound tasks.md already sets. It is an Elite hunt because the board's plain kill-count task is gone; the count and the payout are the board's own elite sizing, so nothing is typed twice",
+      "completes_on": "the first Elite task of the opening zone (the board's own elite sizing)",
+      "reward": "the standard elite payout (Reroll tier stones), unmodified",
       "exit": "once the first gear drop lands the task board stops being the tutorial and the player moves to the zone loop"
     },
     "no_death": "the player cannot be killed by the opening: zone-1 mobs take minutes to kill a level-1 character, and Push returns them to camp at full HP"
   },
-  "doc_prose_lines_max": 1263,
+  "doc_prose_lines_max": 1266,
   "doc_prose": {
     "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
     "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",

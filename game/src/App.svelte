@@ -6,79 +6,57 @@
   import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
-  import { slotsUsed, slotsAvailable, bagStacks } from './sim/slots';
+  import { slotsUsed, slotsAvailable, pouchSlots, bagStacks } from './sim/slots';
   import SlotGrid from './ui/SlotGrid.svelte';
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
   import {
-    settlementById, settlementOfZone, stockOf, priceGold, priceKills, canBuy, buy, sellJunk,
-    standingShare, standingTier, canTravel, claimTask, npcOf, ROAD_LINKS,
+    settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
+    standingShare, standingTier, canTravel, claimTask, npcOf,
   } from './sim/town';
   import { craft, doCraft, stoneNames, stoneName, lineName, lineTier, type CraftOp, type Where } from './sim/craft';
   import { farm, farmLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
   import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
 import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
-  import { road, startTrip, linkReachable, purseReady, linkLabel, startCircuit, stopCircuit, circuitValid, plotRoute, normaliseTrip } from './sim/road';
+  import { road, startWalk, walkLabel, walkBlocks } from './sim/road';
   import { masteryLabel, dropBonusPct, masteryLevel, WEAPONS } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
   import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
   import { mulberry32 } from './engine/client-helpers';
   import { writeSave, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
-  import { FILTER_SLOTS, RARITY_CHOICES, ruleFor, setRule, describeRule } from './sim/filter';
+  import { FILTER_SLOTS, ruleFor, setRule, describeRule } from './sim/filter';
   import { equipFromBag, gearModOf } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
   import { target as goalTarget, describe as describeGoal } from './sim/goal';
   import { elementIcon, mobIcon, skillIcon } from './icon';
   import { bossMark } from './icon';
-  import { hubArt, npcArt, stockArt } from './icon/art';
-  // the settlement map: hand-drawn terrain under the generated overlay (both presentation-only).
-  // Both are inlined as markup, not loaded as <img>: an SVG in an <img> is rasterised at its
-  // intrinsic size and then scaled, so the sheet would pixelate the moment the player zooms in.
-  import mapTerrainRaw from '../../art/svg/map/map-terrain.svg?raw';
-  // the overlay is inlined verbatim — the sheet is names and hexes, so there is no mark to toggle and
-  // the client reads no coordinate, only the ids already on each hex (X33 · M7 · M9)
+  // the settlement map: hand-drawn terrain under the generated overlay (both presentation-only)
+  import mapTerrain from '../../art/svg/map/map-terrain.svg?url';
+  // the overlay is inlined so the travel pin and dash can be toggled by id — the client reads no
+  // coordinate, only settlement/link ids it already holds (X33 · M7 · M10)
   import mapOverlayRaw from '../../art/svg/map/map-overlay.svg?raw';
   import type { GameState, Item } from './sim/types';
   import type { StatKey } from './engine/client';
   import type { Statuses } from './sim/combat';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
-  // The screens, in the order the top bar draws them. QOL is the hub: it owns the client-wide
-  // convenience settings and is the front door to the automation that lives on its own screen.
-  type TabId = 'main' | 'skills' | 'map' | 'farm' | 'qol' | 'save';
-  const TABS: TabId[] = ['main', 'skills', 'map', 'farm', 'qol', 'save'];
-  const TAB_LABEL: Record<TabId, string> = { main: 'Fight', skills: 'Skills', map: 'World', farm: 'Farm', qol: 'QOL', save: 'Save' };
+  const TABS = ['main', 'skills', 'town', 'map', 'farm', 'zones', 'save'] as const;
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
   let gameState = $state<GameState>(newGame());
   let statuses: Statuses = {};
   let running = $state(true);
-  let tab: TabId = $state('main');
-  /** The town-services drawer, opened for the settlement the character occupies. */
-  let overlayOpen = $state(false);
-  let mapDetailMode = $state<'town' | 'zone'>('town');
+  let tab: 'main' | 'skills' | 'town' | 'map' | 'farm' | 'zones' | 'save' = $state('main');
   let saveNote = $state('');
 
-  // The map is a zoomable, pannable sheet: `zoom`/`panX`/`panY` are the viewport transform, and the
-  // stage is the overlay's own pixel canvas (presentation only — no coordinate reaches the sim, X33).
-  let viewportEl = $state<HTMLDivElement | null>(null);
-  let stageEl = $state<HTMLDivElement | null>(null);
-  let zoom = $state(1);
-  let panX = $state(0);
-  let panY = $state(0);
-  const MIN_ZOOM = 0.2, MAX_ZOOM = 12;
-  let dragging = $state(false);
-  let dragged = false;
-  let dragFrom = { x: 0, y: 0, px: 0, py: 0 };
-
   /** The away-window report (parking: "Offline report on return"), filled on mount catch-up + Load. */
-  let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; laps: number; quality: string } | null>(null);
+  let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; quality: string } | null>(null);
 
   /** A small counter snapshot so the report diffs the away window instead of showing lifetime totals. */
   function snapCounters(s: GameState) {
     return {
       kills: s.counters.kills, drops: s.counters.drops, junk: s.counters.junk, gold: s.counters.gold,
       stones: Object.values(s.counters.stones).reduce((a, b) => a + b, 0),
-      level: s.player.level, laps: s.road?.laps ?? 0, quality: eng.zoneById(s.zone).quality,
+      level: s.player.level, quality: eng.zoneById(s.zone).quality,
     };
   }
   type Snap = ReturnType<typeof snapCounters>;
@@ -88,21 +66,21 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       mins, secs, capped,
       kills: a.kills - before.kills, drops: a.drops - before.drops, junk: a.junk - before.junk,
       gold: a.gold - before.gold, stones: a.stones - before.stones, levels: a.level - before.level,
-      laps: a.laps - before.laps, quality: a.quality,
+      quality: a.quality,
     };
   }
 
-  let c = $derived(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points));
+  let c = $derived(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points, gameState.player.treeRanks));
   let zone = $derived(eng.zoneById(gameState.zone));
+  let minutes = $derived(Math.floor(gameState.counters.playSec / 60));
+  let kph = $derived(gameState.counters.playSec > 0 ? (gameState.counters.kills / gameState.counters.playSec) * 3600 : 0);
 
   // The four regions of the main screen, in the shape the slot grid draws. Order and mode are the
   // player's choice; every value inside a slot is read from the engine, never recomputed here.
   let invMode = $state<'grid' | 'list'>('grid');
   let tempMode = $state<'grid' | 'list'>('grid');
-  /** The character sheet splits its two dense halves so each one fits the panel height. */
-  let sheetView = $state<'stats' | 'worn'>('stats');
   let invSort = $state<SortKey>('slot');
-  let tempSort = $state<SortKey>('rarity');
+  let tempSort = $state<SortKey>('level');
 
   const wornOf = (slot: string) => gameState.gear.find((g) => g && g.slot === slot) || null;
   /** the pile the hunt dropped — 50 slots, one piece each, waiting for a decision */
@@ -126,30 +104,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return settings.numberFormat === 'short'
       ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
       : Math.round(n).toLocaleString('en-US');
-  }
-
-  /**
-   * The current zone's Hunt Order; clearing it hands the lean back to the mob: every variant carries
-   * its own lean (`mob.variant_drops`), and the three normal rungs cycle gear · herb · junk. Either
-   * way the lean only shifts weight between the streams, never the total.
-   */
-  function setHuntOrder(v: 'gear' | 'herb' | 'junk' | 'none') {
-    if (!gameState.huntOrder) gameState.huntOrder = {};
-    if (v === 'none') delete gameState.huntOrder[gameState.zone];
-    else gameState.huntOrder[gameState.zone] = v;
-    gameState = { ...gameState };
-  }
-
-  /**
-   * Pick the hunting ground a spawn rolls inside, for a zone — the one the character stands in unless
-   * another zone is named. Empty = the whole cast. Clearing a foreign zone's ground is what lets a click
-   * on a hexagon there choose the ground before the walk arrives.
-   */
-  function setZoneFocus(name: string, zoneId: number = gameState.zone) {
-    if (!gameState.zoneFocus) gameState.zoneFocus = {};
-    if (!name) delete gameState.zoneFocus[zoneId];
-    else gameState.zoneFocus[zoneId] = name;
-    gameState = { ...gameState };
   }
 
   /** Spend or refund stat points. Takes effect on the next tick, so the sheet works mid-combat. */
@@ -251,23 +205,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     };
   });
 
-  // QOL · keyboard. A key is read only when the focus is not in a field, so typing always wins, and
-  // Space is left to a focused button so the button keeps activating the normal way.
-  function onKey(e: KeyboardEvent) {
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
-    const el = e.target as HTMLElement | null;
-    const tag = el?.tagName;
-    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || el?.isContentEditable) return;
-    if (e.key === 'Escape') { if (overlayOpen) { overlayOpen = false; e.preventDefault(); } return; }
-    if (e.key === ' ') { if (tag === 'BUTTON') return; running = !running; e.preventDefault(); return; }
-    const n = Number(e.key);
-    if (Number.isInteger(n) && n >= 1 && n <= TABS.length) tab = TABS[n - 1];
-  }
-  onMount(() => {
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  });
-
   function equip(index: number) {
     // the rule lives in `sim/gear.ts`, where the tests can reach it too; this copy only makes the
     // panel re-read the gameState the verb mutated in place
@@ -275,13 +212,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** A zone is only ever entered on foot, so the Road's encounters fire on the way (never warped). */
-  function visitZone(zoneId: number) {
-    const s = settlementOfZone(zoneId);
-    if (!s) return;
-    tab = 'map';
-    if (s.id === townId) { openServices('zone'); return; }
-    walkTo(s.id);
+  function goToZone(id: number) {
+    const s = settlementOfZone(id);
+    if (!s || !gameState.town.visited.includes(s.id)) {
+      saveNote = `${eng.zoneById(id).name} is not opened yet — walk there from the map panel`;
+      tab = 'town';
+      return;
+    }
+    gameState.zone = id;
+    gameState.group = [];
+    gameState.player.atkTimer = 0;
+    push(gameState, `Walking to ${eng.zoneById(id).name} (levels ${eng.zoneById(id).levels.join('-')})`);
+    gameState = { ...gameState };
   }
 
   /** The slot the player last saved or loaded. Null until they choose, so a fresh in-memory game
@@ -314,10 +256,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const s = await restoreSnapshot(snapSlot, index);
     if (!s) { snapNote = 'That backup is gone'; return; }
     statuses = {};
-    normaliseTrip(s);
     gameState = s;
-    overlayOpen = false;
-    mapDetailMode = 'town';
     const what = describeSnap(snaps[index]);
     await loadSnaps();
     snapNote = `Rewound ${snapSlot} to the backup taken ${what} — the character went back whole, stones and craft counts with it`;
@@ -334,12 +273,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const s = await readSave(slot);
     if (!s) { saveNote = `${slot} is empty`; return; }
     statuses = {};
-    // a save written before the walk arrives with a leg and no blocks; filling the keys here keeps
-    // the walk one shape whether it was restored or started fresh
-    normaliseTrip(s);
     gameState = { ...s };
-    overlayOpen = false;
-    mapDetailMode = 'town';
     const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
     const before = snapCounters(gameState);
     const r = await catchUpAsync(gameState, statuses, away);
@@ -366,8 +300,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     try {
       gameState = importJson(await file.text());
       statuses = {};
-      overlayOpen = false;
-      mapDetailMode = 'town';
       saveNote = 'Imported';
       gameState = { ...gameState };
     } catch (e) {
@@ -379,159 +311,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = newGame();
     statuses = {};
     saveNote = '';
-    overlayOpen = false;
-    mapDetailMode = 'town';
   }
 
-  // the drawer follows the zone the character is actually hunting, so an auto-travel step cannot
+  // the panel follows the zone the character is actually hunting, so an auto-travel step cannot
   // leave it showing the town the character walked away from
   const townId = $derived(settlementOfZone(gameState.zone)?.id || 'eastgate');
   const town = $derived(settlementById(townId));
-  const selectedZone = $derived(eng.zoneById(gameState.zone));
-
-  /** Open the town-services drawer for the occupied settlement. Unavailable on the Road. */
-  function openServices(view: 'town' | 'zone' = 'town') {
-    if (gameState.road) { saveNote = 'Reach a settlement before opening its services'; return; }
-    mapDetailMode = view;
-    overlayOpen = true;
-    saveNote = '';
-  }
-
-  // ------------------------------------------------------------------ the map: zoom & pan
-  /** Frame the whole sheet inside the viewport, centred — the opening view and the `fit` button. */
-  function fitMap() {
-    const vp = viewportEl, st = stageEl;
-    if (!vp || !st || !st.offsetWidth) return;
-    // compute into a local, never re-read the `zoom` state: this runs from an $effect, and reading
-    // `zoom` here would make the effect track it and re-fit on every zoom, pinning the sheet to fit
-    const k = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.min(vp.clientWidth / st.offsetWidth, vp.clientHeight / st.offsetHeight)));
-    zoom = k;
-    panX = (vp.clientWidth - st.offsetWidth * k) / 2;
-    panY = (vp.clientHeight - st.offsetHeight * k) / 2;
-  }
-  /** Zoom by `factor` about a viewport point, so the ground under it stays put. */
-  function zoomAt(factor: number, cx: number, cy: number) {
-    const k = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * factor));
-    if (k === zoom) return;
-    panX = cx - (cx - panX) * (k / zoom);
-    panY = cy - (cy - panY) * (k / zoom);
-    zoom = k;
-    clampPan();
-  }
-  function zoomBy(factor: number) {
-    if (viewportEl) zoomAt(factor, viewportEl.clientWidth / 2, viewportEl.clientHeight / 2);
-  }
-  /**
-   * Keep the sheet inside its own area: past its edges the pan stops, and a sheet smaller than the
-   * viewport is centred — so a drag can never push the map out into the screen around it. Called from
-   * the event handlers only, never from the `fit` effect, which must not read the pan (see fitMap).
-   */
-  function clampPan() {
-    const vp = viewportEl, st = stageEl;
-    if (!vp || !st) return;
-    const w = st.offsetWidth * zoom, h = st.offsetHeight * zoom;
-    panX = w <= vp.clientWidth ? (vp.clientWidth - w) / 2 : Math.min(0, Math.max(vp.clientWidth - w, panX));
-    panY = h <= vp.clientHeight ? (vp.clientHeight - h) / 2 : Math.min(0, Math.max(vp.clientHeight - h, panY));
-  }
-  function onWheel(e: WheelEvent) {
-    if (!viewportEl) return;
-    e.preventDefault();
-    const rect = viewportEl.getBoundingClientRect();
-    zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - rect.left, e.clientY - rect.top);
-  }
-  function onPointerDown(e: PointerEvent) {
-    if (e.button !== 0) return;
-    dragging = true;
-    dragged = false;
-    dragFrom = { x: e.clientX, y: e.clientY, px: panX, py: panY };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  }
-  function onPointerMove(e: PointerEvent) {
-    if (!dragging) return;
-    const dx = e.clientX - dragFrom.x, dy = e.clientY - dragFrom.y;
-    if (Math.abs(dx) + Math.abs(dy) > 4) dragged = true;
-    if (dragged) { panX = dragFrom.px + dx; panY = dragFrom.py + dy; clampPan(); }
-  }
-  function onPointerUp(e: PointerEvent) {
-    if (!dragging) return;
-    dragging = false;
-    (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
-    // a drag that ends off-target never fires a click, so clear the guard on the next task either way
-    if (dragged) setTimeout(() => { dragged = false; }, 0);
-  }
-  // the sheet is framed every time its tab opens, and again if the window is resized while it is up
-  $effect(() => {
-    if (tab !== 'map' || !viewportEl || !stageEl) return;
-    fitMap();
-    const onResize = () => fitMap();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+  // The map overlay with the travel pin toggled by id: the pin sits on the settlement you stand in,
+  // and the destination is marked while a walk runs. No coordinate is read here — only settlement ids
+  // the client already holds (X33 · M7).
+  const mapMarkup = $derived.by(() => {
+    let s = mapOverlayRaw.replace(/^<\?xml[^>]*\?>\s*/, '');
+    s = s.replace(`<g class="pin" data-node="${townId}"`, `<g class="pin here" data-node="${townId}"`);
+    const walk = gameState.walk;
+    if (walk && walk.to !== townId) s = s.replace(`<g class="pin" data-node="${walk.to}"`, `<g class="pin target" data-node="${walk.to}"`);
+    return s;
   });
-
-  /**
-   * The whole lattice is the travel map: every hex registers the place it belongs to, so a click reads
-   * an id and never a coordinate (M7 · M10 · X33). A sub-zone hex of the zone the character stands in
-   * picks the hunting ground; a sub-zone hex anywhere else is walked to with its settlement, because the
-   * Road's encounters are the whole point of crossing. A settlement's own block opens its services where
-   * the character stands, and is a journey (warp when a checkpoint link is open, else a walk) anywhere else.
-   */
-  function pickOnMap(ev: MouseEvent) {
-    if (dragged) { dragged = false; return; }
-    const el = (ev.target as Element)?.closest?.('[data-node]') as SVGElement | null;
-    const id = el?.getAttribute('data-node');
-    if (!id) return;
-    const sub = el?.getAttribute('data-sub');
-    if (sub) {
-      if (id === townId) { setZoneFocus(sub); saveNote = `Hunting ground: ${sub}`; }
-      else {
-        // the ground is chosen for its own zone, so the walk arrives on it rather than the whole cast
-        const zone = settlementById(id)?.zone;
-        if (zone != null) setZoneFocus(sub, zone);
-        walkTo(id);
-      }
-      return;
-    }
-    if (id === townId) {
-      if (el?.getAttribute('data-pod')) openServices();
-      else saveNote = `You are already in ${town.name}`;
-      return;
-    }
-    if (canTravel(gameState, id)) travelTo(id);
-    else walkTo(id);
-  }
-
-  /** Lay a route to a settlement and walk it, block by block — the only way into a zone. */
-  function walkTo(id: string) {
-    if (gameState.road) { saveNote = 'Already on the Road'; return; }
-    const r = plotRoute(gameState, id);
-    saveNote = r.ok
-      ? `Walking to ${settlementById(id)?.name} · ${r.route?.length} links`
-      : `Cannot walk: ${r.why}`;
-    gameState = { ...gameState };
-  }
-
-  // The map is inlined verbatim: the sheet draws names and hexes and nothing else, so the client has no
-  // mark to toggle and reads no coordinate — only the ids already on each hex (M7 · M9). The strip drops
-  // the XML prolog, which is not valid inside HTML.
-  const stripProlog = (s: string) => s.replace(/^<\?xml[^>]*\?>\s*/, '');
-  const prologued = stripProlog(mapOverlayRaw);
-  /** The sheet's own pixel canvas, read off the overlay rather than typed again here (M7). */
-  const CANVAS = (() => {
-    const m = prologued.match(/viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/);
-    return { w: m ? Number(m[1]) : 2000, h: m ? Number(m[2]) : 1200 };
-  })();
-  /**
-   * An SVG clips at its own viewBox, and an outer cluster's far hex can overhang the canvas by up to one
-   * hex pitch — so a rim sub-zone would be cut in half. Widening both viewBoxes by `MAP_BLEED` and growing
-   * the stage to match draws every hex whole. Presentation only: no coordinate reaches the sim (X33 · M7).
-   */
-  const MAP_BLEED = 72;
-  const bleed = (s: string) => s.replace(/viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/,
-    (_, w, h) => `viewBox="${-MAP_BLEED} ${-MAP_BLEED} ${Number(w) + 2 * MAP_BLEED} ${Number(h) + 2 * MAP_BLEED}"`);
-  const mapW = CANVAS.w + 2 * MAP_BLEED;
-  const mapH = CANVAS.h + 2 * MAP_BLEED;
-  const mapTerrain = $derived(bleed(stripProlog(mapTerrainRaw)));
-  const mapMarkup = $derived(bleed(prologued));
   const townStock = $derived(stockOf(town?.id));
   const junkTotal = $derived(Object.values(gameState.junk).reduce((a: number, b: number) => a + b, 0));
   /** Unsold junk as "item ×count", biggest stack first — the record of which variants were farmed. */
@@ -558,20 +353,26 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
+  /** A Waypoint warp: free, instant, and only to a settlement already walked to on foot. */
   function travelTo(id: string) {
     const s = settlementById(id);
-    if (!canTravel(gameState, id)) {
-      saveNote = `${s?.name} is not reachable by checkpoint yet — walk the Road to open it`;
-      return;
-    }
-    if (!gameState.town.visited.includes(id)) gameState.town.visited.push(id);
+    if (!canTravel(gameState, id)) { saveNote = `${s?.name ?? 'That settlement'} has not been walked to yet`; return; }
     // a manual jump is the new floor: a later Push in Forward Mode falls back to the zone just left
     gameState.forwardSafe = gameState.zone;
+    gameState.walk = null;
     gameState.zone = s.zone;
     gameState.group = [];
     gameState.town.waypoint = id;
-    push(gameState, `Warped to ${s.name}`);
-    saveNote = `Warped to ${s.name}`;
+    push(gameState, `Waypoint to ${s.name} — free and instant`);
+    gameState = { ...gameState };
+  }
+
+  /** Start a walk on foot to any settlement, walked to or not — this is how a Waypoint unlocks. */
+  function doWalk(id: string) {
+    const here = gameState.town.waypoint;
+    const r = startWalk(gameState, here, id);
+    if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
+    saveNote = `Walking to ${settlementById(id)?.name} — ${walkBlocks(here, id)} blocks`;
     gameState = { ...gameState };
   }
 
@@ -657,32 +458,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** The Circuit editor's working list, validated against the Road rules before it can start. */
-  let circuitDraft = $state<number[]>([]);
-  const draftCheck = $derived(circuitValid(gameState, circuitDraft));
-  function toggleCircuitLink(i: number) {
-    circuitDraft = circuitDraft.includes(i) ? circuitDraft.filter((x) => x !== i) : [...circuitDraft, i];
-  }
-  function doStartCircuit() {
-    const r = startCircuit(gameState, circuitDraft);
-    townNote = r.ok ? 'Circuit set — the Road will loop it until stopped' : `Circuit refused: ${r.why}`;
-    if (r.ok) circuitDraft = [];
-    gameState = { ...gameState };
-  }
-  function doStopCircuit() {
-    const r = stopCircuit(gameState);
-    townNote = r.ok ? 'Circuit cleared' : `Cannot stop: ${r.why}`;
-    gameState = { ...gameState };
-  }
-
-  function doTrip(i: number) {
-    const r = startTrip(gameState, i);
-    const blocks = road.blocksFor(i);
-    townNote = r.ok
-      ? `Walking ${linkLabel(i)} · ${blocks} blocks of ${road.blockSec}s, ${road.encountersFor(i)} encounters`
-      : `Cannot start: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  
 
   function doSwitchPreset(i: number) {
     switchPreset(gameState, i);
@@ -755,7 +531,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       .join(' · '),
   );
 
-  /** One flag per Element status a row can apply (the five `elements.status_of` names)⬦ */
+  /** One flag per Element status a row can apply (the five `elements.status_of` names)… */
   const statusFlags = $derived(Object.values((E.elements as any).status_of || {}) as string[]);
   /** …and one per curse row, keyed by the row's own id — the two kinds share the one list (§14). */
   const curseFlags = $derived(sm.of('curse') as any[]);
@@ -774,7 +550,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       .join(' · ');
   }
 
-  /** The purse in words, using the names the bench itself charges by. */
+  /** The stones in words, using the names the bench itself charges by. */
   function stonesLine(): string {
     const held = Object.entries(gameState.counters.stones).filter(([, n]) => (n as number) > 0);
     if (!held.length) return 'no stones yet';
@@ -810,39 +586,28 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 </script>
 
-<header class="topbar">
-  <div class="brand" aria-label="ModWorld">
-    <span class="brand-mark" aria-hidden="true"></span>
-    <b>ModWorld</b>
-  </div>
-  <nav class="tabs" aria-label="Game screens">
+<header>
+  <h1>ModWorld</h1>
+  <nav>
     {#each TABS as t}
-      <button class="tab" class:active={tab === t} aria-current={tab === t ? 'page' : undefined} onclick={() => (tab = t)}>{TAB_LABEL[t]}</button>
+      <button class:active={tab === t} onclick={() => (tab = t)}>{t === 'main' ? 'main screen' : t}</button>
     {/each}
   </nav>
-  <div class="status">
-    <!-- Pause lives here rather than on the Fight panel so it stays reachable from every screen. -->
-    <button class="chip run" class:paused={!running} onclick={() => (running = !running)} title={running ? 'Pause the game' : 'Resume the game'}>
-      <span class="dot" aria-hidden="true"></span>{running ? 'running' : 'paused'}
-    </button>
-    <span class="chip">{zone.name}</span>
-    <span class="chip">L{gameState.player.level}</span>
-    <span class="chip num">{fmtNum(gameState.counters.kills)} kills</span>
-    <span class="chip num gold">{fmtNum(gameState.counters.gold)} gold</span>
+  <div class="meta">
+    {zone.name} L{gameState.player.level} · {minutes} min · kills {gameState.counters.kills} · {kph.toFixed(0)}/hr
   </div>
 </header>
 
-<main class="screen" class:main-screen={tab === 'main'} class:map-screen={tab === 'map'}>
 {#if tab === 'main'}
   <div class="main">
     <section class="panel region scene">
-      <h2>Combat · {zone.name}</h2>
+      <h2>Combat scene · {zone.name}</h2>
       {#if awayReport}
         <div style="display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;border:1px solid #8a7048;border-radius:6px;padding:.4rem .6rem;margin:.3rem 0;font-size:.85rem">
-          <button onclick={() => (awayReport = null)} aria-label="Dismiss" style="background:none;border:none;cursor:pointer;color:inherit">✕S"</button>
+          <button onclick={() => (awayReport = null)} aria-label="Dismiss" style="background:none;border:none;cursor:pointer;color:inherit">✕</button>
           <strong>Welcome back</strong>
-          <span>away {awayReport.mins}m {awayReport.secs}s{awayReport.capped ? ' · capped' : ''}</span>
-          <span>+{fmtNum(awayReport.kills)} kills · {fmtNum(awayReport.drops)} drops · {fmtNum(awayReport.stones)} stones · {fmtNum(awayReport.gold)} gold{awayReport.levels ? ` · +${awayReport.levels} levels` : ''}{awayReport.laps ? ` · ${awayReport.laps} laps` : ''}</span>
+          <span>away {awayReport.mins} min · {awayReport.secs} sec simulated{awayReport.capped ? ' (capped at the offline limit)' : ''}</span>
+          <span>+{fmtNum(awayReport.kills)} kills · {fmtNum(awayReport.drops)} items · {fmtNum(awayReport.stones)} stones · {fmtNum(awayReport.junk)} junk · {fmtNum(awayReport.gold)} gold{awayReport.levels ? ` · +${awayReport.levels} level${awayReport.levels > 1 ? 's' : ''}` : ''} · quality floor {awayReport.quality}</span>
         </div>
       {/if}
     <div class="bars">
@@ -865,39 +630,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         {@const k = id ? sm.byId[id] : null}
         <span class="skill-slot" class:empty={!id || !k} role="listitem" title={`Slot ${i + 1}${id && k ? ': ' + k.name : ': empty'}`}>
           {#if id && k}
-            <span class="skill-label">{@html skillIcon(k.id, k.type, k.element)}{k.name}</span>
+            <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span>
             <small class:ready={(gameState.skills.cd[id] || 0) <= 0}>{(gameState.skills.cd[id] || 0) <= 0 ? 'ready' : `${(gameState.skills.cd[id] || 0).toFixed(1)}s`}</small>
           {/if}
         </span>
       {/each}
     </div>
     <p class="state">
-      <label class="travel">Hunt zone
+      <label class="travel">Zone
         <button class={gameState.travel === 'stay' ? 'active' : ''} onclick={() => setTravel('stay')}>stay here</button>
-        <button class={gameState.travel === 'forward' ? 'active' : ''} onclick={() => setTravel('forward')}>forward</button>
-        <small>{gameState.travel === 'forward' ? `Advance past level ${zone.levels[1]}; Push falls back one zone.` : 'Stay until you choose another zone.'}</small>
+        <button class={gameState.travel === 'forward' ? 'active' : ''} onclick={() => setTravel('forward')}>climb forward</button>
+        <small>{gameState.travel === 'forward'
+          ? `climbs: walks on to the next settlement you have already opened once level ${zone.levels[1] + 1} is reached, and a Push sends you back to the last zone you held — the climb resumes one level later`
+          : 'stays in this zone however high you get — you choose when to travel'}</small>
       </label>
     </p>
     <p class="state">
-      <label class="travel">Hunt order
-        <button class={gameState.huntOrder?.[gameState.zone] === undefined ? 'active' : ''} onclick={() => setHuntOrder('none')}>by variant</button>
-        <button class={gameState.huntOrder?.[gameState.zone] === 'gear' ? 'active' : ''} onclick={() => setHuntOrder('gear')}>gear</button>
-        <button class={gameState.huntOrder?.[gameState.zone] === 'herb' ? 'active' : ''} onclick={() => setHuntOrder('herb')}>herbs</button>
-        <button class={gameState.huntOrder?.[gameState.zone] === 'junk' ? 'active' : ''} onclick={() => setHuntOrder('junk')}>junk</button>
-        <small>By variant uses each mob's default bias. Overrides change the loot mix, not total drops.</small>
-      </label>
-      <label class="travel">Hunting ground
-        <select onchange={(e) => setZoneFocus((e.target as HTMLSelectElement).value)}>
-          <option value="" selected={!gameState.zoneFocus?.[gameState.zone]}>the whole cast</option>
-          {#each (eng.zoneById(gameState.zone).subzones || []) as sub}
-            <option value={sub.name} selected={gameState.zoneFocus?.[gameState.zone] === sub.name}>{sub.name} · {sub.element} · {sub.races.join(' + ')}</option>
-          {/each}
-        </select>
-        <small>Spawns use the selected cast. Elite and Boss remain zone-wide.</small>
-      </label>
-    </p>
-    <p class="state">
-      {#if gameState.phase === 'camp'}Pushed · camp {gameState.campSec}s{:else}Fighting · {c.weaponName} · {c.hitsPerSec.toFixed(2)} hits/s · {c.weaponElement || 'no Element'}{/if}
+      {#if gameState.phase === 'camp'}Pushed — recovering at camp for {gameState.campSec} sec. No death, no loss: time is the only cost.{:else}Fighting · {c.hitsPerSec.toFixed(2)} hits/sec with {c.weaponName}, {c.weaponElement ? `carrying ${c.weaponElement}` : 'carrying no Element'}{/if}
     </p>
     <table>
       <thead><tr><th>Target</th><th>Body</th><th>HP</th><th>PS</th><th>Hit vs</th><th>Dodge</th><th>Innate</th><th>Under a curse</th></tr></thead>
@@ -929,30 +678,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <div class="log">
       {#each gameState.log.slice(0, 12) as line}
         <div><span class="t">{line.sec}s</span> {line.text}</div>
-      {:else}
-        <div class="empty">No events yet — the log fills as the hunt runs.</div>
       {/each}
     </div>
-    <div class="controls">
-      <button onclick={step}>One tick</button>
-      <button onclick={() => { if (confirm('Start a new character?')) reset(); }}>New character</button>
-    </div>
+    <button onclick={() => (running = !running)}>{running ? 'Pause' : 'Resume'}</button>
+    <button onclick={step}>One tick</button>
+    <button onclick={() => { if (confirm('Start a new character?')) reset(); }}>New character</button>
     </section>
 
     <section class="panel region sheet">
-      <div class="sheet-head">
-        <h2>Character sheet · level {gameState.player.level}</h2>
-        <div class="seg" role="tablist" aria-label="Character sheet view">
-          <button role="tab" aria-selected={sheetView === 'stats'} class:active={sheetView === 'stats'} onclick={() => (sheetView = 'stats')}>Stats</button>
-          <button role="tab" aria-selected={sheetView === 'worn'} class:active={sheetView === 'worn'} onclick={() => (sheetView = 'worn')}>Worn · {gameState.gear.filter(Boolean).length} / {E.stat.item_slots}</button>
-        </div>
-      </div>
+      <h2>Character sheet · level {gameState.player.level}</h2>
+      <h3>Worn ({gameState.gear.filter(Boolean).length} / {E.stat.item_slots}) — hover a slot on the body to read it</h3>
+      <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="doll" />
 
-      {#if sheetView === 'worn'}
-        <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="doll" />
-        <p class="gate"><small>Weight <b>{c.weightUsed.toFixed(0)}</b> / {Math.round(c.weightCap)}{c.encumbrance > 0 ? ` · aspd ${(c.encumbrance * -100).toFixed(0)}%` : ' · no tax'}</small></p>
-      {:else}
-      <p><small>Unspent <b>{gameState.player.statPoints}</b> · tree <b>{gameState.player.treePoints}</b> · <label><input type="checkbox" checked={gameState.player.autoSpend} onchange={() => { gameState.player.autoSpend = !gameState.player.autoSpend; gameState = { ...gameState }; }} /> auto-allocate</label></small></p>
+      <p><small>Levels grant <b>points</b>, not stats: unspent <b>{gameState.player.statPoints}</b> · tree points banked <b>{gameState.player.treePoints}</b>. <label><input type="checkbox" checked={gameState.player.autoSpend} onchange={() => { gameState.player.autoSpend = !gameState.player.autoSpend; gameState = { ...gameState }; }} /> auto-allocate evenly (idle default)</label> — turn it off to bank points and spend them by hand. Respec is free, at the town Counterhand.</small></p>
       <table class="stats">
         <tbody>
           {#each STATS as k}
@@ -978,8 +716,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr><td>Crit</td><td>{c.critChance.toFixed(1)}% chance · {c.critDmg.toFixed(0)}% damage</td></tr>
           <tr><td>Resistance</td><td>{c.resistance.toFixed(1)}% (Cap {E.caps.elem_res})</td></tr>
           <tr><td>Basic attack</td><td>{basicAttack}{basicAttackLine}</td></tr>
-          <tr><td>Stun Recovery</td><td>{c.stunRecovery.toFixed(1)}% · stop {(E.status.shock.stop_sec * (1 - c.stunRecovery / 100)).toFixed(2)}s</td></tr>
-          <tr><td>Alignment</td><td>{c.alignment.toFixed(1)}%{E.caps.alignment == null ? ' · uncapped' : ` / ${E.caps.alignment}%`}</td></tr>
+          <tr><td>Stun Recovery</td><td>{c.stunRecovery.toFixed(1)}% of a shock's stop — Vit buys it back, so a {E.status.shock.stop_sec} sec stun leaves {(E.status.shock.stop_sec * (1 - c.stunRecovery / 100)).toFixed(2)} sec</td></tr>
+          <tr><td>Alignment</td><td>{c.alignment.toFixed(1)}% (Cap {E.caps.alignment})</td></tr>
           <tr><td>Cooldown reduction</td><td>{c.cdr.toFixed(1)}% (Cap {E.caps.cdr})</td></tr>
           <tr><td>Energy Shield</td><td>{Math.round(c.es)} · regens {c.esRegen.toFixed(1)}/sec after {E.energy_shield.delay_sec} sec ({E.energy_shield.regen_pct}% of the pool, amplified by an es_regen line)</td></tr>
           <tr><td>Weight</td><td>{c.weightUsed.toFixed(0)} used / {Math.round(c.weightCap)} capacity{c.encumbrance > 0 ? ` · aspd ${(c.encumbrance * -100).toFixed(0)}%` : ' · no tax'}</td></tr>
@@ -990,20 +728,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <p class="gate">{describeGoal()}</p>
       <p><small>
         {#if gameState.goal.done}
-          Complete · L{gameState.goal.done.level} · {gameState.goal.attempts} spawns
+          Met at {Math.round(gameState.goal.done.clockSec / 60)} min of play on a level {gameState.goal.done.level} character, {gameState.goal.attempts} spawn{gameState.goal.attempts === 1 ? '' : 's'} in. The run keeps going: levels past it are the item-quality push in the same zone, and there is no prestige.
         {:else}
-          {gameState.goal.attempts === 0 ? 'Awaiting first boss spawn' : `${gameState.goal.attempts} attempts · Push resets the attempt`}
+          Not met yet. It takes {gameState.goal.attempts === 0 ? 'no spawn of this boss yet' : `${gameState.goal.attempts} spawn${gameState.goal.attempts === 1 ? '' : 's'}`}, and every Push inside a spawn starts the count over.
         {/if}
       </small></p>
-      {/if}
     </section>
 
     <section class="panel region temp">
       <h2>Temp inventory · adventure bag ({gameState.bag.length} / {E.inventory.adventure_slots})</h2>
       {#if gameState.bag.length >= E.inventory.adventure_slots}
-        <p class="warn"><b>Bag full · pickups stopped.</b> Return to {settlementById(gameState.town.waypoint)?.name || 'a settlement'} and deposit. {fmtNum(gameState.counters.overflow || 0)} drops were missed.</p>
+        <p class="warn"><b>Bag full — the zone has stopped paying.</b> A full bag picks up nothing and turns nothing into a stone, so {gameState.counters.overflow || 0} pieces so far were left on the ground instead of turning into Reroll value. Walk back to {settlementById(gameState.town.waypoint)?.name || 'a settlement'} and deposit, then come out again.</p>
       {:else}
-        <p><small>Equip kept drops manually.</small></p>
+        <p><small>Kept pieces wait here until you choose. Hover a slot to read the piece and Equip it — nothing equips itself.</small></p>
       {/if}
       <SlotGrid
         entries={tempEntries}
@@ -1018,10 +755,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       />
 
       <details class="filter">
-        <summary>Filter rules</summary>
-        <p><small>Off keeps all drops. Enabled failures dissolve into Reroll value; stones stay.</small></p>
+        <summary>Bag filter — what this run keeps</summary>
+        <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. Turn a slot on and a piece that fails its rule turns into 1 Reroll value stone on the spot (stones are always kept, never discarded) — nothing is deleted.</small></p>
         <table>
-          <thead><tr><th>Slot</th><th>Filter</th><th>Keep when it beats the worn piece by</th><th>Rarity floor</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
+          <thead><tr><th>Slot</th><th>Filter</th><th>Keep when it beats the worn piece by</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
           <tbody>
             {#each FILTER_SLOTS as slot}
               {@const r = ruleFor(gameState.filter, slot)}
@@ -1029,18 +766,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
                 <td>{slot}</td>
                 <td><input type="checkbox" checked={r.enabled} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
                 <td><input type="number" min="0" step="1" value={r.margin_pct} disabled={!r.enabled} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
-                <td>
-                  <select disabled={!r.enabled} onchange={(e) => editRule(slot, { min_rarity: (e.target as HTMLSelectElement).value })}>
-                    {#each RARITY_CHOICES as k}<option value={k} selected={r.min_rarity === k}>{k === 'any' ? 'any Rarity' : k}</option>{/each}
-                  </select>
-                </td>
                 <td><input type="checkbox" checked={r.keep_missing_element} disabled={!r.enabled} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
                 <td>{describeRule(r)}</td>
               </tr>
             {/each}
           </tbody>
         </table>
-        <p><small>Missing res: <b>{gameState.filter.missing.elements.join(', ') || 'none'}</b> · empty slots: <b>{gameState.filter.missing.slots.join(', ') || 'none'}</b></small></p>
+        <p><small>Still not found — Elements you have no resistance for: <b>{gameState.filter.missing.elements.length ? gameState.filter.missing.elements.join(', ') : 'none'}</b> · empty slots: <b>{gameState.filter.missing.slots.length ? gameState.filter.missing.slots.join(', ') : 'none'}</b></small></p>
       </details>
     </section>
 
@@ -1057,7 +789,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         wornOf={wornOf}
         empty="Nothing carried yet — stones, herbs, draughts and junk all land in these slots."
       />
-      <p><small>Stacks: stones/junk {E.inventory.stack_size.stone} · herbs/potions {E.inventory.stack_size.herb} · gold uses no slot · stopped grants {gameState.counters.stopped || 0}.</small></p>
+      <p><small>
+        Stones and junk stack {E.inventory.stack_size.stone} per slot and weigh nothing · herbs and draughts stack {E.inventory.stack_size.herb} per slot and weigh {E.inventory.unit_weight.herb} each · gold takes no slot.
+        A grant with no slot left is left where it is ({gameState.counters.stopped || 0} so far) — nothing is deleted and nothing becomes a different medium.
+        {pouchSlots(gameState) > 0 ? `The Porter's pouches added ${pouchSlots(gameState)} of these slots · ` : ''}Clear space by selling junk at the Counterhand, brewing herbs into draughts, or condensing ten bottles into one.
+      </small></p>
     </section>
   </div>
 {/if}
@@ -1076,14 +812,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         {gameState.presets[gameState.activePreset].zones.includes(gameState.zone) ? 'unbind this zone' : 'bind this zone'}
       </button>
     </div>
-    <p><small>{skillNote || `First ready skill with enough mana casts. Push restores Main; cooldowns continue.`}</small></p>
-    <p><small>Usable mana {Math.round(c.maxMana * (1 - reserved / 100))} · reserved {reserved}% · slots fire top-down. Set each to Always, Conditional or Never.</small></p>
-    <p class="conditions"><small>Conditions</small>
+    <p><small>{skillNote || `Six sets are stored and the game picks one by zone. A Push brings the Main set back, and a skill already counting its cooldown keeps counting.`}</small></p>
+    <p><small>The game presses the first slot whose cooldown is ready and whose mana fits the usable pool. You only arrange the order. A percentage skill charges that share of the usable pool; a flat skill charges its own units, which grow with its level and with the pool. Reserved by auras: {reserved}% of the pool, so {Math.round(c.maxMana * (1 - reserved / 100))} mana stays usable.</small></p>
+    <p><small>Each slot picks <b>when</b> it may fire: <b>always</b> (cast whenever it is ready), <b>conditional</b> (only while one of the shared conditions below holds), or <b>never</b> (silenced). The list is shared by every conditional slot, so a new condition is one entry, never free text.</small></p>
+    <p><small>Conditional slots fire:
       <label><input type="checkbox" checked={gameState.skills.conditions.boss} onchange={(e) => setConditions({ boss: (e.target as HTMLInputElement).checked })} /> against a boss</label> ·
       <label><input type="checkbox" checked={gameState.skills.conditions.hpBelowPct > 0} onchange={(e) => setConditions({ hpBelowPct: (e.target as HTMLInputElement).checked ? 50 : 0 })} /> while HP is under</label>
       <input type="number" min="0" max="100" value={gameState.skills.conditions.hpBelowPct} onchange={(e) => setConditions({ hpBelowPct: Number((e.target as HTMLInputElement).value) })} />% of the pool ·
       {#each statusFlags as st}<label><input type="checkbox" checked={(gameState.skills.conditions.statusMissing || []).includes(st)} onchange={() => toggleStatusMissing(st)} /> while the target has no {st}</label>{' '}{/each}
-      {#each curseFlags as cf}<label><input type="checkbox" checked={(gameState.skills.conditions.statusMissing || []).includes(cf.id)} onchange={() => toggleStatusMissing(cf.id)} /> while {cf.name} is not on it</label>{/each}</p>
+      {#each curseFlags as cf}<label><input type="checkbox" checked={(gameState.skills.conditions.statusMissing || []).includes(cf.id)} onchange={() => toggleStatusMissing(cf.id)} /> while {cf.name} is not on it</label>{' '}{/each}</small></p>
     <table>
       <thead><tr><th>#</th><th>Skill</th><th>Worth</th><th>Level</th><th>cd → eff</th><th>Mana</th><th>Next in</th><th>When</th><th>Place</th></tr></thead>
       <tbody>
@@ -1092,7 +829,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr>
             <td>{i + 1}</td>
             <td>
-              {#if k}<span class="skill-label">{@html skillIcon(k.id, k.type, k.element)}{k.name}</span>{:else}—{/if}
+              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span>{:else}—{/if}
             </td>
             <td>{k && id ? (k.final_pct ? `${Math.round(k.final_pct)}% of your ${k.basis === 'magic' ? 'spell hit' : 'weapon hit'}` : k.type) : ''}</td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
@@ -1118,38 +855,38 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         {/each}
       </tbody>
     </table>
-    <h3>Skill levels</h3>
+    <h3>Duplicates feed each skill's own ladder</h3>
     <table>
       <thead><tr><th>Skill</th><th>Type</th><th>Dupes</th><th>Ladder</th><th>Effect</th></tr></thead>
       <tbody>
         {#each Object.keys(gameState.skills.owned) as id}
           {@const k = sm.byId[id]}
           <tr>
-            <td><span class="skill-label">{@html skillIcon(k.id, k.type, k.element)}{k.name}</span></td><td>{k.type}</td><td>{gameState.skills.owned[id]}</td>
+            <td><span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></td><td>{k.type}</td><td>{gameState.skills.owned[id]}</td>
             <td>{ladderOf(gameState.skills, id)}% cd</td>
             <td>{k.effect || (k.final_pct != null ? `${pct2(k.final_pct)}% of its ${k.basis} hit` : k.reserve) || ''}</td>
           </tr>
         {:else}
-          <tr><td colspan="5">No skills yet · first drop comes from a Boss.</td></tr>
+          <tr><td colspan="5">No skill yet — the first one is a boss drop ({(E.skill_drop.boss * 100).toFixed(0)}% per boss kill).</td></tr>
         {/each}
       </tbody>
     </table>
-    <h3>Buffs · automatic · no slot</h3>
+    <h3>Buff track (re-presses itself, takes no slot)</h3>
     {#each ownedBuffs as k}
-      <label><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label">{@html skillIcon(k.id, k.type, k.element)}{k.name}</span> · {k.duration} on / {k.cd}s cd · {manaNow(c, gameState.skills, k.id)} · {effectLine(k) || k.effect}</label><br />
+      <label><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.duration} on / {k.cd}s cd · {manaNow(c, gameState.skills, k.id)} · {effectLine(k) || k.effect}</label><br />
     {:else}
       <p><small>None owned.</small></p>
     {/each}
-    <p><small>Reserved {reservedPct(gameState.skills)}% / {sm.RESERVATION_LIMIT}% · active: {describeFold(effectsActive(gameState.skills)) || 'none'}.</small></p>
-    <h3>Auras · reserve Max Mana</h3>
+    <p><small>Reserved {reservedPct(gameState.skills)}% of Max Mana · the block is {sm.RESERVATION_LIMIT}%. Up right now: {describeFold(effectsActive(gameState.skills)) || 'nothing — no aura is on and no buff is counting'}.</small></p>
+    <h3>Aura set (reserves Max Mana, may not reserve all of it)</h3>
     {#each ownedAuras as k}
-      <label><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label">{@html skillIcon(k.id, k.type, k.element)}{k.name}</span> · {k.reserve} ({sm.reservePct(k.reserve)}%) · {effectLine(k) || k.effect}</label><br />
+      <label><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.reserve} ({sm.reservePct(k.reserve)}%) · {effectLine(k) || k.effect}</label><br />
     {:else}
       <p><small>None owned.</small></p>
     {/each}
 
-    <h3>Weapon Mastery</h3>
-    <p><small>XP goes to the held weapon; account bonus uses each weapon's best level.</small></p>
+    <h3>Mastery ladder · the whole roster</h3>
+    <p><small>Only the held weapon earns XP (4 a kill), but the account keeps the best value any slot reached. The fight panel shows just the held one; this is every weapon.</small></p>
     <table>
       <thead><tr><th>Weapon</th><th>Mastery</th><th>Drop bonus</th></tr></thead>
       <tbody>
@@ -1164,7 +901,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       </tbody>
     </table>
 
-    <h3>Curable curses</h3>
+    <h3>Curable curses · target-side lines a press can put on a mob</h3>
     <ul>
       {#each curableRows() as k}
         <li>{k.name} · {effectLine(k) || k.effect}</li>
@@ -1174,7 +911,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </ul>
 
     <h2>Passive tree · {treePointsFree(gameState)} banked · {treePointsSpent(gameState)} spent</h2>
-    <p><small>Spend banked points along each branch. Respec at the selected settlement.</small></p>
+    <p><small>A level banks one point and one point buys one rank; a node's rank 1 needs the node before it in its own chain, and every node pays a line at a number. Respec is free, at the town Counterhand.</small></p>
     <div class="tree-branches">
       {#each tree.branches as branch}
         <div class="tree-branch">
@@ -1199,92 +936,42 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </section>
 {/if}
 
-{#if tab === 'map'}
-  <section class="map-screen">
-    <div
-      class="map-viewport"
-      class:dragging
-      bind:this={viewportEl}
-      onpointerdown={onPointerDown}
-      onpointermove={onPointerMove}
-      onpointerup={onPointerUp}
-      onpointercancel={onPointerUp}
-      onwheel={onWheel}
-      onclick={pickOnMap}
-      role="presentation"
-    >
-      <div class="map-stage" bind:this={stageEl} style={`width:${mapW}px; height:${mapH}px; transform: translate(${panX}px, ${panY}px) scale(${zoom})`}>
-        <div class="map-frame">
-          {@html mapTerrain}
-          {@html mapMarkup}
-        </div>
-      </div>
-    </div>
-
-    <div class="map-zoom">
-      <button title="Zoom in" aria-label="Zoom in" onclick={() => zoomBy(1.25)}>+</button>
-      <button title="Zoom out" aria-label="Zoom out" onclick={() => zoomBy(0.8)}>−</button>
-      <button title="Fit the whole map" aria-label="Fit the whole map" onclick={fitMap}>⤢</button>
-    </div>
-
-    <div class="map-hud">
-      <span>At <span class="at">{town.name}</span> · zone {selectedZone.id} · levels {selectedZone.levels.join('-')}</span>
-      {#if gameState.road}
-        <span>· {linkLabel(gameState.road.linkIndex)} · block {gameState.road.blockIndex + 1}/{gameState.road.blocks} · {gameState.road.secLeft}s · {gameState.road.encountersLeft} encounters{gameState.road.kind ? ` · ${gameState.road.kind}` : ''}</span>
-      {/if}
-      <button onclick={() => openServices('town')} disabled={!!gameState.road}>Town services</button>
-    </div>
-
-    {#if saveNote}<p class="map-note">{saveNote}</p>{/if}
-
-    {#if overlayOpen}
-      <aside class="map-drawer" aria-label={`${town.name} services`}>
-        <div class="map-drawer-head">
-          <div>
-            <h2 class="hub-mark">{@html hubArt()}{town.name} · {town.band} band{town.capital ? ` · ${town.capital} capital` : ''}</h2>
-            <p><small>Zone {selectedZone.id} · levels {selectedZone.levels.join('-')} · {town.innate.join(' / ')} · {town.npcs.map((n: string) => npcOf(n).name).join(' · ')}</small></p>
-          </div>
-          <button onclick={() => (overlayOpen = false)} aria-label="Close">✕</button>
-        </div>
-        <div class="map-detail-tabs" role="tablist" aria-label="Place details">
-          <button role="tab" aria-selected={mapDetailMode === 'town'} class:active={mapDetailMode === 'town'} onclick={() => (mapDetailMode = 'town')}>Town</button>
-          <button role="tab" aria-selected={mapDetailMode === 'zone'} class:active={mapDetailMode === 'zone'} onclick={() => (mapDetailMode = 'zone')}>Zone · {selectedZone.id}</button>
-        </div>
-        <div class="map-drawer-body">
-    {#if mapDetailMode === 'town'}
-    <fieldset class="town-actions" aria-label={`Town services in ${town.name}`}>
+{#if tab === 'town'}
+  <section class="panel">
+    <h2>{town.name} · {town.band} band{town.capital ? ` · ${town.capital} capital` : ''}</h2>
+    <p><small>Innate Element {town.innate.join(' / ')} · Base bias flavour {town.base_bias_flavor} · NPCs here: {town.npcs.map((n: string) => npcOf(n).name).join(' · ')}</small></p>
 
     <h3>Counterhand · the gold mint</h3>
     <p>Gold {gameState.counters.gold.toFixed(1)} · junk unsold {junkTotal} ({junkLines.join(' · ') || 'none'}) · stones {stonesLine()}</p>
     <button onclick={doSell} disabled={junkTotal === 0}>Sell all junk here</button>
-    <p><small>Sell junk for gold · dissolve rejected gear for Reroll value.</small></p>
+    <p><small>Junk sells for its rarity price, and selling it is the only thing that mints gold — walking pays a drop roll and nothing else. Rejected gear dissolved for Reroll value stones instead — the two media never mix.</small></p>
 
     <h3>Respec · free</h3>
-    <p><small>Refund Core stat and tree points here.</small></p>
+    <p><small>Hand every allocated stat point back and re-spend them. Free, and only here in a settlement — this game has no death, so a locked build would be a worse punishment than a lost fight.</small></p>
     <button onclick={respec} disabled={!STATS.some((k) => gameState.player.points[k])}>Respec — refund all stat points</button>
     <button onclick={doRespecTree} disabled={!treePointsSpent(gameState)}>Respec the tree — refund {treePointsSpent(gameState)} point{treePointsSpent(gameState) === 1 ? '' : 's'}</button>
 
     <h3>Standing</h3>
-    <p>Tier {standingTier(gameState, town.id)} / {TOWN.standing.tiers.length} · {(standingShare(gameState, town.id) * 100).toFixed(1)}% · {eng.SETTLEMENT_BUDGET_KILLS[town.zone].toLocaleString('en-US')} kill budget</p>
+    <p>Tier {standingTier(gameState, town.id)} / {TOWN.standing.tiers.length} · {(standingShare(gameState, town.id) * 100).toFixed(1)}% of the {eng.SETTLEMENT_BUDGET_KILLS[town.zone].toLocaleString('en-US')} kills in zone {town.zone} that Tier I asks for. Standing buys stock lines, set slots and cosmetics — never a stat, a Mod, a stone or anything mob_HP reads.</p>
 
     <h3>Stall stock</h3>
     <table>
-      <thead><tr><th>Line</th><th>NPC</th><th>Kind</th><th>Kills of income</th><th>Gold</th><th></th></tr></thead>
+      <thead><tr><th>Line</th><th>NPC</th><th>Kind</th><th>Minutes of income</th><th>Gold</th><th></th></tr></thead>
       <tbody>
         {#each townStock as row}
           {@const check = canBuy(gameState, town.id, row.id)}
           <tr>
-            <td><span class="stock-mark">{@html stockArt(row.id, row.npc)}{row.item}</span></td>
-            <td><span class="npc-mark">{@html npcArt(row.npc)}{npcOf(row.npc).name}</span></td>
+            <td>{row.item}</td>
+            <td>{npcOf(row.npc).name}</td>
             <td>{row.kind}</td>
-            <td>{priceKills(row, town.id, gameState)} k{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
+            <td>{priceMinutes(row, town.id, gameState)} m{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
             <td>{priceGold(row, town.id, gameState)}</td>
             <td><button onclick={() => doBuy(row.id)} disabled={!check.ok}>{check.ok ? 'buy' : check.why}</button></td>
           </tr>
         {/each}
       </tbody>
     </table>
-    <p><small>Curio pedlar — today's rolled prices {gameState.pedlar.kills.join(' / ')} kills, {gameState.pedlar.bought} of {gameState.pedlar.kills.length} bought; restocks at the next game day.</small></p>
+    <p><small>Curio pedlar — today's rolled prices {gameState.pedlar.minutes.join(' / ')} minutes, {gameState.pedlar.bought} of {gameState.pedlar.minutes.length} bought; restocks at the next game day.</small></p>
 
     <h3>Guild board · {gameState.town.tasks.length} slots</h3>
     <table>
@@ -1302,23 +989,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         {/each}
       </tbody>
     </table>
-    <p><small>Task rewards: stones.</small></p>
+    <p><small>Payouts are stones only, sized at {TOWN.task_sizing.reward_minutes_of_band_income} minutes of that band's own stone income — the sizing lives in <code>town.json</code> so the rebalance pass can move it without touching code.</small></p>
 
-    <h3>Road · {gameState.town.linksBought} of {ROAD_LINKS} links bought</h3>
+    <h3>Waypoints · {gameState.town.visited.length} of {TOWN.settlements.length} opened</h3>
     <table>
-      <thead><tr><th>Settlement</th><th>Band</th><th>Zone</th><th>Reachable</th><th></th></tr></thead>
+      <thead><tr><th>Settlement</th><th>Band</th><th>Zone</th><th>Waypoint</th><th></th></tr></thead>
       <tbody>
         {#each TOWN.settlements as s}
           <tr>
             <td>{s.name}</td><td>{s.band}</td><td>{s.zone}</td>
-            <td>{canTravel(gameState, s.id) ? 'yes' : 'needs a Road link'}</td>
-            <td><button onclick={() => s.id === townId ? openServices() : canTravel(gameState, s.id) ? travelTo(s.id) : walkTo(s.id)} disabled={!!gameState.road || s.id === townId}>{s.id === townId ? 'here' : canTravel(gameState, s.id) ? 'warp' : 'walk'}</button></td>
+            <td>{canTravel(gameState, s.id) ? 'open' : 'walk there first'}</td>
+            <td><button onclick={() => travelTo(s.id)} disabled={!canTravel(gameState, s.id)}>{townId === s.id ? 'here' : 'waypoint'}</button></td>
           </tr>
         {/each}
       </tbody>
     </table>
+    <p><small>A Waypoint opens the first time you arrive on foot and costs nothing. Until then the walk is the only way there — and the walk is the only way to open it.</small></p>
+    <p>{saveNote}</p>
     <h3>Stash · {tabs} / 6 tabs</h3>
-    <p><small>Stash tabs organize items. Deposit and craft at a settlement.</small></p>
+    <p><small>There is no Bag Cap, so a tab is organisation rather than space — the Porter sells them and a house grants two. Stash and bench are Settlement-only: a long run ends in a trip home.</small></p>
     {#if tabs === 0}
       <p><small>No tab yet — the first one is the teaching purchase above.</small></p>
     {:else}
@@ -1344,26 +1033,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       {/each}
     {/if}
 
-    <h3>Road · {E.road.links.length} links · walked in {road.blockSec}s blocks · a checkpoint warp is the only skip</h3>
-    {#if gameState.road}
-      <p>On the Road: {linkLabel(gameState.road.linkIndex)} · block {gameState.road.blockIndex + 1} of {gameState.road.blocks} · {gameState.road.secLeft}s left on it · {gameState.road.encountersLeft} encounters to go{gameState.road.kind ? ` · ${gameState.road.kind} in progress` : ''}</p>
-    {/if}
-    <table>
-      <thead><tr><th>Link</th><th>Blocks</th><th>Reachable</th><th>Purse today</th><th></th></tr></thead>
-      <tbody>
-        {#each road.links as l}
-          <tr>
-            <td>{l.text}</td>
-            <td>{l.blocks} × {road.blockSec}s</td>
-            <td>{linkReachable(gameState, l.index) ? 'walkable from here' : 'neither end known'}</td>
-            <td>{purseReady(gameState, l.index) ? `${E.road.purse_gold} gold` : 'taken'}</td>
-            <td><button onclick={() => doTrip(l.index)} disabled={!linkReachable(gameState, l.index) || !!gameState.road}>walk</button></td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-    <p><small>Online only · {road.blockSec}s/block · {E.road.encounters_per_min} encounter/min · purse cap {road.purseCapPerDay} gold/day · no stones or offline travel.</small></p>
-    <p>{townNote}</p>
+    
 
     {#if colSet}
       <h3>Collector · {colSet.name} ({colSet.school} school)</h3>
@@ -1385,7 +1055,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         </tbody>
       </table>
       {#if !gameState.collector.done[colSet.id]}
-        <p><small>Missing: {colSet.parsed.filter((p: any) => heldCount(gameState, colSet.id, p.name) === 0).map((p: any) => p.name).join(' · ') || 'ready to turn in'} · {colSet.quality} · {colSet.school}.</small></p>
+        <p><small>Still hunting: {colSet.parsed.filter((p: any) => heldCount(gameState, colSet.id, p.name) === 0).map((p: any) => `${p.name} (${p.slot})`).join(' · ') || 'every piece is in hand — turn it in.'} Frames roll even-weighted across the whole world, so the target is the {colSet.quality} quality and the {colSet.school} school, not one zone.</small></p>
       {/if}
       <button onclick={doTurnIn} disabled={!setUnlocked(gameState, colSet) || gameState.collector.done[colSet.id]}>turn in the set</button>
       <p><small>Reward: {colSet.reward} · {colSet.rule} · the Collector pays no gold and no Mod anywhere (T14).</small></p>
@@ -1397,7 +1067,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     {/if}
 
     <h3>Crafting bench · paid in stones, never gold</h3>
-    <p><small>Reroll · Refine · Ascend · Upgrade · Repair · Corrupt. Stone costs appear on each action.</small></p>
+    <p><small>The bench is Settlement-only, so it lives here. Reroll moves a value inside its own Tier and never down, Refine pushes one slot up a Tier, Ascend raises the whole piece one Item quality step. Element and Mod identity sit outside every stone except Corrupt, which is the one gamble allowed to change an Element (`crafting.md`).</small></p>
     <label>Piece
       <select onchange={(e) => { const v = (e.target as HTMLSelectElement).value; const [w, i] = v.split(':'); bench = v ? { where: w as Where, index: Number(i) } : null; }}>
         <option value="">choose a piece</option>
@@ -1427,7 +1097,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         </tbody>
       </table>
       <button onclick={() => runCraft('ascend', 0)}>Ascend piece · {stoneNames('ascend').add} Add + {stoneNames('ascend').tier} tier stones</button>
-      <button onclick={() => runCraft('add', 0)}>Add a Mod · {stoneNames('add', benchItem).add} Add stone ({benchItem.mods_added || 0}/{E.rarity.mods_added_cap} used)</button>
+      <button onclick={() => runCraft('add', 0)}>Add a Mod · {stoneNames('add', benchItem).add} Add stone ({benchItem.mods_added || 0}/{E.item_level.mods_added_cap} used)</button>
       <button onclick={() => runCraft('remove', 0)}>Remove a non-legacy mod · {stoneNames('remove').remove} Remove stone</button>
       <button onclick={() => runCraft('upgrade', 0)}>
         Upgrade to +{Math.min((benchItem.upgrade_lv || 0) + 1, craft.C.upgrade_cap)} · {stoneNames('upgrade', benchItem).quality} Quality Stone · {upgradeChance()}% chance
@@ -1443,52 +1113,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     {:else}
       <p><small>No piece on the bench yet — pick one from what you wear or what is in the bag.</small></p>
     {/if}
-    </fieldset>
-    {:else}
-      <section class="zone-details">
-        <h3>{selectedZone.name} · zone {selectedZone.id}</h3>
-        <dl class="zone-facts">
-          <div><dt>Levels</dt><dd>{selectedZone.levels.join('-')}</dd></div>
-          <div><dt>mob_HP range</dt><dd>{selectedZone.hp[0].toLocaleString('en-US')} → {selectedZone.hp[1].toLocaleString('en-US')}</dd></div>
-          <div><dt>Quality</dt><dd>{selectedZone.quality}</dd></div>
-          <div><dt>Elements</dt><dd>{selectedZone.elements.join(' · ')}</dd></div>
-          <div><dt>Group</dt><dd>{selectedZone.group}</dd></div>
-        </dl>
-        <h3>Hunting grounds</h3>
-        <p><small>Pick the ground a spawn rolls inside. Elite and Boss stay zone-wide.</small></p>
-        <div class="zone-picker">
-          <button class:active={!gameState.zoneFocus?.[gameState.zone]} onclick={() => setZoneFocus('')}>
-            the whole cast<small>every race in the zone</small>
-          </button>
-          {#each selectedZone.subzones || [] as sub}
-            <button class:active={gameState.zoneFocus?.[gameState.zone] === sub.name} onclick={() => setZoneFocus(sub.name)}>
-              {sub.name}<small>{sub.element} · {sub.races.join(' + ')}</small>
-            </button>
-          {/each}
-        </div>
-        <h3>All zones</h3>
-        <p><small>A zone is always reached on foot — tap its hex, or a name here, to walk the Road there with its encounters.</small></p>
-        <div class="zone-picker">
-          {#each E.mob.zones as z}
-            {@const place = settlementOfZone(z.id)}
-            <button class:active={z.id === selectedZone.id} onclick={() => visitZone(z.id)}>
-              {z.name}<small>{z.levels.join('-')} · {gameState.town.visited.includes(place.id) ? 'opened' : 'walk to open'}</small>
-            </button>
-          {/each}
-        </div>
-      </section>
-    {/if}
-        <p>{townNote}</p>
-        </div>
-      </aside>
-    {/if}
   </section>
 {/if}
 
 {#if tab === 'farm'}
   <section class="panel">
     <h2>Farming · level {fl} / {farm.F.level_cap}</h2>
-    <p><small>{gameState.farm.xp} Farm XP · {farm.F.growth_hours}h growth · {plots}/{farm.plotsMax} plots · herbs brew potions.</small></p>
+    <p><small>The one life skill, and it grants no power: every output is the herb a draught is brewed from. {gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h a cycle · {farm.plotsMax} plots at most ({plots} yours — the Steward sells the two deeds).</small></p>
 
     <h3>Plots</h3>
     <table>
@@ -1546,109 +1177,73 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <label><input type="checkbox" checked={gameState.farm.autoFarm.harvest} onchange={() => { gameState.farm.autoFarm.harvest = !gameState.farm.autoFarm.harvest; gameState = { ...gameState }; }} /> Auto-harvest ready plots</label>
     <label><input type="checkbox" checked={gameState.farm.autoFarm.plant} onchange={() => { gameState.farm.autoFarm.plant = !gameState.farm.autoFarm.plant; gameState = { ...gameState }; }} /> Auto-plant empty plots (uses one herb as the seed)</label>
     <label><input type="checkbox" checked={gameState.farm.autoFarm.brew} onchange={() => { gameState.farm.autoFarm.brew = !gameState.farm.autoFarm.brew; gameState = { ...gameState }; }} /> Auto-brew affordable draughts</label>
-    <p><small>Cooldown {farm.P.shared_cooldown_sec}s · {farm.P.max_uses_per_fight} uses/fight · {farm.P.boss_suppressed ? 'Bosses: disabled' : 'Bosses: enabled'} · condensed {farm.P.condensed.effect_mult}×.</small></p>
+    <p><small>Shared cooldown {farm.P.shared_cooldown_sec} sec · {farm.P.max_uses_per_fight} uses a fight · {farm.P.boss_suppressed ? 'suppressed entirely on bosses' : ''} · a condensed bottle is {farm.P.condensed.effect_mult}× and weighs {farm.P.condensed.weight} against {farm.P.weight} loose.</small></p>
     <p>{farmNote}</p>
   </section>
 {/if}
 
 
 
-{#if tab === 'qol'}
-  <section class="panel hub">
-    <h2>QOL hub</h2>
-    <p class="lead">Every convenience setting in one place. A control that belongs to its own screen keeps its home there — the cards below show where things stand and take you to it.</p>
+{#if tab === 'zones'}
+  <section class="panel">
+    <h2>Zones</h2>
+    <table>
+      <thead><tr><th>Zone</th><th>Levels</th><th>mob_HP</th><th>Quality</th><th>Elements</th><th>Group</th><th>Sub-zones</th><th></th></tr></thead>
+      <tbody>
+        {#each E.mob.zones as z}
+          <tr>
+            <td>{z.id} · {z.name}</td>
+            <td>{z.levels.join('-')}</td>
+            <td>{z.hp.join(' → ')}</td>
+            <td>{z.quality}</td>
+            <td>{z.elements.join(', ')}</td>
+            <td>{z.group}</td>
+            <td>{(z.subzones || []).map((s) => s.name).join(' · ')}</td>
+            <td><button onclick={() => goToZone(z.id)} disabled={z.id === gameState.zone || !gameState.town.visited.includes(settlementOfZone(z.id)?.id)}>
+              {z.id === gameState.zone ? 'here' : gameState.town.visited.includes(settlementOfZone(z.id)?.id) ? 'walk' : 'not opened'}
+            </button></td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    <p><small>A mob spawns at your level clamped into its zone, so these HP figures are the two ends of a linear curve the engine interpolates between.</small></p>
+  </section>
+{/if}
 
-    <div class="hub-grid">
-      <section class="card">
-        <h3>Client</h3>
-        <label class="field">Number format
-          <select value={settings.numberFormat} onchange={(e) => setSetting('numberFormat', (e.target as HTMLSelectElement).value as 'plain' | 'short')}>
-            <option value="plain">plain — 12,345</option>
-            <option value="short">short — 12.3k</option>
-          </select>
-        </label>
-        <label class="check"><input type="checkbox" checked={settings.offlineReport} onchange={(e) => setSetting('offlineReport', (e.target as HTMLInputElement).checked)} /> Welcome-back report after an away period</label>
-      </section>
-
-      <section class="card">
-        <h3>Loot</h3>
-        <label class="field">Auto-dissolve at or below
-          <select value={gameState.autoDissolveRarity ?? 'off'} onchange={(e) => { gameState.autoDissolveRarity = (e.target as HTMLSelectElement).value as 'off' | 'Common' | 'Rare'; gameState = { ...gameState }; }}>
-            <option value="off">off — keep every drop</option>
-            <option value="Common">Common</option>
-            <option value="Rare">Common and Rare</option>
-          </select>
-        </label>
-        <p class="hint">Pays Reroll value. Locked and Collector-held pieces are spared.</p>
-      </section>
-
-      <section class="card">
-        <h3>Character</h3>
-        <dl class="read">
-          <dt>Unspent stat points</dt><dd class="num">{gameState.player.statPoints}</dd>
-          <dt>Banked tree points</dt><dd class="num">{gameState.player.treePoints}</dd>
-          <dt>Auto-allocate</dt><dd>{gameState.player.autoSpend ? 'on' : 'off'}</dd>
-        </dl>
-        <button onclick={() => (tab = 'main')}>Open the character sheet</button>
-      </section>
-
-      <section class="card">
-        <h3>Hunting</h3>
-        <dl class="read">
-          <dt>Zone</dt><dd>{zone.name} · {zone.levels.join('-')}</dd>
-          <dt>Hunt order</dt><dd>{gameState.huntOrder?.[gameState.zone] ?? 'by variant'}</dd>
-          <dt>Hunting ground</dt><dd>{gameState.zoneFocus?.[gameState.zone] || 'the whole cast'}</dd>
-          <dt>Travel</dt><dd>{gameState.travel === 'forward' ? 'forward past the cap' : 'stay here'}</dd>
-        </dl>
-        <button onclick={() => (tab = 'main')}>Fight screen</button>
-      </section>
-
-      <section class="card">
-        <h3>Skills</h3>
-        <dl class="read">
-          <dt>Slots filled</dt><dd class="num">{gameState.skills.list.filter(Boolean).length} / {ACTIVE_SLOTS}</dd>
-          <dt>Folded effect</dt><dd>{describeFold(effectsActive(gameState.skills)) || 'none'}</dd>
-          <dt>Mana reserved</dt><dd class="num">{reserved}% / {sm.RESERVATION_LIMIT}%</dd>
-        </dl>
-        <button onclick={() => (tab = 'skills')}>Skills screen</button>
-      </section>
-
-      <section class="card">
-        <h3>Farming</h3>
-        <dl class="read">
-          <dt>Farm level</dt><dd class="num">{fl} / {farm.F.level_cap}</dd>
-          <dt>Plots</dt><dd class="num">{plots} / {farm.plotsMax}</dd>
-          <dt>Draughts held</dt><dd class="num">{Object.values(gameState.farm.potions).reduce((a: number, b: number) => a + b, 0)}</dd>
-        </dl>
-        <button onclick={() => (tab = 'farm')}>Farm screen</button>
-      </section>
-
-      <section class="card">
-        <h3>World and town</h3>
-        <dl class="read">
-          <dt>At</dt><dd>{town.name}</dd>
-          <dt>Gold</dt><dd class="num">{fmtNum(gameState.counters.gold)}</dd>
-          <dt>Stash tabs</dt><dd class="num">{tabs} / 6</dd>
-        </dl>
-        <button onclick={() => (tab = 'map')}>World screen</button>
-      </section>
-
-      <section class="card">
-        <h3>Controls</h3>
-        <dl class="read">
-          <dt>1 – 6</dt><dd>switch screen</dd>
-          <dt>Space</dt><dd>pause or resume</dd>
-          <dt>Esc</dt><dd>close the town drawer</dd>
-        </dl>
-        <p class="hint">A key is ignored while you are typing in a box.</p>
-      </section>
-
-      <section class="card">
-        <h3>Saves</h3>
-        <p class="hint">Three slots, JSON export and import, and {SAVE_CFG.snapshot_slots} walking backups.</p>
-        <button onclick={() => (tab = 'save')}>Save screen</button>
-      </section>
+{#if tab === 'map'}
+  <section class="panel">
+    <h2>Map</h2>
+    <p><small>The backdrop is hand-drawn; the overlay is generated by <code>node tools/map.ts --write</code> — a hex field where <b>each settlement is a cluster: its own hex plus one hex per sub-zone</b>, every sub-zone named inside the hex it owns, then the biome tones, the river, the named regions, the terrain washes, the landmark marks and the travel pin. The sheet spirals outward, so the first capital sits in the middle and the level bands climb toward the rim; there are no drawn routes — it shows places. Coordinates are presentation only — the client toggles the pin and dash by id (X33 · M7 · M10).</small></p>
+    <div class="map-frame">
+      <img src={mapTerrain} alt="Terrain" />
+      {@html mapMarkup}
     </div>
+    {#if gameState.walk}
+      <p><small>Walking <b>{walkLabel(gameState.walk.from, gameState.walk.to)}</b> — block {gameState.walk.blocksTotal - gameState.walk.blocksLeft + 1} of {gameState.walk.blocksTotal} · {gameState.walk.secLeft}s on this block. Every block crossed rolls a {E.road.encounter_chance_pct}% chance of an ambush.</small></p>
+    {:else}
+      <p><small>The green pin marks the settlement you stand in. Pick a destination below and the character walks it block by block.</small></p>
+    {/if}
+
+    <h3>Walk · {E.road.block_sec}s a block · {E.road.encounter_chance_pct}% an ambush per block</h3>
+    <p><small>Walking to a settlement you have never reached opens its Waypoint, once, and costs nothing — after that the Waypoint warps there free and instantly. A walk is online only: an away period never crosses a block. A Push rests you at the camp of the zone you were ambushed in and walks you back in on the same block, so a Push never costs you the road. An ambush is an ordinary mob group and pays the ordinary drop roll — walking mints no gold, no Standing and no stones.</small></p>
+    <table>
+      <thead><tr><th>Settlement</th><th>Zone</th><th>Blocks</th><th>Time</th><th></th></tr></thead>
+      <tbody>
+        {#each TOWN.settlements.filter((x: any) => x.id !== townId) as s}
+          {@const blocks = walkBlocks(townId, s.id)}
+          <tr>
+            <td>{s.name}</td><td>{s.zone}</td>
+            <td>{blocks}</td>
+            <td>{road.secBetween(townId, s.id)}s</td>
+            <td>
+              <button onclick={() => doWalk(s.id)} disabled={!!gameState.walk}>{gameState.walk?.to === s.id ? 'walking' : 'walk'}</button>
+              {#if canTravel(gameState, s.id)}<button onclick={() => travelTo(s.id)}>waypoint</button>{/if}
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    <p>{saveNote}</p>
   </section>
 {/if}
 
@@ -1664,7 +1259,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <label>Import <input type="file" accept="application/json" onchange={upload} /></label>
     <p>{saveNote}</p>
     <h2>Backups · {SAVE_CFG.snapshot_slots} walking snapshots</h2>
-    <p><small>Snapshots: level-up, successful craft, or every {SAVE_CFG.snapshot_interval_min} minutes. Restore replaces the whole character state.</small></p>
+    <p><small>Owed on a level up, on a successful Ascend or Refine, and every {SAVE_CFG.snapshot_interval_min} minutes of play. They guard a corrupt file, never a wrong decision: a restore takes the character back whole — stones, Reroll baselines and craft counts included — and the shared account record is rebuilt from the slots that survived.</small></p>
     <label>Which slot <select bind:value={snapSlot} onchange={loadSnaps}>{#each saveSlots as s}<option value={s}>{s}</option>{/each}</select></label>
     <button onclick={loadSnaps}>Show backups</button>
     <table>
@@ -1683,118 +1278,75 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       </tbody>
     </table>
     <p>{snapNote}</p>
+
+    <h2>Settings</h2>
+    <p><small>Client-only and shared by all three slots — these never enter a save file, and no `engine.json` constant is shadowed here. Automation lives with what it drives: potion auto-use and auto-farm on the Farm tab, the bag filter on the Main tab, presets on the Skills tab.</small></p>
+    <label>Number format
+      <select value={settings.numberFormat} onchange={(e) => setSetting('numberFormat', (e.target as HTMLSelectElement).value as 'plain' | 'short')}>
+        <option value="plain">plain — 12,345</option>
+        <option value="short">short — 12.3k</option>
+      </select>
+    </label>
+    <label><input type="checkbox" checked={settings.offlineReport} onchange={(e) => setSetting('offlineReport', (e.target as HTMLInputElement).checked)} /> Show the welcome-back report after an away period</label>
+    <label>Auto-dissolve drops below item level
+      <input type="number" min="0" step="1" value={gameState.autoDissolveLevel ?? 0}
+        onchange={(e) => { gameState.autoDissolveLevel = Math.max(0, Number((e.target as HTMLInputElement).value) || 0); gameState = { ...gameState }; }} />
+      <small>{' '}— a piece under the floor turns into Reroll stones instead; zero keeps every drop for a decision</small>
+    </label>
+    <p><small>Auto-dissolve turns a piece into Reroll stones, never gold — the Counterhand is still the only place junk becomes gold. A locked or Collector-held piece is spared.</small></p>
   </section>
 {/if}
- </main>
 
 <style>
-  /* ---- the top bar ---- */
-  .topbar { display: flex; align-items: center; gap: .9rem; min-width: 0; padding: .45rem .75rem; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0) 70%), var(--bg-2); }
-  .brand { display: flex; align-items: center; gap: .5rem; flex: 0 0 auto; }
-  .brand b { font-size: .95rem; letter-spacing: .02em; }
-  .brand-mark { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: linear-gradient(135deg, var(--accent), var(--good)); box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 0 14px -2px rgba(79,195,247,.65); }
-  .tabs { display: flex; gap: .15rem; flex: 0 1 auto; min-width: 0; padding: .15rem; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); overflow-x: auto; scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tabs .tab { background: transparent; border: 1px solid transparent; border-radius: var(--r-sm); padding: .28rem .75rem; color: var(--dim); white-space: nowrap; font-size: .82rem; }
-  .tabs .tab:hover { color: var(--text); background: rgba(255,255,255,.045); }
-  .tabs .tab.active { color: var(--accent-2); background: rgba(79,195,247,.12); border-color: rgba(79,195,247,.35); }
-  .status { display: flex; align-items: center; gap: .35rem; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
-  .chip { display: inline-flex; align-items: center; gap: .35rem; padding: .22rem .55rem; border: 1px solid var(--line); border-radius: 99px; background: var(--panel); color: var(--dim); font-size: .76rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .chip.gold { color: var(--xp); border-color: rgba(241,196,15,.28); }
-  .chip.run { color: var(--good); border-color: rgba(46,204,113,.35); background: rgba(46,204,113,.08); }
-  .chip.run.paused { color: var(--warn); border-color: rgba(224,163,74,.4); background: rgba(224,163,74,.08); }
-  .chip .dot { width: .45rem; height: .45rem; border-radius: 99px; background: currentColor; box-shadow: 0 0 8px currentColor; }
+  header { display: flex; gap: 1rem; align-items: center; padding: .6rem .8rem; border-bottom: 1px solid var(--line); }
+  nav { display: flex; gap: .3rem; flex: 1; }
+  .meta { color: var(--dim); }
+  button.active { border-color: var(--good); color: var(--good); }
+  .panel { padding: .8rem; }
+  /* the map: layout only — the overlay is inlined via {@html}, so its own styling lives in app.css */
+  .map-frame { position: relative; max-width: 900px; }
+  .map-frame img { width: 100%; display: block; }
 
-  /* ---- the shell ---- */
-  .screen { min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
-  .screen > .panel { height: 100%; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
-  .panel { min-width: 0; padding: .7rem; }
-  .panel p { margin: .35rem 0; }
-  .panel h3 { margin: .55rem 0 .25rem; }
-  .panel > h3:first-of-type { margin-top: .4rem; }
-  .lead { color: var(--dim); max-width: 62rem; }
-
-  /* ---- the QOL hub ---- */
-  .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: .6rem; align-items: start; margin-top: .6rem; }
-  .card { display: flex; flex-direction: column; align-items: flex-start; gap: .45rem; padding: .7rem .75rem; background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 55%), var(--bg-2); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow-1); }
-  .card h3 { margin: 0; font-size: .84rem; color: var(--accent-2); }
-  .card .field { display: flex; flex-direction: column; gap: .25rem; width: 100%; color: var(--dim); font-size: .78rem; }
-  .card .field select { width: 100%; }
-  .card .check { display: flex; align-items: flex-start; gap: .4rem; font-size: .8rem; }
-  .hint { margin: 0; color: var(--dim-2); font-size: .76rem; }
-  .read { display: grid; grid-template-columns: auto 1fr; gap: .18rem .7rem; margin: 0; width: 100%; font-size: .8rem; }
-  .read dt { color: var(--dim); white-space: nowrap; }
-  .read dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
-
-  /* ---- the fight screen: the dashboard, three columns wide ---- */
+  /* the main screen: the fight on top of the two bags, the sheet as a sidebar that stays put */
   .main {
-    display: grid; height: 100%; min-height: 0; gap: .5rem; padding: .5rem; align-items: stretch; overflow: hidden;
-    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1.05fr) minmax(0, 1.05fr);
-    grid-template-rows: minmax(0, 1.15fr) minmax(0, .85fr);
-    grid-template-areas: "scene scene sheet" "temp inv sheet";
+    display: grid;
+    gap: .6rem;
+    padding: .6rem;
+    align-items: start;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.05fr) minmax(0, .95fr);
+    grid-template-areas:
+      "scene scene sheet"
+      "temp  inv   sheet";
   }
-  .region { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 45%), var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow-1); }
-  .scene { grid-area: scene; display: flex; flex-direction: column; }
+  .region { min-width: 0; border: 1px solid var(--line); border-radius: 4px; }
+  .scene { grid-area: scene; }
   .sheet { grid-area: sheet; }
   .temp { grid-area: temp; }
   .inv { grid-area: inv; }
-
-  .bars { display: grid; gap: .3rem; margin-bottom: .5rem; }
-  .bars label, .bars span { display: flex; align-items: center; gap: .55rem; font-size: .8rem; }
-  .bars label { color: var(--dim); }
-  .skill-strip { display: flex; flex-wrap: wrap; gap: .3rem .45rem; margin-bottom: .6rem; }
-  .skill-slot { display: inline-flex; align-items: center; gap: .35rem; padding: .18rem .45rem; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg-2); font-size: .72rem; }
-  .skill-slot.empty { min-width: 2.8rem; min-height: 1.6rem; border-style: dashed; opacity: .45; }
-  .skill-slot small { color: var(--dim); }
-  .skill-slot small.ready { color: var(--accent); }
-  .state { display: flex; flex-wrap: wrap; gap: .4rem .9rem; align-items: center; margin: .35rem 0; color: var(--dim); }
-  .travel { display: inline-flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
-  .travel small { flex-basis: 100%; color: var(--dim-2); }
-  .log { flex: 1 1 auto; min-height: 4rem; margin: .5rem 0; overflow: auto; font-family: var(--mono); font-size: 12px; color: var(--dim); display: flex; flex-direction: column; }
-  .log > div { padding: .05rem 0; }
-  .log .empty { margin: auto; color: var(--dim-2); font-family: var(--sans); font-size: .78rem; }
-  .log .t { color: var(--mob); margin-right: .4rem; }
-  .controls { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: auto; }
-
-  .mobbar { display: inline-block; height: 8px; background: var(--hp); margin-right: .4rem; vertical-align: middle; border-radius: 99px; }
-  .mob-name, .element-label, .skill-label { display: inline-flex; align-items: center; gap: .35rem; }
-  .mob-name img { width: 1.25rem; height: 1.25rem; object-fit: contain; }
-  .mob-name.elite { color: #b98cff; }
-  .mob-name.boss { color: #ff6b6b; }
-  .mob-name .tier-mark { width: 1rem; height: 1rem; margin-left: .15rem; }
-  .element-list { display: flex; flex-wrap: wrap; gap: .25rem .5rem; }
-  .element-label { font-size: .72rem; }
-  .element-label img, .skill-label img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex: none; }
-
-  /* the character sheet: a segmented head over two views, so neither half has to scroll */
-  .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; margin-bottom: .5rem; }
-  .sheet-head h2 { margin: 0; }
-  .seg { display: flex; gap: .15rem; padding: .15rem; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); }
-  .seg button { background: transparent; border: 1px solid transparent; border-radius: var(--r-sm); padding: .22rem .6rem; font-size: .76rem; color: var(--dim); white-space: nowrap; }
-  .seg button:hover { color: var(--text); background: rgba(255,255,255,.045); }
-  .seg button.active { color: var(--accent-2); background: rgba(79,195,247,.12); border-color: rgba(79,195,247,.35); }
-  .stats td { font-size: .76rem; padding: .06rem .32rem; }
+  @media (max-width: 1100px) {
+    .main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "scene" "temp" "inv" "sheet"; }
+  }
+  .stats td { font-size: .78rem; padding: .08rem .3rem; }
   .stats td:first-child { color: var(--dim); width: 45%; }
-  .stats td:nth-child(3) { white-space: nowrap; }
-  .stats button { padding: .02rem .3rem; font-size: .72rem; line-height: 1.3; border-radius: var(--r-xs); }
   .gate { font-size: .82rem; }
-  .filter { margin-top: .55rem; }
+  .filter { margin-top: .5rem; }
   .filter summary { cursor: pointer; color: var(--dim); font-size: .8rem; }
   .filter table { margin-top: .4rem; }
+
+  .bars { display: grid; gap: .3rem; margin-bottom: .6rem; }
+  .bars label, .bars span { display: flex; align-items: center; gap: .5rem; }
+  /* the read-only skill bar on the fight panel */
+  .skill-strip { display: flex; flex-wrap: wrap; gap: .3rem .5rem; margin-bottom: .6rem; }
+  .skill-slot { display: inline-flex; align-items: center; gap: .35rem; padding: .15rem .4rem; border: 1px solid var(--line); border-radius: 4px; font-size: .72rem; }
+  .skill-slot.empty { min-width: 2.6rem; min-height: 1.5rem; border-style: dashed; opacity: .5; }
+  .skill-slot small { color: var(--dim); }
+  .skill-slot small.ready { color: var(--mana); }
   .weight { margin: 0 0 .5rem; }
   .weight small { color: var(--dim); }
-  .warn { color: var(--hp); }
-
-  /* the skills screen: conditions read as chips, not as a wrapped sentence */
-  .conditions { display: flex; flex-wrap: wrap; gap: .3rem .5rem; align-items: center; }
-  .conditions label { display: inline-flex; align-items: center; gap: .3rem; padding: .12rem .45rem; border: 1px solid var(--line-soft); border-radius: 99px; background: var(--bg-2); font-size: .74rem; }
-
-  .map-drawer .tab { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; padding: .35rem 0; border-bottom: 1px solid var(--line-soft); }
-
-  progress { flex: 1 1 auto; width: 220px; height: 10px; border: 0; border-radius: 99px; overflow: hidden; background: var(--line); }
-  progress::-webkit-progress-bar { background: var(--line); }
-  progress::-webkit-progress-value { border-radius: 99px; }
-  progress::-moz-progress-bar { border-radius: 99px; }
+  progress { width: 220px; height: 10px; border: 0; border-radius: 3px; overflow: hidden; }
+  progress::-webkit-progress-bar { background: var(--line); border-radius: 3px; }
+  progress::-webkit-progress-value { border-radius: 3px; }
+  progress::-moz-progress-bar { border-radius: 3px; }
   progress.hp::-webkit-progress-value { background: var(--hp); }
   progress.hp::-moz-progress-bar { background: var(--hp); }
   progress.mana::-webkit-progress-value { background: var(--mana); }
@@ -1803,55 +1355,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   progress.es::-moz-progress-bar { background: var(--es); }
   progress.xp::-webkit-progress-value { background: var(--xp); }
   progress.xp::-moz-progress-bar { background: var(--xp); }
-
-  /* The map: a full-bleed viewport the player zooms and pans, the overlay inlined via {@html}
-     (its own styling lives in app.css). A town's services open as a drawer over the sheet.
-     The sheet fills the grid row: every child below is absolutely positioned, so without an
-     explicit height this section (and the viewport inside it) collapses to 0 and reads blank. */
-  .map-screen { position: relative; overflow: hidden; padding: 0; height: 100%; }
-  .map-viewport { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; background: #0b0d11; }
-  .map-viewport.dragging { cursor: grabbing; }
-  /* No will-change here: it promotes the sheet to its own composited layer, which the browser
-     rasterises once and then scales as a bitmap — the exact artefact we are avoiding. Letting the
-     transform stay on the main layer means the inline SVG is re-rendered vector-sharp at every zoom.
-     Width and height come from the overlay's own canvas plus the bleed margin, set inline (M7). */
-  .map-stage { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
-  .map-frame { position: absolute; inset: 0; user-select: none; }
-  .map-zoom { position: absolute; right: .6rem; bottom: .6rem; display: flex; flex-direction: column; gap: .3rem; z-index: 2; }
-  .map-zoom button { width: 2.2rem; height: 2.2rem; padding: 0; font-size: 1.05rem; line-height: 1; background: rgba(23,27,34,.92); }
-  .map-hud { position: absolute; left: .6rem; top: .6rem; z-index: 2; display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; max-width: calc(100% - 6rem); background: rgba(14,16,20,.86); border: 1px solid var(--line); border-radius: var(--r); padding: .35rem .55rem; font-size: .8rem; }
-  .map-hud .at { color: var(--good); font-weight: 600; }
-  .map-note { position: absolute; left: .6rem; bottom: .6rem; z-index: 2; max-width: calc(100% - 6rem); margin: 0; background: rgba(14,16,20,.86); border: 1px solid var(--line); border-radius: var(--r); padding: .3rem .55rem; font-size: .8rem; }
-  .map-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: min(32rem, 96%); background: var(--panel); border-left: 1px solid var(--line); overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; box-shadow: var(--shadow-2); z-index: 3; }
-  .map-drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .6rem; position: sticky; top: 0; z-index: 2; background: var(--panel); padding: .6rem .7rem .45rem; border-bottom: 1px solid var(--line); }
-  .map-drawer-head h2 { margin-bottom: .25rem; }
-  .map-drawer-head p { margin-top: 0; }
-  .map-drawer-body { padding: .2rem .7rem .8rem; }
-  .map-detail-tabs { display: flex; gap: .35rem; position: sticky; top: 0; z-index: 2; background: var(--panel); padding: .45rem .7rem; border-bottom: 1px solid var(--line); }
-  .town-actions { min-width: 0; margin: 0; padding: 0; border: 0; }
-  .zone-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem .8rem; margin: .4rem 0 .8rem; }
-  .zone-facts > div { min-width: 0; }
-  .zone-facts dt { color: var(--dim); font-size: .74rem; }
-  .zone-facts dd { margin: .1rem 0 0; overflow-wrap: anywhere; }
-  .zone-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .35rem; }
-  .zone-picker button { display: flex; flex-direction: column; align-items: flex-start; text-align: left; min-width: 0; }
-  .zone-picker small { color: var(--dim); }
-
-  /* ---- responsive: the dashboard sheds columns before anything clips ---- */
-  @media (max-width: 1720px), (max-height: 949px) {
-    .main {
-      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-      grid-template-rows: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
-      grid-template-areas: "scene sheet" "temp sheet" "inv sheet";
-    }
-  }
-  @media (max-width: 1180px) {
-    .topbar { flex-wrap: wrap; }
-    .tabs { order: 3; flex-basis: 100%; }
-    .status { order: 2; margin-left: auto; }
-  }
-  /* Not enough room for the dashboard: one clean scroll beats four clipped panels. */
-  @media (max-width: 1000px), (max-height: 949px) {
-    .main { display: flex; flex-direction: column; height: auto; overflow: visible; }
-    .region { min-height: 16rem; overflow: visible; }
-  }</style>
+  .state { color: var(--dim); }
+  .warn { color: var(--hp); }
+  .log { margin: .6rem 0; max-height: 190px; overflow: auto; font-size: 12px; color: var(--dim); }
+  .log .t { color: var(--mob); margin-right: .4rem; }
+  .mobbar { display: inline-block; height: 8px; background: var(--hp); margin-right: .4rem; vertical-align: middle; }
+  .mob-name, .element-label, .skill-label { display: inline-flex; align-items: center; gap: .35rem; }
+  .mob-name img { width: 1.25rem; height: 1.25rem; object-fit: contain; }
+  .mob-name.elite { color: #b98cff; }
+  .mob-name.boss { color: #ff6b6b; }
+  .mob-name .tier-mark { width: 1rem; height: 1rem; margin-left: .15rem; }
+  .element-list { display: flex; flex-wrap: wrap; gap: .25rem .5rem; }
+  .element-label { font-size: .72rem; }
+  .element-label img, .skill-label img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex: none; }
+</style>

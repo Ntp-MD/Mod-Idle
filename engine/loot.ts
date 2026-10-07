@@ -1,10 +1,11 @@
 /**
- * Shared drop-roll primitives — the RNG and the Rarity / Item quality / Tier mechanics
+ * Shared drop-roll primitives — the RNG, the seven-line skeleton and the item-level value window
  * `tools/loot.ts` already runs, lifted out so the client rolls the same way.
  *
- * Rarity = Mod count · Item quality = value range · Tier = sub-range (AGENT.md §2 — never mix them).
- * The Bases a slot may carry are still parsed from `item-base.md` on the cage side; the client
- * rolls only the Mod lines that `mods.json` owns.
+ * The line count is fixed (Base + the Legacy pair + two Random lines) and an item's level answers the
+ * only question left: what range its lines may roll in (item-rarity.md). The Bases a slot may carry are
+ * still parsed from `item-base.md` on the cage side; the client rolls only the Mod lines `mods.json`
+ * owns.
  */
 
 import type { EngineData, ModsData, Rng } from './types.ts';
@@ -37,22 +38,23 @@ export function weightedPick(rng: Rng, entries: { id: string; w: number }[]) {
 }
 
 /**
- * Hunt Order (owner-approved rule, `loot.hunt_order`). Redistributes probability MASS among the three
- * collectible streams — gear, herbs, junk — toward the chosen one: the lean stream's share rises while
- * the total expected drops/kill is preserved by renormalizing, so drops/hr and the timeline do not
- * move. `order === 'none'` is the identity, so the measured bands are untouched by default. Stones ride
- * the elite/boss lines and are not a category.
+ * A variant's lean (`loot.variant_lean` · `mob.variant_drops` `lean`). Redistributes probability MASS
+ * among the three collectible streams — gear, herbs, junk — toward the one the variant names: the leaned
+ * stream's share rises while the total expected drops/kill is preserved by renormalizing, so drops/hr and
+ * the timeline do not move. `lean === 'none'` is the identity, which is what Elite and Boss carry. The
+ * variant row is the only author — there is no player control on top of it. Stones ride the elite/boss
+ * lines and are not a category.
  */
-export function huntReweight(
+export function leanReweight(
   p: { gear: number; herb: number; junk: number },
-  order: 'none' | 'gear' | 'herb' | 'junk',
+  lean: 'none' | 'gear' | 'herb' | 'junk',
   shiftPct: number,
 ): { gear: number; herb: number; junk: number } {
-  if (order === 'none') return { ...p };
+  if (lean === 'none') return { ...p };
   const total = p.gear + p.herb + p.junk;
   if (!(total > 0)) return { ...p };
   const s = shiftPct / 100;
-  const f = (k: 'gear' | 'herb' | 'junk') => (k === order ? 1 + s : 1 - s);
+  const f = (k: 'gear' | 'herb' | 'junk') => (k === lean ? 1 + s : 1 - s);
   const scaled = p.gear * f('gear') + p.herb * f('herb') + p.junk * f('junk');
   const norm = total / scaled; // renormalize → Σ stays exactly `total`
   const clamp = (x: number) => Math.max(0, Math.min(1, x));
@@ -70,22 +72,12 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   const SLOTS = ['helmet', 'chest', 'pant', 'boots', 'belt', 'gloves', 'ring', 'ring', 'amulet', 'cape', 'main hand', 'off hand', 'earring'];
   const GEAR_MOD_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves'];
   const GEAR_MODS = ['armour_flat', 'evasion_flat', 'energy_shield_flat'];
-  // Rarity is the line count (loot.md §1 · item-rarity.md). Every piece carries line 1
-  // (Base Mod) and the Legacy pair; `dropped_random` says how many of the 4 Random lines arrive
-  // rolled, and `crafted_max` is the ceiling both Rarities share.
-  const RARITY = Object.keys(E.rarity.drop_chance).map((name) => {
-    const row = (E.rarity as any)[name] || {};
-    return {
-      name,
-      chance: E.rarity.drop_chance[name],
-      dropped_random: row.dropped_random ?? 0,
-      crafted_max: row.crafted_max ?? 0,
-    };
-  });
-  const TIER_SPLIT = [0.17, 0.50]; // T1 17% · T2 33% · T3 50% (item-rarity.md)
-  const QUALITY_MIX = { low: [[0, 1]], mid: [[0, 0.55], [1, 0.45]], high: [[1, 0.40], [2, 0.60]] };
   const TIER_NAME = { 0: 'T1', 1: 'T2', 2: 'T3' };
   const BAND_LABEL = ['low', 'mid', 'high'];
+  // The window's thirds, best last: the TOP third is the rarest, so a good roll is a chance and not a
+  // formality, and the bottom third is the common outcome (item-rarity.md). T1 names the top.
+  const TIER_SPLIT = [0.50, 0.83];
+  const WINDOW_THIRDS = 3;
 
   const WEIGHT_BY_ID: Record<string, number | number[]> = {};
   for (const row of E.mod_weights.rows) for (const id of row.ids) WEIGHT_BY_ID[id] = row.weight;
@@ -93,22 +85,53 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   const MAX_OF: Record<string, number> = {}, NAME_OF: Record<string, string> = {}, BANDS_OF: Record<string, number[][][]> = {};
   for (const m of MODS.mods) { MAX_OF[m.id] = m.max; NAME_OF[m.id] = m.name; BANDS_OF[m.id] = m.bands; }
 
-  /** The Mod weight for one line at one Item quality band (the Flat group steps by band). */
+  /** The Mod weight for one line at one band (the Flat group steps by band). */
   function weightOf(id: string, q: number) {
     const w = WEIGHT_BY_ID[id];
     return Array.isArray(w) ? w[q] : w;
   }
 
-  /** min..max of one Mod line at one Item quality band and one Tier slice. */
-  function rangeOf(id: string, q: number, tier: number) {
-    const band = (BANDS_OF[id] || [])[q];
-    const b = band && band[tier];
-    if (!b) throw new Error(`no value range for mod "${id}" (quality ${q}, tier ${tier})`);
-    return [b[0], b[1]];
+  /** How far through its band's level span a level sits — 0 at the span's start, 1 at its end. */
+  function spanT(ilvl: number, q: number) {
+    const sp = (E.item_level.spans || [])[q] || { from: 1, to: 1 };
+    const span = Math.max(1, (sp.to || 1) - (sp.from || 1));
+    return Math.min(1, Math.max(0, ((ilvl == null ? sp.from : ilvl) - sp.from) / span));
   }
 
-  /** How many Tier slices this Mod actually publishes at this Item quality (2 or 3). */
-  const sliceCount = (id: string, q: number) => ((BANDS_OF[id] || [])[q] || []).length || 1;
+  /**
+   * The value window one Mod line publishes at one item level inside one band (item-rarity.md). The
+   * ceiling is the band's own top and the floor climbs from the band below — so a mid-band piece
+   * starts able to roll the low band's floor and ends above it — and a level past its band's span
+   * clamps, which is what keeps the later loops on the band the zone label names.
+   */
+  function windowAt(id: string, ilvl: number, q: number): [number, number] {
+    const bands = BANDS_OF[id] || [];
+    const band = bands[q] || bands[0];
+    if (!band) throw new Error(`no value window for mod "${id}" (band ${q})`);
+    const lo = band[0][0];
+    const hi = band[band.length - 1][1];
+    const below = bands[q - 1];
+    const floorFrom = below ? below[0][0] : lo;
+    return [Math.round(floorFrom + (lo - floorFrom) * spanT(ilvl, q)), hi];
+  }
+
+  /**
+   * One third of the window — tier 0 the top (T1), tier 2 the bottom (T3). Thirds are uniform for every
+   * Mod, so the skew is one rule rather than a per-Mod ladder, and `tierSlice` spends the weights on it.
+   */
+  function rangeOf(id: string, ilvl: number, q: number, tier: number): [number, number] {
+    const [lo, hi] = windowAt(id, ilvl, q);
+    const size = Math.ceil((hi - lo + 1) / WINDOW_THIRDS);
+    const topLo = Math.max(lo, hi - size + 1);
+    if (tier <= 0) return [topLo, hi];
+    const midHi = Math.max(lo, topLo - 1);
+    const midLo = Math.max(lo, midHi - size + 1);
+    if (tier === 1) return [midLo, Math.max(midLo, midHi)];
+    return [lo, Math.max(lo, midLo - 1)];
+  }
+
+  /** How many positions a window publishes. Uniform now — the thirds are every Mod's ladder. */
+  const sliceCount = () => WINDOW_THIRDS;
 
   const FLAT_GROUP = new Set(E.mod_weights.flat_group);
   const ELEMENTS = E.elements.order;
@@ -198,7 +221,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
    * rest in `extra`, so the 7-line skeleton's counts and the unremovable floor stay fixed. `u` is the
    * item's one Tier draw, shared with the Random lines exactly as `tools/loot.ts` rolls them.
    */
-  function baseModRoll(BASES: any, slot: string, frame: any, weapon: any, rng: Rng, q: number, u: number): any[] {
+  function baseModRoll(BASES: any, slot: string, frame: any, weapon: any, rng: Rng, ilvl: number, q: number, u: number): any[] {
     const BM = E.loot.base_mod;
     const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
@@ -222,8 +245,8 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     }
     const k = scale(ids.length);
     const roll = (id: string) => {
-      const slice = tierSlice(u, sliceCount(id, q));
-      const [lo, hi] = rangeOf(id, q, slice);
+      const slice = tierSlice(u);
+      const [lo, hi] = rangeOf(id, ilvl, q, slice);
       return { id, value: Math.max(1, Math.round((lo + Math.floor(rng() * (hi - lo + 1))) * k)), slice };
     };
     if (!ids.length) return [];
@@ -236,18 +259,20 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     }];
   }
 
-  /** The lines a dropped piece carries: line 1 + the Legacy pair + its rolled Random lines. */
-  function linesAtDrop(rarityName: string) {
-    const row = RARITY.find((r) => r.name === rarityName) || RARITY[RARITY.length - 1];
-    return (E.rarity.base_mod_slots || 0) + (E.rarity.legacy_slots || 0) + (row?.dropped_random || 0);
+  /**
+   * The lines a dropped piece carries: line 1 + the Legacy pair + its rolled Random lines. One count for
+   * every drop — Rarity, the old coin flip between two counts, is gone (item-rarity.md).
+   */
+  function linesAtDrop() {
+    return E.item_level.line_count;
   }
 
   /**
-   * Line 1 at its floor, for a piece restored from a pre-skeleton save. The same Mods a fresh
-   * roll would force, but at the lowest Tier and lowest value of the quality band and with no RNG at
-   * all, so two loads of one save agree to the digit. Still one line, the extra Mods in `extra`.
+   * Line 1 at its floor, for a piece restored from a pre-skeleton save or handed over at minute one. The
+   * same Mods a fresh roll would force, but at the lowest value of the window with no RNG at all, so two
+   * loads of one save agree to the digit. Still one line, the extra Mods in `extra`.
    */
-  function baseModAtFloor(BASES: any, slot: string, frame: any, weapon: any, q: number): any[] {
+  function baseModAtFloor(BASES: any, slot: string, frame: any, weapon: any, ilvl: number, q: number): any[] {
     const BM = E.loot.base_mod;
     const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
@@ -260,7 +285,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     }
     if (!ids.length) return [];
     const k = scale(ids.length);
-    const value = (id: string) => Math.max(1, Math.round(rangeOf(id, q, 0)[0] * k));
+    const value = (id: string) => Math.max(1, Math.round(windowAt(id, ilvl, q)[0] * k));
     return [{
       id: ids[0], value: value(ids[0]), slice: 0, element: null,
       ...(ids.length > 1 ? { extra: ids.slice(1).map((id) => ({ id, value: value(id) })) } : {}),
@@ -283,18 +308,15 @@ export function createLoot(E: EngineData, MODS: ModsData) {
    * noise — `upgrade_margin_pct` — or when it carries an Element the player has no answer to
    * (loot.md §4). Anything else dissolves for 1 Reroll value stone, never for gold (`economy.md`).
    *
-   * The last argument is one slot's configured thresholds (`save.md`): a raised margin, a Rarity
-   * floor and the Element keep-list switch. Every value falls back to the published rule, so a
-   * caller that configures nothing gets exactly the behaviour `tools/loot.ts` measures.
+   * The last argument is one slot's configured thresholds (`save.md`): a raised margin and the Element
+   * keep-list switch. Every value falls back to the published rule, so a caller that configures nothing
+   * gets exactly the behaviour `tools/loot.ts` measures.
    */
   function keepsDrop(item: any, wornScore: number | undefined, knownElements: Set<string> | undefined, marginPct: number, rule?: any) {
     const o = rule || {};
     const margin = o.margin_pct != null ? o.margin_pct / 100 : marginPct;
     const keepElement = o.keep_missing_element !== false;
     const s = score(item);
-    if (o.min_rarity && o.min_rarity !== 'any' && item.rarity !== o.min_rarity) {
-      return { keep: false, reason: 'threshold', score: s, margin };
-    }
     if (wornScore === undefined || s > wornScore * (1 + margin)) {
       return { keep: true, reason: 'upgrade', score: s, margin };
     }
@@ -333,21 +355,20 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   };
 
   /**
-   * Which Tier slice of a Mod this roll lands on. Mods carry 2 or 3 slices per Item quality
-   * band, and the published weights are per Tier (T1 17% · T2 33% · T3 50%), so a 2-slice Mod
-   * spends its T2 and T3 weights on its better slice instead of dropping them.
+   * Which third of the window this roll lands in. The top third is the rarest and the bottom the common
+   * outcome (item-rarity.md): the weights are the one skew every Mod shares, so "best is never free" is a
+   * property of the roll rather than of a per-Mod ladder.
    */
-  function tierSlice(u: number, slices: number) {
-    if (slices <= 1) return 0;
-    if (u < TIER_SPLIT[0]) return 0;
-    if (u < TIER_SPLIT[1]) return Math.round((slices - 1) / 2);
-    return slices - 1;
+  function tierSlice(u: number) {
+    if (u < TIER_SPLIT[0]) return 2;
+    if (u < TIER_SPLIT[1]) return 1;
+    return 0;
   }
 
   return {
-    SLOTS, GEAR_MOD_SLOTS, STAT_IDS, GEAR_MODS, STAT_ROLLS, RARITY, TIER_SPLIT, QUALITY_MIX, TIER_NAME,
+    SLOTS, GEAR_MOD_SLOTS, STAT_IDS, GEAR_MODS, STAT_ROLLS, TIER_SPLIT, TIER_NAME,
     BAND_LABEL, RW, MAX_OF, NAME_OF, BANDS_OF, WEIGHT_BY_ID, FLAT_GROUP, ELEMENTS, ARMOUR_SLOTS,
-    weightOf, rangeOf, sliceCount, tierSlice, score, keepsDrop, notYetFound, statOf, blockedBy,
+    weightOf, windowAt, spanT, rangeOf, sliceCount, tierSlice, score, keepsDrop, notYetFound, statOf, blockedBy,
     slotUnion, poolFor, baseModRoll, baseModAtFloor, linesAtDrop,
     mulberry32, pick, intBetween, pickBand, weightedPick,
   };

@@ -244,7 +244,7 @@ export interface FieldLabelRule {
 /**
  * One variant's drop identity (`mob.variant_drops`, keyed by the variant name `mob.variants` owns).
  * `item`/`rarity` are the junk it pays instead of a species-wide item; `lean` is the collectible
- * stream it tilts toward, applied through `huntReweight` so the total expected drops/kill is conserved.
+ * stream it tilts toward, applied through `leanReweight` so the total expected drops/kill is conserved.
  */
 export interface VariantDrop {
   item: string;
@@ -285,17 +285,21 @@ export interface WeaponCfg {
   weapon_aspd: number;
 }
 
-export interface RarityRow {
-  /** How many of the Random lines (4-7) arrive rolled at drop — the rest are empty slots. */
-  dropped_random: number;
-  crafted_max: number;
+/** One band's own level span — the levels a band reads, `item-rarity.md`. */
+export interface ItemLevelSpan {
+  band: string;
+  from: number;
+  to: number;
 }
 
-export interface RarityCfg {
-  floor_ceiling: Record<string, { floor?: string; ceiling?: string; note?: string }>;
-  Common: RarityRow;
-  Rare: RarityRow;
-  drop_chance: Record<string, number>;
+export interface ItemLevelCfg {
+  /** How many lines arrive rolled at drop. One count for every piece — Rarity is gone. */
+  line_count: number;
+  /** The band ladder: each band's level span, in order. */
+  spans: ItemLevelSpan[];
+  /** Levels Ascend adds to a piece (one span's length, gated against it). */
+  ascend_levels: number;
+  crafted_max: number;
   mods_added_cap: number;
   add_stones_per_fill: number[];
   stat_mod_slots: number;
@@ -336,42 +340,20 @@ export interface ModWeightsCfg {
   flat_group: string[];
 }
 
-export interface RoadLinkCfg {
-  a: string;
-  b: string;
-  zoneA: number;
-  zoneB: number;
-  kind: 'ladder' | 'branch';
-  terrain: string;
-  trip_min: number;
-}
-
-export interface RoadWalkCfg {
-  note: string;
-  block_sec: number;
-  encounter_gap_blocks: number;
-  rule: string;
-  adjacency_rule: string;
-  checkpoint_rule: string;
-  route_rule: string;
+export interface RoadNodeCfg {
+  id: string;
+  q: number;
+  r: number;
 }
 
 export interface RoadCfg {
-  links: RoadLinkCfg[];
-  link_rule: string;
-  trip_min: number;
-  encounters_per_min: number;
-  walk: RoadWalkCfg;
-  terrain: Record<string, Record<string, number>>;
-  terrain_rule: string;
-  encounters: Record<string, { weight: number; mobs: string; resolve: unknown; win: unknown; loss: unknown }>;
-  base_rule: string;
-  purse_gold: number;
-  purse_once_per_link_per_day: boolean;
-  chest_once_per_link_per_day: boolean;
-  circuit: { push_skips_leg: boolean; offline_resolves: boolean; editable_in: string };
-  standing_per_trip_kills: number;
-  forfeit_kills: number;
+  nodes: RoadNodeCfg[];
+  graph_rule: string;
+  block_sec: number;
+  encounter_chance_pct: number;
+  encounter_rule: string;
+  push_rule: string;
+  waypoint_rule: string;
 }
 
 export interface FarmCfg {
@@ -444,7 +426,7 @@ export interface EngineData {
   loot: LootCfg;
   road: RoadCfg;
   inventory: InventoryCfg;
-  rarity: RarityCfg;
+  item_level: ItemLevelCfg;
   salvage: any;
   save: any;
   junk: any;

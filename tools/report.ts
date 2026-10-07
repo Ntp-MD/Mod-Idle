@@ -43,7 +43,7 @@ const CAGES: any[] = [
   { script: 'tools/skills.ts', owns: 'skills.json → skill-pool*.md roster tables + counts', label: 'skills cage' },
   { script: 'tools/tree.ts', owns: 'tree.json + node tables → skill-tree.md summary + D19 refs', label: 'tree cage' },
   { script: 'tools/ladder.ts', owns: 'roster × drop rate → D20/E11 duplicate economy', label: 'ladder cage' },
-  { script: 'tools/loot.ts', owns: 'loot pipeline → loot.md §3 + F4/F11 + upgrades/hr', label: 'loot cage' },
+  { script: 'tools/loot.ts', owns: 'loot pipeline → loot.md §3 + F4/F11 + upgrades per drop', label: 'loot cage' },
   { script: 'tools/timeline.ts', owns: 'engine.json xp → world.md 5-level-step table', label: 'timeline cage' },
   { script: 'tools/lint.ts', owns: 'cross-file references · counts · deprecated terms', label: 'doc lint' },
 ];

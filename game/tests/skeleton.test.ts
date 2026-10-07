@@ -9,7 +9,7 @@ import type { Item } from '../src/sim/types';
 
 /**
  * The 7-line skeleton (`item-base.md`): line 1 is the Base Mod, lines 2-3 the unremovable
- * Legacy pair, lines 4-7 the Random lines a Rarity fills at drop. These tests pin the shape, the
+ * Legacy pair, lines 4-5 the Random lines every drop fills and 6-7 the two Add owns. These tests pin the shape, the
  * one-line/1-3-Mod rule with its value scale, the armour hybrid chance, and the two new avoidance
  * readings the skeleton added — block and armour penetration.
  */
@@ -19,23 +19,24 @@ const armourFrame = (defence: string) =>
 const weaponNamed = (name: string) => BASES.weapons.find((w: any) => w.name === name);
 
 describe('the 7-line skeleton', () => {
-  it('fills a fixed count per Rarity and never exceeds the pool', () => {
+  it('fills the one published count and never exceeds the pool', () => {
     const rng = mulberry32(101);
     for (let i = 0; i < 600; i++) {
-      const item = rollDrop(rng, ['low', 'mid', 'high'][i % 3], 1.2);
-      const target = loot.linesAtDrop(item.rarity);
+      const band = ['low', 'mid', 'high'][i % 3];
+      const item = rollDrop(rng, band, band === 'low' ? 1 : band === 'mid' ? 31 : 61);
+      const target = loot.linesAtDrop();
       expect(item.lines.length).toBeLessThanOrEqual(target);
       if (item.slot === 'main hand') expect(item.lines.length).toBe(target); // a weapon pool always fills
     }
   });
 
-  it('Common fills 5 and Rare fills 7', () => {
-    expect(loot.linesAtDrop('Common')).toBe(5);
-    expect(loot.linesAtDrop('Rare')).toBe(7);
+  it('every drop carries the same count, whatever its band', () => {
+    expect(loot.linesAtDrop()).toBe(E.item_level.line_count);
+    expect(E.item_level.crafted_max - loot.linesAtDrop()).toBe(E.item_level.mods_added_cap);
   });
 
   it('line 1 is the Base Mod, lines 2-3 the Legacy pair, and the craft verbs refuse all three', () => {
-    const item = rollDrop(mulberry32(202), 'high', 1.2);
+    const item = rollDrop(mulberry32(202), 'high', 61);
     expect(craft.BASE_MOD_SLOTS).toBe(1);
     expect(craft.LEGACY_SLOTS).toBe(2);
     expect(craft.UNTOUCHABLE).toBe(3);
@@ -51,38 +52,38 @@ describe('the 7-line skeleton', () => {
 describe('line 1 carries 1-3 Mods on one line, scaled', () => {
   it('a weapon forces every Mod its type lists, at the two-Mod scale', () => {
     const wand = weaponNamed('wand');
-    const line = loot.baseModRoll(BASES, 'main hand', null, wand, () => 0, 1, 0);
+    const line = loot.baseModRoll(BASES, 'main hand', null, wand, () => 0, 1, 0, 0);
     expect(line.length).toBe(1); // ONE line ...
     expect(line[0].id).toBe('magic_power_flat');
     expect(line[0].extra.length).toBe(1); // ... carrying the pair
     expect(line[0].extra[0].id).toBe('cooldown_reduction');
     const k = E.loot.base_mod.value_scale['2'];
-    expect(line[0].value).toBe(Math.round(loot.rangeOf('magic_power_flat', 1, 0)[0] * k));
-    expect(line[0].extra[0].value).toBe(Math.round(loot.rangeOf('cooldown_reduction', 1, 0)[0] * k));
+    expect(line[0].value).toBe(Math.round(loot.windowAt('magic_power_flat', 1, 0)[0] * k));
+    expect(line[0].extra[0].value).toBe(Math.round(loot.windowAt('cooldown_reduction', 1, 0)[0] * k));
   });
 
   it('a single-Mod weapon keeps its full roll', () => {
-    const line = loot.baseModRoll(BASES, 'main hand', null, weaponNamed('two-handed sword'), () => 0, 1, 0);
+    const line = loot.baseModRoll(BASES, 'main hand', null, weaponNamed('two-handed sword'), () => 0, 1, 0, 0);
     expect(line.length).toBe(1);
     expect(line[0].extra).toBeUndefined();
-    expect(line[0].value).toBe(loot.rangeOf('physical_power_flat', 1, 0)[0]);
+    expect(line[0].value).toBe(loot.windowAt('physical_power_flat', 1, 0)[0]);
   });
 
   it('an armour Base locks its own defence type and may add the others at the three-Mod scale', () => {
     const frame = armourFrame('armour_pct');
-    const line = loot.baseModRoll(BASES, 'helmet', frame, null, () => 0, 1, 0);
+    const line = loot.baseModRoll(BASES, 'helmet', frame, null, () => 0, 1, 0, 0);
     expect(line.length).toBe(1);
     expect(line[0].id).toBe('armour_pct');
     expect(line[0].extra.length).toBe(2);
     const k = E.loot.base_mod.value_scale['3'];
-    expect(line[0].value).toBe(Math.round(loot.rangeOf('armour_pct', 1, 0)[0] * k));
+    expect(line[0].value).toBe(Math.round(loot.windowAt('armour_pct', 1, 0)[0] * k));
   });
 
 });
 
 describe('block is its own avoidance layer (exception)', () => {
   const shield = (pct: number): Item => ({
-    slot: 'off hand', base: 'Buckler', rarity: 'Rare', quality: 'high', tier: 'T1', q: 2,
+    slot: 'off hand', base: 'Buckler', ilvl: 61, quality: 'high', tier: 'T1', q: 2,
     lines: [{ id: 'block_chance', value: pct, slice: 0 }],
   } as unknown as Item);
 
@@ -124,11 +125,11 @@ describe('block is its own avoidance layer (exception)', () => {
 
 describe('armour penetration cuts the mob armour ratio ', () => {
   it('the crossbow line lands on the sheet as a fraction', () => {
-    const line = loot.baseModRoll(BASES, 'main hand', null, weaponNamed('crossbow'), () => 0, 1, 0);
+    const line = loot.baseModRoll(BASES, 'main hand', null, weaponNamed('crossbow'), () => 0, 1, 0, 0);
     expect(line[0].extra[0].id).toBe('armour_pen');
     const gear = emptyGear();
     gear[loot.SLOTS.indexOf('main hand')] = {
-      slot: 'main hand', base: 'crossbow', rarity: 'Rare', quality: 'high', tier: 'T1', q: 2,
+      slot: 'main hand', base: 'crossbow', ilvl: 61, quality: 'high', tier: 'T1', q: 2,
       weaponAspd: weaponNamed('crossbow').weapon_aspd, lines: line,
     } as unknown as Item;
     const c = buildCharacter(60, gear);
@@ -150,7 +151,7 @@ describe('armour penetration cuts the mob armour ratio ', () => {
 describe('the new lines reach the sheet through line 1', () => {
   it('sumLines counts a Base Mod line and its extra Mods', () => {
     const item: Item = {
-      slot: 'off hand', base: 'Buckler', rarity: 'Rare', quality: 'high', tier: 'T1', q: 2,
+      slot: 'off hand', base: 'Buckler', ilvl: 61, quality: 'high', tier: 'T1', q: 2,
       lines: [{ id: 'block_chance', value: 20, slice: 0, extra: [{ id: 'evasion_pct', value: 10 }] }],
     } as unknown as Item;
     const gear = emptyGear();

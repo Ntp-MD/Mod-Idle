@@ -12,11 +12,11 @@ A Base does two things, and **is intentionally allowed to do nothing else**
 
 | Base determines | Base does not determine |
 |---|---|
-| **Weight** (differing weights make the Str capacity matter) | Mod count → belongs to Rarity (glossary rule 2) |
+| **Weight** (differing weights make the Str capacity matter) | Mod count → fixed for every drop (`item-rarity.md`) |
 | **Which Mod is Primary / Secondary** on that item | Rolled value per slot → belongs to quality + Tier |
 | | Item home Element → belongs to the Mod pool only |
 
-> Reason Bases must not touch Mod count: if both Rarity and Base set Mod count, two axes collapse into one, and players cannot tell whether an item is "rare" or "a heavy frame".
+> Reason Bases must not touch Mod count: the count is one published number for every drop, so a frame is free to be heavy without also being "more Mods".
 
 # Line 1 · Base Mod (the frame's own line)
 
@@ -224,7 +224,8 @@ Printed by `node tools/bases.ts --blocks` from `tools/data/bases.json`. Mid and 
 # Base Rolling
 
 - **Bases roll equally inside their slot** (helmet 1/3 · chest 1/3 · ring 1/2 · weapon by dropped type)
-- Consequence to be aware of: the chance of the *right* frame is 1/#Base for that slot · multiplied by Rarity (18% Rare) and Tier (17% T1), a truly on-spec item is 1 in ~30-60 drops → this is the job of **Reroll/Refine/Ascend, not luck** (loot.md)
+- Consequence to be aware of: the chance of the *right* frame is 1/#Base for that slot · multiplied by where the roll lands in its window (17% T1), a truly on-spec item is 1 in ~30-60 drops → this is the job of **Reroll/Refine/Ascend, not luck** (loot.md)
+- **Minute one's set is hand-authored, not rolled** — `engine.json` `opening.gear` names a frame per slot and the client gives each piece the one line its frame's Base Mod takes at the floor of its window (`item-rarity.md`), so the drop roll's own count and pools are untouched by the opening.
 
 # What This File Unlocks for Other Systems
 
@@ -233,7 +234,7 @@ Printed by `node tools/bases.ts --blocks` from `tools/data/bases.json`. Mid and 
 | mod-pool.md | Per-slot weight table → becomes per-*Base* weight |
 | formula.md section 11 | The penalty numbers are the ones printed above (cloth pays nothing, the heavy paths pay up to the Cap) |
 | equipment-slot.md | Per-slot Primary/Secondary → moved here per Base · the old notes 2 (Evasion Flat on only 2 slots) and 3 (Alignment on only 2 slots) are **retired**: the union pools now give Evasion Flat 4 slots, and **Elemental alignment and Elemental resistance are separated onto disjoint slot families** (alignment · gloves · ring · amulet · off hand; resistance · helmet · chest · pant · boots · belt · cape) so an Element build never trades survival against the line that gates its status and scales its Element damage — see the generated Mod availability table in equipment-slot-pools.md |
-| item-rarity.md | Third-Rarity (Unique) **cut** — Rarity stays two levels; Base frame + Mods carry identity |
+| item-rarity.md | Third-Rarity (Unique) **cut**, and Rarity itself retired — the item level is the one axis; Base frame + Mods carry identity |
 | crafting.md | Open question "item Base" in the missing-slots list → now answered · **per-item craft-attempt ceiling: none** — structural ceilings (Refine T1 · Ascend high quality) already bound it |
 | loot.md section 1 | Roll order gains a "pick Base" step before Primary/Secondary |
 

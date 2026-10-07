@@ -29,23 +29,23 @@ import mob-roster.md
 | Zone | Settlement · Levels | Region | Dropped Quality ceiling | mob HP (zone edge) | innate Elements | Mobs per group | Boss | roster entries |
 |---|---|---|---|---|---|---|---|---|
 | 1 | Eastgate · 1-10 | pinewood road | low | 120 → 629 | fire | 1-2 | Goblin King (Goblin) | 14 |
-| 2 | Millbrook · 11-20 | slow water | low | 730 → 1,305 | poison | 1-2 | Broodmother (Spider) | 12 |
-| 3 | Ashfall · 21-30 | ash fields | low | 1,436 → 1,824 | fire | 1-2 | Treant Elder (Treant) | 12 |
-| 4 | Ironrow · 31-40 | storm terrace | mid (floor = low) | 3,546 → 4,033 | lightning | 2-3 | Elven Archmage (Elf) | 12 |
-| 5 | Wolf Cross · 41-50 | wolf country | mid | 4,090 → 4,632 | cold | 2-3 | Elder Troll (Troll) | 11 |
-| 6 | Highspire · 51-60 | high crags | mid | 4,696 → 5,293 | cold · lightning | 2-3 | Warlord Orc (Orc) | 12 |
-| 7 | Bonegate · 61-70 | the bone gate | high (floor = mid) | 7,739 → 8,587 | chaos | 3-5 | Hoarder Kobold (Kobold) | 12 |
-| 8 | Frosthold · 71-80 | frost hold | high | 8,685 → 9,605 | cold | 3-5 | Ogre King (Ogre) | 12 |
-| 9 | Vermolch · 81-90 | the vermolch mire | high | 9,712 → 10,709 | poison · chaos | 3-5 | Wolf King (Wolf) | 10 |
-| 10 | Thornwake · 91-100 | wet lowland | low | 10,850 → 12,144 | poison | 1-2 | Ancient Dragon (Dragon) | 10 |
-| 11 | Greyfen · 101-110 | wet lowland | low | 12,291 → 13,639 | poison · chaos | 1-2 | Mummy Lord (Mummy) | 14 |
-| 12 | Saltmarrow · 111-120 | salt flats | low | 13,791 → 15,191 | chaos | 1-2 | Bone Colossus (Skeleton) | 11 |
+| 2 | Highspire · 11-20 | high crags | low | 730 → 1,305 | cold · lightning | 1-2 | Warlord Orc (Orc) | 12 |
+| 3 | Wolf Cross · 21-30 | wolf country | low | 1,436 → 1,824 | cold | 1-2 | Elder Troll (Troll) | 11 |
+| 4 | Greyfen · 31-40 | wet lowland | mid (floor = low) | 3,546 → 4,033 | poison · chaos | 2-3 | Mummy Lord (Mummy) | 14 |
+| 5 | Saltmarrow · 41-50 | salt flats | mid | 4,090 → 4,632 | chaos | 2-3 | Bone Colossus (Skeleton) | 11 |
+| 6 | The Pale Spire · 51-60 | the pale bloom | mid | 4,696 → 5,293 | chaos · poison | 2-3 | Paladin (Human) | 13 |
+| 7 | Blackwater Reach · 61-70 | drowned river mouth | high (floor = mid) | 7,739 → 8,587 | poison | 3-5 | Colossus (Golem) | 8 |
+| 8 | Bonegate · 71-80 | the bone gate | high | 8,685 → 9,605 | chaos | 3-5 | Hoarder Kobold (Kobold) | 12 |
+| 9 | Frosthold · 81-90 | frost hold | high | 9,712 → 10,709 | cold | 3-5 | Ogre King (Ogre) | 12 |
+| 10 | Vermolch · 91-100 | the vermolch mire | low | 10,850 → 12,144 | poison · chaos | 1-2 | Wolf King (Wolf) | 10 |
+| 11 | Duskmoor · 101-110 | open moor | low | 12,291 → 13,639 | cold · chaos | 1-2 | Archdemon (Demon) | 14 |
+| 12 | Nettlecrag · 111-120 | thorn country | low | 13,791 → 15,191 | chaos · poison | 1-2 | Slime King (Slime) | 8 |
 | 13 | Emberhold · 121-130 | slag and foundry heat | mid (floor = low) | 15,350 → 16,803 | fire | 2-3 | Ancient Vampire (Vampire) | 15 |
-| 14 | Duskmoor · 131-140 | open moor | mid (floor = low) | 16,967 → 18,473 | cold · chaos | 2-3 | Archdemon (Demon) | 14 |
-| 15 | Nettlecrag · 141-150 | thorn country | mid (floor = low) | 18,643 → 20,202 | chaos · poison | 2-3 | Slime King (Slime) | 8 |
-| 16 | Blackwater Reach · 151-160 | drowned river mouth | high (floor = mid) | 20,378 → 21,989 | poison | 3-5 | Colossus (Golem) | 8 |
-| 17 | Wyrmback · 161-170 | wyrm breeding ground | high (floor = mid) | 22,171 → 23,836 | fire · cold | 3-5 | Lizardman Chief (Lizardman) | 12 |
-| 18 | The Pale Spire · 171-180 | the pale bloom | high (floor = mid) | 24,024 → 25,741 | chaos · poison | 3-5 | Paladin (Human) | 13 |
+| 14 | Millbrook · 131-140 | slow water | mid (floor = low) | 16,967 → 18,473 | poison | 2-3 | Broodmother (Spider) | 12 |
+| 15 | Wyrmback · 141-150 | wyrm breeding ground | mid (floor = low) | 18,643 → 20,202 | fire · cold | 2-3 | Lizardman Chief (Lizardman) | 12 |
+| 16 | Ashfall · 151-160 | ash fields | high (floor = mid) | 20,378 → 21,989 | fire | 3-5 | Treant Elder (Treant) | 12 |
+| 17 | Ironrow · 161-170 | storm terrace | high (floor = mid) | 22,171 → 23,836 | lightning | 3-5 | Elven Archmage (Elf) | 12 |
+| 18 | Thornwake · 171-180 | wet lowland | high (floor = mid) | 24,024 → 25,741 | poison | 3-5 | Ancient Dragon (Dragon) | 10 |
 
 HP columns are `mob_HP(L)` at the zone's first and last level (checks.md D1) · the boss row is the zone's own `mob_HP × 15 / damage × 4` carrier species (combat.md section 7). `mob-roster.md` expands every one of these into the per-species, per-body entries a build reads from.
 <!-- END GENERATED:zone-table -->
@@ -56,7 +56,7 @@ HP columns are `mob_HP(L)` at the zone's first and last level (checks.md D1) · 
 |---|---|
 | Zone level · group size · Quality ceiling · innate Elements · boss | the generated table above — one row per zone, no second home |
 | Elite spawn chance | **1 in 5 kills** (`engine.json` `loot.elite_spawn_chance`) · always single · each drops a Reroll tier stone **5%** of the time · the main tier-stone source (loot.md section 5) |
-| Boss spawn chance | **1 per 15 min per character** · only attackable while online |
+| Boss spawn chance | **1 per 15 min per character** (0.0068 per kill) · only attackable while online |
 | New group spawn time | 4 sec after clearing the previous group · constant across zones |
 | Species per zone | every legal zone × species × body entry is listed with its numbers in `mob-roster.md` · **X23** fails a zone with fewer than 5 entries or a boss that does not live there |
 
@@ -65,19 +65,19 @@ HP columns are `mob_HP(L)` at the zone's first and last level (checks.md D1) · 
 - **Losing to a boss = losing that spawn** (boss retreats, full HP, must wait for next 15 min cycle) · full rules + which build wins at which zone in combat.md section 7.
 - **A player past a zone's last level still fights that zone at its edge** · the spawn clamp is the zone's own range, so the world's last zones stay the farm for a character at the level cap (as stated in `concept.md` and `formula.md` section 0a).
 
-# Hunting Mode
+# Walk mode
 
 How the walk chooses its zone, switched by the player (`game/` control). The design's default is **Stay**:
 
 - **Stay** — the character farms the zone it is in however high it gets · only the player moves it, so nothing travels without being told.
 - **Forward** — the chapter climb. The walk moves on to the next settlement already opened once the current zone's own level band is behind it (`mob.zones.levels`, no separate travel number), and a **Push** sends it back to the last zone it held. The walk then refuses to re-enter the zone it was chased out of until one more level is gained against that zone, so the ladder settles where the build is survivable instead of looping into a wall.
 
-Forward uses settlements already opened and adds no Road number: Road travel stays its own opt-in, online-only system (`towns.md`).
+Forward uses settlements already opened and adds no travel number: walking to a new settlement stays the player's own act, online only (`towns.md` section 7).
 
 # Full Game Timeline
 
 Generated, never typed: the 5-level-step table below is written by `tools/timeline.ts` from `engine.json` `xp`, and the
-checkpoints it reconciles against are `checks.md` E1-E5. A hand-typed copy of the same hours used to sit here, and it
+checkpoints it reconciles against are `checks.md` E1-E5. A hand-typed copy of the same counts used to sit here, and it
 went stale the moment the re-base moved the funnel, so it is deliberately gone — read the generated table below, or the
 E-rows in `checks.md`.
 
@@ -88,7 +88,7 @@ xp to next level     = 5-level-step table (generated below from the kills anchor
 kills per level       = 20 (L1) · 41 (L5) · 67 (L10) · 71 (L11) · 92 (L15) · 115 (L20) · 121 (L21) · 141 (L25) · 197 (L30) · 207 (L31) · 248 (L35) · 322 (L40) · 334 (L41) · 386 (L45) · 486 (L50) · 504 (L51) · 581 (L55) · 717 (L60) · 741 (L61) · 840 (L65) · 1,147 (L70) · 1,178 (L71) · 1,319 (L75) · 1,562 (L80) · 1,610 (L81) · 1,818 (L85) · 1,863 (L86) · 1,907 (L87) · 1,952 (L88) · 1,995 (L89) · 2,169 (L90) · 2,304 (L91) · 2,430 (L92) · 2,685 (L93) · 2,933 (L94) · 3,360 (L95) · 3,732 (L96) · 3,962 (L97) · 4,757 (L98) · 7,063 (L99)
 ```
 <!-- END GENERATED:xp-formula -->
-- **The elite and boss multipliers are paid in the model.** One kill in five rolls elite (×3 XP) and the boss clock adds ×15, so the average kill is worth ~1.44× a plain mob; the kills-per-level anchors are scaled to hold the published E1-E5 kill counts. Ignoring them would have finished the game about a third early the moment the elite rate moved from 0.5% to 20%.
+- **The elite and boss multipliers are paid in the model.** One kill in five rolls elite (×3 XP) and the boss clock adds ×15 at 0.0068 per kill, so the average kill is worth ~1.44× a plain mob; the kills-per-level anchors are scaled to hold the published E1-E5 kill counts. Ignoring them would have finished the game about a third early the moment the elite rate moved from 0.5% to 20%.
 
 **XP per 5-level step** — generated by `node tools/timeline.ts` from `engine.json` `xp` (anchors + band rates); do not hand-type:
 
@@ -137,9 +137,9 @@ Derived from `xp_to_next(L) = kills(L) × 10 × min(L, 180)` with the kills anch
 | 186-190 | 8,877,750 | 232,236,630 | 4,932 | 205,488 |
 <!-- END GENERATED:xp-table -->
 
-- The run's published checkpoints are the **E-series** (level 100 at 110.7 hr, on to the level cap at 574.5 hr), and they are **informational**: play-length is not a design constraint, so nothing here is tuned to a target number of hours.
+- The run's published checkpoints are the **E-series** (level 100 at 60,031 kills, on to the level cap at 136,698), and they are **informational**: play-length is not a design constraint, so nothing here is tuned to a target number of hours.
 - That settles the "many zones or deep zones" question: 18 zones of 10 levels each, with each zone's share of the timeline read off the `checks.md` E-series · to add another zone later, *reduce* the craft time per zone, never the level time.
-- **Closed with the ladder re-cut**: the old 32-duplicate random ladder asked ~300 hr against the line of the day, and the live ladder (12 duplicates + the 2:1 conversion, generated by `ladder.ts`) is the fix, so no open conflict is left here.
+- **Closed with the ladder re-cut**: the old 32-duplicate random ladder asked far more than the whole run, and the live ladder (12 duplicates + the 2:1 conversion, generated by `ladder.ts`) is the fix, so no open conflict is left here.
 
 # Mob HP Formula Per Level (Replaces Placeholder Line)
 
@@ -183,28 +183,28 @@ A mob is three independent things: a **species**, a **body class**, and an **inn
 <!-- BEGIN GENERATED:mob-sheet -->
 | Species | Zones | Habitat (regions it may live in) | Variants (ladder) | Damage | accuracy | Body classes | str · agi · vit · dex · int · wis · lck |
 |---|---|---|---|---|---|---|---|
-| Goblin | 1 · 2 | pinewood road · slow water | Sneak Goblin → Raider Goblin → Tinker Goblin → Shaman Goblin → Goblin King | physical | ×0.75 | Small · Medium · Large | 1.29 · 1.18 · 0.97 · 0.97 · 0.65 · 0.86 · 1.08 |
-| Orc | 1 · 6 · 11 | pinewood road · high crags · wet lowland | Raider Orc → Shaman Orc → Berserker Orc → Juggernaut Orc → Warlord Orc | physical | ×0.75 | Medium · Large | 1.48 · 1.06 · 1.27 · 0.74 · 0.53 · 0.95 · 0.95 |
-| Kobold | 7 | the bone gate | Miner Kobold → Trapper Kobold → Tinker Kobold → Drake Kobold → Hoarder Kobold | physical | ×0.50 | Small · Medium | 1.07 · 1.32 · 0.85 · 1.06 · 0.64 · 0.85 · 1.22 |
-| Ogre | 6 · 8 · 17 | high crags · frost hold · wyrm breeding ground | Brute Ogre → Butcher Ogre → Swamp Ogre → Mage Ogre → Ogre King | physical | ×0.50 | Medium · Large | 1.43 · 0.96 · 1.38 · 0.74 · 0.59 · 0.95 · 0.95 |
-| Troll | 5 · 7 · 9 · 10 | wolf country · the bone gate · the vermolch mire · wet lowland | Cave Troll → Forest Troll → Swamp Troll → Stone Troll → Elder Troll | physical | ×0.50 | Large | 1.38 · 0.85 · 1.48 · 0.74 · 0.64 · 0.95 · 0.95 |
-| Minotaur | 7 | the bone gate | Warrior Minotaur → Berserker Minotaur → Guardian Minotaur → Blood Minotaur → Minotaur King | physical | ×0.75 | Medium · Large | 1.37 · 1.01 · 1.16 · 0.80 · 0.84 · 0.91 · 0.91 |
-| Skeleton | 12 · 13 · 14 | salt flats · slag and foundry heat · open moor | Warrior Skeleton → Archer Skeleton → Knight Skeleton → Mage Skeleton → Bone Colossus | physical | ×0.25 | Small · Medium · Large | 1.23 · 0.73 · 1.57 · 0.84 · 0.68 · 1.07 · 0.90 |
-| Mummy | 11 · 12 | wet lowland · salt flats | Warrior Mummy → Priest Mummy → Cursed Mummy → Royal Mummy → Mummy Lord | physical | ×0.25 | Medium · Large | 1.28 · 0.78 · 1.56 · 0.78 · 0.67 · 1.00 · 0.94 |
-| Vampire | 12 · 13 · 14 | salt flats · slag and foundry heat · open moor | Blood Vampire → Noble Vampire → Vampire Knight → Vampire Lord → Ancient Vampire | mixed | ×0.75 | Medium · Large | 1.15 · 1.16 · 1.00 · 0.95 · 0.90 · 0.90 · 0.95 |
-| Demon | 8 · 11 · 13 · 14 · 15 · 16 | frost hold · wet lowland · slag and foundry heat · open moor · thorn country · drowned river mouth | Imp → Demon Mage → Demon Brute → Demon Knight → Archdemon | mixed | ×0.75 | Medium · Large | 1.17 · 0.97 · 1.07 · 0.87 · 1.17 · 0.87 · 0.87 |
-| Slime | 5 · 15 · 16 · 17 | wolf country · thorn country · drowned river mouth · wyrm breeding ground | Splitter Slime → Acid Slime → Devourer Slime → Mimic Slime → Slime King | magic | ×0.05 | Small · Medium | 0.73 · 0.63 · 1.46 · 0.73 · 1.15 · 1.25 · 1.04 |
-| Spider | 2 · 5 · 7 · 17 | slow water · wolf country · the bone gate · wyrm breeding ground | Cave Spider → Hunter Spider → Web Spider → Venom Spider → Broodmother | physical | ×0.50 | Small · Medium | 0.72 · 1.34 · 0.82 · 1.24 · 0.82 · 0.93 · 1.13 |
-| Wolf | 1 · 2 · 9 · 10 | pinewood road · slow water · the vermolch mire · wet lowland | Hunting Wolf → Dire Wolf → Shadow Wolf → Alpha Wolf → Wolf King | physical | ×1.00 | Small · Medium | 1.13 · 1.34 · 0.93 · 1.03 · 0.62 · 0.93 · 1.03 |
-| Golem | 7 · 8 · 15 · 16 · 18 | the bone gate · frost hold · thorn country · drowned river mouth · the pale bloom | Stone Golem → Iron Golem → Guardian Golem → Crystal Golem → Colossus | physical | ×0.25 | Large | 1.70 · 0.60 · 1.55 · 0.75 · 0.65 · 1.10 · 0.65 |
-| Dragon | 6 · 8 · 9 · 10 · 18 | high crags · frost hold · the vermolch mire · wet lowland · the pale bloom | Wyrmling → Drake → Wyvern → Elder Dragon → Ancient Dragon | mixed | ×1.00 | Medium · Large | 1.48 · 0.78 · 1.30 · 0.81 · 0.90 · 0.98 · 0.76 |
-| Treant | 3 · 4 | ash fields · storm terrace | Young Treant → Thorn Treant → Rotting Treant → Ancient Treant → Treant Elder | physical | ×0.25 | Large | 1.54 · 0.73 · 1.52 · 0.75 · 0.65 · 1.03 · 0.80 |
-| Human | 1 · 13 · 18 | pinewood road · slag and foundry heat · the pale bloom | Ranger → Warrior → Knight → Mage → Paladin | physical | ×0.75 | Small · Medium · Large | 1.13 · 1.03 · 0.93 · 1.13 · 0.72 · 1.03 · 1.03 |
-| Lizardman | 5 · 11 · 17 | wolf country · wet lowland · wyrm breeding ground | Hunter Lizardman → Warrior Lizardman → Scale Knight → Shaman Lizardman → Lizardman Chief | physical | ×0.75 | Small · Medium · Large | 1.16 · 1.26 · 1.00 · 0.95 · 0.58 · 0.90 · 1.16 |
-| Elf | 3 · 4 · 18 | ash fields · storm terrace · the pale bloom | Wood Elf → High Elf → Moon Elf → Dark Elf → Elven Archmage | mixed | ×1.00 | Medium · Large | 0.86 · 1.15 · 0.77 · 1.25 · 1.05 · 0.96 · 0.96 |
-| Giant | 6 · 9 · 10 | high crags · the vermolch mire · wet lowland | Hill Giant → Stone Giant → Frost Giant → Fire Giant → Storm Giant | physical | ×0.25 | Large | 1.59 · 0.83 · 1.41 · 0.75 · 0.59 · 1.03 · 0.80 |
-| Werewolf | 2 · 3 · 4 · 14 | slow water · ash fields · storm terrace · open moor | Wolfman → Dire Werewolf → Blood Werewolf → Alpha Werewolf → Werewolf Lord | physical | ×1.00 | Medium · Large | 1.31 · 1.20 · 1.10 · 0.89 · 0.58 · 0.94 · 0.99 |
-| Dryad | 3 · 4 | ash fields · storm terrace | Forest Dryad → Flower Dryad → Thorn Dryad → Corrupted Dryad → Ancient Dryad | magic | ×0.50 | Medium · Large | 0.73 · 0.97 · 0.88 · 1.17 · 1.22 · 1.07 · 0.98 |
+| Goblin | 1 · 14 | pinewood road · slow water | Sneak Goblin → Raider Goblin → Tinker Goblin → Shaman Goblin → Goblin King | physical | ×0.75 | Small · Medium · Large | 1.29 · 1.18 · 0.97 · 0.97 · 0.65 · 0.86 · 1.08 |
+| Orc | 1 · 2 · 4 | pinewood road · high crags · wet lowland | Raider Orc → Shaman Orc → Berserker Orc → Juggernaut Orc → Warlord Orc | physical | ×0.75 | Medium · Large | 1.48 · 1.06 · 1.27 · 0.74 · 0.53 · 0.95 · 0.95 |
+| Kobold | 8 | the bone gate | Miner Kobold → Trapper Kobold → Tinker Kobold → Drake Kobold → Hoarder Kobold | physical | ×0.50 | Small · Medium | 1.07 · 1.32 · 0.85 · 1.06 · 0.64 · 0.85 · 1.22 |
+| Ogre | 2 · 9 · 15 | high crags · frost hold · wyrm breeding ground | Brute Ogre → Butcher Ogre → Swamp Ogre → Mage Ogre → Ogre King | physical | ×0.50 | Medium · Large | 1.43 · 0.96 · 1.38 · 0.74 · 0.59 · 0.95 · 0.95 |
+| Troll | 3 · 8 · 10 · 18 | wolf country · the bone gate · the vermolch mire · wet lowland | Cave Troll → Forest Troll → Swamp Troll → Stone Troll → Elder Troll | physical | ×0.50 | Large | 1.38 · 0.85 · 1.48 · 0.74 · 0.64 · 0.95 · 0.95 |
+| Minotaur | 8 | the bone gate | Warrior Minotaur → Berserker Minotaur → Guardian Minotaur → Blood Minotaur → Minotaur King | physical | ×0.75 | Medium · Large | 1.37 · 1.01 · 1.16 · 0.80 · 0.84 · 0.91 · 0.91 |
+| Skeleton | 5 · 11 · 13 | salt flats · slag and foundry heat · open moor | Warrior Skeleton → Archer Skeleton → Knight Skeleton → Mage Skeleton → Bone Colossus | physical | ×0.25 | Small · Medium · Large | 1.23 · 0.73 · 1.57 · 0.84 · 0.68 · 1.07 · 0.90 |
+| Mummy | 4 · 5 | wet lowland · salt flats | Warrior Mummy → Priest Mummy → Cursed Mummy → Royal Mummy → Mummy Lord | physical | ×0.25 | Medium · Large | 1.28 · 0.78 · 1.56 · 0.78 · 0.67 · 1.00 · 0.94 |
+| Vampire | 5 · 11 · 13 | salt flats · slag and foundry heat · open moor | Blood Vampire → Noble Vampire → Vampire Knight → Vampire Lord → Ancient Vampire | mixed | ×0.75 | Medium · Large | 1.15 · 1.16 · 1.00 · 0.95 · 0.90 · 0.90 · 0.95 |
+| Demon | 4 · 7 · 9 · 11 · 12 · 13 | frost hold · wet lowland · slag and foundry heat · open moor · thorn country · drowned river mouth | Imp → Demon Mage → Demon Brute → Demon Knight → Archdemon | mixed | ×0.75 | Medium · Large | 1.17 · 0.97 · 1.07 · 0.87 · 1.17 · 0.87 · 0.87 |
+| Slime | 3 · 7 · 12 · 15 | wolf country · thorn country · drowned river mouth · wyrm breeding ground | Splitter Slime → Acid Slime → Devourer Slime → Mimic Slime → Slime King | magic | ×0.05 | Small · Medium | 0.73 · 0.63 · 1.46 · 0.73 · 1.15 · 1.25 · 1.04 |
+| Spider | 3 · 8 · 14 · 15 | slow water · wolf country · the bone gate · wyrm breeding ground | Cave Spider → Hunter Spider → Web Spider → Venom Spider → Broodmother | physical | ×0.50 | Small · Medium | 0.72 · 1.34 · 0.82 · 1.24 · 0.82 · 0.93 · 1.13 |
+| Wolf | 1 · 10 · 14 · 18 | pinewood road · slow water · the vermolch mire · wet lowland | Hunting Wolf → Dire Wolf → Shadow Wolf → Alpha Wolf → Wolf King | physical | ×1.00 | Small · Medium | 1.13 · 1.34 · 0.93 · 1.03 · 0.62 · 0.93 · 1.03 |
+| Golem | 6 · 7 · 8 · 9 · 12 | the bone gate · frost hold · thorn country · drowned river mouth · the pale bloom | Stone Golem → Iron Golem → Guardian Golem → Crystal Golem → Colossus | physical | ×0.25 | Large | 1.70 · 0.60 · 1.55 · 0.75 · 0.65 · 1.10 · 0.65 |
+| Dragon | 2 · 6 · 9 · 10 · 18 | high crags · frost hold · the vermolch mire · wet lowland · the pale bloom | Wyrmling → Drake → Wyvern → Elder Dragon → Ancient Dragon | mixed | ×1.00 | Medium · Large | 1.48 · 0.78 · 1.30 · 0.81 · 0.90 · 0.98 · 0.76 |
+| Treant | 16 · 17 | ash fields · storm terrace | Young Treant → Thorn Treant → Rotting Treant → Ancient Treant → Treant Elder | physical | ×0.25 | Large | 1.54 · 0.73 · 1.52 · 0.75 · 0.65 · 1.03 · 0.80 |
+| Human | 1 · 6 · 13 | pinewood road · slag and foundry heat · the pale bloom | Ranger → Warrior → Knight → Mage → Paladin | physical | ×0.75 | Small · Medium · Large | 1.13 · 1.03 · 0.93 · 1.13 · 0.72 · 1.03 · 1.03 |
+| Lizardman | 3 · 4 · 15 | wolf country · wet lowland · wyrm breeding ground | Hunter Lizardman → Warrior Lizardman → Scale Knight → Shaman Lizardman → Lizardman Chief | physical | ×0.75 | Small · Medium · Large | 1.16 · 1.26 · 1.00 · 0.95 · 0.58 · 0.90 · 1.16 |
+| Elf | 6 · 16 · 17 | ash fields · storm terrace · the pale bloom | Wood Elf → High Elf → Moon Elf → Dark Elf → Elven Archmage | mixed | ×1.00 | Medium · Large | 0.86 · 1.15 · 0.77 · 1.25 · 1.05 · 0.96 · 0.96 |
+| Giant | 2 · 10 · 18 | high crags · the vermolch mire · wet lowland | Hill Giant → Stone Giant → Frost Giant → Fire Giant → Storm Giant | physical | ×0.25 | Large | 1.59 · 0.83 · 1.41 · 0.75 · 0.59 · 1.03 · 0.80 |
+| Werewolf | 11 · 14 · 16 · 17 | slow water · ash fields · storm terrace · open moor | Wolfman → Dire Werewolf → Blood Werewolf → Alpha Werewolf → Werewolf Lord | physical | ×1.00 | Medium · Large | 1.31 · 1.20 · 1.10 · 0.89 · 0.58 · 0.94 · 0.99 |
+| Dryad | 16 · 17 | ash fields · storm terrace | Forest Dryad → Flower Dryad → Thorn Dryad → Corrupted Dryad → Ancient Dryad | magic | ×0.50 | Medium · Large | 0.73 · 0.97 · 0.88 · 1.17 · 1.22 · 1.07 · 0.98 |
 
 | Body class | HP | PS | evasion | Grouping |
 |---|---|---|---|---|
@@ -225,9 +225,8 @@ A mob is three independent things: a **species**, a **body class**, and an **inn
 - **Mob crit is now possible.** Lck flows into crit through the same K values as a player, so the incoming order in `combat.md` §2 needs a crit step it did not have before this sheet existed.
 - **A variant is its own drop table, not decoration.** Each ladder rung is a **named variant**, and the name is what the drop roll reads: `mob.variant_drops` gives every name its own junk item (a Goblin pays an Ear at Sneak, Bile at Raider, a Cog at Tinker, a Charm at Shaman and a Crown at the King) and the collectible stream that variant **leans** — the three normal rungs of every ladder cycle gear · herb · junk, and Elite and Boss carry `none` because they already pay their own stone lines. So a species is one stat vector but five drop identities, and a Counterhand visit names the variants farmed, not only the races (loot.md · `mob-roster.md`).
 - **The ladder name is its own roll, not a body class.** The three normal rungs roll independently of the body a spawn takes, because a species with two bodies (Orc is Medium · Large) could otherwise never field one of its three names. Body class stays the toughness axis, the name is the drop axis, and innate Element stays a separate spawn roll — the three axes never collapse into one.
-- **The player picks the hunting ground.** Every zone is three **sub-zones**, each with its own race pair and one Element from the zone's set, and the client lets the player choose which one a spawn rolls inside (`zoneFocus`); with none chosen the zone's own cast rolls as before. A chosen sub-zone is therefore the two races and the Element actually fought, and with them the junk their variants pay. Elite and Boss stay zone-level. It is a choice of *what* to farm, never of *how much*: a sub-zone moves no rate, and the upgrade rates the loot bands publish are unchanged.
-- **The walk does not stand on a sub-zone.** The blocks the Road is walked in are the ground *between* settlements (`towns.md`), and the map's hex per sub-zone is still the place you fight in rather than a place you occupy — so `zoneFocus` stays a choice and never becomes a position. Nothing in the walk can change which cast a spawn rolls, and the map cage's **M11** (a settlement's hex plus one hex per sub-zone) is unchanged by either.
-- **A variant leans a stream; the player may override it.** The lean shifts probability between gear, herbs and junk by redistributing mass — never raising the total — so the drop rate the timeline is priced on cannot move. The Hunt Order control is the player's override: cleared, each mob leans what its own rung leans.
+- **A zone is three sub-zones.** Each carries its own race pair and one Element from the zone's set, and every normal or Elite spawn rolls inside one of them, so the two races and the Element fought are the zone's own cast. The player chooses *where* to fight by choosing the zone (`towns.md`) — the sub-zone is not a control. Elite and Boss stay zone-level. It is never a choice of *how much*: a sub-zone is a cast, and the upgrade rates the loot bands publish are unchanged.
+- **A variant leans a stream.** The lean shifts probability between gear, herbs and junk by redistributing mass — never raising the total — so the drop rate the timeline is priced on cannot move. The variant row is the only author: a mob leans what its own rung leans, and no player control sits on top of it.
 
 ## What the species actually produce
 

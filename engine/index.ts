@@ -495,10 +495,15 @@ export function createEngine(E: EngineData) {
     mitigated * (1 - Math.min(1, Math.max(0, physShare)) * (1 - sizeMult));
 
 
+  // ---- item level (item-rarity.md)
+  // The band ladder is the whole rule now that Rarity is gone: a band's floor IS the band below it, so
+  // `floorOf` reads the ladder instead of a floor/ceiling table, and `floorLevelOf` is the level a band
+  // starts at — which is what an offline drop is limited to (save.md · loot.md section 7).
   const QUALITY_INDEX: Record<string, number> = { low: 0, mid: 1, high: 2 };
-  const floorOf = (band: string) => (E.rarity.floor_ceiling[band] || { floor: 'low' }).floor;
-  const ceilingOf = (band: string) => (E.rarity.floor_ceiling[band] || { ceiling: 'low' }).ceiling;
   const qualityIndexOf = (band: string) => QUALITY_INDEX[band] ?? 0;
+  const spanOf = (band: string) => (E.item_level.spans || [])[qualityIndexOf(band)] || { band, from: 1, to: 1 };
+  const floorOf = (band: string) => (E.item_level.spans || [])[Math.max(0, qualityIndexOf(band) - 1)]?.band || band;
+  const floorLevelOf = (band: string) => spanOf(band).from;
 
   // ---- loot bands (loot.md §2)
 
@@ -595,10 +600,7 @@ export function createEngine(E: EngineData) {
     }
   }
 
-  // The price unit is one kill, so its worth is the junk a kill pays (gold a piece), not a slice of
-  // the clock: gold/kill = junk/kill, and it is exact because every stall price is held to the same
-  // gold it always had (AGENT.md · D12 — a price is never quoted in minutes).
-  const goldPerKill = (b: string) => BAND[b].junk_per_hr / BAND[b].kills_derived;
+  const goldPerMinute = (b: string) => Math.round((BAND[b].junk_per_hr / 60) * Math.pow(10, TS.round_rate_to_decimals)) / Math.pow(10, TS.round_rate_to_decimals);
 
   // Stone income per hour, by band — the same three expressions the STONE block prints for high.
   const rerollValueStonesPerHr = (band: string) => Math.round(BAND[band].junk_per_hr / C.reroll_value_stones_per_use);
@@ -652,15 +654,15 @@ export function createEngine(E: EngineData) {
 
   const LCK_BOUND = r2(BAND.high_full_lck.junk_per_hr / BAND.high.junk_per_hr);
 
-  /** A task pays a slice of the band's own stone income, sized in kills (`tasks.md`). */
-  const stonesForKills = (band: string, kills: number) => ({
-    reroll_value: r2(rerollValueStonesPerHr(band) * kills / BAND[band].kills_derived),
-    tier: r2(tierStonesPerHr(band) * kills / BAND[band].kills_derived),
-    add: r2(addStonesPerHr(band) * kills / BAND[band].kills_derived),
+  /** A task pays a slice of the band's own stone income (`tasks.md` "~15 min of §5 income"). */
+  const stonesForMinutes = (band: string, minutes: number) => ({
+    reroll_value: r2(rerollValueStonesPerHr(band) * minutes / 60),
+    tier: r2(tierStonesPerHr(band) * minutes / 60),
+    add: r2(addStonesPerHr(band) * minutes / 60),
   });
-  // A payout is handed over by hand, so it is whole stones; the per-kill rates above stay expected values.
-  const taskPayout = (band: string, kills: number) => {
-    const s = stonesForKills(band, kills);
+  // A payout is handed over by hand, so it is whole stones; the hourly rates above stay expected values.
+  const taskPayout = (band: string, minutes: number) => {
+    const s = stonesForMinutes(band, minutes);
     return { reroll_value: Math.round(s.reroll_value), tier: Math.round(s.tier), add: Math.round(s.add) };
   };
 
@@ -784,10 +786,10 @@ export function createEngine(E: EngineData) {
     armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, agiForCap,
     weaponWeightOf, sizeMultOf, applySizeMult, basicAttackOf,
     // loot + xp
-    lckOf, dropChance, killsDerived, goldPerKill, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
-    floorOf, ceilingOf, qualityIndexOf,
+    lckOf, dropChance, killsDerived, goldPerMinute, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
+    floorOf, qualityIndexOf, spanOf, floorLevelOf,
     rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr,
-    stonesForKills, taskPayout,
+    stonesForMinutes, taskPayout,
     // formatting
     r1, r2, fmt,
   };

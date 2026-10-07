@@ -1,81 +1,98 @@
-# Item Rarity & Quality
+# Item Level
 
 import glossary.md
 import mod-pool.md
+import item-base.md
+import crafting.md
+import loot.md
+import save.md
 
-The item system splits into axes, per terms in glossary.md.
+An item has **one axis of strength: its level** (`ilvl`), stamped at drop by the source that paid it.
+Rarity — the old "how many Mods" axis — is **gone**, and Item quality as a separate axis is gone with it:
+the two names described one story (the drop source's level), so the level answers it directly.
 
-- **Rarity** answers "how many Mods"
-- **Item quality** answers "what value range each Mod rolls"
-- **Tier** is a sub-range inside Item quality, not a third axis.
+- **The line count is fixed.** Every drop arrives with the same lines: the Base Mod, the Legacy pair and
+  the two Random lines the Add craft owns (`item_level.line_count`). A drop is never "a lucky seven".
+- **The level answers the value range.** Each Mod line has a **window** that climbs with the level, and
+  the roll inside it decides what the line is worth.
+- **The band label rides along** (`low` · `mid` · `high`), read off the zone the drop came from. It still
+  drives the things that were always banded — item weight, the flat-group weight step, task and town bands
+  — so nothing measured against a band moves. Only the *values* became continuous.
+- **Tier** (`T1` · `T2` · `T3`) is which third of the window the roll landed in, not a third axis.
 
-> Rarity has no effect on rolled values at all. It affects only Mod count.
-> A high-Item quality Common must be stronger than a low-Item quality Rare.
+# The window
 
-# Rarity — Mod Count
+For one Mod at one level, inside one band:
 
-| Rarity | Dropped lines | Crafted max | Drop chance |
-|---|---|---|---|
-| Common | 5 (Base + 2 Legacy + 2 Random) | 7 (Add mod stone ×2) | 82% |
-| Rare | 7 (Base + 2 Legacy + 4 Random) | 7 | 18% |
-
-- The seven-line skeleton is fixed (item-base.md): the first line is the Base Mod and the next two the Legacy pair, both unremovable, so Rarity fills only the Random lines. Crafted max is the full seven for both, so a Common's `mods_added_cap` is exactly the gap to a full item. Net counting: removing a Random line frees the slot again. Per-item `mods_added` range stored in save.md.
-- Random lines never roll Stat Mod Flat once the item already holds its one Stat Mod line; the stat it feeds is rolled at drop (equipment-slot-pools.md).
-
-- Chance numbers are set in loot.md section 1 · Mod count does **not** change the strength of each Mod value (see next section).
-- Tiers inside Item quality roll with weights **T3 50% · T2 33% · T1 17%** — T1 touches 17% so dropped items feel "almost good" often but "best" is never free. Otherwise Refine would have nothing to do.
-
-- **No third Rarity level.** The old "Unique" idea (a craft-only special Base with a fixed Mod count) is **cut**: Rarity stays two levels, and item identity is carried by Base frame + Mods + quality + Tier instead.
-
-# Item Quality — Value Range
-
-| Item quality | Applies to which value range |
+| | Rule |
 |---|---|
-| Low | Lowest range of every mod |
-| Mid | Middle range of every mod |
-| High | Highest range of every mod |
+| Ceiling | the band's own top — the last slice of that band's ladder in `mods.json` |
+| Floor | climbs from **the band below** (the first band's floor is its own) |
+| Inside | a uniform roll in one third of the window |
 
-- Item quality is a single value for the whole item. Every slot rolls from the same Item quality range set.
-- Per-mod range tables live in mod-pool.md.
-- Item quality comes from the **level of the drop source**, where level acts as a ceiling, not a fixed value.
+- The band ladders in `mods.json` are the **anchors** of the window — the same tables the old value axis
+  read, reinterpreted as a curve over the level. No table was re-written to make the axis continuous.
+- A level past its band's span **clamps** to the band's own window. That is what keeps the later loops
+  honest: a low-band zone at a high level still drops a low-band piece, exactly as its zone label says.
+- The **floor climbs with the level** (owner ruling): a mid-band piece starts able to roll the low band's
+  floor and ends above it. Long play still cannot be handed repeated junk, because the floor it can roll
+  never falls — but a high-level piece *can* still come out at the bottom of its own window.
 
-# Item Quality vs Drop Level
+# The roll inside the window
 
-Each drop source defines a **ceiling** and a **floor**.
-
-| Drop source level | Floor | Ceiling |
+| Where the roll lands | Share | Name |
 |---|---|---|
-| Low | Low | Low |
-| Mid | Low | Mid |
-| High | Mid | High |
+| Top third | 17% | **T1** |
+| Middle third | 33% | **T2** |
+| Bottom third | 50% | **T3** |
 
-- **Ceiling** — Items from this source can request at most this Item quality · Can roll T1, but can also roll T3. Best roll is never forced.
-- **Floor** — Items from this source never fall below this · Prevents long play sessions still dropping repeated junk.
-- Compare to Path of Exile ilvl — high-level items can roll T1 but it is not guaranteed.
+- **Best is never free**: the top third is the rarest outcome at every level, so a high-level drop is a
+  chance and not a formality. This is the property the published weights always meant to carry
+  (`mod-pool.md` owns the skew bound).
+- The thirds are uniform for every Mod, so the skew is one rule rather than a per-Mod ladder — and
+  `Refine` moves a line up exactly one third (`crafting.md`).
 
-Actual level numbers do not exist yet. Waiting for the zone and monster system. For now use the 3 levels above.
+# The level vs the drop source
 
-> **Closed**: boss forces Item quality = **zone ceiling** (floor = ceiling) and is fightable only while online.
-> Result as intended: gives players reason to hunt bosses · And normal monsters still matter because they flow *quantity* (Reroll value stones), not *quality level* — the measured keep-rate in `loot.md` section 3 leaves 99.2% of high-zone drops as crafting currency rather than upgrades, so normal monsters serve as crafting sources, not boss competitors.
+| Drop source | Level the piece is stamped with | Band |
+|---|---|---|
+| a mob | the mob's own level | the zone's own label |
+| an away window (offline) | the band's first level | the zone's own label |
 
-> **Closed**: high Item quality can occur without tying to level — via **Ascend**, which raises Item quality above the drop-source ceiling (crafting.md fixed).
-> Reason this must be allowed: if Ascend stayed capped by zone, the Item quality axis would become a renamed monster level, as feared · The shifted cost is the Core from bosses (active only) instead.
+- **Offline is the floor of the band**, which is the old "quality limited to the zone floor" rule said in
+  the new terms (`save.md` · `loot.md` section 7): the away window rolls nothing above the first level of
+  the band the character was fighting in.
+- **The band comes from the zone label, never from the level.** `mob.zones` already declares it
+  (`low` · `mid (floor = low)` · `high (floor = mid)`), and the later loops depend on it: the level rises
+  past the first loop while the band restarts, which a pure level rule would silently "fix" into a
+  stronger band.
+- The floor/ceiling annotations the zone labels still carry are **vestigial**: the window's floor is now
+  the band ladder's own rule, so `mid (floor = low)` and `mid` produce the same window.
 
-# Comparison Example
+# Ascend, Refine, Add
 
-```
-Rare · High quality · 4 Random lines     Common · Low quality · 2 Random lines
-  power Flat 78 (T1)              power Flat 15 (T3)
-  crit %     8  (T1)              Evasion %  4 (T2)
-  str Flat   24 (T1)              str Flat    5 (T3)
-  elem res % 30 (T1) Element Fire
-```
+- **Ascend** raises the piece one band **and** its level one span, so the window moves up a band without
+  re-rolling what the player already has. Cleared by the boss Core, exactly as before — an item's band can
+  exceed the zone it came from.
+- **Refine** moves one line up one third of its window — the same step the old Tier ladder made.
+- **Add** fills one of the two Random lines every drop leaves open, so its price and its cap
+  (`mods_added_cap`) are unchanged by the axis: the gap it fills is now every piece's gap rather than one
+  Rarity's.
 
-Both carry their frame's Base Mod and the Legacy pair underneath the Random lines shown, so a Rare prints seven lines and a Common five. From the old table tying Tier to Rarity, these pieces could swap places · Now they order directly by stronger level.
+# What the axis buys
+
+- **A reason to keep hunting inside a band.** Values climb with the level, the roll inside the window is
+  skewed low, and the band follows the zone — so a drop can always be a real decision, which `loot.md`
+  section 3 names as the thing a zone otherwise loses.
+- **One axis to price.** Weight, task bands, town bands and the flat-group weight step read the band; the
+  values read the level. There is no second axis to reconcile, and no "high-quality Common vs low-quality
+  Rare" paradox to explain.
 
 # Waiting Items
 
-The A10 consequence is closed — every weapon type now carries its frames in `item-base.md`'s frames table, gated by `bases.ts` — and the crafting and third-Rarity waits were both resolved.
-
+- **The mod ladders stay as they are.** They are the anchors the window interpolates between, and the
+  per-band tables `mods.json` publishes are the numbers every other file already reads; collapsing them to
+  one min/max pair per Mod is not planned.
 - **Crafting and res** — Decided that **Element cannot be locked**. See crafting.md.
-
+- The A10 consequence is closed: every weapon type carries its frames in `item-base.md`'s frames table,
+  gated by `bases.ts`.

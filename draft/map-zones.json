@@ -1,0 +1,610 @@
+{
+  "note": "Placement layer for the 20x15 hex field: one entry per town, holding its own cell, its three sub-zone cells and its three wild-zone cells. A cell, a terrain key and nothing else - no level band, no sub-zone name, no races, because the revamp rewrites all of those and engine.json's zone ids are reassigned with it. Entries are keyed by town name for that reason: nothing here may be keyed on an id. Cells come from the `organic-d` layout in draft/map-field-20x15.html (node draft/build-map-zones.mjs organic-d), so the sheet and this file agree.",
+  "field": {
+    "cols": 20,
+    "rows": 15,
+    "hexes": 300,
+    "ratio": 1.5424,
+    "margin": 2,
+    "cellId": "row letter A-O + col number 1-20"
+  },
+  "terrainColors": {
+    "water": "#cfe4ea",
+    "marsh": "#d6e3d4",
+    "grass": "#e2e8cd",
+    "forest": "#d2e0cd",
+    "rock": "#e3ddd4",
+    "snow": "#eef1f3",
+    "moor": "#e0e4cf",
+    "waste": "#eae4d6",
+    "ash": "#e7ddd8",
+    "salt": "#eae6dc",
+    "village": "#efe6d2",
+    "camp": "#e8dfc8",
+    "town": "#d8d2c4"
+  },
+  "rules": {
+    "wild": "every hex at axial distance 1 from a town that is in the field and is neither a town nor a sub-zone",
+    "ring": "nothing carries a zone past ring 1 yet",
+    "join": "sub-zone name and level band come from the content file; this file supplies the cells and the terrain only",
+    "layout": "organic-d"
+  },
+  "zones": [
+    {
+      "name": "Eastgate",
+      "cell": "H10",
+      "subs": [
+        {
+          "cell": "H11",
+          "terrain": "grass"
+        },
+        {
+          "cell": "I11",
+          "terrain": "village"
+        },
+        {
+          "cell": "I10",
+          "terrain": "camp"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Eastgate 1",
+          "cell": "G10"
+        },
+        {
+          "name": "Eastgate 2",
+          "cell": "G11"
+        },
+        {
+          "name": "Eastgate 3",
+          "cell": "H9"
+        }
+      ]
+    },
+    {
+      "name": "Millbrook",
+      "cell": "F2",
+      "subs": [
+        {
+          "cell": "E2",
+          "terrain": "forest"
+        },
+        {
+          "cell": "G2",
+          "terrain": "forest"
+        },
+        {
+          "cell": "E3",
+          "terrain": "marsh"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Millbrook 1",
+          "cell": "F1"
+        },
+        {
+          "name": "Millbrook 2",
+          "cell": "F3"
+        },
+        {
+          "name": "Millbrook 3",
+          "cell": "G3"
+        }
+      ]
+    },
+    {
+      "name": "Thornwake",
+      "cell": "B17",
+      "subs": [
+        {
+          "cell": "C18",
+          "terrain": "forest"
+        },
+        {
+          "cell": "A17",
+          "terrain": "marsh"
+        },
+        {
+          "cell": "C17",
+          "terrain": "marsh"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Thornwake 1",
+          "cell": "A18"
+        },
+        {
+          "name": "Thornwake 2",
+          "cell": "B16"
+        },
+        {
+          "name": "Thornwake 3",
+          "cell": "B18"
+        }
+      ]
+    },
+    {
+      "name": "Ironrow",
+      "cell": "L2",
+      "subs": [
+        {
+          "cell": "K2",
+          "terrain": "grass"
+        },
+        {
+          "cell": "L3",
+          "terrain": "ash"
+        },
+        {
+          "cell": "K3",
+          "terrain": "marsh"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Ironrow 1",
+          "cell": "L1"
+        },
+        {
+          "name": "Ironrow 2",
+          "cell": "M2"
+        },
+        {
+          "name": "Ironrow 3",
+          "cell": "M3"
+        }
+      ]
+    },
+    {
+      "name": "Ashfall",
+      "cell": "L18",
+      "subs": [
+        {
+          "cell": "L17",
+          "terrain": "ash"
+        },
+        {
+          "cell": "K18",
+          "terrain": "ash"
+        },
+        {
+          "cell": "L19",
+          "terrain": "ash"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Ashfall 1",
+          "cell": "K19"
+        },
+        {
+          "name": "Ashfall 2",
+          "cell": "M18"
+        },
+        {
+          "name": "Ashfall 3",
+          "cell": "M19"
+        }
+      ]
+    },
+    {
+      "name": "Wolf Cross",
+      "cell": "G8",
+      "subs": [
+        {
+          "cell": "H8",
+          "terrain": "moor"
+        },
+        {
+          "cell": "G7",
+          "terrain": "marsh"
+        },
+        {
+          "cell": "F7",
+          "terrain": "snow"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Wolf Cross 1",
+          "cell": "F8"
+        },
+        {
+          "name": "Wolf Cross 2",
+          "cell": "G9"
+        },
+        {
+          "name": "Wolf Cross 3",
+          "cell": "H7"
+        }
+      ]
+    },
+    {
+      "name": "Highspire",
+      "cell": "E10",
+      "subs": [
+        {
+          "cell": "D9",
+          "terrain": "rock"
+        },
+        {
+          "cell": "D10",
+          "terrain": "rock"
+        },
+        {
+          "cell": "E11",
+          "terrain": "rock"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Highspire 1",
+          "cell": "E9"
+        },
+        {
+          "name": "Highspire 2",
+          "cell": "F9"
+        },
+        {
+          "name": "Highspire 3",
+          "cell": "F10"
+        }
+      ]
+    },
+    {
+      "name": "Wyrmback",
+      "cell": "I2",
+      "subs": [
+        {
+          "cell": "I1",
+          "terrain": "water"
+        },
+        {
+          "cell": "J2",
+          "terrain": "ash"
+        },
+        {
+          "cell": "H1",
+          "terrain": "snow"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Wyrmback 1",
+          "cell": "H2"
+        },
+        {
+          "name": "Wyrmback 2",
+          "cell": "I3"
+        },
+        {
+          "name": "Wyrmback 3",
+          "cell": "J1"
+        }
+      ]
+    },
+    {
+      "name": "Saltmarrow",
+      "cell": "F13",
+      "subs": [
+        {
+          "cell": "G14",
+          "terrain": "salt"
+        },
+        {
+          "cell": "E13",
+          "terrain": "water"
+        },
+        {
+          "cell": "G13",
+          "terrain": "salt"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Saltmarrow 1",
+          "cell": "E14"
+        },
+        {
+          "name": "Saltmarrow 2",
+          "cell": "F12"
+        },
+        {
+          "name": "Saltmarrow 3",
+          "cell": "F14"
+        }
+      ]
+    },
+    {
+      "name": "Frosthold",
+      "cell": "M7",
+      "subs": [
+        {
+          "cell": "L6",
+          "terrain": "snow"
+        },
+        {
+          "cell": "M8",
+          "terrain": "snow"
+        },
+        {
+          "cell": "L7",
+          "terrain": "snow"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Frosthold 1",
+          "cell": "M6"
+        },
+        {
+          "name": "Frosthold 2",
+          "cell": "N6"
+        },
+        {
+          "name": "Frosthold 3",
+          "cell": "N7"
+        }
+      ]
+    },
+    {
+      "name": "Greyfen",
+      "cell": "J13",
+      "subs": [
+        {
+          "cell": "J12",
+          "terrain": "waste"
+        },
+        {
+          "cell": "I13",
+          "terrain": "waste"
+        },
+        {
+          "cell": "J14",
+          "terrain": "waste"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Greyfen 1",
+          "cell": "I14"
+        },
+        {
+          "name": "Greyfen 2",
+          "cell": "K13"
+        },
+        {
+          "name": "Greyfen 3",
+          "cell": "K14"
+        }
+      ]
+    },
+    {
+      "name": "Nettlecrag",
+      "cell": "J4",
+      "subs": [
+        {
+          "cell": "I5",
+          "terrain": "forest"
+        },
+        {
+          "cell": "K4",
+          "terrain": "forest"
+        },
+        {
+          "cell": "J3",
+          "terrain": "rock"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Nettlecrag 1",
+          "cell": "I4"
+        },
+        {
+          "name": "Nettlecrag 2",
+          "cell": "J5"
+        },
+        {
+          "name": "Nettlecrag 3",
+          "cell": "K5"
+        }
+      ]
+    },
+    {
+      "name": "Vermolch",
+      "cell": "N12",
+      "subs": [
+        {
+          "cell": "O13",
+          "terrain": "marsh"
+        },
+        {
+          "cell": "O12",
+          "terrain": "ash"
+        },
+        {
+          "cell": "N13",
+          "terrain": "marsh"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Vermolch 1",
+          "cell": "M12"
+        },
+        {
+          "name": "Vermolch 2",
+          "cell": "M13"
+        },
+        {
+          "name": "Vermolch 3",
+          "cell": "N11"
+        }
+      ]
+    },
+    {
+      "name": "Bonegate",
+      "cell": "C7",
+      "subs": [
+        {
+          "cell": "B6",
+          "terrain": "rock"
+        },
+        {
+          "cell": "D6",
+          "terrain": "rock"
+        },
+        {
+          "cell": "B7",
+          "terrain": "rock"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Bonegate 1",
+          "cell": "C6"
+        },
+        {
+          "name": "Bonegate 2",
+          "cell": "C8"
+        },
+        {
+          "name": "Bonegate 3",
+          "cell": "D7"
+        }
+      ]
+    },
+    {
+      "name": "Blackwater Reach",
+      "cell": "B11",
+      "subs": [
+        {
+          "cell": "B12",
+          "terrain": "water"
+        },
+        {
+          "cell": "B10",
+          "terrain": "water"
+        },
+        {
+          "cell": "C12",
+          "terrain": "water"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Blackwater Reach 1",
+          "cell": "A11"
+        },
+        {
+          "name": "Blackwater Reach 2",
+          "cell": "A12"
+        },
+        {
+          "name": "Blackwater Reach 3",
+          "cell": "C11"
+        }
+      ]
+    },
+    {
+      "name": "Duskmoor",
+      "cell": "D15",
+      "subs": [
+        {
+          "cell": "C15",
+          "terrain": "moor"
+        },
+        {
+          "cell": "E15",
+          "terrain": "moor"
+        },
+        {
+          "cell": "D14",
+          "terrain": "waste"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Duskmoor 1",
+          "cell": "C16"
+        },
+        {
+          "name": "Duskmoor 2",
+          "cell": "D16"
+        },
+        {
+          "name": "Duskmoor 3",
+          "cell": "E16"
+        }
+      ]
+    },
+    {
+      "name": "The Pale Spire",
+      "cell": "H15",
+      "subs": [
+        {
+          "cell": "G15",
+          "terrain": "rock"
+        },
+        {
+          "cell": "H14",
+          "terrain": "rock"
+        },
+        {
+          "cell": "H16",
+          "terrain": "rock"
+        }
+      ],
+      "wild": [
+        {
+          "name": "The Pale Spire 1",
+          "cell": "G16"
+        },
+        {
+          "name": "The Pale Spire 2",
+          "cell": "I15"
+        },
+        {
+          "name": "The Pale Spire 3",
+          "cell": "I16"
+        }
+      ]
+    },
+    {
+      "name": "Emberhold",
+      "cell": "E18",
+      "subs": [
+        {
+          "cell": "E17",
+          "terrain": "ash"
+        },
+        {
+          "cell": "E19",
+          "terrain": "ash"
+        },
+        {
+          "cell": "D18",
+          "terrain": "ash"
+        }
+      ],
+      "wild": [
+        {
+          "name": "Emberhold 1",
+          "cell": "D17"
+        },
+        {
+          "name": "Emberhold 2",
+          "cell": "F17"
+        },
+        {
+          "name": "Emberhold 3",
+          "cell": "F18"
+        }
+      ]
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import type { BasesData, TownData } from './types.ts';
 
 export function createCollector(TOWN: TownData, BASES: BasesData) {
   const SETS = TOWN.collector_sets;
-  const HINT_PRICE_K = (TOWN.repeatable.find((r) => r.id === 'collector_hint') || { k: 15 }).k;
+  const HINT_PRICE_M = (TOWN.repeatable.find((r) => r.id === 'collector_hint') || { m: 15 }).m;
   const PEDLAR = TOWN.repeatable.find((r) => r.id === 'pedlar_rotation')!;
 
   /** "coif (helmet)" → { name, slot }. */
@@ -60,11 +60,11 @@ export function createCollector(TOWN: TownData, BASES: BasesData) {
     return { ok: true, consumed: used, left, reward: set.reward, paysGold: set.pays_gold };
   }
 
-  /** The pedlar restocks three slots a real day, priced inside its published kills band. */
-  function pedlarKills(rngValue?: number | null) {
-    const span = (PEDLAR.k_max ?? 0) - (PEDLAR.k_min ?? 0);
-    return Math.round((PEDLAR.k_min ?? 0) + span * (rngValue == null ? 0.5 : rngValue));
+  /** The pedlar restocks three slots a real day, priced inside its published minutes band. */
+  function pedlarPrice(rngValue?: number | null) {
+    const span = (PEDLAR.m_max ?? 0) - (PEDLAR.m_min ?? 0);
+    return Math.round((PEDLAR.m_min ?? 0) + span * (rngValue == null ? 0.5 : rngValue));
   }
 
-  return { sets, setAt, matches, wanter, turnIn, pedlarKills, PEDLAR, HINT_PRICE_K };
+  return { sets, setAt, matches, wanter, turnIn, pedlarPrice, PEDLAR, HINT_PRICE_M };
 }

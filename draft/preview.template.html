@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ModWorld — draft preview</title>
+  <style>
+    :root {
+      --cell: 260px;
+      --gap: 12px;
+      --bg: #14161a;
+      --panel: #1c2027;
+      --line: #303640;
+      --text: #d8dee9;
+      --dim: #929bab;
+      color-scheme: dark;
+    }
+    body.light {
+      --bg: #f2f0ea;
+      --panel: #faf9f5;
+      --line: #d8d5cd;
+      --text: #22252b;
+      --dim: #656a73;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px clamp(16px, 4vw, 48px) 72px;
+      background: var(--bg);
+      color: var(--text);
+      font: 13px/1.5 "Segoe UI", system-ui, sans-serif;
+    }
+    header, .bar, main { max-width: 1400px; margin-inline: auto; }
+    h1 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+    .sub { margin: 6px 0 18px; color: var(--dim); }
+    .sub code { font-size: 12px; }
+    .bar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg);
+    }
+    button, input {
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+    }
+    button { padding: 4px 10px; cursor: pointer; }
+    button:hover { border-color: var(--dim); }
+    button:focus-visible, input:focus-visible, summary:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 2px;
+    }
+    button.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .space { width: 6px; }
+    input[type="search"] { width: min(260px, 50vw); padding: 4px 10px; }
+    .count { margin-left: auto; color: var(--dim); font-variant-numeric: tabular-nums; }
+    main { padding-top: 8px; }
+    .empty-all {
+      margin: 40px 0;
+      padding: 22px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      color: var(--dim);
+      text-align: center;
+    }
+    .empty-all code { color: var(--text); }
+    details { margin: 18px 0 0; }
+    details > summary {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      width: fit-content;
+      cursor: pointer;
+      list-style: none;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::before {
+      content: "\25B8";
+      color: var(--dim);
+      font-size: 10px;
+      transition: transform 120ms ease;
+    }
+    details[open] > summary::before { transform: rotate(90deg); }
+    summary:hover { color: var(--dim); }
+    summary span { color: var(--dim); font-weight: 400; text-transform: none; letter-spacing: 0; }
+    details .folders {
+      margin-left: clamp(8px, 1.6vw, 20px);
+      padding-left: clamp(8px, 1.2vw, 16px);
+      border-left: 1px solid var(--line);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--cell), 1fr));
+      gap: var(--gap);
+    }
+    details.empty { display: none; }
+    figure {
+      position: relative;
+      margin: 0;
+      padding: 14px 12px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--panel) 42%, transparent);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: zoom-in;
+    }
+    figure:hover { border-color: var(--dim); background: var(--panel); }
+    figure .thumb {
+      height: 150px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 4px;
+      background:
+        linear-gradient(45deg, #ffffff10 25%, transparent 25%, transparent 75%, #ffffff10 75%),
+        linear-gradient(45deg, #ffffff10 25%, transparent 25%, transparent 75%, #ffffff10 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 8px 8px;
+    }
+    figure .thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    figure .thumb .badge {
+      font: 600 10px/1 "Segoe UI", system-ui, sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    figcaption { display: flex; flex-direction: column; gap: 2px; }
+    figcaption b { font-weight: 600; overflow-wrap: anywhere; }
+    figcaption small { color: var(--dim); font-size: 10px; }
+    button.open {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      padding: 2px 8px;
+      font-size: 11px;
+    }
+    dialog {
+      width: min(1180px, 94vw);
+      height: min(880px, 92vh);
+      max-width: none;
+      max-height: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 0;
+      overflow: hidden;
+    }
+    dialog::backdrop { background: #000a; }
+    dialog .head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    dialog .head strong { margin-right: auto; overflow-wrap: anywhere; }
+    dialog .head .path { color: var(--dim); font-size: 11px; }
+    dialog iframe { width: 100%; height: calc(100% - 52px); border: 0; background: #fff; }
+    dialog .frame { height: calc(100% - 52px); overflow: auto; padding: 16px; }
+    dialog .frame img { max-width: 100%; display: block; margin-inline: auto; }
+    dialog pre {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--bg);
+      font: 12px/1.6 ui-monospace, Consolas, monospace;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    dialog .rendered { color: var(--text); }
+    dialog .rendered :is(h1,h2,h3,h4,h5,h6) { margin: 18px 0 6px; line-height: 1.25; }
+    dialog .rendered h3 { font-size: 17px; }
+    dialog .rendered h4 { font-size: 15px; }
+    dialog .rendered h5, dialog .rendered h6 { font-size: 13px; color: var(--dim); }
+    dialog .rendered p, dialog .rendered li { max-width: 74ch; }
+    dialog .rendered code {
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--text) 12%, transparent);
+      font: 12px ui-monospace, Consolas, monospace;
+    }
+    dialog .rendered pre { margin: 10px 0; }
+    dialog .rendered pre code { padding: 0; background: none; }
+    dialog .rendered table { border-collapse: collapse; margin: 10px 0; }
+    dialog .rendered :is(td, th) {
+      border: 1px solid var(--line);
+      padding: 4px 8px;
+      text-align: left;
+      font-size: 12px;
+    }
+    dialog .rendered blockquote {
+      margin: 10px 0;
+      padding-left: 12px;
+      border-left: 2px solid var(--line);
+      color: var(--dim);
+    }
+    dialog .rendered hr { border: 0; border-top: 1px solid var(--line); }
+    dialog .rendered a { color: inherit; }
+    @media (max-width: 560px) {
+      .grid { grid-template-columns: 1fr; }
+      .count { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Draft preview</h1>
+    <p class="sub">Generated from <code>draft/</code> by <code>node draft/build-preview.mjs</code>. Standalone — the game client in <code>game/</code> is not involved. <span id="total"></span></p>
+  </header>
+  <div class="bar">
+    <button data-cell="180">small</button>
+    <button data-cell="260" class="on">medium</button>
+    <button data-cell="420">large</button>
+    <span class="space"></span>
+    <button id="theme">light mode</button>
+    <button id="expand">expand all</button>
+    <button id="collapse">collapse all</button>
+    <span class="space"></span>
+    <input type="search" id="filter" placeholder="Filter by path" aria-label="Filter drafts by path">
+    <span class="count" id="count" aria-live="polite"></span>
+  </div>
+  <main id="gallery"></main>
+
+  <dialog id="viewer">
+    <div class="head">
+      <strong id="viewer-name"></strong>
+      <span class="path" id="viewer-path"></span>
+      <button id="copy">Copy path</button>
+      <button id="close">Close</button>
+    </div>
+    <div id="viewer-body" hidden></div>
+  </dialog>
+
+  <script id="manifest" type="application/json">/*__MANIFEST__*/</script>
+  <script>
+    const manifest = JSON.parse(document.getElementById('manifest').textContent);
+    const gallery = document.getElementById('gallery');
+    const countLabel = document.getElementById('count');
+    const filterInput = document.getElementById('filter');
+    document.getElementById('total').textContent = manifest.total
+      ? `${manifest.total} files, ${(manifest.bytes / 1024).toFixed(1)} kB.`
+      : '';
+
+    const records = [];
+
+    function makeCard(item) {
+      const card = document.createElement('figure');
+      card.dataset.path = item.path;
+      card.title = `draft/${item.path}`;
+
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      if (item.kind === 'image') {
+        const image = document.createElement('img');
+        image.src = item.src;
+        image.alt = '';
+        image.loading = 'lazy';
+        thumb.append(image);
+      } else {
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = item.kind === 'page' ? 'page' : item.kind === 'text' ? 'text' : item.name.split('.').pop();
+        thumb.append(badge);
+      }
+
+      const label = document.createElement('figcaption');
+      const name = document.createElement('b');
+      name.textContent = item.name;
+      const meta = document.createElement('small');
+      meta.textContent = `${(item.size / 1024).toFixed(1)} kB`;
+      label.append(name, meta);
+
+      const open = document.createElement('button');
+      open.type = 'button';
+      open.className = 'open';
+      open.textContent = 'open';
+      open.setAttribute('aria-label', `Open ${item.name} in a new tab`);
+      open.addEventListener('click', (event) => {
+        event.stopPropagation();
+        window.open(item.src, '_blank', 'noopener');
+      });
+
+      card.append(thumb, label, open);
+      card.addEventListener('click', () => openViewer(item));
+      return card;
+    }
+
+    function renderNode(node, depth) {
+      const details = document.createElement('details');
+      details.className = 'folder';
+      details.dataset.dir = node.dir;
+      details.open = depth < 2;
+
+      const summary = document.createElement('summary');
+      const count = document.createElement('span');
+      count.textContent = `${node.count}`;
+      summary.append(document.createTextNode(node.name), count);
+
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      for (const item of node.items) {
+        const card = makeCard(item);
+        grid.append(card);
+        records.push({ card, details, path: item.path, haystack: item.path.toLowerCase() });
+      }
+
+      details.append(summary, grid);
+      if (node.children.length) {
+        const subfolders = document.createElement('div');
+        subfolders.className = 'folders';
+        for (const child of node.children) subfolders.append(renderNode(child, depth + 1));
+        details.append(subfolders);
+      }
+      return details;
+    }
+
+    for (const node of manifest.tree) gallery.append(renderNode(node, 0));
+
+    if (!manifest.total) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-all';
+      empty.innerHTML = 'No previewable files in <code>draft/</code> yet.<br>Add one and rerun <code>node draft/build-preview.mjs</code>.';
+      gallery.append(empty);
+    }
+
+    const viewer = document.getElementById('viewer');
+    const viewerBody = document.getElementById('viewer-body');
+
+    function openViewer(item) {
+      document.getElementById('viewer-name').textContent = item.name;
+      document.getElementById('viewer-path').textContent = `draft/${item.path}`;
+      viewerBody.replaceChildren();
+      viewerBody.hidden = false;
+
+      if (item.kind === 'page') {
+        const frame = document.createElement('iframe');
+        frame.title = item.name;
+        frame.src = item.src;
+        viewerBody.append(frame);
+      } else if (item.kind === 'image') {
+        const frame = document.createElement('div');
+        frame.className = 'frame';
+        const image = document.createElement('img');
+        image.src = item.src;
+        image.alt = '';
+        frame.append(image);
+        viewerBody.append(frame);
+      } else {
+        const frame = document.createElement('div');
+        frame.className = 'frame';
+        const rendered = document.createElement('iframe');
+        rendered.title = item.name;
+        rendered.src = item.rendered;
+        rendered.style.cssText = 'width:100%;height:70vh;border:0;display:block';
+        frame.append(rendered);
+        viewerBody.append(frame);
+      }
+      viewer.showModal();
+    }
+
+    function applyFilter() {
+      const query = filterInput.value.trim().toLowerCase();
+      const counts = new Map();
+      let shown = 0;
+
+      for (const record of records) {
+        const match = !query || record.haystack.includes(query);
+        record.card.classList.toggle('empty', !match);
+        record.card.hidden = !match;
+        if (!match) continue;
+        shown += 1;
+        counts.set(record.details, (counts.get(record.details) || 0) + 1);
+      }
+
+      for (const details of gallery.querySelectorAll('details.folder')) {
+        let total = counts.get(details) || 0;
+        for (let parent = details.parentElement?.closest('details.folder'); parent; parent = parent.parentElement?.closest('details.folder')) {
+          total += counts.get(parent) || 0;
+        }
+        details.classList.toggle('empty', total === 0);
+        if (total > 0 && query) details.open = true;
+        details.querySelector('summary span').textContent = `${total}`;
+      }
+
+      countLabel.textContent = query ? `${shown} / ${manifest.total}` : `${manifest.total}`;
+    }
+
+    for (const button of document.querySelectorAll('[data-cell]')) {
+      button.addEventListener('click', () => {
+        document.documentElement.style.setProperty('--cell', `${button.dataset.cell}px`);
+        for (const sibling of document.querySelectorAll('[data-cell]')) {
+          sibling.classList.toggle('on', sibling === button);
+        }
+      });
+    }
+
+    document.getElementById('theme').addEventListener('click', (event) => {
+      const light = document.body.classList.toggle('light');
+      event.target.textContent = light ? 'dark mode' : 'light mode';
+    });
+    document.getElementById('expand').addEventListener('click', () => {
+      for (const details of gallery.querySelectorAll('details')) details.open = true;
+    });
+    document.getElementById('collapse').addEventListener('click', () => {
+      for (const details of gallery.querySelectorAll('details')) details.open = false;
+    });
+
+    filterInput.addEventListener('input', applyFilter);
+    document.getElementById('close').addEventListener('click', () => viewer.close());
+    viewer.addEventListener('close', () => viewerBody.replaceChildren());
+    document.getElementById('copy').addEventListener('click', async (event) => {
+      await navigator.clipboard.writeText(document.getElementById('viewer-path').textContent);
+      event.target.textContent = 'Copied';
+      setTimeout(() => { event.target.textContent = 'Copy path'; }, 1200);
+    });
+
+    applyFilter();
+  </script>
+</body>
+</html>

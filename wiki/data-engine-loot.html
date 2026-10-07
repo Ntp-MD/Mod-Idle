@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span><span class="chip ">rows <b>10</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span><span class="chip ">rows <b>10</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -151,8 +151,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>base_drop_chance</code></td><td>Base drop chance</td><td><code>0.08</code></td><td><a href="rec-engine-loot-base-drop-chance.html">edit</a></td></tr><tr><td><code>ttk_per_mob_sec</code></td><td>Seconds to kill one mob</td><td><code>5.107</code></td><td><a href="rec-engine-loot-ttk-per-mob-sec.html">edit</a></td></tr><tr><td><code>group_spawn_sec</code></td><td>Group spawn interval <span class="dim">(sec)</span></td><td><code>4</code></td><td><a href="rec-engine-loot-group-spawn-sec.html">edit</a></td></tr><tr><td><code>elite_spawn_chance</code></td><td>Elite spawn chance</td><td><code>0.2</code></td><td><a href="rec-engine-loot-elite-spawn-chance.html">edit</a></td></tr><tr><td><code>elite_tier_stones</code></td><td>Tier stones per elite</td><td><code>0.05</code></td><td><a href="rec-engine-loot-elite-tier-stones.html">edit</a></td></tr><tr><td><code>elite_add_stone_chance</code></td><td>Elite add stone chance</td><td><code>0.00625</code></td><td><a href="rec-engine-loot-elite-add-stone-chance.html">edit</a></td></tr><tr><td><code>boss_per_hour</code></td><td>Boss kills per hour</td><td><code>4</code></td><td><a href="rec-engine-loot-boss-per-hour.html">edit</a></td></tr><tr><td><code>boss_tier_stones</code></td><td>Tier stones per boss</td><td><code>3</code></td><td><a href="rec-engine-loot-boss-tier-stones.html">edit</a></td></tr><tr><td><code>boss_add_stones</code></td><td>Boss add stones</td><td><code>1</code></td><td><a href="rec-engine-loot-boss-add-stones.html">edit</a></td></tr><tr><td><code>kill_rate_tolerance</code></td><td>Kill-rate tolerance</td><td><code>0.01</code></td><td><a href="rec-engine-loot-kill-rate-tolerance.html">edit</a></td></tr></tbody></table></div></section>
 
 <section><h2>Raw JSON of this collection</h2><pre class="code">{
-  &quot;hunt_order&quot;: {
-    &quot;note&quot;: &quot;A zone's Hunt Order leans the three collectible streams — gear, herbs, junk — toward one of them by redistributing probability mass, never raising the total expected drops/kill, so drops/hr and the timeline stay put. Stones ride the elite/boss lines and are not a category. 'none' is the identity, so the measured bands are untouched by default.&quot;,
+  &quot;variant_lean&quot;: {
+    &quot;note&quot;: &quot;A variant's lean tilts the three collectible streams — gear, herbs, junk — toward one of them by redistributing probability mass, never raising the total expected drops/kill, so the drop line and the timeline stay put. The variant row owns it (`mob.variant_drops` `lean`) and nothing overrides it: the player used to have a per-zone Hunt Order on top, and that control is gone. Stones ride the elite/boss lines and are not a category. 'none' is the identity, so a variant that carries none behaves exactly as the balanced case.&quot;,
     &quot;shift_pct&quot;: 25,
     &quot;categories&quot;: [
       &quot;gear&quot;,
@@ -163,12 +163,11 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   &quot;base_drop_chance&quot;: 0.08,
   &quot;filter&quot;: {
     &quot;upgrade_margin_pct&quot;: 10,
-    &quot;note&quot;: &quot;The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. At 10% the simulation reproduces the keep-rates this design has published all along (2.2% / 1.2% / 0.7% / 0.3% of drops); at 0% it reports roughly 1.5x that, and the printed sensitivity line shows all three. tools/loot.ts measures the keep-rates; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.&quot;,
+    &quot;note&quot;: &quot;The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. tools/loot.ts measures the keep-rates that margin produces and loot.md publishes them; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.&quot;,
     &quot;rules&quot;: {
       &quot;default_enabled&quot;: false,
-      &quot;default_min_rarity&quot;: &quot;any&quot;,
       &quot;default_keep_missing_element&quot;: true,
-      &quot;note&quot;: &quot;loot.md section 4 names the configurable conditions: the upgrade margin, keep only Rare, and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default: a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept.&quot;
+      &quot;note&quot;: &quot;loot.md section 4 names the configurable conditions: the upgrade margin and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default: a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept. The old keep-only-Rare condition died with Rarity: an item's level is a continuous number now, so 'better than what I wear' is the whole question.&quot;
     }
   },
   &quot;base_mod&quot;: {
@@ -199,7 +198,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;high&quot;: {
       &quot;group_mobs&quot;: 4,
       &quot;lck_level&quot;: 90,
-      &quot;upgrades_per_hr&quot;: 3
+      &quot;upgrades_per_hr&quot;: 2
     },
     &quot;high_full_lck&quot;: {
       &quot;group_mobs&quot;: 4,
@@ -214,7 +213,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   &quot;boss_tier_stones&quot;: 3,
   &quot;boss_add_stones&quot;: 1,
   &quot;quality_stone_sources&quot;: {
-    &quot;note&quot;: &quot;crafting.md prices the +1..+15 ladder as 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 Quality Stones and says the source shifts monsters → elites → bosses by step (steps 1-5 · 6-10 · 11-15). These are the income side of that same split: the per-hour figures and the hours a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.&quot;,
+    &quot;note&quot;: &quot;crafting.md prices the +1..+15 ladder as 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 Quality Stones and says the source shifts monsters → elites → bosses by step (steps 1-5 · 6-10 · 11-15). These are the income side of that same split: the per-kill figures and the kills a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.&quot;,
     &quot;monster_quality_chance&quot;: 0.01,
     &quot;elite_quality_chance&quot;: 0.25,
     &quot;boss_quality_stones&quot;: 24

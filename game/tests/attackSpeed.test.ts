@@ -19,7 +19,7 @@ describe('the attack-speed cap is the final 5 hits/sec ceiling', () => {
   it('caps the character sheet after a multiplicative aspd buff, so Haste cannot pass 5 hits/sec', () => {
     const gear = emptyGear();
     gear[0] = {
-      slot: 'main hand', base: 'dagger', rarity: 'Common', quality: 'mid', tier: 'T1',
+      slot: 'main hand', base: 'dagger', ilvl: 1, quality: 'mid', tier: 'T1',
       lines: [{ id: 'attack_speed', value: 4000 }],
     } as any;
     const plain = buildCharacter(100, gear);

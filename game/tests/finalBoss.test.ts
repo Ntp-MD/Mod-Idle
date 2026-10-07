@@ -3,7 +3,7 @@ import { eng, loot, sm } from '../src/engine/client';
 import { newGame, tick, setLevel } from '../src/sim/game';
 import { target } from '../src/sim/goal';
 import { ACTIVE_SLOTS } from '../src/sim/skills';
-import type { GameState, Item } from '../src/sim/types';
+import type { GameState, Item, Phase } from '../src/sim/types';
 import { ceilingGear } from './sheetFixture';
 
 /**
@@ -45,7 +45,7 @@ const clone = (s: GameState) => JSON.parse(JSON.stringify(s)) as GameState;
  * live loop would hand out; only the group is cleared first, to get the reading on demand.
  */
 function fightBoss(s: GameState) {
-  s.phase = 'hunt';
+  s.phase = 'fighting' as Phase; // a union-typed read, so the run's own Push check below still compiles
   s.player.hp = 1e9;
   tick(s, {}); // the pool, read off the sheet rather than typed
   const pool = s.player.hp;

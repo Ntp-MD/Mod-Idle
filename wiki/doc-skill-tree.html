@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -140,8 +140,8 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Skill Tree</h1>
-<dl class="kv"><dt>file</dt><dd><code>skill-tree.md</code> · 35 lines · 587 words · written 2026-10-06T15:22:54Z</dd><dt>category</dt><dd>Skills</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-skill-pool.html">skill-pool.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-skill-pool-system.html">skill-pool-system.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-skill-tree-control.html">skill-tree-control.md</a> · <a href="doc-skill-tree-impact.html">skill-tree-impact.md</a> · <a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a> · <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../skill-tree.md">skill-tree.md</a></dd></dl>
-
+<dl class="kv"><dt>file</dt><dd><code>skill-tree.md</code> · 35 lines · 619 words · written 2026-10-07T10:37:16Z</dd><dt>category</dt><dd>Skills</dd><dt>imports</dt><dd><a href="doc-glossary.html">glossary.md</a> · <a href="doc-skill-pool.html">skill-pool.md</a></dd><dt>imported by</dt><dd><a href="doc-checks.html">checks.md</a> · <a href="doc-skill-pool-system.html">skill-pool-system.md</a></dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a> · <a href="doc-skill-tree-control.html">skill-tree-control.md</a> · <a href="doc-skill-tree-impact.html">skill-tree-impact.md</a> · <a href="doc-skill-tree-keystone.html">skill-tree-keystone.md</a> · <a href="doc-skill-tree-stream.html">skill-tree-stream.md</a> · <a href="doc-towns.html">towns.md</a></dd><dt>generated blocks</dt><dd><code>tree-summary</code> <span class="tag gen">tools/tree.ts</span></dd><dt>raw</dt><dd><a href="../skill-tree.md">skill-tree.md</a></dd></dl>
+<p class="hint">Text between <code>&lt;!-- BEGIN GENERATED:key --&gt;</code> markers belongs to the tool named above: change the data, run the writer, never the block.</p>
 <h2 id="h-skill-tree">Skill Tree</h2>
 <p>import glossary.md import skill-pool.md</p>
 <p><strong>The tree is back, redesigned from scratch</strong> (owner ask). Three branches — <strong>impact</strong> (offence), <strong>stream</strong> (sustain and Core stats), <strong>control</strong> (defence) — <strong>twenty-one nodes each, three ranks per node, one point per rank</strong>: the tree holds sixty-three nodes and a hundred and eighty-nine ranks, and <code>treePointsAt(level_cap)</code> spends them exactly — a level grants a point and a point buys a rank.</p>
@@ -154,7 +154,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h3 id="h-why-the-old-tree-went">Why the old tree went</h3>
 <p>The removed design was not a node graph. Its own budget said so: 100 points, of which <strong>82 bought rules that granted no numbers at all</strong> — hit-counting tweaks, duration clauses, stack-cap changes — and <strong>all</strong> the power sat in 18 keystones costing 3 points each. That is a keystone picker with connective tissue, and it duplicated the question the skill list already asks: <em>what do I press?</em> It was also load-bearing in the one place that must not wobble — its multiplier was folded into <code>mob_HP</code>, so the price of every mob was set against a system whose shape was about to change again.</p>
 <h3 id="h-still-open">Still open</h3>
-<ul><li><strong>The <code>mob_HP</code> fold</strong> — the tree is not folded into the mob price yet (owner ruling: content and plumbing first). When it is, its power has to be booked inside the curve, and <code>tools/tree.ts</code> is the point where that factor is declared.</li><li><strong>Balance against the mob price</strong> — the scale is stated (a tenth / a fifth of a line at rank 3, two thirds of a gear set for the whole tree) but nothing has measured it against <code>mob_HP</code>, because the fold is open.</li></ul>
+<ul><li><strong>The <code>mob_HP</code> fold — closed, by ruling.</strong> The tree's power is not booked into the mob price: the published rates are the empty-tree baseline, so a rank bought is a strength no published number pays for and no price moves. <code>tools/tree.ts</code> stays the one place the scale is declared, and there is no pass waiting to measure it.</li><li><strong>Balance against the mob price</strong> — the scale is a stated rule, not a measured one, and it stays that way (owner ruling): a tenth / a fifth of a line at rank 3, about two thirds of a gear set for the whole tree. The published rates are the empty-tree baseline, so nothing here is priced against <code>mob_HP</code>.</li></ul>
 <nav class="pager"><a href="doc-skill-pool-system.html">← skill-pool-system.md</a><a href="index.html">Skills</a><a href="doc-skill-tree-impact.html">skill-tree-impact.md →</a></nav>
 
 </article>

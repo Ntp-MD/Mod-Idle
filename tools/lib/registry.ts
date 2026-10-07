@@ -142,7 +142,7 @@ const specs: Record<string, any> = {
         id: str('id', { pattern: '^[a-z][a-z0-9_]*$' }), item: str('Item', { guard: 'power' }),
         npc: ['ref', 'NPC', { ref: 'npcs' }],
         kind: ['enum', 'Kind', { ref: 'invariants.allowed_kinds' }],
-        m: num('Price', { unit: 'm', min: 0 }),
+        m: num('Price (gold weight)', { min: 0 }),
         charge: str('Charge rule'), charge_band: ['enum', 'Charged in band', { ref: 'engine:loot.bands' }],
         qty: ['int', 'Quantity'], qty_by_band: ['map', 'Quantity by band', { ref: 'engine:loot.bands' }],
         ladder: ['enum', 'Price ladder', { options: LADDERS.filter(Boolean).concat(['']) }],
@@ -153,7 +153,7 @@ const specs: Record<string, any> = {
         id: str('id', { pattern: '^[a-z][a-z0-9_]*$' }), item: str('Item', { guard: 'power' }),
         npc: ['ref', 'NPC', { ref: 'npcs' }],
         kind: ['enum', 'Kind', { ref: 'invariants.allowed_kinds' }],
-        m: num('Price', { unit: 'm', min: 0 }), m_min: num('Min price', { unit: 'm' }), m_max: num('Max price', { unit: 'm' }),
+        m: num('Price (gold weight)', { min: 0 }), m_min: num('Min price (gold weight)'), m_max: num('Max price (gold weight)'),
         charge_band: ['enum', 'Charged in band', { ref: 'engine:loot.bands' }],
         per_day_cap: ['int', 'Per-day cap'], note: txt('Note'),
       } },
@@ -483,8 +483,9 @@ function validateCross(coll: any, ctx: any, record: any, { id, siblings = [] }: 
     if (band && !(band in ctx.engine.loot.bands)) errors.push({ field: 'band', msg: `band "${band}" is not in engine.json loot.bands` });
   }
   if ((coll.path === 'one_time' || coll.path === 'repeatable') && record.m != null) {
-    if (/^road_link/.test(id || '') && inv.road_link_max_m != null && record.m > inv.road_link_max_m) {
-      errors.push({ field: 'm', msg: `Road link price ${record.m} m exceeds invariants.road_link_max_m (${inv.road_link_max_m})` });
+    // travel is free now: a walk has no line to buy, so a road/carriage/waypoint line is a mistake
+    if (/^(road|carriage|waypoint)/.test(id || '')) {
+      errors.push({ field: 'id', msg: `"${id}" is a travel line — a walk costs nothing and a Waypoint unlocks on foot, so there is no travel line to sell` });
     }
     const banned = inv.banned_power_nouns || [];
     const text = String(record.item || '');

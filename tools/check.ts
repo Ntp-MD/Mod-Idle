@@ -21,7 +21,7 @@ import * as G from './lib/generated.ts';
 import * as eng from './lib/engine.ts';
 import { readJson } from './lib/json.ts';
 import { createSkillModel } from '../engine/skills.ts';
-import { huntReweight } from '../engine/loot.ts';
+import { createLoot, leanReweight } from '../engine/loot.ts';
 
 const { E, S, K, M, LG, BAND, BANDS, BAND_KEYS, CEIL, SPLIT, FORCED_SPLIT, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
 const MODS = JSON.parse(fs.readFileSync(path.join(eng.ROOT, 'tools/data/mods.json'), 'utf8'));
@@ -37,6 +37,28 @@ const r4 = (x) => Math.round(x * 10000) / 10000;
 const modRange = (id) => { const m = MODS.mods.find((x) => x.id === id); return m ? `${m.min}-${m.max}` : 'TBD'; };
 
 const BAND_LABEL = { low: 'low', mid: 'mid', high: 'high', high_full_lck: 'full Lck' };
+
+// ---- minute one's set, derived the way the client derives it (`openingGear`): the data names a frame
+// per slot and the engine's own floor rule produces the one line each piece carries, so the cages, the
+// generated table and the game cannot disagree about minute one.
+const LOOT_SLOTS = createLoot(E, MODS).SLOTS as string[];
+const LOOT_NAMES: Record<string, string> = Object.fromEntries(MODS.mods.map((m: any) => [m.id, m.name]));
+const openingSet = () => {
+  const OPEN = E.opening;
+  const LOOT = createLoot(E, MODS);
+  return (OPEN.gear as any[]).map((g) => {
+    const q = (LOOT.BAND_LABEL as string[]).indexOf(g.quality);
+    const frame = BASES_JSON.bases.find((b: any) => b.name === g.base && b.slot === g.slot) || null;
+    const weapon = frame ? null : BASES_JSON.weapons.find((w: any) => w.name === g.base) || null;
+    return {
+      g,
+      frame,
+      weapon,
+      lines: LOOT.baseModAtFloor(BASES_JSON, g.slot, frame, weapon, OPEN.level, q),
+      weight: frame ? frame.weight : eng.weaponWeightOf(BASES_JSON, g.base, 'main hand'),
+    };
+  });
+};
 
 // ---------------------------------------------------------------- tables
 
@@ -113,35 +135,37 @@ BLOCKS['group-C'] = () => {
 
 BLOCKS['group-F'] = () => {
   const b = BAND;
-  // A row's rate, re-expressed per 1,000 kills: the denominator is a kill count, never a stretch of
-  // the clock (AGENT.md — no time limit; D12 — never the published source). Ascend/polish full-set
-  // waits are stated in kills for the same reason.
-  const p1k = (v: any, band: string = 'high') => f0(Math.round(v / BAND[band].kills_derived * 1000));
+  // Every income row is per KILL, never per hour (D12): a rate is a tool's own arithmetic, not a
+  // published source, so the only unit the surface states is what one kill pays.
+  const perKill = (band: string, perHr: number) => perHr / BAND[band].kills_derived;
+  const chance = (band: string) => BAND[band].drop_chance_pct / 100;
+  const grp = (band: string) => BAND[band].group_mobs;
+  const bossPerKill = perKill('high', L.boss_per_hour).toFixed(4);
   const rows = [
-    ['F1', 'kills per band', `3600 ÷ (group × ${L.ttk_per_mob_sec} sec clear + ${L.group_spawn_sec} sec spawn) × group`, `${f0(b.high.kills_derived)} high · ${f0(b.mid.kills_derived)} mid · ${f0(b.low.kills_derived)} low`],
+    ['F1', 'kills per clear cycle', `the group a cycle spawns`, `${grp('low')} low · ${grp('mid')} mid · ${grp('high')} high`],
     ['F2', 'drops per kill', `${L.base_drop_chance * 100}% × (1 + Lck×${K.K_LCK_DROP})`, `${f1(b.low.drop_chance_pct)}% (L${L.bands.low.lck_level}) · ${f1(b.mid.drop_chance_pct)}% (L${L.bands.mid.lck_level}) · ${f1(b.high.drop_chance_pct)}% (L${L.bands.high.lck_level}) · ${f1(b.high_full_lck.drop_chance_pct)}% (full Lck ${f0(CEIL)})`],
-    ['F3', 'drops per 1,000 kills', `kills × F2`, `**${p1k(b.high.drops_per_hr)}** (L90) · ${p1k(b.mid.drops_per_hr, 'mid')} (L60) · ${p1k(b.low.drops_per_hr, 'low')} (L30) · ${p1k(b.high_full_lck.drops_per_hr)} (full Lck)`],
-    ['F4', 'upgrades per 1,000 kills', E.f_rows_carried.find((r) => r.id === 'F4').expression, E.f_rows_carried.find((r) => r.id === 'F4').value],
-    ['F5', 'Reroll value stones per 1,000 kills', `junk × ${TS.gold_per_junk_piece} = drops − upgrades`, `**${p1k(b.high.junk_per_hr)}**`],
-    ['F6', 'Reroll value uses per 1,000 kills', `${p1k(b.high.junk_per_hr)} ÷ ${C.reroll_value_stones_per_use}`, `**${p1k(STONE.reroll_uses_per_hr)}**`],
-    ['F7', 'Reroll tier stones per 1,000 kills', `elite ${p1k(b.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones)} (${L.elite_spawn_chance * 100}% of kills ×${L.elite_tier_stones}) + boss ${p1k(L.boss_per_hour * L.boss_tier_stones)} (${L.boss_per_hour} ×${L.boss_tier_stones})`, `**${p1k(STONE.tier_stones_per_hr)}**`],
-    ['F8', 'Refines per 1,000 kills', `${p1k(STONE.tier_stones_per_hr)} ÷ ${C.refine_stones_per_use}`, `**${p1k(STONE.refines_per_hr)}**`],
-    ['F9', 'Add mod stones per 1,000 kills', `elite ${p1k(b.high.kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance)} (${L.elite_spawn_chance * 100}% of kills × ${L.elite_add_stone_chance * 100}% chance) + boss ${p1k(L.boss_per_hour * L.boss_add_stones)} (${L.boss_per_hour} ×${L.boss_add_stones})`, `**${p1k(STONE.add_stones_per_hr)}**`],
-    ['F10', 'Ascends per 1,000 kills', `min(F9 ÷ ${C.ascend_add_stones} Add, F7 ÷ ${C.ascend_tier_stones} tier) — the scarcer stone sets the pace`, `**${p1k(STONE.ascend_per_hr)}** · full 12-piece set **${f0(STONE.ascend_hours_full_set * b.high.kills_derived)} kills** (Add alone ${f0(STONE.add_hours_full_set * b.high.kills_derived)} · tier stones alone ${f0(STONE.tier_hours_full_set * b.high.kills_derived)} → tier stones bind)`],
-    ['F13', 'herb bundles per 1,000 kills', `separate roll · ${f2(E.herbs.mid_chance * 100)}% per kill mid · ${f2(E.herbs.high_chance * 100)}% high · bundle of ${E.herbs.bundle_min}-${E.herbs.bundle_max} zone-tier herbs`, `mid band **${p1k(BAND.mid.kills_derived * E.herbs.mid_chance, 'mid')}** · high band **${p1k(BAND.high.kills_derived * E.herbs.high_chance)}**`],
+    ['F3', 'drops per clear cycle', `F1 × F2`, `${f2(grp('low') * chance('low'))} low · ${f2(grp('mid') * chance('mid'))} mid · ${f2(grp('high') * chance('high'))} high`],
+    ['F4', 'upgrades per drop', E.f_rows_carried.find((r) => r.id === 'F4').expression, E.f_rows_carried.find((r) => r.id === 'F4').value],
+    ['F5', 'junk per kill (gold)', `(drops − upgrades) per kill × ${TS.gold_per_junk_piece}`, `**${perKill('high', b.high.junk_per_hr).toFixed(4)}**`],
+    ['F6', 'Reroll value uses per kill', `F5 ÷ ${C.reroll_value_stones_per_use}`, `**${perKill('high', STONE.reroll_uses_per_hr).toFixed(4)}**`],
+    ['F7', 'Reroll tier stone per kill', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones).toFixed(4)} (${L.elite_spawn_chance * 100}% of kills ×${L.elite_tier_stones}) + boss ${perKill('high', L.boss_per_hour * L.boss_tier_stones).toFixed(4)} (${bossPerKill} ×${L.boss_tier_stones})`, `${perKill('high', STONE.tier_stones_per_hr).toFixed(4)}`],
+    ['F8', 'Refines per kill', `F7 ÷ ${C.refine_stones_per_use}`, `**${perKill('high', STONE.refines_per_hr).toFixed(4)}**`],
+    ['F9', 'Add mod stone per kill', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance).toFixed(4)} (${L.elite_spawn_chance * 100}% of kills × ${L.elite_add_stone_chance * 100}% chance) + boss ${perKill('high', L.boss_per_hour * L.boss_add_stones).toFixed(4)} (${bossPerKill} ×${L.boss_add_stones})`, `**${perKill('high', STONE.add_stones_per_hr).toFixed(4)}**`],
+    ['F10', 'Ascend per kill', `min(F9 ÷ ${C.ascend_add_stones} Add, F7 ÷ ${C.ascend_tier_stones} tier) — the scarcer stone sets the pace`, `**${perKill('high', STONE.ascend_per_hr).toFixed(4)}** · full 12-piece set **${f0(STONE.ascend_hours_full_set * b.high.kills_derived)} kills** (Add alone ${f0(STONE.add_hours_full_set * b.high.kills_derived)} kills · tier stones alone ${f0(STONE.tier_hours_full_set * b.high.kills_derived)} kills → tier stones bind)`],
+    ['F13', 'herb bundles per kill', `separate roll · a bundle of ${E.herbs.bundle_min}-${E.herbs.bundle_max} zone-tier herbs`, `mid band **${f2(E.herbs.mid_chance)}** · high band **${f2(E.herbs.high_chance)}**`],
     ['F16', 'Refine full set', `${C.ascend_items_per_set} pieces × ${C.refine_slots_per_item} slots × ${C.refine_steps} steps = ${STONE.refine_casts_full_set} casts`, `**${STONE.refine_casts_full_set} casts** · ${STONE.refine_casts_full_set * C.refine_stones_per_use} Reroll tier stones (checks.md E6)`],
     ['F17', 'Full-set polish', `${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones`, `**${C.polish_casts_per_full_set} casts** · ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Reroll value stones (checks.md E8)`],
-    ['F18', 'gold per kill of full-sell income', `junk per kill × ${TS.gold_per_junk_piece}`, `${eng.goldPerKill('low').toFixed(4)} low · ${eng.goldPerKill('mid').toFixed(4)} mid · ${eng.goldPerKill('high').toFixed(4)} high · ${eng.goldPerKill('high_full_lck').toFixed(4)} full Lck (towns-stalls.md §1)`],
-    ['F19', 'full-Lck income ceiling over the no-Lck line', `${f0(b.high_full_lck.junk_per_hr)} ÷ ${f0(b.high.junk_per_hr)}`, `**×${f2(LCK_BOUND)}** — the only place Lck may multiply income (G8)`],
-    ['F20', 'Quality stones per 1,000 kills', `monster ${p1k(b.high.kills_derived * L.quality_stone_sources.monster_quality_chance)} (${L.quality_stone_sources.monster_quality_chance * 100}% of kills) + elite ${p1k(b.high.kills_derived * L.elite_spawn_chance * L.quality_stone_sources.elite_quality_chance)} (1 in 5 × ${L.quality_stone_sources.elite_quality_chance * 100}%) + boss ${p1k(L.boss_per_hour * L.quality_stone_sources.boss_quality_stones)} (${L.boss_per_hour} ×${L.quality_stone_sources.boss_quality_stones})`, `**${p1k(STONE.quality_stones_per_hr)}**`],
-    ['F21', 'Upgrade full set', `${C.upgrade_costs.join(' + ')} = ${STONE.upgrade_stones_per_piece} per piece × ${C.ascend_items_per_set} pieces = ${STONE.upgrade_stones_full_set} stones ÷ F20`, `**${f0(STONE.upgrade_hours_full_set * b.high.kills_derived)} kills** for a full +15 set · the steps ${C.upgrade_breaks_from}-15 third alone, hunted only from bosses, is **${f0(STONE.upgrade_boss_third_hours * b.high.kills_derived)} kills** (crafting.md "sources shift monsters → elites → bosses by step")`],
-    ['F22', 'Repair and Corrupt stones per 1,000 kills', `Repair: elite ${p1k(b.high.kills_derived * L.elite_spawn_chance * L.repair_stone_sources.elite_repair_chance)} (1 in 5 × ${L.repair_stone_sources.elite_repair_chance * 100}%) + boss ${p1k(L.boss_per_hour * L.repair_stone_sources.boss_repair_stones)} · Corrupt: boss ${L.boss_per_hour} × ${L.corrupt_stone_sources.boss_corrupt_chance * 100}% chance`, `Repair **${p1k(STONE.repair_stones_per_hr)}** · Corrupt **${p1k(STONE.corrupt_stones_per_hr)}** per 1,000 kills — the rarest stone, so one gamble per piece costs about ${f0(b.high.kills_derived / STONE.corrupt_stones_per_hr)} kills and a full ${STONE.corrupt_gambles_full_set}-piece set of gambles is ${STONE.corrupt_gambles_full_set} × that (crafting.md §Corrupt)`],
+    ['F18', 'gold per kill, the price unit', `F5, the junk line`, `${perKill('low', b.low.junk_per_hr).toFixed(4)} low · ${perKill('mid', b.mid.junk_per_hr).toFixed(4)} mid · ${perKill('high', b.high.junk_per_hr).toFixed(4)} high · ${perKill('high_full_lck', b.high_full_lck.junk_per_hr).toFixed(4)} full Lck (towns-stalls.md §1)`],
+    ['F19', 'full-Lck income ceiling over the no-Lck line', `${perKill('high_full_lck', b.high_full_lck.junk_per_hr).toFixed(4)} ÷ ${perKill('high', b.high.junk_per_hr).toFixed(4)}`, `**×${f2(LCK_BOUND)}** — the only place Lck may multiply income (G8)`],
+    ['F20', 'Quality Stone per kill', `monster ${perKill('high', b.high.kills_derived * L.quality_stone_sources.monster_quality_chance).toFixed(4)} (${L.quality_stone_sources.monster_quality_chance * 100}% of kills) + elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.quality_stone_sources.elite_quality_chance).toFixed(4)} (1 in 5 × ${L.quality_stone_sources.elite_quality_chance * 100}%) + boss ${perKill('high', L.boss_per_hour * L.quality_stone_sources.boss_quality_stones).toFixed(4)} (${bossPerKill} ×${L.quality_stone_sources.boss_quality_stones})`, `**${perKill('high', STONE.quality_stones_per_hr).toFixed(4)}**`],
+    ['F21', 'Upgrade full set', `${C.upgrade_costs.join(' + ')} = ${STONE.upgrade_stones_per_piece} per piece × ${C.ascend_items_per_set} pieces = ${STONE.upgrade_stones_full_set} stones ÷ F20`, `**${f0(STONE.upgrade_stones_full_set / perKill('high', STONE.quality_stones_per_hr))} kills** for a full +15 set · the steps ${C.upgrade_breaks_from}-15 third alone, hunted only from bosses, is **${f0(STONE.upgrade_boss_third_hours * b.high.kills_derived)} kills** (crafting.md "sources shift monsters → elites → bosses by step")`],
+    ['F22', 'Repair and Corrupt stone per kill', `Repair: elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.repair_stone_sources.elite_repair_chance).toFixed(4)} (1 in 5 × ${L.repair_stone_sources.elite_repair_chance * 100}%) + boss ${perKill('high', L.boss_per_hour * L.repair_stone_sources.boss_repair_stones).toFixed(4)} · Corrupt: boss ${bossPerKill} × ${L.corrupt_stone_sources.boss_corrupt_chance * 100}% chance`, `Repair **${perKill('high', STONE.repair_stones_per_hr).toFixed(4)}** · Corrupt **${perKill('high', STONE.corrupt_stones_per_hr).toFixed(4)}** — the rarest stone, so one gamble per piece costs about ${f0(1 / perKill('high', STONE.corrupt_stones_per_hr))} kills and a full ${STONE.corrupt_gambles_full_set}-piece set of gambles is ${f0(STONE.corrupt_gambles_full_set / perKill('high', STONE.corrupt_stones_per_hr))} kills (crafting.md §Corrupt)`],
   ];
   const carried = E.f_rows_carried.filter((r) => !['F4'].includes(r.id)).map((r) => `| ${r.id} | ${r.value} | ${r.expression} · status **${r.status}** |`);
   return ['| id | Value | Expression |', '|---|---|---|',
     ...rows.map((r) => `| ${r[0]} | ${r[1]} | \`${r[2]}\` = ${r[3]} |`),
     ...carried, '',
-    `Derived from: group spawn ${L.group_spawn_sec} sec · ${L.ttk_per_mob_sec} sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = ${S.base} + ${S.point_value}×(points ÷ 7)) · Base drop ${L.base_drop_chance * 100}% (formula-utility.md section 10) · prices ${C.reroll_value_stones_per_use}/${C.refine_stones_per_use} stones (crafting.md). A band is a kill count, so every row is stated per 1,000 kills — never per hour.`,
+    `Derived from: group spawn ${L.group_spawn_sec} sec · ${L.ttk_per_mob_sec} sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = ${S.base} + ${S.point_value}×(points ÷ 7)) · Base drop ${L.base_drop_chance * 100}% (formula-utility.md section 10) · prices ${C.reroll_value_stones_per_use}/${C.refine_stones_per_use} stones (crafting.md).`,
     `F4 · F11 are **simulation output** (loot.md section 3) and F13 is unset — this cage does not invent it, it only refuses to let a derived row drift.`, ''].join('\n');
 };
 
@@ -169,10 +193,12 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     `junk = drops − upgrades everywhere, so gold and stones share one ceiling (G2 · G8)`);
   // The full-Lck junk multiple is a derived anchor: `CEIL × K_LCK_DROP` is the whole lever, so
   // dropping the stat ceiling to 510 moved 3.16 → 2.11, adding the earring as a 13th
-  // item moved it to 2.20, and the re-base (kill rates ×1/3 and the level-90 Lck
-  // line 190 → 76) moved it to the value below. Like X1 this literal is a canary against an
-  // accidental K re-tune, and the docs print the derived value, not this number.
-  add('X7', Math.abs(LCK_BOUND - 3.15) < 0.02, `full-Lck junk line ×${f2(LCK_BOUND)} — the bound G8 and towns-stalls T7 quote`);
+  // item moved it to 2.20, the re-base (kill rates ×1/3 and the level-90 Lck
+  // line 190 → 76) moved it to the value below, and the item-level pass moved it again — the 7-line
+  // Rarity branch is gone, so a drop carries fewer lines and the keep-rate (hence the junk line) sits
+  // where that leaves it. Like X1 this literal is a canary against an accidental K re-tune, and the
+  // docs print the derived value, not this number.
+  add('X7', Math.abs(LCK_BOUND - 3.11) < 0.02, `full-Lck junk line ×${f2(LCK_BOUND)} — the bound G8 and towns-stalls T7 quote`);
   add('X8', STONE.tier_stones_per_hr === 6 + 12 && STONE.reroll_uses_per_hr === 10,
     `stone flow: elite 18 + boss 12 = ${STONE.tier_stones_per_hr} tier stones/hr · ${f0(BAND.high.junk_per_hr)} junk ÷ ${C.reroll_value_stones_per_use} = ${STONE.reroll_uses_per_hr} Reroll uses/hr (F6 · F7)`);
   // The E6 row is read back as a COUNT, never as a duration: this game has no time limit and no
@@ -900,15 +926,15 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   }
 
   // X56: the variant's second drop axis is the stream it leans. A lean is the one edit that could move
-  // a total, so the table is gated the same way Hunt Order is: the three normal rungs of every ladder
-  // cycle gear · herb · junk (so a zone's aggregate stays the identity and only the per-kill mix moves)
-  // and Elite · Boss carry 'none' (they already pay their own stone lines). Reinforcing a lean and
-  // conserving the total are properties of huntReweight, and this gate proves the table keeps them.
+  // a total, so the table is gated: the three normal rungs of every ladder cycle gear · herb · junk (so
+  // a zone's aggregate stays the identity and only the per-kill mix moves) and Elite · Boss carry 'none'
+  // (they already pay their own stone lines). Reinforcing a lean and conserving the total are properties
+  // of leanReweight, and this gate proves the table keeps them.
   {
     const vp: string[] = [];
     const V = (E.mob as any).variants || {};
     const D = (E.mob as any).variant_drops || {};
-    const CATS = E.loot.hunt_order.categories as string[];
+    const CATS = E.loot.variant_lean.categories as string[];
     const sample = { gear: 0.08, herb: 0.17, junk: 0.3 };
     const sum = (x: any) => x.gear + x.herb + x.junk;
     let leaned = 0, normalLeaned = 0;
@@ -926,14 +952,14 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
       // the three normal rungs are the cycle, so a ladder missing one is a ladder with no rule left
       if (normal.length === 3 && normal.join(',') !== CATS.join(',')) vp.push(`${sid}: normal rungs lean ${normal.join(' · ')}, must cycle ${CATS.join(' · ')}`);
       for (const lean of normal) {
-        const out = huntReweight(sample, lean as any, E.loot.hunt_order.shift_pct);
+        const out = leanReweight(sample, lean as any, E.loot.variant_lean.shift_pct);
         if (Math.abs(sum(out) - sum(sample)) > 1e-9) vp.push(`${sid}: lean ${lean} does not conserve the total`);
         if (out[lean as 'gear' | 'herb' | 'junk'] <= sample[lean as 'gear' | 'herb' | 'junk']) vp.push(`${sid}: lean ${lean} does not raise its own stream`);
         leaned++; normalLeaned++;
       }
     }
     add('X56', vp.length === 0, vp.length ? vp.join(' · ')
-      : `every ladder's three normal rungs cycle ${CATS.join(' → ')} and its Elite and Boss rungs carry 'none': ${leaned} leans checked (${normalLeaned} of them normal rungs), each one raises its own stream and conserves ${sum(sample).toFixed(2)} expected drops/kill, so a variant tilts the mix without moving the drop rate the timeline is priced on (mob.variant_drops · loot.hunt_order)`);
+      : `every ladder's three normal rungs cycle ${CATS.join(' → ')} and its Elite and Boss rungs carry 'none': ${leaned} leans checked (${normalLeaned} of them normal rungs), each one raises its own stream and conserves ${sum(sample).toFixed(2)} expected drops/kill, so a variant tilts the mix without moving the drop rate the timeline is priced on (mob.variant_drops · loot.variant_lean)`);
   }
 
   // The AoE rule is data now, and its shape must stay a real trade: lose at 1 target, win at the Cap
@@ -950,152 +976,47 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
       : `the AoE rule is data: ${A.per_target_pct}% per target · Cap ${A.target_cap} · mana ×${A.mana_mult} → damage per mana ${f2(dpm(1))}× / ${f2(dpm(2))}× / ${f2(dpm(A.target_cap))}×, so AoE loses at 1 target and wins at the Cap (skill-pool-system.md)`);
   }
 
-  // The Road is a designed mode now: a link graph of ladder + branch links, a per-terrain encounter
-  // table, a bounded mint and Standing below the time cost. Every link carries its own zone pair, so
-  // a branch link (zone i to zone i+2) cannot be mistaken for the chain by its array position.
+// The Road is walking now: a hex graph, one block per `block_sec`, one encounter chance per block,
+  // and no mint at all — an encounter is a fight that pays the ordinary drop roll. The cage proves
+  // the shape is closed: a node per settlement on the lattice, a reachable world, a sane block time,
+  // an encounter chance that is neither certain nor never, and nothing that pays outside a kill.
   const ROAD = E.road;
   const roadP = [];
-  const zoneIdOfName = (n: string) => (ZONES.find((z) => z.name === n) || {}).id;
-  const ladder = [], branch = [];
-  ROAD.links.forEach((l, i) => {
-    const tag = `link ${i + 1} ${l.a} ↔ ${l.b}`;
-    if (!ZONES.some((z) => z.name === l.a)) roadP.push(`${tag}: "${l.a}" is not a settlement`);
-    if (!ZONES.some((z) => z.name === l.b)) roadP.push(`${tag}: "${l.b}" is not a settlement`);
-    if (zoneIdOfName(l.a) !== l.zoneA || zoneIdOfName(l.b) !== l.zoneB) roadP.push(`${tag}: zone pair ${l.zoneA}/${l.zoneB} disagrees with the settlement names`);
-    if (!E.road.terrain[l.terrain]) roadP.push(`${tag}: terrain "${l.terrain}" is not one of ${Object.keys(E.road.terrain).join('/')}`);
-    if (!(l.trip_min >= 1)) roadP.push(`${tag}: trip_min ${l.trip_min}`);
-    const span = Math.abs(l.zoneA - l.zoneB);
-    if (l.kind === 'ladder') {
-      if (span !== 1) roadP.push(`${tag}: a ladder link must join consecutive zones, not span ${span}`);
-      ladder.push(l);
-    } else if (l.kind === 'branch') {
-      if (span !== 2) roadP.push(`${tag}: a branch link must join zone i to zone i+2, not span ${span}`);
-      branch.push(l);
-    } else roadP.push(`${tag}: kind "${l.kind}" is neither ladder nor branch`);
-  });
-  // the ladder links must be the full chain, one link per consecutive pair, in any array order
-  const wanted = ZONES.slice(0, -1).map((z, i) => [z.id, ZONES[i + 1].id].sort((a, b) => a - b).join('-'));
-  const got = ladder.map((l) => [l.zoneA, l.zoneB].sort((a, b) => a - b).join('-'));
-  for (const w of wanted) if (!got.includes(w)) roadP.push(`ladder links miss the pair ${w}`);
-  for (const g of got) if (!wanted.includes(g)) roadP.push(`ladder link ${g} is not a consecutive zone pair`);
-
-  const roadEnc = Object.entries(ROAD.encounters);
-  const roadWsum = roadEnc.reduce((t, e) => t + e[1].weight, 0);
-  if (roadWsum !== 100) roadP.push(`encounter weights sum ${roadWsum}, not 100`);
-  for (const e of roadEnc) for (const fld of ['mobs', 'resolve', 'win', 'loss']) if (!e[1][fld]) roadP.push(`${e[0]} has no ${fld}`);
-  if (!ROAD.encounters.chest) roadP.push('no chest encounter kind');
-  else {
-    const c = ROAD.encounters.chest;
-    if (!(c.weight > 0 && c.weight < 25)) roadP.push(`the chest weighs ${c.weight}%, outside 1-24%`);
-    if (/stone/i.test(`${c.win} ${c.resolve}`)) roadP.push('the chest pays crafting stones — G5 keeps them with Elite and boss');
-    if (ROAD.chest_once_per_link_per_day !== true) roadP.push('the chest must be capped once per link per day, or it becomes a third mint');
+  const WALK = eng.ROAD;
+  const settlementNames = new Set<string>(readJson(path.join(ROOT, 'tools/data/town.json')).settlements.map((s: any) => s.id));
+  for (const n of ROAD.nodes) {
+    if (!settlementNames.has(n.id)) roadP.push(`walk node "${n.id}" is not a settlement`);
+    if (!Number.isInteger(n.q) || !Number.isInteger(n.r)) roadP.push(`walk node ${n.id} is not on the hex lattice (q/r must be integers)`);
   }
-
-  // terrain tilts the table and must always tilt it somewhere; the base row is the plain average
-  const tIds = Object.keys(ROAD.terrain);
-  if (tIds.length < 2) roadP.push('terrain must carry at least two kinds');
-  for (const [t, row] of Object.entries(ROAD.terrain)) {
-    const sum = roadEnc.reduce((s, [k]) => s + (row[k] ?? 0), 0);
-    if (sum !== 100) roadP.push(`terrain ${t} weights sum ${sum}, not 100`);
-    for (const [k] of roadEnc) if (!(row[k] > 0)) roadP.push(`terrain ${t} drives ${k} to ${row[k] ?? 0} — a zero-weight kind is a skip, not a shortcut`);
-  }
-  for (const [k, e] of roadEnc) {
-    const mean = tIds.reduce((s, t) => s + (ROAD.terrain[t][k] ?? 0), 0) / tIds.length;
-    if (Math.abs(mean - e.weight) > 0.001) roadP.push(`base weight for ${k} is ${e.weight} but the terrain rows average ${f1(mean)} — the base table must be their plain average`);
-  }
-  for (const [t, row] of Object.entries(ROAD.terrain)) {
-    if (roadEnc.every(([k, e]) => row[k] === e.weight)) roadP.push(`terrain ${t} is identical to the base table — the tilt is decoration`);
-  }
-  {
-    const amb = tIds.map((t) => ROAD.terrain[t].ambush);
-    const hi = tIds[amb.indexOf(Math.max(...amb))], lo = tIds[amb.indexOf(Math.min(...amb))];
-    if (hi !== 'mountain' || lo !== 'river') roadP.push(`expected mountain to hold the heaviest ambush and river the lightest, got ${hi} / ${lo}`);
-  }
-
-  const roadPurse = ladder.length * ROAD.purse_gold;
-  const roadJunk = eng.goldPerKill('high') * 6 * BAND.high.kills_derived;
-  if (roadPurse / roadJunk > 0.05) roadP.push(`Road mints ${roadPurse} gold/day = ${f1(roadPurse / roadJunk * 100)}% of the junk ${f0(6 * BAND.high.kills_derived)} high-band kills pay, over the 5% bound`);
-  for (const l of branch) {
-    const idx = ROAD.links.indexOf(l);
-    if (eng.ROAD.purseGoldFor(idx) !== 0) roadP.push(`branch link ${l.a} ↔ ${l.b} pays a purse — branch links pay none`);
-  }
-  const roadTrip = Math.min(...['low', 'mid', 'high'].map((b) => (ROAD.trip_min * BAND[b].kills_derived) / 60));
-  if (ROAD.standing_per_trip_kills / roadTrip > 0.2) roadP.push(`a trip pays ${ROAD.standing_per_trip_kills} kill-equivalents of Standing but costs ${f1(roadTrip)} kills of hunting time`);
-
-  // the walk is the same Road counted in blocks (`road.walk`), so the contract is that nothing about a
-  // leg changed: same length, same encounters, same adjacency. Four things could break that and each
-  // has its own refusal. `ROAD` above is the data; `RW` is the shared model that derives the blocks.
-  const RW = eng.ROAD;
-  const WALK = ROAD.walk || {};
-  if (!(WALK.block_sec > 0)) roadP.push(`walk.block_sec is ${WALK.block_sec}, not a length of walk`);
-  if (WALK.block_sec * WALK.encounter_gap_blocks * ROAD.encounters_per_min !== 60) {
-    roadP.push(`the walk is ${WALK.block_sec}s x ${WALK.encounter_gap_blocks} blocks x ${ROAD.encounters_per_min}/min, which is not a minute — the walk moved the Road's cadence`);
-  }
-  if (!(WALK.encounter_gap_blocks > 0)) roadP.push('walk.encounter_gap_blocks must be positive, or no encounter ever fires');
-  const walkBlocks = RW.blocks || [];
-  if (!walkBlocks.length) roadP.push('the walk owns no blocks — a road with no blocks is a road with no walking');
-  const walkEncTotal = walkBlocks.reduce((t, b) => t + 1 / WALK.encounter_gap_blocks, 0);
-  const roadEncTotal = ROAD.links.reduce((t, l) => t + eng.ROAD.encountersFor(ROAD.links.indexOf(l)), 0);
-  if (Math.abs(walkEncTotal - roadEncTotal) > 0.001) {
-    roadP.push(`walking the whole graph fires ${f1(walkEncTotal)} encounters and walking the same links leg by leg fires ${f1(roadEncTotal)} — the walk must not add or drop one`);
-  }
-  for (const l of ROAD.links) {
-    const idx = ROAD.links.indexOf(l);
-    if (!Number.isInteger(RW.links[idx].blocks)) roadP.push(`${RW.links[idx].id}: ${l.trip_min} min is ${RW.links[idx].blocks} blocks, not a whole number`);
-    if (Math.abs(RW.links[idx].blocks * WALK.block_sec / 60 - l.trip_min) > 0.001) {
-      roadP.push(`${RW.links[idx].id}: ${RW.links[idx].blocks} blocks x ${WALK.block_sec}s is not ${l.trip_min} min — a leg changed length`);
-    }
-    if (RW.blocksFor(idx) / WALK.encounter_gap_blocks !== eng.ROAD.encountersFor(idx)) {
-      roadP.push(`${RW.links[idx].id}: the walk fires ${RW.blocksFor(idx) / WALK.encounter_gap_blocks} encounters, the leg promised ${eng.ROAD.encountersFor(idx)}`);
+  if (ROAD.nodes.length !== settlementNames.size) roadP.push(`${ROAD.nodes.length} walk nodes for ${settlementNames.size} settlements`);
+  if (new Set(ROAD.nodes.map((n) => n.id)).size !== ROAD.nodes.length) roadP.push('two walk nodes share one id');
+  // no two settlements may share a hex: every pair must be a real walk of at least one block
+  for (const a of ROAD.nodes) {
+    if (ROAD.nodes.some((b) => b.id !== a.id && WALK.blocksBetween(a.id, b.id) <= 0)) {
+      roadP.push(`walk node ${a.id} shares a hex with another settlement — every pair must be at least one block apart`);
     }
   }
-  if (!RW.chainIsWalkable) roadP.push('a link\'s blocks do not form a chain — a walk could skip ground');
-  {
-    const ids = new Set(walkBlocks.map((b) => b.id));
-    if (ids.size !== walkBlocks.length) roadP.push(`${walkBlocks.length - ids.size} block id(s) collide, so two blocks share a name`);
-    for (const b of walkBlocks) {
-      if (b.id !== `${RW.links[b.linkIndex].id}#${b.n}`) { roadP.push(`block ${b.id} is not named after its own link`); break; }
-      const deg = (b.n > 0 ? 1 : 0) + (b.n < b.total - 1 ? 1 : 0);
-      const ns = RW.neighboursOf(b.linkIndex, b.n);
-      if (ns.length !== deg || ns.some((id) => RW.blockById.get(id)?.linkIndex !== b.linkIndex)) {
-        roadP.push(`block ${b.id} touches ${ns.length} block(s) instead of the ${deg} its position allows`);
-        break;
-      }
-    }
-    // the checkpoint: warping is the only skip, and it costs the carriage price once per link
-    if (!/checkpoint/.test(WALK.checkpoint_rule || '')) roadP.push('walk.checkpoint_rule does not say what a warp costs');
+  if (!(ROAD.block_sec >= 1)) roadP.push(`block_sec is ${ROAD.block_sec} — a block must cost at least a second`);
+  if (!(ROAD.encounter_chance_pct > 0 && ROAD.encounter_chance_pct < 100)) roadP.push(`encounter chance is ${ROAD.encounter_chance_pct}% — a walk must be able to be quiet and able to be ambushed`);
+  // the walk pays nothing outside a kill: the rules may not name a purse, a chest, Standing or a stone
+  for (const [key, text] of [['encounter_rule', ROAD.encounter_rule], ['push_rule', ROAD.push_rule], ['waypoint_rule', ROAD.waypoint_rule], ['graph_rule', ROAD.graph_rule]]) {
+    if (/\bpurse\b|\bchest\b|\bpedlar\b|\bcaravan\b/i.test(text)) roadP.push(`${key} still names a Road reward — the walk pays a drop roll and nothing else`);
   }
-  // a route is a walk: consecutive links meet at a settlement and the last link reaches the target
-  const settlementNames = eng.ZONES.map((z) => z.name);
-  for (const a of settlementNames) {
-    for (const b of settlementNames) {
-      if (a === b) continue;
-      const r = RW.routeLinks(a, b);
-      if (r === null) { roadP.push(`no route walks from ${a} to ${b} — the graph is not connected`); continue; }
-      if (!r.length) continue;
-      let at = a;
-      for (const i of r) {
-        const l = RW.links[i];
-        if (l.a !== at && l.b !== at) { roadP.push(`a route from ${a} to ${b} enters ${l.id} at neither end`); break; }
-        at = l.a === at ? l.b : l.a;
-      }
-      if (at !== b) roadP.push(`a route from ${a} to ${b} ends at ${at}`);
-    }
-  }
+  if (/\bstone/i.test(ROAD.encounter_rule)) roadP.push('the walk may not pay crafting stones — G5 keeps them with Elite and boss');
+  if (!/on foot/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint must unlock by arriving on foot');
+  if (!/free/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint must warp for free — travel may never be a gold sink');
   add('X36', roadP.length === 0, roadP.length ? roadP.join(' · ')
-    : `Road is a closed design: ${ladder.length} ladder + ${branch.length} branch links (every link carries its own zone pair) · walked in blocks, ${WALK.block_sec}s x ${WALK.encounter_gap_blocks} = one ${f0(60 / ROAD.encounters_per_min)}s encounter gap, so a ${ROAD.trip_min} min leg is ${RW.blocksFor(0)} blocks and still ${eng.ROAD.encountersFor(0)} encounters · base weights ${roadEnc.map((e) => `${e[0]} ${e[1].weight}%`).join(' · ')} = the average of the ${tIds.length} terrain rows · chest capped ${ROAD.chest_once_per_link_per_day ? 'once per link per day' : 'NOT CAPPED'} and pays no stones · purse capped at ${roadPurse} gold/day = ${f1((roadPurse / roadJunk) * 100)}% of a 6-hour junk mint · Standing ${ROAD.standing_per_trip_kills} kill-equivalents against the ${f1(roadTrip)} kills a trip costs · ${walkBlocks.length} blocks, each touching only its own neighbours, and every settlement pair routes`);
+    : `the walk is a closed shape: ${ROAD.nodes.length} settlements on the hex lattice · ${ROAD.block_sec}s a block · ${ROAD.encounter_chance_pct}% an encounter per block, so a ${WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)}-block walk pays ${f1((ROAD.encounter_chance_pct / 100) * WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id) * 10) / 10} fights in expectation · a fight is an ordinary mob group that pays the ordinary drop roll · a Push keeps the walk's blocks · a Waypoint unlocks on foot and warps free`);
 
-  // X46 · the Circuit and the offline split. A Circuit is an ordered list of links the character
-  // loops; a Push skips the current leg instead of ending it, and offline rolls the base table.
-  const circuitP = [];
-  if (ROAD.circuit.push_skips_leg !== true) circuitP.push('a Push must skip the leg, not end the Circuit');
-  if (ROAD.circuit.offline_resolves !== true) circuitP.push('a closed client must play out the rest of the lap');
-  if (ROAD.circuit.editable_in !== 'settlement') circuitP.push('a Circuit may only be edited while standing in a settlement');
-  const untilted = eng.ROAD.weightsFor(null);
-  for (const [k, e] of roadEnc) if (untilted[k] !== e.weight) circuitP.push(`offline weight for ${k} is ${untilted[k]}, not the base ${e.weight}`);
-  for (const t of tIds) if (eng.ROAD.weightsFor(t).ambush === ROAD.encounters.ambush.weight) circuitP.push(`terrain ${t} does not tilt ambush away from the base`);
-  add('X46', circuitP.length === 0, circuitP.length ? circuitP.join(' · ')
-    : `the Circuit is a closed rule: a Push skips the leg (never ends the loop), a closed client plays out the rest of that lap and parks, and the Circuit is editable only in a settlement · offline rolls the untilted base table (${roadEnc.map((e) => `${e[0]} ${e[1].weight}%`).join(' · ')})`);
+  // X46 · the walk is online-only and Push-neutral. A Push must not cost a block, an away period must
+  // not walk, and the waypoint must not gate a zone.
+  const walkP = [];
+  if (!/never ends a walk/i.test(ROAD.push_rule)) walkP.push('a Push must never end a walk');
+  if (!/never gives back a block/i.test(ROAD.push_rule)) walkP.push('a Push must not give back a block');
+  if (!/never gates a zone/i.test(ROAD.waypoint_rule)) walkP.push('a Waypoint must never gate a zone');
+  if (/offline/i.test(ROAD.encounter_rule) && !/never/i.test(ROAD.encounter_rule)) walkP.push('an encounter rule that mentions offline must say an away period never walks');
+  add('X46', walkP.length === 0, walkP.length ? walkP.join(' · ')
+    : `the walk is online-only and Push-neutral: a Push rests at the camp of the zone it was ambushed in and resumes on the same block · an away period never crosses a block · a Waypoint never gates a zone, so a settlement is reached by walking`);
 
   add('X17', E.caps.accuracy === null, 'accuracy has no Cap (the 2,000 Cap was removed) · the ratio formula limits itself at ' + f1(DERIVED.hit_chance * 100) + '%');
 
@@ -1115,24 +1036,28 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     ? `the starting weapon "${opBase}" resolves to ${opWpn.name} (${opWpn.weapon_aspd} hits/sec)`
     : `the starting weapon "${opBase}" matches no row in engine.weapons — a client would have no attack speed`);
   const opStat = eng.statAt(OP.level);
-  const givenFlat = OP.gear.reduce((s, it) => s + ((it.mods && it.mods['Physical power flat']) || 0), 0);
+  // the set is derived the way the client derives it: the data names a frame per slot and the engine's
+  // own floor rule produces the one line each piece carries, so nothing below can disagree with minute one
+  const OP_PIECES = openingSet();
+  const opMain = OP_PIECES.find((p) => p.g.slot === 'main hand');
+  const givenFlat = opMain ? opMain.lines.reduce((s, l) => s + (l.id === 'physical_power_flat' ? l.value : 0), 0) : 0;
   const opPhys = opStat * K.K_STR + givenFlat;
   const opDps = opPhys * (opWpn ? opWpn.weapon_aspd : 0);
   const opMobHp = opZone.hp[0];
   const opSecs = opDps > 0 ? opMobHp / opDps : Infinity;
   const pwRange = MODS.mods.find((m) => m.id === 'physical_power_flat');
-  // the curve prices this mob against exactly this character, so the opening weapon must sit
-  // in the WORST band of the lowest quality, not merely somewhere inside the whole range —
-  // the top of the range is inside it but is a top-tier roll and pays more than the curve
-  const worstTier = pwRange.bands[0][0];
-  add('OP2', !!opWpn && givenFlat >= worstTier[0] && givenFlat <= worstTier[1] && opSecs >= 0.8 && opSecs <= 2,
-    `the starting weapon gives +${givenFlat} physical, and the worst low-quality Tier is ${worstTier[0]}-${worstTier[1]} — so it is the floor of the table, not a gift. A level-1 mob dies in ${Number.isFinite(opSecs) ? f1(opSecs) + ' sec' : 'no time at all (no weapon)'}`);
+  // the curve prices this mob against exactly this character, so the opening line must be the RULE's own
+  // floor for a two-Mod line — the worst slice's low end scaled by `value_scale` — and never a typed
+  // number that merely happens to sit inside the low band
+  const expectFlat = Math.round(pwRange.bands[0][0][0] * (E.loot.base_mod.value_scale['2'] || 1));
+  add('OP2', !!opWpn && givenFlat === expectFlat && opSecs >= 0.8 && opSecs <= 2,
+    `the starting sword's line is the low band's floor at the two-Mod scale (+${givenFlat} physical, the rule's own ${expectFlat}), so minute one is the table's floor and not a gift. A level-1 mob dies in ${Number.isFinite(opSecs) ? f1(opSecs) + ' sec' : 'no time at all (no weapon)'}`);
 
   const opHp = eng.maxHpOf(opStat, OP.level);
   const opRegen = opStat * K.K_VIT_REGEN;
   const opTaken = eng.mobPs(opMobHp, OP.level);
   const opSurvive = opHp / Math.max(0.1, opTaken - opRegen);
-  add('OP3', opSurvive > 60, `a level-1 character survives ${f0(opSurvive)} sec against a zone-1 mob — the opening cannot kill the player`);
+  add('OP3', opSurvive > 60, `a level-1 character with nothing worn survives ${f0(opSurvive)} sec against a zone-1 mob — the opening cannot kill the player, and the set can only raise that`);
 
   add('OP4', OP.skills.length === 0,
     OP.skills.length === 0
@@ -1142,16 +1067,42 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   add('OP5', OP.gold === 0 && Object.keys(OP.stones).length === 0,
     'the opening hands over no currency, so minute one cannot buy past a gate the design has not opened');
 
-  // · the starting sword is carried, so §11 must weigh it — a client that starts weightless is
-  // silently granting the opening build attack speed the weapon column does not give it. The number is
-  // the same engine call the client makes, so the two cannot disagree about minute one. `weight_base`
-  // (owner ruling) lifts the level-1 capacity clear of every main hand, so the opening is untaxed and
-  // A12 is closed: the tax now binds only on a set heavy enough to cross the base line.
-  const opCarry = eng.weaponWeightOf(BASES_JSON, OP.gear[0].base, OP.gear[0].slot);
-  const opTax = eng.encumbranceOf(opCarry, eng.statAt(OP.level));
+  // · the set is carried, so §11 must weigh it — a client that starts weightless is silently granting the
+  // opening build attack speed the frames do not give it. The number is the same engine call the client
+  // makes, so the two cannot disagree about minute one. `weight_base` (owner ruling) lifts the level-1
+  // capacity clear of every main hand, and the lightest frame of each slot keeps the whole set under it.
+  const opCarry = OP_PIECES.reduce((s, p) => s + p.weight, 0);
+  const opTax = eng.encumbranceOf(opCarry, opStat);
   const lightestMain = Math.min(...BASES_JSON.weapons.filter((w) => w.weight > 0).map((w) => w.weight));
   add('OP6', opCarry > 0 && opTax === 0,
-    `the opening weapon weighs ${f0(opCarry)} against a ${f0(eng.weightCapacityOf(eng.statAt(OP.level)))} level-1 capacity, so section 11 takes ${f1(opTax * 100)}% of aspd — the lightest main hand in the table (${f0(lightestMain)}) fits under the weight_base line, so the opening character carries it untaxed`);
+    `the opening set weighs ${f0(opCarry)} against a ${f0(eng.weightCapacityOf(opStat))} level-1 capacity, so section 11 takes ${f1(opTax * 100)}% of aspd — the lightest frame of every slot keeps the set under the weight_base line, and the lightest main hand in the table (${f0(lightestMain)}) fits with it`);
+
+  // OP7 · the set's shape: every slot filled exactly once (the two rings included), one line per piece,
+  // and no Legacy pair or Random line anywhere — minute one is junk, and junk is what this proves
+  const opSlotProblems: string[] = [];
+  const opSlots = (LOOT_SLOTS as string[]);
+  for (const slot of [...new Set(opSlots)]) {
+    const n = OP_PIECES.filter((p) => p.g.slot === slot).length;
+    const want = opSlots.filter((s) => s === slot).length;
+    if (n !== want) opSlotProblems.push(`${slot}: ${n} piece(s), SLOTS carries ${want}`);
+  }
+  const opLineProblems = OP_PIECES
+    .filter((p) => p.lines.length !== 1 || (p.g.slot !== 'main hand' && (p.lines[0].extra || []).length))
+    .map((p) => `${p.g.slot} ${p.g.base}`);
+  add('OP7', OP_PIECES.length === opSlots.length && opSlotProblems.length === 0 && opLineProblems.length === 0,
+    `the set is ${OP_PIECES.length} pieces, one per slot of the ${opSlots.length} a character wears, and every piece carries exactly one line — its frame's Base Mod at the floor, with no Legacy pair and no Random line${opSlotProblems.length ? ' · SLOTS: ' + opSlotProblems.join(' · ') : ''}${opLineProblems.length ? ' · LINES: ' + opLineProblems.join(' · ') : ''}`);
+
+  // OP8 · the priced clock cannot move: no piece outside the main hand may carry an attack line, because
+  // mob_HP, the drop line and the timeline are all keyed on the attack side
+  const ATTACK_LINES = new Set(['physical_power_flat', 'physical_power', 'magic_power_flat', 'magic_power',
+    'elemental_power_flat', 'elemental_power', 'attack_speed', 'critical_chance', 'critical_damage',
+    'accuracy', 'armour_pen', 'bleed_chance', 'stun_chance']);
+  const opAttack = OP_PIECES
+    .filter((p) => p.g.slot !== 'main hand')
+    .flatMap((p) => p.lines.flatMap((l) => [l.id, ...((l.extra || []).map((x) => x.id))]))
+    .filter((id) => ATTACK_LINES.has(id));
+  add('OP8', opAttack.length === 0,
+    `no piece outside the main hand carries an attack line (${[...ATTACK_LINES].length} are watched), so the set dresses the character without moving a price the mob curve publishes${opAttack.length ? ' · FOUND: ' + opAttack.join(' · ') : ''}`);
 
   // ---- mod pool ranges (tools/data/mods.json → mod-pool.md `mod-pool`)
   const modProblems = [];
@@ -1511,7 +1462,7 @@ BLOCKS['hit-chance'] = () => {
     '',
     `Evasion is now the species Dex line (\`stat_c × species.dex × K_EVASION ${K.K_EVASION} × body\`), so hit chance answers *what* is being hit, not just the level. The reference mob is the **mean species vector on a Medium body** (${f1(ref)} evasion at level ${S.level_cap}) — a real average of the ${SE.length} lineages, not an imaginary ×1.00 one. Easiest = ${easiest.name} (Dex ×${easiest.dex.toFixed(2)} · ${f0(easiest.evasion)}) · hardest = ${hardest.name} (Dex ×${hardest.dex.toFixed(2)} · ${f0(hardest.evasion)}).`,
     '',
-    `The reference is set on the mean so the anchor does not move: \`stat_c × ${K.K_EVASION}\` at the roster mean is ${f1(meanEv)} evasion, against the retired \`level × 1\` curve of ${S.level_cap}. The published hit chances therefore hold as they were — ${E.build.hit_chance_pct}% with no Dex, ${f1(DERIVED.hit_chance * 100)}% at the accuracy ceiling — and everything derived from them (the DPS anchor row in formula.md section 0, mob_HP, the E1-E5 hour checkpoints) is untouched. What changed is only *who* sits above and below the reference: the species spread runs ${f0(loEv)}-${f0(hiEv)} evasion, and a body class multiplies it again (Small ×${E.mob.sizes[0].evasion} · Large and Elite ×${E.mob.sizes[2].evasion}).`,
+    `The reference is set on the mean so the anchor does not move: \`stat_c × ${K.K_EVASION}\` at the roster mean is ${f1(meanEv)} evasion, against the retired \`level × 1\` curve of ${S.level_cap}. The published hit chances therefore hold as they were — ${E.build.hit_chance_pct}% with no Dex, ${f1(DERIVED.hit_chance * 100)}% at the accuracy ceiling — and everything derived from them (the DPS anchor row in formula.md section 0, mob_HP, the E1-E5 kill checkpoints) is untouched. What changed is only *who* sits above and below the reference: the species spread runs ${f0(loEv)}-${f0(hiEv)} evasion, and a body class multiplies it again (Small ×${E.mob.sizes[0].evasion} · Large and Elite ×${E.mob.sizes[2].evasion}).`,
     '',
     `**Same line, pointed at the player** — mob accuracy against the player's own Evasion rating (\`Dex × ${K.K_EVASION}\` + Gear Evasion flat ${modRange('evasion_flat')}):`,
     '',
@@ -1561,34 +1512,37 @@ BLOCKS['skill-drop'] = () => {
   const SD = E.skill_drop;
   const kph = BAND.high.kills_derived;
   const elites = kph * L.elite_spawn_chance;
-  // sample size is a count of kills, never an hour: 1,000 kills is the denominator (D12)
-  const perK = elites * SD.elite + L.boss_per_hour * SD.boss + kph * (1 - L.elite_spawn_chance) * SD.normal;
-  const k1k = (v: any) => f1((v / kph) * 1000);
+  const perHour = elites * SD.elite + L.boss_per_hour * SD.boss + kph * (1 - L.elite_spawn_chance) * SD.normal;
+  const per1k = (x: number) => (x / kph) * 1000;
   const rows = [
-    ['Boss (single, always online-only)', f1(SD.boss * 100) + '% per boss kill', k1k(L.boss_per_hour) + ' per 1,000 kills', k1k(L.boss_per_hour * SD.boss) + ' per 1,000 kills'],
-    ['Elite (1 in ' + Math.round(1 / L.elite_spawn_chance) + ' kills)', f1(SD.elite * 100) + '% per elite kill', k1k(elites) + ' per 1,000 kills', k1k(elites * SD.elite) + ' per 1,000 kills'],
-    ['Normal mob', f2(SD.normal * 100) + '% per kill', k1k(kph * (1 - L.elite_spawn_chance)) + ' per 1,000 kills', k1k(kph * (1 - L.elite_spawn_chance) * SD.normal) + ' per 1,000 kills'],
+    ['Boss (single, always online-only)', f1(SD.boss * 100) + '% per boss kill', f2(L.boss_per_hour / kph) + ' per kill', f1(per1k(L.boss_per_hour * SD.boss))],
+    ['Elite (1 in ' + Math.round(1 / L.elite_spawn_chance) + ' kills)', f1(SD.elite * 100) + '% per elite kill', f2(L.elite_spawn_chance) + ' per kill', f1(per1k(elites * SD.elite))],
+    ['Normal mob', f2(SD.normal * 100) + '% per kill', f2(1 - L.elite_spawn_chance) + ' per kill', f1(per1k(kph * (1 - L.elite_spawn_chance) * SD.normal))],
   ];
   return [
-    '| Source | Rate | Volume per 1,000 kills | Skills per 1,000 kills |',
+    '| Source | Rate | Spawns per kill | Skills per 1,000 kills |',
     '|---|---|---|---|',
     ...rows.map((r) => `| ${r.join(' | ')} |`),
     '',
-    `**${k1k(perK)} skills per 1,000 kills** in the high band (boss ${k1k(L.boss_per_hour * SD.boss)} + elite ${k1k(elites * SD.elite)} + normal ${k1k(kph * (1 - L.elite_spawn_chance) * SD.normal)}) — the rare item the whole skill list is gated on. Every number above comes from engine.json and is stated per 1,000 kills; the rates were previously quoted in this file and stored nowhere, so nothing could check them.`,
+    `**${f1(per1k(perHour))} skills per 1,000 kills** in the high band (boss ${f1(per1k(L.boss_per_hour * SD.boss))} + elite ${f1(per1k(elites * SD.elite))} + normal ${f1(per1k(kph * (1 - L.elite_spawn_chance) * SD.normal))}) — the rare item the whole skill list is gated on. Every number above comes from engine.json; the rates were previously quoted in this file and stored nowhere, so nothing could check them.`,
   ].join('\n');
 };
 
 // ---------------------------------------------------------------- minute one
 BLOCKS['opening'] = () => {
   const OP = E.opening;
+  // the opening task is the board's own elite sizing, so the row reads the count from its home
+  const TS = readJson(path.join(ROOT, 'tools/data/town.json')).task_sizing;
   const z = E.mob.zones.find((x) => x.name === OP.settlement);
   const wpn = E.weapons.find((w) => w.name.startsWith('one-handed sword'));
   const stat = eng.statAt(OP.level);
-  const flat = OP.gear.reduce((s, it) => s + ((it.mods && it.mods['Physical power flat']) || 0), 0);
+  const pieces = openingSet();
+  const main = pieces.find((p) => p.g.slot === 'main hand')!;
+  const flat = main.lines.reduce((s, l) => s + (l.id === 'physical_power_flat' ? l.value : 0), 0);
   const phys = stat * K.K_STR + flat;
-  // the sword is carried, so §11 weighs it: the column comes from bases.json through the same engine
-  // rule the client calls, which is why minute one has one answer and not two 
-  const carryWeight = eng.weaponWeightOf(BASES_JSON, OP.gear[0].base, OP.gear[0].slot);
+  // the set is carried, so §11 weighs it: the column comes from bases.json through the same engine rule
+  // the client calls, which is why minute one has one answer and not two
+  const carryWeight = pieces.reduce((s, p) => s + p.weight, 0);
   const tax = eng.encumbranceOf(carryWeight, stat);
   const dps = phys * wpn.weapon_aspd;
   const dpsCarried = phys * wpn.weapon_aspd * (1 - tax);
@@ -1598,18 +1552,23 @@ BLOCKS['opening'] = () => {
   const hp = eng.maxHpOf(stat, OP.level);
   const regen = stat * K.K_VIT_REGEN;
   const survive = hp / Math.max(0.1, eng.mobPs(mobHp, OP.level) - regen);
-  const it0 = OP.gear[0];
+  // every piece, with the one line the engine's own floor rule gave it (the sword's line carries two Mods)
+  const pieceText = (p: any) => {
+    const mods = [p.lines[0], ...((p.lines[0].extra || []) as any[])]
+      .map((l: any) => `${LOOT_NAMES[l.id] ?? l.id} ${l.value}`).join(' + ');
+    return `${p.g.slot}: ${p.g.base} (${mods})`;
+  };
   return [
     '| | Given | Why |',
     '|---|---|---|',
     `| Settlement | **${OP.settlement}** (zone ${z.id}, levels ${z.levels[0]}-${z.levels[1]}) | the zone the player opens in |`,
-    `| Level | **${OP.level}** · ${f0(stat)} each stat · ${f0(hp)} Max HP · ${f1(regen)} regen/sec | level-1 baseline, no gear |`,
-    `| Gear | **1 item**: ${it0.base}, ${it0.quality} quality T${it0.tier}, Physical power flat +${flat} | the floor of the low-quality table |`,
+    `| Level | **${OP.level}** · ${f0(stat)} each stat · ${f0(hp)} Max HP · ${f1(regen)} regen/sec | level-1 baseline, the set is counted below |`,
+    `| Gear | **${pieces.length} pieces**, one line each — ${pieces.map(pieceText).join(' · ')} | the lightest frame of every slot, at the floor of its own window |`,
     `| Skills | **none** | the first skill is the first boss drop |`,
     `| Gold / stones | **0 / 0** | minute one buys nothing |`,
-    `| First rule | **${OP.first_rule.objective}** (from the ${OP.first_rule.source}) | the task board already exists and pays stones only |`,
+    `| First rule | **${OP.first_rule.objective}** — ${TS.elite_n} Elites (from the ${OP.first_rule.source}) | the task board already exists and pays stones only |`,
     '',
-    `**First fight, measured:** a level-${OP.level} character kills a zone-${z.id} mob in **${f1(secs)} sec** as the curve prices it, and in **${f1(secsCarried)} sec** as a character actually carrying the ${f0(carryWeight)}-weight sword swings it (§11 takes ${f0(tax * 100)}% of aspd against a ${f0(eng.weightCapacityOf(stat))} capacity · survives **${f0(survive)} sec** of the mob's return damage). Numbers come from the same engine the cages use, so the opening cannot drift away from the mob curve it is priced against.`,
+    `**First fight, measured:** a level-${OP.level} character kills a zone-${z.id} mob in **${f1(secs)} sec** as the curve prices it, and in **${f1(secsCarried)} sec** as a character actually carrying the ${f0(carryWeight)}-weight set swings it (§11 takes ${f0(tax * 100)}% of aspd against a ${f0(eng.weightCapacityOf(stat))} capacity · with nothing worn it survives **${f0(survive)} sec** of the mob's return damage, and the set can only raise that). Numbers come from the same engine the cages use, so the opening cannot drift away from the mob curve it is priced against.`,
   ].join('\n');
 };
 
@@ -1826,37 +1785,31 @@ BLOCKS['slot-pools'] = () => {
 BLOCKS['road-rules'] = () => {
   const RD = E.road;
   const R = eng.ROAD;
-  const tIds = R.terrainIds;
-  const ladder = R.links.filter((l) => l.kind === 'ladder');
-  const branch = R.links.filter((l) => l.kind === 'branch');
-  const dailyPurse = R.purseCapPerDay;
-  const linkRow = (l) => `**${l.text}** · ${l.kind} · ${l.terrain} · ${l.trip_min} min = ${l.blocks} blocks${l.paysPurse ? '' : ' · no purse'}`;
-  const rows = Object.entries(RD.encounters).map(([k, v]) =>
-    `| ${k} | ${v.weight}% | ${tIds.map((t) => `${t} ${RD.terrain[t][k]}`).join(' · ')} | ${v.mobs} | ${v.win} · loss: ${v.loss} |`);
-  const W = RD.walk;
+  const settlements: any[] = readJson(path.join(ROOT, 'tools/data/town.json')).settlements;
+  const nameOf = (id: string) => (settlements.find((s) => s.id === id) || { name: id }).name;
+  const near = settlements[1];
+  const nearBlocks = R.blocksBetween(settlements[0].id, near.id);
+  const chance = RD.encounter_chance_pct / 100;
+  const rows = settlements
+    .map((s) => `| ${nameOf(s.id)} | zone ${s.zone} | ${R.blocksBetween(settlements[0].id, s.id)} blocks · ${R.secBetween(settlements[0].id, s.id)}s from ${nameOf(settlements[0].id)} |`)
+    .join('\n');
   return [
-    '| Road element | Value |',
+    '| Walk element | Value |',
     '|---|---|',
-    `| Ladder links (${ladder.length}, ${ladder[0]?.trip_min ?? RD.trip_min} min, pays the purse) | ${ladder.map(linkRow).join(' · ')} |`,
-    `| Branch links (${branch.length}, no purse) | ${branch.map(linkRow).join(' · ')} |`,
-    `| Trip length · encounters | a link runs for its own \`trip_min\` · ${RD.encounters_per_min} encounter per Road minute |`,
-    `| The block walk | a link is walked **one block at a time**, \`walk.block_sec\` to the block, so a \`trip_min\` leg is \`trip_min x 60 / walk.block_sec\` blocks (**M13** · **M14**) · an encounter fires on the way into every \`walk.encounter_gap_blocks\`-th block, which is the same ${RD.encounters_per_min}-per-Road-minute cadence the leg always had |`,
-    `| Adjacency | a block touches only the block before it and the block after it on its own link; the first touches the settlement the leg left and the last the settlement it reaches. There is no other edge in the walk, so a character can never be somewhere it did not walk to (**M15** · **X36**) |`,
-    `| Route | pick any settlement and the shortest chain of links to it is plotted and walked link by link. A Circuit is the same list with \`loop\` set — one structure, one validator |`,
-    `| Offline | a Circuit plays out the rest of its lap on the **untilted base table**, then parks the character in a zone before normal idling resumes — an away period can never be routed into ambush country. A plotted route is never resolved while away: it is dropped and the character stands where the walk stopped |`,
-    '| Checkpoint | a settlement is a checkpoint and warping to one is the only way to skip ground: it costs the carriage price **once per link** and is free and instant for every visit after that, so walking is never mandatory and never the cheaper option (**G9** · **T9**) |',
+    `| The world | a pointy-top hex lattice; a settlement owns its own hex and the blocks between two settlements are their hex distance, derived from the axial coordinates and never typed |`,
+    `| Every pair | walkable — there is no link list, no route to buy and no branch shortcut, because the block count *is* the distance |`,
+    `| A block | ${RD.block_sec} real seconds |`,
+    `| An encounter | ${RD.encounter_chance_pct}% per block crossed · ${nameOf(settlements[0].id)} → ${nameOf(near.id)} is ${nearBlocks} blocks, so ${(chance * nearBlocks).toFixed(2)} fights in expectation |`,
+    `| What a fight pays | the ordinary drop roll and nothing else — no gold purse, no chest, no Standing, no crafting stones |`,
+    `| A Push | the ordinary Push: rest at the camp of the zone it was ambushed in, then walk back in on the block it was ambushed on. It never ends a walk and never gives back a block |`,
+    `| A Waypoint | unlocked by arriving on foot, once, and it costs nothing · warps to any unlocked settlement free and instantly · never gates a zone · a Waystone will be a second destination kind |`,
+    `| Offline | a walk is online only — an away period never crosses a block |`,
     '',
-    '| Terrain | ambush | caravan | pedlar | chest |',
-    '|---|---|---|---|---|',
-    ...Object.entries(RD.terrain).map(([t, row]) => `| ${t} | ${row.ambush} | ${row.caravan} | ${row.pedlar} | ${row.chest} |`),
+    '| Settlement | Zone | Distance from the first settlement |',
+    '|---|---|---|',
+    rows,
     '',
-    `Each row sums to 100 and none reaches 0 — a zero-ambush route is a skip, not a shortcut. Terrain tilts the encounter table; it is not decoration.`,
-    '',
-    '| Encounter | Base weight | Terrain tilt | Mobs | Win · loss |',
-    '|---|---|---|---|---|',
-    ...rows,
-    '',
-    `The base column is the plain average of the terrain rows and is what an **offline** session rolls, so the tilt can never be farmed while away. The purse pays **${RD.purse_gold} gold on a ladder link only**, once per link per day, so the Road can never mint more than **${dailyPurse} gold/day** while one 6-hour farming session mints thousands by selling junk — Road gold is a rounding error, which is what "C+D are a content choice, not an income choice" has to mean. A chest pays one Item at the destination zone's ceiling, is capped once per link per day, and pays **no crafting stones**. Standing is granted in kill-equivalents (**${RD.standing_per_trip_kills}** per completed leg), under a fifth of what the same minutes would earn hunting (**X36**). Losing a one-off trip forfeits roughly ${RD.forfeit_kills} kills of progress and the purse; a Push mid-walk skips the rest of the leg. The walk changes the ruler and nothing else: \`walk.block_sec\` x \`walk.encounter_gap_blocks\` x \`encounters_per_min\` is a minute, so a leg is as long and as eventful as it always was, and **${R.blocks.length}** blocks are all that the world added.`,
+    'Distances are hex distances computed from the walk graph, so the sheet and the rule can never disagree about how far a place is.',
   ].join('\n');
 };
 
@@ -1986,24 +1939,24 @@ BLOCKS['k-table'] = () => {
 };
 
 BLOCKS['craft-set'] = () => {
-  // Per 1,000 kills, never per hour: a cast is paid by loot the build earns (D12).
-  const p1k = (v: any) => r1((v / BAND.high.kills_derived) * 1000);
+  // The casts a band pays per 1,000 kills — a count of kills, never a rate against the clock (D12).
+  const perK = 1000 / BAND.high.kills_derived;
   const rows = [
-    `| Reroll value | ${C.reroll_value_stones_per_use} Reroll value stones | ~${p1k(STONE.reroll_uses_per_hr)} | Cheap, can spam · Keeps values inside the same Tier |`,
-    `| Refine | ${C.refine_stones_per_use} Reroll tier stones | ~${p1k(STONE.refines_per_hr)} | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |`,
-    `| Ascend | ${C.ascend_add_stones} Add mod stones + ${C.ascend_tier_stones} Reroll tier stones | ~${p1k(STONE.ascend_per_hr)} | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |`,
+    `| Reroll value | ${C.reroll_value_stones_per_use} Reroll value stones | ~${f0(STONE.reroll_uses_per_hr * perK)} | Cheap, can spam · Keeps values inside the same Tier |`,
+    `| Refine | ${C.refine_stones_per_use} Reroll tier stones | ~${r1(STONE.refines_per_hr * perK)} | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |`,
+    `| Ascend | ${C.ascend_add_stones} Add mod stones + ${C.ascend_tier_stones} Reroll tier stones | ~${r1(STONE.ascend_per_hr * perK)} | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |`,
     '| Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to Rarity crafted max (net counting) |',
     '| Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set | Raises Gear Mod only |',
     '| Repair | 1 Repair stone | elite / boss only | Revives Broken + refills protection |',
   ];
   return [
-    '| Tier | Price | Casts per 1,000 kills at high zone | Meaning |',
+    '| Tier | Price | Actual casts per 1,000 kills at the high zone | Meaning |',
     '|---|---|---|---|',
     ...rows,
     '',
     '```',
     `Refine full set (${C.ascend_items_per_set} pieces × ${C.refine_steps} steps = ${STONE.refine_casts_full_set} casts, because Tier belongs to the piece) = ${STONE.refine_casts_full_set * C.refine_stones_per_use} Reroll tier stones`,
-    `Ascend full set (${C.ascend_items_per_set} pieces)                             ≈ ${f0(Math.round(STONE.ascend_hours_full_set * BAND.high.kills_derived))} kills`,
+    `Ascend full set (${C.ascend_items_per_set} pieces)                             ≈ ${f0(STONE.ascend_hours_full_set * BAND.high.kills_derived)} kills`,
     '```',
   ].join('\n');
 };
@@ -2043,17 +1996,16 @@ BLOCKS['loot-bands'] = () => {
   const lckCell = (b) => (b === 'high_full_lck'
     ? `${BAND[b].lck} → ×${BAND[b].lck_mult.toFixed(2)}`
     : `${BAND[b].lck} (L${L.bands[b].lck_level}) → ×${BAND[b].lck_mult.toFixed(2)}`);
-  // The bands are counts of kills, not stretches of the clock: a kill rate is a tool's own
-  // arithmetic (D12), so the published band table states the kill count and what 1,000 kills pay.
-  const per1k = (b) => Math.round((BAND[b].drops_per_hr / BAND[b].kills_derived) * 1000);
   const rows = BAND_KEYS.map((b) => {
     const grp = BAND[b].group_mobs;
     const cycle = (grp * L.ttk_per_mob_sec + L.group_spawn_sec).toFixed(1);
-    const drops = b === 'high_full_lck' ? `**${f0(per1k(b))}**` : f0(per1k(b));
-    return `| ${label[b]} | ${grp} mobs | ${cycle} sec | ${f0(BAND[b].kills_derived)} | ${lckCell(b)} | ${drops} |`;
+    const drops = (BAND[b].drops_per_hr / BAND[b].kills_derived).toFixed(4);
+    const junkK = (BAND[b].junk_per_hr / BAND[b].kills_derived).toFixed(4);
+    const junkCell = b === 'high_full_lck' ? `**${junkK}**` : junkK;
+    return `| ${label[b]} | ${grp} mobs | ${cycle} sec | ${drops} | ${lckCell(b)} | ${junkCell} |`;
   });
   return [
-    '| Zone | Average group | Cycle | kills per band | Lck at that level | drops per 1,000 kills |',
+    '| Zone | Average group | Cycle | drops per kill | Lck at that level | junk per kill (gold) |',
     '|---|---|---|---|---|---|',
     ...rows,
   ].join('\n');
@@ -2163,7 +2115,7 @@ BLOCKS['race-drop'] = () => {
     '|---|---|---|---|---|---|---|---|---|---|',
     ...rows.map((x) => `| ${x.join(' | ')} |`),
     '',
-    `Every variant drops its own junk, and the five rungs of a ladder read as one family — a Goblin pays an Ear at Sneak, Bile at Raider, a Cog at Tinker, a Charm at Shaman and a Crown at the King — so a Counterhand visit tells the player which **variants** they farmed, not only which races. **Rarity buys frequency, never income**: each rarity's per-kill chance is the junk line divided by its own sell price (\`junk.rarities\`), so a variant's expected gold per kill is the same whatever rung it sits on, and a rarer rung simply drops less often for more gold — which is a bag-pressure trade, since junk stacks ${J.stack}/slot. Rarity is bound to the variant, not to the level, so the same mob never changes what it pays as the player levels. The **lean** column is the collectible stream that variant tilts toward, applied through \`huntReweight\` (**X56**): the three normal rungs of every ladder cycle gear · herb · junk, so a zone's aggregate mix stays the identity and only the per-kill mix moves, while **Elite** and **Boss** carry \`none\` because they already pay their own stone lines. Only a rung the cast can field carries a row at all — a rung nothing spawns is an item nothing pays (**X39**). A **humanoid** lineage adds the potion stream (X49) and a **weapon-carrier** lineage is the only source of weapon-slot gear; gear, herbs and stones are the shared streams every variant pays (loot.md sections 1-2).`,
+    `Every variant drops its own junk, and the five rungs of a ladder read as one family — a Goblin pays an Ear at Sneak, Bile at Raider, a Cog at Tinker, a Charm at Shaman and a Crown at the King — so a Counterhand visit tells the player which **variants** they farmed, not only which races. **Rarity buys frequency, never income**: each rarity's per-kill chance is the junk line divided by its own sell price (\`junk.rarities\`), so a variant's expected gold per kill is the same whatever rung it sits on, and a rarer rung simply drops less often for more gold — which is a bag-pressure trade, since junk stacks ${J.stack}/slot. Rarity is bound to the variant, not to the level, so the same mob never changes what it pays as the player levels. The **lean** column is the collectible stream that variant tilts toward, applied through \`leanReweight\` (**X56**): the three normal rungs of every ladder cycle gear · herb · junk, so a zone's aggregate mix stays the identity and only the per-kill mix moves, while **Elite** and **Boss** carry \`none\` because they already pay their own stone lines. Only a rung the cast can field carries a row at all — a rung nothing spawns is an item nothing pays (**X39**). A **humanoid** lineage adds the potion stream (X49) and a **weapon-carrier** lineage is the only source of weapon-slot gear; gear, herbs and stones are the shared streams every variant pays (loot.md sections 1-2).`,
   ].join('\n');
 };
 

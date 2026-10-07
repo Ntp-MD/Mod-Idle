@@ -344,32 +344,36 @@ export function buildCharacter(
   };
 }
 
-/** mods.json display name → Mod id, the same lookup tools/loot.ts uses. */
-export function modIdByName(name: string): string {
-  const n = name.trim().toLowerCase();
-  const hit = Object.keys(loot.NAME_OF).find((id: string) => {
-    const full = String(loot.NAME_OF[id]).toLowerCase();
-    return n === full || n === full.replace(/\s+(flat|%)$/, '');
-  });
-  if (!hit) throw new Error(`engine.json opening names a Mod that mods.json does not carry: ${name}`);
-  return hit;
-}
-
 /**
- * The minute-one weapon, read straight out of engine.json `opening`. It weighs what its type says it
- * weighs — the same column a dropped weapon is priced from — otherwise the opening character carries
- * a sword for free and the aspd tax (`formula.md` section 11) never bites the build it exists for.
+ * Minute one: the whole starting set, read straight out of engine.json `opening`. The data names a frame
+ * per slot (the main hand names a weapon type, which is what a drop records as its base) and the client
+ * derives each piece's one line with the engine's own floor rule — the same `baseModAtFloor` a
+ * pre-skeleton save restore calls — so no value is typed twice and the set cannot drift from the curve it
+ * is priced against. It weighs what its frames say they weigh, or the opening character would carry a set
+ * for free and the aspd tax (`formula.md` section 11) would never bite the build it exists for.
  */
 export function openingGear(): (Item | null)[] {
   const gear = emptyGear();
-  const g = (E.opening.gear as any[])[0];
-  const lines: ModLine[] = Object.entries(g.mods).map(([name, value]) => ({
-    id: modIdByName(name),
-    value: Number(value),
-  }));
-  gear[0] = {
-    slot: g.slot, base: g.base, rarity: 'Common', quality: g.quality, tier: `T${g.tier}`, lines,
-    weight: weaponWeightOf(g.base, g.slot),
-  };
+  const ilvl = E.opening.level as number;
+  const taken = new Set<number>();
+  for (const g of E.opening.gear as any[]) {
+    const q = loot.BAND_LABEL.indexOf(g.quality);
+    const frame = BASES.bases.find((b: any) => b.name === g.base && b.slot === g.slot) || null;
+    const weapon = frame ? null : BASES.weapons.find((w: any) => w.name === g.base) || null;
+    if (!frame && !weapon) continue;
+    // every slot is filled, and the two ring entries take the two ring slots
+    const at = loot.SLOTS.findIndex((s: string, i: number) => s === g.slot && !taken.has(i));
+    if (at < 0) continue;
+    taken.add(at);
+    gear[at] = {
+      slot: g.slot,
+      base: frame ? frame.name : weapon!.name,
+      ilvl,
+      quality: g.quality,
+      tier: `T${g.tier}`,
+      lines: loot.baseModAtFloor(BASES, g.slot, frame, weapon, ilvl, q),
+      weight: frame ? frame.weight : weaponWeightOf(weapon!.name, 'main hand'),
+    };
+  }
   return gear;
 }

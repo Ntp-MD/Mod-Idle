@@ -33,18 +33,19 @@ describe('a variant is a drop identity, not decoration', () => {
     }
   }, 60000);
 
-  it('a chosen hunting ground is the cast that spawns', () => {
+  it('a zone rolls its own whole cast — there is no hunting ground to pick', () => {
     const s = newGame(5);
     const zone = s.zone;
-    const sub = (E.mob.zones.find((z: any) => z.id === zone) as any).subzones[0].name;
-    s.zoneFocus = { [zone]: sub };
-    const seen = [...seenVariants(s, 8)];
-    expect(seen.length).toBeGreaterThan(0);
-    // a normal spawn is inside the chosen sub-zone; Elite and Boss are zone-level and carry none
-    for (const k of seen) {
-      const kind = k.split('|')[2];
-      if (kind !== '-') expect(kind).toBe(sub);
+    const cast = ((E.mob.zones.find((z: any) => z.id === zone) as any).subzones || []).map((x: any) => x.name);
+    expect(cast.length).toBeGreaterThan(1);
+    const seen = new Set<string>();
+    for (let i = 0; i < 200000 && seen.size < 2; i++) {
+      tick(s, {});
+      for (const m of s.group || []) if (m.subzone) seen.add(String(m.subzone));
     }
+    // more than one sub-zone actually spawns, and every one of them belongs to the zone's own cast
+    expect(seen.size).toBeGreaterThan(1);
+    for (const name of seen) expect(cast).toContain(name);
   });
 
   it('the Counterhand pays each item its own rarity, so a variant never changes the gold', () => {

@@ -4,9 +4,9 @@ import type { GameState } from './types';
 /**
  * The bag filter's stored settings (`save.md` · `loot.md` §4).
  *
- * Every rule is per slot, because the doc's own example is a per-slot decision ("keep only Rare"
- * on jewellery, a tighter margin on a slot that already has a good piece). The default margin is
- * the published swap margin read straight from `engine.json`, so raising one slot is a player
+ * Every rule is per slot, because the doc's own example is a per-slot decision (a tighter margin on a
+ * slot that already has a good piece, the Element keep-list off while farming one Element). The default
+ * margin is the published swap margin read straight from `engine.json`, so raising one slot is a player
  * setting and never a second copy of the number.
  */
 
@@ -15,8 +15,6 @@ export interface SlotRule {
   enabled: boolean;
   /** Keep a drop only when it outscores the piece worn in that slot by more than this. */
   margin_pct: number;
-  /** `any` keeps both Rarities; a named Rarity dissolves every lower one regardless of score. */
-  min_rarity: string;
   /** Elemental res of an Element the player has no answer to is always kept. */
   keep_missing_element: boolean;
 }
@@ -30,12 +28,9 @@ export interface FilterState {
 /** The slots the filter can be tuned per, with the duplicated ring slots folded into one row. */
 export const FILTER_SLOTS: string[] = [...new Set((loot.SLOTS as string[]).map(String))];
 
-export const RARITY_CHOICES: string[] = ['any', ...(loot.RARITY as any[]).map((r) => String(r.name))];
-
 const DEFAULT_RULE: SlotRule = {
   enabled: E.loot.filter.rules.default_enabled,
   margin_pct: E.loot.filter.upgrade_margin_pct,
-  min_rarity: E.loot.filter.rules.default_min_rarity,
   keep_missing_element: E.loot.filter.rules.default_keep_missing_element,
 };
 
@@ -73,7 +68,6 @@ export const coveredElements = (s: GameState): Set<string> => loot.notYetFound(s
 export function describeRule(rule: SlotRule): string {
   if (!rule.enabled) return 'filter off — every drop is kept';
   const parts = [`+${rule.margin_pct}% to keep`];
-  if (rule.min_rarity !== 'any') parts.push(`${rule.min_rarity} only`);
   if (!rule.keep_missing_element) parts.push('an unknown Element does not count');
   return parts.join(' · ');
 }

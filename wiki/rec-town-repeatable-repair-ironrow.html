@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -86,7 +86,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="rec-town-repeatable-repair-ironrow.html" aria-current="page">repair_ironrow</a>
 <a href="rec-town-repeatable-pedlar-rotation.html">pedlar_rotation</a>
 <a href="rec-town-repeatable-prestige-title.html">prestige_title</a>
-<a href="rec-town-repeatable-waypoint-reanchor.html">waypoint_reanchor</a>
 <a href="rec-town-repeatable-banner-coldres.html">banner_coldres</a>
 <a href="rec-town-repeatable-tint-heavy.html">tint_heavy</a>
 <a href="rec-town-repeatable-collector-hint.html">collector_hint</a>
@@ -145,23 +144,20 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>Armourer repair at Ironrow</h1>
 <p class="hint">One row of <code>tools/data/town.json</code> → <code>repeatable</code>. Prices · rosters · stock · Standing shares · Collector sets. The only place a town number is written by hand. tools/town.ts --write rebuilds towns-stalls.md and checks.md group T from it.</p>
-<dl class="kv"><dt>path</dt><dd><code>repeatable[repair_ironrow]</code></dd><dt>collection</dt><dd><a href="data-town-repeatable.html">Repeatable lines</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>9</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>repair_ironrow</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Item</td><td><code>Armourer repair at Ironrow</code></td><td><code>str</code></td><td>—</td></tr><tr><td>NPC</td><td><code>armourer</code></td><td><code>ref</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Kind</td><td><code>time</code></td><td><code>enum</code><span class="dim"> → invariants.allowed_kinds</span></td><td>—</td></tr><tr><td>Price <span class="dim">(m)</span></td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Min price <span class="dim">(m)</span></td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Max price <span class="dim">(m)</span></td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Charged in band</td><td><code>high</code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Per-day cap</td><td><code></code></td><td><code>int</code></td><td>—</td></tr><tr><td>Note</td><td><code>the armourer town discount, and only there · still above the tier-stone floor</code></td><td><code>text</code></td><td>—</td></tr><tr><td>K</td><td><code>137.4333</code></td><td><code>num</code><span class="tag ">inferred</span></td><td>—</td></tr><tr><td>K min</td><td><code></code></td><td><code>num</code><span class="tag ">inferred</span></td><td>—</td></tr><tr><td>K max</td><td><code></code></td><td><code>int</code><span class="tag ">inferred</span></td><td>—</td></tr></tbody></table></div></section>
+<dl class="kv"><dt>path</dt><dd><code>repeatable[repair_ironrow]</code></dd><dt>collection</dt><dd><a href="data-town-repeatable.html">Repeatable lines</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>8</dd></dl>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>repair_ironrow</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Item</td><td><code>Armourer repair at Ironrow</code></td><td><code>str</code></td><td>—</td></tr><tr><td>NPC</td><td><code>armourer</code></td><td><code>ref</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Kind</td><td><code>time</code></td><td><code>enum</code><span class="dim"> → invariants.allowed_kinds</span></td><td>—</td></tr><tr><td>Price (gold weight)</td><td><code>14</code></td><td><code>num</code></td><td>—</td></tr><tr><td>Min price (gold weight)</td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Max price (gold weight)</td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Charged in band</td><td><code>high</code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Per-day cap</td><td><code></code></td><td><code>int</code></td><td>—</td></tr><tr><td>Note</td><td><code>the armourer town discount, and only there · still above the tier-stone floor</code></td><td><code>text</code></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="repeatable"><input type="hidden" name="id" value="repair_ironrow">
 <div class="f"><label for="f-id">id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value="repair_ironrow" pattern="^[a-z][a-z0-9_]*$"></div></div>
 <div class="f"><label for="f-item">Item</label><div><input id="f-item" type="text" inputmode="decimal" name="item" value="Armourer repair at Ironrow"></div></div>
 <div class="f"><label for="f-npc">NPC</label><div><input id="f-npc" type="text" name="npc" value="armourer" list="f-npc-dl" placeholder="one of npcs"><datalist id="f-npc-dl"></datalist></div></div>
 <div class="f"><label for="f-kind">Kind</label><div><input id="f-kind" type="text" name="kind" value="time" list="f-kind-dl" placeholder="one of invariants.allowed_kinds"><datalist id="f-kind-dl"></datalist></div></div>
-<div class="f"><label for="f-m">Price <span class="dim">(m)</span></label><div><input id="f-m" type="text" inputmode="decimal" name="m" value="" min="0"></div></div>
-<div class="f"><label for="f-m-min">Min price <span class="dim">(m)</span></label><div><input id="f-m-min" type="text" inputmode="decimal" name="m_min" value=""></div></div>
-<div class="f"><label for="f-m-max">Max price <span class="dim">(m)</span></label><div><input id="f-m-max" type="text" inputmode="decimal" name="m_max" value=""></div></div>
+<div class="f"><label for="f-m">Price (gold weight)</label><div><input id="f-m" type="text" inputmode="decimal" name="m" value="14" min="0"></div></div>
+<div class="f"><label for="f-m-min">Min price (gold weight)</label><div><input id="f-m-min" type="text" inputmode="decimal" name="m_min" value=""></div></div>
+<div class="f"><label for="f-m-max">Max price (gold weight)</label><div><input id="f-m-max" type="text" inputmode="decimal" name="m_max" value=""></div></div>
 <div class="f"><label for="f-charge-band">Charged in band</label><div><input id="f-charge-band" type="text" name="charge_band" value="high" list="f-charge-band-dl" placeholder="one of engine:loot.bands"><datalist id="f-charge-band-dl"></datalist></div></div>
 <div class="f"><label for="f-per-day-cap">Per-day cap</label><div><input id="f-per-day-cap" type="text" inputmode="decimal" name="per_day_cap" value=""></div></div>
 <div class="f"><label for="f-note">Note</label><div><textarea id="f-note" name="note">the armourer town discount, and only there · still above the tier-stone floor</textarea></div></div>
-<div class="f"><label for="f-k">K<small>inferred from the JSON on disk</small></label><div><input id="f-k" type="text" inputmode="decimal" name="k" value="137.4333"></div></div>
-<div class="f"><label for="f-k-min">K min<small>inferred from the JSON on disk</small></label><div><input id="f-k-min" type="text" inputmode="decimal" name="k_min" value=""></div></div>
-<div class="f"><label for="f-k-max">K max<small>inferred from the JSON on disk</small></label><div><input id="f-k-max" type="text" inputmode="decimal" name="k_max" value=""></div></div>
 <div class="f"><span></span><div><button type="submit">Save &amp; regenerate</button> <label class="chk"><input type="checkbox" name="revertOnFail" value="1" checked> roll back if a cage fails</label></div></div>
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="repeatable"><input type="hidden" name="id" value="repair_ironrow"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
@@ -173,9 +169,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   &quot;item&quot;: &quot;Armourer repair at Ironrow&quot;,
   &quot;npc&quot;: &quot;armourer&quot;,
   &quot;kind&quot;: &quot;time&quot;,
+  &quot;m&quot;: 14,
   &quot;charge_band&quot;: &quot;high&quot;,
-  &quot;note&quot;: &quot;the armourer town discount, and only there · still above the tier-stone floor&quot;,
-  &quot;k&quot;: 137.4333
+  &quot;note&quot;: &quot;the armourer town discount, and only there · still above the tier-stone floor&quot;
 }</pre></section>
 </div>
 </main>

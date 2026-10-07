@@ -2,14 +2,11 @@ import { eng, E, sm, loot, TOWN, tree } from '../engine/client';
 import { buildCharacter, openingGear, SLOT_COUNT } from './player';
 import { playerSwing, mobSwing, rollStatus, dotDamage, type Statuses, type StatusName } from './combat';
 import { rollDrop } from './drop';
-import { newTown, progressTasks, tickTown, huntN } from './town';
+import { newTown, progressTasks, tickTown, taskReward } from './town';
 import { STAT_KEYS, type StatKey } from '../engine/client';
-import { huntReweight } from '../../../engine/loot.ts';
+import { leanReweight } from '../../../engine/loot.ts';
 import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm } from './farm';
-import {
-  road, encounterZones, encounterSizes, payPurse, claimChest, openArrival, grantTripStanding, endTrip,
-  advanceLeg, skipLeg, settlementZone,
-} from './road';
+import { road, walkZones, arrive } from './road';
 import { weaponByName, masteryLevel, payMastery, dropMultiplier } from './mastery';
 import { newPresets, switchPreset, autoSelect } from './presets';
 import { newCollector, newGrants, wants, col } from './collector';
@@ -28,7 +25,7 @@ import {
   newSkillState, tickSkills, castOnce, paySkillXp, grantSkill, buffNeedsRecast, skillCd, usableMana, buffRuleUp,
   skillLevel,
 } from './skills';
-import type { GameState, Mob, Item, RoadTrip } from './types';
+import type { GameState, Mob, Item } from './types';
 import { mulberry32, pick, intBetween, pickBand } from '../engine/client-helpers';
 
 const L = E.loot;
@@ -113,9 +110,7 @@ export function newGame(seed = 20260101): GameState {
     gear,
     bag: [],
     stash: [],
-    road: null,
-    purseDay: {},
-    chestDay: {},
+    walk: null,
     skills: newSkillState(),
     healUp: null,
     junk: {},
@@ -124,12 +119,10 @@ export function newGame(seed = 20260101): GameState {
     activePreset: 0,
     collector: newCollector(),
     grants: newGrants(),
-    pedlar: { day: 0, kills: [], bought: 0 },
+    pedlar: { day: 0, minutes: [], bought: 0 },
     filter: newFilter(),
     travel: 'stay',
-    autoDissolveRarity: 'off',
-    huntOrder: {},
-    zoneFocus: {},
+    autoDissolveLevel: 0,
     goal: newGoal(),
     curses: newCurses(),
     mobStatus: newMobStatusStore(),
@@ -156,16 +149,18 @@ export function newGame(seed = 20260101): GameState {
     clockSec: 0,
     lastSavedAt: Date.now(),
   };
-  // minute one's instruction is the data's own first task (`engine.json` opening.first_rule)
+  // minute one's instruction is the data's own first task (`engine.json` opening.first_rule`): an
+  // Elite hunt in the opening zone, sized and paid by the board's own rule so nothing is typed twice
   const first = E.opening.first_rule;
   const zone = first ? (E.opening.settlement_zone as number) : 1;
+  const openingPay = taskReward('elite', 'low');
   s.town.tasks[0] = {
-    kind: 'hunt',
+    kind: 'elite',
     zone,
-    n: huntN(zone),
+    n: TOWN.task_sizing.elite_n,
     progress: 0,
-    stone: 'reroll_value',
-    count: eng.taskPayout('low', TOWN.task_sizing.reward_k_per_band.low).reroll_value,
+    stone: openingPay.stone as any,
+    count: openingPay.count,
     claimed: false,
     offeredAt: 0,
   };
@@ -179,7 +174,10 @@ export function newGame(seed = 20260101): GameState {
 const _speciesByZone = new Map<number, any[]>();
 const speciesInZone = (zoneId: number): any[] => {
   let pool = _speciesByZone.get(zoneId);
-  if (!pool) { pool = E.mob.species.filter((sp: any) => sp.zones.includes(zoneId)); _speciesByZone.set(zoneId, pool); }
+  if (!pool) {
+    pool = E.mob.species.filter((sp: any) => sp.zones.includes(zoneId)) as any[];
+    _speciesByZone.set(zoneId, pool);
+  }
   return pool;
 };
 const _bossByZone = new Map<number, any>();
@@ -198,16 +196,14 @@ function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | '
   return (((E.mob as any).variant_drops || {})[mob.variant]) || null;
 }
 
-function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, focus?: string): Mob {
+function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string): Mob {
   const z = eng.zoneById(zoneId);
   const zonePool = speciesInZone(zoneId);
   // a sub-zone is what a spawn table rolls against: it names its own race pair and one Element from the
   // zone's set, and the cast a normal or Elite spawn draws from is that pair (the boss is zone-level).
-  // `focus` is the player's chosen hunting ground (`zoneFocus`); with none set the zone's own cast rolls.
+  // The zone's own cast rolls, evenly — there is no per-zone hunting ground any more.
   const subs = z.subzones || [];
-  const sub = kind !== 'boss' && subs.length
-    ? (subs.find((x: any) => x.name === focus) || subs[Math.floor(rng() * subs.length)])
-    : null;
+  const sub = kind !== 'boss' && subs.length ? subs[Math.floor(rng() * subs.length)] : null;
   const speciesPool = sub ? zonePool.filter((sp: any) => sub.races.includes(sp.id)) : zonePool;
   let body = 'medium';
   let species = pick(rng, speciesPool);
@@ -313,11 +309,11 @@ function dissolve(s: GameState): void {
 }
 
 /**
- * One gear roll through the bag filter. A mob kill, a Road chest and any future item source use this
- * same path, so "what the filter keeps" can never mean two different things.
+ * One gear roll through the bag filter. A mob kill — on foot or in an ambush — and any future item
+ * source use this same path, so "what the filter keeps" can never mean two different things.
  */
-function awardDrop(s: GameState, rng: () => number, band: string, q: number | undefined, weaponAspd: number): void {
-  const item = rollDrop(rng, band, weaponAspd, q);
+function awardDrop(s: GameState, rng: () => number, band: string, ilvl: number, weaponAspd: number): void {
+  const item = rollDrop(rng, band, ilvl, weaponAspd);
   s.counters.drops++;
   // the bag filter keeps a drop only when it outscores the piece worn in that slot by more than
   // noise; anything else dissolves for 1 Reroll value stone, never for gold (loot.md §4)
@@ -344,11 +340,9 @@ function awardDrop(s: GameState, rng: () => number, band: string, q: number | un
     )
     : { keep: true, reason: 'filter off', score: loot.score({ ...item, q: item.q ?? 0 }) };
   const set = wants(s, item);
-  // a client auto-dissolve floor: stones only, never gold (the two mints are untouched by AGENT §5).
-  // A set-wanted or player-locked piece is spared; the collector sink below runs first.
-  const belowFloor = !!s.autoDissolveRarity && s.autoDissolveRarity !== 'off'
-    && !item.locked
-    && ['Common', 'Rare'].indexOf(item.rarity) <= ['Common', 'Rare'].indexOf(s.autoDissolveRarity);
+  // a client auto-dissolve floor, read on the item's own level: stones only, never gold (the two mints
+  // are untouched by AGENT §5). A set-wanted or player-locked piece is spared; the collector runs first.
+  const belowFloor = (s.autoDissolveLevel || 0) > 0 && !item.locked && item.ilvl < (s.autoDissolveLevel || 0);
   if (set) {
     // the Collector sink runs before the filter dissolves a piece the set wants
     if (s.bag.length < E.inventory.adventure_slots) {
@@ -364,7 +358,7 @@ function awardDrop(s: GameState, rng: () => number, band: string, q: number | un
     // the piece actually worn, so an idle character that never chooses keeps seeing keeps.
     if (s.bag.length < E.inventory.adventure_slots) {
       s.bag.unshift(item);
-      push(s, `Drop kept (${verdict.reason}): ${item.rarity} ${item.quality} ${item.tier} ${item.base} (${item.slot})`);
+      push(s, `Drop kept (${verdict.reason}): level ${item.ilvl} ${item.quality} ${item.tier} ${item.base} (${item.slot})`);
     } else if (verdict.reason === 'upgrade' && swapWeakestKept(s, item, verdict.score)) {
       // the bag keeps the best decision per slot instead of the first fifty arrivals: a piece that
       // beat the bar replaces the piece it beat, and the loser dissolves for its one stone. The
@@ -408,23 +402,23 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
       : `Skill drop: ${sm.byId[g.id].name} (${sm.byId[g.id].type})`);
   }
   // Mastery adds quantity the same way Lck does, and only a twelfth as strongly (equipment-weapon.md)
-  // offline results are AFK: same drops, quality limited to the zone floor, no boss income
-  const q = online ? undefined : eng.qualityIndexOf(eng.floorOf(band));
-  // Hunt Order: lean the three collectible streams toward a category by shifting probability mass
-  // between them, never raising the total, so drops/hr and the timeline are unmoved. The mob's own
-  // variant supplies the lean (`mob.variant_drops`) and the player's per-zone order overrides it;
-  // 'none' is the identity, so a variant marked 'none' behaves exactly as the balanced case.
+  // offline results are AFK: same drops, but the piece is rolled at the floor level of its band
+  const ilvl = online ? Math.max(1, Math.round(mob.level)) : eng.floorLevelOf(band);
+  // The variant's own lean tilts the three collectible streams toward a category by shifting probability
+  // mass between them, never raising the total, so drops/hr and the timeline stay unmoved
+  // (`loot.variant_lean` · `mob.variant_drops`). The variant row is the only author — there is no player
+  // control on top of it — and 'none' is the identity, so an Elite's or Boss's row behaves as balanced.
   const vdrop = variantDrop(mob);
-  const order = (s.huntOrder?.[mob.zone] || (vdrop ? vdrop.lean : 'none')) as 'none' | 'gear' | 'herb' | 'junk';
+  const order = (vdrop ? vdrop.lean : 'none') as 'none' | 'gear' | 'herb' | 'junk';
   const junkRows = Object.entries(E.junk.rarities as Record<string, any>);
   const pJunkBase = junkRows.reduce((a, [, r]: any) => a + r.drop_chance_per_kill, 0);
-  const hw = huntReweight({
+  const hw = leanReweight({
     gear: Math.min(1, eng.dropChance(band) * dropMultiplier(s)),
     herb: farm.herbChance(band),
     junk: pJunkBase,
-  }, order, E.loot.hunt_order.shift_pct);
+  }, order, E.loot.variant_lean.shift_pct);
   if (rng() < hw.gear) {
-    awardDrop(s, rng, band, q, c.weaponAspd);
+    awardDrop(s, rng, band, ilvl, c.weaponAspd);
   }
   const junkScale = pJunkBase > 0 ? hw.junk / pJunkBase : 1;
   // junk is kept and sold by hand at the Counterhand — it is a gold mint, not a gold drip. The item is
@@ -468,48 +462,20 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
 }
 
 /**
- * A Road encounter: the link's two zone casts supply the mobs, per `engine.json` `road`.
- * Online the roll uses the link's own terrain row; offline it uses the untilted base table, so an
- * away period can never be routed into the heaviest-ambush terrain and paid out at the tilted rate.
+ * An encounter on a block: a real mob group from the lower of the two zones the walk joins, at that
+ * zone's own group size and the ordinary drop roll. It pays exactly what a kill pays and nothing
+ * else — no purse, no chest, no Standing (`engine.json` road `encounter_rule`).
  */
-function spawnEncounter(s: GameState, trip: RoadTrip, rng: () => number, online: boolean, weaponAspd: number) {
-  const l = road.links[trip.linkIndex];
-  const kind = road.rollEncounter(rng, online ? l.terrain : null);
-  trip.kind = kind.id;
-  if (!kind.hasMobs) { resolveEncounter(s, trip, rng, weaponAspd); return; }
-  const zones = encounterZones(trip.linkIndex);
-  const sizes = encounterSizes(kind.id, rng);
+function spawnWalkEncounter(s: GameState, rng: () => number) {
+  const walk = s.walk!;
+  const { lower } = walkZones(walk.from, walk.to);
+  const z = eng.zoneById(lower);
+  const [lo, hi] = (z.group as string).split('-').map(Number);
+  const size = Math.max(1, Math.round(lo + rng() * ((hi || lo || 1) - (lo || 1))));
   const mobs: any[] = [];
-  for (let i = 0; i < sizes.small; i++) mobs.push(spawnMob(rng, zones.lower, s.player.level, 'normal', 'small'));
-  for (let i = 0; i < sizes.large; i++) mobs.push(spawnMob(rng, zones.higher, s.player.level, 'normal', 'large'));
+  for (let i = 0; i < size; i++) mobs.push(spawnMob(rng, lower, s.player.level, 'normal'));
   s.group = mobs;
-  s.spawnIn = road.blockSec;
-  push(s, `Block ${trip.blockIndex} of ${trip.blocks} · ${kind.id} on ${l.text} (${l.terrain})`);
-}
-
-function resolveEncounter(s: GameState, trip: RoadTrip, rng: () => number, weaponAspd: number) {
-  const kind = trip.kind;
-  trip.kind = null;
-  trip.encountersLeft = Math.max(0, trip.encountersLeft - 1);
-  const link = road.links[trip.linkIndex];
-  if (kind === 'ambush') {
-    const gold = payPurse(s);
-    push(s, gold ? `Ambush cleared · purse +${gold} gold` : 'Ambush cleared · this link already paid its purse today');
-  } else if (kind === 'caravan') {
-    push(s, 'Caravan beaten · Standing only, no gold');
-  } else if (kind === 'chest') {
-    if (!claimChest(s)) {
-      push(s, 'A chest already opened on this link today');
-    } else {
-      // the chest pays Item quality up to the DESTINATION zone's ceiling, and pays no crafting stones
-      const dest = settlementZone(trip.settlementTo) ?? s.zone;
-      const band = BAND_OF_QUALITY(eng.zoneById(dest).quality);
-      awardDrop(s, rng, band, eng.qualityIndexOf(eng.ceilingOf(band)), weaponAspd);
-      push(s, `Chest opened on ${link.text} · one Item at the ${band} ceiling, no stones`);
-    }
-  } else {
-    push(s, 'A pedlar offers information for gold · nothing bought');
-  }
+  push(s, `Ambushed on block ${walk.blocksWalked + 1} of ${walk.blocksTotal} · ${size} in ${z.name}`);
 }
 
 export function push(s: GameState, text: string) {
@@ -548,16 +514,16 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
   s.player.es = Math.min(Math.max(0, s.player.es), c.es);
   const day = Math.floor(s.clockSec / 86400);
-  if (s.pedlar.day !== day || !s.pedlar.kills.length) {
+  if (s.pedlar.day !== day || !s.pedlar.minutes.length) {
     s.pedlar = {
       day,
       bought: 0,
-      kills: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarKills(rng())),
+      minutes: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarPrice(rng())),
     };
   }
   // the owner's travel switch: 'forward' climbs through settlements already opened, using the
-  // zone's own level band as the only condition (`mob.zones.levels`) — no new number, and it is not
-  // Road travel, so it does not touch the Road being opt-in and online only.
+  // zone's own level band as the only condition (`mob.zones.levels`) — no new number, and it never
+  // walks: reaching a settlement the player has not opened is a walk, and a walk is online only.
   // Forward Mode is a chapter ladder (owner ask): win the zone (its band is behind you) and the walk
   // moves on; a Push sends the character back to the last zone it held (below) and this same rule
   // refuses to re-enter the zone it was chased out of until a level has been gained against it.
@@ -595,76 +561,46 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     return s;
   }
 
-  // While a leg runs, no ambient zone group appears: the Road replaces zone farming for its minutes.
-  if (s.road) {
-    const trip = s.road;
-    // the walk itself: one block at a time, and the encounter rides on the way INTO the block that
-    // ends each gap (`engine.json` road.walk). The clock does not pause for a fight — a leg is its
-    // own blocks at `block_sec`, so the same length and the same encounter count as before it was
-    // counted in blocks. Only the arrival waits, so the character is never dropped mid-fight.
-    trip.secLeft--;
-    const entered = trip.secLeft <= 0;
-    if (entered) { trip.blockIndex++; trip.secLeft = road.blockSec; }
-    if (!s.group.length) {
-      if (trip.kind) resolveEncounter(s, trip, rng, c.weaponAspd);
-      if (trip.blockIndex >= trip.blocks) {
-        openArrival(s, trip);
-        grantTripStanding(s, trip);
-        const link = road.links[trip.linkIndex];
-        if (trip.loop || trip.route.length > 1) {
-          const wraps = trip.loop && (trip.legIndex + 1) % trip.route.length === 0;
-          if (!online && wraps) {
-            // a closed client plays out the rest of the lap, then parks the character and lets
-            // ordinary offline idling resume (`save.md` · section 5). A plotted route is never
-            // resolved while away: it is dropped and the character stands where the walk stopped.
-            push(s, `Circuit lap done in the away period · parked at ${s.town.waypoint}`);
-            endTrip(s, 'complete');
-          } else {
-            const cleanBefore = s.counters.cleanLaps || 0;
-            // a plotted route ends where it was aimed, so the last leg returns 'done' and the walk
-            // is over; a Circuit always has a next leg and wraps instead
-            if (advanceLeg(s, trip) === 'done') {
-              push(s, `Route arrived · ${trip.blocks} blocks of ${link.text} walked block by block`);
-              endTrip(s, 'complete');
-            } else {
-              push(s, `Leg done (${link.text}) · on to ${road.links[s.road!.linkIndex].text}`);
-              // the Circuit objective: a lap closed with no Push is a completion, logged and never
-              // paid — the Road's gold is capped by G6-G9 and a stone would be a new source
-              if ((s.counters.cleanLaps || 0) > cleanBefore) push(s, `Circuit lap complete with no Push — clean lap ${s.counters.cleanLaps}`);
-            }
-          }
-        } else {
-          push(s, trip.route.length > 1
-            ? `Route arrived · ${road.encountersFor(trip.linkIndex)} encounters over ${trip.blocks} blocks on ${link.text}`
-            : `Road trip over · ${road.encountersFor(trip.linkIndex)} encounters in ${link.trip_min} min of walking`);
-          endTrip(s, 'complete');
+  // While walking, the character crosses one block per `block_sec`. No ambient zone group appears:
+  // a walk is its own minute-to-minute activity — and it is ONLINE only, so an away period never
+  // crosses a block and never opens a Waypoint it did not earn online.
+  if (s.walk) {
+    const walk = s.walk;
+    walk.secLeft--;
+    if (online && walk.secLeft <= 0 && !s.group.length) {
+      // the block is crossed: one encounter chance, then the next block starts
+      walk.blocksLeft--;
+      walk.blocksWalked++;
+      walk.secLeft = road.blockSec;
+      if (walk.blocksLeft <= 0) {
+        const arrived = arrive(s, walk);
+        if (arrived) {
+          push(s, arrived.first
+            ? `Arrived on foot at ${arrived.name} — its Waypoint is open, and it costs nothing`
+            : `Arrived at ${arrived.name}`);
         }
-      } else if (!trip.kind && trip.encountersLeft > 0 && entered
-        && trip.blockIndex % road.encounterGapBlocks === 0) {
-        spawnEncounter(s, trip, rng, online, c.weaponAspd);
+      } else if (road.rollEncounter(rng)) {
+        spawnWalkEncounter(s, rng);
       }
     }
   }
 
-const band = BAND_OF_QUALITY(eng.zoneById(s.zone).quality);
-    const [loGroup, hiGroup] = (eng.zoneById(s.zone).group as string).split('-').map(Number);
-    const groupSize = intBetween(rng, loGroup || 1, hiGroup || loGroup || 1);
-    if (!s.group.length && !s.road) s.spawnIn--;
-  if (!s.group.length && !s.road && s.spawnIn <= 0) {
+  const band = BAND_OF_QUALITY(eng.zoneById(s.zone).quality);
+  const [loGroup, hiGroup] = (eng.zoneById(s.zone).group as string).split('-').map(Number);
+  const groupSize = intBetween(rng, loGroup || 1, hiGroup || loGroup || 1);
+  if (!s.group.length && !s.walk) s.spawnIn--;
+  if (!s.group.length && !s.walk && s.spawnIn <= 0) {
     const wantElite = rng() < L.elite_spawn_chance;
     // the boss clock is a stored due time, per character, and it does not accrue while away
     // (save.md · combat.md §7). A modulo would let a busy tick skip a spawn and hand the next
     // one out early.
     if (online && !s.bossDueAt) s.bossDueAt = s.clockSec + BOSS_EVERY_SEC;
     const wantBoss = online && s.bossDueAt !== undefined && s.clockSec >= s.bossDueAt;
-    // the player's hunting ground for this zone rides every spawn, so a chosen sub-zone is the cast
-    // (race pair + Element) that actually spawns; Elite and Boss ignore it, being zone-level
-    const focus = s.zoneFocus?.[s.zone];
     s.group = wantBoss
       ? [spawnMob(rng, s.zone, s.player.level, 'boss')]
       : wantElite
-        ? [spawnMob(rng, s.zone, s.player.level, 'elite', undefined, focus)]
-        : Array.from({ length: groupSize }, () => spawnMob(rng, s.zone, s.player.level, 'normal', undefined, focus));
+        ? [spawnMob(rng, s.zone, s.player.level, 'elite')]
+        : Array.from({ length: groupSize }, () => spawnMob(rng, s.zone, s.player.level, 'normal'));
     // the queue is front line first, so a reach-1 attack always has the front slot (combat.md §2b)
     s.group.sort((m) => (m.line === 'front' ? -1 : 1));
     s.spawnIn = L.group_spawn_sec;
@@ -860,35 +796,19 @@ const band = BAND_OF_QUALITY(eng.zoneById(s.zone).quality);
     s.campSec = Math.max(1, Math.ceil(c.maxHp / (c.hpRegen * 8)));
     s.counters.pushes++;
     s.group = [];
-    // a Push on a Road trip is the Road's own business (forfeit or skip the leg), so the Forward
-    // Mode zone ladder below stands down while one is running — the two travel systems stay apart
-    const onRoad = !!s.road;
+    // a Push on a walk is the ordinary Push: the walk keeps its blocks and the character walks back
+    // in on the block it was ambushed on, so the Forward Mode ladder below stands down while one runs
+    const walking = !!s.walk;
     // a Push returns the main preset, but cooldowns already counting keep counting (§rule 12)
     if (switchPreset(s, sm.mainPreset)) push(s, `Back on the ${s.presets[sm.mainPreset].name} preset · running cooldowns kept`);
-    if (s.road) {
-      const trip = s.road;
-      // a Push skips the rest of the block chain it is on instead of ending the walk (section 5);
-      // ending it here is what would let a repeated Push loop forever. A one-off trip forfeits, and
-      // so does the last leg of a plotted route that has nowhere left to go.
-      if (trip.loop || trip.route.length > 1) {
-        if (skipLeg(s, trip) === 'forfeit') {
-          push(s, `Trip forfeit · the purse is lost and ${E.road.forfeit_kills} kills of Standing are given up`);
-          endTrip(s, 'forfeit');
-        } else {
-          push(s, 'Push on the Road · the rest of this leg is skipped, the walk carries on');
-        }
-      } else {
-        push(s, `Trip forfeit · the purse is lost and ${E.road.forfeit_kills} kills of Standing are given up`);
-        endTrip(s, 'forfeit');
-      }
-      // the camp branch returns before the walk, so the block clock is already held still here; the
-      // group is cleared above, and a walk that survived is picked up again when the camp ends
+    if (s.walk) {
+      push(s, `Pushed on the walk · the walk keeps its ${s.walk.blocksLeft} block${s.walk.blocksLeft === 1 ? '' : 's'} and resumes from this one`);
     }
     push(s, `Pushed — ${s.campSec} sec at camp (${eng.fmt(c.maxHp)} HP ÷ ${eng.fmt(c.hpRegen * 8)}/sec)`);
     // Forward Mode's fallback: a Push in a zone above the floor means this chapter is not survivable
     // yet, so the walk drops back to the last zone held and refuses to climb back until one level is
     // gained (owner ask). No new number: the gate is a level, the zone is `forwardSafe`.
-    if (!onRoad && s.travel === 'forward' && s.forwardSafe != null && s.forwardSafe < s.zone) {
+    if (!walking && s.travel === 'forward' && s.forwardSafe != null && s.forwardSafe < s.zone) {
       const from = eng.zoneById(s.zone);
       const back = eng.zoneById(s.forwardSafe);
       s.forwardBlockedZone = s.zone;
@@ -918,8 +838,7 @@ function clampPools(s: GameState): void {
 
 /** Offline catch-up: run the same tick over the elapsed seconds, capped by the save rule. */
 function catchUpPlan(elapsedSec: number) {
-  // the Road now runs while away: a Circuit plays out the rest of its lap on the untilted base
-  // table and parks the character, which is why an away period no longer ends a trip 
+  // an away period never walks: a walk is online only, so the catch-up never crosses a block
   const cap = E.inventory.offline_cap_hr * 3600;
   const secs = Math.max(0, Math.min(Math.floor(elapsedSec), cap));
   return { secs, capped: elapsedSec > cap };

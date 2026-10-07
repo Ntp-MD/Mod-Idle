@@ -16,7 +16,7 @@ export function poolGear(): (Item | null)[] {
   gear[0] = {
     slot: 'helmet',
     base: '',
-    rarity: 'Common',
+    ilvl: 1,
     quality: 'low',
     tier: 'T3',
     q: 0,
@@ -61,7 +61,7 @@ export function ceilingGear(): (Item | null)[] {
     gear[i] = {
       slot,
       base: weapon ? weapon.name : (base?.name || ''),
-      rarity: 'Rare',
+      ilvl: 61,
       quality: E.mob.zones[E.mob.zones.length - 1].quality,
       tier: 'T3',
       q: 2,

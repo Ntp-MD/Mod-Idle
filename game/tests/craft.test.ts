@@ -12,7 +12,7 @@ const craft = createCraft(E, loot);
 // `rollDrop` always stamps the quality band (`sim/drop.ts`), so a rolled piece carries a `q` even
 // though `Item.q` is optional for hand-built fixtures elsewhere.
 function piece(seed = 1, band = 'low'): Item & { q: number } {
-  return rollDrop(mulberry32(seed), band, 1.2) as Item & { q: number };
+  return rollDrop(mulberry32(seed), band, band === 'low' ? 1 : band === 'mid' ? 31 : 61) as Item & { q: number };
 }
 
 type CraftResult = { ok: boolean; why?: string; item?: any; changed?: any };
@@ -39,7 +39,7 @@ describe('Reroll', () => {
   it('never rolls below the value it already holds, and stays inside the same Tier', () => {
     const item = piece(3);
     const line = item.lines[craft.UNTOUCHABLE];
-    const [lo, hi] = loot.rangeOf(line.id, item.q, line.slice);
+    const [lo, hi] = loot.rangeOf(line.id, item.ilvl, item.q, line.slice);
     let current = item;
     for (let s = 0; s < 200; s++) {
       const r = made(craft.reroll(current, craft.UNTOUCHABLE, mulberry32(s)));
@@ -70,9 +70,9 @@ describe('Refine and Randomize', () => {
     // `perfect_dodge_pct` one slice per Item quality band, so no roll can put them above slice 0.
     // Refine reads the slot's own slice count, so the fixture must stand a line that publishes them.
     const rolled = piece(4);
-    const slot = rolled.lines.findIndex((l, i) => i >= craft.UNTOUCHABLE && loot.sliceCount(l.id, rolled.q) >= 2);
+    const slot = rolled.lines.findIndex((l, i) => i >= craft.UNTOUCHABLE && loot.sliceCount() >= 2);
     expect(slot).toBeGreaterThanOrEqual(craft.UNTOUCHABLE);
-    const atWorst = (lines: Item['lines']) => lines.map((l) => ({ ...l, slice: Math.max(0, loot.sliceCount(l.id, rolled.q) - 1) }));
+    const atWorst = (lines: Item['lines']) => lines.map((l) => ({ ...l, slice: Math.max(0, loot.sliceCount() - 1) }));
     const item = { ...rolled, lines: atWorst(rolled.lines) };
     const r = made(craft.refine(item, slot, mulberry32(1)));
     expect(r.ok).toBe(true);
@@ -91,13 +91,13 @@ describe('Refine and Randomize', () => {
 });
 
 describe('Ascend', () => {
-  it('moves the whole piece one quality step and carries every line into the next band', () => {
+  it('moves the whole piece one band up and carries every line into the next window', () => {
     const item = piece(6);
     const r = made(craft.ascend(item, mulberry32(2)));
     expect(r.ok).toBe(true);
     expect(r.item.q).toBe(item.q + 1);
     for (const line of r.item.lines) {
-      const [lo, hi] = loot.rangeOf(line.id, r.item.q, line.slice);
+      const [lo, hi] = loot.rangeOf(line.id, r.item.ilvl, r.item.q, line.slice);
       expect(line.value).toBeGreaterThanOrEqual(lo);
       expect(line.value).toBeLessThanOrEqual(hi);
     }
@@ -110,7 +110,7 @@ describe('Ascend', () => {
     const three = refused(craft.ascend(two.item, mulberry32(1)));
     expect(two.item.q).toBe(one.item.q + 1);
     expect(three.ok).toBe(false);
-    expect(three.why).toMatch(/already high/);
+    expect(three.why).toMatch(/already the top band/);
   });
 });
 
@@ -150,7 +150,7 @@ describe('Add mod stone', () => {
   };
 
   it('costs 1 stone then 2, and stops at the Rarity crafted max', () => {
-    let item = { ...piece(21), rarity: 'Rare', lines: piece(21).lines.slice(0, 3) };
+    let item = { ...piece(21), ilvl: 61, lines: piece(21).lines.slice(0, 3) };
     expect(craft.costOf('add', item)).toEqual({ add: 1 });
     const one = made(craft.add(item, poolFor(item), mulberry32(1)));
     expect(one.ok).toBe(true);
@@ -166,7 +166,7 @@ describe('Add mod stone', () => {
   });
 
   it('never repeats a line the piece already carries', () => {
-    const item = { ...piece(22), rarity: 'Rare', lines: [{ id: 'stat_mod_flat', value: 10, slice: 2 }] };
+    const item = { ...piece(22), ilvl: 61, lines: [{ id: 'stat_mod_flat', value: 10, slice: 2 }] };
     const seen = new Set<string>();
     for (let s = 0; s < 40; s++) {
       const r = craft.add(item, ['stat_mod_flat', 'max_hp_flat', 'armour_flat'], mulberry32(s));
@@ -177,8 +177,8 @@ describe('Add mod stone', () => {
     expect(seen.size).toBeGreaterThan(0);
   });
 
-  it('a Common stops at the same crafted ceiling and takes at most two Add stones', () => {
-    const atCeiling = refused(craft.add({ ...piece(23), rarity: 'Common', lines: [
+  it('a piece stops at the crafted ceiling and takes at most two Add stones', () => {
+    const atCeiling = refused(craft.add({ ...piece(23), ilvl: 1, lines: [
       { id: 'physical_power_flat', value: 70, slice: 2 }, { id: 'attack_speed', value: 20, slice: 2 },
       { id: 'max_hp_flat', value: 40, slice: 2 }, { id: 'armour_flat', value: 12, slice: 2 },
       { id: 'evasion_flat', value: 10, slice: 2 }, { id: 'stat_mod_flat', value: 9, slice: 2 },
@@ -186,7 +186,7 @@ describe('Add mod stone', () => {
     ] }, ['elemental_power_flat'], mulberry32(1)));
     expect(atCeiling.ok).toBe(false);
     expect(String(atCeiling.why)).toMatch(/stops at 7 Mods/);
-    const base = { ...piece(23), rarity: 'Common', lines: [{ id: 'stat_mod_flat', value: 9, slice: 2 }] };
+    const base = { ...piece(23), ilvl: 1, lines: [{ id: 'stat_mod_flat', value: 9, slice: 2 }] };
     const first = made(craft.add(base, ['max_hp_flat', 'armour_flat'], mulberry32(1)));
     expect(first.ok).toBe(true);
     const second = made(craft.add(first.item, ['max_hp_flat', 'armour_flat'], mulberry32(2)));
@@ -195,7 +195,7 @@ describe('Add mod stone', () => {
     expect(third.ok).toBe(false);
     expect(String(third.why)).toMatch(/2 Add stones/);
     // the stone count is the cap, not the line count — the piece still has room to the ceiling
-    expect(second.item.lines.length).toBeLessThan(E.rarity.Common.crafted_max);
+    expect(second.item.lines.length).toBeLessThan(E.item_level.crafted_max);
   });
 
   // Stat Mod % was retired with Core Stat %, so `stat_mod_flat` is the only Stat Mod line a
@@ -206,7 +206,7 @@ describe('Add mod stone', () => {
       { id: 'max_hp_flat', value: 50, slice: 2 }, { id: 'armour_flat', value: 20, slice: 2 },
       { id: 'evasion_flat', value: 10, slice: 2 },
     ];
-    const item = { ...piece(24), rarity: 'Rare', q: 0, lines, mods_added: 0 };
+    const item = { ...piece(24), ilvl: 61, q: 0, lines, mods_added: 0 };
     let offered = 0;
     for (let s = 0; s < 25; s++) {
       const r = craft.add(item, ['stat_mod_flat', 'cooldown_reduction'], mulberry32(s));
@@ -220,7 +220,7 @@ describe('Add mod stone', () => {
   it('the bench pays the stone and the client refuses without one', () => {
     const s = newGame(25);
     s.counters.stones.add = 0;
-    s.bag.unshift({ ...piece(26), rarity: 'Rare' });
+    s.bag.unshift({ ...piece(26), ilvl: 61 });
     expect(doCraft(s, 'bag', 0, 'add', 0, mulberry32(1)).ok).toBe(false);
     s.counters.stones.add = 1;
     const before = s.bag[0].lines.length;

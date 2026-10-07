@@ -17,7 +17,7 @@ const topOf = (id: string) => Number((MODS.mods.find((m: any) => m.id === id) ||
 
 const line = (id: string, value: number) => ({ id, value, slice: 1 } as any);
 const piece = (slot: string, lines: any[]): Item => ({
-  slot, base: 'plate', rarity: 'Rare', quality: 'high', tier: 'T1', q: 2, weight: 0, lines,
+  slot, base: 'plate', ilvl: 61, quality: 'high', tier: 'T1', q: 2, weight: 0, lines,
 } as Item);
 
 /** A sheet from nothing but the lines named, so each pair below differs by exactly one line. */

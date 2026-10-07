@@ -150,7 +150,7 @@ export function stunMob(rng: () => number, store: MobStatusStore, mobId: string,
 export function setStacks(
   store: MobStatusStore,
   mobId: string,
-  name: 'burn' | 'poison',
+  name: 'burn' | 'poison' | 'mark',
   stacks: number,
   alignedPerSec: number,
 ): number {
@@ -158,8 +158,9 @@ export function setStacks(
   m.alignedPerSec = Math.max(m.alignedPerSec, alignedPerSec);
   const cfg = S[name];
   const l = line(m, name);
-  l.stacks = Math.min(name === 'burn' ? cfg.stack_max : cfg.stack_max, l.stacks + stacks);
-  l.perSec = alignedPerSec * cfg.k_dps;
+  l.stacks = Math.min(cfg.stack_max, l.stacks + stacks);
+  // a status whose own row carries no DoT coefficient (a mark) adds no per-sec damage of its own
+  l.perSec = alignedPerSec * ((cfg as any).k_dps ?? 0);
   if (name === 'burn') l.secLeft = cfg.time_sec;
   return l.stacks;
 }

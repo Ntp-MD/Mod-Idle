@@ -6,7 +6,7 @@ const C = E.craft;
 const bench: any = craft;
 
 const piece = (over: any = {}) => ({
-  slot: 'helmet', base: 'coif', rarity: 'Common', quality: 'low', tier: 'T3', q: 0,
+  slot: 'helmet', base: 'coif', ilvl: 1, quality: 'low', tier: 'T3', q: 0,
   lines: [{ id: 'armour_flat', value: 20, slice: 2 }], ...over,
 });
 /** A rng pinned to a fixed sequence so every branch of the ladder is reachable. */

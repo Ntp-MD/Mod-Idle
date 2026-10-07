@@ -2,9 +2,9 @@ import { eng, E, TOWN } from '../engine/client';
 import type { GameState, TaskSlot, TownState } from './types';
 
 /**
- * The settlement layer. Every price here is "kills of full-sell income" converted through the shared
- * engine's `goldPerKill`, so a drop-rate change moves the stall prices in the client the same moment
- * it moves them in `towns-stalls.md` (`economy.md` · checks.md T2-T7).
+ * The settlement layer. Every price here is "minutes of full-sell income" converted through the
+ * shared engine's `goldPerMinute`, so a drop-rate change moves the stall prices in the client the
+ * same moment it moves them in `towns-stalls.md` (`economy.md` · checks.md T2-T7).
  *
  * Gold buys space, time, information and appearance only — never gear, Mods, potions or stones
  * (`AGENT.md` §5), and the purchase list is filtered to the kinds `town.json` `invariants` allows.
@@ -28,31 +28,28 @@ export const stockOf = (settlementId: string) =>
 
 export const startSettlement = () => (TOWN.settlements.find((s: any) => s.start) || TOWN.settlements[0]).id;
 
-/** The `k` a row charges at this settlement, honouring the teaching discount where one exists. */
-export function priceKills(row: any, settlementId: string, state?: GameState): number {
+/** The `m` a row charges at this settlement, honouring the teaching discount where one exists. */
+export function priceMinutes(row: any, settlementId: string, state?: GameState): number {
   const s = settlementById(settlementId);
-  if (row.discount && row.discount.settlement === s.id) return row.discount.k;
+  if (row.discount && row.discount.settlement === s.id) return row.discount.m;
   // the pedlar's stock is a fresh roll of three slots each real day, priced inside its band
-  if (row.id === 'pedlar_rotation' && state?.pedlar?.kills?.length) {
-    return state.pedlar.kills[Math.min(state.pedlar.bought, state.pedlar.kills.length - 1)];
+  if (row.id === 'pedlar_rotation' && state?.pedlar?.minutes?.length) {
+    return state.pedlar.minutes[Math.min(state.pedlar.bought, state.pedlar.minutes.length - 1)];
   }
-  const band = row.charge_band || s.band;
-  if (row.k != null) return row.k;
-  // a per-destination or per-band line carries a kill ladder, one per band
-  return row.k_by_band ? row.k_by_band[band] : row.k_min;
+  return row.m != null ? row.m : row.m_min;
 }
 
-/** Gold = kills × that band's gold per kill (one kill's full-sell junk income). */
+/** Gold = minutes of that band's full-sell junk income. */
 export function priceGold(row: any, settlementId: string, state?: GameState): number {
   const s = settlementById(settlementId);
   const band = row.charge_band || s.band;
-  return Math.round(priceKills(row, settlementId, state) * eng.goldPerKill(band) * 100) / 100;
+  return Math.round(priceMinutes(row, settlementId, state) * eng.goldPerMinute(band) * 100) / 100;
 }
 
 export function newTown(): TownState {
   const start = startSettlement();
   return {
-    visited: [start], owned: [], waypoint: start, linksBought: 0,
+    visited: [start], owned: [], waypoint: start,
     tasks: new Array(TS.slots).fill(null), refillAt: new Array(TS.slots).fill(0),
     skipsToday: 0, skipDay: 0,
   };
@@ -73,14 +70,10 @@ export function standingTier(state: GameState, settlementId: string): number {
   return tier;
 }
 
+/** A Waypoint exists for every settlement walked to on foot, once, and it never costs gold. */
 export function canTravel(state: GameState, settlementId: string): boolean {
-  if (state.town.visited.includes(settlementId)) return true;
-  if (settlementId === state.town.waypoint) return true;
-  return state.town.owned.includes('road_link');
+  return state.town.visited.includes(settlementId);
 }
-
-/** The road is bounded: 8 links exist, one per settlement beyond the free start (`one_time.road_link`). */
-export const ROAD_LINKS = TOWN.settlements.length - 1;
 
 export interface BuyResult { ok: boolean; why?: string; row?: any; gold?: number }
 
@@ -114,10 +107,8 @@ export function buy(state: GameState, settlementId: string, rowId: string): BuyR
   const row = check.row;
   state.counters.gold = Math.round((state.counters.gold - (check.gold || 0)) * 100) / 100;
   state.town.owned.push(rowId);
-  if (rowId === 'road_link') state.town.linksBought++;
   if (rowId === 'skip_token') state.town.skipsToday++;
   if (rowId === 'pedlar_rotation' && state.pedlar) state.pedlar.bought++;
-  if (row.kind === 'time' && rowId.startsWith('waypoint_reanchor')) state.town.waypoint = settlementId;
   return check;
 }
 
@@ -138,28 +129,21 @@ export function sellJunk(state: GameState): { pieces: number; gold: number } {
   return { pieces, gold };
 }
 
-const groupUpper = (zone: number) => Number(String(eng.zoneById(zone).group).split('-')[1]) || 1;
-
-/** N for a Hunt: the opening task's 5, scaled by the zone's own group size (`task_sizing`). */
-export function huntN(zone: number): number {
-  return Math.max(1, Math.round(TS.hunt_n_anchor * groupUpper(zone) / 2));
-}
-
 export function taskReward(kind: string, band: string): { stone: string; count: number } {
-  const pay = eng.taskPayout(band, TS.reward_k_per_band[band]);
+  const pay = eng.taskPayout(band, TS.reward_minutes_of_band_income);
   if (kind === 'elite') return { stone: 'tier', count: pay.tier };
-  if (kind === 'boss') return { stone: 'remove', count: TS.boss_reward.remove };
-  return { stone: 'reroll_value', count: pay.reroll_value };
+  return { stone: 'remove', count: TS.boss_reward.remove };
 }
 
 /** The board offers tasks only from zones at or below where the player is fighting (`tasks.md`). */
 export function rollTask(rng: () => number, state: GameState): TaskSlot {
   const maxZone = Math.max(1, Math.min(eng.ZONES.length, state.zone));
   const zone = 1 + Math.floor(rng() * maxZone);
-  const roll = rng();
-  const kind = roll < 0.6 ? 'hunt' : roll < 0.9 ? 'elite' : 'boss';
+  // the board has two kinds: an Elite hunt (the old third kind, the plain kill-count task, is gone) and a
+  // Boss hunt. They keep the 3:1 weight they always had against each other.
+  const kind = rng() < 0.75 ? 'elite' : 'boss';
   const band = eng.zoneById(zone).quality.startsWith('high') ? 'high' : eng.zoneById(zone).quality.startsWith('mid') ? 'mid' : 'low';
-  const n = kind === 'hunt' ? huntN(zone) : kind === 'elite' ? TS.elite_n : 1;
+  const n = kind === 'elite' ? TS.elite_n : 1;
   const reward = taskReward(kind, band);
   return { kind, zone, n, progress: 0, stone: reward.stone as any, count: reward.count, claimed: false, offeredAt: state.clockSec };
 }
@@ -228,8 +212,7 @@ export function progressTasks(state: GameState, mobKind: string, zone: number) {
     if (!task || task.claimed || task.zone !== zone) continue;
     const isElite = mobKind === 'Elite';
     const isBoss = mobKind.startsWith('Boss');
-    if (task.kind === 'hunt' && !isElite && !isBoss) task.progress = Math.min(task.n, task.progress + 1);
-    else if (task.kind === 'elite' && isElite) task.progress = Math.min(task.n, task.progress + 1);
+    if (task.kind === 'elite' && isElite) task.progress = Math.min(task.n, task.progress + 1);
     else if (task.kind === 'boss' && isBoss) task.progress = Math.min(task.n, task.progress + 1);
   }
 }

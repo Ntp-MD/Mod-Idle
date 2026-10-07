@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span><span class="chip ">rows <b>6</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span><span class="chip ">rows <b>6</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -83,15 +83,15 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h4>Collections</h4>
 <a href="data-town-npcs.html">NPC kinds (10)</a>
 <a href="data-town-settlements.html">Settlements (18)</a>
-<a href="data-town-one_time.html">One-time lines (17)</a>
-<a href="data-town-repeatable.html">Repeatable lines (9)</a>
-<a href="data-town-essentials.html">Essentials basket (5)</a>
+<a href="data-town-one_time.html">One-time lines (16)</a>
+<a href="data-town-repeatable.html">Repeatable lines (8)</a>
+<a href="data-town-essentials.html">Essentials basket (4)</a>
 <a href="data-town-collector_sets.html">Collector sets (3)</a>
 <a href="data-town-standing-tiers.html">Standing tiers (3)</a>
 <a href="data-town-standing.html">Standing rules (4)</a>
 <a href="data-town-base_bias.html" aria-current="page">Base bias (pending) (6)</a>
 <a href="data-town-pending.html">Pending numbers (2)</a>
-<a href="data-town-invariants.html">Invariants (guards) (10)</a>
+<a href="data-town-invariants.html">Invariants (guards) (8)</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
 <a href="doc-DECISIONS.html">DECISIONS.md</a>
@@ -147,7 +147,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>Base bias (pending)</h1>
 <dl class="kv"><dt>path</dt><dd><code>tools/data/town.json → base_bias</code></dd><dt>kind</dt><dd><code>constmap</code></dd><dt>rows</dt><dd>6</dd><dt>written by</dt><dd><code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-towns.html">towns.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
-<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>status</code></td><td>Status</td><td><code>decided</code></td><td><a href="rec-town-base_bias-status.html">edit</a></td></tr><tr><td><code>decision</code></td><td>Decision</td><td><code>ship even-weighted (checks.md T15)</code></td><td><a href="rec-town-base_bias-decision.html">edit</a></td></tr><tr><td><code>column_meaning</code></td><td>Column meaning</td><td><code>which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.</code></td><td><a href="rec-town-base_bias-column-meaning.html">edit</a></td></tr><tr><td><code>checks</code></td><td>Checks to close it</td><td><code>Ruled even-weighted: loot.md section 1 step 2 stays &quot;equal roll among all frames of that slot&quot; — no Base weight column is added, and the tools/loot.ts frame_weight path stays a what-if only. · The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable — even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises. · No build must travel for a frame: frames roll equally everywhere, so Base bias is never a progression gate and world.md &quot;unlock by level&quot; is untouched.</code></td><td><a href="rec-town-base_bias-checks.html">edit</a></td></tr><tr><td><code>forbidden_until_closed</code></td><td>Forbidden until closed</td><td><code>numeric per-settlement Base weights (ruled out, not merely pending) · any stock line that is the only source of a frame · any gold price that buys frame odds</code></td><td><a href="rec-town-base_bias-forbidden-until-closed.html">edit</a></td></tr><tr><td><code>closed_checks</code></td><td>Closed checks</td><td><code>Re-run the keep-rate simulation: tools/loot.ts measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) — the owner chose NOT to pay that cost and to ship even. · F3 drops per kill is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops per kill comes from base_drop_chance x Lck, so no weight can change drop count.</code></td><td><a href="rec-town-base_bias-closed-checks.html">edit</a></td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>key</th><th>label</th><th>value</th><th></th></tr></thead><tbody><tr><td><code>status</code></td><td>Status</td><td><code>decided</code></td><td><a href="rec-town-base_bias-status.html">edit</a></td></tr><tr><td><code>decision</code></td><td>Decision</td><td><code>ship even-weighted (checks.md T15)</code></td><td><a href="rec-town-base_bias-decision.html">edit</a></td></tr><tr><td><code>column_meaning</code></td><td>Column meaning</td><td><code>which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.</code></td><td><a href="rec-town-base_bias-column-meaning.html">edit</a></td></tr><tr><td><code>checks</code></td><td>Checks to close it</td><td><code>Ruled even-weighted: loot.md section 1 step 2 stays &quot;equal roll among all frames of that slot&quot; — no Base weight column is added, and the tools/loot.ts frame_weight path stays a what-if only. · The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable — even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises. · No build must travel for a frame: frames roll equally everywhere, so Base bias is never a progression gate and world.md &quot;unlock by level&quot; is untouched.</code></td><td><a href="rec-town-base_bias-checks.html">edit</a></td></tr><tr><td><code>forbidden_until_closed</code></td><td>Forbidden until closed</td><td><code>numeric per-settlement Base weights (ruled out, not merely pending) · any stock line that is the only source of a frame · any gold price that buys frame odds</code></td><td><a href="rec-town-base_bias-forbidden-until-closed.html">edit</a></td></tr><tr><td><code>closed_checks</code></td><td>Closed checks</td><td><code>Re-run the keep-rate simulation: tools/loot.ts measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) — the owner chose NOT to pay that cost and to ship even. · F3 drops/hour is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops/hour comes from base_drop_chance x Lck, so no weight can change drop count.</code></td><td><a href="rec-town-base_bias-closed-checks.html">edit</a></td></tr></tbody></table></div></section>
 
 <section><h2>Raw JSON of this collection</h2><pre class="code">{
   &quot;status&quot;: &quot;decided&quot;,
@@ -165,7 +165,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   ],
   &quot;closed_checks&quot;: [
     &quot;Re-run the keep-rate simulation: tools/loot.ts measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) — the owner chose NOT to pay that cost and to ship even.&quot;,
-    &quot;F3 drops per kill is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops per kill comes from base_drop_chance x Lck, so no weight can change drop count.&quot;
+    &quot;F3 drops/hour is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops/hour comes from base_drop_chance x Lck, so no weight can change drop count.&quot;
   ]
 }</pre><p><a href="../tools/data/town.json">tools/data/town.json</a> · <a href="edit.html">snapshots</a></p></section>
 </div>

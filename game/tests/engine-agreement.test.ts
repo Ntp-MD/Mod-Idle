@@ -30,21 +30,41 @@ describe('the opening character is the designed minute one', () => {
     expect(s.zone).toBe(E.opening.settlement_zone);
     expect(s.counters.gold).toBe(E.opening.gold);
     const c = buildCharacter(s.player.level, s.gear);
-    const item = openingGear()[0]!;
+    // the array is slot-ordered, so the worn set is read by slot, never by index
+    const piece = (slot: string) => s.gear.find((g) => g && g.slot === slot)!;
+    const item = piece('main hand');
     expect(c.phys).toBe(eng.physOf(eng.statAt(1), item.lines[0].value, 0, c.weaponAspd));
     expect(c.weaponAspd).toBe(1.2);
+  });
+
+  it('dresses the character in the whole set: one line per slot, no attack power, no tax', () => {
+    const s = newGame();
+    const worn = s.gear.filter(Boolean);
+    expect(worn.length).toBe(E.stat.item_slots); // every slot the data declares is filled
+    for (const item of worn) {
+      expect(item!.lines.length).toBe(1); // a hand-authored junk piece: its frame's Base Mod, nothing else
+      expect(item!.ilvl).toBe(E.opening.level);
+      if (item!.slot !== 'main hand') expect(item!.lines[0].extra).toBeUndefined();
+    }
+    const c = buildCharacter(s.player.level, s.gear);
+    expect(c.encumbrance).toBe(0); // the lightest frame of every slot fits under the weight_base line
+    // and nothing outside the main hand feeds the attack side the curve is priced against
+    expect(c.phys).toBeGreaterThan(0);
   });
 
   it('weighs minute one exactly the way gate OP6 weighs it', () => {
     const s = newGame();
     const c = buildCharacter(s.player.level, s.gear);
     const held = s.gear.find((g) => g && g.slot === 'main hand')!;
-    // the same three engine calls the cage makes — if the client and the cage ever disagree about the
-    // opening swing, this fails before a doc can print a speed the game cannot produce 
-    expect(c.weightUsed).toBe(eng.weaponWeightOf(BASES, held.base, held.slot));
+    const setWeight = s.gear.reduce((t, g) => t + (g?.weight || 0), 0);
+    // the same calls the cage makes — if the client and the cage ever disagree about the opening set,
+    // this fails before a doc can print a speed the game cannot produce
+    expect(c.weightUsed).toBe(setWeight);
+    expect(c.weightUsed).toBe(eng.weaponWeightOf(BASES, held.base, held.slot)
+      + s.gear.filter((g) => g && g.slot !== 'main hand').reduce((t, g) => t + (g!.weight || 0), 0));
     expect(c.weightCap).toBe(eng.weightCapacityOf(c.core.str));
     expect(c.encumbrance).toBe(eng.encumbranceOf(c.weightUsed, c.core.str));
-    expect(c.aspd).toBeCloseTo(eng.aspdOf(c.core.agi, c.weaponAspd, 0) * (1 - c.encumbrance), 8);
+    expect(c.aspd).toBeCloseTo(eng.aspdOf(c.core.agi, c.weaponAspd, c.lines.aspdPct) * (1 - c.encumbrance), 8);
     // eslint-disable-next-line no-console
     console.log(`minute one: ${c.weightUsed} weight on a ${c.weightCap} capacity (Str ${c.core.str})`
       + ` · tax ${(c.encumbrance * 100).toFixed(2)}% · ${c.aspd.toFixed(2)} aspd = ${c.hitsPerSec.toFixed(3)} hits/sec`

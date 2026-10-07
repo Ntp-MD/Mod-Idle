@@ -63,7 +63,7 @@ hit_chance = accuracy / (accuracy + evasion)
 
 Evasion is now the species Dex line (`stat_c × species.dex × K_EVASION 0.5 × body`), so hit chance answers *what* is being hit, not just the level. The reference mob is the **mean species vector on a Medium body** (49.1 evasion at level 190) — a real average of the 22 lineages, not an imaginary ×1.00 one. Easiest = Slime (Dex ×0.73 · 40) · hardest = Elf (Dex ×1.25 · 68).
 
-The reference is set on the mean so the anchor does not move: `stat_c × 0.5` at the roster mean is 49.1 evasion, against the retired `level × 1` curve of 190. The published hit chances therefore hold as they were — 81% with no Dex, 94.3% at the accuracy ceiling — and everything derived from them (the DPS anchor row in formula.md section 0, mob_HP, the E1-E5 hour checkpoints) is untouched. What changed is only *who* sits above and below the reference: the species spread runs 40-68 evasion, and a body class multiplies it again (Small ×1.1 · Large and Elite ×0.9).
+The reference is set on the mean so the anchor does not move: `stat_c × 0.5` at the roster mean is 49.1 evasion, against the retired `level × 1` curve of 190. The published hit chances therefore hold as they were — 81% with no Dex, 94.3% at the accuracy ceiling — and everything derived from them (the DPS anchor row in formula.md section 0, mob_HP, the E1-E5 kill checkpoints) is untouched. What changed is only *who* sits above and below the reference: the species spread runs 40-68 evasion, and a body class multiplies it again (Small ×1.1 · Large and Elite ×0.9).
 
 **Same line, pointed at the player** — mob accuracy against the player's own Evasion rating (`Dex × 0.5` + Gear Evasion flat 6-30):
 
@@ -92,7 +92,7 @@ drop_rate = (1 + lck * K_LCK_DROP) × (1 + mastery_collection/100)
   This number is tied to craft currency prices and boss skill chances (loot.md · crafting.md · economy.md all closed).
 - `mastery_collection` = number of weapon types with Mastery ≥ 10 → **+1% per type, max +11%** (equipment-weapon.md) · does not touch DPS at all, so it moves only item income, not power.
 - Lck affects drops, so Lck must not become the stat that is good at everything and outshines the rest — Lck gives crit, perfect dodge, and drops all three, so every K must stay low.
-  From the DPS table in section 0: moving 2 items from Str to Lck at the same Agi (Str 8 / Agi 4 → Str 6 / Agi 4 / Lck 2) drops DPS from 6,877 to **6,231 (−9.4%)** in exchange for crit 10.5% → 13.0% — at the retired 816 ceiling the same move cost 22% DPS. The ceiling drop made Lck roughly half as expensive, so the guard this rule was written to set up is held by the G8 ×3.15 junk-line bound (**X7**) instead of by the DPS penalty alone.
+  From the DPS table in section 0: moving 2 items from Str to Lck at the same Agi (Str 8 / Agi 4 → Str 6 / Agi 4 / Lck 2) drops DPS from 6,877 to **6,231 (−9.4%)** in exchange for crit 10.5% → 13.0% — at the retired 816 ceiling the same move cost 22% DPS. The ceiling drop made Lck roughly half as expensive, so the guard this rule was written to set up is held by the G8 ×3.11 junk-line bound (**X7**) instead of by the DPS penalty alone.
 
 # 11. Weight
 

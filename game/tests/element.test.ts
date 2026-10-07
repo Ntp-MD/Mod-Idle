@@ -17,7 +17,7 @@ const weaponWith = (element: string | null): (Item | null)[] => {
   const gear = emptyGear();
   const at = gear.findIndex((_, i) => i === 10); // main hand index in loot.SLOTS
   gear[at] = {
-    slot: 'main hand', base: 'one-handed sword', rarity: 'Common', quality: 'low', tier: 'T3',
+    slot: 'main hand', base: 'one-handed sword', ilvl: 1, quality: 'low', tier: 'T3',
     weaponAspd: 1.2, q: 0,
     lines: [{ id: 'elemental_power_flat', value: 40, slice: 0, element }],
   };
@@ -56,7 +56,7 @@ describe('a weapon carries the Element its own line stores', () => {
   it('counters each Element of one weapon separately, the PoE way', () => {
     const gear = emptyGear();
     gear[10] = {
-      slot: 'main hand', base: 'one-handed sword', rarity: 'Rare', quality: 'mid', tier: 'T2',
+      slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'mid', tier: 'T2',
       weaponAspd: 1.2, q: 1,
       lines: [
         { id: 'elemental_power_flat', value: 60, slice: 0, element: 'fire' },

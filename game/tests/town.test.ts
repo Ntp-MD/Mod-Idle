@@ -2,31 +2,30 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 import { eng, E, TOWN, loot } from '../src/engine/client';
 import {
-  rowById, priceGold, priceKills, stockOf, settlementById, sellJunk, canBuy, buy, huntN,
-  claimTask, newTown, standingShare, standingTier, canTravel, ROAD_LINKS,
+  rowById, priceGold, priceMinutes, stockOf, settlementById, sellJunk, canBuy, buy,
+  claimTask, newTown, standingShare, standingTier, canTravel, rollTask,
 } from '../src/sim/town';
+import { mulberry32 } from '../src/engine/client-helpers';
 import { newGame, tick } from '../src/sim/game';
 
 const require = createRequire(import.meta.url);
 const cage = require('../../tools/lib/engine.ts');
 
-describe('prices are kills of income, not typed gold', () => {
+describe('prices are minutes of income, not typed gold', () => {
   it('the client rate equals the cage rate', () => {
     for (const band of ['low', 'mid', 'high']) {
-      expect(eng.goldPerKill(band)).toBe(cage.goldPerKill(band));
+      expect(eng.goldPerMinute(band)).toBe(cage.goldPerMinute(band));
     }
   });
 
-  it('a Road link costs its kills at the destination band', () => {
-    const row = rowById('road_link');
-    const band = settlementById('millbrook').band;
-    expect(priceKills(row, 'millbrook')).toBe(row.k_by_band[band]);
-    expect(priceGold(row, 'millbrook')).toBeCloseTo(row.k_by_band[band] * eng.goldPerKill(band), 2);
+  it('carries no travel line at all — a walk is free and a Waypoint unlocks on foot', () => {
+    expect(rowById('road_link')).toBeUndefined();
+    expect([...TOWN.one_time, ...TOWN.repeatable].some((r) => /^(road|carriage|waypoint)/.test(r.id))).toBe(false);
   });
 
   it('Eastgate sells the first stash tab at the teaching price', () => {
-    expect(priceKills(rowById('stash_tab_1'), 'eastgate')).toBe(231.5);
-    expect(priceKills(rowById('stash_tab_1'), 'ashfall')).toBe(589);
+    expect(priceMinutes(rowById('stash_tab_1'), 'eastgate')).toBe(30);
+    expect(priceMinutes(rowById('stash_tab_1'), 'ashfall')).toBe(60);
   });
 });
 
@@ -50,7 +49,7 @@ describe('gold stays the convenience medium', () => {
     const r = sellJunk(s);
     // each item is priced at its own rarity, and the item's rarity is the variant row's own
     const rarityOf: Record<string, string> = {};
-    for (const row of Object.values(E.mob.variant_drops)) rarityOf[row.item] = row.rarity;
+    for (const row of Object.values(E.mob.variant_drops as Record<string, any>)) rarityOf[row.item] = row.rarity;
     let expectGold = 0;
     for (const [item, count] of Object.entries(s.junk)) expectGold += count * E.junk.rarities[rarityOf[item]].sell_gold;
     expect(r.gold).toBe(s.counters.gold - goldBefore + expectGold);
@@ -75,34 +74,49 @@ describe('gold stays the convenience medium', () => {
 });
 
 describe('the Guild board', () => {
-  it('minute one offers the hunt engine.json describes', () => {
+  it('minute one offers the Elite task engine.json describes, at the board\u2019s own sizing', () => {
     const s = newGame();
     const task = s.town.tasks[0]!;
-    expect(task.kind).toBe('hunt');
+    expect(task.kind).toBe('elite');
     expect(task.zone).toBe(E.opening.settlement_zone);
-    expect(task.n).toBe(5);
-    expect(huntN(1)).toBe(5);
+    expect(task.n).toBe(TOWN.task_sizing.elite_n);
   });
 
-  it('N scales with the zone group size and the payout is in stones', () => {
-    expect(huntN(9)).toBeGreaterThan(huntN(1));
+  it('the elite payout is in stones, sized off the band\u2019s own income', () => {
     const s = newGame();
     const task = s.town.tasks[0]!;
-    expect(task.stone).toBe('reroll_value');
-    expect(task.count).toBe(eng.taskPayout('low', TOWN.task_sizing.reward_k_per_band.low).reroll_value);
+    expect(task.stone).toBe('tier');
+    expect(task.count).toBe(eng.taskPayout('low', TOWN.task_sizing.reward_minutes_of_band_income).tier);
     expect(Number.isInteger(task.count)).toBe(true);
     task.progress = task.n;
     s.clockSec = 10;
     expect(claimTask(s, 0)).toBe(true);
-    expect(s.counters.stones.reroll_value).toBe(task.count);
+    expect(s.counters.stones.tier).toBe(task.count);
     expect(s.town.tasks[0]).toBe(null);
     expect(s.town.refillAt[0]).toBe(10 + TOWN.task_sizing.refill_sec);
   });
 
+  it('offers only Elite and Boss tasks, each priced by its own kind', () => {
+    const s = newGame(99);
+    const seen = new Set<string>();
+    for (let i = 0; i < 200; i++) {
+      const t = rollTask(mulberry32(i + 1), s);
+      seen.add(t.kind);
+      expect(['elite', 'boss']).toContain(t.kind);
+      expect(t.stone).toBe(t.kind === 'elite' ? 'tier' : 'remove');
+      expect(t.n).toBe(t.kind === 'elite' ? TOWN.task_sizing.elite_n : 1);
+    }
+    // both kinds are reachable, and the plain kill-count task that used to carry 60% of the roll is gone
+    expect(seen.has('elite')).toBe(true);
+    expect(seen.has('boss')).toBe(true);
+  });
+
   it('kills feed the matching slot and an empty slot refills after an hour', () => {
     const s = newGame();
-    s.town.tasks[1] = { kind: 'hunt', zone: 1, n: 3, progress: 0, stone: 'reroll_value', count: 1, claimed: false, offeredAt: 0 };
-    for (let i = 0; i < 60; i++) tick(s, {});
+    s.town.tasks[1] = { kind: 'elite', zone: 1, n: 3, progress: 0, stone: 'tier', count: 1, claimed: false, offeredAt: 0 };
+    // tick until the Elite the slot waits for actually spawns, never for a guessed window: Elites are
+    // one kill in five, so a fixed window is a coin flip on the roll (AGENT.md). The bound is a hang guard.
+    for (let i = 0; i < 200000 && s.town.tasks[1].progress === 0; i++) tick(s, {});
     expect(s.town.tasks[1].progress).toBeGreaterThan(0);
     s.clockSec = s.town.refillAt[0] + 1;
     tick(s, {});
@@ -110,14 +124,16 @@ describe('the Guild board', () => {
   });
 });
 
-describe('the road is bounded and travel follows the links', () => {
-  it('8 links exist and an unlinked settlement is out of reach', () => {
-    expect(ROAD_LINKS).toBe(TOWN.settlements.length - 1);
+describe('a Waypoint opens on foot and never for gold', () => {
+  it('a settlement is unreachable until it has been walked to, and no gold opens it', () => {
     const s = newGame();
-    expect(canTravel(s, 'eastgate')).toBe(true);
+    expect(canTravel(s, 'eastgate')).toBe(true);       // the start is walked to by definition
     expect(canTravel(s, 'vermolch')).toBe(false);
     s.counters.gold = 100_000;
-    buy(s, 'millbrook', 'road_link');
+    // gold cannot buy the way: only arriving on foot does
+    s.town.owned.push('stash_tab_1');
+    expect(canTravel(s, 'vermolch')).toBe(false);
+    s.town.visited.push('vermolch');
     expect(canTravel(s, 'vermolch')).toBe(true);
   });
 
@@ -140,12 +156,12 @@ describe('the Curio pedlar rotates its stock', () => {
     const s = newGame(31);
     for (let i = 0; i < 5; i++) tick(s, {});
     const row = rowById('pedlar_rotation');
-    expect(s.pedlar.kills.length).toBe(row.per_day_cap);
-    for (const k of s.pedlar.kills) {
-      expect(k).toBeGreaterThanOrEqual(Math.round(row.k_min));
-      expect(k).toBeLessThanOrEqual(Math.round(row.k_max));
+    expect(s.pedlar.minutes.length).toBe(row.per_day_cap);
+    for (const m of s.pedlar.minutes) {
+      expect(m).toBeGreaterThanOrEqual(row.m_min);
+      expect(m).toBeLessThanOrEqual(row.m_max);
     }
-    expect(priceKills(row, 'highspire', s)).toBe(s.pedlar.kills[0]);
+    expect(priceMinutes(row, 'highspire', s)).toBe(s.pedlar.minutes[0]);
   });
 
   it('sells at most three slots a day and the price walks up the stock', () => {
@@ -154,7 +170,7 @@ describe('the Curio pedlar rotates its stock', () => {
     s.counters.gold = 100000;
     const seen: number[] = [];
     for (let i = 0; i < 3; i++) {
-      seen.push(priceKills(rowById('pedlar_rotation'), 'highspire', s));
+      seen.push(priceMinutes(rowById('pedlar_rotation'), 'highspire', s));
       expect(buy(s, 'highspire', 'pedlar_rotation').ok).toBe(true);
     }
     expect(new Set(seen).size).toBeGreaterThan(0);

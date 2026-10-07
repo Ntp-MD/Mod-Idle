@@ -77,12 +77,12 @@
   }
 </script>
 
-<div class="detail" class:rare={item.rarity !== 'Common'}>
+<div class="detail" class:rare={item.tier === 'T1'}>
   <h4>{item.base}</h4>
   <p class="tag">
-    <span class="chip rare-chip">{item.rarity}</span>
+    <span class="chip rare-chip">level {item.ilvl}</span>
     <span class="chip">{item.slot}</span>
-    <span class="dim">{item.quality} quality · {item.tier}</span>
+    <span class="dim">{item.quality} band · {item.tier}</span>
   </p>
   {#if (item.upgrade_lv || 0) > 0}
     <p class="tag up">+{item.upgrade_lv} of {craft.C.upgrade_cap} Quality Stone</p>

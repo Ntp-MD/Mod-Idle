@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -82,23 +82,23 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="about.html">About</a>
 <h4>Settlements</h4>
 <a href="rec-town-settlements-eastgate.html">eastgate</a>
-<a href="rec-town-settlements-millbrook.html">millbrook</a>
-<a href="rec-town-settlements-ashfall.html">ashfall</a>
-<a href="rec-town-settlements-ironrow.html">ironrow</a>
-<a href="rec-town-settlements-wolf-cross.html">wolf_cross</a>
 <a href="rec-town-settlements-highspire.html">highspire</a>
+<a href="rec-town-settlements-wolf-cross.html">wolf_cross</a>
+<a href="rec-town-settlements-greyfen.html">greyfen</a>
+<a href="rec-town-settlements-saltmarrow.html">saltmarrow</a>
+<a href="rec-town-settlements-the-pale-spire.html">the_pale_spire</a>
+<a href="rec-town-settlements-blackwater-reach.html">blackwater_reach</a>
 <a href="rec-town-settlements-bonegate.html">bonegate</a>
 <a href="rec-town-settlements-frosthold.html">frosthold</a>
 <a href="rec-town-settlements-vermolch.html">vermolch</a>
-<a href="rec-town-settlements-thornwake.html">thornwake</a>
-<a href="rec-town-settlements-greyfen.html">greyfen</a>
-<a href="rec-town-settlements-saltmarrow.html">saltmarrow</a>
-<a href="rec-town-settlements-emberhold.html" aria-current="page">emberhold</a>
 <a href="rec-town-settlements-duskmoor.html">duskmoor</a>
 <a href="rec-town-settlements-nettlecrag.html">nettlecrag</a>
-<a href="rec-town-settlements-blackwater-reach.html">blackwater_reach</a>
+<a href="rec-town-settlements-emberhold.html" aria-current="page">emberhold</a>
+<a href="rec-town-settlements-millbrook.html">millbrook</a>
 <a href="rec-town-settlements-wyrmback.html">wyrmback</a>
-<a href="rec-town-settlements-the-pale-spire.html">the_pale_spire</a>
+<a href="rec-town-settlements-ashfall.html">ashfall</a>
+<a href="rec-town-settlements-ironrow.html">ironrow</a>
+<a href="rec-town-settlements-thornwake.html">thornwake</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
 <a href="doc-DECISIONS.html">DECISIONS.md</a>
@@ -155,7 +155,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <section><h1>Emberhold</h1>
 <p class="hint">One row of <code>tools/data/town.json</code> → <code>settlements</code>. Prices · rosters · stock · Standing shares · Collector sets. The only place a town number is written by hand. tools/town.ts --write rebuilds towns-stalls.md and checks.md group T from it.</p>
 <dl class="kv"><dt>path</dt><dd><code>settlements[emberhold]</code></dd><dt>collection</dt><dd><a href="data-town-settlements.html">Settlements</a></dd><dt>written by</dt><dd><code>tools/town.ts</code></dd><dt>rows around it</dt><dd>18</dd></dl>
-<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>emberhold</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Name</td><td><code>Emberhold</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Zone</td><td><code>13</code></td><td><code>int</code></td><td>—</td></tr><tr><td>Band</td><td><code>mid</code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Capital of</td><td><code>null</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Innate elements</td><td><code>fire</code></td><td><code>list</code></td><td>—</td></tr><tr><td>Base bias (flavour)</td><td><code>slag and foundry heat</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Budget note</td><td><code></code></td><td><code>text</code></td><td>—</td></tr><tr><td>NPCs</td><td><code>counterhand · porter · waypoint_keeper</code></td><td><code>list</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Stock lines</td><td><code>bag_slot · stash_tab_1 · waypoint_reanchor · filter_preset</code></td><td><code>list</code><span class="dim"> → stock</span></td><td>—</td></tr><tr><td>Starting settlement</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Armourer discount <span class="dim">(m)</span></td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Armourer variant</td><td><code></code></td><td><code>str</code></td><td>—</td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>field</th><th>value</th><th>type</th><th>meaning</th></tr></thead><tbody><tr><td>id</td><td><code>emberhold</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Name</td><td><code>Emberhold</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Zone</td><td><code>13</code></td><td><code>int</code></td><td>—</td></tr><tr><td>Band</td><td><code>mid</code></td><td><code>enum</code><span class="dim"> → engine:loot.bands</span></td><td>—</td></tr><tr><td>Capital of</td><td><code>null</code></td><td><code>enum</code></td><td>—</td></tr><tr><td>Innate elements</td><td><code>fire</code></td><td><code>list</code></td><td>—</td></tr><tr><td>Base bias (flavour)</td><td><code>slag and foundry heat</code></td><td><code>str</code></td><td>—</td></tr><tr><td>Budget note</td><td><code></code></td><td><code>text</code></td><td>—</td></tr><tr><td>NPCs</td><td><code>counterhand · porter · waypoint_keeper</code></td><td><code>list</code><span class="dim"> → npcs</span></td><td>—</td></tr><tr><td>Stock lines</td><td><code>bag_slot · stash_tab_1 · filter_preset</code></td><td><code>list</code><span class="dim"> → stock</span></td><td>—</td></tr><tr><td>Starting settlement</td><td><code></code></td><td><code>bool</code></td><td>—</td></tr><tr><td>Armourer discount <span class="dim">(m)</span></td><td><code></code></td><td><code>num</code></td><td>—</td></tr><tr><td>Armourer variant</td><td><code></code></td><td><code>str</code></td><td>—</td></tr></tbody></table></div></section>
 <section id="edit"><h2>Edit</h2><p class="hint">On save: validate the row → snapshot the files → write the JSON → run the writers → run both cages → keep it or restore the snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="settlements"><input type="hidden" name="id" value="emberhold">
 <div class="f"><label for="f-id">id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value="emberhold" pattern="^[a-z][a-z0-9_]*$"></div></div>
@@ -167,7 +167,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <div class="f"><label for="f-base-bias-flavor">Base bias (flavour)</label><div><input id="f-base-bias-flavor" type="text" inputmode="decimal" name="base_bias_flavor" value="slag and foundry heat"></div></div>
 <div class="f"><label for="f-budget-note">Budget note</label><div><textarea id="f-budget-note" name="budget_note"></textarea></div></div>
 <div class="f"><label for="f-npcs">NPCs</label><div><textarea id="f-npcs" name="npcs" spellcheck="false">[&quot;counterhand&quot;,&quot;porter&quot;,&quot;waypoint_keeper&quot;]</textarea></div></div>
-<div class="f"><label for="f-stock">Stock lines</label><div><textarea id="f-stock" name="stock" spellcheck="false">[&quot;bag_slot&quot;,&quot;stash_tab_1&quot;,&quot;waypoint_reanchor&quot;,&quot;filter_preset&quot;]</textarea></div></div>
+<div class="f"><label for="f-stock">Stock lines</label><div><textarea id="f-stock" name="stock" spellcheck="false">[&quot;bag_slot&quot;,&quot;stash_tab_1&quot;,&quot;filter_preset&quot;]</textarea></div></div>
 <div class="f"><label for="f-start">Starting settlement</label><div><select id="f-start" name="start"><option>true</option><option>false</option></select></div></div>
 <div class="f"><label for="f-armourer-discount-m">Armourer discount <span class="dim">(m)</span></label><div><input id="f-armourer-discount-m" type="text" inputmode="decimal" name="armourer_discount_m" value=""></div></div>
 <div class="f"><label for="f-armourer-variant">Armourer variant</label><div><input id="f-armourer-variant" type="text" inputmode="decimal" name="armourer_variant" value=""></div></div>
@@ -175,7 +175,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 </form><div class="result"></div>
 <form class="rec" data-api="/api/delete" method="post"><input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="settlements"><input type="hidden" name="id" value="emberhold"><div class="f"><span></span><div><button class="warn" type="submit">Delete this row</button> <span class="dim">refused while another row still references it</span></div></div></form><div class="result"></div></section>
 
-<section><h2>Mentioned in the specs</h2><table class=""><thead><tr><th>document</th><th>under heading</th><th>matched as</th><th>hits</th></tr></thead><tbody><tr><td><a href="doc-checks.html#h-t-s-standing-thresholds-in-kills-the-numbers-t12-reads">checks.md</a></td><td>T-S · Standing thresholds in kills (the numbers T12 reads)</td><td><code>emberhold</code></td><td>2</td></tr><tr><td><a href="doc-mob-roster.html#h-cast-per-zone">mob-roster.md</a></td><td>Cast Per Zone</td><td><code>emberhold</code></td><td>1</td></tr><tr><td><a href="doc-towns-stalls.html#h-5-1-npc-roster">towns-stalls.md</a></td><td>5.1 NPC roster</td><td><code>emberhold</code></td><td>3</td></tr><tr><td><a href="doc-towns.html#h-what-the-road-actually-is">towns.md</a></td><td>What the Road actually is</td><td><code>emberhold</code></td><td>2</td></tr><tr><td><a href="doc-world.html#h-zones-and-levels-decided">world.md</a></td><td>Zones and Levels (Decided)</td><td><code>emberhold</code></td><td>1</td></tr><tr><td><a href="doc-towns-stalls.html#h-5-2-stock-standing-and-base-flavour-per-settlement">towns-stalls.md</a></td><td>5.2 Stock, Standing and Base flavour per settlement</td><td><code>slag and foundry heat</code></td><td>1</td></tr></tbody></table></section>
+<section><h2>Mentioned in the specs</h2><table class=""><thead><tr><th>document</th><th>under heading</th><th>matched as</th><th>hits</th></tr></thead><tbody><tr><td><a href="doc-checks.html#h-t-s-standing-thresholds-in-kills-the-numbers-t12-reads">checks.md</a></td><td>T-S · Standing thresholds in kills (the numbers T12 reads)</td><td><code>emberhold</code></td><td>2</td></tr><tr><td><a href="doc-mob-roster.html#h-cast-per-zone">mob-roster.md</a></td><td>Cast Per Zone</td><td><code>emberhold</code></td><td>1</td></tr><tr><td><a href="doc-towns-stalls.html#h-5-1-npc-roster">towns-stalls.md</a></td><td>5.1 NPC roster</td><td><code>emberhold</code></td><td>3</td></tr><tr><td><a href="doc-towns.html#h-4-map-18-zones-onto-6-capitals-and-12-towns">towns.md</a></td><td>4. Map — 18 zones onto 6 capitals and 12 towns</td><td><code>emberhold</code></td><td>2</td></tr><tr><td><a href="doc-world.html#h-zones-and-levels-decided">world.md</a></td><td>Zones and Levels (Decided)</td><td><code>emberhold</code></td><td>1</td></tr><tr><td><a href="doc-towns-stalls.html#h-5-2-stock-standing-and-base-flavour-per-settlement">towns-stalls.md</a></td><td>5.2 Stock, Standing and Base flavour per settlement</td><td><code>slag and foundry heat</code></td><td>1</td></tr></tbody></table></section>
 
 <section><h2>Raw JSON</h2><pre class="code">{
   &quot;id&quot;: &quot;emberhold&quot;,
@@ -195,7 +195,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   &quot;stock&quot;: [
     &quot;bag_slot&quot;,
     &quot;stash_tab_1&quot;,
-    &quot;waypoint_reanchor&quot;,
     &quot;filter_preset&quot;
   ]
 }</pre></section>

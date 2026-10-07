@@ -1,10 +1,9 @@
 {
   "meta": {
     "title": "Town economy source data — the only place a town number is written by hand",
-    "unit": "k = one kill of full-sell income in the band where the purchase matters",
+    "unit": "gold — the Counterhand mints it, the stalls take it; a price is charged at the band of the place that sells it",
     "derived_fields": [
       "gold price",
-      "gold per kill",
       "junk per kill",
       "Standing kill thresholds",
       "lifetime supply",
@@ -123,118 +122,15 @@
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "waypoint_reanchor",
         "filter_preset"
-      ]
-    },
-    {
-      "id": "millbrook",
-      "name": "Millbrook",
-      "zone": 2,
-      "band": "low",
-      "capital": null,
-      "innate": [
-        "poison"
-      ],
-      "base_bias_flavor": "cloth / light",
-      "npcs": [
-        "counterhand",
-        "porter",
-        "waypoint_keeper",
-        "herbalist"
-      ],
-      "stock": [
-        "herb_pouch_ii",
-        "bag_slot",
-        "road_link",
-        "filter_preset"
-      ]
-    },
-    {
-      "id": "ashfall",
-      "name": "Ashfall",
-      "zone": 3,
-      "band": "low",
-      "capital": "low",
-      "innate": [
-        "fire"
-      ],
-      "base_bias_flavor": "light (Evasion)",
-      "npcs": [
-        "counterhand",
-        "steward",
-        "porter",
-        "guild_clerk",
-        "armourer",
-        "waypoint_keeper",
-        "collector",
-        "herbalist"
-      ],
-      "stock": [
-        "house_ashfall",
-        "plot_deed_4",
-        "militia",
-        "collector_hint",
-        "stash_tab_1",
-        "road_link",
-        "repair",
-        "filter_preset"
-      ]
-    },
-    {
-      "id": "ironrow",
-      "name": "Ironrow",
-      "zone": 4,
-      "band": "mid",
-      "capital": null,
-      "innate": [
-        "lightning"
-      ],
-      "base_bias_flavor": "light / Ring Mail",
-      "npcs": [
-        "counterhand",
-        "porter",
-        "waypoint_keeper",
-        "armourer"
-      ],
-      "armourer_discount_m": 12,
-      "stock": [
-        "repair_ironrow",
-        "stash_tab_1",
-        "road_link",
-        "potion_carrier_slot"
-      ]
-    },
-    {
-      "id": "wolf_cross",
-      "name": "Wolf Cross",
-      "zone": 5,
-      "band": "mid",
-      "capital": null,
-      "innate": [
-        "cold"
-      ],
-      "base_bias_flavor": "light",
-      "npcs": [
-        "counterhand",
-        "porter",
-        "waypoint_keeper",
-        "furrier"
-      ],
-      "stock": [
-        "bag_slot",
-        "banner_coldres",
-        "stash_tab_1",
-        "road_link",
-        "waypoint_reanchor"
       ]
     },
     {
       "id": "highspire",
       "name": "Highspire",
-      "zone": 6,
-      "band": "mid",
-      "capital": "mid",
+      "zone": 2,
+      "band": "low",
+      "capital": "low",
       "innate": [
         "cold",
         "lightning"
@@ -255,15 +151,131 @@
         "plot_deed_5",
         "pedlar_rotation",
         "stash_tab_1",
-        "road_link",
         "repair",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "wolf_cross",
+      "name": "Wolf Cross",
+      "zone": 3,
+      "band": "low",
+      "capital": null,
+      "innate": [
+        "cold"
+      ],
+      "base_bias_flavor": "light",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "furrier"
+      ],
+      "stock": [
+        "bag_slot",
+        "banner_coldres",
+        "stash_tab_1"
+      ]
+    },
+    {
+      "id": "greyfen",
+      "name": "Greyfen",
+      "zone": 4,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "poison",
+        "chaos"
+      ],
+      "base_bias_flavor": "wet lowland",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "saltmarrow",
+      "name": "Saltmarrow",
+      "zone": 5,
+      "band": "mid",
+      "capital": "mid",
+      "innate": [
+        "chaos"
+      ],
+      "base_bias_flavor": "salt flats",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "the_pale_spire",
+      "name": "The Pale Spire",
+      "zone": 6,
+      "band": "mid",
+      "capital": "mid",
+      "innate": [
+        "chaos",
+        "poison"
+      ],
+      "base_bias_flavor": "the pale spire",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ],
+      "budget_note": "The last settlement also carries the push band past the spawn cap (levels 181-190), which is where the pre-18-zone world put those hours on Vermolch."
+    },
+    {
+      "id": "blackwater_reach",
+      "name": "Blackwater Reach",
+      "zone": 7,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "poison"
+      ],
+      "base_bias_flavor": "drowned river mouth",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
         "filter_preset"
       ]
     },
     {
       "id": "bonegate",
       "name": "Bonegate",
-      "zone": 7,
+      "zone": 8,
       "band": "high",
       "capital": null,
       "innate": [
@@ -281,7 +293,6 @@
         "reliquary",
         "collector_hint",
         "stash_tab_1",
-        "road_link",
         "repair",
         "filter_preset"
       ]
@@ -289,7 +300,7 @@
     {
       "id": "frosthold",
       "name": "Frosthold",
-      "zone": 8,
+      "zone": 9,
       "band": "high",
       "capital": null,
       "innate": [
@@ -306,17 +317,15 @@
       "stock": [
         "repair",
         "tint_heavy",
-        "stash_tab_1",
-        "road_link",
-        "waypoint_reanchor"
+        "stash_tab_1"
       ]
     },
     {
       "id": "vermolch",
       "name": "Vermolch",
-      "zone": 9,
-      "band": "high",
-      "capital": "high",
+      "zone": 10,
+      "band": "low",
+      "capital": "low",
       "innate": [
         "poison",
         "chaos"
@@ -341,44 +350,21 @@
         "prestige_title",
         "pedlar_rotation",
         "stash_tab_1",
-        "road_link",
         "repair",
         "filter_preset"
       ]
     },
     {
-      "id": "thornwake",
-      "name": "Thornwake",
-      "zone": 10,
-      "band": "low",
-      "capital": null,
-      "innate": [
-        "poison"
-      ],
-      "base_bias_flavor": "wet lowland",
-      "npcs": [
-        "counterhand",
-        "porter",
-        "waypoint_keeper"
-      ],
-      "stock": [
-        "bag_slot",
-        "stash_tab_1",
-        "waypoint_reanchor",
-        "filter_preset"
-      ]
-    },
-    {
-      "id": "greyfen",
-      "name": "Greyfen",
+      "id": "duskmoor",
+      "name": "Duskmoor",
       "zone": 11,
       "band": "low",
       "capital": null,
       "innate": [
-        "poison",
+        "cold",
         "chaos"
       ],
-      "base_bias_flavor": "wet lowland",
+      "base_bias_flavor": "open moor",
       "npcs": [
         "counterhand",
         "porter",
@@ -387,20 +373,20 @@
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "waypoint_reanchor",
         "filter_preset"
       ]
     },
     {
-      "id": "saltmarrow",
-      "name": "Saltmarrow",
+      "id": "nettlecrag",
+      "name": "Nettlecrag",
       "zone": 12,
       "band": "low",
       "capital": "low",
       "innate": [
-        "chaos"
+        "chaos",
+        "poison"
       ],
-      "base_bias_flavor": "salt flats",
+      "base_bias_flavor": "thorn country",
       "npcs": [
         "counterhand",
         "steward",
@@ -413,7 +399,6 @@
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "waypoint_reanchor",
         "filter_preset"
       ]
     },
@@ -435,87 +420,36 @@
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "waypoint_reanchor",
         "filter_preset"
       ]
     },
     {
-      "id": "duskmoor",
-      "name": "Duskmoor",
+      "id": "millbrook",
+      "name": "Millbrook",
       "zone": 14,
       "band": "mid",
       "capital": null,
       "innate": [
-        "cold",
-        "chaos"
-      ],
-      "base_bias_flavor": "open moor",
-      "npcs": [
-        "counterhand",
-        "porter",
-        "waypoint_keeper"
-      ],
-      "stock": [
-        "bag_slot",
-        "stash_tab_1",
-        "waypoint_reanchor",
-        "filter_preset"
-      ]
-    },
-    {
-      "id": "nettlecrag",
-      "name": "Nettlecrag",
-      "zone": 15,
-      "band": "mid",
-      "capital": "mid",
-      "innate": [
-        "chaos",
         "poison"
       ],
-      "base_bias_flavor": "thorn country",
+      "base_bias_flavor": "cloth / light",
       "npcs": [
         "counterhand",
-        "steward",
         "porter",
-        "guild_clerk",
-        "armourer",
         "waypoint_keeper",
         "herbalist"
       ],
       "stock": [
+        "herb_pouch_ii",
         "bag_slot",
-        "stash_tab_1",
-        "waypoint_reanchor",
-        "filter_preset"
-      ]
-    },
-    {
-      "id": "blackwater_reach",
-      "name": "Blackwater Reach",
-      "zone": 16,
-      "band": "high",
-      "capital": null,
-      "innate": [
-        "poison"
-      ],
-      "base_bias_flavor": "drowned river mouth",
-      "npcs": [
-        "counterhand",
-        "porter",
-        "waypoint_keeper"
-      ],
-      "stock": [
-        "bag_slot",
-        "stash_tab_1",
-        "waypoint_reanchor",
         "filter_preset"
       ]
     },
     {
       "id": "wyrmback",
       "name": "Wyrmback",
-      "zone": 17,
-      "band": "high",
+      "zone": 15,
+      "band": "mid",
       "capital": null,
       "innate": [
         "fire",
@@ -530,21 +464,19 @@
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "waypoint_reanchor",
         "filter_preset"
       ]
     },
     {
-      "id": "the_pale_spire",
-      "name": "The Pale Spire",
-      "zone": 18,
+      "id": "ashfall",
+      "name": "Ashfall",
+      "zone": 16,
       "band": "high",
       "capital": "high",
       "innate": [
-        "chaos",
-        "poison"
+        "fire"
       ],
-      "base_bias_flavor": "the pale spire",
+      "base_bias_flavor": "light (Evasion)",
       "npcs": [
         "counterhand",
         "steward",
@@ -552,224 +484,248 @@
         "guild_clerk",
         "armourer",
         "waypoint_keeper",
+        "collector",
         "herbalist"
+      ],
+      "stock": [
+        "house_ashfall",
+        "plot_deed_4",
+        "militia",
+        "collector_hint",
+        "stash_tab_1",
+        "repair",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "ironrow",
+      "name": "Ironrow",
+      "zone": 17,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "lightning"
+      ],
+      "base_bias_flavor": "light / Ring Mail",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "armourer"
+      ],
+      "armourer_discount_m": 12,
+      "stock": [
+        "repair_ironrow",
+        "stash_tab_1",
+        "potion_carrier_slot"
+      ]
+    },
+    {
+      "id": "thornwake",
+      "name": "Thornwake",
+      "zone": 18,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "poison"
+      ],
+      "base_bias_flavor": "wet lowland",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
       ],
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "waypoint_reanchor",
         "filter_preset"
-      ],
-      "budget_note": "The last settlement also carries the push band past the spawn cap (levels 181-190), which is where the pre-18-zone world put those hours on Vermolch."
+      ]
     }
   ],
   "one_time": [
-    {
-      "id": "road_link",
-      "item": "Road link (first visit to a settlement)",
-      "npc": "waypoint_keeper",
-      "kind": "time",
-      "charge": "by_settlement_band",
-      "qty_by_band": {
-        "low": 5,
-        "mid": 5,
-        "high": 7
-      },
-      "ladder": null,
-      "note": "17 links · travel mode B · Eastgate is free",
-      "k_by_band": {
-        "low": 154.3333,
-        "mid": 179,
-        "high": 196.3333
-      }
-    },
     {
       "id": "stash_tab_1",
       "item": "Stash tab 1",
       "npc": "porter",
       "kind": "space",
+      "m": 60,
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
       "discount": {
         "settlement": "eastgate",
-        "k": 231.5
+        "m": 30
       },
-      "note": "no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 231.5 k teaching price",
-      "k": 589
+      "note": "no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 24 gold teaching price"
     },
     {
       "id": "stash_tab_2",
       "item": "Stash tab 2",
       "npc": "porter",
       "kind": "space",
+      "m": 90,
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": "",
-      "k": 883.5
+      "note": ""
     },
     {
       "id": "stash_tab_3",
       "item": "Stash tab 3",
       "npc": "porter",
       "kind": "space",
+      "m": 130,
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": "",
-      "k": 1276.1667
+      "note": ""
     },
     {
       "id": "stash_tab_4",
       "item": "Stash tab 4",
       "npc": "porter",
       "kind": "space",
+      "m": 180,
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": "",
-      "k": 1767
+      "note": ""
     },
     {
       "id": "stash_tab_5",
       "item": "Stash tab 5",
       "npc": "porter",
       "kind": "space",
+      "m": 240,
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": "",
-      "k": 2356
+      "note": ""
     },
     {
       "id": "stash_tab_6",
       "item": "Stash tab 6",
       "npc": "porter",
       "kind": "space",
+      "m": 300,
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": "Cap 6 tabs",
-      "k": 2945
+      "note": "Cap 6 tabs"
     },
     {
       "id": "herb_pouch_ii",
       "item": "Herb pouch II",
       "npc": "porter",
       "kind": "space",
+      "m": 60,
       "charge_band": "mid",
       "qty": 1,
       "ladder": "herb_pouch",
       "note": "one more slot in the character bag (`inventory.character_slots` is the base)",
-      "character_slot_grant": 1,
-      "k": 537
+      "character_slot_grant": 1
     },
     {
       "id": "herb_pouch_iii",
       "item": "Herb pouch III",
       "npc": "porter",
       "kind": "space",
+      "m": 240,
       "charge_band": "high",
       "qty": 1,
       "ladder": "herb_pouch",
       "note": "one more slot in the character bag (`inventory.character_slots` is the base)",
-      "character_slot_grant": 1,
-      "k": 2356
+      "character_slot_grant": 1
     },
     {
       "id": "bag_slot",
       "item": "Bag category slot (herbs / stones / gear display)",
       "npc": "porter",
       "kind": "space",
+      "m": 45,
       "charge_band": "low",
       "qty": 3,
       "ladder": null,
       "display_only": true,
-      "note": "display and sorting only · sells no stone, no gear",
-      "k": 347.25
+      "note": "display and sorting only · sells no stone, no gear"
     },
     {
       "id": "plot_deed_4",
       "item": "Plot deed 4",
       "npc": "steward",
       "kind": "space",
+      "m": 180,
       "charge_band": "mid",
       "qty": 1,
       "ladder": "plot_deed",
-      "note": "4th farm plot (farm.md)",
-      "k": 1611
+      "note": "4th farm plot (farm.md)"
     },
     {
       "id": "plot_deed_5",
       "item": "Plot deed 5",
       "npc": "steward",
       "kind": "space",
+      "m": 540,
       "charge_band": "high",
       "qty": 1,
       "ladder": "plot_deed",
-      "note": "5th plot · the most expensive non-cosmetic line",
-      "k": 5301
+      "note": "5th plot · the most expensive non-cosmetic line"
     },
     {
       "id": "house_ashfall",
       "item": "House · Ashfall",
       "npc": "steward",
       "kind": "space",
+      "m": 120,
       "charge_band": "low",
       "qty": 1,
       "ladder": "house",
-      "note": "2 stash tabs + 1 farm plot + Waypoint anchor, no combat effect",
-      "k": 926
+      "note": "2 stash tabs + 1 farm plot, no combat effect"
     },
     {
       "id": "house_highspire",
       "item": "House · Highspire",
       "npc": "steward",
       "kind": "space",
+      "m": 240,
       "charge_band": "mid",
       "qty": 1,
       "ladder": "house",
-      "note": "",
-      "k": 2148
+      "note": ""
     },
     {
       "id": "house_vermolch",
       "item": "House · Vermolch",
       "npc": "steward",
       "kind": "space",
+      "m": 360,
       "charge_band": "high",
       "qty": 1,
       "ladder": "house",
-      "note": "",
-      "k": 3534
+      "note": ""
     },
     {
       "id": "filter_preset",
       "item": "Saved filter preset slot (extra)",
       "npc": "counterhand",
       "kind": "information",
+      "m": 30,
       "charge": "one_per_band",
       "qty": 3,
       "ladder": null,
-      "note": "preset switching is a concept.md reason-to-open",
-      "k_by_band": {
-        "low": 231.5,
-        "mid": 268.5,
-        "high": 294.5
-      }
+      "note": "preset switching is a concept.md reason-to-open"
     },
     {
       "id": "potion_carrier_slot",
       "item": "Potion carrier slot (belt display)",
       "npc": "armourer",
       "kind": "space",
+      "m": 40,
       "charge_band": "mid",
       "qty": 1,
       "ladder": null,
       "display_only": true,
-      "note": "display only · the carrier pays the weight tax in formula.md section 11 · sells no potion",
-      "k": 358
+      "note": "display only · the carrier pays the weight tax in formula.md section 11 · sells no potion"
     }
   ],
   "repeatable": [
@@ -778,94 +734,78 @@
       "item": "Task skip token",
       "npc": "guild_clerk",
       "kind": "time",
+      "m": 8,
       "charge_band": "high",
       "per_day_cap": 3,
-      "note": "1 per task slot per day on top of the free skip in tasks.md · 3/day = 235.6 k/day",
-      "k": 78.5333
+      "note": "1 per task slot per day on top of the free skip in tasks.md · 3/day = 31 gold/day"
     },
     {
       "id": "repair",
       "item": "Armourer repair (clears Broken, refills protection to 5)",
       "npc": "armourer",
       "kind": "time",
+      "m": 16,
       "charge_band": "high",
-      "note": "must stay above the elite time that earns 1 Reroll tier stone · re-check at F9",
-      "k": 157.0667
+      "note": "must stay above the elite time that earns 1 Reroll tier stone · re-check at F9"
     },
     {
       "id": "repair_ironrow",
       "item": "Armourer repair at Ironrow",
       "npc": "armourer",
       "kind": "time",
+      "m": 14,
       "charge_band": "high",
-      "note": "the armourer town discount, and only there · still above the tier-stone floor",
-      "k": 137.4333
+      "note": "the armourer town discount, and only there · still above the tier-stone floor"
     },
     {
       "id": "pedlar_rotation",
       "item": "Curio pedlar stock: banner · Base tint · title",
       "npc": "curio_pedlar",
       "kind": "appearance",
+      "m_min": 30,
+      "m_max": 120,
       "charge_band": "high",
       "per_day_cap": 3,
-      "note": "3 slots per real day · appearance only",
-      "k_min": 294.5,
-      "k_max": 1178
+      "note": "3 slots per real day · appearance only"
     },
     {
       "id": "prestige_title",
       "item": "Prestige title line (per quality band)",
       "npc": "curio_pedlar",
       "kind": "appearance",
+      "m": 300,
       "charge_band": "high",
-      "note": "the only intentionally expensive line",
-      "k": 2945
-    },
-    {
-      "id": "waypoint_reanchor",
-      "item": "Waypoint re-anchor (move the free return point)",
-      "npc": "waypoint_keeper",
-      "kind": "time",
-      "charge_band": "high",
-      "note": "cosmetic convenience · never gates a zone",
-      "k": 58.9
+      "note": "the only intentionally expensive line"
     },
     {
       "id": "banner_coldres",
       "item": "Coldres banner (settlement cosmetic)",
       "npc": "furrier",
       "kind": "appearance",
+      "m": 90,
       "charge_band": "mid",
-      "note": "one per settlement · Wolf Cross only",
-      "k": 805.5
+      "note": "one per settlement · Wolf Cross only"
     },
     {
       "id": "tint_heavy",
       "item": "Heavy-school Base tint",
       "npc": "armourer",
       "kind": "appearance",
+      "m": 45,
       "charge_band": "high",
-      "note": "stocked only by the Siege Armourer at Frosthold · appearance only",
-      "k": 441.75
+      "note": "stocked only by the Siege Armourer at Frosthold · appearance only"
     },
     {
       "id": "collector_hint",
       "item": "Collector set hint (prints which school the set wants)",
       "npc": "collector",
       "kind": "information",
+      "m": 15,
       "charge_band": "high",
-      "note": "information only · pays no item and sells no piece",
-      "k": 147.25
+      "note": "information only · pays no item and sells no piece"
     }
   ],
   "essentials": [
-    {
-      "id": "road_link",
-      "qty_by_band": {
-        "low": 2,
-        "mid": 2
-      }
-    },
     {
       "id": "stash_tab_1",
       "use_discount": true
@@ -976,17 +916,16 @@
     ],
     "closed_checks": [
       "Re-run the keep-rate simulation: tools/loot.ts measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) — the owner chose NOT to pay that cost and to ship even.",
-      "F3 drops per kill is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops per kill comes from base_drop_chance x Lck, so no weight can change drop count."
+      "F3 drops/hour is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops/hour comes from base_drop_chance x Lck, so no weight can change drop count."
     ]
   },
   "task_sizing": {
     "status": "provisional · owner-veto-able · ",
     "why": "tasks.md leaves N and the reward count to the rebalance pass, but the client needs a number to run on, so the sizing lives here as data instead of being typed into code",
-    "hunt_n_anchor": 5,
-    "hunt_n_rule": "N = round(hunt_n_anchor × the zone group upper bound ÷ 2) — the anchor is engine.json opening.first_rule (kill 5 in zone 1, group 1-2), and N scales with zone group size as tasks.md requires",
     "elite_n": 3,
     "elite_n_rule": "N = 2-4 per tasks.md; the middle of the published range",
-    "reward_rule": "a Hunt pays Reroll value stones and an Elite hunt pays Reroll tier stones, each sized at reward_k_per_band of that band's own stone income (engine.stonesForKills)",
+    "reward_minutes_of_band_income": 15,
+    "reward_rule": "an Elite hunt pays Reroll tier stones sized at reward_minutes_of_band_income of that band's own stone income (engine.stonesForMinutes); a Boss hunt pays its own Remove stone, exactly as tasks.md writes it. The plain kill-count task is gone, so the board pays no Reroll value stones at all",
     "boss_reward": {
       "remove": 1,
       "reroll_tier": 4
@@ -994,18 +933,12 @@
     "boss_reward_rule": "winner's choice, exactly as tasks.md writes it",
     "refill_sec": 3600,
     "slots": 3,
-    "free_skip_per_day": 1,
-    "reward_kills_of_band_income": 115.75,
-    "reward_k_per_band": {
-      "low": 115.75,
-      "mid": 134.25,
-      "high": 147.25
-    }
+    "free_skip_per_day": 1
   },
   "pending": [
     {
       "number": "Task reward sizing (tasks.md rebalance)",
-      "breaks": "skip-token m price vs the ≤10% bound",
+      "breaks": "skip-token gold price vs the ≤10% bound",
       "status": "open"
     },
     {
@@ -1017,8 +950,8 @@
   "invariants": {
     "essentials_max_share_of_lifetime_supply": 0.2,
     "onetime_demand_max_multiple_of_lifetime_supply": 1.5,
-    "road_trip_max_real_minutes": 5,
     "skip_token_max_per_day": 3,
+    "skip_token_max_gold_per_day": 31,
     "allowed_kinds": [
       "space",
       "time",
@@ -1037,8 +970,6 @@
       "weapon"
     ],
     "standing_min_tiers": 3,
-    "chase_tier_min_share": 1,
-    "road_link_max_k": 196.3333,
-    "skip_token_max_k_per_day": 235.6
+    "chase_tier_min_share": 1
   }
 }

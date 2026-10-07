@@ -1,7 +1,5 @@
 import type { Item } from '../sim/types';
 
-import { elementArt, skillArt } from './art';
-
 import battleAxe from './002-lorc-battle-axe.svg?url';
 import bow from './007-delapouite-bow-arrow.svg?url';
 import crossbow from './008-carl-olsen-crossbow.svg?url';
@@ -18,10 +16,15 @@ import cloak from './026-lucasms-cloak.svg?url';
 import wolf from './027-lorc-wolf-head.svg?url';
 import paw from './028-lorc-paw-print.svg?url';
 import crystal from './035-lorc-crystal-cluster.svg?url';
+import padlock from './037-lorc-padlock.svg?url';
+import aura from './040-lorc-expanded-rays.svg?url';
 import crossShield from './042-delapouite-cross-shield.svg?url';
+import chaos from './043-lorc-vortex.svg?url';
 import leaf from './045-lorc-leaf-skeleton.svg?url';
+import lightning from './049-lorc-lightning-branches.svg?url';
 import knight from './053-delapouite-black-knight-helm.svg?url';
 import dragonShield from './057-delapouite-dragon-shield.svg?url';
+import crossedSwords from './062-lorc-crossed-swords.svg?url';
 import spiderWeb from './064-lorc-spider-web.svg?url';
 import wings from './065-delapouite-fairy-wings.svg?url';
 import pendant from './068-lorc-gem-pendant.svg?url';
@@ -36,7 +39,9 @@ import manaPotion from './093-delapouite-magic-potion.svg?url';
 import arrowhead from './105-lorc-arrowhead.svg?url';
 import hood from './113-lorc-hood.svg?url';
 import cloudRing from './117-lorc-cloud-ring.svg?url';
+import snowflake from './119-lorc-snowflake-1.svg?url';
 import rock from './120-lorc-rock.svg?url';
+import fire from './130-lorc-small-fire.svg?url';
 import helmet from './001-sbed-helmet.svg?url';
 import ring from './075-lorc-swirl-ring.svg?url';
 
@@ -69,6 +74,15 @@ const mobBySpecies: Record<string, string> = {
   spider: spiderWeb,
   wolf,
   husk: skull,
+};
+
+const elementByName: Record<string, string> = {
+  physical: broadSword,
+  fire,
+  cold: snowflake,
+  lightning,
+  poison: droplets,
+  chaos,
 };
 
 const weaponIcon = (base: string): string => {
@@ -113,17 +127,23 @@ export function mobIcon(species: string): string {
 /** The mark a boss field label carries (§11): the same dread-skull the junk stream uses. */
 export const bossMark = skull;
 
-/** An Element mark, house set — the same five files `skillArt` falls back to. */
 export function elementIcon(element: string): string {
-  return elementArt(element);
+  return elementByName[element.toLowerCase()] ?? broadSword;
 }
 
-/**
- * The house icon set, inlined rather than loaded as a URL — see `art.ts` for why. Kept on this
- * signature so the five call sites that read a skill row only add the row's `element`.
- */
-export function skillIcon(id: string, type: string, element?: string): string {
-  return skillArt(id, type, element);
+export function skillIcon(id: string, type: string): string {
+  const skill = id.toLowerCase();
+  if (skill.includes('whirlwind')) return cloudRing;
+  if (skill.includes('arrow') || skill.includes('shot') || skill.includes('volley')) return bow;
+  if (skill.includes('shield')) return crossShield;
+  if (skill.includes('flame') || skill.includes('fire')) return fire;
+  if (skill.includes('frost') || skill.includes('cold')) return snowflake;
+  if (skill.includes('lightning') || skill.includes('spark')) return lightning;
+  if (skill.includes('poison') || skill.includes('toxic')) return droplets;
+  if (skill.includes('heal') || skill.includes('cleanse')) return heartBeats;
+  if (type === 'curse') return padlock;
+  if (type === 'buff') return aura;
+  if (type === 'aura') return chaos;
+  if (type === 'attack') return crossedSwords;
+  return spellBook;
 }
-
-export { npcArt, stockArt, hubArt, elementArt, ICON_GAPS } from './art';

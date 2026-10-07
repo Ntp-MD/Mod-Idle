@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span><span class="chip ">rows <b>18</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span><span class="chip ">rows <b>18</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -83,15 +83,15 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <h4>Collections</h4>
 <a href="data-town-npcs.html">NPC kinds (10)</a>
 <a href="data-town-settlements.html" aria-current="page">Settlements (18)</a>
-<a href="data-town-one_time.html">One-time lines (17)</a>
-<a href="data-town-repeatable.html">Repeatable lines (9)</a>
-<a href="data-town-essentials.html">Essentials basket (5)</a>
+<a href="data-town-one_time.html">One-time lines (16)</a>
+<a href="data-town-repeatable.html">Repeatable lines (8)</a>
+<a href="data-town-essentials.html">Essentials basket (4)</a>
 <a href="data-town-collector_sets.html">Collector sets (3)</a>
 <a href="data-town-standing-tiers.html">Standing tiers (3)</a>
 <a href="data-town-standing.html">Standing rules (4)</a>
 <a href="data-town-base_bias.html">Base bias (pending) (6)</a>
 <a href="data-town-pending.html">Pending numbers (2)</a>
-<a href="data-town-invariants.html">Invariants (guards) (10)</a>
+<a href="data-town-invariants.html">Invariants (guards) (8)</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
 <a href="doc-DECISIONS.html">DECISIONS.md</a>
@@ -147,7 +147,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <section><h1>Settlements</h1>
 <dl class="kv"><dt>path</dt><dd><code>tools/data/town.json → settlements</code></dd><dt>kind</dt><dd><code>records</code> · id field <code>id</code></dd><dt>rows</dt><dd>18</dd><dt>written by</dt><dd><code>tools/town.ts --write</code></dd><dt>spec</dt><dd><a href="doc-towns.html">towns.md</a></dd></dl><p class="hint">Read-only view of the rows; the editor writes them.</p>
-<div class="tw"><table class=""><thead><tr><th>id</th><th>Name</th><th>Zone</th><th>Band</th><th>Capital of</th><th>Innate elements</th><th>Base bias (flavour)</th><th></th></tr></thead><tbody><tr><td><a href="rec-town-settlements-eastgate.html">eastgate</a></td><td>Eastgate</td><td>1</td><td>low</td><td>null</td><td>fire</td><td>cloth</td><td><a href="rec-town-settlements-eastgate.html">open</a></td></tr><tr><td><a href="rec-town-settlements-millbrook.html">millbrook</a></td><td>Millbrook</td><td>2</td><td>low</td><td>null</td><td>poison</td><td>cloth / light</td><td><a href="rec-town-settlements-millbrook.html">open</a></td></tr><tr><td><a href="rec-town-settlements-ashfall.html">ashfall</a></td><td>Ashfall</td><td>3</td><td>low</td><td>low</td><td>fire</td><td>light (Evasion)</td><td><a href="rec-town-settlements-ashfall.html">open</a></td></tr><tr><td><a href="rec-town-settlements-ironrow.html">ironrow</a></td><td>Ironrow</td><td>4</td><td>mid</td><td>null</td><td>lightning</td><td>light / Ring Mail</td><td><a href="rec-town-settlements-ironrow.html">open</a></td></tr><tr><td><a href="rec-town-settlements-wolf-cross.html">wolf_cross</a></td><td>Wolf Cross</td><td>5</td><td>mid</td><td>null</td><td>cold</td><td>light</td><td><a href="rec-town-settlements-wolf-cross.html">open</a></td></tr><tr><td><a href="rec-town-settlements-highspire.html">highspire</a></td><td>Highspire</td><td>6</td><td>mid</td><td>mid</td><td>cold · lightning</td><td>Ring Mail</td><td><a href="rec-town-settlements-highspire.html">open</a></td></tr><tr><td><a href="rec-town-settlements-bonegate.html">bonegate</a></td><td>Bonegate</td><td>7</td><td>high</td><td>null</td><td>chaos</td><td>heavy (Armour)</td><td><a href="rec-town-settlements-bonegate.html">open</a></td></tr><tr><td><a href="rec-town-settlements-frosthold.html">frosthold</a></td><td>Frosthold</td><td>8</td><td>high</td><td>null</td><td>cold</td><td>heavy</td><td><a href="rec-town-settlements-frosthold.html">open</a></td></tr><tr><td><a href="rec-town-settlements-vermolch.html">vermolch</a></td><td>Vermolch</td><td>9</td><td>high</td><td>high</td><td>poison · chaos</td><td>heavy · cloth (glass endgame)</td><td><a href="rec-town-settlements-vermolch.html">open</a></td></tr><tr><td><a href="rec-town-settlements-thornwake.html">thornwake</a></td><td>Thornwake</td><td>10</td><td>low</td><td>null</td><td>poison</td><td>wet lowland</td><td><a href="rec-town-settlements-thornwake.html">open</a></td></tr><tr><td><a href="rec-town-settlements-greyfen.html">greyfen</a></td><td>Greyfen</td><td>11</td><td>low</td><td>null</td><td>poison · chaos</td><td>wet lowland</td><td><a href="rec-town-settlements-greyfen.html">open</a></td></tr><tr><td><a href="rec-town-settlements-saltmarrow.html">saltmarrow</a></td><td>Saltmarrow</td><td>12</td><td>low</td><td>low</td><td>chaos</td><td>salt flats</td><td><a href="rec-town-settlements-saltmarrow.html">open</a></td></tr><tr><td><a href="rec-town-settlements-emberhold.html">emberhold</a></td><td>Emberhold</td><td>13</td><td>mid</td><td>null</td><td>fire</td><td>slag and foundry heat</td><td><a href="rec-town-settlements-emberhold.html">open</a></td></tr><tr><td><a href="rec-town-settlements-duskmoor.html">duskmoor</a></td><td>Duskmoor</td><td>14</td><td>mid</td><td>null</td><td>cold · chaos</td><td>open moor</td><td><a href="rec-town-settlements-duskmoor.html">open</a></td></tr><tr><td><a href="rec-town-settlements-nettlecrag.html">nettlecrag</a></td><td>Nettlecrag</td><td>15</td><td>mid</td><td>mid</td><td>chaos · poison</td><td>thorn country</td><td><a href="rec-town-settlements-nettlecrag.html">open</a></td></tr><tr><td><a href="rec-town-settlements-blackwater-reach.html">blackwater_reach</a></td><td>Blackwater Reach</td><td>16</td><td>high</td><td>null</td><td>poison</td><td>drowned river mouth</td><td><a href="rec-town-settlements-blackwater-reach.html">open</a></td></tr><tr><td><a href="rec-town-settlements-wyrmback.html">wyrmback</a></td><td>Wyrmback</td><td>17</td><td>high</td><td>null</td><td>fire · cold</td><td>wyrm breeding ground</td><td><a href="rec-town-settlements-wyrmback.html">open</a></td></tr><tr><td><a href="rec-town-settlements-the-pale-spire.html">the_pale_spire</a></td><td>The Pale Spire</td><td>18</td><td>high</td><td>high</td><td>chaos · poison</td><td>the pale spire</td><td><a href="rec-town-settlements-the-pale-spire.html">open</a></td></tr></tbody></table></div></section>
+<div class="tw"><table class=""><thead><tr><th>id</th><th>Name</th><th>Zone</th><th>Band</th><th>Capital of</th><th>Innate elements</th><th>Base bias (flavour)</th><th></th></tr></thead><tbody><tr><td><a href="rec-town-settlements-eastgate.html">eastgate</a></td><td>Eastgate</td><td>1</td><td>low</td><td>null</td><td>fire</td><td>cloth</td><td><a href="rec-town-settlements-eastgate.html">open</a></td></tr><tr><td><a href="rec-town-settlements-highspire.html">highspire</a></td><td>Highspire</td><td>2</td><td>low</td><td>low</td><td>cold · lightning</td><td>Ring Mail</td><td><a href="rec-town-settlements-highspire.html">open</a></td></tr><tr><td><a href="rec-town-settlements-wolf-cross.html">wolf_cross</a></td><td>Wolf Cross</td><td>3</td><td>low</td><td>null</td><td>cold</td><td>light</td><td><a href="rec-town-settlements-wolf-cross.html">open</a></td></tr><tr><td><a href="rec-town-settlements-greyfen.html">greyfen</a></td><td>Greyfen</td><td>4</td><td>mid</td><td>null</td><td>poison · chaos</td><td>wet lowland</td><td><a href="rec-town-settlements-greyfen.html">open</a></td></tr><tr><td><a href="rec-town-settlements-saltmarrow.html">saltmarrow</a></td><td>Saltmarrow</td><td>5</td><td>mid</td><td>mid</td><td>chaos</td><td>salt flats</td><td><a href="rec-town-settlements-saltmarrow.html">open</a></td></tr><tr><td><a href="rec-town-settlements-the-pale-spire.html">the_pale_spire</a></td><td>The Pale Spire</td><td>6</td><td>mid</td><td>mid</td><td>chaos · poison</td><td>the pale spire</td><td><a href="rec-town-settlements-the-pale-spire.html">open</a></td></tr><tr><td><a href="rec-town-settlements-blackwater-reach.html">blackwater_reach</a></td><td>Blackwater Reach</td><td>7</td><td>high</td><td>null</td><td>poison</td><td>drowned river mouth</td><td><a href="rec-town-settlements-blackwater-reach.html">open</a></td></tr><tr><td><a href="rec-town-settlements-bonegate.html">bonegate</a></td><td>Bonegate</td><td>8</td><td>high</td><td>null</td><td>chaos</td><td>heavy (Armour)</td><td><a href="rec-town-settlements-bonegate.html">open</a></td></tr><tr><td><a href="rec-town-settlements-frosthold.html">frosthold</a></td><td>Frosthold</td><td>9</td><td>high</td><td>null</td><td>cold</td><td>heavy</td><td><a href="rec-town-settlements-frosthold.html">open</a></td></tr><tr><td><a href="rec-town-settlements-vermolch.html">vermolch</a></td><td>Vermolch</td><td>10</td><td>low</td><td>low</td><td>poison · chaos</td><td>heavy · cloth (glass endgame)</td><td><a href="rec-town-settlements-vermolch.html">open</a></td></tr><tr><td><a href="rec-town-settlements-duskmoor.html">duskmoor</a></td><td>Duskmoor</td><td>11</td><td>low</td><td>null</td><td>cold · chaos</td><td>open moor</td><td><a href="rec-town-settlements-duskmoor.html">open</a></td></tr><tr><td><a href="rec-town-settlements-nettlecrag.html">nettlecrag</a></td><td>Nettlecrag</td><td>12</td><td>low</td><td>low</td><td>chaos · poison</td><td>thorn country</td><td><a href="rec-town-settlements-nettlecrag.html">open</a></td></tr><tr><td><a href="rec-town-settlements-emberhold.html">emberhold</a></td><td>Emberhold</td><td>13</td><td>mid</td><td>null</td><td>fire</td><td>slag and foundry heat</td><td><a href="rec-town-settlements-emberhold.html">open</a></td></tr><tr><td><a href="rec-town-settlements-millbrook.html">millbrook</a></td><td>Millbrook</td><td>14</td><td>mid</td><td>null</td><td>poison</td><td>cloth / light</td><td><a href="rec-town-settlements-millbrook.html">open</a></td></tr><tr><td><a href="rec-town-settlements-wyrmback.html">wyrmback</a></td><td>Wyrmback</td><td>15</td><td>mid</td><td>null</td><td>fire · cold</td><td>wyrm breeding ground</td><td><a href="rec-town-settlements-wyrmback.html">open</a></td></tr><tr><td><a href="rec-town-settlements-ashfall.html">ashfall</a></td><td>Ashfall</td><td>16</td><td>high</td><td>high</td><td>fire</td><td>light (Evasion)</td><td><a href="rec-town-settlements-ashfall.html">open</a></td></tr><tr><td><a href="rec-town-settlements-ironrow.html">ironrow</a></td><td>Ironrow</td><td>17</td><td>high</td><td>null</td><td>lightning</td><td>light / Ring Mail</td><td><a href="rec-town-settlements-ironrow.html">open</a></td></tr><tr><td><a href="rec-town-settlements-thornwake.html">thornwake</a></td><td>Thornwake</td><td>18</td><td>high</td><td>null</td><td>poison</td><td>wet lowland</td><td><a href="rec-town-settlements-thornwake.html">open</a></td></tr></tbody></table></div></section>
 <section id="add"><h2>Add a row</h2><p class="hint">Validated, written to <code>tools/data/town.json</code>, then re-run through the writers and both cages. A cage failure rolls the write back from a snapshot.</p><form class="rec" data-api="/api/record" method="post">
 <input type="hidden" name="file" value="town"><input type="hidden" name="coll" value="settlements"><input type="hidden" name="id" value="">
 <div class="f"><label for="f-id">id</label><div><input id="f-id" type="text" inputmode="decimal" name="id" value=""></div></div>
@@ -185,118 +185,15 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;stock&quot;: [
       &quot;bag_slot&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
       &quot;filter_preset&quot;
-    ]
-  },
-  {
-    &quot;id&quot;: &quot;millbrook&quot;,
-    &quot;name&quot;: &quot;Millbrook&quot;,
-    &quot;zone&quot;: 2,
-    &quot;band&quot;: &quot;low&quot;,
-    &quot;capital&quot;: null,
-    &quot;innate&quot;: [
-      &quot;poison&quot;
-    ],
-    &quot;base_bias_flavor&quot;: &quot;cloth / light&quot;,
-    &quot;npcs&quot;: [
-      &quot;counterhand&quot;,
-      &quot;porter&quot;,
-      &quot;waypoint_keeper&quot;,
-      &quot;herbalist&quot;
-    ],
-    &quot;stock&quot;: [
-      &quot;herb_pouch_ii&quot;,
-      &quot;bag_slot&quot;,
-      &quot;road_link&quot;,
-      &quot;filter_preset&quot;
-    ]
-  },
-  {
-    &quot;id&quot;: &quot;ashfall&quot;,
-    &quot;name&quot;: &quot;Ashfall&quot;,
-    &quot;zone&quot;: 3,
-    &quot;band&quot;: &quot;low&quot;,
-    &quot;capital&quot;: &quot;low&quot;,
-    &quot;innate&quot;: [
-      &quot;fire&quot;
-    ],
-    &quot;base_bias_flavor&quot;: &quot;light (Evasion)&quot;,
-    &quot;npcs&quot;: [
-      &quot;counterhand&quot;,
-      &quot;steward&quot;,
-      &quot;porter&quot;,
-      &quot;guild_clerk&quot;,
-      &quot;armourer&quot;,
-      &quot;waypoint_keeper&quot;,
-      &quot;collector&quot;,
-      &quot;herbalist&quot;
-    ],
-    &quot;stock&quot;: [
-      &quot;house_ashfall&quot;,
-      &quot;plot_deed_4&quot;,
-      &quot;militia&quot;,
-      &quot;collector_hint&quot;,
-      &quot;stash_tab_1&quot;,
-      &quot;road_link&quot;,
-      &quot;repair&quot;,
-      &quot;filter_preset&quot;
-    ]
-  },
-  {
-    &quot;id&quot;: &quot;ironrow&quot;,
-    &quot;name&quot;: &quot;Ironrow&quot;,
-    &quot;zone&quot;: 4,
-    &quot;band&quot;: &quot;mid&quot;,
-    &quot;capital&quot;: null,
-    &quot;innate&quot;: [
-      &quot;lightning&quot;
-    ],
-    &quot;base_bias_flavor&quot;: &quot;light / Ring Mail&quot;,
-    &quot;npcs&quot;: [
-      &quot;counterhand&quot;,
-      &quot;porter&quot;,
-      &quot;waypoint_keeper&quot;,
-      &quot;armourer&quot;
-    ],
-    &quot;armourer_discount_m&quot;: 12,
-    &quot;stock&quot;: [
-      &quot;repair_ironrow&quot;,
-      &quot;stash_tab_1&quot;,
-      &quot;road_link&quot;,
-      &quot;potion_carrier_slot&quot;
-    ]
-  },
-  {
-    &quot;id&quot;: &quot;wolf_cross&quot;,
-    &quot;name&quot;: &quot;Wolf Cross&quot;,
-    &quot;zone&quot;: 5,
-    &quot;band&quot;: &quot;mid&quot;,
-    &quot;capital&quot;: null,
-    &quot;innate&quot;: [
-      &quot;cold&quot;
-    ],
-    &quot;base_bias_flavor&quot;: &quot;light&quot;,
-    &quot;npcs&quot;: [
-      &quot;counterhand&quot;,
-      &quot;porter&quot;,
-      &quot;waypoint_keeper&quot;,
-      &quot;furrier&quot;
-    ],
-    &quot;stock&quot;: [
-      &quot;bag_slot&quot;,
-      &quot;banner_coldres&quot;,
-      &quot;stash_tab_1&quot;,
-      &quot;road_link&quot;,
-      &quot;waypoint_reanchor&quot;
     ]
   },
   {
     &quot;id&quot;: &quot;highspire&quot;,
     &quot;name&quot;: &quot;Highspire&quot;,
-    &quot;zone&quot;: 6,
-    &quot;band&quot;: &quot;mid&quot;,
-    &quot;capital&quot;: &quot;mid&quot;,
+    &quot;zone&quot;: 2,
+    &quot;band&quot;: &quot;low&quot;,
+    &quot;capital&quot;: &quot;low&quot;,
     &quot;innate&quot;: [
       &quot;cold&quot;,
       &quot;lightning&quot;
@@ -317,15 +214,131 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;plot_deed_5&quot;,
       &quot;pedlar_rotation&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;road_link&quot;,
       &quot;repair&quot;,
+      &quot;filter_preset&quot;
+    ]
+  },
+  {
+    &quot;id&quot;: &quot;wolf_cross&quot;,
+    &quot;name&quot;: &quot;Wolf Cross&quot;,
+    &quot;zone&quot;: 3,
+    &quot;band&quot;: &quot;low&quot;,
+    &quot;capital&quot;: null,
+    &quot;innate&quot;: [
+      &quot;cold&quot;
+    ],
+    &quot;base_bias_flavor&quot;: &quot;light&quot;,
+    &quot;npcs&quot;: [
+      &quot;counterhand&quot;,
+      &quot;porter&quot;,
+      &quot;waypoint_keeper&quot;,
+      &quot;furrier&quot;
+    ],
+    &quot;stock&quot;: [
+      &quot;bag_slot&quot;,
+      &quot;banner_coldres&quot;,
+      &quot;stash_tab_1&quot;
+    ]
+  },
+  {
+    &quot;id&quot;: &quot;greyfen&quot;,
+    &quot;name&quot;: &quot;Greyfen&quot;,
+    &quot;zone&quot;: 4,
+    &quot;band&quot;: &quot;mid&quot;,
+    &quot;capital&quot;: null,
+    &quot;innate&quot;: [
+      &quot;poison&quot;,
+      &quot;chaos&quot;
+    ],
+    &quot;base_bias_flavor&quot;: &quot;wet lowland&quot;,
+    &quot;npcs&quot;: [
+      &quot;counterhand&quot;,
+      &quot;porter&quot;,
+      &quot;waypoint_keeper&quot;
+    ],
+    &quot;stock&quot;: [
+      &quot;bag_slot&quot;,
+      &quot;stash_tab_1&quot;,
+      &quot;filter_preset&quot;
+    ]
+  },
+  {
+    &quot;id&quot;: &quot;saltmarrow&quot;,
+    &quot;name&quot;: &quot;Saltmarrow&quot;,
+    &quot;zone&quot;: 5,
+    &quot;band&quot;: &quot;mid&quot;,
+    &quot;capital&quot;: &quot;mid&quot;,
+    &quot;innate&quot;: [
+      &quot;chaos&quot;
+    ],
+    &quot;base_bias_flavor&quot;: &quot;salt flats&quot;,
+    &quot;npcs&quot;: [
+      &quot;counterhand&quot;,
+      &quot;steward&quot;,
+      &quot;porter&quot;,
+      &quot;guild_clerk&quot;,
+      &quot;armourer&quot;,
+      &quot;waypoint_keeper&quot;,
+      &quot;herbalist&quot;
+    ],
+    &quot;stock&quot;: [
+      &quot;bag_slot&quot;,
+      &quot;stash_tab_1&quot;,
+      &quot;filter_preset&quot;
+    ]
+  },
+  {
+    &quot;id&quot;: &quot;the_pale_spire&quot;,
+    &quot;name&quot;: &quot;The Pale Spire&quot;,
+    &quot;zone&quot;: 6,
+    &quot;band&quot;: &quot;mid&quot;,
+    &quot;capital&quot;: &quot;mid&quot;,
+    &quot;innate&quot;: [
+      &quot;chaos&quot;,
+      &quot;poison&quot;
+    ],
+    &quot;base_bias_flavor&quot;: &quot;the pale spire&quot;,
+    &quot;npcs&quot;: [
+      &quot;counterhand&quot;,
+      &quot;steward&quot;,
+      &quot;porter&quot;,
+      &quot;guild_clerk&quot;,
+      &quot;armourer&quot;,
+      &quot;waypoint_keeper&quot;,
+      &quot;herbalist&quot;
+    ],
+    &quot;stock&quot;: [
+      &quot;bag_slot&quot;,
+      &quot;stash_tab_1&quot;,
+      &quot;filter_preset&quot;
+    ],
+    &quot;budget_note&quot;: &quot;The last settlement also carries the push band past the spawn cap (levels 181-190), which is where the pre-18-zone world put those hours on Vermolch.&quot;
+  },
+  {
+    &quot;id&quot;: &quot;blackwater_reach&quot;,
+    &quot;name&quot;: &quot;Blackwater Reach&quot;,
+    &quot;zone&quot;: 7,
+    &quot;band&quot;: &quot;high&quot;,
+    &quot;capital&quot;: null,
+    &quot;innate&quot;: [
+      &quot;poison&quot;
+    ],
+    &quot;base_bias_flavor&quot;: &quot;drowned river mouth&quot;,
+    &quot;npcs&quot;: [
+      &quot;counterhand&quot;,
+      &quot;porter&quot;,
+      &quot;waypoint_keeper&quot;
+    ],
+    &quot;stock&quot;: [
+      &quot;bag_slot&quot;,
+      &quot;stash_tab_1&quot;,
       &quot;filter_preset&quot;
     ]
   },
   {
     &quot;id&quot;: &quot;bonegate&quot;,
     &quot;name&quot;: &quot;Bonegate&quot;,
-    &quot;zone&quot;: 7,
+    &quot;zone&quot;: 8,
     &quot;band&quot;: &quot;high&quot;,
     &quot;capital&quot;: null,
     &quot;innate&quot;: [
@@ -343,7 +356,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;reliquary&quot;,
       &quot;collector_hint&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;road_link&quot;,
       &quot;repair&quot;,
       &quot;filter_preset&quot;
     ]
@@ -351,7 +363,7 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
   {
     &quot;id&quot;: &quot;frosthold&quot;,
     &quot;name&quot;: &quot;Frosthold&quot;,
-    &quot;zone&quot;: 8,
+    &quot;zone&quot;: 9,
     &quot;band&quot;: &quot;high&quot;,
     &quot;capital&quot;: null,
     &quot;innate&quot;: [
@@ -368,17 +380,15 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;stock&quot;: [
       &quot;repair&quot;,
       &quot;tint_heavy&quot;,
-      &quot;stash_tab_1&quot;,
-      &quot;road_link&quot;,
-      &quot;waypoint_reanchor&quot;
+      &quot;stash_tab_1&quot;
     ]
   },
   {
     &quot;id&quot;: &quot;vermolch&quot;,
     &quot;name&quot;: &quot;Vermolch&quot;,
-    &quot;zone&quot;: 9,
-    &quot;band&quot;: &quot;high&quot;,
-    &quot;capital&quot;: &quot;high&quot;,
+    &quot;zone&quot;: 10,
+    &quot;band&quot;: &quot;low&quot;,
+    &quot;capital&quot;: &quot;low&quot;,
     &quot;innate&quot;: [
       &quot;poison&quot;,
       &quot;chaos&quot;
@@ -403,44 +413,21 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;prestige_title&quot;,
       &quot;pedlar_rotation&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;road_link&quot;,
       &quot;repair&quot;,
       &quot;filter_preset&quot;
     ]
   },
   {
-    &quot;id&quot;: &quot;thornwake&quot;,
-    &quot;name&quot;: &quot;Thornwake&quot;,
-    &quot;zone&quot;: 10,
-    &quot;band&quot;: &quot;low&quot;,
-    &quot;capital&quot;: null,
-    &quot;innate&quot;: [
-      &quot;poison&quot;
-    ],
-    &quot;base_bias_flavor&quot;: &quot;wet lowland&quot;,
-    &quot;npcs&quot;: [
-      &quot;counterhand&quot;,
-      &quot;porter&quot;,
-      &quot;waypoint_keeper&quot;
-    ],
-    &quot;stock&quot;: [
-      &quot;bag_slot&quot;,
-      &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
-      &quot;filter_preset&quot;
-    ]
-  },
-  {
-    &quot;id&quot;: &quot;greyfen&quot;,
-    &quot;name&quot;: &quot;Greyfen&quot;,
+    &quot;id&quot;: &quot;duskmoor&quot;,
+    &quot;name&quot;: &quot;Duskmoor&quot;,
     &quot;zone&quot;: 11,
     &quot;band&quot;: &quot;low&quot;,
     &quot;capital&quot;: null,
     &quot;innate&quot;: [
-      &quot;poison&quot;,
+      &quot;cold&quot;,
       &quot;chaos&quot;
     ],
-    &quot;base_bias_flavor&quot;: &quot;wet lowland&quot;,
+    &quot;base_bias_flavor&quot;: &quot;open moor&quot;,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;porter&quot;,
@@ -449,20 +436,20 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;stock&quot;: [
       &quot;bag_slot&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
       &quot;filter_preset&quot;
     ]
   },
   {
-    &quot;id&quot;: &quot;saltmarrow&quot;,
-    &quot;name&quot;: &quot;Saltmarrow&quot;,
+    &quot;id&quot;: &quot;nettlecrag&quot;,
+    &quot;name&quot;: &quot;Nettlecrag&quot;,
     &quot;zone&quot;: 12,
     &quot;band&quot;: &quot;low&quot;,
     &quot;capital&quot;: &quot;low&quot;,
     &quot;innate&quot;: [
-      &quot;chaos&quot;
+      &quot;chaos&quot;,
+      &quot;poison&quot;
     ],
-    &quot;base_bias_flavor&quot;: &quot;salt flats&quot;,
+    &quot;base_bias_flavor&quot;: &quot;thorn country&quot;,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;steward&quot;,
@@ -475,7 +462,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;stock&quot;: [
       &quot;bag_slot&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
       &quot;filter_preset&quot;
     ]
   },
@@ -497,87 +483,36 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;stock&quot;: [
       &quot;bag_slot&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
       &quot;filter_preset&quot;
     ]
   },
   {
-    &quot;id&quot;: &quot;duskmoor&quot;,
-    &quot;name&quot;: &quot;Duskmoor&quot;,
+    &quot;id&quot;: &quot;millbrook&quot;,
+    &quot;name&quot;: &quot;Millbrook&quot;,
     &quot;zone&quot;: 14,
     &quot;band&quot;: &quot;mid&quot;,
     &quot;capital&quot;: null,
     &quot;innate&quot;: [
-      &quot;cold&quot;,
-      &quot;chaos&quot;
-    ],
-    &quot;base_bias_flavor&quot;: &quot;open moor&quot;,
-    &quot;npcs&quot;: [
-      &quot;counterhand&quot;,
-      &quot;porter&quot;,
-      &quot;waypoint_keeper&quot;
-    ],
-    &quot;stock&quot;: [
-      &quot;bag_slot&quot;,
-      &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
-      &quot;filter_preset&quot;
-    ]
-  },
-  {
-    &quot;id&quot;: &quot;nettlecrag&quot;,
-    &quot;name&quot;: &quot;Nettlecrag&quot;,
-    &quot;zone&quot;: 15,
-    &quot;band&quot;: &quot;mid&quot;,
-    &quot;capital&quot;: &quot;mid&quot;,
-    &quot;innate&quot;: [
-      &quot;chaos&quot;,
       &quot;poison&quot;
     ],
-    &quot;base_bias_flavor&quot;: &quot;thorn country&quot;,
+    &quot;base_bias_flavor&quot;: &quot;cloth / light&quot;,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
-      &quot;steward&quot;,
       &quot;porter&quot;,
-      &quot;guild_clerk&quot;,
-      &quot;armourer&quot;,
       &quot;waypoint_keeper&quot;,
       &quot;herbalist&quot;
     ],
     &quot;stock&quot;: [
+      &quot;herb_pouch_ii&quot;,
       &quot;bag_slot&quot;,
-      &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
-      &quot;filter_preset&quot;
-    ]
-  },
-  {
-    &quot;id&quot;: &quot;blackwater_reach&quot;,
-    &quot;name&quot;: &quot;Blackwater Reach&quot;,
-    &quot;zone&quot;: 16,
-    &quot;band&quot;: &quot;high&quot;,
-    &quot;capital&quot;: null,
-    &quot;innate&quot;: [
-      &quot;poison&quot;
-    ],
-    &quot;base_bias_flavor&quot;: &quot;drowned river mouth&quot;,
-    &quot;npcs&quot;: [
-      &quot;counterhand&quot;,
-      &quot;porter&quot;,
-      &quot;waypoint_keeper&quot;
-    ],
-    &quot;stock&quot;: [
-      &quot;bag_slot&quot;,
-      &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
       &quot;filter_preset&quot;
     ]
   },
   {
     &quot;id&quot;: &quot;wyrmback&quot;,
     &quot;name&quot;: &quot;Wyrmback&quot;,
-    &quot;zone&quot;: 17,
-    &quot;band&quot;: &quot;high&quot;,
+    &quot;zone&quot;: 15,
+    &quot;band&quot;: &quot;mid&quot;,
     &quot;capital&quot;: null,
     &quot;innate&quot;: [
       &quot;fire&quot;,
@@ -592,21 +527,19 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
     &quot;stock&quot;: [
       &quot;bag_slot&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
       &quot;filter_preset&quot;
     ]
   },
   {
-    &quot;id&quot;: &quot;the_pale_spire&quot;,
-    &quot;name&quot;: &quot;The Pale Spire&quot;,
-    &quot;zone&quot;: 18,
+    &quot;id&quot;: &quot;ashfall&quot;,
+    &quot;name&quot;: &quot;Ashfall&quot;,
+    &quot;zone&quot;: 16,
     &quot;band&quot;: &quot;high&quot;,
     &quot;capital&quot;: &quot;high&quot;,
     &quot;innate&quot;: [
-      &quot;chaos&quot;,
-      &quot;poison&quot;
+      &quot;fire&quot;
     ],
-    &quot;base_bias_flavor&quot;: &quot;the pale spire&quot;,
+    &quot;base_bias_flavor&quot;: &quot;light (Evasion)&quot;,
     &quot;npcs&quot;: [
       &quot;counterhand&quot;,
       &quot;steward&quot;,
@@ -614,15 +547,62 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
       &quot;guild_clerk&quot;,
       &quot;armourer&quot;,
       &quot;waypoint_keeper&quot;,
+      &quot;collector&quot;,
       &quot;herbalist&quot;
+    ],
+    &quot;stock&quot;: [
+      &quot;house_ashfall&quot;,
+      &quot;plot_deed_4&quot;,
+      &quot;militia&quot;,
+      &quot;collector_hint&quot;,
+      &quot;stash_tab_1&quot;,
+      &quot;repair&quot;,
+      &quot;filter_preset&quot;
+    ]
+  },
+  {
+    &quot;id&quot;: &quot;ironrow&quot;,
+    &quot;name&quot;: &quot;Ironrow&quot;,
+    &quot;zone&quot;: 17,
+    &quot;band&quot;: &quot;high&quot;,
+    &quot;capital&quot;: null,
+    &quot;innate&quot;: [
+      &quot;lightning&quot;
+    ],
+    &quot;base_bias_flavor&quot;: &quot;light / Ring Mail&quot;,
+    &quot;npcs&quot;: [
+      &quot;counterhand&quot;,
+      &quot;porter&quot;,
+      &quot;waypoint_keeper&quot;,
+      &quot;armourer&quot;
+    ],
+    &quot;armourer_discount_m&quot;: 12,
+    &quot;stock&quot;: [
+      &quot;repair_ironrow&quot;,
+      &quot;stash_tab_1&quot;,
+      &quot;potion_carrier_slot&quot;
+    ]
+  },
+  {
+    &quot;id&quot;: &quot;thornwake&quot;,
+    &quot;name&quot;: &quot;Thornwake&quot;,
+    &quot;zone&quot;: 18,
+    &quot;band&quot;: &quot;high&quot;,
+    &quot;capital&quot;: null,
+    &quot;innate&quot;: [
+      &quot;poison&quot;
+    ],
+    &quot;base_bias_flavor&quot;: &quot;wet lowland&quot;,
+    &quot;npcs&quot;: [
+      &quot;counterhand&quot;,
+      &quot;porter&quot;,
+      &quot;waypoint_keeper&quot;
     ],
     &quot;stock&quot;: [
       &quot;bag_slot&quot;,
       &quot;stash_tab_1&quot;,
-      &quot;waypoint_reanchor&quot;,
       &quot;filter_preset&quot;
-    ],
-    &quot;budget_note&quot;: &quot;The last settlement also carries the push band past the spawn cap (levels 181-190), which is where the pre-18-zone world put those hours on Vermolch.&quot;
+    ]
   }
 ]</pre><p><a href="../tools/data/town.json">tools/data/town.json</a> · <a href="edit.html">snapshots</a></p></section>
 </div>

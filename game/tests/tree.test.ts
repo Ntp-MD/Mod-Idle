@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { eng, tree } from '../src/engine/client';
 import { newGame, setLevel, tick } from '../src/sim/game';
@@ -59,6 +61,16 @@ describe('the passive tree is spent one rank at a time', () => {
     expect(refund.refunded).toBe(spent);
     expect(treePointsFree(s)).toBe(5);
     expect(treeLines(s)).toEqual([]);
+  });
+
+  // The unit tests above pass `treeRanks` by hand, so they cannot see the one wiring mistake that
+  // shipped: the client built the sheet without threading the state's ranks, and a bought rank lit a
+  // pip while the sheet never moved. This reads the call site, so forgetting the argument fails here.
+  it('the client threads the state tree ranks into the sheet', () => {
+    const app = fs.readFileSync(path.resolve(import.meta.dirname, '../src/App.svelte'), 'utf8');
+    const call = app.match(/buildCharacter\(([^;]*)\)/);
+    expect(call, 'App.svelte must build the character sheet from buildCharacter').toBeTruthy();
+    expect(call![1]).toContain('treeRanks');
   });
 
   it('the tree is live in the hunt: ranks are read from the state, not from a copy', () => {

@@ -33,7 +33,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     randomize: { tier: 1 },
     ascend: { add: C.ascend_add_stones, tier: C.ascend_tier_stones },
     remove: { remove: C.remove_stones_per_use },
-    add: { add: E.rarity ? E.rarity.add_stones_per_fill[Math.min((item?.mods_added || 0), 1)] : 1 },
+    add: { add: E.item_level.add_stones_per_fill[Math.min((item?.mods_added || 0), 1)] },
     // Quality Stones per step are `crafting.md`'s ladder: 1/2/3/4/5, 7/9/11/13/15, 18/21/24/27/30
     upgrade: { quality: C.upgrade_costs[Math.min(item?.upgrade_lv || 0, C.upgrade_cap - 1)] },
     repair: { repair: C.repair_stones },
@@ -76,8 +76,8 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
 
   // The skeleton's unremovable head (item-base.md): line 1 is the Base Mod and lines 2-3 the
   // Legacy pair, so the floor every line-editing verb refuses to cross is base_mod_slots + legacy_slots.
-  const BASE_MOD_SLOTS = E.rarity.base_mod_slots || 1;
-  const LEGACY_SLOTS = E.rarity.legacy_slots || 2;
+  const BASE_MOD_SLOTS = E.item_level.base_mod_slots || 1;
+  const LEGACY_SLOTS = E.item_level.legacy_slots || 2;
   const UNTOUCHABLE = BASE_MOD_SLOTS + LEGACY_SLOTS;
 
   /** A line the bench may edit. The Base Mod and the Legacy pair are refused by every verb. */
@@ -112,7 +112,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const e = editable(item, index);
     if (!e.ok) return e;
     const line = e.line;
-    const [lo, hi] = loot.rangeOf(line.id, item.q, lineSlice(line, 2));
+    const [lo, hi] = loot.rangeOf(line.id, item.ilvl, item.q, lineSlice(line, 2));
     const baseline = (item.baselines && item.baselines[index]) != null ? item.baselines[index] : line.value;
     const floor = Math.max(lo, baseline, line.value);
     const value = floor + Math.floor(rng() * (hi - floor + 1));
@@ -131,7 +131,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const slice = lineSlice(line, 2);
     if (slice <= 0) return { ok: false, why: 'that slot is already T1' };
     const to = slice - 1;
-    const [lo, hi] = loot.rangeOf(line.id, item.q, to);
+    const [lo, hi] = loot.rangeOf(line.id, item.ilvl, item.q, to);
     const value = lo + Math.floor(rng() * (hi - lo + 1));
     const next = { ...item, lines: item.lines.map((l: any, i: number) => (i === index ? { ...l, slice: to, value } : l)) };
     return { ok: true, item: next, changed: { index, from: slice, to, lo, hi } };
@@ -144,25 +144,29 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const e = editable(item, index);
     if (!e.ok) return e;
     const line = e.line;
-    const slices = loot.sliceCount(line.id, item.q);
-    const slice = loot.tierSlice(rng(), slices);
-    const [lo, hi] = loot.rangeOf(line.id, item.q, slice);
+    const slices = loot.sliceCount();
+    const slice = loot.tierSlice(rng());
+    const [lo, hi] = loot.rangeOf(line.id, item.ilvl, item.q, slice);
     const value = lo + Math.floor(rng() * (hi - lo + 1));
     const next = { ...item, lines: item.lines.map((l: any, i: number) => (i === index ? { ...l, slice, value } : l)) };
     return { ok: true, item: next, changed: { index, from: lineSlice(line, 2), to: slice, lo, hi } };
   }
 
-  /** Ascend: the whole piece one Item quality step, every line moving into the next band. */
+  /**
+   * Ascend: the whole piece one band up, with its level shifted by one span so the window moves with it
+   * (item-rarity.md). Every line re-rolls inside the same third of the new, higher window.
+   */
   function ascend(item: any, rng: Rng): any {
     const g = guard(item, 'ascend');
     if (!g.ok) return g;
-    if (item.q >= QUALITY_STEPS.length - 1) return { ok: false, why: 'already high quality' };
+    if (item.q >= QUALITY_STEPS.length - 1) return { ok: false, why: 'already the top band' };
     const q = item.q + 1;
+    const ilvl = (item.ilvl || 0) + E.item_level.ascend_levels;
     const lines = item.lines.map((l: any) => {
-      const [lo, hi] = loot.rangeOf(l.id, q, lineSlice(l, 2));
+      const [lo, hi] = loot.rangeOf(l.id, ilvl, q, lineSlice(l, 2));
       return { ...l, value: lo + Math.floor(rng() * (hi - lo + 1)) };
     });
-    return { ok: true, item: { ...item, q, quality: QUALITY_STEPS[q], lines }, changed: { q } };
+    return { ok: true, item: { ...item, ilvl, q, quality: QUALITY_STEPS[q], lines }, changed: { q, ilvl } };
   }
 
   /** Remove: delete one random non-legacy line. Identity changes only via Remove + Add. */
@@ -184,22 +188,20 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
   function add(item: any, pool: string[], rng: Rng, opts: { ignoreAddCap?: boolean } = {}): any {
     const g = guard(item, 'add');
     if (!g.ok) return g;
-    const R = E.rarity;
-    const row = (R as Record<string, any>)[item.rarity];
-    if (!row) return { ok: false, why: `no Rarity row for ${item.rarity}` };
+    const L = E.item_level;
     const added = item.mods_added || 0;
     // `Corrupt`'s +1 Mod is not an Add stone, so it stops at the crafted ceiling instead
-    if (added >= R.mods_added_cap && !opts.ignoreAddCap) {
-      return { ok: false, why: `this piece has taken its ${R.mods_added_cap} Add stones` };
+    if (added >= L.mods_added_cap && !opts.ignoreAddCap) {
+      return { ok: false, why: `this piece has taken its ${L.mods_added_cap} Add stones` };
     }
-    if (item.lines.length >= row.crafted_max) return { ok: false, why: `${item.rarity} stops at ${row.crafted_max} Mods` };
+    if (item.lines.length >= L.crafted_max) return { ok: false, why: `a piece stops at ${L.crafted_max} Mods` };
     const taken = new Set<string>(item.lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
     const blocked = loot.blockedBy(taken);
     const free = pool.filter((id) => !taken.has(id) && !blocked.has(id));
     if (!free.length) return { ok: false, why: 'this Base has no line left that the piece may carry' };
     const id = loot.weightedPick(rng, free.map((m) => ({ id: m, w: loot.weightOf(m, item.q) })));
-    const slice = loot.tierSlice(rng(), loot.sliceCount(id, item.q));
-    const [lo, hi] = loot.rangeOf(id, item.q, slice);
+    const slice = loot.tierSlice(rng());
+    const [lo, hi] = loot.rangeOf(id, item.ilvl, item.q, slice);
     // a Stat Mod stone bakes the Core stat too, the same way a drop does: the piece's own
     // line carries which stat it feeds, so an added Stat Mod is as specific as a rolled one
     const stat = loot.statOf(id, rng);
@@ -207,7 +209,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     return {
       ok: true,
       item: { ...item, lines: [...item.lines, line], mods_added: added + 1 },
-      changed: { id, value: line.value, slice, cost: R.add_stones_per_fill[added] },
+      changed: { id, value: line.value, slice, cost: L.add_stones_per_fill[added] },
     };
   }
 
@@ -277,7 +279,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     let detail = {};
     if (outcome.kind === 'reroll_values') {
       next.lines = item.lines.map((l: any) => {
-        const [lo, hi] = loot.rangeOf(l.id, next.q, lineSlice(l, 2));
+        const [lo, hi] = loot.rangeOf(l.id, next.ilvl, next.q, lineSlice(l, 2));
         return { ...l, value: lo + Math.floor(rng() * (hi - lo + 1)) };
       });
       detail = { lines: next.lines.length };
@@ -301,12 +303,13 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
       detail = { level: next.upgrade_lv };
     } else if (outcome.kind === 'quality_down') {
       const q = Math.max(0, (item.q || 0) - 1);
-      next = { ...next, q, quality: QUALITY_STEPS[q] };
+      const ilvl = Math.max(1, (item.ilvl || 0) - E.item_level.ascend_levels);
+      next = { ...next, ilvl, q, quality: QUALITY_STEPS[q] };
       next.lines = next.lines.map((l: any) => {
-        const [lo, hi] = loot.rangeOf(l.id, q, lineSlice(l, 2));
+        const [lo, hi] = loot.rangeOf(l.id, ilvl, q, lineSlice(l, 2));
         return { ...l, value: lo + Math.floor(rng() * (hi - lo + 1)) };
       });
-      detail = { q };
+      detail = { q, ilvl };
     }
     return { ok: true, item: next, changed: { outcome: outcome.kind, weight: outcome.weight, ...detail } };
   }

@@ -49,21 +49,22 @@ describe('offline time is AFK, not a second play session', () => {
     // (owner ruling · `AGENT.md`). The cap below is a hang guard, never the measurement.
     for (let i = 0; i < 200000 && s.bag.length === 0; i++) tick(s, {}, { online: false });
     expect(s.bag.length).toBeGreaterThan(0);
-    // the away window pins quality to the zone floor exactly. Listing 'high' here as well would make
-    // the assertion vacuous — the floor is 'mid', so allowing the ceiling checks nothing.
-    const floor = E.rarity.floor_ceiling.high.floor;
-    const allowed = new Set([floor]);
-    for (const item of s.bag) expect(allowed.has(item.quality)).toBe(true);
+    // the away window pins the piece to the floor level of its band exactly. Listing the band's own
+    // levels here as well would make the assertion vacuous — the floor of a high band is the mid band's
+    // first level, so allowing anything above it checks nothing.
+    const floorLevel = eng.floorLevelOf('high');
+    for (const item of s.bag) expect(item.ilvl).toBe(floorLevel);
   });
 
-  it('the same zone online can still roll above the floor', () => {
+  it('the same zone online rolls at the mobs the character actually fights', () => {
     const s = newGame(44);
     setLevel(s, 80);
     s.zone = 9;
-    // tick until the above-the-floor roll lands, not for a guessed window: a fixed window makes this
-    // a coin flip on the 8% drop and a coin flip on Item quality (a time premise · AGENT.md).
-    for (let i = 0; i < 200000 && !s.bag.some((item) => item.quality === 'high'); i++) tick(s, {}, { online: true });
-    expect(s.bag.some((item) => item.quality === 'high')).toBe(true);
+    // tick until a piece above the floor level lands, not for a guessed window: a fixed window makes
+    // this a coin flip on the 8% drop (a time premise · AGENT.md).
+    const floorLevel = eng.floorLevelOf('high');
+    for (let i = 0; i < 200000 && !s.bag.some((item) => item.ilvl > floorLevel); i++) tick(s, {}, { online: true });
+    expect(s.bag.some((item) => item.ilvl > floorLevel)).toBe(true);
   });
 });
 
@@ -74,7 +75,7 @@ describe('the salvage milestone (checks.md F15)', () => {
     setRule(s.filter, 'all', { enabled: true }); // the filter ships off, so nothing would dissolve until it is armed
     // wear a full high-quality set so nearly every drop is a rejection
     s.gear = emptyGear().map((_, i) => {
-      const item = rollDrop(mulberry32(100 + i), 'high', 1.2);
+      const item = rollDrop(mulberry32(100 + i), 'high', 61);
       return { ...item, slot: i === 0 ? 'main hand' : item.slot, q: 2, quality: 'high' };
     });
     // the milestone is a count of salvaged pieces, so the run stops when one has been salvaged
@@ -88,8 +89,8 @@ describe('the salvage milestone (checks.md F15)', () => {
 
 describe('the Reroll baseline survives a downgrade (save.md)', () => {
   it('remembers the highest value the slot ever held', () => {
-    let item = rollDrop(mulberry32(51), 'low', 1.2);
-    item = { ...item, rarity: 'Rare', q: 0, quality: 'low', lines: item.lines.map((l) => ({ ...l, slice: 1 })) };
+    let item = rollDrop(mulberry32(51), 'low', 1);
+    item = { ...item, ilvl: 61, q: 0, quality: 'low', lines: item.lines.map((l) => ({ ...l, slice: 1 })) };
     const up = craft.reroll(item, craft.UNTOUCHABLE, mulberry32(3));
     expect(up.ok).toBe(true);
     const baseline = up.item.lines[craft.UNTOUCHABLE].value;
@@ -118,8 +119,29 @@ describe('the save schema and the account', () => {
     const m = migrate(bare);
     expect(m.presets.length).toBe(E.presets.sets);
     expect(m.grants.stash_tabs).toBe(0);
-    expect(m.pedlar.kills).toEqual([]);
+    expect(m.pedlar.minutes).toEqual([]);
     expect(m.collector.done).toEqual({});
+  });
+
+  it('re-stamps a pre-level piece: it gains its band\u2019s first level and keeps every value', () => {
+    const v8 = newGame(53);
+    // a v8 piece as the old axis wrote it: a Rarity, a band, and the old slice order (T1 = the bottom)
+    const old = {
+      slot: 'helmet', base: 'Sallet', rarity: 'Rare', quality: 'high', tier: 'T1', q: 2,
+      lines: [
+        { id: 'max_hp_flat', value: 123, slice: 0 },
+        { id: 'armour_pct', value: 11, slice: 2 },
+      ],
+    } as any;
+    v8.gear[0] = old;
+    (v8 as any).autoDissolveRarity = 'Common';
+    const m = migrate(JSON.parse(JSON.stringify(v8)), 8);
+    expect(m.gear[0]!.ilvl).toBe(eng.floorLevelOf('high')); // the floor level of its own band
+    expect((m.gear[0] as any).rarity).toBeUndefined();
+    expect(m.gear[0]!.lines.map((l) => l.value)).toEqual([123, 11]); // every value as it was
+    expect(m.gear[0]!.lines.map((l) => l.slice)).toEqual([2, 0]); // the labels flipped onto the new order
+    expect(m.gear[0]!.tier).toBe('T3');
+    expect(m.autoDissolveLevel).toBe(31); // the old keep-above-Common setting became a level floor
   });
 
   it('carries the passive-tree ranks through an export and a load', () => {

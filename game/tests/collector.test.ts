@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { TOWN, BASES, eng } from '../src/engine/client';
 import { col, setUnlocked, turnIn, heldCount, wants, newGrants } from '../src/sim/collector';
-import { stashTabCount, stockOf, priceKills } from '../src/sim/town';
+import { stashTabCount, stockOf, priceMinutes } from '../src/sim/town';
 import { newGame } from '../src/sim/game';
 
 const piece = (base: string, slot: string, quality = 'low') => ({
-  slot, base, rarity: 'Common', quality, tier: 'T1', lines: [], q: 0, weight: 30,
+  slot, base, ilvl: 1, quality, tier: 'T1', lines: [], q: 0, weight: 30,
 });
 
 describe('the three sets are the ones town.json names', () => {
@@ -101,7 +101,7 @@ describe('the Collector panel has something to sell', () => {
     for (const town of ['ashfall', 'bonegate', 'vermolch']) {
       const ids = stockOf(town).map((r: any) => r.id);
       expect(ids).toContain('collector_hint');
-      expect(priceKills(TOWN.repeatable.find((r: any) => r.id === 'collector_hint'), town)).toBe(col.HINT_PRICE_K);
+      expect(priceMinutes(TOWN.repeatable.find((r: any) => r.id === 'collector_hint'), town)).toBe(col.HINT_PRICE_M);
     }
   });
 

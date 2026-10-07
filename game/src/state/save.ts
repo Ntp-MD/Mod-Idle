@@ -9,7 +9,7 @@ import { newGoal } from '../sim/goal';
 import { newCurses } from '../sim/curse';
 import { newMobStatusStore } from '../sim/mobStatus';
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
-import { E, BASES, loot } from '../engine/client';
+import { E, BASES, eng, loot } from '../engine/client';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
@@ -17,10 +17,14 @@ import { E, BASES, loot } from '../engine/client';
 // v4 is the 7-line skeleton: a v3 item is re-stamped, not discarded. v5 bakes the Core stat
 // onto every Stat Mod line, so a v4 piece keeps the stat its player chose. v6 grows the worn
 // set to a thirteenth slot, the earring, so a v5 gear array is padded back to full length.
+// v9 is the item level: Rarity is gone, every drop carries the same line count, and a v8 item gains
+// the level its band starts at with its labels flipped onto the new order. v10 deletes the hunt
+// systems: the per-zone Hunt Order and the per-zone hunting ground are gone, so a v9 save's fields for
+// them are dropped — the variant's own lean is the only lean left.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 10;
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
 
@@ -216,17 +220,35 @@ export async function readSave(slot: SlotName): Promise<GameState | null> {
 
 /**
  * A v3 item predates the 7-line skeleton, so it gains the Base Mod its frame forces and keeps every
- * line it had — the old Legacy pair slides to lines 2-3 (``). The line is built at the lowest
- * Tier and lowest value of the piece's quality band with no RNG, so two loads of one save agree to
- * the digit. A frame the rename left unmatched simply keeps its lines, with no Base Mod.
+ * line it had — the old Legacy pair slides to lines 2-3 (``). The line is built at the lowest value of
+ * the piece's window with no RNG, so two loads of one save agree to the digit. A frame the rename left
+ * unmatched simply keeps its lines, with no Base Mod.
  */
 function restampItem(item: any): void {
   if (!item || !Array.isArray(item.lines)) return;
   const frame = BASES.bases.find((b: any) => b.name === item.base && b.slot === item.slot) || null;
   const weapon = frame ? null : BASES.weapons.find((w: any) => item.base === w.name) || null;
   const q = item.q ?? Math.max(0, loot.BAND_LABEL.indexOf(item.quality));
-  const base = loot.baseModAtFloor(BASES, item.slot, frame, weapon, q);
+  const band = loot.BAND_LABEL[q] || 'low';
+  const base = loot.baseModAtFloor(BASES, item.slot, frame, weapon, item.ilvl ?? eng.floorLevelOf(band), q);
   if (base.length) item.lines = [...base, ...item.lines];
+}
+
+/**
+ * A v8 item predates the item level. It gains the level its band starts at — the same level an offline
+ * drop lands on, so the piece reads as the floor of the band it came from — and its labels are flipped
+ * onto the new order, because the old T1 named the window's bottom and the new T1 names its top. Every
+ * value it holds is kept exactly as it was, and the Rarity field goes away.
+ */
+function levelItem(item: any): void {
+  if (!item || !Array.isArray(item.lines)) return;
+  const band = loot.BAND_LABEL[item.q ?? 0] || item.quality || 'low';
+  if (item.ilvl == null) item.ilvl = Math.max(1, eng.floorLevelOf(band));
+  for (const line of item.lines) if (line && line.slice != null) line.slice = 2 - line.slice;
+  // the item-level tier label rides the same flip, so a piece's tier keeps describing its own lines
+  if (item.tier === 'T1') item.tier = 'T3';
+  else if (item.tier === 'T3') item.tier = 'T1';
+  delete item.rarity;
 }
 
 /**
@@ -262,6 +284,27 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     const n = E.stat.item_slots as number;
     while (s.gear.length < n) s.gear.push(null);
   }
+  // v8 · travel became walking. A v7 save has a Road trip, a carriage ledger and a bought-link count;
+  // none of them exist now, so they are dropped. Every settlement it had already visited keeps its
+  // Waypoint, because a visited settlement is what a Waypoint is — the walk to the rest starts again.
+  if (fromVersion < 8) {
+    delete (s as any).road;
+    delete (s as any).purseDay;
+    delete (s as any).chestDay;
+    if (s.town) delete (s.town as any).linksBought;
+  }
+  if (!s.walk) s.walk = null;
+  // v9 · the item level replaced Rarity. Every piece the save holds gains its level and its labels are
+  // flipped onto the new order; the auto-dissolve setting moves off the Rarity axis onto the level one,
+  // keeping the same idea (the named Rarity's own top level is where "keep above this" now starts).
+  if (fromVersion < 9) {
+    for (const item of s.gear || []) levelItem(item);
+    for (const item of s.bag || []) levelItem(item);
+    for (const tab of s.stash || []) for (const item of tab || []) levelItem(item);
+    const old = (s as any).autoDissolveRarity as string | undefined;
+    if (old && old !== 'off') s.autoDissolveLevel = old === 'Rare' ? 61 : 31;
+    delete (s as any).autoDissolveRarity;
+  }
   if (!s.skills) s.skills = newSkillState();
   // a save from before §14 has no per-slot mode and no shared condition list: default them, so the
   // rotation keeps behaving exactly as it did (`always`) until the player changes something
@@ -278,16 +321,23 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // junk used to be carried per RARITY; the item is per variant now, so a pre-variant stack is moved
   // onto one item of its own rarity. Every rarity is worth the same gold per kill by construction, so
   // the move is value-exact — nothing is deleted and no gold is minted (`junk.rarities` · X39).
-  if (s.junkByRarity) {
+  const junkByRarity = (s as any).junkByRarity as Record<string, number> | undefined;
+  if (junkByRarity) {
     const firstOfRarity: Record<string, string> = {};
     for (const r of Object.values((E.mob as any).variant_drops || {}) as any[]) firstOfRarity[r.rarity] = firstOfRarity[r.rarity] || r.item;
-    for (const [rarity, count] of Object.entries(s.junkByRarity)) {
+    for (const [rarity, count] of Object.entries(junkByRarity)) {
       const item = firstOfRarity[rarity];
       if (item && count) s.junk[item] = (s.junk[item] || 0) + Number(count);
     }
     delete (s as any).junkByRarity;
   }
-  if (!s.zoneFocus) s.zoneFocus = {};
+  // v10 · the hunt systems are gone: the per-zone Hunt Order override and the per-zone hunting ground
+  // are deleted fields, and a save that still carries them simply loses them (the variant's lean, which
+  // survives, is the only author of a lean now).
+  if (fromVersion < 10) {
+    delete (s as any).huntOrder;
+    delete (s as any).zoneFocus;
+  }
   if (!s.town) s.town = newTown();
   if (!s.farm) s.farm = newFarm();
   // a farm saved before the automation block existed gets it off; the player opts in
@@ -295,35 +345,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // an older character auto-allocates its points (the idle default); manual is the opt-out 
   if (s.player && s.player.autoSpend == null) s.player.autoSpend = true;
   if (!s.stash) s.stash = [];
-  // an older save auto-dissolves nothing; the player opts in
-  if (!s.autoDissolveRarity) s.autoDissolveRarity = 'off';
-  if (!s.purseDay) s.purseDay = {};
-  if (!s.chestDay) s.chestDay = {};
-  // A Road saved before the block walk has one `secLeft` for the whole leg and an optional
-  // `circuit` array. Re-express that progress as a block and the unified route/loop shape.
-  if (s.road) {
-    const trip = s.road as any;
-    const oldCircuit: number[] = Array.isArray(trip.circuit) ? trip.circuit : [];
-    if (!Array.isArray(trip.route) || !trip.route.length) trip.route = oldCircuit.length ? [...oldCircuit] : [trip.linkIndex];
-    if (typeof trip.loop !== 'boolean') trip.loop = oldCircuit.length > 0;
-    if (trip.destination === undefined) trip.destination = trip.loop ? null : trip.settlementTo;
-    if (trip.legIndex == null) trip.legIndex = 0;
-    if (trip.laps == null) trip.laps = 0;
-    if (trip.chestPaid == null) trip.chestPaid = false;
-    const link = E.road.links[trip.linkIndex];
-    const blockSec = E.road.walk.block_sec;
-    const totalSec = (link?.trip_min ?? E.road.trip_min) * 60;
-    if (!Number.isFinite(trip.blocks)) trip.blocks = totalSec / blockSec;
-    if (!Number.isFinite(trip.blockIndex)) {
-      const elapsed = Math.max(0, Math.min(totalSec, totalSec - (Number.isFinite(trip.secLeft) ? trip.secLeft : totalSec)));
-      trip.blockIndex = Math.min(trip.blocks, Math.floor(elapsed / blockSec));
-      const withinBlock = elapsed % blockSec;
-      trip.secLeft = elapsed >= totalSec ? 0 : withinBlock === 0 ? blockSec : blockSec - withinBlock;
-    } else if (!Number.isFinite(trip.secLeft)) {
-      trip.secLeft = blockSec;
-    }
-    delete trip.circuit;
-  }
+  // an older save auto-dissolves nothing; the player opts in with a level floor
+  if (s.autoDissolveLevel == null) s.autoDissolveLevel = 0;
   if (!s.mastery) s.mastery = {};
   // a save written before the field existed has no wall-clock stamp, which the offline catch-up
   // reads: without it the whole away period is silently skipped. Default to "now" (no phantom
@@ -333,9 +356,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (s.activePreset == null) s.activePreset = 0;
   if (!s.collector) s.collector = newCollector();
   if (!s.grants) s.grants = newGrants();
-  // the pedlar's roll was priced in minutes before the kill denominate: an old roll is dropped and
-  // re-rolled on the next tick rather than carried with the wrong unit
-  if (!s.pedlar || !Array.isArray((s.pedlar as any).kills)) s.pedlar = { day: 0, kills: [], bought: 0 };
+  if (!s.pedlar) s.pedlar = { day: 0, minutes: [], bought: 0 };
   if (!s.filter) s.filter = newFilter();
   if (s.travel !== 'forward') s.travel = 'stay';
   if (!s.goal) s.goal = newGoal();

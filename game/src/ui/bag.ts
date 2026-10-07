@@ -7,10 +7,10 @@ import type { BagStack } from '../sim/slots';
  * The bag view model.
  *
  * A slot in the panel is either a piece of gear or one carried stack, and both need the same three
- * things to be drawn and sorted: a title, a rank for Rarity and Item quality, and a strength number.
- * Nothing here decides what is strong — `loot.score` does, the same function the bag filter and the
- * cages read — and the orders come out of the data the roll already uses (`loot.RARITY`,
- * `eng.BANDS`), so the panel cannot invent a tier that the drop engine does not know.
+ * things to be drawn and sorted: a title, the item's level, and a strength number. Nothing here decides
+ * what is strong — `loot.score` does, the same function the bag filter and the cages read — and the
+ * orders come out of the data the roll already uses, so the panel cannot invent a tier the drop engine
+ * does not know.
  */
 
 export interface SlotEntry {
@@ -22,7 +22,7 @@ export interface SlotEntry {
   item?: Item;
   stack?: BagStack;
   icon: string;
-  rarityRank: number;
+  levelRank: number;
   qualityRank: number;
   score: number;
   slot: string;
@@ -30,7 +30,6 @@ export interface SlotEntry {
   heldFor?: string;
 }
 
-const RARITY_ORDER = (loot.RARITY as any[]).map((r) => String(r.name));
 const QUALITY_ORDER = (engBands() as string[]);
 
 function engBands(): string[] {
@@ -48,10 +47,10 @@ export function gearEntry(item: Item, index: number): SlotEntry {
     index,
     kind: 'gear',
     title: item.base,
-    sub: `${item.rarity} · ${item.quality} · ${item.tier}`,
+    sub: `level ${item.ilvl} · ${item.quality} · ${item.tier}`,
     item,
     icon: gearIcon(item),
-    rarityRank: rankOf(RARITY_ORDER, item.rarity),
+    levelRank: item.ilvl,
     qualityRank: rankOf(QUALITY_ORDER, item.quality),
     score: loot.score({ ...item, q: item.q ?? 0 }),
     slot: item.slot,
@@ -67,7 +66,7 @@ export function stackEntry(stack: BagStack, index: number): SlotEntry {
     sub: stack.group,
     stack,
     icon: stackIcon(stack.group, stack.name),
-    rarityRank: -1,
+    levelRank: -1,
     qualityRank: -1,
     score: stack.count,
     slot: '',
@@ -75,12 +74,12 @@ export function stackEntry(stack: BagStack, index: number): SlotEntry {
   };
 }
 
-export type SortKey = 'newest' | 'slot' | 'rarity' | 'strength' | 'name';
+export type SortKey = 'newest' | 'slot' | 'level' | 'strength' | 'name';
 
 export const SORT_LABELS: Record<SortKey, string> = {
   newest: 'as it dropped',
   slot: 'by slot',
-  rarity: 'by Rarity',
+  level: 'by item level',
   strength: 'by strength',
   name: 'by name',
 };
@@ -92,8 +91,8 @@ export function sortEntries(entries: SlotEntry[], key: SortKey): SlotEntry[] {
   if (key === 'newest') return list.sort((a, b) => a.index - b.index);
   if (key === 'name') return list.sort(byName);
   if (key === 'slot') return list.sort((a, b) => a.slot.localeCompare(b.slot) || b.score - a.score);
-  if (key === 'rarity') {
-    return list.sort((a, b) => b.rarityRank - a.rarityRank || b.qualityRank - a.qualityRank || b.score - a.score || byName(a, b));
+  if (key === 'level') {
+    return list.sort((a, b) => b.levelRank - a.levelRank || b.qualityRank - a.qualityRank || b.score - a.score || byName(a, b));
   }
   return list.sort((a, b) => b.score - a.score || byName(a, b));
 }

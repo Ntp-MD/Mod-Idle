@@ -91,14 +91,14 @@ mastery_xp   = 4 per 1 kill (counts only the held weapon)
 mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 ```
 
-**Tied to the character XP formula ** · the *same kill* that pays character XP pays Mastery XP, so the two tracks read one kill stream and the whole table below divides by the band's own kill count that `xp` already uses (loot.md section 2 · checks.md F1) · the old "1 per hit" half is retired: the character XP formula has no hit term, and no file ever set a hits/hour anchor for it, so keeping it would leave Mastery paced off an un-owned number instead of the kill curve · Mastery stays a *fixed per-kill* value and deliberately does **not** scale with mob level — that would make it a second copy of the level curve and break its role as the level-independent parallel side-track H2 requires
+**Tied to the character XP formula ** · the *same kill* that pays character XP pays Mastery XP, so the two tracks read one kill stream and the whole table below is a count of kills (loot.md section 2 · checks.md F1) · the old "1 per hit" half is retired: the character XP formula has no hit term, and no file ever set a hit anchor for it, so keeping it would leave Mastery paced off an un-owned number instead of the kill curve · Mastery stays a *fixed per-kill* value and deliberately does **not** scale with mob level — that would make it a second copy of the level curve and break its role as the level-independent parallel side-track H2 requires
 
-| Level | Cumulative xp | Kills to reach | Hours at level 90 (high-band kill rate) |
-|---|---|---|---|
-| 5 | 1,600 | 400 | 0.22 |
-| 10 | 8,100 | 2,025 | 1.13 |
-| 15 | 19,600 | 4,900 | 2.72 |
-| 20 | 36,100 | 9,025 | 5.01 |
+| Level | Cumulative xp | Kills to reach |
+|---|---|---|
+| 5 | 1,600 | 400 |
+| 10 | 8,100 | 2,025 |
+| 15 | 19,600 | 4,900 |
+| 20 | 36,100 | 9,025 |
 
 ## Two-layer bonus — and the layer intentionally *not touching DPS*
 
@@ -116,7 +116,7 @@ mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 11 types to L20  = 550,000 Mastery XP → this is the long tail, and nothing rushes it
 ```
 
-- The XP comes straight from the kill table above ×11, so a lower band simply pays it slower because the band fields fewer kills — the track is now read entirely off the kill rate, not attack speed · Therefore Mastery is a "parallel track" that walks early game then accelerates as the kill rate climbs
+- The XP comes straight from the kill table above ×11, so a lower band simply pays it slower because the band fields fewer kills — the track is now read entirely off the kill stream, not attack speed · Therefore Mastery is a "parallel track" that walks early game then accelerates as the zones climb
 - **AFK earns full Mastery** because it counts purely from kills, unrelated to boss or Item quality · It is the only system in the game that progresses fully while closed — intentionally, so low-playtime players have their own progress track
 
 ## Measured side effects (Mastery L20 on weight tax)
@@ -124,7 +124,7 @@ mastery_level = floor(sqrt(mastery_xp / 100)) + 1     · cap 20
 No table here: the set weights and their taxes are printed once, from `tools/data/bases.json`, in the generated block in `formula-utility.md` section 11 (`node tools/bases.ts --blocks`). Mastery acts on the **held weapon** only — it discounts that weapon's weight by up to 20% — and the weight it discounts is the **weight** column above, per type (B13), so the size of the saving scales with the type you are holding and this file states the number exactly once.
 
 - Mastery **is not a shortcut past Str** — an armored build without Str still hits the tax Cap; the discount applies to one weapon line out of eleven
-- Drop effect: no-Lck players get 139 → 154 drops per 1,000 kills (+11%) · Full Lck 428 → 475 — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
+- Drop effect: no-Lck players get 0.139 → 0.155 pieces per kill (+11%) · Full Lck 0.428 → 0.475 — Mastery adds *quantity* the same way as Lck but only 1/8 as strong as full Lck, so it does not steal the role set in loot.md
 
 # Display
 

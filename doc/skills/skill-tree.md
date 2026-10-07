@@ -30,5 +30,5 @@ The removed design was not a node graph. Its own budget said so: 100 points, of 
 
 ## Still open
 
-- **The `mob_HP` fold** — the tree is not folded into the mob price yet (owner ruling: content and plumbing first). When it is, its power has to be booked inside the curve, and `tools/tree.ts` is the point where that factor is declared.
-- **Balance against the mob price** — the scale is stated (a tenth / a fifth of a line at rank 3, two thirds of a gear set for the whole tree) but nothing has measured it against `mob_HP`, because the fold is open.
+- **The `mob_HP` fold — closed, by ruling.** The tree's power is not booked into the mob price: the published rates are the empty-tree baseline, so a rank bought is a strength no published number pays for and no price moves. `tools/tree.ts` stays the one place the scale is declared, and there is no pass waiting to measure it.
+- **Balance against the mob price** — the scale is a stated rule, not a measured one, and it stays that way (owner ruling): a tenth / a fifth of a line at rank 3, about two thirds of a gear set for the whole tree. The published rates are the empty-tree baseline, so nothing here is priced against `mob_HP`.

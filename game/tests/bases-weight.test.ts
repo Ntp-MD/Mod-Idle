@@ -46,7 +46,7 @@ describe('the weight tax from formula-utility.md section 11', () => {
     for (let i = 0; i < heavy.length; i++) {
       const name = PATHS.armored[i % PATHS.armored.length];
       const frame = BASES.bases.find((b: any) => b.name === name)!;
-      heavy[i] = { slot: frame.slot, base: frame.name, rarity: 'Rare', quality: 'high', tier: 'T3', lines: [], q: 2, weight: frame.weight * 1.3 };
+      heavy[i] = { slot: frame.slot, base: frame.name, ilvl: 61, quality: 'high', tier: 'T3', lines: [], q: 2, weight: frame.weight * 1.3 };
     }
     const c = buildCharacter(100, heavy);
     expect(c.weightUsed).toBeLessThanOrEqual(c.weightCap);
@@ -60,7 +60,7 @@ describe('drops are built from the Base table', () => {
     const rng = mulberry32(20260104);
     const weaponNames = BASES.weapons.map((w: any) => w.name);
     for (let i = 0; i < 400; i++) {
-      const item = rollDrop(rng, ['low', 'mid', 'high'][i % 3], 1.2);
+      const item = rollDrop(rng, ['low', 'mid', 'high'][i % 3], 1);
       if (weaponNames.includes(item.base)) {
         // a weapon — main hand, or a dual-wielded off hand — forces its own line-1 Mods
         expect(item.lines.length).toBeGreaterThan(0);
@@ -84,7 +84,7 @@ describe('drops are built from the Base table', () => {
   });
 
   it('quality weighs more, at the multiplier bases.json carries', () => {
-    const low = rollDrop(mulberry32(7), 'low', 1.2);
+    const low = rollDrop(mulberry32(7), 'low', 1);
     const frame = BASES.bases.find((b: any) => b.name === low.base);
     if (frame) {
       expect(low.weight).toBeCloseTo(frame.weight * Math.pow(BASES.quality_weight_multiplier, low.q!), 6);

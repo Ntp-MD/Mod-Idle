@@ -61,9 +61,9 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <body>
 <header class="top">
 <span class="brand"><b>ModWorld</b> wiki</span>
-<span class="stamp">rendered 2026-10-06 16:19:48Z · static build</span>
+<span class="stamp">rendered 2026-10-07 10:43:49Z · static build</span>
 <form class="inline" onsubmit="return false"><input id="q" type="search" placeholder="filter this page (/)" aria-label="Filter this page"></form>
-<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>346</b></span><span class="chip ok">checks <b>184/0/1</b></span><span class="chip ">generated blocks <b>3</b></span></span>
+<span class="chips"><span class="chip ">docs <b>46</b></span><span class="chip ">data rows <b>341</b></span><span class="chip ok">checks <b>186/0/1</b></span><span class="chip ">generated blocks <b>34</b></span></span>
 <span class="pill off" id="pill" data-live="0">static copy</span>
 <span class="chips"><a class="chip" href="index.html">wiki</a><a class="chip" href="../dashboard.html">dashboard</a><a class="chip" href="about.html">how it works</a></span>
 </header>
@@ -82,7 +82,6 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 <a href="about.html">About</a>
 <h4>On this page</h4>
 <a href="#h-todo">Todo</a>
-<a href="#h-open-work">Open work</a>
 <h4>Spec files</h4>
 <a href="doc-AGENT.html">AGENT.md</a>
 <a href="doc-DECISIONS.html">DECISIONS.md</a>
@@ -138,14 +137,12 @@ svg .node rect{fill:var(--panel-2);stroke:var(--line)}svg text{fill:var(--fg);fo
 
 <article class="doc">
 <h1>Todo</h1>
-<dl class="kv"><dt>file</dt><dd><code>todo.md</code> · 16 lines · 163 words · written 2026-10-06T14:33:33Z</dd><dt>category</dt><dd>Start here</dd><dt>imports</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a></dd><dt>imported by</dt><dd>—</dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-DECISIONS.html">DECISIONS.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../todo.md">todo.md</a></dd></dl>
+<dl class="kv"><dt>file</dt><dd><code>todo.md</code> · 12 lines · 78 words · written 2026-10-07T10:43:08Z</dd><dt>category</dt><dd>Start here</dd><dt>imports</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-checks.html">checks.md</a></dd><dt>imported by</dt><dd>—</dd><dt>quoted by</dt><dd><a href="doc-AGENT.html">AGENT.md</a> · <a href="doc-DECISIONS.html">DECISIONS.md</a></dd><dt>generated blocks</dt><dd>none — prose and hand-written tables only</dd><dt>raw</dt><dd><a href="../todo.md">todo.md</a></dd></dl>
 
 <h2 id="h-todo">Todo</h2>
 <p>import AGENT.md import checks.md</p>
 <p>The <strong>single work file</strong>: only what is _not built yet_, split by who can close it — <strong>A</strong> waiting on the owner · <strong>B</strong> mine to build · <strong>C</strong> housekeeping that must not rot. <strong>When work is done the line is deleted, not ticked.</strong> <code>node tools/verify.ts</code> green is the state of everything already built, so never copy a cage result in here.</p>
-<h2 id="h-open-work">Open work</h2>
-<p><strong>C — housekeeping</strong></p>
-<ul><li><strong>Game UI · desktop viewport and Map hub are code-verified only.</strong> <code>#app</code> owns the <code>100dvh</code> frame; the World tab is now a full-screen sheet with wheel/drag zoom and pan, clicking a town hexagon warps (open link) or walks, clicking a sub-zone hexagon always walks so the Road's encounters fire, and Town services open in a drawer for the settlement occupied. Verify on desktop that zoom/pan, the warp-vs-walk split, drawer Town/Zone actions and Zone hunting work, and no control is clipped by the viewport or an inner scroll panel.</li></ul>
+<p>_Nothing open._ Every planned line has landed or been ruled.</p>
 <nav class="pager"><a href="doc-AGENT.html">← AGENT.md</a><a href="index.html">Start here</a><a href="doc-concept.html">concept.md →</a></nav>
 
 </article>
