@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, TOWN } from '../src/engine/client';
-import { road, startWalk, walkBlocks, walkLabel, walkZones, waypointUnlocked } from '../src/sim/road';
+import { road, startWalk, walkBlocks, walkLabel, walkRoute, walkZones, waypointUnlocked } from '../src/sim/road';
 import { stashTabCount, deposit, withdraw, buy } from '../src/sim/town';
 import { newGame, tick, catchUp, setLevel } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
@@ -28,6 +28,30 @@ describe('the walk model is the shared one', () => {
         // the hex distance is the cube distance: no two settlements may share a hex
         const dq = a.q - b.q, dr = a.r - b.r;
         expect(road.blocksBetween(a.id, b.id)).toBe((Math.abs(dq) + Math.abs(dq + dr) + Math.abs(dr)) / 2);
+      }
+    }
+  });
+
+  it('plots a far destination as a chain of adjacent cells, one per block', () => {
+    for (const a of road.nodes) {
+      for (const b of road.nodes) {
+        if (a.id === b.id) continue;
+        const route = walkRoute(a.id, b.id);
+        // one cell per block, plus the cell the walk starts on
+        expect(route.length).toBe(road.blocksBetween(a.id, b.id) + 1);
+        expect(route[0]).toBe(`${a.q},${a.r}`);
+        expect(route[route.length - 1]).toBe(`${b.q},${b.r}`);
+        // every step is a side of the cell before it, and no cell is crossed twice
+        const seen = new Set<string>();
+        for (let i = 0; i < route.length; i++) {
+          expect(seen.has(route[i])).toBe(false);
+          seen.add(route[i]);
+          if (!i) continue;
+          const [pq, pr] = route[i - 1].split(',').map(Number);
+          const [q, r] = route[i].split(',').map(Number);
+          const dq = q - pq, dr = r - pr;
+          expect((Math.abs(dq) + Math.abs(dq + dr) + Math.abs(dr)) / 2).toBe(1);
+        }
       }
     }
   });

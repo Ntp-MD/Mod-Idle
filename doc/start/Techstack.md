@@ -35,7 +35,7 @@ game/
     engine/client.ts   imports the same JSON + createEngine the cages call
     sim/               tick loop, combat order, drops, offline catch-up
     state/save.ts      IndexedDB + localStorage fallback, 3 slots, JSON export/import
-    App.svelte         combat · character · bag · zones · save panels
+    App.svelte         the field HUD, the menu rail, and the sub-screen behind each tab
   tests/               Vitest: game values === cage values === the numbers the docs publish
 ```
 

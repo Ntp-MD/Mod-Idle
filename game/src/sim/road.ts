@@ -19,6 +19,16 @@ export function walkLabel(fromId: string, toId: string): string {
 export const walkBlocks = (fromId: string, toId: string): number => road.blocksBetween(fromId, toId);
 export const walkSec = (fromId: string, toId: string): number => road.secBetween(fromId, toId);
 
+/**
+ * The plotted route as the cells it crosses, keyed the way the sheet keys a cell. A far destination
+ * is never jumped to: the walk is this chain, one cell per block, and the map lights it up one cell
+ * at a time. The keys come from the walk graph's own coordinates, so the client matches a label the
+ * generated sheet already carries and reads no position table (X33 · M7).
+ */
+export function walkRoute(fromId: string, toId: string): string[] {
+  return road.routeBetween(fromId, toId).map((h: { q: number; r: number }) => `${h.q},${h.r}`);
+}
+
 /** The settlement the character stands in right now, or null while walking. */
 export function standingSettlement(state: GameState): any {
   if (state.walk) return null;

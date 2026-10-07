@@ -35,6 +35,7 @@ Use these exact terms everywhere. Do not use synonyms:
 - Mastery / Base / DoT / Leech / Push
 - Reroll / Refine / Ascend
 - No death (use `push`, never `death` unless quoting history)
+- HUD parts — vitals · pockets · tracker · mob field · cast order · chronicle · map sheet · destination card · rail · pop panel (the field is the whole screen, the mob field is the middle of it; a bare "sheet" is the map, the character sheet is spelled in full) — see `towns-ui.md` section 0 for the whole table
 
 Forbidden substitutions are listed in `glossary.md` — follow that table strictly.
 
@@ -122,6 +123,19 @@ How an agent talks to the owner. This is the only copy — the How we work secti
 - Keep the final response under five bullet points.
 - **Git is not a status line.** Never raise commit, push, branch, PR, worktrees or the sync gate in a reply unless the owner asks for one. Report the work, not the repository — the working tree being dirty is the normal state, never a finding.
 
+### Output policy
+
+The owner's ruling (2026-10-07). This is the reply shape; where it and the two bullets above
+(verdict-line report, five-bullet cap) disagree, **this section wins** — the report shape survives
+only as the fields it names (Changed / Decisions / Gaps / Verify) when a reply is genuinely too
+long for one line.
+
+- No narration, no tool output echo, no recap, no pleasantries.
+- Work silently. Final reply = one line, max 10 words, format: `<status> <files>`.
+  - Done: `✓ auth.ts, login.vue`
+  - Blocked: `✗ <reason>`
+- Ask only when a decision is needed: `Q: A) x (default) B) y`
+
 # How we work
 
 How an agent works in this repo: what to read, how to verify, where work is written, and when to decide or ask. It was folded in here so one file holds every rule the agent reads. Coding agents fail in predictable ways — they lose the thread mid-task, run the wrong checks, and declare victory early. The rules below are the counter.
@@ -147,6 +161,8 @@ Rebuild the views after a doc edit: `node tools/report.ts` (dashboard) and `node
 
 **Mid-task re-anchor:** after a handful of file edits, or after any context cutoff, re-read `todo.md`. If the open work no longer matches what you are doing, fix the file before editing again.
 
+**The client is already running.** The owner keeps the dev server up on `http://localhost:5173/`, so read the screen there rather than starting a second server — and never kill a browser process or free a port to clean up afterwards. Those processes are the owner's, and closing them costs their work, not yours.
+
 ## The work file
 
 `todo.md` is the **single work file** — there is no second slot and no per-topic scratch file. It holds two things and nothing else:
@@ -165,6 +181,7 @@ Write it silently after a meaningful step: a user order, a context shift, a root
 - **Never write a closing paragraph in place of deleting the line.** A tidy summary of completed work is the same clutter in nicer clothes.
 - A parked task (moved to post-release, or waiting on an owner ruling) is a single line under the post-release note — never left to rot in the open list.
 - If a line turns out to be already true when you re-read it, delete it on the spot.
+- **Delete item by item, in the moment.** With several items open (a · b · c), delete a's line as soon as a's own verify is green, then start b — never batch the deletions to the end of the run. A line that outlives its work leaves the file describing a state that is no longer true, and the mid-task re-anchor then reads a stale file instead of reality.
 
 ## Tooling
 

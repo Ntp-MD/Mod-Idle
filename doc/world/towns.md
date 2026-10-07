@@ -151,7 +151,7 @@ Generated from `engine.json` `road` — edit the data, run `node tools/check.ts 
 | The world | a pointy-top hex lattice; a settlement owns its own hex and the blocks between two settlements are their hex distance, derived from the axial coordinates and never typed |
 | Every pair | walkable — there is no link list, no route to buy and no branch shortcut, because the block count *is* the distance |
 | A block | 10 real seconds |
-| An encounter | 16.6667% per block crossed · Eastgate → Highspire is 8 blocks, so 1.33 fights in expectation |
+| An encounter | 16.6667% per block crossed · Eastgate → Highspire is 3 blocks, so 0.50 fights in expectation |
 | What a fight pays | the ordinary drop roll and nothing else — no gold purse, no chest, no Standing, no crafting stones |
 | A Push | the ordinary Push: rest at the camp of the zone it was ambushed in, then walk back in on the block it was ambushed on. It never ends a walk and never gives back a block |
 | A Waypoint | unlocked by arriving on foot, once, and it costs nothing · warps to any unlocked settlement free and instantly · never gates a zone · a Waystone will be a second destination kind |
@@ -160,23 +160,23 @@ Generated from `engine.json` `road` — edit the data, run `node tools/check.ts 
 | Settlement | Zone | Distance from the first settlement |
 |---|---|---|
 | Eastgate | zone 1 | 0 blocks · 0s from Eastgate |
-| Highspire | zone 2 | 8 blocks · 80s from Eastgate |
-| Wolf Cross | zone 3 | 6 blocks · 60s from Eastgate |
-| Greyfen | zone 4 | 8 blocks · 80s from Eastgate |
-| Saltmarrow | zone 5 | 12 blocks · 120s from Eastgate |
-| The Pale Spire | zone 6 | 13 blocks · 130s from Eastgate |
-| Blackwater Reach | zone 7 | 11 blocks · 110s from Eastgate |
-| Bonegate | zone 8 | 4 blocks · 40s from Eastgate |
-| Frosthold | zone 9 | 7 blocks · 70s from Eastgate |
-| Vermolch | zone 10 | 9 blocks · 90s from Eastgate |
-| Duskmoor | zone 11 | 8 blocks · 80s from Eastgate |
-| Nettlecrag | zone 12 | 12 blocks · 120s from Eastgate |
+| Highspire | zone 2 | 3 blocks · 30s from Eastgate |
+| Wolf Cross | zone 3 | 3 blocks · 30s from Eastgate |
+| Greyfen | zone 4 | 4 blocks · 40s from Eastgate |
+| Saltmarrow | zone 5 | 4 blocks · 40s from Eastgate |
+| The Pale Spire | zone 6 | 5 blocks · 50s from Eastgate |
+| Blackwater Reach | zone 7 | 6 blocks · 60s from Eastgate |
+| Bonegate | zone 8 | 6 blocks · 60s from Eastgate |
+| Frosthold | zone 9 | 6 blocks · 60s from Eastgate |
+| Vermolch | zone 10 | 6 blocks · 60s from Eastgate |
+| Duskmoor | zone 11 | 7 blocks · 70s from Eastgate |
+| Nettlecrag | zone 12 | 7 blocks · 70s from Eastgate |
 | Emberhold | zone 13 | 9 blocks · 90s from Eastgate |
-| Millbrook | zone 14 | 4 blocks · 40s from Eastgate |
-| Wyrmback | zone 15 | 6 blocks · 60s from Eastgate |
-| Ashfall | zone 16 | 4 blocks · 40s from Eastgate |
-| Ironrow | zone 17 | 3 blocks · 30s from Eastgate |
-| Thornwake | zone 18 | 5 blocks · 50s from Eastgate |
+| Millbrook | zone 14 | 9 blocks · 90s from Eastgate |
+| Wyrmback | zone 15 | 9 blocks · 90s from Eastgate |
+| Ashfall | zone 16 | 10 blocks · 100s from Eastgate |
+| Ironrow | zone 17 | 10 blocks · 100s from Eastgate |
+| Thornwake | zone 18 | 10 blocks · 100s from Eastgate |
 
 Distances are hex distances computed from the walk graph, so the sheet and the rule can never disagree about how far a place is.
 <!-- END GENERATED:road-rules -->

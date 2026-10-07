@@ -140,17 +140,25 @@ All 4 original items now have values in formula.md.
 3. **Drop chance / Perfect dodge** — Drop is a multiplier `1 + Lck × 0.01` (6.1× at Lck 510) · Perfect dodge is a ratio on the same Lck line (rate `Lck × 0.03`, `K_PDOGE` 57 → 21.2% at Lck 510) clamped by **Cap 21**, which binds at Lck 506.
 4. **Base stat per level** — Base 12 at level 1 and a banked **stat point** per level (5, or 2 in Paragon) the player spends 1:1 into any Core stat, so the sheet shows `(Base · points · gear)` and an unspent counter.
 
-# Where the Sheet Sits on the Main Screen
+# Where the Sheet Sits
 
-The screen holds four regions, all visible at once: the combat scene with the three-row bar above it, the character sheet, the carried inventory and the temporary inventory the hunt fills.
+The field is the one screen that is always up: the map lies behind it, dimmed and out of focus until the
+pointer reaches for it, and a place is picked and travelled to on that map rather than behind a modal.
+The fight fills the frame while every read is pinned to an
+edge — the vitals top-left, what the hunt is worth top-right, where the character stands and what it
+aims at down the right, the cast order and the chronicle along the bottom. The sheet is an overlay
+floating under the vitals, opened from the round sheet button at the end of the cast order and closed
+back to the field; the character keeps hunting behind it, so reading a build never costs the player the
+scene. It is the one panel kept off the rail: it repeats what the vitals already say, so it opens on
+their edge rather than across the screen from them.
 
 - **Worn gear is a fixed five-row slot grid, in the shape the owner drew it** — cape · helmet · amulet across the top, main hand · chest · off hand below, then gloves · belt, then ring · pant · ring, and boots alone at the bottom with a blank either side. No body is drawn: the blanks are simply gaps. Each slot keeps its fixed position and an empty one is drawn as an empty slot labelled with its name, because a player reads the shape of what is missing. Hovering a worn slot opens its detail card, which says it is the piece being worn.
 - **Every other line is text, with the Cap shown as `value / Cap`** — the recommendation in "How to Show Caps" above, since this column is narrow.
-- **Weight shows on the character bag panel, not the fight bar** — `carried / capacity`, with the aspd it costs when over, sits beside the stacks that carry it, since only carried consumables (and gear) weigh.
-- **The gate figure lives under the sheet**, read off the mob curve the same way the fight rolls it, never typed here.
+- **Weight shows on the character bag panel, not on the field's vitals** — `carried / capacity`, with the aspd it costs when over, sits beside the stacks that carry it, since only carried consumables (and gear) weigh.
+- **The gate figure is the field's objective line**, read off the mob curve the same way the fight rolls it, never typed here; the sheet carries only what the figure means.
 - Nothing on the sheet is a number the client owns: every value is the shared engine's, and the equipment grid equips only through the detail card's button.
-- **The skill bar shows on the fight panel too, read-only** — the ordered fifteen-slot strip hangs under the HP / Mana row so a cooldown is readable while hunting; arranging the order stays on the Skills tab.
-- **The level's points are allocated on the sheet, and re-spent at the town desk** — the `+` / `−` / `Max` row with the unspent and tree-point counters sits with the Core Stats table so it is reachable mid-fight; Respec is a settlement service on the town panel, never on the sheet, because a field refund would let a build switch inside a fight.
+- **The cast order shows on the field too, read-only** — the ordered strip of slots lies along the bottom edge so a cooldown is readable while hunting, and the knob past the last slot opens the Skills sub-screen; arranging the order and the auto-cast switches stay on that screen, never on the bar.
+- **The level's points are spent from the level chip beside the XP bar, and re-spent at the town desk** — the allocation is its own overlay under the vitals, holding the `+` / `−` / `Max` row with the unspent and tree-point counters, one press from the bar that fills; Respec is a settlement service in the desk screen's settlement block, never on the field, because a field refund would let a build switch inside a fight.
 
 # Display Rules to Follow
 

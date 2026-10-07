@@ -1,132 +1,669 @@
 {
-  "view": {
-    "w": 2000,
-    "h": 1200
-  },
-  "note": "Presentation only (X33 · X47). The walk graph is the simulator's and lives in engine.json `road` as axial hex coordinates; the x/y coordinates here are the illustrator's and nothing under engine/ or game/src/ may read this file. A node's x/y is the CENTROID of its four-hex pod: `hex.size` is the hex circumradius, and the writer lays the pod out from the centroid. `links` are the consecutive stretches the sheet draws as a path — they are the drawn shape of the walk, not a route table, and the block count between two settlements is the hex distance the simulator derives. `terrain_kinds` are the wash names this sheet draws. `anchor` names a link id (`link:<zoneA>-<zoneB>`) or a node id.",
-  "grid": {
-    "cols": 5,
-    "rows": 5,
-    "note": "A 5x5 presentation grid drawn over the view at low opacity. It is a framing device only - the simulation reads node and link ids, never a cell (X33)."
-  },
-  "terrain_kinds": ["road", "river", "forest", "mountain", "moor"],
-  "hex": {
-    "size": 34,
-    "note": "Pointy-top hex lattice. A settlement is a cluster of four hexes: its own hex plus one hex per sub-zone, fanned outward from the sheet's centre so the cluster points the way the map reads. The layout spirals outward from that centre: the starting capital sits in the middle and the level bands climb toward the rim, so distance from the middle IS difficulty. Hexes further out take the tone of the nearest settlement."
-  },
+  "note": "Presentation only (X33 · M7). The field is the simulator's own lattice: engine.json `road` holds one settlement per cell in axial coordinates measured from the starting settlement, and this file names the cells they land on. A cell id (row letter A-O plus column number 1-20) is a reference mark drawn on the sheet, never a position the simulation reads. What the sheet draws: every cell of the field, the terrain a cell stands on, the settlement mark on its own cell, one named sub-zone cell and one named wild cell per side of a town, the walk graph between settlements, the landmark marks, the region names and the travel pin. Nothing here carries a level band, a sub-zone name or a race — those are the engine's, printed into the cells by tools/map.ts, so the sheet and the content cannot disagree. A wild cell is a side of a town with no sub-zone on it yet: it is named after the town it rings and holds no content of its own until one is written.",
   "field": {
-    "tone": "#c2c69c",
-    "note": "The neutral tone a hex far from any settlement takes. The playable shape is the hex field; the hand-drawn terrain behind it is the off-field grey and the paper."
+    "cols": 20,
+    "rows": 15,
+    "hexes": 300,
+    "radius": 34,
+    "gap": 5,
+    "cell_id": "row letter A-O + col number 1-20",
+    "centre": "the starting settlement sits on the centre cell, and the walk graph is measured from it",
+    "sheet": "#0b1016",
+    "stroke": "#1e2833",
+    "bare_tone": "#1b2430",
+    "fade_near": 0.18,
+    "fade_far": 0.8,
+    "note": "Pointy-top hexes drawn on the lattice radius, then shrunk by the gap so neighbours leave bare ground between their edges. A cell with no zone on it takes the terrain of the nearest settlement, laid on thinner the further out it sits."
   },
-  "tones": [
-    { "zone": 1, "tone": "#cdcb8f" },
-    { "zone": 2, "tone": "#b9bcc0" },
-    { "zone": 3, "tone": "#a8ab86" },
-    { "zone": 4, "tone": "#d8c79a" },
-    { "zone": 5, "tone": "#c9bda4" },
-    { "zone": 6, "tone": "#ded9cc" },
-    { "zone": 7, "tone": "#bfae8e" },
-    { "zone": 8, "tone": "#a89a92" },
-    { "zone": 9, "tone": "#b6ae9c" },
-    { "zone": 10, "tone": "#cdd6dd" },
-    { "zone": 11, "tone": "#b9a6a0" },
-    { "zone": 12, "tone": "#cbb79c" },
-    { "zone": 13, "tone": "#d1a877" },
-    { "zone": 14, "tone": "#a9bb84" },
-    { "zone": 15, "tone": "#bfc4b8" },
-    { "zone": 16, "tone": "#bfae74" },
-    { "zone": 17, "tone": "#b0a795" },
-    { "zone": 18, "tone": "#c6d2da" }
-  ],
-  "region": {
-    "note": "A named span of the sheet, printed as letterspaced serif caps across the hexes it covers. Every zone belongs to exactly one region (M12)."
+  "terrain_colors": {
+    "water": "#14384a",
+    "marsh": "#1b3a32",
+    "grass": "#2c4220",
+    "forest": "#16301c",
+    "rock": "#30343d",
+    "snow": "#45525f",
+    "moor": "#343b1f",
+    "waste": "#3f2f1a",
+    "ash": "#3f2530",
+    "salt": "#3d382e",
+    "village": "#36401f",
+    "camp": "#42301b",
+    "town": "#4b4327",
+    "wild": "#333a28"
   },
-  "regions": [
-    { "name": "Eastgate Vale", "zones": [1, 14], "at": [560, 400] },
-    { "name": "Ashfall Wood", "zones": [16, 17], "at": [1080, 660] },
-    { "name": "Wolfmoor", "zones": [3], "at": [1470, 690] },
-    { "name": "Highspire Peaks", "zones": [2, 8, 9], "at": [700, 1010] },
-    { "name": "Frosthold Snows", "zones": [10, 18], "at": [860, 170] },
-    { "name": "Greyfen Waste", "zones": [4, 5], "at": [1880, 590] },
-    { "name": "Emberhold Ruins", "zones": [11, 13], "at": [1250, 1080] },
-    { "name": "Nettlecrag Deeps", "zones": [7, 12], "at": [230, 300] },
-    { "name": "Wyrmback Shore", "zones": [15], "at": [1340, 130] },
-    { "name": "The Pale Sanctum", "zones": [6], "at": [1870, 790] }
-  ],
-  "river": {
-    "note": "One continuous band, hand-shaped, crossing the sheet from the top edge to the bottom edge on the diagonal that separates the two halves. Presentation only.",
-    "width": 15,
-    "points": [
-      [460, 1000],
-      [460, 880],
-      [496, 762],
-      [600, 682],
-      [720, 612],
-      [850, 556],
-      [990, 520],
-      [1130, 500],
-      [1270, 490],
-      [1420, 478],
-      [1610, 468]
-    ]
+  "ground_colors": {
+    "water": "#0e2230",
+    "marsh": "#122720",
+    "forest": "#17250f",
+    "moor": "#1d2114",
+    "rock": "#1e2229",
+    "waste": "#241b12",
+    "ash": "#25161c"
   },
-  "nodes": [
-    { "id": "eastgate", "x": 1000, "y": 600 },
-    { "id": "millbrook", "x": 750, "y": 565 },
-    { "id": "ashfall", "x": 870, "y": 415 },
-    { "id": "ironrow", "x": 1235, "y": 435 },
-    { "id": "wolf_cross", "x": 1353, "y": 600 },
-    { "id": "highspire", "x": 1221, "y": 766 },
-    { "id": "bonegate", "x": 858, "y": 806 },
-    { "id": "frosthold", "x": 568, "y": 661 },
-    { "id": "vermolch", "x": 595, "y": 425 },
-    { "id": "thornwake", "x": 1080, "y": 290 },
-    { "id": "greyfen", "x": 1468, "y": 458 },
-    { "id": "saltmarrow", "x": 1519, "y": 727 },
-    { "id": "emberhold", "x": 1105, "y": 913 },
-    { "id": "duskmoor", "x": 551, "y": 836 },
-    { "id": "nettlecrag", "x": 305, "y": 505 },
-    { "id": "blackwater_reach", "x": 780, "y": 240 },
-    { "id": "wyrmback", "x": 1364, "y": 268 },
-    { "id": "the_pale_spire", "x": 1757, "y": 565 }
-  ],
-  "links": [
-    { "id": "1-2", "a": "eastgate", "b": "millbrook", "terrain": "forest" },
-    { "id": "2-3", "a": "millbrook", "b": "ashfall", "terrain": "road" },
-    { "id": "3-4", "a": "ashfall", "b": "ironrow", "terrain": "river" },
-    { "id": "4-5", "a": "ironrow", "b": "wolf_cross", "terrain": "forest" },
-    { "id": "5-6", "a": "wolf_cross", "b": "highspire", "terrain": "road" },
-    { "id": "6-7", "a": "highspire", "b": "bonegate", "terrain": "river" },
-    { "id": "7-8", "a": "bonegate", "b": "frosthold", "terrain": "forest" },
-    { "id": "8-9", "a": "frosthold", "b": "vermolch", "terrain": "road" },
-    { "id": "9-10", "a": "vermolch", "b": "thornwake", "terrain": "river" },
-    { "id": "10-11", "a": "thornwake", "b": "greyfen", "terrain": "forest" },
-    { "id": "11-12", "a": "greyfen", "b": "saltmarrow", "terrain": "road" },
-    { "id": "12-13", "a": "saltmarrow", "b": "emberhold", "terrain": "river" },
-    { "id": "13-14", "a": "emberhold", "b": "duskmoor", "terrain": "forest" },
-    { "id": "14-15", "a": "duskmoor", "b": "nettlecrag", "terrain": "road" },
-    { "id": "15-16", "a": "nettlecrag", "b": "blackwater_reach", "terrain": "river" },
-    { "id": "16-17", "a": "blackwater_reach", "b": "wyrmback", "terrain": "forest" },
-    { "id": "17-18", "a": "wyrmback", "b": "the_pale_spire", "terrain": "road" }
-  ],
-  "terrain": [
-    { "id": "eastgate-marsh", "kind": "river", "anchor": "link:1-2" },
-    { "id": "millbrook-woods", "kind": "forest", "anchor": "link:2-3" },
-    { "id": "kings-road", "kind": "road", "anchor": "link:3-4" },
-    { "id": "ironrow-pass", "kind": "mountain", "anchor": "link:4-5" },
-    { "id": "wolf-moor", "kind": "moor", "anchor": "link:5-6" },
-    { "id": "bonegate-heights", "kind": "mountain", "anchor": "link:6-7" },
-    { "id": "frosthold-woods", "kind": "forest", "anchor": "link:7-8" },
-    { "id": "vermolch-river", "kind": "river", "anchor": "link:8-9" },
-    { "id": "ashfall-slopes", "kind": "mountain", "anchor": "ashfall" },
-    { "id": "highspire-overlook", "kind": "mountain", "anchor": "highspire" },
-    { "id": "wolf-cross-ford", "kind": "river", "anchor": "link:5-6" }
+  "cells": [
+    {
+      "town": "eastgate",
+      "cell": "H10",
+      "subs": [
+        {
+          "cell": "H11",
+          "terrain": "grass"
+        },
+        {
+          "cell": "I11",
+          "terrain": "village"
+        },
+        {
+          "cell": "I10",
+          "terrain": "camp"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "G10"
+        },
+        {
+          "cell": "G11"
+        },
+        {
+          "cell": "H9"
+        }
+      ]
+    },
+    {
+      "town": "millbrook",
+      "cell": "F2",
+      "subs": [
+        {
+          "cell": "E2",
+          "terrain": "forest"
+        },
+        {
+          "cell": "G2",
+          "terrain": "forest"
+        },
+        {
+          "cell": "E3",
+          "terrain": "marsh"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "F1"
+        },
+        {
+          "cell": "F3"
+        },
+        {
+          "cell": "G3"
+        }
+      ]
+    },
+    {
+      "town": "thornwake",
+      "cell": "B17",
+      "subs": [
+        {
+          "cell": "C18",
+          "terrain": "forest"
+        },
+        {
+          "cell": "A17",
+          "terrain": "marsh"
+        },
+        {
+          "cell": "C17",
+          "terrain": "marsh"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "A18"
+        },
+        {
+          "cell": "B16"
+        },
+        {
+          "cell": "B18"
+        }
+      ]
+    },
+    {
+      "town": "ironrow",
+      "cell": "L2",
+      "subs": [
+        {
+          "cell": "K2",
+          "terrain": "grass"
+        },
+        {
+          "cell": "L3",
+          "terrain": "ash"
+        },
+        {
+          "cell": "K3",
+          "terrain": "marsh"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "L1"
+        },
+        {
+          "cell": "M2"
+        },
+        {
+          "cell": "M3"
+        }
+      ]
+    },
+    {
+      "town": "ashfall",
+      "cell": "L18",
+      "subs": [
+        {
+          "cell": "L17",
+          "terrain": "ash"
+        },
+        {
+          "cell": "K18",
+          "terrain": "ash"
+        },
+        {
+          "cell": "L19",
+          "terrain": "ash"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "K19"
+        },
+        {
+          "cell": "M18"
+        },
+        {
+          "cell": "M19"
+        }
+      ]
+    },
+    {
+      "town": "wolf_cross",
+      "cell": "G8",
+      "subs": [
+        {
+          "cell": "H8",
+          "terrain": "moor"
+        },
+        {
+          "cell": "G7",
+          "terrain": "marsh"
+        },
+        {
+          "cell": "F7",
+          "terrain": "snow"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "F8"
+        },
+        {
+          "cell": "G9"
+        },
+        {
+          "cell": "H7"
+        }
+      ]
+    },
+    {
+      "town": "highspire",
+      "cell": "E10",
+      "subs": [
+        {
+          "cell": "D9",
+          "terrain": "rock"
+        },
+        {
+          "cell": "D10",
+          "terrain": "rock"
+        },
+        {
+          "cell": "E11",
+          "terrain": "rock"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "E9"
+        },
+        {
+          "cell": "F9"
+        },
+        {
+          "cell": "F10"
+        }
+      ]
+    },
+    {
+      "town": "wyrmback",
+      "cell": "I2",
+      "subs": [
+        {
+          "cell": "I1",
+          "terrain": "water"
+        },
+        {
+          "cell": "J2",
+          "terrain": "ash"
+        },
+        {
+          "cell": "H1",
+          "terrain": "snow"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "H2"
+        },
+        {
+          "cell": "I3"
+        },
+        {
+          "cell": "J1"
+        }
+      ]
+    },
+    {
+      "town": "saltmarrow",
+      "cell": "F13",
+      "subs": [
+        {
+          "cell": "G14",
+          "terrain": "salt"
+        },
+        {
+          "cell": "E13",
+          "terrain": "water"
+        },
+        {
+          "cell": "G13",
+          "terrain": "salt"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "E14"
+        },
+        {
+          "cell": "F12"
+        },
+        {
+          "cell": "F14"
+        }
+      ]
+    },
+    {
+      "town": "frosthold",
+      "cell": "M7",
+      "subs": [
+        {
+          "cell": "L6",
+          "terrain": "snow"
+        },
+        {
+          "cell": "M8",
+          "terrain": "snow"
+        },
+        {
+          "cell": "L7",
+          "terrain": "snow"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "M6"
+        },
+        {
+          "cell": "N6"
+        },
+        {
+          "cell": "N7"
+        }
+      ]
+    },
+    {
+      "town": "greyfen",
+      "cell": "J13",
+      "subs": [
+        {
+          "cell": "J12",
+          "terrain": "waste"
+        },
+        {
+          "cell": "I13",
+          "terrain": "waste"
+        },
+        {
+          "cell": "J14",
+          "terrain": "waste"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "I14"
+        },
+        {
+          "cell": "K13"
+        },
+        {
+          "cell": "K14"
+        }
+      ]
+    },
+    {
+      "town": "nettlecrag",
+      "cell": "J4",
+      "subs": [
+        {
+          "cell": "I5",
+          "terrain": "forest"
+        },
+        {
+          "cell": "K4",
+          "terrain": "forest"
+        },
+        {
+          "cell": "J3",
+          "terrain": "rock"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "I4"
+        },
+        {
+          "cell": "J5"
+        },
+        {
+          "cell": "K5"
+        }
+      ]
+    },
+    {
+      "town": "vermolch",
+      "cell": "N12",
+      "subs": [
+        {
+          "cell": "O13",
+          "terrain": "marsh"
+        },
+        {
+          "cell": "O12",
+          "terrain": "ash"
+        },
+        {
+          "cell": "N13",
+          "terrain": "marsh"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "M12"
+        },
+        {
+          "cell": "M13"
+        },
+        {
+          "cell": "N11"
+        }
+      ]
+    },
+    {
+      "town": "bonegate",
+      "cell": "C7",
+      "subs": [
+        {
+          "cell": "B6",
+          "terrain": "rock"
+        },
+        {
+          "cell": "D6",
+          "terrain": "rock"
+        },
+        {
+          "cell": "B7",
+          "terrain": "rock"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "C6"
+        },
+        {
+          "cell": "C8"
+        },
+        {
+          "cell": "D7"
+        }
+      ]
+    },
+    {
+      "town": "blackwater_reach",
+      "cell": "B11",
+      "subs": [
+        {
+          "cell": "B12",
+          "terrain": "water"
+        },
+        {
+          "cell": "B10",
+          "terrain": "water"
+        },
+        {
+          "cell": "C12",
+          "terrain": "water"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "A11"
+        },
+        {
+          "cell": "A12"
+        },
+        {
+          "cell": "C11"
+        }
+      ]
+    },
+    {
+      "town": "duskmoor",
+      "cell": "D15",
+      "subs": [
+        {
+          "cell": "C15",
+          "terrain": "moor"
+        },
+        {
+          "cell": "E15",
+          "terrain": "moor"
+        },
+        {
+          "cell": "D14",
+          "terrain": "waste"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "C16"
+        },
+        {
+          "cell": "D16"
+        },
+        {
+          "cell": "E16"
+        }
+      ]
+    },
+    {
+      "town": "the_pale_spire",
+      "cell": "H15",
+      "subs": [
+        {
+          "cell": "G15",
+          "terrain": "rock"
+        },
+        {
+          "cell": "H14",
+          "terrain": "rock"
+        },
+        {
+          "cell": "H16",
+          "terrain": "rock"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "G16"
+        },
+        {
+          "cell": "I15"
+        },
+        {
+          "cell": "I16"
+        }
+      ]
+    },
+    {
+      "town": "emberhold",
+      "cell": "E18",
+      "subs": [
+        {
+          "cell": "E17",
+          "terrain": "ash"
+        },
+        {
+          "cell": "E19",
+          "terrain": "ash"
+        },
+        {
+          "cell": "D18",
+          "terrain": "ash"
+        }
+      ],
+      "wild": [
+        {
+          "cell": "D17"
+        },
+        {
+          "cell": "F17"
+        },
+        {
+          "cell": "F18"
+        }
+      ]
+    }
   ],
   "watermarks": [
-    { "id": "eastgate-castle", "kind": "castle", "anchor": "eastgate", "label": "Eastgate Castle" },
-    { "id": "highspire-keep", "kind": "castle", "anchor": "highspire", "label": "Highspire Keep" },
-    { "id": "pale-spire", "kind": "tower", "anchor": "the_pale_spire", "label": "The Pale Spire" },
-    { "id": "wolf-moor-lake", "kind": "lake", "anchor": "link:5-6", "label": "Wolf Moor" },
-    { "id": "bonegate-ruins", "kind": "ruins", "anchor": "bonegate", "label": "Bonegate Ruins" }
+    {
+      "id": "eastgate-castle",
+      "kind": "castle",
+      "anchor": "eastgate",
+      "label": "Eastgate Castle"
+    },
+    {
+      "id": "highspire-keep",
+      "kind": "castle",
+      "anchor": "highspire",
+      "label": "Highspire Keep"
+    },
+    {
+      "id": "pale-spire",
+      "kind": "tower",
+      "anchor": "the_pale_spire",
+      "label": "The Pale Spire"
+    },
+    {
+      "id": "wolf-moor-lake",
+      "kind": "lake",
+      "anchor": "wolf_cross",
+      "label": "Wolf Moor"
+    },
+    {
+      "id": "bonegate-ruins",
+      "kind": "ruins",
+      "anchor": "bonegate",
+      "label": "Bonegate Ruins"
+    }
+  ],
+  "regions": [
+    {
+      "name": "Eastgate Vale",
+      "zones": [
+        1,
+        14
+      ]
+    },
+    {
+      "name": "Ashfall Wood",
+      "zones": [
+        16,
+        17
+      ]
+    },
+    {
+      "name": "Wolfmoor",
+      "zones": [
+        3
+      ]
+    },
+    {
+      "name": "Highspire Peaks",
+      "zones": [
+        2,
+        8,
+        9
+      ]
+    },
+    {
+      "name": "Frosthold Snows",
+      "zones": [
+        10,
+        18
+      ]
+    },
+    {
+      "name": "Greyfen Waste",
+      "zones": [
+        4,
+        5
+      ]
+    },
+    {
+      "name": "Emberhold Ruins",
+      "zones": [
+        11,
+        13
+      ]
+    },
+    {
+      "name": "Nettlecrag Deeps",
+      "zones": [
+        7,
+        12
+      ]
+    },
+    {
+      "name": "Wyrmback Shore",
+      "zones": [
+        15
+      ]
+    },
+    {
+      "name": "The Pale Sanctum",
+      "zones": [
+        6
+      ]
+    }
   ]
 }

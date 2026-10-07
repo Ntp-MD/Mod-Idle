@@ -1,9 +1,9 @@
 :root {
   color-scheme: dark;
-  --bg: #14161a;
+  --bg: #0f1217;
   --panel: #1c2027;
   --line: #2c3340;
-  --text: #d8dee9;
+  --text: #e3e9f2;
   --dim: #8b96a8;
   --hp: #c0392b;
   --mana: #2980b9;
@@ -11,74 +11,107 @@
   --xp: #f1c40f;
   --mob: #7f8c8d;
   --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  --rail: 4.4rem;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
+
+html, body { height: 100%; }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 14px/1.45 ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* a game reads as a sans with lit figures, not as a terminal: the UI face is the voice, and the
+     monospace face stays on the numbers so a column of them still lines up */
+  font: 14px/1.45 var(--ui);
+  overflow: hidden;
 }
 
 h1, h2, h3 { font-weight: 600; margin: 0 0 .5rem; letter-spacing: .02em; }
 h1 { font-size: 1.15rem; }
 h2 { font-size: .95rem; color: var(--dim); text-transform: uppercase; }
+/* a service inside a section — the map panel carries the settlement's own headings under its field */
+h4 { font-size: .82rem; color: var(--dim); margin: .7rem 0 .3rem; letter-spacing: .02em; }
 
 button, select {
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--line);
-  border-radius: 3px;
-  padding: .3rem .6rem;
+  border-radius: 8px;
+  padding: .3rem .7rem;
   font: inherit;
   cursor: pointer;
 }
-button:hover { border-color: var(--dim); }
+button:hover { border-color: var(--gold); color: var(--gold); }
 
 table { border-collapse: collapse; width: 100%; }
-th, td { text-align: left; padding: .2rem .4rem; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+th, td {
+  text-align: left; padding: .25rem .45rem; border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+td { font-family: var(--num); font-size: .8rem; }
 th { color: var(--dim); font-weight: 500; }
 
-/* The settlement map. The overlay is inlined via {@html}, so these selectors live in the global
-   stylesheet: Svelte would prune them from a component's scoped <style>. The pin and the dash are
-   toggled by id (data-node / data-link) — no coordinate is read by the client (X33 · M7 · M10).
-   The sheet is a hex field: one hex per sub-zone, roads and labels carrying the readability, so the
-   ground is pale and the route is the highest contrast on the page. */
-.map-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.map-frame svg .hex { stroke: #6a6647; stroke-width: 1.2; stroke-opacity: .38; }
-.map-frame svg .hex.pod { stroke: #4a4429; stroke-width: 1.8; stroke-opacity: .6; }
-.map-frame svg .hex.pod[data-node]:not([data-sub]) { stroke: #2f2b18; stroke-width: 3.4; stroke-opacity: .85; }
-.map-frame svg .river-band { stroke: #79b4cf; stroke-opacity: .55; stroke-linecap: round; stroke-linejoin: round; }
-.map-frame svg .region { font-size: 26px; letter-spacing: 2px; fill: #f4ecd8; stroke: #3b3322; stroke-width: 2.6; paint-order: stroke; text-anchor: middle; font-weight: 700; opacity: .9; }
-.map-frame svg .subzone { font-size: 11px; letter-spacing: .1px; fill: #f6f0e0; stroke: #342e1f; stroke-width: 2.2; paint-order: stroke; }
-/* the terrain glyphs are soft kind-coloured washes (never solid marks on the sketch) */
-.map-frame svg .terrain { stroke-width: 1.2; stroke-opacity: .32; fill-opacity: .34; }
-.map-frame svg .terrain-road { fill: #cbb583; }
-.map-frame svg .terrain-river { fill: #8cc0d8; }
-.map-frame svg .terrain-forest { fill: #7fa46a; }
-.map-frame svg .terrain-mountain { fill: #b3b0a6; }
-.map-frame svg .terrain-moor { fill: #bcb184; }
-/* a landmark is a mark on the field, smaller than a settlement, so the route still leads the eye */
-.map-frame svg .watermark circle { fill: #2f2a1c; stroke: none; }
-.map-frame svg .watermark circle.halo { fill: none; stroke: #f4ecd8; stroke-width: 1.6; stroke-opacity: .8; }
-.map-frame svg .node circle { fill: #fdfaf0; stroke: #35301f; stroke-width: 2.5; }
-.map-frame svg .node.capital circle { stroke-width: 4.5; }
-.map-frame svg .node .place { font-size: 17px; fill: #f6f0e0; stroke: #2c2718; stroke-width: 3.4; paint-order: stroke; font-weight: 700; }
-.map-frame svg .node .caption { font-size: 13px; fill: #f6f0e0; stroke: #2c2718; stroke-width: 3; paint-order: stroke; }
-.map-frame svg .node .caption .place { font-size: 20px; font-weight: 700; }
-.map-frame svg .node .caption tspan:not(.place) { fill: #efe6cf; font-size: 12px; }
-.map-frame svg .grid-line { stroke: rgba(255,250,235,.22); stroke-width: 1; stroke-dasharray: 5 7; }
-.map-frame svg .pin { display: none; }
-.map-frame svg .pin circle:first-child { fill: rgba(40,220,150,.26); stroke: #2ee59a; stroke-width: 4; }
-.map-frame svg .pin circle:last-child { fill: #2ee59a; }
-.map-frame svg .pin.here, .map-frame svg .pin.target { display: inline; }
-.map-frame svg .pin.target circle:first-child { fill: rgba(240,80,70,.26); stroke: #ff6b5c; }
-.map-frame svg .pin.target circle:last-child { fill: #ff6b5c; }
-.map-frame svg .dash { display: none; }
-.map-frame svg .dash.traveling { display: inline; fill: none; stroke: #ffd166; stroke-width: 7; stroke-linecap: round; stroke-dasharray: 14 16; animation: mapdash 1s linear infinite; }
-@keyframes mapdash { to { stroke-dashoffset: -30; } }
+/* The map sheet — one copy, the ground the field is drawn on (`.map-back`), dimmed under the HUD and
+   brought into focus by the MAP tab. `tools/map.ts` prints one polygon per cell of the
+   hex field the simulator walks on, and the client inlines it via {@html}, so these selectors live in the
+   global stylesheet: Svelte would prune them from a component's scoped <style>. The sheet carries ids,
+   classes and labels (data-cell / data-ax / data-node / data-tone / data-terrain / data-band) and no
+   styling of its own — the fills the client repaints per view, the pin per position and the route per
+   block are matched by those labels, so still no coordinate is read by the client (X33 · M7 · M10). It is
+   ground in the game's own dark: the cells are the tone, the walk is the highest contrast on it, and
+   every text takes its colour here. */
+/* A root `<svg>` clips to its own viewBox by default, and the ground is drawn on past the field so
+   zooming out never reaches an edge — so the clip is lifted here and the frame (`.map-back`) is left
+   as the only thing that bounds the map. */
+.sheet svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sheet svg text { text-anchor: middle; dominant-baseline: central; }
+/* the backdrop owns the whole frame, so the sheet is scaled to fit it rather than to its own width */
+.map-back svg { width: 100%; height: 100%; }
+/* names, the walk graph, the pins and the landmark marks are ink laid on the sheet, not targets: a click
+   falls through to the cell underneath, so a place is pickable on the field itself */
+.sheet svg text, .sheet svg line, .sheet svg .pin, .sheet svg .watermark { pointer-events: none; }
+/* a cell is the click target, and its stroke is what the pick and the route are drawn with */
+.sheet svg .cell { stroke-linejoin: round; transition: fill .12s linear; }
+.sheet svg .cell.town, .sheet svg .cell.sub, .sheet svg .cell.wild { cursor: pointer; }
+.sheet svg .cell:hover { fill-opacity: .82; }
+/* the plotted walk: the cells ahead of you, then the ones already crossed */
+.sheet svg .cell.route { fill: #f2d98a; stroke: #e0b64a; stroke-width: 1.8; }
+.sheet svg .cell.walked { fill: #a67f2c; stroke: #7d5f18; stroke-width: 1.8; }
+.sheet svg .cell.picked { stroke: #4fc3f7; stroke-width: 3; }
+/* the walk graph: one stretch per pair of settlements the walker would step between, in blocks */
+.sheet svg .walk { stroke: #c8a24e; stroke-width: 1.6; stroke-opacity: .8; }
+.sheet svg .walk-blk { font-size: 7px; fill: #d9b768; font-weight: 600; }
+/* a region name lies under the field, so the level views fade the whole group out */
+.sheet svg .region { font-size: 10px; letter-spacing: 1.2px; fill: #cfd8e3; stroke: #0b1016;
+  stroke-width: 2.2; paint-order: stroke; font-weight: 700; text-transform: uppercase; opacity: .28; }
+/* a landmark is a mark on the field, smaller than a settlement */
+.sheet svg .watermark circle { fill: #e0b64a; stroke: none; }
+.sheet svg .watermark circle.halo { fill: none; stroke: #0b1016; stroke-width: 1.6; stroke-opacity: .75; }
+/* a settlement: the house glyph over its own cell, its name, and the band its zone carries */
+.sheet svg .node .place { font-size: 9px; fill: #f2e7d0; stroke: #0b1016; stroke-width: 2.6;
+  paint-order: stroke; font-weight: 700; }
+.sheet svg .node.capital .place { font-size: 10.5px; }
+.sheet svg .zonelabel .zonename { font-size: 7.5px; fill: #c7cdd6; font-weight: 600; }
+.sheet svg .zonelabel .zoneband { font-size: 6.5px; fill: #8b96a8; }
+/* the reference marks: a cell id, printed on the cell and hidden until asked for */
+.sheet svg .cellid { font-size: 6.5px; fill: #6d7987; }
+.sheet svg [data-node] { cursor: pointer; }
+.sheet svg .node.picked .place { fill: #7fd4ff; }
+.sheet svg .pin { display: none; }
+.sheet svg .pin circle:first-child { fill: rgba(46,229,154,.22); stroke: #12a06a; stroke-width: 3.5; }
+.sheet svg .pin circle:last-child { fill: #12a06a; }
+.sheet svg .pin.here, .sheet svg .pin.target { display: inline; }
+.sheet svg .pin.target circle:first-child { fill: rgba(255,107,92,.22); stroke: #e2503f; }
+.sheet svg .pin.target circle:last-child { fill: #e2503f; }
 
 /* The passive tree: three chains side by side, one row per node with its three rank pips. */
 .tree-branches { display: flex; gap: 1rem; flex-wrap: wrap; }

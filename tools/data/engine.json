@@ -4207,7 +4207,7 @@
   },
   "road": {
     "note": "Travel is walking. The world is a pointy-top hex lattice and a settlement owns its own hex; a settlement pair is joined by the hexes between them, so a walk is a count of blocks and never a link with a price. Every block costs `block_sec` and rolls one encounter chance. An encounter is an ordinary mob group from the lower of the two zones, fought with the ordinary rules, and it pays the ordinary drop roll and nothing else: no gold purse, no chest, no Standing, no crafting stones. Gold and junk come from killing mobs, so walking can never mint (`economy.md`). A settlement's Waypoint unlocks the first time the character arrives there on foot, and then warps to any unlocked settlement free and instantly; a Waystone will be a second destination kind on the same rule. The Road's old ladder and branch links, its trip minutes, its terrain tilt table, its encounter kinds, the purse, the chest, the Circuit and the Standing-per-leg are all gone with this shape, and none of them comes back: `encounter_chance_pct` is the retired one-encounter-a-minute rate written in blocks rather than a number chosen by hand, and a branch link has no meaning when the block count IS the distance - a pass would need its own shorter hex path in the lattice.",
-    "graph_rule": "A node is one settlement's own hex in axial coordinates on the pointy-top lattice. Blocks between two nodes are their hex distance, computed from those coordinates and never typed, so a walk's length is derived. Every pair of settlements is walkable - there is no edge list and no route to buy - and a waypoint covers the distance for free once both ends have been walked to.",
+    "graph_rule": "A node is one settlement's own hex in axial coordinates on the pointy-top lattice, which is the field the sheet draws: 20 columns by 15 rows, 300 cells, the starting settlement at the centre cell and the level bands climbing outward by distance rank. Blocks between two nodes are their hex distance, computed from those coordinates and never typed, so a walk's length is derived and one block is one cell the player can see. Every pair of settlements is walkable - there is no edge list and no route to buy - and a walk to a far settlement is plotted as an ordered chain of adjacent cells and crossed one cell at a time. A waypoint covers the distance for free once both ends have been walked to.",
     "block_sec": 10,
     "encounter_chance_pct": 16.6667,
     "encounter_rule": "Every block walked rolls one encounter chance. A block that rolls nothing is silent. An encounter that fires is a real mob group drawn from the lower of the two zones the walk joins, at the player level clamped into that zone's range and at that zone's own group size, fought with the ordinary combat and drop rules: it pays the ordinary drop roll and nothing else.",
@@ -4216,93 +4216,93 @@
     "nodes": [
       {
         "id": "eastgate",
-        "q": 17,
-        "r": 11
+        "q": 0,
+        "r": 0
       },
       {
         "id": "millbrook",
-        "q": 13,
-        "r": 11
+        "q": -7,
+        "r": -2
       },
       {
         "id": "ashfall",
-        "q": 15,
-        "r": 9
+        "q": 6,
+        "r": 4
       },
       {
         "id": "ironrow",
-        "q": 20,
-        "r": 9
+        "q": -10,
+        "r": 4
       },
       {
         "id": "wolf_cross",
-        "q": 23,
-        "r": 11
+        "q": -2,
+        "r": -1
       },
       {
         "id": "highspire",
-        "q": 21,
-        "r": 15
+        "q": 1,
+        "r": -3
       },
       {
         "id": "bonegate",
-        "q": 15,
-        "r": 15
+        "q": -1,
+        "r": -5
       },
       {
         "id": "frosthold",
-        "q": 10,
-        "r": 13
+        "q": -6,
+        "r": 5
       },
       {
         "id": "vermolch",
-        "q": 11,
-        "r": 8
-      },
-      {
-        "id": "thornwake",
-        "q": 18,
+        "q": -1,
         "r": 6
       },
       {
+        "id": "thornwake",
+        "q": 10,
+        "r": -6
+      },
+      {
         "id": "greyfen",
-        "q": 25,
-        "r": 9
+        "q": 2,
+        "r": 2
       },
       {
         "id": "saltmarrow",
-        "q": 26,
-        "r": 14
+        "q": 4,
+        "r": -2
       },
       {
         "id": "emberhold",
-        "q": 19,
-        "r": 18
+        "q": 9,
+        "r": -3
       },
       {
         "id": "duskmoor",
-        "q": 9,
-        "r": 16
+        "q": 7,
+        "r": -4
       },
       {
         "id": "nettlecrag",
-        "q": 6,
-        "r": 10
+        "q": -7,
+        "r": 2
       },
       {
         "id": "blackwater_reach",
-        "q": 12,
-        "r": 5
+        "q": 4,
+        "r": -6
       },
       {
         "id": "wyrmback",
-        "q": 23,
-        "r": 5
+        "q": -9,
+        "r": 1
       },
       {
         "id": "the_pale_spire",
-        "q": 30,
-        "r": 11
+        "q": 5,
+        "r": 0
       }
     ]
   },
