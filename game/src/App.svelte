@@ -10,12 +10,19 @@
   import SlotGrid from './ui/SlotGrid.svelte';
   import Panel from './ui/Panel.svelte';
   import TravelCard from './ui/TravelCard.svelte';
+  import TownHub from './ui/TownHub.svelte';
+  import Market from './ui/Market.svelte';
+  import Forge from './ui/Forge.svelte';
+  import CraftBoard from './ui/CraftBoard.svelte';
+  import StashBoard from './ui/StashBoard.svelte';
+  import KeybindTable from './ui/KeybindTable.svelte';
+  import { KEYBINDS, DEFAULT_BINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/keybinds';
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
     standingShare, standingTier, canTravel, claimTask, npcOf,
   } from './sim/town';
-  import { craft, doCraft, stoneNames, stoneName, lineName, lineTier, type CraftOp, type Where } from './sim/craft';
+  import { doCraft, stoneName, atSettlement, type CraftOp, type Where } from './sim/craft';
   import { farm, farmLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
   import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
 import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
@@ -26,7 +33,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   import { mulberry32 } from './engine/client-helpers';
   import { writeSave, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
   import { FILTER_SLOTS, ruleFor, setRule, describeRule } from './sim/filter';
-  import { equipFromBag, gearModOf } from './sim/gear';
+  import { equipFromBag, autoEquip } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
   import { target as goalTarget, describe as describeGoal } from './sim/goal';
   import { elementIcon, mobIcon, skillIcon } from './icon';
@@ -39,7 +46,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   import treeMark from './icon/045-lorc-leaf-skeleton.svg?url';
   import mapMark from './icon/117-lorc-cloud-ring.svg?url';
   import stashMark from './icon/037-lorc-padlock.svg?url';
-  import benchMark from './icon/017-delapouite-warhammer.svg?url';
+  // the town's own marks: a watch-shield for the hall, a hood for the clerk's desk, the armourer's
+  // upgrade mark for the forge, and a bottle for the house that works the stones on a piece
+  import townMark from './icon/042-delapouite-cross-shield.svg?url';
+  import deskMark from './icon/113-lorc-hood.svg?url';
+  import forgeMark from './icon/076-delapouite-armor-upgrade.svg?url';
+  import craftMark from './icon/093-delapouite-magic-potion.svg?url';
   import farmMark from './icon/090-lorc-droplets.svg?url';
   import saveMark from './icon/010-delapouite-spell-book.svg?url';
   import coinMark from './icon/080-delapouite-coins-pile.svg?url';
@@ -63,19 +75,33 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    * needed a modal. The desk is the one screen a settlement owns: the stall, the board, the counter and
    * the two tables, opened from the rail or from a place's card.
    */
-  const PANELS = ['bag', 'skills', 'tree', 'map', 'desk', 'stash', 'bench', 'farm', 'save'] as const;
+  const PANELS = ['bag', 'skills', 'tree', 'map', 'desk', 'stash', 'farm', 'save', 'town', 'market', 'forge', 'craft', 'keys'] as const;
   type PanelId = (typeof PANELS)[number];
   /** The rail's own tabs. Bag and skills left it for the round screens on the cast order, so the rail
-      keeps the screens that have nowhere else on the field to be reached from. */
-  const RAIL: PanelId[] = ['tree', 'map', 'desk', 'stash', 'bench', 'farm', 'save'];
+      keeps the screens that have nowhere else on the field to be reached from. The settlement's screens
+      lead the order: they are the work a player comes into town to do, and the digit binds follow the
+      order the tabs print, so the rail is its own key legend. The warehouse is not a tab of its own —
+      in a settlement it *is* the bag's other side, which is what a full pile needs. */
+  const RAIL: PanelId[] = ['map', 'bag', 'town', 'market', 'forge', 'craft', 'skills', 'tree', 'desk', 'farm', 'save', 'keys'];
+  /** screens a settlement owns, refused in their own words when the character stands in the field */
+  const TOWN_PANELS: PanelId[] = ['town', 'market', 'forge', 'craft', 'stash', 'desk'];
   /** what each rail tab is drawn with, and the word under it */
   const RAIL_ICON: Record<PanelId, string> = {
-    bag: bagMark, skills: skillMark, tree: treeMark, map: mapMark, desk: coinMark,
-    stash: stashMark, bench: benchMark, farm: farmMark, save: saveMark,
+    bag: bagMark, skills: skillMark, tree: treeMark, map: mapMark, desk: deskMark,
+    stash: stashMark, farm: farmMark, save: saveMark, town: townMark,
+    market: coinMark, forge: forgeMark, craft: craftMark, keys: tuneMark,
   };
   const RAIL_LABEL: Record<PanelId, string> = {
-    bag: 'bag', skills: 'skills', tree: 'tree', map: 'map', desk: 'desk',
-    stash: 'stash', bench: 'bench', farm: 'farm', save: 'save',
+    bag: 'bags', skills: 'skills', tree: 'tree', map: 'map', desk: 'desk',
+    stash: 'stash', farm: 'farm', save: 'save', town: 'town',
+    market: 'market', forge: 'forge', craft: 'craft', keys: 'keys',
+  };
+  /** the action each rail tab answers to, so a tab's key is the binding a player can rebind */
+  const SCREEN_ACTION: Record<PanelId, string> = {
+    bag: 'screen.bag', skills: 'screen.skills', tree: 'screen.tree', map: 'screen.map',
+    desk: 'screen.desk', stash: 'screen.stash', farm: 'screen.farm', save: 'screen.save',
+    town: 'screen.town', market: 'screen.market', forge: 'screen.forge', craft: 'screen.craft',
+    keys: 'screen.keys',
   };
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
@@ -91,22 +117,112 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let sheetOpen = $state(false);
   let saveNote = $state('');
 
+  let settings = $state<ClientSettings>({ ...DEFAULT_SETTINGS });
+  function setSetting<K extends keyof ClientSettings>(k: K, v: ClientSettings[K]) {
+    settings[k] = v;
+    void writeSettings(settings);
+  }
+
   /** Escape uncovers the field: map focus drops, the two dock overlays go with it, and a pick that was
       never travelled to is dropped rather than left ringing under the HUD. A desk screen closes itself. */
   function onfieldKey(ev: KeyboardEvent) {
-    if (ev.key !== 'Escape') return;
-    alloc = false;
-    sheetOpen = false;
-    if (panel === 'map') { panel = null; return; }
-    picked = null;
-    pickedCell = null;
+    if (ev.key === 'Escape') {
+      if (isTypingTarget(ev.target)) return;
+      alloc = false;
+      sheetOpen = false;
+      if (panel === 'map') { panel = null; return; }
+      picked = null;
+      pickedCell = null;
+      return;
+    }
+    // a field owns its own characters, the browser keeps its chords, and a bare modifier is a hand
+    // reaching for a combination rather than a key with a job of its own
+    if (isTypingTarget(ev.target) || isModifierKey(ev) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    const action = actionFor(binds, tokenOf(ev));
+    if (!action) return;
+    ev.preventDefault();
+    runAction(action);
+  }
+
+  /** the keyboard map the player is using: the stored sparse override over the shipped defaults */
+  const binds = $derived(bindTable(settings.keybinds || {}));
+  const keyFor = (action: string) => formatKey(binds[action] || '');
+  function setBind(id: string, token: string) {
+    setSetting('keybinds', { ...(settings.keybinds || {}), [id]: token });
+  }
+  function clearBind(id: string) {
+    const over = { ...(settings.keybinds || {}) };
+    delete over[id];
+    setSetting('keybinds', over);
+  }
+  const resetBinds = () => setSetting('keybinds', {});
+
+  /** the tab the warehouse board is open on, and which side of the bag screen the player is working in */
+  let stashTab = $state(0);
+  let pileSort = $state<SortKey>('level');
+  let bagSide = $state<'pile' | 'stash'>('pile');
+
+  const VIEW_ORDER: ('terrain' | 'band' | 'gate')[] = ['terrain', 'band', 'gate'];
+
+  /**
+   * The one keyboard path through the client, and the one way any screen opens. It answers in the same
+   * order the rail is read: a screen first, then the field's own switches, then the sheet's — because the
+   * map's keys only mean something while the sheet is the thing in focus.
+   */
+  function runAction(action: string) {
+    if (action === 'screen.field') { panel = null; sheetOpen = false; alloc = false; picked = null; pickedCell = null; return; }
+    if (action === 'sheet.open') { sheetOpen = !sheetOpen; return; }
+    if (action === 'game.pause') { running = !running; saveNote = running ? 'the clock is running again' : 'paused — the field holds still'; return; }
+    if (action === 'game.tick') { if (!running) step(); else saveNote = 'the clock is already running'; return; }
+    if (action.startsWith('screen.')) { openPanel(action.slice(7) as PanelId); return; }
+    if (action === 'equip.best') { doBestEquip(); return; }
+    if (action.startsWith('stash.tab')) {
+      if (!tabs) return;
+      const d = action.endsWith('next') ? 1 : -1;
+      stashTab = (stashTab + d + tabs) % tabs;
+      return;
+    }
+    if (action === 'warehouse.stash.all') { if (canStash) doDepositAll(stashTab); return; }
+    if (action === 'warehouse.take.all') { if (canStash) doWithdrawAll(stashTab); return; }
+    // the sheet's own keys answer only in map focus: on the field they would move a view nobody is reading
+    if (panel !== 'map') return;
+    switch (action) {
+      case 'map.zoom.in': mapZoomBy(1.25); break;
+      case 'map.zoom.out': mapZoomBy(1 / 1.25); break;
+      case 'map.zoom.reset': mapReset(); break;
+      case 'map.centre': mapCentre(); break;
+      case 'map.view.next': view = VIEW_ORDER[(VIEW_ORDER.indexOf(view) + 1) % VIEW_ORDER.length]; break;
+      case 'map.walk': showWalk = !showWalk; break;
+      case 'map.ids': showIds = !showIds; break;
+    }
   }
 
   /** The header buttons toggle, so the open panel closes under its own button. */
   function togglePanel(p: PanelId) {
+    openPanel(p);
+  }
+  /**
+   * A settlement screen opens where the character stands. Refusing out loud is the whole point: the rail
+   * and the digits work from anywhere, so the one thing a player cannot tell from a dimmed button is why.
+   *
+   * The bag's own side follows the ground under it. In a settlement the pile's job is to be emptied, so
+   * the screen opens on the warehouse; in the field there is no warehouse to open, so it opens on the
+   * pile. That is the owner's rule read literally: the temp-bag slot *becomes* the stash in town.
+   */
+  function openPanel(p: PanelId) {
+    if (TOWN_PANELS.includes(p) && !atSettlement(gameState)) {
+      saveNote = `${RAIL_LABEL[p]} is a settlement service — walk or warp into one first`;
+      return;
+    }
+    if (p === 'stash') { bagSide = 'stash'; panel = panel === 'bag' ? null : 'bag'; return; }
+    if (p === 'bag') bagSide = atSettlement(gameState) ? 'stash' : 'pile';
     panel = panel === p ? null : p;
   }
   const closePanel = () => (panel = null);
+  /** the board is live only where the warehouse is: a tab cannot be filled from a field. */
+  const canStash = $derived(atSettlement(gameState) && stashTabCount(gameState) > 0);
+  /** whether the character stands in a settlement right now — every service below answers to this */
+  const townLive = $derived(atSettlement(gameState));
 
   /** The away-window report (parking: "Offline report on return"), filled on mount catch-up + Load. */
   let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; quality: string } | null>(null);
@@ -143,7 +259,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let tempSort = $state<SortKey>('level');
 
   const wornOf = (slot: string) => gameState.gear.find((g) => g && g.slot === slot) || null;
-  /** the pile the hunt dropped — 50 slots, one piece each, waiting for a decision */
+  /** the pile the hunt dropped — the adventure slots, one piece each, waiting for a decision */
   const tempEntries = $derived(sortEntries(gameState.bag.map((item, i) => gearEntry(item, i)), tempSort));
   /** what the character carries — stones, herbs, draughts and junk, one slot per stack */
   const invEntries = $derived(sortEntries(bagStacks(gameState).map((s, i) => stackEntry(s, i)), invSort));
@@ -154,11 +270,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       .filter(Boolean) as SlotEntry[],
   );
 
-  let settings = $state<ClientSettings>({ ...DEFAULT_SETTINGS });
-  function setSetting<K extends keyof ClientSettings>(k: K, v: ClientSettings[K]) {
-    settings[k] = v;
-    void writeSettings(settings);
-  }
   /** Number display respects the Settings choice; `short` uses compact notation (12.3k). */
   function fmtNum(n: number): string {
     return settings.numberFormat === 'short'
@@ -270,6 +381,28 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     // panel re-read the gameState the verb mutated in place
     equipFromBag(gameState, index);
     gameState = { ...gameState };
+  }
+
+  /** the answer the last best-gear press gave, read where the press was made */
+  let equipNote = $state('');
+  /**
+   * One press, the whole body dressed from what the character carries. The choice itself — what counts as
+   * best, and what must never be moved — is `sim/gear.ts`'s, and the tests reach it there; this only says
+   * what came of it, in the numbers the player acts on.
+   */
+  function doBestEquip() {
+    const r = autoEquip(gameState, settings.equipMargin || 0);
+    gameState = { ...gameState };
+    // the press just moved pieces out of the pile, so the pile is what the player needs to see now
+    if (r.swaps.length) bagSide = 'pile';
+    const parts: string[] = [];
+    parts.push(r.swaps.length
+      ? `${r.swaps.length} piece${r.swaps.length === 1 ? '' : 's'} went up (${r.swaps.map((w) => `${w.slot}${w.instead ? '' : ' from a free cell'}`).join(', ')})`
+      : 'nothing you carry beats what you wear');
+    const held = r.spared.locked + r.spared.set + r.spared.broken;
+    if (held) parts.push(`${held} left alone — locked, promised to a set, or Broken`);
+    if (r.inStash) parts.push(`${r.inStash} in the stash would beat something worn · take it out to wear it`);
+    equipNote = parts.join(' · ');
   }
 
   function goToZone(id: number) {
@@ -763,12 +896,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** The published success curve for the step the bench is about to attempt. */
-  function upgradeChance(): string {
-    if (!benchItem) return '—';
-    return String(Math.round(craft.successPct((benchItem.upgrade_lv || 0) + 1)));
-  }
-
   let skillNote = $state('');
   let farmNote = $state('');
   const fl = $derived(farmLevel(gameState));
@@ -800,7 +927,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   let townNote = $state('');
   const tabs = $derived(stashTabCount(gameState));
-  const stashSub = $derived(tabs + ' of 6 tabs open');
   const farmSub = $derived('level ' + fl + ' / ' + farm.F.level_cap + ' · the one life skill, and it grants no power');
   const deskSub = $derived(gameState.walk
     ? 'walking ' + walkLabel(gameState.walk.from, gameState.walk.to)
@@ -965,7 +1091,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 <svelte:window onkeydown={onfieldKey} />
 
-<div class="stage" class:mapmode={panel === 'map'}>
+<!-- the client is a desktop surface: below the floor the corner reads stop being placeable, so it says so
+     instead of laying out a phone screen nobody asked for -->
+<div class="small-screen" role="alert">
+  <h2>Mod-Idle is played on a desktop</h2>
+  <p>This screen is built for a window 1024 wide or more — the field reads its numbers in the corners, and
+    they need the room. Widen the window, or set the browser zoom out.</p>
+</div>
+
+<div class="stage" class:mapmode={panel === 'map'} class:veiled={panel !== null && panel !== 'map'}>
   <!-- The field lies on the map: one generated sheet, laid flat behind the HUD, dimmed and out of focus
        until the pointer reaches for it or the MAP tab brings it into focus. It is the only copy and the
        surface a place is picked, plotted and walked on — no modal sits between the player and a cell. -->
@@ -1251,33 +1385,84 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   <!-- bottom-right: the three switches the field itself owns -->
   <div class="controls">
-    <button onclick={() => (running = !running)}>{running ? 'Pause' : 'Resume'}</button>
-    <button onclick={step}>One tick</button>
+    <button onclick={() => (running = !running)} title={`${running ? 'Pause' : 'Resume'} · ${keyFor('game.pause')}`}
+            aria-keyshortcuts={keyFor('game.pause')}>{running ? 'Pause' : 'Resume'}</button>
+    <button onclick={step} title={`One tick · ${keyFor('game.tick')}`} aria-keyshortcuts={keyFor('game.tick')}>One tick</button>
     <button onclick={() => { if (confirm('Start a new character?')) reset(); }}>New character</button>
   </div>
+
+  <!-- every note the client gives by press — a refusal, a forge outcome, a deposit — is said out loud as
+       well as printed, because four different pills in four different corners are not one announcement -->
+  <p class="aloud" role="status" aria-live="polite">{saveNote || equipNote || benchNote || townNote || farmNote}</p>
 </div>
 
 <!-- The menu: one column down the right edge, always above a sub-screen, so switching screens is one
-     press and the field is never further than its first button. -->
+     press and the field is never further than its first button. Each tab prints the key that opens it —
+     the rail is its own key legend, so a binding a player never visited the settings over is still a
+     binding they can find on screen. -->
 <nav class="rail" aria-label="Menu">
-  <button class="tab" class:here={panel === null} onclick={closePanel} title="Back to the field">
-    <img src={skillMark} alt="" aria-hidden="true" /><span>field</span>
+  <button class="tab" class:here={panel === null} onclick={closePanel}
+          title="Back to the field · Esc" aria-keyshortcuts="Esc">
+    <img src={skillMark} alt="" aria-hidden="true" /><span>field</span><kbd>esc</kbd>
   </button>
   {#each RAIL as p}
-    <button class="tab" class:here={panel === p} onclick={() => togglePanel(p)} title={p}>
-      <img src={RAIL_ICON[p]} alt="" aria-hidden="true" /><span>{RAIL_LABEL[p]}</span>
+    {@const label = RAIL_LABEL[p]}
+    {@const key = keyFor(SCREEN_ACTION[p])}
+    {@const far = TOWN_PANELS.includes(p) && !townLive}
+    <button class="tab" class:here={panel === p} class:far={far}
+            onclick={() => togglePanel(p)}
+            title={`${label}${far ? ' — a settlement service, walk or warp into one first' : ''} · ${key}`}
+            aria-keyshortcuts={key}>
+      <img src={RAIL_ICON[p]} alt="" aria-hidden="true" /><span>{label}</span><kbd>{key.toLowerCase()}</kbd>
     </button>
   {/each}
 </nav>
 
 {#if panel === 'bag'}
-  <Panel title="Bags" subtitle={bagSub} onclose={closePanel}>
+  <Panel title="Bags" subtitle={bagSub} width="wide" onclose={closePanel}>
+    <!-- one screen, two sides, and the side that opens follows the ground under the character: in a
+         settlement the pile's only job is to be emptied, so the warehouse is what you meet -->
+    <div class="sides" role="group" aria-label="Which bag">
+      <button class={bagSide === 'pile' ? 'active' : ''} onclick={() => (bagSide = 'pile')}>
+        Hunt pile · {gameState.bag.length} / {E.inventory.adventure_slots}
+      </button>
+      <button class={bagSide === 'stash' ? 'active' : ''} disabled={!townLive}
+              onclick={() => (bagSide = 'stash')}
+              title={townLive ? 'The warehouse the same record opens in every settlement · ' + keyFor('screen.stash')
+                              : 'A settlement service — walk or warp into one first'}>
+        Stash · {tabs} tab{tabs === 1 ? '' : 's'}{townLive ? '' : ' · not here'}
+      </button>
+      <span class="grow"></span>
+      <!-- the margin is the difference between a press that dresses you and one that churns: a piece has
+           to be this much ahead before it goes on, in the same percent the bag filter's margin is set in -->
+      <label class="margin">only if better by
+        <input type="number" min="0" step="1" value={settings.equipMargin || 0}
+               onchange={(e) => setSetting('equipMargin', Math.max(0, Number((e.target as HTMLInputElement).value) || 0))} />
+        %
+      </label>
+      <button class="best" onclick={doBestEquip}
+              title={'Wears whatever is strongest in the pile, piece by piece · ' + keyFor('equip.best')}
+              aria-keyshortcuts={keyFor('equip.best')}>
+        Put on the best I carry
+      </button>
+    </div>
+    {#if equipNote}<p class="equipnote">{equipNote}</p>{/if}
+    {#if bagSide === 'pile' || !townLive}
     <section class="bagblock">
       <h3>Hunt pile · what this trip kept</h3>
       {#if gameState.bag.length >= E.inventory.adventure_slots}
         <p class="warn"><b>Bag full — the zone has stopped paying.</b> A full bag picks up nothing and turns nothing into a stone, so {gameState.counters.overflow || 0} pieces so far were left on the ground instead of turning into Reroll value. Walk back to {settlementById(gameState.town.waypoint)?.name || 'a settlement'} and deposit, then come out again.</p>
       {:else}
         <p><small>Kept pieces wait here until you choose. Hover a slot to read the piece and Equip it — nothing equips itself.</small></p>
+      {/if}
+      {#if townLive && tabs}
+        <!-- the way out of a pile is one press here, because this is the screen a full pile lands on -->
+        <p class="townlink">
+          <button class="mini" disabled={!gameState.bag.length} onclick={() => doDepositAll(stashTab)}>
+            Stash every unlocked piece → Tab {stashTab + 1}
+          </button>
+          <small class="dim">…or take the other side of this screen to choose the tab.</small>
+        </p>
       {/if}
       <SlotGrid
         entries={tempEntries}
@@ -1312,6 +1497,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         <p><small>Still not found — Elements you have no resistance for: <b>{gameState.filter.missing.elements.length ? gameState.filter.missing.elements.join(', ') : 'none'}</b> · empty slots: <b>{gameState.filter.missing.slots.length ? gameState.filter.missing.slots.join(', ') : 'none'}</b></small></p>
       </details>
     </section>
+    {:else}
+      <p><small>There is no Bag Cap, so a tab is organisation rather than space — the Porter sells them and a
+        house grants two. This is the one record the character owns: <b>every settlement on the map opens the
+        same tabs</b>, so a run never has to come home to a particular house to empty a full pile.</small></p>
+      <StashBoard game={gameState} {tabs} tab={stashTab} pileSort={pileSort}
+                  ontab={(t) => (stashTab = t)}
+                  onpilesort={(k) => (pileSort = k)}
+                  ondeposit={(i) => doDeposit(i, stashTab)}
+                  onwithdraw={(i) => doWithdraw(stashTab, i)}
+                  ondepositAll={() => doDepositAll(stashTab)}
+                  onwithdrawAll={() => doWithdrawAll(stashTab)}
+                  onlock={toggleLock} onequip={equip} {wornOf} />
+      {#if townNote}<p class="townnote">{townNote}</p>{/if}
+    {/if}
 
     <section class="bagblock">
       <h3>Carried · the character bag</h3>
@@ -1476,84 +1675,48 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'stash'}
-  <Panel title="Stash" subtitle={stashSub} onclose={closePanel}>
-    <p><small>There is no Bag Cap, so a tab is organisation rather than space — the Porter sells them and a house grants two. Stash and bench are Settlement-only: a long run ends in a trip home.</small></p>
-    {#if tabs === 0}
-      <p><small>No tab yet — the first one is the teaching purchase on the settlement stall, in the map panel.</small></p>
-    {:else}
-      {#each Array(tabs) as _, t}
-        <div class="tab">
-          <b>Tab {t + 1}</b>
-          <button onclick={() => doWithdrawAll(t)}>Withdraw all unlocked</button>
-          {#each gameState.stash[t] || [] as item, i}
-            <button class={item.locked ? 'active' : ''} onclick={() => toggleLock(item)} title="Lock / unlock this piece">{item.locked ? 'unlock' : 'lock'}</button>
-            <button onclick={() => doWithdraw(t, i)}>{item.base} ({item.quality} {item.tier})</button>
-          {:else}
-            <span class="dim"> empty</span>
-          {/each}
-        </div>
-      {/each}
-    {/if}
-    {#if gameState.bag.length}
-      <p><small>Deposit from the bag: {gameState.bag.length} / {E.inventory.adventure_slots} carried. A locked piece stays.</small></p>
-      <button onclick={() => doDepositAll(0)}>Deposit all unlocked → tab 1</button>
-      {#each gameState.bag as item, i}
-        <button class={item.locked ? 'active' : ''} onclick={() => toggleLock(item)} title="Lock / unlock this piece">{item.locked ? 'unlock' : 'lock'}</button>
-        <button onclick={() => doDeposit(i, 0)}>{item.base} → tab 1</button>
-      {/each}
-    {/if}
+{#if panel === 'town'}
+  <Panel title="Town" subtitle={`${town?.name ?? 'the field'} · ${townLive ? 'standing here' : 'not standing here'}`} width="wide" onclose={closePanel}>
+    <TownHub state={gameState} town={town} here={townLive} {tabs}
+             onopen={(id) => openPanel(id as PanelId)} onwarp={travelTo} onsellall={doSell}
+             onbest={doBestEquip}
+             onstashall={() => doDepositAll(stashTab)} />
   </Panel>
 {/if}
 
-{#if panel === 'bench'}
-  <Panel title="Bench" subtitle="paid in stones, never gold" onclose={closePanel}>
-    <p><small>The bench is a Settlement service, so it opens only while the character stands in one. Reroll moves a value inside its own Tier and never down, Refine pushes one slot up a Tier, Ascend raises the whole piece one Item quality step. Element and Mod identity sit outside every stone except Corrupt, which is the one gamble allowed to change an Element (`crafting.md`).</small></p>
-    <label>Piece
-      <select onchange={(e) => { const v = (e.target as HTMLSelectElement).value; const [w, i] = v.split(':'); bench = v ? { where: w as Where, index: Number(i) } : null; }}>
-        <option value="">choose a piece</option>
-        {#each gameState.gear as g, i}
-          {#if g}<option value={'gear:' + i}>worn · {g.slot} · {g.base} ({g.quality} {g.tier})</option>{/if}
-        {/each}
-        {#each gameState.bag as g, i}
-          <option value={'bag:' + i}>bag · {g.slot} · {g.base} ({g.quality} {g.tier})</option>
-        {/each}
-      </select>
-    </label>
-    {#if benchItem}
-      <table>
-        <thead><tr><th>Slot</th><th>Mod line</th><th>Value</th><th>Tier</th><th>Reroll ({stoneNames('reroll').reroll_value} value)</th><th>Refine ({stoneNames('refine').tier} tier)</th><th>Randomize ({stoneNames('randomize').tier} tier)</th></tr></thead>
-        <tbody>
-          {#each benchItem.lines as line, li}
-            <tr>
-              <td>{li < craft.LEGACY_SLOTS ? `Legacy ${li + 1}` : li + 1}</td>
-              <td>{lineName(line.id)}</td>
-              <td>{line.value}</td>
-              <td>{lineTier(line)}</td>
-              <td><button onclick={() => runCraft('reroll', li)}>reroll</button></td>
-              <td><button onclick={() => runCraft('refine', li)}>refine</button></td>
-              <td><button onclick={() => runCraft('randomize', li)}>roll</button></td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-      <button onclick={() => runCraft('ascend', 0)}>Ascend piece · {stoneNames('ascend').add} Add + {stoneNames('ascend').tier} tier stones</button>
-      <button onclick={() => runCraft('add', 0)}>Add a Mod · {stoneNames('add', benchItem).add} Add stone ({benchItem.mods_added || 0}/{E.item_level.mods_added_cap} used)</button>
-      <button onclick={() => runCraft('remove', 0)}>Remove a non-legacy mod · {stoneNames('remove').remove} Remove stone</button>
-      <button onclick={() => runCraft('upgrade', 0)}>
-        Upgrade to +{Math.min((benchItem.upgrade_lv || 0) + 1, craft.C.upgrade_cap)} · {stoneNames('upgrade', benchItem).quality} Quality Stone · {upgradeChance()}% chance
-      </button>
-      <button onclick={() => runCraft('repair', 0)}>Repair · {stoneNames('repair').repair} Repair stone (refills protection to {craft.C.protection_start})</button>
-      <button onclick={() => runCraft('corrupt', 0)}>Corrupt · 1 Corrupt stone · one gamble per piece, then no stone ever touches it again</button>
-      <p><small>This piece: +{benchItem.upgrade_lv || 0} of {craft.C.upgrade_cap} · protection {benchItem.protection_left == null ? craft.C.protection_start : benchItem.protection_left} of {craft.C.protection_start}{benchItem.broken ? ' · BROKEN (contributes nothing until repaired)' : ''}{benchItem.corrupted ? ' · corrupted' : ''}</small></p>
-      {@const gm = gearModOf(benchItem)}
-      <p><small>Each +1 adds {craft.C.gear_mod_per_level} to this piece's Gear Mod —{' '}
-        {gm.stat ? `${lineName(gm.stat)}, now +${gm.value}` : 'this Base carries none'}</small></p>
-      <p><small>Stones held: {stonesLine()}</small></p>
-      <p>{benchNote}</p>
-    {:else}
-      <p><small>No piece on the bench yet — pick one from what you wear or what is in the bag.</small></p>
-    {/if}
+{#if panel === 'market'}
+  <Panel title="Market" subtitle={`${town?.name ?? ''} · the stall, the Counterhand and the purse`} width="wide" onclose={closePanel}>
+    <Market state={gameState} town={town} here={townLive} onbuy={doBuy} onsell={doSell} />
+  </Panel>
+{/if}
+
+{#if panel === 'forge'}
+  <Panel title="Forge" subtitle="enhancement · paid in Quality Stones, never gold" width="wide" onclose={closePanel}>
+    <p><small>The forge is a settlement service, so it opens only while the character stands in one. A step
+      that can fail says so before the press: the chance, the rung it drops back to, and the protection
+      charge that would take the miss instead. Past the break rung with no charge left a miss leaves the piece
+      Broken, and a Broken piece contributes nothing until it is repaired (`crafting.md`).</small></p>
+    <Forge state={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
+           onpick={(w, i) => (bench = { where: w, index: i })}
+           onrun={(op) => runCraft(op, 0)} {wornOf} note={benchNote} />
+  </Panel>
+{/if}
+
+{#if panel === 'craft'}
+  <Panel title="Craft house" subtitle="the stones that change a piece, not its level" width="wide" onclose={closePanel}>
+    <p><small>Reroll moves a value inside its own Tier and never below the floor that slot has ever held,
+      Refine pushes one slot up a Tier, Ascend raises the whole piece one item-quality step. Element and Mod
+      identity sit outside every stone here — only Corrupt, on the Forge, is the one gamble allowed to change
+      an Element (`crafting.md`). Draughts are brewed on the Farm.</small></p>
+    <CraftBoard state={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
+                onpick={(w, i) => (bench = { where: w, index: i })}
+                onrun={(op, line) => runCraft(op, line ?? 0)} {wornOf} note={benchNote} />
+  </Panel>
+{/if}
+
+{#if panel === 'keys'}
+  <Panel title="Keyboard" subtitle={`${KEYBINDS.length} actions, all rebound here`} width="wide" onclose={closePanel}>
+    <KeybindTable binds={binds} onset={setBind} onreset={resetBinds} onclear={clearBind} />
   </Panel>
 {/if}
 
@@ -1822,7 +1985,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      reaches for it or the MAP tab brings it into focus. */
   .map-back {
     position: absolute; inset: 0; overflow: hidden; cursor: crosshair;
-    opacity: .6; filter: blur(9px) brightness(.92) saturate(.85);
+    /* the depth-of-field ladder, read off the one `--dof` the client owns: this surface is soft at rest
+       and sharpens as attention reaches it, rather than each state inventing its own filter */
+    --dof: var(--dof-rest);
+    opacity: calc(1 - var(--dof) / 26);
+    filter: blur(var(--dof)) brightness(.92) saturate(.85);
     /* the sheet is ground in the game's own dark, and the log and the cast order live at the bottom of
        it — the backdrop fades toward that edge so the small grey text there keeps its contrast */
     mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
@@ -1831,6 +1998,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
        the mask and the letterbox stay where the player last saw them */
     transition: opacity .22s ease, filter .22s ease;
     touch-action: none;
+    /* a drag pans this surface, so it must never start a text selection instead — the sheet's own labels
+       are already inert, but the rectangle they sit in was not */
+    user-select: none; -webkit-user-select: none;
   }
   /* the ground itself, moved and scaled inside the frame — it scales from the same point the frame
      reads as its middle, so a cell under a click never moves when the view is reframed */
@@ -1844,18 +2014,34 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* the map comes to the pointer, but not past the HUD: enough to read a name and aim at a cell, not
      enough to compete with the vitals and the log printed over it. Under keyboard the HUD is not being
      aimed at, so the focused sheet sharpens further */
-  .map-back:hover { opacity: .82; filter: blur(2.5px) brightness(.98) saturate(.92); }
-  .map-back:focus-visible { opacity: .92; filter: blur(1.5px) brightness(1) saturate(.95); outline: 2px solid var(--es); outline-offset: -2px; }
+  .map-back:hover { --dof: var(--dof-near); filter: blur(var(--dof)) brightness(.98) saturate(.92); opacity: .82; }
+  .map-back:focus-visible { --dof: 1.5px; opacity: .92; filter: blur(1.5px) brightness(1) saturate(.95); }
+  /* the ring a focused surface wears is drawn on the frame, not on the ground inside it — the ground is
+     scaled and can leave the frame, and a ring that drifted off the map would read as a different state.
+     The frame fills the stage, so the ring is pulled inward: the global rule reads `--ring-offset`. */
+  .map-back:focus-visible { --ring-offset: -2px; }
   /* map focus: the ground the field stands on is brought out from under the HUD — same scale, so the
      cell under a click never moves — and the mob field is taken off the screen rather than left as a
      faint ghost over the map. The fight runs on behind it; only the reading changes. A drag pans the
      sheet here, so the hand is open until it closes on the ground. */
-  .stage.mapmode .map-back { opacity: 1; filter: none; cursor: grab; }
+  .stage.mapmode .map-back { --dof: 0px; opacity: 1; filter: none; cursor: grab; }
   /* while the hand is on the sheet the pan follows it instead of easing after it */
   .map-back.dragging { cursor: grabbing; transition: opacity .22s ease, filter .22s ease; }
   .stage.mapmode .field { display: none; }
   .stage.mapmode .chronicle { opacity: .1; pointer-events: none; }
-  .stage.mapmode .tracker, .stage.mapmode .pockets { opacity: .45; }
+  .stage.mapmode .pockets { opacity: .45; }
+  /* the sheet is the subject in map focus, so the field's own reads leave the frame rather than sitting
+     on top of a sharp map: a zone label and a travel switch cannot share the same square, and the map is
+     the one thing the player is looking at. The purse stays — it costs nothing to read and a walk needs it. */
+  .stage.mapmode .tracker { display: none; }
+  .stage.mapmode .arena { display: none; }
+  /* a working screen is the subject, so the field behind it recedes the way the ground recedes from the
+     map: one ladder, one direction — the veil does the dimming and the field does the blurring */
+  .stage.veiled { --dof: 5px; }
+  .stage.veiled .field, .stage.veiled .tracker, .stage.veiled .chronicle, .stage.veiled .actionbar {
+    filter: blur(2.5px); opacity: .5; transition: filter .18s ease, opacity .18s ease;
+  }
+  .stage.veiled .map-back { --dof: var(--dof-rest); }
   /* the sheet's own controls: the three views, the gate level, the two overlays — and the key under it */
   .map-tools { display: flex; flex-wrap: wrap; gap: .3rem 1rem; align-items: center; font-size: .82rem; margin: .4rem 0; }
   .map-views { display: inline-flex; gap: .6rem; }
@@ -2003,9 +2189,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .alarm-line { border-color: var(--hp) !important; color: #ffb3a8; }
   .objective { color: var(--gold); }
 
-  /* the middle of the frame is the group: one plate per mob, its HP the loudest thing on it */
+  /* the middle of the frame is the group: one plate per mob, its HP the loudest thing on it.
+     The box is symmetric on purpose. The fight is the subject, so it sits on the true middle of the frame
+     it plays in — an asymmetric inset (a wide right gutter for the tracker, a bare 1rem on the left) pushed
+     every plate ~140px off axis at 1440 and worse the bigger the monitor got. The left band the symmetry
+     gives up is breathing room, not information: the dock's reads live along the top edge and the
+     chronicle along the bottom, and neither crosses the middle. */
   .field {
-    position: absolute; inset: 5.6rem clamp(11rem, 34%, 21rem) 6.4rem 1rem;
+    position: absolute; inset: 5.6rem clamp(18rem, 24vw, 21rem) 6.4rem;
     display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: .6rem;
     overflow: auto;
     /* the mob field is a layout box, not a surface: it spans the middle of the map, so the ground
@@ -2040,7 +2231,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .actionbar {
     /* centred in the room the switches leave over, not in the frame: on a short monitor a centred bar
        of fifteen slots runs under the Pause cluster */
-    position: absolute; bottom: .9rem; left: .9rem; right: 15rem;
+    position: absolute; bottom: .9rem; left: .9rem; right: 20rem;
     display: flex; justify-content: center; gap: .3rem; z-index: 4;
     /* the slots sit over the map now, which is dark ground in the game's own colours — so their rim is
        read off this one pair rather than the faint plate edge the other reads use */
@@ -2106,20 +2297,45 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* the rail: one column down the right edge, above a sub-screen, so switching screens is one press */
   .rail {
     position: fixed; top: 0; right: 0; bottom: 0; width: var(--rail); z-index: 70;
-    display: flex; flex-direction: column; gap: .25rem; padding: .8rem .45rem; overflow: auto;
+    display: flex; flex-direction: column; gap: .12rem; padding: .5rem .4rem; overflow: auto;
     background: linear-gradient(180deg, rgba(10, 13, 18, .94), rgba(14, 18, 25, .82));
     border-left: 1px solid var(--edge);
   }
   .tab {
-    flex: none; display: flex; flex-direction: column; align-items: center; gap: .12rem;
-    padding: .4rem .15rem; border-radius: 12px; border: 1px solid transparent; background: none;
-    color: var(--dim); font-size: .6rem; letter-spacing: .06em; text-transform: uppercase;
+    flex: none; display: flex; flex-direction: column; align-items: center; gap: .06rem;
+    padding: .26rem .1rem; border-radius: 12px; border: 1px solid transparent; background: none;
+    color: var(--dim); font-size: .58rem; letter-spacing: .06em; text-transform: uppercase;
   }
-  .tab img { width: 1.35rem; height: 1.35rem; object-fit: contain; opacity: .82; }
+  .tab img { width: 1.2rem; height: 1.2rem; object-fit: contain; opacity: .82; }
   .tab:hover { color: var(--text); border-color: var(--edge); }
   .tab.here { color: var(--gold); background: rgba(232, 193, 105, .10); border-color: rgba(232, 193, 105, .34); }
+  /* the key cap sits under the word so the rail reads as its own legend; it is the binding the settings
+     screen wrote, not a suggestion */
+  .tab kbd {
+    font: .55rem/1 var(--num); color: var(--mob); background: #12151b;
+    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: .1rem .22rem;
+  }
+  .tab.here kbd { color: var(--gold); border-color: rgba(232, 193, 105, .4); }
+  /* a settlement screen from the field is reachable but not live, so it is marked rather than dead — the
+     refusal and its reason come out of the button's own title */
+  .tab.far { opacity: .5; }
+  .tab.far img { filter: grayscale(.6); }
 
   /* the sub-screens that came off the old three-column page */
+  /* the bag's two sides: one control, two settings, and the count each side is holding printed on it, so
+     a player can see the pile is full without opening it */
+  .sides { display: flex; gap: .3rem; margin-bottom: .8rem; border-bottom: 1px solid var(--line); padding-bottom: .6rem; }
+  .sides button { border-radius: 999px; font-size: .78rem; padding: .28rem .8rem; }
+  .sides button.active { border-color: var(--gold); color: var(--gold); background: rgba(232, 193, 105, .12); }
+  .sides button:disabled:hover { border-color: var(--line); color: var(--text); }
+  .sides .grow { flex: 1; }
+  .sides .margin { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; color: var(--dim); }
+  .sides .margin input { width: 3.4rem; }
+  /* the one press in this client that changes the whole body, so it is the one control the accent is spent
+     on — and it is a verb, not a state, so it never takes the gold of "you are here" */
+  .sides .best { border-color: rgba(39, 174, 96, .55); color: #9fe0bb; background: rgba(39, 174, 96, .1); }
+  .sides .best:hover { border-color: var(--good); color: #c8f2d9; }
+  .equipnote { margin: -.4rem 0 .8rem; font-size: .76rem; color: var(--good); }
   .bagblock { border: 0; }
   .skill-label { display: inline-flex; align-items: center; gap: .35rem; }
   .skill-label img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex: none; }
@@ -2146,11 +2362,45 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .gauge.xp progress::-webkit-progress-value { background: linear-gradient(90deg, #d8a92a, #f7e07a); }
   .gauge.xp progress::-moz-progress-bar { background: linear-gradient(90deg, #d8a92a, #f7e07a); }
 
-  /* a monitor is not a phone: below this the corner reads have to give ground rather than overlap */
-  @media (max-width: 1000px) {
-    .tracker { width: min(16rem, 44%); }
-    .field { inset: 5.6rem clamp(9rem, 30%, 16rem) 6.4rem .6rem; }
-    .chronicle { width: 40%; font-size: .68rem; }
+  /* a monitor is not a phone: the client is written for a desktop window and scales with the root size set
+     in app.css, so these steps only move what physically cannot fit — the reads give ground in the middle,
+     they are never taken off the screen. */
+  .townnote { margin: .5rem 0 0; font-size: .76rem; color: var(--good); }
+  .townlink { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin: 0 0 .5rem; }
+  .townlink button { font-size: .76rem; }
+  .mini { padding: .1rem .45rem; font-size: .68rem; }
+  /* the announcement is for the screen reader, not the eye: the same words are already on a pill */
+  .aloud {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  /* the field's own switches and the cast order answer a press, so they wear the ring a plate cannot */
+  .knob:focus-visible, .cast:focus-visible, .face:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .controls button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  /* a plate is read, not worked: it takes no ring, but its controls do */
+  .pop :is(button, select, input, summary):focus-visible { outline-offset: 1px; }
+
+  /* 1024-1279: the two side reads stop sharing the middle with the mob plates */
+  @media (max-width: 1279px) {
+    .tracker { width: min(17rem, 42%); }
+    .field { inset: 5.6rem clamp(16rem, 23vw, 19rem) 6.4rem; }
+    .chronicle { width: min(22rem, 42%); font-size: .7rem; }
     .statuses { display: none; }
+    .dock { width: min(26rem, 50%); }
+    .gauge { width: clamp(9rem, 17vw, 13rem); }
+    .actionbar { right: 19rem; }
+    /* the three switches the field owns are the widest thing on the bottom edge, and the cast order is
+     centred in the room left over — so the room is measured from them, never allowed to run under */
+    .controls { gap: .3rem; }
+    .controls button { padding: .25rem .5rem; font-size: .74rem; }
+  }
+  /* 1600 and wider: the room is spent on the plates rather than on empty ground */
+  @media (min-width: 1600px) {
+    .field { inset: 6rem clamp(14rem, 30%, 26rem) 7rem; gap: 1rem; }
+    .mob { width: 12.5rem; padding: .6rem .7rem .7rem; }
+    .mob .portrait { width: 3.3rem; height: 3.3rem; }
+    .chronicle { width: min(34rem, 42%); }
+    .dock { width: min(36rem, 40%); }
+    .tracker { width: min(23rem, 32%); }
   }
 </style>

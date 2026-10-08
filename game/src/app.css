@@ -16,14 +16,30 @@
   --glass: rgba(17, 22, 30, .74);
   --edge: rgba(255, 255, 255, .10);
   --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
   --rail: 4.4rem;
   --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
   --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur */
+  --dof-rest: 9px;
+  --dof-near: 2.5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
 }
 
 * { box-sizing: border-box; }
 
 html, body { height: 100%; }
+
+/* Desktop and above, only. The root size is the whole client's zoom: every control here is written in
+   rem, so one line grows the HUD on a 27-inch monitor and shrinks it on a 1024-wide window without a
+   second layout. The reference is a mobile game played on a monitor, so there is no phone branch. */
+html { font-size: clamp(12.5px, 0.42vw + 8.2px, 16px); }
 
 body {
   margin: 0;
@@ -33,7 +49,20 @@ body {
      monospace face stays on the numbers so a column of them still lines up */
   font: 14px/1.45 var(--ui);
   overflow: hidden;
+  /* the client is a surface you press and drag, not a page you quote: selection is switched off at the
+     root and opted back in below, on the read-outs a player actually copies */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
+
+/* the copyable minority: a log line, a stat table, an item's numbers — text a player compares or quotes */
+p, td, th, .copyable, .chronicle { user-select: text; -webkit-user-select: text; }
+/* …and a control is never copyable, even sitting inside a copyable table: a drag that starts on a button
+   belongs to the button */
+button, select, summary, .pill, .slot, .cast, .knob, .tab { user-select: none; -webkit-user-select: none; }
+
+::selection { background: var(--sel); color: var(--text); }
 
 h1, h2, h3 { font-weight: 600; margin: 0 0 .5rem; letter-spacing: .02em; }
 h1 { font-size: 1.15rem; }
@@ -50,7 +79,37 @@ button, select {
   font: inherit;
   cursor: pointer;
 }
-button:hover { border-color: var(--gold); color: var(--gold); }
+button:hover, select:hover { border-color: var(--gold); color: var(--gold); }
+/* a control you can reach by keyboard must look reached. `:focus-visible` only, so a press never keeps a
+   ring the pointer did not ask for, and one ring shape serves every control in the client. The offset is a
+   variable rather than a literal: a surface that fills its own frame — the map — pulls the ring inward by
+   setting `--ring-offset`, and a component never has to out-specify this rule to be heard. */
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible,
+a:focus-visible, [tabindex]:not([tabindex="-1"]):focus-visible, summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: var(--ring-offset, 2px);
+  border-color: var(--focus);
+}
+/* the press: a control answers the hand that used it, and a disabled one never pretends it would */
+button:active:not(:disabled) { transform: translateY(1px); filter: brightness(1.14); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:disabled:hover { border-color: var(--line); color: var(--text); }
+input[type=checkbox], input[type=radio] { accent-color: var(--gold); }
+input[type=number], input[type=text] {
+  background: #12151b; color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+  padding: .15rem .35rem; font: inherit; font-family: var(--num);
+}
+input[type=range] { accent-color: var(--gold); }
+/* the caret is part of the design when a field exists at all */
+input, textarea { caret-color: var(--focus); }
+a { color: var(--gold); text-underline-offset: .18em; }
+
+/* the scrolls inside a panel are the client's, not the platform's */
+* { scrollbar-width: thin; scrollbar-color: var(--bar) transparent; }
+*::-webkit-scrollbar { width: .6rem; height: .6rem; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--bar); border-radius: .3rem; }
+*::-webkit-scrollbar-thumb:hover { border-color: var(--gold); background: #2e3742; }
 
 table { border-collapse: collapse; width: 100%; }
 th, td {
@@ -59,6 +118,9 @@ th, td {
 }
 td { font-family: var(--num); font-size: .8rem; }
 th { color: var(--dim); font-weight: 500; }
+/* a row the player can act on, read as a row: the whole line lights, not just its button */
+tr[role="button"], tbody tr button { cursor: pointer; }
+tbody tr:hover { background: rgba(255, 255, 255, .03); }
 
 /* The map sheet — one copy, the ground the field is drawn on (`.map-back`), dimmed under the HUD and
    brought into focus by the MAP tab. `tools/map.ts` prints one polygon per cell of the
@@ -73,7 +135,7 @@ th { color: var(--dim); font-weight: 500; }
    zooming out never reaches an edge — so the clip is lifted here and the frame (`.map-back`) is left
    as the only thing that bounds the map. */
 .sheet svg { display: block; width: 100%; height: auto; overflow: visible; }
-.sheet svg text { text-anchor: middle; dominant-baseline: central; }
+.sheet svg text { text-anchor: middle; dominant-baseline: central; user-select: none; }
 /* the backdrop owns the whole frame, so the sheet is scaled to fit it rather than to its own width */
 .map-back svg { width: 100%; height: 100%; }
 /* names, the walk graph, the pins and the landmark marks are ink laid on the sheet, not targets: a click
@@ -122,3 +184,19 @@ th { color: var(--dim); font-weight: 500; }
 .tree-pips { display: flex; gap: 0.2rem; }
 .pip { min-width: 1.6rem; text-align: center; opacity: 0.35; border: 1px solid currentColor; border-radius: 3px; }
 .pip.on { opacity: 1; font-weight: 600; }
+
+/* Below the desktop floor the corner reads stop being placeable, so the client says so rather than
+   laying a phone screen nobody asked for. */
+.small-screen {
+  position: fixed; inset: 0; z-index: 200; display: none; place-content: center; padding: 2rem;
+  text-align: center; background: var(--bg);
+}
+.small-screen h2 { color: var(--gold); }
+.small-screen p { color: var(--dim); max-width: 34rem; margin: .4rem auto 0; }
+@media (max-width: 1023px) {
+  .small-screen { display: grid; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { BASES, STAT_KEYS } from '../src/engine/client';
+import { BASES, STAT_KEYS, loot } from '../src/engine/client';
 import { newGame, tick, equippedCount } from '../src/sim/game';
-import { equipFromBag, gearModOf } from '../src/sim/gear';
+import { equipFromBag, gearModOf, autoEquip } from '../src/sim/gear';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { craft as clientCraft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
@@ -89,6 +89,104 @@ describe('equipping from the bag', () => {
     expect(equippedCount(s)).toBe(atStart);
   });
 
+  it('fills the second ring slot instead of replacing the first one', () => {
+    // the body carries two rings, so a press that always took the first cell naming the slot could never
+    // wear a second one — and the last ring pressed won, whatever it was worth
+    const s = newGame(77);
+    const ring = (v: number): Item =>
+      ({ slot: 'ring', base: 'Band', ilvl: 20, quality: 'mid', tier: 'T1', q: 1, lines: [{ id: 'all_stat_flat', value: v, slice: 1 }] } as Item);
+    s.bag = [];
+    s.gear[6] = null;
+    s.gear[7] = null;
+    s.bag = [ring(5), ring(10)];
+    expect(equipFromBag(s, 1).ok).toBe(true);
+    expect(equipFromBag(s, 0).ok).toBe(true);
+    expect(s.gear.filter((g) => g && g.slot === 'ring').length).toBe(2);
+  });
+
+  it('takes the weaker of a pair when a piece has to displace one', () => {
+    const s = newGame(78);
+    const ring = (v: number): Item =>
+      ({ slot: 'ring', base: 'Band', ilvl: 20, quality: 'mid', tier: 'T1', q: 1, lines: [{ id: 'all_stat_flat', value: v, slice: 1 }] } as Item);
+    s.bag = [];
+    s.gear[6] = ring(10);
+    s.gear[7] = ring(3);
+    s.bag = [ring(5)];
+    expect(equipFromBag(s, 0).ok).toBe(true);
+    expect(s.gear[6]!.lines[0].value).toBe(10); // the strong ring stayed where it was
+    expect(s.gear[7]!.lines[0].value).toBe(5);
+  });
+});
+
+describe('putting on the best gear the character carries', () => {
+  const piece = (slot: string, v: number, extra: Partial<Item> = {}): Item =>
+    ({ slot, base: 'Band', ilvl: 20, quality: 'mid', tier: 'T1', q: 1, lines: [{ id: 'all_stat_flat', value: v, slice: 1 }], ...extra } as Item);
+  const score = (item: Item) => loot.score({ ...item, q: item.q ?? 0 });
+
+  it('wears what is stronger and leaves the rest in the pile', () => {
+    const s = newGame(80);
+    s.bag = [];
+    s.gear[0] = null; // a bare cell is always worth filling, so the swap needs no guess about the start set
+    s.bag = [piece('helmet', 40), piece('helmet', 1)];
+    const r = autoEquip(s, 0);
+    expect(r.swaps.length).toBe(1);
+    expect(s.gear[0]!.lines[0].value).toBe(40);
+    expect(s.bag.length).toBe(1);
+  });
+
+  it('will not move a piece the player pinned, promised to a set, or left Broken', () => {
+    const s = newGame(81);
+    s.bag = [];
+    s.gear[0] = null;
+    s.bag = [piece('helmet', 999, { locked: true }), piece('helmet', 998, { heldFor: 'a-set' }), piece('helmet', 997, { broken: true })];
+    const r = autoEquip(s, 0);
+    expect(r.spared).toEqual({ locked: 1, set: 1, broken: 1 });
+    expect(r.swaps.length).toBe(0);
+    expect(s.bag.length).toBe(3);
+    expect(s.gear[0]).toBe(null);
+  });
+
+  it('honours the margin it was given instead of churning over a rounding error', () => {
+    const worn = piece('helmet', 100);
+    const tiny = piece('helmet', 101);
+    const big = piece('helmet', 400);
+    const gain = ((score(tiny) - score(worn)) / score(worn)) * 100;
+    expect(gain).toBeGreaterThan(0); // the fixture really is an improvement, or the reading proves nothing
+    const s = newGame(82);
+    s.bag = [];
+    s.gear[0] = worn;
+    s.bag = [tiny];
+    expect(autoEquip(s, gain + 1).swaps.length).toBe(0);
+    expect(s.gear[0]).toBe(worn);
+    s.bag = [big];
+    expect(autoEquip(s, gain + 1).swaps.length).toBe(1);
+  });
+
+  it('settles the second press with nothing left to change', () => {
+    const s = newGame(83);
+    s.bag = [];
+    s.gear[0] = null;
+    s.gear[6] = null;
+    s.bag = [piece('helmet', 30), piece('ring', 50)];
+    expect(autoEquip(s, 0).swaps.length).toBe(2);
+    const wornNow = s.gear.map((g) => (g ? g.lines[0].value : 0)).join('|');
+    expect(autoEquip(s, 0).swaps.length).toBe(0); // no ping-pong once the press has already won
+    expect(s.gear.map((g) => (g ? g.lines[0].value : 0)).join('|')).toBe(wornNow);
+  });
+
+  it('counts what the warehouse holds better, without raiding it', () => {
+    const s = newGame(84);
+    s.bag = [];
+    s.gear[0] = null;
+    s.stash = [[piece('helmet', 900)], [], [], [], [], []];
+    const r = autoEquip(s, 0);
+    expect(r.inStash).toBe(1);
+    expect(s.stash[0].length).toBe(1); // reported, not moved: a stored piece comes out by the player's hand
+    expect(s.gear[0]).toBe(null);
+  });
+});
+
+describe('the school a Base carries', () => {
   it('pays a full Upgrade ladder onto the school its Base carries, and nowhere else', () => {
     const light = BASES.bases.find((b: any) => b.school === 'evasion_flat') as any;
     const heavy = BASES.bases.find((b: any) => b.school === 'armour_flat') as any;

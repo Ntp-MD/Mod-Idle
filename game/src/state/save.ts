@@ -87,9 +87,21 @@ async function get(key: string): Promise<string | null> {
   }
 }
 
-/** Client-only preferences (not part of a save slot): number format and the offline-report toggle. */
-export interface ClientSettings { numberFormat: 'plain' | 'short'; offlineReport: boolean; }
-export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true };
+/**
+ * Client-only preferences (not part of a save slot): number format, the offline-report toggle, and the
+ * keyboard map. Bindings live here rather than in `GameState` because they belong to the hand on the
+ * keyboard, not to the character — one set serves all three slots, and a save file never carries them.
+ * `keybinds` is a sparse override: an action missing from it takes its default, so adding a bound action
+ * later cannot strand an old settings record.
+ */
+export interface ClientSettings {
+  numberFormat: 'plain' | 'short';
+  offlineReport: boolean;
+  keybinds?: Record<string, string>;
+  /** how far ahead a piece must be before "put on the best I carry" will trade for it, in percent */
+  equipMargin?: number;
+}
+export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0 };
 export async function readSettings(): Promise<ClientSettings> {
   const raw = await get('settings');
   if (!raw) return { ...DEFAULT_SETTINGS };

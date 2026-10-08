@@ -29,6 +29,9 @@ const OUT = path.join(ROOT, 'art/svg/map/map-overlay.svg');
 const F = MAP.field;
 const COL = MAP.terrain_colors;
 const GCOL = MAP.ground_colors;
+/** The ground is the field's palette, not a second one: every anchor is the terrain it is named for
+ *  closed on the paper by `field.ground_fade`, and M5 re-derives each one so the two cannot drift. */
+const GFADE = F.ground_fade;
 const R = F.radius;
 const SQ3 = Math.sqrt(3);
 /** Two pointy-top neighbours sit SQ3*R apart and each reaches SQ3*r/2 past its centre, so r = R - GAP/SQ3. */
@@ -87,6 +90,45 @@ const hexToRgb = (h) => { const v = parseInt(h.slice(1), 16); return [(v >> 16) 
 const rgbToHex = ([r, g, b]) => '#' + [r, g, b].map((x) => Math.round(x).toString(16).padStart(2, '0')).join('');
 const SHEET_RGB = hexToRgb(F.sheet);
 const toward = (hex, t) => rgbToHex(hexToRgb(hex).map((v, i) => v + (SHEET_RGB[i] - v) * t));
+/** a colour as HSL — the ground ramp is walked by hue, so hue is what gets measured and guarded. */
+const hslOf = (hex) => {
+  const [r, g, b] = hexToRgb(hex).map((v) => v / 255);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min, l = (max + min) / 2;
+  if (!d) return [0, 0, l];
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h * 60, s, l];
+};
+const hslToHex = ([h, s, l]) => {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  const seg = [[c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x]][Math.floor((((h % 360) + 360) % 360) / 60) % 6];
+  return rgbToHex(seg.map((v) => (v + m) * 255));
+};
+const SHEET_HSL = hslOf(F.sheet);
+/**
+ * The ground's travel toward the paper, held on the colour's own hue: saturation and lightness close on
+ * the sheet's, hue does not move. A plain rgb lerp (`toward`) steps onto the sheet's hue (213) instead,
+ * which drags ash's mauve onto a violet no terrain stands on and turns the ramp into a second palette.
+ */
+const towardHeld = (hex, t) => {
+  const [h, s, l] = hslOf(hex);
+  return hslToHex([h, SHEET_HSL[1] + (s - SHEET_HSL[1]) * (1 - t), SHEET_HSL[2] + (l - SHEET_HSL[2]) * (1 - t)]);
+};
+/** the ramp the data declares, derived from the terrain colours its keys are named for. */
+const groundRamp = () => Object.keys(GCOL).map((k) => towardHeld(COL[k], GFADE));
+/** the ramp's hues with the wheel's wrap taken out, so a step past red reads as the turn it is. */
+const hueWalk = (hexes) => {
+  const out = [];
+  for (const hex of hexes) {
+    let h = hslOf(hex)[0];
+    while (out.length && h - out[out.length - 1] > 180) h -= 360;
+    while (out.length && out[out.length - 1] - h > 180) h += 360;
+    out.push(h);
+  }
+  return out;
+};
 
 /**
  * The claims, in the order the file lists them: a town's own cell, its three sub-zone cells in
@@ -356,9 +398,11 @@ function viewBox() {
  * The ground the field lies on: the same hex lattice, drawn on past the field so zooming out never
  * reaches an edge — pretending to be terrain, not a flat paper, so the field reads as one region of a
  * larger world. The tone is not picked per hex: a value noise, smoothed and periodic over the tile,
- * gives every hex a height, and the height walks the `ground_colors` ramp — so neighbours share a tone,
- * the hues drift instead of scattering, and the ground reads as country rather than confetti. The tile
- * and the field share the one lattice, so the ground lines up with the cells, not behind them.
+ * gives every hex a height, and the height walks the `ground_colors` ramp — the terrain palette at
+ * `ground_fade`, listed in the order its hues fall — so neighbours share a tone, the hues drift one way
+ * round the wheel instead of scattering across it, and the ground reads as country rather than confetti
+ * (M5). The tile and the field share the one lattice, so the ground lines up with the cells, not behind
+ * them. `hazeDef` lays the aerial wash over all of it.
  */
 function hexGridDefs() {
   const keys = Object.keys(GCOL);
@@ -399,12 +443,32 @@ function hexGridDefs() {
 }
 /** How many fields of ground are laid past each edge — enough that the frame is hexes at the lowest zoom. */
 const GROUND_SPAN = 5;
+/**
+ * Aerial perspective: one radial wash centred on the field's own viewBox centre, transparent out to
+ * `haze_clear` half-diagonals — the whole field, and the ring of ground that has to match it — then
+ * deepening on the paper to `fade_far` by `haze_reach`, which is how far the outermost bare cell is
+ * already laid. So the far ground sinks exactly as far as the field's own edge does, the hard ring where
+ * the field ended is gone, and the lattice reads as land falling away instead of a wallpaper tile. Painted
+ * after the hexes and before the cells, so no cell is ever veiled and the client still drives only
+ * `polygon.cell` and `rect.paper` (M10).
+ */
+function hazeDef(v) {
+  const D = Math.hypot(v.vw / 2, v.vh / 2);
+  return [
+    `    <radialGradient id="haze" gradientUnits="userSpaceOnUse" cx="${(v.vx + v.vw / 2).toFixed(1)}" cy="${(v.vy + v.vh / 2).toFixed(1)}" r="${(F.haze_reach * D).toFixed(1)}">`,
+    `      <stop offset="0" stop-color="${F.sheet}" stop-opacity="0"/>`,
+    `      <stop offset="${(F.haze_clear / F.haze_reach).toFixed(4)}" stop-color="${F.sheet}" stop-opacity="0"/>`,
+    `      <stop offset="1" stop-color="${F.sheet}" stop-opacity="${F.fade_far}"/>`,
+    '    </radialGradient>',
+  ];
+}
 function groundRects(v) {
   const x = v.vx - GROUND_SPAN * v.vw, y = v.vy - GROUND_SPAN * v.vh;
   const box = `x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(v.vw * (2 * GROUND_SPAN + 1)).toFixed(1)}" height="${(v.vh * (2 * GROUND_SPAN + 1)).toFixed(1)}"`;
   return [
     `  <rect class="paper" ${box} fill="${F.sheet}"/>`,
     `  <rect ${box} fill="url(#hexgrid)"/>`,
+    `  <rect class="haze" ${box} fill="url(#haze)" pointer-events="none"/>`,
   ];
 }
 
@@ -419,6 +483,7 @@ function write() {
     ...['M3 15 16 4l13 11M6 13v15h20V13M12 28v-9h8v9', 'M9 15h3M20 15h3', 'M16 4V2'].map((d) => `      <path d="${d}"/>`),
     '    </g>',
     ...hexGridDefs(),
+    ...hazeDef(v),
     '  </defs>',
     ...groundRects(v),
     ...fieldGroup(),
@@ -479,15 +544,29 @@ function checks() {
   for (const c of MAP.cells) for (const s of c.subs) {
     if (!COL[s.terrain]) problems.push(`${c.town} sub cell ${s.cell} says terrain "${s.terrain}", which has no colour`);
   }
-  // M5 · every declared colour is drawn somewhere: a terrain on a cell, a ground colour on the ground
+  // M5 · every declared colour is drawn somewhere: a terrain on a cell, a ground colour on the ground —
+  //        and the ground is the terrain palette at `ground_fade` and nothing else. An anchor that is not
+  //        what that fade prints is a hand-typed tone with no home, and a ramp whose hues turn back on
+  //        themselves is confetti again: two neighbouring heights landing on opposite sides of the wheel.
   for (const kind of Object.keys(COL)) {
     const used = MAP.cells.some((c) => c.subs.some((s) => s.terrain === kind)) || ['town', 'wild'].includes(kind);
     if (!used) problems.push(`terrain colour "${kind}" is declared but no cell stands on it`);
   }
   let groundSvg = '';
   try { groundSvg = fs.readFileSync(OUT, 'utf8'); } catch { /* M10 reports the sheet that is not written */ }
-  for (const [name, hex] of Object.entries(GCOL)) {
+  const ramp = groundRamp();
+  const gkeys = Object.keys(GCOL);
+  gkeys.forEach((name, i) => {
+    const hex = GCOL[name];
+    if (!COL[name]) { problems.push(`ground colour "${name}" is declared but names no terrain`); return; }
     if (!groundSvg.includes(`fill="${hex}"`)) problems.push(`ground colour "${name}" is declared but not drawn on the ground`);
+    if (hex !== ramp[i]) problems.push(`ground colour "${name}" is declared but ${COL[name]} closed on the paper by ${GFADE} is ${ramp[i]}`);
+  });
+  const walk = hueWalk(gkeys.map((k) => GCOL[k]));
+  for (let i = 1; i < walk.length; i++) {
+    if (walk[i] > walk[i - 1] - 3) {
+      problems.push(`the ground ramp is declared but its hues turn back: "${gkeys[i]}" at ${walk[i].toFixed(0)} deg follows "${gkeys[i - 1]}" at ${walk[i - 1].toFixed(0)} deg`);
+    }
   }
   // M6 · every sub-zone and wild cell is a side of its own town
   for (const c of MAP.cells) {
@@ -564,7 +643,7 @@ if (args.includes('--checks')) {
   say(!problems.some((p) => /outside the|claimed by/.test(p)), `M2  all ${subs + wild + MAP.cells.length} claimed cells are on the field, none claimed twice`);
   say(!problems.some((p) => /walk graph|walk node|the sheet says/.test(p)), `M3  the sheet's cells and the walk graph's ${roadNodes.length} axial nodes are the same lattice`);
   say(!problems.some((p) => /has no colour/.test(p)), `M4  every terrain a cell stands on has a colour`);
-  say(!problems.some((p) => /declared but/.test(p)), `M5  every declared colour is drawn somewhere (${Object.keys(COL).length} terrain keys · ${Object.keys(GCOL).length} ground keys)`);
+  say(!problems.some((p) => /declared but/.test(p)), `M5  every declared colour is drawn somewhere (${Object.keys(COL).length} terrain keys · ${Object.keys(GCOL).length} ground keys), and the ground ramp is each terrain at ground_fade ${GFADE} walked one way round the wheel`);
   say(!problems.some((p) => /not a side of/.test(p)), `M6  every sub-zone and wild cell is a side of its own town`);
   say(!problems.some((p) => /may not read a coordinate/.test(p)), `M7  no file under engine/ or game/src/ reads map.json — cells stay presentation (X33)`);
   say(!problems.some((p) => /lattice holds|starting settlement/.test(p)), `M8  the field is the declared ${F.cols} x ${F.rows} (${F.hexes} cells) with the start on its centre cell`);

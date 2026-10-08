@@ -13,7 +13,10 @@
     "bare_tone": "#1b2430",
     "fade_near": 0.18,
     "fade_far": 0.8,
-    "note": "Pointy-top hexes drawn on the lattice radius, then shrunk by the gap so neighbours leave bare ground between their edges. A cell with no zone on it takes the terrain of the nearest settlement, laid on thinner the further out it sits."
+    "ground_fade": 0.62,
+    "haze_clear": 1.15,
+    "haze_reach": 5,
+    "note": "Pointy-top hexes drawn on the lattice radius, then shrunk by the gap so neighbours leave bare ground between their edges. A cell with no zone on it takes the terrain of the nearest settlement, laid on thinner the further out it sits. The ground past the field is the field's own palette and not a second one: `ground_fade` is how far each terrain colour is closed on the paper to print its `ground_colors` anchor, holding that terrain's hue — an rgb lerp travels onto the paper's own hue instead and drags a mauve into a violet no terrain stands on. `ground_colors` lists its keys in the order the ramp walks them, one way round the wheel from the rock end to the ash end, so two neighbouring heights differ by a drift and not a jump: M5 re-derives every anchor from its terrain and refuses a ramp whose hues turn back. `haze_clear` and `haze_reach` are field half-diagonals measured from the viewBox centre: the aerial wash is transparent out to `haze_clear`, so the whole field and the ring of ground that has to match it are untouched, then deepens on the paper to `fade_far` — as far as the outermost bare cell is laid — by `haze_reach`, so the far ground sinks exactly as far as the field's own edge and the ring where the field ended is gone."
   },
   "terrain_colors": {
     "water": "#14384a",
@@ -32,13 +35,13 @@
     "wild": "#333a28"
   },
   "ground_colors": {
-    "water": "#0e2230",
-    "marsh": "#122720",
-    "forest": "#17250f",
-    "moor": "#1d2114",
-    "rock": "#1e2229",
-    "waste": "#241b12",
-    "ash": "#25161c"
+    "rock": "#171c27",
+    "water": "#102028",
+    "marsh": "#11231f",
+    "forest": "#0f2013",
+    "moor": "#202412",
+    "waste": "#251c11",
+    "ash": "#26141c"
   },
   "cells": [
     {

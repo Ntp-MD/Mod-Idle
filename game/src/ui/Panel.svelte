@@ -97,9 +97,12 @@
     flex-direction: column;
     justify-self: center;
     width: min(880px, 100%);
-    /* the screen keeps its headroom: a sub-screen that runs edge to edge leaves the field nowhere to
-       be read, so it takes three quarters of the height and scrolls inside the rest */
-    height: min(70vh, 100%);
+    /* the screen takes only the room its own content needs, up to three quarters of the height: a
+       sub-screen is a window over the field, not a second field, and a short one that stretched to a
+       fixed height would leave the ground showing through an empty plate. The row above may still shrink
+       below the content, so a long panel's bottom stays reachable inside its own scroll. */
+    height: auto;
+    max-height: min(70vh, 100%);
     background: var(--bg);
     border-inline: 1px solid var(--edge);
     box-shadow: 0 0 60px rgba(0, 0, 0, .6);
