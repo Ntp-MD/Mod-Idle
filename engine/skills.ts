@@ -1,7 +1,7 @@
 /**
  * The skill model — one home for the roster calculator.
  *
- * `tools/skills.ts --calc`, `tools/report.ts` and the client all read these functions, so a
+ * `tools/skills.ts --calc` and the client both read these functions, so a
  * cooldown or a per-press figure the player sees is the one the cage publishes
  * (`skill-pool.md` · `skill-pool-system.md`).
  */
@@ -25,7 +25,33 @@ import type { EngineData, SkillRow, SkillsData } from './types.ts';
 
 export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const F = (SKILLS.meta && SKILLS.meta.formula) || {};
-  const LEVEL_STEP = F.level_step_pct != null ? F.level_step_pct : 1.5;
+  /**
+   * The per-level table: one row per skill level, carrying the multiplier a press and an effect
+   * carry at that level. It is the only home of the ramp — a row states its level-1 numbers and the
+   * table says what they climb to, so "what does this skill do at level N" is a read, never a formula
+   * buried in code. `special_level_effects` names the effect stats that already spend skill level
+   * their own way (Energy Absorb interpolates base→cap, Ghost Dance counts a charge per N levels) and
+   * must not be scaled a second time.
+   */
+  const LEVEL_ROWS: { level: number; damage_pct: number; effect_pct: number }[] =
+    (F.skill_levels && F.skill_levels.rows) || [{ level: 1, damage_pct: 100, effect_pct: 100 }];
+  const LEVEL_SPECIALS: string[] = ((F.skill_levels && F.skill_levels.special_level_effects) || []).map(String);
+  const LEVEL_CAP = LEVEL_ROWS[LEVEL_ROWS.length - 1].level;
+  /** The step the first two rows state — what the tables and the tests print as `LEVEL_STEP`. */
+  const LEVEL_STEP = LEVEL_ROWS.length > 1 ? Math.round((LEVEL_ROWS[1].damage_pct - LEVEL_ROWS[0].damage_pct) * 100) / 100 : 0;
+  const rowAt = (level?: number) => LEVEL_ROWS[Math.max(0, Math.min(LEVEL_CAP, Math.floor(level || 1)) - 1)];
+  /** The multiplier a press carries at a level, in percent. */
+  const damagePct = (level?: number) => rowAt(level).damage_pct;
+  /** The multiplier an effect carries at a level, in percent. */
+  const effectPct = (level?: number) => rowAt(level).effect_pct;
+  /**
+   * A row's effects at a level. The stored `value` is the level-1 number and it climbs on the table;
+   * a `special_level_effects` stat is handed back untouched, because its own mechanism is the ramp.
+   */
+  function effectsAt(skill: SkillRow, level?: number) {
+    const scale = effectPct(level) / 100;
+    return (skill.effects || []).map((e) => (LEVEL_SPECIALS.includes(e.stat) ? { ...e } : { ...e, value: e.value * scale }));
+  }
   /** A flat mana cost climbs on its own step, steeper than the damage ramp. */
   const MANA_LEVEL_STEP = F.mana_level_step_pct != null ? F.mana_level_step_pct : 5;
   /** How much of the pool's growth a flat cost takes on, so Int and Max Mana gear still price it. */
@@ -91,14 +117,15 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   }
 
   /**
-   * press = final_pct × basis(built from the caller's own lines) × (1 + (skill_level − 1) × 1.5%).
-   * `final_pct` is the level-1 fraction the row states, so a fresh skill presses exactly what its
-   * row says and the level ramp is the only growth (: K_SKILL and the stat/power split are gone).
+   * press = (base_flat + (eff/100) × power) × damage_pct(level)/100 — the PoE shape: the row's own flat
+   * damage at skill level 1 plus its stated share of the added power line, so gear scales a row by its
+   * effectiveness instead of by a percentage of the finished hit. The level multiplier is read from the
+   * per-level table, so a press at any level is a read of `meta.formula.skill_levels`.
    */
   function perPress(skill: SkillRow, { phys, magic, elem, align, level }: { phys?: number; magic?: number; elem?: number; align?: number; level?: number }) {
-    if (skill.final_pct == null || skill.basis == null) return null;
-    const basis = basisOf(skill, { phys, magic, elem, align });
-    return (skill.final_pct / 100) * basis * (1 + Math.max(0, (level || 1) - 1) * LEVEL_STEP / 100);
+    if (skill.base_flat == null || skill.eff == null || skill.basis == null) return null;
+    const power = basisOf(skill, { phys, magic, elem, align });
+    return (skill.base_flat + (skill.eff / 100) * power) * (damagePct(level) / 100);
   }
 
   /** A phys-basis press can crit; a magic-basis one cannot (pin 1). */
@@ -189,12 +216,14 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
    * never enters the character's own sheet**: it comes back in `target`, because Rimbo Form's mob
    * slow and Elemental Fury's mob res cut are bought by the aura but spent on the mob.
    * Every value here is the row's own number — `tools/lib/roster.ts` S11 fails if one of them is
-   * not printed in that row's `effect` sentence.
+   * not printed in that row's `effect` sentence. Pass `levelOf` to fold the rows at the skill levels
+   * the character actually holds; without it every row folds at level 1, which is what the roster
+   * gates and the tables read.
    */
-  function aggregateEffects(rows?: SkillRow[]) {
+  function aggregateEffects(rows?: SkillRow[], levelOf?: (row: SkillRow) => number) {
     const add: Record<string, number> = {}, mult: Record<string, number> = {}, conditional: any[] = [], targetAdd: Record<string, number> = {}, targetMult: Record<string, number> = {};
     for (const s of rows || []) {
-      for (const e of s.effects || []) {
+      for (const e of levelOf ? effectsAt(s, levelOf(s)) : (s.effects || [])) {
         // an Elemental line names the Element it feeds, so the key carries it
         const key = e.element ? `${e.stat}:${e.element}` : e.stat;
         const inAdd = e.subject === 'target' ? targetAdd : add;
@@ -246,6 +275,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
 
   return {
     SKILLS, byId, LEVEL_STEP, CAST_REF, LADDER, CONVERSION, WEAPON_GROUPS,
+    LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, effectsAt,
     MANA_LEVEL_STEP, MANA_POOL_EXPONENT, MANA_REF_POOL, MANA_REF_LEVEL, MANA_UNITS,
     aggregateEffects, EFFECT_STATS, EFFECT_OPS, EFFECT_SUBJECTS, EFFECT_CONDITIONS, EFFECT_RULES, MODELLED_BY,
     PRESETS, presetCount, mainPreset,
@@ -255,10 +285,12 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     all: () => SKILLS.skills,
     of: (type: string) => SKILLS.skills.filter((s) => s.type === type),
     /**
-     * The attack ladder's floor: the weakest attack row in the roster. A magic weapon's basic attack
-     * is a `bolt` worth exactly this, so the filler a caster falls back on is the roster's own floor
-     * rather than a number typed beside it (HugePatch §14c).
+     * The attack ladder's floor: what a magic weapon's `bolt` is worth, as a share of the finished
+     * hit. A caster's filler is a press on the attack clock with no mana and no cooldown, so this is
+     * the number that keeps it from being a downgrade on a full swing (HugePatch §14c). It lives in
+     * `engine.json` `weapon_size_mult.bolt_share_pct` now — the roster no longer states a percentage
+     * of a hit, since a press is its own flat plus an effectiveness.
      */
-    ladderFloorPct: () => Math.min(...SKILLS.skills.filter((s) => s.type === 'attack' && typeof s.final_pct === 'number').map((s) => s.final_pct as number)),
+    ladderFloorPct: () => (E.weapon_size_mult && E.weapon_size_mult.bolt_share_pct) || 100,
   };
 }

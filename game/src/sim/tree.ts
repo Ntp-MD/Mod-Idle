@@ -6,7 +6,7 @@ import type { GameState } from './types';
  *
  * A level banks one point; one point buys one rank; a node's rank 1 needs the node before it in its
  * own chain, and a node holds three ranks. Respec is **free**, at the town Counterhand — the same
- * rule the Core stat points obey, because the build is the player's to express (`AGENT.md` D11), so
+ * rule the Core stat points obey, because the build is the player's to express (`AGENTS.md` D11), so
  * taking it back costs nothing.
  */
 

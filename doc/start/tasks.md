@@ -1,11 +1,5 @@
 # Tasks
 
-import glossary.md
-import world.md
-import loot.md
-import crafting.md
-import item-list.md
-import checks.md
 
 Task board: the daily direction layer. Answers concept.md failure point 1 (nothing visible except loot) without adding power outside the folded funnel (checks.md H1).
 

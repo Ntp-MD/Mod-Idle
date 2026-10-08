@@ -17,7 +17,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import * as G from './lib/generated.ts';
 import * as eng from './lib/engine.ts';
 import { readJson } from './lib/json.ts';
 import { createSkillModel } from '../engine/skills.ts';
@@ -27,7 +26,6 @@ const { E, S, K, M, LG, BAND, BANDS, BAND_KEYS, CEIL, SPLIT, FORCED_SPLIT, DERIV
 const MODS = JSON.parse(fs.readFileSync(path.join(eng.ROOT, 'tools/data/mods.json'), 'utf8'));
 const BASES_JSON = readJson(path.join(import.meta.dirname, 'data/bases.json'));
 const ROOT = eng.ROOT;
-const readDoc = (f) => fs.readFileSync(path.join(ROOT, G.resolveDoc(f)), 'utf8');
 const f0 = (x) => Math.round(x).toLocaleString('en-US');
 const f1 = (x) => x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const f2 = (x) => x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -194,22 +192,13 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   // The full-Lck junk multiple is a derived anchor: `CEIL × K_LCK_DROP` is the whole lever, so
   // dropping the stat ceiling to 510 moved 3.16 → 2.11, adding the earring as a 13th
   // item moved it to 2.20, the re-base (kill rates ×1/3 and the level-90 Lck
-  // line 190 → 76) moved it to the value below, and the item-level pass moved it again — the 7-line
-  // Rarity branch is gone, so a drop carries fewer lines and the keep-rate (hence the junk line) sits
-  // where that leaves it. Like X1 this literal is a canary against an accidental K re-tune, and the
-  // docs print the derived value, not this number.
-  add('X7', Math.abs(LCK_BOUND - 3.11) < 0.02, `full-Lck junk line ×${f2(LCK_BOUND)} — the bound G8 and towns-stalls T7 quote`);
+  // line 190 → 76) moved it to the value below, and the item-level pass moved it again — a drop's
+  // Normal line count is drawn from a range now (2-5, up to 10 crafted), so the keep-rate and with it
+  // the junk line sits where that leaves it. Like X1 this literal is a canary against an accidental K
+  // re-tune, and the docs print the derived value, not this number.
+  add('X7', Math.abs(LCK_BOUND - 3.15) < 0.02, `full-Lck junk line ×${f2(LCK_BOUND)} — the bound G8 and towns-stalls T7 quote`);
   add('X8', STONE.tier_stones_per_hr === 6 + 12 && STONE.reroll_uses_per_hr === 10,
     `stone flow: elite 18 + boss 12 = ${STONE.tier_stones_per_hr} tier stones/hr · ${f0(BAND.high.junk_per_hr)} junk ÷ ${C.reroll_value_stones_per_use} = ${STONE.reroll_uses_per_hr} Reroll uses/hr (F6 · F7)`);
-  // The E6 row is read back as a COUNT, never as a duration: this game has no time limit and no
-  // play-length target (owner ruling · the E group's own header), so a checkpoint states what the
-  // player spends — casts and stones — and the hours a rate would imply are nobody's business.
-  const e6Lines = readDoc('checks.md').split(/\r?\n/);
-  const e6row = e6Lines.find((l) => l.startsWith('| E6 |')) || '';
-  const e6 = Number((e6row.match(/([\d,]+) casts/) || [0, NaN])[1].replace(/,/g, ''));
-  const e6stones = Number((e6row.match(/([\d,]+) Reroll tier stones/) || [0, NaN])[1].replace(/,/g, ''));
-  add('X9', e6 === STONE.refine_casts_full_set && e6stones === STONE.refine_casts_full_set * C.refine_stones_per_use,
-    `Refine full set = ${STONE.refine_casts_full_set} casts × ${C.refine_stones_per_use} Reroll tier stones = ${f0(STONE.refine_casts_full_set * C.refine_stones_per_use)}, and checks.md E6 prints ${f0(e6)} casts · ${f0(e6stones)} stones — Tier belongs to the piece, so a cast moves the whole item one step`);
   add('X10', STONE.polish_hours_full_set <= 10.5, `full-set polish = ${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones = ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Reroll value stones (E8 · the opportunity cost one gold is priced against; the hours it would take at ${f2(STONE.reroll_uses_per_hr)}/hr are nobody's business)`);
 
   // Cap reachability, split by kind. A build-target Cap must bind — the build reaches at
@@ -593,105 +582,25 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
       : `mobs carry no skills — a species trait and its damage tag are the whole of its behaviour; ${E.mob.species.length} species checked, none carries a skill field while skills_enabled is false`);
   }
 
-  // Zone identity is data now (mob.zones), but towns.md and loot.md still print the same facts in prose.
-  // Nothing allowed two homes: this guard reads both back and fails on any drift.
+  // Zone identity lives in `mob.zones` alone. Bands repeat every three zones, so each band owns
+  // however many zones fall in its 30-level window — read off the zone list, never typed.
   const zp = [];
-  let townsText = '';
-  try { townsText = readDoc('towns.md'); } catch (e) { zp.push('towns.md unreadable'); }
-  if (townsText) {
-    for (const line of townsText.split(/\r?\n/)) {
-      const m = line.match(/^\|\s*([1-9])\s*\|\s*([\d]+)-([\d]+)\s*\|\s*([^|]+?)\s*\|/);
-      if (!m) continue;
-      const z = ZONES.find((x) => x.id === Number(m[1]));
-      if (!z) { zp.push(`towns.md has zone ${m[1]} with no data row`); continue; }
-      if (`${z.levels[0]}-${z.levels[1]}` !== `${m[2]}-${m[3]}`) zp.push(`zone ${m[1]} levels towns.md ${m[2]}-${m[3]} vs data ${z.levels.join('-')}`);
-      if (z.name !== m[4]) zp.push(`zone ${m[1]} settlement towns.md "${m[4]}" vs data "${z.name}"`);
-      const cells = line.split('|').map((c) => c.trim());
-      const tElems = cells[5].split('/').map((s) => s.trim()).sort().join('/');
-      const dElems = [...z.elements].sort().join('/');
-      if (tElems !== dElems) zp.push(`zone ${m[1]} innate Element towns.md "${tElems}" vs data "${dElems}"`);
-    }
-  }
-  let lootText = '';
-  try { lootText = readDoc('loot.md'); } catch (e) { zp.push('loot.md unreadable'); }
   const GROUP_AVG = { low: '1-2', mid: '2-3', high: '3-5' };
-  // Bands repeat every three zones, so each band owns however many zones fall in its 30-level
-  // window. The count is read off the zone list rather than typed, so adding zones cannot desync it.
   const ZONES_PER_BAND = Math.ceil(ZONES.length / 3);
-  if (lootText) {
-    for (const line of lootText.split(/\r?\n/)) {
-      const m = line.match(/^\|\s*(low|mid|high)\s*\((\d+)-(\d+)\)\s*\|\s*([\d.]+) mobs/);
-      if (!m) continue;
-      const [, band, from, to] = m;
-      for (const z of ZONES) {
-        if (!z.quality.startsWith(band)) continue;
-        // a band is a 30-level window, so a zone matches when it sits in one of that band's windows
-        const f = Number(from), t = Number(to), span = t - f + 1;
-        const inWindow = [...Array(Math.ceil(ZONES.length / 3))].some((_, i) =>
-          z.levels[0] >= f + i * span && z.levels[1] <= f + i * span + span - 1);
-        if (!inWindow) zp.push(`zone ${z.id} is quality "${z.quality}" but its levels ${z.levels.join('-')} fall outside loot.md's ${band} band ${from}-${to}`);
-        if (z.group !== GROUP_AVG[band]) zp.push(`zone ${z.id} group "${z.group}" does not match loot.md's ${band} band grouping rule (${GROUP_AVG[band]})`);
-      }
-      const inBand = ZONES.filter((z) => z.quality.startsWith(band));
-      if (inBand.length !== ZONES_PER_BAND) zp.push(`loot.md's ${band} band owns ${inBand.length} zones, not ${ZONES_PER_BAND}`);
+  for (const band of Object.keys(GROUP_AVG)) {
+    const inBand = ZONES.filter((z) => z.quality.startsWith(band));
+    if (inBand.length !== ZONES_PER_BAND) zp.push(`band ${band} owns ${inBand.length} zones, not ${ZONES_PER_BAND}`);
+    for (const z of inBand) {
+      if (z.group !== GROUP_AVG[band]) zp.push(`zone ${z.id} group "${z.group}" does not match the ${band} band rule (${GROUP_AVG[band]})`);
     }
   }
   add('X26', zp.length === 0, zp.length ? zp.join(' · ')
-    : `zone identity has one source — towns.md section 4 (9 settlement rows: name · level range · innate Element) and loot.md section 2 (3 quality bands: level range · group average) both read back equal to engine.json mob.zones · this is the map↔resource↔mob seam that previously had no guard`);
-
-  // checks.md D1 (mob HP) and D2 (mob damage) are hand rows, but they are now machine-checkable
-  // against each other: mob_PS = mob_HP ÷ (tree × skill × 27), because mob_HP is built from the same typical DPS.
-  let checksText = '';
-  try { checksText = readDoc('checks.md'); } catch (e) { checksText = ''; }
-  const cp = [];
-  const d1 = checksText.match(/^\| D1 \|[^\n]*/m);
-  const d2 = checksText.match(/^\| D2 \|[^\n]*/m);
-  const readPairs = (line) => [...line.matchAll(/L(\d+) \*{0,2}([\d,]+)/g)].map((m) => [Number(m[1]), Number(m[2].replace(/,/g, ''))]);
-  if (!d1 || !d2) cp.push('D1 or D2 row not found in checks.md');
-  else {
-    const hp = Object.fromEntries(readPairs(d1[0]));
-    const ps = Object.fromEntries(readPairs(d2[0]));
-    for (const [L, psAt] of Object.entries(ps)) {
-      const hpAt = hp[L];
-      if (hpAt === undefined) { cp.push(`D2 gives damage at level ${L} but D1 has no HP anchor to derive it from`); continue; }
-      const want = eng.typicalDps(hpAt, Number(L)) / K.mob_damage_divisor;
-      if (Math.abs(psAt - Math.round(want)) > 1) cp.push(`level ${L}: D2 says ${psAt}/sec, D1's HP ${f0(hpAt)} inverts to ${f1(want)}/sec`);
-    }
-    for (const z of ZONES) {
-      const edge = z.levels[1];
-      // the doc prints whole numbers, so compare at the printed precision rather than by float identity
-      if (hp[edge] !== undefined && Math.abs(z.hp[1] - hp[edge]) > 0.5) cp.push(`zone ${z.id} edge HP data ${f0(z.hp[1])} vs checks.md D1 ${f0(hp[edge])}`);
-    }
-    // world.md prints the mob HP / mob damage curve by hand — check its two rows agree with each other and with the data
-    const wLines = readDoc('world.md').split(/\r?\n/);
-    const wHead = wLines.find((l) => /^\| Level \| \d+ \|/.test(l));
-    const wHp = wLines.find((l) => /^\| mob HP \|/.test(l));
-    const wPs = wLines.find((l) => /^\| mob damage\/sec \|/.test(l));
-    let lv = [];
-    if (!wHead || !wHp || !wPs) cp.push('world.md mob curve table (Level / mob HP / mob damage) not found');
-    else {
-      const cells = (l) => l.split('|').slice(2, -1).map((c) => Number(c.trim().replace(/,/g, '')));
-      lv = cells(wHead);
-      const hpRow = cells(wHp), psRow = cells(wPs);
-      if (lv.length !== hpRow.length || lv.length !== psRow.length) cp.push('world.md mob curve rows have different lengths');
-      for (let i = 0; i < lv.length; i++) {
-        const want = Math.round(eng.typicalDps(hpRow[i], lv[i]) / K.mob_damage_divisor);
-        if (Math.abs(psRow[i] - want) > 1) cp.push(`world.md level ${lv[i]}: HP ${f0(hpRow[i])} derives ${want}/sec, the table says ${psRow[i]}`);
-        // the mob-curve table lists each zone's FIRST level, so match on that edge
-        const z = ZONES.find((x) => x.levels[0] === lv[i]);
-        if (z && Math.abs(z.hp[0] - hpRow[i]) > 0.5) cp.push(`world.md level ${lv[i]} HP ${f0(hpRow[i])} vs engine zone ${z.id} edge ${f0(z.hp[0])}`);
-      }
-    }
-    add('X27', cp.length === 0, cp.length ? cp.join(' · ')
-      : `mob damage is derived from mob HP, not typed beside it — checks.md D1's ${Object.keys(hp).length} HP anchors invert through the skill multiplier ÷ ${K.mob_damage_divisor} to exactly D2's damage anchors (${Object.keys(ps).map((L) => `L${L} ${ps[L]}`).join(' · ')}), every zone edge in engine.json equals the D1 row, and world.md's generated ${lv.length}-point curve (levels ${lv.join(' · ')}) agrees with itself`);
-  }
+    : `zone identity has one home — engine.json mob.zones: the 3 quality bands split the ${ZONES.length} zones evenly and every zone's group average matches its band`);
 
   // B2: mob_HP(L) is defined at every level, not only the published anchors (X37). The curve is
   // anchored at each zone edge and interpolated inside the zone, so a mob at an unlisted level
   // still has an HP; mob_PS derives from the same line. This gate also pins the D1/D2 prose rows.
   {
-    const hpAnchors = d1 ? Object.fromEntries(readPairs(d1[0])) : {};
-    const psAnchors = d2 ? Object.fromEntries(readPairs(d2[0])) : {};
     const p = [];
     let prev = -Infinity;
     for (let L = 1; L <= S.level_cap; L++) {
@@ -703,10 +612,8 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
       if (Math.abs(eng.mobHpAt(z.levels[0]) - z.hp[0]) > 0.5) p.push(`zone ${z.id} start HP ${f1(eng.mobHpAt(z.levels[0]))} vs data ${f0(z.hp[0])}`);
       if (Math.abs(eng.mobHpAt(z.levels[1]) - z.hp[1]) > 0.5) p.push(`zone ${z.id} end HP ${f1(eng.mobHpAt(z.levels[1]))} vs data ${f0(z.hp[1])}`);
     }
-    for (const [L, h] of Object.entries(hpAnchors)) if (Math.abs(eng.mobHpAt(Number(L)) - h) > 0.5) p.push(`D1 L${L} ${f0(h)} vs curve ${f0(eng.mobHpAt(Number(L)))}`);
-    for (const [L, v] of Object.entries(psAnchors)) if (Math.abs(eng.mobPsAt(Number(L)) - v) > 1) p.push(`D2 L${L} ${v} vs curve ${f1(eng.mobPsAt(Number(L)))}`);
     add('X37', p.length === 0, p.length ? p.join(' · ')
-      : `mob_HP(L) is anchored at every zone edge and linearly interpolated inside a zone, so every level 1-${S.level_cap} has a value (${f0(eng.mobHpAt(1))} → ${f0(eng.mobHpAt(S.level_cap))}, strictly rising) · mob_PS(L) is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\` off the same line · the D1 anchors (${Object.keys(hpAnchors).join(' · ')}) read back equal`);
+      : `mob_HP(L) is anchored at every zone edge and linearly interpolated inside a zone, so every level 1-${S.level_cap} has a value (${f0(eng.mobHpAt(1))} → ${f0(eng.mobHpAt(S.level_cap))}, strictly rising) · mob_PS(L) is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\` off the same line`);
   }
 
   // One home for every Cap: core-stats.md is the list a player reads, so it must equal the data.
@@ -722,22 +629,6 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     ['accuracy', /^Accuracy - numeric value, (no Cap)/],
     ['alignment', /^Elemental alignment - % (no Cap)/],
   ];
-  const csText = readDoc('core-stats.md').split(/\r?\n/);
-  const capProblems = [];
-  for (const [key, re] of CAP_LINES) {
-    const line = csText.find((l) => re.test(l));
-    if (!line) { capProblems.push(`core-stats.md has no readable Cap line for ${key}`); continue; }
-    const got = Number(line.match(re)[1]);
-    if (E.caps[key] !== got) capProblems.push(`${key}: core-stats.md says ${got}, engine.json caps say ${E.caps[key]}`);
-  }
-  for (const [key, re] of un) {
-    const line = csText.find((l) => re.test(l));
-    if (E.caps[key] !== null && !line) capProblems.push(`${key} is capped in data but core-stats.md does not show a Cap`);
-    if (E.caps[key] === null && !line) capProblems.push(`${key} has no Cap in data but core-stats.md does not say "no Cap"`);
-  }
-  add('X28', capProblems.length === 0, capProblems.length ? capProblems.join(' · ')
-    : `every Cap has one home — core-stats.md's 5 capped lines and 3 "no Cap" lines equal engine.json caps exactly (${CAP_LINES.map(([k]) => `${k}=${E.caps[k]}`).join(' · ')}) · this is the guard that would have caught the CDR 50 → 45 move`);
-
   // · the Gear Mod ladder is bounded by the published ceiling of the very line it raises, the
   // same `mod_max` row `tools/loot.ts` rolls it from — so +Cap can never out-print a T1 rolled line.
   const GM = E.craft.gear_mod_per_level, GM_CAP = E.craft.upgrade_cap;
@@ -753,18 +644,13 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   add('X43', true,
     `block and stun have NO Cap (owner ruling): the shield's line 1 blocks for ${shieldT1} (mods.json) and keeps climbing; the lightning stun chance is Alignment ${f1(stunAlignOnly)} + the mace line ${maceT1} = ${f1(stunAlignOnly + maceT1)}, uncapped (formula-defense.md §4b · elements.md)`);
   // · a Stat Mod line bakes one of the seven Core stats at drop, so the pool lives in the Mod
-  // row (`mods.json` `rolls`) and core-stats.md only prints it. This gate holds the two together —
-  // the data owns the seven, the doc projects them.
+  // row (`mods.json` `rolls`) — the data owns all seven.
   const statRolls = ((MODS.mods.find((m) => m.id === 'stat_mod_flat') || {}).rolls) || [];
-  const coreStats = readDoc('core-stats.md').split(/\r?\n/)
-    .map((l) => (l.match(/^(Str|Vit|Dex|Agi|Wis|Int|Lck) - /) || [])[1])
-    .filter(Boolean).map((s) => s.toLowerCase());
-  const rollProblems = statRolls.length !== coreStats.length
-    ? [`mods.json rolls ${statRolls.length}, core-stats.md lists ${coreStats.length}`]
-    : coreStats.filter((s) => !statRolls.includes(s)).map((s) => `${s}: on the sheet, not in the roll pool`);
-  add('X44', coreStats.length === 7 && rollProblems.length === 0,
-    rollProblems.length ? rollProblems.join(' · ')
-      : `Stat Mod flat rolls one of the ${statRolls.length} Core stats at drop (${statRolls.join(' · ')}), read from \`mods.json\` and equal to core-stats.md's seven — the data owns the pool, the doc prints it `);
+  const SEVEN_STATS = ['str', 'vit', 'dex', 'agi', 'wis', 'int', 'lck'];
+  const missingStats = SEVEN_STATS.filter((s) => !statRolls.includes(s));
+  add('X44', statRolls.length === SEVEN_STATS.length && missingStats.length === 0,
+    missingStats.length ? `stat_mod_flat does not roll ${missingStats.join(', ')}`
+      : `Stat Mod flat rolls one of the ${statRolls.length} Core stats at drop (${statRolls.join(' · ')}) — the data owns the pool`);
   // · a Mod line can only roll if it also carries a drop weight, or `weightOf` reads `undefined`
   // and the pool's weighted pick goes NaN. Every `mods.json` row must have a `mod_weights` row, and the
   // Stat Mod family (`group: "Stat Mod"`) shares the one slot that `blockedBy` keeps to a single line.
@@ -836,13 +722,11 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
   if (IV.overflow !== 'stop_pickup') ivp.push('overflow must be stop_pickup — a full bag pauses pickups, nothing auto-converts');
   for (const k of ['stone', 'herb', 'potion']) if (!(IV.stack_size && IV.stack_size[k] > 0)) ivp.push(`no stack size for ${k}`);
   if (IV.gold_uses_slot !== false) ivp.push('gold must not consume a slot');
-  const invText = readDoc('loot.md');
-  if (!/adventure bag/i.test(invText)) ivp.push('loot.md never describes the adventure bag');
   const gearHr = L.bands.high.upgrades_per_hr;                       // kept gear/hr = measured upgrades (F4)
   const gearFill = IV.adventure_slots / gearHr;
   const stoneSlotHr = IV.stack_size.stone / BAND.high.junk_per_hr;   // one stone slot of value stones
   add('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
-    : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds consumables (stone ${IV.stack_size.stone}/slot = ${f1(stoneSlotHr)} hr of value stones, herb/potion ${IV.stack_size.herb}/slot) with gold taking no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + craft are Settlement-only (loot.md §4)`);
+    : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds consumables (stone ${IV.stack_size.stone}/slot = ${f1(stoneSlotHr)} hr of value stones, herb/potion ${IV.stack_size.herb}/slot) with gold taking no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + craft are Settlement-only`);
 
   // Junk is gold's primary mint now (Ragnarok-style); every rarity must reproduce the published
   // junk line, so rarity changes the flavour and the price but not the expected income
@@ -1078,7 +962,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     `the opening set weighs ${f0(opCarry)} against a ${f0(eng.weightCapacityOf(opStat))} level-1 capacity, so section 11 takes ${f1(opTax * 100)}% of aspd — the lightest frame of every slot keeps the set under the weight_base line, and the lightest main hand in the table (${f0(lightestMain)}) fits with it`);
 
   // OP7 · the set's shape: every slot filled exactly once (the two rings included), one line per piece,
-  // and no Legacy pair or Random line anywhere — minute one is junk, and junk is what this proves
+  // and no Sub pair or Random line anywhere — minute one is junk, and junk is what this proves
   const opSlotProblems: string[] = [];
   const opSlots = (LOOT_SLOTS as string[]);
   for (const slot of [...new Set(opSlots)]) {
@@ -1090,7 +974,7 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     .filter((p) => p.lines.length !== 1 || (p.g.slot !== 'main hand' && (p.lines[0].extra || []).length))
     .map((p) => `${p.g.slot} ${p.g.base}`);
   add('OP7', OP_PIECES.length === opSlots.length && opSlotProblems.length === 0 && opLineProblems.length === 0,
-    `the set is ${OP_PIECES.length} pieces, one per slot of the ${opSlots.length} a character wears, and every piece carries exactly one line — its frame's Base Mod at the floor, with no Legacy pair and no Random line${opSlotProblems.length ? ' · SLOTS: ' + opSlotProblems.join(' · ') : ''}${opLineProblems.length ? ' · LINES: ' + opLineProblems.join(' · ') : ''}`);
+    `the set is ${OP_PIECES.length} pieces, one per slot of the ${opSlots.length} a character wears, and every piece carries exactly one line — its frame's Base Mod at the floor, with no Sub pair and no Random line${opSlotProblems.length ? ' · SLOTS: ' + opSlotProblems.join(' · ') : ''}${opLineProblems.length ? ' · LINES: ' + opLineProblems.join(' · ') : ''}`);
 
   // OP8 · the priced clock cannot move: no piece outside the main hand may carry an attack line, because
   // mob_HP, the drop line and the timeline are all keyed on the attack side
@@ -1160,35 +1044,77 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
     matrixProblems.length ? matrixProblems.join(' · ')
       : `Mod matrix holds ${matrixRows.length} named lines, all of them real Mod lines · ${offensiveOnly.length} Offensive lines stay off the armour slots · Gear Mod stays on the 5 armour slots · Stat Mod on all ${SLOT_ORDER.length} slots`);
 
-  // L9 · prose may not carry a number. A number outside a GENERATED block has no owner:
-  // no writer writes it, so it cannot move when the data moves, and nothing detects it going stale.
-  // The rule is that prose names the KEY (`Int x K_INT_ES`) and never the value. A large number of
-  // lines still break it, so it lands with a cap equal to today’s count — the shape A2/A3 use for
-  // the derived anchors. The cap may only fall.
+  // The curve's skill term is a canary, not a derivation: `mob_HP` is priced against the character's
+  // own DPS line times this roster-wide level term, so moving `skill_per_level` silently re-bases every
+  // published edge. The gate holds the value the design states, so a re-tune has to be deliberate.
   {
-    const DOCS = G.listDocs();
-    const AGENT_OPS = /(^|\/)todo\.md$/;   // the work file
-    const counted = [];
-    for (const f of DOCS) {
-      if (AGENT_OPS.test(f)) continue;
-      const text = readDoc(f);
-      let inBlock = false;
-      text.split(/\r?\n/).forEach((line, i) => {
-        if (/^\s*<!-- (BEGIN|END) GENERATED:/.test(line)) { inBlock = /BEGIN/.test(line); return; }
-        if (inBlock || /^\s*lint:allow/.test(line)) return;
-        if (/(?<![\w.\/])\d/.test(line)) counted.push(`${f}:${i + 1}`);
-      });
-    }
-    const cap = E.doc_prose_lines_max;
-    const drift = counted.length - cap;
-    add('L9', drift <= 0,
-      `prose carries no numbers: ${counted.length} line(s) still do, cap ${cap}` +
-      (drift > 0 ? ` — OVER BY ${drift}, the cap may only fall` : ` (under by ${-drift})`) +
-      ` · first: ${counted.slice(0, 6).join(', ')}`);
+    const perLevel = E.mob.curve.skill_per_level;
+    const at100 = 1 + perLevel * 100;
+    add('X58', Math.abs(at100 - 1.34) < 0.005,
+      `the level-100 skill multiplier reads ×${at100.toFixed(3)} from skill_per_level ${perLevel} — the curve spends ×1.34, so moving that coefficient is a re-base and must say so here`);
   }
 
-  // doc read-back
-  for (const r of eng.runReadBack()) add('RB', r.ok, `${r.label} — ${r.detail}`);
+  // A retired word must not creep back. The record is `tools/data/aliases.json`; this reads the prose
+  // that survives (`doc/start/` and the root rules) and every data note, and honours each entry's own
+  // `allow_in` list. `renames` and `deprecated` blocks are the record of the rename itself, so they are
+  // skipped wherever they appear.
+  {
+    const ALIASES = readJson(path.join(import.meta.dirname, 'data', 'aliases.json'));
+    const prose = ['doc/start/glossary.md', 'doc/start/concept.md', 'doc/start/Techstack.md', 'doc/start/tasks.md',
+      'AGENTS.md', 'DECISIONS.md', 'PRODUCT.md', 'DESIGN.md'];
+    const SKIP_KEYS = new Set(['renames', 'deprecated', 'aliases']);
+    const stringsOf = (v: any, out: string[] = []): string[] => {
+      if (typeof v === 'string') out.push(v);
+      else if (Array.isArray(v)) for (const x of v) stringsOf(x, out);
+      else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) if (!SKIP_KEYS.has(k)) stringsOf(x, out);
+      return out;
+    };
+    const haystack: [string, string][] = [];
+    for (const f of prose) { try { haystack.push([f, fs.readFileSync(path.join(ROOT, f), 'utf8')]); } catch { /* the file may not exist yet */ } }
+    for (const f of fs.readdirSync(path.join(import.meta.dirname, 'data'))) {
+      if (!f.endsWith('.json') || f === 'aliases.json') continue;
+      haystack.push(['tools/data/' + f, stringsOf(readJson(path.join(import.meta.dirname, 'data', f))).join('\n')]);
+    }
+    const esc = (s: any): string => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const tHits: string[] = [];
+    for (const t of ALIASES.terms || []) {
+      const allow = new Set([...(t.allow_in || []), ...(t.allow_in_data || [])]);
+      const guard = (t.not_prefix || []).map((x: any) => `(?<!${esc(x)} )`).join('');
+      const re = new RegExp(guard + '\\b' + esc(t.old) + '\\b', 'i');
+      for (const [file, text] of haystack) {
+        if (allow.has(file) || allow.has(file.replace(/^.*\//, ''))) continue;
+        if (re.test(text)) tHits.push(`${file} "${t.old}" → ${t.new}`);
+      }
+    }
+    add('X59', tHits.length === 0,
+      tHits.length ? tHits.slice(0, 8).join(' · ')
+        : `${(ALIASES.terms || []).length} retired term(s) stay retired across ${prose.length} prose file(s) and every data note, honouring each entry's own allow-list`);
+  }
+
+  // Minute one is a read a client performs, so the opening set must be complete and resolvable: one
+  // piece per slot, and every `base` a real frame (a weapon TYPE for the hand, a Base for the rest).
+  {
+    const OP = E.opening || {};
+    const want = [...BASES_JSON.slots, 'main hand'];
+    const opProblems: string[] = [];
+    const seen = new Set<string>();
+    for (const g of OP.gear || []) {
+      seen.add(g.slot);
+      if (g.slot === 'main hand') {
+        if (!(BASES_JSON.weapons || []).some((w: any) => w.name === g.base)) opProblems.push(`main hand "${g.base}" is not a weapon type`);
+      } else if (!(BASES_JSON.bases || []).some((b: any) => b.name === g.base)) opProblems.push(`${g.slot} "${g.base}" is not a Base frame`);
+      if (g.quality !== 'low' || g.tier !== 3) opProblems.push(`${g.slot} is not the floor of its window (${g.quality} T${g.tier})`);
+    }
+    for (const s of want) if (!seen.has(s)) opProblems.push(`no opening piece for ${s}`);
+    if (OP.level !== 1) opProblems.push(`the opening level is ${OP.level}, not 1`);
+    const noStones = OP.stones == null || OP.stones === 0 || (typeof OP.stones === 'object' && Object.keys(OP.stones).length === 0);
+    if (OP.gold !== 0 || !noStones) opProblems.push(`minute one buys nothing, so gold and stones must be 0 (gold ${OP.gold}, stones ${JSON.stringify(OP.stones)})`);
+    if ((OP.skills || []).length) opProblems.push('the opening set carries no skill');
+    add('X60', opProblems.length === 0,
+      opProblems.length ? opProblems.join(' · ')
+        : `the opening set is complete and resolvable: ${(OP.gear || []).length} pieces covering all ${want.length} slots, every frame named in bases.json, each at the floor of its own window, level ${OP.level} with nothing bought and no skill`);
+  }
+
   return out.concat();
 }
 
@@ -1197,107 +1123,66 @@ add('X1', Math.abs(CEIL - (eng.statAt(S.level_cap) + S.core_flat_max * S.item_sl
 // weapon pool out of equipment-slot-weapon.md, then prints which Mod can appear on which slot.
 // Nothing here is typed by hand: edit item-base.md and re-run --write.
 
-/** Per-slot pools split by role, read out of item-base.md — the single source. */
-function basePoolsByRole() {
-  const text = readDoc('item-base.md');
-  const out = {};
-  let slot = null, roles = [];
-  for (const line of text.split(/\r?\n/)) {
-    const head = line.match(/^## (.+)$/);
-    if (head) {
-      const name = cleanMod(head[1]);
-      slot = SLOT_ORDER.find((x) => name === x || name.startsWith(x + ' ')) || null;
-      roles = [];
-      continue;
-    }
-    if (!slot) continue;
-    const cells = line.split('|').map(cleanMod);
-    if (cells.length < 5 || cells[0] !== '') continue;
-    if (cells[1] === 'Base') { roles = cells.slice(3); continue; }
-    if (/^-+$/.test(cells[1]) || !roles.length) continue;
-    const bySlot = out[slot] || (out[slot] = {});
-    roles.forEach((role, i) => {
-      const set = bySlot[role] || (bySlot[role] = new Set());
-      for (const one of splitMods(cells[3 + i] || '')) set.add(one);
-    });
-  }
-  return out;
-}
-
 const SLOT_ORDER = ['main hand', 'off hand', 'helmet', 'chest', 'pant', 'boots', 'belt', 'gloves', 'ring', 'amulet', 'earring', 'cape'];
-const GEAR_MOD_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves']; // item-base.md "Gear Mod school per Base"
+const GEAR_MOD_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves']; // `bases.json` `school`
 const GEAR_MODS = ['Armour flat', 'Evasion flat', 'Energy Shield flat'];
-const STAT_MODS = ['Stat Mod flat', 'All stats flat']; // the Stat Mod slot's family — one line per item 
+const STAT_MODS = ['Stat Mod flat', 'All stats flat']; // the Stat Mod slot's family — one line per item
 
 const cleanMod = (s) => s.replace(/\s+/g, ' ').trim();
 const splitMods = (s) => s.split('·').map(cleanMod).filter((x) => x && x !== '—' && x !== '-');
 
-/** Parse the `| Base | Weight | Primary | Secondary |` tables in item-base.md. */
-function basePools() {
-  const text = readDoc('item-base.md');
-  const bySlot = {};
-  const lines = text.split(/\r?\n/);
-  let slot = null;
-  let inTable = false;
-  for (const line of lines) {
-    const head = line.match(/^## (.+)$/);
-    if (head) {
-      const name = cleanMod(head[1]);
-      slot = SLOT_ORDER.find((s) => name === s || name.startsWith(s + ' ')) || null;
-      inTable = false;
-      continue;
-    }
-    if (!slot) continue;
-    const cells = line.split('|').map(cleanMod);
-    if (cells.length < 5 || cells[0] !== '') { inTable = false; continue; }
-    if (cells[1] === 'Base') { inTable = true; continue; }
-    if (!inTable || /^-+$/.test(cells[1])) continue;
-    const mods = bySlot[slot] || (bySlot[slot] = new Set());
-    for (const role of cells.slice(3)) for (const one of splitMods(role)) mods.add(one);
-  }
-  return bySlot;
-}
-
-/**
- * The `| Slot / type | Line 1 pool |` table. Line 1 is the frame's own Base Mod and never enters a
- * craftable pool, so without this the armour and block lines would be absent from the matrix.
- */
-function line1Pools() {
-  const names = rangedMods();
-  const out: Record<string, Set<string>> = {};
-  let inTable = false;
-  for (const line of readDoc('item-base.md').split(/\r?\n/)) {
-    const cells = line.split('|').map(cleanMod);
-    if (cells.length === 4 && cells[1] === 'Slot / type') { inTable = true; continue; }
-    if (!inTable) continue;
-    if (cells.length === 4 && /^-+$/.test(cells[1])) continue;
-    if (cells.length !== 4 || cells[0] !== '') { inTable = false; continue; }
-    const mods = splitMods(cells[2].split('—')[0]).filter((m) => names.has(m));
-    if (!mods.length) continue;
-    for (const tok of cells[1].split('·').map((s) => s.trim())) {
-      const slot = tok === 'Shield' || tok === 'Book' ? 'off hand'
-        : SLOT_ORDER.includes(tok) ? tok
-        : /sword|axe|dagger|mace|wand|staff|spear|bow|crossbow/i.test(tok) ? 'main hand' : null;
-      if (!slot) continue;
-      const set = out[slot] || (out[slot] = new Set());
-      for (const m of mods) set.add(m);
+/** Per-slot pools split by role, read out of `bases.json` — the single source. */
+function basePoolsByRole() {
+  const out: Record<string, any> = {};
+  for (const b of BASES_JSON.bases) {
+    const bySlot = out[b.slot] || (out[b.slot] = {});
+    for (const [role, list] of [['Primary', b.primary], ['Secondary', b.secondary]] as any[]) {
+      const set = bySlot[role] || (bySlot[role] = new Set());
+      for (const id of list || []) set.add(modName(id));
     }
   }
   return out;
 }
 
-/** Every Mod name that carries a value range in mod-pool.md (Total column starts with a digit). */
-function rangedMods() {
-  const text = readDoc('mod-pool.md');
-  const names = new Set();
-  for (const line of text.split(/\r?\n/)) {
-    const cells = line.split('|').map(cleanMod);
-    if (cells.length !== 7 || !/^\d/.test(cells[2] || '')) continue;
-    names.add(cells[1]);
+/** Per-slot pool, engine-faithful: `bases[].primary/secondary` plus the lines the slot adds. */
+function basePools() {
+  const bySlot: Record<string, Set<string>> = {};
+  const add = (slot: string, ids: any[]) => {
+    const set = bySlot[slot] || (bySlot[slot] = new Set());
+    for (const id of ids) set.add(modName(id));
+  };
+  for (const b of BASES_JSON.bases) add(b.slot, [...(b.primary || []), ...(b.secondary || [])]);
+  // engine/loot.ts `poolFor`: the armour slots' own line-1 pool is also rollable
+  for (const slot of ARMOUR_SLOTS) add(slot, BASES_JSON.base_mod?.defence || []);
+  // engine/loot.ts `poolFor`: an off-hand frame draws its slot union plus its family's row
+  for (const [family, ids] of Object.entries<any>(BASES_JSON.weapon_pools?.['off hand'] || {})) {
+    if (family === 'Stat Mod' || family === 'Dual-wield weapon') continue;
+    add('off hand', ids);
   }
-  return names;
+  return bySlot;
 }
 
+/** Line 1 is the frame's own Base Mod and never enters a craftable pool (engine/loot.ts `baseModRoll`). */
+function line1Pools() {
+  const names = rangedMods();
+  const out: Record<string, Set<string>> = {};
+  const add = (slot: string, ids: any[]) => {
+    const set = out[slot] || (out[slot] = new Set());
+    for (const id of ids) { const n = modName(id); if (names.has(n)) set.add(n); }
+  };
+  for (const ids of Object.values<any>(BASES_JSON.base_mod?.weapons || {})) add('main hand', ids);
+  for (const ids of Object.values<any>(BASES_JSON.base_mod?.off_hand || {})) add('off hand', ids);
+  for (const slot of ARMOUR_SLOTS) add(slot, BASES_JSON.base_mod?.defence || []);
+  return out;
+}
+
+/** Every Mod name that carries a value range — `tools/data/mods.json` is the only source. */
+function rangedMods() {
+  return new Set(MODS.mods.map((m: any) => m.name));
+}
+
+const ARMOUR_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves', 'cape'];
+const modName = (id) => LOOT_NAMES[id] || id;
 const mentions = (cell, names) => {
   const hit = new Set();
   for (const name of names) {
@@ -1312,28 +1197,12 @@ const hasBase = (cell, base) =>
   new RegExp('\\b' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+') + '\\b', 'i').test(cell);
 
 /** Parse the `| Role | Mod |` table under `## main hand` plus the By-weapon-type and Offensive Pool tables. */
+/** The weapon pool, engine-faithful: engine/loot.ts `poolFor`'s weapon branch, over both damage kinds. */
 function weaponPools() {
-  const names = rangedMods();
-  const mods = new Set();
-  const text = readDoc('equipment-slot-weapon.md');
-  const from = text.indexOf('## main hand');
-  const body = text.slice(from, text.indexOf('## off hand', from));
-  const cells = [];
-  for (const line of body.split(/\r?\n/)) {
-    const c = line.split('|').map(cleanMod);
-    if (c.length < 3) continue;
-    if (c[1] === 'Primary' || c[1] === 'Secondary') { for (const one of splitMods(c[2])) mods.add(one); continue; }
-    if (c[1] === 'Role' || c[1] === 'Weapon' || c[1] === 'Blocked' || /^-+$/.test(c[1])) continue;
-    cells.push(c[2]);
-  }
-  const pools = readDoc('equipment-slot-pools.md');
-  for (const line of pools.slice(pools.indexOf('# Offensive Pool')).split(/\r?\n/)) {
-    const c = line.split('|').map(cleanMod);
-    if (c.length === 4) cells.push(c[1]);
-  }
-  // a cell such as "Physical power flat / %" carries both variants, so match on the base name
-  for (const name of names) if (cells.some((cell) => hasBase(cell, modBase(name)))) mods.add(name);
-  return mods;
+  const wp = BASES_JSON.weapon_pools?.['main hand'] || {};
+  const crit = (wp.Primary || []).filter((id: string) => !id.startsWith('physical') && !id.startsWith('magic'));
+  const ids = ['physical_power_flat', 'physical_power', 'magic_power_flat', 'magic_power', ...crit, ...(wp.Secondary || []), 'elemental_power_flat'];
+  return new Set(ids.map(modName));
 }
 
 function modMatrix() {
@@ -1945,7 +1814,7 @@ BLOCKS['craft-set'] = () => {
     `| Reroll value | ${C.reroll_value_stones_per_use} Reroll value stones | ~${f0(STONE.reroll_uses_per_hr * perK)} | Cheap, can spam · Keeps values inside the same Tier |`,
     `| Refine | ${C.refine_stones_per_use} Reroll tier stones | ~${r1(STONE.refines_per_hr * perK)} | Main upgrade path · Tier stones come only from elites (1 in 5, 5% drop) + bosses |`,
     `| Ascend | ${C.ascend_add_stones} Add mod stones + ${C.ascend_tier_stones} Reroll tier stones | ~${r1(STONE.ascend_per_hr * perK)} | Slowest and needs planning · Add stones come only from elites and bosses (no AFK path) |`,
-    '| Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to Rarity crafted max (net counting) |',
+    '| Add (1st / 2nd fill) | 1 / 2 Add mod stones | boss-gated | Expands to the crafted line-count ceiling (net counting) |',
     '| Upgrade +N | tiered Quality Stones: 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 (sources shift monsters → elites → bosses by step) | set | Raises Gear Mod only |',
     '| Repair | 1 Repair stone | elite / boss only | Revives Broken + refills protection |',
   ];
@@ -2139,64 +2008,20 @@ BLOCKS['race-resist'] = () => {
   ].join('\n');
 };
 
-const { begin, end, replaceBlock, blockState, writeAll } = G;
-function targets() {
-  const map = {};
-  for (const [file, keys] of Object.entries(E.meta.targets)) (map[file] = map[file] || []).push(...keys);
-  return map;
-}
-
-/** The same writer table the shared guard runs, built from `meta.targets`. */
-function writerTable() {
-  const out = [];
-  for (const [file, keys] of Object.entries(targets())) {
-    for (const k of keys) out.push({ file, key: k, render: () => BLOCKS[k]() });
-  }
-  return out;
-}
-
 // ---------------------------------------------------------------- cli
 
 const arg = process.argv[2];
 
-if (arg === '--emit') {
-  for (const [file, keys] of Object.entries(targets())) {
-    console.log(`\n===== ${file} =====`);
-    for (const k of keys) console.log(`\n${begin(k)}\n${BLOCKS[k]()}\n${end(k)}`);
-  }
-} else if (arg === '--write') {
-  // generated.writeAll owns the guards: an absent marker pair aborts the whole file rather
-  // than leaving a half-written doc that reads as current, and a body that shrinks the doc is refused.
-  if (writeAll(writerTable())) process.exitCode = 1;
-} else if (arg === '--checks') {
+if (arg === '--checks') {
   const rows = runChecks();
   for (const r of rows) console.log(`${r.id.padEnd(3)}  ${(r.status || (r.ok ? 'PASS ' : 'FAIL ')).padEnd(7)}  ${r.detail}`);
   const fails = rows.filter((r) => !r.ok);
-
-  const stale = [];
-  for (const [file, keys] of Object.entries(targets())) {
-    const p = path.join(ROOT, G.resolveDoc(file));
-    if (!fs.existsSync(p)) { stale.push(`${file} (absent)`); continue; }
-    const text = fs.readFileSync(p, 'utf8');
-    for (const k of keys) {
-      const s = blockState(text, k, BLOCKS[k]());
-      if (s !== 'current') stale.push(`${file} :: ${k} (${s})`);
-    }
-  }
-  console.log('');
-  const leaks = [];
-  for (const [file, keys] of Object.entries(targets())) for (const k of keys) if (/undefined|NaN/.test(BLOCKS[k]())) leaks.push(`${file} :: ${k}`);
-  if (leaks.length) console.log('TEMPLATE LEAKS (a generated table contains undefined/NaN):\n  ' + leaks.join('\n  '));
-  else console.log('template leaks: none · every generated cell holds a number or a word');
-  if (stale.length) console.log('DOC BLOCKS NOT CURRENT:\n  ' + stale.join('\n  '));
-  else console.log(`doc blocks: checks.md groups ${targets()['checks.md'].join(' · ')} match the engine`);
-  console.log(`\n${rows.length - fails.length}/${rows.length} PASS · ${fails.length} FAIL`);
-  if (fails.length || stale.length || leaks.length) process.exitCode = 1;
+  console.log(`
+${rows.length - fails.length}/${rows.length} PASS · ${fails.length} FAIL`);
+  if (fails.length) process.exitCode = 1;
 } else {
   console.log(`engine cage — data: tools/data/engine.json (shared with tools/town.ts)
 
-  node tools/check.ts --emit     print the generated group tables
-  node tools/check.ts --write    rewrite groups A · B · C · F inside checks.md
-  node tools/check.ts --checks   run invariants + read every prose file, exit 1 on FAIL or stale doc
+  node tools/check.ts --checks   run the invariants, exit 1 on FAIL
 `);
 }

@@ -1,9 +1,6 @@
 /**
  * Timeline cage — the XP / level-pacing table.
  *
- *   node tools/timeline.ts            help
- *   node tools/timeline.ts --emit     print the generated XP table
- *   node tools/timeline.ts --write    rewrite the XP table in world.md
  *   node tools/timeline.ts --checks   progression sanity
  *
  * Inputs: tools/data/engine.json `xp` (kills anchors · per-kill rate · step). The table is derived,
@@ -12,10 +9,10 @@
  * milestone "takes".
  */
 
-import * as G from './lib/generated.ts';
-import type { Writer } from './lib/types.ts';
+import path from 'node:path';
+import { readJson } from './lib/json.ts';
 
-const E = JSON.parse(G.read('tools/data/engine.json'));
+const E = readJson<any>(path.join(import.meta.dirname, 'data', 'engine.json'));
 const X = E.xp;
 const L = E.loot;
 
@@ -77,57 +74,17 @@ function gates(m: any): any[] {
   return out;
 }
 
-function block(): string {
-  const m = model();
-  const rows = m.steps.map((s: any) =>
-    `| ${s.from}-${s.to} | ${Math.round(s.xp).toLocaleString('en-US')} | ${Math.round(s.cumXp).toLocaleString('en-US')} | ${Math.round(s.kills).toLocaleString('en-US')} | ${Math.round(s.cumKills).toLocaleString('en-US')} |`);
-  return [
-    `Derived from \`xp_to_next(L) = kills(L) × ${X.per_kill_mob_level} × min(L, ${CAP})\` with the kills anchors in \`engine.json\`. The unit is kills, not hours: how long a step takes is the player's own pace (\`AGENT.md\`).`,
-    '',
-    '| Levels | XP to clear the step | Cumulative XP | Kills to clear the step | Cumulative kills |',
-    '|---|---|---|---|---|',
-    ...rows,
-  ].join('\n');
-}
-
-function formulaBlock(): string {
-  const parts = ANCHORS.map((lv: number) => `${Math.round(kills(lv)).toLocaleString('en-US')} (L${lv})`);
-  return [
-    '```',
-    `xp per kill   = ${X.per_kill_mob_level} × mob level (normal) · ×${X.elite_mult} elite · ×${X.boss_mult} boss`,
-    `xp to next level     = ${X.step}-level-step table (generated below from the kills anchors)`,
-    `kills per level       = ${parts.join(' · ')}`,
-    '```',
-  ].join('\n');
-}
-
-const WRITERS: Writer[] = [
-  { file: 'world.md', key: 'xp-formula', render: formulaBlock },
-  { file: 'world.md', key: 'xp-table', render: block },
-];
 const arg = process.argv[2];
-const m = model();
 
-if (arg === '--emit') {
-  console.log(block());
-} else if (arg === '--write') {
-  const missing = G.writeAll(WRITERS);
-  if (missing) process.exitCode = 1;
-} else if (arg === '--checks') {
-  const rows = gates(m);
+if (arg === '--checks') {
+  const rows = gates(model());
   for (const r of rows) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-  const states = G.checkAll(WRITERS);
-  const stale = states.filter((s) => s.state !== 'current');
-  console.log('');
-  for (const s of states) console.log(`${s.state === 'current' ? 'PASS ' : 'FAIL '}  block ${s.key} · ${s.file} (${s.state})`);
-  const fails = rows.filter((r) => !r.ok).length + stale.length;
-  console.log(`\n${rows.length - rows.filter((r) => !r.ok).length}/${rows.length} gate PASS · ${stale.length} block(s) not current · ${fails} FAIL`);
+  const fails = rows.filter((r) => !r.ok).length;
+  console.log(`\n${rows.length - fails}/${rows.length} gate PASS · ${fails} FAIL`);
   if (fails) process.exitCode = 1;
 } else {
-  console.log(`timeline cage — engine.json xp → the 5-level-step table in world.md
+  console.log(`timeline cage — engine.json xp → the 5-level-step table
 
-  node tools/timeline.ts --emit     print the generated XP table
-  node tools/timeline.ts --write    rewrite the XP table in world.md
   node tools/timeline.ts --checks   progression sanity
 `);
 }

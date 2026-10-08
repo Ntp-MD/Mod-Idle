@@ -1,15 +1,85 @@
 {
   "meta": {
-    "note": "Deprecated terms. tools/lint.ts fails when one appears in a doc outside its allow_in list. Add an entry whenever a term is renamed so the old spelling cannot creep back in.",
+    "note": "Deprecated terms — the record of what was renamed. Nothing machine-reads this file any more (the doc linter is gone), so it is the human answer to \"what did this used to be called\". Add an entry whenever a term is renamed.",
     "terms": []
   },
   "terms": [
-    { "old": "Affix", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename" },
-    { "old": "Attribute", "new": "Mod", "allow_in": ["AGENT.md"], "note": "item-mod rename (do not use for item mods)" },
-    { "old": "pdef", "new": "Armour", "note": "there is no second physical-defence stat — Armour is the Str line (AGENT.md section 5)" },
-    { "old": "mdef", "new": "Elemental resistance", "note": "there is no magic-defence stat — the res-able half is Elemental resistance (combat.md section 2)" },
-    { "old": "Dodge flat", "new": "Evasion flat", "not_prefix": ["Perfect", "mob"], "note": " merged the two avoidance lines into one capped Evasion rating" },
-    { "old": "Dodge %", "new": "Evasion %", "not_prefix": ["Perfect", "mob"], "note": " merged the two avoidance lines into one capped Evasion rating; `Perfect dodge %` stays a live term, so the guard skips it" },
-    { "old": "Int x K_INT_ES", "new": "Gear Energy Shield flat + Max Energy Shield %", "note": "K_INT_ES retired (owner ruling): the shield is a gear pool, not an Int line" }
+    {
+      "old": "Affix",
+      "new": "Mod",
+      "allow_in": [
+        "AGENTS.md"
+      ],
+      "note": "item-mod rename"
+    },
+    {
+      "old": "Attribute",
+      "new": "Mod",
+      "allow_in": [
+        "AGENTS.md"
+      ],
+      "note": "item-mod rename (do not use for item mods)"
+    },
+    {
+      "old": "pdef",
+      "new": "Armour",
+      "note": "there is no second physical-defence stat — Armour is the Str line (AGENTS.md section 5)"
+    },
+    {
+      "old": "mdef",
+      "new": "Elemental resistance",
+      "note": "there is no magic-defence stat — the res-able half is Elemental resistance (combat.md section 2)"
+    },
+    {
+      "old": "Dodge flat",
+      "new": "Evasion flat",
+      "not_prefix": [
+        "Perfect",
+        "mob"
+      ],
+      "note": " merged the two avoidance lines into one capped Evasion rating",
+      "allow_in_data": [
+        "tools/data/mods.json"
+      ]
+    },
+    {
+      "old": "Dodge %",
+      "new": "Evasion %",
+      "not_prefix": [
+        "Perfect",
+        "mob"
+      ],
+      "note": " merged the two avoidance lines into one capped Evasion rating; `Perfect dodge %` stays a live term, so the guard skips it"
+    },
+    {
+      "old": "Int x K_INT_ES",
+      "new": "Gear Energy Shield flat + Max Energy Shield %",
+      "note": "K_INT_ES retired (owner ruling): the shield is a gear pool, not an Int line"
+    },
+    {
+      "old": "Rarity",
+      "new": "Item level",
+      "allow_in": [
+        "glossary.md",
+        "item-level.md",
+        "item-base.md",
+        "mob-roster.md",
+        "loot.md",
+        "save.md",
+        "world.md",
+        "economy.md",
+        "equipment-slot-pools.md",
+        "DECISIONS.md"
+      ],
+      "note": "the Mod-count axis retired: the Normal line count is drawn from the range `item_level.stat_mod_slots` publishes, and the level answers the value window, so no drop carries a Rarity band. The allow-list is the files that must name the retired word (D4's ban, the glossary substitution table) plus the unrelated word — junk rung (junk.rarities), the Elite flag, and Mod roll weight — which happens to be spelled the same",
+      "allow_in_data": [
+        "tools/data/engine.json"
+      ]
+    },
+    {
+      "old": "Legacy Mod",
+      "new": "Sub Mod",
+      "note": "the lines 2-3 of a drop; the data key moved with it (item_level.legacy_slots -> item_level.sub_slots)"
+    }
   ]
 }

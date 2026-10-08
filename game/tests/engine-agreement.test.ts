@@ -76,7 +76,7 @@ describe('the tick loop', () => {
   it('kills on-level mobs and pays the XP the curve says', () => {
     const s = newGame();
     // tick until the loop has paid a kill, never for a guessed window: a fixed window is a time
-    // premise (AGENT.md). The bound is a hang guard.
+    // premise (AGENTS.md). The bound is a hang guard.
     for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     expect(s.counters.kills).toBeGreaterThan(0);
     expect(s.player.xp + (s.player.level - 1) * 0).toBeGreaterThan(0);

@@ -77,7 +77,7 @@ describe('the passive tree is spent one rank at a time', () => {
     const s = newGame(5);
     s.player.treePoints = 3;
     spendTreePoint(s, 'control.1'); // armour_flat
-    // tick until the loop has paid a kill, never for a guessed window (AGENT.md · lint L9)
+    // tick until the loop has paid a kill, never for a guessed window (AGENTS.md · lint L9)
     for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     expect(s.player.treeRanks!['control.1']).toBe(1);
     // the fight itself reads the ranks: the sheet the loop builds carries the node's armour

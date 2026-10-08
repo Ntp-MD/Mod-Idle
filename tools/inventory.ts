@@ -12,7 +12,6 @@
  */
 
 import * as eng from './lib/engine.ts';
-import { read } from './lib/generated.ts';
 
 const { E, K, L, BAND, CEIL, DERIVED } = eng;
 const IV = E.inventory;
@@ -56,11 +55,6 @@ function gates(): any[] {
   add('IV3', wOk, wOk
     ? `stones are weightless — a full ${IV.character_slots}-slot stone bag costs 0 weight — while herbs and potions weigh ${w.herb}/${w.potion} per unit, so only herb/potion stacks can tax aspd (a full herb bag ${f0(HERB_BAG_WEIGHT)} vs capacity ${f0(CAPACITY)} · formula.md section 11)`
     : `expected stone weight 0 and herb/potion > 0, got stone ${w.stone} · herb ${w.herb} · potion ${w.potion}`);
-
-  // the docs must describe the bag the data models
-  const loot = read('loot.md');
-  add('IV4', /adventure bag/i.test(loot) && /settlement-only/i.test(loot),
-    `loot.md describes the adventure bag and the Settlement-only deposit/craft loop (loot.md section 4)`);
 
   return out;
 }

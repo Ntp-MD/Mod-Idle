@@ -26,6 +26,11 @@ function pressOn(skill: any, which: string, level: any): any {
 }
 
 const LEVEL_STEP = M.LEVEL_STEP;
+const LEVEL_ROWS = M.LEVEL_ROWS;
+const LEVEL_CAP = M.LEVEL_CAP;
+const damagePct = M.damagePct;
+const effectPct = M.effectPct;
+const effectsAt = M.effectsAt;
 const CAST_REF = M.CAST_REF;
 const LADDER_MAX_DUPLICATES = M.LADDER_MAX_DUPLICATES;
 const manaSpec = M.manaSpec;
@@ -49,7 +54,7 @@ const reservePct = M.reservePct;
 const model = (): any => M;
 
 export {
-  LEVEL_STEP, CAST_REF,
+  LEVEL_STEP, LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, effectsAt, CAST_REF,
   manaSpec, manaCostOf, MANA_LEVEL_STEP, MANA_POOL_EXPONENT, MANA_REF_POOL,
   basisOf, perPress, critsOnBasis,
   effCd, row,

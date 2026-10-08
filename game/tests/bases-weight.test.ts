@@ -27,17 +27,32 @@ describe('bases.json is the mirror the cage gates', () => {
 });
 
 describe('the weight tax from formula-utility.md section 11', () => {
-  it('capacity is weight_base + Str x 2, and the printed sets sit under it', () => {
-    expect(eng.weightCapacityOf(210)).toBe(1420);
-    expect(eng.weightCapacityOf(510)).toBe(2020);
-    expect(eng.encumbranceOf(193, 210)).toBe(0);
-    expect(eng.encumbranceOf(420, 210)).toBe(0);
+  // the shape is the promise; the two constants are the data own (a rescale moves both together)
+  const cap = (str: number) => E.level_gain.weight_base + str * E.K.K_STR_WEIGHT;
+
+  it('capacity is weight_base + Str x K_STR_WEIGHT, and the printed sets sit under it', () => {
+    expect(eng.weightCapacityOf(210)).toBeCloseTo(cap(210), 6);
+    expect(eng.weightCapacityOf(510)).toBeCloseTo(cap(510), 6);
+    expect(eng.encumbranceOf(cap(210) * 0.9, 210)).toBe(0);
+    expect(eng.encumbranceOf(cap(210), 210)).toBe(0);
   });
 
   it('the tax bites only past capacity, and a set heavy enough to cross it hits the 50% ceiling', () => {
-    expect(eng.encumbranceOf(1700, 210)).toBeCloseTo((1700 - 1420) / 1420, 5);
-    expect(eng.encumbranceOf(2130, 210)).toBe(E.caps.weight_overload);
-    expect(eng.encumbranceOf(9999, 210)).toBe(E.caps.weight_overload);
+    const c210 = cap(210);
+    expect(eng.encumbranceOf(c210 * 1.2, 210)).toBeCloseTo((c210 * 1.2 - c210) / c210, 5);
+    expect(eng.encumbranceOf(c210 * 1.5, 210)).toBeCloseTo(E.caps.weight_overload, 6);
+    expect(eng.encumbranceOf(c210 * 40, 210)).toBe(E.caps.weight_overload);
+  });
+
+  // the reason the two constants are a pair: a full set of the heaviest frames at the top band has to
+  // be a real fraction of the ceiling capacity, or the tax is decoration nobody can ever feel
+  it('the heaviest frames at the top band are a real fraction of the ceiling capacity', () => {
+    const heaviestPerSlot = BASES.slots.reduce((t: number, slot: string) =>
+      t + Math.max(...BASES.bases.filter((b: any) => b.slot === slot).map((b: any) => b.weight)), 0);
+    const topBand = heaviestPerSlot * Math.pow(BASES.quality_weight_multiplier, 2);
+    const ceiling = eng.DERIVED.weight;
+    expect(topBand).toBeLessThanOrEqual(ceiling);
+    expect(topBand / ceiling).toBeGreaterThan(0.4);
   });
 
   it('a printed set stays under the base line, so the tax does not fire on it', () => {
@@ -68,10 +83,11 @@ describe('drops are built from the Base table', () => {
       }
       const frame = BASES.bases.find((b: any) => b.name === item.base);
       expect(frame?.slot).toBe(item.slot);
-      // line 1 draws off the frame, but lines 2-7 draw the whole slot union (item-base.md);
-      // an off-hand frame's Base Mod pair is its own line-1 pool, so it is allowed too
+      // line 1 is the frame's OWN set (the flat defence lines its name declares, or an off-hand
+      // family's row), while lines 2-7 draw the whole slot union — so both are allowed here
       const allowed = new Set([
         ...loot.poolFor(BASES, item.slot, frame, null).map((e: any) => e.id),
+        ...(frame?.base_lines || []),
         ...(BASES.base_mod?.off_hand?.[frame?.family] || []),
       ]);
       for (const line of item.lines) {

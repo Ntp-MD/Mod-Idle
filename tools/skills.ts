@@ -1,65 +1,19 @@
 /**
- * Skill cage — tools/data/skills.json → the roster tables in skill-pool*.md.
+ * Skill cage — `tools/data/skills.json` is the roster source of truth.
  *
- *   node tools/skills.ts            help
- *   node tools/skills.ts --emit     print the generated roster blocks
- *   node tools/skills.ts --write    rewrite every roster block in the md files
- *   node tools/skills.ts --checks   run the mechanic gate (D18) + fail on a stale block
+ *   node tools/skills.ts --checks   the mechanic gate (roster · effects · basis)
+ *   node tools/skills.ts --calc     the live workshop: dmg/press · eff cd · press/s · mana/s
+ *                                   flags: --build glass|caster --level N --cdr N --ladder N --pool N
  *
- * The roster is the single source of truth: counts, names, reserves and effects
- * are derived here, never hand-typed in prose. Edit skills.json, then --write.
+ * Counts, names, reserves, effects and the press itself are computed from the data — never
+ * hand-typed anywhere. `engine/skills.ts` is the one calculator; the client calls the same function.
  */
 
 import * as R from './lib/roster.ts';
-import * as G from './lib/generated.ts';
 import * as M from './lib/skillmodel.ts';
 import * as eng from './lib/engine.ts';
-import type { Writer } from './lib/types.ts';
 
-const { SKILLS, TYPES, TYPE_META, RESERVE, byType, count, total, fmt } = R;
-
-// ---------------------------------------------------------------- renderers
-
-const elementLabel = (e: any) => (e === 'physical' ? 'phys' : e);
-
-// `final_pct` is stored at full precision and the engine reads it for cast damage, so this is a
-// display cap only — the table shows at most 2 decimals without forcing trailing zeros.
-const pct2 = (x: any) => Math.round(x * 100) / 100;
-
-function countBlock() {
-  const rows = TYPES.map((t: any) => `| **${t}** | ${count(t)} | ${TYPE_META[t]} |`);
-  return [
-    `# Skill count = ${total()}`,
-    '',
-    '| Type | Count | Controlled by |',
-    '|---|---|---|',
-    ...rows,
-    `| **total** | **${total()}** | Attack set picked · buff + aura carried from the live roster |`,
-    '',
-    `> **The attack roster is the picked set.** The Elemental rows replaced the retired attacks and the physical block is carried from the live roster, so \`skill-pool-attack.md\` prints the roster's own count. The buff, curse, heal and aura rows are unchanged.`,
-  ].join('\n');
-}
-
-function attackRoster() {
-  // the skill level the tables print is the Cap the XP rule reaches (`engine.json` skill_xp)
-  const L = eng.E.skill_xp.level_cap;
-  const rows = byType('attack').map((s: any) => {
-    const r = M.row(s, { cdrPct: M.CAST_REF.cdr_pct, ladderPct: M.CAST_REF.ladder_pct });
-    const glass = fmt(Math.round(M.pressOn(s, 'glass', L)));
-    const caster = fmt(Math.round(M.pressOn(s, 'caster', L)));
-    return `| ${s.name} | ${s.group} | ${elementLabel(s.element)} | ${s.cd} sec | ${r.effCd.toFixed(2)} sec | ${r.pressesPerSec == null ? 'the beat' : r.pressesPerSec.toFixed(2)} | ${s.mana} | ${s.basis} · ${pct2(s.final_pct)}% | ${s.targets} | ${glass} / ${caster} | ${s.effect} |`;
-  });
-  const B = M.referenceBases();
-  return [
-    '| Skill | Group | Element | cd | eff cd | presses/sec | mana | Basis · final_pct (level 1) | Targets/Hits | Damage per press (glass / caster) | What it does |',
-    '|---|---|---|---|---|---|---|---|---|---|---|',
-    ...rows,
-    '',
-    `press = final_pct × basis × (1 + (skill_level − 1) × ${M.LEVEL_STEP}%) at skill level ${L} (B5) — the two columns are the same press read on the two published reference builds:`,
-    `glass = Str 12 · basis phys ${fmt(Math.round(B.glass.phys))} · caster = Int 12 · basis magic ${fmt(Math.round(B.caster.magic))} + elem ${fmt(B.caster.elem)} × Alignment ${B.caster.align}% (${fmt(Math.round(B.caster.elem * B.caster.align / 100))}) = ${fmt(Math.round(M.basisOf({ basis: 'magic' } as any, B.caster)))}.`,
-    `A phys-basis press can crit and a magic-basis one cannot, so neither column includes crit (formula.md section 0's DPS row does).`,
-  ].join('\n');
-}
+const { byType, fmt, TYPES } = R;
 
 function calc() {
   const flags: Record<string, any> = {};
@@ -76,15 +30,20 @@ function calc() {
   const ref = M.referenceBases()[build] || M.referenceBases().glass;
   console.log(`# Skill workshop — ${build} reference (basis phys ${Math.round(ref.phys)} · basis magic ${Math.round(M.basisOf({ basis: 'magic' } as any, ref))}) · skill level ${level} · CDR ${cdrPct}% · ladder ${ladderPct}%`);
   const pool = flags.pool != null ? Number(flags.pool) : M.MANA_REF_POOL;
-  console.log(`# press = final_pct × basis × (1 + (level−1)×${M.LEVEL_STEP}%) · mana = the row's own cost at pool ${Math.round(pool)}, and mana/s = presses/sec × that cost`);
+  console.log(`# press = (base_flat + eff% × power) × damage_pct(level)/100 · mana = the row's own cost at pool ${Math.round(pool)}, and mana/s = presses/sec × that cost`);
+  // A row with no cooldown of its own fires on the attack clock, so its rate is the reference line's
+  // hits/sec rather than a cooldown-derived figure — read from the engine, never typed here.
+  const beatRate = eng.hitsPerSec(eng.REFERENCE.line.aspd);
+  console.log(`# the beat = the attack clock at the reference line (${beatRate.toFixed(2)}/sec) — a row with no timer of its own fires on it`);
   console.log('');
   const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'mana', 'mana/s', 'dmg/press'];
   const rows = byType('attack').map((s: any) => {
     const r = M.row(s, { ...ref, cdrPct, ladderPct, level });
     const cost = M.manaCostOf(s, { skillLevel: level, maxMana: pool, usableMana: pool, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
     // a row with no timer of its own has no cooldown-derived rate: its beat is the attack clock
-    const rate = r.pressesPerSec == null ? 'the beat' : r.pressesPerSec.toFixed(2);
-    const perSec = r.pressesPerSec == null ? '—' : fmt(Math.round(r.pressesPerSec * cost));
+    const rateN = r.pressesPerSec == null ? beatRate : r.pressesPerSec;
+    const rate = r.pressesPerSec == null ? `${beatRate.toFixed(2)} beat` : r.pressesPerSec.toFixed(2);
+    const perSec = fmt(Math.round(rateN * cost));
     return [s.name, s.basis, `${s.cd}`, r.effCd.toFixed(2), rate, `${s.mana} → ${fmt(Math.round(cost))}`, perSec, r.damage != null ? fmt(Math.round(r.damage)) : '—'];
   });
   const widths = head.map((h, i) => Math.max(h.length, ...rows.map((r: any) => String(r[i]).length)));
@@ -94,99 +53,83 @@ function calc() {
   for (const r of rows) console.log(line(r));
 }
 
-function curseRoster() {
-  const rows = byType('curse').map((s: any) =>
-    `| ${s.name} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`);
-  return [
-    '| Skill | cd | mana | Duration | What it does |',
-    '|---|---|---|---|---|',
-    ...rows,
-  ].join('\n');
+/**
+ * The whole roster, one aligned block per type. This is what the retired `skill-pool*.md` roster tables
+ * used to carry: every row with its own numbers, printed from `skills.json` rather than restated in
+ * prose. `--list <attack|buff|curse|heal|aura|all>` picks the types; a row's `effect` sentence goes on
+ * its own line, because that is prose and a column would wrap it.
+ */
+function list(which: string) {
+  const types = which === 'all' ? TYPES : TYPES.filter((t: string) => t === which);
+  if (!types.length) { console.log(`no type "${which}" - try ${TYPES.join(' | ')} | all`); return; }
+  for (const t of types) {
+    const rows = byType(t);
+    console.log('');
+    console.log(`# ${t} - ${rows.length} row(s)`);
+    const head = ['id', 'name', 'cd', 'mana', 'duration', 'group', 'targets', 'reserve', 'basis (flat / eff%)'];
+    const body = rows.map((s: any) => [s.id, s.name, s.cd ?? '-', s.mana ?? '-', s.duration ?? '-', s.group ?? '-',
+      s.targets ?? '-', s.reserve ?? '-', s.base_flat != null ? `${s.basis} ${s.base_flat} / ${s.eff}` : '-']);
+    const widths = head.map((h: string, i: number) => Math.max(String(h).length, ...body.map((r: any[]) => String(r[i]).length)));
+    const draw = (r: any[]) => r.map((c: any, i: number) => String(c).padEnd(widths[i])).join('  ').trimEnd();
+    console.log(draw(head));
+    console.log(widths.map((w: number) => '-'.repeat(w)).join('  '));
+    rows.forEach((s: any, n: number) => {
+      console.log(draw(body[n]));
+      if (s.effect) console.log('    ' + String(s.effect).replace(/\s+/g, ' ').trim());
+    });
+  }
 }
-
-function healRoster() {
-  const rows = byType('heal').map((s: any) =>
-    `| ${s.name} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`);
-  return [
-    '| Skill | cd | mana | Duration | What it does |',
-    '|---|---|---|---|---|',
-    ...rows,
-  ].join('\n');
-}
-
-function buffRoster() {
-  return [
-    '| Skill | cd | mana | Duration | What it does |',
-    '|---|---|---|---|---|',
-    ...byType('buff').map((s: any) =>
-      `| ${s.name} | ${s.cd} sec | ${s.mana} | ${s.duration} | ${s.effect} |`),
-  ].join('\n');
-}
-
-function auraRoster() {
-  const rows = byType('aura').map((s: any) => {
-    const tier = s.reserve ? RESERVE[s.reserve] : null;
-    const reserve = tier ? `${s.reserve} ${tier.pct}%` : '**TBD**';
-    const abs = tier ? tier.abs : '—';
-    return `| ${s.name} | ${s.kind} | ${reserve} | ${abs} | ${s.effect} |`;
-  });
-  const pool = eng.DERIVED.mana;
-  return [
-    `| Aura | Kind | reserve | At pool ${pool.toLocaleString('en-US')} | Effect at skill level 20 |`,
-    '|---|---|---|---|---|',
-    ...rows,
-  ].join('\n');
-}
-
-// per-type headings are generated too, so adding or removing a skill never needs a hand edit
-const heading = (type: any, label: any) => `# ${count(type)} ${label}`;
-
-// ---------------------------------------------------------------- writers
-
-const WRITERS: Writer[] = [
-  { file: 'skill-pool.md', key: 'skill-count', render: countBlock },
-  { file: 'skill-pool-attack.md', key: 'attack-heading', render: () => heading('attack', 'attack skills') },
-  { file: 'skill-pool-attack.md', key: 'attack-roster', render: attackRoster },
-  { file: 'skill-pool-curse.md', key: 'curse-heading', render: () => heading('curse', 'curse skills') },
-  { file: 'skill-pool-curse.md', key: 'curse-roster', render: curseRoster },
-  { file: 'skill-pool-buff.md', key: 'buff-heading', render: () => heading('buff', 'buff skills') },
-  { file: 'skill-pool-buff.md', key: 'buff-roster', render: buffRoster },
-  { file: 'skill-pool-aura-heal.md', key: 'heal-heading', render: () => heading('heal', 'healing skills') },
-  { file: 'skill-pool-aura-heal.md', key: 'heal-roster', render: healRoster },
-  { file: 'skill-pool-aura-heal.md', key: 'aura-heading', render: () => heading('aura', 'aura skills') },
-  { file: 'skill-pool-aura-heal.md', key: 'aura-roster', render: auraRoster },
-];
 
 // ---------------------------------------------------------------- cli
+
+/**
+ * The per-level table for a row: what the skill deals and what its effects are worth at every skill
+ * level. Damage climbs on `damage_pct` and each effect on `effect_pct`, both read from
+ * `skills.json` `meta.formula.skill_levels` — the one home of the ramp — so this print is a read of
+ * the data, never a second formula.
+ */
+function levels(which: string) {
+  const L = eng.E.skill_xp.level_cap;
+  const rows = which === 'all' ? byType('attack') : byType('attack').filter((s: any) => s.id === which || s.name.toLowerCase() === which.toLowerCase());
+  if (!rows.length) { console.log(`no attack row matches "${which}" — try a skill id, a name, or all`); return; }
+  for (const s of rows) {
+    console.log(`
+# ${s.name} (${s.id}) — ${s.basis} basis · cd ${s.cd}s · base_flat ${s.base_flat} · eff ${s.eff}%`);
+    const head = ['level', 'damage%', 'effect%', 'press (glass)', 'press (caster)', 'mana', ...(s.effects || []).map((e: any) => `${e.stat}${e.op === 'mult' ? ' x' : e.op === 'add_flat' ? ' +' : ' +%'}`)];
+    const body: any[][] = [];
+    for (let lv = 1; lv <= L; lv++) {
+      const cost = M.manaCostOf(s, { skillLevel: lv, maxMana: M.MANA_REF_POOL, usableMana: M.MANA_REF_POOL, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
+      body.push([`${lv}`, `${M.damagePct(lv)}`, `${M.effectPct(lv)}`, fmt(Math.round(M.pressOn(s, 'glass', lv))), fmt(Math.round(M.pressOn(s, 'caster', lv))), fmt(Math.round(cost)),
+        ...M.effectsAt(s, lv).map((e: any) => (e.op === 'mult' ? e.value.toFixed(2) : e.value.toFixed(1)))]);
+    }
+    const widths = head.map((h: string, i: number) => Math.max(String(h).length, ...body.map((r: any) => String(r[i]).length)));
+    const line = (r: any) => r.map((c: any, i: number) => String(c).padEnd(widths[i])).join('  ');
+    console.log(line(head));
+    console.log(widths.map((w: number) => '-'.repeat(w)).join('  '));
+    for (const r of body) console.log(line(r));
+  }
+}
 
 const arg = process.argv[2];
 
 if (arg === '--calc') {
   calc();
-} else if (arg === '--emit') {
-  for (const w of WRITERS) console.log(`\n===== ${w.file} :: ${w.key} =====\n${w.render()}`);
-} else if (arg === '--write') {
-  const missing = G.writeAll(WRITERS);
-  if (missing) process.exitCode = 1;
+} else if (arg === '--list') {
+  list(String(process.argv[3] || 'all'));
+} else if (arg === '--levels') {
+  levels(String(process.argv[3] || 'all'));
 } else if (arg === '--checks') {
   const rows = R.gates();
   for (const r of rows) console.log(`${r.id.padEnd(3)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-
-  const states = G.checkAll(WRITERS);
-  const stale = states.filter((s) => s.state !== 'current');
-  console.log('');
-  for (const s of states) console.log(`${s.state === 'current' ? 'PASS ' : 'FAIL '}  block ${s.key} · ${s.file} (${s.state})`);
-
   const gateFails = rows.filter((r) => !r.ok).length;
-  const fails = gateFails + stale.length;
-  console.log(`\n${rows.length - gateFails}/${rows.length} gate PASS · ${stale.length} block(s) not current · ${fails} FAIL`);
-  if (fails) process.exitCode = 1;
+  console.log(`\n${rows.length - gateFails}/${rows.length} gate PASS · ${gateFails} FAIL`);
+  if (gateFails) process.exitCode = 1;
 } else {
   console.log(`skill cage — data: tools/data/skills.json (roster source of truth)
 
-  node tools/skills.ts --emit     print the generated roster blocks
-  node tools/skills.ts --write    rewrite skill-pool*.md roster blocks
-  node tools/skills.ts --checks   mechanic gate (checks.md D18) + stale-block check
+  node tools/skills.ts --checks   mechanic gate (checks.md D18)
+  node tools/skills.ts --list [attack|buff|curse|heal|aura|all]  the whole roster, every row
+  node tools/skills.ts --levels <skill-id|name|all>  the per-level table: damage · effect · mana
   node tools/skills.ts --calc     live skill workshop: dmg/press · eff cd · press/s · mana/s
                                   flags: --build glass|caster --level N --cdr N --ladder N
 `);

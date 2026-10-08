@@ -3,15 +3,13 @@
  * the loot model and craft throughput. Read by tools/check.ts (groups A · B · C · F)
  * and tools/town.ts (gold per minute · kill thresholds · supply).
  *
- * Nothing here is a doc number copied by hand: every value is computed from
- * tools/data/engine.json, and tools/check.ts compares the result against the
- * numbers the docs publish.
+ * Nothing here is a number copied by hand: every value is computed from
+ * tools/data/engine.json, and every cage asserts the result against engine/ and the client.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { readJson } from './json.ts';
-import { resolveDoc } from './generated.ts';
 import * as shared from '../../engine/index.ts';
 import { createRoad } from '../../engine/road.ts';
 import type { EngineData } from '../../engine/types.ts';
@@ -24,7 +22,7 @@ const E = readJson<EngineData>(ENGINE_JSON);
 // This file loads the data and re-exports the shared engine so every existing
 // `import ... from './lib/engine.ts'` keeps working. The formulas are NOT here any more: the cages and
 // the game both call engine/index.ts, so a cage and the game cannot disagree (Techstack.md
-// "The one rule"). Only doc read-back and the town packaging live on this side.
+// "The one rule").
 const { createEngine } = shared;
 const eng = createEngine(E);
 /** The walk model the cages read: the hex graph, the block time and the encounter chance. */
@@ -88,105 +86,14 @@ function engineForTown(townEngine: any): any {
   });
 }
 
-// ---- doc read-back: the numbers the prose files publish must equal the math
-const GENERIC_RULES: any[] = [
-  { file: 'loot.md', label: 'loot.md F5 junk line', re: /\|\s*Reroll value stone\s*\|\s*([\d.]+)\s*\(/, pick: 1, expect: Number((BAND.high.junk_per_hr / BAND.high.kills_derived).toFixed(3)) },
-  { file: 'crafting.md', label: 'crafting.md junk per kill → Reroll uses', re: /\(([\d.]+) per kill → ~([\d.]+) uses per kill\)/, pick: [1, 2], expect: [Number((BAND.high.junk_per_hr / BAND.high.kills_derived).toFixed(3)), Number((STONE.reroll_uses_per_hr / BAND.high.kills_derived).toFixed(3))] },
-  { file: 'crafting.md', label: 'crafting.md tier stones → Refines per kill', re: /\(([\d.]+) per kill → ~([\d.]+) Refines per kill\)/, pick: [1, 2], expect: [Number((STONE.tier_stones_per_hr / BAND.high.kills_derived).toFixed(3)), Number((STONE.refines_per_hr / BAND.high.kills_derived).toFixed(4))] },
-  { file: 'formula.md', label: 'formula.md single-stat ceiling', re: /single-stat ceiling \| \*\*([\d,]+)\*\*/, pick: 1, expect: Math.round(CEIL) },
-  { file: 'formula.md', label: 'formula.md stat at the level cap, no gear', re: /Level \d+ \(no gear\)[^|]*\|[^|]*every stat = (\d+)/, pick: 1, expect: Math.round(statAt(S.level_cap)) },
-  { file: 'formula.md', label: 'formula.md Str 13 physical power', re: /Str 13-item build \| Physical power ([\d,]+)/, pick: 1, expect: Math.round(DERIVED.phys) },
-  { file: 'formula.md', label: 'formula.md K_AGI_ASPD', re: /\| K_AGI_ASPD \| ([\d.]+)/, pick: 1, expect: K.K_AGI_ASPD },
-  { file: 'formula.md', label: 'formula.md K_INT_MREGEN', re: /\| K_INT_MREGEN \| \*\*([\d.]+)\*\*/, pick: 1, expect: K.K_INT_MREGEN },
-  { file: 'formula-utility.md', label: 'formula-utility.md dagger Cap Agi', re: /\| dagger \| ([\d.]+) \| [\d.]+ \| ([\d,]+)/, pick: 2, expect: WEAPONS[0].agi_to_cap },
-  { file: 'formula-utility.md', label: 'formula-utility.md sword Cap Agi', re: /\| one-handed sword \/ axe \| ([\d.]+) \| [\d.]+ \| ([\d,]+)/, pick: 2, expect: WEAPONS[1].agi_to_cap },
-  { file: 'formula-defense.md', label: 'formula-defense.md CDR path to Cap (11 items)', re: /11 Mod items[^=]*= `([\d.]+) × ([\d.]+) = \**([\d.]+)\**`/, pick: [1, 2, 3], expect: [r1(DERIVED.cdr_raw), r2(1 + M.cdr_pct_per_item * LG.cdr_mod_items / 100), r1(DERIVED.cdr_four)] },
-  { file: 'formula-utility.md', label: 'formula-utility.md accuracy ceiling', re: /Mod max 25 on main hand = \*\*([\d,]+)\*\*/, pick: 1, expect: Math.round(DERIVED.accuracy) },
-  { file: 'formula.md', label: 'formula.md K_EVASION row', re: /\| K_EVASION \| ([\d.]+) \|/, pick: 1, expect: K.K_EVASION },
-  { file: 'core-stats.md', label: 'core-stats.md Evasion K', re: /Dex x K_EVASION` \(([\d.]+)\)/, pick: 1, expect: K.K_EVASION },
-  { file: 'core-stats.md', label: 'core-stats.md Armour K and divisor', re: /`Str x K_ARMOUR` \(([\d.]+)\)[\s\S]{0,160}?armour \+ (\d+) × raw_hit/, pick: [1, 2], expect: [K.K_ARMOUR, K.armour_divisor] },
-  { file: 'core-stats.md', label: 'core-stats.md Energy Shield line', re: /Energy Shield - second pool ahead of HP[\s\S]{0,400}?after (\d+) sec without a hit/, pick: 1, expect: E.energy_shield.delay_sec },
-  { file: 'combat.md', label: 'combat.md ES recharge delay', re: /Energy Shield takes the mitigated damage before HP \(chaos bypasses\) · recharges after (\d+) sec/, pick: 1, expect: E.energy_shield.delay_sec },
-  { file: 'crafting.md', label: 'crafting.md ES recharge delay', re: /energy shield\s+= second pool ahead of HP [\u00b7]+ [^\n]*?chaos bypasses [\u00b7]+ recharges after (\d+) sec/, pick: 1, expect: E.energy_shield.delay_sec },
-
-
-  { file: 'concept.md', label: 'concept.md zone-9 boss HP', re: /zone 9 boss \(level 90, HP ([\d,]+)\)/, pick: 1, expect: Math.round(E.mob.zones[8].hp[1] * E.mob.sizes.find((s) => s.id === 'boss')!.hp) },
-  // The stat value in front of each of these is the ceiling itself, so it is interpolated from CEIL
-  // rather than typed: a re-based ceiling moves the pattern instead of silently breaking the match.
-  { file: 'formula-utility.md', label: 'formula-utility.md weight capacity', re: new RegExp('Str ' + Math.round(CEIL) + ' carries ([\\d,]+)'), pick: 1, expect: Math.round(DERIVED.weight) },
-  { file: 'formula-utility.md', label: 'formula-utility.md drop multiplier', re: new RegExp('Lck ' + Math.round(CEIL) + ' gives ([\\d.]+)x'), pick: 1, expect: r1(DERIVED.drop_mult) },
-  { file: 'formula-defense.md', label: 'formula-defense.md level_gain_hp', re: new RegExp('level_gain_hp` = ' + LG.hp_per_level + ' × \\(level − 1\\) → at level ' + S.level_cap + ' gives ([\\d,]+)'), pick: 1, expect: LG.hp_per_level * (S.level_cap - 1) },
-  { file: 'formula-defense.md', label: 'formula-defense.md pool ÷ regen', re: /pool ÷ regen\s*=\s*([\d,]+) ÷ (\d+) = ([\d.]+) seconds/, pick: [1, 3], expect: [Math.round(DERIVED.mana), r1(DERIVED.pool_regen_sec)] },
-  { file: 'core-stats.md', label: 'core-stats.md Evasion Cap', re: /Evasion - % Cap (\d+)/, pick: 1, expect: E.caps.evasion },
-  { file: 'core-stats.md', label: 'core-stats.md aspd Cap', re: /Cap (\d+) \(= 5 hits\/sec/, pick: 1, expect: E.caps.aspd },
-  { file: 'core-stats.md', label: 'core-stats.md res Cap', re: /Cap (\d+) per Element/, pick: 1, expect: E.caps.elem_res },
-  { file: 'core-stats.md', label: 'core-stats.md perfect dodge Cap', re: /Perfect dodge - % Cap (\d+)/, pick: 1, expect: E.caps.perfect_dodge },
-  { file: 'checks.md', label: 'checks.md F2 L90 drop chance', re: /([\d.]+)% \(L90\)/, pick: 1, expect: BAND.high.drop_chance_pct },
-  // Ungated prose read-backs: the economy / item docs quote engine rates in hand-written lines no
-  // writer owns, so they drifted silently under the F1/F3 re-base and the K_INT_MREGEN retune. These
-  // pin the few that matter back to the engine, so the same drift fails the cage instead of hiding.
-  { file: 'economy.md', label: 'economy.md junk per kill', re: /mob junk per kill \(high zone, no Lck\)\s+= ([\d.]+)/, pick: 1, expect: Number((BAND.high.junk_per_hr / BAND.high.kills_derived).toFixed(3)) },
-  { file: 'economy.md', label: 'economy.md gold per kill', re: /max gold per kill\s+= ([\d.]+)/, pick: 1, expect: Number((BAND.high.junk_per_hr / BAND.high.kills_derived).toFixed(3)) },
-  { file: 'item-list.md', label: 'item-list.md reroll use rate', re: /8 per use \(~([\d.]+) per kill\)/, pick: 1, expect: Number((rerollValueStonesPerHr('high') / BAND.high.kills_derived).toFixed(3)) },
-  { file: 'formula-defense.md', label: 'formula-defense.md K_INT_MREGEN', re: /K_INT_MREGEN` = \*\*([\d.]+)\*\*/, pick: 1, expect: K.K_INT_MREGEN },
-  { file: 'elements.md', label: 'elements.md K_ELEM', re: /\| K_ELEM \| (\d+) \|/, pick: 1, expect: K.K_ELEM },
-  { file: 'elements.md', label: 'elements.md K_MOB_RES', re: /\| K_MOB_RES \| ([\d.]+) \|/, pick: 1, expect: K.K_MOB_RES },
-  { file: 'core-stats.md', label: 'core-stats.md weight capacity', re: /capacity = weight_base \(1,000\) \+ Str x 2 \(([\d,]+) at 433 Str\)/, pick: 1, expect: Math.round(DERIVED.weight) },
-  { file: 'mod-pool.md', label: 'mod-pool.md weight capacity', re: /1,217 at the level-only 108 Str · ([\d,]+) at the 433 ceiling/, pick: 1, expect: Math.round(DERIVED.weight) },
-];
-
-function readDoc(file: string): string { return fs.readFileSync(path.join(ROOT, resolveDoc(file)), 'utf8'); }
-const cellNum = (s: any): number => Number(String(s).replace(/[*,\s]/g, '').match(/[\d.]+/)?.[0] ?? NaN);
-
-/** loot.md section 2 is a table, so it is read by row, not by regex. */
-function readLootTable(): any[] {
-  const text = readDoc('loot.md');
-  const out: any[] = [];
-  const rows: Record<string, string> = { low: 'low (1-30)', mid: 'mid (31-60)', high: 'high (61-90)', high_full_lck: 'high + full Lck' };
-  for (const [band, key] of Object.entries(rows)) {
-    const line = text.split(/\r?\n/).find((l) => l.startsWith('| ' + key));
-    if (!line) { out.push({ ok: false, label: `loot.md section 2 ${band} row`, detail: 'row not found' }); continue; }
-    const cells = line.split('|').map((c) => c.trim());
-    const checks: any[][] = [
-      ['drops per kill', cellNum(cells[4]), Number((BAND[band].drops_per_hr / BAND[band].kills_derived).toFixed(4))],
-      ['junk per kill', cellNum(cells[6]), Number((BAND[band].junk_per_hr / BAND[band].kills_derived).toFixed(4))],
-    ];
-    const lckCell = cells[5].match(/(\d+)\s*\(?(?:L\d+)?\)?\s*→\s*×([\d.]+)/) || cells[5].match(/(\d+).*×([\d.]+)/);
-    if (lckCell) {
-      checks.push(['Lck at that level', cellNum(lckCell[1]), BAND[band].lck]);
-      checks.push(['Lck multiplier', cellNum(lckCell[2]), BAND[band].lck_mult]);
-    }
-    for (const [what, got, want] of checks) {
-      out.push({ ok: got === want, label: `loot.md §2 ${band} ${what}`, detail: `doc ${got} · engine ${want}` });
-    }
-  }
-  return out;
-}
-
-function runReadBack(): any[] {
-  const out: any[] = [];
-  for (const rule of GENERIC_RULES) {
-    let text: string;
-    try { text = readDoc(rule.file); } catch (e) { out.push({ ok: false, label: rule.file, detail: e.message }); continue; }
-    const m = text.match(rule.re);
-    if (!m) { out.push({ ok: false, label: rule.label, detail: `pattern not found in ${rule.file}` }); continue; }
-    const picks = Array.isArray(rule.pick) ? rule.pick : [rule.pick];
-    const expects = Array.isArray(rule.expect) ? rule.expect : [rule.expect];
-    picks.forEach((p: number, i: number) => {
-      const got = cellNum(m[p]);
-      out.push({ ok: got === expects[i], label: `${rule.label} [${i}]`, detail: `doc ${got} · engine ${expects[i]}` });
-    });
-  }
-  return out.concat(readLootTable());
-}
 
 export {
   ROOT, E, S, K, M, LG, L, C, TS, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
-  DERIVED, REF, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap,
+  DERIVED, REF, REFERENCE, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap,
   statWithItems, mobEvasion, sizeMult, playerAccuracy, hitVs, MEAN_SPECIES_DEX, SPECIES_EVASION, MOB_EVASION_REF,
   armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt, typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, mobAcc, mobDodge, refAttackerAcc, mobRoster,
   mobResOf, speciesResMult, mobResByElementOf,
-  engineForTown, runReadBack, GENERIC_RULES, fmt, r1, r2, build, ROAD,
+  engineForTown, fmt, r1, r2, build, ROAD,
   aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, dodgeRate, dodgeChance, perfectDodgeChance,
   evasionChance, evasionRating, agilityEvasion,
   critPool, critChanceOf, critDmgOf, maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf,

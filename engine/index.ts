@@ -7,7 +7,7 @@
  *
  * It is a factory over the parsed `tools/data/engine.json`: no fs, no doc reads, no Node
  * builtins, so it runs unchanged in a browser. A formula that exists here and beside it is
- * the same defect as a number typed twice (AGENT.md §3, Techstack.md "The one rule").
+ * the same defect as a number typed twice (AGENTS.md §3, Techstack.md "The one rule").
  */
 
 import type { BasesData, EngineData, MobSize, Rng } from './types.ts';
@@ -102,6 +102,15 @@ export function createEngine(E: EngineData) {
   // one base the species vector multiplies, no level term, so two mobs of a level can be nothing alike.
   const MSTAT = E.mob.stat;
   const mobStat = () => MSTAT.base;
+  /**
+   * The mob's fixed Core stat block: the one flat base through the species vector, with no level term
+   * (owner ruling — a Goblin is the same body at level 1 and at level 180; only HP, PS and XP climb).
+   * Exported so a view reads the seven numbers instead of multiplying the vector a second time.
+   */
+  const mobStatsOf = (speciesId: string): Record<string, number> => {
+    const sp = speciesById(speciesId)?.stats || {};
+    return Object.fromEntries(Object.keys(sp).map((k) => [k, r2(mobStat() * sp[k])]));
+  };
 
   // the zone's average body factor: mob_HP(L) is the zone's AVERAGE mob, so group entries divide by it
   const speciesById = (id: string): any | undefined => (E.mob.species as any[]).find((x) => x.id === id);
@@ -495,7 +504,7 @@ export function createEngine(E: EngineData) {
     mitigated * (1 - Math.min(1, Math.max(0, physShare)) * (1 - sizeMult));
 
 
-  // ---- item level (item-rarity.md)
+  // ---- item level (item-level.md)
   // The band ladder is the whole rule now that Rarity is gone: a band's floor IS the band below it, so
   // `floorOf` reads the ladder instead of a floor/ceiling table, and `floorLevelOf` is the level a band
   // starts at — which is what an offline drop is limited to (save.md · loot.md section 7).
@@ -537,7 +546,7 @@ export function createEngine(E: EngineData) {
     // a 0.05% rounding flip a kill x chance product by one and broke X5 (re-base).
     const dropPct = r1(dropChance(b) * 100);
     // kills/hr is DERIVED from the cycle (TTK per mob, the group it fields, the gap between groups),
-    // never published: the design states what a kill pays, not what an hour holds (AGENT.md — no time
+    // never published: the design states what a kill pays, not what an hour holds (AGENTS.md — no time
     // limit, no play-length target). Every figure below is the same number it always was.
     const kph = Math.round(killsDerived(b));
     const drops = Math.round(kph * (dropPct / 100));
@@ -576,7 +585,7 @@ export function createEngine(E: EngineData) {
     }
   }
   // a band is a COUNT of kills between two checkpoints, never a stretch of hours: how long a band
-  // takes is the player's own pace (AGENT.md — no time limit, no play-length target).
+  // takes is the player's own pace (AGENTS.md — no time limit, no play-length target).
   BAND.low.band_kills = CHECKPOINTS_KILLS.level_30;
   BAND.mid.band_kills = CHECKPOINTS_KILLS.level_60 - CHECKPOINTS_KILLS.level_30;
   BAND.high.band_kills = CHECKPOINTS_KILLS.level_90 - CHECKPOINTS_KILLS.level_60;
@@ -773,7 +782,7 @@ export function createEngine(E: EngineData) {
     statAt, statWithItems, ceilStat, pointsAt, treePointsAt, statOf,
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
-    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
+    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, mobStat, mobStatsOf, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
     speciesResMult, mobResOf, mobResByElementOf,
   evasionChance, evasionRating, agilityEvasion,
     MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION, sizeMult, damageSplit, mobRoster, spawnAt,

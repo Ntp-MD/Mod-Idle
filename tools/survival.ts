@@ -13,9 +13,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import * as G from './lib/generated.ts';
 import * as eng from './lib/engine.ts';
-import type { Writer } from './lib/types.ts';
 
 const { E, S, K, M, LG, DERIVED } = eng as any;
 const ROOT = eng.ROOT;
@@ -329,31 +327,16 @@ function gates() {
   return out;
 }
 
-// ---------------------------------------------------------------- writers
-const WRITERS: Writer[] = SECTIONS.map((s: any) => ({
-  file: 'combat.md', key: s.key, render: () => block(s.key),
-}));
-
 const arg = process.argv[2];
-if (arg === '--emit') {
-  for (const s of SECTIONS) console.log(block(s.key) + '\n');
-} else if (arg === '--write') {
-  const missing = G.writeAll(WRITERS);
-  if (missing) process.exitCode = 1;
-} else if (arg === '--checks') {
+if (arg === '--checks') {
   const rows = gates();
   for (const r of rows) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.d}`);
-  const states = G.checkAll(WRITERS);
-  const stale = states.filter((s: any) => s.state !== 'current');
-  for (const s of states) console.log(`${s.state === 'current' ? 'PASS ' : 'FAIL '}  block ${s.key} · ${s.file} (${s.state})`);
-  const fails = rows.filter((r: any) => !r.ok).length + stale.length;
-  console.log(`\n${rows.length - rows.filter((r: any) => !r.ok).length}/${rows.length} gate PASS · ${stale.length} block(s) not current · ${fails} FAIL`);
+  const fails = rows.filter((r: any) => !r.ok).length;
+  console.log(`\n${rows.length - fails}/${rows.length} gate PASS · ${fails} FAIL`);
   if (fails) process.exitCode = 1;
 } else {
-  console.log(`survival cage — engine.json → combat.md sections 6-7
+  console.log(`survival cage — engine.json → the combat model
 
-  node tools/survival.ts --emit     print the tables
-  node tools/survival.ts --write    rewrite the four tables
   node tools/survival.ts --checks   gate the result
 `);
 }

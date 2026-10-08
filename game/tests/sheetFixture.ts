@@ -47,7 +47,7 @@ const WANTED = [
  * `mods.json` publishes for it. This is a *state* premise, not a duration — it is the same instrument
  * `tools/survival.ts` prices its four builds with (thirteen items, each carrying its own defensive
  * line at the ceiling), so a test that needs a character at the curve never has to say how long it
- * farmed. `AGENT.md`: no time limit and no play-length target is a design constraint, so nothing in
+ * farmed. `AGENTS.md`: no time limit and no play-length target is a design constraint, so nothing in
  * this repo may be gated on hours of play.
  */
 export function ceilingGear(): (Item | null)[] {

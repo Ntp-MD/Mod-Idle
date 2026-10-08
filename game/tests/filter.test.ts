@@ -83,7 +83,7 @@ describe('the bag filter reads per-slot thresholds', () => {
     setLevel(s, 70);
     setRule(s.filter, 'helmet', { margin_pct: 40 });
     // Tick until the state under test exists, never for a guessed window: a fixed window is a time
-    // premise (AGENT.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.
+    // premise (AGENTS.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.
     for (let i = 0; i < 40000 && s.counters.drops === 0; i++) tick(s, {});
     expect(s.counters.drops).toBeGreaterThan(0);
   });

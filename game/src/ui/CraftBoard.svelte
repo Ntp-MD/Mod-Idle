@@ -34,8 +34,8 @@
     const g = craft.guard(item, op);
     if (!g.ok) return g.why;
     if (i != null && i < UNT) return op === 'remove'
-      ? 'the Base Mod and the Legacy pair are part of the piece, not a stone'
-      : 'the Base Mod and Legacy lines cannot be changed';
+      ? 'the Base Mod and the Sub pair are part of the piece, not a stone'
+      : 'the Base Mod and Sub lines cannot be changed';
     if (!craft.payable(held, op, item)) return cost(op, item).map(([k, n]) => `needs ${n} ${stoneName(k)}`).join(' · ');
     return '';
   };
@@ -80,7 +80,7 @@
                 <td class="no">{i + 1}</td>
                 <td>
                   {lineName(l.id)}
-                  {#if fixed}<span class="tag">{i === 0 ? 'Base Mod' : 'Legacy'}</span>{/if}
+                  {#if fixed}<span class="tag">{i === 0 ? 'Base Mod' : 'Sub'}</span>{/if}
                   {#if l.element}<span class="tag el">{l.element}</span>{/if}
                 </td>
                 <td class="val">
@@ -124,7 +124,7 @@
             <b>Ascend the piece</b><span>{line('ascend')} · one item-quality step up</span>
           </button>
           <button disabled={!can('remove')} onclick={() => onrun('remove')} title={why('remove')}>
-            <b>Remove a Mod</b><span>{line('remove')} · never the Base or the Legacy pair</span>
+            <b>Remove a Mod</b><span>{line('remove')} · never the Base or the Sub pair</span>
           </button>
         </div>
         <p class="now">

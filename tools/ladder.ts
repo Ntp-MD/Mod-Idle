@@ -12,10 +12,8 @@
  */
 
 import * as R from './lib/roster.ts';
-import * as G from './lib/generated.ts';
 import * as eng from './lib/engine.ts';
 import { CONVERSION, LADDER } from './lib/skillmodel.ts';
-import type { Writer } from './lib/types.ts';
 
 const ZONES = eng.E.mob.zones.length;  // the data owns the world size, never a typed 9
 // the F12 rate and the E5 game length are DERIVED, never copied: the skill-drop rate is the same sum
@@ -26,7 +24,7 @@ const ELITES = KPH * L.elite_spawn_chance;
 const DROP_PER_HR = ELITES * SD.elite + L.boss_per_hour * SD.boss + KPH * (1 - L.elite_spawn_chance) * SD.normal;
 // the completion checkpoint (E5) — the levels past it are the post-completion loop, so the funnel is
 // the supply the ladder is measured against up to completion, not to the level cap. It is a COUNT of
-// kills, never a stretch of hours: how long the run takes is the player's own pace (AGENT.md).
+// kills, never a stretch of hours: how long the run takes is the player's own pace (AGENTS.md).
 const GAME_KILLS = eng.CHECKPOINTS_KILLS.level_100;
 const DROP_PER_KILL = DROP_PER_HR / KPH;
 const TARGETS = 4;            // checks.md D20 · four full targets
@@ -72,45 +70,17 @@ function gates(m: any) {
   return out;
 }
 
-function block() {
-  const m = model();
-  return [
-    '| Quantity | Value |',
-    '|---|---|',
-    `| roster | ${m.total} skills |`,
-    `| pool per zone | ${m.total} ÷ ${ZONES} = **${m.poolPerZone.toFixed(1)}** |`,
-    `| funnel | ${DROP_PER_KILL.toFixed(4)}/kill × ${GAME_KILLS.toLocaleString('en-US')} kills = **${Math.round(m.funnel)} pieces** |`,
-    `| ladder to max one skill | ${m.dupToMax} duplicates = **${m.piecesPerMax} pieces** via the ${CONVERSION}:1 conversion |`,
-    `| ${TARGETS} maxed targets | **${m.fourMaxed} pieces = ${m.pctOfFunnel.toFixed(0)}% of funnel = ${Math.round(m.kills).toLocaleString('en-US')} kills** |`,
-    `| remaining ${m.offTargets} skills | ${Math.round(m.offPieces)} pieces → **${m.offAvg.toFixed(2)} each** |`,
-  ].join('\n');
-}
-
-const WRITERS: Writer[] = [{ file: 'skill-pool-system.md', key: 'ladder-math', render: block }];
-
 const arg = process.argv[2];
-const m = model();
 
-if (arg === '--emit') {
-  console.log(block());
-} else if (arg === '--write') {
-  const missing = G.writeAll(WRITERS);
-  if (missing) process.exitCode = 1;
-} else if (arg === '--checks') {
-  const rows = gates(m);
+if (arg === '--checks') {
+  const rows = gates(model());
   for (const r of rows) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-  const states = G.checkAll(WRITERS);
-  const stale = states.filter((s) => s.state !== 'current');
-  console.log('');
-  for (const s of states) console.log(`${s.state === 'current' ? 'PASS ' : 'FAIL '}  block ${s.key} · ${s.file} (${s.state})`);
-  const fails = rows.filter((r) => !r.ok).length + stale.length;
-  console.log(`\n${rows.length - rows.filter((r) => !r.ok).length}/${rows.length} gate PASS · ${stale.length} block(s) not current · ${fails} FAIL`);
+  const fails = rows.filter((r) => !r.ok).length;
+  console.log(`\n${rows.length - fails}/${rows.length} gate PASS · ${fails} FAIL`);
   if (fails) process.exitCode = 1;
 } else {
-  console.log(`ladder cage — roster × drop rate × ladder rules → checks.md D20 / E11
+  console.log(`ladder cage — roster × drop rate × ladder rules
 
-  node tools/ladder.ts --emit     print the generated ladder block
-  node tools/ladder.ts --write    rewrite the ladder block in skill-pool-system.md
-  node tools/ladder.ts --checks   invariants + stale-block check
+  node tools/ladder.ts --checks   invariants
 `);
 }

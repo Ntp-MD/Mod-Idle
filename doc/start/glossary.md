@@ -4,7 +4,7 @@ The shared language of the design. Every spec file uses these words with exactly
 
 **How to read a row:** what the term *is* · what it *decides* · what it is *not*, or what it is most often confused with. Values are not typed here; the number lives in `tools/data/` and the doc that prints it owns the figure.
 
-# The 3 Layers of an Item
+# The 2 Layers of an Item
 
 One item answers two separate questions. They are separate on purpose: collapsing them makes an item unreadable.
 
@@ -20,7 +20,7 @@ mid band · level 45
   └── T1  Evasion %            10-11
 ```
 
-- **The line count never touches a rolled value.** Every drop carries the same lines, so two pieces at one level differ only by where their rolls landed.
+- **The line count never touches a rolled value.** A drop's Normal line count is drawn from a range, but every value its lines roll comes from the level's window alone — so two pieces at one level differ by how many lines they drew and by where those rolls landed, never by the count reaching into a value.
 - **The window is one window for the whole item.** Every line reads the same level and band — a Mod cannot borrow another Mod's level.
 - **Tier is a property of the item, not of a Mod.** Two Mods on one item are always inside the same sub-range set.
 
@@ -79,9 +79,9 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Offensive** | Attack-side Mods. Roll on weapon slots only. |
 | **Defensive** | Defence-side Mods. Roll on the 10 non-weapon slots only. |
 | **Base Mod** | The first line of a dropped item — the frame's own line, rolled from the slot's Base-Mod pool. Unremovable: the craft verbs never touch it (item-base.md). |
-| **Legacy mod** | Lines 2-3 of a dropped item, fixed at drop. The Remove mod stone can never target them, and a Random line (lines 4-7) is never legacy. |
+| **Sub mod** | Lines 2-3 of a dropped item, fixed at drop. The Remove mod stone can never target them, and a Random line (lines 4-7) is never sub. |
 | **Gear Mod** | A piece's own inherent defence value — Armour, Evasion or Energy Shield, decided by its Base school. Raised only by a Quality Stone. **Never** a Mod: Reroll, Refine, Remove and Add cannot touch it, and it is always shown on its own top line, never inside the Mod list. |
-| **Base** | The frame of one slot (`Ring Mail` / `Plate Vest` / `Vestment`). Decides **weight** and **which Mods are Primary or Secondary**. Decides nothing else — not Mod count (that is Rarity), not rolled values (that is quality + Tier). |
+| **Base** | The frame of one slot (`Ring Mail` / `Plate Vest` / `Vestment`). Decides **weight** and **which Mods are Primary or Secondary**. Decides nothing else — not the line count (drawn at drop from `stat_mod_slots`), not rolled values (that is Item level + Tier). |
 | **Level floor** | The first level of a band — which is what an away window (offline) is limited to. The window above it is the band's own ceiling. |
 | **Weight** | Carried by the item from its Base, multiplied by quality. **Not a rolled value.** |
 | **Capacity** | How much weight a build can carry, set by Str. Going over does not lock slots — it cuts Attack speed, up to a limit (`formula.md` section 11). |
@@ -112,6 +112,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Leech** | HP returned as a percentage of damage just dealt. |
 | **Perfect dodge** | Removes the hit outright and is **not** contested — the only answer to things Evasion cannot block, such as DoT ticks and unconditional effects. Chance comes from Lck as a ratio, with a Cap just under the top that ratio reaches (the generated Cap table in `formula.md` prints both). |
 | **Reach** | How far a build can act. There is no map, no tiles and no movement: near and far are a queue (`combat.md` section 2b). |
+| **Foe** | The **Field of Enemies** — every mob the character is fighting at once. An aura writes on the foe, so its line lands on all of them; a press or a curse writes only on the mob it landed on. Never a synonym for one mob. |
 | **Elite** | A rarity flag, **not** a size — an Elite is a Large body carrying its own stronger numbers, so two multipliers never stack. |
 | **Attack layer / Defend layer** | One step of the damage calculation in its fixed order (`combat.md` §2). **Not** the same thing as an Offensive or Defensive Mod, which is a Mod pool. A layer removes the hit, reduces the damage, scales it, or receives it. |
 
@@ -137,7 +138,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Reroll** | Re-rolls the value inside a Mod, staying in the same Tier. A tool for fixing a bad line, not for climbing power. |
 | **Refine** | Raises a Mod one Tier. |
 | **Ascend** | Raises Item quality one step for the whole item. |
-| **Remove mod stone** | Deletes one random non-legacy Mod. |
+| **Remove mod stone** | Deletes one random non-sub Mod. |
 | **Add mod stone** | Fills one empty slot by drawing from the item's own Base pool. Always random — the stone draws, the player does not choose. |
 | **Quality Stone** | The only source of Gear Mod points. |
 | **Tier stone** | Feeds Reroll tier and Refine. |
@@ -184,7 +185,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 
 # Abbreviations
 
-A **closed set**. An abbreviation is the *same term shortened*, never a second name for it — so a term with no row here has no abbreviation, and inventing one is a synonym, which `AGENT.md` section 2 forbids. A new row is added only when the abbreviation is actually used in a doc or a tool, and a rejected spelling is recorded in `aliases.json` (guarded by lint **L4**). Every row must survive lint **L8**: one abbreviation per term, one term per abbreviation, and each abbreviation used somewhere in the repo.
+A **closed set**. An abbreviation is the *same term shortened*, never a second name for it — so a term with no row here has no abbreviation, and inventing one is a synonym, which `AGENTS.md` section 2 forbids. A new row is added only when the abbreviation is actually used in a doc or a tool, and a rejected spelling is recorded in `aliases.json` (guarded by lint **L4**). Every row must survive lint **L8**: one abbreviation per term, one term per abbreviation, and each abbreviation used somewhere in the repo.
 
 | Term | Abbreviation | Canonical in |
 |---|---|---|
@@ -222,7 +223,7 @@ A **closed set**. An abbreviation is the *same term shortened*, never a second n
 # Rules That Must Not Be Broken
 
 1. **Never say Tier means Item quality** — Tier is the sub-range, quality is the large range.
-2. **Never tie a value range to the line count** — the count is fixed, so one level's pieces are decided by where their rolls landed.
+2. **Never tie a value range to the line count** — the count is drawn at drop and answers only how many Normal lines a piece has, so one level's pieces are decided by how many they drew and where those rolls landed.
 3. **Never let Mods on one item pull from different range sets** — one item, one level, one Tier set.
 4. **Never swap the item level and the band.**
 5. **Tier is not required on every Mod** — when a window is too narrow to split readably, drop the Tier and keep the window's own range.

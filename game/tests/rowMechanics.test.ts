@@ -41,9 +41,12 @@ describe('the attack rows that press differently', () => {
   const c = buildCharacter(90, emptyGear());
 
   it('Whirlwind presses three rounds and Arrow Shower three arrows at its stated fraction', () => {
-    const ramp = 1 + ((E.skill_xp.level_cap - 1) * sm.LEVEL_STEP) / 100;
-    const onePress = (id: string) => (row(id).final_pct / 100) * c.phys * ramp
-      * sm.groupBonus(row(id), c.weaponName) * sm.masteryBonus(0);
+    const ramp = sm.damagePct(E.skill_xp.level_cap) / 100;   // the level table is the ramp
+    const onePress = (id: string) => {
+      const r = row(id);
+      return (r.base_flat + (r.eff / 100) * c.phys) * ramp
+        * sm.groupBonus(r, c.weaponName) * sm.masteryBonus(0);
+    };
     const dealt = (id: string) => {
       const t = mob({ id: `hit-${id}` });
       return cast(id, c, [t])!.dealt!;

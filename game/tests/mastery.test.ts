@@ -58,7 +58,7 @@ describe('the held weapon is the only one that levels', () => {
 
   it('grows through the live loop and shows on the sheet', () => {
     const s = newGame(5);
-    // Tick until the loop has paid a kill, never for a guessed window (a time premise · AGENT.md).
+    // Tick until the loop has paid a kill, never for a guessed window (a time premise · AGENTS.md).
     for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     const held = heldWeaponName(s)!;
     // the rule is one weapon per kill, not one weapon forever: a kept upgrade is worn at once, so

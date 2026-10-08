@@ -4,20 +4,6 @@
  * the cages themselves, so the type here documents the seam, not the schema.
  */
 
-/** A generated-block writer: it owns one `key` inside one `file`. */
-export interface Writer {
-  file: string;
-  key: string;
-  render(): string;
-}
-
-/** One `<!-- BEGIN GENERATED:key -->` block as it stands on disk. */
-export interface BlockState {
-  file: string;
-  key: string;
-  state: string;
-}
-
 export interface SkillsData {
   skills: any[];
   meta: any;

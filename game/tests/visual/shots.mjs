@@ -174,7 +174,7 @@ for (const size of sizes) {
 
   // the best-gear press: shot, and the answer it printed is kept as text so a silent no-op cannot pass.
   // The press is taken only once the hunt has actually banked pieces — waiting on the pile rather than on
-  // a clock, so the reading is made on a live bag (a time premise · AGENT.md)
+  // a clock, so the reading is made on a live bag (a time premise · AGENTS.md)
   // A real swap, on screen. The client's own Export gives a save; the same pieces with their lines made
   // stronger go back into the pile through the client's own Import; the press then has to dress the body.
   // Every step is a control the player has, so this proves the wiring and the rule together — and a note

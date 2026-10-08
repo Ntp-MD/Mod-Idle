@@ -75,14 +75,14 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
   }
 
   // The skeleton's unremovable head (item-base.md): line 1 is the Base Mod and lines 2-3 the
-  // Legacy pair, so the floor every line-editing verb refuses to cross is base_mod_slots + legacy_slots.
+  // Sub pair, so the floor every line-editing verb refuses to cross is base_mod_slots + sub_slots.
   const BASE_MOD_SLOTS = E.item_level.base_mod_slots || 1;
-  const LEGACY_SLOTS = E.item_level.legacy_slots || 2;
-  const UNTOUCHABLE = BASE_MOD_SLOTS + LEGACY_SLOTS;
+  const SUB_SLOTS = E.item_level.sub_slots || 2;
+  const UNTOUCHABLE = BASE_MOD_SLOTS + SUB_SLOTS;
 
-  /** A line the bench may edit. The Base Mod and the Legacy pair are refused by every verb. */
+  /** A line the bench may edit. The Base Mod and the Sub pair are refused by every verb. */
   function editable(item: any, index: number) {
-    if (index < UNTOUCHABLE) return { ok: false, why: 'the Base Mod and Legacy lines cannot be changed' };
+    if (index < UNTOUCHABLE) return { ok: false, why: 'the Base Mod and Sub lines cannot be changed' };
     const line = item.lines[index];
     if (!line) return { ok: false, why: 'no such slot' };
     return { ok: true, line };
@@ -154,7 +154,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
 
   /**
    * Ascend: the whole piece one band up, with its level shifted by one span so the window moves with it
-   * (item-rarity.md). Every line re-rolls inside the same third of the new, higher window.
+   * (item-level.md). Every line re-rolls inside the same third of the new, higher window.
    */
   function ascend(item: any, rng: Rng): any {
     const g = guard(item, 'ascend');
@@ -169,11 +169,11 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     return { ok: true, item: { ...item, ilvl, q, quality: QUALITY_STEPS[q], lines }, changed: { q, ilvl } };
   }
 
-  /** Remove: delete one random non-legacy line. Identity changes only via Remove + Add. */
+  /** Remove: delete one random non-sub line. Identity changes only via Remove + Add. */
   function remove(item: any, rng: Rng): any {
     const g = guard(item, 'remove');
     if (!g.ok) return g;
-    if (item.lines.length <= UNTOUCHABLE) return { ok: false, why: 'only the Base and Legacy lines are left on this piece' };
+    if (item.lines.length <= UNTOUCHABLE) return { ok: false, why: 'only the Base and Sub lines are left on this piece' };
     const candidates = item.lines.map((l: any, i: number) => i).slice(UNTOUCHABLE);
     const pick = candidates[Math.floor(rng() * candidates.length)];
     return { ok: true, item: { ...item, lines: item.lines.filter((_: any, i: number) => i !== pick) }, changed: { index: pick } };
@@ -326,7 +326,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
   const PENDING_POWER: Record<string, string> = {};
 
   return {
-    C, QUALITY_STEPS, STONE_NAME, BASE_MOD_SLOTS, LEGACY_SLOTS, UNTOUCHABLE, LOCKED, PENDING_POWER, costOf, guard, payable, spend,
+    C, QUALITY_STEPS, STONE_NAME, BASE_MOD_SLOTS, SUB_SLOTS, UNTOUCHABLE, LOCKED, PENDING_POWER, costOf, guard, payable, spend,
     successPct, stepOf, reroll, refine, randomize, ascend, remove, add, upgrade, repair, corrupt,
   };
 }

@@ -1,7 +1,7 @@
 /**
  * Skill-roster loader — the shared read of tools/data/skills.json.
  *
- * Everything that needs the roster (tools/skills.ts, tools/tree.ts, tools/lint.ts)
+ * Everything that needs the roster (tools/skills.ts, tools/tree.ts)
  * goes through here, so the count, the name→id map and the mechanic gate have one
  * definition. Counts are always derived from the data; nothing hand-types "43".
  */
@@ -80,10 +80,11 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
   else {
     killsToMax = (SX.level_cap - 1) * SX.xp_per_step / SX.xp_per_kill;
     // the Cap multiplier is read out of the calculator itself, never recomputed here (ramp:
-    // final_pct × basis × (1 + (level − 1) × step)). What this gate protects is the band the design
-    // promises — checks.md E12: gear ×5.6, skill ×1.1-1.4, nothing in between.
+    // (base_flat + eff/100 × power) × damage_pct(level)/100, with eff 0 so only the ramp shows —
+    // and `perPress` reads that percentage out of `meta.formula.skill_levels`). What this gate
+    // protects is the band the design promises — checks.md E12: gear ×5.6, skill ×1.1-1.4.
     const SM0 = createSkillModel(DATA, EN.E);
-    mult = SM0.perPress({ id: '', basis: 'phys', final_pct: 100 }, { phys: 1, level: SX.level_cap }) ?? 0;
+    mult = SM0.perPress({ id: '', basis: 'phys', base_flat: 1, eff: 0 }, { phys: 1, level: SX.level_cap }) ?? 0;
     if (!(mult > 1.1 && mult < 1.4)) sp.push(`a maxed skill multiplies its basis by ×${mult && mult.toFixed(3)}, outside the ×1.1-1.4 skill band (checks.md E12)`);
     hrs = ['low', 'mid', 'high'].map((b) => killsToMax / EN.BAND[b].kills_per_hr);
     // The band is "catch up inside about one zone". the re-base made a zone ~2.9x longer
@@ -93,6 +94,32 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     if (nullReserve) sp.push(`${nullReserve} aura(s) still have no reserve tier`);
     add('S10', sp.length === 0, sp.length ? sp.join(' \u00b7 ')
       : `skill level is earned per kill (${SX.xp_per_kill} XP) at ${SX.xp_per_step} XP a step to Cap ${SX.level_cap} = **${mult.toFixed(2)}** \u00b7 ${killsToMax.toLocaleString('en-US')} kills to max \u00b7 every aura carries a reserve tier`);
+  }
+
+  // The per-level table is the one home of the ramp, so its shape is a promise: one row per level,
+  // continuous, never falling, and the first row the identity. `special_level_effects` must name real
+  // effect stats — a typo there silently stops scaling the very effect it was meant to exempt.
+  {
+    const T = (DATA.meta.formula && (DATA.meta.formula as any).skill_levels) || null;
+    const tp: string[] = [];
+    const rows: any[] = (T && T.rows) || [];
+    if (!rows.length) tp.push('no skill_levels table');
+    else {
+      if (rows.length !== SX.level_cap) tp.push(`${rows.length} row(s) against skill_xp.level_cap ${SX.level_cap}`);
+      if (rows[0].level !== 1 || !(rows[0].damage_pct > 0) || !(rows[0].effect_pct > 0)) tp.push('the first row is not level 1 with a positive multiplier');
+      rows.forEach((r: any, i: number) => {
+        if (r.level !== i + 1) tp.push(`row ${i + 1} is level ${r.level}`);
+        if (i && r.damage_pct < rows[i - 1].damage_pct) tp.push(`damage_pct falls at level ${r.level}`);
+        if (i && r.effect_pct < rows[i - 1].effect_pct) tp.push(`effect_pct falls at level ${r.level}`);
+      });
+    }
+    const SM18 = createSkillModel(DATA, EN.E);
+    const specials: string[] = ((T && T.special_level_effects) || []) as string[];
+    const unknown = specials.filter((s) => !SM18.EFFECT_STATS.includes(s));
+    if (unknown.length) tp.push(`special_level_effects names unknown stats: ${unknown.join(', ')}`);
+    const last = rows[rows.length - 1];
+    add('S18', tp.length === 0, tp.length ? tp.join(' \u00b7 ')
+      : `the level table is the one ramp: ${rows.length} rows climbing from ${rows[0].damage_pct}% damage and ${rows[0].effect_pct}% effect at level 1 to ${last.damage_pct}% / ${last.effect_pct}% at level ${last.level}, never falling · ${specials.length} effect stat(s) opt out because each already spends skill level its own way`);
   }
 
   // Skill effects as data: a row may carry an `effects` list, and every number in it must be the
@@ -118,22 +145,23 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
   const proseOnly = SKILLS.filter((s) => !(s.effects || []).length).map((s) => s.id);
   add('S12', SKILLS.every((s) => (s.effects || []).length || (s.rules || []).length || s.modelled_by), `${proseOnly.length} rows state a mechanic rather than a magnitude (${SKILLS.filter((s) => (s.rules || []).length).length} carry a rule word, ${SKILLS.filter((s) => s.modelled_by && !(s.effects || []).length).length} more are carried whole by another column) — every one of them is spent in the client, so no row is left as prose (informational)`);
 
-  // B5: a press is a fraction of a finished hit, so an attack row without a named basis or
-  // without its percentage presses nothing. The two reference bases the roster table prints are named
-  // here too, and a hand-typed press column is refused: the table is generated from these numbers.
+  // B5: a press is its own flat damage plus a stated share of the finished hit, so an attack row
+  // without a named basis or without both damage numbers presses nothing. The two reference bases the
+  // roster table prints are named here too, and a hand-typed press column is refused: the table is
+  // generated from these numbers.
   const SM13 = createSkillModel(DATA, EN.E);
   const B13 = EN.REF;
   const attackRows = SKILLS.filter((s) => s.type === 'attack');
   const badBasis = attackRows.filter((s) => s.basis !== 'phys' && s.basis !== 'magic');
-  const badPct = attackRows.filter((s) => !(typeof s.final_pct === 'number' && s.final_pct > 0));
+  const badPct = attackRows.filter((s) => !(typeof s.base_flat === 'number' && s.base_flat > 0 && typeof s.eff === 'number' && s.eff >= 0));
   const handCopy = attackRows.filter((s) => s.damage);
   const num = (v: any): string => Math.round(v).toLocaleString('en-US');
   add('S13', badBasis.length === 0 && badPct.length === 0 && handCopy.length === 0,
-    `${attackRows.length} attack rows press off a basis and a stated percentage` +
+    `${attackRows.length} attack rows press off a basis, their own flat and their effectiveness` +
     ` · reference bases: glass phys ${num(B13.glass.phys)} · caster magic ${num(SM13.basisOf({ id: '', basis: 'magic' }, B13.caster))}` +
     ` (magic ${num(B13.caster.magic)} + elem ${num(B13.caster.elem)} × align ${B13.caster.align}%)` +
     `${badBasis.length ? ' · NO BASIS: ' + badBasis.map((s) => s.id).join(', ') : ''}` +
-    `${badPct.length ? ' · NO final_pct: ' + badPct.map((s) => s.id).join(', ') : ''}` +
+    `${badPct.length ? ' · NO base_flat/eff: ' + badPct.map((s) => s.id).join(', ') : ''}` +
     `${handCopy.length ? ' · HAND-TYPED PRESS COLUMN: ' + handCopy.map((s) => s.id).join(', ') : ''}`);
 
   // B9 close-out: a row that states a mechanic instead of a magnitude names it from a
@@ -178,16 +206,19 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     `${freeAtCap.length ? ' · FREE AT THE CAP: ' + freeAtCap.join(', ') : ''}` +
     `${swapped.length ? ' · PRICED THROUGH THE WRONG FORM: ' + swapped.join(', ') : ''}`);
 
-  //: S10 bands the damage ramp only. A flat cost has its own, steeper step and a pool-growth
-  // term, and the ratio the two make at the cap is the number the design stands on.
+  // S10 bands the damage ramp only. A flat cost has its own step and a pool-growth term, and the
+  // promise here is that a flat row gets *more expensive* as it levels while the pool term stays
+  // inside (0, 1] so gear sets the price without doubling it. It no longer demands a steeper cost
+  // than the damage ramp: a fresh skill presses a quarter of what it will (owner ruling), so a level
+  // now buys more damage than mana and the maxed rotation is the efficient one — that is the design.
   const F = DATA.meta.formula || {};
   const costStep = SM13.MANA_LEVEL_STEP, dmgStep = SM13.LEVEL_STEP, poolExp = SM13.MANA_POOL_EXPONENT;
   const atCap = (step: number) => 1 + (SX.level_cap - 1) * step / 100;
   const ratio = atCap(costStep) / atCap(dmgStep);
-  add('S16', costStep > dmgStep && poolExp > 0 && poolExp <= 1,
-    `a flat cost climbs ${costStep}% a skill level against the damage ramp's ${dmgStep}%, so a maxed rotation is ×${ratio.toFixed(2)} the mana-hungry of a fresh one` +
+  add('S16', costStep > 0 && poolExp > 0 && poolExp <= 1,
+    `a flat cost climbs ${costStep}% a skill level (the damage ramp climbs ${dmgStep}%), so a fresh rotation is ×${ratio.toFixed(2)} the mana-hungry of a maxed one while it presses ×${atCap(dmgStep).toFixed(2)} the damage — a level buys efficiency` +
     ` · the pool term is (pool / ${fmt(SM13.MANA_REF_POOL)})^${poolExp}` +
-    `${costStep <= dmgStep ? ' · NOT STEEPER THAN THE DAMAGE RAMP' : ''}${poolExp <= 0 || poolExp > 1 ? ' · EXPONENT OUTSIDE (0, 1]' : ''}`);
+    `${costStep <= 0 ? ' · A FLAT COST MUST RISE WITH SKILL LEVEL' : ''}${poolExp <= 0 || poolExp > 1 ? ' · EXPONENT OUTSIDE (0, 1]' : ''}`);
 
   //: the `(AoE ×n)` suffix is decoration the client never reads — the sim derives AoE from the
   // target count — so a suffix that disagrees with the data is a second source for the multiplier.

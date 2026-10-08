@@ -7,7 +7,7 @@ import type { GameState, TaskSlot, TownState } from './types';
  * same moment it moves them in `towns-stalls.md` (`economy.md` · checks.md T2-T7).
  *
  * Gold buys space, time, information and appearance only — never gear, Mods, potions or stones
- * (`AGENT.md` §5), and the purchase list is filtered to the kinds `town.json` `invariants` allows.
+ * (`AGENTS.md` §5), and the purchase list is filtered to the kinds `town.json` `invariants` allows.
  */
 
 const TS = TOWN.task_sizing;

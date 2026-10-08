@@ -13,18 +13,18 @@ const require = createRequire(import.meta.url);
 const cageModel = require('../../tools/lib/skillmodel.ts');
 
 const REF = { ...cageModel.referenceBases().glass, level: 20 };
-const RAMP = 1 + ((REF.level - 1) * sm.LEVEL_STEP) / 100;
+const RAMP = sm.damagePct(REF.level) / 100;   // read off the level table, never a second copy of the ramp
 
 describe('the client skill calculator is the cage skill calculator', () => {
   it('per-press and effective cooldown match tools/skills.ts --calc', () => {
     const cleave = sm.byId['attack.cleave'] as any;
-    // press = the row's own fraction of the reference build's finished hit, whose physical line the
-    // engine cage already publishes (checks.md B1) — so this pins the number, not just the shape
-    expect(sm.perPress(cleave, REF)).toBeCloseTo((cleave.final_pct / 100) * eng.DERIVED.phys * RAMP, 2);
+    // press = the row's own flat plus its effectiveness on the reference build's finished hit, whose
+    // physical line the engine cage already publishes (checks.md B1) — so this pins the number, not just the shape
+    expect(sm.perPress(cleave, REF)).toBeCloseTo((cleave.base_flat + (cleave.eff / 100) * eng.DERIVED.phys) * RAMP, 2);
     // a magic-basis row folds Element into the basis instead of the physical line 
     const bolt = sm.byId['attack.chaos_bolt'] as any;
     const magicBasis = REF.magic + REF.elem * (REF.align / 100);
-    expect(sm.perPress(bolt, REF)).toBeCloseTo((bolt.final_pct / 100) * magicBasis * RAMP, 2);
+    expect(sm.perPress(bolt, REF)).toBeCloseTo((bolt.base_flat + (bolt.eff / 100) * magicBasis) * RAMP, 2);
     expect(sm.critsOnBasis(cleave)).toBe(true);
     expect(sm.critsOnBasis(bolt)).toBe(false);
     expect(sm.effCd(cleave.cd, 50, 30)).toBeCloseTo(2.1, 6);

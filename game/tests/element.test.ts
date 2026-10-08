@@ -93,7 +93,7 @@ describe('a weapon carries the Element its own line stores', () => {
     s.zone = 4; // a lightning zone, so a fire weapon sits in the 0.60 counter pair
     s.gear = weaponWith('fire');
     // Tick until the state under test exists, never for a guessed window: a fixed window is a time
-    // premise (AGENT.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.
+    // premise (AGENTS.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.
     for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     expect(buildCharacter(s.player.level, s.gear, {}, 0).weaponElement).toBe('fire');
     expect(s.counters.kills).toBeGreaterThan(0);

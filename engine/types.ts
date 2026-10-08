@@ -103,7 +103,7 @@ export interface LootCfg {
   quality_stone_sources: StoneSource;
   repair_stone_sources: StoneSource;
   corrupt_stone_sources: StoneSource;
-  /** Line 1's hybrid chance and value scale. */
+  /** Line 1's value scale. */
   base_mod: BaseModCfg;
 }
 
@@ -193,6 +193,9 @@ export interface MobSize {
 /** Weapon × body class (HugePatch §12): one row per weapon NAME, three body-class columns. */
 export interface WeaponSizeMultCfg {
   note?: string;
+  /** What a magic weapon's bolt is worth, as a share of the finished hit (the attack ladder's floor). */
+  bolt_share_pct?: number;
+  bolt_note?: string;
   ladder: Record<string, { small: number; medium: number; large: number }>;
 }
 
@@ -285,7 +288,7 @@ export interface WeaponCfg {
   weapon_aspd: number;
 }
 
-/** One band's own level span — the levels a band reads, `item-rarity.md`. */
+/** One band's own level span — the levels a band reads, `item-level.md`. */
 export interface ItemLevelSpan {
   band: string;
   from: number;
@@ -293,8 +296,6 @@ export interface ItemLevelSpan {
 }
 
 export interface ItemLevelCfg {
-  /** How many lines arrive rolled at drop. One count for every piece — Rarity is gone. */
-  line_count: number;
   /** The band ladder: each band's level span, in order. */
   spans: ItemLevelSpan[];
   /** Levels Ascend adds to a piece (one span's length, gated against it). */
@@ -302,18 +303,17 @@ export interface ItemLevelCfg {
   crafted_max: number;
   mods_added_cap: number;
   add_stones_per_fill: number[];
-  stat_mod_slots: number;
-  legacy_slots: number;
-  /** Line 1 — the Base Mod slot, unremovable like the Legacy pair. */
+  /** The Normal lines a drop draws, both ends included. */
+  stat_mod_slots: { min: number; max: number };
+  sub_slots: number;
+  /** Line 1 — the Base Mod slot, unremovable like the Sub pair. */
   base_mod_slots: number;
   note?: string;
 }
 
-/** Line 1's own rules (`engine.json` `loot.base_mod` · item-base.md). */
+/** Line 1's own rules (`engine.json` `loot.base_mod`). */
 export interface BaseModCfg {
-  /** Chance the line gains the 2nd and 3rd defence Mod, in order (armour slots only). */
-  hybrid_chance: number[];
-  /** What each Mod on the line is multiplied by, keyed by how many share it. */
+  /** What each Mod on the line is multiplied by, keyed by how many share it (1 · 2 · 3). */
   value_scale: Record<string, number>;
   note?: string;
 }
@@ -436,6 +436,7 @@ export interface EngineData {
   f_rows_carried: any[];
   elements: ElementsCfg;
   opening: any;
+  weapon_size_mult?: WeaponSizeMultCfg;
   doc_prose_lines_max: number;
   doc_prose: any;
 }
@@ -447,7 +448,10 @@ export interface SkillRow {
   group?: string;
   cd?: number;
   basis?: string;
-  final_pct?: number;
+  /** The row's own flat damage at skill level 1 — its identity, the same for every caster. */
+  base_flat?: number;
+  /** The share of the added power line the press receives, in percent (PoE damage effectiveness). */
+  eff?: number;
   mana?: string;
   effects?: { stat: string; element?: string; op: string; value: number; subject?: string; condition?: string; cap?: number }[];
 }
@@ -455,7 +459,15 @@ export interface SkillRow {
 export interface SkillsData {
   meta: {
     formula?: {
-      level_step_pct?: number;
+      /** One row per skill level: the multiplier a press and an effect carry at that level. */
+      skill_levels?: {
+        note?: string;
+        rows: { level: number; damage_pct: number; effect_pct: number }[];
+        /** Effect stats that already spend skill level their own way and must not be scaled twice. */
+        special_level_effects?: string[];
+      };
+      /** The archetype calibration the press pairs were derived from. */
+      archetype_bands?: any;
       /** A flat mana cost climbs on this step per skill level. */
       mana_level_step_pct?: number;
       /** How much of the pool's growth a flat cost takes on. */

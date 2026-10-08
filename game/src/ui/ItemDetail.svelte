@@ -10,10 +10,11 @@
    * comes out of the rolled line and `mods.json`, so it cannot drift from the drop the player is
    * reading. A line prints as `<value> <plain words>` — no plus
    * sign, no Tier chip, no Mod-book name — and the two fixed kinds are told apart by colour alone:
-   * the Base Mod red, the Legacy pair yellow, the editable Mods plain.
+   * the Base Mod red, the Sub pair yellow, the editable Mods plain.
    *
    * The skeleton reads top to bottom (`item-base.md`): line 1 is the Base Mod the frame owns, lines
-   * 2-3 the Legacy pair, lines 4-7 the Mods the stones may edit. The decision itself is the Equip
+   * 2-3 the Sub pair, then the Normal lines the drop drew — the Mods the stones may edit. The
+   * decision itself is the Equip
    * button, never an automatic swap: gold comes from junk sold by hand, and a rejected piece
    * turns into a stone instead (`economy.md` · `loot.md` §4).
    */
@@ -64,8 +65,8 @@
   /** A line is one Mod plus the Mods its Base Mod carries in `extra` — the card joins them. */
   const slimLine = (line: any): string => [line, ...(line.extra || [])].map(slim).join(' · ');
 
-  /** Which fixed kind a line position is, for the colour class: Base, Legacy, or an editable Mod. */
-  const kindClass = (i: number) => (i === 0 ? 'base' : i < craft.UNTOUCHABLE ? 'legacy' : '');
+  /** Which fixed kind a line position is, for the colour class: Base, Sub, or an editable Mod. */
+  const kindClass = (i: number) => (i === 0 ? 'base' : i < craft.UNTOUCHABLE ? 'sub' : '');
 
   function compareText() {
     if (wornHere) return 'the piece being worn now';
@@ -114,7 +115,7 @@
   .detail {
     min-width: 15rem;
     max-width: 21rem;
-    background: #10131a;
+    background: var(--bg);
     border: 1px solid var(--line);
     border-left: 3px solid var(--dim);
     padding: .5rem .6rem;
@@ -128,11 +129,31 @@
   .rare-chip { color: var(--xp); border-color: var(--xp); }
   .dim { color: var(--dim); }
   .lines { list-style: none; margin: 0 0 .3rem; padding: 0; }
-  .lines li { padding: .05rem 0; font-variant-numeric: tabular-nums; }
-  .lines li.fixed { border-bottom: 1px solid #1b2029; }
-  /* the two fixed kinds read by colour alone: Base Mod red, Legacy pair yellow */
-  .line.base { color: var(--hp); }
-  .line.legacy { color: var(--xp); }
+  /* Every Mod line is a stamped bar: an ink-to-dark sweep with the words in the ink colour, so the
+     value reads first and the kind is carried by the bar's edge and tint, never by the words. */
+  .lines li {
+    --bar-a: color-mix(in srgb, var(--line) 62%, var(--panel));
+    --bar-b: color-mix(in srgb, var(--panel) 45%, var(--bg));
+    margin: .07rem 0;
+    padding: .1rem .4rem;
+    border-left: 2px solid var(--line);
+    border-radius: 2px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(90deg, var(--bar-a), var(--bar-b) 62%, transparent);
+  }
+  /* the two fixed kinds keep their colour in the bar, not in the words: Base Mod red, Sub pair yellow */
+  .line.base {
+    --bar-a: color-mix(in srgb, var(--hp) 26%, var(--panel));
+    --bar-b: color-mix(in srgb, var(--hp) 7%, var(--bg));
+    border-left-color: var(--hp);
+  }
+  .line.sub {
+    --bar-a: color-mix(in srgb, var(--xp) 24%, var(--panel));
+    --bar-b: color-mix(in srgb, var(--xp) 6%, var(--bg));
+    border-left-color: var(--xp);
+  }
+  .lines li.fixed { border-bottom: 1px solid var(--line); }
   .gear { margin: .3rem 0; display: flex; gap: .35rem; align-items: baseline; }
   .gear small { display: block; color: var(--dim); margin-left: auto; font-size: .68rem; }
   .kind { min-width: 2.9rem; color: var(--dim); font-size: .62rem; text-transform: uppercase; letter-spacing: .04em; }

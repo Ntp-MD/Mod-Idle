@@ -990,9 +990,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   const bar = (value: number, max: number) => `${Math.max(0, Math.min(100, (value / max) * 100))}%`;
 
-  // Display cap only: `final_pct` is stored at full precision and the engine reads it for cast
-  // damage, so the panel shows at most 2 decimals without forcing trailing zeros.
-  const pct2 = (x: number) => Math.round(x * 100) / 100;
+  // A press reads as its own flat damage plus its effectiveness on the caster's power line — the
+  // engine's own shape (`engine/skills.ts` perPress), so the panel never restates a formula.
+  const pressText = (k: any) => (k.base_flat == null ? '' : `${Math.round(k.base_flat)} + ${k.eff}% of your ${k.basis === 'magic' ? 'magic' : 'physical'} power`);
 
   const ownedActives = $derived(sm.all().filter((k: any) => ['attack', 'curse', 'heal'].includes(k.type) && gameState.skills.owned[k.id] != null));
   const ownedBuffs = $derived(sm.of('buff').filter((k: any) => gameState.skills.owned[k.id] != null));
@@ -1567,7 +1567,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             <td>
               {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span>{:else}—{/if}
             </td>
-            <td>{k && id ? (k.final_pct ? `${Math.round(k.final_pct)}% of your ${k.basis === 'magic' ? 'spell hit' : 'weapon hit'}` : k.type) : ''}</td>
+            <td>{k && id ? (k.base_flat != null ? pressText(k) : k.type) : ''}</td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
             <td>{k && id ? `${k.cd}s → ${skillCd(gameState.skills, id, c.cdr).toFixed(2)}s` : ''}</td>
             <td>{k && id ? manaNow(c, gameState.skills, id) : ''}</td>
@@ -1600,7 +1600,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr>
             <td><span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></td><td>{k.type}</td><td>{gameState.skills.owned[id]}</td>
             <td>{ladderOf(gameState.skills, id)}% cd</td>
-            <td>{k.effect || (k.final_pct != null ? `${pct2(k.final_pct)}% of its ${k.basis} hit` : k.reserve) || ''}</td>
+            <td>{k.effect || (k.base_flat != null ? `${Math.round(k.base_flat)} + ${k.eff}% of its ${k.basis} power` : k.reserve) || ''}</td>
           </tr>
         {:else}
           <tr><td colspan="5">No skill yet — the first one is a boss drop ({(E.skill_drop.boss * 100).toFixed(0)}% per boss kill).</td></tr>

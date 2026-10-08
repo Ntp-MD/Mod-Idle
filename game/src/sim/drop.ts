@@ -6,10 +6,12 @@ import type { Item, ModLine } from './types';
  * slot → Base (frame, weight) → the item's level (the value window) → the third of the window the roll
  * lands in → value.
  *
- * The skeleton is seven lines (item-base.md): line 1 is the Base Mod, lines 2-3 the Legacy pair, lines
- * 4-5 the Random lines every drop fills (`item_level.line_count`) and lines 6-7 the two the Add craft
- * owns. The Base tables come from `tools/data/bases.json`, which `node tools/bases.ts --checks` gates
- * against `item-base.md`, so the game rolls from the same frame list the loot simulation scores.
+ * The line skeleton (item-base.md): line 1 is the Base Mod, lines 2-3 the Sub pair, then the Normal
+ * lines the drop drew — `item_level.stat_mod_slots` publishes the range, so two pieces of one band and
+ * level can differ in width. The `mods_added_cap` Add stones each widen the piece by one more Normal
+ * line, up to `crafted_max` in all. The Base tables come from `tools/data/bases.json`, which
+ * `node tools/bases.ts --checks` gates, so the game rolls from the same frame list the loot simulation
+ * scores.
  */
 
 /**
@@ -60,7 +62,7 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
   const frame = chosen.frame || null;
   const weapon = chosen.weapon || null;
   // the band is what the drop source declares — the weight half and the label; the level is what the
-  // window's floor and ceiling are read at (`item-rarity.md`)
+  // window's floor and ceiling are read at (`item-level.md`)
   const q = eng.qualityIndexOf(band);
   const u = rng(); // one Tier draw per item, shared by line 1 and every Random line
 
@@ -68,7 +70,7 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
   const lines: ModLine[] = loot.baseModRoll(BASES, slot, frame, weapon, rng, ilvl, q, u);
   const taken = new Set<string>(lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
   const pool = loot.poolFor(BASES, slot, frame, weapon).filter((e: any) => !taken.has(e.id));
-  const target = loot.linesAtDrop();
+  const target = loot.linesAtDrop(rng);
 
   while (lines.length < target) {
     const blocked = loot.blockedBy(taken);
@@ -82,7 +84,7 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
     // stat; every other id leaves `stat` undefined (`mods.json` `rolls`)
     const stat = loot.statOf(id, rng);
     // an Elemental line always carries its Element: it is a stored value, never derived from a
-    // resistance number, because crafting must not change it (item-rarity.md · save.md)
+    // resistance number, because crafting must not change it (item-level.md · save.md)
     lines.push({
       id,
       value: loot.intBetween(rng, lo, hi),

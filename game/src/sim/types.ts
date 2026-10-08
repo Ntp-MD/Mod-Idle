@@ -12,7 +12,7 @@ export interface ModLine {
   slice?: number;
   /**
    * The Element an Elemental line rolls on. Stored as a value rather than folded into the number,
-   * because crafting must never change it (`item-rarity.md` · `save.md`).
+   * because crafting must never change it (`item-level.md` · `save.md`).
    */
   element?: string | null;
   /**
@@ -32,7 +32,7 @@ export interface ModLine {
 export interface Item {
   slot: string;
   base: string;
-  /** The level the piece dropped at. It is the one axis its values ride (`item-rarity.md`). */
+  /** The level the piece dropped at. It is the one axis its values ride (`item-level.md`). */
   ilvl: number;
   weaponAspd?: number;
   /** The band the drop source declared (`low` · `mid` · `high`) — the weight and label half. */
@@ -43,7 +43,7 @@ export interface Item {
   q?: number;
   /** Carried weight in the unit items show: the Base frame's weight at this quality. */
   weight?: number;
-  /** How many Add mod stones this piece has taken, 0-2 (net counting, item-rarity.md). */
+  /** How many Add mod stones this piece has taken, 0-2 (net counting, item-level.md). */
   mods_added?: number;
   /** The highest value each slot has ever held — the Reroll floor (save.md "Reroll baseline"). */
   baselines?: Record<number, number>;

@@ -1,10 +1,5 @@
 # Concept
 
-import glossary.md
-import world.md
-import skill-pool.md
-import item-rarity.md
-import crafting.md
 
 Uses the Melvor Idle frame, but deliberately diverges from it.
 
@@ -128,21 +123,16 @@ From the system in `formula.md` where all 7 stats use the same scale, builds are
 
 # Minute One
 
-**A client builds the starting character from one read of `engine.json` `opening`.** Nothing below
-is hand-typed — the table is generated, and five opening checks hold it against the mob curve.
+**A client builds the starting character from one read of `engine.json` `opening`.** Every value is the data's, and the client reads the same `opening` block the engine prices.
 
-<!-- BEGIN GENERATED:opening -->
-| | Given | Why |
-|---|---|---|
-| Settlement | **Eastgate** (zone 1, levels 1-10) | the zone the player opens in |
-| Level | **1** · 12 each stat · 540 Max HP · 3.0 regen/sec | level-1 baseline, the set is counted below |
-| Gear | **13 pieces**, one line each — main hand: one-handed sword (Physical power flat 11 + Attack speed % 4) · helmet: Circlet (Max Energy Shield % 3) · chest: Vestment (Max Energy Shield % 3) · pant: Legwraps (Max Energy Shield % 3) · boots: Silk Slippers (Max Energy Shield % 3) · gloves: Silk Wraps (Max Energy Shield % 3) · belt: Silk Sash (Max HP flat 40) · ring: Iron Band (Elemental alignment % 1) · ring: Iron Band (Elemental alignment % 1) · amulet: Jade Amulet (Elemental alignment % 1) · earring: Silver Hoop (Elemental alignment % 1) · cape: Traveler's Cloak (Evasion % 3) · off hand: Buckler (Block chance % 10) | the lightest frame of every slot, at the floor of its own window |
-| Skills | **none** | the first skill is the first boss drop |
-| Gold / stones | **0 / 0** | minute one buys nothing |
-| First rule | **the Guild's first Elite task, in the opening zone** — 3 Elites (from the Guild counter, Eastgate) | the task board already exists and pays stones only |
+The block is the whole of minute one — the settlement, the level, the thirteen frames at the floor of
+their own windows, no skill, and nothing bought — and `check.ts` **X60** gates it, so the set cannot
+come up a slot short or name a frame that is not in `bases.json`. The pieces are not restated here:
+the client derives each line the way a drop does, and the data owns the frames.
 
-**First fight, measured:** a level-1 character kills a zone-1 mob in **1.4 sec** as the curve prices it, and in **1.4 sec** as a character actually carrying the 265-weight set swings it (§11 takes 0% of aspd against a 1,024 capacity · with nothing worn it survives **378 sec** of the mob's return damage, and the set can only raise that). Numbers come from the same engine the cages use, so the opening cannot drift away from the mob curve it is priced against.
-<!-- END GENERATED:opening -->
+**The first fight.** The curve prices a level-1 zone-1 mob against a character holding this sword, and a
+character actually carrying the set swings it at the same speed, because the set is far below the
+weight capacity; worn or not, only survival time moves.
 
 - **Why the starting set is junk, on purpose.** The mob-health curve already prices a level-1 zone-1 mob
   against a character holding the sword this set gives, so a free top-tier weapon would pay out more damage
@@ -158,6 +148,6 @@ is hand-typed — the table is generated, and five opening checks hold it agains
 
 # Not Yet Defined
 
-- **Win condition — Decided** · Completion = **kill the zone 9 boss (level 90, HP 160,635) within a single spawn without being Pushed** · A truly measurable number from combat.md §6/§7 and `node tools/survival.ts` (**SV6**): without heal all four builds are Pushed, and one heal round (pool ×2.09) clears it for the two themes that spend their items on surviving — `mix` and `tank` — so it is not a gate requiring new items, but a gate requiring *heal casts*, which is what separates active play from AFK as G5 promised · The glass and Evasion themes are the two that cannot finish without allocating slots to health · **After completion = continued improvement loop, no prestige**: levels 91-100 are the item-quality push in zone 10 (world.md) · Remaining goals are counted, never timed — Ascend a full 12 pieces = 96 Add + 96 Reroll tier stones (E7) · Refine a full set = 24 casts (E6) · Mastery 11 types to L20 = 550,000 Mastery XP · a skill to its full ladder = 32 duplicates (E11). How long any of it takes is the player's own pace (`AGENT.md`).
+- **Win condition — Decided** · Completion = **kill the zone 9 boss (level 90, HP 160,635) within a single spawn without being Pushed** · A truly measurable number from combat.md §6/§7 and `node tools/survival.ts` (**SV6**): without heal all four builds are Pushed, and one heal round (pool ×2.09) clears it for the two themes that spend their items on surviving — `mix` and `tank` — so it is not a gate requiring new items, but a gate requiring *heal casts*, which is what separates active play from AFK as G5 promised · The glass and Evasion themes are the two that cannot finish without allocating slots to health · **After completion = continued improvement loop, no prestige**: levels 91-100 are the item-quality push in zone 10 (world.md) · Remaining goals are counted, never timed — Ascend a full 12 pieces = 96 Add + 96 Reroll tier stones (E7) · Refine a full set = 24 casts (E6) · Mastery 11 types to L20 = 550,000 Mastery XP · a skill to its full ladder = 32 duplicates (E11). How long any of it takes is the player's own pace (`AGENTS.md`).
 - **Short-form content** — 9 bosses (1 per zone) per new zone numbers · **Achievements are cut** · Elite set at 1 in 5 kills (`engine.json` `elite_spawn_chance`).
 

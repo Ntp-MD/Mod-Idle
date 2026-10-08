@@ -34,7 +34,7 @@ describe('offline time is AFK, not a second play session', () => {
   it('a boss does spawn on the same clock while online', () => {
     const s = newGame(42);
     setLevel(s, 60);
-    // tick to the state the test names — a boss on the log — not for a guessed window (AGENT.md)
+    // tick to the state the test names — a boss on the log — not for a guessed window (AGENTS.md)
     for (let i = 0; i < 20000 && !s.log.some((l) => /Boss spawn/.test(l.text)); i++) tick(s, {});
     expect(s.log.some((l) => /Boss spawn/.test(l.text))).toBe(true);
   });
@@ -46,7 +46,7 @@ describe('offline time is AFK, not a second play session', () => {
     // Tick until the away window has paid a drop, not for a guessed number of seconds: an ungeared
     // level-80 in zone 9 lands about twenty kills in four thousand ticks, so a fixed window made this
     // a coin flip on the 8% roll — and a fixed window is a time premise, which no test here may carry
-    // (owner ruling · `AGENT.md`). The cap below is a hang guard, never the measurement.
+    // (owner ruling · `AGENTS.md`). The cap below is a hang guard, never the measurement.
     for (let i = 0; i < 200000 && s.bag.length === 0; i++) tick(s, {}, { online: false });
     expect(s.bag.length).toBeGreaterThan(0);
     // the away window pins the piece to the floor level of its band exactly. Listing the band's own
@@ -61,7 +61,7 @@ describe('offline time is AFK, not a second play session', () => {
     setLevel(s, 80);
     s.zone = 9;
     // tick until a piece above the floor level lands, not for a guessed window: a fixed window makes
-    // this a coin flip on the 8% drop (a time premise · AGENT.md).
+    // this a coin flip on the 8% drop (a time premise · AGENTS.md).
     const floorLevel = eng.floorLevelOf('high');
     for (let i = 0; i < 200000 && !s.bag.some((item) => item.ilvl > floorLevel); i++) tick(s, {}, { online: true });
     expect(s.bag.some((item) => item.ilvl > floorLevel)).toBe(true);

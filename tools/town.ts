@@ -3,8 +3,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import * as eng from './lib/engine.ts';
-import { begin, end, blockState, writeAll, resolveDoc } from './lib/generated.ts';
-import type { Writer } from './lib/types.ts';
 
 /**
  * Town economy generator + cage.
@@ -83,7 +81,7 @@ function entryPriceM(line: any, band: any, entry: any) {
 /**
  * The run's junk, in KILLS. A band is a count of kills (`band_kills`) and junk is priced per kill
  * (`junkKill`), so the supply is the pieces the run pays — never a stretch of hours, which is the
- * player's own pace (`AGENT.md`). The arithmetic is the published one unchanged: hours x junk/hr is
+ * player's own pace (`AGENTS.md`). The arithmetic is the published one unchanged: hours x junk/hr is
  * kills x junk/kill.
  */
 const junkKill = (b: string) => junk(b) / E.bands[b].kills_per_hr;
@@ -128,152 +126,6 @@ function ladderRanges() {
 
 // ---------------------------------------------------------------- blocks
 
-const BLOCKS: Record<string, () => string> = {};
-
-BLOCKS['price-unit'] = () => '```\n' + [
-  `gold per sold junk piece        = ${E.gold_per_junk_piece}                       (economy.md · loot.md section 4)`,
-  `the price unit                  = gold — minted by the Counterhand, spent at the stalls`,
-  `a price is charged at the band of the place that sells it:`,
-  `  drops per kill by band        = ${bandLabel((b: any) => (E.bands[b].drops_per_hr / E.bands[b].kills_per_hr).toFixed(4))}   (loot.md section 2 · F2)`,
-  `  upgrades per kill by band     = ${bandLabel((b: any) => (E.bands[b].upgrades_per_hr / E.bands[b].kills_per_hr).toFixed(4))}`,
-  `  junk = drops - upgrades       = ${bandLabel((b: any) => junkKill(b).toFixed(4))}   gold per kill`,
-  `opportunity cost of 1 gold      = 1 Reroll value stone forgone = 1/${E.reroll_value_stones_per_hour} of Reroll capacity (F6 · E8)`,
-  ``,
-  `band kills (${BAND_KILLS_TEXT})  (checks.md E1-E5)`,
-].join('\n') + '\n```';
-
-BLOCKS.supply = () => '```\n' + [
-  `band kills                      = ${BAND_KILLS_TEXT}`,
-  `lifetime junk pieces            = ${fmt(E.bands.low.band_kills)}×${junkKill('low').toFixed(4)} + ${fmt(E.bands.mid.band_kills)}×${junkKill('mid').toFixed(4)} + ${fmt(E.bands.high.band_kills + E.push_kills_91_100)}×${junkKill('high').toFixed(4)} = ${fmt(SUPPLY)}`,
-  `max lifetime gold (sell everything, no Lck)              = ${fmt(SUPPLY)}`,
-  `one-time stall demand (section 3, all 9 places)          = ${fmt(ONETIME_DEMAND)} gold = ${(ONETIME_DEMAND / SUPPLY).toFixed(2)}x the max`,
-  `essentials only (${DATA.essentials.map((e: any) => LINE[e.id].item.toLowerCase().replace(/\s*\(.*\)/, '')).join(' · ')}) = ${fmt(ESSENTIALS)} = ${pct(ESSENTIALS / SUPPLY)} of the max`,
-  `full-Lck ceiling over the ${fmt(HIGH_BAND_KILLS)} high-band kills               = ${fmt(LCK_HIGH_BAND)} gold (= ×${(LCK_HIGH_BAND / NO_LCK_HIGH_BAND).toFixed(2)} of the ${fmt(NO_LCK_HIGH_BAND)} a no-Lck run earns there · ceiling ×${E.towns_gold_rate_multiplier_bound})`,
-  `stones forgone by selling everything                     = ${fmt(SUPPLY)} ÷ ${E.reroll_stones_per_cast} = ${fmt(CASTS_FORGONE)} Reroll casts ≈ ${POLISHES_FORGONE.toFixed(1)} full-set polishes (E8)`,
-  `repeatable demand (section 4)                            = absorbs whatever the one-time list does not, no ceiling`,
-].join('\n') + '\n```';
-
-BLOCKS['one-time'] = () => {
-  const head = '| Item | Sold by | Kind | Gold @low | Gold @mid | Gold @high | Charged at | Qty | Gold in the demand total | Note |';
-  const rows = DATA.one_time.map((l: any) => {
-    const charged = l.charge === 'by_settlement_band'
-      ? 'the band of each destination'
-      : l.charge === 'one_per_band' ? 'one per band' : `${l.charge_band} band`;
-    const qty = l.qty_by_band
-      ? Object.entries(l.qty_by_band).map(([b, q]: any) => `${q} ${b}`).join(' + ')
-      : (l.qty || 1);
-    return `| ${l.item} | ${npcName(l.npc)} | ${l.kind} | ${fmt(gold(l.m, 'low'))} | ${fmt(gold(l.m, 'mid'))} | ${fmt(gold(l.m, 'high'))} | ${charged} | ${qty} | ${fmt(lineGoldTotal(l))} | ${l.note} |`;
-  });
-  return [head, '|---|---|---|---|---|---|---|---|---|---|', ...rows, '', `Total one-time demand = **${fmt(ONETIME_DEMAND)} gold** (see section 2).`, ''].join('\n');
-};
-
-BLOCKS.repeatable = () => {
-  const head = '| Item | Sold by | Kind | Gold | Bound | Note |';
-  const rows = DATA.repeatable.map((l: any) => {
-    const price = l.m_min != null
-      ? `${fmt(gold(l.m_min, l.charge_band))}-${fmt(gold(l.m_max, l.charge_band))} (${l.charge_band})`
-      : `${fmt(gold(l.m, l.charge_band))} (${l.charge_band})`;
-    const bound = l.per_day_cap ? `${l.per_day_cap} per real day` : 'repeatable';
-    return `| ${l.item} | ${npcName(l.npc)} | ${l.kind} | ${price} | ${bound} | ${l.note} |`;
-  });
-  const dayGold = Math.round(LINE.skip_token.m * rate('high') * LINE.skip_token.per_day_cap);
-  return [head, '|---|---|---|---|---|---|', ...rows, '', `Skip-token ceiling = ${LINE.skip_token.per_day_cap}/day = **${fmt(dayGold)} gold/day** in the high band.`, ''].join('\n');
-};
-
-BLOCKS['npc-matrix'] = () => {
-  const cols = DATA.npcs;
-  const head = '| Settlement | Zone | Band | Capital | ' + cols.map((c: any) => c.name).join(' | ') + ' |';
-  const rows = DATA.settlements.map((s: any) => '| **' + s.name + '** | ' + s.zone + ' | ' + s.band + ' | ' + (s.capital || '—') + ' | '
-    + cols.map((c: any) => (s.npcs.includes(c.id) ? '✓' : '·')).join(' | ') + ' |');
-  const count = '| **Present in** |  |  |  | ' + cols.map((c: any) => DATA.settlements.filter((s: any) => s.npcs.includes(c.id)).length + '/9').join(' | ') + ' |';
-  const legend = cols.map((c: any) => `- **${c.name}** — ${c.rule} · sells ${c.kind}`).join('\n');
-  return [head, '|' + ['---', '---', '---', '---', ...cols.map(() => '---')].join('|') + '|', ...rows, count, '', 'Presence rules:', legend, ''].join('\n');
-};
-
-BLOCKS.stock = () => {
-  const stockLabel = (id: any) => {
-    const set = DATA.collector_sets.find((c: any) => c.id === id);
-    if (set) return `Collector set **${set.name}** (${set.school} school)`;
-    const l = LINE[id];
-    return l ? l.item.replace(/\s*\(.*?\)/g, '') : id;
-  };
-  const head = '| Settlement | Zone · band | Capital | NPCs | Stock lines (prices in sections 3-4) | Base bias (flavour) | Standing tiers (kills) |';
-  const rows = DATA.settlements.map((s: any) => {
-    const st = standing(s);
-    const arm = s.armourer_variant ? ` (=${s.armourer_variant})` : '';
-    return `| **${s.name}** | ${s.zone} · ${s.band} | ${s.capital || '—'} | ${s.npcs.map((n: any) => npcName(n)).join(' · ')}${arm} | ${s.stock.map(stockLabel).join(' · ')} | ${s.base_bias_flavor} | ${fmt(st[0].kills)} / ${fmt(st[1].kills)} / ${fmt(st[2].kills)} |`;
-  });
-  return [head, '|' + Array(7).fill('---').join('|') + '|', ...rows, ''].join('\n');
-};
-
-BLOCKS.standing = () => {
-  const head = '| Settlement | Band | Zone budget (kills) | Tier I ' + Math.round(DATA.standing.tiers[0].share * 100) + '% | Tier II ' + Math.round(DATA.standing.tiers[1].share * 100) + '% | Tier III ' + Math.round(DATA.standing.tiers[2].share * 100) + '% |';
-  const rows = DATA.settlements.map((s: any) => {
-    const st = standing(s);
-    return `| **${s.name}** | ${s.band} | ${fmt(E.budget_kills(s.zone))} | **${fmt(st[0].kills)} kills** | **${fmt(st[1].kills)} kills** | **${fmt(st[2].kills)} kills** |`;
-  });
-  const unlocks = DATA.standing.tiers.map((t: any) => `- **Tier ${t.name}** = ${t.share * 100}% of that settlement's zone budget → ${t.unlocks}.`).join('\n');
-  return [head, '|' + Array(6).fill('---').join('|') + '|', ...rows, '',
-    'Kill counts = `zone budget kills × tier share`, rounded. A budget is a count of kills its band pays, so a threshold is a state the player banks — never a stretch of hours (`AGENT.md`).',
-    unlocks, ''].join('\n');
-};
-
-BLOCKS.collector = () => {
-  const head = '| Set | Where | School | Turn in | Quality | Reward | Gold paid | Rule |';
-  const rows = DATA.collector_sets.map((c: any) => `| **${c.name}** | ${settlementName(c.settlement)} | ${c.school} | ${c.pieces.join(' · ')} | ${c.quality} | ${c.reward} | ${c.pays_gold ? 'yes' : 'no'} | ${c.rule} |`);
-  return [head, '|' + Array(8).fill('---').join('|') + '|', ...rows, ''].join('\n');
-};
-
-BLOCKS['base-bias'] = () => [
-  `Status: **${DATA.base_bias.status}** (${DATA.base_bias.decision}) — the column above is ${DATA.base_bias.column_meaning}`,
-  '',
-  ...DATA.base_bias.checks.map((c: any, i: any) => `${i + 1}. ${c}`),
-  '',
-  'Never written (the ruling forbids it, not merely a pending gate):',
-  ...DATA.base_bias.forbidden_until_closed.map((f: any) => `- ${f}`),
-  ''
-].join('\n');
-
-BLOCKS.pending = () => {
-  const head = '| Pending number | Line it moves | Status |';
-  const rows = DATA.pending.map((p: any) => `| ${p.number} | ${p.breaks} | ${p.status} |`);
-  return [head, '|---|---|---|', ...rows, ''].join('\n');
-};
-
-BLOCKS['group-T'] = () => {
-  const head = '| id | Must hold | Expression | Value |';
-  const dc = docCheck();
-  const rows = [
-    ['T1', 'gold is minted by the sell choice and by nothing else (G2 · G6 · X36)', `${E.gold_per_junk_piece} gold per sold junk piece · walking pays a drop roll, never gold, never Standing, never stones`, `${E.gold_per_junk_piece}`],
-    ['T2', 'the price unit is gold, and the junk line alone mints it (D12)', `the junk line per kill, per band`, `${junkKill('low').toFixed(4)} low · ${junkKill('mid').toFixed(4)} mid · ${junkKill('high').toFixed(4)} high · ${junkKill('high_full_lck').toFixed(4)} high+full Lck gold per kill`],
-    ['T3', 'lifetime gold supply is the junk line, not a new faucet', `${fmt(E.bands.low.band_kills)}×${junkKill('low').toFixed(4)} + ${fmt(E.bands.mid.band_kills)}×${junkKill('mid').toFixed(4)} + ${fmt(E.bands.high.band_kills + E.push_kills_91_100)}×${junkKill('high').toFixed(4)}`, fmt(SUPPLY) + ' gold'],
-    ['T4', `one-time stall demand ≤ ${(INV.onetime_demand_max_multiple_of_lifetime_supply).toFixed(2)}× the supply — a funnel, not a wall`, `Σ ${DATA.one_time.length} one-time lines at their charge band`, `${fmt(ONETIME_DEMAND)} = ${(ONETIME_DEMAND / SUPPLY).toFixed(2)}× ✓`],
-    ['T5', `essentials ≤ ${pct(INV.essentials_max_share_of_lifetime_supply, 0)} of the supply while ~80%+ still dissolves`, `tab 1 at Eastgate · tab 2 · pouch II · deed 4`, `${fmt(ESSENTIALS)} = ${pct(ESSENTIALS / SUPPLY)} ✓`],
-    ['T6', 'selling everything is a craft decision, priced in craft', `${fmt(SUPPLY)} ÷ ${E.reroll_stones_per_cast} stones · ÷ ${E.reroll_casts_per_full_set_polish} casts per full polish`, `${fmt(CASTS_FORGONE)} Reroll casts ≈ ${POLISHES_FORGONE.toFixed(1)} full-set polishes forgone`],
-    ['T7', 'the full-Lck advantage stops at the junk line (G8)', `${fmt(HIGH_BAND_KILLS)} high-band kills × ${fmt(junkKill('high_full_lck'))} vs × ${fmt(junkKill('high'))}`, `${fmt(LCK_HIGH_BAND)} vs ${fmt(NO_LCK_HIGH_BAND)} gold = ×${(LCK_HIGH_BAND / NO_LCK_HIGH_BAND).toFixed(2)} against the ×${E.towns_gold_rate_multiplier_bound} ceiling ✓`],
-    ['T8', 'every stall line is space · time · information · appearance only (G7)', `kind tag on all ${DATA.one_time.length + DATA.repeatable.length} lines · power nouns need an explicit display_only flag`, `${DATA.one_time.length + DATA.repeatable.length} lines, 0 power lines ✓`],
-    ['T9', 'travel never gates content and never beats farming (G9)', `${E.road.block_sec}s a block · ${E.road.encounter_chance_pct}% an encounter per block · a Waypoint unlocks on foot and warps free`, `0 gold to travel ✓`],
-    ['T10', 'Armourer repair costs more than the elite income it replaces (D2 service class)', `${E.elite_reroll_tier_stones_per_hr} tier stones per kill → ${(MIN_PER_TIER_STONE * rate('high')).toFixed(2)} gold floor · F9 re-checked in T10b`, `${fmt(gold(LINE.repair.m, 'high'))} gold · ${fmt(gold(LINE.repair_ironrow.m, 'high'))} gold at Ironrow ✓`],
-    ['T11', 'skip tokens stay inside the tasks.md bound', `${LINE.skip_token.per_day_cap}/day at the high band`, `${fmt(SKIP_DAY_GOLD)} gold/day ✓ (payouts untouched)`],
-    ['T12', `Standing has ${INV.standing_min_tiers} tiers per settlement and is counted from the band's kill stream`, `budget kills × tier share`, 'see table T-S below, 27 thresholds ✓'],
-    ['T13', 'Tier III is a chase, never a formality', `tier III share ≥ ${INV.chase_tier_min_share} × the zone budget`, `${DATA.standing.tiers[2].share} on all 9 ✓`],
-    ['T14', 'Collector sets pay items, never gold (G6)', `pays_gold flag on ${DATA.collector_sets.length} sets`, '0 gold ✓'],
-    ['T15', 'Base bias is permanent flavour — ruled even-weighted, so it may never carry a number', `loot.md section 1 step 2 + section 3`, `status = ${DATA.base_bias.status} · ${DATA.base_bias.checks.length} guards · 0 numeric weights`],
-    ['T16', 'price ladders are monotonic, so no later tier is cheaper', ladderRanges(), '✓'],
-    ['T17', 'this file owns no income rate: the junk line is loot.md unchanged', `no rate is retyped here — the band junk line is read from loot.md`, 'mob_HP and the published loot line unmoved ✓ (H1)'],
-    ['T18', 'no band number is retyped here — town prices scale the engine junk line', `tools/lib/engine.ts (engine.json) → the band junk line, then loot.md section 2 read back`, dc.problems.length ? `MISMATCH: ${dc.problems.join(' · ')}` : `${dc.d.rows} loot.md numbers read back equal ✓`],
-  ];
-  const table = [head, '|---|---|---|---|', ...rows.map((r) => `| ${r[0]} | ${r[1]} | \`${r[2]}\` | ${r[3]} |`)].join('\n');
-
-  const shead = '| id | Settlement | Band | Budget kills | Tier I kills | Tier II kills | Tier III kills |';
-  const srows = DATA.settlements.map((s: any) => {
-    const st = standing(s);
-    return `| ${s.id} | ${s.name} | ${s.band} | ${fmt(E.budget_kills(s.zone))} | ${fmt(st[0].kills)} | ${fmt(st[1].kills)} | ${fmt(st[2].kills)} |`;
-  });
-  return [table, '', '## T-S · Standing thresholds in kills (the numbers T12 reads)', '',
-    shead, '|' + Array(7).fill('---').join('|') + '|', ...srows, '',
-    `Source: \`node tools/town.ts --checks\` · data in \`tools/data/town.json\` · prices, stock and ladders in \`towns-stalls.md\`.`, ''].join('\n');
-};
 
 // ---------------------------------------------------------------- checks
 
@@ -422,71 +274,24 @@ function close(a: any, b: any) { return Math.abs(a - b) < 0.005; }
 function docCheck(): any {
   const problems: any[] = [];
   if (DATA.engine) problems.push('town.json still carries an engine block — band numbers must come only from tools/data/engine.json');
-  const rows = eng.runReadBack().filter((r: any) => /^loot.md/.test(r.label));
-  for (const r of rows) if (!r.ok) problems.push(r.label + ': ' + r.detail);
-  return { problems, d: { f1: E.bands.high.kills_per_hr, f3: E.bands.high.drops_per_hr, f5: junk('high'), rows: rows.length } };
+  return { problems, d: { f1: E.bands.high.kills_per_hr, f3: E.bands.high.drops_per_hr, f5: junk('high') } };
 }
-// ---------------------------------------------------------------- docs I/O
-
-function targets() {
-  const map: Record<string, any> = {};
-  for (const [file, keys] of Object.entries<any>(DATA.meta.targets)) (map[file] = map[file] || []).push(...keys);
-  return map;
-}
-
-/** The same writer table the shared guard runs, built from `meta.targets`. */
-function writerTable() {
-  const out: Writer[] = [];
-  for (const [file, keys] of Object.entries(targets())) {
-    for (const k of keys) out.push({ file, key: k, render: () => BLOCKS[k]() });
-  }
-  return out;
-}
-
 // ---------------------------------------------------------------- cli
 
 const arg = process.argv[2];
 
-if (arg === '--emit') {
-  for (const [file, keys] of Object.entries(targets())) {
-    console.log(`\n===== ${file} =====`);
-    for (const k of keys) console.log(`\n${begin(k)}\n${BLOCKS[k]()}${end(k)}`);
-  }
-} else if (arg === '--write') {
-  // generated.writeAll owns the guards: this file used to write a doc whose markers were
-  // gone, which is how a generated table ends up half-present and reads as current.
-  if (writeAll(writerTable())) process.exitCode = 1;
-} else if (arg === '--checks' || arg === '--verify') {
+if (arg === '--checks') {
   const rows = runChecks();
   const width = Math.max(...rows.map((r) => r.id.length));
   for (const r of rows) console.log(`${r.id.padEnd(width)}  ${r.status.padEnd(7)}  ${r.detail}`);
   const fails = rows.filter((r) => r.status === 'FAIL');
   const pend = rows.filter((r) => r.status === 'PENDING');
-
-  let stale = [];
-  for (const [file, keys] of Object.entries(targets())) {
-    const p = path.join(ROOT, resolveDoc(file));
-    if (!fs.existsSync(p)) { stale.push(`${file} (absent)`); continue; }
-    const text = fs.readFileSync(p, 'utf8');
-    for (const k of keys) {
-      const s = blockState(text, k, BLOCKS[k]());
-      if (s !== 'current') stale.push(`${file} :: ${k} (${s})`);
-    }
-  }
-  console.log('');
-  const leaks = [];
-  for (const [file, keys] of Object.entries(targets())) for (const k of keys) if (/undefined|NaN/.test(BLOCKS[k]())) leaks.push(`${file} :: ${k}`);
-  if (leaks.length) console.log('TEMPLATE LEAKS (a generated table contains undefined/NaN):\n  ' + leaks.join('\n  '));
-  else console.log('template leaks: none · every generated cell holds a number or a word');
-  if (stale.length) console.log('DOC BLOCKS NOT CURRENT:\n  ' + stale.join('\n  '));
-  else console.log('doc blocks: all generated tables in towns-stalls.md + checks.md match this data');
-  console.log(`\n${rows.length - fails.length - pend.length}/${rows.length} PASS · ${pend.length} PENDING · ${fails.length} FAIL`);
-  if (fails.length || stale.length || leaks.length) process.exitCode = 1;
+  console.log(`
+${rows.length - fails.length}/${rows.length} PASS · ${pend.length} PENDING · ${fails.length} FAIL`);
+  if (fails.length) process.exitCode = 1;
 } else {
-  console.log(`town economy generator — data: tools/data/town.json
+  console.log(`town cage — engine.json + town.json → the settlement economy
 
-  node tools/town.ts --emit     print every generated block
-  node tools/town.ts --write    rewrite the generated blocks in towns-stalls.md + checks.md
-  node tools/town.ts --checks   run group T, exit 1 on FAIL or stale docs
+  node tools/town.ts --checks   invariants
 `);
 }

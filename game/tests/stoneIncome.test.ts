@@ -22,7 +22,7 @@ const piece = (over: any = {}) => ({
 
 /**
  * One hunt, stopped by the STATE the calling test waits on rather than by a window of hours: a fixed
- * four-hour run is a time premise (`AGENT.md`) and it was most of this file's 21 minutes of suite.
+ * four-hour run is a time premise (`AGENTS.md`) and it was most of this file's 21 minutes of suite.
  * `until` names the state; the `hours` argument only scales the hang guard.
  */
 function hunt(hours: number, level: number, zone: number, online: boolean, seed: number, until: (s: any) => boolean = (st) => st.counters.kills > 0) {
@@ -30,7 +30,7 @@ function hunt(hours: number, level: number, zone: number, online: boolean, seed:
   setLevel(s, level);
   s.zone = zone;
   // Tick until the run has killed the thing each assertion waits on, never for a fixed number of
-  // hours: a four-hour window is a time premise (AGENT.md) and it is the reason this file cost 21
+  // hours: a four-hour window is a time premise (AGENTS.md) and it is the reason this file cost 21
   // minutes of the suite. The bound is a hang guard. `hours` is only used to scale that bound.
   const cap = 3600 * hours * 6;
   for (let i = 0; i < cap && !until(s); i++) tick(s, {}, { online });

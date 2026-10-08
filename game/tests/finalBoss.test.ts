@@ -19,7 +19,7 @@ import { ceilingGear } from './sheetFixture';
  * and the character's gear all come from the curve the fight itself reads. The character is dressed
  * to the **zone ceiling** (`sheetFixture.ts`), which is a *state*: no hunt and no hour count stands
  * between the premise and the fight, because play-length is not a design constraint (owner ruling ·
- * `AGENT.md`). The clock cap below is a hang guard, never a balance claim.
+ * `AGENTS.md`). The clock cap below is a hang guard, never a balance claim.
  */
 const HOUR = 3600;
 const FIGHT_CAP_SEC = 2 * HOUR;

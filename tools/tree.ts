@@ -15,11 +15,9 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import * as G from './lib/generated.ts';
 import * as eng from './lib/engine.ts';
 import { createTree } from '../engine/tree.ts';
 import { readJson } from './lib/json.ts';
-import type { Writer } from './lib/types.ts';
 
 const TREE = readJson(path.join(import.meta.dirname, 'data', 'tree.json'));
 const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
@@ -106,35 +104,18 @@ function branchBlock(branch: string) {
   ].join('\n');
 }
 
-const WRITERS: Writer[] = [
-  { file: 'skill-tree.md', key: 'tree-summary', render: summaryBlock },
-  { file: 'skill-tree-impact.md', key: 'tree-impact', render: () => branchBlock('impact') },
-  { file: 'skill-tree-stream.md', key: 'tree-stream', render: () => branchBlock('stream') },
-  { file: 'skill-tree-control.md', key: 'tree-control', render: () => branchBlock('control') },
-];
-
 // ---------------------------------------------------------------- cli
 
 const arg = process.argv[2];
-if (arg === '--emit') {
-  for (const w of WRITERS) console.log(`\n===== ${w.file} :: ${w.key} =====\n${w.render()}`);
-} else if (arg === '--write') {
-  const missing = G.writeAll(WRITERS);
-  if (missing) process.exitCode = 1;
-} else if (arg === '--checks') {
+if (arg === '--checks') {
   const rows = gates();
   for (const r of rows) console.log(`${r.id.padEnd(3)}  ${(r.ok ? 'PASS' : 'FAIL').padEnd(5)}  ${r.detail}`);
-  const states = G.checkAll(WRITERS);
-  console.log('');
-  for (const s of states) console.log(`${s.state === 'current' ? 'PASS ' : 'FAIL '}  block ${s.key} · ${s.file} (${s.state})`);
-  const fails = rows.filter((r) => !r.ok).length + states.filter((s) => s.state !== 'current').length;
-  console.log(`\n${rows.filter((r) => r.ok).length}/${rows.length} gate PASS · ${states.filter((s) => s.state !== 'current').length} block(s) not current · ${fails} FAIL`);
+  const fails = rows.filter((r) => !r.ok).length;
+  console.log(`\n${rows.filter((r) => r.ok).length}/${rows.length} gate PASS · ${fails} FAIL`);
   if (fails) process.exitCode = 1;
 } else {
   console.log(`tree cage — data: tools/data/tree.json (the spec) + mods.json (the line maxima)
 
-  node tools/tree.ts --emit     print every generated block
-  node tools/tree.ts --write    rewrite them in skill-tree*.md
   node tools/tree.ts --checks   shape, values, pathing and the point identity
 `);
 }

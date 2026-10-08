@@ -115,7 +115,7 @@ describe('the Guild board', () => {
     const s = newGame();
     s.town.tasks[1] = { kind: 'elite', zone: 1, n: 3, progress: 0, stone: 'tier', count: 1, claimed: false, offeredAt: 0 };
     // tick until the Elite the slot waits for actually spawns, never for a guessed window: Elites are
-    // one kill in five, so a fixed window is a coin flip on the roll (AGENT.md). The bound is a hang guard.
+    // one kill in five, so a fixed window is a coin flip on the roll (AGENTS.md). The bound is a hang guard.
     for (let i = 0; i < 200000 && s.town.tasks[1].progress === 0; i++) tick(s, {});
     expect(s.town.tasks[1].progress).toBeGreaterThan(0);
     s.clockSec = s.town.refillAt[0] + 1;
@@ -200,7 +200,7 @@ describe('the bag filter is the same rule the loot cage runs', () => {
   it('a full bag stops pickup rather than deleting gear (engine.json inventory.overflow)', () => {
     const s = newGame(9);
     s.bag = new Array(E.inventory.adventure_slots).fill({ slot: 'chest', base: 'chest', rarity: 'Common', quality: 'low', tier: 'T1', lines: [], q: 0 });
-    // tick until the paused-pickup run has rolled a drop, never for a guessed window (AGENT.md)
+    // tick until the paused-pickup run has rolled a drop, never for a guessed window (AGENTS.md)
     for (let i = 0; i < 40000 && s.counters.drops === 0; i++) tick(s, {});
     expect(s.counters.drops).toBeGreaterThan(0);
     expect(s.bag.length).toBe(E.inventory.adventure_slots);

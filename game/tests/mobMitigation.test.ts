@@ -152,9 +152,12 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     const resisted = mob({ res: 60 });
     const orbDamage = castPress('attack.nether_orb', c, resisted);
     const boltDamage = castPress('attack.chaos_bolt', c, mob({ id: 'm2', res: 60 }));
-    // the two rows press the same 103.191% of the same basis; only the orb ignores the 60
-    const scaled = boltDamage * (valueOf('attack.nether_orb', 'resistance_pierce_pct') > 0
-      ? sm.byId['attack.nether_orb'].final_pct / sm.byId['attack.chaos_bolt'].final_pct : 1);
+    // the two rows are different archetypes, so scale the bolt by their own press ratio on this
+    // caster; walking through the resistance is then the whole of what is left to assert
+    const orb = sm.byId['attack.nether_orb'] as any;
+    const boltRow = sm.byId['attack.chaos_bolt'] as any;
+    const basis = { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment };
+    const scaled = boltDamage * (sm.perPress(orb, basis) / sm.perPress(boltRow, basis));
     expect(orbDamage).toBeGreaterThan(scaled);
   });
 

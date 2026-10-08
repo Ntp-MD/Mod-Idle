@@ -54,7 +54,7 @@ describe('a pool spends only what stands in it', () => {
     let minMana = Infinity;
     let bad: string | null = null;
     // Tick until a pool has actually been spent, never for a fixed window: the gate has to see a
-    // spent pool to prove anything, and "3,000 sec" was a time premise (AGENT.md). The bound is a
+    // spent pool to prove anything, and "3,000 sec" was a time premise (AGENTS.md). The bound is a
     // hang guard.
     for (let i = 0; i < 60000 && !bad && Math.max(esSpent, manaSpent) === 0; i++) {
       tick(s, {}, { online: true });

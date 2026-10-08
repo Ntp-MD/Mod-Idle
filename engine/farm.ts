@@ -2,7 +2,7 @@
  * The provisioning track — Farm and Potion, both read out of `engine.json`.
  *
  * Farming is the game's one life skill and it grants no power: its whole output is the herb a
- * potion is crafted from, which is why it sits outside the `mob_HP` fold (`AGENT.md` §5).
+ * potion is crafted from, which is why it sits outside the `mob_HP` fold (`AGENTS.md` §5).
  * Potions are a bounded convenience: shared cooldown, a per-fight cap, and nothing works on a boss.
  */
 

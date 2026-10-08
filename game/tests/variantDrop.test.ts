@@ -8,7 +8,7 @@ const drops = (E.mob as any).variant_drops as Record<string, { item: string; rar
 
 /**
  * Every mob variant the sim fields, driven to the state the test needs (a number of distinct spawns)
- * rather than for a fixed window of ticks: a fixed window is a time premise (AGENT.md) and a coin
+ * rather than for a fixed window of ticks: a fixed window is a time premise (AGENTS.md) and a coin
  * flip on which sub-zone the roll lands in. The bound is a hang guard.
  */
 function seenVariants(state: any, want: number) {

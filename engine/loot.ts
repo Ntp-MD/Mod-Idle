@@ -1,11 +1,11 @@
 /**
- * Shared drop-roll primitives — the RNG, the seven-line skeleton and the item-level value window
+ * Shared drop-roll primitives — the RNG, the line skeleton and the item-level value window
  * `tools/loot.ts` already runs, lifted out so the client rolls the same way.
  *
- * The line count is fixed (Base + the Legacy pair + two Random lines) and an item's level answers the
- * only question left: what range its lines may roll in (item-rarity.md). The Bases a slot may carry are
- * still parsed from `item-base.md` on the cage side; the client rolls only the Mod lines `mods.json`
- * owns.
+ * The unremovable head is fixed (line 1 the Base Mod + the Sub pair), the Normal lines are drawn from
+ * the range `item_level.stat_mod_slots` publishes, and an item's level answers the other question: what
+ * range its lines may roll in (item-level.md). The Bases a slot may carry live in `tools/data/bases.json`;
+ * the client rolls only the Mod lines `mods.json` owns.
  */
 
 import type { EngineData, ModsData, Rng } from './types.ts';
@@ -75,7 +75,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   const TIER_NAME = { 0: 'T1', 1: 'T2', 2: 'T3' };
   const BAND_LABEL = ['low', 'mid', 'high'];
   // The window's thirds, best last: the TOP third is the rarest, so a good roll is a chance and not a
-  // formality, and the bottom third is the common outcome (item-rarity.md). T1 names the top.
+  // formality, and the bottom third is the common outcome (item-level.md). T1 names the top.
   const TIER_SPLIT = [0.50, 0.83];
   const WINDOW_THIRDS = 3;
 
@@ -99,7 +99,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * The value window one Mod line publishes at one item level inside one band (item-rarity.md). The
+   * The value window one Mod line publishes at one item level inside one band (item-level.md). The
    * ceiling is the band's own top and the floor climbs from the band below — so a mid-band piece
    * starts able to roll the low band's floor and ends above it — and a level past its band's span
    * clamps, which is what keeps the later loops on the band the zone label names.
@@ -190,8 +190,8 @@ export function createLoot(E: EngineData, MODS: ModsData) {
       for (const e of slotUnion(BASES, slot, frame)) push(e.id, e.role);
       // the Gear Mod is the frame's own school, not all three: a heavy frame carries Armour alone
       if (GEAR_MOD_SLOTS.includes(slot) && frame?.school) push(frame.school, RW.gear_mod);
-      // the armour slots' line-1 pool is also rollable (item-base.md): that is where Armour % and
-      // Max Energy Shield % live, since no frame table names them
+      // the armour slots' line-1 lines are also rollable on the other lines: the three flat defence
+      // lines a frame may carry, so a frame that carries one can still find another on a later line
       if (ARMOUR_SLOTS.includes(slot)) for (const id of (BASES?.base_mod?.defence || [])) push(id, RW.secondary);
       if (slot === 'off hand' && frame?.family) {
         for (const id of (wp['off hand']?.[frame.family] || [])) push(id, RW.secondary);
@@ -199,6 +199,17 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     }
     for (const id of STAT_IDS) push(id, RW.stat_mod);
     return out;
+  }
+
+  /**
+   * The pool of one frame with the odds each line has of filling a pool slot, at one Item quality band.
+   * It is the same `role x weightOf` product `weightedPick` draws from, normalised here, so a table can
+   * print the chances without becoming a second author of the weight model.
+   */
+  function poolChances(BASES: any, slot: string, frame: any, weapon: any, q: number) {
+    const weighted = poolFor(BASES, slot, frame, weapon).map((e) => ({ id: e.id, w: e.role * (weightOf(e.id, q) ?? 1) }));
+    const total = weighted.reduce((sum, e) => sum + e.w, 0) || 1;
+    return weighted.map((e) => ({ id: e.id, chance: e.w / total }));
   }
 
   /**
@@ -213,13 +224,14 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * Line 1 — the Base Mod (item-base.md). Armour slots lock the frame's own defence type and
-   * roll `hybrid_chance` for the next ones, in the pool's own order; a weapon forces every Mod its
-   * type lists; an off-hand frame carries its family's pair; belt / ring / amulet draw one from the
-   * slot's pool. The line shares one budget: one Mod keeps its roll, two take `value_scale` for 2,
-   * three for 3 — so more is better, sublinearly. All of it is ONE line, the first Mod in `id` and the
-   * rest in `extra`, so the 7-line skeleton's counts and the unremovable floor stay fixed. `u` is the
-   * item's one Tier draw, shared with the Random lines exactly as `tools/loot.ts` rolls them.
+   * Line 1 — the Base Mod. An armour frame NAMES the flat defence lines it carries (one, two or all
+   * three of Armour flat, Evasion flat, Energy Shield flat — the seven non-empty combinations the
+   * frames of a slot cover without repeating one, so the frame's own name tells the player what line 1
+   * is); a weapon forces every Mod its type lists; an off-hand frame carries its family's row; belt /
+   * ring / amulet / earring draw one from the slot's pool. A multi-line Base Mod shares one budget, which
+   * `value_scale` applies. All of it is ONE line, the first Mod in `id` and the rest in `extra`, so the
+   * line skeleton's counts and the unremovable floor stay fixed. `u` is the item's one Tier draw,
+   * shared with the Random lines exactly as `tools/loot.ts` rolls them.
    */
   function baseModRoll(BASES: any, slot: string, frame: any, weapon: any, rng: Rng, ilvl: number, q: number, u: number): any[] {
     const BM = E.loot.base_mod;
@@ -229,17 +241,15 @@ export function createLoot(E: EngineData, MODS: ModsData) {
       // a weapon (main hand, or a dual-wielded off hand) forces every Mod its own type lists — and a
       // main hand carries a FRAME (A10), whose own list wins over its type's when it has one
       for (const id of (frame?.base_mod || BASES?.base_mod?.weapons?.[weapon.name] || [])) ids.push(id);
-    } else if (ARMOUR_SLOTS.includes(slot) && frame?.defence) {
-      ids.push(frame.defence);
-      const others = (BASES?.base_mod?.defence || []).filter((id: string) => id !== frame.defence);
-      for (const id of others) {
-        if (rng() >= (BM.hybrid_chance[ids.length - 1] ?? 0)) break;
-        ids.push(id);
-      }
+    } else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) {
+      // the frame names the flat defence lines its Base Mod carries (one, two or all three, the seven
+      // combinations the roster covers without repeating one) — never a random draw, and a multi-line
+      // Base Mod shares one budget, which `scale` applies below.
+      for (const id of frame.base_lines) ids.push(id);
     } else if (slot === 'off hand' && frame?.family) {
       // an off-hand frame carries its family's pair (a Shield the block line, a Book the magic pair)
       for (const id of (BASES?.base_mod?.off_hand?.[frame.family] || [])) ids.push(id);
-    } else if ((BASES?.base_mod?.legacy_slots || []).includes(slot)) {
+    } else if ((BASES?.base_mod?.drawn_line1_slots || []).includes(slot)) {
       const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
       if (pool.length) ids.push(weightedPick(rng, pool.map((e) => ({ id: e.id, w: e.role * weightOf(e.id, q) }))));
     }
@@ -260,11 +270,13 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * The lines a dropped piece carries: line 1 + the Legacy pair + its rolled Random lines. One count for
-   * every drop — Rarity, the old coin flip between two counts, is gone (item-rarity.md).
+   * The lines a dropped piece carries: line 1 + the Sub pair + the Normal lines, whose count is drawn
+   * inside the published range at drop (`item_level.stat_mod_slots`). Both the client and `tools/loot.ts`
+   * call this one function, so a piece and its simulation cannot disagree on how wide a drop is.
    */
-  function linesAtDrop() {
-    return E.item_level.line_count;
+  function linesAtDrop(rng: Rng) {
+    const L = E.item_level;
+    return L.base_mod_slots + L.sub_slots + intBetween(rng, L.stat_mod_slots.min, L.stat_mod_slots.max);
   }
 
   /**
@@ -277,9 +289,9 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
     if (weapon) for (const id of (BASES?.base_mod?.weapons?.[weapon.name] || [])) ids.push(id);
-    else if (ARMOUR_SLOTS.includes(slot) && frame?.defence) ids.push(frame.defence);
+    else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) for (const id of frame.base_lines) ids.push(id);
     else if (slot === 'off hand' && frame?.family) for (const id of (BASES?.base_mod?.off_hand?.[frame.family] || [])) ids.push(id);
-    else if ((BASES?.base_mod?.legacy_slots || []).includes(slot)) {
+    else if ((BASES?.base_mod?.drawn_line1_slots || []).includes(slot)) {
       const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
       if (pool.length) ids.push(pool[0].id);
     }
@@ -356,7 +368,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
 
   /**
    * Which third of the window this roll lands in. The top third is the rarest and the bottom the common
-   * outcome (item-rarity.md): the weights are the one skew every Mod shares, so "best is never free" is a
+   * outcome (item-level.md): the weights are the one skew every Mod shares, so "best is never free" is a
    * property of the roll rather than of a per-Mod ladder.
    */
   function tierSlice(u: number) {
@@ -369,7 +381,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     SLOTS, GEAR_MOD_SLOTS, STAT_IDS, GEAR_MODS, STAT_ROLLS, TIER_SPLIT, TIER_NAME,
     BAND_LABEL, RW, MAX_OF, NAME_OF, BANDS_OF, WEIGHT_BY_ID, FLAT_GROUP, ELEMENTS, ARMOUR_SLOTS,
     weightOf, windowAt, spanT, rangeOf, sliceCount, tierSlice, score, keepsDrop, notYetFound, statOf, blockedBy,
-    slotUnion, poolFor, baseModRoll, baseModAtFloor, linesAtDrop,
+    slotUnion, poolFor, poolChances, baseModRoll, baseModAtFloor, linesAtDrop,
     mulberry32, pick, intBetween, pickBand, weightedPick,
   };
 }

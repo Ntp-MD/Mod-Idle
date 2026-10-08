@@ -1,8 +1,7 @@
 /**
  * One command for the whole cage.
  *
- *   node tools/verify.ts            run every cage + the doc linter, exit 1 on any FAIL
- *   node tools/verify.ts --report   also rebuild dashboard.html when everything passes
+ *   node tools/verify.ts            run every cage, exit 1 on any FAIL
  *
  * This is what a pre-commit hook and CI should call: after any edit it tells you
  * whether a number, a count or a cross-file reference was left dangling.
@@ -12,7 +11,7 @@
  * step order once the pool drains, so the report reads exactly as before.
  */
 
-import { execFileSync, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { CAGES } from './lib/writers.ts';
 import { withNodeFlags } from './lib/node.ts';
@@ -59,10 +58,5 @@ for (let i = 0; i < CAGES.length; i++) {
 }
 
 console.log(`\n${CAGES.length - failed}/${CAGES.length} cages PASS`);
-
-if (process.argv.includes('--report') && !failed) {
-  console.log('\n=== rebuilding dashboard ===');
-  process.stdout.write(execFileSync('node', ['tools/report.ts'], { cwd: ROOT, encoding: 'utf8' }));
-}
 
 if (failed) process.exitCode = 1;

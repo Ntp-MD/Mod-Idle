@@ -17,8 +17,10 @@ import { E, BASES, eng, loot } from '../engine/client';
 // v4 is the 7-line skeleton: a v3 item is re-stamped, not discarded. v5 bakes the Core stat
 // onto every Stat Mod line, so a v4 piece keeps the stat its player chose. v6 grows the worn
 // set to a thirteenth slot, the earring, so a v5 gear array is padded back to full length.
-// v9 is the item level: Rarity is gone, every drop carries the same line count, and a v8 item gains
-// the level its band starts at with its labels flipped onto the new order. v10 deletes the hunt
+// v9 is the item level: the value window moved onto the level and Rarity was retired, and a v8 item
+// gains the level its band starts at with its labels flipped onto the new order. A v9 item keeps
+// whatever line count it holds — the Normal count is drawn at drop from `item_level.stat_mod_slots`,
+// which is data, not schema. v10 deletes the hunt
 // systems: the per-zone Hunt Order and the per-zone hunting ground are gone, so a v9 save's fields for
 // them are dropped — the variant's own lean is the only lean left.
 const DB_NAME = 'modworld';
@@ -232,7 +234,7 @@ export async function readSave(slot: SlotName): Promise<GameState | null> {
 
 /**
  * A v3 item predates the 7-line skeleton, so it gains the Base Mod its frame forces and keeps every
- * line it had — the old Legacy pair slides to lines 2-3 (``). The line is built at the lowest value of
+ * line it had — the old Sub pair slides to lines 2-3 (``). The line is built at the lowest value of
  * the piece's window with no RNG, so two loads of one save agree to the digit. A frame the rename left
  * unmatched simply keeps its lines, with no Base Mod.
  */

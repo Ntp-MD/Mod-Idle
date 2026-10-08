@@ -8,37 +8,45 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import type { Item } from '../src/sim/types';
 
 /**
- * The 7-line skeleton (`item-base.md`): line 1 is the Base Mod, lines 2-3 the unremovable
- * Legacy pair, lines 4-5 the Random lines every drop fills and 6-7 the two Add owns. These tests pin the shape, the
- * one-line/1-3-Mod rule with its value scale, the armour hybrid chance, and the two new avoidance
- * readings the skeleton added — block and armour penetration.
+ * The line skeleton: line 1 is the Base Mod, lines 2-3 the unremovable Sub pair, then the Normal
+ * lines the drop drew (`item_level.stat_mod_slots`) which the Add craft may widen by `mods_added_cap`.
+ * These tests pin the shape, the one-line rule that a Base Mod follows (the FLAT defence lines the
+ * frame's name declares, one, two or all three, sharing one budget at ×0.7 / ×0.55), and the two
+ * avoidance readings the skeleton added — block and armour penetration.
  */
 
-const armourFrame = (defence: string) =>
-  BASES.bases.find((b: any) => b.slot === 'helmet' && b.defence === defence);
+const frameNamed = (name: string) => BASES.bases.find((b: any) => b.name === name);
 const weaponNamed = (name: string) => BASES.weapons.find((w: any) => w.name === name);
 
-describe('the 7-line skeleton', () => {
-  it('fills the one published count and never exceeds the pool', () => {
+describe('the line skeleton', () => {
+  it('draws the Normal line count inside the published range and never exceeds it', () => {
+    const L = E.item_level;
+    const lo = L.base_mod_slots + L.sub_slots + L.stat_mod_slots.min;
+    const hi = L.base_mod_slots + L.sub_slots + L.stat_mod_slots.max;
     const rng = mulberry32(101);
+    const seen = new Set<number>();
     for (let i = 0; i < 600; i++) {
       const band = ['low', 'mid', 'high'][i % 3];
       const item = rollDrop(rng, band, band === 'low' ? 1 : band === 'mid' ? 31 : 61);
-      const target = loot.linesAtDrop();
-      expect(item.lines.length).toBeLessThanOrEqual(target);
-      if (item.slot === 'main hand') expect(item.lines.length).toBe(target); // a weapon pool always fills
+      expect(item.lines.length).toBeGreaterThanOrEqual(lo);
+      expect(item.lines.length).toBeLessThanOrEqual(hi);
+      seen.add(item.lines.length);
     }
+    // it is a draw, not a constant: the same drop source fields pieces of more than one width
+    expect(seen.size).toBeGreaterThan(1);
   });
 
-  it('every drop carries the same count, whatever its band', () => {
-    expect(loot.linesAtDrop()).toBe(E.item_level.line_count);
-    expect(E.item_level.crafted_max - loot.linesAtDrop()).toBe(E.item_level.mods_added_cap);
+  it('the ceiling is the head plus the widest Normal draw plus the Add stones', () => {
+    const L = E.item_level;
+    expect(loot.linesAtDrop(() => 0)).toBe(L.base_mod_slots + L.sub_slots + L.stat_mod_slots.min);
+    expect(loot.linesAtDrop(() => 0.999999)).toBe(L.base_mod_slots + L.sub_slots + L.stat_mod_slots.max);
+    expect(L.crafted_max).toBe(L.base_mod_slots + L.sub_slots + L.stat_mod_slots.max + L.mods_added_cap);
   });
 
-  it('line 1 is the Base Mod, lines 2-3 the Legacy pair, and the craft verbs refuse all three', () => {
+  it('line 1 is the Base Mod, lines 2-3 the Sub pair, and the craft verbs refuse all three', () => {
     const item = rollDrop(mulberry32(202), 'high', 61);
     expect(craft.BASE_MOD_SLOTS).toBe(1);
-    expect(craft.LEGACY_SLOTS).toBe(2);
+    expect(craft.SUB_SLOTS).toBe(2);
     expect(craft.UNTOUCHABLE).toBe(3);
     for (let i = 0; i < craft.UNTOUCHABLE; i++) {
       expect(craft.reroll(item, i, mulberry32(1)).ok).toBe(false);
@@ -69,14 +77,36 @@ describe('line 1 carries 1-3 Mods on one line, scaled', () => {
     expect(line[0].value).toBe(loot.windowAt('physical_power_flat', 1, 0)[0]);
   });
 
-  it('an armour Base locks its own defence type and may add the others at the three-Mod scale', () => {
-    const frame = armourFrame('armour_pct');
-    const line = loot.baseModRoll(BASES, 'helmet', frame, null, () => 0, 1, 0, 0);
-    expect(line.length).toBe(1);
-    expect(line[0].id).toBe('armour_pct');
-    expect(line[0].extra.length).toBe(2);
-    const k = E.loot.base_mod.value_scale['3'];
-    expect(line[0].value).toBe(Math.round(loot.windowAt('armour_pct', 1, 0)[0] * k));
+  it('an armour frame carries the flat defence lines its own name declares, sharing one budget', () => {
+    // Crown is the Armour & Energy Shield frame: two flat lines on ONE line, each at the two-line scale
+    const pair = loot.baseModRoll(BASES, 'helmet', frameNamed('Crown'), null, () => 0, 1, 0, 0);
+    expect(pair.length).toBe(1); // ONE line ...
+    expect(pair[0].id).toBe('armour_flat');
+    expect(pair[0].extra.length).toBe(1); // ... carrying the frame's second line
+    expect(pair[0].extra[0].id).toBe('energy_shield_flat');
+    const k2 = E.loot.base_mod.value_scale['2'];
+    expect(pair[0].value).toBe(Math.round(loot.windowAt('armour_flat', 1, 0)[0] * k2));
+    expect(pair[0].extra[0].value).toBe(Math.round(loot.windowAt('energy_shield_flat', 1, 0)[0] * k2));
+
+    // Hood is the Evasion frame: one line, and it keeps the whole window with nothing to share
+    const single = loot.baseModRoll(BASES, 'helmet', frameNamed('Hood'), null, () => 0, 1, 0, 0);
+    expect(single[0].id).toBe('evasion_flat');
+    expect(single[0].extra).toBeUndefined();
+    expect(single[0].value).toBe(loot.windowAt('evasion_flat', 1, 0)[0]);
+
+    // Bastion is the frame that carries all three: both partners on the same line, each at ×0.55
+    const trio = loot.baseModRoll(BASES, 'helmet', frameNamed('Bastion Helm'), null, () => 0, 1, 0, 0);
+    expect(trio.length).toBe(1); // still ONE line ...
+    expect(trio[0].id).toBe('armour_flat');
+    expect(trio[0].extra.map((x: any) => x.id)).toEqual(['energy_shield_flat', 'evasion_flat']);
+    const k3 = E.loot.base_mod.value_scale['3'];
+    expect(trio[0].value).toBe(Math.round(loot.windowAt('armour_flat', 1, 0)[0] * k3));
+    for (const x of trio[0].extra) expect(x.value).toBe(Math.round(loot.windowAt(x.id, 1, 0)[0] * k3));
+
+    // and the floor roll hands a restored piece the same set, scaled the same way
+    const floor = loot.baseModAtFloor(BASES, 'helmet', frameNamed('Bastion Helm'), null, 1, 0);
+    expect([floor[0].id, ...floor[0].extra.map((x: any) => x.id)]).toEqual(['armour_flat', 'energy_shield_flat', 'evasion_flat']);
+    expect(floor[0].value).toBe(Math.round(loot.windowAt('armour_flat', 1, 0)[0] * k3));
   });
 
 });

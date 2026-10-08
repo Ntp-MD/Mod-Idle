@@ -1,10 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import * as G from './lib/generated.ts';
 import * as eng from './lib/engine.ts';
 import { readJson } from './lib/json.ts';
 import { createLoot } from '../engine/loot.ts';
-import type { Writer } from './lib/types.ts';
 
 /**
  * Loot cage — the drop pipeline, measured instead of asserted.
@@ -51,7 +49,7 @@ const {
   SLOTS, TIER_NAME, ELEMENTS,
   FLAT_GROUP, weightOf, rangeOf, sliceCount, tierSlice,
 } = LOOT;
-// the band ladder and its level spans, read once (`item_level` — item-rarity.md)
+// the band ladder and its level spans, read once (`item_level` — item-level.md)
 const BAND_INDEX: Record<string, number> = { low: 0, mid: 1, high: 2 };
 const SPAN: Record<string, [number, number]> = Object.fromEntries(
   (E.item_level.spans || []).map((s: any) => [s.band, [s.from, s.to]]),
@@ -143,9 +141,11 @@ function rollItem(rng: any, band: any, bias: any) {
 
   // line 1 is the Base Mod: it is rolled first, off the frame, before any Random line
   const lines: any[] = LOOT.baseModRoll(BASES_JSON, slot, frame, weapon, rng, ilvl, q, u);
-  const taken = new Set<string>(lines.map((l: any) => l.id));
+  // every id the piece already holds — a Base Mod line's `extra` Mods included, exactly as the client
+  // does (`game/src/sim/drop.ts`), so a line never appears twice on one piece in either roll
+  const taken = new Set<string>(lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
   const pool = LOOT.poolFor(BASES_JSON, slot, frame, weapon).filter((e: any) => !taken.has(e.id));
-  const target = LOOT.linesAtDrop();
+  const target = LOOT.linesAtDrop(rng);
 
   while (lines.length < target) {
     const blocked = LOOT.blockedBy(taken);
@@ -431,27 +431,17 @@ function gates(rows: any, bias: any) {
   return out;
 }
 
-const WRITERS = [{ file: 'loot.md', key: 'loot-sim', render: () => block(ALL(), biasExperiment()) }];
-
 // ---------------------------------------------------------------- cli
 
 const arg = process.argv[2];
 
-if (arg === '--emit') {
-  console.log(block(ALL(), biasExperiment()));
-} else if (arg === '--write') {
-  const missing = G.writeAll(WRITERS);
-  if (missing) process.exitCode = 1;
-} else if (arg === '--checks') {
+if (arg === '--checks') {
   const rows = ALL();
   const bias = biasExperiment();
   const res = gates(rows, bias);
   for (const r of res) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-  const states = G.checkAll(WRITERS);
-  console.log('');
-  for (const s of states) console.log(`${s.state === 'current' ? 'PASS ' : 'FAIL '}  block ${s.key} · ${s.file} (${s.state})`);
-  const fails = res.filter((r) => !r.ok).length + states.filter((s) => s.state !== 'current').length;
-  console.log(`\n${res.length - res.filter((r) => !r.ok).length}/${res.length} gate PASS · ${states.filter((s) => s.state !== 'current').length} block(s) not current · ${fails} FAIL`);
+  const fails = res.filter((r) => !r.ok).length;
+  console.log(`\n${res.length - fails}/${res.length} gate PASS · ${fails} FAIL`);
   if (fails) process.exitCode = 1;
 } else if (arg === '--sync') {
   sync();
@@ -475,11 +465,9 @@ if (arg === '--emit') {
   console.log('\nbase bias:');
   for (const b of biasExperiment()) console.log('  ' + b.label.padEnd(48) + ' keep ' + b.keepRate.toFixed(2) + '%  up/1k ' + (b.perHr / BAND.high.drops_per_hr * 1000).toFixed(1) + '  score ' + b.avgScore.toFixed(2));
 } else {
-  console.log(`loot cage — the seven roll steps in loot.md section 1, measured
+  console.log(`loot cage — the seven roll steps, measured
 
-  node tools/loot.ts --emit     print the generated measured-results block
-  node tools/loot.ts --write    rewrite that block in loot.md
-  node tools/loot.ts --checks   invariants + stale-block check
+  node tools/loot.ts --checks   invariants
   node tools/loot.ts --sim      raw numbers per band
   node tools/loot.ts --sync     hand the measured upgrades/hr back to engine.json
 `);

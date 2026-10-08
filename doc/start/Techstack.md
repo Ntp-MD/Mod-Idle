@@ -1,13 +1,11 @@
 # Tech Stack
 
-import AGENT.md
-import save.md
 
 **Target:** a browser game, single-player, no server. This file fixes the stack; it is a design decision, not a number source.
 
 # The one rule that matters most
 
-The game and the cages must run the **same engine math**. Today the numbers live in `tools/data/*.json` and the math in `tools/lib/engine.ts`. The game imports the same JSON and calls the same functions — it never copies a formula. When a formula is needed on both sides it is extracted into one shared module that both import, so a cage and the game can never disagree. A second copy of a formula is the same defect as a second copy of a number (`AGENT.md` section 3).
+The game and the cages must run the **same engine math**. Today the numbers live in `tools/data/*.json` and the math in `tools/lib/engine.ts`. The game imports the same JSON and calls the same functions — it never copies a formula. When a formula is needed on both sides it is extracted into one shared module that both import, so a cage and the game can never disagree. A second copy of a formula is the same defect as a second copy of a number (`AGENTS.md` section 3).
 
 # Stack
 

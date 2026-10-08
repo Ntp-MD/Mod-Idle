@@ -1,1256 +1,1472 @@
 {
- "note": "The Base frames per slot, imported from item-base.md by tools/bases.ts --write. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks; school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. base_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, legacy_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the Shield / Book families. weapons and weapon_pools come from equipment-weapon.md and equipment-slot-weapon.md. weapon_frames is the A10 list per weapon type (from the Frames table in item-base.md), which the loot roll reads at step 2. tools/loot.ts and the client both read this file, and `node tools/bases.ts --checks` gates it against the docs so none of them can drift.",
- "roll_rule": "Bases roll equally inside their slot (item-base.md \"Base Rolling\"); a dual-wield off hand weapon uses that weapon type weight x 0.8.",
- "quality_weight_multiplier": 1.3,
- "mastery": {
-  "xp_per_kill": 4,
-  "level_divisor": 100,
-  "level_cap": 20,
-  "weight_discount_per_level_pct": 1,
-  "weight_discount_cap_pct": 20,
-  "skill_bonus_from_level": 5,
-  "skill_bonus_per_level_pct": 0.5,
-  "skill_bonus_cap_pct": 8,
-  "drop_bonus_per_type_pct": 1,
-  "drop_bonus_level_required": 10
- },
- "slots": [
-  "helmet",
-  "chest",
-  "pant",
-  "boots",
-  "belt",
-  "gloves",
-  "ring",
-  "amulet",
-  "earring",
-  "cape",
-  "off hand"
- ],
- "bases": [
-  {
-   "name": "Hood",
-   "weight": 30,
-   "primary": [
-    "evasion_pct",
-    "max_hp_flat"
-   ],
-   "secondary": [
-    "elemental_resistance"
-   ],
-   "slot": "helmet",
-   "defence": "evasion_pct",
-   "school": "evasion_flat",
-   "family": null
+  "note": "The Base frames per slot, imported from item-base.md by tools/bases.ts --write. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks; school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. base_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, drawn_line1_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the Shield / Book families. weapons and weapon_pools come from equipment-weapon.md and equipment-slot-weapon.md. weapon_frames is the A10 list per weapon type (from the Frames table in item-base.md), which the loot roll reads at step 2. tools/loot.ts and the client both read this file, and `node tools/bases.ts --checks` gates it against the docs so none of them can drift.",
+  "roll_rule": "Bases roll equally inside their slot (item-base.md \"Base Rolling\"); a dual-wield off hand weapon uses that weapon type weight x 0.8.",
+  "quality_weight_multiplier": 1.3,
+  "mastery": {
+    "xp_per_kill": 4,
+    "level_divisor": 100,
+    "level_cap": 20,
+    "weight_discount_per_level_pct": 1,
+    "weight_discount_cap_pct": 20,
+    "skill_bonus_from_level": 5,
+    "skill_bonus_per_level_pct": 0.5,
+    "skill_bonus_cap_pct": 8,
+    "drop_bonus_per_type_pct": 1,
+    "drop_bonus_level_required": 10
   },
-  {
-   "name": "Sallet",
-   "weight": 45,
-   "primary": [
-    "max_hp_flat",
-    "max_hp"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "life_regen_pct"
-   ],
-   "slot": "helmet",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
+  "slots": [
+    "helmet",
+    "chest",
+    "pant",
+    "boots",
+    "belt",
+    "gloves",
+    "ring",
+    "amulet",
+    "earring",
+    "cape",
+    "off hand"
+  ],
+  "bases": [
+    {
+      "name": "Hood",
+      "weight": 4.4,
+      "primary": [
+        "evasion_pct",
+        "max_hp_flat"
+      ],
+      "secondary": [
+        "elemental_resistance"
+      ],
+      "slot": "helmet",
+      "school": "evasion_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Sallet",
+      "weight": 7.3,
+      "primary": [
+        "max_hp_flat",
+        "max_hp"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "life_regen_pct"
+      ],
+      "slot": "helmet",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Circlet",
+      "weight": 2,
+      "primary": [
+        "max_mana",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "mana_regen_pct"
+      ],
+      "slot": "helmet",
+      "school": "energy_shield_flat",
+      "family": null,
+      "base_lines": [
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Crown",
+      "weight": 9.2,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "energy_shield_flat"
+      ],
+      "slot": "helmet",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Hunter's Helm",
+      "weight": 6.7,
+      "primary": [
+        "armour_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "elemental_resistance"
+      ],
+      "slot": "helmet",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Warded Hood",
+      "weight": 2.8,
+      "primary": [
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "elemental_alignment",
+        "evasion_flat"
+      ],
+      "slot": "helmet",
+      "school": "evasion_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Bastion Helm",
+      "weight": 6,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "max_hp_flat",
+        "elemental_resistance"
+      ],
+      "slot": "helmet",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat",
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Ring Mail",
+      "weight": 10.2,
+      "primary": [
+        "evasion_pct",
+        "max_hp"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "max_hp_flat"
+      ],
+      "slot": "chest",
+      "school": "evasion_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Plate Vest",
+      "weight": 15,
+      "primary": [
+        "max_hp_flat",
+        "max_hp"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "life_regen_pct"
+      ],
+      "slot": "chest",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Vestment",
+      "weight": 4,
+      "primary": [
+        "max_mana",
+        "max_mana_flat"
+      ],
+      "secondary": [
+        "cooldown_reduction",
+        "mana_regen_pct"
+      ],
+      "slot": "chest",
+      "school": "energy_shield_flat",
+      "family": null,
+      "base_lines": [
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Regalia",
+      "weight": 12.5,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "energy_shield_flat"
+      ],
+      "slot": "chest",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Hunter's Coat",
+      "weight": 5.1,
+      "primary": [
+        "max_energy_shield_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "energy_shield_flat",
+        "elemental_resistance"
+      ],
+      "slot": "chest",
+      "school": "energy_shield_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Warded Robe",
+      "weight": 11.7,
+      "primary": [
+        "armour_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "max_hp_flat"
+      ],
+      "slot": "chest",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Bastion Plate",
+      "weight": 9.5,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "max_hp_flat",
+        "elemental_resistance"
+      ],
+      "slot": "chest",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat",
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Breeches",
+      "weight": 8.2,
+      "primary": [
+        "evasion_flat",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "max_hp_flat"
+      ],
+      "slot": "pant",
+      "school": "evasion_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Cuisses",
+      "weight": 12.1,
+      "primary": [
+        "max_hp_flat",
+        "max_hp"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "life_regen_pct"
+      ],
+      "slot": "pant",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Legwraps",
+      "weight": 3.4,
+      "primary": [
+        "cooldown_reduction",
+        "max_mana_flat"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "mana_regen_pct"
+      ],
+      "slot": "pant",
+      "school": "energy_shield_flat",
+      "family": null,
+      "base_lines": [
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Hunter's Cuisses",
+      "weight": 7.8,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "energy_shield_flat",
+        "evasion_flat"
+      ],
+      "slot": "pant",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Sentinel's Greaves",
+      "weight": 10.6,
+      "primary": [
+        "armour_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "max_hp_flat"
+      ],
+      "slot": "pant",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Warded Legwraps",
+      "weight": 3.8,
+      "primary": [
+        "max_energy_shield_pct",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "energy_shield_flat",
+        "evasion_flat"
+      ],
+      "slot": "pant",
+      "school": "energy_shield_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Bastion Cuisses",
+      "weight": 8.5,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "max_hp_flat",
+        "elemental_resistance"
+      ],
+      "slot": "pant",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat",
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Strapped Boots",
+      "weight": 5.3,
+      "primary": [
+        "evasion_flat",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "cooldown_reduction"
+      ],
+      "slot": "boots",
+      "school": "evasion_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Plated Greaves",
+      "weight": 9.2,
+      "primary": [
+        "max_hp_flat",
+        "max_hp"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "life_regen_pct"
+      ],
+      "slot": "boots",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Silk Slippers",
+      "weight": 4.4,
+      "primary": [
+        "max_mana_flat",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "slot": "boots",
+      "school": "energy_shield_flat",
+      "family": null,
+      "base_lines": [
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Hunter's Treads",
+      "weight": 7.1,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "energy_shield_flat"
+      ],
+      "slot": "boots",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Warden's Sabatons",
+      "weight": 9.8,
+      "primary": [
+        "armour_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "max_hp_flat"
+      ],
+      "slot": "boots",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Warded Slippers",
+      "weight": 4.6,
+      "primary": [
+        "max_energy_shield_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "cooldown_reduction",
+        "evasion_flat"
+      ],
+      "slot": "boots",
+      "school": "evasion_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Bastion Sabatons",
+      "weight": 6.5,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "max_hp_flat",
+        "elemental_resistance"
+      ],
+      "slot": "boots",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat",
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "War Belt",
+      "weight": 6.3,
+      "primary": [
+        "max_hp_flat",
+        "max_hp"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "life_regen_pct"
+      ],
+      "slot": "belt",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Silk Sash",
+      "weight": 2.4,
+      "primary": [
+        "max_mana",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "elemental_resistance",
+        "mana_regen_pct"
+      ],
+      "slot": "belt",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Chain Clasp",
+      "weight": 4,
+      "primary": [
+        "elemental_resistance",
+        "max_hp_flat"
+      ],
+      "secondary": [
+        "evasion_flat"
+      ],
+      "slot": "belt",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Iron Gauntlets",
+      "weight": 7.3,
+      "primary": [
+        "max_hp",
+        "evasion_flat"
+      ],
+      "secondary": [
+        "elemental_alignment",
+        "life_regen_pct"
+      ],
+      "slot": "gloves",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Silk Wraps",
+      "weight": 2.4,
+      "primary": [
+        "elemental_alignment",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "max_mana_flat"
+      ],
+      "slot": "gloves",
+      "school": "energy_shield_flat",
+      "family": null,
+      "base_lines": [
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Nimble Mitts",
+      "weight": 3.4,
+      "primary": [
+        "evasion_pct",
+        "evasion_flat"
+      ],
+      "secondary": [
+        "elemental_alignment"
+      ],
+      "slot": "gloves",
+      "school": "evasion_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Hunter's Mitts",
+      "weight": 7.5,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "energy_shield_flat"
+      ],
+      "slot": "gloves",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Vanguard's Gauntlets",
+      "weight": 8.2,
+      "primary": [
+        "armour_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "max_hp_flat",
+        "armour_flat"
+      ],
+      "slot": "gloves",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Warded Wraps",
+      "weight": 3.2,
+      "primary": [
+        "max_energy_shield_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "elemental_alignment",
+        "cooldown_reduction"
+      ],
+      "slot": "gloves",
+      "school": "evasion_flat",
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Bastion Gauntlets",
+      "weight": 6,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "max_hp_flat",
+        "elemental_resistance"
+      ],
+      "slot": "gloves",
+      "school": "armour_flat",
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat",
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Iron Band",
+      "weight": 0.5,
+      "primary": [
+        "elemental_alignment",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "max_hp",
+        "all_resistance_pct"
+      ],
+      "slot": "ring",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Moonstone Signet",
+      "weight": 1.3,
+      "primary": [
+        "max_mana",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "max_hp",
+        "max_energy_shield_pct"
+      ],
+      "slot": "ring",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Jade Amulet",
+      "weight": 0.9,
+      "primary": [
+        "elemental_alignment",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "max_hp",
+        "all_resistance_pct"
+      ],
+      "slot": "amulet",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Onyx Talisman",
+      "weight": 2.4,
+      "primary": [
+        "elemental_alignment",
+        "max_mana_flat"
+      ],
+      "secondary": [
+        "cooldown_reduction",
+        "max_energy_shield_pct"
+      ],
+      "slot": "amulet",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Silver Hoop",
+      "weight": 0.9,
+      "primary": [
+        "elemental_alignment",
+        "max_mana"
+      ],
+      "secondary": [
+        "cooldown_reduction",
+        "all_resistance_pct"
+      ],
+      "slot": "earring",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Jade Stud",
+      "weight": 1.7,
+      "primary": [
+        "elemental_alignment",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "max_hp",
+        "all_resistance_pct"
+      ],
+      "slot": "earring",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Onyx Drop",
+      "weight": 2.8,
+      "primary": [
+        "max_hp",
+        "elemental_resistance"
+      ],
+      "secondary": [
+        "cooldown_reduction",
+        "all_resistance_pct"
+      ],
+      "slot": "earring",
+      "defence": null,
+      "school": null,
+      "family": null
+    },
+    {
+      "name": "Traveler's Cloak",
+      "weight": 2.4,
+      "primary": [
+        "evasion_pct",
+        "elemental_resistance"
+      ],
+      "secondary": [
+        "cooldown_reduction",
+        "all_resistance_pct"
+      ],
+      "slot": "cape",
+      "school": null,
+      "family": null,
+      "base_lines": [
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Heavy Mantle",
+      "weight": 4.8,
+      "primary": [
+        "max_hp_flat",
+        "elemental_resistance"
+      ],
+      "secondary": [
+        "max_mana_flat",
+        "all_resistance_pct"
+      ],
+      "slot": "cape",
+      "school": null,
+      "family": null,
+      "base_lines": [
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Silk Drape",
+      "weight": 2.8,
+      "primary": [
+        "max_mana",
+        "elemental_resistance"
+      ],
+      "secondary": [
+        "mana_regen_pct",
+        "all_resistance_pct"
+      ],
+      "slot": "cape",
+      "school": null,
+      "family": null,
+      "base_lines": [
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Hunter's Cloak",
+      "weight": 10.9,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "armour_flat",
+        "energy_shield_flat"
+      ],
+      "slot": "cape",
+      "school": null,
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "armour_flat"
+      ]
+    },
+    {
+      "name": "Warded Drape",
+      "weight": 3.6,
+      "primary": [
+        "max_energy_shield_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "energy_shield_flat",
+        "mana_regen_pct"
+      ],
+      "slot": "cape",
+      "school": null,
+      "family": null,
+      "base_lines": [
+        "evasion_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Bulwark Cape",
+      "weight": 5.9,
+      "primary": [
+        "armour_pct",
+        "evasion_pct"
+      ],
+      "secondary": [
+        "max_hp_flat",
+        "elemental_resistance"
+      ],
+      "slot": "cape",
+      "school": null,
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Bastion Cape",
+      "weight": 7,
+      "primary": [
+        "armour_pct",
+        "evasion_pct",
+        "max_energy_shield_pct"
+      ],
+      "secondary": [
+        "max_hp_flat",
+        "elemental_resistance"
+      ],
+      "slot": "cape",
+      "school": null,
+      "family": null,
+      "base_lines": [
+        "armour_flat",
+        "energy_shield_flat",
+        "evasion_flat"
+      ]
+    },
+    {
+      "name": "Buckler",
+      "weight": 3.4,
+      "primary": [
+        "evasion_pct",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "max_hp_flat"
+      ],
+      "slot": "off hand",
+      "defence": null,
+      "school": null,
+      "family": "Shield"
+    },
+    {
+      "name": "Kite Shield",
+      "weight": 9.2,
+      "primary": [
+        "max_hp_flat",
+        "max_hp"
+      ],
+      "secondary": [
+        "evasion_pct"
+      ],
+      "slot": "off hand",
+      "defence": null,
+      "school": null,
+      "family": "Shield"
+    },
+    {
+      "name": "Grimoire",
+      "weight": 4.4,
+      "primary": [
+        "max_mana",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "max_mana_flat",
+        "elemental_alignment"
+      ],
+      "slot": "off hand",
+      "defence": null,
+      "school": null,
+      "family": "Book"
+    }
+  ],
+  "base_mod": {
+    "defence": [
+      "armour_flat",
+      "evasion_flat",
+      "energy_shield_flat"
+    ],
+    "drawn_line1_slots": [
+      "belt",
+      "ring",
+      "amulet",
+      "earring"
+    ],
+    "weapons": {
+      "one-handed sword": [
+        "physical_power_flat",
+        "attack_speed"
+      ],
+      "one-handed axe": [
+        "physical_power_flat",
+        "bleed_chance"
+      ],
+      "dagger": [
+        "physical_power_flat",
+        "critical_chance"
+      ],
+      "mace": [
+        "physical_power_flat",
+        "stun_chance"
+      ],
+      "wand": [
+        "magic_power_flat",
+        "cooldown_reduction"
+      ],
+      "staff": [
+        "magic_power_flat",
+        "max_mana_flat"
+      ],
+      "spear": [
+        "physical_power_flat",
+        "accuracy"
+      ],
+      "two-handed sword": [
+        "physical_power_flat"
+      ],
+      "two-handed axe": [
+        "physical_power_flat",
+        "bleed_chance"
+      ],
+      "bow": [
+        "physical_power_flat",
+        "accuracy"
+      ],
+      "crossbow": [
+        "physical_power_flat",
+        "armour_pen"
+      ]
+    },
+    "off_hand": {
+      "Shield": [
+        "block_chance"
+      ],
+      "Book": [
+        "magic_power_flat",
+        "mana_regen_flat"
+      ]
+    }
   },
-  {
-   "name": "Circlet",
-   "weight": 18,
-   "primary": [
-    "max_mana",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "mana_regen_pct"
-   ],
-   "slot": "helmet",
-   "defence": "max_energy_shield_pct",
-   "school": "energy_shield_flat",
-   "family": null
+  "weapons": [
+    {
+      "name": "one-handed sword",
+      "hands": "Single",
+      "group": "melee",
+      "damage": "physical",
+      "weapon_aspd": 1.2,
+      "weapon_mult": 1,
+      "dual_wield": true,
+      "weight": 5.3
+    },
+    {
+      "name": "one-handed axe",
+      "hands": "Single",
+      "group": "melee",
+      "damage": "physical",
+      "weapon_aspd": 1.2,
+      "weapon_mult": 1,
+      "dual_wield": true,
+      "weight": 6.3
+    },
+    {
+      "name": "dagger",
+      "hands": "Single",
+      "group": "melee",
+      "damage": "physical",
+      "weapon_aspd": 1.5,
+      "weapon_mult": 0.8,
+      "dual_wield": true,
+      "weight": 3.4
+    },
+    {
+      "name": "mace",
+      "hands": "Single",
+      "group": "melee",
+      "damage": "physical",
+      "weapon_aspd": 1,
+      "weapon_mult": 1.2,
+      "dual_wield": false,
+      "weight": 7.3
+    },
+    {
+      "name": "wand",
+      "hands": "Single",
+      "group": "magic",
+      "damage": "magic",
+      "weapon_aspd": 1,
+      "weapon_mult": 1.2,
+      "dual_wield": false,
+      "weight": 3.4
+    },
+    {
+      "name": "staff",
+      "hands": "Two",
+      "group": "magic",
+      "damage": "magic",
+      "weapon_aspd": 0.85,
+      "weapon_mult": 1.41,
+      "dual_wield": false,
+      "weight": 10.2
+    },
+    {
+      "name": "spear",
+      "hands": "Two",
+      "group": "melee",
+      "damage": "physical",
+      "weapon_aspd": 0.85,
+      "weapon_mult": 1.41,
+      "dual_wield": false,
+      "weight": 12.1
+    },
+    {
+      "name": "two-handed sword",
+      "hands": "Two",
+      "group": "melee",
+      "damage": "physical",
+      "weapon_aspd": 0.7,
+      "weapon_mult": 1.71,
+      "dual_wield": false,
+      "weight": 13.1
+    },
+    {
+      "name": "two-handed axe",
+      "hands": "Two",
+      "group": "melee",
+      "damage": "physical",
+      "weapon_aspd": 0.7,
+      "weapon_mult": 1.71,
+      "dual_wield": false,
+      "weight": 15
+    },
+    {
+      "name": "bow",
+      "hands": "Two (range)",
+      "group": "ranged",
+      "damage": "physical",
+      "weapon_aspd": 1.1,
+      "weapon_mult": 1.09,
+      "dual_wield": false,
+      "weight": 8.2
+    },
+    {
+      "name": "crossbow",
+      "hands": "Two (range)",
+      "group": "ranged",
+      "damage": "physical",
+      "weapon_aspd": 1.1,
+      "weapon_mult": 1.09,
+      "dual_wield": false,
+      "weight": 10.2
+    }
+  ],
+  "dual_wield_weight_mult": 0.8,
+  "weapon_pools": {
+    "main hand": {
+      "Primary": [
+        "physical_power_flat",
+        "physical_power",
+        "critical_chance",
+        "critical_damage"
+      ],
+      "Secondary": [
+        "attack_speed",
+        "accuracy"
+      ],
+      "Stat Mod": [
+        "stat_mod_flat"
+      ],
+      "Blocked": [
+        "max_hp",
+        "evasion_flat",
+        "cooldown_reduction",
+        "elemental_resistance"
+      ],
+      "Weapon": [],
+      "sword / dagger / spear / bow": [
+        "physical_power_flat"
+      ],
+      "axe": [
+        "physical_power_flat",
+        "bleed_chance"
+      ],
+      "mace": [
+        "physical_power_flat",
+        "stun_chance"
+      ],
+      "crossbow": [
+        "physical_power_flat",
+        "armour_pen"
+      ],
+      "wand / staff": [
+        "magic_power_flat",
+        "magic_power"
+      ],
+      "all types": [
+        "elemental_power_flat"
+      ]
+    },
+    "off hand": {
+      "Shield": [
+        "max_hp_flat",
+        "max_hp",
+        "evasion_pct",
+        "block_chance"
+      ],
+      "Book": [
+        "max_mana_flat",
+        "max_mana",
+        "cooldown_reduction"
+      ],
+      "Dual-wield weapon": [],
+      "Stat Mod": [
+        "stat_mod_flat"
+      ]
+    }
   },
-  {
-   "name": "Crown",
-   "weight": 55,
-   "primary": [
-    "armour_pct",
-    "evasion_pct",
-    "max_energy_shield_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "energy_shield_flat"
-   ],
-   "slot": "helmet",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Knight's Helm",
-   "weight": 42,
-   "primary": [
-    "armour_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "elemental_resistance"
-   ],
-   "slot": "helmet",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Hunter's Hood",
-   "weight": 22,
-   "primary": [
-    "evasion_pct",
-    "max_energy_shield_pct"
-   ],
-   "secondary": [
-    "elemental_alignment",
-    "evasion_flat"
-   ],
-   "slot": "helmet",
-   "defence": "evasion_pct",
-   "school": "evasion_flat",
-   "family": null
-  },
-  {
-   "name": "Ring Mail",
-   "weight": 60,
-   "primary": [
-    "evasion_pct",
-    "max_hp"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "max_hp_flat"
-   ],
-   "slot": "chest",
-   "defence": "evasion_pct",
-   "school": "evasion_flat",
-   "family": null
-  },
-  {
-   "name": "Plate Vest",
-   "weight": 85,
-   "primary": [
-    "max_hp_flat",
-    "max_hp"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "life_regen_pct"
-   ],
-   "slot": "chest",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Vestment",
-   "weight": 28,
-   "primary": [
-    "max_mana",
-    "max_mana_flat"
-   ],
-   "secondary": [
-    "cooldown_reduction",
-    "mana_regen_pct"
-   ],
-   "slot": "chest",
-   "defence": "max_energy_shield_pct",
-   "school": "energy_shield_flat",
-   "family": null
-  },
-  {
-   "name": "Regalia",
-   "weight": 72,
-   "primary": [
-    "armour_pct",
-    "evasion_pct",
-    "max_energy_shield_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "energy_shield_flat"
-   ],
-   "slot": "chest",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Shadow Coat",
-   "weight": 34,
-   "primary": [
-    "max_energy_shield_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "energy_shield_flat",
-    "elemental_resistance"
-   ],
-   "slot": "chest",
-   "defence": "max_energy_shield_pct",
-   "school": "energy_shield_flat",
-   "family": null
-  },
-  {
-   "name": "Mail Coat",
-   "weight": 68,
-   "primary": [
-    "armour_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "max_hp_flat"
-   ],
-   "slot": "chest",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Breeches",
-   "weight": 50,
-   "primary": [
-    "evasion_flat",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "max_hp_flat"
-   ],
-   "slot": "pant",
-   "defence": "evasion_pct",
-   "school": "evasion_flat",
-   "family": null
-  },
-  {
-   "name": "Cuisses",
-   "weight": 70,
-   "primary": [
-    "max_hp_flat",
-    "max_hp"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "life_regen_pct"
-   ],
-   "slot": "pant",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Legwraps",
-   "weight": 25,
-   "primary": [
-    "cooldown_reduction",
-    "max_mana_flat"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "mana_regen_pct"
-   ],
-   "slot": "pant",
-   "defence": "max_energy_shield_pct",
-   "school": "energy_shield_flat",
-   "family": null
-  },
-  {
-   "name": "Astral Robes",
-   "weight": 48,
-   "primary": [
-    "armour_pct",
-    "evasion_pct",
-    "max_energy_shield_pct"
-   ],
-   "secondary": [
-    "energy_shield_flat",
-    "evasion_flat"
-   ],
-   "slot": "pant",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Sentinel's Greaves",
-   "weight": 62,
-   "primary": [
-    "armour_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "max_hp_flat"
-   ],
-   "slot": "pant",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Dancer's Leggings",
-   "weight": 27,
-   "primary": [
-    "max_energy_shield_pct",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "energy_shield_flat",
-    "evasion_flat"
-   ],
-   "slot": "pant",
-   "defence": "max_energy_shield_pct",
-   "school": "energy_shield_flat",
-   "family": null
-  },
-  {
-   "name": "Strapped Boots",
-   "weight": 35,
-   "primary": [
-    "evasion_flat",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "cooldown_reduction"
-   ],
-   "slot": "boots",
-   "defence": "evasion_pct",
-   "school": "evasion_flat",
-   "family": null
-  },
-  {
-   "name": "Plated Greaves",
-   "weight": 55,
-   "primary": [
-    "max_hp_flat",
-    "max_hp"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "life_regen_pct"
-   ],
-   "slot": "boots",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Silk Slippers",
-   "weight": 30,
-   "primary": [
-    "max_mana_flat",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "evasion_pct",
-    "max_energy_shield_pct"
-   ],
-   "slot": "boots",
-   "defence": "max_energy_shield_pct",
-   "school": "energy_shield_flat",
-   "family": null
-  },
-  {
-   "name": "Striders of the Dawn",
-   "weight": 44,
-   "primary": [
-    "armour_pct",
-    "evasion_pct",
-    "max_energy_shield_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "energy_shield_flat"
-   ],
-   "slot": "boots",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Warden's Sabatons",
-   "weight": 58,
-   "primary": [
-    "armour_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "max_hp_flat"
-   ],
-   "slot": "boots",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Scout's Treads",
-   "weight": 31,
-   "primary": [
-    "max_energy_shield_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "cooldown_reduction",
-    "evasion_flat"
-   ],
-   "slot": "boots",
-   "defence": "evasion_pct",
-   "school": "evasion_flat",
-   "family": null
-  },
-  {
-   "name": "War Belt",
-   "weight": 40,
-   "primary": [
-    "max_hp_flat",
-    "max_hp"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "life_regen_pct"
-   ],
-   "slot": "belt",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Silk Sash",
-   "weight": 20,
-   "primary": [
-    "max_mana",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "elemental_resistance",
-    "mana_regen_pct"
-   ],
-   "slot": "belt",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Chain Clasp",
-   "weight": 28,
-   "primary": [
-    "elemental_resistance",
-    "max_hp_flat"
-   ],
-   "secondary": [
-    "evasion_flat"
-   ],
-   "slot": "belt",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Iron Gauntlets",
-   "weight": 45,
-   "primary": [
-    "max_hp",
-    "evasion_flat"
-   ],
-   "secondary": [
-    "elemental_alignment",
-    "life_regen_pct"
-   ],
-   "slot": "gloves",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Silk Wraps",
-   "weight": 20,
-   "primary": [
-    "elemental_alignment",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "max_mana_flat"
-   ],
-   "slot": "gloves",
-   "defence": "max_energy_shield_pct",
-   "school": "energy_shield_flat",
-   "family": null
-  },
-  {
-   "name": "Nimble Mitts",
-   "weight": 25,
-   "primary": [
-    "evasion_pct",
-    "evasion_flat"
-   ],
-   "secondary": [
-    "elemental_alignment"
-   ],
-   "slot": "gloves",
-   "defence": "evasion_pct",
-   "school": "evasion_flat",
-   "family": null
-  },
-  {
-   "name": "Handwrought Reliquary",
-   "weight": 46,
-   "primary": [
-    "armour_pct",
-    "evasion_pct",
-    "max_energy_shield_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "energy_shield_flat"
-   ],
-   "slot": "gloves",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Vanguard's Gauntlets",
-   "weight": 50,
-   "primary": [
-    "armour_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "max_hp_flat",
-    "armour_flat"
-   ],
-   "slot": "gloves",
-   "defence": "armour_pct",
-   "school": "armour_flat",
-   "family": null
-  },
-  {
-   "name": "Ranger's Gloves",
-   "weight": 24,
-   "primary": [
-    "max_energy_shield_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "elemental_alignment",
-    "cooldown_reduction"
-   ],
-   "slot": "gloves",
-   "defence": "evasion_pct",
-   "school": "evasion_flat",
-   "family": null
-  },
-  {
-   "name": "Iron Band",
-   "weight": 10,
-   "primary": [
-    "elemental_alignment",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "max_hp",
-    "all_resistance_pct"
-   ],
-   "slot": "ring",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Moonstone Signet",
-   "weight": 14,
-   "primary": [
-    "max_mana",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "max_hp",
-    "max_energy_shield_pct"
-   ],
-   "slot": "ring",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Jade Amulet",
-   "weight": 12,
-   "primary": [
-    "elemental_alignment",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "max_hp",
-    "all_resistance_pct"
-   ],
-   "slot": "amulet",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Onyx Talisman",
-   "weight": 20,
-   "primary": [
-    "elemental_alignment",
-    "max_mana_flat"
-   ],
-   "secondary": [
-    "cooldown_reduction",
-    "max_energy_shield_pct"
-   ],
-   "slot": "amulet",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Silver Hoop",
-   "weight": 12,
-   "primary": [
-    "elemental_alignment",
-    "max_mana"
-   ],
-   "secondary": [
-    "cooldown_reduction",
-    "all_resistance_pct"
-   ],
-   "slot": "earring",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Jade Stud",
-   "weight": 16,
-   "primary": [
-    "elemental_alignment",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "max_hp",
-    "all_resistance_pct"
-   ],
-   "slot": "earring",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Onyx Drop",
-   "weight": 22,
-   "primary": [
-    "max_hp",
-    "elemental_resistance"
-   ],
-   "secondary": [
-    "cooldown_reduction",
-    "all_resistance_pct"
-   ],
-   "slot": "earring",
-   "defence": null,
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Traveler's Cloak",
-   "weight": 20,
-   "primary": [
-    "evasion_pct",
-    "elemental_resistance"
-   ],
-   "secondary": [
-    "cooldown_reduction",
-    "all_resistance_pct"
-   ],
-   "slot": "cape",
-   "defence": "evasion_pct",
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Heavy Mantle",
-   "weight": 32,
-   "primary": [
-    "max_hp_flat",
-    "elemental_resistance"
-   ],
-   "secondary": [
-    "max_mana_flat",
-    "all_resistance_pct"
-   ],
-   "slot": "cape",
-   "defence": "armour_pct",
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Silk Drape",
-   "weight": 22,
-   "primary": [
-    "max_mana",
-    "elemental_resistance"
-   ],
-   "secondary": [
-    "mana_regen_pct",
-    "all_resistance_pct"
-   ],
-   "slot": "cape",
-   "defence": "max_energy_shield_pct",
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Mantle of the Bulwark",
-   "weight": 64,
-   "primary": [
-    "armour_pct",
-    "evasion_pct",
-    "max_energy_shield_pct"
-   ],
-   "secondary": [
-    "armour_flat",
-    "energy_shield_flat"
-   ],
-   "slot": "cape",
-   "defence": "armour_pct",
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Astral Shroud",
-   "weight": 26,
-   "primary": [
-    "max_energy_shield_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "energy_shield_flat",
-    "mana_regen_pct"
-   ],
-   "slot": "cape",
-   "defence": "armour_pct",
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Bulwark Cape",
-   "weight": 38,
-   "primary": [
-    "armour_pct",
-    "evasion_pct"
-   ],
-   "secondary": [
-    "max_hp_flat",
-    "elemental_resistance"
-   ],
-   "slot": "cape",
-   "defence": "armour_pct",
-   "school": null,
-   "family": null
-  },
-  {
-   "name": "Buckler",
-   "weight": 25,
-   "primary": [
-    "evasion_pct",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "max_hp_flat"
-   ],
-   "slot": "off hand",
-   "defence": null,
-   "school": null,
-   "family": "Shield"
-  },
-  {
-   "name": "Kite Shield",
-   "weight": 55,
-   "primary": [
-    "max_hp_flat",
-    "max_hp"
-   ],
-   "secondary": [
-    "evasion_pct"
-   ],
-   "slot": "off hand",
-   "defence": null,
-   "school": null,
-   "family": "Shield"
-  },
-  {
-   "name": "Grimoire",
-   "weight": 30,
-   "primary": [
-    "max_mana",
-    "cooldown_reduction"
-   ],
-   "secondary": [
-    "max_mana_flat",
-    "elemental_alignment"
-   ],
-   "slot": "off hand",
-   "defence": null,
-   "school": null,
-   "family": "Book"
+  "weapon_frames": {
+    "one-handed sword": [
+      {
+        "name": "Arming Sword",
+        "base_mod": [
+          "physical_power_flat",
+          "attack_speed"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Longsword",
+        "base_mod": [
+          "physical_power_flat",
+          "accuracy"
+        ],
+        "weight": 1
+      }
+    ],
+    "one-handed axe": [
+      {
+        "name": "Splitting Axe",
+        "base_mod": [
+          "physical_power_flat",
+          "bleed_chance"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Cleaver",
+        "base_mod": [
+          "physical_power_flat",
+          "critical_chance"
+        ],
+        "weight": 1
+      }
+    ],
+    "dagger": [
+      {
+        "name": "Dirk",
+        "base_mod": [
+          "physical_power_flat",
+          "critical_chance"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Stiletto",
+        "base_mod": [
+          "critical_chance",
+          "attack_speed"
+        ],
+        "weight": 1
+      }
+    ],
+    "mace": [
+      {
+        "name": "Warhammer",
+        "base_mod": [
+          "physical_power_flat",
+          "stun_chance"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Cudgel",
+        "base_mod": [
+          "physical_power_flat",
+          "critical_damage"
+        ],
+        "weight": 1
+      }
+    ],
+    "wand": [
+      {
+        "name": "Bone Wand",
+        "base_mod": [
+          "magic_power_flat",
+          "cooldown_reduction"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Crystal Wand",
+        "base_mod": [
+          "magic_power_flat",
+          "elemental_power_flat"
+        ],
+        "weight": 1
+      }
+    ],
+    "staff": [
+      {
+        "name": "Battle Staff",
+        "base_mod": [
+          "magic_power_flat",
+          "max_mana_flat"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Runed Staff",
+        "base_mod": [
+          "magic_power_flat",
+          "elemental_alignment"
+        ],
+        "weight": 1
+      }
+    ],
+    "spear": [
+      {
+        "name": "Pike",
+        "base_mod": [
+          "physical_power_flat",
+          "accuracy"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Partisan",
+        "base_mod": [
+          "physical_power_flat",
+          "attack_speed"
+        ],
+        "weight": 1
+      }
+    ],
+    "two-handed sword": [
+      {
+        "name": "Greatsword",
+        "base_mod": [
+          "physical_power_flat"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Flamberge",
+        "base_mod": [
+          "physical_power_flat",
+          "critical_damage"
+        ],
+        "weight": 1
+      }
+    ],
+    "two-handed axe": [
+      {
+        "name": "Battle Axe",
+        "base_mod": [
+          "physical_power_flat",
+          "bleed_chance"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Halberd",
+        "base_mod": [
+          "physical_power_flat",
+          "accuracy"
+        ],
+        "weight": 1
+      }
+    ],
+    "bow": [
+      {
+        "name": "Longbow",
+        "base_mod": [
+          "physical_power_flat",
+          "accuracy"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Recurve Bow",
+        "base_mod": [
+          "physical_power_flat",
+          "attack_speed"
+        ],
+        "weight": 1
+      }
+    ],
+    "crossbow": [
+      {
+        "name": "Arbalest",
+        "base_mod": [
+          "physical_power_flat",
+          "armour_pen"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Hand Crossbow",
+        "base_mod": [
+          "physical_power_flat",
+          "critical_chance"
+        ],
+        "weight": 1
+      }
+    ]
   }
- ],
- "base_mod": {
-  "defence": [
-   "armour_pct",
-   "evasion_pct",
-   "max_energy_shield_pct"
-  ],
-  "legacy_slots": [
-   "belt",
-   "ring",
-   "amulet",
-   "earring"
-  ],
-  "weapons": {
-   "one-handed sword": [
-    "physical_power_flat",
-    "attack_speed"
-   ],
-   "one-handed axe": [
-    "physical_power_flat",
-    "bleed_chance"
-   ],
-   "dagger": [
-    "physical_power_flat",
-    "critical_chance"
-   ],
-   "mace": [
-    "physical_power_flat",
-    "stun_chance"
-   ],
-   "wand": [
-    "magic_power_flat",
-    "cooldown_reduction"
-   ],
-   "staff": [
-    "magic_power_flat",
-    "max_mana_flat"
-   ],
-   "spear": [
-    "physical_power_flat",
-    "accuracy"
-   ],
-   "two-handed sword": [
-    "physical_power_flat"
-   ],
-   "two-handed axe": [
-    "physical_power_flat",
-    "bleed_chance"
-   ],
-   "bow": [
-    "physical_power_flat",
-    "accuracy"
-   ],
-   "crossbow": [
-    "physical_power_flat",
-    "armour_pen"
-   ]
-  },
-  "off_hand": {
-   "Shield": [
-    "block_chance"
-   ],
-   "Book": [
-    "magic_power_flat",
-    "mana_regen_flat"
-   ]
-  }
- },
- "weapons": [
-  {
-   "name": "one-handed sword",
-   "hands": "Single",
-   "group": "melee",
-   "damage": "physical",
-   "weapon_aspd": 1.2,
-   "weapon_mult": 1,
-   "dual_wield": true,
-   "weight": 35
-  },
-  {
-   "name": "one-handed axe",
-   "hands": "Single",
-   "group": "melee",
-   "damage": "physical",
-   "weapon_aspd": 1.2,
-   "weapon_mult": 1,
-   "dual_wield": true,
-   "weight": 40
-  },
-  {
-   "name": "dagger",
-   "hands": "Single",
-   "group": "melee",
-   "damage": "physical",
-   "weapon_aspd": 1.5,
-   "weapon_mult": 0.8,
-   "dual_wield": true,
-   "weight": 25
-  },
-  {
-   "name": "mace",
-   "hands": "Single",
-   "group": "melee",
-   "damage": "physical",
-   "weapon_aspd": 1,
-   "weapon_mult": 1.2,
-   "dual_wield": false,
-   "weight": 45
-  },
-  {
-   "name": "wand",
-   "hands": "Single",
-   "group": "magic",
-   "damage": "magic",
-   "weapon_aspd": 1,
-   "weapon_mult": 1.2,
-   "dual_wield": false,
-   "weight": 25
-  },
-  {
-   "name": "staff",
-   "hands": "Two",
-   "group": "magic",
-   "damage": "magic",
-   "weapon_aspd": 0.85,
-   "weapon_mult": 1.41,
-   "dual_wield": false,
-   "weight": 60
-  },
-  {
-   "name": "spear",
-   "hands": "Two",
-   "group": "melee",
-   "damage": "physical",
-   "weapon_aspd": 0.85,
-   "weapon_mult": 1.41,
-   "dual_wield": false,
-   "weight": 70
-  },
-  {
-   "name": "two-handed sword",
-   "hands": "Two",
-   "group": "melee",
-   "damage": "physical",
-   "weapon_aspd": 0.7,
-   "weapon_mult": 1.71,
-   "dual_wield": false,
-   "weight": 75
-  },
-  {
-   "name": "two-handed axe",
-   "hands": "Two",
-   "group": "melee",
-   "damage": "physical",
-   "weapon_aspd": 0.7,
-   "weapon_mult": 1.71,
-   "dual_wield": false,
-   "weight": 85
-  },
-  {
-   "name": "bow",
-   "hands": "Two (range)",
-   "group": "ranged",
-   "damage": "physical",
-   "weapon_aspd": 1.1,
-   "weapon_mult": 1.09,
-   "dual_wield": false,
-   "weight": 50
-  },
-  {
-   "name": "crossbow",
-   "hands": "Two (range)",
-   "group": "ranged",
-   "damage": "physical",
-   "weapon_aspd": 1.1,
-   "weapon_mult": 1.09,
-   "dual_wield": false,
-   "weight": 60
-  }
- ],
- "dual_wield_weight_mult": 0.8,
- "weapon_pools": {
-  "main hand": {
-   "Primary": [
-    "physical_power_flat",
-    "physical_power",
-    "critical_chance",
-    "critical_damage"
-   ],
-   "Secondary": [
-    "attack_speed",
-    "accuracy"
-   ],
-   "Stat Mod": [
-    "stat_mod_flat"
-   ],
-   "Blocked": [
-    "max_hp",
-    "evasion_flat",
-    "cooldown_reduction",
-    "elemental_resistance"
-   ],
-   "Weapon": [],
-   "sword / dagger / spear / bow": [
-    "physical_power_flat"
-   ],
-   "axe": [
-    "physical_power_flat",
-    "bleed_chance"
-   ],
-   "mace": [
-    "physical_power_flat",
-    "stun_chance"
-   ],
-   "crossbow": [
-    "physical_power_flat",
-    "armour_pen"
-   ],
-   "wand / staff": [
-    "magic_power_flat",
-    "magic_power"
-   ],
-   "all types": [
-    "elemental_power_flat"
-   ]
-  },
-  "off hand": {
-   "Shield": [
-    "max_hp_flat",
-    "max_hp",
-    "evasion_pct",
-    "block_chance"
-   ],
-   "Book": [
-    "max_mana_flat",
-    "max_mana",
-    "cooldown_reduction"
-   ],
-   "Dual-wield weapon": [],
-   "Stat Mod": [
-    "stat_mod_flat"
-   ]
-  }
- },
- "weapon_frames": {
-  "one-handed sword": [
-   {
-    "name": "Arming Sword",
-    "base_mod": [
-     "physical_power_flat",
-     "attack_speed"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Longsword",
-    "base_mod": [
-     "physical_power_flat",
-     "accuracy"
-    ],
-    "weight": 1
-   }
-  ],
-  "one-handed axe": [
-   {
-    "name": "Splitting Axe",
-    "base_mod": [
-     "physical_power_flat",
-     "bleed_chance"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Cleaver",
-    "base_mod": [
-     "physical_power_flat",
-     "critical_chance"
-    ],
-    "weight": 1
-   }
-  ],
-  "dagger": [
-   {
-    "name": "Dirk",
-    "base_mod": [
-     "physical_power_flat",
-     "critical_chance"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Stiletto",
-    "base_mod": [
-     "critical_chance",
-     "attack_speed"
-    ],
-    "weight": 1
-   }
-  ],
-  "mace": [
-   {
-    "name": "Warhammer",
-    "base_mod": [
-     "physical_power_flat",
-     "stun_chance"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Cudgel",
-    "base_mod": [
-     "physical_power_flat",
-     "critical_damage"
-    ],
-    "weight": 1
-   }
-  ],
-  "wand": [
-   {
-    "name": "Bone Wand",
-    "base_mod": [
-     "magic_power_flat",
-     "cooldown_reduction"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Crystal Wand",
-    "base_mod": [
-     "magic_power_flat",
-     "elemental_power_flat"
-    ],
-    "weight": 1
-   }
-  ],
-  "staff": [
-   {
-    "name": "Battle Staff",
-    "base_mod": [
-     "magic_power_flat",
-     "max_mana_flat"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Runed Staff",
-    "base_mod": [
-     "magic_power_flat",
-     "elemental_alignment"
-    ],
-    "weight": 1
-   }
-  ],
-  "spear": [
-   {
-    "name": "Pike",
-    "base_mod": [
-     "physical_power_flat",
-     "accuracy"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Partisan",
-    "base_mod": [
-     "physical_power_flat",
-     "attack_speed"
-    ],
-    "weight": 1
-   }
-  ],
-  "two-handed sword": [
-   {
-    "name": "Greatsword",
-    "base_mod": [
-     "physical_power_flat"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Flamberge",
-    "base_mod": [
-     "physical_power_flat",
-     "critical_damage"
-    ],
-    "weight": 1
-   }
-  ],
-  "two-handed axe": [
-   {
-    "name": "Battle Axe",
-    "base_mod": [
-     "physical_power_flat",
-     "bleed_chance"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Halberd",
-    "base_mod": [
-     "physical_power_flat",
-     "accuracy"
-    ],
-    "weight": 1
-   }
-  ],
-  "bow": [
-   {
-    "name": "Longbow",
-    "base_mod": [
-     "physical_power_flat",
-     "accuracy"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Recurve Bow",
-    "base_mod": [
-     "physical_power_flat",
-     "attack_speed"
-    ],
-    "weight": 1
-   }
-  ],
-  "crossbow": [
-   {
-    "name": "Arbalest",
-    "base_mod": [
-     "physical_power_flat",
-     "armour_pen"
-    ],
-    "weight": 1
-   },
-   {
-    "name": "Hand Crossbow",
-    "base_mod": [
-     "physical_power_flat",
-     "critical_chance"
-    ],
-    "weight": 1
-   }
-  ]
- }
 }

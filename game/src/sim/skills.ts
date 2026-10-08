@@ -313,7 +313,7 @@ export function effectsActive(sk: SkillState) {
   const rows: any[] = [];
   for (const [id, on] of Object.entries(sk.auras)) if (on && sm.byId[id]) rows.push(sm.byId[id]);
   for (const [id, left] of Object.entries(sk.buffUp)) if (left > 0 && sm.byId[id]) rows.push(sm.byId[id]);
-  return sm.aggregateEffects(rows);
+  return sm.aggregateEffects(rows, (r: any) => skillLevel(sk, r.id));
 }
 
 /** The stat a skill scales on is the finished hit it multiplies, so no `scale` lookup remains. */
@@ -403,10 +403,12 @@ export function castOnce(
     }
     // attack: the row's own fraction of the character's finished hit, then the group bonus and AoE split
     const level = skillLevel(s, id);
+    // the row's effects at the level actually held: the stored value is its level-1 number
+    const effects = sm.effectsAt(skill, level) as any[];
     let dmg = sm.perPress(skill, { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment, level }) || 0;
     // pin 1: a phys-basis press can crit on top of the pre-crit hit, a magic-basis one cannot.
     // A row that names extra crit chance on itself (Headshot) spends it on this press only.
-    const ownCrit = (skill.effects || []).find((e: any) => e.stat === 'crit_chance' && e.subject !== 'target');
+    const ownCrit = effects.find((e: any) => e.stat === 'crit_chance' && e.subject !== 'target');
     let crit = false;
     if (dmg > 0 && sm.critsOnBasis(skill) && rng() * 100 < c.critChance + (ownCrit ? ownCrit.value : 0)) {
       dmg = (dmg * c.critDmg) / 100;
@@ -416,7 +418,6 @@ export function castOnce(
     const hits = valueOf(skill, 'hits', 1);
     if (hits > 1) dmg *= hits * (valueOf(skill, 'hit_pct', 100) / 100);
     dmg *= sm.groupBonus(skill, c.weaponName) * mastery.skillBonus(c.weaponMastery || 0);
-    const effects = (skill.effects || []) as any[];
     const perEvasion = effects.find((e) => e.stat === 'damage_per_evasion_pct');
     // the Evasion-scaling row (parked with the physical add-ons) scales on the Evasion chance the sheet carries, which is the line
     // Dodge was merged into, so the key names what it actually reads.

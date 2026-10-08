@@ -10,7 +10,7 @@ import { setRule } from '../src/sim/filter';
  *
  * So the premise here is a full bag, reached directly, and the measurement is the mint across the
  * kills that follow. No hour bucket, no comparison against a published checkpoint: this game has no
- * time limit and no play-length target (`AGENT.md`), so nothing here — and nothing that reads it —
+ * time limit and no play-length target (`AGENTS.md`), so nothing here — and nothing that reads it —
  * may say how long a run "should" take.
  */
 export const KILLS_AFTER_FULL = 200;
@@ -21,7 +21,7 @@ describe('the built loop keeps its promise once nothing can be picked up', () =>
     const s = newGame(20260104);
     // phase 1: hunt with the filter OFF — the ships-default — so the adventure bag actually fills and
     // pickups pause. That is the state the promise is about, and it is reached by ticking to it, never
-    // by a window of hours (a bag's fill pace is the player's own · AGENT.md).
+    // by a window of hours (a bag's fill pace is the player's own · AGENTS.md).
     for (let i = 0; i < CAP && s.bag.length < E.inventory.adventure_slots; i++) { tick(s, {}); spendReference(s); }
     expect(s.bag.length).toBeGreaterThanOrEqual(E.inventory.adventure_slots);
     // phase 2: arm every slot, so a rejected piece now dissolves on the spot with the bag already full

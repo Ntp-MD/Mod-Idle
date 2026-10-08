@@ -1,30 +1,13 @@
 /**
- * The writer commands that own every generated block in the docs.
- *
- * `tools/build.ts` runs them to regenerate the docs in place;
- * `tools/check-generated.ts` re-runs them in a temp copy to prove the committed
- * files already match. One home so the two can never disagree about what
- * "every writer" means.
- */
-export const WRITERS: [string, string[]][] = [
-  ['check.ts', ['--write']],
-  ['town.ts', ['--write']],
-  ['skills.ts', ['--write']],
-  ['tree.ts', ['--write']],
-  ['ladder.ts', ['--write']],
-  ['loot.ts', ['--write']],
-  ['timeline.ts', ['--write']],
-  ['survival.ts', ['--write']],
-  ['bases.ts', ['--blocks']],
-  ['map.ts', ['--write']],
-];
-
-/**
  * The cages `tools/verify.ts` runs, in order, with the label each prints.
  *
  * One home so `verify.ts` and any other caller agree on what "the cage suite"
  * means. Every entry is read-only under `--checks`, so they may run concurrently
  * (see `tools/verify.ts`).
+ *
+ * There is no writer list any more: the docs are gone, so nothing prints a number
+ * into a file. `tools/data/*.json` is the single numeric home and every cage asserts
+ * it against `engine/` and the client.
  */
 export const CAGES: { label: string; script: string; args: string[] }[] = [
   { label: 'engine cage', script: 'tools/check.ts', args: ['--checks'] },
@@ -37,10 +20,5 @@ export const CAGES: { label: string; script: string; args: string[] }[] = [
   { label: 'timeline cage', script: 'tools/timeline.ts', args: ['--checks'] },
   { label: 'survival cage', script: 'tools/survival.ts', args: ['--checks'] },
   { label: 'inventory cage', script: 'tools/inventory.ts', args: ['--checks'] },
-  { label: 'anchor cage', script: 'tools/anchors.ts', args: ['--checks'] },
   { label: 'map cage', script: 'tools/map.ts', args: ['--checks'] },
-  // the generated-file guard: re-runs every writer in a temp copy and diffs the committed docs, so a
-  // hand-edit between the generated markers cannot hide behind `build.ts --check` never regenerating
-  { label: 'generated guard', script: 'tools/check-generated.ts', args: [] },
-  { label: 'doc lint', script: 'tools/lint.ts', args: [] },
 ];

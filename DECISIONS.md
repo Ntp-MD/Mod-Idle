@@ -6,7 +6,7 @@ The standing decisions of this project, written as constraints that are **in for
 first. A decision that holds is a rule the work is measured against; a decision that stops holding
 is deleted, not archived. If a line is only true because it happened once, it does not belong here.
 
-**What lives where.** `AGENT.md` owns the project shape — phase, terminology, number discipline,
+**What lives where.** `AGENTS.md` owns the project shape — phase, terminology, number discipline,
 doc layout, git — and, in its How we work section, how an agent works: verify routing, report format,
 when to decide and when to ask. `todo.md` owns the open work. This file owns the two things they do
 not: **what is forbidden**, and **how to think about a change before it lands.**
@@ -32,7 +32,19 @@ room for. Where the requested shape and the fitting shape differ, the fitting on
 
 **Name the number before moving it.** Any change that moves a published number goes data → writer →
 cage. If you cannot say which key in `tools/data/` owns a figure, the change is not understood yet.
-The rules for where numbers live are `AGENT.md` §3; this is the habit that follows from them.
+The rules for where numbers live are `AGENTS.md` §3; this is the habit that follows from them.
+
+**Freeze the invariant the curve reads, not the row you are touching.** Before landing a
+re-parameterisation, name the quantity the published model actually consumes, and hold *that*; every
+other number in the system is free and is where the change was supposed to happen. A proof that
+"every value stayed the same" proves only that nothing was designed. `mob_HP` is priced off the
+character's own DPS line (`REF_LINE.dps`) times a roster-wide level term (`skillF`), so a skill's
+per-press damage does not enter the curve at all — pinning all 39 rows' press to their old values
+looked like caution and was in fact the change being quietly refused. The invariants this repo
+prices are named where they live (`engine/index.ts` `REFERENCE`, `mob.curve`, `checks.md` E/F
+groups); read one before touching anything near it.
+
+**Ask:** which quantity does the curve read? Freeze that one and let the rest carry the design.
 
 **The smallest change that fixes the problem.** The design is frozen. The default is the fix, not
 the redesign that would have been nicer to design. Adding a shelf, a cage, a data file or a system
@@ -90,14 +102,15 @@ means it is not. Every Cap must state whether it is reachable (`formula.md`'s Ca
 
 **Ask:** which build, at what level, reaches this Cap? Show the row, not the reasoning.
 
-## D4 · Rarity, Item quality and Tier are three different things with three fixed names
+## D4 · Item level, Item quality and Tier are three different things with three fixed names
 
-**Forbidden:** the bare word `quality` for Rarity, and `tier` where the term is Item quality. The
-fixed words in `AGENT.md` §2 are the only names these three things have.
+**Forbidden:** the bare word `quality` for Item quality, `tier` where the term is Item quality, and the
+retired `Rarity` for the Mod count. The fixed words in `AGENTS.md` §2 are the only names these three
+things have.
 
-**Holds because:** one item answers three separate questions — Rarity = Mod count, Item quality =
-value range, Tier = sub-range. Using one word for two of them is how a loot table ends up
-generating a rule nobody wrote.
+**Holds because:** one item answers three separate questions — Item level = the value window, Item
+quality = the band, Tier = which third of the window. Using one word for two of them is how a loot table
+ends up generating a rule nobody wrote.
 
 **Ask:** which of the three questions is this sentence answering?
 
@@ -187,8 +200,8 @@ number is finished when no allocation is strictly dominated — not when one of 
 pool (`bases.json`) — `Max HP flat` against `Elemental resistance %`, and so on — so which line a
 piece offers, and whether it is flat or %, is the second place a build is expressed. Forbidden here
 too: naming the Mod a player should take, or the frame they should wear, and tuning a Mod's range so
-one line always beats the others. Flat and % exist to be a real trade that changes with level, quality
-and Rarity; if one side wins everywhere, the ranges are wrong — not the player's taste. The AI's job
+one line always beats the others. Flat and % exist to be a real trade that changes with level, Item
+quality and Item level; if one side wins everywhere, the ranges are wrong — not the player's taste. The AI's job
 is to keep every quality band and every craft verb (`Reroll` · `Refine` · `Ascend`) a genuine choice
 by pricing them honestly.
 
@@ -211,7 +224,7 @@ decides income is a second power system, and the player never bought it.
 
 **Holds because:** how much a player kills, and what that pays, is the *build's* answer — the gear and
 Mods they wear, the skill list they press, the tree they spent, the zone and hunting ground they chose.
-The design has no time limit and no play-length target (`AGENT.md`), so nothing is priced by the clock:
+The design has no time limit and no play-length target (`AGENTS.md`), so nothing is priced by the clock:
 a rate says what an hour holds, while the build says what the hour is worth. Publishing the rate as a
 source lets time stand in for power, and every price then moves when the cycle does instead of when the
 build does.

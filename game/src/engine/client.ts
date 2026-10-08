@@ -1,12 +1,12 @@
 // The single place the client touches the numeric sources.
 // engine.json / mods.json are the same files tools/*.js read, and createEngine is the same
 // module the cages call — so a number the client shows is the number the cage gates (Techstack.md).
-import engineJson from '../../../tools/data/engine.json';
-import modsJson from '../../../tools/data/mods.json';
-import skillsJson from '../../../tools/data/skills.json';
-import townJson from '../../../tools/data/town.json';
-import basesJson from '../../../tools/data/bases.json';
-import treeJson from '../../../tools/data/tree.json';
+import engineJson from '../../../tools/data/engine.json' with { type: 'json' };
+import modsJson from '../../../tools/data/mods.json' with { type: 'json' };
+import skillsJson from '../../../tools/data/skills.json' with { type: 'json' };
+import townJson from '../../../tools/data/town.json' with { type: 'json' };
+import basesJson from '../../../tools/data/bases.json' with { type: 'json' };
+import treeJson from '../../../tools/data/tree.json' with { type: 'json' };
 import { createEngine } from '../../../engine/index.ts';
 import { createLoot } from '../../../engine/loot.ts';
 import { createSkillModel } from '../../../engine/skills.ts';

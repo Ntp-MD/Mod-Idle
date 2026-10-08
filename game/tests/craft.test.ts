@@ -55,7 +55,7 @@ describe('Reroll', () => {
     expect(current.lines[craft.UNTOUCHABLE].value).toBe(hi);
   });
 
-  it('refuses to touch the Base Mod or the Legacy pair', () => {
+  it('refuses to touch the Base Mod or the Sub pair', () => {
     const item = piece(3);
     for (let i = 0; i < craft.UNTOUCHABLE; i++) {
       const r = refused(craft.reroll(item, i, mulberry32(1)));
@@ -115,12 +115,12 @@ describe('Ascend', () => {
 });
 
 describe('Remove', () => {
-  it('never touches the Base Mod or the Legacy pair', () => {
+  it('never touches the Base Mod or the Sub pair', () => {
     for (let s = 0; s < 40; s++) {
       const item = { ...piece(8), lines: [
         { id: 'physical_power_flat', value: 70, slice: 2 }, // Base Mod
-        { id: 'attack_speed', value: 20, slice: 2 },        // Legacy 1
-        { id: 'max_hp_flat', value: 40, slice: 2 },         // Legacy 2
+        { id: 'attack_speed', value: 20, slice: 2 },        // Sub 1
+        { id: 'max_hp_flat', value: 40, slice: 2 },         // Sub 2
         { id: 'stat_mod_flat', value: 20, slice: 2 },       // Random
         { id: 'armour_flat', value: 12, slice: 2 },         // Random
       ] };
@@ -133,7 +133,7 @@ describe('Remove', () => {
     }
   });
 
-  it('refuses a piece that has only the Base Mod and Legacy pair left', () => {
+  it('refuses a piece that has only the Base Mod and Sub pair left', () => {
     const item = { ...piece(9), lines: [
       { id: 'physical_power_flat', value: 70, slice: 2 },
       { id: 'attack_speed', value: 20, slice: 2 },
@@ -178,14 +178,12 @@ describe('Add mod stone', () => {
   });
 
   it('a piece stops at the crafted ceiling and takes at most two Add stones', () => {
-    const atCeiling = refused(craft.add({ ...piece(23), ilvl: 1, lines: [
-      { id: 'physical_power_flat', value: 70, slice: 2 }, { id: 'attack_speed', value: 20, slice: 2 },
-      { id: 'max_hp_flat', value: 40, slice: 2 }, { id: 'armour_flat', value: 12, slice: 2 },
-      { id: 'evasion_flat', value: 10, slice: 2 }, { id: 'stat_mod_flat', value: 9, slice: 2 },
-      { id: 'cooldown_reduction', value: 8, slice: 2 },
-    ] }, ['elemental_power_flat'], mulberry32(1)));
+    const L = E.item_level;
+    // a piece already holding as many lines as the ceiling publishes cannot take another stone
+    const full = Array.from({ length: L.crafted_max }, (_v, i) => ({ id: `line_${i}`, value: 1, slice: 2 }));
+    const atCeiling = refused(craft.add({ ...piece(23), ilvl: 1, lines: full }, ['elemental_power_flat'], mulberry32(1)));
     expect(atCeiling.ok).toBe(false);
-    expect(String(atCeiling.why)).toMatch(/stops at 7 Mods/);
+    expect(String(atCeiling.why)).toMatch(new RegExp(`stops at ${L.crafted_max} Mods`));
     const base = { ...piece(23), ilvl: 1, lines: [{ id: 'stat_mod_flat', value: 9, slice: 2 }] };
     const first = made(craft.add(base, ['max_hp_flat', 'armour_flat'], mulberry32(1)));
     expect(first.ok).toBe(true);
@@ -220,7 +218,8 @@ describe('Add mod stone', () => {
   it('the bench pays the stone and the client refuses without one', () => {
     const s = newGame(25);
     s.counters.stones.add = 0;
-    s.bag.unshift({ ...piece(26), ilvl: 61 });
+    // a piece with a free line whatever the drop drew, so the test is about the stone, not the width
+    s.bag.unshift({ ...piece(26), ilvl: 61, lines: [{ id: 'stat_mod_flat', value: 9, slice: 2 }], mods_added: 0 });
     expect(doCraft(s, 'bag', 0, 'add', 0, mulberry32(1)).ok).toBe(false);
     s.counters.stones.add = 1;
     const before = s.bag[0].lines.length;
