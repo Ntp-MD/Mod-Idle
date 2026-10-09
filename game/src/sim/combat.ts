@@ -13,6 +13,12 @@ export interface HitReport {
   damage: number;
   /** HP recovered from mark's leech on this hit (`status.mark.k_leech`). */
   leech?: number;
+  /**
+   * The Element that carried the bigger share of this hit, or null when it was pure physical.
+   * The damage indicator colours a number by this, so a mixed weapon reads as the half that landed
+   * hardest rather than as a second number the sim has to price.
+   */
+  element?: string | null;
 }
 
 /**
@@ -60,10 +66,34 @@ export function playerSwing(
   let nonElement = c.phys + c.magic;
 
   let crit = false;
+  let physShare = c.phys;
   if (c.phys > 0 && rng() * 100 < c.critChance + curse.critChance) {
     // crit multiplies the physical half only: magic and the 5 Elements never crit 
-    nonElement = nonElement - c.phys + c.phys * (c.critDmg / 100);
+    physShare = c.phys * (c.critDmg / 100);
+    nonElement = nonElement - c.phys + physShare;
     crit = true;
+  }
+  // conversion (`draft/convert-damage.md`): a percent of the finished physical share is routed into
+  // its named Element here — after crit, before mitigation — so the converted half answers Elemental
+  // resistance instead of Armour and takes the same weak/counter pair an Element pool does. The summed
+  // percent is capped at the whole hit inside `convertDamageOf`, so overflow is wasted, never a
+  // multiplier, and the physical half shrinks by exactly what converted.
+  if (c.conversion && Object.keys(c.conversion).length) {
+    const conv = eng.convertDamageOf(physShare, c.conversion) as { physical: number; byElement: Record<string, number> };
+    nonElement = c.magic + conv.physical;
+    // the converted share goes into the SAME per-Element map the pools use, so it meets resistance on
+    // its own line. A hit whose element was carried as one number (no named pool) has to be keyed
+    // first, or flipping to the map path would silently drop it — `''` reads the mob's headline `res`,
+    // exactly what the number path did.
+    if (!Object.keys(elemByElement).length && elemDamage > 0) { elemByElement[''] = elemDamage; elemDamage = 0; }
+    for (const [el, amount] of Object.entries(conv.byElement)) {
+      if (!(amount > 0)) continue;
+      const mult = (el === mob.innate[0] && el !== NO_COUNTER_ELEMENT ? E.elements.weak_mult : 1)
+        * counterMult(el, mob.innate[0]);
+      const dmg = amount * mult * elemTaken;
+      elemByElement[el] = (elemByElement[el] || 0) + dmg;
+      elemDamage += dmg;
+    }
   }
   // step 5-6 (B8): the mob answers each half with the line written against it — its own
   // Armour on everything that is not Element, its own Elemental resistance on the Element half.
@@ -83,7 +113,16 @@ export function playerSwing(
   // (`elements.md`) and Berserker pays it from our own sheet, so the two add.
   const leechPct = c.leechPct + curse.leechPct;
   const leech = leechPct > 0 ? (damage * leechPct) / 100 : 0;
-  return { landed: true, crit, damage, leech };
+  // The indicator's colour: which Element carried the bigger share of what actually landed. `null`
+  // is the non-Element half (Physical power plus Magic power), which the HUD reads in one neutral
+  // colour — it is a colour key, not a sixth Element.
+  let element: string | null = null;
+  let best = 0;
+  for (const [el, pool] of Object.entries(elemByElement)) {
+    if ((pool || 0) > best) { best = pool; element = el || null; }
+  }
+  if (elemDamage <= nonElement) element = null;
+  return { landed: true, crit, damage, leech, element };
 }
 
 /**

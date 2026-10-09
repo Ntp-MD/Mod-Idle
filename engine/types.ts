@@ -117,6 +117,7 @@ export interface CraftCfg {
   ascend_tier_stones: number;
   polish_casts_per_full_set: number;
   remove_stones_per_use: number;
+  replace_stones_per_use: number;
   repair_stones: number;
   upgrade_cap: number;
   upgrade_costs: number[];
@@ -279,7 +280,7 @@ export interface MobCfg {
   elite: MobElite;
   curve: CurveCfg;
   spawn_weights: Record<string, number>;
-  damage_split: Record<string, number>;
+  damage_split: Record<string, [number, number]>;
   field_labels: FieldLabelsCfg;
 }
 
@@ -320,6 +321,11 @@ export interface BaseModCfg {
 
 export interface ElementsCfg {
   order: string[];
+  status_of?: Record<string, string>;
+  /** The damage indicator's colour set: one per Element, one for a physical hit, one for a crit. */
+  colour?: Record<string, string>;
+  physical_colour?: string;
+  crit_colour?: string;
 }
 
 export interface SkillXpCfg {
@@ -354,6 +360,7 @@ export interface RoadCfg {
   encounter_rule: string;
   push_rule: string;
   waypoint_rule: string;
+  seen_rule?: string;
 }
 
 export interface FarmCfg {

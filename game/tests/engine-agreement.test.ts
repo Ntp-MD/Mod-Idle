@@ -79,7 +79,7 @@ describe('the tick loop', () => {
     // premise (AGENTS.md). The bound is a hang guard.
     for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     expect(s.counters.kills).toBeGreaterThan(0);
-    expect(s.player.xp + (s.player.level - 1) * 0).toBeGreaterThan(0);
+    expect(s.player.xp).toBeGreaterThan(0);
     expect(Number.isFinite(s.player.hp)).toBe(true);
     expect(s.player.hp).toBeLessThanOrEqual(buildCharacter(s.player.level, s.gear).maxHp + 1);
   });

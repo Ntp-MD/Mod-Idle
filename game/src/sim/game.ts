@@ -18,14 +18,14 @@ import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newCurses, modsOn, applyCurse, tickCurses, combineMods, lineValue, modsFromAuraFold, spreadOnDeath } from './curse';
 import {
-  newMobStatusStore, applyWeaponRiders, stepMob, holdPoison, forgetDead as forgetMobStatus,
+  newMobStatusStore, applyWeaponRiders, stepMobParts, holdPoison, forgetDead as forgetMobStatus,
   modsOn as statusModsOn, targetMods, holdsCondition,
 } from './mobStatus';
 import {
   newSkillState, tickSkills, castOnce, paySkillXp, grantSkill, buffNeedsRecast, skillCd, usableMana, buffRuleUp,
-  skillLevel,
+  skillLevel, triggerAuras, type TriggerAura,
 } from './skills';
-import type { GameState, Mob, Item } from './types';
+import type { GameState, Mob, Item, FxEvent } from './types';
 import { mulberry32, pick, intBetween, pickBand } from '../engine/client-helpers';
 
 const L = E.loot;
@@ -146,6 +146,9 @@ export function newGame(seed = 20260101): GameState {
       playSec: 0,
     },
     log: [],
+    /** The transient event ring the HUD animates; a save writes an empty one. */
+    fx: [],
+    fxSeq: 0,
     clockSec: 0,
     lastSavedAt: Date.now(),
   };
@@ -235,7 +238,8 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   const size = eng.sizeById(body);
   const bf = eng.zoneBodyFactor(zoneId);
   const hp = kind === 'boss' ? eng.mobHpAt(lv) * size.hp : kind === 'elite' ? eng.mobHpAt(lv) * E.mob.elite.hp : base.hp;
-  const ps = kind === 'boss' ? eng.mobPsAt(lv) * size.ps : kind === 'elite' ? eng.mobPsAt(lv) * E.mob.elite.ps : base.ps;
+  const psMult = eng.speciesPsMult(zoneId, species.id);
+  const ps = kind === 'boss' ? eng.mobPsAt(lv) * size.ps * psMult : kind === 'elite' ? eng.mobPsAt(lv) * E.mob.elite.ps * psMult : base.ps;
   // innate Element rolls inside the sub-zone's own Element, or the zone's Elements when a spawn has
   // no sub-zone; the species bias still weighs 3 (mob.element_roll)
   const bias = species.element_bias.filter((e: string) => z.elements.includes(e));
@@ -378,6 +382,8 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   const caught = spreadOnDeath(s.curses, mob.id, s.group.map((m) => m.id));
   if (caught) push(s, `${sm.byId['curse.pandemonium'].name} spreads to ${caught} nearby`);
   s.counters.kills++;
+  // the kill flash wears the mob's own innate Element, the same one its resistance answered with
+  fx(s, { kind: 'kill', side: 'field', text: mob.species, colour: hitColour(mob.innate?.[0] || null) });
   s.counters.zoneKills[mob.zone] = (s.counters.zoneKills[mob.zone] || 0) + 1;
   s.player.xp += mob.xp;
   while (s.player.level < E.stat.level_cap && s.player.xp >= eng.xpToNext(s.player.level)) {
@@ -419,6 +425,7 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   }, order, E.loot.variant_lean.shift_pct);
   if (rng() < hw.gear) {
     awardDrop(s, rng, band, ilvl, c.weaponAspd);
+    fx(s, { kind: 'drop', side: 'field', text: 'drop', colour: hitColour(null) });
   }
   const junkScale = pJunkBase > 0 ? hw.junk / pJunkBase : 1;
   // junk is kept and sold by hand at the Counterhand — it is a gold mint, not a gold drip. The item is
@@ -446,6 +453,10 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     if (rng() < L.elite_add_stone_chance) addTo(s, s.counters.stones, 'add', 'stone', 1);
     if (rng() < L.quality_stone_sources.elite_quality_chance) addTo(s, s.counters.stones, 'quality', 'stone', 1);
     if (rng() < L.repair_stone_sources.elite_repair_chance) addTo(s, s.counters.stones, 'repair', 'stone', 1);
+    if (rng() < L.replace_stone_sources.elite_replace_chance) {
+      addTo(s, s.counters.stones, 'replace', 'stone', 1);
+      fx(s, { kind: 'drop', side: 'field', text: 'Replace stone', colour: hitColour(null) });
+    }
   }
   // Quality Stone comes from every kill, but the ladder's cheap steps are the only part a mob pays
   if (rng() < L.quality_stone_sources.monster_quality_chance) addTo(s, s.counters.stones, 'quality', 'stone', 1);
@@ -455,6 +466,10 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     addTo(s, s.counters.stones, 'quality', 'stone', L.quality_stone_sources.boss_quality_stones);
     addTo(s, s.counters.stones, 'repair', 'stone', L.repair_stone_sources.boss_repair_stones);
     if (rng() < L.corrupt_stone_sources.boss_corrupt_chance) addTo(s, s.counters.stones, 'corrupt', 'stone', 1);
+    if (rng() < L.replace_stone_sources.boss_replace_chance) {
+      addTo(s, s.counters.stones, 'replace', 'stone', 1);
+      fx(s, { kind: 'drop', side: 'field', text: 'Replace stone', colour: hitColour(null) });
+    }
     if (goalKill(s, mob)) {
       push(s, `Gate met — ${mob.kind.replace('Boss · ', '')} killed in one spawn, no Push, at ${Math.round(s.clockSec / 60)} min of play · level ${s.player.level}`);
     }
@@ -481,6 +496,48 @@ function spawnWalkEncounter(s: GameState, rng: () => number) {
 export function push(s: GameState, text: string) {
   s.log.unshift({ sec: s.clockSec, text });
   if (s.log.length > 60) s.log.length = 60;
+}
+
+/** How many events the HUD ring keeps — enough to read a fight by, small enough to never grow. */
+const FX_RING = 24;
+
+/**
+ * One event handed to the screen. A log line is for reading later; this is for animating now, and it
+ * carries the number and the colour, which a total (`counters.damageBy`) and a sentence both lose.
+ */
+export function fx(s: GameState, ev: { kind: FxEvent['kind']; text: string; colour: string; crit?: boolean; side?: FxEvent['side'] }) {
+  s.fx = s.fx || [];
+  s.fxSeq = (s.fxSeq || 0) + 1;
+  s.fx.unshift({ id: s.fxSeq, sec: s.clockSec, ...ev });
+  if (s.fx.length > FX_RING) s.fx.length = FX_RING;
+}
+
+/** The indicator's colour for one hit: a crit first, then the Element that carried it, then neutral. */
+export function hitColour(element: string | null | undefined, crit = false): string {
+  const C = E.elements as any;
+  if (crit) return C.crit_colour || '#ffffff';
+  if (element && C.colour?.[element]) return C.colour[element];
+  return C.physical_colour || '#ffffff';
+}
+
+/**
+ * The colour a status takes — the colour of the Element that inflicts it, read through
+ * `elements.status_of`, so a proc never owns a second copy of a colour. The cold proc is `chill`, and
+ * `chill` is the game's freeze: the ice colour is the same one either word reads.
+ */
+export function statusColour(status: string): string {
+  const C = E.elements as any;
+  const el = Object.keys(C.status_of || {}).find((k) => C.status_of[k] === status);
+  return (el && C.colour?.[el]) || C.physical_colour || '#ffffff';
+}
+
+/**
+ * The status that carried a DoT tick, so the number has one colour to wear. A tie goes to the
+ * Element line over the physical one, which is the same order the budget is written in.
+ */
+function dotLead(parts: { burn: number; poison: number; bleed: number }): string {
+  return parts.burn >= parts.poison && parts.burn >= parts.bleed ? 'burn'
+    : parts.poison >= parts.bleed ? 'poison' : 'bleed';
 }
 
 /**
@@ -572,12 +629,18 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       walk.blocksLeft--;
       walk.blocksWalked++;
       walk.secLeft = road.blockSec;
+      // the step is an event the sheet can animate: the route lights one cell at a time
+      fx(s, {
+        kind: 'travel', side: 'self',
+        text: `block ${walk.blocksWalked} of ${walk.blocksTotal}`, colour: hitColour(null),
+      });
       if (walk.blocksLeft <= 0) {
         const arrived = arrive(s, walk);
         if (arrived) {
           push(s, arrived.first
-            ? `Arrived on foot at ${arrived.name} — its Waypoint is open, and it costs nothing`
+            ? `Arrived on foot at ${arrived.name} — its Waypoint is open`
             : `Arrived at ${arrived.name}`);
+          fx(s, { kind: 'travel', side: 'self', text: `arrived · ${arrived.name}`, colour: hitColour(null) });
         }
       } else if (road.rollEncounter(rng)) {
         spawnWalkEncounter(s, rng);
@@ -632,6 +695,79 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // mob, where `modsOn` reads the same status into `stopped` and the mob's swing is blocked. The
   // attack clock does not advance, so the second is lost rather than banked ($14 · item 5).
   const stunned = (statuses.shock?.secLeft || 0) > 0;
+  // the events the trigger auras listen for, collected where they happen: a crit in this tick's swings,
+  // and any hit that took HP or Energy Shield off the player
+  const trig = triggerAuras(s.skills);
+  let critLanded = false;
+  let tookDamage = false;
+
+  // The cast pipeline is one path: a rotation press and a triggered one differ only by the `trigger`
+  // env handed to `castOnce`, which prices the press, so their outcome handling cannot drift.
+  function applyCast(cast: ReturnType<typeof castOnce>) {
+    if (!cast) return;
+    s.player.mana = Math.max(0, s.player.mana - cast.manaCost);
+    if (cast.heal) s.healUp = cast.heal;
+    if (cast.charges != null) {
+      s.player.charges = cast.charges;
+      push(s, `${cast.name} grants ${cast.charges} perfect-dodge charges`);
+    }
+    if (cast.cleansesSelf) {
+      const cleared = Object.keys(statuses).length;
+      for (const k of Object.keys(statuses) as StatusName[]) delete statuses[k];
+      if (cleared) push(s, `${cast.name} clears ${cleared} status${cleared > 1 ? '' : 'es'} off you`);
+    }
+    if (cast.instantHealPct) {
+      const healed = (c.maxHp * cast.instantHealPct) / 100;
+      s.player.hp = Math.min(c.maxHp, s.player.hp + healed);
+      push(s, `${cast.name} restores ${eng.fmt(healed)} HP at once (${cast.instantHealPct}% of the pool)`);
+    }
+    if (cast.damage && cast.targets) push(s, `${cast.name} hits ${cast.targets} for ${eng.fmt(cast.damage)}${cast.crit ? ' (crit)' : ''}`);
+    // the press's colour comes from the row's own Element (`skills.json` `element`), the same field
+    // the status rider reads — a press with no Element name is the neutral half
+    const castElement = (sm.byId[cast.id] as any)?.element || null;
+    if (cast.damage && cast.targets) {
+      fx(s, {
+        kind: 'hit', side: 'field', crit: cast.crit,
+        text: eng.fmt(cast.damage), colour: hitColour(castElement, cast.crit),
+      });
+    }
+    if (cast.name) fx(s, { kind: 'cast', side: 'self', text: cast.name, colour: hitColour(castElement) });
+    if (cast.damage && !cast.targets) push(s, `${cast.name} was dodged`);
+    credit(s, 'cast', cast.dealt || 0);
+    if (cast.curseOn) {
+      const sec = applyCurse(s.curses, cast.curseOn, sm.byId[cast.id]);
+      // a curse line that names a status clock (Venom Bind) is spent on the status store, not the
+      // curse store, because it changes how another line decays rather than adding a multiplier
+      for (const e of (sm.byId[cast.id].effects || [])) {
+        if (e.subject === 'target' && e.stat === 'poison_hold_sec') holdPoison(s.mobStatus, cast.curseOn, e.value);
+      }
+      push(s, `${cast.name} lands for ${sec} sec`);
+    }
+    while (s.group.length && s.group[0].hp <= 0) {
+      const dead = s.group.shift()!;
+      onKill(s, rng, dead, c);
+    }
+  }
+
+  /**
+   * A trigger aura's press: the same `castOnce` the rotation uses, asking for the first ready slot in
+   * the cast order, with the aura's price on it. It spends the aura's own clock (`trigger_cd_sec`),
+   * never the skill's cooldown, so the trigger is an extra press rather than a re-ordered rotation.
+   */
+  function fireTrigger(aura: TriggerAura | null) {
+    if (!aura || stunned || (s.skills.cd[aura.id] || 0) > 0) return;
+    const t = castOnce(s.skills, c, s.player.mana, s.group, statuses, rng, {
+      mobStatus: s.mobStatus, curses: s.curses,
+      missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
+      isBoss: !!s.group[0] && String(s.group[0].kind).startsWith('Boss'),
+      trigger: { manaMult: aura.manaMult, damageMult: aura.damageMult },
+    });
+    if (!t) return;
+    s.skills.cd[aura.id] = aura.cdSec;
+    push(s, `${sm.byId[aura.id].name} triggers ${t.name}`);
+    applyCast(t);
+  }
+
   if (!stunned) s.player.atkTimer += c.hitsPerSec;
   while (s.player.atkTimer >= 1 && front && !stunned) {
     s.player.atkTimer -= 1;
@@ -645,7 +781,11 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       applyWeaponRiders(rng, c, s.mobStatus, target.id, lineValue(s.curses, target.id, 'bleed_chance') > 0);
       if (r.leech) s.player.hp = Math.min(c.maxHp, s.player.hp + r.leech);
       credit(s, 'swing', r.damage);
-      if (r.crit) push(s, `Crit for ${eng.fmt(r.damage)} (${target.species})`);
+      fx(s, {
+        kind: 'hit', side: 'field', crit: r.crit,
+        text: eng.fmt(r.damage), colour: hitColour(r.element || null, r.crit),
+      });
+      if (r.crit) { critLanded = true; push(s, `Crit for ${eng.fmt(r.damage)} (${target.species})`); }
       if (target.hp <= 0) {
         onKill(s, rng, target, c);
         s.group.shift();
@@ -673,46 +813,21 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
     isBoss: !!s.group[0] && String(s.group[0].kind).startsWith('Boss'),
   });
-  if (cast) {
-    s.player.mana = Math.max(0, s.player.mana - cast.manaCost);
-    if (cast.heal) s.healUp = cast.heal;
-    if (cast.charges != null) {
-      s.player.charges = cast.charges;
-      push(s, `${cast.name} grants ${cast.charges} perfect-dodge charges`);
-    }
-    if (cast.cleansesSelf) {
-      const cleared = Object.keys(statuses).length;
-      for (const k of Object.keys(statuses) as StatusName[]) delete statuses[k];
-      if (cleared) push(s, `${cast.name} clears ${cleared} status${cleared > 1 ? '' : 'es'} off you`);
-    }
-    if (cast.instantHealPct) {
-      const healed = (c.maxHp * cast.instantHealPct) / 100;
-      s.player.hp = Math.min(c.maxHp, s.player.hp + healed);
-      push(s, `${cast.name} restores ${eng.fmt(healed)} HP at once (${cast.instantHealPct}% of the pool)`);
-    }
-    if (cast.damage && cast.targets) push(s, `${cast.name} hits ${cast.targets} for ${eng.fmt(cast.damage)}${cast.crit ? ' (crit)' : ''}`);
-    if (cast.damage && !cast.targets) push(s, `${cast.name} was dodged`);
-    credit(s, 'cast', cast.dealt || 0);
-    if (cast.curseOn) {
-      const sec = applyCurse(s.curses, cast.curseOn, sm.byId[cast.id]);
-      // a curse line that names a status clock (Venom Bind) is spent on the status store, not the
-      // curse store, because it changes how another line decays rather than adding a multiplier
-      for (const e of (sm.byId[cast.id].effects || [])) {
-        if (e.subject === 'target' && e.stat === 'poison_hold_sec') holdPoison(s.mobStatus, cast.curseOn, e.value);
-      }
-      push(s, `${cast.name} lands for ${sec} sec`);
-    }
-    while (s.group.length && s.group[0].hp <= 0) {
-      const dead = s.group.shift()!;
-      onKill(s, rng, dead, c);
-    }
-  }
+  applyCast(cast);
+  // the crit trigger fires after the rotation's own press, so it picks the next ready slot rather than
+  // casting the same skill twice in the same tick
+  if (critLanded) fireTrigger(trig.crit);
 
   // statuses age once a second, and the DoT they deal lands before the mob swings back
   for (const mob of s.group) {
-    const dot = stepMob(s.mobStatus, mob.id);
-    if (dot > 0) mob.hp -= dot;
-    credit(s, 'dot', dot);
+    const dot = stepMobParts(s.mobStatus, mob.id);
+    if (dot.total > 0) {
+      mob.hp -= dot.total;
+      // one number per mob per second, wearing the colour of the status carrying it: burn is the fire
+      // it came from, poison the poison, and bleed the physical neutral it has always been
+      fx(s, { kind: 'hit', side: 'field', text: eng.fmt(dot.total), colour: statusColour(dotLead(dot)) });
+    }
+    credit(s, 'dot', dot.total);
   }
   while (s.group.some((m) => m.hp <= 0)) {
     const dead = s.group.splice(s.group.findIndex((m) => m.hp <= 0), 1)[0];
@@ -735,6 +850,19 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
         continue;
       }
       const r = mobSwing(rng, c, mob, statuses, tm, s.player.es, absorbPct);
+      // a defence is an event too: the screen has to say *which* answer stopped the hit, because
+      // Block, Evasion and a perfect dodge animate differently and the player reads them apart
+      if (r.blocked) fx(s, { kind: 'block', side: 'self', text: r.blocked, colour: hitColour(null) });
+      // `cast_on_damage_taken` listens for any hit that actually took off the player (HP or shield)
+      if (r.toHp > 0 || r.toEs > 0) {
+        tookDamage = true;
+        // the incoming number wears the attacker's own Element, the same line the resistance roll
+        // answered — a chaos hit reads purple whether or not the shield ate it
+        fx(s, {
+          kind: 'taken', side: 'self',
+          text: eng.fmt(r.toHp + r.toEs), colour: hitColour(mob.innate?.[0] || null),
+        });
+      }
       if (r.absorbed > 0) s.player.es = Math.min(c.es, s.player.es + r.absorbed);
       if (r.toEs > 0) { s.player.es -= r.toEs; if (!buffRuleUp(s.skills, 'es_recharge_immediate')) s.player.esIdleSec = 0; }
       if (r.toHp > 0) {
@@ -746,10 +874,15 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
           const elemHalf = (mob.ps / mob.hitsPerSec) * eng.damageSplit(mob.damage)[1];
           const st = immune ? null : rollStatus(rng, mob, elemHalf, statuses, c.statusResist, c.stunRecovery);
           if (st) push(s, `${mob.species} inflicts ${st}`);
+          // a proc is its own beat on screen: the status word in the colour of the Element that
+          // inflicted it, so chill lands as the same ice a cold hit already reads
+          if (st) fx(s, { kind: 'proc', side: 'self', text: st, colour: statusColour(st) });
         }
       }
     }
   }
+  // the damage-taken trigger fires once the incoming clock has run, on the same tick it was hurt
+  if (tookDamage) fireTrigger(trig.taken);
 
   // damage over time on us, then regen (field rule 2: regen works during combat)
   if (s.healUp) {
@@ -761,7 +894,12 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // a charge also stops a DoT tick — the row says it deletes "unconditional effects", which is what
   // a burn tick is: nothing rolls for it (`buff.ghost_dance`)
   if (dot > 0 && (s.player.charges || 0) > 0) s.player.charges!--;
-  else if (dot > 0) s.player.hp -= dot;
+  else if (dot > 0) {
+    s.player.hp -= dot;
+    // the same colour rule on our own side of the field, so a poison the mob left on us reads green
+    const lead = dotLead({ burn: (statuses.burn?.stacks || 0) * (statuses.burn?.perSec || 0), poison: (statuses.poison?.stacks || 0) * (statuses.poison?.perSec || 0), bleed: 0 });
+    fx(s, { kind: 'taken', side: 'self', text: eng.fmt(dot), colour: statusColour(lead) });
+  }
   const burnCut = statuses.burn ? Math.min(E.status.burn.regen_cut_max, statuses.burn.stacks * E.status.burn.regen_cut_per_stack) : 0;
   // `combat.md` §5 reads shock as "attacks stop + regen stops", so the stop covers the pools too.
   // The Energy Shield recharge is left alone on purpose: it is a shield, not regen, and its own

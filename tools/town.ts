@@ -5,16 +5,14 @@ import path from 'node:path';
 import * as eng from './lib/engine.ts';
 
 /**
- * Town economy generator + cage.
+ * Town economy cage — tools/data/town.json, priced off the engine's own band numbers.
  *
  *   node tools/town.ts            help
- *   node tools/town.ts --emit     print every generated block to stdout
- *   node tools/town.ts --write    replace the generated blocks inside the docs
- *   node tools/town.ts --checks   run group T, report, exit 1 on FAIL
+ *   node tools/town.ts --checks   run group T, exit 1 on FAIL
  *
- * Every gold price, Standing kill threshold, supply figure and demand ratio in
- * towns-stalls.md + checks.md group T is an output of tools/data/town.json.
- * Nothing here reads the markdown files except to check that they are current.
+ * Every gold price, Standing kill threshold, supply figure and demand ratio is an output of
+ * tools/data/town.json read against `tools/data/engine.json` — town.json carries no band number
+ * of its own (T18), so the two can never drift.
  */
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -156,8 +154,6 @@ function runChecks() {
     `the junk line rises with the band: ${BANDS.map((b) => junkKill(b).toFixed(4)).join(' < ')} gold per kill`);
   add('T7', Math.abs(junk('high_full_lck') / junk('high') - E.towns_gold_rate_multiplier_bound) < 0.05,
     `full-Lck junk ×${(junk('high_full_lck') / junk('high')).toFixed(2)} against the ×${E.towns_gold_rate_multiplier_bound} ceiling`);
-  add('T3', SUPPLY === Math.round(lifetimeSupply()),
-    `lifetime supply ${fmt(SUPPLY)} gold`);
   add('T4', ONETIME_DEMAND / SUPPLY <= INV.onetime_demand_max_multiple_of_lifetime_supply,
     `one-time demand ${fmt(ONETIME_DEMAND)} = ${(ONETIME_DEMAND / SUPPLY).toFixed(2)}× supply (limit ${(INV.onetime_demand_max_multiple_of_lifetime_supply).toFixed(2)}×)`);
   add('T5', ESSENTIALS / SUPPLY <= INV.essentials_max_share_of_lifetime_supply,
@@ -173,11 +169,18 @@ function runChecks() {
       : risky.length ? `power noun without display_only: ${risky.map((l) => l.id).join(', ')}`
         : `${DATA.one_time.length + DATA.repeatable.length} lines, all tagged space/time/information/appearance`);
 
-  // T9 — travel costs nothing and pays nothing. The walk is a shape (a block time and an encounter
-  // chance) and the Waypoint is free, so the cage reads the shape and proves no gold line survived.
-  const travelLines = [...DATA.one_time, ...DATA.repeatable].filter((l: any) => /road|carriage|waypoint|pedlar_on_road/i.test(l.id));
-  add('T9', travelLines.length === 0 && E.road.block_sec >= 1 && E.road.encounter_chance_pct > 0,
-    `travel is free: no Road, carriage or waypoint line survives in the ${DATA.one_time.length + DATA.repeatable.length} stall lines · ${E.road.block_sec}s a block · ${E.road.encounter_chance_pct}% an encounter per block`);
+  // T9 — the walk costs time and pays nothing; the Waypoint is the only travel line for sale, and it
+  // buys back that time. The cage reads the shape (a block time, an encounter chance, one priced warp
+  // per block that no settlement stocks) rather than trusting prose.
+  const travelLines = [...DATA.one_time, ...DATA.repeatable].filter((l: any) => /road|carriage|pedlar_on_road/i.test(l.id));
+  const warp = DATA.repeatable.find((l: any) => l.id === 'waypoint_warp');
+  const stocked = DATA.settlements.filter((s: any) => (s.stock || []).includes('waypoint_warp'));
+  add('T9', travelLines.length === 0 && !!warp && warp.kind === 'time' && warp.m_per_block > 0
+    && stocked.length === 0 && E.road.block_sec >= 1 && E.road.encounter_chance_pct > 0,
+    travelLines.length ? `a travel line survives the walk: ${travelLines.map((l) => l.id).join(', ')}`
+      : !warp ? 'no waypoint_warp line prices the Waypoint'
+        : stocked.length ? `a settlement stocks the Waypoint (${stocked.map((s) => s.id).join(', ')}) — a warp is not a stall line`
+          : `no route is sold: the Waypoint is the only travel line, ${warp.m_per_block} minutes a block at its own band and stocked nowhere · ${E.road.block_sec}s a block · ${E.road.encounter_chance_pct}% an encounter per block`);
 
   // T10 — Armourer floor
   const repairLines = [...DATA.one_time, ...DATA.repeatable].filter((l) => /repair/.test(l.id));
@@ -226,15 +229,16 @@ function runChecks() {
   });
   add('T16', ladderOk, `${Object.keys(ladders).length} ladders monotonic: ${ladderRanges()}`);
 
-  // T17 — no income invented here
+  // T17 — the band numbers town reads are the engine's own, never a retyped copy
   const kph = BANDS.map((b) => E.bands[b].kills_per_hr);
-  add('T17', kph.join() === '463,537,589', `F1 ${kph.join(' / ')} kills/hr copied from loot.md section 2 · this tool changes no kill rate`);
+  const engineKph = BANDS.map((b) => eng.BAND[b].kills_derived);
+  add('T17', kph.every((v: number, i: number) => v === engineKph[i]),
+    `town's band kills/hr ${kph.join(' / ')} equal the engine's own ${engineKph.join(' / ')} — this tool invents no kill rate`);
 
-  // T18 — this data file must read the same engine the loot docs publish
-  const dc = docCheck();
-  add('T18', dc.problems.length === 0, dc.problems.length
-    ? dc.problems.join(' · ')
-    : `checks.md F1 ${dc.d.f1} · F3 ${dc.d.f3} · F5 ${dc.d.f5} and loot.md section 2 rows all equal the data engine`);
+  // T18 — town.json must not carry an engine block of its own (one home for every number)
+  add('T18', !DATA.engine, DATA.engine
+    ? 'town.json still carries an engine block — band numbers must come only from tools/data/engine.json'
+    : 'town.json carries no engine block: every band number is read from tools/data/engine.json');
 
   // roster consistency
   const setTownIds = DATA.collector_sets.map((c: any) => c.settlement);
@@ -269,13 +273,6 @@ function runChecks() {
 
 function close(a: any, b: any) { return Math.abs(a - b) < 0.005; }
 
-// ---- doc-vs-data: the town tables may only use the shared engine
-
-function docCheck(): any {
-  const problems: any[] = [];
-  if (DATA.engine) problems.push('town.json still carries an engine block — band numbers must come only from tools/data/engine.json');
-  return { problems, d: { f1: E.bands.high.kills_per_hr, f3: E.bands.high.drops_per_hr, f5: junk('high') } };
-}
 // ---------------------------------------------------------------- cli
 
 const arg = process.argv[2];

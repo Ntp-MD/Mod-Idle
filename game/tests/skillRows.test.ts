@@ -192,6 +192,7 @@ describe('the stack rows and the status curses reach the status store', () => {
     guard = 0;
     while (!Object.keys(s.curses).length && guard++ < 60) {
       s.player.mana = c.maxMana;
+      s.player.hp = c.maxHp;   // the test owns the curse landing, not the fight: keep the caster up
       tick(s, {});
     }
     const mobId = Object.keys(s.curses)[0];

@@ -123,6 +123,8 @@ export interface Character {
   elem: number;
   /** Elemental power per Element, from the lines that carry one. Empty when nothing does. */
   elemByElement: Record<string, number>;
+  /** Per-Element conversion percent, from the conversion aura rows (`damage_conversion:<element>`). */
+  conversion: Record<string, number>;
   accuracy: number;
   /** The Dex half of Evasion, as a rating — rolled against whichever mob is attacking. */
   evasion: number;
@@ -242,6 +244,15 @@ export function buildCharacter(
     const el = key.split(':')[1];
     herald[el] = (herald[el] || 0) + v * (1 + lines.elemPct / 100);
   }
+  // conversion (draft/convert-damage.md): the aura rows' `damage_conversion:<element>` fold into a
+  // per-Element percent, the same `stat:element` key shape the Herald bonus reads — the swing and the
+  // physical-basis press route their physical share through it, a magic-basis press never does
+  const conversion: Record<string, number> = {};
+  for (const [key, v] of Object.entries(effects.add || {})) {
+    if (!key.startsWith('damage_conversion:')) continue;
+    const el = key.split(':')[1];
+    conversion[el] = (conversion[el] || 0) + v;
+  }
   const elemTotal = elemFromGear + Object.values(herald).reduce((t, v) => t + v, 0);
   const elemByElement: Record<string, number> = {};
   for (const [el, bucket] of Object.entries((lines.elemBy || {}) as Record<string, { flat: number; pct: number }>)) {
@@ -288,6 +299,8 @@ export function buildCharacter(
     magic: eng.magicOf(core.int, lines.magicFlat, lines.magicPct, weaponAspd),
     elemByElement,
     elem: elemTotal,
+    /** Per-Element conversion percent, from the conversion aura rows (empty when none is up). */
+    conversion,
     accuracy: eng.playerAccuracy(core.dex, lines.accPct),
     evasion: eng.evasionRating(core.dex, lines.evasionFlat, lines.evasionPct) + a(effects, 'evasion'),
     evasionFromAgi: eng.agilityEvasion(core.agi),

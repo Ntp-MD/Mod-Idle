@@ -1,7 +1,7 @@
 # Generated views and writer snapshots — never hand-edited, always rebuildable.
 
 # Static wiki tree: node tools/wiki.ts build
-wiki/
+
 
 
 # Dashboard snapshot: node tools/report.ts

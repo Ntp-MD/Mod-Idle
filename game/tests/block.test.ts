@@ -8,7 +8,7 @@ import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
 
 /**
- * `owner/idea-gameplay.md`: **block answers a physical hit only.** A shield argues with a blade, not
+ * **block answers a physical hit only.** A shield argues with a blade, not
  * with a spell — so the roll is gated on the incoming hit actually carrying a physical half, and the
  * flat `armour / 10` cut is capped by that half. A pure-Element swing is never blocked and never
  * thinned, which is the half of the rule a whole-hit cut could not express.
@@ -33,7 +33,7 @@ const swing = (c: Character, damage: 'physical' | 'magic' | 'mixed') =>
   mobSwing(mulberry32(1), c, mob(damage), {}, NO_CURSE, 0);
 const landed = (r: ReturnType<typeof swing>) => r.toHp + r.toEs;
 
-describe('block answers a physical hit only (owner ruling · owner/idea-gameplay.md)', () => {
+describe('block answers a physical hit only (owner ruling)', () => {
   it('never blocks a pure-Element swing', () => {
     const shielded = swing(withShield(100, 100), 'magic');
     const bare = swing(withShield(100, 0), 'magic');

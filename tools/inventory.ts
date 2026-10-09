@@ -21,10 +21,12 @@ const f1 = (x: number): string => x.toFixed(1);
 // kept gear per hour = the measured upgrade rate (loot.md F4), not the junk flow
 const KEEP_HR = L.bands.high.upgrades_per_hr;
 const GEAR_FILL_HR = IV.adventure_slots / KEEP_HR;
-// one character-bag slot of each consumable, and how long it takes to earn it
+// one character-bag slot of each consumable, and how long it takes to earn it.
+// The high-band herb rate is F13 read out of the data: chance × the average bundle over the band's own kills.
+const HERB_BUNDLES_HR = E.herbs.high_chance * ((E.herbs.bundle_min + E.herbs.bundle_max) / 2) * BAND.high.kills_derived;
 const SLOT_HR = {
   stone: IV.stack_size.stone / BAND.high.junk_per_hr,      // value stones are the junk line
-  herb: IV.stack_size.herb / 54,                           // high-band herb bundles/hr (F13)
+  herb: IV.stack_size.herb / HERB_BUNDLES_HR,              // high-band herb bundles/hr (F13)
 };
 const STONE_BAG_WEIGHT = IV.character_slots * IV.stack_size.stone * IV.unit_weight.stone;
 const HERB_BAG_WEIGHT = IV.character_slots * IV.stack_size.herb * IV.unit_weight.herb;

@@ -178,6 +178,6 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     expect(bare.resistance).toBeGreaterThan(0);
     expect(withAuras.resistance).toBe(bare.resistance);
     expect(withAuras.aspd).toBeCloseTo(bare.aspd, 10);
-    expect(modsFromAuraFold(effectsActive(sk2).target || {}).attackSpeed).toBe(-15);
+    expect(modsFromAuraFold(effectsActive(sk2).target || {}).attackSpeed).toBe(valueOf('aura.rimbo_form', 'attack_speed'));
   });
 });

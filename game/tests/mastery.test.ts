@@ -13,35 +13,35 @@ describe('the Mastery curve is the published one', () => {
   it('the kill anchors in equipment-weapon.md land on the right levels', () => {
     // 4 XP per kill: 400 kills = 1,600 xp = L5, 2,025 = L10, 4,900 = L15, 9,025 = L20
     expect(mastery.level(mastery.xpForLevel(5))).toBe(5);
-    expect(mastery.level(1600)).toBe(5);
-    expect(mastery.level(8100)).toBe(10);
-    expect(mastery.level(19600)).toBe(15);
-    expect(mastery.level(36100)).toBe(20);
+    expect(mastery.level(mastery.xpForLevel(5))).toBe(5);
+    expect(mastery.level(mastery.xpForLevel(10))).toBe(10);
+    expect(mastery.level(mastery.xpForLevel(15))).toBe(15);
+    expect(mastery.level(mastery.xpForLevel(20))).toBe(20);
     expect(mastery.level(999999)).toBe(20);
   });
 
   it('weight falls 1% a level and stops at -20%', () => {
-    expect(mastery.weightDiscount(1)).toBe(1);
-    expect(mastery.weightDiscount(14)).toBe(14);
-    expect(mastery.weightDiscount(20)).toBe(20);
-    expect(mastery.weaponWeight(100, 20)).toBe(80);
+    expect(mastery.weightDiscount(1)).toBe(BASES.mastery.weight_discount_per_level_pct);
+    expect(mastery.weightDiscount(14)).toBe(14 * BASES.mastery.weight_discount_per_level_pct);
+    expect(mastery.weightDiscount(20)).toBe(BASES.mastery.weight_discount_cap_pct);
+    expect(mastery.weaponWeight(100, 20)).toBe(100 * (1 - BASES.mastery.weight_discount_cap_pct / 100));
   });
 
   it('skill damage joins at L5 and caps at +8%', () => {
     expect(mastery.skillBonus(1)).toBe(1);
     expect(mastery.skillBonus(4)).toBe(1);
-    expect(mastery.skillBonus(5)).toBeCloseTo(1.005, 6);
-    expect(mastery.skillBonus(20)).toBeCloseTo(1.08, 6);
+    expect(mastery.skillBonus(5)).toBeCloseTo(1 + BASES.mastery.skill_bonus_per_level_pct / 100, 6);
+    expect(mastery.skillBonus(20)).toBeCloseTo(1 + BASES.mastery.skill_bonus_cap_pct / 100, 6);
   });
 
   it('the drop bonus counts types at L10 or better, to 11%', () => {
     const s = newGame(3);
     expect(dropBonusPct(s)).toBe(0);
     for (const w of WEAPONS) s.mastery[w.name] = mastery.xpForLevel(10);
-    expect(dropBonusPct(s)).toBe(11);
+    expect(dropBonusPct(s)).toBe(BASES.weapons.length * BASES.mastery.drop_bonus_per_type_pct);
     expect(mastery.MAX_DROP_BONUS).toBe(11);
     s.mastery[WEAPONS[0].name] = mastery.xpForLevel(9);
-    expect(dropBonusPct(s)).toBe(10);
+    expect(dropBonusPct(s)).toBe((BASES.weapons.length - 1) * BASES.mastery.drop_bonus_per_type_pct);
   });
 });
 

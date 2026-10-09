@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import {
-  newMobStatusStore, applyElement, applyBleed, stepMob, modsOn, targetMods, forgetDead,
+  newMobStatusStore, applyElement, applyBleed, stepMob, stepMobParts, modsOn, targetMods, forgetDead,
 } from '../src/sim/mobStatus';
 import { combineMods, newCurses, applyCurse } from '../src/sim/curse';
 import { playerSwing, mobSwing } from '../src/sim/combat';
@@ -88,6 +88,26 @@ describe('burn and poison obey the DoT budget', () => {
     stepMob(store, 'm1');
     expect(store.m1?.statuses.poison?.stacks ?? 0).toBe(before - 1);
   });
+
+  it('splits a tick by the status that dealt it, and the split sums to what the cap pays', () => {
+    // the same infliction sequence twice, because the clock moves on every read
+    const build = () => {
+      const store = newMobStatusStore();
+      // one generator per store, advanced by every call: the proc is a roll, so a fresh stream per
+      // attempt would draw the same first number twenty times and land nothing
+      const fire = mulberry32(7), poison = mulberry32(11);
+      for (let i = 0; i < 40; i++) applyElement(fire, store, 'm1', 'fire', charWith('fire', 100), 100);
+      for (let i = 0; i < 40; i++) applyElement(poison, store, 'm1', 'poison', charWith('poison', 100), 100);
+      return store;
+    };
+    const parts = stepMobParts(build(), 'm1');
+    expect(parts.burn).toBeGreaterThan(0);
+    expect(parts.poison).toBeGreaterThan(0);
+    expect(parts.bleed).toBe(0);
+    expect(parts.burn + parts.poison + parts.bleed).toBeCloseTo(parts.total, 10);
+    // the total is the number `stepMob` has always published — the split is for the screen, not a new budget
+    expect(parts.total).toBeCloseTo(stepMob(build(), 'm1'), 10);
+  });
 });
 
 describe('control is bounded, never a lockout', () => {
@@ -129,8 +149,8 @@ describe('control is bounded, never a lockout', () => {
     const c = charWith('cold', 100);
     const store = inflict('cold', c);
     const tm = combineMods({ damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: false, armourCut: 0, resistCut: 0, elemTakenPct: 0 }, targetMods(modsOn(store, 'm1')));
-    expect(tm.attackSpeed).toBe(-20);
-    expect(Math.max(0, 1 + tm.attackSpeed / 100)).toBeCloseTo(0.8, 10);
+    expect(tm.attackSpeed).toBe(-S.chill.aspd_cap);
+    expect(Math.max(0, 1 + tm.attackSpeed / 100)).toBeCloseTo(1 - S.chill.aspd_cap / 100, 10);
   });
 });
 

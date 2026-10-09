@@ -14,20 +14,24 @@ const seq = (values: number[]) => { let i = 0; return () => values[i++ % values.
 
 describe('the +1..+15 ladder', () => {
   it('reads its chance off the published endpoints, interpolated between', () => {
+    const EP = C.upgrade_success_endpoints as any;
+    const midFrom = EP.safe_to + 1, midTo = EP.safe_to + 6;
+    const highFrom = midTo + 1, highTo = C.upgrade_cap;
     expect(bench.successPct(1)).toBe(100);
-    expect(bench.successPct(4)).toBe(100);
-    expect(bench.successPct(5)).toBe(90);
-    expect(bench.successPct(10)).toBe(60);
-    expect(bench.successPct(11)).toBe(50);
-    expect(bench.successPct(15)).toBe(20);
+    expect(bench.successPct(EP.safe_to)).toBe(100);
+    expect(bench.successPct(midFrom)).toBe(EP.mid[0]);
+    expect(bench.successPct(midTo)).toBe(EP.mid[1]);
+    expect(bench.successPct(highFrom)).toBe(EP.high[0]);
+    expect(bench.successPct(highTo)).toBe(EP.high[1]);
     expect(bench.successPct(7)).toBeGreaterThan(bench.successPct(8)); // it only ever falls
   });
 
-  it('charges Quality Stones by the step, 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30', () => {
-    expect(bench.costOf('upgrade', piece())).toEqual({ quality: 1 });
-    expect(bench.costOf('upgrade', piece({ upgrade_lv: 5 }))).toEqual({ quality: 7 });
-    expect(bench.costOf('upgrade', piece({ upgrade_lv: 10 }))).toEqual({ quality: 18 });
-    expect(bench.costOf('upgrade', piece({ upgrade_lv: 14 }))).toEqual({ quality: 30 });
+  it('charges Quality Stones by the step, read off the published cost ladder', () => {
+    const COSTS = C.upgrade_costs as any;
+    expect(bench.costOf('upgrade', piece())).toEqual({ quality: COSTS[0] });
+    expect(bench.costOf('upgrade', piece({ upgrade_lv: 5 }))).toEqual({ quality: COSTS[5] });
+    expect(bench.costOf('upgrade', piece({ upgrade_lv: 10 }))).toEqual({ quality: COSTS[10] });
+    expect(bench.costOf('upgrade', piece({ upgrade_lv: 14 }))).toEqual({ quality: COSTS[14] });
   });
 
   it('stops at +15 and refuses a Broken or corrupted piece', () => {

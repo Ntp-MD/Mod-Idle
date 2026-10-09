@@ -4,34 +4,16 @@ import { readJson } from './lib/json.ts';
 import * as SHARED from '../engine/index.ts';
 
 /**
- * Bases cage — `tools/data/bases.json` must equal the Base tables in `item-base.md`.
+ * Bases cage — `tools/data/bases.json` is the source for every Base frame.
  *
- * The Bases (frame, weight, which Mod line is Primary / Secondary, Gear Mod school) were designed
- * in prose, and `tools/loot.ts` used to parse that prose at run time — which a browser cannot do.
- * This cage lifts them into data and then gates the two against each other, so the JSON is a
- * verified mirror rather than a second hand-typed copy. `--write` re-imports from the doc;
- * `--checks` fails on any drift and reports the published set totals.
+ * The Bases (frame, weight, which Mod line is Primary / Secondary, Gear Mod school) live in the
+ * JSON and nothing parses a doc into them; this cage gates the JSON against `engine/` and the Mod
+ * data, so the file is a verified source rather than a second hand-typed copy.
  */
 
 const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
 
-const ROOT = path.resolve(import.meta.dirname, '..');
-const DOC = 'item-base.md';
 const OUT = path.join(import.meta.dirname, 'data', 'bases.json');
-const SLOT_ORDER = ['helmet', 'chest', 'pant', 'boots', 'belt', 'gloves', 'ring', 'amulet', 'earring', 'cape', 'off hand'];
-
-const clean = (s: any): string => String(s).replace(/\s+/g, ' ').trim();
-const splitMods = (s: any): string[] => String(s).split('·').map(clean).filter((x: string) => x && x !== '—' && x !== '-');
-const idOf = (name: any): any => {
-  const n = clean(name).toLowerCase();
-  let hit: any = null;
-  for (const m of MODS.mods) {
-    const full = m.name.toLowerCase();
-    const bare = full.replace(/\s+(flat|%)$/, '');
-    if (n === full || n === bare || n.startsWith(full + ' ')) hit = hit || m.id;
-  }
-  return hit;
-};
 
 const PATHS = [
   { name: 'cloth/glass', label: 'cloth', bases: ['Circlet', 'Vestment', 'Legwraps', 'Silk Slippers', 'Silk Sash', 'Silk Wraps', 'Iron Band', 'Iron Band', 'Jade Amulet', 'Silver Hoop', 'Traveler\'s Cloak'], gear: 'Circlet \u00b7 Vestment \u00b7 Legwraps \u00b7 Silk Slippers \u00b7 Silk Sash \u00b7 Silk Wraps \u00b7 Iron Band \u00d72 \u00b7 Jade Amulet \u00b7 Silver Hoop \u00b7 Traveler\'s Cloak' },
@@ -123,10 +105,10 @@ function checks(): any[] {
   const weapons = current.weapons || [];
   add('BS5', weapons.length > 0 ? 'pass' : 'fail',
     `${weapons.length} weapon types in bases.json, each with its own frame list`);
-  const multBad = weapons.filter((w: any) => Math.abs(w.weapon_mult - Math.round((1.2 / w.weapon_aspd) * 100) / 100) > 0.011);
+  const multBad = weapons.filter((w: any) => Math.abs(w.weapon_mult - Math.round(ENGINE.weaponMult(w.weapon_aspd) * 100) / 100) > 0.011);
   add('BS6', multBad.length === 0 ? 'pass' : 'fail', multBad.length
-    ? `weapon_mult ≠ 1.2 / weapon_aspd for ${multBad.map((w: any) => w.name).join(', ')}`
-    : 'every weapon type keeps the equal-DPS rule weapon_mult = 1.2 / weapon_aspd');
+    ? `weapon_mult ≠ the engine's weaponMult for ${multBad.map((w: any) => w.name).join(', ')}`
+    : "every weapon type keeps the engine's equal-DPS rule weapon_mult = engine weaponMult(weapon_aspd)");
   const blocked = current.weapon_pools?.['main hand']?.Blocked || [];
   const primary = current.weapon_pools?.['main hand']?.Primary || [];
   const secondary = current.weapon_pools?.['main hand']?.Secondary || [];

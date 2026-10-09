@@ -120,7 +120,7 @@
     "K_VIT_HP": 20,
     "K_VIT_REGEN": 0.25,
     "K_INT_MP": 4,
-    "K_INT_MREGEN": 0.28,
+    "K_INT_MREGEN": 0.160275,
     "K_AGI_ASPD": 0.25,
     "K_WIS_CDR": 0.03,
     "K_DEX_ACC": 1.5,
@@ -139,6 +139,7 @@
     "K_ARMOUR": 2,
     "armour_divisor": 5,
     "mob_damage_divisor": 27,
+    "K_MOB_PS_STAT": 0.01,
     "K_BLEED": 0.7,
     "K_BLEED_CHANCE": 0.4,
     "bleed_time_sec": 5,
@@ -187,6 +188,7 @@
   "mob": {
     "note": "Species (not classes - the player has no class) and body classes, copied from Ragnarok Online: a species is a stat-multiply vector plus an accuracy tier plus a damage type, and a body class is one of the four card sizes. innate Element stays a separate spawn roll (world.md) so the three axes never collapse into one.",
     "stat_block": "every mob carries ONE flat 7-stat block (mob.stat.base) that the species vector multiplies; there is no level term. Accuracy, Evasion, Armour, Elemental resistance, alignment, crit and dodge all read from that flat base through the species vector and the body class, so two mobs of the same level can be nothing alike and a zone differs only in mob_HP and mob_PS (world.md Monsters)",
+    "power_note": "A mob's damage per second is its own power over the zone mean, times the published mob_PS(L) curve: power = mob.species[].power_base + K_MOB_PS_STAT x the Core Stat its `damage` tag reads (physical -> Str, magic -> Int, mixed -> both halves, the same split mob.damage_split spends). The zone's average mob is the published curve (checks.md X37), so the species term only moves the mobs actually in front of the player and no zone edge, timeline, ladder or survival number changes. `power_base` is the per-species Base knob - 1.00 is neutral, and raising or lowering it tilts a species without touching its stat vector.",
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
@@ -1708,7 +1710,7 @@
         "id": "boss",
         "name": "Boss",
         "hp": 15,
-        "ps": 18,
+        "ps": 10,
         "evasion": 1,
         "group": "alone",
         "reads_as": "large",
@@ -1721,7 +1723,7 @@
       "ps": 4,
       "evasion": 0.9,
       "group": "alone",
-      "note": "Elite is a rarity flag, not a fifth size: an Elite is always forced to the Large body and carries its own numbers, so no two multipliers ever stack. Drops 2 Reroll tier stones."
+      "note": "Elite is a rarity flag, not a fifth size: an Elite is always forced to the Large body and carries its own numbers, so no two multipliers ever stack. What an Elite pays in Reroll tier stones is the key `loot.elite_tier_stones` — an expected count per kill, folded into `tierStonesPerHr` — named here rather than retyped."
     },
     "size_rules": [
       "Four card sizes, copied from Ragnarok: Small \u00b7 Medium \u00b7 Large \u00b7 Boss. A size REPLACES the base numbers, it never multiplies with Elite or with another size.",
@@ -1732,6 +1734,7 @@
     "species": [
       {
         "id": "goblin",
+        "power_base": 1,
         "name": "Goblin",
         "zones": [
           1,
@@ -1775,6 +1778,7 @@
       },
       {
         "id": "orc",
+        "power_base": 1,
         "name": "Orc",
         "zones": [
           1,
@@ -1820,6 +1824,7 @@
       },
       {
         "id": "kobold",
+        "power_base": 1,
         "name": "Kobold",
         "zones": [
           8
@@ -1858,6 +1863,7 @@
       },
       {
         "id": "ogre",
+        "power_base": 1,
         "name": "Ogre",
         "zones": [
           2,
@@ -1900,6 +1906,7 @@
       },
       {
         "id": "troll",
+        "power_base": 1,
         "name": "Troll",
         "zones": [
           3,
@@ -1945,6 +1952,7 @@
       },
       {
         "id": "minotaur",
+        "power_base": 1,
         "name": "Minotaur",
         "zones": [
           8
@@ -1983,6 +1991,7 @@
       },
       {
         "id": "skeleton",
+        "power_base": 1,
         "name": "Skeleton",
         "zones": [
           5,
@@ -2027,6 +2036,7 @@
       },
       {
         "id": "mummy",
+        "power_base": 1,
         "name": "Mummy",
         "zones": [
           4,
@@ -2068,6 +2078,7 @@
       },
       {
         "id": "vampire",
+        "power_base": 1,
         "name": "Vampire",
         "zones": [
           5,
@@ -2111,6 +2122,7 @@
       },
       {
         "id": "demon",
+        "power_base": 1,
         "name": "Demon",
         "zones": [
           4,
@@ -2162,6 +2174,7 @@
       },
       {
         "id": "slime",
+        "power_base": 1,
         "name": "Slime",
         "zones": [
           3,
@@ -2209,6 +2222,7 @@
       },
       {
         "id": "spider",
+        "power_base": 1,
         "name": "Spider",
         "zones": [
           3,
@@ -2255,6 +2269,7 @@
       },
       {
         "id": "wolf",
+        "power_base": 1,
         "name": "Wolf",
         "zones": [
           1,
@@ -2301,6 +2316,7 @@
       },
       {
         "id": "golem",
+        "power_base": 1,
         "name": "Golem",
         "zones": [
           6,
@@ -2348,6 +2364,7 @@
       },
       {
         "id": "dragon",
+        "power_base": 1,
         "name": "Dragon",
         "zones": [
           2,
@@ -2395,6 +2412,7 @@
       },
       {
         "id": "treant",
+        "power_base": 1,
         "name": "Treant",
         "zones": [
           16,
@@ -2435,6 +2453,7 @@
       },
       {
         "id": "human",
+        "power_base": 1,
         "name": "Human",
         "zones": [
           1,
@@ -2480,6 +2499,7 @@
       },
       {
         "id": "lizardman",
+        "power_base": 1,
         "name": "Lizardman",
         "zones": [
           3,
@@ -2524,6 +2544,7 @@
       },
       {
         "id": "elf",
+        "power_base": 1,
         "name": "Elf",
         "zones": [
           6,
@@ -2570,6 +2591,7 @@
       },
       {
         "id": "giant",
+        "power_base": 1,
         "name": "Giant",
         "zones": [
           2,
@@ -2612,6 +2634,7 @@
       },
       {
         "id": "werewolf",
+        "power_base": 1,
         "name": "Werewolf",
         "zones": [
           11,
@@ -2659,6 +2682,7 @@
       },
       {
         "id": "dryad",
+        "power_base": 1,
         "name": "Dryad",
         "zones": [
           16,
@@ -3425,8 +3449,8 @@
     "note": "PoE bleed: physical damage over time, does not stack, a new application refreshes the duration, base duration 5 sec, base total 70% of the inflicting hit's physical damage, unaffected by armour, cannot crit. bleed_dps = K_BLEED x physical_per_hit / bleed_time_sec, so it does not scale with attack speed \u2014 slow heavy hits are the build."
   },
   "level_gain": {
-    "hp_per_level": 40,
-    "mp_per_level": 16,
+    "hp_per_level": 10,
+    "mp_per_level": 5,
     "hp_base": 300,
     "mana_base": 100,
     "weight_base": 175,
@@ -4201,17 +4225,21 @@
       "note": "crafting.md: Corrupt stone is boss only and the rarest stone, one use per piece.",
       "boss_corrupt_chance": 0.25
     },
+    "replace_stone_sources": {
+      "note": "The Replace stone trades the Add stone's identity roll for the player's own choice, so it is priced as the pair it replaces (Remove + Add = 2 stones) and gated one step tighter than Add on the same Elite/Boss split: half the Add stone's Elite chance, and a Boss pays one on half its chance so a Boss is still not a guaranteed replacement.",
+      "elite_replace_chance": 0.003125,
+      "boss_replace_chance": 0.5
+    },
     "kill_rate_tolerance": 0.01
   },
   "road": {
-    "note": "Travel is walking. The world is a pointy-top hex lattice and a settlement owns its own hex; a settlement pair is joined by the hexes between them, so a walk is a count of blocks and never a link with a price. Every block costs `block_sec` and rolls one encounter chance. An encounter is an ordinary mob group from the lower of the two zones, fought with the ordinary rules, and it pays the ordinary drop roll and nothing else: no gold purse, no chest, no Standing, no crafting stones. Gold and junk come from killing mobs, so walking can never mint (`economy.md`). A settlement's Waypoint unlocks the first time the character arrives there on foot, and then warps to any unlocked settlement free and instantly; a Waystone will be a second destination kind on the same rule. The Road's old ladder and branch links, its trip minutes, its terrain tilt table, its encounter kinds, the purse, the chest, the Circuit and the Standing-per-leg are all gone with this shape, and none of them comes back: `encounter_chance_pct` is the retired one-encounter-a-minute rate written in blocks rather than a number chosen by hand, and a branch link has no meaning when the block count IS the distance - a pass would need its own shorter hex path in the lattice.",
-    "graph_rule": "A node is one settlement's own hex in axial coordinates on the pointy-top lattice, which is the field the sheet draws: 20 columns by 15 rows, 300 cells, the starting settlement at the centre cell and the level bands climbing outward by distance rank. Blocks between two nodes are their hex distance, computed from those coordinates and never typed, so a walk's length is derived and one block is one cell the player can see. Every pair of settlements is walkable - there is no edge list and no route to buy - and a walk to a far settlement is plotted as an ordered chain of adjacent cells and crossed one cell at a time. A waypoint covers the distance for free once both ends have been walked to.",
+    "note": "Travel is walking. The world is a pointy-top hex lattice and a settlement owns its own hex; a settlement pair is joined by the hexes between them, so a walk is a count of blocks and never a link with a price. Every block costs `block_sec` and rolls one encounter chance. An encounter is an ordinary mob group from the lower of the two zones, fought with the ordinary rules, and it pays the ordinary drop roll and nothing else: no gold purse, no chest, no Standing, no crafting stones. Gold and junk come from killing mobs, so walking can never mint (`economy.md`). A settlement's Waypoint unlocks the first time the character arrives there on foot, and then warps to any unlocked settlement instantly, for gold at the destination's band; a Waystone will be a second destination kind on the same rule. The Road's old ladder and branch links, its trip minutes, its terrain tilt table, its encounter kinds, the purse, the chest, the Circuit and the Standing-per-leg are all gone with this shape, and none of them comes back: `encounter_chance_pct` is the retired one-encounter-a-minute rate written in blocks rather than a number chosen by hand, and a branch link has no meaning when the block count IS the distance - a pass would need its own shorter hex path in the lattice.",
+    "graph_rule": "A node is one settlement's own hex in axial coordinates on the pointy-top lattice, which is the field the sheet draws: 20 columns by 15 rows, 300 cells, the starting settlement at the centre cell and the level bands climbing outward by distance rank. Blocks between two nodes are their hex distance, computed from those coordinates and never typed, so a walk's length is derived and one block is one cell the player can see. Every pair of settlements is walkable - there is no edge list and no route to buy - and a walk to a far settlement is plotted as an ordered chain of adjacent cells and crossed one cell at a time. A step only ever enters a cell adjacent to the one the foot is on, which is what makes the chain a walk and not a jump. A Waypoint covers the distance for gold once both ends have been walked to.",
     "block_sec": 10,
     "encounter_chance_pct": 16.6667,
     "encounter_rule": "Every block walked rolls one encounter chance. A block that rolls nothing is silent. An encounter that fires is a real mob group drawn from the lower of the two zones the walk joins, at the player level clamped into that zone's range and at that zone's own group size, fought with the ordinary combat and drop rules: it pays the ordinary drop roll and nothing else.",
     "push_rule": "A Push on the walk is the ordinary Push. The character is pushed to the camp that owns the zone it was ambushed in, rests there, and walks back in on the block it was ambushed on. A Push never ends a walk and never gives back a block.",
-    "waypoint_rule": "Arriving at a settlement on foot unlocks its Waypoint, once, and it costs nothing. A Waypoint warps to any unlocked settlement free and instantly, and it never gates a zone: a settlement you have not walked to is reached by walking. A Waystone will be a second destination kind that a Waypoint may also target.",
-    "nodes": [
+    "waypoint_rule": "Arriving at a settlement on foot unlocks its Waypoint, once. A Waypoint warps to any unlocked settlement instantly, and it costs gold at the destination settlement's own band: a warp buys back the walk's time, which is what gold is for, and it buys nothing else (`town.json` `waypoint_warp`). It never gates a zone: a settlement you have not walked to is reached by walking, and no amount of gold opens a Waypoint you have not earned on foot. A Waystone will be a second destination kind that a Waypoint may also target.",    "nodes": [
       {
         "id": "eastgate",
         "q": 0,
@@ -4320,7 +4348,7 @@
     "gold_uses_slot": false,
     "offline_cap_hr": 12,
     "overflow": "stop_pickup",
-    "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
+    "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). The Stash is one warehouse on the character and every settlement's counter opens the same one, so standing in a town the bag panel is the Stash by default and the Adventure pile sits one click behind it - the temporary bag is the travelling face of the linked warehouse, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
   },
   "item_level": {
     "note": "The one axis an item's strength rides (item-level.md). The value a Mod line rolls is a window that climbs with the item's level: the window's floor climbs from the band below (so a mid-band piece starts able to roll the low band's floor and ends above it), the ceiling is the band's own top, and the roll lands in one of the window's thirds - the top third is the rarest, so a high-level drop is a chance and not a formality. The Normal line count is not on that ladder: it is drawn inside `stat_mod_slots` at drop, so two pieces of one level and one band can still differ in width.",
@@ -4398,11 +4426,13 @@
     "note": "The AoE rule: an AoE skill deals 60% damage to each target hit, hits at most 3 targets, and costs 1.5x mana. Damage per mana is 0.40x at 1 target, 0.80x at 2, 1.20x at the Cap. Which 3 targets it hits is the reach queue (mob.reach), not a fixed set."
   },
   "craft": {
-    "reroll_value_stones_per_use": 8,
-    "refine_stones_per_use": 8,
+    "reroll_value_stones_per_use": 1,
+    "refine_stones_per_use": 1,
     "remove_stones_per_use": 1,
-    "ascend_add_stones": 8,
-    "ascend_tier_stones": 8,
+    "replace_stones_per_use": 2,
+    "replace_note": "The Replace stone spends what Remove + Add spend (1 + 1): it names the line that leaves and the line that comes in from the piece's own pool, and it rolls the incoming line's Tier fresh - the Mod's identity stops being a gamble, the Tier stays one, so a chosen line still has to be climbed with Reroll tier. It never touches the Base Mod or the Sub pair, spends no Add charge and changes no line count.",
+    "ascend_add_stones": 1,
+    "ascend_tier_stones": 1,
     "refine_slots_per_item": 1,
     "refine_steps": 2,
     "ascend_items_per_set": 12,
@@ -4574,7 +4604,17 @@
       }
     },
     "weak_mult": 1.5,
-    "align_cap": 50
+    "align_cap": 50,
+    "colour_note": "The damage indicator's one colour set (`hud`): a hit is coloured by the Element that carried it, a physical hit by `physical`, and a status proc by the colour of the Element its `status_of` line names, so no status needs its own copy of a colour. Crit is not an Element and takes the HUD's own accent, `--gold`.",
+    "physical_colour": "#cfd6e0",
+    "colour": {
+      "fire": "#e2603a",
+      "cold": "#9fe0f2",
+      "lightning": "#f2d34e",
+      "poison": "#6dbf57",
+      "chaos": "#a970d8"
+    },
+    "crit_colour": "#e8c169"
   },
   "opening": {
     "note": "Minute one. Everything the game hands the player before they touch anything, so a client can create a playable character from one read. The set is hand-authored junk, not a drop: one line per slot, so no Sub pair and no craftable Mod is involved, and the loot roll can never produce it. Every line is derived by the client, never typed here - `openingGear()` calls the same `loot.baseModAtFloor` a pre-skeleton save restore uses - so the frame per slot is the data's whole job and no number can drift. The main hand is the worst roll in the table the mob-health curve already assumes at level 1; a free top-tier weapon would pay more damage than the curve allows.",

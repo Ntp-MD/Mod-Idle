@@ -4,7 +4,7 @@ import { newGame } from '../src/sim/game';
 import { farm, rollPotion } from '../src/sim/farm';
 
 /**
- * `owner/idea-gameplay.md` items 2 + 4: some species drop HP/MP potions, and the humanoid tribes are
+ * Some species drop HP/MP potions, and the humanoid tribes are
  * that source. The rate is **derived, not typed** — the band's own herb stream divided by a potion's
  * herb cost — so the mobs supplement the farm instead of replacing it, and a band with no herb stream
  * has no mob potion source at all. `X49` gates the same derivation.

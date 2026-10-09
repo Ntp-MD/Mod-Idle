@@ -6,10 +6,10 @@ import { newGame, tick, setLevel } from '../src/sim/game';
 describe('six sets, one of them main', () => {
   it('comes straight from engine.json', () => {
     expect(E.presets.sets).toBe(6);
-    expect(sm.presetCount).toBe(6);
+    expect(sm.presetCount).toBe(E.presets.sets);
     expect(sm.mainPreset).toBe(0);
     const s = newGame(3);
-    expect(s.presets.length).toBe(6);
+    expect(s.presets.length).toBe(E.presets.sets);
     expect(s.presets[0].name).toBe('Main');
     expect(s.activePreset).toBe(0);
   });
@@ -63,7 +63,7 @@ describe('six sets, one of them main', () => {
 
   it('a fresh preset list is empty slots, not undefined', () => {
     const p = newPresets();
-    expect(p.length).toBe(6);
+    expect(p.length).toBe(E.presets.sets);
     expect(p[0].list.every((x: string | null) => x === null)).toBe(true);
     expect(p[0].zones).toEqual([]);
   });

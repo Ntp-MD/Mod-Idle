@@ -246,11 +246,17 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     'damage_dealt', 'accuracy', 'crit_chance',
     // what the per-Element pool and the status store made expressible
     'leech', 'elemental_power', 'burn_stacks', 'poison_stacks', 'mark_stacks', 'bleed_chance', 'poison_hold_sec',
+    // conversion: a percent of the finished physical share routed into the named Element before
+    // mitigation (`draft/convert-damage.md` · `convertDamageOf`)
+    'damage_conversion',
     'execute_threshold_pct', 'execute_damage', 'damage_per_evasion_pct', 'resistance_pierce_pct', 'global_speed',
     // a strip of the mob's own Elemental resistance, in percentage points (B8)
     'mob_elemental_resistance_pct',
     // (B9 close-out): the magnitudes the last prose rows state
     'mob_elemental_damage_taken_pct', 'hits', 'hit_pct', 'stop_sec',
+    // the trigger auras (`cast_on_crit` · `cast_on_damage_taken`): their own clock and the price they
+    // put on the press they fire — the mana the trigger charges and the damage it scales
+    'trigger_cd_sec', 'cast_mana_mult', 'cast_damage_mult',
     'missing_hp_pct_for_max', 'damage_at_missing_hp', 'dodge_charges', 'dodge_charges_per_levels',
     'dodge_charges_cap', 'spread_targets',
     // Energy Absorb: the share of an incoming hit converted to Energy Shield, base and Cap
@@ -264,7 +270,9 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const EFFECT_RULES = ['ignores_dodge', 'every_target', 'guaranteed_status', 'bypasses_control_cap',
     'status_immunity', 'cleanses_on_cast', 'es_recharge_immediate', 'cleanses_status',
     // a press that folds its own row onto the character sheet for the row's `duration` (Reap)
-    'self_window'];
+    'self_window',
+    // the trigger auras: the event that fires the first ready slot in the cast order
+    'cast_on_crit', 'cast_on_damage_taken'];
   /** Rows whose mechanic is already carried by another column, so no number is missing. */
   const MODELLED_BY = ['targets', 'element'];
   /**

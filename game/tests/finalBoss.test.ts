@@ -47,6 +47,7 @@ const clone = (s: GameState) => JSON.parse(JSON.stringify(s)) as GameState;
 function fightBoss(s: GameState) {
   s.phase = 'fighting' as Phase; // a union-typed read, so the run's own Push check below still compiles
   s.player.hp = 1e9;
+  s.player.mana = 1e9; // a full pool too: a heal is a share of the pool, and a fight from a full pool casts one
   tick(s, {}); // the pool, read off the sheet rather than typed
   const pool = s.player.hp;
   s.group = [];
@@ -90,7 +91,9 @@ describe('the win gate fought for real', () => {
   const base = dressed();
   const afk = clone(base);
   afk.skills.list = afk.skills.list.map(() => null);
-  const healer = withBar(clone(base), [...ATTACKS, 'heal.heal']);
+  // the heal round leads the bar: the point under test is that casting it cuts what the boss takes
+  // per second, so it must actually fire inside the spawn's window rather than wait behind the attacks
+  const healer = withBar(clone(base), ['heal.heal', ...ATTACKS]);
 
   const afkFight = fightBoss(clone(afk));
   const healFight = fightBoss(clone(healer));

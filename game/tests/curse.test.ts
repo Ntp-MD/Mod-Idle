@@ -42,7 +42,7 @@ describe('a curse writes its own row onto the mob', () => {
     expect(m.damageDealt).toBe(valueOf('curse.weaken', 'damage_dealt'));
     expect(m.attackSpeed).toBe(valueOf('curse.cripple', 'attack_speed'));
     // -25% damage and -20% swing rate both shrink a DPS-priced mob, and they compound
-    expect(psMult(m)).toBeCloseTo(0.75 * 0.8, 10);
+    expect(psMult(m)).toBeCloseTo((1 + valueOf('curse.weaken', 'damage_dealt') / 100) * (1 + valueOf('curse.cripple', 'attack_speed') / 100), 10);
   });
 
   it('keeps every magnitude it took from the roster text', () => {
@@ -64,9 +64,9 @@ describe('the fight feels it', () => {
     const mob = mobOf();
     const clean = mobSwing(mulberry32(9), c, mob, {}, NO_CURSE);
     const weak = mobSwing(mulberry32(9), c, mob, {}, modsOn(cursed('curse.weaken'), 'mob-1'));
-    expect(weak.raw).toBeCloseTo(clean.raw * 0.75, 6);
+    expect(weak.raw).toBeCloseTo(clean.raw * (1 + valueOf('curse.weaken', 'damage_dealt') / 100), 6);
     const slow = mobSwing(mulberry32(9), c, mob, {}, modsOn(cursed('curse.cripple'), 'mob-1'));
-    expect(slow.raw).toBeCloseTo(clean.raw * 0.8, 6);
+    expect(slow.raw).toBeCloseTo(clean.raw * (1 + valueOf('curse.cripple', 'attack_speed') / 100), 6);
   });
 
   it('Blinding Mark costs the mob accuracy on both rolls it feeds', () => {
@@ -92,7 +92,7 @@ describe('the fight feels it', () => {
     const cursedDmg = playerSwing(mulberry32(seed), c, target, null, modsOn(store, 'mob-1')).damage;
     const elsewhere = playerSwing(mulberry32(seed), c, other, null, modsOn(store, 'mob-2')).damage;
     expect(clean).toBeGreaterThan(0);
-    expect(cursedDmg).toBeCloseTo(clean * 1.2, 6);
+    expect(cursedDmg).toBeCloseTo(clean * (1 + valueOf('curse.expose', 'damage_taken') / 100), 6);
     expect(elsewhere).toBeCloseTo(clean, 6);
   });
 

@@ -25,15 +25,15 @@ describe('the attack-speed cap is the final 5 hits/sec ceiling', () => {
     const plain = buildCharacter(100, gear);
     const hasted = buildCharacter(100, gear, {}, 0, { add: {}, mult: { attack_speed: 1.15 } });
     expect(plain.aspd).toBeLessThanOrEqual(E.caps.aspd);
-    expect(plain.hitsPerSec).toBeLessThanOrEqual(5);
+    expect(plain.hitsPerSec).toBeLessThanOrEqual(E.caps.aspd / 100);
     // the buff would push the raw clock past the Cap; the sheet still lands on it
     expect(hasted.aspd).toBe(E.caps.aspd);
-    expect(hasted.hitsPerSec).toBeCloseTo(5, 10);
+    expect(hasted.hitsPerSec).toBeCloseTo(E.caps.aspd / 100, 10);
   });
 
   it('leaves an ordinary build under the Cap — it stays a clock rule, not a build target', () => {
     const c = buildCharacter(E.stat.level_cap, emptyGear());
     expect(c.aspd).toBeLessThan(E.caps.aspd);
-    expect(c.hitsPerSec).toBeLessThan(5);
+    expect(c.hitsPerSec).toBeLessThan(E.caps.aspd / 100);
   });
 });

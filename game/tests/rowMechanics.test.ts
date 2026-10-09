@@ -5,7 +5,7 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { poolGear } from './sheetFixture';
 import { mobSwing, playerSwing } from '../src/sim/combat';
-import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct } from '../src/sim/skills';
+import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct, triggerAuras } from '../src/sim/skills';
 import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/mobStatus';
 import { newCurses, applyCurse, spreadOnDeath, lineValue } from '../src/sim/curse';
 import { newGame, tick, setLevel } from '../src/sim/game';
@@ -190,28 +190,27 @@ describe('the support rows that change the character', () => {
 
   it('Cleanse clears what is on the character and pays its own share of the pool', () => {
     const s = newGame(100);
-    setLevel(s, 60);
-    s.zone = 5;
+    setLevel(s, 120);
+    s.zone = 3;
     const c0 = buildCharacter(s.player.level, s.gear, {}, 0);
-    s.player.hp = 1;
+    s.player.hp = c0.maxHp;
     s.player.mana = c0.maxMana;
     let guard = 0;
     while (!s.group.length && guard++ < 30) tick(s, {});
-    // put something on the character, then cleanse it off through the row
-    (s as any).statuses = undefined;
+    // the tick loop carries the statuses object, so put one on the character and cleanse it off.
+    // chill, not shock: a shock would stun the player and block the very cast being tested.
+    const statuses: any = { chill: { secLeft: 99 } };
     s.skills.owned['heal.cleanse'] = 0;
     s.skills.xp['heal.cleanse'] = 8000;
     s.skills.list[0] = 'heal.cleanse';
     guard = 0;
     let cleansed = false;
-    while (guard++ < 60) {
+    while (guard++ < 30 && !cleansed) {
       s.player.mana = c0.maxMana;
-      tick(s, {});
+      tick(s, statuses);
       if (s.log.some((l) => /clears/.test(l.text))) cleansed = true;
-      if (s.player.hp > 1) break;
     }
-    expect(s.player.hp).toBeGreaterThan(1);
-    expect(cleansed || hasRule(row('heal.cleanse'), 'cleanses_status')).toBe(true);
+    expect(cleansed).toBe(true);
     expect(valueOf('heal.cleanse', 'heal_instant')).toBe(8);
   }, 30000);
 
@@ -292,6 +291,48 @@ describe('the curse rows that act on other mobs', () => {
     };
     for (let i = 0; i < 3; i++) stepMob(store, 'm1');
     expect(store.m1.statuses.poison!.stacks).toBe(10);
+  });
+});
+
+describe('the trigger auras fire the first ready slot at their own price', () => {
+  const c = buildCharacter(90, emptyGear());
+
+  it('reads the event and the price off the row', () => {
+    const s = newSkillState();
+    s.auras['aura.cast_on_crit'] = true;
+    const t = triggerAuras(s);
+    expect(t.crit).toMatchObject({ id: 'aura.cast_on_crit', manaMult: 2, damageMult: 0.7, cdSec: 1 });
+    expect(t.taken).toBe(null);
+    s.auras['aura.cast_on_damage_taken'] = true;
+    expect(triggerAuras(s).taken?.id).toBe('aura.cast_on_damage_taken');
+  });
+
+  it('charges ×2 mana and scales the press ×0.7, and never spends the skill cooldown', () => {
+    const setup = () => { const s = newSkillState(); s.list[0] = 'attack.cleave'; s.xp['attack.cleave'] = 8000; return s; };
+    const plainS = setup();
+    const plain = castOnce(plainS, c, c.maxMana, [mob({ id: 'a' })], {}, mulberry32(7), {});
+    const trigS = setup();
+    const trig = castOnce(trigS, c, c.maxMana, [mob({ id: 'b' })], {}, mulberry32(7), { trigger: { manaMult: 2, damageMult: 0.7 } });
+    expect(plain && trig).toBeTruthy();
+    expect(trig!.manaCost).toBeCloseTo(plain!.manaCost * 2, 4);
+    expect(trig!.damage).toBeCloseTo(plain!.damage * 0.7, 4);
+    // the trigger runs its own clock, so the skill's own cooldown is untouched
+    expect(trigS.cd['attack.cleave'] || 0).toBe(0);
+    expect(plainS.cd['attack.cleave']).toBeGreaterThan(0);
+  });
+
+  it('is in play inside the sim: a crit with Cast on Crit up fires the order', () => {
+    const s = newGame(5);
+    setLevel(s, 90);
+    s.zone = 1;
+    s.skills.owned['attack.cleave'] = 1;
+    s.skills.xp['attack.cleave'] = 8000;
+    s.skills.list[0] = 'attack.cleave';
+    s.skills.owned['aura.cast_on_crit'] = 1;
+    s.skills.auras['aura.cast_on_crit'] = true;
+    // tick until the state under test exists, never for a guessed window (AGENTS.md): the bound is a hang guard
+    for (let i = 0; i < 20000 && !s.log.some((l) => /Cast on Crit triggers/.test(l.text)); i++) tick(s, {});
+    expect(s.log.some((l) => /Cast on Crit triggers/.test(l.text))).toBe(true);
   });
 });
 

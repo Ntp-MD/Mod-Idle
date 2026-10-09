@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { E } from '../src/engine/client';
+import { E, eng, sm } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { playerSwing } from '../src/sim/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
@@ -97,5 +97,53 @@ describe('a weapon carries the Element its own line stores', () => {
     for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     expect(buildCharacter(s.player.level, s.gear, {}, 0).weaponElement).toBe('fire');
     expect(s.counters.kills).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * Conversion (`draft/convert-damage.md`): a percent of the finished physical share is ROUTED into a
+ * named Element before mitigation, so it answers Elemental resistance instead of Armour. The cage holds
+ * the two promises the draft names: a converted swing is the same strength as an unconverted one against
+ * a target that mitigates nothing, and it is weaker-or-equal against one that resists the destination —
+ * never a multiplier, and the summed percent never overflows the hit.
+ */
+describe('conversion routes the physical share, it does not add power', () => {
+  // no crit, so the physical share is exactly `c.phys` and the routing can be checked to the digit
+  const plain = { ...buildCharacter(40, weaponWith(null)), critChance: 0, critPool: 0 };
+  const at = (pct: Record<string, number>) => ({ ...plain, conversion: pct });
+  const tanky = (res: number): Mob => ({ ...mobOf([]), res, resByElement: {} } as Mob);
+
+  it('is exactly as strong as an unconverted swing against a target that mitigates nothing', () => {
+    const a = playerSwing(SWING(), plain, mobOf([]), null).damage;
+    const b = playerSwing(SWING(), at({ fire: 25 }), mobOf([]), null).damage;
+    expect(b).toBeCloseTo(a, 6);
+  });
+
+  it('is weaker, never stronger, against a target that resists the destination Element', () => {
+    const a = playerSwing(SWING(), plain, tanky(50), null).damage;
+    const b = playerSwing(SWING(), at({ fire: 25 }), tanky(50), null).damage;
+    expect(b).toBeLessThan(a);
+    expect(b).toBeGreaterThan(0);
+    // the routed share is what the resistance now answers: the drop is that share times the cut
+    const routed = plain.phys * 0.25;
+    expect(a - b).toBeCloseTo(routed * (Math.min(50, E.caps.elem_res) / 100), 4);
+  });
+
+  it('caps the summed percent at the whole hit — overflow is wasted, never a multiplier', () => {
+    const conv = eng.convertDamageOf(1000, { fire: 60, cold: 60 });
+    expect(conv.byElement.fire).toBeCloseTo(600, 6);
+    expect(conv.byElement.cold).toBeCloseTo(400, 6);
+    expect(conv.physical).toBe(0);
+    const over = eng.convertDamageOf(1000, { fire: 200 });
+    expect(over.byElement.fire).toBeCloseTo(1000, 6);
+    expect(over.physical).toBe(0);
+  });
+
+  it('is folded from the aura rows into the sheet, and the swing spends it', () => {
+    const fold = sm.aggregateEffects([sm.byId['aura.ember_conversion']]);
+    const c = buildCharacter(40, weaponWith(null), {}, 0, fold);
+    expect(c.conversion).toEqual({ fire: sm.byId['aura.ember_conversion'].effects[0].value });
+    // the same build with no aura routes nothing, so the sheet field is the only switch
+    expect(buildCharacter(40, weaponWith(null)).conversion).toEqual({});
   });
 });

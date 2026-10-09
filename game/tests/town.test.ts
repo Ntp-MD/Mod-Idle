@@ -18,14 +18,20 @@ describe('prices are minutes of income, not typed gold', () => {
     }
   });
 
-  it('carries no travel line at all — a walk is free and a Waypoint unlocks on foot', () => {
+  it('sells no route — the walk is free, and the Waypoint is the only travel line for gold', () => {
     expect(rowById('road_link')).toBeUndefined();
-    expect([...TOWN.one_time, ...TOWN.repeatable].some((r) => /^(road|carriage|waypoint)/.test(r.id))).toBe(false);
+    const lines = [...TOWN.one_time, ...TOWN.repeatable].filter((r) => /^(road|carriage)/.test(r.id));
+    expect(lines.length).toBe(0);
+    const warp = rowById('waypoint_warp');
+    expect(warp.kind).toBe('time');
+    expect(warp.m_per_block > 0).toBe(true);
+    // it buys back time and nothing else: no settlement stocks it, so it is never a stall purchase
+    expect(TOWN.settlements.some((s: any) => (s.stock || []).includes('waypoint_warp'))).toBe(false);
   });
 
   it('Eastgate sells the first stash tab at the teaching price', () => {
-    expect(priceMinutes(rowById('stash_tab_1'), 'eastgate')).toBe(30);
-    expect(priceMinutes(rowById('stash_tab_1'), 'ashfall')).toBe(60);
+    expect(priceMinutes(rowById('stash_tab_1'), 'eastgate')).toBe(rowById('stash_tab_1').discount.m);
+    expect(priceMinutes(rowById('stash_tab_1'), 'ashfall')).toBe(rowById('stash_tab_1').m);
   });
 });
 
@@ -145,7 +151,7 @@ describe('a Waypoint opens on foot and never for gold', () => {
     expect(standingTier(s, 'eastgate')).toBe(2);          // Tier III asks for 1.4 of the budget
     // the budget is already a count of kills, so the tier's own threshold is the state to set —
     // rounded up, because a tier is reached AT its threshold and rounding down misses it by a kill
-    s.counters.zoneKills[1] = Math.ceil(budget * 1.4);
+    s.counters.zoneKills[1] = Math.ceil(budget * TOWN.standing.tiers[2].share);
     expect(standingTier(s, 'eastgate')).toBe(3);
     expect(TOWN.standing.never_grants).toContain('any stat');
   });

@@ -4,6 +4,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { poolGear } from './sheetFixture';
 import { newSkillState, effectsActive, toggleTrack, effectLine, describeFold } from '../src/sim/skills';
 import { newGame, tick, setLevel } from '../src/sim/game';
+import { placeStatus } from '../src/sim/mobStatus';
 import { eng } from '../src/engine/client';
 
 const row = (id: string) => sm.byId[id];
@@ -137,17 +138,17 @@ describe('the toggle track', () => {
 
   it('says a whole fold in the same words, not in stat keys', () => {
     const words = describeFold(effectsOf('aura.iron_guard', 'aura.wraith_of_fury', 'buff.iron_will'));
-    expect(words).toContain('armour +32');
-    expect(words).toContain('attack speed +12');
-    expect(words).toContain('damage taken ×0.90');
+    expect(words).toContain(`armour +${row('aura.iron_guard').effects[0].value}`);
+    expect(words).toContain(`attack speed +${row('aura.wraith_of_fury').effects[0].value}`);
+    expect(words).toContain(`damage taken ×${row('buff.iron_will').effects[1].value.toFixed(2)}`);
     expect(words).not.toMatch(/attack_speed|damage_taken/);
     expect(describeFold(sm.aggregateEffects([]))).toBe('');
   });
 
   it('says each row in words a player can act on', () => {
-    expect(effectLine(row('aura.iron_guard'))).toBe('armour +32 flat');
-    expect(effectLine(row('aura.wraith_of_fury'))).toBe('attack speed +12%');
-    expect(effectLine(row('buff.warcry'))).toContain('physical power ×1.15');
+    expect(effectLine(row('aura.iron_guard'))).toBe(`armour +${row('aura.iron_guard').effects[0].value} flat`);
+    expect(effectLine(row('aura.wraith_of_fury'))).toBe(`attack speed +${row('aura.wraith_of_fury').effects[0].value}%`);
+    expect(effectLine(row('buff.warcry'))).toContain(`physical power ×${row('buff.warcry').effects[0].value}`);
     expect(effectLine(row('attack.cleave'))).toBe('');
   });
 });
@@ -176,7 +177,23 @@ describe('heals read their own number', () => {
   it('Heal keeps its drip shape: a per-second percentage over its own duration', () => {
     expect(row('heal.heal').effects[0].stat).toBe('heal_per_sec');
     expect(String(row('heal.heal').duration)).toMatch(/\d+ sec/);
-    expect(E.potions).toBeTruthy();
   });
 });
 
+
+describe('the hit ring colours what a total cannot', () => {
+  it('a burn tick on a mob lands as a field event in the fire colour', () => {
+    const s = newGame(30);
+    for (let i = 0; i < 60 && !s.group.length; i++) tick(s, {});
+    expect(s.group.length).toBeGreaterThan(0);
+    // no weapon Element on this sheet, so every swing is the neutral colour and the only fire number
+    // the ring can hold is the burn itself
+    const c = buildCharacter(30, emptyGear());
+    placeStatus(s.mobStatus, s.group[0].id, 'burn', c, 100);
+    s.fx = [];
+    tick(s, {});
+    const fire = (E.elements as any).colour.fire;
+    const ticks = (s.fx || []).filter((e) => e.kind === 'hit' && e.side === 'field' && e.colour === fire);
+    expect(ticks.length).toBeGreaterThan(0);
+  });
+});

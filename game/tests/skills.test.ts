@@ -89,7 +89,7 @@ describe('the casting rule from skill-pool.md', () => {
     const s = newSkillState();
     s.owned['aura.clarity'] = 0;
     s.auras['aura.clarity'] = true;
-    expect(reservedPct(s)).toBe(E ? sm.reservePct('cheap') : 0);
+    expect(reservedPct(s)).toBe(sm.reservePct('cheap'));
     expect(usableMana(c, s)).toBeCloseTo(c.maxMana * (1 - sm.reservePct('cheap') / 100), 6);
   });
 });

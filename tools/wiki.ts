@@ -352,7 +352,7 @@ page({
         wrap(`${n0(r.levels[0])}-${n0(r.levels[1])}`),
         `<span class="hy">${kind === 'elite' ? `${esc(ELITE.name)} on a Large body` : kind === 'boss' ? `${esc(BOSS.name || 'Boss')} (reads as ${esc(BOSS.reads_as || 'large')})` : esc(r.kind)} · ${esc(r.group)}</span>`,
         `<span class="hy">${Object.entries(eng.mobStatsOf(r.speciesId) || {}).map(([k, v]) => `${esc(k)} ${n1(v)}`).join(' · ')}</span>`,
-        `<span class="hy">${esc(r.damage)} · PS ${wrap(n0(r.ps))} · hit ${wrap(n0(r.acc))} · crit ${wrap(n1(r.crit))}% · status gate ${wrap(n1(r.align))}</span>`,
+        `<span class="hy">${esc(r.damage)} · PS ${wrap(n0(r.ps))} (base ${n2(sp.power_base)} + stat ${n2(eng.speciesPowerStatOf(sp))} over the zone mean) · hit ${wrap(n0(r.acc))} · crit ${wrap(n1(r.crit))}% · status gate ${wrap(n1(r.align))}</span>`,
         `<span class="hy">HP ${wrap(`${n0(r.hpFrom)}-${n0(r.hpTo)}`)} · Armour ${wrap(n0(r.armour))} · Evasion ${wrap(n0(eng.mobEvasion(r.levels[1], sp.stats?.dex ?? 1, sizeId)))} · dodge ${wrap(n1(r.dodge))}% · res ${Object.entries(res).map(([e, v]) => `${esc(e)} ${n0(v)}`).join(' · ')}</span>`,
         dropCell(bandOf(eng.zoneById(r.zone)?.quality), sp, names, kind),
         wrap(`${n0(r.xpFrom)}-${n0(r.xpTo)}`),
@@ -371,11 +371,11 @@ page({
     ['Level', 'the zone range. A mob spawns at the attacker\'s level clamped into that range, so the HP and XP columns are printed as a range too.'],
     ['Size', 'the body class and the group it comes in. Elite is a rarity flag on a Large body, never a fifth size; a Boss reads as a body class for a weapon\'s <code>size_mult</code>.'],
     ['Core Stat', 'the mob\'s <strong>fixed</strong> seven-stat block: the one flat base (<code>mob.stat.base</code>) through the species vector, with no level term — the same body at level 1 and at level 180, because only HP, PS and XP climb. Read through <code>mobStatsOf()</code>.'],
-    ['Offensive', 'what its hit is made of, its damage per second, its accuracy rating, its crit chance and its Elemental Alignment — the number that decides how often its innate status lands.'],
+    ['Offensive', 'what its hit is made of, and its damage per second — its own power (<code>mob.species[].power_base</code> + <code>K_MOB_PS_STAT</code> × the Str or Int its <code>damage</code> tag reads, over the zone mean) times the published <code>mob_PS(L)</code> — plus its accuracy rating, its crit chance and its Elemental Alignment, the number that decides how often its innate status lands.'],
     ['Defensive', 'health at both ends of the zone, Armour, Evasion (capped where the player is capped), its own dodge against a same-level attacker, and its per-Element resistance.'],
     ['What it drops', 'the gear roll and the herb roll at that band, the junk the named variants pay, which stream they lean, and the stones an Elite or a Boss adds.'],
     ['XP', 'what one kill pays at the two ends of the zone: <code>xpPerKill(mob level)</code>, with the Elite and Boss multipliers already on the row.'],
-  ]), 'Nothing here is typed: the sheet is <code>mobRoster()</code>, <code>mobEvasion()</code>, <code>mobResByElementOf()</code> and <code>dropChance()</code> printed out, so a wrong figure is a bug in the data or the engine, and <code>node tools/verify.ts</code> is what says which.'),
+  ]), 'Nothing here is typed: the sheet is <code>mobRoster()</code>, <code>mobEvasion()</code>, <code>mobResByElementOf()</code>, <code>speciesPowerStatOf()</code> and <code>dropChance()</code> printed out, so a wrong figure is a bug in the data or the engine, and <code>node tools/verify.ts</code> is what says which.'),
     ];
   })(),
 });

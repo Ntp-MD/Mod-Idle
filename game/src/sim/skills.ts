@@ -211,6 +211,33 @@ export function toggleTrack(s: SkillState, id: string): { ok: boolean; why?: str
   return { ok: false, why: `a ${skill.type} skill takes a bar slot, not a toggle` };
 }
 
+/** One trigger aura's price: its own clock and the mana / damage it puts on the press it fires. */
+export interface TriggerAura { id: string; cdSec: number; manaMult: number; damageMult: number; }
+
+/**
+ * The active trigger auras, keyed by the event that fires them: `crit` (`aura.cast_on_crit`) and
+ * `taken` (`aura.cast_on_damage_taken`). A null slot means the event has no aura up. The numbers are
+ * read off the row the same way every other effect is, so a re-tune moves the aura and the sim together.
+ */
+export function triggerAuras(s: SkillState): { crit: TriggerAura | null; taken: TriggerAura | null } {
+  const out: { crit: TriggerAura | null; taken: TriggerAura | null } = { crit: null, taken: null };
+  for (const k of sm.all() as any[]) {
+    if (k.type !== 'aura' || !s.auras[k.id]) continue;
+    const rules: string[] = k.rules || [];
+    const event = rules.includes('cast_on_crit') ? 'crit' : rules.includes('cast_on_damage_taken') ? 'taken' : null;
+    if (!event || out[event]) continue;
+    const effects = sm.effectsAt(k, skillLevel(s, k.id)) as any[];
+    const at = (stat: string) => effects.find((e: any) => e.stat === stat);
+    out[event] = {
+      id: k.id,
+      cdSec: at('trigger_cd_sec')?.value ?? 1,
+      manaMult: at('cast_mana_mult')?.value ?? 1,
+      damageMult: at('cast_damage_mult')?.value ?? 1,
+    };
+  }
+  return out;
+}
+
 export function usableMana(c: Character, s: SkillState): number {
   return c.maxMana * (1 - reservedPct(s) / 100);
 }
@@ -264,6 +291,13 @@ export interface CastEnv {
   missingHpPct?: number;
   /** The front target is a boss — the `boss` leg of the shared condition list (§14). */
   isBoss?: boolean;
+  /**
+   * A press a trigger aura fired (`aura.cast_on_crit` · `aura.cast_on_damage_taken`). It is the same
+   * press with a price on it: the mana is multiplied, the damage is scaled, and the skill's own
+   * cooldown is NOT spent — the trigger runs its own clock (`trigger_cd_sec`), so an unmodified press
+   * and a triggered one cannot stack the same row twice through the cooldown.
+   */
+  trigger?: { manaMult?: number; damageMult?: number };
 }
 
 export interface CastReport {
@@ -364,10 +398,12 @@ export function castOnce(
     const ms = sm.manaSpec(skill);
     const cost = sm.manaCostOf(skill, {
       skillLevel: skillLevel(s, id), maxMana: c.maxMana, usableMana: pool, aoe,
-    });
+    }) * (env.trigger?.manaMult ?? 1);
     if (cost > mana) continue;
 
-    s.cd[id] = skillCd(s, id, c.cdr);
+    // a triggered press runs on the trigger's own clock (`trigger_cd_sec`), so the skill's cooldown is
+    // spent by an ordinary cast only — a trigger can fire the same row again without eating its cd
+    if (!env.trigger) s.cd[id] = skillCd(s, id, c.cdr);
     const spent = Math.min(mana, cost);
 
     if (skill.type === 'heal') {
@@ -441,6 +477,8 @@ export function castOnce(
       const times = effects.find((e) => e.stat === 'execute_damage');
       if ((front.hp / front.hpMax) * 100 < limit && times) dmg *= times.value;
     }
+    // the trigger's price on the press it fired: damage scaled down before it is split over targets
+    if (env.trigger?.damageMult) dmg *= env.trigger.damageMult;
     const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
     // the row's own lines are spent on each mob the skill actually reaches: a row that says "all in
     // range" reaches every target the AoE resolved, and a guaranteed status skips only the two rolls
@@ -495,7 +533,16 @@ export function castOnce(
         else if (t.innate && t.innate.length) byEl[t.innate[0]] = elemPart;
         if (Object.keys(byEl).length) elemArg = byEl;
       }
-      const mitigated0 = eng.mitigateMobHit(t, share - elemPart, elemArg, cut, stripped + pierced);
+      // conversion (`draft/convert-damage.md`): a physical-basis press routes a percent of its own
+      // physical share into the named Element before mitigation, through the same `convertDamageOf`
+      // the swing uses; a magic-basis press never converts.
+      let nonElementPart = share - elemPart;
+      if (skill.basis === 'phys' && c.conversion && Object.keys(c.conversion).length) {
+        const conv = eng.convertDamageOf(nonElementPart, c.conversion) as { physical: number; byElement: Record<string, number> };
+        nonElementPart = conv.physical;
+        if (Object.keys(conv.byElement).length) elemArg = conv.byElement;
+      }
+      const mitigated0 = eng.mitigateMobHit(t, nonElementPart, elemArg, cut, stripped + pierced);
       // §12: a PHYSICAL press is the weapon arguing with a body too, so it carries the size ladder;
       // a magic-damage press is exempt (the caster's spell is not the weapon's own swing).
       const mitigated = skill.basis === 'phys'

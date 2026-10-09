@@ -5,7 +5,7 @@ import { E, eng } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 
 /**
- * `owner/idea-gameplay.md` item 5, first step: **a shocked player is stopped.**
+ * Owner ruling, first step: **a shocked player is stopped.**
  *
  * `rollStatus` has always written the player's `shock` with a one-second clock and **nothing ever
  * read it** — the status was applied and did nothing. The mob side is the mirror and shows the shape:

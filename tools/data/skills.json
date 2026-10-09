@@ -1586,6 +1586,119 @@
       ]
     },
     {
+      "id": "aura.ember_conversion",
+      "name": "Ember Conversion",
+      "type": "aura",
+      "kind": "fire",
+      "reserve": "mid",
+      "effect": "35% of physical damage converted to fire",
+      "effects": [
+        {
+          "stat": "damage_conversion",
+          "op": "add_pct",
+          "value": 35,
+          "element": "fire",
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.rime_conversion",
+      "name": "Rime Conversion",
+      "type": "aura",
+      "kind": "cold",
+      "reserve": "mid",
+      "effect": "35% of physical damage converted to cold",
+      "effects": [
+        {
+          "stat": "damage_conversion",
+          "op": "add_pct",
+          "value": 35,
+          "element": "cold",
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.storm_conversion",
+      "name": "Storm Conversion",
+      "type": "aura",
+      "kind": "lightning",
+      "reserve": "mid",
+      "effect": "35% of physical damage converted to lightning",
+      "effects": [
+        {
+          "stat": "damage_conversion",
+          "op": "add_pct",
+          "value": 35,
+          "element": "lightning",
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.cast_on_crit",
+      "name": "Cast on Crit",
+      "type": "aura",
+      "kind": "trigger",
+      "reserve": "heavy",
+      "effect": "on a crit, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers",
+      "rules": [
+        "cast_on_crit"
+      ],
+      "effects": [
+        {
+          "stat": "trigger_cd_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "self"
+        },
+        {
+          "stat": "cast_mana_mult",
+          "op": "mult",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "cast_damage_mult",
+          "op": "mult",
+          "value": 0.7,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.cast_on_damage_taken",
+      "name": "Cast on Damage Taken",
+      "type": "aura",
+      "kind": "trigger",
+      "reserve": "heavy",
+      "effect": "on taking damage, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers",
+      "rules": [
+        "cast_on_damage_taken"
+      ],
+      "effects": [
+        {
+          "stat": "trigger_cd_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "self"
+        },
+        {
+          "stat": "cast_mana_mult",
+          "op": "mult",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "cast_damage_mult",
+          "op": "mult",
+          "value": 0.7,
+          "subject": "self"
+        }
+      ]
+    },
+    {
       "id": "aura.rimbo_form",
       "name": "Rimbo Form",
       "type": "aura",

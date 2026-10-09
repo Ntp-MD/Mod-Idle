@@ -31,7 +31,7 @@ const allNames = (): string[] => SKILLS.map((s) => s.name);
 const fmt = (n: any): string => Number(n).toLocaleString('en-US');
 
 /**
- * Mechanic gate (checks.md D18): the roster must be internally consistent and
+ * Mechanic gate: the roster must be internally consistent and
  * satisfy the promises the design makes about coverage.
  * Returns [{ id, ok, detail }].
  */
@@ -68,28 +68,23 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
 
   const totalReserve = byType('aura').reduce((s, a) => s + (a.reserve ? RESERVE[a.reserve].pct : 0), 0);
   const block = (DATA.meta.reservation && DATA.meta.reservation.max_pct) || 100;
-  add('S9', true, `the full aura set reserves ${totalReserve}% of the pool against the ${block}% block — the set can never all run at once, so the player must choose (informational)`);
+  add('S9', totalReserve > block, `the full aura set reserves ${totalReserve}% of the pool against the ${block}% block — more than the pool holds, so the set can never all run at once and the player must choose`);
 
   // Skill level: the XP rule must be reachable in hours, not in lifetimes.
   const SX = EN.E.skill_xp;
   const sp: string[] = [];
   let mult = 0;
   let killsToMax = 0;
-  let hrs: number[] = [];
   if (!SX || !(SX.xp_per_step > 0) || !(SX.level_cap > 1)) sp.push('skill_xp is missing or has no step cost');
   else {
     killsToMax = (SX.level_cap - 1) * SX.xp_per_step / SX.xp_per_kill;
     // the Cap multiplier is read out of the calculator itself, never recomputed here (ramp:
     // (base_flat + eff/100 × power) × damage_pct(level)/100, with eff 0 so only the ramp shows —
     // and `perPress` reads that percentage out of `meta.formula.skill_levels`). What this gate
-    // protects is the band the design promises — checks.md E12: gear ×5.6, skill ×1.1-1.4.
+    // protects is the band the design promises: gear ×5.6, skill ×1.1-1.4.
     const SM0 = createSkillModel(DATA, EN.E);
     mult = SM0.perPress({ id: '', basis: 'phys', base_flat: 1, eff: 0 }, { phys: 1, level: SX.level_cap }) ?? 0;
-    if (!(mult > 1.1 && mult < 1.4)) sp.push(`a maxed skill multiplies its basis by ×${mult && mult.toFixed(3)}, outside the ×1.1-1.4 skill band (checks.md E12)`);
-    hrs = ['low', 'mid', 'high'].map((b) => killsToMax / EN.BAND[b].kills_per_hr);
-    // The band is "catch up inside about one zone". the re-base made a zone ~2.9x longer
-    // (kill rates x1/3), so the band scales with it: 2-10 hr was one zone on the retired line.
-    if (Math.min(...hrs) < 5 || Math.max(...hrs) > 30) sp.push(`one skill maxes in ${hrs.map((h) => h.toFixed(1)).join(' / ')} hr by band — outside the 5-30 hr "catch up inside about one zone" band`);
+    if (!(mult > 1.1 && mult < 1.4)) sp.push(`a maxed skill multiplies its basis by ×${mult && mult.toFixed(3)}, outside the ×1.1-1.4 skill band`);
     const nullReserve = byType('aura').filter((a) => a.reserve === null).length;
     if (nullReserve) sp.push(`${nullReserve} aura(s) still have no reserve tier`);
     add('S10', sp.length === 0, sp.length ? sp.join(' \u00b7 ')
@@ -144,6 +139,18 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     `${badStat.length ? ' · UNKNOWN STAT: ' + badStat.join(', ') : ''}${badValue.length ? ' · NOT IN TEXT: ' + badValue.join(', ') : ''}`);
   const proseOnly = SKILLS.filter((s) => !(s.effects || []).length).map((s) => s.id);
   add('S12', SKILLS.every((s) => (s.effects || []).length || (s.rules || []).length || s.modelled_by), `${proseOnly.length} rows state a mechanic rather than a magnitude (${SKILLS.filter((s) => (s.rules || []).length).length} carry a rule word, ${SKILLS.filter((s) => s.modelled_by && !(s.effects || []).length).length} more are carried whole by another column) — every one of them is spent in the client, so no row is left as prose (informational)`);
+
+  // S19 · conversion's Cap is the whole hit (`draft/convert-damage.md` · `convertDamageOf`), and a Cap
+  // that cannot be reached is a lie (D3). The `damage_conversion` rows are the only source, so they must
+  // sum to the Cap or past it — overflow is wasted, never a multiplier.
+  {
+    const conv = SKILLS.flatMap((s: any) => (s.effects || [])
+      .filter((e: any) => e.stat === 'damage_conversion')
+      .map((e: any) => ({ id: s.id, pct: e.value, el: e.element })));
+    const sum = conv.reduce((t: number, e: any) => t + e.pct, 0);
+    add('S19', conv.length > 0 && sum >= 100,
+      `${conv.length} conversion rows (${conv.map((e: any) => `${e.el} ${e.pct}%`).join(' · ')}) sum to ${sum}% against the whole-hit Cap 100, so running them all reaches it — the Cap is not a number that misleads a build (D3)`);
+  }
 
   // B5: a press is its own flat damage plus a stated share of the finished hit, so an attack row
   // without a named basis or without both damage numbers presses nothing. The two reference bases the

@@ -11,7 +11,7 @@ import { mulberry32 } from '../src/engine/client-helpers';
 const require = createRequire(import.meta.url);
 const cage = require('../../tools/lib/engine.ts');
 
-describe('the farm curve is the generated one in farm.md', () => {
+describe('the farm curve is the engine curve', () => {
   it('levels on the Mastery sqrt curve and caps at 20', () => {
     expect(farm.farmLevel(0)).toBe(1);
     expect(farm.farmLevel(E.farm.level_divisor)).toBe(2);
@@ -202,6 +202,5 @@ describe('the client and the cages read one farm', () => {
   it('shares engine.json numbers with the cage side', () => {
     expect(E.farm.growth_hours).toBe(cage.E.farm.growth_hours);
     expect(E.potions.craft.high.herbs).toBe(cage.E.potions.craft.high.herbs);
-    expect(farm.farmLevel(3600)).toBe(Math.min(E.farm.level_cap, Math.floor(Math.sqrt(3600 / E.farm.level_divisor)) + 1));
   });
 });

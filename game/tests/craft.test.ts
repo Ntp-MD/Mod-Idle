@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { E, loot } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
 import { rollDrop } from '../src/sim/drop';
-import { doCraft, stoneNames, craft as clientCraft } from '../src/sim/craft';
+import { doCraft, stoneNames, replaceChoices, craft as clientCraft } from '../src/sim/craft';
 import { newGame, tick } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 import type { Item } from '../src/sim/types';
@@ -149,7 +149,7 @@ describe('Add mod stone', () => {
     return frame ? [...frame.primary, ...frame.secondary, 'stat_mod_flat'] : ['physical_power_flat', 'attack_speed', 'stat_mod_flat'];
   };
 
-  it('costs 1 stone then 2, and stops at the Rarity crafted max', () => {
+  it('costs 1 stone then 2, and stops at the max Mod count', () => {
     let item = { ...piece(21), ilvl: 61, lines: piece(21).lines.slice(0, 3) };
     expect(craft.costOf('add', item)).toEqual({ add: 1 });
     const one = made(craft.add(item, poolFor(item), mulberry32(1)));
@@ -238,12 +238,51 @@ describe('the bench in the game', () => {
     const denied = refused(doCraft(s, 'bag', 0, 'reroll', craft.UNTOUCHABLE, mulberry32(1)));
     expect(denied.ok).toBe(false);
     expect(String(denied.why)).toMatch(/needs/);
-    s.counters.stones.reroll_value = 8;
+    s.counters.stones.reroll_value = E.craft.reroll_value_stones_per_use;
     const before = s.bag[0].lines[craft.UNTOUCHABLE].value;
     const ok = doCraft(s, 'bag', 0, 'reroll', craft.UNTOUCHABLE, mulberry32(1));
     expect(ok.ok).toBe(true);
     expect(s.counters.stones.reroll_value).toBe(0);
     expect(s.bag[0].lines[craft.UNTOUCHABLE].value).toBeGreaterThanOrEqual(before);
+  });
+
+  it('the Replace stone lands the Mod named and leaves the Tier to roll', () => {
+    const s = newGame(21);
+    // a drop with an editable line and a pool the piece has not already filled, whichever seed that is
+    let picked: { out: string; inId: string } | null = null;
+    for (let seed = 1; seed < 60 && !picked; seed++) {
+      s.bag.unshift(piece(seed));
+      const item = s.bag[0];
+      const inId = item.lines.length > craft.UNTOUCHABLE
+        ? replaceChoices(s, 'bag', 0).find((id) => id !== item.lines[craft.UNTOUCHABLE].id)
+        : undefined;
+      if (inId) picked = { out: item.lines[craft.UNTOUCHABLE].id, inId };
+      else s.bag.shift();
+    }
+    expect(picked).toBeTruthy();
+    const target = craft.UNTOUCHABLE;
+    const lines = s.bag[0].lines.length;
+    s.counters.stones.replace = 0;
+    expect(refused(doCraft(s, 'bag', 0, 'replace', target, mulberry32(7), picked!.inId)).ok).toBe(false);
+    s.counters.stones.replace = E.craft.replace_stones_per_use;
+    const r = doCraft(s, 'bag', 0, 'replace', target, mulberry32(7), picked!.inId);
+    expect(r.ok).toBe(true);
+    expect(s.bag[0].lines.length).toBe(lines);
+    expect(s.bag[0].lines[target].id).toBe(picked!.inId);
+    expect(s.bag[0].mods_added || 0).toBe(0);
+    expect(s.counters.stones.replace).toBe(0);
+    // the old line's Reroll floor left with its identity: a different Mod is a different line
+    expect(s.bag[0].baselines?.[target]).toBeUndefined();
+  });
+
+  it('the Replace stone is priced as the pair it replaces and refuses a fixed line', () => {
+    expect(E.craft.replace_stones_per_use).toBe(E.craft.remove_stones_per_use + 1);
+    const s = newGame(21);
+    s.bag.unshift(piece(11));
+    s.counters.stones.replace = 4;
+    const pick = replaceChoices(s, 'bag', 0)[0];
+    expect(refused(doCraft(s, 'bag', 0, 'replace', 0, mulberry32(3), pick)).ok).toBe(false);
+    expect(s.counters.stones.replace).toBe(4);
   });
 
   it('has nothing locked and nothing left owing — the ladder is bounded by the line it raises', () => {

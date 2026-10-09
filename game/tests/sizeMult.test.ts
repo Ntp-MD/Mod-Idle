@@ -6,6 +6,9 @@ import { playerSwing } from '../src/sim/combat';
 import { NO_CURSE } from '../src/sim/curse';
 import type { Mob } from '../src/sim/types';
 
+/** The size-multiplier ladder straight off the data (`engine.json weapon_size_mult.ladder`). */
+const ladder = (E as any).weapon_size_mult.ladder;
+
 /**
  * HugePatch §12 · weapon × body class, the mechanism. Mounted on the session's own data:
  * `engine.json weapon_size_mult` carries the ladder, `playerSwing` applies it to the whole
@@ -38,22 +41,21 @@ describe('a weapon meets a body class (§12)', () => {
     const small = landed('mace', 'small');
     const large = landed('mace', 'large');
     // the row is the owner's dagger ladder pointed the other way: 1.25 vs 0.75 = 5/3
-    expect(large / small).toBeCloseTo(1.25 / 0.75, 4);
+    expect(large / small).toBeCloseTo(ladder.mace.large / ladder.mace.small, 4);
   });
 
   it('and a Small-favouring weapon reads the other way round', () => {
-    expect(landed('dagger', 'small') / landed('dagger', 'large')).toBeCloseTo(1.25 / 0.75, 4);
+    expect(landed('dagger', 'small') / landed('dagger', 'large')).toBeCloseTo(ladder.dagger.small / ladder.dagger.large, 4);
     // the neutral column is the same for both, and a magic weapon is answered by the same table
     expect(landed('dagger', 'medium')).toBeGreaterThan(0);
-    expect(landed('wand', 'large') / landed('wand', 'small')).toBeCloseTo(1.25 / 0.75, 4);
+    expect(landed('wand', 'large') / landed('wand', 'small')).toBeCloseTo(ladder.wand.large / ladder.wand.small, 4);
   });
 
   it('a boss reads the class it declares, and an unknown class falls back to flat', () => {
     // the table has three columns, not four: a boss is a species that declares which one it reads
     expect(eng.spawnAt(9, 90, 'boss').readsAs).toBe('large');
     // "boss" is not a column, so it must not silently become a bonus — it reads the identity
-    const ladder = (E as any).weapon_size_mult.ladder;
-    expect(eng.sizeMultOf(ladder, 'mace', 'large')).toBeCloseTo(1.25, 9);
+    expect(eng.sizeMultOf(ladder, 'mace', 'large')).toBeCloseTo(ladder.mace.large, 9);
     expect(eng.sizeMultOf(ladder, 'mace', 'boss')).toBe(1);
     expect(eng.sizeMultOf(ladder, 'a weapon that does not exist', 'large')).toBe(1);
   });

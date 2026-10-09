@@ -194,6 +194,31 @@ export function createEngine(E: EngineData) {
     return non + el;
   }
 
+  /**
+   * Conversion (owner ruling · `draft/convert-damage.md`): take a percent of the finished PHYSICAL
+   * share and route it into a named Element BEFORE mitigation, so the converted half answers
+   * Elemental resistance instead of Armour. `pctByElement` is the per-Element conversion the sheet
+   * folds out of the aura rows (`damage_conversion:<element>`). The summed percent is capped at the
+   * whole hit — overflow is wasted, never a multiplier — and every Element's share is a percent of the
+   * SAME base, so two rows cannot each take a quarter of what the first left. Returns the share that
+   * stayed physical and the converted per-Element share, both still unmitigated; the caller merges the
+   * converted share into its own Element pools and mitigates each half on its own line. Pure over the
+   * numbers it is handed.
+   */
+  const convertDamageOf = (physical: number, pctByElement: Record<string, number>) => {
+    const byElement: Record<string, number> = {};
+    const base = physical > 0 ? physical : 0;
+    let budget = 100;
+    for (const [el, pct] of Object.entries(pctByElement || {})) {
+      if (!(pct > 0) || !(budget > 0)) continue;
+      const take = Math.min(pct, budget);
+      byElement[el] = (byElement[el] || 0) + base * (take / 100);
+      budget -= take;
+    }
+    const converted = Object.values(byElement).reduce((t, v) => t + v, 0);
+    return { physical: base - converted, byElement };
+  };
+
   // ---- Energy Shield: the caster's second pool, worn on gear rather than spent from a stat
   DERIVED.es_pool = M.energy_shield_flat_t1 * (1 + M.max_energy_shield_pct / 100);
   DERIVED.es_regen = DERIVED.es_pool * ES.regen_pct / 100;
@@ -266,6 +291,38 @@ export function createEngine(E: EngineData) {
   // untouchable, which is the same rule as the Evasion Cap one line up.
   const mobDodge = (agiRate: number, Lv: number) => Math.min(100, (agiRate / (agiRate + refAttackerAcc(Lv))) * 100);
   const damageSplit = (tag: string) => E.mob.damage_split[tag];
+
+  // ---- a mob's own damage power (owner ruling, option B): the species Base plus a Core Stat
+  // bonus, read off the SAME tag that splits its hit (`damage_split`: physical → Str, magic → Int,
+  // mixed → both halves). The zone mean divides it out below, so mob_PS stays the published curve
+  // for the zone's AVERAGE mob and only the species actually in front of the player moves the number.
+  const speciesPowerStatOf = (sp: any) => {
+    const [wPhys, wMagic] = damageSplit(sp.damage);
+    return K.K_MOB_PS_STAT * (wPhys * mobStat() * sp.stats.str + wMagic * mobStat() * sp.stats.int);
+  };
+  const speciesPowerOf = (sp: any) => sp.power_base + speciesPowerStatOf(sp);
+  // The zone's average species power: the same weighted mean `zoneBodyFactor` takes for HP, so a
+  // species entry divides its own power by this and the zone's mean stays exactly 1 by construction.
+  const zonePowerCache = new Map<number, number>();
+  function zonePowerFactor(zoneId: number) {
+    const cached = zonePowerCache.get(zoneId);
+    if (cached !== undefined) return cached;
+    const cast = E.mob.species.filter((sp) => sp.zones.includes(zoneId));
+    let w = 0, sum = 0;
+    for (const sp of cast) for (const sid of sp.sizes) {
+      const weight = E.mob.spawn_weights[sid] || 0;
+      if (!weight) continue;
+      w += weight; sum += weight * speciesPowerOf(sp);
+    }
+    const factor = w ? sum / w : 1;
+    zonePowerCache.set(zoneId, factor);
+    return factor;
+  }
+  /** The PS multiplier one species carries in its zone: its own power over the zone mean. */
+  const speciesPsMult = (zoneId: number, speciesId: string) => {
+    const sp = speciesById(speciesId);
+    return sp ? speciesPowerOf(sp) / zonePowerFactor(zoneId) : 1;
+  };
 
   // ---- race resistance: each species tilts its Vit line by Element (mob.resist_rules · X54).
   // The five multipliers average 1.00, so the published res column stays the Vit line and the
@@ -692,7 +749,7 @@ export function createEngine(E: EngineData) {
             id: `z${z.id}_${sp.id}_${size.id}`, zone: z.id, zoneName: z.name, levels: [lFrom, lTo],
             kind: size.name, species: sp.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
             hpFrom: z.hp[0] * size.hp / bf, hpTo: z.hp[1] * size.hp / bf,
-            ps: psEdge * size.ps / bf, bodyFactor: bf,
+            ps: psEdge * size.ps / bf * speciesPsMult(z.id, sp.id), bodyFactor: bf,
             acc: mobAcc(lTo, sp.stats.dex, sp.accuracy_mult),
             ev: edge * sp.stats.dex * K.K_EVASION * size.evasion,
             armour: edge * sp.stats.str * K.K_ARMOUR,
@@ -710,7 +767,7 @@ export function createEngine(E: EngineData) {
           out.push({
             id: `z${z.id}_${sp.id}_elite`, zone: z.id, zoneName: z.name, levels: [lFrom, lTo],
             kind: el.name, species: sp.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
-            hpFrom: z.hp[0] * el.hp, hpTo: z.hp[1] * el.hp, ps: psEdge * el.ps,
+            hpFrom: z.hp[0] * el.hp, hpTo: z.hp[1] * el.hp, ps: psEdge * el.ps * speciesPsMult(z.id, sp.id),
             acc: mobAcc(lTo, sp.stats.dex, sp.accuracy_mult),
             ev: edge * sp.stats.dex * K.K_EVASION * el.evasion,
             armour: edge * sp.stats.str * K.K_ARMOUR,
@@ -729,7 +786,7 @@ export function createEngine(E: EngineData) {
         id: `z${z.id}_boss`, zone: z.id, zoneName: z.name, levels: [lFrom, lTo],
         kind: `${bz.name} · ${boss.name}`, species: bs.name, speciesId: bs.id,
         innate: bs.element_bias.filter((e) => z.elements.includes(e)), weapon: bs.carries_weapon,
-        hpFrom: z.hp[0] * bz.hp, hpTo: z.hp[1] * bz.hp, ps: psEdge * bz.ps,
+        hpFrom: z.hp[0] * bz.hp, hpTo: z.hp[1] * bz.hp, ps: psEdge * bz.ps * speciesPsMult(z.id, bs.id),
         acc: mobAcc(lTo, bs.stats.dex, bs.accuracy_mult),
         ev: edge * bs.stats.dex * K.K_EVASION * bz.evasion,
         armour: edge * bs.stats.str * K.K_ARMOUR,
@@ -756,7 +813,7 @@ export function createEngine(E: EngineData) {
     const size = sizeById(bodyId) || sizeById('medium')!;
     const bf = zoneBodyFactor(zoneId);
     const hp = mobHpAt(lv) * size.hp / bf;
-    const ps = mobPsAt(lv) * size.ps / bf;
+    const ps = mobPsAt(lv) * size.ps / bf * speciesPsMult(zoneId, sp.id);
     return {
       speciesId: sp.id, species: sp.name, zone: zoneId, zoneName: z.name, level: lv,
       body: size.id, kind: size.name, readsAs: size.reads_as || size.id,
@@ -782,6 +839,7 @@ export function createEngine(E: EngineData) {
     statAt, statWithItems, ceilStat, pointsAt, treePointsAt, statOf,
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
+    speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
     ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, mobStat, mobStatsOf, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
     speciesResMult, mobResOf, mobResByElementOf,
   evasionChance, evasionRating, agilityEvasion,
@@ -792,7 +850,7 @@ export function createEngine(E: EngineData) {
     critPool, critChanceOf, critDmgOf,
     maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf, esRegenOf, cdrOf,
     alignmentOf, resistanceOf, stunRecoveryOf, stunStopSec, weightCapacityOf, encumbranceOf, aspdEncumbered, weightAtQuality,
-    armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, agiForCap,
+    armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, convertDamageOf, agiForCap,
     weaponWeightOf, sizeMultOf, applySizeMult, basicAttackOf,
     // loot + xp
     lckOf, dropChance, killsDerived, goldPerMinute, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,

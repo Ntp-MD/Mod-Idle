@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { eng, E, sm, TOWN, BASES, tree } from './engine/client';
   import { buildCharacter } from './sim/player';
-  import { newGame, tick, push, catchUpAsync, carried, heldWeaponName } from './sim/game';
+  import { newGame, tick, push, fx, hitColour, catchUpAsync, carried, heldWeaponName } from './sim/game';
   import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
@@ -26,7 +26,7 @@
   import { farm, farmLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
   import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
 import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
-  import { road, startWalk, walkLabel, walkBlocks, walkRoute } from './sim/road';
+  import { road, startWalk, walkLabel, walkBlocks, walkRoute, warpTo, warpCost, warpRow, walkedCells } from './sim/road';
   import { masteryLabel, dropBonusPct, masteryLevel, WEAPONS } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
   import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
@@ -223,6 +223,27 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const canStash = $derived(atSettlement(gameState) && stashTabCount(gameState) > 0);
   /** whether the character stands in a settlement right now — every service below answers to this */
   const townLive = $derived(atSettlement(gameState));
+
+  /**
+   * The hit ring, split by the half of the frame it belongs on: what the character deals lands over
+   * the mob field, what it takes — and what it casts, sells, warps or crafts — lands on its own plate.
+   * The events come from the sim, so an animation is a fact about the world rather than a CSS timer.
+   */
+  const fieldFx = $derived((gameState.fx || []).filter((e) => e.side === 'field').slice(0, 9));
+  const selfFx = $derived((gameState.fx || []).filter((e) => e.side === 'self').slice(0, 5));
+  /** the newest thing that landed on the field — the front mob's plate flashes on exactly this id */
+  const latestFieldFx = $derived(fieldFx[0] || null);
+  /** the newest hit that took something off the character, for the frame's own edge flash */
+  const latestTaken = $derived(selfFx.find((e) => e.kind === 'taken') || null);
+  /** the key for the indicator's colours, built from the data that paints them — nothing typed here */
+  const fxKey = $derived.by(() => {
+    const C = E.elements as any;
+    return [
+      { name: 'physical', label: 'physical', colour: C.physical_colour },
+      ...(C.order as string[]).map((el) => ({ name: el, label: el, colour: C.colour[el] })),
+      { name: 'crit', label: 'critical', colour: C.crit_colour },
+    ];
+  });
 
   /** The away-window report (parking: "Offline report on return"), filled on mount catch-up + Load. */
   let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; quality: string } | null>(null);
@@ -579,10 +600,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const regions = root.querySelector('#regions') as HTMLElement | null;
     if (regions) regions.style.opacity = v === 'terrain' ? '1' : '0';
     if (picked && picked !== townId) {
-      const crossed = walk && walk.to === picked ? walk.blocksTotal - walk.blocksLeft : -1;
-      walkRoute(townId, picked).forEach((k, i) => {
+      const crossed = new Set(walkedCells(gameState));
+      walkRoute(townId, picked).forEach((k) => {
         const cell = root.querySelector(`polygon.cell[data-ax="${k}"]`);
-        if (cell) cell.classList.add(i <= crossed ? 'walked' : 'route');
+        if (cell) cell.classList.add(crossed.has(k) ? 'walked' : 'route');
       });
     }
     if (pickedCell || picked) {
@@ -608,6 +629,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    * sit in a `g[data-node]` above the polygon — so it resolves to the cell it stands on.
    */
   function onMapClick(ev: MouseEvent) {
+    // a click on the ground — never on a mob plate, which keeps its own pointer — is the field's own way
+    // into map focus: the fight folds down onto the log and the map takes the frame, so the cell the
+    // player reached for is the subject of the click rather than a side effect of it. A pop keeps the
+    // frame; its own close, or Escape, is what leaves it.
+    if (panel === null && !sheetOpen && !alloc) panel = 'map';
     const hit = ev.target as Element | null;
     const mark = hit?.closest?.('g[data-node]')?.getAttribute('data-node');
     const cell = hit?.closest?.('polygon.cell[data-node]')
@@ -844,6 +870,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function doSell() {
     const r = sellJunk(gameState);
     push(gameState, `Counterhand: sold ${r.pieces} junk for ${r.gold} gold`);
+    if (r.pieces > 0) fx(gameState, { kind: 'sell', side: 'self', text: `+${fmtNum(r.gold)} gold`, colour: E.elements.crit_colour || '#e8c169' });
     gameState = { ...gameState };
   }
 
@@ -859,19 +886,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** A Waypoint warp: free, instant, and only to a settlement already walked to on foot. */
+  /** A Waypoint warp: instant, to a settlement already walked to, and it pays gold for the walk's time. */
   function travelTo(id: string) {
     const s = settlementById(id);
-    if (!canTravel(gameState, id)) { saveNote = `${s?.name ?? 'That settlement'} has not been walked to yet`; return; }
+    const saved = walkBlocks(gameState.town.waypoint, id);
+    const r = warpTo(gameState, id);
+    if (!r.ok) { saveNote = `Cannot warp: ${r.why}`; gameState = { ...gameState }; return; }
     // a manual jump is the new floor: a later Push in Forward Mode falls back to the zone just left
     gameState.forwardSafe = gameState.zone;
-    gameState.walk = null;
-    gameState.zone = s.zone;
-    gameState.group = [];
-    gameState.town.waypoint = id;
-    push(gameState, `Waypoint to ${s.name} — free and instant`);
+    push(gameState, `Waypoint to ${s.name} — ${r.gold} gold for the ${saved} blocks it saves`);
+    fx(gameState, { kind: 'warp', side: 'self', text: `warp · ${s.name}`, colour: hitColour(null) });
     gameState = { ...gameState };
   }
+
+  /** What a warp to a settlement would cost, read off the same row the warp pays. */
+  const warpPrice = (id: string) => warpCost(gameState, id);
+  /** the Waypoint's own price line, so the prose quotes the data's number instead of retyping it */
+  const warpFee = $derived(warpRow()?.m_per_block ?? 0);
 
   /** Start a walk on foot to any settlement, walked to or not — this is how a Waypoint unlocks. */
   function doWalk(id: string) {
@@ -886,13 +917,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let benchNote = $state('');
   const benchItem = $derived(bench ? (bench.where === 'gear' ? gameState.gear[bench.index] : gameState.bag[bench.index]) : null);
 
-  function runCraft(op: CraftOp, lineIndex: number) {
+  function runCraft(op: CraftOp, lineIndex: number, pick?: string) {
     if (!bench) return;
     const rng = mulberry32(gameState.rngState);
     gameState.rngState += 1;
-    const r = doCraft(gameState, bench.where, bench.index, op, lineIndex, rng);
+    const r = doCraft(gameState, bench.where, bench.index, op, lineIndex, rng, pick);
     benchNote = r.ok ? `${op}: ${r.note}` : `${op} refused — ${r.why}`;
-    if (r.ok) push(gameState, `Bench ${op} · ${r.note}`);
+    if (r.ok) {
+      push(gameState, `Bench ${op} · ${r.note}`);
+      // a stone landing is a beat on the bench: the same gold the crit wears, because a craft that
+      // worked is the field's other kind of hit
+      fx(gameState, { kind: 'craft', side: 'self', text: `${op} · ${r.note}`, colour: E.elements.crit_colour || '#e8c169' });
+    }
     gameState = { ...gameState };
   }
 
@@ -1099,7 +1135,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     they need the room. Widen the window, or set the browser zoom out.</p>
 </div>
 
-<div class="stage" class:mapmode={panel === 'map'} class:veiled={panel !== null && panel !== 'map'}>
+<div class="stage" class:mapmode={panel === 'map'} class:veiled={panel !== null && panel !== 'map'} class:townmode={townLive && panel !== 'map'}>
   <!-- The field lies on the map: one generated sheet, laid flat behind the HUD, dimmed and out of focus
        until the pointer reaches for it or the MAP tab brings it into focus. It is the only copy and the
        surface a place is picked, plotted and walked on — no modal sits between the player and a cell. -->
@@ -1115,7 +1151,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       {@html mapMarkup}
     </div>
   </div>
-  <h2 class="arena">{zone.name}</h2>
+  <h2 class="arena">{townLive && town && town.name !== zone.name ? `${town.name} · ${zone.name}` : zone.name}</h2>
 
   {#if awayReport}
     <div class="toast">
@@ -1185,7 +1221,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           {#if gameState.walk}
             <p><small>Walking <b>{walkLabel(gameState.walk.from, gameState.walk.to)}</b> — block {gameState.walk.blocksTotal - gameState.walk.blocksLeft + 1} of {gameState.walk.blocksTotal}: the route is plotted once and crossed one cell at a time, the cells behind you darkened. Every block crossed rolls a {E.road.encounter_chance_pct}% chance of an ambush.</small></p>
           {:else}
-            <p><small>The green pin marks the settlement you stand in. Click any cell — a settlement, one of its sub-zones or one of its wild sides — and the card plots the walk to it and offers the walk or the warp. The arrows step the settlement list and Enter takes the trip. Drag the sheet to pan it, scroll to zoom, and <b>centre</b> or <b>reset</b> put it back on the ground you stand on.</small></p>
+            <p><small>The green pin marks the settlement you stand in. Click any cell — a settlement, one of its sub-zones or one of its wild sides — and the card plots the walk to it and offers the walk or the warp; a warp is only ever offered to a settlement you have already reached on foot, and it costs gold. The arrows step the settlement list and Enter takes the trip. Drag the sheet to pan it, scroll to zoom, and <b>centre</b> or <b>reset</b> put it back on the ground you stand on.</small></p>
           {/if}
         </div>
       </section>
@@ -1313,8 +1349,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   <!-- the middle of the frame is the group itself: one plate per mob, HP as the loudest thing on it -->
   <div class="field">
-    {#each gameState.group as m}
-      <div class="mob" class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}>
+    {#each gameState.group as m, mi}
+      <div class="mob" class:front={mi === 0} class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}>
+        {#if mi === 0 && latestFieldFx}
+          <!-- the front plate takes the hit: recreated on the event's own id, so the flash is one beat
+               per swing rather than a loop the eye learns to ignore -->
+          <span class="flash" key={latestFieldFx.id} style="--fx:{latestFieldFx.colour}"></span>
+        {/if}
         <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
         <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
         <p class="body">{m.kind}</p>
@@ -1337,6 +1378,36 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     {/each}
   </div>
 
+  <!-- The hit ring: everything the sim just did, drawn as an event rather than read back out of a
+       total. `counters.damageBy` says how much a build dealt; this says when, in what colour, and with
+       what landing — the number wears the Element that carried the hit, a crit wears the game's one
+       accent, and a status proc wears the colour of the Element that inflicted it (a cold proc is the
+       same ice as a cold hit). Colours come out of `engine.json` `elements`, never typed here. -->
+  <div class="floaters" aria-hidden="true">
+    <div class="float-side field-side">
+      {#each fieldFx as e (e.id)}
+        <span class="fx fx-{e.kind}" class:crit={e.crit} style="--fx:{e.colour}; --lane:{e.id % 7}">{e.text}</span>
+      {/each}
+    </div>
+    <div class="float-side self-side">
+      {#each selfFx as e (e.id)}
+        <span class="fx fx-{e.kind}" style="--fx:{e.colour}; --lane:{e.id % 3}">{e.text}</span>
+      {/each}
+    </div>
+    {#if latestTaken}
+      <!-- the character's own answer to being hit: the frame's edge takes the colour of what landed,
+           so a chaos hit and a physical one are felt differently before the number is even read -->
+      <span class="veil" key={latestTaken.id} style="--fx:{latestTaken.colour}"></span>
+    {/if}
+  </div>
+
+  <!-- what each colour on the field means, read straight off the data that paints it -->
+  <div class="fx-key" aria-label="Damage colour key">
+    {#each fxKey as k (k.name)}
+      <span class="fx-swatch" style="--fx:{k.colour}">{k.label}</span>
+    {/each}
+  </div>
+
   <!-- the pick made on the map the field stands on: the card that plots the walk and offers the trip,
        up on the field and in map focus alike — the desk it opens is the only screen a place owns -->
   {#if pickedSettlement && pickedWalk && (panel === null || panel === 'map')}
@@ -1346,6 +1417,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         cell={pickedCell}
         walk={pickedWalk}
         busy={!!gameState.walk}
+        fare={warpPrice(pickedSettlement.id)}
+        afford={gameState.counters.gold >= warpPrice(pickedSettlement.id)}
         onwalk={doWalk}
         onwarp={travelTo}
         onhunt={goToZone}
@@ -1382,6 +1455,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <div><span class="t">{line.sec}s</span> {line.text}</div>
     {/each}
   </div>
+
+  <!-- map focus folds the fight down onto the log: the compact card the field collapses to reads the
+       group's health while the map is the subject, and its press is the way back to the centred field -->
+  {#if panel === 'map'}
+    <button class="mob-mini" onclick={closePanel} title="Back to the fight · Esc">
+      <span class="mini-tag">fight</span>
+      {#each gameState.group as m}
+        <span class="mini-mob" class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}>
+          <img src={mobIcon(m.species)} alt="" aria-hidden="true" />
+          <span class="mini-bar"><i style={'width:' + bar(m.hp, m.hpMax)}></i></span>
+          <b>{Math.max(0, Math.round(m.hp))}</b>
+        </span>
+      {:else}
+        <span class="mini-empty">nothing on screen</span>
+      {/each}
+    </button>
+  {/if}
 
   <!-- bottom-right: the three switches the field itself owns -->
   <div class="controls">
@@ -1708,7 +1798,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       Refine pushes one slot up a Tier, Ascend raises the whole piece one item-quality step. Element and Mod
       identity sit outside every stone here — only Corrupt, on the Forge, is the one gamble allowed to change
       an Element (`crafting.md`). Draughts are brewed on the Farm.</small></p>
-    <CraftBoard state={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
+    <CraftBoard game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
                 onpick={(w, i) => (bench = { where: w, index: i })}
                 onrun={(op, line) => runCraft(op, line ?? 0)} {wornOf} note={benchNote} />
   </Panel>
@@ -1908,19 +1998,21 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </table>
 
     <h3>Walk · {E.road.block_sec}s a block · {gameState.town.visited.length} of {TOWN.settlements.length} Waypoints opened</h3>
-    <p><small>Every pair of settlements is walkable: there is no edge list and no route to buy, and a far destination is not teleported to — the walk plots an ordered chain of adjacent cells and crosses it one cell per block. Walking to a settlement you have never reached opens its Waypoint, once, and costs nothing — after that the Waypoint covers the distance free and instantly. A walk is online only: an away period never crosses a block. A Push rests you at the camp of the zone you were ambushed in and walks you back in on the same block, so a Push never costs you the road. An ambush is an ordinary mob group and pays the ordinary drop roll — walking mints no gold, no Standing and no stones.</small></p>
+    <p><small>Every pair of settlements is walkable: there is no edge list and no route to buy, and a far destination is not teleported to — the walk plots an ordered chain of adjacent cells and crosses it one cell per block, each step into a cell that shares an edge with the one before it. Walking to a settlement you have never reached opens its Waypoint, once, and costs nothing. After that the Waypoint warps you there instantly, for gold at the destination's own band: <b>{warpFee}</b> minutes of the town's junk income a block, so the price is the time the walk would have spent. A walk is online only: an away period never crosses a block. A Push rests you at the camp of the zone you were ambushed in and walks you back in on the same block, so a Push never costs you the road. An ambush is an ordinary mob group and pays the ordinary drop roll — walking mints no gold, no Standing and no stones. Only ground your feet have crossed is legible on the sheet; the rest sits under cloud until you walk it.</small></p>
     <table class="picklist">
-      <thead><tr><th>Settlement</th><th>Zone</th><th>Blocks</th><th>Time</th><th></th></tr></thead>
+      <thead><tr><th>Settlement</th><th>Zone</th><th>Blocks</th><th>Time</th><th>Warp</th><th></th></tr></thead>
       <tbody>
         {#each TOWN.settlements.filter((x: any) => x.id !== townId) as s}
           {@const blocks = walkBlocks(townId, s.id)}
+          {@const fare = warpPrice(s.id)}
           <tr class:picked={picked === s.id} onclick={() => select(s.id)}>
             <td>{s.name}</td><td>{s.zone}</td>
             <td>{blocks}</td>
             <td>{road.secBetween(townId, s.id)}s</td>
+            <td>{canTravel(gameState, s.id) ? `${fare} gold` : '—'}</td>
             <td>
               <button onclick={(e) => { e.stopPropagation(); doWalk(s.id); }} disabled={!!gameState.walk}>{gameState.walk?.to === s.id ? 'walking' : 'walk'}</button>
-              {#if canTravel(gameState, s.id)}<button onclick={(e) => { e.stopPropagation(); travelTo(s.id); }}>waypoint</button>{/if}
+              {#if canTravel(gameState, s.id)}<button onclick={(e) => { e.stopPropagation(); travelTo(s.id); }} disabled={gameState.counters.gold < fare} title={gameState.counters.gold < fare ? `needs ${fare} gold` : `warp for ${fare} gold`}>waypoint</button>{/if}
             </td>
           </tr>
         {/each}
@@ -2291,6 +2383,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .chronicle div { text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
   .chronicle .t { color: var(--mob); margin-right: .4rem; font-variant-numeric: tabular-nums; }
 
+  /* map focus folds the fight down onto the log: this compact card sits exactly where the chronicle
+     does — the log is dimmed under it there — and its press is the way back to the centred field */
+  .mob-mini {
+    position: absolute; left: .9rem; bottom: 4.4rem; width: min(28rem, 46%); z-index: 3;
+    display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .7rem;
+    padding: .45rem .6rem; border: 1px solid var(--edge); border-radius: 10px; text-align: left;
+    background: var(--glass); backdrop-filter: blur(6px); cursor: pointer;
+  }
+  .mob-mini:hover, .mob-mini:focus-visible { border-color: var(--gold); }
+  .mini-tag { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mob); }
+  .mini-mob { display: inline-flex; align-items: center; gap: .3rem; }
+  .mini-mob img { width: 1.3rem; height: 1.3rem; object-fit: contain; }
+  .mini-mob.elite { color: #b98cff; }
+  .mini-mob.boss { color: #ff8b7a; }
+  .mini-bar { display: block; width: 4rem; height: 6px; border-radius: 3px; overflow: hidden; background: rgba(255, 255, 255, .09); }
+  .mini-bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #ff8a6b, var(--hp)); }
+  .mini-mob b { font-size: .66rem; font-variant-numeric: tabular-nums; color: var(--dim); }
+  .mini-empty { font-size: .72rem; color: var(--dim); }
+
   /* bottom-right, inside the field's own gutter: the three switches the field owns */
   .controls { position: absolute; right: .9rem; bottom: .9rem; display: flex; gap: .4rem; z-index: 4; }
 
@@ -2385,6 +2496,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     .tracker { width: min(17rem, 42%); }
     .field { inset: 5.6rem clamp(16rem, 23vw, 19rem) 6.4rem; }
     .chronicle { width: min(22rem, 42%); font-size: .7rem; }
+    .mob-mini { width: min(22rem, 42%); }
     .statuses { display: none; }
     .dock { width: min(26rem, 50%); }
     .gauge { width: clamp(9rem, 17vw, 13rem); }
@@ -2394,6 +2506,111 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     .controls { gap: .3rem; }
     .controls button { padding: .25rem .5rem; font-size: .74rem; }
   }
+  /* ── the hit ring ─────────────────────────────────────────────────────────────────────────────
+     Every event the sim raised, drawn once and then gone. The colour is the data's (`--fx` is set
+     from `elements.colour` at the call site), so a new Element needs a data row and not a CSS edit.
+     The ring is decoration: it never takes a pointer and never holds layout. */
+  .floaters { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
+  .float-side { position: absolute; display: flex; flex-direction: column-reverse; gap: .1rem; }
+  .field-side { left: 50%; bottom: 46%; transform: translateX(-50%); align-items: center; }
+  .self-side { left: calc(var(--rail) + 1rem); top: 9.5rem; align-items: flex-start; }
+  .fx {
+    --lane: 0;
+    font-family: var(--num);
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--fx, var(--text));
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .75);
+    animation: fx-rise .85s cubic-bezier(.2, .6, .3, 1) forwards;
+    white-space: nowrap;
+  }
+  .fx-hit { font-size: .95rem; }
+  .fx-hit.crit { font-size: 1.3rem; letter-spacing: .02em; animation: fx-crit .95s cubic-bezier(.15, .8, .3, 1) forwards; }
+  .fx-proc, .fx-block, .fx-kill, .fx-cast, .fx-travel, .fx-warp, .fx-sell, .fx-drop, .fx-craft, .fx-taken {
+    font-family: var(--ui);
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: .05rem .35rem;
+    border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--fx, var(--panel)) 14%, transparent);
+  }
+  .fx-proc { animation: fx-proc .95s ease-out forwards; }
+  .fx-cast { animation: fx-cast .8s ease-out forwards; }
+  .fx-travel, .fx-warp { animation: fx-drift 1.6s linear forwards; }
+  .fx-kill { animation: fx-strike .5s ease-out forwards; }
+  .fx-sell, .fx-craft { animation: fx-rise 1.1s ease-out forwards; }
+  /* the front mob's plate takes the blow: a rim of the hit's own colour, in one beat */
+  .mob { position: relative; }
+  .flash {
+    position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
+    border: 1px solid var(--fx, var(--edge));
+    box-shadow: 0 0 .5rem color-mix(in srgb, var(--fx, #fff) 60%, transparent) inset;
+    animation: fx-flash .32s ease-out forwards;
+  }
+  .fx-key {
+    position: absolute; right: .6rem; bottom: .4rem; z-index: 5;
+    display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end;
+    font-size: .62rem; color: var(--dim); pointer-events: none;
+  }
+  .fx-swatch { display: inline-flex; align-items: center; gap: .2rem; text-transform: uppercase; letter-spacing: .04em; }
+  .fx-swatch::before { content: ''; width: .45rem; height: .45rem; border-radius: 50%; background: var(--fx); }
+  @keyframes fx-rise {
+    0% { opacity: 0; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), .3rem) scale(.86); }
+    18% { opacity: 1; }
+    100% { opacity: 0; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), -2.4rem) scale(1); }
+  }
+  @keyframes fx-crit {
+    0% { opacity: 0; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), .6rem) scale(.5); }
+    22% { opacity: 1; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), -.4rem) scale(1.28); }
+    100% { opacity: 0; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), -3.1rem) scale(1); }
+  }
+  @keyframes fx-proc {
+    0% { opacity: 0; transform: scale(.7); }
+    30% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0; transform: translateY(-1.4rem); }
+  }
+  @keyframes fx-cast {
+    0% { opacity: 0; transform: translateY(.4rem) skewX(-8deg); }
+    25% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-1.6rem); }
+  }
+  @keyframes fx-drift {
+    0% { opacity: 0; transform: translateX(-1.2rem); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(1.4rem); }
+  }
+  @keyframes fx-strike {
+    0% { opacity: 1; transform: scale(1.25); }
+    100% { opacity: 0; transform: scale(.9); }
+  }
+  @keyframes fx-flash {
+    0% { opacity: .95; }
+    100% { opacity: 0; }
+  }
+  /* the frame's edge on a hit taken: the same colour rule as the number, one beat wider */
+  .veil {
+    position: absolute; inset: 0; pointer-events: none;
+    box-shadow: inset 0 0 5rem color-mix(in srgb, var(--fx, var(--hp)) 50%, transparent);
+    animation: fx-veil .4s ease-out forwards;
+  }
+  @keyframes fx-veil {
+    0% { opacity: .9; }
+    100% { opacity: 0; }
+  }
+
+  /* ── the town's own face ──────────────────────────────────────────────────────────────────────
+     Standing in a settlement is not a second screen: the character still hunts the zone the town owns.
+     What changes is what the screen puts first — the field recedes, the sheet loses its depth-of-field
+     pull, and the settlement's name sits over the zone's. The work a town is for (the warehouse, the
+     counter, the bench, the desk) is already one rail press away; this only stops the fight from
+     shouting over it. A walk in progress stays readable, because it is the one thing town cannot hide. */
+  .townmode .field { opacity: .78; filter: saturate(.85); }
+  .townmode .arena { color: var(--gold); }
+  .townmode .map-back { opacity: .5; }
+  .townmode .chronicle { opacity: .8; }
+
   /* 1600 and wider: the room is spent on the plates rather than on empty ground */
   @media (min-width: 1600px) {
     .field { inset: 6rem clamp(14rem, 30%, 26rem) 7rem; gap: 1rem; }
