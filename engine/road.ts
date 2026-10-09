@@ -6,7 +6,8 @@
  * coordinates and never typed, so a walk's length is never a hand-written number. A far destination
  * is plotted as a chain of adjacent cells (`routeBetween`) and crossed one cell at a time, which is
  * where an encounter comes from. There is no link list: every pair of settlements is walkable, and a
- * Waypoint covers the distance for free once both ends have been walked to.
+ * Waypoint covers the distance for gold once both ends have been walked to (`town.json`
+ * `waypoint_warp` — a warp buys back the walk's time, which is what gold is for).
  *
  * The Road mints nothing. An encounter is an ordinary mob group that pays the ordinary drop roll
  * (`encounter_rule`), so gold and junk come from killing mobs and from nowhere else.
@@ -25,6 +26,12 @@ export interface Hex {
   q: number;
   r: number;
 }
+
+/** True when two cells share an edge — the adjacency a single block of walking is allowed to cross. */
+export const hexAdjacent = (a: Hex, b: Hex) => {
+  const dq = a.q - b.q, dr = a.r - b.r;
+  return (Math.abs(dq) + Math.abs(dq + dr) + Math.abs(dr)) / 2 === 1;
+};
 
 /** Axial hex distance: the number of blocks walked between two settlements. */
 export function hexDistance(a: RoadNode, b: RoadNode): number {
@@ -77,6 +84,8 @@ export function createRoad(E: EngineData) {
     const nb = nodeById(b);
     return na && nb ? hexPath(na, nb) : [];
   };
+  /** The route as sheet keys, in the order the foot crosses them — one step per block. */
+  const routeKeys = (a: string, b: string): string[] => routeBetween(a, b).map((h) => `${h.q},${h.r}`);
 
   /** One encounter chance per block walked, so a longer walk is a longer series of chances. */
   const encounterChance = () => R.encounter_chance_pct / 100;
@@ -92,7 +101,7 @@ export function createRoad(E: EngineData) {
   })));
 
   return {
-    R, nodes, nodeById, blocksBetween, secBetween, routeBetween, pairs,
+    R, nodes, nodeById, blocksBetween, secBetween, routeBetween, routeKeys, pairs,
     encounterChance, rollEncounter,
     blockSec: R.block_sec,
   };

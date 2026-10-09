@@ -1,7 +1,7 @@
 <script lang="ts">
   import { lineName } from '../sim/craft';
   import { loot } from '../engine/client';
-  import { SORT_LABELS, type SlotEntry, type SortKey } from './bag';
+  import { SORT_LABELS, vsWorn, type SlotEntry, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
   import type { Item } from '../sim/types';
 
@@ -140,6 +140,12 @@
           <img class="slot-icon" src={cell.entry.icon} alt="" aria-hidden="true" />
           {#if cell.entry.count}<span class="count">{cell.entry.count}</span>{/if}
           {#if cell.entry.item && (cell.entry.item.upgrade_lv || 0) > 0}<span class="plus">+{cell.entry.item.upgrade_lv}</span>{/if}
+          {#if cell.entry.item && cell.entry.kind !== 'worn'}
+            <!-- the comparison the list mode already prints, on the square itself: whether this piece
+                 beats what the slot wears, before the pointer ever lands on it -->
+            {@const m = vsWorn(cell.entry.item, wornOf(cell.entry.item.slot))}
+            {#if m != null}<span class="delta" class:up={m > 0} class:down={m < 0}>{m > 0 ? '+' : ''}{m}%</span>{/if}
+          {/if}
         </button>
       {:else}
         <span class="slot empty" style={cell.area ? `grid-area:${cell.area}` : ''} aria-hidden="true">
@@ -232,6 +238,14 @@
   }
   .slot.rare { border-color: var(--xp); }
   .slot.worn { box-shadow: inset 0 0 0 1px #2f3a4d; background: #1b2029; }
+  /* the comparison badge: how far this piece sits from what the slot already wears */
+  .slot .delta {
+    position: absolute; right: .12rem; top: .05rem;
+    font-family: var(--num); font-size: .58rem; line-height: 1;
+    color: var(--dim); text-shadow: 0 1px 0 rgba(0, 0, 0, .8);
+  }
+  .slot .delta.up { color: var(--good); }
+  .slot .delta.down { color: var(--hp); }
   .slot.held { border-style: dashed; border-color: var(--good); }
   .slot.empty { display: flex; align-items: center; justify-content: center; background: #12151b; border-style: dotted; cursor: default; }
   .slotname { font-size: .5rem; color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 .12rem; }

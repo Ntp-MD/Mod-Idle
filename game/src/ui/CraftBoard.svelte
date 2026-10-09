@@ -7,25 +7,33 @@
    * "disabled" with no reason is a wall. Reroll moves a value inside its own Tier and never down: the floor
    * is the highest value that slot has ever held, so the screen shows that floor rather than only the number
    * the line carries now.
+   *
+   * The state prop is `game`, not `state`: a binding named `state` in the same component makes the compiler
+   * read `$state(...)` as a store subscription (the trap `App.svelte` documents for its own top level).
    */
   import { E, loot } from '../engine/client';
-  import { craft, lineName, lineTier, stoneName } from '../sim/craft';
+  import { craft, lineName, lineTier, stoneName, replaceChoices } from '../sim/craft';
   import PieceOn from './PieceOn.svelte';
   import type { GameState, Item } from '../sim/types';
 
-  let { state, item, where = null, index = -1, onpick, onrun, wornOf, note = '' }: {
-    state: GameState;
+  let { game, item, where = null, index = -1, onpick, onrun, wornOf, note = '' }: {
+    game: GameState;
     item: Item | null;
     where?: 'gear' | 'bag' | null;
     index?: number;
     onpick: (where: 'gear' | 'bag', index: number) => void;
-    onrun: (op: 'reroll' | 'refine' | 'randomize' | 'ascend' | 'add' | 'remove', line?: number) => void;
+    onrun: (op: 'reroll' | 'refine' | 'randomize' | 'ascend' | 'add' | 'remove' | 'replace', line?: number, pick?: string) => void;
     wornOf: (slot: string) => Item | null;
     note?: string;
   } = $props();
 
   const UNT = craft.UNTOUCHABLE as number;
-  const held = $derived(state.counters.stones || {});
+  const held = $derived(game.counters.stones || {});
+  /** The bench only offers a chosen line when the purse can actually pay for one. */
+  let pickRow = $state(-1);
+  let pick = $state('');
+  /** What the stone may bring in on this piece — its own Base pool, minus what it already wears. */
+  const choices = $derived(item && where != null && index >= 0 ? replaceChoices(game, where, index) : []);
   const can = (op: string, i?: number) => item
     ? craft.guard(item, op).ok && craft.payable(held, op, item) && (i == null || i >= UNT)
     : false;
@@ -62,7 +70,7 @@
 </script>
 
 <div class="shop">
-  <PieceOn {state} {item} {where} {index} {onpick} {wornOf} />
+  <PieceOn state={game} {item} {where} {index} {onpick} {wornOf} />
 
   {#if item}
     <div class="cols">
@@ -100,9 +108,21 @@
                     <button disabled={!can('reroll', i)} onclick={() => onrun('reroll', i)} title={why('reroll', i)}>reroll value</button>
                     <button disabled={!can('refine', i)} onclick={() => onrun('refine', i)} title={why('refine', i)}>refine tier</button>
                     <button disabled={!can('randomize', i)} onclick={() => onrun('randomize', i)} title={why('randomize', i)}>roll tier</button>
+                    <button class:armed={pickRow === i} disabled={!can('replace', i)}
+                            onclick={() => { pickRow = pickRow === i ? -1 : i; pick = ''; }}
+                            title={why('replace', i)}>replace with…</button>
+                    {#if pickRow === i}
+                      <span class="pick">
+                        <select bind:value={pick} aria-label={`the Mod that takes slot ${i + 1}`}>
+                          <option value="">choose a Mod</option>
+                          {#each choices as id (id)}<option value={id}>{lineName(id)}</option>{/each}
+                        </select>
+                        <button disabled={!pick} onclick={() => { onrun('replace', i, pick); pickRow = -1; }}>press</button>
+                      </span>
+                    {/if}
                   {/if}
                 </td>
-                <td class="prices">{#if !fixed}{line('reroll')} · {line('refine')}{/if}</td>
+                <td class="prices">{#if !fixed}{line('reroll')} · {line('refine')} · {line('replace')}{/if}</td>
               </tr>
             {/each}
           </tbody>
@@ -111,6 +131,10 @@
           Reroll moves the value inside the line's own Tier and never below the floor printed next to it —
           that floor is the highest value this slot has ever held, so a Refine cannot make a Reroll cheap to
           undo. Refine pushes the line one Tier up and moves the whole set of a piece's lines with it.
+          Replace is the one stone that names its own line: you choose which Mod leaves and which comes in,
+          from the list this Base already draws from — and the Tier the new line lands on is still the
+          stone's roll, so a chosen Mod still has to be climbed. It spends no Add charge and never touches
+          the Base Mod or the Sub pair.
         </small></p>
       </section>
 
@@ -165,9 +189,14 @@
   .band i.on { background: var(--gold); border-color: var(--gold); }
   .t { font-size: .68rem; color: var(--dim); }
 
-  .verbs { display: flex; flex-wrap: wrap; gap: .2rem; }
+  .verbs { display: flex; flex-wrap: wrap; gap: .2rem; align-items: center; }
   .verbs button { padding: .12rem .4rem; font-size: .68rem; }
   .verbs button:disabled { opacity: .42; cursor: not-allowed; }
+  .verbs button.armed { border-color: var(--gold); color: var(--gold); }
+  /* the Replace stone's own choice: the line it names, from the pool this Base already draws */
+  .pick { display: inline-flex; gap: .2rem; align-items: center; width: 100%; margin-top: .15rem; }
+  .pick select { font-size: .68rem; padding: .1rem .25rem; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 2px; }
+  .pick button { padding: .12rem .45rem; font-size: .68rem; border-color: var(--gold); }
   .prices { font-size: .66rem; color: var(--mob); }
   .foot { margin: .35rem 0 0; color: var(--dim); }
 

@@ -98,7 +98,7 @@ describe('the gate closes in the live loop', () => {
     s.goal.attempts = 3;
     const bare = JSON.parse(JSON.stringify({ ...s, goal: undefined }));
     expect(migrate(bare).goal).toEqual(newGoal());
-    expect(SCHEMA_VERSION).toBe(10);
+    expect(SCHEMA_VERSION).toBe(11);
     const kept = migrate(JSON.parse(JSON.stringify(s)));
     expect(kept.goal.attempts).toBe(3);
   });

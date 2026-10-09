@@ -76,6 +76,36 @@
     if (delta < 0) return `${Math.abs(delta).toFixed(0)}% weaker than the worn ${worn.base}`;
     return `level with the worn ${worn.base}`;
   }
+
+  /**
+   * The line-by-line comparison: the candidate's rolled lines paired against the worn piece's, keyed
+   * by Mod id (and the Element a line rolled), so the swap reads as what it gains and loses rather
+   * than the single aggregate `vsWorn` score. A `Base Mod` carries its extras, so a line is flattened
+   * the same way the card prints it. No number here is typed — both sides come off the two drops.
+   */
+  type Cmp = { id: string; element?: string; cand: number | null; worn: number | null };
+  const flatLines = (it: Item): any[] => (it.lines || []).flatMap((l: any) => [l, ...(l.extra || [])]);
+  const lineKey = (l: any): string => `${l.id}${l.element ? ':' + l.element : ''}`;
+  const diff = $derived.by<Cmp[]>(() => {
+    if (!worn || wornHere) return [];
+    const map = new Map<string, Cmp>();
+    for (const l of flatLines(worn)) map.set(lineKey(l), { id: l.id, element: l.element, cand: null, worn: l.value });
+    for (const l of flatLines(item)) {
+      const k = lineKey(l);
+      const row = map.get(k) || { id: l.id, element: l.element, cand: null, worn: null };
+      row.cand = l.value;
+      map.set(k, row);
+    }
+    // only what the swap changes: a line both pieces carry at the same value is already printed above
+    return [...map.values()].filter((r) => r.cand !== r.worn);
+  });
+  const cmpName = (r: Cmp): string => (r.element ? `${r.element} ${plainName(r.id)}` : plainName(r.id));
+  const cmpClass = (r: Cmp): string =>
+    r.cand == null ? 'lost' : r.worn == null ? 'gained' : r.cand > r.worn ? 'over' : r.cand < r.worn ? 'under' : 'even';
+  const cmpText = (r: Cmp): string =>
+    r.cand == null ? `${cmpName(r)} −${r.worn}`
+      : r.worn == null ? `${cmpName(r)} +${r.cand}`
+        : `${cmpName(r)} ${r.worn} → ${r.cand}`;
 </script>
 
 <div class="detail" class:rare={item.tier === 'T1'}>
@@ -96,6 +126,14 @@
       <li class="dim">no rolled lines</li>
     {/each}
   </ul>
+
+  {#if diff.length}
+    <ul class="cmp" aria-label={`versus the worn ${worn?.base ?? ''}`}>
+      {#each diff as r (r.id + (r.element ?? ''))}
+        <li class={cmpClass(r)}>{cmpText(r)}</li>
+      {/each}
+    </ul>
+  {/if}
 
   {#if gear.stat}
     <p class="gear">
@@ -154,6 +192,12 @@
     border-left-color: var(--xp);
   }
   .lines li.fixed { border-bottom: 1px solid var(--line); }
+  /* the line-by-line read against the worn piece: gained and over in yellow (the same "up" the
+     upgrade tag wears), lost and under in red — the aggregate % on the foot is still the headline. */
+  .cmp { list-style: none; margin: .3rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .05rem; font-size: .72rem; }
+  .cmp li { padding: .08rem .4rem; border-radius: 2px; color: var(--dim); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--panel) 45%, transparent); }
+  .cmp li.over, .cmp li.gained { color: var(--xp); }
+  .cmp li.under, .cmp li.lost { color: var(--hp); }
   .gear { margin: .3rem 0; display: flex; gap: .35rem; align-items: baseline; }
   .gear small { display: block; color: var(--dim); margin-left: auto; font-size: .68rem; }
   .kind { min-width: 2.9rem; color: var(--dim); font-size: .62rem; text-transform: uppercase; letter-spacing: .04em; }

@@ -803,6 +803,15 @@
       "m": 15,
       "charge_band": "high",
       "note": "information only · pays no item and sells no piece"
+    },
+    {
+      "id": "waypoint_warp",
+      "item": "Waypoint warp (to a settlement already reached on foot)",
+      "kind": "time",
+      "waypoint": true,
+      "m_per_block": 2,
+      "charge_band": "mid",
+      "note": "The Waypoint's own price, not a stall line: it is stocked by no settlement and bought by no vendor, so no `stock` array names it. A warp buys back the walk's time at the destination settlement's band, priced off the blocks the walk would have crossed (`road.block_sec` x blocks), so a short hop is cheap and a crossing of the map is not. It is gold into a sink, never gold out of one: it mints nothing, gates no zone, and opens no Waypoint the foot has not earned. Anchor inside the existing ladder: a 7-block hop costs 14 minutes (an Armourer repair is 16), a 20-block crossing 40 minutes (a pedlar appearance slot is 30-120)."
     }
   ],
   "essentials": [

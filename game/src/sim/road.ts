@@ -1,5 +1,6 @@
 import { E, TOWN } from '../engine/client';
-import { createRoad } from '../../../engine/road.ts';
+import { createRoad, hexAdjacent } from '../../../engine/road.ts';
+import { priceGold, rowById } from './town';
 import type { GameState, Walk } from './types';
 
 /** The walk model comes from the shared module, so every bound is one number in one place. */
@@ -44,7 +45,51 @@ export function canTravel(state: GameState, id: string): boolean {
   return waypointUnlocked(state, id);
 }
 
-/** Lay a walk down. The blocks are the hex distance between the two settlements, never typed. */
+/**
+ * The Waypoint's own price line (`town.json` `waypoint_warp`): minutes per block the walk would have
+ * crossed, charged at the destination settlement's band. It is not a stall line — no `stock` array
+ * names it and no vendor sells it — so it is priced here rather than bought through `canBuy`.
+ */
+export const warpRow: any = () => rowById('waypoint_warp');
+
+/** What a warp to this settlement costs right now, in gold. */
+export function warpCost(state: GameState, id: string): number {
+  const row = warpRow();
+  if (!row) return 0;
+  return priceGold(row, id, state, Math.max(1, road.blocksBetween(state.town.waypoint, id)));
+}
+
+/**
+ * Take the Waypoint: instant, and it pays gold for the time the walk would have taken. It opens no new
+ * destination — the settlement is reachable because the foot earned it (`road.waypoint_rule`).
+ */
+export function warpTo(state: GameState, id: string): { ok: boolean; why?: string; gold?: number } {
+  if (state.walk) return { ok: false, why: 'mid-walk — finish the route or turn back' };
+  if (state.phase === 'camp') return { ok: false, why: 'recovering at camp' };
+  if (id === state.town.waypoint) return { ok: false, why: 'you already stand there' };
+  if (!waypointUnlocked(state, id)) return { ok: false, why: 'no Waypoint — reach it on foot first' };
+  const gold = warpCost(state, id);
+  if (state.counters.gold < gold) return { ok: false, why: `needs ${gold} gold`, gold };
+  state.counters.gold = Math.round((state.counters.gold - gold) * 100) / 100;
+  const dest = settlementById(id);
+  if (!dest) return { ok: false, why: 'no such settlement' };
+  state.zone = dest.zone;
+  state.town.waypoint = id;
+  state.group = [];
+  return { ok: true, gold };
+}
+
+/** Every cell the route has already been walked through, up to and including the current block. */
+export function walkedCells(state: GameState): string[] {
+  const w = state.walk;
+  if (!w) return [];
+  return road.routeKeys(w.from, w.to).slice(0, w.blocksWalked + 1);
+}
+
+/**
+ * Lay a walk down. The blocks are the hex distance between the two settlements, never typed, and the
+ * route is the chain of adjacent cells the foot crosses — one cell per block, never a jump.
+ */
 export function startWalk(state: GameState, fromId: string, toId: string): { ok: boolean; why?: string } {
   if (state.walk) return { ok: false, why: 'already walking' };
   if (state.phase === 'camp') return { ok: false, why: 'recovering at camp' };
@@ -52,6 +97,12 @@ export function startWalk(state: GameState, fromId: string, toId: string): { ok:
   if (!settlementById(fromId) || !settlementById(toId)) return { ok: false, why: 'no such settlement' };
   const blocks = road.blocksBetween(fromId, toId);
   if (blocks <= 0) return { ok: false, why: 'those two settlements share no blocks' };
+  const keys = road.routeKeys(fromId, toId);
+  // a plotted route is a chain of single steps: each cell enters one that shares an edge with the
+  // cell before it, which is what makes a far destination a walk rather than a jump
+  if (keys.some((k: string, i: number) => i > 0 && !adjacent(keys[i - 1], k))) {
+    return { ok: false, why: 'the plotted route leaves the lattice' };
+  }
   state.walk = {
     from: fromId,
     to: toId,
@@ -62,6 +113,13 @@ export function startWalk(state: GameState, fromId: string, toId: string): { ok:
   };
   return { ok: true };
 }
+
+/** Two sheet keys share an edge — the one step a block is allowed to take. */
+const adjacent = (a: string, b: string) => {
+  const [aq, ar] = a.split(',').map(Number);
+  const [bq, br] = b.split(',').map(Number);
+  return hexAdjacent({ q: aq, r: ar }, { q: bq, r: br });
+};
 
 /** Arriving on foot opens the settlement and its Waypoint, and parks the character there. */
 export function arrive(state: GameState, walk: Walk) {

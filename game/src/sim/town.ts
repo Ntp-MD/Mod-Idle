@@ -29,21 +29,23 @@ export const stockOf = (settlementId: string) =>
 export const startSettlement = () => (TOWN.settlements.find((s: any) => s.start) || TOWN.settlements[0]).id;
 
 /** The `m` a row charges at this settlement, honouring the teaching discount where one exists. */
-export function priceMinutes(row: any, settlementId: string, state?: GameState): number {
+export function priceMinutes(row: any, settlementId: string, state?: GameState, blocks = 1): number {
   const s = settlementById(settlementId);
   if (row.discount && row.discount.settlement === s.id) return row.discount.m;
   // the pedlar's stock is a fresh roll of three slots each real day, priced inside its band
   if (row.id === 'pedlar_rotation' && state?.pedlar?.minutes?.length) {
     return state.pedlar.minutes[Math.min(state.pedlar.bought, state.pedlar.minutes.length - 1)];
   }
+  // a per-block line (the Waypoint warp) is priced by the walk it replaces, not by a fixed `m`
+  if (row.m_per_block != null) return row.m_per_block * blocks;
   return row.m != null ? row.m : row.m_min;
 }
 
 /** Gold = minutes of that band's full-sell junk income. */
-export function priceGold(row: any, settlementId: string, state?: GameState): number {
+export function priceGold(row: any, settlementId: string, state?: GameState, blocks = 1): number {
   const s = settlementById(settlementId);
   const band = row.charge_band || s.band;
-  return Math.round(priceMinutes(row, settlementId, state) * eng.goldPerMinute(band) * 100) / 100;
+  return Math.round(priceMinutes(row, settlementId, state, blocks) * eng.goldPerMinute(band) * 100) / 100;
 }
 
 export function newTown(): TownState {
@@ -70,7 +72,7 @@ export function standingTier(state: GameState, settlementId: string): number {
   return tier;
 }
 
-/** A Waypoint exists for every settlement walked to on foot, once, and it never costs gold. */
+/** A Waypoint exists for every settlement walked to on foot, once; warping to it costs gold (`waypoint_warp`). */
 export function canTravel(state: GameState, settlementId: string): boolean {
   return state.town.visited.includes(settlementId);
 }

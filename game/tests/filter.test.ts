@@ -174,7 +174,7 @@ describe('three walking snapshots', () => {
     if (s.player.level > 1) expect(s.pendingSnapshot).toBe('level');
     await writeSave('slot2', s);
     expect(JSON.parse((globalThis as any).localStorage.getItem('modworld:slot2')!).version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(10);
+    expect(SCHEMA_VERSION).toBe(11);
     const round = importJson(exportJson(s));
     expect(round.filter).toBeTruthy();
     expect(round.pendingSnapshot).toBe(null);

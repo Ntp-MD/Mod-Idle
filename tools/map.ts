@@ -462,13 +462,83 @@ function hazeDef(v) {
     '    </radialGradient>',
   ];
 }
-function groundRects(v) {
+/** The ground's own box: the field laid `GROUND_SPAN` fields past each edge. */
+function groundBox(v) {
   const x = v.vx - GROUND_SPAN * v.vw, y = v.vy - GROUND_SPAN * v.vh;
-  const box = `x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(v.vw * (2 * GROUND_SPAN + 1)).toFixed(1)}" height="${(v.vh * (2 * GROUND_SPAN + 1)).toFixed(1)}"`;
+  return { x, y, w: v.vw * (2 * GROUND_SPAN + 1), h: v.vh * (2 * GROUND_SPAN + 1) };
+}
+function groundRects(v) {
+  const b = groundBox(v);
+  const box = `x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}"`;
   return [
     `  <rect class="paper" ${box} fill="${F.sheet}"/>`,
     `  <rect ${box} fill="url(#hexgrid)"/>`,
     `  <rect class="haze" ${box} fill="url(#haze)" pointer-events="none"/>`,
+  ];
+}
+/**
+ * The endless zone's weather. The cloud starts AT the field's own edge and thickens outward, so the
+ * ground past the last cell is covered rather than merely faded: one soft `#cloud` puff, a feathered
+ * rectangular mask that hides all of it inside the field (no cell is ever veiled, and no click is
+ * stolen), a flat fog wash on the outer ground, and a drifting blob field that grows the further out
+ * it goes. Reads `field.cloud_tone` / `field.cloud_opacity`.
+ */
+function cloudDefs(v) {
+  const b = groundBox(v);
+  // the collar: how far past the sheet's border the feather opens, as a share of the field's width
+  const feather = v.vw * 0.05;
+  return [
+    '    <radialGradient id="cloud" cx="0.5" cy="0.5" r="0.5">',
+    `      <stop offset="0" stop-color="${F.cloud_tone}" stop-opacity="${F.cloud_opacity}"/>`,
+    `      <stop offset="0.55" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity / 2).toFixed(3)}"/>`,
+    `      <stop offset="1" stop-color="${F.cloud_tone}" stop-opacity="0"/>`,
+    '    </radialGradient>',
+    `    <filter id="fogFeather" x="-25%" y="-25%" width="150%" height="150%">`,
+    `      <feGaussianBlur stdDeviation="${(feather * 0.55).toFixed(1)}"/>`,
+    '    </filter>',
+    `    <mask id="cloudMask">`,
+    `      <rect x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" fill="#fff"/>`,
+    `      <rect x="${(v.vx - feather).toFixed(1)}" y="${(v.vy - feather).toFixed(1)}" width="${(v.vw + feather * 2).toFixed(1)}" height="${(v.vh + feather * 2).toFixed(1)}" fill="#000" filter="url(#fogFeather)"/>`,
+    '    </mask>',
+    `    <linearGradient id="fogWash" gradientUnits="userSpaceOnUse" x1="${v.vx.toFixed(1)}" y1="${v.vy.toFixed(1)}" x2="${v.vx.toFixed(1)}" y2="${(v.vy - GROUND_SPAN * v.vh).toFixed(1)}">`,
+    `      <stop offset="0" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity * 0.22).toFixed(3)}"/>`,
+    `      <stop offset="1" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity * 0.6).toFixed(3)}"/>`,
+    '    </linearGradient>',
+  ];
+}
+/**
+ * The cloud field itself: clusters seeded in bands outward from the sheet's border, so the near collar
+ * is a wall of weather and the far ground is buried in it. Deterministic (one seed, no `Math.random`)
+ * so the written sheet is stable, painted after the haze and before the cells, `pointer-events="none"`
+ * so a click still reaches a cell.
+ */
+function cloudLayer(v) {
+  const cx = v.vx + v.vw / 2, cy = v.vy + v.vh / 2;
+  const D = Math.hypot(v.vw / 2, v.vh / 2);
+  let seed = 0x9e3779b9;
+  const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const blobs = [];
+  // eight bands, each one field-radius wider than the last, with more clusters as the band recedes —
+  // the eye reads that as weather that never ends rather than a ring with a wall behind it
+  const BANDS = [[1.02, 1.35, 10], [1.35, 1.8, 12], [1.8, 2.35, 14], [2.35, 3, 15], [3, 3.8, 17], [3.8, 4.8, 18], [4.8, 6, 20], [6, 7.4, 22]];
+  for (const [from, to, count] of BANDS) {
+    for (let i = 0; i < count; i++) {
+      const ang = rnd() * Math.PI * 2;
+      const rad = D * (from + rnd() * (to - from));
+      const x = cx + Math.cos(ang) * rad, y = cy + Math.sin(ang) * rad * 0.72;
+      const rx = (0.1 + rnd() * 0.18) * D * (1 + from * 0.12), ry = rx * (0.36 + rnd() * 0.3);
+      const near = Math.max(0.32, 1 - (from - 1.02) * 0.12);
+      blobs.push(`      <ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="url(#cloud)" opacity="${(near * (0.55 + rnd() * 0.45)).toFixed(2)}"/>`);
+    }
+  }
+  const b = groundBox(v);
+  const box = `x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}"`;
+  return [
+    `  <rect class="fog-wash" ${box} fill="url(#fogWash)" mask="url(#cloudMask)" pointer-events="none"/>`,
+    '  <g class="clouds" mask="url(#cloudMask)" pointer-events="none">',
+    '    <animateTransform attributeName="transform" type="translate" dur="150s" repeatCount="indefinite" values="0 0; 8 5; 0 0"/>',
+    ...blobs,
+    '  </g>',
   ];
 }
 
@@ -484,8 +554,10 @@ function write() {
     '    </g>',
     ...hexGridDefs(),
     ...hazeDef(v),
+    ...cloudDefs(v),
     '  </defs>',
     ...groundRects(v),
+    ...cloudLayer(v),
     ...fieldGroup(),
     ...walkGroup(),
     ...watermarkGroup(),

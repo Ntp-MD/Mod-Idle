@@ -207,6 +207,28 @@ export interface Walk {
   blocksWalked: number;
 }
 
+/**
+ * One thing that just happened, handed to the HUD as an event rather than a log line.
+ *
+ * The sim already totals damage (`counters.damageBy`) and narrates (`log`); neither is an event the
+ * screen can animate, because a total has no moment and a log line has no colour. A short ring of
+ * these is what lets a swing, a status proc, a cast, a block-step, a sale or a craft land on screen.
+ * `colour` is read out of the data at the call site (`elements.colour` / `physical_colour` /
+ * `crit_colour`), never typed here, and the field is transient: a save writes an empty ring.
+ */
+export interface FxEvent {
+  /** Monotonic within the run, so the HUD keys one animation per event and never replays an old one. */
+  id: number;
+  sec: number;
+  kind: 'hit' | 'cast' | 'taken' | 'block' | 'proc' | 'kill' | 'drop' | 'sell' | 'travel' | 'craft' | 'warp';
+  /** The number the indicator prints, already formatted by `eng.fmt`, or empty for a non-number. */
+  text: string;
+  colour: string;
+  crit?: boolean;
+  /** Whose side of the field it belongs on: the mob field or the player's own plate. */
+  side?: 'field' | 'self';
+}
+
 export interface GameState {
   seed: number;
   rngState: number;
@@ -267,6 +289,10 @@ export interface GameState {
   spawnIn: number;
   counters: Counters;
   log: LogLine[];
+  /** The transient ring the HUD animates. Never persisted (`save.ts`). */
+  fx: FxEvent[];
+  /** The next ring id. Stored so a restored save cannot replay an old animation key. */
+  fxSeq: number;
   clockSec: number;
   lastSavedAt: number;
   /** When the next boss is due, per character. It does not accrue offline (`save.md`). */

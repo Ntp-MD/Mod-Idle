@@ -8,13 +8,16 @@
    * `data-node`, never off a coordinate).
    */
   let {
-    settlement, cell, walk, busy = false,
+    settlement, cell, walk, busy = false, fare = 0, afford = true,
     onwalk, onwarp, onhunt, ondesk, onclear,
   }: {
     settlement: any;
     cell: { cell: string; kind: 'town' | 'sub' | 'wild'; label: string } | null;
     walk: { self: boolean; blocks: number; sec: number; here: boolean; walking: boolean } | null;
     busy?: boolean;
+    /** what the Waypoint charges to reach this settlement, read off `town.json` by the caller */
+    fare?: number;
+    afford?: boolean;
     onwalk: (id: string) => void;
     onwarp: (id: string) => void;
     onhunt: (zone: number) => void;
@@ -34,12 +37,12 @@
     <span>you are standing in this settlement — nothing to walk</span>
   {:else}
     <span>{walk?.blocks} blocks, plotted cell by cell · {walk?.sec}s at {E.road.block_sec}s a block · {E.road.encounter_chance_pct}% an ambush per block</span>
-    <span>{walk?.here ? 'walked to before — the Waypoint is open' : 'never reached — the first walk is on foot'}</span>
+    <span>{walk?.here ? `walked to before — the Waypoint is open, ${fare} gold to warp${afford ? '' : ' (purse too light)'}` : 'never reached — the first walk is on foot'}</span>
   {/if}
   <span class="verbs">
     {#if !walk?.self}
       <button onclick={() => onwalk(settlement.id)} disabled={busy}>{walk?.walking ? 'walking' : 'walk'}</button>
-      {#if walk?.here}<button onclick={() => onwarp(settlement.id)}>waypoint</button>{/if}
+      {#if walk?.here}<button onclick={() => onwarp(settlement.id)} disabled={!afford} title={afford ? `warp for ${fare} gold` : `needs ${fare} gold`}>waypoint · {fare} gold</button>{/if}
     {/if}
     <button onclick={() => onhunt(settlement.zone)}>hunt this zone</button>
     <button onclick={ondesk}>the desk</button>

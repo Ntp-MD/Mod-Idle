@@ -231,24 +231,32 @@ export function modsOn(store: MobStatusStore, mobId: string): MobStatusMods {
 }
 
 /**
- * One second of the mob's status clocks: decay, expiry, and the DoT it is taking, capped by the
- * global burn + poison budget (`status.dot_cap` × the dealer's aligned damage per second).
+ * One second of the mob's status clocks, split by the status that dealt it.
+ *
+ * `stepMob` keeps publishing the single total every caller already reads; the parts are for the screen,
+ * which colours a tick by what is burning, poisoning or bleeding the target. The `dot_cap` cut is shared
+ * across the Element line, so each contributor is scaled by the same factor — a capped tick is a smaller
+ * version of the same split, never a different one. Bleed sits outside the budget and passes whole.
  */
-export function stepMob(store: MobStatusStore, mobId: string): number {
+export interface DotTick { total: number; burn: number; poison: number; bleed: number }
+
+export function stepMobParts(store: MobStatusStore, mobId: string): DotTick {
+  const none = { total: 0, burn: 0, poison: 0, bleed: 0 };
   const m = store[mobId];
-  if (!m) return 0;
+  if (!m) return none;
   m.elapsedSec++;
   // the control budget is a rolling share of the fight (≤15%), so a second of being alive pays back
   // 0.15 of a stopped second — otherwise one long fight could never be shocked again
   m.stoppedSec = Math.max(0, m.stoppedSec - CONTROL_BOUND);
-  let elementDot = 0;
+  let burnDot = 0;
+  let poisonDot = 0;
   let bleedDot = 0;
   for (const [name, l] of Object.entries(m.statuses) as [MobStatusName, MobLine][]) {
     if (name === 'poison') {
       // the hold covers the next `sec` of this mob's own clock, so the last held second is inclusive
       const held = (m.poisonHeldUntil || 0) >= m.elapsedSec;
       if (!held && m.elapsedSec % S.poison.decay_sec === 0 && l.stacks > 0) l.stacks--;
-      elementDot += l.stacks * l.perSec;
+      poisonDot += l.stacks * l.perSec;
       if (l.stacks <= 0) delete m.statuses.poison;
       continue;
     }
@@ -259,16 +267,26 @@ export function stepMob(store: MobStatusStore, mobId: string): number {
     }
     l.secLeft--;
     if (l.secLeft <= 0) { delete m.statuses[name]; continue; }
-    if (name === 'burn') elementDot += l.stacks * l.perSec;
+    if (name === 'burn') burnDot += l.stacks * l.perSec;
     if (name === 'bleed') bleedDot += l.perSec;
   }
   // `elements.md` §6: the budget is burn + poison only, and bleed sits outside it on purpose — it is
   // physical, it does not stack, and its own budget is 0.70 of the hit that inflicted it over 5 sec.
   const budget = S.dot_cap * m.alignedPerSec;
+  const elementDot = burnDot + poisonDot;
   const capped = S.dot_cap > 0 ? Math.min(elementDot, budget) : elementDot;
+  const share = elementDot > 0 ? capped / elementDot : 0;
   // the record itself stays until the mob leaves the field, because the control budget lives on it
   if (!Object.keys(m.statuses).length) m.alignedPerSec = 0;
-  return capped + bleedDot;
+  return { total: capped + bleedDot, burn: burnDot * share, poison: poisonDot * share, bleed: bleedDot };
+}
+
+/**
+ * One second of the mob's status clocks: decay, expiry, and the DoT it is taking, capped by the
+ * global burn + poison budget (`status.dot_cap` × the dealer's aligned damage per second).
+ */
+export function stepMob(store: MobStatusStore, mobId: string): number {
+  return stepMobParts(store, mobId).total;
 }
 
 /** Drop every record for mobs that are no longer on the field. */

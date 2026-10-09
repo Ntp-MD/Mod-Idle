@@ -22,11 +22,12 @@ import { E, BASES, eng, loot } from '../engine/client';
 // whatever line count it holds — the Normal count is drawn at drop from `item_level.stat_mod_slots`,
 // which is data, not schema. v10 deletes the hunt
 // systems: the per-zone Hunt Order and the per-zone hunting ground are gone, so a v9 save's fields for
-// them are dropped — the variant's own lean is the only lean left.
+// them are dropped — the variant's own lean is the only lean left. v11 is the HUD's transient event
+// ring (`fx`), which a write never stores.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
 
@@ -148,7 +149,7 @@ export async function writeSave(slot: SlotName, state: GameState): Promise<void>
     ? { version: SCHEMA_VERSION, reason: why, clockSec: state.clockSec, takenAt: Date.now(), state: JSON.parse(JSON.stringify({ ...state, pendingSnapshot: null })) }
     : null;
   if (why) armSnapshot(state);
-  await put(slot, JSON.stringify({ version: SCHEMA_VERSION, state }));
+  await put(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...state, fx: [] } }));
   if (shot) await pushSnapshot(slot, shot);
 }
 
@@ -353,6 +354,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     delete (s as any).zoneFocus;
   }
   if (!s.town) s.town = newTown();
+  // v11 · the HUD reads a transient event ring (`fx`), which a write never stores.
+  if (!Array.isArray(s.fx)) s.fx = [];
+  if (!s.fxSeq) s.fxSeq = 0;
   if (!s.farm) s.farm = newFarm();
   // a farm saved before the automation block existed gets it off; the player opts in
   if (s.farm && !s.farm.autoFarm) { s.farm.autoFarm = { plant: false, harvest: false, brew: false }; s.farm.lastAutoFarmAt = -9999; }

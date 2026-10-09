@@ -4,6 +4,7 @@ The working contract: what is fixed, what the agent reads, how it verifies, and 
 
 ## 0. Project — an open-world idle RPG
 
+- **Load `DECISIONS.md` first — every session, on every provider.** D1–D12 (the bans) and §How to think are not optional context; read them before proposing any system. They live in the repo so they travel with the tree, and every provider reads repo files — never copy them into tool-specific memory, because a ban stated twice is a ban that gets updated once.
 - **Mindset: an open-world idle RPG.** What it is, where it lives and who plays it is `PRODUCT.md`; the frame it uses and what it deliberately drops is `doc/start/concept.md`; the stack is `doc/start/Techstack.md`. Read those, not a summary here.
 - **How long anything takes is not a design constraint** (owner ruling): never gate a change, a test or a number on "how long the game should take". The work is **fix · balance · polish · verify**.
 - **The design is settled** (frozen at the first code commit): no new systems, data files or shelves, and no file or term renames, without an explicit owner ask — the default is the smallest change that fixes the problem. What may not be added at all is `DECISIONS.md` D1–D12.
@@ -125,7 +126,7 @@ How an agent works in this repo: what to read, how to verify, what it may change
 ## Read chain
 
 - `AGENTS.md` — this file. Project truth and the working contract. Read first.
-- `DECISIONS.md` — what is forbidden (the D-bans) and how to think. Read before proposing a system.
+- `DECISIONS.md` — **mandatory, on every provider**: what is forbidden (the D-bans) and how to think. Read before proposing a system.
 - `doc/start/glossary.md` — shared language. Read when a term is load-bearing; patch it when one locks.
 - `doc/start/concept.md` — the frame the game uses and what it deliberately drops. Read before proposing a system.
 - `todo.md` — the single work file: what is open, and what is in flight right now. Read at task start.

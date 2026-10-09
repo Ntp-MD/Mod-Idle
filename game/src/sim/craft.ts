@@ -8,7 +8,7 @@ export const craft: any = createCraft(E, loot);
 export const stoneName = (key: string) => craft.STONE_NAME[key] || key;
 export const qualitySteps = QUALITY_STEPS;
 
-export type CraftOp = 'reroll' | 'refine' | 'randomize' | 'ascend' | 'remove' | 'add'
+export type CraftOp = 'reroll' | 'refine' | 'randomize' | 'ascend' | 'remove' | 'add' | 'replace'
   | 'upgrade' | 'repair' | 'corrupt';
 export type Where = 'gear' | 'bag';
 
@@ -53,6 +53,7 @@ export function doCraft(
   op: CraftOp,
   lineIndex: number,
   rng: () => number,
+  pick?: string,
 ): CraftResult {
   const item: Item | null = where === 'gear' ? state.gear[index] : state.bag[index];
   if (!item) return { ok: false, why: 'nothing in that slot' };
@@ -70,8 +71,9 @@ export function doCraft(
       : op === 'refine' ? craft.refine(item, lineIndex, rng)
         : op === 'randomize' ? craft.randomize(item, lineIndex, rng)
           : op === 'ascend' ? craft.ascend(item, rng)
-            : op === 'add' ? craft.add(item, poolOf(item), rng)
-              : craft.remove(item, rng);
+            : op === 'replace' ? craft.replaceLine(item, lineIndex, pick || '', poolOf(item), rng)
+              : op === 'add' ? craft.add(item, poolOf(item), rng)
+                : craft.remove(item, rng);
   if (!result.ok) return { ok: false, why: result.why };
   if (!replace(state, where, index, result.item)) return { ok: false, why: 'slot changed under the bench' };
   craft.spend(state.counters.stones, op, item); // the stone is spent even when Corrupt changes nothing
@@ -81,10 +83,24 @@ export function doCraft(
   const note = whole ? wholeNote(op, result.changed)
     : op === 'ascend' ? `quality ${item.quality} → ${result.item.quality}`
     : op === 'remove' ? `slot ${result.changed.index + 1} removed`
-      : op === 'add' ? `${loot.NAME_OF[result.changed.id] || result.changed.id} ${result.changed.value} lands in slot ${result.item.lines.length}`
-        : line ? `${loot.NAME_OF[line.id]} ${line.value} → ${result.item.lines[lineIndex]?.value}`
-          : op;
+      : op === 'replace' ? `${lineName(result.changed.out)} → ${lineName(result.changed.in)} ${result.changed.value} at T${result.changed.slice + 1}`
+        : op === 'add' ? `${loot.NAME_OF[result.changed.id] || result.changed.id} ${result.changed.value} lands in slot ${result.item.lines.length}`
+          : line ? `${loot.NAME_OF[line.id]} ${line.value} → ${result.item.lines[lineIndex]?.value}`
+            : op;
   return { ok: true, item: result.item, note };
+}
+
+/** The lines the Replace stone may bring in on this piece: its own pool, minus what it already wears. */
+export function replaceChoices(state: GameState, where: Where, index: number): string[] {
+  const item: Item | null = where === 'gear' ? state.gear[index] : state.bag[index];
+  return item ? craft.choicesOf(item, poolOf(item)) : [];
+}
+
+/** The lines a Replace stone may be pointed at: every editable slot, the Base and Sub pair excluded. */
+export function replaceTargets(state: GameState, where: Where, index: number): number[] {
+  const item: Item | null = where === 'gear' ? state.gear[index] : state.bag[index];
+  if (!item) return [];
+  return item.lines.map((_: any, i: number) => i).slice(craft.UNTOUCHABLE);
 }
 
 /** Say a whole-piece craft in the words the ladder uses, so the bench reports what actually happened. */

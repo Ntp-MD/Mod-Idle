@@ -4,7 +4,9 @@
  * Reroll moves a value inside its own Tier and never down. Refine moves one slot up a Tier.
  * Ascend raises the whole piece one Item quality step and carries every line with it.
  * Element, Mod identity and Mod count are never touched by Reroll or Refine — those are the
- * blocking rules. Upgrade, Repair and Corrupt now run too (`crafting.md`'s published ladder and its
+ * blocking rules. Replace is the one verb that does move identity on purpose: the player names both
+ * the line that leaves and the line that comes in from the piece's own Base pool, and the Tier of the
+ * line that arrives stays the stone's roll, so a chosen Mod still has to be climbed. Upgrade, Repair and Corrupt now run too (`crafting.md`'s published ladder and its
  * Vaal table, both copied into `engine.json` `craft`). The one figure that pass still owes is the
  * Gear Mod value per +1, which `crafting.md` sends to the mob-sheet rebalance pass, so
  * `craft.gear_mod_per_level` is 0 and the uplift is switched off rather than guessed.
@@ -21,7 +23,8 @@ export const QUALITY_STEPS = ['low', 'mid', 'high'];
  */
 export const STONE_NAME = {
   reroll_value: 'Reroll value stone', tier: 'Reroll tier stone', add: 'Add mod stone',
-  remove: 'Remove mod stone', quality: 'Quality Stone', repair: 'Repair stone', corrupt: 'Corrupt stone',
+  remove: 'Remove mod stone', replace: 'Replace stone', quality: 'Quality Stone', repair: 'Repair stone',
+  corrupt: 'Corrupt stone',
 };
 
 export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.createLoot>) {
@@ -33,6 +36,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     randomize: { tier: 1 },
     ascend: { add: C.ascend_add_stones, tier: C.ascend_tier_stones },
     remove: { remove: C.remove_stones_per_use },
+    replace: { replace: C.replace_stones_per_use },
     add: { add: E.item_level.add_stones_per_fill[Math.min((item?.mods_added || 0), 1)] },
     // Quality Stones per step are `crafting.md`'s ladder: 1/2/3/4/5, 7/9/11/13/15, 18/21/24/27/30
     upgrade: { quality: C.upgrade_costs[Math.min(item?.upgrade_lv || 0, C.upgrade_cap - 1)] },
@@ -177,6 +181,49 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const candidates = item.lines.map((l: any, i: number) => i).slice(UNTOUCHABLE);
     const pick = candidates[Math.floor(rng() * candidates.length)];
     return { ok: true, item: { ...item, lines: item.lines.filter((_: any, i: number) => i !== pick) }, changed: { index: pick } };
+  }
+
+  /**
+   * The lines a Replace stone may bring in: the piece's own pool, minus what it already carries and
+   * minus anything its pool blocks. The choice is the player's, the pool is the Base's.
+   */
+  function choicesOf(item: any, pool: string[]): string[] {
+    if (!item) return [];
+    const taken = new Set<string>(item.lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
+    const blocked = loot.blockedBy(taken);
+    return pool.filter((id) => !taken.has(id) && !blocked.has(id));
+  }
+
+  /**
+   * Replace stone: one named line leaves, one named line comes in, and the incoming line's Tier is
+   * the stone's own roll. The identity stops being a gamble and the Tier stays one, so a chosen Mod
+   * still has to be climbed with Reroll tier. The slot's Reroll baseline is cleared with the old
+   * identity: a baseline is the highest value *that line* ever held, and a different Mod sitting in
+   * the same slot is not the same line (`crafting.md`'s Reroll rule).
+   */
+  function replaceLine(item: any, index: number, id: string, pool: string[], rng: Rng): any {
+    const g = guard(item, 'replace');
+    if (!g.ok) return g;
+    const e = editable(item, index);
+    if (!e.ok) return e;
+    if (!pool.includes(id)) return { ok: false, why: 'that line is not in this Base pool' };
+    if (!choicesOf(item, pool).includes(id)) return { ok: false, why: 'this piece already carries that Mod' };
+    const slice = loot.tierSlice(rng());
+    const [lo, hi] = loot.rangeOf(id, item.ilvl, item.q, slice);
+    const value = lo + Math.floor(rng() * (hi - lo + 1));
+    const stat = loot.statOf(id, rng);
+    const baselines = { ...(item.baselines || {}) };
+    delete baselines[index];
+    const next = {
+      ...item,
+      baselines,
+      lines: item.lines.map((l: any, i: number) => (i === index ? { id, value, slice, ...(stat ? { stat } : {}) } : l)),
+    };
+    return {
+      ok: true,
+      item: next,
+      changed: { index, out: e.line.id, in: id, value, slice, lo, hi },
+    };
   }
 
   /**
@@ -327,6 +374,6 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
 
   return {
     C, QUALITY_STEPS, STONE_NAME, BASE_MOD_SLOTS, SUB_SLOTS, UNTOUCHABLE, LOCKED, PENDING_POWER, costOf, guard, payable, spend,
-    successPct, stepOf, reroll, refine, randomize, ascend, remove, add, upgrade, repair, corrupt,
+    successPct, stepOf, reroll, refine, randomize, ascend, remove, replaceLine, choicesOf, add, upgrade, repair, corrupt,
   };
 }
