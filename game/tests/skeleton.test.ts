@@ -8,9 +8,9 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import type { Item } from '../src/sim/types';
 
 /**
- * The line skeleton: line 1 is the Base Mod, lines 2-3 the unremovable Sub pair, then the Normal
- * lines the drop drew (`item_level.stat_mod_slots`) which the Add craft may widen by `mods_added_cap`.
- * These tests pin the shape, the one-line rule that a Base Mod follows (the FLAT defence lines the
+ * The line skeleton: line 1 is the Frame Mod, lines 2-3 the unremovable Bound pair, then the Normal
+ * lines the drop drew (`item_level.unbound_slots`) which the Add craft may widen by `mods_added_cap`.
+ * These tests pin the shape, the one-line rule that a Frame Mod follows (the FLAT defence lines the
  * frame's name declares, one, two or all three, sharing one budget at ×0.7 / ×0.55), and the two
  * avoidance readings the skeleton added — block and armour penetration.
  */
@@ -19,10 +19,10 @@ const frameNamed = (name: string) => BASES.bases.find((b: any) => b.name === nam
 const weaponNamed = (name: string) => BASES.weapons.find((w: any) => w.name === name);
 
 describe('the line skeleton', () => {
-  it('draws the Normal line count inside the published range and never exceeds it', () => {
+  it('draws the Unbound line count inside the published range and never exceeds it', () => {
     const L = E.item_level;
-    const lo = L.base_mod_slots + L.sub_slots + L.stat_mod_slots.min;
-    const hi = L.base_mod_slots + L.sub_slots + L.stat_mod_slots.max;
+    const lo = L.frame_mod_slots + L.bound_slots + L.unbound_slots.min;
+    const hi = L.frame_mod_slots + L.bound_slots + L.unbound_slots.max;
     const rng = mulberry32(101);
     const seen = new Set<number>();
     for (let i = 0; i < 600; i++) {
@@ -38,15 +38,15 @@ describe('the line skeleton', () => {
 
   it('the ceiling is the head plus the widest Normal draw plus the Add stones', () => {
     const L = E.item_level;
-    expect(loot.linesAtDrop(() => 0)).toBe(L.base_mod_slots + L.sub_slots + L.stat_mod_slots.min);
-    expect(loot.linesAtDrop(() => 0.999999)).toBe(L.base_mod_slots + L.sub_slots + L.stat_mod_slots.max);
-    expect(L.crafted_max).toBe(L.base_mod_slots + L.sub_slots + L.stat_mod_slots.max + L.mods_added_cap);
+    expect(loot.linesAtDrop(() => 0)).toBe(L.frame_mod_slots + L.bound_slots + L.unbound_slots.min);
+    expect(loot.linesAtDrop(() => 0.999999)).toBe(L.frame_mod_slots + L.bound_slots + L.unbound_slots.max);
+    expect(L.crafted_max).toBe(L.frame_mod_slots + L.bound_slots + L.unbound_slots.max + L.mods_added_cap);
   });
 
-  it('line 1 is the Base Mod, lines 2-3 the Sub pair, and the craft verbs refuse all three', () => {
+  it('line 1 is the Frame Mod, lines 2-3 the Bound pair, and the craft verbs refuse all three', () => {
     const item = rollDrop(mulberry32(202), 'high', 61);
-    expect(craft.BASE_MOD_SLOTS).toBe(1);
-    expect(craft.SUB_SLOTS).toBe(2);
+    expect(craft.FRAME_MOD_SLOTS).toBe(1);
+    expect(craft.BOUND_SLOTS).toBe(2);
     expect(craft.UNTOUCHABLE).toBe(3);
     for (let i = 0; i < craft.UNTOUCHABLE; i++) {
       expect(craft.reroll(item, i, mulberry32(1)).ok).toBe(false);
@@ -60,18 +60,18 @@ describe('the line skeleton', () => {
 describe('line 1 carries 1-3 Mods on one line, scaled', () => {
   it('a weapon forces every Mod its type lists, at the two-Mod scale', () => {
     const wand = weaponNamed('wand');
-    const line = loot.baseModRoll(BASES, 'main hand', null, wand, () => 0, 1, 0, 0);
+    const line = loot.frameModRoll(BASES, 'main hand', null, wand, () => 0, 1, 0, 0);
     expect(line.length).toBe(1); // ONE line ...
     expect(line[0].id).toBe('magic_power_flat');
     expect(line[0].extra.length).toBe(1); // ... carrying the pair
     expect(line[0].extra[0].id).toBe('cooldown_reduction');
-    const k = E.loot.base_mod.value_scale['2'];
+    const k = E.loot.frame_mod.value_scale['2'];
     expect(line[0].value).toBe(Math.round(loot.windowAt('magic_power_flat', 1, 0)[0] * k));
     expect(line[0].extra[0].value).toBe(Math.round(loot.windowAt('cooldown_reduction', 1, 0)[0] * k));
   });
 
   it('a single-Mod weapon keeps its full roll', () => {
-    const line = loot.baseModRoll(BASES, 'main hand', null, weaponNamed('two-handed sword'), () => 0, 1, 0, 0);
+    const line = loot.frameModRoll(BASES, 'main hand', null, weaponNamed('two-handed sword'), () => 0, 1, 0, 0);
     expect(line.length).toBe(1);
     expect(line[0].extra).toBeUndefined();
     expect(line[0].value).toBe(loot.windowAt('physical_power_flat', 1, 0)[0]);
@@ -79,32 +79,32 @@ describe('line 1 carries 1-3 Mods on one line, scaled', () => {
 
   it('an armour frame carries the flat defence lines its own name declares, sharing one budget', () => {
     // Crown is the Armour & Energy Shield frame: two flat lines on ONE line, each at the two-line scale
-    const pair = loot.baseModRoll(BASES, 'helmet', frameNamed('Crown'), null, () => 0, 1, 0, 0);
+    const pair = loot.frameModRoll(BASES, 'helmet', frameNamed('Crown'), null, () => 0, 1, 0, 0);
     expect(pair.length).toBe(1); // ONE line ...
     expect(pair[0].id).toBe('armour_flat');
     expect(pair[0].extra.length).toBe(1); // ... carrying the frame's second line
     expect(pair[0].extra[0].id).toBe('energy_shield_flat');
-    const k2 = E.loot.base_mod.value_scale['2'];
+    const k2 = E.loot.frame_mod.value_scale['2'];
     expect(pair[0].value).toBe(Math.round(loot.windowAt('armour_flat', 1, 0)[0] * k2));
     expect(pair[0].extra[0].value).toBe(Math.round(loot.windowAt('energy_shield_flat', 1, 0)[0] * k2));
 
     // Hood is the Evasion frame: one line, and it keeps the whole window with nothing to share
-    const single = loot.baseModRoll(BASES, 'helmet', frameNamed('Hood'), null, () => 0, 1, 0, 0);
+    const single = loot.frameModRoll(BASES, 'helmet', frameNamed('Hood'), null, () => 0, 1, 0, 0);
     expect(single[0].id).toBe('evasion_flat');
     expect(single[0].extra).toBeUndefined();
     expect(single[0].value).toBe(loot.windowAt('evasion_flat', 1, 0)[0]);
 
     // Bastion is the frame that carries all three: both partners on the same line, each at ×0.55
-    const trio = loot.baseModRoll(BASES, 'helmet', frameNamed('Bastion Helm'), null, () => 0, 1, 0, 0);
+    const trio = loot.frameModRoll(BASES, 'helmet', frameNamed('Bastion Helm'), null, () => 0, 1, 0, 0);
     expect(trio.length).toBe(1); // still ONE line ...
     expect(trio[0].id).toBe('armour_flat');
     expect(trio[0].extra.map((x: any) => x.id)).toEqual(['energy_shield_flat', 'evasion_flat']);
-    const k3 = E.loot.base_mod.value_scale['3'];
+    const k3 = E.loot.frame_mod.value_scale['3'];
     expect(trio[0].value).toBe(Math.round(loot.windowAt('armour_flat', 1, 0)[0] * k3));
     for (const x of trio[0].extra) expect(x.value).toBe(Math.round(loot.windowAt(x.id, 1, 0)[0] * k3));
 
     // and the floor roll hands a restored piece the same set, scaled the same way
-    const floor = loot.baseModAtFloor(BASES, 'helmet', frameNamed('Bastion Helm'), null, 1, 0);
+    const floor = loot.frameModAtFloor(BASES, 'helmet', frameNamed('Bastion Helm'), null, 1, 0);
     expect([floor[0].id, ...floor[0].extra.map((x: any) => x.id)]).toEqual(['armour_flat', 'energy_shield_flat', 'evasion_flat']);
     expect(floor[0].value).toBe(Math.round(loot.windowAt('armour_flat', 1, 0)[0] * k3));
   });
@@ -155,7 +155,7 @@ describe('block is its own avoidance layer (exception)', () => {
 
 describe('armour penetration cuts the mob armour ratio ', () => {
   it('the crossbow line lands on the sheet as a fraction', () => {
-    const line = loot.baseModRoll(BASES, 'main hand', null, weaponNamed('crossbow'), () => 0, 1, 0, 0);
+    const line = loot.frameModRoll(BASES, 'main hand', null, weaponNamed('crossbow'), () => 0, 1, 0, 0);
     expect(line[0].extra[0].id).toBe('armour_pen');
     const gear = emptyGear();
     gear[loot.SLOTS.indexOf('main hand')] = {
@@ -179,7 +179,7 @@ describe('armour penetration cuts the mob armour ratio ', () => {
 });
 
 describe('the new lines reach the sheet through line 1', () => {
-  it('sumLines counts a Base Mod line and its extra Mods', () => {
+  it('sumLines counts a Frame Mod line and its extra Mods', () => {
     const item: Item = {
       slot: 'off hand', base: 'Buckler', ilvl: 61, quality: 'high', tier: 'T1', q: 2,
       lines: [{ id: 'block_chance', value: 20, slice: 0, extra: [{ id: 'evasion_pct', value: 10 }] }],

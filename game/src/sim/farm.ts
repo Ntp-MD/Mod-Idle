@@ -114,7 +114,7 @@ export function craftPotion(state: GameState, name: string): { ok: boolean; why?
   // never pay a cost for a bottle the bag cannot hold (`slots.ts` · stop_pickup)
   if (!fits(state, state.farm.potions, name, 'potion', 1)) return { ok: false, why: 'no free slot in the character bag' };
   if ((state.counters.stones.reroll_value || 0) < cost.reroll_value_stones) {
-    return { ok: false, why: `needs ${cost.reroll_value_stones} Reroll value stones` };
+    return { ok: false, why: `needs ${cost.reroll_value_stones} Value stones` };
   }
   state.farm.herbs[potion.tier] -= cost.herbs;
   state.counters.stones.reroll_value -= cost.reroll_value_stones;

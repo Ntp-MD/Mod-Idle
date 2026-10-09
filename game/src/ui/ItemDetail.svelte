@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { craft } from '../sim/craft';
+  import { craft, craftedMark } from '../sim/craft';
   import { MODS } from '../engine/client';
   import { gearModOf } from '../sim/gear';
   import { vsWorn } from './bag';
@@ -10,10 +10,10 @@
    * comes out of the rolled line and `mods.json`, so it cannot drift from the drop the player is
    * reading. A line prints as `<value> <plain words>` — no plus
    * sign, no Tier chip, no Mod-book name — and the two fixed kinds are told apart by colour alone:
-   * the Base Mod red, the Sub pair yellow, the editable Mods plain.
+   * the Frame Mod red, the Bound pair yellow, the editable Mods plain.
    *
-   * The skeleton reads top to bottom (`item-base.md`): line 1 is the Base Mod the frame owns, lines
-   * 2-3 the Sub pair, then the Normal lines the drop drew — the Mods the stones may edit. The
+   * The skeleton reads top to bottom (`item-base.md`): line 1 is the Frame Mod the frame owns, lines
+   * 2-3 the Bound pair, then the Unbound lines the drop drew — the Mods the stones may edit. The
    * decision itself is the Equip
    * button, never an automatic swap: gold comes from junk sold by hand, and a rejected piece
    * turns into a stone instead (`economy.md` · `loot.md` §4).
@@ -62,11 +62,11 @@
     return `${e.value}${name.trim().endsWith('%') ? '%' : ''} ${plainName(e.id)}`;
   }
 
-  /** A line is one Mod plus the Mods its Base Mod carries in `extra` — the card joins them. */
-  const slimLine = (line: any): string => [line, ...(line.extra || [])].map(slim).join(' · ');
+  /** A line is one Mod plus the Mods its Frame Mod carries in `extra` — the card joins them. */
+  const slimLine = (line: any): string => [line, ...(line.extra || [])].map(slim).join(' · ') + craftedMark(line);
 
-  /** Which fixed kind a line position is, for the colour class: Base, Sub, or an editable Mod. */
-  const kindClass = (i: number) => (i === 0 ? 'base' : i < craft.UNTOUCHABLE ? 'sub' : '');
+  /** Which fixed kind a line position is, for the colour class: Frame, Bound, or an editable Mod. */
+  const kindClass = (i: number) => (i === 0 ? 'frame' : i < craft.UNTOUCHABLE ? 'bound' : '');
 
   function compareText() {
     if (wornHere) return 'the piece being worn now';
@@ -80,7 +80,7 @@
   /**
    * The line-by-line comparison: the candidate's rolled lines paired against the worn piece's, keyed
    * by Mod id (and the Element a line rolled), so the swap reads as what it gains and loses rather
-   * than the single aggregate `vsWorn` score. A `Base Mod` carries its extras, so a line is flattened
+   * than the single aggregate `vsWorn` score. A `Frame Mod` carries its extras, so a line is flattened
    * the same way the card prints it. No number here is typed — both sides come off the two drops.
    */
   type Cmp = { id: string; element?: string; cand: number | null; worn: number | null };
@@ -116,7 +116,7 @@
     <span class="dim">{item.quality} band · {item.tier}</span>
   </p>
   {#if (item.upgrade_lv || 0) > 0}
-    <p class="tag up">+{item.upgrade_lv} of {craft.C.upgrade_cap} Quality Stone</p>
+    <p class="tag up">+{item.upgrade_lv} of {craft.C.upgrade_cap} Quality stone</p>
   {/if}
 
   <ul class="lines">
@@ -180,13 +180,13 @@
     font-variant-numeric: tabular-nums;
     background: linear-gradient(90deg, var(--bar-a), var(--bar-b) 62%, transparent);
   }
-  /* the two fixed kinds keep their colour in the bar, not in the words: Base Mod red, Sub pair yellow */
-  .line.base {
+  /* the two fixed kinds keep their colour in the bar, not in the words: Frame Mod red, Bound pair yellow */
+  .line.frame {
     --bar-a: color-mix(in srgb, var(--hp) 26%, var(--panel));
     --bar-b: color-mix(in srgb, var(--hp) 7%, var(--bg));
     border-left-color: var(--hp);
   }
-  .line.sub {
+  .line.bound {
     --bar-a: color-mix(in srgb, var(--xp) 24%, var(--panel));
     --bar-b: color-mix(in srgb, var(--xp) 6%, var(--bg));
     border-left-color: var(--xp);

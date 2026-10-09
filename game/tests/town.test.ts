@@ -6,7 +6,7 @@ import {
   claimTask, newTown, standingShare, standingTier, canTravel, rollTask,
 } from '../src/sim/town';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, huntZone } from '../src/sim/game';
 
 const require = createRequire(import.meta.url);
 const cage = require('../../tools/lib/engine.ts');
@@ -45,6 +45,7 @@ describe('gold stays the convenience medium', () => {
 
   it('junk is kept, not auto-sold, and pays its rarity price at the Counterhand', () => {
     const s = newGame(77);
+    huntZone(s, s.zone);
     // one roll per kill at the variant's own rarity, so a low zone pays junk on about 1 kill in 20 —
     // run until the first piece lands rather than for a fixed window that can miss it
     const total = () => Object.values(s.junk).reduce((a: number, b: number) => a + b, 0);
@@ -110,7 +111,7 @@ describe('the Guild board', () => {
       seen.add(t.kind);
       expect(['elite', 'boss']).toContain(t.kind);
       expect(t.stone).toBe(t.kind === 'elite' ? 'tier' : 'remove');
-      expect(t.n).toBe(t.kind === 'elite' ? TOWN.task_sizing.elite_n : 1);
+      expect(t.n).toBe(t.kind === 'elite' ? TOWN.task_sizing.elite_n : TOWN.task_sizing.boss_n);
     }
     // both kinds are reachable, and the plain kill-count task that used to carry 60% of the roll is gone
     expect(seen.has('elite')).toBe(true);
@@ -119,6 +120,7 @@ describe('the Guild board', () => {
 
   it('kills feed the matching slot and an empty slot refills after an hour', () => {
     const s = newGame();
+    huntZone(s, s.zone);
     s.town.tasks[1] = { kind: 'elite', zone: 1, n: 3, progress: 0, stone: 'tier', count: 1, claimed: false, offeredAt: 0 };
     // tick until the Elite the slot waits for actually spawns, never for a guessed window: Elites are
     // one kill in five, so a fixed window is a coin flip on the roll (AGENTS.md). The bound is a hang guard.
@@ -205,6 +207,7 @@ describe('the bag filter is the same rule the loot cage runs', () => {
 
   it('a full bag stops pickup rather than deleting gear (engine.json inventory.overflow)', () => {
     const s = newGame(9);
+    huntZone(s, s.zone);
     s.bag = new Array(E.inventory.adventure_slots).fill({ slot: 'chest', base: 'chest', rarity: 'Common', quality: 'low', tier: 'T1', lines: [], q: 0 });
     // tick until the paused-pickup run has rolled a drop, never for a guessed window (AGENTS.md)
     for (let i = 0; i < 40000 && s.counters.drops === 0; i++) tick(s, {});

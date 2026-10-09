@@ -46,7 +46,7 @@ const openingSet = () => {
       g,
       frame,
       weapon,
-      lines: LOOT.baseModAtFloor(BASES_JSON, g.slot, frame, weapon, OPEN.level, q),
+      lines: LOOT.frameModAtFloor(BASES_JSON, g.slot, frame, weapon, OPEN.level, q),
       weight: frame ? frame.weight : eng.weaponWeightOf(BASES_JSON, g.base, 'main hand'),
     };
   });
@@ -116,7 +116,7 @@ BLOCKS['group-C'] = () => {
     ['C7', `Elem res ${cap('elem_res')} · binding Cap`, `${LG.res_mod_items} res items at the max roll · gear only, no Core stat`, `${f1(DERIVED.res_three)} — the build reaches past the Cap, so it **binds** `],
     ['C8', `CDR ${cap('cdr')} · hard ceiling`, `Wis ${f0(CEIL)} + ${LG.cdr_mod_items} CDR items + BO`, `${f1(DERIVED.cdr_four)} — the build tops out under the Cap `],
     ['C9', 'Crit (no Cap)', `Lck ${f0(CEIL)} + ${M.crit_pct_main_hand}% Mod + buff`, `${f1(DERIVED.crit)}% from stats alone · anything over ${K.K_CRIT_CAP} becomes crit damage (B6b) ✓`],
-    ['C10', `stun ${cap('stun')}`, `Alignment reach ${f1(DERIVED.align_path)} × ${K.K_STUN_PER_ALIGN} = ${f1(DERIVED.align_path * K.K_STUN_PER_ALIGN)} + the mace's Chance to stun % line`, `${cap('stun')} ✓ via the mace Base Mod, the only source past the Alignment reach `],
+    ['C10', `stun ${cap('stun')}`, `Alignment reach ${f1(DERIVED.align_path)} × ${K.K_STUN_PER_ALIGN} = ${f1(DERIVED.align_path * K.K_STUN_PER_ALIGN)} + the mace's Chance to stun % line`, `${cap('stun')} ✓ via the mace Frame Mod, the only source past the Alignment reach `],
     ['C11', 'Accuracy', 'no Cap · `acc/(acc+E)` forbids 100% itself', `${f0(DERIVED.accuracy)} → ${f1(DERIVED.hit_chance * 100)}% ✓`],
   ];
   return ['| id | Cap | Reachable path | Value at that point |', '|---|---|---|---|',
@@ -127,7 +127,7 @@ BLOCKS['group-C'] = () => {
 
 BLOCKS['group-F'] = () => {
   const b = BAND;
-  // Every income row is per KILL, never per hour (D12): a rate is a tool's own arithmetic, not a
+  // Every income row is per KILL, never per hour (the kills-not-hours rule): a rate is a tool's own arithmetic, not a
   // published source, so the only unit the surface states is what one kill pays.
   const perKill = (band: string, perHr: number) => perHr / BAND[band].kills_derived;
   const chance = (band: string) => BAND[band].drop_chance_pct / 100;
@@ -140,16 +140,16 @@ BLOCKS['group-F'] = () => {
     ['F4', 'upgrades per drop', E.f_rows_carried.find((r) => r.id === 'F4').expression, E.f_rows_carried.find((r) => r.id === 'F4').value],
     ['F5', 'junk per kill (gold)', `(drops − upgrades) per kill × ${TS.gold_per_junk_piece}`, `**${perKill('high', b.high.junk_per_hr).toFixed(4)}**`],
     ['F6', 'Reroll value uses per kill', `F5 ÷ ${C.reroll_value_stones_per_use}`, `**${perKill('high', STONE.reroll_uses_per_hr).toFixed(4)}**`],
-    ['F7', 'Reroll tier stone per kill', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones).toFixed(4)} (${L.elite_spawn_chance * 100}% of kills ×${L.elite_tier_stones}) + boss ${perKill('high', L.boss_per_hour * L.boss_tier_stones).toFixed(4)} (${bossPerKill} ×${L.boss_tier_stones})`, `${perKill('high', STONE.tier_stones_per_hr).toFixed(4)}`],
+    ['F7', 'Tier stone per kill', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones).toFixed(4)} (${L.elite_spawn_chance * 100}% of kills ×${L.elite_tier_stones}) + boss ${perKill('high', L.boss_per_hour * L.boss_tier_stones).toFixed(4)} (${bossPerKill} ×${L.boss_tier_stones})`, `${perKill('high', STONE.tier_stones_per_hr).toFixed(4)}`],
     ['F8', 'Refines per kill', `F7 ÷ ${C.refine_stones_per_use}`, `**${perKill('high', STONE.refines_per_hr).toFixed(4)}**`],
-    ['F9', 'Add mod stone per kill', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance).toFixed(4)} (${L.elite_spawn_chance * 100}% of kills × ${L.elite_add_stone_chance * 100}% chance) + boss ${perKill('high', L.boss_per_hour * L.boss_add_stones).toFixed(4)} (${bossPerKill} ×${L.boss_add_stones})`, `**${perKill('high', STONE.add_stones_per_hr).toFixed(4)}**`],
+    ['F9', 'Add stone per kill', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance).toFixed(4)} (${L.elite_spawn_chance * 100}% of kills × ${L.elite_add_stone_chance * 100}% chance) + boss ${perKill('high', L.boss_per_hour * L.boss_add_stones).toFixed(4)} (${bossPerKill} ×${L.boss_add_stones})`, `**${perKill('high', STONE.add_stones_per_hr).toFixed(4)}**`],
     ['F10', 'Ascend per kill', `min(F9 ÷ ${C.ascend_add_stones} Add, F7 ÷ ${C.ascend_tier_stones} tier) — the scarcer stone sets the pace`, `**${perKill('high', STONE.ascend_per_hr).toFixed(4)}** · full 12-piece set **${f0(STONE.ascend_hours_full_set * b.high.kills_derived)} kills** (Add alone ${f0(STONE.add_hours_full_set * b.high.kills_derived)} kills · tier stones alone ${f0(STONE.tier_hours_full_set * b.high.kills_derived)} kills → tier stones bind)`],
     ['F13', 'herb bundles per kill', `separate roll · a bundle of ${E.herbs.bundle_min}-${E.herbs.bundle_max} zone-tier herbs`, `mid band **${f2(E.herbs.mid_chance)}** · high band **${f2(E.herbs.high_chance)}**`],
-    ['F16', 'Refine full set', `${C.ascend_items_per_set} pieces × ${C.refine_slots_per_item} slots × ${C.refine_steps} steps = ${STONE.refine_casts_full_set} casts`, `**${STONE.refine_casts_full_set} casts** · ${STONE.refine_casts_full_set * C.refine_stones_per_use} Reroll tier stones (checks.md E6)`],
-    ['F17', 'Full-set polish', `${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones`, `**${C.polish_casts_per_full_set} casts** · ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Reroll value stones (checks.md E8)`],
+    ['F16', 'Refine full set', `${C.ascend_items_per_set} pieces × ${C.refine_slots_per_item} slots × ${C.refine_steps} steps = ${STONE.refine_casts_full_set} casts`, `**${STONE.refine_casts_full_set} casts** · ${STONE.refine_casts_full_set * C.refine_stones_per_use} Tier stones (checks.md E6)`],
+    ['F17', 'Full-set polish', `${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones`, `**${C.polish_casts_per_full_set} casts** · ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Value stones (checks.md E8)`],
     ['F18', 'gold per kill, the price unit', `F5, the junk line`, `${perKill('low', b.low.junk_per_hr).toFixed(4)} low · ${perKill('mid', b.mid.junk_per_hr).toFixed(4)} mid · ${perKill('high', b.high.junk_per_hr).toFixed(4)} high · ${perKill('high_full_lck', b.high_full_lck.junk_per_hr).toFixed(4)} full Lck (towns-stalls.md §1)`],
     ['F19', 'full-Lck income ceiling over the no-Lck line', `${perKill('high_full_lck', b.high_full_lck.junk_per_hr).toFixed(4)} ÷ ${perKill('high', b.high.junk_per_hr).toFixed(4)}`, `**×${f2(LCK_BOUND)}** — the only place Lck may multiply income (G8)`],
-    ['F20', 'Quality Stone per kill', `monster ${perKill('high', b.high.kills_derived * L.quality_stone_sources.monster_quality_chance).toFixed(4)} (${L.quality_stone_sources.monster_quality_chance * 100}% of kills) + elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.quality_stone_sources.elite_quality_chance).toFixed(4)} (1 in 5 × ${L.quality_stone_sources.elite_quality_chance * 100}%) + boss ${perKill('high', L.boss_per_hour * L.quality_stone_sources.boss_quality_stones).toFixed(4)} (${bossPerKill} ×${L.quality_stone_sources.boss_quality_stones})`, `**${perKill('high', STONE.quality_stones_per_hr).toFixed(4)}**`],
+    ['F20', 'Quality stone per kill', `monster ${perKill('high', b.high.kills_derived * L.quality_stone_sources.monster_quality_chance).toFixed(4)} (${L.quality_stone_sources.monster_quality_chance * 100}% of kills) + elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.quality_stone_sources.elite_quality_chance).toFixed(4)} (1 in 5 × ${L.quality_stone_sources.elite_quality_chance * 100}%) + boss ${perKill('high', L.boss_per_hour * L.quality_stone_sources.boss_quality_stones).toFixed(4)} (${bossPerKill} ×${L.quality_stone_sources.boss_quality_stones})`, `**${perKill('high', STONE.quality_stones_per_hr).toFixed(4)}**`],
     ['F21', 'Upgrade full set', `${C.upgrade_costs.join(' + ')} = ${STONE.upgrade_stones_per_piece} per piece × ${C.ascend_items_per_set} pieces = ${STONE.upgrade_stones_full_set} stones ÷ F20`, `**${f0(STONE.upgrade_stones_full_set / perKill('high', STONE.quality_stones_per_hr))} kills** for a full +15 set · the steps ${C.upgrade_breaks_from}-15 third alone, hunted only from bosses, is **${f0(STONE.upgrade_boss_third_hours * b.high.kills_derived)} kills** (crafting.md "sources shift monsters → elites → bosses by step")`],
     ['F22', 'Repair and Corrupt stone per kill', `Repair: elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.repair_stone_sources.elite_repair_chance).toFixed(4)} (1 in 5 × ${L.repair_stone_sources.elite_repair_chance * 100}%) + boss ${perKill('high', L.boss_per_hour * L.repair_stone_sources.boss_repair_stones).toFixed(4)} · Corrupt: boss ${bossPerKill} × ${L.corrupt_stone_sources.boss_corrupt_chance * 100}% chance`, `Repair **${perKill('high', STONE.repair_stones_per_hr).toFixed(4)}** · Corrupt **${perKill('high', STONE.corrupt_stones_per_hr).toFixed(4)}** — the rarest stone, so one gamble per piece costs about ${f0(1 / perKill('high', STONE.corrupt_stones_per_hr))} kills and a full ${STONE.corrupt_gambles_full_set}-piece set of gambles is ${f0(STONE.corrupt_gambles_full_set / perKill('high', STONE.corrupt_stones_per_hr))} kills (crafting.md §Corrupt)`],
   ];
@@ -157,7 +157,7 @@ BLOCKS['group-F'] = () => {
   return ['| id | Value | Expression |', '|---|---|---|',
     ...rows.map((r) => `| ${r[0]} | ${r[1]} | \`${r[2]}\` = ${r[3]} |`),
     ...carried, '',
-    `Derived from: group spawn ${L.group_spawn_sec} sec · ${L.ttk_per_mob_sec} sec TTK per mob (checks.md D1-D3) · Lck read at the band's top level (stat_c = ${S.base} + ${S.point_value}×(points ÷ 7)) · Base drop ${L.base_drop_chance * 100}% (formula-utility.md section 10) · prices ${C.reroll_value_stones_per_use}/${C.refine_stones_per_use} stones (crafting.md).`,
+    `Derived from: group spawn ${L.group_spawn_sec} sec · ${L.ttk_per_mob_sec} sec TTK per mob (engine.json loot) · Lck read at the band's top level (stat_c = ${S.base} + ${S.point_value}×(points ÷ 7)) · Base drop ${L.base_drop_chance * 100}% (formula-utility.md section 10) · prices ${C.reroll_value_stones_per_use}/${C.refine_stones_per_use} stones (crafting.md).`,
     `F4 · F11 are **simulation output** (loot.md section 3) and F13 is unset — this cage does not invent it, it only refuses to let a derived row drift.`, ''].join('\n');
 };
 
@@ -181,11 +181,11 @@ function runChecks() {
   // dropping the stat ceiling to 510 moved 3.16 → 2.11, adding the earring as a 13th
   // item moved it to 2.20, the re-base (kill rates ×1/3 and the level-90 Lck
   // line 190 → 76) moved it to the value below, and the item-level pass moved it again — a drop's
-  // Normal line count is drawn from a range now (2-5, up to 10 crafted), so the keep-rate and with it
+  // Unbound line count is drawn from a range now (2-5, up to 10 crafted), so the keep-rate and with it
   // the junk line sits where that leaves it. Like X1 this literal is a canary against an accidental K
   // re-tune, and the docs print the derived value, not this number.
   add('X7', Math.abs(LCK_BOUND - 3.15) < 0.02, `full-Lck junk line ×${f2(LCK_BOUND)} — the bound G8 and towns-stalls T7 quote`);
-  // The craft pacing is priced in KILLS (D12): what a kill pays is a drop line, so a set's cost is the
+  // The craft pacing is priced in KILLS (the kills-not-hours rule): what a kill pays is a drop line, so a set's cost is the
   // kills it takes, never an hour. `perKillK` turns each hourly figure into its per-kill drop, and
   // `killsFor` reads a set's stone count back out as kills off that same line.
   const perKillK = (perHr: number) => perHr / BAND.high.kills_derived;
@@ -199,7 +199,7 @@ function runChecks() {
   add('X8', Math.round(STONE.tier_stones_per_hr) === 18 && Math.round(STONE.reroll_uses_per_hr) === 79,
     `stone flow, per kill: elite ${perKillK(BAND.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones).toFixed(5)} + boss ${perKillK(L.boss_per_hour * L.boss_tier_stones).toFixed(5)} = ${tierPerKill.toFixed(5)} tier stone · junk ${junkPerKill.toFixed(5)} ÷ ${C.reroll_value_stones_per_use} = ${perKillK(STONE.reroll_uses_per_hr).toFixed(5)} Reroll use (F6 · F7)`);
   const polishKills = killsFor(C.polish_casts_per_full_set * C.reroll_value_stones_per_use, BAND.high.junk_per_hr);
-  add('X10', polishKills <= 6500, `full-set polish = ${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones = ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Reroll value stones, which the junk line pays in ${f0(polishKills)} kills — the cost one gold is priced against, read off the drop a kill pays (E8)`);
+  add('X10', polishKills <= 6500, `full-set polish = ${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones = ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Value stones, which the junk line pays in ${f0(polishKills)} kills — the cost one gold is priced against, read off the drop a kill pays (E8)`);
 
   // Cap reachability, split by kind. A build-target Cap must bind — the build reaches at
   // least the Cap, so the Cap is what the player feels. A hard-ceiling Cap must NOT bind — it sits
@@ -220,7 +220,7 @@ function runChecks() {
   add('X13', capped.length === WEAPONS.length,
     `aspd Cap ${E.caps.aspd} (= ${E.caps.aspd / 100} times/sec, the 0.2 sec floor) is out of reach for every weapon at the Agi ceiling: ${WEAPONS.map((w) => `${w.name} ${f0(w.agi_to_cap)}`).join(' · ')} vs ceiling ${f0(CEIL)} — the Cap is a clock rule, not a build target, and K_AGI_ASPD stays at ${K.K_AGI_ASPD} so no weapon crowds it`);
   add('X14', WEAPONS.every((w) => Math.abs(w.weapon_mult - 1.2 / w.weapon_aspd) < 0.005),
-    `weapon_mult = 1.2 ÷ weapon_aspd for all 6 rows (D10 · equal DPS across every weapon type)`);
+    `weapon_mult = 1.2 ÷ weapon_aspd for all 6 rows (equal DPS across every weapon type)`);
 
   // §12 · the weapon × body-class ladder. The reference weapon must be flat across the three body
   // classes (that is what keeps every zone price still), every row must carry all three columns, and
@@ -406,7 +406,7 @@ function runChecks() {
 
   add('X16', L.base_drop_chance === 0.08 && K.K_LCK_DROP === 0.01,
     `Base drop ${L.base_drop_chance * 100}%/kill · drop_rate = 1 + Lck×${K.K_LCK_DROP} (formula-utility.md section 10 · nothing else mints items)`);
-  // Mob species: every multiplier vector must average 1.00 so mob_HP keeps deriving from player DPS
+  // Mob species: every multiplier vector must average 1.00 so the zone's average mob stays on the published HP anchor
   const MOB = E.mob;
   const ZONES = MOB.zones;
   const bad = MOB.species
@@ -421,7 +421,7 @@ function runChecks() {
     bad.length ? `species stat vector does not average 1.00: ${bad.map((r) => `${r.name} ${r.avg.toFixed(3)}`).join(' · ')}`
       : zoneProblems.length ? `species listed in a zone outside 1-${ZONES.length}: ${zoneProblems.join(', ')}`
         : sizeProblems.length ? `species references a body class that does not exist: ${sizeProblems.join(', ')}`
-          : `${MOB.species.length} species × ${MOB.sizes.length} body classes · every stat vector averages 1.00 (mob_HP still derives from player DPS) · ${Object.keys(MOB.deprecated_species || {}).length} retired lineage(s) stay out of the roster · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} costs a full Dex+Agi pair against the ceiling (X20)`);
+          : `${MOB.species.length} species × ${MOB.sizes.length} body classes · every stat vector averages 1.00 (the zone average stays on the published HP anchor) · ${Object.keys(MOB.deprecated_species || {}).length} retired lineage(s) stay out of the roster · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} costs a full Dex+Agi pair against the ceiling (X20)`);
 
   // The species mix is what makes the Evasion Cap answerable, so guard a floor and a ceiling.
   // X20's question changed shape: Agi now adds flat points rather than an opposed
@@ -589,7 +589,7 @@ function runChecks() {
   // followed the stat ceiling while the caster's HP it is compared against was level-only and did
   // not. The pool is gear now (owner ruling): the shipped range prints 0.7% openly (B15), the client
   // sums the line across items, and survival does not spend the pool at all — so the share is
-  // REPORTED, not gated, until a rebalance re-prices the gear range (a ~20x move with a D1 fold,
+  // REPORTED, not gated, until a rebalance re-prices the gear range (a ~20x move folded into the curve,
   // an owner decision, never a side effect). What stays hard is the mechanics: a real pool, the
   // exact clock, and player-only.
   if (!(ES.delay_sec >= 3 && ES.delay_sec <= 8)) esProblems.push(`es delay ${ES.delay_sec} sec is outside the 3-8 sec band`);
@@ -641,7 +641,7 @@ function runChecks() {
 
   // B2: mob_HP(L) is defined at every level, not only the published anchors (X37). The curve is
   // anchored at each zone edge and interpolated inside the zone, so a mob at an unlisted level
-  // still has an HP; mob_PS derives from the same line. This gate also pins the D1/D2 prose rows.
+  // still has an HP; mob_PS derives from the same line. This gate also pins the published HP and mob_PS rows.
   {
     const p = [];
     let prev = -Infinity;
@@ -723,7 +723,18 @@ function runChecks() {
   add('X41', STONE.quality_stones_per_hr > 0 && STONE.repair_stones_per_hr > 0 && STONE.corrupt_stones_per_hr > 0 &&
       upKills <= 7 * ascKills && corruptPerKill <= tierPerKill / 4,
     `Quality ${perKillK(STONE.quality_stones_per_hr).toFixed(4)}/kill · Repair ${perKillK(STONE.repair_stones_per_hr).toFixed(4)}/kill · Corrupt ${corruptPerKill.toFixed(5)}/kill — a full +15 set is ${f0(upKills)} kills against Ascend's ${f0(ascKills)}, and one gamble is under a quarter of a tier stone's per-kill share, while the flow the prices were set against reads junk ${junkPerKill.toFixed(4)}/kill (F5) and tier ${tierPerKill.toFixed(5)}/kill (F7)`);
-  add('X30', Math.abs(ascKills - 1491) <= 150, `a full ${E.craft.ascend_items_per_set}-piece Ascend set costs ${E.craft.ascend_items_per_set * E.craft.ascend_add_stones} Add + ${E.craft.ascend_items_per_set * E.craft.ascend_tier_stones} tier stones; the drop lines pay Add ${addPerKill.toFixed(5)}/kill and tier ${tierPerKill.toFixed(5)}/kill, so the set is ${f0(ascKills)} kills (Add binds: ${f0(ascAddKills)} vs tier ${f0(ascTierKills)}) — the pace is kills, never an hour (D12 · concept.md)`);
+  add('X30', Math.abs(ascKills - 1491) <= 150, `a full ${E.craft.ascend_items_per_set}-piece Ascend set costs ${E.craft.ascend_items_per_set * E.craft.ascend_add_stones} Add + ${E.craft.ascend_items_per_set * E.craft.ascend_tier_stones} tier stones; the drop lines pay Add ${addPerKill.toFixed(5)}/kill and tier ${tierPerKill.toFixed(5)}/kill, so the set is ${f0(ascKills)} kills (Add binds: ${f0(ascAddKills)} vs tier ${f0(ascTierKills)}) — the pace is kills, never an hour (the kills-not-hours rule · concept.md)`);
+  // The two whole-piece stones are gated as the notes say: Polish is one step tighter than Replace on
+  // the Elite half and keeps its Boss half, Reforge is bosses only on half the Corrupt stone's chance.
+  const PO = E.loot.polish_stone_sources, RF = E.loot.reforge_stone_sources;
+  add('X62', PO.elite_polish_chance === E.loot.replace_stone_sources.elite_replace_chance / 2 &&
+      PO.boss_polish_chance === E.loot.replace_stone_sources.boss_replace_chance &&
+      PO.boss_polish_stones === E.loot.replace_stone_sources.boss_replace_chance * 2 &&
+      RF.boss_reforge_chance === E.loot.corrupt_stone_sources.boss_corrupt_chance / 2 &&
+      STONE.polish_stones_per_hr > 0 && STONE.reforge_stones_per_hr > 0 &&
+      STONE.polish_presses_full_set === E.craft.ascend_items_per_set &&
+      E.craft.polish_stones_per_use === 1 && E.craft.reforge_stones_per_use === 1,
+    `Polish elite ${PO.elite_polish_chance} = half Replace's ${E.loot.replace_stone_sources.elite_replace_chance}, boss ${PO.boss_polish_chance} = Replace's gate, ${PO.boss_polish_stones} a boss · Reforge boss ${RF.boss_reforge_chance} = half Corrupt's ${E.loot.corrupt_stone_sources.boss_corrupt_chance} and no Elite pays one · Polish ${perKillK(STONE.polish_stones_per_hr).toFixed(5)}/kill and Reforge ${perKillK(STONE.reforge_stones_per_hr).toFixed(5)}/kill, one press a piece so a set is ${STONE.polish_presses_full_set} presses · 1 stone a use each`);
 
   // The species damage tag is now a rule: it divides the incoming hit
   const splitTags = [...new Set(E.mob.species.map((r) => r.damage))];
@@ -946,7 +957,7 @@ function runChecks() {
   if (/\bstone/i.test(ROAD.encounter_rule)) roadP.push('the walk may not pay crafting stones — G5 keeps them with Elite and boss');
   if (!/on foot/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint must unlock by arriving on foot');
   // A warp buys back the walk's time, so it is a gold sink and nothing else: gold is the convenience
-  // currency (D8), a stone would make travel a power track, and free warps would delete the walk the
+  // the power currency, so a stone would make travel a power track, and free warps would delete the walk the
   // encounter rate hangs off. The price is one data row, priced per block like every stall line.
   const TOWNJSON = readJson(path.join(eng.ROOT, 'tools/data/town.json'));
   const WARP = (TOWNJSON.repeatable || []).find((r) => r.id === 'waypoint_warp');
@@ -958,7 +969,7 @@ function runChecks() {
     if (WARP.kind !== 'time') roadP.push(`the Waypoint is sold as "${WARP.kind}" — a warp buys time and nothing else`);
     if (TOWNJSON.settlements.some((s) => (s.stock || []).includes('waypoint_warp'))) roadP.push('a Waypoint is not a stall line: no settlement stocks it');
   }
-  if (/\bstone/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint may never be priced in a stone — stones are the power currency (D8)');
+  if (/\bstone/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint may never be priced in a stone — stones are the power currency');
   add('X36', roadP.length === 0, roadP.length ? roadP.join(' · ')
     : `the walk is a closed shape: ${ROAD.nodes.length} settlements on the hex lattice · ${ROAD.block_sec}s a block · ${ROAD.encounter_chance_pct}% an encounter per block, so a ${WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)}-block walk pays ${f1((ROAD.encounter_chance_pct / 100) * WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id) * 10) / 10} fights in expectation · a fight is an ordinary mob group that pays the ordinary drop roll · a Push keeps the walk's blocks · a Waypoint unlocks on foot and warps for ${WARP.m_per_block} minutes of gold a block`);
 
@@ -1003,7 +1014,7 @@ function runChecks() {
   // the curve prices this mob against exactly this character, so the opening line must be the RULE's own
   // floor for a two-Mod line — the worst slice's low end scaled by `value_scale` — and never a typed
   // number that merely happens to sit inside the low band
-  const expectFlat = Math.round(pwRange.bands[0][0][0] * (E.loot.base_mod.value_scale['2'] || 1));
+  const expectFlat = Math.round(pwRange.bands[0][0][0] * (E.loot.frame_mod.value_scale['2'] || 1));
   add('OP2', !!opWpn && givenFlat === expectFlat && opSecs >= 0.8 && opSecs <= 2,
     `the starting sword's line is the low band's floor at the two-Mod scale (+${givenFlat} physical, the rule's own ${expectFlat}), so minute one is the table's floor and not a gift. A level-1 mob dies in ${Number.isFinite(opSecs) ? f1(opSecs) + ' sec' : 'no time at all (no weapon)'}`);
 
@@ -1032,7 +1043,7 @@ function runChecks() {
     `the opening set weighs ${f0(opCarry)} against a ${f0(eng.weightCapacityOf(opStat))} level-1 capacity, so section 11 takes ${f1(opTax * 100)}% of aspd — the lightest frame of every slot keeps the set under the weight_base line, and the lightest main hand in the table (${f0(lightestMain)}) fits with it`);
 
   // OP7 · the set's shape: every slot filled exactly once (the two rings included), one line per piece,
-  // and no Sub pair or Random line anywhere — minute one is junk, and junk is what this proves
+  // and no Bound pair or Unbound line anywhere — minute one is junk, and junk is what this proves
   const opSlotProblems: string[] = [];
   const opSlots = (LOOT_SLOTS as string[]);
   for (const slot of [...new Set(opSlots)]) {
@@ -1044,7 +1055,7 @@ function runChecks() {
     .filter((p) => p.lines.length !== 1 || (p.g.slot !== 'main hand' && (p.lines[0].extra || []).length))
     .map((p) => `${p.g.slot} ${p.g.base}`);
   add('OP7', OP_PIECES.length === opSlots.length && opSlotProblems.length === 0 && opLineProblems.length === 0,
-    `the set is ${OP_PIECES.length} pieces, one per slot of the ${opSlots.length} a character wears, and every piece carries exactly one line — its frame's Base Mod at the floor, with no Sub pair and no Random line${opSlotProblems.length ? ' · SLOTS: ' + opSlotProblems.join(' · ') : ''}${opLineProblems.length ? ' · LINES: ' + opLineProblems.join(' · ') : ''}`);
+    `the set is ${OP_PIECES.length} pieces, one per slot of the ${opSlots.length} a character wears, and every piece carries exactly one line — its frame's Frame Mod at the floor, with no Bound pair and no Unbound line${opSlotProblems.length ? ' · SLOTS: ' + opSlotProblems.join(' · ') : ''}${opLineProblems.length ? ' · LINES: ' + opLineProblems.join(' · ') : ''}`);
 
   // OP8 · the priced clock cannot move: no piece outside the main hand may carry an attack line, because
   // mob_HP, the drop line and the timeline are all keyed on the attack side
@@ -1065,16 +1076,30 @@ function runChecks() {
     if (!flat.length) { modProblems.push(`${m.id} has no slices`); continue; }
     if (flat[0][0] !== m.min) modProblems.push(`${m.id} starts at ${flat[0][0]}, Total says ${m.min}`);
     if (flat[flat.length - 1][1] !== m.max) modProblems.push(`${m.id} ends at ${flat[flat.length - 1][1]}, Total says ${m.max}`);
+    // thirds are contiguous inside a band; a seam overlaps by design (owner ruling): a low-band T1
+    // outrolls the next band's T3, while every band's effective T1 floor still rises above the band
+    // below — the god-roll window is real and the top third always wins.
+    const tiers = m.bands[0].length;
     for (let i = 1; i < flat.length; i++) {
-      if (flat[i][0] <= flat[i - 1][1]) modProblems.push(`${m.id} slice ${i} (${flat[i][0]}) overlaps slice ${i - 1} (ends ${flat[i - 1][1]})`);
-      else if (flat[i][0] !== flat[i - 1][1] + 1) modProblems.push(`${m.id} slice ${i} starts ${flat[i][0]}, a gap after ${flat[i - 1][1]}`);
+      const seam = i % tiers === 0;
+      if (!seam) {
+        if (flat[i][0] <= flat[i - 1][1]) modProblems.push(`${m.id} slice ${i} (${flat[i][0]}) overlaps slice ${i - 1} (ends ${flat[i - 1][1]})`);
+        else if (flat[i][0] !== flat[i - 1][1] + 1) modProblems.push(`${m.id} slice ${i} starts ${flat[i][0]}, a gap after ${flat[i - 1][1]}`);
+      } else {
+        const q = i / tiers;
+        const ov = flat[i - 1][1] - flat[i][0];
+        if (ov < 1) modProblems.push(`${m.id} seam ${i} has no god-roll overlap`);
+        const hi = m.bands[q][m.bands[q].length - 1][1];
+        const size = Math.ceil((hi - flat[i][0] + 1) / 3);
+        if (hi - size + 1 <= flat[i - 1][1]) modProblems.push(`${m.id} seam ${i} T1 no longer wins outright`);
+      }
     }
     const tierCounts = new Set(m.bands.map((b) => b.length));
     if (tierCounts.size !== 1) modProblems.push(`${m.id} has ${[...tierCounts].join('/')} Tiers across its quality bands`);
     for (const b of m.bands) for (const [a, z] of b) if (a > z) modProblems.push(`${m.id} slice ${a}-${z} is inverted`);
   }
   add('MP1', modProblems.length === 0,
-    `every mod range covers its Total exactly — no gap, overlap or mixed Tier count${modProblems.length ? ' · ' + modProblems.join(' · ') : ''}`);
+    `every mod range covers its Total — contiguous thirds, overlapping seams, rising T1 floors${modProblems.length ? ' · ' + modProblems.join(' · ') : ''}`);
 
   const modIds = MODS.mods.map((m) => m.id);
   add('MP2', modIds.length === new Set(modIds).size && MODS.pending.every((p) => !modIds.includes(p.id)),
@@ -1100,7 +1125,7 @@ function runChecks() {
   const matrixProblems = [];
   for (const name of matrixRows) if (!known.has(name) && !GEAR_MODS.includes(name) && !STAT_MODS.includes(name)) matrixProblems.push(`not a Mod line in mod-pool.md: ${name}`);
   const offensiveOnly = ['Physical power flat', 'Physical power %', 'Magic power flat', 'Magic power %', 'Elemental power flat', 'Elemental power %', 'Critical chance %', 'Critical damage %', 'Attack speed %', 'Accuracy %'];
-  // The off hand is a weapon/defence hybrid (a Book carries the magic pair on its Base Mod line),
+  // The off hand is a weapon/defence hybrid (a Book carries the magic pair on its Frame Mod line),
   // so the leak rule reads the armour slots only — helmet through cape.
   const armourCols = (n: string) => {
     const row = modMatrix().split('\n').find((l) => l.startsWith(`| ${n} | `));
@@ -1114,9 +1139,9 @@ function runChecks() {
     matrixProblems.length ? matrixProblems.join(' · ')
       : `Mod matrix holds ${matrixRows.length} named lines, all of them real Mod lines · ${offensiveOnly.length} Offensive lines stay off the armour slots · Gear Mod stays on the 5 armour slots · Stat Mod on all ${SLOT_ORDER.length} slots`);
 
-  // The curve's skill term is a canary, not a derivation: `mob_HP` is priced against the character's
-  // own DPS line times this roster-wide level term, so moving `skill_per_level` silently re-bases every
-  // published edge. The gate holds the value the design states, so a re-tune has to be deliberate.
+  // The curve's skill term is a canary: mob_PS and the reference read-backs divide out of the
+  // static HP table through this roster-wide level term, so moving `skill_per_level` silently
+  // re-bases them. The gate holds the value the design states, so a re-tune has to be deliberate.
   {
     const perLevel = E.mob.curve.skill_per_level;
     const at100 = 1 + perLevel * 100;
@@ -1124,14 +1149,18 @@ function runChecks() {
       `the level-100 skill multiplier reads ×${at100.toFixed(3)} from skill_per_level ${perLevel} — the curve spends ×1.34, so moving that coefficient is a re-base and must say so here`);
   }
 
+  // ---------------------------------------------------------------- the doc linter (X59 · L9 · L10)
+  // The prose shelf that survives, and the record of what was retired, are shared by the three gates:
+  // X59 holds the retired words out of it, L9 holds the numbers out of it, L10 holds the pointers honest.
+  const ALIASES = readJson(path.join(import.meta.dirname, 'data', 'aliases.json'));
+  const prose = ['doc/start/glossary.md', 'doc/start/concept.md', 'doc/start/Techstack.md', 'doc/start/tasks.md',
+    'AGENTS.md', 'DECISIONS.md', 'PRODUCT.md', 'DESIGN.md'];
+
   // A retired word must not creep back. The record is `tools/data/aliases.json`; this reads the prose
   // that survives (`doc/start/` and the root rules) and every data note, and honours each entry's own
   // `allow_in` list. `renames` and `deprecated` blocks are the record of the rename itself, so they are
   // skipped wherever they appear.
   {
-    const ALIASES = readJson(path.join(import.meta.dirname, 'data', 'aliases.json'));
-    const prose = ['doc/start/glossary.md', 'doc/start/concept.md', 'doc/start/Techstack.md', 'doc/start/tasks.md',
-      'AGENTS.md', 'DECISIONS.md', 'PRODUCT.md', 'DESIGN.md'];
     const SKIP_KEYS = new Set(['renames', 'deprecated', 'aliases']);
     const stringsOf = (v: any, out: string[] = []): string[] => {
       if (typeof v === 'string') out.push(v);
@@ -1140,10 +1169,35 @@ function runChecks() {
       return out;
     };
     const haystack: [string, string][] = [];
-    for (const f of prose) { try { haystack.push([f, fs.readFileSync(path.join(ROOT, f), 'utf8')]); } catch { /* the file may not exist yet */ } }
+    const parked = fs.existsSync(path.join(ROOT, 'draft'))
+      ? fs.readdirSync(path.join(ROOT, 'draft')).filter((n) => n.endsWith('.md')).map((n) => 'draft/' + n) : [];
+    const termFiles = prose.concat(['todo.md'], parked);
+    for (const f of termFiles) { try { haystack.push([f, fs.readFileSync(path.join(ROOT, f), 'utf8')]); } catch { /* the file may not exist yet */ } }
     for (const f of fs.readdirSync(path.join(import.meta.dirname, 'data'))) {
       if (!f.endsWith('.json') || f === 'aliases.json') continue;
       haystack.push(['tools/data/' + f, stringsOf(readJson(path.join(import.meta.dirname, 'data', f))).join('\n')]);
+    }
+    // The player reads the client, not the doc shelf, so a retired word may not ship in a UI string.
+    // History comments and data keys are out of scope: comments are allowed to name the old word, and
+    // `rarity:` / `v.rarity` is the junk rung, an unrelated word spelled the same. So this reads only
+    // what a player can see — a string literal, or the text between tags in a template.
+    const quoted = (s: string) => (s.match(/"[^"\n]*"|'[^'\n]*'|`[^`]*`/g) || []).join(' ');
+    const markup = (s: string) => s
+      .replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<style[\s\S]*?<\/style>/g, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ').replace(/\{@const[\s\S]*?\}/g, ' ')
+      .replace(/\{[^{}]*\}/g, ' ').replace(/<[^>]+>/g, ' ');
+    const codeProse: [string, string][] = [];
+    for (const dir of ['game/src', 'engine']) {
+      const walk = (d: string) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => {
+        const p = path.join(d, e.name);
+        if (e.isDirectory()) return e.name === 'node_modules' ? [] : walk(p);
+        return /\.(svelte|ts)$/.test(e.name) ? [p] : [];
+      });
+      for (const f of walk(path.join(ROOT, dir))) {
+        const txt = fs.readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
+        const rel = path.relative(ROOT, f).replace(/\\/g, '/');
+        codeProse.push([rel, `${quoted(txt)} ${/\.(svelte|html)$/.test(rel) ? markup(txt) : ''}`]);
+      }
     }
     const esc = (s: any): string => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const tHits: string[] = [];
@@ -1151,14 +1205,79 @@ function runChecks() {
       const allow = new Set([...(t.allow_in || []), ...(t.allow_in_data || [])]);
       const guard = (t.not_prefix || []).map((x: any) => `(?<!${esc(x)} )`).join('');
       const re = new RegExp(guard + '\\b' + esc(t.old) + '\\b', 'i');
-      for (const [file, text] of haystack) {
+      for (const [file, text] of haystack.concat(codeProse)) {
         if (allow.has(file) || allow.has(file.replace(/^.*\//, ''))) continue;
         if (re.test(text)) tHits.push(`${file} "${t.old}" → ${t.new}`);
       }
     }
     add('X59', tHits.length === 0,
       tHits.length ? tHits.slice(0, 8).join(' · ')
-        : `${(ALIASES.terms || []).length} retired term(s) stay retired across ${prose.length} prose file(s) and every data note, honouring each entry's own allow-list`);
+        : `${(ALIASES.terms || []).length} retired term(s) stay retired across ${termFiles.length} prose file(s), every data note, and the ${codeProse.length} client/engine file(s)' UI strings and template text, honouring each entry's own allow-list`);
+  }
+
+  // L9 · the prose-number ratchet the data owns (`engine.json doc_prose`): a number typed into prose has
+  // no writer, so it cannot move with the data and nothing detects it going stale. The rule and the cap
+  // are the data's; this counts the hand-typed lines and holds the cap, which may only fall.
+  // Structural digits are not values — a section heading, a list ordinal, a table's row index — and
+  // `todo.md` is exempt (the work file), as the data's own `exempt` line says; a line opts out with
+  // `lint:allow`.
+  {
+    const DP = E.doc_prose || {};
+    const hits: string[] = [];
+    for (const f of prose) {
+      let text: string; try { text = fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch { continue; }
+      let fence = false;
+      text.split(/\r?\n/).forEach((l, i) => {
+        if (/^\s*(```|~~~)/.test(l)) { fence = !fence; return; }
+        if (fence || /lint:allow/.test(l)) return;
+        if (/^\s*#{1,6}\s/.test(l)) return;
+        if (/^\s*(?:\d+|[a-z])[.)]\s/.test(l)) return;
+        const cells = l.split('|').map((c) => c.trim());
+        if (cells.length > 2 && /^\d+$/.test(cells[1])) return;
+        if (/\d/.test(l)) hits.push(`${f}:${i + 1}`);
+      });
+    }
+    add('L9', hits.length <= (DP.lines_max ?? 0),
+      `${hits.length} prose line(s) carry a hand-typed number against the cap ${DP.lines_max} (${DP.rule}) · exempt: ${DP.exempt} · over the cap, move the figure to the key that owns it or mark the line \`lint:allow\`${hits.length ? ` · first: ${hits.slice(0, 6).join(' · ')}` : ''}`);
+  }
+
+  // L10 · a pointer to a retired doc must still resolve. The prose shelf collapsed to `doc/start/` plus
+  // the root rules, and the citations stayed where they were written, so `tools/data/aliases.json`
+  // `docs` records the name and the file that owns its numbers now. A pointer to a doc that neither
+  // exists nor is recorded is a pointer to nothing. Generated views (`wiki/`, `tools/wiki.ts`) are the
+  // wiki's own output and read by nobody here, so they are out of the scan.
+  {
+    const DOCS = ALIASES.docs || {};
+    const live = new Set<string>();
+    const hidden = (n: string) => n.startsWith('.');
+    const collect = (d: string) => {
+      for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+        if (e.isDirectory()) { if (!['node_modules', 'dist', 'wiki'].includes(e.name) && !hidden(e.name)) collect(path.join(d, e.name)); }
+        else if (/\.md$/.test(e.name) && !/\.template\.md$/.test(e.name)) live.add(e.name);
+      }
+    };
+    collect(ROOT);
+    const scanned: string[] = [];
+    const walk = (d: string): string[] => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) return ['node_modules', 'dist', 'wiki', 'icon'].includes(e.name) || hidden(e.name) ? [] : walk(p);
+      if (!/\.(ts|svelte|json|md)$/.test(e.name)) return [];
+      if (p.endsWith(path.join('tools', 'wiki.ts')) || p.endsWith('aliases.json')) return [];
+      return [p];
+    });
+    let dead = 0;
+    for (const f of ['engine', 'tools', 'game', 'doc', 'draft'].flatMap((d) => walk(path.join(ROOT, d)))) {
+      const txt = fs.readFileSync(f, 'utf8');
+      const rel = path.relative(ROOT, f).replace(/\\/g, '/');
+      for (const m of txt.matchAll(/\b([a-z][a-z0-9-]*\.md)\b/g)) {
+        const n = m[1];
+        if (live.has(n) || DOCS[n]) continue;
+        dead++; scanned.push(`${rel} → ${n}`);
+      }
+    }
+    add('L10', dead === 0,
+      dead ? `${dead} dangling pointer(s): ${[...new Set(scanned)].slice(0, 8).join(' · ')}`
+        : `every doc pointer resolves: ${Object.keys(DOCS).length} retired name(s) mapped to the data/engine file that owns them now, and the surviving shelf (${[...live].sort().join(' · ')}) is read from disk`);
   }
 
   // Minute one is a read a client performs, so the opening set must be complete and resolvable: one
@@ -1209,7 +1328,7 @@ function rangedMods() {
 }
 
 /** Per-slot pool, engine-faithful: `bases[].primary/secondary` plus the lines the slot adds. */
-function basePools() {
+function framePools() {
   const bySlot: Record<string, Set<string>> = {};
   const add = (slot: string, ids: any[]) => {
     const set = bySlot[slot] || (bySlot[slot] = new Set());
@@ -1217,7 +1336,7 @@ function basePools() {
   };
   for (const b of BASES_JSON.bases) add(b.slot, [...(b.primary || []), ...(b.secondary || [])]);
   // engine/loot.ts `poolFor`: the armour slots' own line-1 pool is also rollable
-  for (const slot of ARMOUR_SLOTS) add(slot, BASES_JSON.base_mod?.defence || []);
+  for (const slot of ARMOUR_SLOTS) add(slot, BASES_JSON.frame_mod?.defence || []);
   // engine/loot.ts `poolFor`: an off-hand frame draws its slot union plus its family's row
   for (const [family, ids] of Object.entries<any>(BASES_JSON.weapon_pools?.['off hand'] || {})) {
     if (family === 'Stat Mod' || family === 'Dual-wield weapon') continue;
@@ -1226,7 +1345,7 @@ function basePools() {
   return bySlot;
 }
 
-/** Line 1 is the frame's own Base Mod and never enters a craftable pool (engine/loot.ts `baseModRoll`). */
+/** Line 1 is the frame's own Frame Mod and never enters a craftable pool (engine/loot.ts `frameModRoll`). */
 function line1Pools() {
   const names = rangedMods();
   const out: Record<string, Set<string>> = {};
@@ -1234,9 +1353,9 @@ function line1Pools() {
     const set = out[slot] || (out[slot] = new Set());
     for (const id of ids) { const n = modName(id); if (names.has(n)) set.add(n); }
   };
-  for (const ids of Object.values<any>(BASES_JSON.base_mod?.weapons || {})) add('main hand', ids);
-  for (const ids of Object.values<any>(BASES_JSON.base_mod?.off_hand || {})) add('off hand', ids);
-  for (const slot of ARMOUR_SLOTS) add(slot, BASES_JSON.base_mod?.defence || []);
+  for (const ids of Object.values<any>(BASES_JSON.frame_mod?.weapons || {})) add('main hand', ids);
+  for (const ids of Object.values<any>(BASES_JSON.frame_mod?.off_hand || {})) add('off hand', ids);
+  for (const slot of ARMOUR_SLOTS) add(slot, BASES_JSON.frame_mod?.defence || []);
   return out;
 }
 
@@ -1249,7 +1368,7 @@ function weaponPools() {
 }
 
 function modMatrix() {
-  const pools = basePools();
+  const pools = framePools();
   const line1 = line1Pools();
   const weapon = weaponPools();
   const slots = {};

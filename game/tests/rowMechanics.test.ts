@@ -8,7 +8,7 @@ import { mobSwing, playerSwing } from '../src/sim/combat';
 import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct, triggerAuras } from '../src/sim/skills';
 import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/mobStatus';
 import { newCurses, applyCurse, spreadOnDeath, lineValue } from '../src/sim/curse';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
 
@@ -173,6 +173,7 @@ describe('the support rows that change the character', () => {
 
   it('the sim spends a charge before the rolls, and Holy Veil keeps statuses off entirely', () => {
     const s = newGame(99);
+    huntZone(s, s.zone);
     setLevel(s, 30);
     s.zone = 3;
     s.skills.owned['buff.ghost_dance'] = 0;
@@ -190,6 +191,7 @@ describe('the support rows that change the character', () => {
 
   it('Cleanse clears what is on the character and pays its own share of the pool', () => {
     const s = newGame(100);
+    huntZone(s, s.zone);
     setLevel(s, 120);
     s.zone = 3;
     const c0 = buildCharacter(s.player.level, s.gear, {}, 0);
@@ -219,6 +221,7 @@ describe('the support rows that change the character', () => {
     expect(Object.keys(fold.add).length + Object.keys(fold.mult).length).toBe(0); // pure mechanic row
     expect(hasRule(row('buff.magia_drive'), 'es_recharge_immediate')).toBe(true);
     const s = newGame(101);
+    huntZone(s, s.zone);
     setLevel(s, 60);
     s.zone = 5;
     // the shield is a gear line, so the character under test wears the piece that carries it — a
@@ -323,6 +326,7 @@ describe('the trigger auras fire the first ready slot at their own price', () =>
 
   it('is in play inside the sim: a crit with Cast on Crit up fires the order', () => {
     const s = newGame(5);
+    huntZone(s, s.zone);
     setLevel(s, 90);
     s.zone = 1;
     s.skills.owned['attack.cleave'] = 1;

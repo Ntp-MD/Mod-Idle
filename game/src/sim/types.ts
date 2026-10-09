@@ -22,7 +22,7 @@ export interface ModLine {
    */
   stat?: StatKey;
   /**
-   * The further Mods a Base Mod line carries on the same line (`item-base.md`): line 1 rolls
+   * The further Mods a Frame Mod line carries on the same line (`item-base.md`): line 1 rolls
    * 1-3 Mods onto one line, its own `value` for the first and one entry here for each of the rest.
    */
   extra?: ModExtra[];
@@ -43,15 +43,17 @@ export interface Item {
   q?: number;
   /** Carried weight in the unit items show: the Base frame's weight at this quality. */
   weight?: number;
-  /** How many Add mod stones this piece has taken, 0-2 (net counting, item-level.md). */
+  /** How many Add stones this piece has taken, gross — the fill price climbs on this and never resets. */
   mods_added?: number;
+  /** Unbound lines the piece dropped with: the +2 Add cap is net against this, so Remove refunds room. */
+  unbound_at_drop?: number;
   /** The highest value each slot has ever held — the Reroll floor (save.md "Reroll baseline"). */
   baselines?: Record<number, number>;
   /** A Collector set this piece is being held for, instead of dissolved at the filter. */
   heldFor?: string;
   /** Player-locked: bulk deposit/withdraw, the bag swap and auto-dissolve all skip it. */
   locked?: boolean;
-  /** +1..+15 from the Quality Stone ladder (`crafting.md`). */
+  /** +1..+15 from the Quality stone ladder (`crafting.md`). */
   upgrade_lv?: number;
   /** Would-be breaks this piece can still absorb; Repair refills it (`craft.protection_start`). */
   protection_left?: number;
@@ -136,7 +138,7 @@ export interface Counters {
   zoneKills: Record<number, number>;
   pushes: number;
   drops: number;
-  /** Gear pieces dissolved by the bag filter; every 500 owes one Reroll tier stone (F15). */
+  /** Gear pieces dissolved by the bag filter; every 500 owes one Tier stone (F15). */
   salvaged?: number;
   /** Every point of damage the character dealt, so a DPS figure is state-backed, not inferred. */
   damage?: number;
@@ -162,6 +164,7 @@ import type { FilterState } from './filter';
 import type { GoalState } from './goal';
 import type { MobStatusStore } from './mobStatus';
 import type { CurseStore } from './curse';
+import type { DungeonRun } from './dungeon';
 
 export interface HealBuff {
   secLeft: number;
@@ -256,6 +259,11 @@ export interface GameState {
   /** 'stay' keeps hunting this zone; 'forward' climbs once its own level band is behind. */
   travel: 'stay' | 'forward';
   /**
+   * False on safe ground: a town fields no mobs, so nothing spawns until the character heads
+   * out (the hunt button, a forward climb, a walk ambush or a dungeon run). True everywhere else.
+   */
+  hunting: boolean;
+  /**
    * Forward Mode's safe floor: the zone the character last held (the one it advanced out of). A
    * Push returns here — the ladder's own answer to "this chapter is not survivable yet".
    */
@@ -287,6 +295,10 @@ export interface GameState {
   phase: Phase;
   campSec: number;
   spawnIn: number;
+  /** The open dungeon run, or null on open ground. A run is a mode, never a coordinate (M7). */
+  dungeon: DungeonRun | null;
+  /** The clock second of the last cleared run; entry cools down from here (`dungeon.cooldown_sec`). */
+  dungeonClearedAt?: number;
   counters: Counters;
   log: LogLine[];
   /** The transient ring the HUD animates. Never persisted (`save.ts`). */

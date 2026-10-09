@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 import { eng, E, sm } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, huntZone } from '../src/sim/game';
 import {
   newSkillState, grantSkill, castOnce, skillCd, skillLevel, ladderOf, reservedPct, usableMana,
   effectsActive, tickSkills, ACTIVE_SLOTS,
@@ -186,6 +186,7 @@ describe('skills in the live loop', () => {
 
   it('kills pay skill XP and a boss can hand out the first skill', () => {
     const game = newGame(999);
+    huntZone(game, game.zone);
     game.skills.owned['attack.cleave'] = 0;
     game.skills.list[0] = 'attack.cleave';
     for (let i = 0; i < 20000 && !game.skills.xp['attack.cleave']; i++) tick(game, {});
@@ -195,6 +196,7 @@ describe('skills in the live loop', () => {
 
   it('a long enough run drops at least one skill through the real rate', () => {
     const game = newGame(20260103);
+    huntZone(game, game.zone);
     // the rate is per kill (0.1% normal, 8% elite, 35% boss), so a fixed window is a coin flip on the
     // kill rate rather than a premise. Tick until a piece lands; the bound is a hang guard.
     // tick to the state BOTH assertions read: a piece owned AND a bar slot filled (the loop slots a

@@ -1,6 +1,8 @@
 #!/bin/sh
-# ModWorld pre-commit: run every cage + the cross-file linter, then prove every
-# committed generated file still matches its writer.
+# ModWorld pre-commit: run every cage (the doc linter is inside them: L9 prose numbers, L10 doc
+# pointers, X59 retired words including the client's UI strings), then typecheck `engine/` + `tools/`.
+# The client suite is the other half of the contract and runs before a replace-all sync, not here:
+# `npm --prefix game test` takes about a minute.
 # Enable once with:  git config core.hooksPath .githooks
 
 node --experimental-strip-types --disable-warning=ExperimentalWarning tools/verify.ts || {
@@ -10,9 +12,9 @@ node --experimental-strip-types --disable-warning=ExperimentalWarning tools/veri
   exit 1
 }
 
-node --experimental-strip-types --disable-warning=ExperimentalWarning tools/check-generated.ts || {
+npx tsc --noEmit -p tsconfig.json || {
   echo ""
-  echo "pre-commit blocked: a committed generated file does not match its writer."
-  echo "Regenerate with 'node tools/build.ts', then commit again."
+  echo "pre-commit blocked: typecheck failed."
+  echo "Run 'npm run typecheck' for the file and line, fix it, and commit again."
   exit 1
 }

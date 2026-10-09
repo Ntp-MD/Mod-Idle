@@ -1,5 +1,6 @@
 import { E, TOWN } from '../engine/client';
 import { createRoad, hexAdjacent } from '../../../engine/road.ts';
+import { abandonRun } from './dungeon';
 import { priceGold, rowById } from './town';
 import type { GameState, Walk } from './types';
 
@@ -63,7 +64,7 @@ export function warpCost(state: GameState, id: string): number {
  * Take the Waypoint: instant, and it pays gold for the time the walk would have taken. It opens no new
  * destination — the settlement is reachable because the foot earned it (`road.waypoint_rule`).
  */
-export function warpTo(state: GameState, id: string): { ok: boolean; why?: string; gold?: number } {
+export function warpTo(state: GameState, id: string): { ok: boolean; why?: string; gold?: number; forfeit?: string } {
   if (state.walk) return { ok: false, why: 'mid-walk — finish the route or turn back' };
   if (state.phase === 'camp') return { ok: false, why: 'recovering at camp' };
   if (id === state.town.waypoint) return { ok: false, why: 'you already stand there' };
@@ -76,7 +77,10 @@ export function warpTo(state: GameState, id: string): { ok: boolean; why?: strin
   state.zone = dest.zone;
   state.town.waypoint = id;
   state.group = [];
-  return { ok: true, gold };
+  // warping home is safe ground: town fields no mobs until the character heads back out
+  state.hunting = false;
+  const forfeit = state.dungeon ? abandonRun(state, 'Warped out') : undefined;
+  return { ok: true, gold, forfeit };
 }
 
 /** Every cell the route has already been walked through, up to and including the current block. */
@@ -90,7 +94,7 @@ export function walkedCells(state: GameState): string[] {
  * Lay a walk down. The blocks are the hex distance between the two settlements, never typed, and the
  * route is the chain of adjacent cells the foot crosses — one cell per block, never a jump.
  */
-export function startWalk(state: GameState, fromId: string, toId: string): { ok: boolean; why?: string } {
+export function startWalk(state: GameState, fromId: string, toId: string): { ok: boolean; why?: string; forfeit?: string } {
   if (state.walk) return { ok: false, why: 'already walking' };
   if (state.phase === 'camp') return { ok: false, why: 'recovering at camp' };
   if (fromId === toId) return { ok: false, why: 'you are already there' };
@@ -111,7 +115,9 @@ export function startWalk(state: GameState, fromId: string, toId: string): { ok:
     secLeft: road.blockSec,
     blocksWalked: 0,
   };
-  return { ok: true };
+  // walking out abandons the open run: a dungeon is entered ground, not a destination
+  const forfeit = state.dungeon ? abandonRun(state, 'Walked out') : undefined;
+  return { ok: true, forfeit };
 }
 
 /** Two sheet keys share an edge — the one step a block is allowed to take. */
@@ -131,6 +137,8 @@ export function arrive(state: GameState, walk: Walk) {
   state.town.waypoint = dest.id;
   state.walk = null;
   state.group = [];
+  // arriving is safe ground — unless Forward Mode is on, which is one long hunt
+  state.hunting = state.travel === 'forward';
   return { name: dest.name, first };
 }
 

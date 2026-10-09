@@ -4,7 +4,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { mobSwing, playerSwing } from '../src/sim/combat';
 import { newCurses, applyCurse, modsOn, tickCurses, psMult, accMult, takenMult, NO_CURSE, curableRows } from '../src/sim/curse';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Mob } from '../src/sim/types';
 
 const row = (id: string) => sm.byId[id];
@@ -128,6 +128,7 @@ describe('the clock runs out', () => {
 
   it('the sim attaches a landed curse and its log says so', () => {
     const s = newGame(61);
+    huntZone(s, s.zone);
     setLevel(s, 50);
     s.zone = 4;
     s.skills.owned['curse.weaken'] = 1;

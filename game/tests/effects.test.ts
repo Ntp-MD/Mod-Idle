@@ -3,7 +3,7 @@ import { sm, E } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { poolGear } from './sheetFixture';
 import { newSkillState, effectsActive, toggleTrack, effectLine, describeFold } from '../src/sim/skills';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import { placeStatus } from '../src/sim/mobStatus';
 import { eng } from '../src/engine/client';
 
@@ -156,6 +156,7 @@ describe('the toggle track', () => {
 describe('heals read their own number', () => {
   it('Greater Heal restores once what its row states, not a per-second drip', () => {
     const s = newGame(52);
+    huntZone(s, s.zone);
     setLevel(s, 60);
     s.zone = 5;
     s.skills.owned['heal.greater_heal'] = 1;
@@ -184,6 +185,7 @@ describe('heals read their own number', () => {
 describe('the hit ring colours what a total cannot', () => {
   it('a burn tick on a mob lands as a field event in the fire colour', () => {
     const s = newGame(30);
+    huntZone(s, s.zone);
     for (let i = 0; i < 60 && !s.group.length; i++) tick(s, {});
     expect(s.group.length).toBeGreaterThan(0);
     // no weapon Element on this sheet, so every swing is the neutral colour and the only fire number

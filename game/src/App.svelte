@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { eng, E, sm, TOWN, BASES, tree } from './engine/client';
   import { buildCharacter } from './sim/player';
-  import { newGame, tick, push, fx, hitColour, catchUpAsync, carried, heldWeaponName } from './sim/game';
+  import { newGame, tick, push, fx, hitColour, catchUpAsync, carried, heldWeaponName, huntZone } from './sim/game';
   import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
@@ -27,6 +27,7 @@
   import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
 import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
   import { road, startWalk, walkLabel, walkBlocks, walkRoute, warpTo, warpCost, warpRow, walkedCells } from './sim/road';
+  import { enterDungeon, cooldownLeft } from './sim/dungeon';
   import { masteryLabel, dropBonusPct, masteryLevel, WEAPONS } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
   import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
@@ -427,18 +428,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function goToZone(id: number) {
-    const s = settlementOfZone(id);
-    if (!s || !gameState.town.visited.includes(s.id)) {
+    const r = huntZone(gameState, id);
+    if (!r.ok) {
+      const s = settlementOfZone(id);
       saveNote = `${eng.zoneById(id).name} is not opened yet — the map panel shows the walk to ${s?.name ?? 'its settlement'}`;
       picked = s?.id ?? null;
       pickedCell = null;
       panel = 'map';
       return;
     }
-    gameState.zone = id;
-    gameState.group = [];
-    gameState.player.atkTimer = 0;
-    push(gameState, `Walking to ${eng.zoneById(id).name} (levels ${eng.zoneById(id).levels.join('-')})`);
+    push(gameState, `Heading out to hunt in ${eng.zoneById(id).name} (levels ${eng.zoneById(id).levels.join('-')})`);
     gameState = { ...gameState };
   }
 
@@ -535,7 +534,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const town = $derived(settlementById(townId));
   /** The settlement picked on the sheet, and the exact cell under the click. */
   let picked = $state<string | null>(null);
-  let pickedCell = $state<{ cell: string; kind: 'town' | 'sub' | 'wild'; label: string } | null>(null);
+  let pickedCell = $state<{ cell: string; kind: 'town' | 'sub' | 'wild'; label: string; wild?: number | null } | null>(null);
   /** The sheet's three views, the level the gate view measures against, and the two overlays. */
   let view = $state<'terrain' | 'band' | 'gate'>('terrain');
   let gateLevel = $state(1);
@@ -612,14 +611,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       if (cell) root.querySelector(`polygon.cell[data-cell="${cell}"]`)?.classList.add('picked');
     }
   });
-  /** What a cell is called: the settlement, its sub-zone, or the wild side it rings. */
-  function cellLabel(node: Element): { kind: 'town' | 'sub' | 'wild'; label: string } {
+  /** What a cell is called: the settlement, its sub-zone, or the wild side it rings. Wild side 0 is the dungeon. */
+  function cellLabel(node: Element): { kind: 'town' | 'sub' | 'wild'; label: string; wild?: number | null } {
     const id = node.getAttribute('data-node') || '';
     const s = settlementById(id);
     const sub = node.getAttribute('data-sub');
     const wild = node.getAttribute('data-wild');
     if (sub != null) return { kind: 'sub', label: (eng.zoneById(s.zone).subzones || [])[Number(sub)]?.name || '' };
-    if (wild != null) return { kind: 'wild', label: s.name + ' ' + (Number(wild) + 1) };
+    if (wild != null) {
+      const w = Number(wild);
+      return { kind: 'wild', wild: w, label: w === 0 ? s.name + ' Dungeon' : s.name + ' ' + (w + 1) };
+    }
     return { kind: 'town', label: s.name };
   }
   /**
@@ -894,6 +896,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (!r.ok) { saveNote = `Cannot warp: ${r.why}`; gameState = { ...gameState }; return; }
     // a manual jump is the new floor: a later Push in Forward Mode falls back to the zone just left
     gameState.forwardSafe = gameState.zone;
+    if (r.forfeit) push(gameState, r.forfeit);
     push(gameState, `Waypoint to ${s.name} — ${r.gold} gold for the ${saved} blocks it saves`);
     fx(gameState, { kind: 'warp', side: 'self', text: `warp · ${s.name}`, colour: hitColour(null) });
     gameState = { ...gameState };
@@ -909,7 +912,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const here = gameState.town.waypoint;
     const r = startWalk(gameState, here, id);
     if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
+    if (r.forfeit) push(gameState, r.forfeit);
     saveNote = `Walking to ${settlementById(id)?.name} — ${walkBlocks(here, id)} blocks`;
+    gameState = { ...gameState };
+  }
+
+  /** The run the card speaks for: inside with a count, or outside with the cooldown left. */
+  const dungeonView = $derived.by(() => {
+    const run = gameState.dungeon;
+    if (run) return { active: true, left: run.left, total: run.total, cooldown: 0 };
+    return { active: false, left: 0, total: 0, cooldown: Math.ceil(cooldownLeft(gameState)) };
+  });
+
+  /** Step into the settlement's dungeon: one run, escrowed loot, forfeited on a Push. */
+  function doDungeon() {
+    const r = enterDungeon(gameState);
+    if (!r.ok) { saveNote = `Cannot enter: ${r.why}`; gameState = { ...gameState }; return; }
+    push(gameState, `Entered the dungeon — ${gameState.dungeon!.total} mobs, loot held in escrow until the last one falls`);
     gameState = { ...gameState };
   }
 
@@ -966,7 +985,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const farmSub = $derived('level ' + fl + ' / ' + farm.F.level_cap + ' · the one life skill, and it grants no power');
   const deskSub = $derived(gameState.walk
     ? 'walking ' + walkLabel(gameState.walk.from, gameState.walk.to)
-    : pickedCell ? `${pickedCell.cell} · ${pickedCell.label}` : `${town?.name ?? 'the field'} · trade, board, hunt, walk`);
+    : gameState.dungeon
+      ? `dungeon — ${gameState.dungeon.total - gameState.dungeon.left}/${gameState.dungeon.total} mobs down, loot in escrow`
+      : !gameState.hunting
+        ? `${town?.name ?? 'the field'} · safe in town — hunt to head out`
+        : pickedCell ? `${pickedCell.cell} · ${pickedCell.label}` : `${town?.name ?? 'the field'} · trade, board, hunt, walk`);
 
   function doDeposit(i: number, tab: number) {
     const r = deposit(gameState, i, tab);
@@ -1419,9 +1442,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         busy={!!gameState.walk}
         fare={warpPrice(pickedSettlement.id)}
         afford={gameState.counters.gold >= warpPrice(pickedSettlement.id)}
+        dungeon={dungeonView}
         onwalk={doWalk}
         onwarp={travelTo}
         onhunt={goToZone}
+        ondungeon={doDungeon}
         ondesk={() => (panel = 'desk')}
         onclear={() => { picked = null; pickedCell = null; }}
       />
@@ -1568,7 +1593,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
       <details class="filter">
         <summary>Bag filter — what this run keeps</summary>
-        <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. Turn a slot on and a piece that fails its rule turns into 1 Reroll value stone on the spot (stones are always kept, never discarded) — nothing is deleted.</small></p>
+        <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. Turn a slot on and a piece that fails its rule turns into 1 Value stone on the spot (stones are always kept, never discarded) — nothing is deleted.</small></p>
         <table>
           <thead><tr><th>Slot</th><th>Filter</th><th>Keep when it beats the worn piece by</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
           <tbody>
@@ -1781,7 +1806,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 {/if}
 
 {#if panel === 'forge'}
-  <Panel title="Forge" subtitle="enhancement · paid in Quality Stones, never gold" width="wide" onclose={closePanel}>
+  <Panel title="Forge" subtitle="enhancement · paid in Quality stones, never gold" width="wide" onclose={closePanel}>
     <p><small>The forge is a settlement service, so it opens only while the character stands in one. A step
       that can fail says so before the press: the chance, the rung it drops back to, and the protection
       charge that would take the miss instead. Past the break rung with no charge left a miss leaves the piece
@@ -1794,13 +1819,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 {#if panel === 'craft'}
   <Panel title="Craft house" subtitle="the stones that change a piece, not its level" width="wide" onclose={closePanel}>
-    <p><small>Reroll moves a value inside its own Tier and never below the floor that slot has ever held,
-      Refine pushes one slot up a Tier, Ascend raises the whole piece one item-quality step. Element and Mod
-      identity sit outside every stone here — only Corrupt, on the Forge, is the one gamble allowed to change
-      an Element (`crafting.md`). Draughts are brewed on the Farm.</small></p>
+    <p><small>Reroll value moves a number inside its own Tier and never below the floor that slot has ever
+      held, Refine pushes one slot up a Tier, Roll tier redraws the Tier and leaves the Mod where it is, and
+      Ascend raises the whole piece one item-quality step. Three stones change what a line <em>is</em>: Roll
+      new Mod lets the Base pool draw the replacement, Replace lets you name it, and an imprint stone carries
+      one Mod's own identity. An Element moves only when an elemental Mod arrives or when Corrupt redraws the
+      piece on the Forge (`crafting.md`). Draughts are brewed on the Farm.</small></p>
     <CraftBoard game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
                 onpick={(w, i) => (bench = { where: w, index: i })}
-                onrun={(op, line) => runCraft(op, line ?? 0)} {wornOf} note={benchNote} />
+                onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote} />
   </Panel>
 {/if}
 
@@ -1848,7 +1875,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr>
             <td>{p.name}</td>
             <td>Instant {farm.potionEffect(p)}% Max {p.pool === 'hp' ? 'HP' : 'Mana'}</td>
-            <td>{cost.herbs} {p.tier} herbs + {cost.reroll_value_stones} Reroll value stone(s)</td>
+            <td>{cost.herbs} {p.tier} herbs + {cost.reroll_value_stones} Value stone(s)</td>
             <td>{gameState.farm.potions[p.name] || 0}{gameState.farm.condensed[p.name] ? ` (+${gameState.farm.condensed[p.name]} condensed)` : ''}</td>
             <td>
               <button onclick={() => doBrew(p.name)}>brew</button>
@@ -1890,7 +1917,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <h4>Counterhand · the gold mint</h4>
       <p>Gold {gameState.counters.gold.toFixed(1)} · junk unsold {junkTotal} ({junkLines.join(' · ') || 'none'}) · stones {stonesLine()}</p>
       <button onclick={doSell} disabled={!viewHere || junkTotal === 0}>Sell all junk here</button>
-      <p><small>Junk sells for its rarity price, and selling it is the only thing that mints gold — walking pays a drop roll and nothing else. Rejected gear dissolved for Reroll value stones instead — the two media never mix.</small></p>
+      <p><small>Junk sells for the gold its own rung prices, and selling it is the only thing that mints gold — walking pays a drop roll and nothing else. Rejected gear dissolved for Value stones instead — the two media never mix.</small></p>
 
       <h4>Respec · free</h4>
       <p><small>Hand every allocated stat point back and re-spend them. Free, and only here in a settlement — this game has no death, so a locked build would be a worse punishment than a lost fight.</small></p>

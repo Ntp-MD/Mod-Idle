@@ -1,7 +1,8 @@
-import { eng, E, sm, loot, TOWN, tree } from '../engine/client';
+import { eng, E, sm, loot, TOWN, tree, dungeon as DG } from '../engine/client';
 import { buildCharacter, openingGear, SLOT_COUNT } from './player';
 import { playerSwing, mobSwing, rollStatus, dotDamage, type Statuses, type StatusName } from './combat';
 import { rollDrop } from './drop';
+import { abandonRun, payoutStacks } from './dungeon';
 import { newTown, progressTasks, tickTown, taskReward } from './town';
 import { STAT_KEYS, type StatKey } from '../engine/client';
 import { leanReweight } from '../../../engine/loot.ts';
@@ -122,6 +123,8 @@ export function newGame(seed = 20260101): GameState {
     pedlar: { day: 0, minutes: [], bought: 0 },
     filter: newFilter(),
     travel: 'stay',
+    // minute one stands in town: safe ground fields no mobs until the character heads out
+    hunting: false,
     autoDissolveLevel: 0,
     goal: newGoal(),
     curses: newCurses(),
@@ -135,6 +138,7 @@ export function newGame(seed = 20260101): GameState {
     phase: 'fighting',
     campSec: 0,
     spawnIn: 0,
+    dungeon: null,
     counters: {
       kills: 0,
       zoneKills: {},
@@ -302,13 +306,48 @@ function swapWeakestKept(s: GameState, item: Item, score: number): boolean {
   return true;
 }
 
-/** One piece becomes one Reroll value stone, and every 500 owes a tier stone (checks.md F15). */
+/** Stones route into the dungeon escrow while a run is open, and pay direct on open ground. */
+function payStone(s: GameState, kind: string, n: number): void {
+  if (s.dungeon) {
+    const e = s.dungeon.escrow.stones;
+    e[kind] = (e[kind] || 0) + n;
+  } else addTo(s, s.counters.stones, kind, 'stone', n);
+}
+
+/** One imprint stone's purse key, uniform over the Mod roster. */
+function imprintDrop(rng: () => number): string {
+  const ids = Object.keys(loot.BANDS_OF);
+  return 'imprint_' + ids[Math.floor(rng() * ids.length)];
+}
+
+/** Move this kill's herb and potion pickups into the run's escrow, leaving the bags as they were. */
+function escrowProvisions(s: GameState, herbHad: Record<string, number>, potionHad: Record<string, number>): void {
+  const run = s.dungeon!;
+  for (const [k, v] of Object.entries(s.farm.herbs)) {
+    const d = v - (herbHad[k] || 0);
+    if (d > 0) {
+      run.escrow.herbs[k] = (run.escrow.herbs[k] || 0) + d;
+      if (herbHad[k]) s.farm.herbs[k] = herbHad[k];
+      else delete s.farm.herbs[k];
+    }
+  }
+  for (const [k, v] of Object.entries(s.farm.potions)) {
+    const d = v - (potionHad[k] || 0);
+    if (d > 0) {
+      run.escrow.potions[k] = (run.escrow.potions[k] || 0) + d;
+      if (potionHad[k]) s.farm.potions[k] = potionHad[k];
+      else delete s.farm.potions[k];
+    }
+  }
+}
+
+/** One piece becomes one Value stone, and every 500 owes a tier stone (checks.md F15). */
 function dissolve(s: GameState): void {
-  addTo(s, s.counters.stones, 'reroll_value', 'stone', 1);
+  payStone(s, 'reroll_value', 1);
   s.counters.salvaged = (s.counters.salvaged || 0) + 1;
   if (s.counters.salvaged % E.salvage.pieces_per_tier_stone === 0) {
-    addTo(s, s.counters.stones, 'tier', 'stone', 1);
-    push(s, `Salvage milestone · ${s.counters.salvaged} pieces dissolved → 1 Reroll tier stone`);
+    payStone(s, 'tier', 1);
+    push(s, `Salvage milestone · ${s.counters.salvaged} pieces dissolved → 1 Tier stone`);
   }
 }
 
@@ -319,8 +358,17 @@ function dissolve(s: GameState): void {
 function awardDrop(s: GameState, rng: () => number, band: string, ilvl: number, weaponAspd: number): void {
   const item = rollDrop(rng, band, ilvl, weaponAspd);
   s.counters.drops++;
+  adjudicateDrop(s, item);
+}
+
+/**
+ * One rolled piece through the bag filter. A mob kill — on foot, in an ambush or paid out of a
+ * dungeon escrow — and any future item source use this same path, so "what the filter keeps" can
+ * never mean two different things.
+ */
+function adjudicateDrop(s: GameState, item: Item): void {
   // the bag filter keeps a drop only when it outscores the piece worn in that slot by more than
-  // noise; anything else dissolves for 1 Reroll value stone, never for gold (loot.md §4)
+  // noise; anything else dissolves for 1 Value stone, never for gold (loot.md §4)
   // the bar is the best piece the character holds for that slot, worn or waiting in the bag: a
   // keep that nobody has worn yet still has to beat what is already on offer, or the bag fills
   // with near-duplicates of a decision already made (`loot.md` §4, read with no auto-pick)
@@ -424,8 +472,14 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     junk: pJunkBase,
   }, order, E.loot.variant_lean.shift_pct);
   if (rng() < hw.gear) {
-    awardDrop(s, rng, band, ilvl, c.weaponAspd);
-    fx(s, { kind: 'drop', side: 'field', text: 'drop', colour: hitColour(null) });
+    const item = rollDrop(rng, band, ilvl, c.weaponAspd);
+    s.counters.drops++;
+    // a run escrows the roll itself: the one filter path judges it when the run pays out
+    if (s.dungeon) s.dungeon.escrow.items.push(item);
+    else {
+      adjudicateDrop(s, item);
+      fx(s, { kind: 'drop', side: 'field', text: 'drop', colour: hitColour(null) });
+    }
   }
   const junkScale = pJunkBase > 0 ? hw.junk / pJunkBase : 1;
   // junk is kept and sold by hand at the Counterhand — it is a gold mint, not a gold drip. The item is
@@ -438,42 +492,91 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
       const pays = rarity === vdrop.rarity;
       // junk occupies a slot like any other carried stack; a bag full of it stops the pickup
       if (rng() < (pays ? r.drop_chance_per_kill * junkScale : 0)) {
-        if (addTo(s, s.junk, vdrop.item, 'stone', 1)) s.counters.junk++;
+        if (s.dungeon) {
+          const e = s.dungeon.escrow.junk;
+          e[vdrop.item] = (e[vdrop.item] || 0) + 1;
+        } else if (addTo(s, s.junk, vdrop.item, 'stone', 1)) s.counters.junk++;
       }
     }
   }
   progressTasks(s, mob.kind, mob.zone);
+  // a run escrows provisioning: herbs and potions write only here, so the delta is exact
+  const herbHad = s.dungeon ? { ...s.farm.herbs } : null;
+  const potionHad = s.dungeon ? { ...s.farm.potions } : null;
   rollHerbs(s, rng, band, band, hw.herb);
   // the humanoid tribes drop a potion on their own roll (items 2 + 4); an ordinary lineage does not
   const dropsPotion = !!E.mob.species.find((sp: any) => sp.id === (mob as any).speciesId)?.humanoid;
   if (dropsPotion && rollPotion(s, rng, band, true)) push(s, `A humanoid drops a potion`);
+  if (s.dungeon && herbHad && potionHad) escrowProvisions(s, herbHad, potionHad);
   if (mob.kind === 'Elite') {
     // the elite stone lines in engine.json are expected values per kill, so the roll keeps them whole
-    if (rng() < L.elite_tier_stones) addTo(s, s.counters.stones, 'tier', 'stone', 1);
-    if (rng() < L.elite_add_stone_chance) addTo(s, s.counters.stones, 'add', 'stone', 1);
-    if (rng() < L.quality_stone_sources.elite_quality_chance) addTo(s, s.counters.stones, 'quality', 'stone', 1);
-    if (rng() < L.repair_stone_sources.elite_repair_chance) addTo(s, s.counters.stones, 'repair', 'stone', 1);
-    if (rng() < L.replace_stone_sources.elite_replace_chance) {
-      addTo(s, s.counters.stones, 'replace', 'stone', 1);
+    if (rng() < L.elite_tier_stones) payStone(s, 'tier', 1);
+    if (rng() < L.elite_add_stone_chance) payStone(s, 'add', 1);
+    // an imprint stone carries one Mod line's own identity, uniform over the roster
+    if (rng() < L.imprint_stone_sources.elite_imprint_chance) payStone(s, imprintDrop(rng), 1);
+    if (rng() < L.quality_stone_sources.elite_quality_chance) payStone(s, 'quality', 1);
+    if (rng() < L.repair_stone_sources.elite_repair_chance) payStone(s, 'repair', 1);
+    // one draw pays both swap stones: Polish sits inside Replace's chance (the data gates it one step
+    // tighter), so reading the same number twice keeps the two lines from drifting and the tick at one draw
+    const eliteSwap = rng();
+    if (eliteSwap < L.replace_stone_sources.elite_replace_chance) {
+      payStone(s, 'replace', 1);
       fx(s, { kind: 'drop', side: 'field', text: 'Replace stone', colour: hitColour(null) });
     }
+    if (eliteSwap < L.polish_stone_sources.elite_polish_chance) payStone(s, 'polish', 1);
   }
-  // Quality Stone comes from every kill, but the ladder's cheap steps are the only part a mob pays
-  if (rng() < L.quality_stone_sources.monster_quality_chance) addTo(s, s.counters.stones, 'quality', 'stone', 1);
+  // Quality stone comes from every kill, but the ladder's cheap steps are the only part a mob pays
+  if (rng() < L.quality_stone_sources.monster_quality_chance) payStone(s, 'quality', 1);
   if (mob.kind.startsWith('Boss')) {
-    addTo(s, s.counters.stones, 'tier', 'stone', L.boss_tier_stones);
-    addTo(s, s.counters.stones, 'add', 'stone', L.boss_add_stones);
-    addTo(s, s.counters.stones, 'quality', 'stone', L.quality_stone_sources.boss_quality_stones);
-    addTo(s, s.counters.stones, 'repair', 'stone', L.repair_stone_sources.boss_repair_stones);
-    if (rng() < L.corrupt_stone_sources.boss_corrupt_chance) addTo(s, s.counters.stones, 'corrupt', 'stone', 1);
-    if (rng() < L.replace_stone_sources.boss_replace_chance) {
-      addTo(s, s.counters.stones, 'replace', 'stone', 1);
+    payStone(s, 'tier', L.boss_tier_stones);
+    payStone(s, 'add', L.boss_add_stones);
+    for (let i = 0; i < L.imprint_stone_sources.boss_imprint_stones; i++) payStone(s, imprintDrop(rng), 1);
+    payStone(s, 'quality', L.quality_stone_sources.boss_quality_stones);
+    payStone(s, 'repair', L.repair_stone_sources.boss_repair_stones);
+    const bossGamble = rng();
+    if (bossGamble < L.corrupt_stone_sources.boss_corrupt_chance) payStone(s, 'corrupt', 1);
+    // Reforge is Corrupt's safer cousin on half the same chance, so it reads that one draw
+    if (bossGamble < L.reforge_stone_sources.boss_reforge_chance) payStone(s, 'reforge', 1);
+    // Rebirth sits inside the same draw again: Corrupt 0.25 ⊃ Reforge 0.125 ⊃ Rebirth 0.0625
+    if (bossGamble < L.rebirth_stone_sources.boss_rebirth_chance) {
+      payStone(s, 'rebirth', L.rebirth_stone_sources.boss_rebirth_stones);
+    }
+    const bossSwap = rng();
+    if (bossSwap < L.replace_stone_sources.boss_replace_chance) {
+      payStone(s, 'replace', 1);
       fx(s, { kind: 'drop', side: 'field', text: 'Replace stone', colour: hitColour(null) });
+    }
+    // Polish keeps Replace's Boss half, so the same draw pays it and only the count is the data's
+    if (bossSwap < L.polish_stone_sources.boss_polish_chance) {
+      payStone(s, 'polish', L.polish_stone_sources.boss_polish_stones);
     }
     if (goalKill(s, mob)) {
       push(s, `Gate met — ${mob.kind.replace('Boss · ', '')} killed in one spawn, no Push, at ${Math.round(s.clockSec / 60)} min of play · level ${s.player.level}`);
     }
   }
+  // the run ends on its last mob: the escrow pays out and the dungeon cools down
+  if (s.dungeon) {
+    s.dungeon.left--;
+    if (s.dungeon.left <= 0) completeDungeonRun(s);
+  }
+}
+
+/**
+ * The run's last mob: stacks merge through the ordinary pickup rule, gear rolls go through the
+ * one filter path, and the dungeon cools down from this clock second.
+ */
+function completeDungeonRun(s: GameState): void {
+  const run = s.dungeon!;
+  const paid = payoutStacks(s);
+  s.dungeon = null;
+  let gear = 0;
+  for (const item of run.escrow.items) {
+    adjudicateDrop(s, item);
+    fx(s, { kind: 'drop', side: 'field', text: 'drop', colour: hitColour(null) });
+    gear++;
+  }
+  s.dungeonClearedAt = s.clockSec;
+  push(s, `Dungeon cleared — ${run.total} mobs · escrow paid: ${gear} gear, ${paid.junk} junk, ${paid.stones} stones, ${paid.herbs} herbs, ${paid.potions} potions · cooling down ${E.dungeon.cooldown_sec}s`);
 }
 
 /**
@@ -496,6 +599,20 @@ function spawnWalkEncounter(s: GameState, rng: () => number) {
 export function push(s: GameState, text: string) {
   s.log.unshift({ sec: s.clockSec, text });
   if (s.log.length > 60) s.log.length = 60;
+}
+
+/**
+ * Head out to hunt a zone on foot from the map: safe ground ends where the hunt begins. Only a
+ * settlement already opened may be hunted in — anything else is still a walk away.
+ */
+export function huntZone(s: GameState, id: number): { ok: boolean; why?: string } {
+  const town = settlementOfZone(id);
+  if (!town || !s.town.visited.includes(town.id)) return { ok: false, why: 'not opened yet' };
+  s.zone = id;
+  s.group = [];
+  s.player.atkTimer = 0;
+  s.hunting = true;
+  return { ok: true };
 }
 
 /** How many events the HUD ring keeps — enough to read a fight by, small enough to never grow. */
@@ -584,7 +701,8 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // Forward Mode is a chapter ladder (owner ask): win the zone (its band is behind you) and the walk
   // moves on; a Push sends the character back to the last zone it held (below) and this same rule
   // refuses to re-enter the zone it was chased out of until a level has been gained against it.
-  if (s.travel === 'forward') {
+  // Forward Mode stands down inside a dungeon: the run owns the zone until it ends
+  if (s.travel === 'forward' && !s.dungeon) {
     const here = eng.zoneById(s.zone);
     if (s.player.level > here.levels[1]) {
       const next = eng.ZONES.find((z: any) => z.id > here.id
@@ -596,6 +714,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
         s.zone = next.id;
         s.group = [];
         s.spawnIn = 0;
+        s.hunting = true; // a climb is a hunt, not a rest
         s.lastAutoZone = -1; // the preset bound to the new zone is picked on this same tick
         push(s, `Moving on to ${next.name} (levels ${next.levels.join('-')})`);
       }
@@ -648,11 +767,25 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     }
   }
 
+  // leaving the run's zone ends the run: a dungeon is entered ground, not a destination
+  if (s.dungeon && s.dungeon.zone !== s.zone) push(s, abandonRun(s, 'Pulled out'));
   const band = BAND_OF_QUALITY(eng.zoneById(s.zone).quality);
   const [loGroup, hiGroup] = (eng.zoneById(s.zone).group as string).split('-').map(Number);
   const groupSize = intBetween(rng, loGroup || 1, hiGroup || loGroup || 1);
+  // a run fields the zone's own normals, clamped to the run's cap and to what is left
+  if (!s.group.length && !s.walk && s.hunting && s.dungeon) {
+    const run = s.dungeon;
+    const [rlo, rhi] = (eng.zoneById(run.zone).group as string).split('-').map(Number);
+    const size = DG.clampGroup(intBetween(rng, rlo || 1, rhi || rlo || 1), run.left);
+    if (size > 0) {
+      s.group = Array.from({ length: size }, () => spawnMob(rng, run.zone, s.player.level, 'normal'));
+      s.group.sort((m) => (m.line === 'front' ? -1 : 1));
+      s.spawnIn = L.group_spawn_sec;
+      s.farm.usesThisFight = 0;
+    }
+  }
   if (!s.group.length && !s.walk) s.spawnIn--;
-  if (!s.group.length && !s.walk && s.spawnIn <= 0) {
+  if (!s.group.length && !s.walk && s.hunting && s.spawnIn <= 0) {
     const wantElite = rng() < L.elite_spawn_chance;
     // the boss clock is a stored due time, per character, and it does not accrue while away
     // (save.md · combat.md §7). A modulo would let a busy tick skip a spawn and hand the next
@@ -933,6 +1066,8 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     s.phase = 'camp';
     s.campSec = Math.max(1, Math.ceil(c.maxHp / (c.hpRegen * 8)));
     s.counters.pushes++;
+    // a Push in a dungeon ends the run at once and the escrow is forfeited, never paid
+    if (s.dungeon) push(s, abandonRun(s, 'Pushed'));
     s.group = [];
     // a Push on a walk is the ordinary Push: the walk keeps its blocks and the character walks back
     // in on the block it was ambushed on, so the Forward Mode ladder below stands down while one runs
@@ -997,11 +1132,17 @@ function pauseBossClock(s: GameState, secs: number): void {
   if (s.bossDueAt !== undefined) s.bossDueAt += secs;
 }
 
+/** The dungeon cooldown is an online gate like the boss clock: away time must not accrue toward it. */
+function pauseDungeonClock(s: GameState, secs: number): void {
+  if (s.dungeonClearedAt !== undefined) s.dungeonClearedAt += secs;
+}
+
 /** Synchronous catch-up — tests and any non-UI caller. */
 export function catchUp(s: GameState, statuses: Statuses, elapsedSec: number) {
   const { secs, capped } = catchUpPlan(elapsedSec);
   runTicks(s, statuses, 0, secs);
   pauseBossClock(s, secs);
+  pauseDungeonClock(s, secs);
   return { simulated: secs, capped };
 }
 
@@ -1018,6 +1159,7 @@ export async function catchUpAsync(s: GameState, statuses: Statuses, elapsedSec:
     if (end < secs) await new Promise((r) => setTimeout(r, 0));
   }
   pauseBossClock(s, secs);
+  pauseDungeonClock(s, secs);
   return { simulated: secs, capped };
 }
 

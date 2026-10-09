@@ -96,7 +96,7 @@ export function createEngine(E: EngineData) {
     },
   };
 
-  // ---- mob evasion: the species Dex line, not a level number (D1 step 1)
+  // ---- mob evasion: the species Dex line, not a level number (one static HP table)
 
   // A mob's own stat block (`mob.stat`), deliberately NOT the player's line. It is FLAT now:
   // one base the species vector multiplies, no level term, so two mobs of a level can be nothing alike.
@@ -226,8 +226,8 @@ export function createEngine(E: EngineData) {
   DERIVED.es_cast_hp = LG.hp_base + statAt(S.level_cap) * K.K_VIT_HP + LG.hp_per_level * (S.level_cap - 1);
   DERIVED.es_share_of_hp = DERIVED.es_pool / DERIVED.es_cast_hp;
 
-  // ---- mob curve: HP is published per zone edge, and the damage line divides back out of it
-  // mob_HP(L) = typical_gear_DPS(L) × tree(L) × skill(L)   ·   mob_PS(L) = typical_gear_DPS(L ÷ 27 (checks.md D1/D2)
+  // ---- mob curve: HP is a static published table per zone edge; the damage line divides back out of it
+  // mob_HP(L) is read off mob.zones[].hp, never priced from player DPS · mob_PS(L) = typicalDPS(L) ÷ K
 
   const CURVE = E.mob.curve;
   const skillF = (Lv: number) => 1 + CURVE.skill_per_level * Lv;
@@ -261,9 +261,9 @@ export function createEngine(E: EngineData) {
 
   // mob_HP(L): a mob spawns at the attacker's level clamped into its zone range, so the curve is
   // anchored at every zone edge (mob.zones[].hp) and interpolated linearly inside a zone. Levels
-  // 91-100 sit past the spawn cap (90) and run to the published cap anchor. typical_gear_DPS(L) is
-  // read back out of that curve, and mob_PS(L) is derived from the same line, never typed beside it
-  // (checks.md D1/D2 · X37).
+  // 91-100 sit past the spawn cap (90) and run to the published cap anchor. The table is static:
+  // typical_gear_DPS(L) is read back out of it, and mob_PS(L) is derived from the same line, never
+  // typed beside it (X37).
   const MOB_HP_ANCHORS = (() => {
     const a: { level: number; hp: number }[] = [];
     for (const z of ZONES) { a.push({ level: z.levels[0], hp: z.hp[0] }); a.push({ level: z.levels[1], hp: z.hp[1] }); }
@@ -407,14 +407,14 @@ export function createEngine(E: EngineData) {
 
   /**
    * Block is its own avoidance layer (it overrules "one avoidance layer" for the
-   * block path only; evasion keeps its Cap). It is a flat percentage the shield's Base Mod line
+   * block path only; evasion keeps its Cap). It is a flat percentage the shield's Frame Mod line
    * prints, rolled last in the incoming order, OPEN-ENDED (no Cap, owner ruling). A blocked hit is
    * NOT deleted — it is cut by a flat `armour / 10` (owner ruling, provisional; applied in mobSwing).
    */
   const blockChance = (pct: number) => Math.max(0, pct || 0);   // no Cap (owner ruling)
   /**
    * Armour penetration is a cut on the mob's armour ratio, taken where that ratio is built (the
-   * crossbow's Base Mod line). It cannot take the cut below zero, so over-penetration is wasted
+   * crossbow's Frame Mod line). It cannot take the cut below zero, so over-penetration is wasted
    * rather than a damage amplifier — the same shape `mobResCut`'s `resOffset` has.
    */
   const armourPenCut = (pct: number) => Math.min(1, Math.max(0, (pct || 0) / 100));
@@ -667,6 +667,12 @@ export function createEngine(E: EngineData) {
   }
 
   const goldPerMinute = (b: string) => Math.round((BAND[b].junk_per_hr / 60) * Math.pow(10, TS.round_rate_to_decimals)) / Math.pow(10, TS.round_rate_to_decimals);
+  /**
+   * A town price in gold: `m` is minutes of the band's own junk income and the charge runs at the
+   * band that sells it (`town.json meta.unit`). One home for the multiplication, so the town cage,
+   * the wiki and the client cannot each carry their own copy of it.
+   */
+  const goldPrice = (m: number, b: string) => Math.round(m * goldPerMinute(b) + 1e-9);
 
   // Stone income per hour, by band — the same three expressions the STONE block prints for high.
   const rerollValueStonesPerHr = (band: string) => Math.round(BAND[band].junk_per_hr / C.reroll_value_stones_per_use);
@@ -674,7 +680,7 @@ export function createEngine(E: EngineData) {
   const addStonesPerHr = (band: string) => r2(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance + L.boss_per_hour * L.boss_add_stones);
 
   // ---- the three craft stones the ladder costs but the loot table did not pay
-  // crafting.md says Quality Stone comes "monsters → elites → bosses by step", Repair "elite / boss
+  // crafting.md says Quality stone comes "monsters → elites → bosses by step", Repair "elite / boss
   // only" and Corrupt "boss only, rarest"; the rates live in `loot.*_stone_sources` and every hour
   // figure below is divided out of them, so the doc never holds a second copy of one.
   const QS = L.quality_stone_sources, RS = L.repair_stone_sources, CS = L.corrupt_stone_sources;
@@ -688,6 +694,16 @@ export function createEngine(E: EngineData) {
     L.boss_per_hour * RS.boss_repair_stones!,
   );
   const corruptStonesPerHr = (band: string) => r2(L.boss_per_hour * CS.boss_corrupt_chance!);
+  // The two whole-piece stones: Polish takes the Replace stone's Boss gate and half its Elite chance,
+  // Reforge is bosses only on half the Corrupt stone's chance (`loot.polish_stone_sources` / `reforge_stone_sources`).
+  // Rebirth is the third: bosses only, one stone when the boss pays, on half the Reforge stone's chance again.
+  const PS = L.polish_stone_sources, FS = L.reforge_stone_sources, REB = L.rebirth_stone_sources;
+  const polishStonesPerHr = (band: string) => r2(
+    BAND[band].kills_derived * L.elite_spawn_chance * PS.elite_polish_chance +
+    L.boss_per_hour * PS.boss_polish_chance * PS.boss_polish_stones,
+  );
+  const reforgeStonesPerHr = (band: string) => r2(L.boss_per_hour * FS.boss_reforge_chance);
+  const rebirthStonesPerHr = (band: string) => r2(L.boss_per_hour * REB.boss_rebirth_chance * REB.boss_rebirth_stones);
   /** One piece climbing +1..+15, and a set of twelve. The boss third alone is the deep grind. */
   const upgradeStonesPerPiece = C.upgrade_costs.reduce((t, n) => t + n, 0);
   const upgradeStonesFullSet = upgradeStonesPerPiece * C.ascend_items_per_set;
@@ -717,6 +733,18 @@ export function createEngine(E: EngineData) {
   STONE.repair_stones_per_hr = repairStonesPerHr('high');
   STONE.corrupt_stones_per_hr = corruptStonesPerHr('high');
   STONE.corrupt_gambles_full_set = C.ascend_items_per_set;
+  // the two whole-piece stones: one press takes one piece, so a set is twelve presses. The per-line
+  // path above (`polish_hours_full_set`, paid in Value stones) stays what it always was.
+  STONE.polish_stones_per_hr = polishStonesPerHr('high');
+  STONE.polish_presses_full_set = C.ascend_items_per_set;
+  STONE.polish_stones_full_set = C.ascend_items_per_set * C.polish_stones_per_use;
+  STONE.polish_stone_hours_full_set = r1(STONE.polish_stones_full_set / STONE.polish_stones_per_hr);
+  STONE.reforge_stones_per_hr = reforgeStonesPerHr('high');
+  STONE.reforge_gambles_full_set = C.ascend_items_per_set;
+  STONE.reforge_hours_full_set = r1((C.ascend_items_per_set * C.reforge_stones_per_use) / STONE.reforge_stones_per_hr);
+  // A Rebirth press is the whole Unbound set, so the set is what the rate buys.
+  STONE.rebirth_stones_per_hr = rebirthStonesPerHr('high');
+  STONE.rebirth_hours_per_press = r1(C.rebirth_stones_per_use / STONE.rebirth_stones_per_hr * 3600);
 
   const LCK_BOUND = r2(BAND.high_full_lck.junk_per_hr / BAND.high.junk_per_hr);
 
@@ -853,9 +881,10 @@ export function createEngine(E: EngineData) {
     armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, convertDamageOf, agiForCap,
     weaponWeightOf, sizeMultOf, applySizeMult, basicAttackOf,
     // loot + xp
-    lckOf, dropChance, killsDerived, goldPerMinute, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
+    lckOf, dropChance, killsDerived, goldPerMinute, goldPrice, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
     floorOf, qualityIndexOf, spanOf, floorLevelOf,
     rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr,
+    polishStonesPerHr, reforgeStonesPerHr, rebirthStonesPerHr,
     stonesForMinutes, taskPayout,
     // formatting
     r1, r2, fmt,

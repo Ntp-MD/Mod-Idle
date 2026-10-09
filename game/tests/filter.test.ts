@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { E, eng, loot } from '../src/engine/client';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import { rollDrop } from '../src/sim/drop';
 import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS } from '../src/sim/filter';
 import { mark, reason, arm, SAVE_CFG } from '../src/sim/snapshot';
@@ -80,6 +80,7 @@ describe('the bag filter reads per-slot thresholds', () => {
 
   it('runs on the live state during a fight without throwing', () => {
     const s = newGame(12);
+    huntZone(s, s.zone);
     setLevel(s, 70);
     setRule(s.filter, 'helmet', { margin_pct: 40 });
     // Tick until the state under test exists, never for a guessed window: a fixed window is a time

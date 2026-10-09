@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng, TOWN } from '../src/engine/client';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import { settlementOfZone } from '../src/sim/town';
 import { walkRoute, walkBlocks, startWalk, warpTo, warpCost } from '../src/sim/road';
 import { hexAdjacent } from '../../engine/road.ts';
@@ -155,6 +155,7 @@ describe('the walked world: single steps and the Waypoint price', () => {
 
   it('raises a hit event the HUD can colour, with the colour read from the data', () => {
     const s = newGame(20);
+    huntZone(s, s.zone);
     for (let i = 0; i < 60; i++) { tick(s, {}); topUp(s); }
     const hits = (s.fx || []).filter((e) => e.kind === 'hit');
     expect(hits.length).toBeGreaterThan(0);

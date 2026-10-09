@@ -8,7 +8,7 @@ import { combineMods, newCurses, applyCurse } from '../src/sim/curse';
 import { playerSwing, mobSwing } from '../src/sim/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Item, Mob } from '../src/sim/types';
 
@@ -215,6 +215,7 @@ describe('the store forgets a mob that left, and the sim runs the whole path', (
 
   it('a fire weapon in the sim sets burn on what it hits and the mob dies faster', () => {
     const s = newGame(101);
+    huntZone(s, s.zone);
     setLevel(s, 60);
     s.zone = 3; // a fire zone: our own fire Element is not countered there
     s.gear = emptyGear();

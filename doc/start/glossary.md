@@ -20,7 +20,7 @@ mid band · level 45
   └── T1  Evasion %            10-11
 ```
 
-- **The line count never touches a rolled value.** A drop's Normal line count is drawn from a range, but every value its lines roll comes from the level's window alone — so two pieces at one level differ by how many lines they drew and by where those rolls landed, never by the count reaching into a value.
+- **The line count never touches a rolled value.** A drop's Unbound line count is drawn from a range, but every value its lines roll comes from the level's window alone — so two pieces at one level differ by how many lines they drew and by where those rolls landed, never by the count reaching into a value.
 - **The window is one window for the whole item.** Every line reads the same level and band — a Mod cannot borrow another Mod's level.
 - **Tier is a property of the item, not of a Mod.** Two Mods on one item are always inside the same sub-range set.
 
@@ -78,10 +78,10 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Stat Mod** | The Mods that are neither Offensive nor Defensive — `Stat Mod flat`, rolling any of the 7 Core stats. It rolls on **every** item and no slot blocks it; the `Stat Mod %` sibling is retired. |
 | **Offensive** | Attack-side Mods. Roll on weapon slots only. |
 | **Defensive** | Defence-side Mods. Roll on the 10 non-weapon slots only. |
-| **Base Mod** | The first line of a dropped item — the frame's own line, rolled from the slot's Base-Mod pool. Unremovable: the craft verbs never touch it (item-base.md). |
-| **Sub mod** | Lines 2-3 of a dropped item, fixed at drop. The Remove mod stone can never target them, and a Random line (lines 4-7) is never sub. |
-| **Gear Mod** | A piece's own inherent defence value — Armour, Evasion or Energy Shield, decided by its Base school. Raised only by a Quality Stone. **Never** a Mod: Reroll, Refine, Remove and Add cannot touch it, and it is always shown on its own top line, never inside the Mod list. |
-| **Base** | The frame of one slot (`Ring Mail` / `Plate Vest` / `Vestment`). Decides **weight** and **which Mods are Primary or Secondary**. Decides nothing else — not the line count (drawn at drop from `stat_mod_slots`), not rolled values (that is Item level + Tier). |
+| **Frame Mod** | The first line of a dropped item — the frame's own line, rolled from the slot's Frame-Mod pool. No craft verb redraws it; only a whole-piece stone moves its value (item-base.md). |
+| **Bound Mod** | Lines 2-3 of a dropped item, fixed at drop: they keep the Mod they rolled. An identity verb (Roll new Mod, Replace) may rewrite them; no value stone, no Add and no Remove reaches them, and an Unbound line (lines 4-7) is never bound. |
+| **Gear Mod** | A piece's own inherent defence value — Armour, Evasion or Energy Shield, decided by its Base school. Raised only by a Quality stone. **Never** a Mod: Reroll, Refine, Remove and Add cannot touch it, and it is always shown on its own top line, never inside the Mod list. |
+| **Base** | The frame of one slot (`Ring Mail` / `Plate Vest` / `Vestment`). Decides **weight** and **which Mods are Primary or Secondary**. Decides nothing else — not the line count (drawn at drop from `unbound_slots`), not rolled values (that is Item level + Tier). |
 | **Level floor** | The first level of a band — which is what an away window (offline) is limited to. The window above it is the band's own ceiling. |
 | **Weight** | Carried by the item from its Base, multiplied by quality. **Not a rolled value.** |
 | **Capacity** | How much weight a build can carry, set by Str. Going over does not lock slots — it cuts Attack speed, up to a limit (`formula.md` section 11). |
@@ -135,19 +135,26 @@ Three consequences worth remembering, because most defensive confusion comes fro
 
 | Term | Meaning |
 |---|---|
-| **Reroll** | Re-rolls the value inside a Mod, staying in the same Tier. A tool for fixing a bad line, not for climbing power. |
+| **Reroll** | Re-rolls the value inside a Mod, staying in the same Tier. A tool for fixing a bad line, not for climbing power. It never moves below the floor that slot has ever held, so a Refine cannot make a Reroll cheap to undo. |
+| **Roll new Mod** | Re-rolls a line's **identity**: the Mod itself is redrawn from the piece's own Base pool, with a fresh Tier and value, and the line count stays where it was. The player names the line, never what arrives — naming what arrives is Replace or an imprint stone. |
+| **Polish** | One press, every line on the piece: each value re-rolls inside its own Tier and no Tier moves. The only stone that reaches the Frame Mod's value and the Bound pair's values. |
 | **Refine** | Raises a Mod one Tier. |
 | **Ascend** | Raises Item quality one step for the whole item. |
-| **Remove mod stone** | Deletes one random non-sub Mod. |
-| **Add mod stone** | Fills one empty slot by drawing from the item's own Base pool. Always random — the stone draws, the player does not choose. |
-| **Quality Stone** | The only source of Gear Mod points. |
-| **Tier stone** | Feeds Reroll tier and Refine. |
-| **Reroll value stone** | The cheapest stone, minted by dissolving junk. |
+| **Remove stone** | Deletes one Unbound Mod — the stone draws it, or the player names it. Never the Frame Mod, never the Bound pair. |
+| **Add stone** | Fills one empty Unbound slot from the item's own Base pool — one line a press, never a bundle: the piece takes at most `item_level.mods_added_cap` Add presses in total, and `item_level.add_stones_per_fill` charges one stone a fill, like every other press. The pool draws the Mod, or the player names it; the chosen twin charges exactly what the drawn one charges, so the choice buys the identity and never a cheaper line. The line it filled reads **`(crafted)`** after its Mod name wherever the piece is shown, and the mark stays with the slot when an identity press rewrites the Mod in it. |
+| **Replace stone** | The chosen swap: the player names the Mod that comes in from the piece's own pool, and either names the line it lands on or lets the stone pick an Unbound one. It charges one stone, like every press, and the Tier the new line lands on is still the stone's roll, so a chosen Mod still has to be climbed. What makes it the dearer buy is its supply, not its price: it is gated one step tighter than the Add stone. |
+| **Imprint stone** | Rewrites one Unbound line as the stone's own Mod, with a fresh roll from that Mod's window. One stone a use. A piece remembers the Unbound count it dropped with, so the Add cap is net: a Remove refunds room, and every press charges one stone (`engine.json loot.imprint_stone_sources` · `craft`). |
+| **Quality stone** | The only source of Gear Mod points. |
+| **Tier stone** | Buys the four tier presses: Refine a line · Roll a tier on a line · Roll a new Mod on a line · Roll a new Mod on the piece. |
+| **Value stone** | The cheapest stone, minted by dissolving junk. Buys Reroll value on a line, or on a random line. |
+| **Polish stone** | Buys Polish the piece: every value rerolled inside its own Tier in one press — the only press that touches the Frame Mod's value. |
+| **Reforge stone** | Buys Reforge the piece: the Tier redrawn across the whole piece in one press. Minted by bosses; the bench has no button for it yet. |
+| **Rebirth stone** | Buys Rebirth the Unbound lines: every line past the Bound pair — the set the piece holds, Add lines included — drawn again from the piece's own pool in one press. One stone whatever the count, because the press chooses nothing: the Frame Mod and the Bound pair keep their identity, the line count never moves, no Add charge is spent. |
 | **Corrupt stone / Repair stone** | Boss-only and elite/boss-only, one use per piece. The rarest stones in the game. |
 | **Upgrade** | Adds Gear Mod points to a piece, one step at a time, with rising failure odds. Low steps are safe; the top steps can **Break** a piece — unequippable, stats zero, kept at its level. Protection absorbs a break before it happens. Online only. |
 | **Corrupt** | One gamble per piece, in the Vaal style: a roll that can take the piece somewhere better or ruin it. A corrupted piece accepts no further stones, so it is a one-way door. |
 | **Salvage** | Bulk disposal of gear below the filter line, with a bounded milestone payout. It creates no new income type. |
-| **Bag filter** | What makes every drop a decision: **Keep** it (it beats the equipped piece in the same slot on at least one axis), **Dissolve** it for a Reroll value stone, or **Sell** it for gold. One piece pays one medium, never both. |
+| **Bag filter** | What makes every drop a decision: **Keep** it (it beats the equipped piece in the same slot on at least one axis), **Dissolve** it for a Value stone, or **Sell** it for gold. One piece pays one medium, never both. |
 | **adventure bag** | The 100-slot bag of **kept gear** carried while adventuring (1 piece per slot, weight counted). Full = pickups pause; nothing auto-converts. Deposit is town-only (`loot.md` section 4). |
 | **character bag** | The 50-slot bag of carried consumables: stones stack 999/slot and are **weightless**, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. |
 | **stash** | Town storage, organisation only, bought with gold (`towns.md`). Never grants power and never auto-converts. |
@@ -166,6 +173,10 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Block** | One hex of the world lattice. Walking is counted in blocks, and the blocks between two settlements are their hex distance. |
 | **Walk** | Crossing blocks to reach a settlement. Every block costs seconds and rolls one chance of an ambush. |
 | **Waypoint** | A settlement opened by arriving on foot: after that a warp there is free and instant. |
+| **Hunt** | Leaving safe ground to fight a zone on foot, from the map. Only a settlement already opened may be hunted in. |
+| **Dungeon run** | A **mode**, not a place: one dungeon per zone, sitting on its settlement's first wild side. A run fields `dungeon.mob_cap` normals of that zone in encounters of `dungeon.group_cap`, pays the ordinary per-kill roll into **escrow**, and cools down for `dungeon.cooldown_sec` after a clear. It never re-prices `mob_HP`, the drop line or the timeline. |
+| **Escrow** | What a dungeon run holds while it runs: the per-kill rolls banked instead of paid. It pays out on the last mob, and a **Push** forfeits it. |
+| **Wild side** | The untamed cells on a settlement's own land — the side its dungeon sits on (`map.json`). |
 | **Standing** | A per-settlement unlock counter earned from the flows that already exist. **Never spendable, never a currency, never grants a stat.** |
 | **Gold** | The quality-of-life medium, minted by **one** thing: selling a filter-rejected piece. Buys space, time, information and appearance — never power. |
 | **Collector set** | A named bundle of gear pieces a settlement wants handed in, one per Base school. The reward is a convenience — a banner, a stash tab, a title — never power, and some sets are paid for in gold. |
@@ -217,19 +228,21 @@ A **closed set**. An abbreviation is the *same term shortened*, never a second n
 | flat res | nothing — res is % only |
 | flat crit chance | nothing — crit chance is % only, has no Cap, and its excess becomes crit damage |
 | Core stat Mod | **Stat Mod** — the Mods that are neither Offensive nor Defensive. "Core stat" on its own still names the 7 attributes. |
+| Reroll value stone · Reroll tier stone · Add mod stone · Remove mod stone | **Value stone · Tier stone · Add stone · Remove stone** — a stone is named for what it is, and the press it buys is named for what it does (`engine/craft.ts` `STONE_NAME` · `PRESS_NAME`) |
+| one name covering several presses | one row per press — `on a line`, `on a random line` and `on the piece` are three different presses and never one |
 | SP / SP pool / SP regen | **mana** / Max Mana / mana regen — this game says mana, never SP |
 | the two pre-Mod names for an item stat line | **Mod** — `aliases.json` holds the deprecated spellings |
 
 # Rules That Must Not Be Broken
 
 1. **Never say Tier means Item quality** — Tier is the sub-range, quality is the large range.
-2. **Never tie a value range to the line count** — the count is drawn at drop and answers only how many Normal lines a piece has, so one level's pieces are decided by how many they drew and where those rolls landed.
+2. **Never tie a value range to the line count** — the count is drawn at drop and answers only how many Unbound lines a piece has, so one level's pieces are decided by how many they drew and where those rolls landed.
 3. **Never let Mods on one item pull from different range sets** — one item, one level, one Tier set.
 4. **Never swap the item level and the band.**
 5. **Tier is not required on every Mod** — when a window is too narrow to split readably, drop the Tier and keep the window's own range.
-6. **One source pays one medium** — a piece yields a Reroll value stone *or* gold, never both, and no gold↔stone exchange exists anywhere.
+6. **One source pays one medium** — a piece yields a Value stone *or* gold, never both, and no gold↔stone exchange exists anywhere.
 7. **Gold never buys power** — space, time, information and appearance only. Gear, Mods, potions and stones are not for sale at any NPC.
-8. **Never type a derived number into a second document** — it lives in `tools/data/`, a writer prints it, and `tools/anchors.ts` fails when a copy multiplies.
+8. **Never type a derived number into a second document** — it lives in `tools/data/`, a writer prints it, and `node tools/verify.ts` fails when a copy multiplies (the L9 gate holds the prose-number budget `engine.json doc_prose` owns, and L10 holds every doc pointer honest).
 
 # Value Reading Examples
 

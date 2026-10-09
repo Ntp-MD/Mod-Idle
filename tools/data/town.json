@@ -746,7 +746,7 @@
       "kind": "time",
       "m": 16,
       "charge_band": "high",
-      "note": "must stay above the elite time that earns 1 Reroll tier stone · re-check at F9"
+      "note": "must stay above the elite time that earns 1 Tier stone · re-check at F9"
     },
     {
       "id": "repair_ironrow",
@@ -930,16 +930,22 @@
   },
   "task_sizing": {
     "status": "provisional · owner-veto-able · ",
-    "why": "tasks.md leaves N and the reward count to the rebalance pass, but the client needs a number to run on, so the sizing lives here as data instead of being typed into code",
+    "why": "tasks.md names the keys and never the value, but the client needs a number to run on, so the sizing lives here as data instead of being typed into code",
     "elite_n": 3,
-    "elite_n_rule": "N = 2-4 per tasks.md; the middle of the published range",
+    "elite_n_rule": "the count the rebalance pass sizes; the client runs on this number and the board never types it twice",
     "reward_minutes_of_band_income": 15,
-    "reward_rule": "an Elite hunt pays Reroll tier stones sized at reward_minutes_of_band_income of that band's own stone income (engine.stonesForMinutes); a Boss hunt pays its own Remove stone, exactly as tasks.md writes it. The plain kill-count task is gone, so the board pays no Reroll value stones at all",
+    "reward_rule": "an Elite hunt pays Tier stones sized at reward_minutes_of_band_income of that band's own stone income (engine.stonesForMinutes); a Boss hunt pays its own Remove stone, exactly as tasks.md writes it. The plain kill-count task is gone, so the board pays no Value stones at all",
     "boss_reward": {
       "remove": 1,
       "reroll_tier": 4
     },
     "boss_reward_rule": "winner's choice, exactly as tasks.md writes it",
+    "boss_n": 1,
+    "boss_n_rule": "one spawn of the zone's boss, within the run it is offered in",
+    "offer_weight_elite": 0.75,
+    "offer_weight_rule": "the Elite hunt weighs this share of an offer against the Boss hunt's remainder (tasks.md). Typed in town.ts rather than in the client, because the board's roll is a read the client performs on the data",
+    "income_bound_pct": 10,
+    "income_bound_rule": "hard rule: all task rewards together stay inside this share of the day's loot flows — bonus stones inside the same funnel, never income on top (tasks.md)",
     "refill_sec": 3600,
     "slots": 3,
     "free_skip_per_day": 1
@@ -947,7 +953,7 @@
   "pending": [
     {
       "number": "Task reward sizing (tasks.md rebalance)",
-      "breaks": "skip-token gold price vs the ≤10% bound",
+      "breaks": "skip-token gold price vs task_sizing.income_bound_pct",
       "status": "open"
     },
     {

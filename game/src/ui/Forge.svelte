@@ -60,7 +60,7 @@
       </div>
     {/each}
   </div>
-  <p class="scale"><small>left is the next rung, right is the top of the ladder · % is the published chance of the step · the number under it is Quality Stones it asks for</small></p>
+  <p class="scale"><small>left is the next rung, right is the top of the ladder · % is the published chance of the step · the number under it is Quality stones it asks for</small></p>
 
   {#if item}
     <div class="press">
@@ -104,7 +104,7 @@
     {#if stones.length}
       {#each stones as [k, v]}<span>{v} × {stoneName(k)}</span>{/each}
     {:else}
-      <span class="dim">No stones in the purse — rejected drops dissolve into Reroll value stones, and Guild tasks pay the rest.</span>
+      <span class="dim">No stones in the purse — rejected drops dissolve into Value stones, and Guild tasks pay the rest.</span>
     {/if}
   </p>
 </div>

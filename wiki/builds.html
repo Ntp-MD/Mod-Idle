@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Builds, skill pieces and the finish line</title></head>
+<body><style>:root {
+  color-scheme: dark;
+  --bg: #0f1217;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #e3e9f2;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #4fc3f7;
+  --xp: #f1c40f;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
+  --rail: 4.4rem;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur */
+  --dof-rest: 9px;
+  --dof-near: 2.5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+nav a { color: var(--dim); }
+nav a.on { color: var(--gold); }
+main { flex: 1; min-width: 0; }
+h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+.lead { color: var(--dim); margin: 0 0 2rem; }
+section { margin: 0 0 2.2rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: .82rem; margin: .3rem 0 .6rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; }
+thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
+.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; }
+.twrap table { min-width: 56rem; }
+td:first-child { white-space: nowrap; }
+.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
+.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
+.rolls .rn { position: relative; flex: 1; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: .72rem; white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: .72rem; white-space: nowrap; }
+td .hy { color: var(--dim); font-size: .8rem; }
+.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: .74rem; }
+.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx li:last-child { border-bottom: 0; }
+.fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
+.fx .fk em { color: var(--text); font-style: normal; }
+.fx .fs { color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.fx .fv { font-family: var(--num); white-space: nowrap; }
+td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
+.rolls .forced .rn { color: var(--gold); }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
+.num { font-family: var(--num); }
+.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+ol { margin: .2rem 0; padding-left: 1.3rem; }
+li { margin: .15rem 0; }</style><div class="layout">
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="on" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
+<main><h1>Builds, skill pieces and the finish line</h1><p class="lead">Skills are found, not bought, and a skill you already own is climbed by finding the same piece again. What a build is measured against is published, so the target is a number you can check rather than a guide someone wrote.</p><section><h2>Finding a skill</h2><p class="note">A skill piece is its own stream, separate from gear and stones (<code>skill_drop.note</code>). The roster itself is on <a href="skills.html">Skills</a>.</p><table><thead><tr><th>From</th><th>A skill piece a kill</th><th>What it means</th></tr></thead><tbody><tr><td>A normal mob</td><td>0.1%</td><td>the slow path — a skill is a find, not a purchase</td></tr><tr><td>An Elite</td><td>8.0%</td><td>about 80× the normal rate</td></tr><tr><td>A Boss</td><td>35.0%</td><td>the only place duplicates come thick, and the only place a Boss fight is open to you</td></tr></tbody></table></section>
+<section><h2>The duplicate ladder</h2><p class="note">12 duplicates is the whole ladder. A skill’s own level climbs on kills with it in the list, up to 20, and that level is account-wide (<code>presets.skill_xp_is_account_wide</code>) — the two ramps are independent: the ladder buys cooldown, the level buys damage and effect strength.</p><table><thead><tr><th>Step</th><th>Cooldown reduction it buys</th><th>Duplicates for the step</th><th>Duplicates to reach it</th></tr></thead><tbody><tr><td><span class="num">1</span></td><td>5%</td><td><span class="num">1</span></td><td><span class="num">1</span></td></tr><tr><td><span class="num">2</span></td><td>10%</td><td><span class="num">1</span></td><td><span class="num">2</span></td></tr><tr><td><span class="num">3</span></td><td>15%</td><td><span class="num">2</span></td><td><span class="num">4</span></td></tr><tr><td><span class="num">4</span></td><td>20%</td><td><span class="num">2</span></td><td><span class="num">6</span></td></tr><tr><td><span class="num">5</span></td><td>25%</td><td><span class="num">3</span></td><td><span class="num">9</span></td></tr><tr><td><span class="num">6</span></td><td>30%</td><td><span class="num">3</span></td><td><span class="num">12</span></td></tr></tbody></table></section>
+<section><h2>What an aura holds back</h2><p class="note">Reserve tiers are <code>skills.json reserve_tiers</code>, and the total may not reach 100% — an aura’s cost is a budget you read up front, not a number you recompute mid-fight. A mana cost written as a percent is a share of your own pool (<code>manaSpec</code>), so two builds paying for one row pay very different amounts.</p><table><thead><tr><th>Aura</th><th>Reserve tier</th><th>Mana it holds open</th><th>What it writes</th></tr></thead><tbody><tr><td>Wraith of Fury</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">aspd +12%</span></td></tr><tr><td>Clarity</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">mana regen +25%</span></td></tr><tr><td>Haste</td><td>extreme</td><td><span class="num">25%</span></td><td><span class="hy">global speed ×1.15: every cooldown ticks 15% faster (a post-cap cooldown multiplier) and final attack speed ×1.15 (still clamped by the 500 Cap)</span></td></tr><tr><td>Vitality</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">hp regen +30%</span></td></tr><tr><td>Herald of Ash</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">fire damage flat +50 · Alignment +6</span></td></tr><tr><td>Herald of Frost</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">cold damage flat +50 · Alignment +6</span></td></tr><tr><td>Herald of Lightning</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">lightning damage flat +50 · Alignment +6</span></td></tr><tr><td>Ember Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to fire</span></td></tr><tr><td>Rime Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to cold</span></td></tr><tr><td>Storm Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to lightning</span></td></tr><tr><td>Cast on Crit</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">on a crit, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers</span></td></tr><tr><td>Cast on Damage Taken</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">on taking damage, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers</span></td></tr><tr><td>Rimbo Form</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">nearby mob aspd −15% (stacks with chill; total may reach −35%)</span></td></tr><tr><td>Elemental Fury</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">foe Elemental res −12%</span></td></tr><tr><td>Trinity Form</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Elemental res +15% on fire / cold / lightning</span></td></tr><tr><td>Grace</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">Evasion flat +24</span></td></tr><tr><td>Iron Guard</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Armour flat +32</span></td></tr><tr><td>Energy Guard</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Energy Shield flat +48</span></td></tr></tbody></table></section>
+<section><h2>Presets</h2><p class="note">Keys are client settings, not character state — a preset is a loadout, never a key map.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Sets you can store</td><td><span class="num">6</span></td><td><code>presets.sets</code></td></tr><tr><td>Which one is main</td><td>index 0</td><td><code>presets.main_index</code> — where a Push sends you back</td></tr><tr><td>Auto-select by zone</td><td>yes</td><td>the game switches on its own as you climb</td></tr><tr><td>Cooldowns across a Push</td><td>yes</td><td>a bar already counting keeps counting</td></tr></tbody></table></section>
+<section><h2>The two builds every published number is measured on</h2><p class="note">The shape the data writes for the physical line: <code>Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%</code>. <code>engine.REFERENCE</code> prices a full set on it at anchor level 100: 1,786 damage a second on the even split against 42,034 on a build that spends every item on one stat — a kill in 5.1 sec against 0.22 sec.</p><table><thead><tr><th></th><th>Physical</th><th>Magic</th><th>Elemental</th><th>Alignment</th></tr></thead><tbody><tr><td>glass</td><td><span class="num">2,607</span></td><td><span class="num">542</span></td><td><span class="num">434</span></td><td><span class="num">5.4</span></td></tr><tr><td>caster</td><td><span class="num">542</span></td><td><span class="num">2,607</span></td><td><span class="num">1,734</span></td><td><span class="num">5.4</span></td></tr></tbody></table></section>
+<section><h2>The finish line</h2><p class="note">There is no prestige and no reset: the level Cap is 190, Paragon points run from 101, and the tree pays 1 point a level (<code>stat.tree_points_per_level</code>). Remaining goals are counted, never timed — see <a href="crafting.html">Crafting</a> and <a href="progression.html">Progression</a>.</p><table><thead><tr><th>Level</th><th>Kills to reach it</th><th>What it is</th></tr></thead><tbody><tr><td>level 10</td><td><span class="num">242</span></td><td></td></tr><tr><td>level 30</td><td><span class="num">1,777</span></td><td></td></tr><tr><td>level 60</td><td><span class="num">9,843</span></td><td></td></tr><tr><td>level 90</td><td><span class="num">36,356</span></td><td></td></tr><tr><td>level 100</td><td><span class="num">60,031</span></td><td>Paragon starts here</td></tr><tr><td>level 120</td><td><span class="num">81,782</span></td><td></td></tr><tr><td>level 150</td><td><span class="num">108,382</span></td><td></td></tr><tr><td>level 180</td><td><span class="num">130,101</span></td><td>the mob level bound</td></tr><tr><td>level 190</td><td><span class="num">136,698</span></td><td>the level Cap</td></tr><tr><td>The win</td><td>one fight</td><td><strong>Ancient Dragon</strong> — zone 18, level 180, 386,109 health, killed inside a single spawn without being Pushed</td></tr><tr><td>Past the Cap</td><td><span class="num">23,675</span> kills</td><td>the stretch from level 90 to level 100, counted in the same currency as everything else (<code>PUSH_KILLS_91_100</code>)</td></tr></tbody></table></section>
+<section><h2>Counted, never timed</h2><p class="note">How long any of it takes is your own pace — the design gates nothing on it.</p><table><thead><tr><th>Goal</th><th>What it spends</th><th>Read from</th></tr></thead><tbody><tr><td>A full Ascend set</td><td>12 pieces, each climbed one band</td><td><code>craft.ascend_items_per_set</code></td></tr><tr><td>A full Refine pass</td><td>Tier stone at <code>refine_stones_per_use</code> a cast, on every line you choose to climb</td><td><code>craft.refine_stones_per_use</code></td></tr><tr><td>Every weapon type to Mastery 20</td><td>11 ladders, and the account-wide drop bonus is the reason to walk them</td><td><code>engine/mastery.ts</code></td></tr><tr><td>One skill to its top</td><td>12 duplicates</td><td><code>skills.json ladder</code></td></tr></tbody></table></section>
+<p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
+</main></div></body></html>

@@ -89,6 +89,38 @@ export interface StoneSource {
   boss_corrupt_chance?: number;
 }
 
+export interface ReplaceStoneSource {
+  elite_replace_chance: number;
+  boss_replace_chance: number;
+  note?: string;
+}
+
+export interface ImprintStoneSource {
+  elite_imprint_chance: number;
+  boss_imprint_stones: number;
+  note?: string;
+}
+
+export interface PolishStoneSource {
+  elite_polish_chance: number;
+  boss_polish_chance: number;
+  boss_polish_stones: number;
+  note?: string;
+}
+
+export interface ReforgeStoneSource {
+  boss_reforge_chance: number;
+  note?: string;
+}
+
+/** Bosses only, and one stone a whole-set press. */
+export interface RebirthStoneSource {
+  boss_rebirth_chance: number;
+  boss_rebirth_stones: number;
+  status?: string;
+  note?: string;
+}
+
 export interface LootCfg {
   bands: Record<string, LootBand>;
   base_drop_chance: number;
@@ -103,13 +135,20 @@ export interface LootCfg {
   quality_stone_sources: StoneSource;
   repair_stone_sources: StoneSource;
   corrupt_stone_sources: StoneSource;
+  replace_stone_sources: ReplaceStoneSource;
+  imprint_stone_sources: ImprintStoneSource;
+  polish_stone_sources: PolishStoneSource;
+  reforge_stone_sources: ReforgeStoneSource;
+  rebirth_stone_sources: RebirthStoneSource;
   /** Line 1's value scale. */
-  base_mod: BaseModCfg;
+  frame_mod: FrameModCfg;
 }
 
 export interface CraftCfg {
   reroll_value_stones_per_use: number;
   refine_stones_per_use: number;
+  /** What one roll of a line costs in Tier stones: Randomize (its Tier) and Reroll mod (its identity). */
+  roll_stones_per_use: number;
   refine_slots_per_item: number;
   refine_steps: number;
   ascend_items_per_set: number;
@@ -118,6 +157,10 @@ export interface CraftCfg {
   polish_casts_per_full_set: number;
   remove_stones_per_use: number;
   replace_stones_per_use: number;
+  imprint_stones_per_use: number;
+  polish_stones_per_use: number;
+  reforge_stones_per_use: number;
+  rebirth_stones_per_use: number;
   repair_stones: number;
   upgrade_cap: number;
   upgrade_costs: number[];
@@ -304,16 +347,16 @@ export interface ItemLevelCfg {
   crafted_max: number;
   mods_added_cap: number;
   add_stones_per_fill: number[];
-  /** The Normal lines a drop draws, both ends included. */
-  stat_mod_slots: { min: number; max: number };
-  sub_slots: number;
-  /** Line 1 — the Base Mod slot, unremovable like the Sub pair. */
-  base_mod_slots: number;
+  /** The Unbound lines a drop draws, both ends included. */
+  unbound_slots: { min: number; max: number };
+  bound_slots: number;
+  /** Line 1 — the Frame Mod slot, unremovable like the Bound pair. */
+  frame_mod_slots: number;
   note?: string;
 }
 
-/** Line 1's own rules (`engine.json` `loot.base_mod`). */
-export interface BaseModCfg {
+/** Line 1's own rules (`engine.json` `loot.frame_mod`). */
+export interface FrameModCfg {
   /** What each Mod on the line is multiplied by, keyed by how many share it (1 · 2 · 3). */
   value_scale: Record<string, number>;
   note?: string;
@@ -344,6 +387,13 @@ export interface ModWeightsCfg {
   rows: { ids: string[]; weight: number | number[] }[];
   role_weights: Record<string, number>;
   flat_group: string[];
+}
+
+export interface DungeonCfg {
+  mob_cap: number;
+  group_cap: number;
+  cooldown_sec: number;
+  note?: string;
 }
 
 export interface RoadNodeCfg {
@@ -432,6 +482,7 @@ export interface EngineData {
   global: any;
   loot: LootCfg;
   road: RoadCfg;
+  dungeon: DungeonCfg;
   inventory: InventoryCfg;
   item_level: ItemLevelCfg;
   salvage: any;
@@ -444,7 +495,6 @@ export interface EngineData {
   elements: ElementsCfg;
   opening: any;
   weapon_size_mult?: WeaponSizeMultCfg;
-  doc_prose_lines_max: number;
   doc_prose: any;
 }
 

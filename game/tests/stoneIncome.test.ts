@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E } from '../src/engine/client';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import { craft } from '../src/sim/craft';
 
 /**
@@ -27,6 +27,7 @@ const piece = (over: any = {}) => ({
  */
 function hunt(hours: number, level: number, zone: number, online: boolean, seed: number, until: (s: any) => boolean = (st) => st.counters.kills > 0) {
   const s = newGame(seed);
+  huntZone(s, s.zone);
   setLevel(s, level);
   s.zone = zone;
   // Tick until the run has killed the thing each assertion waits on, never for a fixed number of
@@ -62,7 +63,7 @@ describe('Quality, Repair and Corrupt stone are minted by hunting', () => {
     expect(s.counters.stones.repair || 0).toBeLessThan(s.counters.stones.quality);
   }, 60000);
 
-  it('the bench charges Quality Stones by the published step, and a run earns the steps', () => {
+  it('the bench charges Quality stones by the published step, and a run earns the steps', () => {
     expect(bench.costOf('upgrade', piece())).toEqual({ quality: C.upgrade_costs[0] });
     expect(bench.costOf('upgrade', piece({ upgrade_lv: 10 }))).toEqual({ quality: C.upgrade_costs[10] });
     expect(bench.costOf('repair', piece({ broken: true }))).toEqual({ repair: C.repair_stones });

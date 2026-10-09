@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { lineName } from '../sim/craft';
+  import { lineName, craftedMark } from '../sim/craft';
   import { loot } from '../engine/client';
   import { SORT_LABELS, vsWorn, type SlotEntry, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
@@ -101,7 +101,7 @@
 
   function lineSummary(entry: SlotEntry) {
     if (!entry.item) return entry.stack ? `${entry.stack.count} carried · ${Math.round(entry.stack.weight)} weight` : '';
-    return entry.item.lines.map((l) => `${lineName(l.id)} +${l.value}`).join(' · ') || 'no lines';
+    return entry.item.lines.map((l) => `${lineName(l.id)} +${l.value}${craftedMark(l)}`).join(' · ') || 'no lines';
   }
 </script>
 

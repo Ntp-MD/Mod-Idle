@@ -6,7 +6,7 @@ import { playerSwing } from '../src/sim/combat';
 import { newSkillState, castOnce, effectsActive, type CastEnv } from '../src/sim/skills';
 import { newCurses, applyCurse, modsOn, lineValue } from '../src/sim/curse';
 import { newMobStatusStore, stepMob, holdsCondition, CONDITION_OF, applyBleed } from '../src/sim/mobStatus';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
 
@@ -182,6 +182,7 @@ describe('the stack rows and the status curses reach the status store', () => {
 
   it('the sim spends a landed curse on the status store, not only on the curse store', () => {
     const s = newGame(96);
+    huntZone(s, s.zone);
     setLevel(s, 50);
     s.zone = 4;
     s.skills.owned['curse.venom_bind'] = 1;

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Items</title></head>
+<body><style>:root {
+  color-scheme: dark;
+  --bg: #0f1217;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #e3e9f2;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #4fc3f7;
+  --xp: #f1c40f;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
+  --rail: 4.4rem;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur */
+  --dof-rest: 9px;
+  --dof-near: 2.5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+nav a { color: var(--dim); }
+nav a.on { color: var(--gold); }
+main { flex: 1; min-width: 0; }
+h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+.lead { color: var(--dim); margin: 0 0 2rem; }
+section { margin: 0 0 2.2rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: .82rem; margin: .3rem 0 .6rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; }
+thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
+.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; }
+.twrap table { min-width: 56rem; }
+td:first-child { white-space: nowrap; }
+.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
+.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
+.rolls .rn { position: relative; flex: 1; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: .72rem; white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: .72rem; white-space: nowrap; }
+td .hy { color: var(--dim); font-size: .8rem; }
+.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: .74rem; }
+.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx li:last-child { border-bottom: 0; }
+.fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
+.fx .fk em { color: var(--text); font-style: normal; }
+.fx .fs { color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.fx .fv { font-family: var(--num); white-space: nowrap; }
+td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
+.rolls .forced .rn { color: var(--gold); }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
+.num { font-family: var(--num); }
+.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+ol { margin: .2rem 0; padding-left: 1.3rem; }
+li { margin: .15rem 0; }</style><div class="layout">
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="on" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
+<main><h1>Items</h1><p class="lead">A piece of gear is a <strong>frame</strong> plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth.</p><section><h2>Two halls</h2><p>Every piece lives in one of two halls — <a href="weapons.html">Weapons</a>, the eleven main-hand types and their frames, or <a href="equipment.html">Equipment</a>, every other slot frame by frame. A third hall opens here when the jewel system lands.</p></section>
+<section><h2>How a drop rolls</h2><p class="note">The window climbs with the Item level, and its floor starts from the band below, so a mid-band piece opens able to roll the low band own floor.</p><table><thead><tr><th></th><th>Number</th><th>What it means</th></tr></thead><tbody><tr><td>Lines on a drop</td><td><span class="num">5-8</span></td><td>1 Frame Mod · 2 Bound · 2-5 Unbound, drawn at drop — a slot whose pool runs out first publishes fewer</td></tr><tr><td>Lines after crafting</td><td><span class="num">10</span></td><td>the Add craft opens one more line per stone, up to 2 — the crafted ceiling</td></tr><tr><td>Item level</td><td>the drop own level</td><td>every line on the piece rolls inside the window that level publishes</td></tr><tr><td>Item quality</td><td>low · mid · high</td><td>low 1-30 · mid 31-60 · high 61-90</td></tr><tr><td>Tier</td><td>T1 · T2 · T3</td><td>which third of the window the roll landed in — T1 is the top third, and the rarest roll (17% T1 · 33% T2 · 50% T3)</td></tr></tbody></table></section>
+<section><h2>Every Mod and the window it rolls in</h2><p class="note">Each band own ladder, read straight out of the data the roll uses — a line gets stronger because the level moved, never because a second table says so.</p><table><thead><tr><th>Mod</th><th>Range</th><th>Window by Item quality: low · mid · high</th></tr></thead><tbody><tr><td>Max HP flat</td><td>40-200</td><td>40-55 → 56-72 → 73-90  ·  86-108 → 109-126 → 127-145  ·  140-163 → 164-181 → 182-200</td></tr><tr><td>Max Mana flat</td><td>20-140</td><td>20-27 → 28-36 → 37-45  ·  43-60 → 61-75 → 76-90  ·  86-105 → 106-120 → 121-140</td></tr><tr><td>Critical damage %</td><td>12-120%</td><td>12-23 → 24-35 → 36-47  ·  44-59 → 60-71 → 72-83  ·  80-96 → 97-108 → 109-120</td></tr><tr><td>Magic power flat</td><td>15-80</td><td>15-21 → 22-28 → 29-36  ·  34-43 → 44-50 → 51-58  ·  56-65 → 66-72 → 73-80</td></tr><tr><td>Physical power flat</td><td>15-80</td><td>15-21 → 22-28 → 29-36  ·  34-43 → 44-50 → 51-58  ·  56-65 → 66-72 → 73-80</td></tr><tr><td>Elemental power flat</td><td>12-64</td><td>12-17 → 18-23 → 24-29  ·  27-35 → 36-41 → 42-46  ·  44-52 → 53-58 → 59-64</td></tr><tr><td>Energy Shield flat</td><td>12-60</td><td>12-16 → 17-22 → 23-27  ·  26-33 → 34-38 → 39-44  ·  42-49 → 50-55 → 56-60</td></tr><tr><td>Block chance %</td><td>10-50%</td><td>10-16 → 17-21  ·  20-28 → 29-35  ·  34-43 → 44-50</td></tr><tr><td>Armour flat</td><td>8-40</td><td>8-11 → 12-14 → 15-18  ·  17-22 → 23-25 → 26-29  ·  28-33 → 34-36 → 37-40</td></tr><tr><td>Life Regeneration flat</td><td>2-31</td><td>2-5 → 6-9  ·  8-14 → 15-19  ·  18-25 → 26-31</td></tr><tr><td>Mana Regeneration flat</td><td>2-31</td><td>2-5 → 6-9  ·  8-14 → 15-19  ·  18-25 → 26-31</td></tr><tr><td>Evasion flat</td><td>6-30</td><td>6-8 → 9-10 → 11-13  ·  12-16 → 17-19 → 20-22  ·  21-25 → 26-27 → 28-30</td></tr><tr><td>Energy Shield Regeneration %</td><td>12-30%</td><td>12-14 → 15-17  ·  16-20 → 21-23  ·  22-26 → 27-30</td></tr><tr><td>Elemental resistance %</td><td>15-30%</td><td>15-17 → 18-19  ·  18-22 → 23-24  ·  23-27 → 28-30</td></tr><tr><td>Accuracy %</td><td>5-25%</td><td>5-8 → 9-12  ·  11-17 → 18-21  ·  20-23 → 24-25</td></tr><tr><td>Attack speed %</td><td>5-25%</td><td>5-8 → 9-12  ·  11-17 → 18-21  ·  20-23 → 24-25</td></tr><tr><td>Cooldown reduction %</td><td>5-25%</td><td>5-8 → 9-12  ·  11-17 → 18-21  ·  20-23 → 24-25</td></tr><tr><td>Mana Regeneration %</td><td>10-25%</td><td>10-11 → 12-14  ·  13-16 → 17-19  ·  18-22 → 23-25</td></tr><tr><td>Status Alignment resistance %</td><td>5-25%</td><td>5-8 → 9-11  ·  10-15 → 16-18  ·  17-22 → 23-25</td></tr><tr><td>Stat Mod flat</td><td>5-25</td><td>5-7 → 8-9 → 10-11  ·  10-14 → 15-16 → 17-18  ·  17-21 → 22-23 → 24-25</td></tr><tr><td>All Resistance %</td><td>10-20%</td><td>10-11 → 12-13  ·  12-15 → 16-17  ·  16-19 → 20-20</td></tr><tr><td>Chance to bleed %</td><td>10-20%</td><td>10-11 → 12-13  ·  12-15 → 16-17  ·  16-19 → 20-20</td></tr><tr><td>Chance to stun %</td><td>10-20%</td><td>10-11 → 12-13  ·  12-15 → 16-17  ·  16-19 → 20-20</td></tr><tr><td>Magic power %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Physical power %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Armour %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Evasion %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Max Energy Shield %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Max HP %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Max Mana %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Life Regeneration %</td><td>5-15%</td><td>5-6 → 7-8  ·  7-10 → 11-12  ·  11-14 → 15-15</td></tr><tr><td>All stats flat</td><td>8-15</td><td>8-9 → 10-10  ·  9-12 → 13-13  ·  12-14 → 15-15</td></tr><tr><td>Armour penetration %</td><td>5-15%</td><td>5-6 → 7-8  ·  7-10 → 11-12  ·  11-14 → 15-15</td></tr><tr><td>Elemental power %</td><td>3-14%</td><td>3-4 → 5-6  ·  5-8 → 9-10  ·  9-12 → 13-14</td></tr><tr><td>Critical chance %</td><td>1-8%</td><td>1-2 → 3-3  ·  2-4 → 5-5  ·  4-7 → 8-8</td></tr><tr><td>Elemental alignment %</td><td>1-5%</td><td>1-2  ·  1-4  ·  3-5</td></tr><tr><td>Perfect dodge %</td><td>1-3%</td><td>1-1  ·  0-2  ·  1-3</td></tr></tbody></table></section>
+<section><h2>God-roll seams</h2><p class="note">Max HP flat, read off the engine at each band own last level: the seams overlap, so a low-band T1 outrolls the next band own T3 — and every T1 floor still rises, so the top third always wins outright. That overlap is the god-roll window: a lucky low-zone drop stays worth wearing into the next band.</p><table><thead><tr><th>Band at its last level</th><th>T1 (top)</th><th>T3 (bottom)</th></tr></thead><tbody><tr><td>low · level 30</td><td>74–90</td><td>40–56</td></tr><tr><td>mid · level 60</td><td>126–145</td><td>86–105</td></tr><tr><td>high · level 90</td><td>180–200</td><td>140–158</td></tr></tbody></table></section>
+<p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
+</main></div></body></html>

@@ -5,7 +5,7 @@
 
 # The one rule that matters most
 
-The game and the cages must run the **same engine math**. Today the numbers live in `tools/data/*.json` and the math in `tools/lib/engine.ts`. The game imports the same JSON and calls the same functions — it never copies a formula. When a formula is needed on both sides it is extracted into one shared module that both import, so a cage and the game can never disagree. A second copy of a formula is the same defect as a second copy of a number (`AGENTS.md` section 3).
+The game and the cages must run the **same engine math**. Today the numbers live in `tools/data/*.json` and the math in `engine/`, which the cages reach through the `tools/lib/engine.ts` bridge. The game imports the same JSON and calls the same functions — it never copies a formula. When a formula is needed on both sides it is extracted into one shared module that both import, so a cage and the game can never disagree. A second copy of a formula is the same defect as a second copy of a number (`AGENTS.md` section 3).
 
 # Stack
 
@@ -37,7 +37,7 @@ game/
   tests/               Vitest: game values === cage values === the numbers the docs publish
 ```
 
-`node tools/verify.ts` (12 cages) and `cd game && npx vitest run` (265 tests) are the two green signals.
+`node tools/verify.ts` (every cage named in `tools/lib/writers.ts` `CAGES`) and `cd game && npx vitest run` (the client suite) are the two green signals; `npm run typecheck` is the third.
 
 # Shared engine home — decided at the first code commit
 

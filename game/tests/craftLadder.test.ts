@@ -26,7 +26,7 @@ describe('the +1..+15 ladder', () => {
     expect(bench.successPct(7)).toBeGreaterThan(bench.successPct(8)); // it only ever falls
   });
 
-  it('charges Quality Stones by the step, read off the published cost ladder', () => {
+  it('charges Quality stones by the step, read off the published cost ladder', () => {
     const COSTS = C.upgrade_costs as any;
     expect(bench.costOf('upgrade', piece())).toEqual({ quality: COSTS[0] });
     expect(bench.costOf('upgrade', piece({ upgrade_lv: 5 }))).toEqual({ quality: COSTS[5] });

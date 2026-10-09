@@ -2,8 +2,8 @@
  * Shared drop-roll primitives — the RNG, the line skeleton and the item-level value window
  * `tools/loot.ts` already runs, lifted out so the client rolls the same way.
  *
- * The unremovable head is fixed (line 1 the Base Mod + the Sub pair), the Normal lines are drawn from
- * the range `item_level.stat_mod_slots` publishes, and an item's level answers the other question: what
+ * The unremovable head is fixed (line 1 the Frame Mod + the Bound pair), the Unbound lines are drawn from
+ * the range `item_level.unbound_slots` publishes, and an item's level answers the other question: what
  * range its lines may roll in (item-level.md). The Bases a slot may carry live in `tools/data/bases.json`;
  * the client rolls only the Mod lines `mods.json` owns.
  */
@@ -192,7 +192,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
       if (GEAR_MOD_SLOTS.includes(slot) && frame?.school) push(frame.school, RW.gear_mod);
       // the armour slots' line-1 lines are also rollable on the other lines: the three flat defence
       // lines a frame may carry, so a frame that carries one can still find another on a later line
-      if (ARMOUR_SLOTS.includes(slot)) for (const id of (BASES?.base_mod?.defence || [])) push(id, RW.secondary);
+      if (ARMOUR_SLOTS.includes(slot)) for (const id of (BASES?.frame_mod?.defence || [])) push(id, RW.secondary);
       if (slot === 'off hand' && frame?.family) {
         for (const id of (wp['off hand']?.[frame.family] || [])) push(id, RW.secondary);
       }
@@ -224,32 +224,32 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * Line 1 — the Base Mod. An armour frame NAMES the flat defence lines it carries (one, two or all
+   * Line 1 — the Frame Mod. An armour frame NAMES the flat defence lines it carries (one, two or all
    * three of Armour flat, Evasion flat, Energy Shield flat — the seven non-empty combinations the
    * frames of a slot cover without repeating one, so the frame's own name tells the player what line 1
    * is); a weapon forces every Mod its type lists; an off-hand frame carries its family's row; belt /
-   * ring / amulet / earring draw one from the slot's pool. A multi-line Base Mod shares one budget, which
+   * ring / amulet / earring draw one from the slot's pool. A multi-line Frame Mod shares one budget, which
    * `value_scale` applies. All of it is ONE line, the first Mod in `id` and the rest in `extra`, so the
    * line skeleton's counts and the unremovable floor stay fixed. `u` is the item's one Tier draw,
-   * shared with the Random lines exactly as `tools/loot.ts` rolls them.
+   * shared with the Unbound lines exactly as `tools/loot.ts` rolls them.
    */
-  function baseModRoll(BASES: any, slot: string, frame: any, weapon: any, rng: Rng, ilvl: number, q: number, u: number): any[] {
-    const BM = E.loot.base_mod;
+  function frameModRoll(BASES: any, slot: string, frame: any, weapon: any, rng: Rng, ilvl: number, q: number, u: number): any[] {
+    const BM = E.loot.frame_mod;
     const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
     if (weapon) {
       // a weapon (main hand, or a dual-wielded off hand) forces every Mod its own type lists — and a
       // main hand carries a FRAME (A10), whose own list wins over its type's when it has one
-      for (const id of (frame?.base_mod || BASES?.base_mod?.weapons?.[weapon.name] || [])) ids.push(id);
+      for (const id of (frame?.frame_mod || BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
     } else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) {
-      // the frame names the flat defence lines its Base Mod carries (one, two or all three, the seven
+      // the frame names the flat defence lines its Frame Mod carries (one, two or all three, the seven
       // combinations the roster covers without repeating one) — never a random draw, and a multi-line
-      // Base Mod shares one budget, which `scale` applies below.
+      // Frame Mod shares one budget, which `scale` applies below.
       for (const id of frame.base_lines) ids.push(id);
     } else if (slot === 'off hand' && frame?.family) {
       // an off-hand frame carries its family's pair (a Shield the block line, a Book the magic pair)
-      for (const id of (BASES?.base_mod?.off_hand?.[frame.family] || [])) ids.push(id);
-    } else if ((BASES?.base_mod?.drawn_line1_slots || []).includes(slot)) {
+      for (const id of (BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
+    } else if ((BASES?.frame_mod?.drawn_line1_slots || []).includes(slot)) {
       const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
       if (pool.length) ids.push(weightedPick(rng, pool.map((e) => ({ id: e.id, w: e.role * weightOf(e.id, q) }))));
     }
@@ -261,7 +261,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     };
     if (!ids.length) return [];
     const first = roll(ids[0]);
-    // an Elemental line carries its Element at drop, exactly as a Random line does
+    // an Elemental line carries its Element at drop, exactly as a Unbound line does
     return [{
       id: first.id, value: first.value, slice: first.slice,
       element: first.id.startsWith('elemental_') ? pick(rng, ELEMENTS) : null,
@@ -270,13 +270,13 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * The lines a dropped piece carries: line 1 + the Sub pair + the Normal lines, whose count is drawn
-   * inside the published range at drop (`item_level.stat_mod_slots`). Both the client and `tools/loot.ts`
+   * The lines a dropped piece carries: line 1 + the Bound pair + the Unbound lines, whose count is drawn
+   * inside the published range at drop (`item_level.unbound_slots`). Both the client and `tools/loot.ts`
    * call this one function, so a piece and its simulation cannot disagree on how wide a drop is.
    */
   function linesAtDrop(rng: Rng) {
     const L = E.item_level;
-    return L.base_mod_slots + L.sub_slots + intBetween(rng, L.stat_mod_slots.min, L.stat_mod_slots.max);
+    return L.frame_mod_slots + L.bound_slots + intBetween(rng, L.unbound_slots.min, L.unbound_slots.max);
   }
 
   /**
@@ -284,14 +284,14 @@ export function createLoot(E: EngineData, MODS: ModsData) {
    * same Mods a fresh roll would force, but at the lowest value of the window with no RNG at all, so two
    * loads of one save agree to the digit. Still one line, the extra Mods in `extra`.
    */
-  function baseModAtFloor(BASES: any, slot: string, frame: any, weapon: any, ilvl: number, q: number): any[] {
-    const BM = E.loot.base_mod;
+  function frameModAtFloor(BASES: any, slot: string, frame: any, weapon: any, ilvl: number, q: number): any[] {
+    const BM = E.loot.frame_mod;
     const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
-    if (weapon) for (const id of (BASES?.base_mod?.weapons?.[weapon.name] || [])) ids.push(id);
+    if (weapon) for (const id of (BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
     else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) for (const id of frame.base_lines) ids.push(id);
-    else if (slot === 'off hand' && frame?.family) for (const id of (BASES?.base_mod?.off_hand?.[frame.family] || [])) ids.push(id);
-    else if ((BASES?.base_mod?.drawn_line1_slots || []).includes(slot)) {
+    else if (slot === 'off hand' && frame?.family) for (const id of (BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
+    else if ((BASES?.frame_mod?.drawn_line1_slots || []).includes(slot)) {
       const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
       if (pool.length) ids.push(pool[0].id);
     }
@@ -309,7 +309,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     let s = 0;
     for (const l of item.lines) {
       s += weightOf(l.id, item.q) * (l.value / MAX_OF[l.id]);
-      // a Base Mod line's extra Mods are part of the same line and count too 
+      // a Frame Mod line's extra Mods are part of the same line and count too 
       for (const x of (l.extra || [])) s += weightOf(x.id, item.q) * (x.value / MAX_OF[x.id]);
     }
     return s;
@@ -318,7 +318,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   /**
    * The bag filter: keep a drop only when it beats the piece worn in the same slot by more than
    * noise — `upgrade_margin_pct` — or when it carries an Element the player has no answer to
-   * (loot.md §4). Anything else dissolves for 1 Reroll value stone, never for gold (`economy.md`).
+   * (loot.md §4). Anything else dissolves for 1 Value stone, never for gold (`economy.md`).
    *
    * The last argument is one slot's configured thresholds (`save.md`): a raised margin and the Element
    * keep-list switch. Every value falls back to the published rule, so a caller that configures nothing
@@ -381,7 +381,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     SLOTS, GEAR_MOD_SLOTS, STAT_IDS, GEAR_MODS, STAT_ROLLS, TIER_SPLIT, TIER_NAME,
     BAND_LABEL, RW, MAX_OF, NAME_OF, BANDS_OF, WEIGHT_BY_ID, FLAT_GROUP, ELEMENTS, ARMOUR_SLOTS,
     weightOf, windowAt, spanT, rangeOf, sliceCount, tierSlice, score, keepsDrop, notYetFound, statOf, blockedBy,
-    slotUnion, poolFor, poolChances, baseModRoll, baseModAtFloor, linesAtDrop,
+    slotUnion, poolFor, poolChances, frameModRoll, frameModAtFloor, linesAtDrop,
     mulberry32, pick, intBetween, pickBand, weightedPick,
   };
 }

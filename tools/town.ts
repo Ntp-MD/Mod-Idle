@@ -25,11 +25,11 @@ const BAND_KEYS = Object.keys(E.bands);
 
 // ---------------------------------------------------------------- helpers
 
-const pow10 = Math.pow(10, E.round_rate_to_decimals);
-
 const junk = (b: any) => E.bands[b].drops_per_hr - E.bands[b].upgrades_per_hr;
-const rate = (b: any) => Math.round((junk(b) / 60) * pow10) / pow10;
-const gold = (m: any, b: any) => Math.round(m * rate(b) + 1e-9);
+// The band's gold rate and the price it turns an `m` into are the engine's own — the cage reads the
+// same two calls the wiki and the client call, so a town price has exactly one home (AGENTS.md §3).
+const rate = (b: any) => eng.goldPerMinute(b);
+const gold = (m: any, b: any) => eng.goldPrice(m, b);
 const fmt = (n: any) => Math.round(n).toLocaleString('en-US');
 const hr = (n: any, d = 2) => Number(n).toFixed(d);
 const pct = (x: any, d = 1) => (x * 100).toFixed(d) + '%';
@@ -98,7 +98,7 @@ const NO_LCK_HIGH_BAND = Math.round(HIGH_BAND_KILLS * junkKill('high'));
 const CASTS_FORGONE = Math.round(SUPPLY / E.reroll_stones_per_cast);
 const POLISHES_FORGONE = SUPPLY / E.reroll_stones_per_cast / E.reroll_casts_per_full_set_polish;
 const MIN_PER_TIER_STONE = 60 / E.elite_reroll_tier_stones_per_hr;
-// T10b: with F9 landed, the Armourer floor is re-checked against the Add mod stone, which is the
+// T10b: with F9 landed, the Armourer floor is re-checked against the Add stone, which is the
 // stone Ascend actually needs and the one the Armourer competes with for the same boss kills.
 const MIN_PER_ADD_STONE = 60 / E.add_mod_stones_per_hr;
 // The skip-token day ceiling, in the gold the high band pays it (D12: prices quote gold, never minutes).
@@ -179,15 +179,15 @@ function runChecks() {
     && stocked.length === 0 && E.road.block_sec >= 1 && E.road.encounter_chance_pct > 0,
     travelLines.length ? `a travel line survives the walk: ${travelLines.map((l) => l.id).join(', ')}`
       : !warp ? 'no waypoint_warp line prices the Waypoint'
-        : stocked.length ? `a settlement stocks the Waypoint (${stocked.map((s) => s.id).join(', ')}) — a warp is not a stall line`
+        : stocked.length ? `a settlement stocks the Waypoint (${stocked.map((s: any) => s.id).join(', ')}) — a warp is not a stall line`
           : `no route is sold: the Waypoint is the only travel line, ${warp.m_per_block} minutes a block at its own band and stocked nowhere · ${E.road.block_sec}s a block · ${E.road.encounter_chance_pct}% an encounter per block`);
 
   // T10 — Armourer floor
   const repairLines = [...DATA.one_time, ...DATA.repeatable].filter((l) => /repair/.test(l.id));
   add('T10', repairLines.every((l) => gold(l.m, 'high') > MIN_PER_TIER_STONE * rate('high')),
-    `repair ${repairLines.map((l) => fmt(gold(l.m, 'high')) + ' gold').join(' / ')} > ${(MIN_PER_TIER_STONE * rate('high')).toFixed(2)} gold per Reroll tier stone (F7 · the elite stone line)`);
+    `repair ${repairLines.map((l) => fmt(gold(l.m, 'high')) + ' gold').join(' / ')} > ${(MIN_PER_TIER_STONE * rate('high')).toFixed(2)} gold per Tier stone (F7 · the elite stone line)`);
   add('T10b', repairLines.every((l) => gold(l.m, 'high') > MIN_PER_ADD_STONE * rate('high')),
-    `with F9 landed, repair ${repairLines.map((l) => fmt(gold(l.m, 'high')) + ' gold').join(' / ')} > ${(MIN_PER_ADD_STONE * rate('high')).toFixed(2)} gold per Add mod stone (F9 · the boss+elite Add line) — the same floor still holds against the stone Ascend needs, so the Add line never makes repair a bad deal`);
+    `with F9 landed, repair ${repairLines.map((l) => fmt(gold(l.m, 'high')) + ' gold').join(' / ')} > ${(MIN_PER_ADD_STONE * rate('high')).toFixed(2)} gold per Add stone (F9 · the boss+elite Add line) — the same floor still holds against the stone Ascend needs, so the Add line never makes repair a bad deal`);
 
   // T11 — skip tokens
   add('T11', LINE.skip_token.per_day_cap <= INV.skip_token_max_per_day

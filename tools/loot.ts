@@ -137,11 +137,11 @@ function rollItem(rng: any, band: any, bias: any) {
   // draws uniformly across it — the same spread of items a real run sees (`item_level.spans`)
   const [from, to] = SPAN[b];
   const ilvl = from + Math.floor(rng() * (to - from + 1));
-  const u = rng(); // one Tier draw per item, shared by line 1 and every Random line
+  const u = rng(); // one Tier draw per item, shared by line 1 and every Unbound line
 
-  // line 1 is the Base Mod: it is rolled first, off the frame, before any Random line
-  const lines: any[] = LOOT.baseModRoll(BASES_JSON, slot, frame, weapon, rng, ilvl, q, u);
-  // every id the piece already holds — a Base Mod line's `extra` Mods included, exactly as the client
+  // line 1 is the Frame Mod: it is rolled first, off the frame, before any Unbound line
+  const lines: any[] = LOOT.frameModRoll(BASES_JSON, slot, frame, weapon, rng, ilvl, q, u);
+  // every id the piece already holds — a Frame Mod line's `extra` Mods included, exactly as the client
   // does (`game/src/sim/drop.ts`), so a line never appears twice on one piece in either roll
   const taken = new Set<string>(lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
   const pool = LOOT.poolFor(BASES_JSON, slot, frame, weapon).filter((e: any) => !taken.has(e.id));

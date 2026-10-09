@@ -8,6 +8,7 @@ import townJson from '../../../tools/data/town.json' with { type: 'json' };
 import basesJson from '../../../tools/data/bases.json' with { type: 'json' };
 import treeJson from '../../../tools/data/tree.json' with { type: 'json' };
 import { createEngine } from '../../../engine/index.ts';
+import { createDungeon } from '../../../engine/dungeon.ts';
 import { createLoot } from '../../../engine/loot.ts';
 import { createSkillModel } from '../../../engine/skills.ts';
 import { createTree } from '../../../engine/tree.ts';
@@ -21,6 +22,7 @@ export const TREE_SPEC = treeJson as any;
 
 /** The shared math, instantiated once. Every formula in the game comes out of this object. */
 export const eng: any = createEngine(E);
+export const dungeon: any = createDungeon(E);
 export const loot: any = createLoot(E, MODS);
 export const sm: any = createSkillModel(SKILLS, E);
 /** The passive tree, derived once from its spec — the same object the tree cage gates. */

@@ -192,7 +192,7 @@
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
-      "note": "The passive tree exists (tools/data/tree.json: three branches, 63 nodes) and has no effect on this line (owner ruling): it is deliberately not folded in, and the published rates are the empty-tree baseline. So mob_HP(L) = stat_c(L) x (1 + skill_per_level x L) x g(L) and mob_PS(L) = mob_HP(L) / mob_damage_divisor. g(L) is the gear-progression factor; above the level-90 edge it is held flat (curve.extend). typical_gear_DPS(L) is derived from that curve, never typed beside it (tools/lib/engine.ts mobHpAt - checks.md X37).",
+      "note": "The passive tree exists (tools/data/tree.json: three branches, 63 nodes) and has no effect on this line (owner ruling): it is deliberately not folded in, and the published rates are the empty-tree baseline. mob_HP(L) is a static published table, never priced from player DPS: every zone edge carries its own HP (mob.zones[].hp) plus one cap anchor at the level cap, and every level between is linearly interpolated. typical_gear_DPS(L) is read back out of that table, never priced into it, and mob_PS(L) = typical_gear_DPS(L) / mob_damage_divisor. Above the level-90 edge the read-back line runs to the cap anchor (tools/lib/engine.ts mobHpAt - X37).",
       "extend": {
         "from_level": 90,
         "gear_factor": 43.15708874022729,
@@ -1723,7 +1723,7 @@
       "ps": 4,
       "evasion": 0.9,
       "group": "alone",
-      "note": "Elite is a rarity flag, not a fifth size: an Elite is always forced to the Large body and carries its own numbers, so no two multipliers ever stack. What an Elite pays in Reroll tier stones is the key `loot.elite_tier_stones` — an expected count per kill, folded into `tierStonesPerHr` — named here rather than retyped."
+      "note": "Elite is a rarity flag, not a fifth size: an Elite is always forced to the Large body and carries its own numbers, so no two multipliers ever stack. What an Elite pays in Tier stones is the key `loot.elite_tier_stones` — an expected count per kill, folded into `tierStonesPerHr` — named here rather than retyped."
     },
     "size_rules": [
       "Four card sizes, copied from Ragnarok: Small \u00b7 Medium \u00b7 Large \u00b7 Boss. A size REPLACES the base numbers, it never multiplies with Elite or with another size.",
@@ -2724,7 +2724,7 @@
       }
     ],
     "species_rules": [
-      "A species is a MULTIPLY vector on the same stat block a player has, so total mob power stays put and mob_HP keeps deriving from player DPS. Check X19 fails any species whose multipliers do not average 1.00.",
+      "A species is a MULTIPLY vector on the same stat block a player has, so the zone's average mob stays on the published HP anchor. Check X19 fails any species whose multipliers do not average 1.00.",
       "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the Evasion Cap 80 question answerable: Cap 80 is reachable against the x0.05 species (Slime) and close to worthless against the x1.00 ones (Wolf \u00b7 Elf \u00b7 Dragon), so no single mob accuracy number can close C1 - the species mix does.",
       "innate Element is rolled on spawn and is NOT part of the species. element_bias only tilts the roll inside the zone's own 1-2 Elements, so players still have to prepare res in advance (world.md).",
       "A species that carries a weapon is the only kind a weapon-slot piece can come from; every species still drops from the non-weapon slots, so the 8% base drop rate and the loot.md funnel are untouched by this flag. Slime \u00b7 Spider \u00b7 Dryad are the weaponless lineages, which is why goblin (zone 1) is where the weapon part of the drop table starts.",
@@ -4169,11 +4169,11 @@
       "rules": {
         "default_enabled": false,
         "default_keep_missing_element": true,
-        "note": "loot.md section 4 names the configurable conditions: the upgrade margin and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default: a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Reroll value stone, and stones are always kept. The old keep-only-Rare condition died with Rarity: an item's level is a continuous number now, so 'better than what I wear' is the whole question."
+        "note": "loot.md section 4 names the configurable conditions: the upgrade margin and keep Elemental res of an Element the player lacks. They are stored per slot (save.md) and start equal for every slot. The filter is OFF by default: a fresh character keeps every gear drop and dissolves nothing, so the player turns the filter on per slot and sets the thresholds; only then does a piece that fails its slot rule dissolve for 1 Value stone, and stones are always kept. The old keep-only-Rare condition died with Rarity: an item's level is a continuous number now, so 'better than what I wear' is the whole question."
       }
     },
-    "base_mod": {
-      "note": "Line 1 of every item (the Base Mod). An armour frame names the FLAT defence lines it carries - one, two or all three of Armour flat, Evasion flat and Energy Shield flat, the seven non-empty combinations whose complete set each armour slot's frames carry without repeating one (owner ruling: the frame name says which, and the Base Mod is flat only). A multi-line Base Mod shares one budget, so `value_scale` is what each Mod on the line is multiplied by once the count is known: 100% alone, 70% with a partner, 55% with two, so a wider line is worth having but never free. Weapons force every Mod their parenthesised list names; an off-hand frame carries its family's row; belt / ring / amulet / earring roll line 1 from the slot's own pool. `bases.json` owns the frame lists; this block owns only the scale.",
+    "frame_mod": {
+      "note": "Line 1 of every item (the Frame Mod). An armour frame names the FLAT defence lines it carries - one, two or all three of Armour flat, Evasion flat and Energy Shield flat, the seven non-empty combinations whose complete set each armour slot's frames carry without repeating one (owner ruling: the frame name says which, and the Frame Mod is flat only). A multi-line Frame Mod shares one budget, so `value_scale` is what each Mod on the line is multiplied by once the count is known: 100% alone, 70% with a partner, 55% with two, so a wider line is worth having but never free. Weapons force every Mod their parenthesised list names; an off-hand frame carries its family's row; belt / ring / amulet / earring roll line 1 from the slot's own pool. `bases.json` owns the frame lists; this block owns only the scale.",
       "value_scale": {
         "1": 1,
         "2": 0.7,
@@ -4211,7 +4211,7 @@
     "boss_tier_stones": 3,
     "boss_add_stones": 1,
     "quality_stone_sources": {
-      "note": "crafting.md prices the +1..+15 ladder as 1/2/3/4/5 \u00b7 7/9/11/13/15 \u00b7 18/21/24/27/30 Quality Stones and says the source shifts monsters \u2192 elites \u2192 bosses by step (steps 1-5 \u00b7 6-10 \u00b7 11-15). These are the income side of that same split: the per-kill figures and the kills a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.",
+      "note": "crafting.md prices the +1..+15 ladder as 1/2/3/4/5 \u00b7 7/9/11/13/15 \u00b7 18/21/24/27/30 Quality stones and says the source shifts monsters \u2192 elites \u2192 bosses by step (steps 1-5 \u00b7 6-10 \u00b7 11-15). These are the income side of that same split: the per-kill figures and the kills a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.",
       "monster_quality_chance": 0.01,
       "elite_quality_chance": 0.25,
       "boss_quality_stones": 24
@@ -4226,9 +4226,30 @@
       "boss_corrupt_chance": 0.25
     },
     "replace_stone_sources": {
-      "note": "The Replace stone trades the Add stone's identity roll for the player's own choice, so it is priced as the pair it replaces (Remove + Add = 2 stones) and gated one step tighter than Add on the same Elite/Boss split: half the Add stone's Elite chance, and a Boss pays one on half its chance so a Boss is still not a guaranteed replacement.",
+      "note": "The Replace stone trades the Add stone’s identity roll for the player’s own choice. It charges one stone like every press — what makes it the dearer purchase is where it comes from, not how many stones one press eats: it is gated one step tighter than Add on the same Elite/Boss split, half the Add stone’s Elite chance, and a Boss pays one on half its chance so a Boss is still not a guaranteed replacement.",
       "elite_replace_chance": 0.003125,
       "boss_replace_chance": 0.5
+    },
+    "imprint_stone_sources": {
+      "note": "One stone per Mod line in the game (imprint_<id>): it names one Unbound line and rewrites it as its own Mod, rolling Tier and value fresh. Elites pay one random imprint stone on their own chance; a Boss pays two. The Mod is uniform over the Mod roster, so a chase line is a hunt, not a purchase.",
+      "elite_imprint_chance": 0.01,
+      "boss_imprint_stones": 2
+    },
+    "polish_stone_sources": {
+      "note": "The Polish stone edits every line where a Replace stone edits one, and the Frame Mod and Bound pair it reaches are lines no other stone can edit at any price, so it is gated one step tighter than Replace on the Elite half and keeps Replace's Boss half: half the Replace stone's Elite chance, and a Boss pays one on half its chance. The per-line Reroll stays the cheap path for the Unbound lines — this stone buys the three lines that are part of the piece, in one press.",
+      "elite_polish_chance": 0.0015625,
+      "boss_polish_chance": 0.5,
+      "boss_polish_stones": 1
+    },
+    "reforge_stone_sources": {
+      "note": "The Reforge stone is the Corrupt stone's safer cousin — it redraws the piece's Tier instead of rolling a one-way table — but unlike Corrupt it leaves the piece open to every other stone, so a press is repeatable and it pays half the Corrupt stone's Boss chance. Bosses only: the gamble is on the whole piece, and an Elite should not hand one out.",
+      "boss_reforge_chance": 0.125
+    },
+    "rebirth_stone_sources": {
+      "status": "provisional · owner-veto-able · the chance is the boss-half ladder read one step further (Corrupt 0.25 · Reforge half = 0.125 · Rebirth half again = 0.0625), not a figure the sim has had to earn yet",
+      "note": "The Rebirth stone redraws the identity of every Unbound line the piece holds — the set the player was dealt, plus any line an Add stone filled — in one press. Frame Mod and Bound pair are untouched, the line count never moves, no Add charge is spent, and each redrawn Mod is the piece's own pool draw. Bosses only: a press re-opens a whole piece, and an Elite should not hand that out.",
+      "boss_rebirth_chance": 0.0625,
+      "boss_rebirth_stones": 1
     },
     "kill_rate_tolerance": 0.01
   },
@@ -4332,6 +4353,12 @@
       }
     ]
   },
+  "dungeon": {
+    "note": "One dungeon per zone, on the first wild side of its settlement (map.json). A run is a mode, not a place: the sim never reads a coordinate (M7), it only knows whether a run is open. A run fields mob_cap normal mobs of the zone it was entered in at that zone's own group sizes clamped to group_cap, and it pays the ordinary per-kill roll — the escrow only delays it, so mob_HP, the drop line and the timeline never move (D1). Loot waits in escrow until the last mob falls; a Push ends the run at once and the escrow is forfeited, never paid. A cleared run cools down for cooldown_sec before the next entry. Owner override: the timer and the forfeit are the veto-able exception to the clock rule.",
+    "mob_cap": 50,
+    "group_cap": 5,
+    "cooldown_sec": 3600
+  },
   "inventory": {
     "adventure_slots": 100,
     "character_slots": 50,
@@ -4351,7 +4378,7 @@
     "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). The Stash is one warehouse on the character and every settlement's counter opens the same one, so standing in a town the bag panel is the Stash by default and the Adventure pile sits one click behind it - the temporary bag is the travelling face of the linked warehouse, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
   },
   "item_level": {
-    "note": "The one axis an item's strength rides (item-level.md). The value a Mod line rolls is a window that climbs with the item's level: the window's floor climbs from the band below (so a mid-band piece starts able to roll the low band's floor and ends above it), the ceiling is the band's own top, and the roll lands in one of the window's thirds - the top third is the rarest, so a high-level drop is a chance and not a formality. The Normal line count is not on that ladder: it is drawn inside `stat_mod_slots` at drop, so two pieces of one level and one band can still differ in width.",
+    "note": "The one axis an item's strength rides (item-level.md). The value a Mod line rolls is a window that climbs with the item's level: the window's floor climbs from the band below (so a mid-band piece starts able to roll the low band's floor and ends above it), the ceiling is the band's own top, and the roll lands in one of the window's thirds - the top third is the rarest, so a high-level drop is a chance and not a formality. The Unbound line count is not on that ladder: it is drawn inside `unbound_slots` at drop, so two pieces of one level and one band can still differ in width.",
     "spans": [
       {
         "band": "low",
@@ -4374,20 +4401,20 @@
     "mods_added_cap": 2,
     "add_stones_per_fill": [
       1,
-      2
+      1
     ],
-    "stat_mod_slots": {
+    "unbound_slots": {
       "min": 2,
       "max": 5
     },
-    "sub_slots": 2,
-    "base_mod_slots": 1,
+    "bound_slots": 2,
+    "frame_mod_slots": 1,
     "span_note": "The spans are the first loop's own level ranges - what the zone labels already say (low zones read 1-30, mid 31-60, high 61-90). A level past its band's span clamps to the band's own range, which is what keeps the later loops honest: a low-band zone at level 91 drops a low-band piece at the top of the low window, exactly as the zone label intends.",
     "ascend_note": "Ascend raises the piece one band and shifts its level by one span, so the window moves up a band without re-rolling the line - the same move the old quality step made, now expressed on the level. The value equals a span's length and is gated against it.",
-    "skeleton_note": "Every item is line 1 the Base Mod (unremovable, part of the frame) + 2 Sub lines (unremovable) + the Normal lines it drew at drop (`stat_mod_slots`, 2 to 5), so a fresh drop carries 5-8 lines and the unremovable head is 3 of them. Each of the `mods_added_cap` Add stones fills one more Normal line, which is what sets `crafted_max` = base_mod_slots + sub_slots + stat_mod_slots.max + mods_added_cap, and a Normal line never appears twice on one piece. `base_mod_slots` is the unremovable floor's other half - the craft verbs refuse index < base_mod_slots + sub_slots."
+    "skeleton_note": "Every item is line 1 the Frame Mod (unremovable, part of the frame) + 2 Bound lines (unremovable) + the Unbound lines it drew at drop (`unbound_slots`, 2 to 5), so a fresh drop carries 5-8 lines and the unremovable head is 3 of them. Each of the `mods_added_cap` Add stones fills one more Unbound line, which is what sets `crafted_max` = frame_mod_slots + bound_slots + unbound_slots.max + mods_added_cap, and a Unbound line never appears twice on one piece. `frame_mod_slots` is the unremovable floor's other half - the craft verbs refuse index < frame_mod_slots + bound_slots."
   },
   "salvage": {
-    "note": "loot.md section 5 \u00b7 checks.md F15: a luck-protection milestone, one Reroll tier stone per 500 gear pieces salvaged (dissolved by the bag filter). The client counts the pieces so the milestone is real rather than implied.",
+    "note": "loot.md section 5 \u00b7 checks.md F15: a luck-protection milestone, one Tier stone per 500 gear pieces salvaged (dissolved by the bag filter). The client counts the pieces so the milestone is real rather than implied.",
     "pieces_per_tier_stone": 500
   },
   "save": {
@@ -4428,9 +4455,19 @@
   "craft": {
     "reroll_value_stones_per_use": 1,
     "refine_stones_per_use": 1,
+    "roll_stones_per_use": 1,
+    "roll_note": "What one roll costs in Tier stones. Randomize redraws the Tier of the Mod a line holds; Reroll mod redraws the Mod itself and lands wherever the piece's own pool and weights put it. A bulk press pays this same figure times the lines it edits, so no number is typed beside it. The chosen swap above is dearer on purpose: the roll gambles, the swap does not.",
     "remove_stones_per_use": 1,
-    "replace_stones_per_use": 2,
-    "replace_note": "The Replace stone spends what Remove + Add spend (1 + 1): it names the line that leaves and the line that comes in from the piece's own pool, and it rolls the incoming line's Tier fresh - the Mod's identity stops being a gamble, the Tier stays one, so a chosen line still has to be climbed with Reroll tier. It never touches the Base Mod or the Sub pair, spends no Add charge and changes no line count.",
+    "replace_stones_per_use": 1,
+    "imprint_stones_per_use": 1,
+    "polish_stones_per_use": 1,
+    "reforge_stones_per_use": 1,
+    "rebirth_stones_per_use": 1,
+    "rebirth_note": "One Rebirth stone buys one press, and the press is the whole Unbound set: every line the piece holds past the Bound pair — including any line an Add stone filled — leaves and a fresh Mod is drawn in its place from the piece's own pool. It is priced as one press rather than one stone a line because the reach is the product: the player is not choosing any of the five lines, only taking the set again. The Frame Mod and the Bound pair are untouched, the line count never moves, no Add charge is spent, and each slot's Reroll floor leaves with the identity it held.",
+    "polish_note": "The Polish stone spends the Reroll rule across the whole piece in one press: every line's value re-rolls inside its own Tier, never below the floor that slot has ever held, and no Tier moves. It is the one stone the owner opened onto the unremovable head — the Frame Mod (line 1, on its shared `frame_mod.value_scale` budget) and the Bound pair are re-rolled with the Unbound lines — and it removes no line, spends no Add charge, moves no identity and no Element. A stone that buys reach, not a cheaper climb: the per-line Reroll is still the cheap path for the Unbound lines, and only this one reaches the three lines that are part of the piece.",
+    "reforge_note": "The Reforge stone redraws the piece's Tier the way a drop does — one draw on the published weights, spent on the whole piece at once — then rolls every line's value inside the Tier it landed on, the Frame Mod on its shared budget. So it can climb every line together or drag them down: the Tier is the gamble and the values follow it. Identity, Element, line count and the Add charge are untouched. A slot whose Tier moved loses its Reroll floor, because a floor is the highest value that line held at that Tier; a slot the draw left where it was keeps its floor.",
+    "imprint_note": "The Imprint stone carries one Mod line's own identity (imprint_<id>, one stone per Mod in the game): it names one Unbound line and rewrites it as that Mod, rolling Tier and value fresh the way a drop does. One stone a use. It never touches the Frame Mod or the Bound pair, spends no Add charge and changes no line count.",
+    "replace_note": "The Replace stone spends what Remove + Add spend (1 + 1): it names the line that leaves and the line that comes in from the piece's own pool, and it rolls the incoming line's Tier fresh - the Mod's identity stops being a gamble, the Tier stays one, so a chosen line still has to be climbed with Reroll tier. It never touches the Frame Mod or the Bound pair, spends no Add charge and changes no line count.",
     "ascend_add_stones": 1,
     "ascend_tier_stones": 1,
     "refine_slots_per_item": 1,
@@ -4442,11 +4479,11 @@
       "safe_to": 4,
       "mid": [
         90,
-        60
+        45
       ],
       "high": [
-        50,
-        20
+        40,
+        10
       ]
     },
     "upgrade_costs": [
@@ -4502,8 +4539,8 @@
     ],
     "gear_mod_per_level": 2,
     "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings \u2014 `evasion_flat_t1` 30 \u00f7 `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.ts --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.ts` holds the G5 boss gate against a fully upgraded set \u2014 which is how checks.md H1 pays for the uplift now that measured `mob_HP` as already inside the pacing (it moves nothing there).",
-    "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing \u00b7 20% reroll values inside the current Tiers \u00b7 15% +1 Mod (crafted max and Core slot cap respected) \u00b7 15% remove one non-sub Mod \u00b7 10% reroll Element (the only Element change in the game) \u00b7 10% Gear Mod +2 \u00b7 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
-    "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe \u00b7 +5 to +10 90% down to 60% and a fail drops one level \u00b7 +11 to +15 50% down to 20% and a fail breaks the piece \u00b7 protection 5 per piece from birth, each would-be break spends one and drops a level \u00b7 Repair stone revives at the pre-break level and refills protection \u00b7 costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality Stones \u00b7 online only"
+    "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing \u00b7 20% reroll values inside the current Tiers \u00b7 15% +1 Mod (crafted max and Core slot cap respected) \u00b7 15% remove one non-bound Mod \u00b7 10% reroll Element (the only Element change in the game) \u00b7 10% Gear Mod +2 \u00b7 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
+    "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe \u00b7 +5 to +10 90% down to 45% and a fail drops one level \u00b7 +11 to +15 40% down to 10% and a fail breaks the piece \u00b7 protection 5 per piece from birth, each would-be break spends one and drops a level \u00b7 Repair stone revives at the pre-break level and refills protection \u00b7 costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality stones \u00b7 online only"
   },
   "town_shared": {
     "gold_per_junk_piece": 1,
@@ -4514,7 +4551,7 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "first 1/14 of drops 21.9 → 2/14-4/14 9.0 → after that 5.8 (low band) · keep-rate 5.36% low · 4.17% mid · 3.26% high · 1.11% high + full_lck",
+      "value": "first 1/14 of drops 21.9 → 2/14-4/14 9.0 → after that 5.8 (low band) · keep-rate 5.36% low · 4.33% mid · 3.43% high · 1.17% high + full_lck",
       "expression": "measured \u2014 tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
@@ -4538,7 +4575,7 @@
     },
     {
       "id": "F15",
-      "value": "1 Reroll tier stone per 500 salvages (~+2.7% of F7)",
+      "value": "1 Tier stone per 500 salvages (~+2.7% of F7)",
       "expression": "salvage milestone bound",
       "status": "rule"
     }
@@ -4617,7 +4654,7 @@
     "crit_colour": "#e8c169"
   },
   "opening": {
-    "note": "Minute one. Everything the game hands the player before they touch anything, so a client can create a playable character from one read. The set is hand-authored junk, not a drop: one line per slot, so no Sub pair and no craftable Mod is involved, and the loot roll can never produce it. Every line is derived by the client, never typed here - `openingGear()` calls the same `loot.baseModAtFloor` a pre-skeleton save restore uses - so the frame per slot is the data's whole job and no number can drift. The main hand is the worst roll in the table the mob-health curve already assumes at level 1; a free top-tier weapon would pay more damage than the curve allows.",
+    "note": "Minute one. Everything the game hands the player before they touch anything, so a client can create a playable character from one read. The set is hand-authored junk, not a drop: one line per slot, so no Bound pair and no craftable Mod is involved, and the loot roll can never produce it. Every line is derived by the client, never typed here - `openingGear()` calls the same `loot.frameModAtFloor` a pre-skeleton save restore uses - so the frame per slot is the data's whole job and no number can drift. The main hand is the worst roll in the table the mob-health curve already assumes at level 1; a free top-tier weapon would pay more damage than the curve allows.",
     "settlement": "Eastgate",
     "settlement_zone": 1,
     "level": 1,
@@ -4703,7 +4740,7 @@
         "tier": 3
       }
     ],
-    "gear_note": "The whole set, one piece per slot, and the lightest frame of every slot: it dresses the character at minute one without handing over a point of attack power. The frames' Base Mods are defence and utility only (Energy Shield %, Max HP flat, Evasion %, Elemental alignment %, Block %) and the one weapon pair is the sword's own floor line, so the priced clock - mob_HP, the drop line, the timeline, the XP ladder - cannot move. The off hand is a Buckler on purpose: a Grimoire's Base Mod is Magic power flat, which is attack power the curve does not pay for.",
+    "gear_note": "The whole set, one piece per slot, and the lightest frame of every slot: it dresses the character at minute one without handing over a point of attack power. The frames' Frame Mods are defence and utility only (Energy Shield %, Max HP flat, Evasion %, Elemental alignment %, Block %) and the one weapon pair is the sword's own floor line, so the priced clock - mob_HP, the drop line, the timeline, the XP ladder - cannot move. The off hand is a Buckler on purpose: a Grimoire's Frame Mod is Magic power flat, which is attack power the curve does not pay for.",
     "gear_rule": "main hand names a weapon TYPE (what a drop records as its base); every other slot names a Base frame from bases.json. The order here is the hand's own listing, not the SLOTS order - a client places each piece at its own slot, and the two ring entries take the two ring slots.",
     "skills": [],
     "skills_note": "No starting skill on purpose. The mob-health curve gives a level-1 character 0.3% skill power, so a free attack skill would hand out several times what the mobs are priced against. The first skill is the first boss drop, which is also the first time the skill axis becomes visible.",
@@ -4713,19 +4750,19 @@
       "objective": "the Guild's first Elite task, in the opening zone",
       "why": "the task board already exists and pays stones only, so the first instruction costs no new system and no power outside the loot funnel - its reward sits inside the task income bound tasks.md already sets. It is an Elite hunt because the board's plain kill-count task is gone; the count and the payout are the board's own elite sizing, so nothing is typed twice",
       "completes_on": "the first Elite task of the opening zone (the board's own elite sizing)",
-      "reward": "the standard elite payout (Reroll tier stones), unmodified",
+      "reward": "the standard elite payout (Tier stones), unmodified",
       "exit": "once the first gear drop lands the task board stops being the tutorial and the player moves to the zone loop"
     },
     "no_death": "the player cannot be killed by the opening: zone-1 mobs take minutes to kill a level-1 character, and Push returns them to camp at full HP"
   },
-  "doc_prose_lines_max": 1243,
   "doc_prose": {
     "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
     "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",
-    "lines_max": 1298,
-    "lines_now": 1269,
-    "gate": "L9 fails when the count rises above lines_max. Lower the cap as lines are fixed.",
+    "lines_max": 85,
+    "lines_now": 85,
+    "gate": "L9 (tools/check.ts) fails when the count rises above lines_max. Lower the cap as lines are fixed.",
     "exempt": "todo.md, and any line marked lint:allow",
-    "baseline_note": "Baseline measured on 2026-10-04 with every doc present. skill-pool.md was restored from git mid-pass and its prose legitimately raised the count from 1370 to 1390, which is the gate working: the cap may only fall, and every fix must lower it here."
+    "counted": "one line per hand-typed figure; a fenced code block, a section heading, a list ordinal, a table's row index and a lint:allow line are not values",
+    "baseline_note": "Re-measured 2026-10-09 on the shelf that survives (doc/start plus the root rules) by the L9 gate itself. The old baseline counted a doc shelf that has since collapsed, and the linter that measured it is folded into the engine cage — so the cap falls in one step here and may only fall from now on."
   }
 }

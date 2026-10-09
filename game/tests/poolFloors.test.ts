@@ -3,7 +3,7 @@ import { buildCharacter, emptyGear, type Character } from '../src/sim/player';
 import { poolGear } from './sheetFixture';
 import { mobSwing } from '../src/sim/combat';
 import { NO_CURSE } from '../src/sim/curse';
-import { newGame, tick, carried, heldWeaponName } from '../src/sim/game';
+import { newGame, tick, carried, heldWeaponName, huntZone } from '../src/sim/game';
 import { masteryLevel } from '../src/sim/mastery';
 import { effectsActive } from '../src/sim/skills';
 import { mulberry32 } from '../src/engine/client-helpers';
@@ -48,6 +48,7 @@ describe('a pool spends only what stands in it', () => {
 
   it('a long hunt never leaves a negative or over-full pool', () => {
     const s = newGame(4242);
+    huntZone(s, s.zone);
     let esSpent = 0;
     let manaSpent = 0;
     let minEs = Infinity;

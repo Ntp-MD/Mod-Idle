@@ -6,8 +6,8 @@ import type { Item, ModLine } from './types';
  * slot → Base (frame, weight) → the item's level (the value window) → the third of the window the roll
  * lands in → value.
  *
- * The line skeleton (item-base.md): line 1 is the Base Mod, lines 2-3 the Sub pair, then the Normal
- * lines the drop drew — `item_level.stat_mod_slots` publishes the range, so two pieces of one band and
+ * The line skeleton (item-base.md): line 1 is the Frame Mod, lines 2-3 the Bound pair, then the Normal
+ * lines the drop drew — `item_level.unbound_slots` publishes the range, so two pieces of one band and
  * level can differ in width. The `mods_added_cap` Add stones each widen the piece by one more Normal
  * line, up to `crafted_max` in all. The Base tables come from `tools/data/bases.json`, which
  * `node tools/bases.ts --checks` gates, so the game rolls from the same frame list the loot simulation
@@ -64,10 +64,10 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
   // the band is what the drop source declares — the weight half and the label; the level is what the
   // window's floor and ceiling are read at (`item-level.md`)
   const q = eng.qualityIndexOf(band);
-  const u = rng(); // one Tier draw per item, shared by line 1 and every Random line
+  const u = rng(); // one Tier draw per item, shared by line 1 and every Unbound line
 
-  // line 1 is the Base Mod: it is rolled first, off the frame, before any Random line
-  const lines: ModLine[] = loot.baseModRoll(BASES, slot, frame, weapon, rng, ilvl, q, u);
+  // line 1 is the Frame Mod: it is rolled first, off the frame, before any Unbound line
+  const lines: ModLine[] = loot.frameModRoll(BASES, slot, frame, weapon, rng, ilvl, q, u);
   const taken = new Set<string>(lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
   const pool = loot.poolFor(BASES, slot, frame, weapon).filter((e: any) => !taken.has(e.id));
   const target = loot.linesAtDrop(rng);
@@ -106,6 +106,8 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
     lines,
     q,
     weight: eng.weightAtQuality(baseWeight, q, BASES.quality_weight_multiplier),
+    // how many Unbound lines it dropped with: the +2 Add cap is net against this
+    unbound_at_drop: lines.length - (E.item_level.frame_mod_slots + E.item_level.bound_slots),
   };
 }
 

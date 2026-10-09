@@ -142,10 +142,10 @@ export function rollTask(rng: () => number, state: GameState): TaskSlot {
   const maxZone = Math.max(1, Math.min(eng.ZONES.length, state.zone));
   const zone = 1 + Math.floor(rng() * maxZone);
   // the board has two kinds: an Elite hunt (the old third kind, the plain kill-count task, is gone) and a
-  // Boss hunt. They keep the 3:1 weight they always had against each other.
-  const kind = rng() < 0.75 ? 'elite' : 'boss';
+  // Boss hunt. Their weight against each other is the data's own line, not a number typed here.
+  const kind = rng() < TS.offer_weight_elite ? 'elite' : 'boss';
   const band = eng.zoneById(zone).quality.startsWith('high') ? 'high' : eng.zoneById(zone).quality.startsWith('mid') ? 'mid' : 'low';
-  const n = kind === 'elite' ? TS.elite_n : 1;
+  const n = kind === 'elite' ? TS.elite_n : TS.boss_n;
   const reward = taskReward(kind, band);
   return { kind, zone, n, progress: 0, stone: reward.stone as any, count: reward.count, claimed: false, offeredAt: state.clockSec };
 }

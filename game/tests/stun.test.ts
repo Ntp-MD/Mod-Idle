@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Statuses } from '../src/sim/combat';
 import { E, eng } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
@@ -19,6 +19,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 
 const run = (shocked: boolean) => {
   const s = newGame(4242);
+  huntZone(s, s.zone);
   setLevel(s, 60);
   s.zone = 3;
   const statuses: Statuses = shocked ? { shock: { stacks: 1, secLeft: 30, perSec: 0 } } : {};
@@ -42,6 +43,7 @@ describe('a shocked player is stopped (the dead half of shock · item 5 step 1)'
     // the duration is the config's own field, so re-cutting the status moves this with it
     expect(E.status.shock.stop_sec).toBeGreaterThan(0);
     const s = newGame(11);
+    huntZone(s, s.zone);
     setLevel(s, 60);
     s.zone = 3;
     const statuses: Statuses = { shock: { stacks: 1, secLeft: E.status.shock.stop_sec, perSec: 0 } };

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Survival, potions and the herb farm</title></head>
+<body><style>:root {
+  color-scheme: dark;
+  --bg: #0f1217;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #e3e9f2;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #4fc3f7;
+  --xp: #f1c40f;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
+  --rail: 4.4rem;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur */
+  --dof-rest: 9px;
+  --dof-near: 2.5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+nav a { color: var(--dim); }
+nav a.on { color: var(--gold); }
+main { flex: 1; min-width: 0; }
+h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+.lead { color: var(--dim); margin: 0 0 2rem; }
+section { margin: 0 0 2.2rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: .82rem; margin: .3rem 0 .6rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; }
+thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
+.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; }
+.twrap table { min-width: 56rem; }
+td:first-child { white-space: nowrap; }
+.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
+.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
+.rolls .rn { position: relative; flex: 1; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: .72rem; white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: .72rem; white-space: nowrap; }
+td .hy { color: var(--dim); font-size: .8rem; }
+.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: .74rem; }
+.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx li:last-child { border-bottom: 0; }
+.fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
+.fx .fk em { color: var(--text); font-style: normal; }
+.fx .fs { color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.fx .fv { font-family: var(--num); white-space: nowrap; }
+td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
+.rolls .forced .rn { color: var(--gold); }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
+.num { font-family: var(--num); }
+.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+ol { margin: .2rem 0; padding-left: 1.3rem; }
+li { margin: .15rem 0; }</style><div class="layout">
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="on" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
+<main><h1>Survival, potions and the herb farm</h1><p class="lead">A fight you lose costs time, never a piece and never a level. These are the pools that buy the time back, and the two provisioning tracks that feed them.</p><section><h2>The pools</h2><p class="note">Respec is free wherever a settlement is (<code>stat.respec_cost</code> reads <span class="num">0</span>), because a locked build would punish you harder than a lost fight does.</p><table><thead><tr><th>Pool</th><th>What it is</th><th>Full at the reference build</th><th>How it comes back</th></tr></thead><tbody><tr><td>Health</td><td>the pool every avoidance layer protects</td><td><span class="num">12,596</span></td><td>27.1 a second off the Vit line — <code>hpRegenOf</code></td></tr><tr><td>Mana</td><td>the resource every skill is paid for with, including the auras that hold a share of it open</td><td><span class="num">2,779</span></td><td>69.5 a second, so an empty pool refills in 40 sec — <code>manaRegenOf</code></td></tr><tr><td>Energy Shield</td><td>the caster’s second pool, spent before Health, and player-only</td><td><span class="num">70</span></td><td>2.1 a second, but only once 3 sec have passed without a hit — <code>esRegenOf</code></td></tr></tbody></table></section>
+<section><h2>What a Push costs</h2><p class="note">Nothing on this list is a number: a Push is the cost of the fight, not a tax on the character.</p><ul class="fx">
+      <li><span class="fk">There is no death.</span><span class="fs">rule</span><span class="fv">a fight you lose rests you at camp and costs time only</span></li>
+      <li><span class="fk">A Push on the walk is the ordinary Push.</span><span class="fs">rule</span><span class="fv">camp, rest, and back in on the block you were ambushed on — the walk is never cancelled and a block is never given back (<code>road.push_rule</code>)</span></li>
+      <li><span class="fk">A dungeon run forfeits its escrow.</span><span class="fs">rule</span><span class="fv">the one place a Push costs loot — <a href="world.html">World</a></span></li>
+      <li><span class="fk">Your preset goes back to the main one.</span><span class="fs">rule</span><span class="fv">and a cooldown already counting keeps counting (<code>presets.cooldowns_persist_on_push</code>)</span></li>
+      <li><span class="fk">A broken piece contributes nothing.</span><span class="fs">rule</span><span class="fv">the Armourer clears it and refills protection — <a href="crafting.html">Crafting</a></span></li>
+    </ul></section>
+<section><h2>Potions</h2><p class="note">Provisioning, not power: one shared cooldown of 30 sec, at most 3 a fight, switched off entirely on a Boss (<code>potions.boss_suppressed</code>), 2 weight each. Auto-use starts on at 30% Health and 25% Mana. That is why no potion moves a health line anywhere in the design.</p><table><thead><tr><th>Draught</th><th>Pool</th><th>Band</th><th>Effect</th><th>Brewed from</th></tr></thead><tbody><tr><td>Red Draught</td><td>hp</td><td>low</td><td><span class="num">10% of the pool, instantly</span></td><td><span class="hy">3 herbs + 1 Value stones</span></td></tr><tr><td>Yellow Draught</td><td>hp</td><td>mid</td><td><span class="num">20% of the pool, instantly</span></td><td><span class="hy">5 herbs + 2 Value stones</span></td></tr><tr><td>White Draught</td><td>hp</td><td>high</td><td><span class="num">30% of the pool, instantly</span></td><td><span class="hy">8 herbs + 4 Value stones</span></td></tr><tr><td>Sky Draught</td><td>mana</td><td>low</td><td><span class="num">15% of the pool, instantly</span></td><td><span class="hy">3 herbs + 1 Value stones</span></td></tr><tr><td>Blue Draught</td><td>mana</td><td>mid</td><td><span class="num">25% of the pool, instantly</span></td><td><span class="hy">5 herbs + 2 Value stones</span></td></tr><tr><td>Deep Blue Draught</td><td>mana</td><td>high</td><td><span class="num">35% of the pool, instantly</span></td><td><span class="hy">8 herbs + 4 Value stones</span></td></tr></tbody></table></section>
+<section><h2>Condensed</h2><p class="note">The one craft that turns a stack into a smaller stack: it buys bag space, never a bigger pool.</p><table><thead><tr><th></th><th>What it takes</th><th>What it gives</th></tr></thead><tbody><tr><td>A Condensed draught</td><td>10 bottles + 4 Value stones</td><td>×10 effect, at 12 weight (20 carried loose)</td></tr></tbody></table></section>
+<section><h2>The herb farm</h2><p class="note">The farm is the game’s one life skill and it is timers only: herbs never become gear, Mods or damage.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Plots</td><td>3 to start, 2 bought, 5 at most</td><td><code>farm.plots</code></td></tr><tr><td>A grow</td><td>4.0 hours, then 3 herbs</td><td><code>farm.growth_hours</code> · <code>farm.yield_per_harvest</code></td></tr><tr><td>A replant</td><td>1 herb of the harvest goes back into the ground</td><td><code>farm.seed_cost_herbs</code></td></tr><tr><td>A day</td><td>2 taps, and up to 12.0 hours of growth are paid while you are away</td><td><code>farm.taps_per_day</code> · <code>farm.offline_cap_hours</code></td></tr><tr><td>A level</td><td>cap 20 · 20 XP a harvest · the same curve as Weapon Mastery</td><td><code>farm.level_*</code></td></tr><tr><td>Which draughts open</td><td>low from 1 · mid from 6 · high from 11</td><td><code>farm.tier_unlock_level</code></td></tr></tbody></table></section>
+<section><h2>Herbs from the ground versus herbs from a fight</h2><p class="note">The bundle roll is its own, separate from gear and stones, and the lowest band pays nothing on it (<code>herbs</code> reads the mid and high chances only). A plot out-taps a hunt; a hunt out-pays a plot in everything else.</p><table><thead><tr><th>Zone band</th><th>A bundle a kill</th><th>A bundle holds</th><th>A brewable draught a kill</th></tr></thead><tbody><tr><td>low</td><td>0.0%</td><td>1-3 herbs</td><td>0.0%</td></tr><tr><td>mid</td><td>2.0%</td><td>1-3 herbs</td><td>0.8%</td></tr><tr><td>high</td><td>3.0%</td><td>1-3 herbs</td><td>0.8%</td></tr></tbody></table></section>
+<p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
+</main></div></body></html>

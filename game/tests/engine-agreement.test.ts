@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 import { eng, E, BASES } from '../src/engine/client';
 import { buildCharacter, openingGear } from '../src/sim/player';
-import { newGame, tick, catchUp } from '../src/sim/game';
+import { newGame, tick, catchUp, huntZone } from '../src/sim/game';
 
 // The cages load tools/lib/engine.ts, which is a bridge over the same engine/index.ts the client
 // calls. Requiring it here proves the client and the cages resolve to one module and one data file
@@ -42,7 +42,7 @@ describe('the opening character is the designed minute one', () => {
     const worn = s.gear.filter(Boolean);
     expect(worn.length).toBe(E.stat.item_slots); // every slot the data declares is filled
     for (const item of worn) {
-      expect(item!.lines.length).toBe(1); // a hand-authored junk piece: its frame's Base Mod, nothing else
+      expect(item!.lines.length).toBe(1); // a hand-authored junk piece: its frame's Frame Mod, nothing else
       expect(item!.ilvl).toBe(E.opening.level);
       if (item!.slot !== 'main hand') expect(item!.lines[0].extra).toBeUndefined();
     }
@@ -75,6 +75,7 @@ describe('the opening character is the designed minute one', () => {
 describe('the tick loop', () => {
   it('kills on-level mobs and pays the XP the curve says', () => {
     const s = newGame();
+    huntZone(s, s.zone);
     // tick until the loop has paid a kill, never for a guessed window: a fixed window is a time
     // premise (AGENTS.md). The bound is a hang guard.
     for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});

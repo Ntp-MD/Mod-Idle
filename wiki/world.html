@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The world</title></head>
+<body><style>:root {
+  color-scheme: dark;
+  --bg: #0f1217;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #e3e9f2;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #4fc3f7;
+  --xp: #f1c40f;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
+  --rail: 4.4rem;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur */
+  --dof-rest: 9px;
+  --dof-near: 2.5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+nav a { color: var(--dim); }
+nav a.on { color: var(--gold); }
+main { flex: 1; min-width: 0; }
+h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+.lead { color: var(--dim); margin: 0 0 2rem; }
+section { margin: 0 0 2.2rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: .82rem; margin: .3rem 0 .6rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; }
+thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
+.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; }
+.twrap table { min-width: 56rem; }
+td:first-child { white-space: nowrap; }
+.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
+.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
+.rolls .rn { position: relative; flex: 1; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: .72rem; white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: .72rem; white-space: nowrap; }
+td .hy { color: var(--dim); font-size: .8rem; }
+.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: .74rem; }
+.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx li:last-child { border-bottom: 0; }
+.fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
+.fx .fk em { color: var(--text); font-style: normal; }
+.fx .fs { color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.fx .fv { font-family: var(--num); white-space: nowrap; }
+td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
+.rolls .forced .rn { color: var(--gold); }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
+.num { font-family: var(--num); }
+.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+ol { margin: .2rem 0; padding-left: 1.3rem; }
+li { margin: .15rem 0; }</style><div class="layout">
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="on" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
+<main><h1>The world</h1><p class="lead">Zones climb in level and in what they pay. A body class is the shape of a fight, not a stat.</p><section><h2>Body classes</h2><p class="note">A boss is not a size — it is a species that happens to be huge, and it reads as Large.</p><table><thead><tr><th>Body</th><th>Health</th><th>Damage</th><th>Evasion</th><th>Comes in</th></tr></thead><tbody><tr><td>small</td><td>×0.7</td><td>×0.7</td><td>×1.1</td><td>up to 5</td></tr><tr><td>medium</td><td>×1.0</td><td>×1.0</td><td>×1.0</td><td>up to 5</td></tr><tr><td>large</td><td>×1.7</td><td>×1.4</td><td>×0.9</td><td>alone</td></tr><tr><td>boss</td><td>×15.0</td><td>×10.0</td><td>×1.0</td><td>alone</td></tr></tbody></table></section>
+<section><h2>Zones</h2><p class="note">The band decides the Item quality of what drops there.</p><table><thead><tr><th>#</th><th>Zone</th><th>Region</th><th>Levels</th><th>Band</th><th>Mob group</th><th>Elements</th></tr></thead><tbody><tr><td><span class="num">1</span></td><td>Eastgate</td><td>pinewood road</td><td>1-10</td><td>low</td><td>1-2</td><td>fire</td></tr><tr><td><span class="num">2</span></td><td>Highspire</td><td>high crags</td><td>11-20</td><td>low</td><td>1-2</td><td>cold · lightning</td></tr><tr><td><span class="num">3</span></td><td>Wolf Cross</td><td>wolf country</td><td>21-30</td><td>low</td><td>1-2</td><td>cold</td></tr><tr><td><span class="num">4</span></td><td>Greyfen</td><td>wet lowland</td><td>31-40</td><td>mid (floor = low)</td><td>2-3</td><td>poison · chaos</td></tr><tr><td><span class="num">5</span></td><td>Saltmarrow</td><td>salt flats</td><td>41-50</td><td>mid</td><td>2-3</td><td>chaos</td></tr><tr><td><span class="num">6</span></td><td>The Pale Spire</td><td>the pale bloom</td><td>51-60</td><td>mid</td><td>2-3</td><td>chaos · poison</td></tr><tr><td><span class="num">7</span></td><td>Blackwater Reach</td><td>drowned river mouth</td><td>61-70</td><td>high (floor = mid)</td><td>3-5</td><td>poison</td></tr><tr><td><span class="num">8</span></td><td>Bonegate</td><td>the bone gate</td><td>71-80</td><td>high</td><td>3-5</td><td>chaos</td></tr><tr><td><span class="num">9</span></td><td>Frosthold</td><td>frost hold</td><td>81-90</td><td>high</td><td>3-5</td><td>cold</td></tr><tr><td><span class="num">10</span></td><td>Vermolch</td><td>the vermolch mire</td><td>91-100</td><td>low</td><td>1-2</td><td>poison · chaos</td></tr><tr><td><span class="num">11</span></td><td>Duskmoor</td><td>open moor</td><td>101-110</td><td>low</td><td>1-2</td><td>cold · chaos</td></tr><tr><td><span class="num">12</span></td><td>Nettlecrag</td><td>thorn country</td><td>111-120</td><td>low</td><td>1-2</td><td>chaos · poison</td></tr><tr><td><span class="num">13</span></td><td>Emberhold</td><td>slag and foundry heat</td><td>121-130</td><td>mid (floor = low)</td><td>2-3</td><td>fire</td></tr><tr><td><span class="num">14</span></td><td>Millbrook</td><td>slow water</td><td>131-140</td><td>mid (floor = low)</td><td>2-3</td><td>poison</td></tr><tr><td><span class="num">15</span></td><td>Wyrmback</td><td>wyrm breeding ground</td><td>141-150</td><td>mid (floor = low)</td><td>2-3</td><td>fire · cold</td></tr><tr><td><span class="num">16</span></td><td>Ashfall</td><td>ash fields</td><td>151-160</td><td>high (floor = mid)</td><td>3-5</td><td>fire</td></tr><tr><td><span class="num">17</span></td><td>Ironrow</td><td>storm terrace</td><td>161-170</td><td>high (floor = mid)</td><td>3-5</td><td>lightning</td></tr><tr><td><span class="num">18</span></td><td>Thornwake</td><td>wet lowland</td><td>171-180</td><td>high (floor = mid)</td><td>3-5</td><td>poison</td></tr></tbody></table></section>
+<section><h2>Dungeons</h2><p class="note">One dungeon per zone, on its settlement's first wild side. Same mobs, same rolls as the zone — but loot waits in escrow until the last mob falls, a Push forfeits it, and a cleared run cools down 60 minutes.</p><table><thead><tr><th>Dungeon</th><th>Zone</th><th>Band</th><th>A run</th></tr></thead><tbody><tr><td>Eastgate Dungeon</td><td><span class="num">1</span></td><td>low</td><td>50 mobs · groups of 5</td></tr><tr><td>Highspire Dungeon</td><td><span class="num">2</span></td><td>low</td><td>50 mobs · groups of 5</td></tr><tr><td>Wolf Cross Dungeon</td><td><span class="num">3</span></td><td>low</td><td>50 mobs · groups of 5</td></tr><tr><td>Greyfen Dungeon</td><td><span class="num">4</span></td><td>mid</td><td>50 mobs · groups of 5</td></tr><tr><td>Saltmarrow Dungeon</td><td><span class="num">5</span></td><td>mid</td><td>50 mobs · groups of 5</td></tr><tr><td>The Pale Spire Dungeon</td><td><span class="num">6</span></td><td>mid</td><td>50 mobs · groups of 5</td></tr><tr><td>Blackwater Reach Dungeon</td><td><span class="num">7</span></td><td>high</td><td>50 mobs · groups of 5</td></tr><tr><td>Bonegate Dungeon</td><td><span class="num">8</span></td><td>high</td><td>50 mobs · groups of 5</td></tr><tr><td>Frosthold Dungeon</td><td><span class="num">9</span></td><td>high</td><td>50 mobs · groups of 5</td></tr><tr><td>Vermolch Dungeon</td><td><span class="num">10</span></td><td>low</td><td>50 mobs · groups of 5</td></tr><tr><td>Duskmoor Dungeon</td><td><span class="num">11</span></td><td>low</td><td>50 mobs · groups of 5</td></tr><tr><td>Nettlecrag Dungeon</td><td><span class="num">12</span></td><td>low</td><td>50 mobs · groups of 5</td></tr><tr><td>Emberhold Dungeon</td><td><span class="num">13</span></td><td>mid</td><td>50 mobs · groups of 5</td></tr><tr><td>Millbrook Dungeon</td><td><span class="num">14</span></td><td>mid</td><td>50 mobs · groups of 5</td></tr><tr><td>Wyrmback Dungeon</td><td><span class="num">15</span></td><td>mid</td><td>50 mobs · groups of 5</td></tr><tr><td>Ashfall Dungeon</td><td><span class="num">16</span></td><td>high</td><td>50 mobs · groups of 5</td></tr><tr><td>Ironrow Dungeon</td><td><span class="num">17</span></td><td>high</td><td>50 mobs · groups of 5</td></tr><tr><td>Thornwake Dungeon</td><td><span class="num">18</span></td><td>high</td><td>50 mobs · groups of 5</td></tr></tbody></table></section>
+<section><h2>Species</h2><p class="note">Resistance is per Element, so a zone is easier for the build that brings the right one.</p><table><thead><tr><th>Species</th><th>Zones</th><th>Body classes</th><th>Damage</th><th>Element bias</th><th>Health line</th></tr></thead><tbody><tr><td>Goblin</td><td>1 · 14</td><td>small · medium · large</td><td>physical</td><td>poison · fire</td><td>farm trash - the cheapest body in the game, and the first weapon-carrier a player meets</td></tr><tr><td>Orc</td><td>1 · 2 · 4</td><td>medium · large</td><td>physical</td><td>cold · chaos · fire</td><td>armour wall - real armour and heavy res, paid for with the worst accuracy on the road</td></tr><tr><td>Kobold</td><td>8</td><td>small · medium</td><td>physical</td><td>chaos</td><td>evasive vermin - quick and looting, killed by Element damage</td></tr><tr><td>Ogre</td><td>2 · 9 · 15</td><td>medium · large</td><td>physical</td><td>cold</td><td>armour wall - slow and heavy, dodged outright by a Dex build</td></tr><tr><td>Troll</td><td>3 · 8 · 10 · 18</td><td>large</td><td>physical</td><td>cold · chaos · poison</td><td>armour wall, all alone - every farming body is Large, so there is never a soft version to farm</td></tr><tr><td>Minotaur</td><td>8</td><td>medium · large</td><td>physical</td><td>chaos</td><td>the labyrinth bruiser - a balanced vector with no hole to exploit</td></tr><tr><td>Skeleton</td><td>5 · 11 · 13</td><td>small · medium · large</td><td>physical</td><td>chaos · fire</td><td>slow caster floor - the accuracy is a joke and the res is not</td></tr><tr><td>Mummy</td><td>4 · 5</td><td>medium · large</td><td>physical</td><td>poison · chaos</td><td>slow caster floor - fires from the second line and shrugs off Element damage</td></tr><tr><td>Vampire</td><td>5 · 11 · 13</td><td>medium · large</td><td>mixed</td><td>chaos · fire</td><td>the mixed threat - half its hit is armour-able and half res-able, so neither answer is complete</td></tr><tr><td>Demon</td><td>4 · 7 · 9 · 11 · 12 · 13</td><td>medium · large</td><td>mixed</td><td>chaos · cold · fire · poison</td><td>the mixed caster - Int-heavy, so its Element half is the part that hurts</td></tr><tr><td>Slime</td><td>3 · 7 · 12 · 15</td><td>small · medium</td><td>magic</td><td>fire · cold · chaos · poison</td><td>slow caster floor - magic only, so Elemental resistance is the whole answer and Armour answers nothing</td></tr><tr><td>Spider</td><td>3 · 8 · 14 · 15</td><td>small · medium</td><td>physical</td><td>cold · poison · chaos</td><td>evasive vermin - hard to hit, dies to any AoE</td></tr><tr><td>Wolf</td><td>1 · 10 · 14 · 18</td><td>small · medium</td><td>physical</td><td>chaos · fire · poison</td><td>accurate striker - Evasion is worthless against it</td></tr><tr><td>Golem</td><td>6 · 7 · 8 · 9 · 12</td><td>large</td><td>physical</td><td>cold · chaos · poison</td><td>armour wall, all alone - the strongest armour line in the game and no soft body to farm</td></tr><tr><td>Dragon</td><td>2 · 6 · 9 · 10 · 18</td><td>medium · large</td><td>mixed</td><td>cold · poison</td><td>accurate striker - the mixed hit at full accuracy is the whole fight</td></tr><tr><td>Treant</td><td>16 · 17</td><td>large</td><td>physical</td><td>fire · lightning</td><td>armour wall, all alone - heavy and rooted, and it never comes in a soft body</td></tr><tr><td>Human</td><td>1 · 6 · 13</td><td>small · medium · large</td><td>physical</td><td>fire · chaos</td><td>accurate striker and status pressure - the militia lineage, and the potion-carrier</td></tr><tr><td>Lizardman</td><td>3 · 4 · 15</td><td>small · medium · large</td><td>physical</td><td>cold · poison</td><td>the swamp hunter - quick, lucky and unremarkable, which is its own kind of easy</td></tr><tr><td>Elf</td><td>6 · 16 · 17</td><td>medium · large</td><td>mixed</td><td>chaos · poison · fire · lightning</td><td>accurate striker, evasive and status pressure - the complete caster line, and the hardest to hit</td></tr><tr><td>Giant</td><td>2 · 10 · 18</td><td>large</td><td>physical</td><td>cold · poison</td><td>armour wall, all alone - the heaviest body that still swings from the front</td></tr><tr><td>Werewolf</td><td>11 · 14 · 16 · 17</td><td>medium · large</td><td>physical</td><td>poison · fire · lightning · cold</td><td>accurate striker - a Wolf that hits harder and can take a hit back</td></tr><tr><td>Dryad</td><td>16 · 17</td><td>medium · large</td><td>magic</td><td>fire · lightning</td><td>evasive vermin and status pressure - magic only, so resistance is the answer</td></tr></tbody></table></section>
+<p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
+</main></div></body></html>

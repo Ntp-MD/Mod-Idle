@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, huntZone } from '../src/sim/game';
 import { E } from '../src/engine/client';
 import { sellJunk } from '../src/sim/town';
 
@@ -23,6 +23,7 @@ function seenVariants(state: any, want: number) {
 describe('a variant is a drop identity, not decoration', () => {
   it('every spawn carries a name its own ladder owns, and that name pays a real item', () => {
     const s = newGame(11);
+    huntZone(s, s.zone);
     const seen = [...seenVariants(s, 6)].map((k) => k.split('|') as [string, string]);
     expect(seen.length).toBeGreaterThan(0);
     for (const [speciesId, variant] of seen) {
@@ -35,6 +36,7 @@ describe('a variant is a drop identity, not decoration', () => {
 
   it('a zone rolls its own whole cast — there is no hunting ground to pick', () => {
     const s = newGame(5);
+    huntZone(s, s.zone);
     const zone = s.zone;
     const cast = ((E.mob.zones.find((z: any) => z.id === zone) as any).subzones || []).map((x: any) => x.name);
     expect(cast.length).toBeGreaterThan(1);

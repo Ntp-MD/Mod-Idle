@@ -28,7 +28,7 @@ const PCT_LINE: Record<string, string> = {
   evasion_pct: 'evasionPct',
   perfect_dodge_pct: 'pdodgePct',
   status_resistance_pct: 'statusResPct',
-  // the four line-1 Base Mods (item-base.md): block, penetration and the two chances
+  // the four line-1 Frame Mods (item-base.md): block, penetration and the two chances
   block_chance: 'blockPct',
   armour_pen: 'armourPenPct',
   bleed_chance: 'bleedChancePct',
@@ -87,7 +87,7 @@ export function sumLines(gear: (Item | null)[], extra?: { id: string; value: num
     const school = BASE_BY_NAME.get(item.base)?.school;
     if (item.gearMod && school && FLAT_LINE[school]) acc[FLAT_LINE[school]] += item.gearMod;
     for (const line of item.lines) {
-      // a Base Mod line carries its extra Mods on the same line (`item-base.md`), so each part
+      // a Frame Mod line carries its extra Mods on the same line (`item-base.md`), so each part
       // feeds its own bucket
       for (const part of [line, ...((line.extra as any[]) || [])]) {
         const stat = (part as any).stat as StatKey | undefined;
@@ -149,9 +149,9 @@ export interface Character {
   perfectDodge: number;
   /** The shield's own avoidance layer: a blocked hit is deleted outright. */
   block: number;
-  /** Cut on the mob's armour ratio, from the crossbow's Base Mod line. */
+  /** Cut on the mob's armour ratio, from the crossbow's Frame Mod line. */
   armourPen: number;
-  /** Chance to bleed on a landed hit, from the axe's Base Mod line. */
+  /** Chance to bleed on a landed hit, from the axe's Frame Mod line. */
   bleedChance: number;
   /** Chance to stun on a landed hit, Alignment × K_STUN_PER_ALIGN + the mace's line (C10). */
   stunChance: number;
@@ -360,7 +360,7 @@ export function buildCharacter(
 /**
  * Minute one: the whole starting set, read straight out of engine.json `opening`. The data names a frame
  * per slot (the main hand names a weapon type, which is what a drop records as its base) and the client
- * derives each piece's one line with the engine's own floor rule — the same `baseModAtFloor` a
+ * derives each piece's one line with the engine's own floor rule — the same `frameModAtFloor` a
  * pre-skeleton save restore calls — so no value is typed twice and the set cannot drift from the curve it
  * is priced against. It weighs what its frames say they weigh, or the opening character would carry a set
  * for free and the aspd tax (`formula.md` section 11) would never bite the build it exists for.
@@ -384,7 +384,7 @@ export function openingGear(): (Item | null)[] {
       ilvl,
       quality: g.quality,
       tier: `T${g.tier}`,
-      lines: loot.baseModAtFloor(BASES, g.slot, frame, weapon, ilvl, q),
+      lines: loot.frameModAtFloor(BASES, g.slot, frame, weapon, ilvl, q),
       weight: frame ? frame.weight : weaponWeightOf(weapon!.name, 'main hand'),
     };
   }

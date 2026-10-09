@@ -167,7 +167,7 @@ export function mobSwing(
     return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   }
   // Block is its own layer, rolled after perfect dodge and evasion (formula-defense.md): the
-  // shield's Base Mod line (open-ended, no Cap). It answers a PHYSICAL hit only (owner ruling): a
+  // shield's Frame Mod line (open-ended, no Cap). It answers a PHYSICAL hit only (owner ruling): a
   // shield argues with a blade, not with a spell, so a pure-Element swing cannot be blocked at all.
   // A blocked hit is NOT deleted — it is cut by a FLAT `armour / 10`, and the cut comes off the
   // physical half alone, capped by it (applied below).

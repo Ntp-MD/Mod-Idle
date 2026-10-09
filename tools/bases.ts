@@ -61,9 +61,9 @@ function checks(): any[] {
   // bases.json is the source now — nothing parses a doc into it
   const doc = current;
   const shape = Array.isArray(current.bases) && current.bases.length > 0 && Array.isArray(current.slots) && current.slots.length > 0
-    && ['base_mod', 'weapons', 'weapon_pools', 'weapon_frames'].every((k: string) => current[k]);
+    && ['frame_mod', 'weapons', 'weapon_pools', 'weapon_frames'].every((k: string) => current[k]);
   add('BS1', shape ? 'pass' : 'fail', shape
-    ? `${current.bases.length} Base rows across ${current.slots.length} slots, with base_mod · weapons · weapon_pools · weapon_frames present`
+    ? `${current.bases.length} Base rows across ${current.slots.length} slots, with frame_mod · weapons · weapon_pools · weapon_frames present`
     : 'bases.json is missing a required section');
   add('BS2', current.quality_weight_multiplier === 1.3 ? 'pass' : 'fail',
     `the Quality multiplier applied to weight is ${current.quality_weight_multiplier}`);
@@ -74,7 +74,7 @@ function checks(): any[] {
   add('BS4', m > 1 && totals.every((x: number) => Math.round(x * m * m) > x) ? 'pass' : 'fail',
     `quality weight grows per band at ×${m}: ${PATHS.map((p, i) => `${p.label} ${totals[i]}→${Math.round(totals[i] * m)}→${Math.round(totals[i] * m * m)}`).join(' · ')}`);
 
-  // The owner ruling: a frame's name says which FLAT defence lines its Base Mod carries, and the frames
+  // The owner ruling: a frame's name says which FLAT defence lines its Frame Mod carries, and the frames
   // of an armour slot cover every combination of the three — three singles, three pairs and the one
   // frame that carries all three — without repeating one. The name is the promise the player reads, so
   // this is the gate behind it.
@@ -99,7 +99,7 @@ function checks(): any[] {
       }
     }
     add('BS11', bad.length === 0 ? 'pass' : 'fail', bad.length ? bad.join(' · ')
-      : `every armour slot covers all ${want.size} combinations of the three flat defence lines exactly once — ${ARMOUR_SLOTS.length} slots × ${want.size} (${[...want].join(' · ')}), one of them the frame that carries all three, each frame's Base Mod flat and named by the frame`);
+      : `every armour slot covers all ${want.size} combinations of the three flat defence lines exactly once — ${ARMOUR_SLOTS.length} slots × ${want.size} (${[...want].join(' · ')}), one of them the frame that carries all three, each frame's Frame Mod flat and named by the frame`);
   }
 
   const weapons = current.weapons || [];
@@ -120,7 +120,7 @@ function checks(): any[] {
   add('BS8', capPct > 0 ? 'pass' : 'fail',
     `the account-wide Mastery drop bonus tops out at ${weapons.length} × ${M.drop_bonus_per_type_pct}% = ${capPct}%`);
   // A10: every weapon type carries a frame list. The FIRST frame of each type is exactly the live
-  // forced pair, so the published behaviour has a named home, and every frame names Base-Mod lines
+  // forced pair, so the published behaviour has a named home, and every frame names Frame-Mod lines
   // that exist in `mods.json`. This replaced the old "no variant list defined yet" guard.
   const KNOWN_MOD_IDS = new Set((MODS.mods || []).map((m: any) => m.id));
   const FRAMES = current.weapon_frames || {};
@@ -128,11 +128,11 @@ function checks(): any[] {
   for (const w of weapons) {
     const list = FRAMES[w.name];
     if (!Array.isArray(list) || !list.length) { frameProblems.push(`${w.name} has no frame list`); continue; }
-    if (JSON.stringify(list[0].base_mod) !== JSON.stringify((current.base_mod?.weapons || {})[w.name])) frameProblems.push(`${w.name}: the first frame is not the live forced pair`);
+    if (JSON.stringify(list[0].frame_mod) !== JSON.stringify((current.frame_mod?.weapons || {})[w.name])) frameProblems.push(`${w.name}: the first frame is not the live forced pair`);
     for (const f of list) {
       if (!(f.weight > 0)) frameProblems.push(`${w.name}/${f.name} carries no weight`);
-      if (!(f.base_mod || []).length) frameProblems.push(`${w.name}/${f.name} forces no line`);
-      for (const id of f.base_mod || []) if (!KNOWN_MOD_IDS.has(id)) frameProblems.push(`${w.name}/${f.name}: unknown line ${id}`);
+      if (!(f.frame_mod || []).length) frameProblems.push(`${w.name}/${f.name} forces no line`);
+      for (const id of f.frame_mod || []) if (!KNOWN_MOD_IDS.has(id)) frameProblems.push(`${w.name}/${f.name}: unknown line ${id}`);
       if (list.filter((x: any) => x.name === f.name).length > 1) frameProblems.push(`${w.name} names ${f.name} twice`);
     }
   }

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Travel and the Waypoint</title></head>
+<body><style>:root {
+  color-scheme: dark;
+  --bg: #0f1217;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #e3e9f2;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #4fc3f7;
+  --xp: #f1c40f;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
+  --rail: 4.4rem;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur */
+  --dof-rest: 9px;
+  --dof-near: 2.5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+nav a { color: var(--dim); }
+nav a.on { color: var(--gold); }
+main { flex: 1; min-width: 0; }
+h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+.lead { color: var(--dim); margin: 0 0 2rem; }
+section { margin: 0 0 2.2rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: .82rem; margin: .3rem 0 .6rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; }
+thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
+.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; }
+.twrap table { min-width: 56rem; }
+td:first-child { white-space: nowrap; }
+.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
+.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
+.rolls .rn { position: relative; flex: 1; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: .72rem; white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: .72rem; white-space: nowrap; }
+td .hy { color: var(--dim); font-size: .8rem; }
+.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: .74rem; }
+.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx li:last-child { border-bottom: 0; }
+.fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
+.fx .fk em { color: var(--text); font-style: normal; }
+.fx .fs { color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.fx .fv { font-family: var(--num); white-space: nowrap; }
+td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
+.rolls .forced .rn { color: var(--gold); }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
+.num { font-family: var(--num); }
+.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+ol { margin: .2rem 0; padding-left: 1.3rem; }
+li { margin: .15rem 0; }</style><div class="layout">
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="on" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
+<main><h1>Travel and the Waypoint</h1><p class="lead">The world is a hex sheet and a walk is a count of blocks. Blocks come out of the lattice coordinates, never a typed distance, so a route has a length and never a price.</p><section><h2>One block</h2><p class="note">Walking mints no gold, so a long walk is a loot question and never a money question.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Time</td><td><span class="num">10</span> sec a block</td><td><code>road.block_sec</code></td></tr><tr><td>An encounter a block</td><td>16.7%</td><td><code>road.encounter_chance_pct</code></td></tr><tr><td>What ambushes you</td><td>an ordinary mob group from the lower of the two zones the walk joins, at that zone’s own level range and group size</td><td><code>road.encounter_rule</code></td></tr><tr><td>What it pays</td><td>the ordinary per-kill drop roll and nothing else</td><td><code>road.encounter_rule</code> — no purse, no chest, no Standing, no stone</td></tr><tr><td>Losing one</td><td>the ordinary Push: camp, rest, and back in on the block you were ambushed on</td><td><code>road.push_rule</code></td></tr></tbody></table></section>
+<section><h2>Every settlement, from the start</h2><p class="note">A warp is priced per block at the destination settlement’s own band (<code>waypoint_warp.m_per_block</code> against <code>goldPerMinute</code>), so a short hop is cheap and a crossing of the map is not. It buys back the walk’s time and nothing else.</p><table><thead><tr><th>Settlement</th><th>Zone</th><th>Item quality band</th><th>Blocks from Eastgate</th><th>On foot</th><th>A warp back there, in gold</th></tr></thead><tbody><tr><td>Highspire <span class="tag">capital</span></td><td><span class="num">2</span></td><td>low</td><td><span class="num">3</span></td><td><span class="num">0.5</span> min</td><td><span class="num">5</span></td></tr><tr><td>Wolf Cross</td><td><span class="num">3</span></td><td>low</td><td><span class="num">3</span></td><td><span class="num">0.5</span> min</td><td><span class="num">5</span></td></tr><tr><td>Greyfen</td><td><span class="num">4</span></td><td>mid</td><td><span class="num">4</span></td><td><span class="num">0.7</span> min</td><td><span class="num">9</span></td></tr><tr><td>Saltmarrow <span class="tag">capital</span></td><td><span class="num">5</span></td><td>mid</td><td><span class="num">4</span></td><td><span class="num">0.7</span> min</td><td><span class="num">9</span></td></tr><tr><td>The Pale Spire <span class="tag">capital</span></td><td><span class="num">6</span></td><td>mid</td><td><span class="num">5</span></td><td><span class="num">0.8</span> min</td><td><span class="num">11</span></td></tr><tr><td>Blackwater Reach</td><td><span class="num">7</span></td><td>high</td><td><span class="num">6</span></td><td><span class="num">1.0</span> min</td><td><span class="num">16</span></td></tr><tr><td>Bonegate</td><td><span class="num">8</span></td><td>high</td><td><span class="num">6</span></td><td><span class="num">1.0</span> min</td><td><span class="num">16</span></td></tr><tr><td>Frosthold</td><td><span class="num">9</span></td><td>high</td><td><span class="num">6</span></td><td><span class="num">1.0</span> min</td><td><span class="num">16</span></td></tr><tr><td>Vermolch <span class="tag">capital</span></td><td><span class="num">10</span></td><td>low</td><td><span class="num">6</span></td><td><span class="num">1.0</span> min</td><td><span class="num">10</span></td></tr><tr><td>Duskmoor</td><td><span class="num">11</span></td><td>low</td><td><span class="num">7</span></td><td><span class="num">1.2</span> min</td><td><span class="num">11</span></td></tr><tr><td>Nettlecrag <span class="tag">capital</span></td><td><span class="num">12</span></td><td>low</td><td><span class="num">7</span></td><td><span class="num">1.2</span> min</td><td><span class="num">11</span></td></tr><tr><td>Emberhold</td><td><span class="num">13</span></td><td>mid</td><td><span class="num">9</span></td><td><span class="num">1.5</span> min</td><td><span class="num">20</span></td></tr><tr><td>Millbrook</td><td><span class="num">14</span></td><td>mid</td><td><span class="num">9</span></td><td><span class="num">1.5</span> min</td><td><span class="num">20</span></td></tr><tr><td>Wyrmback</td><td><span class="num">15</span></td><td>mid</td><td><span class="num">9</span></td><td><span class="num">1.5</span> min</td><td><span class="num">20</span></td></tr><tr><td>Ashfall <span class="tag">capital</span></td><td><span class="num">16</span></td><td>high</td><td><span class="num">10</span></td><td><span class="num">1.7</span> min</td><td><span class="num">26</span></td></tr><tr><td>Ironrow</td><td><span class="num">17</span></td><td>high</td><td><span class="num">10</span></td><td><span class="num">1.7</span> min</td><td><span class="num">26</span></td></tr><tr><td>Thornwake</td><td><span class="num">18</span></td><td>high</td><td><span class="num">10</span></td><td><span class="num">1.7</span> min</td><td><span class="num">26</span></td></tr></tbody></table></section>
+<section><h2>The Waypoint</h2><p class="note">Every pair of the 18 settlements is walkable: there is no edge list and no route to buy (<code>road.graph_rule</code>). The sheet’s cells, pins and walk stretches are gated against the same lattice, so a distance on this page is the distance on the ground — see <a href="world.html">World</a>.</p><table><thead><tr><th></th><th>The rule</th><th>Read from</th></tr></thead><tbody><tr><td>Earning one</td><td>arriving on foot, once</td><td><code>road.waypoint_rule</code></td></tr><tr><td>What it reaches</td><td>any settlement you have already walked to</td><td><code>road.waypoint_rule</code></td></tr><tr><td>What it never does</td><td>gate a zone — no gold opens a Waypoint the foot has not earned</td><td><code>road.waypoint_rule</code></td></tr><tr><td>Where the price lives</td><td>the destination band’s rate, not a seller’s markup</td><td><code>town.json waypoint_warp</code> · <code>engine.goldPerMinute</code></td></tr><tr><td>Later</td><td>a Waystone will be a second destination kind on the same rule</td><td><code>road.waypoint_rule</code></td></tr></tbody></table></section>
+<p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
+</main></div></body></html>

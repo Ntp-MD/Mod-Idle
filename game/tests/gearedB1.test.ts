@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng, loot, sm, TOWN } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick, huntZone } from '../src/sim/game';
 import { equipFromBag } from '../src/sim/gear';
 import { setRule } from '../src/sim/filter';
 import { startWalk } from '../src/sim/road';
@@ -35,6 +35,10 @@ const HOUR = 3600;
 const RUN_CAP_HR = 60;
 
 const clone = (s: GameState) => JSON.parse(JSON.stringify(s)) as GameState;
+// A minute-loop that never returns blocks the worker's RPC channel to the main thread, and vitest's
+// watchdog reports an unhandled error beside an otherwise green suite. The hour hand yields: same
+// ticks, same numbers, and the worker stays answerable.
+const yieldToWorker = () => new Promise<void>((done) => setImmediate(() => done()));
 const barRows = (s: GameState) => s.skills.list.filter(Boolean).length
   + Object.values(s.skills.buffs).filter(Boolean).length
   + Object.values(s.skills.auras).filter(Boolean).length;
@@ -168,8 +172,9 @@ function walkOnward(s: GameState): boolean {
 }
 
 /** One hunt, from the opening minute to the first checkpoint reached — the gear is whatever fell. */
-function huntTo(level: number, seed = 20261004): { s: GameState; hours: number } {
+async function huntTo(level: number, seed = 20261004): Promise<{ s: GameState; hours: number }> {
   const s = newGame(seed);
+  huntZone(s, s.zone);
   // the filter ships off, so this run arms it to reproduce the design's published keep-rate;
   // a bag kept with the filter off fills and pauses, which is not the character the curve prices
   setRule(s.filter, 'all', { enabled: true });
@@ -179,6 +184,7 @@ function huntTo(level: number, seed = 20261004): { s: GameState; hours: number }
     walkOnward(s);
     if (sec % HOUR === 0) dressUp(s);
     tick(s, {}, { online: true });
+    if (sec % HOUR === 0) await yieldToWorker();
   }
   return { s, hours: sec / HOUR };
 }
@@ -195,8 +201,9 @@ function withBar(s: GameState, t: Theme) {
 }
 
 describe('the fold measured on gear the loop actually produced', () => {
-  it('levels to every checkpoint with its own drops, then prints gear-only dps and the list share', () => {
+  it('levels to every checkpoint with its own drops, then prints gear-only dps and the list share', async () => {
     const s = newGame(20261004);
+    huntZone(s, s.zone);
     setRule(s.filter, 'all', { enabled: true }); // the filter ships off; arm it to keep the published rate
     s.travel = 'forward';
     const rows: string[] = [];
@@ -211,6 +218,7 @@ describe('the fold measured on gear the loop actually produced', () => {
       // `pacing.test.ts` measures, and it is not the character the curve prices
       if (sec % HOUR === 0) dressed += dressUp(s);
       tick(s, {}, { online: true });
+      if (sec % HOUR === 0) await yieldToWorker();
       const hit = CHECKPOINTS.find((lv) => s.player.level >= lv && !seen.includes(lv));
       if (hit === undefined) continue;
       seen.push(hit);
@@ -250,8 +258,8 @@ describe('the fold measured on gear the loop actually produced', () => {
     expect(shares[shares.length - 1]).toBeGreaterThan(1); // and it is a real multiplier once levelled
   }, 120000);
 
-  it('leaves the fast-hit build its own value: the damage comes from hits, not from one big press', () => {
-    const { s, hours } = huntTo(90);
+  it('leaves the fast-hit build its own value: the damage comes from hits, not from one big press', async () => {
+    const { s, hours } = await huntTo(90);
     expect(s.player.level).toBeGreaterThanOrEqual(90);
 
     const readings = [FAST, HEAVY].map((t) => {

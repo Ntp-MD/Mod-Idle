@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Away, and what you can carry</title></head>
+<body><style>:root {
+  color-scheme: dark;
+  --bg: #0f1217;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #e3e9f2;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #4fc3f7;
+  --xp: #f1c40f;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
+  --rail: 4.4rem;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur */
+  --dof-rest: 9px;
+  --dof-near: 2.5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+nav a { color: var(--dim); }
+nav a.on { color: var(--gold); }
+main { flex: 1; min-width: 0; }
+h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+.lead { color: var(--dim); margin: 0 0 2rem; }
+section { margin: 0 0 2.2rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: .82rem; margin: .3rem 0 .6rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; }
+thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
+.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; }
+.twrap table { min-width: 56rem; }
+td:first-child { white-space: nowrap; }
+.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
+.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
+.rolls .rn { position: relative; flex: 1; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: .72rem; white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: .72rem; white-space: nowrap; }
+td .hy { color: var(--dim); font-size: .8rem; }
+.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: .74rem; }
+.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx li:last-child { border-bottom: 0; }
+.fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
+.fx .fk em { color: var(--text); font-style: normal; }
+.fx .fs { color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.fx .fv { font-family: var(--num); white-space: nowrap; }
+td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
+.rolls .forced .rn { color: var(--gold); }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
+.num { font-family: var(--num); }
+.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+ol { margin: .2rem 0; padding-left: 1.3rem; }
+li { margin: .15rem 0; }</style><div class="layout">
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="on" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
+<main><h1>Away, and what you can carry</h1><p class="lead">The game keeps earning while the window is shut — at the same kill rate and the same loot count, on the shallowest quality the zone can roll. Nothing is deleted and nothing is auto-converted while you are not there to decide.</p><section><h2>While the window is shut</h2><p class="note">A snapshot guards the file against corruption only. A restore rewinds the whole account, so it is never an undo button for a decision you did not like.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>How long it keeps paying</td><td><span class="num">12</span> hours</td><td><code>inventory.offline_cap_hr</code></td></tr><tr><td>The farm while away</td><td><span class="num">12.0</span> hours</td><td><code>farm.offline_cap_hours</code></td></tr><tr><td>Snapshots</td><td>3 walking copies, one every 10 minutes</td><td><code>save.snapshot_*</code></td></tr><tr><td>What else writes one</td><td>level · ascend · refine</td><td><code>save.snapshot_triggers</code> — a level up, and a successful Ascend or Refine</td></tr></tbody></table></section>
+<section><h2>What away rolls at</h2><p class="note">Away pays the floor of the ladder, not the ceiling: a drop’s Item quality band reads one step down (<code>floorOf</code>) and its Item level is clamped to where that band begins (<code>floorLevelOf</code>). Being in the chair is what lets a zone roll its own band at all.</p><table><thead><tr><th>Item quality band</th><th>A window of</th><th>An away drop reads as</th><th>That floor’s own window starts at</th></tr></thead><tbody><tr><td>low 1-30</td><td><span class="hy">1-30</span></td><td>low</td><td><span class="num">1</span></td></tr><tr><td>mid 31-60</td><td><span class="hy">31-60</span></td><td>low</td><td><span class="num">1</span></td></tr><tr><td>high 61-90</td><td><span class="hy">61-90</span></td><td>mid</td><td><span class="num">31</span></td></tr></tbody></table></section>
+<section><h2>The streams an Elite or a Boss owns</h2><p class="note">The value half of the craft engine keeps running while you are away, because a dissolved piece pays it. Everything else on this table is a reason to be in the chair — see <a href="crafting.html">Crafting</a> for what each stone spends.</p><table><thead><tr><th>Stone or piece</th><th>Every kill</th><th>An Elite</th><th>A Boss</th></tr></thead><tbody><tr><td>Tier stone</td><td>one per 500 pieces dissolved</td><td><span class="num">0.05</span></td><td><span class="num">3</span></td></tr><tr><td>Value stone</td><td>one per piece dissolved</td><td><span class="hy">same</span></td><td><span class="hy">same</span></td></tr><tr><td>Add stone</td><td>never</td><td>0.6%</td><td><span class="num">1</span></td></tr><tr><td>Quality</td><td>1.0%</td><td>25.0%</td><td><span class="num">24</span></td></tr><tr><td>Repair</td><td>never</td><td>5.0%</td><td><span class="num">1</span></td></tr><tr><td>Replace</td><td>never</td><td>0.3%</td><td>50.0%</td></tr><tr><td>Imprint</td><td>never</td><td>1.0%</td><td><span class="num">2</span></td></tr><tr><td>Corrupt</td><td>never</td><td>never</td><td>25.0%</td></tr><tr><td>A skill piece</td><td>0.1%</td><td>8.0%</td><td>35.0%</td></tr></tbody></table></section>
+<section><h2>The two bags</h2><p class="note">A full bag is a pause, never a loss: <code>inventory.overflow</code> reads “stop_pickup” — pickups stop, nothing auto-converts and nothing is deleted, and the client says which happened. A piece that cannot be carried is left on the ground. Stash and crafting are settlement services, and the Stash is one warehouse that every settlement’s counter opens.</p><table><thead><tr><th>Bag</th><th>Slots</th><th>What goes in it</th><th>How it stacks</th><th>What it weighs</th></tr></thead><tbody><tr><td>Adventure bag</td><td><span class="num">100</span></td><td>gear loot, one piece per slot</td><td>one piece a slot</td><td>counted against your weight capacity</td></tr><tr><td>Character bag</td><td><span class="num">50</span></td><td>what you carry to use: stones, herbs, potions</td><td>stones 999 a slot · herbs and potions 100 a slot</td><td>stones 0.00 · herbs and potions 0.10 each</td></tr><tr><td>Gold</td><td>no slot at all (<code>gold_uses_slot</code>)</td><td>the junk money</td><td>—</td><td>—</td></tr><tr><td>Junk</td><td>999 a slot</td><td>what the Counterhand buys</td><td>deep stacks</td><td>0.00 each</td></tr></tbody></table></section>
+<section><h2>Weight</h2><p class="note">The tax is a slowdown, never a slot lock: a full bag swings slower and still swings. A heavy frame is therefore a weight question before it is a damage question, and Mastery answers it — −1% weight a level while that weapon is held (<code>masteryBonus</code>).</p><table><thead><tr><th>Carried</th><th>The cut to your attack speed</th><th>Read from</th></tr></thead><tbody><tr><td>Your capacity</td><td><span class="num">207.5</span> at the even split — Str is the only line that lifts it</td><td><code>weightCapacityOf</code></td></tr><tr><td>At capacity or under</td><td>0.0% cut</td><td><code>encumbranceOf</code></td></tr><tr><td>A tenth over</td><td>10.0% cut</td><td><code>encumbranceOf</code></td></tr><tr><td>Half again over</td><td>50.0% cut, and that is the bound — <code>caps.weight_overload</code> is where the tax stops climbing</td><td><code>encumbranceOf</code></td></tr></tbody></table></section>
+<section><h2>The bag filter</h2><p class="note">Only a slot whose filter is armed dissolves a piece, and a dissolved piece pays the Value stone. Stones are always kept.</p><table><thead><tr><th>Line</th><th>What it does</th><th>The number</th></tr></thead><tbody><tr><td>Upgrade margin</td><td>keeps a piece only when it beats what you wear in the same slot by more than noise</td><td><span class="num">10%</span></td></tr><tr><td>Keep a missing Element</td><td>keeps Elemental resistance of an Element you do not hold</td><td>yes</td></tr><tr><td>On by default</td><td>a fresh character keeps every drop and dissolves nothing</td><td>no</td></tr><tr><td>Stored per slot</td><td>a player setting, so a raised threshold is never a second copy of the number</td><td><span class="hy"><code>loot.filter.rules</code></span></td></tr></tbody></table></section>
+<section><h2>Junk: the only mint</h2><p class="note">The last column is the whole design of the stream: it is the same figure at every kind, so a variant moving between kinds buys drop frequency, never income. Junk weighs nothing and stacks deep, so it fills slots — which is what sends you home.</p><table><thead><tr><th>Junk kind</th><th>Sells for</th><th>A kill pays it</th><th>Expected gold a kill</th></tr></thead><tbody><tr><td>common</td><td><span class="num">1 gold</span></td><td>13.4%</td><td><span class="num">0.13</span></td></tr><tr><td>uncommon</td><td><span class="num">5 gold</span></td><td>2.7%</td><td><span class="num">0.13</span></td></tr><tr><td>rare</td><td><span class="num">25 gold</span></td><td>0.5%</td><td><span class="num">0.13</span></td></tr></tbody></table></section>
+<p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
+</main></div></body></html>

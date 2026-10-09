@@ -1,7 +1,42 @@
 {
   "meta": {
-    "note": "Deprecated terms — the record of what was renamed. Nothing machine-reads this file any more (the doc linter is gone), so it is the human answer to \"what did this used to be called\". Add an entry whenever a term is renamed.",
+    "note": "Deprecated terms and retired doc names — the record of what was renamed. `tools/check.ts` machine-reads both blocks: the term list is gate X59 (a retired word must not creep back), the `docs` list is gate L10 (a pointer to a doc that no longer exists must name the home that took its numbers). Add an entry whenever a term or a doc is renamed.",
     "terms": []
+  },
+  "docs": {
+    "note": "The prose shelf collapsed to `doc/start/` plus the root rules. Each key is a retired doc; the value names the file that owns its content now, so a citation of a retired name still resolves.",
+    "combat.md": "engine/index.ts (the damage layers) · tools/survival.ts",
+    "core-stats.md": "tools/data/engine.json `stat` + `K`",
+    "crafting.md": "tools/data/engine.json `craft` · engine/craft.ts",
+    "checks.md": "tools/check.ts (the engine cage's gates)",
+    "character-sheet.md": "game/src/ui (the character sheet view)",
+    "economy.md": "tools/data/engine.json `junk` + `loot` · tools/data/town.json prices",
+    "elements.md": "tools/data/engine.json `elements` · engine/skills.ts",
+    "equipment-slot.md": "tools/data/bases.json `slots`",
+    "equipment-slot-pools.md": "tools/data/bases.json `slots` (the per-slot pools)",
+    "equipment-slot-armor.md": "tools/data/bases.json `slots` (the armour slots)",
+    "equipment-slot-weapon.md": "tools/data/bases.json `weapon_pools`",
+    "equipment-weapon.md": "tools/data/bases.json `weapons` + `weapon_frames` · engine/mastery.ts",
+    "farm.md": "tools/data/engine.json `farm` + `herbs` · engine/farm.ts",
+    "formula.md": "engine/index.ts (the stat model the K values feed)",
+    "formula-defense.md": "engine/index.ts (the defence layers) · tools/data/engine.json `energy_shield`",
+    "formula-offense.md": "engine/skills.ts (the offensive rows)",
+    "formula-utility.md": "engine/skills.ts (the utility rows: mana, cast, aspd)",
+    "idea-gameplay.md": "draft/stall.md (the parked idea shelf)",
+    "item-base.md": "tools/data/bases.json `bases`",
+    "item-level.md": "tools/data/engine.json `item_level`",
+    "loot.md": "tools/data/engine.json `loot` · tools/data/mods.json · tools/loot.ts",
+    "mob-roster.md": "tools/data/engine.json `mob.species` · tools/ladder.ts",
+    "mod-pool.md": "tools/data/mods.json `mods`",
+    "save.md": "game/src/state/save.ts (the versioned save and its migrations)",
+    "skill-pool.md": "tools/data/skills.json `skills`",
+    "skill-pool-attack.md": "tools/data/skills.json `skills` (the attack rows)",
+    "skill-pool-aura-heal.md": "tools/data/skills.json `skills` (the aura and heal rows)",
+    "skill-pool-system.md": "tools/data/skills.json `skills` (the system rows)",
+    "skill-tree.md": "tools/data/tree.json · engine/tree.ts",
+    "towns.md": "tools/data/town.json `settlements` + `npcs`",
+    "towns-stalls.md": "tools/data/town.json `one_time` + `repeatable` + `standing`",
+    "world.md": "tools/data/engine.json `mob.zones` · tools/data/map.json"
   },
   "terms": [
     {
@@ -71,15 +106,77 @@
         "equipment-slot-pools.md",
         "DECISIONS.md"
       ],
-      "note": "the Mod-count axis retired: the Normal line count is drawn from the range `item_level.stat_mod_slots` publishes, and the level answers the value window, so no drop carries a Rarity band. The allow-list is the files that must name the retired word (D4's ban, the glossary substitution table) plus the unrelated word — junk rung (junk.rarities), the Elite flag, and Mod roll weight — which happens to be spelled the same",
+      "note": "the Mod-count axis retired: the Unbound line count is drawn from the range `item_level.unbound_slots` publishes, and the level answers the value window, so no drop carries a Rarity band. The allow-list is the files that must name the retired word (the Rarity ban in the glossary substitution table) plus the unrelated word — junk rung (junk.rarities), the Elite flag, and Mod roll weight — which happens to be spelled the same",
       "allow_in_data": [
         "tools/data/engine.json"
       ]
     },
     {
+      "old": "Reroll value stone",
+      "new": "Value stone",
+      "allow_in": [
+        "glossary.md"
+      ],
+      "note": "the purse item is the stone; the press it buys is named in engine/craft.ts PRESS_NAME (Reroll value on a line / on a random line), so a stone name no longer carries a verb"
+    },
+    {
+      "old": "Reroll tier stone",
+      "new": "Tier stone",
+      "allow_in": [
+        "glossary.md"
+      ],
+      "note": "one stone buys four tier presses: Refine a line, Roll a tier on a line, Roll a new Mod on a line, Roll a new Mod on the piece"
+    },
+    {
+      "old": "Add mod stone",
+      "new": "Add stone",
+      "allow_in": [
+        "glossary.md"
+      ],
+      "note": "no stone name says mod any more — every purse item buys a Mod line"
+    },
+    {
+      "old": "Remove mod stone",
+      "new": "Remove stone",
+      "allow_in": [
+        "glossary.md"
+      ],
+      "note": "as above; the two presses are Remove a Mod on a random line and on a line"
+    },
+    {
       "old": "Legacy Mod",
       "new": "Sub Mod",
-      "note": "the lines 2-3 of a drop; the data key moved with it (item_level.legacy_slots -> item_level.sub_slots)"
+      "note": "the lines 2-3 of a drop; the data key moved with it (item_level.legacy_slots -> item_level.sub_slots, then sub_slots -> bound_slots)"
+    },
+    {
+      "old": "Base Mod",
+      "new": "Frame Mod",
+      "note": "line 1, the frame's own line; the data key moved with it (loot.base_mod -> loot.frame_mod, item_level.base_mod_slots -> item_level.frame_mod_slots)"
+    },
+    {
+      "old": "Sub Mod",
+      "new": "Bound Mod",
+      "note": "the lines 2-3 of a drop, rolled at drop and locked against every stone"
+    },
+    {
+      "old": "Sub pair",
+      "new": "Bound pair",
+      "note": "the two Bound lines as a unit"
+    },
+    {
+      "old": "Sub line",
+      "new": "Bound line",
+      "note": "one Bound line"
+    },
+    {
+      "old": "Normal Mod",
+      "new": "Unbound Mod",
+      "note": "the rolled lines past the Bound pair; the data key moved with it (item_level.stat_mod_slots -> item_level.unbound_slots)"
+    },
+    {
+      "old": "Normal line",
+      "new": "Unbound line",
+      "note": "one Unbound line"
     }
   ]
 }

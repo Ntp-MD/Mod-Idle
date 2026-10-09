@@ -3,7 +3,7 @@ import { E, eng, sm } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { playerSwing } from '../src/sim/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Item, Mob } from '../src/sim/types';
 
 const mobOf = (innate: string[]): Mob => ({
@@ -89,6 +89,7 @@ describe('a weapon carries the Element its own line stores', () => {
 
   it('is in play inside the sim, where a counter pair is a normal fact of the zone', () => {
     const s = newGame(71);
+    huntZone(s, s.zone);
     setLevel(s, 40);
     s.zone = 4; // a lightning zone, so a fire weapon sits in the 0.60 counter pair
     s.gear = weaponWith('fire');

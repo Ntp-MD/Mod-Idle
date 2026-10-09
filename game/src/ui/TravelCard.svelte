@@ -8,22 +8,26 @@
    * `data-node`, never off a coordinate).
    */
   let {
-    settlement, cell, walk, busy = false, fare = 0, afford = true,
-    onwalk, onwarp, onhunt, ondesk, onclear,
+    settlement, cell, walk, busy = false, fare = 0, afford = true, dungeon = null,
+    onwalk, onwarp, onhunt, ondesk, onclear, ondungeon,
   }: {
     settlement: any;
-    cell: { cell: string; kind: 'town' | 'sub' | 'wild'; label: string } | null;
+    cell: { cell: string; kind: 'town' | 'sub' | 'wild'; label: string; wild?: number | null } | null;
     walk: { self: boolean; blocks: number; sec: number; here: boolean; walking: boolean } | null;
     busy?: boolean;
     /** what the Waypoint charges to reach this settlement, read off `town.json` by the caller */
     fare?: number;
     afford?: boolean;
+    /** the run the card speaks for: inside with a count, or outside with the cooldown left */
+    dungeon?: { active: boolean; left: number; total: number; cooldown: number } | null;
     onwalk: (id: string) => void;
     onwarp: (id: string) => void;
     onhunt: (zone: number) => void;
     ondesk: () => void;
     onclear: () => void;
+    ondungeon: () => void;
   } = $props();
+  const isDungeon = cell?.kind === 'wild' && (cell?.wild ?? -1) === 0;
 </script>
 
 <div class="dest">
@@ -33,6 +37,18 @@
     : cell?.kind === 'wild' ? 'a wild side of ' + settlement.name + ', no content written into it yet'
     : settlement.name}</span>
   <span>zone {settlement.zone} · {settlement.band} band{settlement.capital ? ' · ' + settlement.capital + ' capital' : ''}</span>
+  {#if isDungeon}
+    <span>the dungeon of {settlement.name} — one run fields {E.dungeon.mob_cap} mobs in encounters of {E.dungeon.group_cap}, loot waits in escrow until the last one falls, a Push forfeits it</span>
+    {#if dungeon?.active}
+      <span>inside — {dungeon.left} of {dungeon.total} left</span>
+    {:else if (dungeon?.cooldown ?? 0) > 0}
+      <span>cooling down — {dungeon.cooldown}s left</span>
+    {:else if walk?.self}
+      <span><button onclick={ondungeon}>enter the dungeon</button></span>
+    {:else}
+      <span>stand in this settlement to enter</span>
+    {/if}
+  {/if}
   {#if walk?.self}
     <span>you are standing in this settlement — nothing to walk</span>
   {:else}

@@ -30,7 +30,7 @@ const ROAD = createRoad(E);
 
 const {
   S, K, M, LG, L, C, TS, ES, CAP, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
-  DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap, statWithItems,
+  DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, goldPrice, agiForCap, statWithItems,
   mobEvasion, sizeMult, playerAccuracy, hitVs, hitChance, MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION,
   armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt,
   mobStat, mobStatsOf,
@@ -91,7 +91,7 @@ function engineForTown(townEngine: any): any {
 
 export {
   ROOT, E, S, K, M, LG, L, C, TS, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
-  DERIVED, REF, REFERENCE, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, agiForCap,
+  DERIVED, REF, REFERENCE, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, goldPrice, agiForCap,
   statWithItems, mobEvasion, sizeMult, playerAccuracy, hitVs, MEAN_SPECIES_DEX, SPECIES_EVASION, MOB_EVASION_REF,
   armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt,
   mobStat, mobStatsOf, typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, mobAcc, mobDodge, refAttackerAcc, mobRoster,

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { eng, loot, sm } from '../src/engine/client';
-import { newGame, tick, setLevel } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import { target } from '../src/sim/goal';
 import { ACTIVE_SLOTS } from '../src/sim/skills';
 import type { GameState, Item, Phase } from '../src/sim/types';
@@ -81,6 +81,7 @@ function fightBoss(s: GameState) {
 /** The character the gate is fought with: dressed to the zone ceiling, no hunt and no clock. */
 function dressed() {
   const s = newGame(20261006);
+  huntZone(s, s.zone);
   setLevel(s, target().level);
   s.zone = target().zone;
   s.gear = ceilingGear();

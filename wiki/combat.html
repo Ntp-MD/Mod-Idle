@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combat</title></head>
+<body><style>:root {
+  color-scheme: dark;
+  --bg: #0f1217;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #e3e9f2;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #4fc3f7;
+  --xp: #f1c40f;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
+  --rail: 4.4rem;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur */
+  --dof-rest: 9px;
+  --dof-near: 2.5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+nav a { color: var(--dim); }
+nav a.on { color: var(--gold); }
+main { flex: 1; min-width: 0; }
+h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+.lead { color: var(--dim); margin: 0 0 2rem; }
+section { margin: 0 0 2.2rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: .82rem; margin: .3rem 0 .6rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; }
+thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
+.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; }
+.twrap table { min-width: 56rem; }
+td:first-child { white-space: nowrap; }
+.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
+.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
+.rolls .rn { position: relative; flex: 1; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: .72rem; white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: .72rem; white-space: nowrap; }
+td .hy { color: var(--dim); font-size: .8rem; }
+.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: .74rem; }
+.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx li:last-child { border-bottom: 0; }
+.fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
+.fx .fk em { color: var(--text); font-style: normal; }
+.fx .fs { color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.fx .fv { font-family: var(--num); white-space: nowrap; }
+td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
+.rolls .forced .rn { color: var(--gold); }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
+.num { font-family: var(--num); }
+.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+ol { margin: .2rem 0; padding-left: 1.3rem; }
+li { margin: .15rem 0; }</style><div class="layout">
+<nav><a class="" href="index.html">Start here</a><a class="on" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
+<main><h1>Combat</h1><p class="lead">One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Every number is the engine at the reference build (every point spent evenly across the seven Core stats, level <span class="num">190</span>), so it is the line your own sheet is measured against, not a promise about it.</p><section><h2>The order a hit resolves</h2><p class="note">Chaos is the Element that walks straight past Energy Shield (<code>energy_shield.chaos_bypasses</code>), so a shield does not answer it. A status lands on its own roll — the Alignment gate is on <a href="skills.html">Skills</a>.</p><table><thead><tr><th>Step</th><th>What it decides</th><th>Cap</th><th>What the reference build holds</th></tr></thead><tbody><tr><td>Perfect dodge</td><td>deletes the hit outright, and nothing the attacker has opposes it</td><td><span class="num">21</span></td><td><span class="hy">19% from 13.0 rating — <code>perfectDodgeChance</code></span></td></tr><tr><td>Evasion</td><td>the dodge roll: a Dex rating plus the Agi percentage points, added and then capped together</td><td><span class="num">80</span></td><td><span class="hy">54.2 rating before the Agi points are added — <code>evasionRating</code>, <code>evasionChance</code></span></td></tr><tr><td>Block</td><td>rolled last of the three avoidances; a blocked hit is cut by a flat amount read off your Armour rather than deleted</td><td><span class="hy">no Cap</span></td><td><span class="hy">the Shield offhand’s own line is the only source — <code>caps.block_note</code></span></td></tr><tr><td>Armour</td><td>shrinks only the non-Element part of the hit, as a diminishing ratio</td><td><span class="hy">no Cap on the rating</span></td><td><span class="hy">867 — <code>armourOf</code> — removing 10.2% of a boss-priced hit and 53.3% of a trash-priced one (<code>armour_vs_zone9_boss</code>, <code>armour_vs_zone9_trash</code>)</span></td></tr><tr><td>Elemental resistance</td><td>shrinks the Element part of the hit, separately per Element</td><td><span class="num">75</span></td><td><span class="hy">90% raw from three pieces, which <code>resistanceOf</code> then holds at the Cap — and <code>res_raw</code> is 0, because no Core stat feeds it: it is a gear line alone</span></td></tr><tr><td>Energy Shield</td><td>the caster’s second pool, spent before Health, and shut out for a moment after any hit</td><td><span class="hy">no Cap</span></td><td><span class="hy">70 pool, 2.1 a second, a full pool back in 33 sec, worth 1.6% of your Health — <code>maxEsOf</code>, <code>esRegenOf</code></span></td></tr><tr><td>Health</td><td>the pool every layer above exists to protect</td><td><span class="hy">no Cap</span></td><td><span class="hy">12,596 — <code>DERIVED.hp</code></span></td></tr></tbody></table></section>
+<section><h2>Hit chance, both directions</h2><p class="note">A stopped clock is not a locked one: our stun chance has no Cap (<code>caps.stun</code>) and a mob can never be stun-locked — the control bounds are on the status table in <a href="skills.html">Skills</a>.</p><table><thead><tr><th></th><th>The engine’s own names</th><th>The reference figure</th></tr></thead><tbody><tr><td>You hitting a mob</td><td><code>playerAccuracy</code> · <code>hitChance</code> · <code>hitVs</code></td><td>94.3% against the mean species on a Medium body, which holds 49.1 Evasion</td></tr><tr><td>A mob hitting you</td><td><code>evasionChance</code>, then the three avoidance layers above</td><td>you hold <span class="num">813</span> of accuracy yourself, so the same roll runs backwards on you</td></tr><tr><td>Crit</td><td><code>critPool</code> · <code>critChanceOf</code> · <code>critDmgOf</code></td><td>30% chance · 220% damage — anything the pool holds past what the chance line takes is spent on damage, never wasted</td></tr><tr><td>Stun</td><td><code>stunChanceFrom</code> · <code>stunRecoveryOf</code> · <code>stunStopSec</code></td><td>9.5% a hit · Vit lets you shake off 13% of a mob’s stop time</td></tr></tbody></table></section>
+<section><h2>What shape of fight pays what</h2><p class="note">The multiplier rides the <em>physical</em> share of a finished hit, after mitigation, so a spell is exempt and a staff’s own swing is not — <code>applySizeMult</code>. A Boss is not a fifth body: it reads as large.</p><table><thead><tr><th>Body</th><th>Health</th><th>Damage</th><th>Comes in</th><th>What a weapon does to it</th></tr></thead><tbody><tr><td>Small</td><td>×0.7</td><td>×0.7</td><td>up to 5</td><td><span class="hy">dagger ×1.25 · mace ×0.75 · wand ×0.75 · staff ×0.75 · spear ×1.25 · two-handed sword ×0.75 · two-handed axe ×0.75 · bow ×1.25 · crossbow ×0.75</span></td></tr><tr><td>Medium</td><td>×1.0</td><td>×1.0</td><td>up to 5</td><td><span class="hy">dagger ×0.90 · mace ×0.90 · wand ×0.90 · staff ×0.90 · spear ×0.90 · two-handed sword ×0.90 · two-handed axe ×0.90 · bow ×0.90 · crossbow ×0.90</span></td></tr><tr><td>Large</td><td>×1.7</td><td>×1.4</td><td>alone</td><td><span class="hy">dagger ×0.75 · mace ×1.25 · wand ×1.25 · staff ×1.25 · spear ×0.75 · two-handed sword ×1.25 · two-handed axe ×1.25 · bow ×0.75 · crossbow ×1.25</span></td></tr></tbody></table></section>
+<section><h2>The reach queue</h2><p class="note">A group is a queue, front line first, and only the front slot swings at you. A reach-1 attack that loses its front target waits a beat for the group to close; reach 2 and 3 keep pressing — <code>mob.reach.rules</code>.</p><table><thead><tr><th>Weapon</th><th>Queue slots it may hit</th><th>Band</th></tr></thead><tbody><tr><td>sword</td><td><span class="num">1</span></td><td>melee</td></tr><tr><td>axe</td><td><span class="num">1</span></td><td>melee</td></tr><tr><td>dagger</td><td><span class="num">1</span></td><td>melee</td></tr><tr><td>mace</td><td><span class="num">1</span></td><td>melee</td></tr><tr><td>spear</td><td><span class="num">2</span></td><td>reach</td></tr><tr><td>two-handed sword</td><td><span class="num">2</span></td><td>reach</td></tr><tr><td>two-handed axe</td><td><span class="num">2</span></td><td>reach</td></tr><tr><td>bow</td><td><span class="num">3</span></td><td>standoff</td></tr><tr><td>crossbow</td><td><span class="num">3</span></td><td>standoff</td></tr><tr><td>staff</td><td><span class="num">3</span></td><td>standoff</td></tr><tr><td>wand</td><td><span class="num">3</span></td><td>standoff</td></tr><tr><td>book</td><td><span class="num">3</span></td><td>standoff</td></tr></tbody></table></section>
+<section><h2>Area, bolts and conversion</h2><p class="note">Whether a weapon swings or casts a bolt is read off its own damage line, so a wand cannot be a bolt in one file and a swing in another.</p><table><thead><tr><th>Line</th><th>What it does</th><th>The number</th></tr></thead><tbody><tr><td>Area damage</td><td>each target hit takes a share of the hit, and the targets come out of the reach queue</td><td>60% each · <span class="num">3</span> targets · ×1.50 mana — <code>aoe</code></td></tr><tr><td>A bolt</td><td>a magic weapon has no swing: its filler is a press on the attack clock, with no mana and no cooldown</td><td>103% of a finished hit — <code>weapon_size_mult.bolt_share_pct</code> · <code>basicAttackOf</code></td></tr><tr><td>Conversion</td><td>a percent of the finished physical share, routed into a named Element <em>before</em> mitigation, so that half answers resistance instead of Armour</td><td><code>convertDamageOf</code> — the budget is the whole hit and overflow is wasted, never a multiplier</td></tr></tbody></table></section>
+<section><h2>Bleed, the one damage-over-time that is not an Element</h2><p class="note">It is on this page rather than under <a href="elements.html">Elements</a> because it is the one damage-over-time with no counter stat at all.</p><table><thead><tr><th></th><th>The rule</th><th>Read from</th></tr></thead><tbody><tr><td>Who puts it on</td><td>the Lacerate curse, on its own cooldown</td><td><code>bleed.curse_id</code> · every 14 sec, holding 10 sec = 71% uptime</td></tr><tr><td>Does it stack</td><td>no</td><td><code>bleed.stacks</code> — a new application refreshes the duration instead</td></tr><tr><td>Is it an Element</td><td>no</td><td><code>bleed.is_element</code> — Elemental resistance does not answer it</td></tr><tr><td>Can it crit</td><td>no</td><td><code>bleed.can_crit</code></td></tr><tr><td>Does Armour shrink it</td><td>no</td><td><code>bleed.affected_by_armour</code> — nothing mitigates it but time, heal and Energy Shield</td></tr><tr><td>What it scales with</td><td>the physical of one hit, not your swing count</td><td><code>bleed.note</code> — a slow heavy weapon is the bleed build</td></tr><tr><td>On the mob side</td><td>the heavy physical lineages put bleed on us out of the damage they are already priced at</td><td><code>bleed.mob_side</code> — no extra power, so no health line moves</td></tr></tbody></table></section>
+<section><h2>Elite and Boss</h2><p class="note">An Elite is a spawn flag forced onto a Large body, never a fifth size, so no two multipliers ever stack. A Boss is one named creature per zone (18 of them) and is the only place the Add, Replace and Corrupt stones are paid — see <a href="idle.html">Away &amp; bag</a>. A mob spawns at your level clamped into its own zone’s range (<code>mob.level_rule</code>), which is why <a href="mobs.html">the Mob sheet</a> prints a range.</p><table><thead><tr><th></th><th>Health</th><th>Damage</th><th>Evasion</th><th>Comes in</th><th>How often</th></tr></thead><tbody><tr><td>Elite</td><td>×6</td><td>×4</td><td>×0.90</td><td>alone</td><td>20.0% of kills</td></tr><tr><td>Boss</td><td>×15</td><td>×10</td><td><span class="hy">reads as a body</span></td><td>alone</td><td>4.0 an hour, and online only</td></tr></tbody></table></section>
+<p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
+</main></div></body></html>

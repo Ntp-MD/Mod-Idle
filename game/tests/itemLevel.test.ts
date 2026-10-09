@@ -64,12 +64,12 @@ describe('the roll inside the window', () => {
     expect(loot.tierSlice(0.95)).toBe(0); // 17%: the top — best is never free
   });
 
-  it('keeps every Random line inside its own window at the level it dropped at', () => {
+  it('keeps every Unbound line inside its own window at the level it dropped at', () => {
     const rng = mulberry32(9);
     for (let i = 0; i < 400; i++) {
       const item = rollDrop(rng, 'high', span('high').to);
       // line 1 is the frame's own set (the flat lines its name declares) and is scaled by `value_scale` when it carries a second Mod, so
-      // it is deliberately below the window; the Random lines are the window's own
+      // it is deliberately below the window; the Unbound lines are the window's own
       for (const l of item.lines.slice(1)) {
         const [lo, hi] = loot.rangeOf(l.id, item.ilvl, item.q!, l.slice!);
         expect(l.value).toBeGreaterThanOrEqual(lo);
@@ -80,8 +80,8 @@ describe('the roll inside the window', () => {
 
   it('is stamped with the level it dropped at, on every piece', () => {
     const L = E.item_level;
-    const lo = L.base_mod_slots + L.sub_slots + L.stat_mod_slots.min;
-    const hi = L.base_mod_slots + L.sub_slots + L.stat_mod_slots.max;
+    const lo = L.frame_mod_slots + L.bound_slots + L.unbound_slots.min;
+    const hi = L.frame_mod_slots + L.bound_slots + L.unbound_slots.max;
     const rng = mulberry32(11);
     for (let i = 0; i < 200; i++) {
       const item = rollDrop(rng, 'mid', 45);

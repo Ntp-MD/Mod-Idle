@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { newGame, tick, catchUp, setLevel } from '../src/sim/game';
+import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/game';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { craft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
@@ -12,17 +12,19 @@ import { spendTreePoint, treeLines, treePointsSpent } from '../src/sim/tree';
 describe('offline time is AFK, not a second play session', () => {
   it('never spawns a boss while the player is away', () => {
     const s = newGame(41);
+    huntZone(s, s.zone);
     setLevel(s, 60);
     const r = catchUp(s, {}, 3600 * 3);
     expect(r.simulated).toBe(10800);
     expect(s.log.some((l) => /Boss spawn/.test(l.text))).toBe(false);
     expect(s.counters.kills).toBeGreaterThan(0);
-  });
+  }, 30000);
 
   it('the away period does not advance the boss clock (save.md)', () => {
     // bossDueAt is absolute clockSec, so away ticks used to satisfy it on the first online tick and
     // hand out a free boss. The remaining online time must be identical after the catch-up.
     const s = newGame(46);
+    huntZone(s, s.zone);
     setLevel(s, 60);
     s.bossDueAt = s.clockSec + 1000;
     const remainingBefore = s.bossDueAt - s.clockSec;
@@ -33,6 +35,7 @@ describe('offline time is AFK, not a second play session', () => {
 
   it('a boss does spawn on the same clock while online', () => {
     const s = newGame(42);
+    huntZone(s, s.zone);
     setLevel(s, 60);
     // tick to the state the test names — a boss on the log — not for a guessed window (AGENTS.md)
     for (let i = 0; i < 20000 && !s.log.some((l) => /Boss spawn/.test(l.text)); i++) tick(s, {});
@@ -41,6 +44,7 @@ describe('offline time is AFK, not a second play session', () => {
 
   it('limits offline drop quality to the zone floor', () => {
     const s = newGame(43);
+    huntZone(s, s.zone);
     setLevel(s, 80);
     s.zone = 9;
     // Tick until the away window has paid a drop, not for a guessed number of seconds: an ungeared
@@ -58,6 +62,7 @@ describe('offline time is AFK, not a second play session', () => {
 
   it('the same zone online rolls at the mobs the character actually fights', () => {
     const s = newGame(44);
+    huntZone(s, s.zone);
     setLevel(s, 80);
     s.zone = 9;
     // tick until a piece above the floor level lands, not for a guessed window: a fixed window makes
@@ -69,8 +74,9 @@ describe('offline time is AFK, not a second play session', () => {
 });
 
 describe('the salvage milestone (checks.md F15)', () => {
-  it('owes one Reroll tier stone per 500 pieces dissolved', () => {
+  it('owes one Tier stone per 500 pieces dissolved', () => {
     const s = newGame(45);
+    huntZone(s, s.zone);
     setLevel(s, 90);
     setRule(s.filter, 'all', { enabled: true }); // the filter ships off, so nothing would dissolve until it is armed
     // wear a full high-quality set so nearly every drop is a rejection

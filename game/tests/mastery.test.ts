@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import { BASES, eng } from '../src/engine/client';
 import { mastery, WEAPONS, weaponByName, payMastery, masteryLevel, dropBonusPct } from '../src/sim/mastery';
 import { rollDrop } from '../src/sim/drop';
-import { newGame, tick, heldWeaponName } from '../src/sim/game';
+import { newGame, tick, heldWeaponName, huntZone } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 
 const require = createRequire(import.meta.url);
@@ -58,6 +58,7 @@ describe('the held weapon is the only one that levels', () => {
 
   it('grows through the live loop and shows on the sheet', () => {
     const s = newGame(5);
+    huntZone(s, s.zone);
     // Tick until the loop has paid a kill, never for a guessed window (a time premise · AGENTS.md).
     for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
     const held = heldWeaponName(s)!;

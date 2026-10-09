@@ -158,7 +158,7 @@ for (const entry of MAP.cells) {
     const c = at(w.cell);
     claims.set(key(c[0], c[1]), {
       kind: 'wild', j, town: entry.town, cell: w.cell, zone, s,
-      name: s.name + ' ' + (j + 1),
+      name: j === 0 ? s.name + ' Dungeon' : s.name + ' ' + (j + 1),
     });
   });
   owned.push(entry.town);
@@ -321,7 +321,7 @@ function labelGroups() {
       ids.push(`    <text class="cellid" data-cell="${cell}" x="${h.x.toFixed(1)}" y="${(h.y + 22).toFixed(1)}">${cell}</text>`);
     };
     entry.subs.forEach((sub, j) => put(sub.cell, ((zone.subzones || [])[j] || {}).name || sub.cell, zone));
-    entry.wild.forEach((w, j) => put(w.cell, s.name + ' ' + (j + 1), zone));
+    entry.wild.forEach((w, j) => put(w.cell, j === 0 ? s.name + ' Dungeon' : s.name + ' ' + (j + 1), zone));
   }
   for (const [id, c] of CELLS) {
     if (claims.has(key(c.q, c.r))) continue;

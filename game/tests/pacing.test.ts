@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { newGame, tick, spendReference } from '../src/sim/game';
+import { newGame, tick, spendReference, huntZone } from '../src/sim/game';
 import { setRule } from '../src/sim/filter';
 
 /**
@@ -17,8 +17,9 @@ export const KILLS_AFTER_FULL = 200;
 const CAP = 200000;
 
 describe('the built loop keeps its promise once nothing can be picked up', () => {
-  it('keeps minting Reroll value stones with the adventure bag full', () => {
+  it('keeps minting Value stones with the adventure bag full', () => {
     const s = newGame(20260104);
+    huntZone(s, s.zone);
     // phase 1: hunt with the filter OFF — the ships-default — so the adventure bag actually fills and
     // pickups pause. That is the state the promise is about, and it is reached by ticking to it, never
     // by a window of hours (a bag's fill pace is the player's own · AGENTS.md).

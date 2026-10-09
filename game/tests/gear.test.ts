@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { BASES, STAT_KEYS, loot } from '../src/engine/client';
-import { newGame, tick, equippedCount } from '../src/sim/game';
+import { newGame, tick, equippedCount, huntZone } from '../src/sim/game';
 import { equipFromBag, gearModOf, autoEquip } from '../src/sim/gear';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { craft as clientCraft } from '../src/sim/craft';
@@ -80,6 +80,8 @@ describe('equipping from the bag', () => {
 
   it('never happens by itself while the character is hunting', () => {
     const s = newGame(73);
+    huntZone(s, s.zone);
+    huntZone(s, s.zone);
     const atStart = equippedCount(s);
     // hunt until the loop has actually banked a piece, so the reading is taken on a live bag rather
     // than after a guessed window (a time premise · AGENTS.md)

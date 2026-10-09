@@ -21,4 +21,6 @@ export const CAGES: { label: string; script: string; args: string[] }[] = [
   { label: 'survival cage', script: 'tools/survival.ts', args: ['--checks'] },
   { label: 'inventory cage', script: 'tools/inventory.ts', args: ['--checks'] },
   { label: 'map cage', script: 'tools/map.ts', args: ['--checks'] },
+  { label: 'dungeon cage', script: 'tools/dungeon.ts', args: ['--checks'] },
+  { label: 'imprint cage', script: 'tools/imprint.ts', args: ['--checks'] },
 ];

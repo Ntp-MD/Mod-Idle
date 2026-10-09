@@ -4,18 +4,12 @@
 
 
 
-# Dashboard snapshot: node tools/report.ts
-
-
-# Pre-write snapshots taken by the wiki editor: tools/lib/store.ts
-
-
 # Local browser-automation logs
 .playwright-mcp/
 
 # Owner-private idea parking - local only, never synced, never read by agents
 # unless the owner assigns the exact file path in chat.
-# owner/
+owner/
 
 
 # Installed dependencies and build output for the client

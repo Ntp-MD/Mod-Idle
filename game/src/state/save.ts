@@ -19,7 +19,7 @@ import { E, BASES, eng, loot } from '../engine/client';
 // set to a thirteenth slot, the earring, so a v5 gear array is padded back to full length.
 // v9 is the item level: the value window moved onto the level and Rarity was retired, and a v8 item
 // gains the level its band starts at with its labels flipped onto the new order. A v9 item keeps
-// whatever line count it holds — the Normal count is drawn at drop from `item_level.stat_mod_slots`,
+// whatever line count it holds — the Normal count is drawn at drop from `item_level.unbound_slots`,
 // which is data, not schema. v10 deletes the hunt
 // systems: the per-zone Hunt Order and the per-zone hunting ground are gone, so a v9 save's fields for
 // them are dropped — the variant's own lean is the only lean left. v11 is the HUD's transient event
@@ -234,10 +234,10 @@ export async function readSave(slot: SlotName): Promise<GameState | null> {
 }
 
 /**
- * A v3 item predates the 7-line skeleton, so it gains the Base Mod its frame forces and keeps every
- * line it had — the old Sub pair slides to lines 2-3 (``). The line is built at the lowest value of
+ * A v3 item predates the 7-line skeleton, so it gains the Frame Mod its frame forces and keeps every
+ * line it had — the old Bound pair slides to lines 2-3 (``). The line is built at the lowest value of
  * the piece's window with no RNG, so two loads of one save agree to the digit. A frame the rename left
- * unmatched simply keeps its lines, with no Base Mod.
+ * unmatched simply keeps its lines, with no Frame Mod.
  */
 function restampItem(item: any): void {
   if (!item || !Array.isArray(item.lines)) return;
@@ -245,7 +245,7 @@ function restampItem(item: any): void {
   const weapon = frame ? null : BASES.weapons.find((w: any) => item.base === w.name) || null;
   const q = item.q ?? Math.max(0, loot.BAND_LABEL.indexOf(item.quality));
   const band = loot.BAND_LABEL[q] || 'low';
-  const base = loot.baseModAtFloor(BASES, item.slot, frame, weapon, item.ilvl ?? eng.floorLevelOf(band), q);
+  const base = loot.frameModAtFloor(BASES, item.slot, frame, weapon, item.ilvl ?? eng.floorLevelOf(band), q);
   if (base.length) item.lines = [...base, ...item.lines];
 }
 
@@ -309,6 +309,21 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     if (s.town) delete (s.town as any).linksBought;
   }
   if (!s.walk) s.walk = null;
+  if (!s.dungeon) s.dungeon = null;
+  // saves from before safe ground were always hunting: keep them hunting
+  if (s.hunting == null) s.hunting = true;
+  // pieces from before the drop-count stamp gain it back: current Unbound lines minus Add stones
+  // taken, so the +2 net cap reads the same on an old piece as on a fresh drop.
+  {
+    const stamp = (item: any) => {
+      if (!item || !Array.isArray(item.lines) || item.unbound_at_drop != null) return;
+      const untouchable = (E.item_level.frame_mod_slots || 1) + (E.item_level.bound_slots || 2);
+      item.unbound_at_drop = Math.max(0, item.lines.length - untouchable - (item.mods_added || 0));
+    };
+    for (const item of s.gear || []) stamp(item);
+    for (const item of s.bag || []) stamp(item);
+    for (const tab of s.stash || []) for (const item of tab || []) stamp(item);
+  }
   // v9 · the item level replaced Rarity. Every piece the save holds gains its level and its labels are
   // flipped onto the new order; the auto-dissolve setting moves off the Rarity axis onto the level one,
   // keeping the same idea (the named Rarity's own top level is where "keep above this" now starts).
