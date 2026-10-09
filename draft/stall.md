@@ -2,6 +2,8 @@
 
 # Queue
 
+- No need pre commit
+
 # Adjust
 
 - ทุกหิน cost 1 ก้อน
