@@ -1,5 +1,5 @@
 /**
- * Passive-tree cage — the 63-node / 189-rank tree in `tools/data/tree.json`.
+ * Passive-tree cage — the 64-node / 192-rank tree in `tools/data/tree.json`.
  *
  *   node tools/tree.ts            help
  *   node tools/tree.ts --emit     print every generated block
@@ -15,7 +15,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import * as eng from './lib/engine.ts';
+import { eng } from './lib/engine.ts';
+import * as G from './lib/gates.ts';
 import { createTree } from '../engine/tree.ts';
 import { readJson } from './lib/json.ts';
 
@@ -38,11 +39,11 @@ const pointsAtCap = eng.treePointsAt(eng.S.level_cap);
 // ---------------------------------------------------------------- gates
 
 function gates(): any[] {
-  const out: any[] = [];
-  const add = (id: string, ok: boolean, detail: string) => out.push({ id, ok, detail });
+  const { add, rows } = G.gates();
   const per = BRANCHES.map((b) => perBranch(b).length);
-  add('T1', BRANCHES.length === 3 && per.every((n) => n === 21) && NODES.length === 63,
-    `${BRANCHES.length} branches (${BRANCHES.join(' · ')}), ${per.join('/')} nodes each = ${NODES.length} nodes, ${RANKS} ranks each = ${ranksTotal} ranks`);
+  const WANT: Record<string, number> = { impact: 21, control: 22, stream: 21 };
+  add('T1', BRANCHES.length === 3 && BRANCHES.every((b) => perBranch(b).length === WANT[b]) && NODES.length === 64,
+    `${BRANCHES.length} branches (${BRANCHES.map((b) => `${b} ${perBranch(b).length}`).join(' · ')}), ${per.join('/')} nodes each = ${NODES.length} nodes, ${RANKS} ranks each = ${ranksTotal} ranks`);
   const badLine = NODES.filter((n) => !(n.max > 0));
   add('T2', badLine.length === 0,
     badLine.length ? `node(s) name a line mods.json does not carry: ${badLine.map((n) => `${n.id} ${n.line}`).join(' · ')}`
@@ -64,7 +65,7 @@ function gates(): any[] {
     chain.length ? `node(s) with a broken chain: ${chain.map((n) => n.id).join(' · ')}`
       : `each branch is one chain: node 1 is free, node k needs node k-1 (${BRANCHES.map((b) => `${b} 1→${perBranch(b).length}`).join(' · ')})`);
   add('T6', ranksTotal * COST === pointsAtCap,
-    `${NODES.length} nodes x ${RANKS} ranks x ${COST} point = ${ranksTotal * COST} points, and treePointsAt(level ${eng.S.level_cap}) grants ${pointsAtCap} — a level buys exactly one rank, and the tree spends every point the cap hands out`);
+    `${NODES.length} nodes x ${RANKS} ranks x ${COST} point = ${ranksTotal * COST} points, and treePointsAt(level ${eng.S.level_cap}) grants ${pointsAtCap} (${eng.S.tree_points_base} in hand at character creation + one a level) — a level buys exactly one rank, and the tree spends every point the cap hands out`);
   add('T7', NODES.every((n) => n.line && n.values.length === RANKS),
     'no keystones and no rule-only nodes: every node carries a line and its three values, so the whole tree is numbers (the removed tree put 100% of its power in 18 keystones)');
   const weak = NODES.filter((n) => {
@@ -75,7 +76,17 @@ function gates(): any[] {
   add('T8', weak.length === 0,
     weak.length ? `deep node(s) that are not stronger than their shallow twin: ${weak.map((n) => n.id).join(' · ')}`
       : `every repeated line is strictly stronger at its deep node than at its shallow one, so a longer chain is never a worse buy`);
-  return out;
+  // · the one Cap with an unlock (owner ruling): the control branch's last node raises `elem_res`, and
+  // the raise it buys at rank 3 is exactly the gap the data publishes — the tree can neither fall short
+  // of the unlocked ceiling nor pass it.
+  const capNode = NODES.find((n) => n.line === 'elemental_resistance_cap_pct');
+  const CAP0 = eng.E.caps.elem_res;
+  const CAP1 = eng.E.caps.elem_res_max;
+  add('T9', !!capNode && capNode.branch === 'control' && capNode.values[2] === CAP1 - CAP0
+    && eng.elemResCapOf(capNode.values[2]) === CAP1 && eng.elemResCapOf(capNode.values[2] + 100) === CAP1,
+    capNode ? `${capNode.id} (${capNode.line}) is the tree's Cap unlock: rank 3 raises ${capNode.values[2]}, so ${CAP0} + ${capNode.values[2]} = ${CAP1} = caps.elem_res_max, and elemResCapOf clamps any further raise at that ceiling`
+      : 'no node carries elemental_resistance_cap_pct, so the elem_res unlock has no source');
+  return rows();
 }
 
 // ---------------------------------------------------------------- blocks
@@ -86,7 +97,7 @@ function summaryBlock() {
     '|---|---|---|---|---|---|',
     ...BRANCHES.map((b) => {
       const nodes = perBranch(b);
-      const what = { impact: 'offence lines — power, crit, penetration, accuracy, attack speed, stun, bleed', control: 'defence lines — armour, evasion, block, resistance, HP, Energy Shield, cooldown', stream: 'sustain and Core stats — mana, regeneration, Energy Shield regen, Stat Mod' }[b] || '';
+      const what = { impact: 'offence lines — power, crit, penetration, accuracy, attack speed, stun, bleed', control: 'defence lines — armour, evasion, block, resistance, HP, Energy Shield, cooldown, and the resistance Cap unlock', stream: 'sustain and Core stats — mana, regeneration, Energy Shield regen, Stat Mod' }[b] || '';
       return `| **${b}** | ${what} | ${nodes.length} | ${nodes.length * RANKS} | ${nodes.length * RANKS * COST} | node k needs node k-1 |`;
     }),
     `| **total** | every node pays a number | **${NODES.length}** | **${ranksTotal}** | **${ranksTotal * COST}** | 3 chains |`,
@@ -108,11 +119,7 @@ function branchBlock(branch: string) {
 
 const arg = process.argv[2];
 if (arg === '--checks') {
-  const rows = gates();
-  for (const r of rows) console.log(`${r.id.padEnd(3)}  ${(r.ok ? 'PASS' : 'FAIL').padEnd(5)}  ${r.detail}`);
-  const fails = rows.filter((r) => !r.ok).length;
-  console.log(`\n${rows.filter((r) => r.ok).length}/${rows.length} gate PASS · ${fails} FAIL`);
-  if (fails) process.exitCode = 1;
+  G.report(gates());
 } else {
   console.log(`tree cage — data: tools/data/tree.json (the spec) + mods.json (the line maxima)
 

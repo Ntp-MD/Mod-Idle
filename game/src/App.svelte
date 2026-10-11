@@ -2,8 +2,8 @@
   import { onMount } from 'svelte';
   import { eng, E, sm, TOWN, BASES, tree } from './engine/client';
   import { buildCharacter } from './sim/player';
-  import { newGame, tick, push, fx, hitColour, catchUpAsync, carried, heldWeaponName, huntZone } from './sim/game';
-  import { reservedPct, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf } from './sim/skills';
+  import { newGame, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, carried, heldWeaponName, huntZone, huntHere } from './sim/game';
+  import { reservedPct, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf, condOf, appliedStatusOf, appliedCurseOf } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
   import { slotsUsed, slotsAvailable, pouchSlots, bagStacks } from './sim/slots';
@@ -16,8 +16,11 @@
   import CraftBoard from './ui/CraftBoard.svelte';
   import StashBoard from './ui/StashBoard.svelte';
   import KeybindTable from './ui/KeybindTable.svelte';
-  import { KEYBINDS, DEFAULT_BINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/keybinds';
+  import Minimap from './ui/Minimap.svelte';
+  import { KEYBINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/keybinds';
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
+  import { ramp, cellLabel, paintSheet, type Picked } from './ui/map';
+  import { fxByMob as bucketFx, plateBeat, plateStrike, plateGesture } from './ui/plate';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
     standingShare, standingTier, canTravel, claimTask, npcOf,
@@ -26,7 +29,7 @@
   import { farm, farmLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
   import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
 import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
-  import { road, startWalk, walkLabel, walkBlocks, walkRoute, warpTo, warpCost, warpRow, walkedCells } from './sim/road';
+  import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, warpRow, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
   import { enterDungeon, cooldownLeft } from './sim/dungeon';
   import { masteryLabel, dropBonusPct, masteryLevel, WEAPONS } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
@@ -36,35 +39,36 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   import { FILTER_SLOTS, ruleFor, setRule, describeRule } from './sim/filter';
   import { equipFromBag, autoEquip } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
-  import { target as goalTarget, describe as describeGoal } from './sim/goal';
+  import { describe as describeGoal } from './sim/goal';
   import { elementIcon, mobIcon, skillIcon } from './icon';
   import { bossMark } from './icon';
   // The HUD's own marks, from the same icon shelf the slots draw from — no second asset set.
-  import faceMark from './icon/001-sbed-helmet.svg?url';
-  import sheetMark from './icon/053-delapouite-black-knight-helm.svg?url';
-  import bagMark from './icon/110-delapouite-gauntlet.svg?url';
-  import skillMark from './icon/062-lorc-crossed-swords.svg?url';
-  import treeMark from './icon/045-lorc-leaf-skeleton.svg?url';
-  import mapMark from './icon/117-lorc-cloud-ring.svg?url';
-  import stashMark from './icon/037-lorc-padlock.svg?url';
+  import faceMark from './icon/equipment/helmet-1.svg?url';
+  import sheetMark from './icon/equipment/black-knight-helm.svg?url';
+  import bagMark from './icon/equipment/gauntlet-1.svg?url';
+  import skillMark from './icon/weapon/crossed-swords-1.svg?url';
+  import treeMark from './icon/misc/materials/leaf-skeleton.svg?url';
+  import mapMark from './icon/character/cloud-ring.svg?url';
+  import stashMark from './icon/interface/padlock.svg?url';
   // the town's own marks: a watch-shield for the hall, a hood for the clerk's desk, the armourer's
   // upgrade mark for the forge, and a bottle for the house that works the stones on a piece
-  import townMark from './icon/042-delapouite-cross-shield.svg?url';
-  import deskMark from './icon/113-lorc-hood.svg?url';
-  import forgeMark from './icon/076-delapouite-armor-upgrade.svg?url';
-  import craftMark from './icon/093-delapouite-magic-potion.svg?url';
-  import farmMark from './icon/090-lorc-droplets.svg?url';
-  import saveMark from './icon/010-delapouite-spell-book.svg?url';
-  import coinMark from './icon/080-delapouite-coins-pile.svg?url';
-  import stoneMark from './icon/035-lorc-crystal-cluster.svg?url';
-  import tuneMark from './icon/075-lorc-swirl-ring.svg?url';
+  import townMark from './icon/equipment/cross-shield.svg?url';
+  import deskMark from './icon/equipment/hood-1.svg?url';
+  import forgeMark from './icon/equipment/armor-upgrade.svg?url';
+  import craftMark from './icon/misc/potions/magic-potion-1.svg?url';
+  import farmMark from './icon/misc/droplets.svg?url';
+  import saveMark from './icon/equipment/spell-book.svg?url';
+  import coinMark from './icon/currency/coins-pile.svg?url';
+  import tuneMark from './icon/equipment/swirl-ring.svg?url';
+  import moreMark from './icon/interface/hexes.svg?url';
   // the field sheet, generated by tools/map.ts and inlined so the travel pin, the plotted route and
   // the picked cell are all toggled by id — the client reads no coordinate, only settlement ids and
   // cell keys it already holds (X33 · M7 · M10)
-  import mapOverlayRaw from '../../art/svg/map/map-overlay.svg?raw';
-  import type { GameState, Item } from './sim/types';
+  import mapOverlayRaw from './icon/map/map-overlay.svg?raw';
+  import type { GameState, Item, Cell, Mob, FxEvent } from './sim/types';
   import type { StatKey } from './engine/client';
   import type { Statuses } from './sim/combat';
+  import type { SkillConditions } from './sim/skills';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
   /**
@@ -78,12 +82,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    */
   const PANELS = ['bag', 'skills', 'tree', 'map', 'desk', 'stash', 'farm', 'save', 'town', 'market', 'forge', 'craft', 'keys'] as const;
   type PanelId = (typeof PANELS)[number];
-  /** The rail's own tabs. Bag and skills left it for the round screens on the cast order, so the rail
-      keeps the screens that have nowhere else on the field to be reached from. The settlement's screens
-      lead the order: they are the work a player comes into town to do, and the digit binds follow the
-      order the tabs print, so the rail is its own key legend. The warehouse is not a tab of its own —
-      in a settlement it *is* the bag's other side, which is what a full pile needs. */
-  const RAIL: PanelId[] = ['map', 'bag', 'town', 'market', 'forge', 'craft', 'skills', 'tree', 'desk', 'farm', 'save', 'keys'];
+  /** The rail's own tabs. The bag left it for its wedge on the main wheel, which carries the count
+      the tab could only repeat — the rail keeps the screens that have nowhere else on the field to be
+      reached from, and skills, which answers both to its tab and to its wheel sector. The
+      settlement's screens lead the order: they are the work a player comes into town to do, and the digit
+      binds follow the order the tabs print, so the rail is its own key legend. The warehouse is not a tab of
+      its own — in a settlement it *is* the bag's other side, which is what a full pile needs. */
+  const RAIL: PanelId[] = ['map', 'town', 'market', 'forge', 'craft', 'skills', 'tree', 'desk', 'farm', 'save', 'keys'];
   /** screens a settlement owns, refused in their own words when the character stands in the field */
   const TOWN_PANELS: PanelId[] = ['town', 'market', 'forge', 'craft', 'stash', 'desk'];
   /** what each rail tab is drawn with, and the word under it */
@@ -109,7 +114,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let gameState = $state<GameState>(newGame());
   let statuses: Statuses = {};
   let running = $state(true);
-  let panel = $state<PanelId | null>(null);
+  /** The clock's own pace: how many sim seconds a real second spends. ×1 is the designed beat. */
+  let speed = $state(1);
+  // the game opens on the ground, not on the fight: the first read is where the character stands and
+  // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame
+  let panel = $state<PanelId | null>('map');
+  /** the More box: the whole menu in one grid under the bar, opened by its own tab */
+  let more = $state(false);
+  /** the hub's drag offset from its docked corner, in px — restored from the client settings on load */
+  let hub = $state({ x: 0, y: 0 });
+  /** whether the hub is mid-drag, so the hand closes while it is held */
+  let hubDragged = $state(false);
   /** the point-allocation overlay, hung off the level chip rather than the rail — it is opened where
       the level is read, and Escape closes it along with the sheet */
   let alloc = $state(false);
@@ -123,6 +138,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     settings[k] = v;
     void writeSettings(settings);
   }
+  /** The clock's pace is a client setting like the rest: it survives a reload. */
+  function setSpeed(m: 1 | 2 | 4) {
+    speed = m;
+    setSetting('speed', m);
+    saveNote = running ? `the clock runs ×${m}` : saveNote;
+  }
 
   /** Escape uncovers the field: map focus drops, the two dock overlays go with it, and a pick that was
       never travelled to is dropped rather than left ringing under the HUD. A desk screen closes itself. */
@@ -131,6 +152,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       if (isTypingTarget(ev.target)) return;
       alloc = false;
       sheetOpen = false;
+      more = false;
       if (panel === 'map') { panel = null; return; }
       picked = null;
       pickedCell = null;
@@ -158,10 +180,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   const resetBinds = () => setSetting('keybinds', {});
 
-  /** the tab the warehouse board is open on, and which side of the bag screen the player is working in */
+  /** the tab the warehouse board is open on, and which tab of the inventory the player is working in */
   let stashTab = $state(0);
   let pileSort = $state<SortKey>('level');
-  let bagSide = $state<'pile' | 'stash'>('pile');
+  type InvTab = 'pile' | 'carried' | 'forge' | 'craft' | 'stash';
+  let invTab = $state<InvTab>('pile');
+  /**
+   * One modal, five tabs: switching tabs inside it also moves the panel id the hub highlights read, so
+   * the rail, the wheel and the digits keep pointing at the open screen without a second source.
+   */
+  function goInvTab(t: InvTab) {
+    invTab = t;
+    panel = t === 'forge' ? 'forge' : t === 'craft' ? 'craft' : 'bag';
+  }
 
   const VIEW_ORDER: ('terrain' | 'band' | 'gate')[] = ['terrain', 'band', 'gate'];
 
@@ -174,7 +205,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (action === 'screen.field') { panel = null; sheetOpen = false; alloc = false; picked = null; pickedCell = null; return; }
     if (action === 'sheet.open') { sheetOpen = !sheetOpen; return; }
     if (action === 'game.pause') { running = !running; saveNote = running ? 'the clock is running again' : 'paused — the field holds still'; return; }
-    if (action === 'game.tick') { if (!running) step(); else saveNote = 'the clock is already running'; return; }
     if (action.startsWith('screen.')) { openPanel(action.slice(7) as PanelId); return; }
     if (action === 'equip.best') { doBestEquip(); return; }
     if (action.startsWith('stash.tab')) {
@@ -206,17 +236,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    * A settlement screen opens where the character stands. Refusing out loud is the whole point: the rail
    * and the digits work from anywhere, so the one thing a player cannot tell from a dimmed button is why.
    *
-   * The bag's own side follows the ground under it. In a settlement the pile's job is to be emptied, so
-   * the screen opens on the warehouse; in the field there is no warehouse to open, so it opens on the
-   * pile. That is the owner's rule read literally: the temp-bag slot *becomes* the stash in town.
+   * Bags, forge and craft share one inventory modal, so these ids only choose which tab it opens on.
+   * The tab follows the ground under it: in a settlement the pile's job is to be emptied, so the screen
+   * opens on the warehouse; in the field there is no warehouse to open, so it opens on the pile. That
+   * is the owner's rule read literally: the temp-bag slot *becomes* the stash in town.
    */
   function openPanel(p: PanelId) {
     if (TOWN_PANELS.includes(p) && !atSettlement(gameState)) {
       saveNote = `${RAIL_LABEL[p]} is a settlement service — walk or warp into one first`;
       return;
     }
-    if (p === 'stash') { bagSide = 'stash'; panel = panel === 'bag' ? null : 'bag'; return; }
-    if (p === 'bag') bagSide = atSettlement(gameState) ? 'stash' : 'pile';
+    if (p === 'stash') { invTab = 'stash'; panel = panel === 'bag' ? null : 'bag'; return; }
+    if (p === 'bag') invTab = atSettlement(gameState) ? 'stash' : 'pile';
+    if (p === 'forge') invTab = 'forge';
+    if (p === 'craft') invTab = 'craft';
     panel = panel === p ? null : p;
   }
   const closePanel = () => (panel = null);
@@ -225,26 +258,88 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /** whether the character stands in a settlement right now — every service below answers to this */
   const townLive = $derived(atSettlement(gameState));
 
+  /** How long a plate's own comings and goings run, in ms. A JS transition is painted by the Web Animations
+   *  API, which the stylesheet's reduced-motion zeroing cannot reach, so the reader's switch is read here
+   *  and the gesture is shortened to nothing rather than left to CSS. */
+  const PLATE_MOTION_MS = 260;
+  let plateMotion = $state(PLATE_MOTION_MS);
+  $effect(() => {
+    const q = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const read = () => (plateMotion = q.matches ? 0 : PLATE_MOTION_MS);
+    read();
+    q.addEventListener('change', read);
+    return () => q.removeEventListener('change', read);
+  });
+  /** How long a number's own leave runs, in ms. The reader's reduced-motion switch zeroes it. */
+  const FX_OUT_MS = 520;
+  const fxOutMs = $derived(plateMotion === 0 ? 0 : FX_OUT_MS);
+
+  /**
+   * A plate's comings and goings, written as a transition rather than as a stylesheet timer because only a
+   * transition is handed the item the sim removed. Going sinks the plate out of the frame; a death destroys
+   * the block at once, so there is no separate death gesture.
+   */
+  function plateLife(node: Element, { duration = 0 }: { duration?: number } = {}) {
+    return {
+      duration,
+      // played forward a plate rises into place; played in reverse it sinks back out of it
+      css: (t: number, u: number) => `opacity: ${t}; transform: translateY(${(u * 14).toFixed(1)}px)`,
+    };
+  }
+
+  /**
+   * The way a number leaves. The ring's push-out and the park's drain are both instant, so the leave is
+   * given to a transition — the last gesture the event plays before the DOM lets it go, and the one that
+   * makes a crowded second read as a stagger rather than a flicker (owner ruling, MapleStory-staged). A
+   * column figure fades from wherever its own arc had reached; a parked figure, whose arc ends held, is
+   * dissolved instead — held for its first third, then lifted, fattened and blurred off the card. The
+   * reduced-motion dial hands both a zero, as it does the plates.
+   */
+  function fxOut(node: Element, { ms = 0, held = false }: { ms?: number; held?: boolean } = {}) {
+    if (ms === 0) return { duration: 0 };
+    if (!held) {
+      const from = Number(getComputedStyle(node).opacity) || 1;
+      return { duration: ms, css: (t: number) => `opacity: ${(t * from).toFixed(3)};` };
+    }
+    return {
+      duration: ms,
+      css: (t: number) => {
+        const u = 1 - t;
+        const o = t > 2 / 3 ? 1 : t * 1.5;
+        return `opacity: ${o.toFixed(3)}; transform: translateY(${(-u * 10).toFixed(1)}px)`
+          + ` scale(${(1 + u * .12).toFixed(3)}); filter: blur(${(u * 1.6).toFixed(2)}px);`;
+      },
+    };
+  }
+
   /**
    * The hit ring, split by the half of the frame it belongs on: what the character deals lands over
    * the mob field, what it takes — and what it casts, sells, warps or crafts — lands on its own plate.
    * The events come from the sim, so an animation is a fact about the world rather than a CSS timer.
+   * A blow names the mob it landed on, so it parks over that plate and not in the shared column; the column
+   * keeps what has no body to stand on — a kill and a drop, which name their body only so that card can
+   * remember the blow that ended it.
    */
-  const fieldFx = $derived((gameState.fx || []).filter((e) => e.side === 'field').slice(0, 9));
-  const selfFx = $derived((gameState.fx || []).filter((e) => e.side === 'self').slice(0, 5));
-  /** the newest thing that landed on the field — the front mob's plate flashes on exactly this id */
-  const latestFieldFx = $derived(fieldFx[0] || null);
+  const ring = $derived(gameState.fx || []);
+  const fieldFx = $derived(ring.filter((e) => e.side === 'field' && !(e.kind === 'hit' && e.mobId) && !(e.kind === 'block' && e.mobId)).slice(0, 9));
+  // the character's own answers live on its own corner now (taken blows pop like damage, block
+  // words and status procs beside them), so the shared column keeps only what names no body
+  const selfFx = $derived(ring.filter((e) => e.side === 'self' && e.kind !== 'level' && e.kind !== 'block' && e.kind !== 'proc' && e.kind !== 'taken').slice(0, 5));
+  /** every blow the ring still holds, in its own mob's bucket, newest first as the ring already is */
+  const fxByMob = $derived(bucketFx(ring));
   /** the newest hit that took something off the character, for the frame's own edge flash */
-  const latestTaken = $derived(selfFx.find((e) => e.kind === 'taken') || null);
-  /** the key for the indicator's colours, built from the data that paints them — nothing typed here */
-  const fxKey = $derived.by(() => {
-    const C = E.elements as any;
-    return [
-      { name: 'physical', label: 'physical', colour: C.physical_colour },
-      ...(C.order as string[]).map((el) => ({ name: el, label: el, colour: C.colour[el] })),
-      { name: 'crit', label: 'critical', colour: C.crit_colour },
-    ];
-  });
+  const latestTaken = $derived(ring.find((e) => e.side === 'self' && e.kind === 'taken') || null);
+  /** the newest blow the character landed — a swing or a press going out is what makes its own card lean */
+  const latestLand = $derived(ring.find((e) => e.side === 'field' && e.kind === 'hit' && (e.via === 'swing' || e.via === 'cast')) || null);
+  /** which way the character's card moves this beat, and the event that says so */
+  const selfArt = $derived(plateGesture(latestTaken, latestLand));
+  /** The field plates: the living group the sim owns, nothing else. */
+  const plates = $derived([...gameState.group]);
+  /** the row that last fired — a press or a buff coming up are both the order being worked — so the bar
+   *  lights the slot that actually pressed instead of the one the eye expects */
+  const latestFire = $derived((gameState.fx || []).find((e) => !!e.skillId && (e.kind === 'cast' || e.kind === 'buff')) || null);
+  /** a level is the frame's own beat, not a chip in a column, so it leaves the column and takes the title */
+  const latestLevel = $derived((gameState.fx || []).find((e) => e.kind === 'level') || null);
 
   /** The away-window report (parking: "Offline report on return"), filled on mount catch-up + Load. */
   let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; quality: string } | null>(null);
@@ -271,7 +366,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let c = $derived(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points, gameState.player.treeRanks));
   let zone = $derived(eng.zoneById(gameState.zone));
   let minutes = $derived(Math.floor(gameState.counters.playSec / 60));
-  let kph = $derived(gameState.counters.playSec > 0 ? (gameState.counters.kills / gameState.counters.playSec) * 3600 : 0);
 
   // The two bags the slot grid draws, each in the shape the player chose. Order and mode are theirs;
   // every value inside a slot is read from the engine, never recomputed here.
@@ -283,6 +377,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const wornOf = (slot: string) => gameState.gear.find((g) => g && g.slot === slot) || null;
   /** the pile the hunt dropped — the adventure slots, one piece each, waiting for a decision */
   const tempEntries = $derived(sortEntries(gameState.bag.map((item, i) => gearEntry(item, i)), tempSort));
+
+  // the pile's own view: which kind is shown, what the search matches, and the quality cut. These narrow
+  // what the grid draws — they never touch what the bag holds, so the order Equip addresses is the bag's.
+  let bagCat = $state('all');
+  let bagQuery = $state('');
+  let bagTier = $state('all');
+  const BAG_CATS: [string, string][] = [['all', 'All'], ['weapon', 'Weapons'], ['armour', 'Armour'], ['stones', 'Stones'], ['herbs', 'Herbs'], ['draughts', 'Draughts'], ['junk', 'Junk']];
+  const bagKindOf = (e: { kind: string; slot: string; stack?: { group?: string } }) => e.kind === 'stack'
+    ? (e.stack?.group ?? 'junk')
+    : (e.slot === 'main hand' || e.slot === 'off hand') ? 'weapon' : 'armour';
+  const pileGroups = $derived(BAG_CATS
+    .map(([id, label]) => ({ id, label, n: id === 'all' ? tempEntries.length : tempEntries.filter((e) => bagKindOf(e) === id).length }))
+    .filter((g) => g.id === 'all' || g.n > 0));
+  const bagShown = $derived(tempEntries.filter((e) => {
+    if (bagCat !== 'all' && bagKindOf(e) !== bagCat) return false;
+    if (bagTier !== 'all' && e.kind === 'gear' && String(e.item?.quality ?? '') !== bagTier) return false;
+    const q = bagQuery.trim().toLowerCase();
+    return !q || `${e.title} ${e.sub}`.toLowerCase().includes(q);
+  }));
   /** what the character carries — stones, herbs, draughts and junk, one slot per stack */
   const invEntries = $derived(sortEntries(bagStacks(gameState).map((s, i) => stackEntry(s, i)), invSort));
   /** the twelve worn slots keep their positions, the way an equipment panel does */
@@ -292,11 +405,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       .filter(Boolean) as SlotEntry[],
   );
 
-  /** Number display respects the Settings choice; `short` uses compact notation (12.3k). */
+  /** Number display respects the Settings choice; `short` uses compact notation (12.3k). The two
+   *  formatters are built once and reused: this runs in the vitals and the purses on every tick, and an
+   *  `Intl.NumberFormat` is expensive to construct and cheap to call. */
+  const NF_SHORT = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+  const NF_PLAIN = new Intl.NumberFormat('en-US');
   function fmtNum(n: number): string {
-    return settings.numberFormat === 'short'
-      ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
-      : Math.round(n).toLocaleString('en-US');
+    return settings.numberFormat === 'short' ? NF_SHORT.format(n) : NF_PLAIN.format(Math.round(n));
   }
 
   /** Spend or refund stat points. Takes effect on the next tick, so the sheet works mid-combat. */
@@ -367,6 +482,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const onHide = () => { if (document.visibilityState === 'hidden') flush(); };
     (async () => {
       settings = await readSettings();
+      speed = settings.speed || 1;
+      hub = settings.hub ?? { x: 0, y: 0 };
       // monotonic clock: catch up on the time between sessions, capped by the save rule. The catch-up
       // yields between slices so a long absence cannot block first paint.
       const away = (Date.now() - (gameState.lastSavedAt || Date.now())) / 1000;
@@ -381,9 +498,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       // credit the same absence a second time
       gameState.lastSavedAt = Date.now();
       loadSnaps();
-      // the clock is armed only after the catch-up, so a slice boundary cannot add an extra tick
+      // the clock is armed only after the catch-up, so a slice boundary cannot add an extra tick.
+      // The wake is `WAKE_SEC` and `schedulerBatch` turns real time into sim seconds at the chosen
+      // speed, so ×4 fires one batched wake instead of four stacked timers — the whole batch renders in
+      // one frame, which is what keeps the speed-up from stuttering. A throttled tab never spends more
+      // than `MAX_BATCH` sim seconds in one wake, and the backlog it cannot fit is dropped, not queued.
       if (!disposed) {
-        timer = setInterval(() => { if (running) step(); }, 1000);
+        let acc = 0;
+        timer = setInterval(() => {
+          if (!running) { acc = 0; return; }
+          const batch = schedulerBatch(acc, speed);
+          acc = batch.acc;
+          for (let i = 0; i < batch.ticks; i++) step();
+        }, WAKE_SEC * 1000);
         autosaveTimer = setInterval(flush, AUTOSAVE_SEC * 1000);
         document.addEventListener('visibilitychange', onHide);
         window.addEventListener('beforeunload', flush);
@@ -416,7 +543,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const r = autoEquip(gameState, settings.equipMargin || 0);
     gameState = { ...gameState };
     // the press just moved pieces out of the pile, so the pile is what the player needs to see now
-    if (r.swaps.length) bagSide = 'pile';
+    // (the tab alone — the press never drags the player onto another screen)
+    if (r.swaps.length) invTab = 'pile';
     const parts: string[] = [];
     parts.push(r.swaps.length
       ? `${r.swaps.length} piece${r.swaps.length === 1 ? '' : 's'} went up (${r.swaps.map((w) => `${w.slot}${w.instead ? '' : ' from a free cell'}`).join(', ')})`
@@ -438,6 +566,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       return;
     }
     push(gameState, `Heading out to hunt in ${eng.zoneById(id).name} (levels ${eng.zoneById(id).levels.join('-')})`);
+    gameState = { ...gameState };
+  }
+
+  /**
+   * Hunt from the cell the feet are on: a sub-zone side sends out that side's cast, and ground with no
+   * side named rolls the zone whole (`road.standing_rule`). This is the verb a click on the ground buys.
+   */
+  function doHuntHere() {
+    const r = huntHere(gameState);
+    if (!r.ok) { saveNote = `Cannot hunt here: ${r.why}`; gameState = { ...gameState }; return; }
+    const z = eng.zoneById(gameState.zone);
+    push(gameState, `Hunting ${pickedCell?.kind === 'sub' ? `${pickedCell.label} in ${z.name}` : z.name} (levels ${z.levels.join('-')}) from ${pickedCell?.key}`);
     gameState = { ...gameState };
   }
 
@@ -532,9 +672,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // leave it showing the town the character walked away from
   const townId = $derived(settlementOfZone(gameState.zone)?.id || 'eastgate');
   const town = $derived(settlementById(townId));
-  /** The settlement picked on the sheet, and the exact cell under the click. */
+  /** The settlement picked on the sheet, and the exact cell under the click — any cell is pickable. */
   let picked = $state<string | null>(null);
-  let pickedCell = $state<{ cell: string; kind: 'town' | 'sub' | 'wild'; label: string; wild?: number | null } | null>(null);
+  let pickedCell = $state<Picked | null>(null);
   /** The sheet's three views, the level the gate view measures against, and the two overlays. */
   let view = $state<'terrain' | 'band' | 'gate'>('terrain');
   let gateLevel = $state(1);
@@ -547,7 +687,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      `zoom` scales it about the frame's own origin. Pan and zoom answer only in map focus — the resting
      sheet is a blurred ghost, and dragging a ghost would move the ground under a HUD nobody is aiming
      at. Reset reframes it, Centre puts the settlement you stand in back under the middle. */
-  const MAP_BASE_ZOOM = 1.24, MAP_MIN_ZOOM = 0.25, MAP_MAX_ZOOM = 3;
+  // the floor is where the sheet stops costing frames: below it the endless ground puts enough hexes on
+  // screen that panning lags (owner ruling)
+  const MAP_BASE_ZOOM = 1.24, MAP_MIN_ZOOM = 0.5, MAP_MAX_ZOOM = 3;
   let zoom = $state(MAP_BASE_ZOOM);
   let panX = $state(0);
   let panY = $state(0);
@@ -557,102 +699,57 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // coordinate is read here — only settlement ids and cell keys the client already holds (X33 · M7).
   const mapMarkup = $derived.by(() => {
     let s = mapOverlayRaw.replace(/^<\?xml[^>]*\?>\s*/, '');
-    s = s.replace(`<g class="pin" data-node="${townId}"`, `<g class="pin here" data-node="${townId}"`);
+    // the pin marks the settlement the feet are in; once a walk runs the character is on the road and
+    // only the hex mark tells the truth, so the pin does not stay planted behind it
+    if (!gameState.walk) s = s.replace(`<g class="pin" data-node="${townId}"`, `<g class="pin here" data-node="${townId}"`);
     const walk = gameState.walk;
-    if (walk && walk.to !== townId) s = s.replace(`<g class="pin" data-node="${walk.to}"`, `<g class="pin target" data-node="${walk.to}"`);
+    if (walk && walk.kind === 'town' && walk.node !== townId) s = s.replace(`<g class="pin" data-node="${walk.node}"`, `<g class="pin target" data-node="${walk.node}"`);
     if (picked) s = s.replace(/<g class="node( capital)?" data-node="([a-z_]+)"/g, (m, cap, id) => (id === picked ? `<g class="node${cap || ''} picked" data-node="${id}"` : m));
     return s;
   });
-  /** The band ramp: dark green at the first band of levels, deep red at the last. */
-  const ramp = (band: number) => {
-    const t = band / (E.mob.zones.length - 1);
-    return `hsl(${Math.round(94 - 82 * t)} 36% ${Math.round(20 + 20 * t)}%)`;
-  };
-  const LOCKED = '#0a0e13';
   /** The same ramp, laid end to end, so the legend bar is the sheet's own colours rather than a second palette. */
   const rampCss = $derived(E.mob.zones.map((_: any, i: number) => ramp(i)).join(','));
   /**
-   * The sheet is repainted after every `{@html}` rebuild: the fills follow the view, the walk graph
-   * and the cell ids show or hide, and the plotted route lights up one cell per block — the cells
-   * already crossed in a darker tone. It matches the engine's own cell keys against the labels the
-   * generated sheet carries, so no position table is ever read (X33 · M7 · M10).
+   * The sheet is repainted after every `{@html}` rebuild — the fills, the walk graph, the cell ids, the
+   * plotted route and the character's own hex. The paint itself lives in `ui/map.ts` (the map cluster's
+   * reader); this effect only holds the reactive reads and hands them over, so a `gameState` change and a
+   * markup rebuild both drive one repaint.
    */
   $effect(() => {
     void mapMarkup;
     const root = sheet;
     if (!root) return;
-    const v = view, lv = gateLevel, ids = showIds, hops = showWalk;
-    const walk = gameState.walk;
-    for (const p of Array.from(root.querySelectorAll('polygon.cell'))) {
-      if (v === 'terrain') p.setAttribute('fill', p.getAttribute('data-tone') || 'none');
-      else if (!p.hasAttribute('data-lo')) p.setAttribute('fill', 'none');
-      else p.setAttribute('fill', (v === 'band' || lv >= Number(p.getAttribute('data-lo')))
-        ? ramp(Number(p.getAttribute('data-band'))) : LOCKED);
-      p.classList.remove('route', 'walked', 'picked');
-    }
-    const toggle = (id: string, on: boolean) => {
-      const g = root.querySelector('#' + id) as HTMLElement | null;
-      if (g) g.style.display = on ? '' : 'none';
-    };
-    toggle('ids', ids);
-    toggle('walk', hops);
-    const regions = root.querySelector('#regions') as HTMLElement | null;
-    if (regions) regions.style.opacity = v === 'terrain' ? '1' : '0';
-    if (picked && picked !== townId) {
-      const crossed = new Set(walkedCells(gameState));
-      walkRoute(townId, picked).forEach((k) => {
-        const cell = root.querySelector(`polygon.cell[data-ax="${k}"]`);
-        if (cell) cell.classList.add(crossed.has(k) ? 'walked' : 'route');
-      });
-    }
-    if (pickedCell || picked) {
-      const cell = pickedCell?.cell
-        || root.querySelector(`polygon.cell.town[data-node="${picked}"]`)?.getAttribute('data-cell');
-      if (cell) root.querySelector(`polygon.cell[data-cell="${cell}"]`)?.classList.add('picked');
-    }
+    paintSheet(root, { view, gateLevel, showIds, showWalk, pickedCell, gameState });
   });
-  /** What a cell is called: the settlement, its sub-zone, or the wild side it rings. Wild side 0 is the dungeon. */
-  function cellLabel(node: Element): { kind: 'town' | 'sub' | 'wild'; label: string; wild?: number | null } {
-    const id = node.getAttribute('data-node') || '';
-    const s = settlementById(id);
-    const sub = node.getAttribute('data-sub');
-    const wild = node.getAttribute('data-wild');
-    if (sub != null) return { kind: 'sub', label: (eng.zoneById(s.zone).subzones || [])[Number(sub)]?.name || '' };
-    if (wild != null) {
-      const w = Number(wild);
-      return { kind: 'wild', wild: w, label: w === 0 ? s.name + ' Dungeon' : s.name + ' ' + (w + 1) };
-    }
-    return { kind: 'town', label: s.name };
-  }
   /**
-   * The clicked cell, read off the sheet's own `data-node`: a settlement's own cell, one of its three
-   * sub-zone cells or one of its three wild sides all select the same destination, and a click on bare
-   * ground clears the pick. A settlement's mark is clicked as often as its cell — the name and the icon
-   * sit in a `g[data-node]` above the polygon — so it resolves to the cell it stands on.
+   * The clicked cell, read off the sheet's own marks. Every cell of the field is a place to stand
+   * (`road.standing_rule`), so a settlement, one of its sub-zones, one of its wild sides and bare
+   * ground all pick — the difference is only what standing there is good for. A settlement's mark is
+   * clicked as often as its cell — the name and the icon sit in a `g[data-node]` above the polygon —
+   * so it resolves to the cell it stands on.
    */
   function onMapClick(ev: MouseEvent) {
     // a click on the ground — never on a mob plate, which keeps its own pointer — is the field's own way
-    // into map focus: the fight folds down onto the log and the map takes the frame, so the cell the
-    // player reached for is the subject of the click rather than a side effect of it. A pop keeps the
-    // frame; its own close, or Escape, is what leaves it.
-    if (panel === null && !sheetOpen && !alloc) panel = 'map';
+    // into map focus: the fight folds down onto the log and the map takes the frame. That first click
+    // only sharpens the sheet (owner ruling): a hex is picked by the second click, on the map it can read.
+    if (panel === null && !sheetOpen && !alloc) { panel = 'map'; return; }
     const hit = ev.target as Element | null;
     const mark = hit?.closest?.('g[data-node]')?.getAttribute('data-node');
-    const cell = hit?.closest?.('polygon.cell[data-node]')
+    const cell = hit?.closest?.('polygon.cell')
       || (mark ? sheet?.querySelector(`polygon.cell.town[data-node="${mark}"]`) : null);
-    const id = cell?.getAttribute('data-node');
-    if (!cell || !id || (id === picked && cell.getAttribute('data-cell') === pickedCell?.cell)) {
+    const ax = cell?.getAttribute('data-ax');
+    if (!cell || !ax || (ax === `${pickedCell?.q},${pickedCell?.r}`)) {
       picked = null; pickedCell = null; return;
     }
-    picked = id;
-    pickedCell = { cell: cell.getAttribute('data-cell') || '', ...cellLabel(cell) };
+    pickedCell = cellLabel(cell);
+    picked = pickedCell.kind === 'bare' ? null : cell.getAttribute('data-node') || null;
   }
   /** Selecting a settlement from a table or the keyboard lands on its own cell. */
   function select(id: string) {
+    const cell = settlementCell(id);
     if (picked === id && pickedCell?.kind === 'town') { picked = null; pickedCell = null; return; }
     picked = id;
-    const cell = sheet?.querySelector(`polygon.cell.town[data-node="${id}"]`)?.getAttribute('data-cell') || '';
-    pickedCell = { cell, kind: 'town', label: settlementById(id).name };
+    pickedCell = cell ? { key: sheet?.querySelector(`polygon.cell.town[data-node="${id}"]`)?.getAttribute('data-cell') || '', q: cell.q, r: cell.r, kind: 'town', label: settlementById(id).name, sub: null, wild: null } : null;
   }
   /**
    * The keyboard path over the same field: the arrows move the selection through the settlement order
@@ -667,10 +764,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       select(ids[(ids.indexOf(picked || '') + (back ? -1 : 1) + ids.length) % ids.length]);
       return;
     }
-    if (ev.key === 'Enter' && picked) {
+    if (ev.key === 'Enter' && pickedCell) {
       ev.preventDefault();
-      if (canTravel(gameState, picked)) travelTo(picked);
-      else doWalk(picked);
+      if (pickedCell.kind === 'town' && picked && canTravel(gameState, picked)) travelTo(picked);
+      else doWalk(pickedCell);
     }
   }
   /** Where the sheet scales from, in viewport coordinates: the same 50% / 46% the stylesheet pins. */
@@ -739,6 +836,60 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     mapClampPan(zoom);
   }
   /**
+   * The hub moves as one piece: a press on the plate background (never on a button) drags the wheel
+   * and its satellites together, clamped so at least a corner stays on screen. Under 4px it was a
+   * press, not a drag — the same threshold the sheet pans on. Double-click parks it back in its
+   * docked corner. The offset persists as a client setting like the rest.
+   */
+  function hubDrag(node: HTMLElement) {
+    let start: { x: number; y: number; ox: number; oy: number; w: number; h: number; l: number; t: number } | null = null;
+    // how much of the hub must stay on screen, so it can always be grabbed again
+    const GRAB = 48;
+    const onButton = (ev: Event) => !!(ev.target as Element).closest?.('button');
+    const down = (ev: PointerEvent) => {
+      if (ev.button !== 0 || onButton(ev)) return;
+      const r = node.getBoundingClientRect();
+      start = { x: ev.clientX, y: ev.clientY, ox: hub.x, oy: hub.y, w: r.width, h: r.height, l: r.left, t: r.top };
+      node.setPointerCapture(ev.pointerId);
+    };
+    const move = (ev: PointerEvent) => {
+      if (!start) return;
+      let dx = ev.clientX - start.x;
+      let dy = ev.clientY - start.y;
+      if (!hubDragged && Math.hypot(dx, dy) < 4) return;
+      hubDragged = true;
+      dx = Math.min(Math.max(dx, GRAB - start.w - start.l), window.innerWidth - GRAB - start.l);
+      dy = Math.min(Math.max(dy, GRAB - start.h - start.t), window.innerHeight - GRAB - start.t);
+      hub = { x: start.ox + dx, y: start.oy + dy };
+    };
+    const up = (ev: PointerEvent) => {
+      if (!start) return;
+      start = null;
+      if (node.hasPointerCapture(ev.pointerId)) node.releasePointerCapture(ev.pointerId);
+      if (hubDragged) {
+        hubDragged = false;
+        setSetting('hub', { ...hub });
+      }
+    };
+    const reset = (ev: MouseEvent) => {
+      if (onButton(ev)) return;
+      hub = { x: 0, y: 0 };
+      setSetting('hub', { x: 0, y: 0 });
+    };
+    node.addEventListener('pointerdown', down);
+    node.addEventListener('pointermove', move);
+    node.addEventListener('pointerup', up);
+    node.addEventListener('pointercancel', up);
+    node.addEventListener('dblclick', reset);
+    return { destroy() {
+      node.removeEventListener('pointerdown', down);
+      node.removeEventListener('pointermove', move);
+      node.removeEventListener('pointerup', up);
+      node.removeEventListener('pointercancel', up);
+      node.removeEventListener('dblclick', reset);
+    } };
+  }
+  /**
    * The handlers and the sheet reference are bound by an action rather than a directive: the field
    * arrives as inlined `{@html}` the compiler never sees, so there is no element for a binding to sit on.
    * A drag pans the sheet and a wheel zooms it under the pointer, both only in map focus; a drag that
@@ -755,12 +906,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       if (!focus() || ev.button !== 0) return;
       down = { x: ev.clientX, y: ev.clientY, px: panX, py: panY };
       moved = false;
-      node.setPointerCapture(ev.pointerId);
     };
     const onMove = (ev: PointerEvent) => {
       if (!down) return;
       const dx = ev.clientX - down.x, dy = ev.clientY - down.y;
       if (!moved && Math.hypot(dx, dy) < 4) return;
+      // the sheet claims the pointer only once the drag is real: capturing on the press retargets the
+      // click to the sheet itself, and then no cell under the pointer is ever picked
+      if (!moved) node.setPointerCapture(ev.pointerId);
       moved = true; dragging = true;
       panX = down.px + dx; panY = down.py + dy;
       mapClampPan(zoom);
@@ -793,18 +946,54 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       node.removeEventListener('wheel', onWheel);
     } };
   }
-  const pickedSettlement = $derived(picked ? settlementById(picked) : null);
-  const pickedWalk = $derived.by(() => {
-    if (!picked) return null;
-    // a cell in the settlement you already stand in needs no walk, but it is still a place worth a card
-    const self = picked === townId;
+  /** The settlement that owns the picked cell — the cell's own town, or its nearest one. */
+  const pickedSettlement = $derived(pickedCell ? settlementById(ownerOf({ q: pickedCell.q, r: pickedCell.r }).id) : null);
+  /**
+   * The card's whole subject: the picked cell, what stands on it, what it costs to reach from where the
+   * feet are, and whether the feet are already there.
+   */
+  const pickedDest = $derived.by(() => {
+    if (!pickedCell) return null;
+    const node = ownerOf({ q: pickedCell.q, r: pickedCell.r });
+    const self = pickedCell.q === currentCell(gameState).q && pickedCell.r === currentCell(gameState).r && !gameState.walk;
     return {
+      key: pickedCell.key,
+      kind: pickedCell.kind,
+      label: pickedCell.label,
+      node: node.id,
+      sub: pickedCell.sub,
+      wild: pickedCell.wild,
       self,
-      blocks: self ? 0 : walkBlocks(townId, picked),
-      sec: self ? 0 : road.secBetween(townId, picked),
-      here: !!gameState.town.visited.includes(picked),
-      walking: gameState.walk?.to === picked,
+      walking: !!gameState.walk && gameState.walk.to.q === pickedCell.q && gameState.walk.to.r === pickedCell.r,
+      here: gameState.town.visited.includes(node.id),
+      blocks: self ? 0 : cellBlocks(gameState, { q: pickedCell.q, r: pickedCell.r }),
+      sec: self ? 0 : cellSec(gameState, { q: pickedCell.q, r: pickedCell.r }),
     };
+  });
+  /**
+   * The destination card's place on screen: the end of its anchor that has the room (DECISIONS.md §Interface) — above
+   * the picked cell's own mark, or below it when the sheet's top edge is nearer — clamped inside the map.
+   * The card is placed by the box it measures, so the measure runs again whenever the sheet moves the
+   * cell (a pan or a zoom) or the pick moves to another cell.
+   */
+  let cardAt = $state<{ x: number; y: number; above: boolean } | null>(null);
+  let mapcardEl = $state<HTMLDivElement | null>(null);
+  $effect(() => {
+    if (!pickedCell || panel !== 'map' || !sheet) { cardAt = null; return; }
+    // zoom, pan and the mounted card are read for the tracking alone: the rects below already carry
+    // them physically, and the reads are what make the measure rerun when they move
+    void zoom; void panX; void panY; void mapcardEl;
+    const poly = sheet.querySelector(`polygon.cell[data-ax="${pickedCell.q},${pickedCell.r}"]`) as SVGGraphicsElement | null;
+    if (!poly) { cardAt = null; return; }
+    const b = poly.getBoundingClientRect();
+    const area = sheet.getBoundingClientRect();
+    const cw = mapcardEl?.offsetWidth ?? 0;
+    const ch = mapcardEl?.offsetHeight ?? 0;
+    const m = 12;
+    const above = b.top - ch - m >= area.top;
+    let x = b.left + b.width / 2;
+    if (cw) x = Math.min(area.right - cw / 2 - m, Math.max(area.left + cw / 2 + m, x));
+    cardAt = { x, y: above ? b.top : b.bottom, above };
   });
   /**
    * The settlement the panel speaks for: the one under the pick, or the one you stand in when nothing
@@ -842,6 +1031,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       .reduce((n, m) => n + Number(m[1]), 0);
     return { stretches, blocks };
   });
+  /** The walking read: one trail of boot prints, a left foot then a right, laid along the walk and lit from
+   *  where the walk has reached. `x` is a print's place along the stride, so the lit fraction is the walk's
+   *  own progress — the sim's tick drives it, and nothing here is a looping animation. */
+  const travelTrail = Array.from({ length: 7 }, (_, i) => ({ right: i % 2 === 1, x: i / 6 }));
+  /** Blocks behind plus the part of the block under foot — the same clock the tracker's note counts on,
+      so the trail fills on the sim's tick and stops by itself when the clock is paused. */
+  const walkPct = $derived.by(() => {
+    const w = gameState.walk;
+    if (!w) return 0;
+    const part = w.blocksLeft ? 1 - w.secLeft / road.blockSec : 1;
+    return Math.min(1, Math.max(0, (w.blocksTotal - w.blocksLeft + part) / w.blocksTotal));
+  });
   const firstBand = $derived(E.mob.zones[0].levels);
   const lastBand = $derived(E.mob.zones[E.mob.zones.length - 1].levels);
   const liveBands = $derived(E.mob.zones.filter((z: any) => z.levels[0] <= gateLevel).length);
@@ -861,7 +1062,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     .map(([item, n]) => `${item} ×${n}`));
   /** The purse, the stone pile and the hunt bag, read as the corner pills — the same counters the
       panels print, summed once here so the field never has to open a panel to be read. */
-  const stoneTotal = $derived(Object.values(gameState.counters.stones).reduce((a: number, b: number) => a + b, 0));
   const bagFull = $derived(gameState.bag.length >= E.inventory.adventure_slots);
   // Built outside the markup: the parser ends an attribute expression at the first brace inside a
   // nested template literal, so a subtitle that needs two counts is assembled here.
@@ -872,7 +1072,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function doSell() {
     const r = sellJunk(gameState);
     push(gameState, `Counterhand: sold ${r.pieces} junk for ${r.gold} gold`);
-    if (r.pieces > 0) fx(gameState, { kind: 'sell', side: 'self', text: `+${fmtNum(r.gold)} gold`, colour: E.elements.crit_colour || '#e8c169' });
+    if (r.pieces > 0) fx(gameState, { kind: 'sell', side: 'self', text: `+${fmtNum(r.gold)} gold`, colour: E.elements.crit_colour || 'var(--gold)' });
     gameState = { ...gameState };
   }
 
@@ -882,9 +1082,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  function doClaim(i: number) {
+  function doClaim(i: number, choice?: string) {
     const t = gameState.town.tasks[i];
-    if (t && claimTask(gameState, i)) push(gameState, `Task paid: ${t.count} ${t.stone} stone(s)`);
+    if (t && claimTask(gameState, i, choice)) {
+      const paid = t.alt && choice === t.alt.stone ? t.alt : { stone: t.stone, count: t.count };
+      push(gameState, `Task paid: ${paid.count} ${paid.stone} stone(s)`);
+    }
     gameState = { ...gameState };
   }
 
@@ -907,13 +1110,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /** the Waypoint's own price line, so the prose quotes the data's number instead of retyping it */
   const warpFee = $derived(warpRow()?.m_per_block ?? 0);
 
-  /** Start a walk on foot to any settlement, walked to or not — this is how a Waypoint unlocks. */
-  function doWalk(id: string) {
-    const here = gameState.town.waypoint;
-    const r = startWalk(gameState, here, id);
+  /** Start a walk on foot to any cell of the field — this is how a Waypoint unlocks and a hunt is reached. */
+  function doWalk(dest: Picked | Cell & { key?: string }) {
+    const r = startWalk(gameState, dest);
     if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
+    // the walk takes the frame: the map closes and the field carries the walking read, because a sharp
+    // map and the HUD cannot share a square (DECISIONS.md §Interface three-state rule). The pick is spent with it —
+    // in field view the card has no box left to measure, and a card parked there sits on the self-plate.
+    panel = null;
+    picked = null;
+    pickedCell = null;
     if (r.forfeit) push(gameState, r.forfeit);
-    saveNote = `Walking to ${settlementById(id)?.name} — ${walkBlocks(here, id)} blocks`;
+    const blocks = cellBlocks(gameState, dest);
+    saveNote = `Walking to ${'label' in dest && dest.label ? dest.label : `${dest.q},${dest.r}`} — ${blocks} blocks`;
     gameState = { ...gameState };
   }
 
@@ -946,7 +1155,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       push(gameState, `Bench ${op} · ${r.note}`);
       // a stone landing is a beat on the bench: the same gold the crit wears, because a craft that
       // worked is the field's other kind of hit
-      fx(gameState, { kind: 'craft', side: 'self', text: `${op} · ${r.note}`, colour: E.elements.crit_colour || '#e8c169' });
+      fx(gameState, { kind: 'craft', side: 'self', text: `${op} · ${r.note}`, colour: E.elements.crit_colour || 'var(--gold)' });
     }
     gameState = { ...gameState };
   }
@@ -982,14 +1191,21 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   let townNote = $state('');
   const tabs = $derived(stashTabCount(gameState));
+  /** the inventory reads its tab: the two bags share the pile counts, the benches name their price */
+  const invSub = $derived(
+    invTab === 'forge' ? 'enhancement · paid in Quality stones, never gold'
+      : invTab === 'craft' ? 'the stones that change a piece, not its level'
+        : invTab === 'stash' ? `warehouse · ${tabs} tab${tabs === 1 ? '' : 's'} · one record, every settlement`
+          : bagSub,
+  );
   const farmSub = $derived('level ' + fl + ' / ' + farm.F.level_cap + ' · the one life skill, and it grants no power');
   const deskSub = $derived(gameState.walk
-    ? 'walking ' + walkLabel(gameState.walk.from, gameState.walk.to)
+    ? 'walking to ' + walkNote(gameState)
     : gameState.dungeon
       ? `dungeon — ${gameState.dungeon.total - gameState.dungeon.left}/${gameState.dungeon.total} mobs down, loot in escrow`
       : !gameState.hunting
         ? `${town?.name ?? 'the field'} · safe in town — hunt to head out`
-        : pickedCell ? `${pickedCell.cell} · ${pickedCell.label}` : `${town?.name ?? 'the field'} · trade, board, hunt, walk`);
+        : pickedCell ? `${pickedCell.key} · ${pickedCell.label}` : `${town?.name ?? 'the field'} · trade, board, hunt, walk`);
 
   function doDeposit(i: number, tab: number) {
     const r = deposit(gameState, i, tab);
@@ -1047,7 +1263,37 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  const bar = (value: number, max: number) => `${Math.max(0, Math.min(100, (value / max) * 100))}%`;
+  /** Where the feet are, in the name the player acts on: a settlement's own for its ground, the zone's
+   *  for everything else. The rest read and the empty field both answer to it, so neither can name the
+   *  wrong place for the same ground. */
+  const hereName = $derived(townLive ? (town?.name ?? 'the field') : zone.name);
+
+  /** What the field is doing, said as it is. The client never prints a fight that is not running: an empty
+   *  field names the clock that will fill it, and ground that fields nothing names the action that would. */
+  const phaseRead = $derived.by(() => {
+    if (gameState.phase === 'camp') {
+      return `Pushed — recovering at camp for ${gameState.campSec} sec. No death, no loss: time is the only cost.`;
+    }
+    const swing = `${c.hitsPerSec.toFixed(2)} hits/sec with ${c.weaponName}${c.weaponElement ? `, carrying ${c.weaponElement}` : ', carrying no Element'}`;
+    if (gameState.walk) {
+      return `Walking — block ${gameState.walk.blocksTotal - gameState.walk.blocksLeft + 1} of ${gameState.walk.blocksTotal} · ${swing}`;
+    }
+    if (!gameState.hunting) {
+      return `At rest in ${hereName} — nothing is being attacked. Pick a cell on the map and hunt it.`;
+    }
+    if (!gameState.group.length) {
+      return `Hunting ${hereName} — next group in ${Math.max(0, gameState.spawnIn)} sec · ${swing}`;
+    }
+    return `Fighting — ${swing}`;
+  });
+
+  /** A fill's own style: how far it reaches, and the fraction it reached so the bar's colour can be
+   *  stretched over the whole track rather than squeezed into the fill. A near-empty bar therefore
+   *  shows the hot end of its own ramp — the state is read from across the field, not only from the digit. */
+  const bar = (value: number, max: number) => {
+    const pct = Math.max(0, Math.min(100, (value / max) * 100));
+    return `width:${pct}%;--w:${pct / 100}`;
+  };
 
   // A press reads as its own flat damage plus its effectiveness on the caster's power line — the
   // engine's own shape (`engine/skills.ts` perPress), so the panel never restates a formula.
@@ -1065,14 +1311,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** §14: the per-slot switch, and the one shared condition list every `conditional` slot reads. */
+  /** §14: the per-slot switch — the one thing that decides whether a row's list is read at all. */
   function setMode(id: string, mode: string) {
     gameState.skills.mode[id] = mode as any;
     gameState = { ...gameState };
   }
 
-  function setConditions(patch: { boss?: boolean; hpBelowPct?: number; statusMissing?: string[] }) {
-    gameState.skills.conditions = { ...gameState.skills.conditions, ...patch };
+  /** One leg of one row's own list. Two rows can wait on different facts because neither reads the other.
+      The status leg is trimmed to what the row can actually carry, so no screen can show a wait that the
+      rotation would never answer. */
+  function setCond(id: string, patch: Partial<SkillConditions>) {
+    const next = { ...condOf(gameState.skills, id), ...patch };
+    const flag = rowFlag(id);
+    next.statusMissing = flag && next.statusMissing.includes(flag.key) ? [flag.key] : [];
+    gameState.skills.conditions[id] = next;
     gameState = { ...gameState };
   }
 
@@ -1093,13 +1345,63 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       .join(' · '),
   );
 
-  /** One flag per Element status a row can apply (the five `elements.status_of` names)… */
-  const statusFlags = $derived(Object.values((E.elements as any).status_of || {}) as string[]);
-  /** …and one per curse row, keyed by the row's own id — the two kinds share the one list (§14). */
-  const curseFlags = $derived(sm.of('curse') as any[]);
-  function toggleStatusMissing(name: string) {
-    const now = gameState.skills.conditions.statusMissing || [];
-    setConditions({ statusMissing: now.includes(name) ? now.filter((n) => n !== name) : [...now, name] });
+  /** The three numbers a leg opens at, read from the roster — a screen types no default of its own. */
+  const COND_DEFAULTS = sm.SKILLS.meta.cast_conditions;
+  const HP_BELOW_DEFAULT = COND_DEFAULTS.hp_below_pct_default;
+  const MANA_FLOOR_DEFAULT = COND_DEFAULTS.mana_floor_pct_default;
+  const MIN_TARGETS_DEFAULT = COND_DEFAULTS.min_targets_default;
+  /** …and the one flag a row can meaningfully wait on: the status its own Element applies, or the curse
+      it writes. A row that carries neither is offered no such leg — the old list of every flag in the
+      game asked the player to tick lines that could never fire for the row in front of them. */
+  function rowFlag(id: string | null): { key: string; label: string } | null {
+    const skill = id ? sm.byId[id] : null;
+    const status = appliedStatusOf(skill);
+    if (status) return { key: status, label: status };
+    return appliedCurseOf(skill) ? { key: skill.id, label: skill.name } : null;
+  }
+  function toggleStatusMissing(id: string, name: string) {
+    const now = condOf(gameState.skills, id).statusMissing;
+    setCond(id, { statusMissing: now.includes(name) ? now.filter((n) => n !== name) : [...now, name] });
+  }
+
+  /** Which row's list the screen is showing at the moment — one at a time, so the table stays a table. */
+  let gateOpen = $state<string | null>(null);
+
+  /** A row's own list in one line, so the table cell and the field bar both say the same thing the
+      rotation reads. An empty list is said plainly: no leg holds, so the row never fires. */
+  function gateNote(id: string): string {
+    const cond = condOf(gameState.skills, id);
+    const legs: string[] = [];
+    if (cond.boss) legs.push('a boss');
+    if (cond.hpBelowPct > 0) legs.push(`our HP under ${cond.hpBelowPct}%`);
+    if (cond.minTargets > 0) legs.push(`${cond.minTargets}+ targets`);
+    if (cond.manaFloorPct > 0) legs.push(`keep ${cond.manaFloorPct}% of the pool`);
+    const flag = rowFlag(id);
+    if (flag && cond.statusMissing.includes(flag.key)) legs.push(`no ${flag.label}`);
+    return legs.join(' · ');
+  }
+
+  /** Copy one row's list onto every conditional row — the bulk case, without a second source of truth. */
+  function copyGate(id: string) {
+    const from = { ...condOf(gameState.skills, id) };
+    for (const slot of gameState.skills.list) if (slot && modeOf(gameState.skills, slot) === 'conditional') setCond(slot, from);
+    gameState = { ...gameState };
+  }
+
+  /** A row with no cooldown of its own is the FILLER: the rotation gives it the press only after every
+      timed slot has had its chance, so its place in the order is not what decides when it fires. */
+  const slotFiller = (id: string | null): boolean => Boolean(id) && (sm.byId[id!] as any)?.cd === 0;
+  /** What a slot is actually waiting on, in the bar's own words. A bar that rings every cooled-down row
+      as ready would hide the two modes the player set and the one reorder the sim obeys. */
+  function slotWaiting(id: string | null): string {
+    if (!id) return '';
+    const mode = modeOf(gameState.skills, id);
+    if (mode === 'never') return 'silenced';
+    if (mode === 'conditional') {
+      const note = gateNote(id);
+      return note ? `waiting on ${note}` : 'held — no condition set yet';
+    }
+    return slotFiller(id) ? 'filler — after every timed slot' : 'ready when its cooldown is up';
   }
 
   /** What a curse has written on one mob, in words and with the seconds left on each line. */
@@ -1176,6 +1478,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </div>
   <h2 class="arena">{townLive && town && town.name !== zone.name ? `${town.name} · ${zone.name}` : zone.name}</h2>
 
+  <!-- top-right: the minimap — the sheet's own fills in a circular thumbnail, cropped to the ground
+       the feet are on; one press opens the full map screen. No id is shared with the sheet. -->
+  <Minimap markup={mapMarkup} cell={gameState.cell} onopen={() => togglePanel('map')} />
+  {#if latestLevel}
+    <!-- the one beat the whole frame takes for itself: a level is why the character is here, so it borrows
+         the title's line for one rise and hands it back. The accent is the HUD's own, read out of the data,
+         and the digits are set in `--num` like every other number the client prints. This is
+         decoration to a reader and nothing to a keyboard -->
+    {#key latestLevel.id}
+      <p class="levelup" style={`--fx:${latestLevel.colour}`} aria-hidden="true">{latestLevel.text}</p>
+    {/key}
+  {/if}
+
   {#if awayReport}
     <div class="toast">
       <button class="quit" onclick={() => (awayReport = null)} aria-label="Dismiss">✕</button>
@@ -1190,21 +1505,46 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
        character-sheet.md — Energy Shield sits above HP while the pool is there, and HP / Mana / Attack
        speed are the three always shown; Weight lives on the bag. -->
   <div class="dock">
+    <!-- the portrait cluster: the circular face with the XP ring round it, and to its right the three
+         pools and the remaining reads stacked — each pool a bar carrying its own figure inside. The
+         field stays visible behind all of it. -->
     <div class="vitals">
-      <button class="face" onclick={() => (alloc = !alloc)} aria-expanded={alloc} title="Spend the level's points">
-        <img src={faceMark} alt="" aria-hidden="true" /><b>{gameState.player.level}</b>
-      </button>
-      <div class="gauges">
-        {#if c.es > 0}
-          <label class="gauge es"><progress max={c.es} value={gameState.player.es}></progress><span>Shield {Math.round(gameState.player.es)} / {Math.round(c.es)}</span></label>
+      <div class="portrait">
+        <svg class="xp-ring" viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="track" cx="50" cy="50" r="46"></circle>
+          <circle class="fill" cx="50" cy="50" r="46"
+                  style:stroke-dasharray={`${(gameState.player.xp / eng.xpToNext(gameState.player.level)) * 289} 289`}></circle>
+        </svg>
+        <button class="face" onclick={() => (alloc = !alloc)} aria-expanded={alloc} title="Spend the level's points">
+          <img src={faceMark} alt="" aria-hidden="true" /><b>{gameState.player.level}</b>
+        </button>
+      </div>
+      <div class="vitals-side">
+        <div class="pools">
+          <div class="pool hp" title="HP · +{c.hpRegen.toFixed(0)}/sec">
+            <i style:width={`${Math.max(0, Math.min(100, (gameState.player.hp / c.maxHp) * 100))}%`}></i>
+            <span>{fmtNum(gameState.player.hp)} / {fmtNum(c.maxHp)}</span>
+          </div>
+          {#if c.es > 0}
+            <div class="pool es" title="Shield">
+              <i style:width={`${Math.max(0, Math.min(100, (gameState.player.es / c.es) * 100))}%`}></i>
+              <span>Shield {Math.round(gameState.player.es)} / {Math.round(c.es)}</span>
+            </div>
+          {/if}
+          <div class="pool mana" title="Mana">
+            <i style:width={`${Math.max(0, Math.min(100, (gameState.player.mana / c.maxMana) * 100))}%`}></i>
+            <span>Mana {fmtNum(gameState.player.mana)} / {fmtNum(c.maxMana)}</span>
+          </div>
+        </div>
+        <div class="chips">
+          {#if activeStatusWords}
+            <span class="chip status">On you: {activeStatusWords}</span>
+          {/if}
+          <span class="chip aspd">{c.hitsPerSec.toFixed(2)} hits/sec</span>
+        </div>
+        {#if describeFold(effectsActive(gameState.skills))}
+          <div class="buffs" title="What an aura or a buff is adding right now">{describeFold(effectsActive(gameState.skills))}</div>
         {/if}
-        <label class="gauge hp"><progress max={c.maxHp} value={gameState.player.hp}></progress><span>{fmtNum(gameState.player.hp)} / {fmtNum(c.maxHp)} HP · +{c.hpRegen.toFixed(0)}/sec</span></label>
-        <label class="gauge mana"><progress max={c.maxMana} value={gameState.player.mana}></progress><span>{fmtNum(gameState.player.mana)} / {fmtNum(c.maxMana)} Mana</span></label>
-        <label class="gauge xp"><progress max={eng.xpToNext(gameState.player.level)} value={gameState.player.xp}></progress><span>XP {fmtNum(gameState.player.xp)} / {fmtNum(eng.xpToNext(gameState.player.level))}</span></label>
-        {#if activeStatusWords}
-          <p class="statuses">On you: {activeStatusWords}</p>
-        {/if}
-        <span class="aspd">{c.hitsPerSec.toFixed(2)} hits/sec <small>(Cap {E.caps.aspd})</small></span>
       </div>
     </div>
 
@@ -1242,9 +1582,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             <span class="swatch ramp"><i style:background={`linear-gradient(90deg,${rampCss})`}></i>{firstBand[0]} … {lastBand[1]}</span>
           </div>
           {#if gameState.walk}
-            <p><small>Walking <b>{walkLabel(gameState.walk.from, gameState.walk.to)}</b> — block {gameState.walk.blocksTotal - gameState.walk.blocksLeft + 1} of {gameState.walk.blocksTotal}: the route is plotted once and crossed one cell at a time, the cells behind you darkened. Every block crossed rolls a {E.road.encounter_chance_pct}% chance of an ambush.</small></p>
+            <p><small>Walking to <b>{walkNote(gameState)}</b> — block {gameState.walk.blocksTotal - gameState.walk.blocksLeft + 1} of {gameState.walk.blocksTotal}: the route is plotted once and crossed one cell at a time, the cells behind you darkened. Every block crossed rolls a {E.road.encounter_chance_pct}% chance of an ambush.</small></p>
           {:else}
-            <p><small>The green pin marks the settlement you stand in. Click any cell — a settlement, one of its sub-zones or one of its wild sides — and the card plots the walk to it and offers the walk or the warp; a warp is only ever offered to a settlement you have already reached on foot, and it costs gold. The arrows step the settlement list and Enter takes the trip. Drag the sheet to pan it, scroll to zoom, and <b>centre</b> or <b>reset</b> put it back on the ground you stand on.</small></p>
+            <p><small>The gold ring is your feet. Click any cell — a settlement, one of its sub-zones, bare ground between them — and the card plots the walk to it and offers the walk or the warp; a warp is only ever offered to a settlement you have already reached on foot, and it costs gold. Drag to pan, scroll to zoom, and <b>centre</b> puts you back on the ground you stand on.</small></p>
           {/if}
         </div>
       </section>
@@ -1294,18 +1634,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <table class="stats">
             <tbody>
               <tr><td>Weapon</td><td>{c.weaponName} · {masteryLabel(c.weaponMastery)} · drop bonus {dropBonusPct(gameState)}%</td></tr>
-              <tr><td>Attack speed</td><td>{c.aspd.toFixed(1)} aspd · {c.hitsPerSec.toFixed(2)} hits/sec (Cap {E.caps.aspd})</td></tr>
+              <tr><td>Attack speed</td><td>{c.aspd.toFixed(1)} aspd · {c.hitsPerSec.toFixed(2)} hits/sec (fastest {E.caps.attack_interval_sec} sec a swing)</td></tr>
               <tr><td>Physical power</td><td>{Math.round(c.phys)}</td></tr>
               <tr><td>Magic power</td><td>{Math.round(c.magic)}</td></tr>
+              <tr><td>Attack damage</td><td>{c.attackDamage.toFixed(1)}% — the attack ladder's bucket: this swing and any phys-basis press</td></tr>
+              <tr><td>Spell damage</td><td>{c.spellDamage.toFixed(1)}% — the spell ladder's bucket: any magic-basis press{basicAttack === 'bolt' ? ' and this bolt' : ''}</td></tr>
               <tr><td>Accuracy</td><td>{Math.round(c.accuracy)}</td></tr>
-              <tr><td>Evasion</td><td>{Math.round(c.evasion)} rating · {c.evasionChance.toFixed(1)}% → Cap {E.caps.evasion}%</td></tr>
+              <tr><td>Evasion</td><td>{Math.round(c.evasion)} rating (Agi + the gear Evasion lines) · {c.evasionChance.toFixed(1)}% → Cap {E.caps.evasion}%</td></tr>
               <tr><td>Armour</td><td>{Math.round(c.armour)}</td></tr>
-              <tr><td>Perfect dodge</td><td>{c.perfectDodge.toFixed(1)}% → Cap {E.caps.perfect_dodge}%</td></tr>
+              <tr><td>Perfect dodge</td><td>{c.perfectDodge.toFixed(1)}% (no Cap)</td></tr>
               <tr><td>Crit</td><td>{c.critChance.toFixed(1)}% chance · {c.critDmg.toFixed(0)}% damage</td></tr>
-              <tr><td>Resistance</td><td>{c.resistance.toFixed(1)}% (Cap {E.caps.elem_res})</td></tr>
+              <tr><td>Resistance</td><td>{c.resistance.toFixed(1)}% (Cap {c.resCap}{c.resCap > E.caps.elem_res ? ' · unlocked' : ''})</td></tr>
               <tr><td>Basic attack</td><td>{basicAttack}{basicAttackLine}</td></tr>
-              <tr><td>Stun Recovery</td><td>{c.stunRecovery.toFixed(1)}% of a shock's stop — Vit buys it back, so a {E.status.shock.stop_sec} sec stun leaves {(E.status.shock.stop_sec * (1 - c.stunRecovery / 100)).toFixed(2)} sec</td></tr>
-              <tr><td>Alignment</td><td>{c.alignment.toFixed(1)}% (Cap {E.caps.alignment})</td></tr>
+              <tr><td>Stun Recovery</td><td>{c.stunRecovery.toFixed(1)}% of a shock's stop — Vit buys it back, so a {E.status.shock.stop_sec} sec stun leaves {eng.stunStopSec(c.core.vit, E.status.shock.stop_sec).toFixed(2)} sec</td></tr>
+              <tr><td>Status alignment</td><td>{c.alignment.toFixed(1)}% (no Cap) — the gate a mob's status rolls against, and the mace's stun source</td></tr>
               <tr><td>Cooldown reduction</td><td>{c.cdr.toFixed(1)}% (Cap {E.caps.cdr})</td></tr>
               <tr><td>Energy Shield</td><td>{Math.round(c.es)} · regens {c.esRegen.toFixed(1)}/sec after {E.energy_shield.delay_sec} sec ({E.energy_shield.regen_pct}% of the pool, amplified by an es_regen line)</td></tr>
               <tr><td>Weight</td><td>{c.weightUsed.toFixed(0)} used / {Math.round(c.weightCap)} capacity{c.encumbrance > 0 ? ` · aspd ${(c.encumbrance * -100).toFixed(0)}%` : ' · no tax'}</td></tr>
@@ -1323,98 +1665,288 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         </div>
       </section>
     {/if}
+
+    <!-- the objectives: what the hunt is for and the zone's own switch, hung under the vitals in the same
+         column — a read taken mid-fight, so it flows below whatever the vitals and the overlays take up
+         rather than being pinned to a height the bars no longer have -->
+    <div class="tracker">
+      <p class="phase">{phaseRead}</p>
+      <label class="travel">
+        <b>Zone</b>
+        <span class="seg">
+          <button class={gameState.travel === 'stay' ? 'active' : ''} onclick={() => setTravel('stay')}>stay here</button>
+          <button class={gameState.travel === 'forward' ? 'active' : ''} onclick={() => setTravel('forward')}>climb forward</button>
+        </span>
+        <small>{gameState.travel === 'forward'
+          ? `walks on to the next settlement you have already opened once level ${zone.levels[1] + 1} is reached, and a Push sends you back to the last zone you held`
+          : 'stays in this zone however high you get — you choose when to travel'}</small>
+      </label>
+      {#if bagFull}
+        <p class="alarm-line">Bag full — the zone has stopped paying. Walk to a settlement and deposit.</p>
+      {/if}
+      <p class="objective">{describeGoal()}</p>
+    </div>
   </div>
 
-  <!-- top-right: what the hunt is worth right now, so a decision never needs a panel opened -->
-  <div class="pockets">
-    <span class="pill gold"><img src={coinMark} alt="" aria-hidden="true" />{fmtNum(gameState.counters.gold)}</span>
-    <span class="pill stone"><img src={stoneMark} alt="" aria-hidden="true" />{fmtNum(stoneTotal)} stones</span>
-    <span class="pill clock">{minutes} min · {kph.toFixed(0)}/hr · {fmtNum(gameState.counters.kills)} kills</span>
-    {#if saveNote}<span class="pill note">{saveNote}</span>{/if}
-  </div>
+  <!-- top-right, under the minimap: what the hunt is worth right now, so a decision never needs a panel opened -->
+  {#if saveNote}
+    <!-- the save note reads at the top where the eye already checks announcements, not in the purses -->
+    <span class="pill note save-note">{saveNote}</span>
+  {/if}
 
-  <!-- bottom-centre: the cast order, read-only on the field — arranging it is the Skills sub-screen's
-       job. The game presses the first slot whose cooldown is ready, so this bar is what happens next.
-       Past the last slot sit the round screens: the knob into the Skills screen, the bag carrying its
-       own count, and the character sheet. They open screens rather than cast, so they carry no slot
-       number; the strip itself takes no click. -->
+  <!-- bottom-centre: the cast order as a row of equal orbs, one per slot, each carrying its own number.
+       Read-only on the field — arranging it is the Skills sub-screen's job, so the row ends with the
+       press that opens it; the game presses the first slot whose cooldown is ready and whose mana fits,
+       and a filler row waits behind every timed one, so this row is what happens next. -->
   <div class="actionbar">
     <div class="casts" role="list" aria-label="Skill bar">
       {#each gameState.skills.list as id, i}
         {@const k = id ? sm.byId[id] : null}
         {@const cd = id ? (gameState.skills.cd[id] || 0) : 0}
-        <span class="cast" class:empty={!id || !k} class:ready={!!k && cd <= 0} role="listitem"
-              title={`Slot ${i + 1}${id && k ? ': ' + k.name : ': empty'}`}>
+        {@const when = id ? modeOf(gameState.skills, id) : 'always'}
+        {@const filler = slotFiller(id)}
+        <span class="cast" class:empty={!id || !k} class:ready={!!k && cd <= 0 && when === 'always' && !filler}
+              class:silent={when === 'never'} class:gated={when === 'conditional'} class:filler={filler}
+              role="listitem"
+              title={`Slot ${i + 1}${id && k ? `: ${k.name} · ${slotWaiting(id)}` : ': empty'}`}>
           {#if id && k}
             <img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />
             {#if cd > 0}<small>{cd.toFixed(1)}</small>{/if}
+            {#if latestFire?.skillId === id}
+              <!-- the order is the one place that can say which row fired without a second number: a ring of
+                   the press's own Element, remounted once per event by the key -->
+              {#key latestFire.id}
+                <span class="flare" style={`--fx:${latestFire.colour}`} aria-hidden="true"></span>
+              {/key}
+            {/if}
           {/if}
           <b>{i + 1}</b>
         </span>
       {/each}
-    </div>
-    <div class="knobs" role="group" aria-label="Screens">
-      <button class="knob tune" class:open={panel === 'skills'} onclick={() => togglePanel('skills')}
-              title="Auto-cast and the cast order · {ACTIVE_SLOTS} slots, cast top-down" aria-label="Skills">
+      <!-- the bar's own door: the cast order and each row's mode live on the Skills screen, so the last
+           thing on the row is the press that opens it -->
+      <button class="cast cog" class:here={panel === 'skills'} onclick={() => togglePanel('skills')}
+              title={`Skill settings — cast order and modes · ${keyFor('screen.skills')}`}
+              aria-keyshortcuts={keyFor('screen.skills')} aria-label="Skill settings">
         <img src={tuneMark} alt="" aria-hidden="true" />
       </button>
-      <button class="knob" class:here={panel === 'bag'} onclick={() => togglePanel('bag')}
-              title="Bags — {gameState.bag.length} / {E.inventory.adventure_slots} slots" aria-label="Bags">
+    </div>
+  </div>
+
+  <!-- bottom-right: the main wheel — one plate split three ways (bags, skills, the character sheet)
+       with five satellite knobs for the screens the loop reaches for next. They open or toggle rather
+       than cast, so they carry no slot number; the wheel takes no click of its own. The whole hub drags
+       as one from its plate background — double-click parks it back in its corner. -->
+  <div class="menuring" role="group" aria-label="Main screens" use:hubDrag
+       class:dragging={hubDragged} style={`translate: ${hub.x.toFixed(0)}px ${hub.y.toFixed(0)}px`}>
+    <button class="knob sat sat-map" class:here={panel === 'map'} onclick={() => togglePanel('map')}
+            title={`Map · ${keyFor('screen.map')}`} aria-keyshortcuts={keyFor('screen.map')} aria-label="Map">
+      <img src={mapMark} alt="" aria-hidden="true" />
+    </button>
+    <button class="knob sat sat-craft" class:here={panel === 'craft'} onclick={() => togglePanel('craft')}
+            title={`Craft · ${keyFor('screen.craft')}`} aria-keyshortcuts={keyFor('screen.craft')} aria-label="Craft">
+      <img src={craftMark} alt="" aria-hidden="true" />
+    </button>
+    <button class="knob sat sat-forge" class:here={panel === 'forge'} onclick={() => togglePanel('forge')}
+            title={`Forge · ${keyFor('screen.forge')}`} aria-keyshortcuts={keyFor('screen.forge')} aria-label="Forge">
+      <img src={forgeMark} alt="" aria-hidden="true" />
+    </button>
+    <button class="knob sat sat-market" class:here={panel === 'market'} onclick={() => togglePanel('market')}
+            title={`Market · ${keyFor('screen.market')}`} aria-keyshortcuts={keyFor('screen.market')} aria-label="Market">
+      <img src={coinMark} alt="" aria-hidden="true" />
+    </button>
+    <button class="knob sat sat-tree" class:here={panel === 'tree'} onclick={() => togglePanel('tree')}
+            title={`Tree — spend passive points · ${keyFor('screen.tree')}`} aria-keyshortcuts={keyFor('screen.tree')} aria-label="Passive tree">
+      <img src={treeMark} alt="" aria-hidden="true" />
+    </button>
+    <div class="wheel">
+      <button class="wedge w-bag" class:here={panel === 'bag'} onclick={() => togglePanel('bag')}
+              title={`Bags — ${gameState.bag.length} / ${E.inventory.adventure_slots} slots · ${keyFor('screen.bag')}`}
+               aria-keyshortcuts={keyFor('screen.bag')} aria-label="Bags">
         <img src={bagMark} alt="" aria-hidden="true" />
-        <span class="count" class:alarm={bagFull}>{gameState.bag.length}</span>
       </button>
-      <button class="knob" class:here={sheetOpen} aria-expanded={sheetOpen}
+      <button class="wedge w-skills" class:here={panel === 'skills'} onclick={() => togglePanel('skills')}
+              title="Auto-cast and the cast order · {ACTIVE_SLOTS} slots, cast top-down · {keyFor('screen.skills')}"
+              aria-keyshortcuts={keyFor('screen.skills')} aria-label="Skills">
+        <img src={skillMark} alt="" aria-hidden="true" />
+      </button>
+      <button class="wedge w-sheet" class:here={sheetOpen} aria-expanded={sheetOpen}
               onclick={() => (sheetOpen = !sheetOpen)} title="Character sheet" aria-label="Character sheet">
         <img src={sheetMark} alt="" aria-hidden="true" />
       </button>
     </div>
   </div>
 
-  <!-- the middle of the frame is the group itself: one plate per mob, HP as the loudest thing on it -->
+  <!-- the middle of the frame is the group itself: one plate per mob, HP as the loudest thing on it, and
+       every landed blow popping its own figure off the plate it hit -->
   <div class="field">
-    {#each gameState.group as m, mi}
-      <div class="mob" class:front={mi === 0} class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}>
-        {#if mi === 0 && latestFieldFx}
-          <!-- the front plate takes the hit: recreated on the event's own id, so the flash is one beat
-               per swing rather than a loop the eye learns to ignore -->
-          <span class="flash" key={latestFieldFx.id} style="--fx:{latestFieldFx.colour}"></span>
+    {#each plates as m, mi (m.id)}
+      {@const beat = plateBeat(fxByMob, m.id)}
+      <!-- the rim and the blade are the same blow: one event answers both, so a plate reads one shape per
+           landed hit rather than scanning the ring twice for it -->
+      {@const shape = beat}
+      {@const strike = plateStrike(ring, m.id)}
+      <!-- a mutual exchange: the blow taken and the blow dealt share one second, so the two cards meet
+           halfway instead of the attacker running the whole way down -->
+      {@const clash = strike && beat && strike.sec === beat.sec}
+      <!-- one keyed plate per living body: a death destroys this block at once, no outro kept. A body that
+           leaves for any other reason (the zone changed under the walk) sinks out of
+           the frame instead, and the row below it slides into its place -->
+      <div
+        class="mob"
+        class:front={mi === 0}
+        class:elite={m.kind === 'Elite'}
+        class:boss={m.kind.startsWith('Boss')}
+        in:plateLife={{ duration: plateMotion }}
+        out:plateLife={{ duration: plateMotion }}
+      >
+        {#if beat}
+          <!-- the plate actually struck takes the blow: the rim is remounted on the event's own id, so it is
+               one beat per hit rather than a loop the eye learns to ignore. It follows the hit and not the
+               front rank, because a DoT tick and an AoE press both land on the bodies behind it -->
+          {#key beat.id}
+            <span class="flash" style={`--fx:${beat.colour}`}></span>
+          {/key}
         {/if}
-        <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
-        <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
-        <p class="body">{m.kind}</p>
-        <span class="mobbar"><i style={'width:' + bar(m.hp, m.hpMax)}></i></span>
-        <p class="hpnum">{Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</p>
-        <p class="chips">
-          <span>PS {(m.ps * psMult(modsOn(gameState.curses, m.id))).toFixed(1)}</span>
-          <span>Hit {(eng.hitChance(c.accuracy, m.evasion) * 100).toFixed(1)}%</span>
-          <span>Dodge {eng.dodgeChance(m.dodgeRate, c.accuracy).toFixed(1)}%</span>
-        </p>
-        <p class="element-list">
-          {#each m.innate as element}
-            <span class="element-label"><img src={elementIcon(element)} alt="" aria-hidden="true" />{element}</span>
+        {#if shape}
+          {#key shape.id}
+            {#if shape.via === 'swing'}
+              <!-- the weapon's own path: the shelf's crossed swords swept across the body it cut, wearing the
+                   Element that carried the hit. A DoT tick draws no blade, because none was used -->
+              <span class="arc" style={`--fx:${shape.colour}`} aria-hidden="true"></span>
+            {:else}
+              <!-- a press lands as a burst and not a cut — the same colour rule, a different shape, so the two
+                   halves of the build read apart before the number is read -->
+              <span class="burst" style={`--fx:${shape.colour}`} aria-hidden="true"></span>
+            {/if}
+          {/key}
+        {/if}
+        <!-- every landed blow pops its own figure off the plate it hit and rises away: the newest few
+             the ring still holds, each keyed on its event so it plays once. A status tick pops small beside
+             the cut or burst that caused it, and never takes the rim. A swing the body answered without
+             taking pops its word the same way — dodge and miss read where the dodger stands. The rim, the
+             blade and the figures stay outside the charge below, so a swing back never replays the hit
+             they belong to -->
+        <div class="plate-fx" aria-hidden="true">
+          {#each (fxByMob.get(m.id) || []).filter((e) => e.kind === 'hit' && e.value).slice(0, 4) as e (e.id)}
+            <span class="fx pop" class:crit={e.crit} class:dot={e.via === 'dot'} out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{eng.fmt(e.value)}{e.crit ? '!' : ''}</span>
           {/each}
-        </p>
-        <p class="curses">{[curseWords(m.id), statusWords(m.id)].filter(Boolean).join(' | ') || '—'}</p>
+          {#each (fxByMob.get(m.id) || []).filter((e) => e.kind === 'block').slice(0, 2) as e (e.id)}
+            <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{e.text}</span>
+          {/each}
+        </div>
+        {#key strike ? strike.id : `c${m.id}`}
+          <!-- the attack run, keyed on the mob's own swing: this wrapper wears the whole card face, so the
+               charge moves the card and not just what is drawn inside it. Remounted per strike so every swing
+               reads; the shake inside is keyed on its own event, so being hit and hitting back play together
+               instead of one starving or replaying the other. On a mutual exchange it runs halfway, and the
+               player's card rises to meet it -->
+          <div class="charge" class:lunge={!!strike} class:clash={!!clash}>
+        {#key beat ? beat.id : `i${m.id}`}
+          <!-- the body takes the blow: one node, remounted on every direct hit, so a fast fight re-stamps
+               the flinch instead of looping it -->
+          <div class="art" class:knock={!!beat}>
+            <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
+            <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
+            <p class="body">{m.kind}</p>
+            <span class="mobbar"><i style={bar(m.hp, m.hpMax)}></i><b>{Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</b></span>
+            <p class="chips">
+              <span>PS {(m.ps * psMult(modsOn(gameState.curses, m.id))).toFixed(1)}</span>
+              <span>Hit {(eng.hitChance(c.accuracy, m.evasion) * 100).toFixed(1)}%</span>
+              <span>Dodge {eng.dodgeChance(m.dodgeRate, c.accuracy).toFixed(1)}%</span>
+            </p>
+            <p class="element-list">
+              {#each m.innate as element}
+                <span class="element-label"><img src={elementIcon(element)} alt="" aria-hidden="true" />{element}</span>
+              {/each}
+            </p>
+            <p class="curses">{[curseWords(m.id), statusWords(m.id)].filter(Boolean).join(' | ') || '—'}</p>
+          </div>
+        {/key}
+          </div>
+        {/key}
       </div>
     {:else}
-      <p class="clear-field">No mob on screen — the next group walks in.</p>
+      {#if gameState.walk}
+        <!-- The walking read: the shelf's own boot glyph split into single prints, a left foot and a right
+             foot laid in a stride, lit from where the walk has reached. It mounts only while the field is
+             empty, so a live plate is never covered or out-shouted, and it takes no pointer — the ground
+             behind it still pans. -->
+        <div class="travel" aria-hidden="true" style={`--p:${walkPct.toFixed(3)}`}>
+          {#each travelTrail as d}
+            <span class="print" class:right={d.right} style={`--x:${d.x.toFixed(3)}`}></span>
+          {/each}
+        </div>
+      {:else if !gameState.hunting}
+        <!-- ground that fields nothing says so, and says what would change it: a promise that the next
+             group walks in is false here, and a player who believes it waits forever -->
+        <p class="clear-field">
+          <b>No group walks in while the hunt is off.</b>
+          <span>Pick a cell on the map, then hunt it.</span>
+        </p>
+      {:else}
+        <p class="clear-field">
+          <b>Next group in {Math.max(0, gameState.spawnIn)} sec.</b>
+          <span>{hereName} · levels {zone.levels[0]}–{zone.levels[1]}</span>
+        </p>
+      {/if}
     {/each}
+
+    <!-- the character's own card, on the near edge of the field it fights on: a blow that lands here has a
+         body to land on at last. It is a read and not a control — no pointer, no gold, and no second copy of
+         any number the dock already owns -->
+    <div class="self-plate" aria-label="Your card" class:clash={!!(latestTaken && latestLand && latestTaken.sec === latestLand.sec)}>
+      {#if latestTaken}
+        {#key latestTaken.id}
+          <span class="flash" style={`--fx:${latestTaken.colour}`}></span>
+        {/key}
+      {/if}
+      <div class="plate-fx" aria-hidden="true">
+        {#each ring.filter((e) => e.side === 'self' && e.kind === 'taken' && e.value).slice(0, 3) as e (e.id)}
+          <span class="fx pop" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>-{eng.fmt(e.value)}</span>
+        {/each}
+        {#each ring.filter((e) => e.side === 'self' && (e.kind === 'block' || e.kind === 'proc')).slice(0, 3) as e (e.id)}
+          <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{e.text}</span>
+        {/each}
+      </div>
+      {#key selfArt ? selfArt.id : 'self-idle'}
+        <!-- the face wears the paint and both answers: a hit flinches the whole card down, away from the
+             blow above, and a landed swing surges it up. Remounted on whichever fact is newer, so one
+             gesture plays per beat and the clash on the root composes with it -->
+        <div class="cardface" class:knock={selfArt?.gesture === 'knock'} class:lunge={selfArt?.gesture === 'lunge'}>
+          <div class="art">
+          <img class="portrait" src={faceMark} alt="" aria-hidden="true" />
+          <p class="mob-name">You · {heldWeaponName(gameState) || 'Bare hands'}</p>
+          {#if c.es > 0}
+            <span class="mobbar es"><i style={bar(gameState.player.es, c.es)}></i><b>{Math.max(0, Math.round(gameState.player.es))} / {Math.round(c.es)}</b></span>
+          {/if}
+          <span class="mobbar"><i style={bar(gameState.player.hp, c.maxHp)}></i><b>{Math.max(0, Math.round(gameState.player.hp))} / {Math.round(c.maxHp)}</b></span>
+          <span class="mobbar mana"><i style={bar(gameState.player.mana, c.maxMana)}></i><b>{Math.max(0, Math.round(gameState.player.mana))} / {Math.round(c.maxMana)}</b></span>
+          </div>
+        </div>
+      {/key}
+      <!-- the character's own column rises off the card it belongs to: anchored above the plate, so the
+           events that name the character appear where the character stands rather than in a corner of
+           the screen no card occupies -->
+      <div class="float-side self-side" aria-hidden="true">
+        {#each selfFx as e (e.id)}
+          <span class="fx fx-{e.kind}" out:fxOut={{ ms: fxOutMs }} style="--fx:{e.colour}; --lane:{e.id % 3}">{e.text}</span>
+        {/each}
+      </div>
+    </div>
   </div>
 
-  <!-- The hit ring: everything the sim just did, drawn as an event rather than read back out of a
-       total. `counters.damageBy` says how much a build dealt; this says when, in what colour, and with
-       what landing — the number wears the Element that carried the hit, a crit wears the game's one
-       accent, and a status proc wears the colour of the Element that inflicted it (a cold proc is the
-       same ice as a cold hit). Colours come out of `engine.json` `elements`, never typed here. -->
+  <!-- The hit ring: what the sim just did that has no body to stand on, drawn as an event rather than read
+       back out of a total. A hit names its mob and rises over that plate; this column keeps a kill — whose
+       mob leaves the field the same tick — and a drop, which is loot on the character. `counters.damageBy`
+       says how much a build dealt; this says when, in what colour, and with what landing — the number wears
+       the Element that carried the hit, a crit wears the game's one accent, and a status proc wears the colour
+       of the Element that inflicted it (a cold proc is the same ice as a cold hit). Colours come out of
+       `engine.json` `elements`, never typed here. -->
   <div class="floaters" aria-hidden="true">
     <div class="float-side field-side">
       {#each fieldFx as e (e.id)}
-        <span class="fx fx-{e.kind}" class:crit={e.crit} style="--fx:{e.colour}; --lane:{e.id % 7}">{e.text}</span>
-      {/each}
-    </div>
-    <div class="float-side self-side">
-      {#each selfFx as e (e.id)}
-        <span class="fx fx-{e.kind}" style="--fx:{e.colour}; --lane:{e.id % 3}">{e.text}</span>
+        <span class="fx fx-{e.kind}" class:crit={e.crit} out:fxOut={{ ms: fxOutMs }} style="--fx:{e.colour}; --lane:{e.id % 7}">{e.text}</span>
       {/each}
     </div>
     {#if latestTaken}
@@ -1424,62 +1956,30 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     {/if}
   </div>
 
-  <!-- what each colour on the field means, read straight off the data that paints it -->
-  <div class="fx-key" aria-label="Damage colour key">
-    {#each fxKey as k (k.name)}
-      <span class="fx-swatch" style="--fx:{k.colour}">{k.label}</span>
-    {/each}
-  </div>
-
   <!-- the pick made on the map the field stands on: the card that plots the walk and offers the trip,
-       up on the field and in map focus alike — the desk it opens is the only screen a place owns -->
-  {#if pickedSettlement && pickedWalk && (panel === null || panel === 'map')}
-    <div class="mapcard">
+       anchored to the cell it speaks for in map focus — the desk it opens is the only screen a place owns -->
+  {#if pickedSettlement && pickedDest && panel === 'map'}
+    <div class="mapcard" bind:this={mapcardEl}
+         style:left={cardAt ? `${cardAt.x.toFixed(1)}px` : null}
+         style:top={cardAt ? `${cardAt.y.toFixed(1)}px` : null}
+         style:bottom={cardAt ? 'auto' : null}
+         style:transform={cardAt ? (cardAt.above ? 'translate(-50%, calc(-100% - clamp(7.5px, 0.489vw + 1.89px, 16.2px)))' : 'translate(-50%, clamp(7.5px, 0.489vw + 1.89px, 16.2px))') : null}>
       <TravelCard
         settlement={pickedSettlement}
-        cell={pickedCell}
-        walk={pickedWalk}
+        dest={pickedDest}
         busy={!!gameState.walk}
         fare={warpPrice(pickedSettlement.id)}
         afford={gameState.counters.gold >= warpPrice(pickedSettlement.id)}
         dungeon={dungeonView}
-        onwalk={doWalk}
+        onwalk={() => pickedCell && doWalk(pickedCell)}
         onwarp={travelTo}
-        onhunt={goToZone}
+        onhunt={doHuntHere}
         ondungeon={doDungeon}
         ondesk={() => (panel = 'desk')}
         onclear={() => { picked = null; pickedCell = null; }}
       />
     </div>
   {/if}
-
-  <!-- right edge, under the purses: where the character stands, whether it moves on, what it aims at -->
-  <div class="tracker">
-    <p class="phase">
-      {#if gameState.phase === 'camp'}Pushed — recovering at camp for {gameState.campSec} sec. No death, no loss: time is the only cost.{:else}Fighting · {c.hitsPerSec.toFixed(2)} hits/sec with {c.weaponName}, {c.weaponElement ? `carrying ${c.weaponElement}` : 'carrying no Element'}{/if}
-    </p>
-    <label class="travel">
-      <b>Zone</b>
-      <span class="seg">
-        <button class={gameState.travel === 'stay' ? 'active' : ''} onclick={() => setTravel('stay')}>stay here</button>
-        <button class={gameState.travel === 'forward' ? 'active' : ''} onclick={() => setTravel('forward')}>climb forward</button>
-      </span>
-      <small>{gameState.travel === 'forward'
-        ? `walks on to the next settlement you have already opened once level ${zone.levels[1] + 1} is reached, and a Push sends you back to the last zone you held`
-        : 'stays in this zone however high you get — you choose when to travel'}</small>
-    </label>
-    {#if bagFull}
-      <p class="alarm-line">Bag full — the zone has stopped paying. Walk to a settlement and deposit.</p>
-    {/if}
-    <p class="objective">{describeGoal()}</p>
-  </div>
-
-  <!-- bottom-left: the chronicle, the way a phone game's chat box reads — it grows upward from the edge -->
-  <div class="chronicle">
-    {#each gameState.log.slice(0, 9) as line}
-      <div><span class="t">{line.sec}s</span> {line.text}</div>
-    {/each}
-  </div>
 
   <!-- map focus folds the fight down onto the log: the compact card the field collapses to reads the
        group's health while the map is the subject, and its press is the way back to the centred field -->
@@ -1489,7 +1989,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       {#each gameState.group as m}
         <span class="mini-mob" class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}>
           <img src={mobIcon(m.species)} alt="" aria-hidden="true" />
-          <span class="mini-bar"><i style={'width:' + bar(m.hp, m.hpMax)}></i></span>
+          <span class="mini-bar"><i style={bar(m.hp, m.hpMax)}></i></span>
           <b>{Math.max(0, Math.round(m.hp))}</b>
         </span>
       {:else}
@@ -1498,98 +1998,170 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </button>
   {/if}
 
-  <!-- bottom-right: the three switches the field itself owns -->
-  <div class="controls">
-    <button onclick={() => (running = !running)} title={`${running ? 'Pause' : 'Resume'} · ${keyFor('game.pause')}`}
-            aria-keyshortcuts={keyFor('game.pause')}>{running ? 'Pause' : 'Resume'}</button>
-    <button onclick={step} title={`One tick · ${keyFor('game.tick')}`} aria-keyshortcuts={keyFor('game.tick')}>One tick</button>
-    <button onclick={() => { if (confirm('Start a new character?')) reset(); }}>New character</button>
-  </div>
-
   <!-- every note the client gives by press — a refusal, a forge outcome, a deposit — is said out loud as
        well as printed, because four different pills in four different corners are not one announcement -->
   <p class="aloud" role="status" aria-live="polite">{saveNote || equipNote || benchNote || townNote || farmNote}</p>
 </div>
 
-<!-- The menu: one column down the right edge, always above a sub-screen, so switching screens is one
-     press and the field is never further than its first button. Each tab prints the key that opens it —
-     the rail is its own key legend, so a binding a player never visited the settings over is still a
-     binding they can find on screen. -->
+<!-- The menu: a bar across the top-right, always above a sub-screen, so switching screens is one
+     press and the field is never further than its first button. Each tab wears its own caption; the
+     key still lives in its tooltip and the settings screen prints the full legend. -->
 <nav class="rail" aria-label="Menu">
+  <span class="purse" title="Gold in the purse"><b>{fmtNum(gameState.counters.gold)}</b><i>gold</i></span>
+  <span class="purse" title="Time and kills this run"><b>{minutes} min</b><i>{fmtNum(gameState.counters.kills)} kills</i></span>
   <button class="tab" class:here={panel === null} onclick={closePanel}
-          title="Back to the field · Esc" aria-keyshortcuts="Esc">
-    <img src={skillMark} alt="" aria-hidden="true" /><span>field</span><kbd>esc</kbd>
+          title="Back to the field · Esc" aria-keyshortcuts="Esc" aria-label="Back to the field">
+    <img src={skillMark} alt="" aria-hidden="true" />
+    <span class="cap">Field</span>
   </button>
   {#each RAIL as p}
     {@const label = RAIL_LABEL[p]}
     {@const key = keyFor(SCREEN_ACTION[p])}
     {@const far = TOWN_PANELS.includes(p) && !townLive}
+    {@const badge = p === 'tree' ? gameState.player.statPoints : 0}
     <button class="tab" class:here={panel === p} class:far={far}
             onclick={() => togglePanel(p)}
             title={`${label}${far ? ' — a settlement service, walk or warp into one first' : ''} · ${key}`}
-            aria-keyshortcuts={key}>
-      <img src={RAIL_ICON[p]} alt="" aria-hidden="true" /><span>{label}</span><kbd>{key.toLowerCase()}</kbd>
+            aria-keyshortcuts={key} aria-label={label}>
+      <img src={RAIL_ICON[p]} alt="" aria-hidden="true" />
+      <span class="cap">{label}</span>
+      {#if badge > 0}<span class="count">{badge}</span>{/if}
     </button>
   {/each}
+  <button class="tab" class:here={more} onclick={() => (more = !more)}
+          aria-expanded={more} aria-haspopup="true" title="Every screen · Esc closes" aria-label="More">
+    <img src={moreMark} alt="" aria-hidden="true" />
+    <span class="cap">More</span>
+  </button>
+  <!-- the field's own switches ride the same bar, past a divider: the clock's pace, Pause and
+       New character -->
+  <span class="rail-sep" aria-hidden="true"></span>
+  <div class="controls">
+    <div class="speed" role="group" aria-label="Game speed">
+      {#each [1, 2, 4] as m}
+        <button class:here={speed === m} aria-pressed={speed === m}
+                onclick={() => setSpeed(m)} title={`Clock speed ×${m}`}>×{m}</button>
+      {/each}
+    </div>
+    <button onclick={() => (running = !running)} title={`${running ? 'Pause' : 'Resume'} · ${keyFor('game.pause')}`}
+            aria-keyshortcuts={keyFor('game.pause')}>{running ? 'Pause' : 'Resume'}</button>
+    <button onclick={() => { if (confirm('Start a new character?')) reset(); }}>New character</button>
+  </div>
+  {#if more}
+    <!-- the whole menu in one box: the bar repeats its own tabs for reach, and this is the surface that
+         gathers every screen together, for a hand that would rather read the list once than scan a row -->
+    <div class="morebox" role="menu" aria-label="Every screen">
+      {#each RAIL as p}
+        {@const label = RAIL_LABEL[p]}
+        {@const far = TOWN_PANELS.includes(p) && !townLive}
+        <button class="moreitem" role="menuitem" class:here={panel === p} class:far={far}
+                onclick={() => { togglePanel(p); more = false; }}
+                title={`${label} · ${keyFor(SCREEN_ACTION[p])}`}>
+          <img src={RAIL_ICON[p]} alt="" aria-hidden="true" />
+          <span>{label}</span>
+        </button>
+      {/each}
+    </div>
+  {/if}
 </nav>
 
-{#if panel === 'bag'}
-  <Panel title="Bags" subtitle={bagSub} width="wide" onclose={closePanel}>
-    <!-- one screen, two sides, and the side that opens follows the ground under the character: in a
-         settlement the pile's only job is to be emptied, so the warehouse is what you meet -->
-    <div class="sides" role="group" aria-label="Which bag">
-      <button class={bagSide === 'pile' ? 'active' : ''} onclick={() => (bagSide = 'pile')}>
+{#if panel === 'bag' || panel === 'forge' || panel === 'craft'}
+  <Panel title="Inventory" subtitle={invSub} width="wide" fixed onclose={closePanel}>
+    <!-- one modal, five tabs: the hunt pile, the character bag, the two benches and the warehouse.
+         The benches and the warehouse are settlement tabs — refused with their reason from the field. -->
+    <div class="sides" role="tablist" aria-label="Inventory">
+      <button role="tab" class:active={invTab === 'pile'} aria-selected={invTab === 'pile'} onclick={() => goInvTab('pile')}>
         Hunt pile · {gameState.bag.length} / {E.inventory.adventure_slots}
       </button>
-      <button class={bagSide === 'stash' ? 'active' : ''} disabled={!townLive}
-              onclick={() => (bagSide = 'stash')}
-              title={townLive ? 'The warehouse the same record opens in every settlement · ' + keyFor('screen.stash')
-                              : 'A settlement service — walk or warp into one first'}>
+      <button role="tab" class:active={invTab === 'carried'} aria-selected={invTab === 'carried'} onclick={() => goInvTab('carried')}>
+        Carried · {slotsUsed(gameState)} / {slotsAvailable(gameState)}
+      </button>
+      <button role="tab" class:active={invTab === 'forge'} aria-selected={invTab === 'forge'} disabled={!townLive}
+              onclick={() => goInvTab('forge')}
+              title={townLive ? `Forge — enhance a piece · ${keyFor('screen.forge')}` : 'A settlement service — walk or warp into one first'}>
+        Forge{townLive ? '' : ' · not here'}
+      </button>
+      <button role="tab" class:active={invTab === 'craft'} aria-selected={invTab === 'craft'} disabled={!townLive}
+              onclick={() => goInvTab('craft')}
+              title={townLive ? `Craft house — the stones that change a piece · ${keyFor('screen.craft')}` : 'A settlement service — walk or warp into one first'}>
+        Craft{townLive ? '' : ' · not here'}
+      </button>
+      <button role="tab" class:active={invTab === 'stash'} aria-selected={invTab === 'stash'} disabled={!townLive}
+              onclick={() => goInvTab('stash')}
+              title={townLive ? `The warehouse the same record opens in every settlement · ${keyFor('screen.stash')}` : 'A settlement service — walk or warp into one first'}>
         Stash · {tabs} tab{tabs === 1 ? '' : 's'}{townLive ? '' : ' · not here'}
       </button>
-      <span class="grow"></span>
-      <!-- the margin is the difference between a press that dresses you and one that churns: a piece has
-           to be this much ahead before it goes on, in the same percent the bag filter's margin is set in -->
-      <label class="margin">only if better by
-        <input type="number" min="0" step="1" value={settings.equipMargin || 0}
-               onchange={(e) => setSetting('equipMargin', Math.max(0, Number((e.target as HTMLInputElement).value) || 0))} />
-        %
-      </label>
-      <button class="best" onclick={doBestEquip}
-              title={'Wears whatever is strongest in the pile, piece by piece · ' + keyFor('equip.best')}
-              aria-keyshortcuts={keyFor('equip.best')}>
-        Put on the best I carry
-      </button>
     </div>
-    {#if equipNote}<p class="equipnote">{equipNote}</p>{/if}
-    {#if bagSide === 'pile' || !townLive}
+    <!-- the body folds: one tab visible at a time, grids paged, prose collapsed — nothing here scrolls -->
+    <div class="invbody">
+    {#if invTab === 'pile'}
     <section class="bagblock">
       <h3>Hunt pile · what this trip kept</h3>
       {#if gameState.bag.length >= E.inventory.adventure_slots}
-        <p class="warn"><b>Bag full — the zone has stopped paying.</b> A full bag picks up nothing and turns nothing into a stone, so {gameState.counters.overflow || 0} pieces so far were left on the ground instead of turning into Reroll value. Walk back to {settlementById(gameState.town.waypoint)?.name || 'a settlement'} and deposit, then come out again.</p>
-      {:else}
-        <p><small>Kept pieces wait here until you choose. Hover a slot to read the piece and Equip it — nothing equips itself.</small></p>
+        <p class="warn"><b>Bag full — the zone has stopped paying.</b> {gameState.counters.overflow || 0} pieces have been left on the ground. Walk back to {settlementById(gameState.town.waypoint)?.name || 'a settlement'} and deposit.</p>
       {/if}
-      {#if townLive && tabs}
-        <!-- the way out of a pile is one press here, because this is the screen a full pile lands on -->
-        <p class="townlink">
+      <div class="bagtools">
+        <!-- the margin is the difference between a press that dresses you and one that churns: a piece has
+             to be this much ahead before it goes on, in the same percent the bag filter's margin is set in -->
+        <label class="margin">only if better by
+          <input type="number" min="0" step="1" value={settings.equipMargin || 0}
+                 onchange={(e) => setSetting('equipMargin', Math.max(0, Number((e.target as HTMLInputElement).value) || 0))} />
+          %
+        </label>
+        <button class="best" onclick={doBestEquip}
+                title={'Wears whatever is strongest in the pile, piece by piece · ' + keyFor('equip.best')}
+                aria-keyshortcuts={keyFor('equip.best')}>
+          Put on the best I carry
+        </button>
+        <span class="grow"></span>
+        {#if townLive && tabs}
+          <!-- the way out of a pile is one press here, because this is the screen a full pile lands on -->
           <button class="mini" disabled={!gameState.bag.length} onclick={() => doDepositAll(stashTab)}>
             Stash every unlocked piece → Tab {stashTab + 1}
           </button>
-          <small class="dim">…or take the other side of this screen to choose the tab.</small>
-        </p>
-      {/if}
-      <SlotGrid
-        entries={tempEntries}
-        capacity={E.inventory.adventure_slots}
-        mode={tempMode}
-        onmode={(m) => (tempMode = m)}
-        sort={tempSort}
-        onsort={(k) => (tempSort = k)}
-        wornOf={wornOf}
-        onequip={equip}
-        empty="Nothing yet — kills still drop, and the bag filter is the zone upgrade rate."
-      />
+        {/if}
+      </div>
+      {#if equipNote}<p class="equipnote">{equipNote}</p>{/if}
+      <div class="bagshell">
+        <nav class="bagcats" aria-label="Narrow the pile by kind">
+          {#each pileGroups as g (g.id)}
+            <button class:on={bagCat === g.id} onclick={() => (bagCat = g.id)}>
+              <span>{g.label}</span><b>{g.n}</b>
+            </button>
+          {/each}
+        </nav>
+        <div class="bagmain">
+          <div class="bagtools">
+            <input class="bagsearch" type="search" placeholder="Search this pile…"
+                   bind:value={bagQuery} aria-label="Search the pile" />
+            <label class="bagtier">quality
+              <select bind:value={bagTier} aria-label="Quality">
+                <option value="all">All</option>
+                <option value="low">low</option>
+                <option value="mid">mid</option>
+                <option value="high">high</option>
+              </select>
+            </label>
+            <span class="grow"></span>
+            <small class="dim">{bagShown.length} of {tempEntries.length} shown</small>
+          </div>
+          <SlotGrid
+            entries={bagShown}
+            capacity={E.inventory.adventure_slots}
+            mode={tempMode}
+            onmode={(m) => (tempMode = m)}
+            sort={tempSort}
+            onsort={(k) => (tempSort = k)}
+            wornOf={wornOf}
+            onequip={equip}
+            pageSize={30}
+            empty="Nothing here yet — kills still drop, and the bag filter is the zone upgrade rate."
+          />
+          <p class="bagfoot"><small>{bagShown.length
+            ? `${bagShown.length} shown of ${tempEntries.length} in the pile · ${E.inventory.adventure_slots} slots`
+            : 'nothing matches — clear the search or pick another kind'}</small></p>
+        </div>
+      </div>
 
       <details class="filter">
         <summary>Bag filter — what this run keeps</summary>
@@ -1612,21 +2184,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         <p><small>Still not found — Elements you have no resistance for: <b>{gameState.filter.missing.elements.length ? gameState.filter.missing.elements.join(', ') : 'none'}</b> · empty slots: <b>{gameState.filter.missing.slots.length ? gameState.filter.missing.slots.join(', ') : 'none'}</b></small></p>
       </details>
     </section>
-    {:else}
-      <p><small>There is no Bag Cap, so a tab is organisation rather than space — the Porter sells them and a
-        house grants two. This is the one record the character owns: <b>every settlement on the map opens the
-        same tabs</b>, so a run never has to come home to a particular house to empty a full pile.</small></p>
-      <StashBoard game={gameState} {tabs} tab={stashTab} pileSort={pileSort}
-                  ontab={(t) => (stashTab = t)}
-                  onpilesort={(k) => (pileSort = k)}
-                  ondeposit={(i) => doDeposit(i, stashTab)}
-                  onwithdraw={(i) => doWithdraw(stashTab, i)}
-                  ondepositAll={() => doDepositAll(stashTab)}
-                  onwithdrawAll={() => doWithdrawAll(stashTab)}
-                  onlock={toggleLock} onequip={equip} {wornOf} />
-      {#if townNote}<p class="townnote">{townNote}</p>{/if}
-    {/if}
-
+    {:else if invTab === 'carried'}
     <section class="bagblock">
       <h3>Carried · the character bag</h3>
       <p class="weight">Weight <b>{c.weightUsed.toFixed(0)}</b> / {Math.round(c.weightCap)} <small>{c.encumbrance > 0 ? `· aspd ${(c.encumbrance * -100).toFixed(0)}%` : '· no tax'}</small></p>
@@ -1638,14 +2196,39 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         sort={invSort}
         onsort={(k) => (invSort = k)}
         wornOf={wornOf}
+        pageSize={30}
         empty="Nothing carried yet — stones, herbs, draughts and junk all land in these slots."
       />
-      <p><small>
-        Stones and junk stack {E.inventory.stack_size.stone} per slot and weigh nothing · herbs and draughts stack {E.inventory.stack_size.herb} per slot and weigh {E.inventory.unit_weight.herb} each · gold takes no slot.
-        A grant with no slot left is left where it is ({gameState.counters.stopped || 0} so far) — nothing is deleted and nothing becomes a different medium.
-        {pouchSlots(gameState) > 0 ? `The Porter's pouches added ${pouchSlots(gameState)} of these slots · ` : ''}Clear space by selling junk at the Counterhand, brewing herbs into draughts, or condensing ten bottles into one.
-      </small></p>
     </section>
+    {:else if invTab === 'forge'}
+    <section class="bagblock">
+      <h3>Forge · enhancement, paid in Quality stones</h3>
+      <Forge state={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
+             onpick={(w, i) => (bench = { where: w, index: i })}
+             onrun={(op) => runCraft(op, 0)} {wornOf} note={benchNote} />
+    </section>
+    {:else if invTab === 'craft'}
+    <section class="bagblock">
+      <h3>Craft house · the stones that change a piece</h3>
+      <CraftBoard game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
+                  onpick={(w, i) => (bench = { where: w, index: i })}
+                  onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote} />
+    </section>
+    {:else}
+    <section class="bagblock">
+      <h3>Stash · one warehouse, every settlement</h3>
+      <StashBoard game={gameState} {tabs} tab={stashTab} pileSort={pileSort}
+                  ontab={(t) => (stashTab = t)}
+                  onpilesort={(k) => (pileSort = k)}
+                  ondeposit={(i) => doDeposit(i, stashTab)}
+                  onwithdraw={(i) => doWithdraw(stashTab, i)}
+                  ondepositAll={() => doDepositAll(stashTab)}
+                  onwithdrawAll={() => doWithdrawAll(stashTab)}
+                  onlock={toggleLock} onequip={equip} {wornOf} />
+      {#if townNote}<p class="townnote">{townNote}</p>{/if}
+    </section>
+    {/if}
+    </div>
   </Panel>
 {/if}
 
@@ -1663,17 +2246,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         {gameState.presets[gameState.activePreset].zones.includes(gameState.zone) ? 'unbind this zone' : 'bind this zone'}
       </button>
     </div>
-    <p><small>{skillNote || `Six sets are stored and the game picks one by zone. A Push brings the Main set back, and a skill already counting its cooldown keeps counting.`}</small></p>
-    <p><small>The game presses the first slot whose cooldown is ready and whose mana fits the usable pool. You only arrange the order. A percentage skill charges that share of the usable pool; a flat skill charges its own units, which grow with its level and with the pool. Reserved by auras: {reserved}% of the pool, so {Math.round(c.maxMana * (1 - reserved / 100))} mana stays usable.</small></p>
-    <p><small>Each slot picks <b>when</b> it may fire: <b>always</b> (cast whenever it is ready), <b>conditional</b> (only while one of the shared conditions below holds), or <b>never</b> (silenced). The list is shared by every conditional slot, so a new condition is one entry, never free text.</small></p>
-    <p><small>Conditional slots fire:
-      <label><input type="checkbox" checked={gameState.skills.conditions.boss} onchange={(e) => setConditions({ boss: (e.target as HTMLInputElement).checked })} /> against a boss</label> ·
-      <label><input type="checkbox" checked={gameState.skills.conditions.hpBelowPct > 0} onchange={(e) => setConditions({ hpBelowPct: (e.target as HTMLInputElement).checked ? 50 : 0 })} /> while HP is under</label>
-      <input type="number" min="0" max="100" value={gameState.skills.conditions.hpBelowPct} onchange={(e) => setConditions({ hpBelowPct: Number((e.target as HTMLInputElement).value) })} />% of the pool ·
-      {#each statusFlags as st}<label><input type="checkbox" checked={(gameState.skills.conditions.statusMissing || []).includes(st)} onchange={() => toggleStatusMissing(st)} /> while the target has no {st}</label>{' '}{/each}
-      {#each curseFlags as cf}<label><input type="checkbox" checked={(gameState.skills.conditions.statusMissing || []).includes(cf.id)} onchange={() => toggleStatusMissing(cf.id)} /> while {cf.name} is not on it</label>{' '}{/each}</small></p>
+    {#if skillNote}<p><small>{skillNote}</small></p>{/if}
+    <details class="prose">
+      <summary>How the cast order works</summary>
+      <p><small>The game presses the first slot whose cooldown is ready and whose mana fits the usable pool. You only arrange the order — except a slot with no cooldown of its own, which the game treats as the <b>filler</b>: it presses only after every timed slot has had its chance, so placing it high in the order costs the timed slots nothing. A percentage skill charges that share of the usable pool; a flat skill charges its own units, which grow with its level and with the pool. Reserved by auras: {reserved}% of the pool, so {Math.round(usableMana(c, gameState.skills))} mana stays usable.</small></p>
+      <p><small>Each row picks <b>when</b> it may fire: <b>always</b> (cast whenever it is ready), <b>conditional</b> (only while one of <i>its own</i> conditions holds), or <b>never</b> (silenced). A conditional row carries its own list, so two rows can wait on different things at once — the <b>gate</b> cell says what each one waits on and opens that row's editor. The legs are fixed, never free text: a boss · our HP under a share of the pool · the group at least so wide · a mana floor the press must not break · and, for a row that writes one, the status or curse the target is still missing.</small></p>
+    </details>
     <table>
-      <thead><tr><th>#</th><th>Skill</th><th>Worth</th><th>Level</th><th>cd → eff</th><th>Mana</th><th>Next in</th><th>When</th><th>Place</th></tr></thead>
+      <thead><tr><th>#</th><th>Skill</th><th>Worth</th><th>Level</th><th>cd → eff</th><th>Mana</th><th>Next in</th><th>When</th><th>Gate</th><th>Place</th></tr></thead>
       <tbody>
         {#each gameState.skills.list as id, i}
           {@const k = id ? sm.byId[id] : null}
@@ -1697,15 +2277,45 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               {:else}—{/if}
             </td>
             <td>
+              {#if id && modeOf(gameState.skills, id) === 'conditional'}
+                <button class="gate" onclick={() => (gateOpen = gateOpen === id ? null : id)}
+                        title={gateOpen === id ? 'close this row\'s conditions' : 'edit this row\'s conditions'}>
+                  {gateNote(id) || 'nothing yet — this row never fires'}
+                </button>
+              {:else}—{/if}
+            </td>
+            <td>
               <select value={id || ''} onchange={(e) => setSlot(i, (e.target as HTMLSelectElement).value)}>
                 <option value="">empty</option>
                 {#each ownedActives as k2}<option value={k2.id} selected={id === k2.id}>{k2.name}</option>{/each}
               </select>
             </td>
           </tr>
+          {#if id && gateOpen === id && modeOf(gameState.skills, id) === 'conditional'}
+            <!-- One row's own list, opened under the row it belongs to. The legs are the fixed five the
+                 sim reads; a number a leg needs opens at its data default and the player edits it here. -->
+            {@const cond = condOf(gameState.skills, id)}
+            {@const flag = rowFlag(id)}
+            <tr class="gate-editor">
+              <td></td>
+              <td colspan="9">
+                <label><input type="checkbox" checked={cond.boss} onchange={(e) => setCond(id, { boss: (e.target as HTMLInputElement).checked })} /> against a boss</label> ·
+                <label><input type="checkbox" checked={cond.hpBelowPct > 0} onchange={(e) => setCond(id, { hpBelowPct: (e.target as HTMLInputElement).checked ? HP_BELOW_DEFAULT : 0 })} /> while HP is under</label>
+                <input type="number" min="0" max="100" value={cond.hpBelowPct} onchange={(e) => setCond(id, { hpBelowPct: Number((e.target as HTMLInputElement).value) })} />% of the pool ·
+                <label><input type="checkbox" checked={cond.minTargets > 0} onchange={(e) => setCond(id, { minTargets: (e.target as HTMLInputElement).checked ? MIN_TARGETS_DEFAULT : 0 })} /> only against</label>
+                <input type="number" min="1" value={cond.minTargets} onchange={(e) => setCond(id, { minTargets: Number((e.target as HTMLInputElement).value) })} /> in the group ·
+                <label><input type="checkbox" checked={cond.manaFloorPct > 0} onchange={(e) => setCond(id, { manaFloorPct: (e.target as HTMLInputElement).checked ? MANA_FLOOR_DEFAULT : 0 })} /> never spend below</label>
+                <input type="number" min="0" max="100" value={cond.manaFloorPct} onchange={(e) => setCond(id, { manaFloorPct: Number((e.target as HTMLInputElement).value) })} />% of the usable pool ·
+                {#if flag}<label><input type="checkbox" checked={cond.statusMissing.includes(flag.key)} onchange={() => toggleStatusMissing(id, flag.key)} /> while {flag.label} is not on it</label>{/if}
+                <button onclick={() => copyGate(id)}>copy to every conditional row</button>
+                <button onclick={() => setCond(id, { boss: false, hpBelowPct: 0, statusMissing: [], minTargets: 0, manaFloorPct: 0 })}>clear</button>
+              </td>
+            </tr>
+          {/if}
         {/each}
       </tbody>
     </table>
+    <div class="fold">
     <h3>Duplicates feed each skill's own ladder</h3>
     <table>
       <thead><tr><th>Skill</th><th>Type</th><th>Dupes</th><th>Ladder</th><th>Effect</th></tr></thead>
@@ -1737,7 +2347,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     {/each}
 
     <h3>Mastery ladder · the whole roster</h3>
-    <p><small>Only the held weapon earns XP (4 a kill), but the account keeps the best value any slot reached. The fight panel shows just the held one; this is every weapon.</small></p>
+    <p><small>Only the held weapon earns XP (4 a kill) — the account keeps the best value any slot reached.</small></p>
     <table>
       <thead><tr><th>Weapon</th><th>Mastery</th><th>Drop bonus</th></tr></thead>
       <tbody>
@@ -1760,12 +2370,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         <li><small>None.</small></li>
       {/each}
     </ul>
+    </div>
   </Panel>
 {/if}
 
 {#if panel === 'tree'}
   <Panel title="Passive tree" subtitle={`${treePointsFree(gameState)} banked · ${treePointsSpent(gameState)} spent`} onclose={closePanel}>
-    <p><small>A level banks one point and one point buys one rank; a node's rank 1 needs the node before it in its own chain, and every node pays a line at a number. Respec is free, at the town Counterhand.</small></p>
     <div class="tree-branches">
       {#each tree.branches as branch}
         <div class="tree-branch">
@@ -1805,32 +2415,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'forge'}
-  <Panel title="Forge" subtitle="enhancement · paid in Quality stones, never gold" width="wide" onclose={closePanel}>
-    <p><small>The forge is a settlement service, so it opens only while the character stands in one. A step
-      that can fail says so before the press: the chance, the rung it drops back to, and the protection
-      charge that would take the miss instead. Past the break rung with no charge left a miss leaves the piece
-      Broken, and a Broken piece contributes nothing until it is repaired (`crafting.md`).</small></p>
-    <Forge state={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
-           onpick={(w, i) => (bench = { where: w, index: i })}
-           onrun={(op) => runCraft(op, 0)} {wornOf} note={benchNote} />
-  </Panel>
-{/if}
-
-{#if panel === 'craft'}
-  <Panel title="Craft house" subtitle="the stones that change a piece, not its level" width="wide" onclose={closePanel}>
-    <p><small>Reroll value moves a number inside its own Tier and never below the floor that slot has ever
-      held, Refine pushes one slot up a Tier, Roll tier redraws the Tier and leaves the Mod where it is, and
-      Ascend raises the whole piece one item-quality step. Three stones change what a line <em>is</em>: Roll
-      new Mod lets the Base pool draw the replacement, Replace lets you name it, and an imprint stone carries
-      one Mod's own identity. An Element moves only when an elemental Mod arrives or when Corrupt redraws the
-      piece on the Forge (`crafting.md`). Draughts are brewed on the Farm.</small></p>
-    <CraftBoard game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
-                onpick={(w, i) => (bench = { where: w, index: i })}
-                onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote} />
-  </Panel>
-{/if}
-
 {#if panel === 'keys'}
   <Panel title="Keyboard" subtitle={`${KEYBINDS.length} actions, all rebound here`} width="wide" onclose={closePanel}>
     <KeybindTable binds={binds} onset={setBind} onreset={resetBinds} onclear={clearBind} />
@@ -1839,7 +2423,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 {#if panel === 'farm'}
   <Panel title="Farm" subtitle={farmSub} onclose={closePanel}>
-    <p><small>The one life skill, and it grants no power: every output is the herb a draught is brewed from. {gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h a cycle · {farm.plotsMax} plots at most ({plots} yours — the Steward sells the two deeds).</small></p>
+    <p><small>{gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h a cycle · {farm.plotsMax} plots at most ({plots} yours — the Steward sells the two deeds).</small></p>
 
     <h3>Plots</h3>
     <table>
@@ -1904,23 +2488,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 {#if panel === 'desk'}
   <Panel title="Settlement" subtitle={deskSub} width="wide" onclose={closePanel}>
-    <p><small><b>The desk of whichever settlement the pick rests on</b> — Counterhand, Respec, Standing, the stall lines, the Guild board and the Collector, then the hunt table that is the zone list and the walk table that prices every road. The map is not here: it is the ground the field stands on, sharpened by the MAP tab and clicked where it lies, so reading a desk never takes a place out of view. Nothing here is a second menu — a place is opened by walking to its cell, and the desk belongs to the ground you are standing on.</small></p>
-    <p><small>The field itself is one generated file — <code>node tools/map.ts --write</code> — printing <b>every cell of the hex field the simulator already walks on</b>: each settlement's own cell, one cell for every named sub-zone and one for every wild side it rings, then the walk graph labelled in blocks, the regions, the landmark marks, the level bands and the travel pin. A cell's colour is the terrain it stands on; a cell that carries no zone yet takes the nearest settlement's terrain, laid on thinner the further out it sits. The bands climb outward by construction, because a zone's band is its distance rank from the starting settlement. The field stays presentation: a click reads the cell's own settlement id off `data-node`, and the road module answers for the blocks between two ids (X33 · M7 · M10).</small></p>
+    <p><small><b>The desk of whichever settlement the pick rests on</b> — Counterhand, Respec, Standing, the stall lines, the Guild board and the Collector, then the hunt table that is the zone list and the walk table that prices every road. A place is opened by walking to its cell, so the desk works only the ground you are standing on.</small></p>
 
     {#if viewTown}
       <h3>{viewTown.name} · settlement{viewHere ? '' : ' — read only, you are standing in ' + (town ? town.name : 'the field')}</h3>
       <p><small>Innate Element {viewTown.innate.join(' / ')} · Base bias flavour {viewTown.base_bias_flavor} · NPCs here: {viewTown.npcs.map((n: string) => npcOf(n).name).join(' · ')}</small></p>
       {#if !viewHere}
-        <p><small>The counter, the board and the desk are worked where the character stands. Walk or warp to {viewTown.name} and this section turns live — the field never sells a far purchase.</small></p>
+        <p><small>Walk or warp to {viewTown.name} — this section is live only where the character stands.</small></p>
       {/if}
 
+      <div class="fold">
       <h4>Counterhand · the gold mint</h4>
       <p>Gold {gameState.counters.gold.toFixed(1)} · junk unsold {junkTotal} ({junkLines.join(' · ') || 'none'}) · stones {stonesLine()}</p>
       <button onclick={doSell} disabled={!viewHere || junkTotal === 0}>Sell all junk here</button>
       <p><small>Junk sells for the gold its own rung prices, and selling it is the only thing that mints gold — walking pays a drop roll and nothing else. Rejected gear dissolved for Value stones instead — the two media never mix.</small></p>
 
       <h4>Respec · free</h4>
-      <p><small>Hand every allocated stat point back and re-spend them. Free, and only here in a settlement — this game has no death, so a locked build would be a worse punishment than a lost fight.</small></p>
+      <p><small>Hand every allocated stat point back and re-spend them — free, and only in a settlement.</small></p>
       <button onclick={respec} disabled={!viewHere || !STATS.some((k) => gameState.player.points[k])}>Respec — refund all stat points</button>
       <button onclick={doRespecTree} disabled={!viewHere || !treePointsSpent(gameState)}>Respec the tree — refund {treePointsSpent(gameState)} point{treePointsSpent(gameState) === 1 ? '' : 's'}</button>
 
@@ -1954,16 +2538,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             {#each gameState.town.tasks as t, i}
               <tr>
                 <td>{i + 1}</td>
-                <td>{t ? `${t.kind} ×${t.n}` : 'refills in ' + Math.max(0, gameState.town.refillAt[i] - gameState.clockSec) + 's'}</td>
+                <td>{t ? `${t.kind} ×${t.n}` : 'refills in ' + (() => { const s = Math.max(0, gameState.town.refillAt[i] - gameState.clockSec); return s >= 3600 ? (s / 3600).toFixed(1) + 'h' : s >= 60 ? Math.round(s / 60) + 'm' : Math.round(s) + 's'; })()}</td>
                 <td>{t ? eng.zoneById(t.zone).name : ''}</td>
                 <td>{t ? `${t.progress} / ${t.n}` : ''}</td>
-                <td>{t ? `${t.count} ${t.stone} stone` : ''}</td>
-                <td>{#if t}<button disabled={t.progress < t.n} onclick={() => doClaim(i)}>claim</button>{/if}</td>
+                <td>{t ? (t.alt ? `${t.count} ${t.stone} or ${t.alt.count} ${t.alt.stone}` : `${t.count} ${t.stone} stone`) : ''}</td>
+                <td>{#if t}
+                  {#if t.alt}
+                    <button disabled={t.progress < t.n} onclick={() => doClaim(i, t.stone)}>{t.stone}</button>
+                    <button disabled={t.progress < t.n} onclick={() => doClaim(i, t.alt!.stone)}>{t.alt.stone}</button>
+                  {:else}
+                    <button disabled={t.progress < t.n} onclick={() => doClaim(i)}>claim</button>
+                  {/if}
+                {/if}</td>
               </tr>
             {/each}
           </tbody>
         </table>
-        <p><small>Payouts are stones only, sized at {TOWN.task_sizing.reward_minutes_of_band_income} minutes of that band's own stone income — the sizing lives in <code>town.json</code> so the rebalance pass can move it without touching code.</small></p>
+        <p><small>Payouts are stones only, sized at {TOWN.task_sizing.reward_minutes_of_band_income} minutes of that band's own stone income.</small></p>
       {/if}
 
       {#if viewColSet}
@@ -1998,6 +2589,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         <h4>Collector grants</h4>
         <p><small>{gameState.grants.filter_presets} extra filter preset{gameState.grants.filter_presets === 1 ? '' : 's'} · {stashTabCount(gameState)} stash tabs{gameState.grants.titles.length ? ` · titles: ${gameState.grants.titles.join(', ')}` : ''}{gameState.grants.banners.length ? ` · banners: ${gameState.grants.banners.join(', ')}` : ''}.</small></p>
       {/if}
+      </div>
     {/if}
 
     <h3>Hunt · {E.mob.zones.length} zones, one per settlement</h3>
@@ -2025,20 +2617,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </table>
 
     <h3>Walk · {E.road.block_sec}s a block · {gameState.town.visited.length} of {TOWN.settlements.length} Waypoints opened</h3>
-    <p><small>Every pair of settlements is walkable: there is no edge list and no route to buy, and a far destination is not teleported to — the walk plots an ordered chain of adjacent cells and crosses it one cell per block, each step into a cell that shares an edge with the one before it. Walking to a settlement you have never reached opens its Waypoint, once, and costs nothing. After that the Waypoint warps you there instantly, for gold at the destination's own band: <b>{warpFee}</b> minutes of the town's junk income a block, so the price is the time the walk would have spent. A walk is online only: an away period never crosses a block. A Push rests you at the camp of the zone you were ambushed in and walks you back in on the same block, so a Push never costs you the road. An ambush is an ordinary mob group and pays the ordinary drop roll — walking mints no gold, no Standing and no stones. Only ground your feet have crossed is legible on the sheet; the rest sits under cloud until you walk it.</small></p>
+    <p><small>Every cell of the field is walkable and every cell is a place to stand: there is no edge list and no route to buy, and a far destination is not teleported to — the walk plots an ordered chain of adjacent cells and crosses it one cell per block, each step into a cell that shares an edge with the one before it. One block costs what any block costs, whatever lies under it. Walking to a settlement you have never reached opens its Waypoint, once, and costs nothing — a side of a town or bare ground is standing room, not a Waypoint. After that the Waypoint warps you there instantly, for gold at the destination's own band: <b>{warpFee}</b> minutes of the town's junk income a block, so the price is the time the walk would have spent. A walk is online only: an away period never crosses a block. A Push rests you at the camp of the zone you were ambushed in and walks you back in on the same block, so a Push never costs you the road. An ambush is an ordinary mob group and pays the ordinary drop roll — walking mints no gold, no Standing and no stones. Only ground your feet have crossed is legible on the sheet; the rest sits under cloud until you walk it.</small></p>
+
     <table class="picklist">
       <thead><tr><th>Settlement</th><th>Zone</th><th>Blocks</th><th>Time</th><th>Warp</th><th></th></tr></thead>
       <tbody>
         {#each TOWN.settlements.filter((x: any) => x.id !== townId) as s}
-          {@const blocks = walkBlocks(townId, s.id)}
+          {@const dest = settlementCell(s.id)}
+          {@const blocks = dest ? cellBlocks(gameState, dest) : walkBlocks(townId, s.id)}
           {@const fare = warpPrice(s.id)}
           <tr class:picked={picked === s.id} onclick={() => select(s.id)}>
             <td>{s.name}</td><td>{s.zone}</td>
             <td>{blocks}</td>
-            <td>{road.secBetween(townId, s.id)}s</td>
+            <td>{dest ? cellSec(gameState, dest) : road.secBetween(townId, s.id)}s</td>
             <td>{canTravel(gameState, s.id) ? `${fare} gold` : '—'}</td>
             <td>
-              <button onclick={(e) => { e.stopPropagation(); doWalk(s.id); }} disabled={!!gameState.walk}>{gameState.walk?.to === s.id ? 'walking' : 'walk'}</button>
+              <button onclick={(e) => { e.stopPropagation(); dest && doWalk(dest); }} disabled={!!gameState.walk}>{gameState.walk?.node === s.id ? 'walking' : 'walk'}</button>
               {#if canTravel(gameState, s.id)}<button onclick={(e) => { e.stopPropagation(); travelTo(s.id); }} disabled={gameState.counters.gold < fare} title={gameState.counters.gold < fare ? `needs ${fare} gold` : `warp for ${fare} gold`}>waypoint</button>{/if}
             </td>
           </tr>
@@ -2079,7 +2673,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <p>{snapNote}</p>
 
     <h2>Settings</h2>
-    <p><small>Client-only and shared by all three slots — these never enter a save file, and no `engine.json` constant is shadowed here. Automation lives with what it drives: potion auto-use and auto-farm on the Farm panel, the bag filter on the Bags panel, presets on the Skills panel.</small></p>
+    <p><small>Client-only and shared by all three slots — these never enter a save file. Automation lives with what it drives: potion auto-use and auto-farm on the Farm panel, the bag filter on the Bags panel, presets on the Skills panel.</small></p>
     <label>Number format
       <select value={settings.numberFormat} onchange={(e) => setSetting('numberFormat', (e.target as HTMLSelectElement).value as 'plain' | 'short')}>
         <option value="plain">plain — 12,345</option>
@@ -2097,8 +2691,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 {/if}
 
 <style>
-  button.active { border-color: var(--good); color: var(--good); }
-  /* the map: layout only — the field is inlined via {@html}, so its own styling lives in app.css */
+  button.active { border-color: var(--gold); color: var(--gold); }
+  /* the map: layout only — the field is inlined via {@html}, so its own styling lives in styles/map.css */
   /* the field's background is the map itself, and it is a surface you travel on: scaled past its own
      frame so no band of empty gradient shows at an edge, and kept out of focus until the pointer
      reaches for it or the MAP tab brings it into focus. */
@@ -2107,15 +2701,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     /* the depth-of-field ladder, read off the one `--dof` the client owns: this surface is soft at rest
        and sharpens as attention reaches it, rather than each state inventing its own filter */
     --dof: var(--dof-rest);
-    opacity: calc(1 - var(--dof) / 26);
-    filter: blur(var(--dof)) brightness(.92) saturate(.85);
+    /* the two tints the rest state carries, as dials rather than a written-out filter: the filter itself is
+       declared once, on the node that actually moves, and a state only changes the dials it inherits */
+    --map-lift: .92;
+    --map-sat: .85;
+    /* the dim is the recede, so it follows the ladder's step rather than the pixel count: a lighter blur
+       keeps the ground legible and keeps the sheet sitting behind the plates the way it did before */
+    opacity: calc(1 - var(--dof) / 12);
     /* the sheet is ground in the game's own dark, and the log and the cast order live at the bottom of
        it — the backdrop fades toward that edge so the small grey text there keeps its contrast */
     mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
     -webkit-mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
     /* the frame never moves: the pan and the zoom are written onto the ground inside it, so the edges,
        the mask and the letterbox stay where the player last saw them */
-    transition: opacity .22s ease, filter .22s ease;
+    transition: opacity .22s ease;
     touch-action: none;
     /* a drag pans this surface, so it must never start a text selection instead — the sheet's own labels
        are already inert, but the rectangle they sit in was not */
@@ -2127,14 +2726,21 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     position: absolute; inset: 0;
     transform-origin: 50% 46%;
     transition: transform .18s ease;
+    /* The soft focus rides the node that is actually moved. Declared on the frame instead, every pan frame
+       re-blurred the whole sheet through the frame's mask — measured at 30ms a frame against 8ms at rest,
+       which is a stuttering map. On its own layer the blur is painted once and the pan is a transform. */
+    filter: blur(var(--dof)) brightness(var(--map-lift)) saturate(var(--map-sat));
+    /* the sheet is the one surface in the client that is moved under the hand, so it keeps its own layer
+       rather than paying for a fresh raster the moment the pan crosses it */
+    will-change: transform;
   }
   /* while the hand is on the sheet the pan follows it instead of easing after it */
   .map-back.dragging .map-sheet { transition: none; }
   /* the map comes to the pointer, but not past the HUD: enough to read a name and aim at a cell, not
      enough to compete with the vitals and the log printed over it. Under keyboard the HUD is not being
      aimed at, so the focused sheet sharpens further */
-  .map-back:hover { --dof: var(--dof-near); filter: blur(var(--dof)) brightness(.98) saturate(.92); opacity: .82; }
-  .map-back:focus-visible { --dof: 1.5px; opacity: .92; filter: blur(1.5px) brightness(1) saturate(.95); }
+  .map-back:hover { --dof: var(--dof-near); --map-lift: .98; --map-sat: .92; opacity: .82; }
+  .map-back:focus-visible { --dof: 1.5px; --map-lift: 1; --map-sat: .95; opacity: .92; }
   /* the ring a focused surface wears is drawn on the frame, not on the ground inside it — the ground is
      scaled and can leave the frame, and a ring that drifted off the map would read as a different state.
      The frame fills the stage, so the ring is pulled inward: the global rule reads `--ring-offset`. */
@@ -2143,12 +2749,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      cell under a click never moves — and the mob field is taken off the screen rather than left as a
      faint ghost over the map. The fight runs on behind it; only the reading changes. A drag pans the
      sheet here, so the hand is open until it closes on the ground. */
-  .stage.mapmode .map-back { --dof: 0px; opacity: 1; filter: none; cursor: grab; }
+  .stage.mapmode .map-back { --dof: 0px; --map-lift: 1; --map-sat: 1; opacity: 1; cursor: grab; }
   /* while the hand is on the sheet the pan follows it instead of easing after it */
   .map-back.dragging { cursor: grabbing; transition: opacity .22s ease, filter .22s ease; }
   .stage.mapmode .field { display: none; }
-  .stage.mapmode .chronicle { opacity: .1; pointer-events: none; }
-  .stage.mapmode .pockets { opacity: .45; }
+  /* the full sheet is the subject in map focus, so its own thumbnail has nothing left to say */
+  .stage.mapmode :global(.mini-map) { display: none; }
   /* the sheet is the subject in map focus, so the field's own reads leave the frame rather than sitting
      on top of a sharp map: a zone label and a travel switch cannot share the same square, and the map is
      the one thing the player is looking at. The purse stays — it costs nothing to read and a walk needs it. */
@@ -2156,30 +2762,31 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .stage.mapmode .arena { display: none; }
   /* a working screen is the subject, so the field behind it recedes the way the ground recedes from the
      map: one ladder, one direction — the veil does the dimming and the field does the blurring */
-  .stage.veiled { --dof: 5px; }
-  .stage.veiled .field, .stage.veiled .tracker, .stage.veiled .chronicle, .stage.veiled .actionbar {
+  .stage.veiled { --dof: var(--dof-far); }
+  .stage.veiled .field, .stage.veiled .tracker, .stage.veiled .actionbar {
     filter: blur(2.5px); opacity: .5; transition: filter .18s ease, opacity .18s ease;
   }
   .stage.veiled .map-back { --dof: var(--dof-rest); }
   /* the sheet's own controls: the three views, the gate level, the two overlays — and the key under it */
-  .map-tools { display: flex; flex-wrap: wrap; gap: .3rem 1rem; align-items: center; font-size: .82rem; margin: .4rem 0; }
-  .map-views { display: inline-flex; gap: .6rem; }
-  .map-views label, .map-tools label { display: inline-flex; align-items: center; gap: .25rem; }
-  .map-level input[type=range] { width: 8rem; }
+  .map-tools { display: flex; flex-wrap: wrap; gap: 4px var(--spacing-md); align-items: center; font-size: var(--font-xs); margin: var(--spacing-xs) 0; }
+  .map-views { display: inline-flex; gap: var(--spacing-sm); }
+  .map-views label, .map-tools label { display: inline-flex; align-items: center; gap: 3px; }
+  .map-level input[type=range] { width: var(--box-160); }
   /* the sheet's hand: zoom the frame scales about, and the two ways back to the ground you stand on */
-  .map-zoom { display: inline-flex; align-items: center; gap: .25rem; }
-  .map-zoom button { padding: .15rem .45rem; font-size: .74rem; min-width: 1.5rem; line-height: 1.2; }
-  .map-zoom b { font-family: var(--num); font-size: .7rem; font-weight: 500; color: var(--dim); min-width: 2.6rem; text-align: center; }
-  .map-legend { display: flex; flex-wrap: wrap; gap: .25rem .8rem; font-size: .74rem; color: var(--dim); }
-  .map-legend .swatch { display: inline-flex; align-items: center; gap: .25rem; }
-  .map-legend .swatch i { width: .75rem; height: .75rem; border: 1px solid var(--line); border-radius: 2px; }
-  .map-legend .ramp i { width: 5rem; }
-  /* where the field's own destination card sits: centred over the map it was picked from, clear of the
-     cast order below it and the chronicle to its left. The card itself is ui/TravelCard.svelte, shared
-     with the MAP sub-screen */
+  .map-zoom { display: inline-flex; align-items: center; gap: 3px; }
+  .map-zoom button { padding: 4px var(--spacing-xs); font-size: var(--font-xs); min-width: var(--icon-lg); line-height: 1.2; }
+  .map-zoom b { font-family: var(--num); font-size: var(--font-xs); font-weight: 500; color: var(--dim); min-width: var(--icon-lg); text-align: center; }
+  .map-legend { display: flex; flex-wrap: wrap; gap: 3px var(--spacing-sm); font-size: var(--font-xs); color: var(--dim); }
+  .map-legend .swatch { display: inline-flex; align-items: center; gap: 3px; }
+  .map-legend .swatch i { width: var(--icon-xs); height: var(--icon-xs); border: 1px solid var(--line); border-radius: 2px; }
+  .map-legend .ramp i { width: var(--box-100); }
+  /* where the field's own destination card sits: anchored to the cell it speaks for, placed by the
+     effect that measures the pick (DECISIONS.md §Interface — a floating card is placed by the box it measures, never
+     by the box it expects). The bottom-centre rule below is only the first frame's fallback, before
+     that measure lands. The card itself is ui/TravelCard.svelte, shared with the MAP sub-screen */
   .mapcard {
-    position: absolute; left: 50%; bottom: 4.6rem; transform: translateX(-50%);
-    width: min(34rem, 62%); z-index: 4;
+    position: fixed; left: 50%; bottom: clamp(57.5px, 3.749vw + 14.49px, 124.2px); transform: translateX(-50%);
+    width: min(var(--box-680), 62%); z-index: 4;
   }
   .picklist tr { cursor: pointer; }
   .picklist tr.picked { background: var(--panel); }
@@ -2187,15 +2794,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* ── the frame ───────────────────────────────────────────────────────────────────────────────
      One screen, no page scroll. The field fills the viewport and every read is pinned to an edge
      the way a phone game laid out on a monitor does, so nothing the player has to watch can be
-     scrolled off. The rail owns the right gutter and nothing in the field reaches into it. */
+     scrolled off. The rail floats over the field's top-right now, so the field runs full-bleed. */
   .stage {
     position: fixed;
-    inset: 0 var(--rail) 0 0;
+    inset: 0;
     overflow: hidden;
     background:
-      radial-gradient(120% 85% at 50% 115%, rgba(70, 92, 58, .30), transparent 62%),
-      radial-gradient(95% 70% at 50% -12%, rgba(48, 74, 108, .32), transparent 64%),
-      linear-gradient(180deg, #0a0e13 0%, #131926 45%, #181d18 100%);
+      radial-gradient(120% 85% at 50% 115%, color-mix(in srgb, var(--glow-moss) 30%, transparent), transparent 62%),
+      radial-gradient(95% 70% at 50% -12%, color-mix(in srgb, var(--glow-dusk) 32%, transparent), transparent 64%),
+      linear-gradient(180deg, var(--ground) 0%, var(--ground-2) 45%, var(--ground-3) 100%);
   }
   /* the frame darkens toward its own edges, so the reads sit on a lit middle the way they do on a
      phone screen — the vignette is under every cluster and takes no clicks */
@@ -2203,18 +2810,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background: radial-gradient(115% 95% at 50% 48%, transparent 52%, rgba(0, 0, 0, .55));
   }
-  .vitals, .pockets, .tracker, .field, .chronicle { z-index: 2; }
+  .vitals, .tracker, .field { z-index: 2; }
   /* the zone names the frame itself: a banner across the top edge, quiet, lying behind every read */
   .arena {
-    position: absolute; top: .55rem; left: 50%; transform: translateX(-50%); z-index: 0;
-    margin: 0; font-size: clamp(1.05rem, 2.4vw, 1.85rem); letter-spacing: .2em; text-transform: uppercase;
-    color: rgba(226, 233, 244, .12); white-space: nowrap; pointer-events: none;
+    position: absolute; top: clamp(6.88px, 0.448vw + 1.73px, 14.85px); left: 50%; transform: translateX(-50%); z-index: 0;
+    margin: 0; font-size: var(--fs-arena); letter-spacing: clamp(2.5px, 0.163vw + 0.63px, 5.4px); text-transform: uppercase;
+    color: color-mix(in srgb, var(--text) 12%, transparent); white-space: nowrap; pointer-events: none;
   }
   /* the away report takes the second line, so it never prints over the zone's own name */
   .toast {
-    position: absolute; top: 3.2rem; left: 50%; transform: translateX(-50%); z-index: 6;
-    display: flex; flex-wrap: wrap; gap: .25rem .8rem; align-items: baseline; max-width: min(46rem, 62%);
-    border: 1px solid rgba(232, 193, 105, .38); border-radius: 10px; padding: .45rem .7rem; font-size: .78rem;
+    position: absolute; top: clamp(40px, 2.608vw + 10.08px, 86.4px); left: 50%; transform: translateX(-50%); z-index: 6;
+    display: flex; flex-wrap: wrap; gap: 3px var(--spacing-sm); align-items: baseline; max-width: min(var(--box-920), 62%);
+    border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent); border-radius: 10px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs);
     background: var(--glass); box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
   }
   .toast .quit { background: none; border: none; padding: 0; color: var(--dim); }
@@ -2222,29 +2829,66 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* top-left: the character's own read, and the overlays that hang under it. The dock owns a column,
      not the screen — it takes no click outside its own rows, so the field under it stays the field */
   .dock {
-    position: absolute; top: .9rem; left: .9rem; bottom: 4.8rem; z-index: 3;
-    width: min(31rem, 46%); display: flex; flex-direction: column; gap: .5rem;
+    position: absolute; top: var(--screen-pad); left: var(--screen-pad); bottom: clamp(60px, 3.912vw + 15.12px, 129.6px); z-index: 3;
+    width: min(var(--box-620), 46%); display: flex; flex-direction: column; gap: var(--spacing-xs);
     pointer-events: none;
   }
-  .vitals { display: flex; gap: .55rem; align-items: flex-start; }
+  .vitals {
+    display: flex; gap: var(--spacing-sm); align-items: flex-start;
+    width: max-content; padding: var(--spacing-sm);
+    background: var(--glass); backdrop-filter: blur(6px);
+    border: 1px solid var(--edge); border-radius: clamp(8px, 0.489vw + 1.89px, 16.2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+  }
+  .portrait { position: relative; flex: none; width: var(--portrait-size); height: var(--portrait-size); }
+  /* the XP ring is the portrait's own rim: track faint, fill the xp token, wound clockwise from noon */
+  .xp-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .xp-ring circle { fill: none; stroke-width: 7; }
+  .xp-ring .track { stroke: rgba(255, 255, 255, .12); }
+  .xp-ring .fill { stroke: var(--xp); stroke-linecap: round; }
   .face {
-    position: relative; flex: none; width: 3.2rem; height: 3.2rem; padding: 0; border-radius: 50%;
+    position: absolute; inset: clamp(5.25px, 0.342vw + 1.32px, 11.34px); padding: 0; border-radius: 50%;
     display: grid; place-items: center; background: var(--glass); border: 1px solid var(--edge);
   }
-  .face img { width: 1.9rem; height: 1.9rem; }
+  .face img { width: var(--icon-md); height: var(--icon-md); }
   .face b {
-    position: absolute; right: -.25rem; bottom: -.25rem; min-width: 1.4rem; padding: .05rem .32rem;
-    border-radius: .8rem; background: var(--gold); color: #1a1509; font-size: .7rem; text-align: center;
+    position: absolute; right: clamp(-6.76px, -0.204vw - 0.79px, -3.13px); bottom: clamp(-6.76px, -0.204vw - 0.79px, -3.13px); min-width: var(--icon-md); padding: 1px 4px;
+    border-radius: clamp(10px, 0.652vw + 2.52px, 21.6px); background: var(--gold); color: var(--gold-ink); font-size: var(--font-xs); text-align: center;
   }
-  .gauges { display: grid; gap: .26rem; }
-  .gauge { position: relative; display: block; width: clamp(10rem, 19vw, 16rem); }
-  .gauge span {
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: .3rem;
-    font-size: .66rem; color: #f4f7fb; text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
+  /* the reads beside the portrait: the three pool bars and the chips, stacked as one column that sits
+     to the right of the face */
+  .vitals-side { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  /* the three pools: one bar each, its figure set inside the track so the value is shown in the unit the
+     player acts on. They share one width and one height so they stack as a block, and each paints its
+     own token — never a second colour. */
+  .pools { display: flex; flex-direction: column; gap: 3px; }
+  .pool {
+    position: relative; width: var(--box-180); height: var(--icon-sm);
+    border-radius: clamp(8.75px, 0.57vw + 2.2px, 18.9px); overflow: hidden;
+    background: var(--inset); border: 1px solid var(--edge);
+    display: grid; place-items: center;
   }
-  .statuses { margin: 0; font-size: .68rem; color: #ffb9a6; }
-  .aspd { font-size: .68rem; color: var(--dim); }
-  .aspd small { color: var(--dim); opacity: .75; }
+  .pool i { position: absolute; top: 0; bottom: 0; left: 0; transition: width .25s; }
+  .pool span {
+    position: relative; font-size: var(--font-xs); color: var(--text); font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .95);
+  }
+  .pool.hp i { background: linear-gradient(180deg, var(--hp-lit), var(--hp)); }
+  .pool.es i { background: linear-gradient(180deg, var(--es-lit), var(--es)); }
+  .pool.mana i { background: linear-gradient(180deg, var(--mana-lit), var(--mana)); }
+  /* the chips beside the portrait: bare lines wearing a dark mask for legibility, never a glass card */
+  .chips { display: grid; gap: 3px; justify-items: start; }
+  .chip {
+    max-width: var(--box-300); overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    font-size: var(--font-xs); font-variant-numeric: tabular-nums; color: var(--text);
+    background: linear-gradient(90deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .38) 75%, transparent);
+    padding: 1px var(--spacing-xs) 1px var(--spacing-xs); border-radius: clamp(5px, 0.326vw + 1.26px, 10.8px);
+  }
+  .chip.status { color: var(--alarm); }
+  .chip.aspd { color: var(--dim); }
+  /* what an aura or a buff is adding right now: the one slim read under the pools that is a bonus
+     rather than a pool, so it wears the accent */
+  .buffs { font-size: var(--font-xs); color: var(--gold); opacity: .9; }
 
   /* the dock's two overlays: the sheet and the allocation float under the vitals instead of covering
      the screen — a veil is for a screen you work in, and these are reads you take mid-fight */
@@ -2256,257 +2900,496 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     animation: pop .14s ease-out;
   }
   .pop > header {
-    display: flex; align-items: baseline; gap: .6rem; padding: .5rem .7rem .4rem;
+    display: flex; align-items: baseline; gap: var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-xs);
     border-bottom: 1px solid var(--edge); border-radius: 12px 12px 0 0;
-    background: linear-gradient(180deg, rgba(232, 193, 105, .1), transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent);
   }
-  .pop > header h3 { margin: 0; flex: none; color: var(--gold); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; }
-  .pop .sub { flex: 1; color: var(--dim); font-size: .7rem; }
+  .pop > header h3 { margin: 0; flex: none; color: var(--gold); font-size: var(--font-xs); letter-spacing: clamp(1.5px, 0.098vw + 0.38px, 3.24px); text-transform: uppercase; }
+  .pop .sub { flex: 1; color: var(--dim); font-size: var(--font-xs); }
   .pop .quit {
-    margin-left: auto; width: 1.5rem; height: 1.5rem; padding: 0; line-height: 1;
+    margin-left: auto; width: var(--icon-md); height: var(--icon-md); padding: 0; line-height: 1;
     background: none; border: 1px solid var(--edge); color: var(--dim);
   }
   .pop .quit:hover { color: var(--text); border-color: var(--gold); }
-  .pop-body { padding: .55rem .7rem .7rem; overflow: auto; min-height: 0; overscroll-behavior: contain; }
-  .pop-body h3 { margin: .7rem 0 .3rem; font-size: .74rem; color: var(--dim); letter-spacing: .06em; text-transform: uppercase; }
+  .pop-body { padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm); overflow: auto; min-height: 0; overscroll-behavior: contain; }
+  .pop-body h3 { margin: var(--spacing-sm) 0 4px; font-size: var(--font-xs); color: var(--dim); letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px); text-transform: uppercase; }
   .pop-body h3:first-child { margin-top: 0; }
-  .pop-body p { margin: .35rem 0; font-size: .76rem; }
-  @keyframes pop { from { transform: translateY(-.4rem); opacity: .3; } to { transform: none; opacity: 1; } }
+  .pop-body p { margin: 4px 0; font-size: var(--font-xs); }
+  @keyframes pop { from { transform: translateY(clamp(-10.8px, -0.326vw - 1.26px, -5px)); opacity: .3; } to { transform: none; opacity: 1; } }
 
-  /* top-right: what the hunt is worth, read without opening anything */
-  .pockets {
-    position: absolute; top: .9rem; right: .9rem; display: flex; flex-wrap: wrap;
-    gap: .3rem; justify-content: flex-end; max-width: 48%;
-  }
+  /* the save note reads at the top where the eye already checks announcements */
   .pill {
-    display: inline-flex; align-items: center; gap: .35rem; padding: .22rem .6rem; border-radius: 999px;
-    background: var(--glass); border: 1px solid var(--edge); font-size: .74rem;
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px var(--spacing-sm); border-radius: 999px;
+    background: var(--glass); border: 1px solid var(--edge); font-size: var(--font-xs);
     font-variant-numeric: tabular-nums; backdrop-filter: blur(6px);
   }
-  .pill img { width: 1rem; height: 1rem; }
-  .pill.gold { color: var(--gold); }
-  .pill.clock { color: var(--dim); }
   .pill.note { color: var(--good); }
+  /* the save note reads at the top where the eye already checks announcements, never in the purses */
+  .save-note { position: absolute; top: clamp(100px, 6.52vw + 25.2px, 216px); left: 50%; transform: translateX(-50%); z-index: 7; }
 
-  /* right edge under the purses: where the character stands, whether it moves on, what it aims at */
+  /* left edge under the portrait: where the character stands, whether it moves on, what it aims at —
+     slim masked lines for legibility over the field, never a glass card; long lines clamp to two */
   .tracker {
-    position: absolute; top: 5.4rem; right: .9rem; width: min(20rem, 40%);
-    display: grid; gap: .4rem; align-content: start;
+    /* the objectives flow under the vitals inside the dock: the column's own gap does the spacing, so the
+       reads track the vitals' height instead of being pinned to a number the bars no longer carry. The
+       dock is inert so the field under it stays the field — the tracker opts its own rows back in. */
+    align-self: flex-start; width: var(--objectives-w); pointer-events: auto; z-index: 2;
+    display: grid; gap: 4px; align-content: start;
   }
   .tracker > * {
-    margin: 0; padding: .45rem .6rem; border-radius: 10px; font-size: .76rem;
-    background: var(--glass); border: 1px solid var(--edge); backdrop-filter: blur(6px);
+    margin: 0; padding: 3px var(--spacing-xs); border-radius: clamp(5px, 0.326vw + 1.26px, 10.8px); font-size: var(--font-xs);
+    background: linear-gradient(90deg, rgba(0, 0, 0, .66), rgba(0, 0, 0, .38) 78%, transparent);
   }
   .tracker .phase { color: var(--dim); }
-  .travel { display: grid; gap: .3rem; }
-  .travel b { font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); font-weight: 500; }
+  .tracker .phase, .tracker .objective, .tracker .alarm-line, .tracker .travel small {
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  }
+  .travel { display: grid; gap: 3px; }
+  .travel b { font-size: var(--font-xs); letter-spacing: clamp(1.25px, 0.082vw + 0.32px, 2.7px); text-transform: uppercase; color: var(--dim); font-weight: 500; }
   /* one control, two settings — the same choice the old pair of loose buttons made look like two */
   .seg { display: flex; border: 1px solid var(--edge); border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .05); }
-  .seg button { flex: 1; border: 0; border-radius: 0; background: none; padding: .3rem .5rem; font-size: .72rem; }
-  .seg button.active { background: rgba(232, 193, 105, .16); color: var(--gold); }
-  .travel small { color: var(--dim); font-size: .68rem; }
-  .alarm-line { border-color: var(--hp) !important; color: #ffb3a8; }
+  .seg button { flex: 1; white-space: nowrap; border: 0; border-radius: 0; background: none; padding: var(--spacing-xs) 4px; font-size: var(--font-xs); }
+  .seg button.active { background: color-mix(in srgb, var(--gold) 16%, transparent); color: var(--gold); }
+  .travel small { color: var(--dim); font-size: var(--font-xs); }
+  .alarm-line { color: var(--alarm); }
   .objective { color: var(--gold); }
 
   /* the middle of the frame is the group: one plate per mob, its HP the loudest thing on it.
-     The box is symmetric on purpose. The fight is the subject, so it sits on the true middle of the frame
-     it plays in — an asymmetric inset (a wide right gutter for the tracker, a bare 1rem on the left) pushed
-     every plate ~140px off axis at 1440 and worse the bigger the monitor got. The left band the symmetry
-     gives up is breathing room, not information: the dock's reads live along the top edge and the
-     chronicle along the bottom, and neither crosses the middle. */
+     The box hugs the frame's true middle: a slim left band for the objectives, a right gutter the
+     orb arc owns, a top edge under the portrait, and a floor the self-plate's band sits on — the
+     HUD floats over the field, so the field gives ground to it, not the other way round. */
   .field {
-    position: absolute; inset: 5.6rem clamp(18rem, 24vw, 21rem) 6.4rem;
-    display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: .6rem;
+    position: absolute; inset: clamp(82.5px, 5.379vw + 20.79px, 178.2px) clamp(clamp(175px, 11.41vw + 44.1px, 378px), 17vw, clamp(200px, 13.04vw + 50.4px, 432px)) clamp(55px, 3.586vw + 13.86px, 118.8px) calc(var(--objectives-w) + var(--screen-pad) * 3);
+    display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: var(--spacing-lg);
     overflow: auto;
+    /* one knob for every card on the field: mob plates and the player's own share it, so the two
+       are always the same size at every window. The near band follows it — a 5:7 face plus a breath. */
+    --card-w: var(--box-170);
+    --plate-h: calc(var(--card-w) * 1.45);
+    /* the near band the character's own card stands in, reserved as layout rather than guessed: flex lines
+       centre inside the content box, so this takes the band out of the group's room at every size, and an
+       absolutely positioned child resolves against the padding box, so the card lands inside it */
+    padding-bottom: calc(var(--plate-h) + 4px);
     /* the mob field is a layout box, not a surface: it spans the middle of the map, so the ground
        between two plates has to pass its click down to the cell underneath. The plates stay live */
     pointer-events: none;
+    /* the field recedes on the one ladder as well: sharp at rest, pulled back when a settlement owns
+       the screen — `--dof` is the only dial, the same one the ground reads */
+    --dof: 0px;
+    filter: blur(var(--dof));
+    opacity: calc(1 - var(--dof) / 10);
   }
-  .clear-field { color: var(--dim); font-size: .8rem; }
+  /* the empty field is a read, not a target: it states why nothing stands here and what would change it,
+     and it never takes a click meant for the ground underneath */
+  .clear-field {
+    display: grid; gap: 2px; justify-items: center; text-align: center; pointer-events: none;
+    color: var(--dim); font-size: var(--font-xs);
+  }
+  .clear-field b { color: var(--text); font-weight: 600; }
+  .clear-field span { font-size: var(--font-xs); letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px); }
+  /* The walking read: the shelf's own boot glyph split into single prints — `mask-size: 200%` puts one boot
+     in each half, so a left foot and a right foot alternate down the stride and no second asset is needed.
+     Each print mixes the client's own two greys: `--text` for the ground already crossed, `--dim` for the
+     country still ahead, and the mix answers to `--p`, the fraction of blocks the walk has crossed. Gold is
+     deliberately absent: the accent means *here, or press this*, and a trail is neither. Nothing animates —
+     the ramp moves because the sim ticks, so a paused clock stops the read on its own and a reduced-motion
+     player loses nothing. The mark is a mask, so it contributes only its alpha — the icon shelf's own white
+     never paints the field. */
+  /* the tracker's zone switch is also called a travel read, so the stride keeps to the field it sits on */
+  .field .travel { position: relative; width: min(var(--box-300), 62%); height: var(--icon-xl); }
+  .travel .print {
+    position: absolute; width: var(--icon-lg); height: var(--icon-lg);
+    left: calc(var(--x) * (100% - clamp(18.75px, 1.222vw + 4.72px, 40.5px))); top: 0;
+    --on: clamp(0, calc((var(--p) - var(--x)) * 3), 1);
+    /* the far end of the stride is the same grey a receded HUD read wears, laid on thin: an unlit print that
+       is as loud as a lit one would invert the emphasis the ramp exists to make */
+    background: color-mix(in srgb, var(--text) calc(var(--on) * 100%),
+                color-mix(in srgb, var(--dim) 42%, transparent));
+    transform: rotate(-9deg);
+    -webkit-mask: url('./icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
+            mask: url('./icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
+  }
+  /* the other foot: the glyph's far half, dropped half a step and turned the other way, so the two tracks
+     read as a stride and not as one stamp repeated */
+  .travel .print.right {
+    top: clamp(7.5px, 0.489vw + 1.89px, 16.2px);
+    transform: rotate(9deg);
+    -webkit-mask-position: right center;
+            mask-position: right center;
+  }
   .mob {
     pointer-events: auto;
-    width: 10.5rem; padding: .5rem .6rem .6rem; border-radius: 12px; text-align: center;
+    width: var(--card-w); text-align: center;
+  }
+  /* the charge wrapper wears the whole card face, so an attack run moves the card and not just what is
+     drawn inside it. The shell above keeps the slot: size, place in the row and the reads pinned to it. */
+  .mob .charge {
+    --lunge: 1;
+    width: 100%; min-height: var(--plate-h); display: flex; flex-direction: column; padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); border-radius: 12px;
     background: var(--glass); border: 1px solid var(--edge); box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
   }
-  .mob .portrait { width: 2.7rem; height: 2.7rem; object-fit: contain; }
-  .mob-name { display: flex; align-items: center; justify-content: center; gap: .3rem; margin: .2rem 0 0; font-size: .78rem; }
-  .mob-name .tier-mark { width: 1rem; height: 1rem; }
-  .mob .body { margin: 0; font-size: .66rem; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }
-  .mobbar { display: block; width: 100%; height: 9px; margin: .35rem 0 .2rem; border-radius: 5px; overflow: hidden; background: rgba(255, 255, 255, .09); }
-  .mobbar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #ff8a6b, var(--hp)); }
-  .hpnum { margin: 0; font-size: .68rem; font-variant-numeric: tabular-nums; color: var(--dim); }
-  .chips { display: flex; flex-wrap: wrap; gap: .1rem .45rem; justify-content: center; margin: .3rem 0 0; font-size: .64rem; color: var(--dim); }
-  .curses { margin: .25rem 0 0; font-size: .64rem; color: #c8a5ff; min-height: .9rem; }
-  .mob.elite { border-color: #6c5199; }
-  .mob.elite .mob-name { color: #b98cff; }
-  .mob.boss { border-color: #9d3b34; }
-  .mob.boss .mob-name { color: #ff8b7a; }
-  .element-list { display: flex; flex-wrap: wrap; gap: .15rem .4rem; justify-content: center; margin: .3rem 0 0; }
-  .element-label { display: inline-flex; align-items: center; gap: .2rem; font-size: .64rem; color: var(--dim); }
-  .element-label img { width: .9rem; height: .9rem; object-fit: contain; flex: none; }
+  /* the body fills the card face top to bottom, the way a playing card reads: portrait up top, the
+     fight numbers in the middle, the status line pinned to the foot */
+  .mob .art { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  /* the fight numbers hug the foot of the card: everything from the first bar down sits on the bottom,
+     the portrait and the name keep the head, and the face padding is the breathing room */
+  .mob .art > span.mobbar:first-of-type { margin-top: auto; }
+  /* the body the next swing waits on: a lit edge plus a pair of crop marks, steady while it stands in front —
+     the struck plate's coloured rim still owns the moment the blow actually lands. The marks are the read that
+     survives an elite or a boss border, which out-ranks the edge colour on the same plate. */
+  .mob.front .charge {
+    border-color: color-mix(in srgb, var(--edge) 20%, var(--text));
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .45), 0 0 clamp(12.5px, 0.815vw + 3.15px, 27px) color-mix(in srgb, var(--text) 16%, transparent) inset;
+  }
+  .mob.front .charge::before, .mob.front .charge::after {
+    content: ''; position: absolute; width: var(--icon-sm); height: var(--icon-sm); pointer-events: none;
+    border: 2.5px solid color-mix(in srgb, var(--text) 90%, transparent);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .85));
+  }
+  .mob.front .charge::before { top: clamp(-13.5px, -0.407vw - 1.57px, -6.25px); left: clamp(-13.5px, -0.407vw - 1.57px, -6.25px); border-right: 0; border-bottom: 0; border-top-left-radius: 9px; }
+  .mob.front .charge::after { bottom: clamp(-13.5px, -0.407vw - 1.57px, -6.25px); right: clamp(-13.5px, -0.407vw - 1.57px, -6.25px); border-left: 0; border-top: 0; border-bottom-right-radius: 9px; }
+  .mob .portrait, .self-plate .portrait { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
+  .mob-name { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 3px 0 0; font-size: var(--font-xs); }
+  .mob-name .tier-mark { width: var(--icon-sm); height: var(--icon-sm); }
+  .mob .body { margin: 0; font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px); }
+  .mobbar { display: block; position: relative; width: 100%; height: var(--bar-h); margin: 4px 0 3px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .09); }
+  /* the figure sits in the bar the way the dock's own gauges read: centred, tabular, stroked off the fill */
+  .mobbar b {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: var(--font-xs); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
+  }
+  /* The ramp is stretched over the whole track instead of squeezed into the fill: `--w` is the fraction the
+     bar reached, so a body's last health shows the hot end of its own colour. Across a group of plates that
+     is one red signal read before any digit is looked at. The slide is the sim's own step carried between
+     the two seconds it lands in — damage reads as travel, not as a strobe. */
+  .mobbar i, .mini-bar i {
+    background-size: calc(100% / max(var(--w, 1), .001)) 100%;
+    transition: width .22s ease-out;
+  }
+  .mobbar i { display: block; height: 100%; border-radius: 999px; background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
+  .mob .chips { display: flex; flex-wrap: wrap; gap: 1px var(--spacing-xs); justify-content: center; margin: 4px 0 0; font-size: var(--font-xs); color: var(--dim); }
+  .curses { margin: 3px 0 0; font-size: var(--font-xs); color: var(--curse); min-height: var(--icon-xs); }
+  .mob.elite .charge { border-color: var(--elite); }
+  .mob.elite .mob-name { color: var(--elite-ink); }
+  .mob.boss .charge { border-color: var(--boss); }
+  .mob.boss .mob-name { color: var(--boss-ink); }
+  .element-list { display: flex; flex-wrap: wrap; gap: 2px var(--spacing-xs); justify-content: center; margin: 4px 0 0; }
+  .element-label { display: inline-flex; align-items: center; gap: 3px; font-size: var(--font-xs); color: var(--dim); }
+  .element-label img { width: var(--icon-xs); height: var(--icon-xs); object-fit: contain; flex: none; }
 
-  /* bottom-centre: the cast order, read-only — the game presses the first ready slot, so this is
-     what happens next, and arranging it stays on the Skills sub-screen */
+  /* The character's own card, on the near edge of the field it fights on. Never `.mob`: the harness counts
+     mob plates and measures the group's room against them, and this card is neither of those. It is out of
+     the flex flow so the group keeps every slot it has, it takes no pointer so it can never light gold, and
+     it carries no digits — the HP figure has one home, the vitals gauge, and a bar here is a body's read.
+     Border only: a second shadowed card at the near edge would read as a second subject. */
+  .self-plate {
+    /* the orb row owns the bottom edge now, so the plate clears it rather than standing behind it */
+    position: absolute; bottom: calc(var(--orb-1) + clamp(20px, 1.304vw + 5.04px, 43.2px) + var(--screen-pad)); left: 50%; transform: translateX(-50%); z-index: 2;
+    width: var(--card-w); min-height: var(--plate-h); text-align: center; pointer-events: none;
+  }
+  /* the cardface carries the paint, so every answer moves the whole card: the root keeps the slot only */
+  .self-plate .cardface {
+    min-height: var(--plate-h); display: flex; flex-direction: column; padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); border-radius: 12px;
+    background: var(--glass); border: 1px solid var(--edge);
+  }
+  /* the player's own vitals hug the same foot: the first bar carries the group down */
+  .self-plate .art { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; flex: 1; gap: 4px; }
+  .self-plate .art > span.mobbar:first-of-type { margin-top: auto; }
+  .self-plate .portrait { width: var(--icon-xl); height: var(--icon-xl); }
+  /* Energy Shield sits above HP here exactly as it does in the dock, and only while the pool is there */
+  .mobbar.es i { background-image: linear-gradient(90deg, var(--es), var(--es-lit)); }
+  .mobbar.mana i { background-image: linear-gradient(90deg, var(--mana), var(--mana-lit)); }
+
+  /* bottom-centre: the cast order as a row of equal orbs, one per slot, and the press that opens the
+     Skills screen trailing the row. Read-only on the field. */
   .actionbar {
-    /* centred in the room the switches leave over, not in the frame: on a short monitor a centred bar
-       of fifteen slots runs under the Pause cluster */
-    position: absolute; bottom: .9rem; left: .9rem; right: 20rem;
-    display: flex; justify-content: center; gap: .3rem; z-index: 4;
+    /* full width with the row centred in it: anchoring at left:50% would cap the row's available width
+       at half the viewport, wrapping a full bar of orbs onto a second line */
+    position: absolute; bottom: var(--screen-pad); left: 0; right: 0; z-index: 4;
+    display: flex; justify-content: center;
+    /* one size for every slot, the same for the settings press that ends the row, so the row reads as
+       one rank rather than a descending scale */
+    --orb: var(--orb-cast);
     /* the slots sit over the map now, which is dark ground in the game's own colours — so their rim is
        read off this one pair rather than the faint plate edge the other reads use */
     --slot-face: rgba(12, 16, 22, .82);
-    --slot-edge: rgba(255, 255, 255, .3);
+    --slot-edge: rgba(255, 255, 255, .5);
+  }
+  /* the row runs left to right in slot order: slot 1 leads at the left, the settings press trails. */
+  .casts {
+    display: flex; flex-flow: row wrap-reverse; justify-content: center;
+    align-items: flex-end; align-content: flex-end; gap: 3px; max-width: 62vw;
   }
   .cast {
-    position: relative; width: clamp(2.2rem, 3.4vw, 3rem); height: clamp(2.2rem, 3.4vw, 3rem);
+    position: relative; width: var(--orb); height: var(--orb);
     border-radius: 50%; display: grid; place-items: center;
     background: var(--slot-face); border: 1px solid var(--slot-edge); backdrop-filter: blur(6px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+    /* a dark separation ring under the lit rim keeps the edge crisp against the pale map behind it */
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .45);
   }
-  .cast img { width: 62%; height: 62%; object-fit: contain; }
-  /* an empty slot keeps its size: the bar is the cast order, and it must not jump as skills arrive */
-  .cast.empty { opacity: .55; background: none; border-color: rgba(255, 255, 255, .18); box-shadow: none; }
-  .cast.ready { box-shadow: 0 0 0 1px rgba(232, 193, 105, .6), 0 0 14px rgba(232, 193, 105, .3); }
+  .cast img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
+  /* an empty slot keeps its size: the arc is the cast order, and it must not jump as skills arrive */
+  .cast.empty { opacity: .55; background: none; border-color: rgba(255, 255, 255, .3); box-shadow: none; }
+  /* the row's last press is the door to the Skills screen — the same plate, lightening on reach */
+  .cast.cog { cursor: pointer; }
+  .cast.cog img { opacity: .78; }
+  .cast.cog:hover { border-color: var(--gold); }
+  .cast.cog.here { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 50%, transparent); }
+  .cast.ready { box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 60%, transparent), 0 0 14px color-mix(in srgb, var(--gold) 30%, transparent); }
+  /* three rows on this bar are not "pressable now", and the gold ring is the client's one word for that,
+     so each of them recedes to its own treatment rather than borrowing it: a silenced row keeps no glow
+     at all, a conditional row wears the dashed rim that says "waiting on something", and a filler row
+     drops to the plate's own faint edge because its place in the order is not what gates it. */
+  .cast.silent { opacity: .4; }
+  .cast.gated { border-style: dashed; border-color: rgba(255, 255, 255, .45); }
+  .cast.filler { border-color: rgba(255, 255, 255, .18); }
   .cast small {
     position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%;
-    background: rgba(6, 8, 11, .68); font-size: .72rem; color: #ffd9a0;
+    background: rgba(6, 8, 11, .68); font-size: max(var(--font-xs), calc(var(--orb) * .3)); color: var(--gold-lit);
+    font-variant-numeric: tabular-nums;
   }
-  .cast b { position: absolute; top: -.3rem; left: -.1rem; font-size: .58rem; color: var(--dim); }
-  /* the round screens at the end of the strip: the knob into the Skills screen, and the bag and the
-     character sheet beside it. Not slots, so they carry no number and stand apart from the bar; the
-     same circle the slots use keeps the row one strip. */
-  .casts { display: flex; gap: .3rem; }
-  .knobs { display: flex; align-items: center; gap: .3rem; }
-  .knob {
-    position: relative; margin-left: .7rem; width: clamp(2.2rem, 3.4vw, 3rem); height: clamp(2.2rem, 3.4vw, 3rem);
-    padding: 0; border-radius: 50%; display: grid; place-items: center;
-    background: var(--slot-face); border: 1px solid var(--slot-edge); backdrop-filter: blur(6px);
+  .cast b { position: absolute; top: clamp(-8.1px, -0.244vw - 0.94px, -3.75px); left: clamp(-2.7px, -0.082vw - 0.32px, -1.25px); font-size: var(--font-xs); color: var(--dim); }
+
+  /* bottom-right: the main wheel — one round plate split three ways, the sectors the player's hands
+     live in (bags, skills, the character sheet), and five satellite knobs for the screens the loop
+     reaches for next. The plate is a conic gradient so the sector arcs stay true circles; the press
+     targets are buttons clipped to their sector's wedge, and the split lines are a second conic laid
+     over the seams. */
+  .menuring {
+    position: absolute; bottom: var(--screen-pad); right: var(--screen-pad); z-index: 4;
+    width: var(--wheel); height: var(--wheel);
+    --slot-face: rgba(12, 16, 22, .82);
+    --slot-edge: rgba(255, 255, 255, .3);
+    --sector: color-mix(in srgb, var(--gold) 16%, var(--slot-face));
+    /* the hub drags as one piece from its plate background (buttons keep their own presses): no text
+       selection mid-drag, the grab hand at rest, the closed hand while held */
+    touch-action: none; cursor: grab; user-select: none;
+  }
+  .menuring.dragging { cursor: grabbing; }
+  .wheel {
+    position: absolute; inset: 0; border-radius: 50%; border: 1px solid var(--slot-edge);
+    background: conic-gradient(from 300deg, var(--w1, var(--slot-face)) 0 120deg, var(--w2, var(--slot-face)) 120deg 240deg, var(--w3, var(--slot-face)) 240deg 360deg);
+    backdrop-filter: blur(6px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
   }
-  .knob + .knob { margin-left: 0; }
-  .knob img { width: 58%; height: 58%; object-fit: contain; opacity: .9; }
-  .knob:hover { border-color: var(--gold); }
-  .knob.open, .knob.here { border-color: var(--gold); background: rgba(232, 193, 105, .14); box-shadow: 0 0 0 1px rgba(232, 193, 105, .5); }
-  /* the bag's own read, kept on the button that opens it now that the pill is gone */
-  .knob .count {
-    position: absolute; top: -.35rem; right: -.35rem; min-width: 1.05rem; padding: 0 .2rem;
-    border-radius: .7rem; background: var(--panel); border: 1px solid var(--edge);
-    font-size: .56rem; font-weight: 500; color: var(--dim);
-    font-variant-numeric: tabular-nums; text-align: center;
+  /* the Y split: three thin seams over the sector boundaries at 300, 60 and 180 conic degrees —
+     the same rays the wedge clip-paths use (up-left, up-right, down), so a hover tints the sector
+     the pointer is actually over */
+  .wheel::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+    background: conic-gradient(from 299.1deg,
+      var(--slot-edge) 0 1.8deg, transparent 1.8deg 119.1deg,
+      var(--slot-edge) 119.1deg 120.9deg, transparent 120.9deg 239.1deg,
+      var(--slot-edge) 239.1deg 240.9deg, transparent 240.9deg 360deg);
   }
-  .knob .count.alarm { border-color: var(--hp); color: #ff9a8c; }
-
-  /* bottom-left: the chronicle sits on its own card and fades out at the top, as a chat box does — the
-     card is what keeps the newest lines readable over the pale map the field now lies on. It stacks
-     above the cast order rather than sharing the corner with it, the same gutter the dock keeps. */
-  .chronicle {
-    position: absolute; left: .9rem; bottom: 4.4rem; width: min(28rem, 46%); max-height: 30vh;
-    display: flex; flex-direction: column-reverse; gap: .12rem; overflow: hidden; font-size: .72rem; color: var(--dim);
-    padding: .45rem .6rem; border: 1px solid var(--edge); border-radius: 10px;
-    background: var(--glass); backdrop-filter: blur(6px);
-    mask-image: linear-gradient(180deg, transparent, #000 34%);
-    -webkit-mask-image: linear-gradient(180deg, transparent, #000 34%);
+  /* the press targets: a wedge is the whole plate clipped to its third, so the hover tint lands on the
+     sector the pointer is over, not on a bounding box */
+  .wedge { position: absolute; inset: 0; padding: 0; background: none; border: 0; cursor: pointer; }
+  .w-bag { clip-path: polygon(50% 50%, 6.7% 25%, 14.6% 14.6%, 25% 6.7%, 37.1% 3.3%, 50% 0%, 62.9% 3.3%, 75% 6.7%, 85.4% 14.6%, 93.3% 25%); }
+  .w-skills { clip-path: polygon(50% 50%, 93.3% 25%, 98.3% 37.1%, 100% 50%, 98.3% 62.9%, 93.3% 75%, 85.4% 85.4%, 75% 93.3%, 62.9% 96.7%, 50% 100%); }
+  .w-sheet { clip-path: polygon(50% 50%, 50% 100%, 37.1% 96.7%, 25% 93.3%, 14.6% 85.4%, 6.7% 75%, 1.7% 62.9%, 0% 50%, 1.7% 37.1%, 6.7% 25%); }
+  .wheel:has(.w-bag:hover), .wheel:has(.w-bag.here) { --w1: var(--sector); }
+  .wheel:has(.w-skills:hover), .wheel:has(.w-skills.here) { --w2: var(--sector); }
+  .wheel:has(.w-sheet:hover), .wheel:has(.w-sheet.here) { --w3: var(--sector); }
+  /* an outline would draw on the clipped-away square, so the reached wedge lights its own sector */
+  .wedge:focus-visible { background: color-mix(in srgb, var(--focus) 24%, transparent); outline: none; }
+  .wedge img { position: absolute; width: var(--icon-xl); height: var(--icon-xl); object-fit: contain; opacity: .92; transform: translate(-50%, -50%); }
+  .w-bag img { left: 50%; top: 25%; }
+  .w-skills img { left: 72%; top: 63%; }
+  .w-sheet img { left: 28%; top: 63%; }
+  /* the five satellite knobs ring the wheel's own plate: an arc off its top-left rim in the order the
+     loop reaches for them (map, craft, forge, market, tree). Each sits on a circle of radius --r about
+     the wheel's centre, placed by its own unit offsets, so the ring keeps its gap as the wheel scales.
+     --r is 0.92 (not 0.82): the knob grows faster with the viewport than the arc gap does, so 0.82
+     touches at ~1280px and overlaps past ~1920px. `.knob.sat` outranks `.knob`'s own
+     `position: relative`, which otherwise drops them into flow. */
+  .knob.sat {
+    position: absolute; --r: calc(var(--wheel) * 0.92);
+    left: calc(50% + var(--r) * var(--dx)); top: calc(50% + var(--r) * var(--dy));
+    transform: translate(-50%, -50%);
+    z-index: 1;
   }
-  .chronicle div { text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
-  .chronicle .t { color: var(--mob); margin-right: .4rem; font-variant-numeric: tabular-nums; }
-
-  /* map focus folds the fight down onto the log: this compact card sits exactly where the chronicle
-     does — the log is dimmed under it there — and its press is the way back to the centred field */
+  .sat-map { --dx: 0; --dy: -1; }
+  .sat-craft { --dx: -0.481; --dy: -0.877; }
+  .sat-forge { --dx: -0.843; --dy: -0.537; }
+  .sat-market { --dx: -0.998; --dy: -0.065; }
+  .sat-tree { --dx: -0.906; --dy: 0.423; }
+  .knob {
+    position: relative; width: var(--knob); height: var(--knob);
+    padding: 0; border-radius: 50%; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--gold) 6%, var(--slot-face, rgba(12, 16, 22, .82)));
+    border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--slot-edge, rgba(255, 255, 255, .14)));
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
+  }
+  .knob img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; opacity: .88; }
+  /* satellites share one smaller glyph box so thin-stroke icons (leaf, ring, potion) read at the same
+     weight as solid ones (coins, armour) instead of shouting past the knob's rim */
+  .knob.sat img { width: var(--icon-md); height: var(--icon-md); opacity: .95; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .8)); }
+  .knob.sat:hover img { opacity: 1; }
+  .knob:hover { border-color: color-mix(in srgb, var(--gold) 60%, transparent); background: color-mix(in srgb, var(--gold) 10%, var(--slot-face, rgba(12, 16, 22, .82))); }
+  .knob.open, .knob.here { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 18%, var(--slot-face, rgba(12, 16, 22, .82))); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 50%, transparent), 0 2px 10px rgba(0, 0, 0, .5); }
+  /* map focus folds the fight down onto the log: this compact card sits bottom-left over the field
   .mob-mini {
-    position: absolute; left: .9rem; bottom: 4.4rem; width: min(28rem, 46%); z-index: 3;
-    display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .7rem;
-    padding: .45rem .6rem; border: 1px solid var(--edge); border-radius: 10px; text-align: left;
+    position: absolute; left: var(--screen-pad); bottom: clamp(55px, 3.586vw + 13.86px, 118.8px); width: min(var(--box-560), 46%); z-index: 3;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 3px var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--edge); border-radius: 10px; text-align: left;
     background: var(--glass); backdrop-filter: blur(6px); cursor: pointer;
   }
   .mob-mini:hover, .mob-mini:focus-visible { border-color: var(--gold); }
-  .mini-tag { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mob); }
-  .mini-mob { display: inline-flex; align-items: center; gap: .3rem; }
-  .mini-mob img { width: 1.3rem; height: 1.3rem; object-fit: contain; }
-  .mini-mob.elite { color: #b98cff; }
-  .mini-mob.boss { color: #ff8b7a; }
-  .mini-bar { display: block; width: 4rem; height: 6px; border-radius: 3px; overflow: hidden; background: rgba(255, 255, 255, .09); }
-  .mini-bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #ff8a6b, var(--hp)); }
-  .mini-mob b { font-size: .66rem; font-variant-numeric: tabular-nums; color: var(--dim); }
-  .mini-empty { font-size: .72rem; color: var(--dim); }
+  .mini-tag { font-size: var(--font-xs); letter-spacing: clamp(1.25px, 0.082vw + 0.32px, 2.7px); text-transform: uppercase; color: var(--mob); }
+  .mini-mob { display: inline-flex; align-items: center; gap: 4px; }
+  .mini-mob img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .mini-mob.elite { color: var(--elite-ink); }
+  .mini-mob.boss { color: var(--boss-ink); }
+  .mini-bar { display: block; width: var(--icon-xl); height: var(--bar-h); border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .09); }
+  .mini-bar i { display: block; height: 100%; border-radius: 999px; background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
+  .mini-mob b { font-size: var(--font-xs); font-variant-numeric: tabular-nums; color: var(--dim); }
+  .mini-empty { font-size: var(--font-xs); color: var(--dim); }
 
-  /* bottom-right, inside the field's own gutter: the three switches the field owns */
-  .controls { position: absolute; right: .9rem; bottom: .9rem; display: flex; gap: .4rem; z-index: 4; }
+  /* the field's own switches ride the rail past a divider: the pace rung, Pause and New character */
+  .rail-sep { width: 1px; align-self: stretch; background: var(--edge); margin: 2px 0; }
+  .rail .controls { align-self: center; }
+  .controls {
+    display: flex; flex-direction: row; align-items: center; gap: var(--spacing-xs);
+  }
+  /* the clock's pace is one segmented switch of the same buttons every screen uses — the rung the
+     clock is on reads gold, like everywhere else */
+  .speed { display: flex; }
+  .speed button.here {
+    color: var(--gold); border-color: color-mix(in srgb, var(--gold) 34%, transparent);
+    background: color-mix(in srgb, var(--gold) 10%, transparent);
+  }
 
-  /* the rail: one column down the right edge, above a sub-screen, so switching screens is one press */
+  /* the rail: a bar across the top-right, the purse read at its head and each tab an icon over its own
+     caption, above a sub-screen (z-index keeps it pressable there), so switching screens is one press
+     and the field runs full-bleed underneath it */
   .rail {
-    position: fixed; top: 0; right: 0; bottom: 0; width: var(--rail); z-index: 70;
-    display: flex; flex-direction: column; gap: .12rem; padding: .5rem .4rem; overflow: auto;
-    background: linear-gradient(180deg, rgba(10, 13, 18, .94), rgba(14, 18, 25, .82));
-    border-left: 1px solid var(--edge);
+    position: fixed; top: var(--screen-pad); right: var(--screen-pad); min-height: var(--rail); z-index: 70;
+    display: flex; flex-direction: row; align-items: stretch; gap: 2px;
+    padding: 3px;
+    background: var(--glass); backdrop-filter: blur(6px);
+    border: 1px solid var(--edge); border-radius: clamp(8px, 0.489vw + 1.89px, 16.2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
   }
+  .purse {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    padding: 0 var(--spacing-sm); margin-right: 2px; border-right: 1px solid var(--edge);
+    font-variant-numeric: tabular-nums;
+  }
+  .purse b { font-size: var(--font-sm); font-weight: 600; color: var(--gold); line-height: 1; }
+  .purse i { font-size: var(--font-xs); font-style: normal; color: var(--dim); line-height: 1; }
   .tab {
-    flex: none; display: flex; flex-direction: column; align-items: center; gap: .06rem;
-    padding: .26rem .1rem; border-radius: 12px; border: 1px solid transparent; background: none;
-    color: var(--dim); font-size: .58rem; letter-spacing: .06em; text-transform: uppercase;
+    position: relative; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    min-width: var(--icon-lg); padding: 2px var(--spacing-xs);
+    border-radius: 10px; border: 1px solid transparent; background: none; color: var(--dim);
   }
-  .tab img { width: 1.2rem; height: 1.2rem; object-fit: contain; opacity: .82; }
+  .tab img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; opacity: .82; }
+  .tab .cap { font-size: var(--font-xs); line-height: 1; text-transform: capitalize; }
+  .tab .count {
+    position: absolute; top: 0; right: 0; min-width: var(--icon-xs); padding: 0 3px;
+    border-radius: clamp(8.75px, 0.57vw + 2.2px, 18.9px); background: var(--panel); border: 1px solid var(--edge);
+    font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; text-align: center;
+  }
   .tab:hover { color: var(--text); border-color: var(--edge); }
-  .tab.here { color: var(--gold); background: rgba(232, 193, 105, .10); border-color: rgba(232, 193, 105, .34); }
-  /* the key cap sits under the word so the rail reads as its own legend; it is the binding the settings
-     screen wrote, not a suggestion */
-  .tab kbd {
-    font: .55rem/1 var(--num); color: var(--mob); background: #12151b;
-    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: .1rem .22rem;
-  }
-  .tab.here kbd { color: var(--gold); border-color: rgba(232, 193, 105, .4); }
+  .tab.here { color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, transparent); border-color: color-mix(in srgb, var(--gold) 34%, transparent); }
   /* a settlement screen from the field is reachable but not live, so it is marked rather than dead — the
      refusal and its reason come out of the button's own title */
   .tab.far { opacity: .5; }
   .tab.far img { filter: grayscale(.6); }
+  /* the More box: every screen in one grid hanging under the bar, translucent like the rail it drops
+     from. It is out of flow, so it never stretches the bar it opens from */
+  .morebox {
+    position: absolute; top: calc(100% + var(--spacing-xs)); right: 0;
+    display: grid; grid-template-columns: repeat(3, minmax(var(--box-110), 1fr)); gap: 2px;
+    padding: var(--spacing-sm);
+    background: var(--glass); backdrop-filter: blur(6px);
+    border: 1px solid var(--edge); border-radius: clamp(8px, 0.489vw + 1.89px, 16.2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+  }
+  .moreitem {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: var(--spacing-xs) var(--spacing-sm); border-radius: 10px;
+    border: 1px solid transparent; background: none; color: var(--dim);
+    font-size: var(--font-xs); text-transform: capitalize;
+  }
+  .moreitem img { width: var(--icon-md); height: var(--icon-md); object-fit: contain; opacity: .85; }
+  .moreitem:hover { color: var(--text); border-color: var(--edge); }
+  .moreitem.here { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 34%, transparent); }
+  .moreitem.far { opacity: .5; }
+  .moreitem.far img { filter: grayscale(.6); }
 
+  /* the inventory's own fold: the tab bar, then one visible tab that never scrolls — grids page,
+     prose collapses, and anything taller clips rather than growing a scrollbar */
+  .invbody { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .invbody > section { min-height: 0; overflow: hidden; }
   /* the sub-screens that came off the old three-column page */
-  /* the bag's two sides: one control, two settings, and the count each side is holding printed on it, so
-     a player can see the pile is full without opening it */
-  .sides { display: flex; gap: .3rem; margin-bottom: .8rem; border-bottom: 1px solid var(--line); padding-bottom: .6rem; }
-  .sides button { border-radius: 999px; font-size: .78rem; padding: .28rem .8rem; }
-  .sides button.active { border-color: var(--gold); color: var(--gold); background: rgba(232, 193, 105, .12); }
+  /* the inventory's tabs: one modal, five verbs, and the count each tab is holding printed on it */
+  .sides { display: flex; gap: 4px; margin-bottom: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
+  .sides button { border-radius: 999px; font-size: var(--font-xs); padding: 4px var(--spacing-sm); }
+  .sides button.active { border-color: var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); }
   .sides button:disabled:hover { border-color: var(--line); color: var(--text); }
-  .sides .grow { flex: 1; }
-  .sides .margin { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; color: var(--dim); }
-  .sides .margin input { width: 3.4rem; }
+  /* the equip margin reads in the pile's own tool row now that the tabs own the rail */
+  .bagtools .margin { display: inline-flex; align-items: center; gap: 4px; font-size: var(--font-xs); color: var(--dim); }
+  .bagtools .margin input { width: var(--icon-xl); }
   /* the one press in this client that changes the whole body, so it is the one control the accent is spent
      on — and it is a verb, not a state, so it never takes the gold of "you are here" */
-  .sides .best { border-color: rgba(39, 174, 96, .55); color: #9fe0bb; background: rgba(39, 174, 96, .1); }
-  .sides .best:hover { border-color: var(--good); color: #c8f2d9; }
-  .equipnote { margin: -.4rem 0 .8rem; font-size: .76rem; color: var(--good); }
+  .bagtools .best { border-color: color-mix(in srgb, var(--good) 55%, transparent); color: var(--good-lit); background: color-mix(in srgb, var(--good) 10%, transparent); }
+  /* the pile's shell: a kind rail down the left, a search and a quality cut across the top, the grid
+     under them. It narrows what is drawn and never reorders the bag, so Equip still addresses the drop. */
+  .bagshell { display: grid; grid-template-columns: minmax(var(--box-110), auto) 1fr; gap: var(--spacing-sm); align-items: start; }
+  .bagcats { display: flex; flex-direction: column; gap: 2px; }
+  .bagcats button {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs);
+    text-align: left; border-radius: 8px; border: 1px solid transparent; background: none;
+    color: var(--dim); font-size: var(--font-xs); padding: 4px var(--spacing-sm);
+  }
+  .bagcats button b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .bagcats button.on { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 34%, transparent); background: color-mix(in srgb, var(--gold) 10%, transparent); }
+  .bagmain { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
+  .bagtools { display: flex; align-items: center; gap: var(--spacing-sm); flex-wrap: wrap; }
+  .bagtools .grow { flex: 1; }
+  .bagsearch { min-width: var(--box-110); }
+  .bagtier { display: inline-flex; align-items: center; gap: 4px; font-size: var(--font-xs); color: var(--dim); }
+  .bagfoot { margin: 0; color: var(--dim); }
+  .bagtools .best:hover { border-color: var(--good); }
+  .equipnote { margin: var(--x-pull-note) 0 var(--spacing-sm); font-size: var(--font-xs); color: var(--good); }
   .bagblock { border: 0; }
-  .skill-label { display: inline-flex; align-items: center; gap: .35rem; }
-  .skill-label img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex: none; }
-  .bagblock + .bagblock { border-top: 1px solid var(--line); margin-top: .8rem; padding-top: .6rem; }
-  .stats td { font-size: .78rem; padding: .08rem .3rem; }
+  .skill-label { display: inline-flex; align-items: center; gap: 4px; }
+  .skill-label img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; flex: none; }
+  /* the gate cell is one row's own condition list in a single line, and it is also the button that opens
+     that row's editor — summary and control are the same object, so a row that is waiting on nothing
+     says so in its own cell instead of failing silently somewhere in the rotation */
+  .gate {
+    padding: 1px var(--spacing-xs); font-size: var(--font-xs); color: var(--gold); cursor: pointer;
+    background: none; border: 1px dashed color-mix(in srgb, var(--gold) 50%, transparent); border-radius: 4px;
+  }
+  .gate:hover { border-style: solid; }
+  /* the editor sits under the row it edits and claims no column of its own */
+  .gate-editor td { background: color-mix(in srgb, var(--gold) 5%, transparent); font-size: var(--font-xs); }
+  .gate-editor label { white-space: nowrap; }
+  .gate-editor input[type='number'] { width: var(--icon-xl); }
+  .bagblock + .bagblock { border-top: 1px solid var(--line); margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); }
+  .stats td { font-size: var(--font-xs); padding: 1px 4px; }
   .stats td:first-child { color: var(--dim); width: 45%; }
-  .filter { margin-top: .5rem; }
-  .filter summary { cursor: pointer; color: var(--dim); font-size: .8rem; }
-  .filter table { margin-top: .4rem; }
-  .weight { margin: 0 0 .5rem; }
+  .filter { margin-top: var(--spacing-xs); }
+  .filter summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
+  .filter table { margin-top: var(--spacing-xs); }
+  /* the explanation a player reads once: folded, so the screen's own controls lead and the panel's
+     working part stays on the first screen rather than below a wall of prose */
+  .prose { margin: var(--spacing-xs) 0; }
+  .prose summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
+  .prose summary:hover { color: var(--text); }
+  .prose p:first-of-type { margin-top: var(--spacing-xs); }
+  .weight { margin: 0 0 var(--spacing-xs); }
   .weight small { color: var(--dim); }
-  .warn { color: var(--hp); }
-  progress { height: 15px; border: 0; border-radius: 8px; overflow: hidden; }
-  progress::-webkit-progress-bar { background: rgba(255, 255, 255, .08); border-radius: 8px; }
-  progress::-webkit-progress-value { border-radius: 8px; }
-  progress::-moz-progress-bar { border-radius: 8px; }
-  .gauge progress { display: block; width: 100%; box-shadow: inset 0 0 0 1px var(--edge), 0 2px 6px rgba(0, 0, 0, .45); }
-  .gauge.hp progress::-webkit-progress-value { background: linear-gradient(90deg, #e2503f, #ff8a6b); }
-  .gauge.hp progress::-moz-progress-bar { background: linear-gradient(90deg, #e2503f, #ff8a6b); }
-  .gauge.mana progress::-webkit-progress-value { background: linear-gradient(90deg, #2c7fc0, #6bc4f0); }
-  .gauge.mana progress::-moz-progress-bar { background: linear-gradient(90deg, #2c7fc0, #6bc4f0); }
-  .gauge.es progress::-webkit-progress-value { background: linear-gradient(90deg, #3fa9d8, #a8e6ff); }
-  .gauge.es progress::-moz-progress-bar { background: linear-gradient(90deg, #3fa9d8, #a8e6ff); }
-  .gauge.xp progress::-webkit-progress-value { background: linear-gradient(90deg, #d8a92a, #f7e07a); }
-  .gauge.xp progress::-moz-progress-bar { background: linear-gradient(90deg, #d8a92a, #f7e07a); }
-
+  .warn { color: var(--alarm); }
   /* a monitor is not a phone: the client is written for a desktop window and scales with the root size set
-     in app.css, so these steps only move what physically cannot fit — the reads give ground in the middle,
-     they are never taken off the screen. */
-  .townnote { margin: .5rem 0 0; font-size: .76rem; color: var(--good); }
-  .townlink { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin: 0 0 .5rem; }
-  .townlink button { font-size: .76rem; }
-  .mini { padding: .1rem .45rem; font-size: .68rem; }
+     in styles/variables.css, so these steps only move what physically cannot fit — the reads give ground in
+     the middle, they are never taken off the screen. */
+  .townnote { margin: var(--spacing-xs) 0 0; font-size: var(--font-xs); color: var(--good); }
+  .mini { padding: 1px var(--spacing-xs); font-size: var(--font-xs); }
   /* the announcement is for the screen reader, not the eye: the same words are already on a pill */
   .aloud {
     position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
@@ -2520,93 +3403,324 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   /* 1024-1279: the two side reads stop sharing the middle with the mob plates */
   @media (max-width: 1279px) {
-    .tracker { width: min(17rem, 42%); }
-    .field { inset: 5.6rem clamp(16rem, 23vw, 19rem) 6.4rem; }
-    .chronicle { width: min(22rem, 42%); font-size: .7rem; }
-    .mob-mini { width: min(22rem, 42%); }
-    .statuses { display: none; }
-    .dock { width: min(26rem, 50%); }
-    .gauge { width: clamp(9rem, 17vw, 13rem); }
-    .actionbar { right: 19rem; }
-    /* the three switches the field owns are the widest thing on the bottom edge, and the cast order is
-     centred in the room left over — so the room is measured from them, never allowed to run under */
-    .controls { gap: .3rem; }
-    .controls button { padding: .25rem .5rem; font-size: .74rem; }
+    .field { inset: clamp(82.5px, 5.379vw + 20.79px, 178.2px) clamp(clamp(187.5px, 12.225vw + 47.25px, 405px), 23vw, clamp(237.5px, 15.485vw + 59.85px, 513px)) clamp(55px, 3.586vw + 13.86px, 118.8px) calc(var(--objectives-w) + var(--screen-pad) * 3); }
+    .mob-mini { width: min(var(--box-440), 42%); }
+    .chip.status { display: none; }
+    .dock { width: min(var(--box-520), 50%); }
+    .controls button { padding: 3px var(--spacing-xs); font-size: var(--font-xs); }
   }
   /* ── the hit ring ─────────────────────────────────────────────────────────────────────────────
      Every event the sim raised, drawn once and then gone. The colour is the data's (`--fx` is set
      from `elements.colour` at the call site), so a new Element needs a data row and not a CSS edit.
      The ring is decoration: it never takes a pointer and never holds layout. */
   .floaters { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
-  .float-side { position: absolute; display: flex; flex-direction: column-reverse; gap: .1rem; }
+  .float-side { position: absolute; display: flex; flex-direction: column-reverse; gap: 1px; }
   .field-side { left: 50%; bottom: 46%; transform: translateX(-50%); align-items: center; }
-  .self-side { left: calc(var(--rail) + 1rem); top: 9.5rem; align-items: flex-start; }
+  /* the character's own column is anchored to the card it belongs to: it rises from just above the
+     self-plate's top edge, so its place follows the plate wherever the frame puts it */
+  .self-side { left: 50%; bottom: calc(100% + clamp(5px, 0.326vw + 1.26px, 10.8px)); transform: translateX(-50%); align-items: center; }
   .fx {
     --lane: 0;
     font-family: var(--num);
-    font-size: .82rem;
+    font-size: var(--font-sm);
     font-weight: 600;
     color: var(--fx, var(--text));
-    text-shadow: 0 1px 0 rgba(0, 0, 0, .75);
-    animation: fx-rise .85s cubic-bezier(.2, .6, .3, 1) forwards;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .85), 0 clamp(1.25px, 0.082vw + 0.32px, 2.7px) clamp(4.25px, 0.277vw + 1.07px, 9.18px) rgba(0, 0, 0, .7);
+    animation: fx-rise 1.5s cubic-bezier(.2, .6, .3, 1) forwards;
     white-space: nowrap;
   }
-  .fx-hit { font-size: .95rem; }
-  .fx-hit.crit { font-size: 1.3rem; letter-spacing: .02em; animation: fx-crit .95s cubic-bezier(.15, .8, .3, 1) forwards; }
-  .fx-proc, .fx-block, .fx-kill, .fx-cast, .fx-travel, .fx-warp, .fx-sell, .fx-drop, .fx-craft, .fx-taken {
+  .fx-hit { font-size: var(--font-md); -webkit-text-stroke: .45px currentColor; }
+  .fx-hit.crit { font-size: var(--font-lg); letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px); -webkit-text-stroke-width: .8px; animation: fx-crit 1.9s cubic-bezier(.15, .8, .3, 1) forwards; }
+  .fx-proc, .fx-block, .fx-kill, .fx-cast, .fx-travel, .fx-warp, .fx-sell, .fx-drop, .fx-craft, .fx-taken, .fx-buff {
     font-family: var(--ui);
-    font-size: .68rem;
+    font-size: var(--font-xs);
     text-transform: uppercase;
-    letter-spacing: .06em;
-    padding: .05rem .35rem;
+    letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px);
+    padding: 1px 4px;
     border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
     border-radius: 999px;
     background: color-mix(in srgb, var(--fx, var(--panel)) 14%, transparent);
   }
-  .fx-proc { animation: fx-proc .95s ease-out forwards; }
-  .fx-cast { animation: fx-cast .8s ease-out forwards; }
+  .fx-proc { animation: fx-proc 1.25s ease-out forwards; }
+  .fx-cast { animation: fx-cast 1.1s ease-out forwards; }
   .fx-travel, .fx-warp { animation: fx-drift 1.6s linear forwards; }
-  .fx-kill { animation: fx-strike .5s ease-out forwards; }
-  .fx-sell, .fx-craft { animation: fx-rise 1.1s ease-out forwards; }
-  /* the front mob's plate takes the blow: a rim of the hit's own colour, in one beat */
+  .fx-kill { animation: fx-strike .7s ease-out forwards; }
+  .fx-sell, .fx-craft { animation: fx-rise 1.5s ease-out forwards; }
+  /* the plate actually hit takes the blow: a rim of the hit's own colour, in one beat */
   .mob { position: relative; }
   .flash {
     position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
     border: 1px solid var(--fx, var(--edge));
-    box-shadow: 0 0 .5rem color-mix(in srgb, var(--fx, #fff) 60%, transparent) inset;
+    box-shadow: 0 0 clamp(6.25px, 0.407vw + 1.57px, 13.5px) color-mix(in srgb, var(--fx, var(--text)) 60%, transparent) inset;
     animation: fx-flash .32s ease-out forwards;
   }
-  .fx-key {
-    position: absolute; right: .6rem; bottom: .4rem; z-index: 5;
-    display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end;
-    font-size: .62rem; color: var(--dim); pointer-events: none;
+  /* The figure a body wears, stamped on the card's top-right corner above its frame. A mob pops one
+     figure per landed blow — a cut or a burst full-size, a status tick small beside it — each rising away
+     on its own life, so a plate shows what was done to it and never a sum. The character's own card keeps
+     the held total of what it took, dissolving when the ring drains. Set large and outlined on all four
+     sides so a figure reads over any portrait behind it. */
+  .mob .plate-fx, .self-plate .plate-fx {
+    position: absolute; left: auto; right: clamp(-9.46px, -0.285vw - 1.1px, -4.38px); top: clamp(-29.7px, -0.896vw - 3.47px, -13.75px); z-index: 3; pointer-events: none;
+    display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 1px;
   }
-  .fx-swatch { display: inline-flex; align-items: center; gap: .2rem; text-transform: uppercase; letter-spacing: .04em; }
-  .fx-swatch::before { content: ''; width: .45rem; height: .45rem; border-radius: 50%; background: var(--fx); }
+  .plate-fx .fx-park {
+    font-size: var(--font-xl);
+    font-weight: 800;
+    /* the stroke fattens the glyph itself, so the figure keeps its mass on a monospace that ships no bold */
+    -webkit-text-stroke: 1.4px currentColor;
+    /* the ink is the element that carried the blow, undiluted — the dark outline and its bloom are what set it
+       off the field, so mixing the colour toward white only made it read as another piece of UI text */
+    color: var(--fx, var(--text));
+    text-shadow:
+      0 2px 0 rgba(0, 0, 0, .95), 2px 0 0 rgba(0, 0, 0, .95), -2px 0 0 rgba(0, 0, 0, .95), 0 -2px 0 rgba(0, 0, 0, .95),
+      1.5px 1.5px 0 rgba(0, 0, 0, .9), -1.5px 1.5px 0 rgba(0, 0, 0, .9), 1.5px -1.5px 0 rgba(0, 0, 0, .9), -1.5px -1.5px 0 rgba(0, 0, 0, .9),
+      0 clamp(2.25px, 0.147vw + 0.57px, 4.86px) clamp(4.25px, 0.277vw + 1.07px, 9.18px) rgba(0, 0, 0, .95),
+      0 0 clamp(8.75px, 0.57vw + 2.2px, 18.9px) color-mix(in srgb, var(--fx, var(--text)) 55%, transparent);
+    animation: fx-park .34s cubic-bezier(.2, .9, .3, 1) forwards;
+  }
+  .plate-fx .fx-park.crit {
+    font-size: var(--font-xl);
+    -webkit-text-stroke-width: 1.6px;
+    color: var(--fx, var(--text));
+    letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px);
+    animation-name: fx-park-crit;
+    animation-duration: .42s;
+  }
+  /* one figure per landed blow on a mob plate: a cut or a burst rises full-size off the card, a status
+     tick beside it small — each keyed on its own event, so a burst reads as a shower rather than a sum */
+  .plate-fx .pop {
+    font-size: var(--font-md);
+    -webkit-text-stroke: .55px currentColor;
+    animation: fx-rise 1.1s cubic-bezier(.2, .6, .3, 1) forwards;
+  }
+  .plate-fx .pop.crit {
+    font-size: var(--font-lg);
+    letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px);
+    -webkit-text-stroke-width: .8px;
+    animation: fx-crit 1.4s cubic-bezier(.15, .8, .3, 1) forwards;
+  }
+  .plate-fx .pop.dot { font-size: var(--font-sm); }
+  /* pops from one tick cascade instead of landing all at once: the lane each event already carries
+     staggers the mount, and the both-fill holds the first frame through the wait so nothing flashes */
+  .plate-fx .pop { animation-fill-mode: both; animation-delay: calc(var(--lane) * 90ms); }
+  /* a defense word pops like a number but reads as one: uppercase chip face in the colour of what
+     caused it, small beside the figures, never taking the rim */
+  .plate-fx .pop.word {
+    font-family: var(--ui);
+    font-size: var(--font-xs);
+    text-transform: uppercase;
+    letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px);
+    padding: 1px 4px;
+    border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--fx, var(--panel)) 14%, transparent);
+    animation: fx-rise 1.1s cubic-bezier(.2, .6, .3, 1) forwards;
+  }
+  /* ── the blow, the press and the gain ─────────────────────────────────────────────────────────
+     A number says how much; these say that something happened to a body. Each one is mounted by an event
+     the sim raised and is keyed on that event's id, so it plays once per fact — no CSS timer decides when
+     the world did something, and a paused clock stops the motion on its own. Colour always arrives in
+     `--fx` from `engine.json`; none of it is typed here. */
+  /* One wrapper carries a body's own motion, because a plate root cannot be re-keyed — it wears the comings
+     and goings transitions — and a reactive class is not re-evaluated once the outro has begun. The rim, the
+     blade and the figures live outside it, so motion never restarts a number. */
+  /* a hit flinches away from the blow: a mob struck from below jolts up, the character struck from above
+     ducks down. Same word, opposite directions, so no one reads a hit taken as a hit dealt */
+  .art.knock { animation: fx-knock .3s cubic-bezier(.2, .8, .3, 1); }
+  .self-plate .cardface.knock { animation: fx-flinch-down .3s cubic-bezier(.2, .8, .3, 1); }
+  /* a landed swing surges the striker's own card up toward its victim — a lean, not a leap */
+  .self-plate .cardface.lunge { animation: fx-surge .35s cubic-bezier(.3, .7, .3, 1); }
+  /* a mob's own attack run rides the inner wrapper, so it composes with the outer shake: being hit
+     and hitting back are two facts and the card plays both */
+  .charge.lunge { animation: fx-lunge .45s cubic-bezier(.3, .7, .3, 1); }
+  /* the mutual exchange: both sides landed in one second, so the attacker runs halfway and the player's
+     own card rises to meet it — the two meet in the middle rather than one running the whole way */
+  .charge.lunge.clash { animation: fx-clash .45s cubic-bezier(.3, .7, .3, 1); }
+  .self-plate.clash { animation: fx-meet .45s cubic-bezier(.3, .7, .3, 1); }
+  /* a swing draws the shelf's crossed swords across the body it cut, turned through the strike. A mask
+     contributes only alpha, so the Element that carried the hit paints the blade. */
+  .mob .arc {
+    position: absolute; left: 50%; top: clamp(23.75px, 1.548vw + 5.98px, 51.3px); z-index: 4; pointer-events: none;
+    width: var(--icon-xl); height: var(--icon-xl); margin: var(--x-pull-arc) 0 0 var(--x-pull-arc);
+    background: var(--fx, var(--text));
+    -webkit-mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
+            mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
+    animation: fx-arc .26s ease-out forwards;
+  }
+  /* a press lands as a burst and not a cut, so the two halves of a build read apart before a number is read */
+  .mob .burst {
+    position: absolute; left: 50%; top: clamp(23.75px, 1.548vw + 5.98px, 51.3px); z-index: 4; pointer-events: none;
+    width: var(--icon-lg); height: var(--icon-lg); margin: var(--x-pull-burst) 0 0 var(--x-pull-burst);
+    border: 2px solid var(--fx, var(--text)); border-radius: 50%;
+    animation: fx-burst .34s ease-out forwards;
+  }
+  /* the row that fired, on the bar that lists the order — the one place that can name the press without
+     printing it twice. `ready`'s gold ring means pressable now; this ring is the Element that went out. */
+  .cast .flare {
+    position: absolute; inset: -2px; z-index: 2; pointer-events: none;
+    border: 1px solid var(--fx, var(--text)); border-radius: inherit;
+    animation: fx-flare .5s ease-out forwards;
+  }
+  /* a buff coming up is prose, so it wears the chip face like the other words on the field */
+  .fx-buff {
+    animation: fx-buff 1.15s ease-out forwards;
+  }
+  /* a heal is a number, so it keeps `--num` and never the chip's uppercase face; the heart is the shelf's
+     own, masked, so the glyph is decoration and the digits stay the read */
+  .fx-heal {
+    font-size: var(--font-sm);
+    animation: fx-heal 1.1s ease-out forwards;
+  }
+  .fx-buff::before, .fx-heal::before {
+    content: '';
+    display: inline-block; width: var(--icon-xs); height: var(--icon-xs); margin-right: 3px; vertical-align: clamp(-2.16px, -0.065vw - 0.25px, -1px);
+    background: var(--fx, var(--text));
+    -webkit-mask-size: contain; mask-size: contain;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: center; mask-position: center;
+  }
+  .fx-heal::before {
+    -webkit-mask-image: url('./icon/interface/heart-beats.svg');
+            mask-image: url('./icon/interface/heart-beats.svg');
+  }
+  .fx-buff::before {
+    -webkit-mask-image: url('./icon/skill/aura/expanded-rays.svg');
+            mask-image: url('./icon/skill/aura/expanded-rays.svg');
+  }
+  /* the frame's own beat: a level borrows the title's line for one rise and hands it back */
+  .levelup {
+    position: absolute; top: clamp(33.75px, 2.2vw + 8.51px, 72.9px); left: 50%; z-index: 8; pointer-events: none;
+    margin: 0; white-space: nowrap; font-family: var(--num); font-size: var(--font-md); letter-spacing: clamp(1.5px, 0.098vw + 0.38px, 3.24px);
+    color: var(--fx, var(--gold)); text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
+    animation: fx-level 1.5s cubic-bezier(.2, .7, .3, 1) forwards;
+  }
+  /* a taken blow flinches up, away from the striker below — the shake it replaces read the same
+     from every side, this one names its direction */
+  @keyframes fx-knock {
+    0% { transform: none; }
+    25% { transform: translateY(clamp(-14.86px, -0.448vw - 1.73px, -6.88px)) scale(.98); }
+    55% { transform: translateY(clamp(1.5px, 0.098vw + 0.38px, 3.24px)); }
+    100% { transform: none; }
+  }
+  /* the downward twin, for the card struck from above */
+  @keyframes fx-flinch-down {
+    0% { transform: none; }
+    25% { transform: translateY(clamp(6.88px, 0.448vw + 1.73px, 14.85px)) scale(.98); }
+    55% { transform: translateY(clamp(-3.24px, -0.098vw - 0.38px, -1.5px)); }
+    100% { transform: none; }
+  }
+  /* a landed swing surges its own card a short way up toward the victim */
+  @keyframes fx-surge {
+    0% { transform: none; }
+    30% { transform: translateY(clamp(-13.5px, -0.407vw - 1.57px, -6.25px)) scale(1.03); }
+    100% { transform: none; }
+  }
+  /* the attack run, Hearthstone-style: the body crouches, charges down onto the player's own
+     card, takes the impact and comes back — a run at the player, never a shake in place, so no one
+     reads it as a hit taken */
+  @keyframes fx-lunge {
+    0% { transform: none; }
+    18% { transform: translateY(clamp(-9.46px, -0.285vw - 1.1px, -4.38px)) scale(.98); }
+    45% { transform: translateY(calc(var(--lunge) * clamp(43.75px, 2.853vw + 11.03px, 94.5px))) scale(1.15); }
+    62% { transform: translateY(calc(var(--lunge) * clamp(38.75px, 2.526vw + 9.76px, 83.7px))) scale(1.12); }
+    100% { transform: none; }
+  }
+  /* the halfway run and the rise that answers it: the same crouch-charge-impact shape on a shorter
+     travel, so the pair visibly meets in the middle */
+  @keyframes fx-clash {
+    0% { transform: none; }
+    18% { transform: translateY(clamp(-5.4px, -0.163vw - 0.63px, -2.5px)) scale(.99); }
+    45% { transform: translateY(calc(var(--lunge) * clamp(20px, 1.304vw + 5.04px, 43.2px))) scale(1.08); }
+    62% { transform: translateY(calc(var(--lunge) * clamp(17.5px, 1.141vw + 4.41px, 37.8px))) scale(1.06); }
+    100% { transform: none; }
+  }
+  /* the rise runs on the plate root — the face lives there, so answering it on the inner art
+     would move the portrait while the frame stays. translateX(-50%) is the plate's own centring,
+     carried through every stop so the rise never jumps sideways */
+  @keyframes fx-meet {
+    0% { transform: translateX(-50%); }
+    18% { transform: translateX(-50%) translateY(clamp(2.5px, 0.163vw + 0.63px, 5.4px)) scale(.99); }
+    45% { transform: translateX(-50%) translateY(clamp(-43.2px, -1.304vw - 5.04px, -20px)) scale(1.08); }
+    62% { transform: translateX(-50%) translateY(clamp(-37.8px, -1.141vw - 4.41px, -17.5px)) scale(1.06); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes fx-arc {
+    0% { opacity: 0; transform: translate(clamp(-24.3px, -0.733vw - 2.83px, -11.25px), clamp(8.75px, 0.57vw + 2.2px, 18.9px)) rotate(-42deg) scale(.7); }
+    35% { opacity: .95; }
+    100% { opacity: 0; transform: translate(clamp(11.25px, 0.733vw + 2.83px, 24.3px), clamp(-18.9px, -0.57vw - 2.2px, -8.75px)) rotate(16deg) scale(1.12); }
+  }
+  @keyframes fx-burst {
+    0% { opacity: 0; transform: scale(.35); }
+    25% { opacity: .9; }
+    100% { opacity: 0; transform: scale(1.55); }
+  }
+  @keyframes fx-flare {
+    0% { opacity: 0; transform: scale(.85); }
+    25% { opacity: 1; transform: scale(1.14); }
+    100% { opacity: 0; transform: scale(1); }
+  }
+  @keyframes fx-buff {
+    0% { opacity: 0; transform: scale(.6) translateY(clamp(5px, 0.326vw + 1.26px, 10.8px)); }
+    25% { opacity: 1; transform: scale(1.08); }
+    100% { opacity: 0; transform: translateY(clamp(-48.6px, -1.467vw - 5.67px, -22.5px)) scale(1); }
+  }
+  @keyframes fx-heal {
+    0% { opacity: 0; transform: translateY(clamp(6.25px, 0.407vw + 1.57px, 13.5px)) scale(.9); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(clamp(-45.9px, -1.385vw - 5.36px, -21.25px)) scale(1); }
+  }
+  @keyframes fx-level {
+    0% { opacity: 0; transform: translateX(-50%) translateY(clamp(8.75px, 0.57vw + 2.2px, 18.9px)) scale(.7); }
+    18% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.18); }
+    70% { opacity: 1; transform: translateX(-50%) translateY(clamp(-6.76px, -0.204vw - 0.79px, -3.13px)) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(clamp(-35.1px, -1.059vw - 4.09px, -16.25px)) scale(1); }
+  }
+  /* the column figure's arc, staged the MapleStory way (owner ruling): a quick rise, a hold long enough
+     to read, then the fade — so the number owns its own life on screen and is never cut short while the
+     ring still has room for it */
   @keyframes fx-rise {
-    0% { opacity: 0; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), .3rem) scale(.86); }
-    18% { opacity: 1; }
-    100% { opacity: 0; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), -2.4rem) scale(1); }
+    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(3.75px, 0.244vw + 0.94px, 8.1px)) scale(.86); }
+    14% { opacity: 1; }
+    32% { transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-43.2px, -1.304vw - 5.04px, -20px)) scale(1.02); }
+    60% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-51.3px, -1.548vw - 5.98px, -23.75px)) scale(1); }
+    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-70.2px, -2.119vw - 8.19px, -32.5px)) scale(.96); }
   }
+  /* the crit's own stage: a harder slam, a longer hold, a slower let-go */
   @keyframes fx-crit {
-    0% { opacity: 0; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), .6rem) scale(.5); }
-    22% { opacity: 1; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), -.4rem) scale(1.28); }
-    100% { opacity: 0; transform: translate(calc(var(--lane) * 1.1rem - 3.3rem), -3.1rem) scale(1); }
+    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(7.5px, 0.489vw + 1.89px, 16.2px)) scale(.5); }
+    18% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-10.8px, -0.326vw - 1.26px, -5px)) scale(1.28); }
+    34% { transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-18.9px, -0.57vw - 2.2px, -8.75px)) scale(1); }
+    64% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-21.6px, -0.652vw - 2.52px, -10px)) scale(1); }
+    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-45.9px, -1.385vw - 5.36px, -21.25px)) scale(.96); }
+  }
+  /* the parked figure's own path: it does not rise, it drops in and stamps on the corner — a hard squash
+     overshoot, then it holds at full until the number itself leaves */
+  @keyframes fx-park {
+    0% { opacity: 0; transform: translateY(clamp(-24.3px, -0.733vw - 2.83px, -11.25px)) scale(.45); }
+    30% { opacity: 1; transform: translateY(clamp(1.25px, 0.082vw + 0.32px, 2.7px)) scale(1.26); }
+    55% { transform: translateY(0) scale(.96); }
+    100% { opacity: 1; transform: none; }
+  }
+  @keyframes fx-park-crit {
+    0% { opacity: 0; transform: translateY(clamp(-35.1px, -1.059vw - 4.09px, -16.25px)) scale(.3); }
+    24% { opacity: 1; transform: translateY(clamp(2px, 0.13vw + 0.5px, 4.32px)) scale(1.45); }
+    58% { transform: translateY(0) scale(.97); }
+    100% { opacity: 1; transform: none; }
   }
   @keyframes fx-proc {
     0% { opacity: 0; transform: scale(.7); }
     30% { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 0; transform: translateY(-1.4rem); }
+    100% { opacity: 0; transform: translateY(clamp(-37.8px, -1.141vw - 4.41px, -17.5px)); }
   }
   @keyframes fx-cast {
-    0% { opacity: 0; transform: translateY(.4rem) skewX(-8deg); }
+    0% { opacity: 0; transform: translateY(clamp(5px, 0.326vw + 1.26px, 10.8px)) skewX(-8deg); }
     25% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-1.6rem); }
+    100% { opacity: 0; transform: translateY(clamp(-43.2px, -1.304vw - 5.04px, -20px)); }
   }
   @keyframes fx-drift {
-    0% { opacity: 0; transform: translateX(-1.2rem); }
+    0% { opacity: 0; transform: translateX(clamp(-32.4px, -0.978vw - 3.78px, -15px)); }
     20% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(1.4rem); }
+    100% { opacity: 0; transform: translateX(clamp(17.5px, 1.141vw + 4.41px, 37.8px)); }
   }
   @keyframes fx-strike {
     0% { opacity: 1; transform: scale(1.25); }
@@ -2619,7 +3733,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* the frame's edge on a hit taken: the same colour rule as the number, one beat wider */
   .veil {
     position: absolute; inset: 0; pointer-events: none;
-    box-shadow: inset 0 0 5rem color-mix(in srgb, var(--fx, var(--hp)) 50%, transparent);
+    box-shadow: inset 0 0 clamp(62.5px, 4.075vw + 15.75px, 135px) color-mix(in srgb, var(--fx, var(--hp)) 50%, transparent);
     animation: fx-veil .4s ease-out forwards;
   }
   @keyframes fx-veil {
@@ -2633,18 +3747,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      pull, and the settlement's name sits over the zone's. The work a town is for (the warehouse, the
      counter, the bench, the desk) is already one rail press away; this only stops the fight from
      shouting over it. A walk in progress stays readable, because it is the one thing town cannot hide. */
+  /* the fight stays sharp in a settlement (owner ruling): only the ground recedes, so the field is
+     dimmed and desaturated by hand here and never pulled through the blur half of the ladder */
   .townmode .field { opacity: .78; filter: saturate(.85); }
   .townmode .arena { color: var(--gold); }
-  .townmode .map-back { opacity: .5; }
-  .townmode .chronicle { opacity: .8; }
+  .townmode .map-back { --dof: var(--dof-far); }
 
   /* 1600 and wider: the room is spent on the plates rather than on empty ground */
   @media (min-width: 1600px) {
-    .field { inset: 6rem clamp(14rem, 30%, 26rem) 7rem; gap: 1rem; }
-    .mob { width: 12.5rem; padding: .6rem .7rem .7rem; }
-    .mob .portrait { width: 3.3rem; height: 3.3rem; }
-    .chronicle { width: min(34rem, 42%); }
-    .dock { width: min(36rem, 40%); }
-    .tracker { width: min(23rem, 32%); }
+    .field { inset: clamp(75px, 4.89vw + 18.9px, 162px) clamp(clamp(175px, 11.41vw + 44.1px, 378px), 30%, clamp(325px, 21.19vw + 81.9px, 702px)) clamp(87.5px, 5.705vw + 22.05px, 189px); gap: var(--spacing-md); --card-w: var(--box-200); }
+    .mob .charge { padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm); }
+    .mob .portrait, .self-plate .portrait { width: var(--icon-xl); height: var(--icon-xl); }
+    .dock { width: min(var(--box-720), 40%); }
   }
 </style>

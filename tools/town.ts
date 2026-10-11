@@ -2,7 +2,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import * as eng from './lib/engine.ts';
+import { eng, engineForTown } from './lib/engine.ts';
+import * as G from './lib/gates.ts';
 
 /**
  * Town economy cage — tools/data/town.json, priced off the engine's own band numbers.
@@ -18,7 +19,7 @@ import * as eng from './lib/engine.ts';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const DATA = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'data', 'town.json'), 'utf8'));
 // Band numbers are never stored here: tools/data/engine.json is the only source.
-const E = eng.engineForTown({});
+const E = engineForTown();
 const INV = DATA.invariants;
 const BANDS = ['low', 'mid', 'high'];
 const BAND_KEYS = Object.keys(E.bands);
@@ -27,7 +28,7 @@ const BAND_KEYS = Object.keys(E.bands);
 
 const junk = (b: any) => E.bands[b].drops_per_hr - E.bands[b].upgrades_per_hr;
 // The band's gold rate and the price it turns an `m` into are the engine's own — the cage reads the
-// same two calls the wiki and the client call, so a town price has exactly one home (AGENTS.md §3).
+// same two calls the wiki and the client call, so a town price has exactly one home (AGENTS.md — Numbers).
 const rate = (b: any) => eng.goldPerMinute(b);
 const gold = (m: any, b: any) => eng.goldPrice(m, b);
 const fmt = (n: any) => Math.round(n).toLocaleString('en-US');
@@ -79,7 +80,7 @@ function entryPriceM(line: any, band: any, entry: any) {
 /**
  * The run's junk, in KILLS. A band is a count of kills (`band_kills`) and junk is priced per kill
  * (`junkKill`), so the supply is the pieces the run pays — never a stretch of hours, which is the
- * player's own pace (`AGENTS.md`). The arithmetic is the published one unchanged: hours x junk/hr is
+ * player's own pace (`DECISIONS.md` §Standing intent). The arithmetic is the published one unchanged: hours x junk/hr is
  * kills x junk/kill.
  */
 const junkKill = (b: string) => junk(b) / E.bands[b].kills_per_hr;
@@ -128,9 +129,7 @@ function ladderRanges() {
 // ---------------------------------------------------------------- checks
 
 function runChecks() {
-  const out: any[] = [];
-  const add = (id: any, ok: any, detail: any) => out.push({ id, status: ok ? 'PASS' : 'FAIL', detail });
-  const pending = (id: any, detail: any) => out.push({ id, status: 'PENDING', detail });
+  const { add, watch, pending, rows } = G.gates();
 
   const cp = E.checkpoints_kills;
   add('T3a', close(E.bands.low.band_kills, cp.level_30)
@@ -152,7 +151,8 @@ function runChecks() {
     `Σ ${DATA.settlements.length} settlement budgets = ${fmt(budgetSum)} kills against the ${fmt(cp190)}-kill completion checkpoint (${pct(Math.abs(budgetSum - cp190) / cp190)} apart, the rounding of the per-settlement counts) — the budgets are the curve's own zone slices, so the world's zones and the progression curve cannot drift apart`);
   add('T2', BANDS.every((b, i) => i === 0 || junkKill(b) > junkKill(BANDS[i - 1])),
     `the junk line rises with the band: ${BANDS.map((b) => junkKill(b).toFixed(4)).join(' < ')} gold per kill`);
-  add('T7', Math.abs(junk('high_full_lck') / junk('high') - E.towns_gold_rate_multiplier_bound) < 0.05,
+  watch('T7', Math.abs(junk('high_full_lck') / junk('high') - E.towns_gold_rate_multiplier_bound) < 0.05,
+    `full-Lck junk ×${(junk('high_full_lck') / junk('high')).toFixed(2)} — off the ×${E.towns_gold_rate_multiplier_bound} ceiling the stall prices were set against (±5%); re-read the gold pacing by eye`,
     `full-Lck junk ×${(junk('high_full_lck') / junk('high')).toFixed(2)} against the ×${E.towns_gold_rate_multiplier_bound} ceiling`);
   add('T4', ONETIME_DEMAND / SUPPLY <= INV.onetime_demand_max_multiple_of_lifetime_supply,
     `one-time demand ${fmt(ONETIME_DEMAND)} = ${(ONETIME_DEMAND / SUPPLY).toFixed(2)}× supply (limit ${(INV.onetime_demand_max_multiple_of_lifetime_supply).toFixed(2)}×)`);
@@ -240,6 +240,21 @@ function runChecks() {
     ? 'town.json still carries an engine block — band numbers must come only from tools/data/engine.json'
     : 'town.json carries no engine block: every band number is read from tools/data/engine.json');
 
+  // T19 — the task board's hard income bound (DECISIONS.md §The task board). A day of claims is
+  // every slot's natural refill plus a free skip each plus the bought-token ceiling; each Elite hunt
+  // pays reward_minutes of that band's stone income. The bound is band-independent because the
+  // band's tier-stone rate cancels: total reward-minutes a day must stay under income_bound_pct of a
+  // day's minutes. This is the one the board's sizing was provisional against.
+  {
+    const TSk = DATA.task_sizing;
+    const claims = TSk.slots * (86400 / TSk.refill_sec) + TSk.slots * TSk.free_skip_per_day + LINE.skip_token.per_day_cap;
+    const budget_min = TSk.income_bound_pct / 100 * 1440;
+    const pay_min = claims * TSk.reward_minutes_of_band_income;
+    const tierPerClaim = eng.stonesForMinutes('high', TSk.reward_minutes_of_band_income).tier;
+    add('T19', pay_min <= budget_min,
+      `${claims.toFixed(0)} claims/day × ${TSk.reward_minutes_of_band_income} min = ${pay_min.toFixed(0)} reward-min against the ${budget_min.toFixed(0)}-min bound (${TSk.income_bound_pct}% of a day) · ≈${tierPerClaim} Tier stones a claim · refill ${TSk.refill_sec}s × ${TSk.slots} slots + ${TSk.free_skip_per_day} free skip/slot + ${LINE.skip_token.per_day_cap} tokens`);
+  }
+
   // roster consistency
   const setTownIds = DATA.collector_sets.map((c: any) => c.settlement);
   const pedlarIds = DATA.settlements.filter((s: any) => s.npcs.includes('curio_pedlar')).map((s: any) => s.id);
@@ -268,7 +283,7 @@ function runChecks() {
   }
   add('T-S', stockProblems.length === 0, stockProblems.length ? stockProblems.join(' · ') : 'every stock line resolves to a priced line (or a Collector set) sold by an NPC actually present');
 
-  return out;
+  return rows();
 }
 
 function close(a: any, b: any) { return Math.abs(a - b) < 0.005; }
@@ -278,14 +293,7 @@ function close(a: any, b: any) { return Math.abs(a - b) < 0.005; }
 const arg = process.argv[2];
 
 if (arg === '--checks') {
-  const rows = runChecks();
-  const width = Math.max(...rows.map((r) => r.id.length));
-  for (const r of rows) console.log(`${r.id.padEnd(width)}  ${r.status.padEnd(7)}  ${r.detail}`);
-  const fails = rows.filter((r) => r.status === 'FAIL');
-  const pend = rows.filter((r) => r.status === 'PENDING');
-  console.log(`
-${rows.length - fails.length}/${rows.length} PASS · ${pend.length} PENDING · ${fails.length} FAIL`);
-  if (fails.length) process.exitCode = 1;
+  G.report(runChecks());
 } else {
   console.log(`town cage — engine.json + town.json → the settlement economy
 

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { E, TOWN } from '../src/engine/client';
-import { road, startWalk, walkBlocks, walkLabel, walkRoute, walkZones, waypointUnlocked } from '../src/sim/road';
+import { road, startWalk, walkBlocks, walkLabel, walkZones, settlementCell, cellBlocks, cellsTo, ownerOf, rankOf, waypointUnlocked } from '../src/sim/road';
 import { stashTabCount, deposit, withdraw, buy } from '../src/sim/town';
-import { newGame, tick, catchUp, setLevel } from '../src/sim/game';
+import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 
 const R = E.road;
@@ -36,7 +36,7 @@ describe('the walk model is the shared one', () => {
     for (const a of road.nodes) {
       for (const b of road.nodes) {
         if (a.id === b.id) continue;
-        const route = walkRoute(a.id, b.id);
+        const route = road.hexKeys(road.routeHex(a, b));
         // one cell per block, plus the cell the walk starts on
         expect(route.length).toBe(road.blocksBetween(a.id, b.id) + 1);
         expect(route[0]).toBe(`${a.q},${a.r}`);
@@ -54,6 +54,27 @@ describe('the walk model is the shared one', () => {
         }
       }
     }
+  });
+
+  it('prices a cell and a settlement by the same rule: one block per cell crossed', () => {
+    // the hex route is the id route, so widening travel to any cell changed no cost anywhere
+    for (const a of road.nodes) {
+      for (const b of road.nodes) {
+        if (a.id === b.id) continue;
+        expect(road.blocksBetweenHex(a, b)).toBe(road.blocksBetween(a.id, b.id));
+        expect(road.secFromHex(a, b)).toBe(road.blocksBetween(a.id, b.id) * R.block_sec);
+        expect(road.hexKeys(road.routeHex(a, b))).toEqual(road.routeKeys(a.id, b.id));
+      }
+    }
+    // and a bare cell is a destination like any other: the block count is its distance, no more
+    const s = newGame(31);
+    setLevel(s, 60);
+    const here = { q: R.nodes[0].q, r: R.nodes[0].r };
+    const bare = { q: here.q + 2, r: here.r };
+    expect(rankOf(bare)).toBeGreaterThanOrEqual(2);
+    expect(cellBlocks(s, bare)).toBe(2);
+    expect(cellsTo(s, bare).length).toBe(3);
+    expect(cellsTo(s, bare)[2]).toBe(`${bare.q},${bare.r}`);
   });
 
   it('turns blocks into seconds at the one block time the data owns', () => {
@@ -84,27 +105,29 @@ describe('the walk model is the shared one', () => {
 });
 
 describe('starting a walk', () => {
-  it('needs two different settlements and cannot be started twice', () => {
+  it('needs a cell the feet are not already on and cannot be started twice', () => {
     const s = newGame(11);
     const [a, b] = TOWN.settlements;
-    expect(startWalk(s, a.id, a.id).ok).toBe(false);
-    expect(startWalk(s, a.id, 'nowhere').ok).toBe(false);
-    expect(startWalk(s, a.id, b.id).ok).toBe(true);
-    expect(startWalk(s, a.id, b.id).ok).toBe(false);   // already walking
+    expect(startWalk(s, settlementCell(a.id)!).ok).toBe(false);      // already standing there
+    expect(startWalk(s, settlementCell(b.id)!).ok).toBe(true);
+    expect(startWalk(s, settlementCell(b.id)!).ok).toBe(false);   // already walking
     expect(s.walk!.blocksTotal).toBe(road.blocksBetween(a.id, b.id));
     expect(s.walk!.blocksLeft).toBe(s.walk!.blocksTotal);
+    expect(s.walk!.kind).toBe('town');
+    expect(s.walk!.node).toBe(b.id);
   });
 
   it('crosses a block per block_sec and opens the Waypoint at the far end', () => {
     const s = newGame(19);
     const [a, b] = TOWN.settlements;
     setLevel(s, 60);
-    startWalk(s, a.id, b.id);
+    startWalk(s, settlementCell(b.id)!);
     const blocks = road.blocksBetween(a.id, b.id);
     let guard = 0;
     while (s.walk && guard++ < 20000) tick(s, {});
     expect(guard).toBeLessThan(blocks * R.block_sec + 50);
     expect(s.walk).toBe(null);
+    expect(s.cell).toMatchObject({ q: road.nodeById(b.id)!.q, r: road.nodeById(b.id)!.r });
     expect(s.town.visited).toContain(b.id);          // walked there, so the Waypoint is open
     expect(waypointUnlocked(s, b.id)).toBe(true);
     expect(s.zone).toBe(b.zone);
@@ -114,14 +137,17 @@ describe('starting a walk', () => {
     const s = newGame(12);
     const [a, b] = TOWN.settlements;
     setLevel(s, 60);
-    startWalk(s, a.id, b.id);
-    for (let i = 0; i < R.block_sec + 1; i++) tick(s, {});   // cross one block
-    const left = s.walk!.blocksLeft;
+    startWalk(s, settlementCell(b.id)!);
+    // driven to a mid-walk state, never to a tick count: a tick count is a time premise
+    while (!s.walk || s.walk.blocksLeft === s.walk.blocksTotal) tick(s, {});
+    const total = s.walk!.blocksTotal;
     s.player.hp = -100000;                              // deep enough that regen cannot save it
     tick(s, {});
     expect(s.counters.pushes).toBe(1);
     expect(s.walk).not.toBe(null);                      // the walk survives the Push
-    expect(s.walk!.blocksLeft).toBe(left);              // and it lost no block
+    // a Push never gives a block back, so the route is still the whole one it was plotted as
+    expect(s.walk!.blocksTotal).toBe(total);
+    expect(s.walk!.blocksWalked + s.walk!.blocksLeft).toBe(total);
     expect(s.log.some((l) => /keeps its \d+ block/.test(l.text))).toBe(true);
   });
 
@@ -129,12 +155,27 @@ describe('starting a walk', () => {
     const s = newGame(13);
     const [a, b] = TOWN.settlements;
     setLevel(s, 60);
-    startWalk(s, a.id, b.id);
+    startWalk(s, settlementCell(b.id)!);
     const walked = s.walk!.blocksWalked;
     const r = catchUp(s, {}, 600);
     expect(r.simulated).toBe(600);
     expect(s.walk!.blocksWalked).toBe(walked);
     expect(s.town.visited).not.toContain(b.id);
+  });
+
+  it('spends the standing fight: the group it leaves behind cannot swing behind the sheet', () => {
+    const s = newGame(21);
+    setLevel(s, 30);
+    huntZone(s, s.zone);
+    // tick until the zone has fielded its group, never for a guessed window (a time premise · AGENTS.md)
+    for (let i = 0; i < 20000 && !s.group.length; i++) tick(s, {});
+    expect(s.group.length).toBeGreaterThan(0);
+    const [, b] = TOWN.settlements;
+    expect(startWalk(s, settlementCell(b.id)!).ok).toBe(true);
+    // the walk drops the group whole — a live one would keep swinging (block, evasion) at a
+    // character the mob field no longer shows, and pause the block crossing until it died
+    expect(s.group.length).toBe(0);
+    expect(s.player.atkTimer).toBe(0);
   });
 });
 
@@ -145,7 +186,7 @@ describe('the walk mints nothing', () => {
     setLevel(s, 60);
     const gold = s.counters.gold;
     const standing = Object.values(s.counters.zoneKills).reduce((x: number, y: any) => x + y, 0);
-    startWalk(s, a.id, b.id);
+    startWalk(s, settlementCell(b.id)!);
     let guard = 0;
     while (s.walk && guard++ < 20000) tick(s, {});
     // a walk pays a drop roll and nothing else, so gold and Standing move only by what was killed

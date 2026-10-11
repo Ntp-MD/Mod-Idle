@@ -11,7 +11,8 @@
  * herb/potion 100/slot, gold no slot); both weight-counted; stash + craft town-only.
  */
 
-import * as eng from './lib/engine.ts';
+import { eng } from './lib/engine.ts';
+import * as G from './lib/gates.ts';
 
 const { E, K, L, BAND, CEIL, DERIVED } = eng;
 const IV = E.inventory;
@@ -33,8 +34,7 @@ const HERB_BAG_WEIGHT = IV.character_slots * IV.stack_size.herb * IV.unit_weight
 const CAPACITY = CEIL * K.K_STR_WEIGHT;
 
 function gates(): any[] {
-  const out: any[] = [];
-  const add = (id: string, ok: boolean, detail: string) => out.push({ id, ok, detail });
+  const { add, watch, rows } = G.gates();
 
   const bad: string[] = [];
   if (!(IV.adventure_slots > 0)) bad.push('no adventure bag size');
@@ -47,7 +47,8 @@ function gates(): any[] {
 
   // the adventure bag must not fill from kept gear inside the offline window, or an AFK
   // session would stop looting while the player is away
-  add('IV2', GEAR_FILL_HR > IV.offline_cap_hr,
+  watch('IV2', GEAR_FILL_HR > IV.offline_cap_hr,
+    `the adventure bag fills in ~${f1(GEAR_FILL_HR)} hr at the high band's measured ${KEEP_HR} upgrades/hr — inside the ${IV.offline_cap_hr} hr offline cap, so an offline session can run the bag dry from gear alone; re-read the bag fill by eye`,
     `the adventure bag fills in ~${f1(GEAR_FILL_HR)} hr at the high band's measured ${KEEP_HR} upgrades/hr — longer than the ${IV.offline_cap_hr} hr offline cap, so an offline session cannot run the bag dry from gear alone`);
 
   // stones are weightless on purpose (they are currency-like); herbs and potions still weigh,
@@ -58,7 +59,7 @@ function gates(): any[] {
     ? `stones are weightless — a full ${IV.character_slots}-slot stone bag costs 0 weight — while herbs and potions weigh ${w.herb}/${w.potion} per unit, so only herb/potion stacks can tax aspd (a full herb bag ${f0(HERB_BAG_WEIGHT)} vs capacity ${f0(CAPACITY)} · formula.md section 11)`
     : `expected stone weight 0 and herb/potion > 0, got stone ${w.stone} · herb ${w.herb} · potion ${w.potion}`);
 
-  return out;
+  return rows();
 }
 
 function emit(): void {
@@ -75,11 +76,7 @@ const arg = process.argv[2];
 if (arg === '--emit') {
   emit();
 } else if (arg === '--checks') {
-  const rows = gates();
-  for (const r of rows) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-  const fails = rows.filter((r) => !r.ok).length;
-  console.log(`\n${rows.length - fails}/${rows.length} gate PASS · ${fails} FAIL`);
-  if (fails) process.exitCode = 1;
+  G.report(gates());
 } else {
   console.log(`inventory cage — the two bags, their stacks and their fill times
 

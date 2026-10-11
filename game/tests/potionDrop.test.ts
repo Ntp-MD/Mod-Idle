@@ -10,7 +10,7 @@ import { farm, rollPotion } from '../src/sim/farm';
  * has no mob potion source at all. `X49` gates the same derivation.
  */
 
-describe('the humanoid tribes drop potions (items 2 + 4)', () => {
+describe('the humanoid tribes drop potions', () => {
 
   it('only a humanoid lineage carries it, and the bottle follows the zone band', () => {
     const s = newGame(5);

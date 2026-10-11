@@ -25,10 +25,8 @@ function castPress(id: string, c: ReturnType<typeof buildCharacter>, target: Mob
 /**
  * B8 · the mob's own defences.
  *
- * `mob-roster.md` prints an Armour line from each species' Str and an Elemental resistance from its
- * Vit, and combat.md §2 did not use either — so those two lines were decorative and Chill's armour cut
- * had nothing to cut. This file is the proof that they now bite, and the proof that a DoT still walks
- * past them (status.mob_side: DoT lands in full · formula-offense.md §4: armour does not reduce bleed).
+ * Each species' Armour line and Elemental resistance bite the hit they are written against, and a
+ * DoT still walks past them (status.mob_side: DoT lands in full · armour does not reduce bleed).
  */
 
 const mob = (over: Partial<Mob> = {}): Mob => ({
@@ -69,7 +67,7 @@ describe('a mob answers the half of the hit its line is written against', () => 
       weaponAspd: 1.2, q: 2, lines: [{ id: 'elemental_power_flat', value: 4000, slice: 0, element: 'fire' }],
     } as unknown as Item;
     const c = { ...buildCharacter(90, gear), alignment: 100 } as ReturnType<typeof buildCharacter>;
-    const elemPart = c.elem * (c.alignment / 100) * E.elements.weak_mult * (E.elements.counter as any).fire.fire;
+    const elemPart = c.elem * (c.alignment / 100);
     const bare = swingAgainst(c, { res: 0 });
     const resisted = swingAgainst(c, { res: 40 });
     expect(bare - resisted).toBeCloseTo(elemPart * eng.mobResCut(40), 6);
@@ -133,7 +131,7 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     const after = playerSwing(mulberry32(2), c, { ...resisted }, null, { ...NO_CURSE, resistCut: cut }).damage;
     expect(after).toBeGreaterThan(before);
     // the strip is worth the Element part × the percentage points it removed, and nothing else
-    const elemPart = c.elem * (c.alignment / 100) * E.elements.weak_mult * (E.elements.counter as any).fire.fire;
+    const elemPart = c.elem * (c.alignment / 100);
     expect(after - before).toBeCloseTo(elemPart * (Math.abs(cut) / 100), 6);
   });
 

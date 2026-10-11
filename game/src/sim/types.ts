@@ -1,4 +1,5 @@
 import type { StatKey } from '../engine/client';
+import type { Hex } from '../../../engine/road.ts';
 
 export interface ModExtra {
   id: string;
@@ -86,7 +87,7 @@ export interface Mob {
   hpMax: number;
   ps: number;
   acc: number;
-  /** The mob's own evasion rating our accuracy rolls against: `mob_evasion = Dex × K_EVASION`. */
+  /** The mob's own evasion rating our accuracy rolls against: its integer Core Dex × K_EVASION × the body base Evasion percent, with no level term. */
   evasion: number;
   /** A mob dodging our swing runs its own thin opposed roll off its Agi (X24). */
   dodgeRate: number;
@@ -171,7 +172,8 @@ export interface HealBuff {
   pctPerSec: number;
 }
 
-/** A task slot on the Guild board (`tasks.md`). */
+/** A task slot on the Guild board (`tasks.md`). A Boss hunt pays winner's choice: the
+    default `stone`/`count` (the Remove stone) or the `alt` it names (the Reroll tier count). */
 export interface TaskSlot {
   kind: 'elite' | 'boss';
   zone: number;
@@ -179,6 +181,7 @@ export interface TaskSlot {
   progress: number;
   stone: 'reroll_value' | 'tier' | 'remove';
   count: number;
+  alt?: { stone: 'reroll_value' | 'tier' | 'remove'; count: number };
   claimed: boolean;
   offeredAt: number;
 }
@@ -196,18 +199,39 @@ export interface TownState {
 /**
  * One walk on foot, counted in blocks.
  *
- * `blocksTotal` is the hex distance between the two settlements and `secLeft` is the time left on
- * the block being crossed. Every block crossed rolls one encounter chance. A Push is the ordinary
+ * `blocksTotal` is the hex distance between the two cells and `secLeft` is the time left on the block
+ * being crossed. Every block crossed rolls one encounter chance. A Push is the ordinary
  * Push: the character rests at the camp of the zone it was ambushed in and walks back in on the
  * block it was ambushed on, so `blocksLeft` never moves for it.
+ *
+ * A walk joins two cells, not two settlements (`road.standing_rule`): the destination is any hex the
+ * player clicked, and `node`/`kind`/`sub`/`wild` say what stands on it — a settlement, a named side of
+ * one, a wild side, or bare ground. The content is answered from the lattice, never from a link table.
  */
 export interface Walk {
-  from: string;
-  to: string;
+  from: Hex;
+  to: Hex;
+  /** The settlement the destination belongs to — itself at rank 0, its nearest one on bare ground. */
+  node: string | null;
+  kind: 'town' | 'sub' | 'wild' | 'bare';
+  /** The sub-zone the destination cell is drawn as, or null where none is named. */
+  sub: number | null;
+  /** The wild side the destination cell is drawn as, or null — side 0 is a zone's dungeon door. */
+  wild: number | null;
   blocksTotal: number;
   blocksLeft: number;
   secLeft: number;
   blocksWalked: number;
+}
+
+/** The hex the feet are on, and the content the sheet says stands on it. */
+export interface Cell {
+  q: number;
+  r: number;
+  /** The sub-zone index of this cell, or null — standing on one hunts that sub-zone's cast. */
+  sub: number | null;
+  /** The wild-side index of this cell, or null — side 0 is where a zone's dungeon is entered. */
+  wild: number | null;
 }
 
 /**
@@ -215,7 +239,8 @@ export interface Walk {
  *
  * The sim already totals damage (`counters.damageBy`) and narrates (`log`); neither is an event the
  * screen can animate, because a total has no moment and a log line has no colour. A short ring of
- * these is what lets a swing, a status proc, a cast, a block-step, a sale or a craft land on screen.
+ * these is what lets a swing, a status proc, a cast, a block-step, a sale or a craft land on screen, and
+ * what the character is given — a buff coming up, HP returning, a level taken — lands as its own beat.
  * `colour` is read out of the data at the call site (`elements.colour` / `physical_colour` /
  * `crit_colour`), never typed here, and the field is transient: a save writes an empty ring.
  */
@@ -223,13 +248,31 @@ export interface FxEvent {
   /** Monotonic within the run, so the HUD keys one animation per event and never replays an old one. */
   id: number;
   sec: number;
-  kind: 'hit' | 'cast' | 'taken' | 'block' | 'proc' | 'kill' | 'drop' | 'sell' | 'travel' | 'craft' | 'warp';
+  kind: 'hit' | 'cast' | 'taken' | 'block' | 'proc' | 'kill' | 'drop' | 'sell' | 'travel' | 'craft' | 'warp'
+    | 'buff' | 'heal' | 'level';
   /** The number the indicator prints, already formatted by `eng.fmt`, or empty for a non-number. */
   text: string;
   colour: string;
   crit?: boolean;
   /** Whose side of the field it belongs on: the mob field or the player's own plate. */
   side?: 'field' | 'self';
+  /** The mob the hit landed on, so its own plate raises the number. A `hit` carries it, and a `kill` carries
+   *  it too: the kill's word still reads in the shared column, and its id is what binds the dead body to the
+   *  blow that ended it, so the card shows both before it goes. Absent means the shared column. */
+  mobId?: string;
+  /** The mob that carried the blow — a defence or a hit on the character names its striker, so the
+   *  striker's own plate can lunge. `mobId` says *landed on*, this says *carried by*, and a status clock
+   *  ticking on the character names no body, because no body is swinging. */
+  byId?: string;
+  /** What carried a `hit`, so the screen knows whether to draw a weapon at all: a swing leaves an arc, a
+   *  press leaves an impact, and a status clock leaves only its number. Absent means no arc is honest. */
+  via?: 'swing' | 'cast' | 'dot';
+  /** Which row raised a `cast`, so the cast order can light the slot that actually fired. */
+  skillId?: string;
+  /** The amount behind `text`, unformatted. `text` is what the plate prints; this is what a parked figure
+   *  adds up when several blows land on one body inside the same second, so the sum is the sim's number and
+   *  never a parse of the string the player was shown. */
+  value?: number;
 }
 
 export interface GameState {
@@ -240,6 +283,8 @@ export interface GameState {
   bag: Item[];
   stash: Item[][];
   walk: Walk | null;
+  /** The hex the feet are on — a town, a side of one, or bare ground (`road.standing_rule`). */
+  cell: Cell | null;
   skills: SkillState;
   healUp: HealBuff | null;
   /** Unsold junk, keyed by the variant item's own name (`mob.variant_drops`). */

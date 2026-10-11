@@ -1,0 +1,117 @@
+/* The client's floor: the reset, the element defaults (headings, form controls, scrollbars, tables),
+   the below-desktop guard, and the reduced-motion switch. Everything here is a rule about an element
+   or the document, never about a component — component styling is scoped in its own `<style>`. */
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+/* No root zoom: every size token carries its own clamp(min px, vw, max px) — the vw term does the
+   scaling, so a 27-inch window grows the whole board the same way a narrow one shrinks it. */
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  /* a game reads as a sans with lit figures, not as a terminal: the UI face is the voice, and the
+     monospace face stays on the numbers so a column of them still lines up */
+  font: var(--font-md)/1.45 var(--ui);
+  overflow: hidden;
+  /* the client is a surface you press and drag, not a page you quote: selection is switched off at the
+     root and opted back in below, on the read-outs a player actually copies */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* the copyable minority: a log line, a stat table, an item's numbers — text a player compares or quotes */
+p, td, th, .copyable { user-select: text; -webkit-user-select: text; }
+/* …and a control is never copyable, even sitting inside a copyable table: a drag that starts on a button
+   belongs to the button */
+button, select, summary, .pill, .slot, .cast, .knob, .tab { user-select: none; -webkit-user-select: none; }
+
+::selection { background: var(--sel); color: var(--text); }
+
+h1, h2, h3 { font-weight: 600; margin: 0 0 var(--spacing-xs); letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px); }
+h1 { font-size: var(--font-md); }
+h2 { font-size: var(--font-sm); color: var(--dim); text-transform: uppercase; }
+/* a service inside a section — the map panel carries the settlement's own headings under its field */
+h4 { font-size: var(--font-xs); color: var(--dim); margin: var(--spacing-sm) 0 4px; letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px); }
+
+button, select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px var(--spacing-sm);
+  font: inherit;
+  cursor: pointer;
+}
+button:hover, select:hover { border-color: var(--gold); color: var(--gold); }
+/* a control you can reach by keyboard must look reached. `:focus-visible` only, so a press never keeps a
+   ring the pointer did not ask for, and one ring shape serves every control in the client. The offset is a
+   variable rather than a literal: a surface that fills its own frame — the map — pulls the ring inward by
+   setting `--ring-offset`, and a component never has to out-specify this rule to be heard. */
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible,
+a:focus-visible, [tabindex]:not([tabindex="-1"]):focus-visible, summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: var(--ring-offset, 2px);
+  border-color: var(--focus);
+}
+/* the press: a control answers the hand that used it, and a disabled one never pretends it would */
+button:active:not(:disabled) { transform: translateY(1px); filter: brightness(1.14); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:disabled:hover { border-color: var(--line); color: var(--text); }
+input[type=checkbox], input[type=radio] { accent-color: var(--gold); }
+input[type=number], input[type=text] {
+  background: var(--inset); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+  padding: 2px 4px; font: inherit; font-family: var(--num);
+}
+input[type=range] { accent-color: var(--gold); }
+/* the caret is part of the design when a field exists at all */
+input, textarea { caret-color: var(--focus); }
+a { color: var(--gold); text-underline-offset: clamp(2.25px, 0.147vw + 0.57px, 4.86px); }
+
+/* the scrolls inside a panel are the client's, not the platform's */
+* { scrollbar-width: thin; scrollbar-color: var(--bar) transparent; }
+*::-webkit-scrollbar { width: var(--icon-xs); height: var(--icon-xs); }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--bar); border-radius: clamp(3.75px, 0.244vw + 0.94px, 8.1px); }
+*::-webkit-scrollbar-thumb:hover { border-color: var(--gold); background: var(--bar-2); }
+
+table { border-collapse: collapse; width: 100%; }
+th, td {
+  text-align: left; padding: 3px var(--spacing-xs); border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+td { font-family: var(--num); font-size: var(--font-xs); }
+th { color: var(--dim); font-weight: 500; }
+/* a row the player can act on, read as a row: the whole line lights, not just its button */
+tr[role="button"], tbody tr button { cursor: pointer; }
+tbody tr:hover { background: rgba(255, 255, 255, .03); }
+
+/* The fold — a screen whose stacked sections run taller than the panel may show folds them into two
+   columns instead of scrolling (DECISIONS.md §Interface: content that does not fit shrinks, clips or
+   folds — never scrolls). Each direct child stays whole; a heading keeps the block after it. Wide
+   tables are kept out of a fold and stay full-width, so only short sections split. The floor is the
+   desktop (1024px), where a panel is at least ~500px a column — below it the fold is one column. */
+.fold { column-count: 2; column-gap: var(--spacing-lg); }
+.fold > * { break-inside: avoid; -webkit-column-break-inside: avoid; }
+.fold :is(h3, h4) { break-after: avoid; }
+@media (max-width: 1023px) { .fold { column-count: 1; } }
+
+/* Below the desktop floor the corner reads stop being placeable, so the client says so rather than
+   laying a phone screen nobody asked for. */
+.small-screen {
+  position: fixed; inset: 0; z-index: 200; display: none; place-content: center; padding: var(--spacing-xl);
+  text-align: center; background: var(--bg);
+}
+.small-screen h2 { color: var(--gold); }
+.small-screen p { color: var(--dim); max-width: var(--box-680); margin: var(--spacing-xs) auto 0; }
+@media (max-width: 1023px) {
+  .small-screen { display: grid; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

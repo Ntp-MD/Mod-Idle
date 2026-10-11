@@ -12,8 +12,9 @@
  */
 
 import * as R from './lib/roster.ts';
-import * as eng from './lib/engine.ts';
-import { CONVERSION, LADDER } from './lib/skillmodel.ts';
+import { eng } from './lib/engine.ts';
+import { CONVERSION, LADDER } from '../engine/skills.ts';
+import * as G from './lib/gates.ts';
 
 const ZONES = eng.E.mob.zones.length;  // the data owns the world size, never a typed 9
 // the F12 rate and the E5 game length are DERIVED, never copied: the skill-drop rate is the same sum
@@ -24,7 +25,7 @@ const ELITES = KPH * L.elite_spawn_chance;
 const DROP_PER_HR = ELITES * SD.elite + L.boss_per_hour * SD.boss + KPH * (1 - L.elite_spawn_chance) * SD.normal;
 // the completion checkpoint (E5) — the levels past it are the post-completion loop, so the funnel is
 // the supply the ladder is measured against up to completion, not to the level cap. It is a COUNT of
-// kills, never a stretch of hours: how long the run takes is the player's own pace (AGENTS.md).
+// kills, never a stretch of hours: how long the run takes is the player's own pace (DECISIONS.md §Standing intent).
 const GAME_KILLS = eng.CHECKPOINTS_KILLS.level_100;
 const DROP_PER_KILL = DROP_PER_HR / KPH;
 const TARGETS = 4;            // checks.md D20 · four full targets
@@ -48,8 +49,7 @@ function model() {
 }
 
 function gates(m: any) {
-  const out: any[] = [];
-  const add = (id: any, ok: any, detail: any) => out.push({ id, ok, detail });
+  const { add, watch, rows } = G.gates();
 
   const cumulative = LADDER.reduce((s: any, l: any) => s + l.cost, 0);
   add('LD1', cumulative === 12 && LADDER[LADDER.length - 1].cdr === 30,
@@ -58,26 +58,25 @@ function gates(m: any) {
   const monotonic = LADDER.every((l: any, i: any) => i === 0 || l.cdr > LADDER[i - 1].cdr);
   add('LD2', monotonic, 'cooldown reduction is strictly increasing per step');
 
-  add('LD3', m.poolPerZone > 0 && m.poolPerZone < 6,
+  watch('LD3', m.poolPerZone > 0 && m.poolPerZone < 6,
+    `roster ${m.total} ÷ ${ZONES} zones = ${m.poolPerZone.toFixed(1)} skills per zone pool — outside the thin-pool window (<6); re-read the drop rate by eye`,
     `roster ${m.total} ÷ ${ZONES} zones = ${m.poolPerZone.toFixed(1)} skills per zone pool`);
 
-  add('LD4', m.fourMaxed <= m.funnel,
+  watch('LD4', m.fourMaxed <= m.funnel,
+    `4 maxed targets = ${m.fourMaxed} pieces = ${m.pctOfFunnel.toFixed(0)}% of the ${m.funnel}-piece funnel — over budget; re-read the supply by eye`,
     `4 maxed targets = ${m.fourMaxed} pieces = ${m.pctOfFunnel.toFixed(0)}% of the ${m.funnel}-piece funnel = ${Math.round(m.kills).toLocaleString('en-US')} kills`);
 
-  add('LD5', m.offAvg >= 1,
-    `the other ${m.offTargets} skills split ${m.offPieces} pieces → ${m.offAvg.toFixed(2)} each (≥1 required by D20)`);
+  watch('LD5', m.offAvg >= 1,
+    `the other ${m.offTargets} skills split ${m.offPieces} pieces → ${m.offAvg.toFixed(2)} each — below the ≥1 the funnel promised; re-read the supply by eye`,
+    `the other ${m.offTargets} skills split ${m.offPieces} pieces → ${m.offAvg.toFixed(2)} each`);
 
-  return out;
+  return rows();
 }
 
 const arg = process.argv[2];
 
 if (arg === '--checks') {
-  const rows = gates(model());
-  for (const r of rows) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-  const fails = rows.filter((r) => !r.ok).length;
-  console.log(`\n${rows.length - fails}/${rows.length} gate PASS · ${fails} FAIL`);
-  if (fails) process.exitCode = 1;
+  G.report(gates(model()));
 } else {
   console.log(`ladder cage — roster × drop rate × ladder rules
 

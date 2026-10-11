@@ -1,13 +1,18 @@
 /**
  * The Road — travel by walking, and the only travel-time system (`engine.json` `road`).
  *
- * The world is a pointy-top hex lattice — the 20 x 15 field the map sheet draws. A settlement owns
- * one cell; the blocks between two settlements are their hex distance, derived from the axial
- * coordinates and never typed, so a walk's length is never a hand-written number. A far destination
- * is plotted as a chain of adjacent cells (`routeBetween`) and crossed one cell at a time, which is
- * where an encounter comes from. There is no link list: every pair of settlements is walkable, and a
- * Waypoint covers the distance for gold once both ends have been walked to (`town.json`
- * `waypoint_warp` — a warp buys back the walk's time, which is what gold is for).
+ * The world is a pointy-top hex lattice — the 20 x 15 field the map sheet draws. A cell is a place to
+ * stand (`standing_rule`): the foot crosses one cell per block and any cell may be a destination, so a
+ * walk joins two cells, not two settlements. The blocks between them are their hex distance, derived
+ * from the axial coordinates and never typed, so a walk's length is never a hand-written number. A far
+ * destination is plotted as a chain of adjacent cells (`hexPath`) and crossed one cell at a time, which
+ * is where an encounter comes from. There is no link list: every cell is walkable from every other, and
+ * a Waypoint covers the distance for gold once the settlement at the destination has been walked to
+ * (`town.json` `waypoint_warp` — a warp buys back the walk's time, which is what gold is for).
+ *
+ * A cell that names no settlement belongs to the nearest one (`owningNode`), which is where a bare
+ * hex's zone, hunt ground and encounter band come from. Nothing here stores a second copy of that:
+ * the lattice itself answers it, and the sheet's own marks are what the map cage checks it against.
  *
  * The Road mints nothing. An encounter is an ordinary mob group that pays the ordinary drop roll
  * (`encounter_rule`), so gold and junk come from killing mobs and from nowhere else.
@@ -33,12 +38,19 @@ export const hexAdjacent = (a: Hex, b: Hex) => {
   return (Math.abs(dq) + Math.abs(dq + dr) + Math.abs(dr)) / 2 === 1;
 };
 
-/** Axial hex distance: the number of blocks walked between two settlements. */
-export function hexDistance(a: RoadNode, b: RoadNode): number {
+/** Axial hex distance: the number of blocks walked between two cells. */
+export function hexDistance(a: Hex, b: Hex): number {
   const dq = a.q - b.q;
   const dr = a.r - b.r;
   return (Math.abs(dq) + Math.abs(dq + dr) + Math.abs(dr)) / 2;
 }
+
+/**
+ * The six offsets a single step may cross. They are the pairs `hexAdjacent` accepts at distance 1, so
+ * the ring and the adjacency rule cannot drift apart into two different ideas of a neighbour.
+ */
+export const HEX_DIRECTIONS: ReadonlyArray<readonly [number, number]> =
+  [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
 
 /** Cube rounding, the one way back from a fractional lerp onto the lattice. */
 function cubeRound(qf: number, rf: number): Hex {
@@ -52,12 +64,12 @@ function cubeRound(qf: number, rf: number): Hex {
 }
 
 /**
- * The plotted route: the ordered cells walked between two settlements, one per block, each adjacent
- * to the one before it. A far destination is never jumped to — it is a chain of blocks the sheet can
- * light up one at a time, and its length is the hex distance, so the route and the walk's cost are
- * the same number derived twice rather than a path traded against a distance.
+ * The plotted route: the ordered cells walked between two cells, one per block, each adjacent to the
+ * one before it. A far destination is never jumped to — it is a chain of blocks the sheet can light up
+ * one at a time, and its length is the hex distance, so the route and the walk's cost are the same
+ * number derived twice rather than a path traded against a distance.
  */
-export function hexPath(a: RoadNode, b: RoadNode): Hex[] {
+export function hexPath(a: Hex, b: Hex): Hex[] {
   const n = hexDistance(a, b);
   const out: Hex[] = [];
   for (let i = 0; i <= n; i++) {
@@ -87,6 +99,46 @@ export function createRoad(E: EngineData) {
   /** The route as sheet keys, in the order the foot crosses them — one step per block. */
   const routeKeys = (a: string, b: string): string[] => routeBetween(a, b).map((h) => `${h.q},${h.r}`);
 
+  /* --- the field itself: any cell is a place to stand (`standing_rule`) ------------------------- */
+
+  /** One cell to sheet-key form, so a walk, a route and a click all speak the same address. */
+  const hexKeys = (cells: Hex[]): string[] => cells.map((h) => `${h.q},${h.r}`);
+  /** The plotted route between two cells — the same chain a settlement-to-settlement route is. */
+  const routeHex = (a: Hex, b: Hex): Hex[] => hexPath(a, b);
+  /** Blocks between two cells: one per cell the foot crosses, whatever the ground under it. */
+  const blocksBetweenHex = (a: Hex, b: Hex) => hexDistance(a, b);
+  const secFromHex = (a: Hex, b: Hex) => hexDistance(a, b) * R.block_sec;
+  /** The six cells one step from `h` — the ring a single block is allowed to enter. */
+  const neighbours = (h: Hex): Hex[] => HEX_DIRECTIONS.map(([dq, dr]) => ({ q: h.q + dq, r: h.r + dr }));
+
+  /** Every settlement exactly as far from a cell as the closest one is — more than one is a tie. */
+  function owners(h: Hex): RoadNode[] {
+    let best = Infinity;
+    const ring: RoadNode[] = [];
+    for (const n of nodes) {
+      const d = hexDistance(h, n);
+      if (d < best) { best = d; ring.length = 0; ring.push(n); }
+      else if (d === best) ring.push(n);
+    }
+    return ring;
+  }
+
+  /**
+   * The settlement a cell belongs to: the nearest one in blocks. A tie is broken by `prefer` — the
+   * caller's list of settlement ids, earliest wins — because the rule that decides it (`standing_rule`:
+   * the lowest zone) is town data, and the Road holds no copy of it. With no list given, tied ground
+   * belongs to the first node in `road.nodes`, which is the same answer every time.
+   */
+  function owningNode(h: Hex, prefer?: string[]): RoadNode {
+    const tied = owners(h);
+    if (tied.length === 1 || !prefer?.length) return tied[0];
+    return tied.reduce((a, b) => (prefer.indexOf(b.id) !== -1 && (prefer.indexOf(a.id) === -1
+      || prefer.indexOf(b.id) < prefer.indexOf(a.id)) ? b : a), tied[0]);
+  }
+
+  /** How many blocks from the nearest settlement: 0 is a town, 1 is a side of it, 2 and out is bare. */
+  const cellRank = (h: Hex) => hexDistance(h, owningNode(h));
+
   /** One encounter chance per block walked, so a longer walk is a longer series of chances. */
   const encounterChance = () => R.encounter_chance_pct / 100;
   /** True when a block rolls an encounter. Offline it never does: an away period never walks. */
@@ -102,6 +154,7 @@ export function createRoad(E: EngineData) {
 
   return {
     R, nodes, nodeById, blocksBetween, secBetween, routeBetween, routeKeys, pairs,
+    hexKeys, routeHex, blocksBetweenHex, secFromHex, neighbours, owners, owningNode, cellRank,
     encounterChance, rollEncounter,
     blockSec: R.block_sec,
   };

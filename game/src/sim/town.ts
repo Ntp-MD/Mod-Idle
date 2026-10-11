@@ -7,7 +7,7 @@ import type { GameState, TaskSlot, TownState } from './types';
  * same moment it moves them in `towns-stalls.md` (`economy.md` · checks.md T2-T7).
  *
  * Gold buys space, time, information and appearance only — never gear, Mods, potions or stones
- * (`AGENTS.md` §5), and the purchase list is filtered to the kinds `town.json` `invariants` allows.
+ * (`DECISIONS.md` §Product), and the purchase list is filtered to the kinds `town.json` `invariants` allows.
  */
 
 const TS = TOWN.task_sizing;
@@ -137,6 +137,14 @@ export function taskReward(kind: string, band: string): { stone: string; count: 
   return { stone: 'remove', count: TS.boss_reward.remove };
 }
 
+/** The Boss hunt's winner's choice (`tasks.md`): the Remove stone or the Reroll tier count. */
+export function bossRewardOptions(): { stone: string; count: number }[] {
+  return [
+    { stone: 'remove', count: TS.boss_reward.remove },
+    { stone: 'tier', count: TS.boss_reward.reroll_tier },
+  ];
+}
+
 /** The board offers tasks only from zones at or below where the player is fighting (`tasks.md`). */
 export function rollTask(rng: () => number, state: GameState): TaskSlot {
   const maxZone = Math.max(1, Math.min(eng.ZONES.length, state.zone));
@@ -147,7 +155,10 @@ export function rollTask(rng: () => number, state: GameState): TaskSlot {
   const band = eng.zoneById(zone).quality.startsWith('high') ? 'high' : eng.zoneById(zone).quality.startsWith('mid') ? 'mid' : 'low';
   const n = kind === 'elite' ? TS.elite_n : TS.boss_n;
   const reward = taskReward(kind, band);
-  return { kind, zone, n, progress: 0, stone: reward.stone as any, count: reward.count, claimed: false, offeredAt: state.clockSec };
+  const task: TaskSlot = { kind, zone, n, progress: 0, stone: reward.stone as any, count: reward.count, claimed: false, offeredAt: state.clockSec };
+  // the Boss hunt's second payout rides on the slot so the claim can pay either (tasks.md)
+  if (kind === 'boss') task.alt = { stone: 'tier', count: TS.boss_reward.reroll_tier } as any;
+  return task;
 }
 
 /** No Bag Cap exists, so stash tabs are organisation rather than space (`loot.md` §4 · towns.md). */
@@ -219,17 +230,22 @@ export function progressTasks(state: GameState, mobKind: string, zone: number) {
   }
 }
 
-export function claimTask(state: GameState, index: number): boolean {
+export function claimTask(state: GameState, index: number, choice?: string): boolean {
   const task = state.town.tasks[index];
   if (!task || task.progress < task.n || task.claimed) return false;
+  // a Boss hunt pays winner's choice: name the stone to take it as, defaulting to the Remove stone
+  let stone = task.stone, count = task.count;
+  if (task.kind === 'boss' && choice && task.alt && (choice === task.alt.stone || choice === task.stone)) {
+    if (choice === task.alt.stone) { stone = task.alt.stone; count = task.alt.count; }
+  }
   task.claimed = true;
-  state.counters.stones[task.stone] = (state.counters.stones[task.stone] || 0) + task.count;
+  state.counters.stones[stone] = (state.counters.stones[stone] || 0) + count;
   state.town.refillAt[index] = state.clockSec + TS.refill_sec;
   state.town.tasks[index] = null;
   return true;
 }
 
-/** Slots refill an hour after a claim; the free skip is once per slot per day (`tasks.md`). */
+/** Slots refill `task_sizing.refill_sec` after a claim (the daily direction layer: a day, not an hour); the free skip is once per slot per day (`DECISIONS.md` §The task board). */
 export function tickTown(state: GameState, rng: () => number) {
   const day = Math.floor(state.clockSec / 86400);
   if (day !== state.town.skipDay) { state.town.skipDay = day; state.town.skipsToday = 0; }

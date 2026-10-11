@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { readJson } from './lib/json.ts';
+import * as G from './lib/gates.ts';
 import * as SHARED from '../engine/index.ts';
 
 /**
@@ -50,28 +51,27 @@ function capacities(): any {
 }
 
 function checks(): any[] {
-  const out: any[] = [];
-  const add = (id: any, status: any, detail: any): number => out.push({ id, status, ok: status !== 'fail', detail });
+  const { add, rows } = G.gates();
   let current: any = null;
   try { current = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { current = null; }
   if (!current) {
-    add('BS1', 'fail', 'tools/data/bases.json is missing');
-    return out;
+    add('BS1', false, 'tools/data/bases.json is missing');
+    return rows();
   }
   // bases.json is the source now — nothing parses a doc into it
   const doc = current;
   const shape = Array.isArray(current.bases) && current.bases.length > 0 && Array.isArray(current.slots) && current.slots.length > 0
     && ['frame_mod', 'weapons', 'weapon_pools', 'weapon_frames'].every((k: string) => current[k]);
-  add('BS1', shape ? 'pass' : 'fail', shape
+  add('BS1', shape, shape
     ? `${current.bases.length} Base rows across ${current.slots.length} slots, with frame_mod · weapons · weapon_pools · weapon_frames present`
     : 'bases.json is missing a required section');
-  add('BS2', current.quality_weight_multiplier === 1.3 ? 'pass' : 'fail',
+  add('BS2', current.quality_weight_multiplier === 1.3,
     `the Quality multiplier applied to weight is ${current.quality_weight_multiplier}`);
   const totals = PATHS.map((p) => Math.round(weightOf(doc.bases, p.bases) * 10) / 10);
-  add('BS3', totals.every((x: number) => x > 0) && totals[0] < totals[1] && totals[1] < totals[2] ? 'pass' : 'fail',
+  add('BS3', totals.every((x: number) => x > 0) && totals[0] < totals[1] && totals[1] < totals[2],
     `the three paths order as designed: cloth ${totals[0]} < balanced ${totals[1]} < armored ${totals[2]}, summed from the Base rows the tables print from`);
   const m = current.quality_weight_multiplier;
-  add('BS4', m > 1 && totals.every((x: number) => Math.round(x * m * m) > x) ? 'pass' : 'fail',
+  add('BS4', m > 1 && totals.every((x: number) => Math.round(x * m * m) > x),
     `quality weight grows per band at ×${m}: ${PATHS.map((p, i) => `${p.label} ${totals[i]}→${Math.round(totals[i] * m)}→${Math.round(totals[i] * m * m)}`).join(' · ')}`);
 
   // The owner ruling: a frame's name says which FLAT defence lines its Frame Mod carries, and the frames
@@ -98,26 +98,43 @@ function checks(): any[] {
         for (const id of lines) if (!want.has(id)) bad.push(`${b.name} carries ${id}, which is not one of the three flat defence lines`);
       }
     }
-    add('BS11', bad.length === 0 ? 'pass' : 'fail', bad.length ? bad.join(' · ')
+    add('BS11', bad.length === 0, bad.length ? bad.join(' · ')
       : `every armour slot covers all ${want.size} combinations of the three flat defence lines exactly once — ${ARMOUR_SLOTS.length} slots × ${want.size} (${[...want].join(' · ')}), one of them the frame that carries all three, each frame's Frame Mod flat and named by the frame`);
   }
 
+  // The dodge-thinning rule (owner shape): no frame whose Frame Mod carries an Armour or Energy
+  // Shield line rolls an Evasion line — only the thin evasion_flat-only frames and the frames with
+  // no defence promise (belt · off hand · drawn line-1 slots) own the roll.
+  {
+    const bad: string[] = [];
+    for (const b of (current.bases || [])) {
+      const bl: string[] = b.base_lines || [];
+      if (bl.includes('armour_flat') || bl.includes('energy_shield_flat')) {
+        for (const id of [...(b.primary || []), ...(b.secondary || [])]) {
+          if (id === 'evasion_flat' || id === 'evasion_pct') bad.push(`${b.name} rolls ${id}`);
+        }
+      }
+    }
+    add('BS12', bad.length === 0, bad.length ? bad.join(' · ')
+      : 'no Armour/Energy-Shield frame rolls an Evasion line — only the thin evasion_flat-only frames and the no-defence frames own the roll');
+  }
+
   const weapons = current.weapons || [];
-  add('BS5', weapons.length > 0 ? 'pass' : 'fail',
+  add('BS5', weapons.length > 0,
     `${weapons.length} weapon types in bases.json, each with its own frame list`);
   const multBad = weapons.filter((w: any) => Math.abs(w.weapon_mult - Math.round(ENGINE.weaponMult(w.weapon_aspd) * 100) / 100) > 0.011);
-  add('BS6', multBad.length === 0 ? 'pass' : 'fail', multBad.length
+  add('BS6', multBad.length === 0, multBad.length
     ? `weapon_mult ≠ the engine's weaponMult for ${multBad.map((w: any) => w.name).join(', ')}`
     : "every weapon type keeps the engine's equal-DPS rule weapon_mult = engine weaponMult(weapon_aspd)");
   const blocked = current.weapon_pools?.['main hand']?.Blocked || [];
   const primary = current.weapon_pools?.['main hand']?.Primary || [];
   const secondary = current.weapon_pools?.['main hand']?.Secondary || [];
   const leaks = blocked.filter((id: any) => primary.includes(id) || secondary.includes(id));
-  add('BS7', blocked.length > 0 && leaks.length === 0 ? 'pass' : 'fail',
+  add('BS7', blocked.length > 0 && leaks.length === 0,
     leaks.length ? `the main hand blocks and offers the same line: ${leaks.join(', ')}` : `main-hand pool offers ${primary.length + secondary.length} lines and blocks ${blocked.length}`);
   const M = current.mastery || {};
   const capPct = weapons.length * (M.drop_bonus_per_type_pct || 0);
-  add('BS8', capPct > 0 ? 'pass' : 'fail',
+  add('BS8', capPct > 0,
     `the account-wide Mastery drop bonus tops out at ${weapons.length} × ${M.drop_bonus_per_type_pct}% = ${capPct}%`);
   // A10: every weapon type carries a frame list. The FIRST frame of each type is exactly the live
   // forced pair, so the published behaviour has a named home, and every frame names Frame-Mod lines
@@ -138,26 +155,21 @@ function checks(): any[] {
   }
   for (const t of Object.keys(FRAMES)) if (!weapons.some((w: any) => w.name === t)) frameProblems.push(`a frame list for an unknown type ${t}`);
   const frameCount = Object.values(FRAMES).flat().length;
-  add('BS9', frameProblems.length === 0 ? 'pass' : 'fail',
+  add('BS9', frameProblems.length === 0,
     frameProblems.length ? frameProblems.join(' · ')
       : `${weapons.length} weapon types each carry ${Math.min(...Object.values(FRAMES).map((l: any) => l.length))}-${Math.max(...Object.values(FRAMES).map((l: any) => l.length))} frames (${frameCount} in all), the first frame of every type is its live forced pair, and every frame line is a real Mod (A10)`);
   // B13: the weight column exists and every type carries one.
   const noWeight = weapons.filter((w: any) => !(w.weight > 0));
   const wSpan = [Math.min(...weapons.map((w: any) => w.weight || 0)), Math.max(...weapons.map((w: any) => w.weight || 0))];
-  add('BS10', noWeight.length === 0 ? 'pass' : 'fail',
+  add('BS10', noWeight.length === 0,
     noWeight.length
       ? 'NO WEIGHT: ' + noWeight.map((w: any) => w.name).join(', ')
       : `all ${weapons.length} weapon types carry a weight, spanning ${wSpan[0]}-${wSpan[1]}`);
-  return out;
+  return rows();
 }
 
 function report(): void {
-  const rows = checks();
-  for (const r of rows) console.log(`${r.status.toUpperCase().padEnd(8)}${r.id.padEnd(13)}${r.detail}`);
-  const failed = rows.filter((r: any) => r.status === 'fail').length;
-  const pending = rows.filter((r: any) => r.status === 'pending').length;
-  console.log(`\n${rows.length - failed}/${rows.length} gate PASS · ${pending} PENDING · ${failed} FAIL`);
-  if (failed) process.exit(1);
+  G.report(checks());
 }
 
 if (process.argv.includes('--checks')) {

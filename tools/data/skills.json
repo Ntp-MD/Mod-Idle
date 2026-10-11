@@ -32,6 +32,12 @@
       "max_pct": 100,
       "note": "The player opens auras; the only system rule is that total reserved mana may not reach 100% of the pool — some mana must stay usable for skills. There is no other cap."
     },
+    "cast_conditions": {
+      "hp_below_pct_default": 50,
+      "mana_floor_pct_default": 20,
+      "min_targets_default": 2,
+      "note": "The cast order's condition list, held per conditional slot rather than shared, so two rows may wait on different facts. A row fires while any one of its legs holds, so a list is an OR and the player never writes an expression. The legs: `boss` (the front target is a boss), `hpBelowPct` (our own pool is under that share), `statusMissing` (the target lacks a status or curse this row applies), `minTargets` (the group is at least that wide) and `manaFloorPct` (the press must leave that share of the usable pool). Each `*_default` is the number a leg opens at when its tick-box is first checked and the player edits it from there; they are the only defaults any screen may show, so no screen types its own."
+    },
     "formula": {
       "mana_level_step_pct": 5,
       "mana_pool_exponent": 0.5,

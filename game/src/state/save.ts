@@ -10,6 +10,7 @@ import { newCurses } from '../sim/curse';
 import { newMobStatusStore } from '../sim/mobStatus';
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
 import { E, BASES, eng, loot } from '../engine/client';
+import { road } from '../sim/road';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
@@ -23,11 +24,13 @@ import { E, BASES, eng, loot } from '../engine/client';
 // which is data, not schema. v10 deletes the hunt
 // systems: the per-zone Hunt Order and the per-zone hunting ground are gone, so a v9 save's fields for
 // them are dropped — the variant's own lean is the only lean left. v11 is the HUD's transient event
-// ring (`fx`), which a write never stores.
+// ring (`fx`), which a write never stores. v12 is the hex the feet stand on: a walk joins two cells
+// rather than two settlement ids, so a v11 walk is re-read through the walk graph's own coordinates and
+// an in-flight route that names no settlement is dropped rather than left to compute NaN blocks.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
 
@@ -103,6 +106,10 @@ export interface ClientSettings {
   keybinds?: Record<string, string>;
   /** how far ahead a piece must be before "put on the best I carry" will trade for it, in percent */
   equipMargin?: number;
+  /** the clock's pace: how many sim seconds a real second spends (the field's ×1 ×2 ×4 switch) */
+  speed?: 1 | 2 | 4;
+  /** the hub's drag offset from its docked corner, in px — wheel and satellites move as one */
+  hub?: { x: number; y: number };
 }
 export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0 };
 export async function readSettings(): Promise<ClientSettings> {
@@ -308,7 +315,37 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     delete (s as any).chestDay;
     if (s.town) delete (s.town as any).linksBought;
   }
+  // v12 · a walk joins two cells and the feet stand on one. A v11 save names settlements where the new
+  // shape holds hexes, so both ends are read off the walk graph's own coordinates — and the standing
+  // cell is where the last Waypoint anchor sits, because an old save could only ever be in a town.
+  if (fromVersion < 12) {
+    const home = road.nodeById(s.town?.waypoint || E.road.nodes[0].id) || E.road.nodes[0];
+    s.cell = { q: home.q, r: home.r, sub: null, wild: null };
+    const w = s.walk as any;
+    const from = w && typeof w.from === 'string' ? road.nodeById(w.from) : null;
+    const to = w && typeof w.to === 'string' ? road.nodeById(w.to) : null;
+    if (!from || !to) {
+      s.walk = null;
+    } else {
+      s.walk = {
+        from: { q: from.q, r: from.r },
+        to: { q: to.q, r: to.r },
+        node: to.id,
+        kind: 'town',
+        sub: null,
+        wild: null,
+        blocksTotal: w.blocksTotal,
+        blocksLeft: w.blocksLeft,
+        secLeft: w.secLeft,
+        blocksWalked: w.blocksWalked,
+      };
+    }
+  }
   if (!s.walk) s.walk = null;
+  if (!s.cell) {
+    const home = road.nodeById(s.town?.waypoint || E.road.nodes[0].id) || E.road.nodes[0];
+    s.cell = { q: home.q, r: home.r, sub: null, wild: null };
+  }
   if (!s.dungeon) s.dungeon = null;
   // saves from before safe ground were always hunting: keep them hunting
   if (s.hunting == null) s.hunting = true;
@@ -326,21 +363,39 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   }
   // v9 · the item level replaced Rarity. Every piece the save holds gains its level and its labels are
   // flipped onto the new order; the auto-dissolve setting moves off the Rarity axis onto the level one,
-  // keeping the same idea (the named Rarity's own top level is where "keep above this" now starts).
+  // keeping the same idea (the named Rarity's own band floor is where "keep above this" now starts).
   if (fromVersion < 9) {
     for (const item of s.gear || []) levelItem(item);
     for (const item of s.bag || []) levelItem(item);
     for (const tab of s.stash || []) for (const item of tab || []) levelItem(item);
     const old = (s as any).autoDissolveRarity as string | undefined;
-    if (old && old !== 'off') s.autoDissolveLevel = old === 'Rare' ? 61 : 31;
+    if (old && old !== 'off') s.autoDissolveLevel = eng.floorLevelOf(old === 'Rare' ? 'high' : 'mid');
     delete (s as any).autoDissolveRarity;
   }
   if (!s.skills) s.skills = newSkillState();
-  // a save from before §14 has no per-slot mode and no shared condition list: default them, so the
+  // a save from before §14 has no per-slot mode and no condition lists: default them, so the
   // rotation keeps behaving exactly as it did (`always`) until the player changes something
   if (!s.skills.mode) s.skills.mode = {};
-  if (!s.skills.conditions) s.skills.conditions = { boss: false, hpBelowPct: 0, statusMissing: [] };
-  if (!Array.isArray(s.skills.conditions.statusMissing)) s.skills.conditions.statusMissing = [];
+  if (!s.skills.conditions) s.skills.conditions = {};
+  // §14 moved the list off the character and onto each conditional row. A save still holding the one
+  // shared set is copied onto the rows that were reading it, so an existing rotation keeps firing
+  const sharedCond = s.skills.conditions as any;
+  if (sharedCond && ('boss' in sharedCond || 'hpBelowPct' in sharedCond)) {
+    const perSlot: Record<string, any> = {};
+    for (const id of s.skills.list || []) {
+      if (id && s.skills.mode[id] === 'conditional') {
+        perSlot[id] = {
+          boss: Boolean(sharedCond.boss),
+          hpBelowPct: Number(sharedCond.hpBelowPct) || 0,
+          statusMissing: Array.isArray(sharedCond.statusMissing) ? [...sharedCond.statusMissing] : [],
+          minTargets: 0,
+          manaFloorPct: 0,
+        };
+      }
+    }
+    s.skills.conditions = perSlot;
+  }
+  for (const cond of Object.values(s.skills.conditions)) if (!Array.isArray(cond.statusMissing)) cond.statusMissing = [];
   if (!s.healUp) s.healUp = null;
   if (!s.spawnIn && s.spawnIn !== 0) s.spawnIn = 0;
   if (!s.counters.zoneKills) s.counters.zoneKills = {};

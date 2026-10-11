@@ -72,7 +72,7 @@ describe('burn and poison obey the DoT budget', () => {
     const burn = store.m1.statuses.burn!;
     expect(burn.stacks).toBe(S.burn.stack_max);
     expect(burn.perSec).toBeCloseTo(aligned * S.burn.k_dps, 10);
-    // five stacks is exactly the global Cap: 5 × 0.30 = 1.50 (elements.md §6)
+    // full burn stacks pay exactly the global DoT Cap the status data publishes
     expect(stepMob(store, 'm1')).toBeCloseTo(S.dot_cap * aligned, 6);
   });
 
@@ -115,7 +115,7 @@ describe('control is bounded, never a lockout', () => {
     const c = charWith('cold', 100);
     const mods = modsOn(inflict('cold', c), 'm1');
     const t = targetMods(mods);
-    expect(t.attackSpeed).toBe(-S.chill.aspd_cap); // 10% a stack, Cap 20
+    expect(t.attackSpeed).toBe(-S.chill.aspd_cap); // the whole cut sits at the chill Cap the data publishes
     expect(t.accuracy).toBeLessThanOrEqual(0);
     expect(t.accuracy).toBeGreaterThanOrEqual(-S.chill.acc_cap);
     expect(mods.armourCut).toBe(S.chill.armour_cut);
@@ -123,7 +123,7 @@ describe('control is bounded, never a lockout', () => {
 
   it('shock stops the clock but cannot hold it stopped', () => {
     const c = charWith('lightning', 100);
-    // one mob over a long fight: shock may hold, but only 15% of the seconds it is alive 
+    // one mob over a long fight: shock may hold, but only within the sim's own control bound
     const store = newMobStatusStore();
     const SECONDS = 200;
     let sawStopped = false;
@@ -155,7 +155,7 @@ describe('control is bounded, never a lockout', () => {
 });
 
 describe('mark is the one status that multiplies the hit it rides on', () => {
-  it('stacks to 25 and pays damage plus leech, with no damage term of its own', () => {
+  it('stacks to its Cap and pays damage plus leech, with no damage term of its own', () => {
     const c = charWith('chaos', 100);
     const store = inflict('chaos', c, 400);
     const mk = store.m1.statuses.mark!;
@@ -171,7 +171,7 @@ describe('mark is the one status that multiplies the hit it rides on', () => {
     const target = mob({ id: 'm1' });
     const base = playerSwing(mulberry32(3), plain, target, null).damage;
     const store = newMobStatusStore();
-    store.m1 = { statuses: { mark: { stacks: 25, secLeft: 5, perSec: 0 } }, alignedPerSec: 1, stoppedSec: 0, elapsedSec: 1 };
+    store.m1 = { statuses: { mark: { stacks: S.mark.stack_max, secLeft: 5, perSec: 0 } }, alignedPerSec: 1, stoppedSec: 0, elapsedSec: 1 };
     const tm = targetMods(modsOn(store, 'm1'));
     const hit = playerSwing(mulberry32(3), plain, target, null, combineMods({
       damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: false,

@@ -7,7 +7,7 @@ import type { GameState, Item, Phase } from '../src/sim/types';
 import { ceilingGear } from './sheetFixture';
 
 /**
- * The win condition fought through the loop that ships (`concept.md` · `combat.md` §7 · G5).
+ * The win condition fought through the loop that ships (`concept.md` · G5).
  *
  * `goal.test.ts` proves the gate arms, records and survives a save round-trip — on a shaped mob,
  * with HP pinned to 1e9, because a low-level sword cannot out-sustain a top zone. So the gate has
@@ -61,6 +61,10 @@ function fightBoss(s: GameState) {
   }
   if (!boss) throw new Error('the boss clock never came round');
   const hpMax = boss.hpMax;
+  // Both runs start the fight from the same full pool the premise assumes: the spawn wait can chip
+  // it, and a fight from a half pool would compare two different starting points, not two bars.
+  s.player.hp = pool;
+  s.player.mana = 1e9;
   const hpBefore = s.player.hp;
   const pushesBefore = s.counters.pushes;
   const t0 = s.clockSec;
@@ -113,7 +117,7 @@ describe('the win gate fought for real', () => {
   });
 
   it('is a heal gate: the spawn Pushes a character that does not heal, and one heal round cuts what it takes', () => {
-    // combat.md §7 / G5, read as the shape the client loop can own. Whether a heal round *closes* the
+    // G5, read as the shape the client loop can own. Whether a heal round *closes* the
     // gate is a claim about the curve's gear and belongs to the survival cage (SV6 prices the four
     // Core-stat builds against idealised T1 Mods, and passes); what this test owns is that the real
     // loop reaches the gate — a bar-less character is Pushed by the real spawn clock — and that

@@ -3,19 +3,18 @@ import { E, eng, loot, sm, TOWN } from '../src/engine/client';
 import { newGame, tick, huntZone } from '../src/sim/game';
 import { equipFromBag } from '../src/sim/gear';
 import { setRule } from '../src/sim/filter';
-import { startWalk } from '../src/sim/road';
+import { startWalk, settlementCell } from '../src/sim/road';
 import { ACTIVE_SLOTS } from '../src/sim/skills';
 import type { StatKey } from '../src/engine/client';
 import type { GameState, Item } from '../src/sim/types';
 
 /**
- * B1 · the measurement the fold was taken from, and the reason it came out as none (checks.md D4/D17).
+ * B1 · the measurement the fold was taken from, and the reason it came out as none.
  *
  * `mob_HP(L) = typical_gear_DPS(L) × (1 + skill_per_level × L)` says how much of a level-L mob's HP
- * is paid for by the skill list rather than by the gear. `skillShare.test.ts` measures the list on a
- * gearless character and shows the gap is on the gear side, which is not a reading a fold may be
- * taken from — raising or lowering `mob_HP` there pays for a shortfall that has nothing to do with
- * skills.
+ * is paid for by the skill list rather than by the gear. On a gearless character the gap is on the
+ * gear side, which is not a reading a fold may be taken from — raising or lowering `mob_HP` there
+ * pays for a shortfall that has nothing to do with skills.
  *
  * So this run leaves the gear to the game: nothing is typed into the sheet. The character hunts with
  * `travel` forward, so its gear is exactly what the drop → filter → wear → craft path produced at the
@@ -23,9 +22,10 @@ import type { GameState, Item } from '../src/sim/types';
  * that same instant. The three numbers B1 needs are the gear-only rate against the curve's read-back,
  * the share the list adds at that gear, and how often the fight went to camp.
  *
- * The second test reuses the same geared instant for `concept.md` P0-2 (B3): two builds dressed from
- * the same bag and measured over the same window, one buying hit count and the statuses those hits
- * leave behind, one buying the single big hit.
+ * The second test reuses the same geared instant: two builds dressed from the same bag and measured
+ * over the same window, one buying hit count and the statuses those hits leave behind, one buying the
+ * single big hit. Both tests read one shared loop — the progression to L90 is the same walk twice,
+ * and running it twice was half the suite's wall clock for no second reading.
  */
 const CHECKPOINTS = [30, 60, 90];
 const WINDOW_SEC = 600;
@@ -157,7 +157,7 @@ function dressUp(s: GameState, t?: Theme) {
 
 /**
  * A player who has outgrown the zone walks to the next one, because walking on foot is the only
- * thing that opens a settlement (`world.md` reach queue). `travel: 'forward'` alone cannot do it: it
+ * thing that opens a settlement (`road.ts` reach queue). `travel: 'forward'` alone cannot do it: it
  * walks between settlements already opened, and the next one is by definition not open yet.
  */
 function walkOnward(s: GameState): boolean {
@@ -165,28 +165,91 @@ function walkOnward(s: GameState): boolean {
   if (s.player.level <= here.levels[here.levels.length - 1] || s.walk || s.phase === 'camp') return false;
   for (const dest of TOWN.settlements) {
     if (dest.zone <= s.zone) continue;
-    if (!startWalk(s, s.town.waypoint, dest.id).ok) continue;
+    if (!startWalk(s, settlementCell(dest.id)!).ok) continue;
     return true;                                    // every pair of settlements is walkable
   }
   return false;
 }
 
-/** One hunt, from the opening minute to the first checkpoint reached — the gear is whatever fell. */
-async function huntTo(level: number, seed = 20261004): Promise<{ s: GameState; hours: number }> {
-  const s = newGame(seed);
+/**
+ * One shared pass: the loop from the opening minute to L90 on its own drops, and — at each checkpoint —
+ * the three measured windows B1 reads. Both tests await it, so the suite walks the progression once
+ * instead of once per reading: the walk is the wall clock here, and the second identical walk bought
+ * no second fact.
+ */
+interface Reading {
+  natural: Measure;
+  capped: Measure;
+  gearOnly: Measure;
+  share: number;
+  row: string;
+}
+
+interface Run {
+  s: GameState;
+  hours: number;
+  walks: number;
+  dressed: number;
+  /** per checkpoint: the three windows measured on clones of the instant the level was crossed */
+  readings: Map<number, Reading>;
+}
+
+type Measure = ReturnType<typeof measure>;
+
+let runCache: Promise<Run> | null = null;
+
+function b1Run(): Promise<Run> {
+  if (!runCache) runCache = runLoop();
+  return runCache;
+}
+
+async function runLoop(): Promise<Run> {
+  const s = newGame(20261004);
   huntZone(s, s.zone);
   // the filter ships off, so this run arms it to reproduce the design's published keep-rate;
   // a bag kept with the filter off fills and pauses, which is not the character the curve prices
   setRule(s.filter, 'all', { enabled: true });
   s.travel = 'forward';
+  const readings = new Map<number, Reading>();
+  const seen: number[] = [];
+  let walks = 0;
+  let dressed = 0;
   let sec = 0;
-  for (; sec < RUN_CAP_HR * HOUR && s.player.level < level; sec++) {
-    walkOnward(s);
-    if (sec % HOUR === 0) dressUp(s);
+  for (; sec < RUN_CAP_HR * HOUR && seen.length < CHECKPOINTS.length; sec++) {
+    if (walkOnward(s)) walks++;
+    // a player who checks the bag dresses every hour; the AFK run that never clicks is the one
+    // `pacing.test.ts` measures, and it is not the character the curve prices
+    if (sec % HOUR === 0) dressed += dressUp(s);
     tick(s, {}, { online: true });
     if (sec % HOUR === 0) await yieldToWorker();
+    const hit = CHECKPOINTS.find((lv) => s.player.level >= lv && !seen.includes(lv));
+    if (hit === undefined) continue;
+    seen.push(hit);
+    // three clones of one instant: the run's own bar, the same rows at Cap, and nothing at all
+    const natural = measure(clone(s), WINDOW_SEC);
+    const maxed = clone(s);
+    atCap(maxed);
+    const capped = measure(maxed, WINDOW_SEC);
+    const bare = clone(s);
+    emptyBar(bare);
+    const gearOnly = measure(bare, WINDOW_SEC);
+    const curve = eng.typicalDpsAt(hit);
+    const share = gearOnly.dps > 0 ? capped.dps / gearOnly.dps : NaN;
+    readings.set(hit, {
+      natural, capped, gearOnly, share,
+      row:
+        `L${hit} after ${(sec / HOUR).toFixed(1)} hr · zone ${s.zone} after ${walks} walk(s) · `
+        + `${s.gear.filter(Boolean).length}/${s.gear.length} slots worn over ${dressed} decision(s), `
+        + `${s.bag.length} pieces left in the bag · bar held ${barRows(s)} rows\n`
+        + `    gear-only ${gearOnly.dps.toFixed(0)} dps vs the curve's read-back ${curve.toFixed(0)} = `
+        + `×${(gearOnly.dps / curve).toFixed(2)} of typical gear\n`
+        + `    the list adds ×${(natural.dps / gearOnly.dps).toFixed(2)} as run · `
+        + `×${share.toFixed(2)} at Cap (the curve spends ×${eng.skillF(hit).toFixed(2)})\n`
+        + `    window kills ${gearOnly.kills}/${natural.kills}/${capped.kills} · `
+        + `Pushed ${gearOnly.pushes}/${natural.pushes}/${capped.pushes} (bare/list/Cap)`,
+    });
   }
-  return { s, hours: sec / HOUR };
+  return { s, hours: sec / HOUR, walks, dressed, readings };
 }
 
 function withBar(s: GameState, t: Theme) {
@@ -202,64 +265,23 @@ function withBar(s: GameState, t: Theme) {
 
 describe('the fold measured on gear the loop actually produced', () => {
   it('levels to every checkpoint with its own drops, then prints gear-only dps and the list share', async () => {
-    const s = newGame(20261004);
-    huntZone(s, s.zone);
-    setRule(s.filter, 'all', { enabled: true }); // the filter ships off; arm it to keep the published rate
-    s.travel = 'forward';
-    const rows: string[] = [];
-    const seen: number[] = [];
-    const shares: number[] = [];
-    let walks = 0;
-    let dressed = 0;
-
-    for (let sec = 0; sec < RUN_CAP_HR * HOUR && seen.length < CHECKPOINTS.length; sec++) {
-      if (walkOnward(s)) walks++;
-      // a player who checks the bag dresses every hour; the AFK run that never clicks is the one
-      // `pacing.test.ts` measures, and it is not the character the curve prices
-      if (sec % HOUR === 0) dressed += dressUp(s);
-      tick(s, {}, { online: true });
-      if (sec % HOUR === 0) await yieldToWorker();
-      const hit = CHECKPOINTS.find((lv) => s.player.level >= lv && !seen.includes(lv));
-      if (hit === undefined) continue;
-      seen.push(hit);
-      // three clones of one instant: the run's own bar, the same rows at Cap, and nothing at all
-      const natural = measure(clone(s), WINDOW_SEC);
-      const maxed = clone(s);
-      atCap(maxed);
-      const capped = measure(maxed, WINDOW_SEC);
-      const bare = clone(s);
-      emptyBar(bare);
-      const gearOnly = measure(bare, WINDOW_SEC);
-      const curve = eng.typicalDpsAt(hit);
-      const share = gearOnly.dps > 0 ? capped.dps / gearOnly.dps : NaN;
-      shares.push(share);
-      rows.push(
-        `L${hit} after ${(sec / HOUR).toFixed(1)} hr · zone ${s.zone} after ${walks} walk(s) · `
-        + `${s.gear.filter(Boolean).length}/${s.gear.length} slots worn over ${dressed} decision(s), `
-        + `${s.bag.length} pieces left in the bag · bar held ${barRows(s)} rows\n`
-        + `    gear-only ${gearOnly.dps.toFixed(0)} dps vs the curve's read-back ${curve.toFixed(0)} = `
-        + `×${(gearOnly.dps / curve).toFixed(2)} of typical gear\n`
-        + `    the list adds ×${(natural.dps / gearOnly.dps).toFixed(2)} as run · `
-        + `×${share.toFixed(2)} at Cap (the curve spends ×${eng.skillF(hit).toFixed(2)})\n`
-        + `    window kills ${gearOnly.kills}/${natural.kills}/${capped.kills} · `
-        + `Pushed ${gearOnly.pushes}/${natural.pushes}/${capped.pushes} (bare/list/Cap)`,
-      );
-    }
+    const { readings } = await b1Run();
+    const shares = CHECKPOINTS.map((lv) => readings.get(lv)!.share);
 
     // eslint-disable-next-line no-console
     console.log(`\nB1 · gear from the loop's own drops, damage measured over ${WINDOW_SEC} sec per run\n`
-      + rows.map((r) => '  ' + r.replace(/\n/g, '\n  ')).join('\n'));
+      + CHECKPOINTS.map((lv) => '  ' + readings.get(lv)!.row.replace(/\n/g, '\n  ')).join('\n'));
 
-    expect(seen).toEqual(CHECKPOINTS); // the run must reach them, or the reading is not the design's
+    expect([...readings.keys()]).toEqual(CHECKPOINTS); // the run must reach them, or the reading is not the design's
     // The list is never dead weight at real gear. The 7-line skeleton put more lines on every
     // drop than the fold was anchored against, so the L30 share sits just under 1 instead of the old
-    // >1 — that uplift is unpriced player power, and `checks.md` D34 carries the debt (H1).
+    // >1 — that uplift is unpriced player power, and the balance owes that debt until it is priced.
     expect(shares.every((x) => x > 0.9)).toBe(true);
     expect(shares[shares.length - 1]).toBeGreaterThan(1); // and it is a real multiplier once levelled
   }, 120000);
 
   it('leaves the fast-hit build its own value: the damage comes from hits, not from one big press', async () => {
-    const { s, hours } = await huntTo(90);
+    const { s, hours } = await b1Run();
     expect(s.player.level).toBeGreaterThanOrEqual(90);
 
     const readings = [FAST, HEAVY].map((t) => {
@@ -294,8 +316,8 @@ describe('the fold measured on gear the loop actually produced', () => {
       + `${fast.hitBornePct.toFixed(0)}% of it arrives through a hit or something a hit left behind, `
       + `against ${heavy.hitBornePct.toFixed(0)}% on the big-hit build`);
 
-    // P0-2's promise is that the hit-count build stays a hit-count build rather than a cheaper route
-    // to the same number: the swings and their statuses must carry a larger share of its damage.
+    // the promise the frame makes to a hit-count build: it stays a hit-count build rather than a
+    // cheaper route to the same number, so the swings and their statuses must carry a larger share.
     expect(fast.hitBornePct).toBeGreaterThan(heavy.hitBornePct);
     expect(fast.m.dps).toBeGreaterThan(0);
     expect(heavy.m.dps).toBeGreaterThan(0);

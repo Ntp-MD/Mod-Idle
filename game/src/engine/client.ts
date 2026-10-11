@@ -1,6 +1,6 @@
 // The single place the client touches the numeric sources.
 // engine.json / mods.json are the same files tools/*.js read, and createEngine is the same
-// module the cages call — so a number the client shows is the number the cage gates (Techstack.md).
+// module the cages call — so a number the client shows is the number the cage gates (DECISIONS.md §Stack).
 import engineJson from '../../../tools/data/engine.json' with { type: 'json' };
 import modsJson from '../../../tools/data/mods.json' with { type: 'json' };
 import skillsJson from '../../../tools/data/skills.json' with { type: 'json' };
@@ -12,21 +12,35 @@ import { createDungeon } from '../../../engine/dungeon.ts';
 import { createLoot } from '../../../engine/loot.ts';
 import { createSkillModel } from '../../../engine/skills.ts';
 import { createTree } from '../../../engine/tree.ts';
+import type { EngineData, ModsData, SkillsData } from '../../../engine/types.ts';
+// Each export keeps the type TypeScript infers from its own JSON file. A hand-written interface would be
+// a second copy of the data's shape — the same defect as a second copy of a number, and it drifts the
+// same way. `as any` was the other failure mode: it hid every mis-typed field the HUD prints.
+export const E = engineJson;
+export const MODS = modsJson;
+export const SKILLS = skillsJson;
+export const TOWN = townJson;
+export const BASES = basesJson;
+export const TREE_SPEC = treeJson;
 
-export const E = engineJson as any;
-export const MODS = modsJson as any;
-export const SKILLS = skillsJson as any;
-export const TOWN = townJson as any;
-export const BASES = basesJson as any;
-export const TREE_SPEC = treeJson as any;
+/** The shared math, instantiated once. Every formula in the game comes out of this object.
+ *
+ *  The four `*_DATA` bindings are the JSON→engine seam: each constructor takes the engine's own declared
+ *  view of its file, and a JSON import cannot state a fixed-length pair where `MobZone` declares
+ *  `[number, number]`, so the arity is written once here rather than dropped from the declaration.
+ *  `E`/`MODS`/`SKILLS`/`TOWN`/`BASES` above stay the files' inferred shape — that is what types every
+ *  number the HUD prints, and it is what caught `MobZone` declaring no `quality` the data carries. */
+const ENGINE_DATA = engineJson as unknown as EngineData;
+const MODS_DATA = modsJson as unknown as ModsData;
+const SKILLS_DATA = skillsJson as unknown as SkillsData;
+const TREE_DATA = treeJson as unknown as Parameters<typeof createTree>[0];
 
-/** The shared math, instantiated once. Every formula in the game comes out of this object. */
-export const eng: any = createEngine(E);
-export const dungeon: any = createDungeon(E);
-export const loot: any = createLoot(E, MODS);
-export const sm: any = createSkillModel(SKILLS, E);
+export const eng = createEngine(ENGINE_DATA);
+export const dungeon = createDungeon(ENGINE_DATA);
+export const loot = createLoot(ENGINE_DATA, MODS_DATA);
+export const sm = createSkillModel(SKILLS_DATA, ENGINE_DATA);
 /** The passive tree, derived once from its spec — the same object the tree cage gates. */
-export const tree: any = createTree(TREE_SPEC, MODS);
+export const tree = createTree(TREE_DATA, MODS_DATA);
 
 export const STAT_KEYS = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'] as const;
 export type StatKey = (typeof STAT_KEYS)[number];

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { E, loot } from '../src/engine/client';
+import { E, loot, BASES } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
 import { rollDrop } from '../src/sim/drop';
 import { doCraft, stoneNames, replaceChoices, poolOf, craftedMark, craft as clientCraft } from '../src/sim/craft';
@@ -8,11 +8,13 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import type { Item } from '../src/sim/types';
 
 const craft = createCraft(E, loot);
+// each band's level window starts where its span starts — read off the spans, never typed
+const SPAN_FROM = (band: string) => E.item_level.spans.find((s: any) => s.band === band).from;
 
 // `rollDrop` always stamps the quality band (`sim/drop.ts`), so a rolled piece carries a `q` even
 // though `Item.q` is optional for hand-built fixtures elsewhere.
 function piece(seed = 1, band = 'low'): Item & { q: number } {
-  return rollDrop(mulberry32(seed), band, band === 'low' ? 1 : band === 'mid' ? 31 : 61) as Item & { q: number };
+  return rollDrop(mulberry32(seed), band, SPAN_FROM(band)) as Item & { q: number };
 }
 
 type CraftResult = { ok: boolean; why?: string; item?: any; changed?: any };
@@ -145,13 +147,13 @@ describe('Remove', () => {
 
 describe('Add stone', () => {
   const poolFor = (item: any) => {
-    const frame = require('../../tools/data/bases.json').bases.find((b: any) => b.name === item.base && b.slot === item.slot);
+    const frame = BASES.bases.find((b: any) => b.name === item.base && b.slot === item.slot);
     return frame ? [...frame.primary, ...frame.secondary, 'stat_mod_flat'] : ['physical_power_flat', 'attack_speed', 'stat_mod_flat'];
   };
 
   it('charges one stone every fill, and stops at the max Mod count', () => {
-    let item = { ...piece(21), ilvl: 61, lines: piece(21).lines.slice(0, 3), unbound_at_drop: 0, mods_added: 0 };
-    expect(craft.costOf('add', item)).toEqual({ add: 1 });
+    let item = { ...piece(21), ilvl: SPAN_FROM('high'), lines: piece(21).lines.slice(0, 3), unbound_at_drop: 0, mods_added: 0 };
+    expect(craft.costOf('add', item)).toEqual({ add: E.item_level.add_stones_per_fill[0] });
     const one = made(craft.add(item, poolFor(item), mulberry32(1)));
     expect(one.ok).toBe(true);
     item = one.item;
@@ -163,7 +165,7 @@ describe('Add stone', () => {
     expect(two.item.lines.length).toBe(item.lines.length + 1);
     const three = refused(craft.add(two.item, poolFor(two.item), mulberry32(3)));
     expect(three.ok).toBe(false);
-    expect(String(three.why)).toMatch(/2 Add stones/);
+    expect(String(three.why)).toMatch(new RegExp(`${E.item_level.mods_added_cap} Add stones`));
   });
 
   it('never repeats a line the piece already carries', () => {
@@ -182,7 +184,7 @@ describe('Add stone', () => {
     const L = E.item_level;
     // a piece already holding as many lines as the ceiling publishes cannot take another stone
     const full = Array.from({ length: L.crafted_max }, (_v, i) => ({ id: `line_${i}`, value: 1, slice: 2 }));
-    const atCeiling = refused(craft.add({ ...piece(23), ilvl: 1, lines: full, unbound_at_drop: L.crafted_max - 3, mods_added: 0 }, ['elemental_power_flat'], mulberry32(1)));
+    const atCeiling = refused(craft.add({ ...piece(23), ilvl: 1, lines: full, unbound_at_drop: L.crafted_max - craft.UNTOUCHABLE, mods_added: 0 }, ['elemental_power_flat'], mulberry32(1)));
     expect(atCeiling.ok).toBe(false);
     expect(String(atCeiling.why)).toMatch(new RegExp(`stops at ${L.crafted_max} Mods`));
     const base = { ...piece(23), ilvl: 1, mods_added: 0, unbound_at_drop: 0, lines: [
@@ -196,7 +198,7 @@ describe('Add stone', () => {
     expect(second.ok).toBe(true);
     const third = refused(craft.add(second.item, ['max_hp_flat', 'armour_flat', 'evasion_flat'], mulberry32(3)));
     expect(third.ok).toBe(false);
-    expect(String(third.why)).toMatch(/2 Add stones/);
+    expect(String(third.why)).toMatch(new RegExp(`${E.item_level.mods_added_cap} Add stones`));
     // the stone count is the cap, not the line count — the piece still has room to the ceiling
     expect(second.item.lines.length).toBeLessThan(E.item_level.crafted_max);
   });
@@ -209,7 +211,7 @@ describe('Add stone', () => {
       { id: 'max_hp_flat', value: 50, slice: 2 }, { id: 'armour_flat', value: 20, slice: 2 },
       { id: 'evasion_flat', value: 10, slice: 2 },
     ];
-    const item = { ...piece(24), ilvl: 61, q: 0, lines, mods_added: 0 };
+    const item = { ...piece(24), ilvl: SPAN_FROM('high'), q: 0, lines, mods_added: 0 };
     let offered = 0;
     for (let s = 0; s < 25; s++) {
       const r = craft.add(item, ['stat_mod_flat', 'cooldown_reduction'], mulberry32(s));
@@ -224,7 +226,7 @@ describe('Add stone', () => {
     const s = newGame(25);
     s.counters.stones.add = 0;
     // a piece with a free line whatever the drop drew, so the test is about the stone, not the width
-    s.bag.unshift({ ...piece(26), ilvl: 61, lines: [{ id: 'stat_mod_flat', value: 9, slice: 2 }], mods_added: 0 });
+    s.bag.unshift({ ...piece(26), ilvl: SPAN_FROM('high'), lines: [{ id: 'stat_mod_flat', value: 9, slice: 2 }], mods_added: 0 });
     expect(doCraft(s, 'bag', 0, 'add', 0, mulberry32(1)).ok).toBe(false);
     s.counters.stones.add = 1;
     const before = s.bag[0].lines.length;
@@ -284,7 +286,7 @@ describe('the bench in the game', () => {
     const s = newGame(21);
     s.bag.unshift(piece(11));
     const item = s.bag[0];
-    const ONE_LINE = ['reroll', 'reroll_random', 'refine', 'randomize', 'reroll_mod', 'remove', 'remove_at', 'replace', 'replace_random', 'polish', 'rebirth'];
+    const ONE_LINE = ['reroll', 'reroll_random', 'refine', 'randomize', 'reroll_mod', 'remove', 'remove_at', 'replace', 'replace_random', 'polish', 'reforge', 'rebirth'];
     for (const op of ONE_LINE) {
       const cost = stoneNames(op as any, item);
       const keys = Object.keys(cost);
@@ -390,6 +392,19 @@ describe('the verb × target matrix', () => {
     expect(s.bag[0].lines.map((l: any) => l.slice)).toEqual(slices);
     // the head of the piece is the point of this stone: its values moved, and its Tiers did not
     expect(s.bag[0].lines[0].id).toBe(piece(12).lines[0].id);
+  });
+
+  it('Reforge pays its own stone and redraws one Tier across the whole piece', () => {
+    const s = bench();
+    const paid = s.counters.stones.reforge;
+    expect(stoneNames('reforge', s.bag[0])).toEqual({ reforge: E.craft.reforge_stones_per_use });
+    expect(doCraft(s, 'bag', 0, 'reforge', 0, mulberry32(4)).ok).toBe(true);
+    expect(s.counters.stones.reforge).toBe(paid - E.craft.reforge_stones_per_use);
+    // one Tier draw spent on every line at once: all lines share the redrawn slice
+    const slices = s.bag[0].lines.map((l: any) => l.slice);
+    expect(new Set(slices).size).toBe(1);
+    // identities never move, only the Tier and the values under it
+    expect(s.bag[0].lines.map((l: any) => l.id)).toEqual(piece(12).lines.map((l: any) => l.id));
   });
 
   it('an Add stone stamps its line as crafted, says it on the card, and keeps the stamp through an identity press', () => {

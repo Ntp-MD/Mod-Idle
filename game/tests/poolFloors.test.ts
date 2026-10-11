@@ -32,7 +32,7 @@ describe('a pool spends only what stands in it', () => {
     expect(c.es).toBeGreaterThan(0);
     // This test is about the split, so the swing has to land: the Evasion layer is zeroed rather
     // than hunting a seed that happens to get past it.
-    const sheet = { ...c, evasion: 0, evasionFromAgi: 0 } as Character;
+    const sheet = { ...c, evasion: 0 } as Character;
 
     const standing = mobSwing(mulberry32(3), sheet, mob(), {}, NO_CURSE, sheet.es);
     const half = mobSwing(mulberry32(3), sheet, mob(), {}, NO_CURSE, sheet.es / 2);
@@ -70,7 +70,7 @@ describe('a pool spends only what stands in it', () => {
       manaSpent = Math.max(manaSpent, c.maxMana - s.player.mana);
     }
     // eslint-disable-next-line no-console
-    console.log(`\n3,000 sec of hunting: lowest shield ${minEs.toFixed(1)} · lowest mana ${minMana.toFixed(1)} `
+    console.log(`\nthe hunt: lowest shield ${minEs.toFixed(1)} · lowest mana ${minMana.toFixed(1)} `
       + `· deepest spend ${esSpent.toFixed(1)} ES / ${manaSpent.toFixed(1)} mana · Pushes ${s.counters.pushes} · level ${s.player.level}`);
     expect(bad).toBeNull();
     // the run has to actually spend a pool, or the gate proves nothing

@@ -9,6 +9,7 @@
     "skills": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/skills.ts",
     "tree": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/tree.ts",
     "map": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/map.ts",
+    "gallery": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/gallery.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "dev": "npm --prefix game run dev",
     "build": "npm --prefix game run build",

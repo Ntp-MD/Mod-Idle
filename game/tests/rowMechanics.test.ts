@@ -13,7 +13,7 @@ import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
 
 /**
- * · the last nineteen roster rows.
+ * The roster rows whose behaviour the sim spends.
  *
  * Each one states either a magnitude (`effects`) or a mechanic word (`rules`), and this file is the
  * proof that the client spends it: a row whose word nothing reads fails here, and a rule word that
@@ -51,9 +51,10 @@ describe('the attack rows that press differently', () => {
       const t = mob({ id: `hit-${id}` });
       return cast(id, c, [t])!.dealt!;
     };
-    // Whirlwind: "3 rounds, 1 hit per target per round" · Arrow Shower: "3 arrows, 40% each"
-    expect(dealt('attack.whirlwind')).toBeCloseTo(onePress('attack.whirlwind') * 3, 4);
-    expect(dealt('attack.arrow_shower')).toBeCloseTo(onePress('attack.arrow_shower') * 3 * 0.4, 4);
+    // the press count and the per-arrow share are the rows' own `hits` / `hit_pct`
+    expect(dealt('attack.whirlwind')).toBeCloseTo(onePress('attack.whirlwind') * valueOf('attack.whirlwind', 'hits'), 4);
+    expect(dealt('attack.arrow_shower')).toBeCloseTo(
+      onePress('attack.arrow_shower') * valueOf('attack.arrow_shower', 'hits') * (valueOf('attack.arrow_shower', 'hit_pct') / 100), 4);
     // a row without the line presses once
     expect(dealt('attack.cleave')).toBeCloseTo(onePress('attack.cleave'), 4);
   });
@@ -110,7 +111,7 @@ describe('the attack rows that press differently', () => {
     const curses = newCurses();
     applyCurse(curses, 'm1', { ...row('attack.elemental_break'), duration: row('attack.elemental_break').duration });
     expect(lineValue(curses, 'm1', 'mob_elemental_damage_taken_pct')).toBe(valueOf('attack.elemental_break', 'mob_elemental_damage_taken_pct'));
-    expect(row('attack.elemental_break').duration).toBe('8 sec');
+    expect(String(row('attack.elemental_break').duration)).toMatch(/\d+ sec/);
     const gear = emptyGear();
     gear[10] = {
       slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'high', tier: 'T1',
@@ -129,12 +130,12 @@ describe('the attack rows that press differently', () => {
 });
 
 describe('the support rows that change the character', () => {
-  it('Haste multiplies the cooldown clock and the swing, and both are the row’s 15%', () => {
+  it('Haste multiplies the cooldown clock and the swing, both by the row’s own mult', () => {
     const fold = sm.aggregateEffects([row('aura.haste')]);
     const c = buildCharacter(40, emptyGear(), {}, 0, fold);
-    expect(c.globalSpeed).toBe(1.15);
+    expect(c.globalSpeed).toBe(valueOf('aura.haste', 'global_speed'));
     const plain = buildCharacter(40, emptyGear());
-    expect(c.aspd / plain.aspd).toBeCloseTo(1.15, 6);
+    expect(c.aspd / plain.aspd).toBeCloseTo(valueOf('aura.haste', 'attack_speed'), 6);
   });
 
   it('Trinity Form hardens the three Elements it names, and only those', () => {
@@ -153,7 +154,9 @@ describe('the support rows that change the character', () => {
     expect(cut(fire)).toBeLessThan(1);
     expect(cut(cold)).toBeLessThan(1);
     expect(cut(chaos)).toBe(1);
-    expect(valueOf('aura.trinity_form', 'elemental_resistance')).toBe(15);
+    // the cut sits between the resist the row names and no cut, because some of every swing is non-Element
+    const v = valueOf('aura.trinity_form', 'elemental_resistance');
+    expect(cut(fire)).toBeGreaterThan(1 - v / 100);
   });
 
   it('Ghost Dance charges arrive from the row’s own ramp and delete a hit each', () => {
@@ -213,7 +216,10 @@ describe('the support rows that change the character', () => {
       if (s.log.some((l) => /clears/.test(l.text))) cleansed = true;
     }
     expect(cleansed).toBe(true);
-    expect(valueOf('heal.cleanse', 'heal_instant')).toBe(8);
+    // the press names the share it paid, and the share is the row's own `heal_instant`
+    const restored = s.log.find((l) => /restores .* HP at once/.test(l.text));
+    expect(restored).toBeTruthy();
+    expect(restored!.text).toContain(`(${valueOf('heal.cleanse', 'heal_instant')}% of the pool)`);
   }, 30000);
 
   it('Magia Drive restarts the shield without waiting out the delay', () => {
@@ -243,16 +249,16 @@ describe('the support rows that change the character', () => {
     void fold;
   }, 30000);
 
-  it('Energy Absorb ramps its share from base to Cap and negates it even on a full shield', () => {
-    expect(valueOf('buff.energy_absorb', 'es_absorb_pct')).toBe(15);
-    expect(valueOf('buff.energy_absorb', 'es_absorb_cap')).toBe(30);
+  it('Energy Absorb ramps its share from the row’s base to its Cap and negates it even on a full shield', () => {
+    const base = valueOf('buff.energy_absorb', 'es_absorb_pct');
+    const top = valueOf('buff.energy_absorb', 'es_absorb_cap');
     // the helper ramps linearly off the buff's own skill level, base at level 1 to Cap at 20
     const s = newSkillState();
     s.buffUp['buff.energy_absorb'] = 3;
     s.xp['buff.energy_absorb'] = 0;
-    expect(esAbsorbPct(s)).toBeCloseTo(15, 6);
+    expect(esAbsorbPct(s)).toBeCloseTo(base, 6);
     s.xp['buff.energy_absorb'] = 8000;
-    expect(esAbsorbPct(s)).toBeCloseTo(30, 6);
+    expect(esAbsorbPct(s)).toBeCloseTo(top, 6);
     expect(esAbsorbPct(newSkillState())).toBe(0); // off, nothing is absorbed
 
     // a hit far larger than the pool, against a full shield: the absorbed share is removed from HP
@@ -260,7 +266,7 @@ describe('the support rows that change the character', () => {
     const c = buildCharacter(60, emptyGear());
     const m = mob({ ps: 50000 });
     const plain = mobSwing(mulberry32(4), c, m, {}, NO, c.es, 0);
-    const absorbing = mobSwing(mulberry32(4), c, m, {}, NO, c.es, 15);
+    const absorbing = mobSwing(mulberry32(4), c, m, {}, NO, c.es, base);
     expect(absorbing.absorbed).toBeGreaterThan(0);
     expect(absorbing.toHp).toBeLessThan(plain.toHp);
     expect(plain.toHp + plain.toEs).toBeCloseTo(absorbing.toHp + absorbing.toEs + absorbing.absorbed, 6);
@@ -272,7 +278,8 @@ describe('the curse rows that act on other mobs', () => {
     const store = newCurses();
     applyCurse(store, 'dying', row('curse.pandemonium'));
     applyCurse(store, 'dying', row('curse.weaken'));
-    expect(lineValue(store, 'dying', 'spread_targets')).toBe(3);
+    const cap = valueOf('curse.pandemonium', 'spread_targets');
+    expect(lineValue(store, 'dying', 'spread_targets')).toBe(cap);
     const caught = spreadOnDeath(store, 'dying', ['a', 'b']);
     expect(caught).toBe(2);
     expect(lineValue(store, 'a', 'damage_dealt')).toBe(valueOf('curse.weaken', 'damage_dealt'));
@@ -283,7 +290,7 @@ describe('the curse rows that act on other mobs', () => {
     const many = newCurses();
     applyCurse(many, 'dying', row('curse.pandemonium'));
     applyCurse(many, 'dying', row('curse.expose'));
-    expect(spreadOnDeath(many, 'dying', ['1', '2', '3', '4', '5'])).toBe(3);
+    expect(spreadOnDeath(many, 'dying', ['1', '2', '3', '4', '5'])).toBe(cap);
   });
 
   it('Venom Bind still holds the poison it was written for', () => {
@@ -304,7 +311,13 @@ describe('the trigger auras fire the first ready slot at their own price', () =>
     const s = newSkillState();
     s.auras['aura.cast_on_crit'] = true;
     const t = triggerAuras(s);
-    expect(t.crit).toMatchObject({ id: 'aura.cast_on_crit', manaMult: 2, damageMult: 0.7, cdSec: 1 });
+    const at = (stat: string) => valueOf('aura.cast_on_crit', stat);
+    expect(t.crit).toMatchObject({
+      id: 'aura.cast_on_crit',
+      manaMult: at('cast_mana_mult'),
+      damageMult: at('cast_damage_mult'),
+      cdSec: at('trigger_cd_sec'),
+    });
     expect(t.taken).toBe(null);
     s.auras['aura.cast_on_damage_taken'] = true;
     expect(triggerAuras(s).taken?.id).toBe('aura.cast_on_damage_taken');

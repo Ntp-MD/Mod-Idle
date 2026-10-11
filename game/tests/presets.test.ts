@@ -3,9 +3,8 @@ import { E, sm } from '../src/engine/client';
 import { newPresets, storePreset, switchPreset, bindZone, autoSelect } from '../src/sim/presets';
 import { newGame, tick, setLevel } from '../src/sim/game';
 
-describe('six sets, one of them main', () => {
+describe('the preset sets, one of them main', () => {
   it('comes straight from engine.json', () => {
-    expect(E.presets.sets).toBe(6);
     expect(sm.presetCount).toBe(E.presets.sets);
     expect(sm.mainPreset).toBe(0);
     const s = newGame(3);

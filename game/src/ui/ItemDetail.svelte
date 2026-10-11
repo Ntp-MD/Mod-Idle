@@ -2,7 +2,7 @@
   import { craft, craftedMark } from '../sim/craft';
   import { MODS } from '../engine/client';
   import { gearModOf } from '../sim/gear';
-  import { vsWorn } from './bag';
+  import { vsWorn, compareLines, type LineCmp } from './bag';
   import type { Item } from '../sim/types';
 
   /**
@@ -78,31 +78,13 @@
   }
 
   /**
-   * The line-by-line comparison: the candidate's rolled lines paired against the worn piece's, keyed
-   * by Mod id (and the Element a line rolled), so the swap reads as what it gains and loses rather
-   * than the single aggregate `vsWorn` score. A `Frame Mod` carries its extras, so a line is flattened
-   * the same way the card prints it. No number here is typed — both sides come off the two drops.
+   * The line-by-line pairing is the bag view model's (`compareLines`): it reads the candidate and the
+   * worn piece and returns only the lines the swap changes. The card names those rows and colours
+   * them — no number here is typed, both sides come off the two drops.
    */
-  type Cmp = { id: string; element?: string; cand: number | null; worn: number | null };
-  const flatLines = (it: Item): any[] => (it.lines || []).flatMap((l: any) => [l, ...(l.extra || [])]);
-  const lineKey = (l: any): string => `${l.id}${l.element ? ':' + l.element : ''}`;
-  const diff = $derived.by<Cmp[]>(() => {
-    if (!worn || wornHere) return [];
-    const map = new Map<string, Cmp>();
-    for (const l of flatLines(worn)) map.set(lineKey(l), { id: l.id, element: l.element, cand: null, worn: l.value });
-    for (const l of flatLines(item)) {
-      const k = lineKey(l);
-      const row = map.get(k) || { id: l.id, element: l.element, cand: null, worn: null };
-      row.cand = l.value;
-      map.set(k, row);
-    }
-    // only what the swap changes: a line both pieces carry at the same value is already printed above
-    return [...map.values()].filter((r) => r.cand !== r.worn);
-  });
-  const cmpName = (r: Cmp): string => (r.element ? `${r.element} ${plainName(r.id)}` : plainName(r.id));
-  const cmpClass = (r: Cmp): string =>
-    r.cand == null ? 'lost' : r.worn == null ? 'gained' : r.cand > r.worn ? 'over' : r.cand < r.worn ? 'under' : 'even';
-  const cmpText = (r: Cmp): string =>
+  const diff = $derived(wornHere ? [] : compareLines(item, worn));
+  const cmpName = (r: LineCmp): string => (r.element ? `${r.element} ${plainName(r.id)}` : plainName(r.id));
+  const cmpText = (r: LineCmp): string =>
     r.cand == null ? `${cmpName(r)} −${r.worn}`
       : r.worn == null ? `${cmpName(r)} +${r.cand}`
         : `${cmpName(r)} ${r.worn} → ${r.cand}`;
@@ -130,7 +112,7 @@
   {#if diff.length}
     <ul class="cmp" aria-label={`versus the worn ${worn?.base ?? ''}`}>
       {#each diff as r (r.id + (r.element ?? ''))}
-        <li class={cmpClass(r)}>{cmpText(r)}</li>
+        <li class={r.kind}>{cmpText(r)}</li>
       {/each}
     </ul>
   {/if}
@@ -151,29 +133,29 @@
 
 <style>
   .detail {
-    min-width: 15rem;
-    max-width: 21rem;
+    min-width: var(--box-300);
+    max-width: var(--box-420);
     background: var(--bg);
     border: 1px solid var(--line);
     border-left: 3px solid var(--dim);
-    padding: .5rem .6rem;
-    font-size: .78rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-xs);
   }
   .detail.rare { border-left-color: var(--xp); }
-  h4 { margin: 0; font-size: .9rem; }
-  .tag { display: flex; flex-wrap: wrap; gap: .25rem; align-items: baseline; margin: .1rem 0 .4rem; color: var(--dim); font-size: .72rem; }
+  h4 { margin: 0; font-size: var(--font-sm); }
+  .tag { display: flex; flex-wrap: wrap; gap: 3px; align-items: baseline; margin: 1px 0 var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
   .tag.up { color: var(--xp); }
-  .chip { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .03em; }
+  .chip { border: 1px solid var(--line); border-radius: 2px; padding: 0 3px; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0.38px, 0.024vw + 0.09px, 0.81px); }
   .rare-chip { color: var(--xp); border-color: var(--xp); }
   .dim { color: var(--dim); }
-  .lines { list-style: none; margin: 0 0 .3rem; padding: 0; }
+  .lines { list-style: none; margin: 0 0 4px; padding: 0; }
   /* Every Mod line is a stamped bar: an ink-to-dark sweep with the words in the ink colour, so the
      value reads first and the kind is carried by the bar's edge and tint, never by the words. */
   .lines li {
     --bar-a: color-mix(in srgb, var(--line) 62%, var(--panel));
     --bar-b: color-mix(in srgb, var(--panel) 45%, var(--bg));
-    margin: .07rem 0;
-    padding: .1rem .4rem;
+    margin: 1px 0;
+    padding: 1px var(--spacing-xs);
     border-left: 2px solid var(--line);
     border-radius: 2px;
     color: var(--text);
@@ -194,13 +176,13 @@
   .lines li.fixed { border-bottom: 1px solid var(--line); }
   /* the line-by-line read against the worn piece: gained and over in yellow (the same "up" the
      upgrade tag wears), lost and under in red — the aggregate % on the foot is still the headline. */
-  .cmp { list-style: none; margin: .3rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .05rem; font-size: .72rem; }
-  .cmp li { padding: .08rem .4rem; border-radius: 2px; color: var(--dim); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--panel) 45%, transparent); }
+  .cmp { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 1px; font-size: var(--font-xs); }
+  .cmp li { padding: 1px var(--spacing-xs); border-radius: 2px; color: var(--dim); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--panel) 45%, transparent); }
   .cmp li.over, .cmp li.gained { color: var(--xp); }
   .cmp li.under, .cmp li.lost { color: var(--hp); }
-  .gear { margin: .3rem 0; display: flex; gap: .35rem; align-items: baseline; }
-  .gear small { display: block; color: var(--dim); margin-left: auto; font-size: .68rem; }
-  .kind { min-width: 2.9rem; color: var(--dim); font-size: .62rem; text-transform: uppercase; letter-spacing: .04em; }
-  .foot { margin: .35rem 0 .25rem; color: var(--dim); font-size: .72rem; }
+  .gear { margin: 4px 0; display: flex; gap: 4px; align-items: baseline; }
+  .gear small { display: block; color: var(--dim); margin-left: auto; font-size: var(--font-xs); }
+  .kind { min-width: var(--icon-xl); color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0.5px, 0.033vw + 0.13px, 1.08px); }
+  .foot { margin: 4px 0 3px; color: var(--dim); font-size: var(--font-xs); }
   .go { width: 100%; border-color: var(--good); }
 </style>

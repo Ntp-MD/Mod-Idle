@@ -23,6 +23,17 @@ export const WEAPON_GROUPS = {
 
 import type { EngineData, SkillRow, SkillsData } from './types.ts';
 
+/**
+ * The two damage ladders (the PoE shape, owner ruling): `Attack damage %` scales the attack ladder —
+ * a weapon's own swing and a phys-basis press — and `Spell damage %` scales the spell ladder — a
+ * magic-basis press and a magic weapon's bolt. Each bucket adds only inside itself, the pair never
+ * crosses, and no Core stat moves: this multiplies what the ladder already deals. A magic-basis press
+ * carries its Element share inside the press, so the spell half of the pair scales it too; a swing's
+ * Element pools stay outside the attack bucket, because the swing's Element is not the attack.
+ */
+export const ladderMult = (basis: string, attackPct = 0, spellPct = 0) =>
+  1 + ((basis === 'magic' ? spellPct : attackPct) || 0) / 100;
+
 export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const F = (SKILLS.meta && SKILLS.meta.formula) || {};
   /**
@@ -117,15 +128,16 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   }
 
   /**
-   * press = (base_flat + (eff/100) × power) × damage_pct(level)/100 — the PoE shape: the row's own flat
+   * press = (base_flat + (eff/100) × power) × damage_pct(level)/100 × ladder bucket — the PoE shape: the row's own flat
    * damage at skill level 1 plus its stated share of the added power line, so gear scales a row by its
    * effectiveness instead of by a percentage of the finished hit. The level multiplier is read from the
-   * per-level table, so a press at any level is a read of `meta.formula.skill_levels`.
+   * per-level table, so a press at any level is a read of `meta.formula.skill_levels`. The last factor is
+   * the character's own damage bucket (`Attack damage %` / `Spell damage %`), chosen by the row's basis.
    */
-  function perPress(skill: SkillRow, { phys, magic, elem, align, level }: { phys?: number; magic?: number; elem?: number; align?: number; level?: number }) {
+  function perPress(skill: SkillRow, { phys, magic, elem, align, level, attackPct, spellPct }: { phys?: number; magic?: number; elem?: number; align?: number; level?: number; attackPct?: number; spellPct?: number }) {
     if (skill.base_flat == null || skill.eff == null || skill.basis == null) return null;
     const power = basisOf(skill, { phys, magic, elem, align });
-    return (skill.base_flat + (skill.eff / 100) * power) * (damagePct(level) / 100);
+    return (skill.base_flat + (skill.eff / 100) * power) * (damagePct(level) / 100) * ladderMult(skill.basis, attackPct, spellPct);
   }
 
   /** A phys-basis press can crit; a magic-basis one cannot (pin 1). */
@@ -180,7 +192,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const masteryBonus = (masteryLevel: number) =>
     1 + Math.min(8, Math.max(0, masteryLevel >= 5 ? (masteryLevel - 4) * 0.5 : 0)) / 100;
 
-  function row(skill: SkillRow, opts: { cdrPct?: number; ladderPct?: number; phys?: number; magic?: number; elem?: number; align?: number; level?: number }) {
+  function row(skill: SkillRow, opts: { cdrPct?: number; ladderPct?: number; phys?: number; magic?: number; elem?: number; align?: number; level?: number; attackPct?: number; spellPct?: number }) {
     const cdr = opts.cdrPct != null ? opts.cdrPct : CAST_REF.cdr_pct;
     const ladder = opts.ladderPct != null ? opts.ladderPct : CAST_REF.ladder_pct;
     const ec = effCd(skill.cd!, cdr, ladder);

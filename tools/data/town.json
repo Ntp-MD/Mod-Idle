@@ -10,35 +10,7 @@
       "demand ratio",
       "skip-token day ceiling",
       "repair floor"
-    ],
-    "sources": [
-      "checks.md E1-E5",
-      "checks.md F1-F7",
-      "economy.md gold supply",
-      "loot.md section 2",
-      "loot.md section 4",
-      "towns.md sections 4-7",
-      "farm.md",
-      "tasks.md",
-      "item-base.md"
-    ],
-    "targets": {
-      "towns-stalls.md": [
-        "price-unit",
-        "supply",
-        "one-time",
-        "repeatable",
-        "npc-matrix",
-        "stock",
-        "standing",
-        "collector",
-        "base-bias",
-        "pending"
-      ],
-      "checks.md": [
-        "group-T"
-      ]
-    }
+    ]
   },
   "npcs": [
     {
@@ -811,7 +783,7 @@
       "waypoint": true,
       "m_per_block": 2,
       "charge_band": "mid",
-      "note": "The Waypoint's own price, not a stall line: it is stocked by no settlement and bought by no vendor, so no `stock` array names it. A warp buys back the walk's time at the destination settlement's band, priced off the blocks the walk would have crossed (`road.block_sec` x blocks), so a short hop is cheap and a crossing of the map is not. It is gold into a sink, never gold out of one: it mints nothing, gates no zone, and opens no Waypoint the foot has not earned. Anchor inside the existing ladder: a 7-block hop costs 14 minutes (an Armourer repair is 16), a 20-block crossing 40 minutes (a pedlar appearance slot is 30-120)."
+      "note": "The Waypoint's own price, not a stall line: it is stocked by no settlement and bought by no vendor, so no `stock` array names it. A warp buys back the walk's time at the destination settlement's band, priced off the blocks the walk would have crossed (one gold-minute a block walked), so a short hop is cheap and a crossing of the map is not. It is gold into a sink, never gold out of one: it mints nothing, gates no zone, and opens no Waypoint the foot has not earned. Anchor inside the existing ladder: a 7-block hop costs 14 minutes (an Armourer repair is 16), a 20-block crossing 40 minutes (a pedlar appearance slot is 30-120)."
     }
   ],
   "essentials": [
@@ -945,15 +917,16 @@
     "offer_weight_elite": 0.75,
     "offer_weight_rule": "the Elite hunt weighs this share of an offer against the Boss hunt's remainder (tasks.md). Typed in town.ts rather than in the client, because the board's roll is a read the client performs on the data",
     "income_bound_pct": 10,
-    "income_bound_rule": "hard rule: all task rewards together stay inside this share of the day's loot flows — bonus stones inside the same funnel, never income on top (tasks.md)",
-    "refill_sec": 3600,
+    "income_bound_rule": "hard rule: all task rewards together stay inside this share of the day's loot flows — bonus stones inside the same funnel, never income on top (DECISIONS.md §The task board). T19 gates it: a slot's natural claims plus every skip a day can buy must keep the whole board's Tier-stone drip under the bound",
+    "refill_sec": 86400,
+    "refill_rule": "a finished or skipped slot refills once its clock runs out; the board is the daily direction layer, so the clock is a day, not an hour — at an hour the three slots churn 72 claims a day and breach income_bound_pct by ~7x (T19)",
     "slots": 3,
     "free_skip_per_day": 1
   },
   "pending": [
     {
-      "number": "Task reward sizing (tasks.md rebalance)",
-      "breaks": "skip-token gold price vs task_sizing.income_bound_pct",
+      "number": "Task reward sizing (DECISIONS.md §The task board rebalance)",
+      "breaks": "the income bound is now gated (T19) and holds at the daily refill cadence; the owner's remaining call is only sizing taste — elite_n, reward_minutes_of_band_income and offer_weight_elite",
       "status": "open"
     },
     {

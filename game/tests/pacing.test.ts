@@ -4,7 +4,7 @@ import { newGame, tick, spendReference, huntZone } from '../src/sim/game';
 import { setRule } from '../src/sim/filter';
 
 /**
- * The one promise `loot.md` §4 makes of an AFK run: a piece the filter rejects converts on the spot,
+ * The one promise an AFK run holds: a piece the filter rejects converts on the spot,
  * so the Reroll value mint keeps paying — including **after the adventure bag fills and pickups
  * pause**. That is the whole claim, and it is a claim about a state, not about a pace.
  *

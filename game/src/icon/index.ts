@@ -1,49 +1,63 @@
 import type { Item } from '../sim/types';
 
-import battleAxe from './002-lorc-battle-axe.svg?url';
-import bow from './007-delapouite-bow-arrow.svg?url';
-import crossbow from './008-carl-olsen-crossbow.svg?url';
-import spellBook from './010-delapouite-spell-book.svg?url';
-import healthPotion from './011-delapouite-health-potion.svg?url';
-import dagger from './012-lorc-knife-thrust.svg?url';
-import broadSword from './016-lorc-broadsword.svg?url';
-import warhammer from './017-delapouite-warhammer.svg?url';
-import goblin from './020-delapouite-goblin-head.svg?url';
-import bootPrints from './022-lorc-boot-prints.svg?url';
-import ogre from './023-delapouite-ogre.svg?url';
-import skull from './024-lorc-dread-skull.svg?url';
-import cloak from './026-lucasms-cloak.svg?url';
-import wolf from './027-lorc-wolf-head.svg?url';
-import paw from './028-lorc-paw-print.svg?url';
-import crystal from './035-lorc-crystal-cluster.svg?url';
-import padlock from './037-lorc-padlock.svg?url';
-import aura from './040-lorc-expanded-rays.svg?url';
-import crossShield from './042-delapouite-cross-shield.svg?url';
-import chaos from './043-lorc-vortex.svg?url';
-import leaf from './045-lorc-leaf-skeleton.svg?url';
-import lightning from './049-lorc-lightning-branches.svg?url';
-import knight from './053-delapouite-black-knight-helm.svg?url';
-import dragonShield from './057-delapouite-dragon-shield.svg?url';
-import crossedSwords from './062-lorc-crossed-swords.svg?url';
-import spiderWeb from './064-lorc-spider-web.svg?url';
-import wings from './065-delapouite-fairy-wings.svg?url';
-import pendant from './068-lorc-gem-pendant.svg?url';
-import gauntlet from './110-delapouite-gauntlet.svg?url';
-import armorUpgrade from './076-delapouite-armor-upgrade.svg?url';
-import clothes from './078-delapouite-clothes.svg?url';
-import coins from './080-delapouite-coins-pile.svg?url';
-import centurionHelmet from './071-delapouite-centurion-helmet.svg?url';
-import heartBeats from './087-delapouite-heart-beats.svg?url';
-import droplets from './090-lorc-droplets.svg?url';
-import manaPotion from './093-delapouite-magic-potion.svg?url';
-import arrowhead from './105-lorc-arrowhead.svg?url';
-import hood from './113-lorc-hood.svg?url';
-import cloudRing from './117-lorc-cloud-ring.svg?url';
-import snowflake from './119-lorc-snowflake-1.svg?url';
-import rock from './120-lorc-rock.svg?url';
-import fire from './130-lorc-small-fire.svg?url';
-import helmet from './001-sbed-helmet.svg?url';
-import ring from './075-lorc-swirl-ring.svg?url';
+import battleAxe from './weapon/battle-axe-1.svg?url';
+import bow from './weapon/bow-arrow.svg?url';
+import crossbow from './weapon/crossbow-1.svg?url';
+import spellBook from './equipment/spell-book.svg?url';
+import healthPotion from './misc/potions/health-potion-1.svg?url';
+import dagger from './weapon/knife-thrust.svg?url';
+import broadSword from './weapon/broadsword.svg?url';
+import warhammer from './weapon/warhammer.svg?url';
+import goblin from './character/goblin-head-1.svg?url';
+import bootPrints from './equipment/boot-prints.svg?url';
+import ogre from './character/ogre-1.svg?url';
+import skull from './character/dread-skull.svg?url';
+import cloak from './equipment/cloak-1.svg?url';
+import wolf from './character/wolf-head-2.svg?url';
+import crystal from './misc/stones/crystal-cluster-1.svg?url';
+import padlock from './interface/padlock.svg?url';
+import aura from './skill/aura/expanded-rays.svg?url';
+import crossShield from './equipment/cross-shield.svg?url';
+import chaos from './skill/vortex.svg?url';
+import leaf from './misc/materials/leaf-skeleton.svg?url';
+import lightning from './skill/lightning-branches.svg?url';
+import dragonShield from './equipment/dragon-shield.svg?url';
+import crossedSwords from './weapon/crossed-swords-1.svg?url';
+import spiderWeb from './character/spider-web-1.svg?url';
+import pendant from './equipment/gem-pendant.svg?url';
+import gauntlet from './equipment/gauntlet-1.svg?url';
+import armorUpgrade from './equipment/armor-upgrade.svg?url';
+import clothes from './equipment/clothes.svg?url';
+import coins from './currency/coins-pile.svg?url';
+import centurionHelmet from './equipment/centurion-helmet.svg?url';
+import heartBeats from './interface/heart-beats.svg?url';
+import droplets from './misc/droplets.svg?url';
+import manaPotion from './misc/potions/magic-potion-1.svg?url';
+import arrowhead from './weapon/arrowhead.svg?url';
+import cloudRing from './character/cloud-ring.svg?url';
+import snowflake from './skill/snowflake-1.svg?url';
+import rock from './character/rock.svg?url';
+import fire from './skill/small-fire.svg?url';
+import helmet from './equipment/helmet-1.svg?url';
+import ring from './equipment/swirl-ring.svg?url';
+
+// The four species the shelf carries a real creature for; the rest still fall back to the dread-skull.
+import minotaur from './character/bull.svg?url';
+import dragon from './character/wyvern.svg?url';
+import lizardman from './character/lizardman.svg?url';
+import werewolf from './character/wolf-howl.svg?url';
+import troll from './character/troll.svg?url';
+import kobold from './character/bad-gnome.svg?url';
+import skeleton from './character/skeleton.svg?url';
+import mummy from './character/mummy-head.svg?url';
+import vampire from './character/vampire-dracula.svg?url';
+import demon from './character/daemon-skull.svg?url';
+import orc from './character/orc-head.svg?url';
+import giant from './character/giant.svg?url';
+import human from './character/archer.svg?url';
+import elf from './character/woman-elf-face.svg?url';
+import treant from './character/ent-mouth.svg?url';
+import dryad from './enviroment/tree-face.svg?url';
 
 const armorBySlot: Record<string, string> = {
   helmet,
@@ -59,21 +73,28 @@ const armorBySlot: Record<string, string> = {
 };
 
 const mobBySpecies: Record<string, string> = {
-  bandit: hood,
   goblin,
-  rat: paw,
   slime: cloudRing,
-  troll: ogre,
-  orc: skull,
-  knight,
-  seraph: wings,
-  demon: skull,
-  drake: dragonShield,
-  elf: wings,
+  troll,
+  orc,
+  demon,
+  elf,
   golem: rock,
   spider: spiderWeb,
   wolf,
-  husk: skull,
+  minotaur,
+  dragon,
+  lizardman,
+  werewolf,
+  kobold,
+  skeleton,
+  mummy,
+  vampire,
+  ogre,
+  treant,
+  human,
+  giant,
+  dryad,
 };
 
 const elementByName: Record<string, string> = {

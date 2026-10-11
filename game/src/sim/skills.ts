@@ -23,34 +23,50 @@ export interface SkillState {
   /**
    * §14: what each slotted skill does with its slot. `always` (the default) is what "cast when
    * ready" has always meant; `never` is the player silencing a row they do not want in the
-   * rotation; `conditional` fires only while one of the shared `conditions` holds.
+   * rotation; `conditional` fires only while one of that row's own `conditions` holds.
    */
   mode: Record<string, SkillMode>;
-  /** The ONE condition list every conditional skill draws from — never free text per skill. */
-  conditions: SkillConditions;
+  /**
+   * One condition list per conditional row, keyed by the row's skill id — so a rotation can say
+   * "this row on a boss" and "that row only under half my pool" at once. An `always` or `never` row
+   * is never read here, which keeps `mode` the one switch. Never free text: the legs are the five
+   * named ones in `SkillConditions`.
+   */
+  conditions: Record<string, SkillConditions>;
 }
 
 export type SkillMode = 'always' | 'conditional' | 'never';
 
 export interface SkillConditions {
-  /** Fire the conditional rows against a boss only. */
+  /** Fire this row against a boss only. */
   boss: boolean;
-  /** Fire them only while the character is under this share of its pool (0 = off). */
+  /** Fire it only while the character is under this share of its pool (0 = off). */
   hpBelowPct: number;
   /**
-   * One flag per Element status a row can apply (the five `elements.status_of` names): a conditional
-   * row fires while the target is MISSING a status it applies. Read off the roster, not typed per
+   * One flag per Element status a row can apply (the five `elements.status_of` names): the row fires
+   * while the target is MISSING a status it applies. Read off the roster, not typed per
    * skill — `appliedStatusOf` derives which one a row carries from its own `element`.
    */
   statusMissing: string[];
+  /** One OR leg: fire it when the group is at least this wide (0 = off) — the AoE row's own argument. */
+  minTargets: number;
+  /** Not a leg of the OR but a restraint on the press: never spend what would drop the pool under this
+      share (0 = off). It can only ever hold a row back, never release one. */
+  manaFloorPct: number;
 }
+
+/** Every leg off — the list an `always` or `never` row is read against, so no leg can hold it back. */
+export const NO_COND: SkillConditions = { boss: false, hpBelowPct: 0, statusMissing: [], minTargets: 0, manaFloorPct: 0 };
+
+/** The condition list a row carries, filled out to every leg so a caller never tests for a key. */
+export const condOf = (s: SkillState, id: string): SkillConditions => ({ ...NO_COND, ...(s.conditions?.[id] || {}) });
 
 export const ACTIVE_SLOTS = 15;
 
 export function newSkillState(): SkillState {
   return {
     owned: {}, list: new Array(ACTIVE_SLOTS).fill(null), buffs: {}, auras: {}, xp: {}, cd: {}, buffUp: {},
-    mode: {}, conditions: { boss: false, hpBelowPct: 0, statusMissing: [] },
+    mode: {}, conditions: {},
   };
 }
 
@@ -67,14 +83,15 @@ export function appliedStatusOf(skill: any): string | null {
 export const appliedCurseOf = (skill: any): string | null => (skill?.type === 'curse' ? skill.id : null);
 
 /**
- * Does the shared condition list hold right now? OR across the enabled conditions. The caller
- * resolves the facts (`isBoss` off the front target, `missingHpPct` off the pool, and the
- * `statusMissing` leg per row) so this stays a pure read of the list.
+ * Does this row's own condition list hold right now? OR across the enabled legs. The caller
+ * resolves the facts (`isBoss` off the front target, `missingHpPct` off the pool and the group's width)
+ * so this stays a pure read of the list. The `statusMissing` leg needs the row and the target, so it is
+ * its own step.
  */
-export function conditionsHold(s: SkillState, isBoss: boolean, missingHpPct: number): boolean {
-  const c = s.conditions || { boss: false, hpBelowPct: 0, statusMissing: [] };
-  if (c.boss && isBoss) return true;
-  if (c.hpBelowPct > 0 && missingHpPct >= c.hpBelowPct) return true;
+export function conditionsHold(cond: SkillConditions, isBoss: boolean, missingHpPct: number, groupSize: number): boolean {
+  if (cond.boss && isBoss) return true;
+  if (cond.hpBelowPct > 0 && missingHpPct >= cond.hpBelowPct) return true;
+  if (cond.minTargets > 0 && groupSize >= cond.minTargets) return true;
   return false;
 }
 
@@ -83,8 +100,8 @@ export function conditionsHold(s: SkillState, isBoss: boolean, missingHpPct: num
  * of flag live in the one list, both read off the roster rather than typed per skill — an Element
  * status (from the row's own `element` through `elements.status_of`) and a curse (the row's own id).
  */
-function appliesMissingStatus(s: SkillState, skill: any, env: CastEnv, mob: any): boolean {
-  const want = (s.conditions?.statusMissing || []) as string[];
+function appliesMissingStatus(cond: SkillConditions, skill: any, env: CastEnv, mob: any): boolean {
+  const want = cond.statusMissing || [];
   if (!want.length) return false;
   const status = appliedStatusOf(skill);
   if (status && want.includes(status) && env.mobStatus) {
@@ -317,6 +334,11 @@ export interface CastReport {
   crit?: boolean;
   /** HP actually removed by this cast, across every target it landed on. */
   dealt?: number;
+  /** One entry per mob this press hurt: its id and the HP it lost after mitigation. `dealt` is the sum of
+   *  these, and a press that hurt nobody carries an empty list — so the client can put each number on the
+   *  plate it belongs to instead of splitting a total it was never asked to share. Named for what it is
+   *  keyed by, because `hits` already means this row's repeat count. */
+  byMob: { id: string; amount: number }[];
   /** Ghost Dance: perfect-dodge charges this press grants, from its own level ramp. */
   charges?: number;
   /** A row whose effect is to clear what is on the character (Cleanse, and Holy Veil's cast). */
@@ -377,7 +399,8 @@ export function castOnce(
 ): CastReport | null {
   if (!group.length) return null;
   const pool = usableMana(c, s);
-  // §14: the shared condition list is read once per cast, off the front target and the pool
+  // §14: the two facts every row's own condition list is read against — the front target's kind and
+  // our own pool. They are resolved once per tick, not once per row, so a wide group costs nothing extra
   const condBoss = env.isBoss ?? String(group[0].kind).startsWith('Boss');
   const condMissingHp = env.missingHpPct || 0;
   // §13: a row with no timer of its own is the FILLER — it presses only after every timed slot has had
@@ -387,11 +410,14 @@ export function castOnce(
   for (const id of order) {
     if (!id || (s.cd[id] || 0) > 0) continue;
     // §14: the player's own switch on the slot — `never` silences a row, `conditional` gates it on
-    // the one shared condition list. `always` (the default) is the old "cast when ready".
-    if (modeOf(s, id) === 'never') continue;
+    // that row's own list, which is how two rows can wait on different things. `always` (the default)
+    // is the old "cast when ready", and it reads no list at all.
+    const slotMode = modeOf(s, id);
+    if (slotMode === 'never') continue;
     const skill = sm.byId[id];
-    if (modeOf(s, id) === 'conditional') {
-      const holds = conditionsHold(s, condBoss, condMissingHp) || appliesMissingStatus(s, skill, env, group[0]);
+    const cond = slotMode === 'conditional' ? condOf(s, id) : NO_COND;
+    if (slotMode === 'conditional') {
+      const holds = conditionsHold(cond, condBoss, condMissingHp, group.length) || appliesMissingStatus(cond, skill, env, group[0]);
       if (!holds) continue;
     }
     const aoe = targetCount(skill, group) > 1;
@@ -400,6 +426,9 @@ export function castOnce(
       skillLevel: skillLevel(s, id), maxMana: c.maxMana, usableMana: pool, aoe,
     }) * (env.trigger?.manaMult ?? 1);
     if (cost > mana) continue;
+    // the mana floor is the rotation's one act of restraint: a row that would drop the usable pool under
+    // the share the player named stands down, and the tick goes to whatever else is ready
+    if (cond.manaFloorPct > 0 && mana - cost < pool * (cond.manaFloorPct / 100)) continue;
 
     // a triggered press runs on the trigger's own clock (`trigger_cd_sec`), so the skill's cooldown is
     // spent by an ordinary cast only — a trigger can fire the same row again without eating its cd
@@ -409,7 +438,7 @@ export function castOnce(
     if (skill.type === 'heal') {
       const h = healOf(skill);
       return {
-        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0,
+        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, byMob: [],
         heal: h?.heal, instantHealPct: h?.instantHealPct,
         cleansesSelf: hasRule(skill, 'cleanses_status'),
       };
@@ -423,7 +452,7 @@ export function castOnce(
           base.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'dodge_charges_per_levels', 1)))
         : undefined;
       return {
-        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, charges,
+        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, byMob: [], charges,
         cleansesSelf: hasRule(skill, 'cleanses_on_cast'),
       };
     }
@@ -433,7 +462,7 @@ export function castOnce(
       const hit = rng() <= eng.hitChance(c.accuracy, mob.evasion);
       const writes = (skill.effects || []).some((e: any) => e.subject === 'target');
       return {
-        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: hit ? 1 : 0,
+        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: hit ? 1 : 0, byMob: [],
         curseOn: hit && writes ? mob.id : null,
       };
     }
@@ -441,7 +470,7 @@ export function castOnce(
     const level = skillLevel(s, id);
     // the row's effects at the level actually held: the stored value is its level-1 number
     const effects = sm.effectsAt(skill, level) as any[];
-    let dmg = sm.perPress(skill, { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment, level }) || 0;
+    let dmg = sm.perPress(skill, { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment, level, attackPct: c.attackDamage, spellPct: c.spellDamage }) || 0;
     // pin 1: a phys-basis press can crit on top of the pre-crit hit, a magic-basis one cannot.
     // A row that names extra crit chance on itself (Headshot) spends it on this press only.
     const ownCrit = effects.find((e: any) => e.stat === 'crit_chance' && e.subject !== 'target');
@@ -479,6 +508,8 @@ export function castOnce(
     }
     // the trigger's price on the press it fired: damage scaled down before it is split over targets
     if (env.trigger?.damageMult) dmg *= env.trigger.damageMult;
+    // `E.global.damage_mult` reads the whole clock: a press rides the same bucket a swing does
+    dmg *= E.global.damage_mult;
     const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
     // the row's own lines are spent on each mob the skill actually reaches: a row that says "all in
     // range" reaches every target the AoE resolved, and a guaranteed status skips only the two rolls
@@ -503,6 +534,7 @@ export function castOnce(
     const dodges = !hasRule(skill, 'ignores_dodge');
     let landed = 0;
     let dealt = 0;
+    const struck: { id: string; amount: number }[] = [];
     // the Element share of a magic-basis press is the part the mob's resistance answers, and a
     // row that names a pierce removes that share of the mob's own line for this press only (Nether Orb)
     const magicBasis = skill.basis === 'magic' ? c.magic + c.elem * (c.alignment / 100) : 0;
@@ -551,6 +583,7 @@ export function castOnce(
       t.hp -= mitigated;
       dealt += mitigated;
       landed++;
+      struck.push({ id: t.id, amount: mitigated });
       // §14: a landing attack press carries the swing's own riders — the weapon Element status
       // proc, its bleed chance and the mace's stun — so a rotation does not silently stop applying
       // status the moment the bar fills
@@ -567,7 +600,7 @@ export function castOnce(
       s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
     }
     return {
-      id, name: skill.name, damage: dmg, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: landed, crit, dealt,
+      id, name: skill.name, damage: dmg, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: landed, crit, dealt, byMob: struck,
     };
   }
   return null;

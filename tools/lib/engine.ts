@@ -5,9 +5,12 @@
  *
  * Nothing here is a number copied by hand: every value is computed from
  * tools/data/engine.json, and every cage asserts the result against engine/ and the client.
+ *
+ * This file binds the data to `engine/index.ts` and hands the whole suite back as one object. It
+ * names no member of that suite: a cage reaches `eng.<anything>` straight off the engine, so a new
+ * engine figure is readable by every cage the moment it exists — the mirror cannot fall behind.
  */
 
-import fs from 'node:fs';
 import path from 'node:path';
 import { readJson } from './json.ts';
 import * as shared from '../../engine/index.ts';
@@ -18,91 +21,46 @@ const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const ENGINE_JSON = path.join(import.meta.dirname, '..', 'data', 'engine.json');
 const E = readJson<EngineData>(ENGINE_JSON);
 
-// ---- the shared math now lives in engine/index.ts ------------------------------------
-// This file loads the data and re-exports the shared engine so every existing
-// `import ... from './lib/engine.ts'` keeps working. The formulas are NOT here any more: the cages and
-// the game both call engine/index.ts, so a cage and the game cannot disagree (Techstack.md
-// "The one rule").
-const { createEngine } = shared;
-const eng = createEngine(E);
-/** The walk model the cages read: the hex graph, the block time and the encounter chance. */
-const ROAD = createRoad(E);
-
-const {
-  S, K, M, LG, L, C, TS, ES, CAP, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
-  DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, goldPrice, agiForCap, statWithItems,
-  mobEvasion, sizeMult, playerAccuracy, hitVs, hitChance, MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION,
-  armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt,
-  mobStat, mobStatsOf,
-  typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, mobAcc, mobDodge,
-  speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
-  refAttackerAcc, mobRoster, mobResOf, speciesResMult, mobResByElementOf, convertDamageOf, lckOf, dropChance, killsDerived, r1, r2, fmt,
-  aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, dodgeRate, dodgeChance, perfectDodgeChance,
-  evasionChance, evasionRating, agilityEvasion,
-  critPool, critChanceOf, critDmgOf, maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf,
-  esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS, treePointsAt,
-  encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf, sizeMultOf, applySizeMult,
-  stunRecoveryOf, stunStopSec, basicAttackOf,
-  xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForMinutes, taskPayout,
-} = eng;
-
 /**
- * Re-read `engine.json` and rebuild the engine. The wiki calls this on every fingerprint change, so a
- * data edit shows up on the next render without a rebuild — the ESM replacement for busting
- * `require.cache`. Returns the fresh engine plus the payload it was built from.
+ * The cage-side engine: the shared suite over `tools/data/engine.json`, plus the raw data it was
+ * built from and the walk model the cages read (the hex graph, the block time, the encounter chance).
  */
-function build(): any {
-  const data = readJson<EngineData>(ENGINE_JSON);
-  return Object.assign({}, createEngine(data), { E: data });
-}
+const eng = Object.assign({}, shared.createEngine(E), { E, ROAD: createRoad(E) });
 
 // ---- what tools/town.ts needs, so no town number is a copy of a loot number
+// The shape only: every figure here is a name on the engine, never an expression re-typed here.
 
-function engineForTown(townEngine: any): any {
+function engineForTown(): any {
   const bands: Record<string, any> = {};
-  for (const b of BAND_KEYS) {
+  for (const b of eng.BAND_KEYS) {
     bands[b] = {
-      kills_per_hr: BAND[b].kills_derived,
-      drops_per_hr: BAND[b].drops_per_hr,
-      upgrades_per_hr: BAND[b].upgrades_per_hr,
-      band_kills: b === 'high_full_lck' ? 0 : BAND[b].band_kills,
+      kills_per_hr: eng.BAND[b].kills_derived,
+      drops_per_hr: eng.BAND[b].drops_per_hr,
+      upgrades_per_hr: eng.BAND[b].upgrades_per_hr,
+      band_kills: b === 'high_full_lck' ? 0 : eng.BAND[b].band_kills,
     };
   }
-  return Object.assign({}, townEngine, {
+  return {
     bands,
-    gold_per_junk_piece: TS.gold_per_junk_piece,
-    round_rate_to_decimals: TS.round_rate_to_decimals,
+    gold_per_junk_piece: eng.TS.gold_per_junk_piece,
+    round_rate_to_decimals: eng.TS.round_rate_to_decimals,
     checkpoints_kills: eng.CHECKPOINTS_KILLS,
-    budget_kills: (zone: number) => SETTLEMENT_BUDGET_KILLS[zone],
+    budget_kills: (zone: number) => eng.SETTLEMENT_BUDGET_KILLS[zone],
     push_kills_91_100: eng.PUSH_KILLS_91_100,
-    reroll_value_stones_per_hour: STONE.reroll_uses_per_hr,
-    reroll_stones_per_cast: C.reroll_value_stones_per_use,
-    reroll_casts_per_full_set_polish: C.polish_casts_per_full_set,
-    elite_reroll_tier_stones_per_hr: Math.round(BAND.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones),
-    add_mod_stones_per_hr: STONE.add_stones_per_hr,
-    ascend_stones_per_piece: C.ascend_add_stones + C.ascend_tier_stones,
-    towns_gold_rate_multiplier_bound: LCK_BOUND,
-    gold_per_minute: { low: goldPerMinute('low'), mid: goldPerMinute('mid'), high: goldPerMinute('high'), high_full_lck: goldPerMinute('high_full_lck') },
+    reroll_value_stones_per_hour: eng.STONE.reroll_uses_per_hr,
+    reroll_stones_per_cast: eng.C.reroll_value_stones_per_use,
+    reroll_casts_per_full_set_polish: eng.C.polish_casts_per_full_set,
+    elite_reroll_tier_stones_per_hr: eng.eliteTierStonesPerHr('high'),
+    add_mod_stones_per_hr: eng.STONE.add_stones_per_hr,
+    ascend_stones_per_piece: eng.ascendStonesPerPiece,
+    towns_gold_rate_multiplier_bound: eng.LCK_BOUND,
+    gold_per_minute: {
+      low: eng.goldPerMinute('low'), mid: eng.goldPerMinute('mid'),
+      high: eng.goldPerMinute('high'), high_full_lck: eng.goldPerMinute('high_full_lck'),
+    },
     // the walk's own shape, so T9 prints the block time and the encounter chance rather than a copy
     road: { block_sec: E.road.block_sec, encounter_chance_pct: E.road.encounter_chance_pct },
-  });
+  };
 }
 
-
-export {
-  ROOT, E, S, K, M, LG, L, C, TS, BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL,
-  DERIVED, REF, REFERENCE, ES, WEAPONS, STONE, LCK_BOUND, statAt, pointsAt, goldPerMinute, goldPrice, agiForCap,
-  statWithItems, mobEvasion, sizeMult, playerAccuracy, hitVs, MEAN_SPECIES_DEX, SPECIES_EVASION, MOB_EVASION_REF,
-  armourOf, armourReduce, damageSplit, zoneBodyFactor, skillF, typicalDps, mobPs, mobHpAt,
-  mobStat, mobStatsOf, typicalDpsAt, mobPsAt, MOB_HP_ANCHORS, ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, racesInZone, mobAcc, mobDodge, refAttackerAcc, mobRoster,
-  speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
-  mobResOf, speciesResMult, mobResByElementOf, convertDamageOf,
-  engineForTown, fmt, r1, r2, build, ROAD, dropChance, lckOf, killsDerived,
-  aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, dodgeRate, dodgeChance, perfectDodgeChance,
-  evasionChance, evasionRating, agilityEvasion,
-  critPool, critChanceOf, critDmgOf, maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf,
-  esRegenOf, cdrOf, alignmentOf, resistanceOf, weightCapacityOf, killsToLevel, xpToNext, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS, treePointsAt,
-  encumbranceOf, aspdEncumbered, weightAtQuality, weaponWeightOf, sizeMultOf, applySizeMult,
-  stunRecoveryOf, stunStopSec, basicAttackOf,
-  xpPerKill, spawnAt, rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr, stonesForMinutes, taskPayout, shared,
-};
+export { ROOT, E, eng, engineForTown };

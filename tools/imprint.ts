@@ -15,6 +15,7 @@
 
 import path from 'node:path';
 import { readJson } from './lib/json.ts';
+import * as G from './lib/gates.ts';
 import { createCraft, imprintStoneFor } from '../engine/craft.ts';
 import { createLoot } from '../engine/loot.ts';
 
@@ -247,23 +248,18 @@ function checks() {
 const args = process.argv.slice(2);
 if (args.includes('--checks')) {
   const { im1, im2, im3, im4, im5, im6, im7, im8, im9 } = checks();
-  const say = (ok, text) => console.log(`${ok ? 'PASS' : 'FAIL'}  ${text}`);
-  say(im1.length === 0, `IM1  elite ${E.loot.imprint_stone_sources?.elite_imprint_chance}/kill · boss ${E.loot.imprint_stone_sources?.boss_imprint_stones} stones · 1 a use${im1.length ? ' · ' + im1.join(' · ') : ''}`);
-  say(im2.length === 0, `IM2  one stone per Mod (${MODS.mods.length} lines), each charging itself${im2.length ? ' · ' + im2.slice(0, 4).join(' · ') : ''}`);
-  say(im3.length === 0, `IM3  fresh roll in-window, baseline cleared, locked lines refused, net +2 cap${im3.length ? ' · ' + im3.join(' · ') : ''}`);
-  say(im4.length === 0, `IM4  reach per verb: the Frame Mod by nothing, the Bound pair by identity verbs only, and the four whole-piece presses never by identity${im4.length ? ' · ' + im4.join(' · ') : ''}`);
-  say(im5.length === 0, `IM5  a bulk press costs the single-line price × ${CRAFT.editableCount(fixture(), CRAFT.PIECE_FLOOR)} lines; the drawn and chosen twin charge one price${im5.length ? ' · ' + im5.join(' · ') : ''}`);
-  say(im6.length === 0, `IM6  every redraw stays in the ${POOL.length}-line Base pool, no stack, no blocked sibling, no moved count${im6.length ? ' · ' + im6.slice(0, 4).join(' · ') : ''}`);
-  say(im7.length === 0, `IM7  a corrupted piece closes every verb and Repair opens it again${im7.length ? ' · ' + im7.join(' · ') : ''}`);
-  say(im8.length === 0, `IM8  Rebirth redraws the Unbound set only, one stone a press whatever the count, minted inside the boss ladder (Corrupt ⊃ Reforge ⊃ Rebirth)${im8.length ? ' · ' + im8.join(' · ') : ''}`);
-  say(im9.length === 0, `IM9  only Add stamps a line crafted, no verb puts the mark on the head, and an identity press keeps it${im9.length ? ' · ' + im9.join(' · ') : ''}`);
-  const problems = [...im1, ...im2, ...im3, ...im4, ...im5, ...im6, ...im7, ...im8, ...im9];
-  if (problems.length) {
-    console.log(`\n${problems.length} problem(s):`);
-    for (const p of problems) console.log(`  · ${p}`);
-    process.exit(1);
-  }
-  console.log('\n9/9 gate PASS · 0 FAIL');
+  const g = G.gates();
+  const say = (id: string, problems: string[], detail: string) => g.add(id, problems.length === 0, problems.length ? `${detail} · ${problems.join(' · ')}` : detail);
+  say('IM1', im1, `elite ${E.loot.imprint_stone_sources?.elite_imprint_chance}/kill · boss ${E.loot.imprint_stone_sources?.boss_imprint_stones} stones · 1 a use`);
+  say('IM2', im2, `one stone per Mod (${MODS.mods.length} lines), each charging itself`);
+  say('IM3', im3, 'fresh roll in-window, baseline cleared, locked lines refused, net +2 cap');
+  say('IM4', im4, 'reach per verb: the Frame Mod by nothing, the Bound pair by identity verbs only, and the four whole-piece presses never by identity');
+  say('IM5', im5, `a bulk press costs the single-line price × ${CRAFT.editableCount(fixture(), CRAFT.PIECE_FLOOR)} lines; the drawn and chosen twin charge one price`);
+  say('IM6', im6, `every redraw stays in the ${POOL.length}-line Base pool, no stack, no blocked sibling, no moved count`);
+  say('IM7', im7, 'a corrupted piece closes every verb and Repair opens it again');
+  say('IM8', im8, 'Rebirth redraws the Unbound set only, one stone a press whatever the count, minted inside the boss ladder (Corrupt ⊃ Reforge ⊃ Rebirth)');
+  say('IM9', im9, 'only Add stamps a line crafted, no verb puts the mark on the head, and an identity press keeps it');
+  G.report(g.rows());
 } else {
   console.log('imprint.ts — the identity stone and the bench verb matrix');
   console.log('  --checks   run IM1-IM9 (mint, roster, verb, reach, bulk price, pool, sealed piece, Rebirth, crafted mark)');

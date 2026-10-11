@@ -97,20 +97,20 @@
 </div>
 
 <style>
-  .market { display: grid; gap: .8rem; }
+  .market { display: grid; gap: var(--spacing-sm); }
   /* the purse is the thing a market read needs, so it is set on the plate above the stock rather than
      asked for by opening a second screen */
-  .counter { display: grid; grid-template-columns: minmax(12rem, 18rem) 1fr; gap: 1rem; }
+  .counter { display: grid; grid-template-columns: minmax(clamp(150px, 9.78vw + 37.8px, 324px), clamp(225px, 14.67vw + 56.7px, 486px)) 1fr; gap: var(--spacing-md); }
   .purse {
-    display: grid; align-content: center; gap: .1rem; padding: .7rem .9rem;
+    display: grid; align-content: center; gap: 1px; padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
   }
-  .purse b { font-family: var(--num); font-size: 1.9rem; line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
-  .purse span { color: var(--dim); font-size: .7rem; letter-spacing: .04em; text-transform: uppercase; }
-  .sell { display: grid; align-content: start; gap: .35rem; }
+  .purse b { font-family: var(--num); font-size: var(--font-xl); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .purse span { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(0.5px, 0.033vw + 0.13px, 1.08px); text-transform: uppercase; }
+  .sell { display: grid; align-content: start; gap: 4px; }
   .sell h4 { margin: 0; }
-  .junk { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .2rem .7rem; font-size: .76rem; }
-  .junk li { display: inline-flex; gap: .3rem; color: var(--dim); }
+  .junk { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 3px var(--spacing-sm); font-size: var(--font-xs); }
+  .junk li { display: inline-flex; gap: 4px; color: var(--dim); }
   .junk li b { font-family: var(--num); color: var(--text); }
   .act { justify-self: start; }
   .hint { margin: 0; color: var(--dim); }
@@ -118,11 +118,11 @@
   /* an affordable line is lit; an unaffordable one says by how much, in gold, in the same place the
      lit one puts its button — a refusal that only removes a button teaches nothing */
   .lines td.name { color: var(--text); font-family: var(--ui); }
-  .lines .kind { color: var(--dim); font-family: var(--ui); font-size: .74rem; }
+  .lines .kind { color: var(--dim); font-family: var(--ui); font-size: var(--font-xs); }
   .lines .price { color: var(--gold); }
-  .lines tr.ok { background: rgba(232, 193, 105, .06); }
+  .lines tr.ok { background: color-mix(in srgb, var(--gold) 6%, transparent); }
   .lines tr.ok .price { font-weight: 600; }
   .lines tr.poor td { opacity: .62; }
-  .lines .short { font-size: .7rem; color: #e8a093; }
-  .buy { border-color: rgba(232, 193, 105, .45); color: var(--gold); }
+  .lines .short { font-size: var(--font-xs); color: var(--alarm); }
+  .buy { border-color: color-mix(in srgb, var(--gold) 45%, transparent); color: var(--gold); }
 </style>

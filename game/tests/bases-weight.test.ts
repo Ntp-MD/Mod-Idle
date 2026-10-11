@@ -1,19 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
 import { eng, E, BASES, loot } from '../src/engine/client';
 import { rollDrop } from '../src/sim/drop';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { mulberry32 } from '../src/engine/client-helpers';
-
-const require = createRequire(import.meta.url);
-const basesCage = require('../../tools/bases.ts');
-
-const PATHS: Record<string, string[]> = {
-  cloth: ['Circlet', 'Vestment', 'Legwraps', 'Silk Slippers', 'Silk Sash', 'Silk Wraps', 'Iron Band', 'Iron Band', 'Jade Amulet', 'Silver Hoop', "Traveler's Cloak"],
-  armored: ['Sallet', 'Plate Vest', 'Cuisses', 'Plated Greaves', 'War Belt', 'Iron Gauntlets', 'Moonstone Signet', 'Moonstone Signet', 'Onyx Talisman', 'Onyx Drop', 'Heavy Mantle'],
-};
-
-const weightOf = (names: string[]) => names.reduce((t, n) => t + (BASES.bases.find((b: any) => b.name === n)?.weight || 0), 0);
 
 describe('bases.json is the mirror the cage gates', () => {
   it('carries every frame with a weight and a Primary pool', () => {
@@ -26,7 +15,7 @@ describe('bases.json is the mirror the cage gates', () => {
 
 });
 
-describe('the weight tax from formula-utility.md section 11', () => {
+describe('the weight tax', () => {
   // the shape is the promise; the two constants are the data own (a rescale moves both together)
   const cap = (str: number) => E.level_gain.weight_base + str * E.K.K_STR_WEIGHT;
 
@@ -56,13 +45,34 @@ describe('the weight tax from formula-utility.md section 11', () => {
   });
 
   it('a printed set stays under the base line, so the tax does not fire on it', () => {
-    const bare = buildCharacter(100, emptyGear());
-    const heavy = emptyGear();
-    for (let i = 0; i < heavy.length; i++) {
-      const name = PATHS.armored[i % PATHS.armored.length];
-      const frame = BASES.bases.find((b: any) => b.name === name)!;
-      heavy[i] = { slot: frame.slot, base: frame.name, ilvl: 61, quality: 'high', tier: 'T3', lines: [], q: 2, weight: frame.weight * 1.3 };
+    // the heaviest frame of every slot, read off the data — never a typed frame list
+    const heaviest = new Map<string, any>();
+    for (const b of BASES.bases) {
+      const cur = heaviest.get(b.slot);
+      if (!cur || b.weight > cur.weight) heaviest.set(b.slot, b);
     }
+    let weaponName = BASES.weapons[0].name;
+    let weaponWeight = 0;
+    for (const w of BASES.weapons) {
+      const wt = eng.weaponWeightOf(BASES, w.name, 'main hand');
+      if (wt > weaponWeight) { weaponWeight = wt; weaponName = w.name; }
+    }
+    // both sets carry the same main hand, so the only variable left is the weight the tax reads
+    const bareSet = emptyGear();
+    bareSet[loot.SLOTS.indexOf('main hand')] = {
+      slot: 'main hand', base: weaponName, ilvl: 61, quality: 'high', tier: 'T3', lines: [],
+      q: 2, weight: weaponWeight,
+    };
+    const bare = buildCharacter(100, bareSet);
+    const topW = Math.pow(BASES.quality_weight_multiplier, 2);
+    const heavy = loot.SLOTS.map((slot: string) => {
+      const frame = slot === 'main hand' ? null : heaviest.get(slot)!;
+      return {
+        slot, base: frame ? frame.name : weaponName,
+        ilvl: 61, quality: 'high', tier: 'T3', lines: [], q: 2,
+        weight: (frame ? frame.weight : weaponWeight) * topW,
+      };
+    });
     const c = buildCharacter(100, heavy);
     expect(c.weightUsed).toBeLessThanOrEqual(c.weightCap);
     expect(c.encumbrance).toBe(0);

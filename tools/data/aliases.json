@@ -6,6 +6,7 @@
   "docs": {
     "note": "The prose shelf collapsed to `doc/start/` plus the root rules. Each key is a retired doc; the value names the file that owns its content now, so a citation of a retired name still resolves.",
     "combat.md": "engine/index.ts (the damage layers) · tools/survival.ts",
+    "concept.md": "DECISIONS.md (the frame · the loop · active vs AFK · breadth · builds · minute one · completion, under §Product)",
     "core-stats.md": "tools/data/engine.json `stat` + `K`",
     "crafting.md": "tools/data/engine.json `craft` · engine/craft.ts",
     "checks.md": "tools/check.ts (the engine cage's gates)",
@@ -34,6 +35,8 @@
     "skill-pool-aura-heal.md": "tools/data/skills.json `skills` (the aura and heal rows)",
     "skill-pool-system.md": "tools/data/skills.json `skills` (the system rows)",
     "skill-tree.md": "tools/data/tree.json · engine/tree.ts",
+    "tasks.md": "DECISIONS.md §The task board (the board's rules; every figure is town.json `task_sizing`)",
+    "Techstack.md": "DECISIONS.md §Stack (the fixed stack and the layout)",
     "towns.md": "tools/data/town.json `settlements` + `npcs`",
     "towns-stalls.md": "tools/data/town.json `one_time` + `repeatable` + `standing`",
     "world.md": "tools/data/engine.json `mob.zones` · tools/data/map.json"
@@ -58,7 +61,7 @@
     {
       "old": "pdef",
       "new": "Armour",
-      "note": "there is no second physical-defence stat — Armour is the Str line (AGENTS.md section 5)"
+      "note": "there is no second physical-defence stat — Armour is the Str line (DECISIONS.md §Standing intent)"
     },
     {
       "old": "mdef",

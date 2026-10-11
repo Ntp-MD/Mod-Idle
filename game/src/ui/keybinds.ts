@@ -31,15 +31,16 @@ export const KEYGROUP_LABEL: Record<KeyGroup, string> = {
 };
 
 /**
- * `screen.*` ids are the rail tabs, so opening a screen is one press from anywhere. The digit keys follow
- * the rail's own order — the tab prints its number on it — and the letter keys go to the screens a player
- * reaches for less often than the ones in front of them. The warehouse has no tab: it is the bag's other
- * side, so its key opens that screen on that side.
+ * `screen.*` ids are the screens the rail and the bar carry, so opening one is one press from anywhere. The
+ * digit keys follow the rail's own order — the tab prints its number on it, and the hole in the run is the
+ * screen that left the rail for the bar — and the letter keys go to the screens a player reaches for less
+ * often than the ones in front of them. The warehouse has no tab: it is the bag's other side, so its key
+ * opens that screen on that side.
  */
 export const KEYBINDS: Keybind[] = [
   { id: 'screen.field', label: 'Back to the field', group: 'screen', def: 'Escape', where: 'anywhere' },
   { id: 'screen.map', label: 'Map', group: 'screen', def: '1', where: 'rail' },
-  { id: 'screen.bag', label: 'Bags — the side that serves where you stand', group: 'screen', def: '2', where: 'rail' },
+  { id: 'screen.bag', label: 'Bags — the side that serves where you stand', group: 'screen', def: '2', where: 'action bar' },
   { id: 'screen.town', label: 'Town — the settlement you stand in', group: 'screen', def: '3', where: 'rail' },
   { id: 'screen.market', label: 'Market — buy and sell', group: 'screen', def: '4', where: 'town' },
   { id: 'screen.forge', label: 'Forge — enhance a piece', group: 'screen', def: '5', where: 'town' },
@@ -53,7 +54,6 @@ export const KEYBINDS: Keybind[] = [
   { id: 'sheet.open', label: 'Character sheet', group: 'screen', def: 'c', where: 'action bar' },
 
   { id: 'game.pause', label: 'Pause or resume the clock', group: 'field', def: 'Space', where: 'the field' },
-  { id: 'game.tick', label: 'Step one second while paused', group: 'field', def: 'Shift+Space', where: 'the field' },
 
   { id: 'map.zoom.in', label: 'Zoom the sheet in', group: 'map', def: '+', where: 'map focus' },
   { id: 'map.zoom.out', label: 'Zoom the sheet out', group: 'map', def: '-', where: 'map focus' },

@@ -11,8 +11,8 @@ import type { Item } from '../src/sim/types';
  * The line skeleton: line 1 is the Frame Mod, lines 2-3 the unremovable Bound pair, then the Normal
  * lines the drop drew (`item_level.unbound_slots`) which the Add craft may widen by `mods_added_cap`.
  * These tests pin the shape, the one-line rule that a Frame Mod follows (the FLAT defence lines the
- * frame's name declares, one, two or all three, sharing one budget at ×0.7 / ×0.55), and the two
- * avoidance readings the skeleton added — block and armour penetration.
+ * frame's name declares, one, two or all three, sharing one budget at the value_scale the data
+ * owns), and the two avoidance readings the skeleton added — block and armour penetration.
  */
 
 const frameNamed = (name: string) => BASES.bases.find((b: any) => b.name === name);
@@ -27,7 +27,7 @@ describe('the line skeleton', () => {
     const seen = new Set<number>();
     for (let i = 0; i < 600; i++) {
       const band = ['low', 'mid', 'high'][i % 3];
-      const item = rollDrop(rng, band, band === 'low' ? 1 : band === 'mid' ? 31 : 61);
+      const item = rollDrop(rng, band, eng.floorLevelOf(band));
       expect(item.lines.length).toBeGreaterThanOrEqual(lo);
       expect(item.lines.length).toBeLessThanOrEqual(hi);
       seen.add(item.lines.length);
@@ -44,10 +44,10 @@ describe('the line skeleton', () => {
   });
 
   it('line 1 is the Frame Mod, lines 2-3 the Bound pair, and the craft verbs refuse all three', () => {
-    const item = rollDrop(mulberry32(202), 'high', 61);
-    expect(craft.FRAME_MOD_SLOTS).toBe(1);
-    expect(craft.BOUND_SLOTS).toBe(2);
-    expect(craft.UNTOUCHABLE).toBe(3);
+    const item = rollDrop(mulberry32(202), 'high', eng.floorLevelOf('high'));
+    expect(craft.FRAME_MOD_SLOTS).toBe(E.item_level.frame_mod_slots);
+    expect(craft.BOUND_SLOTS).toBe(E.item_level.bound_slots);
+    expect(craft.UNTOUCHABLE).toBe(E.item_level.frame_mod_slots + E.item_level.bound_slots);
     for (let i = 0; i < craft.UNTOUCHABLE; i++) {
       expect(craft.reroll(item, i, mulberry32(1)).ok).toBe(false);
       expect(craft.refine(item, i, mulberry32(1)).ok).toBe(false);
@@ -136,7 +136,7 @@ describe('block is its own avoidance layer (exception)', () => {
     // an accurate mob keeps the evasion roll near zero, so a draw between that and the block
     // chance lands on the block layer and nowhere else
     const mob = { ps: 300, hitsPerSec: 1, acc: 1e6, damage: 'physical', innate: ['fire'], armour: 0, res: 0 } as any;
-    const ev = eng.evasionChance(c.evasion, c.evasionFromAgi, mob.acc);
+    const ev = eng.evasionChance(c.evasion, mob.acc);
     expect(ev).toBeLessThan(c.block);
     const draw = (ev + c.block) / 200;
     const r = mobSwing(() => draw, c, mob, {} as any);

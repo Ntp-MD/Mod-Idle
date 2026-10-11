@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import * as eng from './lib/engine.ts';
+import { eng } from './lib/engine.ts';
+import * as G from './lib/gates.ts';
 import { readJson } from './lib/json.ts';
 import { createLoot } from '../engine/loot.ts';
 
@@ -356,8 +357,8 @@ function sync() {
 import { leanReweight } from '../engine/loot.ts';
 
 function gates(rows: any, bias: any) {
-  const out: any[] = [];
-  const add = (id: any, ok: any, detail: any) => out.push({ id, ok, detail });
+  const g = G.gates();
+  const { add, watch } = g;
 
   const low = rows.find((r: any) => r.band === 'low')!;
   const high = rows.find((r: any) => r.band === 'high')!;
@@ -380,13 +381,18 @@ function gates(rows: any, bias: any) {
   // reproduce the anchor `engine.json` publishes, and does the decision leg stay flat?
   const lckBound = BAND.high_full_lck.junk_per_hr / BAND.high.junk_per_hr;
   const lckRatio = lck.drops / high.drops;
-  add('LT5', Math.abs(lckRatio - lckBound) / lckBound <= 0.05 && lck.upgrades <= high.upgrades * 1.6,
+  watch('LT5', Math.abs(lckRatio - lckBound) / lckBound <= 0.05 && lck.upgrades <= high.upgrades * 1.6,
+    `the full-Lck run left its window: junk ×${lckRatio.toFixed(2)} against the published bound ×${lckBound.toFixed(2)} (±5%) · upgrades ${lck.upgrades.toFixed(0)} vs ${high.upgrades.toFixed(0)} (≤1.6×)`,
     `Lck buys count, not decisions: ${lck.drops.toFixed(0)} drops vs ${high.drops.toFixed(0)} (x${lckRatio.toFixed(2)} against the published junk bound x${lckBound.toFixed(2)}) but ${lck.upgrades.toFixed(0)} upgrades vs ${high.upgrades.toFixed(0)} (x${(lck.upgrades / high.upgrades).toFixed(2)}) — the rule Lck is craft-speed, not equip-speed`);
 
-  add('LT6', rows.every((r: any) => r.avgScore > 0 && r.linesPerItem >= 2),
+  watch('LT6', rows.every((r: any) => r.avgScore > 0 && r.linesPerItem >= 2),
+    `a band produced ${rows.map((r: any) => `${r.band} score ${r.avgScore.toFixed(2)} on ${r.linesPerItem.toFixed(2)} lines`).join(' · ')} — below two real lines a piece is not worth reading`,
     'every equipped piece carries real lines: ' + rows.map((r: any) => `${r.band.replace('_', ' + ')} score ${r.avgScore.toFixed(2)} on ${r.linesPerItem.toFixed(2)} lines`).join(' · '));
 
-  add('LT7', high.flatPerDrop < low.flatPerDrop && high.flatPerDrop < 0.4,
+  add('LT7', high.flatPerDrop < low.flatPerDrop,
+    `Flat lines per drop fall with Item quality: low ${low.flatPerDrop.toFixed(3)} → high ${high.flatPerDrop.toFixed(3)} of ${high.linesPerItem.toFixed(2)} lines per item — the direction is the rule, and a flip is a wiring break`);
+  watch('LT7t', high.flatPerDrop < 0.4,
+    `high-quality drops carry ${high.flatPerDrop.toFixed(3)} Flat lines — above the 0.4 target the 0.25 high-quality weighting stopped thinning the early-game Flats`,
     `Flat lines per drop fall with Item quality: low ${low.flatPerDrop.toFixed(3)} → high ${high.flatPerDrop.toFixed(3)} of ${high.linesPerItem.toFixed(2)} lines — the 0.25 high-quality weighting keeps drops from being full of dead early-game lines (F11)`);
 
   // The signal a frame weight would move is the upgrade rate, not the average item score. Score is
@@ -394,10 +400,12 @@ function gates(rows: any, bias: any) {
   // the three school biases scored within a thousandth of each other while decisions-per-hour still
   // separated cleanly — and the rate is the row `towns.md` section 4 would actually be changing.
   const biasRows = bias.map((b: any) => `${b.perHr.toFixed(2)} up/hr · ${b.keepRate.toFixed(2)}% keep · ${b.avgScore.toFixed(2)} score`);
-  add('LT8', bias.length === 3 && new Set(bias.map((b: any) => b.perHr.toFixed(2))).size === 3,
+  watch('LT8', bias.length === 3 && new Set(bias.map((b: any) => b.perHr.toFixed(2))).size === 3,
+    `the Base-bias experiment no longer separates the upgrade rate (${bias.map((b: any) => `${b.perHr.toFixed(2)} up/hr`).join(' · ')}) — the sensitivity the A9 even-weight ruling rests on has gone flat`,
     `the Base-bias experiment moves the upgrade rate (${biasRows.join(' | ')}), so a per-settlement frame weight is a real balance change — which is why the owner ruled to ship even-weighted (A9) and no weight is ever added to the data`);
 
-  add('LT9', rows.every((r: any) => r.keepSd / Math.max(r.keepRate, 0.01) < 0.35),
+  watch('LT9', rows.every((r: any) => r.keepSd / Math.max(r.keepRate, 0.01) < 0.35),
+    'a keep-rate is unstable across seeds (±35% target): ' + rows.map((r: any) => `±${(100 * r.keepSd / r.keepRate).toFixed(0)}% (${r.band.replace('_', ' + ')})`).join(' · '),
     'every keep-rate is stable across seeds: ' + rows.map((r: any) => `±${(100 * r.keepSd / r.keepRate).toFixed(0)}% (${r.band.replace('_', ' + ')})`).join(' · '));
 
   const want = measured();
@@ -405,10 +413,14 @@ function gates(rows: any, bias: any) {
   add('LT10', BAND_KEYS.every((b: any) => L.bands[b].upgrades_per_hr === want[b]),
     `engine.json carries the measured upgrades/hr (${stored.join(' · ')}) so the junk line drops - upgrades follows the simulation — run \`node tools/loot.ts --sync\` if this FAILs`);
 
-  add('LT11', L.filter.upgrade_margin_pct > 0 && rows.every((r: any) => r.keepRate < 6.0) && rows.every((r: any) => r.keepRate > 0.15),
+  add('LT11', L.filter.upgrade_margin_pct > 0,
+    `the swap margin is a real line (${L.filter.upgrade_margin_pct}%) — zero would make the filter a no-op the bag still pays for`);
+  watch('LT11t', rows.every((r: any) => r.keepRate < 6.0) && rows.every((r: any) => r.keepRate > 0.15),
+    `a band's keep-rate left the published decision budget (0.15-6.0% of drops): ${rows.map((r: any) => r.keepRate.toFixed(2) + '%').join(' · ')} — re-read the decision pacing by eye`,
     `the swap margin is ${L.filter.upgrade_margin_pct}% and every band stays inside the published decision budget (0.15-6.0% of drops, widened from 3.5 when the re-base cut the drop flow ~3x): ${rows.map((r: any) => r.keepRate.toFixed(2) + '%').join(' · ')}`);
 
-  add('LT12', Math.abs(rows[2].keepRate - 3.1) < 0.6 && Math.abs(rows[0].keepRate - 5.1) < 0.9,
+  watch('LT12', Math.abs(rows[2].keepRate - 3.1) < 0.6 && Math.abs(rows[0].keepRate - 5.1) < 0.9,
+    `the measurement moved off the published keep-rates: low ${rows[0].keepRate.toFixed(2)}% (published 5.1 ±0.9) · high ${rows[2].keepRate.toFixed(2)}% (published 3.1 ±0.6) — re-read the filter rule by eye before re-quoting`,
     `the measurement reproduces the published keep-rates: low ${rows[0].keepRate.toFixed(2)}% (published 5.1) · high ${rows[2].keepRate.toFixed(2)}% (published 3.1) — the filter rule did not change, it was finally written down`);
 
   const carried = (id: any) => (E.f_rows_carried.find((r: any) => r.id === id) || {}).value || '';
@@ -428,7 +440,7 @@ function gates(rows: any, bias: any) {
   add('LT14', identity && conserved && leaning && leans.length === 3,
     `The variant lean: 'none' is the identity, each lean raises its own stream, and every lean conserves ${sum(sample).toFixed(2)} expected drops/kill across gear · herb · junk${!identity ? ' · NONE NOT IDENTITY' : ''}${!conserved ? ' · TOTAL NOT CONSERVED' : ''}${!leaning ? ' · LEAN NOT RAISED' : ''}${leans.length !== 3 ? ' · CATEGORIES != 3' : ''}`);
 
-  return out;
+  return g.rows();
 }
 
 // ---------------------------------------------------------------- cli
@@ -436,13 +448,7 @@ function gates(rows: any, bias: any) {
 const arg = process.argv[2];
 
 if (arg === '--checks') {
-  const rows = ALL();
-  const bias = biasExperiment();
-  const res = gates(rows, bias);
-  for (const r of res) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-  const fails = res.filter((r) => !r.ok).length;
-  console.log(`\n${res.length - fails}/${res.length} gate PASS · ${fails} FAIL`);
-  if (fails) process.exitCode = 1;
+  G.report(gates(ALL(), biasExperiment()));
 } else if (arg === '--sync') {
   sync();
 } else if (arg === '--sim') {

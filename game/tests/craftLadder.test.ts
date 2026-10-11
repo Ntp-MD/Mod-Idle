@@ -12,7 +12,7 @@ const piece = (over: any = {}) => ({
 /** A rng pinned to a fixed sequence so every branch of the ladder is reachable. */
 const seq = (values: number[]) => { let i = 0; return () => values[i++ % values.length]; };
 
-describe('the +1..+15 ladder', () => {
+describe('the upgrade ladder', () => {
   it('reads its chance off the published endpoints, interpolated between', () => {
     const EP = C.upgrade_success_endpoints as any;
     const midFrom = EP.safe_to + 1, midTo = EP.safe_to + 6;
@@ -31,37 +31,38 @@ describe('the +1..+15 ladder', () => {
     expect(bench.costOf('upgrade', piece())).toEqual({ quality: COSTS[0] });
     expect(bench.costOf('upgrade', piece({ upgrade_lv: 5 }))).toEqual({ quality: COSTS[5] });
     expect(bench.costOf('upgrade', piece({ upgrade_lv: 10 }))).toEqual({ quality: COSTS[10] });
-    expect(bench.costOf('upgrade', piece({ upgrade_lv: 14 }))).toEqual({ quality: COSTS[14] });
+    expect(bench.costOf('upgrade', piece({ upgrade_lv: C.upgrade_cap - 1 }))).toEqual({ quality: COSTS[C.upgrade_cap - 1] });
   });
 
-  it('stops at +15 and refuses a Broken or corrupted piece', () => {
-    expect(bench.upgrade(piece({ upgrade_lv: 15 }), seq([0.99])).why).toMatch(/\+15/);
+  it('stops at its cap and refuses a Broken or corrupted piece', () => {
+    expect(bench.upgrade(piece({ upgrade_lv: C.upgrade_cap }), seq([0.99])).why)
+      .toMatch(new RegExp('\\+' + C.upgrade_cap));
     expect(bench.upgrade(piece({ broken: true }), seq([0])).why).toMatch(/Broken/);
     expect(bench.upgrade(piece({ corrupted: true }), seq([0])).why).toMatch(/corrupted/i);
     expect(bench.reroll(piece({ corrupted: true }), 0, seq([0])).why).toMatch(/corrupted/i);
     expect(bench.refine(piece({ broken: true }), 0, seq([0])).why).toMatch(/Broken/);
   });
 
-  it('a fail below +11 drops one level and never breaks', () => {
+  it('a fail below the break threshold drops one level and never breaks', () => {
     const r = bench.upgrade(piece({ upgrade_lv: 6 }), seq([0.99])); // a certain miss
     expect(r.changed.outcome).toBe('dropped');
     expect(r.item.upgrade_lv).toBe(5);
     expect(r.item.broken).toBeFalsy();
   });
 
-  it('a fail at +11 spends protection first, then breaks the piece', () => {
-    const held = bench.upgrade(piece({ upgrade_lv: 10, protection_left: 2 }), seq([0.99]));
+  it('a fail at the break threshold spends protection first, then breaks the piece', () => {
+    const held = bench.upgrade(piece({ upgrade_lv: C.upgrade_breaks_from - 1, protection_left: 2 }), seq([0.99]));
     expect(held.changed.outcome).toBe('protected');
     expect(held.item.protection_left).toBe(1);
     expect(held.item.broken).toBeFalsy();
-    const gone = bench.upgrade(piece({ upgrade_lv: 10, protection_left: 0 }), seq([0.99]));
+    const gone = bench.upgrade(piece({ upgrade_lv: C.upgrade_breaks_from - 1, protection_left: 0 }), seq([0.99]));
     expect(gone.changed.outcome).toBe('broken');
     expect(gone.item.broken).toBe(true);
     expect(gone.item.protection_left).toBe(0);
   });
 
-  it('a piece born with no counter still has its five charges', () => {
-    const r = bench.upgrade(piece({ upgrade_lv: 10 }), seq([0.99]));
+  it('a piece born with no counter still has its full protection', () => {
+    const r = bench.upgrade(piece({ upgrade_lv: C.upgrade_breaks_from - 1 }), seq([0.99]));
     expect(r.changed.outcome).toBe('protected');
     expect(r.item.protection_left).toBe(C.protection_start - 1);
   });
@@ -73,10 +74,10 @@ describe('the +1..+15 ladder', () => {
     const back = bench.repair(broken);
     expect(back.changed.outcome).toBe('repaired');
     expect(back.item.broken).toBe(false);
-    expect(back.item.upgrade_lv).toBe(level); // kept at its level, exactly as the doc states
+    expect(back.item.upgrade_lv).toBe(level); // kept at the level it broke at
     expect(back.item.protection_left).toBe(C.protection_start);
     expect(bench.repair(piece()).why).toMatch(/not Broken/);
-    expect(bench.costOf('repair')).toEqual({ repair: 1 });
+    expect(bench.costOf('repair')).toEqual({ repair: C.repair_stones });
   });
 });
 
@@ -99,7 +100,7 @@ describe('the one Corrupt gamble', () => {
   });
 
   it('never destroys the piece, and its worst outcome is one quality step down', () => {
-    const worst = bench.corrupt(piece({ q: 2, quality: 'high' }), pool, seq([1])); // last row = 5%
+    const worst = bench.corrupt(piece({ q: 2, quality: 'high' }), pool, seq([1])); // the last row, the worst outcome
     expect(worst.changed.outcome).toBe('quality_down');
     expect(worst.item.quality).toBe('mid');
     expect(worst.item.lines.length).toBe(1); // the piece survives, only its step moves

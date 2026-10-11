@@ -11,6 +11,8 @@ export interface HitReport {
   landed: boolean;
   crit: boolean;
   damage: number;
+  /** why a swing that missed did: the accuracy roll failed, or the mob's own dodge answered it. */
+  why?: 'miss' | 'dodge';
   /** HP recovered from mark's leech on this hit (`status.mark.k_leech`). */
   leech?: number;
   /**
@@ -23,10 +25,10 @@ export interface HitReport {
 
 /**
  * One player swing, in combat.md §2 outgoing order:
- * hit roll → mob dodge (opposed) → crit (physical half only) → weak/Element counter
+ * hit roll → mob dodge (opposed) → crit (physical half only)
  * → the mob's own Armour and Elemental resistance → damage_taken → subtract from mob HP.
- * A weapon Element line is what enables steps 3-4; until a Base carries one the counter multiplier
- * is 1, and nothing is invented in its place.
+ * No Element counters another: the Element pools answer the race's own-Element res on their own
+ * lines, and a race's non-own Elements meet no res at all.
  */
 export function playerSwing(
   rng: () => number,
@@ -36,26 +38,20 @@ export function playerSwing(
   curse: CurseMods = NO_CURSE,
 ): HitReport {
   const hit = eng.hitChance(c.accuracy, mob.evasion);
-  if (rng() > hit) return { landed: false, crit: false, damage: 0 };
-  if (rng() * 100 < eng.dodgeChance(mob.dodgeRate, c.accuracy)) return { landed: false, crit: false, damage: 0 };
+  if (rng() > hit) return { landed: false, crit: false, damage: 0, why: 'miss' };
+  if (rng() * 100 < eng.dodgeChance(mob.dodgeRate, c.accuracy)) return { landed: false, crit: false, damage: 0, why: 'dodge' };
 
   // formula-offense §3: dmg_per_hit = phys + magic + elem × elem_align/100
-  // combat.md §2 steps 3-4 are Element-on-Element, so weak and the counter table scale the Elemental
-  // share only — physical is answered by Armour and the Elements by resistance, never by
-  // each other. A cursed target still takes more of the whole hit (Expose).
-  // each Element pool is countered on its own (PoE reading): a fire-and-cold weapon hitting a
-  // fire monster gets the ×1.5 weak line on the fire part and the 0.60 pair on the cold part, and a
-  // pool that no line names is left exactly as strong as it always was. The pools are kept split so
-  // the race's per-Element res (X54) answers each one on its own line.
+  // physical is answered by Armour and the Elements by resistance, never by each other. A cursed
+  // target still takes more of the whole hit (Expose). The pools are kept split so the race's
+  // own-Element res (X54) answers its Element on its own line and every other pool lands unresisted.
   const elemByElement: Record<string, number> = {};
   let elemDamage = 0;
   const pools = Object.entries(c.elemByElement);
   const elemTaken = 1 + (curse.elemTakenPct || 0) / 100;
   if (pools.length && mob.innate.length) {
     for (const [el, pool] of pools) {
-      const mult = (el === mob.innate[0] && el !== NO_COUNTER_ELEMENT ? E.elements.weak_mult : 1)
-        * counterMult(el, mob.innate[0]);
-      const dmg = pool * (c.alignment / 100) * mult * elemTaken;
+      const dmg = pool * (c.alignment / 100) * elemTaken;
       elemByElement[el] = dmg;
       elemDamage += dmg;
     }
@@ -75,9 +71,9 @@ export function playerSwing(
   }
   // conversion (`draft/convert-damage.md`): a percent of the finished physical share is routed into
   // its named Element here — after crit, before mitigation — so the converted half answers Elemental
-  // resistance instead of Armour and takes the same weak/counter pair an Element pool does. The summed
-  // percent is capped at the whole hit inside `convertDamageOf`, so overflow is wasted, never a
-  // multiplier, and the physical half shrinks by exactly what converted.
+  // resistance instead of Armour. The summed percent is capped at the whole hit inside
+  // `convertDamageOf`, so overflow is wasted, never a multiplier, and the physical half shrinks by
+  // exactly what converted.
   if (c.conversion && Object.keys(c.conversion).length) {
     const conv = eng.convertDamageOf(physShare, c.conversion) as { physical: number; byElement: Record<string, number> };
     nonElement = c.magic + conv.physical;
@@ -88,13 +84,18 @@ export function playerSwing(
     if (!Object.keys(elemByElement).length && elemDamage > 0) { elemByElement[''] = elemDamage; elemDamage = 0; }
     for (const [el, amount] of Object.entries(conv.byElement)) {
       if (!(amount > 0)) continue;
-      const mult = (el === mob.innate[0] && el !== NO_COUNTER_ELEMENT ? E.elements.weak_mult : 1)
-        * counterMult(el, mob.innate[0]);
-      const dmg = amount * mult * elemTaken;
+      const dmg = amount * elemTaken;
       elemByElement[el] = (elemByElement[el] || 0) + dmg;
       elemDamage += dmg;
     }
   }
+  // the damage bucket (owner ruling): a swing rides the `Attack damage %` ladder, except a magic
+  // weapon's bolt, which rides `Spell damage %`. The Element pools stay outside it — the swing's
+  // Element is not the attack — and the pair never crosses.
+  nonElement = nonElement * eng.ladderMult(
+    eng.basicAttackOf(BASES, c.weaponName) === 'bolt' ? 'magic' : 'phys',
+    c.attackDamage, c.spellDamage);
+
   // step 5-6 (B8): the mob answers each half with the line written against it — its own
   // Armour on everything that is not Element, its own Elemental resistance on the Element half.
   // A crossbow's `Armour penetration %` line joins the same cut a curse writes, so the two
@@ -126,23 +127,6 @@ export function playerSwing(
 }
 
 /**
- * Chaos is "the only Element with no counter" and gets 1.15 against everything *including itself*
- * (elements.md), so it never also collects the ×1.5 weak line. Which Element that is is read out of
- * the table rather than named in code: it is the one whose row is the same number in every column.
- */
-const NO_COUNTER_ELEMENT = (() => {
-  const order = E.elements.order as string[];
-  const table = E.elements.counter as Record<string, Record<string, number>>;
-  return order.find((our) => order.every((theirs) => table[our][theirs] === table[our][order[0]])) ?? null;
-})();
-
-/** elements.md counter table, including the ×1.5 weak line. */
-export function counterMult(ourElement: string, mobElement: string): number {
-  const table = E.elements.counter as Record<string, Record<string, number>>;
-  return table[ourElement]?.[mobElement] ?? 1;
-}
-
-/**
  * One mob swing, in combat.md §2 incoming order: perfect dodge → evasion → dodge → damage split
  * → armour on the physical half → resistance on the Element half → damage_taken multiplier →
  * Energy Shield before HP (chaos bypasses) → HP. Returns the damage that actually landed.
@@ -161,9 +145,9 @@ export function mobSwing(
   if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   const acc = mob.acc * accMult(curse);
-  // Evasion is one layer: the Dex rating rolls against this mob's accuracy, Agi adds
-  // its points on top, and the pair is capped together. A blocked hit is gone entirely.
-  if (rng() * 100 < eng.evasionChance(c.evasion, c.evasionFromAgi, acc)) {
+  // Evasion is one layer: the Agi rating rolls against this mob's accuracy, the gear Evasion
+  // lines ride on it, and the Cap 80 binds the result. A blocked hit is gone entirely.
+  if (rng() * 100 < eng.evasionChance(c.evasion, acc)) {
     return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   }
   // Block is its own layer, rolled after perfect dodge and evasion (formula-defense.md): the
@@ -178,9 +162,10 @@ export function mobSwing(
   const blockedBy = physShare > 0 && c.block > 0 && rng() * 100 < c.block ? 'block' : null;
   const armourCut = eng.armourReduce(statuses.chill ? c.armour * (1 - E.status.chill.armour_cut) : c.armour, rawHit * physShare);
   const physical = rawHit * physShare * (1 - armourCut);
-  // an aura may harden against one named Element (Trinity Form), and the Cap still binds the total
+  // an aura may harden against one named Element (Trinity Form), and the Cap in force still binds the
+  // total — the Cap the character carries, which the passive tree's unlock node raises
   const hitting = mob.innate[0];
-  const res = Math.min((E.caps as any).elem_res, c.resistance + ((hitting && c.resByElement) ? (c.resByElement[hitting] || 0) : 0));
+  const res = Math.min(c.resCap, c.resistance + ((hitting && c.resByElement) ? (c.resByElement[hitting] || 0) : 0));
   const elemental = rawHit * elemShare * (1 - res / 100);
   // step 7 is the damage_taken bucket: the global one from `engine.json`, times whatever the
   // skills up right now add to it (Berserker takes more, Iron Will takes less)

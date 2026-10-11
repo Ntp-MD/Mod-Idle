@@ -220,6 +220,88 @@
       ]
     },
     {
+      "id": "attack_damage_pct",
+      "name": "Attack damage %",
+      "group": "Combat",
+      "min": 8,
+      "max": 16,
+      "pct": true,
+      "note": "The attack ladder's own multiplier (the PoE `Attack Damage` shape, owner ruling): it scales the weapon swing and a phys-basis press, adds into `spell_damage_pct` only inside its own ladder, and never crosses to the other one. It multiplies the non-Element share, so the weapon's Element pools and every DoT stay outside it — exactly the line the press formula and `playerSwing` read.",
+      "bands": [
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            10,
+            12
+          ],
+          [
+            13,
+            14
+          ]
+        ],
+        [
+          [
+            13,
+            15
+          ],
+          [
+            16,
+            16
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "spell_damage_pct",
+      "name": "Spell damage %",
+      "group": "Combat",
+      "min": 8,
+      "max": 16,
+      "pct": true,
+      "note": "The spell ladder's own multiplier (the PoE `Spell Damage` shape, owner ruling): it scales a magic-basis press and a magic weapon's bolt, and it scales the press's Element share too, because the whole press is the spell. It never touches a swing's physical half, a phys-basis press, or a status DoT.",
+      "bands": [
+        [
+          [
+            8,
+            9
+          ],
+          [
+            10,
+            11
+          ]
+        ],
+        [
+          [
+            10,
+            12
+          ],
+          [
+            13,
+            14
+          ]
+        ],
+        [
+          [
+            13,
+            15
+          ],
+          [
+            16,
+            16
+          ]
+        ]
+      ]
+    },
+    {
       "id": "magic_power_flat",
       "name": "Magic power flat",
       "group": "Combat",
@@ -1269,6 +1351,47 @@
           [
             20,
             20
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "elemental_resistance_cap_pct",
+      "name": "Elemental resistance Cap %",
+      "group": "Elemental",
+      "min": 15,
+      "max": 75,
+      "pct": true,
+      "note": "The passive tree's unlock line (owner ruling): no Base frame offers it and its drop weight is 0, so it never rolls on gear - the control branch's last node is its only source, and that node's rank 3 is 20% of this maximum, exactly the raise from caps.elem_res to caps.elem_res_max.",
+      "bands": [
+        [
+          [
+            15,
+            25
+          ],
+          [
+            26,
+            35
+          ]
+        ],
+        [
+          [
+            34,
+            45
+          ],
+          [
+            46,
+            55
+          ]
+        ],
+        [
+          [
+            54,
+            64
+          ],
+          [
+            65,
+            75
           ]
         ]
       ]

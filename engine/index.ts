@@ -7,10 +7,11 @@
  *
  * It is a factory over the parsed `tools/data/engine.json`: no fs, no doc reads, no Node
  * builtins, so it runs unchanged in a browser. A formula that exists here and beside it is
- * the same defect as a number typed twice (AGENTS.md §3, Techstack.md "The one rule").
+ * the same defect as a number typed twice (AGENTS.md — Numbers · DECISIONS.md §Stack).
  */
 
 import type { BasesData, EngineData, MobSize, Rng } from './types.ts';
+import { ladderMult } from './skills.ts';
 
 const BANDS = ['low', 'mid', 'high'];
 const BAND_KEYS = ['low', 'mid', 'high', 'high_full_lck'];
@@ -39,7 +40,7 @@ export function createEngine(E: EngineData) {
   const pointsAt = (level: number) =>
     S.points_per_level * (Math.min(level, S.paragon_from - 1) - 1)
     + S.paragon_points_per_level * Math.max(0, Math.min(level, S.level_cap) - (S.paragon_from - 1));
-  const treePointsAt = (level: number) => Math.max(0, Math.min(level, S.level_cap) - 1) * S.tree_points_per_level;
+  const treePointsAt = (level: number) => S.tree_points_base + Math.max(0, Math.min(level, S.level_cap) - 1) * S.tree_points_per_level;
   /** A stat's value from the points spent into it: `base + points x point_value`. */
   const statOf = (points: number) => S.base + points * S.point_value;
   /** The REFERENCE build: a level's points split evenly over the 7 stats. Every published number
@@ -98,21 +99,45 @@ export function createEngine(E: EngineData) {
 
   // ---- mob evasion: the species Dex line, not a level number (one static HP table)
 
-  // A mob's own stat block (`mob.stat`), deliberately NOT the player's line. It is FLAT now:
-  // one base the species vector multiplies, no level term, so two mobs of a level can be nothing alike.
-  const MSTAT = E.mob.stat;
-  const mobStat = () => MSTAT.base;
+  // ---- a mob's Core stat: an INTEGER POINT block per species (DECISIONS: one Core model, player and
+  // mob alike). The block is the species' own, set at the anchor zone; a higher zone scales it by the
+  // player's even-split reference line there, so a mob climbs with the zone it lives in while the value
+  // stays a whole number. No mob runs a formula of its own.
+  const mobStatBaseAt = (zoneId: number) => {
+    const z = (E.mob.zones as any[]).find((x) => x.id === zoneId) || (E.mob.zones as any[])[E.mob.zones.length - 1];
+    return statAt((z.levels as number[])[1]);
+  };
+  /** The one zone every single-figure anchor is measured at: the last zone. */
+  const REF_ZONE = (E.mob.zones as any[])[E.mob.zones.length - 1].id;
   /**
-   * The mob's fixed Core stat block: the one flat base through the species vector, with no level term
-   * (owner ruling — a Goblin is the same body at level 1 and at level 180; only HP, PS and XP climb).
-   * Exported so a view reads the seven numbers instead of multiplying the vector a second time.
+   * A mob's own STATIC level inside one zone, read from `mob.species[].zone_levels`. It is a fixed
+   * value placed inside the zone's range — a spawn does not follow the attacker's level. Falls back to
+   * the zone's midpoint if a species is placed in a zone with no level written.
    */
-  const mobStatsOf = (speciesId: string): Record<string, number> => {
-    const sp = speciesById(speciesId)?.stats || {};
-    return Object.fromEntries(Object.keys(sp).map((k) => [k, r2(mobStat() * sp[k])]));
+  const mobLevelIn = (sp: any, zoneId: number): number => {
+    const lv = sp?.zone_levels?.[zoneId];
+    if (lv != null) return lv;
+    const z = (E.mob.zones as any[]).find((x) => x.id === zoneId) || (E.mob.zones as any[])[0];
+    return Math.round(((z.levels as number[])[0] + (z.levels as number[])[1]) / 2);
+  };
+  const CORE_KEYS = ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'] as const;
+  /** The zone the Core block in `mob.species[].core` is written at (`mob.stat.base_zone`). */
+  const CORE_ANCHOR = (() => {
+    const baz = (E.mob.stat as any).base_zone ?? 1;
+    const z = (E.mob.zones as any[]).find((x) => x.id === baz) || (E.mob.zones as any[])[0];
+    return statAt((z.levels as number[])[1]);
+  })();
+  /** One Core stat of one species in one zone: its integer block scaled from the anchor zone, rounded. */
+  const coreOf = (sp: any, key: string, zoneId: number = REF_ZONE) =>
+    Math.round(((sp?.core?.[key] || 0) * mobStatBaseAt(zoneId)) / CORE_ANCHOR);
+  /** The mob's Core stat block in one zone, every value a whole number. */
+  const mobStatsOf = (speciesId: string, zoneId: number = REF_ZONE): Record<string, number> => {
+    const sp = speciesById(speciesId);
+    if (!sp) return {};
+    return Object.fromEntries(CORE_KEYS.map((k) => [k, coreOf(sp, k, zoneId)]));
   };
 
-  // the zone's average body factor: mob_HP(L) is the zone's AVERAGE mob, so group entries divide by it
+  // the zone's average body factor: mob_PS(L) is the zone's AVERAGE mob, so body entries divide by it
   const speciesById = (id: string): any | undefined => (E.mob.species as any[]).find((x) => x.id === id);
   /**
    * The zone cast derived from the single source (`mob.species[].zones`): every species id
@@ -122,7 +147,7 @@ export function createEngine(E: EngineData) {
   const racesInZone = (zoneId: number): string[] =>
     (E.mob.species as any[]).filter((sp) => (sp.zones || []).includes(zoneId)).map((sp) => sp.id).sort();
   const sizeById = (id: string): MobSize | undefined => E.mob.sizes.find((x) => x.id === id);
-  const sizeOr1 = (id: string): MobSize => sizeById(id) || { id, name: id, hp: 1, ps: 1, evasion: 1 };
+  const sizeOr1 = (id: string): MobSize => sizeById(id) || { id, name: id, ps: 1, evasion_pct: 0 };
   const zoneBodyFactorCache = new Map<number, number>();
   function zoneBodyFactor(zoneId: number) {
     const cached = zoneBodyFactorCache.get(zoneId);
@@ -132,21 +157,26 @@ export function createEngine(E: EngineData) {
     for (const sp of cast) for (const sid of sp.sizes) {
       const weight = E.mob.spawn_weights[sid] || 0;
       if (!weight) continue;
-      w += weight; sum += weight * sizeOr1(sid).hp;
+      w += weight; sum += weight * sizeOr1(sid).ps;
     }
     const factor = w ? sum / w : 1;
     zoneBodyFactorCache.set(zoneId, factor);
     return factor;
   }
 
-  const sizeMult = (id: string) => (id === 'elite' ? E.mob.elite.evasion : (sizeOr1(id).evasion));
-  const mobEvasion = (level: number, dexMult = 1, body = 'medium') =>
-    Math.min(CAP.evasion, mobStat() * dexMult * K.K_EVASION * sizeMult(body));
-  const MEAN_SPECIES_DEX = E.mob.species.reduce((t, r) => t + r.stats.dex, 0) / E.mob.species.length;
-  // The reference mob is the mean species vector on a Medium body — a real average of the roster,
-  // not an imaginary x1.00 lineage. It is what every published hit-chance anchor is measured against.
-  const MOB_EVASION_REF = mobEvasion(S.level_cap, MEAN_SPECIES_DEX);
-  const SPECIES_EVASION = E.mob.species.map((r) => ({ name: r.name, dex: r.stats.dex, evasion: mobEvasion(S.level_cap, r.stats.dex) }));
+  // The body class carries a base Evasion as a percent on top of the species Dex line (small +20 /
+  // medium +10 / large 0). The rating under the percent is the mob's Core Dex in its zone.
+  const sizeEvasionPct = (id: string) => (id === 'elite' ? E.mob.elite.evasion_pct : sizeOr1(id).evasion_pct);
+  const mobEvasion = (dexCore: number, body = 'medium') =>
+    Math.min(CAP.evasion, dexCore * K.K_EVASION * (1 + sizeEvasionPct(body) / 100));
+  // The mean species Core block, so the reference mob is a real average of the roster rather than an
+  // imaginary x1.00 lineage. It is what every published hit-chance anchor is measured against.
+  const MEAN_CORE: Record<string, number> = Object.fromEntries(CORE_KEYS.map((k) => [
+    k, E.mob.species.reduce((t, r) => t + (r.core?.[k] || 0), 0) / E.mob.species.length]));
+  const REF_SPECIES = { core: MEAN_CORE, accuracy_mult: 1 };
+  const MEAN_SPECIES_DEX = coreOf(REF_SPECIES, 'dex');
+  const MOB_EVASION_REF = mobEvasion(MEAN_SPECIES_DEX);
+  const SPECIES_EVASION = E.mob.species.map((r) => ({ name: r.name, dex: coreOf(r, 'dex'), evasion: mobEvasion(coreOf(r, 'dex')) }));
 
   DERIVED.mob_evasion_ref = MOB_EVASION_REF;
   DERIVED.hit_chance = DERIVED.accuracy / (DERIVED.accuracy + MOB_EVASION_REF);
@@ -177,8 +207,8 @@ export function createEngine(E: EngineData) {
    * zero, so a −20 on a mob sitting at 9.5% opens it fully rather than amplifying damage.
    *
    * `element` is the Element half of the hit. A number uses the mob's headline `res`; a per-Element
-   * map uses `mob.resByElement` (the race profile, X54) so a race that shrugs fire and fears cold
-   * answers a fire-and-cold swing on each pool separately.
+   * map uses `mob.resByElement` (the race's flat own-Element line, X54) so a race's own Element is
+   * answered on its own line and every other Element lands unresisted.
    */
   function mitigateMobHit(mob: any, nonElement: number, element: number | Record<string, number>, armourCutFraction = 0, resOffset = 0) {
     const non = nonElement * (1 - mobArmourCut(mob.armour, nonElement, armourCutFraction));
@@ -219,8 +249,8 @@ export function createEngine(E: EngineData) {
     return { physical: base - converted, byElement };
   };
 
-  // ---- Energy Shield: the caster's second pool, worn on gear rather than spent from a stat
-  DERIVED.es_pool = M.energy_shield_flat_t1 * (1 + M.max_energy_shield_pct / 100);
+  // ---- Energy Shield: the caster's second pool, bought with Wis plus the gear ES lines
+  DERIVED.es_pool = (statAt(S.level_cap) * K.K_WIS_ES + M.energy_shield_flat_t1) * (1 + M.max_energy_shield_pct / 100);
   DERIVED.es_regen = DERIVED.es_pool * ES.regen_pct / 100;
   DERIVED.es_recover_sec = 100 / ES.regen_pct;
   DERIVED.es_cast_hp = LG.hp_base + statAt(S.level_cap) * K.K_VIT_HP + LG.hp_per_level * (S.level_cap - 1);
@@ -236,26 +266,28 @@ export function createEngine(E: EngineData) {
   const ZONES = E.mob.zones;
   const zoneById = (id: number) => ZONES.find((z) => z.id === id);
 
-  // concept.md sets the win condition on the last zone in the list, so its id is read, never typed
+  // DECISIONS.md §Product sets the win condition on the last zone in the list, so its id is read, never typed
   const finalZoneId = () => ZONES[ZONES.length - 1].id;
 
   /**
    * The completion gate as data: the final zone's boss, killed inside one spawn while never being
-   * Pushed (concept.md). Its HP is the same curve `mobRoster` and the client's spawn both use, so
+   * Pushed (DECISIONS.md §Product — Completion and content). Its HP is the same curve `mobRoster` and the client's spawn both use, so
    * the number the player reads is the number the fight actually rolls.
    */
   function winTarget() {
     const id = finalZoneId();
     const z = zoneById(id)!;
     const boss = E.mob.bosses.find((b) => b.zone === id);
-    const level = z.levels[1];
-    const size = sizeOr1('boss');
+    const sp = boss ? speciesById(boss.species) : undefined;
+    // the boss spawns at its own static level (`mob.species[].zone_levels`), so the gate quotes the
+    // HP that spawn actually carries: the curve at that level + the flat grant + the Core Vit bonus
+    const level = sp ? mobLevelIn(sp, id) : z.levels[1];
     return {
       zone: id,
       zoneName: z.name,
       name: boss ? boss.name : `Zone ${id} boss`,
       level,
-      hp: mobHpAt(level) * size.hp,
+      hp: sp ? mobHpOf(level, coreOf(sp, 'vit', id)) : mobHpAt(level),
     };
   }
 
@@ -282,8 +314,18 @@ export function createEngine(E: EngineData) {
   const typicalDpsAt = (Lv: number) => mobHpAt(Lv) / skillF(Lv);
   const mobPsAt = (Lv: number) => typicalDpsAt(Lv) / K.mob_damage_divisor;
 
-  // a mob accuracy is its own Dex line: stat_c x species.dex x K_DEX_ACC x accuracy tier
-  const mobAcc = (Lv: number, dexMult: number, tier: number) => mobStat() * dexMult * K.K_DEX_ACC * tier;
+  // A mob's pools run the SAME shape the player's do (DECISIONS: one Core model): Base + a flat
+  // per-level grant + a K_core term. Base HP is the published zone curve (`mob_HP`, kept as the zone's
+  // strength); the grant is its OWN line (`level_gain` 10 hp / 5 mana a level, never from Vit or Int);
+  // the K_core term is the mob's Core Vit / Int through the shared `K` table. A mob earns no free Core
+  // points on level-up — its Core block is fixed, and only the Base pools climb.
+  const mobHpOf = (level: number, vitCore: number) =>
+    mobHpAt(level) + LG.hp_per_level * (level - 1) + vitCore * K.K_VIT_HP;
+  const mobManaOf = (level: number, intCore: number) =>
+    LG.mana_base + LG.mp_per_level * (level - 1) + intCore * K.K_INT_MP;
+
+  // a mob accuracy is its own Dex line: Core stat(zone) x K_DEX_ACC x accuracy tier
+  const mobAcc = (dexCore: number, tier: number) => dexCore * K.K_DEX_ACC * tier;
   // A mob's own dodge is contested by the accuracy of the player attacking it, the same opposed shape X20 uses
   // for the player side. Reference attacker = a same-level player with no Dex investment.
   const refAttackerAcc = (Lv: number) => statAt(Lv) * K.K_DEX_ACC * (1 + M.accuracy_pct / 100);
@@ -296,12 +338,12 @@ export function createEngine(E: EngineData) {
   // bonus, read off the SAME tag that splits its hit (`damage_split`: physical → Str, magic → Int,
   // mixed → both halves). The zone mean divides it out below, so mob_PS stays the published curve
   // for the zone's AVERAGE mob and only the species actually in front of the player moves the number.
-  const speciesPowerStatOf = (sp: any) => {
+  const speciesPowerStatOf = (sp: any, zoneId: number = REF_ZONE) => {
     const [wPhys, wMagic] = damageSplit(sp.damage);
-    return K.K_MOB_PS_STAT * (wPhys * mobStat() * sp.stats.str + wMagic * mobStat() * sp.stats.int);
+    return K.K_MOB_PS_STAT * (wPhys * coreOf(sp, 'str', zoneId) + wMagic * coreOf(sp, 'int', zoneId));
   };
   const speciesPowerOf = (sp: any) => sp.power_base + speciesPowerStatOf(sp);
-  // The zone's average species power: the same weighted mean `zoneBodyFactor` takes for HP, so a
+  // The zone's average species power: the same weighted mean `zoneBodyFactor` takes for PS, so a
   // species entry divides its own power by this and the zone's mean stays exactly 1 by construction.
   const zonePowerCache = new Map<number, number>();
   function zonePowerFactor(zoneId: number) {
@@ -324,17 +366,21 @@ export function createEngine(E: EngineData) {
     return sp ? speciesPowerOf(sp) / zonePowerFactor(zoneId) : 1;
   };
 
-  // ---- race resistance: each species tilts its Vit line by Element (mob.resist_rules · X54).
-  // The five multipliers average 1.00, so the published res column stays the Vit line and the
-  // profile only decides which Element a build should bring against a given race.
-  const speciesResMult = (sp: any, el: string) => (sp.resist ? (sp.resist[el] ?? 1) : 1);
-  /** The headline res (the mean of the profile) - the number the roster's res column prints. */
-  const mobResOf = (sp: any) => Math.min(CAP.elem_res, mobStat() * sp.stats.vit * K.K_MOB_RES);
-  /** Per-Element res: the profile applied before the same Cap the player obeys. */
-  const mobResByElementOf = (sp: any) => {
+  // ---- race resistance: a race owns one Element (`mob.species[].element`) and answers it at the flat
+  // `mob.race_res_pct` in every zone; no Element counters another and no profile tilts the Vit line,
+  // so every other Element meets no res at all (X54). The same Cap the player obeys holds the line.
+  /** Per-Element res: the race's own Element at the flat rate, every other Element at zero. */
+  const mobResByElementOf = (sp: any, zoneId: number = REF_ZONE) => {
     const out: Record<string, number> = {};
-    for (const el of E.elements.order) out[el] = Math.min(CAP.elem_res, mobStat() * sp.stats.vit * K.K_MOB_RES * speciesResMult(sp, el));
+    for (const el of E.elements.order) {
+      out[el] = el === (sp as any).element ? E.mob.race_res_pct : 0;
+    }
     return out;
+  };
+  /** The headline res — the mean of the per-Element map, the number the roster's res column prints. */
+  const mobResOf = (sp: any, zoneId: number = REF_ZONE) => {
+    const map = mobResByElementOf(sp, zoneId);
+    return (E.elements.order as string[]).reduce((t, el) => t + (map[el] || 0), 0) / (E.elements.order as string[]).length;
   };
 
   DERIVED.zone9_boss_physical = mobPs(zoneById(9)!.hp[1], 90) * sizeOr1('boss').ps / 2;
@@ -359,8 +405,11 @@ export function createEngine(E: EngineData) {
 
   // ---- weapon aspd: Agi needed to reach the Cap with the max aspd Mod
 
+  // The clock Cap is published in seconds (`attack_interval_sec`), so the aspd ceiling is DERIVED
+  // from it rather than typed: `hits/sec = aspd / 100`, so a swing every `t` seconds is aspd `100 / t`.
+  const ASPD_CAP = 100 / CAP.attack_interval_sec;
   const agiForCap = (weaponAspd: number) =>
-    Math.round((CAP.aspd / weaponAspd - 100 - M.aspd_pct) / K.K_AGI_ASPD + S.base);
+    Math.round((ASPD_CAP / weaponAspd - 100 - M.aspd_pct) / K.K_AGI_ASPD + S.base);
 
   const WEAPONS = E.weapons.map((w) => ({
     ...w,
@@ -370,39 +419,40 @@ export function createEngine(E: EngineData) {
   }));
 
   // aspd = weapon_aspd × (100 + (agi − Base) × K_AGI_ASPD + aspd_pct) · hits/sec = aspd / 100
-  // The Cap is a CLOCK rule (core-stats.md · formula.md): it binds the FINAL figure, so it is
-  // applied LAST — after the aspd Mod band inside the parentheses, after a multiplicative aspd
-  // buff, and after the weight tax — by `capAspd` at the character sheet. No build passes
-  // `CAP.aspd` (~5 hits/sec), which is what makes Haste's ×1.15 clamp instead of stack past it.
+  // The Cap is a CLOCK rule: it binds the FINAL figure, so it is applied LAST — after the aspd Mod
+  // band inside the parentheses, after a multiplicative aspd buff, and after the weight tax — by
+  // `capAspd` at the character sheet. `ASPD_CAP` is derived from `attack_interval_sec`, so the rule
+  // reads as the interval it is: `hits/sec` stops at `1 / attack_interval_sec` for every weapon.
+  // No build passes it, which is what makes Haste's ×1.15 clamp instead of stack past it.
   const aspdOf = (agi: number, weaponAspd: number, aspdPct = 0) =>
     weaponAspd * (100 + (agi - S.base) * K.K_AGI_ASPD + aspdPct);
-  const capAspd = (aspd: number) => Math.min(CAP.aspd, aspd);
+  const capAspd = (aspd: number) => Math.min(ASPD_CAP, aspd);
   const hitsPerSec = (aspd: number) => capAspd(aspd) / 100;
 
   const weaponMult = (weaponAspd: number) => 1.2 / weaponAspd;
   const physOf = (str: number, flat: number, pct: number, weaponAspd: number) => (str * K.K_STR + flat) * (1 + pct / 100) * weaponMult(weaponAspd);
   const magicOf = (int: number, flat: number, pct: number, weaponAspd: number) => (int * K.K_INT + flat) * (1 + pct / 100) * weaponMult(weaponAspd);
 
-  // Evasion is ONE layer. The Dex rating runs the PoE entropy roll against the
-  // attacker's accuracy; Agi then adds flat percentage points on top — 30 Agi = 1 point —
-  // and the Cap 80 binds the sum, so an accurate mob still decides how much of it lands.
-  const evasionChance = (rating: number, agiPoints = 0, attackerAccuracy = 1) => {
+  // Evasion is ONE layer, and AGI carries it (owner ruling): the rating is `agi × K_EVASION` plus
+  // the gear `evasion_flat` × `evasion_pct` lines, it runs the same PoE entropy roll against the
+  // attacker's accuracy that the mob side dodges with (X20), and the Cap 80 binds the result.
+  // Dex feeds it nothing — its line is accuracy and the Status alignment gate now.
+  const evasionChance = (rating: number, attackerAccuracy = 1) => {
     const roll = (1 - attackerAccuracy / (attackerAccuracy + rating)) * 100;
-    return Math.min(CAP.evasion, roll + agiPoints);
+    return Math.min(CAP.evasion, roll);
   };
-  /** The Dex half on its own, for the sheets that print the rating rather than the chance. */
-  const evasionRating = (dex: number, flat = 0, pct = 0) => (dex * K.K_EVASION + flat) * (1 + pct / 100);
-  /** Agi's share, in percentage points — 30 Agi = 1 (K_AGI_EVAS = 1/30). */
-  const agilityEvasion = (agi: number) => agi * K.K_AGI_EVAS;
+  /** The rating on its own, for the sheets that print it rather than the chance it buys. */
+  const evasionRating = (agi: number, flat = 0, pct = 0) => (agi * K.K_EVASION + flat) * (1 + pct / 100);
   // a mob dodging our swing keeps its own thin opposed roll off its Agi (X24).
   // `K_MOB_DODGE` is the mob-side K only — the player's Agi buys Evasion points above.
   const dodgeRate = (agi: number) => agi * K.K_MOB_DODGE;
   const dodgeChance = (rate: number, attackerAccuracy: number) => (rate / (rate + attackerAccuracy)) * 100;
   // perfect dodge is a ratio on the Lck line; `pct` scales that line so a Mod can lift it.
-  // The Cap binds first, so the % can never push a build past `caps.perfect_dodge`.
+  // OPEN-ENDED (no Cap, owner ruling): the ratio keeps climbing with Lck, and it is the Lck line
+  // itself that bounds it, never a Cap.
   const perfectDodgeChance = (lck: number, pct = 0) => {
     const rate = lck * K.K_LCK_PDOGE * (1 + pct / 100);
-    return Math.min(CAP.perfect_dodge, rate / (rate + K.K_PDOGE) * 100);
+    return rate / (rate + K.K_PDOGE) * 100;
   };
 
   /**
@@ -475,9 +525,11 @@ export function createEngine(E: EngineData) {
   const hpRegenOf = (vit: number, pct = 0, flat = 0) => vit * K.K_VIT_REGEN * (1 + pct / 100) + flat;
   const maxManaOf = (int: number, level: number, pct = 0, flat = 0) => (LG.mana_base + int * K.K_INT_MP + LG.mp_per_level * (level - 1) + flat) * (1 + pct / 100);
   const manaRegenOf = (int: number, pct = 0, flat = 0) => int * K.K_INT_MREGEN * (1 + pct / 100) + flat;
-  // Energy Shield is a gear pool (owner ruling): the Mod rows are the whole of it, and the regen is
-  // `regen_pct`% of the max pool per second, which an `es_regen` skill, Mod or passive amplifies.
-  const maxEsOf = (flat = 0, pct = 0) => flat * (1 + pct / 100);
+  // Energy Shield is the caster's second pool: Wis feeds it flat (`K_WIS_ES`, the same shape
+  // `K_INT_MP` gives mana — owner ruling) and the gear Mod rows (`energy_shield_flat` ×
+  // `max_energy_shield_pct`) ride on top. Regen is `regen_pct`% of the max pool per second, which
+  // an `es_regen` skill, Mod or passive amplifies.
+  const maxEsOf = (flat = 0, pct = 0, wis = 0) => (wis * K.K_WIS_ES + flat) * (1 + pct / 100);
   const esRegenOf = (pool: number, ampPct = 0) => pool * (ES.regen_pct / 100) * (1 + ampPct / 100);
   const cdrOf = (wis: number, pctTotal = 0) => Math.min(CAP.cdr, (wis * K.K_WIS_CDR) * (1 + pctTotal / 100));
   // the trailing multiplier is where a skill that scales the finished stat lands (Warcry's
@@ -486,8 +538,12 @@ export function createEngine(E: EngineData) {
   // multiplier, left open-ended. The defensive `Status Alignment resistance %` is a separate Mod line.
   const alignmentOf = (dex: number, flat = 0, mult = 1) => (dex * K.K_DEX_ALIGN + flat) * mult;
   // Elemental resistance is a gear line (owner ruling): no Core stat feeds it, so the Mod rows
-  // are the whole of it and the Cap is the only thing that stops it.
-  const resistanceOf = (pct = 0, mult = 1) => Math.min(CAP.elem_res, pct * mult);
+  // are the whole of it and the Cap is the only thing that stops it. `capBonus` is the raise a
+  // passive-tree node buys (`mods.json elemental_resistance_cap_pct`), passed in by the caller so the published
+  // Cap stays the empty-tree baseline and the unlock lands on top of it. `caps.elem_res_max` is the
+  // hard top of that raise: the tree cannot buy more ceiling than the data grants.
+  const elemResCapOf = (capBonus = 0) => Math.min(CAP.elem_res_max, CAP.elem_res + capBonus);
+  const resistanceOf = (pct = 0, mult = 1, capBonus = 0) => Math.min(elemResCapOf(capBonus), pct * mult);
   /**
    * Stun Recovery (the owner's `owner/idea-gameplay.md` item 5): Vit buys back part of a shock's stop,
    * so a 1 sec stun with 50% recovery leaves half a second. `K_VIT_STUNREC` is derived from that very
@@ -603,8 +659,8 @@ export function createEngine(E: EngineData) {
     // a 0.05% rounding flip a kill x chance product by one and broke X5 (re-base).
     const dropPct = r1(dropChance(b) * 100);
     // kills/hr is DERIVED from the cycle (TTK per mob, the group it fields, the gap between groups),
-    // never published: the design states what a kill pays, not what an hour holds (AGENTS.md — no time
-    // limit, no play-length target). Every figure below is the same number it always was.
+    // never published: the design states what a kill pays, not what an hour holds
+    // (DECISIONS.md §Standing intent). Every figure below is the same number it always was.
     const kph = Math.round(killsDerived(b));
     const drops = Math.round(kph * (dropPct / 100));
     BAND[b] = {
@@ -642,7 +698,7 @@ export function createEngine(E: EngineData) {
     }
   }
   // a band is a COUNT of kills between two checkpoints, never a stretch of hours: how long a band
-  // takes is the player's own pace (AGENTS.md — no time limit, no play-length target).
+  // takes is the player's own pace (DECISIONS.md §Standing intent).
   BAND.low.band_kills = CHECKPOINTS_KILLS.level_30;
   BAND.mid.band_kills = CHECKPOINTS_KILLS.level_60 - CHECKPOINTS_KILLS.level_30;
   BAND.high.band_kills = CHECKPOINTS_KILLS.level_90 - CHECKPOINTS_KILLS.level_60;
@@ -676,7 +732,10 @@ export function createEngine(E: EngineData) {
 
   // Stone income per hour, by band — the same three expressions the STONE block prints for high.
   const rerollValueStonesPerHr = (band: string) => Math.round(BAND[band].junk_per_hr / C.reroll_value_stones_per_use);
-  const tierStonesPerHr = (band: string) => Math.round(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_tier_stones) + L.boss_per_hour * L.boss_tier_stones;
+  // The elite half of the tier-stone ladder, named once so the boss share is the only thing the total
+  // adds. A town rate and a stone rate are the same expression and must not be typed twice.
+  const eliteTierStonesPerHr = (band: string) => Math.round(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_tier_stones);
+  const tierStonesPerHr = (band: string) => eliteTierStonesPerHr(band) + L.boss_per_hour * L.boss_tier_stones;
   const addStonesPerHr = (band: string) => r2(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance + L.boss_per_hour * L.boss_add_stones);
 
   // ---- the three craft stones the ladder costs but the loot table did not pay
@@ -707,6 +766,8 @@ export function createEngine(E: EngineData) {
   /** One piece climbing +1..+15, and a set of twelve. The boss third alone is the deep grind. */
   const upgradeStonesPerPiece = C.upgrade_costs.reduce((t, n) => t + n, 0);
   const upgradeStonesFullSet = upgradeStonesPerPiece * C.ascend_items_per_set;
+  /** One Ascend press: the Add stone and the tier stones it burns together, as one figure. */
+  const ascendStonesPerPiece = C.ascend_add_stones + C.ascend_tier_stones;
   const bossThirdPerSet = C.upgrade_costs.slice(C.upgrade_breaks_from - 1).reduce((t, n) => t + n, 0) * C.ascend_items_per_set;
 
   const STONE: Record<string, number> = {
@@ -765,98 +826,119 @@ export function createEngine(E: EngineData) {
   function mobRoster() {
     const out: any[] = [];
     for (const z of ZONES) {
-      const [lFrom, lTo] = z.levels;
-      const edge = mobStat();
-      const psEdge = mobPs(z.hp[1], lTo);
       for (const sp of E.mob.species) {
         if (!sp.zones.includes(z.id)) continue;
-        const innate = sp.element_bias.filter((e) => z.elements.includes(e));
+        const innate = [(sp as any).element];
         const bf = zoneBodyFactor(z.id);
+        const vit = coreOf(sp, 'vit', z.id);
+        const intC = coreOf(sp, 'int', z.id);
+        // the mob's own static level, placed inside the zone's range (mob.species[].zone_levels)
+        const lvl = mobLevelIn(sp, z.id);
+        const levels: [number, number] = [lvl, lvl];
+        const psEdge = mobPsAt(lvl);
         for (const size of sp.sizes.map((sid) => sizeById(sid)!)) {
+          const hpBase = mobHpAt(lvl);
+          const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
           out.push({
-            id: `z${z.id}_${sp.id}_${size.id}`, zone: z.id, zoneName: z.name, levels: [lFrom, lTo],
+            id: `z${z.id}_${sp.id}_${size.id}`, zone: z.id, zoneName: z.name, levels, level: lvl,
             kind: size.name, species: sp.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
-            hpFrom: z.hp[0] * size.hp / bf, hpTo: z.hp[1] * size.hp / bf,
+            hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
+            manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
             ps: psEdge * size.ps / bf * speciesPsMult(z.id, sp.id), bodyFactor: bf,
-            acc: mobAcc(lTo, sp.stats.dex, sp.accuracy_mult),
-            ev: edge * sp.stats.dex * K.K_EVASION * size.evasion,
-            armour: edge * sp.stats.str * K.K_ARMOUR,
-            res: edge * sp.stats.vit * K.K_MOB_RES, resist: sp.resist,
-            align: edge * sp.stats.dex * K.K_DEX_ALIGN,
-            crit: edge * sp.stats.lck * K.K_LCK_CRIT,
-            dodge: mobDodge(edge * sp.stats.agi * K.K_MOB_DODGE, lTo),
+            acc: mobAcc(coreOf(sp, 'dex', z.id), sp.accuracy_mult),
+            ev: mobEvasion(coreOf(sp, 'dex', z.id), size.id),
+            armour: coreOf(sp, 'str', z.id) * K.K_ARMOUR,
+            res: mobResOf(sp, z.id),
+            align: coreOf(sp, 'dex', z.id) * K.K_DEX_ALIGN,
+            crit: coreOf(sp, 'lck', z.id) * K.K_LCK_CRIT,
+            dodge: mobDodge(coreOf(sp, 'agi', z.id) * K.K_MOB_DODGE, lvl),
             damage: sp.damage,
-            xpFrom: X.per_kill_mob_level * lFrom, xpTo: X.per_kill_mob_level * lTo,
+            xpFrom: X.per_kill_mob_level * lvl, xpTo: X.per_kill_mob_level * lvl,
             group: size.id === 'small' || size.id === 'medium' ? z.group : 'alone',
           });
         }
         if (sp.sizes.includes('large')) {
           const el = E.mob.elite;
+          const hpBase = mobHpAt(lvl) * el.hp;
+          const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
           out.push({
-            id: `z${z.id}_${sp.id}_elite`, zone: z.id, zoneName: z.name, levels: [lFrom, lTo],
+            id: `z${z.id}_${sp.id}_elite`, zone: z.id, zoneName: z.name, levels, level: lvl,
             kind: el.name, species: sp.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
-            hpFrom: z.hp[0] * el.hp, hpTo: z.hp[1] * el.hp, ps: psEdge * el.ps * speciesPsMult(z.id, sp.id),
-            acc: mobAcc(lTo, sp.stats.dex, sp.accuracy_mult),
-            ev: edge * sp.stats.dex * K.K_EVASION * el.evasion,
-            armour: edge * sp.stats.str * K.K_ARMOUR,
-            res: edge * sp.stats.vit * K.K_MOB_RES, resist: sp.resist,
-            align: edge * sp.stats.dex * K.K_DEX_ALIGN, crit: edge * sp.stats.lck * K.K_LCK_CRIT,
-            dodge: mobDodge(edge * sp.stats.agi * K.K_MOB_DODGE, lTo),
+            hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
+            manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
+            ps: psEdge * el.ps * speciesPsMult(z.id, sp.id),
+            acc: mobAcc(coreOf(sp, 'dex', z.id), sp.accuracy_mult),
+            ev: mobEvasion(coreOf(sp, 'dex', z.id), 'elite'),
+            armour: coreOf(sp, 'str', z.id) * K.K_ARMOUR,
+            res: mobResOf(sp, z.id),
+            align: coreOf(sp, 'dex', z.id) * K.K_DEX_ALIGN, crit: coreOf(sp, 'lck', z.id) * K.K_LCK_CRIT,
+            dodge: mobDodge(coreOf(sp, 'agi', z.id) * K.K_MOB_DODGE, lvl),
             damage: sp.damage,
-            xpFrom: X.per_kill_mob_level * lFrom * X.elite_mult, xpTo: X.per_kill_mob_level * lTo * X.elite_mult, group: 'alone',
+            xpFrom: X.per_kill_mob_level * lvl * X.elite_mult, xpTo: X.per_kill_mob_level * lvl * X.elite_mult, group: 'alone',
           });
         }
       }
       const boss = E.mob.bosses.find((b) => b.zone === z.id)!;
       const bs = E.mob.species.find((r) => r.id === boss.species)!;
       const bz = sizeById('boss')!;
+      const bvit = coreOf(bs, 'vit', z.id);
+      const bint = coreOf(bs, 'int', z.id);
+      const blvl = mobLevelIn(bs, z.id);
+      const bhpBase = mobHpAt(blvl);
+      const bhp = bhpBase + LG.hp_per_level * (blvl - 1) + bvit * K.K_VIT_HP;
       out.push({
-        id: `z${z.id}_boss`, zone: z.id, zoneName: z.name, levels: [lFrom, lTo],
+        id: `z${z.id}_boss`, zone: z.id, zoneName: z.name, levels: [blvl, blvl] as [number, number], level: blvl,
         kind: `${bz.name} · ${boss.name}`, species: bs.name, speciesId: bs.id,
-        innate: bs.element_bias.filter((e) => z.elements.includes(e)), weapon: bs.carries_weapon,
-        hpFrom: z.hp[0] * bz.hp, hpTo: z.hp[1] * bz.hp, ps: psEdge * bz.ps * speciesPsMult(z.id, bs.id),
-        acc: mobAcc(lTo, bs.stats.dex, bs.accuracy_mult),
-        ev: edge * bs.stats.dex * K.K_EVASION * bz.evasion,
-        armour: edge * bs.stats.str * K.K_ARMOUR,
-        res: edge * bs.stats.vit * K.K_MOB_RES, resist: bs.resist,
-        align: edge * bs.stats.dex * K.K_DEX_ALIGN, crit: edge * bs.stats.lck * K.K_LCK_CRIT,
-        dodge: mobDodge(edge * bs.stats.agi * K.K_MOB_DODGE, lTo),
+        innate: [(bs as any).element], weapon: bs.carries_weapon,
+        hpFrom: bhp, hpTo: bhp, vit: bvit, hpBaseFrom: bhpBase, hpBaseTo: bhpBase,
+        manaFrom: mobManaOf(blvl, bint), manaTo: mobManaOf(blvl, bint),
+        ps: mobPsAt(blvl) * bz.ps * speciesPsMult(z.id, bs.id),
+        acc: mobAcc(coreOf(bs, 'dex', z.id), bs.accuracy_mult),
+        ev: mobEvasion(coreOf(bs, 'dex', z.id), 'boss'),
+        armour: coreOf(bs, 'str', z.id) * K.K_ARMOUR,
+        res: mobResOf(bs, z.id),
+        align: coreOf(bs, 'dex', z.id) * K.K_DEX_ALIGN, crit: coreOf(bs, 'lck', z.id) * K.K_LCK_CRIT,
+        dodge: mobDodge(coreOf(bs, 'agi', z.id) * K.K_MOB_DODGE, blvl),
         damage: bs.damage,
-        xpFrom: X.per_kill_mob_level * lFrom * X.boss_mult, xpTo: X.per_kill_mob_level * lTo * X.boss_mult, group: 'alone',
+        xpFrom: X.per_kill_mob_level * blvl * X.boss_mult, xpTo: X.per_kill_mob_level * blvl * X.boss_mult, group: 'alone',
       });
     }
     return out;
   }
 
-  // ---- the mob that actually spawns: a mob is at the attacker's level, clamped to its zone
-  // (engine.json mob.level_rule), so a spawn is a roster entry resolved at one level.
+  // ---- the mob that actually spawns: a mob's level is STATIC per species per zone
+  // (`mob.species[].zone_levels`), so a spawn does not follow the attacker's level.
 
   function spawnAt(zoneId: number, level: number, bodyId = 'medium', speciesId: string | null = null) {
     const z = zoneById(zoneId)!;
-    const lv = Math.min(Math.max(level, z.levels[0]), z.levels[1]);
     const candidates = E.mob.species.filter((sp) => sp.zones.includes(zoneId) && (!speciesId || sp.id === speciesId));
     const sp = candidates.length
       ? candidates[Math.min(candidates.length - 1, speciesId ? 0 : 0)]
       : E.mob.species[0];
+    const lv = mobLevelIn(sp, zoneId);
     const size = sizeById(bodyId) || sizeById('medium')!;
     const bf = zoneBodyFactor(zoneId);
-    const hp = mobHpAt(lv) * size.hp / bf;
+    // Base HP is the zone curve; the mob's own pools add the flat level grant and the K_core term
+    const hpBase = mobHpAt(lv);
+    const vit = coreOf(sp, 'vit', zoneId);
+    const hp = hpBase + LG.hp_per_level * (lv - 1) + vit * K.K_VIT_HP;
+    const mana = mobManaOf(lv, coreOf(sp, 'int', zoneId));
     const ps = mobPsAt(lv) * size.ps / bf * speciesPsMult(zoneId, sp.id);
     return {
       speciesId: sp.id, species: sp.name, zone: zoneId, zoneName: z.name, level: lv,
       body: size.id, kind: size.name, readsAs: size.reads_as || size.id,
-      innate: sp.element_bias.filter((e) => z.elements.includes(e)),
+      innate: [(sp as any).element],
       weapon: sp.carries_weapon, damage: sp.damage, accuracy_mult: sp.accuracy_mult,
-      hp, ps,
-      acc: mobAcc(lv, sp.stats.dex, sp.accuracy_mult),
-      evasion: mobEvasion(lv, sp.stats.dex, size.id),
-      // the mob's own FLAT stat line, and the same Cap the player obeys on every percentage it carries
-      armour: armourOf(mobStat() * sp.stats.str),
-      res: mobResOf(sp),
-      resByElement: mobResByElementOf(sp),
-      resist: sp.resist,
-      align: mobStat() * sp.stats.dex * K.K_DEX_ALIGN,
-      dodgeRate: mobStat() * sp.stats.agi * K.K_MOB_DODGE,
+      // hp = Base HP + the flat level grant + the Core Vit bonus; mana = Base + level grant + Core Int
+      hp, hpBase, hpMax: hp, vit, mana, manaMax: mana, ps,
+      acc: mobAcc(coreOf(sp, 'dex', z.id), sp.accuracy_mult),
+      evasion: mobEvasion(coreOf(sp, 'dex', zoneId), size.id),
+      // the mob's own integer Core stat line, and the same Cap the player obeys on every percentage
+      armour: armourOf(coreOf(sp, 'str', zoneId)),
+      res: mobResOf(sp, zoneId),
+      resByElement: mobResByElementOf(sp, zoneId),
+      align: coreOf(sp, 'dex', zoneId) * K.K_DEX_ALIGN,
+      dodgeRate: coreOf(sp, 'agi', zoneId) * K.K_MOB_DODGE,
       xp: xpPerKill(lv),
     };
   }
@@ -868,23 +950,23 @@ export function createEngine(E: EngineData) {
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
     speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
-    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, mobStat, mobStatsOf, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
-    speciesResMult, mobResOf, mobResByElementOf,
-  evasionChance, evasionRating, agilityEvasion,
-    MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION, sizeMult, damageSplit, mobRoster, spawnAt,
+    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, mobStatBaseAt, MEAN_CORE, mobStatsOf, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
+    mobResOf, mobResByElementOf,
+  evasionChance, evasionRating,
+    MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION, sizeEvasionPct, damageSplit, mobRoster, spawnAt,
     // player lines
     aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, playerAccuracy, hitVs, hitChance,
     dodgeRate, dodgeChance, perfectDodgeChance, blockChance, armourPenCut, stunChanceFrom, bleedChanceFrom,
     critPool, critChanceOf, critDmgOf,
     maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf, esRegenOf, cdrOf,
-    alignmentOf, resistanceOf, stunRecoveryOf, stunStopSec, weightCapacityOf, encumbranceOf, aspdEncumbered, weightAtQuality,
+    alignmentOf, resistanceOf, elemResCapOf, ladderMult, stunRecoveryOf, stunStopSec, weightCapacityOf, encumbranceOf, aspdEncumbered, weightAtQuality,
     armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, convertDamageOf, agiForCap,
     weaponWeightOf, sizeMultOf, applySizeMult, basicAttackOf,
     // loot + xp
     lckOf, dropChance, killsDerived, goldPerMinute, goldPrice, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
     floorOf, qualityIndexOf, spanOf, floorLevelOf,
-    rerollValueStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr,
-    polishStonesPerHr, reforgeStonesPerHr, rebirthStonesPerHr,
+    rerollValueStonesPerHr, eliteTierStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr,
+    polishStonesPerHr, reforgeStonesPerHr, rebirthStonesPerHr, ascendStonesPerPiece,
     stonesForMinutes, taskPayout,
     // formatting
     r1, r2, fmt,

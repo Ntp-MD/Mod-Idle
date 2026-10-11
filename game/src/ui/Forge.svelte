@@ -49,7 +49,7 @@
 </script>
 
 <div class="forge">
-  <PieceOn {state} {item} {where} {index} {onpick} {wornOf} />
+  <PieceOn game={state} {item} {where} {index} {onpick} {wornOf} />
 
   <div class="ladder" role="group" aria-label="The enhancement ladder">
     {#each rungs as r (r.n)}
@@ -110,58 +110,58 @@
 </div>
 
 <style>
-  .forge { display: grid; gap: .9rem; }
+  .forge { display: grid; gap: var(--spacing-md); }
 
   /* the ladder is the screen: a rung reads as a rung, climbed from the left, with the lit one being the
      press the button under it makes */
-  .ladder { display: flex; gap: .25rem; align-items: stretch; }
+  .ladder { display: flex; gap: 3px; align-items: stretch; }
   .rung {
-    flex: 1 1 0; min-width: 0; display: grid; gap: .1rem; justify-items: center; align-content: center;
-    padding: .45rem .1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+    flex: 1 1 0; min-width: 0; display: grid; gap: 1px; justify-items: center; align-content: center;
+    padding: var(--spacing-xs) 1px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
   }
-  .rung b { font-family: var(--num); font-size: .82rem; color: var(--dim); }
-  .rung .pc, .rung .st { font-family: var(--num); font-size: .62rem; color: var(--mob); }
-  .rung.done { background: #1b2029; border-color: #2f3a4d; }
+  .rung b { font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
+  .rung .pc, .rung .st { font-family: var(--num); font-size: var(--font-xs); color: var(--mob); }
+  .rung.done { background: var(--panel); border-color: var(--line); }
   .rung.done b { color: var(--text); }
-  .rung.risky b { color: #e2503f; }
+  .rung.risky b { color: var(--hot); }
   .rung.next {
-    border-color: var(--gold); background: rgba(232, 193, 105, .14);
-    box-shadow: 0 0 0 1px rgba(232, 193, 105, .45), 0 6px 18px rgba(0, 0, 0, .4);
+    border-color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent), 0 6px 18px rgba(0, 0, 0, .4);
   }
-  .rung.next b { color: var(--gold); font-size: .95rem; }
-  .scale { margin: -.5rem 0 0; color: var(--mob); }
+  .rung.next b { color: var(--gold); font-size: var(--font-sm); }
+  .scale { margin: var(--x-pull-scale) 0 0; color: var(--mob); }
 
-  .press { display: grid; grid-template-columns: 1fr minmax(16rem, 22rem); gap: 1rem; align-items: start; }
-  .odds { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center; }
+  .press { display: grid; grid-template-columns: 1fr minmax(clamp(200px, 13.04vw + 50.4px, 432px), clamp(275px, 17.93vw + 69.3px, 594px)); gap: var(--spacing-md); align-items: start; }
+  .odds { display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-md); align-items: center; }
   .big {
-    display: grid; gap: .1rem; justify-items: center; padding: .7rem 1rem; min-width: 6.5rem;
+    display: grid; gap: 1px; justify-items: center; padding: var(--spacing-sm) var(--spacing-md); min-width: var(--box-130);
     border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
   }
-  .big b { font-family: var(--num); font-size: 2.2rem; line-height: 1; color: var(--gold); }
+  .big b { font-family: var(--num); font-size: var(--font-xl); line-height: 1; color: var(--gold); }
   .big.safe b { color: var(--good); }
-  .big.high b { color: #ff8b7a; }
-  .big span { font-size: .64rem; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }
-  .terms { margin: 0; padding-left: 1.1rem; display: grid; gap: .2rem; font-size: .78rem; color: var(--dim); }
+  .big.high b { color: var(--alarm); }
+  .big span { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px); }
+  .terms { margin: 0; padding-left: var(--spacing-md); display: grid; gap: 3px; font-size: var(--font-xs); color: var(--dim); }
   .terms b { color: var(--text); font-family: var(--num); }
 
-  .acts { display: grid; gap: .35rem; }
+  .acts { display: grid; gap: 4px; }
   .hammer {
-    padding: .7rem 1rem; font-size: .95rem; border-radius: 12px;
-    border-color: rgba(232, 193, 105, .55); background: rgba(232, 193, 105, .13); color: var(--gold);
+    padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-sm); border-radius: 12px;
+    border-color: color-mix(in srgb, var(--gold) 55%, transparent); background: color-mix(in srgb, var(--gold) 13%, transparent); color: var(--gold);
   }
   .hammer:disabled { opacity: .5; }
-  .refuse { margin: 0; font-size: .72rem; color: #e8a093; }
-  .repair, .corrupt { font-size: .76rem; }
-  .corrupt { border-color: rgba(108, 81, 153, .7); color: #c8a5ff; }
-  .gamble { margin: .1rem 0 0; display: grid; gap: .2rem; }
-  .gamble small { color: var(--dim); font-size: .68rem; }
+  .refuse { margin: 0; font-size: var(--font-xs); color: var(--alarm); }
+  .repair, .corrupt { font-size: var(--font-xs); }
+  .corrupt { border-color: color-mix(in srgb, var(--elite) 70%, transparent); color: var(--curse); }
+  .gamble { margin: 1px 0 0; display: grid; gap: 3px; }
+  .gamble small { color: var(--dim); font-size: var(--font-xs); }
 
-  .result { margin: 0; padding: .4rem .6rem; border-radius: 8px; font-size: .8rem; background: rgba(192, 57, 43, .16); color: #ffb3a8; }
-  .result.good { background: rgba(39, 174, 96, .14); color: #9fe0bb; }
-  .purse { margin: 0; display: flex; flex-wrap: wrap; gap: .2rem .8rem; font-size: .72rem; color: var(--dim); font-family: var(--num); }
+  .result { margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: 8px; font-size: var(--font-xs); background: color-mix(in srgb, var(--hp) 16%, transparent); color: var(--alarm); }
+  .result.good { background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good-lit); }
+  .purse { margin: 0; display: flex; flex-wrap: wrap; gap: 3px var(--spacing-sm); font-size: var(--font-xs); color: var(--dim); font-family: var(--num); }
 
   @media (max-width: 1280px) {
     .press { grid-template-columns: 1fr; }
-    .rung .pc, .rung .st { font-size: .58rem; }
+    .rung .pc, .rung .st { font-size: var(--font-xs); }
   }
 </style>

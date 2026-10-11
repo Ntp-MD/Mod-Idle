@@ -10,8 +10,9 @@
  */
 
 import * as R from './lib/roster.ts';
-import * as M from './lib/skillmodel.ts';
-import * as eng from './lib/engine.ts';
+import { model as M } from './lib/skillmodel.ts';
+import { eng } from './lib/engine.ts';
+import * as G from './lib/gates.ts';
 
 const { byType, fmt, TYPES } = R;
 
@@ -119,11 +120,7 @@ if (arg === '--calc') {
 } else if (arg === '--levels') {
   levels(String(process.argv[3] || 'all'));
 } else if (arg === '--checks') {
-  const rows = R.gates();
-  for (const r of rows) console.log(`${r.id.padEnd(3)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-  const gateFails = rows.filter((r) => !r.ok).length;
-  console.log(`\n${rows.length - gateFails}/${rows.length} gate PASS · ${gateFails} FAIL`);
-  if (gateFails) process.exitCode = 1;
+  G.report(R.gates());
 } else {
   console.log(`skill cage — data: tools/data/skills.json (roster source of truth)
 

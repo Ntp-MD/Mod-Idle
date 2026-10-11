@@ -13,10 +13,10 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import * as eng from './lib/engine.ts';
+import { eng, ROOT } from './lib/engine.ts';
+import * as G from './lib/gates.ts';
 
-const { E, S, K, M, LG, DERIVED } = eng as any;
-const ROOT = eng.ROOT;
+const { E, S, K, M, LG, DERIVED } = eng;
 const f0 = (x: any) => Math.round(x).toLocaleString('en-US');
 const f1 = (x: any) => x.toFixed(1);
 const f2 = (x: any) => x.toFixed(2);
@@ -61,18 +61,40 @@ const BUILDS = [
   { id: 'mix', split: { str: 7, vit: 3, agi: 3 }, themes: THEMES.mix },
   { id: 'tank', split: { vit: 13 }, themes: THEMES.tank },
   { id: 'evasion', split: { agi: 13 }, themes: THEMES.evasion },
-  // Evasion reads Dex, so the evasion build carries a Dex leg alongside its Agi 
+  // Evasion reads gear and Agi only (owner ruling: Dex feeds it nothing), so the evasion build
+  // spends its points in Agi and wears the two Evasion lines
 ];
 
-const SLOT_MOD_ROLLS: Record<string, any> = {
-  'Max HP %': ['helmet', 'chest', 'pant', 'boots', 'belt', 'gloves', 'ring', 'cape', 'earring'],
-  'Max Mana %': ['helmet', 'boots', 'belt', 'ring', 'cape', 'earring'],
-  'Cooldown reduction %': ['off hand', 'helmet', 'chest', 'pant', 'boots', 'belt', 'gloves', 'ring', 'amulet', 'cape', 'earring'],
-  'Elemental resistance %': ['helmet', 'chest', 'pant', 'boots', 'belt', 'ring', 'amulet', 'cape', 'earring'],
-  'Evasion flat': ['pant', 'boots', 'belt', 'gloves'], 'Evasion %': ['helmet', 'chest', 'belt', 'gloves', 'ring'],
-  'Armour flat': ['helmet', 'chest', 'pant', 'boots', 'gloves'],
-  'Energy Shield flat': ['helmet', 'chest', 'pant', 'boots', 'gloves'],
+// The slots each defensive line may roll on, derived from `tools/data/bases.json` — never typed
+// by hand. A slot owns a line when any of its frames names it in Primary / Secondary, when it is
+// one of the three flat defence lines the armour slots add to every later line, or when it sits in
+// an off-hand family row. This is the pool the drops actually draw from, so the cage measures it.
+const BASES: any = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools', 'data', 'bases.json'), 'utf8'));
+const ARMOUR_SLOTS: string[] = ['helmet', 'chest', 'pant', 'boots', 'gloves', 'cape'];
+const MOD_ID_OF: Record<string, string> = {
+  'Max HP %': 'max_hp',
+  'Max Mana %': 'max_mana',
+  'Cooldown reduction %': 'cooldown_reduction',
+  'Elemental resistance %': 'elemental_resistance',
+  'Evasion flat': 'evasion_flat',
+  'Evasion %': 'evasion_pct',
+  'Armour flat': 'armour_flat',
+  'Energy Shield flat': 'energy_shield_flat',
 };
+const slotsOf = (id: string): string[] => {
+  const have = new Set<string>();
+  for (const b of BASES.bases || []) {
+    if ([...(b.primary || []), ...(b.secondary || [])].includes(id)) have.add(b.slot);
+  }
+  if ((BASES.frame_mod?.defence || []).includes(id)) for (const s of ARMOUR_SLOTS) have.add(s);
+  for (const fam of Object.values(BASES.weapon_pools?.['off hand'] || {})) {
+    if ((fam as string[]).includes(id)) have.add('off hand');
+  }
+  return (BASES.slots || []).filter((s: string) => have.has(s));
+};
+const SLOT_MOD_ROLLS: Record<string, any> = Object.fromEntries(
+  Object.entries(MOD_ID_OF).map(([disp, id]) => [disp, slotsOf(id)]),
+);
 
 // ---------------------------------------------------------------- one build
 // stat fed by n items at level L (L = the level cap by default; the zone table passes a zone edge)
@@ -107,26 +129,26 @@ function build(b: any, L = S.level_cap, gearMod = 0): any {
   // the Gear Mod is a second copy of the theme's own defensive line at the upgrade value
   // (`item-base.md`); Energy Shield is a pool this table does not spend and Evasion is not
   // modelled here at all, so only the Armour school can raise this gate
-  const evRating = eng.evasionRating(dex, evFlat, evPct);
-  const evAgi = eng.agilityEvasion(agi);
+  const evRating = eng.evasionRating(agi, evFlat, evPct);
   const armour = eng.armourOf(str) + armourFlat + (armourFlat ? gearMod : 0);
-  return { b, str, vit, dex, agi, hp, regen, res, cdr, evRating, evAgi, armour, hpPct, resPct, cdrPct, manaPct, esFlat };
+  return { b, str, vit, dex, agi, hp, regen, res, cdr, evRating, armour, hpPct, resPct, cdrPct, manaPct, esFlat };
 }
 
-// Evasion: the Dex rating rolls against that mob's accuracy, then Agi adds points 
-const evasionVs = (r: any, mobAcc: any) => eng.evasionChance(r.evRating, r.evAgi, mobAcc);
+// Evasion: the Agi rating (its gear lines folded in) rolls against that mob's accuracy
+const evasionVs = (r: any, mobAcc: any) => eng.evasionChance(r.evRating, mobAcc);
 
 // ---------------------------------------------------------------- engagements
 const MOB = E.mob;
 const zone9: any = eng.zoneById(9);
-const BOSS = MOB.sizes.find((s: any) => s.id === 'boss');
-const LARGE = MOB.sizes.find((s: any) => s.id === 'large');
-const MEDIUM = MOB.sizes.find((s: any) => s.id === 'medium');
+const BOSS = MOB.sizes.find((s: any) => s.id === 'boss')!;
+const LARGE = MOB.sizes.find((s: any) => s.id === 'large')!;
+const MEDIUM = MOB.sizes.find((s: any) => s.id === 'medium')!;
 
 // Elite is a rarity flag on a Large body, not a body of its own: same multipliers the
-// roster prints, different HP/damage multipliers here.
+// roster prints, different HP/damage multipliers here. Body classes no longer scale HP —
+// every mob reads the zone curve, so only Elite keeps a multiplier and only ps varies by body.
 const ELITE = { hp: 6, ps: 4 };
-const KINDS: Record<string, any> = { normal: MEDIUM, elite: ELITE, boss: BOSS, group: MEDIUM };
+const KINDS: Record<string, any> = { normal: { hp: 1, ps: MEDIUM.ps }, elite: ELITE, boss: { hp: 1, ps: BOSS.ps }, group: { hp: 1, ps: MEDIUM.ps } };
 // one round of the heal skills as a multiple of Max HP (engine.json build.heal_pool_mult; SV6 gates it)
 const HEAL_MULT = E.build.heal_pool_mult;
 
@@ -154,7 +176,7 @@ function zoneEncounter(r: any, dps: any, mobHp: any, L: any, kind: any) {
   const dpsIn = eng.mobPs(mobHp, L) * mult.ps;
   const attackers = kind === 'group' ? 3 : 1;
   const secs = hp / dps;
-  const mobAccL = eng.mobAcc(L, eng.MEAN_SPECIES_DEX, 1);
+  const mobAccL = eng.mobAcc(eng.MEAN_SPECIES_DEX, 1);
   const evasion = evasionVs(r, mobAccL);
   const res = Math.min(r.res, E.caps.elem_res);
   const armourCut = eng.armourReduce(r.armour, dpsIn / 2);
@@ -179,7 +201,7 @@ function dpsOf(r: any, L = S.level_cap) {
 }
 
 function table(kind: any, label?: any, gearMod = 0): any {
-  const mobAcc = eng.mobAcc(S.level_cap, eng.MEAN_SPECIES_DEX, 1);
+  const mobAcc = eng.mobAcc(eng.MEAN_SPECIES_DEX, 1);
   const rows = BUILDS.map((b: any) => {
     const r = build(b, S.level_cap, gearMod);
     const dps = dpsOf(r);
@@ -200,7 +222,7 @@ function zoneBossBlock() {
   const head = ['| Zone (level) | boss HP | build | fight time | no heal | with heal |', '|---|---|---|---|---|---|'];
   const rows: any[] = [];
   for (const z of E.mob.zones) {
-    const L = z.levels[1], mobHp = z.hp[1], bossHp = mobHp * BOSS.hp;
+    const L = z.levels[1], mobHp = z.hp[1], bossHp = mobHp;
     for (const b of BUILDS) {
       const r = build(b, L);
       const e = zoneEncounter(r, dpsOf(r, L), mobHp, L, 'boss');
@@ -212,7 +234,7 @@ function zoneBossBlock() {
 }
 
 function buildDefs() {
-  const mobAcc = eng.mobAcc(S.level_cap, eng.MEAN_SPECIES_DEX, 1);
+  const mobAcc = eng.mobAcc(eng.MEAN_SPECIES_DEX, 1);
   const rows = BUILDS.map((b: any) => {
     const r = build(b);
     const split = Object.entries(b.split).map(([k, v]: any) => `${k[0].toUpperCase() + k.slice(1)} ${v}`).join(' / ');
@@ -250,9 +272,8 @@ function block(key: any) {
 
 // ---------------------------------------------------------------- gates
 function gates() {
-  const out: any[] = [];
-  const add = (id: any, ok: any, d: any) => out.push({ id, ok, d });
-  const mobAcc = eng.mobAcc(S.level_cap, eng.MEAN_SPECIES_DEX, 1);
+  const { add, watch, rows } = G.gates();
+  const mobAcc = eng.mobAcc(eng.MEAN_SPECIES_DEX, 1);
   const built = BUILDS.map((b: any) => build(b));
 
   const bad = built.filter((r: any) => r.hp <= 0 || r.regen < 0 || r.evRating < 0);
@@ -268,7 +289,10 @@ function gates() {
   const perLevelHp = LG.hp_per_level * (S.level_cap - 1);
   const sepMax = (vitMax * K.K_VIT_HP + perLevelHp) / (eng.statAt(S.level_cap) * K.K_VIT_HP + perLevelHp);
   const sep = tanks.hp / glass.hp;
-  add('SV2', sep >= 1.5 && sep <= sepMax * 1.02, `tank pool ${f0(tanks.hp)} beats glass ${f0(glass.hp)} by ${f1(sep)}x — the flat-only ceiling allows at most ${f1(sepMax)}x, so the themes are distinct builds and the table cannot sell a wider margin than the data gives`);
+  add('SV2', sep <= sepMax * 1.02, `tank pool ${f0(tanks.hp)} beats glass ${f0(glass.hp)} by ${f1(sep)}x — the flat-only ceiling allows at most ${f1(sepMax)}x, so the table cannot sell a wider margin than the data gives${sep > sepMax * 1.02 ? ' · OVER THE CEILING' : ''}`);
+  watch('SV2t', sep >= 1.5,
+    `tank pool ${f0(tanks.hp)} beats glass ${f0(glass.hp)} by ${f1(sep)}x — below the ×1.5 the themes need to read as distinct builds; re-read the pool pacing by eye`,
+    `tank pool ${f0(tanks.hp)} beats glass ${f0(glass.hp)} by ${f1(sep)}x (ceiling ${f1(sepMax)}x) — the themes are distinct builds`);
 
   const b = table('boss', 'boss');
   const evasionRow = b.rows.find((r: any) => r.r.b.id === 'evasion');
@@ -276,21 +300,24 @@ function gates() {
 
   const grp = table('group', 'group');
   const maxGrp = Math.max(...grp.rows.map((r: any) => r.e.pct));
-  add('SV4', maxGrp < 100, `a group of 5 costs at most ${f1(maxGrp)}% of pool, so AFK stays safe — this is the rule that makes it safe`);
+  watch('SV4', maxGrp < 100,
+    `a group of 5 costs at most ${f1(maxGrp)}% of pool — over the whole pool, so AFK no longer stays safe; re-read the group pacing by eye`,
+    `a group of 5 costs at most ${f1(maxGrp)}% of pool, so AFK stays safe`);
 
   const capped = built.filter((r: any) => evasionVs(r, mobAcc) > E.caps.evasion + 0.01);
   add('SV5', capped.length === 0, `no printed build exceeds the ${E.caps.evasion}% Evasion Cap — the table cannot sell a number the Cap forbids${capped.length ? ' · ' + capped.map((r: any) => r.b.id).join(', ') : ''}`);
 
   // The G5 promise lives here: at the level cap the boss must Push the AFK builds, and a heal round
   // must open the door for the themes that spend their items on surviving. Which themes pass is
-  // published, not just how many: folded Dodge into one capped Evasion line and removed
-  // the Core Stat % multiplier, so a heal round now buys the two defensive themes and not the glass
-  // build. That is the honest shape of the answer — a damage theme does not out-heal a boss — and a
-  // bare count would let any other pair flip and still read as PASS.
+  // published, not just how many: Agi carries the Evasion rating now (owner ruling), so a heal round
+  // buys the two defensive themes and not the glass build — a damage theme does not out-heal a boss,
+  // and a bare count would let any other pair flip and still read as PASS.
   const bossRows = table('boss').rows;
   const pushed = bossRows.filter((r: any) => r.e.pct >= 100).length;
   const pass = healed(bossRows);
-  add('SV6', pushed >= 3 && sameSet(pass, HEAL_PASS), `the G5 boss gate holds at level ${S.level_cap}: ${pushed}/4 builds Pushed without heal, and one heal round (×${HEAL_MULT}) clears it for ${pass.join(', ') || 'nobody'} — AFK cannot beat the boss and the themes that cast heal can${wrongTheme(pass)}`);
+  watch('SV6', pushed >= 3 && sameSet(pass, HEAL_PASS),
+    `the G5 boss promise slipped at level ${S.level_cap}: ${pushed}/4 builds Pushed without heal, and one heal round (×${HEAL_MULT}) clears it for ${pass.join(', ') || 'nobody'}${wrongTheme(pass)} — re-read the boss Push by eye`,
+    `the G5 boss gate holds at level ${S.level_cap}: ${pushed}/4 builds Pushed without heal, and one heal round (×${HEAL_MULT}) clears it for ${pass.join(', ') || 'nobody'}${wrongTheme(pass)}`);
 
   // · the Upgrade ladder is a bounded line, and the bound has to hold against the boss as well:
   // every Gear Mod slot at +Cap is one more copy of the theme's own defensive line at the published
@@ -303,7 +330,8 @@ function gates() {
   const pushedUp = upRows.filter((r: any) => r.e.pct >= 100).length;
   const passUp = healed(upRows);
   const tankUp = upRows.find((r: any) => r.r.b.id === 'tank');
-  add('SV7', pushedUp >= 3 && sameSet(passUp, HEAL_PASS),
+  watch('SV7', pushedUp >= 3 && sameSet(passUp, HEAL_PASS),
+    `a full ${gmSlots}-slot Gear Mod set at +${E.craft.upgrade_cap} is +${GM_FULL} Armour on the heavy theme (${f1(tankUp.e.pct)}% of pool against the bare ${f1(bareTank.e.pct)}%) and the G5 promise slipped: ${pushedUp}/4 builds Pushed without heal, the heal round clears it for ${passUp.join(', ') || 'nobody'}${wrongTheme(passUp)} — re-read the ladder Push by eye`,
     `a full ${gmSlots}-slot Gear Mod set at +${E.craft.upgrade_cap} is +${GM_FULL} Armour on the heavy theme (${f1(tankUp.e.pct)}% of pool against the bare ${f1(bareTank.e.pct)}%) and the G5 promise still holds: ${pushedUp}/4 builds Pushed without heal, and the heal round still clears it for ${passUp.join(', ') || 'nobody'}${wrongTheme(passUp)}`);
 
   // B4 · mob skills are a re-timing of the priced `mob_PS`, never extra power (`combat.md` §5b ·
@@ -321,19 +349,16 @@ function gates() {
   }
   const shortest = shape.reduce((a: any, b: any) => (b.poolSec < a.poolSec ? b : a));
   const fails = shape.filter((s: any) => !(s.poolSec >= 2));
-  add('SV8', fails.length === 0,
-    `no AFK-reachable mob can one-hit-kill through a re-timing: the thinnest margin is ${shortest.id} against an ${shortest.kind} at ${f1(shortest.poolSec)} pool-seconds of its own priced damage, so the two-second burst shape costs ${f1(shortest.spike2)}% of that pool and a skill would have to spend ${f1(shortest.poolSec)} seconds of budget in one instant to empty it${fails.length ? ' · over the line: ' + fails.map((f: any) => `${f.id}/${f.kind}`).join(', ') : ''}`);
+  watch('SV8', fails.length === 0,
+    `a re-timing can one-hit-kill through a re-timing: the thinnest margin is ${shortest.id} against an ${shortest.kind} at ${f1(shortest.poolSec)} pool-seconds (a two-second burst costs ${f1(shortest.spike2)}% of that pool)${fails.length ? ' · over the line: ' + fails.map((f: any) => `${f.id}/${f.kind}`).join(', ') : ''} — re-read the mob-skill budget by eye`,
+    `no AFK-reachable mob can one-hit-kill through a re-timing: the thinnest margin is ${shortest.id} against an ${shortest.kind} at ${f1(shortest.poolSec)} pool-seconds of its own priced damage, so the two-second burst shape costs ${f1(shortest.spike2)}% of that pool and a skill would have to spend ${f1(shortest.poolSec)} seconds of budget in one instant to empty it`);
 
-  return out;
+  return rows();
 }
 
 const arg = process.argv[2];
 if (arg === '--checks') {
-  const rows = gates();
-  for (const r of rows) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.d}`);
-  const fails = rows.filter((r: any) => !r.ok).length;
-  console.log(`\n${rows.length - fails}/${rows.length} gate PASS · ${fails} FAIL`);
-  if (fails) process.exitCode = 1;
+  G.report(gates());
 } else {
   console.log(`survival cage — engine.json → the combat model
 

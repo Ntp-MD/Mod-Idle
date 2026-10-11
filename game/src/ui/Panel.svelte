@@ -12,10 +12,13 @@
    * the ground behind it. Focus is taken by the panel when it opens and kept inside it while it is
    * open, so a keyboard press cannot land on the screen behind the backdrop.
    */
-  let { title, subtitle = '', width = 'normal', onclose, children }: {
+  let { title, subtitle = '', width = 'normal', fixed = false, onclose, children }: {
     title: string;
     subtitle?: string;
     width?: 'normal' | 'wide';
+    /** a fixed viewport-tall box whose body never scrolls: content inside must fold (tabs, pages,
+        collapsed prose) rather than grow, per the no-scrollbar ruling */
+    fixed?: boolean;
     onclose: () => void;
     children: Snippet;
   } = $props();
@@ -62,13 +65,13 @@
 <svelte:window onkeydown={onkey} />
 
 <div class="veil" role="presentation" onclick={onground}>
-  <div class="box {width}" role="dialog" aria-modal="true" aria-labelledby={labelId} tabindex="-1" bind:this={box}>
+  <div class="box {width}" class:fixed role="dialog" aria-modal="true" aria-labelledby={labelId} tabindex="-1" bind:this={box}>
     <header class="panel-head">
       <h2 id={labelId}>{title}</h2>
       {#if subtitle}<p class="sub">{subtitle}</p>{/if}
       <button class="quit" onclick={onclose} aria-label="Close {title}" title="Close (Esc)">✕</button>
     </header>
-    <div class="body">
+    <div class="body" class:fixed>
       {@render children()}
     </div>
   </div>
@@ -77,9 +80,9 @@
 <style>
   .veil {
     position: fixed;
-    /* the rail stays outside the veil's padding: a sub-screen is switched by pressing the next tab,
-       not by closing this one first — so the gutter the rail owns is the right one */
-    inset: 0 var(--rail) 0 0;
+    /* the rail now floats above the veil (its own z-index keeps it pressable), so a sub-screen is still
+       switched by pressing the next tab, not by closing this one first — the veil covers full width */
+    inset: 0;
     z-index: 60;
     display: grid;
     /* one row that may shrink below its content: an `auto` row grows to the panel's full height, the
@@ -96,7 +99,7 @@
     display: flex;
     flex-direction: column;
     justify-self: center;
-    width: min(880px, 100%);
+    width: min(var(--box-1100), 100%);
     /* the screen takes only the room its own content needs, up to three quarters of the height: a
        sub-screen is a window over the field, not a second field, and a short one that stretched to a
        fixed height would leave the ground showing through an empty plate. The row above may still shrink
@@ -109,26 +112,30 @@
     outline: none;
     animation: slide .16s ease-out;
   }
-  .wide { width: min(1440px, 100%); }
-  @keyframes slide { from { transform: translateY(1.2rem); opacity: .4; } to { transform: none; opacity: 1; } }
+  .wide { width: min(var(--box-1800), 100%); }
+  /* the fixed box is viewport-tall and its body is a flex column that never scrolls: tab bars and
+     pages live inside it, and anything taller clips rather than growing a scrollbar */
+  .box.fixed { height: min(88dvh, 100%); max-height: min(88dvh, 100%); }
+  @keyframes slide { from { transform: translateY(clamp(15px, 0.978vw + 3.78px, 32.4px)); opacity: .4; } to { transform: none; opacity: 1; } }
   .panel-head {
     display: flex;
     align-items: baseline;
-    gap: .6rem;
-    padding: .7rem 1rem .55rem;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm);
     border-bottom: 1px solid var(--edge);
-    background: linear-gradient(180deg, rgba(232, 193, 105, .10), transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent);
     position: sticky;
     top: 0;
   }
-  .panel-head h2 { margin: 0; flex: none; color: var(--gold); letter-spacing: .12em; }
-  .sub { margin: 0; flex: 1; color: var(--dim); font-size: .75rem; }
+  .panel-head h2 { margin: 0; flex: none; color: var(--gold); letter-spacing: clamp(1.5px, 0.098vw + 0.38px, 3.24px); }
+  .sub { margin: 0; flex: 1; color: var(--dim); font-size: var(--font-xs); }
   .quit {
     background: none; border: 1px solid var(--edge); color: var(--dim); border-radius: 8px;
-    width: 1.7rem; height: 1.7rem; padding: 0; line-height: 1;
+    width: var(--icon-md); height: var(--icon-md); padding: 0; line-height: 1;
   }
   .quit:hover { color: var(--text); border-color: var(--gold); }
   /* min-height: 0 is what lets a flex child shrink: without it a long panel body keeps its content
      height, the box overflows the veil, and the bottom of the panel is unreachable. */
-  .body { padding: 1rem; overflow: auto; min-height: 0; overscroll-behavior: contain; }
+  .body { padding: var(--spacing-md); overflow: auto; min-height: 0; overscroll-behavior: contain; }
+  .body.fixed { overflow: hidden; display: flex; flex-direction: column; }
 </style>

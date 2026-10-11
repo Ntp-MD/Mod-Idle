@@ -31,7 +31,7 @@ const run = (shocked: boolean) => {
   return s.counters.damage || 0;
 };
 
-describe('a shocked player is stopped (the dead half of shock · item 5 step 1)', () => {
+describe('a shocked player is stopped (the half of shock nothing used to read)', () => {
   it('the status the client already writes now costs the attack', () => {
     const bare = run(false);
     const shocked = run(true);
@@ -55,7 +55,8 @@ describe('a shocked player is stopped (the dead half of shock · item 5 step 1)'
     expect(s.counters.damage || 0).toBeGreaterThan(0);
   });
 
-  it('and the pools stop regenerating — the other half of the published shock', () => {    const s = newGame(7);
+  it('and the pools stop regenerating — the other half of the published shock', () => {
+    const s = newGame(7);
     setLevel(s, 60);
     s.zone = 3;
     s.farm.autoUse = { hp: false, mana: false };   // a potion would read as regen and hide the rule

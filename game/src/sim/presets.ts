@@ -17,8 +17,10 @@ export interface Preset {
   buffs: Record<string, boolean>;
   auras: Record<string, boolean>;
   /** §14: the per-slot Always / Conditional / Never switch rides the set, so six sets are six
-   *  rotations. The shared condition list does not — it is one list for the whole character. */
+   *  rotations. So does each row's own condition list — a set that gates a row on a boss is a
+   *  different rotation from one that fires it always, and the player should not have to rebuild it. */
   mode: Record<string, string>;
+  conditions: Record<string, unknown>;
   zones: number[];
 }
 
@@ -29,6 +31,7 @@ export function newPresets(): Preset[] {
     buffs: {},
     auras: {},
     mode: {},
+    conditions: {},
     zones: [],
   }));
 }
@@ -40,6 +43,7 @@ export function storePreset(state: GameState) {
   p.buffs = { ...state.skills.buffs };
   p.auras = { ...state.skills.auras };
   p.mode = { ...(state.skills.mode || {}) };
+  p.conditions = { ...(state.skills.conditions || {}) };
 }
 
 /** Load a preset into the live loadout. Cooldowns and XP are deliberately untouched. */
@@ -52,6 +56,7 @@ export function switchPreset(state: GameState, index: number): boolean {
   state.skills.buffs = { ...p.buffs };
   state.skills.auras = { ...p.auras };
   state.skills.mode = { ...(p.mode || {}) };
+  state.skills.conditions = { ...(p.conditions || {}) };
   return true;
 }
 

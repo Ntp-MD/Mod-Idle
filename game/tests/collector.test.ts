@@ -8,12 +8,14 @@ const piece = (base: string, slot: string, quality = 'low') => ({
   slot, base, ilvl: 1, quality, tier: 'T1', lines: [], q: 0, weight: 30,
 });
 
-describe('the three sets are the ones town.json names', () => {
-  it('three sets, three set towns, and none of them pays gold', () => {
-    expect(col.sets.length).toBe(3);
-    expect(col.sets.map((s: any) => s.settlement).sort()).toEqual(['ashfall', 'bonegate', 'vermolch']);
+describe('the sets are the ones town.json names', () => {
+  it('one set per set town, and none of them pays gold', () => {
+    expect(col.sets.length).toBe(TOWN.collector_sets.length);
+    expect(col.sets.map((s: any) => s.settlement).sort())
+      .toEqual(TOWN.collector_sets.map((s: any) => s.settlement).sort());
     for (const s of col.sets) expect(s.pays_gold).toBe(false);
-    expect(TOWN.settlements.filter((st: any) => st.npcs.includes('collector')).length).toBe(3);
+    expect(TOWN.settlements.filter((st: any) => st.npcs.includes('collector')).length)
+      .toBe(TOWN.collector_sets.length);
   });
 
   it('a piece matches on Base, slot and the quality the set asks for', () => {
@@ -98,7 +100,7 @@ describe('turning a set in', () => {
 
 describe('the Collector panel has something to sell', () => {
   it('the hint line is stocked at each set town at its published price', () => {
-    for (const town of ['ashfall', 'bonegate', 'vermolch']) {
+    for (const town of TOWN.collector_sets.map((s: any) => s.settlement)) {
       const ids = stockOf(town).map((r: any) => r.id);
       expect(ids).toContain('collector_hint');
       expect(priceMinutes(TOWN.repeatable.find((r: any) => r.id === 'collector_hint'), town)).toBe(col.HINT_PRICE_M);

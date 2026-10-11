@@ -61,21 +61,17 @@ describe('the Heralds feed the Element they name', () => {
     expect(herald.alignment - plain.alignment).toBe(valueOf('aura.herald_of_ash', 'elemental_alignment'));
   });
 
-  it('is worth more on a mob of its own Element, because only the Element half is countered', () => {
+  it('lifts the same Elemental share on any mob — no Element is countered', () => {
     const plain = buildCharacter(90, emptyGear());
     const herald = buildCharacter(90, emptyGear(), {}, 0, fold);
-    const weak = mob({ innate: ['fire'] });
-    const other = mob({ id: 'm2', innate: ['cold'] });
+    const fireMob = mob({ innate: ['fire'] });
+    const coldMob = mob({ id: 'm2', innate: ['cold'] });
     const gainOn = (target: Mob) =>
       playerSwing(mulberry32(1), herald, target, null).damage -
       playerSwing(mulberry32(1), { ...plain, alignment: herald.alignment }, target, null).damage;
-    const weakGain = gainOn(weak);
-    const otherGain = gainOn(other);
-    expect(weakGain).toBeGreaterThan(0);
-    // the flat rides the ×1.5 weak line on its own Element and the counter table everywhere else
-    const table = E.elements.counter as Record<string, Record<string, number>>;
-    expect(weakGain / otherGain)
-      .toBeCloseTo((E.elements.weak_mult * table.fire.fire) / table.fire.cold, 6);
+    expect(gainOn(fireMob)).toBeGreaterThan(0);
+    // the Alignment lift rides no matchup multiplier, so its gain is identical on every race
+    expect(gainOn(fireMob)).toBeCloseTo(gainOn(coldMob), 6);
   });
 });
 
@@ -114,8 +110,8 @@ describe('the stack rows and the status curses reach the status store', () => {
     const store = newMobStatusStore();
     const target = mob();
     castDamage('attack.puncture', c, target, { mobStatus: store });
-    // the row states +100% bleed chance on the target, so the rider lands on the one press
-    expect(valueOf('attack.puncture', 'bleed_chance')).toBe(100);
+    // the row states a certainty (+100% bleed chance), so the rider lands on the one press
+    expect(valueOf('attack.puncture', 'bleed_chance')).toBeGreaterThanOrEqual(100);
     expect(store[target.id].statuses.bleed!.perSec).toBeGreaterThan(0);
 
     const fireStore = newMobStatusStore();
@@ -164,7 +160,7 @@ describe('the stack rows and the status curses reach the status store', () => {
     const curses = newCurses();
     applyCurse(curses, 'm1', row('curse.lacerate'));
     expect(lineValue(curses, 'm1', 'bleed_chance')).toBe(valueOf('curse.lacerate', 'bleed_chance'));
-    // the row's 40% and engine.json's K_BLEED_CHANCE are the same number stated in one home
+    // the row's chance and engine.json's K_BLEED_CHANCE are the same number stated in one home
     expect((E.K as any).K_BLEED_CHANCE * 100).toBe(valueOf('curse.lacerate', 'bleed_chance'));
     const store = newMobStatusStore();
     let applied = 0;

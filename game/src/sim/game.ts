@@ -7,13 +7,13 @@ import { newTown, progressTasks, tickTown, taskReward } from './town';
 import { STAT_KEYS, type StatKey } from '../engine/client';
 import { leanReweight } from '../../../engine/loot.ts';
 import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm } from './farm';
-import { road, walkZones, arrive } from './road';
+import { road, walkZonesHex, arrive, ownerOf, zoneOf } from './road';
 import { weaponByName, masteryLevel, payMastery, dropMultiplier } from './mastery';
 import { newPresets, switchPreset, autoSelect } from './presets';
 import { newCollector, newGrants, wants, col } from './collector';
 import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from './filter';
 import { addTo } from './slots';
-import { settlementOfZone } from './town';
+import { settlementOfZone, settlementById } from './town';
 import { effectsActive, esAbsorbPct } from './skills';
 import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
@@ -27,7 +27,7 @@ import {
   skillLevel, triggerAuras, type TriggerAura,
 } from './skills';
 import type { GameState, Mob, Item, FxEvent } from './types';
-import { mulberry32, pick, intBetween, pickBand } from '../engine/client-helpers';
+import { mulberry32, pick, intBetween } from '../engine/client-helpers';
 
 const L = E.loot;
 /** loot.md F7 publishes 4 bosses an hour; the clock is per character and online only. */
@@ -91,6 +91,7 @@ export function newGame(seed = 20260101): GameState {
   const gear = openingGear();
   const level = E.opening.level as number;
   const c = buildCharacter(level, gear, {}, 0, undefined, ZERO_POINTS());
+  const start = road.nodeById(E.road.nodes[0].id) || E.road.nodes[0];
   const s: GameState = {
     seed,
     rngState: seed,
@@ -112,6 +113,8 @@ export function newGame(seed = 20260101): GameState {
     bag: [],
     stash: [],
     walk: null,
+    // minute one stands on the starting settlement's own hex — rank 0, so it is safe ground
+    cell: { q: start.q, r: start.r, sub: null, wild: null },
     skills: newSkillState(),
     healUp: null,
     junk: {},
@@ -203,14 +206,16 @@ function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | '
   return (((E.mob as any).variant_drops || {})[mob.variant]) || null;
 }
 
-function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string): Mob {
+function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null): Mob {
   const z = eng.zoneById(zoneId);
   const zonePool = speciesInZone(zoneId);
   // a sub-zone is what a spawn table rolls against: it names its own race pair and one Element from the
   // zone's set, and the cast a normal or Elite spawn draws from is that pair (the boss is zone-level).
-  // The zone's own cast rolls, evenly — there is no per-zone hunting ground any more.
+  // Standing on a cell that has a sub-zone written into it hunts that sub-zone; anywhere else the zone's
+  // own cast rolls, evenly (`road.standing_rule`).
   const subs = z.subzones || [];
-  const sub = kind !== 'boss' && subs.length ? subs[Math.floor(rng() * subs.length)] : null;
+  const stood = standSub != null && subs[standSub] ? subs[standSub] : null;
+  const sub = kind !== 'boss' && subs.length ? (stood || subs[Math.floor(rng() * subs.length)]) : null;
   const speciesPool = sub ? zonePool.filter((sp: any) => sub.races.includes(sp.id)) : zonePool;
   let body = 'medium';
   let species = pick(rng, speciesPool);
@@ -240,16 +245,14 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   const base = eng.spawnAt(zoneId, playerLevel, body, species.id);
   const lv = Math.min(Math.max(playerLevel, z.levels[0]), z.levels[1]);
   const size = eng.sizeById(body);
-  const bf = eng.zoneBodyFactor(zoneId);
-  const hp = kind === 'boss' ? eng.mobHpAt(lv) * size.hp : kind === 'elite' ? eng.mobHpAt(lv) * E.mob.elite.hp : base.hp;
+  // body classes no longer scale HP: every mob of a species reads the same curve at its own level,
+  // so the boss takes the same spawn shape any mob of its species takes
+  const hp = kind === 'boss' ? base.hp : kind === 'elite' ? eng.mobHpAt(lv) * E.mob.elite.hp : base.hp;
   const psMult = eng.speciesPsMult(zoneId, species.id);
   const ps = kind === 'boss' ? eng.mobPsAt(lv) * size.ps * psMult : kind === 'elite' ? eng.mobPsAt(lv) * E.mob.elite.ps * psMult : base.ps;
-  // innate Element rolls inside the sub-zone's own Element, or the zone's Elements when a spawn has
-  // no sub-zone; the species bias still weighs 3 (mob.element_roll)
-  const bias = species.element_bias.filter((e: string) => z.elements.includes(e));
-  const rollElems: string[] = sub ? [sub.element] : z.elements;
-  const entries: [string, number][] = rollElems.map((e: string) => [e, bias.includes(e) ? E.mob.element_roll.bias_weight : E.mob.element_roll.other_weight]);
-  const innate = [pickBand(rng, entries)];
+  // the race owns its Element: every spawn of a species wears the same one in every zone, so no
+  // spawn rolls an Element of its own and the sub-zone's list is flavour, not a roll pool
+  const innate = [species.element];
   // the ladder name is its own roll over the species' three normal rungs (Elite and Boss take the fourth
   // and fifth), and it is what the drop table reads: `mob.variant_drops` keys on this name. Drawn last
   // on purpose — every field above keeps the random stream it had, so a variant is purely additive.
@@ -271,7 +274,7 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     subzone: sub ? sub.name : undefined,
     readsAs: base.readsAs,
     acc: base.acc,
-    evasion: kind === 'elite' ? eng.mobEvasion(lv, species.stats.dex, 'elite') : base.evasion,
+    evasion: kind === 'elite' ? eng.mobEvasion(eng.coreOf(species, 'dex', zoneId), 'elite') : base.evasion,
     dodgeRate: base.dodgeRate,
     armour: base.armour,
     res: base.res,
@@ -430,8 +433,13 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   const caught = spreadOnDeath(s.curses, mob.id, s.group.map((m) => m.id));
   if (caught) push(s, `${sm.byId['curse.pandemonium'].name} spreads to ${caught} nearby`);
   s.counters.kills++;
-  // the kill flash wears the mob's own innate Element, the same one its resistance answered with
-  fx(s, { kind: 'kill', side: 'field', text: mob.species, colour: hitColour(mob.innate?.[0] || null) });
+  // the feed names pay, not kills: every kill online banks its XP as its own line, so the chronicle ticks
+  // with the fight itself. Offline the away summary owns the read.
+  if (online) push(s, `+${mob.xp} XP`);
+  // the kill flash wears the mob's own innate Element, the same one its resistance answered with. It names
+  // the body too: the word still reads in the shared column, and the id is what lets the card it died on
+  // show the blow that ended it before it goes.
+  fx(s, { kind: 'kill', side: 'field', mobId: mob.id, text: mob.species, colour: hitColour(mob.innate?.[0] || null) });
   s.counters.zoneKills[mob.zone] = (s.counters.zoneKills[mob.zone] || 0) + 1;
   s.player.xp += mob.xp;
   while (s.player.level < E.stat.level_cap && s.player.xp >= eng.xpToNext(s.player.level)) {
@@ -441,6 +449,9 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     s.player.statPoints += per;
     s.player.treePoints += E.stat.tree_points_per_level;
     push(s, `Level ${s.player.level} — +${per} stat points, +${E.stat.tree_points_per_level} tree point${E.stat.tree_points_per_level === 1 ? '' : 's'}`);
+    // the one beat the whole frame is allowed to take: the level is the reason the character is here, so it
+    // wears the HUD's own accent rather than an Element, and it is raised on the character's half
+    fx(s, { kind: 'level', side: 'self', text: `Level ${s.player.level}`, colour: hitColour(null, true) });
     markSnapshot(s, 'level');
   }
   const band = BAND_OF_QUALITY(eng.zoneById(mob.zone).quality);
@@ -586,12 +597,12 @@ function completeDungeonRun(s: GameState): void {
  */
 function spawnWalkEncounter(s: GameState, rng: () => number) {
   const walk = s.walk!;
-  const { lower } = walkZones(walk.from, walk.to);
+  const { lower } = walkZonesHex(walk.from, walk.to);
   const z = eng.zoneById(lower);
   const [lo, hi] = (z.group as string).split('-').map(Number);
   const size = Math.max(1, Math.round(lo + rng() * ((hi || lo || 1) - (lo || 1))));
   const mobs: any[] = [];
-  for (let i = 0; i < size; i++) mobs.push(spawnMob(rng, lower, s.player.level, 'normal'));
+  for (let i = 0; i < size; i++) mobs.push(spawnMob(rng, lower, s.player.level, 'normal', undefined, walk.sub));
   s.group = mobs;
   push(s, `Ambushed on block ${walk.blocksWalked + 1} of ${walk.blocksTotal} · ${size} in ${z.name}`);
 }
@@ -608,7 +619,28 @@ export function push(s: GameState, text: string) {
 export function huntZone(s: GameState, id: number): { ok: boolean; why?: string } {
   const town = settlementOfZone(id);
   if (!town || !s.town.visited.includes(town.id)) return { ok: false, why: 'not opened yet' };
+  const node = road.nodeById(town.id);
+  if (node) s.cell = { q: node.q, r: node.r, sub: null, wild: null };
   s.zone = id;
+  s.group = [];
+  s.player.atkTimer = 0;
+  s.hunting = true;
+  return { ok: true };
+}
+
+/**
+ * Head out onto the cell the feet are already on and hunt there: a sub-zone side hunts that side's
+ * cast, and ground with no side named rolls the zone whole (`road.standing_rule`). Safe ground ends
+ * where the hunt begins.
+ */
+export function huntHere(s: GameState): { ok: boolean; why?: string } {
+  if (s.walk) return { ok: false, why: 'mid-walk' };
+  if (!s.cell) return { ok: false, why: 'nowhere to stand' };
+  if (road.cellRank(s.cell) === 0) {
+    const town = settlementById(ownerOf(s.cell).id);
+    if (!town || !s.town.visited.includes(town.id)) return { ok: false, why: 'not opened yet' };
+  }
+  s.zone = zoneOf(s.cell) ?? s.zone;
   s.group = [];
   s.player.atkTimer = 0;
   s.hunting = true;
@@ -622,19 +654,22 @@ const FX_RING = 24;
  * One event handed to the screen. A log line is for reading later; this is for animating now, and it
  * carries the number and the colour, which a total (`counters.damageBy`) and a sentence both lose.
  */
-export function fx(s: GameState, ev: { kind: FxEvent['kind']; text: string; colour: string; crit?: boolean; side?: FxEvent['side'] }) {
+export function fx(s: GameState, ev: { kind: FxEvent['kind']; text: string; colour: string; crit?: boolean; side?: FxEvent['side']; mobId?: FxEvent['mobId']; byId?: FxEvent['byId']; via?: FxEvent['via']; skillId?: FxEvent['skillId']; value?: FxEvent['value'] }) {
   s.fx = s.fx || [];
   s.fxSeq = (s.fxSeq || 0) + 1;
   s.fx.unshift({ id: s.fxSeq, sec: s.clockSec, ...ev });
   if (s.fx.length > FX_RING) s.fx.length = FX_RING;
 }
 
-/** The indicator's colour for one hit: a crit first, then the Element that carried it, then neutral. */
+/**
+ * The indicator's colour for one hit: a crit first, then the Element that carried it, then neutral.
+ * A missing data colour falls to `var(--text)`, so the client's own token stays the only neutral.
+ */
 export function hitColour(element: string | null | undefined, crit = false): string {
   const C = E.elements as any;
-  if (crit) return C.crit_colour || '#ffffff';
+  if (crit) return C.crit_colour || 'var(--text)';
   if (element && C.colour?.[element]) return C.colour[element];
-  return C.physical_colour || '#ffffff';
+  return C.physical_colour || 'var(--text)';
 }
 
 /**
@@ -645,7 +680,7 @@ export function hitColour(element: string | null | undefined, crit = false): str
 export function statusColour(status: string): string {
   const C = E.elements as any;
   const el = Object.keys(C.status_of || {}).find((k) => C.status_of[k] === status);
-  return (el && C.colour?.[el]) || C.physical_colour || '#ffffff';
+  return (el && C.colour?.[el]) || C.physical_colour || 'var(--text)';
 }
 
 /**
@@ -712,6 +747,9 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       if (next && !blocked) {
         s.forwardSafe = here.id; // the zone just left is the floor a Push falls back to
         s.zone = next.id;
+        // a climb moves the feet too, so the cell the zone is read from stays the zone's own town
+        const there = road.nodeById(settlementOfZone(next.id)?.id || '');
+        if (there) s.cell = { q: there.q, r: there.r, sub: null, wild: null };
         s.group = [];
         s.spawnIn = 0;
         s.hunting = true; // a climb is a hunt, not a rest
@@ -795,8 +833,8 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     s.group = wantBoss
       ? [spawnMob(rng, s.zone, s.player.level, 'boss')]
       : wantElite
-        ? [spawnMob(rng, s.zone, s.player.level, 'elite')]
-        : Array.from({ length: groupSize }, () => spawnMob(rng, s.zone, s.player.level, 'normal'));
+        ? [spawnMob(rng, s.zone, s.player.level, 'elite', undefined, s.cell?.sub)]
+        : Array.from({ length: groupSize }, () => spawnMob(rng, s.zone, s.player.level, 'normal', undefined, s.cell?.sub));
     // the queue is front line first, so a reach-1 attack always has the front slot (combat.md §2b)
     s.group.sort((m) => (m.line === 'front' ? -1 : 1));
     s.spawnIn = L.group_spawn_sec;
@@ -851,20 +889,26 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     }
     if (cast.instantHealPct) {
       const healed = (c.maxHp * cast.instantHealPct) / 100;
+      const before = s.player.hp;
       s.player.hp = Math.min(c.maxHp, s.player.hp + healed);
       push(s, `${cast.name} restores ${eng.fmt(healed)} HP at once (${cast.instantHealPct}% of the pool)`);
+      // the pool's own answer, in the colour of the Element the press carried — the number the heal
+      // actually moved, not the number the row prices, so a top-off at full HP says what it did
+      fx(s, { kind: 'heal', side: 'self', skillId: cast.id, text: `+${eng.fmt(s.player.hp - before)}`, colour: hitColour((sm.byId[cast.id] as any)?.element || null) });
     }
     if (cast.damage && cast.targets) push(s, `${cast.name} hits ${cast.targets} for ${eng.fmt(cast.damage)}${cast.crit ? ' (crit)' : ''}`);
     // the press's colour comes from the row's own Element (`skills.json` `element`), the same field
     // the status rider reads — a press with no Element name is the neutral half
     const castElement = (sm.byId[cast.id] as any)?.element || null;
-    if (cast.damage && cast.targets) {
+    // one number per mob the press actually hurt, each on its own plate: the sim already decided how the
+    // share split and the mitigation landed on every target, so the screen shows that and not the total
+    for (const h of cast.byMob) {
       fx(s, {
-        kind: 'hit', side: 'field', crit: cast.crit,
-        text: eng.fmt(cast.damage), colour: hitColour(castElement, cast.crit),
+        kind: 'hit', side: 'field', mobId: h.id, crit: cast.crit, via: 'cast',
+        text: eng.fmt(h.amount), value: h.amount, colour: hitColour(castElement, cast.crit),
       });
     }
-    if (cast.name) fx(s, { kind: 'cast', side: 'self', text: cast.name, colour: hitColour(castElement) });
+    if (cast.name) fx(s, { kind: 'cast', side: 'self', skillId: cast.id, text: cast.name, colour: hitColour(castElement) });
     if (cast.damage && !cast.targets) push(s, `${cast.name} was dodged`);
     credit(s, 'cast', cast.dealt || 0);
     if (cast.curseOn) {
@@ -912,11 +956,17 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       // the weapon's own riders — Element status, bleed and stun — on the swing's own hit, and on a
       // landing press too (§14), through one function so the two cannot drift
       applyWeaponRiders(rng, c, s.mobStatus, target.id, lineValue(s.curses, target.id, 'bleed_chance') > 0);
-      if (r.leech) s.player.hp = Math.min(c.maxHp, s.player.hp + r.leech);
+      // a swing that gives back HP is two events, not one: the blow the mob sees and the return the
+      // character feels, each on its own half of the field
+      if (r.leech) {
+        const before = s.player.hp;
+        s.player.hp = Math.min(c.maxHp, s.player.hp + r.leech);
+        fx(s, { kind: 'heal', side: 'self', text: `+${eng.fmt(s.player.hp - before)}`, colour: hitColour(null) });
+      }
       credit(s, 'swing', r.damage);
       fx(s, {
-        kind: 'hit', side: 'field', crit: r.crit,
-        text: eng.fmt(r.damage), colour: hitColour(r.element || null, r.crit),
+        kind: 'hit', side: 'field', mobId: target.id, crit: r.crit, via: 'swing',
+        text: eng.fmt(r.damage), value: r.damage, colour: hitColour(r.element || null, r.crit),
       });
       if (r.crit) { critLanded = true; push(s, `Crit for ${eng.fmt(r.damage)} (${target.species})`); }
       if (target.hp <= 0) {
@@ -924,6 +974,10 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
         s.group.shift();
         s.player.atkTimer = 0;
       }
+    } else if (r.why) {
+      // a swing the mob answered without taking pops its word on that mob's own corner, the way a
+      // landed blow pops its number — a dodge reads where the dodger stands, never in a shared column.
+      fx(s, { kind: 'block', side: 'field', mobId: target.id, text: r.why, colour: hitColour(null) });
     }
   }
 
@@ -940,6 +994,12 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     s.player.mana -= cost;
     s.skills.cd[id] = skillCd(s.skills, id, c.cdr);
     s.skills.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 10);
+    // a buff coming up is a gain the character receives, so it is raised where the character is read, in
+    // the colour of the Element the row carries — the same pair of rules a press already follows
+    fx(s, {
+      kind: 'buff', side: 'self', skillId: id, text: String(skill.name || id),
+      colour: hitColour((skill as any).element || null),
+    });
   }
   const cast = stunned ? null : castOnce(s.skills, c, s.player.mana, s.group, statuses, rng, {
     mobStatus: s.mobStatus, curses: s.curses,
@@ -958,7 +1018,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       mob.hp -= dot.total;
       // one number per mob per second, wearing the colour of the status carrying it: burn is the fire
       // it came from, poison the poison, and bleed the physical neutral it has always been
-      fx(s, { kind: 'hit', side: 'field', text: eng.fmt(dot.total), colour: statusColour(dotLead(dot)) });
+      fx(s, { kind: 'hit', side: 'field', mobId: mob.id, via: 'dot', text: eng.fmt(dot.total), value: dot.total, colour: statusColour(dotLead(dot)) });
     }
     credit(s, 'dot', dot.total);
   }
@@ -984,16 +1044,18 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       }
       const r = mobSwing(rng, c, mob, statuses, tm, s.player.es, absorbPct);
       // a defence is an event too: the screen has to say *which* answer stopped the hit, because
-      // Block, Evasion and a perfect dodge animate differently and the player reads them apart
-      if (r.blocked) fx(s, { kind: 'block', side: 'self', text: r.blocked, colour: hitColour(null) });
+      // Block, Evasion and a perfect dodge animate differently and the player reads them apart. Either way
+      // the striker is named, so the body that swung can lean into its own blow.
+      if (r.blocked) fx(s, { kind: 'block', side: 'self', byId: mob.id, text: r.blocked, colour: hitColour(null) });
       // `cast_on_damage_taken` listens for any hit that actually took off the player (HP or shield)
       if (r.toHp > 0 || r.toEs > 0) {
         tookDamage = true;
         // the incoming number wears the attacker's own Element, the same line the resistance roll
         // answered — a chaos hit reads purple whether or not the shield ate it
         fx(s, {
-          kind: 'taken', side: 'self',
-          text: eng.fmt(r.toHp + r.toEs), colour: hitColour(mob.innate?.[0] || null),
+          kind: 'taken', side: 'self', byId: mob.id,
+          text: eng.fmt(r.toHp + r.toEs), value: r.toHp + r.toEs,
+          colour: hitColour(mob.innate?.[0] || null),
         });
       }
       if (r.absorbed > 0) s.player.es = Math.min(c.es, s.player.es + r.absorbed);
@@ -1019,7 +1081,11 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
 
   // damage over time on us, then regen (field rule 2: regen works during combat)
   if (s.healUp) {
+    const before = s.player.hp;
     s.player.hp = Math.min(c.maxHp, s.player.hp + c.maxHp * s.healUp.pctPerSec);
+    // the stream says what it returned each second, on the same beat it spends — a heal that only lives in
+    // the gauge is a number the eye never sees move
+    fx(s, { kind: 'heal', side: 'self', text: `+${eng.fmt(s.player.hp - before)}`, colour: hitColour(null) });
     s.healUp.secLeft--;
     if (s.healUp.secLeft <= 0) s.healUp = null;
   }
@@ -1031,7 +1097,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     s.player.hp -= dot;
     // the same colour rule on our own side of the field, so a poison the mob left on us reads green
     const lead = dotLead({ burn: (statuses.burn?.stacks || 0) * (statuses.burn?.perSec || 0), poison: (statuses.poison?.stacks || 0) * (statuses.poison?.perSec || 0), bleed: 0 });
-    fx(s, { kind: 'taken', side: 'self', text: eng.fmt(dot), colour: statusColour(lead) });
+    fx(s, { kind: 'taken', side: 'self', via: 'dot', text: eng.fmt(dot), value: dot, colour: statusColour(lead) });
   }
   const burnCut = statuses.burn ? Math.min(E.status.burn.regen_cut_max, statuses.burn.stacks * E.status.burn.regen_cut_per_stack) : 0;
   // `combat.md` §5 reads shock as "attacks stop + regen stops", so the stop covers the pools too.
@@ -1109,8 +1175,25 @@ function clampPools(s: GameState): void {
   s.player.hp = Math.min(s.player.hp, c.maxHp);
 }
 
+/**
+ * The live wake, as one pure step: real time in, whole sim seconds out. The tab wakes every
+ * `WAKE_SEC`, the player's speed multiplies what that wake is worth, and never more than `MAX_BATCH`
+ * seconds are spent in one wake — a throttled tab's backlog is dropped rather than queued, because a
+ * queued burst would play catch-up in the foreground and cost the frame its stutter-free draw.
+ */
+export const WAKE_SEC = 0.25;
+export const MAX_BATCH = 8;
+export function schedulerBatch(acc: number, speed: number): { ticks: number; acc: number } {
+  const total = acc + WAKE_SEC * speed;
+  const ticks = Math.floor(total);
+  if (ticks <= 0) return { ticks: 0, acc: total };
+  // the batch is what runs; the time that could not fit is gone, not owed
+  if (ticks > MAX_BATCH) return { ticks: MAX_BATCH, acc: 0 };
+  return { ticks, acc: total - ticks };
+}
+
 /** Offline catch-up: run the same tick over the elapsed seconds, capped by the save rule. */
-function catchUpPlan(elapsedSec: number) {
+export function catchUpPlan(elapsedSec: number) {
   // an away period never walks: a walk is online only, so the catch-up never crosses a block
   const cap = E.inventory.offline_cap_hr * 3600;
   const secs = Math.max(0, Math.min(Math.floor(elapsedSec), cap));

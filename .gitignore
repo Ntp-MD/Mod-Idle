@@ -2,6 +2,12 @@
 
 # Static wiki tree: node tools/wiki.ts build
 
+# Art browser over the sheets in art/: node tools/gallery.ts
+art/gallery.html
+
+# Fav queue the gallery hands to the agent: node tools/gallery.ts --serve
+art/favs.json
+
 
 
 # Local browser-automation logs
@@ -14,6 +20,9 @@ owner/
 
 # Installed dependencies and build output for the client
 node_modules/
+
+# Locally installed pymanager Python runtime — toolchain, not project content
+Python/
 game/dist/
 game/.vite/
 

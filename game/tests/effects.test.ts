@@ -191,11 +191,169 @@ describe('the hit ring colours what a total cannot', () => {
     // no weapon Element on this sheet, so every swing is the neutral colour and the only fire number
     // the ring can hold is the burn itself
     const c = buildCharacter(30, emptyGear());
-    placeStatus(s.mobStatus, s.group[0].id, 'burn', c, 100);
+    const burned = s.group[0].id;
+    // a pool deep enough that the swing cannot end the body before the DoT step ticks the burn
+    for (const m of s.group) m.hp = m.hpMax * 50;
+    placeStatus(s.mobStatus, burned, 'burn', c, 100);
     s.fx = [];
     tick(s, {});
     const fire = (E.elements as any).colour.fire;
     const ticks = (s.fx || []).filter((e) => e.kind === 'hit' && e.side === 'field' && e.colour === fire);
     expect(ticks.length).toBeGreaterThan(0);
+    // and every one of them names the body it was done to, so the screen can raise it over that plate
+    expect(ticks.every((e) => e.mobId === burned)).toBe(true);
+    // what has no plate of its own stays in the shared column: a kill names its body only so that card can
+    // remember the blow that ended it, and the word itself is still read as a body leaves the field
+    expect((s.fx || []).filter((e) => e.kind === 'kill').every((e) => !s.group.some((m) => m.id === e.mobId))).toBe(true);
+    // and a status clock drew no weapon: the screen only swings when something swung
+    expect(ticks.every((e) => e.via === 'dot')).toBe(true);
+  });
+});
+
+
+describe('the ring carries the beats an animation is made of', () => {
+  /** a field with a group on it, nothing else raised: the caller clears the ring before it watches */
+  function hunting(seed = 30) {
+    const s = newGame(seed);
+    huntZone(s, s.zone);
+    for (let i = 0; i < 60 && !s.group.length; i++) tick(s, {});
+    expect(s.group.length).toBeGreaterThan(0);
+    return s;
+  }
+
+  it('a swing names what carried the hit, so a blade is drawn for a blade', () => {
+    const s = hunting();
+    s.fx = [];
+    for (let i = 0; i < 40 && !(s.fx || []).some((e) => e.kind === 'hit' && e.via === 'swing'); i++) tick(s, {});
+    const swung = (s.fx || []).filter((e) => e.kind === 'hit' && e.via === 'swing');
+    expect(swung.length).toBeGreaterThan(0);
+    // a swing is aimed at one body, so it always names that body
+    expect(swung.every((e) => !!e.mobId)).toBe(true);
+  });
+
+  it('a press says which row fired, so the cast order can light it', () => {
+    const s = hunting();
+    s.skills.list[0] = 'attack.cleave';
+    s.player.mana = 1e6;
+    s.fx = [];
+    for (let i = 0; i < 40 && !(s.fx || []).some((e) => e.kind === 'cast'); i++) tick(s, {});
+    const cast = (s.fx || []).find((e) => e.kind === 'cast');
+    expect(cast).toBeTruthy();
+    expect(s.skills.list).toContain(cast!.skillId);
+    expect(cast!.side).toBe('self');
+  });
+
+  it('a buff coming up is raised on the character half, with its own row', () => {
+    const s = hunting();
+    s.skills.owned['buff.warcry'] = 0;
+    s.skills.buffs['buff.warcry'] = true;
+    s.player.mana = 1e6;
+    s.fx = [];
+    tick(s, {});
+    const up = (s.fx || []).find((e) => e.kind === 'buff');
+    expect(up).toBeTruthy();
+    expect(up!.skillId).toBe('buff.warcry');
+    expect(up!.text).toBe(String((sm.byId['buff.warcry'] as any).name));
+    expect(s.skills.buffUp['buff.warcry']).toBeGreaterThan(0);
+    // the clock it grants is the same fact, so the screen never has to guess a duration
+    expect(up!.colour).toBe(((E.elements as any).colour as any)[(sm.byId['buff.warcry'] as any).element] || (E.elements as any).physical_colour);
+  });
+
+  it('a heal says what the pool actually took back', () => {
+    const s = hunting();
+    s.player.hp = 1;
+    s.healUp = { pctPerSec: 0.05, secLeft: 3 };
+    s.fx = [];
+    tick(s, {});
+    const healed = (s.fx || []).filter((e) => e.kind === 'heal' && e.side === 'self');
+    expect(healed.length).toBeGreaterThan(0);
+    // the number is the movement, not the price: it reads as a gain and carries no minus
+    expect(healed[0].text.startsWith('+')).toBe(true);
+    expect(Number(healed[0].text.slice(1).replace(/,/g, ''))).toBeGreaterThan(0);
+  });
+
+  it('a level is raised on the character half, where its own plate is read', () => {
+    const s = hunting();
+    // one kill's XP is all that is missing, so the very next death takes the level
+    s.player.xp = eng.xpToNext(s.player.level);
+    const before = s.player.level;
+    s.group[0].hp = 0;
+    s.fx = [];
+    tick(s, {});
+    const level = (s.fx || []).find((e) => e.kind === 'level');
+    expect(s.player.level).toBeGreaterThan(before);
+    expect(level).toBeTruthy();
+    expect(level!.side).toBe('self');
+    expect(level!.text).toContain(String(s.player.level));
+  });
+});
+
+describe('the ring carries the amount and the striker, not only the words', () => {
+  /** a field with a group on it, nothing else raised: the caller clears the ring before it watches */
+  function hunting(seed = 30) {
+    const s = newGame(seed);
+    huntZone(s, s.zone);
+    for (let i = 0; i < 60 && !s.group.length; i++) tick(s, {});
+    expect(s.group.length).toBeGreaterThan(0);
+    return s;
+  }
+
+  it('carries the amount behind a figure, so a sum is never a parse of the printed text', () => {
+    const s = hunting();
+    // a pool deep enough that no blow ends a body: then a hit can be read against the HP it actually took off
+    for (const m of s.group) m.hp = m.hpMax * 50;
+    let one: { value: number; lost: number; text: string } | null = null;
+    for (let i = 0; i < 200 && !one; i++) {
+      s.fx = [];
+      const was = new Map(s.group.map((m) => [m.id, m.hp]));
+      tick(s, {});
+      const hits = (s.fx || []).filter((e) => e.kind === 'hit' && e.mobId);
+      if (hits.length !== 1) continue;
+      const body = s.group.find((m) => m.id === hits[0].mobId);
+      const before = was.get(hits[0].mobId!);
+      if (!body || before === undefined) continue;
+      one = { value: hits[0].value || 0, lost: before - body.hp, text: hits[0].text };
+    }
+    expect(one).toBeTruthy();
+    expect(one!.value).toBeGreaterThan(0);
+    expect(one!.value).toBeCloseTo(one!.lost, 6);
+    // the figure the plate parks and the figure it prints are the same number, once
+    expect(one!.text).toBe(eng.fmt(one!.value));
+  });
+
+  it('names the body that carried a blow onto the character, so the striker can lean', () => {
+    const s = hunting();
+    const fielded = new Set(s.group.map((m) => m.id));
+    s.fx = [];
+    // Two blows are not strikers: a status clock ticking on the character names no body, because no body
+    // is swinging, and a field-side `block` is the mob answering *our* swing — it names the body that
+    // answered (`mobId`), not a body that attacked. The invariant is on what came off a body onto us.
+    const swung = (e: { kind: string; side?: string; via?: string }) =>
+      (e.kind === 'taken' || e.kind === 'block') && e.side === 'self' && e.via !== 'dot';
+    for (let i = 0; i < 200 && !(s.fx || []).some(swung); i++) {
+      const onField = s.group.map((m) => m.id);
+      tick(s, {});
+      for (const id of onField) fielded.add(id);
+      for (const m of s.group) fielded.add(m.id);
+    }
+    const landed = (s.fx || []).filter(swung);
+    expect(landed.length).toBeGreaterThan(0);
+    // a striker that fell in the same second it swung is still a body that was on the field
+    const offField = landed.filter((e) => !e.byId || !fielded.has(e.byId!)).map((e) => `${e.kind}@${e.sec} by ${e.byId ?? 'nobody'}`);
+    expect(offField).toEqual([]);
+    // and what did land has an amount of its own, so the character's card parks a number and not a word
+    expect((s.fx || []).filter((e) => e.kind === 'taken').every((e) => (e.value || 0) > 0)).toBe(true);
+  });
+
+  it('binds a death to the body that died — and the group still loses it that same tick', () => {
+    const s = hunting();
+    for (let i = 0; i < 4000 && !(s.fx || []).some((e) => e.kind === 'kill'); i++) tick(s, {});
+    const kill = (s.fx || []).find((e) => e.kind === 'kill');
+    expect(kill).toBeTruthy();
+    expect(kill!.mobId).toBeTruthy();
+    // presentation keeps the card; the sim keeps the truth. A remembered body never stays in the group, and
+    // nothing with its HP spent is left standing on the field
+    expect(s.group.some((m) => m.id === kill!.mobId)).toBe(false);
+    expect(s.group.every((m) => m.hp > 0)).toBe(true);
   });
 });

@@ -5,8 +5,8 @@
  *
  * The pages themselves are NOT here — they live in `game/src/wiki/pages.ts`, the same module the live
  * wiki (`game/wiki.html`) renders in the browser. This file owns only the filesystem: read the
- * client's `app.css` for its `:root` block, render each page, write each file. A figure is therefore
- * identical in both hosts, and neither can be stale against the engine for longer than one reload.
+ * client's `styles/variables.css` for its `:root` block, render each page, write each file. A figure is
+ * therefore identical in both hosts, and neither can be stale against the engine for longer than one reload.
  */
 
 import fs from 'node:fs';
@@ -18,7 +18,7 @@ const OUT = path.join(ROOT, 'wiki');
 
 /** The client's palette, read from the file that owns it — never a copy typed into a page. */
 const tokens = (): string =>
-  extractTokens(fs.readFileSync(path.join(ROOT, 'game', 'src', 'app.css'), 'utf8'));
+  extractTokens(fs.readFileSync(path.join(ROOT, 'game', 'src', 'styles', 'variables.css'), 'utf8'));
 
 if (process.argv[2] === 'build') {
   const css = tokens();

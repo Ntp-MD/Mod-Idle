@@ -19,7 +19,7 @@ describe('a drop carries its Element as a stored value', () => {
     const rng = mulberry32(7);
     let elemental = 0;
     for (let i = 0; i < 400; i++) {
-      for (const l of rollDrop(rng, 'high', 61).lines) {
+      for (const l of rollDrop(rng, 'high', eng.floorLevelOf('high')).lines) {
         if (l.id.startsWith('elemental_')) {
           expect(E.elements.order).toContain(l.element);
           elemental++;
@@ -37,7 +37,7 @@ describe('the bag filter reads per-slot thresholds', () => {
     const f = newFilter();
     for (const slot of FILTER_SLOTS) {
       const r = ruleFor(f, slot);
-      expect(r.enabled).toBe(false); //: no slot filters until the player turns it on
+      expect(r.enabled).toBe(false); // no slot filters until the player turns it on
       expect(r.margin_pct).toBe(E.loot.filter.upgrade_margin_pct);
       expect(r.keep_missing_element).toBe(true);
     }
@@ -90,7 +90,7 @@ describe('the bag filter reads per-slot thresholds', () => {
   });
 });
 
-describe('three walking snapshots', () => {
+describe('walking snapshots', () => {
   beforeEach(() => {
     const store = new Map<string, string>();
     (globalThis as any).localStorage = {
@@ -108,7 +108,9 @@ describe('three walking snapshots', () => {
     expect(s.nextSnapshotAt).toBe(SAVE_CFG.snapshot_interval_min * 60);
     mark(s, 'push');
     expect(s.pendingSnapshot).toBe(null);
-    expect(SAVE_CFG.snapshot_triggers).toEqual(['level', 'ascend', 'refine']);
+    // the list is data: the trigger this test arms is on it, the one it does not is not
+    expect(SAVE_CFG.snapshot_triggers).toContain('level');
+    expect(SAVE_CFG.snapshot_triggers).not.toContain('push');
   });
 
   it('owes a timer snapshot every configured minutes', () => {
@@ -123,7 +125,7 @@ describe('three walking snapshots', () => {
     expect(reason(s)).toBe('refine'); // an event beats the timer
   });
 
-  it('stores a snapshot outside the file it protects, newest first, capped at three', async () => {
+  it('stores a snapshot outside the file it protects, newest first, capped at the data slot count', async () => {
     const s = newGame(23);
     for (let i = 0; i < 5; i++) {
       mark(s, 'level');
@@ -175,7 +177,7 @@ describe('three walking snapshots', () => {
     if (s.player.level > 1) expect(s.pendingSnapshot).toBe('level');
     await writeSave('slot2', s);
     expect(JSON.parse((globalThis as any).localStorage.getItem('modworld:slot2')!).version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(11);
+    expect(SCHEMA_VERSION).toBe(12);
     const round = importJson(exportJson(s));
     expect(round.filter).toBeTruthy();
     expect(round.pendingSnapshot).toBe(null);

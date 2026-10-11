@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
-import { E } from '../src/engine/client';
+import { E, MODS } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import type { Item } from '../src/sim/types';
 
@@ -11,8 +10,6 @@ import type { Item } from '../src/sim/types';
  * would look like an upgrade and do nothing — so each new id gets an assertion here, and every range
  * is read out of `mods.json` instead of being repeated below.
  */
-const require = createRequire(import.meta.url);
-const MODS = require('../../tools/data/mods.json');
 const topOf = (id: string) => Number((MODS.mods.find((m: any) => m.id === id) || {}).max ?? 0);
 
 const line = (id: string, value: number) => ({ id, value, slice: 1 } as any);

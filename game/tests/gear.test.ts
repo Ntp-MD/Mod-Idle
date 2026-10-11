@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BASES, STAT_KEYS, loot } from '../src/engine/client';
+import { E, BASES, STAT_KEYS, loot } from '../src/engine/client';
 import { newGame, tick, equippedCount, huntZone } from '../src/sim/game';
 import { equipFromBag, gearModOf, autoEquip } from '../src/sim/gear';
 import { buildCharacter, emptyGear } from '../src/sim/player';
@@ -15,7 +15,8 @@ import type { Item } from '../src/sim/types';
  * not be dressed for the balance measurement. These three are what the panel's Equip button
  * is allowed to do — and the third is what it is never allowed to do on its own.
  */
-const rolled = (seed: number, band = 'high'): Item => rollDrop(mulberry32(seed), band, 61) as Item;
+const rolled = (seed: number, band = 'high'): Item =>
+  rollDrop(mulberry32(seed), band, E.item_level.spans.find((s: any) => s.band === band).from) as Item;
 
 describe('equipping from the bag', () => {
   it('wears a piece in its own slot and sends the displaced one back to the front of the bag', () => {
@@ -86,7 +87,7 @@ describe('equipping from the bag', () => {
     // hunt until the loop has actually banked a piece, so the reading is taken on a live bag rather
     // than after a guessed window (a time premise · AGENTS.md)
     for (let i = 0; i < 40000 && s.bag.length === 0; i++) tick(s, {}, { online: true });
-    // a bag full of kept pieces is the design working (loot.md §4), not a bug to fix here
+    // a bag full of kept pieces is the design working, not a bug to fix here
     expect(s.bag.length).toBeGreaterThan(0);
     expect(equippedCount(s)).toBe(atStart);
   });
@@ -203,7 +204,7 @@ describe('the school a Base carries', () => {
     for (const p of maxed) p.gearMod = clientCraft.stepOf(p, clientCraft.C.upgrade_cap);
     const uplifted = buildCharacter(100, [...maxed, ...emptyGear().slice(2)]);
 
-    // one ladder reaches the whole ceiling of the smaller school (X42), so +15 Evasion is that line
+    // one ladder reaches the whole ceiling of the smaller school (X42), so the evasion line gains exactly that ceiling
     expect(uplifted.evasion - bare.evasion).toBeCloseTo(clientCraft.C.gear_mod_per_level * clientCraft.C.upgrade_cap, 9);
     // and the heavy piece's uplift is Armour, which the sheet folds after its Str term
     expect(uplifted.armour - bare.armour).toBeCloseTo(clientCraft.C.gear_mod_per_level * clientCraft.C.upgrade_cap, 9);

@@ -39,12 +39,10 @@ A layer either **removes** the hit, **reduces** the damage, **scales** it, or **
 |---|---|---|---|---|
 | 1 | **hit_chance** | removes | `accuracy ÷ (accuracy + mob evasion)` — whether the hit exists at all | never reaches 100% by design |
 | 2 | **crit** | scales | physical hits only, ×(1 + crit_damage/100 − 1) · excess chance becomes crit damage | magic and the 5 Elements never crit |
-| 3 | **Weak** | scales | ×1.5 when our Element matches the mob's Innate element | not the same thing as the Element counter table |
-| 4 | **Element counter** | scales | the Element-versus-Element multiplier | does not apply to physical |
-| 5 | **bleed** | adds over time | physical DoT from a physical hit, no Element tag | does not stack, armour ignores it, cannot crit |
-| 6 | **mob HP** | receives | what is left after layers 1-5 | — |
+| 3 | **bleed** | adds over time | physical DoT from a physical hit, no Element tag | does not stack, armour ignores it, cannot crit |
+| 4 | **mob HP** | receives | what is left after layers 1-3 | — |
 
-The three damage paths — physical, magic, Element — are added together **before** layers 2-4 scale them, so a Weak Element hit and a crit are two different multiplications on one number.
+The three damage paths — physical, magic, Element — are added together **before** layers 2-3 scale them, so an Element hit and a crit are two different multiplications on one number. No Element counters another: the Element paths answer only the race's own-Element res.
 
 ## Defend layers (a mob hits us)
 
@@ -99,7 +97,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **hit_chance** | `accuracy ÷ (accuracy + evasion)` — the chance a hit connects at all. Never 100% by design: the ratio caps itself. |
 | **crit overflow** | Critical chance has no Cap. Chance stops at 100% and **everything above it becomes crit damage**, so stacking more crit is never wasted. |
 | **damage taken** | A multiplier that runs **after** every mitigation layer and before any pool. Armour and resistance each shrink something; evasion and Perfect dodge remove the hit before this ever sees it; this scales what survived them (`combat.md` section 2). |
-| **global damage / global defend / global speed** | The three reserved umbrella multipliers (`engine.json` `global`). `global damage` scales outgoing damage once, after weak / Element counter / crit; `global defend` is the incoming step-6 `damage_taken` bucket; `global speed` scales the whole clock (the `Haste` aura) and is **player-only** — no mob carries Haste. All start at ×1.00 — a future source feeds one bucket, so they never stack as separate multipliers. |
+| **global damage / global defend / global speed** | The three reserved umbrella multipliers (`engine.json` `global`). `global damage` scales outgoing damage once, after crit; `global defend` is the incoming step-6 `damage_taken` bucket; `global speed` scales the whole clock (the `Haste` aura) and is **player-only** — no mob carries Haste. All start at ×1.00 — a future source feeds one bucket, so they never stack as separate multipliers. |
 
 # Combat
 
@@ -111,7 +109,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **DoT** | Damage over time, ticking once a second. All Element DoT shares one budget (`elements.md` section 6). |
 | **Leech** | HP returned as a percentage of damage just dealt. |
 | **Perfect dodge** | Removes the hit outright and is **not** contested — the only answer to things Evasion cannot block, such as DoT ticks and unconditional effects. Chance comes from Lck as a ratio, with a Cap just under the top that ratio reaches (the generated Cap table in `formula.md` prints both). |
-| **Reach** | How far a build can act. There is no map, no tiles and no movement: near and far are a queue (`combat.md` section 2b). |
+| **Reach** | How far a build can act **in a fight**. There is no range band and no positional penalty: near and far are a queue (`combat.md` section 2b). The field's hexes are walked, never aimed at. |
 | **Foe** | The **Field of Enemies** — every mob the character is fighting at once. An aura writes on the foe, so its line lands on all of them; a press or a curse writes only on the mob it landed on. Never a synonym for one mob. |
 | **Elite** | A rarity flag, **not** a size — an Elite is a Large body carrying its own stronger numbers, so two multipliers never stack. |
 | **Attack layer / Defend layer** | One step of the damage calculation in its fixed order (`combat.md` §2). **Not** the same thing as an Offensive or Defensive Mod, which is a Mod pool. A layer removes the hit, reduces the damage, scales it, or receives it. |
@@ -121,15 +119,13 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | Term | Meaning |
 |---|---|
 | **Element** | fire / cold / lightning / poison / chaos. One item holds exactly one Element, and that Element decides which status the item can inflict. |
-| **Innate element** | A mob's home Element. It takes ×1.5 damage from that Element **and** attacks us with that Element, so one preparation answers both halves. |
-| **Weak** | The ×1.5 bonus when our Element matches a mob's Innate element. A relationship between two things — **not** the same thing as the Element counter table. |
-| **Counter element** | The multiplier one Element deals to another (0.60 resisted, 1.20 strongest). Table in `elements.md`. |
+| **Innate element** | The Element a mob's race owns (`mob.species[].element`). It attacks with it and resists it at the flat race res in every zone. |
 | **burn** (fire) | Damage over time that also cuts the target's HP regen, 10% of it per stack, to a limit set by the stack Cap. |
 | **chill** (cold) | Cuts the target's attack speed and accuracy, and cuts its Armour. |
 | **shock** (lightning) | Stops the target's clock, cuts its attack speed, and **cuts our own Alignment against that target** — the one status that fights our own. |
 | **poison** (poison) | Stacking damage over time that decays slowly and survives a weapon swap. |
 | **mark** (chaos) | A growing multiplier on the hit it rides, plus leech. The only status with no damage term of its own. |
-| **bleed** | Physical damage over time, copied from Path of Exile. **Not an Element**: no Element tag, no resistance, no counter row. Does not stack, a new application refreshes it, armour does not reduce it, and it cannot crit. |
+| **bleed** | Physical damage over time, copied from Path of Exile. **Not an Element**: no Element tag and no resistance line. Does not stack, a new application refreshes it, armour does not reduce it, and it cannot crit. |
 
 # Crafting
 
@@ -148,7 +144,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Tier stone** | Buys the four tier presses: Refine a line · Roll a tier on a line · Roll a new Mod on a line · Roll a new Mod on the piece. |
 | **Value stone** | The cheapest stone, minted by dissolving junk. Buys Reroll value on a line, or on a random line. |
 | **Polish stone** | Buys Polish the piece: every value rerolled inside its own Tier in one press — the only press that touches the Frame Mod's value. |
-| **Reforge stone** | Buys Reforge the piece: the Tier redrawn across the whole piece in one press. Minted by bosses; the bench has no button for it yet. |
+| **Reforge stone** | Buys Reforge the piece: the Tier redrawn across the whole piece in one press. Minted by bosses; the bench spends it on the whole piece. |
 | **Rebirth stone** | Buys Rebirth the Unbound lines: every line past the Bound pair — the set the piece holds, Add lines included — drawn again from the piece's own pool in one press. One stone whatever the count, because the press chooses nothing: the Frame Mod and the Bound pair keep their identity, the line count never moves, no Add charge is spent. |
 | **Corrupt stone / Repair stone** | Boss-only and elite/boss-only, one use per piece. The rarest stones in the game. |
 | **Upgrade** | Adds Gear Mod points to a piece, one step at a time, with rising failure odds. Low steps are safe; the top steps can **Break** a piece — unequippable, stats zero, kept at its level. Protection absorbs a break before it happens. Online only. |
@@ -160,7 +156,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **stash** | Town storage, organisation only, bought with gold (`towns.md`). Never grants power and never auto-converts. |
 | **herb** | A plant drop, consumed rather than equipped or sold. Always kept by the filter — it never dissolves. Its rate feeds the herbalist's demand and the pouch ladder. |
 | **junk** | A flavoured drop from each **variant** (a Goblin pays an Ear at Sneak, Bile at Raider, a Cog at Tinker, a Charm at Shaman and a Crown at the King), always kept, stacks 999/slot and is **weightless**, and is sold to the Settlement Counterhand for gold — gold's primary mint (Ragnarok-style). Has three rarities (common · uncommon · rare): rarer junk is dearer and drops less often, so expected gold per kill is flat and rarity buys frequency, not income. Not gear, not a stone. |
-| **variant** | One rung of a species' named ladder (`mob.variants`): the three normal rungs plus Elite and Boss. A variant owns its own junk item and the collectible stream it **leans**, so the name is a drop identity. Each zone is three **sub-zones** — a race pair plus an Element — and a spawn rolls inside one of them, so the cast fought is the zone's own. |
+| **variant** | One rung of a species' named ladder (`mob.variants`): the three normal rungs plus Elite and Boss. A variant owns its own junk item and the collectible stream it **leans**, so the name is a drop identity. Each zone is three **sub-zones** — a race pair plus an Element — and a spawn rolls inside one of them: the side the feet stand on when that side names one, the zone's own draw otherwise, so the cast fought is the zone's own either way. |
 
 # Town and Economy
 
@@ -170,10 +166,10 @@ Three consequences worth remembering, because most defensive confusion comes fro
 | **Adventure / Settlement** | The two states. **Adventure** = in a zone: combat, loot, the adventure bag fills; no crafting and no deposit. **Settlement** = in a settlement: deposit, stash, craft, restock; no combat. Neither is the same as AFK/active — a character can be AFK in either state. |
 | **Capital** | A settlement serving one quality band with the full service set. Three in total. |
 | **Zone** | The combat area attached to a settlement, always the `world.md` zone 1-9. A settlement never replaces a zone. |
-| **Block** | One hex of the world lattice. Walking is counted in blocks, and the blocks between two settlements are their hex distance. |
-| **Walk** | Crossing blocks to reach a settlement. Every block costs seconds and rolls one chance of an ambush. |
-| **Waypoint** | A settlement opened by arriving on foot: after that a warp there is free and instant. |
-| **Hunt** | Leaving safe ground to fight a zone on foot, from the map. Only a settlement already opened may be hunted in. |
+| **Block** | One hex of the world lattice. Walking is counted in blocks: the blocks between two cells are their hex distance, and every cell costs one block whatever lies under it (`road.cost_rule`). |
+| **Walk** | Crossing blocks from the cell the feet are on to the cell clicked. Every block costs seconds and rolls one chance of an ambush. |
+| **Waypoint** | A settlement opened by arriving on foot at the cell it stands on: after that a warp there is instant, and it costs gold at the destination's own band. |
+| **Hunt** | Leaving safe ground to fight from the cell the feet stand on: a side carrying a sub-zone fields that sub-zone's cast, ground carrying none rolls the zone whole. Only ground inside an opened settlement's zone may be hunted in. |
 | **Dungeon run** | A **mode**, not a place: one dungeon per zone, sitting on its settlement's first wild side. A run fields `dungeon.mob_cap` normals of that zone in encounters of `dungeon.group_cap`, pays the ordinary per-kill roll into **escrow**, and cools down for `dungeon.cooldown_sec` after a clear. It never re-prices `mob_HP`, the drop line or the timeline. |
 | **Escrow** | What a dungeon run holds while it runs: the per-kill rolls banked instead of paid. It pays out on the last mob, and a **Push** forfeits it. |
 | **Wild side** | The untamed cells on a settlement's own land — the side its dungeon sits on (`map.json`). |
@@ -196,7 +192,7 @@ Three consequences worth remembering, because most defensive confusion comes fro
 
 # Abbreviations
 
-A **closed set**. An abbreviation is the *same term shortened*, never a second name for it — so a term with no row here has no abbreviation, and inventing one is a synonym, which `AGENTS.md` section 2 forbids. A new row is added only when the abbreviation is actually used in a doc or a tool, and a rejected spelling is recorded in `aliases.json` (guarded by lint **L4**). Every row must survive lint **L8**: one abbreviation per term, one term per abbreviation, and each abbreviation used somewhere in the repo.
+A **closed set**. An abbreviation is the *same term shortened*, never a second name for it — so a term with no row here has no abbreviation, and inventing one is a synonym and is not allowed. A new row is added only when the abbreviation is actually used in a doc or a tool, and a rejected spelling is recorded in `aliases.json` (guarded by lint **L4**). Every row must survive lint **L8**: one abbreviation per term, one term per abbreviation, and each abbreviation used somewhere in the repo.
 
 | Term | Abbreviation | Canonical in |
 |---|---|---|

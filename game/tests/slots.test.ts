@@ -1,17 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { E } from '../src/engine/client';
 import { newGame } from '../src/sim/game';
-import { slotsUsed, slotsFree, addTo, fits, bagSlots, pouchSlots, slotsAvailable } from '../src/sim/slots';
+import { slotsUsed, slotsFree, addTo, bagSlots, pouchSlots, slotsAvailable } from '../src/sim/slots';
 import { craftPotion, plant, harvest } from '../src/sim/farm';
 
 const CAP = E.inventory.stack_size as Record<string, number>;
+const hpPotion = E.potions.list.find((p: any) => p.pool === 'hp' && p.index === 1).name as string;
 
-describe('the thirty-slot character bag', () => {
+describe('the character bag takes its shape from the data', () => {
   it('takes its caps and its size from the data, not from a copy', () => {
     expect(bagSlots).toBe(E.inventory.character_slots);
-    expect(CAP.stone).toBe(999);
-    expect(CAP.herb).toBe(100);
-    expect(CAP.potion).toBe(100);
+    for (const k of ['stone', 'herb', 'potion']) expect(CAP[k]).toBeGreaterThan(0);
   });
 
   it('counts the slots the Porter sold as space, from town.json', () => {
@@ -59,12 +58,11 @@ describe('the thirty-slot character bag', () => {
     for (let i = 0; i < CAP.herb; i++) addTo(s, s.farm.potions, 'pad', 'potion', 1);
     const herbs = s.farm.herbs.low;
     const stones = s.counters.stones.reroll_value;
-    const r = craftPotion(s, 'Red Draught');
+    const r = craftPotion(s, hpPotion);
     expect(r.ok).toBe(false);
     expect(String(r.why)).toMatch(/slot/);
     expect(s.farm.herbs.low).toBe(herbs); // the ingredients and the stone are still there
     expect(s.counters.stones.reroll_value).toBe(stones);
-    void fits;
   });
 
   it('banks a crop that still fits inside the open stack', () => {

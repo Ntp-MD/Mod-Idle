@@ -7,7 +7,7 @@ import { NO_CURSE } from '../src/sim/curse';
 import type { Mob } from '../src/sim/types';
 
 /**
- * HugePatch §14c · `weapon.basic_attack: swing | bolt`.
+ * `weapon.basic_attack: swing | bolt`.
  *
  * A magic weapon has no swing — it flicks a **bolt**: a press on the attack clock, no mana and no
  * cooldown, worth the **attack ladder's floor** (the weakest attack row in the roster). So a caster
@@ -23,10 +23,10 @@ const mob = (): Mob => ({
 
 /** The bolt is switched off by naming a FLAT melee row: the sheet's own phys/magic do not move. */
 const sheet = (weapon: string): Character =>
-  ({ ...buildCharacter(90, emptyGear()), weaponName: weapon, evasion: 0, evasionFromAgi: 0, perfectDodge: 0 } as Character);
+  ({ ...buildCharacter(90, emptyGear()), weaponName: weapon, evasion: 0, perfectDodge: 0 } as Character);
 const landed = (c: Character) => playerSwing(mulberry32(3), c, mob(), null, NO_CURSE).damage;
 
-describe('a magic weapon flicks a bolt (§14c)', () => {
+describe('a magic weapon flicks a bolt', () => {
   it('the bolt is read off the weapon damage line, not a second field', () => {
     expect(eng.basicAttackOf(BASES, 'wand')).toBe('bolt');
     expect(eng.basicAttackOf(BASES, 'staff')).toBe('bolt');

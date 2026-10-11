@@ -14,9 +14,13 @@ describe('the win gate is read off the data, not typed', () => {
     const last = E.mob.zones[E.mob.zones.length - 1];
     const t = target();
     expect(t.zone).toBe(last.id);
-    expect(t.level).toBe(last.levels[1]);
-    // the same curve the spawn reads, so the number the player reads is the number the fight rolls
-    expect(eng.mobHpAt(t.level) * eng.sizeById('boss').hp).toBeCloseTo(t.hp, 6);
+    // the boss spawns at its own static level (`mob.species[].zone_levels`), and the gate quotes it
+    const boss = E.mob.bosses.find((b: any) => b.zone === last.id);
+    const sp = E.mob.species.find((s: any) => s.id === boss!.species);
+    expect(t.level).toBe((sp.zone_levels as any)[last.id]);
+    // the same HP the roster row carries, so the number the player reads is the number the fight rolls
+    const row = eng.mobRoster().find((r: any) => r.zone === last.id && /Boss/.test(r.kind));
+    expect(row.hpTo).toBeCloseTo(t.hp, 6);
     expect(describeGoal()).toContain(t.name);
   });
 
@@ -81,13 +85,13 @@ describe('the gate closes in the live loop', () => {
     s.bossDueAt = s.clockSec + 1; // 0 reads as "no clock stored yet", so the due time is explicit
     let guard = 0;
     while (!s.goal.spawnId && guard++ < 40) {
-      s.player.hp = 1e9; // a level-1 sword cannot out-sustain a level-90 zone; the gate is the subject here
+      s.player.hp = 1e9; // a level-1 sword cannot out-sustain the target zone; the gate is the subject here
       s.player.mana = 1e9;
       tick(s, {});
     }
     expect(s.log.some((l) => /Boss spawn/.test(l.text))).toBe(true);
     const armed = s.goal.spawnId!;
-    expect(armed.startsWith(`${target().zone}_`)).toBe(true); // armed by the real spawn path, on zone 9
+    expect(armed.startsWith(`${target().zone}_`)).toBe(true); // armed by the real spawn path, in the target zone
     expect(s.counters.pushes).toBe(s.goal.pushesAtSpawn); // and the attempt is still clean
     const boss = mobOf({ id: armed, kind: `Boss · ${target().name}`, zone: target().zone, hpMax: Math.round(target().hp) });
     expect(onKill(s, boss)).toBe(true);
@@ -99,7 +103,7 @@ describe('the gate closes in the live loop', () => {
     s.goal.attempts = 3;
     const bare = JSON.parse(JSON.stringify({ ...s, goal: undefined }));
     expect(migrate(bare).goal).toEqual(newGoal());
-    expect(SCHEMA_VERSION).toBe(11);
+    expect(SCHEMA_VERSION).toBe(12);
     const kept = migrate(JSON.parse(JSON.stringify(s)));
     expect(kept.goal.attempts).toBe(3);
   });

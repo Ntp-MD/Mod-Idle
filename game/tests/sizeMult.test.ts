@@ -10,7 +10,7 @@ import type { Mob } from '../src/sim/types';
 const ladder = (E as any).weapon_size_mult.ladder;
 
 /**
- * HugePatch §12 · weapon × body class, the mechanism. Mounted on the session's own data:
+ * Weapon × body class, the mechanism. Mounted on the session's own data:
  * `engine.json weapon_size_mult` carries the ladder, `playerSwing` applies it to the whole
  * non-Element part of a swing (a swing is the weapon arguing with a body, whatever damage type it
  * deals) and it lands AFTER mitigation. `X47` gates the table's shape; this file gates the swing.
@@ -24,12 +24,12 @@ const mob = (readsAs: string): Mob => ({
 
 /** No evasion in the way, so the only variable is the weapon's own ladder. */
 const sheet = (weapon: string): Character =>
-  ({ ...buildCharacter(90, emptyGear()), weaponName: weapon, evasion: 0, evasionFromAgi: 0, perfectDodge: 0 } as Character);
+  ({ ...buildCharacter(90, emptyGear()), weaponName: weapon, evasion: 0, perfectDodge: 0 } as Character);
 
 const landed = (weapon: string, readsAs: string) =>
   playerSwing(mulberry32(3), sheet(weapon), mob(readsAs), null, NO_CURSE).damage;
 
-describe('a weapon meets a body class (§12)', () => {
+describe('a weapon meets a body class', () => {
   it('the reference weapon is indifferent to the body', () => {
     const small = landed('one-handed sword', 'small');
     const large = landed('one-handed sword', 'large');
@@ -40,7 +40,7 @@ describe('a weapon meets a body class (§12)', () => {
   it('a Large-favouring weapon hits a Large body harder than a Small one, by its own row', () => {
     const small = landed('mace', 'small');
     const large = landed('mace', 'large');
-    // the row is the owner's dagger ladder pointed the other way: 1.25 vs 0.75 = 5/3
+    // the row mirrors the dagger ladder, pointed the other way
     expect(large / small).toBeCloseTo(ladder.mace.large / ladder.mace.small, 4);
   });
 

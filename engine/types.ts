@@ -22,6 +22,7 @@ export interface StatCfg {
   point_value: number;
   paragon_from: number;
   paragon_points_per_level: number;
+  tree_points_base: number;
   tree_points_per_level: number;
   reference_build: string;
   respec_cost: number;
@@ -32,12 +33,15 @@ export interface StatCfg {
 export type KMap = Record<string, number>;
 
 export interface Caps {
-  alignment: number;
-  aspd: number;
+  alignment: number | null;
+  /** The clock Cap in its own unit: the fastest swing the game allows. */
+  attack_interval_sec: number;
   cdr: number;
   elem_res: number;
+  /** The top of the tree's `elem_res` unlock — the ceiling the raised Cap cannot pass. */
+  elem_res_max: number;
   evasion: number;
-  perfect_dodge: number;
+  perfect_dodge: number | null;
   weight_overload: number;
   /** The second avoidance layer — a blocked hit is deleted outright. */
   block: number;
@@ -55,11 +59,28 @@ export interface ModMax {
   accuracy_pct: number;
   aspd_pct: number;
   hp_pct_per_item: number;
+  mana_pct_per_item: number;
   res_pct_per_item: number;
   cdr_pct_per_item: number;
   align_pct_per_item: number;
   energy_shield_flat_t1: number;
   max_energy_shield_pct: number;
+  // the defensive and regen ceilings the survival cage reads off the same table
+  armour_flat_t1: number;
+  armour_pct: number;
+  evasion_flat_t1: number;
+  evasion_pct: number;
+  perfect_dodge_pct: number;
+  block_chance: number;
+  all_resistance_pct: number;
+  status_resistance_pct: number;
+  life_regen_pct: number;
+  life_regen_flat: number;
+  mana_regen_pct: number;
+  mana_regen_flat: number;
+  bleed_chance: number;
+  stun_chance: number;
+  armour_pen: number;
 }
 
 export interface LevelGain {
@@ -208,27 +229,24 @@ export interface MobSpecies {
   /** The regions this species may live in — its `zones` must be a subset (X52). */
   habitat: string[];
   sizes: string[];
-  element_bias: string[];
+  /** The one Element the race owns: its attacks, its weakness keys and its flat res all read it. */
+  element: string;
   carries_weapon: boolean;
   accuracy_mult: number;
   damage: unknown;
   /** A humanoid lineage is the only source of the potion drop (X49). */
   humanoid?: boolean;
   trait?: string;
-  /**
-   * Per-Element resistance multipliers on the Vit line (X54). One Element resists (x1.3-1.5) and one
-   * is a weakness (x0.5-0.7); the five always average x1.00 so the headline res is unchanged.
-   */
-  resist?: Record<string, number>;
-  stats: { str: number; dex: number; int: number; vit: number; agi: number; lck: number };
+  /** The Core block the race rolls its reference body from — the roster mean prices MEAN_CORE. */
+  core?: { str: number; agi: number; vit: number; dex: number; int: number; wis: number; lck: number };
 }
 
 export interface MobSize {
   id: string;
   name: string;
-  hp: number;
   ps: number;
-  evasion: number;
+  /** Base Evasion the body class carries, as a percent added on top of the species Dex line. */
+  evasion_pct: number;
   group?: string;
   /** A boss is not a size — it declares which body class a weapon's `size_mult` reads it as. */
   reads_as?: string;
@@ -258,6 +276,9 @@ export interface MobZone {
   region?: string;
   levels: [number, number];
   hp: [number, number];
+  /** The item-quality band this zone pays at — the ceiling a drop in the zone draws under. The bestiary
+   *  page prints it per zone, so the declaration carries it the same way the data row does. */
+  quality: string;
   elements: string[];
   group: string;
   /** What a spawn table rolls against: the zone cast is the union of its sub-zones. */
@@ -274,11 +295,12 @@ export interface MobElite {
   name: string;
   hp: number;
   ps: number;
-  evasion: number;
+  evasion_pct: number;
 }
 
 export interface MobStatCfg {
-  base: number;
+  /** The rule that anchors a zone's Core stat base (`zone_top_level` reads the player's reference line there). */
+  anchor: string;
   note: string;
 }
 
@@ -324,6 +346,8 @@ export interface MobCfg {
   curve: CurveCfg;
   spawn_weights: Record<string, number>;
   damage_split: Record<string, [number, number]>;
+  /** The flat res a race answers its own Element with, in every zone (X54). */
+  race_res_pct: number;
   field_labels: FieldLabelsCfg;
 }
 
@@ -405,6 +429,8 @@ export interface RoadNodeCfg {
 export interface RoadCfg {
   nodes: RoadNodeCfg[];
   graph_rule: string;
+  standing_rule: string;
+  cost_rule: string;
   block_sec: number;
   encounter_chance_pct: number;
   encounter_rule: string;

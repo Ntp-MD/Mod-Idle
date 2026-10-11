@@ -86,7 +86,6 @@
       "weight": 9.2,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -105,8 +104,7 @@
       "name": "Hunter's Helm",
       "weight": 6.7,
       "primary": [
-        "armour_pct",
-        "evasion_pct"
+        "armour_pct"
       ],
       "secondary": [
         "armour_flat",
@@ -124,12 +122,10 @@
       "name": "Warded Hood",
       "weight": 2.8,
       "primary": [
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
-        "elemental_alignment",
-        "evasion_flat"
+        "elemental_alignment"
       ],
       "slot": "helmet",
       "school": "evasion_flat",
@@ -144,7 +140,6 @@
       "weight": 6,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -219,7 +214,6 @@
       "weight": 12.5,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -238,8 +232,7 @@
       "name": "Hunter's Coat",
       "weight": 5.1,
       "primary": [
-        "max_energy_shield_pct",
-        "evasion_pct"
+        "max_energy_shield_pct"
       ],
       "secondary": [
         "energy_shield_flat",
@@ -257,8 +250,7 @@
       "name": "Warded Robe",
       "weight": 11.7,
       "primary": [
-        "armour_pct",
-        "evasion_pct"
+        "armour_pct"
       ],
       "secondary": [
         "armour_flat",
@@ -277,7 +269,6 @@
       "weight": 9.5,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -351,12 +342,10 @@
       "weight": 7.8,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
-        "energy_shield_flat",
-        "evasion_flat"
+        "energy_shield_flat"
       ],
       "slot": "pant",
       "school": "armour_flat",
@@ -370,8 +359,7 @@
       "name": "Sentinel's Greaves",
       "weight": 10.6,
       "primary": [
-        "armour_pct",
-        "evasion_pct"
+        "armour_pct"
       ],
       "secondary": [
         "armour_flat",
@@ -393,8 +381,7 @@
         "cooldown_reduction"
       ],
       "secondary": [
-        "energy_shield_flat",
-        "evasion_flat"
+        "energy_shield_flat"
       ],
       "slot": "pant",
       "school": "energy_shield_flat",
@@ -409,7 +396,6 @@
       "weight": 8.5,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -468,7 +454,6 @@
         "cooldown_reduction"
       ],
       "secondary": [
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "slot": "boots",
@@ -483,7 +468,6 @@
       "weight": 7.1,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -502,8 +486,7 @@
       "name": "Warden's Sabatons",
       "weight": 9.8,
       "primary": [
-        "armour_pct",
-        "evasion_pct"
+        "armour_pct"
       ],
       "secondary": [
         "armour_flat",
@@ -521,12 +504,10 @@
       "name": "Warded Slippers",
       "weight": 4.6,
       "primary": [
-        "max_energy_shield_pct",
-        "evasion_pct"
+        "max_energy_shield_pct"
       ],
       "secondary": [
-        "cooldown_reduction",
-        "evasion_flat"
+        "cooldown_reduction"
       ],
       "slot": "boots",
       "school": "evasion_flat",
@@ -541,7 +522,6 @@
       "weight": 6.5,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -608,8 +588,7 @@
       "name": "Iron Gauntlets",
       "weight": 7.3,
       "primary": [
-        "max_hp",
-        "evasion_flat"
+        "max_hp"
       ],
       "secondary": [
         "elemental_alignment",
@@ -661,7 +640,6 @@
       "weight": 7.5,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -680,8 +658,7 @@
       "name": "Vanguard's Gauntlets",
       "weight": 8.2,
       "primary": [
-        "armour_pct",
-        "evasion_pct"
+        "armour_pct"
       ],
       "secondary": [
         "max_hp_flat",
@@ -699,8 +676,7 @@
       "name": "Warded Wraps",
       "weight": 3.2,
       "primary": [
-        "max_energy_shield_pct",
-        "evasion_pct"
+        "max_energy_shield_pct"
       ],
       "secondary": [
         "elemental_alignment",
@@ -719,7 +695,6 @@
       "weight": 6,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -906,7 +881,6 @@
       "weight": 10.9,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -925,8 +899,7 @@
       "name": "Warded Drape",
       "weight": 3.6,
       "primary": [
-        "max_energy_shield_pct",
-        "evasion_pct"
+        "max_energy_shield_pct"
       ],
       "secondary": [
         "energy_shield_flat",
@@ -944,8 +917,7 @@
       "name": "Bulwark Cape",
       "weight": 5.9,
       "primary": [
-        "armour_pct",
-        "evasion_pct"
+        "armour_pct"
       ],
       "secondary": [
         "max_hp_flat",
@@ -964,7 +936,6 @@
       "weight": 7,
       "primary": [
         "armour_pct",
-        "evasion_pct",
         "max_energy_shield_pct"
       ],
       "secondary": [
@@ -1217,7 +1188,9 @@
       ],
       "Secondary": [
         "attack_speed",
-        "accuracy"
+        "accuracy",
+        "attack_damage_pct",
+        "spell_damage_pct"
       ],
       "Stat Mod": [
         "stat_mod_flat"

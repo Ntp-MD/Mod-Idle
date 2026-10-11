@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { E } from '../src/engine/client';
+import { E, loot } from '../src/engine/client';
 import { newGame, setLevel, tick, huntZone } from '../src/sim/game';
 import { craft, doCraft, imprintStonesOf, poolOf } from '../src/sim/craft';
 import { mulberry32 } from '../src/engine/client-helpers';
@@ -36,8 +36,9 @@ describe('imprint stone', () => {
     const { s, item } = piece();
     const idx = item.lines.findIndex((_, i) => i >= craft.UNTOUCHABLE);
     expect(idx).toBeGreaterThanOrEqual(craft.UNTOUCHABLE);
-    const carried = new Set(item.lines.map((l) => l.id));
-    const target = ['critical_chance', 'attack_speed', 'accuracy'].find((id) => !carried.has(id))!;
+    const carried = new Set(item.lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
+    const blocked = loot.blockedBy(carried);
+    const target = poolOf(item).find((id) => !carried.has(id) && !blocked.has(id))!;
     expect(target).toBeTruthy();
     s.counters.stones = { ...s.counters.stones, ['imprint_' + target]: 1 };
     const before = s.bag[0].lines[idx].id;

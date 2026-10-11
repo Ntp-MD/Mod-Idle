@@ -17,7 +17,7 @@ describe('the passive tree is spent one rank at a time', () => {
     const s = newGame(1);
     setLevel(s, eng.S.level_cap);
     expect(treePointsFree(s)).toBe(eng.treePointsAt(eng.S.level_cap));
-    // the identity the cage gates (T6), read from the client side: nodes x ranks x cost = the points
+    // the identity the cage gates, read from the client side: nodes x ranks x cost = the points
     const allRanks = tree.nodes.reduce((sum: number, node: any) => sum + node.ranks, 0);
     expect(allRanks * tree.cost).toBe(eng.treePointsAt(eng.S.level_cap));
   });
@@ -28,10 +28,12 @@ describe('the passive tree is spent one rank at a time', () => {
     expect(canSpendTree(s, 'impact.2').ok).toBe(false); // its chain head is not owned
     expect(spendTreePoint(s, 'impact.1').ok).toBe(true);
     expect(canSpendTree(s, 'impact.2').ok).toBe(true);  // now it is
-    spendTreePoint(s, 'impact.2');
-    spendTreePoint(s, 'impact.2');
-    spendTreePoint(s, 'impact.2');
-    expect(s.player.treeRanks!['impact.2']).toBe(3);
+    spendTreePoint(s, 'impact.1').ok;
+    expect(canSpendTree(s, 'impact.2').ok).toBe(true);  // now it is
+    // the last rank comes from the data, never a typed count
+    const ranks = tree.byId['impact.2'].ranks;
+    for (let i = 0; i < ranks; i++) spendTreePoint(s, 'impact.2');
+    expect(s.player.treeRanks!['impact.2']).toBe(ranks);
     expect(canSpendTree(s, 'impact.2').ok).toBe(false); // rank 3 is the last one
     expect(canSpendTree(s, 'stream.1').ok).toBe(true);  // a second chain starts free
   });

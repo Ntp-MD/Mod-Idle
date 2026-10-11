@@ -6,19 +6,27 @@
    * same way: this is the one place a piece is described, and the one place a player chooses which piece is
    * on the bench. Both lists are the engine's own — `loot.score` decides what is strong here, exactly as the
    * bag filter and the cages do, so a suggestion on the bench cannot disagree with a drop decision.
+   *
+   * The state prop is `game`, not `state`: a binding named `state` in the same component makes the compiler
+   * read `$state(...)` as a store subscription (the trap `App.svelte` documents for its own top level).
    */
   import { gearIcon } from '../icon';
   import { gearEntry, vsWorn } from './bag';
   import type { Where } from '../sim/craft';
   import type { GameState, Item } from '../sim/types';
 
-  let { state, item, where = null, index = -1, onpick, wornOf }: {
-    state: GameState;
+  let { game, item, where = null, index = -1, onpick, wornOf, wornOnly = false, pickPageSize = 24 }: {
+    game: GameState;
     item: Item | null;
     where?: Where | null;
     index?: number;
     onpick: (where: Where, index: number) => void;
     wornOf: (slot: string) => Item | null;
+    /** the craft bench reads its bag pieces off the bag column beside it, so its picker lists worn only */
+    wornOnly?: boolean;
+    /** the picker folds past this many chips: a forge bench can list the whole hunt pile, and a hundred
+        chips would push the ladder off the modal */
+    pickPageSize?: number;
   } = $props();
 
   const entry = $derived(item ? gearEntry(item, index) : null);
@@ -32,11 +40,17 @@
 
   /** worn first, then the pile, each strongest first inside its own group */
   const picks = $derived.by(() => {
-    const worn = state.gear.map((g, i) => (g ? { where: 'gear' as Where, i, e: gearEntry(g, i) } : null)).filter(Boolean) as any[];
-    const pile = state.bag.map((g, i) => ({ where: 'bag' as Where, i, e: gearEntry(g, i) }));
+    const worn = game.gear.map((g, i) => (g ? { where: 'gear' as Where, i, e: gearEntry(g, i) } : null)).filter(Boolean) as any[];
+    if (wornOnly) return worn.sort((a, b) => b.e.score - a.e.score);
+    const pile = game.bag.map((g, i) => ({ where: 'bag' as Where, i, e: gearEntry(g, i) }));
     const byScore = (a: any, b: any) => b.e.score - a.e.score;
     return [...worn.sort(byScore), ...pile.sort(byScore)];
   });
+  /** the picker's own page: the worn list never fills one, the hunt pile fills several */
+  let pickPage = $state(0);
+  const pickPages = $derived(Math.max(1, Math.ceil(picks.length / pickPageSize)));
+  const pickAt = $derived(Math.min(pickPage, pickPages - 1));
+  const pickView = $derived(picks.slice(pickAt * pickPageSize, pickAt * pickPageSize + pickPageSize));
 </script>
 
 {#if item && entry}
@@ -66,16 +80,17 @@
   </div>
 {:else}
   <div class="head none">
-    <p><b>Nothing is on the bench.</b> Pick a piece below — everything you wear, and everything this trip
-      kept. A stashed piece has to come out of the warehouse first; a service works on what the character
-      is carrying.</p>
+    <p><b>Nothing is on the bench.</b> Pick a piece below — everything you wear{wornOnly
+      ? ''
+      : ', and everything this trip kept'}. A stashed piece has to come out of the warehouse first;
+      a service works on what the character is carrying.</p>
   </div>
 {/if}
 
 <div class="picker">
   <span class="lab">On the bench</span>
   <div class="row">
-    {#each picks as p (p.where + ':' + p.i)}
+    {#each pickView as p (p.where + ':' + p.i)}
       <button
         class="chip"
         class:now={p.where === where && p.i === index}
@@ -86,50 +101,60 @@
         <span>{p.e.title}</span>
         {#if p.e.item.upgrade_lv}<b class="pl">+{p.e.item.upgrade_lv}</b>{/if}
       </button>
-    {:else}
-      <span class="dim">Nothing carried yet.</span>
+      {:else}
+        <span class="dim">Nothing carried yet.</span>
     {/each}
   </div>
+  {#if pickPages > 1}
+    <div class="pager" role="group" aria-label="Bench piece pages">
+      <button disabled={pickAt === 0} onclick={() => (pickPage = pickAt - 1)} aria-label="Previous page">‹</button>
+      <span>{pickAt + 1} / {pickPages}</span>
+      <button disabled={pickAt === pickPages - 1} onclick={() => (pickPage = pickAt + 1)} aria-label="Next page">›</button>
+    </div>
+  {/if}
 </div>
 
 <style>
   .head {
-    display: grid; grid-template-columns: auto 1fr auto; gap: .9rem; align-items: center;
-    padding: .7rem .8rem; border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
+    display: grid; grid-template-columns: auto 1fr auto; gap: var(--spacing-md); align-items: center;
+    padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
   }
   .head.none { grid-template-columns: 1fr; color: var(--dim); }
-  .head.broken { border-color: rgba(192, 57, 43, .6); }
-  .head.corrupted { border-color: rgba(200, 165, 255, .5); }
+  .head.broken { border-color: color-mix(in srgb, var(--hp) 60%, transparent); }
+  .head.corrupted { border-color: color-mix(in srgb, var(--curse) 50%, transparent); }
   .tile {
-    position: relative; width: 3.4rem; height: 3.4rem; display: grid; place-items: center;
-    border: 1px solid var(--line); border-radius: 10px; background: #171b22;
+    position: relative; width: var(--icon-xl); height: var(--icon-xl); display: grid; place-items: center;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--inset);
   }
-  .tile img { width: 68%; height: 68%; object-fit: contain; }
+  .tile img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
   .tile .plus {
-    position: absolute; right: -.2rem; bottom: -.2rem; font-family: var(--num); font-size: .74rem;
-    color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0 .25rem;
+    position: absolute; right: clamp(-5.4px, -0.163vw - 0.63px, -2.5px); bottom: clamp(-5.4px, -0.163vw - 0.63px, -2.5px); font-family: var(--num); font-size: var(--font-xs);
+    color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0 3px;
   }
-  .who h3 { margin: 0; font-size: .95rem; }
+  .who h3 { margin: 0; font-size: var(--font-sm); }
   .who .lv { color: var(--xp); font-family: var(--num); }
-  .sub { margin: .15rem 0 0; color: var(--dim); font-size: .74rem; }
-  .src { color: var(--mob); font-size: .7rem; }
+  .sub { margin: 2px 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .src { color: var(--mob); font-size: var(--font-xs); }
   .src::before { content: '· '; }
-  .vs { margin: .2rem 0 0; font-size: .74rem; font-family: var(--num); color: #e8a093; }
+  .vs { margin: 3px 0 0; font-size: var(--font-xs); font-family: var(--num); color: var(--alarm); }
   .vs.better { color: var(--good); }
-  .flags { display: grid; gap: .2rem; justify-items: end; }
-  .flag { font-size: .68rem; color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: .1rem .5rem; }
-  .flag.bad { color: #ff9a8c; border-color: var(--hp); }
-  .flag.warn { color: #c8a5ff; border-color: #6c5199; }
-  .flag.ok { color: var(--good); border-color: rgba(39, 174, 96, .5); }
+  .flags { display: grid; gap: 3px; justify-items: end; }
+  .flag { font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: 1px var(--spacing-xs); }
+  .flag.bad { color: var(--alarm); border-color: var(--hp); }
+  .flag.warn { color: var(--curse); border-color: var(--elite); }
+  .flag.ok { color: var(--good); border-color: color-mix(in srgb, var(--good) 50%, transparent); }
 
-  .picker { display: grid; gap: .3rem; }
-  .lab { color: var(--dim); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; }
-  .row { display: flex; flex-wrap: wrap; gap: .25rem; }
+  .picker { display: grid; gap: 4px; }
+  .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(1.25px, 0.082vw + 0.32px, 2.7px); text-transform: uppercase; }
+  .row { display: flex; flex-wrap: wrap; gap: 3px; }
   .chip {
-    display: inline-flex; align-items: center; gap: .35rem; padding: .2rem .5rem .2rem .3rem;
-    font-size: .72rem; border-radius: 999px; background: #171b22;
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px var(--spacing-xs) 3px 4px;
+    font-size: var(--font-xs); border-radius: 999px; background: var(--inset);
   }
-  .chip img { width: 1.15rem; height: 1.15rem; object-fit: contain; }
+  .chip img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .chip .pl { color: var(--xp); font-family: var(--num); }
   .chip.now { border-color: var(--gold); background: rgba(232, 193, 105, .12); color: var(--gold); }
+  .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
+  .pager button { padding: 1px var(--spacing-sm); font-size: var(--font-xs); }
+  .pager button:disabled { opacity: .4; }
 </style>

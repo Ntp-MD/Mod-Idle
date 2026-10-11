@@ -24,7 +24,7 @@ const mob = (damage: 'physical' | 'magic' | 'mixed'): Mob => ({
 const withShield = (armour: number, block: number): Character => {
   const c = buildCharacter(90, emptyGear());
   return {
-    ...c, armour, block, perfectDodge: 0, evasion: 0, evasionFromAgi: 0, resistance: 0, damageTaken: 1,
+    ...c, armour, block, perfectDodge: 0, evasion: 0, resistance: 0, damageTaken: 1,
   } as Character;
 };
 

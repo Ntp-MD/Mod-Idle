@@ -8,6 +8,47 @@ import { setRule } from '../src/sim/filter';
 import { exportJson, importJson, migrate, newAccount, mergeMastery, applyAccount, SCHEMA_VERSION } from '../src/state/save';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { spendTreePoint, treeLines, treePointsSpent } from '../src/sim/tree';
+import { startWalk, road, settlementCell } from '../src/sim/road';
+
+describe('the cell under the feet survives a save', () => {
+  it('a walk in flight and the standing hex round-trip unchanged', () => {
+    const s = newGame(91);
+    setLevel(s, 60);
+    const dest = settlementCell(road.nodes[1].id)!;
+    expect(startWalk(s, { ...dest, sub: null, wild: null }).ok).toBe(true);
+    for (let i = 0; i < E.road.block_sec + 1; i++) tick(s, {});
+    const back = importJson(exportJson(s));
+    expect(back.walk).toEqual(s.walk);
+    expect(back.cell).toEqual(s.cell);
+    expect(typeof back.walk!.from).toBe('object');    // hexes, never a settlement name
+    expect(back.walk!.blocksWalked).toBe(s.walk!.blocksWalked);
+  });
+
+  it('a v11 walk that named two settlements is re-read onto the lattice', () => {
+    const s = newGame(92) as any;
+    const [a, b] = road.nodes;
+    const blocks = road.blocksBetweenHex(a, b);
+    s.walk = { from: a.id, to: b.id, blocksTotal: blocks, blocksLeft: blocks - 1, secLeft: 5, blocksWalked: 1 };
+    const m = migrate(JSON.parse(JSON.stringify(s)), SCHEMA_VERSION - 1);
+    expect(m.walk!.from).toEqual({ q: a.q, r: a.r });
+    expect(m.walk!.to).toEqual({ q: b.q, r: b.r });
+    expect(m.walk!.kind).toBe('town');
+    expect(m.walk!.node).toBe(b.id);
+    expect(m.walk!.blocksLeft).toBe(blocks - 1);          // the route keeps the blocks it had left
+    expect(m.cell!).toEqual({ q: a.q, r: a.r, sub: null, wild: null });
+    // and the re-laid route crosses real cells, so no block is priced by a NaN distance
+    expect(road.blocksBetweenHex(m.walk!.from, m.walk!.to)).toBe(m.walk!.blocksTotal);
+  });
+
+  it('a v11 walk naming a settlement that no longer exists is dropped, not left to compute NaN', () => {
+    const s = newGame(93) as any;
+    s.walk = { from: 'eastgate', to: 'a-town-that-is-gone', blocksTotal: 9, blocksLeft: 9, secLeft: 9, blocksWalked: 0 };
+    const m = migrate(JSON.parse(JSON.stringify(s)), SCHEMA_VERSION - 1);
+    expect(m.walk).toBeNull();
+    expect(Number.isInteger(m.cell!.q)).toBe(true);
+    expect(road.cellRank(m.cell!)).toBe(0);             // an old save could only ever stand in a town
+  });
+});
 
 describe('offline time is AFK, not a second play session', () => {
   it('never spawns a boss while the player is away', () => {
@@ -20,7 +61,7 @@ describe('offline time is AFK, not a second play session', () => {
     expect(s.counters.kills).toBeGreaterThan(0);
   }, 30000);
 
-  it('the away period does not advance the boss clock (save.md)', () => {
+  it('the away period does not advance the boss clock', () => {
     // bossDueAt is absolute clockSec, so away ticks used to satisfy it on the first online tick and
     // hand out a free boss. The remaining online time must be identical after the catch-up.
     const s = newGame(46);
@@ -66,14 +107,14 @@ describe('offline time is AFK, not a second play session', () => {
     setLevel(s, 80);
     s.zone = 9;
     // tick until a piece above the floor level lands, not for a guessed window: a fixed window makes
-    // this a coin flip on the 8% drop (a time premise · AGENTS.md).
+    // this a coin flip on the drop roll (a time premise · AGENTS.md).
     const floorLevel = eng.floorLevelOf('high');
     for (let i = 0; i < 200000 && !s.bag.some((item) => item.ilvl > floorLevel); i++) tick(s, {}, { online: true });
     expect(s.bag.some((item) => item.ilvl > floorLevel)).toBe(true);
   });
 });
 
-describe('the salvage milestone (checks.md F15)', () => {
+describe('the salvage milestone', () => {
   it('owes one Tier stone per 500 pieces dissolved', () => {
     const s = newGame(45);
     huntZone(s, s.zone);
@@ -93,7 +134,7 @@ describe('the salvage milestone (checks.md F15)', () => {
   });
 });
 
-describe('the Reroll baseline survives a downgrade (save.md)', () => {
+describe('the Reroll baseline survives a downgrade', () => {
   it('remembers the highest value the slot ever held', () => {
     let item = rollDrop(mulberry32(51), 'low', 1);
     item = { ...item, ilvl: 61, q: 0, quality: 'low', lines: item.lines.map((l) => ({ ...l, slice: 1 })) };
@@ -147,7 +188,16 @@ describe('the save schema and the account', () => {
     expect(m.gear[0]!.lines.map((l) => l.value)).toEqual([123, 11]); // every value as it was
     expect(m.gear[0]!.lines.map((l) => l.slice)).toEqual([2, 0]); // the labels flipped onto the new order
     expect(m.gear[0]!.tier).toBe('T3');
-    expect(m.autoDissolveLevel).toBe(31); // the old keep-above-Common setting became a level floor
+    expect(m.autoDissolveLevel).toBe(eng.floorLevelOf('mid')); // the old keep-above-Common setting became the mid band's floor level
+  });
+
+  it('moves the keep-above setting onto the band floor the named Rarity sat on', () => {
+    const rare = migrate(Object.assign(newGame(54) as any, { autoDissolveRarity: 'Rare' }), 8);
+    expect(rare.autoDissolveLevel).toBe(eng.floorLevelOf('high'));
+    expect((rare as any).autoDissolveRarity).toBeUndefined();
+    // `off` was never a keep-above setting: the level stays where the save left it
+    const off = migrate(Object.assign(newGame(55) as any, { autoDissolveRarity: 'off', autoDissolveLevel: 45 }), 8);
+    expect(off.autoDissolveLevel).toBe(45);
   });
 
   it('carries the passive-tree ranks through an export and a load', () => {
@@ -176,6 +226,24 @@ describe('the save schema and the account', () => {
     const m = migrate(JSON.parse(JSON.stringify(old)));
     expect(m.player.treeRanks).toEqual({});
     expect(m.player.treePoints).toBe(eng.treePointsAt(30));
+  });
+
+  it('moves a shared condition list onto the rows that were reading it', () => {
+    // an old save kept one shared condition list for every conditional row and the shape is per row
+    // now, so an existing rotation keeps firing: the rows that were gated inherit the list, the rows
+    // that were not get none
+    const s = JSON.parse(JSON.stringify(newGame(58)));
+    s.skills.list[0] = 'attack.cleave';
+    s.skills.list[1] = 'attack.fireball';
+    s.skills.mode = { 'attack.cleave': 'conditional' };
+    s.skills.conditions = { boss: true, hpBelowPct: 40, statusMissing: ['burn'] };
+    const m = migrate(s);
+    expect(m.skills.conditions['attack.cleave'])
+      .toEqual({ boss: true, hpBelowPct: 40, statusMissing: ['burn'], minTargets: 0, manaFloorPct: 0 });
+    expect(m.skills.conditions['attack.fireball']).toBeUndefined();
+    // and a save already on the per-row shape is left exactly as it was
+    const kept = migrate(JSON.parse(JSON.stringify(m)));
+    expect(kept.skills.conditions).toEqual(m.skills.conditions);
   });
 
   it('shares Mastery across the three slots and keeps the best', () => {

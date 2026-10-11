@@ -23,13 +23,13 @@ export const imprintStonesOf = (stones: Record<string, number>): { key: string; 
 
 export type CraftOp = 'reroll' | 'reroll_random' | 'refine' | 'randomize' | 'reroll_mod' | 'reroll_mod_all'
   | 'ascend' | 'remove' | 'remove_at' | 'add' | 'add_specific' | 'replace' | 'replace_random' | 'replace_all'
-  | 'imprint' | 'polish' | 'rebirth'
+  | 'imprint' | 'polish' | 'reforge' | 'rebirth'
   | 'upgrade' | 'repair' | 'corrupt';
 export type Where = 'gear' | 'bag';
 
 /** The ops that take the piece rather than one named line. */
 const PIECE_OPS = new Set<CraftOp>(['ascend', 'add', 'add_specific', 'remove', 'reroll_random',
-  'reroll_mod_all', 'replace_all', 'polish', 'rebirth']);
+  'reroll_mod_all', 'replace_all', 'polish', 'reforge', 'rebirth']);
 
 /**
  * The pool a piece may draw from on lines 2-7 (item-base.md): the slot's union of Bases plus
@@ -103,6 +103,7 @@ export function doCraft(
     remove: () => craft.remove(item, rng),
     remove_at: () => craft.removeAt(item, lineIndex),
     polish: () => craft.polish(item, rng),
+    reforge: () => craft.reforge(item, rng),
     rebirth: () => craft.rebirth(item, pool, rng),
     ...FORGE,
   };
@@ -138,6 +139,7 @@ function craftNote(op: CraftOp, item: Item, result: any, lineIndex: number): str
     return `${touched.length || item.lines.length - 1} lines redrawn · ${touched.map((x: any) => lineName(x.in)).join(', ')}`;
   }
   if (op === 'polish') return `every line rerolled inside its own Tier · ${c.lines} lines, Tiers held`;
+  if (op === 'reforge') return `one Tier drawn for the piece, then every value rolled inside it · ${c.lines} lines, ${c.moved} moved Tier`;
   if (op === 'add' || op === 'add_specific') return `${loot.NAME_OF[c.id] || c.id} ${c.value} lands in slot ${result.item.lines.length}`;
   if (op === 'reroll_random') return `slot ${c.index + 1} · ${c.from} → ${c.to}`;
   const line = item.lines[lineIndex];
@@ -168,7 +170,7 @@ export function removeTargets(state: GameState, where: Where, index: number): nu
  * stone); `unbound` stops below it. The Frame Mod is in neither — no verb redraws line 1.
  */
 export const opScope = (op: CraftOp): 'unbound' | 'piece' =>
-  (op === 'reroll_mod' || op === 'reroll_mod_all' || op === 'replace' || op === 'replace_all' || op === 'polish')
+  (op === 'reroll_mod' || op === 'reroll_mod_all' || op === 'replace' || op === 'replace_all' || op === 'polish' || op === 'reforge')
     ? 'piece' : 'unbound';
 
 /** Every line one scope holds on this piece. */

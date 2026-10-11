@@ -1,0 +1,66 @@
+/* The map sheet — one copy, the ground the field is drawn on (`.map-back`), dimmed under the HUD and
+   brought into focus by the MAP tab. `tools/map.ts` prints one polygon per cell of the
+   hex field the simulator walks on, and the client inlines it via {@html}, so these selectors live in the
+   global stylesheet: Svelte would prune them from a component's scoped <style>. The sheet carries ids,
+   classes and labels (data-cell / data-ax / data-node / data-tone / data-terrain / data-band) and no
+   styling of its own — the fills the client repaints per view, the pin per position and the route per
+   block are matched by those labels, so still no coordinate is read by the client (X33 · M7 · M10). It is
+   ground in the game's own dark: the cells are the tone, the walk is the highest contrast on it, and
+   every text takes its colour here. */
+/* A root `<svg>` clips to its own viewBox by default, and the ground is drawn on past the field so
+   zooming out never reaches an edge — so the clip is lifted here and the frame (`.map-back`) is left
+   as the only thing that bounds the map. */
+.sheet svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sheet svg text { text-anchor: middle; dominant-baseline: central; user-select: none; }
+/* the backdrop owns the whole frame, so the sheet is scaled to fit it rather than to its own width */
+.map-back svg { width: 100%; height: 100%; }
+/* names, the walk graph, the pins and the landmark marks are ink laid on the sheet, not targets: a click
+   falls through to the cell underneath, so a place is pickable on the field itself */
+.sheet svg text, .sheet svg line, .sheet svg .pin, .sheet svg .watermark { pointer-events: none; }
+/* a cell is the click target, and its stroke is what the pick and the route are drawn with */
+.sheet svg .cell { stroke-linejoin: round; transition: fill .12s linear; }
+.sheet svg .cell { cursor: pointer; }
+.sheet svg .cell:hover { fill-opacity: .82; }
+/* a cell the level gate has not opened yet: the deep ground the stage stands on, before its band is lit */
+.sheet svg .cell.locked { fill: var(--ground); }
+/* the plotted walk: the cells ahead of you, then the ones already crossed. A route is ink, never the
+   accent — gold means "where you are" and would put the character mark on every cell of the plan */
+.sheet svg .cell.route { fill: var(--es); fill-opacity: .46; stroke: var(--es); stroke-width: 1.8; }
+.sheet svg .cell.walked { fill: var(--mana); fill-opacity: .8; stroke: var(--mana); stroke-width: 1.8; }
+.sheet svg .cell.picked { stroke: var(--es); stroke-width: 3; fill-opacity: .62; }
+/* the hex the feet are on, ringed in the accent so standing reads as one place held
+   and another reached for */
+.sheet svg .cell.standing { stroke: var(--gold); stroke-width: 2.6; stroke-dasharray: 3 2; }
+/* the character itself, drawn where the feet are and moved one hex per block: the hex it stands in,
+   washed, and a diamond on its centre — a shape no settlement mark wears, so the two never trade places.
+   The slide is the walk: a block is crossed, and the mark travels to the next cell instead of blinking */
+.sheet svg .you { pointer-events: none; transition: transform .45s ease-out; }
+.sheet svg .you .hex { fill: var(--gold); fill-opacity: .2; stroke: none; }
+.sheet svg .you .mark { fill: var(--gold); stroke: var(--bg); stroke-width: 1.4; }
+.sheet svg .you.walking .mark { animation: stride 2s ease-in-out infinite; }
+@keyframes stride { 50% { opacity: .6; } }
+/* the walk graph: one stretch per pair of settlements the walker would step between, in blocks */
+.sheet svg .walk { stroke: var(--gold); stroke-width: 1.6; stroke-opacity: .8; }
+.sheet svg .walk-blk { font-size: var(--sheet-fs-walk); fill: var(--gold); font-weight: 600; }
+/* a region name lies under the field, so the level views fade the whole group out */
+.sheet svg .region { font-size: var(--sheet-fs-region); letter-spacing: 1.2px; fill: var(--sheet-ink); stroke: var(--ground);
+  stroke-width: 2.2; paint-order: stroke; font-weight: 700; text-transform: uppercase; opacity: .28; }
+/* a landmark is a mark on the field, smaller than a settlement */
+.sheet svg .watermark circle { fill: var(--gold); stroke: none; }
+.sheet svg .watermark circle.halo { fill: none; stroke: var(--ground); stroke-width: 1.6; stroke-opacity: .75; }
+/* a settlement: the house glyph over its own cell, its name, and the band its zone carries */
+.sheet svg .node .place { font-size: var(--sheet-fs-place); fill: var(--sheet-place); stroke: var(--ground); stroke-width: 2.6;
+  paint-order: stroke; font-weight: 700; }
+.sheet svg .node.capital .place { font-size: var(--sheet-fs-capital); }
+.sheet svg .zonelabel .zonename { font-size: var(--sheet-fs-zonename); fill: var(--sheet-ink); font-weight: 600; }
+.sheet svg .zonelabel .zoneband { font-size: var(--sheet-fs-id); fill: var(--dim); }
+/* the reference marks: a cell id, printed on the cell and hidden until asked for */
+.sheet svg .cellid { font-size: var(--sheet-fs-id); fill: var(--sheet-id); }
+.sheet svg [data-node] { cursor: pointer; }
+.sheet svg .node.picked .place { fill: var(--focus); }
+.sheet svg .pin { display: none; }
+.sheet svg .pin circle:first-child { fill: color-mix(in srgb, var(--pin-here-glow) 22%, transparent); stroke: var(--pin-here); stroke-width: 3.5; }
+.sheet svg .pin circle:last-child { fill: var(--pin-here); }
+.sheet svg .pin.here, .sheet svg .pin.target { display: inline; }
+.sheet svg .pin.target circle:first-child { fill: color-mix(in srgb, var(--pin-target-glow) 22%, transparent); stroke: var(--pin-target); }
+.sheet svg .pin.target circle:last-child { fill: var(--pin-target); }

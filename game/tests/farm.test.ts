@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
 import { E } from '../src/engine/client';
 import {
   farm, newFarm, plant, harvest, plotCount, craftPotion, condense, maybeDrink, maybeFarm, rollHerbs, farmLevel,
@@ -8,11 +7,8 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { newGame, tick } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 
-const require = createRequire(import.meta.url);
-const cage = require('../../tools/lib/engine.ts');
-
 describe('the farm curve is the engine curve', () => {
-  it('levels on the Mastery sqrt curve and caps at 20', () => {
+  it('levels on the Mastery sqrt curve up to the level cap', () => {
     expect(farm.farmLevel(0)).toBe(1);
     expect(farm.farmLevel(E.farm.level_divisor)).toBe(2);
     expect(farm.farmLevel(3600)).toBe(7);
@@ -26,7 +22,7 @@ describe('the farm curve is the engine curve', () => {
     expect(farm.canGrow(E.farm.tier_unlock_level.high, 'high')).toBe(true);
   });
 
-  it('plots are three, and the two Steward deeds raise it to the cap', () => {
+  it('plots start at the base count, and the two Steward deeds raise it to the cap', () => {
     const s = newGame(3);
     expect(plotCount(s)).toBe(E.farm.plots.base);
     s.town.owned.push('plot_deed_4', 'plot_deed_5');
@@ -71,8 +67,9 @@ describe('planting and harvesting', () => {
   });
 
   it('grows into the deed plots 4 and 5 instead of crashing on an undefined slot', () => {
-    // the base array is three long; buying the Steward's deeds used to leave plots[3]/[4] undefined,
-    // so plant() threw and an auto-plant tick froze the game. The track must grow to the owned count.
+    // the base array holds only the base plots; buying the Steward's deeds used to leave
+    // plots[3]/[4] undefined, so plant() threw and an auto-plant tick froze the game.
+    // The track must grow to the owned count.
     const s = newGame(98);
     s.town.owned.push('plot_deed_4', 'plot_deed_5');
     s.farm.herbs.low = 10;
@@ -121,13 +118,14 @@ describe('herbs drop on their own roll', () => {
 });
 
 describe('potions are a bounded convenience', () => {
-  it('derives the effect ladder from the base and step, matching farm.md', () => {
+  it('derives the effect ladder from the base and step the data owns', () => {
     const effects = farm.P.list.map((p: any) => `${p.name}:${farm.potionEffect(p)}`);
-    expect(effects).toContain('Red Draught:10');
-    expect(effects).toContain('Yellow Draught:20');
-    expect(effects).toContain('White Draught:30');
-    expect(effects).toContain('Sky Draught:15');
-    expect(effects).toContain('Deep Blue Draught:35');
+    // `base + step × (index − 1)` percent of the pool, the ladder the engine publishes
+    for (const p of farm.P.list) {
+      const base = p.pool === 'hp' ? farm.P.hp_base_pct : farm.P.mana_base_pct;
+      const step = p.pool === 'hp' ? farm.P.hp_step_pct : farm.P.mana_step_pct;
+      expect(effects).toContain(`${p.name}:${base + step * (p.index - 1)}`);
+    }
   });
 
   it('brews for the published cost and refuses without it', () => {
@@ -143,7 +141,7 @@ describe('potions are a bounded convenience', () => {
     expect(s.counters.stones.reroll_value).toBe(0);
   });
 
-  it('condenses ten bottles into one ten-times dose', () => {
+  it('condenses the published bottle cost into one multiplied dose', () => {
     const s = newGame(10);
     const red = farm.P.list[0];
     s.farm.potions[red.name] = E.potions.condensed.cost_bottles;
@@ -195,12 +193,5 @@ describe('potions are a bounded convenience', () => {
     s.player.hp = 1;
     s.clockSec += E.potions.shared_cooldown_sec + 1;
     expect(maybeDrink(s, c, false)).toBe(null);
-  });
-});
-
-describe('the client and the cages read one farm', () => {
-  it('shares engine.json numbers with the cage side', () => {
-    expect(E.farm.growth_hours).toBe(cage.E.farm.growth_hours);
-    expect(E.potions.craft.high.herbs).toBe(cage.E.potions.craft.high.herbs);
   });
 });

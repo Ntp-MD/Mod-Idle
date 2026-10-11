@@ -1,0 +1,12 @@
+/* The passive tree: three chains side by side, one row per node with its three rank pips. Global for the
+   same reason the map sheet is — the rows are printed by the tree renderer, so a scoped <style> would
+   prune these selectors. */
+
+.tree-branches { display: flex; gap: var(--spacing-md); flex-wrap: wrap; }
+.tree-branch { flex: 1 1 0; min-width: var(--box-320); }
+.tree-branch h3 { margin: 3px 0; text-transform: capitalize; }
+.tree-node { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); }
+.tree-name { flex: 1 1 auto; opacity: 0.85; }
+.tree-pips { display: flex; gap: 3px; }
+.pip { min-width: var(--icon-md); text-align: center; opacity: 0.35; border: 1px solid currentColor; border-radius: 3px; }
+.pip.on { opacity: 1; font-weight: 600; }

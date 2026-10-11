@@ -1,101 +1,10 @@
 {
   "meta": {
-    "title": "Engine source data \u2014 stat model, K values, caps, loot model, craft prices",
+    "title": "Engine source data — stat model, K values, caps, loot model, craft prices",
     "read_by": [
       "tools/check.ts",
       "tools/town.ts"
-    ],
-    "sources": [
-      "mod-pool.md",
-      "formula.md",
-      "formula-offense.md",
-      "formula-defense.md",
-      "formula-utility.md",
-      "core-stats.md",
-      "equipment-slot.md",
-      "item-base.md",
-      "crafting.md",
-      "loot.md section 2",
-      "checks.md A/B/C/F"
-    ],
-    "targets": {
-      "checks.md": [
-        "group-A",
-        "group-B",
-        "group-C",
-        "group-F"
-      ],
-      "equipment-slot-pools.md": [
-        "mod-matrix",
-        "defensive-ranges",
-        "mod-weights"
-      ],
-      "world.md": [
-        "mob-sheet",
-        "mob-stats",
-        "zone-table",
-        "mob-curve"
-      ],
-      "formula-utility.md": [
-        "hit-chance",
-        "weapon-cap"
-      ],
-      "loot.md": [
-        "loot-bands"
-      ],
-      "core-stats.md": [
-        "cap-lines"
-      ],
-      "crafting.md": [
-        "craft-set"
-      ],
-      "formula.md": [
-        "k-table",
-        "cap-table"
-      ],
-      "formula-offense.md": [
-        "weapon-mult"
-      ],
-      "formula-defense.md": [
-        "evasion-table",
-        "hp-mana-block"
-      ],
-      "combat.md": [
-        "reach-table",
-        "mob-status"
-      ],
-      "towns.md": [
-        "road-rules"
-      ],
-      "equipment-slot-armor.md": [
-        "slot-pools"
-      ],
-      "mob-roster.md": [
-        "zone-cast",
-        "mob-roster",
-        "race-drop",
-        "race-resist"
-      ],
-      "elements.md": [
-        "element-k",
-        "element-counter",
-        "element-list"
-      ],
-      "mod-pool.md": [
-        "mod-pool"
-      ],
-      "skill-pool-system.md": [
-        "skill-drop",
-        "aoe-rules"
-      ],
-      "concept.md": [
-        "opening"
-      ],
-      "farm.md": [
-        "farm-model",
-        "potion-table"
-      ]
-    }
+    ]
   },
   "stat": {
     "base": 12,
@@ -109,9 +18,10 @@
     "paragon_from": 101,
     "paragon_points_per_level": 2,
     "tree_points_per_level": 1,
+    "tree_points_base": 3,
     "reference_build": "split",
     "respec_cost": 0,
-    "note": "Stats are SPENT, not granted (owner ruling). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190) and 1 tree point, and `stat = base + points x point_value`. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat)."
+    "note": "Stats are SPENT, not granted (owner ruling). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190) and 1 tree point, and `stat = base + points x point_value`. `tree_points_base` is what a character starts with in hand, and it exists for one reason: T6 holds the identity that the tree's ranks are exactly what the level cap grants. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat)."
   },
   "K": {
     "K_STR": 5,
@@ -123,6 +33,7 @@
     "K_INT_MREGEN": 0.160275,
     "K_AGI_ASPD": 0.25,
     "K_WIS_CDR": 0.03,
+    "K_WIS_ES": 4,
     "K_DEX_ACC": 1.5,
     "K_DEX_ALIGN": 0.05,
     "K_MOB_RES": 0.05,
@@ -143,7 +54,6 @@
     "K_BLEED": 0.7,
     "K_BLEED_CHANCE": 0.4,
     "bleed_time_sec": 5,
-    "K_AGI_EVAS": 0.03333333333333333,
     "K_MOB_DODGE": 0.15
   },
   "status": {
@@ -183,11 +93,11 @@
     "dot_cap": 1.5,
     "dot_cap_note": "burn + poison combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches it exactly at 5 stacks x 0.30, so a maxed fire build fills the whole budget on its own",
     "proc_chance": 0.2,
-    "mob_side": "decided \u2014 mob\u2192player is unchanged (combat.md \u00a75). Player\u2192mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout \u2014 mobs are immune to root/freeze/held-past-action but DO take the game's existing Cap-bounded proc (stun \u226415%, chill/shock/Cripple aspd cut under their own Caps), the same symmetric numbers a mob inflicts on us, so no fight can be stun-locked. No mob resist stat (AGENTS.md \u00a75). combat.md \u00a75b"
+    "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action but DO take the game's existing Cap-bounded proc (stun ≤15%, chill/shock/Cripple aspd cut under their own Caps), the same symmetric numbers a mob inflicts on us, so no fight can be stun-locked. No mob resist stat (DECISIONS.md §Standing intent). combat.md §5b"
   },
   "mob": {
     "note": "Species (not classes - the player has no class) and body classes, copied from Ragnarok Online: a species is a stat-multiply vector plus an accuracy tier plus a damage type, and a body class is one of the four card sizes. innate Element stays a separate spawn roll (world.md) so the three axes never collapse into one.",
-    "stat_block": "every mob carries ONE flat 7-stat block (mob.stat.base) that the species vector multiplies; there is no level term. Accuracy, Evasion, Armour, Elemental resistance, alignment, crit and dodge all read from that flat base through the species vector and the body class, so two mobs of the same level can be nothing alike and a zone differs only in mob_HP and mob_PS (world.md Monsters)",
+    "stat_block": "every mob carries ONE Core stat block (`mob.species[].core`, whole numbers) whose zone value is the block scaled from the anchor zone. Accuracy, Evasion, Armour, Elemental resistance, alignment, crit and dodge all read from that block through the body class, so two mobs of the same level can be nothing alike and a zone differs only in mob_HP and mob_PS (world.md Monsters). The block is the mob's Core stat line, and its Vit is the piece that feeds HP: `hp = Base HP + Vit`, where Base HP is the zone's own mob_HP curve minus that Vit (so the total stays the published anchor). The body class adds a base Evasion percent on top of the Core Dex line (small +20 / medium +10 / large 0).",
     "power_note": "A mob's damage per second is its own power over the zone mean, times the published mob_PS(L) curve: power = mob.species[].power_base + K_MOB_PS_STAT x the Core Stat its `damage` tag reads (physical -> Str, magic -> Int, mixed -> both halves, the same split mob.damage_split spends). The zone's average mob is the published curve (checks.md X37), so the species term only moves the mobs actually in front of the player and no zone edge, timeline, ladder or survival number changes. `power_base` is the per-species Base knob - 1.00 is neutral, and raising or lowering it tilts a species without touching its stat vector.",
     "curve": {
       "skill_per_level": 0.0034,
@@ -196,7 +106,7 @@
       "extend": {
         "from_level": 90,
         "gear_factor": 43.15708874022729,
-        "rule": "mob_HP(L) = stat_c(L) x skill(L) x gear_factor for every zone edge above `from_level`. The gear factor is the one already measured at the level-90 published edge and then held flat: gear stops improving while levels do not, so HP past zone 9 rises on the stat line and the skill multiplier alone. Zones 1-9 keep their published anchors untouched \u2014 this only computes the edges that did not exist. Seeding from the last published edge is what keeps the line continuous, and it lands the zone-18 edge within a fraction of a percent of the owner projection."
+        "rule": "mob_HP(L) = stat_c(L) x skill(L) x gear_factor for every zone edge above `from_level`. The gear factor is the one already measured at the level-90 published edge and then held flat: gear stops improving while levels do not, so HP past zone 9 rises on the stat line and the skill multiplier alone. Zones 1-9 keep their published anchors untouched — this only computes the edges that did not exist. Seeding from the last published edge is what keeps the line continuous, and it lands the zone-18 edge within a fraction of a percent of the owner projection."
       }
     },
     "zones": [
@@ -1575,18 +1485,13 @@
         "wand": 3,
         "book": 3
       },
-      "rules": "A group is a queue ordered front line first. A weapon's reach is how many queue slots it may hit: 1 = the front slot only, 2 = front and second, 3 = any slot in the group. Only the front slot swings at the player; a stand-off mob shoots or casts from where it stands and still counts inside the 3-attacker cap. If the front slot dies while stand-off mobs live, a reach-1 attack waits one engage cycle (1 sec) for the group to close; reach 2 and 3 keep pressing. AoE keeps its rules (60% per target \u00b7 Cap 3 \u00b7 mana \u00d71.5) and only changes which 3: melee fans from the front, stand-off picks any 3. There are no tiles, no movement speed and no coordinates \u2014 reach is the whole positional model, and it replaces the stray 'within 3 tiles' wording."
+      "rules": "A group is a queue ordered front line first. A weapon's reach is how many queue slots it may hit: 1 = the front slot only, 2 = front and second, 3 = any slot in the group. Only the front slot swings at the player; a stand-off mob shoots or casts from where it stands and still counts inside the 3-attacker cap. If the front slot dies while stand-off mobs live, a reach-1 attack waits one engage cycle (1 sec) for the group to close; reach 2 and 3 keep pressing. AoE keeps its rules (60% per target · Cap 3 · mana ×1.5) and only changes which 3: melee fans from the front, stand-off picks any 3. There are no tiles, no movement speed and no coordinates — reach is the whole positional model, and it replaces the stray 'within 3 tiles' wording."
     },
     "spawn_weights": {
       "small": 3,
       "medium": 2,
       "large": 1,
       "note": "how often each farming body shows up in a group. Every zone spends its encounter budget once: the published mob_HP(L) curve is the zone AVERAGE mob, so each group entry divides its body multiplier by the weighted average of the bodies that zone can field. A Large mob is tougher and rarer, a Small mob cheaper and common, and the drop line, the stone funnel and the timeline never move."
-    },
-    "element_roll": {
-      "bias_weight": 3,
-      "other_weight": 1,
-      "note": "innate Element is rolled on spawn inside the zone's own Elements: every Element in the species element_bias weighs 3, any other Element the zone carries weighs 1. A one-Element zone is therefore always that Element, and a two-Element zone lands on the species bias about 3 of every 4 rolls."
     },
     "level_rule": "a mob spawns at the attacking player's level clamped into its zone's range, so mob_HP is read at that level between the two ends printed in mob-roster.md (checks.md D1), and a player past a zone's last level keeps fighting that zone at its own edge.",
     "bosses": [
@@ -1685,33 +1590,29 @@
       {
         "id": "small",
         "name": "Small",
-        "hp": 0.7,
         "ps": 0.7,
-        "evasion": 1.1,
+        "evasion_pct": 20,
         "group": "up to 5"
       },
       {
         "id": "medium",
         "name": "Medium",
-        "hp": 1,
         "ps": 1,
-        "evasion": 1,
+        "evasion_pct": 10,
         "group": "up to 5"
       },
       {
         "id": "large",
         "name": "Large",
-        "hp": 1.7,
         "ps": 1.35,
-        "evasion": 0.9,
+        "evasion_pct": 0,
         "group": "alone"
       },
       {
         "id": "boss",
         "name": "Boss",
-        "hp": 15,
         "ps": 10,
-        "evasion": 1,
+        "evasion_pct": 0,
         "group": "alone",
         "reads_as": "large",
         "reads_as_note": "A boss is not a size, it is a species that happens to be huge: it declares which of the three body classes a weapon's `size_mult` reads it as (- HugePatch section 12). Default Large; a boss may override it on its own entry."
@@ -1721,14 +1622,14 @@
       "name": "Elite",
       "hp": 6,
       "ps": 4,
-      "evasion": 0.9,
+      "evasion_pct": 0,
       "group": "alone",
       "note": "Elite is a rarity flag, not a fifth size: an Elite is always forced to the Large body and carries its own numbers, so no two multipliers ever stack. What an Elite pays in Tier stones is the key `loot.elite_tier_stones` — an expected count per kill, folded into `tierStonesPerHr` — named here rather than retyped."
     },
     "size_rules": [
-      "Four card sizes, copied from Ragnarok: Small \u00b7 Medium \u00b7 Large \u00b7 Boss. A size REPLACES the base numbers, it never multiplies with Elite or with another size.",
+      "Four card sizes, copied from Ragnarok: Small · Medium · Large · Boss. A size REPLACES the base numbers, it never multiplies with Elite or with another size.",
       "Small and Medium form the groups world.md counts (1-2 / 2-3 / 3-5). Large, Elite and Boss always appear alone.",
-      "Bigger bodies are easier to hit: evasion x1.10 on Small down to x0.90 on Large, because a large target presents more of itself.",
+      "The body class carries a base Evasion as a percent on top of its species Dex line: Small +20%, Medium +10%, and nothing above Medium - a Large, Elite or Boss body is not punished for its size, it simply presents all of itself. The rating under the percent is the mob's own flat Core stat line (`mob.stat`), never a level number.",
       "Size raises HP faster than PS, so a Large mob takes longer to kill without hitting proportionally harder - that is what makes Small the farming body and Large the roadblock."
     ],
     "species": [
@@ -1753,28 +1654,22 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "poison",
-          "fire"
-        ],
-        "stats": {
-          "str": 1.29,
-          "agi": 1.18,
-          "vit": 0.97,
-          "dex": 0.97,
-          "int": 0.65,
-          "wis": 0.86,
-          "lck": 1.08
-        },
         "humanoid": true,
         "trait": "farm trash - the cheapest body in the game, and the first weapon-carrier a player meets",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1,
-          "lightning": 1,
-          "poison": 1.4,
-          "chaos": 1
-        }
+        "core": {
+          "str": 22,
+          "agi": 20,
+          "vit": 16,
+          "dex": 16,
+          "int": 0,
+          "wis": 0,
+          "lck": 18
+        },
+        "zone_levels": {
+          "1": 1,
+          "14": 131
+        },
+        "element": "poison"
       },
       {
         "id": "orc",
@@ -1798,29 +1693,23 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "cold",
-          "chaos",
-          "fire"
-        ],
-        "stats": {
-          "str": 1.48,
-          "agi": 1.06,
-          "vit": 1.27,
-          "dex": 0.74,
-          "int": 0.53,
-          "wis": 0.95,
-          "lck": 0.95
-        },
         "humanoid": true,
         "trait": "armour wall - real armour and heavy res, paid for with the worst accuracy on the road",
-        "resist": {
-          "fire": 1.4,
-          "cold": 0.6,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1
-        }
+        "core": {
+          "str": 25,
+          "agi": 18,
+          "vit": 21,
+          "dex": 12,
+          "int": 0,
+          "wis": 0,
+          "lck": 16
+        },
+        "zone_levels": {
+          "1": 7,
+          "2": 20,
+          "4": 40
+        },
+        "element": "fire"
       },
       {
         "id": "kobold",
@@ -1840,26 +1729,20 @@
           "small",
           "medium"
         ],
-        "element_bias": [
-          "chaos"
-        ],
-        "stats": {
-          "str": 1.07,
-          "agi": 1.32,
-          "vit": 0.85,
-          "dex": 1.06,
-          "int": 0.64,
-          "wis": 0.85,
-          "lck": 1.22
-        },
         "trait": "evasive vermin - quick and looting, killed by Element damage",
-        "resist": {
-          "fire": 1.4,
-          "cold": 0.6,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1
-        }
+        "core": {
+          "str": 18,
+          "agi": 22,
+          "vit": 14,
+          "dex": 18,
+          "int": 0,
+          "wis": 0,
+          "lck": 20
+        },
+        "zone_levels": {
+          "8": 73
+        },
+        "element": "fire"
       },
       {
         "id": "ogre",
@@ -1883,26 +1766,22 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "cold"
-        ],
-        "stats": {
-          "str": 1.43,
-          "agi": 0.96,
-          "vit": 1.38,
-          "dex": 0.74,
-          "int": 0.59,
-          "wis": 0.95,
-          "lck": 0.95
-        },
         "trait": "armour wall - slow and heavy, dodged outright by a Dex build",
-        "resist": {
-          "fire": 1,
-          "cold": 1,
-          "lightning": 0.6,
-          "poison": 1,
-          "chaos": 1.4
-        }
+        "core": {
+          "str": 24,
+          "agi": 16,
+          "vit": 23,
+          "dex": 12,
+          "int": 0,
+          "wis": 0,
+          "lck": 16
+        },
+        "zone_levels": {
+          "2": 17,
+          "9": 90,
+          "15": 144
+        },
+        "element": "chaos"
       },
       {
         "id": "troll",
@@ -1927,28 +1806,23 @@
         "sizes": [
           "large"
         ],
-        "element_bias": [
-          "cold",
-          "chaos",
-          "poison"
-        ],
-        "stats": {
-          "str": 1.38,
-          "agi": 0.85,
-          "vit": 1.48,
-          "dex": 0.74,
-          "int": 0.64,
-          "wis": 0.95,
-          "lck": 0.95
-        },
         "trait": "armour wall, all alone - every farming body is Large, so there is never a soft version to farm",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1,
-          "lightning": 1,
-          "poison": 1.4,
-          "chaos": 1
-        }
+        "core": {
+          "str": 24,
+          "agi": 15,
+          "vit": 25,
+          "dex": 13,
+          "int": 0,
+          "wis": 0,
+          "lck": 16
+        },
+        "zone_levels": {
+          "3": 30,
+          "8": 80,
+          "10": 97,
+          "18": 177
+        },
+        "element": "poison"
       },
       {
         "id": "minotaur",
@@ -1968,26 +1842,20 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "chaos"
-        ],
-        "stats": {
-          "str": 1.37,
-          "agi": 1.01,
-          "vit": 1.16,
-          "dex": 0.8,
-          "int": 0.84,
-          "wis": 0.91,
-          "lck": 0.91
-        },
         "trait": "the labyrinth bruiser - a balanced vector with no hole to exploit",
-        "resist": {
-          "fire": 1,
-          "cold": 1,
-          "lightning": 1.4,
-          "poison": 0.6,
-          "chaos": 1
-        }
+        "core": {
+          "str": 24,
+          "agi": 18,
+          "vit": 20,
+          "dex": 14,
+          "int": 0,
+          "wis": 0,
+          "lck": 16
+        },
+        "zone_levels": {
+          "8": 76
+        },
+        "element": "lightning"
       },
       {
         "id": "skeleton",
@@ -2012,27 +1880,22 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "chaos",
-          "fire"
-        ],
-        "stats": {
-          "str": 1.23,
-          "agi": 0.73,
-          "vit": 1.57,
-          "dex": 0.84,
-          "int": 0.68,
-          "wis": 1.07,
-          "lck": 0.9
-        },
         "trait": "slow caster floor - the accuracy is a joke and the res is not",
-        "resist": {
-          "fire": 1,
-          "cold": 1,
-          "lightning": 0.5,
-          "poison": 1,
-          "chaos": 1.5
-        }
+        "core": {
+          "str": 22,
+          "agi": 13,
+          "vit": 27,
+          "dex": 15,
+          "int": 0,
+          "wis": 0,
+          "lck": 16
+        },
+        "zone_levels": {
+          "5": 46,
+          "11": 104,
+          "13": 127
+        },
+        "element": "chaos"
       },
       {
         "id": "mummy",
@@ -2054,27 +1917,21 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "poison",
-          "chaos"
-        ],
-        "stats": {
-          "str": 1.28,
-          "agi": 0.78,
-          "vit": 1.56,
-          "dex": 0.78,
-          "int": 0.67,
-          "wis": 1,
-          "lck": 0.94
-        },
         "trait": "slow caster floor - fires from the second line and shrugs off Element damage",
-        "resist": {
-          "fire": 0.5,
-          "cold": 1,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1.5
-        }
+        "core": {
+          "str": 22,
+          "agi": 13,
+          "vit": 27,
+          "dex": 13,
+          "int": 0,
+          "wis": 0,
+          "lck": 16
+        },
+        "zone_levels": {
+          "4": 37,
+          "5": 41
+        },
+        "element": "chaos"
       },
       {
         "id": "vampire",
@@ -2098,27 +1955,22 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "chaos",
-          "fire"
-        ],
-        "stats": {
-          "str": 1.15,
-          "agi": 1.16,
-          "vit": 1,
-          "dex": 0.95,
-          "int": 0.9,
-          "wis": 0.9,
-          "lck": 0.95
-        },
         "trait": "the mixed threat - half its hit is armour-able and half res-able, so neither answer is complete",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1.4
-        }
+        "core": {
+          "str": 21,
+          "agi": 21,
+          "vit": 18,
+          "dex": 17,
+          "int": 16,
+          "wis": 0,
+          "lck": 17
+        },
+        "zone_levels": {
+          "5": 50,
+          "11": 107,
+          "13": 130
+        },
+        "element": "chaos"
       },
       {
         "id": "demon",
@@ -2148,29 +2000,25 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "chaos",
-          "cold",
-          "fire",
-          "poison"
-        ],
-        "stats": {
-          "str": 1.17,
-          "agi": 0.97,
-          "vit": 1.07,
-          "dex": 0.87,
-          "int": 1.17,
-          "wis": 0.87,
-          "lck": 0.87
-        },
         "trait": "the mixed caster - Int-heavy, so its Element half is the part that hurts",
-        "resist": {
-          "fire": 1.5,
-          "cold": 0.5,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1
-        }
+        "core": {
+          "str": 21,
+          "agi": 18,
+          "vit": 19,
+          "dex": 16,
+          "int": 21,
+          "wis": 0,
+          "lck": 16
+        },
+        "zone_levels": {
+          "4": 31,
+          "7": 61,
+          "9": 81,
+          "11": 101,
+          "12": 111,
+          "13": 121
+        },
+        "element": "fire"
       },
       {
         "id": "slime",
@@ -2196,29 +2044,23 @@
           "small",
           "medium"
         ],
-        "element_bias": [
-          "fire",
-          "cold",
-          "chaos",
-          "poison"
-        ],
-        "stats": {
-          "str": 0.73,
-          "agi": 0.63,
-          "vit": 1.46,
-          "dex": 0.73,
-          "int": 1.15,
-          "wis": 1.25,
-          "lck": 1.04
-        },
         "trait": "slow caster floor - magic only, so Elemental resistance is the whole answer and Armour answers nothing",
-        "resist": {
-          "fire": 1,
-          "cold": 1,
-          "lightning": 0.5,
-          "poison": 1.5,
-          "chaos": 1
-        }
+        "core": {
+          "str": 14,
+          "agi": 12,
+          "vit": 28,
+          "dex": 14,
+          "int": 22,
+          "wis": 0,
+          "lck": 20
+        },
+        "zone_levels": {
+          "3": 24,
+          "7": 70,
+          "12": 120,
+          "15": 147
+        },
+        "element": "poison"
       },
       {
         "id": "spider",
@@ -2244,28 +2086,23 @@
           "small",
           "medium"
         ],
-        "element_bias": [
-          "cold",
-          "poison",
-          "chaos"
-        ],
-        "stats": {
-          "str": 0.72,
-          "agi": 1.34,
-          "vit": 0.82,
-          "dex": 1.24,
-          "int": 0.82,
-          "wis": 0.93,
-          "lck": 1.13
-        },
         "trait": "evasive vermin - hard to hit, dies to any AoE",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1,
-          "lightning": 1,
-          "poison": 1.4,
-          "chaos": 1
-        }
+        "core": {
+          "str": 13,
+          "agi": 24,
+          "vit": 14,
+          "dex": 22,
+          "int": 0,
+          "wis": 0,
+          "lck": 20
+        },
+        "zone_levels": {
+          "3": 27,
+          "8": 78,
+          "14": 134,
+          "15": 150
+        },
+        "element": "poison"
       },
       {
         "id": "wolf",
@@ -2291,28 +2128,23 @@
           "small",
           "medium"
         ],
-        "element_bias": [
-          "chaos",
-          "fire",
-          "poison"
-        ],
-        "stats": {
-          "str": 1.13,
-          "agi": 1.34,
-          "vit": 0.93,
-          "dex": 1.03,
-          "int": 0.62,
-          "wis": 0.93,
-          "lck": 1.03
-        },
         "trait": "accurate striker - Evasion is worthless against it",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1.4,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1
-        }
+        "core": {
+          "str": 19,
+          "agi": 23,
+          "vit": 16,
+          "dex": 17,
+          "int": 0,
+          "wis": 0,
+          "lck": 17
+        },
+        "zone_levels": {
+          "1": 10,
+          "10": 100,
+          "14": 140,
+          "18": 180
+        },
+        "element": "cold"
       },
       {
         "id": "golem",
@@ -2339,28 +2171,24 @@
         "sizes": [
           "large"
         ],
-        "element_bias": [
-          "cold",
-          "chaos",
-          "poison"
-        ],
-        "stats": {
-          "str": 1.7,
-          "agi": 0.6,
-          "vit": 1.55,
-          "dex": 0.75,
-          "int": 0.65,
-          "wis": 1.1,
-          "lck": 0.65
-        },
         "trait": "armour wall, all alone - the strongest armour line in the game and no soft body to farm",
-        "resist": {
-          "fire": 1,
-          "cold": 1,
-          "lightning": 1.5,
-          "poison": 1,
-          "chaos": 0.5
-        }
+        "core": {
+          "str": 30,
+          "agi": 11,
+          "vit": 27,
+          "dex": 13,
+          "int": 0,
+          "wis": 0,
+          "lck": 11
+        },
+        "zone_levels": {
+          "6": 57,
+          "7": 66,
+          "8": 71,
+          "9": 87,
+          "12": 116
+        },
+        "element": "lightning"
       },
       {
         "id": "dragon",
@@ -2388,27 +2216,24 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "cold",
-          "poison"
-        ],
-        "stats": {
-          "str": 1.48,
-          "agi": 0.78,
-          "vit": 1.3,
-          "dex": 0.81,
-          "int": 0.9,
-          "wis": 0.98,
-          "lck": 0.76
-        },
         "trait": "accurate striker - the mixed hit at full accuracy is the whole fight",
-        "resist": {
-          "fire": 1.5,
-          "cold": 0.5,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1
-        }
+        "core": {
+          "str": 27,
+          "agi": 14,
+          "vit": 24,
+          "dex": 15,
+          "int": 17,
+          "wis": 0,
+          "lck": 14
+        },
+        "zone_levels": {
+          "2": 11,
+          "6": 51,
+          "9": 84,
+          "10": 91,
+          "18": 171
+        },
+        "element": "fire"
       },
       {
         "id": "treant",
@@ -2429,27 +2254,21 @@
         "sizes": [
           "large"
         ],
-        "element_bias": [
-          "fire",
-          "lightning"
-        ],
-        "stats": {
-          "str": 1.54,
-          "agi": 0.73,
-          "vit": 1.52,
-          "dex": 0.75,
-          "int": 0.65,
-          "wis": 1.03,
-          "lck": 0.8
-        },
         "trait": "armour wall, all alone - heavy and rooted, and it never comes in a soft body",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1,
-          "lightning": 1,
-          "poison": 1.4,
-          "chaos": 1
-        }
+        "core": {
+          "str": 27,
+          "agi": 13,
+          "vit": 26,
+          "dex": 13,
+          "int": 0,
+          "wis": 0,
+          "lck": 14
+        },
+        "zone_levels": {
+          "16": 157,
+          "17": 167
+        },
+        "element": "poison"
       },
       {
         "id": "human",
@@ -2474,28 +2293,23 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "fire",
-          "chaos"
-        ],
-        "stats": {
-          "str": 1.13,
-          "agi": 1.03,
-          "vit": 0.93,
-          "dex": 1.13,
-          "int": 0.72,
-          "wis": 1.03,
-          "lck": 1.03
-        },
         "humanoid": true,
         "trait": "accurate striker and status pressure - the militia lineage, and the potion-carrier",
-        "resist": {
-          "fire": 1,
-          "cold": 1,
-          "lightning": 0.7,
-          "poison": 1,
-          "chaos": 1.3
-        }
+        "core": {
+          "str": 20,
+          "agi": 18,
+          "vit": 16,
+          "dex": 20,
+          "int": 0,
+          "wis": 0,
+          "lck": 18
+        },
+        "zone_levels": {
+          "1": 4,
+          "6": 60,
+          "13": 124
+        },
+        "element": "chaos"
       },
       {
         "id": "lizardman",
@@ -2520,27 +2334,22 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "cold",
-          "poison"
-        ],
-        "stats": {
-          "str": 1.16,
-          "agi": 1.26,
-          "vit": 1,
-          "dex": 0.95,
-          "int": 0.58,
-          "wis": 0.9,
-          "lck": 1.16
-        },
         "trait": "the swamp hunter - quick, lucky and unremarkable, which is its own kind of easy",
-        "resist": {
-          "fire": 1.4,
-          "cold": 0.6,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1
-        }
+        "core": {
+          "str": 19,
+          "agi": 21,
+          "vit": 17,
+          "dex": 16,
+          "int": 0,
+          "wis": 0,
+          "lck": 19
+        },
+        "zone_levels": {
+          "3": 21,
+          "4": 34,
+          "15": 141
+        },
+        "element": "fire"
       },
       {
         "id": "elf",
@@ -2564,30 +2373,23 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "chaos",
-          "poison",
-          "fire",
-          "lightning"
-        ],
-        "stats": {
-          "str": 0.86,
-          "agi": 1.15,
-          "vit": 0.77,
-          "dex": 1.25,
-          "int": 1.05,
-          "wis": 0.96,
-          "lck": 0.96
-        },
         "humanoid": true,
         "trait": "accurate striker, evasive and status pressure - the complete caster line, and the hardest to hit",
-        "resist": {
-          "fire": 1,
-          "cold": 1,
-          "lightning": 1.4,
-          "poison": 1,
-          "chaos": 0.6
-        }
+        "core": {
+          "str": 16,
+          "agi": 21,
+          "vit": 14,
+          "dex": 23,
+          "int": 19,
+          "wis": 0,
+          "lck": 18
+        },
+        "zone_levels": {
+          "6": 54,
+          "16": 154,
+          "17": 164
+        },
+        "element": "lightning"
       },
       {
         "id": "giant",
@@ -2610,27 +2412,22 @@
         "sizes": [
           "large"
         ],
-        "element_bias": [
-          "cold",
-          "poison"
-        ],
-        "stats": {
-          "str": 1.59,
-          "agi": 0.83,
-          "vit": 1.41,
-          "dex": 0.75,
-          "int": 0.59,
-          "wis": 1.03,
-          "lck": 0.8
-        },
         "trait": "armour wall, all alone - the heaviest body that still swings from the front",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1.4,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1
-        }
+        "core": {
+          "str": 27,
+          "agi": 14,
+          "vit": 24,
+          "dex": 13,
+          "int": 0,
+          "wis": 0,
+          "lck": 14
+        },
+        "zone_levels": {
+          "2": 14,
+          "10": 94,
+          "18": 174
+        },
+        "element": "cold"
       },
       {
         "id": "werewolf",
@@ -2656,29 +2453,23 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "poison",
-          "fire",
-          "lightning",
-          "cold"
-        ],
-        "stats": {
-          "str": 1.31,
-          "agi": 1.2,
-          "vit": 1.1,
-          "dex": 0.89,
-          "int": 0.58,
-          "wis": 0.94,
-          "lck": 0.99
-        },
         "trait": "accurate striker - a Wolf that hits harder and can take a hit back",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1.4,
-          "lightning": 1,
-          "poison": 1,
-          "chaos": 1
-        }
+        "core": {
+          "str": 22,
+          "agi": 20,
+          "vit": 18,
+          "dex": 15,
+          "int": 0,
+          "wis": 0,
+          "lck": 17
+        },
+        "zone_levels": {
+          "11": 110,
+          "14": 137,
+          "16": 160,
+          "17": 170
+        },
+        "element": "cold"
       },
       {
         "id": "dryad",
@@ -2700,46 +2491,41 @@
           "medium",
           "large"
         ],
-        "element_bias": [
-          "fire",
-          "lightning"
-        ],
-        "stats": {
-          "str": 0.73,
-          "agi": 0.97,
-          "vit": 0.88,
-          "dex": 1.17,
-          "int": 1.22,
-          "wis": 1.07,
-          "lck": 0.98
-        },
         "trait": "evasive vermin and status pressure - magic only, so resistance is the answer",
-        "resist": {
-          "fire": 0.6,
-          "cold": 1,
-          "lightning": 1,
-          "poison": 1.4,
-          "chaos": 1
-        }
+        "core": {
+          "str": 14,
+          "agi": 18,
+          "vit": 16,
+          "dex": 22,
+          "int": 23,
+          "wis": 0,
+          "lck": 18
+        },
+        "zone_levels": {
+          "16": 151,
+          "17": 161
+        },
+        "element": "poison"
       }
     ],
     "species_rules": [
       "A species is a MULTIPLY vector on the same stat block a player has, so the zone's average mob stays on the published HP anchor. Check X19 fails any species whose multipliers do not average 1.00.",
-      "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the Evasion Cap 80 question answerable: Cap 80 is reachable against the x0.05 species (Slime) and close to worthless against the x1.00 ones (Wolf \u00b7 Elf \u00b7 Dragon), so no single mob accuracy number can close C1 - the species mix does.",
+      "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the Evasion Cap 80 question answerable: Cap 80 is reachable against the x0.05 species (Slime) and close to worthless against the x1.00 ones (Wolf · Elf · Dragon), so no single mob accuracy number can close C1 - the species mix does.",
       "innate Element is rolled on spawn and is NOT part of the species. element_bias only tilts the roll inside the zone's own 1-2 Elements, so players still have to prepare res in advance (world.md).",
-      "A species that carries a weapon is the only kind a weapon-slot piece can come from; every species still drops from the non-weapon slots, so the 8% base drop rate and the loot.md funnel are untouched by this flag. Slime \u00b7 Spider \u00b7 Dryad are the weaponless lineages, which is why goblin (zone 1) is where the weapon part of the drop table starts.",
+      "A species that carries a weapon is the only kind a weapon-slot piece can come from; every species still drops from the non-weapon slots, so the 8% base drop rate and the loot.md funnel are untouched by this flag. Slime · Spider · Dryad are the weaponless lineages, which is why goblin (zone 1) is where the weapon part of the drop table starts.",
       "A species is not zone-locked. The same species in two zones is the same species at a higher level, never a reskinned one.",
       "A species may appear only where its `habitat` allows. `habitat` is the region list it may live in (the geography layer the zone `region` names) and `zones` is where it currently does, so `zones` must be a subset of the regions those zones carry. Check X52 fails a species placed outside its habitat, a habitat naming a region no zone has, or a region no species claims. Re-placing a species is a `habitat`/`zones` data edit, never a roster rewrite, and it moves no price.",
-      "Mob evasion is the species Dex line, not a level number: `stat_c(level) x species.dex x K_EVASION x body-class evasion`. K_EVASION 0.5 is set so the average species on a Medium body reproduces the retired `level x 1` curve (101 vs 100 at level 100), so this is a derivation, not a rebalance - and it is the same K the player's own Evasion rating uses, because a mob runs the player's math (X21).",
-      "A race carries a variant ladder and each live zone carries sub-zones. The five variants fill the five tier slots in order - Small \u00b7 Medium \u00b7 Large \u00b7 Elite \u00b7 Boss - so the field label is the variant name rather than the species name plus a suffix, and a named boss reads its own name. A sub-zone is what a spawn table rolls against: it names its Environment, one Element chosen from the zone's own set, the two races that live there and the Elite that may roll, and the zone cast is the union of its three sub-zones.",
-      "A proposed zone layout that re-zones the world is a new world, not a mob pass: the zone set is the shipped eighteen with its place regions (X51), and where a race lives is a habitat-legal data edit (X52). A species sheet therefore lands inside the existing zones \u2014 its races, variant ladders, sub-zones and bosses \u2014 and a sub-zone carries one of its zone's own Elements, never a new one."
+      "Mob evasion is the mob's own Core Dex line with the body's base percent on top: `the zone's Core Dex x K_EVASION x (1 + the body base Evasion percent / 100)` (`sizes[].evasion_pct`, `elite.evasion_pct`). It climbs with the zone (the Core block does) but has no per-spawn level term, so a Goblin is exactly as hard to hit across one zone's levels, and a Small one is harder to hit than a Large one by its base percent alone. K_EVASION is the same K the player's own Evasion rating uses, because a mob runs the player's math (X21).",
+      "A race carries a variant ladder and each live zone carries sub-zones. The five variants fill the five tier slots in order - Small · Medium · Large · Elite · Boss - so the field label is the variant name rather than the species name plus a suffix, and a named boss reads its own name. A sub-zone is what a spawn table rolls against: it names its Environment, one Element chosen from the zone's own set, the two races that live there and the Elite that may roll, and the zone cast is the union of its three sub-zones.",
+      "A proposed zone layout that re-zones the world is a new world, not a mob pass: the zone set is the shipped eighteen with its place regions (X51), and where a race lives is a habitat-legal data edit (X52). A species sheet therefore lands inside the existing zones — its races, variant ladders, sub-zones and bosses — and a sub-zone carries one of its zone's own Elements, never a new one."
     ],
     "stat": {
-      "base": 108.43,
-      "note": "A mob's stat block is FLAT (owner ruling): one base the species vector multiplies, with no level term. Every mob stat - accuracy, Evasion, Armour, Elemental resistance, dodge - reads from HERE through the species multiplier, never from the player stat, so two mobs of the same level can be nothing alike and difficulty lives on mob_HP / mob_PS and the species vector alone. Every one of them still ends at the same Cap the player obeys (`caps`). The base is set so the reference build's opposed hit-chance (X20) holds on the player's even-split reference line; re-derive it from the X20/X22/X24/X25 bands if that line moves."
+      "anchor": "zone_top_level",
+      "base_zone": 1,
+      "note": "A mob's Core is an INTEGER POINT block (`mob.species[].core`), written at `mob.stat.base_zone`; a higher zone scales it by the player's even-split reference line (`stat.base + points/7`) at that zone's top level, read through `mobStatBaseAt`, and the result is rounded to a whole number. So a mob's block climbs with the zone it lives in and a Core stat is never a fraction - the same rule the player's `base + points` obeys. Every mob stat - accuracy, Evasion, Armour, Elemental resistance, dodge - reads from the block through the shared K table (the same table the player obeys), never from the player stat. Wis is 0 everywhere (it feeds no mob line) and Int is 0 on a pure-physical body (no magic half). Difficulty still lives on mob_HP / mob_PS and the body class."
     },
     "field_labels": {
-      "note": "The field label is the variant name the body tier lands on (small \u00b7 medium \u00b7 large \u00b7 elite), and a named boss reads its own name instead of its variant. Colour is a client concern - the data carries no hex value. Body class stays in the roster table, never on the field.",
+      "note": "The field label is the variant name the body tier lands on (small · medium · large · elite), and a named boss reads its own name instead of its variant. Colour is a client concern - the data carries no hex value. Body class stays in the roster table, never on the field.",
       "normal": {
         "source": "species",
         "suffix": ""
@@ -2909,7 +2695,7 @@
         "Ancient Dryad"
       ]
     },
-    "variant_drops_note": "The drop identity of one variant NAME (mob.variants owns the names; this table owns what each name drops). `item`/`rarity` are the junk stream the variant pays instead of the species-wide item, and `lean` is the collectible stream that variant tilts toward, applied through leanReweight so the total expected drops/kill is conserved - the three normal variants of every species cycle gear \u00b7 herb \u00b7 junk, so a zone's aggregate stays balanced and only the per-kill mix moves. `none` is the identity, which is what Elite and Boss carry: they already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a variant between rarities never moves gold/kill.",
+    "variant_drops_note": "The drop identity of one variant NAME (mob.variants owns the names; this table owns what each name drops). `item`/`rarity` are the junk stream the variant pays instead of the species-wide item, and `lean` is the collectible stream that variant tilts toward, applied through leanReweight so the total expected drops/kill is conserved - the three normal variants of every species cycle gear · herb · junk, so a zone's aggregate stays balanced and only the per-kill mix moves. `none` is the identity, which is what Elite and Boss carry: they already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a variant between rarities never moves gold/kill.",
     "variant_drops": {
       "Sneak Goblin": {
         "item": "Goblin Ear",
@@ -3426,13 +3212,10 @@
       "seraph": "retired with the 22-race mob sheet; Human takes the Bandit lineage, and creature/loot flavour moves to the races that replace them"
     },
     "species_target": 22,
-    "resist_rules": [
-      "Every species carries a resist profile: one Element it resists (x1.3-1.5 on its Vit line) and one it is weak to (x0.5-0.7), the other three at x1.00. The five multipliers always average x1.00, so the published res column (the Vit line) is unchanged and the profile only tilts it by Element (X26).",
-      "A race resists what it is made of and is weak to what answers it - a Dragon shrugs fire and fears cold, a Skeleton shrugs chaos and fears lightning - so which Element a build brings changes with the zone cast, not only with the counter table.",
-      "The profile multiplies the mob Vit line before the Cap, so a resist never lifts a mob past the same Elemental resistance Cap the player obeys."
-    ],
+    "resist_rules": "A race owns one Element (mob.species[].element): it attacks with it and answers it at the flat mob.race_res_pct in every zone. No Element counters another and no profile tilts the Vit line - the other four Elements meet no res at all. The same Cap the player obeys holds every line.",
     "skills_enabled": false,
-    "skills_note": "Mobs carry NO skills in the current build. A species trait and its damage tag are the whole of its behaviour until the skill/mechanics system lands; no species entry carries a skill field, and X27 fails if one appears while skills_enabled is false."
+    "skills_note": "Mobs carry NO skills in the current build. A species trait and its damage tag are the whole of its behaviour until the skill/mechanics system lands; no species entry carries a skill field, and X27 fails if one appears while skills_enabled is false.",
+    "race_res_pct": 20
   },
   "bleed": {
     "curse_id": "curse.lacerate",
@@ -3444,9 +3227,9 @@
     "affected_by_armour": false,
     "can_crit": false,
     "is_element": false,
-    "mitigations": "none \u2014 bleed has no counter stat in the game; heal and Energy Shield only shorten the race ",
-    "mob_side": "decided \u2014 bleed is a DoT, so it lands on mobs in full from our Lacerate. The reverse is a mob skill: the high-Str physical lineages (Orc \u00b7 Golem \u00b7 Troll \u00b7 Drake) inflict bleed as their signature, delivered as a DoT slice of their already-priced mob_PS, not extra power (combat.md \u00a75b)",
-    "note": "PoE bleed: physical damage over time, does not stack, a new application refreshes the duration, base duration 5 sec, base total 70% of the inflicting hit's physical damage, unaffected by armour, cannot crit. bleed_dps = K_BLEED x physical_per_hit / bleed_time_sec, so it does not scale with attack speed \u2014 slow heavy hits are the build."
+    "mitigations": "none — bleed has no counter stat in the game; heal and Energy Shield only shorten the race ",
+    "mob_side": "decided — bleed is a DoT, so it lands on mobs in full from our Lacerate. The reverse is a mob skill: the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict bleed as their signature, delivered as a DoT slice of their already-priced mob_PS, not extra power (combat.md §5b)",
+    "note": "PoE bleed: physical damage over time, does not stack, a new application refreshes the duration, base duration 5 sec, base total 70% of the inflicting hit's physical damage, unaffected by armour, cannot crit. bleed_dps = K_BLEED x physical_per_hit / bleed_time_sec, so it does not scale with attack speed — slow heavy hits are the build."
   },
   "level_gain": {
     "hp_per_level": 10,
@@ -3458,7 +3241,7 @@
     "res_mod_items": 3,
     "cdr_mod_items": 11,
     "cdr_buff_pct": 0,
-    "base_note": "The flat base each pool starts from before its Core stat is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term \u00b7 Max Mana = mana_base + Int x K_INT_MP + level term \u00b7 weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening set - the sword at 35 and the junk frames at 230 - is carried untaxed."
+    "base_note": "The flat base each pool starts from before its Core stat is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term · Max Mana = mana_base + Int x K_INT_MP + level term · weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening set - the sword at 35 and the junk frames at 230 - is carried untaxed."
   },
   "xp": {
     "per_kill_mob_level": 10,
@@ -3509,7 +3292,7 @@
     },
     "plateau_from": 100,
     "plateau_step_at": 89,
-    "note": "xp_to_next(L) = kills(L) \u00d7 10 \u00d7 min(L, mob_level_cap) \u00b7 kills(L) is the RAGNAROK curve: the classic base-EXP table of RO (1-99) applied in log space and rescaled so level 1 costs 20 kills and the completion checkpoint (level 100) lands on its published 63,231, with the last two steps set by the owner rule \u2014 the step INTO 100 is 1.5\u00d7 the step into 99 in XP \u2014 so the cliff ends on one final push, which keeps RO's signature \u2014 a step at every 10-level boundary and a steeper final decade \u2014 at this game's scale. The anchors are one per level through the cliff (85-100) and at each boundary, so the steps survive interpolation. Past `plateau_from` (100, the completion level) the XP bar is FLAT and holds the XP of the step out of `plateau_step_at` (89 \u2192 90, the last step before RO's own cliff): completing the 91-100 push lowers the bar, and the post-completion loop is a plateau the player paces, never a wall. The progression checkpoints derive from this curve in engine/index.ts (CHECKPOINTS_KILLS), so a re-shape moves the bands and the town budgets with it. tools/timeline.ts derives the table in world.md from this."
+    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) is the RAGNAROK curve: the classic base-EXP table of RO (1-99) applied in log space and rescaled so level 1 costs 20 kills and the completion checkpoint (level 100) lands on its published 63,231, with the last two steps set by the owner rule — the step INTO 100 is 1.5× the step into 99 in XP — so the cliff ends on one final push, which keeps RO's signature — a step at every 10-level boundary and a steeper final decade — at this game's scale. The anchors are one per level through the cliff (85-100) and at each boundary, so the steps survive interpolation. Past `plateau_from` (100, the completion level) the XP bar is FLAT and holds the XP of the step out of `plateau_step_at` (89 → 90, the last step before RO's own cliff): completing the 91-100 push lowers the bar, and the post-completion loop is a plateau the player paces, never a wall. The progression checkpoints derive from this curve in engine/index.ts (CHECKPOINTS_KILLS), so a re-shape moves the bands and the town budgets with it. tools/timeline.ts derives the table in world.md from this."
   },
   "mod_max": {
     "phys_flat_main_hand": 80,
@@ -3557,7 +3340,7 @@
       "physical_power_flat",
       "magic_power_flat"
     ],
-    "flat_group_note": "The 0.5 group is the early-game line: at level 10 it is 1/3 of power, at level 100 it is 1%. Drops full of Flat lines naturally stop being upgrades as the player moves up zones, which is what makes crafting the answer rather than luck (equipment-slot-pools.md). These four ids are also what F11 counts as a Flat line \u2014 Stat Mod flat, Evasion flat and the three Gear Mods are Flats by name but not part of this group.",
+    "flat_group_note": "The 0.5 group is the early-game line: at level 10 it is 1/3 of power, at level 100 it is 1%. Drops full of Flat lines naturally stop being upgrades as the player moves up zones, which is what makes crafting the answer rather than luck (equipment-slot-pools.md). These four ids are also what F11 counts as a Flat line — Stat Mod flat, Evasion flat and the three Gear Mods are Flats by name but not part of this group.",
     "rows": [
       {
         "label": "Max HP %",
@@ -3567,7 +3350,7 @@
         "v100": "+16% EHP",
         "early": "+7%",
         "weight": 0.8,
-        "why": "Strongest defense line \u2192 slightly rarer by design"
+        "why": "Strongest defense line → slightly rarer by design"
       },
       {
         "label": "Physical/Magic power %",
@@ -3588,7 +3371,7 @@
         "v100": "+22% DPS (at 18.5% crit)",
         "early": "+5%",
         "weight": 0.7,
-        "why": "Strongest line in the table \u00b7 must be a target, not an accident \u00b7 **rises once the crit pool passes 100, because overflow crit chance also lands here (formula-offense.md section 3) \u2014 the 0.7 is the no-overflow value"
+        "why": "Strongest line in the table · must be a target, not an accident · **rises once the crit pool passes 100, because overflow crit chance also lands here (formula-offense.md section 3) — the 0.7 is the no-overflow value"
       },
       {
         "label": "Attack speed %",
@@ -3611,6 +3394,16 @@
         "why": "Element builds hunt repeats, so no reduction"
       },
       {
+        "label": "Elemental resistance Cap %",
+        "ids": [
+          "elemental_resistance_cap_pct"
+        ],
+        "v100": "not a drop",
+        "early": "not a drop",
+        "weight": 0,
+        "why": "the tree's own line (owner ruling): no Base frame offers it and the weight is 0, so the weighted pool pick can never draw it — the control branch's last node is the only source"
+      },
+      {
         "label": "Critical chance %",
         "ids": [
           "critical_chance"
@@ -3628,17 +3421,17 @@
         "v100": "+4.2% DPS",
         "early": "+3%",
         "weight": 1.2,
-        "why": "Cheap but lifts the 80% hit floor \u00b7 frequent filler"
+        "why": "Cheap but lifts the 80% hit floor · frequent filler"
       },
       {
         "label": "Stat Mod flat",
         "ids": [
           "stat_mod_flat"
         ],
-        "v100": "+3.1% (on a maxed stat) \u00b7 **+11.9%** (on an uninvested stat)",
+        "v100": "+3.1% (on a maxed stat) · **+11.9%** (on an uninvested stat)",
         "early": "+5.5%",
         "weight": 1,
-        "why": "Stat Mod flat rolls on every item, so an uninvested stat is always reachable \u2014 the single-stat half of the Stat Mod slot"
+        "why": "Stat Mod flat rolls on every item, so an uninvested stat is always reachable — the single-stat half of the Stat Mod slot"
       },
       {
         "label": "All stats flat",
@@ -3665,10 +3458,10 @@
         "ids": [
           "cooldown_reduction"
         ],
-        "v100": "+6.1 CDR points \u2248 +1.9% DPS",
+        "v100": "+6.1 CDR points ≈ +1.9% DPS",
         "early": "+4%",
         "weight": 0.6,
-        "why": "Whole skill list is worth only +7.7% DPS (skill-pool.md) \u2192 CDR is truly a secondary line"
+        "why": "Whole skill list is worth only +7.7% DPS (skill-pool.md) → CDR is truly a secondary line"
       },
       {
         "label": "Max HP flat",
@@ -3682,14 +3475,14 @@
           0.4,
           0.25
         ],
-        "why": "Dies off late-game \u00b7 weight differs by quality tier (low 0.5 \u00b7 mid 0.4 \u00b7 high 0.25)"
+        "why": "Dies off late-game · weight differs by quality tier (low 0.5 · mid 0.4 · high 0.25)"
       },
       {
         "label": "Max Mana flat",
         "ids": [
           "max_mana_flat"
         ],
-        "v100": "+2.9% of pool \u00b7 no EHP",
+        "v100": "+2.9% of pool · no EHP",
         "early": "+8%",
         "weight": [
           0.5,
@@ -3703,10 +3496,10 @@
         "ids": [
           "max_mana"
         ],
-        "v100": "+16% of pool \u00b7 auras **reserve a fixed %**, so a bigger pool leaves a bigger usable pool after reserving",
+        "v100": "+16% of pool · auras **reserve a fixed %**, so a bigger pool leaves a bigger usable pool after reserving",
         "early": "+8%",
         "weight": 0.8,
-        "why": "Cast builds channel longer \u00b7 aura builds like this line"
+        "why": "Cast builds channel longer · aura builds like this line"
       },
       {
         "label": "Physical/Magic power flat",
@@ -3721,7 +3514,7 @@
           0.4,
           0.25
         ],
-        "why": "Same as Max HP Flat \u2014 an early-game line"
+        "why": "Same as Max HP Flat — an early-game line"
       },
       {
         "label": "Elemental power flat / %",
@@ -3730,7 +3523,7 @@
           "elemental_power"
         ],
         "v100": "~21% of a hit after the Alignment gate",
-        "early": "\u2014",
+        "early": "—",
         "weight": 1,
         "why": "Element builds required"
       },
@@ -3742,7 +3535,7 @@
           "energy_shield_flat"
         ],
         "v100": "per Base school",
-        "early": "\u2014",
+        "early": "—",
         "weight": 1,
         "why": "The Gear Mod is the Base's own school line (item-base.md), so it rolls at Primary weight on the five armour slots; the three Gear Mod weights were missing before the loot sim and are set here"
       },
@@ -3754,7 +3547,7 @@
         "v100": "+16% of the shield pool",
         "early": "+7%",
         "weight": 0.8,
-        "why": "The Int build\u2019s scaling defensive line, same shape as the Max HP % and Max Mana % it sits beside"
+        "why": "The Int build’s scaling defensive line, same shape as the Max HP % and Max Mana % it sits beside"
       },
       {
         "label": "Energy Shield Regeneration %",
@@ -3764,24 +3557,24 @@
         "v100": "+30% of the shield's regen rate",
         "early": "+12%",
         "weight": 0.8,
-        "why": "Amplifies the base ES regen (`energy_shield.regen_pct`) the way Life Regeneration % amplifies the Vit line \u2014 a rate line, never a pool line, so it cannot raise the shield's ceiling (checks.md X25)"
+        "why": "Amplifies the base ES regen (`energy_shield.regen_pct`) the way Life Regeneration % amplifies the Vit line — a rate line, never a pool line, so it cannot raise the shield's ceiling (checks.md X25)"
       },
       {
         "label": "Life Regeneration %",
         "ids": [
           "life_regen_pct"
         ],
-        "v100": "+15% of the Vit-derived regen line \u00b7 Vit 510 \u00d7 0.25 = 127.5/sec, so +19.1/sec and 13% off Push downtime",
+        "v100": "+15% of the Vit-derived regen line · Vit 510 × 0.25 = 127.5/sec, so +19.1/sec and 13% off Push downtime",
         "early": "+5%",
         "weight": 1,
-        "why": "Recovery, not a pool \u2014 it cannot raise the ceiling, so it is the defensive line that never breaks an HP Cap, and the only one that shortens the walk back to camp (checks.md D9)"
+        "why": "Recovery, not a pool — it cannot raise the ceiling, so it is the defensive line that never breaks an HP Cap, and the only one that shortens the walk back to camp (checks.md D9)"
       },
       {
         "label": "Mana Regeneration %",
         "ids": [
           "mana_regen_pct"
         ],
-        "v100": "+25% of the Int-derived regen line \u00b7 Int 510 \u00d7 0.28 = 142.8/sec, so +35.7/sec of cast sustain",
+        "v100": "+25% of the Int-derived regen line · Int 510 × 0.28 = 142.8/sec, so +35.7/sec of cast sustain",
         "early": "+10%",
         "weight": 1,
         "why": "Mana is the real casting bottleneck as designed (skill-pool-system.md), so this buys uptime with the bar full rather than more damage per press"
@@ -3791,10 +3584,31 @@
         "ids": [
           "all_resistance_pct"
         ],
-        "v100": "+11.1% EHP across all five Elements at once \u00b7 20% off the Elemental half of a 50/50 hit",
+        "v100": "+11.1% EHP across all five Elements at once · 20% off the Elemental half of a 50/50 hit",
         "early": "+2%",
         "weight": 0.7,
-        "why": "Weaker per Element than Elemental resistance % (top 20 vs 30) precisely because it covers all five, and it lands on the ring, amulet and cape slots that carry no resistance today \u2014 rarer by design"
+        "why": "Weaker per Element than Elemental resistance % (top 20 vs 30) precisely because it covers all five, and it lands on the ring, amulet and cape slots that carry no resistance today — rarer by design"
+      },
+      {
+        "label": "Attack damage % / Spell damage %",
+        "ids": [
+          "attack_damage_pct",
+          "spell_damage_pct"
+        ],
+        "v100": "a ladder multiplier, not a power line: it scales what the ladder already deals, so it is worth most on the build that finished that ladder",
+        "early": "—",
+        "weight": 0.7,
+        "why": "The two rows are the same shape on opposite ladders, so they price together. Rarer than Attack speed and Accuracy because one line multiplies the whole finished press instead of one term inside it, and the pair never crosses: a caster has no use for the attack half and a melee build none for the spell half"
+      },
+      {
+        "label": "Elemental resistance Cap %",
+        "ids": [
+          "elemental_resistance_cap_pct"
+        ],
+        "v100": "not a gear line: it lifts `caps.elem_res` toward `caps.elem_res_max` and only the passive tree grants it",
+        "early": "—",
+        "weight": 0,
+        "why": "The weight is zero on purpose, and no Base frame names the line in its pool, so a drop can never carry the unlock — the row exists because every `mods.json` line resolves a weight (`weightOf` would otherwise read undefined). Tree cage T9 holds the zero and the empty pool."
       },
       {
         "label": "Armour %",
@@ -3804,7 +3618,7 @@
         "v100": "+3.7 points of cut on a zone-9 physical half (41.7% -> 45.4% at full Str, no flat)",
         "early": "+2.2 points",
         "weight": 0.8,
-        "why": "A PoE ratio cuts less of a bigger number, so a % on Armour is a modest line by construction (X22 holds the cut inside 10-40%) \u2014 same rarity as Max HP %"
+        "why": "A PoE ratio cuts less of a bigger number, so a % on Armour is a modest line by construction (X22 holds the cut inside 10-40%) — same rarity as Max HP %"
       },
       {
         "label": "Evasion %",
@@ -3828,14 +3642,14 @@
           0.4,
           0.25
         ],
-        "why": "Dies off late-game exactly like Max HP Flat \u2014 weight differs by quality tier (low 0.5 \u00b7 mid 0.4 \u00b7 high 0.25)"
+        "why": "Dies off late-game exactly like Max HP Flat — weight differs by quality tier (low 0.5 · mid 0.4 · high 0.25)"
       },
       {
         "label": "Mana Regeneration flat",
         "ids": [
           "mana_regen_flat"
         ],
-        "v100": "+31/sec on top of 143/sec (Int 510 \u00d7 0.28) = +22%",
+        "v100": "+31/sec on top of 143/sec (Int 510 × 0.28) = +22%",
         "early": "a level-1 build has 1.8/sec",
         "weight": [
           0.5,
@@ -3852,17 +3666,17 @@
         "v100": "scales the Lck line, so it is worth most on a build that has not finished the line",
         "early": "a level-1 Lck sits at under 1%, where +3% is a large multiplier on the chance",
         "weight": 0.7,
-        "why": "The Cap binds near the top of the maxed Lck ratio, so this line is worth least on a maxed-Lck piece and decisive on a low one \u2014 the same shape as an % line on any other low rate. It is also defined but not offered: no Base pool in bases.json rolls it, so today it is a drop-weight row and nothing more."
+        "why": "The Cap binds near the top of the maxed Lck ratio, so this line is worth least on a maxed-Lck piece and decisive on a low one — the same shape as an % line on any other low rate. It is also defined but not offered: no Base pool in bases.json rolls it, so today it is a drop-weight row and nothing more."
       },
       {
         "label": "Status Alignment resistance %",
         "ids": [
           "status_resistance_pct"
         ],
-        "v100": "cuts the 20% status proc to 15% and cuts crowd control (stun/stop) too \u2014 the gap between status applications goes 2.3 sec -> 3.3 sec",
+        "v100": "cuts the 20% status proc to 15% and cuts crowd control (stun/stop) too — the gap between status applications goes 2.3 sec -> 3.3 sec",
         "early": "same ratio, fewer absolute hits to proc on",
         "weight": 0.7,
-        "why": "The status proc is 20% per landed hit and there is no other gear answer to it \u2014 or to the crowd control statuses carry \u2014 (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other \"answers something niche\" defensive rows"
+        "why": "The status proc is 20% per landed hit and there is no other gear answer to it — or to the crowd control statuses carry — (Holy veil is a timed buff, not a line), so it carries a defensive line of its own; 0.7 matches the other \"answers something niche\" defensive rows"
       },
       {
         "label": "Chance to bleed %",
@@ -3911,23 +3725,24 @@
     "regen_pct": 3,
     "player_only": true,
     "chaos_bypasses": true,
-    "note": "Elemental resistance and Energy Shield are GEAR lines, not Core stat lines (owner ruling): no Core stat feeds either, so `K_MOB_RES` belongs to the mob stat vector alone and the player reads both off the Mod rows. Energy Shield is the caster's second pool: pool = `energy_shield_flat` x (1 + `max_energy_shield_pct`/100). Regen is `regen_pct` (3) percent of the max pool per second once `delay_sec` (3) have passed without a hit, so the base rate alone returns the whole pool in 100 / `regen_pct` sec - the same full-pool span the mana pool was tuned to. Regen is amplified by an `es_regen` line from a skill, Mod or passive: rate x (1 + `es_regen`/100), and that is the only way it moves. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it."
+    "note": "Elemental resistance is a GEAR line (owner ruling): no Core stat feeds it, so `K_MOB_RES` belongs to the mob stat vector alone and the player reads the resistance off the Mod rows. Energy Shield is fed by Wis flat (`K_WIS_ES`) with the gear lines riding on top (owner ruling): pool = (`Wis` x `K_WIS_ES` + `energy_shield_flat`) x (1 + `max_energy_shield_pct`/100). Regen is `regen_pct` (3) percent of the max pool per second once `delay_sec` (3) have passed without a hit, so the base rate alone returns the whole pool in 100 / `regen_pct` sec - the same full-pool span the mana pool was tuned to. Regen is amplified by an `es_regen` line from a skill, Mod or passive: rate x (1 + `es_regen`/100), and that is the only way it moves. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it."
   },
   "caps": {
     "crit_chance": null,
     "evasion": 80,
-    "perfect_dodge": 21,
+    "perfect_dodge": null,
     "alignment": null,
     "elem_res": 75,
+    "elem_res_max": 90,
     "cdr": 80,
-    "aspd": 500,
+    "attack_interval_sec": 0.15,
     "accuracy": null,
     "weight_overload": 0.5,
     "block": null,
     "block_note": "`block` is the second avoidance layer: a blocked hit is cut by a flat `armour / 10` (owner ruling, provisional) rather than deleted, and the roll runs after perfect dodge and evasion. It is fed by the Shield offhand's line 1 only. **No Cap (owner ruling):** the block chance keeps climbing with the shield's own Mod line. formula-defense.md prints the order.",
     "stun": null,
-    "stun_note": "`stun` is the lightning stun chance (elements.md lightning \u00b7 C10): `Alignment \u00d7 K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. **No Cap (owner ruling):** the two sources sum and the chance keeps climbing; the mace's line 1 is the published gear source.",
-    "notes": "`evasion` is the one avoidance Cap (80): the Dex rating roll plus the Agi percentage points, added and capped together. `perfect_dodge` stays a separate Cap because it is not opposed and deletes the hit outright, and it binds on the Lck ratio alone \u2014 the `Perfect dodge %` line is defined in mods.json but no Base pool in bases.json offers it, so nothing lifts that ratio today. **`elem_res` (75) and `cdr` (80) are hard ceilings, not build targets**: a maxed single-stat build reaches only 48.45 / 57.375, so each Cap sits above its own build by intent, the same shape as the aspd Cap (500). **`alignment` has NO Cap (owner ruling):** the Dex-derived Elemental Alignment is an open-ended status gate and Element multiplier, and the defensive `Status Alignment resistance %` is a Mod line with its own range and no Cap. The player keeps the build's real value instead of a cut, which is new power booked on checks.md D34. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
+    "stun_note": "`stun` is the lightning stun chance (elements.md lightning · C10): `Alignment × K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. **No Cap (owner ruling):** the two sources sum and the chance keeps climbing; the mace's line 1 is the published gear source.",
+    "notes": "`evasion` is the one avoidance Cap (80) and AGI carries it (owner ruling): the rating is `agi x K_EVASION` with the `evasion_flat` / `evasion_pct` gear lines riding on the same rating, so Dex no longer feeds it at all. The single opposed roll runs on that rating and the Cap binds against the low-accuracy lineages, which is what C1/C2 and X20 prove. **No Cap (owner ruling):** `perfect_dodge`, `block`, `stun` and `alignment` are all open-ended. Perfect dodge is not opposed and deletes the hit outright, so it binds on the Lck ratio alone and keeps climbing with it. **`elem_res` (75) and `cdr` (80) are hard ceilings, not build targets**: a maxed single-stat build reaches only 48.45 / 57.375, so each Cap sits above its own build by intent. `elem_res` is the one Cap with an unlock: a passive-tree node raises the ceiling, and the engine takes that raise as the `capBonus` its `resistanceOf` argument carries. `elem_res_max` is that unlocked ceiling and its only home, and `resistanceOf` clamps `elem_res + capBonus` there however the raise is stacked — T9 proves the tree's fully-bought node lands exactly on it. `attack_interval_sec` is the clock Cap in its own unit (owner ruling): `hits_per_sec` never passes `1 / attack_interval_sec`, whatever the weapon, because a percent ceiling let a dagger clock faster than a staff. The engine derives its `aspd` ceiling from that one number. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
   },
   "weapons": [
     {
@@ -4025,7 +3840,7 @@
     "note": "A herb bundle drops on its own roll, separate from gear and stones. farm.md prints these; F13 in checks.md is generated from here."
   },
   "farm": {
-    "note": "Farming is the game's ONE life skill \u2014 Melvor's Farming, the farm discipline only (no fishing \u00b7 mining \u00b7 woodcutting). It is a real leveled track: plant a seed on a plot, wait the growth timer, harvest for Farming XP plus herbs. Provisioning ONLY \u2014 it yields the herbs potions are crafted from, never gear \u00b7 Mods \u00b7 combat DPS \u2014 so it grants no power and needs no mob_HP fold (AGENTS.md \u00a75 \u00b7 H1). The level curve is the same sqrt(xp/divisor)+1 shape as weapon Mastery (equipment-weapon.md) and runs parallel to it, separate from character XP. A8 ruling.",
+    "note": "Farming is the game's ONE life skill — Melvor's Farming, the farm discipline only (no fishing · mining · woodcutting). It is a real leveled track: plant a seed on a plot, wait the growth timer, harvest for Farming XP plus herbs. Provisioning ONLY — it yields the herbs potions are crafted from, never gear · Mods · combat DPS — so it grants no power and needs no mob_HP fold (DECISIONS.md §Standing intent · H1). The level curve is the same sqrt(xp/divisor)+1 shape as weapon Mastery (equipment-weapon.md) and runs parallel to it, separate from character XP. A8 ruling.",
     "plots": {
       "base": 3,
       "shop_deeds": 2,
@@ -4046,7 +3861,7 @@
     "taps_per_day": 2
   },
   "potions": {
-    "note": "Single home for the potion ladder farm.md prints (A8). Effect is % of the relevant pool, applied instantly; the value is derived as base + step \u00d7 tier_index (HP tiers 1-3 \u2192 10/20/30 \u00b7 mana tiers 1-3 \u2192 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md \u00a77), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill \u2014 so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP \u00b7 drop line \u00b7 timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience \u2014 this closes the old 'pending survival rerun' note.",
+    "note": "Single home for the potion ladder farm.md prints (A8). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · drop line · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
     "shared_cooldown_sec": 30,
     "auto_use_default": {
       "hp_pct": 30,
@@ -4120,7 +3935,7 @@
     ]
   },
   "presets": {
-    "note": "Loadout presets (`skill-pool.md` Preset \u00b7 `skill-pool-system.md` rule 12 \u00b7 save.md Skills). Six sets can be stored; the game selects one automatically by zone, and a Push returns the player to the main preset while cooldowns already counting keep counting. The count and the reset rule live here so the client and the docs read one number.",
+    "note": "Loadout presets (`skill-pool.md` Preset · `skill-pool-system.md` rule 12 · save.md Skills). Six sets can be stored; the game selects one automatically by zone, and a Push returns the player to the main preset while cooldowns already counting keep counting. The count and the reset rule live here so the client and the docs read one number.",
     "sets": 6,
     "main_index": 0,
     "auto_select_by_zone": true,
@@ -4140,8 +3955,9 @@
     "note": "Skill level is earned the PoE way: every kill awards 1 XP to each skill that is in the list (attack, curse, heal) or open (aura) at that moment, and 400 XP buys one step up to the Cap of 20. So maxing one skill takes 7,600 kills of using it (loot.md section 2) - and it never depends on how often the skill happened to fire, on mana, or on list length. This replaces the old cube-root curve, which needed ~6.86M presses to reach 20 and was therefore unreachable."
   },
   "build": {
-    "reference_split": "Str 12 items \u00b7 Agi/Lck/Dex at level-only 210 \u00b7 sword (aspd 1.2 \u00b7 mult 1.0) \u00b7 main hand T1 aspd +25% \u00b7 crit damage +120%",
-    "hit_chance_pct": 81,
+    "reference_split": "Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%",
+    "hit_chance_pct": 80,
+    "hit_chance_pct_note": "A derived anchor, not an input: the engine's own REFERENCE build hit chance against the reference mob (mean species on a Medium body), rounded. X21 gates it exact, and `node tools/check.ts --sync` re-publishes it here whenever a K, a Cap, a species Dex line or a body top-up moves - the gate stays exact so a stale figure cannot survive, and the repair is one command instead of a hand-typed number.",
     "crit_chance_pct": 18.5,
     "dagger_capped_at_500": false,
     "heal_pool_mult": 2.4,
@@ -4150,11 +3966,11 @@
   "global": {
     "damage_mult": 1,
     "defend_mult": 1,
-    "note": "The two umbrella multipliers reserved for future sources. `global damage` multiplies outgoing damage once, after weak / Element counter / crit; `global defend` is the incoming step-7 `damage_taken_mult` bucket (combat.md section 2). Both start at x1.00 and no source grants either yet \u2014 a future skill or aura feeds one bucket, so the two never stack as separate multipliers. `global speed` (Haste) is the third reserved term: it scales the whole clock (cooldowns and final attack speed). **Player-only:** global speed affects the player alone and no mob ever carries Haste, even when mobs get their own skill lists."
+    "note": "The two umbrella multipliers reserved for future sources. `global damage` multiplies outgoing damage once, after weak / Element counter / crit; `global defend` is the incoming step-7 `damage_taken_mult` bucket (combat.md section 2). Both start at x1.00 and no source grants either yet — a future skill or aura feeds one bucket, so the two never stack as separate multipliers. `global speed` (Haste) is the third reserved term: it scales the whole clock (cooldowns and final attack speed). **Player-only:** global speed affects the player alone and no mob ever carries Haste, even when mobs get their own skill lists."
   },
   "loot": {
     "variant_lean": {
-      "note": "A variant's lean tilts the three collectible streams \u2014 gear, herbs, junk \u2014 toward one of them by redistributing probability mass, never raising the total expected drops/kill, so the drop line and the timeline stay put. The variant row owns it (`mob.variant_drops` `lean`) and nothing overrides it: the player used to have a per-zone Hunt Order on top, and that control is gone. Stones ride the elite/boss lines and are not a category. 'none' is the identity, so a variant that carries none behaves exactly as the balanced case.",
+      "note": "A variant's lean tilts the three collectible streams — gear, herbs, junk — toward one of them by redistributing probability mass, never raising the total expected drops/kill, so the drop line and the timeline stay put. The variant row owns it (`mob.variant_drops` `lean`) and nothing overrides it: the player used to have a per-zone Hunt Order on top, and that control is gone. Stones ride the elite/boss lines and are not a category. 'none' is the identity, so a variant that carries none behaves exactly as the balanced case.",
       "shift_pct": 25,
       "categories": [
         "gear",
@@ -4211,7 +4027,7 @@
     "boss_tier_stones": 3,
     "boss_add_stones": 1,
     "quality_stone_sources": {
-      "note": "crafting.md prices the +1..+15 ladder as 1/2/3/4/5 \u00b7 7/9/11/13/15 \u00b7 18/21/24/27/30 Quality stones and says the source shifts monsters \u2192 elites \u2192 bosses by step (steps 1-5 \u00b7 6-10 \u00b7 11-15). These are the income side of that same split: the per-kill figures and the kills a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.",
+      "note": "crafting.md prices the +1..+15 ladder as 1/2/3/4/5 · 7/9/11/13/15 · 18/21/24/27/30 Quality stones and says the source shifts monsters → elites → bosses by step (steps 1-5 · 6-10 · 11-15). These are the income side of that same split: the per-kill figures and the kills a full 12-piece set takes are derived from them (checks.md F20-F22), never typed beside them.",
       "monster_quality_chance": 0.01,
       "elite_quality_chance": 0.25,
       "boss_quality_stones": 24
@@ -4254,13 +4070,16 @@
     "kill_rate_tolerance": 0.01
   },
   "road": {
-    "note": "Travel is walking. The world is a pointy-top hex lattice and a settlement owns its own hex; a settlement pair is joined by the hexes between them, so a walk is a count of blocks and never a link with a price. Every block costs `block_sec` and rolls one encounter chance. An encounter is an ordinary mob group from the lower of the two zones, fought with the ordinary rules, and it pays the ordinary drop roll and nothing else: no gold purse, no chest, no Standing, no crafting stones. Gold and junk come from killing mobs, so walking can never mint (`economy.md`). A settlement's Waypoint unlocks the first time the character arrives there on foot, and then warps to any unlocked settlement instantly, for gold at the destination's band; a Waystone will be a second destination kind on the same rule. The Road's old ladder and branch links, its trip minutes, its terrain tilt table, its encounter kinds, the purse, the chest, the Circuit and the Standing-per-leg are all gone with this shape, and none of them comes back: `encounter_chance_pct` is the retired one-encounter-a-minute rate written in blocks rather than a number chosen by hand, and a branch link has no meaning when the block count IS the distance - a pass would need its own shorter hex path in the lattice.",
-    "graph_rule": "A node is one settlement's own hex in axial coordinates on the pointy-top lattice, which is the field the sheet draws: 20 columns by 15 rows, 300 cells, the starting settlement at the centre cell and the level bands climbing outward by distance rank. Blocks between two nodes are their hex distance, computed from those coordinates and never typed, so a walk's length is derived and one block is one cell the player can see. Every pair of settlements is walkable - there is no edge list and no route to buy - and a walk to a far settlement is plotted as an ordered chain of adjacent cells and crossed one cell at a time. A step only ever enters a cell adjacent to the one the foot is on, which is what makes the chain a walk and not a jump. A Waypoint covers the distance for gold once both ends have been walked to.",
-    "block_sec": 10,
+    "note": "Travel is walking. The world is a pointy-top hex lattice and a settlement owns its own hex; any cell may be stood on, so a walk joins the two cells it starts and ends on and is a count of blocks and never a link with a price. Every block costs `block_sec` and rolls one encounter chance. An encounter is an ordinary mob group from the lower of the two zones, fought with the ordinary rules, and it pays the ordinary drop roll and nothing else: no gold purse, no chest, no Standing, no crafting stones. Gold and junk come from killing mobs, so walking can never mint (`economy.md`). A settlement's Waypoint unlocks the first time the character arrives there on foot, and then warps to any unlocked settlement instantly, for gold at the destination's band; a Waystone will be a second destination kind on the same rule. The Road's old ladder and branch links, its trip minutes, its terrain tilt table, its encounter kinds, the purse, the chest, the Circuit and the Standing-per-leg are all gone with this shape, and none of them comes back: `encounter_chance_pct` is the retired one-encounter-a-minute rate written in blocks rather than a number chosen by hand, and a branch link has no meaning when the block count IS the distance - a pass would need its own shorter hex path in the lattice.",
+    "graph_rule": "A node is one settlement's own hex in axial coordinates on the pointy-top lattice, which is the field the sheet draws: 20 columns by 15 rows, 300 cells, the starting settlement at the centre cell and the level bands climbing outward by distance rank. Blocks between two cells are their hex distance, computed from those coordinates and never typed, so a walk's length is derived and one block is one cell the player can see. Every cell is walkable from every other - there is no edge list, no route to buy and no ground that refuses a foot - and a walk to a far cell is plotted as an ordered chain of adjacent cells and crossed one cell at a time. A step only ever enters a cell adjacent to the one the foot is on, which is what makes the chain a walk and not a jump. A Waypoint covers the distance for gold once the settlement at the far end has been walked to.",
+    "standing_rule": "Every cell of the field is a place to stand. A cell's zone is its nearest settlement's, measured in blocks and never typed; ground equally near two settlements belongs to the tied one holding the lowest zone, so a tie is answered by the rule and not by a coin toss. Rank is the distance from that settlement: 0 is the settlement itself, 1 is one of its sides, 2 and out is bare ground. Standing on a side that has a sub-zone written into it hunts that sub-zone's cast; standing where no sub-zone is named - in a town, on a side with nothing written into it, on bare ground - rolls the zone's whole cast. A Waypoint opens only where a cell is rank 0, because a Waypoint marks a settlement and not a patch of ground.",
+    "cost_rule": "Every cell costs one block whatever lies under it: no terrain cost, no passability table, no ground dearer to cross than any other. A walk's price is the hex distance between its two cells times `block_sec`, so two routes of the same length are the same walk.",
+    "block_sec": 1,
     "encounter_chance_pct": 16.6667,
     "encounter_rule": "Every block walked rolls one encounter chance. A block that rolls nothing is silent. An encounter that fires is a real mob group drawn from the lower of the two zones the walk joins, at the player level clamped into that zone's range and at that zone's own group size, fought with the ordinary combat and drop rules: it pays the ordinary drop roll and nothing else.",
     "push_rule": "A Push on the walk is the ordinary Push. The character is pushed to the camp that owns the zone it was ambushed in, rests there, and walks back in on the block it was ambushed on. A Push never ends a walk and never gives back a block.",
-    "waypoint_rule": "Arriving at a settlement on foot unlocks its Waypoint, once. A Waypoint warps to any unlocked settlement instantly, and it costs gold at the destination settlement's own band: a warp buys back the walk's time, which is what gold is for, and it buys nothing else (`town.json` `waypoint_warp`). It never gates a zone: a settlement you have not walked to is reached by walking, and no amount of gold opens a Waypoint you have not earned on foot. A Waystone will be a second destination kind that a Waypoint may also target.",    "nodes": [
+    "waypoint_rule": "Arriving at a settlement on foot unlocks its Waypoint, once. A Waypoint warps to any unlocked settlement instantly, and it costs gold at the destination settlement's own band: a warp buys back the walk's time, which is what gold is for, and it buys nothing else (`town.json` `waypoint_warp`). It never gates a zone: a settlement you have not walked to is reached by walking, and no amount of gold opens a Waypoint you have not earned on foot. A Waystone will be a second destination kind that a Waypoint may also target.",
+    "nodes": [
       {
         "id": "eastgate",
         "q": 0,
@@ -4414,7 +4233,7 @@
     "skeleton_note": "Every item is line 1 the Frame Mod (unremovable, part of the frame) + 2 Bound lines (unremovable) + the Unbound lines it drew at drop (`unbound_slots`, 2 to 5), so a fresh drop carries 5-8 lines and the unremovable head is 3 of them. Each of the `mods_added_cap` Add stones fills one more Unbound line, which is what sets `crafted_max` = frame_mod_slots + bound_slots + unbound_slots.max + mods_added_cap, and a Unbound line never appears twice on one piece. `frame_mod_slots` is the unremovable floor's other half - the craft verbs refuse index < frame_mod_slots + bound_slots."
   },
   "salvage": {
-    "note": "loot.md section 5 \u00b7 checks.md F15: a luck-protection milestone, one Tier stone per 500 gear pieces salvaged (dissolved by the bag filter). The client counts the pieces so the milestone is real rather than implied.",
+    "note": "loot.md section 5 · checks.md F15: a luck-protection milestone, one Tier stone per 500 gear pieces salvaged (dissolved by the bag filter). The client counts the pieces so the milestone is real rather than implied.",
     "pieces_per_tier_stone": 500
   },
   "save": {
@@ -4538,9 +4357,9 @@
       }
     ],
     "gear_mod_per_level": 2,
-    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings \u2014 `evasion_flat_t1` 30 \u00f7 `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.ts --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.ts` holds the G5 boss gate against a fully upgraded set \u2014 which is how checks.md H1 pays for the uplift now that measured `mob_HP` as already inside the pacing (it moves nothing there).",
-    "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing \u00b7 20% reroll values inside the current Tiers \u00b7 15% +1 Mod (crafted max and Core slot cap respected) \u00b7 15% remove one non-bound Mod \u00b7 10% reroll Element (the only Element change in the game) \u00b7 10% Gear Mod +2 \u00b7 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
-    "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe \u00b7 +5 to +10 90% down to 45% and a fail drops one level \u00b7 +11 to +15 40% down to 10% and a fail breaks the piece \u00b7 protection 5 per piece from birth, each would-be break spends one and drops a level \u00b7 Repair stone revives at the pre-break level and refills protection \u00b7 costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality stones \u00b7 online only"
+    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.ts --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.ts` holds the G5 boss gate against a fully upgraded set — which is how checks.md H1 pays for the uplift now that measured `mob_HP` as already inside the pacing (it moves nothing there).",
+    "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing · 20% reroll values inside the current Tiers · 15% +1 Mod (crafted max and Core slot cap respected) · 15% remove one non-bound Mod · 10% reroll Element (the only Element change in the game) · 10% Gear Mod +2 · 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
+    "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe · +5 to +10 90% down to 45% and a fail drops one level · +11 to +15 40% down to 10% and a fail breaks the piece · protection 5 per piece from birth, each would-be break spends one and drops a level · Repair stone revives at the pre-break level and refills protection · costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality stones · online only"
   },
   "town_shared": {
     "gold_per_junk_piece": 1,
@@ -4551,25 +4370,25 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "first 1/14 of drops 21.9 → 2/14-4/14 9.0 → after that 5.8 (low band) · keep-rate 5.36% low · 4.33% mid · 3.43% high · 1.17% high + full_lck",
-      "expression": "measured \u2014 tools/loot.ts, the seven roll steps in loot.md section 1",
+      "value": "first 1/14 of drops 22.0 → 2/14-4/14 10.4 → after that 6.4 (low band) · keep-rate 5.66% low · 4.48% mid · 3.54% high · 1.22% high + full_lck",
+      "expression": "measured — tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
     {
       "id": "F11",
-      "value": "0.36 Flat lines per high-zone drop (6.40 lines per item) · the four early-game Flats thin out as Item quality rises",
+      "value": "0.34 Flat lines per high-zone drop (6.41 lines per item) · the four early-game Flats thin out as Item quality rises",
       "expression": "Flat line per drop (high zone, after the 0.25 early-game weighting)",
       "status": "measured"
     },
     {
       "id": "F12",
       "value": "boss 2.4 + elite 16.0 + normal 0.8 = 19.2 per 1,000 kills",
-      "expression": "skill per 1,000 kills \u00b7 skill-pool.md drop chances",
+      "expression": "skill per 1,000 kills · skill-pool.md drop chances",
       "status": "carried"
     },
     {
       "id": "F14",
-      "value": "max 3 uses per fight \u00b7 30 sec shared cooldown \u00b7 suppressed on bosses",
+      "value": "max 3 uses per fight · 30 sec shared cooldown · suppressed on bosses",
       "expression": "potion sustain bound",
       "status": "rule"
     },
@@ -4581,7 +4400,7 @@
     }
   ],
   "elements": {
-    "note": "5 Elements. `counter` is attack row vs target column; chaos is the only one with no counter (1.15 everywhere, itself included), and fire<->cold plus lightning<->poison are the 0.60 pairs. The K values printed in elements.md come from K and status above - do not retype them.",
+    "note": "5 Elements. No Element counters another: a hit Element names its status and answers the target resistance line, nothing more. Each race owns one Element (mob.species[].element), attacks with it and resists it at the flat mob.race_res_pct in every zone; every other Element meets no res at all. The same Cap the player obeys holds the line.",
     "order": [
       "fire",
       "cold",
@@ -4603,44 +4422,6 @@
       "poison": "stacking layers, never expires alone",
       "chaos": "long hits that grow stronger"
     },
-    "counter": {
-      "fire": {
-        "fire": 1,
-        "cold": 0.6,
-        "lightning": 1.1,
-        "poison": 1.2,
-        "chaos": 1
-      },
-      "cold": {
-        "fire": 0.6,
-        "cold": 1,
-        "lightning": 1.1,
-        "poison": 1,
-        "chaos": 1
-      },
-      "lightning": {
-        "fire": 1.1,
-        "cold": 1.1,
-        "lightning": 1,
-        "poison": 0.6,
-        "chaos": 1
-      },
-      "poison": {
-        "fire": 1.2,
-        "cold": 1,
-        "lightning": 0.6,
-        "poison": 1,
-        "chaos": 1
-      },
-      "chaos": {
-        "fire": 1.15,
-        "cold": 1.15,
-        "lightning": 1.15,
-        "poison": 1.15,
-        "chaos": 1.15
-      }
-    },
-    "weak_mult": 1.5,
     "align_cap": 50,
     "colour_note": "The damage indicator's one colour set (`hud`): a hit is coloured by the Element that carried it, a physical hit by `physical`, and a status proc by the colour of the Element its `status_of` line names, so no status needs its own copy of a colour. Crit is not an Element and takes the HUD's own accent, `--gold`.",
     "physical_colour": "#cfd6e0",
@@ -4758,11 +4539,11 @@
   "doc_prose": {
     "rule": "A number may only appear inside a GENERATED block. Prose names the key and never the value.",
     "why": "A prose number has no writer, so it cannot move with the data and nothing detects it going stale.",
-    "lines_max": 85,
-    "lines_now": 85,
+    "lines_max": 43,
+    "lines_now": 43,
     "gate": "L9 (tools/check.ts) fails when the count rises above lines_max. Lower the cap as lines are fixed.",
     "exempt": "todo.md, and any line marked lint:allow",
     "counted": "one line per hand-typed figure; a fenced code block, a section heading, a list ordinal, a table's row index and a lint:allow line are not values",
-    "baseline_note": "Re-measured 2026-10-09 on the shelf that survives (doc/start plus the root rules) by the L9 gate itself. The old baseline counted a doc shelf that has since collapsed, and the linter that measured it is folded into the engine cage — so the cap falls in one step here and may only fall from now on."
+    "baseline_note": "Re-measured 2026-10-11 on the shelf that survives (doc/start/glossary.md plus the root rules) by the L9 gate itself. The cap fell in one step when concept.md, Techstack.md and tasks.md merged into DECISIONS.md — the merged prose names the key instead of typing the figure — and it may only fall from now on."
   }
 }

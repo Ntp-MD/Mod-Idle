@@ -3,8 +3,8 @@
  * Map layer — the generated field sheet (`tools/data/map.json`).
  *
  *   node tools/map.ts            help
- *   node tools/map.ts --write    write the sheet (art/svg/map/map-overlay.svg)
- *   node tools/map.ts --checks   run M1-M12, exit 1 on FAIL
+ *   node tools/map.ts --write    write the sheet (game/src/icon/map/map-overlay.svg)
+ *   node tools/map.ts --checks   run M1-M13, exit 1 on FAIL
  *
  * The sheet is the 20 x 15 hex field the walk graph lives on: one polygon per cell of the field,
  * tinted by the terrain that cell stands on, with a settlement mark on its own cell, one named
@@ -19,12 +19,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { readJson } from './lib/json.ts';
+import * as G from './lib/gates.ts';
+import { createRoad } from '../engine/road.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const MAP = readJson(path.join(ROOT, 'tools/data/map.json'));
 const E = readJson(path.join(ROOT, 'tools/data/engine.json'));
 const TOWN = readJson(path.join(ROOT, 'tools/data/town.json'));
-const OUT = path.join(ROOT, 'art/svg/map/map-overlay.svg');
+const OUT = path.join(ROOT, 'game/src/icon/map/map-overlay.svg');
 
 const F = MAP.field;
 const COL = MAP.terrain_colors;
@@ -47,6 +49,10 @@ const settlementIds = TOWN.settlements.map((s) => s.id);
 const settlementById = (id) => TOWN.settlements.find((s) => s.id === id);
 const zoneById = (id) => E.mob.zones.find((z) => z.id === id);
 const roadNodes = E.road.nodes;
+/** The walk graph itself, so M13 can ask the engine who owns a cell rather than assume it. */
+const ROAD = createRoad(E as any);
+/** The order a tied cell is resolved in: `road.standing_rule` gives it to the lowest zone. */
+const STANDING = TOWN.settlements.slice().sort((a, b) => a.zone - b.zone).map((s) => s.id);
 
 // ------------------------------------------------------------------ the lattice
 
@@ -88,8 +94,6 @@ const inField = (q, r) => CELLS.has(CELLID.get(key(q, r)) || '');
 /** terrain key -> colour, plus the blend a bare cell takes from the nearest settlement. */
 const hexToRgb = (h) => { const v = parseInt(h.slice(1), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; };
 const rgbToHex = ([r, g, b]) => '#' + [r, g, b].map((x) => Math.round(x).toString(16).padStart(2, '0')).join('');
-const SHEET_RGB = hexToRgb(F.sheet);
-const toward = (hex, t) => rgbToHex(hexToRgb(hex).map((v, i) => v + (SHEET_RGB[i] - v) * t));
 /** a colour as HSL — the ground ramp is walked by hue, so hue is what gets measured and guarded. */
 const hslOf = (hex) => {
   const [r, g, b] = hexToRgb(hex).map((v) => v / 255);
@@ -108,9 +112,11 @@ const hslToHex = ([h, s, l]) => {
 };
 const SHEET_HSL = hslOf(F.sheet);
 /**
- * The ground's travel toward the paper, held on the colour's own hue: saturation and lightness close on
- * the sheet's, hue does not move. A plain rgb lerp (`toward`) steps onto the sheet's hue (213) instead,
- * which drags ash's mauve onto a violet no terrain stands on and turns the ramp into a second palette.
+ * The one travel a tone takes toward the paper, held on the colour's own hue: saturation and lightness
+ * close on the sheet's, hue does not move. Both the field's bare cells and the ground past it are printed
+ * with this, so a colour at the field's border is the same colour just outside it. A plain rgb lerp steps
+ * onto the sheet's hue (213) instead, which drags ash's mauve onto a violet no terrain stands on and turns
+ * the ramp into a second palette.
  */
 const towardHeld = (hex, t) => {
   const [h, s, l] = hslOf(hex);
@@ -175,6 +181,37 @@ const townPoints = MAP.cells.map((entry) => {
   const node = roadNodes.find((n) => n.id === entry.town);
   return { town: entry.town, q: node.q, r: node.r, tone: COL[spreadTone.get(entry.town)] };
 });
+/** The country each settlement holds: its cell and the terrain key it spreads over its bare ground. */
+const SPREAD = MAP.cells.map((entry) => {
+  const node = roadNodes.find((n) => n.id === entry.town);
+  return { town: entry.town, q: node.q, r: node.r, k: spreadTone.get(entry.town) };
+});
+/**
+ * The bare cells, each printed with the terrain of the settlement it is nearest, closed on the paper by
+ * a fade that runs from `fade_near` at the nearest to exactly `ground_fade` at the farthest — the value
+ * the ground past the field is anchored at. So the field's outer ring and the country outside it are the
+ * same colour and the two cannot drift apart (M5 holds the seam).
+ */
+const BARE = (() => {
+  const list = [];
+  for (const [id, c] of CELLS) {
+    if (claims.has(key(c.q, c.r))) continue;
+    const near = townPoints.reduce((best, t) => {
+      const d = hd([c.q, c.r], [t.q, t.r]);
+      return !best || d < best.d ? { d, t } : best;
+    }, null);
+    list.push({ id, d: near.d, tone: near.t.tone });
+  }
+  const bMin = Math.min(...list.map((b) => b.d));
+  const bMax = Math.max(...list.map((b) => b.d));
+  const fade = (d) => (bMax === bMin ? GFADE
+    : F.fade_near + (GFADE - F.fade_near) * (d - bMin) / (bMax - bMin));
+  return {
+    max: bMax,
+    byId: new Map(list.map((b) => [b.id, { ...b, fill: towardHeld(b.tone, fade(b.d)) }])),
+    edge: list.filter((b) => b.d === bMax).map((b) => ({ id: b.id, fill: towardHeld(b.tone, fade(b.d)) })),
+  };
+})();
 
 // ------------------------------------------------------------------ the walk graph the sheet draws
 
@@ -235,20 +272,6 @@ const levelText = (zone) => 'Lv ' + (zone.levels || []).join('-');
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 function fieldGroup() {
-  const bare = [];
-  for (const [id, c] of CELLS) {
-    if (claims.has(key(c.q, c.r))) continue;
-    const near = townPoints.reduce((best, t) => {
-      const d = hd([c.q, c.r], [t.q, t.r]);
-      return !best || d < best.d ? { d, t } : best;
-    }, null);
-    bare.push({ id, d: near.d, tone: near.t.tone });
-  }
-  const bMin = Math.min(...bare.map((b) => b.d));
-  const bMax = Math.max(...bare.map((b) => b.d));
-  const bareById = new Map(bare.map((b) => [b.id, b]));
-  const fade = (d) => (bMax === bMin ? 0.4
-    : F.fade_near + (F.fade_far - F.fade_near) * (d - bMin) / (bMax - bMin));
   const lines = ['  <g id="field">'];
   for (const [id, c] of CELLS) {
     const k = key(c.q, c.r);
@@ -259,8 +282,7 @@ function fieldGroup() {
       fill = o.kind === 'town' ? COL.town : o.kind === 'wild' ? COL.wild : COL[o.terrain];
     } else {
       cls = 'bare';
-      const b = bare.find((x) => x.id === id);
-      fill = toward(b.tone, fade(b.d));
+      fill = BARE.byId.get(id).fill;
     }
     const band = o ? zoneById(o.s.zone) : null;
     const attrs = [
@@ -397,16 +419,20 @@ function viewBox() {
 /**
  * The ground the field lies on: the same hex lattice, drawn on past the field so zooming out never
  * reaches an edge — pretending to be terrain, not a flat paper, so the field reads as one region of a
- * larger world. The tone is not picked per hex: a value noise, smoothed and periodic over the tile,
- * gives every hex a height, and the height walks the `ground_colors` ramp — the terrain palette at
- * `ground_fade`, listed in the order its hues fall — so neighbours share a tone, the hues drift one way
- * round the wheel instead of scattering across it, and the ground reads as country rather than confetti
- * (M5). The tile and the field share the one lattice, so the ground lines up with the cells, not behind
- * them. `hazeDef` lays the aerial wash over all of it.
+ * larger world. Its tone is the field's own rule carried outward, not a second pattern: a ground hex
+ * lies in the country of the settlement it is nearest, and wears that settlement's spread terrain at its
+ * `ground_colors` anchor — the same terrain the bare cells around that town are printed in — so the
+ * colours meet the map's regions at the field's border and go on with them instead of starting afresh
+ * outside it. The settlement layout is read on the tile's own repeats, which is what lets one tile stand
+ * for an endless ground; the two lattice translations that carry a tile edge are (N,0) and (N/2,N). A
+ * value noise, periodic with the tile, then drifts a hex one step either way on the ramp, so a country's
+ * edge is a fringe of its neighbour's tone and not a cut, and the ground reads as country rather than as
+ * a chessboard (M5). The tile and the field share the one lattice, so the ground lines up with the cells,
+ * not behind them. `hazeDef` lays the aerial wash over all of it.
  */
 function hexGridDefs() {
   const keys = Object.keys(GCOL);
-  const N = 8, G = 4;                        // hexes per tile edge, control points per edge
+  const N = 32, G = 8;                 // hexes per tile edge, and the fringing noise's control points
   const w = N * SQ3 * R, h = N * 1.5 * R;
   // the ground closes half the seam the cells keep, so it reads as country and not as a mesh
   const gr = R - F.gap / (2 * SQ3);
@@ -416,9 +442,11 @@ function hexGridDefs() {
     k = Math.imul(k ^ (k >>> 13), 1274126177);
     return ((k >>> 8) & 0xffff) / 0xffff;
   };
-  const smooth = (t: number) => t * t * (3 - 2 * t);
-  /** the height at a lattice point, periodic with the tile so the ground cannot seam */
-  const field = (i: number, j: number) => {
+  // the smoother curve, so a control cell holds its drift across the middle of itself and turns over only
+  // near its edge: fringes where they belong, not a gradient smeared over the whole tile
+  const smooth = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
+  /** the drift field, periodic with the tile so the ground cannot seam. */
+  const noise = (i: number, j: number) => {
     const u = (wrap(i, N) / N) * G, v = (wrap(j, N) / N) * G;
     const c = Math.floor(u), r = Math.floor(v);
     const fu = smooth(u - c), fv = smooth(v - r);
@@ -426,10 +454,22 @@ function hexGridDefs() {
     const bot = rnd(c, r + 1) + (rnd(c + 1, r + 1) - rnd(c, r + 1)) * fu;
     return top + (bot - top) * fv;
   };
+  /** the country a hex lies in: the nearest settlement, its repeats counted as the tile repeats. */
+  const country = (q: number, r: number) => {
+    let best = null;
+    for (const t of SPREAD) {
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) {
+        const d = hd([q, r], [t.q + a * N - b * (N >> 1), t.r + b * N]);
+        if (!best || d < best.d) best = { d, k: t.k };
+      }
+    }
+    return keys.indexOf(best.k);
+  };
   const hexes = [];
   for (let j = -1; j <= N; j++) {
     for (let i = -1; i <= N; i++) {
-      const k = Math.min(keys.length - 1, Math.floor(field(i, j) * keys.length));
+      const drift = Math.round(noise(i, j) * 2 - 1);
+      const k = Math.min(keys.length - 1, Math.max(0, country(i - ((j - (j & 1)) >> 1), j) + drift));
       const cx = SQ3 * R * (i + (j & 1) / 2), cy = 1.5 * R * j;
       // a path, not a polygon: M10 counts the sheet's polygons as its cells, and the ground is not one
       hexes.push(`      <path d="M${hexPts(cx, cy, gr).split(' ').join('L')}Z" fill="${GCOL[keys[k]]}"/>`);
@@ -446,11 +486,11 @@ const GROUND_SPAN = 5;
 /**
  * Aerial perspective: one radial wash centred on the field's own viewBox centre, transparent out to
  * `haze_clear` half-diagonals — the whole field, and the ring of ground that has to match it — then
- * deepening on the paper to `fade_far` by `haze_reach`, which is how far the outermost bare cell is
- * already laid. So the far ground sinks exactly as far as the field's own edge does, the hard ring where
- * the field ended is gone, and the lattice reads as land falling away instead of a wallpaper tile. Painted
- * after the hexes and before the cells, so no cell is ever veiled and the client still drives only
- * `polygon.cell` and `rect.paper` (M10).
+ * deepening on the paper from `ground_fade`, where the outermost bare cell and the first ground hex are
+ * both laid, to `fade_far` by `haze_reach`. So the ground sinks on past the value the field stops at, the
+ * hard ring where the field ended is gone, and the lattice reads as land falling away instead of a
+ * wallpaper tile. Painted after the hexes and before the cells, so no cell is ever veiled and the client
+ * still drives only `polygon.cell` and `rect.paper` (M10).
  */
 function hazeDef(v) {
   const D = Math.hypot(v.vw / 2, v.vh / 2);
@@ -586,8 +626,15 @@ function sources(dir, out = []) {
   return out;
 }
 
+/** What M13 measured, so its PASS line reports the field rather than a typed figure. */
+let M13NOTE = '';
+
 function checks() {
   const problems = [];
+  // the five-block reach of the standing rule is a design window, not a wiring fact (owner ruling ·
+  // AGENTS §3): a cell beyond it reads PENDING on M13t and never fails the run
+  const rankProblems = [];
+  M13NOTE = '';
   const cellOf = (id) => { const e = MAP.cells.find((c) => c.town === id); return e && e.cell; };
   // M1 · every settlement owns exactly one cell entry, and no entry is a stranger
   for (const id of settlementIds) if (!cellOf(id)) problems.push(`no field cell for settlement ${id}`);
@@ -620,6 +667,8 @@ function checks() {
   //        and the ground is the terrain palette at `ground_fade` and nothing else. An anchor that is not
   //        what that fade prints is a hand-typed tone with no home, and a ramp whose hues turn back on
   //        themselves is confetti again: two neighbouring heights landing on opposite sides of the wheel.
+  //        The ground past the field is the field's own country carried on, so a settlement whose spread
+  //        terrain has no anchor would have nothing to be carried — the ramp is read on that anchor.
   for (const kind of Object.keys(COL)) {
     const used = MAP.cells.some((c) => c.subs.some((s) => s.terrain === kind)) || ['town', 'wild'].includes(kind);
     if (!used) problems.push(`terrain colour "${kind}" is declared but no cell stands on it`);
@@ -634,6 +683,12 @@ function checks() {
     if (!groundSvg.includes(`fill="${hex}"`)) problems.push(`ground colour "${name}" is declared but not drawn on the ground`);
     if (hex !== ramp[i]) problems.push(`ground colour "${name}" is declared but ${COL[name]} closed on the paper by ${GFADE} is ${ramp[i]}`);
   });
+  for (const t of SPREAD) {
+    if (!GCOL[t.k]) problems.push(`settlement ${t.town} spreads terrain "${t.k}", which has no anchor on the ground ramp — the country past the field has nothing to carry`);
+  }
+  for (const b of BARE.edge) {
+    if (!Object.values(GCOL).includes(b.fill)) problems.push(`the field's outer cell ${b.id} is printed ${b.fill}, which is no ground anchor — the endless ground cannot meet the map at the border`);
+  }
   const walk = hueWalk(gkeys.map((k) => GCOL[k]));
   for (let i = 1; i < walk.length; i++) {
     if (walk[i] > walk[i - 1] - 3) {
@@ -702,37 +757,80 @@ function checks() {
     }
   }
   for (const z of E.mob.zones) if (!covered.includes(z.id)) problems.push(`zone ${z.id} belongs to no region`);
-  return problems;
+  // M13 · the standing rule is honest on the written sheet: every cell a click can land on resolves to
+  //        the settlement that owns it by distance alone, a claimed cell is owned by the settlement
+  //        printed on it, nothing within a side of two towns ties, and bare ground is never closer than
+  //        two blocks. This is the gate that makes "every hex is a place to stand" a derivation rather
+  //        than an assumption — a cell that resolved to no owner would be the hex that does nothing.
+  try {
+    const svg = fs.readFileSync(OUT, 'utf8');
+    const attr = (tag, name) => { const m = new RegExp(`${name}="([^"]*)"`).exec(tag); return m ? m[1] : null; };
+    let rankMax = 0;
+    let read = 0;
+    for (const m of svg.matchAll(/<polygon ([^>]*class="cell [^>]*)>/g)) {
+      const tag = m[1];
+      read++;
+      const ax = attr(tag, 'data-ax');
+      if (!/,/.test(ax || '')) { problems.push('a cell polygon carries no axial key to walk from'); continue; }
+      const [q, r] = ax.split(',').map(Number);
+      const h = { q, r };
+      const rank = ROAD.cellRank(h);
+      rankMax = Math.max(rankMax, rank);
+      if (rank > 5) rankProblems.push(`cell ${ax} is ${rank} blocks from every settlement — no click there can name a zone`);
+      const tied = ROAD.owners(h);
+      if (rank <= 1 && tied.length > 1) problems.push(`cell ${ax} ranks ${rank} and ties between ${tied.map((n) => n.id).join(', ')} — a side cannot have two owners`);
+      const node = attr(tag, 'data-node');
+      const owner = ROAD.owningNode(h, STANDING);
+      if (node && owner.id !== node) problems.push(`cell ${ax} is printed as ${node}'s but the nearest settlement is ${owner.id}`);
+      if (!node && rank < 2) problems.push(`cell ${ax} is bare ground yet ranks ${rank} — it belongs to ${owner.id}`);
+      const zone = attr(tag, 'data-zone');
+      if (zone && String(settlementById(owner.id).zone) !== zone) problems.push(`cell ${ax} prints zone ${zone} but ${owner.id} holds ${settlementById(owner.id).zone}`);
+      const sub = attr(tag, 'data-sub'), wild = attr(tag, 'data-wild');
+      if (rank === 0 && (sub != null || wild != null)) problems.push(`cell ${ax} is a settlement and carries a sub/wild index`);
+    }
+    if (read !== F.hexes) problems.push(`the standing rule read ${read} cell polygons, not the ${F.hexes} the field declares`);
+    M13NOTE = `${read} cells resolve, and ${rankMax} blocks is the farthest any of them sits from a settlement`;
+  } catch { problems.push('sheet not written — run node tools/map.ts --write'); }
+  return { problems, rankProblems };
 }
 
 const args = process.argv.slice(2);
 if (args.includes('--checks')) {
-  const problems = checks();
-  const say = (ok, text) => console.log(`${ok ? 'PASS' : 'FAIL'}  ${text}`);
+  const { problems, rankProblems } = checks();
+  const g = G.gates();
+  // Each gate claims the problems its own check raised, so a problem is printed by the gate that
+  // owns it and an UNCLAIMED problem cannot hide behind a row that still reads PASS.
+  const claimed: string[] = [];
+  const claim = (id: string, re: RegExp, detail: string) => {
+    const mine = problems.filter((p: string) => re.test(p));
+    claimed.push(...mine);
+    g.add(id, mine.length === 0, mine.length ? mine.join(' · ') : detail);
+  };
   const subs = MAP.cells.reduce((n, c) => n + c.subs.length, 0);
   const wild = MAP.cells.reduce((n, c) => n + c.wild.length, 0);
-  say(MAP.cells.length === settlementIds.length, `M1  every settlement owns exactly one cell of the field (${MAP.cells.length})`);
-  say(!problems.some((p) => /outside the|claimed by/.test(p)), `M2  all ${subs + wild + MAP.cells.length} claimed cells are on the field, none claimed twice`);
-  say(!problems.some((p) => /walk graph|walk node|the sheet says/.test(p)), `M3  the sheet's cells and the walk graph's ${roadNodes.length} axial nodes are the same lattice`);
-  say(!problems.some((p) => /has no colour/.test(p)), `M4  every terrain a cell stands on has a colour`);
-  say(!problems.some((p) => /declared but/.test(p)), `M5  every declared colour is drawn somewhere (${Object.keys(COL).length} terrain keys · ${Object.keys(GCOL).length} ground keys), and the ground ramp is each terrain at ground_fade ${GFADE} walked one way round the wheel`);
-  say(!problems.some((p) => /not a side of/.test(p)), `M6  every sub-zone and wild cell is a side of its own town`);
-  say(!problems.some((p) => /may not read a coordinate/.test(p)), `M7  no file under engine/ or game/src/ reads map.json — cells stay presentation (X33)`);
-  say(!problems.some((p) => /lattice holds|starting settlement/.test(p)), `M8  the field is the declared ${F.cols} x ${F.rows} (${F.hexes} cells) with the start on its centre cell`);
-  say(!problems.some((p) => /anchors to/.test(p)), `M9  every landmark anchors to a settlement that owns a cell`);
-  say(!problems.some((p) => /cell polygons|cell keys|travel pins|walk stretches|sheet not written/.test(p)), `M10 the sheet carries ${F.hexes} keyed cells, a pin per settlement and ${WALK.length} walk stretches`);
-  say(!problems.some((p) => /sub-zone cells for|wild cells, not|not the name printed/.test(p)), `M11 one named sub-zone cell per sub-zone (${subs}) and three wild cells per town (${wild})`);
-  say(!problems.some((p) => /two regions|belongs to no region|names zone/.test(p)), `M12 every zone belongs to exactly one named region (${(MAP.regions || []).length} regions)`);
-  if (problems.length) {
-    console.log(`\n${problems.length} problem(s):`);
-    for (const p of problems) console.log(`  · ${p}`);
-    process.exit(1);
-  }
-  console.log('\n12/12 gate PASS · 0 FAIL');
+  g.add('M1', MAP.cells.length === settlementIds.length, `every settlement owns exactly one cell of the field (${MAP.cells.length})${MAP.cells.length === settlementIds.length ? '' : ` — ${MAP.cells.length} cells for ${settlementIds.length} settlements`}`);
+  claim('M2', /outside the|claimed by/, `all ${subs + wild + MAP.cells.length} claimed cells are on the field, none claimed twice`);
+  claim('M3', /walk graph|walk node|the sheet says/, `the sheet's cells and the walk graph's ${roadNodes.length} axial nodes are the same lattice`);
+  claim('M4', /has no colour/, 'every terrain a cell stands on has a colour');
+  claim('M5', /declared but|no ground anchor|no anchor on the ground|cannot meet the map/, `every declared colour is drawn somewhere (${Object.keys(COL).length} terrain keys · ${Object.keys(GCOL).length} ground keys), the ground ramp is each terrain at ground_fade ${GFADE} walked one way round the wheel, and the field's outer ${BARE.edge.length} bare cells are printed on that ramp so the ground meets the map at the border`);
+  claim('M6', /not a side of/, 'every sub-zone and wild cell is a side of its own town');
+  claim('M7', /may not read a coordinate/, 'no file under engine/ or game/src/ reads map.json — cells stay presentation (X33)');
+  claim('M8', /lattice holds|starting settlement/, `the field is the declared ${F.cols} x ${F.rows} (${F.hexes} cells) with the start on its centre cell`);
+  claim('M9', /anchors to/, 'every landmark anchors to a settlement that owns a cell');
+  claim('M10', /cell polygons|cell keys|travel pins|walk stretches|sheet not written/, `the sheet carries ${F.hexes} keyed cells, a pin per settlement and ${WALK.length} walk stretches`);
+  claim('M11', /sub-zone cells for|wild cells, not|not the name printed/, `one named sub-zone cell per sub-zone (${subs}) and three wild cells per town (${wild})`);
+  claim('M12', /two regions|belongs to no region|names zone/, `every zone belongs to exactly one named region (${(MAP.regions || []).length} regions)`);
+  claim('M13', /no click there|two owners|printed as|bare ground yet|carries no axial key|carries a sub\/wild index|prints zone|standing rule read/, `every cell a click can land on resolves to the settlement that owns it, by distance alone (${M13NOTE})`);
+  // M13t is the numeric half of the standing rule — the five-block reach is a design window the
+  // owner reads by eye (AGENTS §3), so it is a watch: PENDING outside the window, never a FAIL.
+  g.watch('M13t', rankProblems.length === 0, rankProblems.join(' · '), `${M13NOTE} — inside the five-block reach`);
+  const unclaimed = problems.filter((p: string) => !claimed.includes(p));
+  g.add('M14', unclaimed.length === 0, unclaimed.length ? `no gate claims: ${unclaimed.join(' · ')}` : 'every problem the map checks raised is claimed by a named gate');
+  G.report(g.rows());
 } else if (args.includes('--write')) {
   write();
 } else {
   console.log('map.ts — the generated field sheet');
-  console.log('  --write    write art/svg/map/map-overlay.svg from tools/data/map.json');
-  console.log('  --checks   run M1-M12 (cells, the walk graph lattice, terrain, labels, the presentation-only rule)');
+  console.log('  --write    write game/src/icon/map/map-overlay.svg from tools/data/map.json');
+  console.log('  --checks   run M1-M14 (cells, the walk graph lattice, terrain, labels, the presentation-only rule, an unclaimed problem)');
 }

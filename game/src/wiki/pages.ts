@@ -10,8 +10,8 @@
  *   tools/wiki.ts build      the same calls, written out to `wiki/**` as a static site
  *
  * One source serves both, so a figure cannot be right in one place and stale in the other. The theme
- * is the client's own: the caller reads `game/src/app.css` and hands its `:root` block to `renderDoc`,
- * so a colour has exactly one home.
+ * is the client's own: the caller reads `game/src/styles/variables.css` and hands its `:root` block to
+ * `renderDoc`, so a colour has exactly one home.
  */
 
 // The wiki reads the engine, and only the engine: this is the same seam the client uses, so a page,
@@ -82,6 +82,11 @@ const esc = (s: any): string => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&':
 const n0 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—');
 const n1 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
 const list = (a: any): string => (a || []).map((x: any) => esc(x)).join(' · ');
+/** A cell as a compact bullet list, one fact per line — easier to scan than a `·`-packed run. */
+const plist = (items: string[]): string =>
+  `<ul class="plist">${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+/** A range collapses to one figure when both ends agree (a mob's level is static). */
+const span = (a: any, b: any): string => (n0(a) === n0(b) ? n0(a) : `${n0(a)}–${n0(b)}`);
 const pctList = (a: any): string => (a || []).map((x: any) => `${(Number(x) * 100).toFixed(1)}%`).join(' · ');
 const table = (head: string[], rows: any[][]): string =>
   `<table><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>` +
@@ -100,6 +105,13 @@ type Page = { file: string; nav: string; title: string; lead: string; body: stri
 const PAGES: Page[] = [];
 const page = (p: Page): void => { PAGES.push(p); };
 const wrap = (s: string) => `<span class="num">${s}</span>`;
+/** The Cap keys the stats page prints, in the words a player reads them by. */
+const CAP_LABEL: Record<string, string> = {
+  crit_chance: 'Crit chance', evasion: 'Evasion', perfect_dodge: 'Perfect dodge', alignment: 'Alignment',
+  elem_res: 'Elemental resistance', elem_res_max: 'Elemental resistance, unlocked', cdr: 'Cooldown reduction',
+  attack_interval_sec: 'Attack interval (sec a swing)', accuracy: 'Accuracy', weight_overload: 'Weight overload',
+  block: 'Block', stun: 'Stun',
+};
 /** A stone is named in one place — `engine/craft.ts` `STONE_NAME` — so a page cannot drift from the bench. */
 const stone = (key: string, n: any): string => `${n0(n)} ${STONE_NAME[key]}${Number(n) === 1 ? '' : 's'}`;
 /** The name of the press, from the same home. */
@@ -376,13 +388,16 @@ page({
   lead: 'Seven Core stats, and every point is yours to spend. Some lines stop at a cap — the table says which ones, and whether a real build can reach it.',
   body: [
     block('Core stats', table(['Stat', 'Feeds'], [
-      ['Str', 'physical power and carry weight'], ['Vit', 'health and regeneration'], ['Dex', 'accuracy, evasion and Elemental alignment'],
-      ['Agi', 'attack speed and evasion'], ['Wis', 'mana and cooldown reduction'], ['Int', 'magic power and mana'],
+      ['Str', 'physical power and carry weight'], ['Vit', 'health, regeneration and stun recovery'], ['Dex', 'accuracy and Status alignment Chance'],
+      ['Agi', 'attack speed and evasion'], ['Wis', 'max Energy Shield and cooldown reduction'], ['Int', 'magic power and mana'],
       ['Lck', 'crit, perfect dodge and drop chance'],
     ]), 'Every stat also has one utility line, so no point is wasted.'),
     block('Caps', table(['Line', 'Cap', 'What that means'], Object.entries(E.caps as Record<string, any>)
-      .filter(([k, v]) => typeof v === 'number' || v === null)
-      .map(([k, v]) => [esc(k), v === null ? 'no cap' : wrap(n0(v)), v === null ? 'keeps climbing as you build for it' : 'a full build stops here'])),
+      .filter(([k, v]) => (typeof v === 'number' || v === null) && k !== 'elem_res_max')
+      .map(([k, v]) => [esc(CAP_LABEL[k] || k), v === null ? 'no cap' : wrap(v < 1 ? n2(v) : n0(v)),
+        v === null ? 'keeps climbing as you build for it'
+          : k === 'elem_res' ? `a full build stops here, and this is the one Cap with an unlock — a passive-tree node lifts the ceiling to ${wrap(n0((E.caps as any).elem_res_max))}`
+          : 'a full build stops here'])),
       'A cap that no build can reach is not a limit, it is decoration — the engine proves which ones bind.'),
   ],
 });
@@ -393,9 +408,9 @@ page({
   title: 'The world',
   lead: 'Zones climb in level and in what they pay. A body class is the shape of a fight, not a stat.',
   body: [
-    block('Body classes', table(['Body', 'Health', 'Damage', 'Evasion', 'Comes in'], (E.mob.sizes || []).map((s: any) => [
-      esc(s.id), `×${n1(s.hp)}`, `×${n1(s.ps)}`, `×${n1(s.evasion)}`, esc(s.group),
-    ])), 'A boss is not a size — it is a species that happens to be huge, and it reads as Large.'),
+    block('Body classes', table(['Body', 'Health', 'Damage', 'Base evasion', 'Comes in'], (E.mob.sizes || []).map((s: any) => [
+      esc(s.id), `×${n1(s.hp)}`, `×${n1(s.ps)}`, `+${n0(s.evasion_pct)}%`, esc(s.group),
+    ])), 'A boss is not a size — it is a species that happens to be huge, and it reads as Large. The base evasion is a percent on top of the species Dex line.'),
     block('Zones', table(['#', 'Zone', 'Region', 'Levels', 'Band', 'Mob group', 'Elements'], eng.ZONES.map((z: any) => [
       wrap(n0(z.id)), esc(z.name), esc(z.region), `${n0(z.levels[0])}-${n0(z.levels[1])}`, esc(z.quality), esc(z.group), list(z.elements),
     ])), 'The band decides the Item quality of what drops there.'),
@@ -404,9 +419,9 @@ page({
       esc(s.name + ' Dungeon'), wrap(n0(s.zone)), esc(s.band),
       `${n0(E.dungeon.mob_cap)} mobs · groups of ${n0(E.dungeon.group_cap)}`,
     ])), `One dungeon per zone, on its settlement's first wild side. Same mobs, same rolls as the zone — but loot waits in escrow until the last mob falls, a Push forfeits it, and a cleared run cools down ${n0(E.dungeon.cooldown_sec / 60)} minutes.`),
-    block('Species', table(['Species', 'Zones', 'Body classes', 'Damage', 'Element bias', 'Health line'], (E.mob.species || []).map((sp: any) => [
-      esc(sp.name), list(sp.zones), list(sp.sizes), esc(sp.damage), list(sp.element_bias), esc(sp.trait || ''),
-    ])), 'Resistance is per Element, so a zone is easier for the build that brings the right one.'),
+    block('Species', table(['Species', 'Zones', 'Body classes', 'Damage', 'Element', 'Health line'], (E.mob.species || []).map((sp: any) => [
+      esc(sp.name), list(sp.zones), list(sp.sizes), esc(sp.damage), esc((sp as any).element), esc(sp.trait || ''),
+    ])), 'A race owns one Element and resists it wherever it stands — any other Element lands on it with no resistance at all.'),
   ],
 });
 
@@ -414,12 +429,12 @@ page({
   file: 'mobs.html',
   nav: 'Mob sheet',
   title: 'Every mob',
-  lead: 'One row per spawn the field can send: every zone, every race that stands in it, every body class it is legal on, plus the Elite and the Boss of the zone. The numbers are <code>engine.mobRoster()</code> — the same roster the world cage gates — read at the zone\'s own level range.',
+  lead: 'One card per spawn the field can send: every zone, every race that stands in it, every body class it is legal on, plus the Elite and the Boss of the zone. The numbers are <code>engine.mobRoster()</code> — the same roster the world cage gates — each mob read at its own STATIC level inside the zone\'s range (<code>mob.species[].zone_levels</code>).',
   body: (() => {
     const ROSTER: any[] = eng.mobRoster();
     const ELITE: any = (E.mob as any).elite || {};
     const BOSS: any = (E.mob.sizes || []).find((s: any) => s.id === 'boss') || {};
-    const bandOf = (q: string) => String(q || 'low').split(' ')[0];
+    const bandOf = (q?: string) => String(q || 'low').split(' ')[0];
     const variantPool = (z: any, spId: string, kind: string) => {
       const v: string[] = ((E.mob as any).variants || {})[spId] || [];
       const elite = new Set((z.subzones || []).map((s: any) => s.elite).filter(Boolean));
@@ -429,58 +444,94 @@ page({
       return v.filter((n) => norm.has(n) && !elite.has(n));
     };
     const junkOf = (n: string) => maybe(E.mob.variant_drops, n);
-    const dropCell = (band: string, sp: any, names: string[], kind: string) => {
+    /** The drop column as label/value pairs, so it reads as a list like every other stat cell. */
+    const dropParts = (band: string, sp: any, names: string[], kind: string): [string, string][] => {
       const herb = band === 'high' ? E.herbs.high_chance : band === 'mid' ? E.herbs.mid_chance : 0;
-      const parts = [`gear ${pc0(eng.dropChance(band))}`, `herb ${pc0(herb)}`];
+      const out: [string, string][] = [['gear', pc0(eng.dropChance(band))], ['herb', pc0(herb)]];
       const j = names.map(junkOf).filter(Boolean);
-      if (j.length) parts.push(`junk ${list([...new Set(j.map((x: any) => x.item))])}`);
+      if (j.length) out.push(['junk', list([...new Set(j.map((x: any) => x.item))])]);
       const leans = [...new Set(j.map((x: any) => x.lean).filter((l: string) => l && l !== 'none'))];
-      if (leans.length) parts.push(`the variants lean ${list(leans)} by ${pts(E.loot.variant_lean.shift_pct)} of the mass`);
+      if (leans.length) out.push(['variants lean', `${list(leans)} by ${pts(E.loot.variant_lean.shift_pct)}`]);
       const stones = (v: number) => (v < 1 ? n2(v) : n0(v));
-      if (kind === 'elite') parts.push(`${stones(E.loot.elite_tier_stones)} ${STONE_NAME.tier} a kill · ${pc1(E.loot.elite_add_stone_chance)} Add stone`);
-      if (kind === 'boss') parts.push(`${stones(E.loot.boss_tier_stones)} ${STONE_NAME.tier} · ${stones(E.loot.boss_add_stones)} Add stone · no potion`);
-      if (kind === 'normal' && sp.humanoid) parts.push('potions (humanoid line)');
-      return `<span class="hy">${parts.join(' · ')}</span>`;
+      if (kind === 'elite') {
+        out.push([STONE_NAME.tier, `${stones(E.loot.elite_tier_stones)} a kill`], ['Add stone', pc1(E.loot.elite_add_stone_chance)]);
+      }
+      if (kind === 'boss') {
+        out.push([STONE_NAME.tier, `${stones(E.loot.boss_tier_stones)} a kill`], ['Add stone', stones(E.loot.boss_add_stones)], ['potion', 'no']);
+      }
+      if (kind === 'normal' && sp.humanoid) out.push(['potions', 'humanoid line']);
+      return out;
     };
-    const HEAD = ['Race', 'Name', 'Element', 'Level', 'Size', 'Core Stat', 'Offensive', 'Defensive', 'What it drops', 'XP', 'Zone'];
-    const rowOf = (r: any) => {
+    /** One fact as `label value` inside a `.plist` cell. */
+    const kv = (k: string, v: string) => `<span class="pk">${esc(k)}</span><span class="pv">${v}</span>`;
+    /** A card's own title line: the body it stands on, and the group it comes in. */
+    const bodyLine = (kind: string, r: any) =>
+      kind === 'elite' ? `${esc(ELITE.name)} on a Large body`
+      : kind === 'boss' ? `${esc(BOSS.name || 'Boss')} (reads as ${esc(BOSS.reads_as || 'large')})`
+      : `${esc(r.kind)} · ${esc(r.group)}`;
+    /** The kind's own name, in the words the sheet prints it by. */
+    const KIND_LABEL: Record<string, string> = { normal: 'Normal', elite: 'Elite', boss: 'Boss' };
+    /** One labelled read inside a card's shelf. */
+    const box = (h: string, body: string, hint = '') =>
+      `<div class="cbox"><h4>${h}${hint ? ` <span class="chint">${hint}</span>` : ''}</h4>${body}</div>`;
+    /** One spawn as a card: its identity on the header line, then the seven reads the grid carried —
+     *  Core, health, offence, defence, per-Element resistance, experience and drop. Every multi-fact
+     *  read is a `.plist`, so a card scans down a stat instead of sideways across a wrapping cell. */
+    const cardOf = (r: any) => {
       const sp: any = eng.speciesById(r.speciesId) || {};
+      const zone = eng.zoneById(r.zone);
       const kind = r.kind === ELITE.name ? 'elite' : String(r.kind).startsWith(BOSS.name || 'Boss') ? 'boss' : 'normal';
-      const names = variantPool(eng.zoneById(r.zone), r.speciesId, kind);
+      const names = variantPool(zone, r.speciesId, kind);
       const shown = kind === 'boss' ? [String(r.kind).replace(/^Boss\s*·\s*/, '')] : names;
-      const sizeId = kind === 'normal' ? String(r.kind).toLowerCase() : 'large';
-      const res = eng.mobResByElementOf(sp);
-      return [
-        esc(r.species) + (sp.humanoid ? ' <span class="tag">humanoid</span>' : '') + (r.weapon ? ' <span class="tag">weapon</span>' : ''),
-        `<span class="hy">${list(shown)}</span>`,
-        list(r.innate),
-        wrap(`${n0(r.levels[0])}-${n0(r.levels[1])}`),
-        `<span class="hy">${kind === 'elite' ? `${esc(ELITE.name)} on a Large body` : kind === 'boss' ? `${esc(BOSS.name || 'Boss')} (reads as ${esc(BOSS.reads_as || 'large')})` : esc(r.kind)} · ${esc(r.group)}</span>`,
-        `<span class="hy">${Object.entries(eng.mobStatsOf(r.speciesId) || {}).map(([k, v]) => `${esc(k)} ${n1(v)}`).join(' · ')}</span>`,
-        `<span class="hy">${esc(r.damage)} · PS ${wrap(n0(r.ps))} (base ${n2(sp.power_base)} + stat ${n2(eng.speciesPowerStatOf(sp))} over the zone mean) · hit ${wrap(n0(r.acc))} · crit ${wrap(n1(r.crit))}% · status gate ${wrap(n1(r.align))}</span>`,
-        `<span class="hy">HP ${wrap(`${n0(r.hpFrom)}-${n0(r.hpTo)}`)} · Armour ${wrap(n0(r.armour))} · Evasion ${wrap(n0(eng.mobEvasion(r.levels[1], sp.stats?.dex ?? 1, sizeId)))} · dodge ${wrap(n1(r.dodge))}% · res ${Object.entries(res).map(([e, v]) => `${esc(e)} ${n0(v)}`).join(' · ')}</span>`,
-        dropCell(bandOf(eng.zoneById(r.zone)?.quality), sp, names, kind),
-        wrap(`${n0(r.xpFrom)}-${n0(r.xpTo)}`),
-        `<span class="hy">${n0(r.zone)} · ${esc(r.zoneName)}</span>`,
-      ];
+      const res = eng.mobResByElementOf(sp, r.zone);
+      const core = eng.mobStatsOf(r.speciesId, r.zone) || {};
+      const bodyCell = kind === 'normal' ? `${esc(r.kind)} · ${esc(r.group)}` : 'Large · alone';
+      const tags = [esc(list(r.innate))];
+      if (sp.humanoid) tags.push('<span class="tag">humanoid</span>');
+      if (r.weapon) tags.push('<span class="tag">weapon</span>');
+      return `<div class="card ${kind}">`
+        + `<header><span class="cname">${esc(r.species)}</span>`
+        + `<span class="ctag">${KIND_LABEL[kind]}</span>`
+        + `<span class="cl">Lv ${esc(span(r.levels[0], r.levels[1]))} · ${bodyCell}</span></header>`
+        + `<p class="cdot">${esc(r.damage)} · ${tags.join(' · ')}${sp.trait ? ` — ${esc(sp.trait)}` : ''}</p>`
+        + (shown.length ? `<p class="cnames"><span class="cl">Names</span>${esc(list(shown))}</p>` : '')
+        + `<div class="cgrid">`
+        + box('Core', plist(Object.entries(core).map(([k, v]) => kv(k, n0(v)))))
+        + box('Health', plist([kv('Base health', span(r.hpBaseFrom, r.hpBaseTo)), kv('health', span(r.hpFrom, r.hpTo)),
+          kv('Base mana', span(r.manaFrom, r.manaTo))]))
+        + box('Offence', plist([kv('damage', esc(r.damage)), kv('damage per second', n0(r.ps)), kv('accuracy', n0(r.acc)),
+          kv('Critical chance', `${n1(r.crit)}%`), kv('Alignment', n1(r.align))]))
+        + box('Defence', plist([kv('Armour', n0(r.armour)),
+          kv('Evasion', n0(eng.mobEvasion(eng.coreOf(sp, 'dex', r.zone), kind === 'normal' ? String(r.kind).toLowerCase() : 'large'))),
+          kv('dodge', `${n1(r.dodge)}%`)]))
+        + box('Elemental resistance', plist(Object.entries(res).map(([e, v]) => kv(e, `${n0(v)}%`))), 'own Element only')
+        + box('XP a kill', wrap(span(r.xpFrom, r.xpTo)))
+        + `</div>`
+        + `<div class="drop">${box('Drop',
+          plist(dropParts(bandOf(zone?.quality), sp, names, kind).map(([k, v]) => kv(k, v))),
+          `band ${esc(bandOf(zone?.quality))}`)}</div>`
+        + `</div>`;
     };
     return [...eng.ZONES.map((z: any) => {
-      const rows = ROSTER.filter((r: any) => r.zone === z.id).map(rowOf);
-      return `<section><h3>Zone ${n0(z.id)} · ${esc(z.name)} — ${esc(z.region)}</h3>`
-        + `<p class="note">Levels ${n0(z.levels[0])}-${n0(z.levels[1])} · band ${esc(z.quality)} · Elements ${list(z.elements)} · group ${esc(z.group)}</p>`
-        + table(HEAD, rows) + '</section>';
-    }), block('How to read the sheet', table(['Column', 'What it is'], [
-    ['Race', 'the species row in <code>mob.species</code>. A weapon tag means its lineage may be the source of a weapon-slot piece; a humanoid tag adds the potion stream.'],
-    ['Name', 'the variant names that zone actually pays (<code>mob.variants</code> ∩ the sub-zone lists). A variant is a drop identity, not a stat line — the numbers are the species and the body.'],
-    ['Element', 'the Elements this race can spawn with inside that zone: its own bias ∩ the zone list. The roll weighs the bias at ×<code>mob.element_roll.bias_weight</code> against any other Element the zone carries at ×<code>mob.element_roll.other_weight</code>.'],
-    ['Level', 'the zone range. A mob spawns at the attacker\'s level clamped into that range, so the HP and XP columns are printed as a range too.'],
-    ['Size', 'the body class and the group it comes in. An Elite is a flag on a Large body, never a fifth size; a Boss reads as a body class for a weapon\'s <code>size_mult</code>.'],
-    ['Core Stat', 'the mob\'s <strong>fixed</strong> seven-stat block: the one flat base (<code>mob.stat.base</code>) through the species vector, with no level term — the same body at level 1 and at level 180, because only HP, PS and XP climb. Read through <code>mobStatsOf()</code>.'],
-    ['Offensive', 'what its hit is made of, and its damage per second — its own power (<code>mob.species[].power_base</code> + <code>K_MOB_PS_STAT</code> × the Str or Int its <code>damage</code> tag reads, over the zone mean) times the published <code>mob_PS(L)</code> — plus its accuracy rating, its crit chance and its Elemental Alignment, the number that decides how often its innate status lands.'],
-    ['Defensive', 'health at both ends of the zone, Armour, Evasion (capped where the player is capped), its own dodge against a same-level attacker, and its per-Element resistance.'],
-    ['What it drops', 'the gear roll and the herb roll at that band, the junk the named variants pay, which stream they lean, and the stones an Elite or a Boss adds.'],
-    ['XP', 'what one kill pays at the two ends of the zone: <code>xpPerKill(mob level)</code>, with the Elite and Boss multipliers already on the row.'],
-  ]), 'Nothing here is typed: the sheet is <code>mobRoster()</code>, <code>mobEvasion()</code>, <code>mobResByElementOf()</code>, <code>speciesPowerStatOf()</code> and <code>dropChance()</code> printed out, so a wrong figure is a bug in the data or the engine, and <code>node tools/verify.ts</code> is what says which.'),
+      const cards = ROSTER.filter((r: any) => r.zone === z.id).map(cardOf);
+      return `<section class="zone"><h3>Zone ${n0(z.id)} · ${esc(z.name)} — ${esc(z.region)}</h3>`
+        + `<p class="note">Levels ${n0(z.levels[0])}-${n0(z.levels[1])} · band ${esc(z.quality)} · Elements ${list(z.elements)} · group ${esc(z.group)} · ${n0(cards.length)} spawns</p>`
+        + `<div class="cards">${cards.join('')}</div></section>`;
+    }), block('How to read a card',
+      `<ul class="legend">`
+      + `<li><strong>Kind</strong> — Normal, or an Elite flag forced onto a Large body (never a fifth size). A Boss is one named creature per zone and reads as a body class for a weapon's <code>size_mult</code>; its body sits in the Elite's bracket, so both print <em>Large · alone</em>.</li>`
+      + `<li><strong>Level</strong> — the spawn's own <strong>static</strong> level inside the zone's range (<code>mob.species[].zone_levels</code>); a spawn does not follow the attacker's level, so every figure is one number.</li>`
+      + `<li><strong>Core</strong> — the seven-stat block <em>in that zone</em> (<code>mobStatsOf(speciesId, zoneId)</code>), scaled from the anchor zone and always a whole number. Wis reads nothing on a mob and a physical body has no magic half, so those entries are 0.</li>`
+      + `<li><strong>Health</strong> — Base health (the published <code>mob_HP</code> curve × the body ÷ the zone body factor) and Base mana, then what the Core makes of them: <code>Base HP + a flat hp-per-level grant + Vit × K_VIT_HP</code> on the health line.</li>`
+      + `<li><strong>Offence</strong> — every line is <code>Base + K_core</code> through the one K table the player obeys: the damage tag (what Armour answers and what resistance answers), damage per second (<code>mob.species[].power_base</code> + the K term on the Str or Int its tag reads, over the zone mean, times the published <code>mob_PS(L)</code>), accuracy (Dex × K_DEX_ACC), Critical chance (Lck × K_LCK_CRIT) and Alignment (Dex × K_DEX_ALIGN).</li>`
+      + `<li><strong>Defence</strong> — Armour (Str × K_ARMOUR), Evasion (Core Dex × K_EVASION × the body's base percent) and dodge (Agi × K_MOB_DODGE).</li>`
+      + `<li><strong>Elemental resistance</strong> — each of the five Elements as a percent the player's hit of that Element is cut by. The race's own Element resists at a flat <code>mob.race_res_pct</code> in every zone; every other Element meets no res at all. The Cap the player obeys is the same Cap here.</li>`
+      + `<li><strong>XP a kill</strong> — <code>xpPerKill(mob level)</code>, with the Elite and Boss multipliers already on the row.</li>`
+      + `<li><strong>Names</strong> (under the species) — the variant names that zone actually pays (<code>mob.variants</code> ∩ the sub-zone lists). A variant is a drop identity, not a stat line — the numbers are the species and the body.</li>`
+      + `<li><strong>Element</strong> — the one Element the race owns (<code>mob.species[].element</code>): fixed, the same in every zone, because a spawn rolls no Element of its own.</li>`
+      + `<li><strong>Drop</strong> — the gear roll and the herb roll at that band, the junk the named variants pay, which stream they lean, and the stones an Elite or a Boss adds.</li>`
+      + `</ul>`,
+      'A card is one race inside one zone, so a race that lives in two zones prints a card in each. Nothing here is typed: the sheet is <code>mobRoster()</code>, <code>mobEvasion()</code>, <code>mobResByElementOf()</code>, <code>mobStatsOf()</code> and <code>dropChance()</code> printed out, so a wrong figure is a bug in the data or the engine, and <code>node tools/verify.ts</code> is what says which.'),
     ];
   })(),
 });
@@ -524,7 +575,7 @@ page({
       ])), `Earned from ${esc(String((TOWN.standing as any).earnt_from || ''))} — and Standing is never bought. What it grants: ${list((TOWN.standing as any).grants || [])}.`),
       block('The task board', table(['', 'The number', 'Read from'], [
         ['Slots open at once', wrap(n0(TS.slots)), '<code>task_sizing.slots</code>'],
-        ['A slot refills', `every ${n0(TS.refill_sec / 60)} minutes`, '<code>task_sizing.refill_sec</code>'],
+        ['A slot refills', TS.refill_sec >= 3600 ? `every ${n0(TS.refill_sec / 3600)} hours` : `every ${n0(TS.refill_sec / 60)} minutes`, '<code>task_sizing.refill_sec</code>'],
         ['A free skip', `${n0(TS.free_skip_per_day)} a day, plus a bought one on top`, '<code>task_sizing.free_skip_per_day</code>'],
         ['An Elite hunt asks for', wrap(n0(TS.elite_n)), '<code>task_sizing.elite_n</code>'],
         ['What it pays', `a slice of that band’s own stone income: ${n0(TS.reward_minutes_of_band_income)} minutes of it`, '<code>task_sizing.reward_minutes_of_band_income</code>'],
@@ -657,7 +708,7 @@ page({
           [pressOf('polish'), tok('all', ALL3, 'reroll value'), stone('polish', E.craft.polish_stones_per_use), 'every value rolls inside its own Tier at once: no Tier moves, no Mod identity moves, no line count moves'],
         ]),
         perStone('reforge', [
-          [`${pressOf('reforge')} — no bench press yet`, tok('all', ALL3, 'reroll tier', 'then reroll value'), stone('reforge', E.craft.reforge_stones_per_use), 'one Tier drawn for the piece, then every value rolled inside it — the whole piece climbs or falls together'],
+          [pressOf('reforge'), tok('all', ALL3, 'reroll tier', 'then reroll value'), stone('reforge', E.craft.reforge_stones_per_use), 'one Tier drawn for the piece, then every value rolled inside it — the whole piece climbs or falls together'],
         ]),
         perStone('rebirth', [
           [pressOf('rebirth'), tok('all', SET, UNB, 'reroll mod', 'with random'), stone('rebirth', E.craft.rebirth_stones_per_use), 'every line the Unbound set holds — the (crafted) ones included — draws a new Mod at once; the bound pair and the frame mod keep theirs, no line is added or removed, no Add charge is spent'],
@@ -691,7 +742,7 @@ page({
         ['Imprint (any of ' + n0(MODS.mods.length) + ')', chance(E.loot.imprint_stone_sources.elite_imprint_chance), `${n0(E.loot.imprint_stone_sources.boss_imprint_stones)} stones`, 'uniform over the Mod roster'],
         [STONE_NAME.corrupt, '—', chance(E.loot.corrupt_stone_sources.boss_corrupt_chance), 'bosses only'],
         [STONE_NAME.polish, chance(E.loot.polish_stone_sources.elite_polish_chance), chance(E.loot.polish_stone_sources.boss_polish_chance), 'one step tighter than Replace on the Elite half, and Replace own Boss half'],
-        [STONE_NAME.reforge, '—', chance(E.loot.reforge_stone_sources.boss_reforge_chance), 'bosses only, on half the Corrupt chance — the stone is minted and the verb is written, but no bench press spends it yet'],
+        [STONE_NAME.reforge, '—', chance(E.loot.reforge_stone_sources.boss_reforge_chance), 'bosses only, on half the Corrupt chance — the bench spends it on the whole piece'],
         [STONE_NAME.rebirth, '—', chance(E.loot.rebirth_stone_sources.boss_rebirth_chance), 'bosses only, inside the same boss draw again (Corrupt ⊃ Reforge ⊃ Rebirth) — the widest press of the three, so the rarest stone'],
       ]);
     })(), 'Elite and boss chances are per kill; a whole-stone value pays out whole.'),
@@ -724,7 +775,7 @@ page({
     ]), 'Mastery never adds damage to a weapon type itself — that would make one type the right answer forever. It answers the weight question (<a href="idle.html">Away &amp; bag</a>) and the drop question (<a href="items.html">Items</a>), and it climbs at full rate while you are away.'),
     block('The passive tree', table(['Branch', 'Nodes', 'Ranks', 'Points'], Object.keys(TREE_CFG.branches || {}).map((name: string) => [
       esc(name), wrap(n0(treeNodes().perBranch(name))), wrap(n0(TREE_CFG.rank_tiers?.shallow?.length ?? 3)), wrap(n0(TREE_CFG.point_cost_per_rank * (TREE_CFG.rank_tiers?.shallow?.length ?? 3) * treeNodes().perBranch(name))),
-    ])), `${n0(TREE_CFG.point_cost_per_rank)} point a rank · a rank pays ${pctList(TREE_CFG.rank_tiers?.shallow)} of the line at the shallow nodes and ${pctList(TREE_CFG.rank_tiers?.deep)} at the deep ones — a deep node of the same line is always the stronger buy.`),
+    ])), `${n0(TREE_CFG.point_cost_per_rank)} point a rank · a rank pays ${pctList(TREE_CFG.rank_tiers?.shallow)} of the line at the shallow nodes and ${pctList(TREE_CFG.rank_tiers?.deep)} at the deep ones — a deep node of the same line is always the stronger buy. ${n0(E.stat.tree_points_base)} points are in hand at character creation and one arrives with every level (<code>stat.tree_points_base</code>, <code>stat.tree_points_per_level</code>), which is exactly the whole tree. The control branch’s last node is the one thing in the game that raises a Cap rather than a number: it lifts Elemental resistance to ${wrap(n0(E.caps.elem_res_max))}.`),
   ],
 });
 
@@ -732,11 +783,11 @@ page({
   file: 'elements.html',
   nav: 'Elements',
   title: 'Elements',
-  lead: `Five Elements, and a counter table: bring the right one and the fight is shorter.${E.elements.weak_mult ? ` A Weak hit deals ×${n1(E.elements.weak_mult)}.` : ''}`,
+  lead: 'Five Elements, and no Element counters another: an Element names the status its hits leave and the one race that resists it.',
   body: [
-    block('Attack against target', table(['You ↓ / Target →', ...E.elements.order.map((e: string) => esc(e))],
-      E.elements.order.map((atk: string) => [esc(atk), ...E.elements.order.map((def: string) => wrap(`×${n1(E.elements.counter?.[atk]?.[def] ?? 1)}`))])),
-      'Above 1 is the counter — the number is the multiplier on that hit, before resistance.'),
+    block('Where an Element is resisted', table(['Element', 'The races that own it'], E.elements.order.map((el: string) => [
+      esc(el), list((E.mob.species || []).filter((sp: any) => (sp as any).element === el).map((sp: any) => sp.name)) || '—',
+    ])), `A race owns one Element (\`mob.species[].element\`) and answers it at a flat \`mob.race_res_pct\` in every zone it lives in. Every other Element lands on it unresisted — no table scales the hit, only the one flat line.`),
     block('What each Element leaves behind', table(['Element', 'Its mark'], E.elements.order.map((e: string) => [
       esc(e), esc(E.elements.status_of?.[e]?.name || E.elements.status_of?.[e] || '—'),
     ])), 'A status is answered by regeneration and by removing the tick, not by mitigation.'),
@@ -770,14 +821,14 @@ page({
     block('The order a hit resolves', table(['Step', 'What it decides', 'Cap', 'What the reference build holds'], [
       row('Perfect dodge', 'deletes the hit outright, and nothing the attacker has opposes it',
         capOf('perfect_dodge'), `${pts(DV.perfect_dodge)} from ${n1(DV.pdogge_rate)} rating — <code>perfectDodgeChance</code>`),
-      row('Evasion', 'the dodge roll: a Dex rating plus the Agi percentage points, added and then capped together',
-        capOf('evasion'), `${n1(eng.evasionRating(EVEN))} rating before the Agi points are added — <code>evasionRating</code>, <code>evasionChance</code>`),
+      row('Evasion', 'the dodge roll: Agi carries the rating and the gear Evasion lines ride on it, opposed by the attacker’s Accuracy',
+        capOf('evasion'), `${n1(eng.evasionRating(EVEN))} rating at the even split alone, before any gear line — <code>evasionRating</code>, <code>evasionChance</code>`),
       row('Block', 'rolled last of the three avoidances; a blocked hit is cut by a flat amount read off your Armour rather than deleted',
         capOf('block'), 'the Shield offhand’s own line is the only source — <code>caps.block_note</code>'),
       row('Armour', 'shrinks only the non-Element part of the hit, as a diminishing ratio',
         '<span class="hy">no Cap on the rating</span>', `${n0(DV.armour_ceil)} — <code>armourOf</code> — removing ${pc1(DV.armour_vs_zone9_boss)} of a boss-priced hit and ${pc1(DV.armour_vs_zone9_trash)} of a trash-priced one (<code>armour_vs_zone9_boss</code>, <code>armour_vs_zone9_trash</code>)`),
       row('Elemental resistance', 'shrinks the Element part of the hit, separately per Element',
-        capOf('elem_res'), `${pts(DV.res_three)} raw from three pieces, which <code>resistanceOf</code> then holds at the Cap — and <code>res_raw</code> is ${n0(DV.res_raw)}, because no Core stat feeds it: it is a gear line alone`),
+        `${wrap(n0(E.caps.elem_res))} <span class="hy">or</span> ${wrap(n0(E.caps.elem_res_max))}`, `${pts(DV.res_three)} raw from three pieces, which <code>resistanceOf</code> then holds at the Cap — and <code>res_raw</code> is ${n0(DV.res_raw)}, because no Core stat feeds it: it is a gear line alone. This is the one Cap with an unlock: the control branch’s last node raises it to ${n0(E.caps.elem_res_max)} — <code>elemResCapOf</code>`),
       row('Energy Shield', 'the caster’s second pool, spent before Health, and shut out for a moment after any hit',
         '<span class="hy">no Cap</span>', `${n0(DV.es_pool)} pool, ${n1(DV.es_regen)} a second, a full pool back in ${n0(DV.es_recover_sec)} sec, worth ${pc1(DV.es_share_of_hp)} of your Health — <code>maxEsOf</code>, <code>esRegenOf</code>`),
       row('Health', 'the pool every layer above exists to protect',
@@ -798,7 +849,7 @@ page({
         const lean = (Object.entries((E.weapon_size_mult as any).ladder || {}) as any[])
           .filter(([, v]: any) => Number(v[s.id]) !== 1)
           .map(([w, v]: any) => `${w === 'one-handed sword' ? 'sword' : w === 'one-handed axe' ? 'axe' : w} ×${n2(v[s.id])}`);
-        return [esc(s.name), `×${n1(s.hp)}`, `×${n1(s.ps)}`, esc(s.group),
+        return [esc(s.name), '<span class="hy">the curve</span>', `×${n1(s.ps)}`, esc(s.group),
           `<span class="hy">${lean.join(' · ') || 'every weapon meets it evenly'}</span>`];
       })),
       'The multiplier rides the <em>physical</em> share of a finished hit, after mitigation, so a spell is exempt and a staff’s own swing is not — <code>applySizeMult</code>. A Boss is not a fifth body: it reads as ' +
@@ -825,9 +876,9 @@ page({
       ['Does Armour shrink it', yes((E.bleed as any).affected_by_armour), '<code>bleed.affected_by_armour</code> — nothing mitigates it but time, heal and Energy Shield'],
       ['What it scales with', 'the physical of one hit, not your swing count', '<code>bleed.note</code> — a slow heavy weapon is the bleed build'],
       ['On the mob side', 'the heavy physical lineages put bleed on us out of the damage they are already priced at', '<code>bleed.mob_side</code> — no extra power, so no health line moves'],
-    ]), 'It is on this page rather than under <a href="elements.html">Elements</a> because it is the one damage-over-time with no counter stat at all.'),
-    block('Elite and Boss', table(['', 'Health', 'Damage', 'Evasion', 'Comes in', 'How often'], [
-      ['Elite', `×${n0((E.mob.elite as any).hp)}`, `×${n0((E.mob.elite as any).ps)}`, `×${n2((E.mob.elite as any).evasion)}`, esc((E.mob.elite as any).group),
+    ]), 'It is on this page rather than under <a href="elements.html">Elements</a> because it is the one damage-over-time no resistance answers.'),
+    block('Elite and Boss', table(['', 'Health', 'Damage', 'Base evasion', 'Comes in', 'How often'], [
+      ['Elite', `×${n0((E.mob.elite as any).hp)}`, `×${n0((E.mob.elite as any).ps)}`, `+${n0((E.mob.elite as any).evasion_pct)}%`, esc((E.mob.elite as any).group),
         `${pc1((E.loot as any).elite_spawn_chance)} of kills`],
       ['Boss', `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).hp)}`, `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).ps)}`, '<span class="hy">reads as a body</span>', 'alone',
         `${n1((E.loot as any).boss_per_hour)} an hour, and online only`],
@@ -1042,12 +1093,12 @@ PAGES.sort((a, b) => ((ORDER.indexOf(a.file) + 1) || 999) - ((ORDER.indexOf(b.fi
 
 // ---------------------------------------------------------------- shell (pure: the caller supplies the tokens)
 
-/** The client's own `:root` block, read out of the `app.css` text - a colour never lives twice. */
+/** The client's own `:root` block, read out of the `variables.css` text - a colour never lives twice. */
 export const extractTokens = (css: string): string => {
   // matched by brace, not by line: the browser gets back the stylesheet Vite processed, where the
   // newlines the file carries are gone — and the static build reads the raw file, so both must agree.
   const m = css.match(/:root\s*\{[^}]*\}/);
-  if (!m) throw new Error('wiki: app.css carries no :root block to wear');
+  if (!m) throw new Error('wiki: variables.css carries no :root block to wear');
   return m[0];
 };
 
@@ -1056,7 +1107,7 @@ export const LAYOUT = `* { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
 a { color: var(--gold); text-decoration: none; }
 a:hover { text-decoration: underline; }
-.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 116rem; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
 nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
 nav a { color: var(--dim); }
 nav a.on { color: var(--gold); }
@@ -1070,9 +1121,11 @@ h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform
 table { border-collapse: collapse; width: 100%; font-size: .86rem; }
 th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--dim); font-weight: 600; }
-thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+thead th { position: sticky; background: var(--panel); z-index: 1; }
+thead tr:first-child th { top: 0; }
 tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
-.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; }
+tbody tr:hover { background: rgba(255,255,255,.06); }
+.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .twrap table { min-width: 56rem; }
 td:first-child { white-space: nowrap; }
 .rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
@@ -1092,8 +1145,44 @@ td .hy { color: var(--dim); font-size: .8rem; }
 td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
 .rolls .forced .rn { color: var(--gold); }
 .rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
-.num { font-family: var(--num); }
-.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+.plist { list-style: none; margin: .15rem 0 0; padding: 0; font-size: .78rem; }
+/* one grid for the whole cell: every key shares track one at the width of the longest key in that
+   cell, every value takes track two — display:contents promotes each key/value pair to the grid,
+   so a spelled-out label like "damage per second" costs no wrap and nothing runs into its number */
+.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: .5rem; row-gap: .03rem; }
+.plist li { display: contents; }
+.plist .pk { font-family: var(--ui); color: var(--dim); }
+.plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
+/* the mob card grid: five cards a row at full width, two-up inside each, and it steps down to three,
+   two and one as the page narrows so a card never squeezes its figures sideways */
+.cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem .6rem; margin-top: .5rem; }
+@media (max-width: 92rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 58rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 36rem) { .cards { grid-template-columns: 1fr; } }
+.card { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: .7rem .85rem .8rem; display: flex; flex-direction: column; gap: .35rem; }
+.card.elite { border-color: var(--gold); }
+.card.boss { border-color: var(--hp); }
+.card header { display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
+.card .cname { font-size: 1rem; font-weight: 600; }
+.card .cl { font-family: var(--num); color: var(--dim); font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; }
+.cdot { margin: 0; color: var(--dim); font-size: .78rem; }
+.ctag { font-family: var(--ui); color: var(--text); text-transform: uppercase; letter-spacing: .05em; font-size: .66rem; border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; margin-right: .4rem; }
+.elite .ctag { border-color: var(--gold); color: var(--gold); }
+.boss .ctag { border-color: var(--hp); color: var(--hp); }
+.cnames { margin: 0; font-size: .76rem; color: var(--text); }
+.cnames .cl { display: block; }
+/* the reads inside a card stack to one column until the card itself is wide enough for two, so a
+   5-across shelf never squeezes a label into its neighbour's number */
+.card { container-type: inline-size; }
+.cgrid { display: grid; grid-template-columns: 1fr; gap: .5rem .9rem; margin-top: .15rem; }
+@container (min-width: 32rem) { .cgrid { grid-template-columns: 1fr 1fr; } }
+.card .drop { margin-top: .15rem; }
+.cbox h4 { margin: 0 0 .15rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); font-weight: 600; }
+.cbox h4 .chint { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .7; }
+.legend { margin: 0; padding-left: 1.1rem; font-size: .82rem; color: var(--dim); }
+.legend li { margin: .3rem 0; }
+.legend strong { color: var(--text); }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }`;
 

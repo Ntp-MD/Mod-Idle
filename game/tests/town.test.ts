@@ -9,7 +9,7 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import { newGame, tick, huntZone } from '../src/sim/game';
 
 const require = createRequire(import.meta.url);
-const cage = require('../../tools/lib/engine.ts');
+const cage = require('../../tools/lib/engine.ts').eng;
 
 describe('prices are minutes of income, not typed gold', () => {
   it('the client rate equals the cage rate', () => {
@@ -113,9 +113,30 @@ describe('the Guild board', () => {
       expect(t.stone).toBe(t.kind === 'elite' ? 'tier' : 'remove');
       expect(t.n).toBe(t.kind === 'elite' ? TOWN.task_sizing.elite_n : TOWN.task_sizing.boss_n);
     }
-    // both kinds are reachable, and the plain kill-count task that used to carry 60% of the roll is gone
+    // both kinds are reachable, and no other kind rolls
     expect(seen.has('elite')).toBe(true);
     expect(seen.has('boss')).toBe(true);
+  });
+
+  it('a Boss hunt pays winner\u2019s choice: the Remove stone or the Reroll tier count', () => {
+    const s = newGame(99);
+    let boss = null as any;
+    for (let i = 0; i < 200 && !boss; i++) {
+      const t = rollTask(mulberry32(i + 1), s);
+      if (t.kind === 'boss') boss = t;
+    }
+    expect(boss).toBeTruthy();
+    expect(boss.stone).toBe('remove');
+    expect(boss.count).toBe(TOWN.task_sizing.boss_reward.remove);
+    expect(boss.alt).toEqual({ stone: 'tier', count: TOWN.task_sizing.boss_reward.reroll_tier });
+    // taking it as the Remove stone pays the default
+    s.town.tasks[0] = { ...boss, progress: boss.n };
+    expect(claimTask(s, 0)).toBe(true);
+    expect(s.counters.stones.remove).toBe(boss.count);
+    // taking it as the Reroll tier count pays the alternative
+    s.town.tasks[0] = { ...boss, progress: boss.n, claimed: false };
+    expect(claimTask(s, 0, 'tier')).toBe(true);
+    expect(s.counters.stones.tier).toBe(boss.alt.count);
   });
 
   it('kills feed the matching slot and an empty slot refills after an hour', () => {
@@ -123,7 +144,7 @@ describe('the Guild board', () => {
     huntZone(s, s.zone);
     s.town.tasks[1] = { kind: 'elite', zone: 1, n: 3, progress: 0, stone: 'tier', count: 1, claimed: false, offeredAt: 0 };
     // tick until the Elite the slot waits for actually spawns, never for a guessed window: Elites are
-    // one kill in five, so a fixed window is a coin flip on the roll (AGENTS.md). The bound is a hang guard.
+    // a minority of spawns, so a fixed window is a coin flip on the roll (AGENTS.md). The bound is a hang guard.
     for (let i = 0; i < 200000 && s.town.tasks[1].progress === 0; i++) tick(s, {});
     expect(s.town.tasks[1].progress).toBeGreaterThan(0);
     s.clockSec = s.town.refillAt[0] + 1;
@@ -150,7 +171,7 @@ describe('a Waypoint opens on foot and never for gold', () => {
     const budget = eng.SETTLEMENT_BUDGET_KILLS[1];
     s.counters.zoneKills[1] = Math.round(budget);
     expect(standingShare(s, 'eastgate')).toBeCloseTo(1, 1);
-    expect(standingTier(s, 'eastgate')).toBe(2);          // Tier III asks for 1.4 of the budget
+    expect(standingTier(s, 'eastgate')).toBe(2);          // Tier III asks for over the whole budget
     // the budget is already a count of kills, so the tier's own threshold is the state to set —
     // rounded up, because a tier is reached AT its threshold and rounding down misses it by a kill
     s.counters.zoneKills[1] = Math.ceil(budget * TOWN.standing.tiers[2].share);

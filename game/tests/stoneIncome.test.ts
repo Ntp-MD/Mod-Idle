@@ -6,9 +6,8 @@ import { craft } from '../src/sim/craft';
 /**
  * The three stones the craft ladder costs have an income now.
  *
- * `crafting.md` priced Upgrade / Repair / Corrupt while `loot.md` §5 paid for none of them, so a
- * player could never run the bench. The rates are `engine.json` `loot.*_stone_sources`; every figure
- * the bench asks for is read from the same data, so this file checks the minting path and nothing else.
+ * The rates are `engine.json` `loot.*_stone_sources`; every figure the bench asks for is read from
+ * the same data, so this file checks the minting path and nothing else.
  */
 
 const L = E.loot as any;
@@ -40,7 +39,7 @@ function hunt(hours: number, level: number, zone: number, online: boolean, seed:
 }
 
 describe('Quality, Repair and Corrupt stone are minted by hunting', () => {
-  // the loop pays a boss stone only to a kill, and `combat.md` §7 says losing = losing the spawn, so
+  // the loop pays a boss stone only to a kill — losing costs the spawn — so
   // these runs hunt a zone the character can actually win: level 90 against zone 1's mobs
   it('a run that kills bosses pays all three stones', () => {
     // corrupt is boss-only, so the state this test waits on is the boss stone itself
@@ -55,8 +54,10 @@ describe('Quality, Repair and Corrupt stone are minted by hunting', () => {
   }, 60000);
 
   it('an offline run mints Quality but cannot mint the boss-only stone', () => {
-    // offline mints no boss stone, so the state to wait on is the quality line, not corrupt
-    const s = hunt(4, 90, 1, false, 91, (st) => (st.counters.stones.quality || 0) > 0);
+    // offline mints no boss stone, so the state to wait on is the quality line, not corrupt. Wait for
+    // a few quality stones, not one: on a single kill Repair can also proc once and a 1-vs-1 tie says
+    // nothing about which line is the smaller one.
+    const s = hunt(4, 90, 1, false, 91, (st) => (st.counters.stones.quality || 0) >= 4);
     expect(s.counters.stones.quality || 0).toBeGreaterThan(0);
     expect(s.counters.stones.corrupt || 0).toBe(0);
     // elites still count while away, so Repair (elite or boss) can arrive but stays the smaller line

@@ -1,35 +1,23 @@
-# ห้ามอ่านถ้าไม่ assign
+# Do not read unless assigned
 
-# Queue
-
-- No need pre commit
-
+# Mission
+- Feed log ลง timestamp เป็นเวลา เช่น 17.30am
+- attack or defend animation ต้องเคลื่อนที่ไปทั้ง Card ไม่ใช่แค่ข้างในกรอบ
+- ให้ overlay ที่แสงบนจอสามาถเลื่อนขยับได้เช่น log feed
+- รวมเมนู forge และ craft ให้ใช้ ui ร่วมกัน
 # Adjust
 
-- ทุกหิน cost 1 ก้อน
-- Perfect dodge uncap
-- elem_res cap 75 but can unlock limit from passive skill tree cap at 90% elem_res
-- aspd increase cap to max 0.15s
-- Vit also gain stun recovery
-- Dex change text Elemental alignment to Status alignment Chance , remove gain evasion
-- Wis change max es gain instead mana gain
 
-# Feature
-
-- อาจจะต้องเพิ่ม tooltip item เมื่อ hover ด้วย
+# Feature (Until User Approve)
+- remake passive tree like poe visual and progession like tree
+- ล่าสัตว์ ทำอาหาร ได้ buff เพิ่มเติม , ให้ hex ที่ว่างเป็น zone ล่าสัตว์
+- hex เหมือง , hex สำหรับต้นไม้หายากราคาแพง หรืออาจจะเอาใช้ craft
+- One zone's mobs, but a zone carries more than one sub-zone: how does the gameplay fill that? The idea is to separate them by drop — the gear type each sub-zone leans, e.g. forest 1 pays helmets at a high chance. How does that read?
 
 # Investigation
-
-- magic damage ที่ทำงาพวกกับ elemental ยังไง
-- check Double Dipping Damage
-- Is the auto-combat configuration complete and flexible
 
 # Town
 
 - What should the screen look like while the character is in town
 
 # Map + Traveling
-
-# Open talk
-
-- One zone's mobs, but a zone carries more than one sub-zone: how does the gameplay fill that? The idea is to separate them by drop — the gear type each sub-zone leans, e.g. forest 1 pays helmets at a high chance. How does that read?

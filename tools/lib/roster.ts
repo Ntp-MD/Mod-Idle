@@ -8,6 +8,7 @@
 
 import path from 'node:path';
 import { readJson } from './json.ts';
+import * as G from './gates.ts';
 import * as EN from './engine.ts';
 import { createSkillModel } from '../../engine/skills.ts';
 import type { SkillsData } from './types.ts';
@@ -33,11 +34,11 @@ const fmt = (n: any): string => Number(n).toLocaleString('en-US');
 /**
  * Mechanic gate: the roster must be internally consistent and
  * satisfy the promises the design makes about coverage.
- * Returns [{ id, ok, detail }].
+ * Returns the gate rows, ready for `G.report()`.
  */
-function gates(): { id: string; ok: boolean; detail: string }[] {
-  const out: { id: string; ok: boolean; detail: string }[] = [];
-  const add = (id: string, ok: boolean, detail: string) => out.push({ id, ok, detail });
+function gates(): G.GateRow[] {
+  const g = G.gates();
+  const { add, watch } = g;
 
   const ids = SKILLS.map((s) => s.id);
   const dupIds = ids.filter((x, i) => ids.indexOf(x) !== i);
@@ -80,15 +81,17 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     killsToMax = (SX.level_cap - 1) * SX.xp_per_step / SX.xp_per_kill;
     // the Cap multiplier is read out of the calculator itself, never recomputed here (ramp:
     // (base_flat + eff/100 × power) × damage_pct(level)/100, with eff 0 so only the ramp shows —
-    // and `perPress` reads that percentage out of `meta.formula.skill_levels`). What this gate
-    // protects is the band the design promises: gear ×5.6, skill ×1.1-1.4.
+    // and `perPress` reads that percentage out of `meta.formula.skill_levels`). The band it is
+    // read against is a watch (S10t), not this gate.
     const SM0 = createSkillModel(DATA, EN.E);
     mult = SM0.perPress({ id: '', basis: 'phys', base_flat: 1, eff: 0 }, { phys: 1, level: SX.level_cap }) ?? 0;
-    if (!(mult > 1.1 && mult < 1.4)) sp.push(`a maxed skill multiplies its basis by ×${mult && mult.toFixed(3)}, outside the ×1.1-1.4 skill band`);
     const nullReserve = byType('aura').filter((a) => a.reserve === null).length;
     if (nullReserve) sp.push(`${nullReserve} aura(s) still have no reserve tier`);
     add('S10', sp.length === 0, sp.length ? sp.join(' \u00b7 ')
       : `skill level is earned per kill (${SX.xp_per_kill} XP) at ${SX.xp_per_step} XP a step to Cap ${SX.level_cap} = **${mult.toFixed(2)}** \u00b7 ${killsToMax.toLocaleString('en-US')} kills to max \u00b7 every aura carries a reserve tier`);
+    watch('S10t', mult > 1.1 && mult < 1.4,
+      `a maxed skill multiplies its basis by ×${mult.toFixed(3)} — outside the ×1.1-1.4 skill band the gear-vs-skill split promises (gear ×5.6); re-read the ramp by eye`,
+      `a maxed skill multiplies its basis by ×${mult.toFixed(3)} — inside the ×1.1-1.4 skill band (gear ×5.6 carries the rest)`);
   }
 
   // The per-level table is the one home of the ramp, so its shape is a promise: one row per level,
@@ -157,7 +160,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
   // roster table prints are named here too, and a hand-typed press column is refused: the table is
   // generated from these numbers.
   const SM13 = createSkillModel(DATA, EN.E);
-  const B13 = EN.REF;
+  const B13 = EN.eng.REF;
   const attackRows = SKILLS.filter((s) => s.type === 'attack');
   const badBasis = attackRows.filter((s) => s.basis !== 'phys' && s.basis !== 'magic');
   const badPct = attackRows.filter((s) => !(typeof s.base_flat === 'number' && s.base_flat > 0 && typeof s.eff === 'number' && s.eff >= 0));
@@ -237,7 +240,7 @@ function gates(): { id: string; ok: boolean; detail: string }[] {
     `every (AoE ×n) suffix in a mana cost states the data's own ${EN.E.aoe.mana_mult} mana multiplier` +
     `${badAoe.length ? ' · DISAGREES: ' + badAoe.join(', ') : ''}`);
 
-  return out;
+  return g.rows();
 }
 
 export {

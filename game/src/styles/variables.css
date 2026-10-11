@@ -1,0 +1,158 @@
+/* Tokens have one home: every colour and every responsive size the client uses is declared here, on
+   `:root`, and nothing downstream hardcodes one. The wiki and the gallery read this file's `:root`
+   block, so a colour never lives twice (X59 · L9 · L10). */
+:root {
+  color-scheme: dark;
+  --bg: #0f1217;
+  --panel: #1c2027;
+  --line: #2c3340;
+  --text: #e3e9f2;
+  --dim: #8b96a8;
+  --hp: #c0392b;
+  --mana: #2980b9;
+  --es: #4fc3f7;
+  --xp: #f1c40f;
+  --mob: #7f8c8d;
+  --good: #27ae60;
+  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+     the gutter the menu rail owns — every corner read on the field stops short of it */
+  --glass: rgba(17, 22, 30, .74);
+  --edge: rgba(255, 255, 255, .10);
+  --gold: #e8c169;
+  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+  --focus: #7fd4ff;
+  /* the floating menu row's height — the rail is a row across the top-right now, not a full-height
+     column, so this is its one axis and the minimap hangs a fixed drop under it */
+  --rail: clamp(46px, 2.6vw + 12px, 88px);
+  /* where the reads under the menu row begin: the row, a drop, then the minimap square — the edge
+     column below keys off this same offset so the three never drift into each other */
+  --rail-drop: calc(var(--screen-pad) + var(--rail) + clamp(8px, 0.489vw + 2px, 16px));
+  /* the gutter every corner read stops short of, and the height a gauge track carries its figure in:
+     one pair for the frame rather than the same two numbers written on each cluster */
+  --screen-pad: var(--spacing-md);
+  --bar-h: clamp(12px, 0.78vw + 2px, 22px);
+  /* the HUD's floating hardware, sized once: the portrait plate and its ring, the minimap sheet,
+     the five cast orbs (biggest first — the slot the rotation presses first), and the objectives
+     column's width on the left edge */
+  --portrait-size: clamp(58px, 3.75vw + 14px, 124px);
+  --minimap-size: clamp(100px, 6.52vw + 25px, 216px);
+  --orb-1: clamp(43px, 2.77vw + 11px, 92px);
+  --orb-2: clamp(36px, 2.36vw + 9px, 78px);
+  --orb-3: clamp(30px, 1.96vw + 8px, 65px);
+  --orb-4: clamp(25px, 1.63vw + 6px, 54px);
+  --orb-5: clamp(21px, 1.39vw + 5px, 46px);
+  --objectives-w: clamp(170px, 11vw + 20px, 300px);
+  /* the main-menu wheel's own plate: three sectors — bag, skills, sheet — and five satellite knobs */
+  --wheel: clamp(138px, 9.01vw + 35px, 298px);
+  /* a body's rank, and the inks its state is named in: an Elite or a Boss wears its own rim and name
+     colour, a curse and a warn read in their own inks, and the gauges climb to a lit end of the same
+     semantic the dim token carries */
+  --elite: #6c5199;
+  --elite-ink: #b98cff;
+  --boss: #9d3b34;
+  --boss-ink: #ff8b7a;
+  --curse: #c8a5ff;
+  --alarm: #ffb3a8;
+  --hot: #e2503f;
+  --good-lit: #9fe0bb;
+  --gold-lit: #ffd9a0;
+  --gold-ink: #1a1509;
+  --hp-lit: #ff8a6b;
+  --mana-lit: #6bc4f0;
+  --es-lit: #a8e6ff;
+  --xp-lit: #f7e07a;
+  /* the stage's own backdrop and its two scene lights: deep ground, a night lift, a shore lift */
+  --ground: #0a0e13;
+  --ground-2: #131926;
+  --ground-3: #181d18;
+  --glow-moss: #465c3a;
+  --glow-dusk: #304a6c;
+  /* a recessed floor (an input well, a kbd cap, an empty slot) and the scrollbar's lit thumb */
+  --inset: #12151b;
+  --bar-2: #2e3742;
+  /* the map sheet's own inks: label fills over the field, the id ink, and the two travel pins */
+  --sheet-ink: #cfd8e3;
+  --sheet-place: #f2e7d0;
+  --sheet-id: #6d7987;
+  --pin-here: #12a06a;
+  --pin-here-glow: #2ee59a;
+  --pin-target: #e2503f;
+  --pin-target-glow: #ff6b5c;
+  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur.
+     The rest step is the smallest blur that still pushes the ground behind the plates: past it the hex
+     sheet stops reading as a map you stand on and becomes a photograph of one. */
+  --dof-rest: 4px;
+  --dof-near: 1.2px;
+  /* the one rung below the rest step: a surface that owns the screen pushes the ground here rather than
+     inventing a pixel count of its own, so the ladder stays a ladder */
+  --dof-far: 5px;
+  --dof: var(--dof-rest);
+  /* the browser's own paints, themed from the same palette instead of left to the platform */
+  --sel: rgba(127, 212, 255, .26);
+  --bar: #232b36;
+  /* THE SIZING — one scale, one home. Three families, five steps each: --font-* is text, --icon-* is
+     a glyph's or a picture's box, --spacing-* is padding, margin and gap. Every step is a
+     `clamp(<int>px, <n>vw, <int>px)`: no decimal, so a figure is written the same way at every site
+     and it scales with the viewport between its two ends. A figure under 5px is too small to be
+     worth a step — a hairline pad, a shadow's blur — and stays a hardcoded figure where it is drawn.
+     The steps were cut to the sizes the client actually uses: read them off this block, edit a step
+     here and every site that reads it moves. */
+  --font-xs: clamp(10px, 0.78vw, 22px);
+  --font-sm: clamp(12px, 0.94vw, 26px);
+  --font-md: clamp(15px, 1.17vw, 32px);
+  --font-lg: clamp(20px, 1.56vw, 43px);
+  --font-xl: clamp(26px, 2.03vw, 56px);
+  --icon-xs: clamp(10px, 0.78vw, 22px);
+  --icon-sm: clamp(14px, 1.09vw, 30px);
+  --icon-md: clamp(20px, 1.56vw, 43px);
+  --icon-lg: clamp(30px, 2.34vw, 65px);
+  --icon-xl: clamp(42px, 3.28vw, 91px);
+  --spacing-xs: clamp(5px, 0.39vw, 11px);
+  --spacing-sm: clamp(8px, 0.62vw, 17px);
+  --spacing-md: clamp(12px, 0.94vw, 26px);
+  --spacing-lg: clamp(17px, 1.33vw, 37px);
+  --spacing-xl: clamp(25px, 1.95vw, 54px);
+
+  /* the unique sizes. These are not steps: the hub — the wheel and the ring of knobs around it —
+     the HUD's fixed hardware, the map sheet and the boxes too big for an icon step each keep their
+     own figure. The same `clamp(<int>px, …)` rule holds, so no row here wears a decimal either. */
+  --fs-arena: clamp(13px, 2.4vw, 28px);
+  --sheet-fs-region: 10px;
+  --sheet-fs-walk: 7px;
+  --sheet-fs-place: 9px;
+  --sheet-fs-capital: 10.5px;
+  --sheet-fs-zonename: 7.5px;
+  --sheet-fs-id: 6.5px;
+  --x-pull-arc: clamp(-46px, -1.385vw - 5px, -21px);
+  --x-pull-burst: clamp(-32px, -0.978vw - 4px, -15px);
+  --x-pull-scale: clamp(-14px, -0.407vw - 2px, -6px);
+  --x-pull-note: clamp(-11px, -0.326vw - 1px, -5px);
+  --orb-cast: clamp(38px, 2.4vw + 12px, 50px);
+  --knob: clamp(41px, 4.5vw, 109px);
+  /* a box this large is its own size, not a step: a panel, a sheet, a board. */
+  --box-100: clamp(63px, 4.07vw + 16px, 135px);
+  --box-110: clamp(69px, 4.48vw + 17px, 149px);
+  --box-130: clamp(81px, 5.29vw + 20px, 176px);
+  --box-160: clamp(100px, 6.52vw + 25px, 216px);
+  --box-170: clamp(106px, 6.92vw + 27px, 230px);
+  --box-180: clamp(113px, 7.33vw + 28px, 243px);
+  --box-200: clamp(125px, 8.14vw + 31px, 270px);
+  --box-220: clamp(138px, 8.96vw + 35px, 297px);
+  --box-240: clamp(150px, 9.77vw + 38px, 324px);
+  --box-300: clamp(188px, 12.22vw + 47px, 405px);
+  --box-320: clamp(200px, 13.03vw + 50px, 432px);
+  --box-420: clamp(263px, 17.1vw + 66px, 567px);
+  --box-440: clamp(275px, 17.92vw + 69px, 594px);
+  --box-520: clamp(325px, 21.18vw + 82px, 702px);
+  --box-560: clamp(350px, 22.8vw + 88px, 756px);
+  --box-620: clamp(388px, 25.25vw + 97px, 837px);
+  --box-680: clamp(425px, 27.69vw + 107px, 918px);
+  --box-720: clamp(450px, 29.32vw + 113px, 972px);
+  --box-920: clamp(575px, 37.46vw + 145px, 1242px);
+  --box-1100: clamp(688px, 44.79vw + 173px, 1485px);
+  --box-1800: clamp(1125px, 73.3vw + 283px, 2430px);
+}

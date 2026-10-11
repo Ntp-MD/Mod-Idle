@@ -4,11 +4,11 @@ import { rollDrop } from '../src/sim/drop';
 import { mulberry32 } from '../src/engine/client-helpers';
 
 /**
- * The item level is the one axis a piece's values ride (`item-level.md`): the window climbs with the
- * level, its floor comes from the band below, and the third a roll lands in decides the value — the top
- * third rarest, so a good roll is never a formality. These tests pin the shape the client and the loot
- * cage both read, and the property the old Rarity axis used to carry: a high-level piece can still come
- * out at the bottom of its own window.
+ * The item level is the one axis a piece's values ride (the `item_level` data owns the rule): the
+ * window climbs with the level, its floor comes from the band below, and the third a roll lands in
+ * decides the value — the top third rarest, so a good roll is never a formality. These tests pin the
+ * shape the client and the loot cage both read, and the property the old Rarity axis used to carry:
+ * a high-level piece can still come out at the bottom of its own window.
  */
 
 const MOD = 'physical_power_flat'; // a flat with a full 3-band ladder in mods.json
@@ -59,9 +59,11 @@ describe('the roll inside the window', () => {
     const bottom = loot.rangeOf(MOD, s.to, 2, 2);
     expect(bottom[0]).toBe(lo); // the bottom third starts at the window's floor
     expect(bottom[1]).toBeLessThan(hi);
-    expect(loot.tierSlice(0.1)).toBe(2); // 50%: the bottom
-    expect(loot.tierSlice(0.6)).toBe(1); // 33%: the middle
-    expect(loot.tierSlice(0.95)).toBe(0); // 17%: the top — best is never free
+    // the sample points sit inside each band of the engine's own tier split
+    const [s0, s1] = loot.TIER_SPLIT;
+    expect(loot.tierSlice(s0 / 2)).toBe(2); // the bottom band
+    expect(loot.tierSlice((s0 + s1) / 2)).toBe(1); // the middle band
+    expect(loot.tierSlice(s1 + (1 - s1) / 2)).toBe(0); // the top — best is never free
   });
 
   it('keeps every Unbound line inside its own window at the level it dropped at', () => {

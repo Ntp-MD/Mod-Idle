@@ -22,7 +22,10 @@ const PCT_LINE: Record<string, string> = {
   elemental_power: 'elemPct',
   elemental_resistance: 'resPct',
   all_resistance_pct: 'allResPct',
+  elemental_resistance_cap_pct: 'resCapPct',
   elemental_alignment: 'alignPct',
+  attack_damage_pct: 'attackDamagePct',
+  spell_damage_pct: 'spellDamagePct',
   cooldown_reduction: 'cdrPct',
   armour_pct: 'armourPct',
   evasion_pct: 'evasionPct',
@@ -120,16 +123,18 @@ export interface Character {
   hitsPerSec: number;
   phys: number;
   magic: number;
+  /** `Attack damage %`: the bucket on the attack ladder — a swing and a phys-basis press. */
+  attackDamage: number;
+  /** `Spell damage %`: the bucket on the spell ladder — a magic-basis press and a magic weapon's bolt. */
+  spellDamage: number;
   elem: number;
   /** Elemental power per Element, from the lines that carry one. Empty when nothing does. */
   elemByElement: Record<string, number>;
   /** Per-Element conversion percent, from the conversion aura rows (`damage_conversion:<element>`). */
   conversion: Record<string, number>;
   accuracy: number;
-  /** The Dex half of Evasion, as a rating — rolled against whichever mob is attacking. */
+  /** Agi plus the gear Evasion lines, as a rating — rolled against whichever mob is attacking. */
   evasion: number;
-  /** Agi's half of Evasion, in percentage points added after that roll (30 Agi = 1). */
-  evasionFromAgi: number;
   /**
    * Evasion read against the reference attacker (mean species · Medium body · tier ×1), so a row
    * that scales off avoidance has one stable sheet number to read — the same snapshot the
@@ -157,6 +162,8 @@ export interface Character {
   stunChance: number;
   alignment: number;
   resistance: number;
+  /** The resistance Cap in force on this character: the published one, plus the tree's unlock. */
+  resCap: number;
   /** Vit's Stun Recovery: the share of a shock's stop it buys back (item 5 · `K_VIT_STUNREC`). */
   stunRecovery: number;
   /** Extra percentage points of resistance against one named Element (Trinity Form). */
@@ -297,24 +304,24 @@ export function buildCharacter(
     phys: eng.physOf(core.str, lines.physFlat, lines.physPct + a(effects, 'physical_power'), weaponAspd)
       * m(effects, 'physical_power'),
     magic: eng.magicOf(core.int, lines.magicFlat, lines.magicPct, weaponAspd),
+    attackDamage: lines.attackDamagePct,
+    spellDamage: lines.spellDamagePct,
     elemByElement,
     elem: elemTotal,
     /** Per-Element conversion percent, from the conversion aura rows (empty when none is up). */
     conversion,
     accuracy: eng.playerAccuracy(core.dex, lines.accPct),
-    evasion: eng.evasionRating(core.dex, lines.evasionFlat, lines.evasionPct) + a(effects, 'evasion'),
-    evasionFromAgi: eng.agilityEvasion(core.agi),
+    evasion: eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct) + a(effects, 'evasion'),
     evasionChance: eng.evasionChance(
-      eng.evasionRating(core.dex, lines.evasionFlat, lines.evasionPct) + a(effects, 'evasion'),
-      eng.agilityEvasion(core.agi),
+      eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct) + a(effects, 'evasion'),
       eng.refAttackerAcc(level),
     ),
     armour: (eng.armourOf(core.str) + lines.armourFlat + a(effects, 'armour')) * m(effects, 'armour')
       * (1 + lines.armourPct / 100),
-    es: eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct),
+    es: eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis),
     // ES regen is `regen_pct`% of the max pool per second; a Mod line or an `es_regen` skill/passive
     // amplifies it, both feeding the one `ampPct` argument the engine already carries.
-    esRegen: eng.esRegenOf(eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct), lines.esRegenPct + a(effects, 'es_regen')),
+    esRegen: eng.esRegenOf(eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis), lines.esRegenPct + a(effects, 'es_regen')),
     maxHp: eng.maxHpOf(core.vit, level, lines.hpPct, lines.hpFlat),
     // the regen lines multiply the stat's own regen — the engine already carries the % argument, so
     // a buff and a Mod line feed the same formula rather than each doing their own arithmetic
@@ -331,8 +338,9 @@ export function buildCharacter(
     stunChance: eng.stunChanceFrom(alignment, lines.stunChancePct),
     alignment,
     // All Resistance lifts every Element at once, so it joins the same line the per-Element Mods feed
-    // and the one Cap still binds the total 
-    resistance: eng.resistanceOf(lines.resPct + lines.allResPct, m(effects, 'elemental_resistance')),
+    // and the one Cap still binds the total — unless the tree bought the unlock, which raises that Cap
+    resistance: eng.resistanceOf(lines.resPct + lines.allResPct, m(effects, 'elemental_resistance'), lines.resCapPct),
+    resCap: eng.elemResCapOf(lines.resCapPct),
     stunRecovery: eng.stunRecoveryOf(core.vit),
     /** Extra resistance against one named Element, from an aura that names it. */
     resByElement,

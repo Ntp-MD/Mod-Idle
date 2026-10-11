@@ -36,6 +36,16 @@
   let at = $state(-1);
   const stored = $derived(game.stash[tab] || []);
   const pile = $derived(sortEntries(game.bag.map((item, i) => gearEntry(item, i)), pileSort));
+  /** both shelves fold at the same page size instead of scrolling: a full pile is four pages */
+  const PAGE = 30;
+  let pilePage = $state(0);
+  let stashPage = $state(0);
+  const pilePages = $derived(Math.max(1, Math.ceil(pile.length / PAGE)));
+  const stashPages = $derived(Math.max(1, Math.ceil(stored.length / PAGE)));
+  const pileAt = $derived(Math.min(pilePage, pilePages - 1));
+  const stashAt = $derived(Math.min(stashPage, stashPages - 1));
+  const pileView = $derived(pile.slice(pileAt * PAGE, pileAt * PAGE + PAGE));
+  const storedView = $derived(stored.slice(stashAt * PAGE, stashAt * PAGE + PAGE));
   const chosen: Item | null = $derived(side === 'pile' ? (game.bag[at] ?? null) : (stored[at] ?? null));
   const cap = $derived(E.inventory.adventure_slots as number);
   const full = $derived(game.bag.length >= cap);
@@ -58,7 +68,6 @@
         Tab {t + 1}<b>{(game.stash[t] || []).length}</b>
       </button>
     {:else}
-      <span class="dim">No tab open yet — the first is the teaching purchase on a settlement stall, and a house grants two more.</span>
     {/each}
     <span class="spacer"></span>
     <span class="shared">one warehouse, every settlement</span>
@@ -71,17 +80,23 @@
         <span class="count" class:alarm={full}>{game.bag.length} / {cap}</span>
       </header>
       <div class="grid">
-        {#each pile as e, i (e.index)}
-          <button class="cell" class:here={side === 'pile' && at === i} class:lock={e.item?.locked}
-                  onclick={() => pick('pile', i)} aria-label={e.title}>
+        {#each pileView as e, k (e.index)}
+          <button class="cell" class:here={side === 'pile' && at === pileAt * PAGE + k} class:lock={e.item?.locked}
+                  onclick={() => pick('pile', pileAt * PAGE + k)} aria-label={e.title}>
             <img src={e.icon} alt="" aria-hidden="true" />
             {#if (e.item?.upgrade_lv || 0) > 0}<b class="pl">+{e.item?.upgrade_lv}</b>{/if}
           </button>
         {:else}
-          <p class="dim">The pile is empty. Kills still drop — a bag that has filled and stopped paying is the
-            reason this screen exists.</p>
+          <p class="dim">The pile is empty.</p>
         {/each}
       </div>
+      {#if pilePages > 1}
+        <div class="pager" role="group" aria-label="Pile pages">
+          <button disabled={pileAt === 0} onclick={() => (pilePage = pileAt - 1)} aria-label="Previous page">‹</button>
+          <span>{pileAt + 1} / {pilePages}</span>
+          <button disabled={pileAt === pilePages - 1} onclick={() => (pilePage = pileAt + 1)} aria-label="Next page">›</button>
+        </div>
+      {/if}
       <div class="bulk">
         <select value={pileSort} aria-label="Order the pile"
                 onchange={(e) => onpilesort?.((e.target as HTMLSelectElement).value as SortKey)}>
@@ -98,9 +113,9 @@
       </header>
       {#if tabs}
         <div class="grid">
-          {#each stored as it, i (i)}
-            <button class="cell" class:here={side === 'stash' && at === i} class:lock={it.locked}
-                    onclick={() => pick('stash', i)} aria-label={it.base}>
+          {#each storedView as it, k (stashAt * PAGE + k)}
+            <button class="cell" class:here={side === 'stash' && at === stashAt * PAGE + k} class:lock={it.locked}
+                    onclick={() => pick('stash', stashAt * PAGE + k)} aria-label={it.base}>
               <img src={gearIcon(it)} alt="" aria-hidden="true" />
               {#if (it.upgrade_lv || 0) > 0}<b class="pl">+{it.upgrade_lv}</b>{/if}
             </button>
@@ -108,11 +123,18 @@
             <p class="dim">This tab is empty.</p>
           {/each}
         </div>
+        {#if stashPages > 1}
+          <div class="pager" role="group" aria-label="Stash pages">
+            <button disabled={stashAt === 0} onclick={() => (stashPage = stashAt - 1)} aria-label="Previous page">‹</button>
+            <span>{stashAt + 1} / {stashPages}</span>
+            <button disabled={stashAt === stashPages - 1} onclick={() => (stashPage = stashAt + 1)} aria-label="Next page">›</button>
+          </div>
+        {/if}
         <div class="bulk">
           <button disabled={!stored.length || full} onclick={() => act(onwithdrawAll, 'stash')}>Take back every unlocked piece</button>
         </div>
       {:else}
-        <p class="dim">Buy a tab on a settlement stall and this side opens.</p>
+        <p class="dim">Buy a tab on a settlement stall.</p>
       {/if}
     </section>
   </div>
@@ -137,59 +159,60 @@
           : 'A locked piece never moves on its own — lock the ones a set or a gamble depends on.'}</small></p>
       </div>
     {:else}
-      <p class="dim">Pick a piece on either side to read it and move it. The two grids face each other because
-        the job is one transfer at a time.</p>
+      <p class="dim">Pick a piece on either side to read it and move it.</p>
     {/if}
   </div>
 </div>
 
 <style>
-  .board { display: grid; gap: .7rem; }
-  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
-  .tb { display: inline-flex; align-items: center; gap: .35rem; padding: .2rem .6rem; font-size: .74rem; }
+  .board { display: grid; gap: var(--spacing-sm); }
+  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; }
+  .tb { display: inline-flex; align-items: center; gap: 4px; padding: 3px var(--spacing-sm); font-size: var(--font-xs); }
   .tb b { font-family: var(--num); color: var(--dim); font-weight: 500; }
   .tb.here { border-color: var(--gold); color: var(--gold); background: rgba(232, 193, 105, .12); }
   .tb.here b { color: var(--gold); }
   .spacer { flex: 1; }
-  .shared { font-size: .68rem; color: var(--mob); letter-spacing: .04em; }
+  .shared { font-size: var(--font-xs); color: var(--mob); letter-spacing: clamp(0.5px, 0.033vw + 0.13px, 1.08px); }
 
-  .grids { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
-  .side { display: grid; gap: .35rem; align-content: start; }
-  .side header { display: flex; align-items: baseline; gap: .5rem; justify-content: space-between; }
+  .grids { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); }
+  .side { display: grid; gap: 4px; align-content: start; }
+  .side header { display: flex; align-items: baseline; gap: var(--spacing-xs); justify-content: space-between; }
   .side h4 { margin: 0; }
-  .count { font-family: var(--num); font-size: .72rem; color: var(--dim); }
-  .count.alarm { color: #ff9a8c; }
+  .count { font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
+  .count.alarm { color: var(--alarm); }
 
   .grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr)); gap: .22rem;
-    max-height: 15rem; overflow: auto; padding: .1rem;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(32.5px, 2.119vw + 8.19px, 70.2px), 1fr)); gap: 3px;
+    padding: 1px;
     /* one cell is one piece, so an empty row of the grid is a gap in the warehouse rather than a message */
   }
+  .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
+  .pager button { font-size: var(--font-xs); padding: 1px var(--spacing-xs); }
+  .pager button:disabled { opacity: .4; }
   /* an empty side says so across the whole shelf, not down one cell's width */
-  .grid p { grid-column: 1 / -1; max-width: 26rem; font-size: .74rem; }
+  .grid p { grid-column: 1 / -1; max-width: var(--box-520); font-size: var(--font-xs); }
   .cell {
-    position: relative; aspect-ratio: 1 / 1; padding: 0; border-radius: 3px; background: #171b22;
+    position: relative; aspect-ratio: 1 / 1; padding: 0; border-radius: 3px; background: var(--inset);
   }
-  .cell img { position: absolute; inset: 17%; width: 66%; height: 66%; object-fit: contain; pointer-events: none; }
-  .cell .pl { position: absolute; left: .12rem; bottom: .05rem; font-size: .58rem; color: var(--xp); }
+  .cell img { position: absolute; inset: 0; margin: auto; width: var(--icon-md); height: var(--icon-md); object-fit: contain; pointer-events: none; }
+  .cell .pl { position: absolute; left: clamp(1.5px, 0.098vw + 0.38px, 3.24px); bottom: clamp(0.63px, 0.041vw + 0.16px, 1.35px); font-size: var(--font-xs); color: var(--xp); }
   .cell.lock { border-style: dashed; border-color: var(--dim); }
   .cell.here { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(232, 193, 105, .5); background: rgba(232, 193, 105, .1); }
 
-  .bulk { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
-  .bulk select, .bulk button { font-size: .72rem; padding: .18rem .5rem; }
+  .bulk { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .bulk select, .bulk button { font-size: var(--font-xs); padding: 2px var(--spacing-xs); }
 
   .draw {
-    display: grid; grid-template-columns: minmax(18rem, 24rem) 1fr; gap: .9rem; align-items: start;
-    border-top: 1px solid var(--line); padding-top: .7rem;
+    display: grid; grid-template-columns: minmax(clamp(225px, 14.67vw + 56.7px, 486px), clamp(300px, 19.56vw + 75.6px, 648px)) 1fr; gap: var(--spacing-md); align-items: start;
+    border-top: 1px solid var(--line); padding-top: var(--spacing-sm);
   }
   .draw > p { grid-column: 1 / -1; margin: 0; }
-  .moves { display: grid; gap: .3rem; justify-items: start; }
+  .moves { display: grid; gap: 4px; justify-items: start; }
   .go { border-color: rgba(232, 193, 105, .5); color: var(--gold); }
-  .lk { font-size: .74rem; }
-  .moves p { margin: .15rem 0 0; color: var(--dim); max-width: 34rem; }
+  .lk { font-size: var(--font-xs); }
+  .moves p { margin: 2px 0 0; color: var(--dim); max-width: var(--box-680); }
 
   @media (max-width: 1280px) {
     .grids, .draw { grid-template-columns: 1fr; }
-    .grid { max-height: 11rem; }
   }
 </style>

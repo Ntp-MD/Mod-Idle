@@ -33,27 +33,25 @@ describe('a weapon carries the Element its own line stores', () => {
     expect(buildCharacter(40, emptyGear()).weaponElement).toBe(null);
   });
 
-  it('scales only the Elemental share, the way the counter is defined', () => {
+  it('scales only the Elemental share, and no Element counters another', () => {
     const c = buildCharacter(40, weaponWith('chaos'));
     const share = c.elem * (c.alignment / 100);
     expect(share).toBeGreaterThan(0);
 
-    // chaos is 1.15 against everything including itself (elements.md)
-    const chaos = playerSwing(SWING(), c, mobOf(['chaos']), c.weaponElement).damage;
-    const plain = playerSwing(SWING(), buildCharacter(40, weaponWith(null)), mobOf(['chaos']), null).damage;
-    expect(chaos).toBeCloseTo(plain + share * (E.elements.counter.chaos.chaos - 1), 6);
+    // no matchup multiplier exists: the same swing lands identically on every Element a race owns
+    const onChaos = playerSwing(SWING(), c, mobOf(['chaos']), c.weaponElement).damage;
+    const onFire = playerSwing(SWING(), c, mobOf(['fire']), c.weaponElement).damage;
+    const onNone = playerSwing(SWING(), c, mobOf([]), c.weaponElement).damage;
+    expect(onChaos).toBeCloseTo(onFire, 6);
+    expect(onChaos).toBeCloseTo(onNone, 6);
 
-    // a same-Element hit also pays the weak line, still on the Elemental share only
-    const fire = buildCharacter(40, weaponWith('fire'));
-    const weakHit = playerSwing(SWING(), fire, mobOf(['fire']), fire.weaponElement).damage;
-    const coldMob = playerSwing(SWING(), fire, mobOf(['cold']), fire.weaponElement).damage;
-    const noElement = playerSwing(SWING(), buildCharacter(40, weaponWith(null)), mobOf(['fire']), null).damage;
-    expect(weakHit).toBeCloseTo(noElement + share * (E.elements.weak_mult * E.elements.counter.fire.fire - 1), 6);
-    // fire against cold is the 0.60 counter pair, so the Elemental share shrinks and physical does not
-    expect(coldMob).toBeCloseTo(noElement + share * (E.elements.counter.fire.cold - 1), 6);
+    // and that figure is exactly the Elemental share: strip the pool and the share goes with it
+    const bare = { ...c, elem: 0, elemByElement: {} } as typeof c;
+    const bareHit = playerSwing(SWING(), bare, mobOf(['chaos']), null).damage;
+    expect(onChaos).toBeCloseTo(bareHit + share, 6);
   });
 
-  it('counters each Element of one weapon separately, the PoE way', () => {
+  it('splits a two-Element weapon into pools and answers each on its own res line', () => {
     const gear = emptyGear();
     gear[10] = {
       slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'mid', tier: 'T2',
@@ -70,12 +68,10 @@ describe('a weapon carries the Element its own line stores', () => {
     expect(fire).toBeGreaterThan(cold); // the K_ELEM base rides with the piece's own Element
     expect(fire + cold).toBeCloseTo(c.elem, 6); // and the split never invents or loses pool
 
-    // against a fire monster: the fire part takes the weak line, the cold part the counter pair
+    // no matchup multiplier: the split exists so each pool meets its own resistance line
     const vsFire = playerSwing(SWING(), c, mobOf(['fire']), 'fire').damage;
     const neutral = playerSwing(SWING(), { ...c, elemByElement: {}, elem: 0, phys: c.phys, magic: c.magic }, mobOf(['fire']), null).damage;
-    const expected = neutral + (fire * align * E.elements.weak_mult * E.elements.counter.fire.fire
-      + cold * align * E.elements.counter.cold.fire);
-    expect(vsFire).toBeCloseTo(expected, 6);
+    expect(vsFire).toBeCloseTo(neutral + (fire + cold) * align, 6);
     expect(vsFire).not.toBeCloseTo(neutral, 6);
   });
 
@@ -91,7 +87,7 @@ describe('a weapon carries the Element its own line stores', () => {
     const s = newGame(71);
     huntZone(s, s.zone);
     setLevel(s, 40);
-    s.zone = 4; // a lightning zone, so a fire weapon sits in the 0.60 counter pair
+    s.zone = 4; // a lightning zone, so a fire weapon meets a race whose Element is not its own
     s.gear = weaponWith('fire');
     // Tick until the state under test exists, never for a guessed window: a fixed window is a time
     // premise (AGENTS.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.
@@ -102,9 +98,9 @@ describe('a weapon carries the Element its own line stores', () => {
 });
 
 /**
- * Conversion (`draft/convert-damage.md`): a percent of the finished physical share is ROUTED into a
+ * Conversion: a percent of the finished physical share is ROUTED into a
  * named Element before mitigation, so it answers Elemental resistance instead of Armour. The cage holds
- * the two promises the draft names: a converted swing is the same strength as an unconverted one against
+ * the two promises: a converted swing is the same strength as an unconverted one against
  * a target that mitigates nothing, and it is weaker-or-equal against one that resists the destination —
  * never a multiplier, and the summed percent never overflows the hit.
  */

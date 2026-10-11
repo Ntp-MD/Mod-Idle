@@ -2,66 +2,29 @@
  * Skill model — a thin bridge over engine/skills.ts.
  *
  * The calculator itself lives in the shared module so the client presses the same numbers the
- * workshop prints (Techstack.md "The one rule"). Nothing is computed on this side.
+ * workshop prints (DECISIONS.md §Stack). Nothing is computed on this side: the bridge hands the
+ * whole suite over as one object, so every figure the shared model publishes is readable by every
+ * cage without this file naming it first.
  */
 
 import path from 'node:path';
 import * as R from './roster.ts';
-import * as eng from './engine.ts';
+import { eng } from './engine.ts';
 import { readJson } from './json.ts';
-import { createSkillModel, LADDER, CONVERSION, WEAPON_GROUPS } from '../../engine/skills.ts';
+import { createSkillModel } from '../../engine/skills.ts';
 
 const E = readJson(path.join(import.meta.dirname, '..', 'data', 'engine.json'));
-const M = createSkillModel(R.DATA, E);
+const M: any = createSkillModel(R.DATA, E);
+const REF: any = eng.REF;
 
 /**
  * The two reference builds a press is printed against live in `engine/index.ts` (`REF`), because the
- * roster table and the client must read the same bases (Techstack.md "The one rule").
+ * roster table and the client must read the same bases (DECISIONS.md §Stack).
  */
-const referenceBases = (): any => eng.REF;
+const model: any = Object.assign({}, M, {
+  referenceBases: () => REF,
+  /** The press a row deals on one reference build, at the skill level the tables print. */
+  pressOn: (skill: any, which: string, level: any) => M.perPress(skill, { ...REF[which], level }),
+});
 
-/** The press a row deals on one reference build, at the skill level the tables print. */
-function pressOn(skill: any, which: string, level: any): any {
-  return M.perPress(skill, { ...referenceBases()[which], level });
-}
-
-const LEVEL_STEP = M.LEVEL_STEP;
-const LEVEL_ROWS = M.LEVEL_ROWS;
-const LEVEL_CAP = M.LEVEL_CAP;
-const damagePct = M.damagePct;
-const effectPct = M.effectPct;
-const effectsAt = M.effectsAt;
-const CAST_REF = M.CAST_REF;
-const LADDER_MAX_DUPLICATES = M.LADDER_MAX_DUPLICATES;
-const manaSpec = M.manaSpec;
-const manaCostOf = M.manaCostOf;
-const MANA_LEVEL_STEP = M.MANA_LEVEL_STEP;
-const MANA_POOL_EXPONENT = M.MANA_POOL_EXPONENT;
-const MANA_REF_POOL = M.MANA_REF_POOL;
-const basisOf = M.basisOf;
-const perPress = M.perPress;
-const critsOnBasis = M.critsOnBasis;
-const effCd = M.effCd;
-const row = M.row;
-const ladderPct = M.ladderPct;
-const ladderCostToStep = M.ladderCostToStep;
-const skillLevel = M.skillLevel;
-const skillXpForLevel = M.skillXpForLevel;
-const weaponGroupOf = M.weaponGroupOf;
-const groupBonus = M.groupBonus;
-const masteryBonus = M.masteryBonus;
-const reservePct = M.reservePct;
-const model = (): any => M;
-
-export {
-  LEVEL_STEP, LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, effectsAt, CAST_REF,
-  manaSpec, manaCostOf, MANA_LEVEL_STEP, MANA_POOL_EXPONENT, MANA_REF_POOL,
-  basisOf, perPress, critsOnBasis,
-  effCd, row,
-  ladderPct, ladderCostToStep, skillLevel,
-  skillXpForLevel, weaponGroupOf,
-  groupBonus, masteryBonus, reservePct,
-  referenceBases, pressOn,
-  LADDER, CONVERSION, WEAPON_GROUPS, LADDER_MAX_DUPLICATES,
-  model,
-};
+export { model };

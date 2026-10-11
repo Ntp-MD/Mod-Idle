@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { E, eng, TOWN } from '../src/engine/client';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import { settlementOfZone } from '../src/sim/town';
-import { walkRoute, walkBlocks, startWalk, warpTo, warpCost } from '../src/sim/road';
+import { walkRoute, walkBlocks, startWalk, settlementCell, warpTo, warpCost, road, rankOf, zoneOf } from '../src/sim/road';
 import { hexAdjacent } from '../../engine/road.ts';
 import type { GameState } from '../src/sim/types';
 
@@ -35,10 +35,12 @@ describe('the stay / move on switch', () => {
     // nothing opened yet but the start, so there is nowhere to go
     for (let i = 0; i < 30; i++) tick(s, {});
     expect(s.zone).toBe(eng.ZONES[0].id);
-    // open the settlement of the next band and it moves on its own
+    // open the settlement of the next band and it moves on its own. The watch stops the tick the
+    // zone moves: the rule is a level gate read every tick, and a long watch lets this bare-geared
+    // character be Pushed back out of the zone it just climbed into — the survival rule, not this one
     const next = eng.ZONES.find((z: any) => z.id > s.zone)!;
     s.town.visited.push(settlementOfZone(next.id)!.id);
-    for (let i = 0; i < 30; i++) tick(s, {});
+    for (let i = 0; i < 5 && s.zone === eng.ZONES[0].id; i++) tick(s, {});
     expect(s.zone).toBe(next.id);
     expect(s.log.some((l) => /Moving on/.test(l.text))).toBe(true);
   });
@@ -72,7 +74,7 @@ describe('Forward Mode falls back to the last zone it held', () => {
     const z1 = eng.ZONES[0];
     const z2 = eng.ZONES.find((z: any) => z.id > z1.id)!;
     s.town.visited.push(settlementOfZone(z2.id)!.id);
-    for (let i = 0; i < 30; i++) tick(s, {});
+    for (let i = 0; i < 5 && s.zone === z1.id; i++) tick(s, {});
     expect(s.zone).toBe(z2.id);
     expect(s.forwardSafe).toBe(z1.id);
 
@@ -122,7 +124,7 @@ describe('the walked world: single steps and the Waypoint price', () => {
     const from = s.town.waypoint, dest = other(s);
     const to = dest.id;
     const blocks = walkBlocks(from, to);
-    startWalk(s, from, to);
+    startWalk(s, settlementCell(to)!);
     expect(s.walk?.blocksTotal).toBe(blocks);
     s.group = [];
     let ticks = 0;
@@ -131,6 +133,36 @@ describe('the walked world: single steps and the Waypoint price', () => {
     expect(s.town.visited).toContain(to);
     expect(s.town.waypoint).toBe(to);
     expect(s.zone).toBe(dest.zone);
+  });
+
+  it('lands the feet on the destination hex, so a warp and a walk stand on the same cell', () => {
+    const s = newGame(10);
+    const dest = other(s);
+    s.counters.gold = 99999;
+    s.town.visited.push(dest.id);
+    s.counters.gold = warpCost(s, dest.id);
+    expect(warpTo(s, dest.id).ok).toBe(true);
+    const node = road.nodeById(dest.id);
+    expect(s.cell).toEqual({ q: node.q, r: node.r, sub: null, wild: null });
+    expect(rankOf(s.cell!)).toBe(0);
+  });
+
+  it('arriving off-town sets the cell and its zone, and opens no Waypoint', () => {
+    const s = newGame(11);
+    topUp(s);
+    const home = road.nodeById(s.town.waypoint);
+    // a cell one step out is a side of the town, never a town of its own
+    const side = road.neighbours(home).find((h: any) => road.cellRank(h) === 1)!;
+    const visited = [...s.town.visited];
+    expect(startWalk(s, { ...side, sub: null, wild: null }).ok).toBe(true);
+    let ticks = 0;
+    while (s.walk && ticks < 600) { tick(s, {}, { online: true }); topUp(s); ticks++; }
+    expect(s.walk).toBeNull();
+    expect(s.cell).toEqual({ q: side.q, r: side.r, sub: null, wild: null });
+    expect(rankOf(s.cell!)).toBe(1);
+    expect(zoneOf(s.cell!)).toBe(s.zone);
+    expect(s.town.visited).toEqual(visited);       // a Waypoint marks a town, not a patch of ground
+    expect(s.town.waypoint).toBe(home.id);
   });
 
   it('charges gold for a warp and never opens a Waypoint money did not earn', () => {

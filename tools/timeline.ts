@@ -11,6 +11,7 @@
 
 import path from 'node:path';
 import { readJson } from './lib/json.ts';
+import * as G from './lib/gates.ts';
 
 const E = readJson<any>(path.join(import.meta.dirname, 'data', 'engine.json'));
 const X = E.xp;
@@ -58,8 +59,7 @@ function model(): any {
 }
 
 function gates(m: any): any[] {
-  const out: any[] = [];
-  const add = (id: string, ok: boolean, detail: string) => out.push({ id, ok, detail });
+  const { add, rows } = G.gates();
   // No wall-clock gate and no clock column: this is an open-world idle RPG with no time limit (owner
   // ruling), so progression is read in kills — a state the player holds. The sanity rule is the shape
   // the owner set: the bar climbs to the completion checkpoint and then holds FLAT.
@@ -71,17 +71,13 @@ function gates(m: any): any[] {
   const plateau = X.plateau_from != null && X.plateau_step_at != null && X.plateau_from > X.plateau_step_at;
   add('TL1', rising && flatTail && plateau,
     `the bar climbs to the completion checkpoint (xp per ${X.step}-level step ${Math.round(up[0].xp).toLocaleString('en-US')} → ${Math.round(up[up.length - 1].xp).toLocaleString('en-US')} through level ${COMPLETION}) and then holds FLAT: every step past ${COMPLETION} costs the same ${Math.round(tail[0].xp).toLocaleString('en-US')} XP, the 89 → 90 size, so the post-completion loop is a plateau and not a wall${rising ? '' : ' · THE CLIMB IS NOT RISING'}${flatTail ? '' : ' · THE TAIL IS NOT FLAT'}${plateau ? '' : ' · NO PLATEAU IS DECLARED'}`);
-  return out;
+  return rows();
 }
 
 const arg = process.argv[2];
 
 if (arg === '--checks') {
-  const rows = gates(model());
-  for (const r of rows) console.log(`${r.id.padEnd(4)}  ${r.ok ? 'PASS ' : 'FAIL '}  ${r.detail}`);
-  const fails = rows.filter((r) => !r.ok).length;
-  console.log(`\n${rows.length - fails}/${rows.length} gate PASS · ${fails} FAIL`);
-  if (fails) process.exitCode = 1;
+  G.report(gates(model()));
 } else {
   console.log(`timeline cage — engine.json xp → the 5-level-step table
 
