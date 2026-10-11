@@ -439,7 +439,7 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   // the kill flash wears the mob's own innate Element, the same one its resistance answered with. It names
   // the body too: the word still reads in the shared column, and the id is what lets the card it died on
   // show the blow that ended it before it goes.
-  fx(s, { kind: 'kill', side: 'field', mobId: mob.id, text: mob.species, colour: hitColour(mob.innate?.[0] || null) });
+  fx(s, { kind: 'kill', side: 'field', mobId: mob.id, text: mob.species, colour: hitColour(mob.innate?.[0] || null), value: online ? mob.xp : 0 });
   s.counters.zoneKills[mob.zone] = (s.counters.zoneKills[mob.zone] || 0) + 1;
   s.player.xp += mob.xp;
   while (s.player.level < E.stat.level_cap && s.player.xp >= eng.xpToNext(s.player.level)) {
@@ -489,7 +489,7 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     if (s.dungeon) s.dungeon.escrow.items.push(item);
     else {
       adjudicateDrop(s, item);
-      fx(s, { kind: 'drop', side: 'field', text: 'drop', colour: hitColour(null) });
+      fx(s, { kind: 'drop', side: 'field', text: `${item.quality} ${item.base}`, colour: hitColour(null) });
     }
   }
   const junkScale = pJunkBase > 0 ? hw.junk / pJunkBase : 1;
@@ -583,7 +583,7 @@ function completeDungeonRun(s: GameState): void {
   let gear = 0;
   for (const item of run.escrow.items) {
     adjudicateDrop(s, item);
-    fx(s, { kind: 'drop', side: 'field', text: 'drop', colour: hitColour(null) });
+    fx(s, { kind: 'drop', side: 'field', text: `${item.quality} ${item.base}`, colour: hitColour(null) });
     gear++;
   }
   s.dungeonClearedAt = s.clockSec;

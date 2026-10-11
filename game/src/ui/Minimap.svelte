@@ -48,17 +48,18 @@
 
 <style>
   .mini-map {
-    position: fixed; top: var(--rail-drop); right: var(--screen-pad); z-index: 40;
+    position: relative; z-index: 40;
     width: var(--minimap-size); height: var(--minimap-size); padding: 0;
     border-radius: 50%; overflow: hidden; cursor: pointer;
-    background: var(--glass); border: 1px solid var(--edge);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+    background: var(--glass);
+    border: 2px solid color-mix(in srgb, var(--gold) 45%, var(--edge));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(0, 0, 0, .55);
   }
   .mini-map svg { width: 100%; height: 100%; display: block; }
   .mini-map :global(.mcell) { stroke: rgba(0, 0, 0, .35); stroke-width: 1.4; }
   .mini-map :global(.mdot) { fill: var(--sheet-place); stroke: rgba(0, 0, 0, .6); stroke-width: 1.4; }
   .mini-map :global(.you-ring) { fill: none; stroke: var(--gold); stroke-width: 3; opacity: .85; }
   .mini-map :global(.you-dot) { fill: var(--gold); }
-  .mini-map:hover { border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
+  .mini-map:hover { border-color: var(--gold); box-shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 0 14px color-mix(in srgb, var(--gold) 30%, transparent); }
   .mini-map:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 </style>

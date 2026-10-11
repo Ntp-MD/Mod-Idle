@@ -341,6 +341,42 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /** a level is the frame's own beat, not a chip in a column, so it leaves the column and takes the title */
   const latestLevel = $derived((gameState.fx || []).find((e) => e.kind === 'level') || null);
 
+  /** what an aura or a buff is adding right now, minus the resistance line — the vitals keep the pools
+       and the offence reads; resistances are a sheet number, not something the corner repeats */
+  const vitalsBuffs = $derived.by(() => {
+    const fold = effectsActive(gameState.skills);
+    const add = { ...fold.add };
+    const mult = { ...fold.mult };
+    for (const key of Object.keys(add)) if (/resistance|res_/.test(key)) delete add[key];
+    for (const key of Object.keys(mult)) if (/resistance|res_/.test(key)) delete mult[key];
+    return describeFold({ add, mult });
+  });
+
+  /** the bottom strip's one read: how far into the level the character stands, in the unit the bar prints */
+  const xpPct = $derived(Math.max(0, Math.min(100, (gameState.player.xp / eng.xpToNext(gameState.player.level)) * 100)));
+
+  /** the field's own log, the chat box's shape: what the world just did, said once and left to scroll away */
+  type FeedLine = { id: number; text: string; tone: string };
+  let feed = $state<FeedLine[]>([]);
+  let feedSeen = 0;
+  $effect(() => {
+    const fresh = ring.filter((e) =>
+      (e.kind === 'kill' || e.kind === 'level' || e.kind === 'travel' || e.kind === 'buff' || e.kind === 'drop') && e.text);
+    if (!fresh.length) return;
+    const top = Math.max(...fresh.map((e) => e.id));
+    if (feedSeen === 0) { feedSeen = top; return; }
+    const add = fresh.filter((e) => e.id > feedSeen).slice(0, 6);
+    feedSeen = top;
+    if (!add.length) return;
+    feed = [...feed, ...add.map((e) => ({
+      id: e.id,
+      text: e.kind === 'kill'
+        ? `Slain · ${e.text} · +${fmtNum(e.value || 0)} EXP`
+        : e.kind === 'buff' ? `${e.text} up` : e.text,
+      tone: e.kind === 'level' ? 'gold' : e.kind === 'drop' ? 'gold' : e.kind === 'travel' ? 'good' : 'dim',
+    }))].slice(-6);
+  });
+
   /** The away-window report (parking: "Offline report on return"), filled on mount catch-up + Load. */
   let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; quality: string } | null>(null);
 
@@ -1478,9 +1514,47 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </div>
   <h2 class="arena">{townLive && town && town.name !== zone.name ? `${town.name} · ${zone.name}` : zone.name}</h2>
 
-  <!-- top-right: the minimap — the sheet's own fills in a circular thumbnail, cropped to the ground
-       the feet are on; one press opens the full map screen. No id is shared with the sheet. -->
-  <Minimap markup={mapMarkup} cell={gameState.cell} onopen={() => togglePanel('map')} />
+  <!-- top-centre: the hunt's headline — who you are and what you are fighting, the way a hub screen
+       names its target: the front body's name over one wide red bar that carries its health -->
+  {#if plates.length}
+    {@const front = plates[0]}
+    <div class="targetbar">
+      <p class="player-tag">Lv.{gameState.player.level} <b>{heldWeaponName(gameState) || 'Bare hands'}</b></p>
+      <p class="target-name">{fieldLabel(front)} <span>{front.kind}</span></p>
+      <div class="target-hp">
+        <i style={bar(front.hp, front.hpMax)}></i>
+        <b>{Math.max(0, Math.round(front.hp))} / {Math.round(front.hpMax)}</b>
+      </div>
+    </div>
+  {/if}
+
+  <!-- top-left: the read column — the zone tag, the purse and the run clock as pills, the minimap
+       under them, and the hunt's own objectives as the quest stack under the map -->
+  <div class="topright">
+    <p class="zone-tag">{zone.name}<b>Lv {zone.levels[0]}–{zone.levels[1]}</b></p>
+    <div class="toprow">
+      <span class="purse" title="Gold in the purse"><b>{fmtNum(gameState.counters.gold)}</b><i>gold</i></span>
+      <span class="purse" title="Time and kills this run"><b>{minutes} min</b><i>{fmtNum(gameState.counters.kills)} kills</i></span>
+    </div>
+    <Minimap markup={mapMarkup} cell={gameState.cell} onopen={() => togglePanel('map')} />
+    <div class="tracker">
+      <p class="phase">{phaseRead}</p>
+      <label class="travel">
+        <b>Zone</b>
+        <span class="seg">
+          <button class={gameState.travel === 'stay' ? 'active' : ''} onclick={() => setTravel('stay')}>stay here</button>
+          <button class={gameState.travel === 'forward' ? 'active' : ''} onclick={() => setTravel('forward')}>climb forward</button>
+        </span>
+        <small>{gameState.travel === 'forward'
+          ? `walks on to the next settlement you have already opened once level ${zone.levels[1] + 1} is reached, and a Push sends you back to the last zone you held`
+          : 'stays in this zone however high you get — you choose when to travel'}</small>
+      </label>
+      {#if bagFull}
+        <p class="alarm-line">Bag full — the zone has stopped paying. Walk to a settlement and deposit.</p>
+      {/if}
+      <p class="objective">{describeGoal()}</p>
+    </div>
+  </div>
   {#if latestLevel}
     <!-- the one beat the whole frame takes for itself: a level is why the character is here, so it borrows
          the title's line for one rise and hands it back. The accent is the HUD's own, read out of the data,
@@ -1500,7 +1574,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </div>
   {/if}
 
-  <!-- top-left: the character's own read, and the two overlays that hang under it — the sheet from its
+  <!-- top-right: the character's own read, and the two overlays that hang under it — the sheet from its
        button under the vitals, the point allocation from the level chip beside the XP bar.
        character-sheet.md — Energy Shield sits above HP while the pool is there, and HP / Mana / Attack
        speed are the three always shown; Weight lives on the bag. -->
@@ -1542,8 +1616,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           {/if}
           <span class="chip aspd">{c.hitsPerSec.toFixed(2)} hits/sec</span>
         </div>
-        {#if describeFold(effectsActive(gameState.skills))}
-          <div class="buffs" title="What an aura or a buff is adding right now">{describeFold(effectsActive(gameState.skills))}</div>
+        {#if vitalsBuffs}
+          <div class="buffs" title="What an aura or a buff is adding right now, resistances aside">{vitalsBuffs}</div>
         {/if}
       </div>
     </div>
@@ -1666,26 +1740,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       </section>
     {/if}
 
-    <!-- the objectives: what the hunt is for and the zone's own switch, hung under the vitals in the same
-         column — a read taken mid-fight, so it flows below whatever the vitals and the overlays take up
-         rather than being pinned to a height the bars no longer have -->
-    <div class="tracker">
-      <p class="phase">{phaseRead}</p>
-      <label class="travel">
-        <b>Zone</b>
-        <span class="seg">
-          <button class={gameState.travel === 'stay' ? 'active' : ''} onclick={() => setTravel('stay')}>stay here</button>
-          <button class={gameState.travel === 'forward' ? 'active' : ''} onclick={() => setTravel('forward')}>climb forward</button>
-        </span>
-        <small>{gameState.travel === 'forward'
-          ? `walks on to the next settlement you have already opened once level ${zone.levels[1] + 1} is reached, and a Push sends you back to the last zone you held`
-          : 'stays in this zone however high you get — you choose when to travel'}</small>
-      </label>
-      {#if bagFull}
-        <p class="alarm-line">Bag full — the zone has stopped paying. Walk to a settlement and deposit.</p>
-      {/if}
-      <p class="objective">{describeGoal()}</p>
-    </div>
+    <!-- the objectives live in the top-right read column now, beside the minimap they serve -->
   </div>
 
   <!-- top-right, under the minimap: what the hunt is worth right now, so a decision never needs a panel opened -->
@@ -1998,6 +2053,24 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </button>
   {/if}
 
+  <!-- bottom-left: the field's own log in the chat box's seat — what the world just did, newest last,
+       each line fading by its age, gone when the window rolls it out. A read only; it takes no press. -->
+  {#if feed.length}
+    <div class="combatlog" role="log" aria-live="polite">
+      {#each feed as line, i (line.id)}
+        <p class={line.tone} style={`--age:${feed.length - 1 - i}`}>{line.text}</p>
+      {/each}
+    </div>
+  {/if}
+
+  <!-- the bottom edge: the run's one strip — the level and how far into it, the run's own clock and
+       its kills, the way a hub screen keeps its progress pinned to the floor of the frame -->
+  <div class="expbar" role="status" aria-label={`Level ${gameState.player.level}, experience ${xpPct.toFixed(1)} percent`}>
+    <span class="lv">Lv {gameState.player.level}</span>
+    <span class="track"><i style={`width:${xpPct.toFixed(1)}%`}></i><b>{xpPct.toFixed(1)}%</b></span>
+    <span class="meta">{fmtNum(gameState.counters.kills)} kills · {minutes} min</span>
+  </div>
+
   <!-- every note the client gives by press — a refusal, a forge outcome, a deposit — is said out loud as
        well as printed, because four different pills in four different corners are not one announcement -->
   <p class="aloud" role="status" aria-live="polite">{saveNote || equipNote || benchNote || townNote || farmNote}</p>
@@ -2007,8 +2080,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      press and the field is never further than its first button. Each tab wears its own caption; the
      key still lives in its tooltip and the settings screen prints the full legend. -->
 <nav class="rail" aria-label="Menu">
-  <span class="purse" title="Gold in the purse"><b>{fmtNum(gameState.counters.gold)}</b><i>gold</i></span>
-  <span class="purse" title="Time and kills this run"><b>{minutes} min</b><i>{fmtNum(gameState.counters.kills)} kills</i></span>
   <button class="tab" class:here={panel === null} onclick={closePanel}
           title="Back to the field · Esc" aria-keyshortcuts="Esc" aria-label="Back to the field">
     <img src={skillMark} alt="" aria-hidden="true" />
@@ -2760,10 +2831,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      the one thing the player is looking at. The purse stays — it costs nothing to read and a walk needs it. */
   .stage.mapmode .tracker { display: none; }
   .stage.mapmode .arena { display: none; }
+  .stage.mapmode .targetbar { display: none; }
   /* a working screen is the subject, so the field behind it recedes the way the ground recedes from the
      map: one ladder, one direction — the veil does the dimming and the field does the blurring */
   .stage.veiled { --dof: var(--dof-far); }
-  .stage.veiled .field, .stage.veiled .tracker, .stage.veiled .actionbar {
+  .stage.veiled .field, .stage.veiled .tracker, .stage.veiled .actionbar, .stage.veiled .targetbar {
     filter: blur(2.5px); opacity: .5; transition: filter .18s ease, opacity .18s ease;
   }
   .stage.veiled .map-back { --dof: var(--dof-rest); }
@@ -2799,6 +2871,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     position: fixed;
     inset: 0;
     overflow: hidden;
+    /* the menu bar's own height band: every top-centre read hangs below it */
+    --rail-h: clamp(52px, 3.4vw, 66px);
     background:
       radial-gradient(120% 85% at 50% 115%, color-mix(in srgb, var(--glow-moss) 30%, transparent), transparent 62%),
       radial-gradient(95% 70% at 50% -12%, color-mix(in srgb, var(--glow-dusk) 32%, transparent), transparent 64%),
@@ -2813,34 +2887,52 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .vitals, .tracker, .field { z-index: 2; }
   /* the zone names the frame itself: a banner across the top edge, quiet, lying behind every read */
   .arena {
-    position: absolute; top: clamp(6.88px, 0.448vw + 1.73px, 14.85px); left: 50%; transform: translateX(-50%); z-index: 0;
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h)); left: 50%; transform: translateX(-50%); z-index: 0;
     margin: 0; font-size: var(--fs-arena); letter-spacing: clamp(2.5px, 0.163vw + 0.63px, 5.4px); text-transform: uppercase;
     color: color-mix(in srgb, var(--text) 12%, transparent); white-space: nowrap; pointer-events: none;
   }
   /* the away report takes the second line, so it never prints over the zone's own name */
   .toast {
-    position: absolute; top: clamp(40px, 2.608vw + 10.08px, 86.4px); left: 50%; transform: translateX(-50%); z-index: 6;
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--fs-arena) + var(--spacing-xs)); left: 50%; transform: translateX(-50%); z-index: 6;
     display: flex; flex-wrap: wrap; gap: 3px var(--spacing-sm); align-items: baseline; max-width: min(var(--box-920), 62%);
     border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent); border-radius: 10px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs);
     background: var(--glass); box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
   }
   .toast .quit { background: none; border: none; padding: 0; color: var(--dim); }
 
-  /* top-left: the character's own read, and the overlays that hang under it. The dock owns a column,
-     not the screen — it takes no click outside its own rows, so the field under it stays the field */
+  /* top-right: the character's own read and the overlays that hang under it — the sheet from its
+       button under the vitals, the point allocation from the level chip beside the XP bar.
+       character-sheet.md — Energy Shield sits above HP while the pool is there, and HP / Mana / Attack
+       speed are the three always shown; Weight lives on the bag. */
   .dock {
-    position: absolute; top: var(--screen-pad); left: var(--screen-pad); bottom: clamp(60px, 3.912vw + 15.12px, 129.6px); z-index: 3;
-    width: min(var(--box-620), 46%); display: flex; flex-direction: column; gap: var(--spacing-xs);
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); right: var(--screen-pad); bottom: clamp(60px, 3.912vw + 15.12px, 129.6px); z-index: 3;
+    width: min(var(--box-620), 46%); display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-xs);
     pointer-events: none;
   }
+  /* panel language shared by the hub's cards (Lumivara navy-and-gold, Genshin corner ticks):
+     deep glass, a gold hairline, one lit top edge, and two gold corner brackets */
   .vitals {
-    display: flex; gap: var(--spacing-sm); align-items: flex-start;
-    width: max-content; padding: var(--spacing-sm);
-    background: var(--glass); backdrop-filter: blur(6px);
-    border: 1px solid var(--edge); border-radius: clamp(8px, 0.489vw + 1.89px, 16.2px);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+    --notch: clamp(8px, 1vw, 16px);
+    position: relative;
+    display: flex; gap: var(--spacing-sm); align-items: center;
+    width: max-content; padding: var(--spacing-xs) var(--spacing-sm);
+    background: linear-gradient(180deg, rgba(23, 29, 40, .85), rgba(11, 15, 21, .93));
+    border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--edge));
+    border-radius: clamp(8px, 0.75vw, 14px);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
   }
+  .vitals::before, .vitals::after {
+    content: ''; position: absolute; width: var(--notch); height: var(--notch); pointer-events: none;
+    border: 2px solid color-mix(in srgb, var(--gold) 62%, transparent);
+  }
+  .vitals::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .vitals::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
   .portrait { position: relative; flex: none; width: var(--portrait-size); height: var(--portrait-size); }
+  /* the portrait's gold collar: a hairline ring a step outside the xp ring's track */
+  .portrait::before {
+    content: ''; position: absolute; inset: -3px; border-radius: 50%; pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  }
   /* the XP ring is the portrait's own rim: track faint, fill the xp token, wound clockwise from noon */
   .xp-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
   .xp-ring circle { fill: none; stroke-width: 7; }
@@ -2848,12 +2940,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .xp-ring .fill { stroke: var(--xp); stroke-linecap: round; }
   .face {
     position: absolute; inset: clamp(5.25px, 0.342vw + 1.32px, 11.34px); padding: 0; border-radius: 50%;
-    display: grid; place-items: center; background: var(--glass); border: 1px solid var(--edge);
+    display: grid; place-items: center;
+    background: radial-gradient(circle at 50% 26%, rgba(255, 255, 255, .09), transparent 58%), linear-gradient(180deg, #1c2430, #0d1218);
+    border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--edge));
   }
   .face img { width: var(--icon-md); height: var(--icon-md); }
   .face b {
     position: absolute; right: clamp(-6.76px, -0.204vw - 0.79px, -3.13px); bottom: clamp(-6.76px, -0.204vw - 0.79px, -3.13px); min-width: var(--icon-md); padding: 1px 4px;
-    border-radius: clamp(10px, 0.652vw + 2.52px, 21.6px); background: var(--gold); color: var(--gold-ink); font-size: var(--font-xs); text-align: center;
+    border-radius: clamp(8px, 0.652vw + 2.52px, 18px);
+    background: linear-gradient(180deg, var(--gold-lit), var(--gold)); color: var(--gold-ink);
+    border: 1px solid rgba(0, 0, 0, .45); box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
+    font-size: var(--font-xs); font-weight: 700; text-align: center;
   }
   /* the reads beside the portrait: the three pool bars and the chips, stacked as one column that sits
      to the right of the face */
@@ -2864,8 +2961,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .pools { display: flex; flex-direction: column; gap: 3px; }
   .pool {
     position: relative; width: var(--box-180); height: var(--icon-sm);
-    border-radius: clamp(8.75px, 0.57vw + 2.2px, 18.9px); overflow: hidden;
-    background: var(--inset); border: 1px solid var(--edge);
+    border-radius: 999px; overflow: hidden;
+    background: rgba(8, 11, 16, .85); border: 1px solid color-mix(in srgb, var(--gold) 18%, var(--edge));
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .6);
     display: grid; place-items: center;
   }
   .pool i { position: absolute; top: 0; bottom: 0; left: 0; transition: width .25s; }
@@ -2893,16 +2991,24 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* the dock's two overlays: the sheet and the allocation float under the vitals instead of covering
      the screen — a veil is for a screen you work in, and these are reads you take mid-fight */
   .pop {
-    pointer-events: auto; flex: 0 1 auto; min-height: 0; max-height: 70vh;
+    pointer-events: auto; flex: 0 1 auto; align-self: stretch; min-height: 0; max-height: 70vh;
+    position: relative;
     display: flex; flex-direction: column;
-    border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, .55); backdrop-filter: blur(8px);
+    border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--edge)); border-radius: clamp(8px, 0.75vw, 14px);
+    background: linear-gradient(180deg, rgba(23, 29, 40, .88), rgba(11, 15, 21, .95));
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .6); backdrop-filter: blur(8px);
     animation: pop .14s ease-out;
   }
+  .pop::before, .pop::after {
+    content: ''; position: absolute; width: clamp(8px, 1vw, 16px); height: clamp(8px, 1vw, 16px); pointer-events: none;
+    border: 2px solid color-mix(in srgb, var(--gold) 62%, transparent);
+  }
+  .pop::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .pop::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
   .pop > header {
     display: flex; align-items: baseline; gap: var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-xs);
-    border-bottom: 1px solid var(--edge); border-radius: 12px 12px 0 0;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--gold) 26%, var(--edge)); border-radius: clamp(8px, 0.75vw, 14px) clamp(8px, 0.75vw, 14px) 0 0;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 14%, transparent), transparent);
   }
   .pop > header h3 { margin: 0; flex: none; color: var(--gold); font-size: var(--font-xs); letter-spacing: clamp(1.5px, 0.098vw + 0.38px, 3.24px); text-transform: uppercase; }
   .pop .sub { flex: 1; color: var(--dim); font-size: var(--font-xs); }
@@ -2930,17 +3036,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* left edge under the portrait: where the character stands, whether it moves on, what it aims at —
      slim masked lines for legibility over the field, never a glass card; long lines clamp to two */
   .tracker {
-    /* the objectives flow under the vitals inside the dock: the column's own gap does the spacing, so the
-       reads track the vitals' height instead of being pinned to a number the bars no longer carry. The
-       dock is inert so the field under it stays the field — the tracker opts its own rows back in. */
-    align-self: flex-start; width: var(--objectives-w); pointer-events: auto; z-index: 2;
-    display: grid; gap: 4px; align-content: start;
+    /* the quest stack under the minimap, in the top-right column: one width, right-aligned with the
+       map it serves, its own rows opting back into pointer events the inert column holds off */
+    width: var(--objectives-w); pointer-events: auto; z-index: 2;
+    display: grid; gap: 4px; align-content: start; justify-items: stretch;
   }
   .tracker > * {
     margin: 0; padding: 3px var(--spacing-xs); border-radius: clamp(5px, 0.326vw + 1.26px, 10.8px); font-size: var(--font-xs);
     background: linear-gradient(90deg, rgba(0, 0, 0, .66), rgba(0, 0, 0, .38) 78%, transparent);
   }
-  .tracker .phase { color: var(--dim); }
+  .tracker .phase {
+    color: var(--gold-lit); text-transform: uppercase;
+    letter-spacing: clamp(1px, 0.065vw + 0.25px, 2.16px);
+    box-shadow: inset 2px 0 0 var(--gold);
+  }
   .tracker .phase, .tracker .objective, .tracker .alarm-line, .tracker .travel small {
     overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
   }
@@ -2959,7 +3068,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      orb arc owns, a top edge under the portrait, and a floor the self-plate's band sits on — the
      HUD floats over the field, so the field gives ground to it, not the other way round. */
   .field {
-    position: absolute; inset: clamp(82.5px, 5.379vw + 20.79px, 178.2px) clamp(clamp(175px, 11.41vw + 44.1px, 378px), 17vw, clamp(200px, 13.04vw + 50.4px, 432px)) clamp(55px, 3.586vw + 13.86px, 118.8px) calc(var(--objectives-w) + var(--screen-pad) * 3);
+    position: absolute; inset: clamp(120px, 5.379vw + 20.79px, 178.2px) clamp(clamp(175px, 11.41vw + 44.1px, 378px), 17vw, clamp(200px, 13.04vw + 50.4px, 432px)) clamp(55px, 3.586vw + 13.86px, 118.8px) calc(var(--box-100) + var(--screen-pad) * 3);
     display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: var(--spacing-lg);
     overflow: auto;
     /* one knob for every card on the field: mob plates and the player's own share it, so the two
@@ -3063,7 +3172,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      bar reached, so a body's last health shows the hot end of its own colour. Across a group of plates that
      is one red signal read before any digit is looked at. The slide is the sim's own step carried between
      the two seconds it lands in — damage reads as travel, not as a strobe. */
-  .mobbar i, .mini-bar i {
+  .mobbar i, .mini-bar i, .target-hp i {
     background-size: calc(100% / max(var(--w, 1), .001)) 100%;
     transition: width .22s ease-out;
   }
@@ -3085,18 +3194,26 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      Border only: a second shadowed card at the near edge would read as a second subject. */
   .self-plate {
     /* the orb row owns the bottom edge now, so the plate clears it rather than standing behind it */
-    position: absolute; bottom: calc(var(--orb-1) + clamp(20px, 1.304vw + 5.04px, 43.2px) + var(--screen-pad)); left: 50%; transform: translateX(-50%); z-index: 2;
+    position: absolute; bottom: calc(var(--orb-cast) * 2 + 3px + var(--spacing-sm) + var(--bar-h) + var(--screen-pad)); left: 50%; transform: translateX(-50%); z-index: 2;
     width: var(--card-w); min-height: var(--plate-h); text-align: center; pointer-events: none;
   }
-  /* the cardface carries the paint, so every answer moves the whole card: the root keeps the slot only */
+  /* the cardface carries the paint, so every answer moves the whole card: the root keeps the slot only.
+       The face is the hub's own avatar read — a round portrait on a dark plinth, the pools under it */
   .self-plate .cardface {
-    min-height: var(--plate-h); display: flex; flex-direction: column; padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); border-radius: 12px;
-    background: var(--glass); border: 1px solid var(--edge);
+    min-height: var(--plate-h); display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); border-radius: clamp(10px, 0.75vw, 16px);
+    background: linear-gradient(180deg, rgba(23, 29, 40, .62), rgba(8, 11, 16, .78));
+    border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
+    box-shadow: 0 6px 22px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
   }
   /* the player's own vitals hug the same foot: the first bar carries the group down */
   .self-plate .art { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; flex: 1; gap: 4px; }
   .self-plate .art > span.mobbar:first-of-type { margin-top: auto; }
-  .self-plate .portrait { width: var(--icon-xl); height: var(--icon-xl); }
+  .self-plate .portrait {
+    width: var(--icon-xl); height: var(--icon-xl); border-radius: 50%;
+    border: 2px solid var(--gold); background: var(--glass); padding: var(--spacing-xs);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .55), 0 2px 10px rgba(0, 0, 0, .5);
+  }
   /* Energy Shield sits above HP here exactly as it does in the dock, and only while the pool is there */
   .mobbar.es i { background-image: linear-gradient(90deg, var(--es), var(--es-lit)); }
   .mobbar.mana i { background-image: linear-gradient(90deg, var(--mana), var(--mana-lit)); }
@@ -3106,7 +3223,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .actionbar {
     /* full width with the row centred in it: anchoring at left:50% would cap the row's available width
        at half the viewport, wrapping a full bar of orbs onto a second line */
-    position: absolute; bottom: var(--screen-pad); left: 0; right: 0; z-index: 4;
+    position: absolute; bottom: calc(var(--bar-h) + var(--screen-pad)); left: 0; right: 0; z-index: 4;
     display: flex; justify-content: center;
     /* one size for every slot, the same for the settings press that ends the row, so the row reads as
        one rank rather than a descending scale */
@@ -3117,16 +3234,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     --slot-edge: rgba(255, 255, 255, .5);
   }
   /* the row runs left to right in slot order: slot 1 leads at the left, the settings press trails. */
+  /* the row runs as two ranks of eight: 15 slots + the settings press wrap at exactly eight per
+       line — the cap is eight orbs plus their seven 3px gaps, so the eighth never slips to a third row */
   .casts {
-    display: flex; flex-flow: row wrap-reverse; justify-content: center;
-    align-items: flex-end; align-content: flex-end; gap: 3px; max-width: 62vw;
+    display: flex; flex-flow: row wrap; justify-content: center;
+    align-items: flex-end; align-content: flex-end; gap: 3px; max-width: calc(var(--orb) * 8 + 21px);
   }
   .cast {
     position: relative; width: var(--orb); height: var(--orb);
     border-radius: 50%; display: grid; place-items: center;
-    background: var(--slot-face); border: 1px solid var(--slot-edge); backdrop-filter: blur(6px);
+    background:
+      radial-gradient(circle at 50% 28%, rgba(255, 255, 255, .1), transparent 56%),
+      linear-gradient(180deg, #242e3c, #10151d);
+    border: 1px solid rgba(255, 255, 255, .2); backdrop-filter: blur(6px);
     /* a dark separation ring under the lit rim keeps the edge crisp against the pale map behind it */
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .45);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .65), 0 3px 10px rgba(0, 0, 0, .5), inset 0 2px 4px rgba(255, 255, 255, .07), inset 0 -6px 12px rgba(0, 0, 0, .5);
+    transition: border-color .15s ease, box-shadow .15s ease;
   }
   .cast img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
   /* an empty slot keeps its size: the arc is the cast order, and it must not jump as skills arrive */
@@ -3136,7 +3259,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .cast.cog img { opacity: .78; }
   .cast.cog:hover { border-color: var(--gold); }
   .cast.cog.here { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 50%, transparent); }
-  .cast.ready { box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 60%, transparent), 0 0 14px color-mix(in srgb, var(--gold) 30%, transparent); }
+  .cast.ready { border-color: color-mix(in srgb, var(--gold) 68%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent), 0 0 16px color-mix(in srgb, var(--gold) 34%, transparent), inset 0 2px 4px rgba(255, 255, 255, .08); }
   /* three rows on this bar are not "pressable now", and the gold ring is the client's one word for that,
      so each of them recedes to its own treatment rather than borrowing it: a silenced row keeps no glow
      at all, a conditional row wears the dashed rim that says "waiting on something", and a filler row
@@ -3157,7 +3280,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      targets are buttons clipped to their sector's wedge, and the split lines are a second conic laid
      over the seams. */
   .menuring {
-    position: absolute; bottom: var(--screen-pad); right: var(--screen-pad); z-index: 4;
+    position: absolute; bottom: calc(var(--bar-h) + var(--screen-pad)); right: var(--screen-pad); z-index: 4;
     width: var(--wheel); height: var(--wheel);
     --slot-face: rgba(12, 16, 22, .82);
     --slot-edge: rgba(255, 255, 255, .3);
@@ -3168,10 +3291,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .menuring.dragging { cursor: grabbing; }
   .wheel {
-    position: absolute; inset: 0; border-radius: 50%; border: 1px solid var(--slot-edge);
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--gold) 48%, var(--slot-edge));
     background: conic-gradient(from 300deg, var(--w1, var(--slot-face)) 0 120deg, var(--w2, var(--slot-face)) 120deg 240deg, var(--w3, var(--slot-face)) 240deg 360deg);
     backdrop-filter: blur(6px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .05);
   }
   /* the Y split: three thin seams over the sector boundaries at 300, 60 and 180 conic degrees —
      the same rays the wedge clip-paths use (up-left, up-right, down), so a hover tints the sector
@@ -3218,10 +3342,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .knob {
     position: relative; width: var(--knob); height: var(--knob);
     padding: 0; border-radius: 50%; display: grid; place-items: center;
-    background: color-mix(in srgb, var(--gold) 6%, var(--slot-face, rgba(12, 16, 22, .82)));
-    border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--slot-edge, rgba(255, 255, 255, .14)));
+    background:
+      radial-gradient(circle at 50% 26%, rgba(255, 255, 255, .09), transparent 58%),
+      linear-gradient(180deg, #1e2733, #0d1218);
+    border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--slot-edge, rgba(255, 255, 255, .14)));
     backdrop-filter: blur(6px);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .07), inset 0 -5px 10px rgba(0, 0, 0, .4);
   }
   .knob img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; opacity: .88; }
   /* satellites share one smaller glyph box so thin-stroke icons (leaf, ring, potion) read at the same
@@ -3248,52 +3374,169 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .mini-mob b { font-size: var(--font-xs); font-variant-numeric: tabular-nums; color: var(--dim); }
   .mini-empty { font-size: var(--font-xs); color: var(--dim); }
 
-  /* the field's own switches ride the rail past a divider: the pace rung, Pause and New character */
-  .rail-sep { width: 1px; align-self: stretch; background: var(--edge); margin: 2px 0; }
-  .rail .controls { align-self: center; }
+  /* the field's own switches ride the bar past a divider: the pace rung, Pause and New character */
+  .rail-sep { width: 1px; align-self: stretch; background: var(--edge); margin: 2px 2px; }
+  .rail .controls { align-self: stretch; }
   .controls {
     display: flex; flex-direction: row; align-items: center; gap: var(--spacing-xs);
   }
   /* the clock's pace is one segmented switch of the same buttons every screen uses — the rung the
      clock is on reads gold, like everywhere else */
-  .speed { display: flex; }
+  .speed { display: flex; justify-content: center; }
   .speed button.here {
     color: var(--gold); border-color: color-mix(in srgb, var(--gold) 34%, transparent);
     background: color-mix(in srgb, var(--gold) 10%, transparent);
   }
 
-  /* the rail: a bar across the top-right, the purse read at its head and each tab an icon over its own
-     caption, above a sub-screen (z-index keeps it pressable there), so switching screens is one press
-     and the field runs full-bleed underneath it */
+  /* top-left: the read column — the zone tag, the purse and the run clock as pills, the minimap
+     under them, and the hunt's own objectives as the quest stack under the map. A column, so each
+     read hangs under the one above it and the corner never becomes a row the field must dodge */
+  .topright {
+    position: absolute; top: var(--screen-pad); left: var(--screen-pad); z-index: 40;
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs);
+    pointer-events: none;
+  }
+  .topright > * { pointer-events: auto; }
+  .toprow { display: flex; gap: var(--spacing-xs); align-items: center; }
+  /* the zone's own tag, the corner's headline: what ground you stand on and the band it hunts at */
+  .zone-tag {
+    margin: 0; display: inline-flex; align-items: baseline; gap: var(--spacing-xs);
+    padding: 3px var(--spacing-sm); border-radius: 999px;
+    background: linear-gradient(180deg, rgba(23, 29, 40, .88), rgba(11, 15, 21, .94));
+    border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--edge));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06);
+    font-size: var(--font-xs); letter-spacing: clamp(1px, 0.065vw + 0.25px, 2.16px); text-transform: uppercase;
+    color: var(--gold); white-space: nowrap;
+  }
+  .zone-tag::before { content: '◆'; font-size: var(--font-xs); color: var(--gold); align-self: center; }
+  .zone-tag b { color: var(--dim); font-weight: 500; letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; }
+
+  /* the top-centre target bar: the front body's name over one wide red bar — the hub's own read of
+     what the rotation is pressing, loud from across the room the way a boss bar is */
+  .targetbar {
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--fs-arena) + var(--spacing-sm)); left: 50%; transform: translateX(-50%); z-index: 2;
+    width: min(var(--box-560), 46%); display: grid; gap: 3px; justify-items: center;
+    pointer-events: none; text-align: center;
+  }
+  .player-tag, .target-name { margin: 0; font-size: var(--font-xs); color: var(--text); white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, .95); }
+  .player-tag b { color: var(--gold-lit); font-weight: 700; }
+  .target-name {
+    display: inline-flex; align-items: center; gap: var(--spacing-xs);
+    text-transform: uppercase; letter-spacing: clamp(1px, 0.065vw + 0.25px, 2.16px);
+    padding: 2px var(--spacing-sm); border-radius: clamp(6px, 0.65vw, 12px);
+    background: linear-gradient(180deg, rgba(23, 29, 40, .9), rgba(11, 15, 21, .96));
+    border: 1px solid color-mix(in srgb, var(--gold) 42%, var(--edge));
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+  }
+  .target-name::before, .target-name::after { content: '◆'; font-size: var(--font-xs); color: var(--gold); }
+  .target-name span { color: var(--dim); }
+  .target-hp {
+    position: relative; width: 100%; height: calc(var(--bar-h) + var(--spacing-sm));
+    overflow: hidden; background: rgba(4, 6, 9, .78);
+    border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--edge));
+    clip-path: polygon(clamp(6px, 0.75vw, 14px) 0, calc(100% - clamp(6px, 0.75vw, 14px)) 0, 100% 50%, calc(100% - clamp(6px, 0.75vw, 14px)) 100%, clamp(6px, 0.75vw, 14px) 100%, 0 50%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+  }
+  .target-hp i {
+    display: block; height: 100%;
+    background-image: linear-gradient(90deg, var(--hp), var(--hp-lit) 55%, var(--hot));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--hot) 55%, transparent);
+    transition: width .22s ease-out;
+  }
+  /* the boss bar's top sheen: one lit line along the fill, the way a metal gauge reads */
+  .target-hp::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .16), transparent);
+  }
+  .target-hp b {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: var(--font-xs); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
+  }
+
+  /* bottom-left: the field's own log in the chat box's seat — what the world just did, newest last,
+       each line fading by its age. A read only; it takes no press and never covers the rail above it. */
+  .combatlog {
+    position: absolute; left: var(--screen-pad); bottom: calc(var(--bar-h) + var(--spacing-xs) + 2px); z-index: 5;
+    width: min(var(--box-420), 28%); display: grid; gap: 2px; pointer-events: none;
+  }
+  .combatlog p {
+    margin: 0; padding: 2px var(--spacing-xs); font-size: var(--font-xs); color: var(--dim);
+    background: linear-gradient(90deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .3) 78%, transparent);
+    border-radius: clamp(5px, 0.326vw + 1.26px, 10.8px);
+    opacity: calc(1 - var(--age, 0) * .14);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .combatlog p.gold { color: var(--gold); }
+  .combatlog p.good { color: var(--good-lit); }
+
+  /* the floor strip: the run's one bar pinned to the frame's bottom edge — the level and how far into
+       it on the left, the track carrying its own figure, the run clock and its kills on the right */
+  .expbar {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; height: var(--bar-h);
+    display: flex; align-items: center; gap: var(--spacing-sm); padding: 0 var(--spacing-sm);
+    background: linear-gradient(180deg, rgba(12, 16, 23, .9), rgba(8, 11, 16, .97));
+    border-top: 1px solid color-mix(in srgb, var(--gold) 30%, var(--edge));
+    font-size: var(--font-xs); font-variant-numeric: tabular-nums; pointer-events: none;
+  }
+  .expbar .lv { color: var(--gold); font-weight: 600; white-space: nowrap; }
+  .expbar .track {
+    position: relative; flex: 1; height: calc(var(--bar-h) - var(--spacing-xs)); min-width: 0;
+    border-radius: 999px; background: rgba(255, 255, 255, .08); border: 1px solid var(--edge); overflow: hidden;
+  }
+  .expbar .track i { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 999px; background-image: linear-gradient(90deg, var(--xp), var(--xp-lit)); transition: width .3s; }
+  .expbar .track b {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--text); text-shadow: 0 1px 2px rgba(0, 0, 0, .95);
+  }
+  .expbar .meta { color: var(--dim); white-space: nowrap; }
+
+  /* the rail: a menu bar across the top edge, right of the vitals and clear of the right corner's
+     own column — one row, icon over caption, ending in the field's own switches past a divider.
+     The row never wraps: past its room it scrolls rather than reflowing into a second line. */
   .rail {
-    position: fixed; top: var(--screen-pad); right: var(--screen-pad); min-height: var(--rail); z-index: 70;
-    display: flex; flex-direction: row; align-items: stretch; gap: 2px;
-    padding: 3px;
-    background: var(--glass); backdrop-filter: blur(6px);
-    border: 1px solid var(--edge); border-radius: clamp(8px, 0.489vw + 1.89px, 16.2px);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+    position: fixed; top: var(--screen-pad); right: var(--screen-pad);
+    width: fit-content; max-width: 78vw; z-index: 70;
+    display: flex; flex-direction: row; flex-wrap: nowrap; align-items: stretch; justify-content: flex-end; gap: 2px;
+    padding: var(--spacing-xs);
+    overflow-x: auto; scrollbar-width: none;
+    background: linear-gradient(180deg, rgba(23, 29, 40, .93), rgba(11, 15, 21, .96));
+    backdrop-filter: blur(8px);
+    border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--edge));
+    border-radius: clamp(8px, 0.75vw, 14px);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
   }
   .purse {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-    padding: 0 var(--spacing-sm); margin-right: 2px; border-right: 1px solid var(--edge);
+    display: inline-flex; align-items: baseline; gap: var(--spacing-xs);
+    padding: 3px var(--spacing-sm); border-radius: 999px;
+    background: linear-gradient(180deg, rgba(23, 29, 40, .88), rgba(11, 15, 21, .94));
+    border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--edge));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06);
     font-variant-numeric: tabular-nums;
   }
-  .purse b { font-size: var(--font-sm); font-weight: 600; color: var(--gold); line-height: 1; }
+  .purse b { font-size: var(--font-sm); font-weight: 700; color: var(--gold-lit); line-height: 1; }
   .purse i { font-size: var(--font-xs); font-style: normal; color: var(--dim); line-height: 1; }
   .tab {
     position: relative; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     min-width: var(--icon-lg); padding: 2px var(--spacing-xs);
-    border-radius: 10px; border: 1px solid transparent; background: none; color: var(--dim);
+    border-radius: clamp(6px, 0.652vw + 2.52px, 12px); border: 1px solid transparent; background: none; color: var(--dim);
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
   }
-  .tab img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; opacity: .82; }
+  .tab img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; opacity: .82; transition: transform .15s ease; }
+  .tab:hover img { transform: translateY(-1px); opacity: 1; }
   .tab .cap { font-size: var(--font-xs); line-height: 1; text-transform: capitalize; }
   .tab .count {
     position: absolute; top: 0; right: 0; min-width: var(--icon-xs); padding: 0 3px;
-    border-radius: clamp(8.75px, 0.57vw + 2.2px, 18.9px); background: var(--panel); border: 1px solid var(--edge);
-    font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; text-align: center;
+    border-radius: 999px; background: linear-gradient(180deg, var(--hot), #a33428); border: 1px solid rgba(0, 0, 0, .45);
+    color: #fff; font-size: var(--font-xs); font-variant-numeric: tabular-nums; text-align: center;
   }
-  .tab:hover { color: var(--text); border-color: var(--edge); }
-  .tab.here { color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, transparent); border-color: color-mix(in srgb, var(--gold) 34%, transparent); }
+  .tab:hover { color: var(--text); border-color: var(--edge); background: rgba(255, 255, 255, .04); }
+  .tab.here {
+    color: var(--gold-lit);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 22%, transparent), color-mix(in srgb, var(--gold) 5%, transparent));
+    border-color: color-mix(in srgb, var(--gold) 42%, transparent);
+    box-shadow: inset 2px 0 0 var(--gold);
+  }
   /* a settlement screen from the field is reachable but not live, so it is marked rather than dead — the
      refusal and its reason come out of the button's own title */
   .tab.far { opacity: .5; }
@@ -3403,7 +3646,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   /* 1024-1279: the two side reads stop sharing the middle with the mob plates */
   @media (max-width: 1279px) {
-    .field { inset: clamp(82.5px, 5.379vw + 20.79px, 178.2px) clamp(clamp(187.5px, 12.225vw + 47.25px, 405px), 23vw, clamp(237.5px, 15.485vw + 59.85px, 513px)) clamp(55px, 3.586vw + 13.86px, 118.8px) calc(var(--objectives-w) + var(--screen-pad) * 3); }
+    .field { inset: clamp(82.5px, 5.379vw + 20.79px, 178.2px) clamp(clamp(187.5px, 12.225vw + 47.25px, 405px), 23vw, clamp(237.5px, 15.485vw + 59.85px, 513px)) clamp(55px, 3.586vw + 13.86px, 118.8px) calc(var(--box-100) + var(--screen-pad) * 3); }
     .mob-mini { width: min(var(--box-440), 42%); }
     .chip.status { display: none; }
     .dock { width: min(var(--box-520), 50%); }
@@ -3415,7 +3658,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      The ring is decoration: it never takes a pointer and never holds layout. */
   .floaters { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
   .float-side { position: absolute; display: flex; flex-direction: column-reverse; gap: 1px; }
-  .field-side { left: 50%; bottom: 46%; transform: translateX(-50%); align-items: center; }
+  /* the pickups' own column, the right edge above the wheel the way a hub screen lists what the
+       character just gathered — each entry a pill, right-aligned, reading up from the floor */
+  .field-side { right: var(--screen-pad); bottom: calc(var(--wheel) + var(--screen-pad) * 2); left: auto; transform: none; align-items: flex-end; }
   /* the character's own column is anchored to the card it belongs to: it rises from just above the
      self-plate's top edge, so its place follows the plate wherever the frame puts it */
   .self-side { left: 50%; bottom: calc(100% + clamp(5px, 0.326vw + 1.26px, 10.8px)); transform: translateX(-50%); align-items: center; }
@@ -3487,22 +3732,33 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     animation-duration: .42s;
   }
   /* one figure per landed blow on a mob plate: a cut or a burst rises full-size off the card, a status
-     tick beside it small — each keyed on its own event, so a burst reads as a shower rather than a sum */
+     tick beside it small — each keyed on its own event, so a burst reads as a shower rather than a sum.
+     The figure is white ink on its own dark rim with the Element's bloom behind it, so it reads over any
+     portrait the way a hub field prints its damage */
   .plate-fx .pop {
-    font-size: var(--font-md);
-    -webkit-text-stroke: .55px currentColor;
-    animation: fx-rise 1.1s cubic-bezier(.2, .6, .3, 1) forwards;
+    font-size: var(--font-lg);
+    font-weight: 700;
+    -webkit-text-stroke: 1px rgba(6, 8, 11, .92);
+    color: var(--text);
+    text-shadow:
+      0 2px 0 rgba(6, 8, 11, .9), 0 -1px 0 rgba(6, 8, 11, .9), 1.5px 0 0 rgba(6, 8, 11, .85), -1.5px 0 0 rgba(6, 8, 11, .85),
+      0 0 clamp(8.75px, 0.57vw + 2.2px, 18.9px) color-mix(in srgb, var(--fx, var(--text)) 40%, transparent);
+    animation: fx-rise .95s cubic-bezier(.18, .78, .3, 1) forwards;
   }
   .plate-fx .pop.crit {
-    font-size: var(--font-lg);
+    font-size: var(--font-xl);
     letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px);
-    -webkit-text-stroke-width: .8px;
-    animation: fx-crit 1.4s cubic-bezier(.15, .8, .3, 1) forwards;
+    -webkit-text-stroke-width: 1.3px;
+    color: var(--gold-lit);
+    text-shadow:
+      0 2px 0 rgba(6, 8, 11, .92), 0 -1px 0 rgba(6, 8, 11, .92), 1.5px 0 0 rgba(6, 8, 11, .88), -1.5px 0 0 rgba(6, 8, 11, .88),
+      0 0 clamp(10px, 0.652vw + 2.52px, 21.6px) color-mix(in srgb, var(--gold) 55%, transparent);
+    animation: fx-crit 1.15s cubic-bezier(.14, .8, .28, 1) forwards;
   }
-  .plate-fx .pop.dot { font-size: var(--font-sm); }
+  .plate-fx .pop.dot { font-size: var(--font-sm); color: var(--fx, var(--text)); }
   /* pops from one tick cascade instead of landing all at once: the lane each event already carries
      staggers the mount, and the both-fill holds the first frame through the wait so nothing flashes */
-  .plate-fx .pop { animation-fill-mode: both; animation-delay: calc(var(--lane) * 90ms); }
+  .plate-fx .pop { animation-fill-mode: both; animation-delay: calc(var(--lane) * 70ms); }
   /* a defense word pops like a number but reads as one: uppercase chip face in the colour of what
      caused it, small beside the figures, never taking the rim */
   .plate-fx .pop.word {
@@ -3589,7 +3845,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   /* the frame's own beat: a level borrows the title's line for one rise and hands it back */
   .levelup {
-    position: absolute; top: clamp(33.75px, 2.2vw + 8.51px, 72.9px); left: 50%; z-index: 8; pointer-events: none;
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); left: 50%; z-index: 8; pointer-events: none;
     margin: 0; white-space: nowrap; font-family: var(--num); font-size: var(--font-md); letter-spacing: clamp(1.5px, 0.098vw + 0.38px, 3.24px);
     color: var(--fx, var(--gold)); text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
     animation: fx-level 1.5s cubic-bezier(.2, .7, .3, 1) forwards;
@@ -3679,16 +3935,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      to read, then the fade — so the number owns its own life on screen and is never cut short while the
      ring still has room for it */
   @keyframes fx-rise {
-    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(3.75px, 0.244vw + 0.94px, 8.1px)) scale(.86); }
+    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(3.75px, 0.244vw + 0.94px, 8.1px)) scale(.55); }
     14% { opacity: 1; }
-    32% { transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-43.2px, -1.304vw - 5.04px, -20px)) scale(1.02); }
+    32% { transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-43.2px, -1.304vw - 5.04px, -20px)) scale(1.08); }
     60% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-51.3px, -1.548vw - 5.98px, -23.75px)) scale(1); }
     100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-70.2px, -2.119vw - 8.19px, -32.5px)) scale(.96); }
   }
   /* the crit's own stage: a harder slam, a longer hold, a slower let-go */
   @keyframes fx-crit {
     0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(7.5px, 0.489vw + 1.89px, 16.2px)) scale(.5); }
-    18% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-10.8px, -0.326vw - 1.26px, -5px)) scale(1.28); }
+    18% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-10.8px, -0.326vw - 1.26px, -5px)) scale(1.42); }
     34% { transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-18.9px, -0.57vw - 2.2px, -8.75px)) scale(1); }
     64% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-21.6px, -0.652vw - 2.52px, -10px)) scale(1); }
     100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-45.9px, -1.385vw - 5.36px, -21.25px)) scale(.96); }
