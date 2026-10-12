@@ -1,16 +1,19 @@
 <script lang="ts">
-  import { E, eng, road } from '../engine/client';
+  import { E, eng, road, sm } from '../engine/client';
   import { modsOn, psMult } from '../sim/curse';
   import { heldWeaponName } from '../sim/game';
   import { fxByMob as bucketFx, plateBeat, plateStrike, plateGesture } from './plate';
   import { fieldLabel } from './hud';
   import { bar, curseWords, statusWords } from './field';
   import { fxOut } from './motion';
-  import { elementIcon, mobIcon } from '../icon';
+  import { elementIcon, mobIcon, skillIcon } from '../icon';
+  import { statusLabel } from '../sim/mobStatus';
   import { bossMark } from '../icon';
   import faceMark from '../icon/equipment/helmet-1.svg?url';
+  import alignMark from '../icon/currency/attribute-dexterity.svg?url';
   import type { GameState, Mob, FxEvent } from '../sim/types';
   import type { Character } from '../sim/player';
+  import type { Statuses, StatusName } from '../sim/combat';
 
   /**
    * The field: the group itself, one plate per mob, plus the character's own card on the near edge.
@@ -20,10 +23,21 @@
    * sim's event ring and nothing else: no clock, no state of its own, every gesture mounted by a fact
    * the sim raised (`ui/plate.ts`).
    */
-  let { s, c, ring, plates, zone, town, townLive, plateMotion, fxOutMs }: {
-    s: GameState; c: Character; ring: FxEvent[]; plates: Mob[]; zone: any;
+  let { s, c, ring, plates, statuses, zone, town, townLive, plateMotion, fxOutMs }: {
+    s: GameState; c: Character; ring: FxEvent[]; plates: Mob[]; statuses: Statuses; zone: any;
     town: any; townLive: boolean; plateMotion: number; fxOutMs: number;
   } = $props();
+
+  function defenseColour(text: string) {
+    const answer = text.toLowerCase();
+    if (answer.includes('block')) return 'var(--es-lit)';
+    if (answer.includes('evasion')) return 'var(--good-lit)';
+    if (answer.includes('dodge')) return 'var(--gold-lit)';
+    if (answer.includes('miss')) return 'var(--dim)';
+    return 'var(--focus)';
+  }
+
+  const shortTime = (secs: number) => secs >= 60 ? `${Math.ceil(secs / 60)}m` : String(secs);
 
   /** A plate's comings and goings. Only a transition is handed the item the sim removed, so a body that
    *  leaves sinks out of the frame while a death destroys its block at once. */
@@ -40,6 +54,69 @@
   const latestTaken = $derived(ring.find((e) => e.side === 'self' && e.kind === 'taken') || null);
   const latestLand = $derived(ring.find((e) => e.side === 'field' && e.kind === 'hit' && (e.via === 'swing' || e.via === 'cast')) || null);
   const selfArt = $derived(plateGesture(latestTaken, latestLand));
+
+  const STATUS_ELEMENT: Record<StatusName, string> = {
+    burn: 'fire', chill: 'cold', shock: 'lightning', poison: 'poison', mark: 'chaos', crippled: 'earth',
+  };
+  const buffMarks = $derived.by(() => {
+    void s.clockSec;
+    const marks: { id: string; label: string; icon: string; secs: number | null }[] = [];
+    for (const skill of sm.of('buff') as any[]) {
+      const left = s.skills.buffUp[skill.id] || 0;
+      if (s.skills.buffs[skill.id] && left > 0) {
+        marks.push({ id: skill.id, label: skill.name, icon: skillIcon(skill.id, 'buff'), secs: Math.ceil(left) });
+      }
+    }
+    for (const skill of sm.of('aura') as any[]) {
+      if (s.skills.auras[skill.id]) {
+        marks.push({ id: skill.id, label: skill.name, icon: skillIcon(skill.id, 'aura'), secs: null });
+      }
+    }
+    return marks;
+  });
+  const debuffMarks = $derived.by(() => {
+    void s.clockSec;
+    return (Object.entries(statuses) as [StatusName, { stacks: number; secLeft: number }][])
+      .filter(([, status]) => status && status.secLeft > 0)
+      .map(([name, status]) => ({
+        name, label: statusLabel(name), icon: elementIcon(STATUS_ELEMENT[name]),
+        stacks: status.stacks, secs: Math.ceil(status.secLeft),
+      }));
+  });
+
+  let selfBodyEl = $state<HTMLDivElement>();
+  let lastLungeId = -1;
+  let lungeAnimation: Animation | null = null;
+  $effect(() => {
+    const hit = latestLand;
+    const node = selfBodyEl;
+    if (!hit || !node || hit.id === lastLungeId) return;
+    lastLungeId = hit.id;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const frame = requestAnimationFrame(() => {
+      if (!node.isConnected) return;
+      const field = node.closest('.field') as HTMLElement | null;
+      if (!field) return;
+      const mobs = Array.from(field.querySelectorAll<HTMLElement>('.mob'));
+      const target = mobs.find((mob) => mob.dataset.mobId === hit.mobId) || mobs[0];
+      const sourceRect = node.getBoundingClientRect();
+      const targetRect = target?.getBoundingClientRect() || field.getBoundingClientRect();
+      const targetX = targetRect.left + targetRect.width / 2;
+      const targetY = target ? targetRect.top + targetRect.height / 2 : targetRect.top + targetRect.height * .24;
+      const dx = (targetX - sourceRect.left - sourceRect.width / 2) * .78;
+      const dy = (targetY - sourceRect.top - sourceRect.height / 2) * .78;
+      const windup = sourceRect.height * .08;
+      lungeAnimation?.cancel();
+      lungeAnimation = node.animate([
+        { transform: 'translate(0, 0) scale(1)', offset: 0 },
+        { transform: `translate(0, ${windup}px) scale(.97)`, offset: .16 },
+        { transform: `translate(${dx}px, ${dy}px) rotate(${Math.sign(dx) * 4}deg) scale(1.09)`, offset: .47 },
+        { transform: `translate(${dx * .88}px, ${dy * .88}px) scale(1.04)`, offset: .60 },
+        { transform: 'translate(0, 0) scale(1)', offset: 1 },
+      ], { duration: 500, easing: 'cubic-bezier(.2, .75, .3, 1)' });
+    });
+    return () => cancelAnimationFrame(frame);
+  });
 
   /** The walking read: one trail of boot prints, a left foot then a right, laid along the walk and lit
    *  from where the walk has reached — the sim's tick drives it, nothing here is a looping animation. */
@@ -68,6 +145,7 @@
        the frame instead, and the row below it slides into its place -->
   <div
     class="mob"
+    data-mob-id={m.id}
     class:front={mi === 0}
     class:elite={m.kind === 'Elite'}
     class:boss={m.kind.startsWith('Boss')}
@@ -106,7 +184,7 @@
         <span class="fx pop" class:crit={e.crit} class:dot={e.via === 'dot'} out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{eng.fmt(e.value ?? 0)}{e.crit ? '!' : ''}</span>
       {/each}
       {#each (fxByMob.get(m.id) || []).filter((e) => e.kind === 'block').slice(0, 2) as e (e.id)}
-        <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{e.text}</span>
+        <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${defenseColour(e.text)}; --lane:${e.id % 4}`}>{e.text}</span>
       {/each}
     </div>
     {#key strike ? strike.id : `c${m.id}`}
@@ -120,9 +198,13 @@
       <!-- the body takes the blow: one node, remounted on every direct hit, so a fast fight re-stamps
            the flinch instead of looping it -->
       <div class="art" class:knock={!!beat}>
-        <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
-        <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
-        <p class="body">{m.kind}</p>
+        <div class="identity">
+          <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
+          <div class="identity-text">
+            <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
+            <p class="body">{m.kind}</p>
+          </div>
+        </div>
         <span class="mobbar"><i style={bar(m.hp, m.hpMax)}></i><b>{Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</b></span>
         <p class="chips">
           <span>PS {(m.ps * psMult(modsOn(s.curses, m.id))).toFixed(1)}</span>
@@ -169,7 +251,7 @@
 <!-- the character's own card, on the near edge of the field it fights on: a blow that lands here has a
      body to land on at last. It is a read and not a control — no pointer, no gold, and no second copy of
      any number the dock already owns -->
-<div class="self-plate" aria-label="Your card" class:clash={!!(latestTaken && latestLand && latestTaken.sec === latestLand.sec)}>
+<div class="self-plate" aria-label="Your card">
   {#if latestTaken}
     {#key latestTaken.id}
       <span class="flash" style={`--fx:${latestTaken.colour}`}></span>
@@ -180,17 +262,47 @@
       <span class="fx pop" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>-{eng.fmt(e.value ?? 0)}</span>
     {/each}
     {#each ring.filter((e) => e.side === 'self' && (e.kind === 'block' || e.kind === 'proc')).slice(0, 3) as e (e.id)}
-      <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{e.text}</span>
+      <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${defenseColour(e.text)}; --lane:${e.id % 4}`}>{e.text}</span>
     {/each}
   </div>
+  <div class="self-body" bind:this={selfBodyEl}>
+    <div class="effect-rail buffs" role="list" aria-label="Active buffs and auras">
+      {#each buffMarks as mark (mark.id)}
+        <span class="effect-badge buff" role="listitem"
+              aria-label={`${mark.label}${mark.secs != null ? `, ${mark.secs} seconds left` : ', aura active'}`}
+              title={`${mark.label}${mark.secs != null ? ` · ${mark.secs}s left` : ' · aura active'}`}>
+          <img src={mark.icon} alt="" aria-hidden="true" />
+          {#if mark.secs != null}<small>{shortTime(mark.secs)}</small>{/if}
+        </span>
+      {/each}
+    </div>
+    <div class="effect-rail ailments" role="list" aria-label="Status alignment and debuffs">
+      <span class="effect-badge alignment" role="listitem" aria-label={`Status alignment ${c.alignment.toFixed(1)}%`}
+            title={`Status alignment ${c.alignment.toFixed(1)}%`}>
+        <img src={alignMark} alt="" aria-hidden="true" />
+        <small>{Math.round(c.alignment)}</small>
+      </span>
+      {#each debuffMarks as mark (mark.name)}
+        <span class="effect-badge debuff" role="listitem"
+              aria-label={`${mark.label}${mark.stacks > 1 ? `, ${mark.stacks} stacks` : ''}, ${mark.secs} seconds left`}
+              title={`${mark.label}${mark.stacks > 1 ? ` ×${mark.stacks}` : ''} · ${mark.secs}s left`}>
+          <img src={mark.icon} alt="" aria-hidden="true" />
+          <small>{shortTime(mark.secs)}</small>
+        </span>
+      {/each}
+    </div>
   {#key selfArt ? selfArt.id : 'self-idle'}
-    <!-- the face wears the paint and both answers: a hit flinches the whole card down, away from the
-         blow above, and a landed swing surges it up. Remounted on whichever fact is newer, so one
-         gesture plays per beat and the clash on the root composes with it -->
-    <div class="cardface" class:knock={selfArt?.gesture === 'knock'} class:lunge={selfArt?.gesture === 'lunge'}>
+    <!-- The card body is remounted for its flinch; the surrounding effect circles travel with the
+         stable wrapper when a landed attack lunges toward the body it struck. -->
+    <div class="cardface" class:knock={selfArt?.gesture === 'knock' && latestTaken?.sec !== latestLand?.sec}>
       <div class="art">
-      <img class="portrait" src={faceMark} alt="" aria-hidden="true" />
-      <p class="mob-name">You · {heldWeaponName(s) || 'Bare hands'}</p>
+      <div class="identity">
+        <img class="portrait" src={faceMark} alt="" aria-hidden="true" />
+        <div class="identity-text">
+          <p class="mob-name">You</p>
+          <p class="body">{heldWeaponName(s) || 'Bare hands'}</p>
+        </div>
+      </div>
       {#if c.es > 0}
         <span class="mobbar es"><i style={bar(s.player.es, c.es)}></i><b>{Math.max(0, Math.round(s.player.es))} / {Math.round(c.es)}</b></span>
       {/if}
@@ -199,6 +311,7 @@
       </div>
     </div>
   {/key}
+  </div>
   <!-- the character's own column rises off the card it belongs to: anchored above the plate, so the
        events that name the character appear where the character stands rather than in a corner of
        the screen no card occupies -->
@@ -250,13 +363,42 @@
      drawn inside it. The shell above keeps the slot: size, place in the row and the reads pinned to it. */
   .mob .charge{
     --lunge: 1;
-    width: 100%; min-height: var(--plate-h); display: flex; flex-direction: column; padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); border-radius: 12px;
-    background: var(--glass); border: 1px solid var(--edge); box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
+    width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; padding: var(--spacing-sm); border-radius: var(--spacing-md);
+    background: color-mix(in srgb, var(--face-floor) 92%, transparent);
+    border: 1px solid var(--edge); box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
   }
 
   /* the body fills the card face top to bottom, the way a playing card reads: portrait up top, the
      fight numbers in the middle, the status line pinned to the foot */
-  .mob .art{ display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .mob .art{ display: flex; flex-direction: column; align-items: stretch; flex: 1; min-width: 0; }
+
+  .mob { position: relative; width: var(--card-w); aspect-ratio: 5 / 7; text-align: left; pointer-events: auto; }
+
+  .self-plate {
+    position: absolute; left: 50%; bottom: var(--spacing-lg); z-index: 2;
+    width: var(--card-w); aspect-ratio: 5 / 7; transform: translateX(-50%); text-align: left; pointer-events: none;
+  }
+  .self-body { position: relative; width: 100%; height: 100%; }
+  .effect-rail {
+    position: absolute; top: 0; z-index: 6; display: flex; flex-direction: column; gap: var(--spacing-xs);
+    pointer-events: none;
+  }
+  .effect-rail.buffs { right: calc(100% + var(--spacing-xs)); }
+  .effect-rail.ailments { left: calc(100% + var(--spacing-xs)); }
+  .effect-badge {
+    position: relative; display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md);
+    border: 1px solid var(--edge); border-radius: 50%; background: var(--glass);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .6); pointer-events: auto;
+  }
+  .effect-badge.buff { border-color: color-mix(in srgb, var(--good-lit) 60%, var(--edge)); }
+  .effect-badge.debuff { border-color: color-mix(in srgb, var(--alarm) 70%, var(--edge)); }
+  .effect-badge.alignment { border-color: color-mix(in srgb, var(--gold) 65%, var(--edge)); }
+  .effect-badge img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .effect-badge small {
+    position: absolute; right: 0; bottom: 0; max-width: 100%; overflow: hidden;
+    color: var(--text); font-size: var(--font-xs); line-height: 1; font-family: var(--num);
+    text-shadow: 0 1px 2px var(--bg); transform: scale(.72); transform-origin: right bottom;
+  }
 
   /* the fight numbers hug the foot of the card: everything from the first bar down sits on the bottom,
      the portrait and the name keep the head, and the face padding is the breathing room */
@@ -265,10 +407,7 @@
   /* the body the next swing waits on: a lit edge plus a pair of crop marks, steady while it stands in front —
      the struck plate's coloured rim still owns the moment the blow actually lands. The marks are the read that
      survives an elite or a boss border, which out-ranks the edge colour on the same plate. */
-  .mob.front .charge{
-    border-color: color-mix(in srgb, var(--edge) 20%, var(--text));
-    box-shadow: 0 8px 22px rgba(0, 0, 0, .45), 0 0 clamp(12px, 0.815vw + 3px, 27px) color-mix(in srgb, var(--text) 16%, transparent) inset;
-  }
+  .mob.front .charge{ border-color: var(--gold); }
 
   .mob.front .charge::before, .mob.front .charge::after{
     content: ''; position: absolute; width: var(--icon-sm); height: var(--icon-sm); pointer-events: none;
@@ -280,11 +419,30 @@
 
   .mob.front .charge::after{ bottom: clamp(-14px, -0.407vw - 2px, -6px); right: clamp(-14px, -0.407vw - 2px, -6px); border-left: 0; border-top: 0; border-bottom-right-radius: 9px; }
 
-  .mob .portrait, .self-plate .portrait{ width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
+  .identity{ display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; }
+  .identity-text{ display: grid; min-width: 0; }
+  .mob .portrait, .self-plate .portrait{ width: var(--icon-lg); height: var(--icon-lg); flex: none; object-fit: contain; }
 
   .mob-name .tier-mark{ width: var(--icon-sm); height: var(--icon-sm); }
 
-  .mob .body{ margin: 0; font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: clamp(1px, 0.049vw + 0px, 2px); }
+  .mob .body, .self-plate .body{ margin: 0; font-size: var(--font-xs); color: var(--dim); }
+
+  .mob-name { display: flex; align-items: center; gap: 4px; margin: 0; font-size: var(--font-sm); font-weight: 600; line-height: 1.15; }
+
+  .mobbar { display: block; position: relative; width: 100%; height: var(--bar-h); margin: 4px 0 3px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .09); }
+
+  /* the figure sits in the bar the way the dock's own gauges read: centred, tabular, stroked off the fill */
+  .mobbar b {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: var(--font-xs); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
+  }
+
+  .clear-field b { color: var(--text); font-weight: 600; }
+  .curses { margin: auto 0 0; font-size: var(--font-xs); color: var(--curse); min-height: var(--icon-xs); }
+  .element-list { display: flex; flex-wrap: wrap; gap: 2px var(--spacing-xs); margin: 3px 0 0; }
+  .element-label { display: inline-flex; align-items: center; gap: 3px; font-size: var(--font-xs); color: var(--dim); }
+  .element-label img { width: var(--icon-xs); height: var(--icon-xs); object-fit: contain; flex: none; }
 
   /* The ramp is stretched over the whole track instead of squeezed into the fill: `--w` is the fraction the
      bar reached, so a body's last health shows the hot end of its own colour. Across a group of plates that
@@ -297,7 +455,7 @@
 
   .mobbar i{ display: block; height: 100%; border-radius: 999px; background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
 
-  .mob .chips{ display: flex; flex-wrap: wrap; gap: 1px var(--spacing-xs); justify-content: center; margin: 4px 0 0; font-size: var(--font-xs); color: var(--dim); }
+  .mob .chips{ display: flex; flex-wrap: wrap; gap: 1px var(--spacing-xs); margin: 2px 0 0; font-size: var(--font-xs); color: var(--dim); }
 
   .mob.elite .charge{ border-color: var(--elite); }
 
@@ -310,22 +468,20 @@
   /* the cardface carries the paint, so every answer moves the whole card: the root keeps the slot only.
        The face is the hub's own avatar read — a round portrait on a dark plinth, the pools under it */
   .self-plate .cardface{
-    min-height: var(--plate-h); display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-    padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); border-radius: clamp(10px, 0.75vw, 16px);
-    background: linear-gradient(180deg, rgba(23, 29, 40, .62), rgba(8, 11, 16, .78));
+    height: 100%; min-height: 0; display: flex; flex-direction: column;
+    padding: var(--spacing-sm); border-radius: var(--spacing-md);
+    background: color-mix(in srgb, var(--face-floor) 92%, transparent);
     border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
     box-shadow: 0 6px 22px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
   }
 
   /* the player's own vitals hug the same foot: the first bar carries the group down */
-  .self-plate .art{ display: flex; flex-direction: column; justify-content: flex-start; align-items: center; flex: 1; gap: 4px; }
+  .self-plate .art{ display: flex; flex-direction: column; align-items: stretch; flex: 1; width: 100%; gap: 2px; }
 
   .self-plate .art > span.mobbar:first-of-type{ margin-top: auto; }
 
   .self-plate .portrait{
-    width: var(--icon-xl); height: var(--icon-xl); border-radius: 50%;
-    border: 2px solid var(--gold); background: var(--glass); padding: var(--spacing-xs);
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, .55), 0 2px 10px rgba(0, 0, 0, .5);
+    border-radius: 50%; border: 1px solid var(--gold); background: var(--face-top); padding: 4px;
   }
 
   /* Energy Shield sits above HP here exactly as it does in the dock, and only while the pool is there */
@@ -333,65 +489,93 @@
 
   .mobbar.mana i{ background-image: linear-gradient(90deg, var(--mana), var(--mana-lit)); }
 
-  /* The figure a body wears, stamped on the card's top-right corner above its frame. A body pops one
-     figure per landed blow — a cut or a burst full-size, a status tick small beside it — each rising away
-     on its own life, so a plate shows what was done to it and never a sum. Set large and outlined on all
-     four sides so a figure reads over any portrait behind it. */
+  /* Each number starts at the body struck, fans into its own lane, then lifts clear of the card. */
   .mob .plate-fx, .self-plate .plate-fx{
-    position: absolute; left: auto; right: clamp(-9px, -0.285vw - 1px, -4px); top: clamp(-30px, -0.896vw - 3px, -14px); z-index: 3; pointer-events: none;
-    display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 1px;
+    position: absolute; inset: 0; z-index: 7; pointer-events: none;
   }
 
-  /* one figure per landed blow on a mob plate: a cut or a burst rises full-size off the card, a status
-     tick beside it small — each keyed on its own event, so a burst reads as a shower rather than a sum.
-     The figure is white ink on its own dark rim with the Element's bloom behind it, so it reads over any
-     portrait the way a hub field prints its damage */
   .plate-fx .pop{
-    font-size: var(--font-lg);
-    font-weight: 700;
-    -webkit-text-stroke: 1px rgba(6, 8, 11, .92);
-    color: var(--text);
-    text-shadow:
-      0 2px 0 rgba(6, 8, 11, .9), 0 -1px 0 rgba(6, 8, 11, .9), 1.5px 0 0 rgba(6, 8, 11, .85), -1.5px 0 0 rgba(6, 8, 11, .85),
-      0 0 clamp(9px, 0.57vw + 2px, 19px) color-mix(in srgb, var(--fx, var(--text)) 40%, transparent);
-    animation: fx-rise .95s cubic-bezier(.18, .78, .3, 1) forwards;
+    position: absolute; left: 50%; top: 32%; white-space: nowrap;
+    padding: var(--spacing-xs); font-family: var(--num); font-size: var(--font-lg); font-weight: 800;
+    -webkit-text-stroke: 1px var(--bg);
+    color: color-mix(in srgb, var(--fx, var(--text)) 25%, var(--text));
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--bg) 78%, transparent), transparent 72%);
+    text-shadow: 0 2px 3px rgba(0, 0, 0, .95),
+                 0 0 var(--spacing-md) color-mix(in srgb, var(--fx, var(--text)) 45%, transparent);
+    animation: plate-number 1.1s cubic-bezier(.18, .78, .3, 1) both;
+    animation-delay: calc(var(--lane) * 70ms);
   }
 
   .plate-fx .pop.crit{
     font-size: var(--font-xl);
-    letter-spacing: clamp(0px, 0.016vw + 0px, 1px);
-    -webkit-text-stroke-width: 1.3px;
+    letter-spacing: 1px; -webkit-text-stroke-width: 1.3px;
     color: var(--gold-lit);
-    text-shadow:
-      0 2px 0 rgba(6, 8, 11, .92), 0 -1px 0 rgba(6, 8, 11, .92), 1.5px 0 0 rgba(6, 8, 11, .88), -1.5px 0 0 rgba(6, 8, 11, .88),
-      0 0 clamp(10px, 0.652vw + 3px, 22px) color-mix(in srgb, var(--gold) 55%, transparent);
-    animation: fx-crit 1.15s cubic-bezier(.14, .8, .28, 1) forwards;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, .95),
+                 0 0 var(--spacing-lg) color-mix(in srgb, var(--gold) 62%, transparent);
+    animation-name: plate-crit-number; animation-duration: 1.25s;
   }
 
-  .plate-fx .pop.dot{ font-size: var(--font-sm); color: var(--fx, var(--text)); }
+  .plate-fx .pop.dot{ font-size: var(--font-sm); animation-duration: .8s; }
+  .self-plate .plate-fx .pop:not(.word) { color: var(--alarm); }
 
-  /* pops from one tick cascade instead of landing all at once: the lane each event already carries
-     staggers the mount, and the both-fill holds the first frame through the wait so nothing flashes */
-  .plate-fx .pop{ animation-fill-mode: both; animation-delay: calc(var(--lane) * 70ms); }
-
-  /* a defense word pops like a number but reads as one: uppercase chip face in the colour of what
-     caused it, small beside the figures, never taking the rim */
+  /* A defence word keeps a small plate face, apart from the larger damage figures. */
   .plate-fx .pop.word{
+    top: var(--spacing-xs);
     font-family: var(--ui);
     font-size: var(--font-xs);
     text-transform: uppercase;
-    letter-spacing: clamp(1px, 0.049vw + 0px, 2px);
+    letter-spacing: 1px;
     padding: 1px 4px;
     border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--fx, var(--panel)) 14%, transparent);
-    animation: fx-rise 1.1s cubic-bezier(.2, .6, .3, 1) forwards;
+    background: var(--glass);
+    color: var(--fx, var(--text));
+    animation-duration: 1.1s;
   }
 
-  .self-plate .cardface.knock{ animation: fx-flinch-down .3s cubic-bezier(.2, .8, .3, 1); }
+  .mob .art.knock { animation: plate-mob-knock .3s cubic-bezier(.2, .8, .3, 1); }
+  .mob .charge.lunge { --reach: var(--box-100); animation: plate-mob-charge .45s cubic-bezier(.3, .7, .3, 1); }
+  .mob .charge.lunge.clash { --reach: calc(var(--box-100) / 2); }
+  .self-plate .cardface.knock { animation: plate-self-knock .3s cubic-bezier(.2, .8, .3, 1); }
+  .mob .flash, .self-plate .flash {
+    position: absolute; inset: -1px; z-index: 4; border: 1px solid var(--fx, var(--edge));
+    border-radius: var(--spacing-md); pointer-events: none;
+    box-shadow: inset 0 0 var(--spacing-sm) color-mix(in srgb, var(--fx, var(--text)) 58%, transparent);
+    animation: plate-flash .32s ease-out forwards;
+  }
 
-  /* a landed swing surges the striker's own card up toward its victim — a lean, not a leap */
-  .self-plate .cardface.lunge{ animation: fx-surge .35s cubic-bezier(.3, .7, .3, 1); }
+  @keyframes plate-number {
+    0% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), var(--spacing-md)) scale(.7); }
+    20% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-xs))) scale(1.16); }
+    60% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-lg))) scale(1); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--box-100))) scale(.94); }
+  }
+  @keyframes plate-crit-number {
+    0% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), var(--spacing-md)) scale(.6); }
+    24% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-sm))) scale(1.4); }
+    52% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-lg))) scale(1.06); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--box-100))) scale(.96); }
+  }
+  @keyframes plate-mob-knock {
+    0%, 100% { transform: none; }
+    30% { transform: translateY(calc(-1 * var(--spacing-sm))) scale(.98); }
+    60% { transform: translateY(2px); }
+  }
+  @keyframes plate-self-knock {
+    0%, 100% { transform: none; }
+    30% { transform: translateY(var(--spacing-sm)) scale(.98); }
+    60% { transform: translateY(-2px); }
+  }
+  @keyframes plate-mob-charge {
+    0%, 100% { transform: none; }
+    18% { transform: translateY(calc(-1 * var(--spacing-xs))) scale(.98); }
+    50% { transform: translateY(var(--reach)) scale(1.09); }
+    64% { transform: translateY(calc(var(--reach) * .86)) scale(1.04); }
+  }
+  @keyframes plate-flash {
+    0%, 100% { opacity: 0; }
+    36% { opacity: 1; }
+  }
 
   /* a swing draws the shelf's crossed swords across the body it cut, turned through the strike. A mask
      contributes only alpha, so the Element that carried the hit paints the blade. */
@@ -401,7 +585,7 @@
     background: var(--fx, var(--text));
     -webkit-mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
             mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
-    animation: fx-arc .26s ease-out forwards;
+    animation: plate-arc .26s ease-out forwards;
   }
 
   /* a press lands as a burst and not a cut, so the two halves of a build read apart before a number is read */
@@ -409,7 +593,18 @@
     position: absolute; left: 50%; top: clamp(24px, 1.548vw + 6px, 51px); z-index: 4; pointer-events: none;
     width: var(--icon-lg); height: var(--icon-lg); margin: var(--x-pull-burst) 0 0 var(--x-pull-burst);
     border: 2px solid var(--fx, var(--text)); border-radius: 50%;
-    animation: fx-burst .34s ease-out forwards;
+    animation: plate-burst .34s ease-out forwards;
+  }
+
+  @keyframes plate-arc {
+    0% { opacity: 0; transform: translate(calc(-1 * var(--spacing-md)), var(--spacing-sm)) rotate(-42deg) scale(.7); }
+    35% { opacity: .95; }
+    100% { opacity: 0; transform: translate(var(--spacing-md), calc(-1 * var(--spacing-sm))) rotate(16deg) scale(1.12); }
+  }
+  @keyframes plate-burst {
+    0% { opacity: 0; transform: scale(.35); }
+    25% { opacity: .9; }
+    100% { opacity: 0; transform: scale(1.55); }
   }
 
 @media (min-width: 1600px) {

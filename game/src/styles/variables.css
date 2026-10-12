@@ -29,9 +29,7 @@
      one pair for the frame rather than the same two numbers written on each cluster */
   --screen-pad: var(--spacing-md);
   --bar-h: clamp(12px, 0.78vw + 2px, 22px);
-  /* the HUD's floating hardware, sized once: the portrait plate and its ring, the minimap sheet,
-     and the objectives column's width on the left edge */
-  --portrait-size: clamp(58px, 3.75vw + 14px, 124px);
+  /* the HUD's floating hardware, sized once: the minimap sheet and the objectives column's width */
   --minimap-size: clamp(100px, 6.52vw + 25px, 216px);
   --objectives-w: clamp(170px, 11vw + 20px, 300px);
   /* a body's rank, and the inks its state is named in: an Elite or a Boss wears its own rim and name

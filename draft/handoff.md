@@ -6,7 +6,7 @@ Not a design doc: this is the working state, what is verified, and what is not.
 **Verified green at hand-off:** `npm run check` 0 errors / 0 warnings · `npm test` **281 passed / 23 files** ·
 `npm run verify` **5/5 cages, 0 FAIL** · `npm run wiki` rebuilt (18 pages).
 
-**One change is NOT browser-verified — see §2. Do that first.**
+**Field plate extraction is browser-verified on port 5173 — see §2.**
 
 ---
 
@@ -80,37 +80,30 @@ Test count went 227 → **281**. Five sim modules that had no direct test now do
 
 ---
 
-## 2 · IN FLIGHT — must be browser-verified
+## 2 · Field plate extraction — browser-verified
 
-`game/src/ui/FieldPlates.svelte` was extracted from `App.svelte` (4078 → **3702** lines). The **markup and
-all its CSS** moved. It type-checks and all 281 tests pass, but **the rendered result has not been looked
-at since the CSS move**. The CSS surgery is the risky part: 39 rule positions were cut from `App.svelte`'s
-`<style>` and re-planted in the child, one multi-selector rule (`.mobbar i, .mini-bar i, .target-hp i`) was
-split, and **one `}` was lost and restored by hand**.
+`game/src/ui/FieldPlates.svelte` was extracted from `App.svelte` (4078 → **3702** lines). The markup and
+plate CSS were checked on port 5173. Browser inspection found the `.mobbar` track and label rules still
+scoped in `App.svelte`, leaving plate bars at zero height. Those rules, plus element and curse labels,
+now live in `FieldPlates.svelte`.
 
-Verify:
+Verified on port 5173:
 
-1. `npm run dev` → open the printed port (5173 is often occupied by another server; use whatever it prints).
-2. Hunt something: the map focus is on at start → click the **Eastgate** cell → the TravelCard's
+1. Reused the existing server on port 5173.
+2. Hunted from **Eastgate** via the TravelCard's
    **hunt here** button.
-3. Confirm, on the field:
-   - the mob plate: portrait, name, body line, **HP bar with the `--w` ramp**, `PS / Hit / Dodge` chips,
-     element label, the `curses` line (`—` when empty);
-   - the character's own card: HP / ES / Mana bars;
-   - a swing draws the **arc** and a press the **burst**; a hit flashes the rim; numbers pop and leave;
-   - the `elite` / `boss` accents and the `front` crop marks;
-   - with no group: `Next group in N sec.` or the hunting-off promise;
-   - while walking: the boot-print stride.
-4. Console must be clean (the only expected error is the pre-existing `favicon.ico` 404).
-5. Turn map focus off (Escape / the Field tab) — the field must stay laid out correctly. `.stage.mapmode`,
+3. Checked mob name, portrait, body, `PS / Hit / Dodge`, Element, empty curse line, and a live HP bar.
+   Its computed height is 12px and its fill carries the `--w` ramp. Checked character HP / ES / Mana bars,
+   elite accent, and floating combat numbers.
+4. Console showed only the pre-existing `favicon.ico` 404.
+5. Turned map focus off (Escape / the Field tab); field layout stayed intact. `.stage.mapmode`,
   `.stage.veiled`, `.townmode` all style `.field` from `App.svelte`; the `div.field` container
   **stayed in App** precisely so those rules keep matching.
 
-If something is unstyled, the rule did not move: re-run `npm run check` and read the
-`Unused CSS selector` warnings — Svelte names exactly which rule is now homeless.
+`npm run check` passes with 0 errors and 0 warnings.
 
-Also worth a glance: `App.svelte` around the `.mobbar b { … }` / `.mini-bar i, .target-hp i` pair
-(the hand-restored brace), and the child's `@media (min-width: 1600px)` block at the end of its `<style>`.
+Still to verify from the original checklist: arc / burst / hit-flash animations, boss accent and front crop
+marks, next-group countdown, and the walking boot-print stride.
 
 ---
 
@@ -121,7 +114,7 @@ Also worth a glance: `App.svelte` around the `.mobbar b { … }` / `.mini-bar i,
 Still in `App.svelte`, each a candidate for the same treatment:
 `CastBar` (cast order orbs) · `Vitals` (portrait + XP ring + pools) · `SheetModal` (+ `AllocOverlay`) ·
 `MenuRing` (hub) · `Floaters` (hit ring) · `PickCard` · `ReadColumn` (zone tag + purses + minimap +
-objectives) · `LogBox` · `ExpBar` · the `<Panel>` blocks (`bag/forge/craft` ≈163 lines, `desk` ≈156,
+objectives) · the `<Panel>` blocks (`bag/forge/craft` ≈163 lines, `desk` ≈156,
 `skills` ≈142, `save` ≈48).
 
 **The recipe that worked here:**
