@@ -1,0 +1,16 @@
+[     947ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/favicon.ico:0
+[ 4117191ms] ReferenceError: faceMark is not defined
+
+	in <unknown>
+	in undefined
+
+    at App (http://localhost:5173/src/App.svelte?t=1791811944319:3666:30)
+    at http://localhost:5173/node_modules/.vite/deps/chunk-J6T4DFA6.js?v=a848ec38:321:56
+    at update_reaction (http://localhost:5173/node_modules/.vite/deps/chunk-7MJ7SC3I.js?v=a848ec38:3538:18)
+    at update_effect (http://localhost:5173/node_modules/.vite/deps/chunk-7MJ7SC3I.js?v=a848ec38:3691:21)
+    at create_effect (http://localhost:5173/node_modules/.vite/deps/chunk-7MJ7SC3I.js?v=a848ec38:3026:7)
+    at branch (http://localhost:5173/node_modules/.vite/deps/chunk-7MJ7SC3I.js?v=a848ec38:3202:10)
+    at http://localhost:5173/node_modules/.vite/deps/chunk-J6T4DFA6.js?v=a848ec38:315:17
+    at update_reaction (http://localhost:5173/node_modules/.vite/deps/chunk-7MJ7SC3I.js?v=a848ec38:3538:18)
+    at update_effect (http://localhost:5173/node_modules/.vite/deps/chunk-7MJ7SC3I.js?v=a848ec38:3691:21)
+    at _Batch.traverse_fn (http://localhost:5173/node_modules/.vite/deps/chunk-7MJ7SC3I.js?v=a848ec38:2484:9)
