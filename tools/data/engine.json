@@ -90,8 +90,15 @@
       "k_leech": 0.002,
       "decay_sec": 5
     },
+    "crippled": {
+      "clock_pct": 50,
+      "clock_cap": 50,
+      "cd_pct": 50,
+      "time_sec": 3,
+      "note": "Earth's status (owner ticket), and it cuts two clocks. On a mob it slows the attack CLOCK — a second of its clock costs 2000 ms — so what it pays is frequency, never the damage of a swing; that is the half a mob feels today. On us it also slows COOLDOWNS: `cd_pct` of the tick rate goes, so a rotation comes back half as fast while it holds (the mirror of Haste's post-cap multiplier, and the same field the mob side reads once mob skills land). It is not an aspd cut — chill and shock move that number, this one slows the timers. No stacks: a second application restarts the three seconds."
+    },
     "dot_cap": 1.5,
-    "dot_cap_note": "burn + poison combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches it exactly at 5 stacks x 0.30, so a maxed fire build fills the whole budget on its own",
+    "dot_cap_note": "burn + poison + the earth line a row leaves (Sand Storm), combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches it exactly at 5 stacks x 0.30, so a maxed fire build fills the whole budget on its own",
     "proc_chance": 0.2,
     "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action but DO take the game's existing Cap-bounded proc (stun ≤15%, chill/shock/Cripple aspd cut under their own Caps), the same symmetric numbers a mob inflicts on us, so no fight can be stun-locked. No mob resist stat (DECISIONS.md §Standing intent). combat.md §5b"
   },
@@ -99,6 +106,12 @@
     "note": "Species (not classes - the player has no class) and body classes, copied from Ragnarok Online: a species is a stat-multiply vector plus an accuracy tier plus a damage type, and a body class is one of the four card sizes. innate Element stays a separate spawn roll (world.md) so the three axes never collapse into one.",
     "stat_block": "every mob carries ONE Core stat block (`mob.species[].core`, whole numbers) whose zone value is the block scaled from the anchor zone. Accuracy, Evasion, Armour, Elemental resistance, alignment, crit and dodge all read from that block through the body class, so two mobs of the same level can be nothing alike and a zone differs only in mob_HP and mob_PS (world.md Monsters). The block is the mob's Core stat line, and its Vit is the piece that feeds HP: `hp = Base HP + Vit`, where Base HP is the zone's own mob_HP curve minus that Vit (so the total stays the published anchor). The body class adds a base Evasion percent on top of the Core Dex line (small +20 / medium +10 / large 0).",
     "power_note": "A mob's damage per second is its own power over the zone mean, times the published mob_PS(L) curve: power = mob.species[].power_base + K_MOB_PS_STAT x the Core Stat its `damage` tag reads (physical -> Str, magic -> Int, mixed -> both halves, the same split mob.damage_split spends). The zone's average mob is the published curve (checks.md X37), so the species term only moves the mobs actually in front of the player and no zone edge, timeline, ladder or survival number changes. `power_base` is the per-species Base knob - 1.00 is neutral, and raising or lowering it tilts a species without touching its stat vector.",
+    "attack_clock_per_sec": {
+      "normal": 1,
+      "elite": 1,
+      "boss": 0.8,
+      "note": "combat.md section 1: a normal and an elite mob swing once a second, a boss 0.8 times. The mob clock is capped at 1 / caps.attack_interval_sec, the same clock rule the player obeys, so no Crippled stack or future mob speed line can out-run the game's one attack ceiling."
+    },
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
@@ -3218,18 +3231,14 @@
     "race_res_pct": 20
   },
   "bleed": {
-    "curse_id": "curse.lacerate",
-    "curse_cd_sec": 14,
-    "curse_duration_sec": 10,
-    "uptime_pct": 71,
     "stacks": false,
     "refreshes": true,
     "affected_by_armour": false,
     "can_crit": false,
     "is_element": false,
     "mitigations": "none — bleed has no counter stat in the game; heal and Energy Shield only shorten the race ",
-    "mob_side": "decided — bleed is a DoT, so it lands on mobs in full from our Lacerate. The reverse is a mob skill: the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict bleed as their signature, delivered as a DoT slice of their already-priced mob_PS, not extra power (combat.md §5b)",
-    "note": "PoE bleed: physical damage over time, does not stack, a new application refreshes the duration, base duration 5 sec, base total 70% of the inflicting hit's physical damage, unaffected by armour, cannot crit. bleed_dps = K_BLEED x physical_per_hit / bleed_time_sec, so it does not scale with attack speed — slow heavy hits are the build."
+    "mob_side": "decided — bleed is a DoT, so it lands on mobs in full from our own bleed sources: the axe's `Chance to bleed %` line, and a press whose row grants the proc. It is a ROLLED status like an Element proc, so it passes the Alignment gate before its own chance (owner ruling) — the same gate a stun passes. The reverse is a mob skill: the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict bleed as their signature, delivered as a DoT slice of their already-priced mob_PS, not extra power (combat.md §5b)",
+    "note": "PoE bleed: physical damage over time, does not stack, a new application refreshes the duration, base duration 5 sec, base total 70% of the inflicting hit's physical damage, unaffected by armour, cannot crit. bleed_dps = K_BLEED x physical_per_hit / bleed_time_sec, so it does not scale with attack speed — slow heavy hits are the build. Delivered by the axe's `Chance to bleed %` line and by a press whose row grants the proc; no curse carries it."
   },
   "level_gain": {
     "hp_per_level": 10,
@@ -3292,7 +3301,7 @@
     },
     "plateau_from": 100,
     "plateau_step_at": 89,
-    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) is the RAGNAROK curve: the classic base-EXP table of RO (1-99) applied in log space and rescaled so level 1 costs 20 kills and the completion checkpoint (level 100) lands on its published 63,231, with the last two steps set by the owner rule — the step INTO 100 is 1.5× the step into 99 in XP — so the cliff ends on one final push, which keeps RO's signature — a step at every 10-level boundary and a steeper final decade — at this game's scale. The anchors are one per level through the cliff (85-100) and at each boundary, so the steps survive interpolation. Past `plateau_from` (100, the completion level) the XP bar is FLAT and holds the XP of the step out of `plateau_step_at` (89 → 90, the last step before RO's own cliff): completing the 91-100 push lowers the bar, and the post-completion loop is a plateau the player paces, never a wall. The progression checkpoints derive from this curve in engine/index.ts (CHECKPOINTS_KILLS), so a re-shape moves the bands and the town budgets with it. tools/timeline.ts derives the table in world.md from this."
+    "note": "xp_to_next(L) = kills(L) × 10 × min(L, mob_level_cap) · kills(L) is the RAGNAROK curve: the classic base-EXP table of RO (1-99) applied in log space and rescaled so level 1 costs 20 kills and the completion checkpoint (level 100) lands on its published 63,231, with the last two steps set by the owner rule — the step INTO 100 is 1.5× the step into 99 in XP — so the cliff ends on one final push, which keeps RO's signature — a step at every 10-level boundary and a steeper final decade — at this game's scale. The anchors are one per level through the cliff (85-100) and at each boundary, so the steps survive interpolation. Past `plateau_from` (100, the completion level) the XP bar is FLAT and holds the XP of the step out of `plateau_step_at` (89 → 90, the last step before RO's own cliff): completing the 91-100 push lowers the bar, and the post-completion loop is a plateau the player paces, never a wall. The progression checkpoints derive from this curve in engine/index.ts (CHECKPOINTS_KILLS), so a re-shape moves the bands and the town budgets with it."
   },
   "mod_max": {
     "phys_flat_main_hand": 80,
@@ -3584,7 +3593,7 @@
         "ids": [
           "all_resistance_pct"
         ],
-        "v100": "+11.1% EHP across all five Elements at once · 20% off the Elemental half of a 50/50 hit",
+        "v100": "+11.1% EHP across every Element at once · 20% off the Elemental half of a 50/50 hit",
         "early": "+2%",
         "weight": 0.7,
         "why": "Weaker per Element than Elemental resistance % (top 20 vs 30) precisely because it covers all five, and it lands on the ring, amulet and cape slots that carry no resistance today — rarer by design"
@@ -3739,6 +3748,7 @@
     "accuracy": null,
     "weight_overload": 0.5,
     "block": null,
+    "block_divisor": 10,
     "block_note": "`block` is the second avoidance layer: a blocked hit is cut by a flat `armour / 10` (owner ruling, provisional) rather than deleted, and the roll runs after perfect dodge and evasion. It is fed by the Shield offhand's line 1 only. **No Cap (owner ruling):** the block chance keeps climbing with the shield's own Mod line. formula-defense.md prints the order.",
     "stun": null,
     "stun_note": "`stun` is the lightning stun chance (elements.md lightning · C10): `Alignment × K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. **No Cap (owner ruling):** the two sources sum and the chance keeps climbing; the mace's line 1 is the published gear source.",
@@ -3861,7 +3871,7 @@
     "taps_per_day": 2
   },
   "potions": {
-    "note": "Single home for the potion ladder farm.md prints (A8). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · drop line · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV6 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
+    "note": "Single home for the potion ladder farm.md prints (A8). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · drop line · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV5 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
     "shared_cooldown_sec": 30,
     "auto_use_default": {
       "hp_pct": 30,
@@ -3956,12 +3966,14 @@
   },
   "build": {
     "reference_split": "Str 12 items · Agi/Lck/Dex at level-only 210 · sword (aspd 1.2 · mult 1.0) · main hand T1 aspd +25% · crit damage +120%",
+    "weapon_aspd_default": 1.2,
+    "weapon_aspd_default_note": "The aspd a build with no weapon in hand clocks at (the bare-hand fallback). It is the sword's own `weapon_aspd` in bases.json, read from here so the empty slot and the opening set cannot drift apart.",
     "hit_chance_pct": 80,
     "hit_chance_pct_note": "A derived anchor, not an input: the engine's own REFERENCE build hit chance against the reference mob (mean species on a Medium body), rounded. X21 gates it exact, and `node tools/check.ts --sync` re-publishes it here whenever a K, a Cap, a species Dex line or a body top-up moves - the gate stays exact so a stale figure cannot survive, and the repair is one command instead of a hand-typed number.",
     "crit_chance_pct": 18.5,
     "dagger_capped_at_500": false,
     "heal_pool_mult": 2.4,
-    "heal_pool_mult_note": "One round of the heal skills, as a multiple of Max HP: Greater Heal 60% + Heal 10%/sec x 8 sec (80%) = 140% => x2.40. Read by tools/survival.ts for the boss 'with heal' column (SV6 gate); the heal skills in skills.json must sum to this number. Retuned from x2.09 when the survival cage's weapon was corrected to the one-handed sword (the old dagger was 25% too fast, so every boss Push was understated): at x2.40 one round still clears the boss for the two themes that spend items on surviving (mix, tank) and not for glass or evasion."
+    "heal_pool_mult_note": "One round of the heal skills, as a multiple of Max HP: Greater Heal 60% + Heal 10%/sec x 8 sec (80%) = 140% => x2.40. Read by tools/survival.ts for the boss 'with heal' column; the heal skills in skills.json must sum to this number. Retuned from x2.09 when the survival cage's weapon was corrected to the one-handed sword (the old dagger was 25% too fast, so every boss Push was understated): at x2.40 one round still clears the boss for the two themes that spend items on surviving (mix, tank) and not for glass or evasion."
   },
   "global": {
     "damage_mult": 1,
@@ -4271,6 +4283,10 @@
     "mana_mult": 1.5,
     "note": "The AoE rule: an AoE skill deals 60% damage to each target hit, hits at most 3 targets, and costs 1.5x mana. Damage per mana is 0.40x at 1 target, 0.80x at 2, 1.20x at the Cap. Which 3 targets it hits is the reach queue (mob.reach), not a fixed set."
   },
+  "max_hp_press": {
+    "boss_pct": 50,
+    "note": "Earth Splitter's share of the target's OWN maximum pool: the row states the percent, and a boss answers it at `boss_pct` of that (owner ticket). A press that scales with the body it lands on is priced by nothing in the archetype bands — the bands read the caster's power — so the row is priced on its own press and this cut is what keeps a %HP slam from out-punching the static `mob_HP` table every other number is priced against."
+  },
   "craft": {
     "reroll_value_stones_per_use": 1,
     "refine_stones_per_use": 1,
@@ -4357,7 +4373,7 @@
       }
     ],
     "gear_mod_per_level": 2,
-    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. `node tools/ladder.ts --checks` gate **LD7** recomputes it from those two published numbers and fails if it drifts, and **SV7** in `tools/survival.ts` holds the G5 boss gate against a fully upgraded set — which is how checks.md H1 pays for the uplift now that measured `mob_HP` as already inside the pacing (it moves nothing there).",
+    "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. checks.md H1 pays for the uplift against the boss now that measured `mob_HP` is already inside the pacing (it moves nothing there).",
     "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing · 20% reroll values inside the current Tiers · 15% +1 Mod (crafted max and Core slot cap respected) · 15% remove one non-bound Mod · 10% reroll Element (the only Element change in the game) · 10% Gear Mod +2 · 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
     "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe · +5 to +10 90% down to 45% and a fail drops one level · +11 to +15 40% down to 10% and a fail breaks the piece · protection 5 per piece from birth, each would-be break spends one and drops a level · Repair stone revives at the pre-break level and refills protection · costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality stones · online only"
   },
@@ -4370,7 +4386,7 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "first 1/14 of drops 22.0 → 2/14-4/14 10.4 → after that 6.4 (low band) · keep-rate 5.66% low · 4.48% mid · 3.54% high · 1.22% high + full_lck",
+      "value": "first 1/14 of drops 22.6 → 2/14-4/14 10.4 → after that 6.4 (low band) · keep-rate 5.75% low · 4.51% mid · 3.56% high · 1.23% high + full_lck",
       "expression": "measured — tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
@@ -4400,27 +4416,33 @@
     }
   ],
   "elements": {
-    "note": "5 Elements. No Element counters another: a hit Element names its status and answers the target resistance line, nothing more. Each race owns one Element (mob.species[].element), attacks with it and resists it at the flat mob.race_res_pct in every zone; every other Element meets no res at all. The same Cap the player obeys holds the line.",
+    "note": "6 Elements. No Element counters another: a hit Element names its status and answers the target resistance line, nothing more. Earth keeps its own status (`crippled`, the clock cut) and is still waiting on its attack rows, so `pending` names it and it rolls on gear, takes a colour and meets the resistance Cap meanwhile. Each race owns one Element (`mob.species[].element`), attacks with it and resists it at the flat `mob.race_res_pct` in every zone; every other Element meets no res at all. The same Cap the player obeys holds the line.",
     "order": [
       "fire",
       "cold",
       "lightning",
       "poison",
-      "chaos"
+      "chaos",
+      "earth"
     ],
+    "pending": {
+      "earth": "the element's status (`crippled`) is live; its attack rows land in a later pass. Gear can roll it and the Cap answers it meanwhile."
+    },
     "status_of": {
       "fire": "burn",
       "cold": "chill",
       "lightning": "shock",
       "poison": "poison",
-      "chaos": "mark"
+      "chaos": "mark",
+      "earth": "crippled"
     },
     "mechanic": {
       "fire": "burn per second",
       "cold": "slow target attack speed",
       "lightning": "short interrupt",
       "poison": "stacking layers, never expires alone",
-      "chaos": "long hits that grow stronger"
+      "chaos": "long hits that grow stronger",
+      "earth": "slows the target's attack clock"
     },
     "align_cap": 50,
     "colour_note": "The damage indicator's one colour set (`hud`): a hit is coloured by the Element that carried it, a physical hit by `physical`, and a status proc by the colour of the Element its `status_of` line names, so no status needs its own copy of a colour. Crit is not an Element and takes the HUD's own accent, `--gold`.",
@@ -4430,7 +4452,8 @@
       "cold": "#9fe0f2",
       "lightning": "#f2d34e",
       "poison": "#6dbf57",
-      "chaos": "#a970d8"
+      "chaos": "#a970d8",
+      "earth": "#a4723f"
     },
     "crit_colour": "#e8c169"
   },

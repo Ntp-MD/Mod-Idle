@@ -35,12 +35,20 @@ export const imprintStoneFor = (modId: string) => 'imprint_' + modId;
  * the stone's name. `imprint_<id>` keys read as `Imprint — <Mod name>` (one stone per Mod).
  */
 export const STONE_NAME: Record<string, string> = {
-  reroll_value: 'Value stone', tier: 'Tier stone', add: 'Add stone',
-  remove: 'Remove stone', replace: 'Replace stone', quality: 'Quality stone', repair: 'Repair stone',
-  corrupt: 'Corrupt stone', polish: 'Polish stone', reforge: 'Reforge stone', rebirth: 'Rebirth stone',
+  reroll_value: 'Reroll Value Stone',
+  tier: 'Tier Stone',
+  add: 'Add Stone',
+  remove: 'Remove Stone',
+  replace: 'Replace Stone',
+  quality: 'Upgrade Stone',
+  repair: 'Repair Stone',
+  corrupt: 'Corrupt Stone',
+  polish: 'Polish Stone',
+  reforge: 'Reforge Stone',
+  rebirth: 'Rebirth Stone',
   // the family label only — a purse never holds this key, it holds `imprint_<modId>`, which the client
   // reads as `Imprint — <Mod name>` so one stone per Mod stays one line in the purse
-  imprint: 'Imprint stone',
+  imprint: 'Imprint Stone',
 };
 
 /**
@@ -707,7 +715,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
   /**
    * What one Upgrade step adds to the piece's Gear Mod. `craft.gear_mod_per_level` is bounded by the
    * published line ceiling — the same `mod_max` line `tools/loot.ts` rolls the Gear Mod from — so a
-   * full ladder cannot pass one T1 line on the piece (gate LD7).
+   * full ladder cannot pass one T1 line on the piece (gate X42).
    */
   const stepOf = (item: any, n: number) => (C.gear_mod_per_level || 0) * n;
 

@@ -24,27 +24,16 @@
   --focus: #7fd4ff;
   /* the floating menu row's height — the rail is a row across the top-right now, not a full-height
      column, so this is its one axis and the minimap hangs a fixed drop under it */
-  --rail: clamp(34px, 2.2vw + 8.51px, 72.9px);
-  /* where the reads under the menu row begin: the row, a drop, then the minimap square — the edge
-     column below keys off this same offset so the three never drift into each other */
-  --rail-drop: calc(var(--screen-pad) + var(--rail) + clamp(7.5px, 0.489vw + 1.89px, 16.2px));
+  --rail: clamp(46px, 2.6vw + 12px, 88px);
   /* the gutter every corner read stops short of, and the height a gauge track carries its figure in:
      one pair for the frame rather than the same two numbers written on each cluster */
-  --screen-pad: clamp(11.25px, 0.733vw + 2.83px, 24.3px);
+  --screen-pad: var(--spacing-md);
   --bar-h: clamp(12px, 0.78vw + 2px, 22px);
   /* the HUD's floating hardware, sized once: the portrait plate and its ring, the minimap sheet,
-     the five cast orbs (biggest first — the slot the rotation presses first), and the objectives
-     column's width on the left edge */
-  --portrait-size: clamp(57.5px, 3.749vw + 14.49px, 124.2px);
-  --minimap-size: clamp(100px, 6.52vw + 25.2px, 216px);
-  --orb-1: clamp(42.5px, 2.771vw + 10.71px, 91.8px);
-  --orb-2: clamp(36.25px, 2.363vw + 9.13px, 78.3px);
-  --orb-3: clamp(30px, 1.956vw + 7.56px, 64.8px);
-  --orb-4: clamp(25px, 1.63vw + 6.3px, 54px);
-  --orb-5: clamp(21.25px, 1.385vw + 5.36px, 45.9px);
+     and the objectives column's width on the left edge */
+  --portrait-size: clamp(58px, 3.75vw + 14px, 124px);
+  --minimap-size: clamp(100px, 6.52vw + 25px, 216px);
   --objectives-w: clamp(170px, 11vw + 20px, 300px);
-  /* the main-menu wheel's own plate: three sectors — bag, skills, sheet — and five satellite knobs */
-  --wheel: clamp(106.25px, 6.928vw + 26.78px, 229.5px);
   /* a body's rank, and the inks its state is named in: an Elite or a Boss wears its own rim and name
      colour, a curse and a warn read in their own inks, and the gauges climb to a lit end of the same
      semantic the dim token carries */
@@ -53,6 +42,15 @@
   --boss: #9d3b34;
   --boss-ink: #ff8b7a;
   --curse: #c8a5ff;
+  /* Item rarity: a content ladder for a drop's name, its slot edge and its card header, the way the
+     rank inks above name a body. It is not the highlight system — gold stays you-or-pressable and
+     green stays the better option, so a rarity ink never carries a control's meaning. The rungs are
+     read off the drop itself (quality band, Tier, and whether a Quality stone was spent on it). */
+  --rar-common: #8b96a8;
+  --rar-uncommon: #5fb87a;
+  --rar-rare: #4f8fe0;
+  --rar-epic: #a877e8;
+  --rar-legend: #e0913f;
   --alarm: #ffb3a8;
   --hot: #e2503f;
   --good-lit: #9fe0bb;
@@ -68,6 +66,14 @@
   --ground-3: #181d18;
   --glow-moss: #465c3a;
   --glow-dusk: #304a6c;
+  /* the two recessed plates the HUD's own hardware is cut from — the portrait face and the wheel's orb,
+     each a top-lit dark over its own floor — and the deep end of the accent's gradient, a shade under
+     `--hot` so the count pill's own floor is a token like its top */
+  --face-top: #1c2430;
+  --face-floor: #0d1218;
+  --orb-top: #242e3c;
+  --orb-floor: #10151d;
+  --hot-deep: #a33428;
   /* a recessed floor (an input well, a kbd cap, an empty slot) and the scrollbar's lit thumb */
   --inset: #12151b;
   --bar-2: #2e3742;
@@ -94,6 +100,64 @@
   /* the browser's own paints, themed from the same palette instead of left to the platform */
   --sel: rgba(127, 212, 255, .26);
   --bar: #232b36;
+  /* THE SIZING — one scale, one home. Three families, five steps each: --font-* is text, --icon-* is
+     a glyph's or a picture's box, --spacing-* is padding, margin and gap. Every step is a
+     `clamp(<int>px, <n>vw, <int>px)`: no decimal, so a figure is written the same way at every site
+     and it scales with the viewport between its two ends. A figure under 5px is too small to be
+     worth a step — a hairline pad, a shadow's blur — and stays a hardcoded figure where it is drawn.
+     The steps were cut to the sizes the client actually uses: read them off this block, edit a step
+     here and every site that reads it moves. */
+  --font-xs: clamp(10px, 0.78vw, 22px);
+  --font-sm: clamp(12px, 0.94vw, 26px);
+  --font-md: clamp(15px, 1.17vw, 32px);
+  --font-lg: clamp(20px, 1.56vw, 43px);
+  --font-xl: clamp(26px, 2.03vw, 56px);
+  --icon-xs: clamp(10px, 0.78vw, 22px);
+  --icon-sm: clamp(14px, 1.09vw, 30px);
+  --icon-md: clamp(20px, 1.56vw, 43px);
+  --icon-lg: clamp(30px, 2.34vw, 65px);
+  --icon-xl: clamp(42px, 3.28vw, 91px);
+  --spacing-xs: clamp(5px, 0.39vw, 11px);
+  --spacing-sm: clamp(8px, 0.62vw, 17px);
+  --spacing-md: clamp(12px, 0.94vw, 26px);
+  --spacing-lg: clamp(17px, 1.33vw, 37px);
+  --spacing-xl: clamp(25px, 1.95vw, 54px);
+
+  /* the unique sizes. These are not steps: the HUD's fixed hardware, the map sheet and the boxes
+     too big for an icon step each keep their own figure. The same `clamp(<int>px, …)` rule holds,
+     so no row here wears a decimal either. */
+  --sheet-fs-region: 10px;
+  --sheet-fs-walk: 7px;
+  --sheet-fs-place: 9px;
+  --sheet-fs-capital: 10.5px;
+  --sheet-fs-zonename: 7.5px;
+  --sheet-fs-id: 6.5px;
+  --x-pull-arc: clamp(-46px, -1.385vw - 5px, -21px);
+  --x-pull-burst: clamp(-32px, -0.978vw - 4px, -15px);
+  --x-pull-scale: clamp(-14px, -0.407vw - 2px, -6px);
+  --x-pull-note: clamp(-11px, -0.326vw - 1px, -5px);
+  --orb-cast: clamp(38px, 2.4vw + 12px, 50px);
+  /* a box this large is its own size, not a step: a panel, a sheet, a board. */
+  --box-100: clamp(63px, 4.07vw + 16px, 135px);
+  --box-110: clamp(69px, 4.48vw + 17px, 149px);
+  --box-130: clamp(81px, 5.29vw + 20px, 176px);
+  --box-160: clamp(100px, 6.52vw + 25px, 216px);
+  --box-170: clamp(106px, 6.92vw + 27px, 230px);
+  --box-180: clamp(113px, 7.33vw + 28px, 243px);
+  --box-200: clamp(125px, 8.14vw + 31px, 270px);
+  --box-240: clamp(150px, 9.77vw + 38px, 324px);
+  --box-300: clamp(188px, 12.22vw + 47px, 405px);
+  --box-320: clamp(200px, 13.03vw + 50px, 432px);
+  --box-420: clamp(263px, 17.1vw + 66px, 567px);
+  --box-440: clamp(275px, 17.92vw + 69px, 594px);
+  --box-520: clamp(325px, 21.18vw + 82px, 702px);
+  --box-560: clamp(350px, 22.8vw + 88px, 756px);
+  --box-620: clamp(388px, 25.25vw + 97px, 837px);
+  --box-680: clamp(425px, 27.69vw + 107px, 918px);
+  --box-720: clamp(450px, 29.32vw + 113px, 972px);
+  --box-920: clamp(575px, 37.46vw + 145px, 1242px);
+  --box-1100: clamp(688px, 44.79vw + 173px, 1485px);
+  --box-1800: clamp(1125px, 73.3vw + 283px, 2430px);
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
@@ -117,6 +181,26 @@ thead th { position: sticky; background: var(--panel); z-index: 1; }
 thead tr:first-child th { top: 0; }
 tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
 tbody tr:hover { background: rgba(255,255,255,.06); }
+/* One table, its rows split into tabbed groups: the strip is a radio group, each tab is a <tbody>, and a
+   press swaps which body shows over the shared header — no script, so the static build and the live wiki
+   behave alike. Generic over the group count a page declares (three here). */
+.tabs { margin: .9rem 0 1.4rem; }
+.tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.tabs > label {
+  display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
+  border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0;
+  color: var(--dim); font-size: .88rem; cursor: pointer;
+}
+.tabs > label b { color: var(--mob); font-weight: 500; }
+.tabs > label:hover { color: var(--text); }
+.tabs > input:checked + label { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); background: color-mix(in srgb, var(--gold) 10%, transparent); }
+.tabs > input:checked + label b { color: var(--gold); }
+.tabs > input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tabs tbody { display: none; }
+.tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
+.tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
+.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
+.tabs table { margin-top: 0; }
 .twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .twrap table { min-width: 56rem; }
 td:first-child { white-space: nowrap; }

@@ -44,6 +44,9 @@
 
 <button class="mini-map" onclick={onopen} title="Open the map" aria-label="Open the map">
   <svg viewBox={thumb.box} aria-hidden="true">{@html thumb.body}</svg>
+  <!-- the two reads a corner map owes: which way is north, and where the feet are on the sheet -->
+  <span class="compass" aria-hidden="true">N</span>
+  {#if cell}<span class="coord" aria-hidden="true">{cell.q},{cell.r}</span>{/if}
 </button>
 
 <style>
@@ -56,6 +59,16 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(0, 0, 0, .55);
   }
   .mini-map svg { width: 100%; height: 100%; display: block; }
+  .mini-map .compass {
+    position: absolute; top: 1px; left: 50%; transform: translateX(-50%);
+    font-size: var(--font-xs); font-weight: 700; color: var(--gold);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
+  }
+  .mini-map .coord {
+    position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);
+    font-family: var(--num); font-size: var(--font-xs); color: var(--sheet-ink);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none; font-variant-numeric: tabular-nums;
+  }
   .mini-map :global(.mcell) { stroke: rgba(0, 0, 0, .35); stroke-width: 1.4; }
   .mini-map :global(.mdot) { fill: var(--sheet-place); stroke: rgba(0, 0, 0, .6); stroke-width: 1.4; }
   .mini-map :global(.you-ring) { fill: none; stroke: var(--gold); stroke-width: 3; opacity: .85; }

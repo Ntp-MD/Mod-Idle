@@ -131,7 +131,7 @@
   .rung.next b { color: var(--gold); font-size: var(--font-sm); }
   .scale { margin: var(--x-pull-scale) 0 0; color: var(--mob); }
 
-  .press { display: grid; grid-template-columns: 1fr minmax(clamp(200px, 13.04vw + 50.4px, 432px), clamp(275px, 17.93vw + 69.3px, 594px)); gap: var(--spacing-md); align-items: start; }
+  .press { display: grid; grid-template-columns: 1fr minmax(clamp(200px, 13.04vw + 50px, 432px), clamp(275px, 17.93vw + 69px, 594px)); gap: var(--spacing-md); align-items: start; }
   .odds { display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-md); align-items: center; }
   .big {
     display: grid; gap: 1px; justify-items: center; padding: var(--spacing-sm) var(--spacing-md); min-width: var(--box-130);
@@ -140,7 +140,7 @@
   .big b { font-family: var(--num); font-size: var(--font-xl); line-height: 1; color: var(--gold); }
   .big.safe b { color: var(--good); }
   .big.high b { color: var(--alarm); }
-  .big span { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px); }
+  .big span { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: clamp(1px, 0.049vw + 0px, 2px); }
   .terms { margin: 0; padding-left: var(--spacing-md); display: grid; gap: 3px; font-size: var(--font-xs); color: var(--dim); }
   .terms b { color: var(--text); font-family: var(--num); }
 

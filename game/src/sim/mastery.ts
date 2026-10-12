@@ -34,3 +34,9 @@ export function dropBonusPct(state: GameState): number {
 
 export const masteryLabel = (lvl: number) =>
   `Mastery ${lvl}/${mastery.M.level_cap} · weight -${mastery.weightDiscount(lvl)}%`;
+
+/** The while-held skill bonus one type's level grants, in percent — the `skillBonus` multiplier as a read. */
+export function weaponSkillBonusPct(lvl: number): number {
+  const s = mastery.skillBonus(lvl);
+  return Math.round((s - 1) * 1000) / 10;
+}

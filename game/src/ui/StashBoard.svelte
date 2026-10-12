@@ -12,8 +12,9 @@
    */
   import { E } from '../engine/client';
   import { gearIcon } from '../icon';
-  import { gearEntry, sortEntries, SORT_LABELS, type SortKey } from './bag';
+  import { gearEntry, sortEntries, rankTone, SORT_LABELS, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
+  import { setDrag, readDrag } from './drag';
   import type { GameState, Item } from '../sim/types';
 
   let { game, tabs, tab, pileSort = 'level', ontab, onpilesort, ondeposit, onwithdraw, ondepositAll, onwithdrawAll, onlock, onequip, wornOf }: {
@@ -52,6 +53,23 @@
   const storedAll = $derived(game.stash.reduce((n, t) => n + t.length, 0));
 
   function pick(s: 'pile' | 'stash', i: number) { side = s; at = i; }
+
+  /**
+   * The two shelves are each other's drop target: a piece dragged from one side lands on the other, which
+   * is the same transfer the two buttons below the card make. The ref names where the piece came from, so
+   * the drop only ever moves it one way — a pile piece goes in, a stored one comes out.
+   */
+  function dragFrom(where: 'pile' | 'stash', index: number, e: DragEvent) {
+    setDrag(e, where === 'stash' ? { where: 'stash', index, tab } : { where: 'pile', index });
+  }
+
+  function dropOn(s: 'pile' | 'stash', e: DragEvent) {
+    const ref = readDrag(e);
+    if (!ref) return;
+    e.preventDefault();
+    if (s === 'stash' && ref.where === 'pile') act(() => ondeposit(ref.index), 'pile');
+    else if (s === 'pile' && ref.where === 'stash') act(() => onwithdraw(ref.index), 'stash');
+  }
   function act(fn: () => void, keep: 'same' | 'pile' | 'stash' = 'same') {
     fn();
     if (keep === 'pile') { side = 'pile'; at = -1; }
@@ -78,9 +96,13 @@
         <h4>Hunt pile · this trip</h4>
         <span class="count" class:alarm={full}>{game.bag.length} / {cap}</span>
       </header>
-      <div class="grid">
+      <div class="grid" role="group" aria-label="Hunt pile — drop a stored piece here to take it back"
+           ondragover={(e) => e.preventDefault()} ondrop={(e) => dropOn('pile', e)}>
         {#each pileView as e, k (e.index)}
           <button class="cell" class:here={side === 'pile' && at === pileAt * PAGE + k} class:lock={e.item?.locked}
+                  style:--rar={rankTone(e.item)}
+                  draggable="true"
+                  ondragstart={(ev) => dragFrom('pile', e.index, ev)}
                   onclick={() => pick('pile', pileAt * PAGE + k)} aria-label={e.title}>
             <img src={e.icon} alt="" aria-hidden="true" />
             {#if (e.item?.upgrade_lv || 0) > 0}<b class="pl">+{e.item?.upgrade_lv}</b>{/if}
@@ -111,9 +133,13 @@
         <span class="count">{stored.length} stored · {storedAll} in all tabs</span>
       </header>
       {#if tabs}
-        <div class="grid">
+        <div class="grid" role="group" aria-label={`Stash tab ${tab + 1} — drop a pile piece here to deposit it`}
+             ondragover={(e) => e.preventDefault()} ondrop={(e) => dropOn('stash', e)}>
           {#each storedView as it, k (stashAt * PAGE + k)}
             <button class="cell" class:here={side === 'stash' && at === stashAt * PAGE + k} class:lock={it.locked}
+                    style:--rar={rankTone(it)}
+                    draggable="true"
+                    ondragstart={(ev) => dragFrom('stash', stashAt * PAGE + k, ev)}
                     onclick={() => pick('stash', stashAt * PAGE + k)} aria-label={it.base}>
               <img src={gearIcon(it)} alt="" aria-hidden="true" />
               {#if (it.upgrade_lv || 0) > 0}<b class="pl">+{it.upgrade_lv}</b>{/if}
@@ -169,7 +195,7 @@
   .tb.here { border-color: var(--gold); color: var(--gold); background: rgba(232, 193, 105, .12); }
   .tb.here b { color: var(--gold); }
   .spacer { flex: 1; }
-  .shared { font-size: var(--font-xs); color: var(--mob); letter-spacing: clamp(0.5px, 0.033vw + 0.13px, 1.08px); }
+  .shared { font-size: var(--font-xs); color: var(--mob); letter-spacing: clamp(0px, 0.033vw + 0px, 1px); }
 
   .grids { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); }
   .side { display: grid; gap: 4px; align-content: start; }
@@ -179,7 +205,7 @@
   .count.alarm { color: var(--alarm); }
 
   .grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(32.5px, 2.119vw + 8.19px, 70.2px), 1fr)); gap: 3px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(32px, 2.119vw + 8px, 70px), 1fr)); gap: 3px;
     padding: 1px;
     /* one cell is one piece, so an empty row of the grid is a gap in the warehouse rather than a message */
   }
@@ -190,9 +216,10 @@
   .grid p { grid-column: 1 / -1; max-width: var(--box-520); font-size: var(--font-xs); }
   .cell {
     position: relative; aspect-ratio: 1 / 1; padding: 0; border-radius: 3px; background: var(--inset);
+    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
   }
   .cell img { position: absolute; inset: 0; margin: auto; width: var(--icon-md); height: var(--icon-md); object-fit: contain; pointer-events: none; }
-  .cell .pl { position: absolute; left: clamp(1.5px, 0.098vw + 0.38px, 3.24px); bottom: clamp(0.63px, 0.041vw + 0.16px, 1.35px); font-size: var(--font-xs); color: var(--xp); }
+  .cell .pl { position: absolute; left: clamp(2px, 0.098vw + 0px, 3px); bottom: clamp(1px, 0.041vw + 0px, 1px); font-size: var(--font-xs); color: var(--xp); }
   .cell.lock { border-style: dashed; border-color: var(--dim); }
   .cell.here { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(232, 193, 105, .5); background: rgba(232, 193, 105, .1); }
 
@@ -200,7 +227,7 @@
   .bulk select, .bulk button { font-size: var(--font-xs); padding: 2px var(--spacing-xs); }
 
   .draw {
-    display: grid; grid-template-columns: minmax(clamp(225px, 14.67vw + 56.7px, 486px), clamp(300px, 19.56vw + 75.6px, 648px)) 1fr; gap: var(--spacing-md); align-items: start;
+    display: grid; grid-template-columns: minmax(clamp(225px, 14.67vw + 57px, 486px), clamp(300px, 19.56vw + 76px, 648px)) 1fr; gap: var(--spacing-md); align-items: start;
     border-top: 1px solid var(--line); padding-top: var(--spacing-sm);
   }
   .moves { display: grid; gap: 4px; justify-items: start; }

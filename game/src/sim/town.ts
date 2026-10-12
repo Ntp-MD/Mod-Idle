@@ -1,4 +1,5 @@
 import { eng, E, TOWN } from '../engine/client';
+import { dayOf } from './game';
 import type { GameState, TaskSlot, TownState } from './types';
 
 /**
@@ -239,7 +240,7 @@ export function claimTask(state: GameState, index: number, choice?: string): boo
 
 /** Slots refill `task_sizing.refill_sec` after a claim (the daily direction layer: a day, not an hour); the free skip is once per slot per day (`DECISIONS.md` §The task board). */
 export function tickTown(state: GameState, rng: () => number) {
-  const day = Math.floor(state.clockSec / 86400);
+  const day = dayOf(state.clockSec);
   if (day !== state.town.skipDay) { state.town.skipDay = day; state.town.skipsToday = 0; }
   state.town.tasks.forEach((task, i) => {
     if (!task && state.clockSec >= state.town.refillAt[i]) state.town.tasks[i] = rollTask(rng, state);

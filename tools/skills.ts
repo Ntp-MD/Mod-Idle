@@ -3,7 +3,7 @@
  *
  *   node tools/skills.ts --checks   the mechanic gate (roster · effects · basis)
  *   node tools/skills.ts --calc     the live workshop: dmg/press · eff cd · press/s · mana/s
- *                                   flags: --build glass|caster --level N --cdr N --ladder N --pool N
+ *                                   flags: --build glass|caster --level N --cdr N --ladder N
  *
  * Counts, names, reserves, effects and the press itself are computed from the data — never
  * hand-typed anywhere. `engine/skills.ts` is the one calculator; the client calls the same function.
@@ -30,8 +30,7 @@ function calc() {
   const build = flags.build != null ? String(flags.build) : 'glass';
   const ref = M.referenceBases()[build] || M.referenceBases().glass;
   console.log(`# Skill workshop — ${build} reference (basis phys ${Math.round(ref.phys)} · basis magic ${Math.round(M.basisOf({ basis: 'magic' } as any, ref))}) · skill level ${level} · CDR ${cdrPct}% · ladder ${ladderPct}%`);
-  const pool = flags.pool != null ? Number(flags.pool) : M.MANA_REF_POOL;
-  console.log(`# press = (base_flat + eff% × power) × damage_pct(level)/100 · mana = the row's own cost at pool ${Math.round(pool)}, and mana/s = presses/sec × that cost`);
+  console.log(`# press = (base_flat + eff% × power) × damage_pct(level)/100 · mana = the row's typed cost in mana units, and mana/s = presses/sec × that cost`);
   // A row with no cooldown of its own fires on the attack clock, so its rate is the reference line's
   // hits/sec rather than a cooldown-derived figure — read from the engine, never typed here.
   const beatRate = eng.hitsPerSec(eng.REFERENCE.line.aspd);
@@ -40,7 +39,7 @@ function calc() {
   const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'mana', 'mana/s', 'dmg/press'];
   const rows = byType('attack').map((s: any) => {
     const r = M.row(s, { ...ref, cdrPct, ladderPct, level });
-    const cost = M.manaCostOf(s, { skillLevel: level, maxMana: pool, usableMana: pool, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
+    const cost = M.manaCostOf(s, { skillLevel: level, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
     // a row with no timer of its own has no cooldown-derived rate: its beat is the attack clock
     const rateN = r.pressesPerSec == null ? beatRate : r.pressesPerSec;
     const rate = r.pressesPerSec == null ? `${beatRate.toFixed(2)} beat` : r.pressesPerSec.toFixed(2);
@@ -99,7 +98,7 @@ function levels(which: string) {
     const head = ['level', 'damage%', 'effect%', 'press (glass)', 'press (caster)', 'mana', ...(s.effects || []).map((e: any) => `${e.stat}${e.op === 'mult' ? ' x' : e.op === 'add_flat' ? ' +' : ' +%'}`)];
     const body: any[][] = [];
     for (let lv = 1; lv <= L; lv++) {
-      const cost = M.manaCostOf(s, { skillLevel: lv, maxMana: M.MANA_REF_POOL, usableMana: M.MANA_REF_POOL, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
+      const cost = M.manaCostOf(s, { skillLevel: lv, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
       body.push([`${lv}`, `${M.damagePct(lv)}`, `${M.effectPct(lv)}`, fmt(Math.round(M.pressOn(s, 'glass', lv))), fmt(Math.round(M.pressOn(s, 'caster', lv))), fmt(Math.round(cost)),
         ...M.effectsAt(s, lv).map((e: any) => (e.op === 'mult' ? e.value.toFixed(2) : e.value.toFixed(1)))]);
     }

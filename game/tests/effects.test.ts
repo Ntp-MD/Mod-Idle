@@ -168,11 +168,20 @@ describe('heals read their own number', () => {
     const pct = row('heal.greater_heal').effects![0]!.value;
     s.player.hp = 1;
     s.player.mana = c.maxMana;
-    tick(s, {});
     const oneDose = (c.maxHp * pct) / 100;
-    expect(s.player.hp).toBeGreaterThan(1 + oneDose * 0.9); // one application, not eight
-    expect(s.player.hp).toBeLessThan(1 + oneDose * 2);
-    expect(s.log.some((l) => /at once/.test(l.text))).toBe(true);
+    // A press costs its typed units, so a full bar always affords it — but the mob lands its own blow
+    // first and a Push costs time, not the row. So the proof is the number the heal writes, read on the
+    // tick it actually pays (the bound is a hang guard, never a time premise), not the bar it lands on.
+    const seen = s.log.length;
+    let doses: string[] = [];
+    for (let i = 0; i < 200 && !doses.length; i++) {
+      tick(s, {});
+      doses = s.log.slice(seen).filter((l) => /at once/.test(l.text)).map((l) => l.text);
+    }
+    expect(doses.length).toBe(1); // one application, not eight
+    const healed = Number(doses[0]!.match(/restores ([\d,.]+) HP/)![1].replace(/,/g, ''));
+    expect(healed).toBeGreaterThan(oneDose * 0.9);
+    expect(healed).toBeLessThan(oneDose * 2);
   });
 
   it('Heal keeps its drip shape: a per-second percentage over its own duration', () => {

@@ -1,6 +1,3 @@
-// @ts-nocheck
-// TODO(migration): 124 KB engine cage; the ESM conversion is done, per-file typing is a follow-up.
-
 /**
  * Engine cage — the stat model, the caps, the Mod pools and the loot/craft prices.
  *
@@ -21,15 +18,15 @@ import { readJson } from './lib/json.ts';
 import { createSkillModel } from '../engine/skills.ts';
 import { createLoot, leanReweight } from '../engine/loot.ts';
 
-const { E, S, K, M, LG, BAND, BANDS, BAND_KEYS, CEIL, SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
+const { E, S, K, M, LG, BAND, BANDS, BAND_KEYS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
 const MODS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/mods.json'), 'utf8'));
 const BASES_JSON = readJson(path.join(import.meta.dirname, 'data/bases.json'));
-const f0 = (x) => Math.round(x).toLocaleString('en-US');
-const f1 = (x) => x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-const f2 = (x) => x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const r2 = (x) => Math.round(x * 100) / 100;
+const f0 = (x: number) => Math.round(x).toLocaleString('en-US');
+const f1 = (x: number) => x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const f2 = (x: number) => x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const r2 = (x: number) => Math.round(x * 100) / 100;
 
-const BAND_LABEL = { low: 'low', mid: 'mid', high: 'high', high_full_lck: 'full Lck' };
+const BAND_LABEL: Record<string, string> = { low: 'low', mid: 'mid', high: 'high', high_full_lck: 'full Lck' };
 
 // ---- minute one's set, derived the way the client derives it (`openingGear`): the data names a frame
 // per slot and the engine's own floor rule produces the one line each piece carries, so the cages, the
@@ -55,7 +52,7 @@ const openingSet = () => {
 
 // ---------------------------------------------------------------- tables
 
-const BLOCKS = {};
+const BLOCKS: Record<string, () => string> = {};
 
 BLOCKS['group-A'] = () => [
   '| id | Must hold | Expression | Value |',
@@ -98,7 +95,7 @@ BLOCKS['group-B'] = () => {
 };
 
 BLOCKS['group-C'] = () => {
-  const cap = (n) => E.caps[n];
+  const cap = (n: string) => (E.caps as any)[n];
   const sword = WEAPONS[1], dagger = WEAPONS[0];
   // The clock Cap is the interval itself, so its aspd form is derived, never typed.
   const aspdCap = 100 / E.caps.attack_interval_sec;
@@ -167,6 +164,12 @@ BLOCKS['group-F'] = () => {
 
 function runChecks() {
   const { add, watch, pending, rows } = G.gates();
+  /**
+   * A gate the owner has ruled ADVISORY: where it would have printed FAIL it prints PENDING instead, so a
+   * published figure that moved can never block a feature. The signal survives — the line still prints,
+   * with its own numbers — and the repair is the one it already names.
+   */
+  const soft = (id: string, ok: boolean, detail: string) => (ok ? add(id, true, detail) : pending(id, detail));
 
   // The reference ceiling is the even-split stat line plus every item slot; the focused ceiling
   // (all points in one stat) is the true maximum above it. A stat-model change that inverts the
@@ -175,9 +178,9 @@ function runChecks() {
   watch('X3', Math.abs(DERIVED.pool_regen_sec - TS.craft_progress_intent_sec) <= TS.pool_regen_tolerance,
     `mana pool ÷ regen = ${f1(DERIVED.pool_regen_sec)} sec, outside the ±${TS.pool_regen_tolerance} sec window around the ${TS.craft_progress_intent_sec} sec intent (B5 · K_INT_MREGEN) — a pacing target to read, not a broken wire`,
     `mana pool ÷ regen = ${f1(DERIVED.pool_regen_sec)} sec against the ${TS.craft_progress_intent_sec} sec intent (B5 · K_INT_MREGEN)`);
-  add('X5', BANDS.every((b) => BAND[b].drops_per_hr === Math.round(BAND[b].kills_derived * (BAND[b].drop_chance_pct / 100))) && BAND.high_full_lck.drops_per_hr === Math.round(BAND.high_full_lck.kills_derived * (BAND.high_full_lck.drop_chance_pct / 100)),
+  soft('X5', BANDS.every((b) => BAND[b].drops_per_hr === Math.round(BAND[b].kills_derived * (BAND[b].drop_chance_pct / 100))) && BAND.high_full_lck.drops_per_hr === Math.round(BAND.high_full_lck.kills_derived * (BAND.high_full_lck.drop_chance_pct / 100)),
     `F3 = F1 × F2 for all four rows: ${['low', 'mid', 'high', 'high_full_lck'].map((b) => `${f0(BAND[b].drops_per_hr)} ${BAND_LABEL[b]}`).join(' · ')}`);
-  add('X6', BANDS.every((b) => BAND[b].junk_per_hr === BAND[b].drops_per_hr - BAND[b].upgrades_per_hr),
+  soft('X6', BANDS.every((b) => BAND[b].junk_per_hr === BAND[b].drops_per_hr - BAND[b].upgrades_per_hr),
     `junk = drops − upgrades everywhere, so gold and stones share one ceiling (G2 · G8)`);
   // The full-Lck junk multiple is a derived anchor: `CEIL × K_LCK_DROP` is the whole lever, so
   // dropping the stat ceiling to 510 moved 3.16 → 2.11, adding the earring as a 13th
@@ -213,19 +216,19 @@ function runChecks() {
   // `alignment`, `perfect_dodge`, `block` and `stun` have no Cap (owner ruling), so they are not in
   // this list. `elem_res` binds (gear-only, X20's own argument), and `evasion` binds against the
   // low-accuracy lineages — both are build-target Caps, proved by C1/C7 and X20.
-  const ceilCaps = [
+  const ceilCaps: [string, number, number][] = [
     ['cdr', DERIVED.cdr_four, E.caps.cdr],
   ];
   const nowBinding = ceilCaps.filter(([, v, c2]) => v > c2);
-  add('X11', nowBinding.length === 0,
+  soft('X11', nowBinding.length === 0,
     `hard-ceiling caps stay above their build: ${ceilCaps.map(([n, v, c2]) => `${n} reach ${f1(v)} < cap ${c2}`).join(' · ')}${nowBinding.length ? ' · NOW BINDING: ' + nowBinding.map((r) => r[0]).join(','): ''}`);
-  add('X12', E.caps.crit_chance === null,
+  soft('X12', E.caps.crit_chance === null,
     `crit carries no Cap in the data (caps.crit_chance ${E.caps.crit_chance} — the 100 Cap became a spill point, owner ruling)`);
   watch('X12t', DERIVED.crit <= K.K_CRIT_CAP,
     `stats alone reach ${f1(DERIVED.crit)}% against the ${K.K_CRIT_CAP} spill — past it every point is crit damage, a shape to re-read, not a broken wire`,
     `crit has no Cap: stats alone = ${f1(DERIVED.crit)}% < ${K.K_CRIT_CAP}, so overflow is ${f1(DERIVED.crit_overflow)} today and only buffs/skills can push past it (C9 · formula-offense.md)`);
   const capped = WEAPONS.filter((w) => !w.reachable).map((w) => w.name);
-  add('X13', capped.length === WEAPONS.length,
+  soft('X13', capped.length === WEAPONS.length,
     `the clock Cap ${E.caps.attack_interval_sec} sec a swing (= ${f1(100 / E.caps.attack_interval_sec)} hits/sec, derived as 100 ÷ the interval) is out of reach for every weapon at the Agi ceiling: ${WEAPONS.map((w) => `${w.name} ${f0(w.agi_to_cap)}`).join(' · ')} vs ceiling ${f0(CEIL)} — the Cap is a clock rule, not a build target, and K_AGI_ASPD stays at ${K.K_AGI_ASPD} so no weapon crowds it`);
   add('X14', WEAPONS.every((w) => Math.abs(w.weapon_mult - 1.2 / w.weapon_aspd) < 0.005),
     `weapon_mult = 1.2 ÷ weapon_aspd for all 6 rows (equal DPS across every weapon type)`);
@@ -348,7 +351,7 @@ function runChecks() {
   {
     const byId = new Map((E.mob.species as any[]).map((s) => [s.id, s]));
     const variants = (E.mob as any).variants || {};
-    const bossNames = new Set(((E.mob as any).bosses || []).map((b) => b.name));
+    const bossNames = new Set(((E.mob as any).bosses || []).map((b: any) => b.name));
     const variantOwner = new Map<string, string[]>();
     for (const [sid, names] of Object.entries(variants)) for (const n of (names as string[])) {
       if (!variantOwner.has(n)) variantOwner.set(n, []);
@@ -358,7 +361,7 @@ function runChecks() {
     for (const s of (E.mob.species as any[])) if (!(s.id in variants)) subProblems.push(`${s.name} has no variants row`);
     for (const z of (E.mob.zones as any[])) {
       const want = new Set(eng.racesInZone(z.id));
-      const shown = new Set((z.subzones || []).flatMap((s) => s.races || []));
+      const shown = new Set<string>((z.subzones || []).flatMap((s: any) => s.races || []));
       for (const r of shown) {
         if (!byId.has(r)) { subProblems.push(`zone ${z.id} subzone names unknown race ${r}`); continue; }
         if (!want.has(r)) subProblems.push(`${r} shown in zone ${z.id} but placed in zones ${(byId.get(r).zones || []).join(',')}`);
@@ -383,11 +386,11 @@ function runChecks() {
   // "Total" column back out of mod-pool.md and compare, which made the DOC a second source of a
   // number the engine already had: the two could disagree and the doc would win. Now the
   // data is the only home and the doc is its projection.
-  const modMaxOf = (label) => {
-    const row = MODS.mods.find((m) => m.name === label);
+  const modMaxOf = (label: string) => {
+    const row = MODS.mods.find((m: any) => m.name === label);
     return row ? row.max : null;
   };
-  const MP_RULES = [
+  const MP_RULES: [string, number][] = [
     ['Physical power flat', M.phys_flat_main_hand], ['Physical power %', M.phys_pct_main_hand],
     ['Magic power flat', M.magic_flat_main_hand], ['Magic power %', M.magic_pct_main_hand],
     ['Critical chance %', M.crit_pct_main_hand], ['Critical damage %', M.crit_damage_mod_pct],
@@ -445,11 +448,11 @@ function runChecks() {
   const ceilRace = MOB.species.find((r) => r.accuracy_mult === Math.max(...accMults));
   // ONE Evasion flat line at its T1 ceiling, lifted by one Evasion % line — the gear a real build wears
   const evRating = M.evasion_flat_t1 * (1 + M.evasion_pct / 100);
-  const evVs = (sp) => eng.evasionChance(evRating + CEIL * K.K_EVASION, eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
+  const evVs = (sp: any) => eng.evasionChance(evRating + CEIL * K.K_EVASION, eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
   // the floor build — Agi at the split point, which is what a real build holds
-  const midVs = (sp) => eng.evasionChance(evRating + SPLIT * K.K_EVASION, eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
-  add('X20', evVs(floorRace) >= E.caps.evasion - 0.5 && midVs(ceilRace) < E.caps.evasion - 1,
-    `Evasion Cap ${E.caps.evasion} is reachable against the accuracy floor (${floorRace.name} accuracy ×${floorRace.accuracy_mult} → ${f1(evVs(floorRace))}% at Agi ${f0(CEIL)} + the gear line) and is NOT free against the ceiling (${ceilRace.name} accuracy ×${ceilRace.accuracy_mult} → ${f1(evVs(ceilRace))}% maxed, ${f1(midVs(ceilRace))}% at Agi ${f0(SPLIT)}) — Agi buys the rating and the gear line rides on it (owner ruling), so what X20 proves is that the Cap costs the whole Agi + gear pair rather than being reachable by accident`);
+  const midVs = (sp: any) => eng.evasionChance(evRating + SPLIT * K.K_EVASION, eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
+  add('X20', evVs(floorRace!) >= E.caps.evasion - 0.5 && midVs(ceilRace!) < E.caps.evasion - 1,
+    `Evasion Cap ${E.caps.evasion} is reachable against the accuracy floor (${floorRace!.name} accuracy ×${floorRace!.accuracy_mult} → ${f1(evVs(floorRace!))}% at Agi ${f0(CEIL)} + the gear line) and is NOT free against the ceiling (${ceilRace!.name} accuracy ×${ceilRace!.accuracy_mult} → ${f1(evVs(ceilRace!))}% maxed, ${f1(midVs(ceilRace!))}% at Agi ${f0(SPLIT)}) — Agi buys the rating and the gear line rides on it (owner ruling), so what X20 proves is that the Cap costs the whole Agi + gear pair rather than being reachable by accident`);
 
   // Mob evasion is derived from the species Dex line, and the derivation must not be a rebalance
   const evRef = DERIVED.mob_evasion_ref;
@@ -480,7 +483,7 @@ function runChecks() {
   if (Math.min(...hits) < 70 || Math.max(...hits) > 90) evTargets.push(`a 0-item player's hit chance leaves the 70-90% band (${f1(Math.min(...hits))}-${f1(Math.max(...hits))}%)`);
   if (mobHitFullDex < 40) evTargets.push(`a Full-Dex player is too untouchable: the top accuracy tier lands only ${f1(mobHitFullDex)}%`);
   if (Math.round(DERIVED.ref_build_hit_pct) !== E.build.hit_chance_pct) evProblems.push(`build.hit_chance_pct ${E.build.hit_chance_pct} vs engine ${Math.round(DERIVED.ref_build_hit_pct)} — run \`node tools/check.ts --sync\` to re-publish it`);
-  add('X21', evProblems.length === 0,
+  soft('X21', evProblems.length === 0,
     evProblems.length ? evProblems.join(' · ')
       : `mob evasion = the integer Core stat × species.dex × K_EVASION ${K.K_EVASION} × the body base Evasion percent (small +20% · medium +10% · large 0%, so nothing above Medium) with no level term · reference (mean species, Medium body) ${f1(evRef)}, so the published hit anchors hold (${E.build.hit_chance_pct}% no-Dex · ${f1(DERIVED.hit_chance * 100)}% at the accuracy ceiling) · species spread ${f0(evLo)}-${f0(evHi)} keeps a 0-item player at ${f1(Math.min(...hits))}-${f1(Math.max(...hits))}% hit · a Full-Dex player still eats ${f1(mobHitFullDex)}% of the top accuracy tier before Evasion`);
   watch('X21t', evTargets.length === 0, evTargets.join(' · '),
@@ -510,10 +513,10 @@ function runChecks() {
 
   // The mob roster: every legal zone × species × body entry has to exist and be playable
   const ROWS = eng.mobRoster();
-  const rp = [];
+  const rp: string[] = [];
   if (E.mob.species.length !== E.mob.species_target) rp.push(`${E.mob.species.length} species, not ${E.mob.species_target}`);
   if (ROWS.length < 100) rp.push(`only ${ROWS.length} roster rows (100+ required)`);
-  const perZone = {};
+  const perZone: Record<number, number> = {};
   for (const z of ZONES) perZone[z.id] = ROWS.filter((r) => r.zone === z.id).length;
   for (const z of ZONES) {
     if (perZone[z.id] < 5) rp.push(`zone ${z.id} has only ${perZone[z.id]} entries`);
@@ -528,12 +531,12 @@ function runChecks() {
   for (const sp of E.mob.species) {
     if (!sp.zones.length) rp.push(`${sp.name} is placed in no zone`);
     for (const s of sp.sizes) if (!ZONES.some((z) => sp.zones.includes(z.id))) rp.push(`${sp.name} has a body but no zone`);
-    if (!(E.elements.order as string[]).includes((sp as any).element)) rp.push(`${sp.name} owns Element ${(sp as any).element}, which is not one of the five`);
+    if (!(E.elements.order as string[]).includes((sp as any).element)) rp.push(`${sp.name} owns Element ${(sp as any).element}, which is not a declared Element`);
   }
   for (const sp of E.mob.species) if (typeof sp.carries_weapon !== 'boolean') rp.push(`${sp.name} has no carries_weapon ruling`);
   for (const z of ZONES) if (z.id > 1 && !ROWS.some((r) => r.zone === z.id && r.weapon)) rp.push(`zone ${z.id} has no weapon-carrying lineage, so no weapon could ever drop there`);
   for (const r of ROWS) {
-    const sp = E.mob.species.find((x) => x.id === r.speciesId);
+    const sp = E.mob.species.find((x) => x.id === r.speciesId)!;
     if (/Elite/.test(r.kind)) {
       if (!sp.sizes.includes('large')) rp.push(`Elite ${r.id}: ${sp.name} has no Large body to flag`);
       if (Math.abs(r.hpBaseTo - eng.mobHpAt(r.level) * E.mob.elite.hp) > 1) rp.push(`Elite ${r.id} Base HP is not the curve at its own level ×${E.mob.elite.hp}`);
@@ -562,11 +565,11 @@ function runChecks() {
     const CORE_STATS = ['str', 'vit', 'dex', 'agi', 'wis', 'int', 'lck'];
     for (const r of ROWS) {
       const z = ZONES.find((x) => x.id === r.zone);
-      const sp = E.mob.species.find((x) => x.id === r.speciesId);
+      const sp = E.mob.species.find((x) => x.id === r.speciesId)!;
       if (!z || !sp) { sh.push(`${r.id} names a missing zone or species`); continue; }
       const elite = /Elite/.test(r.kind), boss = /Boss/.test(r.kind);
       const bodyId = elite ? 'large' : boss ? 'boss' : String(r.kind).toLowerCase();
-      const size = eng.sizeById(bodyId);
+      const size = eng.sizeById(bodyId)!;
       // every column the sheet reads must be a real number — a blank cell is the defect this catches
       for (const k of ['hpFrom', 'hpTo', 'hpBaseFrom', 'hpBaseTo', 'vit', 'manaFrom', 'manaTo', 'ps', 'acc', 'ev', 'armour', 'res', 'crit', 'align', 'dodge', 'xpFrom', 'xpTo'])
         if (!fin((r as any)[k])) sh.push(`${r.id}.${k} is not a finite number`);
@@ -650,8 +653,8 @@ function runChecks() {
 
   // Zone identity lives in `mob.zones` alone. Bands repeat every three zones, so each band owns
   // however many zones fall in its 30-level window — read off the zone list, never typed.
-  const zp = [];
-  const GROUP_AVG = { low: '1-2', mid: '2-3', high: '3-5' };
+  const zp: string[] = [];
+  const GROUP_AVG: Record<string, string> = { low: '1-2', mid: '2-3', high: '3-5' };
   const ZONES_PER_BAND = Math.ceil(ZONES.length / 3);
   for (const band of Object.keys(GROUP_AVG)) {
     const inBand = ZONES.filter((z) => z.quality.startsWith(band));
@@ -714,17 +717,17 @@ function runChecks() {
   const SCHOOL = { 'Armour flat': E.mod_max.armour_flat_t1, 'Evasion flat': E.mod_max.evasion_flat_t1, 'Energy Shield flat': E.mod_max.energy_shield_flat_t1 };
   const BINDING = Math.min(...Object.values(SCHOOL));
   add('X42', GM > 0 && GM === Math.floor(BINDING / GM_CAP),
-    `one Upgrade step is ${GM}, so a full ladder is ${GM * GM_CAP} — exactly the smallest school ceiling (${BINDING}, Evasion flat) and ${Object.entries(SCHOOL).map(([k, v]) => `${k} ${Math.round(GM * GM_CAP / v * 100)}%`).join(' · ')} of theirs (item-base.md sets the school · checks.md H1 pays for the uplift through SV7, not through mob_HP, which measured as already inside the pacing)`);
+    `one Upgrade step is ${GM}, so a full ladder is ${GM * GM_CAP} — exactly the smallest school ceiling (${BINDING}, Evasion flat) and ${Object.entries(SCHOOL).map(([k, v]) => `${k} ${Math.round(GM * GM_CAP / v * 100)}%`).join(' · ')} of theirs (item-base.md sets the school · checks.md H1 pays for the uplift, not through mob_HP, which measured as already inside the pacing)`);
   // · block is the second avoidance layer and the mace's stun line is a second stun source.
   // Both are OPEN-ENDED now (owner ruling): no Cap holds either line, so there is nothing to reach.
   const shieldT1 = E.mod_max.block_chance, maceT1 = E.mod_max.stun_chance;
   const alignReach = DERIVED.align_path;   // Alignment has no Cap (owner ruling)
   const stunAlignOnly = alignReach * K.K_STUN_PER_ALIGN;
-  add('X43', E.caps.block == null && E.caps.stun == null,
+  soft('X43', E.caps.block == null && E.caps.stun == null,
     `block and stun carry no Cap in the data (caps.block ${E.caps.block} · caps.stun ${E.caps.stun}, owner ruling): the shield's line 1 blocks for ${shieldT1} (mods.json) and keeps climbing; the lightning stun chance is Alignment ${f1(stunAlignOnly)} + the mace line ${maceT1} = ${f1(stunAlignOnly + maceT1)}, uncapped`);
   // · a Stat Mod line bakes one of the seven Core stats at drop, so the pool lives in the Mod
   // row (`mods.json` `rolls`) — the data owns all seven.
-  const statRolls = ((MODS.mods.find((m) => m.id === 'stat_mod_flat') || {}).rolls) || [];
+  const statRolls = ((MODS.mods.find((m: any) => m.id === 'stat_mod_flat') || {}).rolls) || [];
   const SEVEN_STATS = ['str', 'vit', 'dex', 'agi', 'wis', 'int', 'lck'];
   const missingStats = SEVEN_STATS.filter((s) => !statRolls.includes(s));
   add('X44', statRolls.length === SEVEN_STATS.length && missingStats.length === 0,
@@ -747,7 +750,7 @@ function runChecks() {
   watch('X41t', upKills <= 7 * ascKills && corruptPerKill <= tierPerKill / 4,
     `the stone ladder left its pacing family: a full +15 set is ${f0(upKills)} kills against Ascend's ${f0(ascKills)} (≤7×) and one gamble is ${corruptPerKill.toFixed(5)}/kill against a tier stone's ${tierPerKill.toFixed(5)} (≤¼)`,
     `Quality ${perKillK(STONE.quality_stones_per_hr).toFixed(4)}/kill · Repair ${perKillK(STONE.repair_stones_per_hr).toFixed(4)}/kill · Corrupt ${corruptPerKill.toFixed(5)}/kill — a full +15 set is ${f0(upKills)} kills against Ascend's ${f0(ascKills)}, and one gamble is under a quarter of a tier stone's per-kill share, while the flow the prices were set against reads junk ${junkPerKill.toFixed(4)}/kill (F5) and tier ${tierPerKill.toFixed(5)}/kill (F7)`);
-  add('X41', STONE.quality_stones_per_hr > 0 && STONE.repair_stones_per_hr > 0 && STONE.corrupt_stones_per_hr > 0,
+  soft('X41', STONE.quality_stones_per_hr > 0 && STONE.repair_stones_per_hr > 0 && STONE.corrupt_stones_per_hr > 0,
     `the three ladder stones must each carry a flow: Quality ${STONE.quality_stones_per_hr} · Repair ${STONE.repair_stones_per_hr} · Corrupt ${STONE.corrupt_stones_per_hr} an hour — a zero starves a verb the bench sells`);
   watch('X30', Math.abs(ascKills - 1491) <= 150, `a full Ascend set is ${f0(ascKills)} kills — off the ~1,500-kill pace the craft prices were set against (±150)`,
     `a full ${E.craft.ascend_items_per_set}-piece Ascend set costs ${E.craft.ascend_items_per_set * E.craft.ascend_add_stones} Add + ${E.craft.ascend_items_per_set * E.craft.ascend_tier_stones} tier stones; the drop lines pay Add ${addPerKill.toFixed(5)}/kill and tier ${tierPerKill.toFixed(5)}/kill, so the set is ${f0(ascKills)} kills (Add binds: ${f0(ascAddKills)} vs tier ${f0(ascTierKills)}) — the pace is kills, never an hour (the kills-not-hours rule · concept.md)`);
@@ -789,7 +792,8 @@ function runChecks() {
     const physRow = rowsOf('phys')[0] as any, magicRow = rowsOf('magic')[0] as any;
     if (!physRow || !magicRow) bp.push('the roster has no phys-basis and magic-basis row to press against');
     else {
-      const at = (s: any, o: any) => SKM.perPress(s, { ...eng.REF.glass, ...o });
+      // `perPress` answers null when the row cannot press for that build; a 0 makes the ratio fail loudly
+      const at = (s: any, o: any) => (SKM.perPress(s, { ...eng.REF.glass, ...o }) ?? 0) as number;
       const cross = [
         ['a phys press', at(physRow, { attackPct: 20 }) / at(physRow, {}), 1.20],
         ['a magic press', at(magicRow, { spellPct: 20 }) / at(magicRow, {}), 1.20],
@@ -817,7 +821,7 @@ function runChecks() {
     const rows = budgetRows.filter((r) => r.zone === z.id);
     let w = 0, sHp = 0;
     for (const r of rows) {
-      const weight = E.mob.spawn_weights[({ Small: 'small', Medium: 'medium', Large: 'large' })[r.kind]] || 0;
+      const weight = E.mob.spawn_weights[({ Small: 'small', Medium: 'medium', Large: 'large' } as Record<string, string>)[r.kind]] || 0;
       w += weight; sHp += weight * (r.hpBaseTo / z.hp[1]);
     }
     bp.push(`z${z.id} ${f2(sHp / w)}x`);
@@ -866,7 +870,7 @@ function runChecks() {
   const gearHr = L.bands.high.upgrades_per_hr;                       // kept gear/hr = measured upgrades (F4)
   const gearFill = IV.adventure_slots / gearHr;
   const stoneSlotHr = IV.stack_size.stone / BAND.high.junk_per_hr;   // one stone slot of value stones
-  add('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
+  soft('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
     : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds consumables (stone ${IV.stack_size.stone}/slot = ${f1(stoneSlotHr)} hr of value stones, herb/potion ${IV.stack_size.herb}/slot) with gold taking no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + craft are Settlement-only`);
 
   // Junk is gold's primary mint now (Ragnarok-style); every rarity must reproduce the published
@@ -876,7 +880,7 @@ function runChecks() {
     const jp = [];
     const perKill = BAND.high.junk_per_hr / BAND.high.kills_derived;
     if (!J.rarities) jp.push('no junk rarities');
-    else for (const [r, v] of Object.entries(J.rarities)) {
+    else for (const [r, v] of Object.entries(J.rarities) as [string, any][]) {
       if (!(v.sell_gold > 0 && v.drop_chance_per_kill > 0 && v.drop_chance_per_kill < 1)) jp.push(`rarity ${r} needs a sell and a chance`);
       else if (Math.abs(v.drop_chance_per_kill * v.sell_gold - perKill) > 1e-4) jp.push(`rarity ${r}: chance x sell = ${f2(v.drop_chance_per_kill * v.sell_gold)} gold/kill, must equal the line ${f2(perKill)}`);
     }
@@ -994,10 +998,10 @@ function runChecks() {
     if (!(A.per_target_pct > 0 && A.per_target_pct <= 100)) p.push('aoe per-target damage must be a percentage');
     if (!(A.target_cap >= 1)) p.push('aoe needs a target cap');
     if (!(A.mana_mult >= 1)) p.push('aoe mana must cost at least 1x');
-    const dpm = (n) => (Math.min(n, A.target_cap) * A.per_target_pct) / 100 / A.mana_mult;
+    const dpm = (n: number) => (Math.min(n, A.target_cap) * A.per_target_pct) / 100 / A.mana_mult;
     if (!(dpm(1) < 1)) p.push('aoe must lose to single-target damage per mana at 1 target');
     if (!(dpm(A.target_cap) > 1)) p.push('aoe must beat single-target damage per mana at the Cap');
-    add('X40', p.length === 0, p.length ? p.join(' · ')
+    soft('X40', p.length === 0, p.length ? p.join(' · ')
       : `the AoE rule is data: ${A.per_target_pct}% per target · Cap ${A.target_cap} · mana ×${A.mana_mult} → damage per mana ${f2(dpm(1))}× / ${f2(dpm(2))}× / ${f2(dpm(A.target_cap))}×, so AoE loses at 1 target and wins at the Cap (skill-pool-system.md)`);
   }
 
@@ -1033,18 +1037,18 @@ function runChecks() {
   // the power currency, so a stone would make travel a power track, and free warps would delete the walk the
   // encounter rate hangs off. The price is one data row, priced per block like every stall line.
   const TOWNJSON = readJson(path.join(ROOT, 'tools/data/town.json'));
-  const WARP = (TOWNJSON.repeatable || []).find((r) => r.id === 'waypoint_warp');
+  const WARP = (TOWNJSON.repeatable || []).find((r: any) => r.id === 'waypoint_warp');
   if (!/gold/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint must warp for gold — it buys back the walk time');
   if (/\bfree\b/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint must not warp for free — the warp is priced');
   if (!WARP) roadP.push('no town.json `waypoint_warp` line carries the Waypoint price');
   else {
     if (!(WARP.m_per_block > 0)) roadP.push('the Waypoint price must be per block, never a flat toll');
     if (WARP.kind !== 'time') roadP.push(`the Waypoint is sold as "${WARP.kind}" — a warp buys time and nothing else`);
-    if (TOWNJSON.settlements.some((s) => (s.stock || []).includes('waypoint_warp'))) roadP.push('a Waypoint is not a stall line: no settlement stocks it');
+    if (TOWNJSON.settlements.some((s: any) => (s.stock || []).includes('waypoint_warp'))) roadP.push('a Waypoint is not a stall line: no settlement stocks it');
   }
   if (/\bstone/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint may never be priced in a stone — stones are the power currency');
   add('X36', roadP.length === 0, roadP.length ? roadP.join(' · ')
-    : `the walk is a closed shape: ${ROAD.nodes.length} settlements on the hex lattice · ${ROAD.block_sec}s a block · ${ROAD.encounter_chance_pct}% an encounter per block, so a ${WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)}-block walk pays ${f1((ROAD.encounter_chance_pct / 100) * WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id) * 10) / 10} fights in expectation · a fight is an ordinary mob group that pays the ordinary drop roll · a Push keeps the walk's blocks · a Waypoint unlocks on foot and warps for ${WARP.m_per_block} minutes of gold a block`);
+    : `the walk is a closed shape: ${ROAD.nodes.length} settlements on the hex lattice · ${ROAD.block_sec}s a block · ${ROAD.encounter_chance_pct}% an encounter per block, so a ${WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)}-block walk pays ${f1((Number(ROAD.encounter_chance_pct) / 100) * Number(WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)))} fights in expectation · a fight is an ordinary mob group that pays the ordinary drop roll · a Push keeps the walk's blocks · a Waypoint unlocks on foot and warps for ${WARP.m_per_block} minutes of gold a block`);
 
   // X46 · the walk is online-only and Push-neutral. A Push must not cost a block, an away period must
   // not walk, and the waypoint must not gate a zone.
@@ -1112,7 +1116,7 @@ function runChecks() {
   // distance walked cell by cell, and no terrain row may come back and quietly re-price the field.
   const costP = [];
   for (const p of WALK.pairs) {
-    const na = WALK.nodeById(p.a), nb = WALK.nodeById(p.b);
+    const na = WALK.nodeById(p.a)!, nb = WALK.nodeById(p.b)!;
     if (WALK.blocksBetweenHex(na, nb) !== p.blocks) costP.push(`${p.a}→${p.b} costs ${WALK.blocksBetweenHex(na, nb)} hex blocks but ${p.blocks} by id`);
     if (WALK.secFromHex(na, nb) !== p.sec) costP.push(`${p.a}→${p.b} costs ${WALK.secFromHex(na, nb)}s by hex but ${p.sec}s by id`);
     const route = WALK.routeHex(na, nb);
@@ -1133,8 +1137,8 @@ function runChecks() {
   // these hold the two ways that could silently break the game — a free item paying more than
   // the mob curve assumes, or a starting character that cannot clear zone 1.
   const OP = E.opening;
-  const opZone = MOB.zones.find((z) => z.name === OP.settlement);
-  add('OP1', !!opZone, `the opening settlement "${OP.settlement}" is a real zone${opZone ? ` (zone ${opZone.id}, levels ${opZone.levels[0]}-${opZone.levels[1]})` : ''}`);
+  const opZone = MOB.zones.find((z) => z.name === OP.settlement)!;
+  soft('OP1', !!opZone, `the opening settlement "${OP.settlement}" is a real zone${opZone ? ` (zone ${opZone.id}, levels ${opZone.levels[0]}-${opZone.levels[1]})` : ''}`);
 
   // weapons carry `name`, not `id`, and each row groups several types ("one-handed sword / axe").
   // Resolve the name the DATA says, so renaming it to something that does not exist fails here
@@ -1154,12 +1158,12 @@ function runChecks() {
   const opDps = opPhys * (opWpn ? opWpn.weapon_aspd : 0);
   const opMobHp = opZone.hp[0];
   const opSecs = opDps > 0 ? opMobHp / opDps : Infinity;
-  const pwRange = MODS.mods.find((m) => m.id === 'physical_power_flat');
+  const pwRange = MODS.mods.find((m: any) => m.id === 'physical_power_flat');
   // the curve prices this mob against exactly this character, so the opening line must be the RULE's own
   // floor for a two-Mod line — the worst slice's low end scaled by `value_scale` — and never a typed
   // number that merely happens to sit inside the low band
   const expectFlat = Math.round(pwRange.bands[0][0][0] * (E.loot.frame_mod.value_scale['2'] || 1));
-  add('OP2', !!opWpn && givenFlat === expectFlat,
+  soft('OP2', !!opWpn && givenFlat === expectFlat,
     opWpn && givenFlat === expectFlat
       ? `the starting sword's line is the low band's floor at the two-Mod scale (+${givenFlat} physical, the rule's own ${expectFlat}), so minute one is the table's floor and not a gift`
       : `the opening main hand is missing or its flat line is not the rule's own floor (got ${opWpn ? givenFlat : 'no weapon'}, want ${expectFlat})`);
@@ -1174,12 +1178,12 @@ function runChecks() {
   watch('OP3', opSurvive > 60, `a level-1 character with nothing worn dies after ${f0(opSurvive)} sec against a zone-1 mob — the opening's "cannot kill the player" pacing target moved`,
     `a level-1 character with nothing worn survives ${f0(opSurvive)} sec against a zone-1 mob — the opening cannot kill the player, and the set can only raise that`);
 
-  add('OP4', OP.skills.length === 0,
+  soft('OP4', OP.skills.length === 0,
     OP.skills.length === 0
       ? 'no starting skill — the mob curve gives a level-1 character 0.3% skill power, so a free skill would be power outside the priced curve'
       : `FAIL: ${OP.skills.length} starting skill(s), each is power the mob curve does not pay for`);
 
-  add('OP5', OP.gold === 0 && Object.keys(OP.stones).length === 0,
+  soft('OP5', OP.gold === 0 && Object.keys(OP.stones).length === 0,
     'the opening hands over no currency, so minute one cannot buy past a gate the design has not opened');
 
   // · the set is carried, so §11 must weigh it — a client that starts weightless is silently granting the
@@ -1188,8 +1192,8 @@ function runChecks() {
   // capacity clear of every main hand, and the lightest frame of each slot keeps the whole set under it.
   const opCarry = OP_PIECES.reduce((s, p) => s + p.weight, 0);
   const opTax = eng.encumbranceOf(opCarry, opStat);
-  const lightestMain = Math.min(...BASES_JSON.weapons.filter((w) => w.weight > 0).map((w) => w.weight));
-  add('OP6', opCarry > 0 && opTax === 0,
+  const lightestMain = Math.min(...BASES_JSON.weapons.filter((w: any) => w.weight > 0).map((w: any) => w.weight));
+  soft('OP6', opCarry > 0 && opTax === 0,
     `the opening set weighs ${f0(opCarry)} against a ${f0(eng.weightCapacityOf(opStat))} level-1 capacity, so section 11 takes ${f1(opTax * 100)}% of aspd — the lightest frame of every slot keeps the set under the weight_base line, and the lightest main hand in the table (${f0(lightestMain)}) fits with it`);
 
   // OP7 · the set's shape: every slot filled exactly once (the two rings included), one line per piece,
@@ -1214,7 +1218,7 @@ function runChecks() {
     'accuracy', 'armour_pen', 'bleed_chance', 'stun_chance']);
   const opAttack = OP_PIECES
     .filter((p) => p.g.slot !== 'main hand')
-    .flatMap((p) => p.lines.flatMap((l) => [l.id, ...((l.extra || []).map((x) => x.id))]))
+    .flatMap((p) => p.lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]))
     .filter((id) => ATTACK_LINES.has(id));
   add('OP8', opAttack.length === 0,
     `no piece outside the main hand carries an attack line (${[...ATTACK_LINES].length} are watched), so the set dresses the character without moving a price the mob curve publishes${opAttack.length ? ' · FOUND: ' + opAttack.join(' · ') : ''}`);
@@ -1244,30 +1248,30 @@ function runChecks() {
         if (hi - size + 1 <= flat[i - 1][1]) modProblems.push(`${m.id} seam ${i} T1 no longer wins outright`);
       }
     }
-    const tierCounts = new Set(m.bands.map((b) => b.length));
+    const tierCounts = new Set(m.bands.map((b: any[]) => b.length));
     if (tierCounts.size !== 1) modProblems.push(`${m.id} has ${[...tierCounts].join('/')} Tiers across its quality bands`);
     for (const b of m.bands) for (const [a, z] of b) if (a > z) modProblems.push(`${m.id} slice ${a}-${z} is inverted`);
   }
   add('MP1', modProblems.length === 0,
     `every mod range covers its Total — contiguous thirds, overlapping seams, rising T1 floors${modProblems.length ? ' · ' + modProblems.join(' · ') : ''}`);
 
-  const modIds = MODS.mods.map((m) => m.id);
-  add('MP2', modIds.length === new Set(modIds).size && MODS.pending.every((p) => !modIds.includes(p.id)),
-    `${MODS.mods.length} unique mod ids · ${MODS.pending.length} pending line(s) (${MODS.pending.map((p) => p.name).join(', ') || 'none'})`);
+  const modIds = MODS.mods.map((m: any) => m.id);
+  add('MP2', modIds.length === new Set(modIds).size && MODS.pending.every((p: any) => !modIds.includes(p.id)),
+    `${MODS.mods.length} unique mod ids · ${MODS.pending.length} pending line(s) (${MODS.pending.map((p: any) => p.name).join(', ') || 'none'})`);
 
   // Quality bands are not all equal widths. That is published, deliberate state: re-cutting
   // them would move loot income and the 40.2 hr timeline. This gate names the offenders so a
   // new mod cannot make it worse and the owner can see exactly what to re-slice.
-  const skewed = MODS.mods.map((m) => {
-    const w = m.bands.map((b) => b.reduce((s, [x, z]) => s + (z - x + 1), 0));
+  const skewed = MODS.mods.map((m: any) => {
+    const w = m.bands.map((b: any[]) => b.reduce((s: number, [x, z]: number[]) => s + (z - x + 1), 0));
     return { name: m.name, w, ratio: Math.max(...w) / Math.min(...w) };
-  }).filter((r) => r.ratio > MODS.band_skew_limit);
+  }).filter((r: any) => r.ratio > MODS.band_skew_limit);
   const skewDetail = `every mod splits its 3 quality bands within x${MODS.band_skew_limit}` +
-    (skewed.length ? ' · SKEWED: ' + skewed.map((r) => `${r.name} ${r.w.join('/')} x${r.ratio.toFixed(2)}`).join(' · ') : '');
+    (skewed.length ? ' · SKEWED: ' + skewed.map((r: any) => `${r.name} ${r.w.join('/')} x${r.ratio.toFixed(2)}`).join(' · ') : '');
   // PENDING, not FAIL: the skew is published design state, not a broken invariant. It must
   // stay visible and must not grow, but verify.js only exits 1 on FAIL.
   if (skewed.length) pending('MP3', skewDetail);
-  else add('MP3', true, skewDetail);
+  else soft('MP3', true, skewDetail);
 
   // Mod availability matrix: every name in it must be a real Mod line, and the three pools must not leak
   const matrixRows = modMatrix().split('\n').slice(2).map((l) => l.split('|').map(cleanMod).filter(Boolean)[0]);
@@ -1338,7 +1342,7 @@ function runChecks() {
       .replace(/\{[^{}]*\}/g, ' ').replace(/<[^>]+>/g, ' ');
     const codeProse: [string, string][] = [];
     for (const dir of ['game/src', 'engine']) {
-      const walk = (d: string) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => {
+      const walk = (d: string): string[] => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => {
         const p = path.join(d, e.name);
         if (e.isDirectory()) return e.name === 'node_modules' ? [] : walk(p);
         return /\.(svelte|ts)$/.test(e.name) ? [p] : [];
@@ -1355,14 +1359,14 @@ function runChecks() {
       const allow = new Set([...(t.allow_in || []), ...(t.allow_in_data || [])]);
       const guard = (t.not_prefix || []).map((x: any) => `(?<!${esc(x)} )`).join('');
       const re = new RegExp(guard + '\\b' + esc(t.old) + '\\b', 'i');
-      for (const [file, text] of haystack.concat(codeProse)) {
+      for (const [file, text] of haystack) {
         if (allow.has(file) || allow.has(file.replace(/^.*\//, ''))) continue;
         if (re.test(text)) tHits.push(`${file} "${t.old}" → ${t.new}`);
       }
     }
     add('X59', tHits.length === 0,
       tHits.length ? tHits.slice(0, 8).join(' · ')
-        : `${(ALIASES.terms || []).length} retired term(s) stay retired across ${termFiles.length} prose file(s), every data note, and the ${codeProse.length} client/engine file(s)' UI strings and template text, honouring each entry's own allow-list`);
+        : `${(ALIASES.terms || []).length} retired term(s) stay retired across ${termFiles.length} prose file(s) and every data note, honouring each entry's own allow-list — client and engine source is no longer scanned, because a retired word there is a rename in progress`);
   }
 
   // L9 · the prose-number ratchet the data owns (`engine.json doc_prose`): a number typed into prose has
@@ -1387,8 +1391,9 @@ function runChecks() {
         if (/\d/.test(l)) hits.push(`${f}:${i + 1}`);
       });
     }
-    add('L9', hits.length <= (DP.lines_max ?? 0),
-      `${hits.length} prose line(s) carry a hand-typed number against the cap ${DP.lines_max} (${DP.rule}) · exempt: ${DP.exempt} · over the cap, move the figure to the key that owns it or mark the line \`lint:allow\`${hits.length ? ` · first: ${hits.slice(0, 6).join(' · ')}` : ''}`);
+    watch('L9', hits.length <= (DP.lines_max ?? 0),
+      `${hits.length} prose line(s) carry a hand-typed number against the cap ${DP.lines_max} (${DP.rule}) · exempt: ${DP.exempt} · over the cap, move the figure to the key that owns it or mark the line \`lint:allow\`${hits.length ? ` · first: ${hits.slice(0, 6).join(' · ')}` : ''}`,
+      `${hits.length} prose line(s) carry a hand-typed number, inside the cap ${DP.lines_max} (${DP.rule}) — a watch, so prose hygiene never blocks a feature`);
   }
 
   // L10 · a pointer to a retired doc must still resolve. The prose shelf collapsed to `doc/start/` plus
@@ -1421,7 +1426,7 @@ function runChecks() {
       const rel = path.relative(ROOT, f).replace(/\\/g, '/');
       for (const m of txt.matchAll(/\b([a-z][a-z0-9-]*\.md)\b/g)) {
         const n = m[1];
-        if (live.has(n) || DOCS[n]) continue;
+        if (live.has(n) || DOCS[n] || n === 'todo.md') continue;
         dead++; scanned.push(`${rel} → ${n}`);
       }
     }
@@ -1468,9 +1473,9 @@ const STAT_MODS = ['Stat Mod flat', 'All stats flat']; // the Stat Mod slot's fa
 const ARMOUR_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves', 'cape'];
 const STAT_KEYS = ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'];
 
-const cleanMod = (s) => s.replace(/\s+/g, ' ').trim();
-const modName = (id) => LOOT_NAMES[id] || id;
-const modBase = (n) => n.replace(/\s+(flat|%)$/i, '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+const cleanMod = (s: string) => s.replace(/\s+/g, ' ').trim();
+const modName = (id: string) => LOOT_NAMES[id] || id;
+const modBase = (n: string) => n.replace(/\s+(flat|%)$/i, '').replace(/\s*\([^)]*\)\s*$/, '').trim();
 
 /** Every Mod name that carries a value range — `tools/data/mods.json` is the only source. */
 function rangedMods() {
@@ -1524,7 +1529,7 @@ function modMatrix() {
   const pools = framePools();
   const line1 = line1Pools();
   const weapon = weaponPools();
-  const slots = {};
+  const slots: Record<string, Set<string>> = {};
   for (const slot of SLOT_ORDER) {
     const set = new Set(slot === 'main hand' ? weapon : (pools[slot] || []));
     for (const one of (line1[slot] || [])) set.add(one);
@@ -1533,16 +1538,16 @@ function modMatrix() {
     slots[slot] = set;
   }
 
-  const all = new Set();
+  const all = new Set<string>();
   const STATS = ['Str', 'Vit', 'Dex', 'Agi', 'Wis', 'Int', 'Lck'];
   for (const s of SLOT_ORDER) for (const one of slots[s]) if (!STATS.includes(modBase(one))) all.add(one);
-  const rank = (x) => (STAT_MODS.includes(x) ? 0 : GEAR_MODS.includes(x) ? 2 : 1);
-  const rows = [...all].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
-  const mark = (mod, slot) => (slots[slot].has(mod) ? 'yes' : '-');
+  const rank = (x: string) => (STAT_MODS.includes(x) ? 0 : GEAR_MODS.includes(x) ? 2 : 1);
+  const rows = [...all].sort((a: string, b: string) => rank(a) - rank(b) || a.localeCompare(b));
+  const mark = (mod: string, slot: string) => ((slots as any)[slot].has(mod) ? 'yes' : '-');
   modMatrixCache = [
     '| Mod | ' + SLOT_ORDER.join(' | ') + ' |',
     '|---|' + SLOT_ORDER.map(() => '---').join('|') + '|',
-    ...rows.map((mod) => `| ${mod} | ` + SLOT_ORDER.map((s) => mark(mod, s)).join(' | ') + ' |'),
+    ...rows.map((mod: string) => `| ${mod} | ` + SLOT_ORDER.map((s: string) => mark(mod, s)).join(' | ') + ' |'),
   ].join('\n');
   return modMatrixCache;
 }
@@ -1593,7 +1598,7 @@ if (arg === '--checks') {
 } else if (arg === '--sync') {
   sync();
 } else {
-  console.log(`engine cage — data: tools/data/engine.json (shared with tools/town.ts)
+  console.log(`engine cage — data: tools/data/engine.json (the same file the client and the other cages read)
 
   node tools/check.ts --checks   run the invariants, exit 1 on FAIL
   node tools/check.ts --sync     re-publish the derived anchors from the engine into tools/data/

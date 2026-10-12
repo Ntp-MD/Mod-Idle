@@ -1,12 +1,12 @@
-import { E, ED, TOWN } from '../engine/client';
-import { createRoad, hexAdjacent } from '../../../engine/road.ts';
+import { E, TOWN, road } from '../engine/client';
+import { hexAdjacent } from '../../../engine/road.ts';
 import type { Hex } from '../../../engine/road.ts';
 import { abandonRun } from './dungeon';
 import { priceGold, rowById } from './town';
 import type { GameState, Cell, Walk } from './types';
 
-/** The walk model comes from the shared module, so every bound is one number in one place. */
-export const road: any = createRoad(ED);
+/** The walk model is `client.ts`'s own instance — one object for the sim, the map views and the wiki. */
+export { road };
 
 const settlementById = (id: string) => TOWN.settlements.find((s: any) => s.id === id);
 

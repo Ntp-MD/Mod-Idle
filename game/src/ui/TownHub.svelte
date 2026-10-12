@@ -136,16 +136,16 @@
     background: color-mix(in srgb, var(--hp) 14%, transparent); border: 1px solid color-mix(in srgb, var(--hp) 45%, transparent); color: var(--alarm);
   }
   .lead { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: baseline; justify-content: space-between; }
-  .lead h3 { margin: 0; font-size: var(--font-md); letter-spacing: clamp(0.13px, 0.008vw + 0.03px, 0.27px); }
+  .lead h3 { margin: 0; font-size: var(--font-md); letter-spacing: clamp(0px, 0.008vw + 0px, 0px); }
   .sub { margin: 3px 0 0; color: var(--dim); font-size: var(--font-xs); }
   .purse { display: flex; gap: var(--spacing-md); font-size: var(--font-xs); color: var(--dim); }
   .purse b { font-family: var(--num); color: var(--gold); font-size: var(--font-sm); }
 
-  .cols { display: grid; grid-template-columns: 1fr minmax(clamp(212.5px, 13.855vw + 53.55px, 459px), clamp(287.5px, 18.745vw + 72.45px, 621px)); gap: var(--spacing-md); align-items: start; }
+  .cols { display: grid; grid-template-columns: 1fr minmax(clamp(212px, 13.855vw + 54px, 459px), clamp(288px, 18.745vw + 72px, 621px)); gap: var(--spacing-md); align-items: start; }
   /* a service is a row, not a card: the name leads, the live state is the reason to press it */
   .services { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
   .services .row {
-    display: grid; grid-template-columns: clamp(93.75px, 6.112vw + 23.63px, 202.5px) clamp(112.5px, 7.335vw + 28.35px, 243px) 1fr auto; gap: var(--spacing-sm); align-items: baseline;
+    display: grid; grid-template-columns: clamp(94px, 6.112vw + 24px, 202px) clamp(112px, 7.335vw + 28px, 243px) 1fr auto; gap: var(--spacing-sm); align-items: baseline;
     width: 100%; text-align: left; padding: var(--spacing-sm) var(--spacing-sm); border-radius: 12px;
     background: var(--glass); border: 1px solid var(--edge);
   }

@@ -46,7 +46,11 @@ describe('the away clock: one loop, two schedules', () => {
     const a = busy(72, 20);
     const b = busy(72, 20);
     catchUp(a, {}, secs);
-    for (let i = 0; i < secs; i++) tick(b, {}, { online: false });
+    // one statuses store for the whole window, the way `runTicks` holds it and the live scheduler holds
+    // it: a fresh `{}` each tick would wipe every mark a mob put on the character before it could tick
+    // down, which is a different fight, not the same seconds
+    const statuses = {};
+    for (let i = 0; i < secs; i++) tick(b, statuses, { online: false });
     expect(shot(b)).toBe(shot(a));
   });
 

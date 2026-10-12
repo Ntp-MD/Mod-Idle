@@ -32,11 +32,11 @@ button, select, summary, .pill, .slot, .cast, .knob, .tab { user-select: none; -
 
 ::selection { background: var(--sel); color: var(--text); }
 
-h1, h2, h3 { font-weight: 600; margin: 0 0 var(--spacing-xs); letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px); }
+h1, h2, h3 { font-weight: 600; margin: 0 0 var(--spacing-xs); letter-spacing: clamp(0px, 0.016vw + 0px, 1px); }
 h1 { font-size: var(--font-md); }
 h2 { font-size: var(--font-sm); color: var(--dim); text-transform: uppercase; }
 /* a service inside a section — the map panel carries the settlement's own headings under its field */
-h4 { font-size: var(--font-xs); color: var(--dim); margin: var(--spacing-sm) 0 4px; letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px); }
+h4 { font-size: var(--font-xs); color: var(--dim); margin: var(--spacing-sm) 0 4px; letter-spacing: clamp(0px, 0.016vw + 0px, 1px); }
 
 button, select {
   background: var(--panel);
@@ -70,13 +70,13 @@ input[type=number], input[type=text] {
 input[type=range] { accent-color: var(--gold); }
 /* the caret is part of the design when a field exists at all */
 input, textarea { caret-color: var(--focus); }
-a { color: var(--gold); text-underline-offset: clamp(2.25px, 0.147vw + 0.57px, 4.86px); }
+a { color: var(--gold); text-underline-offset: clamp(2px, 0.147vw + 1px, 5px); }
 
 /* the scrolls inside a panel are the client's, not the platform's */
 * { scrollbar-width: thin; scrollbar-color: var(--bar) transparent; }
 *::-webkit-scrollbar { width: var(--icon-xs); height: var(--icon-xs); }
 *::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: var(--bar); border-radius: clamp(3.75px, 0.244vw + 0.94px, 8.1px); }
+*::-webkit-scrollbar-thumb { background: var(--bar); border-radius: clamp(4px, 0.244vw + 1px, 8px); }
 *::-webkit-scrollbar-thumb:hover { border-color: var(--gold); background: var(--bar-2); }
 
 table { border-collapse: collapse; width: 100%; }

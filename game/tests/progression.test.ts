@@ -1,0 +1,156 @@
+import { describe, it, expect } from 'vitest';
+import { E, BASES, SKILLS, eng, tree } from '../src/engine/client';
+import { newGame } from '../src/sim/game';
+import { mastery, masteryLevel, dropMultiplier, weaponSkillBonusPct } from '../src/sim/mastery';
+import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines } from '../src/sim/tree';
+import { newGoal, target, onSpawn, onKill, watch } from '../src/sim/goal';
+import type { GameState, Mob } from '../src/sim/types';
+
+/** The three progression side-tracks the game runs beside the level bar: Mastery, the passive tree, the
+ *  win gate. Each one's rules live in the sim; these read them through the same calls the client makes. */
+
+describe('weapon Mastery', () => {
+  it('reads its level off the shared curve, capped at the table', () => {
+    expect(mastery.level(0)).toBe(1);
+    expect(mastery.level(mastery.xpForLevel(5))).toBe(5);
+    expect(mastery.level(Number.MAX_SAFE_INTEGER)).toBe(BASES.mastery.level_cap);
+  });
+
+  it('pays 4 XP a kill while held, and a bare hand keeps nothing', () => {
+    const s = newGame();
+    const name = BASES.weapons[0].name;
+    expect(masteryLevel(s, null)).toBe(1);
+    s.mastery[name] = mastery.payKill(0);
+    expect(s.mastery[name]).toBe(BASES.mastery.xp_per_kill);
+  });
+
+  it('counts one point of drop per type at the required level, account-wide', () => {
+    const s = newGame();
+    expect(dropMultiplier(s)).toBe(1);
+    const need = BASES.mastery.drop_bonus_level_required;
+    for (const w of BASES.weapons) s.mastery[w.name] = mastery.xpForLevel(need);
+    const expected = 1 + (BASES.weapons.length * BASES.mastery.drop_bonus_per_type_pct) / 100;
+    expect(dropMultiplier(s)).toBeCloseTo(expected, 10);
+  });
+
+  it('grants the while-held skill bonus from its own level, whole percent, at the cap', () => {
+    expect(weaponSkillBonusPct(BASES.mastery.skill_bonus_from_level - 1)).toBe(0);
+    expect(weaponSkillBonusPct(BASES.mastery.skill_bonus_from_level)).toBe(BASES.mastery.skill_bonus_per_level_pct);
+    expect(weaponSkillBonusPct(BASES.mastery.level_cap)).toBe(BASES.mastery.skill_bonus_cap_pct);
+  });
+});
+
+describe('the passive tree', () => {
+  const spent = (s: GameState) => treePointsSpent(s);
+  const firstWithNeeds = () => Object.values(tree.byId as Record<string, any>).find((n: any) => n.needs) as any;
+
+  it('refuses a rank with no point banked and one past the node cap', () => {
+    const s = newGame();
+    s.player.treePoints = 0;
+    const id = Object.keys(tree.byId)[0];
+    expect(canSpendTree(s, id).ok).toBe(false);
+    expect(canSpendTree(s, 'no-such-node').ok).toBe(false);
+
+    s.player.treePoints = 1000;
+    expect(canSpendTree(s, id).ok).toBe(true);
+    const cap = (tree.byId as any)[id].ranks;
+    for (let i = 0; i < cap; i++) spendTreePoint(s, id);
+    expect(canSpendTree(s, id).ok).toBe(false);
+  });
+
+  it('holds a chain in order: the node it needs must be bought first', () => {
+    const node = firstWithNeeds();
+    const s = newGame();
+    s.player.treePoints = 1000;
+    expect(canSpendTree(s, node.id).ok).toBe(false);
+    expect(spendTreePoint(s, node.needs).ok).toBe(true);
+    expect(canSpendTree(s, node.id).ok).toBe(true);
+  });
+
+  it('hands every spent point back, free, and grants the lines its ranks buy', () => {
+    const s = newGame();
+    s.player.treePoints = 1000;
+    const id = Object.keys(tree.byId)[0];
+    spendTreePoint(s, id);
+    expect(spent(s)).toBe(tree.cost);
+    expect(treeLines(s).length).toBeGreaterThan(0);
+
+    const refunded = respecTree(s);
+    expect(refunded).toEqual({ ok: true, refunded: tree.cost });
+    expect(s.player.treeRanks).toEqual({});
+    expect(treeLines(s).length).toBe(0);
+    expect(respecTree(s)).toEqual({ ok: false, refunded: 0 });
+  });
+});
+
+describe('the win gate', () => {
+  const bossOf = (zone: number, id = 'b1'): Mob => ({
+    id, species: 'Slime', kind: 'Boss', zone, level: 20, hp: 1e6, hpMax: 1e6, ps: 100, acc: 100,
+    evasion: 0, dodgeRate: 0, armour: 0, res: 0, damage: 'mixed', innate: [], xp: 1, line: 'front',
+    hitsPerSec: 1, atkTimer: 0, engageSec: 0,
+  });
+
+  it('arms only on the final zone boss, and counts the attempt', () => {
+    const s = newGame();
+    s.goal = newGoal();
+    const t = target();
+    onSpawn(s, bossOf(t.zone - 1));
+    expect(s.goal.spawnId).toBeNull();
+    onSpawn(s, bossOf(t.zone));
+    expect(s.goal.spawnId).toBe('b1');
+    expect(s.goal.attempts).toBe(1);
+  });
+
+  it('closes only on the armed spawn, and only while no Push landed', () => {
+    const s = newGame();
+    s.goal = newGoal();
+    const t = target();
+    const boss = bossOf(t.zone);
+    onSpawn(s, boss);
+    expect(onKill(s, bossOf(t.zone, 'other'))).toBe(false);
+
+    s.counters.pushes = s.goal.pushesAtSpawn + 1;
+    expect(onKill(s, boss)).toBe(false);
+    expect(s.goal.done).toBeNull();
+
+    onSpawn(s, boss);
+    const clean = onKill(s, boss);
+    expect(clean).toBe(true);
+    expect(s.goal.done).toMatchObject({ level: s.player.level, hp: boss.hpMax });
+    expect(s.goal.attempts).toBe(2);
+  });
+
+  it('drops an armed spawn that leaves the field alive', () => {
+    const s = newGame();
+    s.goal = newGoal();
+    const boss = bossOf(target().zone);
+    onSpawn(s, boss);
+    s.group = [];
+    watch(s);
+    expect(s.goal.spawnId).toBeNull();
+    expect(s.goal.attempts).toBe(1);
+  });
+});
+
+describe('the goal states the gate in the curve\u2019s own numbers', () => {
+  it('names the final zone and the HP the mob curve gives its boss', () => {
+    const t = target();
+    expect(t.zone).toBe(eng.finalZoneId());
+    expect(t.hp).toBeGreaterThan(0);
+  });
+});
+
+describe('the level table is one ramp for every skill (S18)', () => {
+  it('rises, never falls, and every row is whole-number on the buff column', () => {
+    const rows = (SKILLS as any).meta.formula.skill_levels.rows;
+    expect(rows[0].level).toBe(1);
+    rows.forEach((r: any, i: number) => {
+      expect(r.level).toBe(i + 1);
+      expect(Number.isInteger(r.buff_effect_pct)).toBe(true);
+      if (i) {
+        expect(r.damage_pct).toBeGreaterThanOrEqual(rows[i - 1].damage_pct);
+        expect(r.effect_pct).toBeGreaterThanOrEqual(rows[i - 1].effect_pct);
+      }
+    });
+  });
+});

@@ -203,7 +203,7 @@ export function createEngine(E: EngineData) {
   const mobResCut = (res: number) => (res > 0 ? Math.min(CAP.elem_res, res) / 100 : 0);
   /**
    * `resOffset` is in percentage points and comes from the lines that strip a target's resistance —
-   * Sunder, Elemental Fury, or a pierce on the hit itself (Nether Orb). It cannot take the line below
+   * a curse, an aura, or a pierce on the hit itself. It cannot take the line below
    * zero, so a −20 on a mob sitting at 9.5% opens it fully rather than amplifying damage.
    *
    * `element` is the Element half of the hit. A number uses the mob's headline `res`; a per-Element
@@ -481,11 +481,11 @@ export function createEngine(E: EngineData) {
   const stunChanceFrom = (alignment: number, gearPct = 0) =>
     Math.max(0, alignment * K.K_STUN_PER_ALIGN + (gearPct || 0));   // no Cap (owner ruling)
   /**
-   * Chance to bleed = the axe's `Chance to bleed %` line, plus Lacerate's published proc
-   * (`K_BLEED_CHANCE`) while that curse is up. It is a probability, so it is bounded at 100%.
+   * Chance to bleed = the axe's `Chance to bleed %` line, plus the published proc (`K_BLEED_CHANCE`)
+   * while a curse grants it. It is a probability, so it is bounded at 100%.
    */
-  const bleedChanceFrom = (lacerateUp: boolean, gearPct = 0) =>
-    Math.min(100, (lacerateUp ? K.K_BLEED_CHANCE * 100 : 0) + (gearPct || 0));
+  const bleedChanceFrom = (bleedCurseUp: boolean, gearPct = 0) =>
+    Math.min(100, (bleedCurseUp ? K.K_BLEED_CHANCE * 100 : 0) + (gearPct || 0));
 
   const critPool = (lck: number, pct = 0) => lck * K.K_LCK_CRIT + pct;
   const critChanceOf = (pool: number) => Math.min(pool, K.K_CRIT_CAP);
@@ -540,8 +540,10 @@ export function createEngine(E: EngineData) {
   const cdrOf = (wis: number, pctTotal = 0) => Math.min(CAP.cdr, (wis * K.K_WIS_CDR) * (1 + pctTotal / 100));
   // the trailing multiplier is where a skill that scales the finished stat lands (Warcry's
   // "alignment and Elemental resistance x1.20"); the Cap still applies after it
-  // Elemental Alignment has NO Cap (owner ruling): it is the Dex-derived status gate and Element
-  // multiplier, left open-ended. The defensive `Status Alignment resistance %` is a separate Mod line.
+  // Elemental Alignment has NO Cap (owner ruling): it is the Dex-derived gate EVERY ROLLED STATUS passes
+  // — an Element status, bleed, and a stun — and the multiplier on an Element status's damage, so one
+  // number decides whether anything lands at all and how hard the Elemental part of it lands, left
+  // open-ended. The defensive `Status Alignment resistance %` is a separate Mod line.
   const alignmentOf = (dex: number, flat = 0, mult = 1) => (dex * K.K_DEX_ALIGN + flat) * mult;
   // Elemental resistance is a gear line (owner ruling): no Core stat feeds it, so the Mod rows
   // are the whole of it and the Cap is the only thing that stops it. `capBonus` is the raise a
@@ -639,7 +641,7 @@ export function createEngine(E: EngineData) {
   const dropChance = (band: string) => L.base_drop_chance * (1 + lckOf(band) * K.K_LCK_DROP);
   const killsDerived = (band: string) => (3600 / (L.bands[band].group_mobs * L.ttk_per_mob_sec + L.group_spawn_sec)) * L.bands[band].group_mobs;
 
-  // ---- XP (world.md § Levelling · the same curve tools/timeline.ts publishes)
+  // ---- XP (the same curve the engine publishes as CHECKPOINTS_KILLS)
 
   const X = E.xp;
   const ANCHORS = Object.keys(X.kills_anchors).map(Number).sort((a, b) => a - b);

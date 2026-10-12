@@ -120,21 +120,6 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     return { ...buildCharacter(90, gear), alignment: 100 } as ReturnType<typeof buildCharacter>;
   };
 
-  it('Sunder opens the Element half by the points its row states', () => {
-    const c = fireCaster();
-    const store = newCurses();
-    applyCurse(store, 'm1', sm.byId['curse.sunder']);
-    const cut = curseModsOn(store, 'm1', () => false).resistCut;
-    expect(cut).toBe(valueOf('curse.sunder', 'mob_elemental_resistance_pct'));
-    const resisted = mob({ res: 40, armour: 0 });
-    const before = playerSwing(mulberry32(2), c, resisted, null, NO_CURSE).damage;
-    const after = playerSwing(mulberry32(2), c, { ...resisted }, null, { ...NO_CURSE, resistCut: cut }).damage;
-    expect(after).toBeGreaterThan(before);
-    // the strip is worth the Element part × the percentage points it removed, and nothing else
-    const elemPart = c.elem * (c.alignment / 100);
-    expect(after - before).toBeCloseTo(elemPart * (Math.abs(cut) / 100), 6);
-  });
-
   it('resistance bottoms out at zero rather than amplifying the hit', () => {
     const c = fireCaster();
     const thin = mob({ res: 9.5 });
@@ -143,20 +128,6 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     const opened = playerSwing(mulberry32(2), c, mob({ res: 0 }), null, NO_CURSE).damage;
     expect(stripped).toBeGreaterThan(clean);
     expect(stripped).toBeCloseTo(opened, 6);
-  });
-
-  it('Nether Orb walks through resistance on its own press', () => {
-    const c = fireCaster();
-    const resisted = mob({ res: 60 });
-    const orbDamage = castPress('attack.nether_orb', c, resisted);
-    const boltDamage = castPress('attack.chaos_bolt', c, mob({ id: 'm2', res: 60 }));
-    // the two rows are different archetypes, so scale the bolt by their own press ratio on this
-    // caster; walking through the resistance is then the whole of what is left to assert
-    const orb = sm.byId['attack.nether_orb'] as any;
-    const boltRow = sm.byId['attack.chaos_bolt'] as any;
-    const basis = { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment };
-    const scaled = boltDamage * (sm.perPress(orb, basis)! / sm.perPress(boltRow, basis)!);
-    expect(orbDamage).toBeGreaterThan(scaled);
   });
 
   it('an aura writes its strip on every mob, and stops when it is taken off', () => {

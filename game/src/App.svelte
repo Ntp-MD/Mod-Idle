@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { eng, E, sm, TOWN, BASES, tree } from './engine/client';
+  import { eng, E, sm, TOWN, BASES, tree, loot } from './engine/client';
   import { buildCharacter } from './sim/player';
-  import { newGame, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, carried, heldWeaponName, huntZone, huntHere } from './sim/game';
-  import { reservedPct, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf, condOf, appliedStatusOf, appliedCurseOf } from './sim/skills';
+  import { newGame, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, carried, heldWeaponName, huntZone, huntHere, salvageBag } from './sim/game';
+  import { reservedPct, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, manaNow, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
   import { slotsUsed, slotsAvailable, pouchSlots, bagStacks } from './sim/slots';
@@ -19,8 +19,14 @@
   import Minimap from './ui/Minimap.svelte';
   import { KEYBINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/keybinds';
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
+  import type { MenuItem } from './ui/menu';
   import { ramp, cellLabel, paintSheet, type Picked } from './ui/map';
   import { fxByMob as bucketFx, plateBeat, plateStrike, plateGesture } from './ui/plate';
+  import { setCastDrag, readCastDrag } from './ui/drag';
+  import { snapCounters, buildAwayReport, fieldLabel, describeSnap } from './ui/hud';
+  import { bar, curseWords, statusWords } from './ui/field';
+  import { fxOut } from './ui/motion';
+  import FieldPlates from './ui/FieldPlates.svelte';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
     standingShare, standingTier, canTravel, claimTask, npcOf,
@@ -31,13 +37,13 @@
 import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, warpRow, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
   import { enterDungeon, cooldownLeft } from './sim/dungeon';
-  import { masteryLabel, dropBonusPct, masteryLevel, WEAPONS } from './sim/mastery';
+  import { masteryLabel, dropBonusPct, masteryLevel, weaponSkillBonusPct, WEAPONS } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
   import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
   import { mulberry32 } from './engine/client-helpers';
-  import { writeSave, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
+  import { writeSave, writeSaveSync, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
   import { FILTER_SLOTS, ruleFor, setRule, describeRule } from './sim/filter';
-  import { equipFromBag, autoEquip } from './sim/gear';
+  import { equipFromBag, autoEquip, unequip } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
   import { describe as describeGoal } from './sim/goal';
   import { elementIcon, mobIcon, skillIcon } from './icon';
@@ -114,6 +120,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let gameState = $state<GameState>(newGame());
   let statuses: Statuses = {};
   let running = $state(true);
+  /** Held while a load or a snapshot rewind swaps the character: a live tick landing on the new state
+   *  mid-catch-up would sim the away window twice. The interval drains its accumulator and stands down. */
+  let paused = false;
   /** The clock's own pace: how many sim seconds a real second spends. ×1 is the designed beat. */
   let speed = $state(1);
   // the game opens on the ground, not on the fight: the first read is where the character stands and
@@ -131,6 +140,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /** the sheet floats over the field from its own button under the vitals, so it is not a rail screen
       and keeps its state apart from `panel` — the two never need to know about each other */
   let sheetOpen = $state(false);
+  /** which face of the sheet is open — the body, the core reads, the offence, the defence, or the
+      resistance ladder, the way an MMORPG sheet keeps its numbers on pages instead of one long list */
+  type SheetTab = 'worn' | 'stats' | 'offence' | 'defence' | 'resist';
+  let sheetTab = $state<SheetTab>('worn');
+  const SHEET_TABS: [SheetTab, string][] = [
+    ['worn', 'worn'], ['stats', 'stats'], ['offence', 'offence'], ['defence', 'defence'], ['resist', 'resistances'],
+  ];
   let saveNote = $state('');
 
   let settings = $state<ClientSettings>({ ...DEFAULT_SETTINGS });
@@ -152,6 +168,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function onfieldKey(ev: KeyboardEvent) {
     if (ev.key === 'Escape') {
       if (isTypingTarget(ev.target)) return;
+      // one Escape owner: an open sub-screen closes itself and keeps the field's own read untouched
+      if (document.querySelector('[role="dialog"]')) return;
       alloc = false;
       sheetOpen = false;
       more = false;
@@ -283,44 +301,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const fxOutMs = $derived(plateMotion === 0 ? 0 : FX_OUT_MS);
 
   /**
-   * A plate's comings and goings, written as a transition rather than as a stylesheet timer because only a
-   * transition is handed the item the sim removed. Going sinks the plate out of the frame; a death destroys
-   * the block at once, so there is no separate death gesture.
-   */
-  function plateLife(node: Element, { duration = 0 }: { duration?: number } = {}) {
-    return {
-      duration,
-      // played forward a plate rises into place; played in reverse it sinks back out of it
-      css: (t: number, u: number) => `opacity: ${t}; transform: translateY(${(u * 14).toFixed(1)}px)`,
-    };
-  }
-
-  /**
-   * The way a number leaves. The ring's push-out and the park's drain are both instant, so the leave is
-   * given to a transition — the last gesture the event plays before the DOM lets it go, and the one that
-   * makes a crowded second read as a stagger rather than a flicker (owner ruling, MapleStory-staged). A
-   * column figure fades from wherever its own arc had reached; a parked figure, whose arc ends held, is
-   * dissolved instead — held for its first third, then lifted, fattened and blurred off the card. The
-   * reduced-motion dial hands both a zero, as it does the plates.
-   */
-  function fxOut(node: Element, { ms = 0, held = false }: { ms?: number; held?: boolean } = {}) {
-    if (ms === 0) return { duration: 0 };
-    if (!held) {
-      const from = Number(getComputedStyle(node).opacity) || 1;
-      return { duration: ms, css: (t: number) => `opacity: ${(t * from).toFixed(3)};` };
-    }
-    return {
-      duration: ms,
-      css: (t: number) => {
-        const u = 1 - t;
-        const o = t > 2 / 3 ? 1 : t * 1.5;
-        return `opacity: ${o.toFixed(3)}; transform: translateY(${(-u * 10).toFixed(1)}px)`
-          + ` scale(${(1 + u * .12).toFixed(3)}); filter: blur(${(u * 1.6).toFixed(2)}px);`;
-      },
-    };
-  }
-
-  /**
    * The hit ring, split by the half of the frame it belongs on: what the character deals lands over
    * the mob field, what it takes — and what it casts, sells, warps or crafts — lands on its own plate.
    * The events come from the sim, so an animation is a fact about the world rather than a CSS timer.
@@ -364,9 +344,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const xpPct = $derived(Math.max(0, Math.min(100, (gameState.player.xp / eng.xpToNext(gameState.player.level)) * 100)));
 
   /** the field's own log, the chat box's shape: what the world just did, said once and left to scroll away */
-  type FeedLine = { id: number; text: string; tone: string };
+  type FeedLine = { id: number; text: string; tone: string; chan: 'combat' | 'loot' | 'system' };
+  type ChatTab = 'all' | 'combat' | 'loot' | 'system';
   let feed = $state<FeedLine[]>([]);
   let feedSeen = 0;
+  const CHAT_TABS: [ChatTab, string][] = [['all', 'all'], ['combat', 'combat'], ['loot', 'loot'], ['system', 'system']];
+  /** which channel of the chronicle is showing: one stream, read one way at a time, the way a chat box
+      splits what a kill said from what the world said */
+  let chatTab = $state<ChatTab>('all');
+  const chatShown = $derived((chatTab === 'all' ? feed : feed.filter((l) => l.chan === chatTab)).slice(-8));
   $effect(() => {
     const fresh = ring.filter((e) =>
       (e.kind === 'kill' || e.kind === 'level' || e.kind === 'travel' || e.kind === 'buff' || e.kind === 'drop') && e.text);
@@ -382,30 +368,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         ? `Slain · ${e.text} · +${fmtNum(e.value || 0)} EXP`
         : e.kind === 'buff' ? `${e.text} up` : e.text,
       tone: e.kind === 'level' ? 'gold' : e.kind === 'drop' ? 'gold' : e.kind === 'travel' ? 'good' : 'dim',
-    }))].slice(-6);
+      chan: (e.kind === 'kill' ? 'combat' : e.kind === 'drop' ? 'loot' : 'system') as FeedLine['chan'],
+    }))].slice(-60);
   });
 
   /** The away-window report (parking: "Offline report on return"), filled on mount catch-up + Load. */
   let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; quality: string } | null>(null);
 
-  /** A small counter snapshot so the report diffs the away window instead of showing lifetime totals. */
-  function snapCounters(s: GameState) {
-    return {
-      kills: s.counters.kills, drops: s.counters.drops, junk: s.counters.junk, gold: s.counters.gold,
-      stones: Object.values(s.counters.stones).reduce((a, b) => a + b, 0),
-      level: s.player.level, quality: eng.zoneById(s.zone).quality,
-    };
-  }
-  type Snap = ReturnType<typeof snapCounters>;
-  function buildAwayReport(before: Snap, mins: number, secs: number, capped: boolean) {
-    const a = snapCounters(gameState);
-    return {
-      mins, secs, capped,
-      kills: a.kills - before.kills, drops: a.drops - before.drops, junk: a.junk - before.junk,
-      gold: a.gold - before.gold, stones: a.stones - before.stones, levels: a.level - before.level,
-      quality: a.quality,
-    };
-  }
+  // the away report's own reads live in `ui/hud.ts`, where a test can reach them
 
   let c = $derived(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points, gameState.player.treeRanks));
   let zone = $derived(eng.zoneById(gameState.zone));
@@ -492,19 +462,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /**
-   * §11 field label: the ladder rung this spawn rolled (`mob.variants`), which is what its drop table
-   * keys on — a body tier no longer implies the name, since the three normal rungs are their own roll
-   * and a two-body species would otherwise never field one of them. A named boss reads its own name.
-   */
-  function fieldLabel(m: { species: string; speciesId?: string; kind: string; variant?: string }): string {
-    const fl = E.mob.field_labels;
-    if (m.kind.startsWith('Boss')) return `${m.kind.replace(/^Boss · /, '')}${fl.boss.suffix}`;
-    if (m.variant) return m.variant;
-    const ladder = m.speciesId ? (E.mob.variants as Record<string, string[]>)[m.speciesId] : null;
-    return ladder ? ladder[0] : `${m.species.toLowerCase()}${m.kind === 'Elite' ? fl.elite.suffix : fl.normal.suffix}`;
-  }
-
   function step() {
     // `tick` mutates the state in place. `gameState` is a deep `$state` proxy, so its fine-grained
     // signals fire on their own — no need to clone the whole root and reassign, which used to
@@ -519,11 +476,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     let timer: ReturnType<typeof setInterval> | null = null;
     let autosaveTimer: ReturnType<typeof setInterval> | null = null;
     let disposed = false;
-    // best-effort flush: the away stamp is refreshed so closing the tab loses at most the last slice,
-    // and a reload right after cannot count the same absence twice. IndexedDB may not finish inside
-    // `beforeunload`, so the interval save is the one that actually bounds the loss.
-    const flush = () => { if (lastSlot) void doSave(lastSlot, true); };
-    const onHide = () => { if (document.visibilityState === 'hidden') flush(); };
+    // The unload flush must be synchronous: IndexedDB commits asynchronously and the page can be gone
+    // first, so `writeSaveSync` writes the mirror in one turn. It refreshes the away stamp too, so a
+    // reload right after cannot count the same absence twice.
+    const flushSync = () => {
+      if (!lastSlot) return;
+      gameState.lastSavedAt = Date.now();
+      writeSaveSync(lastSlot, gameState);
+    };
+    const onHide = () => { if (document.visibilityState === 'hidden') flushSync(); };
     (async () => {
       settings = await readSettings();
       speed = settings.speed || 1;
@@ -534,7 +495,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       if (away > 5 && away < 7 * 24 * 3600) {
         const before = snapCounters(gameState);
         const r = await catchUpAsync(gameState, statuses, away);
-        awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped) : null;
+        awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
         push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated${r.capped ? ' (capped at the offline limit)' : ''}`);
         gameState = { ...gameState };
       }
@@ -543,21 +504,27 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       gameState.lastSavedAt = Date.now();
       loadSnaps();
       // the clock is armed only after the catch-up, so a slice boundary cannot add an extra tick.
-      // The wake is `WAKE_SEC` and `schedulerBatch` turns real time into sim seconds at the chosen
-      // speed, so ×4 fires one batched wake instead of four stacked timers — the whole batch renders in
-      // one frame, which is what keeps the speed-up from stuttering. A throttled tab never spends more
-      // than `MAX_BATCH` sim seconds in one wake, and the backlog it cannot fit is dropped, not queued.
+      // The wake carries the REAL time since the last one, and `schedulerBatch` turns that into sim
+      // seconds at the chosen speed: a throttled tab (a hidden one fires at most once a second) banks the
+      // second it actually missed instead of a fixed quarter, so nothing is silently lost. The batch
+      // still caps at `MAX_BATCH` and drops what it cannot fit, so a stalled wake cannot stutter the draw
+      // with a queued burst.
       if (!disposed) {
         let acc = 0;
+        let last = performance.now();
         timer = setInterval(() => {
-          if (!running) { acc = 0; return; }
-          const batch = schedulerBatch(acc, speed);
+          const now = performance.now();
+          // a wake that ran late is measured, never assumed; the tab's own throttling is the only clock
+          const elapsed = Math.max(0, (now - last) / 1000);
+          last = now;
+          if (paused || !running) { acc = 0; return; }
+          const batch = schedulerBatch(acc, speed, elapsed);
           acc = batch.acc;
           for (let i = 0; i < batch.ticks; i++) step();
         }, WAKE_SEC * 1000);
-        autosaveTimer = setInterval(flush, AUTOSAVE_SEC * 1000);
+        autosaveTimer = setInterval(() => { if (lastSlot) void doSave(lastSlot, true); }, AUTOSAVE_SEC * 1000);
         document.addEventListener('visibilitychange', onHide);
-        window.addEventListener('beforeunload', flush);
+        window.addEventListener('beforeunload', flushSync);
       }
     })();
     return () => {
@@ -565,7 +532,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       if (timer) clearInterval(timer);
       if (autosaveTimer) clearInterval(autosaveTimer);
       document.removeEventListener('visibilitychange', onHide);
-      window.removeEventListener('beforeunload', flush);
+      window.removeEventListener('beforeunload', flushSync);
     };
   });
 
@@ -574,6 +541,53 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     // panel re-read the gameState the verb mutated in place
     equipFromBag(gameState, index);
     gameState = { ...gameState };
+  }
+
+  /** Dissolve one piece the player picked, by hand — the same stone a rejected drop pays, never gold. */
+  function doSalvage(index: number) {
+    const r = salvageBag(gameState, index);
+    equipNote = r.ok ? 'That piece dissolved — 1 Value stone into the pile' : `Cannot salvage: ${r.why}`;
+    gameState = { ...gameState };
+  }
+
+  /** Take one body cell off, back into the hunt pile. */
+  function doUnequip(cell: number) {
+    const r = unequip(gameState, cell);
+    equipNote = r.ok ? 'That piece came off into the hunt pile' : `Cannot take it off: ${r.why}`;
+    gameState = { ...gameState };
+  }
+
+  /**
+   * What a right-click offers, per grid. The pile's verbs are the moves a piece can actually make from
+   * there — onto the body, into the warehouse (only where a settlement has made that legal), or into a
+   * stone. The worn grid's one verb is the way back off the body. Both lists read the same sim calls the
+   * panel's buttons already make; nothing here is a second rule.
+   */
+  function pileActions(entry: SlotEntry): MenuItem[] {
+    if (entry.kind !== 'gear' || !entry.item) return [];
+    const it = entry.item;
+    const out: MenuItem[] = [
+      { label: 'Put it on', hint: it.slot, disabled: Boolean(it.broken), onpick: () => equip(entry.index) },
+      {
+        label: it.locked ? 'Unlock' : 'Lock',
+        hint: it.locked ? 'the bulk verbs will move it again' : 'the bulk verbs will leave it',
+        onpick: () => toggleLock(it),
+      },
+    ];
+    if (townLive && tabs) out.push({ label: `Stash it → Tab ${stashTab + 1}`, onpick: () => doDeposit(entry.index, stashTab) });
+    out.push({
+      label: 'Dissolve',
+      hint: '1 Value stone',
+      danger: true,
+      disabled: Boolean(it.locked || it.heldFor),
+      onpick: () => doSalvage(entry.index),
+    });
+    return out;
+  }
+
+  function wornActions(entry: SlotEntry): MenuItem[] {
+    if (entry.kind !== 'worn') return [];
+    return [{ label: 'Take it off', hint: 'back to the hunt pile', onpick: () => doUnequip(entry.index) }];
   }
 
   /** the answer the last best-gear press gave, read where the press was made */
@@ -661,7 +675,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     snapNote = `Rewound ${snapSlot} to the backup taken ${what} — the character went back whole, stones and craft counts with it`;
   }
 
-  const describeSnap = (shot?: Snapshot) => (shot ? `${shot.reason} at ${Math.round(shot.clockSec / 60)} min` : '—');
 
   function editRule(slot: string, patch: Record<string, unknown>) {
     setRule(gameState.filter, slot, patch as any);
@@ -669,19 +682,24 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   async function doLoad(slot: SlotName) {
-    const s = await readSave(slot);
-    if (!s) { saveNote = `${slot} is empty`; return; }
-    statuses = {};
-    gameState = { ...s };
-    const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
-    const before = snapCounters(gameState);
-    const r = await catchUpAsync(gameState, statuses, away);
-    awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped) : null;
-    // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
-    lastSlot = slot;
-    gameState.lastSavedAt = Date.now();
-    saveNote = `Loaded ${slot} — ${r.simulated} sec caught up`;
-    gameState = { ...gameState };
+    paused = true;
+    try {
+      const s = await readSave(slot);
+      if (!s) { saveNote = `${slot} is empty`; return; }
+      statuses = {};
+      gameState = { ...s };
+      const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
+      const before = snapCounters(gameState);
+      const r = await catchUpAsync(gameState, statuses, away);
+      awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
+      // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
+      lastSlot = slot;
+      gameState.lastSavedAt = Date.now();
+      saveNote = `Loaded ${slot} — ${r.simulated} sec caught up`;
+      gameState = { ...gameState };
+    } finally {
+      paused = false;
+    }
   }
 
   function download() {
@@ -1329,14 +1347,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return `Fighting — ${swing}`;
   });
 
-  /** A fill's own style: how far it reaches, and the fraction it reached so the bar's colour can be
-   *  stretched over the whole track rather than squeezed into the fill. A near-empty bar therefore
-   *  shows the hot end of its own ramp — the state is read from across the field, not only from the digit. */
-  const bar = (value: number, max: number) => {
-    const pct = Math.max(0, Math.min(100, (value / max) * 100));
-    return `width:${pct}%;--w:${pct / 100}`;
-  };
-
   // A press reads as its own flat damage plus its effectiveness on the caster's power line — the
   // engine's own shape (`engine/skills.ts` perPress), so the panel never restates a formula.
   const pressText = (k: any) => (k.base_flat == null ? '' : `${Math.round(k.base_flat)} + ${k.eff}% of your ${k.basis === 'magic' ? 'magic' : 'physical'} power`);
@@ -1386,6 +1396,43 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       .map(([name, st]: any) => `${name}${st.stacks > 1 ? ` ×${st.stacks}` : ''} ${Math.ceil(st.secLeft)}s`)
       .join(' · '),
   );
+
+  /**
+   * The vitals' own status row: every mark that is on the character right now, each with its own clock —
+   * the debuffs a mob landed, the buffs that are counting down, and the auras that simply stay on. The
+   * Element a status wears is its icon, the same shelf the plates draw from; the words live in the
+   * mark's own title, so the read is one glance and the explanation is one hover.
+   */
+  const buffMarks = $derived.by(() => {
+    const ELEM_OF: Record<string, string> = { burn: 'fire', chill: 'cold', shock: 'lightning', poison: 'poison', mark: 'physical', crippled: 'earth' };
+    const out: { key: string; icon: string; label: string; secs: number | null; tone: 'buff' | 'debuff' }[] = [];
+    for (const [name, st] of Object.entries(statuses) as [string, any][]) {
+      if (!st || !(st.secLeft > 0)) continue;
+      out.push({
+        key: `st:${name}`,
+        icon: elementIcon(ELEM_OF[name] || 'physical'),
+        label: `${name}${st.stacks > 1 ? ` ×${st.stacks}` : ''}`,
+        secs: Math.ceil(st.secLeft),
+        tone: 'debuff',
+      });
+    }
+    for (const k of sm.of('buff') as any[]) {
+      const left = gameState.skills.buffUp[k.id] || 0;
+      if (!gameState.skills.buffs[k.id] || !(left > 0)) continue;
+      out.push({ key: `bf:${k.id}`, icon: skillIcon(k.id, 'buff'), label: k.name, secs: Math.ceil(left), tone: 'buff' });
+    }
+    for (const k of sm.of('aura') as any[]) {
+      if (!gameState.skills.auras[k.id]) continue;
+      out.push({ key: `au:${k.id}`, icon: skillIcon(k.id, 'aura'), label: k.name, secs: null, tone: 'buff' });
+    }
+    return out;
+  });
+
+  /** A cast-order row dragged onto another place in the bar: the same list the Skills screen edits. */
+  function doMoveSlot(from: number, to: number) {
+    moveSlot(gameState.skills, from, to);
+    gameState = { ...gameState };
+  }
 
   /** The three numbers a leg opens at, read from the roster — a screen types no default of its own. */
   const COND_DEFAULTS = sm.SKILLS.meta.cast_conditions;
@@ -1446,16 +1493,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return slotFiller(id) ? 'filler — after every timed slot' : 'ready when its cooldown is up';
   }
 
-  /** What a curse has written on one mob, in words and with the seconds left on each line. */
-  function curseWords(id: string): string {
-    const lines = gameState.curses[id];
-    if (!lines) return '';
-    return Object.values(lines)
-      .map((l) => `${EFFECT_LABEL[l.stat] || l.stat} ${l.value > 0 ? '+' : ''}${l.value}%` +
-        `${l.condition ? ` while ${l.condition}` : ''} · ${l.secLeft}s left`)
-      .join(' · ');
-  }
-
   /** The stones in words, using the names the bench itself charges by. */
   function stonesLine(): string {
     const held = Object.entries(gameState.counters.stones).filter(([, n]) => (n as number) > 0);
@@ -1470,18 +1507,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       ? 'Climbing: the walk moves on through settlements already opened, and falls back to the last zone held when a Push lands'
       : 'Staying: you farm this zone until you travel yourself');
     gameState = { ...gameState };
-  }
-
-  /** What the character has put on one mob: the DoT and debuff lines, with stacks and seconds. */
-  function statusWords(id: string): string {
-    const m = gameState.mobStatus[id];
-    if (!m) return '';
-    return Object.entries(m.statuses)
-      .filter(([, l]) => l.stacks > 0 || l.secLeft > 0)
-      .map(([name, l]) => statusLabel(name)
-        + (l.stacks > 1 ? ' ×' + l.stacks : '')
-        + (l.secLeft > 0 && l.secLeft < 90 ? ' ' + l.secLeft + 's' : ''))
-      .join(' · ');
   }
 
   function toggle(id: string) {
@@ -1615,11 +1640,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           </div>
         </div>
         <div class="chips">
-          {#if activeStatusWords}
-            <span class="chip status">On you: {activeStatusWords}</span>
-          {/if}
           <span class="chip aspd">{c.hitsPerSec.toFixed(2)} hits/sec</span>
         </div>
+        {#if buffMarks.length}
+          <!-- what is on the character, one mark each with its own clock: a debuff a mob landed, a buff
+               that is counting down, or an aura that simply stays on. The words are the mark's own title. -->
+          <ul class="statusmarks" aria-label={`On you: ${activeStatusWords || 'nothing'}`}>
+            {#each buffMarks as b (b.key)}
+              <li class={b.tone} title={`${b.label}${b.secs != null ? ` · ${b.secs}s left` : ' · on'}`}>
+                <img src={b.icon} alt="" aria-hidden="true" />
+                {#if b.secs != null}<b>{b.secs}</b>{/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
         {#if vitalsBuffs}
           <div class="buffs" title="What an aura or a buff is adding right now, resistances aside">{vitalsBuffs}</div>
         {/if}
@@ -1700,46 +1734,82 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
     {#if sheetOpen}
       <!-- the sheet as an overlay, not a screen of its own: the fight keeps running beside it and the
-           doll keeps the shape the owner drew -->
+           doll keeps the shape the owner drew. Its numbers are read on pages rather than in one long
+           list — the body, the core reads, the offence, the defence, the resistance ladder. -->
       <section class="pop" aria-label="Character sheet">
         <header><h3>Character sheet</h3>
           <span class="sub">Level {gameState.player.level} · {gameState.player.statPoints} stat points unspent · {gameState.player.treePoints} tree points banked</span>
           <button class="quit" onclick={() => (sheetOpen = false)} aria-label="Close character sheet" title="Close (Esc)">✕</button>
         </header>
         <div class="pop-body">
-          <h3>Worn ({gameState.gear.filter(Boolean).length} / {E.stat.item_slots}) — hover a slot on the body to read it</h3>
-          <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="doll" />
-          <table class="stats">
-            <tbody>
-              <tr><td>Weapon</td><td>{c.weaponName} · {masteryLabel(c.weaponMastery)} · drop bonus {dropBonusPct(gameState)}%</td></tr>
-              <tr><td>Attack speed</td><td>{c.aspd.toFixed(1)} aspd · {c.hitsPerSec.toFixed(2)} hits/sec (fastest {E.caps.attack_interval_sec} sec a swing)</td></tr>
-              <tr><td>Physical power</td><td>{Math.round(c.phys)}</td></tr>
-              <tr><td>Magic power</td><td>{Math.round(c.magic)}</td></tr>
-              <tr><td>Attack damage</td><td>{c.attackDamage.toFixed(1)}% — the attack ladder's bucket: this swing and any phys-basis press</td></tr>
-              <tr><td>Spell damage</td><td>{c.spellDamage.toFixed(1)}% — the spell ladder's bucket: any magic-basis press{basicAttack === 'bolt' ? ' and this bolt' : ''}</td></tr>
-              <tr><td>Accuracy</td><td>{Math.round(c.accuracy)}</td></tr>
-              <tr><td>Evasion</td><td>{Math.round(c.evasion)} rating (Agi + the gear Evasion lines) · {c.evasionChance.toFixed(1)}% → Cap {E.caps.evasion}%</td></tr>
-              <tr><td>Armour</td><td>{Math.round(c.armour)}</td></tr>
-              <tr><td>Perfect dodge</td><td>{c.perfectDodge.toFixed(1)}% (no Cap)</td></tr>
-              <tr><td>Crit</td><td>{c.critChance.toFixed(1)}% chance · {c.critDmg.toFixed(0)}% damage</td></tr>
-              <tr><td>Resistance</td><td>{c.resistance.toFixed(1)}% (Cap {c.resCap}{c.resCap > E.caps.elem_res ? ' · unlocked' : ''})</td></tr>
-              <tr><td>Basic attack</td><td>{basicAttack}{basicAttackLine}</td></tr>
-              <tr><td>Stun Recovery</td><td>{c.stunRecovery.toFixed(1)}% of a shock's stop — Vit buys it back, so a {E.status.shock.stop_sec} sec stun leaves {eng.stunStopSec(c.core.vit, E.status.shock.stop_sec).toFixed(2)} sec</td></tr>
-              <tr><td>Status alignment</td><td>{c.alignment.toFixed(1)}% (no Cap) — the gate a mob's status rolls against, and the mace's stun source</td></tr>
-              <tr><td>Cooldown reduction</td><td>{c.cdr.toFixed(1)}% (Cap {E.caps.cdr})</td></tr>
-              <tr><td>Energy Shield</td><td>{Math.round(c.es)} · regens {c.esRegen.toFixed(1)}/sec after {E.energy_shield.delay_sec} sec ({E.energy_shield.regen_pct}% of the pool, amplified by an es_regen line)</td></tr>
-              <tr><td>Weight</td><td>{c.weightUsed.toFixed(0)} used / {Math.round(c.weightCap)} capacity{c.encumbrance > 0 ? ` · aspd ${(c.encumbrance * -100).toFixed(0)}%` : ' · no tax'}</td></tr>
-            </tbody>
-          </table>
+          <div class="seg sheettabs" role="tablist" aria-label="Character sheet faces">
+            {#each SHEET_TABS as [id, label] (id)}
+              <button role="tab" class:active={sheetTab === id} aria-selected={sheetTab === id} onclick={() => (sheetTab = id)}>{label}</button>
+            {/each}
+          </div>
 
-          <h3>The gate</h3>
-          <p><small>
-            {#if gameState.goal.done}
-              Met at {Math.round(gameState.goal.done.clockSec / 60)} min of play on a level {gameState.goal.done.level} character, {gameState.goal.attempts} spawn{gameState.goal.attempts === 1 ? '' : 's'} in. The run keeps going: levels past it are the item-quality push in the same zone, and there is no prestige.
-            {:else}
-              Not met yet. It takes {gameState.goal.attempts === 0 ? 'no spawn of this boss yet' : `${gameState.goal.attempts} spawn${gameState.goal.attempts === 1 ? '' : 's'}`}, and every Push inside a spawn starts the count over.
-            {/if}
-          </small></p>
+          {#if sheetTab === 'worn'}
+            <h3>Worn ({gameState.gear.filter(Boolean).length} / {E.stat.item_slots}) — hover a slot on the body to read it</h3>
+            <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="doll"
+                      actions={wornActions} />
+          {:else if sheetTab === 'stats'}
+            <table class="stats">
+              <tbody>
+                <tr><td>Weapon held</td><td>{c.weaponName}{c.weaponElement ? ` · ${c.weaponElement}` : ''}</td></tr>
+                <tr><td>Attack speed</td><td>{c.aspd.toFixed(1)} aspd · {c.hitsPerSec.toFixed(2)} hits/sec (fastest {E.caps.attack_interval_sec} sec a swing)</td></tr>
+                <tr><td>Accuracy</td><td>{Math.round(c.accuracy)}</td></tr>
+                <tr><td>Cooldown reduction</td><td>{c.cdr.toFixed(1)}% (Cap {E.caps.cdr})</td></tr>
+                <tr><td>Weight</td><td>{c.weightUsed.toFixed(0)} used / {Math.round(c.weightCap)} capacity{c.encumbrance > 0 ? ` · aspd ${(c.encumbrance * -100).toFixed(0)}%` : ' · no tax'}</td></tr>
+                <tr><td>Basic attack</td><td>{basicAttack}{basicAttackLine}</td></tr>
+              </tbody>
+            </table>
+            <h3>The gate</h3>
+            <p><small>
+              {#if gameState.goal.done}
+                Met at {Math.round(gameState.goal.done.clockSec / 60)} min of play on a level {gameState.goal.done.level} character, {gameState.goal.attempts} spawn{gameState.goal.attempts === 1 ? '' : 's'} in. The run keeps going: levels past it are the item-quality push in the same zone, and there is no prestige.
+              {:else}
+                Not met yet. It takes {gameState.goal.attempts === 0 ? 'no spawn of this boss yet' : `${gameState.goal.attempts} spawn${gameState.goal.attempts === 1 ? '' : 's'}`}, and every Push inside a spawn starts the count over.
+              {/if}
+            </small></p>
+          {:else if sheetTab === 'offence'}
+            <table class="stats">
+              <tbody>
+                <tr><td>Weapon</td><td>{c.weaponName} · {masteryLabel(c.weaponMastery)} · drop bonus {dropBonusPct(gameState)}%</td></tr>
+                <tr><td>Physical power</td><td>{Math.round(c.phys)}</td></tr>
+                <tr><td>Magic power</td><td>{Math.round(c.magic)}</td></tr>
+                {#each loot.ELEMENTS as el (el)}
+                  <tr><td>{el} power</td><td>{Math.round(c.elemByElement?.[el] || 0)}{c.conversion?.[el] ? ` · ${c.conversion[el]}% converted` : ''}</td></tr>
+                {/each}
+                <tr><td>Attack damage</td><td>{c.attackDamage.toFixed(1)}% — the attack ladder's bucket: this swing and any phys-basis press</td></tr>
+                <tr><td>Spell damage</td><td>{c.spellDamage.toFixed(1)}% — the spell ladder's bucket: any magic-basis press{basicAttack === 'bolt' ? ' and this bolt' : ''}</td></tr>
+                <tr><td>Crit</td><td>{c.critChance.toFixed(1)}% chance · {c.critDmg.toFixed(0)}% damage</td></tr>
+                <tr><td>Armour penetration</td><td>{c.armourPen.toFixed(1)}% of the mob's armour ratio cut (the crossbow's own line)</td></tr>
+                <tr><td>Chance to bleed</td><td>{c.bleedChance.toFixed(1)}% on a landed hit (the axe's own line)</td></tr>
+              </tbody>
+            </table>
+          {:else if sheetTab === 'defence'}
+            <table class="stats">
+              <tbody>
+                <tr><td>Armour</td><td>{Math.round(c.armour)}</td></tr>
+                <tr><td>Evasion</td><td>{Math.round(c.evasion)} rating (Agi + the gear Evasion lines) · {c.evasionChance.toFixed(1)}% → Cap {E.caps.evasion}%</td></tr>
+                <tr><td>Perfect dodge</td><td>{c.perfectDodge.toFixed(1)}% (no Cap)</td></tr>
+                <tr><td>Block</td><td>{c.block.toFixed(1)}% — a blocked hit is deleted outright</td></tr>
+                <tr><td>Energy Shield</td><td>{Math.round(c.es)} · regens {c.esRegen.toFixed(1)}/sec after {E.energy_shield.delay_sec} sec ({E.energy_shield.regen_pct}% of the pool, amplified by an es_regen line)</td></tr>
+                <tr><td>Stun Recovery</td><td>{c.stunRecovery.toFixed(1)}% of a shock's stop — Vit buys it back, so a {E.status.shock.stop_sec} sec stun leaves {eng.stunStopSec(c.core.vit, E.status.shock.stop_sec).toFixed(2)} sec</td></tr>
+                <tr><td>Status alignment</td><td>{c.alignment.toFixed(1)}% (no Cap) — the gate a mob's status rolls against, and the mace's stun source</td></tr>
+              </tbody>
+            </table>
+          {:else}
+            <h3>Resistance {c.resistance.toFixed(1)}% · Cap {c.resCap}{c.resCap > E.caps.elem_res ? ' · unlocked' : ''}</h3>
+            <table class="stats">
+              <tbody>
+                {#each loot.ELEMENTS as el (el)}
+                  <tr><td>{el}</td><td>{c.resByElement?.[el] ? `+${c.resByElement[el].toFixed(1)}% extra` : 'no line of its own — the overall figure applies'}</td></tr>
+                {/each}
+                <tr><td>Status &amp; control</td><td>{c.statusResist.toFixed(1)}% cut on the proc and on a stun or stop</td></tr>
+              </tbody>
+            </table>
+          {/if}
         </div>
       </section>
     {/if}
@@ -1762,15 +1832,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       {#each gameState.skills.list as id, i}
         {@const k = id ? sm.byId[id] : null}
         {@const cd = id ? (gameState.skills.cd[id] || 0) : 0}
+        {@const eff = id ? skillCd(gameState.skills, id, c.cdr) : 0}
+        <!-- how far the cooling dial has swept: the wedge still dark is the cooldown that is left -->
+        {@const frac = cd > 0 && eff > 0 ? Math.max(0, Math.min(1, 1 - cd / eff)) : 1}
         {@const when = id ? modeOf(gameState.skills, id) : 'always'}
         {@const filler = slotFiller(id)}
         <span class="cast" class:empty={!id || !k} class:ready={!!k && cd <= 0 && when === 'always' && !filler}
               class:silent={when === 'never'} class:gated={when === 'conditional'} class:filler={filler}
               role="listitem"
+              draggable={Boolean(id)}
+              ondragstart={(e) => setCastDrag(e, { index: i })}
+              ondragover={(e) => { if (id) e.preventDefault(); }}
+              ondrop={(e) => { const f = readCastDrag(e); if (f && f.index !== i) doMoveSlot(f.index, i); }}
               title={`Slot ${i + 1}${id && k ? `: ${k.name} · ${slotWaiting(id)}` : ': empty'}`}>
           {#if id && k}
             <img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />
-            {#if cd > 0}<small>{cd.toFixed(1)}</small>{/if}
+            {#if cd > 0}
+              <span class="sweep" style={`--p:${(frac * 100).toFixed(1)}%`} aria-hidden="true"></span>
+              <small>{cd.toFixed(1)}</small>
+            {/if}
             {#if latestFire?.skillId === id}
               <!-- the order is the one place that can say which row fired without a second number: a ring of
                    the press's own Element, remounted once per event by the key -->
@@ -1820,160 +1900,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <!-- the middle of the frame is the group itself: one plate per mob, HP as the loudest thing on it, and
        every landed blow popping its own figure off the plate it hit -->
   <div class="field">
-    {#each plates as m, mi (m.id)}
-      {@const beat = plateBeat(fxByMob, m.id)}
-      <!-- the rim and the blade are the same blow: one event answers both, so a plate reads one shape per
-           landed hit rather than scanning the ring twice for it -->
-      {@const shape = beat}
-      {@const strike = plateStrike(ring, m.id)}
-      <!-- a mutual exchange: the blow taken and the blow dealt share one second, so the two cards meet
-           halfway instead of the attacker running the whole way down -->
-      {@const clash = strike && beat && strike.sec === beat.sec}
-      <!-- one keyed plate per living body: a death destroys this block at once, no outro kept. A body that
-           leaves for any other reason (the zone changed under the walk) sinks out of
-           the frame instead, and the row below it slides into its place -->
-      <div
-        class="mob"
-        class:front={mi === 0}
-        class:elite={m.kind === 'Elite'}
-        class:boss={m.kind.startsWith('Boss')}
-        in:plateLife={{ duration: plateMotion }}
-        out:plateLife={{ duration: plateMotion }}
-      >
-        {#if beat}
-          <!-- the plate actually struck takes the blow: the rim is remounted on the event's own id, so it is
-               one beat per hit rather than a loop the eye learns to ignore. It follows the hit and not the
-               front rank, because a DoT tick and an AoE press both land on the bodies behind it -->
-          {#key beat.id}
-            <span class="flash" style={`--fx:${beat.colour}`}></span>
-          {/key}
-        {/if}
-        {#if shape}
-          {#key shape.id}
-            {#if shape.via === 'swing'}
-              <!-- the weapon's own path: the shelf's crossed swords swept across the body it cut, wearing the
-                   Element that carried the hit. A DoT tick draws no blade, because none was used -->
-              <span class="arc" style={`--fx:${shape.colour}`} aria-hidden="true"></span>
-            {:else}
-              <!-- a press lands as a burst and not a cut — the same colour rule, a different shape, so the two
-                   halves of the build read apart before the number is read -->
-              <span class="burst" style={`--fx:${shape.colour}`} aria-hidden="true"></span>
-            {/if}
-          {/key}
-        {/if}
-        <!-- every landed blow pops its own figure off the plate it hit and rises away: the newest few
-             the ring still holds, each keyed on its event so it plays once. A status tick pops small beside
-             the cut or burst that caused it, and never takes the rim. A swing the body answered without
-             taking pops its word the same way — dodge and miss read where the dodger stands. The rim, the
-             blade and the figures stay outside the charge below, so a swing back never replays the hit
-             they belong to -->
-        <div class="plate-fx" aria-hidden="true">
-          {#each (fxByMob.get(m.id) || []).filter((e) => e.kind === 'hit' && e.value).slice(0, 4) as e (e.id)}
-            <span class="fx pop" class:crit={e.crit} class:dot={e.via === 'dot'} out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{eng.fmt(e.value ?? 0)}{e.crit ? '!' : ''}</span>
-          {/each}
-          {#each (fxByMob.get(m.id) || []).filter((e) => e.kind === 'block').slice(0, 2) as e (e.id)}
-            <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{e.text}</span>
-          {/each}
-        </div>
-        {#key strike ? strike.id : `c${m.id}`}
-          <!-- the attack run, keyed on the mob's own swing: this wrapper wears the whole card face, so the
-               charge moves the card and not just what is drawn inside it. Remounted per strike so every swing
-               reads; the shake inside is keyed on its own event, so being hit and hitting back play together
-               instead of one starving or replaying the other. On a mutual exchange it runs halfway, and the
-               player's card rises to meet it -->
-          <div class="charge" class:lunge={!!strike} class:clash={!!clash}>
-        {#key beat ? beat.id : `i${m.id}`}
-          <!-- the body takes the blow: one node, remounted on every direct hit, so a fast fight re-stamps
-               the flinch instead of looping it -->
-          <div class="art" class:knock={!!beat}>
-            <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
-            <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
-            <p class="body">{m.kind}</p>
-            <span class="mobbar"><i style={bar(m.hp, m.hpMax)}></i><b>{Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</b></span>
-            <p class="chips">
-              <span>PS {(m.ps * psMult(modsOn(gameState.curses, m.id))).toFixed(1)}</span>
-              <span>Hit {(eng.hitChance(c.accuracy, m.evasion) * 100).toFixed(1)}%</span>
-              <span>Dodge {eng.dodgeChance(m.dodgeRate, c.accuracy).toFixed(1)}%</span>
-            </p>
-            <p class="element-list">
-              {#each m.innate as element}
-                <span class="element-label"><img src={elementIcon(element)} alt="" aria-hidden="true" />{element}</span>
-              {/each}
-            </p>
-            <p class="curses">{[curseWords(m.id), statusWords(m.id)].filter(Boolean).join(' | ') || '—'}</p>
-          </div>
-        {/key}
-          </div>
-        {/key}
-      </div>
-    {:else}
-      {#if gameState.walk}
-        <!-- The walking read: the shelf's own boot glyph split into single prints, a left foot and a right
-             foot laid in a stride, lit from where the walk has reached. It mounts only while the field is
-             empty, so a live plate is never covered or out-shouted, and it takes no pointer — the ground
-             behind it still pans. -->
-        <div class="travel" aria-hidden="true" style={`--p:${walkPct.toFixed(3)}`}>
-          {#each travelTrail as d}
-            <span class="print" class:right={d.right} style={`--x:${d.x.toFixed(3)}`}></span>
-          {/each}
-        </div>
-      {:else if !gameState.hunting}
-        <!-- ground that fields nothing says so, and says what would change it: a promise that the next
-             group walks in is false here, and a player who believes it waits forever -->
-        <p class="clear-field">
-          <b>No group walks in while the hunt is off.</b>
-          <span>Pick a cell on the map, then hunt it.</span>
-        </p>
-      {:else}
-        <p class="clear-field">
-          <b>Next group in {Math.max(0, gameState.spawnIn)} sec.</b>
-          <span>{hereName} · levels {zone.levels[0]}–{zone.levels[1]}</span>
-        </p>
-      {/if}
-    {/each}
-
-    <!-- the character's own card, on the near edge of the field it fights on: a blow that lands here has a
-         body to land on at last. It is a read and not a control — no pointer, no gold, and no second copy of
-         any number the dock already owns -->
-    <div class="self-plate" aria-label="Your card" class:clash={!!(latestTaken && latestLand && latestTaken.sec === latestLand.sec)}>
-      {#if latestTaken}
-        {#key latestTaken.id}
-          <span class="flash" style={`--fx:${latestTaken.colour}`}></span>
-        {/key}
-      {/if}
-      <div class="plate-fx" aria-hidden="true">
-        {#each ring.filter((e) => e.side === 'self' && e.kind === 'taken' && e.value).slice(0, 3) as e (e.id)}
-          <span class="fx pop" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>-{eng.fmt(e.value ?? 0)}</span>
-        {/each}
-        {#each ring.filter((e) => e.side === 'self' && (e.kind === 'block' || e.kind === 'proc')).slice(0, 3) as e (e.id)}
-          <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{e.text}</span>
-        {/each}
-      </div>
-      {#key selfArt ? selfArt.id : 'self-idle'}
-        <!-- the face wears the paint and both answers: a hit flinches the whole card down, away from the
-             blow above, and a landed swing surges it up. Remounted on whichever fact is newer, so one
-             gesture plays per beat and the clash on the root composes with it -->
-        <div class="cardface" class:knock={selfArt?.gesture === 'knock'} class:lunge={selfArt?.gesture === 'lunge'}>
-          <div class="art">
-          <img class="portrait" src={faceMark} alt="" aria-hidden="true" />
-          <p class="mob-name">You · {heldWeaponName(gameState) || 'Bare hands'}</p>
-          {#if c.es > 0}
-            <span class="mobbar es"><i style={bar(gameState.player.es, c.es)}></i><b>{Math.max(0, Math.round(gameState.player.es))} / {Math.round(c.es)}</b></span>
-          {/if}
-          <span class="mobbar"><i style={bar(gameState.player.hp, c.maxHp)}></i><b>{Math.max(0, Math.round(gameState.player.hp))} / {Math.round(c.maxHp)}</b></span>
-          <span class="mobbar mana"><i style={bar(gameState.player.mana, c.maxMana)}></i><b>{Math.max(0, Math.round(gameState.player.mana))} / {Math.round(c.maxMana)}</b></span>
-          </div>
-        </div>
-      {/key}
-      <!-- the character's own column rises off the card it belongs to: anchored above the plate, so the
-           events that name the character appear where the character stands rather than in a corner of
-           the screen no card occupies -->
-      <div class="float-side self-side" aria-hidden="true">
-        {#each selfFx as e (e.id)}
-          <span class="fx fx-{e.kind}" out:fxOut={{ ms: fxOutMs }} style="--fx:{e.colour}; --lane:{e.id % 3}">{e.text}</span>
-        {/each}
-      </div>
-    </div>
+    <FieldPlates s={gameState} c={c} ring={ring} plates={plates} zone={zone} town={town} townLive={townLive}
+                 plateMotion={plateMotion} fxOutMs={fxOutMs} />
   </div>
 
   <!-- The hit ring: what the sim just did that has no body to stand on, drawn as an event rather than read
@@ -2005,7 +1933,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
          style:left={cardAt ? `${cardAt.x.toFixed(1)}px` : null}
          style:top={cardAt ? `${cardAt.y.toFixed(1)}px` : null}
          style:bottom={cardAt ? 'auto' : null}
-         style:transform={cardAt ? (cardAt.above ? 'translate(-50%, calc(-100% - clamp(7.5px, 0.489vw + 1.89px, 16.2px)))' : 'translate(-50%, clamp(7.5px, 0.489vw + 1.89px, 16.2px))') : null}>
+         style:transform={cardAt ? (cardAt.above ? 'translate(-50%, calc(-100% - clamp(8px, 0.489vw + 2px, 16px)))' : 'translate(-50%, clamp(8px, 0.489vw + 2px, 16px))') : null}>
       <TravelCard
         settlement={pickedSettlement}
         dest={pickedDest}
@@ -2044,8 +1972,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
        each line fading by its age, gone when the window rolls it out. A read only; it takes no press. -->
   {#if feed.length}
     <div class="combatlog" role="log" aria-live="polite">
-      {#each feed as line, i (line.id)}
-        <p class={line.tone} style={`--age:${feed.length - 1 - i}`}>{line.text}</p>
+      <!-- the chronicle's own channels: one stream, four ways to read it, the way a chat box splits a
+           kill from what the world said -->
+      <div class="chattabs" role="tablist" aria-label="The chronicle">
+        {#each CHAT_TABS as [id, label] (id)}
+          <button role="tab" class:active={chatTab === id} aria-selected={chatTab === id} onclick={() => (chatTab = id)}>{label}</button>
+        {/each}
+      </div>
+      {#each chatShown as line, i (line.id)}
+        <p class={line.tone} style={`--age:${chatShown.length - 1 - i}`}>{line.text}</p>
       {/each}
     </div>
   {/if}
@@ -2203,6 +2138,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               wornOf={wornOf}
               onequip={equip}
               pageSize={30}
+              actions={pileActions}
               empty="Nothing here yet — kills still drop, and the bag filter is the zone upgrade rate."
             />
           </div>
@@ -2302,7 +2238,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     {#if skillNote}<p><small>{skillNote}</small></p>{/if}
     <details class="prose">
       <summary>How the cast order works</summary>
-      <p><small>The game presses the first slot whose cooldown is ready and whose mana fits the usable pool. You only arrange the order — except a slot with no cooldown of its own, which the game treats as the <b>filler</b>: it presses only after every timed slot has had its chance, so placing it high in the order costs the timed slots nothing. A percentage skill charges that share of the usable pool; a flat skill charges its own units, which grow with its level and with the pool. Reserved by auras: {reserved}% of the pool, so {Math.round(usableMana(c, gameState.skills))} mana stays usable.</small></p>
+      <p><small>The game presses the first slot whose cooldown is ready and whose mana fits the usable pool. You only arrange the order — except a slot with no cooldown of its own, which the game treats as the <b>filler</b>: it presses only after every timed slot has had its chance, so placing it high in the order costs the timed slots nothing. A skill's price is a typed number of mana units and it climbs only with that skill's own level — a bigger pool buys more casts, never a cheaper press. Reserved by auras: {reserved}% of the pool, so {Math.round(usableMana(c, gameState.skills))} mana stays usable.</small></p>
       <p><small>Each row picks <b>when</b> it may fire: <b>always</b> (cast whenever it is ready), <b>conditional</b> (only while one of <i>its own</i> conditions holds), or <b>never</b> (silenced). A conditional row carries its own list, so two rows can wait on different things at once — the <b>gate</b> cell says what each one waits on and opens that row's editor. The legs are fixed, never free text: a boss · our HP under a share of the pool · the group at least so wide · a mana floor the press must not break · and, for a row that writes one, the status or curse the target is still missing.</small></p>
     </details>
     <table>
@@ -2313,12 +2249,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr>
             <td>{i + 1}</td>
             <td>
-              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span>{:else}—{/if}
+              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}{#if !sm.weaponFits(k, heldWeaponName(gameState) || '')}<span class="chip locked" title={`${k.name} fires only while a ${k.weapon} is held — you hold ${heldWeaponName(gameState) || 'nothing'}`}>needs {k.weapon}</span>{/if}</span>{:else}—{/if}
             </td>
             <td>{k && id ? (k.base_flat != null ? pressText(k) : k.type) : ''}</td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
             <td>{k && id ? `${k.cd}s → ${skillCd(gameState.skills, id, c.cdr).toFixed(2)}s` : ''}</td>
-            <td>{k && id ? manaNow(c, gameState.skills, id) : ''}</td>
+            <td>{k && id ? manaNow(gameState.skills, id) : ''}</td>
             <td>{id ? `${(gameState.skills.cd[id] || 0).toFixed(1)}s${(gameState.skills.buffUp[id] || 0) > 0 ? ` · window ${gameState.skills.buffUp[id]}s` : ''}` : ''}</td>
             <td>
               {#if id}
@@ -2387,7 +2323,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </table>
     <h3>Buff track (re-presses itself, takes no slot)</h3>
     {#each ownedBuffs as k}
-      <label><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.duration} on / {k.cd}s cd · {manaNow(c, gameState.skills, k.id)} · {effectLine(k) || k.effect}</label><br />
+      <label><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.duration} on / {k.cd}s cd · {manaNow(gameState.skills, k.id)} · {effectLine(k) || k.effect}</label><br />
     {:else}
       <p><small>None owned.</small></p>
     {/each}
@@ -2409,7 +2345,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr>
             <td>{w.name}</td>
             <td>{masteryLabel(lv)}</td>
-            <td>{lv >= 5 ? `+${((lv - 4) * 0.5).toFixed(1)}%` : '—'}</td>
+            <td>{weaponSkillBonusPct(lv) > 0 ? `+${weaponSkillBonusPct(lv).toFixed(1)}%` : '—'}</td>
           </tr>
         {/each}
       </tbody>
@@ -2838,7 +2774,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      by the box it expects). The bottom-centre rule below is only the first frame's fallback, before
      that measure lands. The card itself is ui/TravelCard.svelte, shared with the MAP sub-screen */
   .mapcard {
-    position: fixed; left: 50%; bottom: clamp(57.5px, 3.749vw + 14.49px, 124.2px); transform: translateX(-50%);
+    position: fixed; left: 50%; bottom: clamp(58px, 3.749vw + 14px, 124px); transform: translateX(-50%);
     width: min(var(--box-680), 62%); z-index: 4;
   }
   .picklist tr { cursor: pointer; }
@@ -2886,7 +2822,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
        character-sheet.md — Energy Shield sits above HP while the pool is there, and HP / Mana / Attack
        speed are the three always shown; Weight lives on the bag. */
   .dock {
-    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); right: var(--screen-pad); bottom: clamp(60px, 3.912vw + 15.12px, 129.6px); z-index: 3;
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); right: var(--screen-pad); bottom: clamp(60px, 3.912vw + 15px, 130px); z-index: 3;
     width: min(var(--box-620), 46%); display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-xs);
     pointer-events: none;
   }
@@ -2919,15 +2855,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .xp-ring .track { stroke: rgba(255, 255, 255, .12); }
   .xp-ring .fill { stroke: var(--xp); stroke-linecap: round; }
   .face {
-    position: absolute; inset: clamp(5.25px, 0.342vw + 1.32px, 11.34px); padding: 0; border-radius: 50%;
+    position: absolute; inset: clamp(5px, 0.342vw + 1px, 11px); padding: 0; border-radius: 50%;
     display: grid; place-items: center;
-    background: radial-gradient(circle at 50% 26%, rgba(255, 255, 255, .09), transparent 58%), linear-gradient(180deg, #1c2430, #0d1218);
+    background: radial-gradient(circle at 50% 26%, rgba(255, 255, 255, .09), transparent 58%), linear-gradient(180deg, var(--face-top), var(--face-floor));
     border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--edge));
   }
   .face img { width: var(--icon-md); height: var(--icon-md); }
   .face b {
-    position: absolute; right: clamp(-6.76px, -0.204vw - 0.79px, -3.13px); bottom: clamp(-6.76px, -0.204vw - 0.79px, -3.13px); min-width: var(--icon-md); padding: 1px 4px;
-    border-radius: clamp(8px, 0.652vw + 2.52px, 18px);
+    position: absolute; right: clamp(-7px, -0.204vw - 1px, -3px); bottom: clamp(-7px, -0.204vw - 1px, -3px); min-width: var(--icon-md); padding: 1px 4px;
+    border-radius: clamp(8px, 0.652vw + 3px, 18px);
     background: linear-gradient(180deg, var(--gold-lit), var(--gold)); color: var(--gold-ink);
     border: 1px solid rgba(0, 0, 0, .45); box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
     font-size: var(--font-xs); font-weight: 700; text-align: center;
@@ -2960,13 +2896,28 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     max-width: var(--box-300); overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
     font-size: var(--font-xs); font-variant-numeric: tabular-nums; color: var(--text);
     background: linear-gradient(90deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .38) 75%, transparent);
-    padding: 1px var(--spacing-xs) 1px var(--spacing-xs); border-radius: clamp(5px, 0.326vw + 1.26px, 10.8px);
+    padding: 1px var(--spacing-xs) 1px var(--spacing-xs); border-radius: clamp(5px, 0.326vw + 1px, 11px);
   }
   .chip.status { color: var(--alarm); }
   .chip.aspd { color: var(--dim); }
   /* what an aura or a buff is adding right now: the one slim read under the pools that is a bonus
      rather than a pool, so it wears the accent */
   .buffs { font-size: var(--font-xs); color: var(--gold); opacity: .9; }
+  /* the vitals' status row: one small square per mark, its clock printed in the corner. A debuff a mob
+     landed wears the alarm edge, a buff or aura the lit-good edge, so the two read apart at a glance. */
+  .statusmarks { display: flex; flex-wrap: wrap; gap: 3px; margin: 0; padding: 0; list-style: none; }
+  .statusmarks li {
+    position: relative; display: grid; place-items: center;
+    width: var(--icon-md); height: var(--icon-md);
+    background: var(--glass); border: 1px solid var(--line); border-radius: 3px;
+  }
+  .statusmarks li.debuff { border-color: color-mix(in srgb, var(--alarm) 55%, var(--line)); }
+  .statusmarks li.buff { border-color: color-mix(in srgb, var(--good-lit) 45%, var(--line)); }
+  .statusmarks img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .statusmarks b {
+    position: absolute; right: 1px; bottom: 0; font-size: var(--font-xs); line-height: 1;
+    color: var(--text); text-shadow: 0 1px 2px rgba(0, 0, 0, .95); font-variant-numeric: tabular-nums;
+  }
 
   /* the dock's two overlays: the sheet and the allocation float under the vitals instead of covering
      the screen — a veil is for a screen you work in, and these are reads you take mid-fight */
@@ -2984,7 +2935,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     border-bottom: 1px solid color-mix(in srgb, var(--gold) 26%, var(--edge)); border-radius: clamp(8px, 0.75vw, 14px) clamp(8px, 0.75vw, 14px) 0 0;
     background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 14%, transparent), transparent);
   }
-  .pop > header h3 { margin: 0; flex: none; color: var(--gold); font-size: var(--font-xs); letter-spacing: clamp(1.5px, 0.098vw + 0.38px, 3.24px); text-transform: uppercase; }
+  .pop > header h3 { margin: 0; flex: none; color: var(--gold); font-size: var(--font-xs); letter-spacing: clamp(2px, 0.098vw + 0px, 3px); text-transform: uppercase; }
   .pop .sub { flex: 1; color: var(--dim); font-size: var(--font-xs); }
   .pop .quit {
     margin-left: auto; width: var(--icon-md); height: var(--icon-md); padding: 0; line-height: 1;
@@ -2992,10 +2943,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .pop .quit:hover { color: var(--text); border-color: var(--gold); }
   .pop-body { padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm); overflow: auto; min-height: 0; overscroll-behavior: contain; }
-  .pop-body h3 { margin: var(--spacing-sm) 0 4px; font-size: var(--font-xs); color: var(--dim); letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px); text-transform: uppercase; }
+  .pop-body h3 { margin: var(--spacing-sm) 0 4px; font-size: var(--font-xs); color: var(--dim); letter-spacing: clamp(1px, 0.049vw + 0px, 2px); text-transform: uppercase; }
   .pop-body h3:first-child { margin-top: 0; }
   .pop-body p { margin: 4px 0; font-size: var(--font-xs); }
-  @keyframes pop { from { transform: translateY(clamp(-10.8px, -0.326vw - 1.26px, -5px)); opacity: .3; } to { transform: none; opacity: 1; } }
+  @keyframes pop { from { transform: translateY(clamp(-11px, -0.326vw - 1px, -5px)); opacity: .3; } to { transform: none; opacity: 1; } }
 
   /* the save note reads at the top where the eye already checks announcements */
   .pill {
@@ -3005,7 +2956,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .pill.note { color: var(--good); }
   /* the save note reads at the top where the eye already checks announcements, never in the purses */
-  .save-note { position: absolute; top: clamp(100px, 6.52vw + 25.2px, 216px); left: 50%; transform: translateX(-50%); z-index: 7; }
+  .save-note { position: absolute; top: clamp(100px, 6.52vw + 25px, 216px); left: 50%; transform: translateX(-50%); z-index: 7; }
 
   /* left edge under the portrait: where the character stands, whether it moves on, what it aims at —
      slim masked lines for legibility over the field, never a glass card; long lines clamp to two */
@@ -3016,19 +2967,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     display: grid; gap: 4px; align-content: start; justify-items: stretch;
   }
   .tracker > * {
-    margin: 0; padding: 3px var(--spacing-xs); border-radius: clamp(5px, 0.326vw + 1.26px, 10.8px); font-size: var(--font-xs);
+    margin: 0; padding: 3px var(--spacing-xs); border-radius: clamp(5px, 0.326vw + 1px, 11px); font-size: var(--font-xs);
     background: linear-gradient(90deg, rgba(0, 0, 0, .66), rgba(0, 0, 0, .38) 78%, transparent);
   }
   .tracker .phase {
     color: var(--gold-lit); text-transform: uppercase;
-    letter-spacing: clamp(1px, 0.065vw + 0.25px, 2.16px);
+    letter-spacing: clamp(1px, 0.065vw + 0px, 2px);
     box-shadow: inset 2px 0 0 var(--gold);
   }
   .tracker .phase, .tracker .objective, .tracker .alarm-line, .tracker .travel small {
     overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical;
   }
   .travel { display: grid; gap: 3px; }
-  .travel b { font-size: var(--font-xs); letter-spacing: clamp(1.25px, 0.082vw + 0.32px, 2.7px); text-transform: uppercase; color: var(--dim); font-weight: 500; }
+  .travel b { font-size: var(--font-xs); letter-spacing: clamp(1px, 0.082vw + 0px, 3px); text-transform: uppercase; color: var(--dim); font-weight: 500; }
   /* one control, two settings — the same choice the old pair of loose buttons made look like two */
   .seg { display: flex; border: 1px solid var(--edge); border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .05); }
   .seg button { flex: 1; white-space: nowrap; border: 0; border-radius: 0; background: none; padding: var(--spacing-xs) 4px; font-size: var(--font-xs); }
@@ -3042,7 +2993,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      orb arc owns, a top edge under the portrait, and a floor the self-plate's band sits on — the
      HUD floats over the field, so the field gives ground to it, not the other way round. */
   .field {
-    position: absolute; inset: clamp(120px, 5.379vw + 20.79px, 178.2px) clamp(clamp(175px, 11.41vw + 44.1px, 378px), 17vw, clamp(200px, 13.04vw + 50.4px, 432px)) clamp(55px, 3.586vw + 13.86px, 118.8px) calc(var(--box-100) + var(--screen-pad) * 3);
+    position: absolute; inset: clamp(120px, 5.379vw + 21px, 178px) clamp(clamp(175px, 11.41vw + 44px, 378px), 17vw, clamp(200px, 13.04vw + 50px, 432px)) clamp(55px, 3.586vw + 14px, 119px) calc(var(--box-100) + var(--screen-pad) * 3);
     display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: var(--spacing-lg);
     overflow: auto;
     /* one knob for every card on the field: mob plates and the player's own share it, so the two
@@ -3069,72 +3020,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     color: var(--dim); font-size: var(--font-xs);
   }
   .clear-field b { color: var(--text); font-weight: 600; }
-  .clear-field span { font-size: var(--font-xs); letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px); }
-  /* The walking read: the shelf's own boot glyph split into single prints — `mask-size: 200%` puts one boot
-     in each half, so a left foot and a right foot alternate down the stride and no second asset is needed.
-     Each print mixes the client's own two greys: `--text` for the ground already crossed, `--dim` for the
-     country still ahead, and the mix answers to `--p`, the fraction of blocks the walk has crossed. Gold is
-     deliberately absent: the accent means *here, or press this*, and a trail is neither. Nothing animates —
-     the ramp moves because the sim ticks, so a paused clock stops the read on its own and a reduced-motion
-     player loses nothing. The mark is a mask, so it contributes only its alpha — the icon shelf's own white
-     never paints the field. */
-  /* the tracker's zone switch is also called a travel read, so the stride keeps to the field it sits on */
-  .field .travel { position: relative; width: min(var(--box-300), 62%); height: var(--icon-xl); }
-  .travel .print {
-    position: absolute; width: var(--icon-lg); height: var(--icon-lg);
-    left: calc(var(--x) * (100% - clamp(18.75px, 1.222vw + 4.72px, 40.5px))); top: 0;
-    --on: clamp(0, calc((var(--p) - var(--x)) * 3), 1);
-    /* the far end of the stride is the same grey a receded HUD read wears, laid on thin: an unlit print that
-       is as loud as a lit one would invert the emphasis the ramp exists to make */
-    background: color-mix(in srgb, var(--text) calc(var(--on) * 100%),
-                color-mix(in srgb, var(--dim) 42%, transparent));
-    transform: rotate(-9deg);
-    -webkit-mask: url('./icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
-            mask: url('./icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
-  }
-  /* the other foot: the glyph's far half, dropped half a step and turned the other way, so the two tracks
-     read as a stride and not as one stamp repeated */
-  .travel .print.right {
-    top: clamp(7.5px, 0.489vw + 1.89px, 16.2px);
-    transform: rotate(9deg);
-    -webkit-mask-position: right center;
-            mask-position: right center;
-  }
   .mob {
     pointer-events: auto;
     width: var(--card-w); text-align: center;
   }
-  /* the charge wrapper wears the whole card face, so an attack run moves the card and not just what is
-     drawn inside it. The shell above keeps the slot: size, place in the row and the reads pinned to it. */
-  .mob .charge {
-    --lunge: 1;
-    width: 100%; min-height: var(--plate-h); display: flex; flex-direction: column; padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); border-radius: 12px;
-    background: var(--glass); border: 1px solid var(--edge); box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
-  }
-  /* the body fills the card face top to bottom, the way a playing card reads: portrait up top, the
-     fight numbers in the middle, the status line pinned to the foot */
-  .mob .art { display: flex; flex-direction: column; align-items: center; flex: 1; }
-  /* the fight numbers hug the foot of the card: everything from the first bar down sits on the bottom,
-     the portrait and the name keep the head, and the face padding is the breathing room */
-  .mob .art > span.mobbar:first-of-type { margin-top: auto; }
-  /* the body the next swing waits on: a lit edge plus a pair of crop marks, steady while it stands in front —
-     the struck plate's coloured rim still owns the moment the blow actually lands. The marks are the read that
-     survives an elite or a boss border, which out-ranks the edge colour on the same plate. */
-  .mob.front .charge {
-    border-color: color-mix(in srgb, var(--edge) 20%, var(--text));
-    box-shadow: 0 8px 22px rgba(0, 0, 0, .45), 0 0 clamp(12.5px, 0.815vw + 3.15px, 27px) color-mix(in srgb, var(--text) 16%, transparent) inset;
-  }
-  .mob.front .charge::before, .mob.front .charge::after {
-    content: ''; position: absolute; width: var(--icon-sm); height: var(--icon-sm); pointer-events: none;
-    border: 2.5px solid color-mix(in srgb, var(--text) 90%, transparent);
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .85));
-  }
-  .mob.front .charge::before { top: clamp(-13.5px, -0.407vw - 1.57px, -6.25px); left: clamp(-13.5px, -0.407vw - 1.57px, -6.25px); border-right: 0; border-bottom: 0; border-top-left-radius: 9px; }
-  .mob.front .charge::after { bottom: clamp(-13.5px, -0.407vw - 1.57px, -6.25px); right: clamp(-13.5px, -0.407vw - 1.57px, -6.25px); border-left: 0; border-top: 0; border-bottom-right-radius: 9px; }
-  .mob .portrait, .self-plate .portrait { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
   .mob-name { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 3px 0 0; font-size: var(--font-xs); }
-  .mob-name .tier-mark { width: var(--icon-sm); height: var(--icon-sm); }
-  .mob .body { margin: 0; font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px); }
   .mobbar { display: block; position: relative; width: 100%; height: var(--bar-h); margin: 4px 0 3px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .09); }
   /* the figure sits in the bar the way the dock's own gauges read: centred, tabular, stroked off the fill */
   .mobbar b {
@@ -3143,20 +3033,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
   }
   /* The ramp is stretched over the whole track instead of squeezed into the fill: `--w` is the fraction the
-     bar reached, so a body's last health shows the hot end of its own colour. Across a group of plates that
-     is one red signal read before any digit is looked at. The slide is the sim's own step carried between
-     the two seconds it lands in — damage reads as travel, not as a strobe. */
-  .mobbar i, .mini-bar i, .target-hp i {
+     bar reached, so a body's last health shows the hot end of its own colour. The slide is the sim's own
+     step carried between the two seconds it lands in. */
+  .mini-bar i, .target-hp i {
     background-size: calc(100% / max(var(--w, 1), .001)) 100%;
     transition: width .22s ease-out;
   }
-  .mobbar i { display: block; height: 100%; border-radius: 999px; background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
-  .mob .chips { display: flex; flex-wrap: wrap; gap: 1px var(--spacing-xs); justify-content: center; margin: 4px 0 0; font-size: var(--font-xs); color: var(--dim); }
   .curses { margin: 3px 0 0; font-size: var(--font-xs); color: var(--curse); min-height: var(--icon-xs); }
-  .mob.elite .charge { border-color: var(--elite); }
-  .mob.elite .mob-name { color: var(--elite-ink); }
-  .mob.boss .charge { border-color: var(--boss); }
-  .mob.boss .mob-name { color: var(--boss-ink); }
   .element-list { display: flex; flex-wrap: wrap; gap: 2px var(--spacing-xs); justify-content: center; margin: 4px 0 0; }
   .element-label { display: inline-flex; align-items: center; gap: 3px; font-size: var(--font-xs); color: var(--dim); }
   .element-label img { width: var(--icon-xs); height: var(--icon-xs); object-fit: contain; flex: none; }
@@ -3171,26 +3054,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     position: absolute; bottom: calc(var(--orb-cast) * 2 + 3px + var(--spacing-sm) + var(--bar-h) + var(--screen-pad)); left: 50%; transform: translateX(-50%); z-index: 2;
     width: var(--card-w); min-height: var(--plate-h); text-align: center; pointer-events: none;
   }
-  /* the cardface carries the paint, so every answer moves the whole card: the root keeps the slot only.
-       The face is the hub's own avatar read — a round portrait on a dark plinth, the pools under it */
-  .self-plate .cardface {
-    min-height: var(--plate-h); display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-    padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); border-radius: clamp(10px, 0.75vw, 16px);
-    background: linear-gradient(180deg, rgba(23, 29, 40, .62), rgba(8, 11, 16, .78));
-    border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
-    box-shadow: 0 6px 22px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
-  }
-  /* the player's own vitals hug the same foot: the first bar carries the group down */
-  .self-plate .art { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; flex: 1; gap: 4px; }
-  .self-plate .art > span.mobbar:first-of-type { margin-top: auto; }
-  .self-plate .portrait {
-    width: var(--icon-xl); height: var(--icon-xl); border-radius: 50%;
-    border: 2px solid var(--gold); background: var(--glass); padding: var(--spacing-xs);
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, .55), 0 2px 10px rgba(0, 0, 0, .5);
-  }
-  /* Energy Shield sits above HP here exactly as it does in the dock, and only while the pool is there */
-  .mobbar.es i { background-image: linear-gradient(90deg, var(--es), var(--es-lit)); }
-  .mobbar.mana i { background-image: linear-gradient(90deg, var(--mana), var(--mana-lit)); }
 
   /* bottom-centre: the cast order as a row of equal orbs, one per slot, and the press that opens the
      Skills screen trailing the row. Read-only on the field. */
@@ -3219,7 +3082,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     border-radius: 50%; display: grid; place-items: center;
     background:
       radial-gradient(circle at 50% 28%, rgba(255, 255, 255, .1), transparent 56%),
-      linear-gradient(180deg, #242e3c, #10151d);
+      linear-gradient(180deg, var(--orb-top), var(--orb-floor));
     border: 1px solid rgba(255, 255, 255, .2); backdrop-filter: blur(6px);
     /* a dark separation ring under the lit rim keeps the edge crisp against the pale map behind it */
     box-shadow: 0 0 0 1px rgba(0, 0, 0, .65), 0 3px 10px rgba(0, 0, 0, .5), inset 0 2px 4px rgba(255, 255, 255, .07), inset 0 -6px 12px rgba(0, 0, 0, .5);
@@ -3243,10 +3106,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .cast.filler { border-color: rgba(255, 255, 255, .18); }
   .cast small {
     position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%;
-    background: rgba(6, 8, 11, .68); font-size: max(var(--font-xs), calc(var(--orb) * .3)); color: var(--gold-lit);
-    font-variant-numeric: tabular-nums;
+    background: none; font-size: max(var(--font-xs), calc(var(--orb) * .3)); color: var(--gold-lit);
+    font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
   }
-  .cast b { position: absolute; top: clamp(-8.1px, -0.244vw - 0.94px, -3.75px); left: clamp(-2.7px, -0.082vw - 0.32px, -1.25px); font-size: var(--font-xs); color: var(--dim); }
+  /* the cooling dial: the dark wedge is what is left of the cooldown, sweeping off clockwise from the top */
+  .cast .sweep {
+    position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+    background: conic-gradient(from -90deg, transparent 0 var(--p), rgba(6, 8, 11, .66) var(--p) 100%);
+  }
+  .cast b { position: absolute; top: clamp(-8px, -0.244vw - 1px, -4px); left: clamp(-3px, -0.082vw - 0px, -1px); font-size: var(--font-xs); color: var(--dim); }
 
   /* bottom-right: the main hub — one small card in the rail's own face, holding three separate
      tab buttons (bags, skills, the character sheet) in the same icon-over-caption language the
@@ -3267,13 +3135,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .menuring .tab { min-width: var(--box-110); }
   /* map focus folds the fight down onto the log: this compact card sits bottom-left over the field */
   .mob-mini {
-    position: absolute; left: var(--screen-pad); bottom: clamp(55px, 3.586vw + 13.86px, 118.8px); width: min(var(--box-560), 46%); z-index: 3;
+    position: absolute; left: var(--screen-pad); bottom: clamp(55px, 3.586vw + 14px, 119px); width: min(var(--box-560), 46%); z-index: 3;
     display: flex; flex-wrap: wrap; align-items: center; gap: 3px var(--spacing-sm);
     padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--edge); border-radius: 10px; text-align: left;
     background: var(--glass); backdrop-filter: blur(6px); cursor: pointer;
   }
   .mob-mini:hover, .mob-mini:focus-visible { border-color: var(--gold); }
-  .mini-tag { font-size: var(--font-xs); letter-spacing: clamp(1.25px, 0.082vw + 0.32px, 2.7px); text-transform: uppercase; color: var(--mob); }
+  .mini-tag { font-size: var(--font-xs); letter-spacing: clamp(1px, 0.082vw + 0px, 3px); text-transform: uppercase; color: var(--mob); }
   .mini-mob { display: inline-flex; align-items: center; gap: 4px; }
   .mini-mob img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .mini-mob.elite { color: var(--elite-ink); }
@@ -3314,7 +3182,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     background: var(--hud-face);
     border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--edge));
     box-shadow: 0 4px 14px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06);
-    font-size: var(--font-xs); letter-spacing: clamp(1px, 0.065vw + 0.25px, 2.16px); text-transform: uppercase;
+    font-size: var(--font-xs); letter-spacing: clamp(1px, 0.065vw + 0px, 2px); text-transform: uppercase;
     color: var(--gold); white-space: nowrap;
   }
   .zone-tag::before { content: '◆'; font-size: var(--font-xs); color: var(--gold); align-self: center; }
@@ -3330,7 +3198,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .target-name { margin: 0; font-size: var(--font-xs); color: var(--text); white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, .95); }
   .target-name {
     display: inline-flex; align-items: center; gap: var(--spacing-xs);
-    text-transform: uppercase; letter-spacing: clamp(1px, 0.065vw + 0.25px, 2.16px);
+    text-transform: uppercase; letter-spacing: clamp(1px, 0.065vw + 0px, 2px);
     padding: 2px var(--spacing-sm); border-radius: clamp(6px, 0.65vw, 12px);
     background: var(--hud-face);
     border: 1px solid color-mix(in srgb, var(--gold) 42%, var(--edge));
@@ -3371,12 +3239,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .combatlog p {
     margin: 0; padding: 2px var(--spacing-xs); font-size: var(--font-xs); color: var(--dim);
     background: linear-gradient(90deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .3) 78%, transparent);
-    border-radius: clamp(5px, 0.326vw + 1.26px, 10.8px);
+    border-radius: clamp(5px, 0.326vw + 1px, 11px);
     opacity: calc(1 - var(--age, 0) * .14);
     overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
   }
   .combatlog p.gold { color: var(--gold); }
   .combatlog p.good { color: var(--good-lit); }
+  /* the chronicle's channels: the only pressable things in a read that takes no press, so they are
+     lifted back onto the pointer while the lines themselves stay passive */
+  .chattabs { pointer-events: auto; display: flex; gap: 3px; margin-bottom: 1px; }
+  .chattabs button {
+    padding: 1px var(--spacing-xs); font-size: var(--font-xs); border-radius: 999px;
+    background: rgba(0, 0, 0, .5); border: 1px solid var(--edge); color: var(--dim);
+  }
+  .chattabs button.active { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
 
   /* the floor strip: the run's one bar pinned to the frame's bottom edge — the level and how far into
        it on the left, the track carrying its own figure, the run clock and its kills on the right */
@@ -3427,7 +3303,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .tab {
     position: relative; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     min-width: var(--icon-lg); padding: 2px var(--spacing-xs);
-    border-radius: clamp(6px, 0.652vw + 2.52px, 12px); border: 1px solid transparent; background: none; color: var(--dim);
+    border-radius: clamp(6px, 0.652vw + 3px, 12px); border: 1px solid transparent; background: none; color: var(--dim);
     transition: background .15s ease, color .15s ease, border-color .15s ease;
   }
   .tab img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; opacity: .82; transition: transform .15s ease; }
@@ -3435,7 +3311,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .tab .cap { font-size: var(--font-xs); line-height: 1; text-transform: capitalize; }
   .tab .count {
     position: absolute; top: 0; right: 0; min-width: var(--icon-xs); padding: 0 3px;
-    border-radius: 999px; background: linear-gradient(180deg, var(--hot), #a33428); border: 1px solid rgba(0, 0, 0, .45);
+    border-radius: 999px; background: linear-gradient(180deg, var(--hot), var(--hot-deep)); border: 1px solid rgba(0, 0, 0, .45);
     color: #fff; font-size: var(--font-xs); font-variant-numeric: tabular-nums; text-align: center;
   }
   .tab:hover { color: var(--text); border-color: var(--edge); background: rgba(255, 255, 255, .04); }
@@ -3456,7 +3332,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     display: grid; grid-template-columns: repeat(3, minmax(var(--box-110), 1fr)); gap: 2px;
     padding: var(--spacing-sm);
     background: var(--glass); backdrop-filter: blur(6px);
-    border: 1px solid var(--edge); border-radius: clamp(8px, 0.489vw + 1.89px, 16.2px);
+    border: 1px solid var(--edge); border-radius: clamp(8px, 0.489vw + 2px, 16px);
     box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
   }
   .moreitem {
@@ -3485,10 +3361,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      character's own bag the narrower one — then the bench drawer under them, PoE-style */
   .poewin { display: grid; grid-template-columns: 1.25fr 1fr; gap: var(--spacing-sm); align-items: start; min-height: 0; }
   .poecol { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
-  .poecol h3 { margin: 0; font-size: var(--font-xs); color: var(--dim); letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px); text-transform: uppercase; }
+  .poecol h3 { margin: 0; font-size: var(--font-xs); color: var(--dim); letter-spacing: clamp(1px, 0.049vw + 0px, 2px); text-transform: uppercase; }
   .bagshell.poecol { grid-template-columns: 1fr; }
   .poecol .bagcats { flex-direction: row; flex-wrap: wrap; }
   .benchseg { margin: var(--spacing-sm) 0 var(--spacing-xs); max-width: max-content; }
+  .sheettabs { margin: 0 0 var(--spacing-sm); max-width: max-content; }
   .invbody .seg button:disabled { opacity: .45; }
   /* the equip margin reads in the pile's own tool row now that the tabs own the rail */
   .bagtools .margin { display: inline-flex; align-items: center; gap: 4px; font-size: var(--font-xs); color: var(--dim); }
@@ -3562,7 +3439,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   /* 1024-1279: the two side reads stop sharing the middle with the mob plates */
   @media (max-width: 1279px) {
-    .field { inset: clamp(82.5px, 5.379vw + 20.79px, 178.2px) clamp(clamp(187.5px, 12.225vw + 47.25px, 405px), 23vw, clamp(237.5px, 15.485vw + 59.85px, 513px)) clamp(55px, 3.586vw + 13.86px, 118.8px) calc(var(--box-100) + var(--screen-pad) * 3); }
+    .field { inset: clamp(82px, 5.379vw + 21px, 178px) clamp(clamp(188px, 12.225vw + 47px, 405px), 23vw, clamp(238px, 15.485vw + 60px, 513px)) clamp(55px, 3.586vw + 14px, 119px) calc(var(--box-100) + var(--screen-pad) * 3); }
     .mob-mini { width: min(var(--box-440), 42%); }
     .chip.status { display: none; }
     .dock { width: min(var(--box-520), 50%); }
@@ -3579,24 +3456,24 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .field-side { right: var(--screen-pad); bottom: calc(var(--hub-h) + var(--screen-pad) * 2); left: auto; transform: none; align-items: flex-end; }
   /* the character's own column is anchored to the card it belongs to: it rises from just above the
      self-plate's top edge, so its place follows the plate wherever the frame puts it */
-  .self-side { left: 50%; bottom: calc(100% + clamp(5px, 0.326vw + 1.26px, 10.8px)); transform: translateX(-50%); align-items: center; }
+  .self-side { left: 50%; bottom: calc(100% + clamp(5px, 0.326vw + 1px, 11px)); transform: translateX(-50%); align-items: center; }
   .fx {
     --lane: 0;
     font-family: var(--num);
     font-size: var(--font-sm);
     font-weight: 600;
     color: var(--fx, var(--text));
-    text-shadow: 0 1px 0 rgba(0, 0, 0, .85), 0 clamp(1.25px, 0.082vw + 0.32px, 2.7px) clamp(4.25px, 0.277vw + 1.07px, 9.18px) rgba(0, 0, 0, .7);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .85), 0 clamp(1px, 0.082vw + 0px, 3px) clamp(4px, 0.277vw + 1px, 9px) rgba(0, 0, 0, .7);
     animation: fx-rise 1.5s cubic-bezier(.2, .6, .3, 1) forwards;
     white-space: nowrap;
   }
   .fx-hit { font-size: var(--font-md); -webkit-text-stroke: .45px currentColor; }
-  .fx-hit.crit { font-size: var(--font-lg); letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px); -webkit-text-stroke-width: .8px; animation: fx-crit 1.9s cubic-bezier(.15, .8, .3, 1) forwards; }
+  .fx-hit.crit { font-size: var(--font-lg); letter-spacing: clamp(0px, 0.016vw + 0px, 1px); -webkit-text-stroke-width: .8px; animation: fx-crit 1.9s cubic-bezier(.15, .8, .3, 1) forwards; }
   .fx-proc, .fx-block, .fx-kill, .fx-cast, .fx-travel, .fx-warp, .fx-sell, .fx-drop, .fx-craft, .fx-taken, .fx-buff {
     font-family: var(--ui);
     font-size: var(--font-xs);
     text-transform: uppercase;
-    letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px);
+    letter-spacing: clamp(1px, 0.049vw + 0px, 2px);
     padding: 1px 4px;
     border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
     border-radius: 999px;
@@ -3612,57 +3489,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .flash {
     position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
     border: 1px solid var(--fx, var(--edge));
-    box-shadow: 0 0 clamp(6.25px, 0.407vw + 1.57px, 13.5px) color-mix(in srgb, var(--fx, var(--text)) 60%, transparent) inset;
+    box-shadow: 0 0 clamp(6px, 0.407vw + 2px, 14px) color-mix(in srgb, var(--fx, var(--text)) 60%, transparent) inset;
     animation: fx-flash .32s ease-out forwards;
-  }
-  /* The figure a body wears, stamped on the card's top-right corner above its frame. A body pops one
-     figure per landed blow — a cut or a burst full-size, a status tick small beside it — each rising away
-     on its own life, so a plate shows what was done to it and never a sum. Set large and outlined on all
-     four sides so a figure reads over any portrait behind it. */
-  .mob .plate-fx, .self-plate .plate-fx {
-    position: absolute; left: auto; right: clamp(-9.46px, -0.285vw - 1.1px, -4.38px); top: clamp(-29.7px, -0.896vw - 3.47px, -13.75px); z-index: 3; pointer-events: none;
-    display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 1px;
-  }
-  /* one figure per landed blow on a mob plate: a cut or a burst rises full-size off the card, a status
-     tick beside it small — each keyed on its own event, so a burst reads as a shower rather than a sum.
-     The figure is white ink on its own dark rim with the Element's bloom behind it, so it reads over any
-     portrait the way a hub field prints its damage */
-  .plate-fx .pop {
-    font-size: var(--font-lg);
-    font-weight: 700;
-    -webkit-text-stroke: 1px rgba(6, 8, 11, .92);
-    color: var(--text);
-    text-shadow:
-      0 2px 0 rgba(6, 8, 11, .9), 0 -1px 0 rgba(6, 8, 11, .9), 1.5px 0 0 rgba(6, 8, 11, .85), -1.5px 0 0 rgba(6, 8, 11, .85),
-      0 0 clamp(8.75px, 0.57vw + 2.2px, 18.9px) color-mix(in srgb, var(--fx, var(--text)) 40%, transparent);
-    animation: fx-rise .95s cubic-bezier(.18, .78, .3, 1) forwards;
-  }
-  .plate-fx .pop.crit {
-    font-size: var(--font-xl);
-    letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px);
-    -webkit-text-stroke-width: 1.3px;
-    color: var(--gold-lit);
-    text-shadow:
-      0 2px 0 rgba(6, 8, 11, .92), 0 -1px 0 rgba(6, 8, 11, .92), 1.5px 0 0 rgba(6, 8, 11, .88), -1.5px 0 0 rgba(6, 8, 11, .88),
-      0 0 clamp(10px, 0.652vw + 2.52px, 21.6px) color-mix(in srgb, var(--gold) 55%, transparent);
-    animation: fx-crit 1.15s cubic-bezier(.14, .8, .28, 1) forwards;
-  }
-  .plate-fx .pop.dot { font-size: var(--font-sm); color: var(--fx, var(--text)); }
-  /* pops from one tick cascade instead of landing all at once: the lane each event already carries
-     staggers the mount, and the both-fill holds the first frame through the wait so nothing flashes */
-  .plate-fx .pop { animation-fill-mode: both; animation-delay: calc(var(--lane) * 70ms); }
-  /* a defense word pops like a number but reads as one: uppercase chip face in the colour of what
-     caused it, small beside the figures, never taking the rim */
-  .plate-fx .pop.word {
-    font-family: var(--ui);
-    font-size: var(--font-xs);
-    text-transform: uppercase;
-    letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px);
-    padding: 1px 4px;
-    border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--fx, var(--panel)) 14%, transparent);
-    animation: fx-rise 1.1s cubic-bezier(.2, .6, .3, 1) forwards;
   }
   /* ── the blow, the press and the gain ─────────────────────────────────────────────────────────
      A number says how much; these say that something happened to a body. Each one is mounted by an event
@@ -3675,9 +3503,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* a hit flinches away from the blow: a mob struck from below jolts up, the character struck from above
      ducks down. Same word, opposite directions, so no one reads a hit taken as a hit dealt */
   .art.knock { animation: fx-knock .3s cubic-bezier(.2, .8, .3, 1); }
-  .self-plate .cardface.knock { animation: fx-flinch-down .3s cubic-bezier(.2, .8, .3, 1); }
-  /* a landed swing surges the striker's own card up toward its victim — a lean, not a leap */
-  .self-plate .cardface.lunge { animation: fx-surge .35s cubic-bezier(.3, .7, .3, 1); }
   /* a mob's own attack run rides the inner wrapper, so it composes with the outer shake: being hit
      and hitting back are two facts and the card plays both */
   .charge.lunge { animation: fx-lunge .45s cubic-bezier(.3, .7, .3, 1); }
@@ -3685,23 +3510,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      own card rises to meet it — the two meet in the middle rather than one running the whole way */
   .charge.lunge.clash { animation: fx-clash .45s cubic-bezier(.3, .7, .3, 1); }
   .self-plate.clash { animation: fx-meet .45s cubic-bezier(.3, .7, .3, 1); }
-  /* a swing draws the shelf's crossed swords across the body it cut, turned through the strike. A mask
-     contributes only alpha, so the Element that carried the hit paints the blade. */
-  .mob .arc {
-    position: absolute; left: 50%; top: clamp(23.75px, 1.548vw + 5.98px, 51.3px); z-index: 4; pointer-events: none;
-    width: var(--icon-xl); height: var(--icon-xl); margin: var(--x-pull-arc) 0 0 var(--x-pull-arc);
-    background: var(--fx, var(--text));
-    -webkit-mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
-            mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
-    animation: fx-arc .26s ease-out forwards;
-  }
-  /* a press lands as a burst and not a cut, so the two halves of a build read apart before a number is read */
-  .mob .burst {
-    position: absolute; left: 50%; top: clamp(23.75px, 1.548vw + 5.98px, 51.3px); z-index: 4; pointer-events: none;
-    width: var(--icon-lg); height: var(--icon-lg); margin: var(--x-pull-burst) 0 0 var(--x-pull-burst);
-    border: 2px solid var(--fx, var(--text)); border-radius: 50%;
-    animation: fx-burst .34s ease-out forwards;
-  }
   /* the row that fired, on the bar that lists the order — the one place that can name the press without
      printing it twice. `ready`'s gold ring means pressable now; this ring is the Element that went out. */
   .cast .flare {
@@ -3721,7 +3529,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .fx-buff::before, .fx-heal::before {
     content: '';
-    display: inline-block; width: var(--icon-xs); height: var(--icon-xs); margin-right: 3px; vertical-align: clamp(-2.16px, -0.065vw - 0.25px, -1px);
+    display: inline-block; width: var(--icon-xs); height: var(--icon-xs); margin-right: 3px; vertical-align: clamp(-2px, -0.065vw - 0px, -1px);
     background: var(--fx, var(--text));
     -webkit-mask-size: contain; mask-size: contain;
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
@@ -3738,7 +3546,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* the frame's own beat: a level borrows the title's line for one rise and hands it back */
   .levelup {
     position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); left: 50%; z-index: 8; pointer-events: none;
-    margin: 0; white-space: nowrap; font-family: var(--num); font-size: var(--font-md); letter-spacing: clamp(1.5px, 0.098vw + 0.38px, 3.24px);
+    margin: 0; white-space: nowrap; font-family: var(--num); font-size: var(--font-md); letter-spacing: clamp(2px, 0.098vw + 0px, 3px);
     color: var(--fx, var(--gold)); text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
     animation: fx-level 1.5s cubic-bezier(.2, .7, .3, 1) forwards;
   }
@@ -3746,21 +3554,21 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      from every side, this one names its direction */
   @keyframes fx-knock {
     0% { transform: none; }
-    25% { transform: translateY(clamp(-14.86px, -0.448vw - 1.73px, -6.88px)) scale(.98); }
-    55% { transform: translateY(clamp(1.5px, 0.098vw + 0.38px, 3.24px)); }
+    25% { transform: translateY(clamp(-15px, -0.448vw - 2px, -7px)) scale(.98); }
+    55% { transform: translateY(clamp(2px, 0.098vw + 0px, 3px)); }
     100% { transform: none; }
   }
   /* the downward twin, for the card struck from above */
   @keyframes fx-flinch-down {
     0% { transform: none; }
-    25% { transform: translateY(clamp(6.88px, 0.448vw + 1.73px, 14.85px)) scale(.98); }
-    55% { transform: translateY(clamp(-3.24px, -0.098vw - 0.38px, -1.5px)); }
+    25% { transform: translateY(clamp(7px, 0.448vw + 2px, 15px)) scale(.98); }
+    55% { transform: translateY(clamp(-3px, -0.098vw - 0px, -2px)); }
     100% { transform: none; }
   }
   /* a landed swing surges its own card a short way up toward the victim */
   @keyframes fx-surge {
     0% { transform: none; }
-    30% { transform: translateY(clamp(-13.5px, -0.407vw - 1.57px, -6.25px)) scale(1.03); }
+    30% { transform: translateY(clamp(-14px, -0.407vw - 2px, -6px)) scale(1.03); }
     100% { transform: none; }
   }
   /* the attack run, Hearthstone-style: the body crouches, charges down onto the player's own
@@ -3768,18 +3576,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      reads it as a hit taken */
   @keyframes fx-lunge {
     0% { transform: none; }
-    18% { transform: translateY(clamp(-9.46px, -0.285vw - 1.1px, -4.38px)) scale(.98); }
-    45% { transform: translateY(calc(var(--lunge) * clamp(43.75px, 2.853vw + 11.03px, 94.5px))) scale(1.15); }
-    62% { transform: translateY(calc(var(--lunge) * clamp(38.75px, 2.526vw + 9.76px, 83.7px))) scale(1.12); }
+    18% { transform: translateY(clamp(-9px, -0.285vw - 1px, -4px)) scale(.98); }
+    45% { transform: translateY(calc(var(--lunge) * clamp(44px, 2.853vw + 11px, 94px))) scale(1.15); }
+    62% { transform: translateY(calc(var(--lunge) * clamp(39px, 2.526vw + 10px, 84px))) scale(1.12); }
     100% { transform: none; }
   }
   /* the halfway run and the rise that answers it: the same crouch-charge-impact shape on a shorter
      travel, so the pair visibly meets in the middle */
   @keyframes fx-clash {
     0% { transform: none; }
-    18% { transform: translateY(clamp(-5.4px, -0.163vw - 0.63px, -2.5px)) scale(.99); }
-    45% { transform: translateY(calc(var(--lunge) * clamp(20px, 1.304vw + 5.04px, 43.2px))) scale(1.08); }
-    62% { transform: translateY(calc(var(--lunge) * clamp(17.5px, 1.141vw + 4.41px, 37.8px))) scale(1.06); }
+    18% { transform: translateY(clamp(-5px, -0.163vw - 1px, -2px)) scale(.99); }
+    45% { transform: translateY(calc(var(--lunge) * clamp(20px, 1.304vw + 5px, 43px))) scale(1.08); }
+    62% { transform: translateY(calc(var(--lunge) * clamp(18px, 1.141vw + 4px, 38px))) scale(1.06); }
     100% { transform: none; }
   }
   /* the rise runs on the plate root — the face lives there, so answering it on the inner art
@@ -3787,15 +3595,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      carried through every stop so the rise never jumps sideways */
   @keyframes fx-meet {
     0% { transform: translateX(-50%); }
-    18% { transform: translateX(-50%) translateY(clamp(2.5px, 0.163vw + 0.63px, 5.4px)) scale(.99); }
-    45% { transform: translateX(-50%) translateY(clamp(-43.2px, -1.304vw - 5.04px, -20px)) scale(1.08); }
-    62% { transform: translateX(-50%) translateY(clamp(-37.8px, -1.141vw - 4.41px, -17.5px)) scale(1.06); }
+    18% { transform: translateX(-50%) translateY(clamp(2px, 0.163vw + 1px, 5px)) scale(.99); }
+    45% { transform: translateX(-50%) translateY(clamp(-43px, -1.304vw - 5px, -20px)) scale(1.08); }
+    62% { transform: translateX(-50%) translateY(clamp(-38px, -1.141vw - 4px, -18px)) scale(1.06); }
     100% { transform: translateX(-50%); }
   }
   @keyframes fx-arc {
-    0% { opacity: 0; transform: translate(clamp(-24.3px, -0.733vw - 2.83px, -11.25px), clamp(8.75px, 0.57vw + 2.2px, 18.9px)) rotate(-42deg) scale(.7); }
+    0% { opacity: 0; transform: translate(clamp(-24px, -0.733vw - 3px, -11px), clamp(9px, 0.57vw + 2px, 19px)) rotate(-42deg) scale(.7); }
     35% { opacity: .95; }
-    100% { opacity: 0; transform: translate(clamp(11.25px, 0.733vw + 2.83px, 24.3px), clamp(-18.9px, -0.57vw - 2.2px, -8.75px)) rotate(16deg) scale(1.12); }
+    100% { opacity: 0; transform: translate(clamp(11px, 0.733vw + 3px, 24px), clamp(-19px, -0.57vw - 2px, -9px)) rotate(16deg) scale(1.12); }
   }
   @keyframes fx-burst {
     0% { opacity: 0; transform: scale(.35); }
@@ -3808,53 +3616,53 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     100% { opacity: 0; transform: scale(1); }
   }
   @keyframes fx-buff {
-    0% { opacity: 0; transform: scale(.6) translateY(clamp(5px, 0.326vw + 1.26px, 10.8px)); }
+    0% { opacity: 0; transform: scale(.6) translateY(clamp(5px, 0.326vw + 1px, 11px)); }
     25% { opacity: 1; transform: scale(1.08); }
-    100% { opacity: 0; transform: translateY(clamp(-48.6px, -1.467vw - 5.67px, -22.5px)) scale(1); }
+    100% { opacity: 0; transform: translateY(clamp(-49px, -1.467vw - 6px, -22px)) scale(1); }
   }
   @keyframes fx-heal {
-    0% { opacity: 0; transform: translateY(clamp(6.25px, 0.407vw + 1.57px, 13.5px)) scale(.9); }
+    0% { opacity: 0; transform: translateY(clamp(6px, 0.407vw + 2px, 14px)) scale(.9); }
     20% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(clamp(-45.9px, -1.385vw - 5.36px, -21.25px)) scale(1); }
+    100% { opacity: 0; transform: translateY(clamp(-46px, -1.385vw - 5px, -21px)) scale(1); }
   }
   @keyframes fx-level {
-    0% { opacity: 0; transform: translateX(-50%) translateY(clamp(8.75px, 0.57vw + 2.2px, 18.9px)) scale(.7); }
+    0% { opacity: 0; transform: translateX(-50%) translateY(clamp(9px, 0.57vw + 2px, 19px)) scale(.7); }
     18% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.18); }
-    70% { opacity: 1; transform: translateX(-50%) translateY(clamp(-6.76px, -0.204vw - 0.79px, -3.13px)) scale(1); }
-    100% { opacity: 0; transform: translateX(-50%) translateY(clamp(-35.1px, -1.059vw - 4.09px, -16.25px)) scale(1); }
+    70% { opacity: 1; transform: translateX(-50%) translateY(clamp(-7px, -0.204vw - 1px, -3px)) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(clamp(-35px, -1.059vw - 4px, -16px)) scale(1); }
   }
   /* the column figure's arc, staged the MapleStory way (owner ruling): a quick rise, a hold long enough
      to read, then the fade — so the number owns its own life on screen and is never cut short while the
      ring still has room for it */
   @keyframes fx-rise {
-    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(3.75px, 0.244vw + 0.94px, 8.1px)) scale(.55); }
+    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(4px, 0.244vw + 1px, 8px)) scale(.55); }
     14% { opacity: 1; }
-    32% { transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-43.2px, -1.304vw - 5.04px, -20px)) scale(1.08); }
-    60% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-51.3px, -1.548vw - 5.98px, -23.75px)) scale(1); }
-    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-70.2px, -2.119vw - 8.19px, -32.5px)) scale(.96); }
+    32% { transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(-43px, -1.304vw - 5px, -20px)) scale(1.08); }
+    60% { opacity: 1; transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(-51px, -1.548vw - 6px, -24px)) scale(1); }
+    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(-70px, -2.119vw - 8px, -32px)) scale(.96); }
   }
   /* the crit's own stage: a harder slam, a longer hold, a slower let-go */
   @keyframes fx-crit {
-    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(7.5px, 0.489vw + 1.89px, 16.2px)) scale(.5); }
-    18% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-10.8px, -0.326vw - 1.26px, -5px)) scale(1.42); }
-    34% { transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-18.9px, -0.57vw - 2.2px, -8.75px)) scale(1); }
-    64% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-21.6px, -0.652vw - 2.52px, -10px)) scale(1); }
-    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-45.9px, -1.385vw - 5.36px, -21.25px)) scale(.96); }
+    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(8px, 0.489vw + 2px, 16px)) scale(.5); }
+    18% { opacity: 1; transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(-11px, -0.326vw - 1px, -5px)) scale(1.42); }
+    34% { transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(-19px, -0.57vw - 2px, -9px)) scale(1); }
+    64% { opacity: 1; transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(-22px, -0.652vw - 3px, -10px)) scale(1); }
+    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 0.896vw + 3px, 30px) - clamp(41px, 2.689vw + 10px, 89px)), clamp(-46px, -1.385vw - 5px, -21px)) scale(.96); }
   }
   @keyframes fx-proc {
     0% { opacity: 0; transform: scale(.7); }
     30% { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 0; transform: translateY(clamp(-37.8px, -1.141vw - 4.41px, -17.5px)); }
+    100% { opacity: 0; transform: translateY(clamp(-38px, -1.141vw - 4px, -18px)); }
   }
   @keyframes fx-cast {
-    0% { opacity: 0; transform: translateY(clamp(5px, 0.326vw + 1.26px, 10.8px)) skewX(-8deg); }
+    0% { opacity: 0; transform: translateY(clamp(5px, 0.326vw + 1px, 11px)) skewX(-8deg); }
     25% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(clamp(-43.2px, -1.304vw - 5.04px, -20px)); }
+    100% { opacity: 0; transform: translateY(clamp(-43px, -1.304vw - 5px, -20px)); }
   }
   @keyframes fx-drift {
-    0% { opacity: 0; transform: translateX(clamp(-32.4px, -0.978vw - 3.78px, -15px)); }
+    0% { opacity: 0; transform: translateX(clamp(-32px, -0.978vw - 4px, -15px)); }
     20% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(clamp(17.5px, 1.141vw + 4.41px, 37.8px)); }
+    100% { opacity: 0; transform: translateX(clamp(18px, 1.141vw + 4px, 38px)); }
   }
   @keyframes fx-strike {
     0% { opacity: 1; transform: scale(1.25); }
@@ -3867,7 +3675,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* the frame's edge on a hit taken: the same colour rule as the number, one beat wider */
   .veil {
     position: absolute; inset: 0; pointer-events: none;
-    box-shadow: inset 0 0 clamp(62.5px, 4.075vw + 15.75px, 135px) color-mix(in srgb, var(--fx, var(--hp)) 50%, transparent);
+    box-shadow: inset 0 0 clamp(62px, 4.075vw + 16px, 135px) color-mix(in srgb, var(--fx, var(--hp)) 50%, transparent);
     animation: fx-veil .4s ease-out forwards;
   }
   @keyframes fx-veil {
@@ -3888,9 +3696,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   /* 1600 and wider: the room is spent on the plates rather than on empty ground */
   @media (min-width: 1600px) {
-    .field { inset: clamp(75px, 4.89vw + 18.9px, 162px) clamp(clamp(175px, 11.41vw + 44.1px, 378px), 30%, clamp(325px, 21.19vw + 81.9px, 702px)) clamp(87.5px, 5.705vw + 22.05px, 189px); gap: var(--spacing-md); --card-w: var(--box-200); }
-    .mob .charge { padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm); }
-    .mob .portrait, .self-plate .portrait { width: var(--icon-xl); height: var(--icon-xl); }
+    .field { inset: clamp(75px, 4.89vw + 19px, 162px) clamp(clamp(175px, 11.41vw + 44px, 378px), 30%, clamp(325px, 21.19vw + 82px, 702px)) clamp(88px, 5.705vw + 22px, 189px); gap: var(--spacing-md); --card-w: var(--box-200); }
     .dock { width: min(var(--box-720), 40%); }
   }
 </style>

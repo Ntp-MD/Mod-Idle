@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Imprint cage — the stone that carries a Mod's identity, and the verb/target matrix it sits in.
  *
@@ -156,7 +155,7 @@ function checks() {
       // so the rule reads as the family it is: one member across the piece, the Frame line's own
       // sub-Mods counted — a redraw that brings a sibling in beside one the frame carries is the same
       // defect as one that brings two in beside each other.
-      const onPiece = [...takenOf(res.item)].filter((id) => LOOT.STAT_IDS.includes(id));
+      const onPiece = ([...takenOf(res.item)] as string[]).filter((id) => LOOT.STAT_IDS.includes(id));
       if (onPiece.length > 1) im6.push(`a redraw stacked the Stat Mod family: ${onPiece.join(', ')}`);
       if (res.item.lines.length !== p.lines.length) im6.push('a bulk redraw moved the line count');
       if ((res.item.mods_added || 0) !== 0 || res.item.unbound_at_drop !== p.unbound_at_drop) {
@@ -228,7 +227,7 @@ function checks() {
     if (!last.crafted) im9.push('Add did not stamp the line it filled');
     if (rolled.item.lines.slice(0, CRAFT.UNTOUCHABLE).some((l: any) => l.crafted)) im9.push('a head line carries a crafted mark');
     const swapped = CRAFT.replaceLine(rolled.item, rolled.item.lines.length - 1,
-      POOL.find((id: string) => !rolled.item.lines.some((l: any) => l.id === id)), POOL, roll);
+      POOL.find((id: string) => !rolled.item.lines.some((l: any) => l.id === id))!, POOL, roll);
     if (!swapped.ok) im9.push(`Replace refused the crafted line: ${swapped.why}`);
     else if (!swapped.item.lines[swapped.item.lines.length - 1].crafted) im9.push('Replace dropped the crafted mark with the old identity');
     const born = CRAFT.rebirth(swapped.item, POOL, roll);

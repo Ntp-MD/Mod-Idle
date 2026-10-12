@@ -42,6 +42,15 @@
   --boss: #9d3b34;
   --boss-ink: #ff8b7a;
   --curse: #c8a5ff;
+  /* Item rarity: a content ladder for a drop's name, its slot edge and its card header, the way the
+     rank inks above name a body. It is not the highlight system — gold stays you-or-pressable and
+     green stays the better option, so a rarity ink never carries a control's meaning. The rungs are
+     read off the drop itself (quality band, Tier, and whether a Quality stone was spent on it). */
+  --rar-common: #8b96a8;
+  --rar-uncommon: #5fb87a;
+  --rar-rare: #4f8fe0;
+  --rar-epic: #a877e8;
+  --rar-legend: #e0913f;
   --alarm: #ffb3a8;
   --hot: #e2503f;
   --good-lit: #9fe0bb;
@@ -57,6 +66,14 @@
   --ground-3: #181d18;
   --glow-moss: #465c3a;
   --glow-dusk: #304a6c;
+  /* the two recessed plates the HUD's own hardware is cut from — the portrait face and the wheel's orb,
+     each a top-lit dark over its own floor — and the deep end of the accent's gradient, a shade under
+     `--hot` so the count pill's own floor is a token like its top */
+  --face-top: #1c2430;
+  --face-floor: #0d1218;
+  --orb-top: #242e3c;
+  --orb-floor: #10151d;
+  --hot-deep: #a33428;
   /* a recessed floor (an input well, a kbd cap, an empty slot) and the scrollbar's lit thumb */
   --inset: #12151b;
   --bar-2: #2e3742;

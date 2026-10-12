@@ -26,7 +26,8 @@
       "cold",
       "lightning",
       "poison",
-      "chaos"
+      "chaos",
+      "earth"
     ],
     "reservation": {
       "max_pct": 100,
@@ -40,15 +41,13 @@
     },
     "formula": {
       "mana_level_step_pct": 5,
-      "mana_pool_exponent": 0.5,
-      "mana_reference_level": 1,
       "cast_reference": {
         "cdr_pct": 50,
         "ladder_pct": 30
       },
-      "note": "press = (base_flat + (eff/100) x power) x (1 + (skill_level - 1) x level_step_pct/100) - the PoE shape: `base_flat` is the skill own damage at skill level 1 (its identity, the same for every caster), `eff` is the share of the added power line the press receives, so gear scales a row by its effectiveness instead of by a percentage of the finished hit. power = the row basis - phys = the caster finished physical hit, magic = their magic + Element x Alignment/100 (B5). `archetype_bands` is the calibration the pairs were derived from: a row damage per second is set by its archetype and the pinned maximum is the roster own best cooldown row per basis, so the DPS line read back out of the curve does not move while a press reads as a heavy or a light hit. Read by engine/skills.ts `perPress` - the --calc workshop, the attack-table press column and the client casts all call it, so a press is never computed twice. A mana cost is written in one of two forms and the unit is part of it: `N%` charges N% of the usable pool, `N flat` charges N absolute units. A flat cost is the price at skill level 1 and grows on `mana_level_step_pct` per skill level, steeper than the damage ramp so a maxed rotation costs more, and on `(pool / reference pool)^mana_pool_exponent`, so Int and Max Mana gear still set the price. The reference pool is derived at `mana_reference_level`, never typed here.",
+      "note": "press = (base_flat + (eff/100) x power) x (1 + (skill_level - 1) x level_step_pct/100) - the PoE shape: `base_flat` is the skill own damage at skill level 1 (its identity, the same for every caster), `eff` is the share of the added power line the press receives, so gear scales a row by its effectiveness instead of by a percentage of the finished hit. power = the row basis - phys = the caster finished physical hit, magic = their magic + Element x Alignment/100 (B5). `archetype_bands` is the calibration the pairs were derived from: a row damage per second is set by its archetype and the pinned maximum is the roster own best cooldown row per basis, so the DPS line read back out of the curve does not move while a press reads as a heavy or a light hit. Read by engine/skills.ts `perPress` - the --calc workshop, the attack-table press column and the client casts all call it, so a press is never computed twice. A mana cost is typed mana units and the unit word is part of it: `N flat`. That number is the price at skill level 1 and climbs only on `mana_level_step_pct` per skill level, steeper than the damage ramp so a maxed rotation costs more. The pool sets no price: a bigger bar buys more casts, never a cheaper press. The rows were priced against the level-1 caster's own pool, which is derived from `level_gain.mana_base` and `stat.base` on `K.K_INT_MP` and is a pricing basis, never a term of the formula.",
       "archetype_bands": {
-        "note": "The calibration, not a formula: a row damage per second is set by what it is — a slow single-target nuke sits at the top of its power line, an area row pays a penalty for the targets it reaches, a fast filler sits below — and its per-press is then that rate inverted, so a press reads as a heavy or a light hit instead of every row pressing the same. `base_share` is how much of the press is the row own flat (a nuke) versus its effectiveness on the caster power line (a filler). The pinned maximum is the roster own best cooldown row per basis, so the DPS line the curve prices does not move. The cooldown-less beat row keeps its own press.",
+        "note": "Provenance, not a formula: these are the bands the roster's press pairs were derived from — a slow single-target nuke sits at the top of its power line, an area row pays a penalty for the targets it reaches, a fast filler sits below — and each row's per-press is that rate inverted, so a press reads as a heavy or a light hit instead of every row pressing the same. `base_share` is how much of the press is the row's own flat (a nuke) versus its effectiveness on the caster power line (a filler). The pinned maximum is the roster's own best cooldown row per basis, so the DPS line the curve prices does not move. **No formula reads this block and no gate checks it**: the derived numbers live in each row's own `base_flat` / `eff` / cooldown, which is what `perPress` actually spends, so editing a band here changes nothing in the game and the block exists only to record how the pairs were chosen. The cooldown-less beat row keeps its own press.",
         "bands": {
           "nuke": 1,
           "mid": 0.97,
@@ -62,107 +61,127 @@
         }
       },
       "skill_levels": {
-        "note": "One row per skill level: the multiplier a press and an effect carry at that level. `damage_pct` is the ramp the roster always had; `effect_pct` is the lever that used to be absent (a value in a row is its level-1 number, and it climbs with this column). `special_level_effects` lists the effect stats that opt out of the ramp: Energy Absorb interpolates its base toward its cap across the level range, and Ghost Dance counts a charge every N levels, so both already spend skill level and must not be scaled twice. Row 1 is the FLOOR a fresh skill starts on, not the finished value: a skill dropped at level 1 presses a quarter of what it will, and grows into its press as it levels.",
+        "note": "One row per skill level: the multiplier a press and an effect carry at that level. `damage_pct` is the ramp the roster always had; `effect_pct` is the lever that used to be absent (a value in a row is its level-1 number, and it climbs with this column). `special_level_effects` lists the effect stats that opt out of the ramp: Energy Absorb interpolates its base toward its cap across the level range, and Ghost Dance counts a charge every N levels, so both already spend skill level and must not be scaled twice. Row 1 is the FLOOR a fresh skill starts on, not the finished value: a skill dropped at level 1 presses a quarter of what it will, and grows into its press as it levels. `buff_effect_pct` is the buff/aura lever: those rows open at their whole stored value — a dropped buff or aura is usable the moment it lands — and climb to a higher cap than every other effect rides, whole numbers only so a printed rung reads as a percentage and never a fraction.",
         "rows": [
           {
             "level": 1,
             "damage_pct": 25,
-            "effect_pct": 100
+            "effect_pct": 100,
+            "buff_effect_pct": 100
           },
           {
             "level": 2,
             "damage_pct": 30.45,
-            "effect_pct": 101.5
+            "effect_pct": 101.5,
+            "buff_effect_pct": 104
           },
           {
             "level": 3,
             "damage_pct": 35.89,
-            "effect_pct": 103
+            "effect_pct": 103,
+            "buff_effect_pct": 108
           },
           {
             "level": 4,
             "damage_pct": 41.34,
-            "effect_pct": 104.5
+            "effect_pct": 104.5,
+            "buff_effect_pct": 113
           },
           {
             "level": 5,
             "damage_pct": 46.79,
-            "effect_pct": 106
+            "effect_pct": 106,
+            "buff_effect_pct": 117
           },
           {
             "level": 6,
             "damage_pct": 52.24,
-            "effect_pct": 107.5
+            "effect_pct": 107.5,
+            "buff_effect_pct": 121
           },
           {
             "level": 7,
             "damage_pct": 57.68,
-            "effect_pct": 109
+            "effect_pct": 109,
+            "buff_effect_pct": 125
           },
           {
             "level": 8,
             "damage_pct": 63.13,
-            "effect_pct": 110.5
+            "effect_pct": 110.5,
+            "buff_effect_pct": 129
           },
           {
             "level": 9,
             "damage_pct": 68.58,
-            "effect_pct": 112
+            "effect_pct": 112,
+            "buff_effect_pct": 134
           },
           {
             "level": 10,
             "damage_pct": 74.03,
-            "effect_pct": 113.5
+            "effect_pct": 113.5,
+            "buff_effect_pct": 138
           },
           {
             "level": 11,
             "damage_pct": 79.47,
-            "effect_pct": 115
+            "effect_pct": 115,
+            "buff_effect_pct": 142
           },
           {
             "level": 12,
             "damage_pct": 84.92,
-            "effect_pct": 116.5
+            "effect_pct": 116.5,
+            "buff_effect_pct": 146
           },
           {
             "level": 13,
             "damage_pct": 90.37,
-            "effect_pct": 118
+            "effect_pct": 118,
+            "buff_effect_pct": 151
           },
           {
             "level": 14,
             "damage_pct": 95.82,
-            "effect_pct": 119.5
+            "effect_pct": 119.5,
+            "buff_effect_pct": 155
           },
           {
             "level": 15,
             "damage_pct": 101.26,
-            "effect_pct": 121
+            "effect_pct": 121,
+            "buff_effect_pct": 159
           },
           {
             "level": 16,
             "damage_pct": 106.71,
-            "effect_pct": 122.5
+            "effect_pct": 122.5,
+            "buff_effect_pct": 163
           },
           {
             "level": 17,
             "damage_pct": 112.16,
-            "effect_pct": 124
+            "effect_pct": 124,
+            "buff_effect_pct": 167
           },
           {
             "level": 18,
             "damage_pct": 117.61,
-            "effect_pct": 125.5
+            "effect_pct": 125.5,
+            "buff_effect_pct": 172
           },
           {
             "level": 19,
             "damage_pct": 123.05,
-            "effect_pct": 127
+            "effect_pct": 127,
+            "buff_effect_pct": 176
           },
           {
             "level": 20,
             "damage_pct": 128.5,
-            "effect_pct": 128.5
+            "effect_pct": 128.5,
+            "buff_effect_pct": 180
           }
         ],
         "special_level_effects": [
@@ -170,7 +189,12 @@
           "es_absorb_cap",
           "dodge_charges",
           "dodge_charges_per_levels",
-          "dodge_charges_cap"
+          "dodge_charges_cap",
+          "block_charges",
+          "block_charges_per_levels",
+          "block_charges_cap",
+          "dot_sec",
+          "max_hp_pct_damage"
         ]
       }
     }
@@ -195,28 +219,13 @@
   },
   "skills": [
     {
-      "id": "attack.arcane_pulse",
-      "name": "Arcane Pulse",
-      "type": "attack",
-      "group": "magic",
-      "element": "follow",
-      "cd": 0,
-      "mana": "8%",
-      "basis": "magic",
-      "targets": "1/1",
-      "effect": "Uses the weapon Element · the caster's core press: no timer of its own, so mana and the beat are what gate it",
-      "modelled_by": "element",
-      "base_flat": 174.8,
-      "eff": 72.1
-    },
-    {
       "id": "attack.fireball",
       "name": "Fireball",
       "type": "attack",
       "group": "magic",
       "element": "fire",
       "cd": 6,
-      "mana": "14%",
+      "mana": "21 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Single target · applies 2 burn stacks",
@@ -238,7 +247,7 @@
       "group": "magic",
       "element": "fire",
       "cd": 5,
-      "mana": "11%",
+      "mana": "16 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Fast cheap fire bolt · 1 burn stack",
@@ -310,7 +319,7 @@
       "group": "magic",
       "element": "fire",
       "cd": 9,
-      "mana": "15%",
+      "mana": "22 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Single target · 3 burn stacks",
@@ -326,35 +335,13 @@
       "eff": 92.7
     },
     {
-      "id": "attack.scorch",
-      "name": "Scorch Ray",
-      "type": "attack",
-      "group": "magic",
-      "element": "fire",
-      "cd": 7,
-      "mana": "14%",
-      "basis": "magic",
-      "targets": "1/1",
-      "effect": "Heavy single hit · 2 burn stacks",
-      "effects": [
-        {
-          "stat": "burn_stacks",
-          "op": "add_flat",
-          "value": 2,
-          "subject": "target"
-        }
-      ],
-      "base_flat": 445.1,
-      "eff": 96.16
-    },
-    {
       "id": "attack.frost_bolt",
       "name": "Frost Bolt",
       "type": "attack",
       "group": "magic",
       "element": "cold",
       "cd": 5,
-      "mana": "11%",
+      "mana": "16 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Fast cold bolt · 1 chill",
@@ -371,7 +358,7 @@
       "group": "magic",
       "element": "cold",
       "cd": 6,
-      "mana": "13%",
+      "mana": "19 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Single target · 1 chill",
@@ -388,7 +375,7 @@
       "group": "magic",
       "element": "cold",
       "cd": 8,
-      "mana": "14%",
+      "mana": "21 flat",
       "basis": "magic",
       "targets": "1/2",
       "effect": "2 hits at 55% each · chills the target",
@@ -455,7 +442,7 @@
       "group": "magic",
       "element": "cold",
       "cd": 8,
-      "mana": "14%",
+      "mana": "21 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "+25% damage if the target is already chilled",
@@ -479,7 +466,7 @@
       "group": "magic",
       "element": "lightning",
       "cd": 9,
-      "mana": "16% (AoE ×1.5)",
+      "mana": "24 flat (AoE ×1.5)",
       "basis": "magic",
       "targets": "3/1",
       "effect": "Arcs to 3 targets · shocks all hit",
@@ -497,7 +484,7 @@
       "group": "magic",
       "element": "lightning",
       "cd": 5,
-      "mana": "12%",
+      "mana": "18 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Fast single bolt · 1 shock",
@@ -514,7 +501,7 @@
       "group": "magic",
       "element": "lightning",
       "cd": 4,
-      "mana": "9%",
+      "mana": "13 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Cheapest fastest press · 1 shock",
@@ -566,7 +553,7 @@
       "group": "magic",
       "element": "lightning",
       "cd": 10,
-      "mana": "15% (AoE ×1.5)",
+      "mana": "22 flat (AoE ×1.5)",
       "basis": "magic",
       "targets": "3/1",
       "effect": "Field around self · shocks all hit",
@@ -584,7 +571,7 @@
       "group": "magic",
       "element": "poison",
       "cd": 6,
-      "mana": "13%",
+      "mana": "19 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Single target · 2 poison stacks",
@@ -606,7 +593,7 @@
       "group": "magic",
       "element": "poison",
       "cd": 9,
-      "mana": "16% (AoE ×1.5)",
+      "mana": "24 flat (AoE ×1.5)",
       "basis": "magic",
       "targets": "3/1",
       "effect": "Spray · 1 poison stack to all hit",
@@ -631,7 +618,7 @@
       "group": "magic",
       "element": "poison",
       "cd": 7,
-      "mana": "14%",
+      "mana": "21 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Single target · 3 poison stacks",
@@ -672,35 +659,13 @@
       "eff": 108.77
     },
     {
-      "id": "attack.blight",
-      "name": "Blight",
-      "type": "attack",
-      "group": "magic",
-      "element": "poison",
-      "cd": 10,
-      "mana": "15 flat",
-      "basis": "magic",
-      "targets": "1/1",
-      "effect": "Heavy poison press · 4 poison stacks",
-      "effects": [
-        {
-          "stat": "poison_stacks",
-          "op": "add_flat",
-          "value": 4,
-          "subject": "target"
-        }
-      ],
-      "base_flat": 873.9,
-      "eff": 103
-    },
-    {
       "id": "attack.chaos_bolt",
       "name": "Chaos Bolt",
       "type": "attack",
       "group": "magic",
       "element": "chaos",
       "cd": 6,
-      "mana": "13%",
+      "mana": "19 flat",
       "basis": "magic",
       "targets": "1/1",
       "effect": "Single target · 1 mark stack",
@@ -722,7 +687,7 @@
       "group": "magic",
       "element": "chaos",
       "cd": 9,
-      "mana": "16% (AoE ×1.5)",
+      "mana": "24 flat (AoE ×1.5)",
       "basis": "magic",
       "targets": "3/1",
       "effect": "AoE blast · applies 1 mark stack to all hit",
@@ -741,48 +706,406 @@
       "eff": 81.58
     },
     {
-      "id": "attack.nether_orb",
-      "name": "Nether Orb",
+      "id": "attack.sand_storm",
+      "name": "Sand Storm",
       "type": "attack",
       "group": "magic",
-      "element": "chaos",
+      "element": "earth",
       "cd": 12,
-      "mana": "19 flat",
+      "mana": "19 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "This hit pierces 100% of the target's Elemental res",
+      "targets": "3/1",
+      "effect": "AoE sandstorm · accuracy −20% on every target it hits, and 20 earth damage a second for 10 sec",
       "effects": [
-        {
-          "stat": "resistance_pierce_pct",
-          "op": "add_flat",
-          "value": 100,
-          "subject": "self"
-        }
+        { "stat": "accuracy", "op": "add_pct", "value": -20, "subject": "target" },
+        { "stat": "dot_dps", "op": "add_flat", "value": 20, "subject": "target" },
+        { "stat": "dot_sec", "op": "add_flat", "value": 10, "subject": "target" }
       ],
-      "base_flat": 1048.7,
-      "eff": 123.6
+      "rules": ["every_target"],
+      "base_flat": 922.9,
+      "eff": 108.77
     },
     {
-      "id": "attack.entropy",
-      "name": "Entropy",
+      "id": "attack.earth_splitter",
+      "name": "Earth Splitter",
       "type": "attack",
       "group": "magic",
-      "element": "chaos",
-      "cd": 10,
-      "mana": "15 flat",
+      "element": "earth",
+      "cd": 11,
+      "mana": "18 flat",
       "basis": "magic",
       "targets": "1/1",
-      "effect": "Heavy press · applies 5 mark stacks",
+      "effect": "Heavy slam · adds 15% of the target's own maximum pool as damage, at half of that against a boss",
       "effects": [
-        {
-          "stat": "mark_stacks",
-          "op": "add_flat",
-          "value": 5,
-          "subject": "target"
-        }
+        { "stat": "max_hp_pct_damage", "op": "add_flat", "value": 15, "subject": "target" }
       ],
-      "base_flat": 873.9,
-      "eff": 103
+      "base_flat": 961.3,
+      "eff": 113.3
+    },
+    {
+      "id": "attack.fan_of_knives",
+      "name": "Fan of Knives",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 6,
+      "mana": "15 flat (AoE ×1.5)",
+      "basis": "phys",
+      "targets": "3/1",
+      "effect": "AoE opener · 2 quick cuts on every target hit",
+      "effects": [
+            {
+                    "stat": "hits",
+                    "op": "add_flat",
+                    "value": 2,
+                    "subject": "self"
+            }
+    ],
+      "rules": ["every_target"],
+      "base_flat": 1445.7,
+      "eff": 67.79
+    },
+    {
+      "id": "attack.backstab",
+      "name": "Backstab",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 10,
+      "mana": "27 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "Reads the opening: +25% crit chance on this press",
+      "effects": [
+            {
+                    "stat": "crit_chance",
+                    "op": "add_flat",
+                    "value": 25,
+                    "subject": "self"
+            }
+    ],
+      "base_flat": 3779.7,
+      "eff": 96.67
+    },
+    {
+      "id": "attack.poisoned_edge",
+      "name": "Poisoned Edge",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 7,
+      "mana": "18 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "A hidden edge · 2 poison stacks to the target",
+      "effects": [
+            {
+                    "stat": "poison_stacks",
+                    "op": "add_flat",
+                    "value": 2,
+                    "subject": "target"
+            }
+    ],
+      "base_flat": 1924.8,
+      "eff": 90.25
+    },
+    {
+      "id": "attack.sidestep",
+      "name": "Sidestep",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 7,
+      "mana": "18 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "Slips inside the guard: +30% hit chance on this press",
+      "effects": [
+            {
+                    "stat": "hit_pct",
+                    "op": "add_pct",
+                    "value": 30,
+                    "subject": "self"
+            }
+    ],
+      "base_flat": 1924.8,
+      "eff": 90.25
+    },
+    {
+      "id": "attack.nerve_strike",
+      "name": "Nerve Strike",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 7,
+      "mana": "18 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "A cut on the nerve · the target deals −25% damage",
+      "effects": [
+            {
+                    "stat": "damage_dealt",
+                    "op": "add_pct",
+                    "value": -25,
+                    "subject": "target"
+            }
+    ],
+      "base_flat": 1924.8,
+      "eff": 90.25
+    },
+    {
+      "id": "attack.impale",
+      "name": "Impale",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 9,
+      "mana": "22 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "A thrust through the guard · pierces 100% of the resistance it meets",
+      "effects": [
+            {
+                    "stat": "resistance_pierce_pct",
+                    "op": "add_flat",
+                    "value": 100,
+                    "subject": "target"
+            }
+    ],
+      "base_flat": 3401.7,
+      "eff": 87
+    },
+    {
+      "id": "attack.skewer_line",
+      "name": "Skewer Line",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 9,
+      "mana": "22 flat (AoE ×1.5)",
+      "basis": "phys",
+      "targets": "3/3",
+      "effect": "Skewers the whole rank · 3 thrusts on every target hit",
+      "effects": [
+            {
+                    "stat": "hits",
+                    "op": "add_flat",
+                    "value": 3,
+                    "subject": "self"
+            }
+    ],
+      "rules": ["every_target"],
+      "base_flat": 2993.5,
+      "eff": 76.56
+    },
+    {
+      "id": "attack.reach_thrust",
+      "name": "Reach Thrust",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 12,
+      "mana": "24 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "The longest, slowest thrust of the reach — one heavy hit",
+      "effects": [],
+      "base_flat": 4535.6,
+      "eff": 116
+    },
+    {
+      "id": "attack.low_sweep",
+      "name": "Low Sweep",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 8,
+      "mana": "18 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "Takes the legs out · attack speed −20% on the target",
+      "effects": [
+            {
+                    "stat": "attack_speed",
+                    "op": "add_pct",
+                    "value": -20,
+                    "subject": "target"
+            }
+    ],
+      "base_flat": 3023.8,
+      "eff": 77.33
+    },
+    {
+      "id": "attack.skull_crack",
+      "name": "Skull Crack",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 8,
+      "mana": "18 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "A blow to the head · +20% stun chance on this hit",
+      "effects": [
+            {
+                    "stat": "stun_chance",
+                    "op": "add_flat",
+                    "value": 20,
+                    "subject": "target"
+            }
+    ],
+      "base_flat": 3023.8,
+      "eff": 77.33
+    },
+    {
+      "id": "attack.ground_slam",
+      "name": "Ground Slam",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 6,
+      "mana": "15 flat (AoE ×1.5)",
+      "basis": "phys",
+      "targets": "3/1",
+      "effect": "Slams the ground · stops every target hit for 1 sec",
+      "effects": [
+            {
+                    "stat": "stop_sec",
+                    "op": "add_flat",
+                    "value": 1,
+                    "subject": "target"
+            }
+    ],
+      "rules": ["every_target"],
+      "base_flat": 1445.7,
+      "eff": 67.79
+    },
+    {
+      "id": "attack.bone_breaker",
+      "name": "Bone Breaker",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 12,
+      "mana": "24 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "Breaks the body open · the execute threshold shifts to 35%",
+      "effects": [
+            {
+                    "stat": "execute_threshold_pct",
+                    "op": "add_flat",
+                    "value": 35,
+                    "subject": "target"
+            }
+    ],
+      "base_flat": 4535.6,
+      "eff": 116
+    },
+    {
+      "id": "attack.iron_toll",
+      "name": "Iron Toll",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 10,
+      "mana": "27 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "A tolling blow · the target deals −25% damage",
+      "effects": [
+            {
+                    "stat": "damage_dealt",
+                    "op": "add_pct",
+                    "value": -25,
+                    "subject": "target"
+            }
+    ],
+      "base_flat": 3779.7,
+      "eff": 96.67
+    },
+    {
+      "id": "attack.wide_swing",
+      "name": "Wide Swing",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 6,
+      "mana": "15 flat (AoE ×1.5)",
+      "basis": "phys",
+      "targets": "3/1",
+      "effect": "One wide cut across the whole group — no rider, just the reach",
+      "effects": [],
+      "rules": ["every_target"],
+      "base_flat": 1445.7,
+      "eff": 67.79
+    },
+    {
+      "id": "attack.whirlaxe",
+      "name": "Whirlaxe",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 9,
+      "mana": "22 flat (AoE ×1.5)",
+      "basis": "phys",
+      "targets": "3/3",
+      "effect": "Spins the axe through the rank · 2 cuts on every target hit",
+      "effects": [
+            {
+                    "stat": "hits",
+                    "op": "add_flat",
+                    "value": 2,
+                    "subject": "self"
+            }
+    ],
+      "rules": ["every_target"],
+      "base_flat": 2993.5,
+      "eff": 76.56
+    },
+    {
+      "id": "attack.carnage",
+      "name": "Carnage",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 10,
+      "mana": "27 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "Drinks the wound · leech +15% off this hit",
+      "effects": [
+            {
+                    "stat": "leech",
+                    "op": "add_pct",
+                    "value": 15,
+                    "subject": "self"
+            }
+    ],
+      "base_flat": 3779.7,
+      "eff": 96.67
+    },
+    {
+      "id": "attack.cleave_down",
+      "name": "Cleave Down",
+      "type": "attack",
+      "group": "melee",
+            "element": "physical",
+      "cd": 12,
+      "mana": "24 flat",
+      "basis": "phys",
+      "targets": "1/1",
+      "effect": "Splits the body itself · adds 10% of the target’s own maximum pool (halved on a boss)",
+      "effects": [
+            {
+                    "stat": "max_hp_pct_damage",
+                    "op": "add_flat",
+                    "value": 10,
+                    "subject": "target"
+            }
+    ],
+      "base_flat": 4535.6,
+      "eff": 116
     },
     {
       "id": "attack.cleave",
@@ -791,7 +1114,7 @@
       "group": "melee",
       "element": "physical",
       "cd": 6,
-      "mana": "10% (AoE ×1.5)",
+      "mana": "15 flat (AoE ×1.5)",
       "basis": "phys",
       "targets": "3/1",
       "effect": "Swing around, hits all in range",
@@ -806,7 +1129,7 @@
       "group": "melee",
       "element": "physical",
       "cd": 10,
-      "mana": "18%",
+      "mana": "27 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Heavy hit + target takes +15% Element damage 8 sec (replaces Guard Break, which referenced a nonexistent system)",
@@ -829,7 +1152,7 @@
       "group": "melee",
       "element": "physical",
       "cd": 9,
-      "mana": "15% (AoE ×1.5)",
+      "mana": "22 flat (AoE ×1.5)",
       "basis": "phys",
       "targets": "3/3",
       "effect": "Spin 3 rounds, 1 hit per target per round · Per-target hit count = proc engine",
@@ -851,7 +1174,7 @@
       "group": "melee",
       "element": "physical",
       "cd": 8,
-      "mana": "12%",
+      "mana": "18 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Stops target attacks 1 sec (a flat stop, not a rolled stun chance)",
@@ -874,9 +1197,9 @@
       "name": "Puncture",
       "type": "attack",
       "group": "melee",
-      "element": "physical",
+            "element": "physical",
       "cd": 7,
-      "mana": "12%",
+      "mana": "18 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Guarantees bleeding on the hit (100% bleed chance · bleed does not stack, a new hit refreshes its 5 sec)",
@@ -924,41 +1247,14 @@
       "eff": 87
     },
     {
-      "id": "attack.bloodletting",
-      "name": "Bloodletting",
-      "type": "attack",
-      "group": "melee",
-      "element": "physical",
-      "cd": 11,
-      "mana": "16 flat",
-      "basis": "phys",
-      "targets": "1/1",
-      "effect": "Instant heal 6% Max HP and leech +15% on the press",
-      "effects": [
-        {
-          "stat": "heal_instant",
-          "op": "add_pct",
-          "value": 6,
-          "subject": "self"
-        },
-        {
-          "stat": "leech",
-          "op": "add_pct",
-          "value": 15,
-          "subject": "self"
-        }
-      ],
-      "base_flat": 4157.7,
-      "eff": 106.33
-    },
-    {
       "id": "attack.piercing_shot",
       "name": "Piercing Shot",
       "type": "attack",
       "group": "ranged",
+      "weapon": "bow",
       "element": "physical",
       "cd": 6,
-      "mana": "10%",
+      "mana": "15 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Single target · This hit does not roll dodge",
@@ -973,9 +1269,10 @@
       "name": "Arrow Shower",
       "type": "attack",
       "group": "ranged",
+            "weapon": "bow",
       "element": "physical",
       "cd": 7,
-      "mana": "13%",
+      "mana": "19 flat",
       "basis": "phys",
       "targets": "1/3",
       "effect": "3 arrows, 40% each, 120% total of formula · Per-hit procs fire 3 times",
@@ -1001,9 +1298,10 @@
       "name": "Headshot",
       "type": "attack",
       "group": "ranged",
+      "weapon": "bow",
       "element": "physical",
       "cd": 12,
-      "mana": "16%",
+      "mana": "24 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "This hit +25% crit chance · Burst window for crit builds",
@@ -1023,6 +1321,7 @@
       "name": "Pierce the Veil",
       "type": "attack",
       "group": "ranged",
+      "weapon": "bow",
       "element": "physical",
       "cd": 7,
       "mana": "12 flat",
@@ -1045,11 +1344,36 @@
       "eff": 90.25
     },
     {
+      "id": "attack.earth_shock",
+      "name": "Earth Shock",
+      "type": "attack",
+      "group": "magic",
+      "element": "earth",
+      "cd": 12,
+      "mana": "19 flat (AoE ×1.5)",
+      "basis": "magic",
+      "targets": "3/1",
+      "effect": "AoE earthshock · attack speed −20% on every target it hits",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": -20,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 922.9,
+      "eff": 108.77
+    },
+    {
       "id": "buff.warcry",
       "name": "Warcry",
       "type": "buff",
       "cd": 15,
-      "mana": "10%",
+      "mana": "15 flat",
       "duration": "10 sec",
       "effect": "Physical power x1.15 and Elemental alignment and Elemental resistance x1.20 while up",
       "effects": [
@@ -1075,7 +1399,7 @@
       "name": "Berserker",
       "type": "buff",
       "cd": 15,
-      "mana": "10%",
+      "mana": "15 flat",
       "duration": "10 sec",
       "effect": "Attack speed x1.20 and leech +15%, and damage taken x1.15 while up",
       "effects": [
@@ -1104,7 +1428,7 @@
       "name": "Iron Will",
       "type": "buff",
       "cd": 15,
-      "mana": "10%",
+      "mana": "15 flat",
       "duration": "10 sec",
       "effect": "Armour x1.20 and damage taken x0.90 while up",
       "effects": [
@@ -1125,7 +1449,7 @@
       "name": "Holy veil",
       "type": "buff",
       "cd": 20,
-      "mana": "12%",
+      "mana": "18 flat",
       "duration": "7 sec",
       "effect": "No Element debuff (burn, chill, shock, poison, mark) or bleed can be applied while up, and casting it clears the ones already on you",
       "rules": [
@@ -1138,7 +1462,7 @@
       "name": "Ghost Dance",
       "type": "buff",
       "cd": 15,
-      "mana": "10%",
+      "mana": "15 flat",
       "duration": "10 sec",
       "effect": "Grants perfect dodge charges: 3 at skill level 1, +1 every 5 levels up to 7 at level 20 · each charge deletes one incoming hit outright and is not opposed (stops DoT ticks and unconditional effects)",
       "effects": [
@@ -1163,11 +1487,25 @@
       ]
     },
     {
+      "id": "buff.earth_wall",
+      "name": "Earth Wall",
+      "type": "buff",
+      "cd": 15,
+      "mana": "15 flat",
+      "duration": "10 sec",
+      "effect": "Grants block charges: 5 at skill level 1, +1 every 3 levels up to 10 at level 20 · each charge cuts one incoming physical hit by the block rule (a flat share of Armour), never deletes it",
+      "effects": [
+        { "stat": "block_charges", "op": "add_flat", "value": 5, "subject": "self" },
+        { "stat": "block_charges_per_levels", "op": "add_flat", "value": 3, "subject": "self" },
+        { "stat": "block_charges_cap", "op": "add_flat", "value": 10, "subject": "self" }
+      ]
+    },
+    {
       "id": "buff.magia_drive",
       "name": "Magia Drive",
       "type": "buff",
       "cd": 20,
-      "mana": "12%",
+      "mana": "18 flat",
       "duration": "8 sec",
       "effect": "Forces Energy Shield to start recharging immediately (ignores the 5 sec delay) and the recharge is not interrupted by hits while up",
       "rules": [
@@ -1179,7 +1517,7 @@
       "name": "Energy Absorb",
       "type": "buff",
       "cd": 20,
-      "mana": "12%",
+      "mana": "18 flat",
       "duration": "3 sec",
       "effect": "Converts 15% of every incoming hit into Energy Shield at skill level 1, rising to 30% at level 20, and that share is negated from HP either way while up",
       "effects": [
@@ -1203,7 +1541,7 @@
       "type": "buff",
       "element": "fire",
       "cd": 16,
-      "mana": "12%",
+      "mana": "18 flat",
       "duration": "8 sec",
       "effect": "Grants a flat 350 Energy Shield pool that soaks damage while the guard is up",
       "effects": [
@@ -1220,7 +1558,7 @@
       "name": "Weaken",
       "type": "curse",
       "cd": 12,
-      "mana": "14%",
+      "mana": "21 flat",
       "duration": "8 sec",
       "effect": "Target deals -25% damage",
       "effects": [
@@ -1237,7 +1575,7 @@
       "name": "Blinding Mark",
       "type": "curse",
       "cd": 12,
-      "mana": "14%",
+      "mana": "21 flat",
       "duration": "8 sec",
       "effect": "Target accuracy -30% (multiplies with our Evasion = true EHP)",
       "effects": [
@@ -1250,28 +1588,11 @@
       ]
     },
     {
-      "id": "curse.sunder",
-      "name": "Sunder",
-      "type": "curse",
-      "cd": 15,
-      "mana": "16%",
-      "duration": "8 sec",
-      "effect": "Target Elemental res -20% · Opens res-blocked zones",
-      "effects": [
-        {
-          "stat": "mob_elemental_resistance_pct",
-          "op": "add_pct",
-          "value": -20,
-          "subject": "target"
-        }
-      ]
-    },
-    {
       "id": "curse.expose",
       "name": "Expose",
       "type": "curse",
       "cd": 14,
-      "mana": "16%",
+      "mana": "24 flat",
       "duration": "8 sec",
       "effect": "Target takes +20% damage",
       "effects": [
@@ -1288,7 +1609,7 @@
       "name": "Cripple",
       "type": "curse",
       "cd": 12,
-      "mana": "14%",
+      "mana": "21 flat",
       "duration": "8 sec",
       "effect": "Target aspd -20% · Element-free so usable with all weapons",
       "effects": [
@@ -1305,7 +1626,7 @@
       "name": "Jinx",
       "type": "curse",
       "cd": 13,
-      "mana": "13%",
+      "mana": "19 flat",
       "duration": "8 sec",
       "effect": "Target easier to crit: our crit chance against it +15%",
       "effects": [
@@ -1318,28 +1639,11 @@
       ]
     },
     {
-      "id": "curse.mark_of_the_executioner",
-      "name": "Mark of the Executioner",
-      "type": "curse",
-      "cd": 16,
-      "mana": "15%",
-      "duration": "10 sec",
-      "effect": "Target's execute threshold shifts to 35% · finisher presses and keystones trigger more often",
-      "effects": [
-        {
-          "stat": "execute_threshold_pct",
-          "op": "add_flat",
-          "value": 35,
-          "subject": "target"
-        }
-      ]
-    },
-    {
       "id": "curse.venom_bind",
       "name": "Venom Bind",
       "type": "curse",
       "cd": 15,
-      "mana": "14%",
+      "mana": "21 flat",
       "duration": "6 sec",
       "effect": "Poison stacks on target do not fall 6 sec · Locks 10-stack DoT for the whole window",
       "effects": [
@@ -1352,63 +1656,11 @@
       ]
     },
     {
-      "id": "curse.shatter",
-      "name": "Shatter",
-      "type": "curse",
-      "cd": 14,
-      "mana": "15%",
-      "duration": "8 sec",
-      "effect": "If target has chill, it takes +12% damage (cold gets a curse bonus)",
-      "effects": [
-        {
-          "stat": "damage_taken",
-          "op": "add_pct",
-          "value": 12,
-          "subject": "target",
-          "condition": "chilled"
-        }
-      ]
-    },
-    {
-      "id": "curse.pandemonium",
-      "name": "Pandemonium",
-      "type": "curse",
-      "cd": 20,
-      "mana": "18%",
-      "duration": "10 sec",
-      "effect": "Curse spreads to neighbors when the afflicted target dies (3-target Cap per AoE rules)",
-      "effects": [
-        {
-          "stat": "spread_targets",
-          "op": "add_flat",
-          "value": 3,
-          "subject": "target"
-        }
-      ]
-    },
-    {
-      "id": "curse.lacerate",
-      "name": "Lacerate",
-      "type": "curse",
-      "cd": 14,
-      "mana": "15%",
-      "duration": "10 sec",
-      "effect": "Our physical hits have 40% chance to inflict bleeding · bleed does not stack, a new application refreshes it (formula-offense.md section 4)",
-      "effects": [
-        {
-          "stat": "bleed_chance",
-          "op": "add_pct",
-          "value": 40,
-          "subject": "target"
-        }
-      ]
-    },
-    {
       "id": "heal.heal",
       "name": "Heal",
       "type": "heal",
       "cd": 20,
-      "mana": "20%",
+      "mana": "30 flat",
       "duration": "8 sec",
       "effect": "Restores 10% Max HP per second 8 sec (= +80% pool in long fights)",
       "effects": [
@@ -1424,7 +1676,7 @@
       "name": "Greater Heal",
       "type": "heal",
       "cd": 40,
-      "mana": "25%",
+      "mana": "37 flat",
       "duration": "Instant",
       "effect": "Restores 60% Max HP instantly · Covers last-moment windows",
       "effects": [
@@ -1440,7 +1692,7 @@
       "name": "Cleanse",
       "type": "heal",
       "cd": 24,
-      "mana": "16%",
+      "mana": "24 flat",
       "duration": "Instant",
       "effect": "Cleanses all statuses on self + restores 8% Max HP · Answer to 10-stack poison",
       "effects": [
@@ -1528,7 +1780,7 @@
       "type": "aura",
       "kind": "fire",
       "reserve": "heavy",
-      "effect": "fire damage flat +50 · Alignment +6",
+      "effect": "fire damage flat +50 · Alignment +6%",
       "effects": [
         {
           "stat": "elemental_power",
@@ -1551,7 +1803,7 @@
       "type": "aura",
       "kind": "cold",
       "reserve": "heavy",
-      "effect": "cold damage flat +50 · Alignment +6",
+      "effect": "cold damage flat +50 · Alignment +6%",
       "effects": [
         {
           "stat": "elemental_power",
@@ -1574,7 +1826,7 @@
       "type": "aura",
       "kind": "lightning",
       "reserve": "heavy",
-      "effect": "lightning damage flat +50 · Alignment +6",
+      "effect": "lightning damage flat +50 · Alignment +6%",
       "effects": [
         {
           "stat": "elemental_power",
@@ -1814,6 +2066,17 @@
     }
   ],
   "deprecated": {
+    "Arcane Pulse": "cut in the roster trim (owner ticket) — the cd-0 filler row; nothing took its slot over",
+    "Scorch Ray": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Blight": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Nether Orb": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Entropy": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Bloodletting": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Sunder": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Mark of the Executioner": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Shatter": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Pandemonium": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Lacerate": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
     "Aura of Might": "removed in the 6→12 aura redesign ",
     "Aura of Grace": "removed in the 6→12 aura redesign ",
     "Aura of Fury": "removed in the 6→12 aura redesign ",

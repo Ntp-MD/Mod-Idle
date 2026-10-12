@@ -2,7 +2,7 @@
   import { craft, craftedMark } from '../sim/craft';
   import { MODS } from '../engine/client';
   import { gearModOf } from '../sim/gear';
-  import { vsWorn, compareLines, type LineCmp } from './bag';
+  import { vsWorn, compareLines, pieceRank, type LineCmp } from './bag';
   import type { Item } from '../sim/types';
 
   /**
@@ -27,6 +27,7 @@
 
   const gear = $derived(gearModOf(item));
   const delta = $derived(vsWorn(item, worn));
+  const rar = $derived(pieceRank(item));
 
   /** A Mod's name as plain words, its book suffixes stripped — `Max HP %` reads `max hp`. */
   function plainName(id: string): string {
@@ -90,11 +91,12 @@
         : `${cmpName(r)} ${r.worn} → ${r.cand}`;
 </script>
 
-<div class="detail" class:rare={item.tier === 'T1'}>
+<div class="detail" style:--rar={rar ? rar.tone : null}>
   <h4>{item.base}</h4>
   <p class="tag">
     <span class="chip rare-chip">level {item.ilvl}</span>
     <span class="chip">{item.slot}</span>
+    {#if rar}<span class="chip rar-chip">{rar.name}</span>{/if}
     <span class="dim">{item.quality} band · {item.tier}</span>
   </p>
   {#if (item.upgrade_lv || 0) > 0}
@@ -136,17 +138,18 @@
     min-width: var(--box-300);
     max-width: var(--box-420);
     background: var(--bg);
+    /* the card leads with its rarity edge, the way the slot it came from does */
     border: 1px solid var(--line);
-    border-left: 3px solid var(--dim);
+    border-left: 3px solid var(--rar, var(--dim));
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-xs);
   }
-  .detail.rare { border-left-color: var(--xp); }
-  h4 { margin: 0; font-size: var(--font-sm); }
+  h4 { margin: 0; font-size: var(--font-sm); color: var(--rar, var(--text)); }
   .tag { display: flex; flex-wrap: wrap; gap: 3px; align-items: baseline; margin: 1px 0 var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
   .tag.up { color: var(--xp); }
-  .chip { border: 1px solid var(--line); border-radius: 2px; padding: 0 3px; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0.38px, 0.024vw + 0.09px, 0.81px); }
+  .chip { border: 1px solid var(--line); border-radius: 2px; padding: 0 3px; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0px, 0.024vw + 0px, 1px); }
   .rare-chip { color: var(--xp); border-color: var(--xp); }
+  .rar-chip { color: var(--rar, var(--dim)); border-color: color-mix(in srgb, var(--rar, var(--line)) 60%, var(--line)); text-transform: capitalize; }
   .dim { color: var(--dim); }
   .lines { list-style: none; margin: 0 0 4px; padding: 0; }
   /* Every Mod line is a stamped bar: an ink-to-dark sweep with the words in the ink colour, so the
@@ -182,7 +185,7 @@
   .cmp li.under, .cmp li.lost { color: var(--hp); }
   .gear { margin: 4px 0; display: flex; gap: 4px; align-items: baseline; }
   .gear small { display: block; color: var(--dim); margin-left: auto; font-size: var(--font-xs); }
-  .kind { min-width: var(--icon-xl); color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0.5px, 0.033vw + 0.13px, 1.08px); }
+  .kind { min-width: var(--icon-xl); color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0px, 0.033vw + 0px, 1px); }
   .foot { margin: 4px 0 3px; color: var(--dim); font-size: var(--font-xs); }
   .go { width: 100%; border-color: var(--good); }
 </style>

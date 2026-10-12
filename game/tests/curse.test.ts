@@ -138,7 +138,10 @@ describe('the clock runs out', () => {
     expect(s.group.length).toBeGreaterThan(0);
     s.player.mana = buildCharacter(s.player.level, s.gear, {}, 0).maxMana;
     guard = 0;
-    while (!Object.keys(s.curses).length && guard++ < 60) {
+    // a rolled status costs the rng an extra draw per hit, so the sequence moves: the guard re-hunts if a
+    // Push empties the field, and it is long enough that the case reads the mechanism, not the seed
+    while (!Object.keys(s.curses).length && guard++ < 300) {
+      if (!s.group.length) huntZone(s, s.zone);
       s.player.mana = buildCharacter(s.player.level, s.gear, {}, 0).maxMana;
       tick(s, {});
     }

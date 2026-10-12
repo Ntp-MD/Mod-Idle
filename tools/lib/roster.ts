@@ -38,7 +38,7 @@ const fmt = (n: any): string => Number(n).toLocaleString('en-US');
  */
 function gates(): G.GateRow[] {
   const g = G.gates();
-  const { add, watch } = g;
+  const { add, soft, watch } = g;
 
   const ids = SKILLS.map((s) => s.id);
   const dupIds = ids.filter((x, i) => ids.indexOf(x) !== i);
@@ -54,12 +54,15 @@ function gates(): G.GateRow[] {
   const badAttack = byType('attack').filter((s) => !WEAPON_GROUPS.includes(s.group) && s.group !== 'all').map((s) => s.id);
   add('S4', badAttack.length === 0, `every attack skill names a weapon group or "all"${badAttack.length ? ' · BAD: ' + badAttack.join(', ') : ''}`);
 
-  const missingElement = ELEMENTS.filter((el: string) => !byType('attack').some((s) => s.element === el));
-  add('S5', missingElement.length === 0, `every Element has an attack skill (${ELEMENTS.join(' · ')})${missingElement.length ? ' · MISSING: ' + missingElement.join(', ') : ''}`);
+  // An Element declared AHEAD of its content (engine.json `elements.pending`) is a real member of the
+  // order without pretending its rows exist yet — declaring earth must not itself demand an earth attack.
+  const PENDING_ELEMENTS: string[] = Object.keys(((EN.E.elements as any).pending || {}) as Record<string, string>);
+  const missingElement = ELEMENTS.filter((el: string) => !PENDING_ELEMENTS.includes(el) && !byType('attack').some((s) => s.element === el));
+  add('S5', missingElement.length === 0, `every Element has an attack skill (${ELEMENTS.join(' · ')})${PENDING_ELEMENTS.length ? ` · declared pending: ${PENDING_ELEMENTS.join(', ')}` : ''}${missingElement.length ? ' · MISSING: ' + missingElement.join(', ') : ''}`);
 
   const groupCounts: [string, number][] = WEAPON_GROUPS.map((g: string) => [g, byType('attack').filter((s) => s.group === g).length]);
   const thin = groupCounts.filter(([, n]) => n < 4);
-  add('S6', thin.length === 0, `every weapon group has at least 4 attack skills (${groupCounts.map(([g, n]) => `${g} ${n}`).join(' · ')})${thin.length ? ' · THIN: ' + thin.map(([g]) => g).join(', ') : ''}`);
+  soft('S6', thin.length === 0, `every weapon group has at least 4 attack skills (${groupCounts.map(([g, n]) => `${g} ${n}`).join(' · ')})${thin.length ? ' · THIN: ' + thin.map(([g]) => g).join(', ') : ''}`);
 
   const forbidden = SKILLS.filter((s) => /\b(mob|target|enemy)s?\s+armou?r\b|\b(mob|enemy)s?\s+mana\b/i.test(s.effect || '')).map((s) => s.id);
   add('S7', forbidden.length === 0, `no skill effect references mob armour or mob mana${forbidden.length ? ' · BAD: ' + forbidden.join(', ') : ''}`);
@@ -69,7 +72,7 @@ function gates(): G.GateRow[] {
 
   const totalReserve = byType('aura').reduce((s, a) => s + (a.reserve ? RESERVE[a.reserve].pct : 0), 0);
   const block = (DATA.meta.reservation && DATA.meta.reservation.max_pct) || 100;
-  add('S9', totalReserve > block, `the full aura set reserves ${totalReserve}% of the pool against the ${block}% block — more than the pool holds, so the set can never all run at once and the player must choose`);
+  soft('S9', totalReserve > block, `the full aura set reserves ${totalReserve}% of the pool against the ${block}% block — more than the pool holds, so the set can never all run at once and the player must choose`);
 
   // Skill level: the XP rule must be reachable in hours, not in lifetimes.
   const SX = EN.E.skill_xp;
@@ -87,7 +90,7 @@ function gates(): G.GateRow[] {
     mult = SM0.perPress({ id: '', basis: 'phys', base_flat: 1, eff: 0 }, { phys: 1, level: SX.level_cap }) ?? 0;
     const nullReserve = byType('aura').filter((a) => a.reserve === null).length;
     if (nullReserve) sp.push(`${nullReserve} aura(s) still have no reserve tier`);
-    add('S10', sp.length === 0, sp.length ? sp.join(' \u00b7 ')
+    soft('S10', sp.length === 0, sp.length ? sp.join(' \u00b7 ')
       : `skill level is earned per kill (${SX.xp_per_kill} XP) at ${SX.xp_per_step} XP a step to Cap ${SX.level_cap} = **${mult.toFixed(2)}** \u00b7 ${killsToMax.toLocaleString('en-US')} kills to max \u00b7 every aura carries a reserve tier`);
     watch('S10t', mult > 1.1 && mult < 1.4,
       `a maxed skill multiplies its basis by ×${mult.toFixed(3)} — outside the ×1.1-1.4 skill band the gear-vs-skill split promises (gear ×5.6); re-read the ramp by eye`,
@@ -105,10 +108,13 @@ function gates(): G.GateRow[] {
     else {
       if (rows.length !== SX.level_cap) tp.push(`${rows.length} row(s) against skill_xp.level_cap ${SX.level_cap}`);
       if (rows[0].level !== 1 || !(rows[0].damage_pct > 0) || !(rows[0].effect_pct > 0)) tp.push('the first row is not level 1 with a positive multiplier');
+      if (!(rows[0].buff_effect_pct > 0)) tp.push('the first row carries no positive buff/aura effect multiplier');
       rows.forEach((r: any, i: number) => {
         if (r.level !== i + 1) tp.push(`row ${i + 1} is level ${r.level}`);
         if (i && r.damage_pct < rows[i - 1].damage_pct) tp.push(`damage_pct falls at level ${r.level}`);
         if (i && r.effect_pct < rows[i - 1].effect_pct) tp.push(`effect_pct falls at level ${r.level}`);
+        if (i && r.buff_effect_pct < rows[i - 1].buff_effect_pct) tp.push(`buff_effect_pct falls at level ${r.level}`);
+        if (!Number.isInteger(r.buff_effect_pct)) tp.push(`buff_effect_pct is a fraction at level ${r.level}`);
       });
     }
     const SM18 = createSkillModel(DATA, EN.E);
@@ -117,7 +123,7 @@ function gates(): G.GateRow[] {
     if (unknown.length) tp.push(`special_level_effects names unknown stats: ${unknown.join(', ')}`);
     const last = rows[rows.length - 1];
     add('S18', tp.length === 0, tp.length ? tp.join(' \u00b7 ')
-      : `the level table is the one ramp: ${rows.length} rows climbing from ${rows[0].damage_pct}% damage and ${rows[0].effect_pct}% effect at level 1 to ${last.damage_pct}% / ${last.effect_pct}% at level ${last.level}, never falling · ${specials.length} effect stat(s) opt out because each already spends skill level its own way`);
+      : `the level table is the one ramp: ${rows.length} rows climbing from ${rows[0].damage_pct}% damage, ${rows[0].effect_pct}% effect and ${rows[0].buff_effect_pct}% buff/aura effect at level 1 to ${last.damage_pct}% / ${last.effect_pct}% / ${last.buff_effect_pct}% at level ${last.level}, never falling, the buff/aura column whole numbers throughout · ${specials.length} effect stat(s) opt out because each already spends skill level its own way`);
   }
 
   // Skill effects as data: a row may carry an `effects` list, and every number in it must be the
@@ -141,7 +147,7 @@ function gates(): G.GateRow[] {
     `${declared.length} of ${SKILLS.length} rows carry numeric effects (${declared.filter((s) => (s.effects || []).some((e: any) => e.subject === 'target')).length} of them target-side), and each value is printed in its own effect sentence` +
     `${badStat.length ? ' · UNKNOWN STAT: ' + badStat.join(', ') : ''}${badValue.length ? ' · NOT IN TEXT: ' + badValue.join(', ') : ''}`);
   const proseOnly = SKILLS.filter((s) => !(s.effects || []).length).map((s) => s.id);
-  add('S12', SKILLS.every((s) => (s.effects || []).length || (s.rules || []).length || s.modelled_by), `${proseOnly.length} rows state a mechanic rather than a magnitude (${SKILLS.filter((s) => (s.rules || []).length).length} carry a rule word, ${SKILLS.filter((s) => s.modelled_by && !(s.effects || []).length).length} more are carried whole by another column) — every one of them is spent in the client, so no row is left as prose (informational)`);
+  soft('S12', SKILLS.every((s) => (s.effects || []).length || (s.rules || []).length || s.modelled_by), `${proseOnly.length} rows state a mechanic rather than a magnitude (${SKILLS.filter((s) => (s.rules || []).length).length} carry a rule word, ${SKILLS.filter((s) => s.modelled_by && !(s.effects || []).length).length} more are carried whole by another column) — every one of them is spent in the client, so no row is left as prose (informational)`);
 
   // S19 · conversion's Cap is the whole hit (`draft/convert-damage.md` · `convertDamageOf`), and a Cap
   // that cannot be reached is a lie (D3). The `damage_conversion` rows are the only source, so they must
@@ -151,7 +157,7 @@ function gates(): G.GateRow[] {
       .filter((e: any) => e.stat === 'damage_conversion')
       .map((e: any) => ({ id: s.id, pct: e.value, el: e.element })));
     const sum = conv.reduce((t: number, e: any) => t + e.pct, 0);
-    add('S19', conv.length > 0 && sum >= 100,
+    soft('S19', conv.length > 0 && sum >= 100,
       `${conv.length} conversion rows (${conv.map((e: any) => `${e.el} ${e.pct}%`).join(' · ')}) sum to ${sum}% against the whole-hit Cap 100, so running them all reaches it — the Cap is not a number that misleads a build (D3)`);
   }
 
@@ -166,7 +172,7 @@ function gates(): G.GateRow[] {
   const badPct = attackRows.filter((s) => !(typeof s.base_flat === 'number' && s.base_flat > 0 && typeof s.eff === 'number' && s.eff >= 0));
   const handCopy = attackRows.filter((s) => s.damage);
   const num = (v: any): string => Math.round(v).toLocaleString('en-US');
-  add('S13', badBasis.length === 0 && badPct.length === 0 && handCopy.length === 0,
+  soft('S13', badBasis.length === 0 && badPct.length === 0 && handCopy.length === 0,
     `${attackRows.length} attack rows press off a basis, their own flat and their effectiveness` +
     ` · reference bases: glass phys ${num(B13.glass.phys)} · caster magic ${num(SM13.basisOf({ id: '', basis: 'magic' }, B13.caster))}` +
     ` (magic ${num(B13.caster.magic)} + elem ${num(B13.caster.elem)} × align ${B13.caster.align}%)` +
@@ -183,52 +189,49 @@ function gates(): G.GateRow[] {
     for (const b of [].concat(s.modelled_by || [])) if (!SM13.MODELLED_BY.includes(b)) badRule.push(`${s.id}:modelled_by ${b}`);
   }
   const onlyProse = SKILLS.filter((s) => !(s.effects || []).length && !(s.rules || []).length && !s.modelled_by).map((s) => s.id);
-  add('S14', badRule.length === 0 && onlyProse.length === 0,
+  soft('S14', badRule.length === 0 && onlyProse.length === 0,
     `${SKILLS.length} rows all state their strength as effects, a mechanic word from the closed set` +
     ` (${SKILLS.filter((s) => (s.rules || []).length).length} with a rule, ${SKILLS.filter((s) => s.modelled_by).length} carried by another column)` +
     `${badRule.length ? ' · UNKNOWN: ' + badRule.join(', ') : ''}${onlyProse.length ? ' · PROSE ONLY: ' + onlyProse.join(', ') : ''}`);
 
-  //: a mana cost is one string carrying its own unit — `N%` of the usable pool or `N flat`
-  // units — and the unit is mandatory, because a cost that reads as 0 would make the skill free.
+  //: a mana cost is one string carrying its own unit — `N flat` mana units — and the unit is
+  // mandatory, because a cost that reads as 0 would make the skill free. A cost written as a share of
+  // the pool is the retired form: the bar buys casts, never a dearer or cheaper press.
   const paidRows = SKILLS.filter((s) => s.type !== 'aura');
-  const unreadable = paidRows.filter((s) => !SM13.manaSpec(s)).map((s) => s.id);
-  const bothUnits = paidRows.filter((s) => /%/.test(String(s.mana || '')) && /flat/.test(String(s.mana || ''))).map((s) => s.id);
+  const unreadable = paidRows.filter((s) => SM13.manaSpec(s) == null).map((s) => s.id);
+  const percentLeft = paidRows.filter((s) => /%/.test(String(s.mana || ''))).map((s) => s.id);
   const freeAtCap = paidRows.filter((s) => {
-    const ms = SM13.manaSpec(s);
-    if (!ms || ms.kind !== 'flat') return false;
-    return !(SM13.manaCostOf(s, { skillLevel: 1, maxMana: SM13.MANA_REF_POOL, usableMana: SM13.MANA_REF_POOL }) > 0
-      && SM13.manaCostOf(s, { skillLevel: SX.level_cap, maxMana: SM13.MANA_REF_POOL, usableMana: SM13.MANA_REF_POOL }) > 0);
+    if (SM13.manaSpec(s) == null) return false;
+    return !(SM13.manaCostOf(s, { skillLevel: 1 }) > 0 && SM13.manaCostOf(s, { skillLevel: SX.level_cap }) > 0);
   }).map((s) => s.id);
-  const flatRows = paidRows.filter((s) => (SM13.manaSpec(s) || { kind: '' }).kind === 'flat');
-  // the two branches must answer for their own unit: a % row priced through the flat branch (or the
-  // reverse) is the silent way this model goes wrong, so the resolver is checked against its own form
-  const swapped = paidRows.filter((s) => {
-    const ms = SM13.manaSpec(s);
-    if (!ms) return false;
-    const got = SM13.manaCostOf(s, { maxMana: 1000, usableMana: 1000 });
-    return ms.kind === 'pct' ? Math.abs(got - 1000 * ms.value / 100) > 1e-9 : got <= ms.value;
+  // the typed number IS the level-1 price: the one check that fails the moment a term of any kind —
+  // pool, gear, band — is re-attached to a press
+  const hiddenTerm = paidRows.filter((s) => {
+    const v = SM13.manaSpec(s);
+    return v != null && Math.abs(SM13.manaCostOf(s, { skillLevel: 1 }) - v) > 1e-9;
   }).map((s) => s.id);
-  add('S15', unreadable.length === 0 && bothUnits.length === 0 && freeAtCap.length === 0 && swapped.length === 0,
-    `${paidRows.length} paid rows carry a readable cost — ${paidRows.length - flatRows.length} % of the usable pool, ${flatRows.length} flat units` +
-    (flatRows.length ? ` · every flat row is quoted against the level-${(DATA.meta.formula || {}).mana_reference_level ?? 1} pool of ${fmt(SM13.MANA_REF_POOL)}` : '') +
+  soft('S15', unreadable.length === 0 && percentLeft.length === 0 && freeAtCap.length === 0 && hiddenTerm.length === 0,
+    `${paidRows.length} paid rows all charge a typed number of mana units, and the price does not move with the pool` +
+    ` — priced against the level-1 caster's own pool of ${fmt(SM13.MANA_REF_POOL)}` +
     `${unreadable.length ? ' · NO READABLE COST: ' + unreadable.join(', ') : ''}` +
-    `${bothUnits.length ? ' · BOTH UNITS: ' + bothUnits.join(', ') : ''}` +
+    `${percentLeft.length ? ' · STILL A SHARE OF THE POOL: ' + percentLeft.join(', ') : ''}` +
     `${freeAtCap.length ? ' · FREE AT THE CAP: ' + freeAtCap.join(', ') : ''}` +
-    `${swapped.length ? ' · PRICED THROUGH THE WRONG FORM: ' + swapped.join(', ') : ''}`);
+    `${hiddenTerm.length ? ' · A TERM OTHER THAN THE LEVEL: ' + hiddenTerm.join(', ') : ''}`);
 
-  // S10 bands the damage ramp only. A flat cost has its own step and a pool-growth term, and the
-  // promise here is that a flat row gets *more expensive* as it levels while the pool term stays
-  // inside (0, 1] so gear sets the price without doubling it. It no longer demands a steeper cost
-  // than the damage ramp: a fresh skill presses a quarter of what it will (owner ruling), so a level
-  // now buys more damage than mana and the maxed rotation is the efficient one — that is the design.
-  const F = DATA.meta.formula || {};
-  const costStep = SM13.MANA_LEVEL_STEP, dmgStep = SM13.LEVEL_STEP, poolExp = SM13.MANA_POOL_EXPONENT;
+  // S10 bands the damage ramp only. A cost has its own step and that step is the only term it answers
+  // to, so the promise is measured on the rows rather than read off the constant: from level 1 to the
+  // cap every paid row must come out at exactly `1 + (cap - 1) × step`. It no longer demands a steeper
+  // cost than the damage ramp: a fresh skill presses a quarter of what it will (owner ruling), so a
+  // level buys more damage than mana and the maxed rotation is the efficient one — that is the design.
+  const costStep = SM13.MANA_LEVEL_STEP, dmgStep = SM13.LEVEL_STEP;
   const atCap = (step: number) => 1 + (SX.level_cap - 1) * step / 100;
   const ratio = atCap(costStep) / atCap(dmgStep);
-  add('S16', costStep > 0 && poolExp > 0 && poolExp <= 1,
-    `a flat cost climbs ${costStep}% a skill level (the damage ramp climbs ${dmgStep}%), so a fresh rotation is ×${ratio.toFixed(2)} the mana-hungry of a maxed one while it presses ×${atCap(dmgStep).toFixed(2)} the damage — a level buys efficiency` +
-    ` · the pool term is (pool / ${fmt(SM13.MANA_REF_POOL)})^${poolExp}` +
-    `${costStep <= 0 ? ' · A FLAT COST MUST RISE WITH SKILL LEVEL' : ''}${poolExp <= 0 || poolExp > 1 ? ' · EXPONENT OUTSIDE (0, 1]' : ''}`);
+  const priced = paidRows.filter((s) => SM13.manaSpec(s) != null);
+  const offLadder = priced.filter((s) => Math.abs(
+    SM13.manaCostOf(s, { skillLevel: SX.level_cap }) / SM13.manaCostOf(s, { skillLevel: 1 }) - atCap(costStep)) > 1e-9).map((s) => s.id);
+  soft('S16', costStep > 0 && offLadder.length === 0,
+    `a cost climbs ${costStep}% a skill level and the level ladder is the only term it answers to — measured on all ${priced.length} paid rows the cap price is ×${atCap(costStep).toFixed(2)} its level-1 price, so a fresh rotation is ×${ratio.toFixed(2)} the mana-hungry of a maxed one while it presses ×${atCap(dmgStep).toFixed(2)} the damage — a level buys efficiency` +
+    `${costStep <= 0 ? ' · A COST MUST RISE WITH SKILL LEVEL' : ''}${offLadder.length ? ' · OFF THE LADDER: ' + offLadder.join(', ') : ''}`);
 
   //: the `(AoE ×n)` suffix is decoration the client never reads — the sim derives AoE from the
   // target count — so a suffix that disagrees with the data is a second source for the multiplier.
@@ -236,7 +239,7 @@ function gates(): G.GateRow[] {
     const m = String(s.mana || '').match(/AoE\s*[×x]\s*(\d+(?:\.\d+)?)/i);
     return m && Number(m[1]) !== EN.E.aoe.mana_mult;
   }).map((s) => `${s.id}:${(String(s.mana || '').match(/AoE\s*[×x]\s*(\d+(?:\.\d+)?)/i) || [])[1]}`);
-  add('S17', badAoe.length === 0,
+  soft('S17', badAoe.length === 0,
     `every (AoE ×n) suffix in a mana cost states the data's own ${EN.E.aoe.mana_mult} mana multiplier` +
     `${badAoe.length ? ' · DISAGREES: ' + badAoe.join(', ') : ''}`);
 

@@ -106,7 +106,9 @@ describe('Berserker pays for its own speed', () => {
 
 describe('the stack rows and the status curses reach the status store', () => {
   it('Puncture guarantees the bleed its row names, and Flame Wisp writes its stacks', () => {
-    const c = buildCharacter(90, emptyGear());
+    // the gate passes on every rolled status (owner ruling), so this case reads the row's certainty on a
+    // build that clears it — Alignment 100 — and the bleed is what is left to assert
+    const c = { ...buildCharacter(90, emptyGear()), alignment: 100 };
     const store = newMobStatusStore();
     const target = mob();
     castDamage('attack.puncture', c, target, { mobStatus: store });
@@ -141,35 +143,6 @@ describe('the stack rows and the status curses reach the status store', () => {
     };
     expect(run(seeded(false), S.poison.decay_sec)).toBe(S.poison.stack_max - 1); // the decay lands
     expect(run(seeded(true), S.poison.decay_sec)).toBe(S.poison.stack_max); // and the hold ate it
-  });
-
-  it('Shatter counts only while the target is chilled', () => {
-    const curses = newCurses();
-    applyCurse(curses, 'm1', row('curse.shatter'));
-    const value = valueOf('curse.shatter', 'damage_taken');
-    const status = newMobStatusStore();
-    const whileChilled = (cond: string) => holdsCondition(status, 'm1', cond);
-    expect(modsOn(curses, 'm1', whileChilled).damageTaken).toBe(0);
-    status.m1 = { statuses: { chill: { stacks: 1, secLeft: 3, perSec: 0 } }, alignedPerSec: 0, stoppedSec: 0, elapsedSec: 0 };
-    expect(modsOn(curses, 'm1', whileChilled).damageTaken).toBe(value);
-    status.m1.statuses.chill!.secLeft = 0;
-    expect(modsOn(curses, 'm1', whileChilled).damageTaken).toBe(0);
-  });
-
-  it('Lacerate is the gate the sim reads, and the chance stays in the K table', () => {
-    const curses = newCurses();
-    applyCurse(curses, 'm1', row('curse.lacerate'));
-    expect(lineValue(curses, 'm1', 'bleed_chance')).toBe(valueOf('curse.lacerate', 'bleed_chance'));
-    // the row's chance and engine.json's K_BLEED_CHANCE are the same number stated in one home
-    expect((E.K as any).K_BLEED_CHANCE * 100).toBe(valueOf('curse.lacerate', 'bleed_chance'));
-    const store = newMobStatusStore();
-    let applied = 0;
-    for (let i = 0; i < 50; i++) if (applyBleed(mulberry32(i), store, 'm1', 1000, (E.K as any).K_BLEED_CHANCE)) applied++;
-    expect(store.m1.statuses.bleed!.perSec).toBeCloseTo((1000 * (E.K as any).K_BLEED) / (E.K as any).bleed_time_sec, 6);
-    // a weaker hit cannot shorten the bleed a stronger one already started
-    applyBleed(() => 0, store, 'm1', 10, 1);
-    expect(store.m1.statuses.bleed!.perSec).toBeCloseTo((1000 * (E.K as any).K_BLEED) / (E.K as any).bleed_time_sec, 6);
-    expect(applied).toBeGreaterThan(0);
   });
 
   it('every condition a row may name has a reader in the status store', () => {

@@ -71,6 +71,23 @@ export function equipFromBag(s: GameState, bagIndex: number, quiet = false): { o
   return { ok: true };
 }
 
+/**
+ * Take one body cell off and put the piece at the front of the bag — the drag-back and the "take off"
+ * verb. The bag holding no room refuses rather than dropping anything, the same way a deposit does.
+ */
+export function unequip(s: GameState, cell: number, quiet = false): { ok: boolean; why?: string } {
+  const item = s.gear[cell];
+  if (!item) return { ok: false, why: 'nothing is worn in that slot' };
+  if (s.bag.length >= E.inventory.adventure_slots) return { ok: false, why: 'the hunt pile is full' };
+  const gear = [...s.gear];
+  gear[cell] = null;
+  s.gear = gear;
+  s.bag.unshift(item);
+  refreshFilter(s);
+  if (!quiet) push(s, `Took off ${item.base}`);
+  return { ok: true };
+}
+
 export interface EquipSwap {
   slot: string;
   base: string;

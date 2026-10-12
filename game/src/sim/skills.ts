@@ -1,7 +1,7 @@
 import { eng, E, SKILLS, sm } from '../engine/client';
 import { mastery } from './mastery';
-import { setStacks, stopMob, placeStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, type MobStatusName } from './mobStatus';
-import { lineValue } from './curse';
+import { setStacks, setErosion, stopMob, placeStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, type MobStatusName } from './mobStatus';
+import { lineValue, applyCurse } from './curse';
 import type { Character } from './player';
 import type { Mob } from './types';
 import type { Statuses } from './combat';
@@ -43,7 +43,7 @@ export interface SkillConditions {
   /** Fire it only while the character is under this share of its pool (0 = off). */
   hpBelowPct: number;
   /**
-   * One flag per Element status a row can apply (the five `elements.status_of` names): the row fires
+   * One flag per Element status a row can apply (the `elements.status_of` names): the row fires
    * while the target is MISSING a status it applies. Read off the roster, not typed per
    * skill — `appliedStatusOf` derives which one a row carries from its own `element`.
    */
@@ -57,6 +57,17 @@ export interface SkillConditions {
 
 /** Every leg off — the list an `always` or `never` row is read against, so no leg can hold it back. */
 export const NO_COND: SkillConditions = { boss: false, hpBelowPct: 0, statusMissing: [], minTargets: 0, manaFloorPct: 0 };
+
+/**
+ * Move one row of the cast order to another place. The list is the whole rotation, so a move is a splice
+ * and not a swap: the rows between slide one place, which is what dragging a slot across the bar means.
+ * The bar is a fixed length, so a move never adds or removes a slot.
+ */
+export function moveSlot(s: SkillState, from: number, to: number): void {
+  if (from === to || from < 0 || to < 0 || from >= s.list.length || to >= s.list.length) return;
+  const [row] = s.list.splice(from, 1);
+  s.list.splice(to, 0, row);
+}
 
 /** The condition list a row carries, filled out to every leg so a caller never tests for a key. */
 export const condOf = (s: SkillState, id: string): SkillConditions => ({ ...NO_COND, ...(s.conditions?.[id] || {}) });
@@ -255,14 +266,13 @@ export function usableMana(c: Character, s: SkillState): number {
 }
 
 /**
- * What a row costs for this character right now, so a flat row shows the units it actually charges
- * rather than the base it was quoted at. A percentage row is left as the row states it.
+ * What a row costs this character right now: the typed mana units, grown only by the row's own skill
+ * level, so the bar shows the price this rotation actually charges. The pool sets no price.
  */
-export function manaNow(c: Character, s: SkillState, id: string, aoe = false): string {
+export function manaNow(s: SkillState, id: string, aoe = false): string {
   const skill = sm.byId[id];
-  const spec = sm.manaSpec(skill);
-  if (!spec || spec.kind === 'pct') return skill.mana || '';
-  const cost = sm.manaCostOf(skill, { skillLevel: skillLevel(s, id), maxMana: c.maxMana, usableMana: usableMana(c, s), aoe });
+  if (sm.manaSpec(skill) == null) return skill.mana || '';
+  const cost = sm.manaCostOf(skill, { skillLevel: skillLevel(s, id), aoe });
   return `${skill.mana} · ${Math.round(cost)} now`;
 }
 
@@ -316,8 +326,6 @@ export interface CastReport {
   id: string;
   name: string;
   damage: number;
-  manaKind: 'pct' | 'flat' | null;
-  manaValue: number | null;
   manaCost: number;
   targets: number;
   heal?: { secLeft: number; pctPerSec: number };
@@ -336,6 +344,8 @@ export interface CastReport {
   byMob: { id: string; amount: number }[];
   /** Ghost Dance: perfect-dodge charges this press grants, from its own level ramp. */
   charges?: number;
+  /** Earth Wall: block charges this press grants, from its own level ramp. */
+  blockCharges?: number;
   /** A row whose effect is to clear what is on the character (Cleanse, and Holy Veil's cast). */
   cleansesSelf?: boolean;
 }
@@ -372,7 +382,8 @@ export function effectsActive(sk: SkillState) {
 /** "3/1" → 3 targets when the group is big enough, else 1 (`skill-pool-attack.md` targets column).
  *  The AoE rule is 60% per target, Cap 3, mana ×1.5 (`skill-pool.md`) — the cost multiplier is
  * read from `engine.json` `aoe.mana_mult` inside `manaCostOf`, not repeated here. */
-const AOE_PCT_PER_EXTRA_TARGET = 0.6;
+/** the row's per-target share, read off the AoE rule the engine prices (`aoe.per_target_pct`) */
+const AOE_PCT_PER_EXTRA_TARGET = (E.aoe as any).per_target_pct / 100;
 
 function targetCount(skill: any, group: Mob[]): number {
   const cap = Number(String(skill.targets || '1').split('/')[0]) || 1;
@@ -399,9 +410,9 @@ export function castOnce(
   const condBoss = env.isBoss ?? String(group[0].kind).startsWith('Boss');
   const condMissingHp = env.missingHpPct || 0;
   // §13: a row with no timer of its own is the FILLER — it presses only after every timed slot has had
-  // its chance, so a caster's core press can never take the mana the rotation's real slots are waiting on
-  const order = s.list.filter((id) => id && (sm.byId[id] as any).cd !== 0)
-    .concat(s.list.filter((id) => id && (sm.byId[id] as any).cd === 0));
+  // its chance, so a cd-0 row can never take the mana the rotation's real slots are waiting on
+  const order = s.list.filter((id) => id && (sm.byId[id] as any).cd !== 0 && sm.weaponFits(sm.byId[id], c.weaponName))
+    .concat(s.list.filter((id) => id && (sm.byId[id] as any).cd === 0 && sm.weaponFits(sm.byId[id], c.weaponName)));
   for (const id of order) {
     if (!id || (s.cd[id] || 0) > 0) continue;
     // §14: the player's own switch on the slot — `never` silences a row, `conditional` gates it on
@@ -416,9 +427,8 @@ export function castOnce(
       if (!holds) continue;
     }
     const aoe = targetCount(skill, group) > 1;
-    const ms = sm.manaSpec(skill);
     const cost = sm.manaCostOf(skill, {
-      skillLevel: skillLevel(s, id), maxMana: c.maxMana, usableMana: pool, aoe,
+      skillLevel: skillLevel(s, id), aoe,
     }) * (env.trigger?.manaMult ?? 1);
     if (cost > mana) continue;
     // the mana floor is the rotation's one act of restraint: a row that would drop the usable pool under
@@ -433,7 +443,7 @@ export function castOnce(
     if (skill.type === 'heal') {
       const h = healOf(skill);
       return {
-        id, name: skill.name ?? '', damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, byMob: [],
+        id, name: skill.name ?? '', damage: 0, manaCost: spent, targets: 0, byMob: [],
         heal: h?.heal, instantHealPct: h?.instantHealPct,
         cleansesSelf: hasRule(skill, 'cleanses_status'),
       };
@@ -446,8 +456,14 @@ export function castOnce(
         ? Math.min(valueOf(skill, 'dodge_charges_cap', 0) || Infinity,
           base.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'dodge_charges_per_levels', 1)))
         : undefined;
+      // Earth Wall is the same ramp on the block layer: a pool of cuts rather than of deletions
+      const bBase = (skill.effects || []).find((e: any) => e.stat === 'block_charges');
+      const blockCharges = bBase
+        ? Math.min(valueOf(skill, 'block_charges_cap', 0) || Infinity,
+          bBase.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'block_charges_per_levels', 1)))
+        : undefined;
       return {
-        id, name: skill.name ?? '', damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, byMob: [], charges,
+        id, name: skill.name ?? '', damage: 0, manaCost: spent, targets: 0, byMob: [], charges, blockCharges,
         cleansesSelf: hasRule(skill, 'cleanses_on_cast'),
       };
     }
@@ -457,7 +473,7 @@ export function castOnce(
       const hit = rng() <= eng.hitChance(c.accuracy, mob.evasion);
       const writes = (skill.effects || []).some((e: any) => e.subject === 'target');
       return {
-        id, name: skill.name ?? '', damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: hit ? 1 : 0, byMob: [],
+        id, name: skill.name ?? '', damage: 0, manaCost: spent, targets: hit ? 1 : 0, byMob: [],
         curseOn: hit && writes ? mob.id : null,
       };
     }
@@ -519,6 +535,9 @@ export function castOnce(
         if (e.stat === 'poison_stacks') setStacks(env.mobStatus, t.id, 'poison', e.value, alignedPerSec);
         if (e.stat === 'burn_stacks') setStacks(env.mobStatus, t.id, 'burn', e.value, alignedPerSec);
         if (e.stat === 'mark_stacks') setStacks(env.mobStatus, t.id, 'mark', e.value, alignedPerSec);
+        // Sand Storm's own lingering line: the row types the damage a second and the seconds, and the
+        // tick counts inside the shared DoT budget the cap already runs on
+        if (e.stat === 'dot_dps') setErosion(env.mobStatus, t.id, e.value, dotSec, alignedPerSec);
         if (e.stat === 'stop_sec') stopMob(env.mobStatus, t.id, e.value, hasRule(skill, 'bypasses_control_cap'));
       }
       if (statusName) placeStatus(env.mobStatus, t.id, statusName, c, alignedPerSec);
@@ -531,21 +550,37 @@ export function castOnce(
     let dealt = 0;
     const struck: { id: string; amount: number }[] = [];
     // the Element share of a magic-basis press is the part the mob's resistance answers, and a
-    // row that names a pierce removes that share of the mob's own line for this press only (Nether Orb)
+    // row that names a pierce removes that share of the mob's own line for this press only
     const magicBasis = skill.basis === 'magic' ? c.magic + c.elem * (c.alignment / 100) : 0;
     // the character's own Element mix, so a press's Element share can be split the way a swing's pools are
     const elemPools = Object.entries(c.elemByElement);
     const elemPoolTotal = elemPools.reduce((a, [, v]) => a + v, 0);
     const pierce = effects.find((e) => e.stat === 'resistance_pierce_pct');
+    // Sand Storm's own seconds, unscaled by the ramp (it opts out in `special_level_effects`)
+    const dotSec = effects.find((e) => e.stat === 'dot_sec')?.value ?? 10;
+    // Earth Splitter: the share of the TARGET's own maximum pool the row adds, and the cut a boss takes
+    // (owner ticket) — a %HP slam lands on a body, so it is read per target, never from the caster
+    const pctPool = effects
+      .filter((e) => e.stat === 'max_hp_pct_damage' && (e.subject || 'self') === 'target')
+      .reduce((s, e) => s + e.value, 0);
     // the row's own bleed feed: a target-side `bleed_chance` it guarantees on the mob it lands on
     const rowBleedPct = effects
       .filter((e) => e.stat === 'bleed_chance' && (e.subject || 'self') === 'target')
+      .reduce((s, e) => s + e.value, 0);
+    // and its stun feed, the same shape: a row that adds a stun chance the mace's own line did not
+    const rowStunPct = effects
+      .filter((e) => e.stat === 'stun_chance' && (e.subject || 'self') === 'target')
       .reduce((s, e) => s + e.value, 0);
     for (let i = 0; i < n; i++) {
       const t = group[i];
       if (rng() > eng.hitChance(c.accuracy, t.evasion)) continue;
       if (dodges && rng() * 100 < eng.dodgeChance(t.dodgeRate, c.accuracy)) continue;
-      const share = i === 0 ? dmg : dmg * AOE_PCT_PER_EXTRA_TARGET;
+      // the pool term is the mob's own maximum, so it is added after the press: a hit on a body with
+      // more HP hits harder, and a boss takes its own reduced share of it
+      const poolTerm = pctPool > 0
+        ? t.hpMax * (pctPool / 100) * (t.kind.startsWith('Boss') ? (E.max_hp_press.boss_pct / 100) : 1)
+        : 0;
+      const share = (i === 0 ? dmg : dmg * AOE_PCT_PER_EXTRA_TARGET) + poolTerm;
       const elemPart = magicBasis > 0 ? share * ((c.elem * (c.alignment / 100)) / magicBasis) : 0;
       const cut = env.mobStatus ? (targetMods(mobModsOn(env.mobStatus, t.id)).armourCut || 0) : 0;
       const stripped = env.curses ? lineValue(env.curses, t.id, 'mob_elemental_resistance_pct') : 0;
@@ -583,9 +618,12 @@ export function castOnce(
       // proc, its bleed chance and the mace's stun — so a rotation does not silently stop applying
       // status the moment the bar fills
       if (env.mobStatus) {
-        applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct);
+        applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct, rowStunPct);
       }
       if (everyTarget || i === 0) spendOn(t);
+      // a row's TARGET lines are a curse it writes on the hit: the same store a curse skill fills, so
+      // `accuracy`, `damage_dealt` and a resistance strip read off a press exactly as they do off a curse
+      if (env.curses) applyCurse(env.curses, t.id, skill);
     }
     void statuses;
     // a press that opens a self window (Reap) folds the row onto the character sheet for its own
@@ -595,7 +633,7 @@ export function castOnce(
       s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
     }
     return {
-      id, name: skill.name ?? '', damage: dmg, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: landed, crit, dealt, byMob: struck,
+      id, name: skill.name ?? '', damage: dmg, manaCost: spent, targets: landed, crit, dealt, byMob: struck,
     };
   }
   return null;

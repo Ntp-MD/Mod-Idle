@@ -12,7 +12,8 @@ An open-world idle RPG: grind monsters, assemble a build from dropped items, ear
 | `tools/data/` | every number, one file per domain — see the table below |
 | `tools/` | the cages, their shared readers (`lib/engine.ts` · `lib/roster.ts` · `lib/skillmodel.ts` · `lib/json.ts`) and the entry points that print numbers on demand |
 | `game/` | the client: `src/engine/client.ts` (the same JSON, the same `createEngine`) · `src/sim/` (tick, combat, drops, offline) · `src/state/save.ts` · `src/ui/` · `tests/` |
-| `doc/start/` | the surviving prose — the design `DECISIONS.md` · `glossary.md` · `stone-list.md` · the generated `test.md` — and the work file `todo.md` |
+| `wiki/` | the player-facing pages — the static build of `game/src/wiki/pages.ts`. An output, never a source: rebuild it, never hand-edit it |
+| `doc/start/` | the surviving prose — the design `DECISIONS.md` · `glossary.md` · `stone-list.md` — and the work file `todo.md`, which exists only while a task is open (its absence is normal) |
 | root | `AGENTS.md` |
 
 | Data file | Owns |
@@ -29,7 +30,7 @@ An open-world idle RPG: grind monsters, assemble a build from dropped items, ear
 
 File names stay lowercase with hyphens. Never create `skill.md`, `skills.md` or `SKILL.md` for game content, or a `.opencode/skills/` pattern — those names are reserved for agentic skills and get auto-loaded as instructions.
 
-Every gate id the engine cage prints is described in `doc/start/test.md`. That file is generated from the cage's own output — regenerate it with the cage and never hand-edit a line of it.
+A gate prints its own meaning on its own line, so the run is the documentation: there is no transcript file to keep in step with the cage.
 
 ## Commands
 
@@ -41,6 +42,7 @@ Run from `<repo root | game/ | tools/>`.
 - Typecheck: `<pnpm typecheck>`
 - Cages (data validators): `<command>`
 - Print numbers on demand: `<tools/ entry point>`
+- Rebuild the wiki: `npm run wiki` (writes `wiki/`)
 
 ## Before You Start
 
@@ -54,6 +56,7 @@ Run from `<repo root | game/ | tools/>`.
 2. Run the cages.
 3. Run the tests.
 4. If the change alters a design rule, update `DECISIONS.md` in the same change.
+5. Rebuild the wiki: `npm run wiki`. A page reads the live engine, so any change that moves a number or a page's own read moves `wiki/` with it.
 
 `bases.json` is a source file: never generate it from a doc.
 
@@ -98,6 +101,8 @@ Source of truth: `game/src/styles/variables.css`. Read it before writing or edit
 ## Done When
 
 - Cages pass, tests pass, typecheck passes.
+- The wiki is rebuilt in the same change (`npm run wiki`). Engine updated and `wiki/` left behind is not done: the pages are the numbers a player reads, and an un-rebuilt wiki is a stale copy of them.
+- The wiki's own PROSE moved with the change too: a rebuild refreshes what a page reads from the data, but a rule or a mechanic that changed usually also moved the hand-written sentences in `game/src/wiki/pages.ts` — grep the page for the old reading and fix it in the same change.
 - No new hardcoded numbers outside `tools/data/`.
 - `todo.md` updated if the task was on it.
 

@@ -104,6 +104,7 @@ const elementByName: Record<string, string> = {
   lightning,
   poison: droplets,
   chaos,
+  earth: rock,
 };
 
 const weaponIcon = (base: string): string => {
@@ -129,6 +130,15 @@ export function gearIcon(item: Item): string {
     return crossShield;
   }
   return armorBySlot[slot] ?? armorUpgrade;
+}
+
+/** The glyph an empty slot wears on the doll — the same shelf a worn piece draws from, so a bare body
+ *  still reads as a body with places to fill rather than as a grid of words. */
+export function slotIcon(slot: string): string {
+  const s = slot.toLowerCase();
+  if (s === 'main hand') return broadSword;
+  if (s === 'off hand') return crossShield;
+  return armorBySlot[s] ?? armorUpgrade;
 }
 
 export function stackIcon(group: string, name: string): string {

@@ -350,19 +350,19 @@
   .shop { display: grid; gap: var(--spacing-md); }
   /* the stash shape: the stones on the left, the bench in the middle, the bag on the right — the
      centre column is the work and stays the widest */
-  .bench { display: grid; grid-template-columns: minmax(clamp(137.5px, 8.965vw + 34.65px, 297px), clamp(168.75px, 11.002vw + 42.52px, 364.5px)) minmax(0, 1fr) minmax(clamp(156.25px, 10.188vw + 39.38px, 337.5px), clamp(187.5px, 12.225vw + 47.25px, 405px)); gap: var(--spacing-md); align-items: start; }
+  .bench { display: grid; grid-template-columns: minmax(clamp(138px, 8.965vw + 35px, 297px), clamp(169px, 11.002vw + 43px, 364px)) minmax(0, 1fr) minmax(clamp(156px, 10.188vw + 39px, 338px), clamp(188px, 12.225vw + 47px, 405px)); gap: var(--spacing-md); align-items: start; }
   .stash, .bagcol { position: sticky; top: 0; }
   h4 { margin: 0 0 4px; }
   /* the currency tab: one cell per stone, icon and count, the name on the hover — the purse is read
      at a glance the way a stash tab is, not scanned as a list */
-  .tab { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(37.5px, 2.445vw + 9.45px, 81px), 1fr)); gap: 3px; }
+  .tab { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(38px, 2.445vw + 9px, 81px), 1fr)); gap: 3px; }
   .stone {
     position: relative; aspect-ratio: 1; display: grid; place-items: center;
     background: var(--inset); border: 1px solid var(--line); border-radius: 4px;
   }
   .stone img { width: var(--icon-md); height: var(--icon-md); object-fit: contain; }
   .stone b {
-    position: absolute; right: clamp(2.5px, 0.163vw + 0.63px, 5.4px); bottom: clamp(1.5px, 0.098vw + 0.38px, 3.24px);
+    position: absolute; right: clamp(2px, 0.163vw + 1px, 5px); bottom: clamp(2px, 0.098vw + 0px, 3px);
     font-family: var(--num); font-size: var(--font-xs); color: var(--text); text-shadow: 0 1px 0 rgba(0, 0, 0, .9);
   }
   .tip { margin: var(--spacing-xs) 0 0; }
@@ -395,7 +395,7 @@
   .more p { margin: var(--spacing-xs) 0 0; }
   .work { display: grid; gap: var(--spacing-md); }
 
-  .wbtns { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(162.5px, 10.595vw + 40.95px, 351px), 1fr)); gap: 4px; }
+  .wbtns { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(162px, 10.595vw + 41px, 351px), 1fr)); gap: 4px; }
   .wbtns button { display: grid; gap: 1px; justify-items: start; text-align: left; padding: var(--spacing-xs) var(--spacing-sm); }
   .wbtns b { font-size: var(--font-xs); }
   .wbtns span { font-size: var(--font-xs); color: var(--dim); }

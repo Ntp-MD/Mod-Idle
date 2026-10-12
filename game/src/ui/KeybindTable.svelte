@@ -108,7 +108,7 @@
   .kb .where { font-family: var(--ui); color: var(--mob); font-size: var(--font-xs); }
   .kb .tail { display: flex; gap: 3px; justify-content: flex-end; align-items: center; }
   .cap {
-    min-width: var(--box-110); font-family: var(--num); font-size: var(--font-xs); letter-spacing: clamp(0.5px, 0.033vw + 0.13px, 1.08px);
+    min-width: var(--box-110); font-family: var(--num); font-size: var(--font-xs); letter-spacing: clamp(0px, 0.033vw + 0px, 1px);
     background: var(--inset); border-color: var(--line);
   }
   .cap.waiting { border-color: var(--focus); color: var(--focus); background: color-mix(in srgb, var(--focus) 10%, transparent); }

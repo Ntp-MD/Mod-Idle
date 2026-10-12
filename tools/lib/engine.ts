@@ -1,7 +1,7 @@
 /**
  * Shared engine math — the single source for stat ceilings, derived caps,
  * the loot model and craft throughput. Read by tools/check.ts (groups A · B · C · F)
- * and tools/town.ts (gold per minute · kill thresholds · supply).
+ * and by every reader that needs a derived figure.
  *
  * Nothing here is a number copied by hand: every value is computed from
  * tools/data/engine.json, and every cage asserts the result against engine/ and the client.
@@ -27,7 +27,7 @@ const E = readJson<EngineData>(ENGINE_JSON);
  */
 const eng = Object.assign({}, shared.createEngine(E), { E, ROAD: createRoad(E) });
 
-// ---- what tools/town.ts needs, so no town number is a copy of a loot number
+// ---- the derived figures a reader asks for, so no number is a copy of a loot number
 // The shape only: every figure here is a name on the engine, never an expression re-typed here.
 
 function engineForTown(): any {

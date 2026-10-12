@@ -65,7 +65,25 @@ function openDb(): Promise<IDBDatabase> {
 
 const lsKey = (key: string) => `modworld:${key}`;
 
+/**
+ * The localStorage mirror is written synchronously, so a `beforeunload` flush survives: an IndexedDB
+ * write is async and the page can be gone before its transaction commits, while the same bytes hit
+ * localStorage before the handler returns. A quota failure deletes the mirror rather than leaving a
+ * stale copy behind — `get` reads the mirror first, so a shadowed older record would win forever.
+ */
+function lsWrite(key: string, payload: string): void {
+  if (typeof localStorage === 'undefined') return;
+  try { localStorage.setItem(lsKey(key), payload); }
+  catch { try { localStorage.removeItem(lsKey(key)); } catch { /* the DB copy is the only one left */ } }
+}
+
+function lsRead(key: string): string | null {
+  if (typeof localStorage === 'undefined') return null;
+  try { return localStorage.getItem(lsKey(key)); } catch { return null; }
+}
+
 async function put(key: string, payload: string): Promise<void> {
+  lsWrite(key, payload);
   try {
     const db = await openDb();
     await new Promise<void>((resolve, reject) => {
@@ -75,11 +93,15 @@ async function put(key: string, payload: string): Promise<void> {
       tx.onerror = () => reject(tx.error);
     });
   } catch {
-    if (typeof localStorage !== 'undefined') localStorage.setItem(lsKey(key), payload);
+    // the mirror already holds it; a browser without IndexedDB loses nothing
   }
 }
 
 async function get(key: string): Promise<string | null> {
+  // the mirror first: every `put` writes it synchronously, so it can never be staler than the DB, and
+  // an unload flush mid-transaction is a save the next session actually reads
+  const local = lsRead(key);
+  if (local != null) return local;
   try {
     const db = await openDb();
     return await new Promise<string | null>((resolve, reject) => {
@@ -89,7 +111,7 @@ async function get(key: string): Promise<string | null> {
       req.onerror = () => reject(req.error);
     });
   } catch {
-    return typeof localStorage !== 'undefined' ? localStorage.getItem(lsKey(key)) : null;
+    return null;
   }
 }
 
@@ -158,6 +180,46 @@ export async function writeSave(slot: SlotName, state: GameState): Promise<void>
   if (why) armSnapshot(state);
   await put(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...state, fx: [] } }));
   if (shot) await pushSnapshot(slot, shot);
+}
+
+/** The account record as the mirror holds it — the synchronous twin of `readAccount`, for the unload path. */
+function readAccountSync(): Account {
+  const raw = lsRead(ACCOUNT_KEY);
+  if (!raw) return newAccount();
+  try {
+    return { ...newAccount(), ...(JSON.parse(raw) as Account) };
+  } catch {
+    return newAccount();
+  }
+}
+
+function readSnapshotsSync(slot: SlotName): Snapshot[] {
+  const raw = lsRead(snapKey(slot));
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as Snapshot[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * The synchronous flush the unload path needs: `writeSave` awaits an account read and a transaction,
+ * and the browser may tear the page down before either finishes. This writes the account, the slot and
+ * any owed snapshot straight to the localStorage mirror in one turn, so closing the tab loses nothing.
+ */
+export function writeSaveSync(slot: SlotName, state: GameState): void {
+  lsWrite(ACCOUNT_KEY, JSON.stringify(mergeMastery(readAccountSync(), state, slot)));
+  const why = snapshotReason(state);
+  if (why) {
+    const shot: Snapshot = {
+      version: SCHEMA_VERSION, reason: why, clockSec: state.clockSec, takenAt: Date.now(),
+      state: JSON.parse(JSON.stringify({ ...state, pendingSnapshot: null })),
+    };
+    armSnapshot(state);
+    lsWrite(snapKey(slot), JSON.stringify([shot, ...readSnapshotsSync(slot)].slice(0, SAVE_CFG.snapshot_slots)));
+  }
+  lsWrite(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...state, fx: [] } }));
 }
 
 export interface Snapshot {

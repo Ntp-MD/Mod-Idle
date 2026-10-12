@@ -12,16 +12,16 @@
  * One source serves both, so a figure cannot be right in one place and stale in the other. The theme
  * is the client's own: the caller reads `game/src/styles/variables.css` and hands its `:root` block to
  * `renderDoc`, so a colour has exactly one home.
+ *
+ * Every figure carries its unit — a percent reads `%`, a duration reads `sec`, a count reads bare
+ * (`fxVal` decides it from the stat, never from the wording around it). A number a player cannot place
+ * is a number they cannot act on.
  */
 
 // The wiki reads the engine, and only the engine: this is the same seam the client uses, so a page,
 // a cage and the game all resolve to one module and one data file.
-import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, eng, loot, sm, tree } from '../engine/client.ts';
-// Road and farm are the same engine modules the client runs, instantiated here once for the same
-// reason: a page that multiplied a block count into a walk time by hand would be a second clock.
-import { createRoad } from '../../../engine/road.ts';
+import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, eng, loot, sm, tree, road, farm } from '../engine/client.ts';
 import { STONE_NAME, PRESS_NAME } from '../../../engine/craft.ts';
-import { createFarm } from '../../../engine/farm.ts';
 
 /**
  * A strict view of the data. A key that is not there throws instead of printing `0` or an em dash on a
@@ -43,7 +43,11 @@ const strict = (obj: any, name: string): any => {
         // the same view further down the chain, so `E.craft.ascend_add_stone` fails as loudly as `E.craf`
         return plain !== null && typeof plain === 'object' ? strict(plain, `${name}.${key}`) : plain;
       }
-      throw new Error(`wiki: ${name}.${key} is not in the data — the page reads a key that does not exist`);
+      // A key the data does not carry YET is not a broken page: it reads as `undefined`, so a page's own
+      // `?? '—'` fallback still works, and it says so on the console. That is what lets an element, a
+      // status or a Mod land in the data one step ahead of the prose that describes it.
+      console.warn(`wiki: ${name}.${key} is not in the data — reading it as undefined`);
+      return undefined;
     },
   });
   VIEWS.set(obj, view);
@@ -88,10 +92,23 @@ const plist = (items: string[]): string =>
 /** A range collapses to one figure when both ends agree (a mob's level is static). */
 const span = (a: any, b: any): string => (n0(a) === n0(b) ? n0(a) : `${n0(a)}–${n0(b)}`);
 const pctList = (a: any): string => (a || []).map((x: any) => `${(Number(x) * 100).toFixed(1)}%`).join(' · ');
+const rowHtml = (cells: any[]): string => `<tr>${cells.map((c) => `<td>${c == null ? '' : String(c)}</td>`).join('')}</tr>`;
 const table = (head: string[], rows: any[][]): string =>
   `<table><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>` +
-  rows.map((r) => `<tr>${r.map((c) => `<td>${c == null ? '' : String(c)}</td>`).join('')}</tr>`).join('') +
+  rows.map((r) => rowHtml(r)).join('') +
   '</tbody></table>';
+/**
+ * One table, its rows split into tabbed groups. The strip above it is a radio group and the tabs are
+ * `<tbody>`s, so a press swaps a body over the shared header and neither host needs a script — the static
+ * build and the live wiki render the same markup.
+ */
+const tabbedTable = (name: string, head: string[], groups: { key: string; label: string; rows: any[][] }[]): string => {
+  const strip = groups.map((g, i) =>
+    `<input type="radio" name="${name}" id="${name}-${g.key}"${i === 0 ? ' checked' : ''}>` +
+    `<label for="${name}-${g.key}">${esc(g.label)} <b>${g.rows.length}</b></label>`).join('');
+  const bodies = groups.map((g) => `<tbody class="g-${g.key}">${g.rows.map((r) => rowHtml(r)).join('')}</tbody>`).join('');
+  return `<div class="tabs">${strip}<table><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>${bodies}</table></div>`;
+};
 const block = (h: string, body: string, note = ''): string =>
   `<section><h2>${esc(h)}</h2>${note ? `<p class="note">${note}</p>` : ''}${body}</section>`;
 const yes = (v: any): string => (v ? 'yes' : 'no');
@@ -173,43 +190,76 @@ const pc0 = (v: number): string => `${n0(v * 100)}%`;
 const pc1 = (v: number): string => `${n1(v * 100)}%`;
 /** a figure the data already states in percentage points, not as a fraction */
 const pts = (v: number): string => `${n0(v)}%`;
-/** One effect value as the page prints it: the op decides the sign, the level decides the number. */
-const fxVal = (e: any, v: number): string =>
-  e.op === 'mult' ? `×${n2(v)}` : `${v < 0 ? '−' : '+'}${Number.isInteger(Math.abs(v)) ? n0(Math.abs(v)) : n1(Math.abs(v))}`;
+/** The stats whose value is a percentage even when it is added flat: a crit chance and the Alignment gate,
+    which every other page already reads as a percent. */
+const PCT_FLAT = new Set(['elemental_alignment', 'crit_chance']);
 /**
- * Every line one skill moves, from its level-1 value to the value it holds at the level cap — the two
- * ends the engine's own `effectsAt` prints, so a `special_level_effects` stat that does not ride the
- * ramp shows one number rather than a fake climb. `foe` marks a line an aura writes on the Field of
- * Enemies; `mob` marks one a press or a curse writes on the mob it landed on.
+ * One effect value as the page prints it: the op decides the sign, the level decides the number, and the
+ * stat decides the unit. A figure never ships bare — a percent keeps its `%`, a `*_sec` value says
+ * seconds (added flat or not), a count stays a count, and a ratio is a `×`.
  */
-const fxLadder = (s: any): string => {
+const fxVal = (e: any, v: number): string => {
+  if (e.op === 'mult') return `×${n2(v)}`;
+  const abs = Number.isInteger(Math.abs(v)) ? n0(Math.abs(v)) : n1(Math.abs(v));
+  // `_sec` is a duration — but a `_per_sec` stat is a rate, so its unit comes from its op (a percent a
+  // second), never from the suffix.
+  const unit = e.stat.endsWith('_sec') && !e.stat.endsWith('_per_sec') ? ' sec'
+    : e.stat.endsWith('_pct') || e.op === 'add_pct' || PCT_FLAT.has(e.stat) ? '%' : '';
+  return `${v < 0 ? '−' : '+'}${abs}${unit}`;
+};
+/**
+ * The lines a row moves, one value a line wherever the column is drawn: each line names itself, says who
+ * it lands on, and holds the value it has at that end of the skill-level ramp. A press leads the list on
+ * an attack row, because its damage is that row's headline; an aura writes on the Field of Enemies
+ * (`foe`) and a press or a curse on the mob it hits.
+ */
+const sideOf = (s: any, e: any): string =>
+  e.subject === 'target' ? (s.type === 'aura' || s.type === 'buff' ? 'foe' : 'mob') : 'self';
+const fxEndCell = (s: any, level: number): string => {
   const fx: any[] = s.effects || [];
-  if (!fx.length) return '';
-  const one = sm.effectsAt(s, 1), top = sm.effectsAt(s, sm.LEVEL_CAP);
-  return '<ul class="fx">' + fx.map((e: any, i: number) => {
-    const a = one[i].value, b = top[i].value;
-    const side = e.subject === 'target' ? (s.type === 'aura' || s.type === 'buff' ? 'foe' : 'mob') : 'self';
-    return `<li><span class="fk">${esc(e.stat)}${e.element ? `:${esc(e.element)}` : ''}${e.condition ? ` <em>if ${esc(e.condition)}</em>` : ''}</span>` +
-      `<span class="fs">${side}</span><span class="fv">${fxVal(e, a)}${Math.abs(b - a) > 0.004 ? ` → ${fxVal(e, b)}` : ''}</span></li>`;
-  }).join('') + '</ul>';
+  if (s.type !== 'attack' && !fx.length) return '<span class="hy">—</span>';
+  const at = sm.effectsAt(s, level);
+  const items = fx.map((e: any, i: number) =>
+    `<li><span class="fk">${esc(e.stat)}${e.element ? `:${esc(e.element)}` : ''}${e.condition ? ` <em>if ${esc(e.condition)}</em>` : ''}</span>` +
+    `<span class="fs">${sideOf(s, e)}</span><span class="fv">${fxVal(e, at[i].value)}</span></li>`);
+  if (s.type === 'attack') items.unshift(`<li><span class="fk">press</span><span class="fs">mob</span><span class="fv">${press(s, 'glass', level)}</span></li>`);
+  return `<ul class="fx">${items.join('')}</ul>`;
 };
 const ST: any = (E as any).status || {};
 page({
   file: 'skills.html',
   nav: 'Skills',
   title: 'Skills',
-  lead: `Every skill is found as a drop and paid for with the same resource: <em>mana</em>. A skill levels up on kills with it in the list, up to ${E.skill_xp.level_cap} — and at that level it deals ${sm.damagePct(E.skill_xp.level_cap)}% of its level-1 damage and its effects are ${sm.effectPct(E.skill_xp.level_cap)}% as strong.`,
-  body: [...TYPES.map((t: string) => {
-    const rows = sm.of(t).map((s: any) => {
-      const attack = s.type === 'attack';
-      return [esc(s.name), s.cd ? `${n1(s.cd)} sec` : 'no cooldown', esc(s.mana),
-        attack ? press(s, 'glass', 1) : '', attack ? press(s, 'glass', E.skill_xp.level_cap) : '',
-        esc(s.targets || ''), esc(s.effect || s.reserve || ''), fxLadder(s) || '<span class="hy">writes no stat line</span>'];
-    });
-    const head = ['Skill', 'Cooldown', 'Mana', 'Damage (level 1)', `Damage (level ${E.skill_xp.level_cap})`, 'Targets', 'What it does', `Lines it moves (level 1 → ${E.skill_xp.level_cap})`];
-    return block(`${t} — ${sm.of(t).length}`, table(head, rows),
-      t === 'attack' ? 'Damage is one press on the reference character, before crit. The last column is every stat the row writes on, at level 1 and at the cap; a line with no arrow is one of the <code>special_level_effects</code>, which spend their level their own way.' : '');
-  }),
+  lead: `Every skill is found as a drop and paid for with the same resource: <em>mana</em>. A skill levels up on kills with it in the list, up to ${E.skill_xp.level_cap} — and at that level a press deals ${sm.damagePct(E.skill_xp.level_cap)}% of its level-1 damage, a buff's or an aura's effect climbs to ${sm.buffEffectPct(E.skill_xp.level_cap)}%, and every other effect reaches ${sm.effectPct(E.skill_xp.level_cap)}%.`,
+  body: [(() => {
+    // Three tabs over one table. Active is the slot list — every type that is not on the toggle track —
+    // read from the roster rather than typed, so a new type lands in the right tab by its own kind.
+    const OFF_SLOT = ['buff', 'aura'];
+    const GROUPS = [
+      { key: 'active', label: 'Active Skill', types: TYPES.filter((t) => !OFF_SLOT.includes(t)) },
+      { key: 'buff', label: 'Buff Skill', types: ['buff'] },
+      { key: 'aura', label: 'Aura Skill', types: ['aura'] },
+    ];
+    const head = ['Skill', 'Cooldown', 'Cost', 'Min Effect (level 1)', `Max Effect (level ${E.skill_xp.level_cap})`, 'Targets', 'What it does'];
+    const groups = GROUPS.map((g) => ({
+      key: g.key,
+      label: g.label,
+      rows: g.types.flatMap((t: string) => sm.of(t).map((s: any) => {
+        // Price is flat mana for every row that pays it, and the reserve share for an aura, which pays by
+        // holding that much of the pool open instead (`skills.json` gives an aura no `mana` at all).
+        const cost = s.mana ? esc(s.mana) : s.reserve ? `reserve ${sm.reservePct(s.reserve)}%` : '';
+        // An attack's effect columns lead with its press damage; a buff, an aura, a curse or a heal shows
+        // the lines it moves. Each line names itself, so the two columns read on their own.
+        // a row bound to one weapon says so beside its name (a family token: `axe` covers both axes)
+        const name = `${esc(s.name)}${s.weapon ? ` <span class="hy">${esc(s.weapon)}</span>` : ''}`;
+        return [name, s.cd ? `${n1(s.cd)} sec` : 'no cooldown', cost,
+          fxEndCell(s, 1), fxEndCell(s, E.skill_xp.level_cap),
+          esc(s.targets || ''), esc(s.effect || s.reserve || '')];
+      })),
+    }));
+    return block('The roster', tabbedTable('skillkind', head, groups),
+      'Min and Max are the same list at the two ends of the skill-level ramp: a press reads its damage, everything else the lines it moves, and each line names itself. The damage figure is a press on the reference character, before crit. A row with a weapon beside its name fires only while that weapon is held; one without is open to its whole group.');
+  })(),
     block('What a status changes, and how far it climbs', table(
       ['Status', 'What it does', 'At one stack / hit', 'At its ceiling', 'Holds'],
       [
@@ -233,16 +283,28 @@ page({
           `damage +${pc1(ST.mark.k_dmg)} · leech +${pc1(ST.mark.k_leech)}`,
           `${n0(ST.mark.stack_max)} stacks — damage +${pc0(ST.mark.k_dmg * ST.mark.stack_max)} · leech +${pc1(ST.mark.k_leech * ST.mark.stack_max)}`,
           `decays over ${n0(ST.mark.decay_sec)} sec`],
+        ['crippled', 'Slows the target&rsquo;s own attack clock — the timer its swings are counted on, so a second of its clock costs two — and slows cooldowns while it holds',
+          `clock ×${n2(1 - ST.crippled.clock_pct / 100)} · cooldowns ×${n2(1 - ST.crippled.cd_pct / 100)}`,
+          `no stacks — the cut is the whole status, and a second application only restarts it`,
+          `${n0(ST.crippled.time_sec)} sec`],
+        ['bleed', 'Physical damage over time off a landed hit. <strong>Not an Element</strong> — no resistance line answers it, Armour does not shrink it, and it cannot crit',
+          `×${n2((E as any).K.K_BLEED)} of the hit that inflicted it, spread over ${n0((E as any).K.bleed_time_sec)} sec`,
+          `no stacks — a new application refreshes the clock and keeps the stronger value`,
+          `${n0((E as any).K.bleed_time_sec)} sec`],
+        ['stun', 'The lightning stop — the only control in the game, and the shock line&rsquo;s stopped second rather than a status of its own',
+          `${n1(ST.shock.stop_sec)} sec off the target&rsquo;s clock, on a chance the Alignment gate lets through`,
+          `no stacks — one stop at a time, bounded so no fight can be locked out`,
+          `${n1(ST.shock.stop_sec)} sec`],
       ]),
-      `Every figure is the status table the roll reads. A status lands only when the Alignment gate lets it, and ${pc0(ST.proc_chance)} of the hits that pass the gate then carry it.`),
+      `Every figure is the status table the roll reads. A ROLLED status — an Element status, the bleed an axe&rsquo;s line grants, or a stun — lands only when the Alignment gate lets it, and ${pc0(ST.proc_chance)} of the Element hits that pass then carry their status. A row that declares its status outright is not a roll and never meets the gate.`),
     block('The Alignment a status rides', (() => {
       const raw = DV.align_raw, focused = DV.align_path;
       const stun = (a: number) => `${n1(eng.stunChanceFrom(a))}% chance`;
       return table(['', 'What the engine does', 'From → to'], [
         ['Where it comes from', 'Dex × <code>K_DEX_ALIGN</code>, plus any flat line, times any multiplier on it',
-          `stats alone ${n1(raw)} → the reference build path ${n1(focused)}`],
-        ['The gate', 'a status lands only when the roll beats your Alignment',
-          `then ${pc0(ST.proc_chance)} of the hits that pass carry it`],
+          `stats alone ${n1(raw)}% → the reference build path ${n1(focused)}%`],
+        ['The gate', 'EVERY rolled status passes it — an Element status, the bleed an axe&rsquo;s line grants, and a stun — so a build that cannot pass inflicts none of the three',
+          `then ${pc0(ST.proc_chance)} of the Element hits that pass carry their status`],
         ['The damage', 'aligned damage a second = Elemental power × Alignment ÷ 100 × hits a second',
           `burn and poison together stop at ×${n1(ST.dot_cap)} of that figure`],
         ['What it buys', 'the lightning side converts it into a stun chance through <code>K_STUN_PER_ALIGN</code>',
@@ -390,7 +452,7 @@ page({
     block('Core stats', table(['Stat', 'Feeds'], [
       ['Str', 'physical power and carry weight'], ['Vit', 'health, regeneration and stun recovery'], ['Dex', 'accuracy and Status alignment Chance'],
       ['Agi', 'attack speed and evasion'], ['Wis', 'max Energy Shield and cooldown reduction'], ['Int', 'magic power and mana'],
-      ['Lck', 'crit, perfect dodge and drop chance'],
+      ['Lck', 'crit and perfect dodge'],
     ]), 'Every stat also has one utility line, so no point is wasted.'),
     block('Caps', table(['Line', 'Cap', 'What that means'], Object.entries(E.caps as Record<string, any>)
       .filter(([k, v]) => (typeof v === 'number' || v === null) && k !== 'elem_res_max')
@@ -525,7 +587,7 @@ page({
       + `<li><strong>Health</strong> — Base health (the published <code>mob_HP</code> curve × the body ÷ the zone body factor) and Base mana, then what the Core makes of them: <code>Base HP + a flat hp-per-level grant + Vit × K_VIT_HP</code> on the health line.</li>`
       + `<li><strong>Offence</strong> — every line is <code>Base + K_core</code> through the one K table the player obeys: the damage tag (what Armour answers and what resistance answers), damage per second (<code>mob.species[].power_base</code> + the K term on the Str or Int its tag reads, over the zone mean, times the published <code>mob_PS(L)</code>), accuracy (Dex × K_DEX_ACC), Critical chance (Lck × K_LCK_CRIT) and Alignment (Dex × K_DEX_ALIGN).</li>`
       + `<li><strong>Defence</strong> — Armour (Str × K_ARMOUR), Evasion (Core Dex × K_EVASION × the body's base percent) and dodge (Agi × K_MOB_DODGE).</li>`
-      + `<li><strong>Elemental resistance</strong> — each of the five Elements as a percent the player's hit of that Element is cut by. The race's own Element resists at a flat <code>mob.race_res_pct</code> in every zone; every other Element meets no res at all. The Cap the player obeys is the same Cap here.</li>`
+      + `<li><strong>Elemental resistance</strong> — every Element as a percent the player's hit of that Element is cut by. The race's own Element resists at a flat <code>mob.race_res_pct</code> in every zone; every other Element meets no res at all. The Cap the player obeys is the same Cap here.</li>`
       + `<li><strong>XP a kill</strong> — <code>xpPerKill(mob level)</code>, with the Elite and Boss multipliers already on the row.</li>`
       + `<li><strong>Names</strong> (under the species) — the variant names that zone actually pays (<code>mob.variants</code> ∩ the sub-zone lists). A variant is a drop identity, not a stat line — the numbers are the species and the body.</li>`
       + `<li><strong>Element</strong> — the one Element the race owns (<code>mob.species[].element</code>): fixed, the same in every zone, because a spawn rolls no Element of its own.</li>`
@@ -783,7 +845,7 @@ page({
   file: 'elements.html',
   nav: 'Elements',
   title: 'Elements',
-  lead: 'Five Elements, and no Element counters another: an Element names the status its hits leave and the one race that resists it.',
+  lead: 'Every Element, and no Element counters another: an Element names the status its hits leave and the one race that resists it. An Element declared ahead of its content reads a dash until its status and its skill rows land.',
   body: [
     block('Where an Element is resisted', table(['Element', 'The races that own it'], E.elements.order.map((el: string) => [
       esc(el), list((E.mob.species || []).filter((sp: any) => (sp as any).element === el).map((sp: any) => sp.name)) || '—',
@@ -801,8 +863,6 @@ page({
 // `engine` function, `createRoad`, `createFarm`, or a field of `tools/data/*.json`. The prose names a
 // key and never a number.
 
-const road: any = createRoad(ENGINE as any);
-const farm: any = createFarm(ENGINE as any);
 const S: any = (E as any).stat;
 /** The even-split line the whole design is priced against, at the level cap. */
 const EVEN = eng.statAt(S.level_cap);
@@ -824,7 +884,7 @@ page({
       row('Evasion', 'the dodge roll: Agi carries the rating and the gear Evasion lines ride on it, opposed by the attacker’s Accuracy',
         capOf('evasion'), `${n1(eng.evasionRating(EVEN))} rating at the even split alone, before any gear line — <code>evasionRating</code>, <code>evasionChance</code>`),
       row('Block', 'rolled last of the three avoidances; a blocked hit is cut by a flat amount read off your Armour rather than deleted',
-        capOf('block'), 'the Shield offhand’s own line is the only source — <code>caps.block_note</code>'),
+        capOf('block'), 'the Shield offhand&rsquo;s own line, plus the charges an Earth Wall grants — each charge cuts one hit by the same rule — <code>caps.block_note</code>'),
       row('Armour', 'shrinks only the non-Element part of the hit, as a diminishing ratio',
         '<span class="hy">no Cap on the rating</span>', `${n0(DV.armour_ceil)} — <code>armourOf</code> — removing ${pc1(DV.armour_vs_zone9_boss)} of a boss-priced hit and ${pc1(DV.armour_vs_zone9_trash)} of a trash-priced one (<code>armour_vs_zone9_boss</code>, <code>armour_vs_zone9_trash</code>)`),
       row('Elemental resistance', 'shrinks the Element part of the hit, separately per Element',
@@ -867,9 +927,12 @@ page({
         `${pts((E.weapon_size_mult as any).bolt_share_pct)} of a finished hit — <code>weapon_size_mult.bolt_share_pct</code> · <code>basicAttackOf</code>`],
       ['Conversion', 'a percent of the finished physical share, routed into a named Element <em>before</em> mitigation, so that half answers resistance instead of Armour',
         '<code>convertDamageOf</code> — the budget is the whole hit and overflow is wasted, never a multiplier'],
+      ['A press on the body', 'Earth Splitter adds a share of the <em>target&rsquo;s own</em> maximum pool, so the hit scales with what it lands on rather than with the caster — and a boss answers half of it',
+        '<code>max_hp_press.boss_pct</code> — the row states the percent, this states the boss cut'],
     ]), 'Whether a weapon swings or casts a bolt is read off its own damage line, so a wand cannot be a bolt in one file and a swing in another.'),
     block('Bleed, the one damage-over-time that is not an Element', table(['', 'The rule', 'Read from'], [
-      ['Who puts it on', 'the Lacerate curse, on its own cooldown', `<code>bleed.curse_id</code> · every ${n0((E.bleed as any).curse_cd_sec)} sec, holding ${n0((E.bleed as any).curse_duration_sec)} sec = ${pts((E.bleed as any).uptime_pct)} uptime`],
+      ['Who puts it on', 'the axe&rsquo;s own <code>Chance to bleed %</code> line, or a press whose row grants the proc', '<code>bleed.note</code> &mdash; no curse carries it any more'],
+      ['What lets it land', 'bleed is a rolled status, so it passes the same Alignment gate a stun does <em>before</em> its own chance is rolled', '<code>bleedChanceFrom</code> · <code>K_BLEED_CHANCE</code> · the axe&rsquo;s line'],
       ['Does it stack', yes((E.bleed as any).stacks), `<code>bleed.stacks</code> — a new application ${((E.bleed as any).refreshes) ? 'refreshes the duration instead' : 'does not refresh it'}`],
       ['Is it an Element', yes((E.bleed as any).is_element), '<code>bleed.is_element</code> — Elemental resistance does not answer it'],
       ['Can it crit', yes((E.bleed as any).can_crit), '<code>bleed.can_crit</code>'],
@@ -1050,7 +1113,7 @@ page({
         esc(a.name), esc(a.reserve), wrap(`${n0(sm.reservePct(a.reserve))}%`),
         `<span class="hy">${esc(a.effect || '')}</span>`,
       ])),
-      `Reserve tiers are <code>skills.json reserve_tiers</code>, and the total may not reach ${n0(sm.RESERVATION_LIMIT)}% — an aura’s cost is a budget you read up front, not a number you recompute mid-fight. A mana cost written as a percent is a share of your own pool (<code>manaSpec</code>), so two builds paying for one row pay very different amounts.`),
+      `Reserve tiers are <code>skills.json reserve_tiers</code>, and the total may not reach ${n0(sm.RESERVATION_LIMIT)}% — an aura’s cost is a budget you read up front, not a number you recompute mid-fight. A mana cost is a typed number of mana units (<code>manaSpec</code>) that climbs only with the skill’s own level, so every build pays the same price for one row and a bigger pool simply buys more casts.`),
     block('Presets', table(['', 'The number', 'Read from'], [
       ['Sets you can store', wrap(n0((E.presets as any).sets)), '<code>presets.sets</code>'],
       ['Which one is main', `index ${n0((E.presets as any).main_index)}`, '<code>presets.main_index</code> — where a Push sends you back'],
@@ -1125,6 +1188,26 @@ thead th { position: sticky; background: var(--panel); z-index: 1; }
 thead tr:first-child th { top: 0; }
 tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
 tbody tr:hover { background: rgba(255,255,255,.06); }
+/* One table, its rows split into tabbed groups: the strip is a radio group, each tab is a <tbody>, and a
+   press swaps which body shows over the shared header — no script, so the static build and the live wiki
+   behave alike. Generic over the group count a page declares (three here). */
+.tabs { margin: .9rem 0 1.4rem; }
+.tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.tabs > label {
+  display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
+  border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0;
+  color: var(--dim); font-size: .88rem; cursor: pointer;
+}
+.tabs > label b { color: var(--mob); font-weight: 500; }
+.tabs > label:hover { color: var(--text); }
+.tabs > input:checked + label { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); background: color-mix(in srgb, var(--gold) 10%, transparent); }
+.tabs > input:checked + label b { color: var(--gold); }
+.tabs > input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tabs tbody { display: none; }
+.tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
+.tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
+.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
+.tabs table { margin-top: 0; }
 .twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .twrap table { min-width: 56rem; }
 td:first-child { white-space: nowrap; }

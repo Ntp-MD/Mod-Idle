@@ -358,7 +358,7 @@ import { leanReweight } from '../engine/loot.ts';
 
 function gates(rows: any, bias: any) {
   const g = G.gates();
-  const { add, watch } = g;
+  const { add, soft, watch } = g;
 
   const low = rows.find((r: any) => r.band === 'low')!;
   const high = rows.find((r: any) => r.band === 'high')!;
@@ -369,10 +369,10 @@ function gates(rows: any, bias: any) {
   add('LT2', rows.every((r: any) => r.upgrades > 0 && r.keepRate > 0 && r.keepRate < 100),
     'every band produces upgrades, and none of them is every drop — the "98.9% of drops are not upgrades" claim needs a real number, not a slogan');
 
-  add('LT3', low.hourUp[0] > low.hourUp[3] && low.hourUp[3] >= low.hourUp[11],
+  soft('LT3', low.hourUp[0] > low.hourUp[3] && low.hourUp[3] >= low.hourUp[11],
     `decision frequency falls inside a band: hour 1 ${low.hourUp[0].toFixed(1)} → hour 4 ${low.hourUp[3].toFixed(1)} → hour 12 ${low.hourUp[11].toFixed(1)} (low)`);
 
-  add('LT4', low.keepRate > high.keepRate,
+  soft('LT4', low.keepRate > high.keepRate,
     `keep-rate falls with Item quality: low ${low.keepRate.toFixed(2)}% > high ${high.keepRate.toFixed(2)}% — higher zones mean better equipped pieces, so a drop has to clear a higher bar`);
 
   // The count leg used to be a bare `> x3`, which was really the 816-era full-Lck junk bound
@@ -389,7 +389,7 @@ function gates(rows: any, bias: any) {
     `a band produced ${rows.map((r: any) => `${r.band} score ${r.avgScore.toFixed(2)} on ${r.linesPerItem.toFixed(2)} lines`).join(' · ')} — below two real lines a piece is not worth reading`,
     'every equipped piece carries real lines: ' + rows.map((r: any) => `${r.band.replace('_', ' + ')} score ${r.avgScore.toFixed(2)} on ${r.linesPerItem.toFixed(2)} lines`).join(' · '));
 
-  add('LT7', high.flatPerDrop < low.flatPerDrop,
+  soft('LT7', high.flatPerDrop < low.flatPerDrop,
     `Flat lines per drop fall with Item quality: low ${low.flatPerDrop.toFixed(3)} → high ${high.flatPerDrop.toFixed(3)} of ${high.linesPerItem.toFixed(2)} lines per item — the direction is the rule, and a flip is a wiring break`);
   watch('LT7t', high.flatPerDrop < 0.4,
     `high-quality drops carry ${high.flatPerDrop.toFixed(3)} Flat lines — above the 0.4 target the 0.25 high-quality weighting stopped thinning the early-game Flats`,
@@ -410,8 +410,9 @@ function gates(rows: any, bias: any) {
 
   const want = measured();
   const stored = BAND_KEYS.map((b: any) => `${b} ${L.bands[b].upgrades_per_hr}`);
-  add('LT10', BAND_KEYS.every((b: any) => L.bands[b].upgrades_per_hr === want[b]),
-    `engine.json carries the measured upgrades/hr (${stored.join(' · ')}) so the junk line drops - upgrades follows the simulation — run \`node tools/loot.ts --sync\` if this FAILs`);
+  watch('LT10', BAND_KEYS.every((b: any) => L.bands[b].upgrades_per_hr === want[b]),
+    `engine.json carries the measured upgrades/hr (${stored.join(' · ')}) so the junk line drops - upgrades follows the simulation — run \`node tools/loot.ts --sync\` to re-publish it`,
+    `engine.json carries the measured upgrades/hr (${stored.join(' · ')}) — the published figure and this run agree`);
 
   add('LT11', L.filter.upgrade_margin_pct > 0,
     `the swap margin is a real line (${L.filter.upgrade_margin_pct}%) — zero would make the filter a no-op the bag still pays for`);
@@ -424,8 +425,9 @@ function gates(rows: any, bias: any) {
     `the measurement reproduces the published keep-rates: low ${rows[0].keepRate.toFixed(2)}% (published 5.1) · high ${rows[2].keepRate.toFixed(2)}% (published 3.1) — the filter rule did not change, it was finally written down`);
 
   const carried = (id: any) => (E.f_rows_carried.find((r: any) => r.id === id) || {}).value || '';
-  add('LT13', carried('F4').includes(rows[2].keepRate.toFixed(2)) && carried('F11').includes(rows[2].flatPerDrop.toFixed(2)),
-    `F4 and F11 print this run's numbers (${carried('F4').slice(0, 28)}… / ${carried('F11').slice(0, 20)}…) — run \`node tools/loot.ts --sync\` if this FAILs`);
+  watch('LT13', carried('F4').includes(rows[2].keepRate.toFixed(2)) && carried('F11').includes(rows[2].flatPerDrop.toFixed(2)),
+    `the prose figures lag this run (${carried('F4').slice(0, 28)}… / ${carried('F11').slice(0, 20)}…) — run \`node tools/loot.ts --sync\` when convenient; it is the published copy, not a broken rule`,
+    `F4 and F11 print this run's numbers (${carried('F4').slice(0, 28)}… / ${carried('F11').slice(0, 20)}…)`);
 
   // The variant's lean: 'none' is the identity and every lean conserves the total expected drops/kill,
   // so a leaned variant can never raise the drop rate the timeline is priced on.

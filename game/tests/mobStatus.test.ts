@@ -57,6 +57,8 @@ describe('the Alignment gate and the shared proc', () => {
   it('maps each Element to the status the table names', () => {
     for (const el of E.elements.order as string[]) {
       const name = (E.elements.status_of as Record<string, string>)[el];
+      // an Element declared ahead of its content carries no status yet (earth)
+      if (!name) continue;
       const store = inflict(el, charWith(el, 100));
       expect(Object.keys(store.m1.statuses)).toContain(name);
     }
@@ -138,7 +140,7 @@ describe('control is bounded, never a lockout', () => {
     expect(m.stoppedSec / m.elapsedSec).toBeLessThanOrEqual(0.15 + 0.02);
     const mob1 = mob();
     const r = mobSwing(mulberry32(5), buildCharacter(90, emptyGear()), mob1, {}, combineMods({
-      damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: true,
+      damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, clockPct: 0, stopped: true,
       armourCut: 0, resistCut: 0, elemTakenPct: 0,
     }, {}));
     expect(r.blocked).toBe('shocked');
@@ -148,7 +150,7 @@ describe('control is bounded, never a lockout', () => {
   it('a shocked mob swings slower in the sim clock, not never', () => {
     const c = charWith('cold', 100);
     const store = inflict('cold', c);
-    const tm = combineMods({ damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: false, armourCut: 0, resistCut: 0, elemTakenPct: 0 }, targetMods(modsOn(store, 'm1')));
+    const tm = combineMods({ damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, clockPct: 0, stopped: false, armourCut: 0, resistCut: 0, elemTakenPct: 0 }, targetMods(modsOn(store, 'm1')));
     expect(tm.attackSpeed).toBe(-S.chill.aspd_cap);
     expect(Math.max(0, 1 + tm.attackSpeed / 100)).toBeCloseTo(1 - S.chill.aspd_cap / 100, 10);
   });
@@ -174,7 +176,7 @@ describe('mark is the one status that multiplies the hit it rides on', () => {
     store.m1 = { statuses: { mark: { stacks: S.mark.stack_max, secLeft: 5, perSec: 0 } }, alignedPerSec: 1, stoppedSec: 0, elapsedSec: 1 };
     const tm = targetMods(modsOn(store, 'm1'));
     const hit = playerSwing(mulberry32(3), plain, target, null, combineMods({
-      damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, stopped: false,
+      damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, clockPct: 0, stopped: false,
       armourCut: 0, resistCut: 0, elemTakenPct: 0,
     }, tm));
     expect(hit.damage).toBeCloseTo(base * (1 + tm.damageTaken! / 100), 6);

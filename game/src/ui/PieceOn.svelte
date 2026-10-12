@@ -128,7 +128,7 @@
   }
   .tile img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
   .tile .plus {
-    position: absolute; right: clamp(-5.4px, -0.163vw - 0.63px, -2.5px); bottom: clamp(-5.4px, -0.163vw - 0.63px, -2.5px); font-family: var(--num); font-size: var(--font-xs);
+    position: absolute; right: clamp(-5px, -0.163vw - 1px, -2px); bottom: clamp(-5px, -0.163vw - 1px, -2px); font-family: var(--num); font-size: var(--font-xs);
     color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0 3px;
   }
   .who h3 { margin: 0; font-size: var(--font-sm); }
@@ -145,7 +145,7 @@
   .flag.ok { color: var(--good); border-color: color-mix(in srgb, var(--good) 50%, transparent); }
 
   .picker { display: grid; gap: 4px; }
-  .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(1.25px, 0.082vw + 0.32px, 2.7px); text-transform: uppercase; }
+  .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(1px, 0.082vw + 0px, 3px); text-transform: uppercase; }
   .row { display: flex; flex-wrap: wrap; gap: 3px; }
   .chip {
     display: inline-flex; align-items: center; gap: 4px; padding: 3px var(--spacing-xs) 3px 4px;

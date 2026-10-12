@@ -35,8 +35,11 @@ const BOSS_EVERY_SEC = Math.round(3600 / L.boss_per_hour);
 const BAND_OF_QUALITY = (quality: string): string =>
   quality.startsWith('high') ? 'high' : quality.startsWith('mid') ? 'mid' : 'low';
 
-/** combat.md §1: normal and elite mobs swing once per second, a boss 0.8 times. */
-const mobClock = (kind: string) => (kind.startsWith('Boss') ? 0.8 : 1);
+/** combat.md §1 · engine.json mob.attack_clock_per_sec, capped by the one clock rule (caps.attack_interval_sec). */
+const MOB_CLOCK_FLOOR = E.mob.attack_clock_per_sec;
+const MOB_CLOCK_CAP = 1 / E.caps.attack_interval_sec;
+const mobClock = (kind: string) =>
+  Math.min(kind.startsWith('Boss') ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal, MOB_CLOCK_CAP);
 
 /** What the character carries besides gear: potions, condensed bottles and herbs all weigh. */
 export function heldWeaponName(s: GameState): string | null {
@@ -355,6 +358,23 @@ function dissolve(s: GameState): void {
 }
 
 /**
+ * The player's own dissolve, on the one piece they picked: the same Value stone the bag filter pays for a
+ * rejected drop, so a hand-salvage and an auto-dissolve can never disagree about what a piece is worth.
+ * The two pieces the bulk verbs already spare — a locked one and one promised to a Collector set — are
+ * refused here too, with the reason said out loud.
+ */
+export function salvageBag(s: GameState, bagIndex: number): { ok: boolean; why?: string } {
+  const item = s.bag[bagIndex];
+  if (!item) return { ok: false, why: 'nothing in that bag slot' };
+  if (item.locked) return { ok: false, why: 'that piece is locked' };
+  if (item.heldFor) return { ok: false, why: 'that piece is promised to a Collector set' };
+  s.bag.splice(bagIndex, 1);
+  dissolve(s);
+  push(s, `Salvaged ${item.base} → 1 Value stone`);
+  return { ok: true };
+}
+
+/**
  * One gear roll through the bag filter. A mob kill — on foot or in an ambush — and any future item
  * source use this same path, so "what the filter keeps" can never mean two different things.
  */
@@ -429,9 +449,9 @@ function adjudicateDrop(s: GameState, item: Item): void {
 
 function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>) {
   const online = s.online !== false;
-  // Pandemonium: the lines this mob was carrying jump to the neighbours its row names 
+  // the lines this mob was carrying jump to the neighbours its row names 
   const caught = spreadOnDeath(s.curses, mob.id, s.group.map((m) => m.id));
-  if (caught) push(s, `${sm.byId['curse.pandemonium'].name} spreads to ${caught} nearby`);
+  if (caught) push(s, `the curse spreads to ${caught} nearby`);
   s.counters.kills++;
   // the feed names pay, not kills: every kill online banks its XP as its own line, so the chronicle ticks
   // with the fight itself. Offline the away summary owns the read.
@@ -722,7 +742,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // The bars read these straight, so an unbounded value here is what shows as a negative number there.
   s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
   s.player.es = Math.min(Math.max(0, s.player.es), c.es);
-  const day = Math.floor(s.clockSec / 86400);
+  const day = dayOf(s.clockSec);
   if (s.pedlar.day !== day || !s.pedlar.minutes.length) {
     s.pedlar = {
       day,
@@ -882,6 +902,10 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       s.player.charges = cast.charges;
       push(s, `${cast.name} grants ${cast.charges} perfect-dodge charges`);
     }
+    if (cast.blockCharges != null) {
+      s.player.blockCharges = cast.blockCharges;
+      push(s, `${cast.name} grants ${cast.blockCharges} blocks`);
+    }
     if (cast.cleansesSelf) {
       const cleared = Object.keys(statuses).length;
       for (const k of Object.keys(statuses) as StatusName[]) delete statuses[k];
@@ -982,13 +1006,15 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   }
 
   // the rotation casts the first ready, affordable slot top-down — no manual presses.
-  // Haste is a post-cap multiplier on this clock, which is why it reaches tickSkills at all 
-  tickSkills(s.skills, c.globalSpeed);
+  // Haste is a post-cap multiplier on this clock, which is why it reaches tickSkills at all; Crippled is
+  // the other direction on the same clock, so a slowed rotation is one multiplier, never a second rule.
+  const cdCut = statuses.crippled && statuses.crippled.secLeft > 0 ? (E.status.crippled.cd_pct || 0) / 100 : 0;
+  tickSkills(s.skills, c.globalSpeed * Math.max(0, 1 - cdCut));
   for (const id of Object.keys(s.skills.buffs)) {
     if (!buffNeedsRecast(s.skills, id)) continue;
     const skill = sm.byId[id];
     const cost = sm.manaCostOf(skill, {
-      skillLevel: skillLevel(s.skills, id), maxMana: c.maxMana, usableMana: usableMana(c, s.skills), aoe: false,
+      skillLevel: skillLevel(s.skills, id), aoe: false,
     });
     if (cost > s.player.mana) continue;
     s.player.mana -= cost;
@@ -1033,7 +1059,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   const absorbPct = esAbsorbPct(s.skills);
   for (const mob of engaging) {
     const tm = mobMods(mob.id);
-    mob.atkTimer += mob.hitsPerSec * Math.max(0, 1 + tm.attackSpeed / 100);
+    mob.atkTimer += mob.hitsPerSec * Math.max(0, 1 + tm.attackSpeed / 100) * Math.max(0, 1 - (tm.clockPct || 0) / 100);
     while (mob.atkTimer >= 1) {
       mob.atkTimer -= 1;
       // a Ghost Dance charge deletes the hit outright and is not opposed: it goes before the
@@ -1042,7 +1068,9 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
         s.player.charges!--;
         continue;
       }
-      const r = mobSwing(rng, c, mob, statuses, tm, s.player.es, absorbPct);
+      const r = mobSwing(rng, c, mob, statuses, tm, s.player.es, absorbPct, (s.player.blockCharges || 0) > 0);
+      // an Earth Wall charge answered the swing: it is spent whether the shield rolled or not
+      if (r.blocked === 'block charge') s.player.blockCharges!--;
       // a defence is an event too: the screen has to say *which* answer stopped the hit, because
       // Block, Evasion and a perfect dodge animate differently and the player reads them apart. Either way
       // the striker is named, so the body that swung can lean into its own blow.
@@ -1181,13 +1209,22 @@ function clampPools(s: GameState): void {
  * seconds are spent in one wake — a throttled tab's backlog is dropped rather than queued, because a
  * queued burst would play catch-up in the foreground and cost the frame its stutter-free draw.
  */
+/** Which day the run's clock stands on — the one home, so two callers cannot disagree. */
+export const dayOf = (clockSec: number): number => Math.floor(clockSec / 86400);
+
 export const WAKE_SEC = 0.25;
 export const MAX_BATCH = 8;
-export function schedulerBatch(acc: number, speed: number): { ticks: number; acc: number } {
-  const total = acc + WAKE_SEC * speed;
+/**
+ * Real time into sim seconds, for one wake. `elapsedSec` is what actually passed since the last wake — a
+ * timer that ran late banks what it missed instead of a fixed slice, so a throttled tab (a hidden one
+ * fires at most once a second) still earns, and only a stalled wake loses its backlog. The batch is what
+ * runs; the time that could not fit is dropped, not queued, because a queued burst would play catch-up in
+ * the foreground and cost the frame its stutter-free draw.
+ */
+export function schedulerBatch(acc: number, speed: number, elapsedSec: number = WAKE_SEC): { ticks: number; acc: number } {
+  const total = acc + elapsedSec * speed;
   const ticks = Math.floor(total);
   if (ticks <= 0) return { ticks: 0, acc: total };
-  // the batch is what runs; the time that could not fit is gone, not owed
   if (ticks > MAX_BATCH) return { ticks: MAX_BATCH, acc: 0 };
   return { ticks, acc: total - ticks };
 }

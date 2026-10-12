@@ -133,6 +133,8 @@ export interface Player {
   esIdleSec: number;
   /** Ghost Dance's perfect-dodge charges: each one deletes an incoming hit outright. */
   charges?: number;
+  /** Earth Wall's block charges: each one cuts an incoming physical hit by the block rule. */
+  blockCharges?: number;
   atkTimer: number;
 }
 

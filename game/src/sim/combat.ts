@@ -4,7 +4,7 @@ import type { Mob } from './types';
 import type { CurseMods } from './curse';
 import { NO_CURSE, accMult, takenMult, psMult } from './curse';
 
-export type StatusName = 'burn' | 'chill' | 'shock' | 'poison' | 'mark';
+export type StatusName = 'burn' | 'chill' | 'shock' | 'poison' | 'mark' | 'crippled';
 export type Statuses = Partial<Record<StatusName, { stacks: number; secLeft: number; perSec: number }>>;
 
 export interface HitReport {
@@ -141,6 +141,8 @@ export function mobSwing(
   liveEs: number = c.es,
   /** Energy Absorb: the share of the hit converted to Energy Shield while the buff is up */
   absorbPct = 0,
+  /** Earth Wall: a block charge is standing, so this swing is answered by the block layer either way */
+  blockCharge = false,
 ): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number } {
   if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
   if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
@@ -159,7 +161,11 @@ export function mobSwing(
   // a mob's swing is sized by its priced damage per second, at its own clock rate
   const rawHit = (mob.ps * psMult(curse)) / mob.hitsPerSec;
   const [physShare, elemShare] = eng.damageSplit(mob.damage);
-  const blockedBy = physShare > 0 && c.block > 0 && rng() * 100 < c.block ? 'block' : null;
+  const rolled = physShare > 0 && c.block > 0 && rng() * 100 < c.block ? 'block' : null;
+  // An Earth Wall charge forces the same cut when the shield's own roll misses — one charge a hit. A
+  // hit already removed above (a dodge, Evasion) never reaches here, so a charge is never spent on
+  // nothing, and the answer names itself on screen so the charge reads apart from the shield.
+  const blockedBy = rolled || (physShare > 0 && blockCharge ? 'block charge' : null);
   const armourCut = eng.armourReduce(statuses.chill ? c.armour * (1 - E.status.chill.armour_cut) : c.armour, rawHit * physShare);
   const physical = rawHit * physShare * (1 - armourCut);
   // an aura may harden against one named Element (Trinity Form), and the Cap in force still binds the
@@ -174,7 +180,7 @@ export function mobSwing(
   let damage = physFinal + elemental * hardened;
   // a blocked PHYSICAL hit is cut by a flat `armour / 10` (owner ruling, provisional); the cut can
   // never take more than the physical half, so an Element-heavy swing is not thinned by a shield
-  if (blockedBy) damage = Math.max(0, damage - Math.min(c.armour / 10, physFinal));
+  if (blockedBy) damage = Math.max(0, damage - Math.min(c.armour / E.caps.block_divisor, physFinal));
 
   // Energy Absorb converts a share of the hit into Energy Shield and negates that share outright,
   // whether or not the shield has room — a press on a full shield is still a real defence 
@@ -232,7 +238,7 @@ export function rollStatus(
     s.stacks = 1;
     // chill counts down the status's own clock; shock is a STOP, and its length is the config's own
     // `stop_sec` (the mob side pays its stop out of the same field) — one home, no typed second
-    s.secLeft = name === 'chill' ? cfg.time_sec
+    s.secLeft = name === 'chill' || name === 'crippled' ? cfg.time_sec
       : name === 'shock' ? cfg.stop_sec * (1 - Math.min(100, Math.max(0, stunRecovery)) / 100)
         : 1;
     s.perSec = 0;

@@ -104,5 +104,5 @@
   }
   .dest span { color: var(--dim); }
   .verbs { display: flex; gap: 4px; align-items: baseline; }
-  @keyframes pop { from { transform: translateY(clamp(-10.8px, -0.326vw - 1.26px, -5px)); opacity: .3; } to { transform: none; opacity: 1; } }
+  @keyframes pop { from { transform: translateY(clamp(-11px, -0.326vw - 1px, -5px)); opacity: .3; } to { transform: none; opacity: 1; } }
 </style>

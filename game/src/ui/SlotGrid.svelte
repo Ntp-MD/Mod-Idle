@@ -1,9 +1,12 @@
 <script lang="ts">
   import { lineName, craftedMark } from '../sim/craft';
   import { loot } from '../engine/client';
-  import { SORT_LABELS, vsWorn, type SlotEntry, type SortKey } from './bag';
+  import { slotIcon } from '../icon';
+  import { SORT_LABELS, vsWorn, rankTone, type SlotEntry, type SortKey } from './bag';
   import { popPlace } from './pop';
   import ItemDetail from './ItemDetail.svelte';
+  import SlotMenu from './SlotMenu.svelte';
+  import type { MenuItem } from './menu';
   import type { Item } from '../sim/types';
 
   /**
@@ -28,7 +31,7 @@
    * (`ItemDetail.svelte`) and the card's own Equip button is the only way a piece gets worn, which is
    * the owner's rule rather than a convenience.
    */
-  let { entries, capacity, mode = 'grid', layout = 'grid', onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, fixed = false, empty = 'Empty.', onpick = null, pageSize = 0 }: {
+  let { entries, capacity, mode = 'grid', layout = 'grid', onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, fixed = false, empty = 'Empty.', onpick = null, pageSize = 0, actions = null }: {
     entries: SlotEntry[];
     capacity: number;
     mode?: 'grid' | 'list';
@@ -48,6 +51,9 @@
     /** a page holds this many slots, and a pager folds the rest: every page is the same height, so a
         paged grid never grows the modal it sits in (the doll layout is never paged) */
     pageSize?: number;
+    /** the verbs a right-click offers on a square — the caller owns them, so a grid in one panel and the
+        same grid in another can answer differently without this component knowing why */
+    actions?: ((entry: SlotEntry) => MenuItem[]) | null;
   } = $props();
 
   /** The hovered piece and the box of the square it came from. The card's own place is derived from the
@@ -55,6 +61,8 @@
   let hover = $state<{ entry: SlotEntry; top: number; left: number; right: number; bottom: number } | null>(null);
   let gridEl = $state<HTMLElement | null>(null);
   let popEl = $state<HTMLElement | null>(null);
+  /** the right-clicked square and where the pointer opened its menu */
+  let menu = $state<{ x: number; y: number; entry: SlotEntry } | null>(null);
   /** the card's measured box — zero until it paints, and the card stays out of sight until it is not */
   let popW = $state(0);
   let popH = $state(0);
@@ -113,6 +121,15 @@
     hover = { entry, top: b.top, left: b.left, right: b.right, bottom: b.bottom };
   }
 
+  /** The slot's own menu, opened where the pointer is: the verbs come from the caller, so this component
+      only knows that a square can offer some. */
+  function openMenu(e: MouseEvent, entry: SlotEntry) {
+    if (!actions || !actions(entry).length) return;
+    e.preventDefault();
+    hover = null;
+    menu = { x: e.clientX, y: e.clientY, entry };
+  }
+
   /**
    * Where the card goes: beside the square, on the square's own line, and turned to the other side or the
    * other end whenever that is where the room actually is. The card measures itself, so a five-line piece
@@ -159,14 +176,15 @@
         <button
           class="slot"
           style={cell.area ? `grid-area:${cell.area}` : ''}
+          style:--rar={cell.entry.item ? rankTone(cell.entry.item) : null}
           class:gear={cell.entry.kind === 'gear' || cell.entry.kind === 'worn'}
           class:stack={cell.entry.kind === 'stack'}
-          class:rare={cell.entry.item && cell.entry.item.tier === 'T1'}
           class:held={Boolean(cell.entry.heldFor)}
           class:worn={cell.entry.kind === 'worn'}
           onmouseenter={(e) => open(e.currentTarget, cell.entry!)}
           onfocus={(e) => open(e.currentTarget, cell.entry!)}
           onmouseleave={(e) => leaveTo(e.relatedTarget)}
+          oncontextmenu={(e) => openMenu(e, cell.entry!)}
           onclick={(e) => (onpick && cell.entry && cell.entry.kind === 'gear' ? onpick(cell.entry.index) : open(e.currentTarget, cell.entry!))}
           aria-label={cell.entry.kind === 'stack' ? `${cell.entry.title} ×${cell.entry.count}` : cell.entry.title}
         >
@@ -182,7 +200,12 @@
         </button>
       {:else}
         <span class="slot empty" style={cell.area ? `grid-area:${cell.area}` : ''} aria-hidden="true">
-          {#if cell.slot != null}<span class="slotname">{loot.SLOTS[cell.slot]}</span>{/if}
+          {#if cell.slot != null}
+            <!-- the doll's bare cells carry the slot's own glyph, so an unworn body still reads as a
+                 body with places to fill; a plain grid keeps its wordless blanks -->
+            {#if layout === 'doll'}<img class="slot-glyph" src={slotIcon(loot.SLOTS[cell.slot])} alt="" />{/if}
+            <span class="slotname">{loot.SLOTS[cell.slot]}</span>
+          {/if}
         </span>
       {/if}
     {/each}
@@ -195,7 +218,7 @@
         <tr>
           <td>{entry.slot || entry.stack?.group || '—'}</td>
           <td>
-            <b class="list-title"><img src={entry.icon} alt="" aria-hidden="true" />{entry.title}</b>
+            <b class="list-title" style:--rar={entry.item ? rankTone(entry.item) : null}><img src={entry.icon} alt="" aria-hidden="true" />{entry.title}</b>
             {#if entry.count !== undefined}<span class="dim"> ×{entry.count}</span>{/if}
             <br /><small class="dim">{entry.sub}</small>
           </td>
@@ -249,18 +272,23 @@
   </div>
 {/if}
 
+{#if menu}
+  <!-- the square's own verbs, opened on the right-click that asked for them -->
+  <SlotMenu x={menu.x} y={menu.y} items={actions ? actions(menu.entry) : []} onclose={() => (menu = null)} />
+{/if}
+
 <style>
   .bar { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; margin-bottom: var(--spacing-xs); }
   .lab { color: var(--dim); font-size: var(--font-xs); }
   .spacer { flex: 1; }
   .bar button { padding: 2px var(--spacing-xs); font-size: var(--font-xs); }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(33.75px, 2.2vw + 8.51px, 72.9px), 1fr)); gap: 3px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(34px, 2.2vw + 9px, 73px), 1fr)); gap: 3px; }
 
   /* The equipment panel: three columns by five rows, no body drawn — the `.` cells are the blanks. */
   .doll {
     display: grid;
-    grid-template-columns: repeat(3, clamp(55px, 3.586vw + 13.86px, 118.8px));
+    grid-template-columns: repeat(3, clamp(55px, 3.586vw + 14px, 119px));
     grid-template-rows: repeat(5, auto);
     grid-template-areas:
       "cape    helmet  amulet"
@@ -278,14 +306,16 @@
     aspect-ratio: 1 / 1;
     padding: 0;
     background: var(--inset);
-    border: 1px solid var(--line);
+    /* the edge wears the piece's rarity; a stack has none and keeps the frame's own line */
+    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
     border-radius: 3px;
   }
-  .slot.rare { border-color: var(--xp); }
+  /* the icon carries a whisper of the same ink, so a rarity reads across a full grid before any hover */
+  .slot .slot-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rar, transparent) 55%, transparent)); }
   .slot.worn { box-shadow: inset 0 0 0 1px var(--line); background: var(--panel); }
   /* the comparison badge: how far this piece sits from what the slot already wears */
   .slot .delta {
-    position: absolute; right: clamp(1.5px, 0.098vw + 0.38px, 3.24px); top: clamp(0.63px, 0.041vw + 0.16px, 1.35px);
+    position: absolute; right: clamp(2px, 0.098vw + 0px, 3px); top: clamp(1px, 0.041vw + 0px, 1px);
     font-family: var(--num); font-size: var(--font-xs); line-height: 1;
     color: var(--dim); text-shadow: 0 1px 0 rgba(0, 0, 0, .8);
   }
@@ -293,7 +323,8 @@
   .slot .delta.down { color: var(--hp); }
   .slot.held { border-style: dashed; border-color: var(--good); }
   .slot.empty { display: flex; align-items: center; justify-content: center; background: var(--inset); border-style: dotted; cursor: default; }
-  .slotname { font-size: var(--font-xs); color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 2px; }
+  .slot-glyph { position: absolute; inset: 16%; width: 68%; height: 68%; object-fit: contain; opacity: .2; pointer-events: none; }
+  .slotname { position: relative; font-size: var(--font-xs); color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 2px; }
   .slot-icon {
     position: absolute;
     inset: 17%;
@@ -304,14 +335,14 @@
     pointer-events: none;
   }
   .count, .plus { position: absolute; z-index: 1; font-size: var(--font-xs); line-height: 1; }
-  .count { right: clamp(1.88px, 0.122vw + 0.47px, 4.05px); bottom: clamp(1.25px, 0.082vw + 0.32px, 2.7px); }
-  .plus { left: clamp(1.88px, 0.122vw + 0.47px, 4.05px); bottom: clamp(1.25px, 0.082vw + 0.32px, 2.7px); color: var(--xp); }
+  .count { right: clamp(2px, 0.122vw + 0px, 4px); bottom: clamp(1px, 0.082vw + 0px, 3px); }
+  .plus { left: clamp(2px, 0.122vw + 0px, 4px); bottom: clamp(1px, 0.082vw + 0px, 3px); color: var(--xp); }
 
   .list td, .list th { font-size: var(--font-xs); }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); margin-top: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
   .pager button { padding: 1px var(--spacing-sm); font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
-  .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+  .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--rar, var(--text)); }
   .list-title img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .dim { color: var(--dim); }
 

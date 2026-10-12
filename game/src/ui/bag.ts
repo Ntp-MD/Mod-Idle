@@ -13,6 +13,40 @@ import type { BagStack } from '../sim/slots';
  * does not know.
  */
 
+/**
+ * A drop's edge, read off the piece itself so the client cannot invent one.
+ *
+ * The rungs are three facts the roll already stamped on the item — its quality band (`low` / `mid` /
+ * `high`), its Tier (T1 is the top half of every Mod's range) and whether a Quality stone was spent on
+ * it (`upgrade_lv`) — summed and capped. Nothing here rolls, weighs or compares; a piece reads the
+ * same rung in the bag, on the body and in the warehouse. The ink each rung wears is a token in
+ * `variables.css`, never a colour typed in a component.
+ */
+const BAND_RANK: Record<string, number> = { low: 0, mid: 1, high: 2 };
+
+const RUNGS = [
+  { name: 'common', token: '--rar-common' },
+  { name: 'uncommon', token: '--rar-uncommon' },
+  { name: 'rare', token: '--rar-rare' },
+  { name: 'epic', token: '--rar-epic' },
+  { name: 'legendary', token: '--rar-legend' },
+] as const;
+
+export type ItemRank = { rank: number; name: string; tone: string };
+
+/** The rung a piece sits on, or null for a piece with none (a stack). */
+export function pieceRank(item: Item | null | undefined): ItemRank | null {
+  if (!item) return null;
+  const rank = Math.max(
+    0,
+    Math.min(RUNGS.length - 1, (BAND_RANK[item.quality] ?? 0) + (item.tier === 'T1' ? 1 : 0) + ((item.upgrade_lv || 0) > 0 ? 1 : 0)),
+  );
+  return { rank, name: RUNGS[rank].name, tone: `var(${RUNGS[rank].token})` };
+}
+
+/** The rung's ink as a CSS value, for a style directive; null when the piece has none. */
+export const rankTone = (item: Item | null | undefined): string | null => pieceRank(item)?.tone ?? null;
+
 export interface SlotEntry {
   /** where it sits in the bag it came from; Equip and the stat choice address this index */
   index: number;

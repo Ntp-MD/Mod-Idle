@@ -36,15 +36,17 @@ export interface CurseMods {
   stopped: boolean;
   /** Chill's armour cut, as a fraction of the mob's own Armour line. */
   armourCut: number;
-  /** A resistance strip in percentage points, negative as the row states it (Sunder). */
+  /** A resistance strip in percentage points, negative as the row states it. */
   resistCut: number;
   /** Elemental Break: this target takes more of the Element half, in percentage points. */
   elemTakenPct: number;
+  /** Crippled: the share of the mob's own attack clock the cut removes, in percent. */
+  clockPct: number;
 }
 
 export const NO_CURSE: CurseMods = {
   damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0,
-  stopped: false, armourCut: 0, resistCut: 0, elemTakenPct: 0,
+  stopped: false, armourCut: 0, resistCut: 0, elemTakenPct: 0, clockPct: 0,
 };
 
 /**
@@ -63,11 +65,12 @@ export function combineMods(a: CurseMods, b: Partial<CurseMods>): CurseMods {
     armourCut: (a.armourCut || 0) + (b.armourCut || 0),
     resistCut: (a.resistCut || 0) + (b.resistCut || 0),
     elemTakenPct: (a.elemTakenPct || 0) + (b.elemTakenPct || 0),
+    clockPct: (a.clockPct || 0) + (b.clockPct || 0),
     stopped: Boolean(a.stopped || b.stopped),
   };
 }
 
-/** A conditional line keeps its own key, so Shatter and Expose can both sit on `damage_taken`. */
+/** A conditional line keeps its own key, so two rows can both sit on `damage_taken`. */
 export const lineKey = (e: { stat: string; condition?: string }) =>
   (e.condition ? `${e.stat}#${e.condition}` : e.stat);
 
@@ -83,7 +86,7 @@ export function applyCurse(store: CurseStore, mobId: string, skill: any): number
 
 /**
  * Everything one mob carries from curses, summed. A line with a condition only counts while
- * `present` says that condition holds — an un-chilled target takes nothing from Shatter.
+ * `present` says that condition holds — an un-chilled target takes nothing from such a line.
  */
 export function linesOn(store: CurseStore, mobId: string, present: (condition: string) => boolean = () => false): CurseLine[] {
   return Object.values(store[mobId] || {}).filter((l) => !l.condition || present(l.condition));
@@ -105,7 +108,7 @@ export function modsOn(store: CurseStore, mobId: string, present: (condition: st
     accuracy: v('accuracy'),
     damageTaken: v('damage_taken'),
     critChance: v('crit_chance'),
-    // a strip of the mob's own Elemental resistance, in percentage points (Sunder)
+    // a strip of the mob's own Elemental resistance, in percentage points
     resistCut: v('mob_elemental_resistance_pct'),
     // and a line that makes it take more of the Element half (Elemental Break)
     elemTakenPct: v('mob_elemental_damage_taken_pct'),
@@ -155,7 +158,7 @@ export const takenMult = (m: CurseMods) => 1 + m.damageTaken / 100;
 export const curableRows = () => sm.of('curse').filter((s: any) => (s.effects || []).some((e: any) => e.subject === 'target'));
 
 /**
- * Pandemonium: when a cursed target dies, the lines it was carrying go to the neighbours its row
+ * When a cursed target dies, the lines it was carrying go to the neighbours its row
  * names, each with the duration it still had left. The count is read off the mob's own curse
  * line at the moment of death, so no cast state has to remember it. Returns how many caught it.
  */

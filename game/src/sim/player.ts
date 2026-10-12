@@ -272,9 +272,10 @@ export function buildCharacter(
     resByElement[key.split(':')[1]] = (resByElement[key.split(':')[1]] || 0) + v;
   }
   // the weapon types carry their own aspd; the merged rows in engine.json are an aspd band
+  const aspdDefault = E.build.weapon_aspd_default;
   const weaponAspd = mainHand
-    ? (weaponByName(mainHand.base)?.weapon_aspd ?? mainHand.weaponAspd ?? 1.2)
-    : 1.2;
+    ? (weaponByName(mainHand.base)?.weapon_aspd ?? mainHand.weaponAspd ?? aspdDefault)
+    : aspdDefault;
   const used = weightOfCarry(gear, carried, heldMasteryLevel);
   const burden = eng.encumbranceOf(used, core.str);
   // the Cap is applied LAST (core-stats.md · formula.md): after the aspd Mod band inside the

@@ -33,7 +33,10 @@ export interface StatCfg {
 export type KMap = Record<string, number>;
 
 export interface Caps {
+  /** No Cap (owner ruling) — `null` is the data's word for "keeps climbing". */
   alignment: number | null;
+  crit_chance: number | null;
+  accuracy: number | null;
   /** The clock Cap in its own unit: the fastest swing the game allows. */
   attack_interval_sec: number;
   cdr: number;
@@ -43,10 +46,12 @@ export interface Caps {
   evasion: number;
   perfect_dodge: number | null;
   weight_overload: number;
-  /** The second avoidance layer — a blocked hit is deleted outright. */
-  block: number;
-  /** The lightning stun chance Cap, elements.md — fed by Alignment plus the gear line. */
-  stun: number;
+  /** The second avoidance layer. No Cap (owner ruling): a blocked hit is cut, not deleted. */
+  block: number | null;
+  /** The flat cut a block applies: `armour / block_divisor`. */
+  block_divisor: number;
+  /** The lightning stun chance Cap, elements.md — fed by Alignment plus the gear line. No Cap (owner ruling). */
+  stun: number | null;
 }
 
 export interface ModMax {
@@ -101,13 +106,23 @@ export interface LootBand {
   lck_level: number | 'ceiling';
 }
 
-export interface StoneSource {
-  monster_quality_chance?: number;
-  elite_quality_chance?: number;
-  boss_quality_stones?: number;
-  elite_repair_chance?: number;
-  boss_repair_stones?: number;
-  boss_corrupt_chance?: number;
+/** One interface per stone stream, so a stream's own field is required rather than one of six optionals. */
+export interface QualityStoneSource {
+  monster_quality_chance: number;
+  elite_quality_chance: number;
+  boss_quality_stones: number;
+  note?: string;
+}
+
+export interface RepairStoneSource {
+  elite_repair_chance: number;
+  boss_repair_stones: number;
+  note?: string;
+}
+
+export interface CorruptStoneSource {
+  boss_corrupt_chance: number;
+  note?: string;
 }
 
 export interface ReplaceStoneSource {
@@ -153,9 +168,9 @@ export interface LootCfg {
   boss_per_hour: number;
   boss_tier_stones: number;
   boss_add_stones: number;
-  quality_stone_sources: StoneSource;
-  repair_stone_sources: StoneSource;
-  corrupt_stone_sources: StoneSource;
+  quality_stone_sources: QualityStoneSource;
+  repair_stone_sources: RepairStoneSource;
+  corrupt_stone_sources: CorruptStoneSource;
   replace_stone_sources: ReplaceStoneSource;
   imprint_stone_sources: ImprintStoneSource;
   polish_stone_sources: PolishStoneSource;
@@ -163,6 +178,8 @@ export interface LootCfg {
   rebirth_stone_sources: RebirthStoneSource;
   /** Line 1's value scale. */
   frame_mod: FrameModCfg;
+  /** A variant's lean: the stream its row tilts the three collectible streams toward (`shift_pct`). */
+  variant_lean: { shift_pct: number; categories: string[]; note?: string };
 }
 
 export interface CraftCfg {
@@ -203,6 +220,9 @@ export interface EnergyShieldCfg {
   delay_sec: number;
   /** Base regen as a percent of the max pool per second; an `es_regen` line amplifies it. */
   regen_pct: number;
+  /** Player-only by design: a mob sizes its survivability from `mob_HP`, so a second pool would
+   *  count the same anchor twice (checks.md H1). */
+  player_only: boolean;
 }
 
 export interface XpCfg {
@@ -233,12 +253,15 @@ export interface MobSpecies {
   element: string;
   carries_weapon: boolean;
   accuracy_mult: number;
-  damage: unknown;
+  /** The damage tag: which half of the incoming hit Armour and resistance each answer (X31). */
+  damage: string;
   /** A humanoid lineage is the only source of the potion drop (X49). */
   humanoid?: boolean;
   trait?: string;
+  /** The line the species holds in a mob group's formation (`mob.reach`). */
+  line: string;
   /** The Core block the race rolls its reference body from — the roster mean prices MEAN_CORE. */
-  core?: { str: number; agi: number; vit: number; dex: number; int: number; wis: number; lck: number };
+  core: { str: number; agi: number; vit: number; dex: number; int: number; wis: number; lck: number; [k: string]: number };
 }
 
 export interface MobSize {
@@ -348,6 +371,12 @@ export interface MobCfg {
   damage_split: Record<string, [number, number]>;
   /** The flat res a race answers its own Element with, in every zone (X54). */
   race_res_pct: number;
+  /** Mobs carry no skills in the current build; X27 fails if a species gains one while this is false. */
+  skills_enabled: boolean;
+  /** Formation bands: the melee/reach/standoff distances a group places its mobs at. */
+  reach: { bands: Record<string, number>; weapons: Record<string, number>; rules?: string };
+  /** The clock a normal and an elite swing at, and a boss's own (`mob.attack_clock_per_sec`). */
+  attack_clock_per_sec: { normal: number; elite: number; boss: number; note?: string };
   field_labels: FieldLabelsCfg;
 }
 
@@ -533,6 +562,8 @@ export interface SkillRow {
   name?: string;
   type?: string;
   group?: string;
+  /** the weapon family this row fires with, matched against the Base's own name (`axe` covers both) */
+  weapon?: string;
   element?: string;
   cd?: number;
   basis?: string;
@@ -558,18 +589,15 @@ export interface SkillsData {
       /** One row per skill level: the multiplier a press and an effect carry at that level. */
       skill_levels?: {
         note?: string;
-        rows: { level: number; damage_pct: number; effect_pct: number }[];
+        rows: { level: number; damage_pct: number; effect_pct: number; buff_effect_pct?: number }[];
         /** Effect stats that already spend skill level their own way and must not be scaled twice. */
         special_level_effects?: string[];
       };
-      /** The archetype calibration the press pairs were derived from. */
+      /** Provenance only: the archetype bands the press pairs were *derived from*. No formula reads
+       *  this block — the numbers a cast spends are each row's own `base_flat` / `eff` / cooldown. */
       archetype_bands?: any;
-      /** A flat mana cost climbs on this step per skill level. */
+      /** A mana cost climbs on this step per skill level — the only term that moves a price. */
       mana_level_step_pct?: number;
-      /** How much of the pool's growth a flat cost takes on. */
-      mana_pool_exponent?: number;
-      /** Which character level the reference pool is derived at. */
-      mana_reference_level?: number;
       cast_reference?: { cdr_pct: number; ladder_pct: number };
     };
     /** The three numbers a conditional row's leg opens at (`tools/data/skills.json` `cast_conditions`). */

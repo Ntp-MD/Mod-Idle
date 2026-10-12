@@ -115,51 +115,77 @@ describe('the casting rule', () => {
   });
 });
 
-describe('the two mana cost forms ', () => {
+describe('one mana price, typed in units ', () => {
   const flat = { id: 'test.flat', type: 'attack', mana: '14 flat', cd: 6 } as any;
   const cap = E.skill_xp.level_cap;
   const c = buildCharacter(100, emptyGear());
+  const mob = () => ({ hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 }) as any;
 
-  it('a flat row is never free, and a missing unit is loud', () => {
-    expect(sm.manaSpec(flat)).toEqual({ kind: 'flat', value: 14 });
+  it('a typed row is never free, and a cost without its unit is loud', () => {
+    expect(sm.manaSpec(flat)).toBe(14);
     expect(sm.manaSpec({ id: 'test.bare', mana: '14' } as any)).toBe(null);
-    expect(sm.manaCostOf(flat, { maxMana: sm.MANA_REF_POOL, usableMana: sm.MANA_REF_POOL })).toBeGreaterThan(0);
-    expect(() => sm.manaCostOf({ id: 'test.bare', mana: '14' } as any, { maxMana: 148, usableMana: 148 })).toThrow();
-    expect(() => sm.manaCostOf({ id: 'test.none', type: 'attack' } as any, { maxMana: 148, usableMana: 148 })).toThrow();
+    expect(sm.manaCostOf(flat)).toBeGreaterThan(0);
+    expect(() => sm.manaCostOf({ id: 'test.bare', mana: '14' } as any)).toThrow();
+    expect(() => sm.manaCostOf({ id: 'test.none', type: 'attack' } as any)).toThrow();
   });
 
-  it('the level ramp and the pool term compose', () => {
-    const at = (level: number, pool: number) =>
-      sm.manaCostOf(flat, { skillLevel: level, maxMana: pool, usableMana: pool });
+  it('a share of the pool is no longer a legal price, and no row still carries one', () => {
+    expect(sm.manaSpec({ id: 'test.pct', type: 'attack', mana: '14%' } as any)).toBe(null);
+    expect(() => sm.manaCostOf({ id: 'test.pct', type: 'attack', mana: '14%' } as any)).toThrow();
+    const left = sm.all().filter((k: any) => /%/.test(String(k.mana || ''))).map((k: any) => k.id);
+    expect(left).toEqual([]);
+  });
+
+  it('the skill level is the only term that moves a price', () => {
     const levelFactor = 1 + ((cap - 1) * sm.MANA_LEVEL_STEP) / 100;
-    const poolFactor = Math.pow(c.maxMana / sm.MANA_REF_POOL, sm.MANA_POOL_EXPONENT);
-    expect(at(1, sm.MANA_REF_POOL)).toBeCloseTo(14, 9);
-    expect(at(cap, c.maxMana) / at(1, sm.MANA_REF_POOL)).toBeCloseTo(levelFactor * poolFactor, 6);
-    // the two terms are independent: the level term moves with no pool change, and the reverse
-    expect(at(cap, sm.MANA_REF_POOL) / at(1, sm.MANA_REF_POOL)).toBeCloseTo(levelFactor, 9);
-    expect(at(1, c.maxMana) / at(1, sm.MANA_REF_POOL)).toBeCloseTo(poolFactor, 9);
+    expect(sm.manaCostOf(flat, { skillLevel: 1 })).toBeCloseTo(14, 9);
+    expect(sm.manaCostOf(flat, { skillLevel: cap })).toBeCloseTo(14 * levelFactor, 9);
+    // measured on the roster: a paid row's level-1 price IS its typed number, so no term hides in it
+    for (const skill of sm.all().filter((k: any) => sm.manaSpec(k) != null)) {
+      expect(sm.manaCostOf(skill, { skillLevel: 1 })).toBeCloseTo(sm.manaSpec(skill) as number, 9);
+    }
     expect(cageModel.MANA_REF_POOL).toBe(sm.MANA_REF_POOL);
     expect(cageModel.MANA_LEVEL_STEP).toBe(sm.MANA_LEVEL_STEP);
   });
 
-  it('every % row still charges the usable pool it always did', () => {
-    for (const skill of sm.all().filter((k: any) => (sm.manaSpec(k) || { kind: '' }).kind === 'pct')) {
-      const spec = sm.manaSpec(skill)!;
-      const usable = c.maxMana * (1 - sm.reservePct('mid') / 100);
-      expect(sm.manaCostOf(skill, { maxMana: c.maxMana, usableMana: usable })).toBeCloseTo(usable * spec.value / 100, 9);
-      expect(sm.manaCostOf(skill, { maxMana: c.maxMana, usableMana: usable, aoe: true }))
-        .toBeCloseTo(usable * spec.value / 100 * E.aoe.mana_mult, 9);
+  it('the AoE premium is one multiplier charged once, never a per-target count', () => {
+    for (const skill of sm.all().filter((k: any) => sm.manaSpec(k) != null)) {
+      expect(sm.manaCostOf(skill, { aoe: true })).toBeCloseTo(sm.manaCostOf(skill) * E.aoe.mana_mult, 9);
     }
+    // a wide row through the real cast: one mob, two mobs and three mobs of group
+    const cast = (n: number) => {
+      const s = newSkillState();
+      s.list[0] = 'attack.cleave';
+      const group = Array.from({ length: n }, (_, i) => ({ id: `m${i}`, hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 }) as any);
+      return castOnce(s, c, c.maxMana, group, {}, mulberry32(4))!.manaCost;
+    };
+    expect(cast(2) / cast(1)).toBeCloseTo(E.aoe.mana_mult, 6);
+    expect(cast(3)).toBeCloseTo(cast(2), 6);
   });
 
   it('an aura reserves the bar but never discounts the price', () => {
     const s = newSkillState();
-    const before = sm.manaCostOf(flat, { skillLevel: 1, maxMana: c.maxMana, usableMana: usableMana(c, s) });
+    s.list[0] = 'attack.cleave';
+    const before = castOnce(s, c, usableMana(c, s), [mob()], {}, mulberry32(6))!.manaCost;
+    s.cd = {};
     s.owned['aura.clarity'] = 0;
     s.auras['aura.clarity'] = true;
-    const after = sm.manaCostOf(flat, { skillLevel: 1, maxMana: c.maxMana, usableMana: usableMana(c, s) });
+    const after = castOnce(s, c, usableMana(c, s), [mob()], {}, mulberry32(6))!.manaCost;
     expect(after).toBe(before);
     expect(usableMana(c, s)).toBeLessThan(c.maxMana);
+  });
+
+  it('a bigger bar buys casts, never a cheaper press', () => {
+    const fresh = buildCharacter(1, emptyGear());
+    const capped = buildCharacter(E.stat.level_cap, emptyGear());
+    const press = (who: any) => {
+      const s = newSkillState();
+      s.list[0] = 'attack.cleave';
+      return castOnce(s, who, who.maxMana, [mob()], {}, mulberry32(6))!.manaCost;
+    };
+    const units = press(fresh);
+    expect(press(capped)).toBe(units);
+    expect(Math.floor(capped.maxMana / units)).toBeGreaterThan(Math.floor(fresh.maxMana / units));
   });
 });
 

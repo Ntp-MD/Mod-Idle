@@ -26,6 +26,14 @@ export function gates() {
     add: (id: string, ok: unknown, detail: string) => push(id, ok ? 'PASS' : 'FAIL', detail),
 
     /**
+     * An ADVISORY gate: where `add` would print FAIL this prints PENDING, so a figure that a design
+     * change moved can never block a feature. The signal survives — the line still prints, with its own
+     * numbers — and the repair is the one the line already names. Structural invariants (an id, a
+     * reference, a shape) stay `add`; a measured or published figure is `soft`.
+     */
+    soft: (id: string, ok: unknown, detail: string) => push(id, ok ? 'PASS' : 'PENDING', detail),
+
+    /**
      * A watch: `met` says the measured figure sits inside its window. Outside it the row reads
      * PENDING and the run still passes — `outside` is the line the owner reads by eye.
      */

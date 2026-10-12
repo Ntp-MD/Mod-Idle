@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import type { Snippet } from 'svelte';
 
   /**
@@ -25,10 +25,18 @@
 
   const labelId = $derived(`panel-${title.replace(/\W+/g, '-').toLowerCase()}`);
   let box = $state<HTMLDivElement | null>(null);
+  /** The element that opened the panel, so closing it puts the hand back where it was — one Escape or
+   *  ✕ returns focus to the rail tab, not to the document body. */
+  let opener: HTMLElement | null = null;
 
   onMount(() => {
+    opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     box?.focus();
     box?.scrollTo({ top: 0 });
+  });
+
+  onDestroy(() => {
+    if (opener && opener.isConnected) opener.focus();
   });
 
   /** Escape closes; Tab is held inside the panel so nothing behind the backdrop can be reached. */
@@ -116,7 +124,7 @@
   /* the fixed box is viewport-tall and its body is a flex column that never scrolls: tab bars and
      pages live inside it, and anything taller clips rather than growing a scrollbar */
   .box.fixed { height: min(88dvh, 100%); max-height: min(88dvh, 100%); }
-  @keyframes slide { from { transform: translateY(clamp(15px, 0.978vw + 3.78px, 32.4px)); opacity: .4; } to { transform: none; opacity: 1; } }
+  @keyframes slide { from { transform: translateY(clamp(15px, 0.978vw + 4px, 32px)); opacity: .4; } to { transform: none; opacity: 1; } }
   .panel-head {
     display: flex;
     align-items: baseline;
@@ -127,7 +135,7 @@
     position: sticky;
     top: 0;
   }
-  .panel-head h2 { margin: 0; flex: none; color: var(--gold); letter-spacing: clamp(1.5px, 0.098vw + 0.38px, 3.24px); }
+  .panel-head h2 { margin: 0; flex: none; color: var(--gold); letter-spacing: clamp(2px, 0.098vw + 0px, 3px); }
   .sub { margin: 0; flex: 1; color: var(--dim); font-size: var(--font-xs); }
   .quit {
     background: none; border: 1px solid var(--edge); color: var(--dim); border-radius: 8px;

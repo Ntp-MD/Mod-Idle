@@ -44,8 +44,8 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
    * their own way (Energy Absorb interpolates base→cap, Ghost Dance counts a charge per N levels) and
    * must not be scaled a second time.
    */
-  const LEVEL_ROWS: { level: number; damage_pct: number; effect_pct: number }[] =
-    (F.skill_levels && F.skill_levels.rows) || [{ level: 1, damage_pct: 100, effect_pct: 100 }];
+  const LEVEL_ROWS: { level: number; damage_pct: number; effect_pct: number; buff_effect_pct?: number }[] =
+    (F.skill_levels && F.skill_levels.rows) || [{ level: 1, damage_pct: 100, effect_pct: 100, buff_effect_pct: 100 }];
   const LEVEL_SPECIALS: string[] = ((F.skill_levels && F.skill_levels.special_level_effects) || []).map(String);
   const LEVEL_CAP = LEVEL_ROWS[LEVEL_ROWS.length - 1].level;
   /** The step the first two rows state — what the tables and the tests print as `LEVEL_STEP`. */
@@ -56,67 +56,69 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   /** The multiplier an effect carries at a level, in percent. */
   const effectPct = (level?: number) => rowAt(level).effect_pct;
   /**
-   * A row's effects at a level. The stored `value` is the level-1 number and it climbs on the table;
-   * a `special_level_effects` stat is handed back untouched, because its own mechanism is the ramp.
+   * The multiplier a buff's or an aura's effect carries, in percent, from its own column. Both open at
+   * their whole value — the number a row stores is what a fresh drop gives — and climb to a higher cap
+   * than every other effect rides, so levelling a buff or an aura is worth the kills it costs. Whole
+   * numbers only, so a page printing the rung reads as a percentage and never as a fraction.
+   */
+  const buffEffectPct = (level?: number) => rowAt(level).buff_effect_pct ?? effectPct(level);
+  /**
+   * A row's effects at a level. The stored `value` is the level-1 number and it climbs on the table — a
+   * buff or an aura on its own column, everything else on `effect_pct`; a `special_level_effects` stat is
+   * handed back untouched, because its own mechanism is the ramp.
+   *
+   * A multiplier climbs on its DISTANCE from 1, never on the ratio itself: ×1.15 at 180% is ×1.27, not
+   * ×2.07, and a ×0.90 that shrinks incoming damage becomes ×0.82 — a stronger cut, not a bigger hit.
+   * A buff's or an aura's added value is rounded to a whole number (owner rule), so a printed rung reads
+   * as a percentage and never as a fraction.
    */
   function effectsAt(skill: SkillRow, level?: number) {
-    const scale = effectPct(level) / 100;
-    return (skill.effects || []).map((e) => (LEVEL_SPECIALS.includes(e.stat) ? { ...e } : { ...e, value: e.value * scale }));
+    const buff = skill.type === 'buff' || skill.type === 'aura';
+    const scale = (buff ? buffEffectPct(level) : effectPct(level)) / 100;
+    return (skill.effects || []).map((e) => {
+      if (LEVEL_SPECIALS.includes(e.stat)) return { ...e };
+      if (e.op === 'mult') return { ...e, value: e.value >= 1 ? 1 + (e.value - 1) * scale : 1 - (1 - e.value) * scale };
+      return { ...e, value: buff ? Math.round(e.value * scale) : e.value * scale };
+    });
   }
-  /** A flat mana cost climbs on its own step, steeper than the damage ramp. */
+  /** A mana cost climbs on its own step per skill level, steeper than the damage ramp. */
   const MANA_LEVEL_STEP = F.mana_level_step_pct != null ? F.mana_level_step_pct : 5;
-  /** How much of the pool's growth a flat cost takes on, so Int and Max Mana gear still price it. */
-  const MANA_POOL_EXPONENT = F.mana_pool_exponent != null ? F.mana_pool_exponent : 0.5;
   /**
-   * The pool a flat cost is quoted against — the level-1 caster's own pool, derived from the same
-   * terms `maxManaOf` builds it from, so it cannot drift from the pool model.
+   * The pool the row prices were set against — the level-1 caster's own pool, derived from the same
+   * terms `maxManaOf` builds it from, so it cannot drift from the pool model. It is a basis for
+   * reading a cost, never a term of one: the bar buys casts, not a cheaper press.
    */
   const MANA_REF_POOL = E.level_gain.mana_base
     + E.stat.base * E.K.K_INT_MP;
-  const MANA_REF_LEVEL = F.mana_reference_level != null ? F.mana_reference_level : 1;
   const CAST_REF = F.cast_reference || { cdr_pct: 50, ladder_pct: 30 };
   const SX = E.skill_xp;
 
   const byId: Record<string, SkillRow> = {};
   for (const s of SKILLS.skills) byId[s.id] = s;
 
-  /** A mana cost in either of its two forms: `10% (AoE ×1.5)` → pct 10 · `14 flat` → flat 14. */
-  const MANA_UNITS = { pct: '%', flat: 'flat' } as const;
-  type ManaKind = keyof typeof MANA_UNITS;
-
   /**
-   * The unit is part of the number and the match is anchored, so a bare `14` or a missing field is
-   * a parse failure rather than a zero — a cost that silently reads as 0 would make the skill free
-   *. `tools/lib/roster.ts` S15 is the other half of the guard.
+   * The price is a typed number of mana units and the unit word is part of the number: `21 flat`
+   * prices 21 units. The match is anchored, so a bare `21`, a missing field, or a share of the pool is
+   * a parse failure rather than a zero — a cost that silently reads as 0 would make the skill free.
+   * `tools/lib/roster.ts` S15 is the other half of the guard.
    */
-  function manaSpec(skill: SkillRow): { kind: ManaKind; value: number } | null {
-    const m = String(skill.mana == null ? '' : skill.mana).match(/^(\d+(?:\.\d+)?)\s*(%|flat)(?![A-Za-z])/);
-    if (!m) return null;
-    return { kind: (m[2] === '%' ? 'pct' : 'flat') as ManaKind, value: Number(m[1]) };
+  function manaSpec(skill: SkillRow): number | null {
+    const m = String(skill.mana == null ? '' : skill.mana).match(/^(\d+(?:\.\d+)?)\s*flat(?![A-Za-z])/);
+    return m ? Number(m[1]) : null;
   }
 
   /**
-   * What the row costs right now, in absolute pool units. A percentage charges the usable pool and
-   * is unchanged from before; a flat row charges its own units, grown by skill level on
-   * `MANA_LEVEL_STEP` and by the pool's growth on `MANA_POOL_EXPONENT`, so Int and Max Mana gear
-   * raise the price instead of only widening the bar. Auras reserve a share of the pool but never
-   * discount a cost, so the pool-growth term reads `maxMana`, not `usableMana`.
+   * What the row costs, in mana units: the typed price grown only by skill level on
+   * `MANA_LEVEL_STEP`, steeper than the damage ramp so a maxed rotation costs more. The pool sets
+   * nothing — a bigger bar buys more casts, never a cheaper press — so an aura that reserves a share
+   * of it changes what is there to spend, never the price of the spend. The AoE premium is
+   * `engine.json` `aoe.mana_mult`, charged once on a press that lands on more than one target.
    */
-  function manaCostOf(
-    skill: SkillRow,
-    { skillLevel = 1, maxMana, usableMana, aoe = false }:
-      { skillLevel?: number; maxMana: number; usableMana?: number; aoe?: boolean },
-  ) {
-    const spec = manaSpec(skill);
-    if (!spec) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable mana cost: ${JSON.stringify(skill.mana)}`);
+  function manaCostOf(skill: SkillRow, { skillLevel = 1, aoe = false }: { skillLevel?: number; aoe?: boolean } = {}) {
+    const value = manaSpec(skill);
+    if (value == null) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable mana cost: ${JSON.stringify(skill.mana)}`);
     const aoeMult = aoe ? (E.aoe ? E.aoe.mana_mult : 1.5) : 1;
-    if (spec.kind === 'pct') {
-      const base = usableMana != null ? usableMana : maxMana;
-      return (base * spec.value / 100) * aoeMult;
-    }
-    const byLevel = 1 + Math.max(0, skillLevel - 1) * MANA_LEVEL_STEP / 100;
-    const byPool = Math.pow(maxMana / MANA_REF_POOL, MANA_POOL_EXPONENT);
-    return spec.value * byLevel * byPool * aoeMult;
+    return value * (1 + Math.max(0, skillLevel - 1) * MANA_LEVEL_STEP / 100) * aoeMult;
   }
 
   /**
@@ -187,6 +189,15 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const GROUP_BONUS = 0.25;
   const groupBonus = (skill: SkillRow, weaponName: string) =>
     !skill.group || skill.group === 'all' || skill.group === weaponGroupOf(weaponName) ? 1 + GROUP_BONUS : 1;
+  /**
+   * The weapon a row is BOUND to, as a family token matched against the Base's own name — `axe` covers
+   * both one-handed and two-handed, `sword` both swords. A row without one is open to every weapon in
+   * its group; a row with one fires only while that weapon is held, so a kit can read as its weapon's.
+   */
+  function weaponFits(skill: SkillRow, weaponName: string): boolean {
+    const w = (skill as any).weapon;
+    return !w || String(weaponName || '').toLowerCase().includes(String(w).toLowerCase());
+  }
 
   /** Held-weapon Mastery: +0.5% skill damage per level from L5, max +8% (`equipment-weapon.md`). */
   const masteryBonus = (masteryLevel: number) =>
@@ -197,17 +208,11 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     const ladder = opts.ladderPct != null ? opts.ladderPct : CAST_REF.ladder_pct;
     const ec = effCd(skill.cd!, cdr, ladder);
     const pps = ec > 0 ? 1 / ec : null;
-    const ms = manaSpec(skill);
-    const mp = ms && ms.kind === 'pct' ? ms.value : null;
     return {
       skill,
       cd: skill.cd,
       effCd: ec,
       pressesPerSec: pps,
-      manaKind: ms ? ms.kind : null,
-      manaValue: ms ? ms.value : null,
-      manaPct: mp,
-      manaPerSecPct: pps != null && mp != null ? pps * mp : null,
       damage: opts.phys != null || opts.magic != null ? perPress(skill, opts) : null,
     };
   }
@@ -257,7 +262,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     // the target-side set: what a curse writes on the mob it lands on
     'damage_dealt', 'accuracy', 'crit_chance',
     // what the per-Element pool and the status store made expressible
-    'leech', 'elemental_power', 'burn_stacks', 'poison_stacks', 'mark_stacks', 'bleed_chance', 'poison_hold_sec',
+    'leech', 'elemental_power', 'burn_stacks', 'poison_stacks', 'mark_stacks', 'bleed_chance', 'stun_chance', 'poison_hold_sec',
     // conversion: a percent of the finished physical share routed into the named Element before
     // mitigation (`draft/convert-damage.md` · `convertDamageOf`)
     'damage_conversion',
@@ -271,6 +276,12 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     'trigger_cd_sec', 'cast_mana_mult', 'cast_damage_mult',
     'missing_hp_pct_for_max', 'damage_at_missing_hp', 'dodge_charges', 'dodge_charges_per_levels',
     'dodge_charges_cap', 'spread_targets',
+    // Earth Wall: a charge pool that BLOCKS instead of dodging — same shape as the dodge pair above,
+    // one cut per charge rather than one hit deleted
+    'block_charges', 'block_charges_per_levels', 'block_charges_cap',
+    // Sand Storm: a lingering earth line the row itself applies (seconds and damage a second), and
+    // Earth Splitter's share of the target's own maximum pool
+    'dot_dps', 'dot_sec', 'max_hp_pct_damage',
     // Energy Absorb: the share of an incoming hit converted to Energy Shield, base and Cap
     'es_absorb_pct', 'es_absorb_cap'];
   const EFFECT_OPS = ['add_pct', 'add_flat', 'mult'];
@@ -295,13 +306,13 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
 
   return {
     SKILLS, byId, LEVEL_STEP, CAST_REF, LADDER, CONVERSION, WEAPON_GROUPS,
-    LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, effectsAt,
-    MANA_LEVEL_STEP, MANA_POOL_EXPONENT, MANA_REF_POOL, MANA_REF_LEVEL, MANA_UNITS,
+    LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, buffEffectPct, effectsAt,
+    MANA_LEVEL_STEP, MANA_REF_POOL,
     aggregateEffects, EFFECT_STATS, EFFECT_OPS, EFFECT_SUBJECTS, EFFECT_CONDITIONS, EFFECT_RULES, MODELLED_BY,
     PRESETS, presetCount, mainPreset,
     LADDER_MAX_DUPLICATES, RESERVATION_LIMIT, GROUP_BONUS,
     manaSpec, manaCostOf, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
-    weaponGroupOf, groupBonus, masteryBonus, row, reservePct,
+    weaponGroupOf, groupBonus, weaponFits, masteryBonus, row, reservePct,
     all: () => SKILLS.skills,
     of: (type: string) => SKILLS.skills.filter((s) => s.type === type),
     /**
