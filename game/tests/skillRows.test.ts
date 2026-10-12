@@ -17,8 +17,8 @@ import type { Mob } from '../src/sim/types';
  * its data fails cage gate S11.
  */
 
-const row = (id: string) => sm.byId[id];
-const valueOf = (id: string, stat: string) => row(id).effects.find((e: any) => e.stat === stat).value;
+const row = (id: string) => sm.byId[id]!;
+const valueOf = (id: string, stat: string) => row(id)!.effects!.find((e: any) => e.stat === stat)!.value;
 const foldOf = (...ids: string[]) => sm.aggregateEffects(ids.map(row));
 const S = E.status as any;
 

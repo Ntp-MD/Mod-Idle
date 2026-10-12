@@ -7,9 +7,9 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Mob } from '../src/sim/types';
 
-const row = (id: string) => sm.byId[id];
+const row = (id: string) => sm.byId[id]!;
 const valueOf = (id: string, stat: string) =>
-  row(id).effects.find((e: any) => e.stat === stat).value;
+  row(id)!.effects!.find((e: any) => e.stat === stat)!.value;
 
 const mobOf = (over: Partial<Mob> = {}): Mob => ({
   id: 'mob-1', species: 'Rat', kind: 'Small', zone: 1, level: 20,

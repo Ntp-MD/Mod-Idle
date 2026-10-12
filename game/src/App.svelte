@@ -139,6 +139,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     void writeSettings(settings);
   }
   /** The clock's pace is a client setting like the rest: it survives a reload. */
+  /** the clock's pace rungs, in the order the bar shows them */
+  const SPEEDS: (1 | 2 | 4)[] = [1, 2, 4];
   function setSpeed(m: 1 | 2 | 4) {
     speed = m;
     setSetting('speed', m);
@@ -183,14 +185,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /** the tab the warehouse board is open on, and which tab of the inventory the player is working in */
   let stashTab = $state(0);
   let pileSort = $state<SortKey>('level');
-  type InvTab = 'pile' | 'carried' | 'forge' | 'craft' | 'stash';
-  let invTab = $state<InvTab>('pile');
+  type InvTab = 'inv' | 'stash';
+  let invTab = $state<InvTab>('inv');
+  /** the bench inside the merged inventory window: enhancement or stone craft, one drawer, one switch */
+  let benchMode = $state<'forge' | 'craft'>('forge');
+  type InvTabKey = InvTab | 'forge' | 'craft' | 'pile' | 'carried';
   /**
-   * One modal, five tabs: switching tabs inside it also moves the panel id the hub highlights read, so
-   * the rail, the wheel and the digits keep pointing at the open screen without a second source.
+   * One modal, two tabs: the merged inventory window (both bags and the bench, the way a stash window
+   * in PoE keeps the bags and the bench on one face) and the warehouse. The older seat names — pile,
+   * carried, forge, craft — still route here, so the rail, the wheel and the keys keep their targets:
+   * the bench seats just also pick which half of the drawer is showing.
    */
-  function goInvTab(t: InvTab) {
-    invTab = t;
+  function goInvTab(t: InvTabKey) {
+    invTab = t === 'stash' ? 'stash' : 'inv';
+    if (t === 'forge' || t === 'craft') benchMode = t;
     panel = t === 'forge' ? 'forge' : t === 'craft' ? 'craft' : 'bag';
   }
 
@@ -247,9 +255,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       return;
     }
     if (p === 'stash') { invTab = 'stash'; panel = panel === 'bag' ? null : 'bag'; return; }
-    if (p === 'bag') invTab = atSettlement(gameState) ? 'stash' : 'pile';
-    if (p === 'forge') invTab = 'forge';
-    if (p === 'craft') invTab = 'craft';
+    if (p === 'bag') invTab = atSettlement(gameState) ? 'stash' : 'inv';
+    if (p === 'forge') { invTab = 'inv'; benchMode = 'forge'; }
+    if (p === 'craft') { invTab = 'inv'; benchMode = 'craft'; }
     panel = panel === p ? null : p;
   }
   const closePanel = () => (panel = null);
@@ -580,7 +588,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
     // the press just moved pieces out of the pile, so the pile is what the player needs to see now
     // (the tab alone — the press never drags the player onto another screen)
-    if (r.swaps.length) invTab = 'pile';
+    if (r.swaps.length) invTab = 'inv';
     const parts: string[] = [];
     parts.push(r.swaps.length
       ? `${r.swaps.length} piece${r.swaps.length === 1 ? '' : 's'} went up (${r.swaps.map((w) => `${w.slot}${w.instead ? '' : ' from a free cell'}`).join(', ')})`
@@ -785,7 +793,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const cell = settlementCell(id);
     if (picked === id && pickedCell?.kind === 'town') { picked = null; pickedCell = null; return; }
     picked = id;
-    pickedCell = cell ? { key: sheet?.querySelector(`polygon.cell.town[data-node="${id}"]`)?.getAttribute('data-cell') || '', q: cell.q, r: cell.r, kind: 'town', label: settlementById(id).name, sub: null, wild: null } : null;
+    pickedCell = cell ? { key: sheet?.querySelector(`polygon.cell.town[data-node="${id}"]`)?.getAttribute('data-cell') || '', q: cell.q, r: cell.r, kind: 'town', label: settlementById(id)!.name, sub: null, wild: null } : null;
   }
   /**
    * The keyboard path over the same field: the arrows move the selection through the settlement order
@@ -1038,7 +1046,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    */
   const viewTown = $derived(pickedSettlement ?? town);
   const viewHere = $derived(!!viewTown && viewTown.id === townId);
-  const viewStock = $derived(stockOf(viewTown?.id));
+  const viewStock = $derived(stockOf(viewTown?.id ?? ''));
   const viewColSet = $derived(col.setAt(viewTown?.id));
   /**
    * The sheet's own key, read off the tones it carries: one entry per terrain, in the order the field
@@ -1089,7 +1097,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         ? `band view · ${E.mob.zones.length} zones by distance rank, ${firstBand[0]}-${firstBand[1]} to ${lastBand[1]}`
       : `level ${gateLevel} · ${liveBands} of ${E.mob.zones.length} zones live`)
     + ` · walk ${walkInfo.stretches} stretches / ${walkInfo.blocks} blocks`);
-  const townStock = $derived(stockOf(town?.id));
+  const townStock = $derived(stockOf(town?.id ?? ''));
   const junkTotal = $derived(Object.values(gameState.junk).reduce((a: number, b: number) => a + b, 0));
   /** Unsold junk as "item ×count", biggest stack first — the record of which variants were farmed. */
   const junkLines = $derived(Object.entries(gameState.junk)
@@ -1113,7 +1121,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function doBuy(rowId: string) {
-    const r = buy(gameState, town.id, rowId);
+    const r = buy(gameState, town!.id, rowId);
     saveNote = r.ok ? `Bought ${r.row.item}` : `Cannot buy: ${r.why}`;
     gameState = { ...gameState };
   }
@@ -1129,7 +1137,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   /** A Waypoint warp: instant, to a settlement already walked to, and it pays gold for the walk's time. */
   function travelTo(id: string) {
-    const s = settlementById(id);
+    const s = settlementById(id)!;
     const saved = walkBlocks(gameState.town.waypoint, id);
     const r = warpTo(gameState, id);
     if (!r.ok) { saveNote = `Cannot warp: ${r.why}`; gameState = { ...gameState }; return; }
@@ -1227,12 +1235,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   let townNote = $state('');
   const tabs = $derived(stashTabCount(gameState));
-  /** the inventory reads its tab: the two bags share the pile counts, the benches name their price */
+  /** the inventory reads its tab: the merged window names the two bags, the warehouse names itself */
   const invSub = $derived(
-    invTab === 'forge' ? 'enhancement · paid in Quality stones, never gold'
-      : invTab === 'craft' ? 'the stones that change a piece, not its level'
-        : invTab === 'stash' ? `warehouse · ${tabs} tab${tabs === 1 ? '' : 's'} · one record, every settlement`
-          : bagSub,
+    invTab === 'stash' ? `warehouse · ${tabs} tab${tabs === 1 ? '' : 's'} · one record, every settlement`
+      : `${bagSub} · bench: ${benchMode === 'craft' ? 'stone craft' : 'enhancement in Quality stones'}`,
   );
   const farmSub = $derived('level ' + fl + ' / ' + farm.F.level_cap + ' · the one life skill, and it grants no power');
   const deskSub = $derived(gameState.walk
@@ -1294,7 +1300,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function doTurnIn() {
-    const r = turnIn(gameState, town.id);
+    const r = turnIn(gameState, town!.id);
     townNote = r.ok ? `Turned in the ${viewColSet.name} set · reward: ${r.reward}` : `Turn-in refused: ${r.why}`;
     gameState = { ...gameState };
   }
@@ -1393,7 +1399,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const skill = id ? sm.byId[id] : null;
     const status = appliedStatusOf(skill);
     if (status) return { key: status, label: status };
-    return appliedCurseOf(skill) ? { key: skill.id, label: skill.name } : null;
+    return appliedCurseOf(skill) ? { key: skill!.id, label: skill!.name ?? '' } : null;
   }
   function toggleStatusMissing(id: string, name: string) {
     const now = condOf(gameState.skills, id).statusMissing;
@@ -1512,14 +1518,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       {@html mapMarkup}
     </div>
   </div>
-  <h2 class="arena">{townLive && town && town.name !== zone.name ? `${town.name} · ${zone.name}` : zone.name}</h2>
+  <!-- the zone's own name lives once, on the read column's tag — no second copy of it behind the HUD -->
 
-  <!-- top-centre: the hunt's headline — who you are and what you are fighting, the way a hub screen
+  <!-- top-centre: the hunt's headline — what you are fighting, the way a hub screen
        names its target: the front body's name over one wide red bar that carries its health -->
   {#if plates.length}
     {@const front = plates[0]}
     <div class="targetbar">
-      <p class="player-tag">Lv.{gameState.player.level} <b>{heldWeaponName(gameState) || 'Bare hands'}</b></p>
       <p class="target-name">{fieldLabel(front)} <span>{front.kind}</span></p>
       <div class="target-hp">
         <i style={bar(front.hp, front.hpMax)}></i>
@@ -1534,7 +1539,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <p class="zone-tag">{zone.name}<b>Lv {zone.levels[0]}–{zone.levels[1]}</b></p>
     <div class="toprow">
       <span class="purse" title="Gold in the purse"><b>{fmtNum(gameState.counters.gold)}</b><i>gold</i></span>
-      <span class="purse" title="Time and kills this run"><b>{minutes} min</b><i>{fmtNum(gameState.counters.kills)} kills</i></span>
     </div>
     <Minimap markup={mapMarkup} cell={gameState.cell} onopen={() => togglePanel('map')} />
     <div class="tracker">
@@ -1788,48 +1792,29 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </div>
   </div>
 
-  <!-- bottom-right: the main wheel — one plate split three ways (bags, skills, the character sheet)
-       with five satellite knobs for the screens the loop reaches for next. They open or toggle rather
-       than cast, so they carry no slot number; the wheel takes no click of its own. The whole hub drags
-       as one from its plate background — double-click parks it back in its corner. -->
+  <!-- bottom-right: the main wheel — one plate split three ways (bags, skills, the character sheet).
+       The screens the loop reaches for next all live on the rail above, so the wheel carries no
+       satellite knobs: one screen, one seat. The hub drags as one from its card background —
+       double-click parks it back in its corner. -->
   <div class="menuring" role="group" aria-label="Main screens" use:hubDrag
        class:dragging={hubDragged} style={`translate: ${hub.x.toFixed(0)}px ${hub.y.toFixed(0)}px`}>
-    <button class="knob sat sat-map" class:here={panel === 'map'} onclick={() => togglePanel('map')}
-            title={`Map · ${keyFor('screen.map')}`} aria-keyshortcuts={keyFor('screen.map')} aria-label="Map">
-      <img src={mapMark} alt="" aria-hidden="true" />
+    <button class="tab w-bag" class:here={panel === 'bag'} onclick={() => togglePanel('bag')}
+            title={`Bags — ${gameState.bag.length} / ${E.inventory.adventure_slots} slots · ${keyFor('screen.bag')}`}
+             aria-keyshortcuts={keyFor('screen.bag')} aria-label="Bags">
+      <img src={bagMark} alt="" aria-hidden="true" />
+      <span class="cap">Bag</span>
     </button>
-    <button class="knob sat sat-craft" class:here={panel === 'craft'} onclick={() => togglePanel('craft')}
-            title={`Craft · ${keyFor('screen.craft')}`} aria-keyshortcuts={keyFor('screen.craft')} aria-label="Craft">
-      <img src={craftMark} alt="" aria-hidden="true" />
+    <button class="tab w-skills" class:here={panel === 'skills'} onclick={() => togglePanel('skills')}
+            title="Auto-cast and the cast order · {ACTIVE_SLOTS} slots, cast top-down · {keyFor('screen.skills')}"
+            aria-keyshortcuts={keyFor('screen.skills')} aria-label="Skills">
+      <img src={skillMark} alt="" aria-hidden="true" />
+      <span class="cap">Skills</span>
     </button>
-    <button class="knob sat sat-forge" class:here={panel === 'forge'} onclick={() => togglePanel('forge')}
-            title={`Forge · ${keyFor('screen.forge')}`} aria-keyshortcuts={keyFor('screen.forge')} aria-label="Forge">
-      <img src={forgeMark} alt="" aria-hidden="true" />
+    <button class="tab w-sheet" class:here={sheetOpen} aria-expanded={sheetOpen}
+            onclick={() => (sheetOpen = !sheetOpen)} title="Character sheet" aria-label="Character sheet">
+      <img src={sheetMark} alt="" aria-hidden="true" />
+      <span class="cap">Sheet</span>
     </button>
-    <button class="knob sat sat-market" class:here={panel === 'market'} onclick={() => togglePanel('market')}
-            title={`Market · ${keyFor('screen.market')}`} aria-keyshortcuts={keyFor('screen.market')} aria-label="Market">
-      <img src={coinMark} alt="" aria-hidden="true" />
-    </button>
-    <button class="knob sat sat-tree" class:here={panel === 'tree'} onclick={() => togglePanel('tree')}
-            title={`Tree — spend passive points · ${keyFor('screen.tree')}`} aria-keyshortcuts={keyFor('screen.tree')} aria-label="Passive tree">
-      <img src={treeMark} alt="" aria-hidden="true" />
-    </button>
-    <div class="wheel">
-      <button class="wedge w-bag" class:here={panel === 'bag'} onclick={() => togglePanel('bag')}
-              title={`Bags — ${gameState.bag.length} / ${E.inventory.adventure_slots} slots · ${keyFor('screen.bag')}`}
-               aria-keyshortcuts={keyFor('screen.bag')} aria-label="Bags">
-        <img src={bagMark} alt="" aria-hidden="true" />
-      </button>
-      <button class="wedge w-skills" class:here={panel === 'skills'} onclick={() => togglePanel('skills')}
-              title="Auto-cast and the cast order · {ACTIVE_SLOTS} slots, cast top-down · {keyFor('screen.skills')}"
-              aria-keyshortcuts={keyFor('screen.skills')} aria-label="Skills">
-        <img src={skillMark} alt="" aria-hidden="true" />
-      </button>
-      <button class="wedge w-sheet" class:here={sheetOpen} aria-expanded={sheetOpen}
-              onclick={() => (sheetOpen = !sheetOpen)} title="Character sheet" aria-label="Character sheet">
-        <img src={sheetMark} alt="" aria-hidden="true" />
-      </button>
-    </div>
   </div>
 
   <!-- the middle of the frame is the group itself: one plate per mob, HP as the loudest thing on it, and
@@ -1884,7 +1869,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
              they belong to -->
         <div class="plate-fx" aria-hidden="true">
           {#each (fxByMob.get(m.id) || []).filter((e) => e.kind === 'hit' && e.value).slice(0, 4) as e (e.id)}
-            <span class="fx pop" class:crit={e.crit} class:dot={e.via === 'dot'} out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{eng.fmt(e.value)}{e.crit ? '!' : ''}</span>
+            <span class="fx pop" class:crit={e.crit} class:dot={e.via === 'dot'} out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{eng.fmt(e.value ?? 0)}{e.crit ? '!' : ''}</span>
           {/each}
           {#each (fxByMob.get(m.id) || []).filter((e) => e.kind === 'block').slice(0, 2) as e (e.id)}
             <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{e.text}</span>
@@ -1958,7 +1943,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       {/if}
       <div class="plate-fx" aria-hidden="true">
         {#each ring.filter((e) => e.side === 'self' && e.kind === 'taken' && e.value).slice(0, 3) as e (e.id)}
-          <span class="fx pop" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>-{eng.fmt(e.value)}</span>
+          <span class="fx pop" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>-{eng.fmt(e.value ?? 0)}</span>
         {/each}
         {#each ring.filter((e) => e.side === 'self' && (e.kind === 'block' || e.kind === 'proc')).slice(0, 3) as e (e.id)}
           <span class="fx pop word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${e.colour}; --lane:${e.id % 4}`}>{e.text}</span>
@@ -2007,7 +1992,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     {#if latestTaken}
       <!-- the character's own answer to being hit: the frame's edge takes the colour of what landed,
            so a chaos hit and a physical one are felt differently before the number is even read -->
-      <span class="veil" key={latestTaken.id} style="--fx:{latestTaken.colour}"></span>
+      {#key latestTaken.id}
+        <span class="veil" style="--fx:{latestTaken.colour}"></span>
+      {/key}
     {/if}
   </div>
 
@@ -2109,7 +2096,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <span class="rail-sep" aria-hidden="true"></span>
   <div class="controls">
     <div class="speed" role="group" aria-label="Game speed">
-      {#each [1, 2, 4] as m}
+      {#each SPEEDS as m}
         <button class:here={speed === m} aria-pressed={speed === m}
                 onclick={() => setSpeed(m)} title={`Clock speed ×${m}`}>×{m}</button>
       {/each}
@@ -2138,24 +2125,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 {#if panel === 'bag' || panel === 'forge' || panel === 'craft'}
   <Panel title="Inventory" subtitle={invSub} width="wide" fixed onclose={closePanel}>
-    <!-- one modal, five tabs: the hunt pile, the character bag, the two benches and the warehouse.
-         The benches and the warehouse are settlement tabs — refused with their reason from the field. -->
+    <!-- one modal, two tabs: the merged window keeps both bags and the bench on one face, the way a
+         PoE stash window lays the bags out together — the pile left, the carried bag right, the bench
+         in one drawer under them. The warehouse keeps its own tab, a settlement's own room. -->
     <div class="sides" role="tablist" aria-label="Inventory">
-      <button role="tab" class:active={invTab === 'pile'} aria-selected={invTab === 'pile'} onclick={() => goInvTab('pile')}>
-        Hunt pile · {gameState.bag.length} / {E.inventory.adventure_slots}
-      </button>
-      <button role="tab" class:active={invTab === 'carried'} aria-selected={invTab === 'carried'} onclick={() => goInvTab('carried')}>
-        Carried · {slotsUsed(gameState)} / {slotsAvailable(gameState)}
-      </button>
-      <button role="tab" class:active={invTab === 'forge'} aria-selected={invTab === 'forge'} disabled={!townLive}
-              onclick={() => goInvTab('forge')}
-              title={townLive ? `Forge — enhance a piece · ${keyFor('screen.forge')}` : 'A settlement service — walk or warp into one first'}>
-        Forge{townLive ? '' : ' · not here'}
-      </button>
-      <button role="tab" class:active={invTab === 'craft'} aria-selected={invTab === 'craft'} disabled={!townLive}
-              onclick={() => goInvTab('craft')}
-              title={townLive ? `Craft house — the stones that change a piece · ${keyFor('screen.craft')}` : 'A settlement service — walk or warp into one first'}>
-        Craft{townLive ? '' : ' · not here'}
+      <button role="tab" class:active={invTab === 'inv'} aria-selected={invTab === 'inv'} onclick={() => goInvTab('inv')}>
+        Inventory · pile {gameState.bag.length} / {E.inventory.adventure_slots} · bag {slotsUsed(gameState)} / {slotsAvailable(gameState)}
       </button>
       <button role="tab" class:active={invTab === 'stash'} aria-selected={invTab === 'stash'} disabled={!townLive}
               onclick={() => goInvTab('stash')}
@@ -2165,12 +2140,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </div>
     <!-- the body folds: one tab visible at a time, grids paged, prose collapsed — nothing here scrolls -->
     <div class="invbody">
-    {#if invTab === 'pile'}
+    {#if invTab === 'inv'}
     <section class="bagblock">
-      <h3>Hunt pile · what this trip kept</h3>
       {#if gameState.bag.length >= E.inventory.adventure_slots}
         <p class="warn"><b>Bag full — the zone has stopped paying.</b> {gameState.counters.overflow || 0} pieces have been left on the ground. Walk back to {settlementById(gameState.town.waypoint)?.name || 'a settlement'} and deposit.</p>
       {/if}
+      {#if equipNote}<p class="equipnote">{equipNote}</p>{/if}
       <div class="bagtools">
         <!-- the margin is the difference between a press that dresses you and one that churns: a piece has
              to be this much ahead before it goes on, in the same percent the bag filter's margin is set in -->
@@ -2192,48 +2167,85 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           </button>
         {/if}
       </div>
-      {#if equipNote}<p class="equipnote">{equipNote}</p>{/if}
-      <div class="bagshell">
-        <nav class="bagcats" aria-label="Narrow the pile by kind">
-          {#each pileGroups as g (g.id)}
-            <button class:on={bagCat === g.id} onclick={() => (bagCat = g.id)}>
-              <span>{g.label}</span><b>{g.n}</b>
-            </button>
-          {/each}
-        </nav>
-        <div class="bagmain">
-          <div class="bagtools">
-            <input class="bagsearch" type="search" placeholder="Search this pile…"
-                   bind:value={bagQuery} aria-label="Search the pile" />
-            <label class="bagtier">quality
-              <select bind:value={bagTier} aria-label="Quality">
-                <option value="all">All</option>
-                <option value="low">low</option>
-                <option value="mid">mid</option>
-                <option value="high">high</option>
-              </select>
-            </label>
-            <span class="grow"></span>
-            <small class="dim">{bagShown.length} of {tempEntries.length} shown</small>
+      <!-- the PoE face: two grids, one window — the trip's pile on the left, the character bag on the right -->
+      <div class="poewin">
+        <div class="bagshell poecol">
+          <h3>Hunt pile · what this trip kept</h3>
+          <nav class="bagcats" aria-label="Narrow the pile by kind">
+            {#each pileGroups as g (g.id)}
+              <button class:on={bagCat === g.id} onclick={() => (bagCat = g.id)}>
+                <span>{g.label}</span><b>{g.n}</b>
+              </button>
+            {/each}
+          </nav>
+          <div class="bagmain">
+            <div class="bagtools">
+              <input class="bagsearch" type="search" placeholder="Search this pile…"
+                     bind:value={bagQuery} aria-label="Search the pile" />
+              <label class="bagtier">quality
+                <select bind:value={bagTier} aria-label="Quality">
+                  <option value="all">All</option>
+                  <option value="low">low</option>
+                  <option value="mid">mid</option>
+                  <option value="high">high</option>
+                </select>
+              </label>
+              <span class="grow"></span>
+              <small class="dim">{bagShown.length} / {tempEntries.length}</small>
+            </div>
+            <SlotGrid
+              entries={bagShown}
+              capacity={E.inventory.adventure_slots}
+              mode={tempMode}
+              onmode={(m) => (tempMode = m)}
+              sort={tempSort}
+              onsort={(k) => (tempSort = k)}
+              wornOf={wornOf}
+              onequip={equip}
+              pageSize={30}
+              empty="Nothing here yet — kills still drop, and the bag filter is the zone upgrade rate."
+            />
           </div>
+        </div>
+        <div class="poecol poecarried">
+          <h3>Carried · the character bag</h3>
+          <p class="weight">Weight <b>{c.weightUsed.toFixed(0)}</b> / {Math.round(c.weightCap)} <small>{c.encumbrance > 0 ? `· aspd ${(c.encumbrance * -100).toFixed(0)}%` : '· no tax'}</small></p>
           <SlotGrid
-            entries={bagShown}
-            capacity={E.inventory.adventure_slots}
-            mode={tempMode}
-            onmode={(m) => (tempMode = m)}
-            sort={tempSort}
-            onsort={(k) => (tempSort = k)}
+            entries={invEntries}
+            capacity={slotsAvailable(gameState)}
+            mode={invMode}
+            onmode={(m) => (invMode = m)}
+            sort={invSort}
+            onsort={(k) => (invSort = k)}
             wornOf={wornOf}
-            onequip={equip}
             pageSize={30}
-            empty="Nothing here yet — kills still drop, and the bag filter is the zone upgrade rate."
+            empty="Nothing carried yet — stones, herbs, draughts and junk all land in these slots."
           />
-          <p class="bagfoot"><small>{bagShown.length
-            ? `${bagShown.length} shown of ${tempEntries.length} in the pile · ${E.inventory.adventure_slots} slots`
-            : 'nothing matches — clear the search or pick another kind'}</small></p>
         </div>
       </div>
-
+      <!-- the bench, one drawer with a two-way switch: enhancement and stone craft share the window
+           instead of owning tabs, the way a stash window folds the bench over the bags -->
+      <div class="seg benchseg" role="tablist" aria-label="The bench">
+        <button role="tab" class:active={benchMode === 'forge'} aria-selected={benchMode === 'forge'} disabled={!townLive}
+                onclick={() => (benchMode = 'forge')}
+                title={townLive ? 'Forge — enhance a piece · paid in Quality stones' : 'A settlement service — walk or warp into one first'}>
+          Forge{townLive ? '' : ' · not here'}
+        </button>
+        <button role="tab" class:active={benchMode === 'craft'} aria-selected={benchMode === 'craft'} disabled={!townLive}
+                onclick={() => (benchMode = 'craft')}
+                title={townLive ? 'Craft house — the stones that change a piece, not its level' : 'A settlement service — walk or warp into one first'}>
+          Craft{townLive ? '' : ' · not here'}
+        </button>
+      </div>
+      {#if benchMode === 'forge'}
+        <Forge state={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
+               onpick={(w, i) => (bench = { where: w, index: i })}
+               onrun={(op) => runCraft(op, 0)} {wornOf} note={benchNote} />
+      {:else}
+        <CraftBoard game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
+                    onpick={(w, i) => (bench = { where: w, index: i })}
+                    onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote} />
+      {/if}
       <details class="filter">
         <summary>Bag filter — what this run keeps</summary>
         <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. Turn a slot on and a piece that fails its rule turns into 1 Value stone on the spot (stones are always kept, never discarded) — nothing is deleted.</small></p>
@@ -2254,36 +2266,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         </table>
         <p><small>Still not found — Elements you have no resistance for: <b>{gameState.filter.missing.elements.length ? gameState.filter.missing.elements.join(', ') : 'none'}</b> · empty slots: <b>{gameState.filter.missing.slots.length ? gameState.filter.missing.slots.join(', ') : 'none'}</b></small></p>
       </details>
-    </section>
-    {:else if invTab === 'carried'}
-    <section class="bagblock">
-      <h3>Carried · the character bag</h3>
-      <p class="weight">Weight <b>{c.weightUsed.toFixed(0)}</b> / {Math.round(c.weightCap)} <small>{c.encumbrance > 0 ? `· aspd ${(c.encumbrance * -100).toFixed(0)}%` : '· no tax'}</small></p>
-      <SlotGrid
-        entries={invEntries}
-        capacity={slotsAvailable(gameState)}
-        mode={invMode}
-        onmode={(m) => (invMode = m)}
-        sort={invSort}
-        onsort={(k) => (invSort = k)}
-        wornOf={wornOf}
-        pageSize={30}
-        empty="Nothing carried yet — stones, herbs, draughts and junk all land in these slots."
-      />
-    </section>
-    {:else if invTab === 'forge'}
-    <section class="bagblock">
-      <h3>Forge · enhancement, paid in Quality stones</h3>
-      <Forge state={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
-             onpick={(w, i) => (bench = { where: w, index: i })}
-             onrun={(op) => runCraft(op, 0)} {wornOf} note={benchNote} />
-    </section>
-    {:else if invTab === 'craft'}
-    <section class="bagblock">
-      <h3>Craft house · the stones that change a piece</h3>
-      <CraftBoard game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
-                  onpick={(w, i) => (bench = { where: w, index: i })}
-                  onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote} />
     </section>
     {:else}
     <section class="bagblock">
@@ -2412,7 +2394,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <p><small>Reserved {reservedPct(gameState.skills)}% of Max Mana · the block is {sm.RESERVATION_LIMIT}%. Up right now: {describeFold(effectsActive(gameState.skills)) || 'nothing — no aura is on and no buff is counting'}.</small></p>
     <h3>Aura set (reserves Max Mana, may not reserve all of it)</h3>
     {#each ownedAuras as k}
-      <label><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.reserve} ({sm.reservePct(k.reserve)}%) · {effectLine(k) || k.effect}</label><br />
+      <label><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /> <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span> · {k.reserve} ({sm.reservePct(k.reserve ?? '')}%) · {effectLine(k) || k.effect}</label><br />
     {:else}
       <p><small>None owned.</small></p>
     {/each}
@@ -2563,7 +2545,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
     {#if viewTown}
       <h3>{viewTown.name} · settlement{viewHere ? '' : ' — read only, you are standing in ' + (town ? town.name : 'the field')}</h3>
-      <p><small>Innate Element {viewTown.innate.join(' / ')} · Base bias flavour {viewTown.base_bias_flavor} · NPCs here: {viewTown.npcs.map((n: string) => npcOf(n).name).join(' · ')}</small></p>
+      <p><small>Innate Element {viewTown.innate.join(' / ')} · Base bias flavour {viewTown.base_bias_flavor} · NPCs here: {viewTown.npcs.map((n: string) => npcOf(n)?.name ?? n).join(' · ')}</small></p>
       {#if !viewHere}
         <p><small>Walk or warp to {viewTown.name} — this section is live only where the character stands.</small></p>
       {/if}
@@ -2590,7 +2572,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             {@const check = canBuy(gameState, viewTown.id, row.id)}
             <tr>
               <td>{row.item}</td>
-              <td>{npcOf(row.npc).name}</td>
+              <td>{npcOf(row.npc)?.name ?? row.npc}</td>
               <td>{row.kind}</td>
               <td>{priceMinutes(row, viewTown.id, gameState)} m{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
               <td>{priceGold(row, viewTown.id, gameState)}</td>
@@ -2830,7 +2812,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      on top of a sharp map: a zone label and a travel switch cannot share the same square, and the map is
      the one thing the player is looking at. The purse stays — it costs nothing to read and a walk needs it. */
   .stage.mapmode .tracker { display: none; }
-  .stage.mapmode .arena { display: none; }
   .stage.mapmode .targetbar { display: none; }
   /* a working screen is the subject, so the field behind it recedes the way the ground recedes from the
      map: one ladder, one direction — the veil does the dimming and the field does the blurring */
@@ -2873,6 +2854,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     overflow: hidden;
     /* the menu bar's own height band: every top-centre read hangs below it */
     --rail-h: clamp(52px, 3.4vw, 66px);
+    /* the hub card's own height band: the pickups' column hangs above it */
+    --hub-h: clamp(130px, 8vw, 176px);
+    /* the hub's one panel recipe: every HUD card wears the same deep-glass face and the same
+       gold-tinted edge, declared once and read by name, so the panels can never drift apart */
+    --hud-face: linear-gradient(180deg, rgba(23, 29, 40, .88), rgba(11, 15, 21, .94));
+    --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
     background:
       radial-gradient(120% 85% at 50% 115%, color-mix(in srgb, var(--glow-moss) 30%, transparent), transparent 62%),
       radial-gradient(95% 70% at 50% -12%, color-mix(in srgb, var(--glow-dusk) 32%, transparent), transparent 64%),
@@ -2885,15 +2872,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     background: radial-gradient(115% 95% at 50% 48%, transparent 52%, rgba(0, 0, 0, .55));
   }
   .vitals, .tracker, .field { z-index: 2; }
-  /* the zone names the frame itself: a banner across the top edge, quiet, lying behind every read */
-  .arena {
-    position: absolute; top: calc(var(--screen-pad) + var(--rail-h)); left: 50%; transform: translateX(-50%); z-index: 0;
-    margin: 0; font-size: var(--fs-arena); letter-spacing: clamp(2.5px, 0.163vw + 0.63px, 5.4px); text-transform: uppercase;
-    color: color-mix(in srgb, var(--text) 12%, transparent); white-space: nowrap; pointer-events: none;
-  }
-  /* the away report takes the second line, so it never prints over the zone's own name */
+  /* the away report takes the second line under the menu bar, so it never prints over the fight's name */
   .toast {
-    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--fs-arena) + var(--spacing-xs)); left: 50%; transform: translateX(-50%); z-index: 6;
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-sm)); left: 50%; transform: translateX(-50%); z-index: 6;
     display: flex; flex-wrap: wrap; gap: 3px var(--spacing-sm); align-items: baseline; max-width: min(var(--box-920), 62%);
     border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent); border-radius: 10px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs);
     background: var(--glass); box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
@@ -2910,23 +2891,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     pointer-events: none;
   }
   /* panel language shared by the hub's cards (Lumivara navy-and-gold, Genshin corner ticks):
-     deep glass, a gold hairline, one lit top edge, and two gold corner brackets */
+     the --hud-face/--hud-edge recipe plus two gold corner brackets */
   .vitals {
-    --notch: clamp(8px, 1vw, 16px);
     position: relative;
     display: flex; gap: var(--spacing-sm); align-items: center;
     width: max-content; padding: var(--spacing-xs) var(--spacing-sm);
-    background: linear-gradient(180deg, rgba(23, 29, 40, .85), rgba(11, 15, 21, .93));
-    border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--edge));
+    background: var(--hud-face);
+    border: 1px solid var(--hud-edge);
     border-radius: clamp(8px, 0.75vw, 14px);
     box-shadow: 0 4px 18px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
   }
-  .vitals::before, .vitals::after {
-    content: ''; position: absolute; width: var(--notch); height: var(--notch); pointer-events: none;
+  .vitals::before, .vitals::after, .pop::before, .pop::after {
+    content: ''; position: absolute; width: clamp(8px, 1vw, 16px); height: clamp(8px, 1vw, 16px); pointer-events: none;
     border: 2px solid color-mix(in srgb, var(--gold) 62%, transparent);
   }
-  .vitals::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
-  .vitals::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+  .vitals::before, .pop::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .vitals::after, .pop::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
   .portrait { position: relative; flex: none; width: var(--portrait-size); height: var(--portrait-size); }
   /* the portrait's gold collar: a hairline ring a step outside the xp ring's track */
   .portrait::before {
@@ -2994,17 +2974,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     pointer-events: auto; flex: 0 1 auto; align-self: stretch; min-height: 0; max-height: 70vh;
     position: relative;
     display: flex; flex-direction: column;
-    border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--edge)); border-radius: clamp(8px, 0.75vw, 14px);
-    background: linear-gradient(180deg, rgba(23, 29, 40, .88), rgba(11, 15, 21, .95));
+    border: 1px solid var(--hud-edge); border-radius: clamp(8px, 0.75vw, 14px);
+    background: var(--hud-face);
     box-shadow: 0 14px 40px rgba(0, 0, 0, .6); backdrop-filter: blur(8px);
     animation: pop .14s ease-out;
   }
-  .pop::before, .pop::after {
-    content: ''; position: absolute; width: clamp(8px, 1vw, 16px); height: clamp(8px, 1vw, 16px); pointer-events: none;
-    border: 2px solid color-mix(in srgb, var(--gold) 62%, transparent);
-  }
-  .pop::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
-  .pop::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
   .pop > header {
     display: flex; align-items: baseline; gap: var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-xs);
     border-bottom: 1px solid color-mix(in srgb, var(--gold) 26%, var(--edge)); border-radius: clamp(8px, 0.75vw, 14px) clamp(8px, 0.75vw, 14px) 0 0;
@@ -3051,7 +3025,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     box-shadow: inset 2px 0 0 var(--gold);
   }
   .tracker .phase, .tracker .objective, .tracker .alarm-line, .tracker .travel small {
-    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical;
   }
   .travel { display: grid; gap: 3px; }
   .travel b { font-size: var(--font-xs); letter-spacing: clamp(1.25px, 0.082vw + 0.32px, 2.7px); text-transform: uppercase; color: var(--dim); font-weight: 500; }
@@ -3274,89 +3248,24 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .cast b { position: absolute; top: clamp(-8.1px, -0.244vw - 0.94px, -3.75px); left: clamp(-2.7px, -0.082vw - 0.32px, -1.25px); font-size: var(--font-xs); color: var(--dim); }
 
-  /* bottom-right: the main wheel — one round plate split three ways, the sectors the player's hands
-     live in (bags, skills, the character sheet), and five satellite knobs for the screens the loop
-     reaches for next. The plate is a conic gradient so the sector arcs stay true circles; the press
-     targets are buttons clipped to their sector's wedge, and the split lines are a second conic laid
-     over the seams. */
+  /* bottom-right: the main hub — one small card in the rail's own face, holding three separate
+     tab buttons (bags, skills, the character sheet) in the same icon-over-caption language the
+     menu bar above uses. One screen, one seat; the hub drags as one piece from its card. */
   .menuring {
     position: absolute; bottom: calc(var(--bar-h) + var(--screen-pad)); right: var(--screen-pad); z-index: 4;
-    width: var(--wheel); height: var(--wheel);
-    --slot-face: rgba(12, 16, 22, .82);
-    --slot-edge: rgba(255, 255, 255, .3);
-    --sector: color-mix(in srgb, var(--gold) 16%, var(--slot-face));
-    /* the hub drags as one piece from its plate background (buttons keep their own presses): no text
+    display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+    padding: var(--spacing-xs);
+    background: var(--hud-face);
+    border: 1px solid var(--hud-edge);
+    border-radius: clamp(8px, 0.75vw, 14px);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
+    /* the hub drags as one piece from its card background (buttons keep their own presses): no text
        selection mid-drag, the grab hand at rest, the closed hand while held */
     touch-action: none; cursor: grab; user-select: none;
   }
   .menuring.dragging { cursor: grabbing; }
-  .wheel {
-    position: absolute; inset: 0; border-radius: 50%;
-    border: 2px solid color-mix(in srgb, var(--gold) 48%, var(--slot-edge));
-    background: conic-gradient(from 300deg, var(--w1, var(--slot-face)) 0 120deg, var(--w2, var(--slot-face)) 120deg 240deg, var(--w3, var(--slot-face)) 240deg 360deg);
-    backdrop-filter: blur(6px);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .05);
-  }
-  /* the Y split: three thin seams over the sector boundaries at 300, 60 and 180 conic degrees —
-     the same rays the wedge clip-paths use (up-left, up-right, down), so a hover tints the sector
-     the pointer is actually over */
-  .wheel::after {
-    content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
-    background: conic-gradient(from 299.1deg,
-      var(--slot-edge) 0 1.8deg, transparent 1.8deg 119.1deg,
-      var(--slot-edge) 119.1deg 120.9deg, transparent 120.9deg 239.1deg,
-      var(--slot-edge) 239.1deg 240.9deg, transparent 240.9deg 360deg);
-  }
-  /* the press targets: a wedge is the whole plate clipped to its third, so the hover tint lands on the
-     sector the pointer is over, not on a bounding box */
-  .wedge { position: absolute; inset: 0; padding: 0; background: none; border: 0; cursor: pointer; }
-  .w-bag { clip-path: polygon(50% 50%, 6.7% 25%, 14.6% 14.6%, 25% 6.7%, 37.1% 3.3%, 50% 0%, 62.9% 3.3%, 75% 6.7%, 85.4% 14.6%, 93.3% 25%); }
-  .w-skills { clip-path: polygon(50% 50%, 93.3% 25%, 98.3% 37.1%, 100% 50%, 98.3% 62.9%, 93.3% 75%, 85.4% 85.4%, 75% 93.3%, 62.9% 96.7%, 50% 100%); }
-  .w-sheet { clip-path: polygon(50% 50%, 50% 100%, 37.1% 96.7%, 25% 93.3%, 14.6% 85.4%, 6.7% 75%, 1.7% 62.9%, 0% 50%, 1.7% 37.1%, 6.7% 25%); }
-  .wheel:has(.w-bag:hover), .wheel:has(.w-bag.here) { --w1: var(--sector); }
-  .wheel:has(.w-skills:hover), .wheel:has(.w-skills.here) { --w2: var(--sector); }
-  .wheel:has(.w-sheet:hover), .wheel:has(.w-sheet.here) { --w3: var(--sector); }
-  /* an outline would draw on the clipped-away square, so the reached wedge lights its own sector */
-  .wedge:focus-visible { background: color-mix(in srgb, var(--focus) 24%, transparent); outline: none; }
-  .wedge img { position: absolute; width: var(--icon-xl); height: var(--icon-xl); object-fit: contain; opacity: .92; transform: translate(-50%, -50%); }
-  .w-bag img { left: 50%; top: 25%; }
-  .w-skills img { left: 72%; top: 63%; }
-  .w-sheet img { left: 28%; top: 63%; }
-  /* the five satellite knobs ring the wheel's own plate: an arc off its top-left rim in the order the
-     loop reaches for them (map, craft, forge, market, tree). Each sits on a circle of radius --r about
-     the wheel's centre, placed by its own unit offsets, so the ring keeps its gap as the wheel scales.
-     --r is 0.92 (not 0.82): the knob grows faster with the viewport than the arc gap does, so 0.82
-     touches at ~1280px and overlaps past ~1920px. `.knob.sat` outranks `.knob`'s own
-     `position: relative`, which otherwise drops them into flow. */
-  .knob.sat {
-    position: absolute; --r: calc(var(--wheel) * 0.92);
-    left: calc(50% + var(--r) * var(--dx)); top: calc(50% + var(--r) * var(--dy));
-    transform: translate(-50%, -50%);
-    z-index: 1;
-  }
-  .sat-map { --dx: 0; --dy: -1; }
-  .sat-craft { --dx: -0.481; --dy: -0.877; }
-  .sat-forge { --dx: -0.843; --dy: -0.537; }
-  .sat-market { --dx: -0.998; --dy: -0.065; }
-  .sat-tree { --dx: -0.906; --dy: 0.423; }
-  .knob {
-    position: relative; width: var(--knob); height: var(--knob);
-    padding: 0; border-radius: 50%; display: grid; place-items: center;
-    background:
-      radial-gradient(circle at 50% 26%, rgba(255, 255, 255, .09), transparent 58%),
-      linear-gradient(180deg, #1e2733, #0d1218);
-    border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--slot-edge, rgba(255, 255, 255, .14)));
-    backdrop-filter: blur(6px);
-    box-shadow: 0 3px 12px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .07), inset 0 -5px 10px rgba(0, 0, 0, .4);
-  }
-  .knob img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; opacity: .88; }
-  /* satellites share one smaller glyph box so thin-stroke icons (leaf, ring, potion) read at the same
-     weight as solid ones (coins, armour) instead of shouting past the knob's rim */
-  .knob.sat img { width: var(--icon-md); height: var(--icon-md); opacity: .95; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .8)); }
-  .knob.sat:hover img { opacity: 1; }
-  .knob:hover { border-color: color-mix(in srgb, var(--gold) 60%, transparent); background: color-mix(in srgb, var(--gold) 10%, var(--slot-face, rgba(12, 16, 22, .82))); }
-  .knob.open, .knob.here { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 18%, var(--slot-face, rgba(12, 16, 22, .82))); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 50%, transparent), 0 2px 10px rgba(0, 0, 0, .5); }
-  /* map focus folds the fight down onto the log: this compact card sits bottom-left over the field
+  .menuring .tab { min-width: var(--box-110); }
+  /* map focus folds the fight down onto the log: this compact card sits bottom-left over the field */
   .mob-mini {
     position: absolute; left: var(--screen-pad); bottom: clamp(55px, 3.586vw + 13.86px, 118.8px); width: min(var(--box-560), 46%); z-index: 3;
     display: flex; flex-wrap: wrap; align-items: center; gap: 3px var(--spacing-sm);
@@ -3402,7 +3311,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .zone-tag {
     margin: 0; display: inline-flex; align-items: baseline; gap: var(--spacing-xs);
     padding: 3px var(--spacing-sm); border-radius: 999px;
-    background: linear-gradient(180deg, rgba(23, 29, 40, .88), rgba(11, 15, 21, .94));
+    background: var(--hud-face);
     border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--edge));
     box-shadow: 0 4px 14px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06);
     font-size: var(--font-xs); letter-spacing: clamp(1px, 0.065vw + 0.25px, 2.16px); text-transform: uppercase;
@@ -3414,17 +3323,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* the top-centre target bar: the front body's name over one wide red bar — the hub's own read of
      what the rotation is pressing, loud from across the room the way a boss bar is */
   .targetbar {
-    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--fs-arena) + var(--spacing-sm)); left: 50%; transform: translateX(-50%); z-index: 2;
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-sm)); left: 50%; transform: translateX(-50%); z-index: 2;
     width: min(var(--box-560), 46%); display: grid; gap: 3px; justify-items: center;
     pointer-events: none; text-align: center;
   }
-  .player-tag, .target-name { margin: 0; font-size: var(--font-xs); color: var(--text); white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, .95); }
-  .player-tag b { color: var(--gold-lit); font-weight: 700; }
+  .target-name { margin: 0; font-size: var(--font-xs); color: var(--text); white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, .95); }
   .target-name {
     display: inline-flex; align-items: center; gap: var(--spacing-xs);
     text-transform: uppercase; letter-spacing: clamp(1px, 0.065vw + 0.25px, 2.16px);
     padding: 2px var(--spacing-sm); border-radius: clamp(6px, 0.65vw, 12px);
-    background: linear-gradient(180deg, rgba(23, 29, 40, .9), rgba(11, 15, 21, .96));
+    background: var(--hud-face);
     border: 1px solid color-mix(in srgb, var(--gold) 42%, var(--edge));
     box-shadow: 0 2px 10px rgba(0, 0, 0, .5);
   }
@@ -3500,17 +3408,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     display: flex; flex-direction: row; flex-wrap: nowrap; align-items: stretch; justify-content: flex-end; gap: 2px;
     padding: var(--spacing-xs);
     overflow-x: auto; scrollbar-width: none;
-    background: linear-gradient(180deg, rgba(23, 29, 40, .93), rgba(11, 15, 21, .96));
+    background: var(--hud-face);
     backdrop-filter: blur(8px);
-    border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--edge));
+    border: 1px solid var(--hud-edge);
     border-radius: clamp(8px, 0.75vw, 14px);
     box-shadow: 0 6px 22px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
   }
   .purse {
     display: inline-flex; align-items: baseline; gap: var(--spacing-xs);
     padding: 3px var(--spacing-sm); border-radius: 999px;
-    background: linear-gradient(180deg, rgba(23, 29, 40, .88), rgba(11, 15, 21, .94));
-    border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--edge));
+    background: var(--hud-face);
+    border: 1px solid var(--hud-edge);
     box-shadow: 0 4px 14px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06);
     font-variant-numeric: tabular-nums;
   }
@@ -3563,16 +3471,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .moreitem.far { opacity: .5; }
   .moreitem.far img { filter: grayscale(.6); }
 
-  /* the inventory's own fold: the tab bar, then one visible tab that never scrolls — grids page,
-     prose collapses, and anything taller clips rather than growing a scrollbar */
+  /* the inventory's own fold: the tab bar, then one visible tab — grids page, prose collapses, and
+       the merged window scrolls only when the bench pushes past the frame */
   .invbody { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-  .invbody > section { min-height: 0; overflow: hidden; }
+  .invbody > section { min-height: 0; overflow-y: auto; }
   /* the sub-screens that came off the old three-column page */
-  /* the inventory's tabs: one modal, five verbs, and the count each tab is holding printed on it */
+  /* the inventory's tabs: one modal, two verbs, and the count each tab is holding printed on it */
   .sides { display: flex; gap: 4px; margin-bottom: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
   .sides button { border-radius: 999px; font-size: var(--font-xs); padding: 4px var(--spacing-sm); }
   .sides button.active { border-color: var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); }
   .sides button:disabled:hover { border-color: var(--line); color: var(--text); }
+  /* the merged window's face: the two bags side by side — the trip's pile the wider half, the
+     character's own bag the narrower one — then the bench drawer under them, PoE-style */
+  .poewin { display: grid; grid-template-columns: 1.25fr 1fr; gap: var(--spacing-sm); align-items: start; min-height: 0; }
+  .poecol { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
+  .poecol h3 { margin: 0; font-size: var(--font-xs); color: var(--dim); letter-spacing: clamp(0.75px, 0.049vw + 0.19px, 1.62px); text-transform: uppercase; }
+  .bagshell.poecol { grid-template-columns: 1fr; }
+  .poecol .bagcats { flex-direction: row; flex-wrap: wrap; }
+  .benchseg { margin: var(--spacing-sm) 0 var(--spacing-xs); max-width: max-content; }
+  .invbody .seg button:disabled { opacity: .45; }
   /* the equip margin reads in the pile's own tool row now that the tabs own the rail */
   .bagtools .margin { display: inline-flex; align-items: center; gap: 4px; font-size: var(--font-xs); color: var(--dim); }
   .bagtools .margin input { width: var(--icon-xl); }
@@ -3595,7 +3512,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .bagtools .grow { flex: 1; }
   .bagsearch { min-width: var(--box-110); }
   .bagtier { display: inline-flex; align-items: center; gap: 4px; font-size: var(--font-xs); color: var(--dim); }
-  .bagfoot { margin: 0; color: var(--dim); }
   .bagtools .best:hover { border-color: var(--good); }
   .equipnote { margin: var(--x-pull-note) 0 var(--spacing-sm); font-size: var(--font-xs); color: var(--good); }
   .bagblock { border: 0; }
@@ -3660,7 +3576,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .float-side { position: absolute; display: flex; flex-direction: column-reverse; gap: 1px; }
   /* the pickups' own column, the right edge above the wheel the way a hub screen lists what the
        character just gathered — each entry a pill, right-aligned, reading up from the floor */
-  .field-side { right: var(--screen-pad); bottom: calc(var(--wheel) + var(--screen-pad) * 2); left: auto; transform: none; align-items: flex-end; }
+  .field-side { right: var(--screen-pad); bottom: calc(var(--hub-h) + var(--screen-pad) * 2); left: auto; transform: none; align-items: flex-end; }
   /* the character's own column is anchored to the card it belongs to: it rises from just above the
      self-plate's top edge, so its place follows the plate wherever the frame puts it */
   .self-side { left: 50%; bottom: calc(100% + clamp(5px, 0.326vw + 1.26px, 10.8px)); transform: translateX(-50%); align-items: center; }
@@ -3699,37 +3615,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     box-shadow: 0 0 clamp(6.25px, 0.407vw + 1.57px, 13.5px) color-mix(in srgb, var(--fx, var(--text)) 60%, transparent) inset;
     animation: fx-flash .32s ease-out forwards;
   }
-  /* The figure a body wears, stamped on the card's top-right corner above its frame. A mob pops one
+  /* The figure a body wears, stamped on the card's top-right corner above its frame. A body pops one
      figure per landed blow — a cut or a burst full-size, a status tick small beside it — each rising away
-     on its own life, so a plate shows what was done to it and never a sum. The character's own card keeps
-     the held total of what it took, dissolving when the ring drains. Set large and outlined on all four
-     sides so a figure reads over any portrait behind it. */
+     on its own life, so a plate shows what was done to it and never a sum. Set large and outlined on all
+     four sides so a figure reads over any portrait behind it. */
   .mob .plate-fx, .self-plate .plate-fx {
     position: absolute; left: auto; right: clamp(-9.46px, -0.285vw - 1.1px, -4.38px); top: clamp(-29.7px, -0.896vw - 3.47px, -13.75px); z-index: 3; pointer-events: none;
     display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 1px;
-  }
-  .plate-fx .fx-park {
-    font-size: var(--font-xl);
-    font-weight: 800;
-    /* the stroke fattens the glyph itself, so the figure keeps its mass on a monospace that ships no bold */
-    -webkit-text-stroke: 1.4px currentColor;
-    /* the ink is the element that carried the blow, undiluted — the dark outline and its bloom are what set it
-       off the field, so mixing the colour toward white only made it read as another piece of UI text */
-    color: var(--fx, var(--text));
-    text-shadow:
-      0 2px 0 rgba(0, 0, 0, .95), 2px 0 0 rgba(0, 0, 0, .95), -2px 0 0 rgba(0, 0, 0, .95), 0 -2px 0 rgba(0, 0, 0, .95),
-      1.5px 1.5px 0 rgba(0, 0, 0, .9), -1.5px 1.5px 0 rgba(0, 0, 0, .9), 1.5px -1.5px 0 rgba(0, 0, 0, .9), -1.5px -1.5px 0 rgba(0, 0, 0, .9),
-      0 clamp(2.25px, 0.147vw + 0.57px, 4.86px) clamp(4.25px, 0.277vw + 1.07px, 9.18px) rgba(0, 0, 0, .95),
-      0 0 clamp(8.75px, 0.57vw + 2.2px, 18.9px) color-mix(in srgb, var(--fx, var(--text)) 55%, transparent);
-    animation: fx-park .34s cubic-bezier(.2, .9, .3, 1) forwards;
-  }
-  .plate-fx .fx-park.crit {
-    font-size: var(--font-xl);
-    -webkit-text-stroke-width: 1.6px;
-    color: var(--fx, var(--text));
-    letter-spacing: clamp(0.25px, 0.016vw + 0.06px, 0.54px);
-    animation-name: fx-park-crit;
-    animation-duration: .42s;
   }
   /* one figure per landed blow on a mob plate: a cut or a burst rises full-size off the card, a status
      tick beside it small — each keyed on its own event, so a burst reads as a shower rather than a sum.
@@ -3949,20 +3841,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     64% { opacity: 1; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-21.6px, -0.652vw - 2.52px, -10px)) scale(1); }
     100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(13.75px, 0.896vw + 3.47px, 29.7px) - clamp(41.25px, 2.689vw + 10.39px, 89.1px)), clamp(-45.9px, -1.385vw - 5.36px, -21.25px)) scale(.96); }
   }
-  /* the parked figure's own path: it does not rise, it drops in and stamps on the corner — a hard squash
-     overshoot, then it holds at full until the number itself leaves */
-  @keyframes fx-park {
-    0% { opacity: 0; transform: translateY(clamp(-24.3px, -0.733vw - 2.83px, -11.25px)) scale(.45); }
-    30% { opacity: 1; transform: translateY(clamp(1.25px, 0.082vw + 0.32px, 2.7px)) scale(1.26); }
-    55% { transform: translateY(0) scale(.96); }
-    100% { opacity: 1; transform: none; }
-  }
-  @keyframes fx-park-crit {
-    0% { opacity: 0; transform: translateY(clamp(-35.1px, -1.059vw - 4.09px, -16.25px)) scale(.3); }
-    24% { opacity: 1; transform: translateY(clamp(2px, 0.13vw + 0.5px, 4.32px)) scale(1.45); }
-    58% { transform: translateY(0) scale(.97); }
-    100% { opacity: 1; transform: none; }
-  }
   @keyframes fx-proc {
     0% { opacity: 0; transform: scale(.7); }
     30% { opacity: 1; transform: scale(1.1); }
@@ -4006,7 +3884,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /* the fight stays sharp in a settlement (owner ruling): only the ground recedes, so the field is
      dimmed and desaturated by hand here and never pulled through the blur half of the ladder */
   .townmode .field { opacity: .78; filter: saturate(.85); }
-  .townmode .arena { color: var(--gold); }
   .townmode .map-back { --dof: var(--dof-far); }
 
   /* 1600 and wider: the room is spent on the plates rather than on empty ground */

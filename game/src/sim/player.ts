@@ -52,12 +52,6 @@ const FLAT_LINE: Record<string, string> = {
 
 export const SLOT_COUNT = E.stat.item_slots as number;
 
-export interface StatLine {
-  stat: StatKey;
-  flat: number;
-  pct: number;
-}
-
 export interface Lines {
   [key: string]: any;
   statBy: Record<StatKey, { flat: number; pct: number }>;

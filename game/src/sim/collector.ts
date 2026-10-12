@@ -1,11 +1,11 @@
-import { TOWN, BASES } from '../engine/client';
+import { TD, BD } from '../engine/client';
 import { createCollector } from '../../../engine/collector.ts';
 import { standingTier } from './town';
 import type { GameState } from './types';
 import type { Item } from './types';
 
 /** The set rules live in the shared module, next to the Bases they name. */
-export const col: any = createCollector(TOWN, BASES);
+export const col: any = createCollector(TD, BD);
 
 export interface Grants {
   filter_presets: number;

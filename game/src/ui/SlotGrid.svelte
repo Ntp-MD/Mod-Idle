@@ -53,8 +53,8 @@
   /** The hovered piece and the box of the square it came from. The card's own place is derived from the
       pair plus the size the card measures, so nothing here has to guess how tall a piece's card is. */
   let hover = $state<{ entry: SlotEntry; top: number; left: number; right: number; bottom: number } | null>(null);
-  let gridEl: HTMLElement | null = null;
-  let popEl: HTMLElement | null = null;
+  let gridEl = $state<HTMLElement | null>(null);
+  let popEl = $state<HTMLElement | null>(null);
   /** the card's measured box — zero until it paints, and the card stays out of sight until it is not */
   let popW = $state(0);
   let popH = $state(0);
@@ -167,7 +167,7 @@
           onmouseenter={(e) => open(e.currentTarget, cell.entry!)}
           onfocus={(e) => open(e.currentTarget, cell.entry!)}
           onmouseleave={(e) => leaveTo(e.relatedTarget)}
-          onclick={(e) => (onpick && cell.entry.kind === 'gear' ? onpick(cell.entry.index) : open(e.currentTarget, cell.entry!))}
+          onclick={(e) => (onpick && cell.entry && cell.entry.kind === 'gear' ? onpick(cell.entry.index) : open(e.currentTarget, cell.entry!))}
           aria-label={cell.entry.kind === 'stack' ? `${cell.entry.title} ×${cell.entry.count}` : cell.entry.title}
         >
           <img class="slot-icon" src={cell.entry.icon} alt="" aria-hidden="true" />

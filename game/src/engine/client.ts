@@ -7,6 +7,7 @@ import skillsJson from '../../../tools/data/skills.json' with { type: 'json' };
 import townJson from '../../../tools/data/town.json' with { type: 'json' };
 import basesJson from '../../../tools/data/bases.json' with { type: 'json' };
 import treeJson from '../../../tools/data/tree.json' with { type: 'json' };
+import { createCollector } from '../../../engine/collector.ts';
 import { createEngine } from '../../../engine/index.ts';
 import { createDungeon } from '../../../engine/dungeon.ts';
 import { createLoot } from '../../../engine/loot.ts';
@@ -34,6 +35,11 @@ const ENGINE_DATA = engineJson as unknown as EngineData;
 const MODS_DATA = modsJson as unknown as ModsData;
 const SKILLS_DATA = skillsJson as unknown as SkillsData;
 const TREE_DATA = treeJson as unknown as Parameters<typeof createTree>[0];
+/** The typed views the sim modules pass into the shared factories, where the raw JSON's inferred
+ *  shape (a `levels: number[]` where the engine declares a pair) would not satisfy the seam. */
+export const ED = ENGINE_DATA;
+export const TD = townJson as unknown as Parameters<typeof createCollector>[0];
+export const BD = basesJson as unknown as Parameters<typeof createCollector>[1];
 
 export const eng = createEngine(ENGINE_DATA);
 export const dungeon = createDungeon(ENGINE_DATA);

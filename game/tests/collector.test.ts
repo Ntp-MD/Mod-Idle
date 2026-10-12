@@ -41,7 +41,7 @@ describe('the sets are the ones town.json names', () => {
 describe('turning a set in', () => {
   it('waits for Tier II standing in that settlement', () => {
     const s = newGame(4);
-    const gate = TOWN.settlements.find((x: any) => x.id === 'bonegate');
+    const gate = TOWN.settlements.find((x: any) => x.id === 'bonegate')!;
     const set = col.setAt('bonegate');
     expect(setUnlocked(s, set)).toBe(false);
     expect(turnIn(s, 'bonegate').ok).toBe(false);
@@ -51,7 +51,7 @@ describe('turning a set in', () => {
 
   it('consumes one held piece per line and pays the item itself', () => {
     const s = newGame(5);
-    const gate = TOWN.settlements.find((x: any) => x.id === 'bonegate');
+    const gate = TOWN.settlements.find((x: any) => x.id === 'bonegate')!;
     s.counters.zoneKills[gate.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[gate.zone] * TOWN.standing.tiers[1].share);
     const before = stashTabCount(s);
     const gold = s.counters.gold;
@@ -72,7 +72,7 @@ describe('turning a set in', () => {
 
   it('happens once per character, and a missing piece is refused', () => {
     const s = newGame(6);
-    const gate = TOWN.settlements.find((x: any) => x.id === 'ashfall');
+    const gate = TOWN.settlements.find((x: any) => x.id === 'ashfall')!;
     s.counters.zoneKills[gate.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[gate.zone] * TOWN.standing.tiers[1].share);
     s.bag.unshift({ ...piece('Hood', 'helmet'), heldFor: 'militia' });
     expect(turnIn(s, 'ashfall').ok).toBe(false);
@@ -85,7 +85,7 @@ describe('turning a set in', () => {
 
   it('reads held pieces from the stash as well as the bag', () => {
     const s = newGame(7);
-    const gate = TOWN.settlements.find((x: any) => x.id === 'ashfall');
+    const gate = TOWN.settlements.find((x: any) => x.id === 'ashfall')!;
     s.counters.zoneKills[gate.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[gate.zone] * TOWN.standing.tiers[1].share);
     s.town.owned.push('stash_tab_1');
     s.bag.unshift({ ...piece('Hood', 'helmet'), heldFor: 'militia' });
@@ -112,7 +112,7 @@ describe('the Collector panel has something to sell', () => {
       for (const p of set.parsed) {
         const frame = BASES.bases.find((b: any) => b.name === p.name);
         expect(frame, `bases.json is missing ${p.name}`).toBeTruthy();
-        expect(frame.slot).toBe(p.slot);
+        expect(frame!.slot).toBe(p.slot);
       }
     }
   });

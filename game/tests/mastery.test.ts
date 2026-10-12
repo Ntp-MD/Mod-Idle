@@ -84,7 +84,7 @@ describe('weapon drops obey the union pool', () => {
     const rng = mulberry32(9);
     let seen = 0;
     for (let i = 0; i < 500; i++) {
-      const item = rollDrop(rng, 'high', E.item_level.spans.find((s: any) => s.band === 'high').from);
+      const item = rollDrop(rng, 'high', E.item_level.spans.find((s: any) => s.band === 'high')!.from);
       if (item.slot !== 'main hand') continue;
       seen++;
       // line 1 is the frame's own implicit — a wand carries Cooldown reduction there even though the

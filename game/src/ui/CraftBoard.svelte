@@ -140,7 +140,7 @@
     if (!item) return null;
     const l = item.lines[i];
     if (!l) return null;
-    const [lo, hi] = loot.rangeOf(l.id, item.ilvl, item.q, l.slice == null ? 2 : l.slice);
+    const [lo, hi] = loot.rangeOf(l.id, item.ilvl, item.q ?? 0, l.slice == null ? 2 : l.slice);
     const floor = Math.max(lo, item.baselines?.[i] ?? lo, l.value);
     return { lo, hi, floor, now: l.value };
   };

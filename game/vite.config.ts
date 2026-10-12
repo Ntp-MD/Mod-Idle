@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { fileURLToPath } from 'node:url';
@@ -35,8 +36,8 @@ export default defineConfig({
     // worker needs Node's native type stripping. execArgv is passed to every spawned worker process.
     poolOptions: {
       forks: {
-        minThreads: 1,
-        maxThreads: 4,
+        minForks: 1,
+        maxForks: 4,
         execArgv: ['--experimental-strip-types', '--disable-warning=ExperimentalWarning'],
       },
     },

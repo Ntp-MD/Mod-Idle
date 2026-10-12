@@ -7,7 +7,7 @@ import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import { placeStatus } from '../src/sim/mobStatus';
 import { eng } from '../src/engine/client';
 
-const row = (id: string) => sm.byId[id];
+const row = (id: string) => sm.byId[id]!;
 const effectsOf = (...ids: string[]) => sm.aggregateEffects(ids.map(row));
 
 describe('effect values come from the roster, and the fold is shared', () => {
@@ -22,12 +22,12 @@ describe('effect values come from the roster, and the fold is shared', () => {
 
   it('adds the percent lines and compounds the multipliers', () => {
     const fold = effectsOf('aura.wraith_of_fury', 'aura.clarity', 'buff.warcry');
-    expect(fold.add.attack_speed).toBe(row('aura.wraith_of_fury').effects[0].value);
-    expect(fold.add.mana_regen).toBe(row('aura.clarity').effects[0].value);
-    expect(fold.mult.physical_power).toBeCloseTo(row('buff.warcry').effects[0].value, 10);
+    expect(fold.add.attack_speed).toBe(row('aura.wraith_of_fury').effects![0]!.value);
+    expect(fold.add.mana_regen).toBe(row('aura.clarity').effects![0]!.value);
+    expect(fold.mult.physical_power).toBeCloseTo(row('buff.warcry').effects![0]!.value, 10);
     // two rows on the same stat compound rather than overwrite
     const both = effectsOf('buff.warcry', 'buff.warcry');
-    expect(both.mult.physical_power).toBeCloseTo(Math.pow(row('buff.warcry').effects[0].value, 2), 10);
+    expect(both.mult.physical_power).toBeCloseTo(Math.pow(row('buff.warcry').effects![0]!.value, 2), 10);
   });
 });
 
@@ -39,29 +39,29 @@ describe('the sheet moves when a skill is up', () => {
     const fury = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.wraith_of_fury'));
     // the buff's number reaches the shared aspd formula, whose own cap then decides the result
     expect(fury.aspd).toBeCloseTo(
-      eng.aspdOf(b.core.agi, b.weaponAspd, row('aura.wraith_of_fury').effects[0].value) * (1 - b.encumbrance), 6);
+      eng.aspdOf(b.core.agi, b.weaponAspd, row('aura.wraith_of_fury').effects![0]!.value) * (1 - b.encumbrance), 6);
 
     const guard = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.iron_guard'));
-    expect(guard.armour - b.armour).toBe(row('aura.iron_guard').effects[0].value);
+    expect(guard.armour - b.armour).toBe(row('aura.iron_guard').effects![0]!.value);
 
     const energy = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.energy_guard'));
-    expect(energy.es - b.es).toBe(row('aura.energy_guard').effects[0].value);
+    expect(energy.es - b.es).toBe(row('aura.energy_guard').effects![0]!.value);
 
     const grace = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.grace'));
-    expect(grace.evasion - b.evasion).toBe(row('aura.grace').effects[0].value);
+    expect(grace.evasion - b.evasion).toBe(row('aura.grace').effects![0]!.value);
 
     const vit = buildCharacter(40, poolGear(), {}, 0, effectsOf('aura.vitality'));
-    expect(vit.hpRegen / b.hpRegen).toBeCloseTo(1 + row('aura.vitality').effects[0].value / 100, 6);
+    expect(vit.hpRegen / b.hpRegen).toBeCloseTo(1 + row('aura.vitality').effects![0]!.value / 100, 6);
 
     const war = buildCharacter(40, poolGear(), {}, 0, effectsOf('buff.warcry'));
-    expect(war.phys / b.phys).toBeCloseTo(row('buff.warcry').effects[0].value, 6);
-    expect(war.resistance / b.resistance).toBeCloseTo(row('buff.warcry').effects[2].value, 6);
+    expect(war.phys / b.phys).toBeCloseTo(row('buff.warcry').effects![0]!.value, 6);
+    expect(war.resistance / b.resistance).toBeCloseTo(row('buff.warcry').effects![2]!.value, 6);
   });
 
   it('damage taken is a multiplier on the incoming side, and Iron Will lowers it', () => {
     const will = effectsOf('buff.iron_will');
     const c = buildCharacter(40, poolGear(), {}, 0, will);
-    expect(c.damageTaken).toBeCloseTo(row('buff.iron_will').effects[1].value, 10);
+    expect(c.damageTaken).toBeCloseTo(row('buff.iron_will').effects![1]!.value, 10);
     const before = buildCharacter(40, poolGear());
     const withWill = buildCharacter(40, poolGear(), {}, 0, will);
     // the same mob swing against the same sheet lands cheaper with the buff up
@@ -76,8 +76,8 @@ describe('only what is up counts', () => {
     sk.auras['aura.wraith_of_fury'] = true;
     sk.buffs['buff.warcry'] = true;
     sk.buffUp['buff.warcry'] = 3;
-    expect(effectsActive(sk).add.attack_speed).toBe(row('aura.wraith_of_fury').effects[0].value);
-    expect(effectsActive(sk).mult.physical_power).toBe(row('buff.warcry').effects[0].value);
+    expect(effectsActive(sk).add.attack_speed).toBe(row('aura.wraith_of_fury').effects![0]!.value);
+    expect(effectsActive(sk).mult.physical_power).toBe(row('buff.warcry').effects![0]!.value);
     sk.buffUp['buff.warcry'] = 0;
     expect(effectsActive(sk).mult.physical_power).toBeUndefined();
     sk.auras['aura.wraith_of_fury'] = false;
@@ -90,7 +90,7 @@ describe('only what is up counts', () => {
     for (const id of Object.keys(sm.byId)) {
       const s = sm.byId[id];
       if (s.type !== 'aura') continue;
-      const pct = sm.reservePct(s) || 0;
+      const pct = sm.reservePct(s.reserve ?? '') || 0;
       if (reserved + pct <= sm.RESERVATION_LIMIT) { sk.auras[id] = true; reserved += pct; }
     }
     expect(reserved).toBeLessThanOrEqual(sm.RESERVATION_LIMIT);
@@ -105,7 +105,7 @@ describe('the toggle track', () => {
     let reserved = 0;
     let refused = 0;
     for (const id of auras) {
-      const pct = sm.reservePct(sm.byId[id].reserve);
+      const pct = sm.reservePct(sm.byId[id].reserve ?? '');
       const r = toggleTrack(sk, id);
       if (reserved + pct < sm.RESERVATION_LIMIT) {
         expect(r.ok).toBe(true);
@@ -129,7 +129,7 @@ describe('the toggle track', () => {
     const sk = newSkillState();
     sk.buffs['buff.warcry'] = true;
     sk.buffUp['buff.warcry'] = 6;
-    expect(effectsActive(sk).mult.physical_power).toBe(row('buff.warcry').effects[0].value);
+    expect(effectsActive(sk).mult.physical_power).toBe(row('buff.warcry').effects![0]!.value);
     toggleTrack(sk, 'buff.warcry');
     expect(sk.buffs['buff.warcry']).toBe(false);
     expect(sk.buffUp['buff.warcry']).toBe(0);
@@ -138,17 +138,17 @@ describe('the toggle track', () => {
 
   it('says a whole fold in the same words, not in stat keys', () => {
     const words = describeFold(effectsOf('aura.iron_guard', 'aura.wraith_of_fury', 'buff.iron_will'));
-    expect(words).toContain(`armour +${row('aura.iron_guard').effects[0].value}`);
-    expect(words).toContain(`attack speed +${row('aura.wraith_of_fury').effects[0].value}`);
-    expect(words).toContain(`damage taken ×${row('buff.iron_will').effects[1].value.toFixed(2)}`);
+    expect(words).toContain(`armour +${row('aura.iron_guard').effects![0]!.value}`);
+    expect(words).toContain(`attack speed +${row('aura.wraith_of_fury').effects![0]!.value}`);
+    expect(words).toContain(`damage taken ×${row('buff.iron_will').effects![1]!.value.toFixed(2)}`);
     expect(words).not.toMatch(/attack_speed|damage_taken/);
     expect(describeFold(sm.aggregateEffects([]))).toBe('');
   });
 
   it('says each row in words a player can act on', () => {
-    expect(effectLine(row('aura.iron_guard'))).toBe(`armour +${row('aura.iron_guard').effects[0].value} flat`);
-    expect(effectLine(row('aura.wraith_of_fury'))).toBe(`attack speed +${row('aura.wraith_of_fury').effects[0].value}%`);
-    expect(effectLine(row('buff.warcry'))).toContain(`physical power ×${row('buff.warcry').effects[0].value}`);
+    expect(effectLine(row('aura.iron_guard'))).toBe(`armour +${row('aura.iron_guard').effects![0]!.value} flat`);
+    expect(effectLine(row('aura.wraith_of_fury'))).toBe(`attack speed +${row('aura.wraith_of_fury').effects![0]!.value}%`);
+    expect(effectLine(row('buff.warcry'))).toContain(`physical power ×${row('buff.warcry').effects![0]!.value}`);
     expect(effectLine(row('attack.cleave'))).toBe('');
   });
 });
@@ -165,7 +165,7 @@ describe('heals read their own number', () => {
     while (!s.group.length && guard++ < 30) tick(s, {});
     expect(s.group.length).toBeGreaterThan(0);
     const c = buildCharacter(s.player.level, s.gear, {}, 0);
-    const pct = row('heal.greater_heal').effects[0].value;
+    const pct = row('heal.greater_heal').effects![0]!.value;
     s.player.hp = 1;
     s.player.mana = c.maxMana;
     tick(s, {});
@@ -176,7 +176,7 @@ describe('heals read their own number', () => {
   });
 
   it('Heal keeps its drip shape: a per-second percentage over its own duration', () => {
-    expect(row('heal.heal').effects[0].stat).toBe('heal_per_sec');
+    expect(row('heal.heal').effects![0]!.stat).toBe('heal_per_sec');
     expect(String(row('heal.heal').duration)).toMatch(/\d+ sec/);
   });
 });

@@ -82,7 +82,7 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
     const [lo, hi] = loot.rangeOf(id, ilvl, q, slice);
     // a Stat Mod bakes the Core stat it feeds here, at drop, the way a PoE implicit carries its own
     // stat; every other id leaves `stat` undefined (`mods.json` `rolls`)
-    const stat = loot.statOf(id, rng);
+    const stat = loot.statOf(id, rng) as ModLine['stat'];
     // an Elemental line always carries its Element: it is a stored value, never derived from a
     // resistance number, because crafting must not change it (item-level.md · save.md)
     lines.push({
@@ -110,9 +110,6 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
     unbound_at_drop: lines.length - (E.item_level.frame_mod_slots + E.item_level.bound_slots),
   };
 }
-
-/** The value one line would reach on its best roll, so the UI can show headroom honestly. */
-export const lineMax = (id: string) => loot.MAX_OF[id];
 
 export const modName = (id: string) => loot.NAME_OF[id] || id;
 

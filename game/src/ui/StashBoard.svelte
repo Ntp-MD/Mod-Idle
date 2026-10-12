@@ -67,7 +67,6 @@
       <button role="tab" class="tb" class:here={t === tab} aria-selected={t === tab} onclick={() => { ontab(t); pick('stash', -1); }}>
         Tab {t + 1}<b>{(game.stash[t] || []).length}</b>
       </button>
-    {:else}
     {/each}
     <span class="spacer"></span>
     <span class="shared">one warehouse, every settlement</span>
@@ -158,8 +157,6 @@
           ? 'Locked: bulk deposit and withdrawal skip it, and the bag filter will not dissolve it.'
           : 'A locked piece never moves on its own — lock the ones a set or a gamble depends on.'}</small></p>
       </div>
-    {:else}
-      <p class="dim">Pick a piece on either side to read it and move it.</p>
     {/if}
   </div>
 </div>
@@ -206,7 +203,6 @@
     display: grid; grid-template-columns: minmax(clamp(225px, 14.67vw + 56.7px, 486px), clamp(300px, 19.56vw + 75.6px, 648px)) 1fr; gap: var(--spacing-md); align-items: start;
     border-top: 1px solid var(--line); padding-top: var(--spacing-sm);
   }
-  .draw > p { grid-column: 1 / -1; margin: 0; }
   .moves { display: grid; gap: 4px; justify-items: start; }
   .go { border-color: rgba(232, 193, 105, .5); color: var(--gold); }
   .lk { font-size: var(--font-xs); }

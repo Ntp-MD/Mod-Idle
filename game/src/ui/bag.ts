@@ -30,12 +30,8 @@ export interface SlotEntry {
   heldFor?: string;
 }
 
-const QUALITY_ORDER = (engBands() as string[]);
-
-function engBands(): string[] {
-  const b = loot.BANDS;
-  return Array.isArray(b) ? b.map((x: any) => String(typeof x === 'string' ? x : x?.name ?? x?.id ?? '')) : Object.keys(b || {});
-}
+/** The quality bands in sort order, read off the loot module's own label row. */
+const QUALITY_ORDER = loot.BAND_LABEL as string[];
 
 const rankOf = (order: string[], value?: string) => {
   const i = order.indexOf(String(value ?? ''));

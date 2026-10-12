@@ -244,7 +244,7 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   }
   const base = eng.spawnAt(zoneId, playerLevel, body, species.id);
   const lv = Math.min(Math.max(playerLevel, z.levels[0]), z.levels[1]);
-  const size = eng.sizeById(body);
+  const size = eng.sizeById(body)!;
   // body classes no longer scale HP: every mob of a species reads the same curve at its own level,
   // so the boss takes the same spawn shape any mob of its species takes
   const hp = kind === 'boss' ? base.hp : kind === 'elite' ? eng.mobHpAt(lv) * E.mob.elite.hp : base.hp;

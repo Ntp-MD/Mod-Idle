@@ -10,7 +10,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
  */
 const HITS_CAP = 1 / E.caps.attack_interval_sec;
 // the buff under test is Haste's own attack-speed mult, read off the roster
-const HASTE = sm.byId['aura.haste'].effects.find((e: any) => e.stat === 'attack_speed').value;
+const HASTE = sm.byId['aura.haste']!.effects!.find((e: any) => e.stat === 'attack_speed')!.value;
 
 describe('the attack-speed cap is the final swing-interval ceiling', () => {
   it('clamps the engine helpers however fast the raw clock is built', () => {

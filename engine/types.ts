@@ -405,6 +405,9 @@ export interface SkillXpCfg {
 export interface PresetsCfg {
   sets: number;
   main_index: number;
+  auto_select_by_zone?: boolean;
+  cooldowns_persist_on_push?: boolean;
+  skill_xp_is_account_wide?: boolean;
 }
 
 export interface ModWeightsCfg {
@@ -527,15 +530,25 @@ export interface EngineData {
 /** The skill roster payload (`tools/data/skills.json`) — only the fields the model reads. */
 export interface SkillRow {
   id: string;
+  name?: string;
   type?: string;
   group?: string;
+  element?: string;
   cd?: number;
   basis?: string;
+  targets?: string;
   /** The row's own flat damage at skill level 1 — its identity, the same for every caster. */
   base_flat?: number;
   /** The share of the added power line the press receives, in percent (PoE damage effectiveness). */
   eff?: number;
   mana?: string;
+  effect?: string;
+  modelled_by?: string;
+  rules?: string[];
+  kind?: string;
+  duration?: number;
+  /** The reserve tier name this aura draws from (`reserve_tiers`). */
+  reserve?: string;
   effects?: { stat: string; element?: string; op: string; value: number; subject?: string; condition?: string; cap?: number }[];
 }
 
@@ -559,6 +572,8 @@ export interface SkillsData {
       mana_reference_level?: number;
       cast_reference?: { cdr_pct: number; ladder_pct: number };
     };
+    /** The three numbers a conditional row's leg opens at (`tools/data/skills.json` `cast_conditions`). */
+    cast_conditions: { hp_below_pct_default: number; mana_floor_pct_default: number; min_targets_default: number };
     reservation: { max_pct: number };
   };
   skills: SkillRow[];
@@ -573,7 +588,7 @@ export interface ModsData {
 /** A Base frame (`tools/data/bases.json`) — only the fields the collector reads. */
 export interface BaseRow {
   name: string;
-  school?: string;
+  school?: string | null;
   [k: string]: unknown;
 }
 

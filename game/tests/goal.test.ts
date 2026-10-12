@@ -16,7 +16,7 @@ describe('the win gate is read off the data, not typed', () => {
     expect(t.zone).toBe(last.id);
     // the boss spawns at its own static level (`mob.species[].zone_levels`), and the gate quotes it
     const boss = E.mob.bosses.find((b: any) => b.zone === last.id);
-    const sp = E.mob.species.find((s: any) => s.id === boss!.species);
+    const sp = E.mob.species.find((s: any) => s.id === boss!.species)!;
     expect(t.level).toBe((sp.zone_levels as any)[last.id]);
     // the same HP the roster row carries, so the number the player reads is the number the fight rolls
     const row = eng.mobRoster().find((r: any) => r.zone === last.id && /Boss/.test(r.kind));

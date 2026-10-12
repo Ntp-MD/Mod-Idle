@@ -15,7 +15,7 @@ import type { Item, Mob } from '../src/sim/types';
  * `perPress` run on the sheet the gear produced — never a second copy of the arithmetic.
  */
 
-const topOf = (id: string) => Number(MODS.mods.find((m: any) => m.id === id).max);
+const topOf = (id: string) => Number(MODS.mods.find((m: any) => m.id === id)!.max);
 
 const row = (basis: string) => (SKILLS as any).skills.find((r: any) => r.basis === basis && r.base_flat != null);
 const press = (c: Character, r: any) =>
@@ -52,7 +52,7 @@ describe('the damage buckets reach the sheet', () => {
     expect(bare.attackDamage).toBe(0);
     expect(bare.spellDamage).toBe(0);
     for (const basis of ['phys', 'magic']) {
-      expect(press(bare, row(basis))).toBeCloseTo(sm.perPress(row(basis), { phys: bare.phys, magic: bare.magic, elem: bare.elem, align: bare.alignment }), 9);
+      expect(press(bare, row(basis))).toBeCloseTo(sm.perPress(row(basis), { phys: bare.phys, magic: bare.magic, elem: bare.elem, align: bare.alignment })!, 9);
     }
   });
 });
@@ -62,16 +62,16 @@ describe('a bucket multiplies its own ladder and never the other', () => {
     const pct = topOf('attack_damage_pct');
     const bare = sheetWearing(null);
     const c = sheetWearing('attack_damage_pct');
-    expect(press(c, row('phys'))).toBeCloseTo(press(bare, row('phys')) * (1 + pct / 100), 6);
-    expect(press(c, row('magic'))).toBeCloseTo(press(bare, row('magic')), 6);
+    expect(press(c, row('phys'))).toBeCloseTo(press(bare, row('phys'))! * (1 + pct / 100), 6);
+    expect(press(c, row('magic'))).toBeCloseTo(press(bare, row('magic'))!, 6);
   });
 
   it('Spell damage % scales a magic-basis press and leaves a phys-basis press alone', () => {
     const pct = topOf('spell_damage_pct');
     const bare = sheetWearing(null);
     const c = sheetWearing('spell_damage_pct');
-    expect(press(c, row('magic'))).toBeCloseTo(press(bare, row('magic')) * (1 + pct / 100), 6);
-    expect(press(c, row('phys'))).toBeCloseTo(press(bare, row('phys')), 6);
+    expect(press(c, row('magic'))).toBeCloseTo(press(bare, row('magic'))! * (1 + pct / 100), 6);
+    expect(press(c, row('phys'))).toBeCloseTo(press(bare, row('phys'))!, 6);
   });
 
   it('a swing rides the attack bucket, and the spell half of the pair does not touch it', () => {

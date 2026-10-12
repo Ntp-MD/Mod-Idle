@@ -152,7 +152,7 @@ export function elementIcon(element: string): string {
   return elementByName[element.toLowerCase()] ?? broadSword;
 }
 
-export function skillIcon(id: string, type: string): string {
+export function skillIcon(id: string, type?: string): string {
   const skill = id.toLowerCase();
   if (skill.includes('whirlwind')) return cloudRing;
   if (skill.includes('arrow') || skill.includes('shot') || skill.includes('volley')) return bow;

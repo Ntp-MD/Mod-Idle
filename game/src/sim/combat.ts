@@ -212,7 +212,7 @@ export function rollStatus(
   if (!el) return null;
   const proc = E.status.proc_chance * (1 - Math.max(0, Math.min(100, statusResist)) / 100);
   if (rng() >= proc) return null;
-  const name = E.elements.status_of[el] as StatusName;
+  const name = (E.elements.status_of as Record<string, string | undefined>)[el] as StatusName;
   if (!name) return null;
   const s = statuses[name] || (statuses[name] = { stacks: 0, secLeft: 0, perSec: 0 });
   const cfg = (E.status as any)[name];

@@ -16,7 +16,7 @@ import type { Item } from '../src/sim/types';
  * is allowed to do — and the third is what it is never allowed to do on its own.
  */
 const rolled = (seed: number, band = 'high'): Item =>
-  rollDrop(mulberry32(seed), band, E.item_level.spans.find((s: any) => s.band === band).from) as Item;
+  rollDrop(mulberry32(seed), band, E.item_level.spans.find((s: any) => s.band === band)!.from) as Item;
 
 describe('equipping from the bag', () => {
   it('wears a piece in its own slot and sends the displaced one back to the front of the bag', () => {

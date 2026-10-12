@@ -1,4 +1,4 @@
-import { E, TOWN } from '../engine/client';
+import { E, ED, TOWN } from '../engine/client';
 import { createRoad, hexAdjacent } from '../../../engine/road.ts';
 import type { Hex } from '../../../engine/road.ts';
 import { abandonRun } from './dungeon';
@@ -6,7 +6,7 @@ import { priceGold, rowById } from './town';
 import type { GameState, Cell, Walk } from './types';
 
 /** The walk model comes from the shared module, so every bound is one number in one place. */
-export const road: any = createRoad(E);
+export const road: any = createRoad(ED);
 
 const settlementById = (id: string) => TOWN.settlements.find((s: any) => s.id === id);
 
@@ -72,7 +72,6 @@ export function walkNote(state: GameState): string {
 }
 
 export const walkBlocks = (fromId: string, toId: string): number => road.blocksBetween(fromId, toId);
-export const walkSec = (fromId: string, toId: string): number => road.secBetween(fromId, toId);
 
 /**
  * The plotted route as the cells it crosses, keyed the way the sheet keys a cell. A far destination
@@ -82,14 +81,6 @@ export const walkSec = (fromId: string, toId: string): number => road.secBetween
  */
 export function walkRoute(fromId: string, toId: string): string[] {
   return road.routeBetween(fromId, toId).map((h: { q: number; r: number }) => `${h.q},${h.r}`);
-}
-
-/** The settlement the character stands in right now: rank 0, and opened. */
-export function standingSettlement(state: GameState): any {
-  if (state.walk || !state.cell) return null;
-  if (rankOf(state.cell) !== 0) return null;
-  const node = ownerOf(state.cell);
-  return state.town.visited.includes(node.id) ? settlementById(node.id) : null;
 }
 
 /** A Waypoint exists for every settlement the character has arrived at on foot, once. */

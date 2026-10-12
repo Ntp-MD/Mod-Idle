@@ -58,7 +58,7 @@ describe('gold stays the convenience medium', () => {
     const rarityOf: Record<string, string> = {};
     for (const row of Object.values(E.mob.variant_drops as Record<string, any>)) rarityOf[row.item] = row.rarity;
     let expectGold = 0;
-    for (const [item, count] of Object.entries(s.junk)) expectGold += count * E.junk.rarities[rarityOf[item]].sell_gold;
+    for (const [item, count] of Object.entries(s.junk)) expectGold += count * ((E.junk.rarities as Record<string, any>)[rarityOf[item]]?.sell_gold ?? 0);
     expect(r.gold).toBe(s.counters.gold - goldBefore + expectGold);
     expect(Object.values(s.junk).reduce((a: number, b: number) => a + b, 0)).toBe(0);
   });

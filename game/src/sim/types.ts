@@ -27,6 +27,8 @@ export interface ModLine {
    * 1-3 Mods onto one line, its own `value` for the first and one entry here for each of the rest.
    */
   extra?: ModExtra[];
+  /** Set once a bench has touched the line, so the piece can wear the crafted mark. */
+  crafted?: boolean;
 }
 
 /** One worn or bagged piece. Its level answers the value window; the band label rides along for weights. */

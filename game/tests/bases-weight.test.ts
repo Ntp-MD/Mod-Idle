@@ -98,7 +98,7 @@ describe('drops are built from the Base table', () => {
       const allowed = new Set([
         ...loot.poolFor(BASES, item.slot, frame, null).map((e: any) => e.id),
         ...(frame?.base_lines || []),
-        ...(BASES.frame_mod?.off_hand?.[frame?.family] || []),
+        ...((BASES.frame_mod?.off_hand as Record<string, string[]>)?.[frame?.family as string] || []),
       ]);
       for (const line of item.lines) {
         for (const id of [line.id, ...((line.extra || []).map((x: any) => x.id))]) {

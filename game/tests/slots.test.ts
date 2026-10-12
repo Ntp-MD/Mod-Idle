@@ -5,7 +5,7 @@ import { slotsUsed, slotsFree, addTo, bagSlots, pouchSlots, slotsAvailable } fro
 import { craftPotion, plant, harvest } from '../src/sim/farm';
 
 const CAP = E.inventory.stack_size as Record<string, number>;
-const hpPotion = E.potions.list.find((p: any) => p.pool === 'hp' && p.index === 1).name as string;
+const hpPotion = E.potions.list.find((p: any) => p.pool === 'hp' && p.index === 1)!.name as string;
 
 describe('the character bag takes its shape from the data', () => {
   it('takes its caps and its size from the data, not from a copy', () => {

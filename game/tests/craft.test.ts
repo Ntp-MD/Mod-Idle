@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { E, loot, BASES } from '../src/engine/client';
+import { E, ED, loot, BASES } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
 import { rollDrop } from '../src/sim/drop';
 import { doCraft, stoneNames, replaceChoices, poolOf, craftedMark, craft as clientCraft } from '../src/sim/craft';
@@ -7,9 +7,9 @@ import { newGame, tick } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 import type { Item } from '../src/sim/types';
 
-const craft = createCraft(E, loot);
+const craft = createCraft(ED, loot);
 // each band's level window starts where its span starts — read off the spans, never typed
-const SPAN_FROM = (band: string) => E.item_level.spans.find((s: any) => s.band === band).from;
+const SPAN_FROM = (band: string) => E.item_level.spans.find((s: any) => s.band === band)!.from;
 
 // `rollDrop` always stamps the quality band (`sim/drop.ts`), so a rolled piece carries a `q` even
 // though `Item.q` is optional for hand-built fixtures elsewhere.
@@ -40,8 +40,8 @@ function isMade(r: CraftResult): r is { ok: true; item: any; changed: any } {
 describe('Reroll', () => {
   it('never rolls below the value it already holds, and stays inside the same Tier', () => {
     const item = piece(3);
-    const line = item.lines[craft.UNTOUCHABLE];
-    const [lo, hi] = loot.rangeOf(line.id, item.ilvl, item.q, line.slice);
+    const line = item.lines[craft.UNTOUCHABLE]!;
+    const [lo, hi] = loot.rangeOf(line.id, item.ilvl, item.q ?? 0, line.slice ?? 2);
     let current = item;
     for (let s = 0; s < 200; s++) {
       const r = made(craft.reroll(current, craft.UNTOUCHABLE, mulberry32(s)));

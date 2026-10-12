@@ -25,26 +25,15 @@
   /* the floating menu row's height — the rail is a row across the top-right now, not a full-height
      column, so this is its one axis and the minimap hangs a fixed drop under it */
   --rail: clamp(46px, 2.6vw + 12px, 88px);
-  /* where the reads under the menu row begin: the row, a drop, then the minimap square — the edge
-     column below keys off this same offset so the three never drift into each other */
-  --rail-drop: calc(var(--screen-pad) + var(--rail) + clamp(8px, 0.489vw + 2px, 16px));
   /* the gutter every corner read stops short of, and the height a gauge track carries its figure in:
      one pair for the frame rather than the same two numbers written on each cluster */
   --screen-pad: var(--spacing-md);
   --bar-h: clamp(12px, 0.78vw + 2px, 22px);
   /* the HUD's floating hardware, sized once: the portrait plate and its ring, the minimap sheet,
-     the five cast orbs (biggest first — the slot the rotation presses first), and the objectives
-     column's width on the left edge */
+     and the objectives column's width on the left edge */
   --portrait-size: clamp(58px, 3.75vw + 14px, 124px);
   --minimap-size: clamp(100px, 6.52vw + 25px, 216px);
-  --orb-1: clamp(43px, 2.77vw + 11px, 92px);
-  --orb-2: clamp(36px, 2.36vw + 9px, 78px);
-  --orb-3: clamp(30px, 1.96vw + 8px, 65px);
-  --orb-4: clamp(25px, 1.63vw + 6px, 54px);
-  --orb-5: clamp(21px, 1.39vw + 5px, 46px);
   --objectives-w: clamp(170px, 11vw + 20px, 300px);
-  /* the main-menu wheel's own plate: three sectors — bag, skills, sheet — and five satellite knobs */
-  --wheel: clamp(138px, 9.01vw + 35px, 298px);
   /* a body's rank, and the inks its state is named in: an Elite or a Boss wears its own rim and name
      colour, a curse and a warn read in their own inks, and the gauges climb to a lit end of the same
      semantic the dim token carries */
@@ -117,10 +106,9 @@
   --spacing-lg: clamp(17px, 1.33vw, 37px);
   --spacing-xl: clamp(25px, 1.95vw, 54px);
 
-  /* the unique sizes. These are not steps: the hub — the wheel and the ring of knobs around it —
-     the HUD's fixed hardware, the map sheet and the boxes too big for an icon step each keep their
-     own figure. The same `clamp(<int>px, …)` rule holds, so no row here wears a decimal either. */
-  --fs-arena: clamp(13px, 2.4vw, 28px);
+  /* the unique sizes. These are not steps: the HUD's fixed hardware, the map sheet and the boxes
+     too big for an icon step each keep their own figure. The same `clamp(<int>px, …)` rule holds,
+     so no row here wears a decimal either. */
   --sheet-fs-region: 10px;
   --sheet-fs-walk: 7px;
   --sheet-fs-place: 9px;
@@ -132,7 +120,6 @@
   --x-pull-scale: clamp(-14px, -0.407vw - 2px, -6px);
   --x-pull-note: clamp(-11px, -0.326vw - 1px, -5px);
   --orb-cast: clamp(38px, 2.4vw + 12px, 50px);
-  --knob: clamp(41px, 4.5vw, 109px);
   /* a box this large is its own size, not a step: a panel, a sheet, a board. */
   --box-100: clamp(63px, 4.07vw + 16px, 135px);
   --box-110: clamp(69px, 4.48vw + 17px, 149px);
@@ -141,7 +128,6 @@
   --box-170: clamp(106px, 6.92vw + 27px, 230px);
   --box-180: clamp(113px, 7.33vw + 28px, 243px);
   --box-200: clamp(125px, 8.14vw + 31px, 270px);
-  --box-220: clamp(138px, 8.96vw + 35px, 297px);
   --box-240: clamp(150px, 9.77vw + 38px, 324px);
   --box-300: clamp(188px, 12.22vw + 47px, 405px);
   --box-320: clamp(200px, 13.03vw + 50px, 432px);

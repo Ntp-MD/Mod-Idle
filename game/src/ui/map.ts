@@ -27,17 +27,17 @@ export function cellLabel(node: Element): Picked {
   const wild = node.getAttribute('data-wild');
   const id = node.getAttribute('data-node');
   const h = { q: ax[0], r: ax[1] };
-  if (id && rankOf(h) === 0) return { key, q: h.q, r: h.r, kind: 'town', label: settlementById(id).name, sub: null, wild: null };
+  if (id && rankOf(h) === 0) return { key, q: h.q, r: h.r, kind: 'town', label: settlementById(id)!.name, sub: null, wild: null };
   if (id && sub != null) {
-    const s = settlementById(id);
+    const s = settlementById(id)!;
     return { key, q: h.q, r: h.r, kind: 'sub', label: (eng.zoneById(s.zone).subzones || [])[Number(sub)]?.name || '', sub: Number(sub), wild: null };
   }
   if (id && wild != null) {
-    const s = settlementById(id), w = Number(wild);
+    const s = settlementById(id)!, w = Number(wild);
     return { key, q: h.q, r: h.r, kind: 'wild', wild: w, label: w === 0 ? s.name + ' Dungeon' : s.name + ' ' + (w + 1), sub: null };
   }
   const own = ownerOf(h);
-  return { key, q: h.q, r: h.r, kind: 'bare', label: `${key} · ${own ? settlementById(own.id).name : 'the field'}`, sub: null, wild: null };
+  return { key, q: h.q, r: h.r, kind: 'bare', label: `${key} · ${own ? settlementById(own.id)!.name : 'the field'}`, sub: null, wild: null };
 }
 
 /** The view, gate floor and the two overlays, plus the pick and the walk the state carries. */

@@ -71,7 +71,7 @@
         {@const need = gold(row) - purse}
         <tr class:ok class:poor={here && !ok}>
           <td class="name">{row.item}</td>
-          <td>{npcOf(row.npc).name}</td>
+          <td>{npcOf(row.npc)?.name ?? row.npc}</td>
           <td class="kind">{kindWord(row.kind)}</td>
           <td>{priceMinutes(row, town.id, state)} m{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
           <td class="price">{gold(row)}</td>

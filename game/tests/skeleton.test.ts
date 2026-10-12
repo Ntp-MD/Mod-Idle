@@ -160,7 +160,7 @@ describe('armour penetration cuts the mob armour ratio ', () => {
     const gear = emptyGear();
     gear[loot.SLOTS.indexOf('main hand')] = {
       slot: 'main hand', base: 'crossbow', ilvl: 61, quality: 'high', tier: 'T1', q: 2,
-      weaponAspd: weaponNamed('crossbow').weapon_aspd, lines: line,
+      weaponAspd: weaponNamed('crossbow')!.weapon_aspd, lines: line,
     } as unknown as Item;
     const c = buildCharacter(60, gear);
     expect(c.armourPen).toBeGreaterThan(0);

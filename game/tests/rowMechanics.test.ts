@@ -20,8 +20,8 @@ import type { Mob } from '../src/sim/types';
  * no source file mentions fails the closed-set check at the bottom.
  */
 
-const row = (id: string) => sm.byId[id];
-const valueOf = (id: string, stat: string) => row(id).effects.find((e: any) => e.stat === stat).value;
+const row = (id: string) => sm.byId[id]!;
+const valueOf = (id: string, stat: string) => row(id)!.effects!.find((e: any) => e.stat === stat)!.value;
 
 const mob = (over: Partial<Mob> = {}): Mob => ({
   id: 'm1', species: 'Rat', kind: 'Small', zone: 1, level: 20,
@@ -44,7 +44,7 @@ describe('the attack rows that press differently', () => {
     const ramp = sm.damagePct(E.skill_xp.level_cap) / 100;   // the level table is the ramp
     const onePress = (id: string) => {
       const r = row(id);
-      return (r.base_flat + (r.eff / 100) * c.phys) * ramp
+      return (r.base_flat! + (r.eff! / 100) * c.phys) * ramp
         * sm.groupBonus(r, c.weaponName) * sm.masteryBonus(0);
     };
     const dealt = (id: string) => {

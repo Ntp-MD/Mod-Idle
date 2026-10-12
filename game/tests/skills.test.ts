@@ -204,7 +204,7 @@ describe('skills in the live loop', () => {
     const g = grantSkill(s, rng);
     expect(g).toBeTruthy();
     expect(s.owned[g!.id]).toBe(0);
-    if (['attack', 'curse', 'heal'].includes(sm.byId[g!.id].type)) expect(s.list[0]).toBe(g!.id);
+    if (['attack', 'curse', 'heal'].includes(sm.byId[g!.id].type as string)) expect(s.list[0]).toBe(g!.id);
   });
 
   it('kills pay skill XP and a boss can hand out the first skill', () => {

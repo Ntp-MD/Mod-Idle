@@ -61,7 +61,7 @@ export function bagStacks(state: GameState): BagStack[] {
 /** Slots the bag is using now: one per full or partial stack, by category. */
 export function slotsUsed(state: GameState): number {
   return bagStacks(state)
-    .reduce((sum, s) => sum + slotsFor(s.count, E.inventory.stack_size[s.capKind]), 0);
+    .reduce((sum, s) => sum + slotsFor(s.count, (E.inventory.stack_size as Record<string, number>)[s.capKind]), 0);
 }
 
 export const slotsFree = (state: GameState): number => slotsAvailable(state) - slotsUsed(state);
@@ -79,7 +79,7 @@ export function addTo(
   amount: number,
 ): number {
   if (amount <= 0) return 0;
-  const cap = E.inventory.stack_size[capKind];
+  const cap = (E.inventory.stack_size as Record<string, number>)[capKind];
   const before = bucket[key] || 0;
   const need = slotsFor(before + amount, cap) - slotsFor(before, cap);
   if (need > slotsFree(state)) {
@@ -92,7 +92,7 @@ export function addTo(
 
 /** Would a grant of this size fit? Used by producers that must not consume a cost they can't bank. */
 export const fits = (state: GameState, bucket: Record<string, number>, key: string, capKind: string, amount: number): boolean => {
-  const cap = E.inventory.stack_size[capKind];
+  const cap = (E.inventory.stack_size as Record<string, number>)[capKind];
   const before = bucket[key] || 0;
   return slotsFor(before + amount, cap) - slotsFor(before, cap) <= slotsFree(state);
 };

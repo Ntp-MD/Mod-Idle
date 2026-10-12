@@ -10,7 +10,7 @@
  * the same defect as a number typed twice (AGENTS.md — Numbers · DECISIONS.md §Stack).
  */
 
-import type { BasesData, EngineData, MobSize, Rng } from './types.ts';
+import type { BasesData, EngineData, MobSize, MobZone, Rng } from './types.ts';
 import { ladderMult } from './skills.ts';
 
 const BANDS = ['low', 'mid', 'high'];
@@ -264,7 +264,13 @@ export function createEngine(E: EngineData) {
   const typicalDps = (hpAt: number, Lv: number) => hpAt / skillF(Lv);
   const mobPs = (hpAt: number, Lv: number) => typicalDps(hpAt, Lv) / K.mob_damage_divisor;
   const ZONES = E.mob.zones;
-  const zoneById = (id: number) => ZONES.find((z) => z.id === id);
+  /** The zone table is the sim's own ground: an id outside it is a data error, said out loud rather
+       than handed downstream as a hole the whole read column then has to dodge. */
+  const zoneById = (id: number): MobZone => {
+    const z = ZONES.find((z) => z.id === id);
+    if (!z) throw new Error(`engine: no zone ${id} in the zone table`);
+    return z;
+  };
 
   // DECISIONS.md §Product sets the win condition on the last zone in the list, so its id is read, never typed
   const finalZoneId = () => ZONES[ZONES.length - 1].id;

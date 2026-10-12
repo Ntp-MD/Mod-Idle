@@ -139,7 +139,7 @@ describe('conversion routes the physical share, it does not add power', () => {
   it('is folded from the aura rows into the sheet, and the swing spends it', () => {
     const fold = sm.aggregateEffects([sm.byId['aura.ember_conversion']]);
     const c = buildCharacter(40, weaponWith(null), {}, 0, fold);
-    expect(c.conversion).toEqual({ fire: sm.byId['aura.ember_conversion'].effects[0].value });
+    expect(c.conversion).toEqual({ fire: sm.byId['aura.ember_conversion'].effects![0]!.value });
     // the same build with no aura routes nothing, so the sheet field is the only switch
     expect(buildCharacter(40, weaponWith(null)).conversion).toEqual({});
   });

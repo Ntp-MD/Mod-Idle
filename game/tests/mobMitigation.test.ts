@@ -9,7 +9,7 @@ import { NO_CURSE, applyCurse, newCurses, modsFromAuraFold, modsOn as curseModsO
 import { castOnce, newSkillState, effectsActive } from '../src/sim/skills';
 import type { Item, Mob } from '../src/sim/types';
 
-const valueOf = (id: string, stat: string) => sm.byId[id].effects.find((e: any) => e.stat === stat).value;
+const valueOf = (id: string, stat: string) => sm.byId[id]!.effects!.find((e: any) => e.stat === stat)!.value;
 
 /** HP one cast takes off one mob, so a press can be read off the target rather than recomputed. */
 function castPress(id: string, c: ReturnType<typeof buildCharacter>, target: Mob): number {
@@ -155,7 +155,7 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     const orb = sm.byId['attack.nether_orb'] as any;
     const boltRow = sm.byId['attack.chaos_bolt'] as any;
     const basis = { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment };
-    const scaled = boltDamage * (sm.perPress(orb, basis) / sm.perPress(boltRow, basis));
+    const scaled = boltDamage * (sm.perPress(orb, basis)! / sm.perPress(boltRow, basis)!);
     expect(orbDamage).toBeGreaterThan(scaled);
   });
 

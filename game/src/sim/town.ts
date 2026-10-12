@@ -30,7 +30,7 @@ export const startSettlement = () => (TOWN.settlements.find((s: any) => s.start)
 
 /** The `m` a row charges at this settlement, honouring the teaching discount where one exists. */
 export function priceMinutes(row: any, settlementId: string, state?: GameState, blocks = 1): number {
-  const s = settlementById(settlementId);
+  const s = settlementById(settlementId)!;
   if (row.discount && row.discount.settlement === s.id) return row.discount.m;
   // the pedlar's stock is a fresh roll of three slots each real day, priced inside its band
   if (row.id === 'pedlar_rotation' && state?.pedlar?.minutes?.length) {
@@ -43,7 +43,7 @@ export function priceMinutes(row: any, settlementId: string, state?: GameState, 
 
 /** Gold = minutes of that band's full-sell junk income. */
 export function priceGold(row: any, settlementId: string, state?: GameState, blocks = 1): number {
-  const s = settlementById(settlementId);
+  const s = settlementById(settlementId)!;
   const band = row.charge_band || s.band;
   return Math.round(priceMinutes(row, settlementId, state, blocks) * eng.goldPerMinute(band) * 100) / 100;
 }
@@ -59,7 +59,7 @@ export function newTown(): TownState {
 
 /** Standing is earned by kills in that settlement's own zone (`town.json` standing.earnt_from). */
 export function standingShare(state: GameState, settlementId: string): number {
-  const s = settlementById(settlementId);
+  const s = settlementById(settlementId)!;
   // the budget is the curve's own slice for that zone, so Standing is read straight off it
   const budget = eng.SETTLEMENT_BUDGET_KILLS[s.zone];
   return budget > 0 ? (state.counters.zoneKills[s.zone] || 0) / budget : 0;
@@ -135,14 +135,6 @@ export function taskReward(kind: string, band: string): { stone: string; count: 
   const pay = eng.taskPayout(band, TS.reward_minutes_of_band_income);
   if (kind === 'elite') return { stone: 'tier', count: pay.tier };
   return { stone: 'remove', count: TS.boss_reward.remove };
-}
-
-/** The Boss hunt's winner's choice (`tasks.md`): the Remove stone or the Reroll tier count. */
-export function bossRewardOptions(): { stone: string; count: number }[] {
-  return [
-    { stone: 'remove', count: TS.boss_reward.remove },
-    { stone: 'tier', count: TS.boss_reward.reroll_tier },
-  ];
 }
 
 /** The board offers tasks only from zones at or below where the player is fighting (`tasks.md`). */

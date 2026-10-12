@@ -1,10 +1,10 @@
-import { E, loot, MODS, BASES } from '../engine/client';
-import { createCraft, QUALITY_STEPS } from '../../../engine/craft.ts';
+import { ED, loot, MODS, BASES } from '../engine/client';
+import { createCraft } from '../../../engine/craft.ts';
 import { mark as markSnapshot } from './snapshot';
 import type { GameState, Item } from './types';
 
 /** The bench calls the shared craft module — one home for the prices and one for the names. */
-export const craft: any = createCraft(E, loot);
+export const craft: any = createCraft(ED, loot);
 /** The press name comes from the engine, so a screen never renames a verb for itself. */
 export const pressName = (op: string) => craft.pressName(op);
 /**
@@ -13,7 +13,6 @@ export const pressName = (op: string) => craft.pressName(op);
  */
 export const stoneName = (key: string) => craft.STONE_NAME[key]
   || (key.startsWith('imprint_') ? `Imprint — ${lineName(key.slice('imprint_'.length)).replace(/ %$/, '')}` : key);
-export const qualitySteps = QUALITY_STEPS;
 
 /** Owned imprint stones as the Mod each carries: the purse key minus its prefix. */
 export const imprintStonesOf = (stones: Record<string, number>): { key: string; mod: string }[] =>
@@ -113,7 +112,7 @@ export function doCraft(
   craft.spend(state.counters.stones, op, item, pick); // the stone is spent even when Corrupt changes nothing
   // a successful Ascend or Refine is a snapshot trigger (`save.md` item 5)
   if (op === 'ascend' || op === 'refine') markSnapshot(state, op);
-  const forge = (FORGE as Record<string, string>)[op];
+  const forge = (FORGE as Record<string, unknown>)[op];
   const note = forge !== undefined ? wholeNote(op, result.changed) : craftNote(op, item, result, lineIndex);
   return { ok: true, item: result.item, note };
 }
@@ -152,19 +151,6 @@ export function replaceChoices(state: GameState, where: Where, index: number): s
   return item ? craft.choicesOf(item, poolOf(item)) : [];
 }
 
-/** The lines a Replace stone may be pointed at: every line but the Frame Mod. */
-export function replaceTargets(state: GameState, where: Where, index: number): number[] {
-  return targetsFor(state, where, index, 'piece');
-}
-
-/**
- * The lines a Remove stone may take off — everything past the Bound pair. Exposed so any screen that
- * offers the press can print the same count the purse charges for.
- */
-export function removeTargets(state: GameState, where: Where, index: number): number[] {
-  return targetsFor(state, where, index, 'unbound');
-}
-
 /**
  * Which head a verb may cross. `piece` reaches the Bound pair (the identity verbs and the whole-piece
  * stone); `unbound` stops below it. The Frame Mod is in neither — no verb redraws line 1.
@@ -172,13 +158,6 @@ export function removeTargets(state: GameState, where: Where, index: number): nu
 export const opScope = (op: CraftOp): 'unbound' | 'piece' =>
   (op === 'reroll_mod' || op === 'reroll_mod_all' || op === 'replace' || op === 'replace_all' || op === 'polish' || op === 'reforge')
     ? 'piece' : 'unbound';
-
-/** Every line one scope holds on this piece. */
-export function targetsFor(state: GameState, where: Where, index: number, scope: 'unbound' | 'piece'): number[] {
-  const item: Item | null = where === 'gear' ? state.gear[index] : state.bag[index];
-  if (!item) return [];
-  return item.lines.map((_: any, i: number) => i).slice(scope === 'piece' ? craft.PIECE_FLOOR : craft.UNTOUCHABLE);
-}
 
 /** Say a whole-piece craft in the words the ladder uses, so the bench reports what actually happened. */
 function wholeNote(op: CraftOp, changed: any): string {

@@ -41,7 +41,7 @@
   const worn = $derived(state.gear.filter(Boolean) as any[]);
   const wornCount = $derived(worn.length);
   const lowest = $derived(worn.length ? worn.reduce((a, b) => ((b.upgrade_lv || 0) < (a.upgrade_lv || 0) ? b : a)) : null);
-  const opened = $derived(state.town.visited.filter((v) => v !== town.id).map(settlementById).filter(Boolean));
+  const opened = $derived(state.town.visited.filter((v) => v !== town.id).map(settlementById).filter((s): s is NonNullable<ReturnType<typeof settlementById>> => Boolean(s)));
   const services = $derived([
     { id: 'market', name: 'Market', by: 'the Counterhand and the stall', say: 'Buy stock lines, tabs and bag room · sell the junk this run picked up', live: buys ? `${buys} line${buys === 1 ? '' : 's'} your purse covers` : junk ? `${junk} junk to sell` : 'nothing on offer you can take' },
     { id: 'forge', name: 'Forge', by: 'the Armourer', say: 'Enhance a piece up the + ladder, repair a Broken one, or take the one Corrupt gamble', live: lowest ? `${lowest.slot} is the least forged · +${lowest.upgrade_lv || 0} of +${craft.C.upgrade_cap}` : 'nothing worn yet' },

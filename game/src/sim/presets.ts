@@ -74,5 +74,3 @@ export function bindZone(state: GameState, index: number, zone: number) {
   p.zones = p.zones.includes(zone) ? p.zones.filter((z: number) => z !== zone) : [...p.zones, zone];
   return true;
 }
-
-export const activeLoadout = (state: GameState): SkillState => state.skills;

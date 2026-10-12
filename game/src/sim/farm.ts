@@ -1,11 +1,11 @@
-import { E } from '../engine/client';
+import { ED } from '../engine/client';
 import { createFarm } from '../../../engine/farm.ts';
 import type { GameState } from './types';
 import type { Character } from './player';
 import { addTo, fits } from './slots';
 
 /** The client's farm runs on the shared module — no local copy of a rate or a cost. */
-export const farm: any = createFarm(E);
+export const farm: any = createFarm(ED);
 
 export interface Plot {
   tier: string | null;

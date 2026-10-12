@@ -131,7 +131,7 @@ const valueOf = (skill: any, stat: string, fallback: number): number => {
 /** Effective cooldown, ladder before CDR (`skill-pool.md` "Cooldown calculation order"). */
 export function skillCd(s: SkillState, id: string, cdrPct: number): number {
   const skill = sm.byId[id];
-  return sm.effCd(skill.cd, cdrPct, ladderOf(s, id));
+  return sm.effCd(skill.cd ?? 0, cdrPct, ladderOf(s, id));
 }
 
 /** Auras reserve a % of Max Mana; the set may not reserve the whole pool. */
@@ -139,7 +139,7 @@ export function reservedPct(s: SkillState): number {
   let total = 0;
   for (const [id, on] of Object.entries(s.auras)) {
     if (!on) continue;
-    total += sm.reservePct(sm.byId[id]?.reserve);
+    total += sm.reservePct(sm.byId[id]?.reserve ?? '');
   }
   return total;
 }
@@ -195,11 +195,6 @@ export function esAbsorbPct(sk: SkillState): number {
   return 0;
 }
 
-/** The rows in the toggle track that this character owns, in roster order. */
-export function trackRows(s: SkillState): any[] {
-  return sm.all().filter((k: any) => (k.type === 'aura' || k.type === 'buff') && s.owned[k.id]);
-}
-
 /**
  * Flip one toggle-track skill. An aura can only go on while the pool has the room for its
  * reservation (`skill-pool.md` · the block the S9 gate prints), and taking one off is always free.
@@ -210,7 +205,7 @@ export function toggleTrack(s: SkillState, id: string): { ok: boolean; why?: str
   if (skill.type === 'aura') {
     const turning = !s.auras[id];
     if (turning) {
-      const next = reservedPct(s) + sm.reservePct(skill.reserve);
+      const next = reservedPct(s) + sm.reservePct(skill.reserve ?? '');
       // reserving the whole pool would leave no mana to cast with, so the block is exclusive
       // (`skill-pool.md`: an aura set that may not reserve all of it)
       if (next >= sm.RESERVATION_LIMIT) {
@@ -286,7 +281,7 @@ export function grantSkill(s: SkillState, rng: () => number): { id: string; dupl
     // a row with no timer of its own (`cd 0`) is the FILLER: it is a rotation choice, so a drop never
     // slots it for the player — the bar it fills is the one whose timed slots it should sit under
     const filler = (chosen as any).cd === 0;
-    if (free >= 0 && !filler && ['attack', 'curse', 'heal'].includes(chosen.type)) s.list[free] = chosen.id;
+    if (free >= 0 && !filler && ['attack', 'curse', 'heal'].includes(chosen.type as string)) s.list[free] = chosen.id;
     if (chosen.type === 'aura') s.auras[chosen.id] = true;
     if (chosen.type === 'buff') s.buffs[chosen.id] = true;
   }
@@ -438,7 +433,7 @@ export function castOnce(
     if (skill.type === 'heal') {
       const h = healOf(skill);
       return {
-        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, byMob: [],
+        id, name: skill.name ?? '', damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, byMob: [],
         heal: h?.heal, instantHealPct: h?.instantHealPct,
         cleansesSelf: hasRule(skill, 'cleanses_status'),
       };
@@ -452,7 +447,7 @@ export function castOnce(
           base.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'dodge_charges_per_levels', 1)))
         : undefined;
       return {
-        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, byMob: [], charges,
+        id, name: skill.name ?? '', damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: 0, byMob: [], charges,
         cleansesSelf: hasRule(skill, 'cleanses_on_cast'),
       };
     }
@@ -462,7 +457,7 @@ export function castOnce(
       const hit = rng() <= eng.hitChance(c.accuracy, mob.evasion);
       const writes = (skill.effects || []).some((e: any) => e.subject === 'target');
       return {
-        id, name: skill.name, damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: hit ? 1 : 0, byMob: [],
+        id, name: skill.name ?? '', damage: 0, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: hit ? 1 : 0, byMob: [],
         curseOn: hit && writes ? mob.id : null,
       };
     }
@@ -516,7 +511,7 @@ export function castOnce(
     // that decide *whether* a status lands, never the control budget that decides how often 
     const everyTarget = hasRule(skill, 'every_target');
     const statusName = hasRule(skill, 'guaranteed_status')
-      ? (E.elements.status_of as Record<string, MobStatusName | undefined>)[skill.element] : null;
+      ? (E.elements.status_of as Record<string, MobStatusName | undefined>)[skill.element ?? ''] : null;
     const spendOn = (t: Mob) => {
       if (!env.mobStatus) return;
       for (const e of effects) {
@@ -600,7 +595,7 @@ export function castOnce(
       s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
     }
     return {
-      id, name: skill.name, damage: dmg, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: landed, crit, dealt, byMob: struck,
+      id, name: skill.name ?? '', damage: dmg, manaKind: ms ? ms.kind : null, manaValue: ms ? ms.value : null, manaCost: spent, targets: landed, crit, dealt, byMob: struck,
     };
   }
   return null;
