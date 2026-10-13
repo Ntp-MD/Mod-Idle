@@ -88,12 +88,13 @@ export function createEngine(E: EngineData) {
   const REF_LEVEL_ONLY = statAt(S.level_cap);
   const REF_ALIGN = REF_LEVEL_ONLY * K.K_DEX_ALIGN;
   const REF = {
-    glass: { phys: DERIVED.phys, magic: REF_LEVEL_ONLY * K.K_INT, elem: REF_LEVEL_ONLY * K.K_ELEM, align: REF_ALIGN },
+    glass: { phys: DERIVED.phys, magic: REF_LEVEL_ONLY * K.K_INT, elem: REF_LEVEL_ONLY * K.K_ELEM, align: REF_ALIGN, maxHp: DERIVED.hp },
     caster: {
       phys: REF_LEVEL_ONLY * K.K_STR,
       magic: (CEIL * K.K_INT + M.magic_flat_main_hand) * (1 + M.magic_pct_main_hand / 100),
       elem: CEIL * K.K_ELEM,
       align: REF_ALIGN,
+      maxHp: DERIVED.hp,
     },
   };
 
@@ -332,8 +333,8 @@ export function createEngine(E: EngineData) {
 
   // a mob accuracy is its own Dex line: Core stat(zone) x K_DEX_ACC x accuracy tier
   const mobAcc = (dexCore: number, tier: number) => dexCore * K.K_DEX_ACC * tier;
-  // A mob's own dodge is contested by the accuracy of the player attacking it, the same opposed shape X20 uses
-  // for the player side. Reference attacker = a same-level player with no Dex investment.
+  // A mob's own dodge keeps its thin Agi-versus-attacker-accuracy ratio; the player's Evasion
+  // uses the separate opening-weighted curve below. Reference attacker = a same-level player with no Dex investment.
   const refAttackerAcc = (Lv: number) => statAt(Lv) * K.K_DEX_ACC * (1 + M.accuracy_pct / 100);
   // The dodge roll itself stays a chance bounded by 100: no build and no mob can make itself
   // untouchable, which is the same rule as the Evasion Cap one line up.
@@ -399,7 +400,7 @@ export function createEngine(E: EngineData) {
   // player accuracy at a given Dex. The default carries the max Accuracy % Mod, which is what
   // every published anchor assumes; the game passes the % its own items actually rolled.
   const playerAccuracy = (dex: number, accPct = M.accuracy_pct) => dex * K.K_DEX_ACC * (1 + accPct / 100);
-  // the one entropy roll both sides use (PoE shape): attacker accuracy vs defender evasion
+  // Outgoing hit chance against mob Evasion keeps its accuracy-versus-rating roll.
   const hitChance = (accuracy: number, evasion: number) => accuracy / (accuracy + evasion);
   const hitVs = (dex: number, evasion: number) => hitChance(playerAccuracy(dex), evasion) * 100;
   DERIVED.ref_build_hit_pct = hitVs(statAt(S.level_cap), MOB_EVASION_REF);
@@ -440,12 +441,17 @@ export function createEngine(E: EngineData) {
   const magicOf = (int: number, flat: number, pct: number, weaponAspd: number) => (int * K.K_INT + flat) * (1 + pct / 100) * weaponMult(weaponAspd);
 
   // Evasion is ONE layer, and AGI carries it (owner ruling): the rating is `agi × K_EVASION` plus
-  // the gear `evasion_flat` × `evasion_pct` lines, it runs the same PoE entropy roll against the
-  // attacker's accuracy that the mob side dodges with (X20), and the Cap 80 binds the result.
+  // the gear `evasion_flat` × `evasion_pct` lines. The opening slice has a small share while points
+  // earned beyond it keep their value, then the effective rating is opposed by attacker accuracy.
   // Dex feeds it nothing — its line is accuracy and the Status alignment gate now.
   const evasionChance = (rating: number, attackerAccuracy = 1) => {
-    const roll = (1 - attackerAccuracy / (attackerAccuracy + rating)) * 100;
-    return Math.min(CAP.evasion, roll);
+    const positive = Math.max(0, rating);
+    const opening = Math.min(positive, E.evasion_roll.opening_rating) * E.evasion_roll.opening_share;
+    const earned = Math.max(0, positive - E.evasion_roll.opening_rating) * E.evasion_roll.earned_mult;
+    const evade = opening + earned;
+    if (evade === 0) return 0;
+    const pressure = Math.max(0, attackerAccuracy);
+    return Math.min(CAP.evasion, evade / (evade + pressure) * 100);
   };
   /** The rating on its own, for the sheets that print it rather than the chance it buys. */
   const evasionRating = (agi: number, flat = 0, pct = 0) => (agi * K.K_EVASION + flat) * (1 + pct / 100);

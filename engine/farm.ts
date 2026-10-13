@@ -1,8 +1,8 @@
 /**
  * The provisioning track — Farm and Potion, both read out of `engine.json`.
  *
- * Farming is the game's one life skill and it grants no power: its whole output is the herb a
- * potion is crafted from, which is why it sits outside the `mob_HP` fold (`DECISIONS.md` §Standing intent).
+ * Farming is the settlement herb-provisioning track; mining, woodcutting, hunting and cooking live in
+ * the separate fieldwork track. Its output is still the herb a potion is crafted from, outside the `mob_HP` fold.
  * Potions are a bounded convenience: shared cooldown, a per-fight cap, and nothing works on a boss.
  */
 

@@ -1,7 +1,8 @@
 import type { GameState } from '../sim/types';
-import { newSkillState } from '../sim/skills';
+import { ACTIVE_SLOTS, clearUnownedTracks, newSkillState } from '../sim/skills';
 import { newTown } from '../sim/town';
 import { newFarm } from '../sim/farm';
+import { newFieldwork } from '../sim/fieldwork';
 import { newPresets } from '../sim/presets';
 import { newCollector, newGrants } from '../sim/collector';
 import { newFilter, refresh as refreshFilter } from '../sim/filter';
@@ -9,7 +10,7 @@ import { newGoal } from '../sim/goal';
 import { newCurses } from '../sim/curse';
 import { newMobStatusStore } from '../sim/mobStatus';
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
-import { E, BASES, eng, loot } from '../engine/client';
+import { E, BASES, eng, loot, STAT_KEYS, type StatKey } from '../engine/client';
 import { road } from '../sim/road';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
@@ -27,10 +28,12 @@ import { road } from '../sim/road';
 // ring (`fx`), which a write never stores. v12 is the hex the feet stand on: a walk joins two cells
 // rather than two settlement ids, so a v11 walk is re-read through the walk graph's own coordinates and
 // an in-flight route that names no settlement is dropped rather than left to compute NaN blocks.
+// v13 adds the persistent field Camp, field-skill tracks, materials, meals and active meal timer.
+// v14 adds Hunger, Auto Eat, ten carried food types and persistent trail-event provisions.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 14;
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
 
@@ -130,10 +133,14 @@ export interface ClientSettings {
   equipMargin?: number;
   /** the clock's pace: how many sim seconds a real second spends (the field's ×1 ×2 ×4 switch) */
   speed?: 1 | 2 | 4;
+  /** whether the simulation automatically presses ready skill rows */
+  autoSkills?: boolean;
+  /** whether better gear found in the carried bag is equipped automatically */
+  autoEquip?: boolean;
   /** the hub's drag offset from its docked corner, in px — wheel and satellites move as one */
   hub?: { x: number; y: number };
 }
-export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0 };
+export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true };
 export async function readSettings(): Promise<ClientSettings> {
   const raw = await get('settings');
   if (!raw) return { ...DEFAULT_SETTINGS };
@@ -350,6 +357,35 @@ function restatItem(item: any): void {
   delete item.chosenStat;
 }
 
+/** The broken auto-spend loop restarted its remainder at STR each level. Repair only the exact
+ *  signature it produced, so manually-built or otherwise uneven characters keep their allocation. */
+function repairLegacyAutoSpend(s: GameState): void {
+  const p = s.player;
+  if (!p?.points || !p.autoSpend || p.statPoints !== 0) return;
+  const start = Number(E.opening.level) || 1;
+  const level = Math.min(p.level, E.stat.level_cap as number);
+  const total = eng.pointsAt(level) - eng.pointsAt(start);
+  const spent = STAT_KEYS.reduce((sum, key) => sum + p.points[key], 0);
+  if (total <= 0 || spent !== total) return;
+
+  const legacy = Object.fromEntries(STAT_KEYS.map((key) => [key, 0])) as Record<StatKey, number>;
+  for (let reached = start + 1; reached <= level; reached++) {
+    const grant = reached >= E.stat.paragon_from ? E.stat.paragon_points_per_level : E.stat.points_per_level;
+    const each = Math.floor(grant / STAT_KEYS.length);
+    let remainder = grant;
+    for (const key of STAT_KEYS) { legacy[key] += each; remainder -= each; }
+    for (const key of STAT_KEYS) { if (remainder <= 0) break; legacy[key]++; remainder--; }
+  }
+  if (!STAT_KEYS.every((key) => p.points[key] === legacy[key])) return;
+
+  const balanced = Object.fromEntries(STAT_KEYS.map((key) => [key, 0])) as Record<StatKey, number>;
+  for (let left = total; left > 0; left--) {
+    const least = STAT_KEYS.reduce((best, key) => balanced[key] < balanced[best] ? key : best, STAT_KEYS[0]);
+    balanced[least]++;
+  }
+  p.points = balanced;
+}
+
 /** A save written by an earlier build is missing whole subsystems; fill the shape in. */
 export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): GameState {
   if (fromVersion < 4) {
@@ -435,6 +471,12 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     delete (s as any).autoDissolveRarity;
   }
   if (!s.skills) s.skills = newSkillState();
+  s.skills.owned ||= {};
+  s.skills.buffs ||= {};
+  s.skills.auras ||= {};
+  s.skills.buffUp ||= {};
+  clearUnownedTracks(s.skills);
+  s.skills.list = Array.from({ length: ACTIVE_SLOTS }, (_, i) => s.skills.list?.[i] ?? null);
   // a save from before §14 has no per-slot mode and no condition lists: default them, so the
   // rotation keeps behaving exactly as it did (`always`) until the player changes something
   if (!s.skills.mode) s.skills.mode = {};
@@ -490,10 +532,27 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!Array.isArray(s.fx)) s.fx = [];
   if (!s.fxSeq) s.fxSeq = 0;
   if (!s.farm) s.farm = newFarm();
+  // v13 · field gathering, Camp and cooked meals did not exist in a v12 save.
+  if (fromVersion < 13 || !s.fieldwork) s.fieldwork = newFieldwork();
+  // v14 · carry old meal and meat stacks into the unified provision bag, then add Hunger and Auto Eat.
+  if (fromVersion < 14 || !s.fieldwork.foods) {
+    const defaults = newFieldwork();
+    const fw = s.fieldwork as any;
+    const foods = { ...defaults.foods, ...(fw.foods || {}) };
+    for (const [id, count] of Object.entries(fw.meals || {})) foods[id] = (foods[id] || 0) + Number(count || 0);
+    foods.raw_game_meat = (foods.raw_game_meat || 0) + Number(fw.materials?.meat || 0);
+    fw.foods = foods;
+    fw.hunger = Math.max(0, Math.min(E.fieldwork.hunger.max, Number(fw.hunger ?? E.fieldwork.hunger.max)));
+    fw.autoEat ||= defaults.autoEat;
+    delete fw.meals;
+    if (fw.materials) delete fw.materials.meat;
+    s.fieldwork = fw;
+  }
   // a farm saved before the automation block existed gets it off; the player opts in
   if (s.farm && !s.farm.autoFarm) { s.farm.autoFarm = { plant: false, harvest: false, brew: false }; s.farm.lastAutoFarmAt = -9999; }
   // an older character auto-allocates its points (the idle default); manual is the opt-out 
   if (s.player && s.player.autoSpend == null) s.player.autoSpend = true;
+  repairLegacyAutoSpend(s);
   if (!s.stash) s.stash = [];
   // an older save auto-dissolves nothing; the player opts in with a level floor
   if (s.autoDissolveLevel == null) s.autoDissolveLevel = 0;
@@ -503,6 +562,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // offline credited) so the field is always present.
   if (s.lastSavedAt == null) s.lastSavedAt = Date.now();
   if (!s.presets) s.presets = newPresets();
+  for (const preset of s.presets) {
+    preset.list = Array.from({ length: ACTIVE_SLOTS }, (_, i) => preset.list?.[i] ?? null);
+  }
   if (s.activePreset == null) s.activePreset = 0;
   if (!s.collector) s.collector = newCollector();
   if (!s.grants) s.grants = newGrants();

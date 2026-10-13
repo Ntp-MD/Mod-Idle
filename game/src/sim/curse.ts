@@ -145,8 +145,8 @@ export function tickCurses(store: CurseStore, liveIds: Set<string>): void {
   for (const mobId of Object.keys(store)) if (!liveIds.has(mobId)) delete store[mobId];
 }
 
-/** A mob's threat is priced as damage per second, so a weaker hit and a slower clock scale the same number. */
-export const psMult = (m: CurseMods) => (1 + m.damageDealt / 100) * (1 + m.attackSpeed / 100);
+/** Damage dealt changes each hit; attack speed changes the mob clock where it is advanced in the sim. */
+export const psMult = (m: CurseMods) => 1 + m.damageDealt / 100;
 
 /** Accuracy is a straight percent on the mob's own line, so it moves both hit rolls it feeds. */
 export const accMult = (m: CurseMods) => 1 + m.accuracy / 100;

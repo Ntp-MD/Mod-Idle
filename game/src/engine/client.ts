@@ -13,6 +13,7 @@ import { createDungeon } from '../../../engine/dungeon.ts';
 import { createLoot } from '../../../engine/loot.ts';
 import { createRoad } from '../../../engine/road.ts';
 import { createFarm } from '../../../engine/farm.ts';
+import { createFieldwork } from '../../../engine/fieldwork.ts';
 import { createSkillModel } from '../../../engine/skills.ts';
 import { createTree } from '../../../engine/tree.ts';
 import type { EngineData, ModsData, SkillsData } from '../../../engine/types.ts';
@@ -55,6 +56,7 @@ export const tree = createTree(TREE_DATA, MODS_DATA);
  *  not enumerate — the same reason the sim modules held its instance at `any`. */
 export const road: any = createRoad(ENGINE_DATA);
 export const farm: any = createFarm(ENGINE_DATA);
+export const fieldwork: any = createFieldwork(ENGINE_DATA.fieldwork);
 
 export const STAT_KEYS = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'] as const;
 export type StatKey = (typeof STAT_KEYS)[number];

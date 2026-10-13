@@ -12,6 +12,7 @@
    */
   import { E } from '../engine/client';
   import { gearIcon } from '../icon';
+  import { itemName } from '../sim/item-name';
   import { gearEntry, sortEntries, rankTone, SORT_LABELS, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
   import { setDrag, readDrag } from './drag';
@@ -140,7 +141,7 @@
                     style:--rar={rankTone(it)}
                     draggable="true"
                     ondragstart={(ev) => dragFrom('stash', stashAt * PAGE + k, ev)}
-                    onclick={() => pick('stash', stashAt * PAGE + k)} aria-label={it.base}>
+                    onclick={() => pick('stash', stashAt * PAGE + k)} aria-label={itemName(it)}>
               <img src={gearIcon(it)} alt="" aria-hidden="true" />
               {#if (it.upgrade_lv || 0) > 0}<b class="pl">+{it.upgrade_lv}</b>{/if}
             </button>
@@ -189,28 +190,28 @@
 
 <style>
   .board { display: grid; gap: var(--spacing-sm); }
-  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; }
-  .tb { display: inline-flex; align-items: center; gap: 4px; padding: 3px var(--spacing-sm); font-size: var(--font-xs); }
+  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-2xs); }
+  .tb { display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-2xs) var(--spacing-sm); font-size: var(--font-xs); }
   .tb b { font-family: var(--num); color: var(--dim); font-weight: 500; }
   .tb.here { border-color: var(--gold); color: var(--gold); background: rgba(232, 193, 105, .12); }
   .tb.here b { color: var(--gold); }
   .spacer { flex: 1; }
-  .shared { font-size: var(--font-xs); color: var(--mob); letter-spacing: clamp(0px, 0.033vw + 0px, 1px); }
+  .shared { font-size: var(--font-xs); color: var(--mob); letter-spacing: clamp(0px, 0.05vw, 1px); }
 
   .grids { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); }
-  .side { display: grid; gap: 4px; align-content: start; }
+  .side { display: grid; gap: var(--spacing-2xs); align-content: start; }
   .side header { display: flex; align-items: baseline; gap: var(--spacing-xs); justify-content: space-between; }
   .side h4 { margin: 0; }
   .count { font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
   .count.alarm { color: var(--alarm); }
 
   .grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(32px, 2.119vw + 8px, 70px), 1fr)); gap: 3px;
-    padding: 1px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(32px, 2.52vw, 70px), 1fr)); gap: var(--spacing-2xs);
+    padding: var(--seam);
     /* one cell is one piece, so an empty row of the grid is a gap in the warehouse rather than a message */
   }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { font-size: var(--font-xs); padding: 1px var(--spacing-xs); }
+  .pager button { font-size: var(--font-xs); padding: var(--seam) var(--spacing-xs); }
   .pager button:disabled { opacity: .4; }
   /* an empty side says so across the whole shelf, not down one cell's width */
   .grid p { grid-column: 1 / -1; max-width: var(--box-520); font-size: var(--font-xs); }
@@ -219,21 +220,21 @@
     border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
   }
   .cell img { position: absolute; inset: 0; margin: auto; width: var(--icon-md); height: var(--icon-md); object-fit: contain; pointer-events: none; }
-  .cell .pl { position: absolute; left: clamp(2px, 0.098vw + 0px, 3px); bottom: clamp(1px, 0.041vw + 0px, 1px); font-size: var(--font-xs); color: var(--xp); }
+  .cell .pl { position: absolute; left: clamp(2px, 0.10vw, 3px); bottom: clamp(1px, 0.05vw, 1px); font-size: var(--font-xs); color: var(--xp); }
   .cell.lock { border-style: dashed; border-color: var(--dim); }
   .cell.here { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(232, 193, 105, .5); background: rgba(232, 193, 105, .1); }
 
-  .bulk { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-  .bulk select, .bulk button { font-size: var(--font-xs); padding: 2px var(--spacing-xs); }
+  .bulk { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); align-items: center; }
+  .bulk select, .bulk button { font-size: var(--font-xs); padding: var(--spacing-3xs) var(--spacing-xs); }
 
   .draw {
-    display: grid; grid-template-columns: minmax(clamp(225px, 14.67vw + 57px, 486px), clamp(300px, 19.56vw + 76px, 648px)) 1fr; gap: var(--spacing-md); align-items: start;
+    display: grid; grid-template-columns: minmax(clamp(225px, 17.47vw, 486px), clamp(300px, 23.28vw, 648px)) 1fr; gap: var(--spacing-md); align-items: start;
     border-top: 1px solid var(--line); padding-top: var(--spacing-sm);
   }
-  .moves { display: grid; gap: 4px; justify-items: start; }
+  .moves { display: grid; gap: var(--spacing-2xs); justify-items: start; }
   .go { border-color: rgba(232, 193, 105, .5); color: var(--gold); }
   .lk { font-size: var(--font-xs); }
-  .moves p { margin: 2px 0 0; color: var(--dim); max-width: var(--box-680); }
+  .moves p { margin: var(--spacing-3xs) 0 0; color: var(--dim); max-width: var(--box-680); }
 
   @media (max-width: 1280px) {
     .grids, .draw { grid-template-columns: 1fr; }

@@ -2,7 +2,7 @@
  * Skill cage — `tools/data/skills.json` is the roster source of truth.
  *
  *   node tools/skills.ts --checks   the mechanic gate (roster · effects · basis)
- *   node tools/skills.ts --calc     the live workshop: dmg/press · eff cd · press/s · mana/s
+ *   node tools/skills.ts --calc     the live workshop: dmg/press · eff cd · press/s · cost/s
  *                                   flags: --build glass|caster --level N --cdr N --ladder N
  *
  * Counts, names, reserves, effects and the press itself are computed from the data — never
@@ -30,21 +30,22 @@ function calc() {
   const build = flags.build != null ? String(flags.build) : 'glass';
   const ref = M.referenceBases()[build] || M.referenceBases().glass;
   console.log(`# Skill workshop — ${build} reference (basis phys ${Math.round(ref.phys)} · basis magic ${Math.round(M.basisOf({ basis: 'magic' } as any, ref))}) · skill level ${level} · CDR ${cdrPct}% · ladder ${ladderPct}%`);
-  console.log(`# press = (base_flat + eff% × power) × damage_pct(level)/100 · mana = the row's typed cost in mana units, and mana/s = presses/sec × that cost`);
+  console.log(`# press = (base_flat + eff% × power + max_hp_pct% × caster Max HP) × damage_pct(level)/100 · cost/s = presses/sec × typed Mana or current-HP cost`);
   // A row with no cooldown of its own fires on the attack clock, so its rate is the reference line's
   // hits/sec rather than a cooldown-derived figure — read from the engine, never typed here.
   const beatRate = eng.hitsPerSec(eng.REFERENCE.line.aspd);
   console.log(`# the beat = the attack clock at the reference line (${beatRate.toFixed(2)}/sec) — a row with no timer of its own fires on it`);
   console.log('');
-  const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'mana', 'mana/s', 'dmg/press'];
+  const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'cost', 'cost/s', 'dmg/press'];
   const rows = byType('attack').map((s: any) => {
     const r = M.row(s, { ...ref, cdrPct, ladderPct, level });
-    const cost = M.manaCostOf(s, { skillLevel: level, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
+    const cost = M.costOf(s, { skillLevel: level, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
     // a row with no timer of its own has no cooldown-derived rate: its beat is the attack clock
     const rateN = r.pressesPerSec == null ? beatRate : r.pressesPerSec;
     const rate = r.pressesPerSec == null ? `${beatRate.toFixed(2)} beat` : r.pressesPerSec.toFixed(2);
-    const perSec = fmt(Math.round(rateN * cost));
-    return [s.name, s.basis, `${s.cd}`, r.effCd.toFixed(2), rate, `${s.mana} → ${fmt(Math.round(cost))}`, perSec, r.damage != null ? fmt(Math.round(r.damage)) : '—'];
+    const perSec = fmt(Math.round(rateN * cost.amount));
+    const spec = cost.resource === 'hp' ? s.hp_cost : s.mana;
+    return [s.name, s.max_hp_pct ? `${s.basis} + ${s.max_hp_pct}% Max HP` : s.basis, `${s.cd}`, r.effCd.toFixed(2), rate, `${spec} ${cost.resource} → ${fmt(Math.round(cost.amount))}`, perSec, r.damage != null ? fmt(Math.round(r.damage)) : '—'];
   });
   const widths = head.map((h, i) => Math.max(h.length, ...rows.map((r: any) => String(r[i]).length)));
   const line = (r: any) => r.map((c: any, i: any) => String(c).padEnd(widths[i])).join('  ');
@@ -66,9 +67,9 @@ function list(which: string) {
     const rows = byType(t);
     console.log('');
     console.log(`# ${t} - ${rows.length} row(s)`);
-    const head = ['id', 'name', 'cd', 'mana', 'duration', 'group', 'targets', 'reserve', 'basis (flat / eff%)'];
-    const body = rows.map((s: any) => [s.id, s.name, s.cd ?? '-', s.mana ?? '-', s.duration ?? '-', s.group ?? '-',
-      s.targets ?? '-', s.reserve ?? '-', s.base_flat != null ? `${s.basis} ${s.base_flat} / ${s.eff}` : '-']);
+    const head = ['id', 'name', 'cd', 'cost', 'duration', 'group', 'targets', 'reserve', 'basis (flat / eff%)'];
+    const body = rows.map((s: any) => [s.id, s.name, s.cd ?? '-', s.hp_cost ? `${s.hp_cost} current HP` : s.mana ? `${s.mana} Mana` : '-', s.duration ?? '-', s.group ?? '-',
+      s.targets ?? '-', s.reserve ?? '-', s.base_flat != null ? `${s.basis} ${s.base_flat} / ${s.eff}${s.max_hp_pct ? ` + ${s.max_hp_pct}% Max HP` : ''}` : '-']);
     const widths = head.map((h: string, i: number) => Math.max(String(h).length, ...body.map((r: any[]) => String(r[i]).length)));
     const draw = (r: any[]) => r.map((c: any, i: number) => String(c).padEnd(widths[i])).join('  ').trimEnd();
     console.log(draw(head));
@@ -95,11 +96,11 @@ function levels(which: string) {
   for (const s of rows) {
     console.log(`
 # ${s.name} (${s.id}) — ${s.basis} basis · cd ${s.cd}s · base_flat ${s.base_flat} · eff ${s.eff}%`);
-    const head = ['level', 'damage%', 'effect%', 'press (glass)', 'press (caster)', 'mana', ...(s.effects || []).map((e: any) => `${e.stat}${e.op === 'mult' ? ' x' : e.op === 'add_flat' ? ' +' : ' +%'}`)];
+    const head = ['level', 'damage%', 'effect%', 'press (glass)', 'press (caster)', 'cost', ...(s.effects || []).map((e: any) => `${e.stat}${e.op === 'mult' ? ' x' : e.op === 'add_flat' ? ' +' : ' +%'}`)];
     const body: any[][] = [];
     for (let lv = 1; lv <= L; lv++) {
-      const cost = M.manaCostOf(s, { skillLevel: lv, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
-      body.push([`${lv}`, `${M.damagePct(lv)}`, `${M.effectPct(lv)}`, fmt(Math.round(M.pressOn(s, 'glass', lv))), fmt(Math.round(M.pressOn(s, 'caster', lv))), fmt(Math.round(cost)),
+      const cost = M.costOf(s, { skillLevel: lv, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
+      body.push([`${lv}`, `${M.damagePct(lv)}`, `${M.effectPct(lv)}`, fmt(Math.round(M.pressOn(s, 'glass', lv))), fmt(Math.round(M.pressOn(s, 'caster', lv))), `${fmt(Math.round(cost.amount))} ${cost.resource}`,
         ...M.effectsAt(s, lv).map((e: any) => (e.op === 'mult' ? e.value.toFixed(2) : e.value.toFixed(1)))]);
     }
     const widths = head.map((h: string, i: number) => Math.max(String(h).length, ...body.map((r: any) => String(r[i]).length)));
@@ -125,8 +126,8 @@ if (arg === '--calc') {
 
   node tools/skills.ts --checks   mechanic gate (checks.md D18)
   node tools/skills.ts --list [attack|buff|curse|heal|aura|all]  the whole roster, every row
-  node tools/skills.ts --levels <skill-id|name|all>  the per-level table: damage · effect · mana
-  node tools/skills.ts --calc     live skill workshop: dmg/press · eff cd · press/s · mana/s
+  node tools/skills.ts --levels <skill-id|name|all>  the per-level table: damage · effect · cost
+  node tools/skills.ts --calc     live skill workshop: dmg/press · eff cd · press/s · cost/s
                                   flags: --build glass|caster --level N --cdr N --ladder N
 `);
 }

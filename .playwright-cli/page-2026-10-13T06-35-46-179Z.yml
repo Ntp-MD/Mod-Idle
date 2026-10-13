@@ -1,0 +1,1335 @@
+- generic [ref=f1e1]:
+  - generic:
+    - generic [ref=f1e2744]:
+      - toolbar "Field map — click a cell to pick a place, arrows and Enter work the same list" [ref=f1e2745]:
+        - img [ref=f1e2747]:
+          - generic [ref=f1e2750]:
+            - generic "A1 · no zone yet" [ref=f1e2751] [cursor=pointer]
+            - generic "A2 · no zone yet" [ref=f1e2752] [cursor=pointer]
+            - generic "A3 · no zone yet" [ref=f1e2753] [cursor=pointer]
+            - generic "A4 · no zone yet" [ref=f1e2754] [cursor=pointer]
+            - generic "A5 · no zone yet" [ref=f1e2755] [cursor=pointer]
+            - generic "A6 · no zone yet" [ref=f1e2756] [cursor=pointer]
+            - generic "A7 · no zone yet" [ref=f1e2757] [cursor=pointer]
+            - generic "A8 · no zone yet" [ref=f1e2758] [cursor=pointer]
+            - generic "A9 · no zone yet" [ref=f1e2759] [cursor=pointer]
+            - generic "A10 · no zone yet" [ref=f1e2760] [cursor=pointer]
+            - generic "Blackwater Reach Dungeon · Blackwater Reach · Lv 61-70" [ref=f1e2761] [cursor=pointer]
+            - generic "Blackwater Reach 2 · Blackwater Reach · Lv 61-70" [ref=f1e2762] [cursor=pointer]
+            - generic "A13 · no zone yet" [ref=f1e2763] [cursor=pointer]
+            - generic "A14 · no zone yet" [ref=f1e2764] [cursor=pointer]
+            - generic "A15 · no zone yet" [ref=f1e2765] [cursor=pointer]
+            - generic "A16 · no zone yet" [ref=f1e2766] [cursor=pointer]
+            - generic "Icebreak Shelf · Thornwake · Lv 171-180" [ref=f1e2767] [cursor=pointer]
+            - generic "Thornwake Dungeon · Thornwake · Lv 171-180" [ref=f1e2768] [cursor=pointer]
+            - generic "A19 · no zone yet" [ref=f1e2769] [cursor=pointer]
+            - generic "A20 · no zone yet" [ref=f1e2770] [cursor=pointer]
+            - generic "B1 · no zone yet" [ref=f1e2771] [cursor=pointer]
+            - generic "B2 · no zone yet" [ref=f1e2772] [cursor=pointer]
+            - generic "B3 · no zone yet" [ref=f1e2773] [cursor=pointer]
+            - generic "B4 · no zone yet" [ref=f1e2774] [cursor=pointer]
+            - generic "B5 · no zone yet" [ref=f1e2775] [cursor=pointer]
+            - generic "Tunnels · Bonegate · Lv 71-80" [ref=f1e2776] [cursor=pointer]
+            - generic "Sunken Vault · Bonegate · Lv 71-80" [ref=f1e2777] [cursor=pointer]
+            - generic "B8 · no zone yet" [ref=f1e2778] [cursor=pointer]
+            - generic "B9 · no zone yet" [ref=f1e2779] [cursor=pointer]
+            - generic "Silt Deeps · Blackwater Reach · Lv 61-70" [ref=f1e2780] [cursor=pointer]
+            - generic "Blackwater Reach · Blackwater Reach · Lv 61-70" [ref=f1e2781] [cursor=pointer]
+            - generic "Drowned Stair · Blackwater Reach · Lv 61-70" [ref=f1e2782] [cursor=pointer]
+            - generic "B13 · no zone yet" [ref=f1e2783] [cursor=pointer]
+            - generic "B14 · no zone yet" [ref=f1e2784] [cursor=pointer]
+            - generic "B15 · no zone yet" [ref=f1e2785] [cursor=pointer]
+            - generic "Thornwake 2 · Thornwake · Lv 171-180" [ref=f1e2786] [cursor=pointer]
+            - generic "Thornwake · Thornwake · Lv 171-180" [ref=f1e2787] [cursor=pointer]
+            - generic "Thornwake 3 · Thornwake · Lv 171-180" [ref=f1e2788] [cursor=pointer]
+            - generic "B19 · no zone yet" [ref=f1e2789] [cursor=pointer]
+            - generic "B20 · no zone yet" [ref=f1e2790] [cursor=pointer]
+            - generic "C1 · no zone yet" [ref=f1e2791] [cursor=pointer]
+            - generic "C2 · no zone yet" [ref=f1e2792] [cursor=pointer]
+            - generic "C3 · no zone yet" [ref=f1e2793] [cursor=pointer]
+            - generic "C4 · no zone yet" [ref=f1e2794] [cursor=pointer]
+            - generic "C5 · no zone yet" [ref=f1e2795] [cursor=pointer]
+            - generic "Bonegate Dungeon · Bonegate · Lv 71-80" [ref=f1e2796] [cursor=pointer]
+            - generic "Bonegate · Bonegate · Lv 71-80" [ref=f1e2797] [cursor=pointer]
+            - generic "Bonegate 2 · Bonegate · Lv 71-80" [ref=f1e2798] [cursor=pointer]
+            - generic "C9 · no zone yet" [ref=f1e2799] [cursor=pointer]
+            - generic "C10 · no zone yet" [ref=f1e2800] [cursor=pointer]
+            - generic "Blackwater Reach 3 · Blackwater Reach · Lv 61-70" [ref=f1e2801] [cursor=pointer]
+            - generic "Flooded Abyss · Blackwater Reach · Lv 61-70" [ref=f1e2802] [cursor=pointer]
+            - generic "C13 · no zone yet" [ref=f1e2803] [cursor=pointer]
+            - generic "C14 · no zone yet" [ref=f1e2804] [cursor=pointer]
+            - generic "Blight Field · Duskmoor · Lv 101-110" [ref=f1e2805] [cursor=pointer]
+            - generic "Duskmoor Dungeon · Duskmoor · Lv 101-110" [ref=f1e2806] [cursor=pointer]
+            - generic "Rime Bog · Thornwake · Lv 171-180" [ref=f1e2807] [cursor=pointer]
+            - generic "Frozen Fen · Thornwake · Lv 171-180" [ref=f1e2808] [cursor=pointer]
+            - generic "C19 · no zone yet" [ref=f1e2809] [cursor=pointer]
+            - generic "C20 · no zone yet" [ref=f1e2810] [cursor=pointer]
+            - generic "D1 · no zone yet" [ref=f1e2811] [cursor=pointer]
+            - generic "D2 · no zone yet" [ref=f1e2812] [cursor=pointer]
+            - generic "D3 · no zone yet" [ref=f1e2813] [cursor=pointer]
+            - generic "D4 · no zone yet" [ref=f1e2814] [cursor=pointer]
+            - generic "D5 · no zone yet" [ref=f1e2815] [cursor=pointer]
+            - generic "Deep Warrens · Bonegate · Lv 71-80" [ref=f1e2816] [cursor=pointer]
+            - generic "Bonegate 3 · Bonegate · Lv 71-80" [ref=f1e2817] [cursor=pointer]
+            - generic "D8 · no zone yet" [ref=f1e2818] [cursor=pointer]
+            - generic "Mountain Slopes · Highspire · Lv 11-20" [ref=f1e2819] [cursor=pointer]
+            - generic "Cliff Holds · Highspire · Lv 11-20" [ref=f1e2820] [cursor=pointer]
+            - generic "D11 · no zone yet" [ref=f1e2821] [cursor=pointer]
+            - generic "D12 · no zone yet" [ref=f1e2822] [cursor=pointer]
+            - generic "D13 · no zone yet" [ref=f1e2823] [cursor=pointer]
+            - generic "Rift Scar · Duskmoor · Lv 101-110" [ref=f1e2824] [cursor=pointer]
+            - generic "Duskmoor · Duskmoor · Lv 101-110" [ref=f1e2825] [cursor=pointer]
+            - generic "Duskmoor 2 · Duskmoor · Lv 101-110" [ref=f1e2826] [cursor=pointer]
+            - generic "Emberhold Dungeon · Emberhold · Lv 121-130" [ref=f1e2827] [cursor=pointer]
+            - generic "Noble Quarter · Emberhold · Lv 121-130" [ref=f1e2828] [cursor=pointer]
+            - generic "D19 · no zone yet" [ref=f1e2829] [cursor=pointer]
+            - generic "D20 · no zone yet" [ref=f1e2830] [cursor=pointer]
+            - generic "E1 · no zone yet" [ref=f1e2831] [cursor=pointer]
+            - generic "Fog Thicket · Millbrook · Lv 131-140" [ref=f1e2832] [cursor=pointer]
+            - generic "Spider Hollow · Millbrook · Lv 131-140" [ref=f1e2833] [cursor=pointer]
+            - generic "E4 · no zone yet" [ref=f1e2834] [cursor=pointer]
+            - generic "E5 · no zone yet" [ref=f1e2835] [cursor=pointer]
+            - generic "E6 · no zone yet" [ref=f1e2836] [cursor=pointer]
+            - generic "E7 · no zone yet" [ref=f1e2837] [cursor=pointer]
+            - generic "E8 · no zone yet" [ref=f1e2838] [cursor=pointer]
+            - generic "Highspire Dungeon · Highspire · Lv 11-20" [ref=f1e2839] [cursor=pointer]
+            - generic "Highspire · Highspire · Lv 11-20" [ref=f1e2840] [cursor=pointer]
+            - generic "Dragon Peak · Highspire · Lv 11-20" [ref=f1e2841] [cursor=pointer]
+            - generic "E12 · no zone yet" [ref=f1e2842] [cursor=pointer]
+            - generic "Burial Gallery · Saltmarrow · Lv 41-50" [ref=f1e2843] [cursor=pointer]
+            - generic "Saltmarrow Dungeon · Saltmarrow · Lv 41-50" [ref=f1e2844] [cursor=pointer]
+            - generic "Howling Waste · Duskmoor · Lv 101-110" [ref=f1e2845] [cursor=pointer]
+            - generic "Duskmoor 3 · Duskmoor · Lv 101-110" [ref=f1e2846] [cursor=pointer]
+            - generic "Fallen Gate · Emberhold · Lv 121-130" [ref=f1e2847] [cursor=pointer]
+            - generic "Emberhold · Emberhold · Lv 121-130" [ref=f1e2848] [cursor=pointer]
+            - generic "Market Ruins · Emberhold · Lv 121-130" [ref=f1e2849] [cursor=pointer]
+            - generic "E20 · no zone yet" [ref=f1e2850] [cursor=pointer]
+            - generic "Millbrook Dungeon · Millbrook · Lv 131-140" [ref=f1e2851] [cursor=pointer]
+            - generic "Millbrook · Millbrook · Lv 131-140" [ref=f1e2852] [cursor=pointer]
+            - generic "Millbrook 2 · Millbrook · Lv 131-140" [ref=f1e2853] [cursor=pointer]
+            - generic "F4 · no zone yet" [ref=f1e2854] [cursor=pointer]
+            - generic "F5 · no zone yet" [ref=f1e2855] [cursor=pointer]
+            - generic "F6 · no zone yet" [ref=f1e2856] [cursor=pointer]
+            - generic "Poison Fen · Wolf Cross · Lv 21-30" [ref=f1e2857] [cursor=pointer]
+            - generic "Wolf Cross Dungeon · Wolf Cross · Lv 21-30" [ref=f1e2858] [cursor=pointer]
+            - generic "Highspire 2 · Highspire · Lv 11-20" [ref=f1e2859] [cursor=pointer]
+            - generic "Highspire 3 · Highspire · Lv 11-20" [ref=f1e2860] [cursor=pointer]
+            - generic "F11 · no zone yet" [ref=f1e2861] [cursor=pointer]
+            - generic "Saltmarrow 2 · Saltmarrow · Lv 41-50" [ref=f1e2862] [cursor=pointer]
+            - generic "Saltmarrow · Saltmarrow · Lv 41-50" [ref=f1e2863] [cursor=pointer]
+            - generic "Saltmarrow 3 · Saltmarrow · Lv 41-50" [ref=f1e2864] [cursor=pointer]
+            - generic "F15 · no zone yet" [ref=f1e2865] [cursor=pointer]
+            - generic "F16 · no zone yet" [ref=f1e2866] [cursor=pointer]
+            - generic "Emberhold 2 · Emberhold · Lv 121-130" [ref=f1e2867] [cursor=pointer]
+            - generic "Emberhold 3 · Emberhold · Lv 121-130" [ref=f1e2868] [cursor=pointer]
+            - generic "F19 · no zone yet" [ref=f1e2869] [cursor=pointer]
+            - generic "F20 · no zone yet" [ref=f1e2870] [cursor=pointer]
+            - generic "G1 · no zone yet" [ref=f1e2871] [cursor=pointer]
+            - generic "Dark Grove · Millbrook · Lv 131-140" [ref=f1e2872] [cursor=pointer]
+            - generic "Millbrook 3 · Millbrook · Lv 131-140" [ref=f1e2873] [cursor=pointer]
+            - generic "G4 · no zone yet" [ref=f1e2874] [cursor=pointer]
+            - generic "G5 · no zone yet" [ref=f1e2875] [cursor=pointer]
+            - generic "G6 · no zone yet" [ref=f1e2876] [cursor=pointer]
+            - generic "Mud Flats · Wolf Cross · Lv 21-30" [ref=f1e2877] [cursor=pointer]
+            - generic "Wolf Cross · Wolf Cross · Lv 21-30" [ref=f1e2878] [cursor=pointer]
+            - generic "Wolf Cross 2 · Wolf Cross · Lv 21-30" [ref=f1e2879] [cursor=pointer]
+            - generic "Eastgate Dungeon · Eastgate · Lv 1-10" [ref=f1e2880] [cursor=pointer]
+            - generic "Eastgate 2 · Eastgate · Lv 1-10" [ref=f1e2881] [cursor=pointer]
+            - generic "G12 · no zone yet" [ref=f1e2882] [cursor=pointer]
+            - generic "Inner Sanctum · Saltmarrow · Lv 41-50" [ref=f1e2883] [cursor=pointer]
+            - generic "Outer Court · Saltmarrow · Lv 41-50" [ref=f1e2884] [cursor=pointer]
+            - generic "Outer Colonnade · The Pale Spire · Lv 51-60" [ref=f1e2885] [cursor=pointer]
+            - generic "The Pale Spire Dungeon · The Pale Spire · Lv 51-60" [ref=f1e2886] [cursor=pointer]
+            - generic "G17 · no zone yet" [ref=f1e2887] [cursor=pointer]
+            - generic "G18 · no zone yet" [ref=f1e2888] [cursor=pointer]
+            - generic "G19 · no zone yet" [ref=f1e2889] [cursor=pointer]
+            - generic "G20 · no zone yet" [ref=f1e2890] [cursor=pointer]
+            - generic "Sunken Reef · Wyrmback · Lv 141-150" [ref=f1e2891] [cursor=pointer]
+            - generic "Wyrmback Dungeon · Wyrmback · Lv 141-150" [ref=f1e2892] [cursor=pointer]
+            - generic "H3 · no zone yet" [ref=f1e2893] [cursor=pointer]
+            - generic "H4 · no zone yet" [ref=f1e2894] [cursor=pointer]
+            - generic "H5 · no zone yet" [ref=f1e2895] [cursor=pointer]
+            - generic "H6 · no zone yet" [ref=f1e2896] [cursor=pointer]
+            - generic "Wolf Cross 3 · Wolf Cross · Lv 21-30" [ref=f1e2897] [cursor=pointer]
+            - generic "Murky Swamp · Wolf Cross · Lv 21-30" [ref=f1e2898] [cursor=pointer]
+            - generic "Eastgate 3 · Eastgate · Lv 1-10" [ref=f1e2899] [cursor=pointer]
+            - generic "Eastgate · Eastgate · Lv 1-10" [ref=f1e2900] [cursor=pointer]
+            - generic "Open Grassland · Eastgate · Lv 1-10" [ref=f1e2901] [cursor=pointer]
+            - generic "H12 · no zone yet" [ref=f1e2902] [cursor=pointer]
+            - generic "H13 · no zone yet" [ref=f1e2903] [cursor=pointer]
+            - generic "Hall of Wardens · The Pale Spire · Lv 51-60" [ref=f1e2904] [cursor=pointer]
+            - generic "The Pale Spire · The Pale Spire · Lv 51-60" [ref=f1e2905] [cursor=pointer]
+            - generic "Sanctum Depths · The Pale Spire · Lv 51-60" [ref=f1e2906] [cursor=pointer]
+            - generic "H17 · no zone yet" [ref=f1e2907] [cursor=pointer]
+            - generic "H18 · no zone yet" [ref=f1e2908] [cursor=pointer]
+            - generic "H19 · no zone yet" [ref=f1e2909] [cursor=pointer]
+            - generic "H20 · no zone yet" [ref=f1e2910] [cursor=pointer]
+            - generic "Tideflats · Wyrmback · Lv 141-150" [ref=f1e2911] [cursor=pointer]
+            - generic "Wyrmback · Wyrmback · Lv 141-150" [ref=f1e2912] [cursor=pointer]
+            - generic "Wyrmback 2 · Wyrmback · Lv 141-150" [ref=f1e2913] [cursor=pointer]
+            - generic "Nettlecrag Dungeon · Nettlecrag · Lv 111-120" [ref=f1e2914] [cursor=pointer]
+            - generic "Bone Stair · Nettlecrag · Lv 111-120" [ref=f1e2915] [cursor=pointer]
+            - generic "I6 · no zone yet" [ref=f1e2916] [cursor=pointer]
+            - generic "I7 · no zone yet" [ref=f1e2917] [cursor=pointer]
+            - generic "I8 · no zone yet" [ref=f1e2918] [cursor=pointer]
+            - generic "I9 · no zone yet" [ref=f1e2919] [cursor=pointer]
+            - generic "Raider Camp · Eastgate · Lv 1-10" [ref=f1e2920] [cursor=pointer]
+            - generic "Village Outskirts · Eastgate · Lv 1-10" [ref=f1e2921] [cursor=pointer]
+            - generic "I12 · no zone yet" [ref=f1e2922] [cursor=pointer]
+            - generic "Sunken Tombs · Greyfen · Lv 31-40" [ref=f1e2923] [cursor=pointer]
+            - generic "Greyfen Dungeon · Greyfen · Lv 31-40" [ref=f1e2924] [cursor=pointer]
+            - generic "The Pale Spire 2 · The Pale Spire · Lv 51-60" [ref=f1e2925] [cursor=pointer]
+            - generic "The Pale Spire 3 · The Pale Spire · Lv 51-60" [ref=f1e2926] [cursor=pointer]
+            - generic "I17 · no zone yet" [ref=f1e2927] [cursor=pointer]
+            - generic "I18 · no zone yet" [ref=f1e2928] [cursor=pointer]
+            - generic "I19 · no zone yet" [ref=f1e2929] [cursor=pointer]
+            - generic "I20 · no zone yet" [ref=f1e2930] [cursor=pointer]
+            - generic "Wyrmback 3 · Wyrmback · Lv 141-150" [ref=f1e2931] [cursor=pointer]
+            - generic "Salt Cliffs · Wyrmback · Lv 141-150" [ref=f1e2932] [cursor=pointer]
+            - generic "Throne Abyss · Nettlecrag · Lv 111-120" [ref=f1e2933] [cursor=pointer]
+            - generic "Nettlecrag · Nettlecrag · Lv 111-120" [ref=f1e2934] [cursor=pointer]
+            - generic "Nettlecrag 2 · Nettlecrag · Lv 111-120" [ref=f1e2935] [cursor=pointer]
+            - generic "J6 · no zone yet" [ref=f1e2936] [cursor=pointer]
+            - generic "J7 · no zone yet" [ref=f1e2937] [cursor=pointer]
+            - generic "J8 · no zone yet" [ref=f1e2938] [cursor=pointer]
+            - generic "J9 · no zone yet" [ref=f1e2939] [cursor=pointer]
+            - generic "J10 · no zone yet" [ref=f1e2940] [cursor=pointer]
+            - generic "J11 · no zone yet" [ref=f1e2941] [cursor=pointer]
+            - generic "Dune Sea · Greyfen · Lv 31-40" [ref=f1e2942] [cursor=pointer]
+            - generic "Greyfen · Greyfen · Lv 31-40" [ref=f1e2943] [cursor=pointer]
+            - generic "Scorch Mesa · Greyfen · Lv 31-40" [ref=f1e2944] [cursor=pointer]
+            - generic "J15 · no zone yet" [ref=f1e2945] [cursor=pointer]
+            - generic "J16 · no zone yet" [ref=f1e2946] [cursor=pointer]
+            - generic "J17 · no zone yet" [ref=f1e2947] [cursor=pointer]
+            - generic "J18 · no zone yet" [ref=f1e2948] [cursor=pointer]
+            - generic "J19 · no zone yet" [ref=f1e2949] [cursor=pointer]
+            - generic "J20 · no zone yet" [ref=f1e2950] [cursor=pointer]
+            - generic "K1 · no zone yet" [ref=f1e2951] [cursor=pointer]
+            - generic "Stormbreak Grove · Ironrow · Lv 161-170" [ref=f1e2952] [cursor=pointer]
+            - generic "Thunder Glade · Ironrow · Lv 161-170" [ref=f1e2953] [cursor=pointer]
+            - generic "Molten Deeps · Nettlecrag · Lv 111-120" [ref=f1e2954] [cursor=pointer]
+            - generic "Nettlecrag 3 · Nettlecrag · Lv 111-120" [ref=f1e2955] [cursor=pointer]
+            - generic "K6 · no zone yet" [ref=f1e2956] [cursor=pointer]
+            - generic "K7 · no zone yet" [ref=f1e2957] [cursor=pointer]
+            - generic "K8 · no zone yet" [ref=f1e2958] [cursor=pointer]
+            - generic "K9 · no zone yet" [ref=f1e2959] [cursor=pointer]
+            - generic "K10 · no zone yet" [ref=f1e2960] [cursor=pointer]
+            - generic "K11 · no zone yet" [ref=f1e2961] [cursor=pointer]
+            - generic "K12 · no zone yet" [ref=f1e2962] [cursor=pointer]
+            - generic "Greyfen 2 · Greyfen · Lv 31-40" [ref=f1e2963] [cursor=pointer]
+            - generic "Greyfen 3 · Greyfen · Lv 31-40" [ref=f1e2964] [cursor=pointer]
+            - generic "K15 · no zone yet" [ref=f1e2965] [cursor=pointer]
+            - generic "K16 · no zone yet" [ref=f1e2966] [cursor=pointer]
+            - generic "K17 · no zone yet" [ref=f1e2967] [cursor=pointer]
+            - generic "Elder Rootway · Ashfall · Lv 151-160" [ref=f1e2968] [cursor=pointer]
+            - generic "Ashfall Dungeon · Ashfall · Lv 151-160" [ref=f1e2969] [cursor=pointer]
+            - generic "K20 · no zone yet" [ref=f1e2970] [cursor=pointer]
+            - generic "Ironrow Dungeon · Ironrow · Lv 161-170" [ref=f1e2971] [cursor=pointer]
+            - generic "Ironrow · Ironrow · Lv 161-170" [ref=f1e2972] [cursor=pointer]
+            - generic "Charged Rootway · Ironrow · Lv 161-170" [ref=f1e2973] [cursor=pointer]
+            - generic "L4 · no zone yet" [ref=f1e2974] [cursor=pointer]
+            - generic "L5 · no zone yet" [ref=f1e2975] [cursor=pointer]
+            - generic "Ash Fields · Frosthold · Lv 81-90" [ref=f1e2976] [cursor=pointer]
+            - generic "Caldera · Frosthold · Lv 81-90" [ref=f1e2977] [cursor=pointer]
+            - generic "L8 · no zone yet" [ref=f1e2978] [cursor=pointer]
+            - generic "L9 · no zone yet" [ref=f1e2979] [cursor=pointer]
+            - generic "L10 · no zone yet" [ref=f1e2980] [cursor=pointer]
+            - generic "L11 · no zone yet" [ref=f1e2981] [cursor=pointer]
+            - generic "L12 · no zone yet" [ref=f1e2982] [cursor=pointer]
+            - generic "L13 · no zone yet" [ref=f1e2983] [cursor=pointer]
+            - generic "L14 · no zone yet" [ref=f1e2984] [cursor=pointer]
+            - generic "L15 · no zone yet" [ref=f1e2985] [cursor=pointer]
+            - generic "L16 · no zone yet" [ref=f1e2986] [cursor=pointer]
+            - generic "Glimmer Grove · Ashfall · Lv 151-160" [ref=f1e2987] [cursor=pointer]
+            - generic "Ashfall · Ashfall · Lv 151-160" [ref=f1e2988] [cursor=pointer]
+            - generic "Moonlit Glade · Ashfall · Lv 151-160" [ref=f1e2989] [cursor=pointer]
+            - generic "L20 · no zone yet" [ref=f1e2990] [cursor=pointer]
+            - generic "M1 · no zone yet" [ref=f1e2991] [cursor=pointer]
+            - generic "Ironrow 2 · Ironrow · Lv 161-170" [ref=f1e2992] [cursor=pointer]
+            - generic "Ironrow 3 · Ironrow · Lv 161-170" [ref=f1e2993] [cursor=pointer]
+            - generic "M4 · no zone yet" [ref=f1e2994] [cursor=pointer]
+            - generic "M5 · no zone yet" [ref=f1e2995] [cursor=pointer]
+            - generic "Frosthold Dungeon · Frosthold · Lv 81-90" [ref=f1e2996] [cursor=pointer]
+            - generic "Frosthold · Frosthold · Lv 81-90" [ref=f1e2997] [cursor=pointer]
+            - generic "Slag Pit · Frosthold · Lv 81-90" [ref=f1e2998] [cursor=pointer]
+            - generic "M9 · no zone yet" [ref=f1e2999] [cursor=pointer]
+            - generic "M10 · no zone yet" [ref=f1e3000] [cursor=pointer]
+            - generic "M11 · no zone yet" [ref=f1e3001] [cursor=pointer]
+            - generic "Vermolch Dungeon · Vermolch · Lv 91-100" [ref=f1e3002] [cursor=pointer]
+            - generic "Vermolch 2 · Vermolch · Lv 91-100" [ref=f1e3003] [cursor=pointer]
+            - generic "M14 · no zone yet" [ref=f1e3004] [cursor=pointer]
+            - generic "M15 · no zone yet" [ref=f1e3005] [cursor=pointer]
+            - generic "M16 · no zone yet" [ref=f1e3006] [cursor=pointer]
+            - generic "M17 · no zone yet" [ref=f1e3007] [cursor=pointer]
+            - generic "Ashfall 2 · Ashfall · Lv 151-160" [ref=f1e3008] [cursor=pointer]
+            - generic "Ashfall 3 · Ashfall · Lv 151-160" [ref=f1e3009] [cursor=pointer]
+            - generic "M20 · no zone yet" [ref=f1e3010] [cursor=pointer]
+            - generic "N1 · no zone yet" [ref=f1e3011] [cursor=pointer]
+            - generic "N2 · no zone yet" [ref=f1e3012] [cursor=pointer]
+            - generic "N3 · no zone yet" [ref=f1e3013] [cursor=pointer]
+            - generic "N4 · no zone yet" [ref=f1e3014] [cursor=pointer]
+            - generic "N5 · no zone yet" [ref=f1e3015] [cursor=pointer]
+            - generic "Frosthold 2 · Frosthold · Lv 81-90" [ref=f1e3016] [cursor=pointer]
+            - generic "Frosthold 3 · Frosthold · Lv 81-90" [ref=f1e3017] [cursor=pointer]
+            - generic "N8 · no zone yet" [ref=f1e3018] [cursor=pointer]
+            - generic "N9 · no zone yet" [ref=f1e3019] [cursor=pointer]
+            - generic "N10 · no zone yet" [ref=f1e3020] [cursor=pointer]
+            - generic "Vermolch 3 · Vermolch · Lv 91-100" [ref=f1e3021] [cursor=pointer]
+            - generic "Vermolch · Vermolch · Lv 91-100" [ref=f1e3022] [cursor=pointer]
+            - generic "Rime Hollow · Vermolch · Lv 91-100" [ref=f1e3023] [cursor=pointer]
+            - generic "N14 · no zone yet" [ref=f1e3024] [cursor=pointer]
+            - generic "N15 · no zone yet" [ref=f1e3025] [cursor=pointer]
+            - generic "N16 · no zone yet" [ref=f1e3026] [cursor=pointer]
+            - generic "N17 · no zone yet" [ref=f1e3027] [cursor=pointer]
+            - generic "N18 · no zone yet" [ref=f1e3028] [cursor=pointer]
+            - generic "N19 · no zone yet" [ref=f1e3029] [cursor=pointer]
+            - generic "N20 · no zone yet" [ref=f1e3030] [cursor=pointer]
+            - generic "O1 · no zone yet" [ref=f1e3031] [cursor=pointer]
+            - generic "O2 · no zone yet" [ref=f1e3032] [cursor=pointer]
+            - generic "O3 · no zone yet" [ref=f1e3033] [cursor=pointer]
+            - generic "O4 · no zone yet" [ref=f1e3034] [cursor=pointer]
+            - generic "O5 · no zone yet" [ref=f1e3035] [cursor=pointer]
+            - generic "O6 · no zone yet" [ref=f1e3036] [cursor=pointer]
+            - generic "O7 · no zone yet" [ref=f1e3037] [cursor=pointer]
+            - generic "O8 · no zone yet" [ref=f1e3038] [cursor=pointer]
+            - generic "O9 · no zone yet" [ref=f1e3039] [cursor=pointer]
+            - generic "O10 · no zone yet" [ref=f1e3040] [cursor=pointer]
+            - generic "O11 · no zone yet" [ref=f1e3041] [cursor=pointer]
+            - generic "Glacier Shelf · Vermolch · Lv 91-100" [ref=f1e3042] [cursor=pointer]
+            - generic "Snowfield · Vermolch · Lv 91-100" [ref=f1e3043] [cursor=pointer]
+            - generic "O14 · no zone yet" [ref=f1e3044] [cursor=pointer]
+            - generic "O15 · no zone yet" [ref=f1e3045] [cursor=pointer]
+            - generic "O16 · no zone yet" [ref=f1e3046] [cursor=pointer]
+            - generic "O17 · no zone yet" [ref=f1e3047] [cursor=pointer]
+            - generic "O18 · no zone yet" [ref=f1e3048] [cursor=pointer]
+            - generic "O19 · no zone yet" [ref=f1e3049] [cursor=pointer]
+            - generic "O20 · no zone yet" [ref=f1e3050] [cursor=pointer]
+          - generic [ref=f1e3051]:
+            - generic "Eastgate Castle"
+            - generic "Highspire Keep"
+            - generic "The Pale Spire"
+            - generic "Wolf Moor"
+            - generic "Bonegate Ruins"
+          - generic [ref=f1e3052]:
+            - generic: Eastgate Vale
+            - generic: Ashfall Wood
+            - generic: Wolfmoor
+            - generic: Highspire Peaks
+            - generic: Frosthold Snows
+            - generic: Greyfen Waste
+            - generic: Emberhold Ruins
+            - generic: Nettlecrag Deeps
+            - generic: Wyrmback Shore
+            - generic: The Pale Sanctum
+          - generic [ref=f1e3053]:
+            - generic [ref=f1e3054] [cursor=pointer]: Eastgate
+            - generic [ref=f1e3056] [cursor=pointer]: Millbrook
+            - generic [ref=f1e3058] [cursor=pointer]: Thornwake
+            - generic [ref=f1e3060] [cursor=pointer]: Ironrow
+            - generic [ref=f1e3062] [cursor=pointer]: Ashfall
+            - generic [ref=f1e3064] [cursor=pointer]: Wolf Cross
+            - generic [ref=f1e3066] [cursor=pointer]: Highspire
+            - generic [ref=f1e3068] [cursor=pointer]: Wyrmback
+            - generic [ref=f1e3070] [cursor=pointer]: Saltmarrow
+            - generic [ref=f1e3072] [cursor=pointer]: Frosthold
+            - generic [ref=f1e3074] [cursor=pointer]: Greyfen
+            - generic [ref=f1e3076] [cursor=pointer]: Nettlecrag
+            - generic [ref=f1e3078] [cursor=pointer]: Vermolch
+            - generic [ref=f1e3080] [cursor=pointer]: Bonegate
+            - generic [ref=f1e3082] [cursor=pointer]: Blackwater Reach
+            - generic [ref=f1e3084] [cursor=pointer]: Duskmoor
+            - generic [ref=f1e3086] [cursor=pointer]: The Pale Spire
+            - generic [ref=f1e3088] [cursor=pointer]: Emberhold
+            - generic [ref=f1e3090]:
+              - generic: Open
+              - generic: Grassland
+              - generic: Lv 1-10
+            - generic [ref=f1e3091]:
+              - generic: Village
+              - generic: Outskirts
+              - generic: Lv 1-10
+            - generic [ref=f1e3092]:
+              - generic: Raider Camp
+              - generic: Lv 1-10
+            - generic [ref=f1e3093]:
+              - generic: Eastgate
+              - generic: Dungeon
+              - generic: Lv 1-10
+            - generic [ref=f1e3094]:
+              - generic: Eastgate 2
+              - generic: Lv 1-10
+            - generic [ref=f1e3095]:
+              - generic: Eastgate 3
+              - generic: Lv 1-10
+            - generic [ref=f1e3096]:
+              - generic: Fog Thicket
+              - generic: Lv 131-140
+            - generic [ref=f1e3097]:
+              - generic: Dark Grove
+              - generic: Lv 131-140
+            - generic [ref=f1e3098]:
+              - generic: Spider
+              - generic: Hollow
+              - generic: Lv 131-140
+            - generic [ref=f1e3099]:
+              - generic: Millbrook
+              - generic: Dungeon
+              - generic: Lv 131-140
+            - generic [ref=f1e3100]:
+              - generic: Millbrook 2
+              - generic: Lv 131-140
+            - generic [ref=f1e3101]:
+              - generic: Millbrook 3
+              - generic: Lv 131-140
+            - generic [ref=f1e3102]:
+              - generic: Frozen Fen
+              - generic: Lv 171-180
+            - generic [ref=f1e3103]:
+              - generic: Icebreak
+              - generic: Shelf
+              - generic: Lv 171-180
+            - generic [ref=f1e3104]:
+              - generic: Rime Bog
+              - generic: Lv 171-180
+            - generic [ref=f1e3105]:
+              - generic: Thornwake
+              - generic: Dungeon
+              - generic: Lv 171-180
+            - generic [ref=f1e3106]:
+              - generic: Thornwake 2
+              - generic: Lv 171-180
+            - generic [ref=f1e3107]:
+              - generic: Thornwake 3
+              - generic: Lv 171-180
+            - generic [ref=f1e3108]:
+              - generic: Stormbreak
+              - generic: Grove
+              - generic: Lv 161-170
+            - generic [ref=f1e3109]:
+              - generic: Charged
+              - generic: Rootway
+              - generic: Lv 161-170
+            - generic [ref=f1e3110]:
+              - generic: Thunder
+              - generic: Glade
+              - generic: Lv 161-170
+            - generic [ref=f1e3111]:
+              - generic: Ironrow
+              - generic: Dungeon
+              - generic: Lv 161-170
+            - generic [ref=f1e3112]:
+              - generic: Ironrow 2
+              - generic: Lv 161-170
+            - generic [ref=f1e3113]:
+              - generic: Ironrow 3
+              - generic: Lv 161-170
+            - generic [ref=f1e3114]:
+              - generic: Glimmer
+              - generic: Grove
+              - generic: Lv 151-160
+            - generic [ref=f1e3115]:
+              - generic: Elder
+              - generic: Rootway
+              - generic: Lv 151-160
+            - generic [ref=f1e3116]:
+              - generic: Moonlit
+              - generic: Glade
+              - generic: Lv 151-160
+            - generic [ref=f1e3117]:
+              - generic: Ashfall
+              - generic: Dungeon
+              - generic: Lv 151-160
+            - generic [ref=f1e3118]:
+              - generic: Ashfall 2
+              - generic: Lv 151-160
+            - generic [ref=f1e3119]:
+              - generic: Ashfall 3
+              - generic: Lv 151-160
+            - generic [ref=f1e3120]:
+              - generic: Murky Swamp
+              - generic: Lv 21-30
+            - generic [ref=f1e3121]:
+              - generic: Mud Flats
+              - generic: Lv 21-30
+            - generic [ref=f1e3122]:
+              - generic: Poison Fen
+              - generic: Lv 21-30
+            - generic [ref=f1e3123]:
+              - generic: Wolf Cross
+              - generic: Dungeon
+              - generic: Lv 21-30
+            - generic [ref=f1e3124]:
+              - generic: Wolf Cross 2
+              - generic: Lv 21-30
+            - generic [ref=f1e3125]:
+              - generic: Wolf Cross 3
+              - generic: Lv 21-30
+            - generic [ref=f1e3126]:
+              - generic: Mountain
+              - generic: Slopes
+              - generic: Lv 11-20
+            - generic [ref=f1e3127]:
+              - generic: Cliff Holds
+              - generic: Lv 11-20
+            - generic [ref=f1e3128]:
+              - generic: Dragon Peak
+              - generic: Lv 11-20
+            - generic [ref=f1e3129]:
+              - generic: Highspire
+              - generic: Dungeon
+              - generic: Lv 11-20
+            - generic [ref=f1e3130]:
+              - generic: Highspire 2
+              - generic: Lv 11-20
+            - generic [ref=f1e3131]:
+              - generic: Highspire 3
+              - generic: Lv 11-20
+            - generic [ref=f1e3132]:
+              - generic: Tideflats
+              - generic: Lv 141-150
+            - generic [ref=f1e3133]:
+              - generic: Salt Cliffs
+              - generic: Lv 141-150
+            - generic [ref=f1e3134]:
+              - generic: Sunken Reef
+              - generic: Lv 141-150
+            - generic [ref=f1e3135]:
+              - generic: Wyrmback
+              - generic: Dungeon
+              - generic: Lv 141-150
+            - generic [ref=f1e3136]:
+              - generic: Wyrmback 2
+              - generic: Lv 141-150
+            - generic [ref=f1e3137]:
+              - generic: Wyrmback 3
+              - generic: Lv 141-150
+            - generic [ref=f1e3138]:
+              - generic: Outer Court
+              - generic: Lv 41-50
+            - generic [ref=f1e3139]:
+              - generic: Burial
+              - generic: Gallery
+              - generic: Lv 41-50
+            - generic [ref=f1e3140]:
+              - generic: Inner
+              - generic: Sanctum
+              - generic: Lv 41-50
+            - generic [ref=f1e3141]:
+              - generic: Saltmarrow
+              - generic: Dungeon
+              - generic: Lv 41-50
+            - generic [ref=f1e3142]:
+              - generic: Saltmarrow 2
+              - generic: Lv 41-50
+            - generic [ref=f1e3143]:
+              - generic: Saltmarrow 3
+              - generic: Lv 41-50
+            - generic [ref=f1e3144]:
+              - generic: Ash Fields
+              - generic: Lv 81-90
+            - generic [ref=f1e3145]:
+              - generic: Slag Pit
+              - generic: Lv 81-90
+            - generic [ref=f1e3146]:
+              - generic: Caldera
+              - generic: Lv 81-90
+            - generic [ref=f1e3147]:
+              - generic: Frosthold
+              - generic: Dungeon
+              - generic: Lv 81-90
+            - generic [ref=f1e3148]:
+              - generic: Frosthold 2
+              - generic: Lv 81-90
+            - generic [ref=f1e3149]:
+              - generic: Frosthold 3
+              - generic: Lv 81-90
+            - generic [ref=f1e3150]:
+              - generic: Dune Sea
+              - generic: Lv 31-40
+            - generic [ref=f1e3151]:
+              - generic: Sunken Tombs
+              - generic: Lv 31-40
+            - generic [ref=f1e3152]:
+              - generic: Scorch Mesa
+              - generic: Lv 31-40
+            - generic [ref=f1e3153]:
+              - generic: Greyfen
+              - generic: Dungeon
+              - generic: Lv 31-40
+            - generic [ref=f1e3154]:
+              - generic: Greyfen 2
+              - generic: Lv 31-40
+            - generic [ref=f1e3155]:
+              - generic: Greyfen 3
+              - generic: Lv 31-40
+            - generic [ref=f1e3156]:
+              - generic: Bone Stair
+              - generic: Lv 111-120
+            - generic [ref=f1e3157]:
+              - generic: Molten Deeps
+              - generic: Lv 111-120
+            - generic [ref=f1e3158]:
+              - generic: Throne Abyss
+              - generic: Lv 111-120
+            - generic [ref=f1e3159]:
+              - generic: Nettlecrag
+              - generic: Dungeon
+              - generic: Lv 111-120
+            - generic [ref=f1e3160]:
+              - generic: Nettlecrag 2
+              - generic: Lv 111-120
+            - generic [ref=f1e3161]:
+              - generic: Nettlecrag 3
+              - generic: Lv 111-120
+            - generic [ref=f1e3162]:
+              - generic: Snowfield
+              - generic: Lv 91-100
+            - generic [ref=f1e3163]:
+              - generic: Glacier
+              - generic: Shelf
+              - generic: Lv 91-100
+            - generic [ref=f1e3164]:
+              - generic: Rime Hollow
+              - generic: Lv 91-100
+            - generic [ref=f1e3165]:
+              - generic: Vermolch
+              - generic: Dungeon
+              - generic: Lv 91-100
+            - generic [ref=f1e3166]:
+              - generic: Vermolch 2
+              - generic: Lv 91-100
+            - generic [ref=f1e3167]:
+              - generic: Vermolch 3
+              - generic: Lv 91-100
+            - generic [ref=f1e3168]:
+              - generic: Tunnels
+              - generic: Lv 71-80
+            - generic [ref=f1e3169]:
+              - generic: Deep Warrens
+              - generic: Lv 71-80
+            - generic [ref=f1e3170]:
+              - generic: Sunken Vault
+              - generic: Lv 71-80
+            - generic [ref=f1e3171]:
+              - generic: Bonegate
+              - generic: Dungeon
+              - generic: Lv 71-80
+            - generic [ref=f1e3172]:
+              - generic: Bonegate 2
+              - generic: Lv 71-80
+            - generic [ref=f1e3173]:
+              - generic: Bonegate 3
+              - generic: Lv 71-80
+            - generic [ref=f1e3174]:
+              - generic: Drowned
+              - generic: Stair
+              - generic: Lv 61-70
+            - generic [ref=f1e3175]:
+              - generic: Silt Deeps
+              - generic: Lv 61-70
+            - generic [ref=f1e3176]:
+              - generic: Flooded
+              - generic: Abyss
+              - generic: Lv 61-70
+            - generic [ref=f1e3177]:
+              - generic: Blackwater
+              - generic: Reach
+              - generic: Dungeon
+              - generic: Lv 61-70
+            - generic [ref=f1e3178]:
+              - generic: Blackwater
+              - generic: Reach 2
+              - generic: Lv 61-70
+            - generic [ref=f1e3179]:
+              - generic: Blackwater
+              - generic: Reach 3
+              - generic: Lv 61-70
+            - generic [ref=f1e3180]:
+              - generic: Blight Field
+              - generic: Lv 101-110
+            - generic [ref=f1e3181]:
+              - generic: Howling
+              - generic: Waste
+              - generic: Lv 101-110
+            - generic [ref=f1e3182]:
+              - generic: Rift Scar
+              - generic: Lv 101-110
+            - generic [ref=f1e3183]:
+              - generic: Duskmoor
+              - generic: Dungeon
+              - generic: Lv 101-110
+            - generic [ref=f1e3184]:
+              - generic: Duskmoor 2
+              - generic: Lv 101-110
+            - generic [ref=f1e3185]:
+              - generic: Duskmoor 3
+              - generic: Lv 101-110
+            - generic [ref=f1e3186]:
+              - generic: Outer
+              - generic: Colonnade
+              - generic: Lv 51-60
+            - generic [ref=f1e3187]:
+              - generic: Hall of
+              - generic: Wardens
+              - generic: Lv 51-60
+            - generic [ref=f1e3188]:
+              - generic: Sanctum
+              - generic: Depths
+              - generic: Lv 51-60
+            - generic [ref=f1e3189]:
+              - generic: The Pale
+              - generic: Spire
+              - generic: Dungeon
+              - generic: Lv 51-60
+            - generic [ref=f1e3190]:
+              - generic: The Pale
+              - generic: Spire 2
+              - generic: Lv 51-60
+            - generic [ref=f1e3191]:
+              - generic: The Pale
+              - generic: Spire 3
+              - generic: Lv 51-60
+            - generic [ref=f1e3192]:
+              - generic: Fallen Gate
+              - generic: Lv 121-130
+            - generic [ref=f1e3193]:
+              - generic: Market Ruins
+              - generic: Lv 121-130
+            - generic [ref=f1e3194]:
+              - generic: Noble
+              - generic: Quarter
+              - generic: Lv 121-130
+            - generic [ref=f1e3195]:
+              - generic: Emberhold
+              - generic: Dungeon
+              - generic: Lv 121-130
+            - generic [ref=f1e3196]:
+              - generic: Emberhold 2
+              - generic: Lv 121-130
+            - generic [ref=f1e3197]:
+              - generic: Emberhold 3
+              - generic: Lv 121-130
+      - generic:
+        - generic [ref=f1e3199]:
+          - button "Open the map" [ref=f1e3200] [cursor=pointer]:
+            - generic [aria-hidden]: "N"
+            - generic [aria-hidden]: 0,0
+          - button "Show map tools and guide" [ref=f1e3523] [cursor=pointer]
+        - generic [ref=f1e3526]:
+          - text: Eastgate
+          - generic [ref=f1e3527]: Lv 1–10
+      - generic [ref=f1e3528]:
+        - generic [ref=f1e3529]:
+          - generic [ref=f1e3530]:
+            - generic [ref=f1e3531]:
+              - generic [ref=f1e3532]:
+                - strong [ref=f1e3533]: "580"
+                - text: /580 HP
+              - generic [ref=f1e3534]:
+                - strong [ref=f1e3535]: "108"
+                - text: /108 ES
+            - img "HP 580 of 580, ES 108 of 108" [ref=f1e3536]
+          - list "Skill bar" [ref=f1e3539]:
+            - 'listitem "Slot 1: empty" [ref=f1e3540]':
+              - generic [ref=f1e3541]: "1"
+            - 'listitem "Slot 2: empty" [ref=f1e3542]':
+              - generic [ref=f1e3543]: "2"
+            - 'listitem "Slot 3: empty" [ref=f1e3544]':
+              - generic [ref=f1e3545]: "3"
+            - 'listitem "Slot 4: empty" [ref=f1e3546]':
+              - generic [ref=f1e3547]: "4"
+            - 'listitem "Slot 5: empty" [ref=f1e3548]':
+              - generic [ref=f1e3549]: "5"
+            - 'listitem "Slot 6: empty" [ref=f1e3550]':
+              - generic [ref=f1e3551]: "6"
+            - 'listitem "Slot 7: empty" [ref=f1e3552]':
+              - generic [ref=f1e3553]: "7"
+            - 'listitem "Slot 8: empty" [ref=f1e3554]':
+              - generic [ref=f1e3555]: "8"
+            - 'listitem "Slot 9: empty" [ref=f1e3556]':
+              - generic [ref=f1e3557]: "9"
+            - 'listitem "Slot 10: empty" [ref=f1e3558]':
+              - generic [ref=f1e3559]: "10"
+            - 'listitem "Slot 11: empty" [ref=f1e3560]':
+              - generic [ref=f1e3561]: "11"
+            - 'listitem "Slot 12: empty" [ref=f1e3562]':
+              - generic [ref=f1e3563]: "12"
+            - 'listitem "Slot 13: empty" [ref=f1e3564]':
+              - generic [ref=f1e3565]: "13"
+            - 'listitem "Slot 14: empty" [ref=f1e3566]':
+              - generic [ref=f1e3567]: "14"
+            - 'listitem "Slot 15: empty" [ref=f1e3568]':
+              - generic [ref=f1e3569]: "15"
+            - button "Skill settings" [ref=f1e3570] [cursor=pointer]
+          - generic [ref=f1e3572]:
+            - generic [ref=f1e3574]:
+              - strong [ref=f1e3575]: "148"
+              - text: /148 Mana
+            - img "Mana 148 of 148" [ref=f1e3576]
+        - group "Level 1, experience 0.0 percent":
+          - button "Allocate stat points · level 1" [ref=f1e3579] [cursor=pointer]: Lv 1
+          - generic: 0.0%
+      - group "Game controls" [ref=f1e3580]:
+        - button "Back to the fight" [ref=f1e3581] [cursor=pointer]
+        - generic "Gold in the purse" [ref=f1e3583]:
+          - generic [ref=f1e3584]: "0"
+          - generic [ref=f1e3585]: gold
+        - group "Game speed" [ref=f1e3586]:
+          - button "×1" [pressed] [ref=f1e3587] [cursor=pointer]
+          - button "×2" [ref=f1e3588] [cursor=pointer]
+          - button "×4" [ref=f1e3589] [cursor=pointer]
+        - button "Pause" [ref=f1e3590] [cursor=pointer]
+        - button "New character" [ref=f1e3591] [cursor=pointer]
+      - group "Field quick actions":
+        - button "Stay in this zone" [pressed] [ref=f1e3592] [cursor=pointer]
+        - button "Climb forward automatically" [ref=f1e3594] [cursor=pointer]
+        - button "Auto skills on" [pressed] [ref=f1e3596] [cursor=pointer]
+        - button "Auto equip the best gear in your bag" [ref=f1e3598] [cursor=pointer]
+        - button "Hide field quick actions" [expanded] [ref=f1e3600] [cursor=pointer]
+      - generic:
+        - log:
+          - tablist "The chronicle" [ref=f1e3602]:
+            - tab "all" [selected] [ref=f1e3603] [cursor=pointer]
+            - tab "combat" [ref=f1e3604] [cursor=pointer]
+            - tab "loot" [ref=f1e3605] [cursor=pointer]
+            - tab "system" [ref=f1e3606] [cursor=pointer]
+      - status [ref=f1e3607]
+      - navigation "Menu" [ref=f1e3608]:
+        - button "Back to the field" [ref=f1e3609] [cursor=pointer]:
+          - generic [ref=f1e3611]: Field
+        - button "map" [ref=f1e3612] [cursor=pointer]
+        - button "bags" [ref=f1e3615] [cursor=pointer]
+        - button "skills" [ref=f1e3618] [cursor=pointer]
+        - button "Character sheet" [ref=f1e3621] [cursor=pointer]:
+          - generic [ref=f1e3623]: Sheet
+        - button "craft" [ref=f1e3624] [cursor=pointer]
+        - button "More" [ref=f1e3627] [cursor=pointer]
+    - dialog [active] [ref=f1e3659]:
+      - banner [ref=f1e3660]:
+        - heading "HUD Layout Studio" [level=2] [ref=f1e3661]
+        - paragraph [ref=f1e3662]: Drag regions, set cell bounds, then apply
+        - button "Close HUD Layout Studio" [ref=f1e3663] [cursor=pointer]: ✕
+      - generic [ref=f1e3665]:
+        - complementary "Layout components" [ref=f1e3666]:
+          - tablist "Layout layer" [ref=f1e3667]:
+            - tab "HUD" [selected] [ref=f1e3668] [cursor=pointer]
+            - tab "Modal" [ref=f1e3669] [cursor=pointer]
+          - heading "Components" [level=3] [ref=f1e3670]
+          - generic [ref=f1e3671]:
+            - button "Minimap & objectives" [ref=f1e3672] [cursor=pointer]
+            - button "Target bar" [ref=f1e3675] [cursor=pointer]
+            - button "Menu rail" [ref=f1e3678] [cursor=pointer]
+            - button "Combat field" [ref=f1e3681] [cursor=pointer]
+            - button "Field panels" [ref=f1e3684] [cursor=pointer]
+            - button "Radial wheel" [ref=f1e3687] [cursor=pointer]
+            - button "Chronicle" [ref=f1e3690] [cursor=pointer]
+            - button "Vitals, skills & EXP" [ref=f1e3693] [cursor=pointer]
+            - button "Game controls" [ref=f1e3696] [cursor=pointer]
+          - generic [ref=f1e3699]:
+            - button "Reset layer" [ref=f1e3700] [cursor=pointer]
+            - button "Export JSON" [ref=f1e3701] [cursor=pointer]
+        - region "15 by 15 layout canvas" [ref=f1e3702]:
+          - generic [ref=f1e3703]:
+            - heading "HUD grid · 15×15" [level=3] [ref=f1e3704]
+            - generic [ref=f1e3705]: Drag a component, or select it then click a cell.
+          - grid "Layout cells" [ref=f1e3706]:
+            - gridcell "A1 · Minimap & objectives" [ref=f1e3707] [cursor=pointer]:
+              - generic [ref=f1e3708]: A1
+            - gridcell "A2 · Minimap & objectives" [ref=f1e3709] [cursor=pointer]:
+              - generic [ref=f1e3710]: A2
+            - gridcell "A3" [ref=f1e3711] [cursor=pointer]
+            - gridcell "A4" [ref=f1e3713] [cursor=pointer]
+            - gridcell "A5" [ref=f1e3715] [cursor=pointer]
+            - gridcell "A6 · Target bar" [ref=f1e3717] [cursor=pointer]:
+              - generic [ref=f1e3718]: A6
+            - gridcell "A7 · Target bar" [ref=f1e3719] [cursor=pointer]:
+              - generic [ref=f1e3720]: A7
+            - gridcell "A8 · Target bar" [ref=f1e3721] [cursor=pointer]:
+              - generic [ref=f1e3722]: A8
+            - gridcell "A9 · Target bar" [ref=f1e3723] [cursor=pointer]:
+              - generic [ref=f1e3724]: A9
+            - gridcell "A10 · Target bar" [ref=f1e3725] [cursor=pointer]:
+              - generic [ref=f1e3726]: A10
+            - gridcell "A11" [ref=f1e3727] [cursor=pointer]
+            - gridcell "A12 · Menu rail" [ref=f1e3729] [cursor=pointer]:
+              - generic [ref=f1e3730]: A12
+            - gridcell "A13 · Menu rail" [ref=f1e3731] [cursor=pointer]:
+              - generic [ref=f1e3732]: A13
+            - gridcell "A14 · Menu rail" [ref=f1e3733] [cursor=pointer]:
+              - generic [ref=f1e3734]: A14
+            - gridcell "A15 · Menu rail" [ref=f1e3735] [cursor=pointer]:
+              - generic [ref=f1e3736]: A15
+            - gridcell "B1 · Minimap & objectives" [ref=f1e3737] [cursor=pointer]:
+              - generic [ref=f1e3738]: B1
+            - gridcell "B2 · Minimap & objectives" [ref=f1e3739] [cursor=pointer]:
+              - generic [ref=f1e3740]: B2
+            - gridcell "B3" [ref=f1e3741] [cursor=pointer]
+            - gridcell "B4" [ref=f1e3743] [cursor=pointer]
+            - gridcell "B5" [ref=f1e3745] [cursor=pointer]
+            - gridcell "B6 · Target bar" [ref=f1e3747] [cursor=pointer]:
+              - generic [ref=f1e3748]: B6
+            - gridcell "B7 · Target bar" [ref=f1e3749] [cursor=pointer]:
+              - generic [ref=f1e3750]: B7
+            - gridcell "B8 · Target bar" [ref=f1e3751] [cursor=pointer]:
+              - generic [ref=f1e3752]: B8
+            - gridcell "B9 · Target bar" [ref=f1e3753] [cursor=pointer]:
+              - generic [ref=f1e3754]: B9
+            - gridcell "B10 · Target bar" [ref=f1e3755] [cursor=pointer]:
+              - generic [ref=f1e3756]: B10
+            - gridcell "B11" [ref=f1e3757] [cursor=pointer]
+            - gridcell "B12" [ref=f1e3759] [cursor=pointer]
+            - gridcell "B13 · Field panels" [ref=f1e3761] [cursor=pointer]:
+              - generic [ref=f1e3762]: B13
+            - gridcell "B14 · Field panels" [ref=f1e3763] [cursor=pointer]:
+              - generic [ref=f1e3764]: B14
+            - gridcell "B15 · Field panels" [ref=f1e3765] [cursor=pointer]:
+              - generic [ref=f1e3766]: B15
+            - gridcell "C1 · Minimap & objectives" [ref=f1e3767] [cursor=pointer]:
+              - generic [ref=f1e3768]: C1
+            - gridcell "C2 · Minimap & objectives" [ref=f1e3769] [cursor=pointer]:
+              - generic [ref=f1e3770]: C2
+            - gridcell "C3" [ref=f1e3771] [cursor=pointer]
+            - gridcell "C4 · Combat field" [ref=f1e3773] [cursor=pointer]:
+              - generic [ref=f1e3774]: C4
+            - gridcell "C5 · Combat field" [ref=f1e3775] [cursor=pointer]:
+              - generic [ref=f1e3776]: C5
+            - gridcell "C6 · Combat field" [ref=f1e3777] [cursor=pointer]:
+              - generic [ref=f1e3778]: C6
+            - gridcell "C7 · Combat field" [ref=f1e3779] [cursor=pointer]:
+              - generic [ref=f1e3780]: C7
+            - gridcell "C8 · Combat field" [ref=f1e3781] [cursor=pointer]:
+              - generic [ref=f1e3782]: C8
+            - gridcell "C9 · Combat field" [ref=f1e3783] [cursor=pointer]:
+              - generic [ref=f1e3784]: C9
+            - gridcell "C10 · Combat field" [ref=f1e3785] [cursor=pointer]:
+              - generic [ref=f1e3786]: C10
+            - gridcell "C11 · Combat field" [ref=f1e3787] [cursor=pointer]:
+              - generic [ref=f1e3788]: C11
+            - gridcell "C12 · Combat field" [ref=f1e3789] [cursor=pointer]:
+              - generic [ref=f1e3790]: C12
+            - gridcell "C13 · Field panels" [ref=f1e3791] [cursor=pointer]:
+              - generic [ref=f1e3792]: C13
+            - gridcell "C14 · Field panels" [ref=f1e3793] [cursor=pointer]:
+              - generic [ref=f1e3794]: C14
+            - gridcell "C15 · Field panels" [ref=f1e3795] [cursor=pointer]:
+              - generic [ref=f1e3796]: C15
+            - gridcell "D1 · Minimap & objectives" [ref=f1e3797] [cursor=pointer]:
+              - generic [ref=f1e3798]: D1
+            - gridcell "D2 · Minimap & objectives" [ref=f1e3799] [cursor=pointer]:
+              - generic [ref=f1e3800]: D2
+            - gridcell "D3" [ref=f1e3801] [cursor=pointer]
+            - gridcell "D4 · Combat field" [ref=f1e3803] [cursor=pointer]:
+              - generic [ref=f1e3804]: D4
+            - gridcell "D5 · Combat field" [ref=f1e3805] [cursor=pointer]:
+              - generic [ref=f1e3806]: D5
+            - gridcell "D6 · Combat field" [ref=f1e3807] [cursor=pointer]:
+              - generic [ref=f1e3808]: D6
+            - gridcell "D7 · Combat field" [ref=f1e3809] [cursor=pointer]:
+              - generic [ref=f1e3810]: D7
+            - gridcell "D8 · Combat field" [ref=f1e3811] [cursor=pointer]:
+              - generic [ref=f1e3812]: D8
+            - gridcell "D9 · Combat field" [ref=f1e3813] [cursor=pointer]:
+              - generic [ref=f1e3814]: D9
+            - gridcell "D10 · Combat field" [ref=f1e3815] [cursor=pointer]:
+              - generic [ref=f1e3816]: D10
+            - gridcell "D11 · Combat field" [ref=f1e3817] [cursor=pointer]:
+              - generic [ref=f1e3818]: D11
+            - gridcell "D12 · Combat field" [ref=f1e3819] [cursor=pointer]:
+              - generic [ref=f1e3820]: D12
+            - gridcell "D13 · Field panels" [ref=f1e3821] [cursor=pointer]:
+              - generic [ref=f1e3822]: D13
+            - gridcell "D14 · Field panels" [ref=f1e3823] [cursor=pointer]:
+              - generic [ref=f1e3824]: D14
+            - gridcell "D15 · Field panels" [ref=f1e3825] [cursor=pointer]:
+              - generic [ref=f1e3826]: D15
+            - gridcell "E1 · Minimap & objectives" [ref=f1e3827] [cursor=pointer]:
+              - generic [ref=f1e3828]: E1
+            - gridcell "E2 · Minimap & objectives" [ref=f1e3829] [cursor=pointer]:
+              - generic [ref=f1e3830]: E2
+            - gridcell "E3" [ref=f1e3831] [cursor=pointer]
+            - gridcell "E4 · Combat field" [ref=f1e3833] [cursor=pointer]:
+              - generic [ref=f1e3834]: E4
+            - gridcell "E5 · Combat field" [ref=f1e3835] [cursor=pointer]:
+              - generic [ref=f1e3836]: E5
+            - gridcell "E6 · Combat field" [ref=f1e3837] [cursor=pointer]:
+              - generic [ref=f1e3838]: E6
+            - gridcell "E7 · Combat field" [ref=f1e3839] [cursor=pointer]:
+              - generic [ref=f1e3840]: E7
+            - gridcell "E8 · Combat field" [ref=f1e3841] [cursor=pointer]:
+              - generic [ref=f1e3842]: E8
+            - gridcell "E9 · Combat field" [ref=f1e3843] [cursor=pointer]:
+              - generic [ref=f1e3844]: E9
+            - gridcell "E10 · Combat field" [ref=f1e3845] [cursor=pointer]:
+              - generic [ref=f1e3846]: E10
+            - gridcell "E11 · Combat field" [ref=f1e3847] [cursor=pointer]:
+              - generic [ref=f1e3848]: E11
+            - gridcell "E12 · Combat field" [ref=f1e3849] [cursor=pointer]:
+              - generic [ref=f1e3850]: E12
+            - gridcell "E13 · Field panels" [ref=f1e3851] [cursor=pointer]:
+              - generic [ref=f1e3852]: E13
+            - gridcell "E14 · Field panels" [ref=f1e3853] [cursor=pointer]:
+              - generic [ref=f1e3854]: E14
+            - gridcell "E15 · Field panels" [ref=f1e3855] [cursor=pointer]:
+              - generic [ref=f1e3856]: E15
+            - gridcell "F1" [ref=f1e3857] [cursor=pointer]
+            - gridcell "F2" [ref=f1e3859] [cursor=pointer]
+            - gridcell "F3" [ref=f1e3861] [cursor=pointer]
+            - gridcell "F4 · Combat field" [ref=f1e3863] [cursor=pointer]:
+              - generic [ref=f1e3864]: F4
+            - gridcell "F5 · Combat field" [ref=f1e3865] [cursor=pointer]:
+              - generic [ref=f1e3866]: F5
+            - gridcell "F6 · Combat field" [ref=f1e3867] [cursor=pointer]:
+              - generic [ref=f1e3868]: F6
+            - gridcell "F7 · Combat field" [ref=f1e3869] [cursor=pointer]:
+              - generic [ref=f1e3870]: F7
+            - gridcell "F8 · Combat field" [ref=f1e3871] [cursor=pointer]:
+              - generic [ref=f1e3872]: F8
+            - gridcell "F9 · Combat field" [ref=f1e3873] [cursor=pointer]:
+              - generic [ref=f1e3874]: F9
+            - gridcell "F10 · Combat field" [ref=f1e3875] [cursor=pointer]:
+              - generic [ref=f1e3876]: F10
+            - gridcell "F11 · Combat field" [ref=f1e3877] [cursor=pointer]:
+              - generic [ref=f1e3878]: F11
+            - gridcell "F12 · Combat field" [ref=f1e3879] [cursor=pointer]:
+              - generic [ref=f1e3880]: F12
+            - gridcell "F13 · Field panels" [ref=f1e3881] [cursor=pointer]:
+              - generic [ref=f1e3882]: F13
+            - gridcell "F14 · Field panels" [ref=f1e3883] [cursor=pointer]:
+              - generic [ref=f1e3884]: F14
+            - gridcell "F15 · Field panels" [ref=f1e3885] [cursor=pointer]:
+              - generic [ref=f1e3886]: F15
+            - gridcell "G1" [ref=f1e3887] [cursor=pointer]
+            - gridcell "G2" [ref=f1e3889] [cursor=pointer]
+            - gridcell "G3" [ref=f1e3891] [cursor=pointer]
+            - gridcell "G4 · Combat field" [ref=f1e3893] [cursor=pointer]:
+              - generic [ref=f1e3894]: G4
+            - gridcell "G5 · Combat field" [ref=f1e3895] [cursor=pointer]:
+              - generic [ref=f1e3896]: G5
+            - gridcell "G6 · Combat field" [ref=f1e3897] [cursor=pointer]:
+              - generic [ref=f1e3898]: G6
+            - gridcell "G7 · Combat field" [ref=f1e3899] [cursor=pointer]:
+              - generic [ref=f1e3900]: G7
+            - gridcell "G8 · Combat field" [ref=f1e3901] [cursor=pointer]:
+              - generic [ref=f1e3902]: G8
+            - gridcell "G9 · Combat field" [ref=f1e3903] [cursor=pointer]:
+              - generic [ref=f1e3904]: G9
+            - gridcell "G10 · Combat field" [ref=f1e3905] [cursor=pointer]:
+              - generic [ref=f1e3906]: G10
+            - gridcell "G11 · Combat field" [ref=f1e3907] [cursor=pointer]:
+              - generic [ref=f1e3908]: G11
+            - gridcell "G12 · Combat field" [ref=f1e3909] [cursor=pointer]:
+              - generic [ref=f1e3910]: G12
+            - gridcell "G13" [ref=f1e3911] [cursor=pointer]
+            - gridcell "G14" [ref=f1e3913] [cursor=pointer]
+            - gridcell "G15" [ref=f1e3915] [cursor=pointer]
+            - gridcell "H1" [ref=f1e3917] [cursor=pointer]
+            - gridcell "H2" [ref=f1e3919] [cursor=pointer]
+            - gridcell "H3" [ref=f1e3921] [cursor=pointer]
+            - gridcell "H4 · Combat field" [ref=f1e3923] [cursor=pointer]:
+              - generic [ref=f1e3924]: H4
+            - gridcell "H5 · Combat field" [ref=f1e3925] [cursor=pointer]:
+              - generic [ref=f1e3926]: H5
+            - gridcell "H6 · Combat field" [ref=f1e3927] [cursor=pointer]:
+              - generic [ref=f1e3928]: H6
+            - gridcell "H7 · Combat field" [ref=f1e3929] [cursor=pointer]:
+              - generic [ref=f1e3930]: H7
+            - gridcell "H8 · Combat field" [ref=f1e3931] [cursor=pointer]:
+              - generic [ref=f1e3932]: H8
+            - gridcell "H9 · Combat field" [ref=f1e3933] [cursor=pointer]:
+              - generic [ref=f1e3934]: H9
+            - gridcell "H10 · Combat field" [ref=f1e3935] [cursor=pointer]:
+              - generic [ref=f1e3936]: H10
+            - gridcell "H11 · Combat field" [ref=f1e3937] [cursor=pointer]:
+              - generic [ref=f1e3938]: H11
+            - gridcell "H12 · Combat field" [ref=f1e3939] [cursor=pointer]:
+              - generic [ref=f1e3940]: H12
+            - gridcell "H13" [ref=f1e3941] [cursor=pointer]
+            - gridcell "H14" [ref=f1e3943] [cursor=pointer]
+            - gridcell "H15" [ref=f1e3945] [cursor=pointer]
+            - gridcell "I1" [ref=f1e3947] [cursor=pointer]
+            - gridcell "I2" [ref=f1e3949] [cursor=pointer]
+            - gridcell "I3" [ref=f1e3951] [cursor=pointer]
+            - gridcell "I4 · Combat field" [ref=f1e3953] [cursor=pointer]:
+              - generic [ref=f1e3954]: I4
+            - gridcell "I5 · Combat field" [ref=f1e3955] [cursor=pointer]:
+              - generic [ref=f1e3956]: I5
+            - gridcell "I6 · Combat field" [ref=f1e3957] [cursor=pointer]:
+              - generic [ref=f1e3958]: I6
+            - gridcell "I7 · Combat field" [ref=f1e3959] [cursor=pointer]:
+              - generic [ref=f1e3960]: I7
+            - gridcell "I8 · Combat field" [ref=f1e3961] [cursor=pointer]:
+              - generic [ref=f1e3962]: I8
+            - gridcell "I9 · Combat field" [ref=f1e3963] [cursor=pointer]:
+              - generic [ref=f1e3964]: I9
+            - gridcell "I10 · Combat field" [ref=f1e3965] [cursor=pointer]:
+              - generic [ref=f1e3966]: I10
+            - gridcell "I11 · Combat field" [ref=f1e3967] [cursor=pointer]:
+              - generic [ref=f1e3968]: I11
+            - gridcell "I12 · Combat field" [ref=f1e3969] [cursor=pointer]:
+              - generic [ref=f1e3970]: I12
+            - gridcell "I13" [ref=f1e3971] [cursor=pointer]
+            - gridcell "I14" [ref=f1e3973] [cursor=pointer]
+            - gridcell "I15" [ref=f1e3975] [cursor=pointer]
+            - gridcell "J1" [ref=f1e3977] [cursor=pointer]
+            - gridcell "J2" [ref=f1e3979] [cursor=pointer]
+            - gridcell "J3" [ref=f1e3981] [cursor=pointer]
+            - gridcell "J4 · Combat field" [ref=f1e3983] [cursor=pointer]:
+              - generic [ref=f1e3984]: J4
+            - gridcell "J5 · Combat field" [ref=f1e3985] [cursor=pointer]:
+              - generic [ref=f1e3986]: J5
+            - gridcell "J6 · Combat field" [ref=f1e3987] [cursor=pointer]:
+              - generic [ref=f1e3988]: J6
+            - gridcell "J7 · Combat field" [ref=f1e3989] [cursor=pointer]:
+              - generic [ref=f1e3990]: J7
+            - gridcell "J8 · Combat field" [ref=f1e3991] [cursor=pointer]:
+              - generic [ref=f1e3992]: J8
+            - gridcell "J9 · Combat field" [ref=f1e3993] [cursor=pointer]:
+              - generic [ref=f1e3994]: J9
+            - gridcell "J10 · Combat field" [ref=f1e3995] [cursor=pointer]:
+              - generic [ref=f1e3996]: J10
+            - gridcell "J11 · Combat field" [ref=f1e3997] [cursor=pointer]:
+              - generic [ref=f1e3998]: J11
+            - gridcell "J12 · Combat field" [ref=f1e3999] [cursor=pointer]:
+              - generic [ref=f1e4000]: J12
+            - gridcell "J13 · Radial wheel" [ref=f1e4001] [cursor=pointer]:
+              - generic [ref=f1e4002]: J13
+            - gridcell "J14 · Radial wheel" [ref=f1e4003] [cursor=pointer]:
+              - generic [ref=f1e4004]: J14
+            - gridcell "J15 · Radial wheel" [ref=f1e4005] [cursor=pointer]:
+              - generic [ref=f1e4006]: J15
+            - gridcell "K1 · Chronicle" [ref=f1e4007] [cursor=pointer]:
+              - generic [ref=f1e4008]: K1
+            - gridcell "K2 · Chronicle" [ref=f1e4009] [cursor=pointer]:
+              - generic [ref=f1e4010]: K2
+            - gridcell "K3" [ref=f1e4011] [cursor=pointer]
+            - gridcell "K4 · Combat field" [ref=f1e4013] [cursor=pointer]:
+              - generic [ref=f1e4014]: K4
+            - gridcell "K5 · Combat field" [ref=f1e4015] [cursor=pointer]:
+              - generic [ref=f1e4016]: K5
+            - gridcell "K6 · Combat field" [ref=f1e4017] [cursor=pointer]:
+              - generic [ref=f1e4018]: K6
+            - gridcell "K7 · Combat field" [ref=f1e4019] [cursor=pointer]:
+              - generic [ref=f1e4020]: K7
+            - gridcell "K8 · Combat field" [ref=f1e4021] [cursor=pointer]:
+              - generic [ref=f1e4022]: K8
+            - gridcell "K9 · Combat field" [ref=f1e4023] [cursor=pointer]:
+              - generic [ref=f1e4024]: K9
+            - gridcell "K10 · Combat field" [ref=f1e4025] [cursor=pointer]:
+              - generic [ref=f1e4026]: K10
+            - gridcell "K11 · Combat field" [ref=f1e4027] [cursor=pointer]:
+              - generic [ref=f1e4028]: K11
+            - gridcell "K12 · Combat field" [ref=f1e4029] [cursor=pointer]:
+              - generic [ref=f1e4030]: K12
+            - gridcell "K13 · Radial wheel" [ref=f1e4031] [cursor=pointer]:
+              - generic [ref=f1e4032]: K13
+            - gridcell "K14 · Radial wheel" [ref=f1e4033] [cursor=pointer]:
+              - generic [ref=f1e4034]: K14
+            - gridcell "K15 · Radial wheel" [ref=f1e4035] [cursor=pointer]:
+              - generic [ref=f1e4036]: K15
+            - gridcell "L1 · Chronicle" [ref=f1e4037] [cursor=pointer]:
+              - generic [ref=f1e4038]: L1
+            - gridcell "L2 · Chronicle" [ref=f1e4039] [cursor=pointer]:
+              - generic [ref=f1e4040]: L2
+            - gridcell "L3" [ref=f1e4041] [cursor=pointer]
+            - gridcell "L4" [ref=f1e4043] [cursor=pointer]
+            - gridcell "L5 · Vitals, skills & EXP" [ref=f1e4045] [cursor=pointer]:
+              - generic [ref=f1e4046]: L5
+            - gridcell "L6 · Vitals, skills & EXP" [ref=f1e4047] [cursor=pointer]:
+              - generic [ref=f1e4048]: L6
+            - gridcell "L7 · Vitals, skills & EXP" [ref=f1e4049] [cursor=pointer]:
+              - generic [ref=f1e4050]: L7
+            - gridcell "L8 · Vitals, skills & EXP" [ref=f1e4051] [cursor=pointer]:
+              - generic [ref=f1e4052]: L8
+            - gridcell "L9 · Vitals, skills & EXP" [ref=f1e4053] [cursor=pointer]:
+              - generic [ref=f1e4054]: L9
+            - gridcell "L10 · Vitals, skills & EXP" [ref=f1e4055] [cursor=pointer]:
+              - generic [ref=f1e4056]: L10
+            - gridcell "L11 · Vitals, skills & EXP" [ref=f1e4057] [cursor=pointer]:
+              - generic [ref=f1e4058]: L11
+            - gridcell "L12" [ref=f1e4059] [cursor=pointer]
+            - gridcell "L13 · Radial wheel" [ref=f1e4061] [cursor=pointer]:
+              - generic [ref=f1e4062]: L13
+            - gridcell "L14 · Radial wheel" [ref=f1e4063] [cursor=pointer]:
+              - generic [ref=f1e4064]: L14
+            - gridcell "L15 · Radial wheel" [ref=f1e4065] [cursor=pointer]:
+              - generic [ref=f1e4066]: L15
+            - gridcell "M1 · Chronicle" [ref=f1e4067] [cursor=pointer]:
+              - generic [ref=f1e4068]: M1
+            - gridcell "M2 · Chronicle" [ref=f1e4069] [cursor=pointer]:
+              - generic [ref=f1e4070]: M2
+            - gridcell "M3" [ref=f1e4071] [cursor=pointer]
+            - gridcell "M4" [ref=f1e4073] [cursor=pointer]
+            - gridcell "M5 · Vitals, skills & EXP" [ref=f1e4075] [cursor=pointer]:
+              - generic [ref=f1e4076]: M5
+            - gridcell "M6 · Vitals, skills & EXP" [ref=f1e4077] [cursor=pointer]:
+              - generic [ref=f1e4078]: M6
+            - gridcell "M7 · Vitals, skills & EXP" [ref=f1e4079] [cursor=pointer]:
+              - generic [ref=f1e4080]: M7
+            - gridcell "M8 · Vitals, skills & EXP" [ref=f1e4081] [cursor=pointer]:
+              - generic [ref=f1e4082]: M8
+            - gridcell "M9 · Vitals, skills & EXP" [ref=f1e4083] [cursor=pointer]:
+              - generic [ref=f1e4084]: M9
+            - gridcell "M10 · Vitals, skills & EXP" [ref=f1e4085] [cursor=pointer]:
+              - generic [ref=f1e4086]: M10
+            - gridcell "M11 · Vitals, skills & EXP" [ref=f1e4087] [cursor=pointer]:
+              - generic [ref=f1e4088]: M11
+            - gridcell "M12" [ref=f1e4089] [cursor=pointer]
+            - gridcell "M13 · Radial wheel" [ref=f1e4091] [cursor=pointer]:
+              - generic [ref=f1e4092]: M13
+            - gridcell "M14 · Radial wheel" [ref=f1e4093] [cursor=pointer]:
+              - generic [ref=f1e4094]: M14
+            - gridcell "M15 · Radial wheel" [ref=f1e4095] [cursor=pointer]:
+              - generic [ref=f1e4096]: M15
+            - gridcell "N1 · Chronicle" [ref=f1e4097] [cursor=pointer]:
+              - generic [ref=f1e4098]: N1
+            - gridcell "N2 · Chronicle" [ref=f1e4099] [cursor=pointer]:
+              - generic [ref=f1e4100]: N2
+            - gridcell "N3" [ref=f1e4101] [cursor=pointer]
+            - gridcell "N4" [ref=f1e4103] [cursor=pointer]
+            - gridcell "N5 · Vitals, skills & EXP" [ref=f1e4105] [cursor=pointer]:
+              - generic [ref=f1e4106]: N5
+            - gridcell "N6 · Vitals, skills & EXP" [ref=f1e4107] [cursor=pointer]:
+              - generic [ref=f1e4108]: N6
+            - gridcell "N7 · Vitals, skills & EXP" [ref=f1e4109] [cursor=pointer]:
+              - generic [ref=f1e4110]: N7
+            - gridcell "N8 · Vitals, skills & EXP" [ref=f1e4111] [cursor=pointer]:
+              - generic [ref=f1e4112]: N8
+            - gridcell "N9 · Vitals, skills & EXP" [ref=f1e4113] [cursor=pointer]:
+              - generic [ref=f1e4114]: N9
+            - gridcell "N10 · Vitals, skills & EXP" [ref=f1e4115] [cursor=pointer]:
+              - generic [ref=f1e4116]: N10
+            - gridcell "N11 · Vitals, skills & EXP" [ref=f1e4117] [cursor=pointer]:
+              - generic [ref=f1e4118]: N11
+            - gridcell "N12" [ref=f1e4119] [cursor=pointer]
+            - gridcell "N13 · Radial wheel" [ref=f1e4121] [cursor=pointer]:
+              - generic [ref=f1e4122]: N13
+            - gridcell "N14 · Radial wheel" [ref=f1e4123] [cursor=pointer]:
+              - generic [ref=f1e4124]: N14
+            - gridcell "N15 · Radial wheel" [ref=f1e4125] [cursor=pointer]:
+              - generic [ref=f1e4126]: N15
+            - gridcell "O1" [ref=f1e4127] [cursor=pointer]
+            - gridcell "O2" [ref=f1e4129] [cursor=pointer]
+            - gridcell "O3" [ref=f1e4131] [cursor=pointer]
+            - gridcell "O4" [ref=f1e4133] [cursor=pointer]
+            - gridcell "O5 · Vitals, skills & EXP" [ref=f1e4135] [cursor=pointer]:
+              - generic [ref=f1e4136]: O5
+            - gridcell "O6 · Vitals, skills & EXP" [ref=f1e4137] [cursor=pointer]:
+              - generic [ref=f1e4138]: O6
+            - gridcell "O7 · Vitals, skills & EXP" [ref=f1e4139] [cursor=pointer]:
+              - generic [ref=f1e4140]: O7
+            - gridcell "O8 · Vitals, skills & EXP" [ref=f1e4141] [cursor=pointer]:
+              - generic [ref=f1e4142]: O8
+            - gridcell "O9 · Vitals, skills & EXP" [ref=f1e4143] [cursor=pointer]:
+              - generic [ref=f1e4144]: O9
+            - gridcell "O10 · Vitals, skills & EXP" [ref=f1e4145] [cursor=pointer]:
+              - generic [ref=f1e4146]: O10
+            - gridcell "O11 · Vitals, skills & EXP" [ref=f1e4147] [cursor=pointer]:
+              - generic [ref=f1e4148]: O11
+            - gridcell "O12 · Game controls" [ref=f1e4149] [cursor=pointer]:
+              - generic [ref=f1e4150]: O12
+            - gridcell "O13 · Game controls" [ref=f1e4151] [cursor=pointer]:
+              - generic [ref=f1e4152]: O13
+            - gridcell "O14 · Game controls" [ref=f1e4153] [cursor=pointer]:
+              - generic [ref=f1e4154]: O14
+            - gridcell "O15 · Game controls" [ref=f1e4155] [cursor=pointer]:
+              - generic [ref=f1e4156]: O15
+            - generic: MAP
+            - generic: MOB
+            - generic: MENU
+            - generic: FIELD
+            - generic: PANELS
+            - generic: WHEEL
+            - generic: LOG
+            - generic: VITALS
+            - generic: CTRL
+        - complementary "Selected region" [ref=f1e4157]:
+          - heading "Minimap & objectives" [level=3] [ref=f1e4158]
+          - paragraph [ref=f1e4159]: Cell bounds use inclusive row and column coordinates.
+          - generic [ref=f1e4160]:
+            - generic [ref=f1e4161]:
+              - text: Row from
+              - combobox "Row from" [ref=f1e4162] [cursor=pointer]:
+                - option "1" [selected]
+                - option "2"
+                - option "3"
+                - option "4"
+                - option "5"
+                - option "6"
+                - option "7"
+                - option "8"
+                - option "9"
+                - option "10"
+                - option "11"
+                - option "12"
+                - option "13"
+                - option "14"
+                - option "15"
+            - generic [ref=f1e4163]:
+              - text: Row to
+              - combobox "Row to" [ref=f1e4164] [cursor=pointer]:
+                - option "1"
+                - option "2"
+                - option "3"
+                - option "4"
+                - option "5" [selected]
+                - option "6"
+                - option "7"
+                - option "8"
+                - option "9"
+                - option "10"
+                - option "11"
+                - option "12"
+                - option "13"
+                - option "14"
+                - option "15"
+            - generic [ref=f1e4165]:
+              - text: Column from
+              - combobox "Column from" [ref=f1e4166] [cursor=pointer]:
+                - option "1" [selected]
+                - option "2"
+                - option "3"
+                - option "4"
+                - option "5"
+                - option "6"
+                - option "7"
+                - option "8"
+                - option "9"
+                - option "10"
+                - option "11"
+                - option "12"
+                - option "13"
+                - option "14"
+                - option "15"
+            - generic [ref=f1e4167]:
+              - text: Column to
+              - combobox "Column to" [ref=f1e4168] [cursor=pointer]:
+                - option "1"
+                - option "2" [selected]
+                - option "3"
+                - option "4"
+                - option "5"
+                - option "6"
+                - option "7"
+                - option "8"
+                - option "9"
+                - option "10"
+                - option "11"
+                - option "12"
+                - option "13"
+                - option "14"
+                - option "15"
+          - generic [ref=f1e4169]:
+            - text: Horizontal alignment
+            - combobox "Horizontal alignment" [ref=f1e4170] [cursor=pointer]:
+              - option "Start" [selected]
+              - option "Center"
+              - option "End"
+              - option "Stretch"
+          - generic [ref=f1e4171]:
+            - text: Vertical alignment
+            - combobox "Vertical alignment" [ref=f1e4172] [cursor=pointer]:
+              - option "Start" [selected]
+              - option "Center"
+              - option "End"
+              - option "Stretch"
+          - button "Apply layout" [ref=f1e4173] [cursor=pointer]

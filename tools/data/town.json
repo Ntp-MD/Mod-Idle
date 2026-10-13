@@ -848,7 +848,7 @@
       "quality": "any",
       "reward": "banner + 1 saved filter preset slot",
       "pays_gold": false,
-      "rule": "pieces are consumed, so the sink runs before the filter ever dissolves them"
+      "rule": "only non-upgrades are reserved; the sink then runs before the filter dissolves them"
     },
     {
       "id": "reliquary",
@@ -863,7 +863,7 @@
       "quality": "any",
       "reward": "stash tab (bypasses the one-time price ladder, once per character)",
       "pays_gold": false,
-      "rule": "must be filter-rejected pieces, or the sink competes with keep decisions"
+      "rule": "only non-upgrades are reserved, so the sink does not compete with what the character wears"
     },
     {
       "id": "garden_of_ash",

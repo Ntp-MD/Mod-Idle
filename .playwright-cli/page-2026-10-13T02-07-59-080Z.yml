@@ -1,0 +1,106 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - link "Start here" [ref=e4] [cursor=pointer]:
+      - /url: "#index"
+    - link "Combat" [ref=e5] [cursor=pointer]:
+      - /url: "#combat"
+    - link "Skills" [ref=e6] [cursor=pointer]:
+      - /url: "#skills"
+    - link "Items" [ref=e7] [cursor=pointer]:
+      - /url: "#items"
+    - link "Weapons" [ref=e8] [cursor=pointer]:
+      - /url: "#weapons"
+    - link "Equipment" [ref=e9] [cursor=pointer]:
+      - /url: "#equipment"
+    - link "Stats & caps" [ref=e10] [cursor=pointer]:
+      - /url: "#stats"
+    - link "Survival" [ref=e11] [cursor=pointer]:
+      - /url: "#survival"
+    - link "Away & bag" [ref=e12] [cursor=pointer]:
+      - /url: "#idle"
+    - link "World" [ref=e13] [cursor=pointer]:
+      - /url: "#world"
+    - link "Travel" [ref=e14] [cursor=pointer]:
+      - /url: "#travel"
+    - link "Mob sheet" [ref=e15] [cursor=pointer]:
+      - /url: "#mobs"
+    - link "Towns" [ref=e16] [cursor=pointer]:
+      - /url: "#towns"
+    - link "Economy" [ref=e17] [cursor=pointer]:
+      - /url: "#economy"
+    - link "Crafting" [ref=e18] [cursor=pointer]:
+      - /url: "#crafting"
+    - link "Progression" [ref=e19] [cursor=pointer]:
+      - /url: "#progression"
+    - link "Builds" [ref=e20] [cursor=pointer]:
+      - /url: "#builds"
+    - link "Elements" [ref=e21] [cursor=pointer]:
+      - /url: "#elements"
+  - main [ref=e22]:
+    - heading "ModWorld — how to play" [level=1] [ref=e23]
+    - paragraph [ref=e24]: An open-world idle RPG. Your character fights while the window is open and while it is shut.
+    - generic [ref=e25]:
+      - heading "A run, in six steps" [level=2] [ref=e26]
+      - paragraph [ref=e27]: The whole game is one screen — the field — and the panels behind it.
+      - list [ref=e28]:
+        - listitem [ref=e29]:
+          - strong [ref=e30]: Pick a settlement
+          - text: ", then a zone attached to it."
+        - listitem [ref=e31]:
+          - strong [ref=e32]: Fight
+          - text: — the character attacks on the clock; skills fire on their own cooldowns and mana.
+        - listitem [ref=e33]:
+          - strong [ref=e34]: Loot
+          - text: — every mob pays XP, a chance at gear, crafting stones and junk.
+        - listitem [ref=e35]:
+          - strong [ref=e36]: Decide
+          - text: — equip the piece, or feed it to the crafting stones.
+        - listitem [ref=e37]:
+          - strong [ref=e38]: Craft
+          - text: "at a settlement: reroll a line, refine it, ascend the whole piece."
+        - listitem [ref=e39]:
+          - strong [ref=e40]: Climb
+          - text: "to the next zone. There is no death: a losing fight pushes you back to camp."
+    - generic [ref=e41]:
+      - heading "What is in the game" [level=2] [ref=e42]
+      - paragraph [ref=e43]: Read from the data, never typed here.
+      - table [ref=e44]:
+        - rowgroup [ref=e45]:
+          - row [ref=e46]:
+            - columnheader [ref=e47]
+            - columnheader "Count" [ref=e48]
+            - columnheader "What it is" [ref=e49]
+        - rowgroup [ref=e50]:
+          - row [ref=e51]:
+            - cell "Zones" [ref=e52]
+            - cell "18" [ref=e53]
+            - cell "each with its own level band, Element and group size" [ref=e54]
+          - row [ref=e55]:
+            - cell "Worn pieces" [ref=e56]
+            - cell "13" [ref=e57]
+            - cell "over 11 slot names — every slot has its own frames and Mod pools" [ref=e58]
+          - row [ref=e59]:
+            - cell "Skills" [ref=e60]
+            - cell "89" [ref=e61]
+            - cell "53 attack · 9 buff · 6 curse · 3 heal · 18 aura" [ref=e62]
+          - row [ref=e63]:
+            - cell "Mob species" [ref=e64]
+            - cell "22" [ref=e65]
+            - cell "each legal on one to three body classes" [ref=e66]
+          - row [ref=e67]:
+            - cell "Elements" [ref=e68]
+            - cell "6" [ref=e69]
+            - cell "fire · cold · lightning · poison · chaos · earth" [ref=e70]
+          - row [ref=e71]:
+            - cell "Settlements" [ref=e72]
+            - cell "18" [ref=e73]
+            - cell "shops, storage, tasks and crafting" [ref=e74]
+          - row [ref=e75]:
+            - cell "Dungeons" [ref=e76]
+            - cell "18" [ref=e77]
+            - cell "one per settlement — escrowed loot, forfeited on a Push" [ref=e78]
+          - row [ref=e79]:
+            - cell "Passive tree" [ref=e80]
+            - cell "64" [ref=e81]
+            - cell "3 branches · 1 point a rank" [ref=e82]
+    - paragraph [ref=e83]: Rendered from tools/data/*.json and engine/ — nothing here is typed by hand.

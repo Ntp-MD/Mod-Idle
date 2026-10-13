@@ -9,7 +9,7 @@ import type { Statuses } from './combat';
 export interface SkillState {
   /** Owned skills: id → duplicates poured into its own ladder. */
   owned: Record<string, number>;
-  /** The 15-slot active bar, cast top-down (attack · curse · heal). */
+  /** The 14-slot active bar, cast top-down (attack · curse · heal). */
   list: (string | null)[];
   /** Buffs and auras are a toggle track and take no slot. */
   buffs: Record<string, boolean>;
@@ -72,13 +72,23 @@ export function moveSlot(s: SkillState, from: number, to: number): void {
 /** The condition list a row carries, filled out to every leg so a caller never tests for a key. */
 export const condOf = (s: SkillState, id: string): SkillConditions => ({ ...NO_COND, ...(s.conditions?.[id] || {}) });
 
-export const ACTIVE_SLOTS = 15;
+export const ACTIVE_SLOTS = SKILLS.meta.active_slots;
 
 export function newSkillState(): SkillState {
   return {
     owned: {}, list: new Array(ACTIVE_SLOTS).fill(null), buffs: {}, auras: {}, xp: {}, cd: {}, buffUp: {},
     mode: {}, conditions: {},
   };
+}
+
+/** A first copy has count 0; property presence, not truthiness, means the skill is owned. */
+export const ownsSkill = (s: SkillState, id: string): boolean => Object.hasOwn(s.owned, id);
+
+/** Old or malformed saves must not keep effects whose skill is absent from the collection. */
+export function clearUnownedTracks(s: SkillState): void {
+  for (const track of [s.buffs, s.auras, s.buffUp]) {
+    for (const id of Object.keys(track)) if (!ownsSkill(s, id)) delete track[id];
+  }
 }
 
 export const modeOf = (s: SkillState, id: string): SkillMode => s.mode[id] || 'always';
@@ -149,7 +159,7 @@ export function skillCd(s: SkillState, id: string, cdrPct: number): number {
 export function reservedPct(s: SkillState): number {
   let total = 0;
   for (const [id, on] of Object.entries(s.auras)) {
-    if (!on) continue;
+    if (!on || !ownsSkill(s, id)) continue;
     total += sm.reservePct(sm.byId[id]?.reserve ?? '');
   }
   return total;
@@ -185,7 +195,7 @@ export function effectLine(skill: any): string {
 
 /** A buff whose row carries this mechanic word is currently on its clock. */
 export function buffRuleUp(sk: SkillState, rule: string): boolean {
-  return Object.entries(sk.buffUp).some(([id, left]) => left > 0 && hasRule(sm.byId[id], rule));
+  return Object.entries(sk.buffUp).some(([id, left]) => ownsSkill(sk, id) && left > 0 && hasRule(sm.byId[id], rule));
 }
 
 /**
@@ -195,7 +205,7 @@ export function buffRuleUp(sk: SkillState, rule: string): boolean {
 export function esAbsorbPct(sk: SkillState): number {
   const cap = E.skill_xp.level_cap;
   for (const [id, left] of Object.entries(sk.buffUp)) {
-    if (left <= 0) continue;
+    if (left <= 0 || !ownsSkill(sk, id)) continue;
     const row = sm.byId[id];
     const base = (row?.effects || []).find((e: any) => e.stat === 'es_absorb_pct');
     if (!base) continue;
@@ -213,6 +223,7 @@ export function esAbsorbPct(sk: SkillState): number {
 export function toggleTrack(s: SkillState, id: string): { ok: boolean; why?: string } {
   const skill = sm.byId[id];
   if (!skill) return { ok: false, why: 'not in the collection' };
+  if (!ownsSkill(s, id)) return { ok: false, why: 'skill not owned' };
   if (skill.type === 'aura') {
     const turning = !s.auras[id];
     if (turning) {
@@ -245,7 +256,7 @@ export interface TriggerAura { id: string; cdSec: number; manaMult: number; dama
 export function triggerAuras(s: SkillState): { crit: TriggerAura | null; taken: TriggerAura | null } {
   const out: { crit: TriggerAura | null; taken: TriggerAura | null } = { crit: null, taken: null };
   for (const k of sm.all() as any[]) {
-    if (k.type !== 'aura' || !s.auras[k.id]) continue;
+    if (k.type !== 'aura' || !s.auras[k.id] || !ownsSkill(s, k.id)) continue;
     const rules: string[] = k.rules || [];
     const event = rules.includes('cast_on_crit') ? 'crit' : rules.includes('cast_on_damage_taken') ? 'taken' : null;
     if (!event || out[event]) continue;
@@ -266,24 +277,26 @@ export function usableMana(c: Character, s: SkillState): number {
 }
 
 /**
- * What a row costs this character right now: the typed mana units, grown only by the row's own skill
- * level, so the bar shows the price this rotation actually charges. The pool sets no price.
+ * What a row costs this character right now: its typed flat Mana or current-HP units, grown only by
+ * the row's own skill level. Pool size decides whether the press is affordable, never its price.
  */
-export function manaNow(s: SkillState, id: string, aoe = false): string {
+export function costNow(s: SkillState, id: string, aoe = false): string {
   const skill = sm.byId[id];
-  if (sm.manaSpec(skill) == null) return skill.mana || '';
-  const cost = sm.manaCostOf(skill, { skillLevel: skillLevel(s, id), aoe });
-  return `${skill.mana} · ${Math.round(cost)} now`;
+  if (skill.type === 'aura') return `reserve ${sm.reservePct(skill.reserve || '')}% Max Mana`;
+  const cost = sm.costOf(skill, { skillLevel: skillLevel(s, id), aoe });
+  const resource = cost.resource === 'hp' ? 'HP' : 'Mana';
+  const spec = cost.resource === 'hp' ? skill.hp_cost : skill.mana;
+  return `${spec} · ${Math.round(cost.amount)} ${resource} now`;
 }
 
 /** Grant a skill drop: a new skill, or a duplicate that feeds that skill's own ladder. */
 export function grantSkill(s: SkillState, rng: () => number): { id: string; duplicate: boolean } | null {
-  const pool = sm.all().filter((k: any) => k.type !== 'aura' || true);
-  const fresh = pool.filter((k: any) => !s.owned[k.id]);
+  const pool = sm.all();
+  const fresh = pool.filter((k: any) => !ownsSkill(s, k.id));
   const pickFrom = fresh.length && rng() < 0.7 ? fresh : pool;
   const chosen = pickFrom[Math.floor(rng() * pickFrom.length)];
   if (!chosen) return null;
-  const duplicate = Boolean(s.owned[chosen.id]);
+  const duplicate = ownsSkill(s, chosen.id);
   s.owned[chosen.id] = (s.owned[chosen.id] || 0) + (duplicate ? 1 : 0);
   if (!duplicate) {
     s.xp[chosen.id] = 0;
@@ -292,16 +305,15 @@ export function grantSkill(s: SkillState, rng: () => number): { id: string; dupl
     // slots it for the player — the bar it fills is the one whose timed slots it should sit under
     const filler = (chosen as any).cd === 0;
     if (free >= 0 && !filler && ['attack', 'curse', 'heal'].includes(chosen.type as string)) s.list[free] = chosen.id;
-    if (chosen.type === 'aura') s.auras[chosen.id] = true;
-    if (chosen.type === 'buff') s.buffs[chosen.id] = true;
+    // A new toggle-track skill is collected, not activated; the player decides when it goes up.
   }
   return { id: chosen.id, duplicate };
 }
 
 /** Every kill pays 1 XP to each slotted or open skill (`engine.json` skill_xp). */
 export function paySkillXp(s: SkillState) {
-  const earning = [...s.list.filter((id): id is string => id !== null), ...Object.keys(s.auras).filter((k) => s.auras[k]),
-    ...Object.keys(s.buffs).filter((k) => s.buffs[k])];
+  const earning = [...s.list.filter((id): id is string => id !== null && ownsSkill(s, id)), ...Object.keys(s.auras).filter((k) => s.auras[k] && ownsSkill(s, k)),
+    ...Object.keys(s.buffs).filter((k) => s.buffs[k] && ownsSkill(s, k))];
   for (const id of earning) s.xp[id] = (s.xp[id] || 0) + E.skill_xp.xp_per_kill;
 }
 
@@ -309,13 +321,15 @@ export function paySkillXp(s: SkillState) {
 export interface CastEnv {
   mobStatus?: any;
   curses?: any;
+  /** The current HP pool is the affordability check for a skill with a flat HP cost. */
+  currentHp?: number;
   /** How much of the pool is currently missing, for a row that scales with lost HP. */
   missingHpPct?: number;
   /** The front target is a boss — the `boss` leg of the shared condition list (§14). */
   isBoss?: boolean;
   /**
    * A press a trigger aura fired (`aura.cast_on_crit` · `aura.cast_on_damage_taken`). It is the same
-   * press with a price on it: the mana is multiplied, the damage is scaled, and the skill's own
+   * press with a price on it: its resource cost is multiplied, the damage is scaled, and the skill's own
    * cooldown is NOT spent — the trigger runs its own clock (`trigger_cd_sec`), so an unmodified press
    * and a triggered one cannot stack the same row twice through the cooldown.
    */
@@ -327,6 +341,8 @@ export interface CastReport {
   name: string;
   damage: number;
   manaCost: number;
+  /** HP paid from the caster's current pool; cost cannot take the final HP point. */
+  hpCost: number;
   targets: number;
   heal?: { secLeft: number; pctPerSec: number };
   /** A heal that lands at once, as a % of the pool — Greater Heal, not the per-second drip. */
@@ -372,8 +388,8 @@ function healOf(skill: any): { heal?: { secLeft: number; pctPerSec: number }; in
  */
 export function effectsActive(sk: SkillState) {
   const rows: any[] = [];
-  for (const [id, on] of Object.entries(sk.auras)) if (on && sm.byId[id]) rows.push(sm.byId[id]);
-  for (const [id, left] of Object.entries(sk.buffUp)) if (left > 0 && sm.byId[id]) rows.push(sm.byId[id]);
+  for (const [id, on] of Object.entries(sk.auras)) if (on && ownsSkill(sk, id) && sm.byId[id]) rows.push(sm.byId[id]);
+  for (const [id, left] of Object.entries(sk.buffUp)) if (left > 0 && ownsSkill(sk, id) && sm.byId[id]) rows.push(sm.byId[id]);
   return sm.aggregateEffects(rows, (r: any) => skillLevel(sk, r.id));
 }
 
@@ -391,7 +407,7 @@ function targetCount(skill: any, group: Mob[]): number {
 }
 
 /**
- * The rotation: cycle the 15 slots top-down and cast the first skill whose cooldown is ready and
+ * The rotation: cycle the 14 slots top-down and cast the first skill whose cooldown is ready and
  * whose mana fits the usable pool. No manual presses — the player only arranges order.
  */
 export function castOnce(
@@ -427,23 +443,26 @@ export function castOnce(
       if (!holds) continue;
     }
     const aoe = targetCount(skill, group) > 1;
-    const cost = sm.manaCostOf(skill, {
+    const cost = sm.costOf(skill, {
       skillLevel: skillLevel(s, id), aoe,
-    }) * (env.trigger?.manaMult ?? 1);
-    if (cost > mana) continue;
+    });
+    const manaCost = (cost.resource === 'mana' ? cost.amount : 0) * (env.trigger?.manaMult ?? 1);
+    const hpCost = cost.resource === 'hp' ? cost.amount : 0;
+    const currentHp = env.currentHp ?? c.maxHp;
+    if (manaCost > mana || (hpCost > 0 && hpCost >= currentHp)) continue;
     // the mana floor is the rotation's one act of restraint: a row that would drop the usable pool under
     // the share the player named stands down, and the tick goes to whatever else is ready
-    if (cond.manaFloorPct > 0 && mana - cost < pool * (cond.manaFloorPct / 100)) continue;
+    if (cond.manaFloorPct > 0 && mana - manaCost < pool * (cond.manaFloorPct / 100)) continue;
 
     // a triggered press runs on the trigger's own clock (`trigger_cd_sec`), so the skill's cooldown is
     // spent by an ordinary cast only — a trigger can fire the same row again without eating its cd
     if (!env.trigger) s.cd[id] = skillCd(s, id, c.cdr);
-    const spent = Math.min(mana, cost);
+    const spent = Math.min(mana, manaCost);
 
     if (skill.type === 'heal') {
       const h = healOf(skill);
       return {
-        id, name: skill.name ?? '', damage: 0, manaCost: spent, targets: 0, byMob: [],
+        id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [],
         heal: h?.heal, instantHealPct: h?.instantHealPct,
         cleansesSelf: hasRule(skill, 'cleanses_status'),
       };
@@ -463,7 +482,7 @@ export function castOnce(
           bBase.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'block_charges_per_levels', 1)))
         : undefined;
       return {
-        id, name: skill.name ?? '', damage: 0, manaCost: spent, targets: 0, byMob: [], charges, blockCharges,
+        id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [], charges, blockCharges,
         cleansesSelf: hasRule(skill, 'cleanses_on_cast'),
       };
     }
@@ -473,7 +492,7 @@ export function castOnce(
       const hit = rng() <= eng.hitChance(c.accuracy, mob.evasion);
       const writes = (skill.effects || []).some((e: any) => e.subject === 'target');
       return {
-        id, name: skill.name ?? '', damage: 0, manaCost: spent, targets: hit ? 1 : 0, byMob: [],
+        id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: hit ? 1 : 0, byMob: [],
         curseOn: hit && writes ? mob.id : null,
       };
     }
@@ -481,7 +500,7 @@ export function castOnce(
     const level = skillLevel(s, id);
     // the row's effects at the level actually held: the stored value is its level-1 number
     const effects = sm.effectsAt(skill, level) as any[];
-    let dmg = sm.perPress(skill, { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment, level, attackPct: c.attackDamage, spellPct: c.spellDamage }) || 0;
+    let dmg = sm.perPress(skill, { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment, maxHp: c.maxHp, level, attackPct: c.attackDamage, spellPct: c.spellDamage }) || 0;
     // pin 1: a phys-basis press can crit on top of the pre-crit hit, a magic-basis one cannot.
     // A row that names extra crit chance on itself (Headshot) spends it on this press only.
     const ownCrit = effects.find((e: any) => e.stat === 'crit_chance' && e.subject !== 'target');
@@ -633,7 +652,7 @@ export function castOnce(
       s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
     }
     return {
-      id, name: skill.name ?? '', damage: dmg, manaCost: spent, targets: landed, crit, dealt, byMob: struck,
+      id, name: skill.name ?? '', damage: dmg, manaCost: spent, hpCost, targets: landed, crit, dealt, byMob: struck,
     };
   }
   return null;
@@ -647,5 +666,5 @@ export function tickSkills(s: SkillState, globalSpeed = 1) {
 
 /** A toggled buff re-presses itself the moment it lapses (`skill-pool.md` "Buff — toggle track"). */
 export function buffNeedsRecast(s: SkillState, id: string): boolean {
-  return Boolean(s.buffs[id]) && !(s.buffUp[id] > 0) && (s.cd[id] || 0) <= 0;
+  return ownsSkill(s, id) && Boolean(s.buffs[id]) && !(s.buffUp[id] > 0) && (s.cd[id] || 0) <= 0;
 }

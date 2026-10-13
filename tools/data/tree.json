@@ -1,6 +1,6 @@
 {
   "meta": {
-    "note": "The passive tree. SHAPE: three branches - impact (offence), control (defence), stream (sustain and Core stats) - 21 nodes each plus a 22nd on control that raises the Elemental resistance Cap (owner ruling), three ranks per node, one point per rank, so the tree holds 64 nodes and 192 ranks and treePointsAt(level_cap) spends it exactly: a level banks one point, a character starts with `tree_points_base` in hand, and one point buys one rank. PATHING: a chain per branch - node k+1 needs node k owned; no hub, no limbs, and NO KEYSTONES (the removed tree put all its power in 18 of them; here every node pays a number). VALUES: a node grants one real line from mods.json as a fraction of that line's own maximum - a shallow node's rank 3 is a tenth of the line's max, a deep node's is a fifth, and the ranks below step down - so a fully bought tree is worth about two thirds of a gear set (64 nodes, deep ones at twice a shallow one) and a deep node of the same line is always the stronger buy. The scale is a stated rule, not a measured one, and it stays that way (owner ruling): the published rates are the empty-tree baseline.",
+    "note": "The passive tree is a connected three-wing network: impact (offence), control (defence) and stream (sustain/Core stats), with 21 nodes per wing and a 22nd control node raising the Elemental resistance Cap. A free centre start connects the first node of every wing; 7th, 14th and 21st ranks cross-link the wings, so owned paths can branch and reconnect. Node ids stay branch.index so existing allocations survive the visual and pathing remake. Every paid node still grants a real line; there are no keystones. There are 64 nodes, 192 ranks and one point per rank. Values remain fractions of mods.json maxima: a shallow node's rank 3 is a tenth, a deep node's is a fifth, and the published rates remain the empty-tree baseline.",
     "node_columns": [
       "Node",
       "Line",
@@ -22,6 +22,15 @@
       0.13333333333333333,
       0.2
     ]
+  },
+  "graph": {
+    "start": { "x": 50, "y": 50 },
+    "nodes_per_ring": 7,
+    "ring_radii": [15, 29, 42],
+    "extra_radius": 47,
+    "arc_span_deg": 60,
+    "branch_angle_deg": { "impact": 270, "control": 30, "stream": 150 },
+    "crosslink_ranks": [7, 14, 21]
   },
   "branches": {
     "impact": [

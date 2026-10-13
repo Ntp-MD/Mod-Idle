@@ -5,7 +5,7 @@ import {
   newMobStatusStore, applyElement, applyBleed, stepMob, stepMobParts, modsOn, targetMods, forgetDead,
 } from '../src/sim/mobStatus';
 import { combineMods, newCurses, applyCurse } from '../src/sim/curse';
-import { playerSwing, mobSwing } from '../src/sim/combat';
+import { playerSwing, mobSwing, rollStatus, dotDamageParts, type Statuses } from '../src/sim/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
@@ -112,7 +112,109 @@ describe('burn and poison obey the DoT budget', () => {
   });
 });
 
+describe('damage spends Energy Shield before Health', () => {
+  it('routes a chaos hit through the live shield, then sends only overflow to Health', () => {
+    const c = { ...buildCharacter(90, emptyGear()), perfectDodge: 0, evasion: 0, block: 0, es: 1000 };
+    const attacker = mob({ damage: 'magic', innate: ['chaos'], ps: 100, acc: 1e9 });
+    const full = mobSwing(() => 0.99, c, attacker, {}, undefined, c.es);
+    expect(full.toEs).toBeGreaterThan(0);
+    expect(full.toHp).toBe(0);
+    const poisonHit = mobSwing(() => 0.99, c, mob({ damage: 'magic', innate: ['poison'], ps: 100, acc: 1e9 }), {}, undefined, c.es);
+    expect(poisonHit.toHp).toBe(0); // the poison status tick, not its inflicting hit, bypasses ES
+    const low = mobSwing(() => 0.99, c, attacker, {}, undefined, 10);
+    expect(low.toEs).toBe(10);
+    expect(low.toHp).toBeCloseTo(full.toEs - 10);
+  });
+
+  it('spends Energy Absorb shield gain on the same hit before Health takes overflow', () => {
+    const c = { ...buildCharacter(90, emptyGear()), perfectDodge: 0, evasion: 0, block: 0, armour: 0, es: 80 };
+    const attacker = mob({ damage: 'physical', innate: [], ps: 1000, acc: 1e9 });
+    const liveEs = 20;
+    const hit = mobSwing(() => 0.99, c, attacker, {}, undefined, liveEs, 20);
+    const afterEs = Math.min(c.es, liveEs + hit.absorbed) - hit.toEs;
+    expect(hit.absorbed).toBeGreaterThan(0);
+    expect(hit.toHp).toBeGreaterThan(0);
+    expect(afterEs).toBeCloseTo(0);
+  });
+
+  it('keeps poison and bleed on Health while burn drains the shield', () => {
+    const s = newGame(91);
+    s.hunting = false;
+    s.player.esIdleSec = 0;
+    const c = buildCharacter(s.player.level, s.gear, {}, 0, undefined, s.player.points, s.player.treeRanks);
+    s.player.hp = c.maxHp / 2;
+    s.player.es = c.es;
+    const statuses: Statuses = {
+      burn: { stacks: 1, secLeft: 5, perSec: 4 },
+      poison: { stacks: 1, secLeft: 5, perSec: 3 },
+      bleed: { stacks: 1, secLeft: 5, perSec: 2 },
+    };
+    const parts = dotDamageParts(c, statuses);
+    const hp = s.player.hp;
+    const es = s.player.es;
+    expect(es).toBeGreaterThan(0);
+    expect(parts.burn).toBeGreaterThan(0);
+    expect(parts.poison).toBeGreaterThan(0);
+    expect(parts.bleed).toBeGreaterThan(0);
+    tick(s, statuses, { autoSkills: false });
+    const toEs = Math.min(parts.burn, es);
+    const burnCut = Math.min(S.burn.regen_cut_max, S.burn.regen_cut_per_stack);
+    expect(s.player.es).toBeCloseTo(es - toEs);
+    expect(s.player.hp).toBeCloseTo(hp - parts.poison - parts.bleed - parts.burn + toEs + c.hpRegen * (1 - burnCut));
+    expect(s.player.esIdleSec).toBe(1);
+  });
+});
+
 describe('control is bounded, never a lockout', () => {
+  it('Stun Recovery shortens the player shock and removes it completely at 100%', () => {
+    const lightning = mob({ innate: ['lightning'] });
+    const half = {} as Statuses;
+    expect(rollStatus(() => 0, lightning, 0, half, 0, 50)).toBe('shock');
+    expect(half.shock?.secLeft).toBeCloseTo(S.shock.stop_sec * 0.5, 10);
+
+    const full = {} as Statuses;
+    expect(rollStatus(() => 0, lightning, 0, full, 0, 100)).toBeNull();
+    expect(full.shock).toBeUndefined();
+  });
+
+  it('advances player clocks through the fraction left after shock recovery', () => {
+    const swingsAt = (shockSec: number) => {
+      const s = newGame(71);
+      huntZone(s, s.zone);
+      const target = mob({ id: 'dummy', hp: 1e9, hpMax: 1e9, ps: 0, hitsPerSec: 0, innate: [], evasion: 0, dodgeRate: 0 });
+      s.group = [target];
+      const c = buildCharacter(s.player.level, s.gear);
+      s.player.atkTimer = Math.max(0, 1 - c.hitsPerSec * 0.5 + 0.01);
+      const statuses: Statuses = { shock: { stacks: 1, secLeft: shockSec, perSec: 0 } };
+      tick(s, statuses);
+      return target.hp;
+    };
+
+    expect(swingsAt(1)).toBe(1e9); // the full second is stopped
+    expect(swingsAt(0.5)).toBeLessThan(1e9); // the remaining half-second advances the attack clock
+  });
+
+  it('keeps a newly inflicted player shock through the tick that applied it', () => {
+    let appliedSec = 0;
+    let expectedSec = 0;
+    for (let seed = 1; seed <= 100 && !appliedSec; seed++) {
+      const s = newGame(seed);
+      huntZone(s, s.zone);
+      s.gear = emptyGear();
+      const striker = mob({ id: 'stunner', ps: 100, acc: 1e9, damage: 'physical', innate: ['lightning'], hitsPerSec: 1 });
+      s.group = [striker];
+      const c = buildCharacter(s.player.level, s.gear);
+      const statuses: Statuses = {};
+      tick(s, statuses);
+      if (statuses.shock) {
+        appliedSec = statuses.shock.secLeft;
+        expectedSec = eng.stunStopSec(c.core.vit, S.shock.stop_sec);
+      }
+    }
+    expect(appliedSec).toBeGreaterThan(0);
+    expect(appliedSec).toBeCloseTo(expectedSec, 10);
+  });
+
   it('chill cuts the swing rate and the accuracy only to their own Caps', () => {
     const c = charWith('cold', 100);
     const mods = modsOn(inflict('cold', c), 'm1');

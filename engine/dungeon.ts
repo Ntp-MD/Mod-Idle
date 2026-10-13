@@ -1,5 +1,5 @@
 /**
- * The dungeon run — one dungeon per zone, on the first wild side of its settlement.
+ * The dungeon run — one dungeon per zone, entered at wild-side index zero.
  *
  * A run is a mode, not a place: the sim never reads a coordinate (M7), it only knows whether a
  * run is open. The run fields `mob_cap` normal mobs of the zone it was entered in and pays the

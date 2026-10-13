@@ -1,0 +1,287 @@
+<!doctype html>
+<!-- the hub draft — a 15 x 15 lattice, every region placed by name.
+
+     macro = grid-template-areas : each region is pinned to fixed cells, so it keeps its
+             spot at every window size and never collides with a neighbour.
+     micro = flexbox inside a region : direction / gap / align arrange a region's own
+             children — never absolute, never a guessed margin.
+     tracks are minmax(0, 1fr), not 1fr : 1fr is minmax(auto, 1fr), so a fat child could
+             stretch its track and bend the lattice. 0 keeps every cell the same share.
+     every track is an equal share, so the grid is a frame: 225 cells the same size, and a
+             region fits inside it.  a region's own content is clipped, never a bent track.
+
+     the lattice tiles the whole viewport: left lane c1-2 (objectives over feed), centre field
+     c4-12, right lane c13-15 (panels / wheel / controls), and the rail's menu reaches in to
+     c12 over that lane.  a cell no region uses stays blank (c3 runs blank the whole height,
+     r2 c3-12 is blank, r7-9 c13-15 is blank, …) — a blank cell is a cell the design has not
+     spent, not a hole.
+
+     the regions rose from the 11 x 11 draft by proportion, so the frame and the placement move
+     together: lanes 2 | 9 | 3 with c3 blank, band r1, field r3-12, bottom band r13-15.
+     the bottom strip is life (hp) c5-6 · skills c7-9 · mana c10-11 on rows r13-15, centred on
+     c8; controls rests at r15 c13-15.
+
+     tokens come from game/src/styles/variables.css, so the draft paints the real scale. -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>hub draft · 15 × 15</title>
+        <link rel="stylesheet" href="game/src/styles/variables.css" />
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                background: #0a0e13;
+            }
+            body {
+                font:
+                    600 var(--font-xs) / 1.2 ui-monospace,
+                    Menlo,
+                    Consolas,
+                    monospace;
+                color: var(--dim);
+            }
+
+            /* the 15 x 15 track template, stated once: the hub and the always-on lattice both read it.
+               every track is an equal share, so all 225 cells are the same size and the grid is a
+               frame, nothing more. a region fits inside it — no track is squeezed for a region. */
+            .hub,
+            .lattice {
+                grid-template-columns: repeat(15, minmax(0, 1fr));
+                grid-template-rows: repeat(15, minmax(0, 1fr));
+            }
+
+            /* the lattice: the grid is on at all times, every cell drawn — so a blank cell
+               (r1 c4, r6-10 c1-3 …) reads as a cell too. It precedes .hub in the DOM, so the
+               regions and their corner tags paint over it, and it mirrors the hub's tracks. */
+            .lattice {
+                position: fixed;
+                inset: 0;
+                display: grid;
+                pointer-events: none;
+            }
+            .lattice > span {
+                border-right: 1px solid rgba(127, 212, 255, 0.18);
+                border-bottom: 1px solid rgba(127, 212, 255, 0.18);
+            }
+
+            .hub {
+                position: fixed;
+                inset: 0;
+                display: grid;
+                /* the coordinate language: read a region's cells straight off this block.
+                   lanes 2 | 9 | 3 with c3 blank, band r1, field r3-12, bottom band r13-15.
+                   the menu row starts at c12, reaching in over the right lane */
+                grid-template-areas:
+                    "objectives objectives .          .          .          target     target     target     target     target     .          menu       menu       menu       menu"
+                    "objectives objectives .          .          .          target     target     target     target     target     .          .          panels     panels     panels"
+                    "objectives objectives .          field      field      field      field      field      field      field      field      field      panels     panels     panels"
+                    "objectives objectives .          field      field      field      field      field      field      field      field      field      panels     panels     panels"
+                    "objectives objectives .          field      field      field      field      field      field      field      field      field      panels     panels     panels"
+                    ".          .          .          field      field      field      field      field      field      field      field      field      panels     panels     panels"
+                    ".          .          .          field      field      field      field      field      field      field      field      field      .          .          ."
+                    ".          .          .          field      field      field      field      field      field      field      field      field      .          .          ."
+                    ".          .          .          field      field      field      field      field      field      field      field      field      .          .          ."
+                    ".          .          .          field      field      field      field      field      field      field      field      field      wheel      wheel      wheel"
+                    "feed       feed       .          field      field      field      field      field      field      field      field      field      wheel      wheel      wheel"
+                    "feed       feed       .          field      field      field      field      field      field      field      field      field      wheel      wheel      wheel"
+                    "feed       feed       .          .          life       life       skills     skills     skills     mana       mana       .          wheel      wheel      wheel"
+                    "feed       feed       .          .          life       life       skills     skills     skills     mana       mana       .          wheel      wheel      wheel"
+                    "feed       feed       .          .          life       life       skills     skills     skills     mana       mana       .          controls   controls   controls";
+            }
+
+            /* one box for every region: only the name, the coordinates and the inner flex differ */
+            .hub > * {
+                position: relative;
+                min-width: 0;
+                min-height: 0;
+                overflow: hidden;
+                /* the top rung is the label strip: no region's own content starts under the corner tags */
+                display: flex;
+                gap: var(--spacing-2xs);
+                padding: var(--spacing-md) var(--spacing-2xs) var(--spacing-2xs);
+                border: 1px dashed rgba(127, 212, 255, 0.35);
+                border-radius: 8px;
+                background: rgba(127, 212, 255, 0.03);
+            }
+            /* corner tags on one header line: name at top-left, coordinates at top-right */
+            .hub > *::before,
+            .hub > *::after {
+                position: absolute;
+                z-index: 1;
+                pointer-events: none;
+                font-size: var(--font-xs);
+                line-height: 1;
+                color: rgba(127, 212, 255, 0.55);
+            }
+            .hub > *::before {
+                content: attr(data-name);
+                top: var(--spacing-2xs);
+                left: var(--spacing-xs);
+            }
+            .hub > *::after {
+                content: attr(data-cells);
+                top: var(--spacing-2xs);
+                right: var(--spacing-xs);
+                opacity: 0.7;
+            }
+
+            /* ── the regions: each states its own flex, nothing else ───────────────────────── */
+            .objectives {
+                grid-area: objectives;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .target {
+                grid-area: target;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .menu {
+                grid-area: menu;
+                flex-direction: row;
+                justify-content: flex-end;
+                align-items: center;
+            }
+            .field {
+                grid-area: field;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-content: flex-start;
+                justify-content: center;
+            }
+            .panels {
+                grid-area: panels;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+            .wheel {
+                grid-area: wheel;
+                align-items: center;
+                justify-content: center;
+            }
+            .feed {
+                grid-area: feed;
+                flex-direction: column;
+                justify-content: flex-end;
+                align-items: flex-start;
+            }
+            .life {
+                grid-area: life;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .skills {
+                grid-area: skills;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+            }
+            .mana {
+                grid-area: mana;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .controls {
+                grid-area: controls;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* a chip is any child of a region: the region's flex decides where it lands */
+            .chip {
+                flex: none;
+                padding: var(--spacing-3xs) var(--spacing-xs);
+                border: 1px solid var(--edge);
+                border-radius: 6px;
+                background: var(--glass);
+                color: var(--text);
+                white-space: nowrap;
+            }
+            .orb {
+                width: var(--icon-xl);
+                height: var(--icon-xl);
+                border-radius: 50%;
+                border: 1px solid var(--edge);
+                background: var(--hud-face);
+            }
+            .slab {
+                width: 100%;
+                height: var(--spacing-sm);
+                border-radius: 4px;
+                background: var(--glass);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="lattice" aria-hidden="true"></div>
+
+        <div class="hub">
+            <section class="objectives" data-name="objectives" data-cells="c1-2 r1-5">
+                <span class="chip">minimap</span>
+                <span class="chip">zone tag</span>
+                <span class="chip">tracker</span>
+                <span class="chip">toast</span>
+            </section>
+
+            <section class="target" data-name="target" data-cells="c6-10 r1-2">
+                <span class="chip">target name</span>
+                <span class="slab" style="width: 60%"></span>
+            </section>
+
+            <nav class="menu" data-name="menu (rail)" data-cells="c12-15 r1">
+                <span class="chip">map</span>
+                <span class="chip">inv</span>
+                <span class="chip">skills</span>
+                <span class="chip">more</span>
+            </nav>
+
+            <main class="field" data-name="field" data-cells="c4-12 r3-12"></main>
+
+            <aside class="panels" data-name="panels (dock)" data-cells="c13-15 r2-6">
+                <span class="chip">character sheet</span>
+                <span class="slab" style="width: 80%"></span>
+            </aside>
+
+            <section class="wheel" data-name="wheel" data-cells="c13-15 r10-14">
+                <span class="orb"></span>
+            </section>
+
+            <section class="controls" data-name="controls" data-cells="c13-15 r15">
+                <span class="chip">speed</span>
+            </section>
+
+            <section class="feed" data-name="feed" data-cells="c1-2 r11-15">
+                <span class="chip">log box</span>
+            </section>
+
+            <section class="life" data-name="life" data-cells="c5-6 r13-15">
+                <span class="orb"></span>
+            </section>
+
+            <section class="skills" data-name="skills (casts)" data-cells="c7-9 r13-15">
+                <span class="chip">1</span>
+                <span class="chip">2</span>
+                <span class="chip">3</span>
+            </section>
+
+            <section class="mana" data-name="mana" data-cells="c10-11 r13-15">
+                <span class="orb"></span>
+            </section>
+        </div>
+
+        <script>
+            // the lattice is the hub's own template, cell by cell: 225 spans, nothing inside them.
+            const lattice = document.querySelector(".lattice");
+            for (let r = 0; r < 15; r++) {
+                for (let c = 0; c < 15; c++) lattice.append(document.createElement("span"));
+            }
+        </script>
+    </body>
+</html>

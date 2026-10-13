@@ -41,8 +41,8 @@ describe('a curse writes its own row onto the mob', () => {
     const m = modsOn(both, 'mob-1');
     expect(m.damageDealt).toBe(valueOf('curse.weaken', 'damage_dealt'));
     expect(m.attackSpeed).toBe(valueOf('curse.cripple', 'attack_speed'));
-    // -25% damage and -20% swing rate both shrink a DPS-priced mob, and they compound
-    expect(psMult(m)).toBeCloseTo((1 + valueOf('curse.weaken', 'damage_dealt') / 100) * (1 + valueOf('curse.cripple', 'attack_speed') / 100), 10);
+    // Damage dealt changes each hit; attack speed is applied by the mob clock, not a second time here.
+    expect(psMult(m)).toBeCloseTo(1 + valueOf('curse.weaken', 'damage_dealt') / 100, 10);
   });
 
   it('keeps every magnitude it took from the roster text', () => {
@@ -60,13 +60,14 @@ describe('a curse writes its own row onto the mob', () => {
 describe('the fight feels it', () => {
   const c = buildCharacter(60, emptyGear());
 
-  it('Weaken and Cripple land as less incoming damage, swing for swing', () => {
+  it('Weaken cuts hit damage while Cripple slows the clock without shrinking each hit', () => {
     const mob = mobOf();
     const clean = mobSwing(mulberry32(9), c, mob, {}, NO_CURSE);
     const weak = mobSwing(mulberry32(9), c, mob, {}, modsOn(cursed('curse.weaken'), 'mob-1'));
     expect(weak.raw).toBeCloseTo(clean.raw * (1 + valueOf('curse.weaken', 'damage_dealt') / 100), 6);
     const slow = mobSwing(mulberry32(9), c, mob, {}, modsOn(cursed('curse.cripple'), 'mob-1'));
-    expect(slow.raw).toBeCloseTo(clean.raw * (1 + valueOf('curse.cripple', 'attack_speed') / 100), 6);
+    expect(slow.raw).toBeCloseTo(clean.raw, 6);
+    expect(slow.toHp + slow.toEs).toBeCloseTo(clean.toHp + clean.toEs, 6);
   });
 
   it('Blinding Mark costs the mob accuracy on both rolls it feeds', () => {

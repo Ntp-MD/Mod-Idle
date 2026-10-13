@@ -1,0 +1,23 @@
+[    1120ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/favicon.ico:0
+[  317516ms] [ERROR] [vite] SyntaxError: The requested module '/src/sim/skills.ts?t=1791873929741' does not provide an export named 'manaNow' @ http://localhost:5173/@vite/client:881
+[  317516ms] [ERROR] [vite] Failed to reload /src/App.svelte. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:881
+[  317519ms] TypeError: Cannot read properties of undefined (reading 'default')
+    at http://localhost:5173/src/App.svelte?t=1791873892469:9501:28
+    at http://localhost:5173/@vite/client:46:60
+    at http://localhost:5173/@vite/client:213:11
+    at http://localhost:5173/@vite/client:186:58
+    at Array.forEach (<anonymous>)
+    at HMRClient.queueUpdate (http://localhost:5173/@vite/client:186:36)
+    at async Promise.all (index 0)
+    at async handleMessage (http://localhost:5173/@vite/client:927:7)
+[  328006ms] [ERROR] [vite] SyntaxError: The requested module '/src/sim/skills.ts?t=1791873940237' does not provide an export named 'manaNow' @ http://localhost:5173/@vite/client:881
+[  328006ms] [ERROR] [vite] Failed to reload /src/App.svelte. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:881
+[  328008ms] TypeError: Cannot read properties of undefined (reading 'default')
+    at http://localhost:5173/src/App.svelte?t=1791873892469:9501:28
+    at http://localhost:5173/@vite/client:46:60
+    at http://localhost:5173/@vite/client:213:11
+    at http://localhost:5173/@vite/client:186:58
+    at Array.forEach (<anonymous>)
+    at HMRClient.queueUpdate (http://localhost:5173/@vite/client:186:36)
+    at async Promise.all (index 0)
+    at async handleMessage (http://localhost:5173/@vite/client:927:7)

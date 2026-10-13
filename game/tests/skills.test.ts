@@ -4,7 +4,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { newGame, tick, huntZone } from '../src/sim/game';
 import {
   newSkillState, grantSkill, castOnce, skillCd, skillLevel, ladderOf, reservedPct, usableMana,
-  effectsActive, tickSkills, ACTIVE_SLOTS,
+  effectsActive, tickSkills, toggleTrack, clearUnownedTracks, ownsSkill, ACTIVE_SLOTS,
 } from '../src/sim/skills';
 import { mulberry32 } from '../src/engine/client-helpers';
 // the same module tools/skills.ts --calc prints from, imported so the suite's transform carries it
@@ -29,6 +29,13 @@ describe('the client skill calculator is the cage skill calculator', () => {
     expect(sm.effCd(cleave.cd, CR.cdr_pct, CR.ladder_pct)).toBeCloseTo(2.1, 6);
     expect(cageModel.perPress(cleave, REF)).toBe(sm.perPress(cleave, REF));
     expect(cageModel.effCd(cleave.cd, CR.cdr_pct, CR.ladder_pct)).toBe(sm.effCd(cleave.cd, CR.cdr_pct, CR.ladder_pct));
+  });
+
+  it('adds the caster Max-HP term inside the levelled press formula', () => {
+    const hpBasis = { id: 'test.max-hp', basis: 'phys', base_flat: 100, eff: 0, max_hp_pct: 12 } as any;
+    const press = sm.perPress(hpBasis, { phys: 0, maxHp: 1000, level: 20, attackPct: 0, spellPct: 0 });
+    expect(press).toBeCloseTo((100 + 120) * sm.damagePct(20) / 100, 9);
+    expect(cageModel.perPress(hpBasis, { phys: 0, maxHp: 1000, level: 20, attackPct: 0, spellPct: 0 })).toBe(press);
   });
 
   it('the ladder tops out at its last rung for a full set of duplicates', () => {
@@ -189,6 +196,44 @@ describe('one mana price, typed in units ', () => {
   });
 });
 
+describe('current HP skill costs', () => {
+  const c = buildCharacter(100, emptyGear());
+
+  it('uses a typed flat HP amount on the shared cost ladder, as the sole resource cost', () => {
+    const hpSkill = { id: 'test.hp-cost', hp_cost: '20 flat' } as any;
+    const factor = 1 + ((E.skill_xp.level_cap - 1) * sm.COST_LEVEL_STEP) / 100;
+    expect(sm.hpCostSpec(hpSkill)).toBe(20);
+    expect(sm.costOf(hpSkill, { skillLevel: 1 })).toEqual({ resource: 'hp', amount: 20 });
+    expect(sm.costOf(hpSkill, { skillLevel: E.skill_xp.level_cap }).amount).toBeCloseTo(20 * factor, 9);
+    expect(() => sm.costOf({ ...hpSkill, mana: '10 flat' })).toThrow(/both Mana and HP/);
+    expect(() => sm.costOf({ id: 'test.untyped-hp', hp_cost: '20%' })).toThrow();
+  });
+
+  it('skips the press when paying it would consume the final HP point', () => {
+    const id = 'test.hp-cost.cast';
+    const prior = sm.byId[id];
+    sm.byId[id] = {
+      id, name: 'HP Cost Test', type: 'attack', group: 'all', basis: 'phys', targets: '1/1', cd: 6,
+      hp_cost: '20 flat', base_flat: 100, eff: 0, effects: [],
+    } as any;
+    try {
+      const mob = { id: 'test-mob', hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 } as any;
+      const short = newSkillState();
+      short.list[0] = id;
+      expect(castOnce(short, c, c.maxMana, [mob], {}, mulberry32(7), { currentHp: 20 })).toBe(null);
+
+      const enough = newSkillState();
+      enough.list[0] = id;
+      const cast = castOnce(enough, c, c.maxMana, [mob], {}, mulberry32(7), { currentHp: 21 });
+      expect(cast?.manaCost).toBe(0);
+      expect(cast?.hpCost).toBe(20);
+    } finally {
+      if (prior) sm.byId[id] = prior;
+      else delete sm.byId[id];
+    }
+  });
+});
+
 describe('a press can open its own timed window (Reap)', () => {
   const c = buildCharacter(100, emptyGear());
 
@@ -223,6 +268,41 @@ describe('a press can open its own timed window (Reap)', () => {
 });
 
 describe('skills in the live loop', () => {
+  it('collects buff and aura drops without switching them on, and counts a second copy as a duplicate', () => {
+    const pool = sm.all();
+    for (const type of ['buff', 'aura']) {
+      const s = newSkillState();
+      const index = pool.findIndex((skill: any) => skill.type === type);
+      expect(index).toBeGreaterThanOrEqual(0);
+      let call = 0;
+      const first = grantSkill(s, () => call++ === 0 ? 0 : (index + 0.5) / pool.length)!;
+      expect(sm.byId[first.id].type).toBe(type);
+      expect(first.duplicate).toBe(false);
+      expect(ownsSkill(s, first.id)).toBe(true); // count zero is still the first owned copy
+      expect(s.buffs[first.id]).not.toBe(true);
+      expect(s.auras[first.id]).not.toBe(true);
+      expect(reservedPct(s)).toBe(0);
+      call = 0;
+      const second = grantSkill(s, () => call++ === 0 ? 1 : (index + 0.5) / pool.length)!;
+      expect(second).toEqual({ id: first.id, duplicate: true });
+      expect(s.owned[first.id]).toBe(1);
+    }
+  });
+
+  it('ignores and clears persistent buff and aura toggles for unowned skills', () => {
+    const s = newSkillState();
+    s.auras['aura.clarity'] = true;
+    s.buffs['buff.energy_absorb'] = true;
+    s.buffUp['buff.energy_absorb'] = 30;
+    expect(reservedPct(s)).toBe(0);
+    expect(effectsActive(s).add).toEqual({});
+    expect(toggleTrack(s, 'aura.clarity').ok).toBe(false);
+    clearUnownedTracks(s);
+    expect(s.auras).toEqual({});
+    expect(s.buffs).toEqual({});
+    expect(s.buffUp).toEqual({});
+  });
+
   it('the bar holds its slots and a fresh skill auto-slots', () => {
     const s = newSkillState();
     expect(s.list.length).toBe(ACTIVE_SLOTS);

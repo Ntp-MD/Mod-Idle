@@ -10,6 +10,24 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import { spendTreePoint, treeLines, treePointsSpent } from '../src/sim/tree';
 import { startWalk, road, settlementCell } from '../src/sim/road';
 
+describe('skill toggles on a restored character', () => {
+  it('removes effects with no owned skill while preserving a player-owned aura', () => {
+    const s = newGame(90);
+    s.skills.auras['aura.clarity'] = true;
+    s.skills.buffs['buff.energy_absorb'] = true;
+    s.skills.buffUp['buff.energy_absorb'] = 30;
+    const orphaned = importJson(exportJson(s));
+    expect(orphaned.skills.auras).toEqual({});
+    expect(orphaned.skills.buffs).toEqual({});
+    expect(orphaned.skills.buffUp).toEqual({});
+
+    s.skills.owned['aura.clarity'] = 0;
+    const owned = importJson(exportJson(s));
+    expect(owned.skills.auras['aura.clarity']).toBe(true);
+    expect(owned.skills.buffs['buff.energy_absorb']).toBeUndefined();
+  });
+});
+
 describe('the cell under the feet survives a save', () => {
   it('a walk in flight and the standing hex round-trip unchanged', () => {
     const s = newGame(91);
@@ -29,7 +47,7 @@ describe('the cell under the feet survives a save', () => {
     const [a, b] = road.nodes;
     const blocks = road.blocksBetweenHex(a, b);
     s.walk = { from: a.id, to: b.id, blocksTotal: blocks, blocksLeft: blocks - 1, secLeft: 5, blocksWalked: 1 };
-    const m = migrate(JSON.parse(JSON.stringify(s)), SCHEMA_VERSION - 1);
+    const m = migrate(JSON.parse(JSON.stringify(s)), 11);
     expect(m.walk!.from).toEqual({ q: a.q, r: a.r });
     expect(m.walk!.to).toEqual({ q: b.q, r: b.r });
     expect(m.walk!.kind).toBe('town');
@@ -43,7 +61,7 @@ describe('the cell under the feet survives a save', () => {
   it('a v11 walk naming a settlement that no longer exists is dropped, not left to compute NaN', () => {
     const s = newGame(93) as any;
     s.walk = { from: 'eastgate', to: 'a-town-that-is-gone', blocksTotal: 9, blocksLeft: 9, secLeft: 9, blocksWalked: 0 };
-    const m = migrate(JSON.parse(JSON.stringify(s)), SCHEMA_VERSION - 1);
+    const m = migrate(JSON.parse(JSON.stringify(s)), 11);
     expect(m.walk).toBeNull();
     expect(Number.isInteger(m.cell!.q)).toBe(true);
     expect(road.cellRank(m.cell!)).toBe(0);             // an old save could only ever stand in a town
@@ -88,6 +106,11 @@ describe('offline time is AFK, not a second play session', () => {
     huntZone(s, s.zone);
     setLevel(s, 80);
     s.zone = 9;
+    // This test isolates offline loot quality, so its expedition carries the cooked provisions it needs
+    // rather than measuring how quickly an unprepared run starves at this difficult zone.
+    for (const food of E.fieldwork.foods.filter((row) => row.kind === 'cooked')) {
+      s.fieldwork.foods[food.id] = E.inventory.stack_size.food;
+    }
     // Tick until the away window has paid a drop, not for a guessed number of seconds: an ungeared
     // level-80 in zone 9 lands about twenty kills in four thousand ticks, so a fixed window made this
     // a coin flip on the 8% roll — and a fixed window is a time premise, which no test here may carry
@@ -106,6 +129,9 @@ describe('offline time is AFK, not a second play session', () => {
     huntZone(s, s.zone);
     setLevel(s, 80);
     s.zone = 9;
+    for (const food of E.fieldwork.foods.filter((row) => row.kind === 'cooked')) {
+      s.fieldwork.foods[food.id] = E.inventory.stack_size.food;
+    }
     // tick until a piece above the floor level lands, not for a guessed window: a fixed window makes
     // this a coin flip on the drop roll (a time premise · AGENTS.md).
     const floorLevel = eng.floorLevelOf('high');

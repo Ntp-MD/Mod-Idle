@@ -80,7 +80,7 @@
     min-width: var(--box-160);
     max-width: var(--box-300);
     display: flex; flex-direction: column;
-    padding: 3px;
+    padding: var(--spacing-2xs);
     background: var(--panel);
     border: 1px solid var(--line);
     box-shadow: 0 0 22px rgba(0, 0, 0, .65);
@@ -90,7 +90,7 @@
     display: flex; align-items: baseline; gap: var(--spacing-xs);
     justify-content: space-between;
     text-align: left;
-    padding: 3px var(--spacing-xs);
+    padding: var(--spacing-2xs) var(--spacing-xs);
     font-size: var(--font-xs);
     background: none;
     border: 1px solid transparent;

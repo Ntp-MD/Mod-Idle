@@ -2,162 +2,173 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Crafting</title></head>
 <body><style>:root {
-  color-scheme: dark;
-  --bg: #0f1217;
-  --panel: #1c2027;
-  --line: #2c3340;
-  --text: #e3e9f2;
-  --dim: #8b96a8;
-  --hp: #c0392b;
-  --mana: #2980b9;
-  --es: #4fc3f7;
-  --xp: #f1c40f;
-  --mob: #7f8c8d;
-  --good: #27ae60;
-  /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
+    color-scheme: dark;
+    --bg: #0f1217;
+    --panel: #1c2027;
+    --line: #2c3340;
+    --text: #e3e9f2;
+    --dim: #8b96a8;
+    --hp: #c0392b;
+    --mana: #2980b9;
+    --es: #4fc3f7;
+    --xp: #f1c40f;
+    --mob: #7f8c8d;
+    --good: #27ae60;
+    /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
      the gutter the menu rail owns — every corner read on the field stops short of it */
-  --glass: rgba(17, 22, 30, .74);
-  --edge: rgba(255, 255, 255, .10);
-  --gold: #e8c169;
-  /* focus is its own colour and never the accent: a focused control that is also the recommended one
+    --glass: rgba(17, 22, 30, 0.74);
+    --edge: rgba(255, 255, 255, 0.1);
+    --gold: #e8c169;
+    /* the HUD's shared panel face and edge: available to fixed rails outside the stage and controls inside it */
+    --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
+    --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
+    /* focus is its own colour and never the accent: a focused control that is also the recommended one
      would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
-  --focus: #7fd4ff;
-  /* the floating menu row's height — the rail is a row across the top-right now, not a full-height
+    --focus: #7fd4ff;
+    /* the floating menu row's height — the rail is a row across the top-right now, not a full-height
      column, so this is its one axis and the minimap hangs a fixed drop under it */
-  --rail: clamp(46px, 2.6vw + 12px, 88px);
-  /* the gutter every corner read stops short of, and the height a gauge track carries its figure in:
+    --rail: clamp(46px, 3.19vw, 88px);
+    /* the gutter every corner read stops short of, and the height a gauge track carries its figure in:
      one pair for the frame rather than the same two numbers written on each cluster */
-  --screen-pad: var(--spacing-md);
-  --bar-h: clamp(12px, 0.78vw + 2px, 22px);
-  /* the HUD's floating hardware, sized once: the portrait plate and its ring, the minimap sheet,
-     and the objectives column's width on the left edge */
-  --portrait-size: clamp(58px, 3.75vw + 14px, 124px);
-  --minimap-size: clamp(100px, 6.52vw + 25px, 216px);
-  --objectives-w: clamp(170px, 11vw + 20px, 300px);
-  /* a body's rank, and the inks its state is named in: an Elite or a Boss wears its own rim and name
+    --screen-pad: var(--spacing-md);
+    --bar-h: clamp(12px, 0.87vw, 22px);
+    /* the HUD's floating hardware, sized once: the minimap sheet and the objectives column's width */
+    --minimap-size: clamp(100px, 7.74vw, 216px);
+    --objectives-w: clamp(170px, 11.96vw, 300px);
+    /* a body's rank, and the inks its state is named in: an Elite or a Boss wears its own rim and name
      colour, a curse and a warn read in their own inks, and the gauges climb to a lit end of the same
      semantic the dim token carries */
-  --elite: #6c5199;
-  --elite-ink: #b98cff;
-  --boss: #9d3b34;
-  --boss-ink: #ff8b7a;
-  --curse: #c8a5ff;
-  /* Item rarity: a content ladder for a drop's name, its slot edge and its card header, the way the
+    --elite: #6c5199;
+    --elite-ink: #b98cff;
+    --boss: #9d3b34;
+    --boss-ink: #ff8b7a;
+    --curse: #c8a5ff;
+    /* Item rarity: a content ladder for a drop's name, its slot edge and its card header, the way the
      rank inks above name a body. It is not the highlight system — gold stays you-or-pressable and
      green stays the better option, so a rarity ink never carries a control's meaning. The rungs are
      read off the drop itself (quality band, Tier, and whether a Quality stone was spent on it). */
-  --rar-common: #8b96a8;
-  --rar-uncommon: #5fb87a;
-  --rar-rare: #4f8fe0;
-  --rar-epic: #a877e8;
-  --rar-legend: #e0913f;
-  --alarm: #ffb3a8;
-  --hot: #e2503f;
-  --good-lit: #9fe0bb;
-  --gold-lit: #ffd9a0;
-  --gold-ink: #1a1509;
-  --hp-lit: #ff8a6b;
-  --mana-lit: #6bc4f0;
-  --es-lit: #a8e6ff;
-  --xp-lit: #f7e07a;
-  /* the stage's own backdrop and its two scene lights: deep ground, a night lift, a shore lift */
-  --ground: #0a0e13;
-  --ground-2: #131926;
-  --ground-3: #181d18;
-  --glow-moss: #465c3a;
-  --glow-dusk: #304a6c;
-  /* the two recessed plates the HUD's own hardware is cut from — the portrait face and the wheel's orb,
+    --rar-common: #8b96a8;
+    --rar-uncommon: #5fb87a;
+    --rar-rare: #4f8fe0;
+    --rar-epic: #a877e8;
+    --rar-legend: #e0913f;
+    --alarm: #ffb3a8;
+    --hot: #e2503f;
+    --good-lit: #9fe0bb;
+    --gold-lit: #ffd9a0;
+    --hp-lit: #ff8a6b;
+    --mana-lit: #6bc4f0;
+    --es-lit: #a8e6ff;
+    --xp-lit: #f7e07a;
+    /* the stage's own backdrop and its two scene lights: deep ground, a night lift, a shore lift */
+    --ground: #0a0e13;
+    --ground-2: #131926;
+    --ground-3: #181d18;
+    --glow-moss: #465c3a;
+    --glow-dusk: #304a6c;
+    /* the two recessed plates the HUD's own hardware is cut from — the portrait face and the wheel's orb,
      each a top-lit dark over its own floor — and the deep end of the accent's gradient, a shade under
      `--hot` so the count pill's own floor is a token like its top */
-  --face-top: #1c2430;
-  --face-floor: #0d1218;
-  --orb-top: #242e3c;
-  --orb-floor: #10151d;
-  --hot-deep: #a33428;
-  /* a recessed floor (an input well, a kbd cap, an empty slot) and the scrollbar's lit thumb */
-  --inset: #12151b;
-  --bar-2: #2e3742;
-  /* the map sheet's own inks: label fills over the field, the id ink, and the two travel pins */
-  --sheet-ink: #cfd8e3;
-  --sheet-place: #f2e7d0;
-  --sheet-id: #6d7987;
-  --pin-here: #12a06a;
-  --pin-here-glow: #2ee59a;
-  --pin-target: #e2503f;
-  --pin-target-glow: #ff6b5c;
-  --ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --num: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
-  /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
+    --face-top: #1c2430;
+    --face-floor: #0d1218;
+    --orb-top: #242e3c;
+    --orb-floor: #10151d;
+    --hot-deep: #a33428;
+    /* a recessed floor (an input well, a kbd cap, an empty slot) and the scrollbar's lit thumb */
+    --inset: #12151b;
+    --bar-2: #2e3742;
+    /* the map sheet's own inks: label fills over the field, the id ink, and the two travel pins */
+    --sheet-ink: #cfd8e3;
+    --sheet-place: #f2e7d0;
+    --sheet-id: #6d7987;
+    --pin-here: #12a06a;
+    --pin-here-glow: #2ee59a;
+    --pin-target: #e2503f;
+    --pin-target-glow: #ff6b5c;
+    --ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --num: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+    /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
      reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur.
      The rest step is the smallest blur that still pushes the ground behind the plates: past it the hex
      sheet stops reading as a map you stand on and becomes a photograph of one. */
-  --dof-rest: 4px;
-  --dof-near: 1.2px;
-  /* the one rung below the rest step: a surface that owns the screen pushes the ground here rather than
+    --dof-rest: 4px;
+    /* the one rung below the rest step: a surface that owns the screen pushes the ground here rather than
      inventing a pixel count of its own, so the ladder stays a ladder */
-  --dof-far: 5px;
-  --dof: var(--dof-rest);
-  /* the browser's own paints, themed from the same palette instead of left to the platform */
-  --sel: rgba(127, 212, 255, .26);
-  --bar: #232b36;
-  /* THE SIZING — one scale, one home. Three families, five steps each: --font-* is text, --icon-* is
-     a glyph's or a picture's box, --spacing-* is padding, margin and gap. Every step is a
-     `clamp(<int>px, <n>vw, <int>px)`: no decimal, so a figure is written the same way at every site
-     and it scales with the viewport between its two ends. A figure under 5px is too small to be
-     worth a step — a hairline pad, a shadow's blur — and stays a hardcoded figure where it is drawn.
-     The steps were cut to the sizes the client actually uses: read them off this block, edit a step
-     here and every site that reads it moves. */
-  --font-xs: clamp(10px, 0.78vw, 22px);
-  --font-sm: clamp(12px, 0.94vw, 26px);
-  --font-md: clamp(15px, 1.17vw, 32px);
-  --font-lg: clamp(20px, 1.56vw, 43px);
-  --font-xl: clamp(26px, 2.03vw, 56px);
-  --icon-xs: clamp(10px, 0.78vw, 22px);
-  --icon-sm: clamp(14px, 1.09vw, 30px);
-  --icon-md: clamp(20px, 1.56vw, 43px);
-  --icon-lg: clamp(30px, 2.34vw, 65px);
-  --icon-xl: clamp(42px, 3.28vw, 91px);
-  --spacing-xs: clamp(5px, 0.39vw, 11px);
-  --spacing-sm: clamp(8px, 0.62vw, 17px);
-  --spacing-md: clamp(12px, 0.94vw, 26px);
-  --spacing-lg: clamp(17px, 1.33vw, 37px);
-  --spacing-xl: clamp(25px, 1.95vw, 54px);
+    --dof-far: 5px;
+    --dof: var(--dof-rest);
+    /* the browser's own paints, themed from the same palette instead of left to the platform */
+    --sel: rgba(127, 212, 255, 0.26);
+    --bar: #232b36;
+    /* Responsive families use per-token vw values with their own floor and cap. Slopes are calibrated
+     to the 2066px reference width, so each family can be tuned independently. A figure under 5px stays
+     a hairline, blur or other local detail where it is drawn. */
+    --font-xs: clamp(11px, 0.82vw, 23px);
+    --font-sm: clamp(13px, 0.97vw, 27px);
+    --font-md: clamp(16px, 1.21vw, 34px);
+    --font-lg: clamp(21px, 1.60vw, 45px);
+    --font-xl: clamp(27px, 2.08vw, 58px);
+    --icon-xs: clamp(11px, 0.82vw, 23px);
+    --icon-sm: clamp(14px, 1.11vw, 31px);
+    --icon-md: clamp(21px, 1.60vw, 45px);
+    --icon-lg: clamp(32px, 2.42vw, 68px);
+    --icon-xl: clamp(44px, 3.39vw, 95px);
 
-  /* the unique sizes. These are not steps: the HUD's fixed hardware, the map sheet and the boxes
-     too big for an icon step each keep their own figure. The same `clamp(<int>px, …)` rule holds,
-     so no row here wears a decimal either. */
-  --sheet-fs-region: 10px;
-  --sheet-fs-walk: 7px;
-  --sheet-fs-place: 9px;
-  --sheet-fs-capital: 10.5px;
-  --sheet-fs-zonename: 7.5px;
-  --sheet-fs-id: 6.5px;
-  --x-pull-arc: clamp(-46px, -1.385vw - 5px, -21px);
-  --x-pull-burst: clamp(-32px, -0.978vw - 4px, -15px);
-  --x-pull-scale: clamp(-14px, -0.407vw - 2px, -6px);
-  --x-pull-note: clamp(-11px, -0.326vw - 1px, -5px);
-  --orb-cast: clamp(38px, 2.4vw + 12px, 50px);
-  /* a box this large is its own size, not a step: a panel, a sheet, a board. */
-  --box-100: clamp(63px, 4.07vw + 16px, 135px);
-  --box-110: clamp(69px, 4.48vw + 17px, 149px);
-  --box-130: clamp(81px, 5.29vw + 20px, 176px);
-  --box-160: clamp(100px, 6.52vw + 25px, 216px);
-  --box-170: clamp(106px, 6.92vw + 27px, 230px);
-  --box-180: clamp(113px, 7.33vw + 28px, 243px);
-  --box-200: clamp(125px, 8.14vw + 31px, 270px);
-  --box-240: clamp(150px, 9.77vw + 38px, 324px);
-  --box-300: clamp(188px, 12.22vw + 47px, 405px);
-  --box-320: clamp(200px, 13.03vw + 50px, 432px);
-  --box-420: clamp(263px, 17.1vw + 66px, 567px);
-  --box-440: clamp(275px, 17.92vw + 69px, 594px);
-  --box-520: clamp(325px, 21.18vw + 82px, 702px);
-  --box-560: clamp(350px, 22.8vw + 88px, 756px);
-  --box-620: clamp(388px, 25.25vw + 97px, 837px);
-  --box-680: clamp(425px, 27.69vw + 107px, 918px);
-  --box-720: clamp(450px, 29.32vw + 113px, 972px);
-  --box-920: clamp(575px, 37.46vw + 145px, 1242px);
-  --box-1100: clamp(688px, 44.79vw + 173px, 1485px);
-  --box-1800: clamp(1125px, 73.3vw + 283px, 2430px);
+    --icon-hub: clamp(40px, 4vw, 60px);
+    --icon-hub-img: 50%;
+    --slot-skill-size: clamp(30px, 4vw, 70px);
+    --field-card-size: clamp(125px, 8.63vw, 180px);
+    --spacing-xs: clamp(5px, 0.39vw, 11px);
+    --spacing-sm: clamp(8px, 0.63vw, 18px);
+    --spacing-md: clamp(13px, 0.97vw, 27px);
+    --spacing-lg: clamp(18px, 1.36vw, 38px);
+    --spacing-xl: clamp(26px, 2.03vw, 57px);
+    /* THE MICRO RUNGS. The five steps above are a ladder of about ×1.62, and the two rungs under
+     `--spacing-xs` are where that same ratio lands: 8 ÷ 1.62 ≈ 5, 5 ÷ 1.62 ≈ 3, 3 ÷ 1.62 ≈ 2. The
+     client used to write 1/2/3/4px freely for the same jobs — an icon against its label, one readout
+     line under another, the seam between two bordered cells — and four values for three jobs is how
+     the rail ended up a 2px row while the cast orbs beside it ran a 3px one. They are steps now, and
+     they scale: a hardcoded 3px gap under a panel that grew 35% is no longer the same gap.
+       --spacing-3xs  two lines of one read, a glyph against its label
+       --spacing-2xs  a control's own inner pad, the seam between bordered cells
+     A 1px that is a border's own hairline is not spacing and never joins the ladder: `--seam`. */
+    --spacing-2xs: clamp(2px, 0.15vw, 4px);
+    --spacing-3xs: clamp(1px, 0.10vw, 3px);
+    --seam: 1px;
+
+    /* the unique sizes. These are not steps: the HUD's fixed hardware, the map sheet and the boxes
+     too big for an icon step each keep their own figure. Each is the same `calc(<design>px * …)`, and
+     the two ends are that row's own hardware — the floor a control cannot read under and the ceiling
+     it must not grow past — so they bind where they always bound, only now on the shared ramp. */
+    --sheet-fs-region: clamp(8px, 0.48vw, 14px);
+    --sheet-fs-walk: clamp(6px, 0.34vw, 9px);
+    --sheet-fs-place: clamp(7px, 0.44vw, 12px);
+    --sheet-fs-capital: clamp(8px, 0.53vw, 15px);
+    --sheet-fs-zonename: clamp(6px, 0.39vw, 11px);
+    --sheet-fs-id: clamp(5px, 0.34vw, 9px);
+    --x-pull-arc: clamp(-46px, -1.65vw, -21px);
+    --x-pull-burst: clamp(-32px, -1.16vw, -15px);
+    --x-pull-scale: clamp(-14px, -0.48vw, -6px);
+    --x-pull-note: clamp(-11px, -0.39vw, -5px);
+    /* the skill slot diameter, shared by its grid and the field's vertical budget */
+
+    /* a box this large is its own size, not a step: a panel, a sheet, a board. The name is its design
+     figure — the pixels it paints at scale 1, which is a 2066px viewport. */
+    --box-100: clamp(63px, 4.84vw, 135px);
+    --box-110: clamp(69px, 5.32vw, 149px);
+    --box-130: clamp(81px, 6.29vw, 176px);
+    --box-160: clamp(100px, 7.74vw, 216px);
+    --box-170: clamp(106px, 8.23vw, 230px);
+    --box-180: clamp(113px, 8.71vw, 243px);
+    --box-200: clamp(125px, 9.68vw, 270px);
+    --box-240: clamp(150px, 11.62vw, 324px);
+    --box-300: clamp(188px, 14.52vw, 405px);
+    --box-320: clamp(200px, 15.49vw, 432px);
+    --box-420: clamp(263px, 20.33vw, 567px);
+    --box-440: clamp(275px, 21.30vw, 594px);
+    --box-520: clamp(325px, 25.17vw, 702px);
+    --box-560: clamp(350px, 27.11vw, 756px);
+    --box-680: clamp(425px, 32.91vw, 918px);
+    --box-920: clamp(575px, 44.53vw, 1242px);
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
@@ -201,8 +212,10 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
 .tabs table { margin-top: 0; }
-.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
-.twrap table { min-width: 56rem; }
+.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.twrap table { width: 100%; min-width: 0; table-layout: fixed; }
+.twrap th, .twrap td { overflow-wrap: anywhere; }
+.twrap td:first-child { white-space: normal; }
 td:first-child { white-space: nowrap; }
 .rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
 .rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
@@ -262,7 +275,13 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }</style><div class="layout">
 <nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="on" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
-<main><h1>Crafting</h1><p class="lead">Stones change what a piece <em>is</em>; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. Every price below is read, never typed.</p><section><h2>The stones, one by one</h2><p class="note">Every Target cell reads the same way: <b>which line</b> (<i>select</i> = you name it · <i>random</i> = the stone draws it · <i>all</i> = every line in scope) · <b>how many</b> · <b>what kind</b> (<i>unbound mod</i> is the set past the Bound pair, <i>bound mod</i> the pair fixed at drop, <i>frame mod</i> line 1) · <b>what happens</b>, and a swap closes with what arrives. The frame mod belongs to no press except Corrupt, Polish and Reforge — those three are the only ones that touch it.</p><h3>Reroll Value Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Reroll value on a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">reroll value</span></td><td>1 Reroll Value Stone</td><td>the Mod stays and its value rolls again inside its own Tier, never below the floor this slot has held</td></tr><tr><td>Reroll value on a random line</td><td><span class="tag">random</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">reroll value</span></td><td>1 Reroll Value Stone</td><td>the same press with the line drawn rather than named</td></tr></tbody></table><h3>Tier Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Refine a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">raise tier by 1</span></td><td>1 Tier Stone</td><td>the Mod stays and never moves past the top Tier</td></tr><tr><td>Roll a tier on a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">reroll tier</span></td><td>1 Tier Stone</td><td>the Mod stays, its Tier and value roll again: the line can come back lower</td></tr><tr><td>Roll a new Mod on a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound or bound mod</span> <span class="tag">reroll mod</span></td><td>1 Tier Stone</td><td>a new Mod out of the Base pool with a fresh Tier and value; the line count and the frame mod are untouched</td></tr><tr><td>Roll a new Mod on the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound mod</span> <span class="tag">reroll mod</span></td><td>1 Tier Stone a line × the lines it edits</td><td>the same roll spent on every line in scope at once</td></tr></tbody></table><h3>Add Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Add a Mod on the piece</td><td><span class="tag">add</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">random</span></td><td>1 Add Stone</td><td>one line joins the set, marked (crafted); the piece stops at 2 presses</td></tr><tr><td>Add a chosen Mod on the piece</td><td><span class="tag">add</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">select</span></td><td>the same price as the drawn press</td><td>the Mod is chosen and the price is not: the choice buys the identity, never a cheaper line</td></tr></tbody></table><h3>Remove Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Remove a Mod on a random line</td><td><span class="tag">remove</span> <span class="tag">random</span> <span class="tag">1</span> <span class="tag">unbound mod</span></td><td>1 Remove Stone</td><td>a line leaves the set and the Add charge it took is refunded</td></tr><tr><td>Remove a Mod on a line</td><td><span class="tag">remove</span> <span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span></td><td>1 Remove Stone</td><td>the same press with the line named</td></tr></tbody></table><h3>Replace Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Replace a Mod on a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound or bound mod</span> <span class="tag">set mod</span> <span class="tag">with select</span></td><td>1 Replace Stone</td><td>both ends are chosen by the player; the Tier the new Mod lands on is the stone roll</td></tr><tr><td>Replace a Mod on a random line</td><td><span class="tag">random</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">set mod</span> <span class="tag">with select</span></td><td>1 Replace Stone</td><td>the Mod is named, the line is drawn from the Unbound set</td></tr><tr><td>Replace a Mod on the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound mod</span> <span class="tag">set mod</span> <span class="tag">with random</span></td><td>1 Replace Stone a line × the lines it edits</td><td>every line in scope at the one-stone Replace price; what arrives is drawn, not named</td></tr></tbody></table><h3>Imprint Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Imprint a Mod on a line · one Mod you hold (40 stones in the game)</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">set mod</span> <span class="tag">with the stone mod</span></td><td>1 stone of that one Mod</td><td>a fresh Tier and value on the Mod the stone carries: no Add charge, no line count moved</td></tr></tbody></table><h3>Upgrade Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Upgrade a step</td><td><span class="tag">item</span> <span class="tag">raise level by 1</span></td><td>the ladder below — 1 up to 30 a step</td><td>the piece own Gear line climbs (2 a step): not a Mod, so no line is added and nothing rerolls</td></tr></tbody></table><h3>Repair Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Repair the piece</td><td><span class="tag">item</span> <span class="tag">clear broken</span></td><td>1 Repair Stone</td><td>the piece returns at the level it broke at and its protection is refilled</td></tr></tbody></table><h3>Corrupt Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Corrupt the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound + frame mod</span> <span class="tag">roll once</span> <span class="tag">and close</span></td><td>1 stone · the piece is closed to stones after</td><td>25% nothing · 20% reroll value on every line · 15% adds one unbound mod, marked (crafted) · 15% removes one unbound mod · 10% rerolls the Element · 10% raises the Gear line · 5% one Item quality band down</td></tr></tbody></table><h3>Polish Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Polish the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound + frame mod</span> <span class="tag">reroll value</span></td><td>1 Polish Stone</td><td>every value rolls inside its own Tier at once: no Tier moves, no Mod identity moves, no line count moves</td></tr></tbody></table><h3>Reforge Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Reforge the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound + frame mod</span> <span class="tag">reroll tier</span> <span class="tag">then reroll value</span></td><td>1 Reforge Stone</td><td>one Tier drawn for the piece, then every value rolled inside it — the whole piece climbs or falls together</td></tr></tbody></table><h3>Rebirth Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Rebirth the Unbound lines</td><td><span class="tag">all</span> <span class="tag">2-5</span> <span class="tag">unbound mod</span> <span class="tag">reroll mod</span> <span class="tag">with random</span></td><td>1 Rebirth Stone</td><td>every line the Unbound set holds — the (crafted) ones included — draws a new Mod at once; the bound pair and the frame mod keep theirs, no line is added or removed, no Add charge is spent</td></tr></tbody></table><h3>Not a stone — presses that spend other stones</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Ascend the piece</td><td><span class="tag">item</span> <span class="tag">raise quality by 1</span></td><td>1 Add Stone + 1 Tier Stone</td><td>the value window moves with the band and every line rolls again inside the same Tier third it held</td></tr><tr><td>Condense a potion</td><td><span class="tag">potion</span> <span class="tag">raise effect by 10</span></td><td>10 bottles + 4 Reroll Value Stones</td><td>one bottle does the work of many, at one weight</td></tr></tbody></table></section>
+<main><h1>Crafting</h1><p class="lead">Stones change what a piece <em>is</em>; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. Use the settlement Craft bench to drag stones from your stack onto an equipped or carried target. Every price below is read, never typed.</p><section><h2>Use the Craft bench</h2><p class="note">Gear crafting is a Settlement service. Camp cooking is the field exception; it does not craft gear.</p><ol>
+      <li>Drag a piece from Equipped or Inventory into the central bench slot.</li>
+      <li>Hover a gear piece to inspect its full item detail and current Mod lines.</li>
+      <li>Drag a stone from the stack onto the selected piece. Direct presses apply on drop; presses that need a line or Mod choice prepare the action for review and confirmation.</li>
+      <li>Hover the gear again after the press to read its updated Mod lines.</li>
+    </ol></section>
+<section><h2>The stones, one by one</h2><p class="note">Every Target cell reads the same way: <b>which line</b> (<i>select</i> = you name it · <i>random</i> = the stone draws it · <i>all</i> = every line in scope) · <b>how many</b> · <b>what kind</b> (<i>unbound mod</i> is the set past the Bound pair, <i>bound mod</i> the pair fixed at drop, <i>frame mod</i> line 1) · <b>what happens</b>, and a swap closes with what arrives. The frame mod belongs to no press except Corrupt, Polish and Reforge — those three are the only ones that touch it.</p><h3>Reroll Value Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Reroll value on a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">reroll value</span></td><td>1 Reroll Value Stone</td><td>the Mod stays and its value rolls again inside its own Tier, never below the floor this slot has held</td></tr><tr><td>Reroll value on a random line</td><td><span class="tag">random</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">reroll value</span></td><td>1 Reroll Value Stone</td><td>the same press with the line drawn rather than named</td></tr></tbody></table><h3>Tier Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Refine a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">raise tier by 1</span></td><td>1 Tier Stone</td><td>the Mod stays and never moves past the top Tier</td></tr><tr><td>Roll a tier on a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">reroll tier</span></td><td>1 Tier Stone</td><td>the Mod stays, its Tier and value roll again: the line can come back lower</td></tr><tr><td>Roll a new Mod on a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound or bound mod</span> <span class="tag">reroll mod</span></td><td>1 Tier Stone</td><td>a new Mod out of the Base pool with a fresh Tier and value; the line count and the frame mod are untouched</td></tr><tr><td>Roll a new Mod on the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound mod</span> <span class="tag">reroll mod</span></td><td>1 Tier Stone a line × the lines it edits</td><td>the same roll spent on every line in scope at once</td></tr></tbody></table><h3>Add Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Add a Mod on the piece</td><td><span class="tag">add</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">random</span></td><td>1 Add Stone</td><td>one line joins the set, marked (crafted); the piece stops at 2 presses</td></tr><tr><td>Add a chosen Mod on the piece</td><td><span class="tag">add</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">select</span></td><td>the same price as the drawn press</td><td>the Mod is chosen and the price is not: the choice buys the identity, never a cheaper line</td></tr></tbody></table><h3>Remove Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Remove a Mod on a random line</td><td><span class="tag">remove</span> <span class="tag">random</span> <span class="tag">1</span> <span class="tag">unbound mod</span></td><td>1 Remove Stone</td><td>a line leaves the set and the Add charge it took is refunded</td></tr><tr><td>Remove a Mod on a line</td><td><span class="tag">remove</span> <span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span></td><td>1 Remove Stone</td><td>the same press with the line named</td></tr></tbody></table><h3>Replace Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Replace a Mod on a line</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound or bound mod</span> <span class="tag">set mod</span> <span class="tag">with select</span></td><td>1 Replace Stone</td><td>both ends are chosen by the player; the Tier the new Mod lands on is the stone roll</td></tr><tr><td>Replace a Mod on a random line</td><td><span class="tag">random</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">set mod</span> <span class="tag">with select</span></td><td>1 Replace Stone</td><td>the Mod is named, the line is drawn from the Unbound set</td></tr><tr><td>Replace a Mod on the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound mod</span> <span class="tag">set mod</span> <span class="tag">with random</span></td><td>1 Replace Stone a line × the lines it edits</td><td>every line in scope at the one-stone Replace price; what arrives is drawn, not named</td></tr></tbody></table><h3>Imprint Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Imprint a Mod on a line · one Mod you hold (40 stones in the game)</td><td><span class="tag">select</span> <span class="tag">1</span> <span class="tag">unbound mod</span> <span class="tag">set mod</span> <span class="tag">with the stone mod</span></td><td>1 stone of that one Mod</td><td>a fresh Tier and value on the Mod the stone carries: no Add charge, no line count moved</td></tr></tbody></table><h3>Upgrade Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Upgrade a step</td><td><span class="tag">item</span> <span class="tag">raise level by 1</span></td><td>the ladder below — 1 up to 30 a step</td><td>the piece own Gear line climbs (2 a step): not a Mod, so no line is added and nothing rerolls</td></tr></tbody></table><h3>Repair Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Repair the piece</td><td><span class="tag">item</span> <span class="tag">clear broken</span></td><td>1 Repair Stone</td><td>the piece returns at the level it broke at and its protection is refilled</td></tr></tbody></table><h3>Corrupt Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Corrupt the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound + frame mod</span> <span class="tag">roll once</span> <span class="tag">and close</span></td><td>1 stone · the piece is closed to stones after</td><td>25% nothing · 20% reroll value on every line · 15% adds one unbound mod, marked (crafted) · 15% removes one unbound mod · 10% rerolls the Element · 10% raises the Gear line · 5% one Item quality band down</td></tr></tbody></table><h3>Polish Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Polish the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound + frame mod</span> <span class="tag">reroll value</span></td><td>1 Polish Stone</td><td>every value rolls inside its own Tier at once: no Tier moves, no Mod identity moves, no line count moves</td></tr></tbody></table><h3>Reforge Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Reforge the piece</td><td><span class="tag">all</span> <span class="tag">unbound + bound + frame mod</span> <span class="tag">reroll tier</span> <span class="tag">then reroll value</span></td><td>1 Reforge Stone</td><td>one Tier drawn for the piece, then every value rolled inside it — the whole piece climbs or falls together</td></tr></tbody></table><h3>Rebirth Stone</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Rebirth the Unbound lines</td><td><span class="tag">all</span> <span class="tag">2-5</span> <span class="tag">unbound mod</span> <span class="tag">reroll mod</span> <span class="tag">with random</span></td><td>1 Rebirth Stone</td><td>every line the Unbound set holds — the (crafted) ones included — draws a new Mod at once; the bound pair and the frame mod keep theirs, no line is added or removed, no Add charge is spent</td></tr></tbody></table><h3>Not a stone — presses that spend other stones</h3><table><thead><tr><th>Press</th><th>Target</th><th>Cost</th><th>What it does</th></tr></thead><tbody><tr><td>Ascend the piece</td><td><span class="tag">item</span> <span class="tag">raise quality by 1</span></td><td>1 Add Stone + 1 Tier Stone</td><td>the value window moves with the band and every line rolls again inside the same Tier third it held</td></tr><tr><td>Condense a potion</td><td><span class="tag">potion</span> <span class="tag">raise effect by 10</span></td><td>10 bottles + 4 Reroll Value Stones</td><td>one bottle does the work of many, at one weight</td></tr></tbody></table></section>
 <section><h2>Quality ladder</h2><p class="note">Protection: 5 per piece from birth — each would-be break spends one and drops a level instead. A Repair stone revives at the pre-break level and refills protection. Online only.</p><table><thead><tr><th>Step</th><th>Quality Stones</th><th>Odds</th></tr></thead><tbody><tr><td>+1</td><td><span class="num">1</span></td><td>safe</td></tr><tr><td>+2</td><td><span class="num">2</span></td><td>safe</td></tr><tr><td>+3</td><td><span class="num">3</span></td><td>safe</td></tr><tr><td>+4</td><td><span class="num">4</span></td><td>safe</td></tr><tr><td>+5</td><td><span class="num">5</span></td><td>90% down to 45% — a fail drops one level</td></tr><tr><td>+6</td><td><span class="num">7</span></td><td>90% down to 45% — a fail drops one level</td></tr><tr><td>+7</td><td><span class="num">9</span></td><td>90% down to 45% — a fail drops one level</td></tr><tr><td>+8</td><td><span class="num">11</span></td><td>90% down to 45% — a fail drops one level</td></tr><tr><td>+9</td><td><span class="num">13</span></td><td>90% down to 45% — a fail drops one level</td></tr><tr><td>+10</td><td><span class="num">15</span></td><td>90% down to 45% — a fail drops one level</td></tr><tr><td>+11</td><td><span class="num">18</span></td><td>40% down to 10% — a fail breaks the piece</td></tr><tr><td>+12</td><td><span class="num">21</span></td><td>40% down to 10% — a fail breaks the piece</td></tr><tr><td>+13</td><td><span class="num">24</span></td><td>40% down to 10% — a fail breaks the piece</td></tr><tr><td>+14</td><td><span class="num">27</span></td><td>40% down to 10% — a fail breaks the piece</td></tr><tr><td>+15</td><td><span class="num">30</span></td><td>40% down to 10% — a fail breaks the piece</td></tr></tbody></table></section>
 <section><h2>Where stones come from</h2><p class="note">Elite and boss chances are per kill; a whole-stone value pays out whole.</p><table><thead><tr><th>Stone</th><th>Elite</th><th>Boss</th><th>Every kill</th></tr></thead><tbody><tr><td>Reroll Value Stone</td><td>—</td><td>—</td><td>one per dissolved piece, plus one Tier Stone per 500 dissolved</td></tr><tr><td>Tier Stone</td><td>5% per kill</td><td>3 stones</td><td>—</td></tr><tr><td>Add Stone</td><td>0.6% per kill</td><td>1 stone</td><td>—</td></tr><tr><td>Upgrade Stone</td><td>25% per kill</td><td>24 stones</td><td>1% per kill</td></tr><tr><td>Repair Stone</td><td>5% per kill</td><td>1 stone</td><td>elites and bosses only</td></tr><tr><td>Replace Stone</td><td>0.3% per kill</td><td>50% per kill</td><td>—</td></tr><tr><td>Imprint (any of 40)</td><td>1% per kill</td><td>2 stones</td><td>uniform over the Mod roster</td></tr><tr><td>Corrupt Stone</td><td>—</td><td>25% per kill</td><td>bosses only</td></tr><tr><td>Polish Stone</td><td>0.2% per kill</td><td>50% per kill</td><td>one step tighter than Replace on the Elite half, and Replace own Boss half</td></tr><tr><td>Reforge Stone</td><td>—</td><td>12.5% per kill</td><td>bosses only, on half the Corrupt chance — the bench spends it on the whole piece</td></tr><tr><td>Rebirth Stone</td><td>—</td><td>6.3% per kill</td><td>bosses only, inside the same boss draw again (Corrupt ⊃ Reforge ⊃ Rebirth) — the widest press of the three, so the rarest stone</td></tr></tbody></table></section>
 <section><h2>How many lines a piece can gain</h2><p class="note">Remove refunds room — but every stone taken still counts toward the climbing fill price.</p><p>A piece remembers how many Unbound lines it dropped with, and Add stones may add 2 more in total — one line a press, never a bundle, and the fill price climbs with every press the piece has taken.</p></section>

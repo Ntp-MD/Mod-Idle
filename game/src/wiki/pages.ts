@@ -20,7 +20,7 @@
 
 // The wiki reads the engine, and only the engine: this is the same seam the client uses, so a page,
 // a cage and the game all resolve to one module and one data file.
-import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, eng, loot, sm, tree, road, farm } from '../engine/client.ts';
+import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, eng, loot, sm, tree, road, farm, fieldwork } from '../engine/client.ts';
 import { STONE_NAME, PRESS_NAME } from '../../../engine/craft.ts';
 
 /**
@@ -144,6 +144,10 @@ const treeNodes = () => ({
   perBranch: (name: string) => Object.keys((TREE_SPEC as any).branches?.[name] || {}).length,
 });
 const TREE_CFG = TREE_SPEC as any;
+const weaponFrameCounts = (BASES.weapons || []).map((weapon: any) => ((BASES.weapon_frames as any)?.[weapon.name] || []).length);
+const weaponFrameSummary = weaponFrameCounts.every((count: number) => count === weaponFrameCounts[0])
+  ? `${n0(weaponFrameCounts[0])} frames for each weapon type`
+  : `${n0(Math.min(...weaponFrameCounts))}–${n0(Math.max(...weaponFrameCounts))} frames per weapon type`;
 
 /** A Mod id as the name the player reads — the same table the engine rolls from. */
 const modName = (id: any): string => (id ? ((MODS.mods || []).find((m: any) => m.id === id)?.name || String(id)) : '—');
@@ -160,12 +164,12 @@ page({
   lead: 'An open-world idle RPG. Your character fights while the window is open and while it is shut.',
   body: [
     block('A run, in six steps', `<ol>
-      <li><strong>Pick a settlement</strong>, then a zone attached to it.</li>
-      <li><strong>Fight</strong> — the character attacks on the clock; skills fire on their own cooldowns and mana.</li>
-      <li><strong>Loot</strong> — every mob pays XP, a chance at gear, crafting stones and junk.</li>
+      <li><strong>Pick a settlement</strong> and a zone. In the field, a player-set Camp opens gathering and cooking.</li>
+      <li><strong>Fight</strong> — the character attacks on the clock; paid skills use flat Mana or current-HP costs, while auras reserve Max Mana.</li>
+      <li><strong>Loot</strong> — kills pay XP and their separate gear, junk, stone and skill-piece rolls; hunting can also yield field provisions.</li>
       <li><strong>Decide</strong> — equip the piece, or feed it to the crafting stones.</li>
-      <li><strong>Craft</strong> at a settlement: reroll a line, refine it, ascend the whole piece.</li>
-      <li><strong>Climb</strong> to the next zone. There is no death: a losing fight pushes you back to camp.</li>
+      <li><strong>Craft</strong> at a settlement: drag gear to the bench and a stone stack to the target; hover a piece to inspect its Mods.</li>
+      <li><strong>Climb</strong> to the next zone. A Push costs recovery time: a Field Camp in that zone receives you and ends the walk; otherwise the route resumes at its ambush block.</li>
     </ol>`, 'The whole game is one screen — the field — and the panels behind it.'),
     block('What is in the game', table(['', 'Count', 'What it is'], [
       ['Zones', wrap(n0(eng.ZONES.length)), 'each with its own level band, Element and group size'],
@@ -175,7 +179,7 @@ page({
       ['Elements', wrap(n0(E.elements.order.length)), list(E.elements.order)],
       ['Settlements', wrap(n0(TOWN.settlements.length)), 'shops, storage, tasks and crafting'],
       ['Dungeons', wrap(n0(TOWN.settlements.length)), 'one per settlement — escrowed loot, forfeited on a Push'],
-      ['Passive tree', wrap(n0(treeNodes().count)), `${treeNodes().branches} branches · ${n0(TREE_CFG.point_cost_per_rank)} point a rank`],
+      ['Passive tree', wrap(n0(treeNodes().count)), `${treeNodes().branches} wings · a centre start, cross-links at ranks ${list((TREE_CFG.graph as any).crosslink_ranks)} · ${n0(TREE_CFG.point_cost_per_rank)} point a rank`],
     ]), 'Read from the data, never typed here.'),
   ],
 });
@@ -230,7 +234,7 @@ page({
   file: 'skills.html',
   nav: 'Skills',
   title: 'Skills',
-  lead: `Every skill is found as a drop and paid for with the same resource: <em>mana</em>. A skill levels up on kills with it in the list, up to ${E.skill_xp.level_cap} — and at that level a press deals ${sm.damagePct(E.skill_xp.level_cap)}% of its level-1 damage, a buff's or an aura's effect climbs to ${sm.buffEffectPct(E.skill_xp.level_cap)}%, and every other effect reaches ${sm.effectPct(E.skill_xp.level_cap)}%.`,
+  lead: `Every skill is found as a drop. New buffs and auras enter the collection switched off; turn them on in Skills when you want their effects. A paid row uses one typed flat Mana or current-HP cost; an aura reserves Max Mana. A skill levels up on kills while it is slotted or toggled on, up to ${E.skill_xp.level_cap} — and at that level a press deals ${sm.damagePct(E.skill_xp.level_cap)}% of its level-1 damage, a buff's or an aura's effect climbs to ${sm.buffEffectPct(E.skill_xp.level_cap)}%, and every other effect reaches ${sm.effectPct(E.skill_xp.level_cap)}%.`,
   body: [(() => {
     // Three tabs over one table. Active is the slot list — every type that is not on the toggle track —
     // read from the roster rather than typed, so a new type lands in the right tab by its own kind.
@@ -245,9 +249,9 @@ page({
       key: g.key,
       label: g.label,
       rows: g.types.flatMap((t: string) => sm.of(t).map((s: any) => {
-        // Price is flat mana for every row that pays it, and the reserve share for an aura, which pays by
-        // holding that much of the pool open instead (`skills.json` gives an aura no `mana` at all).
-        const cost = s.mana ? esc(s.mana) : s.reserve ? `reserve ${sm.reservePct(s.reserve)}%` : '';
+        // A paid row names either its typed flat Mana or current-HP cost; an aura pays by holding a
+        // share of Max Mana open instead.
+        const cost = s.mana ? `${esc(s.mana)} Mana` : s.hp_cost ? `${esc(s.hp_cost)} current HP` : s.reserve ? `reserve ${sm.reservePct(s.reserve)}% Max Mana` : '';
         // An attack's effect columns lead with its press damage; a buff, an aura, a curse or a heal shows
         // the lines it moves. Each line names itself, so the two columns read on their own.
         // a row bound to one weapon says so beside its name (a family token: `axe` covers both axes)
@@ -260,6 +264,13 @@ page({
     return block('The roster', tabbedTable('skillkind', head, groups),
       'Min and Max are the same list at the two ends of the skill-level ramp: a press reads its damage, everything else the lines it moves, and each line names itself. The damage figure is a press on the reference character, before crit. A row with a weapon beside its name fires only while that weapon is held; one without is open to its whole group.');
   })(),
+    block('Cost and Max HP terms', table(['Rule', 'How the press reads it', 'Data term'], [
+      ['Flat cost', 'A paid active skill has either a Mana cost or an HP cost, never both; skill level raises the configured flat price.', '<code>mana</code> · <code>hp_cost</code>'],
+      ['HP safety', 'HP cost comes from current HP and cannot spend the final point.', '<code>hp_cost</code>'],
+      ['Caster Max HP', 'A skill may add a share of the caster’s Max HP before the skill-level ramp, crit, weapon and damage-bucket multipliers.', '<code>max_hp_pct</code>'],
+      ['Target Max HP', 'A separate skill effect may add a share of the target’s Max HP; it is not the caster term.', '<code>max_hp_pct_damage</code>'],
+      ['Area premium', 'Only a Mana-cost press receives the configured AoE cost premium.', '<code>aoe</code>'],
+    ]), 'Mana pool size changes how many presses are affordable, not their flat price. HP pool size does not change an HP price either; HP costs leave one point.'),
     block('What a status changes, and how far it climbs', table(
       ['Status', 'What it does', 'At one stack / hit', 'At its ceiling', 'Holds'],
       [
@@ -421,7 +432,7 @@ page({
   file: 'weapons.html',
   nav: 'Weapons',
   title: 'Weapons',
-  lead: `Eleven main-hand types. Each brings two frames; the first is the live forced pair. Windows read at the mid band, like every window on this wiki.`,
+  lead: `${n0((BASES.weapons || []).length)} main-hand types, ${weaponFrameSummary}. The first frame is the live forced pair. Windows read at the mid band, like every window on this wiki.`,
   body: [
     block('Weapon by weapon', ((BASES.weapons || []) as any[]).map((w: any) => {
       const frames = (maybe(BASES.weapon_frames, w.name) || []) as any[];
@@ -439,7 +450,7 @@ page({
   title: 'Equipment',
   lead: 'Every slot that is not a main hand, frame by frame. The frame decides what it can roll; the roll decides what it is worth.',
   body: [
-    block('Slot by slot', slotSections(EQUIP_SLOTS), `A drop is not one Mod. Line 1 is the frame own — and on an armour slot that line carries the flat defence lines the frame's name promises: one, two or all three of Armour flat, Evasion flat and Energy Shield flat, never a random draw, every value scaled as the line carries more Mods. The next ${n0(IL.bound_slots)} lines are the Bound pair: rolled at drop, locked against every stone. The Unbound lines are rolled too — a drop draws ${spacing(NORM)} of them, so two pieces of one level and one band need not be the same width — and the Add craft opens up to ${n0(IL.mods_added_cap)} more for the ${n0(IL.crafted_max)}-line ceiling. Bound and Unbound lines draw the same slot pool and only the stone lock tells them apart, so the pool is printed once. Beside every line is the value window it rolls in at the ${esc(BAND_SPAN.band || 'mid')} band — its floor at the band's first level, its ceiling at its last, so a higher Item level lifts the floor and never the ceiling. A Frame Mod that shares one budget across several Mods is printed unscaled; the × note beside it says what the share does.`),
+    block('Slot by slot', slotSections(EQUIP_SLOTS), `A drop is not one Mod. Line 1 is the frame own — and on an armour slot it carries the flat defence lines the frame promises: one, two or all three of Armour, Evasion and Energy Shield; on a Shield off-hand it locks Block Chance with that frame's Armour, Energy Shield or Armour + Energy Shield profile. These lines are never a random draw, and every value scales as the line carries more Mods. The next ${n0(IL.bound_slots)} lines are the Bound pair: rolled at drop, locked against every stone. The Unbound lines are rolled too — a drop draws ${spacing(NORM)} of them, so two pieces of one level and one band need not be the same width — and the Add craft opens up to ${n0(IL.mods_added_cap)} more for the ${n0(IL.crafted_max)}-line ceiling. Bound and Unbound lines draw the same slot pool and only the stone lock tells them apart, so the pool is printed once. Beside every line is the value window it rolls in at the ${esc(BAND_SPAN.band || 'mid')} band — its floor at the band's first level, its ceiling at its last, so a higher Item level lifts the floor and never the ceiling. A Frame Mod that shares one budget across several Mods is printed unscaled; the × note beside it says what the share does.`),
   ],
 });
 
@@ -480,7 +491,7 @@ page({
       // the sheet prints the same name (tools/map.ts owns it); the wiki only reads it back
       esc(s.name + ' Dungeon'), wrap(n0(s.zone)), esc(s.band),
       `${n0(E.dungeon.mob_cap)} mobs · groups of ${n0(E.dungeon.group_cap)}`,
-    ])), `One dungeon per zone, on its settlement's first wild side. Same mobs, same rolls as the zone — but loot waits in escrow until the last mob falls, a Push forfeits it, and a cleared run cools down ${n0(E.dungeon.cooldown_sec / 60)} minutes.`),
+    ])), `One dungeon per zone, entered at wild-side index ${n0((E.fieldwork as any).wild_site_index.dungeon)}. Same mobs, same rolls as the zone — but loot waits in escrow until the last mob falls, a Push forfeits it, and a cleared run cools down ${n0(E.dungeon.cooldown_sec / 60)} minutes.`),
     block('Species', table(['Species', 'Zones', 'Body classes', 'Damage', 'Element', 'Health line'], (E.mob.species || []).map((sp: any) => [
       esc(sp.name), list(sp.zones), list(sp.sizes), esc(sp.damage), esc((sp as any).element), esc(sp.trait || ''),
     ])), 'A race owns one Element and resists it wherever it stands — any other Element lands on it with no resistance at all.'),
@@ -661,7 +672,7 @@ page({
         esc(c.name || c.id), esc((TOWN.settlements || []).find((s: any) => s.id === c.settlement)?.name || c.settlement),
         esc(c.school), list(c.pieces || []), esc(c.quality || 'any'),
         `<span class="hy">${esc(c.reward || '')}${c.pays_gold === false ? ' · never gold, never a Mod' : ''}</span>`,
-      ])), 'Pieces are consumed, so the sink runs before any filter ever dissolves them (<code>collector_sets.rule</code>). The Collector pays neither gold nor a Mod — that is what keeps it out of the power economy.'),
+      ])), 'A piece that improves what you wear stays available for Auto Equip. The Collector reserves non-upgrades before a filter can dissolve them (<code>collector_sets.rule</code>). The Collector pays neither gold nor a Mod — that is what keeps it out of the power economy.'),
     ];
   })(),
 });
@@ -701,8 +712,14 @@ page({
   file: 'crafting.html',
   nav: 'Crafting',
   title: 'Crafting',
-  lead: 'Stones change what a piece <em>is</em>; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. Every price below is read, never typed.',
+  lead: 'Stones change what a piece <em>is</em>; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. Use the settlement Craft bench to drag stones from your stack onto an equipped or carried target. Every price below is read, never typed.',
   body: [
+    block('Use the Craft bench', `<ol>
+      <li>Drag a piece from Equipped or Inventory into the central bench slot.</li>
+      <li>Hover a gear piece to inspect its full item detail and current Mod lines.</li>
+      <li>Drag a stone from the stack onto the selected piece. Direct presses apply on drop; presses that need a line or Mod choice prepare the action for review and confirmation.</li>
+      <li>Hover the gear again after the press to read its updated Mod lines.</li>
+    </ol>`, 'Gear crafting is a Settlement service. Camp cooking is the field exception; it does not craft gear.'),
     block('The stones, one by one', (() => {
       /** one heading per stone, then the presses that stone buys — a press is never a stone */
       const perStone = (key: string, presses: any[][]): string =>
@@ -816,7 +833,7 @@ page({
   file: 'progression.html',
   nav: 'Progression',
   title: 'Progression',
-  lead: `Levels come from kills. Skill levels come from kills with that skill. Weapon Mastery comes from kills with that weapon. Nothing is priced by the clock.`,
+  lead: `Character levels come from kills. Combat skill levels come from kills with that skill, field skill levels from their actions, and Weapon Mastery from kills with that weapon. Nothing is priced by the clock.`,
   body: [
     block('Level steps', table(['Level', 'XP to next', 'Cumulative XP', 'Kills at your own level'], (() => {
       const cap = E.stat.level_cap;
@@ -835,9 +852,9 @@ page({
       ['Account-wide', `+${pts((BASES.mastery as any).drop_bonus_per_type_pct)} drop rate per weapon type once that type reaches Mastery ${n0((BASES.mastery as any).drop_bonus_level_required)}`, `across ${n0((BASES.weapons || []).length)} types — <code>mastery.dropMultiplier</code>`],
       ['The ladder', `${n0((BASES.mastery as any).xp_per_kill)} Mastery XP a kill, the same curve shape as the herb farm, capped at ${n0((BASES.mastery as any).level_cap)}`, '<code>engine/mastery.ts</code>'],
     ]), 'Mastery never adds damage to a weapon type itself — that would make one type the right answer forever. It answers the weight question (<a href="idle.html">Away &amp; bag</a>) and the drop question (<a href="items.html">Items</a>), and it climbs at full rate while you are away.'),
-    block('The passive tree', table(['Branch', 'Nodes', 'Ranks', 'Points'], Object.keys(TREE_CFG.branches || {}).map((name: string) => [
+    block('The passive tree', table(['Wing', 'Nodes', 'Ranks', 'Points'], Object.keys(TREE_CFG.branches || {}).map((name: string) => [
       esc(name), wrap(n0(treeNodes().perBranch(name))), wrap(n0(TREE_CFG.rank_tiers?.shallow?.length ?? 3)), wrap(n0(TREE_CFG.point_cost_per_rank * (TREE_CFG.rank_tiers?.shallow?.length ?? 3) * treeNodes().perBranch(name))),
-    ])), `${n0(TREE_CFG.point_cost_per_rank)} point a rank · a rank pays ${pctList(TREE_CFG.rank_tiers?.shallow)} of the line at the shallow nodes and ${pctList(TREE_CFG.rank_tiers?.deep)} at the deep ones — a deep node of the same line is always the stronger buy. ${n0(E.stat.tree_points_base)} points are in hand at character creation and one arrives with every level (<code>stat.tree_points_base</code>, <code>stat.tree_points_per_level</code>), which is exactly the whole tree. The control branch’s last node is the one thing in the game that raises a Cap rather than a number: it lifts Elemental resistance to ${wrap(n0(E.caps.elem_res_max))}.`),
+    ])), `${n0(TREE_CFG.point_cost_per_rank)} point a rank · a free centre connects the first node of each wing. Owned paths branch to adjacent nodes; cross-links reconnect the wings at ranks ${list((TREE_CFG.graph as any).crosslink_ranks)}. A rank pays ${pctList(TREE_CFG.rank_tiers?.shallow)} of the line at shallow nodes and ${pctList(TREE_CFG.rank_tiers?.deep)} at deep ones — a deep node of the same line is always the stronger buy. ${n0(E.stat.tree_points_base)} points are in hand at character creation and one arrives with every level (<code>stat.tree_points_base</code>, <code>stat.tree_points_per_level</code>), enough for the whole tree. The control wing’s last node is the one thing in the game that raises a Cap rather than a number: it lifts Elemental resistance to ${wrap(n0(E.caps.elem_res_max))}. Every node pays one real stat line; there are no keystones.`),
   ],
 });
 
@@ -881,19 +898,19 @@ page({
     block('The order a hit resolves', table(['Step', 'What it decides', 'Cap', 'What the reference build holds'], [
       row('Perfect dodge', 'deletes the hit outright, and nothing the attacker has opposes it',
         capOf('perfect_dodge'), `${pts(DV.perfect_dodge)} from ${n1(DV.pdogge_rate)} rating — <code>perfectDodgeChance</code>`),
-      row('Evasion', 'the dodge roll: Agi carries the rating and the gear Evasion lines ride on it, opposed by the attacker’s Accuracy',
+      row('Evasion', `the dodge roll: Agi and gear build a rating; the first ${n0(E.evasion_roll.opening_rating)} points count at ${pc0(E.evasion_roll.opening_share)}, then earned rating grows at ×${n1(E.evasion_roll.earned_mult)} before meeting attacker Accuracy. Opening chance stays below ${n0(E.evasion_roll.opening_max_chance_pct)}% against zone-one mobs`,
         capOf('evasion'), `${n1(eng.evasionRating(EVEN))} rating at the even split alone, before any gear line — <code>evasionRating</code>, <code>evasionChance</code>`),
       row('Block', 'rolled last of the three avoidances; a blocked hit is cut by a flat amount read off your Armour rather than deleted',
         capOf('block'), 'the Shield offhand&rsquo;s own line, plus the charges an Earth Wall grants — each charge cuts one hit by the same rule — <code>caps.block_note</code>'),
       row('Armour', 'shrinks only the non-Element part of the hit, as a diminishing ratio',
         '<span class="hy">no Cap on the rating</span>', `${n0(DV.armour_ceil)} — <code>armourOf</code> — removing ${pc1(DV.armour_vs_zone9_boss)} of a boss-priced hit and ${pc1(DV.armour_vs_zone9_trash)} of a trash-priced one (<code>armour_vs_zone9_boss</code>, <code>armour_vs_zone9_trash</code>)`),
       row('Elemental resistance', 'shrinks the Element part of the hit, separately per Element',
-        `${wrap(n0(E.caps.elem_res))} <span class="hy">or</span> ${wrap(n0(E.caps.elem_res_max))}`, `${pts(DV.res_three)} raw from three pieces, which <code>resistanceOf</code> then holds at the Cap — and <code>res_raw</code> is ${n0(DV.res_raw)}, because no Core stat feeds it: it is a gear line alone. This is the one Cap with an unlock: the control branch’s last node raises it to ${n0(E.caps.elem_res_max)} — <code>elemResCapOf</code>`),
+        `${wrap(n0(E.caps.elem_res))} <span class="hy">or</span> ${wrap(n0(E.caps.elem_res_max))}`, `${pts(DV.res_three)} raw from three pieces, which <code>resistanceOf</code> then holds at the Cap — and <code>res_raw</code> is ${n0(DV.res_raw)}, because no Core stat feeds it: it is a gear line alone. This is the one Cap with an unlock: the control wing’s last node raises it to ${n0(E.caps.elem_res_max)} — <code>elemResCapOf</code>`),
       row('Energy Shield', 'the caster’s second pool, spent before Health, and shut out for a moment after any hit',
         '<span class="hy">no Cap</span>', `${n0(DV.es_pool)} pool, ${n1(DV.es_regen)} a second, a full pool back in ${n0(DV.es_recover_sec)} sec, worth ${pc1(DV.es_share_of_hp)} of your Health — <code>maxEsOf</code>, <code>esRegenOf</code>`),
       row('Health', 'the pool every layer above exists to protect',
         '<span class="hy">no Cap</span>', `${n0(DV.hp)} — <code>DERIVED.hp</code>`),
-    ]), 'Chaos is the Element that walks straight past Energy Shield (<code>energy_shield.chaos_bypasses</code>), so a shield does not answer it. A status lands on its own roll — the Alignment gate is on <a href="skills.html">Skills</a>.'),
+    ]), 'Hits of every Element, including chaos, and burn DoT spend Energy Shield before Health. Poison and bleed DoT go straight to Health. A status lands on its own roll — the Alignment gate is on <a href="skills.html">Skills</a>.'),
     block('Hit chance, both directions', table(['', 'The engine’s own names', 'The reference figure'], [
       ['You hitting a mob', '<code>playerAccuracy</code> · <code>hitChance</code> · <code>hitVs</code>',
         `${pc1(DV.hit_chance)} against the mean species on a Medium body, which holds ${n1(DV.mob_evasion_ref)} Evasion`],
@@ -927,16 +944,18 @@ page({
         `${pts((E.weapon_size_mult as any).bolt_share_pct)} of a finished hit — <code>weapon_size_mult.bolt_share_pct</code> · <code>basicAttackOf</code>`],
       ['Conversion', 'a percent of the finished physical share, routed into a named Element <em>before</em> mitigation, so that half answers resistance instead of Armour',
         '<code>convertDamageOf</code> — the budget is the whole hit and overflow is wasted, never a multiplier'],
-      ['A press on the body', 'Earth Splitter adds a share of the <em>target&rsquo;s own</em> maximum pool, so the hit scales with what it lands on rather than with the caster — and a boss answers half of it',
+      ['Caster Max HP press', 'a skill may add a share of the <em>caster&rsquo;s</em> Max HP before skill level, crit, weapon and damage-bucket multipliers',
+        '<code>max_hp_pct</code> — the caster pool is read'],
+      ['Target Max HP press', 'Earth Splitter adds a share of the <em>target&rsquo;s own</em> maximum pool, so the hit scales with what it lands on rather than with the caster — and a boss answers half of it',
         '<code>max_hp_press.boss_pct</code> — the row states the percent, this states the boss cut'],
-    ]), 'Whether a weapon swings or casts a bolt is read off its own damage line, so a wand cannot be a bolt in one file and a swing in another.'),
+    ]), 'Caster Max HP (`max_hp_pct`) and target Max HP (`max_hp_pct_damage`) are separate press terms. Whether a weapon swings or casts a bolt is read off its own damage line, so a wand cannot be a bolt in one file and a swing in another.'),
     block('Bleed, the one damage-over-time that is not an Element', table(['', 'The rule', 'Read from'], [
       ['Who puts it on', 'the axe&rsquo;s own <code>Chance to bleed %</code> line, or a press whose row grants the proc', '<code>bleed.note</code> &mdash; no curse carries it any more'],
       ['What lets it land', 'bleed is a rolled status, so it passes the same Alignment gate a stun does <em>before</em> its own chance is rolled', '<code>bleedChanceFrom</code> · <code>K_BLEED_CHANCE</code> · the axe&rsquo;s line'],
       ['Does it stack', yes((E.bleed as any).stacks), `<code>bleed.stacks</code> — a new application ${((E.bleed as any).refreshes) ? 'refreshes the duration instead' : 'does not refresh it'}`],
       ['Is it an Element', yes((E.bleed as any).is_element), '<code>bleed.is_element</code> — Elemental resistance does not answer it'],
       ['Can it crit', yes((E.bleed as any).can_crit), '<code>bleed.can_crit</code>'],
-      ['Does Armour shrink it', yes((E.bleed as any).affected_by_armour), '<code>bleed.affected_by_armour</code> — nothing mitigates it but time, heal and Energy Shield'],
+      ['Does Armour shrink it', yes((E.bleed as any).affected_by_armour), '<code>bleed.affected_by_armour</code> — its DoT bypasses Energy Shield; healing can recover the Health it spends'],
       ['What it scales with', 'the physical of one hit, not your swing count', '<code>bleed.note</code> — a slow heavy weapon is the bleed build'],
       ['On the mob side', 'the heavy physical lineages put bleed on us out of the damage they are already priced at', '<code>bleed.mob_side</code> — no extra power, so no health line moves'],
     ]), 'It is on this page rather than under <a href="elements.html">Elements</a> because it is the one damage-over-time no resistance answers.'),
@@ -952,23 +971,56 @@ page({
 page({
   file: 'survival.html',
   nav: 'Survival',
-  title: 'Survival, potions and the herb farm',
-  lead: 'A fight you lose costs time, never a piece and never a level. These are the pools that buy the time back, and the two provisioning tracks that feed them.',
+  title: 'Survival, field skills and provisions',
+  lead: 'A fight you lose costs time, never a piece and never a level. Read the pools, player-set Field Camp, Hunger, field provisions and the farm that feeds alchemy.',
   body: [
     block('The pools', table(['Pool', 'What it is', 'Full at the reference build', 'How it comes back'], [
       ['Health', 'the pool every avoidance layer protects', wrap(n0(DV.hp)), `${n1(eng.hpRegenOf(EVEN))} a second off the Vit line — <code>hpRegenOf</code>`],
-      ['Mana', 'the resource every skill is paid for with, including the auras that hold a share of it open', wrap(n0(DV.mana)),
+      ['Mana', 'the pool Mana-cost skills spend from; HP-cost skills debit the current HP pool, while auras reserve Max Mana', wrap(n0(DV.mana)),
         `${n1(DV.mana_regen)} a second, so an empty pool refills in ${n0(DV.pool_regen_sec)} sec — <code>manaRegenOf</code>`],
       ['Energy Shield', 'the caster’s second pool, spent before Health, and player-only', wrap(n0(DV.es_pool)),
         `${n1(DV.es_regen)} a second, but only once ${n0((E.energy_shield as any).delay_sec)} sec have passed without a hit — <code>esRegenOf</code>`],
     ]), 'Respec is free wherever a settlement is (<code>stat.respec_cost</code> reads ' + wrap(n0(S.respec_cost)) + '), because a locked build would punish you harder than a lost fight does.'),
     block('What a Push costs', `<ul class="fx">
       <li><span class="fk">There is no death.</span><span class="fs">rule</span><span class="fv">a fight you lose rests you at camp and costs time only</span></li>
-      <li><span class="fk">A Push on the walk is the ordinary Push.</span><span class="fs">rule</span><span class="fv">camp, rest, and back in on the block you were ambushed on — the walk is never cancelled and a block is never given back (<code>road.push_rule</code>)</span></li>
+      <li><span class="fk">A Push on the walk is the ordinary Push.</span><span class="fs">rule</span><span class="fv">with a Field Camp in this zone, recovery returns there and ends the walk; otherwise the route resumes at its ambush block (<code>road.push_rule</code>)</span></li>
       <li><span class="fk">A dungeon run forfeits its escrow.</span><span class="fs">rule</span><span class="fv">the one place a Push costs loot — <a href="world.html">World</a></span></li>
       <li><span class="fk">Your preset goes back to the main one.</span><span class="fs">rule</span><span class="fv">and a cooldown already counting keeps counting (<code>presets.cooldowns_persist_on_push</code>)</span></li>
       <li><span class="fk">A broken piece contributes nothing.</span><span class="fs">rule</span><span class="fv">the Armourer clears it and refills protection — <a href="crafting.html">Crafting</a></span></li>
     </ul>`, 'Nothing on this list is a number: a Push is the cost of the fight, not a tax on the character.'),
+    block('Field Camp and life skills', table(['Skill', 'Field site', 'What it yields'], [
+      ['Mining', `wild-side index ${n0((E.fieldwork as any).wild_site_index.mine)}`, `${n0((E.fieldwork as any).actions.mine.yield)} ore every ${n0((E.fieldwork as any).actions.mine.interval_sec)} sec · rich-vein chance scales with Mining and Mine Mastery`],
+      ['Woodcutting', `wild-side index ${n0((E.fieldwork as any).wild_site_index.grove)}`, `${n0((E.fieldwork as any).actions.grove.yield)} timber per action · rarewood and herb chances scale with Woodcutting and Grove Mastery`],
+      ['Hunting', 'bare field hexes', `raw meat and lineage provision chances and quantities scale with Hunting and each lineage’s Mastery`],
+      ['Cooking', 'active Field Camp', 'turn raw food, fruit, edible herbs and ingredients into timed combat meals'],
+    ]), `The first Field Camp and one relocation are free; later moves cost ${n0((E.fieldwork as any).camp.relocate_ore)} ore and ${n0((E.fieldwork as any).camp.relocate_timber)} timber. It is safe ground in its zone, allows field gathering and cooking, and receives a Push. Only one meal buff is active at a time. Field skill XP and Mastery are separate from character XP.`),
+    block('Field-skill progression', table(['Progress', 'Benefit', 'Read from'], [
+      ['Harvest milestones', `+${n0((E.fieldwork as any).progression.harvest_bonus_per_level)} unit per action at Skill levels ${list((E.fieldwork as any).progression.harvest_bonus_levels)}`, '<code>fieldwork.progression.harvest_bonus_*</code>'],
+      ['Field drop rate', `+${n1((E.fieldwork as any).progression.drop_rate_bonus_per_skill_level_pct)}% per Skill level after 1 and +${n1((E.fieldwork as any).progression.drop_rate_bonus_per_mastery_level_pct)}% per resource Mastery level after 1, up to +${n0((E.fieldwork as any).progression.drop_rate_bonus_cap_pct)}%`, '<code>fieldwork.progression.drop_rate_bonus_*</code>'],
+    ]), 'The field-drop bonus increases each configured material or provision chance multiplicatively; gear and crafting-stone drops are unchanged. Skill levels increase harvest quantity at the listed milestones, and Hunting applies that quantity bonus to raw meat and lineage provisions.'),
+    block('Food drops from hunts', table(['Lineage', 'Provision', 'Chance', 'Quantity'],
+      ((E.fieldwork as any).hunt.food_drops || []).map((drop: any) => [
+        esc(drop.species.join(' · ')),
+        esc((E.fieldwork as any).foods.find((food: any) => food.id === drop.food_id)?.name || drop.food_id),
+        pc1(drop.chance), `${n0(drop.min)}–${n0(drop.max)}`,
+      ])),
+      'These lineage drops are separate from the raw-meat roll. Goblins may leave raw haunches, human patrols may leave cooked rations, and forest folk can yield edible moonmint.'),
+    block('Hunger and provisions', table(['Food', 'Kind', 'Hunger restored', 'Source'],
+      ((E.fieldwork as any).foods || []).map((food: any) => [
+        esc(food.name), esc(food.kind), food.edible ? `+${n0(food.hunger_restore)}` : 'cooking ingredient', esc(food.source || '—'),
+      ])),
+      `Walking, hunting and gathering drain Hunger at their own configured rates. Town and a safe idle Camp pause it. Auto Eat defaults to ${n0((E.fieldwork as any).hunger.auto_eat.threshold_default)}%, uses cooked food → fruit → edible herbs, and saves raw food for empty-Hunger emergencies unless opted in earlier. At empty Hunger, HP regeneration is cut by ${n0((E.fieldwork as any).hunger.empty_hp_regen_cut_pct)}%; Energy Shield recharge stays unchanged. Each crossed road block also rolls a separate supply or rest event, in addition to its usual ambush chance.`),
+    block('Camp kitchen menu', table(['Menu', 'Dish', 'Cooking level', 'Ingredients', 'Hunger and timed effect'],
+      ((E.fieldwork as any).recipes || []).map((recipe: any) => {
+        const foods = Object.entries(recipe.foods).map(([id, amount]) =>
+          `${n0(amount)} ${(E.fieldwork as any).foods.find((food: any) => food.id === id)?.name || id}`);
+        const materials = Object.entries(recipe.materials).map(([id, amount]) => `${n0(amount)} ${id}`);
+        const herbs = Object.entries(recipe.herbs).map(([tier, amount]) => `${n0(amount)} ${tier} herb`);
+        const menu = recipe.menu === 'hearth' ? 'Hearth' : 'Wild forage';
+        return [esc(menu), esc(recipe.name), n0(recipe.level), esc([...foods, ...materials, ...herbs].join(' · ') || '—'),
+          `+${n0(recipe.hunger_restore)} Hunger · ${n0(recipe.duration_sec / 60)} min · +${n0(recipe.damage_pct)}% damage · +${n1(recipe.hp_regen_pct)}% Max HP regen/sec`];
+      })),
+      'Cook at a player-set Field Camp. A cooked meal restores Hunger and replaces the one active meal buff.'),
     block('Potions', table(['Draught', 'Pool', 'Band', 'Effect', 'Brewed from'],
       ((E.potions as any).list || []).map((p: any) => [
         esc(p.name), esc(p.pool), esc(p.tier),
@@ -987,7 +1039,7 @@ page({
       ['A day', `${n0((E.farm as any).taps_per_day)} taps, and up to ${n1(farm.offlineCapSec / 3600)} hours of growth are paid while you are away`, '<code>farm.taps_per_day</code> · <code>farm.offline_cap_hours</code>'],
       ['A level', `cap ${n0((E.farm as any).level_cap)} · ${n0((E.farm as any).xp_per_harvest)} XP a harvest · the same curve as Weapon Mastery`, '<code>farm.level_*</code>'],
       ['Which draughts open', `low from ${n0((E.farm as any).tier_unlock_level.low)} · mid from ${n0((E.farm as any).tier_unlock_level.mid)} · high from ${n0((E.farm as any).tier_unlock_level.high)}`, '<code>farm.tier_unlock_level</code>'],
-    ]), 'The farm is the game’s one life skill and it is timers only: herbs never become gear, Mods or damage.'),
+    ]), 'Settlement Farming provisions herbs for alchemy. Mining, Woodcutting, Hunting and Cooking are separate field skills; none of their XP is character XP.'),
     block('Herbs from the ground versus herbs from a fight', table(['Zone band', 'A bundle a kill', 'A bundle holds', 'A brewable draught a kill'],
       QUAL_BANDS.map((b: string) => [
         esc(b), pc1(farm.herbChance(b)), `${n0((E.herbs as any).bundle_min)}-${n0((E.herbs as any).bundle_max)} herbs`, pc1(farm.potionDropChance(b)),
@@ -1028,12 +1080,12 @@ page({
     ]), 'The value half of the craft engine keeps running while you are away, because a dissolved piece pays it. Everything else on this table is a reason to be in the chair — see <a href="crafting.html">Crafting</a> for what each stone spends.'),
     block('The two bags', table(['Bag', 'Slots', 'What goes in it', 'How it stacks', 'What it weighs'], [
       ['Adventure bag', wrap(n0((E.inventory as any).adventure_slots)), 'gear loot, one piece per slot', 'one piece a slot', 'counted against your weight capacity'],
-      ['Character bag', wrap(n0((E.inventory as any).character_slots)), 'what you carry to use: stones, herbs, potions',
-        `stones ${n0((E.inventory as any).stack_size.stone)} a slot · herbs and potions ${n0((E.inventory as any).stack_size.herb)} a slot`,
-        `stones ${n2((E.inventory as any).unit_weight.stone)} · herbs and potions ${n2((E.inventory as any).unit_weight.herb)} each`],
+      ['Character bag', wrap(n0((E.inventory as any).character_slots)), 'stones, herbs, potions, field materials and provisions',
+        `stones ${n0((E.inventory as any).stack_size.stone)} a slot · herbs and potions ${n0((E.inventory as any).stack_size.herb)} · materials ${n0((E.inventory as any).stack_size.material)} · provisions ${n0((E.inventory as any).stack_size.food)} a slot`,
+        `stones ${n2((E.inventory as any).unit_weight.stone)} · herbs and potions ${n2((E.inventory as any).unit_weight.herb)} · materials ${n2((E.inventory as any).unit_weight.material)} · provisions ${n2((E.inventory as any).unit_weight.food)} each`],
       ['Gold', 'no slot at all (<code>gold_uses_slot</code>)', 'the junk money', '—', '—'],
       ['Junk', `${n0((E.junk as any).stack)} a slot`, 'what the Counterhand buys', 'deep stacks', `${n2((E.junk as any).unit_weight)} each`],
-    ]), `A full bag is a pause, never a loss: <code>inventory.overflow</code> reads “${esc((E.inventory as any).overflow)}” — pickups stop, nothing auto-converts and nothing is deleted, and the client says which happened. A piece that cannot be carried is left on the ground. Stash and crafting are settlement services, and the Stash is one warehouse that every settlement’s counter opens.`),
+    ]), `A full bag is a pause, never a loss: <code>inventory.overflow</code> reads “${esc((E.inventory as any).overflow)}” — pickups stop, nothing auto-converts and nothing is deleted, and the client says which happened. A piece that cannot be carried is left on the ground. Gear crafting and Stash are settlement services; Camp cooking is the field exception. The Stash is one warehouse that every settlement’s counter opens.`),
     block('Weight', table(['Carried', 'The cut to your attack speed', 'Read from'], [
       ['Your capacity', wrap(n1(eng.weightCapacityOf(EVEN))) + ' at the even split — Str is the only line that lifts it', '<code>weightCapacityOf</code>'],
       ['At capacity or under', `${pc1(eng.encumbranceOf(eng.weightCapacityOf(EVEN), EVEN))} cut`, '<code>encumbranceOf</code>'],
@@ -1064,9 +1116,10 @@ page({
     block('One block', table(['', 'The number', 'Read from'], [
       ['Time', wrap(n0(road.blockSec)) + ' sec a block', '<code>road.block_sec</code>'],
       ['An encounter a block', pc1(road.encounterChance()), '<code>road.encounter_chance_pct</code>'],
+      ['A trail event a block', pc1((E.fieldwork as any).travel_events.chance_per_block), 'an independent supply or rest roll; it never replaces the encounter roll'],
       ['What ambushes you', 'an ordinary mob group from the lower of the two zones the walk joins, at that zone’s own level range and group size', '<code>road.encounter_rule</code>'],
       ['What it pays', 'the ordinary per-kill drop roll and nothing else', '<code>road.encounter_rule</code> — no purse, no chest, no Standing, no stone'],
-      ['Losing one', 'the ordinary Push: camp, rest, and back in on the block you were ambushed on', '<code>road.push_rule</code>'],
+      ['Losing one', 'a same-zone Field Camp receives you and ends the walk; without one, recover and resume at the ambush block', '<code>road.push_rule</code>'],
     ]), 'Walking mints no gold, so a long walk is a loot question and never a money question.'),
     block('Every settlement, from the start', (() => {
       const start: any = (TOWN.settlements || []).find((s: any) => s.start) || (TOWN.settlements || [])[0];
@@ -1107,13 +1160,13 @@ page({
       (sm.LADDER as any[]).map((l: any) => [
         wrap(n0(l.step)), pts(l.cdr), wrap(n0(l.cost)), wrap(n0(sm.ladderCostToStep(l.step))),
       ])),
-      `${n0(sm.LADDER_MAX_DUPLICATES)} duplicates is the whole ladder. A skill’s own level climbs on kills with it in the list, up to ${n0(sm.LEVEL_CAP)}, and that level is account-wide (<code>presets.skill_xp_is_account_wide</code>) — the two ramps are independent: the ladder buys cooldown, the level buys damage and effect strength.`),
+      `${n0(sm.LADDER_MAX_DUPLICATES)} duplicates is the whole ladder. A skill’s own level climbs on kills while it is slotted or toggled on, up to ${n0(sm.LEVEL_CAP)}, and that level is account-wide (<code>presets.skill_xp_is_account_wide</code>) — the two ramps are independent: the ladder buys cooldown, the level buys damage and effect strength.`),
     block('What an aura holds back', table(['Aura', 'Reserve tier', 'Mana it holds open', 'What it writes'],
       sm.of('aura').map((a: any) => [
         esc(a.name), esc(a.reserve), wrap(`${n0(sm.reservePct(a.reserve))}%`),
         `<span class="hy">${esc(a.effect || '')}</span>`,
       ])),
-      `Reserve tiers are <code>skills.json reserve_tiers</code>, and the total may not reach ${n0(sm.RESERVATION_LIMIT)}% — an aura’s cost is a budget you read up front, not a number you recompute mid-fight. A mana cost is a typed number of mana units (<code>manaSpec</code>) that climbs only with the skill’s own level, so every build pays the same price for one row and a bigger pool simply buys more casts.`),
+      `Reserve tiers are <code>skills.json reserve_tiers</code>, and the total may not reach ${n0(sm.RESERVATION_LIMIT)}% — an aura’s cost is a budget you read up front, not a number you recompute mid-fight. A paid row has one typed flat cost: Mana or current HP. Both climb only with the skill’s own level; pool size controls affordability, not price. HP costs leave one HP, and only Mana costs receive the AoE premium.`),
     block('Presets', table(['', 'The number', 'Read from'], [
       ['Sets you can store', wrap(n0((E.presets as any).sets)), '<code>presets.sets</code>'],
       ['Which one is main', `index ${n0((E.presets as any).main_index)}`, '<code>presets.main_index</code> — where a Push sends you back'],
@@ -1208,8 +1261,10 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
 .tabs table { margin-top: 0; }
-.twrap { overflow-x: auto; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
-.twrap table { min-width: 56rem; }
+.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.twrap table { width: 100%; min-width: 0; table-layout: fixed; }
+.twrap th, .twrap td { overflow-wrap: anywhere; }
+.twrap td:first-child { white-space: normal; }
 td:first-child { white-space: nowrap; }
 .rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
 .rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }

@@ -103,8 +103,8 @@ function pickWeighted(rng: any, options: any[]) {
 
 /**
  * Step 2 — the frame inside the rolled slot. Main hand picks a weapon type by weight; the off hand
- * picks equally among its three frames (Buckler · Kite Shield · Grimoire) and one dual-wielded
- * weapon, so a shield or a book can actually drop (item-base.md); every other slot picks a
+ * picks equally among its Shield / Book frames and one dual-wielded weapon, so a shield or a book can
+ * actually drop (item-base.md); every other slot picks a
  * Base by weight.
  */
 function rollBase(rng: any, slot: any, bias: any) {

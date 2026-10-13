@@ -12,7 +12,7 @@
   import PieceOn from './PieceOn.svelte';
   import type { GameState, Item } from '../sim/types';
 
-  let { state, item, where = null, index = -1, onpick, onrun, wornOf, note = '' }: {
+  let { state, item, where = null, index = -1, onpick, onrun, wornOf, note = '', embedded = false, compact = false }: {
     state: GameState;
     item: Item | null;
     where?: 'gear' | 'bag' | null;
@@ -21,6 +21,8 @@
     onrun: (op: 'upgrade' | 'repair' | 'corrupt', line?: number) => void;
     wornOf: (slot: string) => Item | null;
     note?: string;
+    embedded?: boolean;
+    compact?: boolean;
   } = $props();
 
   const C = craft.C;
@@ -49,7 +51,30 @@
 </script>
 
 <div class="forge">
-  <PieceOn game={state} {item} {where} {index} {onpick} {wornOf} />
+  {#if compact}
+    {#if item}
+      <div class="compact-forge">
+        <div class="compact-rungs" role="group" aria-label="Enhancement chances and Upgrade Stone costs">
+          {#each rungs as r (r.n)}
+            <div class="compact-rung" class:next={r.next} class:done={r.done} class:risky={r.n > C.upgrade_breaks_from - 1} title={`+${r.n} · ${Math.round(r.chance)}% · ${r.stones} Upgrade Stones`}>
+              <b>+{r.n}</b><span>{Math.round(r.chance)}%</span><small>{r.stones}</small>
+            </div>
+          {/each}
+        </div>
+        <small class="compact-facts">{maxed ? `Maximum +${cap}` : `${Math.round(chance)}% · ${Object.entries(cost).map(([k, n]) => `${n} ${stoneName(k)}`).join(' + ')}`} · protection {protection}/{C.protection_start} · {maxed ? 'no higher step' : miss}</small>
+        <div class="compact-actions">
+          <button disabled={!gate.ok || !afford || maxed}
+                  title={gate.ok ? `${Object.entries(cost).map(([k, n]) => `${n} ${stoneName(k)}`).join(' + ')} · ${miss}` : gate.why}
+                  onclick={() => onrun('upgrade')}>{maxed ? 'Max +' + cap : 'Enhance +' + step}</button>
+          <button disabled={!repairGate.ok} title={repairGate.why || `Repair · ${stoneName('repair')}`} onclick={() => onrun('repair')}>Repair</button>
+          <button class="corrupt" disabled={Boolean(!item.corrupted && !craft.payable(state.counters.stones, 'corrupt', item))}
+                  title="One irreversible gamble; can change an Element, lower quality or break the piece"
+                  onclick={() => onrun('corrupt')}>Corrupt</button>
+        </div>
+      </div>
+    {/if}
+  {:else}
+  {#if !embedded}<PieceOn game={state} {item} {where} {index} {onpick} {wornOf} />{/if}
 
   <div class="ladder" role="group" aria-label="The enhancement ladder">
     {#each rungs as r (r.n)}
@@ -60,7 +85,7 @@
       </div>
     {/each}
   </div>
-  <p class="scale"><small>left is the next rung, right is the top of the ladder · % is the published chance of the step · the number under it is Quality stones it asks for</small></p>
+  <p class="scale"><small>left is the next rung, right is the top of the ladder · % is the published chance of the step · the number under it is Upgrade Stones it asks for</small></p>
 
   {#if item}
     <div class="press">
@@ -100,24 +125,36 @@
     {#if note}<p class="result" class:good={!/drop|BROKEN|broken|refus/i.test(note)}>{note}</p>{/if}
   {/if}
 
-  <p class="purse">
+  {#if !embedded}<p class="purse">
     {#if stones.length}
       {#each stones as [k, v]}<span>{v} × {stoneName(k)}</span>{/each}
     {:else}
       <span class="dim">No stones in the purse — rejected drops dissolve into Value stones, and Guild tasks pay the rest.</span>
     {/if}
-  </p>
+  </p>{/if}
+  {/if}
 </div>
 
 <style>
   .forge { display: grid; gap: var(--spacing-md); }
+  .compact-forge { display: grid; gap: var(--spacing-2xs); min-width: 0; }
+  .compact-rungs { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--icon-md), 1fr)); gap: var(--spacing-3xs); }
+  .compact-rung { min-width: 0; display: grid; justify-items: center; gap: 1px; padding: var(--spacing-3xs) 0; border: 1px solid var(--line); background: var(--panel); font-family: var(--num); font-size: var(--font-xs); line-height: 1; }
+  .compact-rung b { color: var(--dim); font-weight: 500; }
+  .compact-rung span, .compact-rung small { color: var(--mob); font-size: var(--font-xs); }
+  .compact-rung.risky b { color: var(--hot); }
+  .compact-rung.next { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--panel)); }
+  .compact-rung.next b { color: var(--gold); }
+  .compact-facts { color: var(--dim); font-size: var(--font-xs); line-height: 1.1; }
+  .compact-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-2xs); }
+  .compact-actions button { min-width: 0; padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
 
   /* the ladder is the screen: a rung reads as a rung, climbed from the left, with the lit one being the
      press the button under it makes */
-  .ladder { display: flex; gap: 3px; align-items: stretch; }
+  .ladder { display: flex; gap: var(--spacing-2xs); align-items: stretch; }
   .rung {
-    flex: 1 1 0; min-width: 0; display: grid; gap: 1px; justify-items: center; align-content: center;
-    padding: var(--spacing-xs) 1px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+    flex: 1 1 0; min-width: 0; display: grid; gap: var(--seam); justify-items: center; align-content: center;
+    padding: var(--spacing-xs) var(--seam); border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
   }
   .rung b { font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
   .rung .pc, .rung .st { font-family: var(--num); font-size: var(--font-xs); color: var(--mob); }
@@ -131,20 +168,20 @@
   .rung.next b { color: var(--gold); font-size: var(--font-sm); }
   .scale { margin: var(--x-pull-scale) 0 0; color: var(--mob); }
 
-  .press { display: grid; grid-template-columns: 1fr minmax(clamp(200px, 13.04vw + 50px, 432px), clamp(275px, 17.93vw + 69px, 594px)); gap: var(--spacing-md); align-items: start; }
+  .press { display: grid; grid-template-columns: 1fr minmax(var(--box-320), var(--box-440)); gap: var(--spacing-md); align-items: start; }
   .odds { display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-md); align-items: center; }
   .big {
-    display: grid; gap: 1px; justify-items: center; padding: var(--spacing-sm) var(--spacing-md); min-width: var(--box-130);
+    display: grid; gap: var(--spacing-3xs); justify-items: center; padding: var(--spacing-sm) var(--spacing-md); min-width: var(--box-130);
     border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
   }
   .big b { font-family: var(--num); font-size: var(--font-xl); line-height: 1; color: var(--gold); }
   .big.safe b { color: var(--good); }
   .big.high b { color: var(--alarm); }
-  .big span { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: clamp(1px, 0.049vw + 0px, 2px); }
-  .terms { margin: 0; padding-left: var(--spacing-md); display: grid; gap: 3px; font-size: var(--font-xs); color: var(--dim); }
+  .big span { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: clamp(1px, 0.05vw, 2px); }
+  .terms { margin: 0; padding-left: var(--spacing-md); display: grid; gap: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); }
   .terms b { color: var(--text); font-family: var(--num); }
 
-  .acts { display: grid; gap: 4px; }
+  .acts { display: grid; gap: var(--spacing-2xs); }
   .hammer {
     padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-sm); border-radius: 12px;
     border-color: color-mix(in srgb, var(--gold) 55%, transparent); background: color-mix(in srgb, var(--gold) 13%, transparent); color: var(--gold);
@@ -153,12 +190,12 @@
   .refuse { margin: 0; font-size: var(--font-xs); color: var(--alarm); }
   .repair, .corrupt { font-size: var(--font-xs); }
   .corrupt { border-color: color-mix(in srgb, var(--elite) 70%, transparent); color: var(--curse); }
-  .gamble { margin: 1px 0 0; display: grid; gap: 3px; }
+  .gamble { margin: var(--spacing-3xs) 0 0; display: grid; gap: var(--spacing-2xs); }
   .gamble small { color: var(--dim); font-size: var(--font-xs); }
 
   .result { margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: 8px; font-size: var(--font-xs); background: color-mix(in srgb, var(--hp) 16%, transparent); color: var(--alarm); }
   .result.good { background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good-lit); }
-  .purse { margin: 0; display: flex; flex-wrap: wrap; gap: 3px var(--spacing-sm); font-size: var(--font-xs); color: var(--dim); font-family: var(--num); }
+  .purse { margin: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-2xs) var(--spacing-sm); font-size: var(--font-xs); color: var(--dim); font-family: var(--num); }
 
   @media (max-width: 1280px) {
     .press { grid-template-columns: 1fr; }

@@ -1,0 +1,813 @@
+- generic [ref=f2e2876]:
+  - toolbar "Field map — click a cell to pick a place, arrows and Enter work the same list" [ref=f2e2877]:
+    - img [ref=f2e2879]:
+      - generic [ref=f2e2882]:
+        - generic "A1 · no zone yet" [ref=f2e2883] [cursor=pointer]
+        - generic "A2 · no zone yet" [ref=f2e2884] [cursor=pointer]
+        - generic "A3 · no zone yet" [ref=f2e2885] [cursor=pointer]
+        - generic "A4 · no zone yet" [ref=f2e2886] [cursor=pointer]
+        - generic "A5 · no zone yet" [ref=f2e2887] [cursor=pointer]
+        - generic "A6 · no zone yet" [ref=f2e2888] [cursor=pointer]
+        - generic "A7 · no zone yet" [ref=f2e2889] [cursor=pointer]
+        - generic "A8 · no zone yet" [ref=f2e2890] [cursor=pointer]
+        - generic "A9 · no zone yet" [ref=f2e2891] [cursor=pointer]
+        - generic "A10 · no zone yet" [ref=f2e2892] [cursor=pointer]
+        - generic "Blackwater Reach Dungeon · Blackwater Reach · Lv 61-70" [ref=f2e2893] [cursor=pointer]
+        - generic "Blackwater Reach 2 · Blackwater Reach · Lv 61-70" [ref=f2e2894] [cursor=pointer]
+        - generic "A13 · no zone yet" [ref=f2e2895] [cursor=pointer]
+        - generic "A14 · no zone yet" [ref=f2e2896] [cursor=pointer]
+        - generic "A15 · no zone yet" [ref=f2e2897] [cursor=pointer]
+        - generic "A16 · no zone yet" [ref=f2e2898] [cursor=pointer]
+        - generic "Icebreak Shelf · Thornwake · Lv 171-180" [ref=f2e2899] [cursor=pointer]
+        - generic "Thornwake Dungeon · Thornwake · Lv 171-180" [ref=f2e2900] [cursor=pointer]
+        - generic "A19 · no zone yet" [ref=f2e2901] [cursor=pointer]
+        - generic "A20 · no zone yet" [ref=f2e2902] [cursor=pointer]
+        - generic "B1 · no zone yet" [ref=f2e2903] [cursor=pointer]
+        - generic "B2 · no zone yet" [ref=f2e2904] [cursor=pointer]
+        - generic "B3 · no zone yet" [ref=f2e2905] [cursor=pointer]
+        - generic "B4 · no zone yet" [ref=f2e2906] [cursor=pointer]
+        - generic "B5 · no zone yet" [ref=f2e2907] [cursor=pointer]
+        - generic "Tunnels · Bonegate · Lv 71-80" [ref=f2e2908] [cursor=pointer]
+        - generic "Sunken Vault · Bonegate · Lv 71-80" [ref=f2e2909] [cursor=pointer]
+        - generic "B8 · no zone yet" [ref=f2e2910] [cursor=pointer]
+        - generic "B9 · no zone yet" [ref=f2e2911] [cursor=pointer]
+        - generic "Silt Deeps · Blackwater Reach · Lv 61-70" [ref=f2e2912] [cursor=pointer]
+        - generic "Blackwater Reach · Blackwater Reach · Lv 61-70" [ref=f2e2913] [cursor=pointer]
+        - generic "Drowned Stair · Blackwater Reach · Lv 61-70" [ref=f2e2914] [cursor=pointer]
+        - generic "B13 · no zone yet" [ref=f2e2915] [cursor=pointer]
+        - generic "B14 · no zone yet" [ref=f2e2916] [cursor=pointer]
+        - generic "B15 · no zone yet" [ref=f2e2917] [cursor=pointer]
+        - generic "Thornwake 2 · Thornwake · Lv 171-180" [ref=f2e2918] [cursor=pointer]
+        - generic "Thornwake · Thornwake · Lv 171-180" [ref=f2e2919] [cursor=pointer]
+        - generic "Thornwake 3 · Thornwake · Lv 171-180" [ref=f2e2920] [cursor=pointer]
+        - generic "B19 · no zone yet" [ref=f2e2921] [cursor=pointer]
+        - generic "B20 · no zone yet" [ref=f2e2922] [cursor=pointer]
+        - generic "C1 · no zone yet" [ref=f2e2923] [cursor=pointer]
+        - generic "C2 · no zone yet" [ref=f2e2924] [cursor=pointer]
+        - generic "C3 · no zone yet" [ref=f2e2925] [cursor=pointer]
+        - generic "C4 · no zone yet" [ref=f2e2926] [cursor=pointer]
+        - generic "C5 · no zone yet" [ref=f2e2927] [cursor=pointer]
+        - generic "Bonegate Dungeon · Bonegate · Lv 71-80" [ref=f2e2928] [cursor=pointer]
+        - generic "Bonegate · Bonegate · Lv 71-80" [ref=f2e2929] [cursor=pointer]
+        - generic "Bonegate 2 · Bonegate · Lv 71-80" [ref=f2e2930] [cursor=pointer]
+        - generic "C9 · no zone yet" [ref=f2e2931] [cursor=pointer]
+        - generic "C10 · no zone yet" [ref=f2e2932] [cursor=pointer]
+        - generic "Blackwater Reach 3 · Blackwater Reach · Lv 61-70" [ref=f2e2933] [cursor=pointer]
+        - generic "Flooded Abyss · Blackwater Reach · Lv 61-70" [ref=f2e2934] [cursor=pointer]
+        - generic "C13 · no zone yet" [ref=f2e2935] [cursor=pointer]
+        - generic "C14 · no zone yet" [ref=f2e2936] [cursor=pointer]
+        - generic "Blight Field · Duskmoor · Lv 101-110" [ref=f2e2937] [cursor=pointer]
+        - generic "Duskmoor Dungeon · Duskmoor · Lv 101-110" [ref=f2e2938] [cursor=pointer]
+        - generic "Rime Bog · Thornwake · Lv 171-180" [ref=f2e2939] [cursor=pointer]
+        - generic "Frozen Fen · Thornwake · Lv 171-180" [ref=f2e2940] [cursor=pointer]
+        - generic "C19 · no zone yet" [ref=f2e2941] [cursor=pointer]
+        - generic "C20 · no zone yet" [ref=f2e2942] [cursor=pointer]
+        - generic "D1 · no zone yet" [ref=f2e2943] [cursor=pointer]
+        - generic "D2 · no zone yet" [ref=f2e2944] [cursor=pointer]
+        - generic "D3 · no zone yet" [ref=f2e2945] [cursor=pointer]
+        - generic "D4 · no zone yet" [ref=f2e2946] [cursor=pointer]
+        - generic "D5 · no zone yet" [ref=f2e2947] [cursor=pointer]
+        - generic "Deep Warrens · Bonegate · Lv 71-80" [ref=f2e2948] [cursor=pointer]
+        - generic "Bonegate 3 · Bonegate · Lv 71-80" [ref=f2e2949] [cursor=pointer]
+        - generic "D8 · no zone yet" [ref=f2e2950] [cursor=pointer]
+        - generic "Mountain Slopes · Highspire · Lv 11-20" [ref=f2e2951] [cursor=pointer]
+        - generic "Cliff Holds · Highspire · Lv 11-20" [ref=f2e2952] [cursor=pointer]
+        - generic "D11 · no zone yet" [ref=f2e2953] [cursor=pointer]
+        - generic "D12 · no zone yet" [ref=f2e2954] [cursor=pointer]
+        - generic "D13 · no zone yet" [ref=f2e2955] [cursor=pointer]
+        - generic "Rift Scar · Duskmoor · Lv 101-110" [ref=f2e2956] [cursor=pointer]
+        - generic "Duskmoor · Duskmoor · Lv 101-110" [ref=f2e2957] [cursor=pointer]
+        - generic "Duskmoor 2 · Duskmoor · Lv 101-110" [ref=f2e2958] [cursor=pointer]
+        - generic "Emberhold Dungeon · Emberhold · Lv 121-130" [ref=f2e2959] [cursor=pointer]
+        - generic "Noble Quarter · Emberhold · Lv 121-130" [ref=f2e2960] [cursor=pointer]
+        - generic "D19 · no zone yet" [ref=f2e2961] [cursor=pointer]
+        - generic "D20 · no zone yet" [ref=f2e2962] [cursor=pointer]
+        - generic "E1 · no zone yet" [ref=f2e2963] [cursor=pointer]
+        - generic "Fog Thicket · Millbrook · Lv 131-140" [ref=f2e2964] [cursor=pointer]
+        - generic "Spider Hollow · Millbrook · Lv 131-140" [ref=f2e2965] [cursor=pointer]
+        - generic "E4 · no zone yet" [ref=f2e2966] [cursor=pointer]
+        - generic "E5 · no zone yet" [ref=f2e2967] [cursor=pointer]
+        - generic "E6 · no zone yet" [ref=f2e2968] [cursor=pointer]
+        - generic "E7 · no zone yet" [ref=f2e2969] [cursor=pointer]
+        - generic "E8 · no zone yet" [ref=f2e2970] [cursor=pointer]
+        - generic "Highspire Dungeon · Highspire · Lv 11-20" [ref=f2e2971] [cursor=pointer]
+        - generic "Highspire · Highspire · Lv 11-20" [ref=f2e2972] [cursor=pointer]
+        - generic "Dragon Peak · Highspire · Lv 11-20" [ref=f2e2973] [cursor=pointer]
+        - generic "E12 · no zone yet" [ref=f2e2974] [cursor=pointer]
+        - generic "Burial Gallery · Saltmarrow · Lv 41-50" [ref=f2e2975] [cursor=pointer]
+        - generic "Saltmarrow Dungeon · Saltmarrow · Lv 41-50" [ref=f2e2976] [cursor=pointer]
+        - generic "Howling Waste · Duskmoor · Lv 101-110" [ref=f2e2977] [cursor=pointer]
+        - generic "Duskmoor 3 · Duskmoor · Lv 101-110" [ref=f2e2978] [cursor=pointer]
+        - generic "Fallen Gate · Emberhold · Lv 121-130" [ref=f2e2979] [cursor=pointer]
+        - generic "Emberhold · Emberhold · Lv 121-130" [ref=f2e2980] [cursor=pointer]
+        - generic "Market Ruins · Emberhold · Lv 121-130" [ref=f2e2981] [cursor=pointer]
+        - generic "E20 · no zone yet" [ref=f2e2982] [cursor=pointer]
+        - generic "Millbrook Dungeon · Millbrook · Lv 131-140" [ref=f2e2983] [cursor=pointer]
+        - generic "Millbrook · Millbrook · Lv 131-140" [ref=f2e2984] [cursor=pointer]
+        - generic "Millbrook 2 · Millbrook · Lv 131-140" [ref=f2e2985] [cursor=pointer]
+        - generic "F4 · no zone yet" [ref=f2e2986] [cursor=pointer]
+        - generic "F5 · no zone yet" [ref=f2e2987] [cursor=pointer]
+        - generic "F6 · no zone yet" [ref=f2e2988] [cursor=pointer]
+        - generic "Poison Fen · Wolf Cross · Lv 21-30" [ref=f2e2989] [cursor=pointer]
+        - generic "Wolf Cross Dungeon · Wolf Cross · Lv 21-30" [ref=f2e2990] [cursor=pointer]
+        - generic "Highspire 2 · Highspire · Lv 11-20" [ref=f2e2991] [cursor=pointer]
+        - generic "Highspire 3 · Highspire · Lv 11-20" [ref=f2e2992] [cursor=pointer]
+        - generic "F11 · no zone yet" [ref=f2e2993] [cursor=pointer]
+        - generic "Saltmarrow 2 · Saltmarrow · Lv 41-50" [ref=f2e2994] [cursor=pointer]
+        - generic "Saltmarrow · Saltmarrow · Lv 41-50" [ref=f2e2995] [cursor=pointer]
+        - generic "Saltmarrow 3 · Saltmarrow · Lv 41-50" [ref=f2e2996] [cursor=pointer]
+        - generic "F15 · no zone yet" [ref=f2e2997] [cursor=pointer]
+        - generic "F16 · no zone yet" [ref=f2e2998] [cursor=pointer]
+        - generic "Emberhold 2 · Emberhold · Lv 121-130" [ref=f2e2999] [cursor=pointer]
+        - generic "Emberhold 3 · Emberhold · Lv 121-130" [ref=f2e3000] [cursor=pointer]
+        - generic "F19 · no zone yet" [ref=f2e3001] [cursor=pointer]
+        - generic "F20 · no zone yet" [ref=f2e3002] [cursor=pointer]
+        - generic "G1 · no zone yet" [ref=f2e3003] [cursor=pointer]
+        - generic "Dark Grove · Millbrook · Lv 131-140" [ref=f2e3004] [cursor=pointer]
+        - generic "Millbrook 3 · Millbrook · Lv 131-140" [ref=f2e3005] [cursor=pointer]
+        - generic "G4 · no zone yet" [ref=f2e3006] [cursor=pointer]
+        - generic "G5 · no zone yet" [ref=f2e3007] [cursor=pointer]
+        - generic "G6 · no zone yet" [ref=f2e3008] [cursor=pointer]
+        - generic "Mud Flats · Wolf Cross · Lv 21-30" [ref=f2e3009] [cursor=pointer]
+        - generic "Wolf Cross · Wolf Cross · Lv 21-30" [ref=f2e3010] [cursor=pointer]
+        - generic "Wolf Cross 2 · Wolf Cross · Lv 21-30" [ref=f2e3011] [cursor=pointer]
+        - generic "Eastgate Dungeon · Eastgate · Lv 1-10" [ref=f2e3012] [cursor=pointer]
+        - generic "Eastgate 2 · Eastgate · Lv 1-10" [ref=f2e3013] [cursor=pointer]
+        - generic "G12 · no zone yet" [ref=f2e3014] [cursor=pointer]
+        - generic "Inner Sanctum · Saltmarrow · Lv 41-50" [ref=f2e3015] [cursor=pointer]
+        - generic "Outer Court · Saltmarrow · Lv 41-50" [ref=f2e3016] [cursor=pointer]
+        - generic "Outer Colonnade · The Pale Spire · Lv 51-60" [ref=f2e3017] [cursor=pointer]
+        - generic "The Pale Spire Dungeon · The Pale Spire · Lv 51-60" [ref=f2e3018] [cursor=pointer]
+        - generic "G17 · no zone yet" [ref=f2e3019] [cursor=pointer]
+        - generic "G18 · no zone yet" [ref=f2e3020] [cursor=pointer]
+        - generic "G19 · no zone yet" [ref=f2e3021] [cursor=pointer]
+        - generic "G20 · no zone yet" [ref=f2e3022] [cursor=pointer]
+        - generic "Sunken Reef · Wyrmback · Lv 141-150" [ref=f2e3023] [cursor=pointer]
+        - generic "Wyrmback Dungeon · Wyrmback · Lv 141-150" [ref=f2e3024] [cursor=pointer]
+        - generic "H3 · no zone yet" [ref=f2e3025] [cursor=pointer]
+        - generic "H4 · no zone yet" [ref=f2e3026] [cursor=pointer]
+        - generic "H5 · no zone yet" [ref=f2e3027] [cursor=pointer]
+        - generic "H6 · no zone yet" [ref=f2e3028] [cursor=pointer]
+        - generic "Wolf Cross 3 · Wolf Cross · Lv 21-30" [ref=f2e3029] [cursor=pointer]
+        - generic "Murky Swamp · Wolf Cross · Lv 21-30" [ref=f2e3030] [cursor=pointer]
+        - generic "Eastgate 3 · Eastgate · Lv 1-10" [ref=f2e3031] [cursor=pointer]
+        - generic "Eastgate · Eastgate · Lv 1-10" [ref=f2e3032] [cursor=pointer]
+        - generic "Open Grassland · Eastgate · Lv 1-10" [ref=f2e3033] [cursor=pointer]
+        - generic "H12 · no zone yet" [ref=f2e3034] [cursor=pointer]
+        - generic "H13 · no zone yet" [ref=f2e3035] [cursor=pointer]
+        - generic "Hall of Wardens · The Pale Spire · Lv 51-60" [ref=f2e3036] [cursor=pointer]
+        - generic "The Pale Spire · The Pale Spire · Lv 51-60" [ref=f2e3037] [cursor=pointer]
+        - generic "Sanctum Depths · The Pale Spire · Lv 51-60" [ref=f2e3038] [cursor=pointer]
+        - generic "H17 · no zone yet" [ref=f2e3039] [cursor=pointer]
+        - generic "H18 · no zone yet" [ref=f2e3040] [cursor=pointer]
+        - generic "H19 · no zone yet" [ref=f2e3041] [cursor=pointer]
+        - generic "H20 · no zone yet" [ref=f2e3042] [cursor=pointer]
+        - generic "Tideflats · Wyrmback · Lv 141-150" [ref=f2e3043] [cursor=pointer]
+        - generic "Wyrmback · Wyrmback · Lv 141-150" [ref=f2e3044] [cursor=pointer]
+        - generic "Wyrmback 2 · Wyrmback · Lv 141-150" [ref=f2e3045] [cursor=pointer]
+        - generic "Nettlecrag Dungeon · Nettlecrag · Lv 111-120" [ref=f2e3046] [cursor=pointer]
+        - generic "Bone Stair · Nettlecrag · Lv 111-120" [ref=f2e3047] [cursor=pointer]
+        - generic "I6 · no zone yet" [ref=f2e3048] [cursor=pointer]
+        - generic "I7 · no zone yet" [ref=f2e3049] [cursor=pointer]
+        - generic "I8 · no zone yet" [ref=f2e3050] [cursor=pointer]
+        - generic "I9 · no zone yet" [ref=f2e3051] [cursor=pointer]
+        - generic "Raider Camp · Eastgate · Lv 1-10" [ref=f2e3052] [cursor=pointer]
+        - generic "Village Outskirts · Eastgate · Lv 1-10" [ref=f2e3053] [cursor=pointer]
+        - generic "I12 · no zone yet" [ref=f2e3054] [cursor=pointer]
+        - generic "Sunken Tombs · Greyfen · Lv 31-40" [ref=f2e3055] [cursor=pointer]
+        - generic "Greyfen Dungeon · Greyfen · Lv 31-40" [ref=f2e3056] [cursor=pointer]
+        - generic "The Pale Spire 2 · The Pale Spire · Lv 51-60" [ref=f2e3057] [cursor=pointer]
+        - generic "The Pale Spire 3 · The Pale Spire · Lv 51-60" [ref=f2e3058] [cursor=pointer]
+        - generic "I17 · no zone yet" [ref=f2e3059] [cursor=pointer]
+        - generic "I18 · no zone yet" [ref=f2e3060] [cursor=pointer]
+        - generic "I19 · no zone yet" [ref=f2e3061] [cursor=pointer]
+        - generic "I20 · no zone yet" [ref=f2e3062] [cursor=pointer]
+        - generic "Wyrmback 3 · Wyrmback · Lv 141-150" [ref=f2e3063] [cursor=pointer]
+        - generic "Salt Cliffs · Wyrmback · Lv 141-150" [ref=f2e3064] [cursor=pointer]
+        - generic "Throne Abyss · Nettlecrag · Lv 111-120" [ref=f2e3065] [cursor=pointer]
+        - generic "Nettlecrag · Nettlecrag · Lv 111-120" [ref=f2e3066] [cursor=pointer]
+        - generic "Nettlecrag 2 · Nettlecrag · Lv 111-120" [ref=f2e3067] [cursor=pointer]
+        - generic "J6 · no zone yet" [ref=f2e3068] [cursor=pointer]
+        - generic "J7 · no zone yet" [ref=f2e3069] [cursor=pointer]
+        - generic "J8 · no zone yet" [ref=f2e3070] [cursor=pointer]
+        - generic "J9 · no zone yet" [ref=f2e3071] [cursor=pointer]
+        - generic "J10 · no zone yet" [ref=f2e3072] [cursor=pointer]
+        - generic "J11 · no zone yet" [ref=f2e3073] [cursor=pointer]
+        - generic "Dune Sea · Greyfen · Lv 31-40" [ref=f2e3074] [cursor=pointer]
+        - generic "Greyfen · Greyfen · Lv 31-40" [ref=f2e3075] [cursor=pointer]
+        - generic "Scorch Mesa · Greyfen · Lv 31-40" [ref=f2e3076] [cursor=pointer]
+        - generic "J15 · no zone yet" [ref=f2e3077] [cursor=pointer]
+        - generic "J16 · no zone yet" [ref=f2e3078] [cursor=pointer]
+        - generic "J17 · no zone yet" [ref=f2e3079] [cursor=pointer]
+        - generic "J18 · no zone yet" [ref=f2e3080] [cursor=pointer]
+        - generic "J19 · no zone yet" [ref=f2e3081] [cursor=pointer]
+        - generic "J20 · no zone yet" [ref=f2e3082] [cursor=pointer]
+        - generic "K1 · no zone yet" [ref=f2e3083] [cursor=pointer]
+        - generic "Stormbreak Grove · Ironrow · Lv 161-170" [ref=f2e3084] [cursor=pointer]
+        - generic "Thunder Glade · Ironrow · Lv 161-170" [ref=f2e3085] [cursor=pointer]
+        - generic "Molten Deeps · Nettlecrag · Lv 111-120" [ref=f2e3086] [cursor=pointer]
+        - generic "Nettlecrag 3 · Nettlecrag · Lv 111-120" [ref=f2e3087] [cursor=pointer]
+        - generic "K6 · no zone yet" [ref=f2e3088] [cursor=pointer]
+        - generic "K7 · no zone yet" [ref=f2e3089] [cursor=pointer]
+        - generic "K8 · no zone yet" [ref=f2e3090] [cursor=pointer]
+        - generic "K9 · no zone yet" [ref=f2e3091] [cursor=pointer]
+        - generic "K10 · no zone yet" [ref=f2e3092] [cursor=pointer]
+        - generic "K11 · no zone yet" [ref=f2e3093] [cursor=pointer]
+        - generic "K12 · no zone yet" [ref=f2e3094] [cursor=pointer]
+        - generic "Greyfen 2 · Greyfen · Lv 31-40" [ref=f2e3095] [cursor=pointer]
+        - generic "Greyfen 3 · Greyfen · Lv 31-40" [ref=f2e3096] [cursor=pointer]
+        - generic "K15 · no zone yet" [ref=f2e3097] [cursor=pointer]
+        - generic "K16 · no zone yet" [ref=f2e3098] [cursor=pointer]
+        - generic "K17 · no zone yet" [ref=f2e3099] [cursor=pointer]
+        - generic "Elder Rootway · Ashfall · Lv 151-160" [ref=f2e3100] [cursor=pointer]
+        - generic "Ashfall Dungeon · Ashfall · Lv 151-160" [ref=f2e3101] [cursor=pointer]
+        - generic "K20 · no zone yet" [ref=f2e3102] [cursor=pointer]
+        - generic "Ironrow Dungeon · Ironrow · Lv 161-170" [ref=f2e3103] [cursor=pointer]
+        - generic "Ironrow · Ironrow · Lv 161-170" [ref=f2e3104] [cursor=pointer]
+        - generic "Charged Rootway · Ironrow · Lv 161-170" [ref=f2e3105] [cursor=pointer]
+        - generic "L4 · no zone yet" [ref=f2e3106] [cursor=pointer]
+        - generic "L5 · no zone yet" [ref=f2e3107] [cursor=pointer]
+        - generic "Ash Fields · Frosthold · Lv 81-90" [ref=f2e3108] [cursor=pointer]
+        - generic "Caldera · Frosthold · Lv 81-90" [ref=f2e3109] [cursor=pointer]
+        - generic "L8 · no zone yet" [ref=f2e3110] [cursor=pointer]
+        - generic "L9 · no zone yet" [ref=f2e3111] [cursor=pointer]
+        - generic "L10 · no zone yet" [ref=f2e3112] [cursor=pointer]
+        - generic "L11 · no zone yet" [ref=f2e3113] [cursor=pointer]
+        - generic "L12 · no zone yet" [ref=f2e3114] [cursor=pointer]
+        - generic "L13 · no zone yet" [ref=f2e3115] [cursor=pointer]
+        - generic "L14 · no zone yet" [ref=f2e3116] [cursor=pointer]
+        - generic "L15 · no zone yet" [ref=f2e3117] [cursor=pointer]
+        - generic "L16 · no zone yet" [ref=f2e3118] [cursor=pointer]
+        - generic "Glimmer Grove · Ashfall · Lv 151-160" [ref=f2e3119] [cursor=pointer]
+        - generic "Ashfall · Ashfall · Lv 151-160" [ref=f2e3120] [cursor=pointer]
+        - generic "Moonlit Glade · Ashfall · Lv 151-160" [ref=f2e3121] [cursor=pointer]
+        - generic "L20 · no zone yet" [ref=f2e3122] [cursor=pointer]
+        - generic "M1 · no zone yet" [ref=f2e3123] [cursor=pointer]
+        - generic "Ironrow 2 · Ironrow · Lv 161-170" [ref=f2e3124] [cursor=pointer]
+        - generic "Ironrow 3 · Ironrow · Lv 161-170" [ref=f2e3125] [cursor=pointer]
+        - generic "M4 · no zone yet" [ref=f2e3126] [cursor=pointer]
+        - generic "M5 · no zone yet" [ref=f2e3127] [cursor=pointer]
+        - generic "Frosthold Dungeon · Frosthold · Lv 81-90" [ref=f2e3128] [cursor=pointer]
+        - generic "Frosthold · Frosthold · Lv 81-90" [ref=f2e3129] [cursor=pointer]
+        - generic "Slag Pit · Frosthold · Lv 81-90" [ref=f2e3130] [cursor=pointer]
+        - generic "M9 · no zone yet" [ref=f2e3131] [cursor=pointer]
+        - generic "M10 · no zone yet" [ref=f2e3132] [cursor=pointer]
+        - generic "M11 · no zone yet" [ref=f2e3133] [cursor=pointer]
+        - generic "Vermolch Dungeon · Vermolch · Lv 91-100" [ref=f2e3134] [cursor=pointer]
+        - generic "Vermolch 2 · Vermolch · Lv 91-100" [ref=f2e3135] [cursor=pointer]
+        - generic "M14 · no zone yet" [ref=f2e3136] [cursor=pointer]
+        - generic "M15 · no zone yet" [ref=f2e3137] [cursor=pointer]
+        - generic "M16 · no zone yet" [ref=f2e3138] [cursor=pointer]
+        - generic "M17 · no zone yet" [ref=f2e3139] [cursor=pointer]
+        - generic "Ashfall 2 · Ashfall · Lv 151-160" [ref=f2e3140] [cursor=pointer]
+        - generic "Ashfall 3 · Ashfall · Lv 151-160" [ref=f2e3141] [cursor=pointer]
+        - generic "M20 · no zone yet" [ref=f2e3142] [cursor=pointer]
+        - generic "N1 · no zone yet" [ref=f2e3143] [cursor=pointer]
+        - generic "N2 · no zone yet" [ref=f2e3144] [cursor=pointer]
+        - generic "N3 · no zone yet" [ref=f2e3145] [cursor=pointer]
+        - generic "N4 · no zone yet" [ref=f2e3146] [cursor=pointer]
+        - generic "N5 · no zone yet" [ref=f2e3147] [cursor=pointer]
+        - generic "Frosthold 2 · Frosthold · Lv 81-90" [ref=f2e3148] [cursor=pointer]
+        - generic "Frosthold 3 · Frosthold · Lv 81-90" [ref=f2e3149] [cursor=pointer]
+        - generic "N8 · no zone yet" [ref=f2e3150] [cursor=pointer]
+        - generic "N9 · no zone yet" [ref=f2e3151] [cursor=pointer]
+        - generic "N10 · no zone yet" [ref=f2e3152] [cursor=pointer]
+        - generic "Vermolch 3 · Vermolch · Lv 91-100" [ref=f2e3153] [cursor=pointer]
+        - generic "Vermolch · Vermolch · Lv 91-100" [ref=f2e3154] [cursor=pointer]
+        - generic "Rime Hollow · Vermolch · Lv 91-100" [ref=f2e3155] [cursor=pointer]
+        - generic "N14 · no zone yet" [ref=f2e3156] [cursor=pointer]
+        - generic "N15 · no zone yet" [ref=f2e3157] [cursor=pointer]
+        - generic "N16 · no zone yet" [ref=f2e3158] [cursor=pointer]
+        - generic "N17 · no zone yet" [ref=f2e3159] [cursor=pointer]
+        - generic "N18 · no zone yet" [ref=f2e3160] [cursor=pointer]
+        - generic "N19 · no zone yet" [ref=f2e3161] [cursor=pointer]
+        - generic "N20 · no zone yet" [ref=f2e3162] [cursor=pointer]
+        - generic "O1 · no zone yet" [ref=f2e3163] [cursor=pointer]
+        - generic "O2 · no zone yet" [ref=f2e3164] [cursor=pointer]
+        - generic "O3 · no zone yet" [ref=f2e3165] [cursor=pointer]
+        - generic "O4 · no zone yet" [ref=f2e3166] [cursor=pointer]
+        - generic "O5 · no zone yet" [ref=f2e3167] [cursor=pointer]
+        - generic "O6 · no zone yet" [ref=f2e3168] [cursor=pointer]
+        - generic "O7 · no zone yet" [ref=f2e3169] [cursor=pointer]
+        - generic "O8 · no zone yet" [ref=f2e3170] [cursor=pointer]
+        - generic "O9 · no zone yet" [ref=f2e3171] [cursor=pointer]
+        - generic "O10 · no zone yet" [ref=f2e3172] [cursor=pointer]
+        - generic "O11 · no zone yet" [ref=f2e3173] [cursor=pointer]
+        - generic "Glacier Shelf · Vermolch · Lv 91-100" [ref=f2e3174] [cursor=pointer]
+        - generic "Snowfield · Vermolch · Lv 91-100" [ref=f2e3175] [cursor=pointer]
+        - generic "O14 · no zone yet" [ref=f2e3176] [cursor=pointer]
+        - generic "O15 · no zone yet" [ref=f2e3177] [cursor=pointer]
+        - generic "O16 · no zone yet" [ref=f2e3178] [cursor=pointer]
+        - generic "O17 · no zone yet" [ref=f2e3179] [cursor=pointer]
+        - generic "O18 · no zone yet" [ref=f2e3180] [cursor=pointer]
+        - generic "O19 · no zone yet" [ref=f2e3181] [cursor=pointer]
+        - generic "O20 · no zone yet" [ref=f2e3182] [cursor=pointer]
+      - generic [ref=f2e3183]:
+        - generic "Eastgate Castle"
+        - generic "Highspire Keep"
+        - generic "The Pale Spire"
+        - generic "Wolf Moor"
+        - generic "Bonegate Ruins"
+      - generic [ref=f2e3184]:
+        - generic: Eastgate Vale
+        - generic: Ashfall Wood
+        - generic: Wolfmoor
+        - generic: Highspire Peaks
+        - generic: Frosthold Snows
+        - generic: Greyfen Waste
+        - generic: Emberhold Ruins
+        - generic: Nettlecrag Deeps
+        - generic: Wyrmback Shore
+        - generic: The Pale Sanctum
+      - generic [ref=f2e3185]:
+        - generic [ref=f2e3186] [cursor=pointer]: Eastgate
+        - generic [ref=f2e3188] [cursor=pointer]: Millbrook
+        - generic [ref=f2e3190] [cursor=pointer]: Thornwake
+        - generic [ref=f2e3192] [cursor=pointer]: Ironrow
+        - generic [ref=f2e3194] [cursor=pointer]: Ashfall
+        - generic [ref=f2e3196] [cursor=pointer]: Wolf Cross
+        - generic [ref=f2e3198] [cursor=pointer]: Highspire
+        - generic [ref=f2e3200] [cursor=pointer]: Wyrmback
+        - generic [ref=f2e3202] [cursor=pointer]: Saltmarrow
+        - generic [ref=f2e3204] [cursor=pointer]: Frosthold
+        - generic [ref=f2e3206] [cursor=pointer]: Greyfen
+        - generic [ref=f2e3208] [cursor=pointer]: Nettlecrag
+        - generic [ref=f2e3210] [cursor=pointer]: Vermolch
+        - generic [ref=f2e3212] [cursor=pointer]: Bonegate
+        - generic [ref=f2e3214] [cursor=pointer]: Blackwater Reach
+        - generic [ref=f2e3216] [cursor=pointer]: Duskmoor
+        - generic [ref=f2e3218] [cursor=pointer]: The Pale Spire
+        - generic [ref=f2e3220] [cursor=pointer]: Emberhold
+        - generic [ref=f2e3222]:
+          - generic: Open
+          - generic: Grassland
+          - generic: Lv 1-10
+        - generic [ref=f2e3223]:
+          - generic: Village
+          - generic: Outskirts
+          - generic: Lv 1-10
+        - generic [ref=f2e3224]:
+          - generic: Raider Camp
+          - generic: Lv 1-10
+        - generic [ref=f2e3225]:
+          - generic: Eastgate
+          - generic: Dungeon
+          - generic: Lv 1-10
+        - generic [ref=f2e3226]:
+          - generic: Eastgate 2
+          - generic: Lv 1-10
+        - generic [ref=f2e3227]:
+          - generic: Eastgate 3
+          - generic: Lv 1-10
+        - generic [ref=f2e3228]:
+          - generic: Fog Thicket
+          - generic: Lv 131-140
+        - generic [ref=f2e3229]:
+          - generic: Dark Grove
+          - generic: Lv 131-140
+        - generic [ref=f2e3230]:
+          - generic: Spider
+          - generic: Hollow
+          - generic: Lv 131-140
+        - generic [ref=f2e3231]:
+          - generic: Millbrook
+          - generic: Dungeon
+          - generic: Lv 131-140
+        - generic [ref=f2e3232]:
+          - generic: Millbrook 2
+          - generic: Lv 131-140
+        - generic [ref=f2e3233]:
+          - generic: Millbrook 3
+          - generic: Lv 131-140
+        - generic [ref=f2e3234]:
+          - generic: Frozen Fen
+          - generic: Lv 171-180
+        - generic [ref=f2e3235]:
+          - generic: Icebreak
+          - generic: Shelf
+          - generic: Lv 171-180
+        - generic [ref=f2e3236]:
+          - generic: Rime Bog
+          - generic: Lv 171-180
+        - generic [ref=f2e3237]:
+          - generic: Thornwake
+          - generic: Dungeon
+          - generic: Lv 171-180
+        - generic [ref=f2e3238]:
+          - generic: Thornwake 2
+          - generic: Lv 171-180
+        - generic [ref=f2e3239]:
+          - generic: Thornwake 3
+          - generic: Lv 171-180
+        - generic [ref=f2e3240]:
+          - generic: Stormbreak
+          - generic: Grove
+          - generic: Lv 161-170
+        - generic [ref=f2e3241]:
+          - generic: Charged
+          - generic: Rootway
+          - generic: Lv 161-170
+        - generic [ref=f2e3242]:
+          - generic: Thunder
+          - generic: Glade
+          - generic: Lv 161-170
+        - generic [ref=f2e3243]:
+          - generic: Ironrow
+          - generic: Dungeon
+          - generic: Lv 161-170
+        - generic [ref=f2e3244]:
+          - generic: Ironrow 2
+          - generic: Lv 161-170
+        - generic [ref=f2e3245]:
+          - generic: Ironrow 3
+          - generic: Lv 161-170
+        - generic [ref=f2e3246]:
+          - generic: Glimmer
+          - generic: Grove
+          - generic: Lv 151-160
+        - generic [ref=f2e3247]:
+          - generic: Elder
+          - generic: Rootway
+          - generic: Lv 151-160
+        - generic [ref=f2e3248]:
+          - generic: Moonlit
+          - generic: Glade
+          - generic: Lv 151-160
+        - generic [ref=f2e3249]:
+          - generic: Ashfall
+          - generic: Dungeon
+          - generic: Lv 151-160
+        - generic [ref=f2e3250]:
+          - generic: Ashfall 2
+          - generic: Lv 151-160
+        - generic [ref=f2e3251]:
+          - generic: Ashfall 3
+          - generic: Lv 151-160
+        - generic [ref=f2e3252]:
+          - generic: Murky Swamp
+          - generic: Lv 21-30
+        - generic [ref=f2e3253]:
+          - generic: Mud Flats
+          - generic: Lv 21-30
+        - generic [ref=f2e3254]:
+          - generic: Poison Fen
+          - generic: Lv 21-30
+        - generic [ref=f2e3255]:
+          - generic: Wolf Cross
+          - generic: Dungeon
+          - generic: Lv 21-30
+        - generic [ref=f2e3256]:
+          - generic: Wolf Cross 2
+          - generic: Lv 21-30
+        - generic [ref=f2e3257]:
+          - generic: Wolf Cross 3
+          - generic: Lv 21-30
+        - generic [ref=f2e3258]:
+          - generic: Mountain
+          - generic: Slopes
+          - generic: Lv 11-20
+        - generic [ref=f2e3259]:
+          - generic: Cliff Holds
+          - generic: Lv 11-20
+        - generic [ref=f2e3260]:
+          - generic: Dragon Peak
+          - generic: Lv 11-20
+        - generic [ref=f2e3261]:
+          - generic: Highspire
+          - generic: Dungeon
+          - generic: Lv 11-20
+        - generic [ref=f2e3262]:
+          - generic: Highspire 2
+          - generic: Lv 11-20
+        - generic [ref=f2e3263]:
+          - generic: Highspire 3
+          - generic: Lv 11-20
+        - generic [ref=f2e3264]:
+          - generic: Tideflats
+          - generic: Lv 141-150
+        - generic [ref=f2e3265]:
+          - generic: Salt Cliffs
+          - generic: Lv 141-150
+        - generic [ref=f2e3266]:
+          - generic: Sunken Reef
+          - generic: Lv 141-150
+        - generic [ref=f2e3267]:
+          - generic: Wyrmback
+          - generic: Dungeon
+          - generic: Lv 141-150
+        - generic [ref=f2e3268]:
+          - generic: Wyrmback 2
+          - generic: Lv 141-150
+        - generic [ref=f2e3269]:
+          - generic: Wyrmback 3
+          - generic: Lv 141-150
+        - generic [ref=f2e3270]:
+          - generic: Outer Court
+          - generic: Lv 41-50
+        - generic [ref=f2e3271]:
+          - generic: Burial
+          - generic: Gallery
+          - generic: Lv 41-50
+        - generic [ref=f2e3272]:
+          - generic: Inner
+          - generic: Sanctum
+          - generic: Lv 41-50
+        - generic [ref=f2e3273]:
+          - generic: Saltmarrow
+          - generic: Dungeon
+          - generic: Lv 41-50
+        - generic [ref=f2e3274]:
+          - generic: Saltmarrow 2
+          - generic: Lv 41-50
+        - generic [ref=f2e3275]:
+          - generic: Saltmarrow 3
+          - generic: Lv 41-50
+        - generic [ref=f2e3276]:
+          - generic: Ash Fields
+          - generic: Lv 81-90
+        - generic [ref=f2e3277]:
+          - generic: Slag Pit
+          - generic: Lv 81-90
+        - generic [ref=f2e3278]:
+          - generic: Caldera
+          - generic: Lv 81-90
+        - generic [ref=f2e3279]:
+          - generic: Frosthold
+          - generic: Dungeon
+          - generic: Lv 81-90
+        - generic [ref=f2e3280]:
+          - generic: Frosthold 2
+          - generic: Lv 81-90
+        - generic [ref=f2e3281]:
+          - generic: Frosthold 3
+          - generic: Lv 81-90
+        - generic [ref=f2e3282]:
+          - generic: Dune Sea
+          - generic: Lv 31-40
+        - generic [ref=f2e3283]:
+          - generic: Sunken Tombs
+          - generic: Lv 31-40
+        - generic [ref=f2e3284]:
+          - generic: Scorch Mesa
+          - generic: Lv 31-40
+        - generic [ref=f2e3285]:
+          - generic: Greyfen
+          - generic: Dungeon
+          - generic: Lv 31-40
+        - generic [ref=f2e3286]:
+          - generic: Greyfen 2
+          - generic: Lv 31-40
+        - generic [ref=f2e3287]:
+          - generic: Greyfen 3
+          - generic: Lv 31-40
+        - generic [ref=f2e3288]:
+          - generic: Bone Stair
+          - generic: Lv 111-120
+        - generic [ref=f2e3289]:
+          - generic: Molten Deeps
+          - generic: Lv 111-120
+        - generic [ref=f2e3290]:
+          - generic: Throne Abyss
+          - generic: Lv 111-120
+        - generic [ref=f2e3291]:
+          - generic: Nettlecrag
+          - generic: Dungeon
+          - generic: Lv 111-120
+        - generic [ref=f2e3292]:
+          - generic: Nettlecrag 2
+          - generic: Lv 111-120
+        - generic [ref=f2e3293]:
+          - generic: Nettlecrag 3
+          - generic: Lv 111-120
+        - generic [ref=f2e3294]:
+          - generic: Snowfield
+          - generic: Lv 91-100
+        - generic [ref=f2e3295]:
+          - generic: Glacier
+          - generic: Shelf
+          - generic: Lv 91-100
+        - generic [ref=f2e3296]:
+          - generic: Rime Hollow
+          - generic: Lv 91-100
+        - generic [ref=f2e3297]:
+          - generic: Vermolch
+          - generic: Dungeon
+          - generic: Lv 91-100
+        - generic [ref=f2e3298]:
+          - generic: Vermolch 2
+          - generic: Lv 91-100
+        - generic [ref=f2e3299]:
+          - generic: Vermolch 3
+          - generic: Lv 91-100
+        - generic [ref=f2e3300]:
+          - generic: Tunnels
+          - generic: Lv 71-80
+        - generic [ref=f2e3301]:
+          - generic: Deep Warrens
+          - generic: Lv 71-80
+        - generic [ref=f2e3302]:
+          - generic: Sunken Vault
+          - generic: Lv 71-80
+        - generic [ref=f2e3303]:
+          - generic: Bonegate
+          - generic: Dungeon
+          - generic: Lv 71-80
+        - generic [ref=f2e3304]:
+          - generic: Bonegate 2
+          - generic: Lv 71-80
+        - generic [ref=f2e3305]:
+          - generic: Bonegate 3
+          - generic: Lv 71-80
+        - generic [ref=f2e3306]:
+          - generic: Drowned
+          - generic: Stair
+          - generic: Lv 61-70
+        - generic [ref=f2e3307]:
+          - generic: Silt Deeps
+          - generic: Lv 61-70
+        - generic [ref=f2e3308]:
+          - generic: Flooded
+          - generic: Abyss
+          - generic: Lv 61-70
+        - generic [ref=f2e3309]:
+          - generic: Blackwater
+          - generic: Reach
+          - generic: Dungeon
+          - generic: Lv 61-70
+        - generic [ref=f2e3310]:
+          - generic: Blackwater
+          - generic: Reach 2
+          - generic: Lv 61-70
+        - generic [ref=f2e3311]:
+          - generic: Blackwater
+          - generic: Reach 3
+          - generic: Lv 61-70
+        - generic [ref=f2e3312]:
+          - generic: Blight Field
+          - generic: Lv 101-110
+        - generic [ref=f2e3313]:
+          - generic: Howling
+          - generic: Waste
+          - generic: Lv 101-110
+        - generic [ref=f2e3314]:
+          - generic: Rift Scar
+          - generic: Lv 101-110
+        - generic [ref=f2e3315]:
+          - generic: Duskmoor
+          - generic: Dungeon
+          - generic: Lv 101-110
+        - generic [ref=f2e3316]:
+          - generic: Duskmoor 2
+          - generic: Lv 101-110
+        - generic [ref=f2e3317]:
+          - generic: Duskmoor 3
+          - generic: Lv 101-110
+        - generic [ref=f2e3318]:
+          - generic: Outer
+          - generic: Colonnade
+          - generic: Lv 51-60
+        - generic [ref=f2e3319]:
+          - generic: Hall of
+          - generic: Wardens
+          - generic: Lv 51-60
+        - generic [ref=f2e3320]:
+          - generic: Sanctum
+          - generic: Depths
+          - generic: Lv 51-60
+        - generic [ref=f2e3321]:
+          - generic: The Pale
+          - generic: Spire
+          - generic: Dungeon
+          - generic: Lv 51-60
+        - generic [ref=f2e3322]:
+          - generic: The Pale
+          - generic: Spire 2
+          - generic: Lv 51-60
+        - generic [ref=f2e3323]:
+          - generic: The Pale
+          - generic: Spire 3
+          - generic: Lv 51-60
+        - generic [ref=f2e3324]:
+          - generic: Fallen Gate
+          - generic: Lv 121-130
+        - generic [ref=f2e3325]:
+          - generic: Market Ruins
+          - generic: Lv 121-130
+        - generic [ref=f2e3326]:
+          - generic: Noble
+          - generic: Quarter
+          - generic: Lv 121-130
+        - generic [ref=f2e3327]:
+          - generic: Emberhold
+          - generic: Dungeon
+          - generic: Lv 121-130
+        - generic [ref=f2e3328]:
+          - generic: Emberhold 2
+          - generic: Lv 121-130
+        - generic [ref=f2e3329]:
+          - generic: Emberhold 3
+          - generic: Lv 121-130
+  - generic:
+    - generic [ref=f2e3331]:
+      - button "Open the map" [ref=f2e3332] [cursor=pointer]:
+        - generic [aria-hidden]: "N"
+        - generic [aria-hidden]: 0,0
+      - button "Show map tools and guide" [ref=f2e3655] [cursor=pointer]
+    - generic [ref=f2e3658]:
+      - text: Eastgate
+      - generic [ref=f2e3659]: Lv 1–10
+  - generic [ref=f2e3660]:
+    - generic [ref=f2e3661]:
+      - generic [ref=f2e3662]:
+        - generic [ref=f2e3663]:
+          - generic [ref=f2e3664]:
+            - strong [ref=f2e3665]: "580"
+            - text: /580 HP
+          - generic [ref=f2e3666]:
+            - strong [ref=f2e3667]: "108"
+            - text: /108 ES
+        - img "HP 580 of 580, ES 108 of 108" [ref=f2e3668]
+      - list "Skill bar" [ref=f2e3671]:
+        - 'listitem "Slot 1: empty" [ref=f2e3672]':
+          - generic [ref=f2e3673]: "1"
+        - 'listitem "Slot 2: empty" [ref=f2e3674]':
+          - generic [ref=f2e3675]: "2"
+        - 'listitem "Slot 3: empty" [ref=f2e3676]':
+          - generic [ref=f2e3677]: "3"
+        - 'listitem "Slot 4: empty" [ref=f2e3678]':
+          - generic [ref=f2e3679]: "4"
+        - 'listitem "Slot 5: empty" [ref=f2e3680]':
+          - generic [ref=f2e3681]: "5"
+        - 'listitem "Slot 6: empty" [ref=f2e3682]':
+          - generic [ref=f2e3683]: "6"
+        - 'listitem "Slot 7: empty" [ref=f2e3684]':
+          - generic [ref=f2e3685]: "7"
+        - 'listitem "Slot 8: empty" [ref=f2e3686]':
+          - generic [ref=f2e3687]: "8"
+        - 'listitem "Slot 9: empty" [ref=f2e3688]':
+          - generic [ref=f2e3689]: "9"
+        - 'listitem "Slot 10: empty" [ref=f2e3690]':
+          - generic [ref=f2e3691]: "10"
+        - 'listitem "Slot 11: empty" [ref=f2e3692]':
+          - generic [ref=f2e3693]: "11"
+        - 'listitem "Slot 12: empty" [ref=f2e3694]':
+          - generic [ref=f2e3695]: "12"
+        - 'listitem "Slot 13: empty" [ref=f2e3696]':
+          - generic [ref=f2e3697]: "13"
+        - 'listitem "Slot 14: empty" [ref=f2e3698]':
+          - generic [ref=f2e3699]: "14"
+        - 'listitem "Slot 15: empty" [ref=f2e3700]':
+          - generic [ref=f2e3701]: "15"
+        - button "Skill settings" [ref=f2e3702] [cursor=pointer]
+      - generic [ref=f2e3704]:
+        - generic [ref=f2e3706]:
+          - strong [ref=f2e3707]: "148"
+          - text: /148 Mana
+        - img "Mana 148 of 148" [ref=f2e3708]
+    - group "Level 1, experience 0.0 percent":
+      - button "Allocate stat points · level 1" [ref=f2e3711] [cursor=pointer]: Lv 1
+      - generic: 0.0%
+  - group "Game controls" [ref=f2e3712]:
+    - button "Back to the fight" [ref=f2e3713] [cursor=pointer]
+    - generic "Gold in the purse" [ref=f2e3715]:
+      - generic [ref=f2e3716]: "0"
+      - generic [ref=f2e3717]: gold
+    - group "Game speed" [ref=f2e3718]:
+      - button "×1" [pressed] [ref=f2e3719] [cursor=pointer]
+      - button "×2" [ref=f2e3720] [cursor=pointer]
+      - button "×4" [ref=f2e3721] [cursor=pointer]
+    - button "Pause" [ref=f2e3722] [cursor=pointer]
+    - button "New character" [ref=f2e3723] [cursor=pointer]
+  - group "Field quick actions":
+    - button "Stay in this zone" [pressed] [ref=f2e3724] [cursor=pointer]
+    - button "Climb forward automatically" [ref=f2e3726] [cursor=pointer]
+    - button "Auto skills on" [pressed] [ref=f2e3728] [cursor=pointer]
+    - button "Auto equip the best gear in your bag" [ref=f2e3730] [cursor=pointer]
+    - button "Hide field quick actions" [expanded] [ref=f2e3732] [cursor=pointer]
+  - generic:
+    - log:
+      - tablist "The chronicle" [ref=f2e3734]:
+        - tab "all" [selected] [ref=f2e3735] [cursor=pointer]
+        - tab "combat" [ref=f2e3736] [cursor=pointer]
+        - tab "loot" [ref=f2e3737] [cursor=pointer]
+        - tab "system" [ref=f2e3738] [cursor=pointer]
+  - status [ref=f2e3739]
+  - navigation "Menu" [ref=f2e3740]:
+    - button "Back to the field" [ref=f2e3741] [cursor=pointer]:
+      - generic [ref=f2e3743]: Field
+    - button "map" [ref=f2e3744] [cursor=pointer]
+    - button "bags" [ref=f2e3747] [cursor=pointer]
+    - button "skills" [ref=f2e3750] [cursor=pointer]
+    - button "Character sheet" [ref=f2e3753] [cursor=pointer]:
+      - generic [ref=f2e3755]: Sheet
+    - button "craft" [ref=f2e3756] [cursor=pointer]
+    - button "More" [expanded] [active] [ref=f2e3759] [cursor=pointer]
+    - menu "More screens" [ref=f2e3762]:
+      - menuitem "town" [ref=f2e3763] [cursor=pointer]
+      - menuitem "market" [ref=f2e3766] [cursor=pointer]
+      - menuitem "tree" [ref=f2e3769] [cursor=pointer]
+      - menuitem "desk" [ref=f2e3772] [cursor=pointer]
+      - menuitem "farm" [ref=f2e3775] [cursor=pointer]
+      - menuitem "save" [ref=f2e3778] [cursor=pointer]
+      - menuitem "keys" [ref=f2e3781] [cursor=pointer]
+      - menuitemcheckbox "HUD grid · 15×15" [ref=f2e3784] [cursor=pointer]

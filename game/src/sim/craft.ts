@@ -1,6 +1,7 @@
 import { ED, loot, MODS, BASES } from '../engine/client';
 import { createCraft } from '../../../engine/craft.ts';
 import { mark as markSnapshot } from './snapshot';
+import { road } from './road';
 import type { GameState, Item } from './types';
 
 /** The bench calls the shared craft module — one home for the prices and one for the names. */
@@ -43,9 +44,9 @@ export function poolOf(item: Item): string[] {
 
 export interface CraftResult { ok: boolean; why?: string; item?: Item; note?: string }
 
-/** Every craft in the game is Settlement-only (`crafting.md`). */
+/** Gear crafting is Settlement-only (`crafting.md`); field meals use the Camp recipe track. */
 export function atSettlement(state: GameState): boolean {
-  return Boolean(state.town.visited.includes(state.town.waypoint)) && state.phase !== 'camp';
+  return !!state.cell && !state.walk && state.phase !== 'camp' && road.cellRank(state.cell) === 0;
 }
 
 export function stoneNames(op: CraftOp, item?: Item): Record<string, number> {

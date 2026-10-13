@@ -121,6 +121,7 @@ export function warpTo(state: GameState, id: string): { ok: boolean; why?: strin
   const dest = settlementById(id);
   if (!dest) return { ok: false, why: 'no such settlement' };
   state.zone = dest.zone;
+  if (state.fieldwork) state.fieldwork.action = null;
   state.town.waypoint = id;
   // a warp lands the feet on the settlement's own hex: the Waypoint buys the walk's time, and the
   // ground it arrives on is the same cell a foot would have stood on
@@ -182,6 +183,7 @@ export function startWalk(state: GameState, dest: Cell): { ok: boolean; why?: st
     secLeft: road.blockSec,
     blocksWalked: 0,
   };
+  if (state.fieldwork) state.fieldwork.action = null;
   // the walk spends the standing fight: a group left alive here keeps swinging through the whole
   // walk — block and evasion events off mobs the field never shows — so it is dropped whole, the
   // same way entering a hunt drops it. An ambush on the road spawns its own group fresh.

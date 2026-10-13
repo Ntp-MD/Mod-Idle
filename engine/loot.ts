@@ -247,8 +247,9 @@ export function createLoot(E: EngineData, MODS: ModsData) {
       // Frame Mod shares one budget, which `scale` applies below.
       for (const id of frame.base_lines) ids.push(id);
     } else if (slot === 'off hand' && frame?.family) {
-      // an off-hand frame carries its family's pair (a Shield the block line, a Book the magic pair)
-      for (const id of (BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
+      // A Shield may extend the family's locked Block line with its flat defence profile; other
+      // off-hand frames use the family's standard line (a Book's magic pair).
+      for (const id of (frame?.frame_mod || BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
     } else if ((BASES?.frame_mod?.drawn_line1_slots || []).includes(slot)) {
       const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
       if (pool.length) ids.push(weightedPick(rng, pool.map((e) => ({ id: e.id, w: e.role * weightOf(e.id, q) }))));
@@ -290,7 +291,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     const ids: string[] = [];
     if (weapon) for (const id of (BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
     else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) for (const id of frame.base_lines) ids.push(id);
-    else if (slot === 'off hand' && frame?.family) for (const id of (BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
+    else if (slot === 'off hand' && frame?.family) for (const id of (frame?.frame_mod || BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
     else if ((BASES?.frame_mod?.drawn_line1_slots || []).includes(slot)) {
       const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
       if (pool.length) ids.push(pool[0].id);

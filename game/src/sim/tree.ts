@@ -4,8 +4,8 @@ import type { GameState } from './types';
 /**
  * Spending the passive tree (`skill-tree.md` · `engine/tree.ts`).
  *
- * A level banks one point; one point buys one rank; a node's rank 1 needs the node before it in its
- * own chain, and a node holds three ranks. Respec is **free**, at the town Counterhand — the same
+ * A level banks one point; one point buys one rank; a node opens from any owned adjacent path, and a node
+ * holds three ranks. Respec is **free**, at the town Counterhand — the same
  * rule the Core stat points obey, because the build is the player's to express (`AGENTS.md` D11), so
  * taking it back costs nothing.
  */
@@ -25,8 +25,8 @@ export function canSpendTree(state: GameState, nodeId: string): TreeVerdict {
   if (treePointsFree(state) < tree.cost) return { ok: false, why: `needs ${tree.cost} banked point` };
   const rank = state.player.treeRanks?.[nodeId] || 0;
   if (rank >= node.ranks) return { ok: false, why: `${node.id} is already at rank ${node.ranks}` };
-  if (node.needs && (state.player.treeRanks?.[node.needs] || 0) < 1) {
-    return { ok: false, why: `${node.needs} comes first in that chain` };
+  if (!node.needs.includes('start') && !node.needs.some((parent) => (state.player.treeRanks?.[parent] || 0) > 0)) {
+    return { ok: false, why: 'connect this node to an owned path first' };
   }
   return { ok: true };
 }

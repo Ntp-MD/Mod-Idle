@@ -18,7 +18,7 @@ import type { GameState } from '../sim/types';
  */
 export function bar(value: number, max: number): string {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
-  return `width:${pct}%;--w:${pct / 100}`;
+  return `--fill:${pct / 100};--w:${pct / 100}`;
 }
 
 /** What a curse has written on one mob, in words and with the seconds left on each line. */

@@ -26,6 +26,8 @@ const BUCKETS: { read: (s: GameState) => Record<string, number>; cap: string; la
   { read: (s) => s.farm.herbs, cap: 'herb', label: 'herbs' },
   { read: (s) => s.farm.potions, cap: 'potion', label: 'draughts' },
   { read: (s) => s.farm.condensed, cap: 'potion', label: 'condensed' },
+  { read: (s) => s.fieldwork.materials, cap: 'material', label: 'materials' },
+  { read: (s) => s.fieldwork.foods, cap: 'food', label: 'food' },
   { read: (s) => s.junk, cap: 'stone', label: 'junk' },
 ];
 
@@ -52,7 +54,10 @@ export function bagStacks(state: GameState): BagStack[] {
     for (const [name, total] of Object.entries(b.read(state) || {})) {
       const count = Number(total) || 0;
       if (count <= 0) continue;
-      out.push({ name, group: b.label, capKind: b.cap, count, weight: count * unit });
+      const label = b.cap === 'food'
+        ? (E.fieldwork.foods as any[]).find((food) => food.id === name)?.name || name
+        : name;
+      out.push({ name: label, group: b.label, capKind: b.cap, count, weight: count * unit });
     }
   }
   return out;

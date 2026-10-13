@@ -7,6 +7,7 @@
     "note": "The prose shelf collapsed to `doc/start/` plus the root rules. Each key is a retired doc; the value names the file that owns its content now, so a citation of a retired name still resolves.",
     "combat.md": "engine/index.ts (the damage layers) · tools/survival.ts",
     "concept.md": "DECISIONS.md (the frame · the loop · active vs AFK · breadth · builds · minute one · completion, under §Product)",
+    "convert-damage.md": "tools/data/skills.json damage-conversion rows · engine/skills.ts · game/src/sim/skills.ts",
     "core-stats.md": "tools/data/engine.json `stat` + `K`",
     "crafting.md": "tools/data/engine.json `craft` · engine/craft.ts",
     "checks.md": "tools/check.ts (the engine cage's gates)",

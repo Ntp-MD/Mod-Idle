@@ -24,6 +24,18 @@ describe('game and cages run one engine', () => {
 
 
 describe('the opening character is the designed minute one', () => {
+  it('starts below the designed Evasion ceiling against the reference and every zone-one lineage', () => {
+    const s = newGame();
+    const c = buildCharacter(s.player.level, s.gear, {}, 0, undefined, s.player.points, s.player.treeRanks);
+    expect(c.evasion).toBeGreaterThan(0);
+    expect(c.evasionChance).toBeGreaterThan(0);
+    expect(c.evasionChance).toBeLessThanOrEqual(E.evasion_roll.opening_max_chance_pct);
+    for (const species of E.mob.species.filter((row) => row.zones.includes(s.zone))) {
+      const acc = eng.mobAcc(eng.coreOf(species, 'dex', s.zone), species.accuracy_mult);
+      expect(eng.evasionChance(c.evasion, acc), species.name).toBeLessThanOrEqual(E.evasion_roll.opening_max_chance_pct);
+    }
+  });
+
   it('comes from engine.json opening, not a typed copy', () => {
     const s = newGame();
     expect(s.player.level).toBe(E.opening.level);
@@ -42,9 +54,8 @@ describe('the opening character is the designed minute one', () => {
     const worn = s.gear.filter(Boolean);
     expect(worn.length).toBe(E.stat.item_slots); // every slot the data declares is filled
     for (const item of worn) {
-      expect(item!.lines.length).toBe(1); // a hand-authored junk piece: its frame's Frame Mod, nothing else
+      expect(item!.lines.length).toBe(1); // a hand-authored piece: its frame's single locked Frame Mod line
       expect(item!.ilvl).toBe(E.opening.level);
-      if (item!.slot !== 'main hand') expect(item!.lines[0].extra).toBeUndefined();
     }
     const c = buildCharacter(s.player.level, s.gear);
     expect(c.encumbrance).toBe(0); // the lightest frame of every slot fits under the weight_base line

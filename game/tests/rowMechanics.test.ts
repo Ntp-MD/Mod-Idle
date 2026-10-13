@@ -258,6 +258,7 @@ describe('the support rows that change the character', () => {
     const top = valueOf('buff.energy_absorb', 'es_absorb_cap');
     // the helper ramps linearly off the buff's own skill level, base at level 1 to Cap at 20
     const s = newSkillState();
+    s.owned['buff.energy_absorb'] = 0;
     s.buffUp['buff.energy_absorb'] = 3;
     s.xp['buff.energy_absorb'] = 0;
     expect(esAbsorbPct(s)).toBeCloseTo(base, 6);
@@ -294,6 +295,8 @@ describe('the trigger auras fire the first ready slot at their own price', () =>
 
   it('reads the event and the price off the row', () => {
     const s = newSkillState();
+    s.owned['aura.cast_on_crit'] = 0;
+    s.owned['aura.cast_on_damage_taken'] = 0;
     s.auras['aura.cast_on_crit'] = true;
     const t = triggerAuras(s);
     const at = (stat: string) => valueOf('aura.cast_on_crit', stat);

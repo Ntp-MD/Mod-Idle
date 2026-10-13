@@ -14,6 +14,12 @@
   import { canBuy, stockOf, settlementById, standingTier, standingShare } from '../sim/town';
   import { craft } from '../sim/craft';
   import type { GameState } from '../sim/types';
+  import marketMark from '../icon/currency/coin-purse.svg?url';
+  import forgeMark from '../icon/building/anvil-1.svg?url';
+  import craftMark from '../icon/misc/stones/stone-add-mod.svg?url';
+  import stashMark from '../icon/misc/treasure-chest.svg?url';
+  import deskMark from '../icon/misc/quest-journal.svg?url';
+  import farmMark from '../icon/character/farmer.svg?url';
 
   let { state, town, here, tabs, onopen, onwarp, onsellall, onstashall, onbest }: {
     state: GameState;
@@ -43,12 +49,12 @@
   const lowest = $derived(worn.length ? worn.reduce((a, b) => ((b.upgrade_lv || 0) < (a.upgrade_lv || 0) ? b : a)) : null);
   const opened = $derived(state.town.visited.filter((v) => v !== town.id).map(settlementById).filter((s): s is NonNullable<ReturnType<typeof settlementById>> => Boolean(s)));
   const services = $derived([
-    { id: 'market', name: 'Market', by: 'the Counterhand and the stall', say: 'Buy stock lines, tabs and bag room · sell the junk this run picked up', live: buys ? `${buys} line${buys === 1 ? '' : 's'} your purse covers` : junk ? `${junk} junk to sell` : 'nothing on offer you can take' },
-    { id: 'forge', name: 'Forge', by: 'the Armourer', say: 'Enhance a piece up the + ladder, repair a Broken one, or take the one Corrupt gamble', live: lowest ? `${lowest.slot} is the least forged · +${lowest.upgrade_lv || 0} of +${craft.C.upgrade_cap}` : 'nothing worn yet' },
-    { id: 'craft', name: 'Craft house', by: 'the Armourer and the Herbalist', say: 'Move a mod line inside its Tier, push it a Tier up, add or remove a mod, ascend the piece', live: stones ? `${stones} stones in the purse` : 'no stones — a rejected drop dissolves into them' },
-    { id: 'stash', name: 'Stash', by: 'the Porter', say: 'The warehouse the same record opens in every settlement', live: tabs ? `${stored} stored · ${tabs} tab${tabs === 1 ? '' : 's'}` : 'no tab bought yet' },
-    { id: 'desk', name: 'Desk', by: 'the Guild clerk and the Collector', say: 'Standing, the board, a set turn-in, the hunt and walk tables', live: ready ? `${ready} task${ready === 1 ? '' : 's'} ready to claim` : `${state.town.tasks.filter(Boolean).length} of ${state.town.tasks.length} board slots filled` },
-    { id: 'farm', name: 'Farm', by: 'the Herbalist', say: 'Herb plots, brewing and condensing — the life skill, and it grants no power', live: `${state.farm.plots.filter((p: any) => p?.tier).length} plot(s) sown` },
+    { id: 'market', name: 'Market', icon: marketMark, by: 'the Counterhand and the stall', say: 'Buy stock lines, tabs and bag room · sell the junk this run picked up', live: buys ? `${buys} line${buys === 1 ? '' : 's'} your purse covers` : junk ? `${junk} junk to sell` : 'nothing on offer you can take' },
+    { id: 'forge', name: 'Forge', icon: forgeMark, by: 'the Armourer', say: 'Enhance a piece up the + ladder, repair a Broken one, or take the one Corrupt gamble', live: lowest ? `${lowest.slot} is the least forged · +${lowest.upgrade_lv || 0} of +${craft.C.upgrade_cap}` : 'nothing worn yet' },
+    { id: 'craft', name: 'Craft house', icon: craftMark, by: 'the Armourer and the Herbalist', say: 'Move a mod line inside its Tier, push it a Tier up, add or remove a mod, ascend the piece', live: stones ? `${stones} stones in the purse` : 'no stones — a rejected drop dissolves into them' },
+    { id: 'stash', name: 'Stash', icon: stashMark, by: 'the Porter', say: 'The warehouse the same record opens in every settlement', live: tabs ? `${stored} stored · ${tabs} tab${tabs === 1 ? '' : 's'}` : 'no tab bought yet' },
+    { id: 'desk', name: 'Desk', icon: deskMark, by: 'the Guild clerk and the Collector', say: 'Standing, the board, a set turn-in, the hunt and walk tables', live: ready ? `${ready} task${ready === 1 ? '' : 's'} ready to claim` : `${state.town.tasks.filter(Boolean).length} of ${state.town.tasks.length} board slots filled` },
+    { id: 'farm', name: 'Farm', icon: farmMark, by: 'the Herbalist', say: 'Herb plots, brewing and condensing — the life skill, and it grants no power', live: `${state.farm.plots.filter((p: any) => p?.tier).length} plot(s) sown` },
   ]);
 </script>
 
@@ -81,7 +87,7 @@
       {#each services as s (s.id)}
         <li role="listitem">
           <button class="row" disabled={!here} onclick={() => onopen(s.id)}>
-            <span class="nm">{s.name}</span>
+            <span class="service-name"><img src={s.icon} alt="" aria-hidden="true" /><span class="nm">{s.name}</span></span>
             <span class="by">{s.by}</span>
             <span class="say">{s.say}</span>
             <span class="live">{here ? s.live : 'walk or warp here first'}</span>
@@ -130,26 +136,28 @@
 </div>
 
 <style>
-  .town { display: grid; gap: var(--spacing-md); }
+  .town { display: grid; gap: var(--spacing-md); height: 100%; min-height: 0; align-content: start; }
   .out {
     margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: 10px; font-size: var(--font-xs);
     background: color-mix(in srgb, var(--hp) 14%, transparent); border: 1px solid color-mix(in srgb, var(--hp) 45%, transparent); color: var(--alarm);
   }
   .lead { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: baseline; justify-content: space-between; }
-  .lead h3 { margin: 0; font-size: var(--font-md); letter-spacing: clamp(0px, 0.008vw + 0px, 0px); }
-  .sub { margin: 3px 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .lead h3 { margin: 0; font-size: var(--font-md); letter-spacing: clamp(0px, 0.00vw, 0px); }
+  .sub { margin: var(--spacing-2xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
   .purse { display: flex; gap: var(--spacing-md); font-size: var(--font-xs); color: var(--dim); }
   .purse b { font-family: var(--num); color: var(--gold); font-size: var(--font-sm); }
 
-  .cols { display: grid; grid-template-columns: 1fr minmax(clamp(212px, 13.855vw + 54px, 459px), clamp(288px, 18.745vw + 72px, 621px)); gap: var(--spacing-md); align-items: start; }
+  .cols { display: grid; grid-template-columns: 1fr minmax(clamp(212px, 16.51vw, 459px), clamp(288px, 22.27vw, 621px)); gap: var(--spacing-md); align-items: start; }
   /* a service is a row, not a card: the name leads, the live state is the reason to press it */
-  .services { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .services { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-2xs); }
   .services .row {
-    display: grid; grid-template-columns: clamp(94px, 6.112vw + 24px, 202px) clamp(112px, 7.335vw + 28px, 243px) 1fr auto; gap: var(--spacing-sm); align-items: baseline;
+    display: grid; grid-template-columns: clamp(94px, 7.31vw, 202px) var(--box-180) 1fr auto; gap: var(--spacing-sm); align-items: baseline;
     width: 100%; text-align: left; padding: var(--spacing-sm) var(--spacing-sm); border-radius: 12px;
     background: var(--glass); border: 1px solid var(--edge);
   }
   .services .nm { font-size: var(--font-sm); color: var(--gold); }
+  .service-name { display: flex; align-items: center; gap: var(--spacing-2xs); }
+  .service-name img { width: var(--icon-md); height: var(--icon-md); flex: none; object-fit: contain; opacity: .9; }
   .services .by { font-size: var(--font-xs); color: var(--mob); }
   .services .say { font-size: var(--font-xs); color: var(--text); }
   .services .live { font-size: var(--font-xs); color: var(--dim); font-family: var(--num); }
@@ -159,17 +167,17 @@
   .qol, .ways { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: 12px; }
   .qol h4, .ways h4 { margin: 0; }
   /* one row, three columns: the thing, how much of it there is, and the press that empties it */
-  .qrow { display: grid; grid-template-columns: 1fr auto auto; gap: 3px var(--spacing-sm); align-items: center; }
+  .qrow { display: grid; grid-template-columns: 1fr auto auto; gap: var(--spacing-2xs) var(--spacing-sm); align-items: center; }
   .qrow span { font-size: var(--font-xs); color: var(--dim); }
   .qrow b { font-family: var(--num); font-size: var(--font-xs); text-align: right; }
-  .qol { display: grid; gap: 4px; }
-  .qol p { margin: 3px 0 0; color: var(--dim); }
-  .mini { padding: 1px var(--spacing-xs); font-size: var(--font-xs); }
-  .chips { display: flex; flex-wrap: wrap; gap: 3px; }
-  .now { font-size: var(--font-xs); color: var(--good); border: 1px solid rgba(39, 174, 96, .45); border-radius: 999px; padding: 1px var(--spacing-xs); }
-  .chip { padding: 1px var(--spacing-xs); font-size: var(--font-xs); border-radius: 999px; }
+  .qol { display: grid; gap: var(--spacing-2xs); }
+  .qol p { margin: var(--spacing-2xs) 0 0; color: var(--dim); }
+  .mini { padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); }
+  .now { font-size: var(--font-xs); color: var(--good); border: 1px solid rgba(39, 174, 96, .45); border-radius: 999px; padding: var(--seam) var(--spacing-xs); }
+  .chip { padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); border-radius: 999px; }
 
-  @media (max-width: 1280px) {
+  @media (max-width: 1023px) {
     .cols { grid-template-columns: 1fr; }
     .services .row { grid-template-columns: 1fr auto; }
     .services .by, .services .say { grid-column: 1 / -1; }

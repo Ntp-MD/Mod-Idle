@@ -97,6 +97,7 @@ describe('Berserker pays for its own speed', () => {
 
   it('counts only while its own clock is running', () => {
     const s = newSkillState();
+    s.owned['buff.berserker'] = 0;
     s.buffs['buff.berserker'] = true;
     expect(effectsActive(s).mult.attack_speed).toBeUndefined();
     s.buffUp['buff.berserker'] = 4;

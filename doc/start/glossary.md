@@ -50,6 +50,8 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Alignment** | Dex spent twice: the gate **every rolled status** passes — an Element status, bleed, and a stun — **and** the multiplier on an Element status's damage. |
 | **Physical power / Magic power** | The damage derived from the character. There is no weapon Base power. |
 | **Elemental power** | The third damage path, derived from Int and named by the weapon's own Element. |
+| **Current HP cost** | A flat HP amount paid by a skill from the caster's current pool; a press cannot spend its final HP point. |
+| **Caster Max HP damage** | The optional `max_hp_pct` term added to a skill's damage basis, read from the caster's Max HP. |
 | **hit_chance** | Whether a hit connects at all — the accuracy-versus-evasion ratio. |
 | **crit overflow** | Chance past a whole chance becomes crit damage, so stacking more crit is never wasted. |
 | **damage taken** | A multiplier on the incoming hit that runs after every mitigation layer and before any pool. |
@@ -60,7 +62,7 @@ The order itself is a rule: see `DECISIONS.md`.
 | Term | Meaning |
 |---|---|
 | **Push** | HP reaching zero is **not death**: the fighter is pushed out of combat, rests, then walks back in alone. Time is the only thing this game charges. |
-| **Camp** | The Push rest location, and nothing else — the settlement that owns the current zone. |
+| **Camp** | Short for Field Camp: a player-set safe hex that receives a Push and enables field gathering and cooking. |
 | **No death** | The standing rule: defensive value comes from time not lost, not from survival. |
 | **DoT** | Damage over time, ticking once a second. |
 | **Leech** | HP returned as a percentage of damage just dealt. |
@@ -107,9 +109,15 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Salvage** | Disposal of gear below the filter line, with a milestone payout. |
 | **Bag filter** | What makes every drop a decision: **keep** it, **dissolve** it, or **sell** it. |
 | **adventure bag** | The bag of kept gear carried while adventuring. |
-| **character bag** | The bag of carried consumables. |
+| **character bag** | The bag of carried consumables, field materials and provisions. |
 | **stash** | Settlement storage, organisation only. |
 | **herb** | A plant drop, consumed rather than equipped or sold. |
+| **field material** | A stack from Mine, Rare Grove or hunting activity, carried in the character bag. |
+| **meal** | A cooked food item; eating one replaces the active timed combat buff. |
+| **Hunger** | A saved field provision meter. Travel, hunting and gathering spend it; at zero, HP regeneration is reduced, while Energy Shield recharge is unchanged. |
+| **Auto Eat** | A saved per-character setting that consumes eligible carried cooked food, then fruit, then edible field herbs at the chosen Hunger threshold. Ingredients are never edible; raw food is opt-in before Hunger is empty and may be used as an empty-Hunger emergency. |
+| **provision** | A carried raw food, fruit, edible field herb, cooking ingredient or cooked meal. Their effects and sources are defined in `engine.json` `fieldwork.foods`, `fieldwork.hunt` and `fieldwork.recipes`. |
+| **trail event** | An independent travel-block event that can provide food or restore Hunger without replacing the block's ambush roll. |
 | **junk** | A flavoured drop from a **variant**, sold to the settlement Counterhand for gold. |
 | **variant** | One rung of a species' named ladder (`mob.variants`). |
 
@@ -124,8 +132,11 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Block** | One hex of the world lattice; a walk is counted in blocks. |
 | **Walk** | Crossing blocks from the cell the feet are on to the cell clicked. |
 | **Waypoint** | A settlement opened by arriving on foot: after that a warp there is instant. |
-| **Hunt** | Leaving safe ground to fight from the cell the feet stand on. |
-| **Dungeon run** | A **mode**, not a place: one dungeon per zone, on its settlement's first wild side. |
+| **Hunt** | Leaving safe ground to fight from the cell the feet stand on; sub-zones pick a cast, bare ground hunts the whole zone. |
+| **Field Camp** | One player-set safe hex. It enables field gathering and cooking, and receives a Push in its zone. |
+| **Mine** | A wild-side fieldwork hex that yields ore while gathering at a Camp. |
+| **Rare Grove** | A wild-side fieldwork hex that yields timber and can yield rarewood while gathering at a Camp. |
+| **Dungeon run** | A **mode**, not a place: one dungeon per zone, entered at its wild-side index 0. |
 | **Escrow** | What a dungeon run holds while it runs: the per-kill rolls banked instead of paid. |
 | **Wild side** | The untamed cells on a settlement's own land. |
 | **Standing** | A per-settlement unlock counter earned from the flows that already exist. |

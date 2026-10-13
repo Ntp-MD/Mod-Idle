@@ -115,7 +115,7 @@
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
-      "note": "The passive tree exists (tools/data/tree.json: three branches, 63 nodes) and has no effect on this line (owner ruling): it is deliberately not folded in, and the published rates are the empty-tree baseline. mob_HP(L) is a static published table, never priced from player DPS: every zone edge carries its own HP (mob.zones[].hp) plus one cap anchor at the level cap, and every level between is linearly interpolated. typical_gear_DPS(L) is read back out of that table, never priced into it, and mob_PS(L) = typical_gear_DPS(L) / mob_damage_divisor. Above the level-90 edge the read-back line runs to the cap anchor (tools/lib/engine.ts mobHpAt - X37).",
+      "note": "The passive tree exists (tools/data/tree.json: three connected branches, 64 nodes) and has no effect on this line (owner ruling): it is deliberately not folded in, and the published rates are the empty-tree baseline. mob_HP(L) is a static published table, never priced from player DPS: every zone edge carries its own HP (mob.zones[].hp) plus one cap anchor at the level cap, and every level between is linearly interpolated. typical_gear_DPS(L) is read back out of that table, never priced into it, and mob_PS(L) = typical_gear_DPS(L) / mob_damage_divisor. Above the level-90 edge the read-back line runs to the cap anchor (tools/lib/engine.ts mobHpAt - X37).",
       "extend": {
         "from_level": 90,
         "gear_factor": 43.15708874022729,
@@ -3236,7 +3236,7 @@
     "affected_by_armour": false,
     "can_crit": false,
     "is_element": false,
-    "mitigations": "none — bleed has no counter stat in the game; heal and Energy Shield only shorten the race ",
+    "mitigations": "none — bleed has no counter stat in the game and its DoT bypasses Energy Shield; healing can shorten the race",
     "mob_side": "decided — bleed is a DoT, so it lands on mobs in full from our own bleed sources: the axe's `Chance to bleed %` line, and a press whose row grants the proc. It is a ROLLED status like an Element proc, so it passes the Alignment gate before its own chance (owner ruling) — the same gate a stun passes. The reverse is a mob skill: the high-Str physical lineages (Orc · Golem · Troll · Drake) inflict bleed as their signature, delivered as a DoT slice of their already-priced mob_PS, not extra power (combat.md §5b)",
     "note": "PoE bleed: physical damage over time, does not stack, a new application refreshes the duration, base duration 5 sec, base total 70% of the inflicting hit's physical damage, unaffected by armour, cannot crit. bleed_dps = K_BLEED x physical_per_hit / bleed_time_sec, so it does not scale with attack speed — slow heavy hits are the build. Delivered by the axe's `Chance to bleed %` line and by a press whose row grants the proc; no curse carries it."
   },
@@ -3733,8 +3733,15 @@
     "delay_sec": 3,
     "regen_pct": 3,
     "player_only": true,
-    "chaos_bypasses": true,
-    "note": "Elemental resistance is a GEAR line (owner ruling): no Core stat feeds it, so `K_MOB_RES` belongs to the mob stat vector alone and the player reads the resistance off the Mod rows. Energy Shield is fed by Wis flat (`K_WIS_ES`) with the gear lines riding on top (owner ruling): pool = (`Wis` x `K_WIS_ES` + `energy_shield_flat`) x (1 + `max_energy_shield_pct`/100). Regen is `regen_pct` (3) percent of the max pool per second once `delay_sec` (3) have passed without a hit, so the base rate alone returns the whole pool in 100 / `regen_pct` sec - the same full-pool span the mana pool was tuned to. Regen is amplified by an `es_regen` line from a skill, Mod or passive: rate x (1 + `es_regen`/100), and that is the only way it moves. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Chaos bypasses it, and armour + Elemental resistance shrink the number that drains it."
+    "chaos_bypasses": false,
+    "note": "Elemental resistance is a GEAR line (owner ruling): no Core stat feeds it, so `K_MOB_RES` belongs to the mob stat vector alone and the player reads the resistance off the Mod rows. Energy Shield is fed by Wis flat (`K_WIS_ES`) with the gear lines riding on top (owner ruling): pool = (`Wis` x `K_WIS_ES` + `energy_shield_flat`) x (1 + `max_energy_shield_pct`/100). Regen is `regen_pct` (3) percent of the max pool per second once `delay_sec` (3) have passed without a hit, so the base rate alone returns the whole pool in 100 / `regen_pct` sec - the same full-pool span the mana pool was tuned to. Regen is amplified by an `es_regen` line from a skill, Mod or passive: rate x (1 + `es_regen`/100), and that is the only way it moves. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Hits of every Element, including chaos, and burn DoT drain Energy Shield before HP; poison and bleed DoT bypass it. Armour + Elemental resistance shrink the hit that drains it."
+  },
+  "evasion_roll": {
+    "opening_rating": 12,
+    "opening_max_chance_pct": 5,
+    "opening_share": 0.05,
+    "earned_mult": 1.3,
+    "note": "The first opening_rating Evasion points count at opening_share; points above that count at earned_mult. The effective rating is opposed by attacker Accuracy and capped by caps.evasion. The opening chance stays below opening_max_chance_pct even against the least accurate zone-1 lineage, while preserving the value of Agi and gear in later zones. Mob Evasion and outgoing hit chance keep their own accuracy-versus-rating roll."
   },
   "caps": {
     "crit_chance": null,
@@ -3752,7 +3759,7 @@
     "block_note": "`block` is the second avoidance layer: a blocked hit is cut by a flat `armour / 10` (owner ruling, provisional) rather than deleted, and the roll runs after perfect dodge and evasion. It is fed by the Shield offhand's line 1 only. **No Cap (owner ruling):** the block chance keeps climbing with the shield's own Mod line. formula-defense.md prints the order.",
     "stun": null,
     "stun_note": "`stun` is the lightning stun chance (elements.md lightning · C10): `Alignment × K_STUN_PER_ALIGN` plus the `Chance to stun %` gear line. **No Cap (owner ruling):** the two sources sum and the chance keeps climbing; the mace's line 1 is the published gear source.",
-    "notes": "`evasion` is the one avoidance Cap (80) and AGI carries it (owner ruling): the rating is `agi x K_EVASION` with the `evasion_flat` / `evasion_pct` gear lines riding on the same rating, so Dex no longer feeds it at all. The single opposed roll runs on that rating and the Cap binds against the low-accuracy lineages, which is what C1/C2 and X20 prove. **No Cap (owner ruling):** `perfect_dodge`, `block`, `stun` and `alignment` are all open-ended. Perfect dodge is not opposed and deletes the hit outright, so it binds on the Lck ratio alone and keeps climbing with it. **`elem_res` (75) and `cdr` (80) are hard ceilings, not build targets**: a maxed single-stat build reaches only 48.45 / 57.375, so each Cap sits above its own build by intent. `elem_res` is the one Cap with an unlock: a passive-tree node raises the ceiling, and the engine takes that raise as the `capBonus` its `resistanceOf` argument carries. `elem_res_max` is that unlocked ceiling and its only home, and `resistanceOf` clamps `elem_res + capBonus` there however the raise is stacked — T9 proves the tree's fully-bought node lands exactly on it. `attack_interval_sec` is the clock Cap in its own unit (owner ruling): `hits_per_sec` never passes `1 / attack_interval_sec`, whatever the weapon, because a percent ceiling let a dagger clock faster than a staff. The engine derives its `aspd` ceiling from that one number. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
+    "notes": "`evasion` is the one avoidance Cap (80) and AGI carries it (owner ruling): the rating is `agi x K_EVASION` with the `evasion_flat` / `evasion_pct` gear lines riding on the same rating, so Dex no longer feeds it at all. The opening-weighted effective rating in `evasion_roll` runs the opposed roll and the Cap binds against the low-accuracy lineages, which is what C1/C2 and X20 prove. **No Cap (owner ruling):** `perfect_dodge`, `block`, `stun` and `alignment` are all open-ended. Perfect dodge is not opposed and deletes the hit outright, so it binds on the Lck ratio alone and keeps climbing with it. **`elem_res` (75) and `cdr` (80) are hard ceilings, not build targets**: a maxed single-stat build reaches only 48.45 / 57.375, so each Cap sits above its own build by intent. `elem_res` is the one Cap with an unlock: a passive-tree node raises the ceiling, and the engine takes that raise as the `capBonus` its `resistanceOf` argument carries. `elem_res_max` is that unlocked ceiling and its only home, and `resistanceOf` clamps `elem_res + capBonus` there however the raise is stacked — T9 proves the tree's fully-bought node lands exactly on it. `attack_interval_sec` is the clock Cap in its own unit (owner ruling): `hits_per_sec` never passes `1 / attack_interval_sec`, whatever the weapon, because a percent ceiling let a dagger clock faster than a staff. The engine derives its `aspd` ceiling from that one number. **X11** proves the split: a build-target Cap must have reach >= cap (it must bind), a hard-ceiling Cap must have reach <= cap (it must not)."
   },
   "weapons": [
     {
@@ -3850,7 +3857,7 @@
     "note": "A herb bundle drops on its own roll, separate from gear and stones. farm.md prints these; F13 in checks.md is generated from here."
   },
   "farm": {
-    "note": "Farming is the game's ONE life skill — Melvor's Farming, the farm discipline only (no fishing · mining · woodcutting). It is a real leveled track: plant a seed on a plot, wait the growth timer, harvest for Farming XP plus herbs. Provisioning ONLY — it yields the herbs potions are crafted from, never gear · Mods · combat DPS — so it grants no power and needs no mob_HP fold (DECISIONS.md §Standing intent · H1). The level curve is the same sqrt(xp/divisor)+1 shape as weapon Mastery (equipment-weapon.md) and runs parallel to it, separate from character XP. A8 ruling.",
+    "note": "Settlement Farming is the herb-provisioning life skill: plant a seed on a plot, wait the growth timer, harvest for Farming XP plus herbs. It remains separate from the field skills (Mining, Woodcutting, Hunting and Cooking). Farm and field-skill XP are independent of character XP and do not alter mob_HP.",
     "plots": {
       "base": 3,
       "shop_deeds": 2,
@@ -3869,6 +3876,253 @@
     },
     "offline_cap_hours": 12,
     "taps_per_day": 2
+  },
+  "fieldwork": {
+    "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not replace ambushes. All rates and effects live here; map.json remains presentation only.",
+    "level_divisor": 100,
+    "level_cap": 20,
+    "mastery_divisor": 25,
+    "mastery_cap": 99,
+    "progression": {
+      "harvest_bonus_levels": [5, 10, 15],
+      "harvest_bonus_per_level": 1,
+      "drop_rate_bonus_per_skill_level_pct": 0.5,
+      "drop_rate_bonus_per_mastery_level_pct": 0.25,
+      "drop_rate_bonus_cap_pct": 40
+    },
+    "hunger": {
+      "max": 100,
+      "empty_hp_regen_cut_pct": 90,
+      "drain_per_sec": { "travel": 0.03, "hunting": 0.055, "gathering": 0.025 },
+      "auto_eat": { "enabled_default": true, "threshold_default": 25, "threshold_options": [10, 25, 50, 75], "allow_raw_default": false, "emergency_raw_at_zero": true, "priority": ["cooked", "fruit", "herb", "raw"] }
+    },
+    "foods": [
+      { "id": "raw_game_meat", "name": "Raw Game Meat", "kind": "raw", "hunger_restore": 22, "edible": true, "auto_eat": false, "source": "wildlife" },
+      { "id": "goblin_haunch", "name": "Goblin Haunch", "kind": "raw", "hunger_restore": 20, "edible": true, "auto_eat": false, "source": "goblin scavengers" },
+      { "id": "wild_berries", "name": "Wild Berries", "kind": "fruit", "hunger_restore": 14, "edible": true, "auto_eat": true, "source": "road forage" },
+      { "id": "forest_nuts", "name": "Forest Nuts", "kind": "fruit", "hunger_restore": 18, "edible": true, "auto_eat": true, "source": "road forage and large beasts" },
+      { "id": "sunroot", "name": "Sunroot", "kind": "fruit", "hunger_restore": 21, "edible": true, "auto_eat": true, "source": "sunlit road forage" },
+      { "id": "moonmint", "name": "Moonmint", "kind": "herb", "hunger_restore": 12, "edible": true, "auto_eat": true, "source": "elves, dryads and moonlit trails" },
+      { "id": "field_mushroom", "name": "Field Mushroom", "kind": "ingredient", "hunger_restore": 0, "edible": false, "auto_eat": false, "source": "slimes and road forage" },
+      { "id": "aromatic_herb", "name": "Aromatic Herb", "kind": "ingredient", "hunger_restore": 0, "edible": false, "auto_eat": false, "source": "Rare Grove" },
+      { "id": "soldier_ration", "name": "Soldier's Ration", "kind": "cooked", "hunger_restore": 40, "edible": true, "auto_eat": true, "source": "human patrols and cooking" },
+      { "id": "trail_stew", "name": "Trail Stew", "kind": "cooked", "hunger_restore": 42, "edible": true, "auto_eat": true, "source": "cooking" },
+      { "id": "hunter_roast", "name": "Hunter's Roast", "kind": "cooked", "hunger_restore": 58, "edible": true, "auto_eat": true, "source": "cooking" },
+      { "id": "warden_broth", "name": "Warden Broth", "kind": "cooked", "hunger_restore": 64, "edible": true, "auto_eat": true, "source": "cooking" },
+      { "id": "grilled_skewer", "name": "Grilled Skewer", "kind": "cooked", "hunger_restore": 32, "edible": true, "auto_eat": true, "source": "cooking" },
+      { "id": "berry_porridge", "name": "Berry Porridge", "kind": "cooked", "hunger_restore": 38, "edible": true, "auto_eat": true, "source": "cooking" }
+    ],
+    "travel_events": {
+      "chance_per_block": 0.12,
+      "events": [
+        { "id": "berry_patch", "weight": 4, "kind": "food", "text": "Found wild berries along the trail", "food_id": "wild_berries", "amount_min": 1, "amount_max": 2 },
+        { "id": "nut_cache", "weight": 3, "kind": "food", "text": "Found a cache of forest nuts", "food_id": "forest_nuts", "amount_min": 1, "amount_max": 2 },
+        { "id": "mushroom_patch", "weight": 2, "kind": "food", "text": "Found field mushrooms beneath a fallen log", "food_id": "field_mushroom", "amount_min": 1, "amount_max": 2 },
+        { "id": "sunroot_patch", "weight": 2, "kind": "food", "text": "A sunroot breaks through the roadside earth", "food_id": "sunroot", "amount_min": 1, "amount_max": 2 },
+        { "id": "moonmint_sprig", "weight": 2, "kind": "food", "text": "Moonmint glimmers in the trail shade", "food_id": "moonmint", "amount_min": 1, "amount_max": 2 },
+        { "id": "clear_spring", "weight": 2, "kind": "restore", "text": "A clear spring restores your strength", "hunger_restore": 20 }
+      ]
+    },
+    "camp": {
+      "free_relocations": 1,
+      "relocate_ore": 1,
+      "relocate_timber": 5,
+      "note": "The first field Camp and its first relocation are free, so the player can reach both gathering sites. Later relocations consume ore and timber. A Camp is safe ground and the field Push return point for its zone."
+    },
+    "wild_site_index": {
+      "dungeon": 0,
+      "mine": 1,
+      "grove": 2
+    },
+    "actions": {
+      "mine": {
+        "resource": "ore",
+        "yield": 1,
+        "interval_sec": 10,
+        "xp": 15,
+        "mastery_xp": 1,
+        "rare_drop_chance": 0.05,
+        "rare_resource": "ore"
+      },
+      "grove": {
+        "resource": "timber",
+        "yield": 1,
+        "interval_sec": 10,
+        "xp": 15,
+        "mastery_xp": 1,
+        "rare_drop_chance": 0.02,
+        "rare_resource": "rarewood",
+        "food_drop_chance": 0.025,
+        "food_id": "aromatic_herb"
+      }
+    },
+    "hunt": {
+      "xp_per_kill": 3,
+      "mastery_xp_per_kill": 1,
+      "meat_drop_chance": 0.35,
+      "meat_min": 1,
+      "meat_max": 2,
+      "edible_species": ["wolf", "ogre", "troll", "minotaur", "slime", "dragon", "lizardman", "giant", "werewolf"],
+      "food_drops": [
+        { "species": ["goblin"], "food_id": "goblin_haunch", "chance": 0.22, "min": 1, "max": 2 },
+        { "species": ["human"], "food_id": "soldier_ration", "chance": 0.18, "min": 1, "max": 1 },
+        { "species": ["elf", "dryad"], "food_id": "moonmint", "chance": 0.08, "min": 1, "max": 2 },
+        { "species": ["slime", "lizardman"], "food_id": "field_mushroom", "chance": 0.06, "min": 1, "max": 1 },
+        { "species": ["troll", "giant", "ogre"], "food_id": "forest_nuts", "chance": 0.04, "min": 1, "max": 2 }
+      ]
+    },
+    "recipes": [
+      {
+        "id": "trail_stew",
+        "name": "Trail Stew",
+        "menu": "hearth",
+        "level": 1,
+        "xp": 30,
+        "mastery_xp": 1,
+        "materials": {},
+        "foods": { "raw_game_meat": 2 },
+        "herbs": {},
+        "hunger_restore": 42,
+        "duration_sec": 900,
+        "damage_pct": 5,
+        "hp_regen_pct": 0.2
+      },
+      {
+        "id": "hunter_roast",
+        "name": "Hunter's Roast",
+        "menu": "hearth",
+        "level": 6,
+        "xp": 90,
+        "mastery_xp": 1,
+        "materials": { "rarewood": 1 },
+        "foods": { "raw_game_meat": 3, "field_mushroom": 1 },
+        "herbs": { "mid": 1 },
+        "hunger_restore": 58,
+        "duration_sec": 1800,
+        "damage_pct": 9,
+        "hp_regen_pct": 0.35
+      },
+      {
+        "id": "warden_broth",
+        "name": "Warden Broth",
+        "menu": "hearth",
+        "level": 11,
+        "xp": 160,
+        "mastery_xp": 1,
+        "materials": {},
+        "foods": { "raw_game_meat": 2, "aromatic_herb": 1 },
+        "herbs": { "high": 1 },
+        "hunger_restore": 64,
+        "duration_sec": 2700,
+        "damage_pct": 7,
+        "hp_regen_pct": 0.6
+      },
+      {
+        "id": "grilled_skewer",
+        "name": "Grilled Skewer",
+        "menu": "hearth",
+        "level": 1,
+        "xp": 24,
+        "mastery_xp": 1,
+        "materials": {},
+        "foods": { "raw_game_meat": 1, "field_mushroom": 1 },
+        "herbs": {},
+        "hunger_restore": 32,
+        "duration_sec": 600,
+        "damage_pct": 3,
+        "hp_regen_pct": 0.1
+      },
+      {
+        "id": "berry_porridge",
+        "name": "Berry Porridge",
+        "menu": "forage",
+        "level": 1,
+        "xp": 26,
+        "mastery_xp": 1,
+        "materials": {},
+        "foods": { "wild_berries": 2, "forest_nuts": 1 },
+        "herbs": { "low": 1 },
+        "hunger_restore": 38,
+        "duration_sec": 600,
+        "damage_pct": 2,
+        "hp_regen_pct": 0.2
+      },
+      {
+        "id": "soldier_ration",
+        "name": "Soldier's Ration",
+        "menu": "hearth",
+        "level": 1,
+        "xp": 28,
+        "mastery_xp": 1,
+        "materials": {},
+        "foods": { "raw_game_meat": 1, "forest_nuts": 1 },
+        "herbs": {},
+        "hunger_restore": 40,
+        "duration_sec": 900,
+        "damage_pct": 2,
+        "hp_regen_pct": 0.12
+      },
+      {
+        "id": "goblin_bone_broth",
+        "name": "Goblin Bone Broth",
+        "menu": "forage",
+        "level": 3,
+        "xp": 55,
+        "mastery_xp": 1,
+        "materials": {},
+        "foods": { "goblin_haunch": 2, "field_mushroom": 1, "moonmint": 1 },
+        "herbs": {},
+        "hunger_restore": 54,
+        "duration_sec": 1200,
+        "damage_pct": 5,
+        "hp_regen_pct": 0.25
+      },
+      {
+        "id": "moonmint_tea",
+        "name": "Moonmint Tea",
+        "menu": "forage",
+        "level": 2,
+        "xp": 45,
+        "mastery_xp": 1,
+        "materials": {},
+        "foods": { "moonmint": 2, "wild_berries": 1 },
+        "herbs": {},
+        "hunger_restore": 34,
+        "duration_sec": 1200,
+        "damage_pct": 0,
+        "hp_regen_pct": 0.5
+      },
+      {
+        "id": "sunroot_porridge",
+        "name": "Sunroot Porridge",
+        "menu": "forage",
+        "level": 4,
+        "xp": 60,
+        "mastery_xp": 1,
+        "materials": {},
+        "foods": { "sunroot": 2, "wild_berries": 1 },
+        "herbs": { "low": 1 },
+        "hunger_restore": 46,
+        "duration_sec": 1500,
+        "damage_pct": 3,
+        "hp_regen_pct": 0.2
+      },
+      {
+        "id": "spiced_trail_roast",
+        "name": "Spiced Trail Roast",
+        "menu": "forage",
+        "level": 7,
+        "xp": 110,
+        "mastery_xp": 1,
+        "materials": { "rarewood": 1 },
+        "foods": { "raw_game_meat": 2, "forest_nuts": 1, "aromatic_herb": 1 },
+        "herbs": { "mid": 1 },
+        "hunger_restore": 62,
+        "duration_sec": 2100,
+        "damage_pct": 8,
+        "hp_regen_pct": 0.4
+      }
+    ]
   },
   "potions": {
     "note": "Single home for the potion ladder farm.md prints (A8). Effect is % of the relevant pool, applied instantly; the value is derived as base + step × tier_index (HP tiers 1-3 → 10/20/30 · mana tiers 1-3 → 15/25/35). Potions are provisioning, not power: they are suppressed on bosses (combat.md §7), sit on a shared cooldown, are capped per fight, and almost never trigger inside a 1-sec AFK farm kill — so they do NOT enter the survival model (tools/survival.ts) and move no mob_HP · drop line · timeline number (H1). The 2026-10-03 survival re-run (SV1-SV5 green) confirms they remain a bounded non-combat convenience — this closes the old 'pending survival rerun' note.",
@@ -4089,7 +4343,7 @@
     "block_sec": 1,
     "encounter_chance_pct": 16.6667,
     "encounter_rule": "Every block walked rolls one encounter chance. A block that rolls nothing is silent. An encounter that fires is a real mob group drawn from the lower of the two zones the walk joins, at the player level clamped into that zone's range and at that zone's own group size, fought with the ordinary combat and drop rules: it pays the ordinary drop roll and nothing else.",
-    "push_rule": "A Push on the walk is the ordinary Push. The character is pushed to the camp that owns the zone it was ambushed in, rests there, and walks back in on the block it was ambushed on. A Push never ends a walk and never gives back a block.",
+    "push_rule": "A Push costs recovery time. A same-zone Field Camp receives the character and ends the current walk without refunding a block. With no same-zone Field Camp, the existing walk is preserved and resumes on the ambush block after recovery. Away time never walks.",
     "waypoint_rule": "Arriving at a settlement on foot unlocks its Waypoint, once. A Waypoint warps to any unlocked settlement instantly, and it costs gold at the destination settlement's own band: a warp buys back the walk's time, which is what gold is for, and it buys nothing else (`town.json` `waypoint_warp`). It never gates a zone: a settlement you have not walked to is reached by walking, and no amount of gold opens a Waypoint you have not earned on foot. A Waystone will be a second destination kind that a Waypoint may also target.",
     "nodes": [
       {
@@ -4196,17 +4450,21 @@
     "stack_size": {
       "stone": 999,
       "herb": 100,
-      "potion": 100
+      "potion": 100,
+      "material": 100,
+      "food": 100
     },
     "unit_weight": {
       "stone": 0,
       "herb": 0.1,
-      "potion": 0.1
+      "potion": 0.1,
+      "material": 0.1,
+      "food": 0.1
     },
     "gold_uses_slot": false,
     "offline_cap_hr": 12,
     "overflow": "stop_pickup",
-    "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots of carried consumables: stones stack 999/slot and are weightless, herbs and potions stack 100/slot and weigh 0.1/unit, gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Stash and crafting are Settlement-only: leave Adventure and return to a settlement to deposit and to craft (towns.md, crafting.md). The Stash is one warehouse on the character and every settlement's counter opens the same one, so standing in a town the bag panel is the Stash by default and the Adventure pile sits one click behind it - the temporary bag is the travelling face of the linked warehouse, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
+    "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots: stones stack 999/slot and are weightless; herbs, potions, materials and all provisions stack 100/slot and weigh 0.1/unit; gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Gear crafting and Stash are Settlement-only; Camp cooking is the field exception. The Stash is one warehouse on the character and every settlement's counter opens the same one, so standing in a town the bag panel is the Stash by default and the Adventure pile sits one click behind it - the temporary bag is the travelling face of the linked warehouse, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
   },
   "item_level": {
     "note": "The one axis an item's strength rides (item-level.md). The value a Mod line rolls is a window that climbs with the item's level: the window's floor climbs from the band below (so a mid-band piece starts able to roll the low band's floor and ends above it), the ceiling is the band's own top, and the roll lands in one of the window's thirds - the top third is the rarest, so a high-level drop is a chance and not a formality. The Unbound line count is not on that ladder: it is drawn inside `unbound_slots` at drop, so two pieces of one level and one band can still differ in width.",

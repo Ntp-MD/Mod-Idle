@@ -18,6 +18,7 @@
   } = $props();
 
   let capturing = $state<string | null>(null);
+  let activeGroup = $state<KeyGroup>('screen');
   const clash = $derived(conflicts(binds));
   const groups = $derived(Object.keys(KEYGROUP_LABEL) as KeyGroup[]);
 
@@ -52,48 +53,50 @@
     </p>
   {/if}
 
-  <div class="fold">
-  {#each groups as g (g)}
-    <section class="grp">
-      <h4>{KEYGROUP_LABEL[g]}</h4>
-      <table class="kb">
-        <thead><tr><th>Action</th><th>Where it works</th><th>Key</th><th></th></tr></thead>
-        <tbody>
-          {#each KEYBINDS.filter((b) => b.group === g) as b (b.id)}
-            {@const hot = capturing === b.id}
-            {@const dup = (clash[binds[b.id]] || []).length > 1}
-            <tr class:hot class:dup>
-              <td class="act">{b.label}</td>
-              <td class="where">{b.where}</td>
-              <td>
-                <button class="cap" class:waiting={hot} onclick={() => (capturing = hot ? null : b.id)}
-                        aria-label={hot ? `Press a key for ${b.label}` : `Rebind ${b.label} to ${formatKey(binds[b.id])}`}>
-                  {#if hot}press a key…{:else}{formatKey(binds[b.id])}{/if}
-                </button>
-                {#if dup}<span class="warn">twice</span>{/if}
-              </td>
-              <td class="tail">
-                {#if offDefault(b.id)}
-                  <button class="mini" onclick={() => onset(b.id, DEFAULT_BINDS[b.id])}>default</button>
-                  <button class="mini" onclick={() => onclear(b.id)}>clear</button>
-                {:else}
-                  <span class="dim">as shipped</span>
-                {/if}
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    </section>
-  {/each}
+  <div class="group-tabs" role="tablist" aria-label="Key binding groups">
+    {#each groups as g (g)}
+      <button role="tab" class:active={activeGroup === g} aria-selected={activeGroup === g} onclick={() => (activeGroup = g)}>{KEYGROUP_LABEL[g]}</button>
+    {/each}
   </div>
+
+  <section class="grp" aria-label={KEYGROUP_LABEL[activeGroup]}>
+    <h4>{KEYGROUP_LABEL[activeGroup]}</h4>
+    <table class="kb">
+      <thead><tr><th>Action</th><th>Where it works</th><th>Key</th><th></th></tr></thead>
+      <tbody>
+        {#each KEYBINDS.filter((b) => b.group === activeGroup) as b (b.id)}
+          {@const hot = capturing === b.id}
+          {@const dup = (clash[binds[b.id]] || []).length > 1}
+          <tr class:hot class:dup>
+            <td class="act">{b.label}</td>
+            <td class="where">{b.where}</td>
+            <td>
+              <button class="cap" class:waiting={hot} onclick={() => (capturing = hot ? null : b.id)}
+                      aria-label={hot ? `Press a key for ${b.label}` : `Rebind ${b.label} to ${formatKey(binds[b.id])}`}>
+                {#if hot}press a key…{:else}{formatKey(binds[b.id])}{/if}
+              </button>
+              {#if dup}<span class="warn">twice</span>{/if}
+            </td>
+            <td class="tail">
+              {#if offDefault(b.id)}
+                <button class="mini" onclick={() => onset(b.id, DEFAULT_BINDS[b.id])}>default</button>
+                <button class="mini" onclick={() => onclear(b.id)}>clear</button>
+              {:else}
+                <span class="dim">as shipped</span>
+              {/if}
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </section>
 
   <p class="foot"><small>The rail prints each screen's key on its own tab, and a control that has one names
     it in its tooltip — so a binding you never set here is still a binding you can find on screen.</small></p>
 </div>
 
 <style>
-  .keys { display: grid; gap: var(--spacing-sm); }
+  .keys { height: 100%; min-height: 0; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto; gap: var(--spacing-sm); }
   .top { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; justify-content: space-between; }
   .top p { margin: 0; color: var(--dim); max-width: var(--box-920); }
   .clash {
@@ -101,20 +104,23 @@
     background: color-mix(in srgb, var(--gold) 10%, transparent); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); color: var(--gold-lit);
   }
   .clash b { font-family: var(--num); color: var(--gold); }
-  .grp { display: grid; gap: 3px; }
-  .grp h4 { margin: 4px 0 0; }
+  .group-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); }
+  .group-tabs button { padding: var(--spacing-3xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .group-tabs button.active { border-color: var(--gold); color: var(--gold); }
+  .grp { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: var(--spacing-2xs); }
+  .grp h4 { margin: var(--spacing-2xs) 0 0; }
   .kb td { border-bottom-color: var(--line); }
   .kb .act { font-family: var(--ui); color: var(--text); font-size: var(--font-xs); }
   .kb .where { font-family: var(--ui); color: var(--mob); font-size: var(--font-xs); }
-  .kb .tail { display: flex; gap: 3px; justify-content: flex-end; align-items: center; }
+  .kb .tail { display: flex; gap: var(--spacing-2xs); justify-content: flex-end; align-items: center; }
   .cap {
-    min-width: var(--box-110); font-family: var(--num); font-size: var(--font-xs); letter-spacing: clamp(0px, 0.033vw + 0px, 1px);
+    min-width: var(--box-110); font-family: var(--num); font-size: var(--font-xs); letter-spacing: clamp(0px, 0.05vw, 1px);
     background: var(--inset); border-color: var(--line);
   }
   .cap.waiting { border-color: var(--focus); color: var(--focus); background: color-mix(in srgb, var(--focus) 10%, transparent); }
   tr.hot { background: color-mix(in srgb, var(--focus) 7%, transparent); }
   tr.dup .cap { border-color: var(--hp); }
   .warn { margin-left: var(--spacing-xs); font-size: var(--font-xs); color: var(--alarm); }
-  .mini { padding: 1px var(--spacing-xs); font-size: var(--font-xs); }
+  .mini { padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); }
   .foot { margin: 0; color: var(--dim); }
 </style>

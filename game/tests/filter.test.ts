@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { E, eng, loot } from '../src/engine/client';
-import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone, adjudicateDrop } from '../src/sim/game';
+import { autoEquip } from '../src/sim/gear';
+import { wants } from '../src/sim/collector';
 import { rollDrop } from '../src/sim/drop';
 import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS } from '../src/sim/filter';
 import { mark, reason, arm, SAVE_CFG } from '../src/sim/snapshot';
@@ -33,6 +35,32 @@ describe('a drop carries its Element as a stored value', () => {
 });
 
 describe('the bag filter reads per-slot thresholds', () => {
+  it('compares a new drop with worn gear, never a stronger piece waiting in the bag', () => {
+    const s = newGame(10);
+    setRule(s.filter, 'ring', { enabled: true, margin_pct: 0 });
+    const ring = (value: number) => piece({ slot: 'ring', base: 'Iron Band', lines: [{ id: 'all_stat_flat', value, slice: 1 }] });
+    const waiting = ring(30);
+    const incoming = ring(10);
+    const worn = s.gear.find((g) => g?.slot === 'ring')!;
+    expect(loot.score(incoming)).toBeGreaterThan(loot.score({ ...worn, q: worn.q ?? 0 }));
+    expect(loot.score(waiting)).toBeGreaterThan(loot.score(incoming));
+    s.bag = [waiting];
+    adjudicateDrop(s, incoming);
+    expect(s.bag).toContain(incoming);
+  });
+
+  it('keeps a Collector-wanted upgrade available for Auto Equip', () => {
+    const s = newGame(10);
+    const drop = Array.from({ length: 100 }, (_, i) => rollDrop(mulberry32(i + 1), 'low', E.item_level.spans[0].from))
+      .find((item) => wants(s, item) && s.gear.some((g) => g?.slot === item.slot
+        && loot.score(item) > loot.score({ ...g, q: g.q ?? 0 })));
+    expect(drop).toBeDefined();
+    adjudicateDrop(s, drop!);
+    expect(s.bag).toContain(drop);
+    expect(drop!.heldFor).toBeUndefined();
+    expect(autoEquip(s).swaps).toHaveLength(1);
+  });
+
   it('starts every slot off, with the published margin ready when it is turned on', () => {
     const f = newFilter();
     for (const slot of FILTER_SLOTS) {
@@ -177,7 +205,7 @@ describe('walking snapshots', () => {
     if (s.player.level > 1) expect(s.pendingSnapshot).toBe('level');
     await writeSave('slot2', s);
     expect(JSON.parse((globalThis as any).localStorage.getItem('modworld:slot2')!).version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(12);
+    expect(SCHEMA_VERSION).toBe(14);
     const round = importJson(exportJson(s));
     expect(round.filter).toBeTruthy();
     expect(round.pendingSnapshot).toBe(null);

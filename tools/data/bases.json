@@ -1,5 +1,5 @@
 {
-  "note": "The Base frames per slot, imported from item-base.md by tools/bases.ts --write. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks; school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. frame_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, drawn_line1_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the Shield / Book families. weapons and weapon_pools come from equipment-weapon.md and equipment-slot-weapon.md. weapon_frames is the A10 list per weapon type (from the Frames table in item-base.md), which the loot roll reads at step 2. tools/loot.ts and the client both read this file, and `node tools/bases.ts --checks` gates it against the docs so none of them can drift.",
+  "note": "Source of truth for Base frames, weapon types and named weapon-frame variants. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks; school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. frame_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, drawn_line1_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the default Shield / Book families. Shield frames may override the family line with their own locked defence profile. weapon_frames holds each type's named variant list and the Frame Mod lines its variants force. tools/loot.ts and the client both read this file; `node tools/bases.ts --checks` validates the frame lists and their Mod ids.",
   "roll_rule": "Bases roll equally inside their slot (item-base.md \"Base Rolling\"); a dual-wield off hand weapon uses that weapon type weight x 0.8.",
   "quality_weight_multiplier": 1.3,
   "mastery": {
@@ -955,8 +955,8 @@
       "name": "Buckler",
       "weight": 3.4,
       "primary": [
-        "evasion_pct",
-        "cooldown_reduction"
+        "cooldown_reduction",
+        "max_hp"
       ],
       "secondary": [
         "max_hp_flat"
@@ -964,7 +964,11 @@
       "slot": "off hand",
       "defence": null,
       "school": null,
-      "family": "Shield"
+      "family": "Shield",
+      "frame_mod": [
+        "block_chance",
+        "armour_flat"
+      ]
     },
     {
       "name": "Kite Shield",
@@ -974,12 +978,37 @@
         "max_hp"
       ],
       "secondary": [
-        "evasion_pct"
+        "max_mana_flat"
       ],
       "slot": "off hand",
       "defence": null,
       "school": null,
-      "family": "Shield"
+      "family": "Shield",
+      "frame_mod": [
+        "block_chance",
+        "armour_flat",
+        "energy_shield_flat"
+      ]
+    },
+    {
+      "name": "Warded Aegis",
+      "weight": 6.3,
+      "primary": [
+        "max_mana",
+        "cooldown_reduction"
+      ],
+      "secondary": [
+        "max_mana_flat",
+        "elemental_alignment"
+      ],
+      "slot": "off hand",
+      "defence": null,
+      "school": null,
+      "family": "Shield",
+      "frame_mod": [
+        "block_chance",
+        "energy_shield_flat"
+      ]
     },
     {
       "name": "Grimoire",
@@ -1229,7 +1258,6 @@
       "Shield": [
         "max_hp_flat",
         "max_hp",
-        "evasion_pct",
         "block_chance"
       ],
       "Book": [
@@ -1246,7 +1274,7 @@
   "weapon_frames": {
     "one-handed sword": [
       {
-        "name": "Arming Sword",
+        "name": "Gloamblade",
         "frame_mod": [
           "physical_power_flat",
           "attack_speed"
@@ -1258,6 +1286,22 @@
         "frame_mod": [
           "physical_power_flat",
           "accuracy"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Dawnbrand",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_damage"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Kingsbane",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_chance"
         ],
         "weight": 1
       }
@@ -1278,11 +1322,27 @@
           "critical_chance"
         ],
         "weight": 1
+      },
+      {
+        "name": "Rift Hatchet",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_damage"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Gravesplitter",
+        "frame_mod": [
+          "physical_power_flat",
+          "accuracy"
+        ],
+        "weight": 1
       }
     ],
     "dagger": [
       {
-        "name": "Dirk",
+        "name": "Nightfang",
         "frame_mod": [
           "physical_power_flat",
           "critical_chance"
@@ -1290,10 +1350,26 @@
         "weight": 1
       },
       {
-        "name": "Stiletto",
+        "name": "Wraithknife",
         "frame_mod": [
           "critical_chance",
           "attack_speed"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Hexknife",
+        "frame_mod": [
+          "physical_power_flat",
+          "attack_speed"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Gravewhisper",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_damage"
         ],
         "weight": 1
       }
@@ -1308,17 +1384,33 @@
         "weight": 1
       },
       {
-        "name": "Cudgel",
+        "name": "Duskmaul",
         "frame_mod": [
           "physical_power_flat",
           "critical_damage"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Stormmaul",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_chance"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Siegebreaker",
+        "frame_mod": [
+          "physical_power_flat",
+          "attack_speed"
         ],
         "weight": 1
       }
     ],
     "wand": [
       {
-        "name": "Bone Wand",
+        "name": "Ashen Wand",
         "frame_mod": [
           "magic_power_flat",
           "cooldown_reduction"
@@ -1330,6 +1422,22 @@
         "frame_mod": [
           "magic_power_flat",
           "elemental_power_flat"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Thornwood Wand",
+        "frame_mod": [
+          "magic_power_flat",
+          "max_mana_flat"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Voidcaller Wand",
+        "frame_mod": [
+          "magic_power_flat",
+          "elemental_alignment"
         ],
         "weight": 1
       }
@@ -1350,11 +1458,27 @@
           "elemental_alignment"
         ],
         "weight": 1
+      },
+      {
+        "name": "Starcaller Staff",
+        "frame_mod": [
+          "magic_power_flat",
+          "elemental_power_flat"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Runebinder Staff",
+        "frame_mod": [
+          "magic_power_flat",
+          "cooldown_reduction"
+        ],
+        "weight": 1
       }
     ],
     "spear": [
       {
-        "name": "Pike",
+        "name": "Moonspear",
         "frame_mod": [
           "physical_power_flat",
           "accuracy"
@@ -1362,10 +1486,26 @@
         "weight": 1
       },
       {
-        "name": "Partisan",
+        "name": "Gale Spear",
         "frame_mod": [
           "physical_power_flat",
           "attack_speed"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Dawnpiercer",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_chance"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Stormlance",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_damage"
         ],
         "weight": 1
       }
@@ -1383,6 +1523,22 @@
         "frame_mod": [
           "physical_power_flat",
           "critical_damage"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Oathcleaver",
+        "frame_mod": [
+          "physical_power_flat",
+          "accuracy"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Voidedge",
+        "frame_mod": [
+          "physical_power_flat",
+          "attack_speed"
         ],
         "weight": 1
       }
@@ -1403,6 +1559,22 @@
           "accuracy"
         ],
         "weight": 1
+      },
+      {
+        "name": "Grimreaver",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_damage"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Skullsplitter",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_chance"
+        ],
+        "weight": 1
       }
     ],
     "bow": [
@@ -1421,6 +1593,22 @@
           "attack_speed"
         ],
         "weight": 1
+      },
+      {
+        "name": "Hawkeye Bow",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_chance"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Nightstalker Bow",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_damage"
+        ],
+        "weight": 1
       }
     ],
     "crossbow": [
@@ -1433,10 +1621,26 @@
         "weight": 1
       },
       {
-        "name": "Hand Crossbow",
+        "name": "Runelock Crossbow",
         "frame_mod": [
           "physical_power_flat",
           "critical_chance"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Repeater Crossbow",
+        "frame_mod": [
+          "physical_power_flat",
+          "accuracy"
+        ],
+        "weight": 1
+      },
+      {
+        "name": "Ironstorm Crossbow",
+        "frame_mod": [
+          "physical_power_flat",
+          "critical_damage"
         ],
         "weight": 1
       }

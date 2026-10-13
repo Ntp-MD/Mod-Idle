@@ -12,11 +12,13 @@
    * read `$state(...)` as a store subscription (the trap `App.svelte` documents for its own top level).
    */
   import { E, loot } from '../engine/client';
+  import { itemName } from '../sim/item-name';
   import { craft, lineName, lineTier, stoneName, replaceChoices, imprintStonesOf, opScope, pressName, craftedMark } from '../sim/craft';
   import type { CraftOp } from '../sim/craft';
   import PieceOn from './PieceOn.svelte';
   import SlotGrid from './SlotGrid.svelte';
   import { gearEntry } from './bag';
+  import { modIcon } from '../icon';
   import type { GameState, Item } from '../sim/types';
   import stoneRerollValue from '../icon/misc/stones/stone-reroll-value.svg?url';
   import stoneRerollTier from '../icon/misc/stones/stone-reroll-tier.svg?url';
@@ -30,7 +32,7 @@
   import crystalTwo from '../icon/misc/stones/crystal-cluster-2.svg?url';
   import crystalGrowth from '../icon/misc/stones/crystal-growth.svg?url';
 
-  let { game, item, where = null, index = -1, onpick, onrun, wornOf, note = '' }: {
+  let { game, item, where = null, index = -1, onpick, onrun, wornOf, note = '', embedded = false, stoneRequest = null, onstoneclear = () => {} }: {
     game: GameState;
     item: Item | null;
     where?: 'gear' | 'bag' | null;
@@ -39,6 +41,9 @@
     onrun: (op: CraftOp, line?: number, pick?: string) => void;
     wornOf: (slot: string) => Item | null;
     note?: string;
+    embedded?: boolean;
+    stoneRequest?: { key: string; id: number; applied?: boolean } | null;
+    onstoneclear?: () => void;
   } = $props();
 
   const UNT = craft.UNTOUCHABLE as number;
@@ -68,7 +73,9 @@
         : op === 'reroll_mod_all' || op === 'replace_all' ? craft.editableCount(item, FRAME)
           : 1;
   const can = (op: CraftOp, i?: number) => item
-    ? presses(op) > 0 && craft.guard(item, op).ok && craft.payable(held, op, item) && (i == null || i >= floorOf(op))
+    ? presses(op) > 0 && craft.guard(item, op).ok && craft.payable(held, op, item)
+      && (i == null || i >= floorOf(op))
+      && !(op === 'refine' && i != null && lineTier(item.lines[i]) === 'T1')
     : false;
   const why = (op: CraftOp, i?: number) => {
     if (!item) return 'pick a piece first';
@@ -79,10 +86,11 @@
       ? 'the Frame Mod is the frame itself — no stone redraws it'
       : opScope(op) === 'piece' ? 'that verb does not reach this line'
         : 'the Bound pair is part of the piece: value and count stones stop below it';
+    if (op === 'refine' && i != null && item.lines[i] && lineTier(item.lines[i]) === 'T1') return 'that slot is already T1';
     if (!craft.payable(held, op, item)) return cost(op, item).map(([k, n]) => `needs ${n} ${stoneName(k)}`).join(' · ');
     return '';
   };
-  const cost = (op: string, it: any) => Object.entries(craft.costOf(op, it) || {}) as [string, number][];
+  const cost = (op: string, it: any, pick?: string) => Object.entries(craft.costOf(op, it, pick) || {}) as [string, number][];
   const line = (op: CraftOp) => cost(op, item).map(([k, n]) => `${n} ${stoneName(k)}`).join(' + ');
   /** A press with nothing to edit has no price to print — it has a reason. */
   const price = (op: CraftOp) => (presses(op) === 0 ? 'no line to edit' : line(op));
@@ -135,6 +143,92 @@
   /** The bag on the right: the hunt pile as slots — a press on a piece puts it on the bench. */
   const bagEntries = $derived(game.bag.map((it, i) => gearEntry(it, i)));
 
+  /** The integrated bench keeps all verbs in one compact action picker instead of extending a scroll. */
+  const WHOLE_ACTIONS: CraftOp[] = ['add', 'add_specific', 'remove', 'reroll_random', 'reroll_mod_all', 'replace_all', 'replace_random', 'polish', 'reforge', 'rebirth', 'ascend'];
+  let compactTarget = $state('piece');
+  let compactAction = $state('');
+  let compactPick = $state('');
+  const compactTargets = $derived.by(() => [
+    { id: 'piece', label: `Whole piece · ${item ? itemName(item) : 'choose one'}` },
+    ...(item?.lines || []).map((line, i) => ({ id: `line:${i}`, label: `Line ${i + 1} · ${lineName(line.id)}` })),
+  ]);
+  const compactOptions = $derived.by(() => {
+    if (!item) return [];
+    if (compactTarget === 'piece') return WHOLE_ACTIONS.map((op) => ({ id: `piece:${op}`, op, line: undefined, label: pressName(op) }));
+    const i = Number(compactTarget.slice(5));
+    if (!Number.isInteger(i) || !item.lines[i]) return [];
+    const valueLocked = i < UNT;
+    const ops: CraftOp[] = [...(!valueLocked ? ['reroll', 'refine', 'randomize'] as CraftOp[] : []), 'reroll_mod', 'replace', ...(!valueLocked ? ['imprint', 'remove_at'] as CraftOp[] : [])];
+    return ops.map((op) => ({ id: `${compactTarget}:${op}`, op, line: i, label: pressName(op) }));
+  });
+  const compactSelected = $derived(compactOptions.find((choice) => choice.id === compactAction) ?? null);
+  const compactNeedsPick = $derived(!!compactSelected && ['add_specific', 'replace', 'replace_random', 'imprint'].includes(compactSelected.op));
+  const compactPickRows = $derived(compactSelected?.op === 'imprint' ? imprints : choices.map((mod) => ({ key: mod, mod, count: 0 })));
+  const compactCanRun = $derived.by(() => {
+    if (!item || !compactSelected) return false;
+    const { op, line: at } = compactSelected;
+    if (compactNeedsPick && !compactPick) return false;
+    if (!craft.guard(item, op).ok || !craft.payable(held, op, item, compactPick || undefined)) return false;
+    if (at != null && at < floorOf(op)) return false;
+    if (op === 'refine' && at != null && lineTier(item.lines[at]) === 'T1') return false;
+    if (op === 'imprint' && at != null && !canImprint(at, compactPick)) return false;
+    return presses(op) > 0;
+  });
+  const compactCost = $derived.by(() => !compactSelected || !item ? ''
+    : cost(compactSelected.op, item, compactPick || undefined).map(([key, n]) => `${n} ${stoneName(key)}`).join(' + '));
+  const compactHint = $derived.by(() => {
+    if (!item) return 'Choose a piece first.';
+    if (!compactSelected) return 'Choose an action.';
+    if (compactNeedsPick && !compactPick) return 'Choose the Mod or imprint stone for this action.';
+    if (!compactCanRun) return why(compactSelected.op, compactSelected.line) || 'This action cannot run on this piece.';
+    return compactCost || 'Ready';
+  });
+  let handledStoneRequest = $state(0);
+  $effect(() => {
+    const request = stoneRequest;
+    if (!embedded || !item || !request || request.id === handledStoneRequest) return;
+    if (request.applied) {
+      compactTarget = 'piece';
+      compactAction = '';
+      compactPick = '';
+      handledStoneRequest = request.id;
+      onstoneclear();
+      return;
+    }
+    const line = item.lines.findIndex((_, i) => i >= UNT);
+    if (request.key === 'tier' && line >= 0) {
+      compactTarget = `line:${line}`;
+      const tierPress = lineTier(item.lines[line]) === 'T1' ? 'randomize' : 'refine';
+      compactAction = `line:${line}:${tierPress}`;
+      compactPick = '';
+    } else if (request.key === 'replace') {
+      compactTarget = 'piece';
+      compactAction = 'piece:replace_random';
+      compactPick = '';
+    } else if (request.key.startsWith('imprint_') && line >= 0) {
+      compactTarget = `line:${line}`;
+      compactAction = `line:${line}:imprint`;
+      compactPick = request.key.slice('imprint_'.length);
+    }
+    handledStoneRequest = request.id;
+  });
+
+  function commitCompact() {
+    if (!compactSelected || !compactCanRun) return;
+    onrun(compactSelected.op, compactSelected.line ?? 0, compactPick || undefined);
+    if (stoneRequest && !stoneRequest.applied) {
+      onstoneclear();
+      compactAction = '';
+      compactPick = '';
+    }
+  }
+
+  function cancelStoneRequest() {
+    onstoneclear();
+    compactAction = '';
+    compactPick = '';
+  }
+
   /** the range a Reroll can move inside, so the row can show the room a press has */
   const room = (i: number) => {
     if (!item) return null;
@@ -146,14 +240,65 @@
   };
 </script>
 
-<div class="shop">
+<div class="shop" class:compact-shop={embedded}>
+  {#if embedded}
+    {#if item}
+      <div class="compact-craft">
+        <div class="compact-summary">
+          {#if compactSelected?.line != null}
+            {@const line = item.lines[compactSelected.line]}
+            <span><img class="mod-icon" src={modIcon(line.id, line.stat, line.element)} alt="" aria-hidden="true" />Line {compactSelected.line + 1} · {lineName(line.id)} · {line.value} · {lineTier(line)}</span>
+          {:else}
+            <span>{item.quality} quality · {item.lines.length} Mod lines · +{item.upgrade_lv || 0}</span>
+          {/if}
+          <span>{compactCost || 'Select an action to see its stone cost.'}</span>
+          {#if stoneRequest && !stoneRequest.applied}
+            <span class="stone-request">{stoneName(stoneRequest.key)} ready</span>
+            <button class="stone-cancel" onclick={cancelStoneRequest} aria-label="Cancel stone use">Cancel</button>
+          {/if}
+        </div>
+        <div class="compact-selects">
+          <label>Target
+            <select value={compactTarget} onchange={(e) => { compactTarget = (e.target as HTMLSelectElement).value; compactAction = ''; compactPick = ''; }}>
+              {#each compactTargets as target (target.id)}<option value={target.id}>{target.label}</option>{/each}
+            </select>
+          </label>
+          <label>Action
+            <select value={compactAction} disabled={Boolean(stoneRequest && !stoneRequest.applied)} title={stoneRequest && !stoneRequest.applied ? `${stoneName(stoneRequest.key)} selected from the stone stack` : undefined}
+                    onchange={(e) => { compactAction = (e.target as HTMLSelectElement).value; compactPick = ''; }}>
+              <option value="">Choose action</option>
+              {#each compactOptions as option (option.id)}<option value={option.id}>{option.label}</option>{/each}
+            </select>
+          </label>
+          {#if compactNeedsPick}
+            <label>Mod
+              <select bind:value={compactPick}>
+                <option value="">Choose a Mod</option>
+                {#each compactPickRows as row (row.key)}
+                  <option value={row.mod}>{compactSelected?.op === 'imprint' ? `${lineName(row.mod)} · ${held['imprint_' + row.mod]}` : lineName(row.mod)}</option>
+                {/each}
+              </select>
+            </label>
+          {/if}
+          <button class="compact-press" disabled={!compactCanRun}
+                  title={compactHint}
+                  onclick={commitCompact}>
+            {compactSelected ? pressName(compactSelected.op) : 'Choose an action'}
+          </button>
+        </div>
+        <small class="compact-hint">{compactHint}</small>
+      </div>
+    {:else}
+      <p class="dim compact-empty">Select a piece to see its Mod actions.</p>
+    {/if}
+  {:else}
   <PieceOn {game} {item} {where} {index} {onpick} {wornOf} wornOnly />
 
   {#if item}
-    <div class="bench">
+    <div class={embedded ? 'bench-work' : 'bench'}>
       <!-- left: the stones, read the way a stash's currency tab reads — one cell per stone, its icon
            and the count it holds, the name on the hover -->
-      <section class="stash">
+      {#if !embedded}<section class="stash">
         <h4>Stones held</h4>
         <div class="tab">
           {#each stoneCells as s (s.key)}
@@ -166,7 +311,7 @@
           {/each}
         </div>
         <p class="dim tip"><small>A stone is spent even when a press changes nothing.</small></p>
-      </section>
+      </section>{/if}
 
       <!-- centre: the piece on the bench and every press it takes -->
       <section class="work">
@@ -185,7 +330,7 @@
                 <tr class:fixed={fixed || valueLocked}>
                   <td class="no">{i + 1}</td>
                   <td>
-                    {lineName(l.id)}{craftedMark(l)}
+                    <span class="mod-label"><img src={modIcon(l.id, l.stat, l.element)} alt="" aria-hidden="true" />{lineName(l.id)}{craftedMark(l)}</span>
                     {#if fixed}<span class="tag">Frame Mod</span>{/if}
                     {#if bound}<span class="tag">Bound</span>{/if}
                     {#if l.element}<span class="tag el">{l.element}</span>{/if}
@@ -335,68 +480,88 @@
       </section>
 
       <!-- right: the bag as slots — a press on a piece puts it on the bench -->
-      <section class="bagcol">
+      {#if !embedded}<section class="bagcol">
         <h4>Bag</h4>
         <SlotGrid entries={bagEntries} capacity={E.inventory.adventure_slots} mode="grid" pageSize={30}
                   {wornOf} onpick={(i) => onpick('bag', i)} />
-      </section>
+      </section>{/if}
     </div>
   {:else}
     <p class="dim">Pick a piece above to see what each stone would do to it.</p>
+  {/if}
   {/if}
 </div>
 
 <style>
   .shop { display: grid; gap: var(--spacing-md); }
+  .compact-shop { display: block; }
+  .compact-craft { display: grid; gap: var(--spacing-2xs); }
+  .compact-summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--spacing-2xs) var(--spacing-sm); color: var(--dim); font-size: var(--font-xs); }
+  .stone-request { color: var(--gold-lit); }
+  .stone-cancel { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .compact-selects { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) auto; align-items: end; gap: var(--spacing-xs); }
+  .compact-selects label { display: grid; gap: var(--spacing-3xs); min-width: 0; color: var(--dim); font-size: var(--font-xs); }
+  .compact-selects select { width: 100%; min-width: 0; padding: var(--spacing-3xs) var(--spacing-2xs); font-size: var(--font-xs); }
+  .compact-press { align-self: end; padding: var(--spacing-2xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .compact-hint { color: var(--dim); font-size: var(--font-xs); }
+  .compact-empty { margin: 0; color: var(--dim); font-size: var(--font-xs); }
+  .bench-work { min-width: 0; }
+  .bench-work .work { min-width: 0; }
+  .bench-work .lines { overflow: hidden; }
   /* the stash shape: the stones on the left, the bench in the middle, the bag on the right — the
      centre column is the work and stays the widest */
-  .bench { display: grid; grid-template-columns: minmax(clamp(138px, 8.965vw + 35px, 297px), clamp(169px, 11.002vw + 43px, 364px)) minmax(0, 1fr) minmax(clamp(156px, 10.188vw + 39px, 338px), clamp(188px, 12.225vw + 47px, 405px)); gap: var(--spacing-md); align-items: start; }
+  .bench { display: grid; grid-template-columns: minmax(clamp(138px, 10.70vw, 297px), clamp(169px, 13.12vw, 364px)) minmax(0, 1fr) minmax(clamp(156px, 12.10vw, 338px), var(--box-300)); gap: var(--spacing-md); align-items: start; }
   .stash, .bagcol { position: sticky; top: 0; }
-  h4 { margin: 0 0 4px; }
+  h4 { margin: 0 0 var(--spacing-2xs); }
   /* the currency tab: one cell per stone, icon and count, the name on the hover — the purse is read
      at a glance the way a stash tab is, not scanned as a list */
-  .tab { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(38px, 2.445vw + 9px, 81px), 1fr)); gap: 3px; }
+  .tab { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(38px, 2.90vw, 81px), 1fr)); gap: var(--spacing-2xs); }
   .stone {
     position: relative; aspect-ratio: 1; display: grid; place-items: center;
     background: var(--inset); border: 1px solid var(--line); border-radius: 4px;
   }
   .stone img { width: var(--icon-md); height: var(--icon-md); object-fit: contain; }
   .stone b {
-    position: absolute; right: clamp(2px, 0.163vw + 1px, 5px); bottom: clamp(2px, 0.098vw + 0px, 3px);
+    position: absolute; right: clamp(2px, 0.19vw, 5px); bottom: clamp(2px, 0.10vw, 3px);
     font-family: var(--num); font-size: var(--font-xs); color: var(--text); text-shadow: 0 1px 0 rgba(0, 0, 0, .9);
   }
   .tip { margin: var(--spacing-xs) 0 0; }
+  .mod-label { display: inline-flex; align-items: center; gap: var(--spacing-3xs); }
+  .mod-label img, .mod-icon { width: var(--icon-xs); height: var(--icon-xs); flex: none; object-fit: contain; opacity: .9; vertical-align: middle; }
   .val { color: var(--text); }
-  .val small { color: var(--mob); font-size: var(--font-xs); margin-left: 4px; }
+  .val small { color: var(--mob); font-size: var(--font-xs); margin-left: var(--spacing-2xs); }
   .no { color: var(--mob); width: var(--icon-lg); }
-  .tag { margin-left: 4px; font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: 0 4px; }
+  .tag { margin-left: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: 0 var(--spacing-2xs); }
   .tag.el { color: var(--es-lit); border-color: color-mix(in srgb, var(--es) 40%, transparent); }
   tr.fixed td { opacity: .72; }
 
   /* the tier a line sits in is a band of three, because Tier is a set of steps and not a number */
-  .band { display: inline-flex; gap: 2px; margin-right: 4px; vertical-align: middle; }
+  .band { display: inline-flex; gap: var(--spacing-3xs); margin-right: var(--spacing-2xs); vertical-align: middle; }
   .band i { width: var(--icon-xs); height: 4px; border-radius: 2px; background: var(--bar); border: 1px solid var(--line); }
   .band i.on { background: var(--gold); border-color: var(--gold); }
   .t { font-size: var(--font-xs); color: var(--dim); }
 
-  .verbs { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
-  .verbs button { padding: 2px var(--spacing-xs); font-size: var(--font-xs); }
+  .verbs { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); align-items: center; }
+  .verbs button { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
   .verbs button:disabled { opacity: .42; cursor: not-allowed; }
   .verbs button.armed { border-color: var(--gold); color: var(--gold); }
   /* the Replace stone's own choice: the line it names, from the pool this Base already draws */
-  .pick { display: inline-flex; gap: 3px; align-items: center; width: 100%; margin-top: 2px; }
-  .pick select { font-size: var(--font-xs); padding: 1px 3px; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 2px; }
-  .pick button { padding: 2px var(--spacing-xs); font-size: var(--font-xs); border-color: var(--gold); }
+  .pick { display: inline-flex; gap: var(--spacing-2xs); align-items: center; width: 100%; margin-top: var(--spacing-3xs); }
+  .pick select { font-size: var(--font-xs); padding: var(--seam) var(--spacing-2xs); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 2px; }
+  .pick button { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); border-color: var(--gold); }
   .prices { font-size: var(--font-xs); color: var(--mob); }
-  .foot { margin: 4px 0 0; color: var(--dim); }
+  .foot { margin: var(--spacing-2xs) 0 0; color: var(--dim); }
   /* the explainers fold: the table and the presses lead, the prose waits one press away */
-  .more { margin: 4px 0 0; }
+  .more { margin: var(--spacing-2xs) 0 0; }
   .more summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
   .more p { margin: var(--spacing-xs) 0 0; }
   .work { display: grid; gap: var(--spacing-md); }
 
-  .wbtns { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(162px, 10.595vw + 41px, 351px), 1fr)); gap: 4px; }
-  .wbtns button { display: grid; gap: 1px; justify-items: start; text-align: left; padding: var(--spacing-xs) var(--spacing-sm); }
+  .wbtns { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(162px, 12.58vw, 351px), 1fr)); gap: var(--spacing-2xs); }
+  .bench-work .wbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bench-work .wbtns .pick { display: flex; flex-wrap: wrap; align-content: start; }
+  .bench-work .wbtns .pick select, .bench-work .wbtns .pick button { flex: 1 1 var(--box-110); min-width: 0; }
+  .wbtns > button { display: grid; gap: var(--spacing-3xs); justify-items: start; text-align: left; padding: var(--spacing-xs) var(--spacing-sm); }
   .wbtns b { font-size: var(--font-xs); }
   .wbtns span { font-size: var(--font-xs); color: var(--dim); }
   .wbtns button:disabled { opacity: .45; cursor: not-allowed; }

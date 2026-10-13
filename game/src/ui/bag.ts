@@ -1,5 +1,6 @@
 import { loot } from '../engine/client';
 import { gearIcon, stackIcon } from '../icon';
+import { itemName } from '../sim/item-name';
 import type { Item } from '../sim/types';
 import type { BagStack } from '../sim/slots';
 
@@ -76,7 +77,7 @@ export function gearEntry(item: Item, index: number): SlotEntry {
   return {
     index,
     kind: 'gear',
-    title: item.base,
+    title: itemName(item),
     sub: `level ${item.ilvl} · ${item.quality} · ${item.tier}`,
     item,
     icon: gearIcon(item),

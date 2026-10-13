@@ -1,13 +1,13 @@
 <script lang="ts">
   import { E, eng, road, sm } from '../engine/client';
   import { modsOn, psMult } from '../sim/curse';
-  import { heldWeaponName } from '../sim/game';
   import { fxByMob as bucketFx, plateBeat, plateStrike, plateGesture } from './plate';
   import { fieldLabel } from './hud';
   import { bar, curseWords, statusWords } from './field';
   import { fxOut } from './motion';
   import { elementIcon, mobIcon, skillIcon } from '../icon';
   import { statusLabel } from '../sim/mobStatus';
+  import { ownsSkill } from '../sim/skills';
   import { bossMark } from '../icon';
   import faceMark from '../icon/equipment/helmet-1.svg?url';
   import alignMark from '../icon/currency/attribute-dexterity.svg?url';
@@ -23,9 +23,9 @@
    * sim's event ring and nothing else: no clock, no state of its own, every gesture mounted by a fact
    * the sim raised (`ui/plate.ts`).
    */
-  let { s, c, ring, plates, statuses, zone, town, townLive, plateMotion, fxOutMs }: {
+  let { s, c, ring, plates, statuses, zone, town, townLive, vitals, plateMotion, fxOutMs }: {
     s: GameState; c: Character; ring: FxEvent[]; plates: Mob[]; statuses: Statuses; zone: any;
-    town: any; townLive: boolean; plateMotion: number; fxOutMs: number;
+    town: any; townLive: boolean; vitals: { hp: number; es: number; mana: number }; plateMotion: number; fxOutMs: number;
   } = $props();
 
   function defenseColour(text: string) {
@@ -50,25 +50,25 @@
 
   /** every blow the ring still holds, in its own mob's bucket, newest first as the ring already is */
   const fxByMob = $derived(bucketFx(ring));
-  const selfFx = $derived(ring.filter((e) => e.side === 'self' && e.kind !== 'level' && e.kind !== 'block' && e.kind !== 'proc' && e.kind !== 'taken').slice(0, 5));
+  const selfFx = $derived(ring.filter((e) => e.side === 'self' && e.kind !== 'travel' && e.kind !== 'level' && e.kind !== 'block' && e.kind !== 'proc' && e.kind !== 'taken').slice(0, 5));
   const latestTaken = $derived(ring.find((e) => e.side === 'self' && e.kind === 'taken') || null);
   const latestLand = $derived(ring.find((e) => e.side === 'field' && e.kind === 'hit' && (e.via === 'swing' || e.via === 'cast')) || null);
   const selfArt = $derived(plateGesture(latestTaken, latestLand));
 
   const STATUS_ELEMENT: Record<StatusName, string> = {
-    burn: 'fire', chill: 'cold', shock: 'lightning', poison: 'poison', mark: 'chaos', crippled: 'earth',
+    burn: 'fire', chill: 'cold', shock: 'lightning', poison: 'poison', bleed: 'physical', mark: 'chaos', crippled: 'earth',
   };
   const buffMarks = $derived.by(() => {
     void s.clockSec;
     const marks: { id: string; label: string; icon: string; secs: number | null }[] = [];
     for (const skill of sm.of('buff') as any[]) {
       const left = s.skills.buffUp[skill.id] || 0;
-      if (s.skills.buffs[skill.id] && left > 0) {
+      if (ownsSkill(s.skills, skill.id) && s.skills.buffs[skill.id] && left > 0) {
         marks.push({ id: skill.id, label: skill.name, icon: skillIcon(skill.id, 'buff'), secs: Math.ceil(left) });
       }
     }
     for (const skill of sm.of('aura') as any[]) {
-      if (s.skills.auras[skill.id]) {
+      if (ownsSkill(s.skills, skill.id) && s.skills.auras[skill.id]) {
         marks.push({ id: skill.id, label: skill.name, icon: skillIcon(skill.id, 'aura'), secs: null });
       }
     }
@@ -198,24 +198,24 @@
       <!-- the body takes the blow: one node, remounted on every direct hit, so a fast fight re-stamps
            the flinch instead of looping it -->
       <div class="art" class:knock={!!beat}>
-        <div class="identity">
-          <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
-          <div class="identity-text">
-            <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
-            <p class="body">{m.kind}</p>
+        <div class="mob-head">
+          <span class="race-mark" role="img" aria-label={`Race: ${m.species}`} title={`Race · ${m.species}`}>
+            <img src={mobIcon(m.species)} alt="" aria-hidden="true" />
+          </span>
+          <div class="identity">
+            <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
+            <div class="identity-text">
+              <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
+              <p class="body">{m.kind}</p>
+            </div>
           </div>
+          {#each m.innate as element}
+            <span class="innate-mark" role="img" aria-label={`Innate Element: ${element}`} title={`Innate · ${element}`}>
+              <img src={elementIcon(element)} alt="" aria-hidden="true" />
+            </span>
+          {/each}
         </div>
         <span class="mobbar"><i style={bar(m.hp, m.hpMax)}></i><b>{Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</b></span>
-        <p class="chips">
-          <span>PS {(m.ps * psMult(modsOn(s.curses, m.id))).toFixed(1)}</span>
-          <span>Hit {(eng.hitChance(c.accuracy, m.evasion) * 100).toFixed(1)}%</span>
-          <span>Dodge {eng.dodgeChance(m.dodgeRate, c.accuracy).toFixed(1)}%</span>
-        </p>
-        <p class="element-list">
-          {#each m.innate as element}
-            <span class="element-label"><img src={elementIcon(element)} alt="" aria-hidden="true" />{element}</span>
-          {/each}
-        </p>
         <p class="curses">{[curseWords(s, m.id), statusWords(s, m.id)].filter(Boolean).join(' | ') || '—'}</p>
       </div>
     {/key}
@@ -300,14 +300,13 @@
         <img class="portrait" src={faceMark} alt="" aria-hidden="true" />
         <div class="identity-text">
           <p class="mob-name">You</p>
-          <p class="body">{heldWeaponName(s) || 'Bare hands'}</p>
         </div>
       </div>
       {#if c.es > 0}
-        <span class="mobbar es"><i style={bar(s.player.es, c.es)}></i><b>{Math.max(0, Math.round(s.player.es))} / {Math.round(c.es)}</b></span>
+        <span class="mobbar es"><i style={bar(vitals.es, c.es)}></i><b>{Math.max(0, Math.round(vitals.es))} / {Math.round(c.es)}</b></span>
       {/if}
-      <span class="mobbar"><i style={bar(s.player.hp, c.maxHp)}></i><b>{Math.max(0, Math.round(s.player.hp))} / {Math.round(c.maxHp)}</b></span>
-      <span class="mobbar mana"><i style={bar(s.player.mana, c.maxMana)}></i><b>{Math.max(0, Math.round(s.player.mana))} / {Math.round(c.maxMana)}</b></span>
+      <span class="mobbar"><i style={bar(vitals.hp, c.maxHp)}></i><b>{Math.max(0, Math.round(vitals.hp))} / {Math.round(c.maxHp)}</b></span>
+      <span class="mobbar mana"><i style={bar(vitals.mana, c.maxMana)}></i><b>{Math.max(0, Math.round(vitals.mana))} / {Math.round(c.maxMana)}</b></span>
       </div>
     </div>
   {/key}
@@ -324,7 +323,7 @@
 
 <style>
 
-  .clear-field span{ font-size: var(--font-xs); letter-spacing: clamp(0px, 0.016vw + 0px, 1px); }
+  .clear-field span{ font-size: var(--font-xs); letter-spacing: clamp(0px, 0.00vw, 1px); }
 
   /* The walking read: the shelf's own boot glyph split into single prints — `mask-size: 200%` puts one boot
      in each half, so a left foot and a right foot alternate down the stride and no second asset is needed.
@@ -339,7 +338,7 @@
 
   .travel .print{
     position: absolute; width: var(--icon-lg); height: var(--icon-lg);
-    left: calc(var(--x) * (100% - clamp(19px, 1.222vw + 5px, 40px))); top: 0;
+    left: calc(var(--x) * (100% - clamp(19px, 1.45vw, 40px))); top: 0;
     --on: clamp(0, calc((var(--p) - var(--x)) * 3), 1);
     /* the far end of the stride is the same grey a receded HUD read wears, laid on thin: an unlit print that
        is as loud as a lit one would invert the emphasis the ramp exists to make */
@@ -353,7 +352,7 @@
   /* the other foot: the glyph's far half, dropped half a step and turned the other way, so the two tracks
      read as a stride and not as one stamp repeated */
   .travel .print.right{
-    top: clamp(8px, 0.489vw + 2px, 16px);
+    top: clamp(8px, 0.58vw, 16px);
     transform: rotate(9deg);
     -webkit-mask-position: right center;
             mask-position: right center;
@@ -415,47 +414,51 @@
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .85));
   }
 
-  .mob.front .charge::before{ top: clamp(-14px, -0.407vw - 2px, -6px); left: clamp(-14px, -0.407vw - 2px, -6px); border-right: 0; border-bottom: 0; border-top-left-radius: 9px; }
+  .mob.front .charge::before{ top: var(--x-pull-scale); left: var(--x-pull-scale); border-right: 0; border-bottom: 0; border-top-left-radius: 9px; }
 
-  .mob.front .charge::after{ bottom: clamp(-14px, -0.407vw - 2px, -6px); right: clamp(-14px, -0.407vw - 2px, -6px); border-left: 0; border-top: 0; border-bottom-right-radius: 9px; }
+  .mob.front .charge::after{ bottom: var(--x-pull-scale); right: var(--x-pull-scale); border-left: 0; border-top: 0; border-bottom-right-radius: 9px; }
 
-  .identity{ display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; }
-  .identity-text{ display: grid; min-width: 0; }
-  .mob .portrait, .self-plate .portrait{ width: var(--icon-lg); height: var(--icon-lg); flex: none; object-fit: contain; }
+  .mob-head { display: grid; grid-template-columns: var(--icon-md) minmax(0, 1fr) var(--icon-md); align-items: start; gap: var(--spacing-2xs); width: 100%; min-width: 0; }
+  .race-mark, .innate-mark { display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md); border: 1px solid var(--hud-edge); border-radius: 50%; background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
+  .race-mark img, .innate-mark img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .mob-head .identity { min-width: 0; }
+
+  /* the card head is a column: the body's own portrait on top and centred, its name under it. A mob
+     is recognised by its shape before its words, so the face leads rather than sitting beside the
+     text it labels. */
+  .identity{ display: flex; flex-direction: column; align-items: center; justify-items: center; gap: var(--spacing-3xs); min-width: 0; text-align: center; }
+  .identity-text{ display: grid; justify-items: center; min-width: 0; }
+  .mob .portrait, .self-plate .portrait{ width: calc(var(--icon-lg) * 4 / 5); height: calc(var(--icon-lg) * 4 / 5); flex: none; object-fit: contain; }
 
   .mob-name .tier-mark{ width: var(--icon-sm); height: var(--icon-sm); }
 
   .mob .body, .self-plate .body{ margin: 0; font-size: var(--font-xs); color: var(--dim); }
 
-  .mob-name { display: flex; align-items: center; gap: 4px; margin: 0; font-size: var(--font-sm); font-weight: 600; line-height: 1.15; }
+  .mob-name { display: flex; align-items: center; justify-content: center; gap: var(--spacing-2xs); max-width: 100%; margin: 0; overflow-wrap: anywhere; font-size: var(--font-sm); font-weight: 600; line-height: 1.15; }
 
-  .mobbar { display: block; position: relative; width: 100%; height: var(--bar-h); margin: 4px 0 3px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .09); }
+  .mobbar { display: block; position: relative; width: 100%; height: var(--spacing-sm); margin: var(--spacing-3xs) 0; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .09); }
 
   /* the figure sits in the bar the way the dock's own gauges read: centred, tabular, stroked off the fill */
   .mobbar b {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    font-size: var(--font-xs); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+    max-width: 100%; overflow: hidden; white-space: nowrap; font-size: var(--spacing-sm); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
     text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
   }
 
   .clear-field b { color: var(--text); font-weight: 600; }
-  .curses { margin: auto 0 0; font-size: var(--font-xs); color: var(--curse); min-height: var(--icon-xs); }
-  .element-list { display: flex; flex-wrap: wrap; gap: 2px var(--spacing-xs); margin: 3px 0 0; }
-  .element-label { display: inline-flex; align-items: center; gap: 3px; font-size: var(--font-xs); color: var(--dim); }
-  .element-label img { width: var(--icon-xs); height: var(--icon-xs); object-fit: contain; flex: none; }
+  .curses { min-width: 0; max-width: 100%; margin: auto 0 0; overflow: hidden; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; font-size: var(--font-xs); color: var(--curse); min-height: var(--icon-xs); }
 
   /* The ramp is stretched over the whole track instead of squeezed into the fill: `--w` is the fraction the
      bar reached, so a body's last health shows the hot end of its own colour. Across a group of plates that
      is one red signal read before any digit is looked at. The slide is the sim's own step carried between
      the two seconds it lands in — damage reads as travel, not as a strobe. */
   .mobbar i {
+    width: 100%; transform: scaleX(var(--fill)); transform-origin: left center;
     background-size: calc(100% / max(var(--w, 1), .001)) 100%;
-    transition: width .22s ease-out;
+    transition: transform .65s cubic-bezier(.2, .8, .2, 1);
   }
 
   .mobbar i{ display: block; height: 100%; border-radius: 999px; background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
-
-  .mob .chips{ display: flex; flex-wrap: wrap; gap: 1px var(--spacing-xs); margin: 2px 0 0; font-size: var(--font-xs); color: var(--dim); }
 
   .mob.elite .charge{ border-color: var(--elite); }
 
@@ -476,16 +479,19 @@
   }
 
   /* the player's own vitals hug the same foot: the first bar carries the group down */
-  .self-plate .art{ display: flex; flex-direction: column; align-items: stretch; flex: 1; width: 100%; gap: 2px; }
+  .self-plate .art{ display: flex; flex-direction: column; align-items: stretch; flex: 1; width: 100%; gap: var(--spacing-3xs); }
 
   .self-plate .art > span.mobbar:first-of-type{ margin-top: auto; }
 
   .self-plate .portrait{
-    border-radius: 50%; border: 1px solid var(--gold); background: var(--face-top); padding: 4px;
+    border-radius: 50%; border: 1px solid var(--gold); background: var(--face-top); padding: var(--spacing-2xs);
   }
 
   /* Energy Shield sits above HP here exactly as it does in the dock, and only while the pool is there */
   .mobbar.es i{ background-image: linear-gradient(90deg, var(--es), var(--es-lit)); }
+
+  /* Player meters receive an already eased live value from the HUD, so the keyed hit flinch cannot snap them. */
+  .self-plate .mobbar i { transition: none; }
 
   .mobbar.mana i{ background-image: linear-gradient(90deg, var(--mana), var(--mana-lit)); }
 
@@ -525,7 +531,7 @@
     font-size: var(--font-xs);
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 1px 4px;
+    padding: var(--seam) var(--spacing-2xs);
     border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
     border-radius: 999px;
     background: var(--glass);
@@ -580,7 +586,7 @@
   /* a swing draws the shelf's crossed swords across the body it cut, turned through the strike. A mask
      contributes only alpha, so the Element that carried the hit paints the blade. */
   .mob .arc{
-    position: absolute; left: 50%; top: clamp(24px, 1.548vw + 6px, 51px); z-index: 4; pointer-events: none;
+    position: absolute; left: 50%; top: clamp(24px, 1.84vw, 51px); z-index: 4; pointer-events: none;
     width: var(--icon-xl); height: var(--icon-xl); margin: var(--x-pull-arc) 0 0 var(--x-pull-arc);
     background: var(--fx, var(--text));
     -webkit-mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
@@ -590,7 +596,7 @@
 
   /* a press lands as a burst and not a cut, so the two halves of a build read apart before a number is read */
   .mob .burst{
-    position: absolute; left: 50%; top: clamp(24px, 1.548vw + 6px, 51px); z-index: 4; pointer-events: none;
+    position: absolute; left: 50%; top: clamp(24px, 1.84vw, 51px); z-index: 4; pointer-events: none;
     width: var(--icon-lg); height: var(--icon-lg); margin: var(--x-pull-burst) 0 0 var(--x-pull-burst);
     border: 2px solid var(--fx, var(--text)); border-radius: 50%;
     animation: plate-burst .34s ease-out forwards;
@@ -607,10 +613,4 @@
     100% { opacity: 0; transform: scale(1.55); }
   }
 
-@media (min-width: 1600px) {
-  
-      .mob .charge{ padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm); }
-  
-      .mob .portrait, .self-plate .portrait{ width: var(--icon-xl); height: var(--icon-xl); }
-}
 </style>

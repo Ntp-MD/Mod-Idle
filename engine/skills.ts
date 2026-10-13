@@ -81,8 +81,10 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
       return { ...e, value: buff ? Math.round(e.value * scale) : e.value * scale };
     });
   }
-  /** A mana cost climbs on its own step per skill level, steeper than the damage ramp. */
-  const MANA_LEVEL_STEP = F.mana_level_step_pct != null ? F.mana_level_step_pct : 5;
+  /** The existing cost step applies to each typed Mana or HP flat price, separate from damage. */
+  const COST_LEVEL_STEP = F.mana_level_step_pct != null ? F.mana_level_step_pct : 5;
+  /** Kept as the existing public name for the source-data key and its readers. */
+  const MANA_LEVEL_STEP = COST_LEVEL_STEP;
   /**
    * The pool the row prices were set against — the level-1 caster's own pool, derived from the same
    * terms `maxManaOf` builds it from, so it cannot drift from the pool model. It is a basis for
@@ -107,6 +109,12 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     return m ? Number(m[1]) : null;
   }
 
+  /** Flat HP units paid from the caster's current pool; it is an alternative to, never a second cost beside, Mana. */
+  function hpCostSpec(skill: SkillRow): number | null {
+    const m = String(skill.hp_cost == null ? '' : skill.hp_cost).match(/^(\d+(?:\.\d+)?)\s*flat(?![A-Za-z])/);
+    return m ? Number(m[1]) : null;
+  }
+
   /**
    * What the row costs, in mana units: the typed price grown only by skill level on
    * `MANA_LEVEL_STEP`, steeper than the damage ramp so a maxed rotation costs more. The pool sets
@@ -118,7 +126,21 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     const value = manaSpec(skill);
     if (value == null) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable mana cost: ${JSON.stringify(skill.mana)}`);
     const aoeMult = aoe ? (E.aoe ? E.aoe.mana_mult : 1.5) : 1;
-    return value * (1 + Math.max(0, skillLevel - 1) * MANA_LEVEL_STEP / 100) * aoeMult;
+    return value * (1 + Math.max(0, skillLevel - 1) * COST_LEVEL_STEP / 100) * aoeMult;
+  }
+
+  /** HP prices use the same level ladder but remain flat pool units, not a share of Max HP. */
+  function hpCostOf(skill: SkillRow, { skillLevel = 1 }: { skillLevel?: number } = {}) {
+    const value = hpCostSpec(skill);
+    if (value == null) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable HP cost: ${JSON.stringify(skill.hp_cost)}`);
+    return value * (1 + Math.max(0, skillLevel - 1) * COST_LEVEL_STEP / 100);
+  }
+
+  /** One paid resource per active row. Mana keeps its AoE premium; HP is paid as the row's flat amount. */
+  function costOf(skill: SkillRow, opts: { skillLevel?: number; aoe?: boolean } = {}) {
+    if (skill.mana != null && skill.hp_cost != null) throw new Error(`skill ${skill.id || '(unnamed)'} cannot charge both Mana and HP`);
+    if (skill.hp_cost != null) return { resource: 'hp' as const, amount: hpCostOf(skill, opts) };
+    return { resource: 'mana' as const, amount: manaCostOf(skill, opts) };
   }
 
   /**
@@ -130,16 +152,18 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   }
 
   /**
-   * press = (base_flat + (eff/100) × power) × damage_pct(level)/100 × ladder bucket — the PoE shape: the row's own flat
-   * damage at skill level 1 plus its stated share of the added power line, so gear scales a row by its
+   * press = (base_flat + (eff/100) × power + (max_hp_pct/100) × caster Max HP) × damage_pct(level)/100 × ladder bucket —
+   * the HP term is optional. The PoE shape still gives the row its own flat damage at skill level 1 plus its stated share
+   * of the added power line, so gear scales a row by its
    * effectiveness instead of by a percentage of the finished hit. The level multiplier is read from the
    * per-level table, so a press at any level is a read of `meta.formula.skill_levels`. The last factor is
    * the character's own damage bucket (`Attack damage %` / `Spell damage %`), chosen by the row's basis.
    */
-  function perPress(skill: SkillRow, { phys, magic, elem, align, level, attackPct, spellPct }: { phys?: number; magic?: number; elem?: number; align?: number; level?: number; attackPct?: number; spellPct?: number }) {
+  function perPress(skill: SkillRow, { phys, magic, elem, align, maxHp, level, attackPct, spellPct }: { phys?: number; magic?: number; elem?: number; align?: number; maxHp?: number; level?: number; attackPct?: number; spellPct?: number }) {
     if (skill.base_flat == null || skill.eff == null || skill.basis == null) return null;
     const power = basisOf(skill, { phys, magic, elem, align });
-    return (skill.base_flat + (skill.eff / 100) * power) * (damagePct(level) / 100) * ladderMult(skill.basis, attackPct, spellPct);
+    const hpPower = ((skill.max_hp_pct || 0) / 100) * (maxHp || 0);
+    return (skill.base_flat + (skill.eff / 100) * power + hpPower) * (damagePct(level) / 100) * ladderMult(skill.basis, attackPct, spellPct);
   }
 
   /** A phys-basis press can crit; a magic-basis one cannot (pin 1). */
@@ -203,7 +227,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const masteryBonus = (masteryLevel: number) =>
     1 + Math.min(8, Math.max(0, masteryLevel >= 5 ? (masteryLevel - 4) * 0.5 : 0)) / 100;
 
-  function row(skill: SkillRow, opts: { cdrPct?: number; ladderPct?: number; phys?: number; magic?: number; elem?: number; align?: number; level?: number; attackPct?: number; spellPct?: number }) {
+  function row(skill: SkillRow, opts: { cdrPct?: number; ladderPct?: number; phys?: number; magic?: number; elem?: number; align?: number; maxHp?: number; level?: number; attackPct?: number; spellPct?: number }) {
     const cdr = opts.cdrPct != null ? opts.cdrPct : CAST_REF.cdr_pct;
     const ladder = opts.ladderPct != null ? opts.ladderPct : CAST_REF.ladder_pct;
     const ec = effCd(skill.cd!, cdr, ladder);
@@ -307,11 +331,11 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   return {
     SKILLS, byId, LEVEL_STEP, CAST_REF, LADDER, CONVERSION, WEAPON_GROUPS,
     LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, buffEffectPct, effectsAt,
-    MANA_LEVEL_STEP, MANA_REF_POOL,
+    COST_LEVEL_STEP, MANA_LEVEL_STEP, MANA_REF_POOL,
     aggregateEffects, EFFECT_STATS, EFFECT_OPS, EFFECT_SUBJECTS, EFFECT_CONDITIONS, EFFECT_RULES, MODELLED_BY,
     PRESETS, presetCount, mainPreset,
     LADDER_MAX_DUPLICATES, RESERVATION_LIMIT, GROUP_BONUS,
-    manaSpec, manaCostOf, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
+    manaSpec, manaCostOf, hpCostSpec, hpCostOf, costOf, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
     weaponGroupOf, groupBonus, weaponFits, masteryBonus, row, reservePct,
     all: () => SKILLS.skills,
     of: (type: string) => SKILLS.skills.filter((s) => s.type === type),

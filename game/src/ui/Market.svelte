@@ -100,7 +100,7 @@
 </div>
 
 <style>
-  .market { display: grid; gap: var(--spacing-sm); }
+  .market { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: var(--spacing-sm); height: 100%; min-height: 0; align-content: start; }
   /* the purse is the thing a market read needs, so it heads the plate rather than being asked for by
      opening a second screen */
   .purse {
@@ -109,18 +109,18 @@
     border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
   }
   .purse b { font-family: var(--num); font-size: var(--font-xl); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
-  .purse span { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(0px, 0.033vw + 0px, 1px); text-transform: uppercase; }
+  .purse span { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(0px, 0.05vw, 1px); text-transform: uppercase; }
 
   /* the vendor split: what you carry on the left, the stall's wares on the right */
   .panes { display: grid; grid-template-columns: minmax(var(--box-300), 1fr) 1.6fr; gap: var(--spacing-md); align-items: start; }
-  @media (max-width: 1280px) { .panes { grid-template-columns: 1fr; } }
+  @media (max-width: 1023px) { .panes { grid-template-columns: 1fr; } }
   .pane { display: grid; gap: var(--spacing-xs); align-content: start; min-width: 0; }
-  .pane > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+  .pane > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-2xs); }
   .pane h4 { margin: 0; }
   .count { font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
 
-  .junk { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: var(--font-xs); }
-  .junk li { display: flex; justify-content: space-between; gap: var(--spacing-sm); padding: 1px var(--spacing-xs); background: color-mix(in srgb, var(--panel) 55%, transparent); border-radius: 3px; }
+  .junk { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-3xs); font-size: var(--font-xs); }
+  .junk li { display: flex; justify-content: space-between; gap: var(--spacing-sm); padding: var(--seam) var(--spacing-xs); background: color-mix(in srgb, var(--panel) 55%, transparent); border-radius: 3px; }
   .junk li span { color: var(--dim); }
   .junk li b { font-family: var(--num); color: var(--text); }
   .act { justify-self: start; }
@@ -129,7 +129,7 @@
   /* a ware is a card: what it is, what it costs in minutes and in gold, and the one press it takes */
   .wares { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--box-200), 1fr)); gap: var(--spacing-xs); }
   .ware {
-    display: grid; gap: 2px; align-content: start;
+    display: grid; gap: var(--spacing-3xs); align-content: start;
     padding: var(--spacing-xs) var(--spacing-sm);
     background: var(--inset); border: 1px solid var(--line); border-radius: 6px;
   }
@@ -140,7 +140,7 @@
   .ware h5 { margin: 0; font-size: var(--font-sm); color: var(--text); }
   .ware .kind { margin: 0; font-size: var(--font-xs); color: var(--dim); }
   .ware .mins { margin: 0; font-size: var(--font-xs); color: var(--mob); }
-  .ware .price { margin: 1px 0 0; font-family: var(--num); font-size: var(--font-sm); color: var(--gold); }
+  .ware .price { margin: var(--spacing-3xs) 0 0; font-family: var(--num); font-size: var(--font-sm); color: var(--gold); }
   .ware .price i { font-family: var(--ui); font-size: var(--font-xs); font-style: normal; color: var(--dim); }
   .ware .short { font-size: var(--font-xs); color: var(--alarm); }
   .buy { justify-self: start; border-color: color-mix(in srgb, var(--gold) 45%, transparent); color: var(--gold); }

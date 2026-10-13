@@ -11,6 +11,7 @@
    * read `$state(...)` as a store subscription (the trap `App.svelte` documents for its own top level).
    */
   import { gearIcon } from '../icon';
+  import { itemName } from '../sim/item-name';
   import { gearEntry, vsWorn } from './bag';
   import type { Where } from '../sim/craft';
   import type { GameState, Item } from '../sim/types';
@@ -60,7 +61,7 @@
       {#if plus}<b class="plus">+{plus}</b>{/if}
     </span>
     <div class="who">
-      <h3>{item.base}{#if plus} <span class="lv">+{plus}</span>{/if}</h3>
+      <h3>{itemName(item)}{#if plus} <span class="lv">+{plus}</span>{/if}</h3>
       <p class="sub">
         {item.slot} · item level {item.ilvl} · {item.quality} quality · {item.tier} tier · {item.lines.length} mod lines
         <span class="src">{at}</span>
@@ -128,33 +129,33 @@
   }
   .tile img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
   .tile .plus {
-    position: absolute; right: clamp(-5px, -0.163vw - 1px, -2px); bottom: clamp(-5px, -0.163vw - 1px, -2px); font-family: var(--num); font-size: var(--font-xs);
-    color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0 3px;
+    position: absolute; right: clamp(-5px, -0.19vw, -2px); bottom: clamp(-5px, -0.19vw, -2px); font-family: var(--num); font-size: var(--font-xs);
+    color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0 var(--spacing-2xs);
   }
   .who h3 { margin: 0; font-size: var(--font-sm); }
   .who .lv { color: var(--xp); font-family: var(--num); }
-  .sub { margin: 2px 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .sub { margin: var(--spacing-3xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
   .src { color: var(--mob); font-size: var(--font-xs); }
   .src::before { content: '· '; }
-  .vs { margin: 3px 0 0; font-size: var(--font-xs); font-family: var(--num); color: var(--alarm); }
+  .vs { margin: var(--spacing-2xs) 0 0; font-size: var(--font-xs); font-family: var(--num); color: var(--alarm); }
   .vs.better { color: var(--good); }
-  .flags { display: grid; gap: 3px; justify-items: end; }
-  .flag { font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: 1px var(--spacing-xs); }
+  .flags { display: grid; gap: var(--spacing-2xs); justify-items: end; }
+  .flag { font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: var(--seam) var(--spacing-xs); }
   .flag.bad { color: var(--alarm); border-color: var(--hp); }
   .flag.warn { color: var(--curse); border-color: var(--elite); }
   .flag.ok { color: var(--good); border-color: color-mix(in srgb, var(--good) 50%, transparent); }
 
-  .picker { display: grid; gap: 4px; }
-  .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(1px, 0.082vw + 0px, 3px); text-transform: uppercase; }
-  .row { display: flex; flex-wrap: wrap; gap: 3px; }
+  .picker { display: grid; gap: var(--spacing-2xs); }
+  .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(1px, 0.10vw, 3px); text-transform: uppercase; }
+  .row { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); }
   .chip {
-    display: inline-flex; align-items: center; gap: 4px; padding: 3px var(--spacing-xs) 3px 4px;
+    display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-2xs) var(--spacing-xs) var(--spacing-2xs) var(--spacing-2xs);
     font-size: var(--font-xs); border-radius: 999px; background: var(--inset);
   }
   .chip img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .chip .pl { color: var(--xp); font-family: var(--num); }
   .chip.now { border-color: var(--gold); background: rgba(232, 193, 105, .12); color: var(--gold); }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { padding: 1px var(--spacing-sm); font-size: var(--font-xs); }
+  .pager button { padding: var(--seam) var(--spacing-sm); font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
 </style>

@@ -183,6 +183,8 @@ export interface Carried {
   potions?: number;
   condensed?: number;
   herbs?: number;
+  materials?: number;
+  food?: number;
 }
 
 /** Everything carried that weighs: the worn pieces plus consumables (formula-utility.md §11). */
@@ -194,7 +196,9 @@ export function weightOfCarry(gear: (Item | null)[], carried: Carried = {}, held
   return worn
     + (carried.potions || 0) * E.potions.weight
     + (carried.condensed || 0) * E.potions.condensed.weight
-    + (carried.herbs || 0) * E.inventory.unit_weight.herb;
+    + (carried.herbs || 0) * E.inventory.unit_weight.herb
+    + (carried.materials || 0) * E.inventory.unit_weight.material
+    + (carried.food || 0) * E.inventory.unit_weight.food;
 }
 
 /**

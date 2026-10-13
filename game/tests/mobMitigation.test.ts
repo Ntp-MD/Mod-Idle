@@ -132,6 +132,7 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
 
   it('an aura writes its strip on every mob, and stops when it is taken off', () => {
     const sk = newSkillState();
+    sk.owned['aura.elemental_fury'] = 0;
     sk.auras['aura.elemental_fury'] = true;
     expect(modsFromAuraFold(effectsActive(sk).target || {}).resistCut)
       .toBe(valueOf('aura.elemental_fury', 'mob_elemental_resistance_pct'));
@@ -139,6 +140,8 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     expect(modsFromAuraFold(effectsActive(sk).target || {}).resistCut).toBe(0);
     // and a target-side line never leaks into our own sheet — Rimbo Form slows the mob, not us
     const sk2 = newSkillState();
+    sk2.owned['aura.elemental_fury'] = 0;
+    sk2.owned['aura.rimbo_form'] = 0;
     sk2.auras['aura.elemental_fury'] = true;
     sk2.auras['aura.rimbo_form'] = true;
     // a sheet wearing the gear line that carries resistance, or the equality below is 0 === 0

@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { E, BASES, STAT_KEYS, loot } from '../src/engine/client';
-import { newGame, tick, equippedCount, huntZone } from '../src/sim/game';
+import { newGame, tick, equippedCount, huntZone, carried } from '../src/sim/game';
 import { equipFromBag, gearModOf, autoEquip } from '../src/sim/gear';
+import { itemName } from '../src/sim/item-name';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { craft as clientCraft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
@@ -17,6 +18,45 @@ import type { Item } from '../src/sim/types';
  */
 const rolled = (seed: number, band = 'high'): Item =>
   rollDrop(mulberry32(seed), band, E.item_level.spans.find((s: any) => s.band === band)!.from) as Item;
+
+describe('weapon frame names', () => {
+  it('resolves every main-hand Frame Mod to its named variant without changing its weapon type key', () => {
+    for (const [weapon, frames] of Object.entries(BASES.weapon_frames as Record<string, any[]>)) {
+      for (const frame of frames) {
+        const [id, ...extraIds] = frame.frame_mod;
+        const item = {
+          slot: 'main hand',
+          base: weapon,
+          lines: [{ id, value: 1, slice: 0, extra: extraIds.map((extraId: string) => ({ id: extraId, value: 1 })) }],
+        } as Item;
+        expect(itemName(item)).toBe(frame.name);
+        expect(item.base).toBe(weapon);
+      }
+    }
+  });
+});
+
+describe('shield frame defences', () => {
+  it('locks Block Chance and each distinct flat defence profile into the Frame Mod', () => {
+    const shields = (BASES.bases as any[]).filter((frame) => frame.slot === 'off hand' && frame.family === 'Shield');
+    const profiles = new Set<string>();
+    expect(shields).toHaveLength(3);
+
+    for (const frame of shields) {
+      expect(frame.frame_mod[0]).toBe('block_chance');
+      const profile = frame.frame_mod.slice(1).sort().join('+');
+      profiles.add(profile);
+
+      const floorLine = loot.frameModAtFloor(BASES, 'off hand', frame, null, 1, 0)[0];
+      const rolledLine = loot.frameModRoll(BASES, 'off hand', frame, null, mulberry32(17), 1, 0, 0.9)[0];
+      const lineIds = (line: any) => [line.id, ...(line.extra || []).map((part: any) => part.id)];
+      expect(lineIds(floorLine)).toEqual(frame.frame_mod);
+      expect(lineIds(rolledLine)).toEqual(frame.frame_mod);
+    }
+
+    expect(profiles).toEqual(new Set(['armour_flat', 'energy_shield_flat', 'armour_flat+energy_shield_flat']));
+  });
+});
 
 describe('equipping from the bag', () => {
   it('wears a piece in its own slot and sends the displaced one back to the front of the bag', () => {
@@ -126,6 +166,24 @@ describe('putting on the best gear the character carries', () => {
     ({ slot, base: 'Band', ilvl: 20, quality: 'mid', tier: 'T1', q: 1, lines: [{ id: 'all_stat_flat', value: v, slice: 1 }], ...extra } as Item);
   const score = (item: Item) => loot.score({ ...item, q: item.q ?? 0 });
 
+  it('does not count gear waiting in the bag toward character stats', () => {
+    const s = newGame(79);
+    const sheet = () => buildCharacter(s.player.level, s.gear, carried(s), 0, undefined, s.player.points, s.player.treeRanks);
+    const before = sheet();
+    s.bag = [piece('ring', 999)];
+    expect(sheet()).toEqual(before);
+  });
+
+  it('wears a real low-band drop that beats the opening piece', () => {
+    const s = newGame(79);
+    const drop = Array.from({ length: 100 }, (_, i) => rollDrop(mulberry32(i + 1), 'low', E.item_level.spans[0].from))
+      .find((item) => s.gear.some((g) => g?.slot === item.slot && score(item) > score(g)));
+    expect(drop).toBeDefined();
+    s.bag = [drop!];
+    expect(autoEquip(s).swaps).toHaveLength(1);
+    expect(s.gear.some((g) => g === drop || (g?.base === drop!.base && g.lines.length === drop!.lines.length))).toBe(true);
+  });
+
   it('wears what is stronger and leaves the rest in the pile', () => {
     const s = newGame(80);
     s.bag = [];
@@ -137,16 +195,16 @@ describe('putting on the best gear the character carries', () => {
     expect(s.bag.length).toBe(1);
   });
 
-  it('will not move a piece the player pinned, promised to a set, or left Broken', () => {
+  it('leaves locked and Broken pieces alone but wears a reserved upgrade', () => {
     const s = newGame(81);
     s.bag = [];
     s.gear[0] = null;
     s.bag = [piece('helmet', 999, { locked: true }), piece('helmet', 998, { heldFor: 'a-set' }), piece('helmet', 997, { broken: true })];
     const r = autoEquip(s, 0);
-    expect(r.spared).toEqual({ locked: 1, set: 1, broken: 1 });
-    expect(r.swaps.length).toBe(0);
-    expect(s.bag.length).toBe(3);
-    expect(s.gear[0]).toBe(null);
+    expect(r.spared).toEqual({ locked: 1, set: 0, broken: 1 });
+    expect(r.swaps.length).toBe(1);
+    expect(s.bag.length).toBe(2);
+    expect(s.gear[0]!.heldFor).toBeUndefined();
   });
 
   it('honours the margin it was given instead of churning over a rounding error', () => {

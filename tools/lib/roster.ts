@@ -194,27 +194,28 @@ function gates(): G.GateRow[] {
     ` (${SKILLS.filter((s) => (s.rules || []).length).length} with a rule, ${SKILLS.filter((s) => s.modelled_by).length} carried by another column)` +
     `${badRule.length ? ' · UNKNOWN: ' + badRule.join(', ') : ''}${onlyProse.length ? ' · PROSE ONLY: ' + onlyProse.join(', ') : ''}`);
 
-  //: a mana cost is one string carrying its own unit — `N flat` mana units — and the unit is
-  // mandatory, because a cost that reads as 0 would make the skill free. A cost written as a share of
-  // the pool is the retired form: the bar buys casts, never a dearer or cheaper press.
+  //: every paid row has one typed, flat resource cost: Mana or current HP, never both. A cost written
+  // as a share of either pool is the retired form; pool size controls affordability, not the price.
   const paidRows = SKILLS.filter((s) => s.type !== 'aura');
-  const unreadable = paidRows.filter((s) => SM13.manaSpec(s) == null).map((s) => s.id);
-  const percentLeft = paidRows.filter((s) => /%/.test(String(s.mana || ''))).map((s) => s.id);
+  const dualCost = paidRows.filter((s) => s.mana != null && s.hp_cost != null).map((s) => s.id);
+  const unreadable = paidRows.filter((s) => s.mana != null && s.hp_cost != null
+    ? false : s.hp_cost != null ? SM13.hpCostSpec(s) == null : SM13.manaSpec(s) == null).map((s) => s.id);
+  const percentLeft = paidRows.filter((s) => /%/.test(String(s.mana || '')) || /%/.test(String(s.hp_cost || ''))).map((s) => s.id);
+  const pricedRows = paidRows.filter((s) => !dualCost.includes(s.id) && (SM13.manaSpec(s) != null || SM13.hpCostSpec(s) != null));
   const freeAtCap = paidRows.filter((s) => {
-    if (SM13.manaSpec(s) == null) return false;
-    return !(SM13.manaCostOf(s, { skillLevel: 1 }) > 0 && SM13.manaCostOf(s, { skillLevel: SX.level_cap }) > 0);
+    if (!pricedRows.includes(s)) return false;
+    return !(SM13.costOf(s, { skillLevel: 1 }).amount > 0 && SM13.costOf(s, { skillLevel: SX.level_cap }).amount > 0);
   }).map((s) => s.id);
-  // the typed number IS the level-1 price: the one check that fails the moment a term of any kind —
-  // pool, gear, band — is re-attached to a press
-  const hiddenTerm = paidRows.filter((s) => {
-    const v = SM13.manaSpec(s);
-    return v != null && Math.abs(SM13.manaCostOf(s, { skillLevel: 1 }) - v) > 1e-9;
+  // the typed number IS the level-1 price: no term of any kind — pool, gear or band — re-prices it
+  const hiddenTerm = pricedRows.filter((s) => {
+    const v = s.hp_cost != null ? SM13.hpCostSpec(s) : SM13.manaSpec(s);
+    return v != null && Math.abs(SM13.costOf(s, { skillLevel: 1 }).amount - v) > 1e-9;
   }).map((s) => s.id);
-  soft('S15', unreadable.length === 0 && percentLeft.length === 0 && freeAtCap.length === 0 && hiddenTerm.length === 0,
-    `${paidRows.length} paid rows all charge a typed number of mana units, and the price does not move with the pool` +
-    ` — priced against the level-1 caster's own pool of ${fmt(SM13.MANA_REF_POOL)}` +
+  soft('S15', dualCost.length === 0 && unreadable.length === 0 && percentLeft.length === 0 && freeAtCap.length === 0 && hiddenTerm.length === 0,
+    `${paidRows.length} paid rows each charge one typed flat resource (Mana or current HP); pool size changes affordability, not price` +
     `${unreadable.length ? ' · NO READABLE COST: ' + unreadable.join(', ') : ''}` +
-    `${percentLeft.length ? ' · STILL A SHARE OF THE POOL: ' + percentLeft.join(', ') : ''}` +
+    `${dualCost.length ? ' · BOTH RESOURCES: ' + dualCost.join(', ') : ''}` +
+    `${percentLeft.length ? ' · STILL A SHARE OF A POOL: ' + percentLeft.join(', ') : ''}` +
     `${freeAtCap.length ? ' · FREE AT THE CAP: ' + freeAtCap.join(', ') : ''}` +
     `${hiddenTerm.length ? ' · A TERM OTHER THAN THE LEVEL: ' + hiddenTerm.join(', ') : ''}`);
 
@@ -223,14 +224,14 @@ function gates(): G.GateRow[] {
   // cap every paid row must come out at exactly `1 + (cap - 1) × step`. It no longer demands a steeper
   // cost than the damage ramp: a fresh skill presses a quarter of what it will (owner ruling), so a
   // level buys more damage than mana and the maxed rotation is the efficient one — that is the design.
-  const costStep = SM13.MANA_LEVEL_STEP, dmgStep = SM13.LEVEL_STEP;
+  const costStep = SM13.COST_LEVEL_STEP, dmgStep = SM13.LEVEL_STEP;
   const atCap = (step: number) => 1 + (SX.level_cap - 1) * step / 100;
   const ratio = atCap(costStep) / atCap(dmgStep);
-  const priced = paidRows.filter((s) => SM13.manaSpec(s) != null);
+  const priced = pricedRows;
   const offLadder = priced.filter((s) => Math.abs(
-    SM13.manaCostOf(s, { skillLevel: SX.level_cap }) / SM13.manaCostOf(s, { skillLevel: 1 }) - atCap(costStep)) > 1e-9).map((s) => s.id);
+    SM13.costOf(s, { skillLevel: SX.level_cap }).amount / SM13.costOf(s, { skillLevel: 1 }).amount - atCap(costStep)) > 1e-9).map((s) => s.id);
   soft('S16', costStep > 0 && offLadder.length === 0,
-    `a cost climbs ${costStep}% a skill level and the level ladder is the only term it answers to — measured on all ${priced.length} paid rows the cap price is ×${atCap(costStep).toFixed(2)} its level-1 price, so a fresh rotation is ×${ratio.toFixed(2)} the mana-hungry of a maxed one while it presses ×${atCap(dmgStep).toFixed(2)} the damage — a level buys efficiency` +
+    `Mana and HP costs climb ${costStep}% a skill level and the level ladder is their only price term — all ${priced.length} paid rows reach ×${atCap(costStep).toFixed(2)} at cap while presses reach ×${atCap(dmgStep).toFixed(2)} — a level buys efficiency` +
     `${costStep <= 0 ? ' · A COST MUST RISE WITH SKILL LEVEL' : ''}${offLadder.length ? ' · OFF THE LADDER: ' + offLadder.join(', ') : ''}`);
 
   //: the `(AoE ×n)` suffix is decoration the client never reads — the sim derives AoE from the
@@ -242,6 +243,14 @@ function gates(): G.GateRow[] {
   soft('S17', badAoe.length === 0,
     `every (AoE ×n) suffix in a mana cost states the data's own ${EN.E.aoe.mana_mult} mana multiplier` +
     `${badAoe.length ? ' · DISAGREES: ' + badAoe.join(', ') : ''}`);
+
+  // A caster Max-HP basis is an additive percentage term inside the skill press formula.
+  const badMaxHpBasis = SKILLS.filter((s) => s.max_hp_pct != null
+    && (s.type !== 'attack' || !Number.isFinite(s.max_hp_pct) || s.max_hp_pct <= 0 || s.base_flat == null || s.eff == null))
+    .map((s) => s.id);
+  soft('S20', badMaxHpBasis.length === 0,
+    `caster Max HP damage is a positive percentage on attack rows with a complete press formula` +
+    `${badMaxHpBasis.length ? ' · INVALID: ' + badMaxHpBasis.join(', ') : ''}`);
 
   return g.rows();
 }

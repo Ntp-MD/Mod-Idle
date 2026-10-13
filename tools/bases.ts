@@ -104,17 +104,19 @@ function checks(): any[] {
 
   // The dodge-thinning rule (owner shape): no frame whose Frame Mod carries an Armour or Energy
   // Shield line rolls an Evasion line — only the thin evasion_flat-only frames and the frames with
-  // no defence promise (belt · off hand · drawn line-1 slots) own the roll.
+  // no defence promise (belt · Book off hand · drawn line-1 slots) own the roll.
   {
     const bad: string[] = [];
     for (const b of (current.bases || [])) {
-      const bl: string[] = b.base_lines || [];
+      const bl: string[] = [...(b.base_lines || []), ...(b.frame_mod || [])];
       if (bl.includes('armour_flat') || bl.includes('energy_shield_flat')) {
         for (const id of [...(b.primary || []), ...(b.secondary || [])]) {
           if (id === 'evasion_flat' || id === 'evasion_pct') bad.push(`${b.name} rolls ${id}`);
         }
       }
     }
+    const shieldPool: string[] = current.weapon_pools?.['off hand']?.Shield || [];
+    for (const id of shieldPool) if (id === 'evasion_flat' || id === 'evasion_pct') bad.push(`Shield pool rolls ${id}`);
     add('BS12', bad.length === 0, bad.length ? bad.join(' · ')
       : 'no Armour/Energy-Shield frame rolls an Evasion line — only the thin evasion_flat-only frames and the no-defence frames own the roll');
   }
@@ -165,6 +167,25 @@ function checks(): any[] {
     noWeight.length
       ? 'NO WEIGHT: ' + noWeight.map((w: any) => w.name).join(', ')
       : `all ${weapons.length} weapon types carry a weight, spanning ${wSpan[0]}-${wSpan[1]}`);
+  const shields = (current.bases || []).filter((b: any) => b.slot === 'off hand' && b.family === 'Shield');
+  const shieldProfiles = new Set(['armour_flat', 'energy_shield_flat', 'armour_flat+energy_shield_flat']);
+  const seenShieldProfiles = new Set<string>();
+  const shieldProblems: string[] = [];
+  const knownModIds = new Set((MODS.mods || []).map((m: any) => m.id));
+  for (const frame of shields) {
+    const ids: string[] = frame.frame_mod || [];
+    const profile = ids.slice(1).sort().join('+');
+    if (ids[0] !== 'block_chance') shieldProblems.push(`${frame.name} does not lock Block Chance first`);
+    if (!shieldProfiles.has(profile)) shieldProblems.push(`${frame.name} has unexpected defence profile ${profile || '(empty)'}`);
+    if (seenShieldProfiles.has(profile)) shieldProblems.push(`duplicate Shield profile ${profile}`);
+    seenShieldProfiles.add(profile);
+    if (!(frame.weight > 0)) shieldProblems.push(`${frame.name} carries no weight`);
+    for (const id of ids) if (!knownModIds.has(id)) shieldProblems.push(`${frame.name}: unknown Frame Mod ${id}`);
+  }
+  if (shields.length !== 3) shieldProblems.push(`expected 3 Shield frames, found ${shields.length}`);
+  add('BS13', shieldProblems.length === 0, shieldProblems.length
+    ? shieldProblems.join(' · ')
+    : 'three Shield frames lock Block Chance with unique Armour, Energy Shield, and Armour + Energy Shield profiles');
   return rows();
 }
 

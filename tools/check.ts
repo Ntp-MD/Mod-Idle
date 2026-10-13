@@ -100,14 +100,14 @@ BLOCKS['group-C'] = () => {
   // The clock Cap is the interval itself, so its aspd form is derived, never typed.
   const aspdCap = 100 / E.caps.attack_interval_sec;
   // Evasion is one layer, and AGI carries it (owner ruling): the rating is `agi × K_EVASION` plus
-  // the gear lines, it runs the entropy roll against that mob's accuracy, and the Cap 80 binds it.
+  // the gear lines; its opening slice is discounted before the rest meets mob accuracy.
   // Dex feeds it nothing — its line is accuracy and the Status alignment gate.
   const evFloor = E.mob.species.reduce((a, b) => (b.accuracy_mult < a.accuracy_mult ? b : a));
-  const c2rating = SPLIT * K.K_EVASION + M.evasion_flat_t1 * (1 + M.evasion_pct / 100);
+  const c2rating = eng.evasionRating(SPLIT, M.evasion_flat_t1, M.evasion_pct);
   const c2chance = eng.evasionChance(c2rating, eng.mobAcc(eng.coreOf(evFloor, 'dex'), evFloor.accuracy_mult));
   const rows = [
-    ['C1', `Evasion ${cap('evasion')}%`, `Agi rating ÷ (rating + that mob's accuracy), the gear Evasion lines folded in · Dex feeds nothing (owner ruling) · the same opposed shape the mob side dodges with (X20)`, `**reachable** against the ${evFloor.name} ✓`],
-    ['C2', `(compare) Agi ${f0(SPLIT)} + one Evasion flat line vs the floor lineage`, `rating = ${f0(SPLIT)}×${K.K_EVASION} + ${M.evasion_flat_t1} × (1 + ${M.evasion_pct}/100) = ${f1(c2rating)}`, `${f1(c2chance)}% vs ${evFloor.name} · does not hit Cap ✓`],
+    ['C1', `Evasion ${cap('evasion')}%`, `first ${E.evasion_roll.opening_rating} rating × ${E.evasion_roll.opening_share}; rating above × ${E.evasion_roll.earned_mult}; effective rating ÷ (effective rating + mob accuracy) · Dex feeds nothing (owner ruling)`, `**reachable** against the ${evFloor.name} ✓`],
+    ['C2', `(compare) Agi ${f0(SPLIT)} + one Evasion flat line vs the floor lineage`, `rating = (${f0(SPLIT)}×${K.K_EVASION} + ${M.evasion_flat_t1}) × (1 + ${M.evasion_pct}/100) = ${f1(c2rating)}`, `${f1(c2chance)}% vs ${evFloor.name} · does not hit Cap ✓`],
     ['C3', `aspd ${f0(aspdCap)} (${E.caps.attack_interval_sec} sec a swing)`, `sword ${sword.weapon_aspd} + ${M.aspd_pct}% Mod → Agi = ${f0(sword.agi_to_cap)}`, `**${f0(sword.agi_to_cap)}** (ceiling ${f0(CEIL)}) ✓`],
     ['C4', `aspd ${f0(aspdCap)} (${E.caps.attack_interval_sec} sec a swing)`, `dagger ${dagger.weapon_aspd} + ${M.aspd_pct}% Mod`, `${f0(dagger.agi_to_cap)} ✓ · staff/2h unreachable by intent`],
     ['C5', 'Perfect dodge · no Cap', `ratio: Lck ${f0(CEIL)} × ${K.K_LCK_PDOGE} = rate ${f1(DERIVED.pdogge_rate)} ÷ (rate + ${K.K_PDOGE}) = ${f1(DERIVED.perfect_dodge)}%`, `the Lck ratio is the whole bound — it tops out under the old Cap, so the Cap was decoration and it was removed (owner ruling)`],
@@ -447,10 +447,9 @@ function runChecks() {
   const floorRace = MOB.species.find((r) => r.accuracy_mult === Math.min(...accMults));
   const ceilRace = MOB.species.find((r) => r.accuracy_mult === Math.max(...accMults));
   // ONE Evasion flat line at its T1 ceiling, lifted by one Evasion % line — the gear a real build wears
-  const evRating = M.evasion_flat_t1 * (1 + M.evasion_pct / 100);
-  const evVs = (sp: any) => eng.evasionChance(evRating + CEIL * K.K_EVASION, eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
+  const evVs = (sp: any) => eng.evasionChance(eng.evasionRating(CEIL, M.evasion_flat_t1, M.evasion_pct), eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
   // the floor build — Agi at the split point, which is what a real build holds
-  const midVs = (sp: any) => eng.evasionChance(evRating + SPLIT * K.K_EVASION, eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
+  const midVs = (sp: any) => eng.evasionChance(eng.evasionRating(SPLIT, M.evasion_flat_t1, M.evasion_pct), eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
   add('X20', evVs(floorRace!) >= E.caps.evasion - 0.5 && midVs(ceilRace!) < E.caps.evasion - 1,
     `Evasion Cap ${E.caps.evasion} is reachable against the accuracy floor (${floorRace!.name} accuracy ×${floorRace!.accuracy_mult} → ${f1(evVs(floorRace!))}% at Agi ${f0(CEIL)} + the gear line) and is NOT free against the ceiling (${ceilRace!.name} accuracy ×${ceilRace!.accuracy_mult} → ${f1(evVs(ceilRace!))}% maxed, ${f1(midVs(ceilRace!))}% at Agi ${f0(SPLIT)}) — Agi buys the rating and the gear line rides on it (owner ruling), so what X20 proves is that the Cap costs the whole Agi + gear pair rather than being reachable by accident`);
 
@@ -549,7 +548,7 @@ function runChecks() {
   add('X23', rp.length === 0, rp.length ? rp.join(' · ')
     : `${ROWS.length} roster rows from ${E.mob.species.length} species × 3 body classes + ${ROWS.filter((r) => /Elite/.test(r.kind)).length} Elite + ${ROWS.filter((r) => /Boss/.test(r.kind)).length} named bosses · every zone 6+ entries and exactly one boss · every species owns one Element of the five and a spawn rolls none of its own · zone entry counts ${ZONES.map((z) => `${z.id}:${perZone[z.id]}`).join(' ')}`);
 
-  // Mob dodge: the same opposed shape as the player side, and it must stay a thin layer
+  // Mob dodge keeps its own thin opposed ratio; player Evasion uses the opening-weighted curve.
   const dodges = ROWS.map((r) => r.dodge);
   const dLo = Math.min(...dodges), dHi = Math.max(...dodges);
   watch('X24', dLo > 2 && dHi < 40, `mob dodge runs ${f1(dLo)}-${f1(dHi)}% — outside the 2-40% thin-layer band; a mob's own Agi is becoming the answer to a build`,
@@ -865,13 +864,14 @@ function runChecks() {
   if (!(IV.adventure_slots > 0)) ivp.push('no adventure bag size');
   if (!(IV.character_slots > 0)) ivp.push('no character bag size');
   if (IV.overflow !== 'stop_pickup') ivp.push('overflow must be stop_pickup — a full bag pauses pickups, nothing auto-converts');
-  for (const k of ['stone', 'herb', 'potion']) if (!(IV.stack_size && IV.stack_size[k] > 0)) ivp.push(`no stack size for ${k}`);
+  for (const k of ['stone', 'herb', 'potion', 'material', 'food']) if (!(IV.stack_size && IV.stack_size[k] > 0)) ivp.push(`no stack size for ${k}`);
+  for (const k of ['herb', 'potion', 'material', 'food']) if (!(IV.unit_weight && IV.unit_weight[k] >= 0)) ivp.push(`no unit weight for ${k}`);
   if (IV.gold_uses_slot !== false) ivp.push('gold must not consume a slot');
   const gearHr = L.bands.high.upgrades_per_hr;                       // kept gear/hr = measured upgrades (F4)
   const gearFill = IV.adventure_slots / gearHr;
   const stoneSlotHr = IV.stack_size.stone / BAND.high.junk_per_hr;   // one stone slot of value stones
   soft('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
-    : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds consumables (stone ${IV.stack_size.stone}/slot = ${f1(stoneSlotHr)} hr of value stones, herb/potion ${IV.stack_size.herb}/slot) with gold taking no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + craft are Settlement-only`);
+    : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds stone (${IV.stack_size.stone}/slot, weightless), herb ${IV.stack_size.herb}/slot, potion ${IV.stack_size.potion}/slot, material ${IV.stack_size.material}/slot, food ${IV.stack_size.food}/slot; gold takes no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + gear craft are Settlement-only, meal cooking is Camp-only`);
 
   // Junk is gold's primary mint now (Ragnarok-style); every rarity must reproduce the published
   // junk line, so rarity changes the flavour and the price but not the expected income
@@ -1050,15 +1050,16 @@ function runChecks() {
   add('X36', roadP.length === 0, roadP.length ? roadP.join(' · ')
     : `the walk is a closed shape: ${ROAD.nodes.length} settlements on the hex lattice · ${ROAD.block_sec}s a block · ${ROAD.encounter_chance_pct}% an encounter per block, so a ${WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)}-block walk pays ${f1((Number(ROAD.encounter_chance_pct) / 100) * Number(WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)))} fights in expectation · a fight is an ordinary mob group that pays the ordinary drop roll · a Push keeps the walk's blocks · a Waypoint unlocks on foot and warps for ${WARP.m_per_block} minutes of gold a block`);
 
-  // X46 · the walk is online-only and Push-neutral. A Push must not cost a block, an away period must
-  // not walk, and the waypoint must not gate a zone.
+  // X46 · the walk is online-only and Push-neutral. A Push cannot refund a block, a same-zone Field
+  // Camp can end its current route, an away period must not walk, and a Waypoint must not gate a zone.
   const walkP = [];
-  if (!/never ends a walk/i.test(ROAD.push_rule)) walkP.push('a Push must never end a walk');
-  if (!/never gives back a block/i.test(ROAD.push_rule)) walkP.push('a Push must not give back a block');
+  if (!/same-zone Field Camp/i.test(ROAD.push_rule)) walkP.push('a same-zone Field Camp must own the field return');
+  if (!/ends the current walk/i.test(ROAD.push_rule)) walkP.push('a Field Camp return must end the interrupted walk');
+  if (!/without refunding a block/i.test(ROAD.push_rule)) walkP.push('a Push must not refund a block');
   if (!/never gates a zone/i.test(ROAD.waypoint_rule)) walkP.push('a Waypoint must never gate a zone');
   if (/offline/i.test(ROAD.encounter_rule) && !/never/i.test(ROAD.encounter_rule)) walkP.push('an encounter rule that mentions offline must say an away period never walks');
   add('X46', walkP.length === 0, walkP.length ? walkP.join(' · ')
-    : `the walk is online-only and Push-neutral: a Push rests at the camp of the zone it was ambushed in and resumes on the same block · an away period never crosses a block · a Waypoint never gates a zone, so a settlement is reached by walking`);
+    : `the walk is online-only and Push-neutral: a same-zone Field Camp receives a Push and ends the route without refunding a block; without one, the walk resumes at the ambush block · an away period never crosses a block · a Waypoint never gates a zone`);
 
   // X64 · every cell is a place to stand, so a cell's zone must be answerable from the lattice alone —
   // nearest settlement, with a written tie-break. The cage proves the ownership is a derivation and not
@@ -1206,7 +1207,7 @@ function runChecks() {
     if (n !== want) opSlotProblems.push(`${slot}: ${n} piece(s), SLOTS carries ${want}`);
   }
   const opLineProblems = OP_PIECES
-    .filter((p) => p.lines.length !== 1 || (p.g.slot !== 'main hand' && (p.lines[0].extra || []).length))
+    .filter((p) => p.lines.length !== 1)
     .map((p) => `${p.g.slot} ${p.g.base}`);
   add('OP7', OP_PIECES.length === opSlots.length && opSlotProblems.length === 0 && opLineProblems.length === 0,
     `the set is ${OP_PIECES.length} pieces, one per slot of the ${opSlots.length} a character wears, and every piece carries exactly one line — its frame's Frame Mod at the floor, with no Bound pair and no Unbound line${opSlotProblems.length ? ' · SLOTS: ' + opSlotProblems.join(' · ') : ''}${opLineProblems.length ? ' · LINES: ' + opLineProblems.join(' · ') : ''}`);

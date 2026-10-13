@@ -187,10 +187,10 @@ describe('the field HUD reads (hud.ts)', () => {
 
 describe('the field reads in words (field.ts)', () => {
   it('stretches a fill over its own track and clamps past the ends', () => {
-    expect(bar(50, 100)).toBe('width:50%;--w:0.5');
-    expect(bar(0, 100)).toContain('width:0%');
-    expect(bar(200, 100)).toContain('width:100%');
-    expect(bar(-5, 100)).toContain('width:0%');
+    expect(bar(50, 100)).toBe('--fill:0.5;--w:0.5');
+    expect(bar(0, 100)).toContain('--fill:0');
+    expect(bar(200, 100)).toContain('--fill:1');
+    expect(bar(-5, 100)).toContain('--fill:0');
   });
 
   it('writes a curse on a mob with its sign and its seconds, and nothing when it carries none', () => {

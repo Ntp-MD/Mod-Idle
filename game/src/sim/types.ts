@@ -170,6 +170,7 @@ import type { GoalState } from './goal';
 import type { MobStatusStore } from './mobStatus';
 import type { CurseStore } from './curse';
 import type { DungeonRun } from './dungeon';
+import type { FieldworkState } from './fieldwork';
 
 export interface HealBuff {
   secLeft: number;
@@ -204,9 +205,9 @@ export interface TownState {
  * One walk on foot, counted in blocks.
  *
  * `blocksTotal` is the hex distance between the two cells and `secLeft` is the time left on the block
- * being crossed. Every block crossed rolls one encounter chance. A Push is the ordinary
- * Push: the character rests at the camp of the zone it was ambushed in and walks back in on the
- * block it was ambushed on, so `blocksLeft` never moves for it.
+ * being crossed. Every block crossed rolls one encounter chance. A Push preserves the block count.
+ * A same-zone Field Camp can end the walk and receive the character; without one, recovery returns to
+ * the ambush block and the route continues.
  *
  * A walk joins two cells, not two settlements (`road.standing_rule`): the destination is any hex the
  * player clicked, and `node`/`kind`/`sub`/`wild` say what stands on it — a settlement, a named side of
@@ -339,6 +340,7 @@ export interface GameState {
   nextSnapshotAt: number;
   town: TownState;
   farm: FarmState;
+  fieldwork: FieldworkState;
   zone: number;
   group: Mob[];
   phase: Phase;

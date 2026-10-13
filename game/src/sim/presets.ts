@@ -6,7 +6,7 @@ import type { SkillState } from './skills';
 /**
  * Loadout presets (`skill-pool.md` · `engine.json` `presets`).
  *
- * Six sets exist; each holds the 15-slot order plus the buff and aura toggles and the zones it is
+ * Six sets exist; each holds the 14-slot order plus the buff and aura toggles and the zones it is
  * bound to. Skill XP, cooldowns and duplicates are account-wide and never live in a preset, so
  * switching does not reset progress and a Push that returns to the main set leaves every running
  * cooldown counting (`skill-pool-system.md` rule 12).

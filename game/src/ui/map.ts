@@ -1,7 +1,7 @@
 import { eng } from '../engine/client';
-import { E } from '../engine/client';
+import { E, fieldwork } from '../engine/client';
 import { settlementById } from '../sim/town';
-import { ownerOf, rankOf, currentCell, walkedCells, trailCells, cellsTo } from '../sim/road';
+import { rankOf, currentCell, walkedCells, trailCells, cellsTo } from '../sim/road';
 
 /**
  * The map cluster's own reader — the geometry and the sheet repaint that `App.svelte` used to hold
@@ -34,10 +34,13 @@ export function cellLabel(node: Element): Picked {
   }
   if (id && wild != null) {
     const s = settlementById(id)!, w = Number(wild);
-    return { key, q: h.q, r: h.r, kind: 'wild', wild: w, label: w === 0 ? s.name + ' Dungeon' : s.name + ' ' + (w + 1), sub: null };
+    const site = fieldwork.siteAt(w);
+    const label = site === 'dungeon' ? `${s.name} Dungeon`
+      : site === 'mine' ? `${s.name} Mine`
+        : site === 'grove' ? `${s.name} Rare Grove` : `${s.name} Wild Side`;
+    return { key, q: h.q, r: h.r, kind: 'wild', wild: w, label, sub: null };
   }
-  const own = ownerOf(h);
-  return { key, q: h.q, r: h.r, kind: 'bare', label: `${key} · ${own ? settlementById(own.id)!.name : 'the field'}`, sub: null, wild: null };
+  return { key, q: h.q, r: h.r, kind: 'bare', label: `Hunting Ground · ${key}`, sub: null, wild: null };
 }
 
 /** The view, gate floor and the two overlays, plus the pick and the walk the state carries. */
@@ -50,6 +53,38 @@ export type PaintOpts = {
   gameState: any;
 };
 
+/** Feather the finite field cells into the endless patterned ground beneath them. */
+function featherFieldEdge(cells: SVGPolygonElement[]) {
+  if (!cells.length || cells.every((cell) => cell.hasAttribute('data-edge-opacity'))) return;
+  const neighbours = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]];
+  const byAx = new Map(cells.map((cell) => [cell.getAttribute('data-ax') || '', cell]));
+  const depth = new Map<string, number>();
+  const edge = [...byAx.keys()].filter((key) => {
+    const [q, r] = key.split(',').map(Number);
+    return neighbours.some(([dq, dr]) => !byAx.has(`${q + dq},${r + dr}`));
+  });
+  edge.forEach((key) => depth.set(key, 0));
+
+  // Walk inward by actual hex neighbours; a rectangular pixel mask would clip the skewed axial edge.
+  for (let cursor = 0; cursor < edge.length; cursor++) {
+    const key = edge[cursor];
+    const [q, r] = key.split(',').map(Number);
+    for (const [dq, dr] of neighbours) {
+      const next = `${q + dq},${r + dr}`;
+      if (!byAx.has(next) || depth.has(next)) continue;
+      depth.set(next, depth.get(key)! + 1);
+      edge.push(next);
+    }
+  }
+
+  const fadeRings = 3;
+  cells.forEach((cell) => {
+    const rings = depth.get(cell.getAttribute('data-ax') || '') ?? fadeRings;
+    const ramp = Math.min(1, rings / fadeRings);
+    cell.setAttribute('data-edge-opacity', (ramp * ramp * (3 - 2 * ramp)).toFixed(3));
+  });
+}
+
 /**
  * The sheet is repainted after every `{@html}` rebuild: the fills follow the view, the walk graph
  * and the cell ids show or hide, and the plotted route lights up one cell per block — the cells
@@ -61,8 +96,16 @@ export type PaintOpts = {
 export function paintSheet(root: HTMLElement, opts: PaintOpts) {
   const { view: v, gateLevel: lv, showIds: ids, showWalk: hops, pickedCell, gameState } = opts;
   const walk = gameState.walk;
-  for (const p of Array.from(root.querySelectorAll('polygon.cell'))) {
+  const cells = Array.from(root.querySelectorAll<SVGPolygonElement>('polygon.cell'));
+  featherFieldEdge(cells);
+  for (const p of cells) {
     p.classList.remove('locked');
+    p.classList.remove('site-dungeon', 'site-mine', 'site-grove', 'field-camp');
+    const wildIndex = p.getAttribute('data-wild');
+    const site = wildIndex == null ? null : fieldwork.siteAt(Number(wildIndex));
+    if (site) p.classList.add(`site-${site}`);
+    const camp = gameState.fieldwork?.camp;
+    if (camp && camp.cell.q === Number(p.getAttribute('data-ax')?.split(',')[0]) && camp.cell.r === Number(p.getAttribute('data-ax')?.split(',')[1])) p.classList.add('field-camp');
     if (v === 'terrain') p.setAttribute('fill', p.getAttribute('data-tone') || 'none');
     else if (!p.hasAttribute('data-lo')) p.setAttribute('fill', 'none');
     else {
@@ -70,6 +113,9 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
       // the gate holds the fill as a state the stylesheet paints (`--ground`), not a second colour here
       if (v !== 'band' && lv < Number(p.getAttribute('data-lo'))) p.classList.add('locked');
     }
+    const edgeOpacity = v === 'terrain' ? p.getAttribute('data-edge-opacity') || '1' : '1';
+    p.setAttribute('fill-opacity', edgeOpacity);
+    p.setAttribute('stroke-opacity', edgeOpacity);
     p.classList.remove('route', 'walked', 'picked', 'standing');
   }
   const toggle = (id: string, on: boolean) => {

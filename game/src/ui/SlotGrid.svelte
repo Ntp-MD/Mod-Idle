@@ -31,12 +31,14 @@
    * (`ItemDetail.svelte`) and the card's own Equip button is the only way a piece gets worn, which is
    * the owner's rule rather than a convenience.
    */
-  let { entries, capacity, mode = 'grid', layout = 'grid', onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, fixed = false, empty = 'Empty.', onpick = null, pageSize = 0, actions = null }: {
+  let { entries, capacity, mode = 'grid', layout = 'grid', compactDoll = false, onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, fixed = false, empty = 'Empty.', onpick = null, ondragitem = null, selectedIndex = null, pageSize = 0, actions = null }: {
     entries: SlotEntry[];
     capacity: number;
     mode?: 'grid' | 'list';
     /** `doll` draws the fixed equipment panel on the five-row slot grid (no body) */
     layout?: 'grid' | 'doll';
+    /** a narrower doll for a side panel with an adjacent inventory grid */
+    compactDoll?: boolean;
     onmode?: ((m: 'grid' | 'list') => void) | null;
     sort?: SortKey;
     onsort?: ((k: SortKey) => void) | null;
@@ -48,6 +50,10 @@
     empty?: string;
     /** when set, a press on a gear piece hands it over instead of opening the card — the craft bench's way onto itself */
     onpick?: ((index: number) => void) | null;
+    /** an optional drag source for gear and worn pieces; the caller owns the drop payload */
+    ondragitem?: ((entry: SlotEntry, event: DragEvent) => void) | null;
+    /** the source position currently placed on a workbench */
+    selectedIndex?: number | null;
     /** a page holds this many slots, and a pager folds the rest: every page is the same height, so a
         paged grid never grows the modal it sits in (the doll layout is never paged) */
     pageSize?: number;
@@ -138,14 +144,13 @@
    */
   const place = $derived(hover && popPlace(hover, { w: popW, h: popH }, window.innerWidth, window.innerHeight));
 
-  /**
-   * Leaving closes at once — the pointer has gone somewhere else. It stays open while the pointer is
-   * only crossing the grid's own gaps or stepping onto the card, read off the element the pointer
-   * landed on rather than by a timer: the card holds the buttons, so nothing closes under the hand
-   * that is reaching for one, and no ghost of a closed decision lingers after the pointer is gone.
-   */
+  /** Keep the card while the pointer or focus moves to another filled slot or into the card itself.
+   * Empty grid space counts as leaving, so the detail closes once the item does. */
   function leaveTo(related: EventTarget | null) {
-    if (related instanceof Node && ((gridEl && gridEl.contains(related)) || (popEl && popEl.contains(related)))) return;
+    if (related instanceof Element && (
+      (popEl && popEl.contains(related)) ||
+      (gridEl && gridEl.contains(related) && related.closest('.slot'))
+    )) return;
     hover = null;
   }
 
@@ -170,7 +175,7 @@
 </div>
 
 {#if mode === 'grid'}
-  <div class={layout === 'doll' ? 'doll' : 'grid'} bind:this={gridEl}>
+  <div class={layout === 'doll' ? 'doll' : 'grid'} class:compact-doll={layout === 'doll' && compactDoll} bind:this={gridEl}>
     {#each shown as cell, pos (pos)}
       {#if cell.entry}
         <button
@@ -181,11 +186,18 @@
           class:stack={cell.entry.kind === 'stack'}
           class:held={Boolean(cell.entry.heldFor)}
           class:worn={cell.entry.kind === 'worn'}
+          class:selected={Boolean(cell.entry.item && cell.entry.index === selectedIndex)}
+          draggable={Boolean(ondragitem && cell.entry.item)}
+          ondragstart={(e) => { hover = null; if (cell.entry) ondragitem?.(cell.entry, e); }}
           onmouseenter={(e) => open(e.currentTarget, cell.entry!)}
           onfocus={(e) => open(e.currentTarget, cell.entry!)}
+          onblur={(e) => leaveTo(e.relatedTarget)}
           onmouseleave={(e) => leaveTo(e.relatedTarget)}
           oncontextmenu={(e) => openMenu(e, cell.entry!)}
-          onclick={(e) => (onpick && cell.entry && cell.entry.kind === 'gear' ? onpick(cell.entry.index) : open(e.currentTarget, cell.entry!))}
+          onclick={(e) => {
+            if (onpick && cell.entry?.item) { hover = null; onpick(cell.entry.index); }
+            else open(e.currentTarget, cell.entry!);
+          }}
           aria-label={cell.entry.kind === 'stack' ? `${cell.entry.title} ×${cell.entry.count}` : cell.entry.title}
         >
           <img class="slot-icon" src={cell.entry.icon} alt="" aria-hidden="true" />
@@ -278,17 +290,17 @@
 {/if}
 
 <style>
-  .bar { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; margin-bottom: var(--spacing-xs); }
+  .bar { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); align-items: center; margin-bottom: var(--spacing-xs); }
   .lab { color: var(--dim); font-size: var(--font-xs); }
   .spacer { flex: 1; }
-  .bar button { padding: 2px var(--spacing-xs); font-size: var(--font-xs); }
+  .bar button { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(34px, 2.2vw + 9px, 73px), 1fr)); gap: 3px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(34px, 2.61vw, 73px), 1fr)); gap: var(--spacing-2xs); }
 
   /* The equipment panel: three columns by five rows, no body drawn — the `.` cells are the blanks. */
   .doll {
     display: grid;
-    grid-template-columns: repeat(3, clamp(55px, 3.586vw + 14px, 119px));
+    grid-template-columns: repeat(3, clamp(55px, 4.26vw, 119px));
     grid-template-rows: repeat(5, auto);
     grid-template-areas:
       "cape    helmet  amulet"
@@ -296,9 +308,13 @@
       "gloves  belt    earring"
       "ringa   pant    ringb"
       ".       boots   .";
-    gap: 4px;
+    gap: var(--spacing-2xs);
     width: fit-content;
     margin: 0 auto var(--spacing-sm);
+  }
+  .doll.compact-doll {
+    grid-template-columns: repeat(3, calc(var(--icon-xl) - var(--spacing-xs)));
+    margin-bottom: var(--spacing-2xs);
   }
 
   .slot {
@@ -313,9 +329,10 @@
   /* the icon carries a whisper of the same ink, so a rarity reads across a full grid before any hover */
   .slot .slot-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rar, transparent) 55%, transparent)); }
   .slot.worn { box-shadow: inset 0 0 0 1px var(--line); background: var(--panel); }
+  .slot.selected { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
   /* the comparison badge: how far this piece sits from what the slot already wears */
   .slot .delta {
-    position: absolute; right: clamp(2px, 0.098vw + 0px, 3px); top: clamp(1px, 0.041vw + 0px, 1px);
+    position: absolute; right: clamp(2px, 0.10vw, 3px); top: clamp(1px, 0.05vw, 1px);
     font-family: var(--num); font-size: var(--font-xs); line-height: 1;
     color: var(--dim); text-shadow: 0 1px 0 rgba(0, 0, 0, .8);
   }
@@ -324,7 +341,7 @@
   .slot.held { border-style: dashed; border-color: var(--good); }
   .slot.empty { display: flex; align-items: center; justify-content: center; background: var(--inset); border-style: dotted; cursor: default; }
   .slot-glyph { position: absolute; inset: 16%; width: 68%; height: 68%; object-fit: contain; opacity: .2; pointer-events: none; }
-  .slotname { position: relative; font-size: var(--font-xs); color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 2px; }
+  .slotname { position: relative; font-size: var(--font-xs); color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 var(--spacing-3xs); }
   .slot-icon {
     position: absolute;
     inset: 17%;
@@ -335,12 +352,12 @@
     pointer-events: none;
   }
   .count, .plus { position: absolute; z-index: 1; font-size: var(--font-xs); line-height: 1; }
-  .count { right: clamp(2px, 0.122vw + 0px, 4px); bottom: clamp(1px, 0.082vw + 0px, 3px); }
-  .plus { left: clamp(2px, 0.122vw + 0px, 4px); bottom: clamp(1px, 0.082vw + 0px, 3px); color: var(--xp); }
+  .count { right: clamp(2px, 0.15vw, 4px); bottom: clamp(1px, 0.10vw, 3px); }
+  .plus { left: clamp(2px, 0.15vw, 4px); bottom: clamp(1px, 0.10vw, 3px); color: var(--xp); }
 
   .list td, .list th { font-size: var(--font-xs); }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); margin-top: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { padding: 1px var(--spacing-sm); font-size: var(--font-xs); }
+  .pager button { padding: var(--seam) var(--spacing-sm); font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
   .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--rar, var(--text)); }
   .list-title img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
@@ -352,7 +369,7 @@
      paints, and a card that has not been measured has no business being seen. */
   .pop {
     position: fixed; z-index: 40;
-    max-height: calc(100dvh - var(--icon-sm)); overflow: auto; overscroll-behavior: contain;
+    max-height: none; overflow: hidden;
   }
   .pop.blind { visibility: hidden; }
   .plain {
@@ -363,5 +380,5 @@
     min-width: var(--box-240);
   }
   .plain h4 { margin: 0; }
-  .plain p { margin: 3px 0 0; color: var(--dim); }
+  .plain p { margin: var(--spacing-2xs) 0 0; color: var(--dim); }
 </style>

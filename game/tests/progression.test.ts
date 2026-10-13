@@ -42,7 +42,7 @@ describe('weapon Mastery', () => {
 
 describe('the passive tree', () => {
   const spent = (s: GameState) => treePointsSpent(s);
-  const firstWithNeeds = () => Object.values(tree.byId as Record<string, any>).find((n: any) => n.needs) as any;
+  const firstWithNeeds = () => Object.values(tree.byId as Record<string, any>).find((n: any) => n.needs.length && !n.needs.includes('start')) as any;
 
   it('refuses a rank with no point banked and one past the node cap', () => {
     const s = newGame();
@@ -58,13 +58,23 @@ describe('the passive tree', () => {
     expect(canSpendTree(s, id).ok).toBe(false);
   });
 
-  it('holds a chain in order: the node it needs must be bought first', () => {
+  it('requires an owned adjacent node before extending a path', () => {
     const node = firstWithNeeds();
     const s = newGame();
     s.player.treePoints = 1000;
     expect(canSpendTree(s, node.id).ok).toBe(false);
-    expect(spendTreePoint(s, node.needs).ok).toBe(true);
+    const parent = node.needs.find((id: string) => id !== 'start');
+    expect(spendTreePoint(s, parent).ok).toBe(true);
     expect(canSpendTree(s, node.id).ok).toBe(true);
+  });
+
+  it('opens a cross-linked branch from a neighbouring owned path', () => {
+    const s = newGame();
+    s.player.treePoints = 1000;
+    for (let rank = 1; rank <= 7; rank++) expect(spendTreePoint(s, `impact.${rank}`).ok).toBe(true);
+    expect(canSpendTree(s, 'control.7').ok).toBe(true);
+    expect(spendTreePoint(s, 'control.7').ok).toBe(true);
+    expect(canSpendTree(s, 'control.8').ok).toBe(true);
   });
 
   it('hands every spent point back, free, and grants the lines its ranks buy', () => {

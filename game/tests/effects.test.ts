@@ -73,6 +73,8 @@ describe('the sheet moves when a skill is up', () => {
 describe('only what is up counts', () => {
   it('takes every reserved aura and each buff still on its clock', () => {
     const sk = newSkillState();
+    sk.owned['aura.wraith_of_fury'] = 0;
+    sk.owned['buff.warcry'] = 0;
     sk.auras['aura.wraith_of_fury'] = true;
     sk.buffs['buff.warcry'] = true;
     sk.buffUp['buff.warcry'] = 3;
@@ -90,6 +92,7 @@ describe('only what is up counts', () => {
     for (const id of Object.keys(sm.byId)) {
       const s = sm.byId[id];
       if (s.type !== 'aura') continue;
+      sk.owned[id] = 0;
       const pct = sm.reservePct(s.reserve ?? '') || 0;
       if (reserved + pct <= sm.RESERVATION_LIMIT) { sk.auras[id] = true; reserved += pct; }
     }
@@ -102,6 +105,7 @@ describe('the toggle track', () => {
   it('refuses an aura that would reserve past the block, and never refuses taking one off', () => {
     const sk = newSkillState();
     const auras: string[] = sm.all().filter((s: any) => s.type === 'aura' && s.reserve).map((s: any) => s.id);
+    for (const id of auras) sk.owned[id] = 0;
     let reserved = 0;
     let refused = 0;
     for (const id of auras) {
@@ -127,6 +131,7 @@ describe('the toggle track', () => {
 
   it('a buff switch stops its clock on the way off', () => {
     const sk = newSkillState();
+    sk.owned['buff.warcry'] = 0;
     sk.buffs['buff.warcry'] = true;
     sk.buffUp['buff.warcry'] = 6;
     expect(effectsActive(sk).mult.physical_power).toBe(row('buff.warcry').effects![0]!.value);

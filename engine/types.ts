@@ -223,6 +223,15 @@ export interface EnergyShieldCfg {
   /** Player-only by design: a mob sizes its survivability from `mob_HP`, so a second pool would
    *  count the same anchor twice (checks.md H1). */
   player_only: boolean;
+  chaos_bypasses: boolean;
+}
+
+export interface EvasionRollCfg {
+  opening_rating: number;
+  opening_max_chance_pct: number;
+  opening_share: number;
+  earned_mult: number;
+  note: string;
 }
 
 export interface XpCfg {
@@ -483,6 +492,55 @@ export interface FarmCfg {
   offline_cap_hours: number;
 }
 
+export interface FieldworkCfg {
+  level_divisor: number;
+  level_cap: number;
+  mastery_divisor: number;
+  mastery_cap: number;
+  progression: {
+    harvest_bonus_levels: number[];
+    harvest_bonus_per_level: number;
+    drop_rate_bonus_per_skill_level_pct: number;
+    drop_rate_bonus_per_mastery_level_pct: number;
+    drop_rate_bonus_cap_pct: number;
+  };
+  hunger: {
+    max: number;
+    empty_hp_regen_cut_pct: number;
+    drain_per_sec: { travel: number; hunting: number; gathering: number };
+    auto_eat: { enabled_default: boolean; threshold_default: number; threshold_options: number[]; allow_raw_default: boolean; emergency_raw_at_zero: boolean; priority: ('cooked' | 'fruit' | 'herb' | 'raw')[] };
+  };
+  foods: {
+    id: string; name: string; kind: 'raw' | 'fruit' | 'herb' | 'ingredient' | 'cooked';
+    hunger_restore: number; edible: boolean; auto_eat: boolean; source?: string;
+  }[];
+  travel_events: {
+    chance_per_block: number;
+    events: {
+      id: string; weight: number; kind: 'food' | 'restore'; text: string;
+      food_id?: string; amount_min?: number; amount_max?: number; hunger_restore?: number;
+    }[];
+  };
+  camp: { free_relocations: number; relocate_ore: number; relocate_timber: number };
+  wild_site_index: { dungeon: number; mine: number; grove: number };
+  actions: Record<'mine' | 'grove', {
+    resource: string; yield: number; interval_sec: number; xp: number; mastery_xp: number;
+    rare_drop_chance: number; rare_resource: string;
+    food_drop_chance?: number; food_id?: string;
+  }>;
+  hunt: {
+    xp_per_kill: number; mastery_xp_per_kill: number; meat_drop_chance: number;
+    meat_min: number; meat_max: number; edible_species: string[];
+    food_drops: { species: string[]; food_id: string; chance: number; min: number; max: number }[];
+  };
+  recipes: {
+    id: string; name: string; menu: 'hearth' | 'forage'; level: number; xp: number; mastery_xp: number;
+    materials: Record<string, number>; foods: Record<string, number>; herbs: Record<string, number>;
+    hunger_restore: number;
+    duration_sec: number; damage_pct: number; hp_regen_pct: number;
+  }[];
+}
+
 export interface HerbsCfg {
   low_chance: number;
   mid_chance: number;
@@ -528,10 +586,12 @@ export interface EngineData {
   mod_max: ModMax;
   mod_weights: ModWeightsCfg;
   energy_shield: EnergyShieldCfg;
+  evasion_roll: EvasionRollCfg;
   caps: Caps;
   weapons: WeaponCfg[];
   herbs: HerbsCfg;
   farm: FarmCfg;
+  fieldwork: FieldworkCfg;
   potions: PotionsCfg;
   presets: PresetsCfg;
   skill_drop: any;
@@ -573,6 +633,10 @@ export interface SkillRow {
   /** The share of the added power line the press receives, in percent (PoE damage effectiveness). */
   eff?: number;
   mana?: string;
+  /** Flat HP units paid out of the caster's current HP pool instead of Mana. */
+  hp_cost?: string;
+  /** The caster's Max HP share added to the skill's damage basis, in percent. */
+  max_hp_pct?: number;
   effect?: string;
   modelled_by?: string;
   rules?: string[];
@@ -596,7 +660,7 @@ export interface SkillsData {
       /** Provenance only: the archetype bands the press pairs were *derived from*. No formula reads
        *  this block — the numbers a cast spends are each row's own `base_flat` / `eff` / cooldown. */
       archetype_bands?: any;
-      /** A mana cost climbs on this step per skill level — the only term that moves a price. */
+      /** The existing data key names the step shared by typed Mana and HP skill costs. */
       mana_level_step_pct?: number;
       cast_reference?: { cdr_pct: number; ladder_pct: number };
     };

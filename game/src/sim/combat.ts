@@ -4,8 +4,39 @@ import type { Mob } from './types';
 import type { CurseMods } from './curse';
 import { NO_CURSE, accMult, takenMult, psMult } from './curse';
 
-export type StatusName = 'burn' | 'chill' | 'shock' | 'poison' | 'mark' | 'crippled';
-export type Statuses = Partial<Record<StatusName, { stacks: number; secLeft: number; perSec: number }>>;
+export type StatusName = 'burn' | 'chill' | 'shock' | 'poison' | 'bleed' | 'mark' | 'crippled';
+export interface StatusLine {
+  stacks: number;
+  secLeft: number;
+  perSec: number;
+  /** Per-stack snapshots for DoTs applied by multiple mobs with different damage. */
+  stackPerSec?: number[];
+}
+export type Statuses = Partial<Record<StatusName, StatusLine>>;
+
+function addStack(s: StatusLine, cap: number, perSec?: number): void {
+  if (perSec !== undefined) {
+    s.stackPerSec ||= Array.from({ length: Math.max(0, s.stacks) }, () => s.perSec);
+    if (s.stacks < cap) s.stackPerSec.push(perSec);
+    s.perSec = s.stackPerSec.length
+      ? s.stackPerSec.reduce((sum, value) => sum + value, 0) / s.stackPerSec.length
+      : perSec;
+  }
+  s.stacks = Math.min(cap, s.stacks + 1);
+}
+
+export function decayStatusStack(s: StatusLine): void {
+  if (s.stackPerSec?.length) s.stackPerSec.shift();
+  s.stacks = Math.max(0, s.stacks - 1);
+  if (s.stackPerSec?.length) {
+    s.perSec = s.stackPerSec.reduce((sum, value) => sum + value, 0) / s.stackPerSec.length;
+  }
+}
+
+export function statusDamagePerSec(s?: StatusLine): number {
+  if (!s) return 0;
+  return s.stackPerSec ? s.stackPerSec.reduce((sum, value) => sum + value, 0) : s.stacks * s.perSec;
+}
 
 export interface HitReport {
   landed: boolean;
@@ -129,7 +160,8 @@ export function playerSwing(
 /**
  * One mob swing, in combat.md §2 incoming order: perfect dodge → evasion → dodge → damage split
  * → armour on the physical half → resistance on the Element half → damage_taken multiplier →
- * Energy Shield before HP (chaos bypasses) → HP. Returns the damage that actually landed.
+ * Energy Shield before HP (unless the data explicitly allows an Element to bypass it) → HP.
+ * Poison and bleed DoT are routed separately. Returns the damage that actually landed.
  */
 export function mobSwing(
   rng: () => number,
@@ -143,14 +175,14 @@ export function mobSwing(
   absorbPct = 0,
   /** Earth Wall: a block charge is standing, so this swing is answered by the block layer either way */
   blockCharge = false,
-): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number } {
-  if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
-  if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
+): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number; leech?: number; blockChargeSpent: boolean } {
+  if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
+  if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
   const acc = mob.acc * accMult(curse);
   // Evasion is one layer: the Agi rating rolls against this mob's accuracy, the gear Evasion
   // lines ride on it, and the Cap 80 binds the result. A blocked hit is gone entirely.
   if (rng() * 100 < eng.evasionChance(c.evasion, acc)) {
-    return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0 };
+    return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
   }
   // Block is its own layer, rolled after perfect dodge and evasion (formula-defense.md): the
   // shield's Frame Mod line (open-ended, no Cap). It answers a PHYSICAL hit only (owner ruling): a
@@ -176,28 +208,35 @@ export function mobSwing(
   // step 7 is the damage_taken bucket: the global one from `engine.json`, times whatever the
   // skills up right now add to it (Berserker takes more, Iron Will takes less)
   const hardened = E.global.defend_mult * (c.damageTaken ?? 1);
-  const physFinal = physical * hardened;
-  let damage = physFinal + elemental * hardened;
+  let physFinal = physical * hardened;
+  const elementalFinal = elemental * hardened;
   // a blocked PHYSICAL hit is cut by a flat `armour / 10` (owner ruling, provisional); the cut can
   // never take more than the physical half, so an Element-heavy swing is not thinned by a shield
-  if (blockedBy) damage = Math.max(0, damage - Math.min(c.armour / E.caps.block_divisor, physFinal));
+  if (blockedBy) physFinal = Math.max(0, physFinal - Math.min(c.armour / E.caps.block_divisor, physFinal));
+  const marked = statuses.mark && statuses.mark.secLeft > 0 ? statuses.mark : null;
+  const markMult = marked ? 1 + marked.stacks * E.status.mark.k_dmg : 1;
+  let damage = (physFinal + elementalFinal) * markMult;
 
   // Energy Absorb converts a share of the hit into Energy Shield and negates that share outright,
   // whether or not the shield has room — a press on a full shield is still a real defence 
-  const absorbed = absorbPct > 0 ? damage * (Math.min(100, Math.max(0, absorbPct)) / 100) : 0;
-  damage -= absorbed;
-
-  let toEs = 0;
-  if (mob.innate.includes('chaos')) {
-    // chaos bypasses Energy Shield and hits HP directly 
-  } else {
-    // the pool that is *left* absorbs, not the pool the sheet says the build has: reading the maximum
-    // lets one swing spend a shield that is half recharged twice over, and the number goes negative
-    const pool = Math.max(0, Math.min(liveEs, c.es));
-    toEs = Math.min(damage, pool);
-    damage -= toEs;
-  }
-  return { blocked: blockedBy, toHp: damage, toEs, absorbed, raw: rawHit };
+  const absorbRatio = Math.min(100, Math.max(0, absorbPct)) / 100;
+  const absorbed = damage * absorbRatio;
+  const remaining = damage - absorbed;
+  // The data owns whether Chaos is an exception. Today all direct hits, including Chaos, meet ES.
+  const chaosBypass = E.energy_shield.chaos_bypasses && mob.innate.includes('chaos')
+    ? elementalFinal * markMult * (1 - absorbRatio) : 0;
+  const esEligible = Math.max(0, remaining - chaosBypass);
+  // Energy Absorb fills the live shield before the rest of this hit reaches it. Using the old pool
+  // would send damage to HP, then leave the absorbed ES standing after the same hit.
+  const pool = Math.max(0, Math.min(liveEs + absorbed, c.es));
+  const toEs = Math.min(esEligible, pool);
+  const toHp = remaining - toEs;
+  const leechPct = marked ? marked.stacks * E.status.mark.k_leech * 100 : 0;
+  return {
+    blocked: blockedBy, toHp, toEs, absorbed, raw: rawHit,
+    leech: (toHp + toEs) * leechPct / 100,
+    blockChargeSpent: rawHit > 0 && physShare > 0 && blockCharge,
+  };
 }
 
 /**
@@ -223,35 +262,45 @@ export function rollStatus(
   const s = statuses[name] || (statuses[name] = { stacks: 0, secLeft: 0, perSec: 0 });
   const cfg = (E.status as any)[name];
   if (name === 'burn') {
-    s.stacks = Math.min(cfg.stack_max, s.stacks + 1);
-    s.perSec = elemHalf * cfg.k_dps;
+    addStack(s, cfg.stack_max, elemHalf * cfg.k_dps);
     s.secLeft = cfg.time_sec;
   } else if (name === 'poison') {
-    s.stacks = Math.min(cfg.stack_max, s.stacks + 1);
-    s.perSec = elemHalf * cfg.k_dps;
-    s.secLeft = 999;
+    const wasClear = s.stacks <= 0;
+    addStack(s, cfg.stack_max, elemHalf * cfg.k_dps);
+    // Poison loses one stack on its own clock. A new proc adds a stack, but never restarts that clock.
+    if (wasClear) s.secLeft = cfg.decay_sec;
   } else if (name === 'mark') {
+    const wasClear = s.stacks <= 0;
     s.stacks = Math.min(cfg.stack_max, s.stacks + 1);
     s.perSec = 0;
-    s.secLeft = cfg.decay_sec;
+    if (wasClear) s.secLeft = cfg.decay_sec;
   } else {
     s.stacks = 1;
     // chill counts down the status's own clock; shock is a STOP, and its length is the config's own
     // `stop_sec` (the mob side pays its stop out of the same field) — one home, no typed second
-    s.secLeft = name === 'chill' || name === 'crippled' ? cfg.time_sec
-      : name === 'shock' ? cfg.stop_sec * (1 - Math.min(100, Math.max(0, stunRecovery)) / 100)
-        : 1;
+    if (name === 'chill' || name === 'crippled') s.secLeft = cfg.time_sec;
+    else if (name === 'shock') {
+      s.secLeft = cfg.stop_sec * (1 - Math.min(100, Math.max(0, stunRecovery)) / 100);
+      if (s.secLeft <= 0) { delete statuses.shock; return null; }
+    } else s.secLeft = 1;
     s.perSec = 0;
   }
   return name;
 }
 
-/** Per-second damage over time, capped by the burn + poison dot_cap (elements.md §6). */
-export function dotDamage(c: Character, statuses: Statuses): number {
-  const burn = statuses.burn, poison = statuses.poison;
-  let total = 0;
-  if (burn && burn.secLeft > 0) total += burn.stacks * burn.perSec;
-  if (poison && poison.secLeft > 0) total += poison.stacks * poison.perSec;
+/** Burn and poison share the Element DoT budget; bleed is physical and sits outside it. */
+export function dotDamageParts(c: Character, statuses: Statuses): { burn: number; poison: number; bleed: number; total: number } {
+  const rawBurn = statuses.burn && statuses.burn.secLeft > 0 ? statusDamagePerSec(statuses.burn) : 0;
+  const rawPoison = statuses.poison && statuses.poison.secLeft > 0 ? statusDamagePerSec(statuses.poison) : 0;
+  const bleed = statuses.bleed && statuses.bleed.secLeft > 0 ? statusDamagePerSec(statuses.bleed) : 0;
+  const elemental = rawBurn + rawPoison;
   const cap = E.status.dot_cap * (c.elem * (c.alignment / 100) || 0);
-  return E.status.dot_cap && c.elem > 0 ? Math.min(total, cap) : total;
+  const scale = E.status.dot_cap && c.elem > 0 && elemental > cap ? cap / elemental : 1;
+  const burn = rawBurn * scale;
+  const poison = rawPoison * scale;
+  return { burn, poison, bleed, total: burn + poison + bleed };
+}
+
+export function dotDamage(c: Character, statuses: Statuses): number {
+  return dotDamageParts(c, statuses).total;
 }

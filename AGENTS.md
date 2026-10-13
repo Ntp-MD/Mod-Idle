@@ -70,20 +70,23 @@ Run from `<repo root | game/ | tools/>`.
 
 Source of truth: `game/src/styles/variables.css`. Read it before writing or editing any CSS.
 
-- Use tokens only. Do not hardcode sizes in components.
+- Use semantic size tokens for shared dimensions. A component-specific size may use its own bounded `clamp()`.
   - Font size: `--font-xs` · `--font-sm` · `--font-md` · `--font-lg` · `--font-xl`
   - Icon, image: `--icon-xs` · `--icon-sm` · `--icon-md` · `--icon-lg` · `--icon-xl`
-  - Padding, margin, gap: `--spacing-xs` · `--spacing-sm` · `--spacing-md` · `--spacing-lg` · `--spacing-xl`
-- Values under 5px may be hardcoded (1px to 4px), e.g. `box-shadow`, blur, spread, border, outline.
-- Scalable sizes use `clamp(min px, vw, max px)`. Integers only, never decimals.
+  - Padding, margin, gap: `--spacing-3xs` · `--spacing-2xs` · `--spacing-xs` · `--spacing-sm` · `--spacing-md` · `--spacing-lg` · `--spacing-xl` — the ladder runs from 2px to 42px at about ×1.62 a step
+  - `--seam` is a 1px hairline that sits against a 1px border. It is not a spacing step and never scales: if the gap is between two lines or two controls, it is `--spacing-3xs`, not a seam.
+- A shadow, a blur, a border, an outline and a letter-spacing may keep a hardcoded figure under 5px. A `gap`, `padding` or `margin` may not — those are on the ladder, and a frozen 3px next to a panel that grew 35% is a different gap than the one that was designed.
+- Responsive sizes use bounded width values in their own token or component rule: `clamp(<floor>px, <preferred vw>, <ceiling>px)`. Calibrate the preferred value against the 2066px design width.
+- Keep floor and ceiling values as whole pixels. Viewport slopes may use two decimal places. Do not introduce a global multiplier such as `--ui-scale`; Grid Area owns position, and semantic size tokens own dimensions.
 - No token fits exactly: use the nearest existing token. Do not add a new token for a one-off value.
-- HUD exception: unique sizes are allowed for the wheel menu and the circle around it. Keep them in the HUD section of `variables.css`, and do not reuse them outside the HUD.
-- Ask first: adding a new token to a scale, or changing the clamp values of an existing token.
-- Done when: no hardcoded size of 5px or more outside `variables.css`, and no decimal inside any `clamp()`.
+- HUD-only dimensions such as `--icon-hub` and `--slot-skill-size` belong in `variables.css` and must not be reused outside the HUD.
+- Ask first: adding a shared size token or changing an existing token's design figure.
+- Done when: no `--ui-scale` remains, no unbounded viewport-size ramp is used, and no raw fixed size of 5px or more appears in component CSS.
 
 ## Boundaries
 
 - Always: edit `tools/data/`, `engine/`, `game/src/`, `game/tests/`.
+- Always: keep the HUD Layout Studio and the live HUD linked through one `HudLayout`. Every movable live HUD region must have a `HudRegionId`, appear in `HUD_REGION_META` and `DEFAULT_HUD_LAYOUT`, be positionable in the Studio, and use the same `hudLayout` values in `App.svelte`. Do not place a movable live HUD region with CSS-only coordinates outside that layout. When adding a region, fill it from its default when loading older saved layouts so existing custom positions survive; verify that applying it in the Studio moves the live region.
 - Ask first: add a dependency, rename a data file or key, change the save format in `game/src/state/save.ts`, edit `DECISIONS.md` rules.
 - Never: fold passive-tree power into `mob_HP` (owner ruling), read `map.json` from `engine/` or `game/src/`, create `skill.md` / `skills.md` / `SKILL.md` for game content.
 
