@@ -159,6 +159,26 @@ describe('equipping from the bag', () => {
     expect(s.gear[6]!.lines[0].value).toBe(10); // the strong ring stayed where it was
     expect(s.gear[7]!.lines[0].value).toBe(5);
   });
+
+  it('refuses a swap onto a full pile instead of deleting its last piece', () => {
+    // the pile never deletes: a full bag refuses the equip the same way a take-off refuses,
+    // otherwise wearing a piece while the pile is full would silently drop its last kept piece
+    const s = newGame(78);
+    const ring = (v: number): Item =>
+      ({ slot: 'ring', base: 'Band', ilvl: 20, quality: 'mid', tier: 'T1', q: 1, lines: [{ id: 'all_stat_flat', value: v, slice: 1 }] } as Item);
+    s.bag = [];
+    const cap = E.inventory.adventure_slots as number;
+    for (let i = 0; i < cap - 1; i++) s.bag.push(ring(1)); // distinct keeps the deletion observable
+    const upgrade = ring(50);
+    s.bag.unshift(upgrade); // the pile is now exactly full, and the last piece is one to keep
+    expect(s.bag.length).toBe(cap);
+    const lastBefore = s.bag[cap - 1]!;
+    const r = equipFromBag(s, 0);
+    expect(r.ok).toBe(false);
+    expect(r.why).toBeTruthy();
+    expect(s.bag.length).toBe(cap);
+    expect(s.bag[cap - 1]).toBe(lastBefore);
+  });
 });
 
 describe('putting on the best gear the character carries', () => {
@@ -171,7 +191,34 @@ describe('putting on the best gear the character carries', () => {
     const sheet = () => buildCharacter(s.player.level, s.gear, carried(s), 0, undefined, s.player.points, s.player.treeRanks);
     const before = sheet();
     s.bag = [piece('ring', 999)];
-    expect(sheet()).toEqual(before);
+    expect(sheet().core).toEqual(before.core);
+  });
+
+  it('counts the hunt pile against weight capacity, though never toward stats', () => {
+    // the bag rides on the back, the rule DECISIONS.md states as "weight counted" and the wiki
+    // prints as "counted against your weight capacity": its pieces weigh what their Base says, so
+    // a full pile of heavy frames slows the swing — while the piece still contributes no stat
+    const s = newGame(79);
+    const sheet = () => buildCharacter(s.player.level, s.gear, carried(s), 0, undefined, s.player.points, s.player.treeRanks);
+    const before = sheet();
+    const heavy = { ...piece('chest', 1), weight: 40 };
+    const over = Math.ceil((before.weightCap - before.weightUsed) / 40) + 1; // one piece past the line
+    s.bag = Array.from({ length: over }, () => ({ ...heavy }));
+    const after = sheet();
+    expect(after.weightUsed).toBeCloseTo(before.weightUsed + over * 40, 8);
+    expect(after.encumbrance).toBeGreaterThan(0); // the tax bites past the capacity, as the wiki prints
+    expect(after.core).toEqual(before.core); // carried weight is not a stat line
+  });
+
+  it('says the pile is full when a swap is refused, instead of claiming nothing better is carried', () => {
+    const s = newGame(79);
+    const upgrade = piece('chest', 999);
+    const cap = E.inventory.adventure_slots as number;
+    while (s.bag.length < cap) s.bag.push(piece('ring', 1)); // no room for a displaced piece
+    s.bag.unshift(upgrade);
+    autoEquip(s, 0);
+    expect(s.log[0]!.text).toContain('hunt pile is full');
+    expect(s.log[0]!.text).not.toContain('already the best');
   });
 
   it('wears a real low-band drop that beats the opening piece', () => {

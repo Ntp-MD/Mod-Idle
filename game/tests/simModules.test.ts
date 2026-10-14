@@ -69,6 +69,9 @@ describe('the six loadout presets', () => {
   it('round-trips a loadout across sets, and leaves cooldowns and XP alone', () => {
     const s = newGame();
     const xpBefore = { ...s.skills.xp };
+    // the loadout only carries owned rows, so the fixture grants them the way a drop would
+    s.skills.owned['attack.cleave'] = 0;
+    s.skills.owned['buff.iron_will'] = 0;
     // switching SAVES the set being left and loads the one being entered, so the trip is out and back
     s.skills.list = s.skills.list.map((_, i) => (i === 0 ? 'attack.cleave' : null));
     s.skills.buffs = { 'buff.iron_will': true };

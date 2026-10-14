@@ -253,7 +253,8 @@ export function modsOn(store: MobStatusStore, mobId: string): MobStatusMods {
   if (cr && cr.secLeft > 0) out.clockPct = Math.min(S.crippled.clock_cap, S.crippled.clock_pct);
   const shock = m.statuses.shock;
   if (shock && shock.secLeft > 0) {
-    out.aspdPct = Math.max(out.aspdPct, -S.shock.aspd_cap) + (chill ? 0 : 0);
+    // the stronger cut wins: shock's own aspd_cap is the floor the merge takes, chill or not
+    out.aspdPct = Math.min(out.aspdPct, -S.shock.aspd_cap);
     out.stopped = true;
   }
   const mk = m.statuses.mark;
@@ -300,11 +301,13 @@ export function stepMobParts(store: MobStatusStore, mobId: string): DotTick {
       if (l.stacks <= 0) delete m.statuses.mark;
       continue;
     }
-    l.secLeft--;
-    if (l.secLeft <= 0) { delete m.statuses[name]; continue; }
+    // the tick is paid before its clock runs: a status applied for `time_sec` pays `time_sec`
+    // ticks, the "once a second" rule and the player-side mirror, which reads the DoT before aging
     if (name === 'burn') burnDot += l.stacks * l.perSec;
     if (name === 'erosion') erosionDot += l.stacks * l.perSec;
     if (name === 'bleed') bleedDot += l.perSec;
+    l.secLeft--;
+    if (l.secLeft <= 0) { delete m.statuses[name]; continue; }
   }
   // `elements.md` §6: the budget is burn + poison + the earth line a row leaves (owner ticket), and
   // bleed sits outside it on purpose — it is physical, it does not stack, and its own budget is 0.70 of

@@ -60,6 +60,9 @@ export function equipFromBag(s: GameState, bagIndex: number, quiet = false): { o
   const at = cellFor(gear, item);
   if (at < 0) return { ok: false, why: 'no empty slot left to wear it in' };
   const prev = gear[at];
+  // the pile never deletes: a swap needs a free cell in it, the same way a take-off does
+  if (prev && s.bag.length >= E.inventory.adventure_slots)
+    return { ok: false, why: 'the hunt pile is full' };
   // a Stat Mod line already carries its own Core stat, baked at drop, so wearing changes
   // nothing about it — the piece is worn exactly as it was rolled
   gear[at] = { ...item };
@@ -67,7 +70,6 @@ export function equipFromBag(s: GameState, bagIndex: number, quiet = false): { o
   delete gear[at]!.heldFor;
   s.bag.splice(bagIndex, 1);
   if (prev) s.bag.unshift(prev);
-  if (s.bag.length > E.inventory.adventure_slots) s.bag.length = E.inventory.adventure_slots;
   s.gear = gear;
   refreshFilter(s); // the "not yet found" keep-list is read from what is actually worn
   if (!quiet) push(s, `Equipped ${itemName(item)} in ${item.slot}${prev ? `, ${itemName(prev)} to the bag` : ''}`);
@@ -135,6 +137,7 @@ export interface EquipResult {
  */
 export function autoEquip(s: GameState, marginPct = 0): EquipResult {
   const swaps: EquipSwap[] = [];
+  let refused: string | null = null;
   // one swap per cell the body owns is the most any press can do, so the pass count is bounded by the body
   for (let pass = 0; pass < s.gear.length; pass++) {
     // the whole pile read against the body it has now, then the single best swap taken. The pile is
@@ -150,7 +153,8 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
       .filter((p) => p.cell >= 0 && p.gains > marginPct)
       .sort((a, b) => b.gains - a.gains)[0];
     if (!best) break;
-    if (!equipFromBag(s, best.bagIndex, true).ok) break;
+    const wore = equipFromBag(s, best.bagIndex, true);
+    if (!wore.ok) { refused = wore.why ?? 'refused'; break; }
     swaps.push({ slot: best.item.slot, base: itemName(best.item), instead: best.worn ? itemName(best.worn) : null, gains: best.gains });
   }
   const spared = s.bag.reduce(
@@ -175,6 +179,11 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
   const where = (w: EquipSwap) => w.gains === Infinity ? `${w.slot} into a free cell` : `${w.slot} +${w.gains.toFixed(0)}%`;
   if (swaps.length) {
     push(s, `Best gear on — ${swaps.length} piece${swaps.length === 1 ? '' : 's'} went up: ${swaps.map(where).join(', ')}`);
+  } else if (refused) {
+    // a refusal is its own answer: the pile heard "nothing better is carried" and that would be a lie
+    push(s, `Nothing went on — ${refused === 'the hunt pile is full'
+      ? 'the hunt pile is full, so a swap has nowhere to put the piece it takes off'
+      : refused}`);
   } else {
     const held = spared.locked + spared.set + spared.broken;
     push(s, `Nothing to change — what you wear is already the best you carry`

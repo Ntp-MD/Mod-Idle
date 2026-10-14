@@ -52,11 +52,20 @@ export function switchPreset(state: GameState, index: number): boolean {
   if (!p) return false;
   state.presets[state.activePreset] && storePreset(state);
   state.activePreset = index;
-  state.skills.list = [...p.list];
-  state.skills.buffs = { ...p.buffs };
-  state.skills.auras = { ...p.auras };
+  const real = (id: string | null): id is string =>
+    Boolean(id) && Boolean(sm.byId[id as string]) && Object.hasOwn(state.skills.owned, id as string);
+  // a preset written by an older or hand-edited save can name a skill that is unknown or no longer
+  // owned: the live loadout only ever carries rows the collection knows and owns
+  state.skills.list = p.list.map((id: string | null) => (real(id) ? id : null));
+  state.skills.buffs = {};
+  state.skills.auras = {};
+  for (const [id, on] of Object.entries(p.buffs)) if (on && real(id)) state.skills.buffs[id] = true;
+  for (const [id, on] of Object.entries(p.auras)) if (on && real(id)) state.skills.auras[id] = true;
   state.skills.mode = { ...(p.mode || {}) };
   state.skills.conditions = { ...(p.conditions || {}) };
+  // a buff that was up under the old set dies with it: its toggle is off in this one, so its clock
+  // cannot keep folding effects the player can no longer see or cancel
+  for (const id of Object.keys(state.skills.buffUp)) if (!state.skills.buffs[id]) state.skills.buffUp[id] = 0;
   return true;
 }
 

@@ -10,7 +10,7 @@ import { newGoal } from '../sim/goal';
 import { newCurses } from '../sim/curse';
 import { newMobStatusStore } from '../sim/mobStatus';
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
-import { E, BASES, eng, loot, STAT_KEYS, type StatKey } from '../engine/client';
+import { E, BASES, eng, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
 import { road } from '../sim/road';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
@@ -476,6 +476,10 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   s.skills.auras ||= {};
   s.skills.buffUp ||= {};
   clearUnownedTracks(s.skills);
+  // a skill the collection no longer knows is not an owned copy and not a rotation slot; the raw
+  // list stays readable until the §14 copy below has read it, and is sanitised right after
+  for (const key of Object.keys(s.skills.owned)) if (!sm.byId[key]) delete s.skills.owned[key];
+  for (const key of Object.keys(s.skills.xp || {})) if (!sm.byId[key]) delete s.skills.xp[key];
   s.skills.list = Array.from({ length: ACTIVE_SLOTS }, (_, i) => s.skills.list?.[i] ?? null);
   // a save from before §14 has no per-slot mode and no condition lists: default them, so the
   // rotation keeps behaving exactly as it did (`always`) until the player changes something
@@ -500,6 +504,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     s.skills.conditions = perSlot;
   }
   for (const cond of Object.values(s.skills.conditions)) if (!Array.isArray(cond.statusMissing)) cond.statusMissing = [];
+  // the rotation reads every id raw (`castOnce`), so a dead id here would throw on the first
+  // hunting tick, and an unowned one would cast without ownership — dropped, not kept
+  s.skills.list = s.skills.list.map((id) => (id && sm.byId[id] && Object.hasOwn(s.skills.owned, id) ? id : null));
   if (!s.healUp) s.healUp = null;
   if (!s.spawnIn && s.spawnIn !== 0) s.spawnIn = 0;
   if (!s.counters.zoneKills) s.counters.zoneKills = {};
@@ -542,7 +549,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     for (const [id, count] of Object.entries(fw.meals || {})) foods[id] = (foods[id] || 0) + Number(count || 0);
     foods.raw_game_meat = (foods.raw_game_meat || 0) + Number(fw.materials?.meat || 0);
     fw.foods = foods;
-    fw.hunger = Math.max(0, Math.min(E.fieldwork.hunger.max, Number(fw.hunger ?? E.fieldwork.hunger.max)));
+    const hunger = Number(fw.hunger);
+    fw.hunger = Math.max(0, Math.min(E.fieldwork.hunger.max, Number.isFinite(hunger) ? hunger : E.fieldwork.hunger.max));
     fw.autoEat ||= defaults.autoEat;
     delete fw.meals;
     if (fw.materials) delete fw.materials.meat;
@@ -563,7 +571,21 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (s.lastSavedAt == null) s.lastSavedAt = Date.now();
   if (!s.presets) s.presets = newPresets();
   for (const preset of s.presets) {
-    preset.list = Array.from({ length: ACTIVE_SLOTS }, (_, i) => preset.list?.[i] ?? null);
+    // a preset row the collection does not know dies here, the same read the live switch does
+    preset.list = Array.from({ length: ACTIVE_SLOTS }, (_, i) => {
+      const id = preset.list?.[i] ?? null;
+      return id && sm.byId[id] ? id : null;
+    });
+  }
+  // the aura set a save carries must obey the same reservation limit a toggle does: turn the
+  // later auras off until the held share fits again (deterministic in insertion order)
+  {
+    let held = 0;
+    for (const [id, on] of Object.entries(s.skills.auras)) {
+      if (!on || !sm.byId[id]) { delete s.skills.auras[id]; continue; }
+      held += sm.reservePct(sm.byId[id].reserve ?? '');
+      if (held >= sm.RESERVATION_LIMIT) s.skills.auras[id] = false;
+    }
   }
   if (s.activePreset == null) s.activePreset = 0;
   if (!s.collector) s.collector = newCollector();
@@ -576,6 +598,40 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.mobStatus) s.mobStatus = newMobStatusStore();
   if (s.pendingSnapshot === undefined) s.pendingSnapshot = null;
   if (!s.nextSnapshotAt && s.nextSnapshotAt !== 0) s.nextSnapshotAt = 0;
+  // An imported or hand-edited file must not be an impossible state: the numbers below are clamped
+  // to what the live rules can produce, and every id the collection no longer knows is dropped.
+  // Nothing here is a schema change — the shape stays, the values come back inside their bounds.
+  {
+    const finite = (v: unknown, fallback: number): number => {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : fallback;
+    };
+    if (s.player) {
+      const lv = Math.max(1, Math.min(E.stat.level_cap as number, Math.floor(finite(s.player.level, 1))));
+      s.player.level = lv;
+      s.player.xp = Math.max(0, finite(s.player.xp, 0));
+      s.player.hp = Math.max(0, finite(s.player.hp, 1));
+      s.player.mana = Math.max(0, finite(s.player.mana, 0));
+      s.player.es = Math.max(0, finite(s.player.es, 0));
+      // points in hand cannot exceed what the level curve has paid out in total
+      s.player.statPoints = Math.max(0, Math.min(eng.pointsAt(lv), Math.floor(finite(s.player.statPoints, 0))));
+      s.player.treePoints = Math.max(0, Math.min(eng.treePointsAt(lv), Math.floor(finite(s.player.treePoints, 0))));
+      const spent = Object.values(s.player.points || {}).reduce((a: number, b: any) => a + Math.max(0, finite(b, 0)), 0);
+      if (spent > eng.pointsAt(lv)) s.player.points = Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Record<StatKey, number>;
+      // a rank on a node the tree no longer carries is not an allocation
+      const ranks = s.player.treeRanks || (s.player.treeRanks = {});
+      for (const id of Object.keys(ranks)) if (!tree.byId[id]) delete ranks[id];
+    }
+    if (!eng.ZONES.some((z: any) => z.id === s.zone)) s.zone = eng.ZONES[0].id;
+    if (s.dungeon && !eng.ZONES.some((z: any) => z.id === s.dungeon!.zone)) s.dungeon = null;
+    // a Hunger that is not a number would read as 0 forever (the empty cut, Auto Eat re-firing)
+    if (s.fieldwork) {
+      const h = Number(s.fieldwork.hunger);
+      s.fieldwork.hunger = Number.isFinite(h)
+        ? Math.max(0, Math.min(E.fieldwork.hunger.max, h))
+        : E.fieldwork.hunger.max;
+    }
+  }
   refreshFilter(s);
   return s;
 }

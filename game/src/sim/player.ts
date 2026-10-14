@@ -185,15 +185,18 @@ export interface Carried {
   herbs?: number;
   materials?: number;
   food?: number;
+  /** The hunt pile's own piece weights: a kept piece rides against the capacity until worn or stashed. */
+  bagWeight?: number;
 }
 
-/** Everything carried that weighs: the worn pieces plus consumables (formula-utility.md §11). */
+/** Everything carried that weighs: the worn pieces, the hunt pile, and consumables (formula-utility.md §11). */
 export function weightOfCarry(gear: (Item | null)[], carried: Carried = {}, heldMasteryLevel = 0): number {
   // Mastery lightens the held weapon only, up to -20% of its own weight
   const worn = gear.reduce((t, g) => t + (g?.slot === 'main hand'
     ? mastery.weaponWeight(g?.weight || 0, heldMasteryLevel)
     : (g?.weight || 0)), 0);
   return worn
+    + (carried.bagWeight || 0)
     + (carried.potions || 0) * E.potions.weight
     + (carried.condensed || 0) * E.potions.condensed.weight
     + (carried.herbs || 0) * E.inventory.unit_weight.herb

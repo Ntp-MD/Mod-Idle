@@ -9,6 +9,9 @@ export interface StatusLine {
   stacks: number;
   secLeft: number;
   perSec: number;
+  /** The dealer's aligned Elemental DPS at apply time, the mirror of the mob record's `alignedPerSec`:
+   *  the DoT budget is priced off the dealer, never off the character taking the damage. */
+  alignedSec?: number;
   /** Per-stack snapshots for DoTs applied by multiple mobs with different damage. */
   stackPerSec?: number[];
 }
@@ -206,13 +209,16 @@ export function mobSwing(
   const res = Math.min(c.resCap, c.resistance + ((hitting && c.resByElement) ? (c.resByElement[hitting] || 0) : 0));
   const elemental = rawHit * elemShare * (1 - res / 100);
   // step 7 is the damage_taken bucket: the global one from `engine.json`, times whatever the
-  // skills up right now add to it (Berserker takes more, Iron Will takes less)
+  // skills up right now add to it (Berserker takes more, Iron Will takes less). Block is a
+  // mitigation layer, so its flat cut lands BEFORE this multiplier — "damage taken" runs after
+  // every mitigation layer, the glossary's own order.
   const hardened = E.global.defend_mult * (c.damageTaken ?? 1);
-  let physFinal = physical * hardened;
-  const elementalFinal = elemental * hardened;
+  let physFinal = physical;
   // a blocked PHYSICAL hit is cut by a flat `armour / 10` (owner ruling, provisional); the cut can
   // never take more than the physical half, so an Element-heavy swing is not thinned by a shield
   if (blockedBy) physFinal = Math.max(0, physFinal - Math.min(c.armour / E.caps.block_divisor, physFinal));
+  physFinal = physFinal * hardened;
+  const elementalFinal = elemental * hardened;
   const marked = statuses.mark && statuses.mark.secLeft > 0 ? statuses.mark : null;
   const markMult = marked ? 1 + marked.stacks * E.status.mark.k_dmg : 1;
   let damage = (physFinal + elementalFinal) * markMult;
@@ -252,6 +258,8 @@ export function rollStatus(
   statusResist = 0,
   /** Vit's Stun Recovery (item 5): it buys part of a shock's stop back before the clock is set. */
   stunRecovery = 0,
+  /** The dealer's aligned Elemental DPS: the DoT budget's basis, the mirror of the mob-side record. */
+  alignedSec = 0,
 ): StatusName | null {
   const el = mob.innate[0];
   if (!el) return null;
@@ -264,11 +272,13 @@ export function rollStatus(
   if (name === 'burn') {
     addStack(s, cfg.stack_max, elemHalf * cfg.k_dps);
     s.secLeft = cfg.time_sec;
+    s.alignedSec = Math.max(s.alignedSec || 0, alignedSec);
   } else if (name === 'poison') {
     const wasClear = s.stacks <= 0;
     addStack(s, cfg.stack_max, elemHalf * cfg.k_dps);
     // Poison loses one stack on its own clock. A new proc adds a stack, but never restarts that clock.
     if (wasClear) s.secLeft = cfg.decay_sec;
+    s.alignedSec = Math.max(s.alignedSec || 0, alignedSec);
   } else if (name === 'mark') {
     const wasClear = s.stacks <= 0;
     s.stacks = Math.min(cfg.stack_max, s.stacks + 1);
@@ -288,14 +298,18 @@ export function rollStatus(
   return name;
 }
 
-/** Burn and poison share the Element DoT budget; bleed is physical and sits outside it. */
+/** Burn and poison share the Element DoT budget; bleed is physical and sits outside it.
+ *  The budget's basis is the dealer's aligned Elemental DPS (the mob-side mirror keeps the same
+ *  number on the victim's record as `alignedPerSec`), never the character taking the damage — a
+ *  respec must not move how hard the mobs' fire burns. */
 export function dotDamageParts(c: Character, statuses: Statuses): { burn: number; poison: number; bleed: number; total: number } {
   const rawBurn = statuses.burn && statuses.burn.secLeft > 0 ? statusDamagePerSec(statuses.burn) : 0;
   const rawPoison = statuses.poison && statuses.poison.secLeft > 0 ? statusDamagePerSec(statuses.poison) : 0;
   const bleed = statuses.bleed && statuses.bleed.secLeft > 0 ? statusDamagePerSec(statuses.bleed) : 0;
   const elemental = rawBurn + rawPoison;
-  const cap = E.status.dot_cap * (c.elem * (c.alignment / 100) || 0);
-  const scale = E.status.dot_cap && c.elem > 0 && elemental > cap ? cap / elemental : 1;
+  const aligned = Math.max(statuses.burn?.alignedSec || 0, statuses.poison?.alignedSec || 0);
+  const cap = E.status.dot_cap * aligned;
+  const scale = E.status.dot_cap > 0 && aligned > 0 && elemental > cap ? cap / elemental : 1;
   const burn = rawBurn * scale;
   const poison = rawPoison * scale;
   return { burn, poison, bleed, total: burn + poison + bleed };

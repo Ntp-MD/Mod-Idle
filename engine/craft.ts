@@ -682,7 +682,9 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
       });
       detail = { lines: next.lines.length };
     } else if (outcome.kind === 'add_mod') {
-      const added = add(next, pool, rng, { ignoreAddCap: true });
+      // the gamble's own outcome works on the piece as it was: the `corrupted` seal lands after,
+      // the same way the remove branch strips it — otherwise `add`'s guard refuses its own roll
+      const added = add({ ...next, corrupted: false }, pool, rng, { ignoreAddCap: true });
       if (added.ok) next = { ...added.item, corrupted: true };
       detail = { added: added.ok, why: added.why };
     } else if (outcome.kind === 'remove_mod') {
@@ -696,9 +698,11 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
         : l));
     } else if (outcome.kind === 'gear_mod_up') {
       const steps = outcome.steps || 2;
-      next.upgrade_lv = Math.min(C.upgrade_cap, (item.upgrade_lv || 0) + steps);
-      next.gearMod = (item.gearMod || 0) + stepOf(item, steps);
-      detail = { level: next.upgrade_lv };
+      const lv = Math.min(C.upgrade_cap, (item.upgrade_lv || 0) + steps);
+      next.upgrade_lv = lv;
+      // the Gear Mod only climbs with the level behind it: at the cap the piece keeps its +N
+      if (lv > (item.upgrade_lv || 0)) next.gearMod = (item.gearMod || 0) + stepOf(item, lv - (item.upgrade_lv || 0));
+      detail = { level: lv };
     } else if (outcome.kind === 'quality_down') {
       const q = Math.max(0, (item.q || 0) - 1);
       const ilvl = Math.max(1, (item.ilvl || 0) - E.item_level.ascend_levels);

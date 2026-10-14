@@ -25,7 +25,7 @@ import {
   modsOn as statusModsOn, targetMods, holdsCondition,
 } from './mobStatus';
 import {
-  newSkillState, tickSkills, castOnce, paySkillXp, grantSkill, buffNeedsRecast, skillCd, usableMana, buffRuleUp,
+  newSkillState, tickSkills, castOnce, paySkillXp, grantSkill, buffNeedsRecast, skillCd, usableMana, spendableMana, buffRuleUp,
   skillLevel, triggerAuras, type TriggerAura,
 } from './skills';
 import type { GameState, Mob, Item, FxEvent } from './types';
@@ -57,7 +57,9 @@ export function carried(s: GameState) {
   const herbs = Object.values(s.farm.herbs).reduce((a: number, b: number) => a + b, 0);
   const materials = Object.values(s.fieldwork.materials).reduce((a: number, b: number) => a + b, 0);
   const food = Object.values(s.fieldwork.foods).reduce((a: number, b: number) => a + b, 0);
-  return { potions: bottles, condensed, herbs, materials, food };
+  // the hunt pile rides on the back: its pieces weigh what their Base says, against the same capacity
+  const bagWeight = s.bag.reduce((t, g) => t + (g?.weight || 0), 0);
+  return { potions: bottles, condensed, herbs, materials, food, bagWeight };
 }
 
 /** A fresh character has spent no points: the sheet starts empty and grants on level-up. */
@@ -107,7 +109,9 @@ export function newGame(seed = 20260101): GameState {
       points: ZERO_POINTS(),
       statPoints: 0,
       autoSpend: true,
-      treePoints: 0,
+      // the level curve pays tree points from level one (`stat.tree_points_base`): a fresh
+      // character starts with them in hand, the same number setLevel banks on the same level
+      treePoints: eng.treePointsAt(level),
       treeRanks: {},
       hp: c.maxHp,
       mana: c.maxMana,
@@ -250,13 +254,21 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     body = pick(rng, species.sizes.filter((s: string) => s !== 'boss' && s !== 'large'));
   }
   const base = eng.spawnAt(zoneId, playerLevel, body, species.id);
-  const lv = Math.min(Math.max(playerLevel, z.levels[0]), z.levels[1]);
+  // the spawn's level is the species' own static level in this zone (`mob.species[].zone_levels`):
+  // a spawn never follows the attacker's level, so every line below — the Elite's HP and PS, the
+  // mob card's level, the drop's item level — reads the one level the engine priced the shape at
+  const lv = base.level;
   const size = eng.sizeById(body)!;
   // body classes no longer scale HP: every mob of a species reads the same curve at its own level,
   // so the boss takes the same spawn shape any mob of its species takes
-  const hp = kind === 'boss' ? base.hp : kind === 'elite' ? eng.mobHpAt(lv) * E.mob.elite.hp : base.hp;
+  const flat = eng.LG.hp_per_level * (lv - 1) + eng.coreOf(species, 'vit', zoneId) * eng.K.K_VIT_HP;
+  const hp = kind === 'elite'
+    ? (eng.mobHpAt(lv) + flat) * E.mob.elite.hp // the Elite multiplier rides the same curve the engine adds its flat terms to
+    : base.hp;
   const psMult = eng.speciesPsMult(zoneId, species.id);
-  const ps = kind === 'boss' ? eng.mobPsAt(lv) * size.ps * psMult : kind === 'elite' ? eng.mobPsAt(lv) * E.mob.elite.ps * psMult : base.ps;
+  // the Elite swaps the Large body's own ps factor for its multiplier; the boss keeps the spawn
+  // shape whole (the zone-mean divide included), exactly like any other body of its species
+  const ps = kind === 'elite' ? base.ps / size.ps * E.mob.elite.ps : base.ps;
   // the race owns its Element: every spawn of a species wears the same one in every zone, so no
   // spawn rolls an Element of its own and the sub-zone's list is flavour, not a roll pool
   const innate = [species.element];
@@ -426,6 +438,9 @@ export function adjudicateDrop(s: GameState, item: Item): void {
       item.heldFor = set.id;
       s.bag.unshift(item);
       push(s, `Held for the ${set.name} set · ${itemName(item)} (${item.slot})`);
+    } else {
+      // a full pile picks up nothing and deletes nothing — the hold waits like any other pickup
+      s.counters.overflow = (s.counters.overflow || 0) + 1;
     }
   } else if (belowFloor) {
     dissolve(s);
@@ -980,7 +995,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
    */
   function fireTrigger(aura: TriggerAura | null) {
     if (!aura || playerActiveFraction <= 0 || (s.skills.cd[aura.id] || 0) > 0) return;
-    const t = castOnce(s.skills, attackCharacter, s.player.mana, s.group, statuses, rng, {
+    const t = castOnce(s.skills, attackCharacter, spendableMana(attackCharacter, s.skills, s.player.mana), s.group, statuses, rng, {
       mobStatus: s.mobStatus, curses: s.curses,
       currentHp: s.player.hp,
       missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
@@ -1034,8 +1049,10 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // the other direction on the same clock, so a slowed rotation is one multiplier, never a second rule.
   const cdCut = crippled ? (E.status.crippled.cd_pct || 0) / 100 : 0;
   tickSkills(s.skills, c.globalSpeed * Math.max(0, 1 - cdCut) * playerActiveFraction);
-  // Cooldowns still count down while Auto Skills is off; only automatic casts stop.
-  if (autoSkills) {
+  // Cooldowns still count down while Auto Skills is off; only automatic casts stop. A shocked clock
+  // (playerActiveFraction 0) stops the presses the same way it stops the rotation: nothing re-presses
+  // while the character cannot act, and regen is stopped beside it.
+  if (autoSkills && playerActiveFraction > 0) {
     for (const id of Object.keys(s.skills.buffs)) {
       if (!buffNeedsRecast(s.skills, id)) continue;
       const skill = sm.byId[id];
@@ -1043,7 +1060,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
         skillLevel: skillLevel(s.skills, id), aoe: false,
       });
       if (cost.resource === 'mana') {
-        if (cost.amount > s.player.mana) continue;
+        if (cost.amount > spendableMana(c, s.skills, s.player.mana)) continue;
         s.player.mana -= cost.amount;
       } else {
         if (cost.amount >= s.player.hp) continue;
@@ -1058,7 +1075,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
         colour: hitColour((skill as any).element || null),
       });
     }
-    const cast = playerActiveFraction <= 0 ? null : castOnce(s.skills, attackCharacter, s.player.mana, s.group, statuses, rng, {
+    const cast = castOnce(s.skills, attackCharacter, spendableMana(attackCharacter, s.skills, s.player.mana), s.group, statuses, rng, {
       mobStatus: s.mobStatus, curses: s.curses,
       currentHp: s.player.hp,
       missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
@@ -1130,8 +1147,11 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       // A shield block deflects the status, including an Earth Wall charge. Evasion and perfect dodge
       // return raw=0; a hit absorbed by ES still landed and can apply its status.
       if (r.raw > 0 && r.blocked !== 'block' && r.blocked !== 'block charge') {
-        const elemHalf = (mob.ps / mob.hitsPerSec) * eng.damageSplit(mob.damage)[1];
-        const st = immune ? null : rollStatus(rng, mob, elemHalf, statuses, c.statusResist, c.stunRecovery);
+        // the mirror of `applyWeaponRiders`: the mob's aligned Elemental DPS — its full per-second
+        // Element output under its own Alignment multiplier — is both the per-second DoT basis and
+        // the budget's basis, exactly what our statuses on a mob are priced from
+        const alignedElemDps = mob.ps * eng.damageSplit(mob.damage)[1] * (((mob as any).align ?? 100) / 100);
+        const st = immune ? null : rollStatus(rng, mob, alignedElemDps, statuses, c.statusResist, c.stunRecovery, alignedElemDps);
         if (st) { statusesAppliedThisTick.add(st); push(s, `${mob.species} inflicts ${st}`); }
         if (st) fx(s, { kind: 'proc', side: 'self', text: st, colour: statusColour(st) });
       }
@@ -1159,8 +1179,11 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     // overflow to HP when the shield runs out, so a mixed DoT tick never spends ES on poison.
     const toEs = Math.min(dot.burn, s.player.es);
     s.player.es -= toEs;
-    s.player.hp -= dot.poison + dot.bleed + dot.burn - toEs;
-    if (toEs > 0 && !buffRuleUp(s.skills, 'es_recharge_immediate')) s.player.esIdleSec = 0;
+    const toHpDot = dot.poison + dot.bleed + dot.burn - toEs;
+    s.player.hp -= toHpDot;
+    // the delay answers to damage taken, not to the pool it landed on: a poison tick that reached
+    // HP interrupts the recharge the same way an equal direct hit does
+    if ((toEs > 0 || toHpDot > 0) && !buffRuleUp(s.skills, 'es_recharge_immediate')) s.player.esIdleSec = 0;
     const lead = dotLead(dot);
     fx(s, { kind: 'taken', side: 'self', via: 'dot', text: eng.fmt(dot.total), value: dot.total, colour: statusColour(lead) });
   }
@@ -1210,6 +1233,9 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     s.phase = 'camp';
     s.campSec = Math.max(1, Math.ceil(c.maxHp / (c.hpRegen * 8)));
     s.counters.pushes++;
+    // the rest is a clean one: whatever the fight had on the character ends at the Push — the
+    // statuses are the fight's, and the camp neither ticks nor banks them
+    for (const key of Object.keys(statuses) as (keyof Statuses)[]) delete statuses[key];
     // a Push in a dungeon ends the run at once and the escrow is forfeited, never paid
     if (s.dungeon) push(s, abandonRun(s, 'Pushed'));
     s.group = [];
@@ -1305,17 +1331,26 @@ function pauseBossClock(s: GameState, secs: number): void {
   if (s.bossDueAt !== undefined) s.bossDueAt += secs;
 }
 
-/** The dungeon cooldown is an online gate like the boss clock: away time must not accrue toward it. */
-function pauseDungeonClock(s: GameState, secs: number): void {
-  if (s.dungeonClearedAt !== undefined) s.dungeonClearedAt += secs;
+/** The dungeon cooldown is an online gate like the boss clock: away time must not accrue toward it.
+ *  A run that cleared mid-window stamped its cooldown at a virtual mid-away second, so shifting the
+ *  whole window would over-charge it; that stamp is re-set to the return second instead, and the
+ *  full `cooldown_sec` stands when the player is back. */
+function settleDungeonClock(s: GameState, startClock: number, secs: number): void {
+  if (s.dungeonClearedAt === undefined) return;
+  if (s.dungeon === null && s.dungeonClearedAt > startClock && s.dungeonClearedAt <= startClock + secs) {
+    s.dungeonClearedAt = startClock + secs;
+  } else {
+    s.dungeonClearedAt += secs;
+  }
 }
 
 /** Synchronous catch-up — tests and any non-UI caller. */
 export function catchUp(s: GameState, statuses: Statuses, elapsedSec: number, opts: { autoSkills?: boolean } = {}) {
   const { secs, capped } = catchUpPlan(elapsedSec);
+  const startClock = s.clockSec;
   runTicks(s, statuses, 0, secs, opts.autoSkills !== false);
   pauseBossClock(s, secs);
-  pauseDungeonClock(s, secs);
+  settleDungeonClock(s, startClock, secs);
   return { simulated: secs, capped };
 }
 
@@ -1325,6 +1360,7 @@ export function catchUp(s: GameState, statuses: Statuses, elapsedSec: number, op
  */
 export async function catchUpAsync(s: GameState, statuses: Statuses, elapsedSec: number, opts: { autoSkills?: boolean } = {}) {
   const { secs, capped } = catchUpPlan(elapsedSec);
+  const startClock = s.clockSec;
   const SLICE = 2000;
   for (let i = 0; i < secs; i += SLICE) {
     const end = Math.min(i + SLICE, secs);
@@ -1332,7 +1368,7 @@ export async function catchUpAsync(s: GameState, statuses: Statuses, elapsedSec:
     if (end < secs) await new Promise((r) => setTimeout(r, 0));
   }
   pauseBossClock(s, secs);
-  pauseDungeonClock(s, secs);
+  settleDungeonClock(s, startClock, secs);
   return { simulated: secs, capped };
 }
 

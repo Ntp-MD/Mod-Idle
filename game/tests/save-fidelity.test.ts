@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { E, eng } from '../src/engine/client';
+import { E, eng, sm } from '../src/engine/client';
 import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/game';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { craft } from '../src/sim/craft';
@@ -295,5 +295,46 @@ describe('the save schema and the account', () => {
     // and an account with a higher line still lifts the slot
     applyAccount({ ...newAccount(), mastery: { dagger: 1200 } }, s);
     expect(s.mastery['dagger']).toBe(1200);
+  });
+});
+
+describe('an imported file cannot be an impossible state', () => {
+  it('clamps the numbers a hand-edited file breaks and drops ids the collection does not know', () => {
+    const s: any = JSON.parse(JSON.stringify(newGame(61)));
+    s.zone = 999; // the live tick reads eng.zoneById(s.zone) — this used to throw every tick
+    if (s.dungeon) s.dungeon.zone = 999;
+    s.player.hp = 'abc';
+    s.player.statPoints = 99999;
+    s.player.treePoints = 99999;
+    s.player.treeRanks['wing.nope'] = 3;
+    s.fieldwork.hunger = 'abc';
+    s.skills.list[0] = 'attack.nope';
+    s.skills.owned['attack.nope'] = 0;
+    s.skills.xp['attack.nope'] = 5;
+    s.presets[1].list[0] = 'attack.nope';
+    const m = migrate(s);
+    expect(m.zone).toBe(eng.ZONES[0].id);
+    expect(Number.isFinite(m.player.hp)).toBe(true);
+    expect(m.player.statPoints).toBeLessThanOrEqual(eng.pointsAt(m.player.level));
+    expect(m.player.treePoints).toBeLessThanOrEqual(eng.treePointsAt(m.player.level));
+    expect(m.player.treeRanks!['wing.nope']).toBeUndefined();
+    expect(Number.isFinite(m.fieldwork.hunger)).toBe(true);
+    expect(m.skills.list).not.toContain('attack.nope');
+    expect(m.skills.owned['attack.nope']).toBeUndefined();
+    expect(m.skills.xp['attack.nope']).toBeUndefined();
+    expect(m.presets[1].list).not.toContain('attack.nope');
+    // and the restored state still runs a live hunting tick
+    huntZone(m, m.zone);
+    expect(() => tick(m, {}, { online: true })).not.toThrow();
+  });
+
+  it('turns auras off until the set obeys the reservation limit again', () => {
+    const s: any = JSON.parse(JSON.stringify(newGame(62)));
+    const ids = (sm.all() as any[]).filter((k) => k.type === 'aura' && k.reserve).map((k) => k.id);
+    for (const id of ids) { s.skills.owned[id] = 0; s.skills.auras[id] = true; }
+    const m = migrate(s);
+    const held = Object.entries(m.skills.auras).filter(([, on]) => on)
+      .reduce((t, [id]) => t + sm.reservePct((sm.byId as any)[id]?.reserve ?? ''), 0);
+    expect(held).toBeLessThan(sm.RESERVATION_LIMIT);
   });
 });

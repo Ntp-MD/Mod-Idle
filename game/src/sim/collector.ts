@@ -55,11 +55,16 @@ export function turnIn(state: GameState, settlementId: string): { ok: boolean; w
   if (!set) return { ok: false, why: 'no Collector set here' };
   if (!setUnlocked(state, set)) return { ok: false, why: 'Tier II standing in this settlement opens the set slots' };
   if (state.collector.done[set.id]) return { ok: false, why: 'this set is already turned in' };
-  const held = heldFor(state, set.id);
+  // nothing the player pinned moves (`gear.ts`'s own rule, the same one salvage and the bulk verbs
+  // keep): a locked held piece is invisible to the turn-in, so the set reports what is missing
+  const held = heldFor(state, set.id).filter((h) => !h.item.locked);
   const used: typeof held = [];
   for (const p of set.parsed) {
     const found = held.find((h) => h.item.base === p.name && !used.includes(h));
-    if (!found) return { ok: false, why: `missing ${p.name}` };
+    if (!found) {
+      const pinned = heldFor(state, set.id).find((h) => h.item.base === p.name && h.item.locked);
+      return { ok: false, why: pinned ? `missing ${p.name} — the piece you hold is locked` : `missing ${p.name}` };
+    }
     used.push(found);
   }
   // remove by descending index so earlier removals cannot shift the ones still to come

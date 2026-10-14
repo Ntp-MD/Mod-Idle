@@ -397,7 +397,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let invSort = $state<SortKey>('slot');
   let tempSort = $state<SortKey>('level');
 
-  const wornOf = (slot: string) => gameState.gear.find((g) => g && g.slot === slot) || null;
+  /** The piece a candidate is read against: where the body carries a pair, the weaker of the two —
+   *  the same piece the bag filter compares and Auto Equip replaces, so every "better than worn"
+   *  badge, item card and craft read answers to the one number the drop decision uses. */
+  const wornOf = (slot: string) => {
+    const worn = gameState.gear.filter((g): g is Item => Boolean(g) && g!.slot === slot);
+    if (worn.length < 2) return worn[0] || null;
+    const score = (g: Item) => loot.score({ ...g, q: g.q ?? 0 });
+    return worn.reduce((a, b) => (score(a) <= score(b) ? a : b));
+  };
   /** the pile the hunt dropped — the adventure slots, one piece each, waiting for a decision */
   const tempEntries = $derived(sortEntries(gameState.bag.map((item, i) => gearEntry(item, i)), tempSort));
 
@@ -519,7 +527,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       // monotonic clock: catch up on the time between sessions, capped by the save rule. The catch-up
       // yields between slices so a long absence cannot block first paint.
       const away = (Date.now() - (gameState.lastSavedAt || Date.now())) / 1000;
-      if (away > 5 && away < 7 * 24 * 3600) {
+      // no upper bound: the window itself is capped by the save rule (`offline_cap_hr`), so an old
+      // file still catches up on the capped window instead of being skipped for being too old
+      if (away > 5) {
         const before = snapCounters(gameState);
         const r = await catchUpAsync(gameState, statuses, away, { autoSkills: settings.autoSkills !== false });
         awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
@@ -568,7 +578,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function equip(index: number) {
     // the rule lives in `sim/gear.ts`, where the tests can reach it too; this copy only makes the
     // panel re-read the gameState the verb mutated in place
-    equipFromBag(gameState, index);
+    const r = equipFromBag(gameState, index);
+    if (!r.ok) equipNote = `Cannot put it on: ${r.why}`;
     gameState = { ...gameState };
   }
 

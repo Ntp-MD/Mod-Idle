@@ -276,6 +276,16 @@ export function usableMana(c: Character, s: SkillState): number {
   return c.maxMana * (1 - reservedPct(s) / 100);
 }
 
+/** The units the auras hold back: a share of Max Mana that stays in the bar but never leaves it. */
+export function reservedMana(c: Character, s: SkillState): number {
+  return c.maxMana * (reservedPct(s) / 100);
+}
+
+/** What the rotation may spend right now: the pool minus the slice the auras hold back. */
+export function spendableMana(c: Character, s: SkillState, currentMana: number): number {
+  return Math.max(0, currentMana - reservedMana(c, s));
+}
+
 /**
  * What a row costs this character right now: its typed flat Mana or current-HP units, grown only by
  * the row's own skill level. Pool size decides whether the press is affordable, never its price.
@@ -658,10 +668,11 @@ export function castOnce(
   return null;
 }
 
-/** Cooldowns and buff clocks tick down once per second, post-cap speed aside. */
+/** Cooldowns and buff clocks tick down once per second, post-cap speed aside — the same multiplier
+ *  moves both, so Haste shortens a buff's window and its recast cooldown together. */
 export function tickSkills(s: SkillState, globalSpeed = 1) {
   for (const id of Object.keys(s.cd)) if (s.cd[id] > 0) s.cd[id] = Math.max(0, s.cd[id] - globalSpeed);
-  for (const id of Object.keys(s.buffUp)) if (s.buffUp[id] > 0) s.buffUp[id] = Math.max(0, s.buffUp[id] - 1);
+  for (const id of Object.keys(s.buffUp)) if (s.buffUp[id] > 0) s.buffUp[id] = Math.max(0, s.buffUp[id] - globalSpeed);
 }
 
 /** A toggled buff re-presses itself the moment it lapses (`skill-pool.md` "Buff — toggle track"). */
