@@ -43,6 +43,7 @@
   import { farm, farmLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
   import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
 import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
+  import { respecStats } from './sim/respec';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, warpRow, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
   import { enterDungeon, cooldownLeft } from './sim/dungeon';
   import { masteryLabel, masteryLevel, weaponSkillBonusPct, WEAPONS } from './sim/mastery';
@@ -104,16 +105,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    */
   const PANELS = ['bag', 'skills', 'tree', 'map', 'desk', 'stash', 'farm', 'camp', 'save', 'town', 'market', 'forge', 'craft', 'keys'] as const;
   type PanelId = (typeof PANELS)[number];
-  /** All direct screen destinations, ordered for the More menu and shortcut legend. Camp is surfaced by the field controls. */
   const RAIL: PanelId[] = ['map', 'town', 'market', 'craft', 'bag', 'skills', 'tree', 'desk', 'farm', 'camp', 'save', 'keys'];
-  /** The frequent play and build destinations stay visible beside Field and Sheet. */
   const MAIN_RAIL: PanelId[] = ['map', 'bag', 'skills', 'craft'];
   const MORE_RAIL = RAIL.filter((p) => !MAIN_RAIL.includes(p) && p !== 'camp');
-  /** Viewport grid references: rows A–O top-to-bottom, columns 1–15 left-to-right. */
   const HUD_GRID_LABELS = Array.from({ length: 225 }, (_, i) => `${String.fromCharCode(65 + Math.floor(i / 15))}${(i % 15) + 1}`);
-  /** screens a settlement owns, refused in their own words when the character stands in the field */
   const TOWN_PANELS: PanelId[] = ['town', 'market', 'forge', 'craft', 'stash', 'desk'];
-  /** what each rail tab is drawn with, and the word under it */
   const RAIL_ICON: Record<PanelId, string> = {
     bag: bagMark, skills: skillMark, tree: treeMark, map: mapMark, desk: deskMark,
     stash: stashMark, farm: farmMark, camp: campMark, save: saveMark, town: townMark,
@@ -124,7 +120,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     stash: 'stash', farm: 'farm', save: 'save', town: 'town',
     market: 'market', forge: 'forge', craft: 'craft', keys: 'keys', camp: 'camp',
   };
-  /** the action each rail tab answers to, so a tab's key is the binding a player can rebind */
   const SCREEN_ACTION: Record<PanelId, string> = {
     bag: 'screen.bag', skills: 'screen.skills', tree: 'screen.tree', map: 'screen.map',
     desk: 'screen.desk', stash: 'screen.stash', farm: 'screen.farm', camp: 'screen.camp', save: 'screen.save',
@@ -140,7 +135,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    *  mid-catch-up would sim the away window twice. The interval drains its accumulator and stands down. */
   let paused = $state(false);
   let cooldownStepMs = $state(0);
-  /** The clock's own pace: how many sim seconds a real second spends. ×1 is the designed beat. */
   let speed = $state(1);
   const vitalTweenOptions = {
     get duration() { return prefersReducedMotion.current ? 0 : 650; },
@@ -155,7 +149,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // the game opens on the ground, not on the fight: the first read is where the character stands and
   // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame
   let panel = $state<PanelId | null>('map');
-  /** the More box: the whole menu in one grid under the bar, opened by its own tab */
   let more = $state(false);
   let hudGridVisible = $state(false);
   let layoutEditorOpen = $state(false);
@@ -171,11 +164,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     layoutEditorOpen = false;
   }
   const openLayoutEditor = () => { layoutEditorOpen = true; more = false; };
-  /** the point-allocation overlay, opened from the level read in the bottom experience strip */
   let alloc = $state(false);
   let selectedTreeNodeId = $state('impact.1');
   const selectedTreeVerdict = $derived(canSpendTree(gameState, selectedTreeNodeId));
-  /** the character sheet opens in the same full-screen panel layer as the other menu screens */
   let sheetOpen = $state(false);
   let saveNote = $state('');
 
@@ -184,8 +175,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     settings[k] = v;
     void writeSettings(settings);
   }
-  /** The clock's pace is a client setting like the rest: it survives a reload. */
-  /** the clock's pace rungs, in the order the bar shows them */
   const SPEEDS: (1 | 2 | 4)[] = [1, 2, 4];
   function setSpeed(m: 1 | 2 | 4) {
     speed = m;
@@ -217,7 +206,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     runAction(action);
   }
 
-  /** the keyboard map the player is using: the stored sparse override over the shipped defaults */
   const binds = $derived(bindTable(settings.keybinds || {}));
   const keyFor = (action: string) => formatKey(binds[action] || '');
   function setBind(id: string, token: string) {
@@ -230,7 +218,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   const resetBinds = () => setSetting('keybinds', {});
 
-  /** the tab the warehouse board is open on, and which tab of the inventory the player is working in */
   let stashTab = $state(0);
   let pileSort = $state<SortKey>('level');
   type InvTab = 'inv' | 'stash';
@@ -270,7 +257,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     }
   }
 
-  /** The header buttons toggle, so the open panel closes under its own button. */
   function togglePanel(p: PanelId) {
     openPanel(p);
   }
@@ -293,9 +279,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     panel = panel === p ? null : p;
   }
   const closePanel = () => (panel = null);
-  /** the board is live only where the warehouse is: a tab cannot be filled from a field. */
   const canStash = $derived(atSettlement(gameState) && stashTabCount(gameState) > 0);
-  /** whether the character stands in a settlement right now — every service below answers to this */
   const townLive = $derived(atSettlement(gameState));
 
   /** How long a plate's own comings and goings run, in ms. A JS transition is painted by the Web Animations
@@ -310,7 +294,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     q.addEventListener('change', read);
     return () => q.removeEventListener('change', read);
   });
-  /** How long a number's own leave runs, in ms. The reader's reduced-motion switch zeroes it. */
   const FX_OUT_MS = 520;
   const fxOutMs = $derived(plateMotion === 0 ? 0 : FX_OUT_MS);
 
@@ -327,26 +310,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // the character's own answers live on its own corner now (taken blows pop like damage, block
   // words and status procs beside them), so the shared column keeps only what names no body
   const selfFx = $derived(ring.filter((e) => e.side === 'self' && !(e.kind === 'travel' && e.text?.startsWith('arrived ·')) && e.kind !== 'level' && e.kind !== 'block' && e.kind !== 'proc' && e.kind !== 'taken').slice(0, 5));
-  /** every blow the ring still holds, in its own mob's bucket, newest first as the ring already is */
   const fxByMob = $derived(bucketFx(ring));
-  /** the newest hit that took something off the character, for the frame's own edge flash */
   const latestTaken = $derived(ring.find((e) => e.side === 'self' && e.kind === 'taken') || null);
-  /** the newest blow the character landed — a swing or a press going out is what makes its own card lean */
   const latestLand = $derived(ring.find((e) => e.side === 'field' && e.kind === 'hit' && (e.via === 'swing' || e.via === 'cast')) || null);
-  /** which way the character's card moves this beat, and the event that says so */
   const selfArt = $derived(plateGesture(latestTaken, latestLand));
-  /** The field plates: the living group the sim owns, nothing else. */
   const plates = $derived([...gameState.group]);
   /** the row that last fired — a press or a buff coming up are both the order being worked — so the bar
    *  lights the slot that actually pressed instead of the one the eye expects */
   const latestFire = $derived((gameState.fx || []).find((e) => !!e.skillId && (e.kind === 'cast' || e.kind === 'buff')) || null);
-  /** a level is the frame's own beat, not a chip in a column, so it leaves the column and takes the title */
   const latestLevel = $derived((gameState.fx || []).find((e) => e.kind === 'level') || null);
 
-  /** the bottom strip's one read: how far into the level the character stands, in the unit the bar prints */
   const xpPct = $derived(Math.max(0, Math.min(100, (gameState.player.xp / eng.xpToNext(gameState.player.level)) * 100)));
 
-  /** the field's own log, the chat box's shape: what the world just did, said once and left to scroll away */
   type FeedLine = { id: number; text: string; tone: string; chan: 'combat' | 'loot' | 'system' };
   type ChatTab = 'all' | 'combat' | 'loot' | 'system';
   let feed = $state<FeedLine[]>([]);
@@ -375,7 +350,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     }))].slice(-60);
   });
 
-  /** The away-window report (parking: "Offline report on return"), filled on mount catch-up + Load. */
   let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; quality: string } | null>(null);
 
   // the away report's own reads live in `ui/hud.ts`, where a test can reach them
@@ -406,7 +380,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const score = (g: Item) => loot.score({ ...g, q: g.q ?? 0 });
     return worn.reduce((a, b) => (score(a) <= score(b) ? a : b));
   };
-  /** the pile the hunt dropped — the adventure slots, one piece each, waiting for a decision */
   const tempEntries = $derived(sortEntries(gameState.bag.map((item, i) => gearEntry(item, i)), tempSort));
 
   // the pile's own view: which kind is shown, what the search matches, and the quality cut. These narrow
@@ -427,9 +400,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const q = bagQuery.trim().toLowerCase();
     return !q || `${e.title} ${e.sub}`.toLowerCase().includes(q);
   }));
-  /** what the character carries — stones, herbs, draughts and junk, one slot per stack */
   const invEntries = $derived(sortEntries(bagStacks(gameState).map((s, i) => stackEntry(s, i)), invSort));
-  /** the twelve worn slots keep their positions, the way an equipment panel does */
   const wornEntries = $derived(
     gameState.gear
       .map((g, i) => (g ? ({ ...gearEntry(g, i), kind: 'worn' } as SlotEntry) : null))
@@ -445,7 +416,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return settings.numberFormat === 'short' ? NF_SHORT.format(n) : NF_PLAIN.format(Math.round(n));
   }
 
-  /** Spend or refund stat points. Takes effect on the next tick, so the sheet works mid-combat. */
   function allocate(k: StatKey, delta: number) {
     const p = gameState.player;
     if (delta > 0) {
@@ -459,24 +429,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     }
     gameState = { ...gameState };
   }
-  /** Buy one rank of a passive-tree node; the verdict explains a refusal in the button's title. */
   function doSpendTree(nodeId: string) {
     const r = spendTreePoint(gameState, nodeId);
     if (r.ok) gameState = { ...gameState };
     return r;
   }
-  /** The tree respec is free too, and it lives with the stat respec in the map panel's settlement block. */
   function doRespecTree() {
-    respecTree(gameState);
-    gameState = { ...gameState };
+    if (!viewHere) return;
+    if (respecTree(gameState).ok) gameState = { ...gameState };
   }
-  /** Free Respec — settlement only (the button is in the map panel's settlement block). Hands every allocated point back. */
   function respec() {
-    const p = gameState.player;
-    let total = 0;
-    for (const k of STATS) { total += p.points[k]; p.points[k] = 0; }
-    p.statPoints += total;
-    gameState = { ...gameState };
+    if (!viewHere) return;
+    if (respecStats(gameState).ok) gameState = { ...gameState };
   }
 
   function step() {
@@ -492,7 +456,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     }
   }
 
-  /** How often the game writes itself back to the last-used slot while it is running. */
   const AUTOSAVE_SEC = 30;
 
   onMount(() => {
@@ -583,14 +546,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** Dissolve one piece the player picked, by hand — the same stone a rejected drop pays, never gold. */
   function doSalvage(index: number) {
     const r = salvageBag(gameState, index);
     equipNote = r.ok ? 'That piece dissolved — 1 Value stone into the pile' : `Cannot salvage: ${r.why}`;
     gameState = { ...gameState };
   }
 
-  /** Take one body cell off, back into the hunt pile. */
   function doUnequip(cell: number) {
     const r = unequip(gameState, cell);
     equipNote = r.ok ? 'That piece came off into the hunt pile' : `Cannot take it off: ${r.why}`;
@@ -630,7 +591,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return [{ label: 'Take it off', hint: 'back to the hunt pile', onpick: () => doUnequip(entry.index) }];
   }
 
-  /** the answer the last best-gear press gave, read where the press was made */
   let equipNote = $state('');
   /**
    * One press, the whole body dressed from what the character carries. The choice itself — what counts as
@@ -845,11 +805,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // leave it showing the town the character walked away from
   const townId = $derived(settlementOfZone(gameState.zone)?.id || 'eastgate');
   const town = $derived(settlementById(townId));
-  /** The settlement picked on the sheet, and the exact cell under the click — any cell is pickable. */
   let picked = $state<string | null>(null);
   let pickedCell = $state<Picked | null>(null);
   let deskTab = $state<'services' | 'stall' | 'guild' | 'hunt' | 'walk'>('services');
-  /** The sheet's three views, the level the gate view measures against, and the two overlays. */
   let view = $state<'terrain' | 'band' | 'gate'>('terrain');
   let gateLevel = $state(1);
   let showWalk = $state(false);
@@ -910,7 +868,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const mist = `<g class="map-mist-world" aria-hidden="true" pointer-events="none"><rect x="${paperX}" y="${paperY}" width="${paperW}" height="${paperH}" fill="url(#map-mist-static)" opacity=".16"/></g>${movingClouds}`;
     return withPattern.replace('</svg>', `${mist}</svg>`);
   });
-  /** The same ramp, laid end to end, so the legend bar is the sheet's own colours rather than a second palette. */
   const rampCss = $derived(E.mob.zones.map((_: any, i: number) => ramp(i)).join(','));
   /**
    * The sheet is repainted after every `{@html}` rebuild — the fills, the walk graph, the cell ids, the
@@ -947,7 +904,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     pickedCell = cellLabel(cell);
     picked = pickedCell.kind === 'bare' ? null : cell.getAttribute('data-node') || null;
   }
-  /** Selecting a settlement from a table or the keyboard lands on its own cell. */
   function select(id: string) {
     const cell = settlementCell(id);
     if (picked === id && pickedCell?.kind === 'town') { picked = null; pickedCell = null; return; }
@@ -973,12 +929,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       else doWalk(pickedCell);
     }
   }
-  /** Where the sheet scales from, in viewport coordinates: the same 50% / 46% the stylesheet pins. */
   function mapOrigin() {
     const r = sheet?.getBoundingClientRect();
     return r ? { x: r.left + r.width * .5, y: r.top + r.height * .46 } : null;
   }
-  /** Zoom about a screen point: the ground under the pointer, or the frame's own origin for the buttons. */
   /**
    * The pan the ground allows. The ground is drawn on far past the field, so panning runs on well
    * beyond the field and reads as endless — but it is only pretending: past the ground's own edge
@@ -1095,7 +1049,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       node.removeEventListener('wheel', onWheel);
     } };
   }
-  /** The settlement that owns the picked cell — the cell's own town, or its nearest one. */
   const pickedSettlement = $derived(pickedCell ? settlementById(ownerOf({ q: pickedCell.q, r: pickedCell.r }).id) : null);
   /**
    * The card's whole subject: the picked cell, what stands on it, what it costs to reach from where the
@@ -1197,7 +1150,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const liveBands = $derived(E.mob.zones.filter((z: any) => z.levels[0] <= gateLevel).length);
   const townStock = $derived(stockOf(town?.id ?? ''));
   const junkTotal = $derived(Object.values(gameState.junk).reduce((a: number, b: number) => a + b, 0));
-  /** Unsold junk as "item ×count", biggest stack first — the record of which variants were farmed. */
   const junkLines = $derived(Object.entries(gameState.junk)
     .filter(([, n]) => n > 0)
     .sort((a, b) => b[1] - a[1])
@@ -1229,11 +1181,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (t && claimTask(gameState, i, choice)) {
       const paid = t.alt && choice === t.alt.stone ? t.alt : { stone: t.stone, count: t.count };
       push(gameState, `Task paid: ${paid.count} ${paid.stone} stone(s)`);
+    } else if (t && t.progress >= t.n && !t.claimed) {
+      push(gameState, atSettlement(gameState)
+        ? 'Task reward is waiting — make room in the character bag, then claim again'
+        : 'Visit a settlement to claim the task reward');
     }
     gameState = { ...gameState };
   }
 
-  /** A Waypoint warp: instant, to a settlement already walked to, and it pays gold for the walk's time. */
   function travelTo(id: string) {
     const s = settlementById(id)!;
     const saved = walkBlocks(gameState.town.waypoint, id);
@@ -1247,12 +1202,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** What a warp to a settlement would cost, read off the same row the warp pays. */
   const warpPrice = (id: string) => warpCost(gameState, id);
-  /** the Waypoint's own price line, so the prose quotes the data's number instead of retyping it */
   const warpFee = $derived(warpRow()?.m_per_block ?? 0);
 
-  /** Start a walk on foot to any cell of the field — this is how a Waypoint unlocks and a hunt is reached. */
   function doWalk(dest: Picked | Cell & { key?: string }) {
     const r = startWalk(gameState, dest);
     if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
@@ -1267,14 +1219,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** The run the card speaks for: inside with a count, or outside with the cooldown left. */
   const dungeonView = $derived.by(() => {
     const run = gameState.dungeon;
     if (run) return { active: true, left: run.left, total: run.total, cooldown: 0 };
     return { active: false, left: 0, total: 0, cooldown: Math.ceil(cooldownLeft(gameState)) };
   });
 
-  /** Step into the settlement's dungeon: one run, escrowed loot, forfeited on a Push. */
   function doDungeon() {
     const r = enterDungeon(gameState);
     if (!r.ok) { saveNote = `Cannot enter: ${r.why}`; gameState = { ...gameState }; return; }
@@ -1334,7 +1284,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   let townNote = $state('');
   const tabs = $derived(stashTabCount(gameState));
-  /** the inventory reads its tab: the hunt pile names its two bags, the warehouse names itself */
   const invSub = $derived(
     invTab === 'stash' ? `warehouse · ${tabs} tab${tabs === 1 ? '' : 's'} · one record, every settlement`
       : bagSub,
@@ -1372,13 +1321,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** A locked piece is skipped by bulk deposit/withdraw, the bag swap and auto-dissolve. */
   function toggleLock(item: Item) {
     item.locked = !item.locked;
     gameState = { ...gameState };
   }
 
-  
+
 
   function doSwitchPreset(i: number) {
     switchPreset(gameState, i);
@@ -1453,7 +1401,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** §14: the per-slot switch — the one thing that decides whether a row's list is read at all. */
   function setMode(id: string, mode: string) {
     gameState.skills.mode[id] = mode as any;
     gameState = { ...gameState };
@@ -1474,13 +1421,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return Math.min(c.resCap, c.resistance + (c.resByElement?.[el] || 0));
   }
 
-  /** A cast-order row dragged onto another place in the bar: the same list the Skills screen edits. */
   function doMoveSlot(from: number, to: number) {
     moveSlot(gameState.skills, from, to);
     gameState = { ...gameState };
   }
 
-  /** The three numbers a leg opens at, read from the roster — a screen types no default of its own. */
   const COND_DEFAULTS = sm.SKILLS.meta.cast_conditions;
   const HP_BELOW_DEFAULT = COND_DEFAULTS.hp_below_pct_default;
   const MANA_FLOOR_DEFAULT = COND_DEFAULTS.mana_floor_pct_default;
@@ -1499,7 +1444,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     setCond(id, { statusMissing: now.includes(name) ? now.filter((n) => n !== name) : [...now, name] });
   }
 
-  /** Which row's list the screen is showing at the moment — one at a time, so the table stays a table. */
   let gateOpen = $state<string | null>(null);
 
   /** A row's own list in one line, so the table cell and the field bar both say the same thing the
@@ -1516,7 +1460,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return legs.join(' · ');
   }
 
-  /** Copy one row's list onto every conditional row — the bulk case, without a second source of truth. */
   function copyGate(id: string) {
     const from = { ...condOf(gameState.skills, id) };
     for (const slot of gameState.skills.list) if (slot && modeOf(gameState.skills, slot) === 'conditional') setCond(slot, from);
@@ -1539,7 +1482,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return slotFiller(id) ? 'filler — after every timed slot' : 'ready when its cooldown is up';
   }
 
-  /** The stones in words, using the names the bench itself charges by. */
   function stonesLine(): string {
     const held = Object.entries(gameState.counters.stones).filter(([, n]) => (n as number) > 0);
     if (!held.length) return 'no stones yet';
@@ -2303,7 +2245,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr>
             <td>{i + 1}</td>
             <td>
-              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}{#if !sm.weaponFits(k, heldWeaponName(gameState) || '')}<span class="chip locked" title={`${k.name} fires only while a ${k.weapon} is held — you hold ${heldWeaponName(gameState) || 'nothing'}`}>needs {k.weapon}</span>{/if}</span>{:else}—{/if}
+              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}{#if !sm.weaponFits(k, heldWeaponName(gameState) || '')}<span class="chip locked" title={`${k.name} fires only while a ${k.weapon === 'bow' ? 'bow or crossbow' : k.weapon} is held — you hold ${heldWeaponName(gameState) || 'nothing'}`}>needs {k.weapon === 'bow' ? 'bow/crossbow' : k.weapon}</span>{/if}</span>{:else}—{/if}
             </td>
             <td>{k && id ? (k.base_flat != null ? pressText(k) : k.type) : ''}</td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
@@ -2400,7 +2342,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <h3>Mastery ladder · the whole roster</h3>
     <p><small>Only the held weapon earns XP (4 a kill) — the account keeps the best value any slot reached.</small></p>
     <table>
-      <thead><tr><th>Weapon</th><th>Mastery</th><th>Drop bonus</th></tr></thead>
+      <thead><tr><th>Weapon</th><th>Mastery</th><th>Matching-skill bonus</th></tr></thead>
       <tbody>
         {#each WEAPONS as w}
           {@const lv = masteryLevel(gameState, w.name)}
@@ -2412,6 +2354,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         {/each}
       </tbody>
     </table>
+    <p><small>Other skills receive half of the held weapon's Mastery bonus.</small></p>
 
     <h3>Curable curses · target-side lines a press can put on a mob</h3>
     <ul>
@@ -2590,8 +2533,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
       <h4>Respec · free</h4>
       <p><small>Hand every allocated stat point back and re-spend them — free, and only in a settlement.</small></p>
-      <button onclick={respec} disabled={!viewHere || !STATS.some((k) => gameState.player.points[k])}>Respec — refund all stat points</button>
-      <button onclick={doRespecTree} disabled={!viewHere || !treePointsSpent(gameState)}>Respec the tree — refund {treePointsSpent(gameState)} point{treePointsSpent(gameState) === 1 ? '' : 's'}</button>
+      <button onclick={respec} disabled={!townLive || !viewHere || !STATS.some((k) => gameState.player.points[k])}>Respec — refund all stat points</button>
+      <button onclick={doRespecTree} disabled={!townLive || !viewHere || !treePointsSpent(gameState)}>Respec the tree — refund {treePointsSpent(gameState)} point{treePointsSpent(gameState) === 1 ? '' : 's'}</button>
 
       <h4>Standing</h4>
       <p>Tier {standingTier(gameState, viewTown.id)} / {TOWN.standing.tiers.length} · {(standingShare(gameState, viewTown.id) * 100).toFixed(1)}% of the {eng.SETTLEMENT_BUDGET_KILLS[viewTown.zone].toLocaleString('en-US')} kills in zone {viewTown.zone} that Tier I asks for. Standing buys stock lines, set slots and cosmetics — never a stat, a Mod, a stone or anything mob_HP reads.</p>
@@ -2803,36 +2746,27 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 <style>
   button.active { border-color: var(--gold); color: var(--gold); }
-  /* the map: layout only — the field is inlined via {@html}, so its own styling lives in styles/map.css */
-  /* the field's background is the map itself, and it is a surface you travel on: scaled past its own
-     frame so no band of empty gradient shows at an edge, and kept out of focus until the pointer
-     reaches for it or the MAP tab brings it into focus. */
+
+
   .map-back {
     position: absolute; inset: 0; overflow: hidden; cursor: crosshair;
-    /* the depth-of-field ladder, read off the one `--dof` the client owns: this surface is soft at rest
-       and sharpens as attention reaches it, rather than each state inventing its own filter */
+
     --dof: var(--dof-rest);
-    /* the two tints the rest state carries, as dials rather than a written-out filter: the filter itself is
-       declared once, on the node that actually moves, and a state only changes the dials it inherits */
+
     --map-lift: .92;
     --map-sat: .85;
-    /* the dim is the recede, so it follows the ladder's step rather than the pixel count: a lighter blur
-       keeps the ground legible and keeps the sheet sitting behind the plates the way it did before */
+
     opacity: calc(1 - var(--dof) / 12);
-    /* the map frame still fades only at the bottom for HUD legibility; the terrain seam is feathered
-       on the finite cell layer itself so the endless ground remains full-strength at viewport edges */
+
     mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
     -webkit-mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
-    /* the frame never moves: the pan and the zoom are written onto the ground inside it, so the edges,
-       the mask and the letterbox stay where the player last saw them */
+
     transition: opacity .22s ease;
     touch-action: none;
-    /* a drag pans this surface, so it must never start a text selection instead — the sheet's own labels
-       are already inert, but the rectangle they sit in was not */
+
     user-select: none; -webkit-user-select: none;
   }
-  /* the map stays clear around the player's attention and falls into the scene's own ground at the
-     four screen corners; the frame is fixed while the sheet pans beneath it, like a viewing lens */
+
   .map-back::after {
     content: '';
     position: absolute; inset: 0; z-index: 1; pointer-events: none;
@@ -2840,50 +2774,38 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       color-mix(in srgb, var(--ground) 30%, transparent) 78%,
       color-mix(in srgb, var(--ground) 84%, transparent) 100%);
   }
-  /* the ground itself, moved and scaled inside the frame — it scales from the same point the frame
-     reads as its middle, so a cell under a click never moves when the view is reframed */
+
   .map-sheet {
     position: absolute; inset: 0;
     transform-origin: 50% 46%;
     transition: transform .18s ease;
-    /* The soft focus rides the node that is actually moved. Declared on the frame instead, every pan frame
-       re-blurred the whole sheet through the frame's mask — measured at 30ms a frame against 8ms at rest,
-       which is a stuttering map. On its own layer the blur is painted once and the pan is a transform. */
+
     filter: blur(var(--dof)) brightness(var(--map-lift)) saturate(var(--map-sat));
-    /* the sheet is the one surface in the client that is moved under the hand, so it keeps its own layer
-       rather than paying for a fresh raster the moment the pan crosses it */
+
     will-change: transform;
   }
-  /* while the hand is on the sheet the pan follows it instead of easing after it */
+
   .map-back.dragging .map-sheet { transition: none; }
-  /* Mouse movement leaves the resting blur in place; keyboard focus can still sharpen the sheet. */
+
   .map-back:focus-visible { --dof: 1.5px; --map-lift: 1; --map-sat: .95; opacity: .92; }
-  /* the ring a focused surface wears is drawn on the frame, not on the ground inside it — the ground is
-     scaled and can leave the frame, and a ring that drifted off the map would read as a different state.
-     The frame fills the stage, so the ring is pulled inward: the global rule reads `--ring-offset`. */
+
   .map-back:focus-visible { --ring-offset: -2px; }
-  /* map focus: the ground the field stands on is brought out from under the HUD — same scale, so the
-     cell under a click never moves — and the mob field is taken off the screen rather than left as a
-     faint ghost over the map. The fight runs on behind it; only the reading changes. A drag pans the
-     sheet here, so the hand is open until it closes on the ground. */
+
   .stage.mapmode .map-back { --dof: 0px; --map-lift: 1; --map-sat: 1; opacity: 1; cursor: grab; }
-  /* while the hand is on the sheet the pan follows it instead of easing after it */
+
   .map-back.dragging { cursor: grabbing; transition: opacity .22s ease, filter .22s ease; }
   .stage.mapmode .field { display: none; }
-  /* Keep the minimap visible as a persistent location reference, including while the full map is open. */
-  /* the sheet is the subject in map focus, so the field's own reads leave the frame rather than sitting
-     on top of a sharp map: a zone label and a travel switch cannot share the same square, and the map is
-     the one thing the player is looking at. The purse stays — it costs nothing to read and a walk needs it. */
+
+
   .stage.mapmode .tracker { display: none; }
   .stage.mapmode .targetbar { display: none; }
-  /* a working screen is the subject, so the field behind it recedes the way the ground recedes from the
-     map: one ladder, one direction — the veil does the dimming and the field does the blurring */
+
   .stage.veiled { --dof: var(--dof-far); }
   .stage.veiled .field, .stage.veiled .tracker, .stage.veiled .actionbar, .stage.veiled .targetbar {
     filter: blur(2.5px); opacity: .5; transition: filter .18s ease, opacity .18s ease;
   }
   .stage.veiled .map-back { --dof: var(--dof-rest); }
-  /* the sheet's own controls: the three views, the gate level, the two overlays — and the key under it */
+
   .map-tools { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs); width: 100%; padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--edge); font-size: var(--font-xs); }
   .map-reference { position: relative; display: flex; justify-content: flex-start; width: 100%; }
   .map-reference :global(.mini-map) { flex: none; }
@@ -2896,7 +2818,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-views { display: flex; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-sm); width: 100%; }
   .map-views label, .map-tools label { display: inline-flex; align-items: center; gap: var(--spacing-2xs); white-space: nowrap; }
   .map-level input[type=range] { width: var(--box-160); }
-  /* the sheet's hand: zoom the frame scales about, and the two ways back to the ground you stand on */
+
   .map-zoom { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-2xs); width: 100%; }
   .map-zoom button { padding: var(--spacing-2xs) var(--spacing-xs); font-size: var(--font-xs); min-width: var(--icon-lg); line-height: 1.2; }
   .map-zoom b { font-family: var(--num); font-size: var(--font-xs); font-weight: 500; color: var(--dim); min-width: var(--icon-lg); text-align: center; }
@@ -2904,10 +2826,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-legend .swatch { display: inline-flex; align-items: center; gap: var(--spacing-2xs); }
   .map-legend .swatch i { width: var(--icon-xs); height: var(--icon-xs); border: 1px solid var(--line); border-radius: 2px; }
   .map-legend .ramp i { width: var(--box-100); }
-  /* where the field's own destination card sits: anchored to the cell it speaks for, placed by the
-     effect that measures the pick (DECISIONS.md §Interface — a floating card is placed by the box it measures, never
-     by the box it expects). The bottom-centre rule below is only the first frame's fallback, before
-     that measure lands. The card itself is ui/TravelCard.svelte, shared with the MAP sub-screen */
+
   .mapcard {
     position: fixed; left: 50%; bottom: clamp(58px, 4.45vw, 124px); transform: translateX(-50%);
     width: min(var(--box-560), 52%); z-index: 4;
@@ -2915,18 +2834,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .picklist tr { cursor: pointer; }
   .picklist tr.picked { background: var(--panel); }
 
-  /* ── the frame ───────────────────────────────────────────────────────────────────────────────
-     The map remains full-bleed behind the HUD. The 15 × 15 named grid gives stable regions to the
-     field, menu, target, objectives, automation controls, action row, game controls and chronicle. */
+
   .stage {
     position: fixed;
     inset: 0;
     overflow: hidden;
-    /* the menu bar's own height band: every top-centre read hangs below it */
+
     --rail-h: clamp(52px, 3.29vw, 66px);
-    /* the control dock's floor band: pickups clear its buttons */
+
     --controls-h: calc(var(--rail) + var(--spacing-sm));
-    /* Row one belongs to the target. A notice takes row two, and the field yields a row while it is up. */
+
     --band-toast: clamp(32px, 4.14vw, 132px);
     --band-note: clamp(64px, 7.89vw, 264px);
     background:
@@ -2934,17 +2851,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       radial-gradient(95% 70% at 50% -12%, color-mix(in srgb, var(--glow-dusk) 32%, transparent), transparent 64%),
       linear-gradient(180deg, var(--ground) 0%, var(--ground-2) 45%, var(--ground-3) 100%);
   }
-  /* the frame darkens toward its own edges, so the reads sit on a lit middle the way they do on a
-     phone screen — the vignette is under every cluster and takes no clicks */
+
   .stage::after {
     content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background: radial-gradient(115% 95% at 50% 48%, transparent 52%, rgba(0, 0, 0, .55));
   }
   .tracker, .field { z-index: 2; }
-  /* A report occupies row two; with its paired save note in row three, the field yields both rows. */
+
   .stage:has(.toast) .field { grid-row-start: 5; }
   .stage:not(:has(.toast)) .save-note { top: var(--band-toast); }
-  /* the away report owns the band's second row, under the fight's own headline */
+
   .toast {
     position: absolute; top: var(--band-toast); left: 50%; transform: translateX(-50%); z-index: 6;
     display: flex; flex-wrap: wrap; gap: var(--spacing-2xs) var(--spacing-sm); align-items: baseline; max-width: min(var(--box-920), 62%);
@@ -2953,7 +2869,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .toast .quit { background: none; border: none; padding: 0; color: var(--dim); }
 
-  /* right-edge overlays: contextual reads appear here only while their screen is open. */
+
   .dock {
     z-index: 3;
     display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-xs);
@@ -2966,8 +2882,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .pop::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
   .pop::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
 
-  /* contextual overlays sit over the field — a veil is for a screen you work in, and these are reads
-     you take mid-fight */
+
   .pop {
     pointer-events: auto; flex: 0 1 auto; align-self: stretch; min-height: 0; max-height: clamp(320px, 42vw, 900px);
     position: relative;
@@ -2992,26 +2907,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .pop-body p { margin: var(--spacing-2xs) 0; font-size: var(--font-xs); }
   @keyframes pop { from { transform: translateY(var(--x-pull-note)); opacity: .3; } to { transform: none; opacity: 1; } }
 
-  /* the save note reads at the top where the eye already checks announcements */
+
   .pill {
     display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-2xs) var(--spacing-sm); border-radius: 999px;
     background: var(--glass); border: 1px solid var(--edge); font-size: var(--font-xs);
     font-variant-numeric: tabular-nums; backdrop-filter: blur(6px);
   }
   .pill.note { color: var(--good); }
-  /* the save note reads at the top where the eye already checks announcements, never in the purses.
-     It owns the band's third and last row; the width cap keeps a long `why` on the note's own line
-     rather than folding it down into the plates' ceiling */
+
   .save-note {
     position: absolute; top: var(--band-note); left: 50%; transform: translateX(-50%); z-index: 7;
     max-width: min(var(--box-680), 86%);
   }
 
-  /* left edge under the portrait: where the character stands, whether it moves on, what it aims at —
-     slim masked lines for legibility over the field, never a glass card; long lines clamp to two */
+
   .tracker {
-    /* the quest stack under the minimap, in the top-right column: one width, right-aligned with the
-       map it serves, its own rows opting back into pointer events the inert column holds off */
+
     width: var(--objectives-w); pointer-events: auto; z-index: 2;
     display: grid; gap: var(--spacing-2xs); align-content: start; justify-items: stretch;
   }
@@ -3036,55 +2947,40 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .alarm-line { color: var(--alarm); }
   .objective { color: var(--gold); }
 
-  /* the middle of the frame is the group: one plate per mob, its HP the loudest thing on it.
-     The box hugs the frame's true middle: a slim left band for the objectives, a right gutter the
-     orb arc owns, a top edge under the portrait, and a floor the self-plate's band sits on — the
-     HUD floats over the field, so the field gives ground to it, not the other way round. */
+
   .field {
     min-width: 0; min-height: 0;
     display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: var(--spacing-md);
     overflow: visible;
-    /* one knob for every card on the field: mob plates and the player's own share it, so the two
-       are always the same size at every window. The near band follows it — a 5:7 playing-card face plus a breath. */
+
     --card-w: var(--field-card-size);
     --plate-h: calc(var(--card-w) * 7 / 5);
-    /* the near band the character's own card stands in, reserved as layout rather than guessed: flex lines
-       centre inside the content box, so this takes the band out of the group's room at every size, and an
-       absolutely positioned child resolves against the padding box, so the card lands inside it */
+
     padding-bottom: calc(var(--plate-h) + var(--spacing-xl));
-    /* the mob field is a layout box, not a surface: it spans the middle of the map, so the ground
-       between two plates has to pass its click down to the cell underneath. The plates stay live */
+
     pointer-events: none;
-    /* the field recedes on the one ladder as well: sharp at rest, pulled back when a settlement owns
-       the screen — `--dof` is the only dial, the same one the ground reads */
+
     --dof: 0px;
     filter: blur(var(--dof));
     opacity: calc(1 - var(--dof) / 10);
   }
-  /* the empty field is a read, not a target: it states why nothing stands here and what would change it,
-     and it never takes a click meant for the ground underneath */
+
   .clear-field {
     display: grid; gap: var(--spacing-3xs); justify-items: center; text-align: center; pointer-events: none;
     color: var(--dim); font-size: var(--font-xs);
   }
-  /* The ramp is stretched over the whole track instead of squeezed into the fill: `--w` is the fraction the
-     bar reached, so a body's last health shows the hot end of its own colour. The slide is the sim's own
-     step carried between the two seconds it lands in. */
+
   .target-hp i {
     background-size: calc(100% / max(var(--w, 1), .001)) 100%;
   }
 
-  /* bottom-centre: the cast order as a row of equal orbs, one per slot, and the press that opens the
-     Skills screen trailing the row. Read-only on the field. */
+
   .actionbar {
-    /* full width with the row centred in it: anchoring at left:50% would cap the row's available width
-       at half the viewport, wrapping a full bar of orbs onto a second line */
+
     z-index: 4;
     display: flex; justify-content: center;
-    /* one size for every slot, the same for the settings press that ends the row, so the row reads as
-       one rank rather than a descending scale */
-    /* the slots sit over the map now, which is dark ground in the game's own colours — so their rim is
-       read off this one pair rather than the faint plate edge the other reads use */
+
+
     --slot-face: rgba(12, 16, 22, .82);
     --slot-edge: rgba(255, 255, 255, .5);
   }
@@ -3095,8 +2991,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .orb-readout strong { font-weight: inherit; }
   .orb-shield { color: var(--es); }
   .orb-reserved { color: var(--dim); }
-  /* A worn stone-and-iron shell sits over both liquid pools. Energy Shield veils the Life glass while
-     it holds, thinning with the current pool instead of painting a separate ring. */
+
   .vital-orb {
     position: relative; flex: none; width: var(--box-160); height: var(--box-160); padding: var(--spacing-xs);
     isolation: isolate; border-radius: 50%; background: var(--face-floor); container-type: inline-size;
@@ -3182,8 +3077,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     background: radial-gradient(ellipse at 36% 18%, rgba(255, 255, 255, .18), transparent 32%),
                 linear-gradient(145deg, rgba(255, 255, 255, .06), transparent 45% 65%, rgba(0, 0, 0, .36));
   }
-  /* the row runs left to right in slot order: slot 1 leads at the left, the settings press trails. */
-  /* Fourteen slots sit in two balanced ranks of seven, with the cap keeping the second rank aligned. */
+
+
   .casts {
     display: flex; flex-flow: row wrap; justify-content: center;
     align-items: flex-end; align-content: flex-end; gap: var(--spacing-2xs); max-width: calc(var(--slot-skill-size) * 7 + var(--spacing-2xs) * 6);
@@ -3195,18 +3090,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       radial-gradient(circle at 50% 28%, rgba(255, 255, 255, .1), transparent 56%),
       linear-gradient(180deg, var(--orb-top), var(--orb-floor));
     border: 1px solid rgba(255, 255, 255, .2); backdrop-filter: blur(6px);
-    /* a dark separation ring under the lit rim keeps the edge crisp against the pale map behind it */
+
     box-shadow: 0 0 0 1px rgba(0, 0, 0, .65), 0 3px 10px rgba(0, 0, 0, .5), inset 0 2px 4px rgba(255, 255, 255, .07), inset 0 -6px 12px rgba(0, 0, 0, .5);
     transition: border-color .15s ease, box-shadow .15s ease;
   }
   .cast img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
-  /* an empty slot keeps its size: the arc is the cast order, and it must not jump as skills arrive */
+
   .cast.empty { opacity: .55; background: none; border-color: rgba(255, 255, 255, .3); box-shadow: none; }
   .cast.ready { border-color: color-mix(in srgb, var(--gold) 68%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent), 0 0 16px color-mix(in srgb, var(--gold) 34%, transparent), inset 0 2px 4px rgba(255, 255, 255, .08); }
-  /* three rows on this bar are not "pressable now", and the gold ring is the client's one word for that,
-     so each of them recedes to its own treatment rather than borrowing it: a silenced row keeps no glow
-     at all, a conditional row wears the dashed rim that says "waiting on something", and a filler row
-     drops to the plate's own faint edge because its place in the order is not what gates it. */
+
   .cast.silent { opacity: .4; }
   .cast.gated { border-style: dashed; border-color: rgba(255, 255, 255, .45); }
   .cast.filler { border-color: rgba(255, 255, 255, .18); }
@@ -3215,7 +3107,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     background: none; font-size: max(var(--font-xs), calc(var(--slot-skill-size) * .3)); color: var(--gold-lit);
     font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
   }
-  /* the cooling dial: the dark wedge is what is left of the cooldown, sweeping off clockwise from the top */
+
   .cast .sweep {
     position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
     background: conic-gradient(from -90deg, transparent 0 var(--skill-cooldown-progress), rgba(6, 8, 11, .66) var(--skill-cooldown-progress) 100%);
@@ -3225,7 +3117,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   @media (prefers-reduced-motion: reduce) { .cast .sweep { transition: none; } }
   .cast b { position: absolute; top: clamp(-8px, -0.29vw, -4px); left: clamp(-3px, -0.10vw, -1px); font-size: var(--font-xs); color: var(--dim); }
 
-  /* bottom-right controls are a small row of the same circular menu buttons used across the HUD. */
+
   .controls-dock {
     z-index: 5;
     display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-end;
@@ -3281,7 +3173,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     display: flex; align-items: flex-end; gap: var(--spacing-xs);
     pointer-events: none;
   }
-  /* top-left hub column: map, location and objective text share the same left reading edge. */
+
   .topright {
     z-index: 40;
     display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs);
@@ -3301,7 +3193,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .field-travel-actions > * { pointer-events: auto; }
   .field-auto-tab { flex: none; }
-  /* the zone plaque names the band first, then the immediate ground and its level range */
+
   .zone-tag {
     margin: 0; align-self: stretch; display: flex; align-items: center; gap: var(--spacing-2xs); min-width: 0;
     padding: var(--spacing-2xs) var(--spacing-xs); border-radius: var(--spacing-sm);
@@ -3332,8 +3224,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     outline: 2px solid var(--focus); outline-offset: 2px;
   }
 
-  /* the top-centre target bar: the front body's name over one wide red bar — the hub's own read of
-     what the rotation is pressing, loud from across the room the way a boss bar is */
+
   .targetbar {
     z-index: 2;
     display: grid; justify-items: center; gap: var(--spacing-2xs);
@@ -3364,7 +3255,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     transform: scaleX(var(--fill)); transform-origin: left center;
     transition: transform .65s cubic-bezier(.2, .8, .2, 1);
   }
-  /* the boss bar's top sheen: one lit line along the fill, the way a metal gauge reads */
+
   .target-hp::after {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%; pointer-events: none;
     background: linear-gradient(180deg, rgba(255, 255, 255, .16), transparent);
@@ -3375,7 +3266,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
   }
 
-  /* the screen rail stays in one row inside the grid's menu region. */
+
   .rail {
     z-index: 70;
     display: flex; flex-direction: row; flex-wrap: nowrap; align-items: stretch; justify-content: flex-end; gap: var(--spacing-sm);
@@ -3401,11 +3292,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .tab:hover { color: var(--text); }
   .tab.here { color: var(--gold-lit); }
-  /* a settlement screen from the field is reachable but not live, so it is marked rather than dead — the
-     refusal and its reason come out of the button's own title */
+
   .tab.far { opacity: .5; }
   .tab.far img { filter: grayscale(.6); }
-  /* More keeps the less frequent screens, field actions and HUD tools in one menu under the rail. */
+
   .morebox {
     position: absolute; top: calc(100% + var(--spacing-xs)); right: 0;
     display: grid; grid-template-columns: repeat(3, minmax(var(--icon-lg), 1fr)); gap: var(--spacing-sm);
@@ -3429,16 +3319,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .moreitem.far { opacity: .5; }
   .moreitem.far img { filter: grayscale(.6); }
 
-  /* The outer panel owns scrolling so every inventory slot stays in one continuous view. */
+
   .invbody { min-height: 0; overflow: visible; }
   .invbody > section { min-height: 0; overflow: visible; }
-  /* the sub-screens that came off the old three-column page */
-  /* the inventory's tabs: one modal, two verbs, and the count each tab is holding printed on it */
+
+
   .sides { display: flex; gap: var(--spacing-2xs); margin-bottom: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
   .sides button { border-radius: 999px; font-size: var(--font-xs); padding: var(--spacing-2xs) var(--spacing-sm); }
   .sides button.active { border-color: var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); }
   .sides button:disabled:hover { border-color: var(--line); color: var(--text); }
-  /* the inventory's face: the trip's pile and carried bag side by side */
+
   .poewin { display: grid; grid-template-columns: 1.25fr 1fr; gap: var(--spacing-sm); align-items: start; min-height: 0; }
   .poecol { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
   .poecol h3 { margin: 0; font-size: var(--font-xs); color: var(--dim); letter-spacing: clamp(1px, 0.05vw, 2px); text-transform: uppercase; }
@@ -3465,14 +3355,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .sheet-new-character { display: inline-flex; align-items: center; gap: var(--spacing-2xs); margin-left: auto; padding: var(--spacing-2xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--spacing-2xs); background: color-mix(in srgb, var(--hot) 6%, var(--panel)); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; transition: border-color .15s ease, color .15s ease, background .15s ease; }
   .sheet-new-character img { width: var(--icon-xs); height: var(--icon-xs); padding: 0; border: 0; border-radius: 0; background: none; object-fit: contain; }
   .sheet-new-character:hover { border-color: color-mix(in srgb, var(--hot) 58%, var(--edge)); background: color-mix(in srgb, var(--hot) 12%, var(--panel)); color: var(--alarm); }
-  /* the equip margin reads in the pile's own tool row now that the tabs own the rail */
+
   .bagtools .margin { display: inline-flex; align-items: center; gap: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); }
   .bagtools .margin input { width: var(--icon-xl); }
-  /* the one press in this client that changes the whole body, so it is the one control the accent is spent
-     on — and it is a verb, not a state, so it never takes the gold of "you are here" */
+
   .bagtools .best { border-color: color-mix(in srgb, var(--good) 55%, transparent); color: var(--good-lit); background: color-mix(in srgb, var(--good) 10%, transparent); }
-  /* the pile's shell: a kind rail down the left, a search and a quality cut across the top, the grid
-     under them. It narrows what is drawn and never reorders the bag, so Equip still addresses the drop. */
+
   .bagshell { display: grid; grid-template-columns: minmax(var(--box-110), auto) 1fr; gap: var(--spacing-sm); align-items: start; }
   .bagcats { display: flex; flex-direction: column; gap: var(--spacing-3xs); }
   .bagcats button {
@@ -3492,15 +3380,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .bagblock { border: 0; }
   .skill-label { display: inline-flex; align-items: center; gap: var(--spacing-2xs); }
   .skill-label img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; flex: none; }
-  /* the gate cell is one row's own condition list in a single line, and it is also the button that opens
-     that row's editor — summary and control are the same object, so a row that is waiting on nothing
-     says so in its own cell instead of failing silently somewhere in the rotation */
+
   .gate {
     padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); color: var(--gold); cursor: pointer;
     background: none; border: 1px dashed color-mix(in srgb, var(--gold) 50%, transparent); border-radius: 4px;
   }
   .gate:hover { border-style: solid; }
-  /* the editor sits under the row it edits and claims no column of its own */
+
   .gate-editor td { background: color-mix(in srgb, var(--gold) 5%, transparent); font-size: var(--font-xs); }
   .gate-editor label { white-space: nowrap; }
   .gate-editor input[type='number'] { width: var(--icon-xl); }
@@ -3564,8 +3450,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .filter { margin-top: var(--spacing-xs); }
   .filter summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
   .filter table { margin-top: var(--spacing-xs); }
-  /* the explanation a player reads once: folded, so the screen's own controls lead and the panel's
-     working part stays on the first screen rather than below a wall of prose */
+
   .prose { margin: var(--spacing-xs) 0; }
   .prose summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
   .prose summary:hover { color: var(--text); }
@@ -3573,33 +3458,26 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .weight { margin: 0 0 var(--spacing-xs); }
   .weight small { color: var(--dim); }
   .warn { color: var(--alarm); }
-  /* a monitor is not a phone: the client is written for a desktop window and scales with the root size set
-     in styles/variables.css, so these steps only move what physically cannot fit — the reads give ground in
-     the middle, they are never taken off the screen. */
+
   .townnote { margin: var(--spacing-xs) 0 0; font-size: var(--font-xs); color: var(--good); }
   .mini { padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); }
-  /* the announcement is for the screen reader, not the eye: the same words are already on a pill */
+
   .aloud {
     position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
     clip-path: inset(50%); white-space: nowrap; border: 0;
   }
-  /* the field's own switches and the cast order answer a press, so they wear the ring a plate cannot */
+
   .knob:focus-visible, .cast:focus-visible, .face:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   .controls-dock button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  /* a plate is read, not worked: it takes no ring, but its controls do */
+
   .pop :is(button, select, input, summary):focus-visible { outline-offset: 1px; }
 
-  /* ── the hit ring ─────────────────────────────────────────────────────────────────────────────
-     Every event the sim raised, drawn once and then gone. The colour is the data's (`--fx` is set
-     from `elements.colour` at the call site), so a new Element needs a data row and not a CSS edit.
-     The ring is decoration: it never takes a pointer and never holds layout. */
+
   .floaters { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
   .float-side { position: absolute; display: flex; flex-direction: column-reverse; gap: var(--spacing-3xs); }
-  /* the pickups' own column, the right edge above the control dock, where the latest loot stays readable
-     while the fight continues */
+
   .field-side { right: var(--screen-pad); bottom: calc(var(--controls-h) + var(--screen-pad) * 2); left: auto; transform: none; align-items: flex-end; }
-  /* the character's own column is anchored to the card it belongs to: it rises from just above the
-     self-plate's top edge, so its place follows the plate wherever the frame puts it */
+
   .self-side { left: 50%; bottom: calc(100% + clamp(5px, 0.39vw, 11px)); transform: translateX(-50%); align-items: center; }
   .fx {
     --lane: 0;
@@ -3628,19 +3506,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .fx-travel, .fx-warp { animation: fx-drift 1.6s linear forwards; }
   .fx-kill { animation: fx-strike .7s ease-out forwards; }
   .fx-sell, .fx-craft { animation: fx-rise 1.5s ease-out forwards; }
-  /* the row that fired, on the bar that lists the order — the one place that can name the press without
-     printing it twice. `ready`'s gold ring means pressable now; this ring is the Element that went out. */
+
   .cast .flare {
     position: absolute; inset: -2px; z-index: 2; pointer-events: none;
     border: 1px solid var(--fx, var(--text)); border-radius: inherit;
     animation: fx-flare .5s ease-out forwards;
   }
-  /* a buff coming up is prose, so it wears the chip face like the other words on the field */
+
   .fx-buff {
     animation: fx-buff 1.15s ease-out forwards;
   }
-  /* a heal is a number, so it keeps `--num` and never the chip's uppercase face; the heart is the shelf's
-     own, masked, so the glyph is decoration and the digits stay the read */
+
   .fx-heal {
     font-size: var(--font-sm);
     animation: fx-heal 1.1s ease-out forwards;
@@ -3661,7 +3537,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     -webkit-mask-image: url('./icon/skill/aura/expanded-rays.svg');
             mask-image: url('./icon/skill/aura/expanded-rays.svg');
   }
-  /* the frame's own beat: a level borrows the title's line for one rise and hands it back */
+
   .levelup {
     position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); left: 50%; z-index: 8; pointer-events: none;
     margin: 0; white-space: nowrap; font-family: var(--num); font-size: var(--font-md); letter-spacing: clamp(2px, 0.10vw, 3px);
@@ -3689,9 +3565,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     70% { opacity: 1; transform: translateX(-50%) translateY(clamp(-7px, -0.24vw, -3px)) scale(1); }
     100% { opacity: 0; transform: translateX(-50%) translateY(clamp(-35px, -1.26vw, -16px)) scale(1); }
   }
-  /* the column figure's arc, staged the MapleStory way (owner ruling): a quick rise, a hold long enough
-     to read, then the fade — so the number owns its own life on screen and is never cut short while the
-     ring still has room for it */
+
   @keyframes fx-rise {
     0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(4px, 0.29vw, 8px)) scale(.55); }
     14% { opacity: 1; }
@@ -3699,7 +3573,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     60% { opacity: 1; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-51px, -1.84vw, -24px)) scale(1); }
     100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-70px, -2.52vw, -32px)) scale(.96); }
   }
-  /* the crit's own stage: a harder slam, a longer hold, a slower let-go */
+
   @keyframes fx-crit {
     0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(8px, 0.58vw, 16px)) scale(.5); }
     18% { opacity: 1; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), var(--x-pull-note)) scale(1.42); }
@@ -3726,7 +3600,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     0% { opacity: 1; transform: scale(1.25); }
     100% { opacity: 0; transform: scale(.9); }
   }
-  /* the frame's edge on a hit taken: the same colour rule as the number, one beat wider */
+
   .veil {
     position: absolute; inset: 0; pointer-events: none;
     box-shadow: inset 0 0 var(--box-100) color-mix(in srgb, var(--fx, var(--hp)) 50%, transparent);
@@ -3737,25 +3611,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     100% { opacity: 0; }
   }
 
-  /* ── the town's own face ──────────────────────────────────────────────────────────────────────
-     Standing in a settlement is not a second screen: the character still hunts the zone the town owns.
-     What changes is what the screen puts first — the field recedes, the sheet loses its depth-of-field
-     pull, and the settlement's name sits over the zone's. The work a town is for (the warehouse, the
-     counter, the bench, the desk) is already one rail press away; this only stops the fight from
-     shouting over it. A walk in progress stays readable, because it is the one thing town cannot hide. */
-  /* the fight stays sharp in a settlement (owner ruling): only the ground recedes, so the field is
-     dimmed and desaturated by hand here and never pulled through the blur half of the ladder */
+
+
   .townmode .field { opacity: .78; filter: saturate(.85); }
   .townmode .map-back { --dof: var(--dof-far); }
 
 
-  /* The parent owns the edge gutters. Its inner 15 × 15 tracks place every named HUD region, so
-     children never need viewport-based margins to clear the screen edge. */
+
   .stage {
     display: grid;
     grid-template-columns: var(--screen-pad) repeat(15, minmax(0, 1fr)) var(--screen-pad);
     grid-template-rows: var(--screen-pad) repeat(15, minmax(0, 1fr)) var(--screen-pad);
-    /* Region tracks come from the one saved grid layout on the stage element. */
+
   }
   .topright {
     grid-area: objectives;

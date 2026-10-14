@@ -5,6 +5,8 @@ import { mastery, masteryLevel, dropMultiplier, weaponSkillBonusPct } from '../s
 import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines } from '../src/sim/tree';
 import { newGoal, target, onSpawn, onKill, watch } from '../src/sim/goal';
 import type { GameState, Mob } from '../src/sim/types';
+import { respecStats } from '../src/sim/respec';
+import { buildCharacter } from '../src/sim/player';
 
 /** The three progression side-tracks the game runs beside the level bar: Mastery, the passive tree, the
  *  win gate. Each one's rules live in the sim; these read them through the same calls the client makes. */
@@ -90,6 +92,54 @@ describe('the passive tree', () => {
     expect(s.player.treeRanks).toEqual({});
     expect(treeLines(s).length).toBe(0);
     expect(respecTree(s)).toEqual({ ok: false, refunded: 0 });
+  });
+});
+
+describe('settlement respec', () => {
+  it.each(['field', 'camp', 'walking', 'missing-cell'])('refuses both refunds in %s without changing points', (place) => {
+    const s = newGame();
+    s.player.points.str = 5;
+    s.player.treeRanks = { [Object.keys(tree.byId)[0]]: 1 };
+    if (place === 'field') s.cell = { ...s.cell!, q: s.cell!.q + 1 };
+    if (place === 'camp') s.phase = 'camp';
+    if (place === 'walking') s.walk = {} as GameState['walk'];
+    if (place === 'missing-cell') s.cell = null;
+    const before = structuredClone(s.player);
+    expect(respecStats(s)).toEqual({ ok: false, refunded: 0 });
+    expect(respecTree(s)).toEqual({ ok: false, refunded: 0 });
+    expect(s.player).toEqual(before);
+  });
+
+  it('refunds allocated stats exactly once for free in a settlement', () => {
+    const s = newGame();
+    s.player.points.str = 5;
+    s.player.points.vit = 3;
+    const banked = s.player.statPoints;
+    expect(respecStats(s)).toEqual({ ok: true, refunded: 8 });
+    expect(Object.values(s.player.points).every((n) => n === 0)).toBe(true);
+    expect(s.player.statPoints).toBe(banked + 8);
+    expect(respecStats(s)).toEqual({ ok: false, refunded: 0 });
+  });
+});
+
+describe('resistance ceiling', () => {
+  it('caps at 75% normally and lets only passive ranks extend it to 90%', () => {
+    const s = newGame();
+    const item = s.gear.find((g) => g)!;
+    item.lines = [
+      { id: 'elemental_resistance', value: 200 },
+      { id: 'elemental_resistance_cap_pct', value: 15 },
+    ];
+    const base = buildCharacter(s.player.level, [item]);
+    expect(base.resCap).toBe(75);
+    expect(base.resistance).toBe(75);
+    const node = Object.values(tree.byId).find((n) => n.line === 'elemental_resistance_cap_pct')!;
+    for (let rank = 1; rank <= node.ranks; rank++) {
+      const c = buildCharacter(s.player.level, [item], {}, 0, undefined, undefined, { [node.id]: rank });
+      expect(c.resCap).toBe(Math.min(90, 75 + node.values[rank - 1]));
+      expect(c.resistance).toBe(c.resCap);
+    }
+    expect(eng.elemResCapOf(1000)).toBe(90);
   });
 });
 

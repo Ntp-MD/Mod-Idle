@@ -38,12 +38,9 @@ export function weightedPick(rng: Rng, entries: { id: string; w: number }[]) {
 }
 
 /**
- * A variant's lean (`loot.variant_lean` · `mob.variant_drops` `lean`). Redistributes probability MASS
- * among the three collectible streams — gear, herbs, junk — toward the one the variant names: the leaned
- * stream's share rises while the total expected drops/kill is preserved by renormalizing, so drops/hr and
- * the timeline do not move. `lean === 'none'` is the identity, which is what Elite and Boss carry. The
- * variant row is the only author — there is no player control on top of it. Stones ride the elite/boss
- * lines and are not a category.
+ * Redistributes probability MASS among gear, herbs and junk toward one source's lean. Each tilt
+ * preserves expected drops/kill by renormalizing; callers may layer a variant lean and an environment
+ * lean without moving drops/hr. `lean === 'none'` is the identity. Stones are not a category.
  */
 export function leanReweight(
   p: { gear: number; herb: number; junk: number },
@@ -63,6 +60,15 @@ export function leanReweight(
     herb: clamp(p.herb * f('herb') * norm),
     junk: clamp(p.junk * f('junk') * norm),
   };
+}
+
+/** Apply independent source tilts in order, keeping the expected total fixed after every step. */
+export function leanReweightMany(
+  p: { gear: number; herb: number; junk: number },
+  leans: Array<'none' | 'gear' | 'herb' | 'junk'>,
+  shiftPct: number,
+): { gear: number; herb: number; junk: number } {
+  return leans.reduce((weights, lean) => leanReweight(weights, lean, shiftPct), { ...p });
 }
 
 export function createLoot(E: EngineData, MODS: ModsData) {
@@ -185,7 +191,9 @@ export function createLoot(E: EngineData, MODS: ModsData) {
       const crit = (wp['main hand']?.Primary || []).filter((id: string) => !id.startsWith('physical') && !id.startsWith('magic'));
       for (const id of [...power, ...crit]) push(id, half ? RW.secondary : RW.primary);
       for (const id of (wp['main hand']?.Secondary || [])) push(id, RW.secondary);
-      push('elemental_power_flat', RW.secondary);
+      const typePool = wp['main hand']?.[weapon.name] || [];
+      for (const id of typePool) push(id, RW.secondary);
+      for (const id of (wp['main hand']?.['all types'] || [])) push(id, RW.secondary);
     } else {
       for (const e of slotUnion(BASES, slot, frame)) push(e.id, e.role);
       // the Gear Mod is the frame's own school, not all three: a heavy frame carries Armour alone
@@ -235,12 +243,13 @@ export function createLoot(E: EngineData, MODS: ModsData) {
    */
   function frameModRoll(BASES: any, slot: string, frame: any, weapon: any, rng: Rng, ilvl: number, q: number, u: number): any[] {
     const BM = E.loot.frame_mod;
+    const lineFrame = weapon && !frame ? (BASES?.weapon_frames?.[weapon.name] || [])[0] : frame;
     const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
     if (weapon) {
       // a weapon (main hand, or a dual-wielded off hand) forces every Mod its own type lists — and a
       // main hand carries a FRAME (A10), whose own list wins over its type's when it has one
-      for (const id of (frame?.frame_mod || BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
+      for (const id of (lineFrame?.frame_mod || BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
     } else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) {
       // the frame names the flat defence lines its Frame Mod carries (one, two or all three, the seven
       // combinations the roster covers without repeating one) — never a random draw, and a multi-line
@@ -258,7 +267,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     const roll = (id: string) => {
       const slice = tierSlice(u);
       const [lo, hi] = rangeOf(id, ilvl, q, slice);
-      return { id, value: Math.max(1, Math.round((lo + Math.floor(rng() * (hi - lo + 1))) * k)), slice };
+      return { id, value: Math.max(1, Math.round((lo + Math.floor(rng() * (hi - lo + 1))) * k * (lineFrame?.value_bias ?? 1))), slice };
     };
     if (!ids.length) return [];
     const first = roll(ids[0]);
@@ -287,9 +296,10 @@ export function createLoot(E: EngineData, MODS: ModsData) {
    */
   function frameModAtFloor(BASES: any, slot: string, frame: any, weapon: any, ilvl: number, q: number): any[] {
     const BM = E.loot.frame_mod;
+    const lineFrame = weapon && !frame ? (BASES?.weapon_frames?.[weapon.name] || [])[0] : frame;
     const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
-    if (weapon) for (const id of (BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
+    if (weapon) for (const id of (lineFrame?.frame_mod || BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
     else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) for (const id of frame.base_lines) ids.push(id);
     else if (slot === 'off hand' && frame?.family) for (const id of (frame?.frame_mod || BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
     else if ((BASES?.frame_mod?.drawn_line1_slots || []).includes(slot)) {
@@ -298,7 +308,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     }
     if (!ids.length) return [];
     const k = scale(ids.length);
-    const value = (id: string) => Math.max(1, Math.round(windowAt(id, ilvl, q)[0] * k));
+    const value = (id: string) => Math.max(1, Math.round(windowAt(id, ilvl, q)[0] * k * (lineFrame?.value_bias ?? 1)));
     return [{
       id: ids[0], value: value(ids[0]), slice: 0, element: null,
       ...(ids.length > 1 ? { extra: ids.slice(1).map((id) => ({ id, value: value(id) })) } : {}),

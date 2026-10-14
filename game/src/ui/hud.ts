@@ -40,13 +40,13 @@ export function buildAwayReport(before: Snap, mins: number, secs: number, capped
 }
 
 /**
- * §11 field label: the ladder rung this spawn rolled (`mob.variants`), which is what its drop table
- * keys on — a body tier no longer implies the name, since the three normal rungs are their own roll
- * and a two-body species would otherwise never field one of them. A named boss reads its own name.
+ * Field label: the fixed level-band form, with Elite/Boss kept as separate ranks. Drop variants remain
+ * a loot identity and do not change the form's Core or name. A named boss reads its own name.
  */
-export function fieldLabel(m: { species: string; speciesId?: string; kind: string; variant?: string }): string {
+export function fieldLabel(m: { species: string; speciesId?: string; kind: string; variant?: string; formName?: string }): string {
   const fl = E.mob.field_labels;
   if (m.kind.startsWith('Boss')) return `${m.kind.replace(/^Boss · /, '')}${fl.boss.suffix}`;
+  if (m.formName) return m.kind === 'Elite' ? `${m.formName}${fl.elite.suffix}` : m.formName;
   if (m.variant) return m.variant;
   const ladder = m.speciesId ? (E.mob.variants as Record<string, string[]>)[m.speciesId] : null;
   return ladder ? ladder[0] : `${m.species.toLowerCase()}${m.kind === 'Elite' ? fl.elite.suffix : fl.normal.suffix}`;
@@ -55,3 +55,16 @@ export function fieldLabel(m: { species: string; speciesId?: string; kind: strin
 /** One backup's caption, in the words the panel prints. */
 export const describeSnap = (shot?: Snapshot): string =>
   shot ? `${shot.reason} at ${Math.round(shot.clockSec / 60)} min` : '—';
+
+/**
+ * What a spawn's trait mechanics read like on the card. The words and their assembly are the engine's
+ * (`mob.trait_mechanics[].word`), so the card, the travel panel and the wiki cannot disagree.
+ */
+export const mechanicWords = (m: { mechanics?: Record<string, string | boolean> | null }): string[] =>
+  eng.mechanicWordsOf(m.mechanics);
+
+/** What standing on one side of a settlement rolls, in the words the travel card prints. */
+export function sideSpawnWords(spawn?: { group?: string; elite_pct?: number; pack?: string } | null): string[] {
+  if (!spawn) return [];
+  return [`${spawn.group} a pack`, `${spawn.elite_pct}% elite`, eng.packWordOf(spawn.pack)];
+}

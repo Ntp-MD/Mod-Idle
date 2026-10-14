@@ -1,5 +1,5 @@
 import type { GameState } from '../sim/types';
-import { ACTIVE_SLOTS, clearUnownedTracks, newSkillState } from '../sim/skills';
+import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive, newSkillState } from '../sim/skills';
 import { newTown } from '../sim/town';
 import { newFarm } from '../sim/farm';
 import { newFieldwork } from '../sim/fieldwork';
@@ -7,6 +7,7 @@ import { newPresets } from '../sim/presets';
 import { newCollector, newGrants } from '../sim/collector';
 import { newFilter, refresh as refreshFilter } from '../sim/filter';
 import { newGoal } from '../sim/goal';
+import { buildCharacter } from '../sim/player';
 import { newCurses } from '../sim/curse';
 import { newMobStatusStore } from '../sim/mobStatus';
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
@@ -577,16 +578,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       return id && sm.byId[id] ? id : null;
     });
   }
-  // the aura set a save carries must obey the same reservation limit a toggle does: turn the
-  // later auras off until the held share fits again (deterministic in insertion order)
-  {
-    let held = 0;
-    for (const [id, on] of Object.entries(s.skills.auras)) {
-      if (!on || !sm.byId[id]) { delete s.skills.auras[id]; continue; }
-      held += sm.reservePct(sm.byId[id].reserve ?? '');
-      if (held >= sm.RESERVATION_LIMIT) s.skills.auras[id] = false;
-    }
-  }
+  clampAuraReservations(s.skills);
   if (s.activePreset == null) s.activePreset = 0;
   if (!s.collector) s.collector = newCollector();
   if (!s.grants) s.grants = newGrants();
@@ -616,11 +608,38 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       // points in hand cannot exceed what the level curve has paid out in total
       s.player.statPoints = Math.max(0, Math.min(eng.pointsAt(lv), Math.floor(finite(s.player.statPoints, 0))));
       s.player.treePoints = Math.max(0, Math.min(eng.treePointsAt(lv), Math.floor(finite(s.player.treePoints, 0))));
-      const spent = Object.values(s.player.points || {}).reduce((a: number, b: any) => a + Math.max(0, finite(b, 0)), 0);
-      if (spent > eng.pointsAt(lv)) s.player.points = Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Record<StatKey, number>;
+      s.player.points = Object.fromEntries(STAT_KEYS.map((k) => [k, Math.max(0, Math.floor(finite(s.player.points?.[k], 0)))])) as Record<StatKey, number>;
+      let spent = Object.values(s.player.points).reduce((a, b) => a + b, 0);
+      if (spent > eng.pointsAt(lv)) {
+        s.player.points = Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Record<StatKey, number>;
+        s.player.statPoints = eng.pointsAt(lv);
+        spent = 0;
+      }
+      s.player.statPoints = Math.min(s.player.statPoints, eng.pointsAt(lv) - spent);
       // a rank on a node the tree no longer carries is not an allocation
       const ranks = s.player.treeRanks || (s.player.treeRanks = {});
-      for (const id of Object.keys(ranks)) if (!tree.byId[id]) delete ranks[id];
+      for (const id of Object.keys(ranks)) {
+        if (!tree.byId[id]) delete ranks[id];
+        else ranks[id] = Math.max(0, Math.min(tree.byId[id].ranks, Math.floor(finite(ranks[id], 0))));
+      }
+      if (tree.pointsSpent(ranks) > eng.treePointsAt(lv)) {
+        for (const id of Object.keys(ranks)) delete ranks[id];
+        s.player.treePoints = eng.treePointsAt(lv);
+      }
+      s.player.treePoints = Math.min(s.player.treePoints, eng.treePointsAt(lv) - tree.pointsSpent(ranks));
+      const fixUpgrade = (item: any) => {
+        if (!item || item.upgrade_lv == null) return;
+        item.upgrade_lv = Math.max(0, Math.min(E.craft.upgrade_cap, Math.floor(finite(item.upgrade_lv, 0))));
+        item.gearMod = item.upgrade_lv * E.craft.gear_mod_per_level;
+      };
+      for (const item of s.gear || []) fixUpgrade(item);
+      for (const item of s.bag || []) fixUpgrade(item);
+      for (const tab of s.stash || []) for (const item of tab) fixUpgrade(item);
+      // an imported character's pools cannot exceed what its gear and allocations support
+      const c = buildCharacter(lv, Array.isArray(s.gear) ? s.gear : [], {}, 0, effectsActive(s.skills), s.player.points, ranks);
+      s.player.hp = Math.min(Math.max(0, s.player.hp), c.maxHp);
+      s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
+      s.player.es = Math.min(Math.max(0, s.player.es), c.es);
     }
     if (!eng.ZONES.some((z: any) => z.id === s.zone)) s.zone = eng.ZONES[0].id;
     if (s.dungeon && !eng.ZONES.some((z: any) => z.id === s.dungeon!.zone)) s.dungeon = null;

@@ -24,13 +24,28 @@
     ]
   },
   "graph": {
-    "start": { "x": 50, "y": 50 },
+    "start": {
+      "x": 50,
+      "y": 50
+    },
     "nodes_per_ring": 7,
-    "ring_radii": [15, 29, 42],
+    "ring_radii": [
+      15,
+      29,
+      42
+    ],
     "extra_radius": 47,
     "arc_span_deg": 60,
-    "branch_angle_deg": { "impact": 270, "control": 30, "stream": 150 },
-    "crosslink_ranks": [7, 14, 21]
+    "branch_angle_deg": {
+      "impact": 270,
+      "control": 30,
+      "stream": 150
+    },
+    "crosslink_ranks": [
+      7,
+      14,
+      21
+    ]
   },
   "branches": {
     "impact": [
@@ -201,6 +216,31 @@
           1,
           2
         ]
+      },
+      {
+        "line": "bleed_chance",
+        "name": "One-Handed Axe",
+        "weapon": "one-handed axe"
+      },
+      {
+        "line": "critical_chance",
+        "name": "Dagger",
+        "weapon": "dagger"
+      },
+      {
+        "line": "critical_damage",
+        "name": "Two-Handed Sword",
+        "weapon": "two-handed sword"
+      },
+      {
+        "line": "bleed_chance",
+        "name": "Two-Handed Axe",
+        "weapon": "two-handed axe"
+      },
+      {
+        "line": "attack_speed",
+        "name": "One-Handed Sword",
+        "weapon": "one-handed sword"
       }
     ],
     "control": [
@@ -379,6 +419,21 @@
           10,
           15
         ]
+      },
+      {
+        "line": "accuracy",
+        "name": "Spear",
+        "weapon": "spear"
+      },
+      {
+        "line": "accuracy",
+        "name": "Bow",
+        "weapon": "bow"
+      },
+      {
+        "line": "armour_pen",
+        "name": "Crossbow",
+        "weapon": "crossbow"
       }
     ],
     "stream": [
@@ -549,6 +604,21 @@
           5,
           8
         ]
+      },
+      {
+        "line": "cooldown_reduction",
+        "name": "Wand",
+        "weapon": "wand"
+      },
+      {
+        "line": "elemental_power_flat",
+        "name": "Staff",
+        "weapon": "staff"
+      },
+      {
+        "line": "stun_chance",
+        "name": "Mace",
+        "weapon": "mace"
       }
     ]
   }

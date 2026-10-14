@@ -86,8 +86,22 @@ export const ownsSkill = (s: SkillState, id: string): boolean => Object.hasOwn(s
 
 /** Old or malformed saves must not keep effects whose skill is absent from the collection. */
 export function clearUnownedTracks(s: SkillState): void {
-  for (const track of [s.buffs, s.auras, s.buffUp]) {
-    for (const id of Object.keys(track)) if (!ownsSkill(s, id)) delete track[id];
+  for (const track of [s.buffs, s.auras, s.buffUp, s.cd]) {
+    for (const id of Object.keys(track)) if (!ownsSkill(s, id) || !sm.byId[id]) delete track[id];
+  }
+  for (const id of Object.keys(s.buffs)) if (sm.byId[id]?.type !== 'buff') delete s.buffs[id];
+  for (const id of Object.keys(s.auras)) if (sm.byId[id]?.type !== 'aura') delete s.auras[id];
+  for (const id of Object.keys(s.xp || {})) if (!ownsSkill(s, id)) delete s.xp[id];
+}
+
+export function clampAuraReservations(s: SkillState): void {
+  let held = 0;
+  for (const [id, on] of Object.entries(s.auras)) {
+    const row = sm.byId[id];
+    if (!on || !ownsSkill(s, id) || row?.type !== 'aura') { delete s.auras[id]; continue; }
+    const next = held + sm.reservePct(row.reserve ?? '');
+    if (next >= sm.RESERVATION_LIMIT) s.auras[id] = false;
+    else held = next;
   }
 }
 
@@ -324,7 +338,7 @@ export function grantSkill(s: SkillState, rng: () => number): { id: string; dupl
 export function paySkillXp(s: SkillState) {
   const earning = [...s.list.filter((id): id is string => id !== null && ownsSkill(s, id)), ...Object.keys(s.auras).filter((k) => s.auras[k] && ownsSkill(s, k)),
     ...Object.keys(s.buffs).filter((k) => s.buffs[k] && ownsSkill(s, k))];
-  for (const id of earning) s.xp[id] = (s.xp[id] || 0) + E.skill_xp.xp_per_kill;
+  for (const id of new Set(earning)) s.xp[id] = (s.xp[id] || 0) + E.skill_xp.xp_per_kill;
 }
 
 /** The stores a cast may write to, passed in so the rotation stays a function of state. */
@@ -398,7 +412,7 @@ function healOf(skill: any): { heal?: { secLeft: number; pctPerSec: number }; in
  */
 export function effectsActive(sk: SkillState) {
   const rows: any[] = [];
-  for (const [id, on] of Object.entries(sk.auras)) if (on && ownsSkill(sk, id) && sm.byId[id]) rows.push(sm.byId[id]);
+  for (const [id, on] of Object.entries(sk.auras)) if (on && ownsSkill(sk, id) && sm.byId[id]?.type === 'aura') rows.push(sm.byId[id]);
   for (const [id, left] of Object.entries(sk.buffUp)) if (left > 0 && ownsSkill(sk, id) && sm.byId[id]) rows.push(sm.byId[id]);
   return sm.aggregateEffects(rows, (r: any) => skillLevel(sk, r.id));
 }
@@ -437,8 +451,9 @@ export function castOnce(
   const condMissingHp = env.missingHpPct || 0;
   // §13: a row with no timer of its own is the FILLER — it presses only after every timed slot has had
   // its chance, so a cd-0 row can never take the mana the rotation's real slots are waiting on
-  const order = s.list.filter((id) => id && (sm.byId[id] as any).cd !== 0 && sm.weaponFits(sm.byId[id], c.weaponName))
-    .concat(s.list.filter((id) => id && (sm.byId[id] as any).cd === 0 && sm.weaponFits(sm.byId[id], c.weaponName)));
+  const eligible = s.list.filter((id): id is string => Boolean(id) && ownsSkill(s, id!) && Boolean(sm.byId[id!]) && sm.weaponFits(sm.byId[id!], c.weaponName));
+  const order = eligible.filter((id) => sm.byId[id].cd !== 0)
+    .concat(eligible.filter((id) => sm.byId[id].cd === 0));
   for (const id of order) {
     if (!id || (s.cd[id] || 0) > 0) continue;
     // §14: the player's own switch on the slot — `never` silences a row, `conditional` gates it on
@@ -522,7 +537,7 @@ export function castOnce(
     // a row may press more than once: Whirlwind "3 rounds", Arrow Shower "3 arrows, 40% each"
     const hits = valueOf(skill, 'hits', 1);
     if (hits > 1) dmg *= hits * (valueOf(skill, 'hit_pct', 100) / 100);
-    dmg *= sm.groupBonus(skill, c.weaponName) * mastery.skillBonus(c.weaponMastery || 0);
+    dmg *= sm.groupBonus(skill, c.weaponName) * mastery.skillBonus(c.weaponMastery || 0, sm.weaponMatches(skill, c.weaponName));
     const perEvasion = effects.find((e) => e.stat === 'damage_per_evasion_pct');
     // the Evasion-scaling row (parked with the physical add-ons) scales on the Evasion chance the sheet carries, which is the line
     // Dodge was merged into, so the key names what it actually reads.
@@ -569,7 +584,7 @@ export function castOnce(
         if (e.stat === 'dot_dps') setErosion(env.mobStatus, t.id, e.value, dotSec, alignedPerSec);
         if (e.stat === 'stop_sec') stopMob(env.mobStatus, t.id, e.value, hasRule(skill, 'bypasses_control_cap'));
       }
-      if (statusName) placeStatus(env.mobStatus, t.id, statusName, c, alignedPerSec);
+      if (statusName) placeStatus(env.mobStatus, t.id, statusName, c, alignedPerSec, t.immune || []);
     };
     // a cast goes through the same defence chain as a swing: hit, then the mob's own dodge
     // (skill-pool.md — a curse attaches "with the same hit chance an attack uses"). A row whose hit is
@@ -647,7 +662,7 @@ export function castOnce(
       // proc, its bleed chance and the mace's stun — so a rotation does not silently stop applying
       // status the moment the bar fills
       if (env.mobStatus) {
-        applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct, rowStunPct);
+        applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct, rowStunPct, t.immune || []);
       }
       if (everyTarget || i === 0) spendOn(t);
       // a row's TARGET lines are a curse it writes on the hit: the same store a curse skill fills, so

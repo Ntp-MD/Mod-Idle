@@ -14,39 +14,30 @@
     --xp: #f1c40f;
     --mob: #7f8c8d;
     --good: #27ae60;
-    /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
-     the gutter the menu rail owns — every corner read on the field stops short of it */
+
     --glass: rgba(17, 22, 30, 0.74);
     --edge: rgba(255, 255, 255, 0.1);
     --gold: #e8c169;
-    /* the HUD's shared panel face and edge: available to fixed rails outside the stage and controls inside it */
+
     --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
     --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
-    /* focus is its own colour and never the accent: a focused control that is also the recommended one
-     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+
     --focus: #7fd4ff;
-    /* the floating menu row's height — the rail is a row across the top-right now, not a full-height
-     column, so this is its one axis and the minimap hangs a fixed drop under it */
+
     --rail: clamp(46px, 3.19vw, 88px);
-    /* the gutter every corner read stops short of, and the height a gauge track carries its figure in:
-     one pair for the frame rather than the same two numbers written on each cluster */
+
     --screen-pad: var(--spacing-md);
     --bar-h: clamp(12px, 0.87vw, 22px);
-    /* the HUD's floating hardware, sized once: the minimap sheet and the objectives column's width */
+
     --minimap-size: clamp(100px, 7.74vw, 216px);
     --objectives-w: clamp(170px, 11.96vw, 300px);
-    /* a body's rank, and the inks its state is named in: an Elite or a Boss wears its own rim and name
-     colour, a curse and a warn read in their own inks, and the gauges climb to a lit end of the same
-     semantic the dim token carries */
+
     --elite: #6c5199;
     --elite-ink: #b98cff;
     --boss: #9d3b34;
     --boss-ink: #ff8b7a;
     --curse: #c8a5ff;
-    /* Item rarity: a content ladder for a drop's name, its slot edge and its card header, the way the
-     rank inks above name a body. It is not the highlight system — gold stays you-or-pressable and
-     green stays the better option, so a rarity ink never carries a control's meaning. The rungs are
-     read off the drop itself (quality band, Tier, and whether a Quality stone was spent on it). */
+
     --rar-common: #8b96a8;
     --rar-uncommon: #5fb87a;
     --rar-rare: #4f8fe0;
@@ -60,24 +51,22 @@
     --mana-lit: #6bc4f0;
     --es-lit: #a8e6ff;
     --xp-lit: #f7e07a;
-    /* the stage's own backdrop and its two scene lights: deep ground, a night lift, a shore lift */
+
     --ground: #0a0e13;
     --ground-2: #131926;
     --ground-3: #181d18;
     --glow-moss: #465c3a;
     --glow-dusk: #304a6c;
-    /* the two recessed plates the HUD's own hardware is cut from — the portrait face and the wheel's orb,
-     each a top-lit dark over its own floor — and the deep end of the accent's gradient, a shade under
-     `--hot` so the count pill's own floor is a token like its top */
+
     --face-top: #1c2430;
     --face-floor: #0d1218;
     --orb-top: #242e3c;
     --orb-floor: #10151d;
     --hot-deep: #a33428;
-    /* a recessed floor (an input well, a kbd cap, an empty slot) and the scrollbar's lit thumb */
+
     --inset: #12151b;
     --bar-2: #2e3742;
-    /* the map sheet's own inks: label fills over the field, the id ink, and the two travel pins */
+
     --sheet-ink: #cfd8e3;
     --sheet-place: #f2e7d0;
     --sheet-id: #6d7987;
@@ -87,21 +76,15 @@
     --pin-target-glow: #ff6b5c;
     --ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
     --num: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
-    /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
-     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur.
-     The rest step is the smallest blur that still pushes the ground behind the plates: past it the hex
-     sheet stops reading as a map you stand on and becomes a photograph of one. */
+
     --dof-rest: 4px;
-    /* the one rung below the rest step: a surface that owns the screen pushes the ground here rather than
-     inventing a pixel count of its own, so the ladder stays a ladder */
+
     --dof-far: 5px;
     --dof: var(--dof-rest);
-    /* the browser's own paints, themed from the same palette instead of left to the platform */
+
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
-    /* Responsive families use per-token vw values with their own floor and cap. Slopes are calibrated
-     to the 2066px reference width, so each family can be tuned independently. A figure under 5px stays
-     a hairline, blur or other local detail where it is drawn. */
+
     --font-xs: clamp(11px, 0.82vw, 23px);
     --font-sm: clamp(13px, 0.97vw, 27px);
     --font-md: clamp(16px, 1.21vw, 34px);
@@ -122,23 +105,11 @@
     --spacing-md: clamp(13px, 0.97vw, 27px);
     --spacing-lg: clamp(18px, 1.36vw, 38px);
     --spacing-xl: clamp(26px, 2.03vw, 57px);
-    /* THE MICRO RUNGS. The five steps above are a ladder of about ×1.62, and the two rungs under
-     `--spacing-xs` are where that same ratio lands: 8 ÷ 1.62 ≈ 5, 5 ÷ 1.62 ≈ 3, 3 ÷ 1.62 ≈ 2. The
-     client used to write 1/2/3/4px freely for the same jobs — an icon against its label, one readout
-     line under another, the seam between two bordered cells — and four values for three jobs is how
-     the rail ended up a 2px row while the cast orbs beside it ran a 3px one. They are steps now, and
-     they scale: a hardcoded 3px gap under a panel that grew 35% is no longer the same gap.
-       --spacing-3xs  two lines of one read, a glyph against its label
-       --spacing-2xs  a control's own inner pad, the seam between bordered cells
-     A 1px that is a border's own hairline is not spacing and never joins the ladder: `--seam`. */
+
     --spacing-2xs: clamp(2px, 0.15vw, 4px);
     --spacing-3xs: clamp(1px, 0.10vw, 3px);
     --seam: 1px;
 
-    /* the unique sizes. These are not steps: the HUD's fixed hardware, the map sheet and the boxes
-     too big for an icon step each keep their own figure. Each is the same `calc(<design>px * …)`, and
-     the two ends are that row's own hardware — the floor a control cannot read under and the ceiling
-     it must not grow past — so they bind where they always bound, only now on the shared ramp. */
     --sheet-fs-region: clamp(8px, 0.48vw, 14px);
     --sheet-fs-walk: clamp(6px, 0.34vw, 9px);
     --sheet-fs-place: clamp(7px, 0.44vw, 12px);
@@ -149,10 +120,7 @@
     --x-pull-burst: clamp(-32px, -1.16vw, -15px);
     --x-pull-scale: clamp(-14px, -0.48vw, -6px);
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
-    /* the skill slot diameter, shared by its grid and the field's vertical budget */
 
-    /* a box this large is its own size, not a step: a panel, a sheet, a board. The name is its design
-     figure — the pixels it paints at scale 1, which is a 2066px viewport. */
     --box-100: clamp(63px, 4.84vw, 135px);
     --box-110: clamp(69px, 5.32vw, 149px);
     --box-130: clamp(81px, 6.29vw, 176px);
@@ -242,6 +210,15 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .plist li { display: contents; }
 .plist .pk { font-family: var(--ui); color: var(--dim); }
 .plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
+.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem .8rem; padding: .65rem .8rem; cursor: pointer; }
+.zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.zone > summary::marker { color: var(--gold); }
+.zone-title { font-weight: 600; }
+.zone-meta { color: var(--dim); font-size: .8rem; }
+.zone[open] > summary { border-bottom: 1px solid var(--line); }
+.zone-body { padding: .1rem .8rem .8rem; }
+@media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
 /* the mob card grid: five cards a row at full width, two-up inside each, and it steps down to three,
    two and one as the page narrows so a card never squeezes its figures sideways */
 .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem .6rem; margin-top: .5rem; }
@@ -274,7 +251,7 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }</style><div class="layout">
-<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="on" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="on" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
 <main><h1>Survival, field skills and provisions</h1><p class="lead">A fight you lose costs time, never a piece and never a level. Read the pools, player-set Field Camp, Hunger, field provisions and the farm that feeds alchemy.</p><section><h2>The pools</h2><p class="note">Respec is free wherever a settlement is (<code>stat.respec_cost</code> reads <span class="num">0</span>), because a locked build would punish you harder than a lost fight does.</p><table><thead><tr><th>Pool</th><th>What it is</th><th>Full at the reference build</th><th>How it comes back</th></tr></thead><tbody><tr><td>Health</td><td>the pool every avoidance layer protects</td><td><span class="num">12,596</span></td><td>27.1 a second off the Vit line — <code>hpRegenOf</code></td></tr><tr><td>Mana</td><td>the pool Mana-cost skills spend from; HP-cost skills debit the current HP pool, while auras reserve Max Mana</td><td><span class="num">2,779</span></td><td>69.5 a second, so an empty pool refills in 40 sec — <code>manaRegenOf</code></td></tr><tr><td>Energy Shield</td><td>the caster’s second pool, spent before Health, and player-only</td><td><span class="num">573</span></td><td>17.2 a second, but only once 3 sec have passed without a hit — <code>esRegenOf</code></td></tr></tbody></table></section>
 <section><h2>What a Push costs</h2><p class="note">Nothing on this list is a number: a Push is the cost of the fight, not a tax on the character.</p><ul class="fx">
       <li><span class="fk">There is no death.</span><span class="fs">rule</span><span class="fv">a fight you lose rests you at camp and costs time only</span></li>
@@ -287,7 +264,7 @@ li { margin: .15rem 0; }</style><div class="layout">
 <section><h2>Field-skill progression</h2><p class="note">The field-drop bonus increases each configured material or provision chance multiplicatively; gear and crafting-stone drops are unchanged. Skill levels increase harvest quantity at the listed milestones, and Hunting applies that quantity bonus to raw meat and lineage provisions.</p><table><thead><tr><th>Progress</th><th>Benefit</th><th>Read from</th></tr></thead><tbody><tr><td>Harvest milestones</td><td>+1 unit per action at Skill levels 5 · 10 · 15</td><td><code>fieldwork.progression.harvest_bonus_*</code></td></tr><tr><td>Field drop rate</td><td>+0.5% per Skill level after 1 and +0.3% per resource Mastery level after 1, up to +40%</td><td><code>fieldwork.progression.drop_rate_bonus_*</code></td></tr></tbody></table></section>
 <section><h2>Food drops from hunts</h2><p class="note">These lineage drops are separate from the raw-meat roll. Goblins may leave raw haunches, human patrols may leave cooked rations, and forest folk can yield edible moonmint.</p><table><thead><tr><th>Lineage</th><th>Provision</th><th>Chance</th><th>Quantity</th></tr></thead><tbody><tr><td>goblin</td><td>Goblin Haunch</td><td>22.0%</td><td>1–2</td></tr><tr><td>human</td><td>Soldier's Ration</td><td>18.0%</td><td>1–1</td></tr><tr><td>elf · dryad</td><td>Moonmint</td><td>8.0%</td><td>1–2</td></tr><tr><td>slime · lizardman</td><td>Field Mushroom</td><td>6.0%</td><td>1–1</td></tr><tr><td>troll · giant · ogre</td><td>Forest Nuts</td><td>4.0%</td><td>1–2</td></tr></tbody></table></section>
 <section><h2>Hunger and provisions</h2><p class="note">Walking, hunting and gathering drain Hunger at their own configured rates. Town and a safe idle Camp pause it. Auto Eat defaults to 25%, uses cooked food → fruit → edible herbs, and saves raw food for empty-Hunger emergencies unless opted in earlier. At empty Hunger, HP regeneration is cut by 90%; Energy Shield recharge stays unchanged. Each crossed road block also rolls a separate supply or rest event, in addition to its usual ambush chance.</p><table><thead><tr><th>Food</th><th>Kind</th><th>Hunger restored</th><th>Source</th></tr></thead><tbody><tr><td>Raw Game Meat</td><td>raw</td><td>+22</td><td>wildlife</td></tr><tr><td>Goblin Haunch</td><td>raw</td><td>+20</td><td>goblin scavengers</td></tr><tr><td>Wild Berries</td><td>fruit</td><td>+14</td><td>road forage</td></tr><tr><td>Forest Nuts</td><td>fruit</td><td>+18</td><td>road forage and large beasts</td></tr><tr><td>Sunroot</td><td>fruit</td><td>+21</td><td>sunlit road forage</td></tr><tr><td>Moonmint</td><td>herb</td><td>+12</td><td>elves, dryads and moonlit trails</td></tr><tr><td>Field Mushroom</td><td>ingredient</td><td>cooking ingredient</td><td>slimes and road forage</td></tr><tr><td>Aromatic Herb</td><td>ingredient</td><td>cooking ingredient</td><td>Rare Grove</td></tr><tr><td>Soldier's Ration</td><td>cooked</td><td>+40</td><td>human patrols and cooking</td></tr><tr><td>Trail Stew</td><td>cooked</td><td>+42</td><td>cooking</td></tr><tr><td>Hunter's Roast</td><td>cooked</td><td>+58</td><td>cooking</td></tr><tr><td>Warden Broth</td><td>cooked</td><td>+64</td><td>cooking</td></tr><tr><td>Grilled Skewer</td><td>cooked</td><td>+32</td><td>cooking</td></tr><tr><td>Berry Porridge</td><td>cooked</td><td>+38</td><td>cooking</td></tr></tbody></table></section>
-<section><h2>Camp kitchen menu</h2><p class="note">Cook at a player-set Field Camp. A cooked meal restores Hunger and replaces the one active meal buff.</p><table><thead><tr><th>Menu</th><th>Dish</th><th>Cooking level</th><th>Ingredients</th><th>Hunger and timed effect</th></tr></thead><tbody><tr><td>Hearth</td><td>Trail Stew</td><td>1</td><td>2 Raw Game Meat</td><td>+42 Hunger · 15 min · +5% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Hunter's Roast</td><td>6</td><td>3 Raw Game Meat · 1 Field Mushroom · 1 rarewood · 1 mid herb</td><td>+58 Hunger · 30 min · +9% damage · +0.4% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Warden Broth</td><td>11</td><td>2 Raw Game Meat · 1 Aromatic Herb · 1 high herb</td><td>+64 Hunger · 45 min · +7% damage · +0.6% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Grilled Skewer</td><td>1</td><td>1 Raw Game Meat · 1 Field Mushroom</td><td>+32 Hunger · 10 min · +3% damage · +0.1% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Berry Porridge</td><td>1</td><td>2 Wild Berries · 1 Forest Nuts · 1 low herb</td><td>+38 Hunger · 10 min · +2% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Soldier's Ration</td><td>1</td><td>1 Raw Game Meat · 1 Forest Nuts</td><td>+40 Hunger · 15 min · +2% damage · +0.1% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Goblin Bone Broth</td><td>3</td><td>2 Goblin Haunch · 1 Field Mushroom · 1 Moonmint</td><td>+54 Hunger · 20 min · +5% damage · +0.3% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Moonmint Tea</td><td>2</td><td>2 Moonmint · 1 Wild Berries</td><td>+34 Hunger · 20 min · +0% damage · +0.5% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Sunroot Porridge</td><td>4</td><td>2 Sunroot · 1 Wild Berries · 1 low herb</td><td>+46 Hunger · 25 min · +3% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Spiced Trail Roast</td><td>7</td><td>2 Raw Game Meat · 1 Forest Nuts · 1 Aromatic Herb · 1 rarewood · 1 mid herb</td><td>+62 Hunger · 35 min · +8% damage · +0.4% Max HP regen/sec</td></tr></tbody></table></section>
+<section><h2>Camp kitchen menu</h2><p class="note">Cook at a player-set Field Camp. A cooked meal restores Hunger and replaces the one active meal buff. Cooking, brewing and condensing count the bag space freed by their ingredients; if the output still cannot fit, nothing is spent.</p><table><thead><tr><th>Menu</th><th>Dish</th><th>Cooking level</th><th>Ingredients</th><th>Hunger and timed effect</th></tr></thead><tbody><tr><td>Hearth</td><td>Trail Stew</td><td>1</td><td>2 Raw Game Meat</td><td>+42 Hunger · 15 min · +5% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Hunter's Roast</td><td>6</td><td>3 Raw Game Meat · 1 Field Mushroom · 1 rarewood · 1 mid herb</td><td>+58 Hunger · 30 min · +9% damage · +0.4% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Warden Broth</td><td>11</td><td>2 Raw Game Meat · 1 Aromatic Herb · 1 high herb</td><td>+64 Hunger · 45 min · +7% damage · +0.6% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Grilled Skewer</td><td>1</td><td>1 Raw Game Meat · 1 Field Mushroom</td><td>+32 Hunger · 10 min · +3% damage · +0.1% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Berry Porridge</td><td>1</td><td>2 Wild Berries · 1 Forest Nuts · 1 low herb</td><td>+38 Hunger · 10 min · +2% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Soldier's Ration</td><td>1</td><td>1 Raw Game Meat · 1 Forest Nuts</td><td>+40 Hunger · 15 min · +2% damage · +0.1% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Goblin Bone Broth</td><td>3</td><td>2 Goblin Haunch · 1 Field Mushroom · 1 Moonmint</td><td>+54 Hunger · 20 min · +5% damage · +0.3% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Moonmint Tea</td><td>2</td><td>2 Moonmint · 1 Wild Berries</td><td>+34 Hunger · 20 min · +0% damage · +0.5% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Sunroot Porridge</td><td>4</td><td>2 Sunroot · 1 Wild Berries · 1 low herb</td><td>+46 Hunger · 25 min · +3% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Spiced Trail Roast</td><td>7</td><td>2 Raw Game Meat · 1 Forest Nuts · 1 Aromatic Herb · 1 rarewood · 1 mid herb</td><td>+62 Hunger · 35 min · +8% damage · +0.4% Max HP regen/sec</td></tr></tbody></table></section>
 <section><h2>Potions</h2><p class="note">Provisioning, not power: one shared cooldown of 30 sec, at most 3 a fight, switched off entirely on a Boss (<code>potions.boss_suppressed</code>), 2 weight each. Auto-use starts on at 30% Health and 25% Mana. That is why no potion moves a health line anywhere in the design.</p><table><thead><tr><th>Draught</th><th>Pool</th><th>Band</th><th>Effect</th><th>Brewed from</th></tr></thead><tbody><tr><td>Red Draught</td><td>hp</td><td>low</td><td><span class="num">10% of the pool, instantly</span></td><td><span class="hy">3 herbs + 1 Reroll Value Stones</span></td></tr><tr><td>Yellow Draught</td><td>hp</td><td>mid</td><td><span class="num">20% of the pool, instantly</span></td><td><span class="hy">5 herbs + 2 Reroll Value Stones</span></td></tr><tr><td>White Draught</td><td>hp</td><td>high</td><td><span class="num">30% of the pool, instantly</span></td><td><span class="hy">8 herbs + 4 Reroll Value Stones</span></td></tr><tr><td>Sky Draught</td><td>mana</td><td>low</td><td><span class="num">15% of the pool, instantly</span></td><td><span class="hy">3 herbs + 1 Reroll Value Stones</span></td></tr><tr><td>Blue Draught</td><td>mana</td><td>mid</td><td><span class="num">25% of the pool, instantly</span></td><td><span class="hy">5 herbs + 2 Reroll Value Stones</span></td></tr><tr><td>Deep Blue Draught</td><td>mana</td><td>high</td><td><span class="num">35% of the pool, instantly</span></td><td><span class="hy">8 herbs + 4 Reroll Value Stones</span></td></tr></tbody></table></section>
 <section><h2>Condensed</h2><p class="note">The one craft that turns a stack into a smaller stack: it buys bag space, never a bigger pool.</p><table><thead><tr><th></th><th>What it takes</th><th>What it gives</th></tr></thead><tbody><tr><td>A Condensed draught</td><td>10 bottles + 4 Reroll Value Stones</td><td>×10 effect, at 12 weight (20 carried loose)</td></tr></tbody></table></section>
 <section><h2>The herb farm</h2><p class="note">Settlement Farming provisions herbs for alchemy. Mining, Woodcutting, Hunting and Cooking are separate field skills; none of their XP is character XP.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Plots</td><td>3 to start, 2 bought, 5 at most</td><td><code>farm.plots</code></td></tr><tr><td>A grow</td><td>4.0 hours, then 3 herbs</td><td><code>farm.growth_hours</code> · <code>farm.yield_per_harvest</code></td></tr><tr><td>A replant</td><td>1 herb of the harvest goes back into the ground</td><td><code>farm.seed_cost_herbs</code></td></tr><tr><td>A day</td><td>2 taps, and up to 12.0 hours of growth are paid while you are away</td><td><code>farm.taps_per_day</code> · <code>farm.offline_cap_hours</code></td></tr><tr><td>A level</td><td>cap 20 · 20 XP a harvest · the same curve as Weapon Mastery</td><td><code>farm.level_*</code></td></tr><tr><td>Which draughts open</td><td>low from 1 · mid from 6 · high from 11</td><td><code>farm.tier_unlock_level</code></td></tr></tbody></table></section>

@@ -9,7 +9,7 @@ const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 
 export default defineConfig({
   plugins: [svelte()],
-  server: { fs: { allow: [repoRoot] } },
+  server: { port: 5173, strictPort: true, fs: { allow: [repoRoot] } },
   build: {
     outDir: 'dist',
     emptyOutDir: true,

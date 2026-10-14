@@ -2,7 +2,7 @@
   import { E, eng, road, sm } from '../engine/client';
   import { modsOn, psMult } from '../sim/curse';
   import { fxByMob as bucketFx, plateBeat, plateStrike, plateGesture } from './plate';
-  import { fieldLabel } from './hud';
+  import { fieldLabel, mechanicWords } from './hud';
   import { bar, curseWords, statusWords } from './field';
   import { fxOut } from './motion';
   import { elementIcon, mobIcon, skillIcon } from '../icon';
@@ -206,7 +206,7 @@
             <img class="portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
             <div class="identity-text">
               <p class="mob-name">{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
-              <p class="body">{m.kind}</p>
+              <p class="body">{[m.kind, ...mechanicWords(m)].join(' · ')}</p>
             </div>
           </div>
           {#each m.innate as element}

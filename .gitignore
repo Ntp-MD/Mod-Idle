@@ -12,6 +12,7 @@ art/favs.json
 
 # Local browser-automation logs
 .playwright-mcp/
+.playwright-cli/
 
 # Owner-private idea parking - local only, never synced, never read by agents
 # unless the owner assigns the exact file path in chat.

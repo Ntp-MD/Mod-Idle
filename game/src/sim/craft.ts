@@ -45,8 +45,9 @@ export function poolOf(item: Item): string[] {
 export interface CraftResult { ok: boolean; why?: string; item?: Item; note?: string }
 
 /** Gear crafting is Settlement-only (`crafting.md`); field meals use the Camp recipe track. */
-export function atSettlement(state: GameState): boolean {
-  return !!state.cell && !state.walk && state.phase !== 'camp' && road.cellRank(state.cell) === 0;
+export function atSettlement(state: GameState, settlementId?: string): boolean {
+  return !!state.cell && !state.walk && state.phase !== 'camp' && road.cellRank(state.cell) === 0
+    && (!settlementId || road.owningNode(state.cell).id === settlementId);
 }
 
 export function stoneNames(op: CraftOp, item?: Item): Record<string, number> {
@@ -74,6 +75,7 @@ export function doCraft(
   rng: () => number,
   pick?: string,
 ): CraftResult {
+  if (!atSettlement(state)) return { ok: false, why: 'gear crafting is a settlement service' };
   const item: Item | null = where === 'gear' ? state.gear[index] : state.bag[index];
   if (!item) return { ok: false, why: 'nothing in that slot' };
   if (craft.LOCKED[op]) return { ok: false, why: craft.LOCKED[op] };

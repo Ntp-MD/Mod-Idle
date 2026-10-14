@@ -14,7 +14,7 @@ export const LADDER = [
 /** Any 2 duplicates convert into 1 of a chosen skill (`skill-pool-system.md`). */
 export const CONVERSION = 2;
 
-/** Weapon type → skill group (`skill-pool.md` "Weapon groups", following equipment-weapon.md). */
+/** Weapon type → skill group (`skill-pool.md` "Weapon groups"). */
 export const WEAPON_GROUPS = {
   melee: ['sword', 'axe', 'dagger', 'mace', 'spear', 'two-handed sword', 'two-handed axe'],
   ranged: ['bow', 'crossbow'],
@@ -191,12 +191,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   const skillLevel = (xp: number) => Math.min(SX.level_cap, Math.floor(xp / SX.xp_per_step) + 1);
   const skillXpForLevel = (level: number) => (level - 1) * SX.xp_per_step;
 
-  /**
-   * Weapon type → skill group (`skill-pool.md` "Weapon groups", following equipment-weapon.md).
-   * `engine.json` `weapons` rows merge several weapon types onto one tempo (a staff and a spear
-   * share an aspd band), so a rolled Base name can name more than one group. The first type named
-   * in the Base governs the group — the merged row is an aspd band, not a weapon type.
-   */
+  /** Resolve a weapon's group from its Base name. */
   function weaponGroupOf(weaponName: string) {
     const n = String(weaponName || '').toLowerCase();
     let best: { index: number; group: string | null } = { index: -1, group: null };
@@ -215,17 +210,21 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     !skill.group || skill.group === 'all' || skill.group === weaponGroupOf(weaponName) ? 1 + GROUP_BONUS : 1;
   /**
    * The weapon a row is BOUND to, as a family token matched against the Base's own name — `axe` covers
-   * both one-handed and two-handed, `sword` both swords. A row without one is open to every weapon in
-   * its group; a row with one fires only while that weapon is held, so a kit can read as its weapon's.
+   * both one-handed and two-handed, `sword` both swords, `bow` both bow and crossbow. Only the arrow
+   * rows carry one (firing solely while a bow or a crossbow is held); every other row is open to any
+   * weapon and answers only its group bonus.
    */
   function weaponFits(skill: SkillRow, weaponName: string): boolean {
     const w = (skill as any).weapon;
     return !w || String(weaponName || '').toLowerCase().includes(String(w).toLowerCase());
   }
 
-  /** Held-weapon Mastery: +0.5% skill damage per level from L5, max +8% (`equipment-weapon.md`). */
-  const masteryBonus = (masteryLevel: number) =>
-    1 + Math.min(8, Math.max(0, masteryLevel >= 5 ? (masteryLevel - 4) * 0.5 : 0)) / 100;
+  function weaponMatches(skill: SkillRow, weaponName: string): boolean {
+    if (!weaponName || weaponName === 'bare hand') return false;
+    if ((skill as any).weapon) return weaponFits(skill, weaponName);
+    const group = (skill as any).group;
+    return !group || group === 'all' || group === weaponGroupOf(weaponName);
+  }
 
   function row(skill: SkillRow, opts: { cdrPct?: number; ladderPct?: number; phys?: number; magic?: number; elem?: number; align?: number; maxHp?: number; level?: number; attackPct?: number; spellPct?: number }) {
     const cdr = opts.cdrPct != null ? opts.cdrPct : CAST_REF.cdr_pct;
@@ -336,7 +335,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     PRESETS, presetCount, mainPreset,
     LADDER_MAX_DUPLICATES, RESERVATION_LIMIT, GROUP_BONUS,
     manaSpec, manaCostOf, hpCostSpec, hpCostOf, costOf, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
-    weaponGroupOf, groupBonus, weaponFits, masteryBonus, row, reservePct,
+    weaponGroupOf, groupBonus, weaponFits, weaponMatches, row, reservePct,
     all: () => SKILLS.skills,
     of: (type: string) => SKILLS.skills.filter((s) => s.type === type),
     /**

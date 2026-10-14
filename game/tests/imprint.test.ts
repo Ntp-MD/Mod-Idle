@@ -33,18 +33,31 @@ describe('imprint stone', () => {
   });
 
   it('one stone rewrites one Unbound line with a fresh roll, clearing the baseline', () => {
-    const { s, item } = piece();
-    const idx = item.lines.findIndex((_, i) => i >= craft.UNTOUCHABLE);
-    expect(idx).toBeGreaterThanOrEqual(craft.UNTOUCHABLE);
-    const carried = new Set(item.lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
-    const blocked = loot.blockedBy(carried);
-    const target = poolOf(item).find((id) => !carried.has(id) && !blocked.has(id))!;
+    const s = newGame();
+    huntZone(s, s.zone);
+    setLevel(s, 60);
+    // hunt for a drop the bench can actually imprint: a piece rolled full to its own Base pool, or one
+    // holding the Stat Mod line that blocks every sibling in that family, names no target at all
+    let bag = -1, line = -1, target = '';
+    let guard = 0;
+    while (guard++ < 200000 && !target) {
+      tick(s, {}, { online: true });
+      for (let i = 0; i < s.bag.length && !target; i++) {
+        const item: any = s.bag[i];
+        const untouchable = item.lines.findIndex((_: any, j: number) => j >= craft.UNTOUCHABLE);
+        if (untouchable < 0) continue;
+        const carried = new Set<string>(item.lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
+        const blocked = loot.blockedBy(carried);
+        const found = poolOf(item).find((id) => !carried.has(id) && !blocked.has(id));
+        if (found) { bag = i; line = untouchable; target = found; }
+      }
+    }
     expect(target).toBeTruthy();
     s.counters.stones = { ...s.counters.stones, ['imprint_' + target]: 1 };
-    const before = s.bag[0].lines[idx].id;
-    const r = doCraft(s, 'bag', 0, 'imprint', idx, seed(7), target);
+    const before = s.bag[bag].lines[line].id;
+    const r = doCraft(s, 'bag', bag, 'imprint', line, seed(7), target);
     expect(r.ok).toBe(true);
-    expect(s.bag[0].lines[idx].id).toBe(target);
+    expect(s.bag[bag].lines[line].id).toBe(target);
     expect(target).not.toBe(before);
     expect(s.counters.stones['imprint_' + target] || 0).toBe(0);
   });

@@ -9,6 +9,7 @@ import { poolOf } from '../src/sim/craft';
 import { cooldownLeft, enterDungeon } from '../src/sim/dungeon';
 import { col, turnIn } from '../src/sim/collector';
 import { settlementById } from '../src/sim/town';
+import { settlementCell } from '../src/sim/road';
 import { mobSwing, dotDamageParts, type Statuses } from '../src/sim/combat';
 import { newMobStatusStore, placeStatus, applyBleed, stepMob, modsOn, targetMods } from '../src/sim/mobStatus';
 import { spendableMana, reservedMana, usableMana, tickSkills, newSkillState } from '../src/sim/skills';
@@ -239,6 +240,8 @@ describe('the Collector never consumes a pinned piece', () => {
     const s = newGame(38);
     const set = col.sets[0];
     const settlement = settlementById(set.settlement)!;
+    s.cell = { ...settlementCell(set.settlement)!, sub: null, wild: null };
+    s.zone = settlement.zone;
     // Tier II standing opens the set slots: Standing reads kills over the settlement's own budget
     s.counters.zoneKills[settlement.zone] = eng.SETTLEMENT_BUDGET_KILLS[settlement.zone] * 10;
     for (const [i, p] of set.parsed.entries()) {

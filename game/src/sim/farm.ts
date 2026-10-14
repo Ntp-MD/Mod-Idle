@@ -83,7 +83,6 @@ export function plant(state: GameState, index: number, tier: string): { ok: bool
   if (seedCost) state.farm.herbs[tier] -= seedCost;
   plot.tier = tier;
   plot.plantedAt = state.clockSec;
-  // no seed is priced or dropped anywhere in the design, so planting costs time only
   plot.readyAt = state.clockSec + farm.growthSec;
   return { ok: true };
 }
@@ -110,11 +109,14 @@ export function craftPotion(state: GameState, name: string): { ok: boolean; why?
   if (!potion) return { ok: false, why: 'no such draught' };
   const cost = farm.craftCost(potion.tier);
   if ((state.farm.herbs[potion.tier] || 0) < cost.herbs) return { ok: false, why: `needs ${cost.herbs} ${potion.tier} herbs` };
-  // never pay a cost for a bottle the bag cannot hold (`slots.ts` · stop_pickup)
-  if (!fits(state, state.farm.potions, name, 'potion', 1)) return { ok: false, why: 'no free slot in the character bag' };
   if ((state.counters.stones.reroll_value || 0) < cost.reroll_value_stones) {
     return { ok: false, why: `needs ${cost.reroll_value_stones} Value stones` };
   }
+  // never pay a cost for a bottle the bag cannot hold (`slots.ts` · stop_pickup)
+  if (!fits(state, state.farm.potions, name, 'potion', 1, [
+    { bucket: state.farm.herbs, key: potion.tier, capKind: 'herb', amount: cost.herbs },
+    { bucket: state.counters.stones, key: 'reroll_value', capKind: 'stone', amount: cost.reroll_value_stones },
+  ])) return { ok: false, why: 'no free slot in the character bag' };
   state.farm.herbs[potion.tier] -= cost.herbs;
   state.counters.stones.reroll_value -= cost.reroll_value_stones;
   addTo(state, state.farm.potions, name, 'potion', 1);
@@ -125,8 +127,11 @@ export function craftPotion(state: GameState, name: string): { ok: boolean; why?
 export function condense(state: GameState, name: string): { ok: boolean; why?: string } {
   const cost = farm.condensedCost();
   if ((state.farm.potions[name] || 0) < cost.bottles) return { ok: false, why: `needs ${cost.bottles} bottles` };
-  if (!fits(state, state.farm.condensed, name, 'potion', 1)) return { ok: false, why: 'no free slot in the character bag' };
   if ((state.counters.stones.reroll_value || 0) < cost.reroll_value) return { ok: false, why: `needs ${cost.reroll_value} stones` };
+  if (!fits(state, state.farm.condensed, name, 'potion', 1, [
+    { bucket: state.farm.potions, key: name, capKind: 'potion', amount: cost.bottles },
+    { bucket: state.counters.stones, key: 'reroll_value', capKind: 'stone', amount: cost.reroll_value },
+  ])) return { ok: false, why: 'no free slot in the character bag' };
   state.farm.potions[name] -= cost.bottles;
   state.counters.stones.reroll_value -= cost.reroll_value;
   addTo(state, state.farm.condensed, name, 'potion', 1);

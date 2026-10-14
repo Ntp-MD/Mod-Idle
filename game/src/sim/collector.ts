@@ -3,6 +3,7 @@ import { createCollector } from '../../../engine/collector.ts';
 import { standingTier } from './town';
 import type { GameState } from './types';
 import type { Item } from './types';
+import { atSettlement } from './craft';
 
 /** The set rules live in the shared module, next to the Bases they name. */
 export const col: any = createCollector(TD, BD);
@@ -51,6 +52,7 @@ export function wants(state: GameState, item: Item): any {
  * the filter stops holding pieces for it. There is no gold in any Collector payout (T14).
  */
 export function turnIn(state: GameState, settlementId: string): { ok: boolean; why?: string; reward?: string } {
+  if (!atSettlement(state, settlementId)) return { ok: false, why: 'stand in this settlement to turn in the set' };
   const set = col.setAt(settlementId);
   if (!set) return { ok: false, why: 'no Collector set here' };
   if (!setUnlocked(state, set)) return { ok: false, why: 'Tier II standing in this settlement opens the set slots' };

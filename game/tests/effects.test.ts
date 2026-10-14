@@ -165,7 +165,7 @@ describe('heals read their own number', () => {
     setLevel(s, 60);
     s.zone = 5;
     s.skills.owned['heal.greater_heal'] = 1;
-    s.skills.list[0] = 'heal.greater_heal';
+    s.skills.list[0] = 'heal.greater_heal'; s.skills.owned['heal.greater_heal'] ??= 0;
     let guard = 0;
     while (!s.group.length && guard++ < 30) tick(s, {});
     expect(s.group.length).toBeGreaterThan(0);
@@ -247,7 +247,7 @@ describe('the ring carries the beats an animation is made of', () => {
 
   it('a press says which row fired, so the cast order can light it', () => {
     const s = hunting();
-    s.skills.list[0] = 'attack.cleave';
+    s.skills.list[0] = 'attack.chain_lightning'; s.skills.owned['attack.chain_lightning'] ??= 0;
     s.player.mana = 1e6;
     s.fx = [];
     for (let i = 0; i < 40 && !(s.fx || []).some((e) => e.kind === 'cast'); i++) tick(s, {});

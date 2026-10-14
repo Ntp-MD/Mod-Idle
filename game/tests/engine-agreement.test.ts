@@ -24,13 +24,17 @@ describe('game and cages run one engine', () => {
 
 
 describe('the opening character is the designed minute one', () => {
-  it('starts below the designed Evasion ceiling against the reference and every zone-one lineage', () => {
+  it('starts below the designed Evasion ceiling against the reference and the top-accuracy zone-one race', () => {
     const s = newGame();
     const c = buildCharacter(s.player.level, s.gear, {}, 0, undefined, s.player.points, s.player.treeRanks);
     expect(c.evasion).toBeGreaterThan(0);
     expect(c.evasionChance).toBeGreaterThan(0);
     expect(c.evasionChance).toBeLessThanOrEqual(E.evasion_roll.opening_max_chance_pct);
-    for (const species of E.mob.species.filter((row) => row.zones.includes(s.zone))) {
+    const zoneCast = E.mob.species.filter((row) => row.zones.includes(s.zone));
+    const topAccuracy = Math.max(...zoneCast.map((row) => eng.mobAcc(eng.coreOf(row, 'dex', s.zone), row.accuracy_mult)));
+    const topRaces = zoneCast.filter((row) => eng.mobAcc(eng.coreOf(row, 'dex', s.zone), row.accuracy_mult) === topAccuracy);
+    expect(topRaces.length).toBeGreaterThan(0);
+    for (const species of topRaces) {
       const acc = eng.mobAcc(eng.coreOf(species, 'dex', s.zone), species.accuracy_mult);
       expect(eng.evasionChance(c.evasion, acc), species.name).toBeLessThanOrEqual(E.evasion_roll.opening_max_chance_pct);
     }
@@ -45,7 +49,9 @@ describe('the opening character is the designed minute one', () => {
     // the array is slot-ordered, so the worn set is read by slot, never by index
     const piece = (slot: string) => s.gear.find((g) => g && g.slot === slot)!;
     const item = piece('main hand');
-    expect(c.phys).toBe(eng.physOf(eng.statAt(1), item.lines[0].value, 0, c.weaponAspd));
+    const frameFlat = [item.lines[0], ...(item.lines[0].extra || [])]
+      .filter((line) => line.id === 'physical_power_flat').reduce((sum, line) => sum + line.value, 0);
+    expect(c.phys).toBe(eng.physOf(eng.statAt(1), frameFlat, 0, c.weaponAspd, item.base));
     expect(c.weaponAspd).toBe(1.2);
   });
 

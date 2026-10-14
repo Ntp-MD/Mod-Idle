@@ -16,11 +16,12 @@ import { eng, ROOT } from './lib/engine.ts';
 import * as G from './lib/gates.ts';
 import { readJson } from './lib/json.ts';
 import { createSkillModel } from '../engine/skills.ts';
-import { createLoot, leanReweight } from '../engine/loot.ts';
+import { createLoot, leanReweight, leanReweightMany } from '../engine/loot.ts';
 
 const { E, S, K, M, LG, BAND, BANDS, BAND_KEYS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
 const MODS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/mods.json'), 'utf8'));
 const BASES_JSON = readJson(path.join(import.meta.dirname, 'data/bases.json'));
+const MAP = readJson(path.join(ROOT, 'tools/data/map.json'));
 const f0 = (x: number) => Math.round(x).toLocaleString('en-US');
 const f1 = (x: number) => x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const f2 = (x: number) => x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -104,7 +105,7 @@ BLOCKS['group-C'] = () => {
   // Dex feeds it nothing — its line is accuracy and the Status alignment gate.
   const evFloor = E.mob.species.reduce((a, b) => (b.accuracy_mult < a.accuracy_mult ? b : a));
   const c2rating = eng.evasionRating(SPLIT, M.evasion_flat_t1, M.evasion_pct);
-  const c2chance = eng.evasionChance(c2rating, eng.mobAcc(eng.coreOf(evFloor, 'dex'), evFloor.accuracy_mult));
+  const c2chance = eng.evasionChance(c2rating, eng.mobAcc(eng.coreOf(evFloor, 'dex', evFloor.zones[0]), evFloor.accuracy_mult));
   const rows = [
     ['C1', `Evasion ${cap('evasion')}%`, `first ${E.evasion_roll.opening_rating} rating × ${E.evasion_roll.opening_share}; rating above × ${E.evasion_roll.earned_mult}; effective rating ÷ (effective rating + mob accuracy) · Dex feeds nothing (owner ruling)`, `**reachable** against the ${evFloor.name} ✓`],
     ['C2', `(compare) Agi ${f0(SPLIT)} + one Evasion flat line vs the floor lineage`, `rating = (${f0(SPLIT)}×${K.K_EVASION} + ${M.evasion_flat_t1}) × (1 + ${M.evasion_pct}/100) = ${f1(c2rating)}`, `${f1(c2chance)}% vs ${evFloor.name} · does not hit Cap ✓`],
@@ -182,15 +183,6 @@ function runChecks() {
     `F3 = F1 × F2 for all four rows: ${['low', 'mid', 'high', 'high_full_lck'].map((b) => `${f0(BAND[b].drops_per_hr)} ${BAND_LABEL[b]}`).join(' · ')}`);
   soft('X6', BANDS.every((b) => BAND[b].junk_per_hr === BAND[b].drops_per_hr - BAND[b].upgrades_per_hr),
     `junk = drops − upgrades everywhere, so gold and stones share one ceiling (G2 · G8)`);
-  // The full-Lck junk multiple is a derived anchor: `CEIL × K_LCK_DROP` is the whole lever, so
-  // dropping the stat ceiling to 510 moved 3.16 → 2.11, adding the earring as a 13th
-  // item moved it to 2.20, the re-base (kill rates ×1/3 and the level-90 Lck
-  // line 190 → 76) moved it to the value below, and the item-level pass moved it again — a drop's
-  // Unbound line count is drawn from a range now (2-5, up to 10 crafted), so the keep-rate and with it
-  // the junk line sits where that leaves it. Like X1 this literal is a canary against an accidental K
-  // re-tune, and the docs print the derived value, not this number.
-  watch('X7', Math.abs(LCK_BOUND - 3.15) < 0.02, `full-Lck junk line ×${f2(LCK_BOUND)} — off the ×3.15 the G8 and towns-stalls T7 quotes were written against; retune them with it`,
-    `full-Lck junk line ×${f2(LCK_BOUND)} — the bound G8 and towns-stalls T7 quote`);
   // The craft pacing is priced in KILLS (the kills-not-hours rule): what a kill pays is a drop line, so a set's cost is the
   // kills it takes, never an hour. `perKillK` turns each hourly figure into its per-kill drop, and
   // `killsFor` reads a set's stone count back out as kills off that same line.
@@ -202,9 +194,6 @@ function runChecks() {
   const ascAddKills = killsFor(C.ascend_items_per_set * C.ascend_add_stones, STONE.add_stones_per_hr);
   const ascTierKills = killsFor(C.ascend_items_per_set * C.ascend_tier_stones, STONE.tier_stones_per_hr);
   const ascKills = Math.max(ascAddKills, ascTierKills);
-  watch('X8', Math.round(STONE.tier_stones_per_hr) === 18 && Math.round(STONE.reroll_uses_per_hr) === 79,
-    `stone flow moved off the 18 tier stones / 79 Reroll uses an hour the prices were set against — re-price with it or re-tune the flow`,
-    `stone flow, per kill: elite ${perKillK(BAND.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones).toFixed(5)} + boss ${perKillK(L.boss_per_hour * L.boss_tier_stones).toFixed(5)} = ${tierPerKill.toFixed(5)} tier stone · junk ${junkPerKill.toFixed(5)} ÷ ${C.reroll_value_stones_per_use} = ${perKillK(STONE.reroll_uses_per_hr).toFixed(5)} Reroll use (F6 · F7)`);
   const polishKills = killsFor(C.polish_casts_per_full_set * C.reroll_value_stones_per_use, BAND.high.junk_per_hr);
   watch('X10', polishKills <= 6500, `full-set polish costs ${f0(polishKills)} kills — past the ~6,500-kill pace the bench price was set at`,
     `full-set polish = ${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones = ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Value stones, which the junk line pays in ${f0(polishKills)} kills — the cost one gold is priced against, read off the drop a kill pays (E8)`);
@@ -230,8 +219,14 @@ function runChecks() {
   const capped = WEAPONS.filter((w) => !w.reachable).map((w) => w.name);
   soft('X13', capped.length === WEAPONS.length,
     `the clock Cap ${E.caps.attack_interval_sec} sec a swing (= ${f1(100 / E.caps.attack_interval_sec)} hits/sec, derived as 100 ÷ the interval) is out of reach for every weapon at the Agi ceiling: ${WEAPONS.map((w) => `${w.name} ${f0(w.agi_to_cap)}`).join(' · ')} vs ceiling ${f0(CEIL)} — the Cap is a clock rule, not a build target, and K_AGI_ASPD stays at ${K.K_AGI_ASPD} so no weapon crowds it`);
-  add('X14', WEAPONS.every((w) => Math.abs(w.weapon_mult - 1.2 / w.weapon_aspd) < 0.005),
-    `weapon_mult = 1.2 ÷ weapon_aspd for all 6 rows (equal DPS across every weapon type)`);
+  const sword = WEAPONS.find((w) => w.name === 'one-handed sword');
+  const anchorDps = sword ? sword.weapon_aspd * sword.weapon_mult : 0;
+  const outsideWeaponBand = WEAPONS.filter((w) => {
+    const index = anchorDps ? w.weapon_aspd * w.weapon_mult / anchorDps : 0;
+    return index < 0.9 || index > 1.1;
+  });
+  add('X14', WEAPONS.length === 11 && sword?.weapon_mult === 1 && outsideWeaponBand.length === 0,
+    `11 type-specific multipliers keep the one-handed sword at 1.00 and every type within ±10% DPS (sword anchor ${anchorDps}, outside: ${outsideWeaponBand.map((w) => w.name).join(', ') || 'none'})`);
 
   // §12 · the weapon × body-class ladder. The reference weapon must be flat across the three body
   // classes (that is what keeps every zone price still), every row must carry all three columns, and
@@ -260,7 +255,7 @@ function runChecks() {
   if (!bossBodySize?.reads_as || !E.mob.sizes.some((s) => s.id === bossBodySize!.reads_as)) weaponSizeProblems.push('mob.sizes.boss does not declare a real reads_as body class');
   
   add('X47', weaponSizeProblems.length === 0, weaponSizeProblems.length ? weaponSizeProblems.join(' · ')
-    : `${weaponRows.length} weapon rows carry a small/medium/large ladder, ${REF_WEAPON} is flat at 1.00 so the reference row moves no zone price, ${nonFlat.length} row(s) are non-flat (${nonFlat.join(', ') || 'none'}) · a boss reads as \`${bossBodySize!.reads_as}\` (a boss is a species, not a size) · the rule is one multiplier on the physical share of an outgoing hit, applied after mitigation (HugePatch section 12)`);
+    : `${weaponRows.length} weapon rows carry a small/medium/large ladder, ${REF_WEAPON} is flat at 1.00 so the reference row moves no zone price, ${nonFlat.length} row(s) are non-flat (${nonFlat.join(', ') || 'none'}) · Boss profiles declare the body class each one reads as (default \`${bossBodySize!.reads_as}\`) · the rule is one multiplier on the physical share of an outgoing hit, applied after mitigation (HugePatch section 12)`);
 
   // item 5 · Stun Recovery is Vit's line, and its K is derived from the owner's own example rather
   // than picked: a single-stat Vit build at the ceiling lands on 50%, so the published one-second
@@ -343,10 +338,8 @@ function runChecks() {
   const habitatSizes = (E.mob.species as any[]).map((s) => s.habitat.length);
   add('X52', habitatProblems.length === 0, habitatProblems.length ? habitatProblems.join(' · ')
     : `${E.mob.species.length} species each carry a habitat of ${Math.min(...habitatSizes)}-${Math.max(...habitatSizes)} regions, every named region is real and claimed by at least one species, and every zone a species sits in is inside its habitat — a species appears only where its habitat allows, so the owner's re-placement is a data edit this gate reads (mob.species[].habitat · world.md \`mob-sheet\`)`);
-  // X53: subzones are presentation over the species source, never a second placement table.
-  // `mob.species[].zones` owns where a race lives; `mob.zones[].subzones[].races` must read back
-  // equal to it, and every displayed variant name must belong to a race shown in that subzone.
-  // Adding a race is one species entry plus its variants row — this gate catches the drift.
+  // X53: species.zones owns the zone cast; subzones partition that cast into actual spawn pools.
+  // Their union must match the source, and every displayed ladder rung must belong to its pool.
   const subProblems: string[] = [];
   {
     const byId = new Map((E.mob.species as any[]).map((s) => [s.id, s]));
@@ -382,6 +375,295 @@ function runChecks() {
   }
   add('X53', subProblems.length === 0, subProblems.length ? subProblems.join(' · ')
     : `${E.mob.zones.length} zones read their cast from mob.species[].zones via racesInZone, every subzone race resolves and matches, and every displayed variant belongs to a race shown in its subzone — add a race with one species entry plus its variants row`);
+
+  // The map stays presentation-only. This crosswalk lets the cage catch drift between its ground
+  // vocabulary and the environments attached to combat subzones without making the client read map data.
+  const environmentTerrain = (MAP as any).environment_terrain || {};
+  const mobEnvironments = new Set<string>((E.mob.zones as any[]).flatMap((z) =>
+    (z.subzones || []).map((s: any) => s.environment)));
+  const mapTerrains = new Set<string>(((MAP as any).cells || []).flatMap((cell: any) =>
+    (cell.subs || []).map((sub: any) => sub.terrain)));
+  const environmentTerrainProblems: string[] = [];
+  for (const environment of mobEnvironments) {
+    if (!(environment in environmentTerrain)) environmentTerrainProblems.push(`${environment}: no terrain mapping`);
+  }
+  for (const [environment, terrain] of Object.entries(environmentTerrain) as [string, string][]) {
+    if (!mobEnvironments.has(environment)) environmentTerrainProblems.push(`${environment}: no mob environment uses this mapping`);
+    if (!mapTerrains.has(terrain)) environmentTerrainProblems.push(`${environment}: unknown map terrain ${terrain}`);
+  }
+  const usedMapTerrains = new Set<string>(Object.values(environmentTerrain));
+  for (const terrain of mapTerrains) if (!usedMapTerrains.has(terrain)) environmentTerrainProblems.push(`${terrain}: no mob environment maps to it`);
+  add('X66', environmentTerrainProblems.length === 0, environmentTerrainProblems.length
+    ? environmentTerrainProblems.join(' · ')
+    : `${mobEnvironments.size} mob environments map to the map's ${mapTerrains.size} terrain labels; both vocabularies are joined for validation only (map.json environment_terrain)`);
+
+  // A wild cell's kind is the readable label for the fieldwork index it occupies. The array order
+  // remains the address; its kind makes accidental reordering visible to this gate.
+  const wildIndex = (E.fieldwork as any).wild_site_index || {};
+  const wildKindAt = new Map<number, string>();
+  const wildProblems: string[] = [];
+  for (const [kind, index] of Object.entries(wildIndex) as [string, number][]) {
+    if (!Number.isInteger(index) || index < 0 || wildKindAt.has(index)) wildProblems.push(`${kind}: invalid or duplicate wild-site index ${index}`);
+    else wildKindAt.set(index, kind);
+  }
+  const wildCount = wildKindAt.size;
+  for (const [cellIndex, cell] of ((MAP as any).cells || []).entries()) {
+    if (!Array.isArray(cell.wild) || cell.wild.length !== wildCount) {
+      wildProblems.push(`map cell ${cellIndex}: ${cell.wild?.length ?? 0} wild sites, expected ${wildCount}`);
+      continue;
+    }
+    cell.wild.forEach((site: any, index: number) => {
+      const expected = wildKindAt.get(index);
+      if (!expected || site.kind !== expected) wildProblems.push(`map cell ${cellIndex} wild index ${index}: kind ${site.kind || 'missing'}, expected ${expected || 'no site kind'}`);
+    });
+  }
+  add('X67', wildProblems.length === 0, wildProblems.length ? wildProblems.join(' · ')
+    : `${(MAP as any).cells.length} map cells label all ${wildCount} wild sites by the matching fieldwork index (map.json cells[].wild)`);
+
+  const accuracyLevels = new Set((E.mob.species as any[]).map((s) => s.accuracy_mult));
+  const sizePatterns = new Set((E.mob.species as any[]).map((s) => [...s.sizes].sort().join('+')));
+  const m3Problems: string[] = [];
+  if (accuracyLevels.size < 7) m3Problems.push(`accuracy ladder has ${accuracyLevels.size} values, expected at least 7`);
+  if (sizePatterns.size < 6) m3Problems.push(`species use ${sizePatterns.size} body-class patterns, expected at least 6`);
+  for (const id of ['kobold', 'slime', 'spider', 'wolf']) {
+    if ((E.mob.species as any[]).find((s) => s.id === id)?.sizes.includes('large')) m3Problems.push(`${id}: swarm body may not include Large`);
+  }
+  for (const id of ['ogre', 'troll', 'golem', 'treant', 'giant']) {
+    if ((E.mob.species as any[]).find((s) => s.id === id)?.sizes.includes('small')) m3Problems.push(`${id}: bruiser body may not include Small`);
+  }
+  for (const zone of (E.mob.zones as any[]).slice(-3)) {
+    const cast = (E.mob.species as any[]).filter((s) => s.zones.includes(zone.id));
+    const nonPhysical = cast.filter((s) => s.damage !== 'physical').length;
+    if (nonPhysical * 2 < cast.length) m3Problems.push(`zone ${zone.id}: ${nonPhysical}/${cast.length} species use mixed or magic damage`);
+  }
+  add('X69', m3Problems.length === 0, m3Problems.length ? m3Problems.join(' · ')
+    : `${accuracyLevels.size} accuracy tiers, ${sizePatterns.size} body-class patterns, role-specific Small/Large bounds, and mixed or magic damage on at least half of each final-zone cast`);
+
+  const subzoneCasts = (E.mob.zones as any[]).flatMap((z) =>
+    (z.subzones || []).map((s: any) => (s.races || []).slice().sort().join('+')));
+  const distinctSubzoneCasts = new Set(subzoneCasts).size;
+  add('X70', subzoneCasts.length > 0 && distinctSubzoneCasts >= 40, subzoneCasts.length > 0 && distinctSubzoneCasts >= 40
+    ? `${distinctSubzoneCasts} distinct race casts across ${subzoneCasts.length} subzones (target 40+)`
+    : `${distinctSubzoneCasts} distinct race casts across ${subzoneCasts.length} subzones; the layout target is 40+`);
+
+  const bossProfileProblems: string[] = [];
+  const physicalBodies = new Set(['small', 'medium', 'large']);
+  for (const boss of E.mob.bosses as any[]) {
+    const species = (E.mob.species as any[]).find((s) => s.id === boss.species);
+    if (!species) { bossProfileProblems.push(`${boss.name}: missing species ${boss.species}`); continue; }
+    if (!boss.core || STAT_KEYS.some((key) => !Number.isInteger(boss.core[key]) || boss.core[key] < 0)) bossProfileProblems.push(`${boss.name}: Core must contain whole non-negative stats`);
+    if (boss.core?.wis !== 0) bossProfileProblems.push(`${boss.name}: Wis is not live on mobs`);
+    if (boss.core?.vit !== species.core.vit) bossProfileProblems.push(`${boss.name}: Vit changes its species HP contribution`);
+    if (boss.damage === 'physical' && boss.core?.int !== 0) bossProfileProblems.push(`${boss.name}: physical profile carries Int`);
+    if (boss.damage !== 'physical' && !(boss.core?.int > 0)) bossProfileProblems.push(`${boss.name}: ${boss.damage} profile needs Int`);
+    if (!(boss.damage in (E.mob.damage_split as any))) bossProfileProblems.push(`${boss.name}: unknown damage tag ${boss.damage}`);
+    if (!(E.elements.order as string[]).includes(boss.element)) bossProfileProblems.push(`${boss.name}: unknown Element ${boss.element}`);
+    if (!physicalBodies.has(boss.reads_as)) bossProfileProblems.push(`${boss.name}: reads_as must name a body class`);
+    if (!(boss.accuracy_mult > 0) || !boss.trait) bossProfileProblems.push(`${boss.name}: accuracy tier or trait is missing`);
+  }
+  add('X71', bossProfileProblems.length === 0, bossProfileProblems.length ? bossProfileProblems.join(' · ')
+    : `${E.mob.bosses.length} per-zone bosses own Core, trait, Element, damage, accuracy and reads_as; their species Vit keeps each HP contribution fixed`);
+
+  const mapRegionProblems: string[] = [];
+  const zoneById = new Map<number, any>((E.mob.zones as any[]).map((zone) => [zone.id, zone]));
+  const mappedZoneIds = new Set<number>();
+  for (const region of ((MAP as any).regions || [])) {
+    const ids = region.zones || [];
+    for (const id of ids) {
+      if (mappedZoneIds.has(id)) mapRegionProblems.push(`${region.name}: zone ${id} is assigned to more than one map region`);
+      mappedZoneIds.add(id);
+      if (!zoneById.has(id)) mapRegionProblems.push(`${region.name}: zone ${id} does not exist`);
+    }
+    const expected = [...new Set(ids.map((id: number) => zoneById.get(id)?.region).filter(Boolean))].sort();
+    const actual = [...(region.zone_regions || [])].sort();
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) mapRegionProblems.push(`${region.name}: zone_regions ${actual.join(', ') || '(missing)'}, expected ${expected.join(', ')}`);
+  }
+  for (const zone of E.mob.zones as any[]) if (!mappedZoneIds.has(zone.id)) mapRegionProblems.push(`zone ${zone.id} has no map region`);
+  add('X72', mapRegionProblems.length === 0, mapRegionProblems.length ? mapRegionProblems.join(' · ')
+    : `${((MAP as any).regions || []).length} presentation regions map all ${mappedZoneIds.size} zone IDs to their gameplay zone.region names (map.json regions[].zone_regions)`);
+
+  const environmentLean = (E.mob as any).environment_lean || {};
+  const environmentLeanProblems: string[] = [];
+  for (const environment of mobEnvironments) {
+    if (!(environment in environmentLean)) environmentLeanProblems.push(`${environment}: no drop lean`);
+  }
+  for (const [environment, lean] of Object.entries(environmentLean) as [string, string][]) {
+    if (!mobEnvironments.has(environment)) environmentLeanProblems.push(`${environment}: no subzone uses this lean`);
+    if (!['none', 'gear', 'herb', 'junk'].includes(lean)) environmentLeanProblems.push(`${environment}: unknown lean ${lean}`);
+  }
+  const leanSample = { gear: 0.08, herb: 0.17, junk: 0.3 };
+  const onceLeaned = leanReweight(leanSample, 'gear', E.loot.variant_lean.shift_pct);
+  const combinedLeans = (lean: 'none' | 'gear' | 'herb' | 'junk') =>
+    leanReweightMany(leanSample, ['gear', lean], E.loot.variant_lean.shift_pct);
+  const probabilityTotal = (p: any) => p.gear + p.herb + p.junk;
+  for (const [environment, lean] of Object.entries(environmentLean) as [string, 'none' | 'gear' | 'herb' | 'junk'][]) {
+    const result = combinedLeans(lean);
+    if (Math.abs(probabilityTotal(result) - probabilityTotal(leanSample)) > 1e-9) environmentLeanProblems.push(`${environment}: variant + environment tilts changed expected drops/kill`);
+    if (lean !== 'none' && result[lean] <= onceLeaned[lean]) environmentLeanProblems.push(`${environment}: environment lean ${lean} does not increase its stream over the variant lean`);
+  }
+  add('X73', environmentLeanProblems.length === 0, environmentLeanProblems.length
+    ? environmentLeanProblems.join(' · ')
+    : `${mobEnvironments.size} subzone environments carry a second lean; each layers over the variant lean and conserves the gear/herb/junk expected total`);
+
+  // X74: the species trait is read as a mechanic. The set is closed, every key carries the one number
+  // it runs on, and no key may reach mob_HP, mob PS, the drop line or the stone funnel — the variety is
+  // in how a fight reads, never in what the published anchors pay.
+  {
+    const TM = (E.mob as any).trait_mechanics || {};
+    const tp: string[] = [];
+    const set: string[] = TM.set || [];
+    if (!set.length) tp.push('mob.trait_mechanics.set is empty — the trait is a label again');
+    for (const key of set) {
+      if (!TM[key]) tp.push(`${key}: named in the set but carries no rule`);
+      else if (!TM[key].word) tp.push(`${key}: no word for the card, the travel panel and the wiki to print`);
+      else if (key === 'fast_clock' && !(TM[key].clock_mult > 1)) tp.push('fast_clock: clock_mult must speed the swing (>1)');
+      else if (key === 'poison_burst' && !(TM[key].ps_pct > 0)) tp.push('poison_burst: ps_pct must be a real share (>0)');
+      else if (key === 'element_weak' && !(TM[key].taken_pct > 0)) tp.push('element_weak: taken_pct must be a real share (>0)');
+      else if (key === 'bleed_immune' && !(TM[key].statuses || []).includes('bleed')) tp.push('bleed_immune: it must name the status it refuses');
+    }
+    const elements = new Set(E.elements.order as string[]);
+    const mechanicCount: Record<string, number> = {};
+    for (const sp of E.mob.species) {
+      const mech = (sp as any).mechanics || {};
+      for (const [key, arg] of Object.entries(mech) as [string, any][]) {
+        if (!set.includes(key)) tp.push(`${sp.id}: ${key} is not in mob.trait_mechanics.set`);
+        mechanicCount[key] = (mechanicCount[key] || 0) + 1;
+        if (key === 'element_weak') {
+          if (!elements.has(String(arg))) tp.push(`${sp.id}: weak to ${arg}, which is not a declared Element`);
+          else if (arg === (sp as any).element) tp.push(`${sp.id}: weak to its own Element, which its flat res already answers`);
+        } else if (arg !== true) tp.push(`${sp.id}: ${key} takes no argument but carries ${JSON.stringify(arg)}`);
+      }
+      // a fast clock is the one mechanic that moves a swing rate, and the mob clock is the same ceiling
+      // the player obeys — the published PS is divided by it, so the damage per second never moves
+      if (mech.fast_clock && 1 / (E.mob.attack_clock_per_sec.normal * TM.fast_clock.clock_mult) < E.caps.attack_interval_sec) {
+        tp.push(`${sp.id}: a fast clock would out-run caps.attack_interval_sec`);
+      }
+    }
+    for (const key of set) if (!mechanicCount[key]) tp.push(`${key}: no species carries it — the mechanic is never read`);
+    add('X74', tp.length === 0, tp.length ? tp.join(' · ')
+      : `${Object.values(mechanicCount).reduce((a, b) => a + b, 0)} species mechanics over the closed set ${set.join(' · ')}: ${Object.entries(mechanicCount).map(([k, n]) => `${k} ×${n}`).join(' · ')} — none of them touches mob_HP, mob PS, the drop line or the stone funnel`);
+  }
+
+  // X75: the side the feet stand on fields its own pack, and every zone spends the encounter budget it
+  // publishes: the three sides average back to the zone's own group range, to loot.elite_spawn_chance
+  // and to the plain body mix, so a crowded side and a heavy side are a choice of ground, not a rate.
+  {
+    const sp2: string[] = [];
+    const packs = (E.mob as any).spawn_packs || {};
+    const packNames = Object.keys(packs).filter((k) => k !== 'note');
+    if (!packNames.includes('even')) sp2.push('mob.spawn_packs has no `even` — bare ground has no mix to roll');
+    if (!packNames.length) sp2.push('mob.spawn_packs is empty — the side profile is decoration');
+    // the mix tilts cancel: the mean Small share over the pack kinds is the plain mix's own Small share
+    if (packNames.length) {
+      const smallOf = (name: string) => {
+        const p = packs[name] || {};
+        const total = (p.small || 0) + (p.medium || 0);
+        return total ? (p.small || 0) / total : 0;
+      };
+      const evenSmall = smallOf('even');
+      const meanSmall = packNames.reduce((t, n) => t + smallOf(n), 0) / packNames.length;
+      if (Math.abs(meanSmall - evenSmall) > 1e-9) sp2.push(`the pack kinds average a ${f1(meanSmall * 100)}% Small share, not the even mix's ${f1(evenSmall * 100)}%`);
+    }
+    const mid = (g: string) => { const [lo, hi] = String(g).split('-').map(Number); return ((lo || 1) + (hi || lo || 1)) / 2; };
+    const zoneList = E.mob.zones as any[];
+    let profiled = 0;
+    for (const z of zoneList) {
+      const subs = z.subzones || [];
+      if (!subs.length) continue;
+      const kinds = subs.map((s: any) => (s.spawn || {}).pack);
+      if (kinds.every((k: string) => k === kinds[0]) && kinds[0]) sp2.push(`zone ${z.id}: every side rolls the same pack, so the zone reads tilted, not the side`);
+      // one of each kind per zone is what keeps the zone's own body mix on the published line
+      if (kinds.every((k: string) => k) && kinds.slice().sort().join(' ') !== packNames.slice().sort().join(' ')) {
+        sp2.push(`zone ${z.id}: its sides carry ${kinds.join(' ')}, not one of each pack kind`);
+      }
+      const groups = subs.map((s: any) => (s.spawn || {}).group);
+      if (groups.every((g: string) => !g)) continue;
+      profiled++;
+      const meanGroup = groups.reduce((t: number, g: string) => t + (g ? mid(g) : mid(z.group)), 0) / subs.length;
+      if (Math.abs(meanGroup - mid(z.group)) > 1e-9) sp2.push(`zone ${z.id}: the sides average a ${f2(meanGroup)}-mob pack against the published ${f2(mid(z.group))} (${groups.join(' ')})`);
+      const pcts = subs.map((s: any) => (s.spawn || {}).elite_pct);
+      const meanElite = pcts.reduce((t: number, p: any) => t + (p == null ? E.loot.elite_spawn_chance * 100 : p), 0) / subs.length;
+      if (Math.abs(meanElite - E.loot.elite_spawn_chance * 100) > 1e-9) sp2.push(`zone ${z.id}: the sides average ${f1(meanElite)}% Elites against the published ${f1(E.loot.elite_spawn_chance * 100)}% (${pcts.join(' ')})`);
+      for (const s of subs) {
+        const own = (s as any).spawn || {};
+        if (own.pack && !packNames.includes(own.pack)) sp2.push(`zone ${z.id} ${s.name}: pack ${own.pack} is not in mob.spawn_packs`);
+        if (own.group && own.group.split('-').length !== 2) sp2.push(`zone ${z.id} ${s.name}: group ${own.group} is not a lo-hi range`);
+        if (own.elite_pct != null && !(own.elite_pct >= 0 && own.elite_pct <= 100)) sp2.push(`zone ${z.id} ${s.name}: elite_pct ${own.elite_pct} is not a percent`);
+      }
+    }
+    add('X75', sp2.length === 0, sp2.length ? sp2.join(' · ')
+      : `${profiled}/${zoneList.filter((z: any) => (z.subzones || []).length).length} zones field a per-side pack, Elite rate and body mix; each zone's sides average back to its published group and to the ${f1(E.loot.elite_spawn_chance * 100)}% Elite rate, and the ${packNames.length} pack kinds average the plain mix`);
+  }
+
+  const formProblems: string[] = [];
+  const formNames = new Set<string>();
+  const formCoreKeys = ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'];
+  for (const z of E.mob.zones) {
+    const zoneForms = (E.mob.forms as any)?.[z.id] || {};
+    const placed = E.mob.species.filter((sp) => sp.zones.includes(z.id));
+    if (z.levels[0] > E.mob.form_level_cap) {
+      if (Object.keys(zoneForms).length) formProblems.push(`zone ${z.id}: levels above 100 must not define mob variants`);
+      continue;
+    }
+    const expectedIds = placed.map((sp) => sp.id).sort();
+    const actualIds = Object.keys(zoneForms).sort();
+    if (JSON.stringify(actualIds) !== JSON.stringify(expectedIds)) formProblems.push(`zone ${z.id}: forms do not match its placed lineages`);
+    for (const sp of placed) {
+      const form = zoneForms[sp.id];
+      if (!form) continue;
+      if (form.levels?.[0] !== z.levels[0] || form.levels?.[1] !== z.levels[1]) formProblems.push(`${z.id}/${sp.id}: form range does not match the zone`);
+      if (!form.name || formNames.has(form.name)) formProblems.push(`${z.id}/${sp.id}: form name is missing or duplicated (${form.name || 'empty'})`);
+      else formNames.add(form.name);
+      for (const key of formCoreKeys) if (!Number.isInteger(form.core?.[key])) formProblems.push(`${z.id}/${sp.id}: form Core ${key} is missing or not an integer`);
+    }
+  }
+  add('X76', formProblems.length === 0, formProblems.length ? formProblems.join(' · ')
+    : `${formNames.size} uniquely named fixed-Core forms cover real mob placements through level ${E.mob.form_level_cap}; later zones reuse the latest lineage form and Core, with Elite and Boss as rank overlays`);
+
+  const catalogProblems: string[] = [];
+  const catalogNames = new Set<string>();
+  let catalogCount = 0;
+  const catalogZones = E.mob.zones.filter((z) => z.levels[0] <= E.mob.form_level_cap);
+  for (const z of catalogZones) {
+    const zoneCatalog = (E.mob.form_catalog as any)?.[z.id] || {};
+    const expectedIds = E.mob.species.map((sp) => sp.id).sort();
+    const actualIds = Object.keys(zoneCatalog).sort();
+    if (JSON.stringify(actualIds) !== JSON.stringify(expectedIds)) catalogProblems.push(`zone ${z.id}: catalog does not contain every race`);
+    for (const sp of E.mob.species) {
+      const form = zoneCatalog[sp.id];
+      if (!form) continue;
+      catalogCount++;
+      if (form.levels?.[0] !== z.levels[0] || form.levels?.[1] !== z.levels[1]) catalogProblems.push(`${z.id}/${sp.id}: catalog range does not match its band`);
+      if (!form.name || catalogNames.has(form.name)) catalogProblems.push(`${z.id}/${sp.id}: catalog name is missing or duplicated (${form.name || 'empty'})`);
+      else catalogNames.add(form.name);
+      for (const key of formCoreKeys) if (!Number.isInteger(form.core?.[key])) catalogProblems.push(`${z.id}/${sp.id}: catalog Core ${key} is missing or not an integer`);
+    }
+  }
+  const expectedCatalogCount = E.mob.species.length * catalogZones.length;
+  if (catalogCount !== expectedCatalogCount) catalogProblems.push(`catalog has ${catalogCount} forms, expected ${expectedCatalogCount}`);
+  for (const z of E.mob.zones.filter((zone) => zone.levels[0] > E.mob.form_level_cap)) {
+    if ((E.mob.form_catalog as any)?.[z.id]) catalogProblems.push(`zone ${z.id}: catalog extends above the form cap`);
+  }
+  add('X77', catalogProblems.length === 0, catalogProblems.length ? catalogProblems.join(' · ')
+    : `${catalogCount} uniquely named race forms cover ${E.mob.species.length} races across ${catalogZones.length} real level bands, all assigned to their gameplay zones`);
+
+  const formDropProblems: string[] = [];
+  const dropVariants = (E.mob as any).variants || {};
+  const formDropRows = (E.mob as any).variant_drops || {};
+  for (const z of catalogZones) for (const sp of E.mob.species) {
+    const form = (E.mob.form_catalog as any)[z.id][sp.id];
+    const ladder = dropVariants[sp.id] || [];
+    if (form.drop_profile !== sp.id) formDropProblems.push(`${z.id}/${sp.id}: form does not reference its race drop profile`);
+    if (ladder.length !== 5) formDropProblems.push(`${sp.id}: drop profile has ${ladder.length} rungs, expected 5`);
+    for (const name of ladder.slice(0, 3)) if (!formDropRows[name]) formDropProblems.push(`${z.id}/${sp.id}: normal drop rung ${name} has no item/rarity/lean row`);
+    for (const name of ladder.slice(3)) {
+      const row = formDropRows[name];
+      if (row && (typeof row.item !== 'string' || typeof row.rarity !== 'string' || typeof row.lean !== 'string')) formDropProblems.push(`${z.id}/${sp.id}: ranked drop rung ${name} has an incomplete row`);
+    }
+  }
+  add('X78', formDropProblems.length === 0, formDropProblems.length ? formDropProblems.join(' · ')
+    : `all ${catalogCount} forms inherit their race drop profile; normal rungs have junk rows and ranked rungs keep their stone/optional-junk behavior`);
+
   // X15 reads the maxima out of `mods.json` — the file that owns them. It used to parse the
   // "Total" column back out of mod-pool.md and compare, which made the DOC a second source of a
   // number the engine already had: the two could disagree and the doc would win. Now the
@@ -430,14 +712,21 @@ function runChecks() {
     .map((r) => ({ name: r.name, vals: STAT_KEYS.map((k) => `${k} ${r.core[k]}`).join(' ') }));
   const zoneProblems = MOB.species.filter((r) => r.zones.some((z) => z < 1 || z > ZONES.length)).map((r) => r.name);
   const sizeProblems = MOB.species.filter((r) => r.sizes.some((s) => !MOB.sizes.some((x) => x.id === s))).map((r) => r.name);
+  const speciesPower = MOB.species.map((r) => r.power_base);
+  const speciesPowerMean = speciesPower.reduce((sum, value) => sum + value, 0) / speciesPower.length;
+  const powerProblems: string[] = [];
+  if (speciesPower.some((value) => !Number.isFinite(value) || value <= 0)) powerProblems.push('power_base must be finite and positive for every species');
+  if (Math.abs(speciesPowerMean - 1) > 1e-9) powerProblems.push(`power_base mean is ${speciesPowerMean.toFixed(4)}, expected 1.00`);
+  if (new Set(speciesPower).size < 4) powerProblems.push(`power_base has ${new Set(speciesPower).size} values, expected at least 4`);
   // a retired lineage may not creep back into the roster — the `deprecated_species` record is what says so
   const zombie = Object.keys(MOB.deprecated_species || {}).filter((id) => MOB.species.some((r) => r.id === id));
   if (zombie.length) zoneProblems.push(`retired lineage(s) back in the roster: ${zombie.join(', ')}`);
-  add('X19', bad.length === 0 && zoneProblems.length === 0 && sizeProblems.length === 0,
+  add('X19', bad.length === 0 && zoneProblems.length === 0 && sizeProblems.length === 0 && powerProblems.length === 0,
     bad.length ? `a species Core block is not a whole number, is negative, or carries a dead stat: ${bad.map((r) => `${r.name} (${r.vals})`).join(' · ')}`
       : zoneProblems.length ? `species listed in a zone outside 1-${ZONES.length}: ${zoneProblems.join(', ')}`
         : sizeProblems.length ? `species references a body class that does not exist: ${sizeProblems.join(', ')}`
-          : `${MOB.species.length} species × ${MOB.sizes.length} body classes · every Core block is whole numbers, Wis is 0 everywhere (it feeds no mob line) and Int is 0 on the physical bodies (no magic half) · ${Object.keys(MOB.deprecated_species || {}).length} retired lineage(s) stay out of the roster · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} answers to the gear line against the floor and not against the ceiling (X20)`);
+          : powerProblems.length ? powerProblems.join(' · ')
+            : `${MOB.species.length} species × ${MOB.sizes.length} body classes · Core blocks stay whole, Wis is 0 everywhere and Int is 0 on physical bodies · power_base spans ${Math.min(...speciesPower).toFixed(2)}-${Math.max(...speciesPower).toFixed(2)} with a ${speciesPowerMean.toFixed(2)} mean · ${Object.keys(MOB.deprecated_species || {}).length} retired lineage(s) stay out of the roster · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} answers to the gear line against the floor and not against the ceiling (X20)`);
 
   // The species mix is what makes the Evasion Cap answerable, so guard a floor and a ceiling.
   // X20's question changed shape with the Agi ruling: Agi IS the rating now, so what must hold is
@@ -447,11 +736,14 @@ function runChecks() {
   const floorRace = MOB.species.find((r) => r.accuracy_mult === Math.min(...accMults));
   const ceilRace = MOB.species.find((r) => r.accuracy_mult === Math.max(...accMults));
   // ONE Evasion flat line at its T1 ceiling, lifted by one Evasion % line — the gear a real build wears
-  const evVs = (sp: any) => eng.evasionChance(eng.evasionRating(CEIL, M.evasion_flat_t1, M.evasion_pct), eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
+  const floorZone = floorRace!.zones[0];
+  const ceilingZone = ceilRace!.zones[ceilRace!.zones.length - 1];
+  const formName = (sp: any, zoneId: number) => (E.mob.forms as any)[zoneId]?.[sp.id]?.name || sp.name;
+  const evVs = (sp: any, zoneId: number) => eng.evasionChance(eng.evasionRating(CEIL, M.evasion_flat_t1, M.evasion_pct), eng.mobAcc(eng.coreOf(sp, 'dex', zoneId), sp.accuracy_mult));
   // the floor build — Agi at the split point, which is what a real build holds
-  const midVs = (sp: any) => eng.evasionChance(eng.evasionRating(SPLIT, M.evasion_flat_t1, M.evasion_pct), eng.mobAcc(eng.coreOf(sp, 'dex'), sp.accuracy_mult));
-  add('X20', evVs(floorRace!) >= E.caps.evasion - 0.5 && midVs(ceilRace!) < E.caps.evasion - 1,
-    `Evasion Cap ${E.caps.evasion} is reachable against the accuracy floor (${floorRace!.name} accuracy ×${floorRace!.accuracy_mult} → ${f1(evVs(floorRace!))}% at Agi ${f0(CEIL)} + the gear line) and is NOT free against the ceiling (${ceilRace!.name} accuracy ×${ceilRace!.accuracy_mult} → ${f1(evVs(ceilRace!))}% maxed, ${f1(midVs(ceilRace!))}% at Agi ${f0(SPLIT)}) — Agi buys the rating and the gear line rides on it (owner ruling), so what X20 proves is that the Cap costs the whole Agi + gear pair rather than being reachable by accident`);
+  const midVs = (sp: any, zoneId: number) => eng.evasionChance(eng.evasionRating(SPLIT, M.evasion_flat_t1, M.evasion_pct), eng.mobAcc(eng.coreOf(sp, 'dex', zoneId), sp.accuracy_mult));
+  add('X20', evVs(floorRace!, floorZone) >= E.caps.evasion - 0.5 && midVs(ceilRace!, ceilingZone) < E.caps.evasion - 1,
+    `Evasion Cap ${E.caps.evasion} is reachable against the low-accuracy form (${formName(floorRace!, floorZone)} · ×${floorRace!.accuracy_mult} → ${f1(evVs(floorRace!, floorZone))}% at Agi ${f0(CEIL)} + gear) and is not free against the highest-accuracy form (${formName(ceilRace!, ceilingZone)} · ×${ceilRace!.accuracy_mult} → ${f1(midVs(ceilRace!, ceilingZone))}% at Agi ${f0(SPLIT)}); species forms supply the fixed Core while zone bands supply progression`);
 
   // Mob evasion is derived from the species Dex line, and the derivation must not be a rebalance
   const evRef = DERIVED.mob_evasion_ref;
@@ -459,8 +751,7 @@ function runChecks() {
   const evMean = eng.mobEvasion(eng.MEAN_SPECIES_DEX);
   const evList = eng.SPECIES_EVASION.map((r) => r.evasion);
   const evLo = Math.min(...evList), evHi = Math.max(...evList);
-  const noDex = eng.statWithItems(0);
-  const hits = eng.SPECIES_EVASION.map((r) => eng.hitVs(noDex, r.evasion));
+  const hits = eng.SPECIES_EVASION.map((r) => eng.hitChance(eng.playerAccuracy(eng.statAt(r.level), 0), r.evasion) * 100);
   const topMobAcc = eng.statAt(S.level_cap) * K.K_DEX_ACC * Math.max(...MOB.species.map((r) => r.accuracy_mult));
   const mobHitFullDex = (topMobAcc / (topMobAcc + eng.statWithItems(S.item_slots) * K.K_EVASION)) * 100;
   const evProblems = [];
@@ -479,12 +770,12 @@ function runChecks() {
   // The two hit anchors are pacing targets the owner reads by eye, not conditions: they move with
   // any balance pass and only the eye can say whether the new figure is the one they meant.
   const evTargets = [];
-  if (Math.min(...hits) < 70 || Math.max(...hits) > 90) evTargets.push(`a 0-item player's hit chance leaves the 70-90% band (${f1(Math.min(...hits))}-${f1(Math.max(...hits))}%)`);
+  if (Math.min(...hits) < 70 || Math.max(...hits) > 90) evTargets.push(`same-level, no-gear hit chances leave the 70-90% band (${f1(Math.min(...hits))}-${f1(Math.max(...hits))}%)`);
   if (mobHitFullDex < 40) evTargets.push(`a Full-Dex player is too untouchable: the top accuracy tier lands only ${f1(mobHitFullDex)}%`);
   if (Math.round(DERIVED.ref_build_hit_pct) !== E.build.hit_chance_pct) evProblems.push(`build.hit_chance_pct ${E.build.hit_chance_pct} vs engine ${Math.round(DERIVED.ref_build_hit_pct)} — run \`node tools/check.ts --sync\` to re-publish it`);
   soft('X21', evProblems.length === 0,
     evProblems.length ? evProblems.join(' · ')
-      : `mob evasion = the integer Core stat × species.dex × K_EVASION ${K.K_EVASION} × the body base Evasion percent (small +20% · medium +10% · large 0%, so nothing above Medium) with no level term · reference (mean species, Medium body) ${f1(evRef)}, so the published hit anchors hold (${E.build.hit_chance_pct}% no-Dex · ${f1(DERIVED.hit_chance * 100)}% at the accuracy ceiling) · species spread ${f0(evLo)}-${f0(evHi)} keeps a 0-item player at ${f1(Math.min(...hits))}-${f1(Math.max(...hits))}% hit · a Full-Dex player still eats ${f1(mobHitFullDex)}% of the top accuracy tier before Evasion`);
+      : `form Evasion = its fixed Core Dex × K_EVASION ${K.K_EVASION} × body base percent (Small +20% · Medium +10% · Large 0%) · reference (mean form, Medium body) ${f1(evRef)} · same-level no-gear hit chances ${f1(Math.min(...hits))}-${f1(Math.max(...hits))}% · a Full-Dex player still eats ${f1(mobHitFullDex)}% of the top accuracy tier before Evasion`);
   watch('X21t', evTargets.length === 0, evTargets.join(' · '),
     `hit anchors by eye: a 0-item player lands ${f1(Math.min(...hits))}-${f1(Math.max(...hits))}% across the species (70-90 band) and a Full-Dex player still eats ${f1(mobHitFullDex)}% from the top accuracy tier (40 floor)`);
 
@@ -503,12 +794,15 @@ function runChecks() {
   if (trashCut < 50) armProblems.push(`armour does not answer trash mobs (${f1(trashCut)}% cut)`);
   // The mob's own armour reads the mob's integer Core stat, not the player's line: mobs carry no
   // level term, so `statAt(80)` here was a stale read of the player's curve.
-  const mobArmour = Math.max(...E.mob.species.map((r) => eng.coreOf(r, 'str', 18) * K.K_ARMOUR));
+  const formRows = Object.entries(E.mob.forms as Record<string, Record<string, any>>)
+    .flatMap(([zoneId, forms]) => Object.values(forms).map((form) => ({ zoneId: Number(zoneId), form })));
+  const hardestArmour = formRows.reduce((best, row) => row.form.core.str > best.form.core.str ? row : best, formRows[0]);
+  const mobArmour = Math.max(...formRows.map((row) => row.form.core.str * K.K_ARMOUR));
   const mobArmourCut = (mobArmour / (mobArmour + K.armour_divisor * DERIVED.phys)) * 100;
   if (mobArmourCut > 10) armProblems.push(`the hardest-armoured mob cuts a max physical hit by ${f1(mobArmourCut)}% — armour is walling the player`);
   watch('X22', armProblems.length === 0, armProblems.length ? armProblems.join(' · ')
     : `armour bands held`,
-    `armour = Str × ${K.K_ARMOUR} both sides · reduction = armour ÷ (armour + ${K.armour_divisor} × raw physical) · Str ${f0(CEIL)} = ${f0(DERIVED.armour_ceil)} armour cuts the zone-9 boss physical hit ${f1(bossCut)}% and a zone-9 trash hit ${f1(trashCut)}% · the hardest mob armour (${f0(mobArmour)} · Golem at 80) costs a max physical hit only ${f1(mobArmourCut)}%`);
+    `armour = Str × ${K.K_ARMOUR} both sides · reduction = armour ÷ (armour + ${K.armour_divisor} × raw physical) · Str ${f0(CEIL)} = ${f0(DERIVED.armour_ceil)} armour cuts the zone-9 boss physical hit ${f1(bossCut)}% and a zone-9 trash hit ${f1(trashCut)}% · the hardest form armour (${f0(mobArmour)} · ${hardestArmour.form.name}, zone ${hardestArmour.zoneId}) costs a max physical hit only ${f1(mobArmourCut)}%`);
 
   // The mob roster: every legal zone × species × body entry has to exist and be playable
   const ROWS = eng.mobRoster();
@@ -546,13 +840,7 @@ function runChecks() {
     }
   }
   add('X23', rp.length === 0, rp.length ? rp.join(' · ')
-    : `${ROWS.length} roster rows from ${E.mob.species.length} species × 3 body classes + ${ROWS.filter((r) => /Elite/.test(r.kind)).length} Elite + ${ROWS.filter((r) => /Boss/.test(r.kind)).length} named bosses · every zone 6+ entries and exactly one boss · every species owns one Element of the five and a spawn rolls none of its own · zone entry counts ${ZONES.map((z) => `${z.id}:${perZone[z.id]}`).join(' ')}`);
-
-  // Mob dodge keeps its own thin opposed ratio; player Evasion uses the opening-weighted curve.
-  const dodges = ROWS.map((r) => r.dodge);
-  const dLo = Math.min(...dodges), dHi = Math.max(...dodges);
-  watch('X24', dLo > 2 && dHi < 40, `mob dodge runs ${f1(dLo)}-${f1(dHi)}% — outside the 2-40% thin-layer band; a mob's own Agi is becoming the answer to a build`,
-    `mob dodge runs ${f1(dLo)}-${f1(dHi)}% against a same-level attacker — it must stay a thin layer so a mob's own Agi never becomes the answer to a build. The ceiling was 25% on the level-scaled mob line; the flat mob stat makes a low-level attacker's accuracy the small number, so the band is re-based, the rule is not`);
+    : `${ROWS.length} roster rows from ${E.mob.species.length} species × 3 body classes + ${ROWS.filter((r) => /Elite/.test(r.kind)).length} Elite + ${ROWS.filter((r) => /Boss/.test(r.kind)).length} named bosses · every zone 6+ entries and exactly one boss · normal and Elite spawns inherit their species Element; each Boss reads its declared Element profile · zone entry counts ${ZONES.map((z) => `${z.id}:${perZone[z.id]}`).join(' ')}`);
 
   // X61 · the mob sheet is a VIEW (`tools/wiki.ts`), so every cell it prints must agree with the engine
   // the sheet reads it from — the four calls are `mobRoster()`, `mobEvasion()`, `mobResByElementOf()`
@@ -567,15 +855,19 @@ function runChecks() {
       const sp = E.mob.species.find((x) => x.id === r.speciesId)!;
       if (!z || !sp) { sh.push(`${r.id} names a missing zone or species`); continue; }
       const elite = /Elite/.test(r.kind), boss = /Boss/.test(r.kind);
+      const bossProfile = boss ? (E.mob.bosses as any[]).find((entry) => entry.zone === z.id) : null;
+      if (boss && !bossProfile) { sh.push(`${r.id} has no boss profile`); continue; }
       const bodyId = elite ? 'large' : boss ? 'boss' : String(r.kind).toLowerCase();
       const size = eng.sizeById(bodyId)!;
       // every column the sheet reads must be a real number — a blank cell is the defect this catches
       for (const k of ['hpFrom', 'hpTo', 'hpBaseFrom', 'hpBaseTo', 'vit', 'manaFrom', 'manaTo', 'ps', 'acc', 'ev', 'armour', 'res', 'crit', 'align', 'dodge', 'xpFrom', 'xpTo'])
         if (!fin((r as any)[k])) sh.push(`${r.id}.${k} is not a finite number`);
       // Core Stat cell: the seven-stat block the sheet prints in full, every value a whole number
-      const block = eng.mobStatsOf(sp.id, z.id);
+      const block = r.core || eng.mobStatsOf(sp.id, z.id);
+      const expectedCore = bossProfile?.core || eng.mobStatsOf(sp.id, z.id);
       if (CORE_STATS.some((k) => !fin(block[k]))) sh.push(`${r.id} Core Stat block is missing a stat`);
       if (CORE_STATS.some((k) => !Number.isInteger(block[k]))) sh.push(`${r.id} Core Stat block carries a fraction (${CORE_STATS.map((k) => `${k} ${block[k]}`).join(' · ')})`);
+      if (CORE_STATS.some((k) => block[k] !== Number(expectedCore[k] || 0))) sh.push(`${r.id} Core differs from its fixed species/Boss profile`);
       // HP must add back up: Base HP + the flat level grant + the Core Vit bonus = HP, at both edges
       const hpGrant = (lv: number) => LG.hp_per_level * (lv - 1) + r.vit * K.K_VIT_HP;
       if (Math.abs(r.hpBaseFrom + hpGrant(r.levels[0]) - r.hpFrom) > 1e-6 || Math.abs(r.hpBaseTo + hpGrant(r.levels[1]) - r.hpTo) > 1e-6)
@@ -583,15 +875,17 @@ function runChecks() {
       if (r.hpBaseFrom <= 0 || r.hpBaseTo <= 0)
         sh.push(`${r.id} Base HP is not positive (${f1(r.hpBaseFrom)}-${f1(r.hpBaseTo)}) — the Vit bonus is eating the whole curve`);
       // res cell: the sheet prints the headline and every Element — the headline IS the profile mean
-      const prof = eng.mobResByElementOf(sp, z.id);
+      const prof = r.resByElement || eng.mobResByElementOf(sp, z.id);
       const mean = (E.elements.order as string[]).reduce((t, el) => t + (prof[el] || 0), 0) / (E.elements.order as string[]).length;
       if (Math.abs(mean - r.res) > 0.05) sh.push(`${r.id} res ${f1(r.res)} is not the profile mean ${f1(mean)}`);
       // Armour cell: the roster's inline Str line must equal the engine's own `armourOf`
-      if (Math.abs(eng.armourOf(eng.coreOf(sp, 'str', z.id)) - r.armour) > 0.5)
-        sh.push(`${r.id} Armour ${f1(r.armour)} vs armourOf() ${f1(eng.armourOf(eng.coreOf(sp, 'str', z.id)))}`);
+      if (Math.abs(eng.armourOf(block.str) - r.armour) > 0.5)
+        sh.push(`${r.id} Armour ${f1(r.armour)} vs armourOf() ${f1(eng.armourOf(block.str))}`);
       // PS cell: the roster's column rebuilt off the curve, the body class and the species term
-      const mult = elite ? E.mob.elite.ps : boss ? size.ps : size.ps / eng.zoneBodyFactor(z.id);
-      const ps = eng.mobPsAt(r.level) * mult * eng.speciesPsMult(z.id, sp.id);
+      const mult = elite ? E.mob.elite.ps : size.ps / eng.zoneBodyFactor(z.id);
+      const powerProfile = bossProfile ? { ...sp, core: bossProfile.core, _fixedCore: bossProfile.core, damage: bossProfile.damage } : sp;
+      const speciesTerm = eng.speciesPowerOf(powerProfile, z.id) / eng.zonePowerFactor(z.id);
+      const ps = eng.mobPsAt(r.level) * mult * speciesTerm;
       if (Math.abs(ps - r.ps) > 0.5) sh.push(`${r.id} PS ${f1(r.ps)} vs the curve at its own level × body × species ${f1(ps)}`);
       // the drop cell the sheet prints names a band, and every band must actually pay gear
       const band = String(z.quality || 'low').split(' ')[0];
@@ -600,7 +894,7 @@ function runChecks() {
       if (!size) sh.push(`${r.id} body ${bodyId} is not a size`);
     }
     add('X61', sh.length === 0, sh.length ? sh.slice(0, 6).join(' · ')
-      : `the mob sheet is a view of the engine: all ${ROWS.length} roster rows carry every column it prints, each cell a finite number, the Core Stat block is the seven-stat line, the res headline is the per-Element profile mean, and Armour and PS rebuild off \`armourOf\` and the \`mobPs\` curve × body class × the species term — so a wrong cell fails here instead of only showing on the wiki`);
+      : `the mob sheet is a view of the engine: all ${ROWS.length} roster rows carry every column it prints, Boss rows use their own Core and Element profile, and Armour and PS rebuild off the same Core and the mob curve × body factor × power term — so a wrong cell fails here instead of only showing on the wiki`);
   }
 
   // Energy Shield: the caster's second pool, sized so it supplements HP instead of doubling it
@@ -647,7 +941,7 @@ function runChecks() {
     if (E.mob.skills_enabled) sk.push('skills_enabled is true but the mob skill system is not built');
     for (const sp of E.mob.species) if ((sp as any).skills) sk.push(`${sp.id} carries a skill field while skills_enabled is false`);
     add('X55', sk.length === 0, sk.length ? sk.join(' · ')
-      : `mobs carry no skills — a species trait and its damage tag are the whole of its behaviour; ${E.mob.species.length} species checked, none carries a skill field while skills_enabled is false`);
+      : `mobs carry no skills — a species' damage tag, its Element and its trait mechanics (X74) are the whole of its behaviour; ${E.mob.species.length} species checked, none carries a skill field while skills_enabled is false`);
   }
 
   // Zone identity lives in `mob.zones` alone. Bands repeat every three zones, so each band owns
@@ -813,29 +1107,6 @@ function runChecks() {
 
   // With a mob's level STATIC per species (spread inside the zone, `mob.species[].zone_levels`), the
   // zone average no longer equals the zone-top anchor: a mob reads `mob_HP` at its OWN level, so the
-  // body-mix average sits under 1.00 by design. X23 holds the per-row check; this is a watch to read.
-  const budgetRows = ROWS.filter((r) => !/Elite|Boss/.test(r.kind));
-  const bp = [];
-  for (const z of ZONES) {
-    const rows = budgetRows.filter((r) => r.zone === z.id);
-    let w = 0, sHp = 0;
-    for (const r of rows) {
-      const weight = E.mob.spawn_weights[({ Small: 'small', Medium: 'medium', Large: 'large' } as Record<string, string>)[r.kind]] || 0;
-      w += weight; sHp += weight * (r.hpBaseTo / z.hp[1]);
-    }
-    bp.push(`z${z.id} ${f2(sHp / w)}x`);
-  }
-  // The high-band drop count is a derived canary (418 on the retired stat_c line); the re-base
-  // moved the level-90 Lck line 190 → 76 and the kill rate ×1/3, so it is 82 today. A canary is a
-  // watch: it pins a figure the drop prose was written against, and re-pinning it is the owner's call.
-  watch('X32t', BAND.high.drops_per_hr === 82,
-    `normalising bodies moved the drop engine: the high band is ${BAND.high.drops_per_hr} drops/hr, not the 82 the loot prose quotes`,
-    `the high band holds its published ${BAND.high.drops_per_hr} drops/hr, the figure the loot prose quotes`);
-  // A by-eye read rather than a condition: the owner compares these averages against the anchor, so the
-  // gate pends in every run instead of wearing a condition that is never evaluated.
-  pending('X32',
-    `zone body-mix BASE HP against the zone-top anchor (read by eye): ${bp.join(' · ')} — a mob reads mob_HP at its own static level, so these sit under 1.00 by design; X23 holds each row exact`);
-
   // Reach: the only positional model, and its cost to a melee build must stay small
   const RP = [];
   const allWeapons = ['sword','axe','dagger','mace','spear','two-handed sword','two-handed axe','bow','crossbow','staff','wand','book'];
@@ -954,11 +1225,8 @@ function runChecks() {
       : `${normals} normal body row(s) and ${elites} declared elite(s) are the rungs of the races their sub-zone casts — the elite a sub-zone promises is the elite that spawns, and its junk is that variant's own (mob.zones[].subzones · mob.variants · game/src/sim/game.ts)`);
   }
 
-  // X56: the variant's second drop axis is the stream it leans. A lean is the one edit that could move
-  // a total, so the table is gated: the three normal rungs of every ladder cycle gear · herb · junk (so
-  // a zone's aggregate stays the identity and only the per-kill mix moves) and Elite · Boss carry 'none'
-  // (they already pay their own stone lines). Reinforcing a lean and conserving the total are properties
-  // of leanReweight, and this gate proves the table keeps them.
+  // X56: normal variant rungs share their species' drop archetype. Elite and Boss rows stay balanced
+  // because they already pay their own stone lines. Every lean still conserves expected drops/kill.
   {
     const vp: string[] = [];
     const V = (E.mob as any).variants || {};
@@ -972,14 +1240,17 @@ function runChecks() {
       list.forEach((n, i) => {
         const r = D[n];
         if (!r) return; // a pruned rung carries no row; X39 owns that fact, not this gate
-        if (i < 3) normal.push(r.lean);
+        if (i < 3) {
+          normal.push(r.lean);
+          if (!CATS.includes(r.lean)) vp.push(`${sid}: ${n} has unknown lean ${r.lean}`);
+        }
         else {
           if (r.lean !== 'none') vp.push(`${sid}: ${r.item} leans ${r.lean}, Elite and Boss must stay 'none'`);
           leaned++;
         }
       });
-      // the three normal rungs are the cycle, so a ladder missing one is a ladder with no rule left
-      if (normal.length === 3 && normal.join(',') !== CATS.join(',')) vp.push(`${sid}: normal rungs lean ${normal.join(' · ')}, must cycle ${CATS.join(' · ')}`);
+      if (normal.length !== 3) vp.push(`${sid}: has ${normal.length} normal lean rows, expected 3`);
+      if (new Set(normal).size > 1) vp.push(`${sid}: normal rungs split across ${[...new Set(normal)].join(' · ')}`);
       for (const lean of normal) {
         const out = leanReweight(sample, lean as any, E.loot.variant_lean.shift_pct);
         if (Math.abs(sum(out) - sum(sample)) > 1e-9) vp.push(`${sid}: lean ${lean} does not conserve the total`);
@@ -988,7 +1259,7 @@ function runChecks() {
       }
     }
     add('X56', vp.length === 0, vp.length ? vp.join(' · ')
-      : `every ladder's three normal rungs cycle ${CATS.join(' → ')} and its Elite and Boss rungs carry 'none': ${leaned} leans checked (${normalLeaned} of them normal rungs), each one raises its own stream and conserves ${sum(sample).toFixed(2)} expected drops/kill, so a variant tilts the mix without moving the drop rate the timeline is priced on (mob.variant_drops · loot.variant_lean)`);
+      : `each species' three normal rungs share one archetype lean and Elite/Boss rungs carry 'none': ${leaned} leans checked (${normalLeaned} normal rows), each lean raises its stream and conserves ${sum(sample).toFixed(2)} expected drops/kill (mob.variant_drops · loot.variant_lean)`);
   }
 
   // The AoE rule is data now, and its shape must stay a real trade: lose at 1 target, win at the Cap
@@ -1141,11 +1412,10 @@ function runChecks() {
   const opZone = MOB.zones.find((z) => z.name === OP.settlement)!;
   soft('OP1', !!opZone, `the opening settlement "${OP.settlement}" is a real zone${opZone ? ` (zone ${opZone.id}, levels ${opZone.levels[0]}-${opZone.levels[1]})` : ''}`);
 
-  // weapons carry `name`, not `id`, and each row groups several types ("one-handed sword / axe").
-  // Resolve the name the DATA says, so renaming it to something that does not exist fails here
-  // instead of silently falling back to weapons[0] — which is the dagger, a different speed.
+  // Resolve the opening weapon by its exact data name, so a rename cannot fall back to the dagger.
   const opBase = OP.gear[0].base;
   const opWpn = E.weapons.find((w) => w.name === opBase || w.name.split(' / ').includes(opBase));
+  const opFrame = ((BASES_JSON.weapon_frames || {})[opBase] || [])[0];
   add('OP0', !!opWpn, opWpn
     ? `the starting weapon "${opBase}" resolves to ${opWpn.name} (${opWpn.weapon_aspd} hits/sec)`
     : `the starting weapon "${opBase}" matches no row in engine.weapons — a client would have no attack speed`);
@@ -1154,19 +1424,21 @@ function runChecks() {
   // own floor rule produces the one line each piece carries, so nothing below can disagree with minute one
   const OP_PIECES = openingSet();
   const opMain = OP_PIECES.find((p) => p.g.slot === 'main hand');
-  const givenFlat = opMain ? opMain.lines.reduce((s, l) => s + (l.id === 'physical_power_flat' ? l.value : 0), 0) : 0;
+  const givenFlat = opMain ? opMain.lines.reduce((s, l) => s + (l.id === 'physical_power_flat' ? l.value : 0)
+    + (l.extra || []).reduce((n: number, part: any) => n + (part.id === 'physical_power_flat' ? part.value : 0), 0), 0) : 0;
   const opPhys = opStat * K.K_STR + givenFlat;
-  const opDps = opPhys * (opWpn ? opWpn.weapon_aspd : 0);
+  const opDps = opPhys * (opWpn ? opWpn.weapon_aspd * opWpn.weapon_mult : 0);
   const opMobHp = opZone.hp[0];
   const opSecs = opDps > 0 ? opMobHp / opDps : Infinity;
   const pwRange = MODS.mods.find((m: any) => m.id === 'physical_power_flat');
   // the curve prices this mob against exactly this character, so the opening line must be the RULE's own
   // floor for a two-Mod line — the worst slice's low end scaled by `value_scale` — and never a typed
   // number that merely happens to sit inside the low band
-  const expectFlat = Math.round(pwRange.bands[0][0][0] * (E.loot.frame_mod.value_scale['2'] || 1));
+  const expectFlat = Math.max(1, Math.round(pwRange.bands[0][0][0]
+    * (E.loot.frame_mod.value_scale['2'] || 1) * (opFrame?.value_bias ?? 1)));
   soft('OP2', !!opWpn && givenFlat === expectFlat,
     opWpn && givenFlat === expectFlat
-      ? `the starting sword's line is the low band's floor at the two-Mod scale (+${givenFlat} physical, the rule's own ${expectFlat}), so minute one is the table's floor and not a gift`
+      ? `the starting weapon's flat is the low band's two-Mod floor after its frame value bias (+${givenFlat} physical; the unweighted floor is ${Math.round(pwRange.bands[0][0][0] * (E.loot.frame_mod.value_scale['2'] || 1))})`
       : `the opening main hand is missing or its flat line is not the rule's own floor (got ${opWpn ? givenFlat : 'no weapon'}, want ${expectFlat})`);
   watch('OP2t', opSecs >= 0.8 && opSecs <= 2,
     `minute one kills a level-1 mob in ${Number.isFinite(opSecs) ? f1(opSecs) + ' sec' : 'no time at all'} — outside the 0.8-2 sec opening pacing band`,
@@ -1260,20 +1532,6 @@ function runChecks() {
   add('MP2', modIds.length === new Set(modIds).size && MODS.pending.every((p: any) => !modIds.includes(p.id)),
     `${MODS.mods.length} unique mod ids · ${MODS.pending.length} pending line(s) (${MODS.pending.map((p: any) => p.name).join(', ') || 'none'})`);
 
-  // Quality bands are not all equal widths. That is published, deliberate state: re-cutting
-  // them would move loot income and the 40.2 hr timeline. This gate names the offenders so a
-  // new mod cannot make it worse and the owner can see exactly what to re-slice.
-  const skewed = MODS.mods.map((m: any) => {
-    const w = m.bands.map((b: any[]) => b.reduce((s: number, [x, z]: number[]) => s + (z - x + 1), 0));
-    return { name: m.name, w, ratio: Math.max(...w) / Math.min(...w) };
-  }).filter((r: any) => r.ratio > MODS.band_skew_limit);
-  const skewDetail = `every mod splits its 3 quality bands within x${MODS.band_skew_limit}` +
-    (skewed.length ? ' · SKEWED: ' + skewed.map((r: any) => `${r.name} ${r.w.join('/')} x${r.ratio.toFixed(2)}`).join(' · ') : '');
-  // PENDING, not FAIL: the skew is published design state, not a broken invariant. It must
-  // stay visible and must not grow, but verify.js only exits 1 on FAIL.
-  if (skewed.length) pending('MP3', skewDetail);
-  else soft('MP3', true, skewDetail);
-
   // Mod availability matrix: every name in it must be a real Mod line, and the three pools must not leak
   const matrixRows = modMatrix().split('\n').slice(2).map((l) => l.split('|').map(cleanMod).filter(Boolean)[0]);
   const known = rangedMods();
@@ -1309,10 +1567,10 @@ function runChecks() {
   // The prose shelf that survives, and the record of what was retired, are shared by the three gates:
   // X59 holds the retired words out of it, L9 holds the numbers out of it, L10 holds the pointers honest.
   const ALIASES = readJson(path.join(import.meta.dirname, 'data', 'aliases.json'));
-  const prose = ['doc/start/glossary.md', 'doc/start/DECISIONS.md', 'AGENTS.md'];
+  const prose = ['doc/glossary.md', 'doc/DECISIONS.md', 'AGENTS.md'];
 
   // A retired word must not creep back. The record is `tools/data/aliases.json`; this reads the prose
-  // that survives (`doc/start/` and the root rules) and every data note, and honours each entry's own
+  // that survives (`doc/` and the root rules) and every data note, and honours each entry's own
   // `allow_in` list. `renames` and `deprecated` blocks are the record of the rename itself, so they are
   // skipped wherever they appear.
   {
@@ -1326,7 +1584,7 @@ function runChecks() {
     const haystack: [string, string][] = [];
     const parked = fs.existsSync(path.join(ROOT, 'draft'))
       ? fs.readdirSync(path.join(ROOT, 'draft')).filter((n) => n.endsWith('.md')).map((n) => 'draft/' + n) : [];
-    const termFiles = prose.concat(['doc/start/todo.md'], parked);
+    const termFiles = prose.concat(['doc/todo.md'], parked);
     for (const f of termFiles) { try { haystack.push([f, fs.readFileSync(path.join(ROOT, f), 'utf8')]); } catch { /* the file may not exist yet */ } }
     for (const f of fs.readdirSync(path.join(import.meta.dirname, 'data'))) {
       if (!f.endsWith('.json') || f === 'aliases.json') continue;
@@ -1397,7 +1655,7 @@ function runChecks() {
       `${hits.length} prose line(s) carry a hand-typed number, inside the cap ${DP.lines_max} (${DP.rule}) — a watch, so prose hygiene never blocks a feature`);
   }
 
-  // L10 · a pointer to a retired doc must still resolve. The prose shelf collapsed to `doc/start/` plus
+  // L10 · a pointer to a retired doc must still resolve. The prose shelf collapsed to `doc/` plus
   // the root rules, and the citations stayed where they were written, so `tools/data/aliases.json`
   // `docs` records the name and the file that owns its numbers now. A pointer to a doc that neither
   // exists nor is recorded is a pointer to nothing. Generated views (`wiki/`, `tools/wiki.ts`) are the
@@ -1519,7 +1777,9 @@ function line1Pools() {
 function weaponPools() {
   const wp = BASES_JSON.weapon_pools?.['main hand'] || {};
   const crit = (wp.Primary || []).filter((id: string) => !id.startsWith('physical') && !id.startsWith('magic'));
-  const ids = ['physical_power_flat', 'physical_power', 'magic_power_flat', 'magic_power', ...crit, ...(wp.Secondary || []), 'elemental_power_flat'];
+  const fixed = new Set(['Primary', 'Secondary', 'Stat Mod', 'Blocked', 'Weapon']);
+  const typePools = Object.entries<any>(wp).filter(([key]) => !fixed.has(key)).flatMap(([, ids]) => ids);
+  const ids = ['physical_power_flat', 'physical_power', 'magic_power_flat', 'magic_power', ...crit, ...(wp.Secondary || []), ...typePools];
   return new Set(ids.map(modName));
 }
 

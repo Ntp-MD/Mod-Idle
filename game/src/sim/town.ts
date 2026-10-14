@@ -1,6 +1,8 @@
 import { eng, E, TOWN } from '../engine/client';
 import { dayOf } from './game';
 import type { GameState, TaskSlot, TownState } from './types';
+import { atSettlement } from './craft';
+import { addTo, fits } from './slots';
 
 /**
  * The settlement layer. Every price here is "minutes of full-sell income" converted through the
@@ -105,6 +107,7 @@ export function dailyUsed(state: GameState, rowId: string): number {
 
 /** Spend gold on a stall line. Purchases that grant no state change are display-only by design. */
 export function buy(state: GameState, settlementId: string, rowId: string): BuyResult {
+  if (!atSettlement(state, settlementId)) return { ok: false, why: 'stand in this settlement to buy' };
   const check = canBuy(state, settlementId, rowId);
   if (!check.ok) return check;
   const row = check.row;
@@ -117,6 +120,7 @@ export function buy(state: GameState, settlementId: string, rowId: string): BuyR
 
 /** Junk is sold by hand at the Counterhand — the only gold mint besides the Road (`economy.md`). */
 export function sellJunk(state: GameState): { pieces: number; gold: number } {
+  if (!atSettlement(state)) return { pieces: 0, gold: 0 };
   let pieces = 0, gold = 0;
   for (const [item, count] of Object.entries(state.junk)) {
     if (!count) continue;
@@ -165,6 +169,7 @@ export function stashTabCount(state: GameState): number {
 
 /** Deposit and withdraw only happen at a settlement (`inventory.note`). */
 export function deposit(state: GameState, bagIndex: number, tab: number): { ok: boolean; why?: string } {
+  if (!atSettlement(state)) return { ok: false, why: 'stash transfers are a settlement service' };
   if (tab >= stashTabCount(state)) return { ok: false, why: 'that tab is not bought yet' };
   const item = state.bag[bagIndex];
   if (!item) return { ok: false, why: 'nothing in that slot' };
@@ -175,6 +180,7 @@ export function deposit(state: GameState, bagIndex: number, tab: number): { ok: 
 }
 
 export function withdraw(state: GameState, tab: number, index: number): { ok: boolean; why?: string } {
+  if (!atSettlement(state)) return { ok: false, why: 'stash transfers are a settlement service' };
   const item = state.stash[tab]?.[index];
   if (!item) return { ok: false, why: 'empty' };
   if (state.bag.length >= E.inventory.adventure_slots) return { ok: false, why: 'the bag is full' };
@@ -185,6 +191,7 @@ export function withdraw(state: GameState, tab: number, index: number): { ok: bo
 
 /** Bulk deposit: high index first so the splice indices stay valid; a locked piece is left behind. */
 export function depositMany(state: GameState, indices: number[], tab: number): number {
+  if (!atSettlement(state)) return 0;
   if (tab >= stashTabCount(state)) return 0;
   let moved = 0;
   for (const i of [...indices].sort((a, b) => b - a)) {
@@ -200,6 +207,7 @@ export function depositMany(state: GameState, indices: number[], tab: number): n
 
 /** Bulk withdraw: stop at a full adventure bag; a locked piece stays where it is. */
 export function withdrawMany(state: GameState, tab: number, indices: number[]): number {
+  if (!atSettlement(state)) return 0;
   let moved = 0;
   for (const i of [...indices].sort((a, b) => b - a)) {
     const item = state.stash[tab]?.[i];
@@ -224,6 +232,7 @@ export function progressTasks(state: GameState, mobKind: string, zone: number) {
 }
 
 export function claimTask(state: GameState, index: number, choice?: string): boolean {
+  if (!atSettlement(state)) return false;
   const task = state.town.tasks[index];
   if (!task || task.progress < task.n || task.claimed) return false;
   // a Boss hunt pays winner's choice: name the stone to take it as, defaulting to the Remove stone
@@ -231,8 +240,9 @@ export function claimTask(state: GameState, index: number, choice?: string): boo
   if (task.kind === 'boss' && choice && task.alt && (choice === task.alt.stone || choice === task.stone)) {
     if (choice === task.alt.stone) { stone = task.alt.stone; count = task.alt.count; }
   }
+  if (!fits(state, state.counters.stones, stone, 'stone', count)) return false;
+  addTo(state, state.counters.stones, stone, 'stone', count);
   task.claimed = true;
-  state.counters.stones[stone] = (state.counters.stones[stone] || 0) + count;
   state.town.refillAt[index] = state.clockSec + TS.refill_sec;
   state.town.tasks[index] = null;
   return true;

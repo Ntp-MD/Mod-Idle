@@ -4,7 +4,7 @@ import { E, loot } from '../src/engine/client';
 import { pieceRank, rankTone, gearEntry, stackEntry, sortEntries, vsWorn, compareLines } from '../src/ui/bag';
 import { fxByMob, plateBeat, platePark, plateStrike, plateGesture, graveIds, parked } from '../src/ui/plate';
 import { ramp } from '../src/ui/map';
-import { snapCounters, buildAwayReport, fieldLabel, describeSnap } from '../src/ui/hud';
+import { snapCounters, buildAwayReport, fieldLabel, describeSnap, mechanicWords, sideSpawnWords } from '../src/ui/hud';
 import { bar, curseWords, statusWords } from '../src/ui/field';
 import type { Item, Mob, FxEvent } from '../src/sim/types';
 import type { BagStack } from '../src/sim/slots';
@@ -177,6 +177,25 @@ describe('the field HUD reads (hud.ts)', () => {
     expect(normal).toBeTruthy();
     const boss = fieldLabel({ species: sp.name, speciesId: sp.id, kind: `Boss · ${sp.name}` });
     expect(boss).toContain(E.mob.field_labels.boss.suffix);
+  });
+
+  it('says what a body does, in the data\u2019s own words', () => {
+    expect(mechanicWords({ mechanics: null })).toEqual([]);
+    expect(mechanicWords({ mechanics: { bleed_immune: true } }))
+      .toEqual([(E.mob as any).trait_mechanics.bleed_immune.word]);
+    // a key with an argument reads as the word plus the thing it names
+    expect(mechanicWords({ mechanics: { element_weak: 'fire' } })[0])
+      .toContain((E.mob as any).trait_mechanics.element_weak.word);
+  });
+
+  it('says what standing on one side rolls', () => {
+    expect(sideSpawnWords(null)).toEqual([]);
+    const zone = (E.mob.zones as any[]).find((z: any) => z.subzones?.length === 3)!;
+    const spawn = zone.subzones[0].spawn;
+    const words = sideSpawnWords(spawn);
+    expect(words[0]).toContain(spawn.group);
+    expect(words[1]).toContain(String(spawn.elite_pct));
+    expect(words[2]).toBe((E.mob as any).spawn_packs[spawn.pack].word);
   });
 
   it('captions a backup, and answers an em dash when there is none', () => {

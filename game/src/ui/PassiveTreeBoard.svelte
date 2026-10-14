@@ -77,8 +77,8 @@
         <span class="branch-label">{selected.branch}</span>
         <b>{selected.id}</b>
       </div>
-      <h3>{selected.line.replaceAll('_', ' ')}</h3>
-      <p>{ready(selected) ? 'Connected to an owned path' : 'Connect through a neighbouring node first'}</p>
+      <h3>{selected.name || selected.line.replaceAll('_', ' ')}</h3>
+      <p>{selected.weapon ? `Active while holding ${selected.weapon}. ` : ''}{ready(selected) ? 'Connected to an owned path' : 'Connect through a neighbouring node first'}</p>
       <div class="rank-table" aria-label="Node rank values">
         {#each selected.values as value, index (index)}
           <span class:owned-rank={rank >= index + 1}>

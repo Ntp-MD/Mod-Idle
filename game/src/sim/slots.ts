@@ -96,10 +96,38 @@ export function addTo(
 }
 
 /** Would a grant of this size fit? Used by producers that must not consume a cost they can't bank. */
-export const fits = (state: GameState, bucket: Record<string, number>, key: string, capKind: string, amount: number): boolean => {
+export interface BagCost { bucket: Record<string, number>; key: string; capKind: string; amount: number }
+
+export function fitsAll(state: GameState, grants: BagCost[]): boolean {
+  const grouped = new Map<Record<string, number>, Map<string, { amount: number; capKind: string }>>();
+  for (const grant of grants) {
+    if (grant.amount < 0) return false;
+    if (!grouped.has(grant.bucket)) grouped.set(grant.bucket, new Map());
+    const bucket = grouped.get(grant.bucket)!;
+    const prior = bucket.get(grant.key);
+    bucket.set(grant.key, { capKind: grant.capKind, amount: (prior?.amount || 0) + grant.amount });
+  }
+  let need = 0;
+  for (const [bucket, keys] of grouped) for (const [key, grant] of keys) {
+    const cap = (E.inventory.stack_size as Record<string, number>)[grant.capKind];
+    const before = bucket[key] || 0;
+    need += slotsFor(before + grant.amount, cap) - slotsFor(before, cap);
+  }
+  return need <= slotsFree(state);
+}
+
+export const fits = (state: GameState, bucket: Record<string, number>, key: string, capKind: string, amount: number, costs: BagCost[] = []): boolean => {
   const cap = (E.inventory.stack_size as Record<string, number>)[capKind];
-  const before = bucket[key] || 0;
-  return slotsFor(before + amount, cap) - slotsFor(before, cap) <= slotsFree(state);
+  let before = bucket[key] || 0;
+  let freed = 0;
+  for (const cost of costs) {
+    const count = cost.bucket[cost.key] || 0;
+    if (cost.amount < 0 || count < cost.amount) return false;
+    const costCap = (E.inventory.stack_size as Record<string, number>)[cost.capKind];
+    freed += slotsFor(count, costCap) - slotsFor(count - cost.amount, costCap);
+    if (cost.bucket === bucket && cost.key === key) before -= cost.amount;
+  }
+  return slotsFor(before + amount, cap) - slotsFor(before, cap) <= slotsFree(state) + freed;
 };
 
 /** Extra character-bag slots the Porter's pouch lines sold — each is a `space` line. */

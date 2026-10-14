@@ -11,6 +11,24 @@ const craft = createCraft(ED, loot);
 // each band's level window starts where its span starts — read off the spans, never typed
 const SPAN_FROM = (band: string) => E.item_level.spans.find((s: any) => s.band === band)!.from;
 
+describe('broken upgrade repair', () => {
+  it('revives one level below the pre-break level and refills protection', () => {
+    const item = piece(3);
+    const from = E.craft.upgrade_breaks_from - 1;
+    const broken = made(craft.upgrade({ ...item, upgrade_lv: from, protection_left: 0 }, () => 0.999));
+    expect(broken.item.broken).toBe(true);
+    expect(broken.item.upgrade_lv).toBe(from - 1);
+    expect(broken.item.broken_at).toBe(from);
+    const repaired = made(craft.repair(broken.item));
+    expect(repaired.item.broken).toBe(false);
+    expect(repaired.item.upgrade_lv).toBe(from - 1);
+    expect(repaired.changed.level).toBe(from - 1);
+    expect(repaired.item.protection_left).toBe(E.craft.protection_start);
+    expect(repaired.item.lines).toEqual(item.lines);
+    expect(craft.repair(repaired.item).ok).toBe(false);
+  });
+});
+
 // `rollDrop` always stamps the quality band (`sim/drop.ts`), so a rolled piece carries a `q` even
 // though `Item.q` is optional for hand-built fixtures elsewhere.
 function piece(seed = 1, band = 'low'): Item & { q: number } {

@@ -14,6 +14,8 @@ export interface TreeNode {
   tier: 'shallow' | 'deep';
   /** The `mods.json` line this node grants. */
   line: string;
+  name?: string;
+  weapon?: string;
   /** What rank 1, 2 and 3 grant. Never zero, never falling. */
   values: number[];
   /** The line's own maximum, kept so a reader can see the fraction a node buys. */
@@ -30,7 +32,7 @@ export interface TreeNode {
 export interface TreeSpec {
   point_cost_per_rank: number;
   rank_tiers: { shallow: number[]; deep: number[] };
-  branches: Record<string, { line: string; values?: number[] }[]>;
+  branches: Record<string, { line: string; values?: number[]; name?: string; weapon?: string }[]>;
   graph: {
     start: { x: number; y: number };
     nodes_per_ring: number;
@@ -67,6 +69,8 @@ export function createTree(spec: TreeSpec, mods: any) {
       const radius = spec.graph.ring_radii[ring] ?? spec.graph.extra_radius;
       nodes.push({
         id: `${branch}.${i + 1}`, branch, index: i + 1, tier, line: entry.line,
+        ...(entry.name ? { name: entry.name } : {}),
+        ...(entry.weapon ? { weapon: entry.weapon } : {}),
         values, max: maxOf(entry.line),
         x: spec.graph.start.x + Math.cos(angle) * radius,
         y: spec.graph.start.y + Math.sin(angle) * radius,
@@ -87,11 +91,12 @@ export function createTree(spec: TreeSpec, mods: any) {
   }
 
   /** The lines the bought ranks actually grant, in the shape `sumLines` accumulates. */
-  function linesOf(ranks: Record<string, number> | undefined): { id: string; value: number }[] {
+  function linesOf(ranks: Record<string, number> | undefined, weaponName = ''): { id: string; value: number }[] {
     const out: { id: string; value: number }[] = [];
     for (const [id, rank] of Object.entries(ranks || {})) {
       const node = byId[id];
       if (!node) continue;
+      if (node.weapon && node.weapon !== weaponName) continue;
       const r = Math.max(0, Math.min(node.ranks, Math.floor(rank)));
       if (r > 0) out.push({ id: node.line, value: node.values[r - 1] });
     }

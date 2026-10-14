@@ -1,5 +1,5 @@
 {
-  "note": "Presentation only (X33 · M7). The field is the simulator's own lattice: engine.json `road` holds one settlement per cell in axial coordinates measured from the starting settlement, and this file names the cells they land on. A cell id (row letter A-O plus column number 1-20) is a reference mark drawn on the sheet, never a position the simulation reads. What the sheet draws: every cell of the field, the terrain a cell stands on, the settlement mark on its own cell, one named sub-zone cell and one named wild cell per side of a town, the walk graph between settlements, the landmark marks, the region names and the travel pin. Nothing here carries a level band, a sub-zone name or a race — those are the engine's, printed into the cells by tools/map.ts, so the sheet and the content cannot disagree. A wild cell is a side of a town with no sub-zone on it yet: it is named after the town it rings and holds no content of its own until one is written.",
+  "note": "Presentation only (X33 · M7). The field is the simulator's own lattice: engine.json `road` holds one settlement per cell in axial coordinates measured from the starting settlement, and this file names the cells they land on. A cell id (row letter A-O plus column number 1-20) is a reference mark drawn on the sheet, never a position the simulation reads. What the sheet draws: every cell of the field, the terrain a cell stands on, the settlement mark on its own cell, one named sub-zone cell and one named wild cell per side of a town, the walk graph between settlements, the landmark marks, the region names and the travel pin. Nothing here carries a level band, a sub-zone name or a race — those are the engine's, printed into the cells by tools/map.ts, so the sheet and the content cannot disagree. A wild cell is a side of a town with no sub-zone on it yet: it is named after the town it rings and holds no content of its own until one is written. Wild-side cells also name their fieldwork kind at its stable site index. The environment_terrain crosswalk joins map labels to mob vocabulary for validation; the game reads neither map data nor the crosswalk. Each map region also lists the gameplay zone region names it groups, checked against the zone IDs.",
   "field": {
     "cols": 20,
     "rows": 15,
@@ -37,6 +37,53 @@
     "town": "#4b4327",
     "wild": "#333a28"
   },
+  "environment_terrain": {
+    "abyss": "waste",
+    "blight": "ash",
+    "caldera": "ash",
+    "camp": "camp",
+    "cliff": "rock",
+    "cliffs": "rock",
+    "coast": "water",
+    "court": "village",
+    "dark forest": "forest",
+    "deeps": "rock",
+    "depths": "rock",
+    "dunes": "salt",
+    "fog": "moor",
+    "gallery": "rock",
+    "gate": "rock",
+    "glade": "grass",
+    "grassland": "grass",
+    "grove": "forest",
+    "hollow": "rock",
+    "ice": "snow",
+    "lava": "ash",
+    "market": "village",
+    "mesa": "rock",
+    "mountain": "rock",
+    "mud": "marsh",
+    "peak": "snow",
+    "poison fen": "marsh",
+    "quarter": "village",
+    "rift": "waste",
+    "rime": "snow",
+    "rootway": "forest",
+    "ruins": "ash",
+    "sanctum": "rock",
+    "sea": "water",
+    "snow": "snow",
+    "stair": "rock",
+    "swamp": "marsh",
+    "temple": "rock",
+    "tombs": "ash",
+    "tunnels": "rock",
+    "vault": "rock",
+    "village": "village",
+    "volcano": "ash",
+    "warrens": "rock",
+    "waste": "waste"
+  },
   "ground_colors": {
     "rock": "#171c27",
     "snow": "#1e2934",
@@ -69,13 +116,16 @@
       ],
       "wild": [
         {
-          "cell": "G10"
+          "cell": "G10",
+          "kind": "dungeon"
         },
         {
-          "cell": "G11"
+          "cell": "G11",
+          "kind": "mine"
         },
         {
-          "cell": "H9"
+          "cell": "H9",
+          "kind": "grove"
         }
       ]
     },
@@ -98,13 +148,16 @@
       ],
       "wild": [
         {
-          "cell": "F1"
+          "cell": "F1",
+          "kind": "dungeon"
         },
         {
-          "cell": "F3"
+          "cell": "F3",
+          "kind": "mine"
         },
         {
-          "cell": "G3"
+          "cell": "G3",
+          "kind": "grove"
         }
       ]
     },
@@ -127,13 +180,16 @@
       ],
       "wild": [
         {
-          "cell": "A18"
+          "cell": "A18",
+          "kind": "dungeon"
         },
         {
-          "cell": "B16"
+          "cell": "B16",
+          "kind": "mine"
         },
         {
-          "cell": "B18"
+          "cell": "B18",
+          "kind": "grove"
         }
       ]
     },
@@ -156,13 +212,16 @@
       ],
       "wild": [
         {
-          "cell": "L1"
+          "cell": "L1",
+          "kind": "dungeon"
         },
         {
-          "cell": "M2"
+          "cell": "M2",
+          "kind": "mine"
         },
         {
-          "cell": "M3"
+          "cell": "M3",
+          "kind": "grove"
         }
       ]
     },
@@ -185,13 +244,16 @@
       ],
       "wild": [
         {
-          "cell": "K19"
+          "cell": "K19",
+          "kind": "dungeon"
         },
         {
-          "cell": "M18"
+          "cell": "M18",
+          "kind": "mine"
         },
         {
-          "cell": "M19"
+          "cell": "M19",
+          "kind": "grove"
         }
       ]
     },
@@ -214,13 +276,16 @@
       ],
       "wild": [
         {
-          "cell": "F8"
+          "cell": "F8",
+          "kind": "dungeon"
         },
         {
-          "cell": "G9"
+          "cell": "G9",
+          "kind": "mine"
         },
         {
-          "cell": "H7"
+          "cell": "H7",
+          "kind": "grove"
         }
       ]
     },
@@ -243,13 +308,16 @@
       ],
       "wild": [
         {
-          "cell": "E9"
+          "cell": "E9",
+          "kind": "dungeon"
         },
         {
-          "cell": "F9"
+          "cell": "F9",
+          "kind": "mine"
         },
         {
-          "cell": "F10"
+          "cell": "F10",
+          "kind": "grove"
         }
       ]
     },
@@ -272,13 +340,16 @@
       ],
       "wild": [
         {
-          "cell": "H2"
+          "cell": "H2",
+          "kind": "dungeon"
         },
         {
-          "cell": "I3"
+          "cell": "I3",
+          "kind": "mine"
         },
         {
-          "cell": "J1"
+          "cell": "J1",
+          "kind": "grove"
         }
       ]
     },
@@ -301,13 +372,16 @@
       ],
       "wild": [
         {
-          "cell": "E14"
+          "cell": "E14",
+          "kind": "dungeon"
         },
         {
-          "cell": "F12"
+          "cell": "F12",
+          "kind": "mine"
         },
         {
-          "cell": "F14"
+          "cell": "F14",
+          "kind": "grove"
         }
       ]
     },
@@ -330,13 +404,16 @@
       ],
       "wild": [
         {
-          "cell": "M6"
+          "cell": "M6",
+          "kind": "dungeon"
         },
         {
-          "cell": "N6"
+          "cell": "N6",
+          "kind": "mine"
         },
         {
-          "cell": "N7"
+          "cell": "N7",
+          "kind": "grove"
         }
       ]
     },
@@ -359,13 +436,16 @@
       ],
       "wild": [
         {
-          "cell": "I14"
+          "cell": "I14",
+          "kind": "dungeon"
         },
         {
-          "cell": "K13"
+          "cell": "K13",
+          "kind": "mine"
         },
         {
-          "cell": "K14"
+          "cell": "K14",
+          "kind": "grove"
         }
       ]
     },
@@ -388,13 +468,16 @@
       ],
       "wild": [
         {
-          "cell": "I4"
+          "cell": "I4",
+          "kind": "dungeon"
         },
         {
-          "cell": "J5"
+          "cell": "J5",
+          "kind": "mine"
         },
         {
-          "cell": "K5"
+          "cell": "K5",
+          "kind": "grove"
         }
       ]
     },
@@ -417,13 +500,16 @@
       ],
       "wild": [
         {
-          "cell": "M12"
+          "cell": "M12",
+          "kind": "dungeon"
         },
         {
-          "cell": "M13"
+          "cell": "M13",
+          "kind": "mine"
         },
         {
-          "cell": "N11"
+          "cell": "N11",
+          "kind": "grove"
         }
       ]
     },
@@ -446,13 +532,16 @@
       ],
       "wild": [
         {
-          "cell": "C6"
+          "cell": "C6",
+          "kind": "dungeon"
         },
         {
-          "cell": "C8"
+          "cell": "C8",
+          "kind": "mine"
         },
         {
-          "cell": "D7"
+          "cell": "D7",
+          "kind": "grove"
         }
       ]
     },
@@ -475,13 +564,16 @@
       ],
       "wild": [
         {
-          "cell": "A11"
+          "cell": "A11",
+          "kind": "dungeon"
         },
         {
-          "cell": "A12"
+          "cell": "A12",
+          "kind": "mine"
         },
         {
-          "cell": "C11"
+          "cell": "C11",
+          "kind": "grove"
         }
       ]
     },
@@ -504,13 +596,16 @@
       ],
       "wild": [
         {
-          "cell": "C16"
+          "cell": "C16",
+          "kind": "dungeon"
         },
         {
-          "cell": "D16"
+          "cell": "D16",
+          "kind": "mine"
         },
         {
-          "cell": "E16"
+          "cell": "E16",
+          "kind": "grove"
         }
       ]
     },
@@ -533,13 +628,16 @@
       ],
       "wild": [
         {
-          "cell": "G16"
+          "cell": "G16",
+          "kind": "dungeon"
         },
         {
-          "cell": "I15"
+          "cell": "I15",
+          "kind": "mine"
         },
         {
-          "cell": "I16"
+          "cell": "I16",
+          "kind": "grove"
         }
       ]
     },
@@ -562,13 +660,16 @@
       ],
       "wild": [
         {
-          "cell": "D17"
+          "cell": "D17",
+          "kind": "dungeon"
         },
         {
-          "cell": "F17"
+          "cell": "F17",
+          "kind": "mine"
         },
         {
-          "cell": "F18"
+          "cell": "F18",
+          "kind": "grove"
         }
       ]
     }
@@ -611,20 +712,23 @@
       "zones": [
         1,
         14
-      ]
+      ],
+      "zone_regions": ["pinewood road", "slow water"]
     },
     {
       "name": "Ashfall Wood",
       "zones": [
         16,
         17
-      ]
+      ],
+      "zone_regions": ["ash fields", "storm terrace"]
     },
     {
       "name": "Wolfmoor",
       "zones": [
         3
-      ]
+      ],
+      "zone_regions": ["wolf country"]
     },
     {
       "name": "Highspire Peaks",
@@ -632,47 +736,54 @@
         2,
         8,
         9
-      ]
+      ],
+      "zone_regions": ["frost hold", "high crags", "the bone gate"]
     },
     {
       "name": "Frosthold Snows",
       "zones": [
         10,
         18
-      ]
+      ],
+      "zone_regions": ["the vermolch mire", "wet lowland"]
     },
     {
       "name": "Greyfen Waste",
       "zones": [
         4,
         5
-      ]
+      ],
+      "zone_regions": ["salt flats", "wet lowland"]
     },
     {
       "name": "Emberhold Ruins",
       "zones": [
         11,
         13
-      ]
+      ],
+      "zone_regions": ["open moor", "slag and foundry heat"]
     },
     {
       "name": "Nettlecrag Deeps",
       "zones": [
         7,
         12
-      ]
+      ],
+      "zone_regions": ["drowned river mouth", "thorn country"]
     },
     {
       "name": "Wyrmback Shore",
       "zones": [
         15
-      ]
+      ],
+      "zone_regions": ["wyrm breeding ground"]
     },
     {
       "name": "The Pale Sanctum",
       "zones": [
         6
-      ]
+      ],
+      "zone_regions": ["the pale bloom"]
     }
   ]
 }

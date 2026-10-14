@@ -1,5 +1,5 @@
 import { eng, loot, E, STAT_KEYS, BASES, BASE_BY_NAME } from '../engine/client';
-import { mastery, weaponByName } from './mastery';
+import { mastery } from './mastery';
 import { weaponWeightOf } from './drop';
 import type { Item, ModLine } from './types';
 import { tree } from '../engine/client';
@@ -87,6 +87,8 @@ export function sumLines(gear: (Item | null)[], extra?: { id: string; value: num
       // a Frame Mod line carries its extra Mods on the same line (`item-base.md`), so each part
       // feeds its own bucket
       for (const part of [line, ...((line.extra as any[]) || [])]) {
+        // The cap unlock belongs exclusively to passive ranks, including for imported gear.
+        if (part.id === 'elemental_resistance_cap_pct') continue;
         const stat = (part as any).stat as StatKey | undefined;
         if (part.id === 'stat_mod_flat' && stat) acc.statBy[stat].flat += part.value;
         // the all-stats sibling lifts every Core stat by the one value it rolled 
@@ -228,7 +230,8 @@ export function buildCharacter(
   points?: Record<StatKey, number>,
   treeRanks?: Record<string, number>,
 ): Character {
-  const lines = sumLines(gear, tree ? tree.linesOf(treeRanks) : undefined);
+  const mainHand = gear.find((g) => g && !g.broken && g.slot === 'main hand') || null;
+  const lines = sumLines(gear, tree ? tree.linesOf(treeRanks, mainHand?.base || '') : undefined);
   const core = {} as Record<StatKey, number>;
   // With no allocation given, fall back to the REFERENCE even-split line — the build every published
   // number and every test is measured against. The client passes the player's own `points`.
@@ -237,7 +240,6 @@ export function buildCharacter(
     const spent = points ? (points[k] ?? 0) : refPts;
     core[k] = (eng.statOf(spent) + lines.statBy[k].flat) * (1 + lines.statBy[k].pct / 100);
   }
-  const mainHand = gear.find((g) => g && g.slot === 'main hand') || null;
   // a weapon's Element is a stored line on the piece, not a property of the weapon types:
   // `equipment-weapon.md` carries no Element column, and `crafting.md` forbids locking one
   const weaponElement = mainHand ? (mainHand.lines.find((l) => l.element)?.element ?? null) : null;
@@ -278,10 +280,11 @@ export function buildCharacter(
     if (!key.startsWith('elemental_resistance:')) continue;
     resByElement[key.split(':')[1]] = (resByElement[key.split(':')[1]] || 0) + v;
   }
-  // the weapon types carry their own aspd; the merged rows in engine.json are an aspd band
+  // The engine row gives each named type its attack tempo.
   const aspdDefault = E.build.weapon_aspd_default;
+  const weaponStats = mainHand ? E.weapons.find((weapon: any) => weapon.name === mainHand.base) : null;
   const weaponAspd = mainHand
-    ? (weaponByName(mainHand.base)?.weapon_aspd ?? mainHand.weaponAspd ?? aspdDefault)
+    ? (weaponStats?.weapon_aspd ?? mainHand.weaponAspd ?? aspdDefault)
     : aspdDefault;
   const used = weightOfCarry(gear, carried, heldMasteryLevel);
   const burden = eng.encumbranceOf(used, core.str);
@@ -303,9 +306,9 @@ export function buildCharacter(
     weaponElement,
     aspd,
     hitsPerSec: eng.hitsPerSec(aspd),
-    phys: eng.physOf(core.str, lines.physFlat, lines.physPct + a(effects, 'physical_power'), weaponAspd)
+    phys: eng.physOf(core.str, lines.physFlat, lines.physPct + a(effects, 'physical_power'), weaponAspd, mainHand?.base)
       * m(effects, 'physical_power'),
-    magic: eng.magicOf(core.int, lines.magicFlat, lines.magicPct, weaponAspd),
+    magic: eng.magicOf(core.int, lines.magicFlat, lines.magicPct, weaponAspd, mainHand?.base),
     attackDamage: lines.attackDamagePct,
     spellDamage: lines.spellDamagePct,
     elemByElement,

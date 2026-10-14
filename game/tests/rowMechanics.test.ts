@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { E, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { buildCharacter, emptyGear } from '../src/sim/player';
+import { mastery } from '../src/sim/mastery';
 import { poolGear } from './sheetFixture';
 import { mobSwing, playerSwing } from '../src/sim/combat';
 import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct, triggerAuras } from '../src/sim/skills';
@@ -32,41 +33,43 @@ const mob = (over: Partial<Mob> = {}): Mob => ({
 
 function cast(id: string, c: Character, group: Mob[], env: any = {}, seed = 7) {
   const s = newSkillState();
-  s.list[0] = id;
+  s.list[0] = id; s.owned[id] ??= 0;
   s.xp[id] = 8000;
   return castOnce(s, c, c.maxMana, group, {}, mulberry32(seed), env);
 }
 
 describe('the attack rows that press differently', () => {
-  const c = buildCharacter(90, emptyGear());
+  const c = { ...buildCharacter(90, emptyGear()), weaponName: 'one-handed axe' } as Character;
+  const archer = { ...c, weaponName: 'bow' } as Character;
 
   it('Whirlwind presses three rounds and Arrow Shower three arrows at its stated fraction', () => {
     const ramp = sm.damagePct(E.skill_xp.level_cap) / 100;   // the level table is the ramp
-    const onePress = (id: string) => {
+    const onePress = (id: string, actor: Character) => {
       const r = row(id);
-      return (r.base_flat! + (r.eff! / 100) * c.phys) * ramp
-        * sm.groupBonus(r, c.weaponName) * sm.masteryBonus(0);
+      return (r.base_flat! + (r.eff! / 100) * actor.phys) * ramp
+        * sm.groupBonus(r, actor.weaponName) * mastery.skillBonus(0, sm.weaponMatches(r, actor.weaponName));
     };
     const dealt = (id: string) => {
       const t = mob({ id: `hit-${id}` });
-      return cast(id, c, [t])!.dealt!;
+      const actor = id === 'attack.arrow_shower' ? archer : c;
+      return cast(id, actor, [t])!.dealt!;
     };
     // the press count and the per-arrow share are the rows' own `hits` / `hit_pct`
-    expect(dealt('attack.whirlwind')).toBeCloseTo(onePress('attack.whirlwind') * valueOf('attack.whirlwind', 'hits'), 4);
+    expect(dealt('attack.whirlwind')).toBeCloseTo(onePress('attack.whirlwind', c) * valueOf('attack.whirlwind', 'hits'), 4);
     // Arrow Shower is bound to a bow, so it is read on an archer — and the hand formula above does not
     // carry the weapon's own size multiplier, so reading it here would assert the formula, not the row.
     // The lock is what this file would otherwise block: an over-tight expectation is a cage, not a rule.
     // a row without the line presses once
-    expect(dealt('attack.cleave')).toBeCloseTo(onePress('attack.cleave'), 4);
+    expect(dealt('attack.cleave')).toBeCloseTo(onePress('attack.cleave', c), 4);
   });
 
   it('Piercing Shot is not dodged, and Cleave is', () => {
     // Piercing Shot is a bow row, so the archer is the one who reads it — the case compares the sim with
     // itself, so a weapon name is all the setup it needs
-    const archer = { ...c, weaponName: 'bow' } as Character;
+    const crossbow = { ...c, weaponName: 'crossbow' } as Character;
     const dodgey = mob({ dodgeRate: 1e9 });
     const normal = cast('attack.cleave', c, [mob({ id: 'n', dodgeRate: 1e9 })], {}, 3);
-    const pierced = cast('attack.piercing_shot', archer, [dodgey], {}, 3);
+    const pierced = cast('attack.piercing_shot', crossbow, [dodgey], {}, 3);
     expect(normal?.targets).toBe(0);
     expect(pierced?.targets).toBe(1);
     expect(hasRule(row('attack.piercing_shot'), 'ignores_dodge')).toBe(true);
@@ -82,7 +85,7 @@ describe('the attack rows that press differently', () => {
     expect(shocked.length).toBe(castResult?.targets);
     // with no Alignment the ordinary proc path could not have done this
     const plain = newMobStatusStore();
-    cast('attack.piercing_shot', zeroAlign, [mob({ id: 'z' })], { mobStatus: plain }, 11);
+    cast('attack.piercing_shot', { ...zeroAlign, weaponName: 'crossbow' }, [mob({ id: 'z' })], { mobStatus: plain }, 11);
     expect(Object.keys(plain).length).toBeLessThanOrEqual(1);
     expect(Object.keys(plain.z?.statuses || {}).length).toBe(0);
   });
@@ -165,13 +168,13 @@ describe('the support rows that change the character', () => {
 
   it('Ghost Dance charges arrive from the row’s own ramp and delete a hit each', () => {
     const s = newSkillState();
-    s.list[0] = 'buff.ghost_dance';
+    s.list[0] = 'buff.ghost_dance'; s.owned['buff.ghost_dance'] ??= 0;
     s.xp['buff.ghost_dance'] = 8000;
     const c = buildCharacter(40, emptyGear());
     const atCap = castOnce(s, c, c.maxMana, [mob()], {}, mulberry32(1));
     expect(atCap?.charges).toBe(valueOf('buff.ghost_dance', 'dodge_charges_cap'));
     const fresh = newSkillState();
-    fresh.list[0] = 'buff.ghost_dance';
+    fresh.list[0] = 'buff.ghost_dance'; fresh.owned['buff.ghost_dance'] ??= 0;
     fresh.owned['buff.ghost_dance'] = 0;
     const atOne = castOnce(fresh, c, c.maxMana, [mob()], {}, mulberry32(1));
     expect(atOne?.charges).toBe(valueOf('buff.ghost_dance', 'dodge_charges'));
@@ -185,7 +188,7 @@ describe('the support rows that change the character', () => {
     s.zone = 3;
     s.skills.owned['buff.ghost_dance'] = 0;
     s.skills.xp['buff.ghost_dance'] = 8000;
-    s.skills.list[0] = 'buff.ghost_dance';
+    s.skills.list[0] = 'buff.ghost_dance'; s.skills.owned['buff.ghost_dance'] ??= 0;
     let guard = 0;
     while ((s.player.charges || 0) === 0 && guard++ < 200) tick(s, {});
     expect(s.player.charges! > 0).toBe(true);
@@ -211,7 +214,7 @@ describe('the support rows that change the character', () => {
     const statuses: any = { chill: { secLeft: 99 } };
     s.skills.owned['heal.cleanse'] = 0;
     s.skills.xp['heal.cleanse'] = 8000;
-    s.skills.list[0] = 'heal.cleanse';
+    s.skills.list[0] = 'heal.cleanse'; s.skills.owned['heal.cleanse'] ??= 0;
     guard = 0;
     let cleansed = false;
     while (guard++ < 30 && !cleansed) {
@@ -239,7 +242,7 @@ describe('the support rows that change the character', () => {
     s.gear = poolGear();
     s.skills.owned['buff.magia_drive'] = 0;
     s.skills.xp['buff.magia_drive'] = 8000;
-    s.skills.list[0] = 'buff.magia_drive';
+    s.skills.list[0] = 'buff.magia_drive'; s.skills.owned['buff.magia_drive'] ??= 0;
     let guard = 0;
     let rechargedWhileHit = false;
     while (guard++ < 200) {
@@ -291,7 +294,7 @@ describe('the curse rows that act on other mobs', () => {
 });
 
 describe('the trigger auras fire the first ready slot at their own price', () => {
-  const c = buildCharacter(90, emptyGear());
+  const c = { ...buildCharacter(90, emptyGear()), weaponName: 'one-handed axe' } as Character;
 
   it('reads the event and the price off the row', () => {
     const s = newSkillState();
@@ -312,7 +315,7 @@ describe('the trigger auras fire the first ready slot at their own price', () =>
   });
 
   it('charges ×2 mana and scales the press ×0.7, and never spends the skill cooldown', () => {
-    const setup = () => { const s = newSkillState(); s.list[0] = 'attack.cleave'; s.xp['attack.cleave'] = 8000; return s; };
+    const setup = () => { const s = newSkillState(); s.list[0] = 'attack.cleave'; s.owned['attack.cleave'] ??= 0; s.xp['attack.cleave'] = 8000; return s; };
     const plainS = setup();
     const plain = castOnce(plainS, c, c.maxMana, [mob({ id: 'a' })], {}, mulberry32(7), {});
     const trigS = setup();
@@ -332,7 +335,7 @@ describe('the trigger auras fire the first ready slot at their own price', () =>
     s.zone = 1;
     s.skills.owned['attack.cleave'] = 1;
     s.skills.xp['attack.cleave'] = 8000;
-    s.skills.list[0] = 'attack.cleave';
+    s.skills.list[0] = 'attack.cleave'; s.skills.owned['attack.cleave'] ??= 0;
     s.skills.owned['aura.cast_on_crit'] = 1;
     s.skills.auras['aura.cast_on_crit'] = true;
     // tick until the state under test exists, never for a guessed window (AGENTS.md): the bound is a hang guard

@@ -31,7 +31,7 @@ const cond = (patch: Partial<ReturnType<typeof condOf>> = {}) => ({ ...NO_COND, 
 
 function armed(mode: 'always' | 'conditional' | 'never', patch = {}) {
   const s = newSkillState();
-  s.list[0] = ATTACK;
+  s.list[0] = ATTACK; s.owned[ATTACK] ??= 0;
   s.xp[ATTACK] = 8000;
   s.mode[ATTACK] = mode;
   s.conditions[ATTACK] = { ...NO_COND, ...patch };
@@ -54,14 +54,14 @@ function casts(
 }
 
 describe('a slot picks when it may fire', () => {
-  const c = buildCharacter(90, emptyGear());
+  const c = { ...buildCharacter(90, emptyGear()), weaponName: 'one-handed axe' };
 
   it('casts when the mode is always, which is the default', () => {
     const s = armed('always');
     expect(casts(s, c)).toBe(ATTACK);
     // the field itself is optional: a state that never set a mode behaves as `always`
     const fresh = newSkillState();
-    fresh.list[0] = ATTACK;
+    fresh.list[0] = ATTACK; fresh.owned[ATTACK] ??= 0;
     fresh.xp[ATTACK] = 8000;
     expect(casts(fresh, c)).toBe(ATTACK);
   });
@@ -71,7 +71,7 @@ describe('a slot picks when it may fire', () => {
     expect(casts(s, c)).toBeNull();
     // a second slot set back to `always` still fires — `never` is per skill, not a bar-wide switch
     const other = sm.of('attack').find((k: any) => k.id !== ATTACK) as any;
-    s.list[1] = other.id;
+    s.list[1] = other.id; s.owned[other.id] ??= 0;
     s.xp[other.id] = 8000;
     expect(casts(s, c)).toBe(other.id);
   });
@@ -101,8 +101,8 @@ describe('a slot picks when it may fire', () => {
     // the whole point of the per-row list: the burst row is for the boss and the finisher for the pool
     const other = sm.of('attack').find((k: any) => k.id !== ATTACK) as any;
     const s = newSkillState();
-    s.list[0] = ATTACK;
-    s.list[1] = other.id;
+    s.list[0] = ATTACK; s.owned[ATTACK] ??= 0;
+    s.list[1] = other.id; s.owned[other.id] ??= 0;
     s.xp[ATTACK] = 8000;
     s.xp[other.id] = 8000;
     s.mode[ATTACK] = 'conditional';
@@ -149,7 +149,7 @@ describe('a slot picks when it may fire', () => {
     const statusStore = newMobStatusStore();
     const FLAME = 'attack.fireball';                          // element `fire` → applies `burn`
     const s = newSkillState();
-    s.list[0] = FLAME;
+    s.list[0] = FLAME; s.owned[FLAME] ??= 0;
     s.xp[FLAME] = 8000;
     s.mode[FLAME] = 'conditional';
     // the flag is off, so nothing in the list holds
@@ -168,7 +168,7 @@ describe('a slot picks when it may fire', () => {
     const curses = newCurses();
     const WEAKEN = 'curse.weaken';                            // a curse row keys the flag by its own id
     const s = newSkillState();
-    s.list[0] = WEAKEN;
+    s.list[0] = WEAKEN; s.owned[WEAKEN] ??= 0;
     s.xp[WEAKEN] = 8000;
     s.mode[WEAKEN] = 'conditional';
     s.conditions[WEAKEN] = cond({ statusMissing: [WEAKEN] });

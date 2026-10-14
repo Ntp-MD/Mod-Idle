@@ -1,5 +1,6 @@
 <script lang="ts">
   import { E, eng, fieldwork } from '../engine/client';
+  import { sideSpawnWords } from './hud';
 
   /**
    * The destination card: what a picked cell is, what it costs to get there, and the verbs that take
@@ -62,6 +63,8 @@
     return [...new Set(candidates.filter((name: unknown): name is string => typeof name === 'string'))];
   });
   const zoneBoss = $derived(E.mob.bosses.find((boss: any) => boss.zone === settlement.zone) ?? null);
+  /** The side's own pack, Elite rate and body mix — what standing here rolls (`mob.spawn_packs`). */
+  const sideWords = $derived(sideSpawnWords(subzone?.spawn));
   /** The one line that says what standing here is good for. */
   const ground = $derived(({
     town: 'the settlement itself — safe ground, and a Waypoint',
@@ -107,8 +110,9 @@
     <ul class="dest-mob-list" title="Mobs spawn at your level, clamped to this range">
       {#each encounterNames as name (name)}<li>{name}</li>{/each}
     </ul>
-    {#if eliteNames.length || zoneBoss}
+    {#if eliteNames.length || zoneBoss || sideWords.length}
       <div class="dest-specials">
+        {#if sideWords.length}<span><b>This side</b> {sideWords.join(' · ')}</span>{/if}
         {#if eliteNames.length}<span><b>Elite</b> {eliteNames.join(' · ')}</span>{/if}
         {#if zoneBoss}<span><b>Boss</b> {zoneBoss.name}</span>{/if}
       </div>

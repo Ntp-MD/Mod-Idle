@@ -11,6 +11,8 @@ export function itemName(item: Pick<Item, 'slot' | 'base' | 'lines'>): string {
   const line = item.lines[0];
   if (!line) return item.base;
   const mods = [line.id, ...(line.extra || []).map((extra) => extra.id)];
-  const frames = ((BASES.weapon_frames as any)?.[item.base] || []) as { name: string; frame_mod: string[] }[];
-  return frames.find((frame) => frame.frame_mod.length === mods.length && frame.frame_mod.every((id, i) => id === mods[i]))?.name || item.base;
+  const frames = ((BASES.weapon_frames as any)?.[item.base] || []) as { name: string; frame_mod: string[]; legacy_frame_mod?: string[] }[];
+  return frames.find((frame) => frame.frame_mod.length === mods.length && frame.frame_mod.every((id, i) => id === mods[i]))?.name
+    || frames.find((frame) => frame.legacy_frame_mod?.length === mods.length && frame.legacy_frame_mod.every((id, i) => id === mods[i]))?.name
+    || item.base;
 }

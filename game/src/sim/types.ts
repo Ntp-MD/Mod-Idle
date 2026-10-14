@@ -71,10 +71,14 @@ export interface Item {
 export interface Mob {
   id: string;
   species: string;
+  /** The fixed level-band form name, separate from its lineage and drop variant. */
+  formName?: string;
   /** The lineage's own id, so a per-species rule reads one flag rather than matching a name. */
   speciesId?: string;
-  /** The sub-zone this spawn rolled into: its own race pair and one of the zone's own Elements. */
+  /** The sub-zone this spawn rolled into: its race pool and one of the zone's own Elements. */
   subzone?: string;
+  /** The combat subzone's environment, which can add a conserved drop lean. */
+  environment?: string;
   /**
    * The ladder name this spawn rolled (`mob.variants` → `mob.variant_drops`). It owns both the junk
    * item the mob pays and the stream it leans, so two mobs of one species are not one drop table.
@@ -83,6 +87,17 @@ export interface Mob {
   kind: string;
   /** Which body-class column a weapon's `size_mult` reads this mob as (a boss declares its own). */
   readsAs?: string;
+  /** Boss-specific descriptive identity, when this spawn has one. */
+  trait?: string;
+  /**
+   * The trait read as a mechanic (`mob.trait_mechanics`): the statuses this body cannot answer, the
+   * Element it flinches from, what it pays when it dies, and the clock multiplier it swings on.
+   */
+  immune?: string[];
+  weak?: { element: string; taken_pct: number } | null;
+  burst?: { ps_pct: number } | null;
+  /** The keys this lineage names in `mob.trait_mechanics.set`, so a readout can say "swift". */
+  mechanics?: Record<string, string | boolean> | null;
   zone: number;
   level: number;
   hp: number;

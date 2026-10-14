@@ -1,5 +1,6 @@
 import { tree } from '../engine/client';
 import type { GameState } from './types';
+import { atSettlement } from './craft';
 
 /**
  * Spending the passive tree (`skill-tree.md` · `engine/tree.ts`).
@@ -43,6 +44,7 @@ export function spendTreePoint(state: GameState, nodeId: string): TreeVerdict {
 
 /** Hand every spent point back. Free, and it touches nothing else. */
 export function respecTree(state: GameState): { ok: boolean; refunded: number } {
+  if (!atSettlement(state)) return { ok: false, refunded: 0 };
   const refunded = treePointsSpent(state);
   if (!refunded) return { ok: false, refunded: 0 };
   state.player.treeRanks = {};
@@ -51,4 +53,7 @@ export function respecTree(state: GameState): { ok: boolean; refunded: number } 
 }
 
 /** The lines the bought ranks grant — what the character sheet adds to its gear. */
-export const treeLines = (state: GameState) => tree.linesOf(state.player.treeRanks);
+export const treeLines = (state: GameState) => {
+  const weapon = state.gear.find((item) => item && !item.broken && item.slot === 'main hand')?.base || '';
+  return tree.linesOf(state.player.treeRanks, weapon);
+};

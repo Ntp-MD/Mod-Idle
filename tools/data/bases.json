@@ -1,5 +1,5 @@
 {
-  "note": "Source of truth for Base frames, weapon types and named weapon-frame variants. Weight is in the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks; school is the Gear Mod the frame carries; family is the off-hand family (Shield · Book) and null elsewhere. frame_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, drawn_line1_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the default Shield / Book families. Shield frames may override the family line with their own locked defence profile. weapon_frames holds each type's named variant list and the Frame Mod lines its variants force. tools/loot.ts and the client both read this file; `node tools/bases.ts --checks` validates the frame lists and their Mod ids.",
+  "note": "Source of truth for Base frames, weapon weights and weapon-frame variants. Weapon type and damage tempo live in engine.json. Weight is the unit items show; primary and secondary are the Mod ids that frame may roll; defence is the type line 1 locks; school is the Gear Mod the Base carries; family is the off-hand family (Shield · Book) and null elsewhere. frame_mod is the line-1 pool in the shape the roll reads: defence is the three armour Mods, drawn_line1_slots the slots whose line 1 draws from their own pool, weapons the forced Mods per type, off_hand the default Shield / Book families. Shield frames may override the family line with their own locked defence profile. weapon_frames holds each type’s named variant list, Frame Mod lines, drop weight and value bias. Legacy line pairs preserve weapon-frame names already stored in saves. tools/loot.ts and the client both read this file; node tools/bases.ts --checks validates the frame lists and their Mod ids.",
   "roll_rule": "Bases roll equally inside their slot (item-base.md \"Base Rolling\"); a dual-wield off hand weapon uses that weapon type weight x 0.8.",
   "quality_weight_multiplier": 1.3,
   "mastery": {
@@ -12,7 +12,8 @@
     "skill_bonus_per_level_pct": 0.5,
     "skill_bonus_cap_pct": 8,
     "drop_bonus_per_type_pct": 1,
-    "drop_bonus_level_required": 10
+    "drop_bonus_level_required": 10,
+    "skill_bonus_off_type_mult": 0.5
   },
   "slots": [
     "helmet",
@@ -1041,47 +1042,48 @@
     ],
     "weapons": {
       "one-handed sword": [
-        "physical_power_flat",
-        "attack_speed"
+        "attack_speed",
+        "physical_power_flat"
       ],
       "one-handed axe": [
-        "physical_power_flat",
-        "bleed_chance"
+        "bleed_chance",
+        "attack_speed"
       ],
       "dagger": [
-        "physical_power_flat",
-        "critical_chance"
-      ],
-      "mace": [
-        "physical_power_flat",
-        "stun_chance"
-      ],
-      "wand": [
-        "magic_power_flat",
-        "cooldown_reduction"
-      ],
-      "staff": [
-        "magic_power_flat",
-        "max_mana_flat"
-      ],
-      "spear": [
-        "physical_power_flat",
+        "critical_chance",
         "accuracy"
       ],
+      "mace": [
+        "stun_chance",
+        "critical_damage"
+      ],
+      "wand": [
+        "cooldown_reduction",
+        "magic_power_flat"
+      ],
+      "staff": [
+        "max_mana_flat",
+        "magic_power_flat"
+      ],
+      "spear": [
+        "accuracy",
+        "attack_speed"
+      ],
       "two-handed sword": [
+        "critical_damage",
         "physical_power_flat"
       ],
       "two-handed axe": [
-        "physical_power_flat",
-        "bleed_chance"
+        "bleed_chance",
+        "attack_speed"
       ],
       "bow": [
-        "physical_power_flat",
-        "accuracy"
+        "accuracy",
+        "attack_speed"
       ],
       "crossbow": [
-        "physical_power_flat",
-        "armour_pen"
+        "armour_pen",
+        "critical_damage"
       ]
     },
     "off_hand": {
@@ -1100,8 +1102,6 @@
       "hands": "Single",
       "group": "melee",
       "damage": "physical",
-      "weapon_aspd": 1.2,
-      "weapon_mult": 1,
       "dual_wield": true,
       "weight": 5.3
     },
@@ -1110,8 +1110,6 @@
       "hands": "Single",
       "group": "melee",
       "damage": "physical",
-      "weapon_aspd": 1.2,
-      "weapon_mult": 1,
       "dual_wield": true,
       "weight": 6.3
     },
@@ -1120,8 +1118,6 @@
       "hands": "Single",
       "group": "melee",
       "damage": "physical",
-      "weapon_aspd": 1.5,
-      "weapon_mult": 0.8,
       "dual_wield": true,
       "weight": 3.4
     },
@@ -1130,8 +1126,6 @@
       "hands": "Single",
       "group": "melee",
       "damage": "physical",
-      "weapon_aspd": 1,
-      "weapon_mult": 1.2,
       "dual_wield": false,
       "weight": 7.3
     },
@@ -1140,8 +1134,6 @@
       "hands": "Single",
       "group": "magic",
       "damage": "magic",
-      "weapon_aspd": 1,
-      "weapon_mult": 1.2,
       "dual_wield": false,
       "weight": 3.4
     },
@@ -1150,8 +1142,6 @@
       "hands": "Two",
       "group": "magic",
       "damage": "magic",
-      "weapon_aspd": 0.85,
-      "weapon_mult": 1.41,
       "dual_wield": false,
       "weight": 10.2
     },
@@ -1160,8 +1150,6 @@
       "hands": "Two",
       "group": "melee",
       "damage": "physical",
-      "weapon_aspd": 0.85,
-      "weapon_mult": 1.41,
       "dual_wield": false,
       "weight": 12.1
     },
@@ -1170,8 +1158,6 @@
       "hands": "Two",
       "group": "melee",
       "damage": "physical",
-      "weapon_aspd": 0.7,
-      "weapon_mult": 1.71,
       "dual_wield": false,
       "weight": 13.1
     },
@@ -1180,8 +1166,6 @@
       "hands": "Two",
       "group": "melee",
       "damage": "physical",
-      "weapon_aspd": 0.7,
-      "weapon_mult": 1.71,
       "dual_wield": false,
       "weight": 15
     },
@@ -1190,8 +1174,6 @@
       "hands": "Two (range)",
       "group": "ranged",
       "damage": "physical",
-      "weapon_aspd": 1.1,
-      "weapon_mult": 1.09,
       "dual_wield": false,
       "weight": 8.2
     },
@@ -1200,8 +1182,6 @@
       "hands": "Two (range)",
       "group": "ranged",
       "damage": "physical",
-      "weapon_aspd": 1.1,
-      "weapon_mult": 1.09,
       "dual_wield": false,
       "weight": 10.2
     }
@@ -1231,24 +1211,68 @@
         "elemental_resistance"
       ],
       "Weapon": [],
-      "sword / dagger / spear / bow": [
-        "physical_power_flat"
+      "one-handed sword": [
+        "attack_speed",
+        "critical_chance",
+        "critical_damage",
+        "accuracy"
       ],
-      "axe": [
-        "physical_power_flat",
-        "bleed_chance"
+      "one-handed axe": [
+        "bleed_chance",
+        "attack_speed",
+        "critical_chance",
+        "critical_damage"
+      ],
+      "dagger": [
+        "critical_chance",
+        "critical_damage",
+        "attack_speed"
       ],
       "mace": [
-        "physical_power_flat",
-        "stun_chance"
-      ],
-      "crossbow": [
-        "physical_power_flat",
+        "stun_chance",
+        "critical_damage",
         "armour_pen"
       ],
-      "wand / staff": [
-        "magic_power_flat",
-        "magic_power"
+      "wand": [
+        "cooldown_reduction",
+        "elemental_power_flat",
+        "max_mana_flat"
+      ],
+      "staff": [
+        "elemental_power_flat",
+        "elemental_alignment",
+        "cooldown_reduction",
+        "max_mana_flat"
+      ],
+      "spear": [
+        "accuracy",
+        "attack_speed",
+        "critical_chance",
+        "critical_damage"
+      ],
+      "two-handed sword": [
+        "critical_damage",
+        "critical_chance",
+        "attack_speed",
+        "accuracy"
+      ],
+      "two-handed axe": [
+        "bleed_chance",
+        "critical_damage",
+        "critical_chance",
+        "accuracy"
+      ],
+      "bow": [
+        "accuracy",
+        "critical_chance",
+        "critical_damage",
+        "attack_speed"
+      ],
+      "crossbow": [
+        "armour_pen",
+        "critical_chance",
+        "critical_damage",
+        "accuracy"
       ],
       "all types": [
         "elemental_power_flat"
@@ -1276,373 +1300,593 @@
       {
         "name": "Gloamblade",
         "frame_mod": [
+          "attack_speed",
+          "physical_power_flat"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "attack_speed"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Longsword",
         "frame_mod": [
+          "accuracy",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "accuracy"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Dawnbrand",
         "frame_mod": [
+          "critical_damage",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Kingsbane",
         "frame_mod": [
+          "critical_chance",
+          "accuracy"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_chance"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "one-handed axe": [
       {
         "name": "Splitting Axe",
         "frame_mod": [
+          "bleed_chance",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "bleed_chance"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Cleaver",
         "frame_mod": [
+          "bleed_chance",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_chance"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Rift Hatchet",
         "frame_mod": [
+          "bleed_chance",
+          "critical_damage"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Gravesplitter",
         "frame_mod": [
+          "bleed_chance",
+          "accuracy"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "accuracy"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "dagger": [
       {
         "name": "Nightfang",
         "frame_mod": [
+          "critical_chance",
+          "accuracy"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_chance"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Wraithknife",
         "frame_mod": [
           "critical_chance",
+          "critical_damage"
+        ],
+        "legacy_frame_mod": [
+          "critical_chance",
           "attack_speed"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Hexknife",
         "frame_mod": [
+          "attack_speed",
+          "accuracy"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "attack_speed"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Gravewhisper",
         "frame_mod": [
+          "critical_damage",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "mace": [
       {
         "name": "Warhammer",
         "frame_mod": [
+          "stun_chance",
+          "critical_damage"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "stun_chance"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Duskmaul",
         "frame_mod": [
+          "critical_damage",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Stormmaul",
         "frame_mod": [
+          "stun_chance",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_chance"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Siegebreaker",
         "frame_mod": [
+          "stun_chance",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "attack_speed"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "wand": [
       {
         "name": "Ashen Wand",
         "frame_mod": [
+          "cooldown_reduction",
+          "magic_power_flat"
+        ],
+        "legacy_frame_mod": [
           "magic_power_flat",
           "cooldown_reduction"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Crystal Wand",
         "frame_mod": [
+          "elemental_power_flat",
+          "magic_power_flat"
+        ],
+        "legacy_frame_mod": [
           "magic_power_flat",
           "elemental_power_flat"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Thornwood Wand",
         "frame_mod": [
+          "max_mana_flat",
+          "magic_power_flat"
+        ],
+        "legacy_frame_mod": [
           "magic_power_flat",
           "max_mana_flat"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Voidcaller Wand",
         "frame_mod": [
+          "elemental_alignment",
+          "magic_power_flat"
+        ],
+        "legacy_frame_mod": [
           "magic_power_flat",
           "elemental_alignment"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "staff": [
       {
         "name": "Battle Staff",
         "frame_mod": [
+          "max_mana_flat",
+          "magic_power_flat"
+        ],
+        "legacy_frame_mod": [
           "magic_power_flat",
           "max_mana_flat"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Runed Staff",
         "frame_mod": [
+          "elemental_alignment",
+          "magic_power_flat"
+        ],
+        "legacy_frame_mod": [
           "magic_power_flat",
           "elemental_alignment"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Starcaller Staff",
         "frame_mod": [
+          "elemental_power_flat",
+          "magic_power_flat"
+        ],
+        "legacy_frame_mod": [
           "magic_power_flat",
           "elemental_power_flat"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Runebinder Staff",
         "frame_mod": [
+          "cooldown_reduction",
+          "magic_power_flat"
+        ],
+        "legacy_frame_mod": [
           "magic_power_flat",
           "cooldown_reduction"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "spear": [
       {
         "name": "Moonspear",
         "frame_mod": [
+          "accuracy",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "accuracy"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Gale Spear",
         "frame_mod": [
+          "attack_speed",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "attack_speed"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Dawnpiercer",
         "frame_mod": [
+          "critical_chance",
+          "critical_damage"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_chance"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Stormlance",
         "frame_mod": [
+          "critical_damage",
+          "accuracy"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "two-handed sword": [
       {
         "name": "Greatsword",
         "frame_mod": [
+          "critical_damage",
           "physical_power_flat"
         ],
-        "weight": 1
+        "legacy_frame_mod": [
+          "physical_power_flat"
+        ],
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Flamberge",
         "frame_mod": [
+          "critical_damage",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Oathcleaver",
         "frame_mod": [
+          "critical_damage",
+          "accuracy"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "accuracy"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Voidedge",
         "frame_mod": [
+          "critical_damage",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "attack_speed"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "two-handed axe": [
       {
         "name": "Battle Axe",
         "frame_mod": [
+          "bleed_chance",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "bleed_chance"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Halberd",
         "frame_mod": [
+          "bleed_chance",
+          "accuracy"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "accuracy"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Grimreaver",
         "frame_mod": [
+          "bleed_chance",
+          "critical_damage"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Skullsplitter",
         "frame_mod": [
+          "bleed_chance",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_chance"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "bow": [
       {
         "name": "Longbow",
         "frame_mod": [
+          "accuracy",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "accuracy"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Recurve Bow",
         "frame_mod": [
+          "accuracy",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "attack_speed"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Hawkeye Bow",
         "frame_mod": [
+          "accuracy",
+          "critical_damage"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_chance"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Nightstalker Bow",
         "frame_mod": [
+          "critical_damage",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ],
     "crossbow": [
       {
         "name": "Arbalest",
         "frame_mod": [
+          "armour_pen",
+          "critical_damage"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "armour_pen"
         ],
-        "weight": 1
+        "drop_weight": 1.25,
+        "value_bias": 0.82
       },
       {
         "name": "Runelock Crossbow",
         "frame_mod": [
+          "armour_pen",
+          "critical_chance"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_chance"
         ],
-        "weight": 1
+        "drop_weight": 1,
+        "value_bias": 0.88
       },
       {
         "name": "Repeater Crossbow",
         "frame_mod": [
+          "armour_pen",
+          "accuracy"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "accuracy"
         ],
-        "weight": 1
+        "drop_weight": 0.85,
+        "value_bias": 0.94
       },
       {
         "name": "Ironstorm Crossbow",
         "frame_mod": [
+          "armour_pen",
+          "attack_speed"
+        ],
+        "legacy_frame_mod": [
           "physical_power_flat",
           "critical_damage"
         ],
-        "weight": 1
+        "drop_weight": 0.65,
+        "value_bias": 1
       }
     ]
   }

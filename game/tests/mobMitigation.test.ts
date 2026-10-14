@@ -14,7 +14,7 @@ const valueOf = (id: string, stat: string) => sm.byId[id]!.effects!.find((e: any
 /** HP one cast takes off one mob, so a press can be read off the target rather than recomputed. */
 function castPress(id: string, c: ReturnType<typeof buildCharacter>, target: Mob): number {
   const s = newSkillState();
-  s.list[0] = id;
+  s.list[0] = id; s.owned[id] ??= 0;
   s.xp[id] = 8000;
   const before = target.hp;
   const cast = castOnce(s, c, c.maxMana, [target], {}, mulberry32(7));

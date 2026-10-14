@@ -65,12 +65,13 @@ export function applyElement(
   element: string,
   c: Character,
   alignedPerHit: number,
+  immune: string[] = [],
 ): MobStatusName | null {
   const name = (E.elements.status_of as Record<string, string>)[element] as MobStatusName | undefined;
   if (!name) return null;
   if (!alignmentPass(rng, c.alignment)) return null; // the Alignment gate
   if (rng() >= S.proc_chance) return null;
-  return placeStatus(store, mobId, name, c, alignedPerHit);
+  return placeStatus(store, mobId, name, c, alignedPerHit, immune);
 }
 
 /**
@@ -93,7 +94,10 @@ export function placeStatus(
   name: MobStatusName,
   c: Character,
   alignedPerHit: number,
+  /** the statuses this body cannot answer (`Mob.immune`, from `mob.trait_mechanics`) */
+  immune: string[] = [],
 ): MobStatusName | null {
+  if (immune.includes(name)) return null;
   const m = mark(store, mobId);
   m.alignedPerSec = Math.max(m.alignedPerSec, alignedPerHit);
   const l = line(m, name);
@@ -198,7 +202,9 @@ export function applyBleed(
   mobId: string,
   physicalPerHit: number,
   chance: number,
+  immune: string[] = [],
 ): boolean {
+  if (immune.includes('bleed')) return false;
   if (rng() >= chance) return false;
   const m = mark(store, mobId);
   const l = line(m, 'bleed');
@@ -388,10 +394,12 @@ export function applyWeaponRiders(
   bonusBleedPct = 0,
   /** the row's own stun feed: a target-side `stun_chance` it adds to the mace's line */
   bonusStunPct = 0,
+  /** the statuses this body cannot answer (`Mob.immune`) — neither an Element proc nor a bleed lands */
+  immune: string[] = [],
 ): void {
   const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
   for (const el of Object.keys(c.elemByElement)) {
-    if (el && (c.elemByElement as any)[el] > 0) applyElement(rng, store, mobId, el, c, alignedPerSec);
+    if (el && (c.elemByElement as any)[el] > 0) applyElement(rng, store, mobId, el, c, alignedPerSec, immune);
   }
   // a row of its own may add a bleed chance on the target it lands on (Puncture guarantees it), so the
   // press's own sentence reaches the same roll the gear and a granting curse feed
@@ -400,7 +408,7 @@ export function applyWeaponRiders(
   // hit — a build that cannot pass it inflicts neither, whatever its gear lines say
   const passed = alignmentPass(rng, c.alignment);
   const bleedPct = eng.bleedChanceFrom(bleedCurseUp, c.bleedChance + (bonusBleedPct || 0));
-  if (passed && c.phys > 0 && bleedPct > 0) applyBleed(rng, store, mobId, c.phys, bleedPct / 100);
+  if (passed && c.phys > 0 && bleedPct > 0) applyBleed(rng, store, mobId, c.phys, bleedPct / 100, immune);
   const stunPct = c.stunChance + (bonusStunPct || 0);
   if (passed && stunPct > 0) stunMob(rng, store, mobId, stunPct);
 }

@@ -10,7 +10,7 @@
  * the same defect as a number typed twice (AGENTS.md — Numbers · DECISIONS.md §Stack).
  */
 
-import type { BasesData, EngineData, MobSize, MobZone, Rng } from './types.ts';
+import type { BasesData, EngineData, MobSize, MobSubzone, MobZone, Rng, WeaponCfg } from './types.ts';
 import { ladderMult } from './skills.ts';
 
 const BANDS = ['low', 'mid', 'high'];
@@ -100,16 +100,9 @@ export function createEngine(E: EngineData) {
 
   // ---- mob evasion: the species Dex line, not a level number (one static HP table)
 
-  // ---- a mob's Core stat: an INTEGER POINT block per species (DECISIONS: one Core model, player and
-  // mob alike). The block is the species' own, set at the anchor zone; a higher zone scales it by the
-  // player's even-split reference line there, so a mob climbs with the zone it lives in while the value
-  // stays a whole number. No mob runs a formula of its own.
-  const mobStatBaseAt = (zoneId: number) => {
-    const z = (E.mob.zones as any[]).find((x) => x.id === zoneId) || (E.mob.zones as any[])[E.mob.zones.length - 1];
-    return statAt((z.levels as number[])[1]);
-  };
-  /** The one zone every single-figure anchor is measured at: the last zone. */
-  const REF_ZONE = (E.mob.zones as any[])[E.mob.zones.length - 1].id;
+  // Named fixed-Core forms cover real mob progression through level 100. Later zones
+  // remain playable with the lineage's base Core and name, without another variant.
+  const REF_ZONE = [...(E.mob.zones as any[])].reverse().find((z) => z.levels[0] <= E.mob.form_level_cap)?.id || 1;
   /**
    * A mob's own STATIC level inside one zone, read from `mob.species[].zone_levels`. It is a fixed
    * value placed inside the zone's range — a spawn does not follow the attacker's level. Falls back to
@@ -122,16 +115,24 @@ export function createEngine(E: EngineData) {
     return Math.round(((z.levels as number[])[0] + (z.levels as number[])[1]) / 2);
   };
   const CORE_KEYS = ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'] as const;
-  /** The zone the Core block in `mob.species[].core` is written at (`mob.stat.base_zone`). */
-  const CORE_ANCHOR = (() => {
-    const baz = (E.mob.stat as any).base_zone ?? 1;
-    const z = (E.mob.zones as any[]).find((x) => x.id === baz) || (E.mob.zones as any[])[0];
-    return statAt((z.levels as number[])[1]);
-  })();
-  /** One Core stat of one species in one zone: its integer block scaled from the anchor zone, rounded. */
-  const coreOf = (sp: any, key: string, zoneId: number = REF_ZONE) =>
-    Math.round(((sp?.core?.[key] || 0) * mobStatBaseAt(zoneId)) / CORE_ANCHOR);
-  /** The mob's Core stat block in one zone, every value a whole number. */
+  const FORM_ZONES = [...(E.mob.zones as any[])]
+    .filter((z) => z.levels[0] <= E.mob.form_level_cap)
+    .sort((a, b) => b.levels[0] - a.levels[0]);
+  const formOf = (sp: any, zoneId: number) => {
+    const forms = E.mob.forms as any;
+    const exact = forms?.[String(zoneId)]?.[sp?.id];
+    if (exact) return exact;
+    for (const z of FORM_ZONES) {
+      if (z.id <= zoneId && forms?.[String(z.id)]?.[sp?.id]) return forms[String(z.id)][sp.id];
+    }
+    return { name: sp?.name || 'Mob', core: sp?.core || {} };
+  };
+  /** A form's Core is fixed data; the zone selects the form, never scales its stats. */
+  const coreOf = (sp: any, key: string, zoneId: number = REF_ZONE) => {
+    const core = sp?._fixedCore || formOf(sp, zoneId).core || sp?.core;
+    return Number(core?.[key] || 0);
+  };
+  /** The fixed Core block selected for a lineage in one zone band. */
   const mobStatsOf = (speciesId: string, zoneId: number = REF_ZONE): Record<string, number> => {
     const sp = speciesById(speciesId);
     if (!sp) return {};
@@ -140,10 +141,58 @@ export function createEngine(E: EngineData) {
 
   // the zone's average body factor: mob_PS(L) is the zone's AVERAGE mob, so body entries divide by it
   const speciesById = (id: string): any | undefined => (E.mob.species as any[]).find((x) => x.id === id);
+  const mobProfileOf = (species: any, boss?: any, zoneId = REF_ZONE) => boss ? ({
+    ...species,
+    core: boss.core || species.core,
+    _fixedCore: boss.core || formOf(species, zoneId).core,
+    trait: boss.trait || species.trait,
+    mechanics: boss.mechanics || species.mechanics,
+    element: boss.element || species.element,
+    damage: boss.damage || species.damage,
+    accuracy_mult: boss.accuracy_mult ?? species.accuracy_mult,
+    reads_as: boss.reads_as || null,
+  }) : species;
+  // ---- the trait read as a mechanic (`mob.trait_mechanics`)
+  // A species' `mechanics` row names keys from the closed set; each key below is the one number that
+  // mechanic runs on. None of them moves mob_HP, mob PS, the drop line or the stone funnel — a faster
+  // clock thins the hit by the same share it speeds it by, and a weakness answers one Element only.
+  const TRAIT = ((E.mob as any).trait_mechanics || {}) as Record<string, any>;
+  const hasMechanic = (sp: any, key: string) => !!(sp?.mechanics && key in sp.mechanics);
+  /** The statuses this body cannot be dealt — a bleed immunity answers exactly the statuses its key names. */
+  const mobImmuneOf = (sp: any): string[] =>
+    hasMechanic(sp, 'bleed_immune') ? (TRAIT.bleed_immune?.statuses || []) : [];
+  /** The clock multiplier this body swings at; the hit is divided by it, so its PS never moves. */
+  const mobClockMultOf = (sp: any): number =>
+    hasMechanic(sp, 'fast_clock') ? (TRAIT.fast_clock?.clock_mult ?? 1) : 1;
+  /** The Element this body flinches from, with the percent more of that Element's hit it takes. */
+  const mobWeakOf = (sp: any): { element: string; taken_pct: number } | null =>
+    hasMechanic(sp, 'element_weak')
+      ? { element: String(sp.mechanics.element_weak), taken_pct: TRAIT.element_weak?.taken_pct ?? 0 }
+      : null;
+  /** What the body pays when it dies: a poison line worth this share of its own output. */
+  const mobBurstOf = (sp: any): { ps_pct: number } | null =>
+    hasMechanic(sp, 'poison_burst') ? { ps_pct: TRAIT.poison_burst?.ps_pct ?? 0 } : null;
+  /**
+   * The mechanics of one lineage in the words a player reads. The words are the data's
+   * (`mob.trait_mechanics[].word`), so the mob card, the travel panel and the wiki cannot disagree
+   * about what a body does, and a key with no word is a cage failure (X74), not a blank on a card.
+   */
+  const mechanicWordsOf = (mechanics?: Record<string, string | boolean> | null): string[] =>
+    Object.entries(mechanics || {}).map(([key, arg]) => {
+      const word = TRAIT[key]?.word || key;
+      return arg === true ? word : `${word} ${arg}`;
+    });
+  /** The same for one side's body mix (`mob.spawn_packs[].word`). */
+  const packWordOf = (pack?: string | null): string => {
+    const packs = ((E.mob as any).spawn_packs || {}) as Record<string, any>;
+    const name = pack || 'even';
+    return packs[name]?.word || name;
+  };
+
   /**
    * The zone cast derived from the single source (`mob.species[].zones`): every species id
-   * placed in the zone, sorted. `mob.zones[].subzones[].races` is presentation only and must
-   * read back equal to this list (cage X53) — runtime code reads this, never the subzones.
+   * placed in the zone, sorted. Each subzone partitions this cast into its spawn pool; the union
+   * of its race IDs must read back equal to this list (cage X53).
    */
   const racesInZone = (zoneId: number): string[] =>
     (E.mob.species as any[]).filter((sp) => (sp.zones || []).includes(zoneId)).map((sp) => sp.id).sort();
@@ -166,18 +215,19 @@ export function createEngine(E: EngineData) {
   }
 
   // The body class carries a base Evasion as a percent on top of the species Dex line (small +20 /
-  // medium +10 / large 0). The rating under the percent is the mob's Core Dex in its zone.
+  // medium +10 / large 0). The rating under the percent is the species' fixed Core Dex.
   const sizeEvasionPct = (id: string) => (id === 'elite' ? E.mob.elite.evasion_pct : sizeOr1(id).evasion_pct);
   const mobEvasion = (dexCore: number, body = 'medium') =>
     Math.min(CAP.evasion, dexCore * K.K_EVASION * (1 + sizeEvasionPct(body) / 100));
-  // The mean species Core block, so the reference mob is a real average of the roster rather than an
-  // imaginary x1.00 lineage. It is what every published hit-chance anchor is measured against.
+  // The reference mob is the mean of the actual fixed forms, not an imaginary x1.00 lineage.
+  const ALL_FORMS = Object.entries(E.mob.forms as Record<string, Record<string, any>>)
+    .flatMap(([zoneId, forms]) => Object.entries(forms).map(([speciesId, form]) => ({ zoneId: Number(zoneId), speciesId, form })));
   const MEAN_CORE: Record<string, number> = Object.fromEntries(CORE_KEYS.map((k) => [
-    k, E.mob.species.reduce((t, r) => t + (r.core?.[k] || 0), 0) / E.mob.species.length]));
+    k, ALL_FORMS.reduce((t, r) => t + (r.form.core?.[k] || 0), 0) / Math.max(1, ALL_FORMS.length)]));
   const REF_SPECIES = { core: MEAN_CORE, accuracy_mult: 1 };
   const MEAN_SPECIES_DEX = coreOf(REF_SPECIES, 'dex');
   const MOB_EVASION_REF = mobEvasion(MEAN_SPECIES_DEX);
-  const SPECIES_EVASION = E.mob.species.map((r) => ({ name: r.name, dex: coreOf(r, 'dex'), evasion: mobEvasion(coreOf(r, 'dex')) }));
+  const SPECIES_EVASION = ALL_FORMS.map(({ form }) => ({ name: form.name, level: form.levels[1], dex: form.core.dex, evasion: mobEvasion(form.core.dex) }));
 
   DERIVED.mob_evasion_ref = MOB_EVASION_REF;
   DERIVED.hit_chance = DERIVED.accuracy / (DERIVED.accuracy + MOB_EVASION_REF);
@@ -213,6 +263,10 @@ export function createEngine(E: EngineData) {
    */
   function mitigateMobHit(mob: any, nonElement: number, element: number | Record<string, number>, armourCutFraction = 0, resOffset = 0) {
     const non = nonElement * (1 - mobArmourCut(mob.armour, nonElement, armourCutFraction));
+    // a trait weakness (`mob.trait_mechanics.element_weak`) answers one named Element with more
+    // damage taken; it is not a res line, so the race's own-Element res map stays exactly as X54 states
+    const weak = mob.weak || null;
+    const weakMult = (name: string) => (weak && weak.element === name ? 1 + weak.taken_pct / 100 : 1);
     if (typeof element === 'number') {
       const res = Math.max(0, (mob.res || 0) + resOffset);
       return non + element * (1 - mobResCut(res));
@@ -220,7 +274,7 @@ export function createEngine(E: EngineData) {
     let el = 0;
     for (const [name, dmg] of Object.entries(element)) {
       const base = (mob.resByElement && mob.resByElement[name] != null) ? mob.resByElement[name] : (mob.res || 0);
-      el += dmg * (1 - mobResCut(Math.max(0, base + resOffset)));
+      el += dmg * (1 - mobResCut(Math.max(0, base + resOffset))) * weakMult(name);
     }
     return non + el;
   }
@@ -271,6 +325,30 @@ export function createEngine(E: EngineData) {
     const z = ZONES.find((z) => z.id === id);
     if (!z) throw new Error(`engine: no zone ${id} in the zone table`);
     return z;
+  };
+
+  // ---- the side the feet stand on: one sub-zone's own spawn profile (`subzones[].spawn`)
+  // A side fields its own pack range, Elite rate and body mix; every zone's three sides average back
+  // to the zone's published `group`, to `loot.elite_spawn_chance` and to the plain mix (X75), so the
+  // zone pays exactly what the published rates say while one side reads crowded and one reads heavy.
+  const subzoneAt = (zoneId: number, subIndex: number | null | undefined): MobSubzone | null => {
+    const subs = (zoneById(zoneId).subzones || []) as MobSubzone[];
+    return subIndex == null ? null : (subs[subIndex] || null);
+  };
+  const groupRangeOf = (zoneId: number, subIndex: number | null | undefined = null): [number, number] => {
+    const raw = subzoneAt(zoneId, subIndex)?.spawn?.group || zoneById(zoneId).group;
+    const [lo, hi] = String(raw).split('-').map(Number);
+    return [lo || 1, hi || lo || 1];
+  };
+  const eliteChanceOf = (zoneId: number, subIndex: number | null | undefined = null): number => {
+    const pct = subzoneAt(zoneId, subIndex)?.spawn?.elite_pct;
+    return pct == null ? L.elite_spawn_chance : pct / 100;
+  };
+  /** The body odds a normal spawn on this side draws from; the plain mix is the even pack. */
+  const spawnPackOf = (zoneId: number, subIndex: number | null | undefined = null): Record<string, number> => {
+    const packs = ((E.mob as any).spawn_packs || {}) as Record<string, Record<string, number>>;
+    const name = subzoneAt(zoneId, subIndex)?.spawn?.pack || 'even';
+    return packs[name] || packs.even || {};
   };
 
   // DECISIONS.md §Product sets the win condition on the last zone in the list, so its id is read, never typed
@@ -331,7 +409,7 @@ export function createEngine(E: EngineData) {
   const mobManaOf = (level: number, intCore: number) =>
     LG.mana_base + LG.mp_per_level * (level - 1) + intCore * K.K_INT_MP;
 
-  // a mob accuracy is its own Dex line: Core stat(zone) x K_DEX_ACC x accuracy tier
+  // a mob accuracy is its own Dex line: fixed species Core Dex x K_DEX_ACC x accuracy tier
   const mobAcc = (dexCore: number, tier: number) => dexCore * K.K_DEX_ACC * tier;
   // A mob's own dodge keeps its thin Agi-versus-attacker-accuracy ratio; the player's Evasion
   // uses the separate opening-weighted curve below. Reference attacker = a same-level player with no Dex investment.
@@ -349,7 +427,7 @@ export function createEngine(E: EngineData) {
     const [wPhys, wMagic] = damageSplit(sp.damage);
     return K.K_MOB_PS_STAT * (wPhys * coreOf(sp, 'str', zoneId) + wMagic * coreOf(sp, 'int', zoneId));
   };
-  const speciesPowerOf = (sp: any) => sp.power_base + speciesPowerStatOf(sp);
+  const speciesPowerOf = (sp: any, zoneId: number = REF_ZONE) => sp.power_base + speciesPowerStatOf(sp, zoneId);
   // The zone's average species power: the same weighted mean `zoneBodyFactor` takes for PS, so a
   // species entry divides its own power by this and the zone's mean stays exactly 1 by construction.
   const zonePowerCache = new Map<number, number>();
@@ -361,16 +439,17 @@ export function createEngine(E: EngineData) {
     for (const sp of cast) for (const sid of sp.sizes) {
       const weight = E.mob.spawn_weights[sid] || 0;
       if (!weight) continue;
-      w += weight; sum += weight * speciesPowerOf(sp);
+      w += weight; sum += weight * speciesPowerOf(sp, zoneId);
     }
     const factor = w ? sum / w : 1;
     zonePowerCache.set(zoneId, factor);
     return factor;
   }
   /** The PS multiplier one species carries in its zone: its own power over the zone mean. */
+  const speciesPsMultOf = (zoneId: number, sp: any) => speciesPowerOf(sp, zoneId) / zonePowerFactor(zoneId);
   const speciesPsMult = (zoneId: number, speciesId: string) => {
     const sp = speciesById(speciesId);
-    return sp ? speciesPowerOf(sp) / zonePowerFactor(zoneId) : 1;
+    return sp ? speciesPsMultOf(zoneId, sp) : 1;
   };
 
   // ---- race resistance: a race owns one Element (`mob.species[].element`) and answers it at the flat
@@ -420,7 +499,6 @@ export function createEngine(E: EngineData) {
 
   const WEAPONS = E.weapons.map((w) => ({
     ...w,
-    weapon_mult: r2(1.2 / w.weapon_aspd),
     agi_to_cap: agiForCap(w.weapon_aspd),
     reachable: agiForCap(w.weapon_aspd) <= CEIL,
   }));
@@ -436,9 +514,14 @@ export function createEngine(E: EngineData) {
   const capAspd = (aspd: number) => Math.min(ASPD_CAP, aspd);
   const hitsPerSec = (aspd: number) => capAspd(aspd) / 100;
 
-  const weaponMult = (weaponAspd: number) => 1.2 / weaponAspd;
-  const physOf = (str: number, flat: number, pct: number, weaponAspd: number) => (str * K.K_STR + flat) * (1 + pct / 100) * weaponMult(weaponAspd);
-  const magicOf = (int: number, flat: number, pct: number, weaponAspd: number) => (int * K.K_INT + flat) * (1 + pct / 100) * weaponMult(weaponAspd);
+  const weaponMult = (weaponAspd: number, weaponName?: string) => {
+    const row = (weaponName && E.weapons.find((w) => w.name === weaponName))
+      || E.weapons.find((w) => w.weapon_aspd === weaponAspd);
+    if (!row) throw new Error(`No weapon multiplier for ${weaponName || `attack speed ${weaponAspd}`}`);
+    return row.weapon_mult;
+  };
+  const physOf = (str: number, flat: number, pct: number, weaponAspd: number, weaponName?: string) => (str * K.K_STR + flat) * (1 + pct / 100) * weaponMult(weaponAspd, weaponName);
+  const magicOf = (int: number, flat: number, pct: number, weaponAspd: number, weaponName?: string) => (int * K.K_INT + flat) * (1 + pct / 100) * weaponMult(weaponAspd, weaponName);
 
   // Evasion is ONE layer, and AGI carries it (owner ruling): the rating is `agi × K_EVASION` plus
   // the gear `evasion_flat` × `evasion_pct` lines. The opening slice has a small share while points
@@ -504,10 +587,10 @@ export function createEngine(E: EngineData) {
   // list. `loot.ttk_per_mob_sec` in the data is `REFERENCE.ttk`: mob_HP at the anchor level divided by
   // the reference DPS times the skill multiplier, so the kill rates, the loot bands and the timeline
   // follow the build the docs actually publish instead of a retired ceiling.
-  const REF_WEAPON = E.weapons.find((w) => /one-handed/.test(w.name)) || E.weapons[0];
-  const buildLine = (stat: number, weaponAspd: number) => {
-    const phys = physOf(stat, M.phys_flat_main_hand, M.phys_pct_main_hand, weaponAspd);
-    const aspd = capAspd(aspdOf(stat, weaponAspd, M.aspd_pct));
+  const REF_WEAPON = E.weapons.find((w) => w.name === 'one-handed sword') || E.weapons[0];
+  const buildLine = (stat: number, weapon: WeaponCfg) => {
+    const phys = physOf(stat, M.phys_flat_main_hand, M.phys_pct_main_hand, weapon.weapon_aspd, weapon.name);
+    const aspd = capAspd(aspdOf(stat, weapon.weapon_aspd, M.aspd_pct));
     const pool = critPool(stat);
     const crit = critChanceOf(pool);
     const critDmg = critDmgOf(pool, M.crit_damage_mod_pct);
@@ -517,8 +600,8 @@ export function createEngine(E: EngineData) {
   };
   const REF_STAT = statAt(S.level_cap) + (S.core_flat_max * S.item_slots) / REF_STATS;
   const FOCUS_STAT = statOf(pointsAt(S.level_cap)) + S.core_flat_max * S.item_slots;
-  const REF_LINE = buildLine(REF_STAT, REF_WEAPON.weapon_aspd);
-  const FOCUS_LINE = buildLine(FOCUS_STAT, REF_WEAPON.weapon_aspd);
+  const REF_LINE = buildLine(REF_STAT, REF_WEAPON);
+  const FOCUS_LINE = buildLine(FOCUS_STAT, REF_WEAPON);
   const ANCHOR_LEVEL = 100;
   const REFERENCE = {
     weapon: REF_WEAPON.name,
@@ -843,6 +926,7 @@ export function createEngine(E: EngineData) {
       for (const sp of E.mob.species) {
         if (!sp.zones.includes(z.id)) continue;
         const innate = [(sp as any).element];
+        const form = formOf(sp, z.id);
         const bf = zoneBodyFactor(z.id);
         const vit = coreOf(sp, 'vit', z.id);
         const intC = coreOf(sp, 'int', z.id);
@@ -855,7 +939,7 @@ export function createEngine(E: EngineData) {
           const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
           out.push({
             id: `z${z.id}_${sp.id}_${size.id}`, zone: z.id, zoneName: z.name, levels, level: lvl,
-            kind: size.name, species: sp.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
+            kind: size.name, species: sp.name, formName: form.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
             hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
             manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
             ps: psEdge * size.ps / bf * speciesPsMult(z.id, sp.id), bodyFactor: bf,
@@ -867,6 +951,8 @@ export function createEngine(E: EngineData) {
             crit: coreOf(sp, 'lck', z.id) * K.K_LCK_CRIT,
             dodge: mobDodge(coreOf(sp, 'agi', z.id) * K.K_MOB_DODGE, lvl),
             damage: sp.damage,
+            immune: mobImmuneOf(sp), weak: mobWeakOf(sp), burst: mobBurstOf(sp),
+            mechanics: sp.mechanics || null, clockMult: mobClockMultOf(sp),
             xpFrom: X.per_kill_mob_level * lvl, xpTo: X.per_kill_mob_level * lvl,
             group: size.id === 'small' || size.id === 'medium' ? z.group : 'alone',
           });
@@ -877,7 +963,7 @@ export function createEngine(E: EngineData) {
           const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
           out.push({
             id: `z${z.id}_${sp.id}_elite`, zone: z.id, zoneName: z.name, levels, level: lvl,
-            kind: el.name, species: sp.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
+            kind: el.name, species: sp.name, formName: form.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
             hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
             manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
             ps: psEdge * el.ps * speciesPsMult(z.id, sp.id),
@@ -888,29 +974,37 @@ export function createEngine(E: EngineData) {
             align: coreOf(sp, 'dex', z.id) * K.K_DEX_ALIGN, crit: coreOf(sp, 'lck', z.id) * K.K_LCK_CRIT,
             dodge: mobDodge(coreOf(sp, 'agi', z.id) * K.K_MOB_DODGE, lvl),
             damage: sp.damage,
+            immune: mobImmuneOf(sp), weak: mobWeakOf(sp), burst: mobBurstOf(sp),
+            mechanics: sp.mechanics || null, clockMult: mobClockMultOf(sp),
             xpFrom: X.per_kill_mob_level * lvl * X.elite_mult, xpTo: X.per_kill_mob_level * lvl * X.elite_mult, group: 'alone',
           });
         }
       }
       const boss = E.mob.bosses.find((b) => b.zone === z.id)!;
-      const bs = E.mob.species.find((r) => r.id === boss.species)!;
+      const bs = mobProfileOf(speciesById(boss.species), boss, z.id);
       const bz = sizeById('boss')!;
+      const bf = zoneBodyFactor(z.id);
       const bvit = coreOf(bs, 'vit', z.id);
       const bint = coreOf(bs, 'int', z.id);
+      const bossCore = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(bs, key, z.id)]));
       const blvl = mobLevelIn(bs, z.id);
       const bhpBase = mobHpAt(blvl);
       const bhp = bhpBase + LG.hp_per_level * (blvl - 1) + bvit * K.K_VIT_HP;
       out.push({
         id: `z${z.id}_boss`, zone: z.id, zoneName: z.name, levels: [blvl, blvl] as [number, number], level: blvl,
-        kind: `${bz.name} · ${boss.name}`, species: bs.name, speciesId: bs.id,
-        innate: [(bs as any).element], weapon: bs.carries_weapon,
+        kind: `${bz.name} · ${boss.name}`, species: bs.name, formName: formOf(speciesById(boss.species), z.id).name, speciesId: bs.id,
+        innate: [bs.element], weapon: bs.carries_weapon, trait: bs.trait, core: bossCore,
+        immune: mobImmuneOf(bs), weak: mobWeakOf(bs), burst: mobBurstOf(bs),
+        mechanics: bs.mechanics || null, clockMult: mobClockMultOf(bs),
+        readsAs: bs.reads_as || bz.reads_as || 'large',
         hpFrom: bhp, hpTo: bhp, vit: bvit, hpBaseFrom: bhpBase, hpBaseTo: bhpBase,
         manaFrom: mobManaOf(blvl, bint), manaTo: mobManaOf(blvl, bint),
-        ps: mobPsAt(blvl) * bz.ps * speciesPsMult(z.id, bs.id),
+        ps: mobPsAt(blvl) * bz.ps / bf * speciesPsMultOf(z.id, bs),
         acc: mobAcc(coreOf(bs, 'dex', z.id), bs.accuracy_mult),
         ev: mobEvasion(coreOf(bs, 'dex', z.id), 'boss'),
         armour: coreOf(bs, 'str', z.id) * K.K_ARMOUR,
         res: mobResOf(bs, z.id),
+        resByElement: mobResByElementOf(bs, z.id),
         align: coreOf(bs, 'dex', z.id) * K.K_DEX_ALIGN, crit: coreOf(bs, 'lck', z.id) * K.K_LCK_CRIT,
         dodge: mobDodge(coreOf(bs, 'agi', z.id) * K.K_MOB_DODGE, blvl),
         damage: bs.damage,
@@ -923,12 +1017,14 @@ export function createEngine(E: EngineData) {
   // ---- the mob that actually spawns: a mob's level is STATIC per species per zone
   // (`mob.species[].zone_levels`), so a spawn does not follow the attacker's level.
 
-  function spawnAt(zoneId: number, level: number, bodyId = 'medium', speciesId: string | null = null) {
+  function spawnAt(zoneId: number, level: number, bodyId = 'medium', speciesId: string | null = null, boss?: any) {
     const z = zoneById(zoneId)!;
     const candidates = E.mob.species.filter((sp) => sp.zones.includes(zoneId) && (!speciesId || sp.id === speciesId));
-    const sp = candidates.length
+    const baseSpecies = candidates.length
       ? candidates[Math.min(candidates.length - 1, speciesId ? 0 : 0)]
       : E.mob.species[0];
+    const sp = mobProfileOf(baseSpecies, boss, zoneId);
+    const form = formOf(baseSpecies, zoneId);
     const lv = mobLevelIn(sp, zoneId);
     const size = sizeById(bodyId) || sizeById('medium')!;
     const bf = zoneBodyFactor(zoneId);
@@ -937,15 +1033,20 @@ export function createEngine(E: EngineData) {
     const vit = coreOf(sp, 'vit', zoneId);
     const hp = hpBase + LG.hp_per_level * (lv - 1) + vit * K.K_VIT_HP;
     const mana = mobManaOf(lv, coreOf(sp, 'int', zoneId));
-    const ps = mobPsAt(lv) * size.ps / bf * speciesPsMult(zoneId, sp.id);
+    const ps = mobPsAt(lv) * size.ps / bf * speciesPsMultOf(zoneId, sp);
     return {
-      speciesId: sp.id, species: sp.name, zone: zoneId, zoneName: z.name, level: lv,
-      body: size.id, kind: size.name, readsAs: size.reads_as || size.id,
-      innate: [(sp as any).element],
+      speciesId: sp.id, species: sp.name, formName: form.name, zone: zoneId, zoneName: z.name, level: lv,
+      body: size.id, kind: size.name, readsAs: sp.reads_as || size.reads_as || size.id,
+      innate: [sp.element], trait: sp.trait,
+      // the trait's mechanics ride the spawn: the statuses it cannot answer, the Element it flinches
+      // from, what it pays when it dies, and the clock it swings on
+      mechanics: sp.mechanics || null, immune: mobImmuneOf(sp), weak: mobWeakOf(sp),
+      burst: mobBurstOf(sp), clock_mult: mobClockMultOf(sp),
       weapon: sp.carries_weapon, damage: sp.damage, accuracy_mult: sp.accuracy_mult,
       // hp = Base HP + the flat level grant + the Core Vit bonus; mana = Base + level grant + Core Int
       hp, hpBase, hpMax: hp, vit, mana, manaMax: mana, ps,
-      acc: mobAcc(coreOf(sp, 'dex', z.id), sp.accuracy_mult),
+      core: Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, zoneId)])),
+      acc: mobAcc(coreOf(sp, 'dex', zoneId), sp.accuracy_mult),
       evasion: mobEvasion(coreOf(sp, 'dex', zoneId), size.id),
       // the mob's own integer Core stat line, and the same Cap the player obeys on every percentage
       armour: armourOf(coreOf(sp, 'str', zoneId)),
@@ -964,7 +1065,9 @@ export function createEngine(E: EngineData) {
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
     speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
-    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, mobStatBaseAt, MEAN_CORE, mobStatsOf, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
+    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, MEAN_CORE, mobStatsOf, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
+    subzoneAt, groupRangeOf, eliteChanceOf, spawnPackOf,
+    mobImmuneOf, mobClockMultOf, mobWeakOf, mobBurstOf, mechanicWordsOf, packWordOf,
     mobResOf, mobResByElementOf,
   evasionChance, evasionRating,
     MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION, sizeEvasionPct, damageSplit, mobRoster, spawnAt,

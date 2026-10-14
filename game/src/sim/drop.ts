@@ -34,6 +34,13 @@ function pickWeighted(rng: () => number, options: any[]): any {
   return options[options.length - 1];
 }
 
+function pickWeaponFrame(rng: () => number, weapon: any) {
+  const frames = (BASES.weapon_frames as any)[weapon.name] || [];
+  return frames.length
+    ? pickWeighted(rng, frames.map((frame: any) => ({ value: frame, weight: frame.drop_weight }))).value
+    : null;
+}
+
 /**
  * Step 2 — the frame inside the rolled slot (loot.md §1 · item-base.md). Main hand picks a
  * weapon type by weight; the off hand picks equally among its three frames (Buckler · Kite Shield ·
@@ -42,7 +49,8 @@ function pickWeighted(rng: () => number, options: any[]): any {
  */
 function rollBase(rng: () => number, slot: string): { frame?: any; weapon?: any } {
   if (slot === 'main hand') {
-    return { weapon: pickWeighted(rng, BASES.weapons.map((w: any) => ({ value: w, weight: 1 }))).value };
+    const weapon = pickWeighted(rng, BASES.weapons.map((w: any) => ({ value: w, weight: 1 }))).value;
+    return { weapon, frame: pickWeaponFrame(rng, weapon) };
   }
   if (slot === 'off hand') {
     const dual = BASES.weapons.filter((w: any) => w.dual_wield);
@@ -51,13 +59,16 @@ function rollBase(rng: () => number, slot: string): { frame?: any; weapon?: any 
       ...(dual.length ? [{ kind: 'weapon', value: loot.pick(rng, dual), weight: 1 }] : []),
     ];
     const chosen = pickWeighted(rng, options);
-    return chosen.kind === 'frame' ? { frame: chosen.value } : { weapon: chosen.value };
+    return chosen.kind === 'frame'
+      ? { frame: chosen.value }
+      : { weapon: chosen.value, frame: pickWeaponFrame(rng, chosen.value) };
   }
   return { frame: pickWeighted(rng, basesFor(slot).map((b: any) => ({ value: b, weight: 1 }))).value };
 }
 
-export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponAspd?: number): Item {
-  const slot = loot.pick(rng, loot.SLOTS);
+export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponAspd?: number, carriesWeapon = true): Item {
+  const slots = carriesWeapon ? loot.SLOTS : loot.SLOTS.filter((slot: string) => slot !== 'main hand' && slot !== 'off hand');
+  const slot = loot.pick(rng, slots);
   const chosen = rollBase(rng, slot);
   const frame = chosen.frame || null;
   const weapon = chosen.weapon || null;
@@ -100,7 +111,7 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
     slot,
     base: weapon ? String(weapon.name) : frame!.name,
     ilvl,
-    weaponAspd: slot === 'main hand' && weapon ? weapon.weapon_aspd : undefined,
+    weaponAspd: slot === 'main hand' && weapon ? E.weapons.find((row: any) => row.name === weapon.name)?.weapon_aspd : undefined,
     quality: loot.BAND_LABEL[q],
     tier: loot.TIER_NAME[loot.tierSlice(u)],
     lines,

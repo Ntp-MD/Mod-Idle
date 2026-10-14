@@ -124,10 +124,15 @@ function checks(): any[] {
   const weapons = current.weapons || [];
   add('BS5', weapons.length > 0,
     `${weapons.length} weapon types in bases.json, each with its own frame list`);
-  const multBad = weapons.filter((w: any) => Math.abs(w.weapon_mult - Math.round(ENGINE.weaponMult(w.weapon_aspd) * 100) / 100) > 0.011);
-  add('BS6', multBad.length === 0, multBad.length
-    ? `weapon_mult ≠ the engine's weaponMult for ${multBad.map((w: any) => w.name).join(', ')}`
-    : "every weapon type keeps the engine's equal-DPS rule weapon_mult = engine weaponMult(weapon_aspd)");
+  const engineWeapons = new Map((ENGINE.WEAPONS || []).map((w: any) => [w.name, w]));
+  const multBad = weapons.filter((w: any) => {
+    const row: any = engineWeapons.get(w.name);
+    return !row || w.weapon_aspd != null || w.weapon_mult != null
+      || ENGINE.weaponMult(row.weapon_aspd, w.name) !== row.weapon_mult;
+  });
+  add('BS6', weapons.length === 11 && multBad.length === 0, multBad.length
+    ? `weapon rows disagree with engine.json: ${multBad.map((w: any) => w.name).join(', ')}`
+    : 'all 11 Base weapons read their named attack speed and multiplier from engine.json');
   const blocked = current.weapon_pools?.['main hand']?.Blocked || [];
   const primary = current.weapon_pools?.['main hand']?.Primary || [];
   const secondary = current.weapon_pools?.['main hand']?.Secondary || [];
@@ -148,18 +153,32 @@ function checks(): any[] {
     const list = FRAMES[w.name];
     if (!Array.isArray(list) || !list.length) { frameProblems.push(`${w.name} has no frame list`); continue; }
     if (JSON.stringify(list[0].frame_mod) !== JSON.stringify((current.frame_mod?.weapons || {})[w.name])) frameProblems.push(`${w.name}: the first frame is not the live forced pair`);
+    if (new Set(list.map((f: any) => JSON.stringify(f.frame_mod)).concat(list.map((f: any) => JSON.stringify(f.legacy_frame_mod))).filter(Boolean)).size !== list.length * 2) frameProblems.push(`${w.name}: current and legacy frame identities collide`);
     for (const f of list) {
-      if (!(f.weight > 0)) frameProblems.push(`${w.name}/${f.name} carries no weight`);
+      if (!(f.drop_weight > 0)) frameProblems.push(`${w.name}/${f.name} carries no drop weight`);
+      if (!(f.value_bias > 0)) frameProblems.push(`${w.name}/${f.name} carries no value bias`);
       if (!(f.frame_mod || []).length) frameProblems.push(`${w.name}/${f.name} forces no line`);
+      if (!(f.legacy_frame_mod || []).length) frameProblems.push(`${w.name}/${f.name} has no legacy identity`);
       for (const id of f.frame_mod || []) if (!KNOWN_MOD_IDS.has(id)) frameProblems.push(`${w.name}/${f.name}: unknown line ${id}`);
+      for (const id of f.legacy_frame_mod || []) if (!KNOWN_MOD_IDS.has(id)) frameProblems.push(`${w.name}/${f.name}: unknown legacy line ${id}`);
       if (list.filter((x: any) => x.name === f.name).length > 1) frameProblems.push(`${w.name} names ${f.name} twice`);
     }
+    if (new Set(list.map((f: any) => f.drop_weight)).size < 2) frameProblems.push(`${w.name}: frame drop weights are identical`);
   }
   for (const t of Object.keys(FRAMES)) if (!weapons.some((w: any) => w.name === t)) frameProblems.push(`a frame list for an unknown type ${t}`);
   const frameCount = Object.values(FRAMES).flat().length;
   add('BS9', frameProblems.length === 0,
     frameProblems.length ? frameProblems.join(' · ')
-      : `${weapons.length} weapon types each carry ${Math.min(...Object.values(FRAMES).map((l: any) => l.length))}-${Math.max(...Object.values(FRAMES).map((l: any) => l.length))} frames (${frameCount} in all), the first frame of every type is its live forced pair, and every frame line is a real Mod (A10)`);
+      : `${weapons.length} weapon types each carry ${Math.min(...Object.values(FRAMES).map((l: any) => l.length))}-${Math.max(...Object.values(FRAMES).map((l: any) => l.length))} weighted frames (${frameCount} in all), current and legacy frame identities are unique, and each line is a real Mod (A10)`);
+  const typePoolProblems: string[] = [];
+  const typePools = current.weapon_pools?.['main hand'] || {};
+  for (const w of weapons) {
+    const ids = typePools[w.name];
+    if (!Array.isArray(ids) || !ids.length) typePoolProblems.push(`${w.name} has no named pool`);
+    else for (const id of ids) if (!KNOWN_MOD_IDS.has(id)) typePoolProblems.push(`${w.name}: unknown pool line ${id}`);
+  }
+  add('BS11', typePoolProblems.length === 0,
+    typePoolProblems.length ? typePoolProblems.join(' · ') : `${weapons.length} weapon types each have a valid named Mod pool`);
   // B13: the weight column exists and every type carries one.
   const noWeight = weapons.filter((w: any) => !(w.weight > 0));
   const wSpan = [Math.min(...weapons.map((w: any) => w.weight || 0)), Math.max(...weapons.map((w: any) => w.weight || 0))];

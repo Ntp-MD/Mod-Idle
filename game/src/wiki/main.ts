@@ -11,6 +11,7 @@
  */
 
 import { PAGES, pageBody, extractTokens } from './pages.ts';
+import { ICONS, renderIconsGallery } from './icons-live.ts';
 import tokensCss from '../styles/variables.css?inline';
 
 const tokens = extractTokens(tokensCss);
@@ -22,6 +23,10 @@ const paint = (): void => {
   const p = BY_KEY.get(key) || PAGES[0];
   document.title = p.title;
   document.body.innerHTML = pageBody(p, p.file, tokens).replace(/href="([\w-]+)\.html"/g, 'href="#$1"');
+  if (key === 'icons') {
+    const el = document.getElementById('icons-gallery');
+    if (el) renderIconsGallery(ICONS);
+  }
   window.scrollTo(0, 0);
 };
 

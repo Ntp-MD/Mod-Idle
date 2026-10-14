@@ -1,5 +1,5 @@
 import { sm } from '../engine/client';
-import { ACTIVE_SLOTS } from './skills';
+import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks } from './skills';
 import type { GameState } from './types';
 import type { SkillState } from './skills';
 
@@ -61,6 +61,8 @@ export function switchPreset(state: GameState, index: number): boolean {
   state.skills.auras = {};
   for (const [id, on] of Object.entries(p.buffs)) if (on && real(id)) state.skills.buffs[id] = true;
   for (const [id, on] of Object.entries(p.auras)) if (on && real(id)) state.skills.auras[id] = true;
+  clearUnownedTracks(state.skills);
+  clampAuraReservations(state.skills);
   state.skills.mode = { ...(p.mode || {}) };
   state.skills.conditions = { ...(p.conditions || {}) };
   // a buff that was up under the old set dies with it: its toggle is off in this one, so its clock

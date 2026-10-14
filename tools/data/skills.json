@@ -718,11 +718,28 @@
       "targets": "3/1",
       "effect": "AoE sandstorm · accuracy −20% on every target it hits, and 20 earth damage a second for 10 sec",
       "effects": [
-        { "stat": "accuracy", "op": "add_pct", "value": -20, "subject": "target" },
-        { "stat": "dot_dps", "op": "add_flat", "value": 20, "subject": "target" },
-        { "stat": "dot_sec", "op": "add_flat", "value": 10, "subject": "target" }
+        {
+          "stat": "accuracy",
+          "op": "add_pct",
+          "value": -20,
+          "subject": "target"
+        },
+        {
+          "stat": "dot_dps",
+          "op": "add_flat",
+          "value": 20,
+          "subject": "target"
+        },
+        {
+          "stat": "dot_sec",
+          "op": "add_flat",
+          "value": 10,
+          "subject": "target"
+        }
       ],
-      "rules": ["every_target"],
+      "rules": [
+        "every_target"
+      ],
       "base_flat": 922.9,
       "eff": 108.77
     },
@@ -738,7 +755,12 @@
       "targets": "1/1",
       "effect": "Heavy slam · adds 15% of the target's own maximum pool as damage, at half of that against a boss",
       "effects": [
-        { "stat": "max_hp_pct_damage", "op": "add_flat", "value": 15, "subject": "target" }
+        {
+          "stat": "max_hp_pct_damage",
+          "op": "add_flat",
+          "value": 15,
+          "subject": "target"
+        }
       ],
       "base_flat": 961.3,
       "eff": 113.3
@@ -748,21 +770,23 @@
       "name": "Fan of Knives",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 6,
       "mana": "15 flat (AoE ×1.5)",
       "basis": "phys",
       "targets": "3/1",
       "effect": "AoE opener · 2 quick cuts on every target hit",
       "effects": [
-            {
-                    "stat": "hits",
-                    "op": "add_flat",
-                    "value": 2,
-                    "subject": "self"
-            }
-    ],
-      "rules": ["every_target"],
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
       "base_flat": 1445.7,
       "eff": 67.79
     },
@@ -771,20 +795,20 @@
       "name": "Backstab",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 10,
       "mana": "27 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Reads the opening: +25% crit chance on this press",
       "effects": [
-            {
-                    "stat": "crit_chance",
-                    "op": "add_flat",
-                    "value": 25,
-                    "subject": "self"
-            }
-    ],
+        {
+          "stat": "crit_chance",
+          "op": "add_flat",
+          "value": 25,
+          "subject": "self"
+        }
+      ],
       "base_flat": 3779.7,
       "eff": 96.67
     },
@@ -793,20 +817,20 @@
       "name": "Poisoned Edge",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 7,
       "mana": "18 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "A hidden edge · 2 poison stacks to the target",
       "effects": [
-            {
-                    "stat": "poison_stacks",
-                    "op": "add_flat",
-                    "value": 2,
-                    "subject": "target"
-            }
-    ],
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
       "base_flat": 1924.8,
       "eff": 90.25
     },
@@ -815,20 +839,20 @@
       "name": "Sidestep",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 7,
       "mana": "18 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Slips inside the guard: +30% hit chance on this press",
       "effects": [
-            {
-                    "stat": "hit_pct",
-                    "op": "add_pct",
-                    "value": 30,
-                    "subject": "self"
-            }
-    ],
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 30,
+          "subject": "self"
+        }
+      ],
       "base_flat": 1924.8,
       "eff": 90.25
     },
@@ -837,20 +861,20 @@
       "name": "Nerve Strike",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 7,
       "mana": "18 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "A cut on the nerve · the target deals −25% damage",
       "effects": [
-            {
-                    "stat": "damage_dealt",
-                    "op": "add_pct",
-                    "value": -25,
-                    "subject": "target"
-            }
-    ],
+        {
+          "stat": "damage_dealt",
+          "op": "add_pct",
+          "value": -25,
+          "subject": "target"
+        }
+      ],
       "base_flat": 1924.8,
       "eff": 90.25
     },
@@ -859,20 +883,20 @@
       "name": "Impale",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 9,
       "mana": "22 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "A thrust through the guard · pierces 100% of the resistance it meets",
       "effects": [
-            {
-                    "stat": "resistance_pierce_pct",
-                    "op": "add_flat",
-                    "value": 100,
-                    "subject": "target"
-            }
-    ],
+        {
+          "stat": "resistance_pierce_pct",
+          "op": "add_flat",
+          "value": 100,
+          "subject": "target"
+        }
+      ],
       "base_flat": 3401.7,
       "eff": 87
     },
@@ -881,21 +905,23 @@
       "name": "Skewer Line",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 9,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "phys",
       "targets": "3/3",
       "effect": "Skewers the whole rank · 3 thrusts on every target hit",
       "effects": [
-            {
-                    "stat": "hits",
-                    "op": "add_flat",
-                    "value": 3,
-                    "subject": "self"
-            }
-    ],
-      "rules": ["every_target"],
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
       "base_flat": 2993.5,
       "eff": 76.56
     },
@@ -904,7 +930,7 @@
       "name": "Reach Thrust",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 12,
       "mana": "24 flat",
       "basis": "phys",
@@ -919,20 +945,20 @@
       "name": "Low Sweep",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 8,
       "mana": "18 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Takes the legs out · attack speed −20% on the target",
       "effects": [
-            {
-                    "stat": "attack_speed",
-                    "op": "add_pct",
-                    "value": -20,
-                    "subject": "target"
-            }
-    ],
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": -20,
+          "subject": "target"
+        }
+      ],
       "base_flat": 3023.8,
       "eff": 77.33
     },
@@ -941,20 +967,20 @@
       "name": "Skull Crack",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 8,
       "mana": "18 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "A blow to the head · +20% stun chance on this hit",
       "effects": [
-            {
-                    "stat": "stun_chance",
-                    "op": "add_flat",
-                    "value": 20,
-                    "subject": "target"
-            }
-    ],
+        {
+          "stat": "stun_chance",
+          "op": "add_flat",
+          "value": 20,
+          "subject": "target"
+        }
+      ],
       "base_flat": 3023.8,
       "eff": 77.33
     },
@@ -963,21 +989,23 @@
       "name": "Ground Slam",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 6,
       "mana": "15 flat (AoE ×1.5)",
       "basis": "phys",
       "targets": "3/1",
       "effect": "Slams the ground · stops every target hit for 1 sec",
       "effects": [
-            {
-                    "stat": "stop_sec",
-                    "op": "add_flat",
-                    "value": 1,
-                    "subject": "target"
-            }
-    ],
-      "rules": ["every_target"],
+        {
+          "stat": "stop_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
       "base_flat": 1445.7,
       "eff": 67.79
     },
@@ -986,20 +1014,20 @@
       "name": "Bone Breaker",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 12,
       "mana": "24 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Breaks the body open · the execute threshold shifts to 35%",
       "effects": [
-            {
-                    "stat": "execute_threshold_pct",
-                    "op": "add_flat",
-                    "value": 35,
-                    "subject": "target"
-            }
-    ],
+        {
+          "stat": "execute_threshold_pct",
+          "op": "add_flat",
+          "value": 35,
+          "subject": "target"
+        }
+      ],
       "base_flat": 4535.6,
       "eff": 116
     },
@@ -1008,20 +1036,20 @@
       "name": "Iron Toll",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 10,
       "mana": "27 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "A tolling blow · the target deals −25% damage",
       "effects": [
-            {
-                    "stat": "damage_dealt",
-                    "op": "add_pct",
-                    "value": -25,
-                    "subject": "target"
-            }
-    ],
+        {
+          "stat": "damage_dealt",
+          "op": "add_pct",
+          "value": -25,
+          "subject": "target"
+        }
+      ],
       "base_flat": 3779.7,
       "eff": 96.67
     },
@@ -1030,14 +1058,16 @@
       "name": "Wide Swing",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 6,
       "mana": "15 flat (AoE ×1.5)",
       "basis": "phys",
       "targets": "3/1",
       "effect": "One wide cut across the whole group — no rider, just the reach",
       "effects": [],
-      "rules": ["every_target"],
+      "rules": [
+        "every_target"
+      ],
       "base_flat": 1445.7,
       "eff": 67.79
     },
@@ -1046,21 +1076,23 @@
       "name": "Whirlaxe",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 9,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "phys",
       "targets": "3/3",
       "effect": "Spins the axe through the rank · 2 cuts on every target hit",
       "effects": [
-            {
-                    "stat": "hits",
-                    "op": "add_flat",
-                    "value": 2,
-                    "subject": "self"
-            }
-    ],
-      "rules": ["every_target"],
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
       "base_flat": 2993.5,
       "eff": 76.56
     },
@@ -1069,20 +1101,20 @@
       "name": "Carnage",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 10,
       "mana": "27 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Drinks the wound · leech +15% off this hit",
       "effects": [
-            {
-                    "stat": "leech",
-                    "op": "add_pct",
-                    "value": 15,
-                    "subject": "self"
-            }
-    ],
+        {
+          "stat": "leech",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self"
+        }
+      ],
       "base_flat": 3779.7,
       "eff": 96.67
     },
@@ -1091,20 +1123,20 @@
       "name": "Cleave Down",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 12,
       "mana": "24 flat",
       "basis": "phys",
       "targets": "1/1",
       "effect": "Splits the body itself · adds 10% of the target’s own maximum pool (halved on a boss)",
       "effects": [
-            {
-                    "stat": "max_hp_pct_damage",
-                    "op": "add_flat",
-                    "value": 10,
-                    "subject": "target"
-            }
-    ],
+        {
+          "stat": "max_hp_pct_damage",
+          "op": "add_flat",
+          "value": 10,
+          "subject": "target"
+        }
+      ],
       "base_flat": 4535.6,
       "eff": 116
     },
@@ -1198,7 +1230,7 @@
       "name": "Puncture",
       "type": "attack",
       "group": "melee",
-            "element": "physical",
+      "element": "physical",
       "cd": 7,
       "mana": "18 flat",
       "basis": "phys",
@@ -1270,7 +1302,7 @@
       "name": "Arrow Shower",
       "type": "attack",
       "group": "ranged",
-            "weapon": "bow",
+      "weapon": "bow",
       "element": "physical",
       "cd": 7,
       "mana": "19 flat",
@@ -1496,9 +1528,24 @@
       "duration": "10 sec",
       "effect": "Grants block charges: 5 at skill level 1, +1 every 3 levels up to 10 at level 20 · each charge cuts one incoming physical hit by the block rule (a flat share of Armour), never deletes it",
       "effects": [
-        { "stat": "block_charges", "op": "add_flat", "value": 5, "subject": "self" },
-        { "stat": "block_charges_per_levels", "op": "add_flat", "value": 3, "subject": "self" },
-        { "stat": "block_charges_cap", "op": "add_flat", "value": 10, "subject": "self" }
+        {
+          "stat": "block_charges",
+          "op": "add_flat",
+          "value": 5,
+          "subject": "self"
+        },
+        {
+          "stat": "block_charges_per_levels",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "self"
+        },
+        {
+          "stat": "block_charges_cap",
+          "op": "add_flat",
+          "value": 10,
+          "subject": "self"
+        }
       ]
     },
     {

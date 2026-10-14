@@ -289,7 +289,12 @@ export function canCook(state: GameState, recipeId: string): { ok: boolean; why?
   for (const [tier, amount] of Object.entries(recipe.herbs as Record<string, number>)) {
     if ((state.farm.herbs[tier] || 0) < amount) return { ok: false, why: `needs ${amount} ${tier} herb` };
   }
-  if (!fits(state, state.fieldwork.foods, recipe.id, 'food', 1)) return { ok: false, why: 'character bag has no room for food' };
+  const costs = [
+    ...Object.entries(recipe.materials as Record<string, number>).map(([key, amount]) => ({ bucket: state.fieldwork.materials, key, amount, capKind: 'material' })),
+    ...Object.entries(recipe.foods as Record<string, number>).map(([key, amount]) => ({ bucket: state.fieldwork.foods, key, amount, capKind: 'food' })),
+    ...Object.entries(recipe.herbs as Record<string, number>).map(([key, amount]) => ({ bucket: state.farm.herbs, key, amount, capKind: 'herb' })),
+  ];
+  if (!fits(state, state.fieldwork.foods, recipe.id, 'food', 1, costs)) return { ok: false, why: 'character bag has no room for food' };
   return { ok: true };
 }
 

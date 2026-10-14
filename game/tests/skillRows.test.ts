@@ -32,7 +32,7 @@ const mob = (over: Partial<Mob> = {}): Mob => ({
 /** Cast one slotted skill once against one mob and report how much HP it took. */
 function castDamage(id: string, c: Character, target: Mob, env: CastEnv = {}): number {
   const s = newSkillState();
-  s.list[0] = id;
+  s.list[0] = id; s.owned[id] ??= 0;
   s.xp[id] = 0;
   const before = target.hp;
   const cast = castOnce(s, c, c.maxMana, [target], {}, mulberry32(7), env);
@@ -109,7 +109,7 @@ describe('the stack rows and the status curses reach the status store', () => {
   it('Puncture guarantees the bleed its row names, and Flame Wisp writes its stacks', () => {
     // the gate passes on every rolled status (owner ruling), so this case reads the row's certainty on a
     // build that clears it — Alignment 100 — and the bleed is what is left to assert
-    const c = { ...buildCharacter(90, emptyGear()), alignment: 100 };
+    const c = { ...buildCharacter(90, emptyGear()), alignment: 100, weaponName: 'one-handed sword' };
     const store = newMobStatusStore();
     const target = mob();
     castDamage('attack.puncture', c, target, { mobStatus: store });
@@ -156,7 +156,7 @@ describe('the stack rows and the status curses reach the status store', () => {
     setLevel(s, 50);
     s.zone = 4;
     s.skills.owned['curse.venom_bind'] = 1;
-    s.skills.list[0] = 'curse.venom_bind';
+    s.skills.list[0] = 'curse.venom_bind'; s.skills.owned['curse.venom_bind'] ??= 0;
     let guard = 0;
     while (!s.group.length && guard++ < 30) tick(s, {});
     const c = buildCharacter(s.player.level, s.gear, {}, 0);

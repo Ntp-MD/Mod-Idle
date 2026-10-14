@@ -1,9 +1,8 @@
 /**
  * Weapon Mastery — the level-independent side track (`equipment-weapon.md`).
  *
- * Mastery is earned per kill by the weapon actually held, and it pays in weight and drop rate only.
- * It never touches damage, because all weapon types are already tuned to equal DPS — a damage bonus
- * would make one type permanently better and kill the reason the track exists.
+ * Mastery is earned per kill by the weapon actually held. It pays in weight, drop rate and skill
+ * damage, never in basic-attack damage.
  */
 
 import type { BasesData } from './types.ts';
@@ -20,8 +19,11 @@ export function createMastery(BASES: BasesData) {
   const weightDiscount = (lvl: number) => Math.min(M.weight_discount_cap_pct, lvl * M.weight_discount_per_level_pct);
   const weaponWeight = (baseWeight: number, lvl: number) => baseWeight * (1 - weightDiscount(lvl) / 100);
 
-  /** While held: skills with this weapon gain 0.5% a level from L5, to +8%. */
-  const skillBonus = (lvl: number) => 1 + Math.min(M.skill_bonus_cap_pct, Math.max(0, lvl >= M.skill_bonus_from_level ? (lvl - M.skill_bonus_from_level + 1) * M.skill_bonus_per_level_pct : 0)) / 100;
+  /** While held: matching skills gain full Mastery damage and other skills gain half. */
+  const skillBonus = (lvl: number, matchesWeapon = true) => {
+    const pct = Math.min(M.skill_bonus_cap_pct, Math.max(0, lvl >= M.skill_bonus_from_level ? (lvl - M.skill_bonus_from_level + 1) * M.skill_bonus_per_level_pct : 0));
+    return 1 + pct * (matchesWeapon ? 1 : M.skill_bonus_off_type_mult) / 100;
+  };
 
   /** Account-wide: every type at L10 or better adds +1% drop rate — the cap is one point per type. */
   const dropBonusPct = (levelsByType?: Record<string, number>) => Object.values(levelsByType || {})

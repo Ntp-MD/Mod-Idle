@@ -298,6 +298,24 @@ export function rollStatus(
   return name;
 }
 
+/**
+ * A bursting body (`mob.trait_mechanics.poison_burst`) pays one poison line when it dies, worth a share
+ * of its own damage per second. It is not a proc — the pop is the whole body — so it answers no
+ * `status.proc_chance` roll; the fighter's own status immunity is the only answer to it.
+ */
+export function poisonBurst(mob: Mob, statuses: Statuses, psPct: number): boolean {
+  const perSec = mob.ps * psPct / 100;
+  if (!(perSec > 0)) return false;
+  const cfg = (E.status as any).poison;
+  const s = statuses.poison || (statuses.poison = { stacks: 0, secLeft: 0, perSec: 0 });
+  const wasClear = s.stacks <= 0;
+  addStack(s, cfg.stack_max, perSec);
+  // the same clock a proc'd poison runs on: one stack decays on its own beat, never restarted by the pop
+  if (wasClear) s.secLeft = cfg.decay_sec;
+  s.alignedSec = Math.max(s.alignedSec || 0, mob.ps);
+  return true;
+}
+
 /** Burn and poison share the Element DoT budget; bleed is physical and sits outside it.
  *  The budget's basis is the dealer's aligned Elemental DPS (the mob-side mirror keeps the same
  *  number on the victim's record as `alignedPerSec`), never the character taking the damage — a

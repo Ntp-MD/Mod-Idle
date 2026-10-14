@@ -14,10 +14,8 @@
  * A bulk press costs the single-line press times the lines the press edits — no discount, no premium —
  * so `craft` prices one line and the count is read off the piece.
  *
- * Upgrade, Repair and Corrupt run on `crafting.md`'s published ladder and Vaal table, both copied into
- * `engine.json` `craft`. The one figure that pass still owes is the Gear Mod value per +1, which
- * `crafting.md` sends to the mob-sheet rebalance pass, so `craft.gear_mod_per_level` is 0 and the
- * uplift is switched off rather than guessed.
+ * Upgrade, Repair and Corrupt read their ladder, Gear Mod increment and outcome table from
+ * `engine.json` `craft`.
  */
 
 import type * as lootMod from './loot.ts';
@@ -629,30 +627,32 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
         changed: { outcome: 'up', level: step, chance },
       };
     }
+    const level = Math.max(0, from - 1);
+    const dropped = { ...item, upgrade_lv: level, gearMod: Math.max(0, (item.gearMod || 0) - stepOf(item, from - level)) };
     if (step < C.upgrade_breaks_from) {
       return {
         ok: true,
-        item: { ...item, upgrade_lv: Math.max(0, from - 1) },
-        changed: { outcome: 'dropped', level: Math.max(0, from - 1), chance },
+        item: dropped,
+        changed: { outcome: 'dropped', level, chance },
       };
     }
     const left = item.protection_left == null ? C.protection_start : item.protection_left;
     if (left > 0) {
       return {
         ok: true,
-        item: { ...item, protection_left: left - 1, upgrade_lv: Math.max(0, from - 1) },
-        changed: { outcome: 'protected', level: Math.max(0, from - 1), protection_left: left - 1, chance },
+        item: { ...dropped, protection_left: left - 1 },
+        changed: { outcome: 'protected', level, protection_left: left - 1, chance },
       };
     }
     return {
       ok: true,
-      item: { ...item, broken: true, broken_at: from, upgrade_lv: Math.max(0, from - 1) },
-      changed: { outcome: 'broken', level: Math.max(0, from - 1), chance },
+      item: { ...dropped, broken: true, broken_at: from },
+      changed: { outcome: 'broken', level, chance },
     };
   }
 
   /**
-   * Repair: one Repair stone revives the piece at the level it broke at and refills protection
+   * Repair: one Repair stone revives the piece one level below its pre-break level and refills protection
    * (`crafting.md` / `engine.json` `craft.repair_stones`). Nothing else about the piece changes.
    */
   function repair(item: any): any {

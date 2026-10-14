@@ -1,12 +1,12 @@
 import { eng, E, sm, loot, TOWN, tree, dungeon as DG } from '../engine/client';
 import { buildCharacter, openingGear, SLOT_COUNT } from './player';
 import { itemName } from './item-name';
-import { playerSwing, mobSwing, rollStatus, dotDamageParts, decayStatusStack, type Statuses, type StatusName } from './combat';
+import { playerSwing, mobSwing, rollStatus, poisonBurst, dotDamageParts, decayStatusStack, type Statuses, type StatusName } from './combat';
 import { rollDrop } from './drop';
 import { abandonRun, payoutStacks } from './dungeon';
 import { newTown, progressTasks, tickTown, taskReward } from './town';
 import { STAT_KEYS, type StatKey } from '../engine/client';
-import { leanReweight } from '../../../engine/loot.ts';
+import { leanReweightMany } from '../../../engine/loot.ts';
 import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm } from './farm';
 import { newFieldwork, tickFieldwork, tickHunger, resolveTravelEvent, recordHuntKill, withMeal, withHunger, pushToFieldCamp, finishPushAtCamp } from './fieldwork';
 import { road, walkZonesHex, arrive, ownerOf, zoneOf } from './road';
@@ -14,7 +14,7 @@ import { weaponByName, masteryLevel, payMastery, dropMultiplier } from './master
 import { newPresets, switchPreset, autoSelect } from './presets';
 import { newCollector, newGrants, wants, col } from './collector';
 import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from './filter';
-import { addTo } from './slots';
+import { addTo, fitsAll } from './slots';
 import { settlementOfZone, settlementById } from './town';
 import { effectsActive, esAbsorbPct } from './skills';
 import { mark as markSnapshot } from './snapshot';
@@ -37,15 +37,17 @@ const BOSS_EVERY_SEC = Math.round(3600 / L.boss_per_hour);
 const BAND_OF_QUALITY = (quality: string): string =>
   quality.startsWith('high') ? 'high' : quality.startsWith('mid') ? 'mid' : 'low';
 
-/** combat.md §1 · engine.json mob.attack_clock_per_sec, capped by the one clock rule (caps.attack_interval_sec). */
+/** combat.md §1 · engine.json mob.attack_clock_per_sec, capped by the one clock rule (caps.attack_interval_sec).
+ *  A fast-clock lineage (`mob.trait_mechanics.fast_clock`) multiplies its own clock; the swing divides
+ *  by the same number in `mobSwing`, so the faster body deals exactly its published damage per second. */
 const MOB_CLOCK_FLOOR = E.mob.attack_clock_per_sec;
 const MOB_CLOCK_CAP = 1 / E.caps.attack_interval_sec;
-const mobClock = (kind: string) =>
-  Math.min(kind.startsWith('Boss') ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal, MOB_CLOCK_CAP);
+const mobClock = (kind: string, mult = 1) =>
+  Math.min((kind.startsWith('Boss') ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal) * mult, MOB_CLOCK_CAP);
 
 /** What the character carries besides gear: potions, condensed bottles and herbs all weigh. */
 export function heldWeaponName(s: GameState): string | null {
-  const main = s.gear.find((g) => g && g.slot === 'main hand');
+  const main = s.gear.find((g) => g && !g.broken && g.slot === 'main hand');
   const w = main ? weaponByName(main.base) : null;
   return w ? w.name : null;
 }
@@ -217,17 +219,34 @@ function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | '
   return (((E.mob as any).variant_drops || {})[mob.variant]) || null;
 }
 
+/**
+ * The body a normal spawn takes: the side's pack odds (`mob.spawn_packs`) run over the bodies this
+ * species can field. A species with one body takes it whatever the pack says, and a side with no pack
+ * rolls the plain even mix — which is every body at equal odds, exactly what bare ground rolls.
+ */
+function pickBody(rng: () => number, bodies: string[], pack: Record<string, number> | null): string {
+  const total = bodies.reduce((t, b) => t + ((pack || {})[b] || 0), 0);
+  if (!pack || !(total > 0)) return pick(rng, bodies);
+  let roll = rng() * total;
+  for (const b of bodies) {
+    roll -= (pack[b] || 0);
+    if (roll < 0) return b;
+  }
+  return bodies[bodies.length - 1];
+}
+
 function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null): Mob {
   const z = eng.zoneById(zoneId);
   const zonePool = speciesInZone(zoneId);
-  // a sub-zone is what a spawn table rolls against: it names its own race pair and one Element from the
-  // zone's set, and the cast a normal or Elite spawn draws from is that pair (the boss is zone-level).
+  // a sub-zone is what a spawn table rolls against: it names its own race pool and one Element from the
+  // zone's set, and the cast a normal or Elite spawn draws from that pool (the boss is zone-level).
   // Standing on a cell that has a sub-zone written into it hunts that sub-zone; anywhere else the zone's
   // own cast rolls, evenly (`road.standing_rule`).
   const subs = z.subzones || [];
   const stood = standSub != null && subs[standSub] ? subs[standSub] : null;
   const sub = kind !== 'boss' && subs.length ? (stood || subs[Math.floor(rng() * subs.length)]) : null;
   const speciesPool = sub ? zonePool.filter((sp: any) => sub.races.includes(sp.id)) : zonePool;
+  let bossProfile: any = null;
   let body = 'medium';
   let species = pick(rng, speciesPool);
   if (bodyHint) {
@@ -236,6 +255,7 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     body = bodyHint;
   } else if (kind === 'boss') {
     const boss = bossInZone(zoneId)!;
+    bossProfile = boss;
     species = E.mob.species.find((sp: any) => sp.id === boss.species)!;
     body = 'boss';
   } else if (kind === 'elite') {
@@ -251,9 +271,12 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   } else {
     const groupable = speciesPool.filter((sp: any) => sp.sizes.includes('small') || sp.sizes.includes('medium'));
     species = pick(rng, groupable.length ? groupable : speciesPool);
-    body = pick(rng, species.sizes.filter((s: string) => s !== 'boss' && s !== 'large'));
+    // the side's own body mix (`mob.spawn_packs`): a swarm side rolls Small twice as often as it rolls
+    // Medium, a brute side the other way, and bare ground rolls the plain even mix it always rolled
+    const pack = sub ? ((E.mob as any).spawn_packs?.[(sub.spawn || {}).pack || ''] || null) : null;
+    body = pickBody(rng, species.sizes.filter((s: string) => s !== 'boss' && s !== 'large'), pack);
   }
-  const base = eng.spawnAt(zoneId, playerLevel, body, species.id);
+  const base = eng.spawnAt(zoneId, playerLevel, body, species.id, bossProfile);
   // the spawn's level is the species' own static level in this zone (`mob.species[].zone_levels`):
   // a spawn never follows the attacker's level, so every line below — the Elite's HP and PS, the
   // mob card's level, the drop's item level — reads the one level the engine priced the shape at
@@ -261,7 +284,7 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   const size = eng.sizeById(body)!;
   // body classes no longer scale HP: every mob of a species reads the same curve at its own level,
   // so the boss takes the same spawn shape any mob of its species takes
-  const flat = eng.LG.hp_per_level * (lv - 1) + eng.coreOf(species, 'vit', zoneId) * eng.K.K_VIT_HP;
+  const flat = eng.LG.hp_per_level * (lv - 1) + base.vit * eng.K.K_VIT_HP;
   const hp = kind === 'elite'
     ? (eng.mobHpAt(lv) + flat) * E.mob.elite.hp // the Elite multiplier rides the same curve the engine adds its flat terms to
     : base.hp;
@@ -269,9 +292,8 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   // the Elite swaps the Large body's own ps factor for its multiplier; the boss keeps the spawn
   // shape whole (the zone-mean divide included), exactly like any other body of its species
   const ps = kind === 'elite' ? base.ps / size.ps * E.mob.elite.ps : base.ps;
-  // the race owns its Element: every spawn of a species wears the same one in every zone, so no
-  // spawn rolls an Element of its own and the sub-zone's list is flavour, not a roll pool
-  const innate = [species.element];
+  // Normal and Elite spawns inherit the species Element; a Boss reads its own declared profile.
+  const innate = base.innate;
   // the ladder name is its own roll over the species' three normal rungs (Elite and Boss take the fourth
   // and fifth), and it is what the drop table reads: `mob.variant_drops` keys on this name. Drawn last
   // on purpose — every field above keeps the random stream it had, so a variant is purely additive.
@@ -283,7 +305,10 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     id: `${zoneId}_${species.id}_${body}_${Math.floor(rng() * 1e9)}`,
     species: species.name,
     speciesId: species.id,
+    formName: base.formName,
     variant,
+    trait: base.trait,
+    environment: sub?.environment,
     kind: kind === 'boss' ? `Boss · ${(bossInZone(zoneId) || { name: 'Boss' }).name}` : kind === 'elite' ? 'Elite' : size.name,
     zone: zoneId,
     level: lv,
@@ -298,11 +323,12 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     armour: base.armour,
     res: base.res,
     resByElement: base.resByElement,
-    damage: species.damage,
+    damage: base.damage,
     innate,
     xp: kind === 'elite' ? base.xp * E.xp.elite_mult : kind === 'boss' ? base.xp * E.xp.boss_mult : base.xp,
     line: species.line,
-    hitsPerSec: mobClock(kind),
+    immune: base.immune, weak: base.weak, burst: base.burst, mechanics: base.mechanics,
+    hitsPerSec: mobClock(kind, base.clock_mult),
     atkTimer: 0,
     engageSec: 0,
   };
@@ -384,6 +410,11 @@ export function salvageBag(s: GameState, bagIndex: number): { ok: boolean; why?:
   if (!item) return { ok: false, why: 'nothing in that bag slot' };
   if (item.locked) return { ok: false, why: 'that piece is locked' };
   if (item.heldFor) return { ok: false, why: 'that piece is promised to a Collector set' };
+  const grants = [{ bucket: s.counters.stones, key: 'reroll_value', capKind: 'stone', amount: 1 }];
+  if (((s.counters.salvaged || 0) + 1) % E.salvage.pieces_per_tier_stone === 0) {
+    grants.push({ bucket: s.counters.stones, key: 'tier', capKind: 'stone', amount: 1 });
+  }
+  if (!s.dungeon && !fitsAll(s, grants)) return { ok: false, why: 'make room in the character bag for the salvage stones' };
   s.bag.splice(bagIndex, 1);
   dissolve(s);
   push(s, `Salvaged ${itemName(item)} → 1 Value stone`);
@@ -462,11 +493,19 @@ export function adjudicateDrop(s: GameState, item: Item): void {
   }
 }
 
-function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>) {
+function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>, statuses: Statuses = {}) {
   const online = s.online !== false;
   // the lines this mob was carrying jump to the neighbours its row names 
   const caught = spreadOnDeath(s.curses, mob.id, s.group.map((m) => m.id));
   if (caught) push(s, `the curse spreads to ${caught} nearby`);
+  // a bursting body pays its poison as it goes (`mob.trait_mechanics.poison_burst`) — a guaranteed
+  // line, not a proc, and the one answer to it is the fighter's own status immunity
+  if (mob.burst?.ps_pct && !buffRuleUp(s.skills, 'status_immunity')) {
+    if (poisonBurst(mob, statuses, mob.burst.ps_pct)) {
+      if (online) push(s, `${mob.species} bursts — poison`);
+      fx(s, { kind: 'proc', side: 'self', text: 'poison', colour: statusColour('poison') });
+    }
+  }
   s.counters.kills++;
   // the feed names pay, not kills: every kill online banks its XP as its own line, so the chronicle ticks
   // with the fight itself. Offline the away summary owns the read.
@@ -504,21 +543,21 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   // Mastery adds quantity the same way Lck does, and only a twelfth as strongly (equipment-weapon.md)
   // offline results are AFK: same drops, but the piece is rolled at the floor level of its band
   const ilvl = online ? Math.max(1, Math.round(mob.level)) : eng.floorLevelOf(band);
-  // The variant's own lean tilts the three collectible streams toward a category by shifting probability
-  // mass between them, never raising the total, so drops/hr and the timeline stay unmoved
-  // (`loot.variant_lean` · `mob.variant_drops`). The variant row is the only author — there is no player
-  // control on top of it — and 'none' is the identity, so an Elite's or Boss's row behaves as balanced.
+  // The variant lean runs first, then the subzone environment lean. Each shift renormalizes the same
+  // gear/herb/junk total, so a local tilt changes the mix without changing expected drops per kill.
   const vdrop = variantDrop(mob);
   const order = (vdrop ? vdrop.lean : 'none') as 'none' | 'gear' | 'herb' | 'junk';
+  const environmentLean = ((E.mob as any).environment_lean || {})[mob.environment || ''] || 'none';
   const junkRows = Object.entries(E.junk.rarities as Record<string, any>);
   const pJunkBase = junkRows.reduce((a, [, r]: any) => a + r.drop_chance_per_kill, 0);
-  const hw = leanReweight({
+  const hw = leanReweightMany({
     gear: Math.min(1, eng.dropChance(band) * dropMultiplier(s)),
     herb: farm.herbChance(band),
     junk: pJunkBase,
-  }, order, E.loot.variant_lean.shift_pct);
+  }, [order, environmentLean], E.loot.variant_lean.shift_pct);
   if (rng() < hw.gear) {
-    const item = rollDrop(rng, band, ilvl, c.weaponAspd);
+    const carriesWeapon = E.mob.species.find((species: any) => species.id === mob.speciesId)?.carries_weapon ?? true;
+    const item = rollDrop(rng, band, ilvl, c.weaponAspd, carriesWeapon);
     s.counters.drops++;
     // a run escrows the roll itself: the one filter path judges it when the run pays out
     if (s.dungeon) s.dungeon.escrow.items.push(item);
@@ -630,13 +669,14 @@ function completeDungeonRun(s: GameState): void {
 /**
  * An encounter on a block: a real mob group from the lower of the two zones the walk joins, at that
  * zone's own group size and the ordinary drop roll. It pays exactly what a kill pays and nothing
- * else — no purse, no chest, no Standing (`engine.json` road `encounter_rule`).
+ * else — no purse, no chest, no Standing (`engine.json` road `encounter_rule`). A walk that ends on a
+ * sub-zone side is ambushed by that side's own pack, the same pack the feet would hunt.
  */
 function spawnWalkEncounter(s: GameState, rng: () => number) {
   const walk = s.walk!;
   const { lower } = walkZonesHex(walk.from, walk.to);
   const z = eng.zoneById(lower);
-  const [lo, hi] = (z.group as string).split('-').map(Number);
+  const [lo, hi] = eng.groupRangeOf(lower, walk.sub);
   const size = Math.max(1, Math.round(lo + rng() * ((hi || lo || 1) - (lo || 1))));
   const mobs: any[] = [];
   for (let i = 0; i < size; i++) mobs.push(spawnMob(rng, lower, s.player.level, 'normal', undefined, walk.sub));
@@ -853,7 +893,9 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // leaving the run's zone ends the run: a dungeon is entered ground, not a destination
   if (s.dungeon && s.dungeon.zone !== s.zone) push(s, abandonRun(s, 'Pulled out'));
   const band = BAND_OF_QUALITY(eng.zoneById(s.zone).quality);
-  const [loGroup, hiGroup] = (eng.zoneById(s.zone).group as string).split('-').map(Number);
+  // the side the feet stand on fields its own pack (`subzones[].spawn.group`); bare ground, a town and
+  // a wild side roll the zone's published range, which is the average of its three sides (X75)
+  const [loGroup, hiGroup] = eng.groupRangeOf(s.zone, s.cell?.sub);
   const groupSize = intBetween(rng, loGroup || 1, hiGroup || loGroup || 1);
   // a run fields the zone's own normals, clamped to the run's cap and to what is left
   if (!s.group.length && !s.walk && s.hunting && s.dungeon) {
@@ -869,7 +911,8 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   }
   if (!s.group.length && !s.walk) s.spawnIn--;
   if (!s.group.length && !s.walk && s.hunting && s.spawnIn <= 0) {
-    const wantElite = rng() < L.elite_spawn_chance;
+    // the side fields its own Elite rate; everywhere else the published global chance rolls
+    const wantElite = rng() < eng.eliteChanceOf(s.zone, s.cell?.sub);
     // the boss clock is a stored due time, per character, and it does not accrue while away
     // (save.md · combat.md §7). A modulo would let a busy tick skip a spawn and hand the next
     // one out early.
@@ -984,7 +1027,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     }
     while (s.group.length && s.group[0].hp <= 0) {
       const dead = s.group.shift()!;
-      onKill(s, rng, dead, c);
+      onKill(s, rng, dead, c, statuses);
     }
   }
 
@@ -1018,7 +1061,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     if (r.landed) {
       // the weapon's own riders — Element status, bleed and stun — on the swing's own hit, and on a
       // landing press too (§14), through one function so the two cannot drift
-      applyWeaponRiders(rng, c, s.mobStatus, target.id, lineValue(s.curses, target.id, 'bleed_chance') > 0);
+      applyWeaponRiders(rng, c, s.mobStatus, target.id, lineValue(s.curses, target.id, 'bleed_chance') > 0, 0, 0, target.immune || []);
       // a swing that gives back HP is two events, not one: the blow the mob sees and the return the
       // character feels, each on its own half of the field
       if (r.leech) {
@@ -1033,7 +1076,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       });
       if (r.crit) { critLanded = true; push(s, `Crit for ${eng.fmt(r.damage)} (${target.species})`); }
       if (target.hp <= 0) {
-        onKill(s, rng, target, c);
+        onKill(s, rng, target, c, statuses);
         s.group.shift();
         s.player.atkTimer = 0;
       }
@@ -1100,7 +1143,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   }
   while (s.group.some((m) => m.hp <= 0)) {
     const dead = s.group.splice(s.group.findIndex((m) => m.hp <= 0), 1)[0];
-    onKill(s, rng, dead, c);
+    onKill(s, rng, dead, c, statuses);
   }
 
   // mob clocks
@@ -1158,10 +1201,10 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     }
   }
   // the damage-taken trigger fires once the incoming clock has run, on the same tick it was hurt
-  if (autoSkills && tookDamage) fireTrigger(trig.taken);
+  if (autoSkills && tookDamage && s.player.hp > 0) fireTrigger(trig.taken);
 
   // damage over time on us, then regen (field rule 2: regen works during combat)
-  if (s.healUp) {
+  if (s.healUp && s.player.hp > 0) {
     const before = s.player.hp;
     s.player.hp = Math.min(c.maxHp, s.player.hp + c.maxHp * s.healUp.pctPerSec);
     // the stream says what it returned each second, on the same beat it spends — a heal that only lives in
@@ -1191,7 +1234,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // `combat.md` §5 reads shock as "attacks stop + regen stops", so the stop covers the pools too.
   // The Energy Shield recharge is left alone on purpose: it is a shield, not regen, and its own
   // `delay_sec` rule already governs it.
-  s.player.hp = Math.min(c.maxHp, s.player.hp + c.hpRegen * (1 - burnCut) * playerActiveFraction);
+  if (s.player.hp > 0) s.player.hp = Math.min(c.maxHp, s.player.hp + c.hpRegen * (1 - burnCut) * playerActiveFraction);
   s.player.mana = Math.min(c.maxMana, s.player.mana + c.manaRegen * playerActiveFraction);
   s.player.esIdleSec++;
   // Magia Drive forces the recharge: the delay is ignored and a hit does not interrupt it
@@ -1219,7 +1262,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     }
   }
 
-  const drank = maybeDrink(s, c, s.group.some((m) => m.kind.startsWith('Boss')));
+  const drank = s.player.hp > 0 ? maybeDrink(s, c, s.group.some((m) => m.kind.startsWith('Boss'))) : null;
   if (drank) push(s, `${drank.name} restores ${eng.fmt(drank.amount)} ${drank.pool} (shared ${E.potions.shared_cooldown_sec}s cooldown)`);
 
   // the farm's own automation, the twin of the potion path (parking: "Auto plant, harvest and brew")

@@ -251,6 +251,17 @@ export interface CurveCfg {
   hp_at_player_level_cap: number;
 }
 
+export interface MobCore {
+  str: number;
+  agi: number;
+  vit: number;
+  dex: number;
+  int: number;
+  wis: number;
+  lck: number;
+  [key: string]: number;
+}
+
 export interface MobSpecies {
   id: string;
   name: string;
@@ -267,10 +278,18 @@ export interface MobSpecies {
   /** A humanoid lineage is the only source of the potion drop (X49). */
   humanoid?: boolean;
   trait?: string;
+  /**
+   * The trait read as a mechanic: keys from the closed set `mob.trait_mechanics.set`, each with the
+   * argument it needs (`element_weak` names an Element; the rest are flags). Absent means an ordinary
+   * body. None of them moves mob_HP, mob PS, the drop line or the stone funnel (X74).
+   */
+  mechanics?: Record<string, string | boolean>;
   /** The line the species holds in a mob group's formation (`mob.reach`). */
   line: string;
+  /** The species' Base damage power, averaged to 1.00 across the roster (X68). */
+  power_base: number;
   /** The Core block the race rolls its reference body from — the roster mean prices MEAN_CORE. */
-  core: { str: number; agi: number; vit: number; dex: number; int: number; wis: number; lck: number; [k: string]: number };
+  core: MobCore;
 }
 
 export interface MobSize {
@@ -300,6 +319,23 @@ export interface MobSubzone {
   races: string[];
   normal: string[];
   elite: string | null;
+  /**
+   * This side's own spawn profile (X75): the pack range, the Elite rate and the body mix a group
+   * rolled on this side draws from. Every zone's three sides average back to the zone's published
+   * `group`, to `loot.elite_spawn_chance`, and to the plain body mix, so standing on a side changes
+   * what that side reads like and never what the zone pays.
+   */
+  spawn?: MobSubzoneSpawn;
+}
+
+/** One side's spawn profile (`mob.zones[].subzones[].spawn`). */
+export interface MobSubzoneSpawn {
+  /** The group range rolled on this side, e.g. `"1-3"`. */
+  group?: string;
+  /** The percent of groups on this side that arrive as an Elite. */
+  elite_pct?: number;
+  /** The body mix a normal spawn draws: `swarm` | `even` | `brute` (`mob.spawn_packs`). */
+  pack?: string;
 }
 
 export interface MobZone {
@@ -321,6 +357,15 @@ export interface MobBoss {
   zone: number;
   name: string;
   species: string;
+  /** Bosses keep the source species' Vit, so the zone's HP anchor stays fixed. */
+  core: MobCore;
+  trait: string;
+  /** A boss runs its species' trait mechanics unless it declares its own. */
+  mechanics?: Record<string, string | boolean>;
+  element: string;
+  damage: 'physical' | 'magic' | 'mixed';
+  accuracy_mult: number;
+  reads_as: 'small' | 'medium' | 'large';
 }
 
 export interface MobElite {
@@ -331,9 +376,16 @@ export interface MobElite {
 }
 
 export interface MobStatCfg {
-  /** The rule that anchors a zone's Core stat base (`zone_top_level` reads the player's reference line there). */
-  anchor: string;
   note: string;
+}
+
+/** One fixed Core form for a lineage in one ten-level zone band. */
+export interface MobForm {
+  name: string;
+  levels: [number, number];
+  core: MobCore;
+  /** Species-owned five-rung drop identity ladder inherited by this form. */
+  drop_profile?: string;
 }
 
 /** One field-label tier: where the word comes from (`species` | `name`) and the suffix appended. */
@@ -363,14 +415,26 @@ export interface FieldLabelsCfg {
 
 export interface MobCfg {
   stat: MobStatCfg;
+  /** Highest mob level that receives a named fixed-Core form. Later zones use base lineage identity. */
+  form_level_cap: number;
+  /** Fixed per-zone forms keyed by zone id, then lineage id. */
+  forms: Record<string, Record<string, MobForm>>;
+  /** Complete named race-form catalog for the real ten-level bands; not a spawn table. */
+  form_catalog: Record<string, Record<string, MobForm>>;
   zones: MobZone[];
   species: MobSpecies[];
   /** The published roster size — X23 fails when the species list drifts from it. */
   species_target?: number;
-  /** The five names a race's variant ladder carries, Small → Boss (the field labels). */
+  /** Drop identities by normal body tier, Elite and Boss; these do not select the level-band form or its Core. */
   variants?: Record<string, string[]>;
   /** What each of those names drops: its own junk item and the stream it leans (`X56`). */
   variant_drops?: Record<string, VariantDrop>;
+  /** The second drop tilt keyed by the subzone environment; `none` is the identity (`X73`). */
+  environment_lean?: Record<string, 'none' | 'gear' | 'herb' | 'junk'>;
+  /** The closed set of trait mechanics, each with the one number it runs on (`X74`). */
+  trait_mechanics?: Record<string, any>;
+  /** The three body mixes a side's normal spawns draw from (`mob.spawn_packs`, `X75`). */
+  spawn_packs?: Record<string, any>;
   deprecated_species?: Record<string, string>;
   sizes: MobSize[];
   bosses: MobBoss[];
@@ -392,6 +456,7 @@ export interface MobCfg {
 export interface WeaponCfg {
   name: string;
   weapon_aspd: number;
+  weapon_mult: number;
 }
 
 /** One band's own level span — the levels a band reads, `item-level.md`. */
@@ -622,7 +687,7 @@ export interface SkillRow {
   name?: string;
   type?: string;
   group?: string;
-  /** the weapon family this row fires with, matched against the Base's own name (`axe` covers both) */
+  /** the weapon family this row fires with, matched against the Base's own name — only the arrow rows carry one (`bow` covers bow and crossbow) */
   weapon?: string;
   element?: string;
   cd?: number;

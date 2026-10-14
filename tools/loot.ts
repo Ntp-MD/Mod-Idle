@@ -109,10 +109,10 @@ function pickWeighted(rng: any, options: any[]) {
  */
 function rollBase(rng: any, slot: any, bias: any) {
   if (slot === 'main hand') {
-    const weapon = pickWeighted(rng, WEAPON_TYPES.map((w: any) => ({ weapon: w, weight: bias && bias.weapon_weight ? bias.weapon_weight : 1 })));
+    const weapon = pickWeighted(rng, WEAPON_TYPES.map((w: any) => ({ weapon: w, weight: bias && bias.weapon_weight ? bias.weapon_weight : 1 }))).weapon;
     // A10: the type picks the frame pool, and the frame is what the piece is called and what it forces
     const frames = (BASES_JSON.weapon_frames || {})[weapon.name] || [];
-    const frame = frames.length ? pickWeighted(rng, frames.map((f: any) => ({ frame: f, weight: f.weight || 1 }))) : null;
+    const frame = frames.length ? pickWeighted(rng, frames.map((f: any) => ({ frame: f, weight: f.drop_weight || 1 }))).frame : null;
     return { frame, weapon };
   }
   if (slot === 'off hand') {
@@ -120,7 +120,11 @@ function rollBase(rng: any, slot: any, bias: any) {
       ...BASES['off hand'].map((f: any) => ({ frame: f, weight: 1 })),
       { weapon: pick(rng, DUAL_WIELD), weight: 1 },
     ];
-    return pickWeighted(rng, options);
+    const selected = pickWeighted(rng, options);
+    if (!selected.weapon) return selected;
+    const frames = (BASES_JSON.weapon_frames || {})[selected.weapon.name] || [];
+    const frame = frames.length ? pickWeighted(rng, frames.map((f: any) => ({ frame: f, weight: f.drop_weight || 1 }))).frame : null;
+    return { weapon: selected.weapon, frame };
   }
   const frames = BASES[slot].map((b: any) => ({ frame: b, weight: bias && bias.frame_weight ? bias.frame_weight(b) : 1 }));
   return pickWeighted(rng, frames);

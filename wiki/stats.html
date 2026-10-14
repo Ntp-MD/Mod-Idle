@@ -14,39 +14,30 @@
     --xp: #f1c40f;
     --mob: #7f8c8d;
     --good: #27ae60;
-    /* the HUD's own set: a translucent plate over the field, its lit edge, the game's one accent, and
-     the gutter the menu rail owns — every corner read on the field stops short of it */
+
     --glass: rgba(17, 22, 30, 0.74);
     --edge: rgba(255, 255, 255, 0.1);
     --gold: #e8c169;
-    /* the HUD's shared panel face and edge: available to fixed rails outside the stage and controls inside it */
+
     --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
     --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
-    /* focus is its own colour and never the accent: a focused control that is also the recommended one
-     would read as one state, so the keyboard ring is cyan and `--gold` stays "this is where you are" */
+
     --focus: #7fd4ff;
-    /* the floating menu row's height — the rail is a row across the top-right now, not a full-height
-     column, so this is its one axis and the minimap hangs a fixed drop under it */
+
     --rail: clamp(46px, 3.19vw, 88px);
-    /* the gutter every corner read stops short of, and the height a gauge track carries its figure in:
-     one pair for the frame rather than the same two numbers written on each cluster */
+
     --screen-pad: var(--spacing-md);
     --bar-h: clamp(12px, 0.87vw, 22px);
-    /* the HUD's floating hardware, sized once: the minimap sheet and the objectives column's width */
+
     --minimap-size: clamp(100px, 7.74vw, 216px);
     --objectives-w: clamp(170px, 11.96vw, 300px);
-    /* a body's rank, and the inks its state is named in: an Elite or a Boss wears its own rim and name
-     colour, a curse and a warn read in their own inks, and the gauges climb to a lit end of the same
-     semantic the dim token carries */
+
     --elite: #6c5199;
     --elite-ink: #b98cff;
     --boss: #9d3b34;
     --boss-ink: #ff8b7a;
     --curse: #c8a5ff;
-    /* Item rarity: a content ladder for a drop's name, its slot edge and its card header, the way the
-     rank inks above name a body. It is not the highlight system — gold stays you-or-pressable and
-     green stays the better option, so a rarity ink never carries a control's meaning. The rungs are
-     read off the drop itself (quality band, Tier, and whether a Quality stone was spent on it). */
+
     --rar-common: #8b96a8;
     --rar-uncommon: #5fb87a;
     --rar-rare: #4f8fe0;
@@ -60,24 +51,22 @@
     --mana-lit: #6bc4f0;
     --es-lit: #a8e6ff;
     --xp-lit: #f7e07a;
-    /* the stage's own backdrop and its two scene lights: deep ground, a night lift, a shore lift */
+
     --ground: #0a0e13;
     --ground-2: #131926;
     --ground-3: #181d18;
     --glow-moss: #465c3a;
     --glow-dusk: #304a6c;
-    /* the two recessed plates the HUD's own hardware is cut from — the portrait face and the wheel's orb,
-     each a top-lit dark over its own floor — and the deep end of the accent's gradient, a shade under
-     `--hot` so the count pill's own floor is a token like its top */
+
     --face-top: #1c2430;
     --face-floor: #0d1218;
     --orb-top: #242e3c;
     --orb-floor: #10151d;
     --hot-deep: #a33428;
-    /* a recessed floor (an input well, a kbd cap, an empty slot) and the scrollbar's lit thumb */
+
     --inset: #12151b;
     --bar-2: #2e3742;
-    /* the map sheet's own inks: label fills over the field, the id ink, and the two travel pins */
+
     --sheet-ink: #cfd8e3;
     --sheet-place: #f2e7d0;
     --sheet-id: #6d7987;
@@ -87,21 +76,15 @@
     --pin-target-glow: #ff6b5c;
     --ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
     --num: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
-    /* the one depth-of-field ladder. A surface sits at `--dof-rest` and sharpens toward 0 as attention
-     reaches it; a component that wants the field to recede sets `--dof` rather than inventing a blur.
-     The rest step is the smallest blur that still pushes the ground behind the plates: past it the hex
-     sheet stops reading as a map you stand on and becomes a photograph of one. */
+
     --dof-rest: 4px;
-    /* the one rung below the rest step: a surface that owns the screen pushes the ground here rather than
-     inventing a pixel count of its own, so the ladder stays a ladder */
+
     --dof-far: 5px;
     --dof: var(--dof-rest);
-    /* the browser's own paints, themed from the same palette instead of left to the platform */
+
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
-    /* Responsive families use per-token vw values with their own floor and cap. Slopes are calibrated
-     to the 2066px reference width, so each family can be tuned independently. A figure under 5px stays
-     a hairline, blur or other local detail where it is drawn. */
+
     --font-xs: clamp(11px, 0.82vw, 23px);
     --font-sm: clamp(13px, 0.97vw, 27px);
     --font-md: clamp(16px, 1.21vw, 34px);
@@ -122,23 +105,11 @@
     --spacing-md: clamp(13px, 0.97vw, 27px);
     --spacing-lg: clamp(18px, 1.36vw, 38px);
     --spacing-xl: clamp(26px, 2.03vw, 57px);
-    /* THE MICRO RUNGS. The five steps above are a ladder of about ×1.62, and the two rungs under
-     `--spacing-xs` are where that same ratio lands: 8 ÷ 1.62 ≈ 5, 5 ÷ 1.62 ≈ 3, 3 ÷ 1.62 ≈ 2. The
-     client used to write 1/2/3/4px freely for the same jobs — an icon against its label, one readout
-     line under another, the seam between two bordered cells — and four values for three jobs is how
-     the rail ended up a 2px row while the cast orbs beside it ran a 3px one. They are steps now, and
-     they scale: a hardcoded 3px gap under a panel that grew 35% is no longer the same gap.
-       --spacing-3xs  two lines of one read, a glyph against its label
-       --spacing-2xs  a control's own inner pad, the seam between bordered cells
-     A 1px that is a border's own hairline is not spacing and never joins the ladder: `--seam`. */
+
     --spacing-2xs: clamp(2px, 0.15vw, 4px);
     --spacing-3xs: clamp(1px, 0.10vw, 3px);
     --seam: 1px;
 
-    /* the unique sizes. These are not steps: the HUD's fixed hardware, the map sheet and the boxes
-     too big for an icon step each keep their own figure. Each is the same `calc(<design>px * …)`, and
-     the two ends are that row's own hardware — the floor a control cannot read under and the ceiling
-     it must not grow past — so they bind where they always bound, only now on the shared ramp. */
     --sheet-fs-region: clamp(8px, 0.48vw, 14px);
     --sheet-fs-walk: clamp(6px, 0.34vw, 9px);
     --sheet-fs-place: clamp(7px, 0.44vw, 12px);
@@ -149,10 +120,7 @@
     --x-pull-burst: clamp(-32px, -1.16vw, -15px);
     --x-pull-scale: clamp(-14px, -0.48vw, -6px);
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
-    /* the skill slot diameter, shared by its grid and the field's vertical budget */
 
-    /* a box this large is its own size, not a step: a panel, a sheet, a board. The name is its design
-     figure — the pixels it paints at scale 1, which is a 2066px viewport. */
     --box-100: clamp(63px, 4.84vw, 135px);
     --box-110: clamp(69px, 5.32vw, 149px);
     --box-130: clamp(81px, 6.29vw, 176px);
@@ -242,6 +210,15 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .plist li { display: contents; }
 .plist .pk { font-family: var(--ui); color: var(--dim); }
 .plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
+.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem .8rem; padding: .65rem .8rem; cursor: pointer; }
+.zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.zone > summary::marker { color: var(--gold); }
+.zone-title { font-weight: 600; }
+.zone-meta { color: var(--dim); font-size: .8rem; }
+.zone[open] > summary { border-bottom: 1px solid var(--line); }
+.zone-body { padding: .1rem .8rem .8rem; }
+@media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
 /* the mob card grid: five cards a row at full width, two-up inside each, and it steps down to three,
    two and one as the page narrows so a card never squeezes its figures sideways */
 .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem .6rem; margin-top: .5rem; }
@@ -274,8 +251,9 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }</style><div class="layout">
-<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="on" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a></nav>
-<main><h1>Stats and caps</h1><p class="lead">Seven Core stats, and every point is yours to spend. Some lines stop at a cap — the table says which ones, and whether a real build can reach it.</p><section><h2>Core stats</h2><p class="note">Every stat also has one utility line, so no point is wasted.</p><table><thead><tr><th>Stat</th><th>Feeds</th></tr></thead><tbody><tr><td>Str</td><td>physical power and carry weight</td></tr><tr><td>Vit</td><td>health, regeneration and stun recovery</td></tr><tr><td>Dex</td><td>accuracy and Status alignment Chance</td></tr><tr><td>Agi</td><td>attack speed and evasion</td></tr><tr><td>Wis</td><td>max Energy Shield and cooldown reduction</td></tr><tr><td>Int</td><td>magic power and mana</td></tr><tr><td>Lck</td><td>crit and perfect dodge</td></tr></tbody></table></section>
-<section><h2>Caps</h2><p class="note">A cap that no build can reach is not a limit, it is decoration — the engine proves which ones bind.</p><table><thead><tr><th>Line</th><th>Cap</th><th>What that means</th></tr></thead><tbody><tr><td>Crit chance</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>Evasion</td><td><span class="num">80</span></td><td>a full build stops here</td></tr><tr><td>Perfect dodge</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>Alignment</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>Elemental resistance</td><td><span class="num">75</span></td><td>a full build stops here, and this is the one Cap with an unlock — a passive-tree node lifts the ceiling to <span class="num">90</span></td></tr><tr><td>Cooldown reduction</td><td><span class="num">80</span></td><td>a full build stops here</td></tr><tr><td>Attack interval (sec a swing)</td><td><span class="num">0.15</span></td><td>a full build stops here</td></tr><tr><td>Accuracy</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>Weight overload</td><td><span class="num">0.50</span></td><td>a full build stops here</td></tr><tr><td>Block</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>block_divisor</td><td><span class="num">10</span></td><td>a full build stops here</td></tr><tr><td>Stun</td><td>no cap</td><td>keeps climbing as you build for it</td></tr></tbody></table></section>
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="on" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
+<main><h1>Stats and caps</h1><p class="lead">Seven Core stats, and every point is yours to spend. Some lines stop at a cap — the table says which ones, and whether a real build can reach it.</p><section><h2>Core stats</h2><p class="note">Every stat also has one utility line, so no point is wasted. The last column is what a single point buys: every stat line is <code>Base + K_core</code> through the one K table (<code>engine.json K</code>), and the attack-speed and drop figures are already in the units the game adds them in.</p><table><thead><tr><th>Stat</th><th>Feeds</th><th>One point buys</th></tr></thead><tbody><tr><td>Str</td><td>physical power · Armour · carry weight</td><td>+5 power · +2 Armour · +0.3 weight</td></tr><tr><td>Vit</td><td>health · health regeneration · stun recovery</td><td>+20 health · +0.25/s regen · +0.12% stun recovery</td></tr><tr><td>Dex</td><td>accuracy · Status alignment Chance</td><td>+1.5 accuracy · +0.05 alignment</td></tr><tr><td>Agi</td><td>attack speed · evasion</td><td>+0.25% attack speed · +0.5 evasion</td></tr><tr><td>Wis</td><td>max Energy Shield · cooldown reduction</td><td>+4 Energy Shield · +0.03 cooldown reduction</td></tr><tr><td>Int</td><td>magic power · Elemental power · mana</td><td>+5 magic power · +4 Elemental power · +4 mana · +0.16/s mana regen</td></tr><tr><td>Lck</td><td>crit · perfect dodge</td><td>+0.05 crit pool · +0.03 perfect dodge</td></tr></tbody></table></section>
+<section><h2>What a level gives</h2><p class="note">A level pays the pools their flat term and hands over points; no stat line rises on its own (<code>level_gain</code> · <code>stat</code>). Respec is town-only.</p><table><thead><tr><th>Line</th><th>Gain per level</th><th>Where it starts</th></tr></thead><tbody><tr><td>Max HP</td><td><span class="num">+10</span></td><td><span class="num">300</span></td></tr><tr><td>Max Mana</td><td><span class="num">+5</span></td><td><span class="num">100</span></td></tr><tr><td>Carry weight</td><td>—</td><td><span class="num">175</span></td></tr><tr><td>Stat points</td><td><span class="num">5</span> · <span class="num">2</span> past level <span class="num">101</span></td><td>spent by hand</td></tr><tr><td>Tree points</td><td><span class="num">1</span></td><td><span class="num">3</span></td></tr></tbody></table></section>
+<section><h2>Caps</h2><table><thead><tr><th>Line</th><th>Cap</th><th>What that means</th></tr></thead><tbody><tr><td>Crit chance</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>Evasion</td><td><span class="num">80</span></td><td>a full build stops here</td></tr><tr><td>Perfect dodge</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>Alignment</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>Elemental resistance</td><td><span class="num">75</span></td><td>a full build stops here, and this is the one Cap with an unlock — a passive-tree node lifts the ceiling to <span class="num">90</span></td></tr><tr><td>Cooldown reduction</td><td><span class="num">80</span></td><td>a full build stops here</td></tr><tr><td>Attack interval (sec a swing)</td><td><span class="num">0.15</span></td><td>a full build stops here</td></tr><tr><td>Accuracy</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>Weight overload</td><td><span class="num">0.50</span></td><td>a full build stops here</td></tr><tr><td>Block</td><td>no cap</td><td>keeps climbing as you build for it</td></tr><tr><td>block_divisor</td><td><span class="num">10</span></td><td>a full build stops here</td></tr><tr><td>Stun</td><td>no cap</td><td>keeps climbing as you build for it</td></tr></tbody></table></section>
 <p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
 </main></div></body></html>

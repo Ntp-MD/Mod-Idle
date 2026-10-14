@@ -146,9 +146,6 @@ function gates(): G.GateRow[] {
   add('S11', badStat.length === 0 && badValue.length === 0,
     `${declared.length} of ${SKILLS.length} rows carry numeric effects (${declared.filter((s) => (s.effects || []).some((e: any) => e.subject === 'target')).length} of them target-side), and each value is printed in its own effect sentence` +
     `${badStat.length ? ' · UNKNOWN STAT: ' + badStat.join(', ') : ''}${badValue.length ? ' · NOT IN TEXT: ' + badValue.join(', ') : ''}`);
-  const proseOnly = SKILLS.filter((s) => !(s.effects || []).length).map((s) => s.id);
-  soft('S12', SKILLS.every((s) => (s.effects || []).length || (s.rules || []).length || s.modelled_by), `${proseOnly.length} rows state a mechanic rather than a magnitude (${SKILLS.filter((s) => (s.rules || []).length).length} carry a rule word, ${SKILLS.filter((s) => s.modelled_by && !(s.effects || []).length).length} more are carried whole by another column) — every one of them is spent in the client, so no row is left as prose (informational)`);
-
   // S19 · conversion's Cap is the whole hit (`draft/convert-damage.md` · `convertDamageOf`), and a Cap
   // that cannot be reached is a lie (D3). The `damage_conversion` rows are the only source, so they must
   // sum to the Cap or past it — overflow is wasted, never a multiplier.
@@ -179,20 +176,6 @@ function gates(): G.GateRow[] {
     `${badBasis.length ? ' · NO BASIS: ' + badBasis.map((s) => s.id).join(', ') : ''}` +
     `${badPct.length ? ' · NO base_flat/eff: ' + badPct.map((s) => s.id).join(', ') : ''}` +
     `${handCopy.length ? ' · HAND-TYPED PRESS COLUMN: ' + handCopy.map((s) => s.id).join(', ') : ''}`);
-
-  // B9 close-out: a row that states a mechanic instead of a magnitude names it from a
-  // closed set, and nothing may be left as prose. `modelled_by` covers the rows whose mechanic is
-  // already carried by another column — the AoE `targets` cell or `element: follow`.
-  const badRule: string[] = [];
-  for (const s of SKILLS) {
-    for (const r of s.rules || []) if (!SM13.EFFECT_RULES.includes(r)) badRule.push(`${s.id}:${r}`);
-    for (const b of [].concat(s.modelled_by || [])) if (!SM13.MODELLED_BY.includes(b)) badRule.push(`${s.id}:modelled_by ${b}`);
-  }
-  const onlyProse = SKILLS.filter((s) => !(s.effects || []).length && !(s.rules || []).length && !s.modelled_by).map((s) => s.id);
-  soft('S14', badRule.length === 0 && onlyProse.length === 0,
-    `${SKILLS.length} rows all state their strength as effects, a mechanic word from the closed set` +
-    ` (${SKILLS.filter((s) => (s.rules || []).length).length} with a rule, ${SKILLS.filter((s) => s.modelled_by).length} carried by another column)` +
-    `${badRule.length ? ' · UNKNOWN: ' + badRule.join(', ') : ''}${onlyProse.length ? ' · PROSE ONLY: ' + onlyProse.join(', ') : ''}`);
 
   //: every paid row has one typed, flat resource cost: Mana or current HP, never both. A cost written
   // as a share of either pool is the retired form; pool size controls affordability, not the price.

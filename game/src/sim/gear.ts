@@ -40,24 +40,25 @@ const gainPct = (better: Item, worse: Item | null): number => {
  *  has to take the weaker of the pair. The old search took the first cell naming the slot, which is a worn
  *  ring ahead of the empty one beside it, so a second ring could never be worn and each press replaced
  *  the last one. A two-hander keeps the rule it always had: it belongs in the main hand it displaces. */
-function cellFor(gear: (Item | null)[], item: Item): number {
+function cellFor(gear: (Item | null)[], item: Item, protectLocked = false): number {
   const free = gear.findIndex((g, i) => !g && loot.SLOTS[i] === item.slot);
   const same = gear
-    .map((g, i) => (g && g.slot === item.slot ? i : -1))
+    .map((g, i) => (g && g.slot === item.slot && (!protectLocked || !g.locked) ? i : -1))
     .filter((i) => i >= 0);
   const weakest = same.length ? same.reduce((a, b) => (scoreOf(gear[b]!) < scoreOf(gear[a]!) ? b : a)) : -1;
   if (item.slot === 'main hand' && weakest >= 0) return weakest;
   if (free >= 0) return free;
   if (weakest >= 0) return weakest;
-  return gear.findIndex((g) => !g);
+  return -1;
 }
 
 /** Wear the piece at `bagIndex`; the piece it displaces goes back to the front of the bag. */
-export function equipFromBag(s: GameState, bagIndex: number, quiet = false): { ok: boolean; why?: string } {
+export function equipFromBag(s: GameState, bagIndex: number, quiet = false, protectLocked = false): { ok: boolean; why?: string } {
   const item = s.bag[bagIndex];
   if (!item) return { ok: false, why: 'nothing in that bag slot' };
+  if (item.broken) return { ok: false, why: 'Broken — Repair it before equipping' };
   const gear = [...s.gear];
-  const at = cellFor(gear, item);
+  const at = cellFor(gear, item, protectLocked);
   if (at < 0) return { ok: false, why: 'no empty slot left to wear it in' };
   const prev = gear[at];
   // the pile never deletes: a swap needs a free cell in it, the same way a take-off does
@@ -146,14 +147,14 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
       .map((item, bagIndex) => ({ item, bagIndex }))
       .filter((p): p is { item: Item; bagIndex: number } => Boolean(p.item) && !untouchable(p.item!))
       .map((p) => {
-        const cell = cellFor(s.gear, p.item);
+        const cell = cellFor(s.gear, p.item, true);
         const worn = cell >= 0 ? s.gear[cell] : null;
         return { ...p, cell, worn, gains: cell >= 0 ? gainPct(p.item, worn) : 0 };
       })
       .filter((p) => p.cell >= 0 && p.gains > marginPct)
       .sort((a, b) => b.gains - a.gains)[0];
     if (!best) break;
-    const wore = equipFromBag(s, best.bagIndex, true);
+    const wore = equipFromBag(s, best.bagIndex, true, true);
     if (!wore.ok) { refused = wore.why ?? 'refused'; break; }
     swaps.push({ slot: best.item.slot, base: itemName(best.item), instead: best.worn ? itemName(best.worn) : null, gains: best.gains });
   }
@@ -170,7 +171,7 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
   const inStash = s.stash.reduce(
     (n, tab) => n + tab.filter((item) => {
       if (!item || untouchable(item) || item.heldFor) return false;
-      const at = cellFor(s.gear, item);
+      const at = cellFor(s.gear, item, true);
       return at >= 0 && gainPct(item, s.gear[at]) > marginPct;
     }).length,
     0,
