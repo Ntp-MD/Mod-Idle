@@ -70,7 +70,7 @@ describe('the Heralds feed the Element they name', () => {
       playerSwing(mulberry32(1), herald, target, null).damage -
       playerSwing(mulberry32(1), { ...plain, alignment: herald.alignment }, target, null).damage;
     expect(gainOn(fireMob)).toBeGreaterThan(0);
-    // the Alignment lift rides no matchup multiplier, so its gain is identical on every race
+    // the Alignment lift rides no matchup multiplier, so its gain is identical against every Species
     expect(gainOn(fireMob)).toBeCloseTo(gainOn(coldMob), 6);
   });
 });

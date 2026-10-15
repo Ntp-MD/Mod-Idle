@@ -168,6 +168,8 @@ export interface LootCfg {
   boss_per_hour: number;
   boss_tier_stones: number;
   boss_add_stones: number;
+  /** Wild-unique share per normal spawn: one selected Species Unique upgrades the spawn it replaces. */
+  unique_chance: number;
   quality_stone_sources: QualityStoneSource;
   repair_stone_sources: RepairStoneSource;
   corrupt_stone_sources: CorruptStoneSource;
@@ -239,6 +241,8 @@ export interface XpCfg {
   kills_anchors: Record<string, number>;
   elite_mult: number;
   boss_mult: number;
+  /** A wild Species Unique pays its own XP line on top of the Elite stone lines. */
+  unique_mult: number;
   step: number;
   /** The level the flat XP bar starts at, and the level whose step out of it sets that bar. */
   plateau_from?: number;
@@ -265,20 +269,22 @@ export interface MobCore {
 export interface MobSpecies {
   id: string;
   name: string;
-  /** One extra race-flavoured junk item per sale rarity; the variant still owns its rarity roll. */
-  junk_items: Record<'common' | 'uncommon' | 'rare', string>;
+  /** The single broad fantasy Race that contains this Species. */
+  race: MobRaceId;
+  /** Optional species-flavoured alternatives, at most one for each sale rarity. */
+  junk_items: Partial<Record<'common' | 'uncommon' | 'rare', string>>;
   zones: number[];
   /** The regions this species may live in — its `zones` must be a subset (X52). */
   habitat: string[];
   sizes: string[];
-  /** The one Element the race owns: its attacks, its weakness keys and its flat res all read it. */
+  /** The one Element the Species owns: its attacks, its weakness keys and its flat resistance read it. */
   element: string;
   carries_weapon: boolean;
   accuracy_mult: number;
   /** The damage tag: which half of the incoming hit Armour and resistance each answer (X31). */
   damage: string;
-  /** A humanoid lineage is the only source of the potion drop (X49). */
-  humanoid?: boolean;
+  /** Explicit potion-drop permission; independent of the Species' Race. */
+  potion_source?: boolean;
   trait?: string;
   /**
    * The trait read as a mechanic: keys from the closed set `mob.trait_mechanics.set`, each with the
@@ -290,7 +296,7 @@ export interface MobSpecies {
   line: string;
   /** The species' Base damage power, averaged to 1.00 across the roster (X68). */
   power_base: number;
-  /** The Core block the race rolls its reference body from — the roster mean prices MEAN_CORE. */
+  /** The Core block the Species uses for its reference body — the roster mean prices MEAN_CORE. */
   core: MobCore;
 }
 
@@ -318,9 +324,8 @@ export interface MobSubzone {
   name: string;
   environment: string;
   element: string;
-  races: string[];
-  normal: string[];
-  elite: string | null;
+  /** Species ids fielded in this side of the zone. */
+  species: string[];
   /**
    * This side's own spawn profile (X75): the pack range, the Elite rate and the body mix a group
    * rolled on this side draws from. Every zone's three sides average back to the zone's published
@@ -355,6 +360,22 @@ export interface MobZone {
   subzones?: MobSubzone[];
 }
 
+/** One fixed-level normal variant: its name, level band and authored combat Core. */
+export interface MobVariant {
+  name: string;
+  levels: [number, number];
+  core: MobCore;
+}
+
+export type MobRaceId =
+  | 'humanoid' | 'beast' | 'undead' | 'demon' | 'dragon' | 'insect'
+  | 'plant' | 'fish' | 'formless' | 'elemental' | 'celestial';
+
+export interface MobRacesCfg {
+  note: string;
+  set: MobRaceId[];
+}
+
 export interface MobBoss {
   zone: number;
   name: string;
@@ -363,6 +384,20 @@ export interface MobBoss {
   core: MobCore;
   trait: string;
   /** A boss runs its species' trait mechanics unless it declares its own. */
+  mechanics?: Record<string, string | boolean>;
+  element: string;
+  damage: 'physical' | 'magic' | 'mixed';
+  accuracy_mult: number;
+  reads_as: 'small' | 'medium' | 'large';
+}
+
+/** An optional named wild boss belonging to a Species; it is a creature, not a rank. */
+export interface MobUnique {
+  species: string;
+  name: string;
+  core: MobCore;
+  trait: string;
+  /** A unique runs its species' trait mechanics unless it declares its own. */
   mechanics?: Record<string, string | boolean>;
   element: string;
   damage: 'physical' | 'magic' | 'mixed';
@@ -381,12 +416,13 @@ export interface MobStatCfg {
   note: string;
 }
 
-/** One fixed Core form for a lineage in one ten-level zone band. */
+/** One named field form for a lineage in one ten-level zone band. */
 export interface MobForm {
   name: string;
   levels: [number, number];
+  /** Legacy field-form Core projection; live normal/Elite combat Core belongs to MobVariant. */
   core: MobCore;
-  /** Species-owned five-rung drop identity ladder inherited by this form. */
+  /** Species-owned normal-variant drop identity inherited by this form. */
   drop_profile?: string;
 }
 
@@ -417,21 +453,23 @@ export interface FieldLabelsCfg {
 }
 
 export interface MobCfg {
+  /** Closed taxonomy registry. Races are descriptive, not automatic gameplay rules. */
+  races: MobRacesCfg;
   stat: MobStatCfg;
-  /** Highest mob level that receives a named fixed-Core form. Later zones use base lineage identity. */
+  /** Highest mob level that receives authored field forms. Later zones reuse the latest form label. */
   form_level_cap: number;
-  /** Fixed per-zone forms keyed by zone id, then lineage id. */
+  /** Optional field labels keyed by zone id, then Species id. Missing rows inherit the prior label. */
   forms: Record<string, Record<string, MobForm>>;
-  /** Complete named race-form catalog for the real ten-level bands; not a spawn table. */
+  /** Optional catalog projection for authored field forms; not a spawn table. */
   form_catalog: Record<string, Record<string, MobForm>>;
   zones: MobZone[];
   species: MobSpecies[];
-  /** The published roster size — X23 fails when the species list drifts from it. */
-  species_target?: number;
-  /** Drop identities by normal body tier, Elite and Boss; these do not select the level-band form or its Core. */
-  variants?: Record<string, string[]>;
+  /** Fixed-level normal Variants by Species id; Elite/Boss/Unique are ranks, never rows here. */
+  variants?: Record<string, MobVariant[]>;
   /** What each of those names drops: its base junk item, sale rarity and stream lean (`X56`). */
   variant_drops?: Record<string, VariantDrop>;
+  /** Zero or more named Uniques per Species (`mob.uniques`); chance is per normal spawn. */
+  uniques?: MobUnique[];
   /** The second drop tilt keyed by the subzone environment; `none` is the identity (`X73`). */
   environment_lean?: Record<string, 'none' | 'gear' | 'herb' | 'junk'>;
   /** The closed set of trait mechanics, each with the one number it runs on (`X74`). */
@@ -445,8 +483,8 @@ export interface MobCfg {
   curve: CurveCfg;
   spawn_weights: Record<string, number>;
   damage_split: Record<string, [number, number]>;
-  /** The flat res a race answers its own Element with, in every zone (X54). */
-  race_res_pct: number;
+  /** The flat res a species answers its own Element with, in every zone (X54). */
+  species_res_pct: number;
   /** Mobs carry no skills in the current build; X27 fails if a species gains one while this is false. */
   skills_enabled: boolean;
   /** Formation bands: the melee/reach/standoff distances a group places its mobs at. */
@@ -595,11 +633,15 @@ export interface FieldworkCfg {
     resource: string; yield: number; interval_sec: number; xp: number; mastery_xp: number;
     rare_drop_chance: number; rare_resource: string;
     food_drop_chance?: number; food_id?: string;
+    /** The resource this verb is the bulk source for, named again on the kill table below. */
+    mob_resource?: string;
   }>;
   hunt: {
     xp_per_kill: number; mastery_xp_per_kill: number; meat_drop_chance: number;
     meat_min: number; meat_max: number; edible_species: string[];
     food_drops: { species: string[]; food_id: string; chance: number; min: number; max: number }[];
+    /** The metal and wood a body is made of, paid into `materials` the way `mine`/`grove` pay it. */
+    material_drops?: { species: string[]; resource: string; chance: number; min: number; max: number }[];
   };
   recipes: {
     id: string; name: string; menu: 'hearth' | 'forage'; level: number; xp: number; mastery_xp: number;
@@ -681,7 +723,6 @@ export interface EngineData {
   elements: ElementsCfg;
   opening: any;
   weapon_size_mult?: WeaponSizeMultCfg;
-  doc_prose: any;
 }
 
 /** The skill roster payload (`tools/data/skills.json`) — only the fields the model reads. */

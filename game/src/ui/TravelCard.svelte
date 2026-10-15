@@ -52,15 +52,15 @@
   const zone = $derived(eng.zoneById(settlement.zone));
   const subzone = $derived(dest.kind === 'sub' && dest.sub != null ? zone.subzones?.[dest.sub] ?? null : null);
   const encounterNames = $derived.by(() => {
-    const configured = subzone
-      ? subzone.normal
-      : (zone.subzones || []).flatMap((part: any) => part.normal || []);
-    const names = [...new Set(configured)];
-    return names.length ? names : eng.racesInZone(settlement.zone).map((id: string) => eng.speciesById(id)?.name ?? id);
+    // fixed-level Variants field the side whose band they own; subzones hold Species ids.
+    const speciesIds = subzone ? (subzone.species || []) : eng.speciesInZone(settlement.zone);
+    const names = [...new Set(speciesIds.flatMap((id: string) => eng.variantsInZone(id, settlement.zone).map((v: any) => v.name)))];
+    return names.length ? names : speciesIds.map((id: string) => eng.speciesById(id)?.name ?? id);
   });
-  const eliteNames = $derived.by(() => {
-    const candidates = subzone ? [subzone.elite] : (zone.subzones || []).map((part: any) => part.elite);
-    return [...new Set(candidates.filter((name: unknown): name is string => typeof name === 'string'))];
+  const uniqueNames = $derived.by(() => {
+    // A Species may have no Unique or several; Elite remains a rank over the rolled Variant.
+    const speciesIds = subzone ? (subzone.species || []) : eng.speciesInZone(settlement.zone);
+    return [...new Set(speciesIds.flatMap((id: string) => eng.uniquesOf(id).map((unique: any) => unique.name)))];
   });
   const zoneBoss = $derived(E.mob.bosses.find((boss: any) => boss.zone === settlement.zone) ?? null);
   /** The side's own pack, Elite rate and body mix — what standing here rolls (`mob.spawn_packs`). */
@@ -107,13 +107,13 @@
       <strong>Encounter guide</strong>
       <span>{subzone ? subzone.name : 'Zone pool'} · Lv {zone.levels[0]}–{zone.levels[1]}</span>
     </header>
-    <ul class="dest-mob-list" title="Mobs spawn at your level, clamped to this range">
+    <ul class="dest-mob-list" title="Each variant haunts only its own level band">
       {#each encounterNames as name (name)}<li>{name}</li>{/each}
     </ul>
-    {#if eliteNames.length || zoneBoss || sideWords.length}
+    {#if uniqueNames.length || zoneBoss || sideWords.length}
       <div class="dest-specials">
         {#if sideWords.length}<span><b>This side</b> {sideWords.join(' · ')}</span>{/if}
-        {#if eliteNames.length}<span><b>Elite</b> {eliteNames.join(' · ')}</span>{/if}
+        {#if uniqueNames.length}<span><b>Unique</b> {uniqueNames.join(' · ')}</span>{/if}
         {#if zoneBoss}<span><b>Boss</b> {zoneBoss.name}</span>{/if}
       </div>
     {/if}
@@ -178,31 +178,31 @@
   }
   .dest-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; }
   .dest-head h2 { min-width: 0; margin: 0; overflow: hidden; color: var(--text); font-size: var(--font-sm); font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-  .dest-cell { flex: none; padding: var(--spacing-3xs) var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-xs); color: var(--gold-lit); font-variant-numeric: tabular-nums; }
+  .dest-cell { flex: none; padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-xs); color: var(--gold-lit); font-variant-numeric: tabular-nums; }
   .dest-summary { margin: 0; color: var(--text); line-height: 1.35; }
   .dest-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(69px, 5.32vw, 149px), 1fr)); gap: var(--spacing-sm); padding: var(--spacing-xs) 0; border-block: 1px solid var(--edge); }
-  .dest-stat { display: grid; gap: var(--spacing-3xs); min-width: 0; }
+  .dest-stat { display: grid; gap: var(--spacing-xs); min-width: 0; }
   .dest-stat span { color: var(--dim); letter-spacing: 1px; text-transform: uppercase; }
   .dest-stat strong { color: var(--text); font-weight: 600; }
   .dest-guide { display: grid; gap: var(--spacing-xs); min-width: 0; }
-  .dest-guide-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); padding-bottom: var(--spacing-2xs); border-bottom: 1px solid var(--edge); }
+  .dest-guide-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--edge); }
   .dest-guide-head strong { color: var(--text); font-size: var(--font-sm); font-weight: 600; }
   .dest-guide-head span { flex: none; color: var(--gold-lit); font-variant-numeric: tabular-nums; }
   .dest-mob-list {
-    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-2xs) var(--spacing-sm);
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm);
     max-height: clamp(106px, 8.23vw, 230px); margin: 0; padding: 0; overflow-y: auto; list-style: none;
   }
-  .dest-mob-list li { min-width: 0; padding-bottom: var(--spacing-3xs); border-bottom: 1px solid var(--edge); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dest-specials { display: flex; flex-direction: column; gap: var(--spacing-3xs); color: var(--dim); }
+  .dest-mob-list li { min-width: 0; padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--edge); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dest-specials { display: flex; flex-direction: column; gap: var(--spacing-xs); color: var(--dim); }
   .dest-specials b { color: var(--gold-lit); font-weight: 600; }
   .dest-note { margin: 0; color: var(--dim); }
-  .dest-dungeon { display: grid; gap: var(--spacing-2xs); }
+  .dest-dungeon { display: grid; gap: var(--spacing-xs); }
   .dest-dungeon p { margin: 0; color: var(--dim); line-height: 1.35; }
   .dest-state { justify-self: start; color: var(--gold-lit); }
   .dest-state.ready { color: var(--good-lit); }
   .dest-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs); }
   .dest-actions button {
-    padding: var(--spacing-2xs) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-xs);
+    padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-xs);
     background: var(--panel); color: var(--text); font-size: var(--font-xs); transition: border-color var(--motion-fast) var(--ease-ui), background var(--motion-fast) var(--ease-ui), color var(--motion-fast) var(--ease-ui);
   }
   .dest-actions button:hover { border-color: var(--gold); }

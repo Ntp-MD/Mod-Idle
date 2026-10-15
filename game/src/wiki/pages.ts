@@ -7,7 +7,7 @@
  *
  *   game/src/wiki/main.ts    the live wiki - the browser calls this when the page opens, so a data
  *                            edit shows on the next reload and no stale artefact can exist
- *   tools/wiki.ts build      the same calls, written out to `wiki/**` as a static site
+  *   tools/wiki.ts build      the same calls, written out to `docs/wiki/*.html` as a static site
  *
  * One source serves both, so a figure cannot be right in one place and stale in the other. The theme
  * is the client's own: the caller reads `game/src/styles/variables.css` and hands its `:root` block to
@@ -175,7 +175,7 @@ page({
       ['Zones', wrap(n0(eng.ZONES.length)), 'each with its own level band, Element and group size'],
       ['Worn pieces', wrap(n0(E.opening.gear.length)), `over ${n0(BASES.slots.length)} slot names — every slot has its own frames and Mod pools`],
       ['Skills', wrap(n0(sm.all().length)), TYPES.map((t: string) => `${sm.of(t).length} ${t}`).join(' · ')],
-      ['Mob species', wrap(n0(E.mob.species.length)), 'each legal on one to three body classes'],
+      ['Mob Species', wrap(n0(E.mob.species.length)), 'grouped into fantasy Races'],
       ['Elements', wrap(n0(E.elements.order.length)), list(E.elements.order)],
       ['Settlements', wrap(n0(TOWN.settlements.length)), 'shops, storage, tasks and crafting'],
       ['Dungeons', wrap(n0(TOWN.settlements.length)), 'one per settlement — escrowed loot, forfeited on a Push'],
@@ -509,38 +509,41 @@ page({
   body: [
     block('Body classes', table(['Body', 'Health', 'Damage', 'Base evasion', 'Comes in'], (E.mob.sizes || []).map((s: any) => [
       esc(s.id), `×${n1(s.hp)}`, `×${n1(s.ps)}`, `+${n0(s.evasion_pct)}%`, esc(s.group),
-    ])), 'A boss is not a size. Each boss declares the body class a weapon reads it as; the default is Large. The base evasion is a percent on top of the species Dex line.'),
+    ])), 'A boss is not a size. Each boss declares the body class a weapon reads it as; the default is Large. The base evasion is a percent on top of the Species Dex line.'),
     block('Zones', table(['#', 'Zone', 'Region', 'Levels', 'Band', 'Mob group', 'Its three sides', 'Elements'], eng.ZONES.map((z: any) => [
       wrap(n0(z.id)), esc(z.name), esc(z.region), `${n0(z.levels[0])}-${n0(z.levels[1])}`, esc(z.quality), esc(z.group),
       list((z.subzones || []).map((s: any) => `${s.name}: ${(s.spawn || {}).group || z.group} pack, ${(s.spawn || {}).elite_pct ?? Math.round(E.loot.elite_spawn_chance * 100)}% elite, ${eng.packWordOf((s.spawn || {}).pack)}`)),
       list(eng.zoneElements(z.id)),
-    ])), 'The band decides the Item quality of what drops there. Each side of a zone fields its own pack, Elite rate and body mix, and a zone\u2019s three sides average back to the group and the Elite rate published above — a crowded side and a heavy side are a choice of ground, not a rate. The Elements column is what a spawn here actually wears — its race\u2019s own Element, plus the zone Boss\u2019s declared one — read off the cast, so it is never a limit on what can appear.'),
+    ])), 'The band decides the Item quality of what drops there. Each side of a zone fields its own pack, Elite rate and body mix, and a zone\u2019s three sides average back to the group and the Elite rate published above — a crowded side and a heavy side are a choice of ground, not a rate. The Elements column is what a spawn here actually wears — each Species’ own Element, plus the zone Boss’ declared one — read off the cast, so it is never a limit on what can appear.'),
     block('Dungeons', table(['Dungeon', 'Zone', 'Band', 'A run'], (TOWN.settlements || []).map((s: any) => [
       // the sheet prints the same name (tools/map.ts owns it); the wiki only reads it back
       esc(s.name + ' Dungeon'), wrap(n0(s.zone)), esc(s.band),
       `${n0(E.dungeon.mob_cap)} mobs · groups of ${n0(E.dungeon.group_cap)}`,
     ])), `One dungeon per zone, entered at wild-side index ${n0((E.fieldwork as any).wild_site_index.dungeon)}. Same mobs, same rolls as the zone — but loot waits in escrow until the last mob falls, a Push forfeits it, and a cleared run cools down ${n0(E.dungeon.cooldown_sec / 60)} minutes.`),
-    block('Species', table(['Species', 'Zones', 'Body classes', 'Damage', 'Element', 'What its body does', 'Health line'], (E.mob.species || []).map((sp: any) => [
-      esc(sp.name), list(sp.zones), list(sp.sizes), esc(sp.damage), esc((sp as any).element),
+    block('Species', table(['Species', 'Race', 'Zones', 'Body classes', 'Damage', 'Element', 'What its body does', 'Health line'], (E.mob.species || []).map((sp: any) => [
+      esc(sp.name), esc(sp.race), list(sp.zones), list(sp.sizes), esc(sp.damage), esc((sp as any).element),
       list(eng.mechanicWordsOf((sp as any).mechanics)) || 'an ordinary body', esc(sp.trait || ''),
-    ])), 'A normal or Elite race owns one Element and resists it wherever it stands — any other Element lands on it with no resistance at all. A zone Boss may declare its own Element and resistance. A trait is a mechanic, not a sentence: the names in "What its body does" are the rules the fight runs, and none of them moves a mob\u2019s health, its damage per second, or what it drops.'),
+    ])), 'Each Species owns one Element and resists it wherever it stands — any other Element lands on it with no resistance at all. A zone Boss may declare its own Element and resistance. A Race is taxonomy only; it does not grant the member Species shared mechanics.'),
   ],
 });
 
 page({
   file: 'mobs.html',
-  nav: 'Races',
-  title: 'Race roster',
+  nav: 'Bestiary',
+  title: 'Races, Species and Variants',
   lead: (() => {
     const variants = (E.mob as any).variants || {};
     const total = (E.mob.species || []).reduce((n: number, sp: any) => n + (variants[sp.id] || []).length, 0);
-    return `${E.mob.species.length} races · ${total} species variants. One row per race; the species count is the total number of variants that race has.`;
+    const uniques = ((E.mob as any).uniques || []).length;
+    const races = (E.mob.races?.set || []).length;
+    return `${races} Races · ${E.mob.species.length} Species · ${total} Variants · ${uniques} Uniques. Counts describe the current world; Races and Species have no required roster size.`;
   })(),
   body: (() => {
-    const variantsByRace = (E.mob as any).variants || {};
-    const races = E.mob.species || [];
-    const variantCount = (sp: any) => (variantsByRace[sp.id] || []).length;
-    const totalVariants = races.reduce((n: number, sp: any) => n + variantCount(sp), 0);
+    const variantsBySpecies = (E.mob as any).variants || {};
+    const speciesRows = E.mob.species || [];
+    const races: string[] = E.mob.races?.set || [];
+    const variantCount = (sp: any) => (variantsBySpecies[sp.id] || []).length;
+    const totalVariants = speciesRows.reduce((n: number, sp: any) => n + variantCount(sp), 0);
     const rarityRows = Object.entries((E.junk as any).rarities || {}) as [string, any][];
     const bandRows = ['low', 'mid', 'high'].map((band) => [
       esc(band),
@@ -549,41 +552,53 @@ page({
       rarityRows.map(([rarity, row]) => `${esc(rarity)} ${pc1(row.drop_chance_per_kill)}`).join(' · '),
       pc1(farm.potionDropChance(band)),
     ]);
-    const raceCard = (sp: any) => {
-      const variants: string[] = variantsByRace[sp.id] || [];
-      const drops = variants.map((name, index) => {
+    const speciesCard = (sp: any) => {
+      const variants: { name: string; levels: [number, number]; core?: Record<string, number> }[] = variantsBySpecies[sp.id] || [];
+      const uniques: any[] = ((E.mob as any).uniques || []).filter((u: any) => u.species === sp.id);
+      const coreText = (core?: Record<string, number>) => core
+        ? ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'].map((key) => `${key.toUpperCase()} ${n0(core[key] || 0)}`).join(' · ')
+        : '—';
+      const dropRow = (name: string, level: string, role: string, extraDrops: string, core?: Record<string, number>) => {
         const drop: any = maybe(E.mob.variant_drops, name);
-        const role = index < 3 ? `Normal ${index + 1}` : index === 3 ? 'Elite' : index === 4 ? 'Boss' : `Variant ${index + 1}`;
-        const extraDrops = index === 3
-          ? `Tier stone ${pc1(E.loot.elite_tier_stones)}/kill · Add stone ${pc1(E.loot.elite_add_stone_chance)}`
-          : index === 4
-            ? `${n0(E.loot.boss_tier_stones)} Tier stones/kill · ${n0(E.loot.boss_add_stones)} Add stones/kill`
-            : sp.humanoid ? 'Humanoid potion · see band rates' : '—';
-        if (!drop) return [esc(name), role, 'No junk row', '—', '—', extraDrops];
+        if (!drop) return [esc(name), level, role, coreText(core), 'No junk row', '—', '—', extraDrops];
         const chance = Number((E.junk as any).rarities?.[drop.rarity]?.drop_chance_per_kill || 0);
         const choices = [...new Set([drop.item, sp.junk_items?.[drop.rarity]].filter(Boolean))] as string[];
         const outcomePct = choices.length ? chance / choices.length : 0;
         const outcomes = choices.map((item) => `${esc(item)} ${pc1(outcomePct)}`).join(' · ');
-        return [esc(name), role, outcomes || '—', `${esc(drop.rarity)} · ${pc1(chance)} total`, esc(drop.lean), extraDrops];
-      });
+        return [esc(name), level, role, coreText(core), outcomes || '—', `${esc(drop.rarity)} · ${pc1(chance)} total`, esc(drop.lean), extraDrops];
+      };
+      const drops = [
+        ...variants.map((v) => dropRow(v.name, `${n0(v.levels[0])}–${n0(v.levels[1])}`, 'Variant',
+          sp.potion_source ? 'Potion source · see band rates' : '—', v.core)),
+        ...uniques.map((unique) => dropRow(unique.name, 'wild', 'Unique',
+          `Elite stones · XP ×${n0(E.xp.unique_mult)} · skill ${pc1(E.skill_drop.unique)}`)),
+      ];
       const facts = [
         ['Sizes', list(sp.sizes)],
         ['Damage', esc(sp.damage)],
         ['Element', esc(sp.element)],
         ['Zones', list(sp.zones)],
       ].map(([label, value]) => `<div><b>${esc(label)}</b><span>${value || '—'}</span></div>`).join('');
-      return `<article class="race-entry">`
-        + `<header><h3>${esc(sp.name)}</h3><span class="race-species-count">${n0(variants.length)} Species</span></header>`
-        + `<div class="race-facts">${facts}</div>`
+      return `<article class="species-entry">`
+        + `<header><h4>${esc(sp.name)}</h4><span class="species-count">${n0(variants.length)} variants · ${n0(uniques.length)} uniques</span></header>`
+        + `<div class="species-facts">${facts}</div>`
         + `<h4>Variants and junk drops</h4>`
-        + table(['Variant', 'Role', 'Junk outcomes · each %', 'Base junk / kill', 'Lean', 'Extra drops'], drops)
+        + table(['Variant', 'Level', 'Role', 'Core', 'Junk outcomes · each %', 'Base junk / kill', 'Lean', 'Extra drops'], drops)
         + `</article>`;
     };
+    const raceSections = races.map((race) => {
+      const members = speciesRows.filter((sp: any) => sp.race === race);
+      const title = race[0].toUpperCase() + race.slice(1);
+      return `<section class="race-group"><header><h3>${esc(title)}</h3><span>${n0(members.length)} Species</span></header>`
+        + (members.length ? `<div class="species-roster">${members.map(speciesCard).join('')}</div>`
+          : `<p class="race-empty">No Species in this Race yet.</p>`)
+        + `</section>`;
+    }).join('');
     return [
-      block('Shared drop rates', table(['Zone band', 'Gear', 'Herbs', 'Junk by rarity', 'Potion · humanoids'], bandRows),
-        'Base chances per kill before LCK, mastery, variant leans and subzone environment leans. Each variant pays its listed junk rarity; its own item and the race item for that rarity are equally likely. The variant table lists each outcome chance separately and the total rarity chance.'),
-      block('Every race', `<div class="race-roster">${races.map(raceCard).join('')}</div>`,
-        `All ${races.length} races are shown individually. Each Species count is the number of variants owned by that Race (${totalVariants} variants total). The junk table shows the base per-item chance after the 50/50 choice, alongside the rarity's total base chance.`),
+      block('Shared drop rates', table(['Zone band', 'Gear', 'Herbs', 'Junk by rarity', 'Potion · eligible Species'], bandRows),
+        'Base chances per kill before LCK, mastery, Variant leans and subzone environment leans. Each Variant pays its listed junk rarity; its own item and any Species alternative for that rarity are equally likely.'),
+      block('Race → Species → Variant', `<div class="race-roster">${raceSections}</div>`,
+        `Races group Species for world taxonomy only. Each Species may have any number of Variants, authored Core forms and optional Uniques (${totalVariants} Variants currently). Potion drops use an explicit per-Species flag, not Race membership: the six tribal lines — Goblin · Orc · Kobold · Human · Lizardman · Elf — mint the flasks, and the rest of the same Race does not.`),
     ];
   })(),
 });
@@ -842,11 +857,11 @@ page({
   file: 'elements.html',
   nav: 'Elements',
   title: 'Elements',
-  lead: 'Every Element, and no Element counters another: an Element names the status its hits leave and the one race that resists it. An Element declared ahead of its content reads a dash until its status and its skill rows land.',
+  lead: 'Every Element names the status its hits leave. A Species resists its own Element; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land.',
   body: [
-    block('Where an Element is resisted', table(['Element', 'The races that own it'], E.elements.order.map((el: string) => [
+    block('Where an Element is resisted', table(['Element', 'Species that own it'], E.elements.order.map((el: string) => [
       esc(el), list((E.mob.species || []).filter((sp: any) => (sp as any).element === el).map((sp: any) => sp.name)) || '—',
-    ])), `A race owns one Element (\`mob.species[].element\`) and answers it at a flat \`mob.race_res_pct\` in every zone it lives in. Every other Element lands on it unresisted — no table scales the hit, only the one flat line.`),
+    ])), `Each Species owns one Element (\`mob.species[].element\`) and answers it at a flat \`mob.species_res_pct\` in every zone it lives in. Its Race does not set resistance. Every other Element lands on it unresisted.`),
     block('What each Element leaves behind', table(['Element', 'Its mark'], E.elements.order.map((e: string) => [
       esc(e), esc(E.elements.status_of?.[e]?.name || E.elements.status_of?.[e] || '—'),
     ])), 'A status is answered by regeneration and by removing the tick, not by mitigation.'),
@@ -893,7 +908,7 @@ page({
     ]), 'Hits of every Element, including chaos, and burn DoT spend Energy Shield before Health. Poison and bleed DoT go straight to Health. A status lands on its own roll — the Alignment gate is on <a href="skills.html">Skills</a>.'),
     block('Hit chance, both directions', table(['', 'The engine’s own names', 'The reference figure'], [
       ['You hitting a mob', '<code>playerAccuracy</code> · <code>hitChance</code> · <code>hitVs</code>',
-        `${pc1(DV.hit_chance)} against the mean species on a Medium body, which holds ${n1(DV.mob_evasion_ref)} Evasion`],
+        `${pc1(DV.hit_chance)} against the mean Species on a Medium body, which holds ${n1(DV.mob_evasion_ref)} Evasion`],
       ['A mob hitting you', '<code>evasionChance</code>, then the three avoidance layers above',
         `you hold ${wrap(n0(DV.accuracy))} of accuracy yourself, so the same roll runs backwards on you`],
       ['Crit', '<code>critPool</code> · <code>critChanceOf</code> · <code>critDmgOf</code>',
@@ -944,7 +959,9 @@ page({
         `${pc1((E.loot as any).elite_spawn_chance)} of kills`],
       ['Boss', `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).hp)}`, `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).ps)}`, '<span class="hy">reads as a body</span>', 'alone',
         `${n1((E.loot as any).boss_per_hour)} an hour, and online only`],
-    ]), `An Elite is a spawn flag forced onto a Large body, never a fifth size, so no two multipliers ever stack. A Boss is one named creature per zone (${n0((E.mob.bosses || []).length)} of them) and is the only place the Add, Replace and Corrupt stones are paid — see <a href="idle.html">Away &amp; bag</a>. A mob spawns at your level clamped into its own zone’s range (<code>mob.level_rule</code>), which is why <a href="mobs.html">the Mob sheet</a> prints a range.`),
+      ['Unique', `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).hp)}`, `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).ps)}`, '<span class="hy">reads as a body</span>', 'alone',
+        `${pc1((E.loot as any).unique_chance)} of spawns`],
+    ]), `An Elite is a spawn flag forced onto a Large body, never a fifth size, so no two multipliers ever stack — it keeps the selected Variant's name and junk. A Boss is one named creature per zone (${n0((E.mob.bosses || []).length)} of them) and is the only place the Add, Replace and Corrupt stones are paid — see <a href="idle.html">Away &amp; bag</a>. A Species may have no Unique or several (${n0(((E.mob as any).uniques || []).length)} total): each is a wild boss that replaces its Species' spawn, paying Elite stones with ×${n0(E.xp.unique_mult)} XP. A mob uses its Variant's authored level band (<code>mob.variants[].levels</code>), which is why <a href="mobs.html">the Bestiary</a> prints each band.`),
   ],
 });
 
@@ -985,6 +1002,13 @@ page({
         pc1(drop.chance), `${n0(drop.min)}–${n0(drop.max)}`,
       ])),
       'These lineage drops are separate from the raw-meat roll. Goblins may leave raw haunches, human patrols may leave cooked rations, and forest folk can yield edible moonmint.'),
+    block('Ore and timber from kills', table(['Lineage', 'Material', 'Chance', 'Quantity'],
+      ((E.fieldwork as any).hunt.material_drops || []).map((drop: any) => [
+        esc(drop.species.join(' · ')),
+        esc(drop.resource),
+        pc1(drop.chance), `${n0(drop.min)}–${n0(drop.max)}`,
+      ])),
+      'A body that is already metal or wood can leave a piece of it, paid into the same Material store the `mine` and `grove` sites fill. The site stays the bulk source — it owns the rate, the Skill XP and the Mastery — so a kill is the chance you meet on the way there, never the way to cap a Material.'),
     block('Hunger and provisions', table(['Food', 'Kind', 'Hunger restored', 'Source'],
       ((E.fieldwork as any).foods || []).map((food: any) => [
         esc(food.name), esc(food.kind), food.edible ? `+${n0(food.hunger_restore)}` : 'cooking ingredient', esc(food.source || '—'),
@@ -1083,7 +1107,7 @@ page({
       Object.entries((E.junk as any).rarities || {}).map(([r, v]: any) => [
         esc(r), wrap(`${n0(v.sell_gold)} gold`), pc1(v.drop_chance_per_kill), wrap(n2(v.sell_gold * v.drop_chance_per_kill)),
       ])),
-      'Each species adds one junk alternative per rarity to its variants’ own items. The last column is the whole design of the stream: it is the same figure at every kind, so a variant moving between kinds buys drop frequency, never income. Junk weighs nothing and stacks deep, so it fills slots — which is what sends you home.'),
+      'Each Species may add junk alternatives in selected rarities to its Variants’ own items. The last column is the whole design of the stream: it is the same figure at every kind, so a Variant moving between kinds buys drop frequency, never income. Junk weighs nothing and stacks deep, so it fills slots — which is what sends you home.'),
   ],
 });
 
@@ -1289,19 +1313,25 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-.race-roster { display: grid; gap: .75rem; margin-top: .5rem; }
-.race-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .75rem .9rem .9rem; }
-.race-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.race-entry h3 { margin: 0; font-size: 1.05rem; }
-.race-species-count { color: var(--gold); font-family: var(--num); font-size: .78rem; }
-.race-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
-.race-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
-.race-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
-.race-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.race-entry table { font-size: .78rem; }
-.race-entry th, .race-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
-@media (max-width: 58rem) { .race-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .race-facts { grid-template-columns: 1fr 1fr; } .race-entry { padding: .6rem; } }
+.race-roster { display: grid; gap: .9rem; margin-top: .5rem; }
+.race-group { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
+.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
+.race-group > header h3 { margin: 0; color: var(--gold); font-size: .9rem; }
+.race-group > header span, .species-count { font-family: var(--num); font-size: .75rem; }
+.race-empty { margin: .55rem .2rem .2rem; color: var(--dim); font-size: .8rem; }
+.species-roster { display: grid; gap: .65rem; margin-top: .6rem; }
+.species-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
+.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.species-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+.species-entry > header h4 { margin: 0; color: var(--text); font-size: 1rem; text-transform: none; letter-spacing: 0; }
+.species-count { color: var(--gold); }
+.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
+.species-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
+.species-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.species-entry table { font-size: .78rem; }
+.species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
+@media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
 .legend { margin: 0; padding-left: 1.1rem; font-size: .82rem; color: var(--dim); }
 .legend li { margin: .3rem 0; }
 .legend strong { color: var(--text); }

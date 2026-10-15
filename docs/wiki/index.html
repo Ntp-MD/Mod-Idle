@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The two currencies</title></head>
+<title>ModWorld — how to play</title></head>
 <body><style>:root {
     color-scheme: dark;
     --bg: #0f1217;
@@ -66,6 +66,7 @@
     --rail: clamp(46px, 3.19vw, 88px);
 
     --screen-pad: var(--spacing-md);
+    --pad-area: 20px;
     --bar-h: clamp(12px, 0.87vw, 22px);
 
     --minimap-size: clamp(100px, 7.74vw, 216px);
@@ -139,14 +140,11 @@
     --icon-hub-img: 50%;
     --slot-skill-size: clamp(30px, 4vw, 70px);
     --field-card-size: clamp(125px, 8.63vw, 180px);
-    --spacing-xs: clamp(5px, 0.39vw, 11px);
-    --spacing-sm: clamp(8px, 0.63vw, 18px);
-    --spacing-md: clamp(13px, 0.97vw, 27px);
-    --spacing-lg: clamp(18px, 1.36vw, 38px);
-    --spacing-xl: clamp(26px, 2.03vw, 57px);
-
-    --spacing-2xs: clamp(2px, 0.15vw, 4px);
-    --spacing-3xs: clamp(1px, 0.10vw, 3px);
+    --spacing-xs: 3px;
+    --spacing-sm: 5px;
+    --spacing-md: 10px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
     --seam: 1px;
 
     --sheet-fs-region: clamp(9px, 0.54vw, 15px);
@@ -241,34 +239,40 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-.race-roster { display: grid; gap: .75rem; margin-top: .5rem; }
-.race-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .75rem .9rem .9rem; }
-.race-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.race-entry h3 { margin: 0; font-size: 1.05rem; }
-.race-species-count { color: var(--gold); font-family: var(--num); font-size: .78rem; }
-.race-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
-.race-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
-.race-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
-.race-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.race-entry table { font-size: .78rem; }
-.race-entry th, .race-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
-@media (max-width: 58rem) { .race-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .race-facts { grid-template-columns: 1fr 1fr; } .race-entry { padding: .6rem; } }
+.race-roster { display: grid; gap: .9rem; margin-top: .5rem; }
+.race-group { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
+.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
+.race-group > header h3 { margin: 0; color: var(--gold); font-size: .9rem; }
+.race-group > header span, .species-count { font-family: var(--num); font-size: .75rem; }
+.race-empty { margin: .55rem .2rem .2rem; color: var(--dim); font-size: .8rem; }
+.species-roster { display: grid; gap: .65rem; margin-top: .6rem; }
+.species-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
+.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.species-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+.species-entry > header h4 { margin: 0; color: var(--text); font-size: 1rem; text-transform: none; letter-spacing: 0; }
+.species-count { color: var(--gold); }
+.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
+.species-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
+.species-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.species-entry table { font-size: .78rem; }
+.species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
+@media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
 .legend { margin: 0; padding-left: 1.1rem; font-size: .82rem; color: var(--dim); }
 .legend li { margin: .3rem 0; }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }</style><div class="layout">
-<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Races</a><a class="" href="towns.html">Towns</a><a class="on" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
-<main><h1>The two currencies</h1><p class="lead">Crafting stones buy power. Gold buys convenience. They never convert into each other.</p><section><h2>Crafting</h2><p>Every verb, price and stone source lives on the <a href="crafting.html">Crafting</a> page.</p></section>
-<section><h2>Gold: where it comes from</h2><p class="note">One mint: mob junk sold at the Counterhand (<code>junk.rarities</code>, read on <a href="idle.html">Away &amp; bag</a>). The rate is the band’s own junk flow, so a stall price written as <code>m</code> minutes of income costs the same effort everywhere — a small-looking figure at a high band is not a discount, it is a dearer mob. Spend the same items on Lck and the high band’s line lifts to <code>4.5</code> gold a minute (<code>LCK_BOUND</code> is that ratio’s bound).</p><table><thead><tr><th>Band</th><th>Kills an hour</th><th>Junk an hour</th><th>Gold a minute</th></tr></thead><tbody><tr><td>low</td><td><span class="num">497</span></td><td><span class="num">50</span></td><td>0.8 gold</td></tr><tr><td>mid</td><td><span class="num">583</span></td><td><span class="num">69</span></td><td>1.2 gold</td></tr><tr><td>high</td><td><span class="num">645</span></td><td><span class="num">87</span></td><td>1.5 gold</td></tr></tbody></table></section>
-<section><h2>Gold: what it buys</h2><p class="note">Gold never buys gear, a Mod, a potion or a stone. A better build earns gold faster without ever turning gold into power.</p><table><thead><tr><th>Buys</th><th>Lines that buy it</th><th>Written as</th><th>What a line is worth</th></tr></thead><tbody><tr><td>space</td><td><span class="num">15</span></td><td>40–540 minutes of the band’s income</td><td><span class="hy">Stash tab 1 · Stash tab 2 · Stash tab 3 · Stash tab 4 · Stash tab 5 · Stash tab 6 · Herb pouch II · Herb pouch III · Bag category slot (herbs / stones / gear display) · Plot deed 4 · Plot deed 5 · House · Ashfall · House · Highspire · House · Vermolch · Potion carrier slot (belt display)</span></td></tr><tr><td>time</td><td><span class="num">4</span></td><td>8–16 minutes of the band’s income</td><td><span class="hy">Task skip token · Armourer repair (clears Broken, refills protection to 5) · Armourer repair at Ironrow · Waypoint warp (to a settlement already reached on foot)</span></td></tr><tr><td>information</td><td><span class="num">2</span></td><td>15–30 minutes of the band’s income</td><td><span class="hy">Saved filter preset slot (extra) · Collector set hint (prints which school the set wants)</span></td></tr><tr><td>appearance</td><td><span class="num">4</span></td><td>30–300 minutes of the band’s income</td><td><span class="hy">Curio pedlar stock: banner · Base tint · title · Prestige title line (per quality band) · Coldres banner (settlement cosmetic) · Heavy-school Base tint</span></td></tr></tbody></table></section>
-<section><h2>What is deliberately absent</h2><ul class="fx">
-      <li><span class="fk">No sink that sells power.</span><span class="fs">rule</span><span class="fv">the loot funnel is the only road to a stronger piece</span></li>
-      <li><span class="fk">No auction, no trading.</span><span class="fs">rule</span><span class="fv">one character, one account, one set of numbers</span></li>
-      <li><span class="fk">No prestige currency.</span><span class="fs">rule</span><span class="fv">nothing resets what you earned — <a href="builds.html">Builds</a></span></li>
-      <li><span class="fk">No timed shop, no sale.</span><span class="fs">rule</span><span class="fv">time is not a design constraint, so no screen sells urgency</span></li>
-    </ul></section>
+<nav><a class="on" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Bestiary</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
+<main><h1>ModWorld — how to play</h1><p class="lead">An open-world idle RPG. Your character fights while the window is open and while it is shut.</p><section><h2>A run, in six steps</h2><p class="note">The whole game is one screen — the field — and the panels behind it.</p><ol>
+      <li><strong>Pick a settlement</strong> and a zone. In the field, a player-set Camp opens gathering and cooking.</li>
+      <li><strong>Fight</strong> — the character attacks on the clock; paid skills use flat Mana or current-HP costs, while auras reserve Max Mana.</li>
+      <li><strong>Loot</strong> — kills pay XP and their separate gear, junk, stone and skill-piece rolls; hunting can also yield field provisions.</li>
+      <li><strong>Decide</strong> — equip the piece, or feed it to the crafting stones.</li>
+      <li><strong>Craft</strong> at a settlement: drag gear to the bench and a stone stack to the target; hover a piece to inspect its Mods.</li>
+      <li><strong>Climb</strong> to the next zone. A Push costs recovery time: a Field Camp in that zone receives you and ends the walk; otherwise the route resumes at its ambush block.</li>
+    </ol></section>
+<section><h2>What is in the game</h2><p class="note">Read from the data, never typed here.</p><table><thead><tr><th></th><th>Count</th><th>What it is</th></tr></thead><tbody><tr><td>Zones</td><td><span class="num">18</span></td><td>each with its own level band, Element and group size</td></tr><tr><td>Worn pieces</td><td><span class="num">13</span></td><td>over 11 slot names — every slot has its own frames and Mod pools</td></tr><tr><td>Skills</td><td><span class="num">89</span></td><td>53 attack · 9 buff · 6 curse · 3 heal · 18 aura</td></tr><tr><td>Mob Species</td><td><span class="num">35</span></td><td>grouped into fantasy Races</td></tr><tr><td>Elements</td><td><span class="num">6</span></td><td>fire · cold · lightning · poison · chaos · earth</td></tr><tr><td>Settlements</td><td><span class="num">18</span></td><td>shops, storage, tasks and crafting</td></tr><tr><td>Dungeons</td><td><span class="num">18</span></td><td>one per settlement — escrowed loot, forfeited on a Push</td></tr><tr><td>Passive tree</td><td><span class="num">75</span></td><td>3 wings · a centre start, cross-links at ranks 7 · 14 · 21 · 1 point a rank</td></tr></tbody></table></section>
 <p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
 </main></div></body></html>

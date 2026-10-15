@@ -26,7 +26,7 @@ const COLOURS = new Set([ENGINE.elements.physical_colour, ENGINE.elements.crit_c
 /** what one block of road costs in seconds, so the leg waits on the walk the data priced rather than on a guess */
 const BLOCK_SEC = ENGINE.road.block_sec;
 /** The widest group the design ever sends at the character, read off the zones' own `group` ranges. The field
- *  leg measures a live fight, and the starting zone fields a broad race pool, so a wrapped second row is a
+ *  leg measures a live fight, and the starting zone fields a broad Species pool, so a wrapped second row is a
  *  claim about the worst case and has to be settled by arithmetic rather than left to luck. */
 const MAX_GROUP = ENGINE.mob.zones.reduce((n, z) => Math.max(n, Number(String(z.group ?? '').split('-').pop()) || 0), 0);
 /** every beat the field can play, each mounted by a fact from the sim rather than by a stylesheet's clock.

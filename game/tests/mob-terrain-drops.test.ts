@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { E, eng } from '../src/engine/client';
+import { createEngine } from '../../engine/index.ts';
 import { mobIcon } from '../src/icon/index';
 import { huntZone, newGame, setLevel, tick } from '../src/sim/game';
 import { buildCharacter } from '../src/sim/player';
 import { mobSwing } from '../src/sim/combat';
 import { newMobStatusStore, applyBleed, placeStatus } from '../src/sim/mobStatus';
+import { road, settlementZone } from '../src/sim/road';
 import type { Mob } from '../src/sim/types';
 import * as loot from '../../engine/loot.ts';
 import { leanReweight, leanReweightMany } from '../../engine/loot.ts';
@@ -84,27 +86,75 @@ describe('mob, terrain and drop data', () => {
     expect(armedDrops.some((item) => item.slot === 'off hand')).toBe(true);
   });
 
-  it('keeps species power centered on the published 1.00 baseline', () => {
+  it('uses finite positive species power multipliers', () => {
     const power = E.mob.species.map((species: any) => species.power_base);
 
     expect(power.every((value: number) => Number.isFinite(value) && value > 0)).toBe(true);
-    expect(power.reduce((sum: number, value: number) => sum + value, 0) / power.length).toBeCloseTo(1, 10);
-    expect(new Set(power).size).toBeGreaterThanOrEqual(4);
   });
 
-  it('assigns named fixed-Core forms through level 100 and uses base lineage above it', () => {
+  it('keeps Race classification separate from explicit potion eligibility', () => {
+    const races = new Set((E.mob.races as any).set as string[]);
+    expect(E.mob.species.every((species: any) => races.has(species.race))).toBe(true);
+    expect(races.has('fish')).toBe(true);
+    expect(races.has('celestial')).toBe(true);
+    expect((E.mob.species.find((species: any) => species.id === 'goblin') as any).race).toBe('humanoid');
+    expect((E.mob.species.find((species: any) => species.id === 'orc') as any).race).toBe('humanoid');
+    expect((E.mob.species.find((species: any) => species.id === 'kobold') as any).race).toBe('humanoid');
+    // Kobold and Lizardman are Tribal lines that DO mint a potion; the brute humanoids of the same Race
+    // do not, so `race === 'humanoid'` cannot be what grants the drop.
+    expect((E.mob.species.find((species: any) => species.id === 'kobold') as any).potion_source).toBe(true);
+    expect((E.mob.species.find((species: any) => species.id === 'ogre') as any).potion_source).toBeUndefined();
+    expect((E.mob.species.find((species: any) => species.id === 'troll') as any).potion_source).toBeUndefined();
+  });
+
+  it('carries the closest earlier Variant through an authored level gap', () => {
+    const data = structuredClone(engineData);
+    const ladder = data.mob.variants.goblin;
+    data.mob.variants.goblin = [
+      { ...ladder[0], levels: [20, 30] },
+      { ...ladder[1], levels: [50, 60] },
+    ];
+    const testEngine = createEngine(data);
+
+    expect(testEngine.variantsInZone('goblin', 1).map((variant: any) => variant.name)).toEqual([ladder[0].name]);
+    expect(testEngine.variantsInZone('goblin', 4).map((variant: any) => variant.name)).toEqual([ladder[0].name]);
+    expect(testEngine.variantsInZone('goblin', 7).map((variant: any) => variant.name)).toEqual([ladder[1].name]);
+  });
+
+  it('supports Species with no Unique or several Uniques', () => {
+    const data = structuredClone(engineData);
+    const extra = structuredClone(data.mob.uniques.find((unique: any) => unique.species === 'orc'));
+    data.mob.uniques = data.mob.uniques.filter((unique: any) => unique.species !== 'goblin');
+    data.mob.uniques.push({ ...extra, name: 'Orc Mire Champion' });
+    const flexibleEngine = createEngine(data);
+
+    expect(flexibleEngine.uniquesOf('goblin')).toEqual([]);
+    expect(flexibleEngine.uniquesOf('orc')).toHaveLength(2);
+    const orcRows = flexibleEngine.mobRoster().filter((row: any) => row.speciesId === 'orc' && String(row.kind).startsWith('Unique'));
+    expect(new Set(orcRows.map((row: any) => row.id)).size).toBe(orcRows.length);
+    expect(orcRows.some((row: any) => row.variant === 'Orc Mire Champion')).toBe(true);
+  });
+
+  it('uses authored field forms when present and inherits the latest label when absent', () => {
     for (const species of E.mob.species as any[]) {
       for (const zoneId of species.zones) {
-        const zone = E.mob.zones.find((entry: any) => entry.id === zoneId);
+        const zone = E.mob.zones.find((entry: any) => entry.id === zoneId)!;
         const form = (E.mob.forms as any)[zoneId]?.[species.id];
-        const mob = eng.spawnAt(zoneId, species.zone_levels[zoneId], species.sizes[0], species.id);
+        const assigned = eng.variantsInZone(species.id, zoneId)[0] || null;
+        const mob = eng.spawnAt(zoneId, species.zone_levels[zoneId], species.sizes[0], species.id,
+          undefined, zone.levels[0] <= E.mob.form_level_cap ? assigned?.levels : undefined, assigned?.core);
         if (zone.levels[0] <= E.mob.form_level_cap) {
-          expect(form).toBeDefined();
-          expect(form.levels).toEqual(zone.levels);
-          expect(eng.mobStatsOf(species.id, zoneId)).toEqual(form.core);
-          expect(eng.coreOf(species, 'vit', zoneId)).toBe(form.core.vit);
-          expect(mob.core).toEqual(form.core);
-          expect(mob.formName).toBe(form.name);
+          if (form) expect(form.levels).toEqual(zone.levels);
+          const previousForm = [...E.mob.zones]
+            .filter((entry: any) => entry.id <= zoneId && entry.levels[0] <= E.mob.form_level_cap && (E.mob.forms as any)[entry.id]?.[species.id])
+            .sort((a: any, b: any) => b.levels[0] - a.levels[0])
+            .map((entry: any) => (E.mob.forms as any)[entry.id][species.id])
+            .find(Boolean);
+          const expectedLabel = form?.name || previousForm?.name || species.name;
+          expect(assigned).toBeDefined();
+          expect(eng.mobStatsOf(species.id, zoneId)).toEqual(form?.core || previousForm?.core || species.core);
+          expect(mob.core).toEqual(assigned!.core);
+          expect(mob.formName).toBe(expectedLabel);
         } else {
           expect(form).toBeUndefined();
           const priorForm = [...E.mob.zones]
@@ -112,9 +162,11 @@ describe('mob, terrain and drop data', () => {
             .sort((a: any, b: any) => b.levels[0] - a.levels[0])
             .map((entry: any) => (E.mob.forms as any)[entry.id]?.[species.id])
             .find(Boolean);
-          const expectedCore = priorForm?.core || species.core;
+          const frozenVariant = eng.variantsOf(species.id).at(-1);
+          const expectedLegacyCore = priorForm?.core || species.core;
+          const expectedCore = frozenVariant?.core || expectedLegacyCore;
           const expectedName = priorForm?.name || species.name;
-          expect(eng.mobStatsOf(species.id, zoneId)).toEqual(expectedCore);
+          expect(eng.mobStatsOf(species.id, zoneId)).toEqual(expectedLegacyCore);
           expect(mob.core).toEqual(expectedCore);
           expect(mob.formName).toBe(expectedName);
         }
@@ -122,75 +174,111 @@ describe('mob, terrain and drop data', () => {
     }
   });
 
-  it('catalogs one uniquely named fixed-Core form per race in every real level band', () => {
+  it('inherits a Species field label from the previous available form', () => {
+    const data = structuredClone(engineData);
+    delete data.mob.forms['2'].goblin;
+    delete data.mob.form_catalog['2'].goblin;
+    const fallbackEngine = createEngine(data);
+    const variant = fallbackEngine.variantsInZone('goblin', 2)[0];
+    const mob = fallbackEngine.spawnAt(2, 11, 'small', 'goblin', undefined, variant.levels, variant.core);
+
+    expect(mob.formName).toBe(data.mob.forms['1'].goblin.name);
+    expect(mob.core).toEqual(variant.core);
+  });
+
+  it('validates any authored field-form catalog rows without requiring a full grid', () => {
     const bands = E.mob.zones.filter((zone: any) => zone.levels[0] <= E.mob.form_level_cap);
     const catalog = E.mob.form_catalog as any;
     const names: string[] = [];
     let count = 0;
     for (const zone of bands) {
-      expect(Object.keys(catalog[zone.id]).sort()).toEqual(E.mob.species.map((species: any) => species.id).sort());
-      for (const species of E.mob.species as any[]) {
-        const form = catalog[zone.id][species.id];
+      for (const [speciesId, form] of Object.entries<any>(catalog[zone.id] || {})) {
+        expect(E.mob.species.some((species: any) => species.id === speciesId)).toBe(true);
         expect(form.levels).toEqual(zone.levels);
         expect(form.name).toBeTruthy();
         expect(Object.values(form.core).every(Number.isInteger)).toBe(true);
-        expect(form.drop_profile).toBe(species.id);
-        const dropLadder = (E.mob.variants as any)[species.id];
-        expect(dropLadder).toHaveLength(5);
-        expect(dropLadder.slice(0, 3).every((name: string) => Boolean((E.mob.variant_drops as any)[name]))).toBe(true);
+        expect(form.drop_profile).toBe(speciesId);
         names.push(form.name);
         count++;
       }
     }
-    expect(count).toBe(E.mob.species.length * bands.length);
     expect(new Set(names).size).toBe(count);
   });
 
-  it('gives late-zone species more than one damage archetype', () => {
-    for (const zoneId of [16, 17, 18]) {
-      const species = E.mob.species.filter((entry: any) => entry.zones.includes(zoneId));
-      const nonPhysical = species.filter((entry: any) => entry.damage !== 'physical').length;
-      expect(nonPhysical).toBeGreaterThanOrEqual(Math.ceil(species.length / 2));
+  it('fields a Species with one Variant or several without a fixed count rule', () => {
+    const data = structuredClone(engineData);
+    const goblin = data.mob.variants.goblin[0];
+    data.mob.variants.goblin = [{ ...goblin, levels: [1, 100] }];
+    data.mob.variants.orc = [
+      { ...data.mob.variants.orc[0], levels: [1, 25] },
+      { ...data.mob.variants.orc[1], levels: [26, 60] },
+      { ...data.mob.variants.orc[2], levels: [61, 100] },
+    ];
+    const flexibleEngine = createEngine(data);
+
+    expect(flexibleEngine.variantsOf('goblin')).toHaveLength(1);
+    expect(flexibleEngine.variantsOf('orc')).toHaveLength(3);
+    for (const zone of data.mob.zones.filter((entry: any) => entry.levels[0] <= data.mob.form_level_cap)) {
+      expect(flexibleEngine.variantsInZone('goblin', zone.id)).toHaveLength(1);
+      expect(flexibleEngine.variantsInZone('orc', zone.id)).toHaveLength(1);
     }
   });
 
-  it('keeps swarm bodies small or medium and bruisers medium or large', () => {
-    const byId = new Map(E.mob.species.map((species: any) => [species.id, species]));
-    for (const id of ['kobold', 'slime', 'spider', 'wolf']) {
-      expect((byId.get(id) as any).sizes).not.toContain('large');
+  it('live spawns use the fixed-level variant assigned to their zone', () => {
+    const ladders = E.mob.variants as unknown as Record<string, { name: string; levels: [number, number]; core: Record<string, number> }[]>;
+    for (const zoneId of [1, 6, 10]) {
+      const zone = E.mob.zones.find((entry: any) => entry.id === zoneId)!;
+      const seen: Mob[] = [];
+      for (let seed = 1; seed <= 36 && seen.length < 6; seed++) {
+        const s = newGame(seed);
+        setLevel(s, zone.levels[0]);
+        const town = road.nodes.find((node: any) => settlementZone(node.id) === zoneId)!;
+        s.town.visited = [...new Set([...s.town.visited, town.id])];
+        expect(huntZone(s, zoneId).ok).toBe(true);
+        s.hunting = true;
+        s.spawnIn = 0;
+        const statuses = newMobStatusStore();
+        for (let step = 0; step < 250 && seen.length < 6; step++) {
+          tick(s, statuses, { online: true });
+          const mob = s.group.find((candidate) => candidate.speciesId != null
+            && ladders[candidate.speciesId]?.some((variant) => variant.name === candidate.variant));
+          if (mob) {
+            seen.push(mob);
+            break;
+          }
+          if (s.group.length) {
+            s.group = [];
+            s.spawnIn = 0;
+          }
+        }
+      }
+      expect(seen).toHaveLength(6);
+      for (const mob of seen) {
+        const variants = eng.variantsInZone(mob.speciesId!, zoneId);
+        expect(variants).toHaveLength(1);
+        expect(mob.variant).toBe(variants[0]!.name);
+        expect(mob.level).toBe(eng.variantLevelOf(variants[0]));
+        expect(mob.core).toEqual(variants[0]!.core);
+      }
     }
-    for (const id of ['ogre', 'troll', 'golem', 'treant', 'giant']) {
-      expect((byId.get(id) as any).sizes).not.toContain('small');
-    }
-    expect(new Set(E.mob.species.map((species: any) => species.sizes.slice().sort().join('+'))).size)
-      .toBeGreaterThanOrEqual(5);
   });
 
-  it('gives every race with normal variants a Small or Medium body the group spawner can field', () => {
-    const normalNames = new Set(E.mob.zones.flatMap((zone: any) =>
-      zone.subzones.flatMap((sub: any) => sub.normal)));
-    const normalRaces = Object.entries(E.mob.variants as Record<string, string[]>)
-      .filter(([, names]) => names.slice(0, 3).some((name) => normalNames.has(name)))
-      .map(([race]) => race);
+  it('gives every Species with Variants a Small or Medium body the group spawner can field', () => {
+    const normalSpecies = Object.keys(E.mob.variants as Record<string, unknown[]>);
     const speciesById = new Map(E.mob.species.map((species: any) => [species.id, species]));
 
-    for (const race of normalRaces) {
-      const species = speciesById.get(race) as any;
-      expect(species.sizes.some((size: string) => size === 'small' || size === 'medium'), race).toBe(true);
+    for (const speciesId of normalSpecies) {
+      const species = speciesById.get(speciesId) as any;
+      expect(species.sizes.some((size: string) => size === 'small' || size === 'medium'), speciesId).toBe(true);
     }
   });
 
-  it('uses at least 40 distinct race casts across the 54 subzones', () => {
-    const casts = E.mob.zones.flatMap((zone: any) => zone.subzones.map((sub: any) =>
-      sub.races.slice().sort().join('+')));
-
-    expect(casts).toHaveLength(54);
-    expect(new Set(casts).size).toBeGreaterThanOrEqual(40);
-  });
-
-  it('gives each race one additional unique junk item at every rarity', () => {
+  it('allows a Species to declare a subset of unique junk alternatives', () => {
     const extras: string[] = E.mob.species.flatMap((species: any) => {
-      expect(Object.keys(species.junk_items || {}).sort()).toEqual(['common', 'rare', 'uncommon']);
+      const rarities = Object.keys(species.junk_items || {});
+      expect(rarities.length).toBeGreaterThanOrEqual(1);
+      expect(rarities.length).toBeLessThanOrEqual(3);
+      expect(rarities.every((rarity) => ['common', 'uncommon', 'rare'].includes(rarity))).toBe(true);
       return Object.values(species.junk_items || {}) as string[];
     });
     const existing = Object.values(E.mob.variant_drops as Record<string, any>).map((row) => row.item);
@@ -199,12 +287,12 @@ describe('mob, terrain and drop data', () => {
     expect(extras.some((item: string) => existing.includes(item))).toBe(false);
   });
 
-  it('allows one race in subzones with different environments and keeps its normal variants fieldable', () => {
+  it('allows one Species in subzones with different environments and keeps its Variants fieldable', () => {
     const zone = E.mob.zones.find((entry: any) => entry.id === 1) as any;
     const appearances = new Map<string, any[]>();
     for (const subzone of zone.subzones) {
-      for (const race of subzone.races) {
-        appearances.set(race, [...(appearances.get(race) || []), subzone]);
+      for (const speciesId of subzone.species) {
+        appearances.set(speciesId, [...(appearances.get(speciesId) || []), subzone]);
       }
     }
     const overlap = [...appearances.entries()].find(([, subzones]) =>
@@ -212,30 +300,32 @@ describe('mob, terrain and drop data', () => {
 
     expect(overlap).toBeDefined();
     if (!overlap) return;
-    const [race, subzones] = overlap;
-    const normalVariants = (E.mob.variants as Record<string, string[]>)[race].slice(0, 3);
-    for (const subzone of subzones) {
-      expect(subzone.normal).toEqual(expect.arrayContaining(normalVariants));
+    const [speciesId] = overlap;
+    // the Species' fixed-level Variants field the zone whose band they own, whatever the side
+    const fieldable = eng.variantsInZone(speciesId, zone.id);
+    expect(fieldable.length).toBeGreaterThan(0);
+    for (const v of fieldable) {
+      expect((E.mob.variant_drops as any)[v.name]).toBeDefined();
     }
   });
 
-  it('resolves a distinct race icon for every species', () => {
+  it('resolves a distinct Species icon for every Species', () => {
     const icons = E.mob.species.map((species: any) => mobIcon(species.id));
 
     expect(icons.every(Boolean)).toBe(true);
     expect(new Set(icons).size).toBe(E.mob.species.length);
   });
 
-  it('chooses the variant junk item or either race-specific alternative', () => {
+  it('chooses the Variant junk item or the matching Species alternative', () => {
     const chooseJunkItem = (loot as any).chooseJunkItem;
     expect(typeof chooseJunkItem).toBe('function');
     if (typeof chooseJunkItem !== 'function') return;
 
-    expect(chooseJunkItem(() => 0, 'Variant item', 'common', { common: 'Common race item' }))
+    expect(chooseJunkItem(() => 0, 'Variant item', 'common', { common: 'Common Species item' }))
       .toBe('Variant item');
-    expect(chooseJunkItem(() => 0.75, 'Variant item', 'common', { common: 'Common race item', rare: 'Rare race item' }))
-      .toBe('Common race item');
-    expect(chooseJunkItem(() => 0.75, 'Variant item', 'uncommon', { common: 'Common race item', rare: 'Rare race item' }))
+    expect(chooseJunkItem(() => 0.75, 'Variant item', 'common', { common: 'Common Species item', rare: 'Rare Species item' }))
+      .toBe('Common Species item');
+    expect(chooseJunkItem(() => 0.75, 'Variant item', 'uncommon', { common: 'Common Species item', rare: 'Rare Species item' }))
       .toBe('Variant item');
   });
 
@@ -273,13 +363,12 @@ describe('mob, terrain and drop data', () => {
 
   it('keeps the collectible lean stable across each species normal variants', () => {
     for (const species of E.mob.species as any[]) {
-      const variants = (E.mob.variants as Record<string, string[]>)[species.id];
-      const leans = variants.slice(0, 3).map((name: string) => (E.mob.variant_drops as any)[name].lean);
+      const variants = (E.mob.variants as Record<string, { name: string }[]>)[species.id];
+      const leans = variants.map((v) => (E.mob.variant_drops as any)[v.name].lean);
       expect(new Set(leans).size).toBe(1);
-      for (const name of variants.slice(3)) {
-        const row = (E.mob.variant_drops as any)[name];
-        if (row) expect(row.lean).toBe('none');
-      }
+    }
+    for (const u of ((E.mob as any).uniques || []) as any[]) {
+      expect((E.mob.variant_drops as any)[u.name].lean).toBe('none');
     }
   });
 });

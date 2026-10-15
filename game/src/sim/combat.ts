@@ -61,8 +61,8 @@ export interface HitReport {
  * One player swing, in combat.md §2 outgoing order:
  * hit roll → mob dodge (opposed) → crit (physical half only)
  * → the mob's own Armour and Elemental resistance → damage_taken → subtract from mob HP.
- * No Element counters another: the Element pools answer the race's own-Element res on their own
- * lines, and a race's non-own Elements meet no res at all.
+ * No Element counters another: the Element pools answer the Species' own-Element resistance on their own
+ * lines, and a Species' non-own Elements meet no resistance at all.
  */
 export function playerSwing(
   rng: () => number,
@@ -77,7 +77,7 @@ export function playerSwing(
 
   // formula-offense §3: dmg_per_hit = phys + magic + elem × elem_align/100
   // physical is answered by Armour and the Elements by resistance, never by each other. A cursed
-  // target still takes more of the whole hit (Expose). The pools are kept split so the race's
+  // target still takes more of the whole hit (Expose). The pools are kept split so the Species'
   // own-Element res (X54) answers its Element on its own line and every other pool lands unresisted.
   const elemByElement: Record<string, number> = {};
   let elemDamage = 0;

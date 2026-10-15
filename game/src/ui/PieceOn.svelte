@@ -130,32 +130,32 @@
   .tile img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
   .tile .plus {
     position: absolute; right: clamp(-5px, -0.19vw, -2px); bottom: clamp(-5px, -0.19vw, -2px); font-family: var(--num); font-size: var(--font-xs);
-    color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 var(--spacing-2xs);
+    color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 var(--spacing-xs);
   }
   .who h3 { margin: 0; font-size: var(--font-sm); }
   .who .lv { color: var(--xp); font-family: var(--num); }
-  .sub { margin: var(--spacing-3xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .sub { margin: var(--spacing-xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
   .src { color: var(--mob); font-size: var(--font-xs); }
   .src::before { content: '· '; }
-  .vs { margin: var(--spacing-2xs) 0 0; font-size: var(--font-xs); font-family: var(--num); color: var(--alarm); }
+  .vs { margin: var(--spacing-xs) 0 0; font-size: var(--font-xs); font-family: var(--num); color: var(--alarm); }
   .vs.better { color: var(--good); }
-  .flags { display: grid; gap: var(--spacing-2xs); justify-items: end; }
-  .flag { font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-round); padding: var(--spacing-3xs) var(--spacing-xs); }
+  .flags { display: grid; gap: var(--spacing-xs); justify-items: end; }
+  .flag { font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-round); padding: var(--spacing-xs) var(--spacing-xs); }
   .flag.bad { color: var(--alarm); border-color: var(--hp); }
   .flag.warn { color: var(--curse); border-color: var(--elite); }
   .flag.ok { color: var(--good); border-color: color-mix(in srgb, var(--good) 50%, transparent); }
 
-  .picker { display: grid; gap: var(--spacing-2xs); }
-  .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: var(--spacing-3xs); text-transform: uppercase; }
-  .row { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); }
+  .picker { display: grid; gap: var(--spacing-xs); }
+  .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: var(--spacing-xs); text-transform: uppercase; }
+  .row { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
   .chip {
-    display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-2xs) var(--spacing-xs) var(--spacing-2xs) var(--spacing-2xs);
+    display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) var(--spacing-xs);
     font-size: var(--font-xs); border-radius: var(--radius-round); background: var(--inset);
   }
   .chip img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .chip .pl { color: var(--xp); font-family: var(--num); }
   .chip.now { border-color: var(--gold); background: var(--surface-selected); color: var(--gold); }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { padding: var(--spacing-3xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .pager button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
 </style>

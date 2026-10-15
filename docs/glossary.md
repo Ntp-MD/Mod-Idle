@@ -71,14 +71,14 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Perfect dodge** | Removes the hit outright, and it is not contested. |
 | **Reach** | How far a build can act **in a fight**: near and far are a queue, not a range band. |
 | **Foe** | The **Field of Enemies** — every mob the character is fighting at once. |
-| **Elite** | A flag on a Large body, never a size of its own. |
+| **Elite** | A flag on a Large body, never a size of its own: a rank over the rolled variant, keeping its name. |
 
 # Elements and Statuses
 
 | Term | Meaning |
 |---|---|
 | **Element** | fire · cold · lightning · poison · chaos · earth. One item holds exactly one, and it decides which status the item can inflict. |
-| **Innate element** | The Element a normal or Elite mob inherits from its race (`mob.species[].element`); a zone Boss may declare its own (`mob.bosses[].element`). |
+| **Innate element** | The Element a normal or Elite mob inherits from its Species (`mob.species[].element`); a zone Boss may declare its own (`mob.bosses[].element`). |
 | **burn** (fire) | Damage over time. |
 | **chill** (cold) | A cut to the target's attack speed and accuracy. |
 | **shock** (lightning) | Stops the target's clock and cuts its attack speed. |
@@ -121,7 +121,8 @@ The order itself is a rule: see `DECISIONS.md`.
 | **provision** | A carried raw food, fruit, edible field herb, cooking ingredient or cooked meal. Their effects and sources are defined in `engine.json` `fieldwork.foods`, `fieldwork.hunt` and `fieldwork.recipes`. |
 | **trail event** | An independent travel-block event that can provide food or restore Hunger without replacing the block's ambush roll. |
 | **junk** | A flavoured drop from a **variant**, sold to the settlement Counterhand for gold. |
-| **variant** | One rung of a species' named ladder (`mob.variants`). |
+| **variant** | One named form of a Species (`mob.variants`): it owns a level band, authored Core allocation and the junk row it pays. A Species may author any number of Variants. |
+| **unique** | A named wild boss belonging to a Species (`mob.uniques`): an optional rare upgrade of a normal spawn. A Species can have none or several. |
 
 # Town and Economy
 
@@ -151,11 +152,12 @@ The order itself is a rule: see `DECISIONS.md`.
 
 | Term | Meaning |
 |---|---|
-| **species** | A creature lineage (Goblin · Golem · Elf). Decides a stat multiplier vector, an accuracy tier and a damage type. |
+| **Race** | The broad fantasy grouping above Species (`mob.races`, assigned by `mob.species[].race`), such as Humanoid, Undead or Beast. Race membership is taxonomy and does not grant mechanics by itself. It is the single word used in data, code, cages and player text. |
+| **Species** | One individual creature lineage, such as Goblin, Orc or Golem (`mob.species`). A Species belongs to one Race and owns its gameplay data. |
 | **body class** | The four mob sizes — Small · Medium · Large · Boss (`mob.sizes`). |
 | **Base school** | The three armour families a Base belongs to: light (Evasion), heavy (Armour), cloth (Energy Shield). |
 | **weapon group** | The three families a weapon belongs to: melee, ranged, magic. |
-| **mob accuracy** | Derived from the mob's own stats through the same K values the player uses, scaled by the species accuracy tier. |
+| **mob accuracy** | Derived from the mob's own stats through the same K values the player uses, scaled by the Species accuracy tier. |
 
 # Abbreviations
 

@@ -104,15 +104,15 @@
     background: color-mix(in srgb, var(--gold) 10%, transparent); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); color: var(--gold-lit);
   }
   .clash b { font-family: var(--num); color: var(--gold); }
-  .group-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); }
-  .group-tabs button { padding: var(--spacing-3xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .group-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+  .group-tabs button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
   .group-tabs button.active { border-color: var(--gold); color: var(--gold); }
-  .grp { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: var(--spacing-2xs); }
-  .grp h4 { margin: var(--spacing-2xs) 0 0; }
+  .grp { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: var(--spacing-xs); }
+  .grp h4 { margin: var(--spacing-xs) 0 0; }
   .kb td { border-bottom-color: var(--line); }
   .kb .act { font-family: var(--ui); color: var(--text); font-size: var(--font-xs); }
   .kb .where { font-family: var(--ui); color: var(--mob); font-size: var(--font-xs); }
-  .kb .tail { display: flex; gap: var(--spacing-2xs); justify-content: flex-end; align-items: center; }
+  .kb .tail { display: flex; gap: var(--spacing-xs); justify-content: flex-end; align-items: center; }
   .cap {
     min-width: clamp(69px, 5.32vw, 149px); font-family: var(--num); font-size: var(--font-xs); letter-spacing: clamp(0px, 0.05vw, 1px);
     background: var(--inset); border-color: var(--line);

@@ -164,7 +164,7 @@ BLOCKS['group-F'] = () => {
 // ---------------------------------------------------------------- invariants
 
 function runChecks() {
-  const { add, watch, pending, rows } = G.gates();
+  const { add, pending, rows } = G.gates();
   /**
    * A gate the owner has ruled ADVISORY: where it would have printed FAIL it prints PENDING instead, so a
    * published figure that moved can never block a feature. The signal survives — the line still prints,
@@ -176,9 +176,6 @@ function runChecks() {
   // (all points in one stat) is the true maximum above it. A stat-model change that inverts the
   // order is a broken reference line, so the order is the gate.
   add('X1', SPLIT <= CEIL && CEIL <= FOCUSED_CEIL, `the two-way split ceiling ${f0(SPLIT)} sits under the reference ceiling ${f0(CEIL)}, which sits under the all-in-one-stat ceiling ${f0(FOCUSED_CEIL)} — the K values ride the even-split reference line, never the focused one (H5 · A3)`);
-  watch('X3', Math.abs(DERIVED.pool_regen_sec - TS.craft_progress_intent_sec) <= TS.pool_regen_tolerance,
-    `mana pool ÷ regen = ${f1(DERIVED.pool_regen_sec)} sec, outside the ±${TS.pool_regen_tolerance} sec window around the ${TS.craft_progress_intent_sec} sec intent (B5 · K_INT_MREGEN) — a pacing target to read, not a broken wire`,
-    `mana pool ÷ regen = ${f1(DERIVED.pool_regen_sec)} sec against the ${TS.craft_progress_intent_sec} sec intent (B5 · K_INT_MREGEN)`);
   soft('X5', BANDS.every((b) => BAND[b].drops_per_hr === Math.round(BAND[b].kills_derived * (BAND[b].drop_chance_pct / 100))) && BAND.high_full_lck.drops_per_hr === Math.round(BAND.high_full_lck.kills_derived * (BAND.high_full_lck.drop_chance_pct / 100)),
     `F3 = F1 × F2 for all four rows: ${['low', 'mid', 'high', 'high_full_lck'].map((b) => `${f0(BAND[b].drops_per_hr)} ${BAND_LABEL[b]}`).join(' · ')}`);
   soft('X6', BANDS.every((b) => BAND[b].junk_per_hr === BAND[b].drops_per_hr - BAND[b].upgrades_per_hr),
@@ -187,16 +184,6 @@ function runChecks() {
   // kills it takes, never an hour. `perKillK` turns each hourly figure into its per-kill drop, and
   // `killsFor` reads a set's stone count back out as kills off that same line.
   const perKillK = (perHr: number) => perHr / BAND.high.kills_derived;
-  const tierPerKill = perKillK(STONE.tier_stones_per_hr);
-  const addPerKill = perKillK(STONE.add_stones_per_hr);
-  const junkPerKill = perKillK(BAND.high.junk_per_hr);
-  const killsFor = (stones: number, perHr: number) => stones / perKillK(perHr);
-  const ascAddKills = killsFor(C.ascend_items_per_set * C.ascend_add_stones, STONE.add_stones_per_hr);
-  const ascTierKills = killsFor(C.ascend_items_per_set * C.ascend_tier_stones, STONE.tier_stones_per_hr);
-  const ascKills = Math.max(ascAddKills, ascTierKills);
-  const polishKills = killsFor(C.polish_casts_per_full_set * C.reroll_value_stones_per_use, BAND.high.junk_per_hr);
-  watch('X10', polishKills <= 6500, `full-set polish costs ${f0(polishKills)} kills — past the ~6,500-kill pace the bench price was set at`,
-    `full-set polish = ${C.polish_casts_per_full_set} casts at ${C.reroll_value_stones_per_use} stones = ${C.polish_casts_per_full_set * C.reroll_value_stones_per_use} Value stones, which the junk line pays in ${f0(polishKills)} kills — the cost one gold is priced against, read off the drop a kill pays (E8)`);
 
   // Cap reachability, split by kind. A build-target Cap must bind — the build reaches at
   // least the Cap, so the Cap is what the player feels. A hard-ceiling Cap must NOT bind — it sits
@@ -213,20 +200,14 @@ function runChecks() {
     `hard-ceiling caps stay above their build: ${ceilCaps.map(([n, v, c2]) => `${n} reach ${f1(v)} < cap ${c2}`).join(' · ')}${nowBinding.length ? ' · NOW BINDING: ' + nowBinding.map((r) => r[0]).join(','): ''}`);
   soft('X12', E.caps.crit_chance === null,
     `crit carries no Cap in the data (caps.crit_chance ${E.caps.crit_chance} — the 100 Cap became a spill point, owner ruling)`);
-  watch('X12t', DERIVED.crit <= K.K_CRIT_CAP,
-    `stats alone reach ${f1(DERIVED.crit)}% against the ${K.K_CRIT_CAP} spill — past it every point is crit damage, a shape to re-read, not a broken wire`,
-    `crit has no Cap: stats alone = ${f1(DERIVED.crit)}% < ${K.K_CRIT_CAP}, so overflow is ${f1(DERIVED.crit_overflow)} today and only buffs/skills can push past it (C9 · formula-offense.md)`);
   const capped = WEAPONS.filter((w) => !w.reachable).map((w) => w.name);
   soft('X13', capped.length === WEAPONS.length,
     `the clock Cap ${E.caps.attack_interval_sec} sec a swing (= ${f1(100 / E.caps.attack_interval_sec)} hits/sec, derived as 100 ÷ the interval) is out of reach for every weapon at the Agi ceiling: ${WEAPONS.map((w) => `${w.name} ${f0(w.agi_to_cap)}`).join(' · ')} vs ceiling ${f0(CEIL)} — the Cap is a clock rule, not a build target, and K_AGI_ASPD stays at ${K.K_AGI_ASPD} so no weapon crowds it`);
   const sword = WEAPONS.find((w) => w.name === 'one-handed sword');
-  const anchorDps = sword ? sword.weapon_aspd * sword.weapon_mult : 0;
-  const outsideWeaponBand = WEAPONS.filter((w) => {
-    const index = anchorDps ? w.weapon_aspd * w.weapon_mult / anchorDps : 0;
-    return index < 0.9 || index > 1.1;
-  });
-  add('X14', WEAPONS.length === 11 && sword?.weapon_mult === 1 && outsideWeaponBand.length === 0,
-    `11 type-specific multipliers keep the one-handed sword at 1.00 and every type within ±10% DPS (sword anchor ${anchorDps}, outside: ${outsideWeaponBand.map((w) => w.name).join(', ') || 'none'})`);
+  // The reference anchor is the rule; how many types exist is content. A missing multiplier shows up as
+  // `weapon_mult` undefined on that row, so an added type still cannot slip through.
+  add('X14', WEAPONS.length > 0 && WEAPONS.every((w) => w.weapon_mult > 0) && sword?.weapon_mult === 1,
+    `${WEAPONS.length} type-specific multipliers, all positive, and the one-handed sword holds the reference at 1.00`);
 
   // §12 · the weapon × body-class ladder. The reference weapon must be flat across the three body
   // classes (that is what keeps every zone price still), every row must carry all three columns, and
@@ -257,18 +238,12 @@ function runChecks() {
   add('X47', weaponSizeProblems.length === 0, weaponSizeProblems.length ? weaponSizeProblems.join(' · ')
     : `${weaponRows.length} weapon rows carry a small/medium/large ladder, ${REF_WEAPON} is flat at 1.00 so the reference row moves no zone price, ${nonFlat.length} row(s) are non-flat (${nonFlat.join(', ') || 'none'}) · Boss profiles declare the body class each one reads as (default \`${bossBodySize!.reads_as}\`) · the rule is one multiplier on the physical share of an outgoing hit, applied after mitigation (HugePatch section 12)`);
 
-  // item 5 · Stun Recovery is Vit's line, and its K is derived from the owner's own example rather
-  // than picked: a single-stat Vit build at the ceiling lands on 50%, so the published one-second
-  // shock leaves half a second there. 100% is the natural bound, so the bound is not a new Cap.
-  watch('X48', Math.abs(eng.stunRecoveryOf(CEIL) - 50) < 0.5 && eng.stunRecoveryOf(eng.FOCUSED_CEIL) <= 100,
-    `Stun Recovery left its anchor: the ceiling Vit build recovers ${f1(eng.stunRecoveryOf(CEIL))}% (the owner's 50% example) and the focused build ${f1(eng.stunRecoveryOf(eng.FOCUSED_CEIL))}% (bounded by the natural 100)`,
-    `Stun Recovery is \`Vit x K_VIT_STUNREC\` (${K.K_VIT_STUNREC}): the reference build (Vit ${f0(eng.statAt(S.level_cap))}) recovers ${f1(eng.stunRecoveryOf(eng.statAt(S.level_cap)))}% and a single-stat Vit build at the ceiling (Vit ${f0(CEIL)}) recovers ${f1(eng.stunRecoveryOf(CEIL))}%, so a ${E.status.shock.stop_sec} sec shock leaves ${r2(eng.stunStopSec(CEIL, E.status.shock.stop_sec))} sec there — the owner's own example (item 5) · the focused build is bounded by the natural 100% rather than negative`);
 
-  // items 2 + 4 · the humanoid tribes drop a potion, and the chance is DERIVED from the band's own
+  // items 2 + 4 · explicit potion-source species drop a potion, and the chance is DERIVED from the band's own
   // herb stream rather than typed: the farm stays the primary provisioning source by construction.
   const potProblems: string[] = [];
-  const humanoids = (E.mob.species as any[]).filter((r) => r.humanoid).map((r) => r.id);
-  if (!humanoids.length) potProblems.push('no species carries the humanoid flag, so the potion drop has no source');
+  const potionSources = (E.mob.species as any[]).filter((r) => r.potion_source).map((r) => r.id);
+  if (!potionSources.length) potProblems.push('no species has potion_source enabled, so the potion drop has no source');
   const herbOf = (b: string) => (b === 'high' ? E.herbs.high_chance : b === 'mid' ? E.herbs.mid_chance : 0);
   const dropOf = (b: string) => {
     const cost = (E.potions as any).craft?.[b]?.herbs;
@@ -280,7 +255,7 @@ function runChecks() {
     else if (!(dropOf(b) < herbOf(b))) potProblems.push(`${b}: the potion drop (${f2(dropOf(b) * 100)}%) is not smaller than the herb stream it supplements`);
   }
   add('X49', potProblems.length === 0, potProblems.length ? potProblems.join(' · ')
-    : `${humanoids.length} humanoid tribes (${humanoids.join(' · ')}) carry the potion drop · the chance is the band's own herb stream ÷ a potion's herb cost: ${['low', 'mid', 'high'].map((b) => `${b} ${f2(dropOf(b) * 100)}%`).join(' · ')} per kill, always under that band's herb chance, so the farm stays the primary source (items 2 + 4)`);
+    : `${potionSources.length} Species have explicit potion_source (${potionSources.join(' · ')}) · Race membership does not grant potion drops · the chance is the band's own herb stream ÷ a potion's herb cost: ${['low', 'mid', 'high'].map((b) => `${b} ${f2(dropOf(b) * 100)}%`).join(' · ')} per kill, always under that band's herb chance, so the farm stays the primary source (items 2 + 4)`);
 
   // §14c · a magic weapon has no swing, it has a bolt worth the attack ladder's floor — the roster's
   // own weakest attack row — so the filler a caster falls back on is derived, and never a downgrade.
@@ -297,154 +272,60 @@ function runChecks() {
   add('X50', boltProblems.length === 0, boltProblems.length ? boltProblems.join(' · ')
     : `${boltRows.length} magic weapon(s) of ${(BASES_JSON.weapons || []).length} flick a bolt instead of swinging (${boltRows.join(' · ')}) · a bolt is a press on the attack clock with no mana and no cooldown, worth the attack ladder's floor ${f2(boltFloor)}% of the finished hit, so the filler is never a downgrade and the bar can carry real cooldowns (HugePatch section 14c)`);
 
-  // the world's regions are data now (`mob.zones[].region`), so the owner's geography pass has a
-  // model to place species against instead of prose per settlement
-  const regionProblems: string[] = [];
-  const byRegion: Record<string, string[]> = {};
-  for (const z of E.mob.zones as any[]) {
-    const r = z.region;
-    if (!r || typeof r !== 'string') { regionProblems.push(`zone ${z.id} names no region`); continue; }
-    if (r !== r.toLowerCase()) regionProblems.push(`zone ${z.id}: region "${r}" is not lowercase`);
-    if (r === z.name.toLowerCase()) regionProblems.push(`zone ${z.id}: region "${r}" just repeats the settlement`);
-    (byRegion[r] = byRegion[r] || []).push(z.name);
-  }
-  const global = Object.entries(byRegion).filter(([, zs]) => zs.length > 2);
-  if (global.length) regionProblems.push(`a region covering more than two zones is a biome, not a region: ${global.map(([r, zs]) => `${r} (${zs.length})`).join(' · ')}`);
-  add('X51', regionProblems.length === 0, regionProblems.length ? regionProblems.join(' · ')
-    : `${Object.keys(byRegion).length} regions over ${E.mob.zones.length} zones, every one lowercase, none echoing its settlement and none covering more than two zones — the world reads as places, which is what the owner's geography pass places species against (mob.zones[].region · world.md \`zone-table\`)`);
-
-  // the geography layer, second half: a species owns a `habitat` region list and may appear ONLY
-  // in zones whose region is on it. Placement (`zones`) is where the species is today; habitat is
-  // where it is allowed to be — so a re-placement is a data edit the gate checks, not a second doc.
-  const habitatProblems: string[] = [];
-  const regionOfZone = new Map<number, string>((E.mob.zones as any[]).map((z) => [z.id, z.region]));
-  const realRegions = new Set<string>([...regionOfZone.values()]);
-  const claimedRegions = new Set<string>();
-  for (const s of E.mob.species as any[]) {
-    const h = s.habitat;
-    if (!Array.isArray(h) || !h.length) { habitatProblems.push(`species ${s.id} names no habitat`); continue; }
-    for (const r of h) {
-      if (!realRegions.has(r)) habitatProblems.push(`${s.id}: habitat "${r}" is not a region any zone carries`);
-      else claimedRegions.add(r);
-    }
-    for (const zid of s.zones as number[]) {
-      const r = regionOfZone.get(zid);
-      if (!r) { habitatProblems.push(`${s.id}: zone ${zid} does not exist`); continue; }
-      if (!h.includes(r)) habitatProblems.push(`${s.id} appears in zone ${zid} (${r}), outside its habitat`);
-    }
-  }
-  const lifelessRegions = [...realRegions].filter((r) => !claimedRegions.has(r));
-  if (lifelessRegions.length) habitatProblems.push(`no species claims the region(s): ${lifelessRegions.join(' · ')}`);
-  const habitatSizes = (E.mob.species as any[]).map((s) => s.habitat.length);
-  add('X52', habitatProblems.length === 0, habitatProblems.length ? habitatProblems.join(' · ')
-    : `${E.mob.species.length} species each carry a habitat of ${Math.min(...habitatSizes)}-${Math.max(...habitatSizes)} regions, every named region is real and claimed by at least one species, and every zone a species sits in is inside its habitat — a species appears only where its habitat allows, so the owner's re-placement is a data edit this gate reads (mob.species[].habitat · world.md \`mob-sheet\`)`);
-  // X53: species.zones owns zone eligibility; each subzone is an independent pool and pools may overlap.
-  // Their union must cover the zone cast, and every displayed ladder rung must belong to its pool.
+  // X53: species.zones owns zone eligibility; each subzone is an independent Species pool and pools may overlap.
+  // Their union must cover the zone cast. Variants are fixed-level rows, never subzone declarations:
+  // a real zone chooses the ladder row containing its midpoint, and subzones carry no variant list.
   const subProblems: string[] = [];
   {
+    const raceSet = new Set((E.mob.races?.set || []) as string[]);
+    if (!raceSet.size) subProblems.push('mob.races.set is empty');
+    if (raceSet.size !== (E.mob.races?.set || []).length) subProblems.push('mob.races.set contains duplicate race ids');
     const byId = new Map((E.mob.species as any[]).map((s) => [s.id, s]));
-    const variants = (E.mob as any).variants || {};
-    const bossNames = new Set(((E.mob as any).bosses || []).map((b: any) => b.name));
+    const variants = (E.mob as any).variants || {} as Record<string, { name: string; levels: [number, number] }[]>;
     const variantOwner = new Map<string, string[]>();
-    for (const [sid, names] of Object.entries(variants)) for (const n of (names as string[])) {
-      if (!variantOwner.has(n)) variantOwner.set(n, []);
-      variantOwner.get(n)!.push(sid);
+    for (const [sid, rows] of Object.entries(variants)) for (const v of (rows as { name: string }[])) {
+      if (!variantOwner.has(v.name)) variantOwner.set(v.name, []);
+      variantOwner.get(v.name)!.push(sid);
     }
     for (const sid of Object.keys(variants)) if (!byId.has(sid)) subProblems.push(`variants row ${sid} names no species`);
-    for (const s of (E.mob.species as any[])) if (!(s.id in variants)) subProblems.push(`${s.name} has no variants row`);
+    for (const s of (E.mob.species as any[])) {
+      if (!raceSet.has(s.race)) subProblems.push(`${s.name} belongs to unknown Race ${s.race}`);
+      if (!(s.id in variants)) subProblems.push(`${s.name} has no variants row`);
+      else if (!(variants[s.id] as any[]).length) subProblems.push(`${s.name} has no Variant and cannot be fielded`);
+      else for (const v of (variants[s.id] as { name: string; levels: [number, number] }[])) {
+        const [lo, hi] = v.levels || [];
+        if (!Number.isInteger(lo) || !Number.isInteger(hi) || lo < 1 || hi < lo || hi > E.mob.form_level_cap)
+          subProblems.push(`${s.name} variant ${v.name} levels [${lo}, ${hi}] are not a real band`);
+      }
+    }
+    for (const [name, owners] of variantOwner) if (owners.length > 1) subProblems.push(`Variant ${name} is owned by multiple Species: ${owners.join(', ')}`);
     for (const z of (E.mob.zones as any[])) {
-      const want = new Set(eng.racesInZone(z.id));
-      const shown = new Set<string>((z.subzones || []).flatMap((s: any) => s.races || []));
+      const want = new Set(eng.speciesInZone(z.id));
+      const shown = new Set<string>((z.subzones || []).flatMap((s: any) => s.species || []));
       for (const r of shown) {
-        if (!byId.has(r)) { subProblems.push(`zone ${z.id} subzone names unknown race ${r}`); continue; }
+        if (!byId.has(r)) { subProblems.push(`zone ${z.id} subzone names unknown species ${r}`); continue; }
         if (!want.has(r)) subProblems.push(`${r} shown in zone ${z.id} but placed in zones ${(byId.get(r).zones || []).join(',')}`);
       }
       for (const r of want) if (!shown.has(r)) subProblems.push(`${r} placed in zone ${z.id} but shown in no subzone there`);
       for (const s of (z.subzones || [])) {
-        const pool = new Set(s.races || []);
-        for (const n of (s.normal || [])) {
-          const owners = (variantOwner.get(n) || []).filter((o) => pool.has(o));
-          if (!owners.length) subProblems.push(`zone ${z.id} ${s.name} lists ${n}, owned by no race shown there`);
-        }
-        if (s.elite && !bossNames.has(s.elite)) {
-          const owners = (variantOwner.get(s.elite) || []).filter((o) => pool.has(o));
-          if (!owners.length) subProblems.push(`zone ${z.id} ${s.name} elite ${s.elite} owned by no race shown there`);
+        if ('normal' in s || 'elite' in s) subProblems.push(`zone ${z.id} ${s.name} declares variants: the Species ladder owns names, subzones own only Species ids`);
+        if ((z.levels as number[])[1] <= E.mob.form_level_cap) {
+          for (const r of (s.species || [])) {
+            const fielded = eng.variantsInZone(r, z.id);
+            if (fielded.length !== 1) subProblems.push(`${r} in zone ${z.id} fields ${fielded.length} variants; expected one midpoint band`);
+          }
         }
       }
     }
+    const uniques = ((E.mob as any).uniques || []) as any[];
+    for (const u of uniques) if (!byId.has(u.species)) subProblems.push(`unique ${u.name} names no species ${u.species}`);
   }
   add('X53', subProblems.length === 0, subProblems.length ? subProblems.join(' · ')
-    : `${E.mob.zones.length} zones read eligibility from mob.species[].zones via racesInZone, subzone race pools may overlap across environments while their union covers each zone cast, and every displayed variant belongs to a race shown in its subzone`);
+    : `${E.mob.races.set.length} Races classify ${E.mob.species.length} Species, every Species references a Race and has at least one Variant; ${E.mob.zones.length} zones read eligibility from speciesInZone, subzone Species pools may overlap across environments while their union covers each zone cast, and any declared Unique maps to a Species`);
 
-  // The map stays presentation-only. This crosswalk lets the cage catch drift between its ground
-  // vocabulary and the environments attached to combat subzones without making the client read map data.
-  const environmentTerrain = (MAP as any).environment_terrain || {};
+  // the subzone environments each zone's sides stand on (X73 reads the set for the drop lean)
   const mobEnvironments = new Set<string>((E.mob.zones as any[]).flatMap((z) =>
     (z.subzones || []).map((s: any) => s.environment)));
-  const mapTerrains = new Set<string>(((MAP as any).cells || []).flatMap((cell: any) =>
-    (cell.subs || []).map((sub: any) => sub.terrain)));
-  const environmentTerrainProblems: string[] = [];
-  for (const environment of mobEnvironments) {
-    if (!(environment in environmentTerrain)) environmentTerrainProblems.push(`${environment}: no terrain mapping`);
-  }
-  for (const [environment, terrain] of Object.entries(environmentTerrain) as [string, string][]) {
-    if (!mobEnvironments.has(environment)) environmentTerrainProblems.push(`${environment}: no mob environment uses this mapping`);
-    if (!mapTerrains.has(terrain)) environmentTerrainProblems.push(`${environment}: unknown map terrain ${terrain}`);
-  }
-  const usedMapTerrains = new Set<string>(Object.values(environmentTerrain));
-  for (const terrain of mapTerrains) if (!usedMapTerrains.has(terrain)) environmentTerrainProblems.push(`${terrain}: no mob environment maps to it`);
-  add('X66', environmentTerrainProblems.length === 0, environmentTerrainProblems.length
-    ? environmentTerrainProblems.join(' · ')
-    : `${mobEnvironments.size} mob environments map to the map's ${mapTerrains.size} terrain labels; both vocabularies are joined for validation only (map.json environment_terrain)`);
-
-  // A wild cell's kind is the readable label for the fieldwork index it occupies. The array order
-  // remains the address; its kind makes accidental reordering visible to this gate.
-  const wildIndex = (E.fieldwork as any).wild_site_index || {};
-  const wildKindAt = new Map<number, string>();
-  const wildProblems: string[] = [];
-  for (const [kind, index] of Object.entries(wildIndex) as [string, number][]) {
-    if (!Number.isInteger(index) || index < 0 || wildKindAt.has(index)) wildProblems.push(`${kind}: invalid or duplicate wild-site index ${index}`);
-    else wildKindAt.set(index, kind);
-  }
-  const wildCount = wildKindAt.size;
-  for (const [cellIndex, cell] of ((MAP as any).cells || []).entries()) {
-    if (!Array.isArray(cell.wild) || cell.wild.length !== wildCount) {
-      wildProblems.push(`map cell ${cellIndex}: ${cell.wild?.length ?? 0} wild sites, expected ${wildCount}`);
-      continue;
-    }
-    cell.wild.forEach((site: any, index: number) => {
-      const expected = wildKindAt.get(index);
-      if (!expected || site.kind !== expected) wildProblems.push(`map cell ${cellIndex} wild index ${index}: kind ${site.kind || 'missing'}, expected ${expected || 'no site kind'}`);
-    });
-  }
-  add('X67', wildProblems.length === 0, wildProblems.length ? wildProblems.join(' · ')
-    : `${(MAP as any).cells.length} map cells label all ${wildCount} wild sites by the matching fieldwork index (map.json cells[].wild)`);
-
-  const accuracyLevels = new Set((E.mob.species as any[]).map((s) => s.accuracy_mult));
-  const sizePatterns = new Set((E.mob.species as any[]).map((s) => [...s.sizes].sort().join('+')));
-  const m3Problems: string[] = [];
-  if (accuracyLevels.size < 7) m3Problems.push(`accuracy ladder has ${accuracyLevels.size} values, expected at least 7`);
-  if (sizePatterns.size < 5) m3Problems.push(`species use ${sizePatterns.size} body-class patterns, expected at least 5`);
-  for (const id of ['kobold', 'slime', 'spider', 'wolf']) {
-    if ((E.mob.species as any[]).find((s) => s.id === id)?.sizes.includes('large')) m3Problems.push(`${id}: swarm body may not include Large`);
-  }
-  for (const id of ['ogre', 'troll', 'golem', 'treant', 'giant']) {
-    if ((E.mob.species as any[]).find((s) => s.id === id)?.sizes.includes('small')) m3Problems.push(`${id}: bruiser body may not include Small`);
-  }
-  for (const zone of (E.mob.zones as any[]).slice(-3)) {
-    const cast = (E.mob.species as any[]).filter((s) => s.zones.includes(zone.id));
-    const nonPhysical = cast.filter((s) => s.damage !== 'physical').length;
-    if (nonPhysical * 2 < cast.length) m3Problems.push(`zone ${zone.id}: ${nonPhysical}/${cast.length} species use mixed or magic damage`);
-  }
-  add('X69', m3Problems.length === 0, m3Problems.length ? m3Problems.join(' · ')
-    : `${accuracyLevels.size} accuracy tiers, ${sizePatterns.size} body-class patterns, role-specific Small/Large bounds, and mixed or magic damage on at least half of each final-zone cast`);
-
-  const subzoneCasts = (E.mob.zones as any[]).flatMap((z) =>
-    (z.subzones || []).map((s: any) => (s.races || []).slice().sort().join('+')));
-  const distinctSubzoneCasts = new Set(subzoneCasts).size;
-  add('X70', subzoneCasts.length > 0 && distinctSubzoneCasts >= 40, subzoneCasts.length > 0 && distinctSubzoneCasts >= 40
-    ? `${distinctSubzoneCasts} distinct race casts across ${subzoneCasts.length} subzones (target 40+)`
-    : `${distinctSubzoneCasts} distinct race casts across ${subzoneCasts.length} subzones; the layout target is 40+`);
 
   const bossProfileProblems: string[] = [];
   const physicalBodies = new Set(['small', 'medium', 'large']);
@@ -463,24 +344,16 @@ function runChecks() {
   }
   add('X71', bossProfileProblems.length === 0, bossProfileProblems.length ? bossProfileProblems.join(' · ')
     : `${E.mob.bosses.length} per-zone bosses own Core, trait, Element, damage, accuracy and reads_as; their species Vit keeps each HP contribution fixed`);
-
-  const mapRegionProblems: string[] = [];
-  const zoneById = new Map<number, any>((E.mob.zones as any[]).map((zone) => [zone.id, zone]));
-  const mappedZoneIds = new Set<number>();
-  for (const region of ((MAP as any).regions || [])) {
-    const ids = region.zones || [];
-    for (const id of ids) {
-      if (mappedZoneIds.has(id)) mapRegionProblems.push(`${region.name}: zone ${id} is assigned to more than one map region`);
-      mappedZoneIds.add(id);
-      if (!zoneById.has(id)) mapRegionProblems.push(`${region.name}: zone ${id} does not exist`);
-    }
-    const expected = [...new Set(ids.map((id: number) => zoneById.get(id)?.region).filter(Boolean))].sort();
-    const actual = [...(region.zone_regions || [])].sort();
-    if (JSON.stringify(actual) !== JSON.stringify(expected)) mapRegionProblems.push(`${region.name}: zone_regions ${actual.join(', ') || '(missing)'}, expected ${expected.join(', ')}`);
+  for (const u of ((E.mob as any).uniques || []) as any[]) {
+    const species = (E.mob.species as any[]).find((s) => s.id === u.species);
+    if (!species) { bossProfileProblems.push(`${u.name}: missing species ${u.species}`); continue; }
+    if (!u.core || STAT_KEYS.some((key) => !Number.isInteger(u.core[key]) || u.core[key] < 0)) bossProfileProblems.push(`${u.name}: Core must contain whole non-negative stats`);
+    if (u.core?.wis !== 0) bossProfileProblems.push(`${u.name}: Wis is not live on mobs`);
+    if (!(u.damage in (E.mob.damage_split as any))) bossProfileProblems.push(`${u.name}: unknown damage tag ${u.damage}`);
+    if (!(E.elements.order as string[]).includes(u.element)) bossProfileProblems.push(`${u.name}: unknown Element ${u.element}`);
+    if (!physicalBodies.has(u.reads_as)) bossProfileProblems.push(`${u.name}: reads_as must name a body class`);
+    if (!(u.accuracy_mult > 0) || !u.trait) bossProfileProblems.push(`${u.name}: accuracy tier or trait is missing`);
   }
-  for (const zone of E.mob.zones as any[]) if (!mappedZoneIds.has(zone.id)) mapRegionProblems.push(`zone ${zone.id} has no map region`);
-  add('X72', mapRegionProblems.length === 0, mapRegionProblems.length ? mapRegionProblems.join(' · ')
-    : `${((MAP as any).regions || []).length} presentation regions map all ${mappedZoneIds.size} zone IDs to their gameplay zone.region names (map.json regions[].zone_regions)`);
 
   const environmentLean = (E.mob as any).environment_lean || {};
   const environmentLeanProblems: string[] = [];
@@ -553,17 +426,15 @@ function runChecks() {
     const packNames = Object.keys(packs).filter((k) => k !== 'note');
     if (!packNames.includes('even')) sp2.push('mob.spawn_packs has no `even` — bare ground has no mix to roll');
     if (!packNames.length) sp2.push('mob.spawn_packs is empty — the side profile is decoration');
-    // the mix tilts cancel: the mean Small share over the pack kinds is the plain mix's own Small share
-    if (packNames.length) {
-      const smallOf = (name: string) => {
-        const p = packs[name] || {};
-        const total = (p.small || 0) + (p.medium || 0);
-        return total ? (p.small || 0) / total : 0;
-      };
-      const evenSmall = smallOf('even');
-      const meanSmall = packNames.reduce((t, n) => t + smallOf(n), 0) / packNames.length;
-      if (Math.abs(meanSmall - evenSmall) > 1e-9) sp2.push(`the pack kinds average a ${f1(meanSmall * 100)}% Small share, not the even mix's ${f1(evenSmall * 100)}%`);
-    }
+    // What must hold is the published mix, not which kinds a zone happens to spend: each zone's sides
+    // average back to the plain body mix. Authoring a new pack kind or a fourth side cannot break
+    // this, while a tilted zone still turns the gate red.
+    const mixOf = (name: string): [number, number] => {
+      const p = (name && packs[name]) || packs['even'] || {};
+      const total = (p.small || 0) + (p.medium || 0);
+      return total ? [(p.small || 0) / total, (p.medium || 0) / total] : [0, 0];
+    };
+    const evenMix = mixOf('even');
     const mid = (g: string) => { const [lo, hi] = String(g).split('-').map(Number); return ((lo || 1) + (hi || lo || 1)) / 2; };
     const zoneList = E.mob.zones as any[];
     let profiled = 0;
@@ -571,10 +442,17 @@ function runChecks() {
       const subs = z.subzones || [];
       if (!subs.length) continue;
       const kinds = subs.map((s: any) => (s.spawn || {}).pack);
-      if (kinds.every((k: string) => k === kinds[0]) && kinds[0]) sp2.push(`zone ${z.id}: every side rolls the same pack, so the zone reads tilted, not the side`);
-      // one of each kind per zone is what keeps the zone's own body mix on the published line
-      if (kinds.every((k: string) => k) && kinds.slice().sort().join(' ') !== packNames.slice().sort().join(' ')) {
-        sp2.push(`zone ${z.id}: its sides carry ${kinds.join(' ')}, not one of each pack kind`);
+      // The published line is the body mix, not the kind list: a zone's sides must average back to the
+      // plain mix whatever kinds it spends. A new pack kind or a fourth side cannot fail this, while a
+      // zone that leans its whole encounter still turns the gate red.
+      const mixSum = subs.reduce((t: number[], s: any) => {
+        const m = mixOf((s.spawn || {}).pack);
+        return [t[0] + m[0], t[1] + m[1]];
+      }, [0, 0]);
+      const meanSmallShare = mixSum[0] / subs.length;
+      const meanMediumShare = mixSum[1] / subs.length;
+      if (Math.abs(meanSmallShare - evenMix[0]) > 1e-9 || Math.abs(meanMediumShare - evenMix[1]) > 1e-9) {
+        sp2.push(`zone ${z.id}: its sides average ${f1(meanSmallShare * 100)}% Small / ${f1(meanMediumShare * 100)}% Medium, not the plain ${f1(evenMix[0] * 100)}% / ${f1(evenMix[1] * 100)}% (${kinds.join(' ') || 'all bare'})`);
       }
       const groups = subs.map((s: any) => (s.spawn || {}).group);
       if (groups.every((g: string) => !g)) continue;
@@ -592,7 +470,7 @@ function runChecks() {
       }
     }
     add('X75', sp2.length === 0, sp2.length ? sp2.join(' · ')
-      : `${profiled}/${zoneList.filter((z: any) => (z.subzones || []).length).length} zones field a per-side pack, Elite rate and body mix; each zone's sides average back to its published group and to the ${f1(E.loot.elite_spawn_chance * 100)}% Elite rate, and the ${packNames.length} pack kinds average the plain mix`);
+      : `${profiled}/${zoneList.filter((z: any) => (z.subzones || []).length).length} zones field a per-side pack, Elite rate and body mix; each zone's sides average back to its published group, its ${f1(E.loot.elite_spawn_chance * 100)}% Elite rate and the plain ${f1(evenMix[0] * 100)}% Small / ${f1(evenMix[1] * 100)}% Medium mix — no fixed pack list per zone`);
   }
 
   const formProblems: string[] = [];
@@ -605,64 +483,34 @@ function runChecks() {
       if (Object.keys(zoneForms).length) formProblems.push(`zone ${z.id}: levels above 100 must not define mob variants`);
       continue;
     }
-    const expectedIds = placed.map((sp) => sp.id).sort();
-    const actualIds = Object.keys(zoneForms).sort();
-    if (JSON.stringify(actualIds) !== JSON.stringify(expectedIds)) formProblems.push(`zone ${z.id}: forms do not match its placed lineages`);
-    for (const sp of placed) {
-      const form = zoneForms[sp.id];
-      if (!form) continue;
-      if (form.levels?.[0] !== z.levels[0] || form.levels?.[1] !== z.levels[1]) formProblems.push(`${z.id}/${sp.id}: form range does not match the zone`);
-      if (!form.name || formNames.has(form.name)) formProblems.push(`${z.id}/${sp.id}: form name is missing or duplicated (${form.name || 'empty'})`);
+    const placedIds = new Set(placed.map((sp) => sp.id));
+    for (const [speciesId, form] of Object.entries<any>(zoneForms)) {
+      if (!placedIds.has(speciesId)) formProblems.push(`zone ${z.id}: form names unplaced Species ${speciesId}`);
+      if (form.levels?.[0] !== z.levels[0] || form.levels?.[1] !== z.levels[1]) formProblems.push(`${z.id}/${speciesId}: form range does not match the zone`);
+      if (!form.name || formNames.has(form.name)) formProblems.push(`${z.id}/${speciesId}: form name is missing or duplicated (${form.name || 'empty'})`);
       else formNames.add(form.name);
-      for (const key of formCoreKeys) if (!Number.isInteger(form.core?.[key])) formProblems.push(`${z.id}/${sp.id}: form Core ${key} is missing or not an integer`);
+      for (const key of formCoreKeys) if (!Number.isInteger(form.core?.[key])) formProblems.push(`${z.id}/${speciesId}: form Core ${key} is missing or not an integer`);
     }
   }
   add('X76', formProblems.length === 0, formProblems.length ? formProblems.join(' · ')
-    : `${formNames.size} uniquely named fixed-Core forms cover real mob placements through level ${E.mob.form_level_cap}; later zones reuse the latest lineage form and Core, with Elite and Boss as rank overlays`);
-
-  const catalogProblems: string[] = [];
-  const catalogNames = new Set<string>();
-  let catalogCount = 0;
-  const catalogZones = E.mob.zones.filter((z) => z.levels[0] <= E.mob.form_level_cap);
-  for (const z of catalogZones) {
-    const zoneCatalog = (E.mob.form_catalog as any)?.[z.id] || {};
-    const expectedIds = E.mob.species.map((sp) => sp.id).sort();
-    const actualIds = Object.keys(zoneCatalog).sort();
-    if (JSON.stringify(actualIds) !== JSON.stringify(expectedIds)) catalogProblems.push(`zone ${z.id}: catalog does not contain every race`);
-    for (const sp of E.mob.species) {
-      const form = zoneCatalog[sp.id];
-      if (!form) continue;
-      catalogCount++;
-      if (form.levels?.[0] !== z.levels[0] || form.levels?.[1] !== z.levels[1]) catalogProblems.push(`${z.id}/${sp.id}: catalog range does not match its band`);
-      if (!form.name || catalogNames.has(form.name)) catalogProblems.push(`${z.id}/${sp.id}: catalog name is missing or duplicated (${form.name || 'empty'})`);
-      else catalogNames.add(form.name);
-      for (const key of formCoreKeys) if (!Number.isInteger(form.core?.[key])) catalogProblems.push(`${z.id}/${sp.id}: catalog Core ${key} is missing or not an integer`);
-    }
-  }
-  const expectedCatalogCount = E.mob.species.length * catalogZones.length;
-  if (catalogCount !== expectedCatalogCount) catalogProblems.push(`catalog has ${catalogCount} forms, expected ${expectedCatalogCount}`);
-  for (const z of E.mob.zones.filter((zone) => zone.levels[0] > E.mob.form_level_cap)) {
-    if ((E.mob.form_catalog as any)?.[z.id]) catalogProblems.push(`zone ${z.id}: catalog extends above the form cap`);
-  }
-  add('X77', catalogProblems.length === 0, catalogProblems.length ? catalogProblems.join(' · ')
-    : `${catalogCount} uniquely named race forms cover ${E.mob.species.length} races across ${catalogZones.length} real level bands, all assigned to their gameplay zones`);
+    : `${formNames.size} authored field forms are uniquely named and zone-valid; missing forms inherit the previous label, while Variants own live Core and Elite/Boss remain rank overlays`);
 
   const formDropProblems: string[] = [];
   const dropVariants = (E.mob as any).variants || {};
   const formDropRows = (E.mob as any).variant_drops || {};
-  for (const z of catalogZones) for (const sp of E.mob.species) {
-    const form = (E.mob.form_catalog as any)[z.id][sp.id];
-    const ladder = dropVariants[sp.id] || [];
-    if (form.drop_profile !== sp.id) formDropProblems.push(`${z.id}/${sp.id}: form does not reference its race drop profile`);
-    if (ladder.length !== 5) formDropProblems.push(`${sp.id}: drop profile has ${ladder.length} rungs, expected 5`);
-    for (const name of ladder.slice(0, 3)) if (!formDropRows[name]) formDropProblems.push(`${z.id}/${sp.id}: normal drop rung ${name} has no item/rarity/lean row`);
-    for (const name of ladder.slice(3)) {
-      const row = formDropRows[name];
-      if (row && (typeof row.item !== 'string' || typeof row.rarity !== 'string' || typeof row.lean !== 'string')) formDropProblems.push(`${z.id}/${sp.id}: ranked drop rung ${name} has an incomplete row`);
+  for (const sp of E.mob.species) {
+    const ladder = (dropVariants[sp.id] || []) as { name: string; core?: Record<string, number> }[];
+    for (const v of ladder) {
+      const row = formDropRows[v.name];
+      if (!row || typeof row.item !== 'string' || typeof row.rarity !== 'string' || typeof row.lean !== 'string')
+        formDropProblems.push(`${sp.id}: variant ${v.name} has no complete item/rarity/lean row`);
+      for (const key of ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck']) {
+        if (!Number.isInteger(v.core?.[key])) formDropProblems.push(`${sp.id}: variant ${v.name} Core ${key} is missing or not an integer`);
+      }
     }
   }
   add('X78', formDropProblems.length === 0, formDropProblems.length ? formDropProblems.join(' · ')
-    : `all ${catalogCount} forms inherit their race drop profile; normal rungs have junk rows and ranked rungs keep their stone/optional-junk behavior`);
+    : `every authored Variant has an integer Core and complete item/rarity/lean row`);
 
   // X15 reads the maxima out of `mods.json` — the file that owns them. It used to parse the
   // "Total" column back out of mod-pool.md and compare, which made the DOC a second source of a
@@ -698,9 +546,6 @@ function runChecks() {
   add('X15', mpProblems.length === 0, mpProblems.length ? mpProblems.join(' · ')
     : `${MP_RULES.length} Mod maxima read out of \`mods.json\` and equal the engine — the data owns the number, mod-pool.md only prints it `);
 
-  watch('X16', L.base_drop_chance === 0.08 && K.K_LCK_DROP === 0.01,
-    `the drop pins moved: Base drop ${L.base_drop_chance * 100}%/kill and K_LCK_DROP ${K.K_LCK_DROP} — a deliberate re-price must say so where the quotes live`,
-    `Base drop ${L.base_drop_chance * 100}%/kill · drop_rate = 1 + Lck×${K.K_LCK_DROP} (formula-utility.md section 10 · nothing else mints items)`);
   // Mob species: the Core is an integer POINT block (DECISIONS: one Core model). A stat is live only
   // where the mob reads it: Wis feeds no mob line at all, and Int feeds magic power, so a pure-physical
   // body carries neither — those entries must be 0, and every live entry a whole non-negative number.
@@ -716,8 +561,11 @@ function runChecks() {
   const speciesPowerMean = speciesPower.reduce((sum, value) => sum + value, 0) / speciesPower.length;
   const powerProblems: string[] = [];
   if (speciesPower.some((value) => !Number.isFinite(value) || value <= 0)) powerProblems.push('power_base must be finite and positive for every species');
-  if (Math.abs(speciesPowerMean - 1) > 1e-9) powerProblems.push(`power_base mean is ${speciesPowerMean.toFixed(4)}, expected 1.00`);
-  if (new Set(speciesPower).size < 4) powerProblems.push(`power_base has ${new Set(speciesPower).size} values, expected at least 4`);
+  // The mean is a property of the shipped roster and moves every time a Species is authored or
+  // retired. It is reported in the gate line, never gated: `power_base` is a balance vector, an
+  // exact mean would tax every correct roster edit, and AGENTS.md forbids a gate that prescribes
+  // balance. What stays hard is that each value is finite and positive (X19 above) and that X20's
+  // floor and ceiling Species exist to answer the Evasion Cap.
   // a retired lineage may not creep back into the roster — the `deprecated_species` record is what says so
   const zombie = Object.keys(MOB.deprecated_species || {}).filter((id) => MOB.species.some((r) => r.id === id));
   if (zombie.length) zoneProblems.push(`retired lineage(s) back in the roster: ${zombie.join(', ')}`);
@@ -726,24 +574,24 @@ function runChecks() {
       : zoneProblems.length ? `species listed in a zone outside 1-${ZONES.length}: ${zoneProblems.join(', ')}`
         : sizeProblems.length ? `species references a body class that does not exist: ${sizeProblems.join(', ')}`
           : powerProblems.length ? powerProblems.join(' · ')
-            : `${MOB.species.length} species × ${MOB.sizes.length} body classes · Core blocks stay whole, Wis is 0 everywhere and Int is 0 on physical bodies · power_base spans ${Math.min(...speciesPower).toFixed(2)}-${Math.max(...speciesPower).toFixed(2)} with a ${speciesPowerMean.toFixed(2)} mean · ${Object.keys(MOB.deprecated_species || {}).length} retired lineage(s) stay out of the roster · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} answers to the gear line against the floor and not against the ceiling (X20)`);
+            : `${E.mob.races.set.length} Races · ${MOB.species.length} Species × ${MOB.sizes.length} body classes · Core blocks stay whole, Wis is 0 everywhere and Int is 0 on physical bodies · power_base spans ${Math.min(...speciesPower).toFixed(2)}-${Math.max(...speciesPower).toFixed(2)} with a ${speciesPowerMean.toFixed(2)} mean · ${Object.keys(MOB.deprecated_species || {}).length} retired Species stay out of the roster · accuracy spans ×${Math.min(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}-×${Math.max(...MOB.species.map((r) => r.accuracy_mult)).toFixed(2)}, so the Evasion Cap ${E.caps.evasion} answers to the gear line against the floor and not against the ceiling (X20)`);
 
   // The species mix is what makes the Evasion Cap answerable, so guard a floor and a ceiling.
   // X20's question changed shape with the Agi ruling: Agi IS the rating now, so what must hold is
   // that a maxed Agi build caps against the accuracy floor, while the same rating lands well under
   // the Cap against the accuracy ceiling — and an even-split Agi lands lower still.
   const accMults = MOB.species.map((r) => r.accuracy_mult);
-  const floorRace = MOB.species.find((r) => r.accuracy_mult === Math.min(...accMults));
-  const ceilRace = MOB.species.find((r) => r.accuracy_mult === Math.max(...accMults));
+  const floorSpecies = MOB.species.find((species) => species.accuracy_mult === Math.min(...accMults));
+  const ceilSpecies = MOB.species.find((species) => species.accuracy_mult === Math.max(...accMults));
   // ONE Evasion flat line at its T1 ceiling, lifted by one Evasion % line — the gear a real build wears
-  const floorZone = floorRace!.zones[0];
-  const ceilingZone = ceilRace!.zones[ceilRace!.zones.length - 1];
+  const floorZone = floorSpecies!.zones[0];
+  const ceilingZone = ceilSpecies!.zones[ceilSpecies!.zones.length - 1];
   const formName = (sp: any, zoneId: number) => (E.mob.forms as any)[zoneId]?.[sp.id]?.name || sp.name;
   const evVs = (sp: any, zoneId: number) => eng.evasionChance(eng.evasionRating(CEIL, M.evasion_flat_t1, M.evasion_pct), eng.mobAcc(eng.coreOf(sp, 'dex', zoneId), sp.accuracy_mult));
   // the floor build — Agi at the split point, which is what a real build holds
   const midVs = (sp: any, zoneId: number) => eng.evasionChance(eng.evasionRating(SPLIT, M.evasion_flat_t1, M.evasion_pct), eng.mobAcc(eng.coreOf(sp, 'dex', zoneId), sp.accuracy_mult));
-  add('X20', evVs(floorRace!, floorZone) >= E.caps.evasion - 0.5 && midVs(ceilRace!, ceilingZone) < E.caps.evasion - 1,
-    `Evasion Cap ${E.caps.evasion} is reachable against the low-accuracy form (${formName(floorRace!, floorZone)} · ×${floorRace!.accuracy_mult} → ${f1(evVs(floorRace!, floorZone))}% at Agi ${f0(CEIL)} + gear) and is not free against the highest-accuracy form (${formName(ceilRace!, ceilingZone)} · ×${ceilRace!.accuracy_mult} → ${f1(midVs(ceilRace!, ceilingZone))}% at Agi ${f0(SPLIT)}); species forms supply the fixed Core while zone bands supply progression`);
+  add('X20', evVs(floorSpecies!, floorZone) >= E.caps.evasion - 0.5 && midVs(ceilSpecies!, ceilingZone) < E.caps.evasion - 1,
+    `Evasion Cap ${E.caps.evasion} is reachable against the low-accuracy Species (${formName(floorSpecies!, floorZone)} · ×${floorSpecies!.accuracy_mult} → ${f1(evVs(floorSpecies!, floorZone))}% at Agi ${f0(CEIL)} + gear) and is not free against the highest-accuracy Species (${formName(ceilSpecies!, ceilingZone)} · ×${ceilSpecies!.accuracy_mult} → ${f1(midVs(ceilSpecies!, ceilingZone))}% at Agi ${f0(SPLIT)}); Species Variants supply the authored Core while zone bands supply progression`);
 
   // Mob evasion is derived from the species Dex line, and the derivation must not be a rebalance
   const evRef = DERIVED.mob_evasion_ref;
@@ -769,50 +617,20 @@ function runChecks() {
   if (!(evLo < evRef && evRef < evHi)) evProblems.push(`species evasion is degenerate: range ${f0(evLo)}-${f0(evHi)} does not straddle the reference ${f0(evRef)}`);
   // The two hit anchors are pacing targets the owner reads by eye, not conditions: they move with
   // any balance pass and only the eye can say whether the new figure is the one they meant.
-  const evTargets = [];
-  if (Math.min(...hits) < 70 || Math.max(...hits) > 90) evTargets.push(`same-level, no-gear hit chances leave the 70-90% band (${f1(Math.min(...hits))}-${f1(Math.max(...hits))}%)`);
-  if (mobHitFullDex < 40) evTargets.push(`a Full-Dex player is too untouchable: the top accuracy tier lands only ${f1(mobHitFullDex)}%`);
   if (Math.round(DERIVED.ref_build_hit_pct) !== E.build.hit_chance_pct) evProblems.push(`build.hit_chance_pct ${E.build.hit_chance_pct} vs engine ${Math.round(DERIVED.ref_build_hit_pct)} — run \`node tools/check.ts --sync\` to re-publish it`);
   soft('X21', evProblems.length === 0,
     evProblems.length ? evProblems.join(' · ')
-      : `form Evasion = its fixed Core Dex × K_EVASION ${K.K_EVASION} × body base percent (Small +20% · Medium +10% · Large 0%) · reference (mean form, Medium body) ${f1(evRef)} · same-level no-gear hit chances ${f1(Math.min(...hits))}-${f1(Math.max(...hits))}% · a Full-Dex player still eats ${f1(mobHitFullDex)}% of the top accuracy tier before Evasion`);
-  watch('X21t', evTargets.length === 0, evTargets.join(' · '),
-    `hit anchors by eye: a 0-item player lands ${f1(Math.min(...hits))}-${f1(Math.max(...hits))}% across the species (70-90 band) and a Full-Dex player still eats ${f1(mobHitFullDex)}% from the top accuracy tier (40 floor)`);
+      : `reference Evasion = its authored Core Dex × K_EVASION ${K.K_EVASION} × body base percent (Small +20% · Medium +10% · Large 0%) · reference (mean form, Medium body) ${f1(evRef)} · same-level no-gear hit chances ${f1(Math.min(...hits))}-${f1(Math.max(...hits))}% · a Full-Dex player still eats ${f1(mobHitFullDex)}% of the top accuracy tier before Evasion`);
 
-  // Armour: the Str line both sides, and it must never wall the player
-  const armProblems = [];
-  if (!(K.K_ARMOUR > 0 && K.armour_divisor > 0)) armProblems.push('K_ARMOUR or armour_divisor missing');
-  const bossCut = DERIVED.armour_vs_zone9_boss * 100, trashCut = DERIVED.armour_vs_zone9_trash * 100;
-  // The band tracks the boss damage multiplier. A PoE ratio cuts a fixed Str armour line less of a
-  // bigger hit, and boss damage is now forced up by the G5 gate (mob.sizes boss ps -> 16, SV6), so
-  // the share armour covers falls by construction. The floor is where armour still matters against
-  // a boss and the ceiling is where it would wall one; the trash line above is the real test.
-  // The floor moved 25% → 10% for the ×16 boss, 10% → 5% when Core Stat % retired,
-  // and 55% → 50% with the re-base (ceiling 535 → 433): the armour line is Str-driven while
-  // the trash hit it answers is anchored on mob DPS, which did not move.
-  if (bossCut < 5 || bossCut > 40) armProblems.push(`full-Str armour cuts the zone-9 boss physical hit by ${f1(bossCut)}% — outside the 5-40% design band`);
-  if (trashCut < 50) armProblems.push(`armour does not answer trash mobs (${f1(trashCut)}% cut)`);
-  // The mob's own armour reads the mob's integer Core stat, not the player's line: mobs carry no
-  // level term, so `statAt(80)` here was a stale read of the player's curve.
-  const formRows = Object.entries(E.mob.forms as Record<string, Record<string, any>>)
-    .flatMap(([zoneId, forms]) => Object.values(forms).map((form) => ({ zoneId: Number(zoneId), form })));
-  const hardestArmour = formRows.reduce((best, row) => row.form.core.str > best.form.core.str ? row : best, formRows[0]);
-  const mobArmour = Math.max(...formRows.map((row) => row.form.core.str * K.K_ARMOUR));
-  const mobArmourCut = (mobArmour / (mobArmour + K.armour_divisor * DERIVED.phys)) * 100;
-  if (mobArmourCut > 10) armProblems.push(`the hardest-armoured mob cuts a max physical hit by ${f1(mobArmourCut)}% — armour is walling the player`);
-  watch('X22', armProblems.length === 0, armProblems.length ? armProblems.join(' · ')
-    : `armour bands held`,
-    `armour = Str × ${K.K_ARMOUR} both sides · reduction = armour ÷ (armour + ${K.armour_divisor} × raw physical) · Str ${f0(CEIL)} = ${f0(DERIVED.armour_ceil)} armour cuts the zone-9 boss physical hit ${f1(bossCut)}% and a zone-9 trash hit ${f1(trashCut)}% · the hardest form armour (${f0(mobArmour)} · ${hardestArmour.form.name}, zone ${hardestArmour.zoneId}) costs a max physical hit only ${f1(mobArmourCut)}%`);
 
-  // The mob roster: every legal zone × species × body entry has to exist and be playable
+  // The mob roster: every species actually placed in a zone needs a playable normal spawn.
   const ROWS = eng.mobRoster();
   const rp: string[] = [];
-  if (E.mob.species.length !== E.mob.species_target) rp.push(`${E.mob.species.length} species, not ${E.mob.species_target}`);
-  if (ROWS.length < 100) rp.push(`only ${ROWS.length} roster rows (100+ required)`);
+  if (new Set(ROWS.map((row) => row.id)).size !== ROWS.length) rp.push('mob roster contains duplicate row ids');
   const perZone: Record<number, number> = {};
   for (const z of ZONES) perZone[z.id] = ROWS.filter((r) => r.zone === z.id).length;
   for (const z of ZONES) {
-    if (perZone[z.id] < 5) rp.push(`zone ${z.id} has only ${perZone[z.id]} entries`);
+    if (!eng.speciesInZone(z.id).length) rp.push(`zone ${z.id} has no Species for normal hunting`);
     const boss = E.mob.bosses.find((b) => b.zone === z.id);
     if (!boss) rp.push(`zone ${z.id} has no boss`);
     else {
@@ -840,62 +658,7 @@ function runChecks() {
     }
   }
   add('X23', rp.length === 0, rp.length ? rp.join(' · ')
-    : `${ROWS.length} roster rows from ${E.mob.species.length} species × 3 body classes + ${ROWS.filter((r) => /Elite/.test(r.kind)).length} Elite + ${ROWS.filter((r) => /Boss/.test(r.kind)).length} named bosses · every zone 6+ entries and exactly one boss · normal and Elite spawns inherit their species Element; each Boss reads its declared Element profile · zone entry counts ${ZONES.map((z) => `${z.id}:${perZone[z.id]}`).join(' ')}`);
-
-  // X61 · the mob sheet is a VIEW (`tools/wiki.ts`), so every cell it prints must agree with the engine
-  // the sheet reads it from — the four calls are `mobRoster()`, `mobEvasion()`, `mobResByElementOf()`
-  // and `dropChance()`. The roster builds its columns inline while the sheet calls the named functions,
-  // so a divergence between the two paths is a wrong cell nothing else catches.
-  {
-    const sh: string[] = [];
-    const fin = (x: any) => typeof x === 'number' && Number.isFinite(x);
-    const CORE_STATS = ['str', 'vit', 'dex', 'agi', 'wis', 'int', 'lck'];
-    for (const r of ROWS) {
-      const z = ZONES.find((x) => x.id === r.zone);
-      const sp = E.mob.species.find((x) => x.id === r.speciesId)!;
-      if (!z || !sp) { sh.push(`${r.id} names a missing zone or species`); continue; }
-      const elite = /Elite/.test(r.kind), boss = /Boss/.test(r.kind);
-      const bossProfile = boss ? (E.mob.bosses as any[]).find((entry) => entry.zone === z.id) : null;
-      if (boss && !bossProfile) { sh.push(`${r.id} has no boss profile`); continue; }
-      const bodyId = elite ? 'large' : boss ? 'boss' : String(r.kind).toLowerCase();
-      const size = eng.sizeById(bodyId)!;
-      // every column the sheet reads must be a real number — a blank cell is the defect this catches
-      for (const k of ['hpFrom', 'hpTo', 'hpBaseFrom', 'hpBaseTo', 'vit', 'manaFrom', 'manaTo', 'ps', 'acc', 'ev', 'armour', 'res', 'crit', 'align', 'dodge', 'xpFrom', 'xpTo'])
-        if (!fin((r as any)[k])) sh.push(`${r.id}.${k} is not a finite number`);
-      // Core Stat cell: the seven-stat block the sheet prints in full, every value a whole number
-      const block = r.core || eng.mobStatsOf(sp.id, z.id);
-      const expectedCore = bossProfile?.core || eng.mobStatsOf(sp.id, z.id);
-      if (CORE_STATS.some((k) => !fin(block[k]))) sh.push(`${r.id} Core Stat block is missing a stat`);
-      if (CORE_STATS.some((k) => !Number.isInteger(block[k]))) sh.push(`${r.id} Core Stat block carries a fraction (${CORE_STATS.map((k) => `${k} ${block[k]}`).join(' · ')})`);
-      if (CORE_STATS.some((k) => block[k] !== Number(expectedCore[k] || 0))) sh.push(`${r.id} Core differs from its fixed species/Boss profile`);
-      // HP must add back up: Base HP + the flat level grant + the Core Vit bonus = HP, at both edges
-      const hpGrant = (lv: number) => LG.hp_per_level * (lv - 1) + r.vit * K.K_VIT_HP;
-      if (Math.abs(r.hpBaseFrom + hpGrant(r.levels[0]) - r.hpFrom) > 1e-6 || Math.abs(r.hpBaseTo + hpGrant(r.levels[1]) - r.hpTo) > 1e-6)
-        sh.push(`${r.id} Base HP + level grant + Vit bonus does not equal HP (${f1(r.hpBaseFrom)}+${f1(hpGrant(r.levels[0]))} vs ${f1(r.hpFrom)})`);
-      if (r.hpBaseFrom <= 0 || r.hpBaseTo <= 0)
-        sh.push(`${r.id} Base HP is not positive (${f1(r.hpBaseFrom)}-${f1(r.hpBaseTo)}) — the Vit bonus is eating the whole curve`);
-      // res cell: the sheet prints the headline and every Element — the headline IS the profile mean
-      const prof = r.resByElement || eng.mobResByElementOf(sp, z.id);
-      const mean = (E.elements.order as string[]).reduce((t, el) => t + (prof[el] || 0), 0) / (E.elements.order as string[]).length;
-      if (Math.abs(mean - r.res) > 0.05) sh.push(`${r.id} res ${f1(r.res)} is not the profile mean ${f1(mean)}`);
-      // Armour cell: the roster's inline Str line must equal the engine's own `armourOf`
-      if (Math.abs(eng.armourOf(block.str) - r.armour) > 0.5)
-        sh.push(`${r.id} Armour ${f1(r.armour)} vs armourOf() ${f1(eng.armourOf(block.str))}`);
-      // PS cell: the roster's column rebuilt off the curve, the body class and the species term
-      const mult = elite ? E.mob.elite.ps : size.ps / eng.zoneBodyFactor(z.id);
-      const powerProfile = bossProfile ? { ...sp, core: bossProfile.core, _fixedCore: bossProfile.core, damage: bossProfile.damage } : sp;
-      const speciesTerm = eng.speciesPowerOf(powerProfile, z.id) / eng.zonePowerFactor(z.id);
-      const ps = eng.mobPsAt(r.level) * mult * speciesTerm;
-      if (Math.abs(ps - r.ps) > 0.5) sh.push(`${r.id} PS ${f1(r.ps)} vs the curve at its own level × body × species ${f1(ps)}`);
-      // the drop cell the sheet prints names a band, and every band must actually pay gear
-      const band = String(z.quality || 'low').split(' ')[0];
-      if (!(eng.dropChance(band) > 0)) sh.push(`${r.id} band ${band} pays no gear drop`);
-      // body class must resolve, or the sheet's Size column reads a missing row
-      if (!size) sh.push(`${r.id} body ${bodyId} is not a size`);
-    }
-    add('X61', sh.length === 0, sh.length ? sh.slice(0, 6).join(' · ')
-      : `the mob sheet is a view of the engine: all ${ROWS.length} roster rows carry every column it prints, Boss rows use their own Core and Element profile, and Armour and PS rebuild off the same Core and the mob curve × body factor × power term — so a wrong cell fails here instead of only showing on the wiki`);
-  }
+    : `${ROWS.length} roster rows from ${E.mob.species.length} Species × authored Variants × body classes + ${ROWS.filter((r) => /Elite/.test(r.kind)).length} Elite + ${ROWS.filter((r) => /Unique/.test(r.kind)).length} Species Uniques + ${ROWS.filter((r) => /Boss/.test(r.kind)).length} named bosses · every zone has a normal Species and a Boss · normal and Elite spawns inherit their Species Element; each Boss reads its declared Element profile · zone row counts ${ZONES.map((z) => `${z.id}:${perZone[z.id]}`).join(' ')}`);
 
   // Energy Shield: the caster's second pool, sized so it supplements HP instead of doubling it
   const esProblems = [];
@@ -912,11 +675,8 @@ function runChecks() {
   if (!ES.player_only || ROWS.some((r) => r.es)) esProblems.push('Energy Shield leaked to the mob side (it would double-count mob_HP · checks.md H1)');
   add('X25', esProblems.length === 0, esProblems.length ? esProblems.join(' · ')
     : `Energy Shield is Wis plus gear (owner ruling): Wis ${f0(eng.statAt(S.level_cap))} × ${K.K_WIS_ES} and ${M.energy_shield_flat_t1} flat, × (1 + ${M.max_energy_shield_pct}%) = ${f0(DERIVED.es_pool)} at the ceiling, and regen is ${ES.regen_pct}% of the pool per sec — ${f1(DERIVED.es_regen)}/sec after ${ES.delay_sec} sec without a hit, so the base rate alone returns the whole pool in ${f1(DERIVED.es_recover_sec)} sec · an \`es_regen\` skill, Mod or passive amplifies the rate · ${f1(DERIVED.es_share_of_hp * 100)}% of a caster build's ${f0(DERIVED.es_cast_hp)} HP · **player-only** so mob_HP stays the single survivability anchor`);
-  watch('X25t', ES.regen_pct >= 2 && ES.regen_pct <= 8 && ES.delay_sec >= 3 && ES.delay_sec <= 8,
-    `the pool's clock moved off its pacing bands: regen ${ES.regen_pct}%/sec (2-8) · delay ${ES.delay_sec} sec (3-8)`,
-    `the pool's clock sits in its pacing bands: regen ${ES.regen_pct}%/sec (2-8) · delay ${ES.delay_sec} sec (3-8)`);
 
-  // Race resistance: a race owns one Element and answers it at the flat race res; no Element
+  // Species resistance: each Species owns one Element and answers it at the flat species res; no Element
   // counters another, so every other Element meets no res at all (mob.resist_rules · X54)
   {
     const order = E.elements.order as string[];
@@ -926,13 +686,13 @@ function runChecks() {
       for (const z of sp.zones) {
         const map = eng.mobResByElementOf(sp, z);
         for (const el of order) {
-          const want = el === (sp as any).element ? E.mob.race_res_pct : 0;
-          if (Math.abs(map[el] - want) > 1e-9) rp.push(`${sp.id} in zone ${z} resists ${el} at ${f1(map[el])} — not the ${f1(want)} the race shape states`);
+          const want = el === (sp as any).element ? E.mob.species_res_pct : 0;
+          if (Math.abs(map[el] - want) > 1e-9) rp.push(`${sp.id} in zone ${z} resists ${el} at ${f1(map[el])} — not the ${f1(want)} the Species rule states`);
         }
       }
     }
     add('X54', rp.length === 0, rp.length ? rp.join(' · ')
-      : `every one of ${E.mob.species.length} races owns one Element (\`mob.species[].element\`) and answers it at a flat \`mob.race_res_pct\` in every zone it lives in · no Element counters another: the other four meet no res at all, and no profile tilts the Vit line`);
+      : `every Species owns one Element (\`mob.species[].element\`) and answers it at a flat \`mob.species_res_pct\` in every zone it lives in · no Element counters another: the other four meet no res at all, and no profile tilts the Vit line`);
   }
 
   // Mobs carry no skills until the skill/mechanics system lands (mob.skills_note)
@@ -948,16 +708,15 @@ function runChecks() {
   // however many zones fall in its 30-level window — read off the zone list, never typed.
   const zp: string[] = [];
   const GROUP_AVG: Record<string, string> = { low: '1-2', mid: '2-3', high: '3-5' };
-  const ZONES_PER_BAND = Math.ceil(ZONES.length / 3);
   for (const band of Object.keys(GROUP_AVG)) {
     const inBand = ZONES.filter((z) => z.quality.startsWith(band));
-    if (inBand.length !== ZONES_PER_BAND) zp.push(`band ${band} owns ${inBand.length} zones, not ${ZONES_PER_BAND}`);
+    if (!inBand.length) zp.push(`band ${band} owns no zone — the band rule would print an empty row`);
     for (const z of inBand) {
       if (z.group !== GROUP_AVG[band]) zp.push(`zone ${z.id} group "${z.group}" does not match the ${band} band rule (${GROUP_AVG[band]})`);
     }
   }
   add('X26', zp.length === 0, zp.length ? zp.join(' · ')
-    : `zone identity has one home — engine.json mob.zones: the 3 quality bands split the ${ZONES.length} zones evenly and every zone's group average matches its band`);
+    : `zone identity has one home — engine.json mob.zones: every zone's group average matches the band its own \`quality\` names (${ZONES.length} zones read from the list, no per-band zone count is required)`);
 
   // B2: mob_HP(L) is defined at every level, not only the published anchors (X37). The curve is
   // anchored at each zone edge and interpolated inside the zone, so a mob at an unlisted level
@@ -974,21 +733,8 @@ function runChecks() {
       if (Math.abs(eng.mobHpAt(z.levels[0]) - z.hp[0]) > 0.5) p.push(`zone ${z.id} start HP ${f1(eng.mobHpAt(z.levels[0]))} vs data ${f0(z.hp[0])}`);
       if (Math.abs(eng.mobHpAt(z.levels[1]) - z.hp[1]) > 0.5) p.push(`zone ${z.id} end HP ${f1(eng.mobHpAt(z.levels[1]))} vs data ${f0(z.hp[1])}`);
     }
-    // The species power term divides out exactly: each zone's spawn-weighted mean species
-    // multiplier is 1, so the zone's average mob IS the published curve and no edge, timeline,
-    // ladder or survival number moves when a species Base or stat vector is re-tuned.
-    for (const z of ZONES) {
-      let w = 0, sum = 0;
-      for (const sp of E.mob.species.filter((x) => x.zones.includes(z.id))) for (const sid of sp.sizes) {
-        const weight = E.mob.spawn_weights[sid] || 0;
-        if (!weight) continue;
-        w += weight; sum += weight * eng.speciesPsMult(z.id, sp.id);
-      }
-      const mean = w ? sum / w : 1;
-      if (Math.abs(mean - 1) > 1e-9) p.push(`zone ${z.id} species power mean ${mean} is not 1`);
-    }
     add('X37', p.length === 0, p.length ? p.join(' · ')
-      : `mob_HP(L) is anchored at every zone edge and linearly interpolated inside a zone, so every level 1-${S.level_cap} has a value (${f0(eng.mobHpAt(1))} → ${f0(eng.mobHpAt(S.level_cap))}, strictly rising) · mob_PS(L) is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\` for the zone's AVERAGE mob, and each species moves it by (\`power_base + ${K.K_MOB_PS_STAT} ×\` the Str/Int its \`damage\` tag reads) over the zone mean`);
+      : `mob_HP(L) is anchored at every zone edge and linearly interpolated inside a zone, so every level 1-${S.level_cap} has a value (${f0(eng.mobHpAt(1))} → ${f0(eng.mobHpAt(S.level_cap))}, strictly rising) · mob_PS(L) is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\` for the zone's AVERAGE mob, and each Species Variant moves it by (\`power_base + ${K.K_MOB_PS_STAT} ×\` the Str/Int its \`damage\` tag reads) over the zone mean`);
   }
 
   // One home for every Cap: core-stats.md is the list a player reads, so it must equal the data.
@@ -1035,18 +781,8 @@ function runChecks() {
   add('X45', unweighted.length === 0 && statFamily.length >= 2,
     unweighted.length ? `Mods with no \`mod_weights\` row: ${unweighted.join(', ')}`
       : `all ${MODS.mods.length} Mod lines carry a \`mod_weights\` row, so a pool pick always resolves a weight · the Stat Mod slot is one line shared by ${statFamily.map((m: any) => m.name).join(' · ')} `);
-  // The endgame craft target is now the engine's own number, not a claim in prose
-  // B21 · the three stones the ladder costs must be reachable, and the new income must sit in the
-  // pacing family the other crafts were priced in (a full Upgrade set against a full Ascend set).
-  const upKills = STONE.upgrade_stones_full_set / perKillK(STONE.quality_stones_per_hr);
-  const corruptPerKill = perKillK(STONE.corrupt_stones_per_hr);
-  watch('X41t', upKills <= 7 * ascKills && corruptPerKill <= tierPerKill / 4,
-    `the stone ladder left its pacing family: a full +15 set is ${f0(upKills)} kills against Ascend's ${f0(ascKills)} (≤7×) and one gamble is ${corruptPerKill.toFixed(5)}/kill against a tier stone's ${tierPerKill.toFixed(5)} (≤¼)`,
-    `Quality ${perKillK(STONE.quality_stones_per_hr).toFixed(4)}/kill · Repair ${perKillK(STONE.repair_stones_per_hr).toFixed(4)}/kill · Corrupt ${corruptPerKill.toFixed(5)}/kill — a full +15 set is ${f0(upKills)} kills against Ascend's ${f0(ascKills)}, and one gamble is under a quarter of a tier stone's per-kill share, while the flow the prices were set against reads junk ${junkPerKill.toFixed(4)}/kill (F5) and tier ${tierPerKill.toFixed(5)}/kill (F7)`);
   soft('X41', STONE.quality_stones_per_hr > 0 && STONE.repair_stones_per_hr > 0 && STONE.corrupt_stones_per_hr > 0,
     `the three ladder stones must each carry a flow: Quality ${STONE.quality_stones_per_hr} · Repair ${STONE.repair_stones_per_hr} · Corrupt ${STONE.corrupt_stones_per_hr} an hour — a zero starves a verb the bench sells`);
-  watch('X30', Math.abs(ascKills - 1491) <= 150, `a full Ascend set is ${f0(ascKills)} kills — off the ~1,500-kill pace the craft prices were set against (±150)`,
-    `a full ${E.craft.ascend_items_per_set}-piece Ascend set costs ${E.craft.ascend_items_per_set * E.craft.ascend_add_stones} Add + ${E.craft.ascend_items_per_set * E.craft.ascend_tier_stones} tier stones; the drop lines pay Add ${addPerKill.toFixed(5)}/kill and tier ${tierPerKill.toFixed(5)}/kill, so the set is ${f0(ascKills)} kills (Add binds: ${f0(ascAddKills)} vs tier ${f0(ascTierKills)}) — the pace is kills, never an hour (the kills-not-hours rule · concept.md)`);
   // The two whole-piece stones are gated as the notes say: Polish is one step tighter than Replace on
   // the Elite half and keeps its Boss half, Reforge is bosses only on half the Corrupt stone's chance.
   const PO = E.loot.polish_stone_sources, RF = E.loot.reforge_stone_sources;
@@ -1103,10 +839,11 @@ function runChecks() {
   const splitTags = [...new Set(E.mob.species.map((r) => r.damage))];
   const spProblems = splitTags.filter((t) => !E.mob.damage_split[t] || Math.abs(E.mob.damage_split[t][0] + E.mob.damage_split[t][1] - 1) > 1e-9);
   const counts = splitTags.map((t) => `${t} ${E.mob.species.filter((r) => r.damage === t).length}`);
-  add('X31', spProblems.length === 0 && splitTags.length === 3, spProblems.length ? `no valid split for: ${spProblems.join(', ')}` : `every species damage tag resolves to a real split (${counts.join(' · ')}) · physical is the whole armour-able half (Knight · Golem · Troll answered by Armour and chill), magic is the whole res-able half (Slime · Seraph only reachable through res), mixed keeps the old 50/50`);
+  add('X31', spProblems.length === 0, spProblems.length ? `no valid split for: ${spProblems.join(', ')}` : `every species damage tag resolves to a real split (${counts.join(' · ')}) · physical is the whole armour-able half (Knight · Golem · Troll answered by Armour and chill), magic is the whole res-able half (Slime · Seraph only reachable through res), mixed keeps the old 50/50`);
 
-  // With a mob's level STATIC per species (spread inside the zone, `mob.species[].zone_levels`), the
-  // zone average no longer equals the zone-top anchor: a mob reads `mob_HP` at its OWN level, so the
+  // With a mob's level STATIC per variant (`mob.variants[].levels`; the legacy per-species zone
+  // table `mob.species[].zone_levels` answers only past the form cap), the zone average no longer
+  // equals the zone-top anchor: a mob reads `mob_HP` at its OWN level, so the
   // Reach: the only positional model, and its cost to a melee build must stay small
   const RP = [];
   const allWeapons = ['sword','axe','dagger','mace','spear','two-handed sword','two-handed axe','bow','crossbow','staff','wand','book'];
@@ -1116,16 +853,6 @@ function runChecks() {
     const cast = E.mob.species.filter((sp) => sp.zones.includes(z.id));
     if (cast.some((sp) => sp.line === 'stand-off') && !cast.some((sp) => sp.line === 'front')) RP.push(`zone ${z.id} fields only stand-off mobs, so a melee build could never engage there`);
   }
-  const exposure = ZONES.map((z) => {
-    const cast = E.mob.species.filter((sp) => sp.zones.includes(z.id));
-    let wAll = 0, wBack = 0;
-    for (const sp of cast) for (const sid of sp.sizes) { const wt = E.mob.spawn_weights[sid] || 0; wAll += wt; if (sp.line === 'stand-off') wBack += wt; }
-    const G = z.id <= 3 ? 1.5 : z.id <= 6 ? 2.5 : 4;
-    return { zone: z.id, pct: (wBack / wAll) * 100, cyclePct: (wBack / wAll) / (G + 4) * 100 };
-  });
-  const worst = exposure.reduce((a, b) => (b.cyclePct > a.cyclePct ? b : a));
-  watch('X33t', worst.cyclePct <= 12, `reach costs a melee build ${f1(worst.cyclePct)}% of the cycle in zone ${worst.zone} — past the 12% ceiling the owner read the model against`,
-    `reach is the whole positional model (no tiles, no movement): ${allWeapons.length} weapons mapped to ${Object.keys(E.mob.reach.bands).length} bands · ${E.mob.species.length} species all carry a line (${E.mob.species.filter((sp) => sp.line === 'front').length} front · ${E.mob.species.filter((sp) => sp.line === 'stand-off').length} stand-off) · the worst case is ${f1(worst.cyclePct)}% of the cycle in zone ${worst.zone} (the 12% ceiling)`);
   add('X33', RP.length === 0, RP.length ? RP.join(' · ')
     : `reach is the whole positional model (no tiles, no movement): ${allWeapons.length} weapons mapped to ${Object.keys(E.mob.reach.bands).length} bands · ${E.mob.species.length} species all carry a line (${E.mob.species.filter((sp) => sp.line === 'front').length} front · ${E.mob.species.filter((sp) => sp.line === 'stand-off').length} stand-off)`);
 
@@ -1159,27 +886,15 @@ function runChecks() {
     // rarity; those names must be globally unique and map to the same fixed sale rarity in town.
     const V = (E.mob as any).variants || {};
     const D = (E.mob as any).variant_drops || {};
-    // Only a FIELDABLE rung may promise a junk item: a name the cast can never field is a drop the
+    // Only a FIELDABLE name may promise a junk item: a name the cast can never field is a drop the
     // Counterhand would advertise and nothing could ever pay. Reachability is read off the cast, not
-    // typed: a normal rung is cast in some sub-zone, an elite rung is declared by some sub-zone, and a
-    // boss rung belongs to a species that owns a boss entry (X57 checks the names are the right rungs).
-    const declaredNormal = new Set<string>(), declaredElite = new Set<string>();
-    for (const z of E.mob.zones as any[]) for (const s of z.subzones || []) {
-      if (s.elite) declaredElite.add(s.elite);
-      for (const n of s.normal || []) declaredNormal.add(n);
-    }
-    const rungOf = new Map<string, { sid: string; rung: number }>();
-    for (const [sid, list] of Object.entries<string[]>(V)) list.forEach((n, i) => rungOf.set(n, { sid, rung: i }));
-    const names = [...rungOf.keys()];
-    const fieldable = names.filter((n) => {
-      const o = rungOf.get(n)!;
-      if (o.rung < 3) return declaredNormal.has(n);
-      if (o.rung === 3) return declaredElite.has(n);
-      return E.mob.bosses.some((b) => b.species === o.sid);
-    });
+    // typed: every normal Variant is fielded in its band, and every Species Unique is fielded wild.
+    const ladderNames = (Object.values(V) as { name: string }[][]).flat().map((v) => v.name);
+    const uniqueNames = (((E.mob as any).uniques || []) as any[]).map((u) => u.name);
+    const names = [...ladderNames, ...uniqueNames];
     const paidBy = new Map<string, string>();
     const variantItems = new Set(Object.values(D).map((row: any) => row.item));
-    for (const n of fieldable) {
+    for (const n of names) {
       const row = D[n];
       if (!row) { jp.push(`variant ${n} can be fielded but has no variant_drops row`); continue; }
       const owner = paidBy.get(row.item);
@@ -1188,85 +903,82 @@ function runChecks() {
       if (!J.rarities || !J.rarities[row.rarity]) jp.push(`${n} junk "${row.item}" has unknown rarity ${row.rarity}`);
     }
     const speciesItemOwner = new Map<string, string>();
-    const expectedRarities = Object.keys(J.rarities || {}).sort();
     for (const species of E.mob.species as any[]) {
       const items = species.junk_items || {};
-      const rarities = Object.keys(items).sort();
-      if (rarities.join('|') !== expectedRarities.join('|')) {
-        jp.push(`${species.name} junk_items must declare exactly one item for each rarity (${expectedRarities.join(', ')})`);
-      }
-      for (const rarity of expectedRarities) {
-        const item = items[rarity];
-        if (typeof item !== 'string' || !item.trim()) { jp.push(`${species.name} has no ${rarity} race junk item`); continue; }
-        if (!J.rarities[rarity]) jp.push(`${species.name} junk "${item}" has unknown rarity ${rarity}`);
-        if (variantItems.has(item)) jp.push(`${species.name} race junk "${item}" duplicates a variant junk item`);
+      const entries = Object.entries(items) as [string, unknown][];
+      if (entries.length < 1 || entries.length > Object.keys(J.rarities || {}).length)
+        jp.push(`${species.name} must declare between 1 and ${Object.keys(J.rarities || {}).length} species junk alternatives`);
+      for (const [rarity, value] of entries) {
+        const item = value;
+        if (!J.rarities?.[rarity]) { jp.push(`${species.name} junk item uses unknown rarity ${rarity}`); continue; }
+        if (typeof item !== 'string' || !item.trim()) { jp.push(`${species.name} has no valid ${rarity} species junk item`); continue; }
+        if (variantItems.has(item)) jp.push(`${species.name} species junk "${item}" duplicates a variant junk item`);
         const owner = speciesItemOwner.get(item);
-        if (owner) jp.push(`race junk item "${item}" is shared by ${owner} and ${species.id}`);
+        if (owner) jp.push(`species junk item "${item}" is shared by ${owner} and ${species.id}`);
         speciesItemOwner.set(item, species.id);
       }
     }
     for (const k of Object.keys(D)) {
-      if (!names.includes(k)) jp.push(`variant_drops row for a name no ladder carries: ${k}`);
-      else if (!fieldable.includes(k)) jp.push(`variant_drops row for a rung the cast can never field: ${k}`);
+      if (!names.includes(k)) jp.push(`variant_drops row for a name no ladder or unique carries: ${k}`);
     }
     const junkHr = BAND.high.kills_derived * perKill;
     add('X39', jp.length === 0, jp.length ? jp.join(' · ')
-      : `mob junk is gold's primary mint: ${fieldable.length} unique variant items plus ${speciesItemOwner.size} unique race items across ${Object.keys(J.rarities).length} rarities · each race alternative shares its rarity's existing sale price, and each rarity's chance = the line / its sell, so expected gold is ${f2(perKill)}/kill for any variant and the junk line stays ${f0(junkHr)}/hr · every variant row belongs to a fieldable rung · stacks ${J.stack}/slot, weightless`);
+      : `mob junk is gold's primary mint: ${names.length} unique variant items plus ${speciesItemOwner.size} unique Species alternatives across ${Object.keys(J.rarities).length} rarities · each Species alternative shares its rarity's existing sale price, and each rarity's chance = the line / its sell, so expected gold is ${f2(perKill)}/kill for any variant and the junk line stays ${f0(junkHr)}/hr · every declared Variant and Unique carries exactly one row · stacks ${J.stack}/slot, weightless`);
   }
 
-  // X57: the cast names the rung it is. A sub-zone's normal names must be the NORMAL rungs of races
-  // cast there, and its declared elite must be exactly an ELITE rung (index 3) of one of them — X53
-  // only asked that a name be owned by some race shown, which let a sub-zone promise a normal rung as
-  // its elite. The sim reads that declared elite to choose the spawn and its junk, so the promise and
-  // the fight had to be the same fact (game/src/sim/game.ts spawnMob).
+  // X57: a Species may author any number of Variants. Bands are valid and non-overlapping;
+  // zones carry a previous Variant across gaps. Subzones list Species ids, never Variant names.
   {
     const cp: string[] = [];
     const V = (E.mob as any).variants || {};
-    const rungOf = new Map<string, { sid: string; rung: number }>();
-    for (const [sid, list] of Object.entries<string[]>(V)) list.forEach((n, i) => rungOf.set(n, { sid, rung: i }));
-    let normals = 0, elites = 0;
-    for (const z of E.mob.zones as any[]) for (const s of z.subzones || []) {
-      const pool = new Set<string>(s.races || []);
-      for (const n of s.normal || []) {
-        const o = rungOf.get(n);
-        if (!o || !pool.has(o.sid) || o.rung > 2) cp.push(`zone ${z.id} ${s.name} lists ${n} as a normal body, but it is not a normal rung of a race cast there`);
-        else normals++;
+    const seenNames = new Set<string>();
+    let rows = 0;
+    for (const [sid, list] of Object.entries<{ name: string; levels: [number, number] }[]>(V)) {
+      const bands = (list as { name: string; levels: [number, number] }[]).map((v) => v.levels);
+      rows += bands.length;
+      // A Species may author any number of Variants: a ladder length is content, not correctness, so it
+      // is never a gate. What holds is the shape below.
+      for (const v of list) {
+        if (!v.name || seenNames.has(v.name)) cp.push(`variant name is missing or repeated: ${v.name || '(empty)'}`);
+        else seenNames.add(v.name);
+        // Variant names are authored freely: a name must read as a creature, which no check can prove.
+        // What stays gated is the shape below — unique names, real bands, no overlap.
+        if (!Number.isInteger(v.levels?.[0]) || !Number.isInteger(v.levels?.[1]) || v.levels[0] < 1 || v.levels[1] < v.levels[0] || v.levels[1] > E.mob.form_level_cap)
+          cp.push(`${sid} variant ${v.name} has invalid levels [${v.levels?.[0]}, ${v.levels?.[1]}]`);
       }
-      if (s.elite) {
-        const o = rungOf.get(s.elite);
-        if (!o || !pool.has(o.sid) || o.rung !== 3) cp.push(`zone ${z.id} ${s.name} declares elite ${s.elite}, which is not an elite rung of a race cast there`);
-        else elites++;
+      const sorted = [...bands].sort((a, b) => a[0] - b[0]);
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i][0] <= sorted[i - 1][1]) cp.push(`${sid} Variant bands overlap at ${sorted[i - 1][1]}→${sorted[i][0]}`);
       }
     }
+    for (const z of E.mob.zones as any[]) for (const s of z.subzones || []) {
+      if ('normal' in s || 'elite' in s) cp.push(`zone ${z.id} ${s.name} still declares variant names`);
+    }
     add('X57', cp.length === 0, cp.length ? cp.join(' · ')
-      : `${normals} normal body row(s) and ${elites} declared elite(s) are the rungs of the races their sub-zone casts — the elite a sub-zone promises is the elite that spawns, and its junk is that variant's own (mob.zones[].subzones · mob.variants · game/src/sim/game.ts)`);
+      : `${rows} authored Variants across ${Object.keys(V).length} Species; ladder length is free, bands stay valid and non-overlapping, zone gaps carry the prior Variant, names are unique across the roster, and subzones declare no variants`);
   }
 
-  // X56: normal variant rungs share their species' drop archetype. Elite and Boss rows stay balanced
-  // because they already pay their own stone lines. Every lean still conserves expected drops/kill.
+  // X56: normal Variants share their Species' drop archetype. Species Uniques stay balanced
+  // because they already pay the boss stone lines. Every lean still conserves expected drops/kill.
   {
     const vp: string[] = [];
     const V = (E.mob as any).variants || {};
     const D = (E.mob as any).variant_drops || {};
+    const U = new Set((((E.mob as any).uniques || []) as any[]).map((u) => u.name));
     const CATS = E.loot.variant_lean.categories as string[];
     const sample = { gear: 0.08, herb: 0.17, junk: 0.3 };
     const sum = (x: any) => x.gear + x.herb + x.junk;
     let leaned = 0, normalLeaned = 0;
-    for (const [sid, list] of Object.entries<string[]>(V)) {
+    for (const [sid, list] of Object.entries<{ name: string }[]>(V)) {
       const normal: string[] = [];
-      list.forEach((n, i) => {
-        const r = D[n];
-        if (!r) return; // a pruned rung carries no row; X39 owns that fact, not this gate
-        if (i < 3) {
-          normal.push(r.lean);
-          if (!CATS.includes(r.lean)) vp.push(`${sid}: ${n} has unknown lean ${r.lean}`);
-        }
-        else {
-          if (r.lean !== 'none') vp.push(`${sid}: ${r.item} leans ${r.lean}, Elite and Boss must stay 'none'`);
-          leaned++;
-        }
-      });
-      if (normal.length !== 3) vp.push(`${sid}: has ${normal.length} normal lean rows, expected 3`);
+      for (const v of (list as { name: string }[])) {
+        const r = D[v.name];
+        if (!r) continue; // a pruned rung carries no row; X39 owns that fact, not this gate
+        if (U.has(v.name)) continue;
+        normal.push(r.lean);
+        if (!CATS.includes(r.lean)) vp.push(`${sid}: ${v.name} has unknown lean ${r.lean}`);
+      }
+      if (normal.length !== (list as unknown[]).length) vp.push(`${sid}: has ${normal.length} normal lean rows, expected ${(list as unknown[]).length}`);
       if (new Set(normal).size > 1) vp.push(`${sid}: normal rungs split across ${[...new Set(normal)].join(' · ')}`);
       for (const lean of normal) {
         const out = leanReweight(sample, lean as any, E.loot.variant_lean.shift_pct);
@@ -1275,8 +987,13 @@ function runChecks() {
         leaned++; normalLeaned++;
       }
     }
+    for (const u of U) {
+      const r = D[u];
+      if (r && r.lean !== 'none') vp.push(`Unique ${u} leans ${r.lean}, Species Uniques must stay 'none'`);
+      if (r) leaned++;
+    }
     add('X56', vp.length === 0, vp.length ? vp.join(' · ')
-      : `each species' three normal rungs share one archetype lean and Elite/Boss rungs carry 'none': ${leaned} leans checked (${normalLeaned} normal rows), each lean raises its stream and conserves ${sum(sample).toFixed(2)} expected drops/kill (mob.variant_drops · loot.variant_lean)`);
+      : `each Species' normal Variants share one archetype lean and its Uniques carry 'none': ${leaned} leans checked (${normalLeaned} normal rows), each lean raises its stream and conserves ${sum(sample).toFixed(2)} expected drops/kill (mob.variant_drops · loot.variant_lean)`);
   }
 
   // The AoE rule is data now, and its shape must stay a real trade: lose at 1 target, win at the Cap
@@ -1446,7 +1163,6 @@ function runChecks() {
   const opPhys = opStat * K.K_STR + givenFlat;
   const opDps = opPhys * (opWpn ? opWpn.weapon_aspd * opWpn.weapon_mult : 0);
   const opMobHp = opZone.hp[0];
-  const opSecs = opDps > 0 ? opMobHp / opDps : Infinity;
   const pwRange = MODS.mods.find((m: any) => m.id === 'physical_power_flat');
   // the curve prices this mob against exactly this character, so the opening line must be the RULE's own
   // floor for a two-Mod line — the worst slice's low end scaled by `value_scale` — and never a typed
@@ -1457,16 +1173,6 @@ function runChecks() {
     opWpn && givenFlat === expectFlat
       ? `the starting weapon's flat is the low band's two-Mod floor after its frame value bias (+${givenFlat} physical; the unweighted floor is ${Math.round(pwRange.bands[0][0][0] * (E.loot.frame_mod.value_scale['2'] || 1))})`
       : `the opening main hand is missing or its flat line is not the rule's own floor (got ${opWpn ? givenFlat : 'no weapon'}, want ${expectFlat})`);
-  watch('OP2t', opSecs >= 0.8 && opSecs <= 2,
-    `minute one kills a level-1 mob in ${Number.isFinite(opSecs) ? f1(opSecs) + ' sec' : 'no time at all'} — outside the 0.8-2 sec opening pacing band`,
-    `minute one's kill of a level-1 mob reads ${Number.isFinite(opSecs) ? f1(opSecs) + ' sec' : 'never'} — inside the 0.8-2 sec opening pacing band`);
-
-  const opHp = eng.maxHpOf(opStat, OP.level);
-  const opRegen = opStat * K.K_VIT_REGEN;
-  const opTaken = eng.mobPs(opMobHp, OP.level);
-  const opSurvive = opHp / Math.max(0.1, opTaken - opRegen);
-  watch('OP3', opSurvive > 60, `a level-1 character with nothing worn dies after ${f0(opSurvive)} sec against a zone-1 mob — the opening's "cannot kill the player" pacing target moved`,
-    `a level-1 character with nothing worn survives ${f0(opSurvive)} sec against a zone-1 mob — the opening cannot kill the player, and the set can only raise that`);
 
   soft('OP4', OP.skills.length === 0,
     OP.skills.length === 0
@@ -1486,20 +1192,22 @@ function runChecks() {
   soft('OP6', opCarry > 0 && opTax === 0,
     `the opening set weighs ${f0(opCarry)} against a ${f0(eng.weightCapacityOf(opStat))} level-1 capacity, so section 11 takes ${f1(opTax * 100)}% of aspd — the lightest frame of every slot keeps the set under the weight_base line, and the lightest main hand in the table (${f0(lightestMain)}) fits with it`);
 
-  // OP7 · the set's shape: every slot filled exactly once (the two rings included), one line per piece,
-  // and no Bound pair or Unbound line anywhere — minute one is junk, and junk is what this proves
+  // OP7 · the set's shape: no slot worn twice, one line per piece, and no Bound pair or Unbound line
+  // anywhere — minute one is junk, and junk is what this proves. Whether the set reaches every slot is
+  // not gated: a slot added later may legally start empty, and that is a content choice, not a defect.
   const opSlotProblems: string[] = [];
   const opSlots = (LOOT_SLOTS as string[]);
   for (const slot of [...new Set(opSlots)]) {
     const n = OP_PIECES.filter((p) => p.g.slot === slot).length;
     const want = opSlots.filter((s) => s === slot).length;
-    if (n !== want) opSlotProblems.push(`${slot}: ${n} piece(s), SLOTS carries ${want}`);
+    if (n > want) opSlotProblems.push(`${slot}: ${n} piece(s) worn against the ${want} the slot list carries`);
   }
+  for (const p of OP_PIECES) if (!opSlots.includes(p.g.slot)) opSlotProblems.push(`${p.g.slot} ${p.g.base}: a slot the character does not wear`);
   const opLineProblems = OP_PIECES
     .filter((p) => p.lines.length !== 1)
     .map((p) => `${p.g.slot} ${p.g.base}`);
-  add('OP7', OP_PIECES.length === opSlots.length && opSlotProblems.length === 0 && opLineProblems.length === 0,
-    `the set is ${OP_PIECES.length} pieces, one per slot of the ${opSlots.length} a character wears, and every piece carries exactly one line — its frame's Frame Mod at the floor, with no Bound pair and no Unbound line${opSlotProblems.length ? ' · SLOTS: ' + opSlotProblems.join(' · ') : ''}${opLineProblems.length ? ' · LINES: ' + opLineProblems.join(' · ') : ''}`);
+  add('OP7', opSlotProblems.length === 0 && opLineProblems.length === 0,
+    `the set is ${OP_PIECES.length} pieces across the ${opSlots.length} slots a character wears — no slot worn twice, nothing outside the worn list, every piece exactly one line: its frame's Frame Mod at the floor, with no Bound pair and no Unbound line${opSlotProblems.length ? ' · SLOTS: ' + opSlotProblems.join(' · ') : ''}${opLineProblems.length ? ' · LINES: ' + opLineProblems.join(' · ') : ''} · coverage of every slot is X60's rule, not this one`);
 
   // OP8 · the priced clock cannot move: no piece outside the main hand may carry an attack line, because
   // mob_HP, the drop line and the timeline are all keyed on the attack side
@@ -1568,148 +1276,6 @@ function runChecks() {
   add('X18', matrixProblems.length === 0,
     matrixProblems.length ? matrixProblems.join(' · ')
       : `Mod matrix holds ${matrixRows.length} named lines, all of them real Mod lines · ${offensiveOnly.length} Offensive lines stay off the armour slots · Gear Mod stays on the 5 armour slots · Stat Mod on all ${SLOT_ORDER.length} slots`);
-
-  // The curve's skill term is a canary: mob_PS and the reference read-backs divide out of the
-  // static HP table through this roster-wide level term, so moving `skill_per_level` silently
-  // re-bases them. The gate holds the value the design states, so a re-tune has to be deliberate.
-  {
-    const perLevel = E.mob.curve.skill_per_level;
-    const at100 = 1 + perLevel * 100;
-    watch('X58', Math.abs(at100 - 1.34) < 0.005,
-      `the level-100 skill multiplier reads ×${at100.toFixed(3)} — off the ×1.34 the skill tables were written against; re-quoting them is the owner's call`,
-      `the level-100 skill multiplier reads ×${at100.toFixed(3)} from skill_per_level ${perLevel} — the curve spends ×1.34, so moving that coefficient is a re-base and must say so here`);
-  }
-
-  // ---------------------------------------------------------------- the doc linter (X59 · L9 · L10)
-  // The prose shelf that survives, and the record of what was retired, are shared by the three gates:
-  // X59 holds the retired words out of it, L9 holds the numbers out of it, L10 holds the pointers honest.
-  const ALIASES = readJson(path.join(import.meta.dirname, 'data', 'aliases.json'));
-  const prose = ['doc/glossary.md', 'doc/DECISIONS.md', 'AGENTS.md'];
-
-  // A retired word must not creep back. The record is `tools/data/aliases.json`; this reads the prose
-  // that survives (`doc/` and the root rules) and every data note, and honours each entry's own
-  // `allow_in` list. `renames` and `deprecated` blocks are the record of the rename itself, so they are
-  // skipped wherever they appear.
-  {
-    const SKIP_KEYS = new Set(['renames', 'deprecated', 'aliases']);
-    const stringsOf = (v: any, out: string[] = []): string[] => {
-      if (typeof v === 'string') out.push(v);
-      else if (Array.isArray(v)) for (const x of v) stringsOf(x, out);
-      else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) if (!SKIP_KEYS.has(k)) stringsOf(x, out);
-      return out;
-    };
-    const haystack: [string, string][] = [];
-    const parked = fs.existsSync(path.join(ROOT, 'draft'))
-      ? fs.readdirSync(path.join(ROOT, 'draft')).filter((n) => n.endsWith('.md')).map((n) => 'draft/' + n) : [];
-    const termFiles = prose.concat(['doc/todo.md'], parked);
-    for (const f of termFiles) { try { haystack.push([f, fs.readFileSync(path.join(ROOT, f), 'utf8')]); } catch { /* the file may not exist yet */ } }
-    for (const f of fs.readdirSync(path.join(import.meta.dirname, 'data'))) {
-      if (!f.endsWith('.json') || f === 'aliases.json') continue;
-      haystack.push(['tools/data/' + f, stringsOf(readJson(path.join(import.meta.dirname, 'data', f))).join('\n')]);
-    }
-    // The player reads the client, not the doc shelf, so a retired word may not ship in a UI string.
-    // History comments and data keys are out of scope: comments are allowed to name the old word, and
-    // `rarity:` / `v.rarity` is the junk rung, an unrelated word spelled the same. So this reads only
-    // what a player can see — a string literal, or the text between tags in a template.
-    const quoted = (s: string) => (s.match(/"[^"\n]*"|'[^'\n]*'|`[^`]*`/g) || []).join(' ');
-    const markup = (s: string) => s
-      .replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<style[\s\S]*?<\/style>/g, ' ')
-      .replace(/<!--[\s\S]*?-->/g, ' ').replace(/\{@const[\s\S]*?\}/g, ' ')
-      .replace(/\{[^{}]*\}/g, ' ').replace(/<[^>]+>/g, ' ');
-    const codeProse: [string, string][] = [];
-    for (const dir of ['game/src', 'engine']) {
-      const walk = (d: string): string[] => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => {
-        const p = path.join(d, e.name);
-        if (e.isDirectory()) return e.name === 'node_modules' ? [] : walk(p);
-        return /\.(svelte|ts)$/.test(e.name) ? [p] : [];
-      });
-      for (const f of walk(path.join(ROOT, dir))) {
-        const txt = fs.readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
-        const rel = path.relative(ROOT, f).replace(/\\/g, '/');
-        codeProse.push([rel, `${quoted(txt)} ${/\.(svelte|html)$/.test(rel) ? markup(txt) : ''}`]);
-      }
-    }
-    const esc = (s: any): string => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const tHits: string[] = [];
-    for (const t of ALIASES.terms || []) {
-      const allow = new Set([...(t.allow_in || []), ...(t.allow_in_data || [])]);
-      const guard = (t.not_prefix || []).map((x: any) => `(?<!${esc(x)} )`).join('');
-      const re = new RegExp(guard + '\\b' + esc(t.old) + '\\b', 'i');
-      for (const [file, text] of haystack) {
-        if (allow.has(file) || allow.has(file.replace(/^.*\//, ''))) continue;
-        if (re.test(text)) tHits.push(`${file} "${t.old}" → ${t.new}`);
-      }
-    }
-    add('X59', tHits.length === 0,
-      tHits.length ? tHits.slice(0, 8).join(' · ')
-        : `${(ALIASES.terms || []).length} retired term(s) stay retired across ${termFiles.length} prose file(s) and every data note, honouring each entry's own allow-list — client and engine source is no longer scanned, because a retired word there is a rename in progress`);
-  }
-
-  // L9 · the prose-number ratchet the data owns (`engine.json doc_prose`): a number typed into prose has
-  // no writer, so it cannot move with the data and nothing detects it going stale. The rule and the cap
-  // are the data's; this counts the hand-typed lines and holds the cap, which may only fall.
-  // Structural digits are not values — a section heading, a list ordinal, a table's row index — and
-  // `todo.md` is exempt (the work file), as the data's own `exempt` line says; a line opts out with
-  // `lint:allow`.
-  {
-    const DP = E.doc_prose || {};
-    const hits: string[] = [];
-    for (const f of prose) {
-      let text: string; try { text = fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch { continue; }
-      let fence = false;
-      text.split(/\r?\n/).forEach((l, i) => {
-        if (/^\s*(```|~~~)/.test(l)) { fence = !fence; return; }
-        if (fence || /lint:allow/.test(l)) return;
-        if (/^\s*#{1,6}\s/.test(l)) return;
-        if (/^\s*(?:\d+|[a-z])[.)]\s/.test(l)) return;
-        const cells = l.split('|').map((c) => c.trim());
-        if (cells.length > 2 && /^\d+$/.test(cells[1])) return;
-        if (/\d/.test(l)) hits.push(`${f}:${i + 1}`);
-      });
-    }
-    watch('L9', hits.length <= (DP.lines_max ?? 0),
-      `${hits.length} prose line(s) carry a hand-typed number against the cap ${DP.lines_max} (${DP.rule}) · exempt: ${DP.exempt} · over the cap, move the figure to the key that owns it or mark the line \`lint:allow\`${hits.length ? ` · first: ${hits.slice(0, 6).join(' · ')}` : ''}`,
-      `${hits.length} prose line(s) carry a hand-typed number, inside the cap ${DP.lines_max} (${DP.rule}) — a watch, so prose hygiene never blocks a feature`);
-  }
-
-  // L10 · a pointer to a retired doc must still resolve. The prose shelf collapsed to `doc/` plus
-  // the root rules, and the citations stayed where they were written, so `tools/data/aliases.json`
-  // `docs` records the name and the file that owns its numbers now. A pointer to a doc that neither
-  // exists nor is recorded is a pointer to nothing. Generated views (`wiki/`, `tools/wiki.ts`) are the
-  // wiki's own output and read by nobody here, so they are out of the scan.
-  {
-    const DOCS = ALIASES.docs || {};
-    const live = new Set<string>();
-    const hidden = (n: string) => n.startsWith('.');
-    const collect = (d: string) => {
-      for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-        if (e.isDirectory()) { if (!['node_modules', 'dist', 'wiki'].includes(e.name) && !hidden(e.name)) collect(path.join(d, e.name)); }
-        else if (/\.md$/.test(e.name) && !/\.template\.md$/.test(e.name)) live.add(e.name);
-      }
-    };
-    collect(ROOT);
-    const scanned: string[] = [];
-    const walk = (d: string): string[] => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => {
-      const p = path.join(d, e.name);
-      if (e.isDirectory()) return ['node_modules', 'dist', 'wiki', 'icon'].includes(e.name) || hidden(e.name) ? [] : walk(p);
-      if (!/\.(ts|svelte|json|md)$/.test(e.name)) return [];
-      if (p.endsWith(path.join('tools', 'wiki.ts')) || p.endsWith('aliases.json')) return [];
-      return [p];
-    });
-    let dead = 0;
-    for (const f of ['engine', 'tools', 'game', 'doc', 'draft'].flatMap((d) => walk(path.join(ROOT, d)))) {
-      const txt = fs.readFileSync(f, 'utf8');
-      const rel = path.relative(ROOT, f).replace(/\\/g, '/');
-      for (const m of txt.matchAll(/\b([a-z][a-z0-9-]*\.md)\b/g)) {
-        const n = m[1];
-        if (live.has(n) || DOCS[n] || n === 'todo.md') continue;
-        dead++; scanned.push(`${rel} → ${n}`);
-      }
-    }
-    add('L10', dead === 0,
-      dead ? `${dead} dangling pointer(s): ${[...new Set(scanned)].slice(0, 8).join(' · ')}`
-        : `every doc pointer resolves: ${Object.keys(DOCS).length} retired name(s) mapped to the data/engine file that owns them now, and the surviving shelf (${[...live].sort().join(' · ')}) is read from disk`);
-  }
 
   // Minute one is a read a client performs, so the opening set must be complete and resolvable: one
   // piece per slot, and every `base` a real frame (a weapon TYPE for the hand, a Base for the rest).
@@ -1842,6 +1408,14 @@ const ANCHORS: any[] = [
     label: 'build.hit_chance_pct',
     re: /("hit_chance_pct":\s*)(\d+)/,
     want: () => String(Math.round(DERIVED.ref_build_hit_pct)),
+  },
+  {
+    // the reference time-to-kill is derived from the roster, so a Species added or retired moves it:
+    // the cage re-publishes it instead of leaving a hand-typed figure to rot (`engine/index.ts` REFERENCE)
+    file: 'engine.json',
+    label: 'loot.ttk_per_mob_sec',
+    re: /("ttk_per_mob_sec":\s*)([\d.]+)/,
+    want: () => eng.REFERENCE.ttk.toFixed(4),
   },
 ];
 

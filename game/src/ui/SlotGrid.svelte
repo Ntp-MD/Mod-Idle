@@ -290,12 +290,12 @@
 {/if}
 
 <style>
-  .bar { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); align-items: center; margin-bottom: var(--spacing-xs); }
+  .bar { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; margin-bottom: var(--spacing-xs); }
   .lab { color: var(--dim); font-size: var(--font-xs); }
   .spacer { flex: 1; }
-  .bar button { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .bar button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(34px, 2.61vw, 73px), 1fr)); gap: var(--spacing-2xs); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(34px, 2.61vw, 73px), 1fr)); gap: var(--spacing-xs); }
 
   /* The equipment panel: three columns by five rows, no body drawn — the `.` cells are the blanks. */
   .doll {
@@ -308,13 +308,13 @@
       "gloves  belt    earring"
       "ringa   pant    ringb"
       ".       boots   .";
-    gap: var(--spacing-2xs);
+    gap: var(--spacing-xs);
     width: fit-content;
     margin: 0 auto var(--spacing-sm);
   }
   .doll.compact-doll {
     grid-template-columns: repeat(3, calc(var(--icon-xl) - var(--spacing-xs)));
-    margin-bottom: var(--spacing-2xs);
+    margin-bottom: var(--spacing-xs);
   }
 
   .slot {
@@ -341,7 +341,7 @@
   .slot.held { border-style: dashed; border-color: var(--good); }
   .slot.empty { display: flex; align-items: center; justify-content: center; background: var(--inset); border-style: dotted; cursor: default; }
   .slot-glyph { position: absolute; inset: 16%; width: 68%; height: 68%; object-fit: contain; opacity: .2; pointer-events: none; }
-  .slotname { position: relative; font-size: var(--font-xs); color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 var(--spacing-3xs); }
+  .slotname { position: relative; font-size: var(--font-xs); color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 var(--spacing-xs); }
   .slot-icon {
     position: absolute;
     inset: 17%;
@@ -352,12 +352,12 @@
     pointer-events: none;
   }
   .count, .plus { position: absolute; z-index: var(--z-underlay); font-size: var(--font-xs); line-height: 1; }
-  .count { right: var(--spacing-2xs); bottom: var(--spacing-3xs); }
-  .plus { left: var(--spacing-2xs); bottom: var(--spacing-3xs); color: var(--xp); }
+  .count { right: var(--spacing-xs); bottom: var(--spacing-xs); }
+  .plus { left: var(--spacing-xs); bottom: var(--spacing-xs); color: var(--xp); }
 
   .list td, .list th { font-size: var(--font-xs); }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); margin-top: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { padding: var(--spacing-3xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .pager button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
   .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--rar, var(--text)); }
   .list-title img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
@@ -380,5 +380,5 @@
     min-width: clamp(150px, 11.62vw, 324px);
   }
   .plain h4 { margin: 0; }
-  .plain p { margin: var(--spacing-2xs) 0 0; color: var(--dim); }
+  .plain p { margin: var(--spacing-xs) 0 0; color: var(--dim); }
 </style>

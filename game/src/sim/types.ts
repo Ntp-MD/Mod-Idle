@@ -75,13 +75,14 @@ export interface Mob {
   formName?: string;
   /** The lineage's own id, so a per-species rule reads one flag rather than matching a name. */
   speciesId?: string;
-  /** The sub-zone this spawn rolled into: its race pool and one of the zone's own Elements. */
+  /** The sub-zone this spawn rolled into: its Species pool and one of the zone's own Elements. */
   subzone?: string;
   /** The combat subzone's environment, which can add a conserved drop lean. */
   environment?: string;
   /**
-   * The ladder name this spawn rolled (`mob.variants` → `mob.variant_drops`). It owns both the junk
-   * item the mob pays and the stream it leans, so two mobs of one species are not one drop table.
+   * The fixed-level variant name this spawn rolled (`mob.variants` → `mob.variant_drops`), or the
+   * fixed boss/unique name for those ranks. It owns both the junk item the mob pays and the stream
+   * it leans, so two mobs of one species are not one drop table. Elite keeps the rolled variant.
    */
   variant?: string;
   kind: string;
@@ -103,6 +104,8 @@ export interface Mob {
   hp: number;
   hpMax: number;
   ps: number;
+  /** The authored Core selected by the Species Variant (or the boss profile). */
+  core?: Record<string, number>;
   acc: number;
   /** The mob's own evasion rating our accuracy rolls against: its integer Core Dex × K_EVASION × the body base Evasion percent, with no level term. */
   evasion: number;
@@ -110,7 +113,7 @@ export interface Mob {
   dodgeRate: number;
   armour: number;
   res: number;
-  /** Per-Element res from the race profile (X54); the Element half of a swing or skill press reads this. */
+  /** Per-Element resistance from the Species profile (X54); the Element half of a swing or skill press reads this. */
   resByElement?: Record<string, number>;
   damage: 'physical' | 'magic' | 'mixed';
   innate: string[];

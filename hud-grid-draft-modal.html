@@ -112,8 +112,8 @@
                 overflow: hidden;
                 /* the top rung is the label strip: no region's own content starts under the corner tags */
                 display: flex;
-                gap: var(--spacing-2xs);
-                padding: var(--spacing-md) var(--spacing-2xs) var(--spacing-2xs);
+                gap: var(--spacing-xs);
+                padding: var(--spacing-md) var(--spacing-xs) var(--spacing-xs);
                 border: 1px dashed rgba(127, 212, 255, 0.35);
                 border-radius: 8px;
                 background: rgba(127, 212, 255, 0.03);
@@ -130,12 +130,12 @@
             }
             .hub > *::before {
                 content: attr(data-name);
-                top: var(--spacing-2xs);
+                top: var(--spacing-xs);
                 left: var(--spacing-xs);
             }
             .hub > *::after {
                 content: attr(data-cells);
-                top: var(--spacing-2xs);
+                top: var(--spacing-xs);
                 right: var(--spacing-xs);
                 opacity: 0.7;
             }
@@ -223,7 +223,7 @@
                 flex-direction: row;
                 flex-wrap: wrap;
                 align-content: flex-start;
-                gap: var(--spacing-2xs);
+                gap: var(--spacing-xs);
                 padding: var(--spacing-lg) var(--spacing-sm) var(--spacing-sm);
                 border: 1px dashed rgba(255, 199, 120, 0.6);
                 border-radius: 10px;
@@ -240,12 +240,12 @@
             }
             .modals > *::before {
                 content: attr(data-name);
-                top: var(--spacing-2xs);
+                top: var(--spacing-xs);
                 left: var(--spacing-xs);
             }
             .modals > *::after {
                 content: attr(data-cells);
-                top: var(--spacing-2xs);
+                top: var(--spacing-xs);
                 right: var(--spacing-xs);
                 opacity: 0.85;
             }
@@ -264,7 +264,7 @@
             /* a chip is any child of a region or a modal: the parent's flex decides where it lands */
             .chip {
                 flex: none;
-                padding: var(--spacing-3xs) var(--spacing-xs);
+                padding: var(--spacing-xs) var(--spacing-xs);
                 border: 1px solid var(--edge);
                 border-radius: 6px;
                 background: var(--glass);

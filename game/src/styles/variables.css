@@ -70,6 +70,7 @@
     --rail: clamp(46px, 3.19vw, 88px);
 
     --screen-pad: var(--spacing-md);
+    --pad-area: 20px;
     --bar-h: clamp(12px, 0.87vw, 22px);
 
     --minimap-size: clamp(100px, 7.74vw, 216px);
@@ -143,14 +144,11 @@
     --icon-hub-img: 50%;
     --slot-skill-size: clamp(30px, 4vw, 70px);
     --field-card-size: clamp(125px, 8.63vw, 180px);
-    --spacing-xs: clamp(5px, 0.39vw, 11px);
-    --spacing-sm: clamp(8px, 0.63vw, 18px);
-    --spacing-md: clamp(13px, 0.97vw, 27px);
-    --spacing-lg: clamp(18px, 1.36vw, 38px);
-    --spacing-xl: clamp(26px, 2.03vw, 57px);
-
-    --spacing-2xs: clamp(2px, 0.15vw, 4px);
-    --spacing-3xs: clamp(1px, 0.10vw, 3px);
+    --spacing-xs: 3px;
+    --spacing-sm: 5px;
+    --spacing-md: 10px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
     --seam: 1px;
 
     --sheet-fs-region: clamp(9px, 0.54vw, 15px);

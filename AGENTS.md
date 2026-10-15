@@ -1,114 +1,97 @@
 # Agent Rules — ModWorld
 
-The working contract: where truth lives, what an agent may do without asking, and where it stops. Design detail is not here — this file routes to it.
+ModWorld is a single-player, browser-only open-world idle RPG with no server. Players grind monsters, assemble builds from drops, and earn progress while the window is open or closed. `docs/DECISIONS.md` records design decisions; this file defines the agent's working rules.
 
-An open-world idle RPG: grind monsters, assemble a build from dropped items, earn with the window open or shut. Single-player, in the browser, no server. The whole design is one file: `doc/DECISIONS.md`.
+## Operating Principles
 
-## Where things live
+- **Correctness and preservation come first.** Complete the requested task with minimal unnecessary elapsed time, tokens, and tool calls; never trade away required verification.
+- **Use the local working tree as the source of truth.** Graphify and history provide context, not authority. Follow existing owner decisions; do not silently replace them.
+- **Keep exploration proportional.** Locate relevant files with targeted searches, batch independent lookups when useful, and expand only when evidence calls for it. Reuse verified findings; reread files when changed, incomplete, or context was lost.
+- **Match planning to risk.** Implement trivial, unambiguous changes directly. For cross-layer, risky, or ambiguous work, make a concise plan before editing. A feature request authorizes related data, engine, sim, UI, tests, and docs; routine implementation choices need no extra approval.
+- **Make coherent edits.** Avoid repeated status checks, speculative refactors, needless subagents, and retry loops. Parallelize only independent tasks with nonoverlapping file ownership. When retries produce no new evidence, reassess the cause.
+- **Verify efficiently.** Run focused checks first, then required broader checks for affected layers. Do not rerun passing checks without a relevant change. Review the final diff and acceptance criteria; stop once complete.
+- **Communicate briefly.** Report decisions that need input, substantive findings, changes, verification, and unresolved issues—not routine tool narration.
 
-| Home | Owns |
-|---|---|
-| `engine/` | the shared math, pure over the data: `index.ts` (stat model, combat lines) · `loot.ts` · `craft.ts` · `skills.ts` · `mastery.ts` · `farm.ts` · `tree.ts` |
-| `tools/data/` | every number, one file per domain — see the table below |
-| `tools/` | the cages, their shared readers (`lib/engine.ts` · `lib/roster.ts` · `lib/skillmodel.ts` · `lib/json.ts`) and the entry points that print numbers on demand |
-| `game/` | the client: `src/engine/client.ts` (the same JSON, the same `createEngine`) · `src/sim/` (tick, combat, drops, offline) · `src/state/save.ts` · `src/ui/` · `tests/` |
-| `wiki/` | the player-facing pages — the static build of `game/src/wiki/pages.ts`. An output, never a source: rebuild it, never hand-edit it |
-| `doc/` | the surviving prose — the design `DECISIONS.md` · `glossary.md` · `stone-list.md` — and the work file `todo.md`, which exists only while a task is open (its absence is normal) |
-| root | `AGENTS.md` |
+## Repository Map
 
-| Data file | Owns |
-|---|---|
-| `engine.json` | stat model · K values · caps · loot · mod weights · craft · status · herbs · farm · potions · skill drop · mob species, zones, bosses · elements · timeline · inventory · reach · junk · dungeon · imprint |
-| `mods.json` | Mod value ranges, quality bands, the drop weight of each line |
-| `town.json` | prices · rosters · stock · Standing · Collector sets · the board's `task_sizing` |
-| `skills.json` | roster · reserve tiers · formula · renames |
-| `tree.json` | the passive tree's spec |
-| `bases.json` | Base frames per slot · weight · Primary / Secondary pools · Gear Mod school · the per-type Line-1 and weapon pools. The source: nothing parses a doc into it |
-| `map.json` | the field's cells, terrain, ground colours and regions |
-| `aliases.json` | renamed terms (gate X59) and retired docs pointing to their current homes (gate L10) |
+| Location        | Responsibility                                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `engine/`       | Shared, data-driven math: `index.ts` (stats/combat), `loot.ts`, `craft.ts`, `skills.ts`, `mastery.ts`, `farm.ts`, `tree.ts` |
+| `tools/data/`   | Canonical numeric and game content data; see ownership table                                                                |
+| `tools/`        | Cages, reports, and shared readers: `lib/engine.ts`, `lib/roster.ts`, `lib/skillmodel.ts`, `lib/json.ts`                    |
+| `game/`         | Browser client: `src/engine/client.ts` (same JSON and `createEngine`), `src/sim/`, `src/state/save.ts`, `src/ui/`, `tests/` |
+| `docs/`         | `DECISIONS.md`, `glossary.md`, `stone-list.md`, and generated player wiki `docs/wiki/`                                      |
+| Repository root | `AGENTS.md`                                                                                                                 |
 
-File names stay lowercase with hyphens. Never create `skill.md`, `skills.md` or `SKILL.md` for game content, or a `.opencode/skills/` pattern — those names are reserved for agentic skills and get auto-loaded as instructions.
+### Data ownership — `tools/data/`
 
-Gate output is the run record; do not add transcript files.
+| File          | Owns                                                                                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `engine.json` | Stat model, K, caps, loot, mod weights, craft, status, herbs, farm, potions, skill drops, mobs/zones/bosses, elements, timeline, inventory, reach, junk, dungeon, imprint |
+| `mods.json`   | Mod ranges, quality bands, drop weights                                                                                                                                   |
+| `town.json`   | Prices, rosters, stock, Standing, Collector sets, `task_sizing`                                                                                                           |
+| `skills.json` | Skill roster, reserve tiers, formulas, renames                                                                                                                            |
+| `tree.json`   | Passive tree specification                                                                                                                                                |
+| `bases.json`  | Base frames/slots, weights, Primary/Secondary pools, Gear Mod schools, Line-1 and weapon pools; hand-maintained—never generated by parsing docs                           |
+| `map.json`    | Field cells, terrain, ground colours, regions                                                                                                                             |
 
-## Commands
+Numerical game rules belong in `tools/data/<domain>.json`, never duplicated as literals in `engine/` or `game/src/`. Use lowercase hyphenated names for new game-content files. Do not create `skill.md`, `skills.md`, `SKILL.md`, or `.opencode/skills/` for game content; those names/paths are reserved for agent skills. Gate output is the run record; do not create transcript files.
 
-Run from `<repo root | game/ | tools/>`.
+## Context and Authorization
 
-- Install: `pnpm install`
-- Client dev server: `pnpm dev` (port `5173` only)
-- Tests: `pnpm test` (`game/tests/`)
-- Typecheck: `pnpm typecheck`
-- Cages: `pnpm verify`
-- Print reports: `pnpm skills`, `pnpm gallery`, or the relevant `tools/` entry point
+- Check `docs/glossary.md` before creating, renaming, or interpreting game terminology; use current names. Consult only relevant sections of `docs/DECISIONS.md`.
+- Update `DECISIONS.md` when an implementation changes or establishes a design rule. Do not add redundant notes for routine implementation details.
+- Ask before changes that materially alter requested behavior or scope, override an owner ruling, add dependencies, or introduce unsafe/lossy save changes. Otherwise make routine decisions and proceed without extra approval. Optional skills create no approval gates.
 
-## Before You Start
+## Commands and Environment
 
-- Treat the current local working tree as the source of truth. Use Graphify and Git history as context only; if either conflicts with the current local files or uncommitted changes, preserve and follow the local implementation.
-- Read `doc/glossary.md` before touching any game term. Use current names only; retired words live in `tools/data/aliases.json`.
-- Read only the `DECISIONS.md` section relevant to the task, not the whole file.
-- Check `doc/todo.md` for the current work item. Update it when you finish or defer something.
+Windows + PowerShell; use forward slashes in code paths. Available commands (run from the applicable repository root, `game/`, or `tools/` package):
 
-## Authorized Scope and Autonomy
+- Development: `pnpm install`, `pnpm dev` (**port 5173 only**).
+- Checks: `pnpm test` (`game/tests/`), `pnpm typecheck`, `pnpm verify`.
+- Content/reports: `pnpm wiki`, `pnpm skills`, `pnpm gallery`, or the relevant `tools/` entry point.
 
-- A feature request authorizes related data, engine, simulation, UI, tests and documentation changes. Keep layers consistent; update `DECISIONS.md` as part of implementation. Do not override explicit owner rulings.
-- Choose routine details and state minor assumptions. Ask only about unresolved choices that materially affect behavior, scope, existing saves or owner rules; inspect first and do not re-ask settled questions.
-- When behavior is clear, implement and verify without another approval gate. For substantial uncertainty, write a proportionate plan. Optional skills cannot add approval gates to authorized work; higher-priority instructions still apply.
+Before starting a dev server, check `Get-NetTCPConnection -LocalPort 5173`. Reuse the existing server; never start a second instance or kill an existing process merely to reclaim that port.
 
-## Verification
+## Verification by Change Type
 
-- Numbers belong in `tools/data/<domain>.json`, never hardcoded in `engine/` or `game/src/`. `bases.json` is hand-maintained; never generate it from a doc.
-- Update `DECISIONS.md` when a change alters a design rule.
-- Gameplay/data changes: cages, tests and typecheck. UI changes: typecheck, relevant tests and interaction/visual checks when behavior or layout changes. Docs-only changes: check the text and diff; skip unrelated game checks.
-- Rebuild `wiki/` with `pnpm wiki` when data, engine behavior, wiki source or player-facing wiki rules change. The build refreshes data reads, not hand-written prose.
+- **Gameplay/data:** run relevant cages, tests, and typecheck; expand checks when shared behavior changes.
+- **UI:** run typecheck and relevant tests. For behavior/layout changes, verify actual interactions and appearance in the integrated browser at **1920 × 1080**.
+- **Docs-only:** check content and diff; no gameplay suite unless the change affects generated content or code.
+- **Wiki:** run `pnpm wiki` when data, engine behavior, wiki source, or player-facing rules change. `docs/wiki/*.html` is generated from `game/src/wiki/pages.ts`; rebuild, never hand-edit.
+- Tests verify system correctness, **not prescribed balance**. Do not encode pacing bands, price pace, tuned windows, or content counts (minimum or maximum) as gates.
+- Before finishing, inspect the diff and check the requested acceptance criteria. Never skip essential safety, regression, migration, or visual checks to save time.
 
-## UI Workflow
+## UI Workflow and Architecture
 
-- Begin UI work in the integrated browser at `http://localhost:5173/__showcase#showcase-field`. The Showcase renders the real game components with sample state and exposes panels that are normally hidden; open the relevant section and any affected tabs or collapsed controls while reviewing.
-- Pair the Showcase with `http://localhost:5173/__showcase#panel-hud-layout-studio` for HUD layout work. The Studio positions live HUD groups on the same grid and controls the shared modal canvas; its Apply action updates the Showcase preview, while applying from the real game saves the layout.
-- Keep the Showcase and game on the same `.svelte` components and CSS. Let Vite HMR update both; do not create mirrored showcase components or duplicate styles.
-- When adding or moving a HUD group, include its current contents in the Studio, wire it to the shared `HudLayout`, and verify Apply changes the live field preview at 1920 × 1080. Inspect the affected Showcase states and Studio together so the same surfaces do not need a separate repeat audit.
+- Use the **integrated browser** only. Inspect real components with HMR at `http://localhost:5173/__showcase#showcase-field`; do not build mirrors or duplicate styles.
+- For HUD work, also use `#panel-hud-layout-studio`: **Studio Apply** previews; **game Apply** saves. Verify changes move the live region at **1920 × 1080**.
+- All new/moved HUD groups use shared `HudLayout`: `HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT`, and matching values in `App.svelte`. New regions backfill defaults for older layouts. Do not position regions via CSS-only coordinates; keep Studio descriptions current.
+- Field map interactions support pointer and keyboard: arrow keys select adjacent Block, Enter walks or warps through a known Waypoint, and selections are announced.
+- `tools/data/map.json` owns layout; `tools/map.ts` generates overlay SVG. **Never read `map.json` in `engine/` or `game/src/`.** One tab holds an exclusive Web Lock for writes; other tabs are read-only until takeover. Without Web Locks, saving stays disabled.
+- Character sheet composition belongs to `game/src/sim/player.ts`, formulas to `engine/index.ts`, and numbers to data JSON; do not duplicate these responsibilities.
 
-## Dev Server
+### Design tokens and sizing
 
-- Use only port `5173`. Check it before starting: `Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue`.
-- Reuse the existing server. Never start a second server, switch ports, or kill the existing process to free the port.
-- For Playwright/browser checks, use the IDE's integrated browser at `http://localhost:5173` only. Set the viewport to `1920 × 1080` (16:9); do not launch a separate browser.
+**Read `game/src/styles/variables.css` before changing CSS.** Use shared tokens for repeatable values; one-off art effects may remain local.
 
-## Sizing
+- Fonts: `--font-xs`, `--font-sm`, `--font-md`, `--font-lg`, `--font-xl`.
+- Icons/images: `--icon-xs`, `--icon-sm`, `--icon-md`, `--icon-lg`, `--icon-xl`.
+- Spacing: `--spacing-xs` (3px), `--spacing-sm` (5px), `--spacing-md` (10px), `--spacing-lg` (20px), `--spacing-xl` (30px). `--seam` is a 1px hairline, **not** spacing.
+- Radii: `--radius-xs` (4px, compact), `--radius-sm` (8px, standard/cards), `--radius-md` (12px, panels), `--radius-round` (50%, circles/capsules). No one-off radii or responsive radius ramps.
+- Colors, shadows, motion, easing, and stacking come from `variables.css`. Use local `--z-underlay`–`--z-toast` and named app-wide `--z-*` tokens as applicable; use established fast/UI/map/travel motion values. Recurring colors become shared tokens.
+- Use an exact matching token, otherwise the nearest existing token; do not invent one-off shared-size values. `--icon-hub`, `--slot-skill-size`, and `--pad-area` are HUD-only.
+- Raw values under 5px are permitted for shadows, blurs, borders, outlines, and letter-spacing; **never** hardcode `gap`, `padding`, or `margin`. No raw component CSS dimensions ≥5px where a size token is required.
+- For component-specific responsive sizing only, use bounded `clamp(<floor>px, <preferred vw>, <ceiling>px)` based on 2066px design width, whole-pixel bounds, and slopes with at most two decimals. No global multiplier: Grid Area owns position, tokens own dimensions.
+- Ask before introducing/changing a shared token or design figure. UI sizing is complete only when there are no unbounded ramps or prohibited raw sizes.
 
-Source of truth: `game/src/styles/variables.css`. Read it before writing or editing any CSS.
+## Data, Saves, and Git Boundaries
 
-- Use semantic size tokens for shared dimensions. A component-specific size may use its own bounded `clamp()`.
-  - Font size: `--font-xs` · `--font-sm` · `--font-md` · `--font-lg` · `--font-xl`
-  - Icon, image: `--icon-xs` · `--icon-sm` · `--icon-md` · `--icon-lg` · `--icon-xl`
-  - Padding, margin, gap: `--spacing-3xs` · `--spacing-2xs` · `--spacing-xs` · `--spacing-sm` · `--spacing-md` · `--spacing-lg` · `--spacing-xl` — the ladder runs from 2px to 42px at about ×1.62 a step
-  - Border radius: `--radius-xs` (4px) · `--radius-sm` (8px) · `--radius-md` (12px) · `--radius-round` (50%, circles and capsules)
-  - `--seam` is a 1px hairline that sits against a 1px border. It is not a spacing step and never scales. Do not use it for `gap`, `padding` or `margin`; use the spacing ladder, including `--spacing-3xs` for the tightest gap.
-- A shadow, a blur, a border, an outline and a letter-spacing may keep a hardcoded figure under 5px. A `gap`, `padding` or `margin` may not — those are on the ladder, and a frozen 3px next to a panel that grew 35% is a different gap than the one that was designed.
-- Responsive sizes use bounded width values in their own token or component rule: `clamp(<floor>px, <preferred vw>, <ceiling>px)`. Calibrate the preferred value against the 2066px design width.
-- Keep floor and ceiling values as whole pixels. Viewport slopes may use two decimal places. Do not introduce a global multiplier such as `--ui-scale`; Grid Area owns position, and semantic size tokens own dimensions.
-- If a component size exactly matches an existing bounded token, reference that token instead of copying its `clamp()`. Use a component-specific `clamp()` only when no existing token represents that dimension. No token fits exactly: use the nearest existing token. Do not add a new token for a one-off value.
-- Do not reintroduce the retired `--box-*` scale. Use the existing semantic tokens for shared font, icon, spacing, and radius dimensions; use bounded component-local `clamp()` values for content widths and other one-off dimensions.
-- Use the shared semantic color tokens in `variables.css` for recurring text, surface, status and item-rank colors. Keep one-off translucent overlays, blends and visual effects local; do not mint a shared token for a single effect.
-- HUD-only dimensions such as `--icon-hub` and `--slot-skill-size` belong in `variables.css` and must not be reused outside the HUD.
-- Ask first: adding a shared size token or changing an existing token's design figure.
-- Done when: no `--ui-scale` remains, no unbounded viewport-size ramp is used, and no raw fixed size of 5px or more appears in component CSS.
+- Rename data files/keys only together with all readers, writers, validators, and docs. Ask first if doing so breaks saves, imports/exports, or external consumers.
+- Extend saves through `game/src/state/save.ts` with automatic, meaning-preserving migration; verify old-save loading, migration, and round-trip. Ask first for lossy or unsafe changes.
+- Never fold tree power into `mob_HP`.
+- Never commit, push, or pull unless explicitly asked. For any "replace all" operation, establish which side wins. If asked to commit, format messages as `<type: short summary>`.
 
-## Boundaries
+## Completion Standard
 
-- Always: keep the HUD Layout Studio and the live HUD linked through one `HudLayout`. Every movable live HUD region must have a `HudRegionId`, appear in `HUD_REGION_META` and `DEFAULT_HUD_LAYOUT`, be positionable in the Studio, and use the same `hudLayout` values in `App.svelte`. Do not place a movable live HUD region with CSS-only coordinates outside that layout. Keep the Studio's descriptions and palette current with the controls inside each group. When adding a region, fill it from its default when loading older saved layouts so existing custom positions survive; verify that applying it in the Studio moves the live region.
-- Within the requested scope: rename internal data files or keys when all readers, writers, validators, and documentation are updated together. Ask first if the rename breaks saved data, import/export compatibility, or external consumers.
-- Within the requested scope: extend the save format in `game/src/state/save.ts` with automatic migration that preserves existing player data and its meaning. Verify loading older saves, migration, and round-trip save/import behavior. Ask first for changes that discard data, reinterpret existing data, or cannot migrate safely.
-- Ask first before adding a dependency or overriding an owner ruling. Existing authorization for that exact action is sufficient.
-- Never fold passive-tree power into `mob_HP`; read `map.json` from `engine/` or `game/src/`; or create `skill.md`, `skills.md`, or `SKILL.md` for game content.
-
-## Git
-
-- Never commit, push, or pull unless asked.
-- "Replace all" means `<one line: which side overwrites which, and how>`.
-- Commit format: `<type: short summary>`.
-
-## Environment
-
-- Windows, PowerShell commands; forward slashes in code paths.
+Finish when requested behavior is implemented, affected layers remain consistent, required checks pass (or failures are clearly reported), docs/generated output are updated when applicable, and no unrelated changes remain. Report the result concisely and stop.

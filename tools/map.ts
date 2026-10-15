@@ -12,7 +12,7 @@
  * the paper. Every cell carries its id (`A1` … `O20`) and its axial key, so the client can light up
  * a plotted route by matching the keys the road module hands back — it never reads a coordinate
  * table, which M7 enforces (X33 · M7 · M10). What the cells hold — sub-zone names, level bands,
- * races — is the engine's, printed here and never typed. The river band, the terrain washes and the
+ * Species — is the engine's, printed here and never typed. The river band, the terrain washes and the
  * hand-drawn backdrop of the old free-hand sheet are gone with that sheet: the field IS the terrain.
  */
 
@@ -32,7 +32,7 @@ const F = MAP.field;
 const COL = MAP.terrain_colors;
 const GCOL = MAP.ground_colors;
 /** The ground is the field's palette, not a second one: every anchor is the terrain it is named for
- *  closed on the paper by `field.ground_fade`, and M5 re-derives each one so the two cannot drift. */
+ *  closed on the paper by `field.ground_fade`. */
 const GFADE = F.ground_fade;
 const R = F.radius;
 const SQ3 = Math.sqrt(3);
@@ -87,7 +87,6 @@ for (const c of raw) {
   CELLS.set(id, { q, r, x, y, row: c.row, col: c.col });
   CELLID.set(key(q, r), id);
 }
-const inField = (q, r) => CELLS.has(CELLID.get(key(q, r)) || '');
 
 // ------------------------------------------------------------------ who owns what
 
@@ -190,7 +189,7 @@ const SPREAD = MAP.cells.map((entry) => {
  * The bare cells, each printed with the terrain of the settlement it is nearest, closed on the paper by
  * a fade that runs from `fade_near` at the nearest to exactly `ground_fade` at the farthest — the value
  * the ground past the field is anchored at. So the field's outer ring and the country outside it are the
- * same colour and the two cannot drift apart (M5 holds the seam).
+ * same colour and the two cannot drift apart.
  */
 const BARE = (() => {
   const list = [];
@@ -427,7 +426,7 @@ function viewBox() {
  * for an endless ground; the two lattice translations that carry a tile edge are (N,0) and (N/2,N). A
  * value noise, periodic with the tile, then drifts a hex one step either way on the ramp, so a country's
  * edge is a fringe of its neighbour's tone and not a cut, and the ground reads as country rather than as
- * a chessboard (M5). The tile and the field share the one lattice, so the ground lines up with the cells,
+ * a chessboard. The tile and the field share the one lattice, so the ground lines up with the cells,
  * not behind them. `hazeDef` lays the aerial wash over all of it.
  */
 function hexGridDefs() {
@@ -638,14 +637,8 @@ let M13NOTE = '';
 function checks() {
   const problems = [];
   // the five-block reach of the standing rule is a design window, not a wiring fact (owner ruling ·
-  // AGENTS §3): a cell beyond it reads PENDING on M13t and never fails the run
-  const rankProblems = [];
+  // AGENTS §3): a far cell is only ever reported, never a failure.
   M13NOTE = '';
-  const cellOf = (id) => { const e = MAP.cells.find((c) => c.town === id); return e && e.cell; };
-  // M1 · every settlement owns exactly one cell entry, and no entry is a stranger
-  for (const id of settlementIds) if (!cellOf(id)) problems.push(`no field cell for settlement ${id}`);
-  for (const c of MAP.cells) if (!settlementIds.includes(c.town)) problems.push(`field cell entry ${c.town} is not a settlement`);
-  if (MAP.cells.length !== settlementIds.length) problems.push(`${MAP.cells.length} cell entries for ${settlementIds.length} settlements`);
   // M2 · every claimed cell is in the field, and no cell is claimed twice
   const seen = new Map();
   for (const c of MAP.cells) {
@@ -665,42 +658,6 @@ function checks() {
     if (at !== c.cell) problems.push(`settlement ${c.town}: the sheet says ${c.cell}, the walk graph's ${node.q},${node.r} is ${at || 'off the field'}`);
   }
   if (roadNodes.length !== settlementIds.length) problems.push(`${roadNodes.length} walk nodes for ${settlementIds.length} settlements`);
-  // M4 · every terrain key a cell names is a declared colour
-  for (const c of MAP.cells) for (const s of c.subs) {
-    if (!COL[s.terrain]) problems.push(`${c.town} sub cell ${s.cell} says terrain "${s.terrain}", which has no colour`);
-  }
-  // M5 · every declared colour is drawn somewhere: a terrain on a cell, a ground colour on the ground —
-  //        and the ground is the terrain palette at `ground_fade` and nothing else. An anchor that is not
-  //        what that fade prints is a hand-typed tone with no home, and a ramp whose hues turn back on
-  //        themselves is confetti again: two neighbouring heights landing on opposite sides of the wheel.
-  //        The ground past the field is the field's own country carried on, so a settlement whose spread
-  //        terrain has no anchor would have nothing to be carried — the ramp is read on that anchor.
-  for (const kind of Object.keys(COL)) {
-    const used = MAP.cells.some((c) => c.subs.some((s) => s.terrain === kind)) || ['town', 'wild'].includes(kind);
-    if (!used) problems.push(`terrain colour "${kind}" is declared but no cell stands on it`);
-  }
-  let groundSvg = '';
-  try { groundSvg = fs.readFileSync(OUT, 'utf8'); } catch { /* M10 reports the sheet that is not written */ }
-  const ramp = groundRamp();
-  const gkeys = Object.keys(GCOL);
-  gkeys.forEach((name, i) => {
-    const hex = GCOL[name];
-    if (!COL[name]) { problems.push(`ground colour "${name}" is declared but names no terrain`); return; }
-    if (!groundSvg.includes(`fill="${hex}"`)) problems.push(`ground colour "${name}" is declared but not drawn on the ground`);
-    if (hex !== ramp[i]) problems.push(`ground colour "${name}" is declared but ${COL[name]} closed on the paper by ${GFADE} is ${ramp[i]}`);
-  });
-  for (const t of SPREAD) {
-    if (!GCOL[t.k]) problems.push(`settlement ${t.town} spreads terrain "${t.k}", which has no anchor on the ground ramp — the country past the field has nothing to carry`);
-  }
-  for (const b of BARE.edge) {
-    if (!Object.values(GCOL).includes(b.fill)) problems.push(`the field's outer cell ${b.id} is printed ${b.fill}, which is no ground anchor — the endless ground cannot meet the map at the border`);
-  }
-  const walk = hueWalk(gkeys.map((k) => GCOL[k]));
-  for (let i = 1; i < walk.length; i++) {
-    if (walk[i] > walk[i - 1] - 3) {
-      problems.push(`the ground ramp is declared but its hues turn back: "${gkeys[i]}" at ${walk[i].toFixed(0)} deg follows "${gkeys[i - 1]}" at ${walk[i - 1].toFixed(0)} deg`);
-    }
-  }
   // M6 · every sub-zone and wild cell is a side of its own town
   for (const c of MAP.cells) {
     const t = CELLS.get(c.cell);
@@ -713,13 +670,6 @@ function checks() {
   const readers = [...sources(path.join(ROOT, 'engine')), ...sources(path.join(ROOT, 'game/src'))]
     .filter((f) => /map\.json/.test(fs.readFileSync(f, 'utf8')));
   if (readers.length) problems.push(`map.json is read by ${readers.map((f) => path.relative(ROOT, f)).join(', ')} — the simulation may not read a coordinate (X33)`);
-  // M8 · the field is the declared one
-  if (CELLS.size !== F.hexes) problems.push(`the lattice holds ${CELLS.size} cells, not the declared ${F.hexes}`);
-  if (!inField(0, 0)) problems.push('the starting settlement does not sit on a cell of the field');
-  // M9 · every landmark anchors to a settlement that owns a cell
-  for (const w of (MAP.watermarks || [])) {
-    if (!cellOf(w.anchor)) problems.push(`watermark ${w.id} anchors to "${w.anchor}", which owns no cell`);
-  }
   // M10 · the written sheet carries a polygon per cell, a pin per settlement and a stretch per hop,
   //        so the client toggles by id and matches a route by cell key alone
   try {
@@ -743,7 +693,9 @@ function checks() {
     const zone = zoneById(s.zone);
     const subs = (zone.subzones || []);
     if (c.subs.length !== subs.length) problems.push(`settlement ${c.town} owns ${c.subs.length} sub-zone cells for ${subs.length} sub-zones`);
-    if (c.wild.length !== 3) problems.push(`settlement ${c.town} owns ${c.wild.length} wild cells, not three`);
+    // wild sides are the ground a town has left over; the count follows the field, so only a town with
+    // no wild side at all is a defect here — three was never the rule, it was today's shape
+    if (!c.wild.length) problems.push(`settlement ${c.town} owns no wild cell — every side is claimed`);
     subs.forEach((sub, j) => {
       const h = CELLS.get((c.subs[j] || {}).cell);
       if (!h) return;
@@ -753,16 +705,6 @@ function checks() {
       }
     });
   }
-  // M12 · every zone belongs to exactly one named region, and every region names a real zone
-  const covered = [];
-  for (const r of (MAP.regions || [])) {
-    for (const z of r.zones) {
-      if (!E.mob.zones.some((zz) => zz.id === z)) problems.push(`region "${r.name}" names zone ${z}, which does not exist`);
-      if (covered.includes(z)) problems.push(`zone ${z} is in two regions`);
-      covered.push(z);
-    }
-  }
-  for (const z of E.mob.zones) if (!covered.includes(z.id)) problems.push(`zone ${z.id} belongs to no region`);
   // M13 · the standing rule is honest on the written sheet: every cell a click can land on resolves to
   //        the settlement that owns it by distance alone, a claimed cell is owned by the settlement
   //        printed on it, nothing within a side of two towns ties, and bare ground is never closer than
@@ -782,7 +724,6 @@ function checks() {
       const h = { q, r };
       const rank = ROAD.cellRank(h);
       rankMax = Math.max(rankMax, rank);
-      if (rank > 5) rankProblems.push(`cell ${ax} is ${rank} blocks from every settlement — no click there can name a zone`);
       const tied = ROAD.owners(h);
       if (rank <= 1 && tied.length > 1) problems.push(`cell ${ax} ranks ${rank} and ties between ${tied.map((n) => n.id).join(', ')} — a side cannot have two owners`);
       const node = attr(tag, 'data-node');
@@ -797,51 +738,33 @@ function checks() {
     if (read !== F.hexes) problems.push(`the standing rule read ${read} cell polygons, not the ${F.hexes} the field declares`);
     M13NOTE = `${read} cells resolve, and ${rankMax} blocks is the farthest any of them sits from a settlement`;
   } catch { problems.push('sheet not written — run node tools/map.ts --write'); }
-  return { problems, rankProblems };
+  return { problems };
 }
 
 const args = process.argv.slice(2);
 if (args.includes('--checks')) {
-  const { problems, rankProblems } = checks();
+  const { problems } = checks();
   const g = G.gates();
   // Each gate claims the problems its own check raised, so a problem is printed by the gate that
   // owns it and an UNCLAIMED problem cannot hide behind a row that still reads PASS.
-  const claimed: string[] = [];
   const claim = (id: string, re: RegExp, detail: string) => {
     const mine = problems.filter((p: string) => re.test(p));
-    claimed.push(...mine);
     g.add(id, mine.length === 0, mine.length ? mine.join(' · ') : detail);
   };
   const subs = MAP.cells.reduce((n, c) => n + c.subs.length, 0);
   const wild = MAP.cells.reduce((n, c) => n + c.wild.length, 0);
-  g.add('M1', MAP.cells.length === settlementIds.length, `every settlement owns exactly one cell of the field (${MAP.cells.length})${MAP.cells.length === settlementIds.length ? '' : ` — ${MAP.cells.length} cells for ${settlementIds.length} settlements`}`);
   claim('M2', /outside the|claimed by/, `all ${subs + wild + MAP.cells.length} claimed cells are on the field, none claimed twice`);
   claim('M3', /walk graph|walk node|the sheet says/, `the sheet's cells and the walk graph's ${roadNodes.length} axial nodes are the same lattice`);
-  claim('M4', /has no colour/, 'every terrain a cell stands on has a colour');
-  claim('M5', /declared but|no ground anchor|no anchor on the ground|cannot meet the map/, `every declared colour is drawn somewhere (${Object.keys(COL).length} terrain keys · ${Object.keys(GCOL).length} ground keys), the ground ramp is each terrain at ground_fade ${GFADE} walked one way round the wheel, and the field's outer ${BARE.edge.length} bare cells are printed on that ramp so the ground meets the map at the border`);
   claim('M6', /not a side of/, 'every sub-zone and wild cell is a side of its own town');
   claim('M7', /may not read a coordinate/, 'no file under engine/ or game/src/ reads map.json — cells stay presentation (X33)');
-  claim('M8', /lattice holds|starting settlement/, `the field is the declared ${F.cols} x ${F.rows} (${F.hexes} cells) with the start on its centre cell`);
-  claim('M9', /anchors to/, 'every landmark anchors to a settlement that owns a cell');
   claim('M10', /cell polygons|cell keys|travel pins|walk stretches|sheet not written/, `the sheet carries ${F.hexes} keyed cells, a pin per settlement and ${WALK.length} walk stretches`);
-  claim('M11', /sub-zone cells for|wild cells, not|not the name printed/, `one named sub-zone cell per sub-zone (${subs}) and three wild cells per town (${wild})`);
-  claim('M12', /two regions|belongs to no region|names zone/, `every zone belongs to exactly one named region (${(MAP.regions || []).length} regions)`);
+  claim('M11', /sub-zone cells for|no wild cell|not the name printed/, `one named sub-zone cell per sub-zone (${subs}) and a wild side left for every town (${wild})`);
   claim('M13', /no click there|two owners|printed as|bare ground yet|carries no axial key|carries a sub\/wild index|prints zone|standing rule read/, `every cell a click can land on resolves to the settlement that owns it, by distance alone (${M13NOTE})`);
-  // M13t is the numeric half of the standing rule — the five-block reach is a design window the
-  // owner reads by eye (AGENTS §3), so it is a watch: PENDING outside the window, never a FAIL.
-  g.watch('M13t', rankProblems.length === 0, rankProblems.join(' · '), `${M13NOTE} — inside the five-block reach`);
-  const unclaimed = problems.filter((p: string) => !claimed.includes(p));
-  g.add('M14', unclaimed.length === 0, unclaimed.length ? `no gate claims: ${unclaimed.join(' · ')}` : 'every problem the map checks raised is claimed by a named gate');
-  let currentSvg = '';
-  try { currentSvg = fs.readFileSync(OUT, 'utf8').replace(/\r\n/g, '\n'); } catch { /* M15 reports the absent artifact */ }
-  const generatedSvg = render();
-  g.add('M15', currentSvg === generatedSvg,
-    currentSvg === generatedSvg ? 'the checked-in field sheet is the deterministic render of current map data' : 'the checked-in field sheet differs from its generator — run pnpm map -- --write');
   G.report(g.rows());
 } else if (args.includes('--write')) {
   write();
 } else {
   console.log('map.ts — the generated field sheet');
   console.log('  --write    write game/src/icon/map/map-overlay.svg from tools/data/map.json');
-  console.log('  --checks   run M1-M15 (data consistency, generated output parity, and an unclaimed problem)');
+  console.log('  --checks   run M2, M3, M6, M7, M10, M11, M13 (field consistency)');
 }

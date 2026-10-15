@@ -447,7 +447,7 @@ export function castOnce(
   const pool = usableMana(c, s);
   // §14: the two facts every row's own condition list is read against — the front target's kind and
   // our own pool. They are resolved once per tick, not once per row, so a wide group costs nothing extra
-  const condBoss = env.isBoss ?? String(group[0].kind).startsWith('Boss');
+  const condBoss = env.isBoss ?? (String(group[0].kind).startsWith('Boss') || String(group[0].kind).startsWith('Unique'));
   const condMissingHp = env.missingHpPct || 0;
   // §13: a row with no timer of its own is the FILLER — it presses only after every timed slot has had
   // its chance, so a cd-0 row can never take the mana the rotation's real slots are waiting on
@@ -622,16 +622,16 @@ export function castOnce(
       // the pool term is the mob's own maximum, so it is added after the press: a hit on a body with
       // more HP hits harder, and a boss takes its own reduced share of it
       const poolTerm = pctPool > 0
-        ? t.hpMax * (pctPool / 100) * (t.kind.startsWith('Boss') ? (E.max_hp_press.boss_pct / 100) : 1)
+        ? t.hpMax * (pctPool / 100) * ((t.kind.startsWith('Boss') || t.kind.startsWith('Unique')) ? (E.max_hp_press.boss_pct / 100) : 1)
         : 0;
       const share = (i === 0 ? dmg : dmg * AOE_PCT_PER_EXTRA_TARGET) + poolTerm;
       const elemPart = magicBasis > 0 ? share * ((c.elem * (c.alignment / 100)) / magicBasis) : 0;
       const cut = env.mobStatus ? (targetMods(mobModsOn(env.mobStatus, t.id)).armourCut || 0) : 0;
       const stripped = env.curses ? lineValue(env.curses, t.id, 'mob_elemental_resistance_pct') : 0;
       const pierced = pierce ? -((t.res || 0) * (pierce.value / 100)) : 0;
-      // the press's Element share meets the race's per-Element res (X54) exactly as a swing's does:
+      // the press's Element share meets the Species' per-Element resistance (X54) exactly as a swing's does:
       // the share is split by the character's own Element mix, or by the mob's innate when the build
-      // carries no named pool, so a race that shrugs fire and fears cold answers each pool on its own.
+      // carries no named pool, so a Species that shrugs fire and fears cold answers each pool on its own.
       let elemArg: number | Record<string, number> = elemPart;
       if (elemPart > 0) {
         const byEl: Record<string, number> = {};

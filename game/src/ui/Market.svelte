@@ -115,12 +115,12 @@
   .panes { display: grid; grid-template-columns: minmax(clamp(188px, 14.52vw, 405px), 1fr) 1.6fr; gap: var(--spacing-md); align-items: start; }
   @media (max-width: 1023px) { .panes { grid-template-columns: 1fr; } }
   .pane { display: grid; gap: var(--spacing-xs); align-content: start; min-width: 0; }
-  .pane > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-2xs); }
+  .pane > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-xs); }
   .pane h4 { margin: 0; }
   .count { font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
 
-  .junk { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-3xs); font-size: var(--font-xs); }
-  .junk li { display: flex; justify-content: space-between; gap: var(--spacing-sm); padding: var(--spacing-3xs) var(--spacing-xs); background: color-mix(in srgb, var(--panel) 55%, transparent); border-radius: var(--radius-sm); }
+  .junk { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-xs); font-size: var(--font-xs); }
+  .junk li { display: flex; justify-content: space-between; gap: var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-xs); background: color-mix(in srgb, var(--panel) 55%, transparent); border-radius: var(--radius-sm); }
   .junk li span { color: var(--dim); }
   .junk li b { font-family: var(--num); color: var(--text); }
   .act { justify-self: start; }
@@ -129,7 +129,7 @@
   /* a ware is a card: what it is, what it costs in minutes and in gold, and the one press it takes */
   .wares { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(125px, 9.68vw, 270px), 1fr)); gap: var(--spacing-xs); }
   .ware {
-    display: grid; gap: var(--spacing-3xs); align-content: start;
+    display: grid; gap: var(--spacing-xs); align-content: start;
     padding: var(--spacing-xs) var(--spacing-sm);
     background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-sm);
   }
@@ -140,7 +140,7 @@
   .ware h5 { margin: 0; font-size: var(--font-sm); color: var(--text); }
   .ware .kind { margin: 0; font-size: var(--font-xs); color: var(--dim); }
   .ware .mins { margin: 0; font-size: var(--font-xs); color: var(--mob); }
-  .ware .price { margin: var(--spacing-3xs) 0 0; font-family: var(--num); font-size: var(--font-sm); color: var(--gold); }
+  .ware .price { margin: var(--spacing-xs) 0 0; font-family: var(--num); font-size: var(--font-sm); color: var(--gold); }
   .ware .price i { font-family: var(--ui); font-size: var(--font-xs); font-style: normal; color: var(--dim); }
   .ware .short { font-size: var(--font-xs); color: var(--alarm); }
   .buy { justify-self: start; border-color: color-mix(in srgb, var(--gold) 45%, transparent); color: var(--gold); }

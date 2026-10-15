@@ -190,8 +190,8 @@
 
 <style>
   .board { display: grid; gap: var(--spacing-sm); }
-  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-2xs); }
-  .tb { display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-2xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); }
+  .tb { display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
   .tb b { font-family: var(--num); color: var(--dim); font-weight: 500; }
   .tb.here { border-color: var(--gold); color: var(--gold); background: var(--surface-selected); }
   .tb.here b { color: var(--gold); }
@@ -199,19 +199,19 @@
   .shared { font-size: var(--font-xs); color: var(--mob); letter-spacing: clamp(0px, 0.05vw, 1px); }
 
   .grids { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); }
-  .side { display: grid; gap: var(--spacing-2xs); align-content: start; }
+  .side { display: grid; gap: var(--spacing-xs); align-content: start; }
   .side header { display: flex; align-items: baseline; gap: var(--spacing-xs); justify-content: space-between; }
   .side h4 { margin: 0; }
   .count { font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
   .count.alarm { color: var(--alarm); }
 
   .grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(32px, 2.52vw, 70px), 1fr)); gap: var(--spacing-2xs);
-    padding: var(--spacing-3xs);
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(32px, 2.52vw, 70px), 1fr)); gap: var(--spacing-xs);
+    padding: var(--spacing-xs);
     /* one cell is one piece, so an empty row of the grid is a gap in the warehouse rather than a message */
   }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { font-size: var(--font-xs); padding: var(--spacing-3xs) var(--spacing-xs); }
+  .pager button { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
   .pager button:disabled { opacity: .4; }
   /* an empty side says so across the whole shelf, not down one cell's width */
   .grid p { grid-column: 1 / -1; max-width: clamp(325px, 25.17vw, 702px); font-size: var(--font-xs); }
@@ -224,17 +224,17 @@
   .cell.lock { border-style: dashed; border-color: var(--dim); }
   .cell.here { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(232, 193, 105, .5); background: rgba(232, 193, 105, .1); }
 
-  .bulk { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); align-items: center; }
-  .bulk select, .bulk button { font-size: var(--font-xs); padding: var(--spacing-3xs) var(--spacing-xs); }
+  .bulk { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; }
+  .bulk select, .bulk button { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
 
   .draw {
     display: grid; grid-template-columns: minmax(clamp(225px, 17.47vw, 486px), clamp(300px, 23.28vw, 648px)) 1fr; gap: var(--spacing-md); align-items: start;
     border-top: 1px solid var(--line); padding-top: var(--spacing-sm);
   }
-  .moves { display: grid; gap: var(--spacing-2xs); justify-items: start; }
+  .moves { display: grid; gap: var(--spacing-xs); justify-items: start; }
   .go { border-color: rgba(232, 193, 105, .5); color: var(--gold); }
   .lk { font-size: var(--font-xs); }
-  .moves p { margin: var(--spacing-3xs) 0 0; color: var(--dim); max-width: clamp(425px, 32.91vw, 918px); }
+  .moves p { margin: var(--spacing-xs) 0 0; color: var(--dim); max-width: clamp(425px, 32.91vw, 918px); }
 
   @media (max-width: 1280px) {
     .grids, .draw { grid-template-columns: 1fr; }

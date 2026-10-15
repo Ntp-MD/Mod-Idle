@@ -80,7 +80,7 @@
     min-width: clamp(100px, 7.74vw, 216px);
     max-width: clamp(188px, 14.52vw, 405px);
     display: flex; flex-direction: column;
-    padding: var(--spacing-2xs);
+    padding: var(--spacing-xs);
     background: var(--panel);
     border: 1px solid var(--line);
     box-shadow: 0 0 22px rgba(0, 0, 0, .65);
@@ -90,7 +90,7 @@
     display: flex; align-items: baseline; gap: var(--spacing-xs);
     justify-content: space-between;
     text-align: left;
-    padding: var(--spacing-2xs) var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-xs);
     font-size: var(--font-xs);
     background: none;
     border: 1px solid transparent;

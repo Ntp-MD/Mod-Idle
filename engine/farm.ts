@@ -27,9 +27,9 @@ export function createFarm(E: EngineData) {
   /** Herb bundles roll on their own line: mid zones 2%, high zones 3%, 1-3 of the zone's tier. */
   const herbChance = (band: string) => (band === 'high' ? H.high_chance : band === 'mid' ? H.mid_chance : 0);
   /**
-   * The humanoid tribes drop a potion on their own roll (the owner's potion-tribe items). The chance
+   * Explicit potion-source Species drop a potion on their own roll (the owner's potion-source items). The chance
    * is DERIVED, never typed: the band's own herb stream (its chance x the average bundle) divided by
-   * that band's potion herb cost, so a humanoid kill is worth the provisioning of the herb bundle an
+   * that band's potion herb cost, so an eligible Species is worth the provisioning of the herb bundle an
    * ordinary kill would have dropped. The farm stays the primary source and the mobs supplement it;
    * a band with no herb stream at all (low) therefore has no mob potion source either.
    */

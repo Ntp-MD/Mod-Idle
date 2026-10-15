@@ -18,7 +18,7 @@
 <style>
   /* The compact run read sits below the vital and skill cluster. */
   .expbar {
-    position: relative; flex: none; width: 100%; height: max(var(--bar-h), calc(var(--font-xs) + var(--spacing-2xs)));
+    position: relative; flex: none; width: 100%; height: max(var(--bar-h), calc(var(--font-xs) + var(--spacing-xs)));
     display: flex; align-items: center; gap: var(--spacing-sm); padding: 0 var(--spacing-sm);
     background: linear-gradient(180deg, rgba(12, 16, 23, .9), rgba(8, 11, 16, .97));
     border-top: 1px solid color-mix(in srgb, var(--gold) 30%, var(--edge));
@@ -29,7 +29,7 @@
     color: var(--gold); font: inherit; font-weight: 600; white-space: nowrap;
   }
   .track {
-    position: relative; flex: 1; height: max(var(--bar-h), calc(var(--font-xs) + var(--spacing-3xs) + var(--seam))); min-width: 0;
+    position: relative; flex: 1; height: max(var(--bar-h), calc(var(--font-xs) + var(--spacing-xs) + var(--seam))); min-width: 0;
     border-radius: var(--radius-round); background: rgba(255, 255, 255, .08); border: 1px solid var(--edge); overflow: hidden;
   }
   .track i { position: absolute; top: 0; bottom: 0; left: 0; width: 100%; border-radius: var(--radius-round); background-image: linear-gradient(90deg, var(--xp), var(--xp-lit)); transform: scaleX(var(--progress)); transform-origin: left center; transition: transform var(--motion-ui); }

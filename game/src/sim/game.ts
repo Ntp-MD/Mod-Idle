@@ -43,7 +43,7 @@ const BAND_OF_QUALITY = (quality: string): string =>
 const MOB_CLOCK_FLOOR = E.mob.attack_clock_per_sec;
 const MOB_CLOCK_CAP = 1 / E.caps.attack_interval_sec;
 const mobClock = (kind: string, mult = 1) =>
-  Math.min((kind.startsWith('Boss') ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal) * mult, MOB_CLOCK_CAP);
+  Math.min(((kind.startsWith('Boss') || kind.startsWith('Unique')) ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal) * mult, MOB_CLOCK_CAP);
 
 /** What the character carries besides gear: potions, condensed bottles and herbs all weigh. */
 export function heldWeaponName(s: GameState): string | null {
@@ -209,11 +209,14 @@ const bossInZone = (zoneId: number): any => {
   return _bossByZone.get(zoneId);
 };
 
-/**
- * What one spawn's ladder name pays: its row in `mob.variant_drops`, which owns the base junk item,
- * its rarity and the stream the mob leans. The species can supply a same-rarity alternative item.
- * A spawn whose name carries no row drops no junk, which is why the caller guards on `null`.
- */
+/** A boss-class kill: the clock Boss or a wild Species Unique. Both pay the boss lines. */
+export const isBossKind = (k: string) => k.startsWith('Boss') || k.startsWith('Unique');
+const _uniquesBySpecies = new Map<string, any[]>();
+const uniquesInSpecies = (speciesId: string): any[] => {
+  if (!_uniquesBySpecies.has(speciesId)) _uniquesBySpecies.set(speciesId, eng.uniquesOf(speciesId));
+  return _uniquesBySpecies.get(speciesId)!;
+};
+/** One spawn's variant name pays its `mob.variant_drops` row: base junk item, rarity, lean. */
 function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | 'herb' | 'junk' | 'none' } | null {
   if (!mob || !mob.variant) return null;
   return (((E.mob as any).variant_drops || {})[mob.variant]) || null;
@@ -238,36 +241,41 @@ function pickBody(rng: () => number, bodies: string[], pack: Record<string, numb
 function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null): Mob {
   const z = eng.zoneById(zoneId);
   const zonePool = speciesInZone(zoneId);
-  // a sub-zone is what a spawn table rolls against: it names its own race pool and one Element from the
+  // a sub-zone is what a spawn table rolls against: it names its own species pool and one Element from the
   // zone's set, and the cast a normal or Elite spawn draws from that pool (the boss is zone-level).
   // Standing on a cell that has a sub-zone written into it hunts that sub-zone; anywhere else the zone's
   // own cast rolls, evenly (`road.standing_rule`).
   const subs = z.subzones || [];
   const stood = standSub != null && subs[standSub] ? subs[standSub] : null;
   const sub = kind !== 'boss' && subs.length ? (stood || subs[Math.floor(rng() * subs.length)]) : null;
-  const speciesPool = sub ? zonePool.filter((sp: any) => sub.races.includes(sp.id)) : zonePool;
+  const speciesPool = sub ? zonePool.filter((sp: any) => sub.species.includes(sp.id)) : zonePool;
+  // past the form cap the variant bands stop: spawns read the legacy per-species zone level (frozen)
+  const frozen = (z.levels as number[])[0] > E.mob.form_level_cap;
+  let rank: string = kind;
   let bossProfile: any = null;
   let body = 'medium';
   let species = pick(rng, speciesPool);
+  let variant: { name: string; levels: [number, number]; core: Record<string, number> } | null = null;
+  let fixedName: string | null = null;
+  const rollVariant = (sp: any) => pick(rng, eng.variantsInZone(sp.id, zoneId)) || null;
   if (bodyHint) {
     const able = speciesPool.filter((sp: any) => sp.sizes.includes(bodyHint));
     species = pick(rng, able.length ? able : speciesPool);
     body = bodyHint;
+    variant = rollVariant(species);
   } else if (kind === 'boss') {
     const boss = bossInZone(zoneId)!;
     bossProfile = boss;
     species = E.mob.species.find((sp: any) => sp.id === boss.species)!;
     body = 'boss';
+    fixedName = boss.name;
   } else if (kind === 'elite') {
-    // an Elite is always forced to the Large body (engine.json mob.elite.note), and its NAME is the
-    // sub-zone's declared elite — the cast the bestiary promises is the cast that spawns, so an elite
-    // pays the junk of the variant it shows rather than of whatever large body the roll landed on
-    const declared = sub ? sub.elite : null;
-    const owner = declared
-      ? (E.mob.species as any[]).find((sp: any) => ((((E.mob as any).variants || {})[sp.id] || []) as string[])[3] === declared)
-      : null;
-    species = owner || pick(rng, speciesPool.filter((sp: any) => sp.sizes.includes('large')));
+    // an Elite is always forced to the Large body (engine.json mob.elite.note), and it keeps the
+    // rolled variant's NAME — Elite is a rank over that variant, never a separate rung
+    const large = speciesPool.filter((sp: any) => sp.sizes.includes('large'));
+    species = pick(rng, large.length ? large : speciesPool);
     body = 'large';
+    variant = rollVariant(species);
   } else {
     const groupable = speciesPool.filter((sp: any) => sp.sizes.includes('small') || sp.sizes.includes('medium'));
     species = pick(rng, groupable.length ? groupable : speciesPool);
@@ -275,60 +283,72 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     // Medium, a brute side the other way, and bare ground rolls the plain even mix it always rolled
     const pack = sub ? ((E.mob as any).spawn_packs?.[(sub.spawn || {}).pack || ''] || null) : null;
     body = pickBody(rng, species.sizes.filter((s: string) => s !== 'boss' && s !== 'large'), pack);
+    variant = rollVariant(species);
+    // A species may have no wild unique or several; choose only after its rare proc lands.
+    const uniques = uniquesInSpecies(species.id);
+    if (uniques.length && rng() < (E.loot.unique_chance || 0)) {
+      rank = 'unique';
+      bossProfile = uniques.length === 1 ? uniques[0] : pick(rng, uniques);
+      body = 'boss';
+      fixedName = bossProfile.name;
+      variant = null;
+    }
   }
-  const base = eng.spawnAt(zoneId, playerLevel, body, species.id, bossProfile);
-  // the spawn's level is the species' own static level in this zone (`mob.species[].zone_levels`):
-  // a spawn never follows the attacker's level, so every line below — the Elite's HP and PS, the
-  // mob card's level, the drop's item level — reads the one level the engine priced the shape at
+  const top: [number, number] = [(z.levels as number[])[1], (z.levels as number[])[1]];
+  const base = eng.spawnAt(zoneId, playerLevel, body, species.id, bossProfile,
+    rank === 'unique' ? top : (variant && !frozen ? variant.levels : null),
+    rank === 'unique' ? null : (variant ? variant.core : null));
+  // the spawn's level is the variant's own fixed level (`mob.variants[].levels`): a spawn never
+  // follows the attacker's level, so every line below — the Elite's HP and PS, the mob card's
+  // level, the drop's item level — reads the one level the engine priced the shape at
   const lv = base.level;
   const size = eng.sizeById(body)!;
   // body classes no longer scale HP: every mob of a species reads the same curve at its own level,
   // so the boss takes the same spawn shape any mob of its species takes
   const flat = eng.LG.hp_per_level * (lv - 1) + base.vit * eng.K.K_VIT_HP;
-  const hp = kind === 'elite'
+  const hp = rank === 'elite'
     ? (eng.mobHpAt(lv) + flat) * E.mob.elite.hp // the Elite multiplier rides the same curve the engine adds its flat terms to
     : base.hp;
   const psMult = eng.speciesPsMult(zoneId, species.id);
   // the Elite swaps the Large body's own ps factor for its multiplier; the boss keeps the spawn
   // shape whole (the zone-mean divide included), exactly like any other body of its species
-  const ps = kind === 'elite' ? base.ps / size.ps * E.mob.elite.ps : base.ps;
+  const ps = rank === 'elite' ? base.ps / size.ps * E.mob.elite.ps : base.ps;
   // Normal and Elite spawns inherit the species Element; a Boss reads its own declared profile.
   const innate = base.innate;
-  // the ladder name is its own roll over the species' three normal rungs (Elite and Boss take the fourth
-  // and fifth), and it is what the drop table reads: `mob.variant_drops` keys on this name. Drawn last
-  // on purpose — every field above keeps the random stream it had, so a variant is purely additive.
-  const ladder = (((E.mob as any).variants || {})[species.id] || []) as string[];
-  const variant = kind === 'boss' ? ladder[4]
-    : kind === 'elite' ? (sub?.elite || ladder[3])
-      : pick(rng, ladder.slice(0, 3));
+  // the variant name is the drop table's key (`mob.variant_drops`): the rolled fixed-level variant
+  // for normal and Elite alike — an Elite pays the junk of the variant it shows — and the fixed
+  // boss/unique name for those ranks. Drawn last on purpose — every field above keeps the random
+  // stream it had, so a variant is purely additive.
+  const variantName = fixedName || (variant ? variant.name : species.name);
   return {
     id: `${zoneId}_${species.id}_${body}_${Math.floor(rng() * 1e9)}`,
     species: species.name,
     speciesId: species.id,
     formName: base.formName,
-    variant,
+    variant: variantName,
     trait: base.trait,
     environment: sub?.environment,
-    kind: kind === 'boss' ? `Boss · ${(bossInZone(zoneId) || { name: 'Boss' }).name}` : kind === 'elite' ? 'Elite' : size.name,
+    kind: rank === 'boss' ? `Boss · ${(bossInZone(zoneId) || { name: 'Boss' }).name}` : rank === 'unique' ? `Unique · ${fixedName}` : rank === 'elite' ? 'Elite' : size.name,
     zone: zoneId,
     level: lv,
     hp,
     hpMax: hp,
     ps,
+    core: base.core,
     subzone: sub ? sub.name : undefined,
     readsAs: base.readsAs,
     acc: base.acc,
-    evasion: kind === 'elite' ? eng.mobEvasion(eng.coreOf(species, 'dex', zoneId), 'elite') : base.evasion,
+    evasion: kind === 'elite' ? eng.mobEvasion(base.core.dex, 'elite') : base.evasion,
     dodgeRate: base.dodgeRate,
     armour: base.armour,
     res: base.res,
     resByElement: base.resByElement,
     damage: base.damage,
     innate,
-    xp: kind === 'elite' ? base.xp * E.xp.elite_mult : kind === 'boss' ? base.xp * E.xp.boss_mult : base.xp,
+    xp: rank === 'elite' ? base.xp * E.xp.elite_mult : rank === 'boss' ? base.xp * E.xp.boss_mult : rank === 'unique' ? base.xp * E.xp.unique_mult : base.xp,
     line: species.line,
     immune: base.immune, weak: base.weak, burst: base.burst, mechanics: base.mechanics,
-    hitsPerSec: mobClock(kind, base.clock_mult),
+    hitsPerSec: mobClock(rank, base.clock_mult),
     atkTimer: 0,
     engageSec: 0,
   };
@@ -533,6 +553,7 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   payMastery(s, heldWeaponName(s)); // 4 XP per kill to the weapon actually held
   // a skill piece is its own drop stream (engine.json skill_drop)
   const skillRate = mob.kind.startsWith('Boss') ? E.skill_drop.boss
+    : mob.kind.startsWith('Unique') ? E.skill_drop.unique
     : mob.kind === 'Elite' ? E.skill_drop.elite : E.skill_drop.normal;
   if (rng() < skillRate) {
     const g = grantSkill(s.skills, rng);
@@ -567,7 +588,7 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     }
   }
   const junkScale = pJunkBase > 0 ? hw.junk / pJunkBase : 1;
-  // Junk is a gold mint, not a gold drip. Only the variant's rarity rolls, and its race's alternative
+  // Junk is a gold mint, not a gold drip. Only the Variant's rarity rolls, and its Species alternative
   // has the same sale value. Reuse the successful rarity roll to choose the item, so this stream still
   // consumes exactly one draw per rarity and every later roll in the tick keeps its prior sequence.
   if (vdrop) {
@@ -591,12 +612,13 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   const herbHad = s.dungeon ? { ...s.farm.herbs } : null;
   const potionHad = s.dungeon ? { ...s.farm.potions } : null;
   rollHerbs(s, rng, band, band, hw.herb);
-  // the humanoid tribes drop a potion on their own roll (items 2 + 4); an ordinary lineage does not
-  const dropsPotion = !!E.mob.species.find((sp: any) => sp.id === (mob as any).speciesId)?.humanoid;
-  if (dropsPotion && rollPotion(s, rng, band, true)) push(s, `A humanoid drops a potion`);
+  // Potion eligibility is an explicit species permission, independent of its Family.
+  const potionSource = !!E.mob.species.find((sp: any) => sp.id === (mob as any).speciesId)?.potion_source;
+  if (potionSource && rollPotion(s, rng, band, true)) push(s, `A potion drops`);
   if (s.dungeon && herbHad && potionHad) escrowProvisions(s, herbHad, potionHad);
-  if (mob.kind === 'Elite') {
-    // the elite stone lines in engine.json are expected values per kill, so the roll keeps them whole
+  if (mob.kind === 'Elite' || mob.kind.startsWith('Unique')) {
+    // the elite stone lines in engine.json are expected values per kill, so the roll keeps them whole;
+    // a wild unique pays these same lines (its jackpot is XP and its crown, never boss stones)
     if (rng() < L.elite_tier_stones) payStone(s, 'tier', 1);
     if (rng() < L.elite_add_stone_chance) payStone(s, 'add', 1);
     // an imprint stone carries one Mod line's own identity, uniform over the roster
@@ -1044,7 +1066,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       mobStatus: s.mobStatus, curses: s.curses,
       currentHp: s.player.hp,
       missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
-      isBoss: !!s.group[0] && String(s.group[0].kind).startsWith('Boss'),
+      isBoss: !!s.group[0] && isBossKind(String(s.group[0].kind)),
       trigger: { manaMult: aura.manaMult, damageMult: aura.damageMult },
     });
     if (!t) return;
@@ -1124,7 +1146,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       mobStatus: s.mobStatus, curses: s.curses,
       currentHp: s.player.hp,
       missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
-      isBoss: !!s.group[0] && String(s.group[0].kind).startsWith('Boss'),
+      isBoss: !!s.group[0] && isBossKind(String(s.group[0].kind)),
     });
     applyCast(cast);
   }
@@ -1264,7 +1286,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     }
   }
 
-  const drank = s.player.hp > 0 ? maybeDrink(s, c, s.group.some((m) => m.kind.startsWith('Boss'))) : null;
+  const drank = s.player.hp > 0 ? maybeDrink(s, c, s.group.some((m) => isBossKind(m.kind))) : null;
   if (drank) push(s, `${drank.name} restores ${eng.fmt(drank.amount)} ${drank.pool} (shared ${E.potions.shared_cooldown_sec}s cooldown)`);
 
   // the farm's own automation, the twin of the potion path (parking: "Auto plant, harvest and brew")

@@ -27,14 +27,14 @@ h1, h2, h3 { font-weight: 600; margin: 0 0 var(--spacing-xs); }
 h1 { font-size: var(--font-md); }
 h2 { font-size: var(--font-sm); color: var(--dim); text-transform: uppercase; }
 
-h4 { font-size: var(--font-xs); color: var(--dim); margin: var(--spacing-sm) 0 var(--spacing-2xs); }
+h4 { font-size: var(--font-xs); color: var(--dim); margin: var(--spacing-sm) 0 var(--spacing-xs); }
 
 button, select {
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--line);
   border-radius: var(--radius-xs);
-  padding: var(--spacing-2xs) var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
   font: inherit;
   cursor: pointer;
 }
@@ -50,11 +50,11 @@ a:focus-visible, [tabindex]:not([tabindex="-1"]):focus-visible, summary:focus-vi
 button:active:not(:disabled) { transform: translateY(1px); filter: brightness(1.14); }
 button:disabled { opacity: .45; cursor: not-allowed; }
 button:disabled:hover { border-color: var(--line); color: var(--text); }
-button.mini { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
+button.mini { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
 input[type=checkbox], input[type=radio] { accent-color: var(--gold); }
 input[type=number], input[type=text] {
   background: var(--inset); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-xs);
-  padding: var(--spacing-3xs) var(--spacing-2xs); font: inherit; font-family: var(--num);
+  padding: var(--spacing-xs) var(--spacing-xs); font: inherit; font-family: var(--num);
 }
 input[type=range] { accent-color: var(--gold); }
 
@@ -69,7 +69,7 @@ a { color: var(--gold); text-underline-offset: clamp(2px, 0.19vw, 5px); }
 
 table { border-collapse: collapse; width: 100%; }
 th, td {
-  text-align: left; padding: var(--spacing-2xs) var(--spacing-xs); border-bottom: 1px solid var(--line);
+  text-align: left; padding: var(--spacing-xs) var(--spacing-xs); border-bottom: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
 }
 td { font-family: var(--num); font-size: var(--font-xs); }

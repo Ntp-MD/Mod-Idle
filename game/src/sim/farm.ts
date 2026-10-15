@@ -216,12 +216,12 @@ export function maybeFarm(state: GameState): string[] {
 /** Herb bundles ride their own roll, separate from gear and stones (`engine.json` `herbs`). A Hunt
  *  Order may hand in an already-reweighted chance so the three collectible streams stay balanced. */
 /**
- * A potion drop rides its own roll, exactly as the herb stream does. Only the humanoid tribes carry
+ * A potion drop rides its own roll, exactly as the herb stream does. Only explicit potion sources carry
  * it, the tier follows the zone's quality band, and the pool is an even coin between hp and mp. A
  * bottle the bag cannot hold is left where it fell, never converted — the same rule as an herb.
  */
-export function rollPotion(state: GameState, rng: () => number, band: string, humanoid: boolean): string | null {
-  if (!humanoid || rng() >= farm.potionDropChance(band)) return null;
+export function rollPotion(state: GameState, rng: () => number, band: string, potionSource: boolean): string | null {
+  if (!potionSource || rng() >= farm.potionDropChance(band)) return null;
   const pool = rng() < 0.5 ? 'hp' : 'mp';
   const potion = farm.P.list.find((p: any) => p.pool === pool && p.tier === band);
   if (!potion) return null;

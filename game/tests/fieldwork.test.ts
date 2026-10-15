@@ -51,6 +51,22 @@ describe('field Camp and fieldwork', () => {
     expect(upgraded.fieldwork.autoEat.enabled).toBe(fieldwork.F.hunger.auto_eat.enabled_default);
   });
 
+  it('pays the metal a body is made of into the same materials map the mine verb fills', () => {
+    const state = newGame();
+    state.hunting = true;
+    const before = state.fieldwork.materials.ore || 0;
+    const log = recordHuntKill(state, 'golem', () => 0);   // every roll succeeds
+    expect(state.fieldwork.materials.ore).toBeGreaterThan(before);
+    expect(log).toContain('ore');
+    // the site verb owns the bulk: one kill never out-yields a mined action
+    expect(state.fieldwork.materials.ore - before).toBeLessThanOrEqual(fieldwork.F.actions.mine.yield);
+    // a body with no metal row pays none of it
+    const plain = newGame();
+    plain.hunting = true;
+    recordHuntKill(plain, 'skeleton', () => 0);
+    expect(plain.fieldwork.materials.ore || 0).toBe(0);
+  });
+
   it('accepts a new food key in an existing provision bag without changing its save schema', () => {
     const old = JSON.parse(JSON.stringify(newGame()));
     delete old.fieldwork.foods.goblin_haunch;

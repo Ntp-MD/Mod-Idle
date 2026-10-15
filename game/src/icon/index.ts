@@ -91,6 +91,19 @@ import human from './character/archer.svg?url';
 import elf from './character/woman-elf-face.svg?url';
 import treant from './character/ent-mouth.svg?url';
 import dryad from './enviroment/tree-face.svg?url';
+import sirenIcon from './character/siren.svg?url';
+import wraithIcon from './character/wraith.svg?url';
+import impIcon from './character/imp.svg?url';
+import wyvernIcon from './character/dragon-head-2.svg?url';
+import beetleIcon from './character/scarab-beetle.svg?url';
+import hornetIcon from './character/bee.svg?url';
+import oozeIcon from './character/acid-blob.svg?url';
+import mistIcon from './character/jellyfish.svg?url';
+import salamanderIcon from './character/salamander.svg?url';
+import wispIcon from './character/spark-spirit.svg?url';
+import sharkIcon from './character/fish-monster.svg?url';
+import crabIcon from './character/crab.svg?url';
+import archonIcon from './character/sun-priest.svg?url';
 
 const armorBySlot: Record<string, string> = {
   helmet,
@@ -142,6 +155,19 @@ const mobBySpecies: Record<string, string> = {
   human,
   giant,
   dryad,
+  siren: sirenIcon,
+  wraith: wraithIcon,
+  imp: impIcon,
+  wyvern: wyvernIcon,
+  beetle: beetleIcon,
+  hornet: hornetIcon,
+  ooze: oozeIcon,
+  mist: mistIcon,
+  salamander: salamanderIcon,
+  wisp: wispIcon,
+  shark: sharkIcon,
+  crab: crabIcon,
+  archon: archonIcon,
 };
 
 const elementByName: Record<string, string> = {

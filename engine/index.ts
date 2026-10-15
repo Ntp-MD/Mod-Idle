@@ -10,7 +10,7 @@
  * the same defect as a number typed twice (AGENTS.md — Numbers · DECISIONS.md §Stack).
  */
 
-import type { BasesData, EngineData, MobSize, MobSubzone, MobZone, Rng, WeaponCfg } from './types.ts';
+import type { BasesData, EngineData, MobCore, MobSize, MobSubzone, MobZone, Rng, WeaponCfg } from './types.ts';
 import { ladderMult } from './skills.ts';
 
 const BANDS = ['low', 'mid', 'high'];
@@ -100,8 +100,8 @@ export function createEngine(E: EngineData) {
 
   // ---- mob evasion: the species Dex line, not a level number (one static HP table)
 
-  // Named fixed-Core forms cover real mob progression through level 100. Later zones
-  // remain playable with the lineage's base Core and name, without another variant.
+  // Named field forms cover the label progression through level 100. Live normal and Elite combat
+  // uses the selected Species Variant's authored Core; later zones keep the latest form label.
   const REF_ZONE = [...(E.mob.zones as any[])].reverse().find((z) => z.levels[0] <= E.mob.form_level_cap)?.id || 1;
   /**
    * A mob's own STATIC level inside one zone, read from `mob.species[].zone_levels`. It is a fixed
@@ -114,6 +114,35 @@ export function createEngine(E: EngineData) {
     const z = (E.mob.zones as any[]).find((x) => x.id === zoneId) || (E.mob.zones as any[])[0];
     return Math.round(((z.levels as number[])[0] + (z.levels as number[])[1]) / 2);
   };
+  /** A Species' fixed-level normal Variants (`mob.variants`): names, bands and authored Core, never ranks. */
+  const variantsOf = (speciesId: string): { name: string; levels: [number, number]; core: MobCore }[] =>
+    (((E.mob as any).variants || {})[speciesId] || []) as { name: string; levels: [number, number]; core: MobCore }[];
+  /** The fixed level a variant haunts: its band's midpoint, never the attacker's level. */
+  const variantLevelOf = (v: { levels: [number, number] }): number =>
+    Math.round(((v.levels as number[])[0] + (v.levels as number[])[1]) / 2);
+  /**
+   * One variant a zone can field. Prefer the band containing the zone midpoint; in a gap, carry
+   * forward the nearest earlier band, or use the first band before any band starts. Above the cap,
+   * keep the last authored variant fieldable.
+   */
+  const variantsInZone = (speciesId: string, zoneId: number): { name: string; levels: [number, number]; core: MobCore }[] => {
+    const ladder = variantsOf(speciesId);
+    if (!ladder.length) return [];
+    const z = (E.mob.zones as any[]).find((x) => x.id === zoneId);
+    if (!z) return ladder;
+    const [lo, hi] = z.levels as [number, number];
+    if (lo > E.mob.form_level_cap) return [ladder[ladder.length - 1]];
+    const midpoint = Math.round((lo + hi) / 2);
+    const hit = ladder.find((v) => v.levels[0] <= midpoint && v.levels[1] >= midpoint);
+    if (hit) return [hit];
+    const previous = ladder
+      .filter((v) => v.levels[0] <= midpoint)
+      .sort((a, b) => b.levels[0] - a.levels[0])[0];
+    return [previous || ladder[0]];
+  };
+  /** Zero or more fixed species uniques (`mob.uniques`), each an independent wild boss. */
+  const uniquesOf = (speciesId: string): any[] =>
+    (((E.mob as any).uniques || []) as any[]).filter((u) => u.species === speciesId);
   const CORE_KEYS = ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'] as const;
   const FORM_ZONES = [...(E.mob.zones as any[])]
     .filter((z) => z.levels[0] <= E.mob.form_level_cap)
@@ -127,12 +156,12 @@ export function createEngine(E: EngineData) {
     }
     return { name: sp?.name || 'Mob', core: sp?.core || {} };
   };
-  /** A form's Core is fixed data; the zone selects the form, never scales its stats. */
-  const coreOf = (sp: any, key: string, zoneId: number = REF_ZONE) => {
-    const core = sp?._fixedCore || formOf(sp, zoneId).core || sp?.core;
+  /** A form supplies the field label; an optional variant override supplies live combat Core. */
+  const coreOf = (sp: any, key: string, zoneId: number = REF_ZONE, override?: Partial<MobCore>) => {
+    const core = override || sp?._fixedCore || formOf(sp, zoneId).core || sp?.core;
     return Number(core?.[key] || 0);
   };
-  /** The fixed Core block selected for a lineage in one zone band. */
+  /** The legacy field-form Core; live normal and Elite spawns supply their Variant Core override. */
   const mobStatsOf = (speciesId: string, zoneId: number = REF_ZONE): Record<string, number> => {
     const sp = speciesById(speciesId);
     if (!sp) return {};
@@ -192,9 +221,9 @@ export function createEngine(E: EngineData) {
   /**
    * The zone cast derived from the single source (`mob.species[].zones`): every species id
    * placed in the zone, sorted. Each subzone partitions this cast into its spawn pool; the union
-   * of its race IDs must read back equal to this list (cage X53).
+   * of its Species ids must read back equal to this list (cage X53).
    */
-  const racesInZone = (zoneId: number): string[] =>
+  const speciesInZone = (zoneId: number): string[] =>
     (E.mob.species as any[]).filter((sp) => (sp.zones || []).includes(zoneId)).map((sp) => sp.id).sort();
   /**
    * The Elements a zone fields, derived from what actually spawns there rather than declared beside
@@ -203,7 +232,7 @@ export function createEngine(E: EngineData) {
    * the zone's cast, printed in `elements.order`.
    */
   const zoneElements = (zoneId: number): string[] => {
-    const worn = new Set(racesInZone(zoneId).map((id) => speciesById(id)?.element));
+    const worn = new Set(speciesInZone(zoneId).map((id) => speciesById(id)?.element));
     for (const b of E.mob.bosses as any[]) {
       if (b.zone === zoneId) worn.add(b.element || speciesById(b.species)?.element);
     }
@@ -228,11 +257,12 @@ export function createEngine(E: EngineData) {
   }
 
   // The body class carries a base Evasion as a percent on top of the species Dex line (small +20 /
-  // medium +10 / large 0). The rating under the percent is the species' fixed Core Dex.
+  // medium +10 / large 0). The rating under the percent is the selected Species Variant's Core Dex.
   const sizeEvasionPct = (id: string) => (id === 'elite' ? E.mob.elite.evasion_pct : sizeOr1(id).evasion_pct);
   const mobEvasion = (dexCore: number, body = 'medium') =>
     Math.min(CAP.evasion, dexCore * K.K_EVASION * (1 + sizeEvasionPct(body) / 100));
-  // The reference mob is the mean of the actual fixed forms, not an imaginary x1.00 lineage.
+  // The published reference mob remains the mean of the legacy field-form projections. Live
+  // normal and Elite combat rows pass their selected Variant Core explicitly below.
   const ALL_FORMS = Object.entries(E.mob.forms as Record<string, Record<string, any>>)
     .flatMap(([zoneId, forms]) => Object.entries(forms).map(([speciesId, form]) => ({ zoneId: Number(zoneId), speciesId, form })));
   const MEAN_CORE: Record<string, number> = Object.fromEntries(CORE_KEYS.map((k) => [
@@ -271,13 +301,13 @@ export function createEngine(E: EngineData) {
    * zero, so a −20 on a mob sitting at 9.5% opens it fully rather than amplifying damage.
    *
    * `element` is the Element half of the hit. A number uses the mob's headline `res`; a per-Element
-   * map uses `mob.resByElement` (the race's flat own-Element line, X54) so a race's own Element is
+   * map uses `mob.resByElement` (the Species' flat own-Element line, X54) so the Species' own Element is
    * answered on its own line and every other Element lands unresisted.
    */
   function mitigateMobHit(mob: any, nonElement: number, element: number | Record<string, number>, armourCutFraction = 0, resOffset = 0) {
     const non = nonElement * (1 - mobArmourCut(mob.armour, nonElement, armourCutFraction));
     // a trait weakness (`mob.trait_mechanics.element_weak`) answers one named Element with more
-    // damage taken; it is not a res line, so the race's own-Element res map stays exactly as X54 states
+    // damage taken; it is not a res line, so the Species' own-Element res map stays exactly as X54 states
     const weak = mob.weak || null;
     const weakMult = (name: string) => (weak && weak.element === name ? 1 + weak.taken_pct / 100 : 1);
     if (typeof element === 'number') {
@@ -436,11 +466,11 @@ export function createEngine(E: EngineData) {
   // bonus, read off the SAME tag that splits its hit (`damage_split`: physical → Str, magic → Int,
   // mixed → both halves). The zone mean divides it out below, so mob_PS stays the published curve
   // for the zone's AVERAGE mob and only the species actually in front of the player moves the number.
-  const speciesPowerStatOf = (sp: any, zoneId: number = REF_ZONE) => {
+  const speciesPowerStatOf = (sp: any, zoneId: number = REF_ZONE, override?: Partial<MobCore>) => {
     const [wPhys, wMagic] = damageSplit(sp.damage);
-    return K.K_MOB_PS_STAT * (wPhys * coreOf(sp, 'str', zoneId) + wMagic * coreOf(sp, 'int', zoneId));
+    return K.K_MOB_PS_STAT * (wPhys * coreOf(sp, 'str', zoneId, override) + wMagic * coreOf(sp, 'int', zoneId, override));
   };
-  const speciesPowerOf = (sp: any, zoneId: number = REF_ZONE) => sp.power_base + speciesPowerStatOf(sp, zoneId);
+  const speciesPowerOf = (sp: any, zoneId: number = REF_ZONE, override?: Partial<MobCore>) => sp.power_base + speciesPowerStatOf(sp, zoneId, override);
   // The zone's average species power: the same weighted mean `zoneBodyFactor` takes for PS, so a
   // species entry divides its own power by this and the zone's mean stays exactly 1 by construction.
   const zonePowerCache = new Map<number, number>();
@@ -452,27 +482,29 @@ export function createEngine(E: EngineData) {
     for (const sp of cast) for (const sid of sp.sizes) {
       const weight = E.mob.spawn_weights[sid] || 0;
       if (!weight) continue;
-      w += weight; sum += weight * speciesPowerOf(sp, zoneId);
+      const zone = zoneById(zoneId);
+      const variantCore = variantsInZone(sp.id, zoneId)[0]?.core;
+      w += weight; sum += weight * speciesPowerOf(sp, zoneId, variantCore);
     }
     const factor = w ? sum / w : 1;
     zonePowerCache.set(zoneId, factor);
     return factor;
   }
   /** The PS multiplier one species carries in its zone: its own power over the zone mean. */
-  const speciesPsMultOf = (zoneId: number, sp: any) => speciesPowerOf(sp, zoneId) / zonePowerFactor(zoneId);
-  const speciesPsMult = (zoneId: number, speciesId: string) => {
+  const speciesPsMultOf = (zoneId: number, sp: any, override?: Partial<MobCore>) => speciesPowerOf(sp, zoneId, override) / zonePowerFactor(zoneId);
+  const speciesPsMult = (zoneId: number, speciesId: string, override?: Partial<MobCore>) => {
     const sp = speciesById(speciesId);
-    return sp ? speciesPsMultOf(zoneId, sp) : 1;
+    return sp ? speciesPsMultOf(zoneId, sp, override) : 1;
   };
 
-  // ---- race resistance: a race owns one Element (`mob.species[].element`) and answers it at the flat
-  // `mob.race_res_pct` in every zone; no Element counters another and no profile tilts the Vit line,
+  // ---- Species resistance: a Species owns one Element (`mob.species[].element`) and answers it at the flat
+  // `mob.species_res_pct` in every zone; no Element counters another and no profile tilts the Vit line,
   // so every other Element meets no res at all (X54). The same Cap the player obeys holds the line.
-  /** Per-Element res: the race's own Element at the flat rate, every other Element at zero. */
+  /** Per-Element res: the Species' own Element at the flat rate, every other Element at zero. */
   const mobResByElementOf = (sp: any, zoneId: number = REF_ZONE) => {
     const out: Record<string, number> = {};
     for (const el of E.elements.order) {
-      out[el] = el === (sp as any).element ? E.mob.race_res_pct : 0;
+      out[el] = el === (sp as any).element ? E.mob.species_res_pct : 0;
     }
     return out;
   };
@@ -795,7 +827,8 @@ export function createEngine(E: EngineData) {
   const xpMix = (kph: number) => {
     const elite = L.elite_spawn_chance;
     const bossShare = L.boss_per_hour / kph;
-    return (1 - elite - bossShare) + elite * X.elite_mult + bossShare * X.boss_mult;
+    const unique = L.unique_chance || 0;
+    return (1 - elite - bossShare - unique) + elite * X.elite_mult + bossShare * X.boss_mult + unique * X.unique_mult;
   };
   const CHECKPOINTS_KILLS: Record<string, number> = {};
   {
@@ -845,6 +878,8 @@ export function createEngine(E: EngineData) {
   // The elite half of the tier-stone ladder, named once so the boss share is the only thing the total
   // adds. A town rate and a stone rate are the same expression and must not be typed twice.
   const eliteTierStonesPerHr = (band: string) => Math.round(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_tier_stones);
+  // A wild unique pays the Elite stone lines, so the clock Boss keeps the only boss payout and the
+  // craft pacing gates never move: only the XP mix below knows the unique's own multiplier.
   const tierStonesPerHr = (band: string) => eliteTierStonesPerHr(band) + L.boss_per_hour * L.boss_tier_stones;
   const addStonesPerHr = (band: string) => r2(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance + L.boss_per_hour * L.boss_add_stones);
 
@@ -931,67 +966,118 @@ export function createEngine(E: EngineData) {
     return { reroll_value: Math.round(s.reroll_value), tier: Math.round(s.tier), add: Math.round(s.add) };
   };
 
-  // ---- the full mob roster: every legal zone × species × body entry, plus Elite and Boss
+  // ---- the full mob roster: every legal zone × species × variant × body entry,
+  // plus Elite (a rank over the rolled variant), the wild unique and the clock Boss
 
   function mobRoster() {
     const out: any[] = [];
+    // one species × variant placement: the shared normal/Elite row shape at the variant's own level
+    const variantRows = (z: any, sp: any, v: { name: string; levels: [number, number]; core: MobCore } | null, lvl: number, tag: string | null) => {
+      const innate = [(sp as any).element];
+      const form = formOf(sp, z.id);
+      const bf = zoneBodyFactor(z.id);
+      const variantCore = v?.core;
+      const core = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, z.id, variantCore)]));
+      const vit = core.vit;
+      const intC = core.int;
+      const levels: [number, number] = [lvl, lvl];
+      const psEdge = mobPsAt(lvl);
+      const vname = v ? v.name : null;
+      for (const size of sp.sizes.map((sid: string) => sizeById(sid)!)) {
+        const hpBase = mobHpAt(lvl);
+        const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
+        out.push({
+          id: `z${z.id}_${sp.id}_${tag || 'v'}_${size.id}`, zone: z.id, zoneName: z.name, levels, level: lvl,
+          kind: size.name, species: sp.name, formName: form.name, speciesId: sp.id, variant: vname, innate, weapon: sp.carries_weapon, core,
+          hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
+          manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
+          ps: psEdge * size.ps / bf * speciesPsMultOf(z.id, sp, variantCore), bodyFactor: bf,
+          acc: mobAcc(core.dex, sp.accuracy_mult),
+          ev: mobEvasion(core.dex, size.id),
+          armour: core.str * K.K_ARMOUR,
+          res: mobResOf(sp, z.id),
+          align: core.dex * K.K_DEX_ALIGN,
+          crit: core.lck * K.K_LCK_CRIT,
+          dodge: mobDodge(core.agi * K.K_MOB_DODGE, lvl),
+          damage: sp.damage,
+          immune: mobImmuneOf(sp), weak: mobWeakOf(sp), burst: mobBurstOf(sp),
+          mechanics: sp.mechanics || null, clockMult: mobClockMultOf(sp),
+          xpFrom: X.per_kill_mob_level * lvl, xpTo: X.per_kill_mob_level * lvl,
+          group: size.id === 'small' || size.id === 'medium' ? z.group : 'alone',
+        });
+      }
+      if (sp.sizes.includes('large')) {
+        const el = E.mob.elite;
+        const hpBase = mobHpAt(lvl) * el.hp;
+        const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
+        out.push({
+          id: `z${z.id}_${sp.id}_${tag || 'v'}_elite`, zone: z.id, zoneName: z.name, levels, level: lvl,
+          kind: el.name, species: sp.name, formName: form.name, speciesId: sp.id, variant: vname, innate, weapon: sp.carries_weapon, core,
+          hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
+          manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
+          ps: psEdge * el.ps * speciesPsMultOf(z.id, sp, variantCore),
+          acc: mobAcc(core.dex, sp.accuracy_mult),
+          ev: mobEvasion(core.dex, 'elite'),
+          armour: core.str * K.K_ARMOUR,
+          res: mobResOf(sp, z.id),
+          align: core.dex * K.K_DEX_ALIGN, crit: core.lck * K.K_LCK_CRIT,
+          dodge: mobDodge(core.agi * K.K_MOB_DODGE, lvl),
+          damage: sp.damage,
+          immune: mobImmuneOf(sp), weak: mobWeakOf(sp), burst: mobBurstOf(sp),
+          mechanics: sp.mechanics || null, clockMult: mobClockMultOf(sp),
+          xpFrom: X.per_kill_mob_level * lvl * X.elite_mult, xpTo: X.per_kill_mob_level * lvl * X.elite_mult, group: 'alone',
+        });
+      }
+    };
+    // each Species Unique: a fixed named boss at the zone's top, paying the unique line
+    const uniqueRow = (z: any, sp: any, u: any) => {
+      const bs = mobProfileOf(sp, u, z.id);
+      const bz = sizeById('boss')!;
+      const bf = zoneBodyFactor(z.id);
+      const bvit = coreOf(bs, 'vit', z.id);
+      const bint = coreOf(bs, 'int', z.id);
+      const bossCore = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(bs, key, z.id)]));
+      const ulvl = (z.levels as [number, number])[1];
+      const uniqueKey = String(u.name).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+      const bhpBase = mobHpAt(ulvl);
+      const bhp = bhpBase + LG.hp_per_level * (ulvl - 1) + bvit * K.K_VIT_HP;
+      out.push({
+        id: `z${z.id}_${sp.id}_unique_${uniqueKey}`, zone: z.id, zoneName: z.name, levels: [ulvl, ulvl] as [number, number], level: ulvl,
+        kind: `Unique · ${u.name}`, species: bs.name, formName: formOf(sp, z.id).name, speciesId: bs.id,
+        variant: u.name,
+        innate: [bs.element], weapon: bs.carries_weapon, trait: bs.trait, core: bossCore,
+        immune: mobImmuneOf(bs), weak: mobWeakOf(bs), burst: mobBurstOf(bs),
+        mechanics: bs.mechanics || null, clockMult: mobClockMultOf(bs),
+        readsAs: bs.reads_as || bz.reads_as || 'large',
+        hpFrom: bhp, hpTo: bhp, vit: bvit, hpBaseFrom: bhpBase, hpBaseTo: bhpBase,
+        manaFrom: mobManaOf(ulvl, bint), manaTo: mobManaOf(ulvl, bint),
+        ps: mobPsAt(ulvl) * bz.ps / bf * speciesPsMultOf(z.id, bs),
+        acc: mobAcc(coreOf(bs, 'dex', z.id), bs.accuracy_mult),
+        ev: mobEvasion(coreOf(bs, 'dex', z.id), 'boss'),
+        armour: coreOf(bs, 'str', z.id) * K.K_ARMOUR,
+        res: mobResOf(bs, z.id),
+        resByElement: mobResByElementOf(bs, z.id),
+        align: coreOf(bs, 'dex', z.id) * K.K_DEX_ALIGN, crit: coreOf(bs, 'lck', z.id) * K.K_LCK_CRIT,
+        dodge: mobDodge(coreOf(bs, 'agi', z.id) * K.K_MOB_DODGE, ulvl),
+        damage: bs.damage,
+        xpFrom: X.per_kill_mob_level * ulvl * X.unique_mult, xpTo: X.per_kill_mob_level * ulvl * X.unique_mult, group: 'alone',
+      });
+    };
     for (const z of ZONES) {
+      const realBand = (z.levels as [number, number])[1] <= E.mob.form_level_cap;
       for (const sp of E.mob.species) {
         if (!sp.zones.includes(z.id)) continue;
-        const innate = [(sp as any).element];
-        const form = formOf(sp, z.id);
-        const bf = zoneBodyFactor(z.id);
-        const vit = coreOf(sp, 'vit', z.id);
-        const intC = coreOf(sp, 'int', z.id);
-        // the mob's own static level, placed inside the zone's range (mob.species[].zone_levels)
-        const lvl = mobLevelIn(sp, z.id);
-        const levels: [number, number] = [lvl, lvl];
-        const psEdge = mobPsAt(lvl);
-        for (const size of sp.sizes.map((sid) => sizeById(sid)!)) {
-          const hpBase = mobHpAt(lvl);
-          const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
-          out.push({
-            id: `z${z.id}_${sp.id}_${size.id}`, zone: z.id, zoneName: z.name, levels, level: lvl,
-            kind: size.name, species: sp.name, formName: form.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
-            hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
-            manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
-            ps: psEdge * size.ps / bf * speciesPsMult(z.id, sp.id), bodyFactor: bf,
-            acc: mobAcc(coreOf(sp, 'dex', z.id), sp.accuracy_mult),
-            ev: mobEvasion(coreOf(sp, 'dex', z.id), size.id),
-            armour: coreOf(sp, 'str', z.id) * K.K_ARMOUR,
-            res: mobResOf(sp, z.id),
-            align: coreOf(sp, 'dex', z.id) * K.K_DEX_ALIGN,
-            crit: coreOf(sp, 'lck', z.id) * K.K_LCK_CRIT,
-            dodge: mobDodge(coreOf(sp, 'agi', z.id) * K.K_MOB_DODGE, lvl),
-            damage: sp.damage,
-            immune: mobImmuneOf(sp), weak: mobWeakOf(sp), burst: mobBurstOf(sp),
-            mechanics: sp.mechanics || null, clockMult: mobClockMultOf(sp),
-            xpFrom: X.per_kill_mob_level * lvl, xpTo: X.per_kill_mob_level * lvl,
-            group: size.id === 'small' || size.id === 'medium' ? z.group : 'alone',
-          });
+        if (realBand) {
+          // a real band fields the one variant containing this zone's midpoint — never a zone-level table
+          const ladder = variantsInZone(sp.id, z.id);
+          ladder.forEach((v, i) => variantRows(z, sp, v, variantLevelOf(v), `v${i}`));
+        } else {
+          // frozen past the cap: keep the last Variant and Core, but use the legacy static zone level
+          const lvl = mobLevelIn(sp, z.id);
+          const finalVariant = variantsOf(sp.id).at(-1) || null;
+          variantRows(z, sp, finalVariant, lvl, 'frozen');
         }
-        if (sp.sizes.includes('large')) {
-          const el = E.mob.elite;
-          const hpBase = mobHpAt(lvl) * el.hp;
-          const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
-          out.push({
-            id: `z${z.id}_${sp.id}_elite`, zone: z.id, zoneName: z.name, levels, level: lvl,
-            kind: el.name, species: sp.name, formName: form.name, speciesId: sp.id, innate, weapon: sp.carries_weapon,
-            hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
-            manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
-            ps: psEdge * el.ps * speciesPsMult(z.id, sp.id),
-            acc: mobAcc(coreOf(sp, 'dex', z.id), sp.accuracy_mult),
-            ev: mobEvasion(coreOf(sp, 'dex', z.id), 'elite'),
-            armour: coreOf(sp, 'str', z.id) * K.K_ARMOUR,
-            res: mobResOf(sp, z.id),
-            align: coreOf(sp, 'dex', z.id) * K.K_DEX_ALIGN, crit: coreOf(sp, 'lck', z.id) * K.K_LCK_CRIT,
-            dodge: mobDodge(coreOf(sp, 'agi', z.id) * K.K_MOB_DODGE, lvl),
-            damage: sp.damage,
-            immune: mobImmuneOf(sp), weak: mobWeakOf(sp), burst: mobBurstOf(sp),
-            mechanics: sp.mechanics || null, clockMult: mobClockMultOf(sp),
-            xpFrom: X.per_kill_mob_level * lvl * X.elite_mult, xpTo: X.per_kill_mob_level * lvl * X.elite_mult, group: 'alone',
-          });
-        }
+        for (const unique of uniquesOf(sp.id)) uniqueRow(z, sp, unique);
       }
       const boss = E.mob.bosses.find((b) => b.zone === z.id)!;
       const bs = mobProfileOf(speciesById(boss.species), boss, z.id);
@@ -1027,10 +1113,11 @@ export function createEngine(E: EngineData) {
     return out;
   }
 
-  // ---- the mob that actually spawns: a mob's level is STATIC per species per zone
-  // (`mob.species[].zone_levels`), so a spawn does not follow the attacker's level.
+  // ---- the mob that actually spawns: a normal mob's level and Core are STATIC per variant
+  // (`mob.variants[].levels` + `.core`), so a spawn does not follow the attacker's level. Past the form
+  // cap the bands stop and the legacy per-species zone level (`mob.species[].zone_levels`) answers.
 
-  function spawnAt(zoneId: number, level: number, bodyId = 'medium', speciesId: string | null = null, boss?: any) {
+  function spawnAt(zoneId: number, level: number, bodyId = 'medium', speciesId: string | null = null, boss?: any, variantLevels?: [number, number] | null, variantCore?: Partial<MobCore> | null) {
     const z = zoneById(zoneId)!;
     const candidates = E.mob.species.filter((sp) => sp.zones.includes(zoneId) && (!speciesId || sp.id === speciesId));
     const baseSpecies = candidates.length
@@ -1038,15 +1125,17 @@ export function createEngine(E: EngineData) {
       : E.mob.species[0];
     const sp = mobProfileOf(baseSpecies, boss, zoneId);
     const form = formOf(baseSpecies, zoneId);
-    const lv = mobLevelIn(sp, zoneId);
+    const lv = variantLevels ? variantLevelOf({ levels: variantLevels }) : mobLevelIn(sp, zoneId);
     const size = sizeById(bodyId) || sizeById('medium')!;
     const bf = zoneBodyFactor(zoneId);
     // Base HP is the zone curve; the mob's own pools add the flat level grant and the K_core term
     const hpBase = mobHpAt(lv);
-    const vit = coreOf(sp, 'vit', zoneId);
+    const selectedVariantCore = variantCore || (!boss ? variantsInZone(sp.id, zoneId)[0]?.core : undefined);
+    const core = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, zoneId, selectedVariantCore)]));
+    const vit = core.vit;
     const hp = hpBase + LG.hp_per_level * (lv - 1) + vit * K.K_VIT_HP;
-    const mana = mobManaOf(lv, coreOf(sp, 'int', zoneId));
-    const ps = mobPsAt(lv) * size.ps / bf * speciesPsMultOf(zoneId, sp);
+    const mana = mobManaOf(lv, core.int);
+    const ps = mobPsAt(lv) * size.ps / bf * speciesPsMultOf(zoneId, sp, selectedVariantCore);
     return {
       speciesId: sp.id, species: sp.name, formName: form.name, zone: zoneId, zoneName: z.name, level: lv,
       body: size.id, kind: size.name, readsAs: sp.reads_as || size.reads_as || size.id,
@@ -1058,15 +1147,15 @@ export function createEngine(E: EngineData) {
       weapon: sp.carries_weapon, damage: sp.damage, accuracy_mult: sp.accuracy_mult,
       // hp = Base HP + the flat level grant + the Core Vit bonus; mana = Base + level grant + Core Int
       hp, hpBase, hpMax: hp, vit, mana, manaMax: mana, ps,
-      core: Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, zoneId)])),
-      acc: mobAcc(coreOf(sp, 'dex', zoneId), sp.accuracy_mult),
-      evasion: mobEvasion(coreOf(sp, 'dex', zoneId), size.id),
+      core,
+      acc: mobAcc(core.dex, sp.accuracy_mult),
+      evasion: mobEvasion(core.dex, size.id),
       // the mob's own integer Core stat line, and the same Cap the player obeys on every percentage
-      armour: armourOf(coreOf(sp, 'str', zoneId)),
+      armour: armourOf(core.str),
       res: mobResOf(sp, zoneId),
       resByElement: mobResByElementOf(sp, zoneId),
-      align: coreOf(sp, 'dex', zoneId) * K.K_DEX_ALIGN,
-      dodgeRate: coreOf(sp, 'agi', zoneId) * K.K_MOB_DODGE,
+      align: core.dex * K.K_DEX_ALIGN,
+      dodgeRate: core.agi * K.K_MOB_DODGE,
       xp: xpPerKill(lv),
     };
   }
@@ -1078,7 +1167,8 @@ export function createEngine(E: EngineData) {
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
     speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
-    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, MEAN_CORE, mobStatsOf, racesInZone, zoneElements, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
+    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, MEAN_CORE, mobStatsOf, speciesInZone, zoneElements, zoneBodyFactor, mobEvasion, mobAcc,
+    variantsOf, variantsInZone, variantLevelOf, uniquesOf, mobDodge, refAttackerAcc,
     subzoneAt, groupRangeOf, eliteChanceOf, spawnPackOf,
     mobImmuneOf, mobClockMultOf, mobWeakOf, mobBurstOf, mechanicWordsOf, packWordOf,
     mobResOf, mobResByElementOf,

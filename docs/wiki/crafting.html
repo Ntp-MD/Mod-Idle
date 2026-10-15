@@ -66,6 +66,7 @@
     --rail: clamp(46px, 3.19vw, 88px);
 
     --screen-pad: var(--spacing-md);
+    --pad-area: 20px;
     --bar-h: clamp(12px, 0.87vw, 22px);
 
     --minimap-size: clamp(100px, 7.74vw, 216px);
@@ -139,14 +140,11 @@
     --icon-hub-img: 50%;
     --slot-skill-size: clamp(30px, 4vw, 70px);
     --field-card-size: clamp(125px, 8.63vw, 180px);
-    --spacing-xs: clamp(5px, 0.39vw, 11px);
-    --spacing-sm: clamp(8px, 0.63vw, 18px);
-    --spacing-md: clamp(13px, 0.97vw, 27px);
-    --spacing-lg: clamp(18px, 1.36vw, 38px);
-    --spacing-xl: clamp(26px, 2.03vw, 57px);
-
-    --spacing-2xs: clamp(2px, 0.15vw, 4px);
-    --spacing-3xs: clamp(1px, 0.10vw, 3px);
+    --spacing-xs: 3px;
+    --spacing-sm: 5px;
+    --spacing-md: 10px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
     --seam: 1px;
 
     --sheet-fs-region: clamp(9px, 0.54vw, 15px);
@@ -241,26 +239,32 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-.race-roster { display: grid; gap: .75rem; margin-top: .5rem; }
-.race-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .75rem .9rem .9rem; }
-.race-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.race-entry h3 { margin: 0; font-size: 1.05rem; }
-.race-species-count { color: var(--gold); font-family: var(--num); font-size: .78rem; }
-.race-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
-.race-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
-.race-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
-.race-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.race-entry table { font-size: .78rem; }
-.race-entry th, .race-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
-@media (max-width: 58rem) { .race-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .race-facts { grid-template-columns: 1fr 1fr; } .race-entry { padding: .6rem; } }
+.race-roster { display: grid; gap: .9rem; margin-top: .5rem; }
+.race-group { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
+.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
+.race-group > header h3 { margin: 0; color: var(--gold); font-size: .9rem; }
+.race-group > header span, .species-count { font-family: var(--num); font-size: .75rem; }
+.race-empty { margin: .55rem .2rem .2rem; color: var(--dim); font-size: .8rem; }
+.species-roster { display: grid; gap: .65rem; margin-top: .6rem; }
+.species-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
+.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.species-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+.species-entry > header h4 { margin: 0; color: var(--text); font-size: 1rem; text-transform: none; letter-spacing: 0; }
+.species-count { color: var(--gold); }
+.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
+.species-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
+.species-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.species-entry table { font-size: .78rem; }
+.species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
+@media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
 .legend { margin: 0; padding-left: 1.1rem; font-size: .82rem; color: var(--dim); }
 .legend li { margin: .3rem 0; }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }</style><div class="layout">
-<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Races</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="on" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Bestiary</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="on" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
 <main><h1>Crafting</h1><p class="lead">Stones change what a piece <em>is</em>; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. Use the settlement Craft bench to drag stones from your stack onto an equipped or carried target. Every price below is read, never typed.</p><section><h2>Use the Craft bench</h2><p class="note">Gear crafting is a Settlement service. Camp cooking is the field exception; it does not craft gear.</p><ol>
       <li>Drag a piece from Equipped or Inventory into the central bench slot.</li>
       <li>Hover a gear piece to inspect its full item detail and current Mod lines.</li>

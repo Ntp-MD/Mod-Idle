@@ -332,16 +332,16 @@
   .craft-pane { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
   .equipment-pane, .inventory-pane { display: flex; flex-direction: column; overflow: hidden; }
   .pane-head, .pile-head {
-    display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-2xs);
+    display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs);
     padding: var(--spacing-sm); border-bottom: 1px solid var(--line);
   }
   h3 { margin: 0; color: var(--gold); font-size: var(--font-sm); }
   .pane-head span, .pile-head span { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
   .stone-controls { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); color: var(--dim); font-size: var(--font-xs); }
-  .stone-controls button { padding: var(--spacing-3xs) var(--spacing-xs); color: var(--gold); font-size: var(--font-xs); }
+  .stone-controls button { padding: var(--spacing-xs) var(--spacing-xs); color: var(--gold); font-size: var(--font-xs); }
   .stone-controls b { font-weight: 500; font-variant-numeric: tabular-nums; }
-  .stone-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-2xs); align-content: start; padding: 0 var(--spacing-sm); min-height: 0; }
-  .stone-tile { position: relative; display: grid; grid-template-columns: var(--icon-sm) minmax(0, 1fr); align-items: center; gap: var(--spacing-2xs); min-width: 0; min-height: var(--icon-lg); padding: var(--spacing-2xs); text-align: left; background: var(--inset); }
+  .stone-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); align-content: start; padding: 0 var(--spacing-sm); min-height: 0; }
+  .stone-tile { position: relative; display: grid; grid-template-columns: var(--icon-sm) minmax(0, 1fr); align-items: center; gap: var(--spacing-xs); min-width: 0; min-height: var(--icon-lg); padding: var(--spacing-xs); text-align: left; background: var(--inset); }
   .stone-tile img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .stone-tile span { grid-column: 1 / -1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dim); font-size: var(--font-xs); }
   .stone-tile b { justify-self: end; color: var(--gold-lit); font-family: var(--num); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
@@ -349,18 +349,18 @@
   .stone-tile[draggable="true"]:active, .imprint-row[draggable="true"]:active { cursor: grabbing; }
   .stone-tile.unowned { opacity: .65; }
   .stone-tile.chosen, .imprint-row.chosen { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--inset)); }
-  .all-types { align-self: flex-start; margin: var(--spacing-xs) var(--spacing-sm); padding: var(--spacing-3xs) var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
+  .all-types { align-self: flex-start; margin: var(--spacing-xs) var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
   .imprint-search { margin: 0 var(--spacing-sm) var(--spacing-xs); min-width: 0; }
-  .imprint-list { flex: 1; min-height: 0; display: grid; grid-template-rows: repeat(8, minmax(0, 1fr)); gap: var(--spacing-2xs); padding: 0 var(--spacing-sm); }
-  .imprint-row { display: grid; grid-template-columns: var(--icon-sm) minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-xs); min-width: 0; min-height: 0; padding: var(--spacing-2xs) var(--spacing-xs); text-align: left; background: var(--inset); }
+  .imprint-list { flex: 1; min-height: 0; display: grid; grid-template-rows: repeat(8, minmax(0, 1fr)); gap: var(--spacing-xs); padding: 0 var(--spacing-sm); }
+  .imprint-row { display: grid; grid-template-columns: var(--icon-sm) minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-xs); min-width: 0; min-height: 0; padding: var(--spacing-xs) var(--spacing-xs); text-align: left; background: var(--inset); }
   .imprint-row img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .imprint-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-xs); }
   .imprint-row b { color: var(--gold-lit); font-family: var(--num); font-size: var(--font-xs); }
-  .imprint-pages { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-2xs); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
-  .imprint-pages button { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .imprint-pages { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
+  .imprint-pages button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
   .imprint-pages button:disabled { opacity: .4; }
   .stone-empty { grid-column: 1 / -1; margin: var(--spacing-xs) 0; color: var(--dim); font-size: var(--font-xs); }
-  .stone-detail { display: grid; gap: var(--spacing-3xs); margin-top: auto; padding: var(--spacing-sm); border-top: 1px solid var(--line); font-size: var(--font-xs); }
+  .stone-detail { display: grid; gap: var(--spacing-xs); margin-top: auto; padding: var(--spacing-sm); border-top: 1px solid var(--line); font-size: var(--font-xs); }
   .stone-detail strong { color: var(--gold-lit); font-weight: 600; }
   .stone-detail span { color: var(--dim); }
   .drop-slot {
@@ -374,11 +374,11 @@
   .piece-icon { flex: none; width: var(--icon-xl); aspect-ratio: 1; display: grid; place-items: center; border: 1px solid var(--edge); background: var(--inset); }
   .piece-icon img { width: 80%; height: 80%; object-fit: contain; }
   .piece-icon.vacant img { opacity: .38; }
-  .piece-copy { display: grid; gap: var(--spacing-3xs); min-width: 0; }
+  .piece-copy { display: grid; gap: var(--spacing-xs); min-width: 0; }
   .piece-copy strong { color: var(--text); font-size: var(--font-sm); }
   .piece-copy span, .piece-copy small { color: var(--dim); font-size: var(--font-xs); }
   .clear { margin-left: auto; align-self: start; font-size: var(--font-xs); }
-  .operations { flex: 1; min-height: 0; overflow: hidden; padding: var(--spacing-xs); display: grid; align-content: start; gap: var(--spacing-2xs); }
+  .operations { flex: 1; min-height: 0; overflow: hidden; padding: var(--spacing-xs); display: grid; align-content: start; gap: var(--spacing-xs); }
   .work-note { margin: 0; color: var(--gold-lit); font-size: var(--font-xs); }
   .empty-work { margin: 0; color: var(--dim); font-size: var(--font-sm); }
   .doll-wrap { padding: var(--spacing-xs); }

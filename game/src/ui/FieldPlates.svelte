@@ -199,7 +199,7 @@
            the flinch instead of looping it -->
       <div class="art" class:knock={!!beat}>
         <div class="mob-head">
-          <span class="race-mark" role="img" aria-label={`Race: ${m.species}`} title={`Race · ${m.species}`}>
+          <span class="species-mark" role="img" aria-label={`Species: ${m.species}`} title={`Species · ${m.species}`}>
             <img src={mobIcon(m.species)} alt="" aria-hidden="true" />
           </span>
           <div class="identity">
@@ -418,15 +418,15 @@
 
   .mob.front .charge::after{ bottom: var(--x-pull-scale); right: var(--x-pull-scale); border-left: 0; border-top: 0; border-bottom-right-radius: var(--radius-sm); }
 
-  .mob-head { display: grid; grid-template-columns: var(--icon-md) minmax(0, 1fr) var(--icon-md); align-items: start; gap: var(--spacing-2xs); width: 100%; min-width: 0; }
-  .race-mark, .innate-mark { display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
-  .race-mark img, .innate-mark img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .mob-head { display: grid; grid-template-columns: var(--icon-md) minmax(0, 1fr) var(--icon-md); align-items: start; gap: var(--spacing-xs); width: 100%; min-width: 0; }
+  .species-mark, .innate-mark { display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
+  .species-mark img, .innate-mark img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .mob-head .identity { min-width: 0; }
 
   /* the card head is a column: the body's own portrait on top and centred, its name under it. A mob
      is recognised by its shape before its words, so the face leads rather than sitting beside the
      text it labels. */
-  .identity{ display: flex; flex-direction: column; align-items: center; justify-items: center; gap: var(--spacing-3xs); min-width: 0; text-align: center; }
+  .identity{ display: flex; flex-direction: column; align-items: center; justify-items: center; gap: var(--spacing-xs); min-width: 0; text-align: center; }
   .identity-text{ display: grid; justify-items: center; min-width: 0; }
   .mob .portrait, .self-plate .portrait{ width: calc(var(--icon-lg) * 4 / 5); height: calc(var(--icon-lg) * 4 / 5); flex: none; object-fit: contain; }
 
@@ -434,9 +434,9 @@
 
   .mob .body, .self-plate .body{ margin: 0; font-size: var(--font-xs); color: var(--dim); }
 
-  .mob-name { display: flex; align-items: center; justify-content: center; gap: var(--spacing-2xs); max-width: 100%; margin: 0; overflow-wrap: anywhere; font-size: var(--font-sm); font-weight: 600; line-height: 1.15; }
+  .mob-name { display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); max-width: 100%; margin: 0; overflow-wrap: anywhere; font-size: var(--font-sm); font-weight: 600; line-height: 1.15; }
 
-  .mobbar { display: block; position: relative; width: 100%; height: max(var(--spacing-sm), var(--font-xs)); margin: var(--spacing-3xs) 0; border-radius: var(--radius-xs); overflow: hidden; background: rgba(255, 255, 255, .09); }
+  .mobbar { display: block; position: relative; width: 100%; height: max(var(--spacing-sm), var(--font-xs)); margin: var(--spacing-xs) 0; border-radius: var(--radius-xs); overflow: hidden; background: rgba(255, 255, 255, .09); }
 
   /* the figure sits in the bar the way the dock's own gauges read: centred, tabular, stroked off the fill */
   .mobbar b {
@@ -479,12 +479,12 @@
   }
 
   /* the player's own vitals hug the same foot: the first bar carries the group down */
-  .self-plate .art{ display: flex; flex-direction: column; align-items: stretch; flex: 1; width: 100%; gap: var(--spacing-3xs); }
+  .self-plate .art{ display: flex; flex-direction: column; align-items: stretch; flex: 1; width: 100%; gap: var(--spacing-xs); }
 
   .self-plate .art > span.mobbar:first-of-type{ margin-top: auto; }
 
   .self-plate .portrait{
-    border-radius: var(--radius-round); border: 1px solid var(--gold); background: var(--face-top); padding: var(--spacing-2xs);
+    border-radius: var(--radius-round); border: 1px solid var(--gold); background: var(--face-top); padding: var(--spacing-xs);
   }
 
   /* Energy Shield sits above HP here exactly as it does in the dock, and only while the pool is there */
@@ -531,7 +531,7 @@
     font-size: var(--font-xs);
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: var(--spacing-3xs) var(--spacing-2xs);
+    padding: var(--spacing-xs) var(--spacing-xs);
     border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
     border-radius: var(--radius-round);
     background: var(--glass);

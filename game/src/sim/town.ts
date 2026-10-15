@@ -15,7 +15,7 @@ import { addTo, fits } from './slots';
 
 const TS = TOWN.task_sizing;
 
-/** Item name → its sale rarity, from the variant rung or its race's same-rarity alternative. */
+/** Item name → its sale rarity, from the Variant or its Species' same-rarity alternative. */
 const JUNK_RARITY: Record<string, string> = (() => {
   const out: Record<string, string> = {};
   for (const r of Object.values((E.mob as any).variant_drops || {}) as any[]) out[r.item] = r.rarity;
@@ -228,7 +228,7 @@ export function progressTasks(state: GameState, mobKind: string, zone: number) {
   for (const task of state.town.tasks) {
     if (!task || task.claimed || task.zone !== zone) continue;
     const isElite = mobKind === 'Elite';
-    const isBoss = mobKind.startsWith('Boss');
+    const isBoss = mobKind.startsWith('Boss') || mobKind.startsWith('Unique');
     if (task.kind === 'elite' && isElite) task.progress = Math.min(task.n, task.progress + 1);
     else if (task.kind === 'boss' && isBoss) task.progress = Math.min(task.n, task.progress + 1);
   }

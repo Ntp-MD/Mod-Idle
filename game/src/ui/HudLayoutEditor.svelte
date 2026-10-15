@@ -309,10 +309,10 @@
   .layout-palette, .layout-workspace, .layout-inspector { min-width: 0; min-height: 0; }
   .layout-palette, .layout-inspector { display: flex; flex-direction: column; gap: var(--spacing-xs); }
   h3 { margin: 0; color: var(--gold); font-size: var(--font-xs); }
-  .layer-switch { display: flex; gap: var(--spacing-2xs); }
-  .layer-switch button { flex: 1; padding: var(--spacing-2xs); font-size: var(--font-xs); }
+  .layer-switch { display: flex; gap: var(--spacing-xs); }
+  .layer-switch button { flex: 1; padding: var(--spacing-xs); font-size: var(--font-xs); }
   .layer-switch .active { color: var(--gold-lit); border-color: var(--gold); }
-  .component-list { display: grid; align-content: start; gap: var(--spacing-2xs); min-height: 0; }
+  .component-list { display: grid; align-content: start; gap: var(--spacing-xs); min-height: 0; }
   .component {
     display: grid; grid-template-columns: var(--icon-xs) minmax(0, 1fr); align-items: center; gap: var(--spacing-xs);
     min-width: 0; padding: var(--spacing-xs); text-align: left; font-size: var(--font-xs); color: var(--text);
@@ -320,7 +320,7 @@
   .component i { width: var(--icon-xs); height: var(--icon-xs); border: 1px solid var(--region-tone); background: color-mix(in srgb, var(--region-tone) 22%, transparent); }
   .component span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .component.selected { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--panel)); }
-  .editor-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-2xs); margin-top: auto; }
+  .editor-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xs); margin-top: auto; }
   .editor-actions button, .apply { padding: var(--spacing-xs); font-size: var(--font-xs); }
   .layout-workspace { display: flex; flex-direction: column; justify-content: center; gap: var(--spacing-xs); }
   .canvas-heading { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); }
@@ -333,21 +333,21 @@
   }
   .grid-cell {
     display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
-    min-width: 0; min-height: 0; padding: var(--spacing-3xs); border-radius: var(--radius-sm); border-top: 0; border-left: 0;
+    min-width: 0; min-height: 0; padding: var(--spacing-xs); border-radius: var(--radius-sm); border-top: 0; border-left: 0;
     background: transparent; text-align: left; color: var(--dim);
   }
   .grid-cell small { font: var(--font-xs) / 1 var(--num); opacity: .7; }
   .region-caption {
     display: grid; place-items: center; z-index: var(--z-content); pointer-events: none; overflow: hidden;
-    padding: var(--spacing-3xs); color: var(--region-tone); font-size: var(--font-xs); font-weight: 700;
+    padding: var(--spacing-xs); color: var(--region-tone); font-size: var(--font-xs); font-weight: 700;
     line-height: 1; letter-spacing: .02em; text-shadow: 0 1px 2px var(--bg);
   }
   .grid-cell.occupied { background: color-mix(in srgb, var(--region-tone) 14%, transparent); border-color: color-mix(in srgb, var(--region-tone) 55%, var(--line)); }
   .grid-cell.chosen { box-shadow: inset 0 0 0 1px var(--gold); background: color-mix(in srgb, var(--gold) 20%, var(--region-tone)); }
   .grid-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; z-index: var(--z-underlay); }
   .coordinates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); }
-  .layout-inspector label { display: grid; gap: var(--spacing-3xs); color: var(--dim); font-size: var(--font-xs); }
-  .layout-inspector select { min-width: 0; padding: var(--spacing-2xs); font-size: var(--font-xs); }
+  .layout-inspector label { display: grid; gap: var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
+  .layout-inspector select { min-width: 0; padding: var(--spacing-xs); font-size: var(--font-xs); }
   .apply { margin-top: auto; color: var(--gold-lit); border-color: var(--gold); }
   .apply:disabled { opacity: .45; }
   .notice, .issue { margin: 0; font-size: var(--font-xs); }

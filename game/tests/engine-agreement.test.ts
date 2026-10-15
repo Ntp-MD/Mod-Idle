@@ -18,7 +18,7 @@ describe('game and cages run one engine', () => {
     expect(eng.mobHpAt(100)).toBe(cage.mobHpAt(100));
     expect(eng.xpToNext(30)).toBe(cage.xpToNext(30));
     expect(eng.aspdOf(510, 1.2, 25)).toBe(cage.aspdOf(510, 1.2, 25));
-    expect(eng.racesInZone(16)).toEqual(cage.racesInZone(16));
+    expect(eng.speciesInZone(16)).toEqual(cage.speciesInZone(16));
     expect(eng.zoneElements(16)).toEqual(cage.zoneElements(16));
   });
 
@@ -26,7 +26,7 @@ describe('game and cages run one engine', () => {
 
 
 describe('the opening character is the designed minute one', () => {
-  it('starts below the designed Evasion ceiling against the reference and the top-accuracy zone-one race', () => {
+  it('starts below the designed Evasion ceiling against the reference and the top-accuracy zone-one Species', () => {
     const s = newGame();
     const c = buildCharacter(s.player.level, s.gear, {}, 0, undefined, s.player.points, s.player.treeRanks);
     expect(c.evasion).toBeGreaterThan(0);
@@ -34,9 +34,9 @@ describe('the opening character is the designed minute one', () => {
     expect(c.evasionChance).toBeLessThanOrEqual(E.evasion_roll.opening_max_chance_pct);
     const zoneCast = E.mob.species.filter((row) => row.zones.includes(s.zone));
     const topAccuracy = Math.max(...zoneCast.map((row) => eng.mobAcc(eng.coreOf(row, 'dex', s.zone), row.accuracy_mult)));
-    const topRaces = zoneCast.filter((row) => eng.mobAcc(eng.coreOf(row, 'dex', s.zone), row.accuracy_mult) === topAccuracy);
-    expect(topRaces.length).toBeGreaterThan(0);
-    for (const species of topRaces) {
+    const topAccuracySpecies = zoneCast.filter((row) => eng.mobAcc(eng.coreOf(row, 'dex', s.zone), row.accuracy_mult) === topAccuracy);
+    expect(topAccuracySpecies.length).toBeGreaterThan(0);
+    for (const species of topAccuracySpecies) {
       const acc = eng.mobAcc(eng.coreOf(species, 'dex', s.zone), species.accuracy_mult);
       expect(eng.evasionChance(c.evasion, acc), species.name).toBeLessThanOrEqual(E.evasion_roll.opening_max_chance_pct);
     }

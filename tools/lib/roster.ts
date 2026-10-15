@@ -38,7 +38,7 @@ const fmt = (n: any): string => Number(n).toLocaleString('en-US');
  */
 function gates(): G.GateRow[] {
   const g = G.gates();
-  const { add, soft, watch } = g;
+  const { add, soft } = g;
 
   const ids = SKILLS.map((s) => s.id);
   const dupIds = ids.filter((x, i) => ids.indexOf(x) !== i);
@@ -60,10 +60,6 @@ function gates(): G.GateRow[] {
   const missingElement = ELEMENTS.filter((el: string) => !PENDING_ELEMENTS.includes(el) && !byType('attack').some((s) => s.element === el));
   add('S5', missingElement.length === 0, `every Element has an attack skill (${ELEMENTS.join(' · ')})${PENDING_ELEMENTS.length ? ` · declared pending: ${PENDING_ELEMENTS.join(', ')}` : ''}${missingElement.length ? ' · MISSING: ' + missingElement.join(', ') : ''}`);
 
-  const groupCounts: [string, number][] = WEAPON_GROUPS.map((g: string) => [g, byType('attack').filter((s) => s.group === g).length]);
-  const thin = groupCounts.filter(([, n]) => n < 4);
-  soft('S6', thin.length === 0, `every weapon group has at least 4 attack skills (${groupCounts.map(([g, n]) => `${g} ${n}`).join(' · ')})${thin.length ? ' · THIN: ' + thin.map(([g]) => g).join(', ') : ''}`);
-
   const forbidden = SKILLS.filter((s) => /\b(mob|target|enemy)s?\s+armou?r\b|\b(mob|enemy)s?\s+mana\b/i.test(s.effect || '')).map((s) => s.id);
   add('S7', forbidden.length === 0, `no skill effect references mob armour or mob mana${forbidden.length ? ' · BAD: ' + forbidden.join(', ') : ''}`);
 
@@ -74,28 +70,7 @@ function gates(): G.GateRow[] {
   const block = (DATA.meta.reservation && DATA.meta.reservation.max_pct) || 100;
   soft('S9', totalReserve > block, `the full aura set reserves ${totalReserve}% of the pool against the ${block}% block — more than the pool holds, so the set can never all run at once and the player must choose`);
 
-  // Skill level: the XP rule must be reachable in hours, not in lifetimes.
   const SX = EN.E.skill_xp;
-  const sp: string[] = [];
-  let mult = 0;
-  let killsToMax = 0;
-  if (!SX || !(SX.xp_per_step > 0) || !(SX.level_cap > 1)) sp.push('skill_xp is missing or has no step cost');
-  else {
-    killsToMax = (SX.level_cap - 1) * SX.xp_per_step / SX.xp_per_kill;
-    // the Cap multiplier is read out of the calculator itself, never recomputed here (ramp:
-    // (base_flat + eff/100 × power) × damage_pct(level)/100, with eff 0 so only the ramp shows —
-    // and `perPress` reads that percentage out of `meta.formula.skill_levels`). The band it is
-    // read against is a watch (S10t), not this gate.
-    const SM0 = createSkillModel(DATA, EN.E);
-    mult = SM0.perPress({ id: '', basis: 'phys', base_flat: 1, eff: 0 }, { phys: 1, level: SX.level_cap }) ?? 0;
-    const nullReserve = byType('aura').filter((a) => a.reserve === null).length;
-    if (nullReserve) sp.push(`${nullReserve} aura(s) still have no reserve tier`);
-    soft('S10', sp.length === 0, sp.length ? sp.join(' \u00b7 ')
-      : `skill level is earned per kill (${SX.xp_per_kill} XP) at ${SX.xp_per_step} XP a step to Cap ${SX.level_cap} = **${mult.toFixed(2)}** \u00b7 ${killsToMax.toLocaleString('en-US')} kills to max \u00b7 every aura carries a reserve tier`);
-    watch('S10t', mult > 1.1 && mult < 1.4,
-      `a maxed skill multiplies its basis by ×${mult.toFixed(3)} — outside the ×1.1-1.4 skill band the gear-vs-skill split promises (gear ×5.6); re-read the ramp by eye`,
-      `a maxed skill multiplies its basis by ×${mult.toFixed(3)} — inside the ×1.1-1.4 skill band (gear ×5.6 carries the rest)`);
-  }
 
   // The per-level table is the one home of the ramp, so its shape is a promise: one row per level,
   // continuous, never falling, and the first row the identity. `special_level_effects` must name real

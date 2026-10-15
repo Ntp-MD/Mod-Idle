@@ -495,14 +495,14 @@
 <style>
   .shop { display: grid; gap: var(--spacing-md); }
   .compact-shop { display: block; }
-  .compact-craft { display: grid; gap: var(--spacing-2xs); }
-  .compact-summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--spacing-2xs) var(--spacing-sm); color: var(--dim); font-size: var(--font-xs); }
+  .compact-craft { display: grid; gap: var(--spacing-xs); }
+  .compact-summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--spacing-xs) var(--spacing-sm); color: var(--dim); font-size: var(--font-xs); }
   .stone-request { color: var(--gold-lit); }
-  .stone-cancel { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .stone-cancel { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
   .compact-selects { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) auto; align-items: end; gap: var(--spacing-xs); }
-  .compact-selects label { display: grid; gap: var(--spacing-3xs); min-width: 0; color: var(--dim); font-size: var(--font-xs); }
-  .compact-selects select { width: 100%; min-width: 0; padding: var(--spacing-3xs) var(--spacing-2xs); font-size: var(--font-xs); }
-  .compact-press { align-self: end; padding: var(--spacing-2xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .compact-selects label { display: grid; gap: var(--spacing-xs); min-width: 0; color: var(--dim); font-size: var(--font-xs); }
+  .compact-selects select { width: 100%; min-width: 0; padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .compact-press { align-self: end; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
   .compact-hint { color: var(--dim); font-size: var(--font-xs); }
   .compact-empty { margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .bench-work { min-width: 0; }
@@ -512,10 +512,10 @@
      centre column is the work and stays the widest */
   .bench { display: grid; grid-template-columns: minmax(clamp(138px, 10.70vw, 297px), clamp(169px, 13.12vw, 364px)) minmax(0, 1fr) minmax(clamp(156px, 12.10vw, 338px), clamp(188px, 14.52vw, 405px)); gap: var(--spacing-md); align-items: start; }
   .stash, .bagcol { position: sticky; top: 0; }
-  h4 { margin: 0 0 var(--spacing-2xs); }
+  h4 { margin: 0 0 var(--spacing-xs); }
   /* the currency tab: one cell per stone, icon and count, the name on the hover — the purse is read
      at a glance the way a stash tab is, not scanned as a list */
-  .tab { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(38px, 2.90vw, 81px), 1fr)); gap: var(--spacing-2xs); }
+  .tab { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(38px, 2.90vw, 81px), 1fr)); gap: var(--spacing-xs); }
   .stone {
     position: relative; aspect-ratio: 1; display: grid; place-items: center;
     background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-sm);
@@ -526,42 +526,42 @@
     font-family: var(--num); font-size: var(--font-xs); color: var(--text); text-shadow: 0 1px 0 rgba(0, 0, 0, .9);
   }
   .tip { margin: var(--spacing-xs) 0 0; }
-  .mod-label { display: inline-flex; align-items: center; gap: var(--spacing-3xs); }
+  .mod-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .mod-label img, .mod-icon { width: var(--icon-xs); height: var(--icon-xs); flex: none; object-fit: contain; opacity: .9; vertical-align: middle; }
   .val { color: var(--text); }
-  .val small { color: var(--mob); font-size: var(--font-xs); margin-left: var(--spacing-2xs); }
+  .val small { color: var(--mob); font-size: var(--font-xs); margin-left: var(--spacing-xs); }
   .no { color: var(--mob); width: var(--icon-lg); }
-  .tag { margin-left: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-round); padding: 0 var(--spacing-2xs); }
+  .tag { margin-left: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-round); padding: 0 var(--spacing-xs); }
   .tag.el { color: var(--es-lit); border-color: color-mix(in srgb, var(--es) 40%, transparent); }
   tr.fixed td { opacity: .72; }
 
   /* the tier a line sits in is a band of three, because Tier is a set of steps and not a number */
-  .band { display: inline-flex; gap: var(--spacing-3xs); margin-right: var(--spacing-2xs); vertical-align: middle; }
+  .band { display: inline-flex; gap: var(--spacing-xs); margin-right: var(--spacing-xs); vertical-align: middle; }
   .band i { width: var(--icon-xs); height: 4px; border-radius: var(--radius-round); background: var(--bar); border: 1px solid var(--line); }
   .band i.on { background: var(--gold); border-color: var(--gold); }
   .t { font-size: var(--font-xs); color: var(--dim); }
 
-  .verbs { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); align-items: center; }
-  .verbs button { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .verbs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; }
+  .verbs button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
   .verbs button:disabled { opacity: .42; cursor: not-allowed; }
   .verbs button.armed { border-color: var(--gold); color: var(--gold); }
   /* the Replace stone's own choice: the line it names, from the pool this Base already draws */
-  .pick { display: inline-flex; gap: var(--spacing-2xs); align-items: center; width: 100%; margin-top: var(--spacing-3xs); }
-  .pick select { font-size: var(--font-xs); padding: var(--spacing-3xs) var(--spacing-2xs); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); }
-  .pick button { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); border-color: var(--gold); }
+  .pick { display: inline-flex; gap: var(--spacing-xs); align-items: center; width: 100%; margin-top: var(--spacing-xs); }
+  .pick select { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .pick button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); border-color: var(--gold); }
   .prices { font-size: var(--font-xs); color: var(--mob); }
-  .foot { margin: var(--spacing-2xs) 0 0; color: var(--dim); }
+  .foot { margin: var(--spacing-xs) 0 0; color: var(--dim); }
   /* the explainers fold: the table and the presses lead, the prose waits one press away */
-  .more { margin: var(--spacing-2xs) 0 0; }
+  .more { margin: var(--spacing-xs) 0 0; }
   .more summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
   .more p { margin: var(--spacing-xs) 0 0; }
   .work { display: grid; gap: var(--spacing-md); }
 
-  .wbtns { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(162px, 12.58vw, 351px), 1fr)); gap: var(--spacing-2xs); }
+  .wbtns { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(162px, 12.58vw, 351px), 1fr)); gap: var(--spacing-xs); }
   .bench-work .wbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bench-work .wbtns .pick { display: flex; flex-wrap: wrap; align-content: start; }
   .bench-work .wbtns .pick select, .bench-work .wbtns .pick button { flex: 1 1 clamp(69px, 5.32vw, 149px); min-width: 0; }
-  .wbtns > button { display: grid; gap: var(--spacing-3xs); justify-items: start; text-align: left; padding: var(--spacing-xs) var(--spacing-sm); }
+  .wbtns > button { display: grid; gap: var(--spacing-xs); justify-items: start; text-align: left; padding: var(--spacing-xs) var(--spacing-sm); }
   .wbtns b { font-size: var(--font-xs); }
   .wbtns span { font-size: var(--font-xs); color: var(--dim); }
   .wbtns button:disabled { opacity: .45; cursor: not-allowed; }

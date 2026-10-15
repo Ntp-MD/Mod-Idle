@@ -4,7 +4,7 @@
  * `GALLERY_RUNTIME` is the whole client side — search, category tabs and a per-icon star — held as a
  * string because the two hosts load it differently. The live wiki (`wiki.html`, Vite) resolves every
  * SVG to a URL and runs this text in the page; `tools/wiki.ts` writes the same text into
- * `wiki/icons.html`, where the icons are read off the disk by relative path, so the page works straight
+ * `docs/wiki/icons.html`, where the icons are read off the disk by relative path, so the page works straight
  * from `file://`. The entries arrive the same way in both: a `#icons-data` JSON block the static build
  * bakes in, or `window.__ICONS__` when a host sets it. No DOM is touched here, so the static build can
  * import this module from Node.

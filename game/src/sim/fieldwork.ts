@@ -270,6 +270,14 @@ export function recordHuntKill(state: GameState, speciesId: string, rng: () => n
     const received = food ? addTo(state, state.fieldwork.foods, food.id, 'food', amount) : 0;
     if (food && received) drops.push(`${food.name} ×${received}`);
   }
+  // The metal and wood a body is made of pays into the same `materials` map `mine` and `grove` fill,
+  // so a kill is the chance you meet and the hex stays the bulk source (`fieldwork.hunt.material_drops`).
+  for (const drop of config.material_drops || []) {
+    if (!drop.species.includes(speciesId) || rng() >= fieldDropChance(state, 'hunting', speciesId, drop.chance)) continue;
+    const amount = drop.min + Math.floor(rng() * (drop.max - drop.min + 1)) + fieldHarvestBonus(state, 'hunting');
+    const received = addTo(state, state.fieldwork.materials, drop.resource, 'material', amount);
+    if (received) drops.push(`${drop.resource} ×${received}`);
+  }
   return drops.length ? drops.join(' · ') : null;
 }
 

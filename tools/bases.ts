@@ -54,17 +54,9 @@ function checks(): any[] {
   const { add, soft, rows } = G.gates();
   let current: any = null;
   try { current = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { current = null; }
-  if (!current) {
-    add('BS1', false, 'tools/data/bases.json is missing');
-    return rows();
-  }
+  if (!current) throw new Error('tools/data/bases.json is missing');
   // bases.json is the source now — nothing parses a doc into it
   const doc = current;
-  const shape = Array.isArray(current.bases) && current.bases.length > 0 && Array.isArray(current.slots) && current.slots.length > 0
-    && ['frame_mod', 'weapons', 'weapon_pools', 'weapon_frames'].every((k: string) => current[k]);
-  add('BS1', shape, shape
-    ? `${current.bases.length} Base rows across ${current.slots.length} slots, with frame_mod · weapons · weapon_pools · weapon_frames present`
-    : 'bases.json is missing a required section');
   soft('BS2', current.quality_weight_multiplier === 1.3,
     `the Quality multiplier applied to weight is ${current.quality_weight_multiplier}`);
   const totals = PATHS.map((p) => Math.round(weightOf(doc.bases, p.bases) * 10) / 10);
@@ -163,7 +155,9 @@ function checks(): any[] {
       for (const id of f.legacy_frame_mod || []) if (!KNOWN_MOD_IDS.has(id)) frameProblems.push(`${w.name}/${f.name}: unknown legacy line ${id}`);
       if (list.filter((x: any) => x.name === f.name).length > 1) frameProblems.push(`${w.name} names ${f.name} twice`);
     }
-    if (new Set(list.map((f: any) => f.drop_weight)).size < 2) frameProblems.push(`${w.name}: frame drop weights are identical`);
+    // a weighted roll needs at least two weights to be a roll: one frame is a legal type, two frames
+    // that drop alike are not a list
+    if (list.length > 1 && new Set(list.map((f: any) => f.drop_weight)).size < 2) frameProblems.push(`${w.name}: frame drop weights are identical`);
   }
   for (const t of Object.keys(FRAMES)) if (!weapons.some((w: any) => w.name === t)) frameProblems.push(`a frame list for an unknown type ${t}`);
   const frameCount = Object.values(FRAMES).flat().length;

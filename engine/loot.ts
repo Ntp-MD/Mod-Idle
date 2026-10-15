@@ -23,14 +23,14 @@ export function mulberry32(a: number) {
 export const pick = (rng: Rng, arr: any[]): any => arr[Math.floor(rng() * arr.length)];
 export const intBetween = (rng: Rng, lo: number, hi: number) => lo + Math.floor(rng() * (hi - lo + 1));
 
-/** Keep the variant's sale rarity while allowing its race to supply one matching-rarity alternative. */
+/** Keep the Variant's sale rarity while allowing its Species to supply a matching-rarity alternative. */
 export function chooseJunkItem(
   rng: Rng,
   variantItem: string,
   rarity: string,
-  raceItems: Record<string, string>,
+  speciesItems: Record<string, string>,
 ): string {
-  const alternative = raceItems[rarity];
+  const alternative = speciesItems[rarity];
   return alternative && rng() >= 0.5 ? alternative : variantItem;
 }
 

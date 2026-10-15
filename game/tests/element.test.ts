@@ -38,7 +38,7 @@ describe('a weapon carries the Element its own line stores', () => {
     const share = c.elem * (c.alignment / 100);
     expect(share).toBeGreaterThan(0);
 
-    // no matchup multiplier exists: the same swing lands identically on every Element a race owns
+    // no matchup multiplier exists: the same swing lands identically on every Element a Species owns
     const onChaos = playerSwing(SWING(), c, mobOf(['chaos']), c.weaponElement).damage;
     const onFire = playerSwing(SWING(), c, mobOf(['fire']), c.weaponElement).damage;
     const onNone = playerSwing(SWING(), c, mobOf([]), c.weaponElement).damage;
@@ -87,7 +87,7 @@ describe('a weapon carries the Element its own line stores', () => {
     const s = newGame(71);
     huntZone(s, s.zone);
     setLevel(s, 40);
-    s.zone = 4; // a lightning zone, so a fire weapon meets a race whose Element is not its own
+    s.zone = 4; // a lightning zone, so a fire weapon meets a Species whose Element is not its own
     s.gear = weaponWith('fire');
     // Tick until the state under test exists, never for a guessed window: a fixed window is a time
     // premise (AGENTS.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.

@@ -120,8 +120,8 @@
   .branch-label { text-transform: capitalize; }
   .tree-detail h3 { color: var(--gold); text-transform: capitalize; }
   .tree-detail p { margin: 0; color: var(--dim); }
-  .rank-table { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-2xs); }
-  .rank-table span { display: grid; justify-items: center; gap: var(--spacing-3xs); padding: var(--spacing-xs); border: 1px solid var(--line); color: var(--dim); font-variant-numeric: tabular-nums; }
+  .rank-table { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-xs); }
+  .rank-table span { display: grid; justify-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs); border: 1px solid var(--line); color: var(--dim); font-variant-numeric: tabular-nums; }
   .rank-table span.owned-rank { border-color: var(--gold); color: var(--gold); }
   .detail-actions { display: grid; gap: var(--spacing-xs); }
   .detail-actions small { color: var(--dim); }

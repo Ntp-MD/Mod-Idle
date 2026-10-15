@@ -39,25 +39,25 @@
   .combatlog {
     width: min(clamp(263px, 20.33vw, 567px), 100%); height: 100%;
     min-height: calc(var(--font-xs) * 10 + var(--spacing-xs) * 4 + var(--spacing-md));
-    display: flex; flex-direction: column; gap: var(--spacing-2xs); padding: var(--spacing-2xs);
+    display: flex; flex-direction: column; gap: var(--spacing-xs); padding: var(--spacing-xs);
     overflow: hidden; pointer-events: none;
     background: var(--glass); border: 1px solid var(--hud-edge); border-radius: var(--radius-sm);
     box-shadow: 0 3px 10px rgba(0, 0, 0, .32);
   }
   .feed-body {
-    display: flex; flex: 1; flex-direction: column; justify-content: flex-end; gap: var(--spacing-3xs);
-    min-height: 0; overflow: hidden; padding: var(--spacing-2xs);
+    display: flex; flex: 1; flex-direction: column; justify-content: flex-end; gap: var(--spacing-xs);
+    min-height: 0; overflow: hidden; padding: var(--spacing-xs);
     background: rgba(0, 0, 0, .2); border-radius: var(--radius-sm);
   }
   .empty-feed {
     display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center;
-    gap: var(--spacing-3xs); padding: var(--spacing-xs); text-align: center;
+    gap: var(--spacing-xs); padding: var(--spacing-xs); text-align: center;
   }
   .empty-feed strong { color: var(--text); font-size: var(--font-xs); font-weight: 600; }
   .empty-feed small { max-width: 34ch; color: var(--dim); font-size: var(--font-xs); line-height: 1.35; }
   .feed-body p {
     flex: none;
-    margin: 0; padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); color: var(--dim);
+    margin: 0; padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); color: var(--dim);
     background: linear-gradient(90deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .3) 78%, transparent);
     border-radius: var(--radius-sm);
     opacity: calc(1 - var(--age, 0) * .14);
@@ -67,12 +67,12 @@
   .feed-body p.good { color: var(--good-lit); }
   /* channel filters share one framed rail; log lines stay passive */
   .chattabs {
-    pointer-events: auto; display: flex; flex: none; width: 100%;
+    pointer-events: auto; display: flex; flex: none; flex-wrap: wrap; width: 100%;
     overflow: hidden; border: 1px solid var(--hud-edge); border-radius: var(--radius-sm);
     background: rgba(8, 11, 16, .82); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
   }
   .chattabs button {
-    flex: 1 1 0; min-width: 0; padding: var(--spacing-2xs) var(--spacing-3xs); font-size: var(--font-xs);
+    flex: 1 1 max-content; min-width: 0; padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs);
     text-transform: capitalize; background: transparent; border: 0; border-right: 1px solid var(--edge); color: var(--dim);
   }
   .chattabs button:last-child { border-right: 0; }

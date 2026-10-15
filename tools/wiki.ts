@@ -1,7 +1,7 @@
 /**
- * The static half of the wiki: it calls the page source and writes the result to `wiki/**`.
+ * The static half of the wiki: it calls the page source and writes the result to `docs/wiki/*.html`.
  *
- *   node tools/wiki.ts build     write `wiki/**` (git-ignored, rebuildable)
+ *   node tools/wiki.ts build     write `docs/wiki/*.html` (rebuildable)
  *
  * The pages themselves are NOT here — they live in `game/src/wiki/pages.ts`, the same module the live
  * wiki (`game/wiki.html`) renders in the browser. This file owns the filesystem: read the client's
@@ -17,7 +17,7 @@ import { PAGES, renderDoc, extractTokens } from '../game/src/wiki/pages.ts';
 import { iconEntry, GALLERY_RUNTIME } from '../game/src/wiki/icons-gallery.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const OUT = path.join(ROOT, 'wiki');
+const OUT = path.join(ROOT, 'docs', 'wiki');
 const ICONS = path.join(ROOT, 'game', 'src', 'icon');
 
 /** The client's palette, read from the file that owns it — never a copy typed into a page. */
@@ -27,7 +27,7 @@ const tokens = (): string =>
 /**
  * The icon gallery, from the shelf rather than a browser: the folder is the truth, so a sheet dropped on
  * `game/src/icon/` lands on the page at the next build. The entries are named by the same `iconEntry` the
- * live wiki calls, and the paths stay relative to `wiki/`, so the page opens straight from the disk.
+ * live wiki calls, and the paths stay relative to `docs/wiki/`, so the page opens straight from the disk.
  */
 const gallery = (page: string): string => {
   const mount = '<div id="icons-gallery"></div>';
@@ -43,7 +43,7 @@ const gallery = (page: string): string => {
   walk(ICONS, '');
   const entries = rels
     .sort()
-    .map((rel) => iconEntry(rel, `../game/src/icon/${encodeURI(rel)}`));
+    .map((rel) => iconEntry(rel, `../../game/src/icon/${encodeURI(rel)}`));
   const data = `<script type="application/json" id="icons-data">${JSON.stringify(entries)}</script>`;
   return page.replace(mount, `${mount}\n${data}\n<script>${GALLERY_RUNTIME}</script>`);
 };
@@ -55,13 +55,13 @@ if (process.argv[2] === 'build') {
     const html = renderDoc(p, p.file, css);
     fs.writeFileSync(path.join(OUT, p.file), p.file === 'icons.html' ? gallery(html) : html, 'utf8');
   }
-  console.log(`wrote wiki/ (${PAGES.length} pages) · ${PAGES.map((p) => path.basename(p.file, '.html')).join(' · ')}`);
+  console.log(`wrote docs/wiki/ (${PAGES.length} pages) · ${PAGES.map((p) => path.basename(p.file, '.html')).join(' · ')}`);
   console.log(`live: the same pages render in the browser at http://localhost:5173/wiki.html`);
   console.log(`open: file://${path.join(OUT, 'index.html').replace(/\\/g, '/')}`);
 } else {
   console.log(`player wiki — the pages live in game/src/wiki/pages.ts and two hosts render them
 
-  node tools/wiki.ts build           write wiki/** as a static site (git-ignored)
+  node tools/wiki.ts build           write docs/wiki/*.html as a static site
   http://localhost:5173/wiki.html    the live wiki: the same module, no rebuild, no stale figure
 `);
 }
