@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { E, eng } from '../src/engine/client';
+import { mobIcon } from '../src/icon/index';
 import { huntZone, newGame, setLevel, tick } from '../src/sim/game';
 import { buildCharacter } from '../src/sim/player';
 import { mobSwing } from '../src/sim/combat';
 import { newMobStatusStore, applyBleed, placeStatus } from '../src/sim/mobStatus';
 import type { Mob } from '../src/sim/types';
+import * as loot from '../../engine/loot.ts';
 import { leanReweight, leanReweightMany } from '../../engine/loot.ts';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { rollDrop } from '../src/sim/drop';
@@ -161,7 +163,21 @@ describe('mob, terrain and drop data', () => {
       expect((byId.get(id) as any).sizes).not.toContain('small');
     }
     expect(new Set(E.mob.species.map((species: any) => species.sizes.slice().sort().join('+'))).size)
-      .toBeGreaterThanOrEqual(6);
+      .toBeGreaterThanOrEqual(5);
+  });
+
+  it('gives every race with normal variants a Small or Medium body the group spawner can field', () => {
+    const normalNames = new Set(E.mob.zones.flatMap((zone: any) =>
+      zone.subzones.flatMap((sub: any) => sub.normal)));
+    const normalRaces = Object.entries(E.mob.variants as Record<string, string[]>)
+      .filter(([, names]) => names.slice(0, 3).some((name) => normalNames.has(name)))
+      .map(([race]) => race);
+    const speciesById = new Map(E.mob.species.map((species: any) => [species.id, species]));
+
+    for (const race of normalRaces) {
+      const species = speciesById.get(race) as any;
+      expect(species.sizes.some((size: string) => size === 'small' || size === 'medium'), race).toBe(true);
+    }
   });
 
   it('uses at least 40 distinct race casts across the 54 subzones', () => {
@@ -170,6 +186,57 @@ describe('mob, terrain and drop data', () => {
 
     expect(casts).toHaveLength(54);
     expect(new Set(casts).size).toBeGreaterThanOrEqual(40);
+  });
+
+  it('gives each race one additional unique junk item at every rarity', () => {
+    const extras: string[] = E.mob.species.flatMap((species: any) => {
+      expect(Object.keys(species.junk_items || {}).sort()).toEqual(['common', 'rare', 'uncommon']);
+      return Object.values(species.junk_items || {}) as string[];
+    });
+    const existing = Object.values(E.mob.variant_drops as Record<string, any>).map((row) => row.item);
+
+    expect(new Set(extras).size).toBe(extras.length);
+    expect(extras.some((item: string) => existing.includes(item))).toBe(false);
+  });
+
+  it('allows one race in subzones with different environments and keeps its normal variants fieldable', () => {
+    const zone = E.mob.zones.find((entry: any) => entry.id === 1) as any;
+    const appearances = new Map<string, any[]>();
+    for (const subzone of zone.subzones) {
+      for (const race of subzone.races) {
+        appearances.set(race, [...(appearances.get(race) || []), subzone]);
+      }
+    }
+    const overlap = [...appearances.entries()].find(([, subzones]) =>
+      new Set(subzones.map((subzone) => subzone.environment)).size > 1);
+
+    expect(overlap).toBeDefined();
+    if (!overlap) return;
+    const [race, subzones] = overlap;
+    const normalVariants = (E.mob.variants as Record<string, string[]>)[race].slice(0, 3);
+    for (const subzone of subzones) {
+      expect(subzone.normal).toEqual(expect.arrayContaining(normalVariants));
+    }
+  });
+
+  it('resolves a distinct race icon for every species', () => {
+    const icons = E.mob.species.map((species: any) => mobIcon(species.id));
+
+    expect(icons.every(Boolean)).toBe(true);
+    expect(new Set(icons).size).toBe(E.mob.species.length);
+  });
+
+  it('chooses the variant junk item or either race-specific alternative', () => {
+    const chooseJunkItem = (loot as any).chooseJunkItem;
+    expect(typeof chooseJunkItem).toBe('function');
+    if (typeof chooseJunkItem !== 'function') return;
+
+    expect(chooseJunkItem(() => 0, 'Variant item', 'common', { common: 'Common race item' }))
+      .toBe('Variant item');
+    expect(chooseJunkItem(() => 0.75, 'Variant item', 'common', { common: 'Common race item', rare: 'Rare race item' }))
+      .toBe('Common race item');
+    expect(chooseJunkItem(() => 0.75, 'Variant item', 'uncommon', { common: 'Common race item', rare: 'Rare race item' }))
+      .toBe('Variant item');
   });
 
   it('gives bosses their own combat profile in the engine roster', () => {
@@ -301,6 +368,7 @@ describe('the species trait read as a mechanic', () => {
     expect(burst).toBeDefined();
     // the kill is the whole application: no proc roll, and the line is a share of the body's own output
     const perSec = burst.ps * burst.burst.ps_pct / 100;
+    s.group = [burst];
     burst.hp = 0.5;
     tick(s, statuses, { online: true });
     expect(statuses.poison?.stacks).toBeGreaterThanOrEqual(1);

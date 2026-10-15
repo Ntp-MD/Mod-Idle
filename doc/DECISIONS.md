@@ -1,5 +1,15 @@
 # Final Stat Calculation
 
+## Interface Surfaces
+
+Border radius uses four shared values: `--radius-xs` for compact controls, `--radius-sm` for standard controls and cards, `--radius-md` for major panels, and `--radius-round` (`50%`) for circles and capsules. Corner-specific shapes may use these shared tokens; do not add one-off values or responsive radius ramps.
+
+Shared UI colors, shadows, motion and stacking order live in `game/src/styles/variables.css`. Promote a value to a token when it recurs across components or expresses a shared state; keep one-off art, overlays and effects local. Component-local stacking uses the `--z-underlay` through `--z-toast` steps; app-wide layers use their named `--z-*` tokens. Shared transitions use the fast, UI, map or travel motion tokens and the matching easing token.
+
+The field map is operable by pointer and keyboard: arrow keys select an adjacent Block; Enter walks to the selected place, or uses its Waypoint if that Settlement is known. Keyboard selection announces the selected Block and place.
+
+`tools/data/map.json` is the map layout source. `tools/map.ts` generates `game/src/icon/map/map-overlay.svg`, and its parity gate keeps the checked-in SVG aligned with the current local map data. Client and engine code must not read `map.json` directly. One browser tab owns writes to the shared account and save slots through an exclusive Web Lock; other tabs remain read-only until they take over and reload the chosen slot. If Web Locks are unavailable, saving stays disabled rather than risking a quiet overwrite.
+
 The character sheet is assembled by `game/src/sim/player.ts`; shared formulas live in `engine/index.ts`. Read values from `tools/data/engine.json`, `mods.json`, `bases.json` and `tree.json`. Do not duplicate configured values here.
 
 ## Inputs and order
@@ -46,7 +56,7 @@ Let `C` be final Core, `F` the summed flat lines, `P` the summed percent lines, 
 | Block | `max(0, P.block)`; read directly from the Shield Frame Mod and passive tree |
 | Elemental resistance | `min(caps.elem_res_max, caps.elem_res + P.resistance_cap, (P.resistance + P.all_resistance) × resistance_effect_mult)` |
 | Elemental alignment | `(C.dex × K_DEX_ALIGN + P.alignment + effect_add) × effect_mult` |
-| Stun chance | `max(0, alignment × K_STUN_PER_ALIGN + P.stun_chance)` |
+| Stun chance | `max(0, alignment × K_STUN_PER_ALIGN + P.stun_chance)`; uncapped. A separate rolling control budget limits mob stop time, not chance. |
 | Stun recovery | `min(100, max(0, C.vit × K_VIT_STUNREC))`; remaining stop is `stop_sec × (1 - recovery / 100)` |
 | Cooldown reduction | `min(caps.cdr, C.wis × K_WIS_CDR × (1 + P.cdr / 100))` |
 | Weight capacity | `weight_base + C.str × K_STR_WEIGHT` |
@@ -56,13 +66,15 @@ Armour penetration, status resistance, attack/spell damage, bleed chance, leech,
 
 ## Mob Core
 
-`mob.form_catalog` contains 220 named race forms: all 22 races across the ten real level bands from 1–10 through 91–100. Each form owns a fixed integer Core block; Str/Agi/Vit/Int/Wis/Lck inherit the race profile, while Dex is authored per variant for its accuracy and Evasion identity. Runtime never scales Core by level. `mob.forms` assigns these forms to the first ten zone bands, and each subzone partitions all 22 races into spawn pools. Every form inherits its race's five-rung drop profile. Levels 101–180 remain playable without new catalog variants; they reuse the latest available form and Core for that lineage. Mobs have no equipment or passive tree. Elite is a rank over the selected form, and each Boss may declare its own fixed profile. `map.json` remains presentation-only:
+`mob.form_catalog` contains 220 named race forms: all 22 races across the ten real level bands from 1–10 through 91–100. Each form owns a fixed integer Core block; Str/Agi/Vit/Int/Wis/Lck inherit the race profile, while Dex is authored per variant for its accuracy and Evasion identity. Runtime never scales Core by level. `mob.forms` assigns these forms to the first ten zone bands. Body sizes are authored per race; no race needs all three, and every race with normal variants must have Small or Medium so the group spawner can field it. Large remains the solo Elite body. A zone's subzones are independent spawn pools, not a partition: their union covers the zone's species cast, while one race may appear in multiple pools with different environments. Every form inherits its race's five-rung drop profile and its three additional junk items, one at each sale rarity; the variant still chooses the rarity and drop lean, and its race supplies a same-rarity item alternative. Each mob uses its species' own icon. Levels 101–180 remain playable without new catalog variants; they reuse the latest available form and Core for that lineage. Mobs have no equipment or passive tree. Elite is a rank over the selected form, and each Boss may declare its own fixed profile. `map.json` remains presentation-only:
 
 ```text
 mobCore[k, form] = form.core[k]
 ```
 
 The species' zone level is fixed by `mob.species[].zone_levels`. Mob HP and combat lines use the same shared engine and their configured species, zone, size, and boss inputs.
+
+Zone Element summaries describe the current spawn data; zones do not impose exclusive Element themes or filter races by Element. Keep zone species rosters broad unless a separate world-design decision changes them. Stun chance has no Cap; the mob's separate rolling control budget limits stop time so a fight cannot become a lockout. One-handed axe size multipliers remain neutral at 1.0 pending an explicit balance decision.
 
 ```text
 mobHP(level) = mobHpAt(level) + hp_per_level × (level - 1) + mobVit × K_VIT_HP

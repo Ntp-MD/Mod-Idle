@@ -24,7 +24,7 @@ export interface MobMark {
   statuses: Partial<Record<MobStatusName, MobLine>>;
   /** The dealer's aligned Elemental damage per second, which is what the DoT Cap divides by. */
   alignedPerSec: number;
-  /** Seconds of clock this spawn has already had stopped, against the 15% control bound. */
+  /** Seconds of clock this spawn has already had stopped, against the rolling control budget. */
   stoppedSec: number;
   elapsedSec: number;
   /** Until this second, poison on the target does not decay (`curse.venom_bind`). */
@@ -37,9 +37,8 @@ export const newMobStatusStore = (): MobStatusStore => ({});
 
 const S = E.status as any;
 const K = E.K as any;
-/** Control is bounded, never a lockout: at most this share of a fight may be spent stopped. */
-const CONTROL_BOUND = 0.15;
-const MAX_STOP_SEC = 15; // stun is capped at 15% chance in the same rule (`combat.md` §5b)
+/** Stun chance is uncapped; only total stopped time is bounded by this rolling share of the fight. */
+const CONTROL_BOUND = S.mob_control_budget_pct;
 
 const line = (m: MobMark, name: MobStatusName): MobLine =>
   (m.statuses[name] ||= { stacks: 0, secLeft: 0, perSec: 0 });
@@ -105,7 +104,7 @@ export function placeStatus(
   if (name === 'burn' || name === 'poison') {
     l.stacks = Math.min(stacksUnderCap(name), l.stacks + 1);
     l.perSec = alignedPerHit * cfg.k_dps;
-    l.secLeft = name === 'burn' ? cfg.time_sec : MAX_STOP_SEC * 40; // poison only decays on its own clock
+    if (name === 'burn') l.secLeft = cfg.time_sec;
   } else if (name === 'mark') {
     l.stacks = Math.min(cfg.stack_max, l.stacks + 1);
     l.perSec = 0;
@@ -131,8 +130,8 @@ export function placeStatus(
 }
 
 /**
- * A stop that names its own length and no chance (Shield Bash's row says so), so it is not charged
- * against the 15% control budget — that bound is what proc-based stuns obey (combat.md §5b).
+ * A direct stop names its own length and no chance. It pays the shared rolling stop-time budget
+ * unless its row explicitly sets `bypassBudget` (combat.md §5b).
  */
 export function stopMob(store: MobStatusStore, mobId: string, sec: number, bypassBudget = false): void {
   const m = mark(store, mobId);
@@ -145,8 +144,8 @@ export function stopMob(store: MobStatusStore, mobId: string, sec: number, bypas
 
 /**
  * A proc-based stun — the mace's `Chance to stun %` line. A landed hit rolls the chance and
- * a landed stun stops the mob for `shock.stop_sec`, paid out of the same 15% control budget shock
- * obeys, so a gear stun can never lock a fight (combat.md §5b).
+ * a landed stun stops the mob for `shock.stop_sec`, paid out of the separate rolling stop-time budget
+ * shock obeys, so an uncapped chance can never lock a fight (combat.md §5b).
  */
 export function stunMob(rng: () => number, store: MobStatusStore, mobId: string, chancePct: number): boolean {
   if (chancePct <= 0 || rng() * 100 >= chancePct) return false;
@@ -286,8 +285,8 @@ export function stepMobParts(store: MobStatusStore, mobId: string): DotTick {
   const m = store[mobId];
   if (!m) return none;
   m.elapsedSec++;
-  // the control budget is a rolling share of the fight (≤15%), so a second of being alive pays back
-  // 0.15 of a stopped second — otherwise one long fight could never be shocked again
+  // the control budget is a rolling share of the fight, so each second alive pays that share back
+  // from the stopped-time allowance and a long fight can still be shocked again
   m.stoppedSec = Math.max(0, m.stoppedSec - CONTROL_BOUND);
   let burnDot = 0;
   let poisonDot = 0;

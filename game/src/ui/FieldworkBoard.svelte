@@ -186,7 +186,7 @@
 <style>
   .fieldwork-board { display: grid; grid-template-rows: auto auto auto auto auto minmax(0, 1fr); gap: var(--spacing-sm); flex: 1; min-height: 0; overflow: hidden; font-size: var(--font-xs); }
   .camp-line, .activity-line { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-sm); min-width: 0; border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-xs); }
-  .camp-mark, .activity-mark { display: grid; place-items: center; width: var(--icon-lg); height: var(--icon-lg); border: 1px solid var(--edge); border-radius: var(--spacing-sm); background: var(--panel); }
+  .camp-mark, .activity-mark { display: grid; place-items: center; width: var(--icon-lg); height: var(--icon-lg); border: 1px solid var(--edge); border-radius: var(--radius-sm); background: var(--panel); }
   .camp-mark img, .activity-mark img { width: var(--icon-md); height: var(--icon-md); object-fit: contain; }
   .camp-copy, .activity-copy { display: grid; gap: var(--spacing-3xs); min-width: 0; }
   .camp-copy h3, .kitchen-line h3 { margin: 0; color: var(--gold); font-size: var(--font-sm); }
@@ -198,13 +198,13 @@
   .hunger-meter > div { display: flex; justify-content: space-between; gap: var(--spacing-sm); }
   .hunger-meter b { color: var(--gold); }
   .hunger-meter strong { color: var(--text); font-family: var(--num); font-weight: 600; }
-  .hunger-meter > i { display: block; height: 4px; overflow: hidden; border-radius: 999px; background: var(--bar-2); }
+  .hunger-meter > i { display: block; height: 4px; overflow: hidden; border-radius: var(--radius-round); background: var(--bar-2); }
   .hunger-meter em { display: block; height: 100%; background: var(--gold); }
   .hunger-meter.empty strong { color: var(--alarm); }
   .hunger-meter.empty em { background: var(--alarm); }
   .auto-eat { display: flex; align-items: center; gap: var(--spacing-sm); white-space: nowrap; }
   .auto-eat label { display: inline-flex; align-items: center; gap: var(--spacing-2xs); }
-  .auto-eat select { max-width: var(--box-100); }
+  .auto-eat select { max-width: clamp(63px, 4.84vw, 135px); }
   .activity-line { grid-template-columns: auto minmax(0, 1fr) auto; }
   .stock-line { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-xs); }
   .stock-group, .skill-group { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); }
@@ -217,7 +217,7 @@
   .provisions-line > header b { color: var(--gold); }
   .provisions-line > header small { color: var(--dim); }
   .provisions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-2xs); }
-  .provision { display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-3xs) var(--spacing-xs); border: 1px solid var(--edge); border-radius: var(--spacing-xs); background: color-mix(in srgb, var(--panel) 65%, transparent); white-space: nowrap; }
+  .provision { display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-3xs) var(--spacing-xs); border: 1px solid var(--edge); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--panel) 65%, transparent); white-space: nowrap; }
   .provision strong { color: var(--gold); font-family: var(--num); }
   .provision img { width: var(--icon-xs); height: var(--icon-xs); object-fit: contain; }
   .provision.ingredient { color: var(--dim); }
@@ -236,5 +236,5 @@
   .recipe-head strong { color: var(--gold); }
   .recipe-actions { display: flex; gap: var(--spacing-2xs); margin-top: var(--spacing-2xs); }
   .recipe-actions button { flex: 1; }
-  .meal-live { flex: none; width: var(--icon-xs); height: var(--icon-xs); border-radius: 50%; border: 1px solid var(--good-lit); background: var(--good-lit); }
+  .meal-live { flex: none; width: var(--icon-xs); height: var(--icon-xs); border-radius: var(--radius-round); border: 1px solid var(--good-lit); background: var(--good-lit); }
 </style>

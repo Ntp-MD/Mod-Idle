@@ -10,9 +10,9 @@
   /**
    * The detail card a slot shows on hover. The whole card is a projection: every value and every name
    * comes out of the rolled line and `mods.json`, so it cannot drift from the drop the player is
-   * reading. A line prints as `<value> <plain words>` — no plus
-   * sign, no Tier chip, no Mod-book name — and the two fixed kinds are told apart by colour alone:
-   * the Frame Mod red, the Bound pair yellow, the editable Mods plain.
+   * reading. A line prints as `<value> <plain words>` — no plus sign and no Mod-book name — while
+   * Frame, Bound, and Unbound lines are named directly so fixed and editable Mods do not rely on
+   * colour alone.
    *
    * The skeleton reads top to bottom (`item-base.md`): line 1 is the Frame Mod the frame owns, lines
    * 2-3 the Bound pair, then the Unbound lines the drop drew — the Mods the stones may edit. The
@@ -30,6 +30,7 @@
   const gear = $derived(gearModOf(item));
   const delta = $derived(vsWorn(item, worn));
   const rar = $derived(pieceRank(item));
+  const tierLabel = $derived(/^T\d+$/i.test(item.tier) ? `Tier ${item.tier.slice(1)}` : item.tier);
 
   /** The Mod book owns both the printed name and whether its number is flat or a percentage. */
   function modSourceName(id: string): string {
@@ -79,9 +80,10 @@
 
   /** Which fixed kind a line position is, for the colour class: Frame, Bound, or an editable Mod. */
   const kindClass = (i: number) => (i === 0 ? 'frame' : i < craft.UNTOUCHABLE ? 'bound' : '');
+  const lineLabel = (i: number) => (i === 0 ? 'Frame' : i < craft.UNTOUCHABLE ? 'Bound' : 'Unbound');
 
   function compareText() {
-    if (wornHere) return 'the piece being worn now';
+    if (wornHere) return 'currently equipped';
     if (!worn) return 'nothing of this slot is worn — this would be the first';
     if (delta == null) return '';
     if (delta > 0) return `${delta.toFixed(0)}% stronger than the worn ${itemName(worn)}`;
@@ -103,47 +105,74 @@
 </script>
 
 <div class="detail" style:--rar={rar ? rar.tone : null}>
-  <h4>{itemName(item)}</h4>
-  <p class="tag">
-    <span class="chip rare-chip">level {item.ilvl}</span>
-    <span class="chip">{item.slot}</span>
-    {#if rar}<span class="chip rar-chip">{rar.name}</span>{/if}
-    <span class="dim">{item.quality} band · {item.tier}</span>
-  </p>
+  <header class="item-heading">
+    <h4>{itemName(item)}</h4>
+    <div class="item-meta">
+      <span class="chip rare-chip">Item level {item.ilvl}</span>
+      <span class="chip">{item.slot}</span>
+      {#if rar}<span class="chip rar-chip">{rar.name}</span>{/if}
+      <span class="meta-note">{item.quality} band · {tierLabel}</span>
+    </div>
+  </header>
   {#if (item.upgrade_lv || 0) > 0}
-    <p class="tag up">+{item.upgrade_lv} of {craft.C.upgrade_cap} Quality stone</p>
+    <p class="tag up">+{item.upgrade_lv} Quality stone upgrades · cap {craft.C.upgrade_cap}</p>
   {/if}
 
-  <ul class="lines">
-    {#each item.lines as line, i}
-      <li class="line {kindClass(i)}" class:fixed={kindClass(i) !== ''}>
-        {#each modParts(line) as part, j}
-          {#if j > 0}<span class="mod-sep" aria-hidden="true">·</span>{/if}
-          <span class="mod-part"><img src={part.icon} alt="" aria-hidden="true" />{part.text}</span>
-        {/each}
-        {#if craftedMark(line)}<span class="crafted">{craftedMark(line)}</span>{/if}
-      </li>
-    {:else}
-      <li class="dim">no rolled lines</li>
-    {/each}
-  </ul>
-
-  {#if diff.length}
-    <ul class="cmp" aria-label={`versus the worn ${worn ? itemName(worn) : ''}`}>
-      {#each diff as r (r.id + (r.element ?? ''))}
-        <li class={r.kind}><img src={modIcon(r.id, undefined, r.element)} alt="" aria-hidden="true" />{cmpText(r)}</li>
+  <section class="mods" aria-label="Item Mods">
+    <div class="section-heading">
+      <h5>Mods</h5>
+      <p>Frame/Bound fixed · Unbound editable</p>
+    </div>
+    <ul class="lines">
+      {#each item.lines as line, i}
+        <li class="line {kindClass(i)}" class:fixed={kindClass(i) !== ''}>
+          <span class="line-kind">{lineLabel(i)}</span>
+          <span class="line-body">
+            {#each modParts(line) as part, j}
+              {#if j > 0}<span class="mod-sep" aria-hidden="true">·</span>{/if}
+              <span class="mod-part"><img src={part.icon} alt="" aria-hidden="true" />{part.text}</span>
+            {/each}
+            {#if craftedMark(line)}<span class="crafted">{craftedMark(line)}</span>{/if}
+          </span>
+        </li>
+      {:else}
+        <li class="dim">no rolled lines</li>
       {/each}
     </ul>
+  </section>
+
+  {#if diff.length}
+    <section class="comparison">
+      <div class="section-heading">
+        <h5>Changed stats</h5>
+        <p>vs. {worn ? itemName(worn) : 'the worn item'}</p>
+      </div>
+      <ul class="cmp" aria-label={`versus the worn ${worn ? itemName(worn) : ''}`}>
+        {#each diff as r (r.id + (r.element ?? ''))}
+          <li class={r.kind}><img src={modIcon(r.id, undefined, r.element)} alt="" aria-hidden="true" />{cmpText(r)}</li>
+        {/each}
+      </ul>
+    </section>
   {/if}
 
   {#if gear.stat}
-    <p class="gear">
-      <span class="kind">Gear</span><span class="gear-stat"><img src={modIcon(gear.stat)} alt="" aria-hidden="true" />{gear.value > 0 ? `${modValue(gear.stat, gear.value)} ${plainName(gear.stat)}` : plainName(gear.stat)}</span>
-      <small>+{craft.C.gear_mod_per_level} a step — this Base’s own line</small>
-    </p>
+    <section class="gear" aria-label="Gear Mod">
+      <div class="section-heading">
+        <h5>Gear Mod</h5>
+        <p>Inherent to this Base</p>
+      </div>
+      <div class="gear-row">
+        <img src={modIcon(gear.stat)} alt="" aria-hidden="true" />
+        <strong>{gear.value > 0 ? `${modValue(gear.stat, gear.value)} ${plainName(gear.stat)}` : plainName(gear.stat)}</strong>
+      </div>
+      <p class="gear-note">+{craft.C.gear_mod_per_level} per Quality stone</p>
+    </section>
   {/if}
 
-  <p class="foot">weighs {Math.round(item.weight || 0)} · {compareText()}</p>
+  <div class="summary">
+    <p class="weight"><span>Weight:</span><strong>{Math.round(item.weight || 0)}</strong></p>
+    <p class="compare-summary">{compareText()}</p>
+  </div>
 
   {#if onequip && !wornHere}
     <button class="go" onclick={onequip}>Equip {itemName(item)}</button>
@@ -152,39 +181,49 @@
 
 <style>
   .detail {
-    min-width: var(--box-300);
-    max-width: var(--box-420);
+    width: min(clamp(280px, 19.36vw, 400px), calc(100vw - var(--screen-pad) - var(--screen-pad)));
+    min-width: 0;
     background: var(--bg);
     /* the card leads with its rarity edge, the way the slot it came from does */
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--rar, var(--dim));
+    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 45%, var(--line));
+    border-radius: var(--radius-md);
     padding: var(--spacing-xs) var(--spacing-sm);
+    display: grid;
+    gap: var(--spacing-xs);
     font-size: var(--font-xs);
   }
+  .item-heading { display: grid; gap: var(--spacing-2xs); }
   h4 { margin: 0; font-size: var(--font-sm); color: var(--rar, var(--text)); }
-  .tag { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); align-items: baseline; margin: var(--seam) 0 var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
-  .tag.up { color: var(--xp); }
-  .chip { border: 1px solid var(--line); border-radius: 2px; padding: 0 var(--spacing-2xs); color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0px, 0.05vw, 1px); }
+  .item-meta { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); align-items: center; color: var(--dim); font-size: var(--font-xs); }
+  .chip { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 var(--spacing-2xs); color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0px, 0.05vw, 1px); }
   .rare-chip { color: var(--xp); border-color: var(--xp); }
   .rar-chip { color: var(--rar, var(--dim)); border-color: color-mix(in srgb, var(--rar, var(--line)) 60%, var(--line)); text-transform: capitalize; }
   .dim { color: var(--dim); }
-  .lines { list-style: none; margin: 0 0 var(--spacing-2xs); padding: 0; }
+  .meta-note { color: var(--dim); }
+  .tag.up { margin: 0; color: var(--xp); font-size: var(--font-xs); }
+  .section-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--spacing-2xs); margin-bottom: var(--spacing-2xs); }
+  h5 { margin: 0; color: var(--gold-lit); font-size: var(--font-xs); }
+  .section-heading p { margin: 0; color: var(--dim); font-size: var(--font-xs); }
+  .lines { display: grid; gap: var(--spacing-3xs); list-style: none; margin: 0; padding: 0; }
   /* Every Mod line is a stamped bar: an ink-to-dark sweep with the words in the ink colour, so the
      value reads first and the kind is carried by the bar's edge and tint, never by the words. */
   .lines li {
     --bar-a: color-mix(in srgb, var(--line) 62%, var(--panel));
     --bar-b: color-mix(in srgb, var(--panel) 45%, var(--bg));
-    display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-3xs) var(--spacing-xs);
-    margin: var(--spacing-3xs) 0;
-    padding: var(--seam) var(--spacing-xs);
-    border-left: 2px solid var(--line);
-    border-radius: 2px;
+    display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--spacing-3xs) var(--spacing-xs);
+    padding: var(--spacing-3xs) var(--spacing-xs);
+    border-left: 1px solid var(--line);
+    border-radius: var(--radius-sm);
     color: var(--text);
     font-variant-numeric: tabular-nums;
     background: linear-gradient(90deg, var(--bar-a), var(--bar-b) 62%, transparent);
   }
-  .mod-part, .gear-stat { display: inline-flex; align-items: center; gap: var(--spacing-3xs); white-space: nowrap; }
-  .mod-part img, .cmp img, .gear-stat img { width: var(--icon-xs); height: var(--icon-xs); flex: none; object-fit: contain; opacity: .9; }
+  .line-kind { flex: none; padding-top: var(--spacing-3xs); color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0px, 0.05vw, 1px); }
+  .line.frame .line-kind { color: var(--hp-lit); }
+  .line.bound .line-kind { color: var(--xp-lit); }
+  .line-body { display: flex; flex: 1 1 clamp(125px, 9.68vw, 200px); flex-wrap: wrap; align-items: center; gap: var(--spacing-3xs) var(--spacing-2xs); min-width: 0; }
+  .mod-part { display: inline-flex; align-items: center; gap: var(--spacing-3xs); min-width: 0; white-space: normal; }
+  .mod-part img, .cmp img, .gear-row img { width: var(--icon-xs); height: var(--icon-xs); flex: none; object-fit: contain; opacity: .9; }
   .mod-sep { color: var(--dim); }
   .crafted { color: var(--dim); }
   /* the two fixed kinds keep their colour in the bar, not in the words: Frame Mod red, Bound pair yellow */
@@ -201,13 +240,18 @@
   .lines li.fixed { border-bottom: 1px solid var(--line); }
   /* the line-by-line read against the worn piece: gained and over in yellow (the same "up" the
      upgrade tag wears), lost and under in red — the aggregate % on the foot is still the headline. */
-  .cmp { list-style: none; margin: var(--spacing-2xs) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-3xs); font-size: var(--font-xs); }
-  .cmp li { display: flex; align-items: center; gap: var(--spacing-3xs); padding: var(--seam) var(--spacing-xs); border-radius: 2px; color: var(--dim); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--panel) 45%, transparent); }
+  .comparison { padding-top: var(--spacing-2xs); border-top: 1px solid var(--line); }
+  .cmp { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-3xs); font-size: var(--font-xs); }
+  .cmp li { display: flex; align-items: center; gap: var(--spacing-3xs); padding: var(--spacing-3xs) var(--spacing-xs); border-radius: var(--radius-sm); color: var(--dim); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--panel) 45%, transparent); }
   .cmp li.over, .cmp li.gained { color: var(--xp); }
   .cmp li.under, .cmp li.lost { color: var(--hp); }
-  .gear { margin: var(--spacing-2xs) 0; display: flex; gap: var(--spacing-2xs); align-items: baseline; }
-  .gear small { display: block; color: var(--dim); margin-left: auto; font-size: var(--font-xs); }
-  .kind { min-width: var(--icon-xl); color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0px, 0.05vw, 1px); }
-  .foot { margin: var(--spacing-2xs) 0 var(--spacing-2xs); color: var(--dim); font-size: var(--font-xs); }
+  .gear { display: grid; gap: var(--spacing-2xs); padding-top: var(--spacing-2xs); border-top: 1px solid var(--line); }
+  .gear-row { display: flex; align-items: center; gap: var(--spacing-xs); color: var(--text); font-variant-numeric: tabular-nums; }
+  .gear-row strong { font-size: var(--font-xs); }
+  .gear-note { margin: var(--spacing-3xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .summary { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: var(--spacing-sm); padding-top: var(--spacing-2xs); border-top: 1px solid var(--line); }
+  .weight { display: flex; align-items: baseline; gap: var(--spacing-xs); margin: 0; color: var(--dim); font-size: var(--font-xs); }
+  .weight strong { color: var(--text); font-variant-numeric: tabular-nums; }
+  .compare-summary { margin: 0; color: var(--dim); font-size: var(--font-xs); text-align: right; }
   .go { width: 100%; border-color: var(--good); }
 </style>

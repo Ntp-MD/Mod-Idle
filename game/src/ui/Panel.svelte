@@ -12,7 +12,7 @@
    * the ground behind it. Focus is taken by the panel when it opens and kept inside it while it is
    * open, so a keyboard press cannot land on the screen behind the backdrop.
    */
-  let { title, subtitle = '', width = 'normal', fixed = true, topmost = true, gridArea = '2 / 3 / 15 / 14', onclose, children }: {
+  let { title, subtitle = '', width = 'normal', fixed = true, topmost = true, showcase = false, gridArea = '2 / 3 / 15 / 14', onclose, children }: {
     title: string;
     subtitle?: string;
     width?: 'normal' | 'wide';
@@ -21,6 +21,8 @@
     fixed?: boolean;
     /** a modal that must cover the fixed screen rail instead of switching screens behind it */
     topmost?: boolean;
+    /** Reflow this live panel into the development Showcase document. */
+    showcase?: boolean;
     /** the footprint on the shared modal grid, in CSS grid-line coordinates */
     gridArea?: string;
     onclose: () => void;
@@ -34,11 +36,13 @@
   let opener: HTMLElement | null = null;
 
   onMount(() => {
+    if (showcase) return;
     opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     box?.focus();
   });
 
   onDestroy(() => {
+    if (showcase) return;
     if (opener && opener.isConnected) opener.focus();
   });
 
@@ -73,16 +77,16 @@
   }
 </script>
 
-<svelte:window onkeydown={onkey} />
+<svelte:window onkeydown={showcase ? undefined : onkey} />
 
-<div class="veil" class:front={topmost} style={`--panel-grid-area:${gridArea};`} role="presentation" onclick={onground}>
-  <div class="box {width}" class:fixed role="dialog" aria-modal="true" aria-labelledby={labelId} tabindex="-1" bind:this={box}>
+<div class="veil" class:front={topmost} class:showcase style={`--panel-grid-area:${gridArea};`} role="presentation" onclick={showcase ? undefined : onground}>
+  <div class="box {width}" class:fixed class:showcase role={showcase ? 'region' : 'dialog'} aria-modal={showcase ? undefined : 'true'} aria-labelledby={labelId} tabindex="-1" bind:this={box}>
     <header class="panel-head">
       <h2 id={labelId}>{title}</h2>
       {#if subtitle}<p class="sub">{subtitle}</p>{/if}
-      <button class="quit" onclick={onclose} aria-label="Close {title}" title="Close (Esc)">✕</button>
+      <button class="quit" onclick={onclose} disabled={showcase} aria-label="Close {title}" title={showcase ? 'Panel stays visible in the Showcase' : 'Close (Esc)'}>✕</button>
     </header>
-    <div class="body" class:fixed>
+    <div class="body" class:fixed class:showcase>
       {@render children()}
     </div>
   </div>
@@ -92,7 +96,7 @@
   .veil {
     position: fixed;
     inset: 0;
-    z-index: 60;
+    z-index: var(--z-panel);
     display: grid;
     grid-template-columns: repeat(15, minmax(0, 1fr));
     grid-template-rows: repeat(15, minmax(0, 1fr));
@@ -101,7 +105,7 @@
     background: rgba(6, 9, 13, .68);
     backdrop-filter: blur(4px);
   }
-  .veil.front { z-index: 80; }
+  .veil.front { z-index: var(--z-popover); }
   .box {
     grid-area: var(--panel-grid-area, 2 / 3 / 15 / 14);
     display: flex;
@@ -122,6 +126,16 @@
   .wide { width: 100%; }
   /* Tab bars and compact pages stay inside the shared modal canvas without a scrollbar. */
   .box.fixed { height: 100%; max-height: 100%; }
+  .veil.showcase { position: relative; inset: auto; z-index: auto; display: block; padding: var(--spacing-md) var(--screen-pad); background: none; backdrop-filter: none; }
+  .veil.showcase.front { z-index: auto; }
+  .box.showcase {
+    width: clamp(960px, 92vw, 1900px); max-width: calc(100% - 2 * var(--screen-pad));
+    height: auto; max-height: none; min-height: 0; margin-inline: auto; overflow: visible;
+    border: 1px solid var(--edge); border-radius: var(--radius-md); box-shadow: var(--shadow-soft); animation: none;
+  }
+  .box.fixed.showcase { height: auto; max-height: none; }
+  .body.showcase { overflow: visible; }
+  .body.fixed.showcase { display: block; height: auto; max-height: none; }
   @keyframes slide { from { transform: translateY(clamp(15px, 1.16vw, 32px)); opacity: .4; } to { transform: none; opacity: 1; } }
   .panel-head {
     display: flex;
@@ -135,7 +149,7 @@
   .panel-head h2 { margin: 0; flex: none; color: var(--gold); letter-spacing: clamp(2px, 0.10vw, 3px); }
   .sub { margin: 0; flex: 1; color: var(--dim); font-size: var(--font-xs); }
   .quit {
-    background: none; border: 1px solid var(--edge); color: var(--dim); border-radius: 8px;
+    background: none; border: 1px solid var(--edge); color: var(--dim); border-radius: var(--radius-xs);
     width: var(--icon-md); height: var(--icon-md); padding: 0; line-height: 1;
   }
   .quit:hover { color: var(--text); border-color: var(--gold); }

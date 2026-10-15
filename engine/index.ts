@@ -196,6 +196,19 @@ export function createEngine(E: EngineData) {
    */
   const racesInZone = (zoneId: number): string[] =>
     (E.mob.species as any[]).filter((sp) => (sp.zones || []).includes(zoneId)).map((sp) => sp.id).sort();
+  /**
+   * The Elements a zone fields, derived from what actually spawns there rather than declared beside
+   * it: a Normal or Elite spawn wears its species' Element and a Boss wears its own declared one
+   * (`spawnAt` · `mob.bosses[].element`), so the column the player reads is the union of the two over
+   * the zone's cast, printed in `elements.order`.
+   */
+  const zoneElements = (zoneId: number): string[] => {
+    const worn = new Set(racesInZone(zoneId).map((id) => speciesById(id)?.element));
+    for (const b of E.mob.bosses as any[]) {
+      if (b.zone === zoneId) worn.add(b.element || speciesById(b.species)?.element);
+    }
+    return (E.elements.order as string[]).filter((el) => worn.has(el));
+  };
   const sizeById = (id: string): MobSize | undefined => E.mob.sizes.find((x) => x.id === id);
   const sizeOr1 = (id: string): MobSize => sizeById(id) || { id, name: id, ps: 1, evasion_pct: 0 };
   const zoneBodyFactorCache = new Map<number, number>();
@@ -1065,7 +1078,7 @@ export function createEngine(E: EngineData) {
     // mob curve
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
     speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
-    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, MEAN_CORE, mobStatsOf, racesInZone, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
+    ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, MEAN_CORE, mobStatsOf, racesInZone, zoneElements, zoneBodyFactor, mobEvasion, mobAcc, mobDodge, refAttackerAcc,
     subzoneAt, groupRangeOf, eliteChanceOf, spawnPackOf,
     mobImmuneOf, mobClockMultOf, mobWeakOf, mobBurstOf, mechanicWordsOf, packWordOf,
     mobResOf, mobResByElementOf,

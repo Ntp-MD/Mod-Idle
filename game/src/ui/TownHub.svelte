@@ -138,11 +138,11 @@
 <style>
   .town { display: grid; gap: var(--spacing-md); height: 100%; min-height: 0; align-content: start; }
   .out {
-    margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: 10px; font-size: var(--font-xs);
+    margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs);
     background: color-mix(in srgb, var(--hp) 14%, transparent); border: 1px solid color-mix(in srgb, var(--hp) 45%, transparent); color: var(--alarm);
   }
   .lead { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: baseline; justify-content: space-between; }
-  .lead h3 { margin: 0; font-size: var(--font-md); letter-spacing: clamp(0px, 0.00vw, 0px); }
+  .lead h3 { margin: 0; font-size: var(--font-md); }
   .sub { margin: var(--spacing-2xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
   .purse { display: flex; gap: var(--spacing-md); font-size: var(--font-xs); color: var(--dim); }
   .purse b { font-family: var(--num); color: var(--gold); font-size: var(--font-sm); }
@@ -151,8 +151,8 @@
   /* a service is a row, not a card: the name leads, the live state is the reason to press it */
   .services { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-2xs); }
   .services .row {
-    display: grid; grid-template-columns: clamp(94px, 7.31vw, 202px) var(--box-180) 1fr auto; gap: var(--spacing-sm); align-items: baseline;
-    width: 100%; text-align: left; padding: var(--spacing-sm) var(--spacing-sm); border-radius: 12px;
+    display: grid; grid-template-columns: clamp(94px, 7.31vw, 202px) clamp(113px, 8.71vw, 243px) 1fr auto; gap: var(--spacing-sm); align-items: baseline;
+    width: 100%; text-align: left; padding: var(--spacing-sm) var(--spacing-sm); border-radius: var(--radius-sm);
     background: var(--glass); border: 1px solid var(--edge);
   }
   .services .nm { font-size: var(--font-sm); color: var(--gold); }
@@ -164,7 +164,7 @@
   .services .row:disabled { opacity: .5; cursor: not-allowed; }
 
   .aside { display: grid; gap: var(--spacing-sm); }
-  .qol, .ways { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: 12px; }
+  .qol, .ways { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-sm); }
   .qol h4, .ways h4 { margin: 0; }
   /* one row, three columns: the thing, how much of it there is, and the press that empties it */
   .qrow { display: grid; grid-template-columns: 1fr auto auto; gap: var(--spacing-2xs) var(--spacing-sm); align-items: center; }
@@ -172,10 +172,9 @@
   .qrow b { font-family: var(--num); font-size: var(--font-xs); text-align: right; }
   .qol { display: grid; gap: var(--spacing-2xs); }
   .qol p { margin: var(--spacing-2xs) 0 0; color: var(--dim); }
-  .mini { padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); }
   .chips { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); }
-  .now { font-size: var(--font-xs); color: var(--good); border: 1px solid rgba(39, 174, 96, .45); border-radius: 999px; padding: var(--seam) var(--spacing-xs); }
-  .chip { padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); border-radius: 999px; }
+  .now { font-size: var(--font-xs); color: var(--good); border: 1px solid rgba(39, 174, 96, .45); border-radius: var(--radius-round); padding: var(--spacing-3xs) var(--spacing-xs); }
+  .chip { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); border-radius: var(--radius-round); }
 
   @media (max-width: 1023px) {
     .cols { grid-template-columns: 1fr; }

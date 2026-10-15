@@ -106,13 +106,13 @@
   .purse {
     display: flex; align-items: baseline; gap: var(--spacing-sm);
     padding: var(--spacing-xs) var(--spacing-md);
-    border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
+    border: 1px solid var(--edge); border-radius: var(--radius-sm); background: var(--glass);
   }
   .purse b { font-family: var(--num); font-size: var(--font-xl); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
   .purse span { color: var(--dim); font-size: var(--font-xs); letter-spacing: clamp(0px, 0.05vw, 1px); text-transform: uppercase; }
 
   /* the vendor split: what you carry on the left, the stall's wares on the right */
-  .panes { display: grid; grid-template-columns: minmax(var(--box-300), 1fr) 1.6fr; gap: var(--spacing-md); align-items: start; }
+  .panes { display: grid; grid-template-columns: minmax(clamp(188px, 14.52vw, 405px), 1fr) 1.6fr; gap: var(--spacing-md); align-items: start; }
   @media (max-width: 1023px) { .panes { grid-template-columns: 1fr; } }
   .pane { display: grid; gap: var(--spacing-xs); align-content: start; min-width: 0; }
   .pane > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-2xs); }
@@ -120,18 +120,18 @@
   .count { font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
 
   .junk { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-3xs); font-size: var(--font-xs); }
-  .junk li { display: flex; justify-content: space-between; gap: var(--spacing-sm); padding: var(--seam) var(--spacing-xs); background: color-mix(in srgb, var(--panel) 55%, transparent); border-radius: 3px; }
+  .junk li { display: flex; justify-content: space-between; gap: var(--spacing-sm); padding: var(--spacing-3xs) var(--spacing-xs); background: color-mix(in srgb, var(--panel) 55%, transparent); border-radius: var(--radius-sm); }
   .junk li span { color: var(--dim); }
   .junk li b { font-family: var(--num); color: var(--text); }
   .act { justify-self: start; }
   .hint { margin: 0; color: var(--dim); }
 
   /* a ware is a card: what it is, what it costs in minutes and in gold, and the one press it takes */
-  .wares { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--box-200), 1fr)); gap: var(--spacing-xs); }
+  .wares { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(125px, 9.68vw, 270px), 1fr)); gap: var(--spacing-xs); }
   .ware {
     display: grid; gap: var(--spacing-3xs); align-content: start;
     padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--inset); border: 1px solid var(--line); border-radius: 6px;
+    background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-sm);
   }
   /* an affordable ware is lit; an unaffordable one says by how much, in gold, in the same place the lit
      one puts its button — a refusal that only removes a button teaches nothing */

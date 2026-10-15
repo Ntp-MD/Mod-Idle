@@ -6,7 +6,7 @@ import { rollDrop } from './drop';
 import { abandonRun, payoutStacks } from './dungeon';
 import { newTown, progressTasks, tickTown, taskReward } from './town';
 import { STAT_KEYS, type StatKey } from '../engine/client';
-import { leanReweightMany } from '../../../engine/loot.ts';
+import { chooseJunkItem, leanReweightMany } from '../../../engine/loot.ts';
 import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm } from './farm';
 import { newFieldwork, tickFieldwork, tickHunger, resolveTravelEvent, recordHuntKill, withMeal, withHunger, pushToFieldCamp, finishPushAtCamp } from './fieldwork';
 import { road, walkZonesHex, arrive, ownerOf, zoneOf } from './road';
@@ -210,9 +210,9 @@ const bossInZone = (zoneId: number): any => {
 };
 
 /**
- * What one spawn's ladder name pays: its row in `mob.variant_drops`, which owns both the junk item
- * (with its rarity) and the stream the mob leans. A spawn whose name carries no row — or a variant
- * table read before the name was rolled — drops no junk, which is why the caller guards on `null`.
+ * What one spawn's ladder name pays: its row in `mob.variant_drops`, which owns the base junk item,
+ * its rarity and the stream the mob leans. The species can supply a same-rarity alternative item.
+ * A spawn whose name carries no row drops no junk, which is why the caller guards on `null`.
  */
 function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | 'herb' | 'junk' | 'none' } | null {
   if (!mob || !mob.variant) return null;
@@ -567,20 +567,22 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     }
   }
   const junkScale = pJunkBase > 0 ? hw.junk / pJunkBase : 1;
-  // junk is kept and sold by hand at the Counterhand — it is a gold mint, not a gold drip. The item is
-  // the variant's own, and only that variant's rarity rolls, so the kill pays one item at its price.
-  // one draw per rarity, exactly as this stream always rolled, so every other roll in the tick keeps
-  // the sequence it had — but only the variant's OWN rarity can pay. The item is therefore the
-  // variant's, while the expected gold is still the line: chance × sell is flat by rarity (X39).
+  // Junk is a gold mint, not a gold drip. Only the variant's rarity rolls, and its race's alternative
+  // has the same sale value. Reuse the successful rarity roll to choose the item, so this stream still
+  // consumes exactly one draw per rarity and every later roll in the tick keeps its prior sequence.
   if (vdrop) {
+    const speciesItems = E.mob.species.find((species: any) => species.id === mob.speciesId)?.junk_items || {};
     for (const [rarity, r] of junkRows) {
       const pays = rarity === vdrop.rarity;
+      const chance = pays ? r.drop_chance_per_kill * junkScale : 0;
+      const roll = rng();
       // junk occupies a slot like any other carried stack; a bag full of it stops the pickup
-      if (rng() < (pays ? r.drop_chance_per_kill * junkScale : 0)) {
+      if (roll < chance) {
+        const item = chooseJunkItem(() => roll / chance, vdrop.item, rarity, speciesItems);
         if (s.dungeon) {
           const e = s.dungeon.escrow.junk;
-          e[vdrop.item] = (e[vdrop.item] || 0) + 1;
-        } else if (addTo(s, s.junk, vdrop.item, 'stone', 1)) s.counters.junk++;
+          e[item] = (e[item] || 0) + 1;
+        } else if (addTo(s, s.junk, item, 'stone', 1)) s.counters.junk++;
       }
     }
   }

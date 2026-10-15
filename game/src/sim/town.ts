@@ -15,10 +15,13 @@ import { addTo, fits } from './slots';
 
 const TS = TOWN.task_sizing;
 
-/** Item name → the rarity it was paid at, straight off `mob.variant_drops` (the table that owns both). */
+/** Item name → its sale rarity, from the variant rung or its race's same-rarity alternative. */
 const JUNK_RARITY: Record<string, string> = (() => {
   const out: Record<string, string> = {};
   for (const r of Object.values((E.mob as any).variant_drops || {}) as any[]) out[r.item] = r.rarity;
+  for (const species of (E.mob as any).species || []) {
+    for (const [rarity, item] of Object.entries(species.junk_items || {}) as [string, string][]) out[item] = rarity;
+  }
   return out;
 })();
 export const ALL_ROWS: any[] = [...TOWN.one_time, ...TOWN.repeatable];

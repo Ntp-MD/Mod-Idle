@@ -172,15 +172,15 @@
   /* the card floats over its selected cell: title, place, travel read and choices have separate stops */
   .dest {
     display: grid; gap: var(--spacing-xs); min-width: 0;
-    border: 1px solid var(--edge); border-radius: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-xs);
+    border: 1px solid var(--edge); border-radius: var(--radius-md); padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-xs);
     background: var(--glass); backdrop-filter: blur(8px); box-shadow: 0 14px 40px rgba(0, 0, 0, .55);
     animation: pop .14s ease-out;
   }
   .dest-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; }
   .dest-head h2 { min-width: 0; margin: 0; overflow: hidden; color: var(--text); font-size: var(--font-sm); font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-  .dest-cell { flex: none; padding: var(--spacing-3xs) var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--spacing-sm); color: var(--gold-lit); font-variant-numeric: tabular-nums; }
+  .dest-cell { flex: none; padding: var(--spacing-3xs) var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-xs); color: var(--gold-lit); font-variant-numeric: tabular-nums; }
   .dest-summary { margin: 0; color: var(--text); line-height: 1.35; }
-  .dest-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--box-110), 1fr)); gap: var(--spacing-sm); padding: var(--spacing-xs) 0; border-block: 1px solid var(--edge); }
+  .dest-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(69px, 5.32vw, 149px), 1fr)); gap: var(--spacing-sm); padding: var(--spacing-xs) 0; border-block: 1px solid var(--edge); }
   .dest-stat { display: grid; gap: var(--spacing-3xs); min-width: 0; }
   .dest-stat span { color: var(--dim); letter-spacing: 1px; text-transform: uppercase; }
   .dest-stat strong { color: var(--text); font-weight: 600; }
@@ -190,7 +190,7 @@
   .dest-guide-head span { flex: none; color: var(--gold-lit); font-variant-numeric: tabular-nums; }
   .dest-mob-list {
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-2xs) var(--spacing-sm);
-    max-height: var(--box-170); margin: 0; padding: 0; overflow-y: auto; list-style: none;
+    max-height: clamp(106px, 8.23vw, 230px); margin: 0; padding: 0; overflow-y: auto; list-style: none;
   }
   .dest-mob-list li { min-width: 0; padding-bottom: var(--spacing-3xs); border-bottom: 1px solid var(--edge); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dest-specials { display: flex; flex-direction: column; gap: var(--spacing-3xs); color: var(--dim); }
@@ -202,8 +202,8 @@
   .dest-state.ready { color: var(--good-lit); }
   .dest-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs); }
   .dest-actions button {
-    padding: var(--spacing-2xs) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--spacing-sm);
-    background: var(--panel); color: var(--text); font-size: var(--font-xs); transition: border-color .15s ease, background .15s ease, color .15s ease;
+    padding: var(--spacing-2xs) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-xs);
+    background: var(--panel); color: var(--text); font-size: var(--font-xs); transition: border-color var(--motion-fast) var(--ease-ui), background var(--motion-fast) var(--ease-ui), color var(--motion-fast) var(--ease-ui);
   }
   .dest-actions button:hover { border-color: var(--gold); }
   .dest-actions .dest-primary { border-color: color-mix(in srgb, var(--gold) 54%, var(--edge)); background: color-mix(in srgb, var(--gold) 12%, var(--panel)); color: var(--gold-lit); }

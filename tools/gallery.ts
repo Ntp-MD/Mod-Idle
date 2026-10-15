@@ -130,12 +130,12 @@ body {
 .tabs { display: flex; gap: .3rem; }
 .tabs button {
   display: flex; gap: .4rem; align-items: baseline; padding: .28rem .65rem;
-  background: none; border-color: transparent; color: var(--dim); border-radius: 8px 8px 0 0;
+  background: none; border-color: transparent; color: var(--dim); border-radius: var(--radius-sm);
 }
 .tabs button:hover { color: var(--text); border-color: var(--line); }
 .tabs button[now] { color: var(--gold); background: var(--bg); border-color: var(--line); border-bottom-color: var(--bg); }
 .tabs .n { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: .74rem; color: var(--dim); }
-input, select, button { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+input, select, button { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); }
 input[type="search"] { padding: .3rem .6rem; width: 12rem; }
 select, button { padding: .26rem .55rem; cursor: pointer; }
 button:hover, select:hover { border-color: var(--gold); }
@@ -161,7 +161,7 @@ button#send[busy] { opacity: .6; cursor: progress; }
 }
 .folders button {
   display: flex; justify-content: space-between; gap: .5rem; width: 100%;
-  border: 0; border-radius: 0; background: none; color: var(--dim);
+  border: 0; border-radius: var(--radius-sm); background: none; color: var(--dim);
   padding: .18rem .8rem .18rem 1.35rem; text-align: left;
 }
 .folders button:hover { color: var(--text); background: rgba(255,255,255,.05); }
@@ -181,7 +181,7 @@ button#send[busy] { opacity: .6; cursor: progress; }
 }
 .tile {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: .25rem;
-  padding: .3rem; border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+  padding: .3rem; border: 1px solid var(--line); border-radius: var(--radius-sm); cursor: pointer;
   background: var(--sheet);
   background-image: var(--checker, none); background-size: 12px 12px; background-position: 0 0, 6px 6px;
 }
@@ -195,7 +195,7 @@ button#send[busy] { opacity: .6; cursor: progress; }
 /* a sheet that does not paint white gets a dot, so the odd ones are findable at a glance */
 .tile.odd::after {
   content: ''; position: absolute; top: .3rem; right: .3rem; width: .42rem; height: .42rem;
-  border-radius: 50%; background: var(--xp); box-shadow: 0 0 0 1px rgba(0,0,0,.4);
+  border-radius: var(--radius-round); background: var(--xp); box-shadow: 0 0 0 1px rgba(0,0,0,.4);
 }
 /* the star is the pick queue: it marks a library sheet for the client shelf, and moves nothing itself */
 .tile .star {
@@ -217,7 +217,7 @@ button#send[busy] { opacity: .6; cursor: progress; }
 }
 .box[hidden] { display: none; }
 .box .art {
-  display: flex; padding: 1.2rem; border: 1px solid var(--line); border-radius: 10px;
+  display: flex; padding: 1.2rem; border: 1px solid var(--line); border-radius: var(--radius-sm);
   background: var(--sheet); background-image: var(--checker, none); background-size: 22px 22px;
 }
 .box .art .glyph { width: min(58vh, 70vw); height: min(58vh, 70vw); }

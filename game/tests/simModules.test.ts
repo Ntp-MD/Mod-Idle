@@ -175,18 +175,21 @@ describe('the town board and its stalls', () => {
     expect(boss.count).toBeGreaterThan(0);
   });
 
-  it('mints gold from junk at the Counterhand, and only for a rarity the data prices', () => {
+  it('mints gold from variant and race junk at the Counterhand using each item rarity', () => {
     const s = newGame();
-    // the item→rarity table is `mob.variant_drops`, and `junk.rarities` owns the price per rarity
+    // Variant and race items each resolve to their declared rarity; `junk.rarities` owns the price.
     const drop = (Object.values((E.mob as any).variant_drops) as any[])[0];
     const price = (E.junk as any).rarities[drop.rarity].sell_gold;
+    const raceItem = E.mob.species[0].junk_items.common;
     s.junk[drop.item] = 3;
+    s.junk[raceItem] = 2;
     s.counters.gold = 0;
     const r = sellJunk(s);
-    expect(r.pieces).toBe(3);
-    expect(r.gold).toBe(price * 3);
-    expect(s.counters.gold).toBe(price * 3);
+    expect(r.pieces).toBe(5);
+    expect(r.gold).toBe(price * 3 + (E.junk as any).rarities.common.sell_gold * 2);
+    expect(s.counters.gold).toBe(r.gold);
     expect(s.junk[drop.item]).toBe(0);
+    expect(s.junk[raceItem]).toBe(0);
   });
 
   it('sells a stocked, allowed line and refuses power, an unstocked line and an empty purse', () => {

@@ -193,7 +193,7 @@
   .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-2xs); }
   .tb { display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-2xs) var(--spacing-sm); font-size: var(--font-xs); }
   .tb b { font-family: var(--num); color: var(--dim); font-weight: 500; }
-  .tb.here { border-color: var(--gold); color: var(--gold); background: rgba(232, 193, 105, .12); }
+  .tb.here { border-color: var(--gold); color: var(--gold); background: var(--surface-selected); }
   .tb.here b { color: var(--gold); }
   .spacer { flex: 1; }
   .shared { font-size: var(--font-xs); color: var(--mob); letter-spacing: clamp(0px, 0.05vw, 1px); }
@@ -207,16 +207,16 @@
 
   .grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(32px, 2.52vw, 70px), 1fr)); gap: var(--spacing-2xs);
-    padding: var(--seam);
+    padding: var(--spacing-3xs);
     /* one cell is one piece, so an empty row of the grid is a gap in the warehouse rather than a message */
   }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { font-size: var(--font-xs); padding: var(--seam) var(--spacing-xs); }
+  .pager button { font-size: var(--font-xs); padding: var(--spacing-3xs) var(--spacing-xs); }
   .pager button:disabled { opacity: .4; }
   /* an empty side says so across the whole shelf, not down one cell's width */
-  .grid p { grid-column: 1 / -1; max-width: var(--box-520); font-size: var(--font-xs); }
+  .grid p { grid-column: 1 / -1; max-width: clamp(325px, 25.17vw, 702px); font-size: var(--font-xs); }
   .cell {
-    position: relative; aspect-ratio: 1 / 1; padding: 0; border-radius: 3px; background: var(--inset);
+    position: relative; aspect-ratio: 1 / 1; padding: 0; border-radius: var(--radius-sm); background: var(--inset);
     border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
   }
   .cell img { position: absolute; inset: 0; margin: auto; width: var(--icon-md); height: var(--icon-md); object-fit: contain; pointer-events: none; }
@@ -234,7 +234,7 @@
   .moves { display: grid; gap: var(--spacing-2xs); justify-items: start; }
   .go { border-color: rgba(232, 193, 105, .5); color: var(--gold); }
   .lk { font-size: var(--font-xs); }
-  .moves p { margin: var(--spacing-3xs) 0 0; color: var(--dim); max-width: var(--box-680); }
+  .moves p { margin: var(--spacing-3xs) 0 0; color: var(--dim); max-width: clamp(425px, 32.91vw, 918px); }
 
   @media (max-width: 1280px) {
     .grids, .draw { grid-template-columns: 1fr; }

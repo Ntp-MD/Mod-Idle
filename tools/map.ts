@@ -1,0 +1,847 @@
+// @ts-nocheck
+/**
+ * Map layer — the generated field sheet (`tools/data/map.json`).
+ *
+ *   node tools/map.ts            help
+ *   node tools/map.ts --write    write the sheet (game/src/icon/map/map-overlay.svg)
+ *   node tools/map.ts --checks   run M1-M13, exit 1 on FAIL
+ *
+ * The sheet is the 20 x 15 hex field the walk graph lives on: one polygon per cell of the field,
+ * tinted by the terrain that cell stands on, with a settlement mark on its own cell, one named
+ * sub-zone cell and one named wild cell on each of its sides, and bare ground beyond them faded to
+ * the paper. Every cell carries its id (`A1` … `O20`) and its axial key, so the client can light up
+ * a plotted route by matching the keys the road module hands back — it never reads a coordinate
+ * table, which M7 enforces (X33 · M7 · M10). What the cells hold — sub-zone names, level bands,
+ * races — is the engine's, printed here and never typed. The river band, the terrain washes and the
+ * hand-drawn backdrop of the old free-hand sheet are gone with that sheet: the field IS the terrain.
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { readJson } from './lib/json.ts';
+import * as G from './lib/gates.ts';
+import { createRoad } from '../engine/road.ts';
+
+const ROOT = path.resolve(import.meta.dirname, '..');
+const MAP = readJson(path.join(ROOT, 'tools/data/map.json'));
+const E = readJson(path.join(ROOT, 'tools/data/engine.json'));
+const TOWN = readJson(path.join(ROOT, 'tools/data/town.json'));
+const OUT = path.join(ROOT, 'game/src/icon/map/map-overlay.svg');
+
+const F = MAP.field;
+const COL = MAP.terrain_colors;
+const GCOL = MAP.ground_colors;
+/** The ground is the field's palette, not a second one: every anchor is the terrain it is named for
+ *  closed on the paper by `field.ground_fade`, and M5 re-derives each one so the two cannot drift. */
+const GFADE = F.ground_fade;
+const R = F.radius;
+const SQ3 = Math.sqrt(3);
+/** Two pointy-top neighbours sit SQ3*R apart and each reaches SQ3*r/2 past its centre, so r = R - GAP/SQ3. */
+const HEX_R = R - F.gap / SQ3;
+const PX = ([q, r]) => [SQ3 * (q + r / 2) * R, 1.5 * r * R];
+const key = (q, r) => q + ',' + r;
+const hd = (a, b) => {
+  const dq = a[0] - b[0], dr = a[1] - b[1];
+  return (Math.abs(dq) + Math.abs(dr) + Math.abs(dq + dr)) / 2;
+};
+
+const settlementIds = TOWN.settlements.map((s) => s.id);
+const settlementById = (id) => TOWN.settlements.find((s) => s.id === id);
+const zoneById = (id) => E.mob.zones.find((z) => z.id === id);
+const roadNodes = E.road.nodes;
+/** The walk graph itself, so M13 can ask the engine who owns a cell rather than assume it. */
+const ROAD = createRoad(E as any);
+/** The order a tied cell is resolved in: `road.standing_rule` gives it to the lowest zone. */
+const STANDING = TOWN.settlements.slice().sort((a, b) => a.zone - b.zone).map((s) => s.id);
+
+// ------------------------------------------------------------------ the lattice
+
+/**
+ * The field, generated the way the sheet is read: rows of columns, each row offset half a hex.
+ * Axial coordinates are measured from the centre cell, which is where the starting settlement
+ * stands, so they are the same numbers `engine.json` `road` holds.
+ */
+const raw = [];
+for (let row = 0; row < F.rows; row++) {
+  for (let col = 0; col < F.cols; col++) {
+    raw.push({ q: col - ((row - (row & 1)) >> 1), r: row, row, col });
+  }
+}
+let sx = 0, sy = 0;
+for (const c of raw) { const [x, y] = PX([c.q, c.r]); sx += x; sy += y; }
+sx /= raw.length; sy /= raw.length;
+let centre = raw[0], bd = Infinity;
+for (const c of raw) {
+  const [x, y] = PX([c.q, c.r]);
+  const d = (x - sx) ** 2 + (y - sy) ** 2;
+  if (d < bd) { bd = d; centre = c; }
+}
+const Q0 = centre.q, R0 = centre.r;
+/** cell id -> { q, r, x, y } in the engine's own axial frame, and the id a pair of coords lands on. */
+const CELLS = new Map();
+const CELLID = new Map();
+for (const c of raw) {
+  const q = c.q - Q0, r = c.r - R0;
+  const id = String.fromCharCode(65 + c.row) + (c.col + 1);
+  const [x, y] = PX([q, r]);
+  CELLS.set(id, { q, r, x, y, row: c.row, col: c.col });
+  CELLID.set(key(q, r), id);
+}
+const inField = (q, r) => CELLS.has(CELLID.get(key(q, r)) || '');
+
+// ------------------------------------------------------------------ who owns what
+
+/** terrain key -> colour, plus the blend a bare cell takes from the nearest settlement. */
+const hexToRgb = (h) => { const v = parseInt(h.slice(1), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; };
+const rgbToHex = ([r, g, b]) => '#' + [r, g, b].map((x) => Math.round(x).toString(16).padStart(2, '0')).join('');
+/** a colour as HSL — the ground ramp is walked by hue, so hue is what gets measured and guarded. */
+const hslOf = (hex) => {
+  const [r, g, b] = hexToRgb(hex).map((v) => v / 255);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min, l = (max + min) / 2;
+  if (!d) return [0, 0, l];
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h * 60, s, l];
+};
+const hslToHex = ([h, s, l]) => {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  const seg = [[c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x]][Math.floor((((h % 360) + 360) % 360) / 60) % 6];
+  return rgbToHex(seg.map((v) => (v + m) * 255));
+};
+const SHEET_HSL = hslOf(F.sheet);
+/**
+ * The one travel a tone takes toward the paper, held on the colour's own hue: saturation and lightness
+ * close on the sheet's, hue does not move. Both the field's bare cells and the ground past it are printed
+ * with this, so a colour at the field's border is the same colour just outside it. A plain rgb lerp steps
+ * onto the sheet's hue (213) instead, which drags ash's mauve onto a violet no terrain stands on and turns
+ * the ramp into a second palette.
+ */
+const towardHeld = (hex, t) => {
+  const [h, s, l] = hslOf(hex);
+  return hslToHex([h, SHEET_HSL[1] + (s - SHEET_HSL[1]) * (1 - t), SHEET_HSL[2] + (l - SHEET_HSL[2]) * (1 - t)]);
+};
+/** the ramp the data declares, derived from the terrain colours its keys are named for. */
+const groundRamp = () => Object.keys(GCOL).map((k) => towardHeld(COL[k], GFADE));
+/** the ramp's hues with the wheel's wrap taken out, so a step past red reads as the turn it is. */
+const hueWalk = (hexes) => {
+  const out = [];
+  for (const hex of hexes) {
+    let h = hslOf(hex)[0];
+    while (out.length && h - out[out.length - 1] > 180) h -= 360;
+    while (out.length && out[out.length - 1] - h > 180) h += 360;
+    out.push(h);
+  }
+  return out;
+};
+
+/**
+ * The claims, in the order the file lists them: a town's own cell, its three sub-zone cells in
+ * sub-zone order, and the sides left over as wild cells. Level bands and sub-zone names come from
+ * the engine, read through the settlement's zone, so a cell never carries a number this file typed.
+ */
+const claims = new Map();
+const owned = [];
+for (const entry of MAP.cells) {
+  const s = settlementById(entry.town);
+  const zone = zoneById(s.zone);
+  const at = (id) => {
+    const c = CELLS.get(id);
+    if (!c) throw new Error(`${entry.town} names cell ${id}, which is not on the ${F.cols} x ${F.rows} field`);
+    return [c.q, c.r];
+  };
+  const townCell = at(entry.cell);
+  claims.set(key(townCell[0], townCell[1]), { kind: 'town', town: entry.town, cell: entry.cell, zone, s });
+  entry.subs.forEach((sub, j) => {
+    const c = at(sub.cell);
+    claims.set(key(c[0], c[1]), {
+      kind: 'sub', j, town: entry.town, cell: sub.cell, terrain: sub.terrain, zone, s,
+      name: (zone.subzones || [])[j] ? zone.subzones[j].name : '',
+    });
+  });
+  entry.wild.forEach((w, j) => {
+    const c = at(w.cell);
+    claims.set(key(c[0], c[1]), {
+      kind: 'wild', j, town: entry.town, cell: w.cell, zone, s,
+      name: j === 0 ? s.name + ' Dungeon' : s.name + ' ' + (j + 1),
+    });
+  });
+  owned.push(entry.town);
+}
+/** The tone a settlement spreads: the terrain most of its sub-zone cells stand on, ties to the first. */
+const spreadTone = new Map();
+for (const entry of MAP.cells) {
+  const count = {};
+  for (const sub of entry.subs) count[sub.terrain] = (count[sub.terrain] || 0) + 1;
+  spreadTone.set(entry.town, entry.subs.reduce((best, sub) =>
+    (count[sub.terrain] > count[best] ? sub.terrain : best), entry.subs[0].terrain));
+}
+const townPoints = MAP.cells.map((entry) => {
+  const node = roadNodes.find((n) => n.id === entry.town);
+  return { town: entry.town, q: node.q, r: node.r, tone: COL[spreadTone.get(entry.town)] };
+});
+/** The country each settlement holds: its cell and the terrain key it spreads over its bare ground. */
+const SPREAD = MAP.cells.map((entry) => {
+  const node = roadNodes.find((n) => n.id === entry.town);
+  return { town: entry.town, q: node.q, r: node.r, k: spreadTone.get(entry.town) };
+});
+/**
+ * The bare cells, each printed with the terrain of the settlement it is nearest, closed on the paper by
+ * a fade that runs from `fade_near` at the nearest to exactly `ground_fade` at the farthest — the value
+ * the ground past the field is anchored at. So the field's outer ring and the country outside it are the
+ * same colour and the two cannot drift apart (M5 holds the seam).
+ */
+const BARE = (() => {
+  const list = [];
+  for (const [id, c] of CELLS) {
+    if (claims.has(key(c.q, c.r))) continue;
+    const near = townPoints.reduce((best, t) => {
+      const d = hd([c.q, c.r], [t.q, t.r]);
+      return !best || d < best.d ? { d, t } : best;
+    }, null);
+    list.push({ id, d: near.d, tone: near.t.tone });
+  }
+  const bMin = Math.min(...list.map((b) => b.d));
+  const bMax = Math.max(...list.map((b) => b.d));
+  const fade = (d) => (bMax === bMin ? GFADE
+    : F.fade_near + (GFADE - F.fade_near) * (d - bMin) / (bMax - bMin));
+  return {
+    max: bMax,
+    byId: new Map(list.map((b) => [b.id, { ...b, fill: towardHeld(b.tone, fade(b.d)) }])),
+    edge: list.filter((b) => b.d === bMax).map((b) => ({ id: b.id, fill: towardHeld(b.tone, fade(b.d)) })),
+  };
+})();
+
+// ------------------------------------------------------------------ the walk graph the sheet draws
+
+/**
+ * The hops a walker would take: the shortest set of stretches that connects every settlement, built
+ * by always adding the closest town still outside. It is a drawing of the graph the simulator
+ * already derives — every pair is walkable, so nothing here is a route table — and each stretch is
+ * labelled in blocks, which is the engine's hex distance and nothing else.
+ */
+function walkGraph() {
+  const T = MAP.cells.map((entry) => {
+    const node = roadNodes.find((n) => n.id === entry.town);
+    return { id: entry.town, q: node.q, r: node.r };
+  });
+  const dist = (a, b) => hd([a.q, a.r], [b.q, b.r]);
+  const inTree = new Set([0]);
+  const edges = [];
+  while (inTree.size < T.length) {
+    let best = null;
+    for (const a of inTree) {
+      for (let b = 0; b < T.length; b++) {
+        if (inTree.has(b)) continue;
+        const d = dist(T[a], T[b]);
+        if (!best || d < best.d) best = { a, b, d };
+      }
+    }
+    edges.push({ a: T[best.a].id, b: T[best.b].id, blocks: best.d });
+    inTree.add(best.b);
+  }
+  return edges;
+}
+const WALK = walkGraph();
+
+// ------------------------------------------------------------------ drawing
+
+function hexPts(cx, cy, r = HEX_R) {
+  const p = [];
+  for (let k = 0; k < 6; k++) {
+    const a = (Math.PI / 180) * (60 * k - 30);
+    p.push((cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1));
+  }
+  return p.join(' ');
+}
+
+/** A name inside a hex: wrapped to the hex's width, at most three lines. */
+function wrap(text, max) {
+  const lines = [];
+  let line = '';
+  for (const w of text.split(' ')) {
+    if (line && (line + ' ' + w).length > max) { lines.push(line); line = w; }
+    else line = line ? line + ' ' + w : w;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+const levelText = (zone) => 'Lv ' + (zone.levels || []).join('-');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+function fieldGroup() {
+  const lines = ['  <g id="field">'];
+  for (const [id, c] of CELLS) {
+    const k = key(c.q, c.r);
+    const o = claims.get(k);
+    let fill, cls;
+    if (o) {
+      cls = o.kind;
+      fill = o.kind === 'town' ? COL.town : o.kind === 'wild' ? COL.wild : COL[o.terrain];
+    } else {
+      cls = 'bare';
+      fill = BARE.byId.get(id).fill;
+    }
+    const band = o ? zoneById(o.s.zone) : null;
+    const attrs = [
+      `points="${hexPts(c.x, c.y)}"`,
+      `class="cell ${cls}"`,
+      `data-cell="${id}"`,
+      `data-ax="${c.q},${c.r}"`,
+      o ? `data-node="${o.town}"` : '',
+      o ? `data-zone="${o.s.zone}"` : '',
+      o && o.kind === 'sub' ? `data-sub="${o.j}"` : '',
+      o && o.kind === 'wild' ? `data-wild="${o.j}"` : '',
+      `data-terrain="${o ? (o.kind === 'sub' ? o.terrain : o.kind) : 'bare'}"`,
+      band ? `data-band="${band.id - 1}" data-lo="${band.levels[0]}" data-hi="${band.levels[1]}"` : '',
+      `fill="${fill}"`,
+      `data-tone="${fill}"`,
+      `stroke="${F.stroke}"`,
+    ].filter(Boolean).join(' ');
+    const title = o
+      ? `<title>${esc(o.kind === 'town' ? o.s.name : o.name)} · ${esc(o.s.name)} · ${levelText(o.s && zoneById(o.s.zone))}</title>`
+      : `<title>${id} · no zone yet</title>`;
+    lines.push(`    <polygon ${attrs}>${title}</polygon>`);
+  }
+  lines.push('  </g>');
+  return lines;
+}
+
+function walkGroup() {
+  const lines = ['  <g id="walk">'];
+  for (const e of WALK) {
+    const a = CELLS.get(MAP.cells.find((c) => c.town === e.a).cell);
+    const b = CELLS.get(MAP.cells.find((c) => c.town === e.b).cell);
+    lines.push(`    <line class="walk" data-from="${e.a}" data-to="${e.b}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}"/>`);
+    lines.push(`    <text class="walk-blk" x="${((a.x + b.x) / 2).toFixed(1)}" y="${((a.y + b.y) / 2 - 4).toFixed(1)}">${e.blocks} blk</text>`);
+  }
+  lines.push('  </g>');
+  return lines;
+}
+
+function labelGroups() {
+  const towns = [], zones = [], ids = [];
+  for (const entry of MAP.cells) {
+    const s = settlementById(entry.town);
+    const zone = zoneById(s.zone);
+    const c = CELLS.get(entry.cell);
+    towns.push(`    <g class="node${s.capital ? ' capital' : ''}" data-node="${entry.town}" data-zone="${zone.id}">`
+      + `<use href="#icon-town" transform="translate(${(c.x - 6.8).toFixed(1)},${(c.y - 18).toFixed(1)}) scale(0.42)"/>`
+      + `<text class="place" x="${c.x.toFixed(1)}" y="${(c.y + 4).toFixed(1)}">${esc(s.name)}</text>`
+      + `</g>`);
+    ids.push(`    <text class="cellid" data-cell="${entry.cell}" x="${c.x.toFixed(1)}" y="${(c.y + 14).toFixed(1)}">${entry.cell}</text>`);
+    const put = (cell, name, band) => {
+      const h = CELLS.get(cell);
+      const lines = wrap(name, 12);
+      const lh = 8.4, top = h.y - ((lines.length - 1) * lh) / 2 - 9;
+      zones.push(`    <g class="zonelabel" data-cell="${cell}">`
+        + lines.map((l, i) => `<text class="zonename" x="${h.x.toFixed(1)}" y="${(top + i * lh).toFixed(1)}">${esc(l)}</text>`).join('')
+        + `<text class="zoneband" x="${h.x.toFixed(1)}" y="${(h.y + 13).toFixed(1)}">${levelText(band)}</text>`
+        + `</g>`);
+      ids.push(`    <text class="cellid" data-cell="${cell}" x="${h.x.toFixed(1)}" y="${(h.y + 22).toFixed(1)}">${cell}</text>`);
+    };
+    entry.subs.forEach((sub, j) => put(sub.cell, ((zone.subzones || [])[j] || {}).name || sub.cell, zone));
+    entry.wild.forEach((w, j) => put(w.cell, j === 0 ? s.name + ' Dungeon' : s.name + ' ' + (j + 1), zone));
+  }
+  for (const [id, c] of CELLS) {
+    if (claims.has(key(c.q, c.r))) continue;
+    ids.push(`    <text class="cellid" data-cell="${id}" x="${c.x.toFixed(1)}" y="${c.y.toFixed(1)}">${id}</text>`);
+  }
+  return [
+    '  <g id="labels">',
+    ...towns,
+    ...zones,
+    '  </g>',
+    '  <g id="ids">',
+    ...ids,
+    '  </g>',
+  ];
+}
+
+/** A named span of the field, printed across the middle of the cells its zones own. */
+function regionGroup() {
+  const lines = ['  <g id="regions">'];
+  for (const r of MAP.regions) {
+    const pts = r.zones.map((z) => {
+      const s = TOWN.settlements.find((x) => x.zone === z);
+      return s && CELLS.get((MAP.cells.find((c) => c.town === s.id) || {}).cell);
+    }).filter(Boolean);
+    if (!pts.length) continue;
+    const x = pts.reduce((n, p) => n + p.x, 0) / pts.length;
+    const y = pts.reduce((n, p) => n + p.y, 0) / pts.length;
+    lines.push(`    <text class="region" data-zone="${r.zones.join(' ')}" x="${x.toFixed(1)}" y="${y.toFixed(1)}">${esc(r.name)}</text>`);
+  }
+  lines.push('  </g>');
+  return lines;
+}
+
+/** A landmark mark on its settlement's own cell: not architecture, so it never reads as a town. */
+function watermarkGroup() {
+  const lines = ['  <g id="watermarks">'];
+  for (const w of MAP.watermarks) {
+    const entry = MAP.cells.find((c) => c.town === w.anchor);
+    if (!entry) continue;
+    const c = CELLS.get(entry.cell);
+    // parked on the cell's upper-left rim, where it reads as ground beside the settlement mark
+    const mx = (c.x - 17).toFixed(1), my = (c.y - 12).toFixed(1);
+    lines.push(`    <g class="watermark watermark-${w.kind}" data-feature="${w.id}" data-anchor="${w.anchor}">`
+      + `<circle cx="${mx}" cy="${my}" r="4"/>`
+      + `<circle class="halo" cx="${mx}" cy="${my}" r="7"/>`
+      + `<title>${esc(w.label || w.kind)}</title></g>`);
+  }
+  lines.push('  </g>');
+  return lines;
+}
+
+function markersGroup() {
+  const lines = [
+    '  <!-- the client toggles these by id: the pin of the settlement you stand in, the pin of the one you walk to -->',
+    '  <g id="markers">',
+  ];
+  for (const entry of MAP.cells) {
+    const c = CELLS.get(entry.cell);
+    lines.push(`    <g class="pin" data-node="${entry.town}"><circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="16"/><circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="7"/></g>`);
+  }
+  lines.push('  </g>');
+  return lines;
+}
+
+function viewBox() {
+  const xs = [...CELLS.values()].map((c) => c.x), ys = [...CELLS.values()].map((c) => c.y);
+  const padX = (SQ3 * R) / 2 + 1, padY = R + 1;
+  const vx = Math.min(...xs) - padX, vy = Math.min(...ys) - padY;
+  const vw = Math.max(...xs) + padX - vx, vh = Math.max(...ys) + padY - vy;
+  return { vx, vy, vw, vh };
+}
+
+/**
+ * The ground the field lies on: the same hex lattice, drawn on past the field so zooming out never
+ * reaches an edge — pretending to be terrain, not a flat paper, so the field reads as one region of a
+ * larger world. Its tone is the field's own rule carried outward, not a second pattern: a ground hex
+ * lies in the country of the settlement it is nearest, and wears that settlement's spread terrain at its
+ * `ground_colors` anchor — the same terrain the bare cells around that town are printed in — so the
+ * colours meet the map's regions at the field's border and go on with them instead of starting afresh
+ * outside it. The settlement layout is read on the tile's own repeats, which is what lets one tile stand
+ * for an endless ground; the two lattice translations that carry a tile edge are (N,0) and (N/2,N). A
+ * value noise, periodic with the tile, then drifts a hex one step either way on the ramp, so a country's
+ * edge is a fringe of its neighbour's tone and not a cut, and the ground reads as country rather than as
+ * a chessboard (M5). The tile and the field share the one lattice, so the ground lines up with the cells,
+ * not behind them. `hazeDef` lays the aerial wash over all of it.
+ */
+function hexGridDefs() {
+  const keys = Object.keys(GCOL);
+  const N = 32, G = 8;                 // hexes per tile edge, and the fringing noise's control points
+  const w = N * SQ3 * R, h = N * 1.5 * R;
+  // the ground closes half the seam the cells keep, so it reads as country and not as a mesh
+  const gr = R - F.gap / (2 * SQ3);
+  const wrap = (v: number, m: number) => ((v % m) + m) % m;
+  const rnd = (cx: number, cy: number) => {
+    let k = Math.imul(wrap(cx, G), 374761393) + Math.imul(wrap(cy, G), 668265263) + 2654435761;
+    k = Math.imul(k ^ (k >>> 13), 1274126177);
+    return ((k >>> 8) & 0xffff) / 0xffff;
+  };
+  // the smoother curve, so a control cell holds its drift across the middle of itself and turns over only
+  // near its edge: fringes where they belong, not a gradient smeared over the whole tile
+  const smooth = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
+  /** the drift field, periodic with the tile so the ground cannot seam. */
+  const noise = (i: number, j: number) => {
+    const u = (wrap(i, N) / N) * G, v = (wrap(j, N) / N) * G;
+    const c = Math.floor(u), r = Math.floor(v);
+    const fu = smooth(u - c), fv = smooth(v - r);
+    const top = rnd(c, r) + (rnd(c + 1, r) - rnd(c, r)) * fu;
+    const bot = rnd(c, r + 1) + (rnd(c + 1, r + 1) - rnd(c, r + 1)) * fu;
+    return top + (bot - top) * fv;
+  };
+  /** the country a hex lies in: the nearest settlement, its repeats counted as the tile repeats. */
+  const country = (q: number, r: number) => {
+    let best = null;
+    for (const t of SPREAD) {
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) {
+        const d = hd([q, r], [t.q + a * N - b * (N >> 1), t.r + b * N]);
+        if (!best || d < best.d) best = { d, k: t.k };
+      }
+    }
+    return keys.indexOf(best.k);
+  };
+  const hexes = [];
+  for (let j = -1; j <= N; j++) {
+    for (let i = -1; i <= N; i++) {
+      const drift = Math.round(noise(i, j) * 2 - 1);
+      const k = Math.min(keys.length - 1, Math.max(0, country(i - ((j - (j & 1)) >> 1), j) + drift));
+      const cx = SQ3 * R * (i + (j & 1) / 2), cy = 1.5 * R * j;
+      // a path, not a polygon: M10 counts the sheet's polygons as its cells, and the ground is not one
+      hexes.push(`      <path d="M${hexPts(cx, cy, gr).split(' ').join('L')}Z" fill="${GCOL[keys[k]]}"/>`);
+    }
+  }
+  return [
+    `    <pattern id="hexgrid" width="${w.toFixed(1)}" height="${h.toFixed(1)}" patternUnits="userSpaceOnUse">`,
+    ...hexes,
+    '    </pattern>',
+  ];
+}
+/** How many fields of ground are laid past each edge — enough that the frame is hexes at the lowest zoom. */
+const GROUND_SPAN = 5;
+/**
+ * Aerial perspective: one radial wash centred on the field's own viewBox centre, transparent out to
+ * `haze_clear` half-diagonals — the whole field, and the ring of ground that has to match it — then
+ * deepening on the paper from `ground_fade`, where the outermost bare cell and the first ground hex are
+ * both laid, to `fade_far` by `haze_reach`. So the ground sinks on past the value the field stops at, the
+ * hard ring where the field ended is gone, and the lattice reads as land falling away instead of a
+ * wallpaper tile. Painted after the hexes and before the cells, so no cell is ever veiled and the client
+ * still drives only `polygon.cell` and `rect.paper` (M10).
+ */
+function hazeDef(v) {
+  const D = Math.hypot(v.vw / 2, v.vh / 2);
+  return [
+    `    <radialGradient id="haze" gradientUnits="userSpaceOnUse" cx="${(v.vx + v.vw / 2).toFixed(1)}" cy="${(v.vy + v.vh / 2).toFixed(1)}" r="${(F.haze_reach * D).toFixed(1)}">`,
+    `      <stop offset="0" stop-color="${F.sheet}" stop-opacity="0"/>`,
+    `      <stop offset="${(F.haze_clear / F.haze_reach).toFixed(4)}" stop-color="${F.sheet}" stop-opacity="0"/>`,
+    `      <stop offset="1" stop-color="${F.sheet}" stop-opacity="${F.fade_far}"/>`,
+    '    </radialGradient>',
+  ];
+}
+/** The ground's own box: the field laid `GROUND_SPAN` fields past each edge. */
+function groundBox(v) {
+  const x = v.vx - GROUND_SPAN * v.vw, y = v.vy - GROUND_SPAN * v.vh;
+  return { x, y, w: v.vw * (2 * GROUND_SPAN + 1), h: v.vh * (2 * GROUND_SPAN + 1) };
+}
+function groundRects(v) {
+  const b = groundBox(v);
+  const box = `x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}"`;
+  return [
+    `  <rect class="paper" ${box} fill="${F.sheet}"/>`,
+    `  <rect ${box} fill="url(#hexgrid)"/>`,
+    `  <rect class="haze" ${box} fill="url(#haze)" pointer-events="none"/>`,
+  ];
+}
+/**
+ * The endless zone's weather. The cloud starts AT the field's own edge and thickens outward, so the
+ * ground past the last cell is covered rather than merely faded: one soft `#cloud` puff, a feathered
+ * rectangular mask that hides all of it inside the field (no cell is ever veiled, and no click is
+ * stolen), a flat fog wash on the outer ground, and a drifting blob field that grows the further out
+ * it goes. Reads `field.cloud_tone` / `field.cloud_opacity`.
+ */
+function cloudDefs(v) {
+  const b = groundBox(v);
+  // the collar: how far past the sheet's border the feather opens, as a share of the field's width
+  const feather = v.vw * 0.05;
+  return [
+    '    <radialGradient id="cloud" cx="0.5" cy="0.5" r="0.5">',
+    `      <stop offset="0" stop-color="${F.cloud_tone}" stop-opacity="${F.cloud_opacity}"/>`,
+    `      <stop offset="0.55" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity / 2).toFixed(3)}"/>`,
+    `      <stop offset="1" stop-color="${F.cloud_tone}" stop-opacity="0"/>`,
+    '    </radialGradient>',
+    `    <filter id="fogFeather" x="-25%" y="-25%" width="150%" height="150%">`,
+    `      <feGaussianBlur stdDeviation="${(feather * 0.55).toFixed(1)}"/>`,
+    '    </filter>',
+    `    <mask id="cloudMask">`,
+    `      <rect x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" fill="#fff"/>`,
+    `      <rect x="${(v.vx - feather).toFixed(1)}" y="${(v.vy - feather).toFixed(1)}" width="${(v.vw + feather * 2).toFixed(1)}" height="${(v.vh + feather * 2).toFixed(1)}" fill="#000" filter="url(#fogFeather)"/>`,
+    '    </mask>',
+    `    <linearGradient id="fogWash" gradientUnits="userSpaceOnUse" x1="${v.vx.toFixed(1)}" y1="${v.vy.toFixed(1)}" x2="${v.vx.toFixed(1)}" y2="${(v.vy - GROUND_SPAN * v.vh).toFixed(1)}">`,
+    `      <stop offset="0" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity * 0.22).toFixed(3)}"/>`,
+    `      <stop offset="1" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity * 0.6).toFixed(3)}"/>`,
+    '    </linearGradient>',
+  ];
+}
+/**
+ * The cloud field itself: clusters seeded in bands outward from the sheet's border, so the near collar
+ * is a wall of weather and the far ground is buried in it. Deterministic (one seed, no `Math.random`)
+ * so the written sheet is stable, painted after the haze and before the cells, `pointer-events="none"`
+ * so a click still reaches a cell.
+ */
+function cloudLayer(v) {
+  const cx = v.vx + v.vw / 2, cy = v.vy + v.vh / 2;
+  const D = Math.hypot(v.vw / 2, v.vh / 2);
+  let seed = 0x9e3779b9;
+  const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const blobs = [];
+  // eight bands, each one field-radius wider than the last, with more clusters as the band recedes —
+  // the eye reads that as weather that never ends rather than a ring with a wall behind it
+  const BANDS = [[1.02, 1.35, 10], [1.35, 1.8, 12], [1.8, 2.35, 14], [2.35, 3, 15], [3, 3.8, 17], [3.8, 4.8, 18], [4.8, 6, 20], [6, 7.4, 22]];
+  for (const [from, to, count] of BANDS) {
+    for (let i = 0; i < count; i++) {
+      const ang = rnd() * Math.PI * 2;
+      const rad = D * (from + rnd() * (to - from));
+      const x = cx + Math.cos(ang) * rad, y = cy + Math.sin(ang) * rad * 0.72;
+      const rx = (0.1 + rnd() * 0.18) * D * (1 + from * 0.12), ry = rx * (0.36 + rnd() * 0.3);
+      const near = Math.max(0.32, 1 - (from - 1.02) * 0.12);
+      blobs.push(`      <ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="url(#cloud)" opacity="${(near * (0.55 + rnd() * 0.45)).toFixed(2)}"/>`);
+    }
+  }
+  const b = groundBox(v);
+  const box = `x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}"`;
+  return [
+    `  <rect class="fog-wash" ${box} fill="url(#fogWash)" mask="url(#cloudMask)" pointer-events="none"/>`,
+    '  <g class="clouds" mask="url(#cloudMask)" pointer-events="none">',
+    '    <animateTransform attributeName="transform" type="translate" dur="150s" repeatCount="indefinite" values="0 0; 8 5; 0 0"/>',
+    ...blobs,
+    '  </g>',
+  ];
+}
+
+function render(): string {
+  const v = viewBox();
+  const lines = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    `<!-- GENERATED by tools/map.ts from tools/data/map.json — do not hand-edit. One polygon per cell of the ${F.cols} x ${F.rows} field; the content in the cells is the engine's. -->`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${v.vx.toFixed(1)} ${v.vy.toFixed(1)} ${v.vw.toFixed(1)} ${v.vh.toFixed(1)}" width="${Math.round(v.vw)}" height="${Math.round(v.vh)}" font-family="Inter, 'Segoe UI', system-ui, sans-serif">`,
+    '  <defs>',
+    '    <g id="icon-town" fill="none" stroke="#f0e5cb" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">',
+    ...['M3 15 16 4l13 11M6 13v15h20V13M12 28v-9h8v9', 'M9 15h3M20 15h3', 'M16 4V2'].map((d) => `      <path d="${d}"/>`),
+    '    </g>',
+    ...hexGridDefs(),
+    ...hazeDef(v),
+    ...cloudDefs(v),
+    '  </defs>',
+    ...groundRects(v),
+    ...cloudLayer(v),
+    ...fieldGroup(),
+    ...walkGroup(),
+    ...watermarkGroup(),
+    ...regionGroup(),
+    ...labelGroups(),
+    ...markersGroup(),
+    '</svg>',
+    '',
+  ];
+  return lines.join('\n');
+}
+
+function write() {
+  const v = viewBox();
+  const svg = render();
+  fs.mkdirSync(path.dirname(OUT), { recursive: true });
+  fs.writeFileSync(OUT, svg);
+  const subs = MAP.cells.reduce((n, c) => n + c.subs.length, 0);
+  const wild = MAP.cells.reduce((n, c) => n + c.wild.length, 0);
+  console.log(`wrote ${path.relative(ROOT, OUT)} · ${CELLS.size} cells of a ${F.cols} x ${F.rows} field · ${MAP.cells.length} settlements · ${subs} sub-zone cells · ${wild} wild cells · ${WALK.length} walk stretches / ${WALK.reduce((n, e) => n + e.blocks, 0)} blocks · ${Math.round(v.vw)}x${Math.round(v.vh)} (ratio ${(v.vw / v.vh).toFixed(4)})`);
+}
+
+// ------------------------------------------------------------------ the gate
+
+/** Nothing under engine/ or game/src/ may read a coordinate table (X33). */
+function sources(dir, out = []) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) sources(p, out);
+    else if (/\.(ts|js|svelte)$/.test(e.name)) out.push(p);
+  }
+  return out;
+}
+
+/** What M13 measured, so its PASS line reports the field rather than a typed figure. */
+let M13NOTE = '';
+
+function checks() {
+  const problems = [];
+  // the five-block reach of the standing rule is a design window, not a wiring fact (owner ruling ·
+  // AGENTS §3): a cell beyond it reads PENDING on M13t and never fails the run
+  const rankProblems = [];
+  M13NOTE = '';
+  const cellOf = (id) => { const e = MAP.cells.find((c) => c.town === id); return e && e.cell; };
+  // M1 · every settlement owns exactly one cell entry, and no entry is a stranger
+  for (const id of settlementIds) if (!cellOf(id)) problems.push(`no field cell for settlement ${id}`);
+  for (const c of MAP.cells) if (!settlementIds.includes(c.town)) problems.push(`field cell entry ${c.town} is not a settlement`);
+  if (MAP.cells.length !== settlementIds.length) problems.push(`${MAP.cells.length} cell entries for ${settlementIds.length} settlements`);
+  // M2 · every claimed cell is in the field, and no cell is claimed twice
+  const seen = new Map();
+  for (const c of MAP.cells) {
+    for (const [cell, kind] of [[c.cell, 'town'], ...c.subs.map((s) => [s.cell, 'sub']), ...c.wild.map((w) => [w.cell, 'wild'])]) {
+      if (!CELLS.has(cell)) { problems.push(`${c.town} ${kind} cell ${cell} is outside the ${F.cols} x ${F.rows} field`); continue; }
+      if (seen.has(cell)) problems.push(`cell ${cell} claimed by ${seen.get(cell)} and ${c.town} ${kind}`);
+      seen.set(cell, `${c.town} ${kind}`);
+    }
+  }
+  // M3 · the sheet and the walk graph are the same lattice: each settlement's cell is where its
+  //        axial coordinates land, and no two settlements share a cell.
+  for (const c of MAP.cells) {
+    const node = roadNodes.find((n) => n.id === c.town);
+    if (!node) { problems.push(`the walk graph has no node for settlement ${c.town}`); continue; }
+    if (!Number.isInteger(node.q) || !Number.isInteger(node.r)) problems.push(`walk node ${c.town} is not on the hex lattice`);
+    const at = CELLID.get(key(node.q, node.r));
+    if (at !== c.cell) problems.push(`settlement ${c.town}: the sheet says ${c.cell}, the walk graph's ${node.q},${node.r} is ${at || 'off the field'}`);
+  }
+  if (roadNodes.length !== settlementIds.length) problems.push(`${roadNodes.length} walk nodes for ${settlementIds.length} settlements`);
+  // M4 · every terrain key a cell names is a declared colour
+  for (const c of MAP.cells) for (const s of c.subs) {
+    if (!COL[s.terrain]) problems.push(`${c.town} sub cell ${s.cell} says terrain "${s.terrain}", which has no colour`);
+  }
+  // M5 · every declared colour is drawn somewhere: a terrain on a cell, a ground colour on the ground —
+  //        and the ground is the terrain palette at `ground_fade` and nothing else. An anchor that is not
+  //        what that fade prints is a hand-typed tone with no home, and a ramp whose hues turn back on
+  //        themselves is confetti again: two neighbouring heights landing on opposite sides of the wheel.
+  //        The ground past the field is the field's own country carried on, so a settlement whose spread
+  //        terrain has no anchor would have nothing to be carried — the ramp is read on that anchor.
+  for (const kind of Object.keys(COL)) {
+    const used = MAP.cells.some((c) => c.subs.some((s) => s.terrain === kind)) || ['town', 'wild'].includes(kind);
+    if (!used) problems.push(`terrain colour "${kind}" is declared but no cell stands on it`);
+  }
+  let groundSvg = '';
+  try { groundSvg = fs.readFileSync(OUT, 'utf8'); } catch { /* M10 reports the sheet that is not written */ }
+  const ramp = groundRamp();
+  const gkeys = Object.keys(GCOL);
+  gkeys.forEach((name, i) => {
+    const hex = GCOL[name];
+    if (!COL[name]) { problems.push(`ground colour "${name}" is declared but names no terrain`); return; }
+    if (!groundSvg.includes(`fill="${hex}"`)) problems.push(`ground colour "${name}" is declared but not drawn on the ground`);
+    if (hex !== ramp[i]) problems.push(`ground colour "${name}" is declared but ${COL[name]} closed on the paper by ${GFADE} is ${ramp[i]}`);
+  });
+  for (const t of SPREAD) {
+    if (!GCOL[t.k]) problems.push(`settlement ${t.town} spreads terrain "${t.k}", which has no anchor on the ground ramp — the country past the field has nothing to carry`);
+  }
+  for (const b of BARE.edge) {
+    if (!Object.values(GCOL).includes(b.fill)) problems.push(`the field's outer cell ${b.id} is printed ${b.fill}, which is no ground anchor — the endless ground cannot meet the map at the border`);
+  }
+  const walk = hueWalk(gkeys.map((k) => GCOL[k]));
+  for (let i = 1; i < walk.length; i++) {
+    if (walk[i] > walk[i - 1] - 3) {
+      problems.push(`the ground ramp is declared but its hues turn back: "${gkeys[i]}" at ${walk[i].toFixed(0)} deg follows "${gkeys[i - 1]}" at ${walk[i - 1].toFixed(0)} deg`);
+    }
+  }
+  // M6 · every sub-zone and wild cell is a side of its own town
+  for (const c of MAP.cells) {
+    const t = CELLS.get(c.cell);
+    for (const cell of [...c.subs.map((s) => s.cell), ...c.wild.map((w) => w.cell)]) {
+      const h = CELLS.get(cell);
+      if (h && hd([h.q, h.r], [t.q, t.r]) !== 1) problems.push(`${c.town} cell ${cell} is not a side of ${c.cell}`);
+    }
+  }
+  // M7 · presentation only: no coordinate table is read by the simulation
+  const readers = [...sources(path.join(ROOT, 'engine')), ...sources(path.join(ROOT, 'game/src'))]
+    .filter((f) => /map\.json/.test(fs.readFileSync(f, 'utf8')));
+  if (readers.length) problems.push(`map.json is read by ${readers.map((f) => path.relative(ROOT, f)).join(', ')} — the simulation may not read a coordinate (X33)`);
+  // M8 · the field is the declared one
+  if (CELLS.size !== F.hexes) problems.push(`the lattice holds ${CELLS.size} cells, not the declared ${F.hexes}`);
+  if (!inField(0, 0)) problems.push('the starting settlement does not sit on a cell of the field');
+  // M9 · every landmark anchors to a settlement that owns a cell
+  for (const w of (MAP.watermarks || [])) {
+    if (!cellOf(w.anchor)) problems.push(`watermark ${w.id} anchors to "${w.anchor}", which owns no cell`);
+  }
+  // M10 · the written sheet carries a polygon per cell, a pin per settlement and a stretch per hop,
+  //        so the client toggles by id and matches a route by cell key alone
+  try {
+    const svg = fs.readFileSync(OUT, 'utf8');
+    const polys = (svg.match(/class="cell /g) || []).length;
+    const pins = (svg.match(/class="pin"/g) || []).length;
+    const hops = (svg.match(/class="walk"/g) || []).length;
+    const axes = (svg.match(/data-ax="/g) || []).length;
+    const shapes = [...svg.matchAll(/<polygon points="([^"]*)"/g)];
+    const hexes = shapes.filter((m) => m[1].trim().split(/\s+/).length === 6).length;
+    if (polys !== F.hexes) problems.push(`sheet has ${polys} cell polygons for ${F.hexes} cells`);
+    // a polygon with no points is invisible, and an invisible field still passes a count of tags
+    if (hexes !== F.hexes) problems.push(`sheet has ${hexes} drawn hexes for ${F.hexes} cells — a cell with no points is not on the sheet`);
+    if (axes !== F.hexes) problems.push(`sheet has ${axes} cell keys for ${F.hexes} cells — a plotted route could not be matched`);
+    if (pins !== MAP.cells.length) problems.push(`sheet has ${pins} travel pins for ${MAP.cells.length} settlements`);
+    if (hops !== WALK.length) problems.push(`sheet has ${hops} walk stretches for ${WALK.length} hops`);
+  } catch { problems.push('sheet not written — run node tools/map.ts --write'); }
+  // M11 · one named sub-zone cell per sub-zone, in the engine's order, and the name printed on it
+  for (const c of MAP.cells) {
+    const s = settlementById(c.town);
+    const zone = zoneById(s.zone);
+    const subs = (zone.subzones || []);
+    if (c.subs.length !== subs.length) problems.push(`settlement ${c.town} owns ${c.subs.length} sub-zone cells for ${subs.length} sub-zones`);
+    if (c.wild.length !== 3) problems.push(`settlement ${c.town} owns ${c.wild.length} wild cells, not three`);
+    subs.forEach((sub, j) => {
+      const h = CELLS.get((c.subs[j] || {}).cell);
+      if (!h) return;
+      const k = key(h.q, h.r);
+      if (!(claims.get(k) || {}).name || claims.get(k).name !== sub.name) {
+        problems.push(`sub-zone "${sub.name}" of ${c.town} is not the name printed on its cell ${(c.subs[j] || {}).cell}`);
+      }
+    });
+  }
+  // M12 · every zone belongs to exactly one named region, and every region names a real zone
+  const covered = [];
+  for (const r of (MAP.regions || [])) {
+    for (const z of r.zones) {
+      if (!E.mob.zones.some((zz) => zz.id === z)) problems.push(`region "${r.name}" names zone ${z}, which does not exist`);
+      if (covered.includes(z)) problems.push(`zone ${z} is in two regions`);
+      covered.push(z);
+    }
+  }
+  for (const z of E.mob.zones) if (!covered.includes(z.id)) problems.push(`zone ${z.id} belongs to no region`);
+  // M13 · the standing rule is honest on the written sheet: every cell a click can land on resolves to
+  //        the settlement that owns it by distance alone, a claimed cell is owned by the settlement
+  //        printed on it, nothing within a side of two towns ties, and bare ground is never closer than
+  //        two blocks. This is the gate that makes "every hex is a place to stand" a derivation rather
+  //        than an assumption — a cell that resolved to no owner would be the hex that does nothing.
+  try {
+    const svg = fs.readFileSync(OUT, 'utf8');
+    const attr = (tag, name) => { const m = new RegExp(`${name}="([^"]*)"`).exec(tag); return m ? m[1] : null; };
+    let rankMax = 0;
+    let read = 0;
+    for (const m of svg.matchAll(/<polygon ([^>]*class="cell [^>]*)>/g)) {
+      const tag = m[1];
+      read++;
+      const ax = attr(tag, 'data-ax');
+      if (!/,/.test(ax || '')) { problems.push('a cell polygon carries no axial key to walk from'); continue; }
+      const [q, r] = ax.split(',').map(Number);
+      const h = { q, r };
+      const rank = ROAD.cellRank(h);
+      rankMax = Math.max(rankMax, rank);
+      if (rank > 5) rankProblems.push(`cell ${ax} is ${rank} blocks from every settlement — no click there can name a zone`);
+      const tied = ROAD.owners(h);
+      if (rank <= 1 && tied.length > 1) problems.push(`cell ${ax} ranks ${rank} and ties between ${tied.map((n) => n.id).join(', ')} — a side cannot have two owners`);
+      const node = attr(tag, 'data-node');
+      const owner = ROAD.owningNode(h, STANDING);
+      if (node && owner.id !== node) problems.push(`cell ${ax} is printed as ${node}'s but the nearest settlement is ${owner.id}`);
+      if (!node && rank < 2) problems.push(`cell ${ax} is bare ground yet ranks ${rank} — it belongs to ${owner.id}`);
+      const zone = attr(tag, 'data-zone');
+      if (zone && String(settlementById(owner.id).zone) !== zone) problems.push(`cell ${ax} prints zone ${zone} but ${owner.id} holds ${settlementById(owner.id).zone}`);
+      const sub = attr(tag, 'data-sub'), wild = attr(tag, 'data-wild');
+      if (rank === 0 && (sub != null || wild != null)) problems.push(`cell ${ax} is a settlement and carries a sub/wild index`);
+    }
+    if (read !== F.hexes) problems.push(`the standing rule read ${read} cell polygons, not the ${F.hexes} the field declares`);
+    M13NOTE = `${read} cells resolve, and ${rankMax} blocks is the farthest any of them sits from a settlement`;
+  } catch { problems.push('sheet not written — run node tools/map.ts --write'); }
+  return { problems, rankProblems };
+}
+
+const args = process.argv.slice(2);
+if (args.includes('--checks')) {
+  const { problems, rankProblems } = checks();
+  const g = G.gates();
+  // Each gate claims the problems its own check raised, so a problem is printed by the gate that
+  // owns it and an UNCLAIMED problem cannot hide behind a row that still reads PASS.
+  const claimed: string[] = [];
+  const claim = (id: string, re: RegExp, detail: string) => {
+    const mine = problems.filter((p: string) => re.test(p));
+    claimed.push(...mine);
+    g.add(id, mine.length === 0, mine.length ? mine.join(' · ') : detail);
+  };
+  const subs = MAP.cells.reduce((n, c) => n + c.subs.length, 0);
+  const wild = MAP.cells.reduce((n, c) => n + c.wild.length, 0);
+  g.add('M1', MAP.cells.length === settlementIds.length, `every settlement owns exactly one cell of the field (${MAP.cells.length})${MAP.cells.length === settlementIds.length ? '' : ` — ${MAP.cells.length} cells for ${settlementIds.length} settlements`}`);
+  claim('M2', /outside the|claimed by/, `all ${subs + wild + MAP.cells.length} claimed cells are on the field, none claimed twice`);
+  claim('M3', /walk graph|walk node|the sheet says/, `the sheet's cells and the walk graph's ${roadNodes.length} axial nodes are the same lattice`);
+  claim('M4', /has no colour/, 'every terrain a cell stands on has a colour');
+  claim('M5', /declared but|no ground anchor|no anchor on the ground|cannot meet the map/, `every declared colour is drawn somewhere (${Object.keys(COL).length} terrain keys · ${Object.keys(GCOL).length} ground keys), the ground ramp is each terrain at ground_fade ${GFADE} walked one way round the wheel, and the field's outer ${BARE.edge.length} bare cells are printed on that ramp so the ground meets the map at the border`);
+  claim('M6', /not a side of/, 'every sub-zone and wild cell is a side of its own town');
+  claim('M7', /may not read a coordinate/, 'no file under engine/ or game/src/ reads map.json — cells stay presentation (X33)');
+  claim('M8', /lattice holds|starting settlement/, `the field is the declared ${F.cols} x ${F.rows} (${F.hexes} cells) with the start on its centre cell`);
+  claim('M9', /anchors to/, 'every landmark anchors to a settlement that owns a cell');
+  claim('M10', /cell polygons|cell keys|travel pins|walk stretches|sheet not written/, `the sheet carries ${F.hexes} keyed cells, a pin per settlement and ${WALK.length} walk stretches`);
+  claim('M11', /sub-zone cells for|wild cells, not|not the name printed/, `one named sub-zone cell per sub-zone (${subs}) and three wild cells per town (${wild})`);
+  claim('M12', /two regions|belongs to no region|names zone/, `every zone belongs to exactly one named region (${(MAP.regions || []).length} regions)`);
+  claim('M13', /no click there|two owners|printed as|bare ground yet|carries no axial key|carries a sub\/wild index|prints zone|standing rule read/, `every cell a click can land on resolves to the settlement that owns it, by distance alone (${M13NOTE})`);
+  // M13t is the numeric half of the standing rule — the five-block reach is a design window the
+  // owner reads by eye (AGENTS §3), so it is a watch: PENDING outside the window, never a FAIL.
+  g.watch('M13t', rankProblems.length === 0, rankProblems.join(' · '), `${M13NOTE} — inside the five-block reach`);
+  const unclaimed = problems.filter((p: string) => !claimed.includes(p));
+  g.add('M14', unclaimed.length === 0, unclaimed.length ? `no gate claims: ${unclaimed.join(' · ')}` : 'every problem the map checks raised is claimed by a named gate');
+  let currentSvg = '';
+  try { currentSvg = fs.readFileSync(OUT, 'utf8').replace(/\r\n/g, '\n'); } catch { /* M15 reports the absent artifact */ }
+  const generatedSvg = render();
+  g.add('M15', currentSvg === generatedSvg,
+    currentSvg === generatedSvg ? 'the checked-in field sheet is the deterministic render of current map data' : 'the checked-in field sheet differs from its generator — run pnpm map -- --write');
+  G.report(g.rows());
+} else if (args.includes('--write')) {
+  write();
+} else {
+  console.log('map.ts — the generated field sheet');
+  console.log('  --write    write game/src/icon/map/map-overlay.svg from tools/data/map.json');
+  console.log('  --checks   run M1-M15 (data consistency, generated output parity, and an unclaimed problem)');
+}

@@ -318,8 +318,8 @@
 
 <style>
   .workshop {
-    display: grid; grid-template-columns: minmax(var(--box-240), .75fr) minmax(0, 2.1fr) minmax(var(--box-240), 1fr);
-    grid-template-rows: minmax(var(--box-320), 1.2fr) minmax(var(--box-240), .9fr);
+    display: grid; grid-template-columns: minmax(clamp(150px, 11.62vw, 324px), .75fr) minmax(0, 2.1fr) minmax(clamp(150px, 11.62vw, 324px), 1fr);
+    grid-template-rows: minmax(clamp(200px, 15.49vw, 432px), 1.2fr) minmax(clamp(150px, 11.62vw, 324px), .9fr);
     grid-template-areas: "stones craft equipment" "stones inventory inventory";
     gap: var(--spacing-sm); width: 100%; height: 100%; min-height: 0;
   }
@@ -364,9 +364,9 @@
   .stone-detail strong { color: var(--gold-lit); font-weight: 600; }
   .stone-detail span { color: var(--dim); }
   .drop-slot {
-    display: flex; align-items: center; gap: var(--spacing-sm); min-height: var(--box-130);
+    display: flex; align-items: center; gap: var(--spacing-sm); min-height: clamp(81px, 6.29vw, 176px);
     margin: var(--spacing-sm); padding: var(--spacing-sm); border: 1px dashed var(--gold);
-    background: color-mix(in srgb, var(--gold) 6%, var(--inset)); transition: background .15s ease, border-color .15s ease;
+    background: color-mix(in srgb, var(--gold) 6%, var(--inset)); transition: background var(--motion-fast) var(--ease-ui), border-color var(--motion-fast) var(--ease-ui);
   }
   .drop-slot.ready { border-style: solid; border-color: var(--focus); background: color-mix(in srgb, var(--focus) 14%, var(--inset)); }
   .drop-slot.stone-ready { border-style: solid; border-color: var(--gold-lit); background: color-mix(in srgb, var(--gold) 14%, var(--inset)); }

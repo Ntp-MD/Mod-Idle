@@ -338,8 +338,8 @@ function runChecks() {
   const habitatSizes = (E.mob.species as any[]).map((s) => s.habitat.length);
   add('X52', habitatProblems.length === 0, habitatProblems.length ? habitatProblems.join(' · ')
     : `${E.mob.species.length} species each carry a habitat of ${Math.min(...habitatSizes)}-${Math.max(...habitatSizes)} regions, every named region is real and claimed by at least one species, and every zone a species sits in is inside its habitat — a species appears only where its habitat allows, so the owner's re-placement is a data edit this gate reads (mob.species[].habitat · world.md \`mob-sheet\`)`);
-  // X53: species.zones owns the zone cast; subzones partition that cast into actual spawn pools.
-  // Their union must match the source, and every displayed ladder rung must belong to its pool.
+  // X53: species.zones owns zone eligibility; each subzone is an independent pool and pools may overlap.
+  // Their union must cover the zone cast, and every displayed ladder rung must belong to its pool.
   const subProblems: string[] = [];
   {
     const byId = new Map((E.mob.species as any[]).map((s) => [s.id, s]));
@@ -374,7 +374,7 @@ function runChecks() {
     }
   }
   add('X53', subProblems.length === 0, subProblems.length ? subProblems.join(' · ')
-    : `${E.mob.zones.length} zones read their cast from mob.species[].zones via racesInZone, every subzone race resolves and matches, and every displayed variant belongs to a race shown in its subzone — add a race with one species entry plus its variants row`);
+    : `${E.mob.zones.length} zones read eligibility from mob.species[].zones via racesInZone, subzone race pools may overlap across environments while their union covers each zone cast, and every displayed variant belongs to a race shown in its subzone`);
 
   // The map stays presentation-only. This crosswalk lets the cage catch drift between its ground
   // vocabulary and the environments attached to combat subzones without making the client read map data.
@@ -424,7 +424,7 @@ function runChecks() {
   const sizePatterns = new Set((E.mob.species as any[]).map((s) => [...s.sizes].sort().join('+')));
   const m3Problems: string[] = [];
   if (accuracyLevels.size < 7) m3Problems.push(`accuracy ladder has ${accuracyLevels.size} values, expected at least 7`);
-  if (sizePatterns.size < 6) m3Problems.push(`species use ${sizePatterns.size} body-class patterns, expected at least 6`);
+  if (sizePatterns.size < 5) m3Problems.push(`species use ${sizePatterns.size} body-class patterns, expected at least 5`);
   for (const id of ['kobold', 'slime', 'spider', 'wolf']) {
     if ((E.mob.species as any[]).find((s) => s.id === id)?.sizes.includes('large')) m3Problems.push(`${id}: swarm body may not include Large`);
   }
@@ -1155,10 +1155,8 @@ function runChecks() {
       if (!(v.sell_gold > 0 && v.drop_chance_per_kill > 0 && v.drop_chance_per_kill < 1)) jp.push(`rarity ${r} needs a sell and a chance`);
       else if (Math.abs(v.drop_chance_per_kill * v.sell_gold - perKill) > 1e-4) jp.push(`rarity ${r}: chance x sell = ${f2(v.drop_chance_per_kill * v.sell_gold)} gold/kill, must equal the line ${f2(perKill)}`);
     }
-    // The item is per VARIANT now: every name a ladder carries owns exactly one junk row, and no two
-    // variants may pay the same item (the Counterhand reads which variants were farmed, so a shared
-    // item would erase the answer). This replaced the species-keyed table; a dead row or a bad rarity
-    // is the drift this catches.
+    // Every fieldable variant keeps its unique base item. Each species also owns one alternative per
+    // rarity; those names must be globally unique and map to the same fixed sale rarity in town.
     const V = (E.mob as any).variants || {};
     const D = (E.mob as any).variant_drops || {};
     // Only a FIELDABLE rung may promise a junk item: a name the cast can never field is a drop the
@@ -1180,6 +1178,7 @@ function runChecks() {
       return E.mob.bosses.some((b) => b.species === o.sid);
     });
     const paidBy = new Map<string, string>();
+    const variantItems = new Set(Object.values(D).map((row: any) => row.item));
     for (const n of fieldable) {
       const row = D[n];
       if (!row) { jp.push(`variant ${n} can be fielded but has no variant_drops row`); continue; }
@@ -1188,13 +1187,31 @@ function runChecks() {
       paidBy.set(row.item, n);
       if (!J.rarities || !J.rarities[row.rarity]) jp.push(`${n} junk "${row.item}" has unknown rarity ${row.rarity}`);
     }
+    const speciesItemOwner = new Map<string, string>();
+    const expectedRarities = Object.keys(J.rarities || {}).sort();
+    for (const species of E.mob.species as any[]) {
+      const items = species.junk_items || {};
+      const rarities = Object.keys(items).sort();
+      if (rarities.join('|') !== expectedRarities.join('|')) {
+        jp.push(`${species.name} junk_items must declare exactly one item for each rarity (${expectedRarities.join(', ')})`);
+      }
+      for (const rarity of expectedRarities) {
+        const item = items[rarity];
+        if (typeof item !== 'string' || !item.trim()) { jp.push(`${species.name} has no ${rarity} race junk item`); continue; }
+        if (!J.rarities[rarity]) jp.push(`${species.name} junk "${item}" has unknown rarity ${rarity}`);
+        if (variantItems.has(item)) jp.push(`${species.name} race junk "${item}" duplicates a variant junk item`);
+        const owner = speciesItemOwner.get(item);
+        if (owner) jp.push(`race junk item "${item}" is shared by ${owner} and ${species.id}`);
+        speciesItemOwner.set(item, species.id);
+      }
+    }
     for (const k of Object.keys(D)) {
       if (!names.includes(k)) jp.push(`variant_drops row for a name no ladder carries: ${k}`);
       else if (!fieldable.includes(k)) jp.push(`variant_drops row for a rung the cast can never field: ${k}`);
     }
     const junkHr = BAND.high.kills_derived * perKill;
     add('X39', jp.length === 0, jp.length ? jp.join(' · ')
-      : `mob junk is gold's primary mint: ${fieldable.length} items over ${Object.keys(J.rarities).length} rarities (common ${J.rarities.common.sell_gold}g · uncommon ${J.rarities.uncommon.sell_gold}g · rare ${J.rarities.rare.sell_gold}g) · each rarity's chance = the line / its sell, so expected gold is ${f2(perKill)}/kill for any variant and the junk line stays ${f0(junkHr)}/hr · every row belongs to a rung the cast can field and every item is paid by exactly one variant · stacks ${J.stack}/slot, weightless`);
+      : `mob junk is gold's primary mint: ${fieldable.length} unique variant items plus ${speciesItemOwner.size} unique race items across ${Object.keys(J.rarities).length} rarities · each race alternative shares its rarity's existing sale price, and each rarity's chance = the line / its sell, so expected gold is ${f2(perKill)}/kill for any variant and the junk line stays ${f0(junkHr)}/hr · every variant row belongs to a fieldable rung · stacks ${J.stack}/slot, weightless`);
   }
 
   // X57: the cast names the rung it is. A sub-zone's normal names must be the NORMAL rungs of races

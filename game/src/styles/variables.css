@@ -26,6 +26,45 @@
     --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
     --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
 
+    /* Shared radius scale: tight controls, standard surfaces, major panels, circles and capsules. */
+    --radius-round: 50%;
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+
+    /* Shared visual states */
+    --surface-selected: rgba(232, 193, 105, .12);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, .5);
+    --shadow-soft: 0 4px 14px rgba(0, 0, 0, .45);
+
+    /* Shared motion */
+    --motion-fast: 150ms;
+    --motion-ui: 220ms;
+    --motion-map: 450ms;
+    --motion-travel: 650ms;
+    --ease-ui: ease;
+    --ease-out: ease-out;
+    --ease-linear: linear;
+    --ease-glide: cubic-bezier(.2, .8, .2, 1);
+
+    /* Shared stacking order; small values are component-local layers. */
+    --z-underlay: 1;
+    --z-content: 2;
+    --z-effect: 3;
+    --z-highlight: 4;
+    --z-control: 5;
+    --z-floater: 6;
+    --z-label: 7;
+    --z-toast: 8;
+    --z-travel: 35;
+    --z-hud-control: 40;
+    --z-panel: 60;
+    --z-navigation: 70;
+    --z-popover-backdrop: 79;
+    --z-popover: 80;
+    --z-notice: 90;
+    --z-screen-guard: 200;
+
     --focus: #7fd4ff;
 
     --rail: clamp(46px, 3.19vw, 88px);
@@ -89,11 +128,11 @@
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
 
-    --font-xs: clamp(11px, 0.82vw, 23px);
-    --font-sm: clamp(13px, 0.97vw, 27px);
-    --font-md: clamp(16px, 1.21vw, 34px);
-    --font-lg: clamp(21px, 1.60vw, 45px);
-    --font-xl: clamp(27px, 2.08vw, 58px);
+    --font-xs: clamp(12px, 0.90vw, 24px);
+    --font-sm: clamp(14px, 1.04vw, 28px);
+    --font-md: clamp(17px, 1.28vw, 36px);
+    --font-lg: clamp(22px, 1.67vw, 47px);
+    --font-xl: clamp(29px, 2.18vw, 62px);
     --icon-xs: clamp(11px, 0.82vw, 23px);
     --icon-sm: clamp(14px, 1.11vw, 31px);
     --icon-md: clamp(21px, 1.60vw, 45px);
@@ -114,31 +153,14 @@
     --spacing-3xs: clamp(1px, 0.10vw, 3px);
     --seam: 1px;
 
-    --sheet-fs-region: clamp(8px, 0.48vw, 14px);
-    --sheet-fs-walk: clamp(6px, 0.34vw, 9px);
-    --sheet-fs-place: clamp(7px, 0.44vw, 12px);
-    --sheet-fs-capital: clamp(8px, 0.53vw, 15px);
-    --sheet-fs-zonename: clamp(6px, 0.39vw, 11px);
-    --sheet-fs-id: clamp(5px, 0.34vw, 9px);
+    --sheet-fs-region: clamp(9px, 0.54vw, 15px);
+    --sheet-fs-walk: clamp(8px, 0.40vw, 11px);
+    --sheet-fs-place: clamp(9px, 0.50vw, 14px);
+    --sheet-fs-capital: clamp(10px, 0.60vw, 17px);
+    --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
+    --sheet-fs-id: clamp(7px, 0.40vw, 11px);
     --x-pull-arc: clamp(-46px, -1.65vw, -21px);
     --x-pull-burst: clamp(-32px, -1.16vw, -15px);
     --x-pull-scale: clamp(-14px, -0.48vw, -6px);
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
-
-    --box-100: clamp(63px, 4.84vw, 135px);
-    --box-110: clamp(69px, 5.32vw, 149px);
-    --box-130: clamp(81px, 6.29vw, 176px);
-    --box-160: clamp(100px, 7.74vw, 216px);
-    --box-170: clamp(106px, 8.23vw, 230px);
-    --box-180: clamp(113px, 8.71vw, 243px);
-    --box-200: clamp(125px, 9.68vw, 270px);
-    --box-240: clamp(150px, 11.62vw, 324px);
-    --box-300: clamp(188px, 14.52vw, 405px);
-    --box-320: clamp(200px, 15.49vw, 432px);
-    --box-420: clamp(263px, 20.33vw, 567px);
-    --box-440: clamp(275px, 21.30vw, 594px);
-    --box-520: clamp(325px, 25.17vw, 702px);
-    --box-560: clamp(350px, 27.11vw, 756px);
-    --box-680: clamp(425px, 32.91vw, 918px);
-    --box-920: clamp(575px, 44.53vw, 1242px);
 }

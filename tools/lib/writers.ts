@@ -15,4 +15,5 @@ export const CAGES: { label: string; script: string; args: string[] }[] = [
   { label: 'loot cage', script: 'tools/loot.ts', args: ['--checks'] },
   { label: 'bases cage', script: 'tools/bases.ts', args: ['--checks'] },
   { label: 'imprint cage', script: 'tools/imprint.ts', args: ['--checks'] },
+  { label: 'map cage', script: 'tools/map.ts', args: ['--checks'] },
 ];

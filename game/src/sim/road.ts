@@ -1,4 +1,4 @@
-import { E, TOWN, road } from '../engine/client';
+import { E, TOWN, road, fieldwork } from '../engine/client';
 import { hexAdjacent } from '../../../engine/road.ts';
 import type { Hex } from '../../../engine/road.ts';
 import { abandonRun } from './dungeon';
@@ -64,9 +64,12 @@ export function walkNote(state: GameState): string {
   const own = w.node ? settlementById(w.node) : null;
   const name = own?.name ?? w.node ?? 'the field';
   const subs = own ? ((E.mob.zones.find((z: any) => z.id === own.zone)?.subzones) || []) : [];
+  // The site a wild side carries is `fieldwork.wild_site_index`, read through the shared `siteAt` —
+  // the index is data, so the sentence may not type it.
+  const site = w.kind === 'wild' ? fieldwork.siteAt(w.wild) : null;
   const where = w.kind === 'town' ? name
     : w.kind === 'sub' ? `${subs[w.sub ?? 0]?.name ?? `sub-zone ${(w.sub ?? 0) + 1}`} of ${name}`
-      : w.kind === 'wild' ? (w.wild === 0 ? `the dungeon side of ${name}` : `wild side ${name}`)
+      : w.kind === 'wild' ? (site ? `the ${site} side of ${name}` : `wild side ${name}`)
         : `bare ground in the field of ${name}`;
   return where;
 }

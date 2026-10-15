@@ -106,7 +106,7 @@
   .tree-start circle { fill: var(--gold); stroke: var(--bg); stroke-width: 0.5; }
   .tree-start path { fill: var(--bg); }
   .tree-node { cursor: pointer; outline: none; }
-  .tree-node circle:first-of-type { fill: var(--panel); stroke: var(--line); stroke-width: 0.5; transition: fill 120ms ease, stroke 120ms ease; }
+  .tree-node circle:first-of-type { fill: var(--panel); stroke: var(--line); stroke-width: 0.5; transition: fill var(--motion-fast) var(--ease-ui), stroke var(--motion-fast) var(--ease-ui); }
   .tree-node.impact circle:first-of-type { stroke: var(--hot); }
   .tree-node.control circle:first-of-type { stroke: var(--mana-lit); }
   .tree-node.stream circle:first-of-type { stroke: var(--good-lit); }

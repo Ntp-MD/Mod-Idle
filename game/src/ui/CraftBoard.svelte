@@ -510,7 +510,7 @@
   .bench-work .lines { overflow: hidden; }
   /* the stash shape: the stones on the left, the bench in the middle, the bag on the right — the
      centre column is the work and stays the widest */
-  .bench { display: grid; grid-template-columns: minmax(clamp(138px, 10.70vw, 297px), clamp(169px, 13.12vw, 364px)) minmax(0, 1fr) minmax(clamp(156px, 12.10vw, 338px), var(--box-300)); gap: var(--spacing-md); align-items: start; }
+  .bench { display: grid; grid-template-columns: minmax(clamp(138px, 10.70vw, 297px), clamp(169px, 13.12vw, 364px)) minmax(0, 1fr) minmax(clamp(156px, 12.10vw, 338px), clamp(188px, 14.52vw, 405px)); gap: var(--spacing-md); align-items: start; }
   .stash, .bagcol { position: sticky; top: 0; }
   h4 { margin: 0 0 var(--spacing-2xs); }
   /* the currency tab: one cell per stone, icon and count, the name on the hover — the purse is read
@@ -518,7 +518,7 @@
   .tab { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(38px, 2.90vw, 81px), 1fr)); gap: var(--spacing-2xs); }
   .stone {
     position: relative; aspect-ratio: 1; display: grid; place-items: center;
-    background: var(--inset); border: 1px solid var(--line); border-radius: 4px;
+    background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-sm);
   }
   .stone img { width: var(--icon-md); height: var(--icon-md); object-fit: contain; }
   .stone b {
@@ -531,13 +531,13 @@
   .val { color: var(--text); }
   .val small { color: var(--mob); font-size: var(--font-xs); margin-left: var(--spacing-2xs); }
   .no { color: var(--mob); width: var(--icon-lg); }
-  .tag { margin-left: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: 0 var(--spacing-2xs); }
+  .tag { margin-left: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-round); padding: 0 var(--spacing-2xs); }
   .tag.el { color: var(--es-lit); border-color: color-mix(in srgb, var(--es) 40%, transparent); }
   tr.fixed td { opacity: .72; }
 
   /* the tier a line sits in is a band of three, because Tier is a set of steps and not a number */
   .band { display: inline-flex; gap: var(--spacing-3xs); margin-right: var(--spacing-2xs); vertical-align: middle; }
-  .band i { width: var(--icon-xs); height: 4px; border-radius: 2px; background: var(--bar); border: 1px solid var(--line); }
+  .band i { width: var(--icon-xs); height: 4px; border-radius: var(--radius-round); background: var(--bar); border: 1px solid var(--line); }
   .band i.on { background: var(--gold); border-color: var(--gold); }
   .t { font-size: var(--font-xs); color: var(--dim); }
 
@@ -547,7 +547,7 @@
   .verbs button.armed { border-color: var(--gold); color: var(--gold); }
   /* the Replace stone's own choice: the line it names, from the pool this Base already draws */
   .pick { display: inline-flex; gap: var(--spacing-2xs); align-items: center; width: 100%; margin-top: var(--spacing-3xs); }
-  .pick select { font-size: var(--font-xs); padding: var(--seam) var(--spacing-2xs); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 2px; }
+  .pick select { font-size: var(--font-xs); padding: var(--spacing-3xs) var(--spacing-2xs); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); }
   .pick button { padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); border-color: var(--gold); }
   .prices { font-size: var(--font-xs); color: var(--mob); }
   .foot { margin: var(--spacing-2xs) 0 0; color: var(--dim); }
@@ -560,13 +560,13 @@
   .wbtns { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(162px, 12.58vw, 351px), 1fr)); gap: var(--spacing-2xs); }
   .bench-work .wbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bench-work .wbtns .pick { display: flex; flex-wrap: wrap; align-content: start; }
-  .bench-work .wbtns .pick select, .bench-work .wbtns .pick button { flex: 1 1 var(--box-110); min-width: 0; }
+  .bench-work .wbtns .pick select, .bench-work .wbtns .pick button { flex: 1 1 clamp(69px, 5.32vw, 149px); min-width: 0; }
   .wbtns > button { display: grid; gap: var(--spacing-3xs); justify-items: start; text-align: left; padding: var(--spacing-xs) var(--spacing-sm); }
   .wbtns b { font-size: var(--font-xs); }
   .wbtns span { font-size: var(--font-xs); color: var(--dim); }
   .wbtns button:disabled { opacity: .45; cursor: not-allowed; }
   .now { margin: var(--spacing-xs) 0 0; font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
-  .result { margin: var(--spacing-xs) 0 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: 8px; font-size: var(--font-xs); background: var(--panel); border: 1px solid var(--edge); }
+  .result { margin: var(--spacing-xs) 0 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs); background: var(--panel); border: 1px solid var(--edge); }
 
   @media (max-width: 1280px) {
     .bench { grid-template-columns: 1fr; }

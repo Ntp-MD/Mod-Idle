@@ -35,6 +35,7 @@
   import FieldPlates from './ui/FieldPlates.svelte';
   import ExpBar from './ui/ExpBar.svelte';
   import LogBox from './ui/LogBox.svelte';
+  import { feedEventsAfter } from './ui/logbox';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
     standingShare, standingTier, canTravel, claimTask, npcOf,
@@ -51,6 +52,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
   import { mulberry32 } from './engine/client-helpers';
   import { writeSave, writeSaveSync, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
+  import { requestAccountWriterLock, type AccountWriterLockResult } from './state/accountWriterLock';
   import { FILTER_SLOTS, ruleFor, setRule, describeRule } from './sim/filter';
   import { equipFromBag, autoEquip, unequip } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
@@ -94,6 +96,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   import type { SkillConditions } from './sim/skills';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
+  const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
+
+  function showcaseGame(): GameState {
+    const sample = newGame();
+    sample.hunting = true;
+    tick(sample, {}, { online: false, autoSkills: false });
+    const starter = sample.gear.find((piece): piece is Item => piece !== null);
+    if (starter) {
+      const carriedSample = structuredClone(starter);
+      carriedSample.locked = true;
+      sample.bag.push(carriedSample);
+    }
+    const activeSkill = Object.values(sm.byId).find((skill) => ['attack', 'curse', 'heal'].includes(skill.type));
+    if (activeSkill) {
+      sample.skills.owned[activeSkill.id] = 0;
+      sample.skills.list[0] = activeSkill.id;
+    }
+    return sample;
+  }
   /**
    * The play screen is the field itself, laid out the way a phone game laid out on a monitor does: the
    * fight fills the frame and every read sits in a corner, so nothing the player has to watch can be
@@ -128,9 +149,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   };
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
-  let gameState = $state<GameState>(newGame());
+  let gameState = $state<GameState>(showcaseMode ? showcaseGame() : newGame());
   let statuses = $state<Statuses>({});
-  let running = $state(true);
+  let running = $state(!showcaseMode);
   /** Held while a load or a snapshot rewind swaps the character: a live tick landing on the new state
    *  mid-catch-up would sim the away window twice. The interval drains its accumulator and stands down. */
   let paused = $state(false);
@@ -148,7 +169,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const shownMana = $derived(manaVisual.current);
   // the game opens on the ground, not on the fight: the first read is where the character stands and
   // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame
-  let panel = $state<PanelId | null>('map');
+  let panel = $state<PanelId | null>(showcaseMode ? null : 'map');
   let more = $state(false);
   let hudGridVisible = $state(false);
   let layoutEditorOpen = $state(false);
@@ -160,7 +181,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (validateHudLayout(nextHud) || !validGridArea(nextModal)) return;
     hudLayout = copyHudLayout(nextHud);
     modalLayout = { ...nextModal };
-    localStorage.setItem(HUD_LAYOUT_STORAGE_KEY, JSON.stringify({ version: 1, hud: hudLayout, modal: modalLayout }));
+    if (!showcaseMode) localStorage.setItem(HUD_LAYOUT_STORAGE_KEY, JSON.stringify({ version: 1, hud: hudLayout, modal: modalLayout }));
     layoutEditorOpen = false;
   }
   const openLayoutEditor = () => { layoutEditorOpen = true; more = false; };
@@ -169,11 +190,26 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const selectedTreeVerdict = $derived(canSpendTree(gameState, selectedTreeNodeId));
   let sheetOpen = $state(false);
   let saveNote = $state('');
+  type AccountWriterState = 'checking' | 'owner' | 'readonly' | 'waiting' | 'unsupported';
+  let accountWriterState = $state<AccountWriterState>('checking');
+  let accountWriterLease: Extract<AccountWriterLockResult, { status: 'acquired' }> | null = null;
+  let takeoverController: AbortController | null = null;
+  let takeoverSlot = $state<SlotName>('slot1');
+  const canWriteAccount = $derived(accountWriterState === 'owner');
+  const accountWriterMessage = $derived(accountWriterState === 'owner'
+    ? 'This tab controls saves for the account.'
+    : accountWriterState === 'readonly'
+      ? 'Another tab controls this account. You can load and play here, but saving and restoring are paused.'
+      : accountWriterState === 'waiting'
+        ? 'Waiting for the other tab to release account control.'
+        : accountWriterState === 'unsupported'
+          ? 'This browser cannot coordinate account saves. Saving is disabled to protect progress.'
+          : 'Checking account save access…');
 
   let settings = $state<ClientSettings>({ ...DEFAULT_SETTINGS });
   function setSetting<K extends keyof ClientSettings>(k: K, v: ClientSettings[K]) {
     settings[k] = v;
-    void writeSettings(settings);
+    if (!showcaseMode) void writeSettings(settings);
   }
   const SPEEDS: (1 | 2 | 4)[] = [1, 2, 4];
   function setSpeed(m: 1 | 2 | 4) {
@@ -185,6 +221,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   /** Escape uncovers the field: map focus drops, the two dock overlays go with it, and a pick that was
       never travelled to is dropped rather than left ringing under the HUD. A desk screen closes itself. */
   function onfieldKey(ev: KeyboardEvent) {
+    if (showcaseMode) return;
     if (ev.key === 'Escape') {
       if (isTypingTarget(ev.target)) return;
       // one Escape owner: an open sub-screen closes itself and keeps the field's own read untouched
@@ -336,8 +373,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       (e.kind === 'kill' || e.kind === 'level' || e.kind === 'travel' || e.kind === 'buff' || e.kind === 'drop') && e.text);
     if (!fresh.length) return;
     const top = Math.max(...fresh.map((e) => e.id));
-    if (feedSeen === 0) { feedSeen = top; return; }
-    const add = fresh.filter((e) => e.id > feedSeen).slice(0, 6);
+    const add = feedEventsAfter(fresh, feedSeen);
     feedSeen = top;
     if (!add.length) return;
     feed = [...feed, ...add.map((e) => ({
@@ -462,6 +498,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     let timer: ReturnType<typeof setInterval> | null = null;
     let autosaveTimer: ReturnType<typeof setInterval> | null = null;
     let disposed = false;
+    if (showcaseMode) {
+      document.body.classList.add('ui-showcase');
+      settings = { ...DEFAULT_SETTINGS };
+      speed = settings.speed || 1;
+      return () => document.body.classList.remove('ui-showcase');
+    }
     try {
       const savedLayout = localStorage.getItem(HUD_LAYOUT_STORAGE_KEY);
       if (savedLayout) {
@@ -479,12 +521,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     // first, so `writeSaveSync` writes the mirror in one turn. It refreshes the away stamp too, so a
     // reload right after cannot count the same absence twice.
     const flushSync = () => {
-      if (!lastSlot) return;
+      if (!canWriteAccount || !lastSlot) return;
       gameState.lastSavedAt = Date.now();
       writeSaveSync(lastSlot, gameState);
     };
     const onHide = () => { if (document.visibilityState === 'hidden') flushSync(); };
     (async () => {
+      const writerLock = await requestAccountWriterLock();
+      if (disposed) {
+        if (writerLock.status === 'acquired') writerLock.release();
+        return;
+      }
+      if (writerLock.status === 'acquired') {
+        accountWriterLease = writerLock;
+        accountWriterState = 'owner';
+      } else if (writerLock.status === 'busy') {
+        accountWriterState = 'readonly';
+      } else {
+        accountWriterState = 'unsupported';
+      }
       settings = await readSettings();
       speed = settings.speed || 1;
       // monotonic clock: catch up on the time between sessions, capped by the save rule. The catch-up
@@ -524,7 +579,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           if (batch.ticks > 0) cooldownStepMs = (batch.ticks / speed) * 1000;
           for (let i = 0; i < batch.ticks; i++) step();
         }, WAKE_SEC * 1000);
-        autosaveTimer = setInterval(() => { if (lastSlot) void doSave(lastSlot, true); }, AUTOSAVE_SEC * 1000);
+        autosaveTimer = setInterval(() => { if (canWriteAccount && lastSlot) void doSave(lastSlot, true); }, AUTOSAVE_SEC * 1000);
         document.addEventListener('visibilitychange', onHide);
         window.addEventListener('beforeunload', flushSync);
       }
@@ -535,6 +590,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       if (autosaveTimer) clearInterval(autosaveTimer);
       document.removeEventListener('visibilitychange', onHide);
       window.removeEventListener('beforeunload', flushSync);
+      takeoverController?.abort();
+      accountWriterLease?.release();
+      accountWriterLease = null;
     };
   });
 
@@ -713,6 +771,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let lastSlot = $state<SlotName | null>(null);
 
   async function doSave(slot: SlotName, quiet = false) {
+    if (showcaseMode) return;
+    if (!canWriteAccount) { saveNote = 'This tab does not control account saves.'; return; }
     // stamp the wall clock before the write, so the next session's away window starts here (and a
     // reload before the next save cannot count the same absence twice)
     gameState.lastSavedAt = Date.now();
@@ -731,11 +791,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let saveTab = $state<'slots' | 'backups' | 'settings'>('slots');
 
   async function loadSnaps() {
+    if (showcaseMode) { snaps = []; snapNote = 'Snapshots are disabled in the Showcase.'; return; }
     snaps = await listSnapshots(snapSlot);
     snapNote = snaps.length ? '' : 'No backup yet — one is owed on the next level up, craft or timer.';
   }
 
   async function restore(index: number) {
+    if (showcaseMode || !canWriteAccount) return;
     const s = await restoreSnapshot(snapSlot, index);
     if (!s) { snapNote = 'That backup is gone'; return; }
     statuses = {};
@@ -752,10 +814,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   async function doLoad(slot: SlotName) {
+    if (showcaseMode) return;
     paused = true;
     try {
       const s = await readSave(slot);
-      if (!s) { saveNote = `${slot} is empty`; return; }
+      if (!s) { saveNote = `${slot} is empty`; return false; }
       statuses = {};
       gameState = { ...s };
       const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
@@ -765,12 +828,46 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
       // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
       lastSlot = slot;
+      takeoverSlot = slot;
       gameState.lastSavedAt = Date.now();
-      saveNote = `Loaded ${slot} — ${r.simulated} sec caught up`;
+      saveNote = canWriteAccount
+        ? `Loaded ${slot} — ${r.simulated} sec caught up`
+        : `Loaded ${slot} read-only — ${r.simulated} sec caught up`;
       gameState = { ...gameState };
+      return true;
     } finally {
       paused = false;
     }
+  }
+
+  async function takeOverAccount() {
+    if (showcaseMode || accountWriterState !== 'readonly') return;
+    const controller = new AbortController();
+    takeoverController = controller;
+    accountWriterState = 'waiting';
+    const result = await requestAccountWriterLock({ wait: true, signal: controller.signal });
+    if (takeoverController !== controller) {
+      if (result.status === 'acquired') result.release();
+      return;
+    }
+    takeoverController = null;
+    if (result.status !== 'acquired') {
+      accountWriterState = result.status === 'cancelled' ? 'readonly' : 'unsupported';
+      return;
+    }
+    accountWriterLease = result;
+    accountWriterState = 'owner';
+    const loaded = await doLoad(takeoverSlot);
+    if (!loaded) {
+      accountWriterLease.release();
+      accountWriterLease = null;
+      accountWriterState = 'readonly';
+      saveNote = `${takeoverSlot} is empty. Choose a slot with a saved character before taking over.`;
+    }
+  }
+
+  function cancelTakeover() {
+    takeoverController?.abort();
   }
 
   function download() {
@@ -783,6 +880,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   async function upload(ev: Event) {
+    if (showcaseMode || !canWriteAccount) return;
     const file = (ev.target as HTMLInputElement).files?.[0];
     if (!file) return;
     try {
@@ -796,6 +894,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function reset() {
+    if (!canWriteAccount) return;
     gameState = newGame();
     statuses = {};
     saveNote = '';
@@ -832,6 +931,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // the floor is where the sheet stops costing frames: below it the endless ground puts enough hexes on
   // screen that panning lags (owner ruling)
   const MAP_BASE_ZOOM = 1.24, MAP_MIN_ZOOM = 0.5, MAP_MAX_ZOOM = 3;
+  const HEX_NEIGHBORS: ReadonlyArray<readonly [number, number]> = [
+    [1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1],
+  ];
+  const MAP_ARROW_VECTORS = {
+    ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1],
+  } as const;
   let zoom = $state(MAP_BASE_ZOOM);
   let panX = $state(0);
   let panY = $state(0);
@@ -901,8 +1006,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (!cell || !ax || (ax === `${pickedCell?.q},${pickedCell?.r}`)) {
       picked = null; pickedCell = null; return;
     }
-    pickedCell = cellLabel(cell);
-    picked = pickedCell.kind === 'bare' ? null : cell.getAttribute('data-node') || null;
+    pickMapCell(cell);
+  }
+  function pickMapCell(cell: Element) {
+    const next = cellLabel(cell);
+    pickedCell = next;
+    picked = next.kind === 'bare' ? null : cell.getAttribute('data-node') || null;
   }
   function select(id: string) {
     const cell = settlementCell(id);
@@ -910,21 +1019,47 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     picked = id;
     pickedCell = cell ? { key: sheet?.querySelector(`polygon.cell.town[data-node="${id}"]`)?.getAttribute('data-cell') || '', q: cell.q, r: cell.r, kind: 'town', label: settlementById(id)!.name, sub: null, wild: null } : null;
   }
-  /**
-   * The keyboard path over the same field: the arrows move the selection through the settlement order
-   * the list beside it prints, and Enter takes the walk — or the warp, once the Waypoint is open. So
-   * the click is a shortcut, never the only way to reach a place.
-   */
+  function adjacentMapCell(origin: SVGPolygonElement, direction: readonly [number, number]) {
+    if (!sheet) return null;
+    const ax = origin.getAttribute('data-ax');
+    if (!ax) return null;
+    const [q, r] = ax.split(',').map(Number);
+    if (!Number.isFinite(q) || !Number.isFinite(r)) return null;
+
+    const box = origin.getBBox();
+    const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+    const [ux, uy] = direction;
+    let nearest: SVGPolygonElement | null = null;
+    let nearestAngle = Infinity;
+    for (const [dq, dr] of HEX_NEIGHBORS) {
+      const candidate = sheet.querySelector<SVGPolygonElement>(`polygon.cell[data-ax="${q + dq},${r + dr}"]`);
+      if (!candidate) continue;
+      const nextBox = candidate.getBBox();
+      const dx = nextBox.x + nextBox.width / 2 - cx;
+      const dy = nextBox.y + nextBox.height / 2 - cy;
+      const forward = dx * ux + dy * uy;
+      if (forward <= 0) continue;
+      const lateral = Math.abs(dx * uy - dy * ux);
+      const angle = lateral / forward;
+      if (angle < nearestAngle) { nearest = candidate; nearestAngle = angle; }
+    }
+    return nearest;
+  }
+  /** Arrow keys move to an adjacent block; Enter walks there or uses a known settlement Waypoint. */
   function onMapKey(ev: KeyboardEvent) {
-    const ids = TOWN.settlements.map((s: any) => s.id) as string[];
-    const back = ev.key === 'ArrowLeft' || ev.key === 'ArrowUp';
-    if (back || ev.key === 'ArrowRight' || ev.key === 'ArrowDown') {
+    if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight' || ev.key === 'ArrowUp' || ev.key === 'ArrowDown') {
       ev.preventDefault();
-      select(ids[(ids.indexOf(picked || '') + (back ? -1 : 1) + ids.length) % ids.length]);
+      ev.stopPropagation();
+      const position = pickedCell || currentCell(gameState);
+      const origin = sheet?.querySelector<SVGPolygonElement>(`polygon.cell[data-ax="${position.q},${position.r}"]`);
+      const target = origin && adjacentMapCell(origin, MAP_ARROW_VECTORS[ev.key]);
+      if (target) pickMapCell(target);
       return;
     }
     if (ev.key === 'Enter' && pickedCell) {
       ev.preventDefault();
+      ev.stopPropagation();
       if (pickedCell.kind === 'town' && picked && canTravel(gameState, picked)) travelTo(picked);
       else doWalk(pickedCell);
     }
@@ -1507,6 +1642,34 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 <svelte:window onkeydown={onfieldKey} />
 
+<svelte:head><title>{showcaseMode ? 'ModWorld UI Showcase' : 'ModWorld'}</title></svelte:head>
+
+{#if showcaseMode}
+  <header class="showcase-banner">
+    <div>
+      <h1>UI Showcase</h1>
+      <p>Live game components · sample state · changes to source UI appear here through Vite HMR</p>
+    </div>
+    <a href="/">Return to the game</a>
+  </header>
+  <nav class="showcase-index" aria-label="Showcase sections">
+    <a href="#showcase-field">Field HUD</a>
+    <a href="#panel-hud-layout-studio">HUD Layout</a>
+    <a href="#panel-character-sheet">Sheet</a>
+    <a href="#panel-inventory">Inventory</a>
+    <a href="#panel-craft">Craft</a>
+    <a href="#panel-skills">Skills</a>
+    <a href="#panel-passive-tree">Tree</a>
+    <a href="#panel-town">Town</a>
+    <a href="#panel-market">Market</a>
+    <a href="#panel-keyboard">Keys</a>
+    <a href="#panel-field-camp">Camp</a>
+    <a href="#panel-farm">Farm</a>
+    <a href="#panel-settlement">Desk</a>
+    <a href="#panel-save">Save</a>
+  </nav>
+{/if}
+
 <!-- the client is a desktop surface: below the floor the corner reads stop being placeable, so it says so
      instead of laying out a phone screen nobody asked for -->
 <div class="small-screen" role="alert">
@@ -1515,21 +1678,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     they need the room. Widen the window, or set the browser zoom out.</p>
 </div>
 
-<div class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:mapmode={panel === 'map'} class:veiled={(panel !== null && panel !== 'map') || sheetOpen} class:townmode={townLive && panel !== 'map'}>
+<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
   <!-- The field lies on the map: one generated sheet, laid flat behind the HUD, dimmed and out of focus
        until the pointer reaches for it or the MAP tab brings it into focus. It is the only copy and the
        surface a place is picked, plotted and walked on — no modal sits between the player and a cell. -->
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
     class="map-back sheet"
     class:dragging
-    role="toolbar"
-    aria-label="Field map — click a cell to pick a place, arrows and Enter work the same list"
+    role="application"
+    aria-label="World map. Use arrow keys to select an adjacent block; Enter walks to it or warps through an open settlement Waypoint."
     tabindex="0"
     use:mapField
   >
     <div class="map-sheet" style:transform={`translate(${panX.toFixed(1)}px, ${panY.toFixed(1)}px) scale(${zoom.toFixed(4)})`}>
       {@html mapWithMist}
     </div>
+    <span class="aloud" aria-live="polite" aria-atomic="true">{pickedCell ? `Selected block ${pickedCell.key}: ${pickedCell.label}` : ''}</span>
   </div>
   <!-- the zone's own name lives once, on the read column's tag — no second copy of it behind the HUD -->
 
@@ -1565,7 +1730,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <p class="phase">{phaseRead}</p>
       <div class="hunger-read" class:empty={gameState.fieldwork.hunger <= 0} title={gameState.fieldwork.hunger <= 0 ? `Hunger empty · HP regeneration reduced by ${fieldwork.F.hunger.empty_hp_regen_cut_pct}% · ES recharge unchanged` : 'Hunger · travel and field activity consume supplies'}>
         <span>Hunger</span><b>{Math.floor(gameState.fieldwork.hunger)}%</b>
-        <i><em style:width={`${hungerFill * 100}%`}></em></i>
+        <i><em style={`--fill:${hungerFill.toFixed(3)}`}></em></i>
       </div>
       {#if bagFull}
         <p class="alarm-line">Bag full — the zone has stopped paying. Walk to a settlement and deposit.</p>
@@ -1680,8 +1845,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   </div>
 
-  {#if !alloc && !more}
-    <div class="field-auto-actions" role="group" aria-label="Field automation">
+  {#if (!alloc && !more) || showcaseMode}
+    <div class="field-auto-actions" role="group" aria-label="Field automation"
+         style:justify-self={hudLayout.automation.justify} style:align-self={hudLayout.automation.align}
+         style:width={hudLayout.automation.justify === 'stretch' ? '100%' : null}>
       <button class="tab field-auto-tab" class:here={panel === 'skills'} type="button"
               aria-label="Skill settings" aria-expanded={panel === 'skills'}
               title={`Skill settings — cast order and modes · ${keyFor('screen.skills')}`}
@@ -1878,7 +2045,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <!-- the chronicle stays in the bottom-left corner -->
   <div class="field-feed" style:justify-self={hudLayout.feed.justify} style:align-self={hudLayout.feed.align}
        style:width={hudLayout.feed.justify === 'stretch' ? '100%' : 'auto'}>
-    <LogBox lines={chatShown} tabs={CHAT_TABS} active={chatTab} onTab={(tab) => (chatTab = tab)} />
+    <LogBox lines={chatShown} tabs={CHAT_TABS} active={chatTab} hasActivity={feed.length > 0} onTab={(tab) => (chatTab = tab)} />
   </div>
 
   <!-- every note the client gives by press — a refusal, a forge outcome, a deposit — is said out loud as
@@ -1952,22 +2119,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </div>
 {/if}
 
-{#if layoutEditorOpen}
-  <Panel title="HUD Layout Studio" subtitle="Drag regions, set cell bounds, then apply" width="wide" gridArea="2 / 3 / 15 / 14" onclose={() => (layoutEditorOpen = false)}>
+{#if layoutEditorOpen || showcaseMode}
+  <Panel title="HUD Layout Studio" subtitle="Arrange live HUD groups and the shared screen canvas" width="wide" showcase={showcaseMode} gridArea="2 / 3 / 15 / 14" onclose={() => (layoutEditorOpen = false)}>
     <HudLayoutEditor hud={hudLayout} modal={modalLayout} onapply={applyHudLayout} />
   </Panel>
 {/if}
 
-{#if sheetOpen}
+{#if sheetOpen || showcaseMode}
   <Panel
     title="Character sheet"
     subtitle={`Level ${gameState.player.level} · final values include gear, tree, and active effects · ${gameState.player.statPoints} stat points unspent · ${gameState.player.treePoints} tree points banked`}
     width="wide"
+    showcase={showcaseMode}
     gridArea={modalGridArea}
     onclose={() => (sheetOpen = false)}
   >
     <div class="sheet-tools">
-      <button class="sheet-new-character" type="button" title="Start a new character"
+      <button class="sheet-new-character" type="button" disabled={showcaseMode || !canWriteAccount} title="Start a new character"
               aria-label="New character" onclick={() => { if (confirm('Start a new character?')) reset(); }}>
         <img src={newCharacterMark} alt="" aria-hidden="true" />
         <span>New character</span>
@@ -2061,8 +2229,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'bag'}
-  <Panel title="Inventory" subtitle={invSub} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'bag' || showcaseMode}
+  <Panel title="Inventory" subtitle={invSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <!-- Inventory and warehouse share this window; Forge and Craft open from their own More menu entries. -->
     <div class="sides" role="tablist" aria-label="Inventory">
       <button role="tab" class:active={invTab === 'inv'} aria-selected={invTab === 'inv'} onclick={() => (invTab = 'inv')}>
@@ -2201,8 +2369,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'craft'}
-  <Panel title="Craft" subtitle="Stones, bench, and equipment" width="wide" fixed topmost gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'craft' || showcaseMode}
+  <Panel title="Craft" subtitle="Stones, bench, and equipment" width="wide" fixed topmost showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <CraftWorkshop game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
                    onpick={(where, index) => { bench = { where, index }; benchNote = ''; }}
                    onclear={() => { bench = null; benchNote = ''; }}
@@ -2210,8 +2378,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'skills'}
-  <Panel title="Skills" subtitle={`${ACTIVE_SLOTS} slots, cast top-down`} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'skills' || showcaseMode}
+  <Panel title="Skills" subtitle={`${ACTIVE_SLOTS} slots, cast top-down`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="skills-panel">
     <div class="skill-tabs" role="tablist" aria-label="Skill sections">
       <button role="tab" class:active={skillTab === 'loadout'} aria-selected={skillTab === 'loadout'} onclick={() => (skillTab = 'loadout')}>Loadout</button>
@@ -2370,8 +2538,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'tree'}
-  <Panel title="Passive tree" subtitle={`${treePointsFree(gameState)} banked · ${treePointsSpent(gameState)} spent`} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'tree' || showcaseMode}
+  <Panel title="Passive tree" subtitle={`${treePointsFree(gameState)} banked · ${treePointsSpent(gameState)} spent`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <PassiveTreeBoard
       nodes={tree.nodes}
       graph={tree.graph}
@@ -2384,8 +2552,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'town'}
-  <Panel title="Town" subtitle={`${town?.name ?? 'the field'} · ${townLive ? 'standing here' : 'not standing here'}`} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'town' || showcaseMode}
+  <Panel title="Town" subtitle={`${town?.name ?? 'the field'} · ${townLive ? 'standing here' : 'not standing here'}`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <TownHub state={gameState} town={town} here={townLive} {tabs}
              onopen={(id) => openPanel(id as PanelId)} onwarp={travelTo} onsellall={doSell}
              onbest={doBestEquip}
@@ -2393,20 +2561,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'market'}
-  <Panel title="Market" subtitle={`${town?.name ?? ''} · the stall, the Counterhand and the purse`} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'market' || showcaseMode}
+  <Panel title="Market" subtitle={`${town?.name ?? ''} · the stall, the Counterhand and the purse`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <Market state={gameState} town={town} here={townLive} onbuy={doBuy} onsell={doSell} />
   </Panel>
 {/if}
 
-{#if panel === 'keys'}
-  <Panel title="Keyboard" subtitle={`${KEYBINDS.length} actions, all rebound here`} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'keys' || showcaseMode}
+  <Panel title="Keyboard" subtitle={`${KEYBINDS.length} actions, all rebound here`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <KeybindTable binds={binds} onset={setBind} onreset={resetBinds} onclear={clearBind} />
   </Panel>
 {/if}
 
-{#if panel === 'camp'}
-  <Panel title="Field Camp" subtitle={`${fieldworkSite ? fieldworkSite.replace(/^./, (letter) => letter.toUpperCase()) : 'Field'} · ${fieldCampHere ? 'safe at Camp' : 'set up away from town'}`} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'camp' || showcaseMode}
+  <Panel title="Field Camp" subtitle={`${fieldworkSite ? fieldworkSite.replace(/^./, (letter) => letter.toUpperCase()) : 'Field'} · ${fieldCampHere ? 'safe at Camp' : 'set up away from town'}`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <FieldworkBoard
       state={gameState}
       site={fieldworkSite}
@@ -2427,8 +2595,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'farm'}
-  <Panel title="Farm" subtitle={farmSub} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'farm' || showcaseMode}
+  <Panel title="Farm" subtitle={farmSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="farm-panel">
     <p><small>{gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h a cycle · {farm.plotsMax} plots at most ({plots} yours).</small></p>
     <div class="farm-tabs" role="tablist" aria-label="Farm sections">
@@ -2505,8 +2673,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'desk'}
-  <Panel title="Settlement" subtitle={deskSub} width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'desk' || showcaseMode}
+  <Panel title="Settlement" subtitle={deskSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="desk-panel">
     <div class="desk-tabs" role="tablist" aria-label="Settlement sections">
       <button role="tab" class:active={deskTab === 'services'} aria-selected={deskTab === 'services'} onclick={() => (deskTab = 'services')}>Services</button>
@@ -2641,7 +2809,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             <td>{z.levels.join('-')}</td>
             <td>{z.hp.join(' → ')}</td>
             <td>{z.quality}</td>
-            <td>{z.elements.join(', ')}</td>
+            <td>{eng.zoneElements(z.id).join(', ')}</td>
             <td>{z.group}</td>
             <td>{(z.subzones || []).map((s: any) => s.name).join(' · ')}</td>
             <td><button onclick={(e) => { e.stopPropagation(); goToZone(z.id); }} disabled={z.id === gameState.zone || !opened}>
@@ -2683,30 +2851,44 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </Panel>
 {/if}
 
-{#if panel === 'save'}
-  <Panel title="Save" subtitle="local only" width="wide" gridArea={modalGridArea} onclose={closePanel}>
+{#if panel === 'save' || showcaseMode}
+  <Panel title="Save" subtitle="local only" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="save-panel">
     <div class="save-tabs" role="tablist" aria-label="Save sections">
       <button role="tab" class:active={saveTab === 'slots'} aria-selected={saveTab === 'slots'} onclick={() => (saveTab = 'slots')}>Slots</button>
       <button role="tab" class:active={saveTab === 'backups'} aria-selected={saveTab === 'backups'} onclick={() => { saveTab = 'backups'; loadSnaps(); }}>Backups</button>
       <button role="tab" class:active={saveTab === 'settings'} aria-selected={saveTab === 'settings'} onclick={() => (saveTab = 'settings')}>Settings</button>
     </div>
+    {#if showcaseMode}<p class="showcase-note">Save, load, backup, import, and export are disabled here. This page never reads or writes a player save.</p>{/if}
+    {#if !showcaseMode}
+      <div class="account-writer" class:owner={accountWriterState === 'owner'} role="status" aria-live="polite">
+        <p>{accountWriterMessage}</p>
+        {#if accountWriterState === 'readonly'}
+          <label>Reload after takeover
+            <select bind:value={takeoverSlot}>{#each saveSlots as slot}<option value={slot}>{slot}</option>{/each}</select>
+          </label>
+          <button type="button" onclick={takeOverAccount}>Take over and reload</button>
+        {:else if accountWriterState === 'waiting'}
+          <button type="button" onclick={cancelTakeover}>Cancel wait</button>
+        {/if}
+      </div>
+    {/if}
     {#if saveTab === 'slots'}
     <p>Three local character slots · away time catches up to {E.inventory.offline_cap_hr} hours.</p>
     <div class="save-actions">
     {#each saveSlots as slot}
-      <button onclick={() => doSave(slot)}>Save {slot}</button>
-      <button onclick={() => doLoad(slot)}>Load {slot}</button>
+      <button disabled={showcaseMode || !canWriteAccount} onclick={() => doSave(slot)}>Save {slot}</button>
+      <button disabled={showcaseMode || accountWriterState === 'checking' || accountWriterState === 'waiting' || accountWriterState === 'unsupported'} onclick={() => doLoad(slot)}>Load {slot}</button>
     {/each}
-    <button onclick={download}>Export JSON</button>
-    <label>Import <input type="file" accept="application/json" onchange={upload} /></label>
+    <button disabled={showcaseMode} onclick={download}>Export JSON</button>
+    <label>Import <input type="file" accept="application/json" disabled={showcaseMode || !canWriteAccount} onchange={upload} /></label>
     </div>
     {#if saveNote}<p class="save-note-inline" role="status">{saveNote}</p>{/if}
     {:else if saveTab === 'backups'}
     <h2>Backups · {SAVE_CFG.snapshot_slots} walking snapshots</h2>
     <p><small>Owed on a level up, on a successful Ascend or Refine, and every {SAVE_CFG.snapshot_interval_min} minutes of play. They guard a corrupt file, never a wrong decision: a restore takes the character back whole — stones, Reroll baselines and craft counts included — and the shared account record is rebuilt from the slots that survived.</small></p>
-    <label>Which slot <select bind:value={snapSlot} onchange={loadSnaps}>{#each saveSlots as s}<option value={s}>{s}</option>{/each}</select></label>
-    <button onclick={loadSnaps}>Show backups</button>
+    <label>Which slot <select bind:value={snapSlot} disabled={showcaseMode} onchange={loadSnaps}>{#each saveSlots as s}<option value={s}>{s}</option>{/each}</select></label>
+    <button disabled={showcaseMode} onclick={loadSnaps}>Show backups</button>
     <table>
       <thead><tr><th>#</th><th>Taken because</th><th>Then</th><th></th></tr></thead>
       <tbody>
@@ -2715,7 +2897,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             <td>{i + 1}</td>
             <td>{shot.reason}</td>
             <td>{Math.round(shot.clockSec / 60)} min of play · level {shot.state.player.level}</td>
-            <td><button onclick={() => restore(i)}>Rewind to this</button></td>
+            <td><button disabled={showcaseMode || !canWriteAccount} onclick={() => restore(i)}>Rewind to this</button></td>
           </tr>
         {:else}
           <tr><td colspan="4">Nothing stored yet.</td></tr>
@@ -2747,6 +2929,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 <style>
   button.active { border-color: var(--gold); color: var(--gold); }
 
+  :global(body.ui-showcase) { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+  .showcase-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--screen-pad); border-bottom: 1px solid var(--line);
+    background: linear-gradient(90deg, var(--panel), var(--bg));
+  }
+  .showcase-banner h1 { margin: 0; color: var(--gold); font-size: var(--font-md); }
+  .showcase-banner p { margin: var(--spacing-3xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .showcase-banner a { flex: none; padding: var(--spacing-2xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-xs); text-decoration: none; }
+  .showcase-index { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
+  .showcase-index a { padding: var(--spacing-3xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-xs); color: var(--dim); font-size: var(--font-xs); text-decoration: none; white-space: nowrap; }
+  .showcase-index a:hover, .showcase-index a:focus-visible { border-color: var(--gold); color: var(--gold-lit); }
+  .showcase-note { margin: 0 0 var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-xs); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
+
 
   .map-back {
     position: absolute; inset: 0; overflow: hidden; cursor: crosshair;
@@ -2761,7 +2957,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
     -webkit-mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
 
-    transition: opacity .22s ease;
+    transition: opacity var(--motion-ui) var(--ease-ui);
     touch-action: none;
 
     user-select: none; -webkit-user-select: none;
@@ -2769,7 +2965,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .map-back::after {
     content: '';
-    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    position: absolute; inset: 0; z-index: var(--z-underlay); pointer-events: none;
     background: radial-gradient(ellipse 76% 68% at 50% 48%, transparent 67%,
       color-mix(in srgb, var(--ground) 30%, transparent) 78%,
       color-mix(in srgb, var(--ground) 84%, transparent) 100%);
@@ -2778,7 +2974,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-sheet {
     position: absolute; inset: 0;
     transform-origin: 50% 46%;
-    transition: transform .18s ease;
+    transition: transform var(--motion-fast) var(--ease-ui);
 
     filter: blur(var(--dof)) brightness(var(--map-lift)) saturate(var(--map-sat));
 
@@ -2793,7 +2989,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .stage.mapmode .map-back { --dof: 0px; --map-lift: 1; --map-sat: 1; opacity: 1; cursor: grab; }
 
-  .map-back.dragging { cursor: grabbing; transition: opacity .22s ease, filter .22s ease; }
+  .map-back.dragging { cursor: grabbing; transition: opacity var(--motion-ui) var(--ease-ui), filter var(--motion-ui) var(--ease-ui); }
   .stage.mapmode .field { display: none; }
 
 
@@ -2802,34 +2998,34 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .stage.veiled { --dof: var(--dof-far); }
   .stage.veiled .field, .stage.veiled .tracker, .stage.veiled .actionbar, .stage.veiled .targetbar {
-    filter: blur(2.5px); opacity: .5; transition: filter .18s ease, opacity .18s ease;
+    filter: blur(2.5px); opacity: .5; transition: filter var(--motion-fast) var(--ease-ui), opacity var(--motion-fast) var(--ease-ui);
   }
   .stage.veiled .map-back { --dof: var(--dof-rest); }
 
   .map-tools { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs); width: 100%; padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--edge); font-size: var(--font-xs); }
   .map-reference { position: relative; display: flex; justify-content: flex-start; width: 100%; }
   .map-reference :global(.mini-map) { flex: none; }
-  .map-guide { position: relative; z-index: 2; display: grid; justify-items: start; gap: var(--spacing-xs); width: fit-content; padding: var(--spacing-xs); color: var(--text); background: var(--hud-face); border: 1px solid var(--hud-edge); border-radius: var(--spacing-sm); box-shadow: 0 6px 18px rgba(0, 0, 0, .55); backdrop-filter: blur(8px); }
-  .map-guide:not(.open) { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-3xs); padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; backdrop-filter: none; }
+  .map-guide { position: relative; z-index: var(--z-content); display: grid; justify-items: start; gap: var(--spacing-xs); width: fit-content; padding: var(--spacing-xs); color: var(--text); background: var(--hud-face); border: 1px solid var(--hud-edge); border-radius: var(--radius-sm); box-shadow: 0 6px 18px rgba(0, 0, 0, .55); backdrop-filter: blur(8px); }
+  .map-guide:not(.open) { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-3xs); padding: 0; background: none; border: 0; border-radius: var(--radius-sm); box-shadow: none; backdrop-filter: none; }
   .map-guide.open { width: clamp(188px, 14.52vw, 405px); }
   .map-hint { margin: 0; max-width: 100%; line-height: 1.3; }
-  .map-help-toggle { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-3xs); padding: 0; color: var(--dim); background: none; border: 0; border-radius: 0; font-size: var(--font-xs); }
+  .map-help-toggle { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-3xs); padding: 0; color: var(--dim); background: none; border: 0; border-radius: var(--radius-sm); font-size: var(--font-xs); }
   .map-help-toggle:hover { color: var(--text); }
   .map-views { display: flex; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-sm); width: 100%; }
   .map-views label, .map-tools label { display: inline-flex; align-items: center; gap: var(--spacing-2xs); white-space: nowrap; }
-  .map-level input[type=range] { width: var(--box-160); }
+  .map-level input[type=range] { width: clamp(100px, 7.74vw, 216px); }
 
   .map-zoom { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-2xs); width: 100%; }
   .map-zoom button { padding: var(--spacing-2xs) var(--spacing-xs); font-size: var(--font-xs); min-width: var(--icon-lg); line-height: 1.2; }
   .map-zoom b { font-family: var(--num); font-size: var(--font-xs); font-weight: 500; color: var(--dim); min-width: var(--icon-lg); text-align: center; }
   .map-legend { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); }
   .map-legend .swatch { display: inline-flex; align-items: center; gap: var(--spacing-2xs); }
-  .map-legend .swatch i { width: var(--icon-xs); height: var(--icon-xs); border: 1px solid var(--line); border-radius: 2px; }
-  .map-legend .ramp i { width: var(--box-100); }
+  .map-legend .swatch i { width: var(--icon-xs); height: var(--icon-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .map-legend .ramp i { width: clamp(63px, 4.84vw, 135px); }
 
   .mapcard {
     position: fixed; left: 50%; bottom: clamp(58px, 4.45vw, 124px); transform: translateX(-50%);
-    width: min(var(--box-560), 52%); z-index: 4;
+    width: min(clamp(350px, 27.11vw, 756px), 52%); z-index: var(--z-highlight);
   }
   .picklist tr { cursor: pointer; }
   .picklist tr.picked { background: var(--panel); }
@@ -2851,27 +3047,29 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       radial-gradient(95% 70% at 50% -12%, color-mix(in srgb, var(--glow-dusk) 32%, transparent), transparent 64%),
       linear-gradient(180deg, var(--ground) 0%, var(--ground-2) 45%, var(--ground-3) 100%);
   }
+  .stage.showcase { position: relative; inset: auto; width: 100%; height: clamp(720px, 56.25vw, 1200px); margin-inline: auto; }
+  .stage.showcase .mapcard { position: absolute; }
 
   .stage::after {
-    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    content: ''; position: absolute; inset: 0; z-index: var(--z-underlay); pointer-events: none;
     background: radial-gradient(115% 95% at 50% 48%, transparent 52%, rgba(0, 0, 0, .55));
   }
-  .tracker, .field { z-index: 2; }
+  .tracker, .field { z-index: var(--z-content); }
 
   .stage:has(.toast) .field { grid-row-start: 5; }
   .stage:not(:has(.toast)) .save-note { top: var(--band-toast); }
 
   .toast {
-    position: absolute; top: var(--band-toast); left: 50%; transform: translateX(-50%); z-index: 6;
-    display: flex; flex-wrap: wrap; gap: var(--spacing-2xs) var(--spacing-sm); align-items: baseline; max-width: min(var(--box-920), 62%);
-    border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent); border-radius: 10px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs);
+    position: absolute; top: var(--band-toast); left: 50%; transform: translateX(-50%); z-index: var(--z-floater);
+    display: flex; flex-wrap: wrap; gap: var(--spacing-2xs) var(--spacing-sm); align-items: baseline; max-width: min(clamp(575px, 44.53vw, 1242px), 62%);
+    border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent); border-radius: var(--radius-sm); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs);
     background: var(--glass); box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
   }
   .toast .quit { background: none; border: none; padding: 0; color: var(--dim); }
 
 
   .dock {
-    z-index: 3;
+    z-index: var(--z-effect);
     display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-xs);
     pointer-events: none;
   }
@@ -2887,14 +3085,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     pointer-events: auto; flex: 0 1 auto; align-self: stretch; min-height: 0; max-height: clamp(320px, 42vw, 900px);
     position: relative;
     display: flex; flex-direction: column;
-    border: 1px solid var(--hud-edge); border-radius: clamp(8px, 0.58vw, 14px);
+    border: 1px solid var(--hud-edge); border-radius: var(--radius-sm);
     background: var(--hud-face);
     box-shadow: 0 14px 40px rgba(0, 0, 0, .6); backdrop-filter: blur(8px);
     animation: pop .14s ease-out;
   }
   .pop > header {
     display: flex; align-items: baseline; gap: var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-xs);
-    border-bottom: 1px solid color-mix(in srgb, var(--gold) 26%, var(--edge)); border-radius: clamp(8px, 0.58vw, 14px) clamp(8px, 0.58vw, 14px) 0 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--gold) 26%, var(--edge)); border-radius: var(--radius-sm);
     background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 14%, transparent), transparent);
   }
   .pop > header h3 { margin: 0; flex: none; color: var(--gold); font-size: var(--font-xs); letter-spacing: clamp(2px, 0.10vw, 3px); text-transform: uppercase; }
@@ -2909,25 +3107,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 
   .pill {
-    display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-2xs) var(--spacing-sm); border-radius: 999px;
+    display: inline-flex; align-items: center; gap: var(--spacing-2xs); padding: var(--spacing-2xs) var(--spacing-sm); border-radius: var(--radius-round);
     background: var(--glass); border: 1px solid var(--edge); font-size: var(--font-xs);
     font-variant-numeric: tabular-nums; backdrop-filter: blur(6px);
   }
   .pill.note { color: var(--good); }
 
   .save-note {
-    position: absolute; top: var(--band-note); left: 50%; transform: translateX(-50%); z-index: 7;
-    max-width: min(var(--box-680), 86%);
+    position: absolute; top: var(--band-note); left: 50%; transform: translateX(-50%); z-index: var(--z-label);
+    max-width: min(clamp(425px, 32.91vw, 918px), 86%);
   }
 
 
   .tracker {
 
-    width: var(--objectives-w); pointer-events: auto; z-index: 2;
+    width: var(--objectives-w); pointer-events: auto; z-index: var(--z-content);
     display: grid; gap: var(--spacing-2xs); align-content: start; justify-items: stretch;
   }
   .tracker > * {
-    margin: 0; padding: var(--spacing-2xs) var(--spacing-xs); border-radius: clamp(5px, 0.39vw, 11px); font-size: var(--font-xs);
+    margin: 0; padding: var(--spacing-2xs) var(--spacing-xs); border-radius: var(--radius-sm); font-size: var(--font-xs);
     background: linear-gradient(90deg, rgba(0, 0, 0, .66), rgba(0, 0, 0, .38) 78%, transparent);
   }
   .tracker .phase {
@@ -2937,8 +3135,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .hunger-read { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-3xs) var(--spacing-xs); color: var(--dim); }
   .hunger-read b { color: var(--gold-lit); font-family: var(--num); font-weight: 600; }
-  .hunger-read i { grid-column: 1 / -1; display: block; height: 3px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--text) 16%, transparent); }
-  .hunger-read i em { display: block; height: 100%; background: var(--gold); transition: width .25s ease; }
+  .hunger-read i { grid-column: 1 / -1; display: block; height: 3px; overflow: hidden; border-radius: var(--radius-round); background: color-mix(in srgb, var(--text) 16%, transparent); }
+  .hunger-read i em { display: block; width: 100%; height: 100%; transform: scaleX(var(--fill)); transform-origin: left center; background: var(--gold); transition: transform var(--motion-ui) var(--ease-ui); }
   .hunger-read.empty b { color: var(--alarm); }
   .hunger-read.empty i em { background: var(--alarm); }
   .tracker .phase, .tracker .objective, .tracker .alarm-line {
@@ -2977,7 +3175,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .actionbar {
 
-    z-index: 4;
+    z-index: var(--z-highlight);
     display: flex; justify-content: center;
 
 
@@ -2985,7 +3183,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     --slot-edge: rgba(255, 255, 255, .5);
   }
   .action-cluster { display: flex; align-items: flex-end; gap: var(--spacing-md); }
-  .vital-stack { display: flex; flex: none; flex-direction: column; align-items: center; gap: var(--spacing-xs); width: var(--box-160); container-type: inline-size; }
+  .vital-stack { --orb-size: clamp(100px, 7.74vw, 216px); display: flex; flex: none; flex-direction: column; align-items: center; gap: var(--spacing-xs); width: var(--orb-size); container-type: inline-size; }
   .orb-readout { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-3xs); width: 100%; color: var(--text); font-family: var(--ui); font-size: clamp(var(--font-xs), 8cqw, var(--font-sm)); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); white-space: nowrap; }
   .orb-readout > span { max-width: 100%; overflow: hidden; }
   .orb-readout strong { font-weight: inherit; }
@@ -2993,29 +3191,29 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .orb-reserved { color: var(--dim); }
 
   .vital-orb {
-    position: relative; flex: none; width: var(--box-160); height: var(--box-160); padding: var(--spacing-xs);
-    isolation: isolate; border-radius: 50%; background: var(--face-floor); container-type: inline-size;
+    position: relative; flex: none; width: var(--orb-size); height: var(--orb-size); padding: var(--spacing-xs);
+    isolation: isolate; border-radius: var(--radius-round); background: var(--face-floor); container-type: inline-size;
     box-shadow: 0 4px 14px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .12);
   }
   .vital-orb::after {
-    content: ''; position: absolute; inset: 0; z-index: 6; pointer-events: none;
-    background: url('./assets/orb-skin.png') center / contain no-repeat;
+    content: ''; position: absolute; inset: 0; z-index: var(--z-floater); pointer-events: none;
+    background: url('./assets/orb-skin.webp') center / contain no-repeat;
     -webkit-mask: radial-gradient(circle, transparent 0 58%, var(--text) 70%);
             mask: radial-gradient(circle, transparent 0 58%, var(--text) 70%);
     filter: brightness(1.2) contrast(1.1);
   }
   .orb-well {
-    position: absolute; inset: var(--spacing-xs); overflow: hidden; border-radius: 50%;
+    position: absolute; inset: var(--spacing-xs); overflow: hidden; border-radius: var(--radius-round);
     background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, .09), transparent 34%), var(--face-floor);
     box-shadow: inset 0 2px 8px rgba(0, 0, 0, .8);
   }
   .orb-well::before {
-    content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-    background: url('./assets/orb-skin.png') center / cover no-repeat;
+    content: ''; position: absolute; inset: 0; z-index: var(--z-content); pointer-events: none;
+    background: url('./assets/orb-skin.webp') center / cover no-repeat;
     mix-blend-mode: soft-light; opacity: .8;
   }
   .life-orb .orb-well::after {
-    content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    content: ''; position: absolute; inset: 0; z-index: var(--z-effect); pointer-events: none;
     background: linear-gradient(180deg, color-mix(in srgb, var(--es-lit) 78%, transparent), transparent 5%),
                 radial-gradient(circle at 35% 20%, color-mix(in srgb, var(--es-lit) 75%, transparent), transparent 66%),
                 linear-gradient(145deg, color-mix(in srgb, var(--es) 65%, var(--mana)),
@@ -3024,16 +3222,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     opacity: .42; transform: scaleY(var(--shield-strength)); transform-origin: bottom;
   }
   .mana-orb.reserved .orb-well::after {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; z-index: 3; pointer-events: none;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; z-index: var(--z-effect); pointer-events: none;
     height: var(--reserved); border-bottom: 1px solid color-mix(in srgb, var(--mana-lit) 35%, var(--edge));
     background: linear-gradient(180deg, color-mix(in srgb, var(--face-floor) 92%, var(--dim)),
                                           color-mix(in srgb, var(--face-floor) 70%, var(--mana)));
     opacity: .94;
   }
   .orb-fill {
-    position: absolute; inset: 0; z-index: 1; overflow: hidden;
+    position: absolute; inset: 0; z-index: var(--z-underlay); overflow: hidden;
     transform: translateY(calc((1 - var(--fill)) * 100%));
-    transition: transform .25s ease-out;
+    transition: transform .3s ease-out;
     --liquid-light: var(--hp-lit);
     background: radial-gradient(ellipse at 35% 15%, color-mix(in srgb, var(--hp-lit) 25%, var(--hp)), transparent 64%),
                 linear-gradient(180deg, color-mix(in srgb, var(--hp) 70%, var(--bg)), color-mix(in srgb, var(--hp) 35%, var(--bg)));
@@ -3073,7 +3271,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     .orb-fill::before, .orb-fill::after { animation: none; }
   }
   .orb-gloss {
-    position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    position: absolute; inset: 0; z-index: var(--z-highlight); pointer-events: none;
     background: radial-gradient(ellipse at 36% 18%, rgba(255, 255, 255, .18), transparent 32%),
                 linear-gradient(145deg, rgba(255, 255, 255, .06), transparent 45% 65%, rgba(0, 0, 0, .36));
   }
@@ -3085,14 +3283,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .cast {
     position: relative; width: var(--slot-skill-size); height: var(--slot-skill-size);
-    border-radius: 50%; display: grid; place-items: center;
+    border-radius: var(--radius-round); display: grid; place-items: center;
     background:
       radial-gradient(circle at 50% 28%, rgba(255, 255, 255, .1), transparent 56%),
       linear-gradient(180deg, var(--orb-top), var(--orb-floor));
     border: 1px solid rgba(255, 255, 255, .2); backdrop-filter: blur(6px);
 
     box-shadow: 0 0 0 1px rgba(0, 0, 0, .65), 0 3px 10px rgba(0, 0, 0, .5), inset 0 2px 4px rgba(255, 255, 255, .07), inset 0 -6px 12px rgba(0, 0, 0, .5);
-    transition: border-color .15s ease, box-shadow .15s ease;
+    transition: border-color var(--motion-fast) var(--ease-ui), box-shadow var(--motion-fast) var(--ease-ui);
   }
   .cast img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
 
@@ -3103,13 +3301,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .cast.gated { border-style: dashed; border-color: rgba(255, 255, 255, .45); }
   .cast.filler { border-color: rgba(255, 255, 255, .18); }
   .cast small {
-    position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%;
+    position: absolute; inset: 0; display: grid; place-items: center; border-radius: var(--radius-round);
     background: none; font-size: max(var(--font-xs), calc(var(--slot-skill-size) * .3)); color: var(--gold-lit);
     font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
   }
 
   .cast .sweep {
-    position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+    position: absolute; inset: 0; border-radius: var(--radius-round); pointer-events: none;
     background: conic-gradient(from -90deg, transparent 0 var(--skill-cooldown-progress), rgba(6, 8, 11, .66) var(--skill-cooldown-progress) 100%);
     transition: --skill-cooldown-progress var(--cooldown-step, 0ms) linear;
   }
@@ -3119,75 +3317,74 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 
   .controls-dock {
-    z-index: 5;
+    z-index: var(--z-control);
     display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-end;
     gap: var(--spacing-xs); padding: var(--spacing-2xs);
-    background: none; border: 0; border-radius: 0; box-shadow: none;
+    background: none; border: 0; border-radius: var(--radius-sm); box-shadow: none;
   }
   .control-tab { min-width: var(--icon-lg); }
   .toggle-ring {
     position: relative; isolation: isolate; flex: none; display: grid; place-items: center;
     width: var(--icon-hub); height: var(--icon-hub); padding: var(--spacing-3xs);
-    border: 1px solid var(--hud-edge); border-radius: 50%; background: var(--hud-face); box-sizing: border-box;
+    border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box;
   }
   .toggle-ring > img, .toggle-ring > svg {
-    position: relative; z-index: 1;
+    position: relative; z-index: var(--z-underlay);
     width: var(--icon-hub-img); height: var(--icon-hub-img); aspect-ratio: 1 / 1;
-    padding: 0; border: 0; border-radius: 0; background: none; box-sizing: border-box;
+    padding: 0; border: 0; border-radius: var(--radius-sm); background: none; box-sizing: border-box;
     object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9));
   }
   .toggle-ring > svg { fill: none; stroke: currentColor; stroke-width: 1.5; }
-  .toggle-ring.here { border-color: color-mix(in srgb, var(--gold) 65%, var(--hud-edge)); background: color-mix(in srgb, var(--gold) 12%, var(--hud-face)); }
+  .toggle-ring.here { border-color: color-mix(in srgb, var(--gold) 65%, var(--hud-edge)); background: var(--hud-face); }
   .toggle-ring.here::before, .toggle-ring.here::after {
-    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    content: ''; position: absolute; inset: 0; border-radius: var(--radius-round);
     pointer-events: none; animation: auto-border-light 1.3s linear infinite;
   }
   .toggle-ring.here::before {
-    inset: calc(var(--spacing-xs) * -1); z-index: 2;
+    inset: calc(var(--spacing-xs) * -1); z-index: var(--z-content);
     background: conic-gradient(transparent 0deg 240deg, color-mix(in srgb, var(--gold) 26%, transparent) 262deg, color-mix(in srgb, var(--gold-lit) 58%, transparent) 295deg, transparent 332deg);
     mask: radial-gradient(circle closest-side, transparent 70%, #000 80%, transparent 90%);
     filter: drop-shadow(0 0 var(--spacing-sm) color-mix(in srgb, var(--gold) 72%, transparent));
   }
   .toggle-ring.here::after {
-    inset: calc(var(--spacing-3xs) * -1); z-index: 3;
+    inset: calc(var(--spacing-3xs) * -1); z-index: var(--z-effect);
     background: conic-gradient(transparent 0deg 270deg, color-mix(in srgb, var(--gold-lit) 55%, transparent) 292deg, #fff 309deg, var(--gold-lit) 318deg, transparent 337deg);
     mask: radial-gradient(circle closest-side, transparent 82%, #000 90%, transparent 100%);
     filter: drop-shadow(0 0 var(--spacing-xs) var(--gold-lit));
   }
-  .control-icon { transition: transform .15s ease; }
+  .control-icon { transition: transform var(--motion-fast) var(--ease-ui); }
   .control-icon > svg { stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .control-tab:hover .control-icon { transform: translateY(-1px); }
   .speed-menu { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-3xs); color: var(--dim); }
   .speed-menu .cap { font-size: var(--font-xs); line-height: 1; text-transform: capitalize; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); }
   .speed-options { display: flex; align-items: center; gap: var(--spacing-3xs); }
-  .speed-orb { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; transition: color .15s ease; }
+  .speed-orb { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; transition: color var(--motion-fast) var(--ease-ui); }
   .speed-orb:hover { color: var(--text); }
   .speed-orb.here { color: var(--gold-lit); }
   .speed-orb:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   @keyframes auto-border-light { to { transform: rotate(1turn); } }
   @media (prefers-reduced-motion: reduce) {
-    .toggle-ring.here::before, .toggle-ring.here::after { animation: none; }
+    .toggle-ring.here::before, .toggle-ring.here::after { animation: none !important; }
   }
   .field-feed {
-    z-index: 5;
+    z-index: var(--z-control);
     display: flex; align-items: flex-end; gap: var(--spacing-xs);
     pointer-events: none;
   }
 
   .topright {
-    z-index: 40;
+    z-index: var(--z-hud-control);
     display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs);
     pointer-events: none;
   }
   .topright > * { pointer-events: auto; }
   .toprow { display: flex; gap: var(--spacing-xs); align-items: center; }
   .field-auto-actions {
-    position: absolute; top: 50%; right: var(--screen-pad); z-index: 35;
+    z-index: var(--z-travel);
     display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs);
-    transform: translateY(-50%);
   }
   .field-travel-actions {
-    grid-area: travel; z-index: 35; width: fit-content; min-width: 0;
+    grid-area: travel; z-index: var(--z-travel); width: fit-content; min-width: 0;
     display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs);
     pointer-events: none;
   }
@@ -3196,10 +3393,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .zone-tag {
     margin: 0; align-self: stretch; display: flex; align-items: center; gap: var(--spacing-2xs); min-width: 0;
-    padding: var(--spacing-2xs) var(--spacing-xs); border-radius: var(--spacing-sm);
+    padding: var(--spacing-2xs) var(--spacing-xs); border-radius: var(--radius-sm);
     background: var(--hud-face);
     border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--edge));
-    box-shadow: 0 4px 14px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, .06);
     color: var(--text);
   }
   .zone-emblem { flex: none; width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; opacity: .9; }
@@ -3211,13 +3408,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .travel-actions { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: var(--spacing-2xs); }
   .travel-action {
     display: flex; flex-direction: column; align-items: center; justify-content: center; width: fit-content; gap: var(--spacing-3xs); min-width: 0;
-    padding: var(--spacing-3xs) var(--spacing-xs); border: 0; border-radius: 0;
+    padding: var(--spacing-3xs) var(--spacing-xs); border: 0; border-radius: var(--radius-sm);
     background: none; color: var(--dim); font-size: var(--font-xs); white-space: nowrap;
-    transition: color .15s ease;
+    transition: color var(--motion-fast) var(--ease-ui);
   }
   .travel-action:hover { color: var(--text); }
   .travel-action.here { color: var(--gold-lit); }
-  .zone-emblem { padding: var(--spacing-3xs); border: 1px solid var(--hud-edge); border-radius: 50%; background: var(--hud-face); box-sizing: border-box; }
+  .zone-emblem { padding: var(--spacing-3xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box; }
   .tab:hover .toggle-ring, .moreitem:hover .toggle-ring, .travel-action:hover .toggle-ring, .map-help-toggle:hover .toggle-ring { border-color: var(--gold); }
   .tab:focus-visible, .moreitem:focus-visible, .travel-action:focus-visible, .map-help-toggle:focus-visible { outline: none; }
   .tab:focus-visible .toggle-ring, .moreitem:focus-visible .toggle-ring, .travel-action:focus-visible .toggle-ring, .map-help-toggle:focus-visible .toggle-ring {
@@ -3226,7 +3423,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 
   .targetbar {
-    z-index: 2;
+    z-index: var(--z-content);
     display: grid; justify-items: center; gap: var(--spacing-2xs);
     pointer-events: none; text-align: center;
   }
@@ -3234,7 +3431,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .target-name {
     display: inline-flex; align-items: center; gap: var(--spacing-xs);
     text-transform: uppercase; letter-spacing: clamp(1px, 0.05vw, 2px);
-    padding: var(--spacing-3xs) var(--spacing-sm); border-radius: clamp(6px, 0.48vw, 12px);
+    padding: var(--spacing-3xs) var(--spacing-sm); border-radius: var(--radius-sm);
     background: var(--hud-face);
     border: 1px solid color-mix(in srgb, var(--gold) 42%, var(--edge));
     box-shadow: 0 2px 10px rgba(0, 0, 0, .5);
@@ -3253,7 +3450,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     background-image: linear-gradient(90deg, var(--hp), var(--hp-lit) 55%, var(--hot));
     box-shadow: 0 0 12px color-mix(in srgb, var(--hot) 55%, transparent);
     transform: scaleX(var(--fill)); transform-origin: left center;
-    transition: transform .65s cubic-bezier(.2, .8, .2, 1);
+    transition: transform var(--motion-travel) var(--ease-glide);
   }
 
   .target-hp::after {
@@ -3268,27 +3465,27 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 
   .rail {
-    z-index: 70;
+    z-index: var(--z-navigation);
     display: flex; flex-direction: row; flex-wrap: nowrap; align-items: stretch; justify-content: flex-end; gap: var(--spacing-sm);
     padding: var(--spacing-xs);
   }
   .purse { display: inline-flex; align-items: center; gap: var(--spacing-2xs); flex: none; font-variant-numeric: tabular-nums; }
-  .purse img { width: var(--icon-sm); height: var(--icon-sm); padding: var(--spacing-3xs); border: 1px solid var(--hud-edge); border-radius: 50%; background: var(--hud-face); box-sizing: border-box; object-fit: contain; }
+  .purse img { width: var(--icon-sm); height: var(--icon-sm); padding: var(--spacing-3xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box; object-fit: contain; }
   .purse b { font-size: var(--font-sm); font-weight: 700; color: var(--gold-lit); line-height: 1; }
   .purse i { font-size: var(--font-xs); font-style: normal; color: var(--dim); line-height: 1; text-transform: uppercase; letter-spacing: 1px; }
   .tab {
     position: relative; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-3xs);
     min-width: var(--icon-lg); padding: var(--spacing-3xs) var(--spacing-xs);
-    border: 0; border-radius: 0; background: none; color: var(--dim);
-    transition: color .15s ease;
+    border: 0; border-radius: var(--radius-sm); background: none; color: var(--dim);
+    transition: color var(--motion-fast) var(--ease-ui);
   }
-  .tab img { object-fit: contain; opacity: .82; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9)); transition: transform .15s ease; }
+  .tab img { object-fit: contain; opacity: .82; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9)); transition: transform var(--motion-fast) var(--ease-ui); }
   .tab:hover img { transform: translateY(-1px); opacity: 1; }
   .tab .cap { font-size: var(--font-xs); line-height: 1; text-transform: capitalize; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); }
   .tab .count {
     position: absolute; top: 0; right: 0; min-width: var(--icon-xs); padding: 0 var(--spacing-2xs);
-    border-radius: 999px; background: linear-gradient(180deg, var(--hot), var(--hot-deep)); border: 1px solid rgba(0, 0, 0, .45);
-    color: #fff; font-size: var(--font-xs); font-variant-numeric: tabular-nums; text-align: center;
+    border-radius: var(--radius-round); background: linear-gradient(180deg, var(--hot), var(--hot-deep)); border: 1px solid rgba(0, 0, 0, .45);
+    color: var(--text); font-size: var(--font-xs); font-variant-numeric: tabular-nums; text-align: center;
   }
   .tab:hover { color: var(--text); }
   .tab.here { color: var(--gold-lit); }
@@ -3301,17 +3498,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     display: grid; grid-template-columns: repeat(3, minmax(var(--icon-lg), 1fr)); gap: var(--spacing-sm);
     padding: var(--spacing-xs);
     background: var(--glass); backdrop-filter: blur(6px);
-    border: 1px solid var(--edge); border-radius: var(--spacing-sm);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+    border: 1px solid var(--edge); border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-soft);
   }
   .moreitem {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-3xs);
-    min-width: var(--icon-lg); padding: var(--spacing-3xs) var(--spacing-xs); border: 0; border-radius: 0;
+    min-width: var(--icon-lg); padding: var(--spacing-3xs) var(--spacing-xs); border: 0; border-radius: var(--radius-sm);
     background: none; color: var(--dim);
     font-size: var(--font-xs); line-height: 1; text-transform: capitalize; text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
-    transition: color .15s ease;
+    transition: color var(--motion-fast) var(--ease-ui);
   }
-  .moreitem img, .moreitem svg { object-fit: contain; opacity: .82; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9)); transition: transform .15s ease, opacity .15s ease; }
+  .moreitem img, .moreitem svg { object-fit: contain; opacity: .82; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9)); transition: transform var(--motion-fast) var(--ease-ui), opacity var(--motion-fast) var(--ease-ui); }
   .moreitem:hover img, .moreitem:hover svg { transform: translateY(-1px); opacity: 1; }
   .moreitem svg { fill: none; stroke: currentColor; stroke-width: 1.5; }
   .moreitem:hover { color: var(--text); }
@@ -3325,7 +3522,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 
   .sides { display: flex; gap: var(--spacing-2xs); margin-bottom: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
-  .sides button { border-radius: 999px; font-size: var(--font-xs); padding: var(--spacing-2xs) var(--spacing-sm); }
+  .sides button { border-radius: var(--radius-sm); font-size: var(--font-xs); padding: var(--spacing-2xs) var(--spacing-sm); }
   .sides button.active { border-color: var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); }
   .sides button:disabled:hover { border-color: var(--line); color: var(--text); }
 
@@ -3337,23 +3534,28 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .sheet-tools { display: flex; justify-content: flex-end; margin-bottom: var(--spacing-sm); }
   .sheet-layout {
     flex: 1; min-height: 0; display: grid;
-    grid-template-columns: minmax(var(--box-300), .72fr) minmax(0, 1.8fr);
+    grid-template-columns: minmax(clamp(188px, 14.52vw, 405px), .72fr) minmax(0, 1.8fr);
     gap: var(--spacing-md); overflow: hidden;
   }
   .sheet-doll { min-width: 0; border-right: 1px solid var(--line); padding-right: var(--spacing-md); }
   .sheet-doll h3 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); margin: 0 0 var(--spacing-sm); font-size: var(--font-sm); }
   .sheet-doll h3 span { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
-  .sheet-values { --sheet-font-size: clamp(10px, 0.72vw, 20px); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--box-320)), 1fr)); gap: var(--spacing-md); align-content: start; min-height: 0; height: 100%; overflow: auto; }
+  .sheet-values {
+    --sheet-font-size: clamp(11px, 0.72vw, 20px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(200px, 15.49vw, 432px)), 1fr));
+    gap: var(--spacing-md); align-content: start; min-height: 0; height: 100%; overflow: auto;
+  }
   .sheet-value-column { display: flex; flex-direction: column; gap: var(--spacing-md); min-width: 0; }
   .sheet-stat-group { min-width: 0; }
   .sheet-stat-group h3 { margin: 0 0 var(--spacing-2xs); color: var(--gold-lit); font-size: var(--font-sm); }
   .sheet-values .stats { width: 100%; border-collapse: collapse; }
-  .sheet-values .stats td { padding: var(--seam) var(--spacing-2xs); font-size: var(--sheet-font-size); line-height: 1.15; vertical-align: top; }
+  .sheet-values .stats td { padding: var(--spacing-3xs) var(--spacing-2xs); font-size: var(--sheet-font-size); line-height: 1.15; vertical-align: top; }
   .sheet-values .stats td:first-child { width: 40%; }
   .sheet-values .stats small { color: var(--dim); font-size: var(--sheet-font-size); }
   .sheet-gate { margin: 0; color: var(--dim); font-size: var(--sheet-font-size); }
-  .sheet-new-character { display: inline-flex; align-items: center; gap: var(--spacing-2xs); margin-left: auto; padding: var(--spacing-2xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--spacing-2xs); background: color-mix(in srgb, var(--hot) 6%, var(--panel)); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; transition: border-color .15s ease, color .15s ease, background .15s ease; }
-  .sheet-new-character img { width: var(--icon-xs); height: var(--icon-xs); padding: 0; border: 0; border-radius: 0; background: none; object-fit: contain; }
+  .sheet-new-character { display: inline-flex; align-items: center; gap: var(--spacing-2xs); margin-left: auto; padding: var(--spacing-2xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-xs); background: color-mix(in srgb, var(--hot) 6%, var(--panel)); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; transition: border-color var(--motion-fast) var(--ease-ui), color var(--motion-fast) var(--ease-ui), background var(--motion-fast) var(--ease-ui); }
+  .sheet-new-character img { width: var(--icon-xs); height: var(--icon-xs); padding: 0; border: 0; background: none; object-fit: contain; }
   .sheet-new-character:hover { border-color: color-mix(in srgb, var(--hot) 58%, var(--edge)); background: color-mix(in srgb, var(--hot) 12%, var(--panel)); color: var(--alarm); }
 
   .bagtools .margin { display: inline-flex; align-items: center; gap: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); }
@@ -3361,11 +3563,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .bagtools .best { border-color: color-mix(in srgb, var(--good) 55%, transparent); color: var(--good-lit); background: color-mix(in srgb, var(--good) 10%, transparent); }
 
-  .bagshell { display: grid; grid-template-columns: minmax(var(--box-110), auto) 1fr; gap: var(--spacing-sm); align-items: start; }
+  .bagshell { display: grid; grid-template-columns: minmax(clamp(69px, 5.32vw, 149px), auto) 1fr; gap: var(--spacing-sm); align-items: start; }
   .bagcats { display: flex; flex-direction: column; gap: var(--spacing-3xs); }
   .bagcats button {
     display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs);
-    text-align: left; border-radius: 8px; border: 1px solid transparent; background: none;
+    text-align: left; border-radius: var(--radius-sm); border: 1px solid transparent; background: none;
     color: var(--dim); font-size: var(--font-xs); padding: var(--spacing-2xs) var(--spacing-sm);
   }
   .bagcats button b { color: var(--text); font-variant-numeric: tabular-nums; }
@@ -3373,7 +3575,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .bagmain { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
   .bagtools { display: flex; align-items: center; gap: var(--spacing-sm); flex-wrap: wrap; }
   .bagtools .grow { flex: 1; }
-  .bagsearch { min-width: var(--box-110); }
+  .bagsearch { min-width: clamp(69px, 5.32vw, 149px); }
   .bagtier { display: inline-flex; align-items: center; gap: var(--spacing-2xs); font-size: var(--font-xs); color: var(--dim); }
   .bagtools .best:hover { border-color: var(--good); }
   .equipnote { margin: var(--x-pull-note) 0 var(--spacing-sm); font-size: var(--font-xs); color: var(--good); }
@@ -3382,8 +3584,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .skill-label img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; flex: none; }
 
   .gate {
-    padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); color: var(--gold); cursor: pointer;
-    background: none; border: 1px dashed color-mix(in srgb, var(--gold) 50%, transparent); border-radius: 4px;
+    padding: var(--spacing-3xs) var(--spacing-xs); font-size: var(--font-xs); color: var(--gold); cursor: pointer;
+    background: none; border: 1px dashed color-mix(in srgb, var(--gold) 50%, transparent); border-radius: var(--radius-sm);
   }
   .gate:hover { border-style: solid; }
 
@@ -3391,9 +3593,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .gate-editor label { white-space: nowrap; }
   .gate-editor input[type='number'] { width: var(--icon-xl); }
   .bagblock + .bagblock { border-top: 1px solid var(--line); margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); }
-  .stats td { font-size: var(--font-xs); padding: var(--seam) var(--spacing-2xs); }
+  .stats td { font-size: var(--font-xs); padding: var(--spacing-3xs) var(--spacing-2xs); }
   .stats td:first-child { color: var(--dim); width: 45%; }
   .save-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; align-content: start; gap: var(--spacing-sm); }
+  .account-writer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); }
+  .account-writer.owner { border-color: color-mix(in srgb, var(--good) 48%, var(--line)); }
+  .account-writer p { flex: 1 1 clamp(150px, 11.62vw, 324px); min-width: 0; color: var(--dim); font-size: var(--font-xs); }
+  .account-writer.owner p { color: var(--good-lit); }
+  .account-writer label { display: inline-flex; align-items: center; gap: var(--spacing-2xs); color: var(--dim); font-size: var(--font-xs); }
+  .account-writer select, .account-writer button { font-size: var(--font-xs); border-radius: var(--radius-xs); }
   .save-tabs, .farm-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); flex: none; }
   .save-tabs button { padding: var(--spacing-3xs) var(--spacing-sm); font-size: var(--font-xs); }
   .save-tabs button.active { border-color: var(--gold); color: var(--gold); }
@@ -3409,7 +3617,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .desk-content { flex: 1; min-height: 0; overflow: hidden; }
   .desk-content > h3 { margin: var(--spacing-2xs) 0; font-size: var(--font-sm); }
   .desk-content > p { margin: var(--spacing-2xs) 0; font-size: var(--font-xs); }
-  .desk-content .picklist th, .desk-content .picklist td { padding: var(--seam) var(--spacing-3xs); line-height: 1.1; font-size: var(--font-xs); }
+  .desk-content .picklist th, .desk-content .picklist td { padding: var(--spacing-3xs) var(--spacing-3xs); line-height: 1.1; font-size: var(--font-xs); }
   .desk-content .picklist button { padding: var(--spacing-3xs) var(--spacing-2xs); font-size: var(--font-xs); }
   .skills-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .skill-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); flex: none; }
@@ -3419,13 +3627,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .skill-view { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .skill-view h3 { margin: var(--spacing-2xs) 0 0; }
   .skill-view table { width: 100%; }
-  .skill-view th, .skill-view td { padding: var(--seam) var(--spacing-3xs); line-height: 1.15; font-size: var(--font-xs); }
-  .skill-view select { max-width: 100%; padding: var(--seam) var(--spacing-2xs); font-size: var(--font-xs); }
+  .skill-view th, .skill-view td { padding: var(--spacing-3xs) var(--spacing-3xs); line-height: 1.15; font-size: var(--font-xs); }
+  .skill-view select { max-width: 100%; padding: var(--spacing-3xs) var(--spacing-2xs); font-size: var(--font-xs); }
   .skill-view .skill-label { gap: var(--spacing-3xs); }
   .skill-view .skill-label img { width: var(--icon-xs); height: var(--icon-xs); }
   .skill-view label { font-size: var(--font-xs); }
   .skill-view .prose { margin: 0; }
-  .skill-owned-grid, .skill-effect-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--box-180), 1fr)); gap: var(--spacing-2xs); align-content: start; }
+  .skill-owned-grid, .skill-effect-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(113px, 8.71vw, 243px), 1fr)); gap: var(--spacing-2xs); align-content: start; }
   .skill-owned-grid { flex: 1; min-height: 0; overflow: hidden; }
   .skill-owned { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-2xs); padding: var(--spacing-3xs) var(--spacing-xs); border: 1px solid var(--line); background: var(--inset); }
   .skill-owned .skill-label { min-width: 0; }
@@ -3460,7 +3668,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .warn { color: var(--alarm); }
 
   .townnote { margin: var(--spacing-xs) 0 0; font-size: var(--font-xs); color: var(--good); }
-  .mini { padding: var(--seam) var(--spacing-xs); font-size: var(--font-xs); }
 
   .aloud {
     position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
@@ -3473,43 +3680,43 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .pop :is(button, select, input, summary):focus-visible { outline-offset: 1px; }
 
 
-  .floaters { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
+  .floaters { position: absolute; inset: 0; pointer-events: none; z-index: var(--z-floater); }
   .float-side { position: absolute; display: flex; flex-direction: column-reverse; gap: var(--spacing-3xs); }
 
   .field-side { right: var(--screen-pad); bottom: calc(var(--controls-h) + var(--screen-pad) * 2); left: auto; transform: none; align-items: flex-end; }
 
-  .self-side { left: 50%; bottom: calc(100% + clamp(5px, 0.39vw, 11px)); transform: translateX(-50%); align-items: center; }
+  .self-side { left: 50%; bottom: calc(100% + var(--spacing-xs)); transform: translateX(-50%); align-items: center; }
   .fx {
     --lane: 0;
     font-family: var(--num);
     font-size: var(--font-sm);
     font-weight: 600;
     color: var(--fx, var(--text));
-    text-shadow: 0 1px 0 rgba(0, 0, 0, .85), 0 clamp(1px, 0.10vw, 3px) clamp(4px, 0.34vw, 9px) rgba(0, 0, 0, .7);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .85), 0 var(--spacing-3xs) clamp(4px, 0.34vw, 9px) rgba(0, 0, 0, .7);
     animation: fx-rise 1.5s cubic-bezier(.2, .6, .3, 1) forwards;
     white-space: nowrap;
   }
   .fx-hit { font-size: var(--font-md); -webkit-text-stroke: .45px currentColor; }
-  .fx-hit.crit { font-size: var(--font-lg); letter-spacing: clamp(0px, 0.00vw, 1px); -webkit-text-stroke-width: .8px; animation: fx-crit 1.9s cubic-bezier(.15, .8, .3, 1) forwards; }
+  .fx-hit.crit { font-size: var(--font-lg); -webkit-text-stroke-width: .8px; animation: fx-crit 1.9s cubic-bezier(.15, .8, .3, 1) forwards; }
   .fx-proc, .fx-block, .fx-kill, .fx-cast, .fx-travel, .fx-warp, .fx-sell, .fx-drop, .fx-craft, .fx-taken, .fx-buff {
     font-family: var(--ui);
     font-size: var(--font-xs);
     text-transform: uppercase;
     letter-spacing: clamp(1px, 0.05vw, 2px);
-    padding: var(--seam) var(--spacing-2xs);
+    padding: var(--spacing-3xs) var(--spacing-2xs);
     border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
-    border-radius: 999px;
+    border-radius: var(--radius-round);
     background: color-mix(in srgb, var(--fx, var(--panel)) 14%, transparent);
   }
-  .fx-proc { animation: fx-proc 1.25s ease-out forwards; }
+  .fx-proc { animation: fx-proc 1.3s ease-out forwards; }
   .fx-cast { animation: fx-cast 1.1s ease-out forwards; }
   .fx-travel, .fx-warp { animation: fx-drift 1.6s linear forwards; }
   .fx-kill { animation: fx-strike .7s ease-out forwards; }
   .fx-sell, .fx-craft { animation: fx-rise 1.5s ease-out forwards; }
 
   .cast .flare {
-    position: absolute; inset: -2px; z-index: 2; pointer-events: none;
-    border: 1px solid var(--fx, var(--text)); border-radius: inherit;
+    position: absolute; inset: -2px; z-index: var(--z-content); pointer-events: none;
+    border: 1px solid var(--fx, var(--text)); border-radius: var(--radius-round);
     animation: fx-flare .5s ease-out forwards;
   }
 
@@ -3539,7 +3746,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   .levelup {
-    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); left: 50%; z-index: 8; pointer-events: none;
+    position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); left: 50%; z-index: var(--z-toast); pointer-events: none;
     margin: 0; white-space: nowrap; font-family: var(--num); font-size: var(--font-md); letter-spacing: clamp(2px, 0.10vw, 3px);
     color: var(--fx, var(--gold)); text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
     animation: fx-level 1.5s cubic-bezier(.2, .7, .3, 1) forwards;
@@ -3550,7 +3757,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     100% { opacity: 0; transform: scale(1); }
   }
   @keyframes fx-buff {
-    0% { opacity: 0; transform: scale(.6) translateY(clamp(5px, 0.39vw, 11px)); }
+    0% { opacity: 0; transform: scale(.6) translateY(var(--spacing-xs)); }
     25% { opacity: 1; transform: scale(1.08); }
     100% { opacity: 0; transform: translateY(clamp(-49px, -1.74vw, -22px)) scale(1); }
   }
@@ -3587,14 +3794,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     100% { opacity: 0; transform: translateY(clamp(-38px, -1.36vw, -18px)); }
   }
   @keyframes fx-cast {
-    0% { opacity: 0; transform: translateY(clamp(5px, 0.39vw, 11px)) skewX(-8deg); }
+    0% { opacity: 0; transform: translateY(var(--spacing-xs)) skewX(-8deg); }
     25% { opacity: 1; }
     100% { opacity: 0; transform: translateY(clamp(-43px, -1.55vw, -20px)); }
   }
   @keyframes fx-drift {
     0% { opacity: 0; transform: translateX(var(--x-pull-burst)); }
     20% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(clamp(18px, 1.36vw, 38px)); }
+    100% { opacity: 0; transform: translateX(var(--spacing-lg)); }
   }
   @keyframes fx-strike {
     0% { opacity: 1; transform: scale(1.25); }
@@ -3603,7 +3810,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .veil {
     position: absolute; inset: 0; pointer-events: none;
-    box-shadow: inset 0 0 var(--box-100) color-mix(in srgb, var(--fx, var(--hp)) 50%, transparent);
+    box-shadow: inset 0 0 clamp(63px, 4.84vw, 135px) color-mix(in srgb, var(--fx, var(--hp)) 50%, transparent);
     animation: fx-veil .4s ease-out forwards;
   }
   @keyframes fx-veil {
@@ -3633,7 +3840,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .targetbar {
     grid-area: target;
-    width: min(var(--box-560), 100%);
+    width: min(clamp(350px, 27.11vw, 756px), 100%);
     min-width: 0;
     justify-self: stretch;
     align-items: center;
@@ -3664,6 +3871,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     align-self: stretch;
   }
   .dock .pop { width: 100%; max-width: 100%; max-height: 100%; flex: 1 1 auto; }
+  .field-auto-actions {
+    grid-area: automation;
+    width: fit-content;
+    min-width: 0;
+    max-width: 100%;
+    justify-self: end;
+    align-self: center;
+  }
   .actionbar {
     grid-area: actionbar;
     min-width: 0;
@@ -3698,7 +3913,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .hud-grid-debug {
     position: fixed;
     inset: 0;
-    z-index: 90;
+    z-index: var(--z-notice);
     display: grid;
     grid-template-columns: repeat(15, minmax(0, 1fr));
     grid-template-rows: repeat(15, minmax(0, 1fr));

@@ -14,7 +14,7 @@
   }));
   const TONES: Record<RegionId, string> = {
     objectives: 'var(--focus)', target: 'var(--hot)', menu: 'var(--gold)', field: 'var(--good-lit)',
-    travel: 'var(--focus)', panels: 'var(--gold-lit)', feed: 'var(--dim)',
+    travel: 'var(--focus)', panels: 'var(--gold-lit)', automation: 'var(--good-lit)', feed: 'var(--dim)',
     actionbar: 'var(--mana-lit)', controls: 'var(--hp-lit)', panel: 'var(--gold)',
   };
   const ALIGNMENTS: [GridAlign, string][] = [
@@ -42,6 +42,9 @@
   const issue = $derived(layer === 'hud' ? validateHudLayout(hudDraft) : (validGridArea(modalDraft) ? null : 'Panel canvas goes outside the grid.'));
   const activeArea = $derived(layer === 'hud' ? hudDraft[selected as HudRegionId].area : modalDraft);
   const activeLabel = $derived(layer === 'hud' ? hudDraft[selected as HudRegionId].label : 'Main panel canvas');
+  const activeDescription = $derived(layer === 'hud'
+    ? HUD_REGION_META.find(({ id }) => id === selected)?.description ?? ''
+    : 'A shared position for every screen panel shown in the Showcase and game.');
 
   function regionAt(row: number, column: number): RegionId | null {
     if (layer === 'modal') {
@@ -60,7 +63,7 @@
 
   function shortLabel(id: RegionId): string {
     const labels: Record<RegionId, string> = {
-      objectives: 'MAP', target: 'MOB', menu: 'MENU', travel: 'TRAVEL', field: 'FIELD', panels: 'PANELS',
+      objectives: 'MAP', target: 'MOB', menu: 'MENU', travel: 'TRAVEL', field: 'FIELD', panels: 'PANELS', automation: 'AUTO',
       feed: 'LOG', actionbar: 'VITALS', controls: 'CTRL', panel: 'PANEL',
     };
     return labels[id];
@@ -205,7 +208,7 @@
     <div class="component-list">
       {#if layer === 'hud'}
         {#each HUD_REGION_META as region (region.id)}
-          <button class="component" class:selected={selected === region.id} draggable="true"
+            <button class="component" class:selected={selected === region.id} draggable="true" title={region.description}
                   ondragstart={(event) => dragStart(event, region.id)} onclick={() => chooseRegion(region.id)}>
             <i style={`--region-tone:${TONES[region.id]}`}></i><span>{region.label}</span>
           </button>
@@ -226,7 +229,7 @@
   <section class="layout-workspace" aria-label="15 by 15 layout canvas">
     <div class="canvas-heading">
       <h3>{layer === 'hud' ? 'HUD grid · 15×15' : 'Modal grid · 15×15'}</h3>
-      <span>Drag a component, or select it then click a cell.</span>
+      <span>Drag to move · select then click an empty cell.</span>
     </div>
     <div class="layout-grid" bind:this={gridEl} role="grid" aria-label="Layout cells"
          tabindex="-1" onkeydown={onGridKeydown}
@@ -260,7 +263,15 @@
 
   <aside class="layout-inspector" aria-label="Selected region">
     <h3>{activeLabel}</h3>
-    <p>Cell bounds use inclusive row and column coordinates.</p>
+    <p>{activeDescription}</p>
+    <p class="editor-help">
+      <strong>How to use:</strong>
+      {#if layer === 'hud'}
+        Select a group and click an empty cell, or drag it from the list. Change the inclusive row/column bounds to resize it; alignment positions its contents. Reset restores this layer's draft. Apply updates the HUD; in Showcase it changes the preview only.
+      {:else}
+        Set the shared panel bounds with the inclusive coordinates. Reset restores this layer's draft. Apply updates the game; in Showcase it changes the preview only.
+      {/if}
+    </p>
     <div class="coordinates">
       {#each [['rowStart', 'Row from'], ['rowEnd', 'Row to'], ['columnStart', 'Column from'], ['columnEnd', 'Column to']] as [key, label] (key)}
         <label>{label}
@@ -289,7 +300,7 @@
 <style>
   .layout-editor {
     display: grid;
-    grid-template-columns: minmax(var(--box-180), .75fr) minmax(0, 3fr) minmax(var(--box-200), .85fr);
+    grid-template-columns: minmax(clamp(113px, 8.71vw, 243px), .75fr) minmax(0, 3fr) minmax(clamp(125px, 9.68vw, 270px), .85fr);
     gap: var(--spacing-sm);
     flex: 1;
     min-width: 0;
@@ -313,25 +324,27 @@
   .editor-actions button, .apply { padding: var(--spacing-xs); font-size: var(--font-xs); }
   .layout-workspace { display: flex; flex-direction: column; justify-content: center; gap: var(--spacing-xs); }
   .canvas-heading { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); }
-  .canvas-heading span, .layout-inspector p { margin: 0; color: var(--dim); font-size: var(--font-xs); }
+  .canvas-heading span, .layout-inspector p { margin: 0; color: var(--dim); font-size: var(--font-xs); line-height: 1.35; }
+  .layout-inspector .editor-help { padding-top: var(--spacing-xs); border-top: 1px solid var(--edge); }
+  .layout-inspector .editor-help strong { color: var(--text); }
   .layout-grid {
     display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); grid-template-rows: repeat(15, minmax(0, 1fr));
     width: 100%; max-height: 100%; aspect-ratio: 16 / 9; align-self: center; min-height: 0; border: 1px solid var(--hud-edge); background: var(--bg);
   }
   .grid-cell {
     display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
-    min-width: 0; min-height: 0; padding: var(--spacing-3xs); border-radius: 0; border-top: 0; border-left: 0;
+    min-width: 0; min-height: 0; padding: var(--spacing-3xs); border-radius: var(--radius-sm); border-top: 0; border-left: 0;
     background: transparent; text-align: left; color: var(--dim);
   }
   .grid-cell small { font: var(--font-xs) / 1 var(--num); opacity: .7; }
   .region-caption {
-    display: grid; place-items: center; z-index: 2; pointer-events: none; overflow: hidden;
+    display: grid; place-items: center; z-index: var(--z-content); pointer-events: none; overflow: hidden;
     padding: var(--spacing-3xs); color: var(--region-tone); font-size: var(--font-xs); font-weight: 700;
     line-height: 1; letter-spacing: .02em; text-shadow: 0 1px 2px var(--bg);
   }
   .grid-cell.occupied { background: color-mix(in srgb, var(--region-tone) 14%, transparent); border-color: color-mix(in srgb, var(--region-tone) 55%, var(--line)); }
   .grid-cell.chosen { box-shadow: inset 0 0 0 1px var(--gold); background: color-mix(in srgb, var(--gold) 20%, var(--region-tone)); }
-  .grid-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; z-index: 1; }
+  .grid-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; z-index: var(--z-underlay); }
   .coordinates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); }
   .layout-inspector label { display: grid; gap: var(--spacing-3xs); color: var(--dim); font-size: var(--font-xs); }
   .layout-inspector select { min-width: 0; padding: var(--spacing-2xs); font-size: var(--font-xs); }

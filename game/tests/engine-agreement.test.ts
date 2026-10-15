@@ -18,6 +18,8 @@ describe('game and cages run one engine', () => {
     expect(eng.mobHpAt(100)).toBe(cage.mobHpAt(100));
     expect(eng.xpToNext(30)).toBe(cage.xpToNext(30));
     expect(eng.aspdOf(510, 1.2, 25)).toBe(cage.aspdOf(510, 1.2, 25));
+    expect(eng.racesInZone(16)).toEqual(cage.racesInZone(16));
+    expect(eng.zoneElements(16)).toEqual(cage.zoneElements(16));
   });
 
 });

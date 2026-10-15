@@ -1,4 +1,4 @@
-export type HudRegionId = 'objectives' | 'target' | 'menu' | 'travel' | 'field' | 'panels' | 'feed' | 'actionbar' | 'controls';
+export type HudRegionId = 'objectives' | 'target' | 'menu' | 'travel' | 'field' | 'panels' | 'automation' | 'feed' | 'actionbar' | 'controls';
 export type GridAlign = 'start' | 'center' | 'end' | 'stretch';
 
 export type GridArea = {
@@ -20,16 +20,17 @@ export type HudLayout = Record<HudRegionId, HudRegion>;
 
 export const HUD_LAYOUT_STORAGE_KEY = 'modworld.hud-layout.v1';
 
-export const HUD_REGION_META: Pick<HudRegion, 'id' | 'label'>[] = [
-  { id: 'objectives', label: 'Minimap & objectives' },
-  { id: 'target', label: 'Target bar' },
-  { id: 'menu', label: 'Menu rail' },
-  { id: 'travel', label: 'Travel controls' },
-  { id: 'field', label: 'Combat field' },
-  { id: 'panels', label: 'Field panels' },
-  { id: 'feed', label: 'Chronicle' },
-  { id: 'actionbar', label: 'Vitals, skills & EXP' },
-  { id: 'controls', label: 'Game controls' },
+export const HUD_REGION_META: { id: HudRegionId; label: string; description: string }[] = [
+  { id: 'objectives', label: 'Minimap & objectives', description: 'Minimap, current location, and objective summary.' },
+  { id: 'target', label: 'Target bar', description: 'Current enemy name and health bar.' },
+  { id: 'menu', label: 'Menu rail', description: 'Main screen navigation and the More menu.' },
+  { id: 'travel', label: 'Travel controls', description: 'Stay Here, Forward, and map tools when the map is open.' },
+  { id: 'field', label: 'Combat field', description: 'Live combat field, mob plates, and hit effects.' },
+  { id: 'panels', label: 'Field panels', description: 'Contextual overlays such as point allocation.' },
+  { id: 'automation', label: 'Field automation', description: 'Skill Settings, Auto Skills, Auto Equip, and Field Camp.' },
+  { id: 'feed', label: 'Chronicle', description: 'Combat, loot, and system feed with its filters.' },
+  { id: 'actionbar', label: 'Vitals, skills & EXP', description: 'Health and mana orbs, 14 skill slots, and the experience bar.' },
+  { id: 'controls', label: 'Game controls', description: 'Game speed and Pause/Resume controls.' },
 ];
 
 export const DEFAULT_HUD_LAYOUT: HudLayout = {
@@ -39,6 +40,7 @@ export const DEFAULT_HUD_LAYOUT: HudLayout = {
   travel: { id: 'travel', label: 'Travel controls', area: { rowStart: 7, rowEnd: 8, columnStart: 1, columnEnd: 1 }, justify: 'start', align: 'center' },
   field: { id: 'field', label: 'Combat field', area: { rowStart: 3, rowEnd: 11, columnStart: 4, columnEnd: 12 }, justify: 'stretch', align: 'stretch' },
   panels: { id: 'panels', label: 'Field panels', area: { rowStart: 2, rowEnd: 6, columnStart: 13, columnEnd: 15 }, justify: 'stretch', align: 'stretch' },
+  automation: { id: 'automation', label: 'Field automation', area: { rowStart: 7, rowEnd: 9, columnStart: 15, columnEnd: 15 }, justify: 'end', align: 'center' },
   feed: { id: 'feed', label: 'Chronicle', area: { rowStart: 11, rowEnd: 14, columnStart: 1, columnEnd: 2 }, justify: 'stretch', align: 'stretch' },
   actionbar: { id: 'actionbar', label: 'Vitals, skills & EXP', area: { rowStart: 12, rowEnd: 15, columnStart: 5, columnEnd: 11 }, justify: 'stretch', align: 'stretch' },
   controls: { id: 'controls', label: 'Game controls', area: { rowStart: 15, rowEnd: 15, columnStart: 12, columnEnd: 15 }, justify: 'end', align: 'stretch' },

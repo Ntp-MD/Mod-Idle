@@ -323,7 +323,7 @@
 
 <style>
 
-  .clear-field span{ font-size: var(--font-xs); letter-spacing: clamp(0px, 0.00vw, 1px); }
+  .clear-field span{ font-size: var(--font-xs); }
 
   /* The walking read: the shelf's own boot glyph split into single prints — `mask-size: 200%` puts one boot
      in each half, so a left foot and a right foot alternate down the stride and no second asset is needed.
@@ -334,7 +334,7 @@
      player loses nothing. The mark is a mask, so it contributes only its alpha — the icon shelf's own white
      never paints the field. */
   /* the tracker's zone switch is also called a travel read, so the stride keeps to the field it sits on */
-.travel{ position: relative; width: min(var(--box-300), 62%); height: var(--icon-xl); }
+.travel{ position: relative; width: min(clamp(188px, 14.52vw, 405px), 62%); height: var(--icon-xl); }
 
   .travel .print{
     position: absolute; width: var(--icon-lg); height: var(--icon-lg);
@@ -345,8 +345,8 @@
     background: color-mix(in srgb, var(--text) calc(var(--on) * 100%),
                 color-mix(in srgb, var(--dim) 42%, transparent));
     transform: rotate(-9deg);
-    -webkit-mask: url('./icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
-            mask: url('./icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
+    -webkit-mask: url('../icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
+            mask: url('../icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
   }
 
   /* the other foot: the glyph's far half, dropped half a step and turned the other way, so the two tracks
@@ -362,7 +362,7 @@
      drawn inside it. The shell above keeps the slot: size, place in the row and the reads pinned to it. */
   .mob .charge{
     --lunge: 1;
-    width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; padding: var(--spacing-sm); border-radius: var(--spacing-md);
+    width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; padding: var(--spacing-sm); border-radius: var(--radius-sm);
     background: color-mix(in srgb, var(--face-floor) 92%, transparent);
     border: 1px solid var(--edge); box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
   }
@@ -374,19 +374,19 @@
   .mob { position: relative; width: var(--card-w); aspect-ratio: 5 / 7; text-align: left; pointer-events: auto; }
 
   .self-plate {
-    position: absolute; left: 50%; bottom: var(--spacing-lg); z-index: 2;
+    position: absolute; left: 50%; bottom: var(--spacing-lg); z-index: var(--z-content);
     width: var(--card-w); aspect-ratio: 5 / 7; transform: translateX(-50%); text-align: left; pointer-events: none;
   }
   .self-body { position: relative; width: 100%; height: 100%; }
   .effect-rail {
-    position: absolute; top: 0; z-index: 6; display: flex; flex-direction: column; gap: var(--spacing-xs);
+    position: absolute; top: 0; z-index: var(--z-floater); display: flex; flex-direction: column; gap: var(--spacing-xs);
     pointer-events: none;
   }
   .effect-rail.buffs { right: calc(100% + var(--spacing-xs)); }
   .effect-rail.ailments { left: calc(100% + var(--spacing-xs)); }
   .effect-badge {
     position: relative; display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md);
-    border: 1px solid var(--edge); border-radius: 50%; background: var(--glass);
+    border: 1px solid var(--edge); border-radius: var(--radius-round); background: var(--glass);
     box-shadow: 0 2px 8px rgba(0, 0, 0, .6); pointer-events: auto;
   }
   .effect-badge.buff { border-color: color-mix(in srgb, var(--good-lit) 60%, var(--edge)); }
@@ -414,12 +414,12 @@
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .85));
   }
 
-  .mob.front .charge::before{ top: var(--x-pull-scale); left: var(--x-pull-scale); border-right: 0; border-bottom: 0; border-top-left-radius: 9px; }
+  .mob.front .charge::before{ top: var(--x-pull-scale); left: var(--x-pull-scale); border-right: 0; border-bottom: 0; border-top-left-radius: var(--radius-sm); }
 
-  .mob.front .charge::after{ bottom: var(--x-pull-scale); right: var(--x-pull-scale); border-left: 0; border-top: 0; border-bottom-right-radius: 9px; }
+  .mob.front .charge::after{ bottom: var(--x-pull-scale); right: var(--x-pull-scale); border-left: 0; border-top: 0; border-bottom-right-radius: var(--radius-sm); }
 
   .mob-head { display: grid; grid-template-columns: var(--icon-md) minmax(0, 1fr) var(--icon-md); align-items: start; gap: var(--spacing-2xs); width: 100%; min-width: 0; }
-  .race-mark, .innate-mark { display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md); border: 1px solid var(--hud-edge); border-radius: 50%; background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
+  .race-mark, .innate-mark { display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
   .race-mark img, .innate-mark img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .mob-head .identity { min-width: 0; }
 
@@ -436,12 +436,12 @@
 
   .mob-name { display: flex; align-items: center; justify-content: center; gap: var(--spacing-2xs); max-width: 100%; margin: 0; overflow-wrap: anywhere; font-size: var(--font-sm); font-weight: 600; line-height: 1.15; }
 
-  .mobbar { display: block; position: relative; width: 100%; height: var(--spacing-sm); margin: var(--spacing-3xs) 0; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .09); }
+  .mobbar { display: block; position: relative; width: 100%; height: max(var(--spacing-sm), var(--font-xs)); margin: var(--spacing-3xs) 0; border-radius: var(--radius-xs); overflow: hidden; background: rgba(255, 255, 255, .09); }
 
   /* the figure sits in the bar the way the dock's own gauges read: centred, tabular, stroked off the fill */
   .mobbar b {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    max-width: 100%; overflow: hidden; white-space: nowrap; font-size: var(--spacing-sm); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+    max-width: 100%; overflow: hidden; white-space: nowrap; font-size: var(--font-xs); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
     text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
   }
 
@@ -455,10 +455,10 @@
   .mobbar i {
     width: 100%; transform: scaleX(var(--fill)); transform-origin: left center;
     background-size: calc(100% / max(var(--w, 1), .001)) 100%;
-    transition: transform .65s cubic-bezier(.2, .8, .2, 1);
+    transition: transform var(--motion-travel) var(--ease-glide);
   }
 
-  .mobbar i{ display: block; height: 100%; border-radius: 999px; background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
+  .mobbar i{ display: block; height: 100%; border-radius: var(--radius-xs); background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
 
   .mob.elite .charge{ border-color: var(--elite); }
 
@@ -472,7 +472,7 @@
        The face is the hub's own avatar read — a round portrait on a dark plinth, the pools under it */
   .self-plate .cardface{
     height: 100%; min-height: 0; display: flex; flex-direction: column;
-    padding: var(--spacing-sm); border-radius: var(--spacing-md);
+    padding: var(--spacing-sm); border-radius: var(--radius-sm);
     background: color-mix(in srgb, var(--face-floor) 92%, transparent);
     border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
     box-shadow: 0 6px 22px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
@@ -484,7 +484,7 @@
   .self-plate .art > span.mobbar:first-of-type{ margin-top: auto; }
 
   .self-plate .portrait{
-    border-radius: 50%; border: 1px solid var(--gold); background: var(--face-top); padding: var(--spacing-2xs);
+    border-radius: var(--radius-round); border: 1px solid var(--gold); background: var(--face-top); padding: var(--spacing-2xs);
   }
 
   /* Energy Shield sits above HP here exactly as it does in the dock, and only while the pool is there */
@@ -497,7 +497,7 @@
 
   /* Each number starts at the body struck, fans into its own lane, then lifts clear of the card. */
   .mob .plate-fx, .self-plate .plate-fx{
-    position: absolute; inset: 0; z-index: 7; pointer-events: none;
+    position: absolute; inset: 0; z-index: var(--z-label); pointer-events: none;
   }
 
   .plate-fx .pop{
@@ -531,21 +531,21 @@
     font-size: var(--font-xs);
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: var(--seam) var(--spacing-2xs);
+    padding: var(--spacing-3xs) var(--spacing-2xs);
     border: 1px solid color-mix(in srgb, var(--fx, var(--line)) 55%, transparent);
-    border-radius: 999px;
+    border-radius: var(--radius-round);
     background: var(--glass);
     color: var(--fx, var(--text));
     animation-duration: 1.1s;
   }
 
-  .mob .art.knock { animation: plate-mob-knock .3s cubic-bezier(.2, .8, .3, 1); }
-  .mob .charge.lunge { --reach: var(--box-100); animation: plate-mob-charge .45s cubic-bezier(.3, .7, .3, 1); }
-  .mob .charge.lunge.clash { --reach: calc(var(--box-100) / 2); }
-  .self-plate .cardface.knock { animation: plate-self-knock .3s cubic-bezier(.2, .8, .3, 1); }
+  .mob .art.knock { animation: plate-mob-knock var(--motion-ui) cubic-bezier(.2, .8, .3, 1); }
+  .mob .charge.lunge { --reach: clamp(63px, 4.84vw, 135px); animation: plate-mob-charge .45s cubic-bezier(.3, .7, .3, 1); }
+  .mob .charge.lunge.clash { --reach: calc(clamp(63px, 4.84vw, 135px) / 2); }
+  .self-plate .cardface.knock { animation: plate-self-knock var(--motion-ui) cubic-bezier(.2, .8, .3, 1); }
   .mob .flash, .self-plate .flash {
-    position: absolute; inset: -1px; z-index: 4; border: 1px solid var(--fx, var(--edge));
-    border-radius: var(--spacing-md); pointer-events: none;
+    position: absolute; inset: -1px; z-index: var(--z-highlight); border: 1px solid var(--fx, var(--edge));
+    border-radius: var(--radius-sm); pointer-events: none;
     box-shadow: inset 0 0 var(--spacing-sm) color-mix(in srgb, var(--fx, var(--text)) 58%, transparent);
     animation: plate-flash .32s ease-out forwards;
   }
@@ -554,13 +554,13 @@
     0% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), var(--spacing-md)) scale(.7); }
     20% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-xs))) scale(1.16); }
     60% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-lg))) scale(1); }
-    100% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--box-100))) scale(.94); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * clamp(63px, 4.84vw, 135px))) scale(.94); }
   }
   @keyframes plate-crit-number {
     0% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), var(--spacing-md)) scale(.6); }
     24% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-sm))) scale(1.4); }
     52% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-lg))) scale(1.06); }
-    100% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--box-100))) scale(.96); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * clamp(63px, 4.84vw, 135px))) scale(.96); }
   }
   @keyframes plate-mob-knock {
     0%, 100% { transform: none; }
@@ -586,19 +586,19 @@
   /* a swing draws the shelf's crossed swords across the body it cut, turned through the strike. A mask
      contributes only alpha, so the Element that carried the hit paints the blade. */
   .mob .arc{
-    position: absolute; left: 50%; top: clamp(24px, 1.84vw, 51px); z-index: 4; pointer-events: none;
+    position: absolute; left: 50%; top: clamp(24px, 1.84vw, 51px); z-index: var(--z-highlight); pointer-events: none;
     width: var(--icon-xl); height: var(--icon-xl); margin: var(--x-pull-arc) 0 0 var(--x-pull-arc);
     background: var(--fx, var(--text));
-    -webkit-mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
-            mask: url('./icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
+    -webkit-mask: url('../icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
+            mask: url('../icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
     animation: plate-arc .26s ease-out forwards;
   }
 
   /* a press lands as a burst and not a cut, so the two halves of a build read apart before a number is read */
   .mob .burst{
-    position: absolute; left: 50%; top: clamp(24px, 1.84vw, 51px); z-index: 4; pointer-events: none;
+    position: absolute; left: 50%; top: clamp(24px, 1.84vw, 51px); z-index: var(--z-highlight); pointer-events: none;
     width: var(--icon-lg); height: var(--icon-lg); margin: var(--x-pull-burst) 0 0 var(--x-pull-burst);
-    border: 2px solid var(--fx, var(--text)); border-radius: 50%;
+    border: 2px solid var(--fx, var(--text)); border-radius: var(--radius-round);
     animation: plate-burst .34s ease-out forwards;
   }
 

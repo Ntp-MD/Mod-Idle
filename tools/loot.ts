@@ -48,7 +48,7 @@ const SEED0 = 20260101;    // fixed, so a cage run is reproducible
 const LOOT = createLoot(E, MODS);
 const {
   SLOTS, TIER_NAME, ELEMENTS,
-  FLAT_GROUP, weightOf, rangeOf, sliceCount, tierSlice,
+  FLAT_GROUP, weightOf, rangeOf, sliceCount, tierSlice, statOf,
 } = LOOT;
 // the band ladder and its level spans, read once (`item_level` — item-level.md)
 const BAND_INDEX: Record<string, number> = { low: 0, mid: 1, high: 2 };
@@ -160,10 +160,14 @@ function rollItem(rng: any, band: any, bias: any) {
     taken.add(id);
     const slice = tierSlice(u);
     const [lo, hi] = rangeOf(id, ilvl, q, slice);
-    lines.push({ id, value: intBetween(rng, lo, hi), slice, element: id.startsWith('elemental_') ? pick(rng, ELEMENTS) : null });
+    // A Stat Mod bakes the Core stat it feeds at drop, and the draw it spends sits in this exact
+    // position in the client's roll (`game/src/sim/drop.ts`). Skipping it would shift every later
+    // draw, so one seed would stop producing one item across the two rolls.
+    const stat = statOf(id, rng);
+    lines.push({ id, value: intBetween(rng, lo, hi), slice, element: id.startsWith('elemental_') ? pick(rng, ELEMENTS) : null, ...(stat ? { stat } : {}) });
   }
 
-  return { slot, base: frame ? frame.name : weapon.name, ilvl, quality: BANDS[q], tier: (TIER_NAME as any)[tierSlice(u)], q, lines };
+  return { slot, base: weapon ? weapon.name : frame.name, ilvl, quality: BANDS[q], tier: (TIER_NAME as any)[tierSlice(u)], q, lines };
 }
 
 /** The score the filter compares lives in engine/loot.ts — one copy for the cage and the client. */
@@ -445,6 +449,27 @@ function gates(rows: any, bias: any) {
   const leaning = leans.every(({ c, r }: { c: 'gear' | 'herb' | 'junk'; r: { gear: number; herb: number; junk: number } }) => r[c] > sample[c]);
   add('LT14', identity && conserved && leaning && leans.length === 3,
     `The variant lean: 'none' is the identity, each lean raises its own stream, and every lean conserves ${sum(sample).toFixed(2)} expected drops/kill across gear · herb · junk${!identity ? ' · NONE NOT IDENTITY' : ''}${!conserved ? ' · TOTAL NOT CONSERVED' : ''}${!leaning ? ' · LEAN NOT RAISED' : ''}${leans.length !== 3 ? ' · CATEGORIES != 3' : ''}`);
+
+  // The cage rolls the item the client rolls. A Stat Mod bakes the Core stat it feeds at drop, and the
+  // draw that spends sits between the value window and the value (`game/src/sim/drop.ts`) — skip it and
+  // every later draw shifts, so one seed stops producing one item across the two rolls and the rates
+  // published here price a different drop stream than the game runs.
+  {
+    const ROLLS = new Map((MODS.mods as any[]).map((m: any) => [m.id, m.rolls]));
+    const rng = mulberry32(SEED0);
+    const bad: string[] = [];
+    let baked = 0;
+    for (let i = 0; i < 400; i++) {
+      for (const l of rollItem(rng, 'mid', null).lines) {
+        const pool: any = ROLLS.get(l.id);
+        if (pool) { if (pool.includes((l as any).stat)) baked++; else bad.push(`${l.id} baked ${(l as any).stat}`); }
+        else if ((l as any).stat !== undefined) bad.push(`${l.id} baked a stat its Mod declares no rolls for`);
+      }
+    }
+    add('LT15', bad.length === 0 && baked > 0, bad.length
+      ? `this roll is not the client's roll: ${bad.slice(0, 4).join(' · ')}`
+      : `this roll is the client's roll: a Stat Mod bakes the Core stat its own \`rolls\` names, in the draw position \`game/src/sim/drop.ts\` spends it, so one seed buys one item on both sides (${baked} baked line(s) over 400 mid-band drops)`);
+  }
 
   return g.rows();
 }

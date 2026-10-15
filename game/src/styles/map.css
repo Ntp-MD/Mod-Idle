@@ -7,7 +7,7 @@
 
 .sheet svg text, .sheet svg line, .sheet svg .pin, .sheet svg .watermark { pointer-events: none; }
 
-.sheet svg .cell { stroke-linejoin: round; transition: fill .12s linear; }
+.sheet svg .cell { stroke-linejoin: round; transition: fill var(--motion-fast) var(--ease-linear); }
 .sheet svg .cell { cursor: pointer; }
 .sheet svg .cell:hover { fill-opacity: .82; }
 
@@ -26,7 +26,7 @@
 
 .sheet svg .cell.standing { stroke: var(--gold); stroke-width: 2.6; stroke-dasharray: 3 2; }
 
-.sheet svg .you { pointer-events: none; transition: transform .45s ease-out; }
+.sheet svg .you { pointer-events: none; transition: transform var(--motion-map) var(--ease-out); }
 .sheet svg .you .hex { fill: var(--gold); fill-opacity: .2; stroke: none; }
 .sheet svg .you .mark { fill: var(--gold); stroke: var(--bg); stroke-width: 1.4; }
 .sheet svg .you.walking .mark { animation: stride 2s ease-in-out infinite; }

@@ -153,8 +153,8 @@
      press the button under it makes */
   .ladder { display: flex; gap: var(--spacing-2xs); align-items: stretch; }
   .rung {
-    flex: 1 1 0; min-width: 0; display: grid; gap: var(--seam); justify-items: center; align-content: center;
-    padding: var(--spacing-xs) var(--seam); border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+    flex: 1 1 0; min-width: 0; display: grid; gap: var(--spacing-3xs); justify-items: center; align-content: center;
+    padding: var(--spacing-xs) var(--spacing-3xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel);
   }
   .rung b { font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
   .rung .pc, .rung .st { font-family: var(--num); font-size: var(--font-xs); color: var(--mob); }
@@ -168,11 +168,11 @@
   .rung.next b { color: var(--gold); font-size: var(--font-sm); }
   .scale { margin: var(--x-pull-scale) 0 0; color: var(--mob); }
 
-  .press { display: grid; grid-template-columns: 1fr minmax(var(--box-320), var(--box-440)); gap: var(--spacing-md); align-items: start; }
+  .press { display: grid; grid-template-columns: 1fr minmax(clamp(200px, 15.49vw, 432px), clamp(275px, 21.30vw, 594px)); gap: var(--spacing-md); align-items: start; }
   .odds { display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-md); align-items: center; }
   .big {
-    display: grid; gap: var(--spacing-3xs); justify-items: center; padding: var(--spacing-sm) var(--spacing-md); min-width: var(--box-130);
-    border: 1px solid var(--edge); border-radius: 12px; background: var(--glass);
+    display: grid; gap: var(--spacing-3xs); justify-items: center; padding: var(--spacing-sm) var(--spacing-md); min-width: clamp(81px, 6.29vw, 176px);
+    border: 1px solid var(--edge); border-radius: var(--radius-sm); background: var(--glass);
   }
   .big b { font-family: var(--num); font-size: var(--font-xl); line-height: 1; color: var(--gold); }
   .big.safe b { color: var(--good); }
@@ -183,7 +183,7 @@
 
   .acts { display: grid; gap: var(--spacing-2xs); }
   .hammer {
-    padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-sm); border-radius: 12px;
+    padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-sm); border-radius: var(--radius-sm);
     border-color: color-mix(in srgb, var(--gold) 55%, transparent); background: color-mix(in srgb, var(--gold) 13%, transparent); color: var(--gold);
   }
   .hammer:disabled { opacity: .5; }
@@ -193,7 +193,7 @@
   .gamble { margin: var(--spacing-3xs) 0 0; display: grid; gap: var(--spacing-2xs); }
   .gamble small { color: var(--dim); font-size: var(--font-xs); }
 
-  .result { margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: 8px; font-size: var(--font-xs); background: color-mix(in srgb, var(--hp) 16%, transparent); color: var(--alarm); }
+  .result { margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs); background: color-mix(in srgb, var(--hp) 16%, transparent); color: var(--alarm); }
   .result.good { background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good-lit); }
   .purse { margin: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-2xs) var(--spacing-sm); font-size: var(--font-xs); color: var(--dim); font-family: var(--num); }
 

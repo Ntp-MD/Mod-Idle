@@ -51,12 +51,12 @@
 
 <style>
   .mini-map {
-    position: relative; z-index: 40;
+    position: relative; z-index: var(--z-hud-control);
     width: var(--minimap-size); height: var(--minimap-size); padding: 0;
-    border-radius: 50%; overflow: hidden; cursor: pointer;
+    border-radius: var(--radius-round); overflow: hidden; cursor: pointer;
     background: var(--glass);
     border: 2px solid color-mix(in srgb, var(--gold) 45%, var(--edge));
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(0, 0, 0, .55);
+    box-shadow: var(--shadow-raised), inset 0 0 0 1px rgba(0, 0, 0, .55);
   }
   .mini-map svg { width: 100%; height: 100%; display: block; }
   .mini-map .compass {
@@ -73,6 +73,6 @@
   .mini-map :global(.mdot) { fill: var(--sheet-place); stroke: rgba(0, 0, 0, .6); stroke-width: 1.4; }
   .mini-map :global(.you-ring) { fill: none; stroke: var(--gold); stroke-width: 3; opacity: .85; }
   .mini-map :global(.you-dot) { fill: var(--gold); }
-  .mini-map:hover { border-color: var(--gold); box-shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 0 14px color-mix(in srgb, var(--gold) 30%, transparent); }
+  .mini-map:hover { border-color: var(--gold); box-shadow: var(--shadow-raised), 0 0 14px color-mix(in srgb, var(--gold) 30%, transparent); }
   .mini-map:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 </style>

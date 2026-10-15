@@ -22,6 +22,45 @@
     --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
     --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
 
+    /* Shared radius scale: tight controls, standard surfaces, major panels, circles and capsules. */
+    --radius-round: 50%;
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+
+    /* Shared visual states */
+    --surface-selected: rgba(232, 193, 105, .12);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, .5);
+    --shadow-soft: 0 4px 14px rgba(0, 0, 0, .45);
+
+    /* Shared motion */
+    --motion-fast: 150ms;
+    --motion-ui: 220ms;
+    --motion-map: 450ms;
+    --motion-travel: 650ms;
+    --ease-ui: ease;
+    --ease-out: ease-out;
+    --ease-linear: linear;
+    --ease-glide: cubic-bezier(.2, .8, .2, 1);
+
+    /* Shared stacking order; small values are component-local layers. */
+    --z-underlay: 1;
+    --z-content: 2;
+    --z-effect: 3;
+    --z-highlight: 4;
+    --z-control: 5;
+    --z-floater: 6;
+    --z-label: 7;
+    --z-toast: 8;
+    --z-travel: 35;
+    --z-hud-control: 40;
+    --z-panel: 60;
+    --z-navigation: 70;
+    --z-popover-backdrop: 79;
+    --z-popover: 80;
+    --z-notice: 90;
+    --z-screen-guard: 200;
+
     --focus: #7fd4ff;
 
     --rail: clamp(46px, 3.19vw, 88px);
@@ -85,11 +124,11 @@
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
 
-    --font-xs: clamp(11px, 0.82vw, 23px);
-    --font-sm: clamp(13px, 0.97vw, 27px);
-    --font-md: clamp(16px, 1.21vw, 34px);
-    --font-lg: clamp(21px, 1.60vw, 45px);
-    --font-xl: clamp(27px, 2.08vw, 58px);
+    --font-xs: clamp(12px, 0.90vw, 24px);
+    --font-sm: clamp(14px, 1.04vw, 28px);
+    --font-md: clamp(17px, 1.28vw, 36px);
+    --font-lg: clamp(22px, 1.67vw, 47px);
+    --font-xl: clamp(29px, 2.18vw, 62px);
     --icon-xs: clamp(11px, 0.82vw, 23px);
     --icon-sm: clamp(14px, 1.11vw, 31px);
     --icon-md: clamp(21px, 1.60vw, 45px);
@@ -110,33 +149,16 @@
     --spacing-3xs: clamp(1px, 0.10vw, 3px);
     --seam: 1px;
 
-    --sheet-fs-region: clamp(8px, 0.48vw, 14px);
-    --sheet-fs-walk: clamp(6px, 0.34vw, 9px);
-    --sheet-fs-place: clamp(7px, 0.44vw, 12px);
-    --sheet-fs-capital: clamp(8px, 0.53vw, 15px);
-    --sheet-fs-zonename: clamp(6px, 0.39vw, 11px);
-    --sheet-fs-id: clamp(5px, 0.34vw, 9px);
+    --sheet-fs-region: clamp(9px, 0.54vw, 15px);
+    --sheet-fs-walk: clamp(8px, 0.40vw, 11px);
+    --sheet-fs-place: clamp(9px, 0.50vw, 14px);
+    --sheet-fs-capital: clamp(10px, 0.60vw, 17px);
+    --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
+    --sheet-fs-id: clamp(7px, 0.40vw, 11px);
     --x-pull-arc: clamp(-46px, -1.65vw, -21px);
     --x-pull-burst: clamp(-32px, -1.16vw, -15px);
     --x-pull-scale: clamp(-14px, -0.48vw, -6px);
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
-
-    --box-100: clamp(63px, 4.84vw, 135px);
-    --box-110: clamp(69px, 5.32vw, 149px);
-    --box-130: clamp(81px, 6.29vw, 176px);
-    --box-160: clamp(100px, 7.74vw, 216px);
-    --box-170: clamp(106px, 8.23vw, 230px);
-    --box-180: clamp(113px, 8.71vw, 243px);
-    --box-200: clamp(125px, 9.68vw, 270px);
-    --box-240: clamp(150px, 11.62vw, 324px);
-    --box-300: clamp(188px, 14.52vw, 405px);
-    --box-320: clamp(200px, 15.49vw, 432px);
-    --box-420: clamp(263px, 20.33vw, 567px);
-    --box-440: clamp(275px, 21.30vw, 594px);
-    --box-520: clamp(325px, 25.17vw, 702px);
-    --box-560: clamp(350px, 27.11vw, 756px);
-    --box-680: clamp(425px, 32.91vw, 918px);
-    --box-920: clamp(575px, 44.53vw, 1242px);
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
@@ -167,7 +189,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .tabs > label {
   display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
-  border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0;
+  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
   color: var(--dim); font-size: .88rem; cursor: pointer;
 }
 .tabs > label b { color: var(--mob); font-weight: 500; }
@@ -180,7 +202,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
 .tabs table { margin-top: 0; }
-.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
@@ -210,7 +232,7 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .plist li { display: contents; }
 .plist .pk { font-family: var(--ui); color: var(--dim); }
 .plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
-.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem .8rem; padding: .65rem .8rem; cursor: pointer; }
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
@@ -219,39 +241,26 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-/* the mob card grid: five cards a row at full width, two-up inside each, and it steps down to three,
-   two and one as the page narrows so a card never squeezes its figures sideways */
-.cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem .6rem; margin-top: .5rem; }
-@media (max-width: 92rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 58rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .cards { grid-template-columns: 1fr; } }
-.card { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: .7rem .85rem .8rem; display: flex; flex-direction: column; gap: .35rem; }
-.card.elite { border-color: var(--gold); }
-.card.boss { border-color: var(--hp); }
-.card header { display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
-.card .cname { font-size: 1rem; font-weight: 600; }
-.card .cl { font-family: var(--num); color: var(--dim); font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; }
-.cdot { margin: 0; color: var(--dim); font-size: .78rem; }
-.ctag { font-family: var(--ui); color: var(--text); text-transform: uppercase; letter-spacing: .05em; font-size: .66rem; border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; margin-right: .4rem; }
-.elite .ctag { border-color: var(--gold); color: var(--gold); }
-.boss .ctag { border-color: var(--hp); color: var(--hp); }
-.cnames { margin: 0; font-size: .76rem; color: var(--text); }
-.cnames .cl { display: block; }
-/* the reads inside a card stack to one column until the card itself is wide enough for two, so a
-   5-across shelf never squeezes a label into its neighbour's number */
-.card { container-type: inline-size; }
-.cgrid { display: grid; grid-template-columns: 1fr; gap: .5rem .9rem; margin-top: .15rem; }
-@container (min-width: 32rem) { .cgrid { grid-template-columns: 1fr 1fr; } }
-.card .drop { margin-top: .15rem; }
-.cbox h4 { margin: 0 0 .15rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); font-weight: 600; }
-.cbox h4 .chint { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .7; }
+.race-roster { display: grid; gap: .75rem; margin-top: .5rem; }
+.race-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .75rem .9rem .9rem; }
+.race-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.race-entry h3 { margin: 0; font-size: 1.05rem; }
+.race-species-count { color: var(--gold); font-family: var(--num); font-size: .78rem; }
+.race-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
+.race-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
+.race-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.race-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+.race-entry table { font-size: .78rem; }
+.race-entry th, .race-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
+@media (max-width: 58rem) { .race-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 36rem) { .race-facts { grid-template-columns: 1fr 1fr; } .race-entry { padding: .6rem; } }
 .legend { margin: 0; padding-left: 1.1rem; font-size: .82rem; color: var(--dim); }
 .legend li { margin: .3rem 0; }
 .legend strong { color: var(--text); }
-.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }</style><div class="layout">
-<nav><a class="on" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
+<nav><a class="on" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Races</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
 <main><h1>ModWorld — how to play</h1><p class="lead">An open-world idle RPG. Your character fights while the window is open and while it is shut.</p><section><h2>A run, in six steps</h2><p class="note">The whole game is one screen — the field — and the panels behind it.</p><ol>
       <li><strong>Pick a settlement</strong> and a zone. In the field, a player-set Camp opens gathering and cooking.</li>
       <li><strong>Fight</strong> — the character attacks on the clock; paid skills use flat Mana or current-HP costs, while auras reserve Max Mana.</li>

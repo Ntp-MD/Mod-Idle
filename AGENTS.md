@@ -44,6 +44,7 @@ Run from `<repo root | game/ | tools/>`.
 
 ## Before You Start
 
+- Treat the current local working tree as the source of truth. Use Graphify and Git history as context only; if either conflicts with the current local files or uncommitted changes, preserve and follow the local implementation.
 - Read `doc/glossary.md` before touching any game term. Use current names only; retired words live in `tools/data/aliases.json`.
 - Read only the `DECISIONS.md` section relevant to the task, not the whole file.
 - Check `doc/todo.md` for the current work item. Update it when you finish or defer something.
@@ -61,6 +62,13 @@ Run from `<repo root | game/ | tools/>`.
 - Gameplay/data changes: cages, tests and typecheck. UI changes: typecheck, relevant tests and interaction/visual checks when behavior or layout changes. Docs-only changes: check the text and diff; skip unrelated game checks.
 - Rebuild `wiki/` with `pnpm wiki` when data, engine behavior, wiki source or player-facing wiki rules change. The build refreshes data reads, not hand-written prose.
 
+## UI Workflow
+
+- Begin UI work in the integrated browser at `http://localhost:5173/__showcase#showcase-field`. The Showcase renders the real game components with sample state and exposes panels that are normally hidden; open the relevant section and any affected tabs or collapsed controls while reviewing.
+- Pair the Showcase with `http://localhost:5173/__showcase#panel-hud-layout-studio` for HUD layout work. The Studio positions live HUD groups on the same grid and controls the shared modal canvas; its Apply action updates the Showcase preview, while applying from the real game saves the layout.
+- Keep the Showcase and game on the same `.svelte` components and CSS. Let Vite HMR update both; do not create mirrored showcase components or duplicate styles.
+- When adding or moving a HUD group, include its current contents in the Studio, wire it to the shared `HudLayout`, and verify Apply changes the live field preview at 1920 × 1080. Inspect the affected Showcase states and Studio together so the same surfaces do not need a separate repeat audit.
+
 ## Dev Server
 
 - Use only port `5173`. Check it before starting: `Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue`.
@@ -75,18 +83,21 @@ Source of truth: `game/src/styles/variables.css`. Read it before writing or edit
   - Font size: `--font-xs` · `--font-sm` · `--font-md` · `--font-lg` · `--font-xl`
   - Icon, image: `--icon-xs` · `--icon-sm` · `--icon-md` · `--icon-lg` · `--icon-xl`
   - Padding, margin, gap: `--spacing-3xs` · `--spacing-2xs` · `--spacing-xs` · `--spacing-sm` · `--spacing-md` · `--spacing-lg` · `--spacing-xl` — the ladder runs from 2px to 42px at about ×1.62 a step
-  - `--seam` is a 1px hairline that sits against a 1px border. It is not a spacing step and never scales: if the gap is between two lines or two controls, it is `--spacing-3xs`, not a seam.
+  - Border radius: `--radius-xs` (4px) · `--radius-sm` (8px) · `--radius-md` (12px) · `--radius-round` (50%, circles and capsules)
+  - `--seam` is a 1px hairline that sits against a 1px border. It is not a spacing step and never scales. Do not use it for `gap`, `padding` or `margin`; use the spacing ladder, including `--spacing-3xs` for the tightest gap.
 - A shadow, a blur, a border, an outline and a letter-spacing may keep a hardcoded figure under 5px. A `gap`, `padding` or `margin` may not — those are on the ladder, and a frozen 3px next to a panel that grew 35% is a different gap than the one that was designed.
 - Responsive sizes use bounded width values in their own token or component rule: `clamp(<floor>px, <preferred vw>, <ceiling>px)`. Calibrate the preferred value against the 2066px design width.
 - Keep floor and ceiling values as whole pixels. Viewport slopes may use two decimal places. Do not introduce a global multiplier such as `--ui-scale`; Grid Area owns position, and semantic size tokens own dimensions.
-- No token fits exactly: use the nearest existing token. Do not add a new token for a one-off value.
+- If a component size exactly matches an existing bounded token, reference that token instead of copying its `clamp()`. Use a component-specific `clamp()` only when no existing token represents that dimension. No token fits exactly: use the nearest existing token. Do not add a new token for a one-off value.
+- Do not reintroduce the retired `--box-*` scale. Use the existing semantic tokens for shared font, icon, spacing, and radius dimensions; use bounded component-local `clamp()` values for content widths and other one-off dimensions.
+- Use the shared semantic color tokens in `variables.css` for recurring text, surface, status and item-rank colors. Keep one-off translucent overlays, blends and visual effects local; do not mint a shared token for a single effect.
 - HUD-only dimensions such as `--icon-hub` and `--slot-skill-size` belong in `variables.css` and must not be reused outside the HUD.
 - Ask first: adding a shared size token or changing an existing token's design figure.
 - Done when: no `--ui-scale` remains, no unbounded viewport-size ramp is used, and no raw fixed size of 5px or more appears in component CSS.
 
 ## Boundaries
 
-- Always: keep the HUD Layout Studio and the live HUD linked through one `HudLayout`. Every movable live HUD region must have a `HudRegionId`, appear in `HUD_REGION_META` and `DEFAULT_HUD_LAYOUT`, be positionable in the Studio, and use the same `hudLayout` values in `App.svelte`. Do not place a movable live HUD region with CSS-only coordinates outside that layout. When adding a region, fill it from its default when loading older saved layouts so existing custom positions survive; verify that applying it in the Studio moves the live region.
+- Always: keep the HUD Layout Studio and the live HUD linked through one `HudLayout`. Every movable live HUD region must have a `HudRegionId`, appear in `HUD_REGION_META` and `DEFAULT_HUD_LAYOUT`, be positionable in the Studio, and use the same `hudLayout` values in `App.svelte`. Do not place a movable live HUD region with CSS-only coordinates outside that layout. Keep the Studio's descriptions and palette current with the controls inside each group. When adding a region, fill it from its default when loading older saved layouts so existing custom positions survive; verify that applying it in the Studio moves the live region.
 - Within the requested scope: rename internal data files or keys when all readers, writers, validators, and documentation are updated together. Ask first if the rename breaks saved data, import/export compatibility, or external consumers.
 - Within the requested scope: extend the save format in `game/src/state/save.ts` with automatic migration that preserves existing player data and its meaning. Verify loading older saves, migration, and round-trip save/import behavior. Ask first for changes that discard data, reinterpret existing data, or cannot migrate safely.
 - Ask first before adding a dependency or overriding an owner ruling. Existing authorization for that exact action is sufficient.

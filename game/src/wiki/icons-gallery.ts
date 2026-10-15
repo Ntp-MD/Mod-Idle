@@ -77,7 +77,7 @@ export const GALLERY_RUNTIME = `(function () {
   searchInput.type = 'search';
   searchInput.placeholder = 'Search ' + ALL.length + ' icons…';
   searchInput.setAttribute('aria-label', 'Search icons');
-  searchInput.style.cssText = 'width:100%;padding:.4rem .6rem;margin-bottom:.6rem;background:var(--panel);border:1px solid var(--line);border-radius:4px;color:var(--text);font:inherit;';
+  searchInput.style.cssText = 'width:100%;padding:.4rem .6rem;margin-bottom:.6rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--text);font:inherit;';
 
   var tabs = document.createElement('div');
   tabs.style.cssText = 'display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;';
@@ -88,8 +88,8 @@ export const GALLERY_RUNTIME = `(function () {
   var grid = document.createElement('div');
   grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;';
 
-  var TAB_ON = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:4px;background:var(--gold);color:#000;cursor:pointer;font-size:.75rem;';
-  var TAB_OFF = 'padding:.25rem .6rem;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--text);cursor:pointer;font-size:.75rem;';
+  var TAB_ON = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-sm);background:var(--gold);color:#000;cursor:pointer;font-size:.75rem;';
+  var TAB_OFF = 'padding:.25rem .6rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:transparent;color:var(--text);cursor:pointer;font-size:.75rem;';
 
   function renderTabs() {
     tabs.textContent = '';
@@ -121,7 +121,7 @@ export const GALLERY_RUNTIME = `(function () {
 
   function card(item) {
     var el = document.createElement('div');
-    el.style.cssText = 'border:1px solid var(--line);border-radius:4px;padding:.4rem;text-align:center;position:relative;background:var(--panel);';
+    el.style.cssText = 'border:1px solid var(--line);border-radius:var(--radius-sm);padding:.4rem;text-align:center;position:relative;background:var(--panel);';
 
     var on = hasFav(item.path);
     var star = document.createElement('button');

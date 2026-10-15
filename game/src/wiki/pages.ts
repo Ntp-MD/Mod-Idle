@@ -513,8 +513,8 @@ page({
     block('Zones', table(['#', 'Zone', 'Region', 'Levels', 'Band', 'Mob group', 'Its three sides', 'Elements'], eng.ZONES.map((z: any) => [
       wrap(n0(z.id)), esc(z.name), esc(z.region), `${n0(z.levels[0])}-${n0(z.levels[1])}`, esc(z.quality), esc(z.group),
       list((z.subzones || []).map((s: any) => `${s.name}: ${(s.spawn || {}).group || z.group} pack, ${(s.spawn || {}).elite_pct ?? Math.round(E.loot.elite_spawn_chance * 100)}% elite, ${eng.packWordOf((s.spawn || {}).pack)}`)),
-      list(z.elements),
-    ])), 'The band decides the Item quality of what drops there. Each side of a zone fields its own pack, Elite rate and body mix, and a zone\u2019s three sides average back to the group and the Elite rate published above — a crowded side and a heavy side are a choice of ground, not a rate.'),
+      list(eng.zoneElements(z.id)),
+    ])), 'The band decides the Item quality of what drops there. Each side of a zone fields its own pack, Elite rate and body mix, and a zone\u2019s three sides average back to the group and the Elite rate published above — a crowded side and a heavy side are a choice of ground, not a rate. The Elements column is what a spawn here actually wears — its race\u2019s own Element, plus the zone Boss\u2019s declared one — read off the cast, so it is never a limit on what can appear.'),
     block('Dungeons', table(['Dungeon', 'Zone', 'Band', 'A run'], (TOWN.settlements || []).map((s: any) => [
       // the sheet prints the same name (tools/map.ts owns it); the wiki only reads it back
       esc(s.name + ' Dungeon'), wrap(n0(s.zone)), esc(s.band),
@@ -529,115 +529,61 @@ page({
 
 page({
   file: 'mobs.html',
-  nav: 'Mob sheet',
-  title: 'Mobs by zone',
-  lead: `${eng.mobRoster().length} spawn entries from the live roster. Open a zone to inspect its form names, levels, Core, combat values and drops.`,
+  nav: 'Races',
+  title: 'Race roster',
+  lead: (() => {
+    const variants = (E.mob as any).variants || {};
+    const total = (E.mob.species || []).reduce((n: number, sp: any) => n + (variants[sp.id] || []).length, 0);
+    return `${E.mob.species.length} races · ${total} species variants. One row per race; the species count is the total number of variants that race has.`;
+  })(),
   body: (() => {
-    const ROSTER: any[] = eng.mobRoster();
-    const ELITE: any = (E.mob as any).elite || {};
-    const BOSS: any = (E.mob.sizes || []).find((s: any) => s.id === 'boss') || {};
-    const FORM_BAND: Record<string, string> = {};
-    for (const forms of Object.values((E.mob as any).form_catalog || {}) as any[]) {
-      for (const form of Object.values(forms) as any[]) FORM_BAND[form.name] = span(form.levels[0], form.levels[1]);
-    }
-    const bandOf = (q?: string) => String(q || 'low').split(' ')[0];
-    const variantPool = (z: any, spId: string, kind: string) => {
-      const v: string[] = ((E.mob as any).variants || {})[spId] || [];
-      const elite = new Set((z.subzones || []).map((s: any) => s.elite).filter(Boolean));
-      const norm = new Set((z.subzones || []).flatMap((s: any) => s.normal || []));
-      if (kind === 'elite') return v.filter((n) => elite.has(n));
-      if (kind === 'boss') return v.filter((n) => !elite.has(n) && !norm.has(n));
-      return v.filter((n) => norm.has(n) && !elite.has(n));
-    };
-    const junkOf = (n: string) => maybe(E.mob.variant_drops, n);
-    /** The drop column as label/value pairs, so it reads as a list like every other stat cell. */
-    const dropParts = (band: string, sp: any, names: string[], kind: string): [string, string][] => {
-      const herb = band === 'high' ? E.herbs.high_chance : band === 'mid' ? E.herbs.mid_chance : 0;
-      const out: [string, string][] = [['gear', pc0(eng.dropChance(band))], ['herb', pc0(herb)]];
-      const j = names.map(junkOf).filter(Boolean);
-      if (j.length) out.push(['junk', list([...new Set(j.map((x: any) => x.item))])]);
-      const leans = [...new Set(j.map((x: any) => x.lean).filter((l: string) => l && l !== 'none'))];
-      if (leans.length) out.push(['variants lean', `${list(leans)} by ${pts(E.loot.variant_lean.shift_pct)}`]);
-      const stones = (v: number) => (v < 1 ? n2(v) : n0(v));
-      if (kind === 'elite') {
-        out.push([STONE_NAME.tier, `${stones(E.loot.elite_tier_stones)} a kill`], ['Add stone', pc1(E.loot.elite_add_stone_chance)]);
-      }
-      if (kind === 'boss') {
-        out.push([STONE_NAME.tier, `${stones(E.loot.boss_tier_stones)} a kill`], ['Add stone', stones(E.loot.boss_add_stones)], ['potion', 'no']);
-      }
-      if (kind === 'normal' && sp.humanoid) out.push(['potions', 'humanoid line']);
-      return out;
-    };
-    /** One fact as `label value` inside a `.plist` cell. */
-    const kv = (k: string, v: string) => `<span class="pk">${esc(k)}</span><span class="pv">${v}</span>`;
-    /** The kind's own name, in the words the sheet prints it by. */
-    const KIND_LABEL: Record<string, string> = { normal: 'Normal', elite: 'Elite', boss: 'Boss' };
-    /** One labelled read inside a card's shelf. */
-    const box = (h: string, body: string, hint = '') =>
-      `<div class="cbox"><h4>${h}${hint ? ` <span class="chint">${hint}</span>` : ''}</h4>${body}</div>`;
-    /** One spawn as a card: its identity on the header line, then the seven reads the grid carried —
-     *  Core, health, offence, defence, per-Element resistance, experience and drop. Every multi-fact
-     *  read is a `.plist`, so a card scans down a stat instead of sideways across a wrapping cell. */
-    const cardOf = (r: any) => {
-      const sp: any = eng.speciesById(r.speciesId) || {};
-      const zone = eng.zoneById(r.zone);
-      const kind = r.kind === ELITE.name ? 'elite' : String(r.kind).startsWith(BOSS.name || 'Boss') ? 'boss' : 'normal';
-      const names = variantPool(zone, r.speciesId, kind);
-      const shown = kind === 'boss' ? [String(r.kind).replace(/^Boss\s*·\s*/, '')] : names;
-      const res = r.resByElement || eng.mobResByElementOf(sp, r.zone);
-      const core = r.core || eng.mobStatsOf(r.speciesId, r.zone) || {};
-      const bossBody = r.readsAs ? `${r.readsAs.charAt(0).toUpperCase()}${r.readsAs.slice(1)}` : 'Large';
-      const bodyCell = kind === 'normal' ? `${esc(r.kind)} · ${esc(r.group)}` : `${esc(kind === 'boss' ? bossBody : 'Large')} · alone`;
-      const tags = [esc(list(r.innate))];
-      if (sp.humanoid) tags.push('<span class="tag">humanoid</span>');
-      if (r.weapon) tags.push('<span class="tag">weapon</span>');
-      for (const word of eng.mechanicWordsOf(r.mechanics || sp.mechanics)) tags.push(`<span class="tag">${esc(word)}</span>`);
-      return `<div class="card ${kind}">`
-        + `<header><span class="cname">${esc(r.formName || r.species)}</span>`
-        + `<span class="ctag">${KIND_LABEL[kind]}</span>`
-        + `<span class="cl">Lv ${esc(span(r.levels[0], r.levels[1]))} · ${bodyCell}</span></header>`
-        + `<p class="cdot">${esc(r.damage)} · ${tags.join(' · ')}${r.trait || sp.trait ? ` — ${esc(r.trait || sp.trait)}` : ''}</p>`
-        + (FORM_BAND[r.formName] ? `<p class="cnames"><span class="cl">Form level</span>${esc(FORM_BAND[r.formName])}</p>` : '')
-        + (shown.length ? `<p class="cnames"><span class="cl">Drop variants</span>${esc(list(shown))}</p>` : '')
-        + `<div class="cgrid">`
-        + box('Core', plist(Object.entries(core).map(([k, v]) => kv(k.toUpperCase(), n0(v)))))
-        + box('Health', plist([kv('HP curve', span(r.hpBaseFrom, r.hpBaseTo)), kv('HP', span(r.hpFrom, r.hpTo)),
-          kv('Mana', span(r.manaFrom, r.manaTo))]))
-        + box('Offence', plist([kv('DPS', n0(r.ps)), kv('Accuracy', n0(r.acc)),
-          kv('Critical chance', `${n1(r.crit)}%`), kv('Alignment', n1(r.align))]))
-        + box('Defence', plist([kv('Armour', n0(r.armour)),
-          kv('Evasion', n0(r.ev)),
-          kv('dodge', `${n1(r.dodge)}%`)]))
-        + box('Elemental resistance', plist(Object.entries(res).filter(([, v]: any) => Number(v) !== 0).map(([e, v]) => kv(e, `${n0(v)}%`))), 'unlisted = 0%')
-        + box('XP a kill', wrap(span(r.xpFrom, r.xpTo)))
-        + `</div>`
-        + `<div class="drop">${box('Drop',
-          plist(dropParts(bandOf(zone?.quality), sp, names, kind).map(([k, v]) => kv(k, v))),
-          `band ${esc(bandOf(zone?.quality))}`)}</div>`
-        + `</div>`;
+    const variantsByRace = (E.mob as any).variants || {};
+    const races = E.mob.species || [];
+    const variantCount = (sp: any) => (variantsByRace[sp.id] || []).length;
+    const totalVariants = races.reduce((n: number, sp: any) => n + variantCount(sp), 0);
+    const rarityRows = Object.entries((E.junk as any).rarities || {}) as [string, any][];
+    const bandRows = ['low', 'mid', 'high'].map((band) => [
+      esc(band),
+      pc1(eng.dropChance(band)),
+      pc1(farm.herbChance(band)),
+      rarityRows.map(([rarity, row]) => `${esc(rarity)} ${pc1(row.drop_chance_per_kill)}`).join(' · '),
+      pc1(farm.potionDropChance(band)),
+    ]);
+    const raceCard = (sp: any) => {
+      const variants: string[] = variantsByRace[sp.id] || [];
+      const drops = variants.map((name, index) => {
+        const drop: any = maybe(E.mob.variant_drops, name);
+        const role = index < 3 ? `Normal ${index + 1}` : index === 3 ? 'Elite' : index === 4 ? 'Boss' : `Variant ${index + 1}`;
+        const extraDrops = index === 3
+          ? `Tier stone ${pc1(E.loot.elite_tier_stones)}/kill · Add stone ${pc1(E.loot.elite_add_stone_chance)}`
+          : index === 4
+            ? `${n0(E.loot.boss_tier_stones)} Tier stones/kill · ${n0(E.loot.boss_add_stones)} Add stones/kill`
+            : sp.humanoid ? 'Humanoid potion · see band rates' : '—';
+        if (!drop) return [esc(name), role, 'No junk row', '—', '—', extraDrops];
+        const chance = Number((E.junk as any).rarities?.[drop.rarity]?.drop_chance_per_kill || 0);
+        const choices = [...new Set([drop.item, sp.junk_items?.[drop.rarity]].filter(Boolean))] as string[];
+        const outcomePct = choices.length ? chance / choices.length : 0;
+        const outcomes = choices.map((item) => `${esc(item)} ${pc1(outcomePct)}`).join(' · ');
+        return [esc(name), role, outcomes || '—', `${esc(drop.rarity)} · ${pc1(chance)} total`, esc(drop.lean), extraDrops];
+      });
+      const facts = [
+        ['Sizes', list(sp.sizes)],
+        ['Damage', esc(sp.damage)],
+        ['Element', esc(sp.element)],
+        ['Zones', list(sp.zones)],
+      ].map(([label, value]) => `<div><b>${esc(label)}</b><span>${value || '—'}</span></div>`).join('');
+      return `<article class="race-entry">`
+        + `<header><h3>${esc(sp.name)}</h3><span class="race-species-count">${n0(variants.length)} Species</span></header>`
+        + `<div class="race-facts">${facts}</div>`
+        + `<h4>Variants and junk drops</h4>`
+        + table(['Variant', 'Role', 'Junk outcomes · each %', 'Base junk / kill', 'Lean', 'Extra drops'], drops)
+        + `</article>`;
     };
     return [
-      block('Mob rules at a glance', table(['Topic', 'Rule'], [
-        ['Level', 'A spawn uses its species level for the zone; it does not scale to the player.'],
-        ['Form and Core', `Each race has a named fixed-Core form for every ten-level band through ${n0(E.mob.form_level_cap)}; each card shows its form band. Levels above the cap reuse the latest form. Mobs have no equipment or passive tree; a Boss may use its own Core.`],
-        ['Health and mana', 'HP uses the mob_HP curve plus per-level HP and Core Vit × K_VIT_HP. Mana uses its base, per-level gain and Core Int × K_INT_MP.'],
-        ['Combat', 'The shared engine derives DPS, Accuracy, Critical chance, Alignment, Armour, Evasion and dodge from Core, damage tag, body class and zone.'],
-        ['Elements and traits', 'Normal and Elite spawns inherit their race Element and resist only it. A Boss may set its own Element and resistance. Traits apply their named mechanic.'],
-        ['Drops', 'Zone band sets gear quality. Drop variants and subzone environment leans redistribute gear, herbs and junk. Elite and Boss add stone drops; normal humanoid spawns can drop potions. Only weapon-carrying species drop weapons.'],
-      ]), `${Object.keys((E.mob as any).form_catalog || {}).length} form bands · ${Object.values((E.mob as any).form_catalog || {}).reduce((n: number, forms: any) => n + Object.keys(forms).length, 0)} named forms · ${E.mob.species.length} species.`),
-      ...eng.ZONES.map((z: any) => {
-      const rows = ROSTER.filter((r: any) => r.zone === z.id);
-      const cards = rows.map(cardOf);
-      const title = `Zone ${n0(z.id)} · ${esc(z.name)} — ${esc(z.region)}`;
-      const meta = `Lv ${span(z.levels[0], z.levels[1])} · ${esc(z.quality)} band · ${list(z.elements)} · ${n0(rows.length)} spawns`;
-      return `<details class="zone"><summary><span class="zone-title">${title}</span><span class="zone-meta">${meta}</span></summary>`
-        + `<div class="zone-body"><p class="note">Sides: ${list((z.subzones || []).map((s: any) => `${s.name}: ${(s.spawn || {}).group || z.group} pack · ${(s.spawn || {}).elite_pct ?? Math.round(E.loot.elite_spawn_chance * 100)}% Elite · ${eng.packWordOf((s.spawn || {}).pack)}`))}</p>`
-        + `<div class="cards">${cards.join('')}</div></div></details>`;
-    }), block('Subzone environment drop mix', table(['Lean', 'Environments'], ['gear', 'herb', 'junk', 'none'].map((lean) => [
-      esc(lean === 'none' ? 'balanced' : lean),
-      list(Object.entries((E.mob as any).environment_lean || {})
-        .filter(([, value]: any) => value === lean).map(([environment]) => environment)),
-    ])), 'A subzone environment applies after a species variant lean. Each tilt redistributes the same expected gear, herb and junk drops per kill.'),
+      block('Shared drop rates', table(['Zone band', 'Gear', 'Herbs', 'Junk by rarity', 'Potion · humanoids'], bandRows),
+        'Base chances per kill before LCK, mastery, variant leans and subzone environment leans. Each variant pays its listed junk rarity; its own item and the race item for that rarity are equally likely. The variant table lists each outcome chance separately and the total rarity chance.'),
+      block('Every race', `<div class="race-roster">${races.map(raceCard).join('')}</div>`,
+        `All ${races.length} races are shown individually. Each Species count is the number of variants owned by that Race (${totalVariants} variants total). The junk table shows the base per-item chance after the 50/50 choice, alongside the rarity's total base chance.`),
     ];
   })(),
 });
@@ -1137,7 +1083,7 @@ page({
       Object.entries((E.junk as any).rarities || {}).map(([r, v]: any) => [
         esc(r), wrap(`${n0(v.sell_gold)} gold`), pc1(v.drop_chance_per_kill), wrap(n2(v.sell_gold * v.drop_chance_per_kill)),
       ])),
-      'The last column is the whole design of the stream: it is the same figure at every kind, so a variant moving between kinds buys drop frequency, never income. Junk weighs nothing and stacks deep, so it fills slots — which is what sends you home.'),
+      'Each species adds one junk alternative per rarity to its variants’ own items. The last column is the whole design of the stream: it is the same figure at every kind, so a variant moving between kinds buys drop frequency, never income. Junk weighs nothing and stacks deep, so it fills slots — which is what sends you home.'),
   ],
 });
 
@@ -1291,7 +1237,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .tabs > label {
   display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
-  border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0;
+  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
   color: var(--dim); font-size: .88rem; cursor: pointer;
 }
 .tabs > label b { color: var(--mob); font-weight: 500; }
@@ -1304,7 +1250,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
 .tabs table { margin-top: 0; }
-.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
@@ -1334,7 +1280,7 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .plist li { display: contents; }
 .plist .pk { font-family: var(--ui); color: var(--dim); }
 .plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
-.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem .8rem; padding: .65rem .8rem; cursor: pointer; }
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
@@ -1343,36 +1289,23 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-/* the mob card grid: five cards a row at full width, two-up inside each, and it steps down to three,
-   two and one as the page narrows so a card never squeezes its figures sideways */
-.cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem .6rem; margin-top: .5rem; }
-@media (max-width: 92rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 58rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .cards { grid-template-columns: 1fr; } }
-.card { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: .7rem .85rem .8rem; display: flex; flex-direction: column; gap: .35rem; }
-.card.elite { border-color: var(--gold); }
-.card.boss { border-color: var(--hp); }
-.card header { display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
-.card .cname { font-size: 1rem; font-weight: 600; }
-.card .cl { font-family: var(--num); color: var(--dim); font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; }
-.cdot { margin: 0; color: var(--dim); font-size: .78rem; }
-.ctag { font-family: var(--ui); color: var(--text); text-transform: uppercase; letter-spacing: .05em; font-size: .66rem; border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; margin-right: .4rem; }
-.elite .ctag { border-color: var(--gold); color: var(--gold); }
-.boss .ctag { border-color: var(--hp); color: var(--hp); }
-.cnames { margin: 0; font-size: .76rem; color: var(--text); }
-.cnames .cl { display: block; }
-/* the reads inside a card stack to one column until the card itself is wide enough for two, so a
-   5-across shelf never squeezes a label into its neighbour's number */
-.card { container-type: inline-size; }
-.cgrid { display: grid; grid-template-columns: 1fr; gap: .5rem .9rem; margin-top: .15rem; }
-@container (min-width: 32rem) { .cgrid { grid-template-columns: 1fr 1fr; } }
-.card .drop { margin-top: .15rem; }
-.cbox h4 { margin: 0 0 .15rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); font-weight: 600; }
-.cbox h4 .chint { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .7; }
+.race-roster { display: grid; gap: .75rem; margin-top: .5rem; }
+.race-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .75rem .9rem .9rem; }
+.race-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.race-entry h3 { margin: 0; font-size: 1.05rem; }
+.race-species-count { color: var(--gold); font-family: var(--num); font-size: .78rem; }
+.race-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
+.race-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
+.race-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.race-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+.race-entry table { font-size: .78rem; }
+.race-entry th, .race-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
+@media (max-width: 58rem) { .race-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 36rem) { .race-facts { grid-template-columns: 1fr 1fr; } .race-entry { padding: .6rem; } }
 .legend { margin: 0; padding-left: 1.1rem; font-size: .82rem; color: var(--dim); }
 .legend li { margin: .3rem 0; }
 .legend strong { color: var(--text); }
-.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }`;
 

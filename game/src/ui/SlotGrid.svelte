@@ -324,7 +324,7 @@
     background: var(--inset);
     /* the edge wears the piece's rarity; a stack has none and keeps the frame's own line */
     border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
   }
   /* the icon carries a whisper of the same ink, so a rarity reads across a full grid before any hover */
   .slot .slot-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rar, transparent) 55%, transparent)); }
@@ -351,13 +351,13 @@
     opacity: .92;
     pointer-events: none;
   }
-  .count, .plus { position: absolute; z-index: 1; font-size: var(--font-xs); line-height: 1; }
-  .count { right: clamp(2px, 0.15vw, 4px); bottom: clamp(1px, 0.10vw, 3px); }
-  .plus { left: clamp(2px, 0.15vw, 4px); bottom: clamp(1px, 0.10vw, 3px); color: var(--xp); }
+  .count, .plus { position: absolute; z-index: var(--z-underlay); font-size: var(--font-xs); line-height: 1; }
+  .count { right: var(--spacing-2xs); bottom: var(--spacing-3xs); }
+  .plus { left: var(--spacing-2xs); bottom: var(--spacing-3xs); color: var(--xp); }
 
   .list td, .list th { font-size: var(--font-xs); }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); margin-top: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { padding: var(--seam) var(--spacing-sm); font-size: var(--font-xs); }
+  .pager button { padding: var(--spacing-3xs) var(--spacing-sm); font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
   .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--rar, var(--text)); }
   .list-title img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
@@ -368,7 +368,7 @@
      scrolling rather than by being cut. `blind` is the first frame only: the card cannot be measured until it
      paints, and a card that has not been measured has no business being seen. */
   .pop {
-    position: fixed; z-index: 40;
+    position: fixed; z-index: var(--z-hud-control);
     max-height: none; overflow: hidden;
   }
   .pop.blind { visibility: hidden; }
@@ -377,7 +377,7 @@
     border: 1px solid var(--line);
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-xs);
-    min-width: var(--box-240);
+    min-width: clamp(150px, 11.62vw, 324px);
   }
   .plain h4 { margin: 0; }
   .plain p { margin: var(--spacing-2xs) 0 0; color: var(--dim); }

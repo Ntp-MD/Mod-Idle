@@ -74,11 +74,11 @@
 </div>
 
 <style>
-  .backdrop { position: fixed; inset: 0; z-index: 79; }
+  .backdrop { position: fixed; inset: 0; z-index: var(--z-popover-backdrop); }
   .menu {
-    position: fixed; z-index: 80;
-    min-width: var(--box-160);
-    max-width: var(--box-300);
+    position: fixed; z-index: var(--z-popover);
+    min-width: clamp(100px, 7.74vw, 216px);
+    max-width: clamp(188px, 14.52vw, 405px);
     display: flex; flex-direction: column;
     padding: var(--spacing-2xs);
     background: var(--panel);

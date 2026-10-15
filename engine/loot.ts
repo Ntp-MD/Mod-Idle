@@ -22,6 +22,18 @@ export function mulberry32(a: number) {
 
 export const pick = (rng: Rng, arr: any[]): any => arr[Math.floor(rng() * arr.length)];
 export const intBetween = (rng: Rng, lo: number, hi: number) => lo + Math.floor(rng() * (hi - lo + 1));
+
+/** Keep the variant's sale rarity while allowing its race to supply one matching-rarity alternative. */
+export function chooseJunkItem(
+  rng: Rng,
+  variantItem: string,
+  rarity: string,
+  raceItems: Record<string, string>,
+): string {
+  const alternative = raceItems[rarity];
+  return alternative && rng() >= 0.5 ? alternative : variantItem;
+}
+
 export const pickBand = (rng: Rng, table: [string, number][]) => {
   const r = rng();
   let acc = 0;

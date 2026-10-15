@@ -100,12 +100,13 @@
     "dot_cap": 1.5,
     "dot_cap_note": "burn + poison + the earth line a row leaves (Sand Storm), combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches it exactly at 5 stacks x 0.30, so a maxed fire build fills the whole budget on its own",
     "proc_chance": 0.2,
-    "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action but DO take the game's existing Cap-bounded proc (stun ≤15%, chill/shock/Cripple aspd cut under their own Caps), the same symmetric numbers a mob inflicts on us, so no fight can be stun-locked. No mob resist stat (DECISIONS.md §Standing intent). combat.md §5b"
+    "mob_control_budget_pct": 0.15,
+    "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action and stun chance has no Cap, while a separate rolling stop-time budget (mob_control_budget_pct) limits total stopped time. Chill/shock/Cripple speed cuts obey their own Caps, so no fight can be stun-locked. No mob resist stat (DECISIONS.md §Standing intent). combat.md §5b"
   },
   "mob": {
     "form_level_cap": 100,
     "note": "Species (not classes - the player has no class) and body classes, copied from Ragnarok Online: a species is a stat-multiply vector plus an accuracy tier plus a damage type, and a body class is one of the four card sizes. innate Element stays a separate spawn roll (world.md) so the three axes never collapse into one.",
-    "stat_block": "`mob.form_catalog` contains 220 named race forms: all 22 races across the ten real level bands through level 100. Each form owns a fixed integer Core block: Str/Agi/Vit/Int/Wis/Lck inherit the race profile and Dex is authored per variant. `mob.forms` activates these forms in zones 1-10; each gameplay subzone owns a partition of the 22-race spawn pool. Each form inherits its race drop profile. Runtime never scales Core by level. Mobs have no equipment or passive tree.",
+    "stat_block": "`mob.form_catalog` contains 220 named race forms: all 22 races across the ten real level bands through level 100. Each form owns a fixed integer Core block: Str/Agi/Vit/Int/Wis/Lck inherit the race profile and Dex is authored per variant. `mob.forms` activates these forms in zones 1-10; each gameplay subzone is an independent spawn pool, and the same race may appear in multiple pools with different environments as long as their union covers the zone cast. Each form inherits its race drop profile and its three additional junk items, one per sale rarity. Runtime never scales Core by level. Mobs have no equipment or passive tree.",
     "power_note": "A mob's damage per second is its own power over the zone mean, times the published mob_PS(L) curve: power = mob.species[].power_base + K_MOB_PS_STAT x the Core Stat its `damage` tag reads (physical -> Str, magic -> Int, mixed -> both halves, the same split mob.damage_split spends). The zone's average mob is the published curve (checks.md X37), so the species term only moves the mobs actually in front of the player and no zone edge, timeline, ladder or survival number changes. `power_base` is the per-species Base knob - 1.00 is neutral, and raising or lowering it tilts a species without touching its stat vector.",
     "attack_clock_per_sec": {
       "normal": 1,
@@ -137,9 +138,6 @@
           629
         ],
         "quality": "low",
-        "elements": [
-          "fire"
-        ],
         "group": "1-2",
         "subzones": [
           {
@@ -207,6 +205,7 @@
               "dragon",
               "elf",
               "werewolf",
+              "wolf",
               "dryad",
               "treant"
             ],
@@ -226,6 +225,9 @@
               "Wolfman",
               "Dire Werewolf",
               "Blood Werewolf",
+              "Hunting Wolf",
+              "Dire Wolf",
+              "Shadow Wolf",
               "Forest Dryad",
               "Flower Dryad",
               "Thorn Dryad",
@@ -290,10 +292,6 @@
           1305
         ],
         "quality": "low",
-        "elements": [
-          "cold",
-          "lightning"
-        ],
         "group": "1-2",
         "subzones": [
           {
@@ -444,9 +442,6 @@
           1824
         ],
         "quality": "low",
-        "elements": [
-          "cold"
-        ],
         "group": "1-2",
         "subzones": [
           {
@@ -597,10 +592,6 @@
           4033
         ],
         "quality": "mid (floor = low)",
-        "elements": [
-          "poison",
-          "chaos"
-        ],
         "group": "2-3",
         "subzones": [
           {
@@ -751,9 +742,6 @@
           4632
         ],
         "quality": "mid",
-        "elements": [
-          "chaos"
-        ],
         "group": "2-3",
         "subzones": [
           {
@@ -904,10 +892,6 @@
           5293
         ],
         "quality": "mid",
-        "elements": [
-          "chaos",
-          "poison"
-        ],
         "group": "2-3",
         "subzones": [
           {
@@ -1058,9 +1042,6 @@
           8587
         ],
         "quality": "high (floor = mid)",
-        "elements": [
-          "poison"
-        ],
         "group": "3-5",
         "subzones": [
           {
@@ -1211,9 +1192,6 @@
           9605
         ],
         "quality": "high",
-        "elements": [
-          "chaos"
-        ],
         "group": "3-5",
         "subzones": [
           {
@@ -1364,9 +1342,6 @@
           10709
         ],
         "quality": "high",
-        "elements": [
-          "cold"
-        ],
         "group": "3-5",
         "subzones": [
           {
@@ -1517,10 +1492,6 @@
           12144.404771499958
         ],
         "quality": "low",
-        "elements": [
-          "poison",
-          "chaos"
-        ],
         "group": "1-2",
         "subzones": [
           {
@@ -1671,10 +1642,6 @@
           13638.50318368663
         ],
         "quality": "low",
-        "elements": [
-          "cold",
-          "chaos"
-        ],
         "group": "1-2",
         "subzones": [
           {
@@ -1761,10 +1728,6 @@
           15191.295236560005
         ],
         "quality": "low",
-        "elements": [
-          "chaos",
-          "poison"
-        ],
         "group": "1-2",
         "subzones": [
           {
@@ -1851,9 +1814,6 @@
           16802.78093012009
         ],
         "quality": "mid (floor = low)",
-        "elements": [
-          "fire"
-        ],
         "group": "2-3",
         "subzones": [
           {
@@ -1940,9 +1900,6 @@
           18472.960264366888
         ],
         "quality": "mid (floor = low)",
-        "elements": [
-          "poison"
-        ],
         "group": "2-3",
         "subzones": [
           {
@@ -2029,10 +1986,6 @@
           20201.833239300395
         ],
         "quality": "mid (floor = low)",
-        "elements": [
-          "fire",
-          "cold"
-        ],
         "group": "2-3",
         "subzones": [
           {
@@ -2119,9 +2072,6 @@
           21989.399854920608
         ],
         "quality": "high (floor = mid)",
-        "elements": [
-          "fire"
-        ],
         "group": "3-5",
         "subzones": [
           {
@@ -2208,9 +2158,6 @@
           23835.660111227528
         ],
         "quality": "high (floor = mid)",
-        "elements": [
-          "lightning"
-        ],
         "group": "3-5",
         "subzones": [
           {
@@ -2297,9 +2244,6 @@
           25740.614008221164
         ],
         "quality": "high (floor = mid)",
-        "elements": [
-          "poison"
-        ],
         "group": "3-5",
         "subzones": [
           {
@@ -2804,13 +2748,14 @@
     },
     "size_rules": [
       "Four card sizes, copied from Ragnarok: Small · Medium · Large · Boss. A size REPLACES the base numbers, it never multiplies with Elite or with another size.",
-      "Small and Medium form the groups world.md counts (1-2 / 2-3 / 3-5). Large, Elite and Boss always appear alone.",
+      "Small and Medium form the groups world.md counts (1-2 / 2-3 / 3-5). Large, Elite and Boss always appear alone. Each species carries only the sizes that fit it; every species with normal variants needs Small or Medium to enter a group, while Large remains the solo Elite body.",
       "The body class carries a base Evasion as a percent on top of its species Dex line: Small +20%, Medium +10%, and nothing above Medium - a Large, Elite or Boss body is not punished for its size, it simply presents all of itself. The rating under the percent is the mob's own flat Core stat line (`mob.stat`), never a level number.",
       "Size raises HP faster than PS, so a Large mob takes longer to kill without hitting proportionally harder - that is what makes Small the farming body and Large the roadblock."
     ],
     "species": [
       {
         "id": "goblin",
+        "junk_items": { "common": "Goblin Bent Spoon", "uncommon": "Goblin Wax Seal", "rare": "Goblin Tin Whistle" },
         "power_base": 0.9,
         "name": "Goblin",
         "zones": [
@@ -2876,6 +2821,7 @@
       },
       {
         "id": "orc",
+        "junk_items": { "common": "Orc Split Belt", "uncommon": "Orc Dented Greave", "rare": "Orc War Drum" },
         "power_base": 1.05,
         "name": "Orc",
         "zones": [
@@ -2937,6 +2883,7 @@
       },
       {
         "id": "kobold",
+        "junk_items": { "common": "Kobold Brass Bell", "uncommon": "Kobold Fuse Bundle", "rare": "Kobold Dragon Tooth Chip" },
         "power_base": 0.9,
         "name": "Kobold",
         "zones": [
@@ -2999,6 +2946,7 @@
       },
       {
         "id": "ogre",
+        "junk_items": { "common": "Ogre Cracked Mug", "uncommon": "Ogre Torn Harness", "rare": "Ogre Iron Cudgel Cap" },
         "power_base": 1.05,
         "name": "Ogre",
         "zones": [
@@ -3062,6 +3010,7 @@
       },
       {
         "id": "troll",
+        "junk_items": { "common": "Troll Moss Clump", "uncommon": "Troll Broken Club", "rare": "Troll River Pebble" },
         "power_base": 1.05,
         "name": "Troll",
         "zones": [
@@ -3094,9 +3043,10 @@
         "damage": "mixed",
         "accuracy_mult": 0.35,
         "sizes": [
+          "medium",
           "large"
         ],
-        "trait": "armour wall, all alone - every farming body is Large, so there is never a soft version to farm",
+        "trait": "armour wall - never Small; its normal bodies are Medium and its Elites are Large",
         "core": {
           "str": 24,
           "agi": 15,
@@ -3123,6 +3073,7 @@
       },
       {
         "id": "minotaur",
+        "junk_items": { "common": "Minotaur Bell Shard", "uncommon": "Minotaur Broken Reins", "rare": "Minotaur Maze Token" },
         "power_base": 1,
         "name": "Minotaur",
         "zones": [
@@ -3183,6 +3134,7 @@
       },
       {
         "id": "skeleton",
+        "junk_items": { "common": "Skeleton Rusty Nail", "uncommon": "Skeleton Dusty Scroll", "rare": "Skeleton Jawbone" },
         "power_base": 1,
         "name": "Skeleton",
         "zones": [
@@ -3253,6 +3205,7 @@
       },
       {
         "id": "mummy",
+        "junk_items": { "common": "Mummy Canopic Seal", "uncommon": "Mummy Linen Knot", "rare": "Mummy Scarab Shell" },
         "power_base": 1,
         "name": "Mummy",
         "zones": [
@@ -3316,6 +3269,7 @@
       },
       {
         "id": "vampire",
+        "junk_items": { "common": "Vampire Black Ribbon", "uncommon": "Vampire Empty Vial", "rare": "Vampire Mirror Shard" },
         "power_base": 1,
         "name": "Vampire",
         "zones": [
@@ -3385,6 +3339,7 @@
       },
       {
         "id": "demon",
+        "junk_items": { "common": "Demon Cinder", "uncommon": "Demon Broken Chain", "rare": "Demon Horn Soot" },
         "power_base": 1,
         "name": "Demon",
         "zones": [
@@ -3454,6 +3409,7 @@
       },
       {
         "id": "slime",
+        "junk_items": { "common": "Slime Bubble", "uncommon": "Slime Slick", "rare": "Slime Prism Droplet" },
         "power_base": 0.9,
         "name": "Slime",
         "zones": [
@@ -3523,6 +3479,7 @@
       },
       {
         "id": "spider",
+        "junk_items": { "common": "Spider Egg Sac", "uncommon": "Spider Torn Web", "rare": "Spider Venom Bladder" },
         "power_base": 0.95,
         "name": "Spider",
         "zones": [
@@ -3592,6 +3549,7 @@
       },
       {
         "id": "wolf",
+        "junk_items": { "common": "Wolf Chewed Bone", "uncommon": "Wolf Torn Collar", "rare": "Wolf Moon Sinew" },
         "power_base": 0.95,
         "name": "Wolf",
         "zones": [
@@ -3660,6 +3618,7 @@
       },
       {
         "id": "golem",
+        "junk_items": { "common": "Golem Pebble", "uncommon": "Golem Clay Clump", "rare": "Golem Rune Chip" },
         "power_base": 1.1,
         "name": "Golem",
         "zones": [
@@ -3693,9 +3652,10 @@
         "damage": "physical",
         "accuracy_mult": 0.35,
         "sizes": [
+          "medium",
           "large"
         ],
-        "trait": "armour wall, all alone - the strongest armour line in the game and no soft body to farm",
+        "trait": "armour wall - never Small; its normal bodies are Medium and its Elites are Large",
         "core": {
           "str": 30,
           "agi": 11,
@@ -3725,6 +3685,7 @@
       },
       {
         "id": "dragon",
+        "junk_items": { "common": "Dragon Ember", "uncommon": "Dragon Scorched Tooth", "rare": "Dragon Ash Pearl" },
         "power_base": 1.1,
         "name": "Dragon",
         "zones": [
@@ -3787,6 +3748,7 @@
       },
       {
         "id": "treant",
+        "junk_items": { "common": "Treant Acorn", "uncommon": "Treant Leaf Bundle", "rare": "Treant Seedpod" },
         "power_base": 1.05,
         "name": "Treant",
         "zones": [
@@ -3822,9 +3784,10 @@
         "damage": "mixed",
         "accuracy_mult": 0.25,
         "sizes": [
+          "medium",
           "large"
         ],
-        "trait": "armour wall, all alone - heavy and rooted, and it never comes in a soft body",
+        "trait": "rooted bruiser - never Small; its normal bodies are Medium and its Elites are Large",
         "core": {
           "str": 27,
           "agi": 13,
@@ -3855,6 +3818,7 @@
       },
       {
         "id": "human",
+        "junk_items": { "common": "Militia Belt Buckle", "uncommon": "Torn Tabard", "rare": "Dented Medallion" },
         "power_base": 0.95,
         "name": "Human",
         "zones": [
@@ -3920,6 +3884,7 @@
       },
       {
         "id": "lizardman",
+        "junk_items": { "common": "Lizardman Eggshell", "uncommon": "Lizardman Split Spearhead", "rare": "Lizardman Shed Crest" },
         "power_base": 0.95,
         "name": "Lizardman",
         "zones": [
@@ -3984,6 +3949,7 @@
       },
       {
         "id": "elf",
+        "junk_items": { "common": "Elf Leaf Charm", "uncommon": "Elf Broken Arrowhead", "rare": "Elf Glass Bead" },
         "power_base": 0.95,
         "name": "Elf",
         "zones": [
@@ -4051,6 +4017,7 @@
       },
       {
         "id": "giant",
+        "junk_items": { "common": "Giant Belt Stud", "uncommon": "Giant Bowl Shard", "rare": "Giant Knuckle Dust" },
         "power_base": 1.05,
         "name": "Giant",
         "zones": [
@@ -4083,9 +4050,10 @@
         "damage": "mixed",
         "accuracy_mult": 0.35,
         "sizes": [
+          "medium",
           "large"
         ],
-        "trait": "armour wall, all alone - the heaviest body that still swings from the front",
+        "trait": "heavy frontliner - never Small; its normal bodies are Medium and its Elites are Large",
         "core": {
           "str": 27,
           "agi": 14,
@@ -4112,6 +4080,7 @@
       },
       {
         "id": "werewolf",
+        "junk_items": { "common": "Werewolf Collar Tag", "uncommon": "Werewolf Claw Fragment", "rare": "Werewolf Moon Charm" },
         "power_base": 1,
         "name": "Werewolf",
         "zones": [
@@ -4187,6 +4156,7 @@
       },
       {
         "id": "dryad",
+        "junk_items": { "common": "Dryad Seedpod", "uncommon": "Dryad Dew Vial", "rare": "Dryad Flower Husk" },
         "power_base": 1.1,
         "name": "Dryad",
         "zones": [
@@ -4262,7 +4232,7 @@
       "A lineage can use a named fixed-Core form in a zone through the form level cap. Higher zones remain playable and reuse that lineage's latest form; no new variant is added.",
       "A species may appear only where its `habitat` allows. `habitat` is the region list it may live in (the geography layer the zone `region` names) and `zones` is where it currently does, so `zones` must be a subset of the regions those zones carry. Check X52 fails a species placed outside its habitat, a habitat naming a region no zone has, or a region no species claims. Re-placing a species is a `habitat`/`zones` data edit, never a roster rewrite, and it moves no price.",
       "Mob Evasion uses the selected fixed-Core form Dex, or the lineage base Core Dex when no earlier form exists, with the body base percent on top. Core is authored data, not scaled at runtime.",
-      "`mob.form_catalog` defines one uniquely named fixed-Core form for every race and real ten-level band. `mob.forms` activates every form in zones 1-10, and each subzone partitions the 22-race cast into its spawn pool. Levels 101-180 remain playable and reuse each lineage's latest active form. Each form inherits its race drop profile; Elite/Boss remain rank overlays.",
+      "`mob.form_catalog` defines one uniquely named fixed-Core form for every race and real ten-level band. `mob.forms` activates every form in zones 1-10; each subzone has an independent race spawn pool, pools may overlap across environments, and their union covers the zone cast. Levels 101-180 remain playable and reuse each lineage's latest active form. Each form inherits its race drop profile and three extra junk items (one per rarity); variant rarity and lean remain variant-owned. Mob plates use their species-specific icon; Elite/Boss remain rank overlays.",
       "A proposed zone layout that re-zones the world is a new world, not a mob pass: the zone set is the shipped eighteen with its place regions (X51), and where a race lives is a habitat-legal data edit (X52). A species sheet therefore lands inside the existing zones — its races, variant ladders, sub-zones and bosses — and a sub-zone carries one of its zone's own Elements, never a new one.",
       "A species' trait is a mechanic, not a label: `mob.species[].mechanics` names keys from the closed set `mob.trait_mechanics.set`, and the client runs each one - a body that cannot bleed, a body that bursts poison when it dies, a body that swings faster at the same damage per second, a body that flinches from one named Element. A species with no `mechanics` row is an ordinary body.",
       "A species' trait is a mechanic, not a label: `mob.species[].mechanics` names keys from the closed set `mob.trait_mechanics.set`, and the client runs each one - a body that cannot bleed, a body that bursts poison when it dies, a body that swings faster at the same damage per second, a body that flinches from one named Element. A species with no `mechanics` row is an ordinary body."
@@ -4441,7 +4411,7 @@
         "Ancient Dryad"
       ]
     },
-    "variant_drops_note": "The drop identity of one variant NAME (mob.variants owns the five-rung species ladder; each mob.form_catalog entry points to its race through drop_profile, and this table owns what each rung drops). `item`/`rarity` are the junk stream the variant pays instead of the species-wide item, and `lean` is the collectible stream that variant tilts toward, applied through leanReweight so the total expected drops/kill is conserved - the three normal variants of each species share one archetype lean, and a subzone environment adds a second lean without changing expected drops per kill. `none` is the identity, which is what Elite and Boss carry: they already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a variant between rarities never moves gold/kill.",
+    "variant_drops_note": "The drop identity of one variant NAME (mob.variants owns the five-rung species ladder; each mob.form_catalog entry points to its race through drop_profile, and this table owns the variant's base junk item, rarity and lean). When junk pays, the race may substitute its additional junk item for that same rarity; `mob.species[].junk_items` owns one alternative per rarity and town prices it at that rarity. `lean` is the collectible stream the variant tilts toward, applied through leanReweight so the total expected drops/kill is conserved - the three normal variants of each species share one archetype lean, and a subzone environment adds a second lean without changing expected drops per kill. `none` is the identity, which is what Elite and Boss carry: they already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a variant between rarities never moves gold/kill.",
     "variant_drops": {
       "Sneak Goblin": {
         "item": "Goblin Ear",
@@ -13055,10 +13025,10 @@
         "ids": [
           "stun_chance"
         ],
-        "v100": "runs beside the lightning-Alignment stun path, which is the one that carries the Cap (elements.md section 6)",
+        "v100": "adds to the uncapped lightning-Alignment stun chance; the Alignment gate still applies (elements.md section 6)",
         "early": "stun is a fixed 1 sec stop, so the line is worth the same at every level",
         "weight": 0.7,
-        "why": "A weapon-only line (mace). Stun stops the target clock for 1 sec - attacks and regen - and the Alignment path already prices that window, so the gear source is priced against it and the alignment Cap still binds on the lightning side"
+        "why": "A weapon-only line (mace). Stun chance has no Cap; Alignment remains the status gate, and the mob's separate rolling stop-time budget limits how much time a proc can remove from its clock"
       },
       {
         "label": "Block chance %",
@@ -13174,7 +13144,7 @@
   "weapon_size_mult": {
     "bolt_share_pct": 103,
     "bolt_note": "A magic weapon has no swing, it has a bolt: a press on the attack clock with no mana and no cooldown, worth this share of the finished hit so the filler is never a downgrade on a full swing (X50). It used to be derived from the attack roster weakest stated percentage; a press is no longer a percentage of a hit (it is its own flat plus an effectiveness), so the bolt own share lives here.",
-    "note": "Weapon x body class (HugePatch section 12): the shape of a fight, not a stat. One multiplier on the PHYSICAL share of an outgoing hit, applied after mitigation, so it never scales the armour cut; the weapon's own swing always carries its row (a staff's swing included), a physical attack skill carries it too, and a magic-damage skill is exempt. Three columns, not four: a boss is not a size, it declares which column it reads (mob.sizes[].reads_as, overridable per boss). The one-handed sword is the flat reference row, which is what keeps every zone price still. Every row keys a weapon NAME from bases.json's 12; a row left flat is one this pass has not derived an opinion for yet.",
+    "note": "Weapon x body class (HugePatch section 12): the shape of a fight, not a stat. One multiplier on the PHYSICAL share of an outgoing hit, applied after mitigation, so it never scales the armour cut; the weapon's own swing always carries its row (a staff's swing included), a physical attack skill carries it too, and a magic-damage skill is exempt. Three columns, not four: a boss is not a size, it declares which column it reads (mob.sizes[].reads_as, overridable per boss). The one-handed sword is the flat reference row, which is what keeps every zone price still. One-handed axe remains at neutral 1.0 for all sizes pending a balance decision. Every row keys a weapon NAME from bases.json `weapons`; other flat rows remain uncalibrated until decided.",
     "ladder": {
       "one-handed sword": {
         "small": 1,
@@ -14199,7 +14169,7 @@
         "drop_chance_per_kill": 0.0053953
       }
     },
-    "note": "RO-style mob junk: a fourth drop stream, sold to the Settlement Counterhand for gold. The ITEM is per variant, not per race - `mob.variant_drops` owns which variant pays which item at which rarity - and this block owns only the mechanics the rarities are: each rarity's drop_chance_per_kill is set to junk_per_kill / sell_gold, so a kill of any variant has the same expected gold (the F3 junk line per kill) whatever the species or variant mix, and a variant moving between rarities cannot move gold/kill. A variant's rarity therefore buys drop frequency, not income: common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat - which is also the bag-pressure trade a variant picks. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
+    "note": "RO-style mob junk: a fourth drop stream, sold to the Settlement Counterhand for gold. `mob.variant_drops` owns each variant's base item, rarity, and lean; `mob.species[].junk_items` adds one alternate item for each rarity. A successful rarity roll can pay either item at the variant's rarity price, so each rarity's drop_chance_per_kill remains junk_per_kill / sell_gold and a kill of any variant keeps the same expected gold (the F3 junk line per kill). A variant's rarity therefore buys drop frequency, not income: common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat - which is also the bag-pressure trade a variant picks. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
   },
   "aoe": {
     "per_target_pct": 60,
@@ -14310,13 +14280,13 @@
   "f_rows_carried": [
     {
       "id": "F4",
-      "value": "first 1/14 of drops 23.0 → 2/14-4/14 8.4 → after that 7.1 (low band) · keep-rate 5.19% low · 4.06% mid · 3.15% high · 1.09% high + full_lck",
+      "value": "first 1/14 of drops 21.9 → 2/14-4/14 10.5 → after that 6.2 (low band) · keep-rate 5.21% low · 4.05% mid · 3.03% high · 1.05% high + full_lck",
       "expression": "measured — tools/loot.ts, the seven roll steps in loot.md section 1",
       "status": "measured"
     },
     {
       "id": "F11",
-      "value": "0.35 Flat lines per high-zone drop (6.41 lines per item) · the four early-game Flats thin out as Item quality rises",
+      "value": "0.34 Flat lines per high-zone drop (6.44 lines per item) · the four early-game Flats thin out as Item quality rises",
       "expression": "Flat line per drop (high zone, after the 0.25 early-game weighting)",
       "status": "measured"
     },

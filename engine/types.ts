@@ -265,6 +265,8 @@ export interface MobCore {
 export interface MobSpecies {
   id: string;
   name: string;
+  /** One extra race-flavoured junk item per sale rarity; the variant still owns its rarity roll. */
+  junk_items: Record<'common' | 'uncommon' | 'rare', string>;
   zones: number[];
   /** The regions this species may live in — its `zones` must be a subset (X52). */
   habitat: string[];
@@ -347,9 +349,9 @@ export interface MobZone {
   /** The item-quality band this zone pays at — the ceiling a drop in the zone draws under. The bestiary
    *  page prints it per zone, so the declaration carries it the same way the data row does. */
   quality: string;
-  elements: string[];
   group: string;
-  /** What a spawn table rolls against: the zone cast is the union of its sub-zones. */
+  /** What a spawn table rolls against: the zone cast is the union of its sub-zones. The Elements a
+   *  zone fields are derived from that cast (`zoneElements`), never declared beside it. */
   subzones?: MobSubzone[];
 }
 
@@ -396,8 +398,9 @@ export interface FieldLabelRule {
 
 /**
  * One variant's drop identity (`mob.variant_drops`, keyed by the variant name `mob.variants` owns).
- * `item`/`rarity` are the junk it pays instead of a species-wide item; `lean` is the collectible
- * stream it tilts toward, applied through `leanReweight` so the total expected drops/kill is conserved.
+ * `item`/`rarity` are its base junk item and sale rarity; its species may supply a second item at the
+ * same rarity. `lean` is the collectible stream it tilts toward, applied through `leanReweight` so
+ * the total expected drops/kill is conserved.
  */
 export interface VariantDrop {
   item: string;
@@ -427,7 +430,7 @@ export interface MobCfg {
   species_target?: number;
   /** Drop identities by normal body tier, Elite and Boss; these do not select the level-band form or its Core. */
   variants?: Record<string, string[]>;
-  /** What each of those names drops: its own junk item and the stream it leans (`X56`). */
+  /** What each of those names drops: its base junk item, sale rarity and stream lean (`X56`). */
   variant_drops?: Record<string, VariantDrop>;
   /** The second drop tilt keyed by the subzone environment; `none` is the identity (`X73`). */
   environment_lean?: Record<string, 'none' | 'gear' | 'herb' | 'junk'>;

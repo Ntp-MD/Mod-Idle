@@ -22,6 +22,45 @@
     --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
     --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
 
+    /* Shared radius scale: tight controls, standard surfaces, major panels, circles and capsules. */
+    --radius-round: 50%;
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+
+    /* Shared visual states */
+    --surface-selected: rgba(232, 193, 105, .12);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, .5);
+    --shadow-soft: 0 4px 14px rgba(0, 0, 0, .45);
+
+    /* Shared motion */
+    --motion-fast: 150ms;
+    --motion-ui: 220ms;
+    --motion-map: 450ms;
+    --motion-travel: 650ms;
+    --ease-ui: ease;
+    --ease-out: ease-out;
+    --ease-linear: linear;
+    --ease-glide: cubic-bezier(.2, .8, .2, 1);
+
+    /* Shared stacking order; small values are component-local layers. */
+    --z-underlay: 1;
+    --z-content: 2;
+    --z-effect: 3;
+    --z-highlight: 4;
+    --z-control: 5;
+    --z-floater: 6;
+    --z-label: 7;
+    --z-toast: 8;
+    --z-travel: 35;
+    --z-hud-control: 40;
+    --z-panel: 60;
+    --z-navigation: 70;
+    --z-popover-backdrop: 79;
+    --z-popover: 80;
+    --z-notice: 90;
+    --z-screen-guard: 200;
+
     --focus: #7fd4ff;
 
     --rail: clamp(46px, 3.19vw, 88px);
@@ -85,11 +124,11 @@
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
 
-    --font-xs: clamp(11px, 0.82vw, 23px);
-    --font-sm: clamp(13px, 0.97vw, 27px);
-    --font-md: clamp(16px, 1.21vw, 34px);
-    --font-lg: clamp(21px, 1.60vw, 45px);
-    --font-xl: clamp(27px, 2.08vw, 58px);
+    --font-xs: clamp(12px, 0.90vw, 24px);
+    --font-sm: clamp(14px, 1.04vw, 28px);
+    --font-md: clamp(17px, 1.28vw, 36px);
+    --font-lg: clamp(22px, 1.67vw, 47px);
+    --font-xl: clamp(29px, 2.18vw, 62px);
     --icon-xs: clamp(11px, 0.82vw, 23px);
     --icon-sm: clamp(14px, 1.11vw, 31px);
     --icon-md: clamp(21px, 1.60vw, 45px);
@@ -110,33 +149,16 @@
     --spacing-3xs: clamp(1px, 0.10vw, 3px);
     --seam: 1px;
 
-    --sheet-fs-region: clamp(8px, 0.48vw, 14px);
-    --sheet-fs-walk: clamp(6px, 0.34vw, 9px);
-    --sheet-fs-place: clamp(7px, 0.44vw, 12px);
-    --sheet-fs-capital: clamp(8px, 0.53vw, 15px);
-    --sheet-fs-zonename: clamp(6px, 0.39vw, 11px);
-    --sheet-fs-id: clamp(5px, 0.34vw, 9px);
+    --sheet-fs-region: clamp(9px, 0.54vw, 15px);
+    --sheet-fs-walk: clamp(8px, 0.40vw, 11px);
+    --sheet-fs-place: clamp(9px, 0.50vw, 14px);
+    --sheet-fs-capital: clamp(10px, 0.60vw, 17px);
+    --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
+    --sheet-fs-id: clamp(7px, 0.40vw, 11px);
     --x-pull-arc: clamp(-46px, -1.65vw, -21px);
     --x-pull-burst: clamp(-32px, -1.16vw, -15px);
     --x-pull-scale: clamp(-14px, -0.48vw, -6px);
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
-
-    --box-100: clamp(63px, 4.84vw, 135px);
-    --box-110: clamp(69px, 5.32vw, 149px);
-    --box-130: clamp(81px, 6.29vw, 176px);
-    --box-160: clamp(100px, 7.74vw, 216px);
-    --box-170: clamp(106px, 8.23vw, 230px);
-    --box-180: clamp(113px, 8.71vw, 243px);
-    --box-200: clamp(125px, 9.68vw, 270px);
-    --box-240: clamp(150px, 11.62vw, 324px);
-    --box-300: clamp(188px, 14.52vw, 405px);
-    --box-320: clamp(200px, 15.49vw, 432px);
-    --box-420: clamp(263px, 20.33vw, 567px);
-    --box-440: clamp(275px, 21.30vw, 594px);
-    --box-520: clamp(325px, 25.17vw, 702px);
-    --box-560: clamp(350px, 27.11vw, 756px);
-    --box-680: clamp(425px, 32.91vw, 918px);
-    --box-920: clamp(575px, 44.53vw, 1242px);
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
@@ -167,7 +189,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .tabs > label {
   display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
-  border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0;
+  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
   color: var(--dim); font-size: .88rem; cursor: pointer;
 }
 .tabs > label b { color: var(--mob); font-weight: 500; }
@@ -180,7 +202,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
 .tabs table { margin-top: 0; }
-.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
@@ -210,7 +232,7 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .plist li { display: contents; }
 .plist .pk { font-family: var(--ui); color: var(--dim); }
 .plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
-.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem .8rem; padding: .65rem .8rem; cursor: pointer; }
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
@@ -219,39 +241,26 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-/* the mob card grid: five cards a row at full width, two-up inside each, and it steps down to three,
-   two and one as the page narrows so a card never squeezes its figures sideways */
-.cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem .6rem; margin-top: .5rem; }
-@media (max-width: 92rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 58rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .cards { grid-template-columns: 1fr; } }
-.card { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: .7rem .85rem .8rem; display: flex; flex-direction: column; gap: .35rem; }
-.card.elite { border-color: var(--gold); }
-.card.boss { border-color: var(--hp); }
-.card header { display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
-.card .cname { font-size: 1rem; font-weight: 600; }
-.card .cl { font-family: var(--num); color: var(--dim); font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; }
-.cdot { margin: 0; color: var(--dim); font-size: .78rem; }
-.ctag { font-family: var(--ui); color: var(--text); text-transform: uppercase; letter-spacing: .05em; font-size: .66rem; border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; margin-right: .4rem; }
-.elite .ctag { border-color: var(--gold); color: var(--gold); }
-.boss .ctag { border-color: var(--hp); color: var(--hp); }
-.cnames { margin: 0; font-size: .76rem; color: var(--text); }
-.cnames .cl { display: block; }
-/* the reads inside a card stack to one column until the card itself is wide enough for two, so a
-   5-across shelf never squeezes a label into its neighbour's number */
-.card { container-type: inline-size; }
-.cgrid { display: grid; grid-template-columns: 1fr; gap: .5rem .9rem; margin-top: .15rem; }
-@container (min-width: 32rem) { .cgrid { grid-template-columns: 1fr 1fr; } }
-.card .drop { margin-top: .15rem; }
-.cbox h4 { margin: 0 0 .15rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); font-weight: 600; }
-.cbox h4 .chint { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .7; }
+.race-roster { display: grid; gap: .75rem; margin-top: .5rem; }
+.race-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .75rem .9rem .9rem; }
+.race-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.race-entry h3 { margin: 0; font-size: 1.05rem; }
+.race-species-count { color: var(--gold); font-family: var(--num); font-size: .78rem; }
+.race-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
+.race-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
+.race-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.race-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+.race-entry table { font-size: .78rem; }
+.race-entry th, .race-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
+@media (max-width: 58rem) { .race-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 36rem) { .race-facts { grid-template-columns: 1fr 1fr; } .race-entry { padding: .6rem; } }
 .legend { margin: 0; padding-left: 1.1rem; font-size: .82rem; color: var(--dim); }
 .legend li { margin: .3rem 0; }
 .legend strong { color: var(--text); }
-.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: 2px; padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }</style><div class="layout">
-<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="on" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Mob sheet</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
+<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="on" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Races</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
 <main><h1>Items</h1><p class="lead">A piece of gear is a <strong>frame</strong> plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth.</p><section><h2>Two halls</h2><p>Every piece lives in one of two halls — <a href="weapons.html">Weapons</a>, the eleven main-hand types and their frames, or <a href="equipment.html">Equipment</a>, every other slot frame by frame. A third hall opens here when the jewel system lands.</p></section>
 <section><h2>How a drop rolls</h2><p class="note">The window climbs with the Item level, and its floor starts from the band below, so a mid-band piece opens able to roll the low band own floor.</p><table><thead><tr><th></th><th>Number</th><th>What it means</th></tr></thead><tbody><tr><td>Lines on a drop</td><td><span class="num">5-8</span></td><td>1 Frame Mod · 2 Bound · 2-5 Unbound, drawn at drop — a slot whose pool runs out first publishes fewer</td></tr><tr><td>Lines after crafting</td><td><span class="num">10</span></td><td>the Add craft opens one more line per stone, up to 2 — the crafted ceiling</td></tr><tr><td>Item level</td><td>the drop own level</td><td>every line on the piece rolls inside the window that level publishes</td></tr><tr><td>Item quality</td><td>low · mid · high</td><td>low 1-30 · mid 31-60 · high 61-90</td></tr><tr><td>Tier</td><td>T1 · T2 · T3</td><td>which third of the window the roll landed in — T1 is the top third, and the rarest roll (17% T1 · 33% T2 · 50% T3)</td></tr></tbody></table></section>
 <section><h2>Every Mod and the window it rolls in</h2><p class="note">Each band own ladder, read straight out of the data the roll uses — a line gets stronger because the level moved, never because a second table says so.</p><table><thead><tr><th>Mod</th><th>Range</th><th>Window by Item quality: low · mid · high</th></tr></thead><tbody><tr><td>Max HP flat</td><td>40-200</td><td>40-55 → 56-72 → 73-90  ·  86-108 → 109-126 → 127-145  ·  140-163 → 164-181 → 182-200</td></tr><tr><td>Max Mana flat</td><td>20-140</td><td>20-27 → 28-36 → 37-45  ·  43-60 → 61-75 → 76-90  ·  86-105 → 106-120 → 121-140</td></tr><tr><td>Critical damage %</td><td>12-120%</td><td>12-23 → 24-35 → 36-47  ·  44-59 → 60-71 → 72-83  ·  80-96 → 97-108 → 109-120</td></tr><tr><td>Magic power flat</td><td>15-80</td><td>15-21 → 22-28 → 29-36  ·  34-43 → 44-50 → 51-58  ·  56-65 → 66-72 → 73-80</td></tr><tr><td>Physical power flat</td><td>15-80</td><td>15-21 → 22-28 → 29-36  ·  34-43 → 44-50 → 51-58  ·  56-65 → 66-72 → 73-80</td></tr><tr><td>Elemental resistance Cap %</td><td>15-75%</td><td>15-25 → 26-35  ·  34-45 → 46-55  ·  54-64 → 65-75</td></tr><tr><td>Elemental power flat</td><td>12-64</td><td>12-17 → 18-23 → 24-29  ·  27-35 → 36-41 → 42-46  ·  44-52 → 53-58 → 59-64</td></tr><tr><td>Energy Shield flat</td><td>12-60</td><td>12-16 → 17-22 → 23-27  ·  26-33 → 34-38 → 39-44  ·  42-49 → 50-55 → 56-60</td></tr><tr><td>Block chance %</td><td>10-50%</td><td>10-16 → 17-21  ·  20-28 → 29-35  ·  34-43 → 44-50</td></tr><tr><td>Armour flat</td><td>8-40</td><td>8-11 → 12-14 → 15-18  ·  17-22 → 23-25 → 26-29  ·  28-33 → 34-36 → 37-40</td></tr><tr><td>Life Regeneration flat</td><td>2-31</td><td>2-5 → 6-9  ·  8-14 → 15-19  ·  18-25 → 26-31</td></tr><tr><td>Mana Regeneration flat</td><td>2-31</td><td>2-5 → 6-9  ·  8-14 → 15-19  ·  18-25 → 26-31</td></tr><tr><td>Evasion flat</td><td>6-30</td><td>6-8 → 9-10 → 11-13  ·  12-16 → 17-19 → 20-22  ·  21-25 → 26-27 → 28-30</td></tr><tr><td>Energy Shield Regeneration %</td><td>12-30%</td><td>12-14 → 15-17  ·  16-20 → 21-23  ·  22-26 → 27-30</td></tr><tr><td>Elemental resistance %</td><td>15-30%</td><td>15-17 → 18-19  ·  18-22 → 23-24  ·  23-27 → 28-30</td></tr><tr><td>Accuracy %</td><td>5-25%</td><td>5-8 → 9-12  ·  11-17 → 18-21  ·  20-23 → 24-25</td></tr><tr><td>Attack speed %</td><td>5-25%</td><td>5-8 → 9-12  ·  11-17 → 18-21  ·  20-23 → 24-25</td></tr><tr><td>Cooldown reduction %</td><td>5-25%</td><td>5-8 → 9-12  ·  11-17 → 18-21  ·  20-23 → 24-25</td></tr><tr><td>Mana Regeneration %</td><td>10-25%</td><td>10-11 → 12-14  ·  13-16 → 17-19  ·  18-22 → 23-25</td></tr><tr><td>Status Alignment resistance %</td><td>5-25%</td><td>5-8 → 9-11  ·  10-15 → 16-18  ·  17-22 → 23-25</td></tr><tr><td>Stat Mod flat</td><td>5-25</td><td>5-7 → 8-9 → 10-11  ·  10-14 → 15-16 → 17-18  ·  17-21 → 22-23 → 24-25</td></tr><tr><td>All Resistance %</td><td>10-20%</td><td>10-11 → 12-13  ·  12-15 → 16-17  ·  16-19 → 20-20</td></tr><tr><td>Chance to bleed %</td><td>10-20%</td><td>10-11 → 12-13  ·  12-15 → 16-17  ·  16-19 → 20-20</td></tr><tr><td>Chance to stun %</td><td>10-20%</td><td>10-11 → 12-13  ·  12-15 → 16-17  ·  16-19 → 20-20</td></tr><tr><td>Magic power %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Attack damage %</td><td>8-16%</td><td>8-9 → 10-11  ·  10-12 → 13-14  ·  13-15 → 16-16</td></tr><tr><td>Spell damage %</td><td>8-16%</td><td>8-9 → 10-11  ·  10-12 → 13-14  ·  13-15 → 16-16</td></tr><tr><td>Physical power %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Armour %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Evasion %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Max Energy Shield %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Max HP %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Max Mana %</td><td>3-16%</td><td>3-5 → 6-7  ·  6-9 → 10-11  ·  10-14 → 15-16</td></tr><tr><td>Life Regeneration %</td><td>5-15%</td><td>5-6 → 7-8  ·  7-10 → 11-12  ·  11-14 → 15-15</td></tr><tr><td>All stats flat</td><td>8-15</td><td>8-9 → 10-10  ·  9-12 → 13-13  ·  12-14 → 15-15</td></tr><tr><td>Armour penetration %</td><td>5-15%</td><td>5-6 → 7-8  ·  7-10 → 11-12  ·  11-14 → 15-15</td></tr><tr><td>Elemental power %</td><td>3-14%</td><td>3-4 → 5-6  ·  5-8 → 9-10  ·  9-12 → 13-14</td></tr><tr><td>Critical chance %</td><td>1-8%</td><td>1-2 → 3-3  ·  2-4 → 5-5  ·  4-7 → 8-8</td></tr><tr><td>Elemental alignment %</td><td>1-5%</td><td>1-2  ·  1-4  ·  3-5</td></tr><tr><td>Perfect dodge %</td><td>1-3%</td><td>1-1  ·  0-2  ·  1-3</td></tr></tbody></table></section>

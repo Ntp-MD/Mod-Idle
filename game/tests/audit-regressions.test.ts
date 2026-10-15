@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { eng, E, ED, loot, sm } from '../src/engine/client';
+import { eng, E, ED, loot, sm, MODS, fieldwork } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
 import { newGame, tick, huntZone, carried, setLevel, catchUp } from '../src/sim/game';
 import { buildCharacter } from '../src/sim/player';
@@ -9,11 +9,12 @@ import { poolOf } from '../src/sim/craft';
 import { cooldownLeft, enterDungeon } from '../src/sim/dungeon';
 import { col, turnIn } from '../src/sim/collector';
 import { settlementById } from '../src/sim/town';
-import { settlementCell } from '../src/sim/road';
+import { settlementCell, walkNote } from '../src/sim/road';
 import { mobSwing, dotDamageParts, type Statuses } from '../src/sim/combat';
 import { newMobStatusStore, placeStatus, applyBleed, stepMob, modsOn, targetMods } from '../src/sim/mobStatus';
 import { spendableMana, reservedMana, usableMana, tickSkills, newSkillState } from '../src/sim/skills';
 import { switchPreset } from '../src/sim/presets';
+import { PAGES } from '../src/wiki/pages';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
 
@@ -253,5 +254,65 @@ describe('the Collector never consumes a pinned piece', () => {
     expect(r.why).toContain('locked');
     expect(s.bag.length).toBe(before);
     expect(s.collector.done[set.id]).toBeFalsy();
+  });
+});
+
+/**
+ * What a spawn in a zone actually wears: a Normal or Elite takes its species' Element and a Boss its
+ * own declared one (`spawnAt` · `mob.bosses[].element`). Read off the data here rather than off the
+ * engine's own helper, so the two cannot agree by sharing a bug.
+ */
+const wornInZone = (zoneId: number): string[] => {
+  const worn = new Set<string>();
+  for (const sp of E.mob.species as any[]) if ((sp.zones || []).includes(zoneId)) worn.add(sp.element);
+  for (const b of E.mob.bosses as any[]) if (b.zone === zoneId) worn.add(b.element);
+  return (E.elements.order as string[]).filter((el) => worn.has(el));
+};
+
+describe('the zone Elements column is what spawns there, not a declared copy', () => {
+  it('derives every zone from the cast it fields', () => {
+    for (const z of E.mob.zones as any[]) expect(eng.zoneElements(z.id), z.name).toEqual(wornInZone(z.id));
+  });
+
+  it('prints that set on the wiki world page, where a player reads it as what to resist', () => {
+    const html = PAGES.find((p) => p.file === 'world.html')!.body.join('\n');
+    const at = html.indexOf('<h2>Zones</h2>');
+    expect(at).toBeGreaterThan(-1);
+    const zones = html.slice(at, html.indexOf('</section>', at));
+    for (const z of E.mob.zones as any[]) {
+      const row = zones.slice(zones.indexOf(`<td>${z.name}</td>`));
+      // Elements is the last column of the Zones table
+      expect(row.slice(0, row.indexOf('</tr>')).endsWith(`<td>${wornInZone(z.id).join(' · ')}</td>`), z.name).toBe(true);
+    }
+  });
+
+  it('leaves no declared column behind to drift out of agreement again', () => {
+    for (const z of E.mob.zones as any[]) expect(z.elements, z.name).toBeUndefined();
+  });
+});
+
+describe('the road names a wild side by the site the data puts there', () => {
+  it('reads all three sites from fieldwork.wild_site_index instead of typing the dungeon door', () => {
+    const s = newGame(11);
+    for (const [site, index] of Object.entries(E.fieldwork.wild_site_index as Record<string, number>)) {
+      s.walk = { kind: 'wild', wild: index, node: null } as any;
+      expect(walkNote(s), site).toBe(`the ${site} side of the field`);
+    }
+    s.walk = { kind: 'wild', wild: 99, node: null } as any;
+    expect(walkNote(s)).toBe('wild side the field');
+  });
+});
+
+describe('a Stat Mod bakes the Core stat it feeds at drop', () => {
+  it('gives every line whose Mod declares `rolls` one of them, and no other line one', () => {
+    const rolls = new Map((MODS.mods as any[]).map((m) => [m.id, m.rolls]));
+    let baked = 0;
+    for (let seed = 1; seed <= 300; seed++) {
+      for (const l of rollDrop(mulberry32(seed), 'mid', 60).lines as any[]) {
+        const pool = rolls.get(l.id);
+        if (pool) { expect(pool, l.id).toContain(l.stat); baked++; } else expect(l.stat, l.id).toBeUndefined();
+      }
+    }
+    expect(baked).toBeGreaterThan(0);
   });
 });
