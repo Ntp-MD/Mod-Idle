@@ -4,12 +4,8 @@
 
 ## Feature (Wait User Assign on chat)
 
-
-
-- Card Player Vital , Name(You) icon , หลอดความหิว และเอาปุ่ม control มาไว้ใน card นี้
-
 ## i'm thinking
-- Black Market
+
 - remake passive tree like poe visual and progession like tree
 - One zone's mobs, but a zone carries more than one sub-zone: how does the gameplay fill that? The idea is to separate them by drop — the gear type each sub-zone leans, e.g. forest 1 pays helmets at a high chance. How does that read?
 
