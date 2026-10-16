@@ -1,383 +1,169 @@
 import type { Item } from '../sim/types';
+import {
+  characterIconCandidates, gearIconCandidates, skillIconCandidates,
+  slotIconCandidates, stackIconCandidates,
+} from './registry';
 
-import battleAxe from './weapon/battle-axe-1.svg?url';
-import bow from './weapon/bow-arrow.svg?url';
-import crossbow from './weapon/crossbow-1.svg?url';
-import spellBook from './equipment/spell-book.svg?url';
-import healthPotion from './misc/potions/health-potion-1.svg?url';
-import dagger from './weapon/knife-thrust.svg?url';
-import broadSword from './weapon/broadsword.svg?url';
-import warhammer from './weapon/warhammer.svg?url';
-import goblin from './character/goblin-head-1.svg?url';
-import bootPrints from './equipment/boot-prints.svg?url';
-import ogre from './character/minotaur-2.svg?url';
-import skull from './character/dread-skull.svg?url';
-import cloak from './equipment/cape.svg?url';
-import wolf from './character/wolf-head-2.svg?url';
-import crystal from './misc/stones/crystal-cluster-1.svg?url';
-import crossShield from './equipment/cross-shield.svg?url';
-import chaos from './skill/vortex.svg?url';
-import leaf from './misc/materials/leaf-skeleton.svg?url';
-import lightning from './skill/lightning-branches.svg?url';
-import dragonShield from './equipment/dragon-shield.svg?url';
-import crossedSwords from './weapon/crossed-swords-1.svg?url';
-import spiderWeb from './character/spider-web-1.svg?url';
-import pendant from './equipment/gem-pendant.svg?url';
-import gauntlet from './equipment/gloves.svg?url';
-import armorUpgrade from './equipment/armor-upgrade.svg?url';
-import clothes from './equipment/clothes.svg?url';
-import coins from './currency/coin-purse.svg?url';
-import roastFood from './misc/food-roast-meat.svg?url';
-import berryFruit from './enviroment/berry-bush.svg?url';
-import mushroomFood from './misc/mushroom.svg?url';
-import herbFood from './misc/materials/herb.svg?url';
-import centurionHelmet from './equipment/centurion-helmet.svg?url';
-import heartBeats from './interface/heart-beats.svg?url';
-import manaPotion from './misc/potions/magic-potion-1.svg?url';
-import arrowhead from './weapon/arrowhead.svg?url';
-import cloudRing from './character/cloud-ring.svg?url';
-import snowflake from './skill/snowflake-1.svg?url';
-import rock from './character/rock.svg?url';
-import fire from './skill/small-fire.svg?url';
-import helmet from './equipment/helmet-1.svg?url';
-import ring from './equipment/swirl-ring.svg?url';
-import accuracyMark from './interface/bullseye.svg?url';
-import allStatsMark from './interface/d12.svg?url';
-import cooldownMark from './misc/hourglass.svg?url';
-import healthMark from './interface/heart-beats.svg?url';
-import strengthMark from './weapon/battle-axe-1.svg?url';
-import intelligenceMark from './currency/attribute-intelligence.svg?url';
-import agilityMark from './skill/buff/dodging.svg?url';
-import dexterityMark from './weapon/bow-arrow.svg?url';
-import wisdomMark from './currency/attribute-wisdom.svg?url';
-import luckMark from './enviroment/clover-1.svg?url';
-import armorMark from './equipment/layer-armour.svg?url';
-import armorPenMark from './equipment/layer-armour-penetration.svg?url';
-import energyShieldMark from './equipment/layer-energy-shield.svg?url';
-import attackSpeedMark from './skill/layer-attack-speed.svg?url';
-import criticalDamageMark from './skill/layer-critical-damage.svg?url';
-import magicPowerMark from './skill/layer-magic-power.svg?url';
-import manaRegenMark from './skill/layer-mana-regeneration.svg?url';
-import alignmentMark from './skill/layer-elemental-alignment.svg?url';
-import statusResistanceMark from './skill/layer-status-resistance.svg?url';
-import maxManaMark from './skill/potion-mana.svg?url';
-import dodgeMark from './skill/buff/dodging.svg?url';
-import bleedMark from './skill/debuff-bleed.svg?url';
-import stunMark from './skill/status-stun.svg?url';
-import genericModMark from './misc/gear.svg?url';
-import poisonMark from './skill/poison.svg?url';
-import voidMark from './skill/element-void.svg?url';
-import sandstormMark from './skill/sandstorm.svg?url';
-import activeSkillMark from './skill/type-active-skill.svg?url';
-import auraSkillMark from './skill/type-aura-skill.svg?url';
-import buffSkillMark from './skill/type-buff-skill.svg?url';
-import curseSkillMark from './skill/type-curse-skill.svg?url';
-import healSkillMark from './skill/type-heal-skill.svg?url';
-
-// The four species the shelf carries a real creature for; the rest still fall back to the dread-skull.
-import minotaur from './character/minotaur-1.svg?url';
-import dragon from './character/wyvern.svg?url';
-import lizardman from './character/lizardman.svg?url';
-import werewolf from './character/wolf-howl.svg?url';
-import troll from './character/minotaur-1.svg?url';
-import kobold from './character/goblin-head-1.svg?url';
-import mummy from './character/mummy-head.svg?url';
-import vampire from './character/bat-1.svg?url';
-import demon from './character/daemon-skull.svg?url';
-import orc from './character/orc.svg?url';
-import giant from './character/giant-squid.svg?url';
-import human from './character/female.svg?url';
-import elf from './character/female.svg?url';
-import treant from './character/ent-mouth.svg?url';
-import dryad from './enviroment/tree-face.svg?url';
-import sirenIcon from './character/mermaid.svg?url';
-import wraithIcon from './character/wraith.svg?url';
-import impIcon from './character/imp.svg?url';
-import wyvernIcon from './character/dragon-head-2.svg?url';
-import beetleIcon from './character/scarab-beetle.svg?url';
-import hornetIcon from './character/bee.svg?url';
-import oozeIcon from './character/acid-blob.svg?url';
-import mistIcon from './character/jellyfish.svg?url';
-import salamanderIcon from './character/salamander.svg?url';
-import wispIcon from './character/spark-spirit.svg?url';
-import sharkIcon from './character/angler-fish.svg?url';
-import crabIcon from './character/crab.svg?url';
-import archonIcon from './character/harpy.svg?url';
-
-const armorBySlot: Record<string, string> = {
-  helmet,
-  chest: armorUpgrade,
-  pant: clothes,
-  boots: bootPrints,
-  belt: pendant,
-  gloves: gauntlet,
-  ring,
-  amulet: pendant,
-  earring: crystal,
-  cape: cloak,
-};
-
-const skillAssets = import.meta.glob<string>('./skill/**/*.svg', {
+/**
+ * The icon shelf.
+ *
+ * Every figure under this folder is art, discovered by file name. Semantic item, skill, and character
+ * associations live in registry.ts and use stable IDs where available. Resolvers try ordered candidates
+ * and category fallbacks, so missing bespoke art never leaves a broken image in the UI.
+ */
+const shelfAssets = import.meta.glob<string>('./**/*.png', {
   eager: true,
   query: '?url',
   import: 'default',
 });
 
-function skillAsset(...paths: string[]): string | undefined {
-  for (const path of paths) {
-    const asset = skillAssets[`./skill/${path}.svg`];
-    if (asset) return asset;
+/** The per-item vector set: one file per item name, the same slug the bag prints. */
+const itemAssets = import.meta.glob<string>('./items/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
+const baseName = (path: string): string => path.slice(path.lastIndexOf('/') + 1).replace(/\.(png|svg)$/, '');
+
+const shelf = new Map<string, string>(
+  [...Object.entries(shelfAssets), ...Object.entries(itemAssets)].map(([p, url]) => [baseName(p), url]),
+);
+
+/** The first name the shelf carries art for. */
+function art(...names: (string | undefined)[]): string | undefined {
+  for (const name of names) {
+    if (!name) continue;
+    const url = shelf.get(name);
+    if (url) return url;
   }
   return undefined;
 }
 
-/**
- * The self-generated shelf. `0.self-gen-png/` is the primary art for everything it covers and the
- * vector shelf below is the fallback, so a new figure needs only a file named after the thing —
- * a species id, or a Draught's colour — and no code.
- */
-const selfGenAssets = import.meta.glob<string>('./0.self-gen-png/**/*.png', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-});
+const ANCHOR = 'gear';
 
-/** Indexed by file name alone: the category folder is how the art is filed, not part of the lookup,
- *  so a figure can move between folders without a code change. */
-const selfGenByName = new Map<string, string>(
-  Object.entries(selfGenAssets).map(([p, url]) => [p.slice(p.lastIndexOf('/') + 1).replace(/\.png$/, ''), url]),
-);
-
-function selfGen(name: string): string | undefined {
-  return selfGenByName.get(name);
+/** The mark a screen asks for by name, or the shelf's own generic mark when it has none. */
+export function icon(name: string, fallback?: string): string {
+  return art(name, fallback) ?? art(ANCHOR) ?? '';
 }
 
-/** Two shelf files stand for a name the data does not carry. */
-const selfGenAlias: Record<string, string> = { human: 'player' };
-
-/** The hub's art: the self-generated figure where the shelf carries one, the vector mark where it does
- *  not. The rail is ringed and small, so a named file is the whole contract — no code per tab. */
+/** The hub's art: the shelf figure where it carries one, the caller's vector mark where it does not.
+ *  The rail is ringed and small, so a named file is the whole contract — no code per tab. */
 export function hubIcon(name: string, fallback: string): string {
-  return selfGen(name) ?? fallback;
+  return art(name) ?? fallback;
 }
 
-/** Draught art follows the liquid, so each tier of each pool reads apart in the bag. */
-const draughtArt: Record<string, string> = {
-  'red draught': 'hp-potion',
-  'yellow draught': 'orange-potion',
-  'white draught': 'white-potion',
-  'sky draught': 'mana-potion',
-  'blue draught': 'blue-potion',
-  'deep blue draught': 'puple-potion',
+const ELEMENT_ART: Record<string, string> = {
+  physical: 'broadsword',
+  fire: 'fire',
+  cold: 'snowflake',
+  lightning: 'lightning',
+  poison: 'poison',
+  chaos: 'chaos',
+  earth: 'boulder',
 };
 
-const mobBySpecies: Record<string, string> = {
-  goblin,
-  slime: cloudRing,
-  troll,
-  orc,
-  demon,
-  elf,
-  golem: rock,
-  spider: spiderWeb,
-  wolf,
-  minotaur,
-  dragon,
-  lizardman,
-  werewolf,
-  kobold,
-  mummy,
-  vampire,
-  ogre,
-  treant,
-  human,
-  giant,
-  dryad,
-  siren: sirenIcon,
-  wraith: wraithIcon,
-  imp: impIcon,
-  wyvern: wyvernIcon,
-  beetle: beetleIcon,
-  hornet: hornetIcon,
-  ooze: oozeIcon,
-  mist: mistIcon,
-  salamander: salamanderIcon,
-  wisp: wispIcon,
-  shark: sharkIcon,
-  crab: crabIcon,
-  archon: archonIcon,
+const STAT_ART: Record<string, string> = {
+  str: 'battle-axe-1',
+  int: 'concentration-orb',
+  vit: 'heart-beats',
+  agi: 'dodging',
+  dex: 'bow-arrow',
+  wis: 'awareness',
+  lck: 'clover-2',
 };
 
-const elementByName: Record<string, string> = {
-  physical: broadSword,
-  fire,
-  cold: snowflake,
-  lightning,
-  poison: poisonMark,
-  chaos,
-  earth: rock,
+const MOD_ART: Record<string, string> = {
+  accuracy: 'bullseye',
+  attack_speed: 'layer-attack-speed',
+  critical_chance: 'bullseye',
+  critical_damage: 'layer-critical-damage',
+  magic_power: 'layer-magic-power',
+  attack_damage_pct: 'crossed-swords-1',
+  spell_damage_pct: 'layer-magic-power',
+  magic_power_flat: 'layer-magic-power',
+  physical_power: 'crossed-swords-1',
+  physical_power_flat: 'crossed-swords-1',
+  armour_flat: 'layer-armour',
+  armour_pct: 'layer-armour',
+  cooldown_reduction: 'hourglass',
+  energy_shield_flat: 'layer-energy-shield',
+  evasion_flat: 'dodging',
+  evasion_pct: 'dodging',
+  life_regen_flat: 'heart-beats',
+  life_regen_pct: 'heart-beats',
+  mana_regen_flat: 'layer-mana-regeneration',
+  mana_regen_pct: 'layer-mana-regeneration',
+  max_energy_shield_pct: 'layer-energy-shield',
+  energy_shield_regen: 'layer-energy-shield',
+  max_hp: 'heart-beats',
+  max_hp_flat: 'heart-beats',
+  max_mana: 'potion-mana',
+  max_mana_flat: 'potion-mana',
+  perfect_dodge_pct: 'dodging',
+  status_resistance_pct: 'layer-status-resistance',
+  all_resistance_pct: 'layer-status-resistance',
+  elemental_resistance_cap_pct: 'layer-status-resistance',
+  elemental_alignment: 'layer-elemental-alignment',
+  elemental_power: 'layer-magic-power',
+  elemental_power_flat: 'layer-magic-power',
+  elemental_resistance: 'layer-energy-shield',
+  bleed_chance: 'debuff-bleed',
+  stun_chance: 'status-stun',
+  block_chance: 'cross-shield',
+  armour_pen: 'layer-armour-penetration',
 };
 
-const statIcons: Record<string, string> = {
-  str: strengthMark,
-  int: intelligenceMark,
-  vit: healthMark,
-  agi: agilityMark,
-  dex: dexterityMark,
-  wis: wisdomMark,
-  lck: luckMark,
+/** Only the species the shelf has no figure of its own needs a row here. */
+const MOB_BY_SPECIES: Record<string, string> = {
+  ogre: 'minotaur-2',
+  human: 'player',
 };
 
-const modIcons: Record<string, string> = {
-  accuracy: accuracyMark,
-  attack_speed: attackSpeedMark,
-  critical_chance: accuracyMark,
-  critical_damage: criticalDamageMark,
-  magic_power: magicPowerMark,
-  attack_damage_pct: crossedSwords,
-  spell_damage_pct: magicPowerMark,
-  magic_power_flat: magicPowerMark,
-  physical_power: crossedSwords,
-  physical_power_flat: crossedSwords,
-  armour_flat: armorMark,
-  armour_pct: armorMark,
-  cooldown_reduction: cooldownMark,
-  energy_shield_flat: energyShieldMark,
-  evasion_flat: dodgeMark,
-  evasion_pct: dodgeMark,
-  life_regen_flat: healthMark,
-  life_regen_pct: healthMark,
-  mana_regen_flat: manaRegenMark,
-  mana_regen_pct: manaRegenMark,
-  max_energy_shield_pct: energyShieldMark,
-  energy_shield_regen: energyShieldMark,
-  max_hp: healthMark,
-  max_hp_flat: healthMark,
-  max_mana: maxManaMark,
-  max_mana_flat: maxManaMark,
-  perfect_dodge_pct: dodgeMark,
-  status_resistance_pct: statusResistanceMark,
-  all_resistance_pct: statusResistanceMark,
-  elemental_resistance_cap_pct: statusResistanceMark,
-  elemental_alignment: alignmentMark,
-  elemental_power: magicPowerMark,
-  elemental_power_flat: magicPowerMark,
-  elemental_resistance: energyShieldMark,
-  bleed_chance: bleedMark,
-  stun_chance: stunMark,
-  block_chance: crossShield,
-  armour_pen: armorPenMark,
-};
-
-const weaponIcon = (base: string): string => {
-  if (base.includes('crossbow')) return crossbow;
-  if (base.includes('bow')) return bow;
-  if (base.includes('dagger')) return dagger;
-  if (base.includes('mace')) return warhammer;
-  if (base.includes('axe')) return battleAxe;
-  if (base.includes('spear')) return arrowhead;
-  if (base.includes('staff') || base.includes('wand')) return spellBook;
-  return broadSword;
-};
+const pick = (...names: (string | undefined)[]): string => art(...names) ?? icon(ANCHOR);
 
 export function gearIcon(item: Item): string {
-  const slot = item.slot.toLowerCase();
-  const base = item.base.toLowerCase();
-  if (slot === 'main hand') return weaponIcon(base);
-  if (slot === 'helmet' && base.includes('barbute')) return centurionHelmet;
-  if (slot === 'off hand') {
-    if (base.includes('tome')) return spellBook;
-    if (base.includes('kite')) return dragonShield;
-    if (base.includes('sword') || base.includes('axe') || base.includes('dagger')) return weaponIcon(base);
-    return crossShield;
-  }
-  return armorBySlot[slot] ?? armorUpgrade;
+  return art(...gearIconCandidates(item.base, item.slot)) ?? icon(ANCHOR);
 }
 
 /** The glyph an empty slot wears on the doll — the same shelf a worn piece draws from, so a bare body
  *  still reads as a body with places to fill rather than as a grid of words. */
 export function slotIcon(slot: string): string {
-  const s = slot.toLowerCase();
-  if (s === 'main hand') return broadSword;
-  if (s === 'off hand') return crossShield;
-  return armorBySlot[s] ?? armorUpgrade;
+  return art(...slotIconCandidates(slot)) ?? icon(ANCHOR);
 }
 
-export function stackIcon(group: string, name: string): string {
-  const category = group.toLowerCase();
-  const item = name.toLowerCase();
-  if (category === 'stones') return crystal;
-  if (category === 'herbs') return leaf;
-  if (category === 'draughts') {
-    return selfGen(draughtArt[item]) ?? (item.includes('mana') ? manaPotion : healthPotion);
-  }
-  // the Condensed is every Draught cooked down, so it wears the one bottle that holds every colour
-  if (category === 'condensed') return selfGen('rainbow-potion') ?? healthPotion;
-    if (category === 'food') {
-      if (item.includes('berry') || item.includes('nut')) return berryFruit;
-      if (item.includes('mushroom')) return mushroomFood;
-      if (item.includes('herb')) return herbFood;
-      return roastFood;
-    }
-  if (category === 'junk') return skull;
-  return coins;
+export function stackIcon(group: string, name: string, stableId?: string): string {
+  return art(...stackIconCandidates(group, name, stableId)) ?? icon(ANCHOR);
 }
 
 export function mobIcon(species: string): string {
   const key = species.toLowerCase();
-  return selfGen(selfGenAlias[key] ?? key) ?? mobBySpecies[key] ?? skull;
+  return pick(key, MOB_BY_SPECIES[key], 'dread-skull');
 }
 
 /** The mark a boss field label carries (§11): the same dread-skull the junk stream uses. */
-export const bossMark = skull;
+export const bossMark = pick('dread-skull');
 
 export function elementIcon(element: string): string {
-  return elementByName[element.toLowerCase()] ?? broadSword;
+  return pick(ELEMENT_ART[element.toLowerCase()], 'broadsword');
 }
 
 /** A Mod's mark follows its stat or Element, so equipment lines scan by meaning as well as by number. */
 export function modIcon(id: string, stat?: string | null, element?: string | null): string {
   const key = id.toLowerCase();
-  if (key === 'stat_mod_flat') return statIcons[stat?.toLowerCase() ?? ''] ?? allStatsMark;
-  if (key === 'all_stat_flat') return allStatsMark;
+  if (key === 'stat_mod_flat') return pick(STAT_ART[stat?.toLowerCase() ?? ''], 'd12');
+  if (key === 'all_stat_flat') return pick('d12');
   if (element && ['elemental_power', 'elemental_power_flat', 'elemental_resistance'].includes(key)) {
     return elementIcon(element);
   }
-  return modIcons[key] ?? genericModMark;
+  return pick(MOD_ART[key], 'gear');
 }
 
 export function skillIcon(id: string, type?: string): string {
-  const skill = id.toLowerCase();
-  const kind = (type || skill.split('.')[0]).toLowerCase();
-  const slug = skill.split('.').pop()?.replace(/_/g, '-') ?? skill.replace(/_/g, '-');
-  const exact = skillAsset(`${kind}/${kind}-${slug}`, `${kind}/${slug}`, slug);
-  if (exact) return exact;
-  if (skill.includes('whirlwind') || skill.includes('whirlaxe') || skill.includes('twister')) {
-    return skillAsset('whirlwind-1', 'whirlwind-2') ?? cloudRing;
-  }
-  if (skill.includes('sand_storm')) return sandstormMark;
-  if (/fan_of_knives|backstab|nerve_strike|poisoned_edge/.test(skill)) return dagger;
-  if (/impale|skewer_line|reach_thrust/.test(skill)) return arrowhead;
-  if (/skull_crack|bone_breaker|iron_toll/.test(skill)) return warhammer;
-  if (/low_sweep|wide_swing|cleave_down/.test(skill)) return crossedSwords;
-  if (skill.includes('acid')) return poisonMark;
-  if (skill.includes('arrow') || skill.includes('shot') || skill.includes('volley')) return bow;
-  if (skill.includes('shield') || skill.includes('guard') || skill.includes('wall') || skill.includes('block') || skill.includes('damage_taken')) return crossShield;
-  if (skill.includes('heal') || skill.includes('cleanse') || skill.includes('vitality')) return heartBeats;
-  if (skill.includes('bleed') || skill.includes('reap') || skill.includes('carnage')) return bleedMark;
-  if (/fire|flame|ember|meteor|wisp|burn/.test(skill)) return fire;
-  if (/frost|cold|ice|rime|snow|blizzard|frozen/.test(skill)) return snowflake;
-  if (/lightning|spark|thunder|storm|static/.test(skill)) return lightning;
-  if (/poison|toxic|venom|acid/.test(skill)) return poisonMark;
-  if (skill.includes('void') || skill.includes('veil')) return voidMark;
-  if (skill.includes('chaos')) return chaos;
-  if (/earth|sand|quake|ground|stone|rock/.test(skill)) return rock;
-  if (skill.includes('dodge') || skill.includes('sidestep')) return dodgeMark;
-  if (skill.includes('crit')) return criticalDamageMark;
-  if (kind === 'curse') return curseSkillMark;
-  if (kind === 'buff') return buffSkillMark;
-  if (kind === 'aura') return auraSkillMark;
-  if (kind === 'heal') return healSkillMark;
-  if (kind === 'attack') return activeSkillMark;
-  return spellBook;
+  return art(...skillIconCandidates(id, type)) ?? icon(ANCHOR);
+}
+
+/** The player portrait has its own stable registration, separate from Human mob art and the creation control. */
+export function characterIcon(id = 'player.default'): string {
+  return art(...characterIconCandidates(id)) ?? icon(ANCHOR);
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { E } from '../engine/client';
-  import { gearIcon } from '../icon';
+  import { gearIcon, icon } from '../icon';
   import { itemName } from '../sim/item-name';
   import { craft, stoneName, type CraftOp, type Where } from '../sim/craft';
   import { gearEntry, type SlotEntry } from './bag';
@@ -8,16 +8,17 @@
   import Forge from './Forge.svelte';
   import CraftBoard from './CraftBoard.svelte';
   import type { GameState, Item } from '../sim/types';
-  import stoneRerollValue from '../icon/misc/stones/stone-reroll-value.svg?url';
-  import stoneRerollTier from '../icon/misc/stones/stone-reroll-tier.svg?url';
-  import stoneAdd from '../icon/misc/stones/stone-add-mod.svg?url';
-  import stoneRemove from '../icon/misc/stones/stone-remove-mod.svg?url';
-  import stoneQuality from '../icon/misc/stones/stone-quality.svg?url';
-  import stoneRepair from '../icon/misc/stones/stone-repair.svg?url';
-  import stoneCorrupt from '../icon/misc/stones/stone-corrupt.svg?url';
-  import runeStone from '../icon/misc/stones/rune-stone.svg?url';
-  import crystalOne from '../icon/misc/stones/crystal-cluster-1.svg?url';
-  import crystalGrowth from '../icon/misc/stones/crystal-growth.svg?url';
+  // Each stone wears the press it buys — the same marks the Craft board hangs on the purse.
+  const stoneRerollValue = icon('swirl-ring');
+  const stoneRerollTier = icon('ladder-stack');
+  const stoneAdd = icon('add-plus');
+  const stoneRemove = icon('remove-minus');
+  const stoneQuality = icon('level-up');
+  const stoneRepair = icon('anvil-impact');
+  const stoneCorrupt = icon('cursed-star');
+  const runeStone = icon('keystone-node');
+  const crystalOne = icon('crystal-cluster-1');
+  const crystalGrowth = icon('crystal-growth');
 
   let { game, item, where = null, index = -1, onpick, onclear, onrun, wornOf, note = '' }: {
     game: GameState;

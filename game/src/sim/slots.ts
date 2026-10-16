@@ -35,6 +35,8 @@ const slotsFor = (count: number, cap: number) => Math.ceil(Math.max(0, count) / 
 
 /** One stack the character carries, in the shape the bag grid draws it. */
 export interface BagStack {
+  /** Stable source key for icon registration; `name` is display-only and may change. */
+  key: string;
   name: string;
   group: string;
   capKind: string;
@@ -57,7 +59,7 @@ export function bagStacks(state: GameState): BagStack[] {
       const label = b.cap === 'food'
         ? fieldwork.foodById[name]?.name || name
         : b.cap === 'material' ? fieldwork.materialById[name]?.name || name : name;
-      out.push({ name: label, group: b.label, capKind: b.cap, count, weight: count * unit });
+      out.push({ key: name, name: label, group: b.label, capKind: b.cap, count, weight: count * unit });
     }
   }
   return out;

@@ -112,13 +112,13 @@ export const GALLERY_RUNTIME = `(function () {
   tabs.style.cssText = 'display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;';
 
   var count = document.createElement('p');
-  count.style.cssText = 'margin:0 0 .5rem;font-size:.78rem;color:var(--dim);';
+  count.style.cssText = 'margin:0 0 .5rem;font-size:var(--font-xs);color:var(--dim);';
 
   var grid = document.createElement('div');
   grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;';
 
-  var TAB_ON = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-sm);background:var(--gold);color:#000;cursor:pointer;font-size:.75rem;';
-  var TAB_OFF = 'padding:.25rem .6rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:transparent;color:var(--text);cursor:pointer;font-size:.75rem;';
+  var TAB_ON = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-sm);background:var(--gold);color:#000;cursor:pointer;font-size:var(--font-xs);';
+  var TAB_OFF = 'padding:.25rem .6rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:transparent;color:var(--text);cursor:pointer;font-size:var(--font-xs);';
 
   function renderTabs() {
     tabs.textContent = '';
@@ -159,7 +159,7 @@ export const GALLERY_RUNTIME = `(function () {
     var star = document.createElement('button');
     star.textContent = on ? '★' : '☆';
     star.title = on ? 'Remove favourite' : 'Mark favourite';
-    star.style.cssText = 'position:absolute;top:2px;right:2px;background:none;border:none;cursor:pointer;font-size:.95rem;color:var(--gold);padding:0;';
+    star.style.cssText = 'position:absolute;top:2px;right:2px;background:none;border:none;cursor:pointer;font-size:var(--font-xs);color:var(--gold);padding:0;';
     star.onclick = function (e) { e.stopPropagation(); toggleFav(item.path); render(); };
 
     var isMarked = hasMark(item.path);
@@ -196,7 +196,7 @@ export const GALLERY_RUNTIME = `(function () {
     var label = document.createElement('div');
     label.textContent = item.name;
     label.title = item.path;
-    label.style.cssText = 'font-size:.62rem;color:var(--dim);margin-top:.25rem;word-break:break-all;line-height:1.25;';
+    label.style.cssText = 'font-size:var(--font-xs);color:var(--dim);margin-top:.25rem;word-break:break-all;line-height:1.25;';
 
     el.appendChild(star);
     el.appendChild(marker);

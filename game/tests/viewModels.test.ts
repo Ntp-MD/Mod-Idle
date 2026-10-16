@@ -52,7 +52,7 @@ describe('the bag view model (bag.ts)', () => {
     expect(a.levelRank).toBe(30);
     expect(a.score).toBeGreaterThan(0);
 
-    const stack: BagStack = { name: 'Tier stone', group: 'stones', capKind: 'stone', count: 7, weight: 0 };
+    const stack: BagStack = { key: 'tier', name: 'Tier stone', group: 'stones', capKind: 'stone', count: 7, weight: 0 };
     const s = stackEntry(stack, 2);
     expect(s.kind).toBe('stack');
     expect(s.count).toBe(7);

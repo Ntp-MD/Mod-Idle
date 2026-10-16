@@ -5,12 +5,12 @@
   import { fieldLabel, mechanicWords } from './hud';
   import { bar, curseWords, statusWords } from './field';
   import { fxOut } from './motion';
-  import { elementIcon, mobIcon, skillIcon } from '../icon';
+  import { characterIcon, elementIcon, icon, mobIcon, skillIcon } from '../icon';
   import { statusLabel } from '../sim/mobStatus';
   import { ownsSkill } from '../sim/skills';
   import { bossMark } from '../icon';
-  import faceMark from '../icon/equipment/helmet-1.svg?url';
-  import alignMark from '../icon/skill/layer-elemental-alignment.svg?url';
+  const faceMark = characterIcon();
+  const alignMark = icon('layer-elemental-alignment');
   import type { GameState, Mob, FxEvent } from '../sim/types';
   import type { Character } from '../sim/player';
   import type { Statuses, StatusName } from '../sim/combat';
@@ -345,8 +345,8 @@
     background: color-mix(in srgb, var(--text) calc(var(--on) * 100%),
                 color-mix(in srgb, var(--dim) 42%, transparent));
     transform: rotate(-9deg);
-    -webkit-mask: url('../icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
-            mask: url('../icon/equipment/boot-prints.svg') left center / 200% 100% no-repeat;
+    -webkit-mask: url('../icon/ui/boot-prints.png') left center / 200% 100% no-repeat;
+            mask: url('../icon/ui/boot-prints.png') left center / 200% 100% no-repeat;
   }
 
   /* the other foot: the glyph's far half, dropped half a step and turned the other way, so the two tracks
@@ -589,8 +589,8 @@
     position: absolute; left: 50%; top: clamp(24px, 1.84vw, 51px); z-index: var(--z-highlight); pointer-events: none;
     width: var(--icon-xl); height: var(--icon-xl); margin: var(--x-pull-arc) 0 0 var(--x-pull-arc);
     background: var(--fx, var(--text));
-    -webkit-mask: url('../icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
-            mask: url('../icon/weapon/crossed-swords-1.svg') center / contain no-repeat;
+    -webkit-mask: url('../icon/gear/crossed-swords-1.png') center / contain no-repeat;
+            mask: url('../icon/gear/crossed-swords-1.png') center / contain no-repeat;
     animation: plate-arc .26s ease-out forwards;
   }
 

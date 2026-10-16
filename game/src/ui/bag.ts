@@ -90,13 +90,14 @@ export function gearEntry(item: Item, index: number): SlotEntry {
 }
 
 export function stackEntry(stack: BagStack, index: number): SlotEntry {
+  const iconKind = stack.group === 'junk' ? 'junk' : stack.capKind;
   return {
     index,
     kind: 'stack',
     title: stack.name,
     sub: stack.group,
     stack,
-    icon: stackIcon(stack.group, stack.name),
+    icon: stackIcon(stack.group, stack.name, `${iconKind}:${stack.key}`),
     levelRank: -1,
     qualityRank: -1,
     score: stack.count,

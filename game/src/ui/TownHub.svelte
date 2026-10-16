@@ -14,12 +14,13 @@
   import { canBuy, stockOf, settlementById, standingTier, standingShare } from '../sim/town';
   import { craft } from '../sim/craft';
   import type { GameState } from '../sim/types';
-  import marketMark from '../icon/currency/coin-purse.svg?url';
-  import forgeMark from '../icon/building/anvil-1.svg?url';
-  import craftMark from '../icon/misc/stones/stone-add-mod.svg?url';
-  import stashMark from '../icon/misc/treasure-chest.svg?url';
-  import deskMark from '../icon/misc/quest-journal.svg?url';
-  import farmMark from '../icon/enviroment/plant-watering.svg?url';
+  import { icon } from '../icon';
+  const marketMark = icon('currency-strongbox');
+  const forgeMark = icon('anvil-1');
+  const craftMark = icon('add-plus');
+  const stashMark = icon('treasure-chest');
+  const deskMark = icon('quest-journal');
+  const farmMark = icon('sprout');
 
   let { state, town, here, tabs, onopen, onwarp, onsellall, onstashall, onbest }: {
     state: GameState;

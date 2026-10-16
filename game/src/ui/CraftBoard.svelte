@@ -18,18 +18,19 @@
   import PieceOn from './PieceOn.svelte';
   import SlotGrid from './SlotGrid.svelte';
   import { gearEntry } from './bag';
-  import { modIcon } from '../icon';
+  import { modIcon, icon } from '../icon';
   import type { GameState, Item } from '../sim/types';
-  import stoneRerollValue from '../icon/misc/stones/stone-reroll-value.svg?url';
-  import stoneRerollTier from '../icon/misc/stones/stone-reroll-tier.svg?url';
-  import stoneAdd from '../icon/misc/stones/stone-add-mod.svg?url';
-  import stoneRemove from '../icon/misc/stones/stone-remove-mod.svg?url';
-  import stoneQuality from '../icon/misc/stones/stone-quality.svg?url';
-  import stoneRepair from '../icon/misc/stones/stone-repair.svg?url';
-  import stoneCorrupt from '../icon/misc/stones/stone-corrupt.svg?url';
-  import runeStone from '../icon/misc/stones/rune-stone.svg?url';
-  import crystalOne from '../icon/misc/stones/crystal-cluster-1.svg?url';
-  import crystalGrowth from '../icon/misc/stones/crystal-growth.svg?url';
+  // Each stone wears the press it buys, so the purse reads by shape before it reads by name.
+  const stoneRerollValue = icon('swirl-ring');
+  const stoneRerollTier = icon('ladder-stack');
+  const stoneAdd = icon('add-plus');
+  const stoneRemove = icon('remove-minus');
+  const stoneQuality = icon('level-up');
+  const stoneRepair = icon('anvil-impact');
+  const stoneCorrupt = icon('cursed-star');
+  const runeStone = icon('keystone-node');
+  const crystalOne = icon('crystal-cluster-1');
+  const crystalGrowth = icon('crystal-growth');
 
   let { game, item, where = null, index = -1, onpick, onrun, wornOf, note = '', embedded = false, stoneRequest = null, onstoneclear = () => {} }: {
     game: GameState;

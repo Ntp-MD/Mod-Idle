@@ -9,6 +9,9 @@ import { slotsAvailable, slotsUsed } from '../src/sim/slots';
 import { condense, craftPotion, farm } from '../src/sim/farm';
 import { canCook, cookMeal, establishCamp } from '../src/sim/fieldwork';
 import { castOnce, effectsActive, newSkillState, paySkillXp } from '../src/sim/skills';
+import { playerSwing, mobSwing } from '../src/sim/combat';
+import { emptyGear, type Character } from '../src/sim/player';
+import { NO_CURSE } from '../src/sim/curse';
 import { exportJson, importJson } from '../src/state/save';
 import { buy, canBuy, claimTask, deposit, depositMany, sellJunk, settlementById, stockOf, withdraw, withdrawMany } from '../src/sim/town';
 import { col, turnIn } from '../src/sim/collector';
@@ -293,5 +296,69 @@ describe('audit follow-up', () => {
     tick(s, {}, { autoSkills: false });
     expect(s.phase).toBe('camp');
     expect(s.player.hp).toBe(0);
+  });
+});
+
+const hitMob = (over: Partial<Mob> = {}): Mob => ({
+  id: 'm', kind: 'Small', hp: 1e9, hpMax: 1e9, xp: 1, ps: 100, hitsPerSec: 1, acc: 1,
+  evasion: 0, dodgeRate: 0, damage: 'physical', innate: [], align: 0, crit: 0, armour: 0, res: 0,
+  atkTimer: 0, engageSec: 0, line: 'front', ...over,
+} as Mob);
+const flat = (v: number) => () => v;
+
+describe('audit follow-up: character, combat order and recovery', () => {
+  it('only worn gear moves the stat — the bag, the stash and the Collector pile never do', () => {
+    const piece: Item = { ...armour(), slot: 'chest', lines: [{ id: 'armour_flat', value: 100 }] };
+    const worn = emptyGear();
+    const at = loot.SLOTS.indexOf('chest');
+    worn[at] = piece;
+    const bare = buildCharacter(1, emptyGear());
+    const equipped = buildCharacter(1, worn);
+    expect(equipped.armour).toBeGreaterThan(bare.armour);
+    // the same piece parked in the bag/stash leaves the build untouched (buildCharacter reads gear only)
+    expect(buildCharacter(1, emptyGear()).armour).toBe(bare.armour);
+    // removal returns the sheet to the baseline the tick would rebuild to
+    worn[at] = null;
+    expect(buildCharacter(1, worn).armour).toBe(bare.armour);
+  });
+
+  it('runs perfect dodge before Evasion and Block, and Evasion before Block', () => {
+    const base = buildCharacter(60, emptyGear());
+    const dodged = mobSwing(flat(0.5), { ...base, perfectDodge: 100, block: 100 } as Character, hitMob(), {}, NO_CURSE);
+    expect(dodged.blocked).toBe('perfect dodge');
+    expect(dodged.toEs + dodged.toHp).toBe(0);
+    // with no perfect dodge but a standing Evasion, the swing dies at Evasion and never reaches Block
+    const evaded = mobSwing(flat(0.5), { ...base, perfectDodge: 0, evasion: 1e9, block: 100 } as Character, hitMob(), {}, NO_CURSE);
+    expect(evaded.blocked).toBe('evasion');
+  });
+
+  it('lets a shield block only a physical swing, never a pure Element one', () => {
+    const base = buildCharacter(60, emptyGear());
+    const char = { ...base, perfectDodge: 0, evasion: 0, armour: 0, resistance: 0, resCap: 100, block: 100 } as Character;
+    expect(mobSwing(flat(0.5), char, hitMob({ damage: 'physical' }), {}, NO_CURSE).blocked).toBe('block');
+    expect(mobSwing(flat(0.5), char, hitMob({ damage: 'magic' }), {}, NO_CURSE).blocked).toBeNull();
+  });
+
+  it('spends Energy Shield before Health, and overflow lands on Health once', () => {
+    const base = buildCharacter(60, emptyGear());
+    const char = { ...base, perfectDodge: 0, evasion: 0, block: 0, armour: 0, resistance: 0, resCap: 100, es: 1000 } as Character;
+    const raw = mobSwing(flat(0.5), char, hitMob(), {}, NO_CURSE);
+    expect(raw.toHp + raw.toEs).toBeGreaterThan(0);
+    const partial = mobSwing(flat(0.5), char, hitMob(), {}, NO_CURSE, 10);
+    expect(partial.toEs).toBeLessThan(partial.raw);
+    expect(partial.toHp).toBeGreaterThan(0);
+    expect(partial.toEs + partial.toHp).toBeCloseTo(raw.toHp + raw.toEs, 6);
+    const full = mobSwing(flat(0.5), char, hitMob(), {}, NO_CURSE, 1000);
+    expect(full.toHp).toBe(0);
+  });
+
+  it('prints Evasion as the reference anchor, not the live roll against a heavy attacker', () => {
+    const s = newGame(100);
+    s.player.level = 100;
+    const c = buildCharacter(100, s.gear, {}, 0, { add: {}, mult: {} }, s.player.points, s.player.treeRanks);
+    expect(c.evasion).toBeGreaterThan(0);
+    expect(c.evasionChance).toBeCloseTo(eng.evasionChance(c.evasion, eng.refAttackerAcc(100)), 9);
+    // against a mob with far thinner accuracy, the live roll climbs above the published anchor
+    expect(eng.evasionChance(c.evasion, eng.refAttackerAcc(100) / 10)).toBeGreaterThan(c.evasionChance);
   });
 });

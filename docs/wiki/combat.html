@@ -130,11 +130,11 @@
     --font-md: clamp(17px, 1.28vw, 36px);
     --font-lg: clamp(22px, 1.67vw, 47px);
     --font-xl: clamp(29px, 2.18vw, 62px);
-    --icon-xs: clamp(11px, 0.82vw, 23px);
-    --icon-sm: clamp(14px, 1.11vw, 31px);
-    --icon-md: clamp(21px, 1.60vw, 45px);
-    --icon-lg: clamp(32px, 2.42vw, 68px);
-    --icon-xl: clamp(44px, 3.39vw, 95px);
+    --icon-xs: clamp(11px, 12vw, 23px);
+    --icon-sm: clamp(14px, 1vw, 31px);
+    --icon-md: clamp(21px, 1.50vw, 45px);
+    --icon-lg: clamp(32px, 3vw, 68px);
+    --icon-xl: clamp(44px, 4vw, 95px);
 
     --icon-hub: clamp(40px, 4vw, 60px);
     --icon-hub-img: 50%;
@@ -159,7 +159,7 @@
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--ui); }
+body { margin: 0; background: var(--bg); color: var(--text); font: var(--font-xs)/1.55 var(--ui); }
 a { color: var(--gold); text-decoration: none; }
 a:hover { text-decoration: underline; }
 .layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 116rem; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
@@ -167,13 +167,13 @@ nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-directi
 nav a { color: var(--dim); }
 nav a.on { color: var(--gold); }
 main { flex: 1; min-width: 0; }
-h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+h1 { margin: 0 0 .3rem; font-size: var(--font-md); }
 .lead { color: var(--dim); margin: 0 0 2rem; }
 section { margin: 0 0 2.2rem; }
-h2 { font-size: 1.05rem; margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
-h3 { font-size: .9rem; margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
-.note { color: var(--dim); font-size: .82rem; margin: .3rem 0 .6rem; }
-table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+h2 { font-size: var(--font-sm); margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: var(--font-xs); margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: var(--font-xs); margin: .3rem 0 .6rem; }
+table { border-collapse: collapse; width: 100%; font-size: var(--font-xs); }
 th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--dim); font-weight: 600; }
 thead th { position: sticky; background: var(--panel); z-index: 1; }
@@ -188,7 +188,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs > label {
   display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
   border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
-  color: var(--dim); font-size: .88rem; cursor: pointer;
+  color: var(--dim); font-size: var(--font-xs); cursor: pointer;
 }
 .tabs > label b { color: var(--mob); font-weight: 500; }
 .tabs > label:hover { color: var(--text); }
@@ -205,24 +205,24 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
 td:first-child { white-space: nowrap; }
-.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: .78rem; }
+.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: var(--font-xs); }
 .rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
 .rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
 .rolls .rn { position: relative; flex: 1; }
-.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: .72rem; white-space: nowrap; opacity: .8; }
-.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: .72rem; white-space: nowrap; }
-td .hy { color: var(--dim); font-size: .8rem; }
-.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: .74rem; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: var(--font-xs); white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; }
+td .hy { color: var(--dim); font-size: var(--font-xs); }
+.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: var(--font-xs); }
 .fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
 .fx li:last-child { border-bottom: 0; }
 .fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
 .fx .fk em { color: var(--text); font-style: normal; }
-.fx .fs { color: var(--dim); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.fx .fs { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
 .fx .fv { font-family: var(--num); white-space: nowrap; }
-td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15rem; }
+td .sub { display: block; color: var(--dim); font-size: var(--font-xs); margin-top: .15rem; }
 .rolls .forced .rn { color: var(--gold); }
-.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: .72rem; }
-.plist { list-style: none; margin: .15rem 0 0; padding: 0; font-size: .78rem; }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: var(--font-xs); }
+.plist { list-style: none; margin: .15rem 0 0; padding: 0; font-size: var(--font-xs); }
 /* one grid for the whole cell: every key shares track one at the width of the longest key in that
    cell, every value takes track two — display:contents promotes each key/value pair to the grid,
    so a spelled-out label like "damage per second" costs no wrap and nothing runs into its number */
@@ -235,33 +235,33 @@ td .sub { display: block; color: var(--dim); font-size: .78rem; margin-top: .15r
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
 .zone-title { font-weight: 600; }
-.zone-meta { color: var(--dim); font-size: .8rem; }
+.zone-meta { color: var(--dim); font-size: var(--font-xs); }
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
 .race-roster { display: grid; gap: .9rem; margin-top: .5rem; }
 .race-group { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
 .race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
-.race-group > header h3 { margin: 0; color: var(--gold); font-size: .9rem; }
-.race-group > header span, .species-count { font-family: var(--num); font-size: .75rem; }
-.race-empty { margin: .55rem .2rem .2rem; color: var(--dim); font-size: .8rem; }
+.race-group > header h3 { margin: 0; color: var(--gold); font-size: var(--font-xs); }
+.race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
+.race-empty { margin: .55rem .2rem .2rem; color: var(--dim); font-size: var(--font-xs); }
 .species-roster { display: grid; gap: .65rem; margin-top: .6rem; }
 .species-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
 .species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.species-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.species-entry > header h4 { margin: 0; color: var(--text); font-size: 1rem; text-transform: none; letter-spacing: 0; }
+.species-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
+.species-entry > header h4 { margin: 0; color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
 .species-count { color: var(--gold); }
 .species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
-.species-facts div { display: grid; gap: .1rem; min-width: 0; font-size: .8rem; overflow-wrap: anywhere; }
-.species-facts b { color: var(--dim); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
-.species-entry table { font-size: .78rem; }
+.species-facts div { display: grid; gap: .1rem; min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
+.species-facts b { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
+.species-entry table { font-size: var(--font-xs); }
 .species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
 @media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
-.legend { margin: 0; padding-left: 1.1rem; font-size: .82rem; color: var(--dim); }
+.legend { margin: 0; padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend li { margin: .3rem 0; }
 .legend strong { color: var(--text); }
-.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: .68rem; text-transform: uppercase; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
 ol { margin: .2rem 0; padding-left: 1.3rem; }
 li { margin: .15rem 0; }</style><div class="layout">
 <nav><a class="" href="index.html">Start here</a><a class="on" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Bestiary</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>

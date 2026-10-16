@@ -65,6 +65,7 @@ Before starting a dev server, check `Get-NetTCPConnection -LocalPort 5173`. Reus
 ## UI Workflow and Architecture
 
 - Use the **integrated browser** only. Inspect real components with HMR at `http://localhost:5173/__showcase#showcase-field`; do not build mirrors or duplicate styles.
+- **Playwright runs inside an IDE browser tab, never a standalone or headless instance.** Open (or reuse) the IDE's browser on the target URL first, then drive that tab; if the tool cannot attach to it, report that instead of launching a separate window. One visible tab per check, at **1920 × 1080**, closed when the verification ends.
 - For HUD work, also use `#panel-hud-layout-studio`: **Studio Apply** previews; **game Apply** saves. Verify changes move the live region at **1920 × 1080**.
 - All new/moved HUD groups use shared `HudLayout`: `HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT`, and matching values in `App.svelte`. New regions backfill defaults for older layouts. Do not position regions via CSS-only coordinates; keep Studio descriptions current.
 - Field map interactions support pointer and keyboard: arrow keys select adjacent Block, Enter walks or warps through a known Waypoint, and selections are announced.

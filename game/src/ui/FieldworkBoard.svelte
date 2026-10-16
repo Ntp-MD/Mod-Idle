@@ -2,13 +2,13 @@
   import { fieldwork } from '../engine/client';
   import { activeMeal, canCook, fieldDropChance, fieldHarvestAmount, fieldMasteryLevel, fieldSkillLevel } from '../sim/fieldwork';
   import type { GameState } from '../sim/types';
-  import campIcon from '../icon/building/camping-tent.svg?url';
-  import pickIcon from '../icon/weapon/pickaxe.svg?url';
-  import treeIcon from '../icon/skill/tree.svg?url';
-  import meatIcon from '../icon/misc/meat.svg?url';
-  import herbIcon from '../icon/enviroment/jasmine.svg?url';
-  import mineralIcon from '../icon/misc/materials/minerals.svg?url';
-  import { stackIcon } from '../icon';
+  import { stackIcon, icon } from '../icon';
+  const campIcon = icon('camping-tent');
+  const pickIcon = icon('pickaxe');
+  const treeIcon = icon('tree');
+  const meatIcon = icon('meat');
+  const herbIcon = icon('jasmine');
+  const mineralIcon = icon('minerals');
 
   let {
     state: gameState, site, cellName, campName, campHere, busy, inTown,
@@ -141,7 +141,7 @@
     <div class="provisions">
       {#each pantry as food (food.id)}
         <span class="provision" class:ingredient={food.kind === 'ingredient'}>
-          <img src={stackIcon('food', food.name)} alt="" aria-hidden="true" />
+          <img src={stackIcon('food', food.name, `food:${food.id}`)} alt="" aria-hidden="true" />
           <span>{food.name}</span><strong>×{gameState.fieldwork.foods[food.id] || 0}</strong>
           {#if food.edible}<button class="eat-small" disabled={(gameState.fieldwork.foods[food.id] || 0) === 0} aria-label="Eat {food.name}" title="Eat {food.name} · +{food.hunger_restore} Hunger" onclick={() => oneat(food.id)}>Eat</button>{/if}
         </span>
