@@ -37,7 +37,7 @@ const gallery = (page: string): string => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) walk(full, `${base}${entry.name}/`);
-      else if (entry.name.toLowerCase().endsWith('.svg')) rels.push(base + entry.name);
+      else if (/\.(svg|png)$/i.test(entry.name)) rels.push(base + entry.name);
     }
   };
   walk(ICONS, '');

@@ -97,8 +97,19 @@ One hit runs perfect dodge → Evasion → block → Armour → resistance → d
 Every faucet and sink lives in `tools/data/`, measured in expectations. Every payout calls the engine function, never a copied formula or literal price. `loot.ttk_per_mob_sec` is the reference time-to-kill the roster computes (`eng.REFERENCE.ttk`), so the cage re-publishes it with `--sync` — it is never hand-typed, and a Species added or retired moves it. `mob_PS(L)` is the zone's **average** mob by construction: each Species' power reads over that same zone mean (`eng.speciesPsMult`), so the mean is 1 for every zone whatever the roster holds and no zone edge, timeline or survival number moves when a Species is added, retired or re-tuned. That identity is a consequence of the model, so no gate re-checks it.
 
 - `leanReweight` redistributes mass across gear/herb/junk; total expected drops/kill is unchanged.
-- Junk rarity buys frequency, not income: chance × sell is flat.
+- Junk rarity buys frequency at the reference value: chance × base sale value is flat. Realised gold depends on the destination market and its supplied demand.
 - No band lets a player loop a sink back into a faucet.
+
+### Regional goods and town demand
+
+- The Counterhand buys earned junk, field materials, provisions and farm herbs. Gold still buys the existing town services only; markets do not sell goods back into a profit or power loop.
+- `town.json.trade` owns base values, each town's import needs and abundant exports, demand capacity, recovery and processing value. Junk keeps its rarity base value; explicit commercial groups in `trade.junk_groups` classify Species drops independently of Race. Race membership grants no automatic mechanic.
+- Each town shares one saved supply pool per goods category, measured in base gold rather than item count. Deliveries consume demand; it recovers over credited simulation time online or offline. Reading a quote, opening a screen, walking, reloading or changing the real-world date does not reset supply. Quotes integrate the declining premium across a sale so splitting the same quantity cannot improve its payment.
+- Sale payments use the currency's configured decimal precision; earned fractions carry in the save into the next sale, preserving value across split transactions and reloads.
+- The Market compares current quotes for a chosen quantity, walking blocks, available Waypoint costs and net proceeds after the warp. A route opens the existing map selection. Visiting a buyer and carrying the goods are required to sell. The quick Sell action handles junk only; provisions, herbs and materials require an explicit sale.
+- `engine.json.fieldwork.regional_sources` owns each zone's Mine mineral, Grove wood and forage bonus. Existing ore, timber and rarewood keys and stock are preserved. Regional resources supplement those common materials and feed distinct cooking or workshop recipes as well as trade.
+- Workshops consume carried materials at a settlement and produce finished cargo. Cooking recipes define their edible cooked provision directly, including Hunger and the one active meal buff. Goods are not interchangeable currencies: selling ingredients gives up their Camp, food, brewing or processing uses.
+- Market records and catalogue defaults backfill automatically in current-schema saves without changing existing item counts, gold, skill XP or market records. Imports and exports keep their existing schema compatibility.
 
 ## Saves & offline
 

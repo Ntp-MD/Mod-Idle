@@ -210,6 +210,10 @@ export interface TaskSlot {
 }
 
 export interface TownState {
+  /** Base-value supply already delivered, decaying over simulation time at each town and category. */
+  market: Record<string, Record<string, { used: number; atSec: number }>>;
+  /** Earned fractions below the currency display unit carry forward into the next sale. */
+  marketCredit: number;
   visited: string[];
   owned: string[];
   waypoint: string;

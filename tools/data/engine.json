@@ -122,7 +122,7 @@
     },
     "form_level_cap": 100,
     "note": "Family > Species > Variant: Family is a broad fantasy grouping, Species is an individual creature lineage, and each Species may own any number of named level Variants. Body classes remain the four card sizes. Innate Element stays a separate spawn roll (world.md).",
-    "stat_block": "`mob.form_catalog` holds optional named field forms for real zone bands. Each Species may author as many fixed-level Variants as the fantasy content needs; each Variant owns its live combat Core and drop identity. Forms are optional field labels and legacy projections; runtime normal and Elite spawns read the selected Variant Core. No Core line scales at runtime.",
+    "stat_block": "`mob.forms` holds optional named field forms for real zone bands. Each Species may author as many fixed-level Variants as the fantasy content needs; each Variant owns its live combat Core and drop identity. Forms are optional field labels and legacy projections; runtime normal and Elite spawns read the selected Variant Core. No Core line scales at runtime.",
     "power_note": "A mob's damage per second is its own power over the zone mean, times the published mob_PS(L) curve: power = mob.species[].power_base + K_MOB_PS_STAT x the Core Stat its `damage` tag reads (physical -> Str, magic -> Int, mixed -> both halves, the same split mob.damage_split spends). The zone's average mob is the published curve — each Species multiplier is read against that same zone mean, so the average is 1 by construction and no gate re-checks it, so the species term only moves the mobs actually in front of the player and no zone edge, timeline, ladder or survival number changes. `power_base` is the per-species Base knob - 1.00 is neutral, and raising or lowering it tilts a species without touching its stat vector.",
     "attack_clock_per_sec": {
       "normal": 1,
@@ -4749,7 +4749,7 @@
       "A Species has at least one named fixed-level Variant; it may author as many as its fantasy content needs. Bands are valid and non-overlapping, gaps carry the nearest earlier Variant, and higher zones keep the final Variant and field label.",
       "A species may appear only where its `habitat` allows. `habitat` is the region list it may live in (the geography layer the zone `region` names) and `zones` is where it currently does, so `zones` must be a subset of the regions those zones carry. Re-placing a species is a `habitat`/`zones` data edit, never a roster rewrite, and it moves no price.",
       "Mob Evasion uses the selected variant's authored Core Dex, with the body base percent on top. The field form remains a label projection; Core is authored data, not scaled at runtime.",
-      "`mob.races` is the broad taxonomy; `mob.species[].race` assigns each Species to one Race. `mob.variants` holds any number of authored level Variants per Species. `mob.forms` and `mob.form_catalog` are optional field-label projections; missing labels inherit the latest earlier form. Each subzone has an independent Species spawn pool, pools may overlap across environments, and their union covers the zone cast. Levels 101-180 remain playable and reuse the final Variant and available label. Variant rarity and lean remain Variant-owned. Mob plates use the Species icon; Elite/Boss remain rank overlays.",
+      "`mob.races` is the broad taxonomy; `mob.species[].race` assigns each Species to one Race. `mob.variants` holds any number of authored level Variants per Species. `mob.forms` is the optional field-label projection; missing labels inherit the latest earlier form. Each subzone has an independent Species spawn pool, pools may overlap across environments, and their union covers the zone cast. Levels 101-180 remain playable and reuse the final Variant and available label. Variant rarity and lean remain Variant-owned. Mob plates use the Species icon; Elite/Boss remain rank overlays.",
       "A proposed zone layout that re-zones the world is a new world, not a mob pass: the zone set is the shipped eighteen with its place regions, and where a Species lives is a habitat-legal data edit. New Races may be declared without members; adding a Species or Variant does not require matching a roster count. A subzone carries one of its zone's own Elements, never a new one.",
       "A species' trait is a mechanic, not a label: `mob.species[].mechanics` names keys from the closed set `mob.trait_mechanics.set`, and the client runs each one - a body that cannot bleed, a body that bursts poison when it dies, a body that swings faster at the same damage per second, a body that flinches from one named Element. A species with no `mechanics` row is an ordinary body.",
       "A species' trait is a mechanic, not a label: `mob.species[].mechanics` names keys from the closed set `mob.trait_mechanics.set`, and the client runs each one - a body that cannot bleed, a body that bursts poison when it dies, a body that swings faster at the same damage per second, a body that flinches from one named Element. A species with no `mechanics` row is an ordinary body."
@@ -5381,7 +5381,7 @@
           }
         },
         {
-          "name": "Royal Mummy",
+          "name": "Cartouche Mummy",
           "levels": [
             41,
             60
@@ -5479,7 +5479,7 @@
           }
         },
         {
-          "name": "Crimson Fencer Vampire",
+          "name": "Bloodveil Vampire",
           "levels": [
             61,
             80
@@ -6037,7 +6037,7 @@
           }
         },
         {
-          "name": "Ancient Treant",
+          "name": "Thicket Treant",
           "levels": [
             41,
             60
@@ -6217,7 +6217,7 @@
           }
         },
         {
-          "name": "Scale Spear Lizardman",
+          "name": "Reed Spear Lizardman",
           "levels": [
             61,
             80
@@ -6299,7 +6299,7 @@
           }
         },
         {
-          "name": "Moon Archer Elf",
+          "name": "Silverarrow Elf",
           "levels": [
             61,
             80
@@ -6529,7 +6529,7 @@
           }
         },
         {
-          "name": "Corrupted Dryad",
+          "name": "Blackbark Dryad",
           "levels": [
             41,
             60
@@ -7644,7 +7644,7 @@
         }
       ]
     },
-    "variant_drops_note": "Each Species may author any number of Variants; every Variant name owns its base junk item, rarity and lean in this table. A Species may provide one additional junk item in any subset of rarities. `lean` is the collectible stream a Variant tilts toward, applied through leanReweight so the total expected drops/kill is conserved; its Species race has no automatic effect on the drop. `none` is the identity, used by Unique and Boss drops that already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a Variant between rarities never moves gold/kill.",
+    "variant_drops_note": "Each Species may author any number of Variants; every Variant name owns its base junk item, rarity and lean in this table. A Species may provide one additional junk item in any subset of rarities. `lean` is the collectible stream a Variant tilts toward, applied through leanReweight so the total expected drops/kill is conserved; its Species race has no automatic effect on the drop. `none` is the identity, used by Unique and Boss drops that already pay their own stone lines. Rarity is free by construction - every rarity's chance is the junk line divided by its own sell price - so moving a Variant between rarities never moves reference base gold/kill; realised income uses town demand.",
     "variant_drops": {
       "Sneak Goblin": {
         "item": "Goblin Ear",
@@ -7831,8 +7831,8 @@
         "rarity": "rare",
         "lean": "junk"
       },
-      "Royal Mummy": {
-        "item": "Mummy Royal Cartouche",
+      "Cartouche Mummy": {
+        "item": "Mummy Cartouche",
         "rarity": "rare",
         "lean": "junk"
       },
@@ -7861,8 +7861,8 @@
         "rarity": "rare",
         "lean": "junk"
       },
-      "Crimson Fencer Vampire": {
-        "item": "Vampire Crimson Thread",
+      "Bloodveil Vampire": {
+        "item": "Vampire Bloodveil Thread",
         "rarity": "uncommon",
         "lean": "junk"
       },
@@ -8031,8 +8031,8 @@
         "rarity": "rare",
         "lean": "herb"
       },
-      "Ancient Treant": {
-        "item": "Ancient Treant Seedpod",
+      "Thicket Treant": {
+        "item": "Treant Thicket Shoot",
         "rarity": "rare",
         "lean": "herb"
       },
@@ -8086,8 +8086,8 @@
         "rarity": "rare",
         "lean": "gear"
       },
-      "Scale Spear Lizardman": {
-        "item": "Lizardman Scale Spearhead",
+      "Reed Spear Lizardman": {
+        "item": "Lizardman Reed Spearhead",
         "rarity": "uncommon",
         "lean": "gear"
       },
@@ -8111,8 +8111,8 @@
         "rarity": "rare",
         "lean": "herb"
       },
-      "Moon Archer Elf": {
-        "item": "Elf Moon Arrow",
+      "Silverarrow Elf": {
+        "item": "Elf Silver Arrow",
         "rarity": "uncommon",
         "lean": "herb"
       },
@@ -8181,8 +8181,8 @@
         "rarity": "rare",
         "lean": "herb"
       },
-      "Corrupted Dryad": {
-        "item": "Corrupted Dryad Bark",
+      "Blackbark Dryad": {
+        "item": "Dryad Blackbark",
         "rarity": "rare",
         "lean": "herb"
       },
@@ -8753,4210 +8753,6 @@
       "seraph": "retired from a legacy Species roster; creature/loot flavour moves to the Species that replace it"
     },
     "forms": {
-      "1": {
-        "goblin": {
-          "name": "Goblin",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 16,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Orc",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 12,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Kobold",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 18,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Ogre",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 14,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Troll",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 13,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Minotaur",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 14,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Skeleton",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 15,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Mummy",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 13,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Vampire",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 17,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Demon",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 16,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Slime",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 14,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Spider",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 21,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Wolf",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 17,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Golem",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 13,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Dragon",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 15,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Treant",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 13,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Human",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 20,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Lizardman",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 16,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Elf",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 21,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Giant",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 13,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Werewolf",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 15,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Dryad",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 21,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "beetle": {
-          "name": "Beetle",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 24,
-            "agi": 14,
-            "vit": 22,
-            "dex": 16,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "beetle"
-        }
-      },
-      "2": {
-        "goblin": {
-          "name": "Redcap Goblin",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 19,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Initiate Orc",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 15,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Snuffer Kobold",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 21,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Hauler Ogre",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 17,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Keeper Troll",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 16,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Runner Minotaur",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 17,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Ashen Skeleton",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 18,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Watcher Mummy",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 16,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Thrall Vampire",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 20,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Hooked Demon",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 19,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Jelly Slime",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 17,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Needle Spider",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 24,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Dire Wolf",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 20,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Slate Golem",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 16,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Maw Drake",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 18,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Briarback Treant",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 16,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Militia Human",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 23,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Spear Lizardman",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 19,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Scout Elf",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 24,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Boulder Giant",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 16,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Runner Werewolf",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 18,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Dew Dryad",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 24,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "imp": {
-          "name": "Imp",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 12,
-            "agi": 25,
-            "vit": 13,
-            "dex": 25,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "imp"
-        },
-        "wyvern": {
-          "name": "Wyvern",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 26,
-            "agi": 18,
-            "vit": 22,
-            "dex": 22,
-            "int": 15,
-            "wis": 0,
-            "lck": 15
-          },
-          "drop_profile": "wyvern"
-        },
-        "wisp": {
-          "name": "Wisp",
-          "levels": [
-            11,
-            20
-          ],
-          "core": {
-            "str": 10,
-            "agi": 24,
-            "vit": 14,
-            "dex": 27,
-            "int": 26,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "wisp"
-        }
-      },
-      "3": {
-        "goblin": {
-          "name": "Brassnose Goblin",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 22,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Shaman Orc",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 18,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Runner Kobold",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 24,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Barrelback Ogre",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 20,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Regenerator Troll",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 19,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Warden Minotaur",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 20,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Sentinel Skeleton",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 21,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Scribe Mummy",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 19,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Courtier Vampire",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 23,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Ash Demon",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 22,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Ooze Slime",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 20,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Widow Spider",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 27,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Stalker Wolf",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 23,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Bronze Golem",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 19,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Cinder Drake",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 21,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Moss Treant",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 19,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Duelist Human",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 26,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Stalker Lizardman",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 22,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Duelist Elf",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 27,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Avalanche Giant",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 19,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Stalker Werewolf",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 21,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Bramble Dryad",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 27,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "hornet": {
-          "name": "Hornet",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 11,
-            "agi": 26,
-            "vit": 12,
-            "dex": 29,
-            "int": 12,
-            "wis": 0,
-            "lck": 21
-          },
-          "drop_profile": "hornet"
-        },
-        "ooze": {
-          "name": "Ooze",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 13,
-            "agi": 11,
-            "vit": 27,
-            "dex": 21,
-            "int": 23,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "ooze"
-        }
-      },
-      "4": {
-        "goblin": {
-          "name": "Tinkerer Goblin",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 25,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Berserker Orc",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 21,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Sapper Kobold",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 27,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Bridgebreaker Ogre",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 23,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Brute Troll",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 22,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Butcher Minotaur",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 23,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Skein Skeleton",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 24,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Stalker Mummy",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 22,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Bloodkeeper Vampire",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 26,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Choir Demon",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 25,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Acid Slime",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 23,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Snare Spider",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 30,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Prowler Wolf",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 26,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Kilnheart Golem",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 22,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Rain Wyvern",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 24,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Sentinel Treant",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 22,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Tracker Human",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 29,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Fang Lizardman",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 25,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Starleaf Elf",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 30,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Stone Giant",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 22,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Ravager Werewolf",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 24,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Warden Dryad",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 30,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "siren": {
-          "name": "Siren",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 14,
-            "agi": 21,
-            "vit": 16,
-            "dex": 29,
-            "int": 26,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "siren"
-        },
-        "beetle": {
-          "name": "Carapace Beetle",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 24,
-            "agi": 14,
-            "vit": 22,
-            "dex": 25,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "beetle"
-        },
-        "salamander": {
-          "name": "Salamander",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 18,
-            "agi": 17,
-            "vit": 23,
-            "dex": 27,
-            "int": 25,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "salamander"
-        },
-        "crab": {
-          "name": "Crab",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 25,
-            "agi": 12,
-            "vit": 24,
-            "dex": 24,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "crab"
-        }
-      },
-      "5": {
-        "goblin": {
-          "name": "Knifehand Goblin",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 28,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Reaver Orc",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 24,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Lurker Kobold",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 30,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Eater Ogre",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 26,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Knuckle Troll",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 25,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Charger Minotaur",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 26,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Pike Skeleton",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 27,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Jackal Mummy",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 25,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Duelist Vampire",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 29,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Tormentor Demon",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 28,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Tar Slime",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 26,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Huntsman Spider",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 33,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Pack Wolf",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 29,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Colossus Golem",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 25,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Sunscale Dragon",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 27,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Choir Treant",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 25,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Brigand Human",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 32,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Harrier Lizardman",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 28,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Huntress Elf",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 33,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Cloud Giant",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 25,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Howling Werewolf",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 27,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Thorncrown Dryad",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 33,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "wraith": {
-          "name": "Wraith",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 22,
-            "agi": 19,
-            "vit": 18,
-            "dex": 32,
-            "int": 17,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "wraith"
-        },
-        "imp": {
-          "name": "Cinder Imp",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 12,
-            "agi": 25,
-            "vit": 13,
-            "dex": 34,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "imp"
-        },
-        "crab": {
-          "name": "Boulder Crab",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 25,
-            "agi": 12,
-            "vit": 24,
-            "dex": 27,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "crab"
-        }
-      },
-      "6": {
-        "goblin": {
-          "name": "Alchemist Goblin",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 31,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Breaker Orc",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 27,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Keeper Kobold",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 33,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Glutton Ogre",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 29,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Drowned Bell Troll",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 28,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Eater Minotaur",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 29,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Tomb Skeleton",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 30,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Guard Mummy",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 28,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Baron Vampire",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 32,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Sin Demon",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 31,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Mirror Slime",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 29,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Matron Spider",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 36,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Alpha Wolf",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 32,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Runebreaker Golem",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 28,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Storm Wyrm",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 30,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Stag Treant",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 28,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Inquisitor Human",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 35,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Silt Lizardman",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 31,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Warden Elf",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 36,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Reaver Giant",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 28,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Moon Werewolf",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 30,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Witch Dryad",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 36,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "wraith": {
-          "name": "Crypt Wraith",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 22,
-            "agi": 19,
-            "vit": 18,
-            "dex": 35,
-            "int": 17,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "wraith"
-        },
-        "imp": {
-          "name": "Hornling Imp",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 12,
-            "agi": 25,
-            "vit": 13,
-            "dex": 37,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "imp"
-        },
-        "hornet": {
-          "name": "Vespa Hornet",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 11,
-            "agi": 26,
-            "vit": 12,
-            "dex": 38,
-            "int": 12,
-            "wis": 0,
-            "lck": 21
-          },
-          "drop_profile": "hornet"
-        },
-        "archon": {
-          "name": "Archon",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 20,
-            "agi": 22,
-            "vit": 18,
-            "dex": 39,
-            "int": 27,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "archon"
-        }
-      },
-      "7": {
-        "goblin": {
-          "name": "Banner Goblin",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 34,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Captain Orc",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 30,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Trickster Kobold",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 36,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Bruiser Ogre",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 32,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Hulk Troll",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 31,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Gate Minotaur",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 32,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Guardian Skeleton",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 33,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Pharaoh Mummy",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 31,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Pale Vampire",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 35,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Red Demon",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 34,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Pudding Slime",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 32,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Silk Spider",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 39,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Gravehowl Wolf",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 35,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Obsidian Golem",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 31,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Glassfire Drake",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 33,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Shepherd Treant",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 31,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Marshal Human",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 38,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Brute Lizardman",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 34,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Seer Elf",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 39,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Glacier Giant",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 31,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Grave Werewolf",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 33,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Root Dryad",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 39,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "siren": {
-          "name": "Tide Siren",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 14,
-            "agi": 21,
-            "vit": 16,
-            "dex": 38,
-            "int": 26,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "siren"
-        },
-        "mist": {
-          "name": "Mist",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 12,
-            "agi": 19,
-            "vit": 18,
-            "dex": 38,
-            "int": 24,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "mist"
-        },
-        "shark": {
-          "name": "Shark",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 27,
-            "agi": 20,
-            "vit": 21,
-            "dex": 39,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "shark"
-        }
-      },
-      "8": {
-        "goblin": {
-          "name": "Hexer Goblin",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 37,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Warbringer Orc",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 33,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Saboteur Kobold",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 39,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Devourer Ogre",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 35,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Ravager Troll",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 34,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Thread Minotaur",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 35,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Grave Skeleton",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 36,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Vizier Mummy",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 34,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Crimson Vampire",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 38,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Marshal Demon",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 37,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Leech Slime",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 35,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Trapmaster Spider",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 42,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Ghost Wolf",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 38,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Unmoved Golem",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 34,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Iron Dragon",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 36,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Oak Treant",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 34,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Hunter Human",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 41,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Scale Lizardman",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 37,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Bow Elf",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 42,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Mountain Giant",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 34,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Beast Werewolf",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 36,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Blossom Dryad",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 42,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "wraith": {
-          "name": "Banshee Wraith",
-          "levels": [
-            71,
-            80
-          ],
-          "core": {
-            "str": 22,
-            "agi": 19,
-            "vit": 18,
-            "dex": 41,
-            "int": 17,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "wraith"
-        }
-      },
-      "9": {
-        "goblin": {
-          "name": "Marauder Goblin",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 40,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Blood Orc",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 36,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "Burrower Kobold",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 42,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Feaster Ogre",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 38,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Mire Troll",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 37,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Unlost Minotaur",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 38,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "Regent Skeleton",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 39,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Crooked Mummy",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 37,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Night Vampire",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 41,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Abomination Demon",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 40,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Vat Slime",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 38,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Moon Spider",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 45,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Stormfang Wolf",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 41,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Granite Golem",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 37,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "Star Dragon",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 39,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Grove Treant",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 37,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Captain Human",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 44,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Warden Lizardman",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 40,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Everspring Elf",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 45,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Worldsend Giant",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 37,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Huntmaster Werewolf",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 39,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Matriarch Dryad",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 45,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "wraith": {
-          "name": "Gloom Wraith",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 22,
-            "agi": 19,
-            "vit": 18,
-            "dex": 44,
-            "int": 17,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "wraith"
-        },
-        "wyvern": {
-          "name": "Ridge Wyvern",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 26,
-            "agi": 18,
-            "vit": 22,
-            "dex": 43,
-            "int": 15,
-            "wis": 0,
-            "lck": 15
-          },
-          "drop_profile": "wyvern"
-        },
-        "salamander": {
-          "name": "Magma Salamander",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 18,
-            "agi": 17,
-            "vit": 23,
-            "dex": 42,
-            "int": 25,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "salamander"
-        }
-      },
-      "10": {
-        "goblin": {
-          "name": "Warcaller Goblin",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 16,
-            "dex": 43,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "goblin"
-        },
-        "orc": {
-          "name": "Chieftain Orc",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 25,
-            "agi": 18,
-            "vit": 21,
-            "dex": 39,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "orc"
-        },
-        "kobold": {
-          "name": "King Kobold",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 18,
-            "agi": 22,
-            "vit": 14,
-            "dex": 45,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "kobold"
-        },
-        "ogre": {
-          "name": "Maw Ogre",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 24,
-            "agi": 16,
-            "vit": 23,
-            "dex": 41,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "ogre"
-        },
-        "troll": {
-          "name": "Unrotting Troll",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 24,
-            "agi": 15,
-            "vit": 25,
-            "dex": 40,
-            "int": 10,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "troll"
-        },
-        "minotaur": {
-          "name": "Mapless Minotaur",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 24,
-            "agi": 18,
-            "vit": 20,
-            "dex": 41,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "minotaur"
-        },
-        "skeleton": {
-          "name": "King Skeleton",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 42,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "skeleton"
-        },
-        "mummy": {
-          "name": "Embalmed Mummy",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 22,
-            "agi": 13,
-            "vit": 27,
-            "dex": 40,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "mummy"
-        },
-        "vampire": {
-          "name": "Count Vampire",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 21,
-            "agi": 21,
-            "vit": 18,
-            "dex": 44,
-            "int": 16,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "vampire"
-        },
-        "demon": {
-          "name": "Crown Demon",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 21,
-            "agi": 18,
-            "vit": 19,
-            "dex": 43,
-            "int": 21,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "demon"
-        },
-        "slime": {
-          "name": "Underflow Slime",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 14,
-            "agi": 12,
-            "vit": 28,
-            "dex": 41,
-            "int": 22,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "slime"
-        },
-        "spider": {
-          "name": "Loom Spider",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 13,
-            "agi": 24,
-            "vit": 14,
-            "dex": 48,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "spider"
-        },
-        "wolf": {
-          "name": "Moon Wolf",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 19,
-            "agi": 23,
-            "vit": 16,
-            "dex": 44,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "wolf"
-        },
-        "golem": {
-          "name": "Anvil Golem",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 30,
-            "agi": 11,
-            "vit": 27,
-            "dex": 40,
-            "int": 0,
-            "wis": 0,
-            "lck": 11
-          },
-          "drop_profile": "golem"
-        },
-        "dragon": {
-          "name": "World Wyrm",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 42,
-            "int": 17,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "dragon"
-        },
-        "treant": {
-          "name": "Heartwood Treant",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 27,
-            "agi": 13,
-            "vit": 26,
-            "dex": 40,
-            "int": 14,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "treant"
-        },
-        "human": {
-          "name": "Thronebreaker Human",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 20,
-            "agi": 18,
-            "vit": 16,
-            "dex": 47,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "human"
-        },
-        "lizardman": {
-          "name": "Marsh Lizardman",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 19,
-            "agi": 21,
-            "vit": 17,
-            "dex": 43,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          },
-          "drop_profile": "lizardman"
-        },
-        "elf": {
-          "name": "Light Elf",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 16,
-            "agi": 21,
-            "vit": 14,
-            "dex": 48,
-            "int": 19,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "elf"
-        },
-        "giant": {
-          "name": "Skyfall Giant",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 24,
-            "dex": 40,
-            "int": 12,
-            "wis": 0,
-            "lck": 14
-          },
-          "drop_profile": "giant"
-        },
-        "werewolf": {
-          "name": "Last Werewolf",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 22,
-            "agi": 20,
-            "vit": 18,
-            "dex": 42,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "werewolf"
-        },
-        "dryad": {
-          "name": "Bloom Dryad",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 14,
-            "agi": 18,
-            "vit": 16,
-            "dex": 48,
-            "int": 23,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "dryad"
-        },
-        "hornet": {
-          "name": "Gilded Hornet",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 11,
-            "agi": 26,
-            "vit": 12,
-            "dex": 50,
-            "int": 12,
-            "wis": 0,
-            "lck": 21
-          },
-          "drop_profile": "hornet"
-        },
-        "ooze": {
-          "name": "Creeping Ooze",
-          "levels": [
-            91,
-            100
-          ],
-          "core": {
-            "str": 13,
-            "agi": 11,
-            "vit": 27,
-            "dex": 42,
-            "int": 23,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "ooze"
-        }
-      }
-    },
-    "form_catalog": {
       "1": {
         "goblin": {
           "name": "Goblin",
@@ -17894,7 +13690,7 @@
     "taps_per_day": 2
   },
   "fieldwork": {
-    "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not replace ambushes. All rates and effects live here; map.json remains presentation only.",
+    "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not replace ambushes. All rates and effects live here; map.json remains presentation only. Regional Mine and Grove bonus yields are authored per zone in regional_sources. Existing ore, timber and rarewood keep their keys and uses. Workshop recipes consume gathered materials at a settlement and produce trade goods; all cooking recipes also define edible cooked provisions.",
     "level_divisor": 100,
     "level_cap": 20,
     "mastery_divisor": 25,
@@ -18063,6 +13859,42 @@
         "edible": true,
         "auto_eat": true,
         "source": "cooking"
+      },
+      {
+        "id": "river-fish",
+        "name": "River Fish",
+        "kind": "raw",
+        "hunger_restore": 20,
+        "edible": true,
+        "auto_eat": false,
+        "source": "regional gathering and hunting"
+      },
+      {
+        "id": "shellfish",
+        "name": "Shellfish",
+        "kind": "raw",
+        "hunger_restore": 16,
+        "edible": true,
+        "auto_eat": false,
+        "source": "regional gathering and hunting"
+      },
+      {
+        "id": "wild-grain",
+        "name": "Wild Grain",
+        "kind": "ingredient",
+        "hunger_restore": 0,
+        "edible": false,
+        "auto_eat": false,
+        "source": "regional gathering and hunting"
+      },
+      {
+        "id": "marsh-sage",
+        "name": "Marsh Sage",
+        "kind": "herb",
+        "hunger_restore": 15,
+        "edible": true,
+        "auto_eat": true,
+        "source": "regional gathering and hunting"
       }
     ],
     "travel_events": {
@@ -18283,6 +14115,35 @@
           ],
           "food_id": "wild_berries",
           "chance": 0.04,
+          "min": 1,
+          "max": 1
+        },
+        {
+          "species": [
+            "siren",
+            "shark"
+          ],
+          "food_id": "river-fish",
+          "chance": 0.12,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "species": [
+            "crab"
+          ],
+          "food_id": "shellfish",
+          "chance": 0.15,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "species": [
+            "dryad",
+            "treant"
+          ],
+          "food_id": "marsh-sage",
+          "chance": 0.06,
           "min": 1,
           "max": 1
         }
@@ -18541,6 +14402,332 @@
         "duration_sec": 2100,
         "damage_pct": 8,
         "hp_regen_pct": 0.4
+      },
+      {
+        "id": "salted-fish",
+        "name": "Salted Fish",
+        "level": 2,
+        "foods": {
+          "river-fish": 2
+        },
+        "materials": {
+          "rock-salt": 1,
+          "timber": 1
+        },
+        "herbs": {},
+        "hunger_restore": 55,
+        "duration_sec": 1800,
+        "damage_pct": 4,
+        "hp_regen_pct": 0.3,
+        "xp": 55,
+        "menu": "forage",
+        "mastery_xp": 1
+      },
+      {
+        "id": "cedar-smoked-game",
+        "name": "Cedar-smoked Game",
+        "level": 5,
+        "foods": {
+          "raw_game_meat": 3,
+          "aromatic_herb": 1
+        },
+        "materials": {
+          "cedar-wood": 1
+        },
+        "herbs": {},
+        "hunger_restore": 60,
+        "duration_sec": 2400,
+        "damage_pct": 6,
+        "hp_regen_pct": 0.2,
+        "xp": 85,
+        "menu": "forage",
+        "mastery_xp": 1
+      },
+      {
+        "id": "shellfish-chowder",
+        "name": "Shellfish Chowder",
+        "level": 6,
+        "foods": {
+          "shellfish": 2,
+          "field_mushroom": 1
+        },
+        "materials": {
+          "rock-salt": 1
+        },
+        "herbs": {
+          "mid": 1
+        },
+        "hunger_restore": 62,
+        "duration_sec": 1800,
+        "damage_pct": 3,
+        "hp_regen_pct": 0.55,
+        "xp": 95,
+        "menu": "forage",
+        "mastery_xp": 1
+      },
+      {
+        "id": "pine-nut-bread",
+        "name": "Pine Nut Bread",
+        "level": 2,
+        "foods": {
+          "wild-grain": 2,
+          "forest_nuts": 1
+        },
+        "materials": {
+          "pine-wood": 1
+        },
+        "herbs": {
+          "low": 1
+        },
+        "hunger_restore": 50,
+        "duration_sec": 1500,
+        "damage_pct": 3,
+        "hp_regen_pct": 0.2,
+        "xp": 50,
+        "menu": "forage",
+        "mastery_xp": 1
+      },
+      {
+        "id": "sage-tea",
+        "name": "Marsh Sage Tea",
+        "level": 3,
+        "foods": {
+          "marsh-sage": 2,
+          "moonmint": 1
+        },
+        "materials": {
+          "willow-wood": 1
+        },
+        "herbs": {},
+        "hunger_restore": 40,
+        "duration_sec": 1800,
+        "damage_pct": 0,
+        "hp_regen_pct": 0.45,
+        "xp": 60,
+        "menu": "forage",
+        "mastery_xp": 1
+      }
+    ],
+    "materials": [
+      {
+        "id": "ore",
+        "name": "Ore",
+        "group": "ore"
+      },
+      {
+        "id": "timber",
+        "name": "Timber",
+        "group": "wood"
+      },
+      {
+        "id": "rarewood",
+        "name": "Rarewood",
+        "group": "wood"
+      },
+      {
+        "id": "copper-ore",
+        "name": "Copper Ore",
+        "group": "ore"
+      },
+      {
+        "id": "iron-ore",
+        "name": "Iron Ore",
+        "group": "ore"
+      },
+      {
+        "id": "silver-ore",
+        "name": "Silver Ore",
+        "group": "ore"
+      },
+      {
+        "id": "rock-salt",
+        "name": "Rock Salt",
+        "group": "ore"
+      },
+      {
+        "id": "pine-wood",
+        "name": "Pine Wood",
+        "group": "wood"
+      },
+      {
+        "id": "hardwood",
+        "name": "Hardwood",
+        "group": "wood"
+      },
+      {
+        "id": "willow-wood",
+        "name": "Willow Wood",
+        "group": "wood"
+      },
+      {
+        "id": "cedar-wood",
+        "name": "Cedar Wood",
+        "group": "wood"
+      },
+      {
+        "id": "copper-fittings",
+        "name": "Copper Fittings",
+        "group": "craft"
+      },
+      {
+        "id": "iron-tools",
+        "name": "Iron Tools",
+        "group": "craft"
+      },
+      {
+        "id": "silver-inlay",
+        "name": "Silver Inlay",
+        "group": "craft"
+      },
+      {
+        "id": "seasoned-planks",
+        "name": "Seasoned Planks",
+        "group": "craft"
+      }
+    ],
+    "regional_drop_chance": 0.22,
+    "regional_food_chance": 0.04,
+    "regional_food_yield": 1,
+    "regional_sources": {
+      "1": {
+        "mine": "copper-ore",
+        "grove": "pine-wood",
+        "food": "wild-grain"
+      },
+      "2": {
+        "mine": "iron-ore",
+        "grove": "hardwood",
+        "food": "forest_nuts"
+      },
+      "3": {
+        "mine": "copper-ore",
+        "grove": "willow-wood",
+        "food": "marsh-sage"
+      },
+      "4": {
+        "mine": "rock-salt",
+        "grove": "willow-wood",
+        "food": "marsh-sage"
+      },
+      "5": {
+        "mine": "rock-salt",
+        "grove": "cedar-wood",
+        "food": "sunroot"
+      },
+      "6": {
+        "mine": "silver-ore",
+        "grove": "cedar-wood",
+        "food": "moonmint"
+      },
+      "7": {
+        "mine": "rock-salt",
+        "grove": "willow-wood",
+        "food": "river-fish"
+      },
+      "8": {
+        "mine": "iron-ore",
+        "grove": "hardwood",
+        "food": "field_mushroom"
+      },
+      "9": {
+        "mine": "iron-ore",
+        "grove": "pine-wood",
+        "food": "forest_nuts"
+      },
+      "10": {
+        "mine": "copper-ore",
+        "grove": "willow-wood",
+        "food": "marsh-sage"
+      },
+      "11": {
+        "mine": "iron-ore",
+        "grove": "pine-wood",
+        "food": "wild-grain"
+      },
+      "12": {
+        "mine": "silver-ore",
+        "grove": "hardwood",
+        "food": "field_mushroom"
+      },
+      "13": {
+        "mine": "iron-ore",
+        "grove": "cedar-wood",
+        "food": "sunroot"
+      },
+      "14": {
+        "mine": "copper-ore",
+        "grove": "willow-wood",
+        "food": "river-fish"
+      },
+      "15": {
+        "mine": "rock-salt",
+        "grove": "cedar-wood",
+        "food": "shellfish"
+      },
+      "16": {
+        "mine": "silver-ore",
+        "grove": "hardwood",
+        "food": "moonmint"
+      },
+      "17": {
+        "mine": "silver-ore",
+        "grove": "cedar-wood",
+        "food": "sunroot"
+      },
+      "18": {
+        "mine": "iron-ore",
+        "grove": "pine-wood",
+        "food": "marsh-sage"
+      }
+    },
+    "workshop_recipes": [
+      {
+        "id": "copper-fittings",
+        "name": "Copper Fittings",
+        "skill": "mining",
+        "level": 1,
+        "xp": 20,
+        "materials": {
+          "copper-ore": 2,
+          "timber": 1
+        },
+        "yield": 1
+      },
+      {
+        "id": "iron-tools",
+        "name": "Iron Tools",
+        "skill": "mining",
+        "level": 3,
+        "xp": 35,
+        "materials": {
+          "iron-ore": 2,
+          "hardwood": 1
+        },
+        "yield": 1
+      },
+      {
+        "id": "silver-inlay",
+        "name": "Silver Inlay",
+        "skill": "mining",
+        "level": 5,
+        "xp": 55,
+        "materials": {
+          "silver-ore": 2,
+          "rarewood": 1
+        },
+        "yield": 1
+      },
+      {
+        "id": "seasoned-planks",
+        "name": "Seasoned Planks",
+        "skill": "woodcutting",
+        "level": 1,
+        "xp": 20,
+        "materials": {
+          "pine-wood": 1,
+          "willow-wood": 1
+        },
+        "yield": 1
       }
     ]
   },
@@ -18956,7 +15143,7 @@
         "drop_chance_per_kill": 0.0053953
       }
     },
-    "note": "RO-style mob junk: a fourth drop stream, sold to the Settlement Counterhand for gold. `mob.variant_drops` owns each Variant's base item, rarity and lean; `mob.species[].junk_items` may add an alternate item in any selected rarity. A successful rarity roll pays the Variant item or its Species alternative when present at the Variant's rarity price, so each rarity's drop_chance_per_kill remains junk_per_kill / sell_gold and a kill keeps the expected gold line (F3). Variant rarity buys drop frequency, not income: common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat - which is also the bag-pressure trade. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. Gold's mints are junk sold at the Counterhand plus bounded Road events - the old 'sell a rejected gear piece for 1 gold' option is retired."
+    "note": "RO-style mob junk: a fourth drop stream, sold to the Settlement Counterhand for gold. `mob.variant_drops` owns each Variant's base item, rarity and lean; `mob.species[].junk_items` may add an alternate item in any selected rarity. A successful rarity roll pays the Variant item or its Species alternative when present at the Variant's rarity price, so each rarity's drop_chance_per_kill remains junk_per_kill / sell_gold and a kill keeps the reference base gold line (F3). Variant rarity buys drop frequency at a flat expected base value: common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat - which is also the bag-pressure trade. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. The Counterhand buys this junk at its town demand quote alongside gathered materials, provisions and herbs; walking itself pays no gold - the old 'sell a rejected gear piece for 1 gold' option is retired."
   },
   "aoe": {
     "per_target_pct": 60,

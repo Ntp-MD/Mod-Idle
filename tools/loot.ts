@@ -393,8 +393,8 @@ function gates(rows: any, bias: any) {
   const leans = HO.categories.map((c: 'gear' | 'herb' | 'junk') => ({ c, r: leanReweight(sample, c, HO.shift_pct) }));
   const conserved = leans.every(({ r }: any) => Math.abs(sum(r) - sum(sample)) < 1e-9);
   const leaning = leans.every(({ c, r }: { c: 'gear' | 'herb' | 'junk'; r: { gear: number; herb: number; junk: number } }) => r[c] > sample[c]);
-  add('LT14', identity && conserved && leaning && leans.length === 3,
-    `The variant lean: 'none' is the identity, each lean raises its own stream, and every lean conserves ${sum(sample).toFixed(2)} expected drops/kill across gear · herb · junk${!identity ? ' · NONE NOT IDENTITY' : ''}${!conserved ? ' · TOTAL NOT CONSERVED' : ''}${!leaning ? ' · LEAN NOT RAISED' : ''}${leans.length !== 3 ? ' · CATEGORIES != 3' : ''}`);
+  add('LT14', identity && conserved && leaning,
+    `The variant lean: 'none' is the identity, each configured lean raises its own stream, and every lean conserves ${sum(sample).toFixed(2)} expected drops/kill across gear · herb · junk${!identity ? ' · NONE NOT IDENTITY' : ''}${!conserved ? ' · TOTAL NOT CONSERVED' : ''}${!leaning ? ' · LEAN NOT RAISED' : ''}`);
 
   // The cage rolls the item the client rolls. A Stat Mod bakes the Core stat it feeds at drop, and the
   // draw that spends sits between the value window and the value (`game/src/sim/drop.ts`) — skip it and

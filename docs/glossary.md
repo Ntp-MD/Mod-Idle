@@ -121,6 +121,10 @@ The order itself is a rule: see `DECISIONS.md`.
 | **provision** | A carried raw food, fruit, edible field herb, cooking ingredient or cooked meal. Their effects and sources are defined in `engine.json` `fieldwork.foods`, `fieldwork.hunt` and `fieldwork.recipes`. |
 | **trail event** | An independent travel-block event that can provide food or restore Hunger without replacing the block's ambush roll. |
 | **junk** | A flavoured drop from a **variant**, sold to the settlement Counterhand for gold. |
+| **trade good** | Carried junk, material, provision or farm herb that a town Counterhand buys; ingredients can instead be kept for their recipes and field uses. |
+| **Demand** | A town's unfilled appetite for one goods category. Supplying it lowers that category's premium until demand recovers over game time. |
+| **Supply** | The saved base value already delivered into a town's category demand pool; it is shared across items in that category. |
+| **Workshop** | A settlement service that consumes gathered materials to make finished trade goods and grants the recipe's field skill XP. |
 | **variant** | One named form of a Species (`mob.variants`): it owns a level band, authored Core allocation and the junk row it pays. A Species may author any number of Variants. |
 | **unique** | A named wild boss belonging to a Species (`mob.uniques`): an optional rare upgrade of a normal spawn. A Species can have none or several. |
 

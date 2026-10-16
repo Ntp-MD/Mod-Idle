@@ -17,7 +17,6 @@
   import stoneCorrupt from '../icon/misc/stones/stone-corrupt.svg?url';
   import runeStone from '../icon/misc/stones/rune-stone.svg?url';
   import crystalOne from '../icon/misc/stones/crystal-cluster-1.svg?url';
-  import crystalTwo from '../icon/misc/stones/crystal-cluster-2.svg?url';
   import crystalGrowth from '../icon/misc/stones/crystal-growth.svg?url';
 
   let { game, item, where = null, index = -1, onpick, onclear, onrun, wornOf, note = '' }: {
@@ -42,7 +41,7 @@
     { key: 'replace', icon: runeStone, detail: 'Change a Mod identity' },
     { key: 'quality', icon: stoneQuality, detail: 'Enhance a gear piece one step' },
     { key: 'polish', icon: crystalOne, detail: 'Reroll every Mod value' },
-    { key: 'reforge', icon: crystalTwo, detail: 'Redraw the piece Tier' },
+    { key: 'reforge', icon: crystalOne, detail: 'Redraw the piece Tier' },
     { key: 'rebirth', icon: crystalGrowth, detail: 'Redraw Unbound Mods' },
     { key: 'corrupt', icon: stoneCorrupt, detail: 'One permanent gamble' },
     { key: 'repair', icon: stoneRepair, detail: 'Repair a Broken piece' },

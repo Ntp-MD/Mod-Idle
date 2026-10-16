@@ -4,7 +4,7 @@
 
 ## Feature (Wait User Assign on chat)
 
-- economy between town demand supply , junk , ore , wood anything ตัวอย่าง gameplay ฟาร์มของไปขายเมืองที่ให้ราคาของนั้นดี เพื่อให้เกิด การเดินทางบ่อยขึ้น , หาวิธีทำให้ item มีค่ามากขึ้น , ให้มีของหลายอย่างมากขึ้นและสำคัญมากขึ้น เช่นความหลากหลายของ ore , wood , raw , food , recipes , wood , herb and stuff
+
 
 - Card Player Vital , Name(You) icon , หลอดความหิว และเอาปุ่ม control มาไว้ใน card นี้
 

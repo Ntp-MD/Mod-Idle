@@ -959,5 +959,300 @@
     ],
     "standing_min_tiers": 3,
     "chase_tier_min_share": 1
+  },
+  "trade": {
+    "currency_decimals": 2,
+    "floor_mult": 0.6,
+    "neutral_peak": 1.15,
+    "import_peak": 2.6,
+    "export_peak": 0.85,
+    "capacity_gold": 120,
+    "recovery_sec": 14400,
+    "recipe_value_mult": 1.5,
+    "workshop_value_mult": 1.5,
+    "food_values": {
+      "raw": 0.4,
+      "fruit": 0.6,
+      "herb": 1,
+      "ingredient": 0.8,
+      "cooked": 1.5
+    },
+    "herb_values": {
+      "low": 0.5,
+      "mid": 1.5,
+      "high": 3
+    },
+    "material_values": {
+      "ore": 0.2,
+      "timber": 0.2,
+      "rarewood": 1.5,
+      "copper-ore": 0.8,
+      "iron-ore": 1.1,
+      "silver-ore": 1.8,
+      "rock-salt": 0.5,
+      "pine-wood": 0.5,
+      "hardwood": 0.9,
+      "willow-wood": 0.6,
+      "cedar-wood": 1.1
+    },
+    "junk_groups": {
+      "salvage": [
+        "goblin",
+        "orc",
+        "kobold",
+        "human",
+        "lizardman",
+        "elf",
+        "golem"
+      ],
+      "trophies": [
+        "wolf",
+        "werewolf",
+        "ogre",
+        "troll",
+        "minotaur",
+        "giant",
+        "dragon",
+        "wyvern",
+        "shark",
+        "siren"
+      ],
+      "relics": [
+        "skeleton",
+        "mummy",
+        "vampire",
+        "wraith",
+        "archon"
+      ],
+      "botanicals": [
+        "dryad",
+        "treant",
+        "slime",
+        "ooze"
+      ],
+      "curios": [
+        "demon",
+        "imp",
+        "spider",
+        "beetle",
+        "hornet",
+        "mist",
+        "salamander",
+        "wisp",
+        "crab"
+      ]
+    },
+    "towns": {
+      "eastgate": {
+        "imports": [
+          "ore",
+          "craft",
+          "junk:relics"
+        ],
+        "exports": [
+          "wood"
+        ],
+        "needs": "Road repairs and new workshops need metals and fittings."
+      },
+      "highspire": {
+        "imports": [
+          "wood",
+          "cooked",
+          "herb"
+        ],
+        "exports": [
+          "ore"
+        ],
+        "needs": "Miners need timber supports, meals and herbs."
+      },
+      "wolf_cross": {
+        "imports": [
+          "ore",
+          "food:salted-fish",
+          "craft"
+        ],
+        "exports": [
+          "raw",
+          "wood"
+        ],
+        "needs": "Hunters trade local game for tools and preserved fish."
+      },
+      "greyfen": {
+        "imports": [
+          "wood",
+          "raw",
+          "herb",
+          "fruit"
+        ],
+        "exports": [
+          "material:rock-salt"
+        ],
+        "needs": "Dryland kitchens need fresh game, herbs and fuel."
+      },
+      "saltmarrow": {
+        "imports": [
+          "wood",
+          "cooked",
+          "junk:trophies"
+        ],
+        "exports": [
+          "material:rock-salt"
+        ],
+        "needs": "Tomb crews need supplies for long expeditions."
+      },
+      "the_pale_spire": {
+        "imports": [
+          "material:silver-inlay",
+          "herb",
+          "junk:curios"
+        ],
+        "exports": [
+          "material:silver-ore"
+        ],
+        "needs": "Sanctum artisans commission inlay and botanical supplies."
+      },
+      "blackwater_reach": {
+        "imports": [
+          "craft",
+          "food:pine-nut-bread",
+          "junk:salvage",
+          "ingredient"
+        ],
+        "exports": [
+          "food:river-fish",
+          "wood"
+        ],
+        "needs": "Boat builders need fittings and dry provisions."
+      },
+      "bonegate": {
+        "imports": [
+          "cooked",
+          "wood",
+          "herb"
+        ],
+        "exports": [
+          "junk:relics",
+          "ore"
+        ],
+        "needs": "Wardens consume fuel and food at the old gate."
+      },
+      "frosthold": {
+        "imports": [
+          "food:cedar-smoked-game",
+          "wood",
+          "herb"
+        ],
+        "exports": [
+          "ore"
+        ],
+        "needs": "Cold camps pay for long meals and firewood."
+      },
+      "vermolch": {
+        "imports": [
+          "craft",
+          "food:salted-fish",
+          "junk:curios"
+        ],
+        "exports": [
+          "wood",
+          "food:marsh-sage"
+        ],
+        "needs": "Mire settlements need tools and food that travels."
+      },
+      "duskmoor": {
+        "imports": [
+          "wood",
+          "raw",
+          "junk:botanicals"
+        ],
+        "exports": [
+          "ore",
+          "food:wild-grain"
+        ],
+        "needs": "Moor kitchens and shelters consume forest supplies."
+      },
+      "nettlecrag": {
+        "imports": [
+          "wood",
+          "cooked",
+          "herb"
+        ],
+        "exports": [
+          "ore"
+        ],
+        "needs": "Deep crews import timber, meals and medicinal herbs."
+      },
+      "emberhold": {
+        "imports": [
+          "wood",
+          "material:copper-fittings",
+          "food:river-fish"
+        ],
+        "exports": [
+          "material:iron-ore"
+        ],
+        "needs": "Foundries consume wood and copper fittings."
+      },
+      "millbrook": {
+        "imports": [
+          "ore",
+          "craft",
+          "junk:trophies"
+        ],
+        "exports": [
+          "wood",
+          "food:river-fish"
+        ],
+        "needs": "Waterworks need metal parts and tools."
+      },
+      "wyrmback": {
+        "imports": [
+          "wood",
+          "craft",
+          "food:sage-tea"
+        ],
+        "exports": [
+          "food:shellfish",
+          "material:rock-salt"
+        ],
+        "needs": "Coastal crews import hull timber and warming tea."
+      },
+      "ashfall": {
+        "imports": [
+          "ore",
+          "food:shellfish-chowder",
+          "junk:curios"
+        ],
+        "exports": [
+          "wood",
+          "herb"
+        ],
+        "needs": "Forest artisans need metal and coastal provisions."
+      },
+      "ironrow": {
+        "imports": [
+          "wood",
+          "food:pine-nut-bread",
+          "herb"
+        ],
+        "exports": [
+          "material:silver-ore"
+        ],
+        "needs": "Terrace workshops need timber and expedition food."
+      },
+      "thornwake": {
+        "imports": [
+          "food:cedar-smoked-game",
+          "craft",
+          "junk:relics"
+        ],
+        "exports": [
+          "ore",
+          "wood"
+        ],
+        "needs": "Frontier crews pay for finished supplies and rare trophies."
+      }
+    },
+    "note": "The Counterhand buys gathered goods and junk. Each town has stable import needs and abundant exports. Sales spend a shared category demand pool measured in base gold; it recovers over simulation time, including credited offline time. Quotes integrate the declining premium across the whole sale, so splitting stacks does not improve payment. Goods cannot be bought back; gold buys existing convenience services only. Base junk drop expectations and stall pricing anchors remain reference values, while realised trade income depends on destination and supply."
   }
 }

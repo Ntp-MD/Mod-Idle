@@ -19,7 +19,7 @@
   import craftMark from '../icon/misc/stones/stone-add-mod.svg?url';
   import stashMark from '../icon/misc/treasure-chest.svg?url';
   import deskMark from '../icon/misc/quest-journal.svg?url';
-  import farmMark from '../icon/character/farmer.svg?url';
+  import farmMark from '../icon/enviroment/plant-watering.svg?url';
 
   let { state, town, here, tabs, onopen, onwarp, onsellall, onstashall, onbest }: {
     state: GameState;
@@ -49,7 +49,7 @@
   const lowest = $derived(worn.length ? worn.reduce((a, b) => ((b.upgrade_lv || 0) < (a.upgrade_lv || 0) ? b : a)) : null);
   const opened = $derived(state.town.visited.filter((v) => v !== town.id).map(settlementById).filter((s): s is NonNullable<ReturnType<typeof settlementById>> => Boolean(s)));
   const services = $derived([
-    { id: 'market', name: 'Market', icon: marketMark, by: 'the Counterhand and the stall', say: 'Buy stock lines, tabs and bag room · sell the junk this run picked up', live: buys ? `${buys} line${buys === 1 ? '' : 's'} your purse covers` : junk ? `${junk} junk to sell` : 'nothing on offer you can take' },
+    { id: 'market', name: 'Market', icon: marketMark, by: 'the Counterhand and the workshop', say: 'Sell gathered goods, compare town demand, process materials and plan trade routes', live: buys ? `${buys} stall line${buys === 1 ? '' : 's'} your purse covers` : junk ? `${junk} junk to sell` : 'Compare buyers and regional supplies' },
     { id: 'forge', name: 'Forge', icon: forgeMark, by: 'the Armourer', say: 'Enhance a piece up the + ladder, repair a Broken one, or take the one Corrupt gamble', live: lowest ? `${lowest.slot} is the least forged · +${lowest.upgrade_lv || 0} of +${craft.C.upgrade_cap}` : 'nothing worn yet' },
     { id: 'craft', name: 'Craft house', icon: craftMark, by: 'the Armourer and the Herbalist', say: 'Move a mod line inside its Tier, push it a Tier up, add or remove a mod, ascend the piece', live: stones ? `${stones} stones in the purse` : 'no stones — a rejected drop dissolves into them' },
     { id: 'stash', name: 'Stash', icon: stashMark, by: 'the Porter', say: 'The warehouse the same record opens in every settlement', live: tabs ? `${stored} stored · ${tabs} tab${tabs === 1 ? '' : 's'}` : 'no tab bought yet' },

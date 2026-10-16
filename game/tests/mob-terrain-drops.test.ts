@@ -177,7 +177,6 @@ describe('mob, terrain and drop data', () => {
   it('inherits a Species field label from the previous available form', () => {
     const data = structuredClone(engineData);
     delete data.mob.forms['2'].goblin;
-    delete data.mob.form_catalog['2'].goblin;
     const fallbackEngine = createEngine(data);
     const variant = fallbackEngine.variantsInZone('goblin', 2)[0];
     const mob = fallbackEngine.spawnAt(2, 11, 'small', 'goblin', undefined, variant.levels, variant.core);
@@ -186,13 +185,13 @@ describe('mob, terrain and drop data', () => {
     expect(mob.core).toEqual(variant.core);
   });
 
-  it('validates any authored field-form catalog rows without requiring a full grid', () => {
+  it('validates any authored field-form rows without requiring a full grid', () => {
     const bands = E.mob.zones.filter((zone: any) => zone.levels[0] <= E.mob.form_level_cap);
-    const catalog = E.mob.form_catalog as any;
+    const forms = E.mob.forms as any;
     const names: string[] = [];
     let count = 0;
     for (const zone of bands) {
-      for (const [speciesId, form] of Object.entries<any>(catalog[zone.id] || {})) {
+      for (const [speciesId, form] of Object.entries<any>(forms[zone.id] || {})) {
         expect(E.mob.species.some((species: any) => species.id === speciesId)).toBe(true);
         expect(form.levels).toEqual(zone.levels);
         expect(form.name).toBeTruthy();

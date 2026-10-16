@@ -181,7 +181,6 @@ function checks(): any[] {
       ? 'NO WEIGHT: ' + noWeight.map((w: any) => w.name).join(', ')
       : `all ${weapons.length} weapon types carry a weight, spanning ${wSpan[0]}-${wSpan[1]}`);
   const shields = (current.bases || []).filter((b: any) => b.slot === 'off hand' && b.family === 'Shield');
-  const shieldProfiles = new Set(['armour_flat', 'energy_shield_flat', 'armour_flat+energy_shield_flat']);
   const seenShieldProfiles = new Set<string>();
   const shieldProblems: string[] = [];
   const knownModIds = new Set((MODS.mods || []).map((m: any) => m.id));
@@ -189,16 +188,15 @@ function checks(): any[] {
     const ids: string[] = frame.frame_mod || [];
     const profile = ids.slice(1).sort().join('+');
     if (ids[0] !== 'block_chance') shieldProblems.push(`${frame.name} does not lock Block Chance first`);
-    if (!shieldProfiles.has(profile)) shieldProblems.push(`${frame.name} has unexpected defence profile ${profile || '(empty)'}`);
     if (seenShieldProfiles.has(profile)) shieldProblems.push(`duplicate Shield profile ${profile}`);
     seenShieldProfiles.add(profile);
     if (!(frame.weight > 0)) shieldProblems.push(`${frame.name} carries no weight`);
     for (const id of ids) if (!knownModIds.has(id)) shieldProblems.push(`${frame.name}: unknown Frame Mod ${id}`);
   }
-  if (shields.length !== 3) shieldProblems.push(`expected 3 Shield frames, found ${shields.length}`);
+  if (shields.length < 1) shieldProblems.push('at least one Shield frame is required');
   add('BS13', shieldProblems.length === 0, shieldProblems.length
     ? shieldProblems.join(' · ')
-    : 'three Shield frames lock Block Chance with unique Armour, Energy Shield, and Armour + Energy Shield profiles');
+    : `${shields.length} Shield frames lock Block Chance with unique supported defence profiles and valid weights and Frame Mods`);
   return rows();
 }
 

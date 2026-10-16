@@ -3,9 +3,10 @@ import { dayOf } from './game';
 import type { GameState, TaskSlot, TownState } from './types';
 import { atSettlement } from './craft';
 import { addTo, fits } from './slots';
+import { sellGoods, tradeInventory } from './trade';
 
 /**
- * The settlement layer. Every price here is "minutes of full-sell income" converted through the
+ * The settlement layer. Stall prices here are "minutes of reference full-sell income" converted through the
  * shared engine's `goldPerMinute`, so a drop-rate change moves the stall prices in the client the
  * same moment it moves them in `towns-stalls.md` (`economy.md` · checks.md T2-T7).
  *
@@ -15,15 +16,6 @@ import { addTo, fits } from './slots';
 
 const TS = TOWN.task_sizing;
 
-/** Item name → its sale rarity, from the Variant or its Species' same-rarity alternative. */
-const JUNK_RARITY: Record<string, string> = (() => {
-  const out: Record<string, string> = {};
-  for (const r of Object.values((E.mob as any).variant_drops || {}) as any[]) out[r.item] = r.rarity;
-  for (const species of (E.mob as any).species || []) {
-    for (const [rarity, item] of Object.entries(species.junk_items || {}) as [string, string][]) out[item] = rarity;
-  }
-  return out;
-})();
 export const ALL_ROWS: any[] = [...TOWN.one_time, ...TOWN.repeatable];
 export const rowById = (id: string) => ALL_ROWS.find((r) => r.id === id);
 export const settlementById = (id: string) => TOWN.settlements.find((s: any) => s.id === id);
@@ -57,6 +49,8 @@ export function priceGold(row: any, settlementId: string, state?: GameState, blo
 export function newTown(): TownState {
   const start = startSettlement();
   return {
+    market: {},
+    marketCredit: 0,
     visited: [start], owned: [], waypoint: start,
     tasks: new Array(TS.slots).fill(null), refillAt: new Array(TS.slots).fill(0),
     skipsToday: 0, skipDay: 0,
@@ -121,21 +115,16 @@ export function buy(state: GameState, settlementId: string, rowId: string): BuyR
   return check;
 }
 
-/** Junk is sold by hand at the Counterhand — the only gold mint besides the Road (`economy.md`). */
+/** The quick town action sells junk only; provisions and materials require an explicit Market sale. */
 export function sellJunk(state: GameState): { pieces: number; gold: number } {
   if (!atSettlement(state)) return { pieces: 0, gold: 0 };
   let pieces = 0, gold = 0;
-  for (const [item, count] of Object.entries(state.junk)) {
-    if (!count) continue;
-    // the item's own rarity sets the price, and every rarity is worth the same gold per kill, so
-    // which variant dropped the stack never changes what the Counterhand pays
-    const rarity = JUNK_RARITY[item];
-    const price = rarity ? ((E.junk.rarities as any)[rarity] || {}).sell_gold || 0 : 0;
-    pieces += count;
-    gold += count * price;
-    state.junk[item] = 0;
+  for (const { good, count } of tradeInventory(state)) {
+    if (good.bucket !== 'junk') continue;
+    const result = sellGoods(state, good.id, count);
+    pieces += result.pieces;
+    gold += result.gold;
   }
-  state.counters.gold += gold;
   return { pieces, gold };
 }
 

@@ -1,4 +1,4 @@
-import { E, TOWN } from '../engine/client';
+import { E, TOWN, fieldwork } from '../engine/client';
 import type { GameState } from './types';
 
 /**
@@ -55,8 +55,8 @@ export function bagStacks(state: GameState): BagStack[] {
       const count = Number(total) || 0;
       if (count <= 0) continue;
       const label = b.cap === 'food'
-        ? (E.fieldwork.foods as any[]).find((food) => food.id === name)?.name || name
-        : name;
+        ? fieldwork.foodById[name]?.name || name
+        : b.cap === 'material' ? fieldwork.materialById[name]?.name || name : name;
       out.push({ name: label, group: b.label, capKind: b.cap, count, weight: count * unit });
     }
   }

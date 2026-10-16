@@ -14,11 +14,19 @@ export function createFieldwork(F: FieldworkCfg) {
     return Math.min(1, Math.max(0, baseChance) * (1 + bonusPct / 100));
   };
   const recipeById = Object.fromEntries(F.recipes.map((recipe) => [recipe.id, recipe]));
-  const foodById = Object.fromEntries(F.foods.map((food) => [food.id, food]));
+  // A cooking recipe owns its cooked provision too. Newly authored dishes must be edible and
+  // available to Auto Eat without a second manually maintained food row.
+  const foods = [...F.foods.filter((food) => !recipeById[food.id]), ...F.recipes.map((recipe) => ({
+    id: recipe.id, name: recipe.name, kind: 'cooked' as const, hunger_restore: recipe.hunger_restore,
+    edible: true, auto_eat: true, source: F.foods.find((food) => food.id === recipe.id)?.source || 'cooking',
+  }))];
+  const foodById = Object.fromEntries(foods.map((food) => [food.id, food]));
+  const materialById = Object.fromEntries(F.materials.map((material) => [material.id, material]));
+  const workshopById = Object.fromEntries(F.workshop_recipes.map((recipe) => [recipe.id, recipe]));
   const siteAt = (wild: number | null | undefined): 'dungeon' | 'mine' | 'grove' | null => {
     if (wild == null) return null;
     const sites = F.wild_site_index;
     return wild === sites.dungeon ? 'dungeon' : wild === sites.mine ? 'mine' : wild === sites.grove ? 'grove' : null;
   };
-  return { F, skillLevel, masteryLevel, harvestBonus, dropChanceAt, recipeById, foodById, siteAt };
+  return { F, foods, skillLevel, masteryLevel, harvestBonus, dropChanceAt, recipeById, foodById, materialById, workshopById, siteAt };
 }

@@ -20,7 +20,7 @@
 
 // The wiki reads the engine, and only the engine: this is the same seam the client uses, so a page,
 // a cage and the game all resolve to one module and one data file.
-import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, eng, loot, sm, tree, road, farm, fieldwork } from '../engine/client.ts';
+import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, eng, loot, sm, tree, road, farm, fieldwork, trade } from '../engine/client.ts';
 import { STONE_NAME, PRESS_NAME } from '../../../engine/craft.ts';
 
 /**
@@ -683,7 +683,19 @@ page({
         esc(b), wrap(n0(EBAND[b].kills_derived)), wrap(n0(EBAND[b].junk_per_hr)),
         `${n1(eng.goldPerMinute(b))} gold`,
       ])),
-      'One mint: mob junk sold at the Counterhand (<code>junk.rarities</code>, read on <a href="idle.html">Away &amp; bag</a>). The rate is the band’s own junk flow, so a stall price written as <code>m</code> minutes of income costs the same effort everywhere — a small-looking figure at a high band is not a discount, it is a dearer mob. Spend the same items on Lck and the high band’s line lifts to <code>' + n1(eng.goldPerMinute('high_full_lck')) + '</code> gold a minute (<code>LCK_BOUND</code> is that ratio’s bound).'),
+      'These are reference junk values before market demand, and town service prices still use this baseline. The Counterhand also buys gathered materials, provisions and farm herbs. Actual payment depends on the buyer, the quantity and how much of that category the town has already received.'),
+    block('Town buyers and trade routes', table(['Town', 'Import needs', 'Abundant exports', 'Why it buys'], TOWN.settlements.map((town: any) => {
+      const profile = TOWN.trade.towns[town.id];
+      const words = (entries: string[]) => entries.map((id) => trade.byId[id]?.name || id.replace('junk:', '')).join(' · ');
+      return [esc(town.name), esc(words(profile.imports)), esc(words(profile.exports)), esc(profile.needs)];
+    })), `At full demand, imported goods pay up to ×${n2(TOWN.trade.import_peak)} base value; abundant exports pay up to ×${n2(TOWN.trade.export_peak)}. Deliveries consume the shared category pool of ${n0(TOWN.trade.capacity_gold)} base gold and the price approaches ×${n2(TOWN.trade.floor_mult)}. Demand recovers over ${n0(TOWN.trade.recovery_sec / 3600)} game hours, including credited away time. A bulk quote includes the whole price decline; splitting a stack earns the same total. Open Market to compare buyers, walking distance, warp fees and net proceeds, then select Map route. Goods can be sold only while standing in that town.`),
+    block('Regional gathering', table(['Town field', 'Mine bonus', 'Grove bonus', 'Grove forage'], TOWN.settlements.map((town: any) => {
+      const source = (E.fieldwork as any).regional_sources[town.zone];
+      return [esc(town.name), esc(fieldwork.materialById[source.mine].name), esc(fieldwork.materialById[source.grove].name), esc(fieldwork.foodById[source.food].name)];
+    })), 'Regional bonuses supplement common ore, timber and rarewood. Keep stock for Camp and recipes, or carry it to a town that needs it. Mining and Woodcutting improve bonus chances and harvests.'),
+    block('Workshop cargo', table(['Finished good', 'Field skill', 'Materials', 'Base value'], (E.fieldwork as any).workshop_recipes.map((recipe: any) => [
+      esc(recipe.name), `${esc(recipe.skill)} Lv ${n0(recipe.level)}`, esc(Object.entries(recipe.materials).map(([id, count]) => `${count} ${fieldwork.materialById[id].name}`).join(' · ')), `${n2(trade.byId[`material:${recipe.id}`].value)} gold`,
+    ])), 'Use the Market Workshop while standing in a settlement. Finished cargo has a derived base value above its inputs, but the buyer’s remaining demand still decides the actual offer. Making a good spends its listed materials and grants field skill XP. A full bag refuses the action without spending anything.'),
     block('Gold: what it buys', table(['Buys', 'Lines that buy it', 'Written as', 'What a line is worth'],
       (['space', 'time', 'information', 'appearance'] as string[]).map((kind: string) => {
         const lines = [...(TOWN.one_time || []), ...(TOWN.repeatable || [])].filter((l: any) => l.kind === kind);
@@ -695,7 +707,7 @@ page({
       'Gold never buys gear, a Mod, a potion or a stone. A better build earns gold faster without ever turning gold into power.'),
     block('What is deliberately absent', `<ul class="fx">
       <li><span class="fk">No sink that sells power.</span><span class="fs">rule</span><span class="fv">the loot funnel is the only road to a stronger piece</span></li>
-      <li><span class="fk">No auction, no trading.</span><span class="fs">rule</span><span class="fv">one character, one account, one set of numbers</span></li>
+      <li><span class="fk">No player auction.</span><span class="fs">rule</span><span class="fv">trade is between the character and town buyers</span></li>
       <li><span class="fk">No prestige currency.</span><span class="fs">rule</span><span class="fv">nothing resets what you earned — <a href="builds.html">Builds</a></span></li>
       <li><span class="fk">No timed shop, no sale.</span><span class="fs">rule</span><span class="fv">time is not a design constraint, so no screen sells urgency</span></li>
     </ul>`),
@@ -1010,7 +1022,7 @@ page({
       ])),
       'A body that is already metal or wood can leave a piece of it, paid into the same Material store the `mine` and `grove` sites fill. The site stays the bulk source — it owns the rate, the Skill XP and the Mastery — so a kill is the chance you meet on the way there, never the way to cap a Material.'),
     block('Hunger and provisions', table(['Food', 'Kind', 'Hunger restored', 'Source'],
-      ((E.fieldwork as any).foods || []).map((food: any) => [
+      fieldwork.foods.map((food: any) => [
         esc(food.name), esc(food.kind), food.edible ? `+${n0(food.hunger_restore)}` : 'cooking ingredient', esc(food.source || '—'),
       ])),
       `Walking, hunting and gathering drain Hunger at their own configured rates. Town and a safe idle Camp pause it. Auto Eat defaults to ${n0((E.fieldwork as any).hunger.auto_eat.threshold_default)}%, uses cooked food → fruit → edible herbs, and saves raw food for empty-Hunger emergencies unless opted in earlier. At empty Hunger, HP regeneration is cut by ${n0((E.fieldwork as any).hunger.empty_hp_regen_cut_pct)}%; Energy Shield recharge stays unchanged. Each crossed road block also rolls a separate supply or rest event, in addition to its usual ambush chance.`),
@@ -1103,11 +1115,11 @@ page({
       ['On by default', 'a fresh character keeps every drop and dissolves nothing', yes((E.loot as any).filter.rules.default_enabled)],
       ['Stored per slot', 'a player setting, so a raised threshold is never a second copy of the number', '<span class="hy"><code>loot.filter.rules</code></span>'],
     ]), 'Only a slot whose filter is armed dissolves a piece, and a dissolved piece pays the Value stone. Manual salvage keeps the piece if its payout cannot fit. Auto Equip preserves locked worn pieces and skips Broken gear. Stones are always kept.'),
-    block('Junk: the only mint', table(['Junk kind', 'Sells for', 'A kill pays it', 'Expected gold a kill'],
+    block('Junk: reference values', table(['Junk kind', 'Base value', 'A kill pays it', 'Expected base gold a kill'],
       Object.entries((E.junk as any).rarities || {}).map(([r, v]: any) => [
         esc(r), wrap(`${n0(v.sell_gold)} gold`), pc1(v.drop_chance_per_kill), wrap(n2(v.sell_gold * v.drop_chance_per_kill)),
       ])),
-      'Each Species may add junk alternatives in selected rarities to its Variants’ own items. The last column is the whole design of the stream: it is the same figure at every kind, so a Variant moving between kinds buys drop frequency, never income. Junk weighs nothing and stacks deep, so it fills slots — which is what sends you home.'),
+      'Each Species may add junk alternatives in selected rarities to its Variants’ own items. The last column is the reference stream before town demand: rarity changes drop frequency while preserving expected base value. The town buyer and its remaining category demand decide actual gold. Junk weighs nothing and stacks deep; compare buyers on the Economy page and in Market.'),
   ],
 });
 
@@ -1124,7 +1136,7 @@ page({
       ['What ambushes you', 'an ordinary mob group from the lower of the two zones the walk joins, at that zone’s own level range and at the pack of the side it walks onto — the zone’s own pack on bare ground', '<code>road.encounter_rule</code>'],
       ['What it pays', 'the ordinary per-kill drop roll and nothing else', '<code>road.encounter_rule</code> — no purse, no chest, no Standing, no stone'],
       ['Losing one', 'a same-zone Field Camp receives you and ends the walk; without one, recover and resume at the ambush block', '<code>road.push_rule</code>'],
-    ]), 'Walking mints no gold, so a long walk is a loot question and never a money question.'),
+    ]), 'Walking pays no gold directly. It can carry cargo to a buyer with better demand; compare the extra sale value with travel time, provisions and any Waypoint fee in Market.'),
     block('Every settlement, from the start', (() => {
       const start: any = (TOWN.settlements || []).find((s: any) => s.start) || (TOWN.settlements || [])[0];
       const warp: any = (TOWN.repeatable || []).find((l: any) => l.id === 'waypoint_warp') || { m_per_block: 0 };
@@ -1204,7 +1216,7 @@ page({
   file: 'icons.html',
   nav: 'Icons',
   title: 'Icon Gallery',
-  lead: `Every SVG the game ships, in one place. Search by name, filter by category, and star the ones you want to find again.`,
+  lead: `Every SVG the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch.`,
   body: ['<div id="icons-gallery"></div>'],
 });
 

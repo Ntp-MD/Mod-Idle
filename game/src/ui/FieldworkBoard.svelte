@@ -31,11 +31,10 @@
     onauto: (patch: Partial<{ enabled: boolean; threshold: number; allowRaw: boolean }>) => void;
   } = $props();
 
-  const resources = [
-    { id: 'ore', name: 'Ore', icon: mineralIcon },
-    { id: 'timber', name: 'Timber', icon: treeIcon },
-    { id: 'rarewood', name: 'Rarewood', icon: treeIcon },
-  ];
+  const regional = $derived(fieldwork.F.regional_sources[String(gameState.zone)]);
+  const resources = $derived(fieldwork.F.materials.filter((material: any) =>
+    (gameState.fieldwork.materials[material.id] || 0) > 0 || ['ore', 'timber', 'rarewood', regional?.mine, regional?.grove].includes(material.id))
+    .map((material: any) => ({ ...material, icon: material.group === 'wood' ? treeIcon : mineralIcon })));
   const skillNames = [
     ['mining', 'Mining'], ['woodcutting', 'Woodcutting'], ['hunting', 'Hunting'], ['cooking', 'Cooking'],
   ] as const;
@@ -49,13 +48,13 @@
   const campMoveLabel = $derived(gameState.fieldwork.freeRelocationsRemaining > 0 ? 'Move Camp · free' : `Move Camp · ${fieldwork.F.camp.relocate_ore} ore · ${fieldwork.F.camp.relocate_timber} timber`);
   const siteAction = $derived(site === 'mine' ? 'mine' : site === 'grove' ? 'grove' : null);
   const activityTitle = $derived(site === 'mine' ? 'Mine' : site === 'grove' ? 'Rare Grove' : site === 'hunt' ? 'Hunting Ground' : site === 'dungeon' ? 'Dungeon Entrance' : 'Field');
-  const pantry = $derived(fieldwork.F.foods.filter((food: any) => food.kind !== 'cooked'));
+  const pantry = $derived(fieldwork.foods.filter((food: any) => food.kind !== 'cooked'));
   const visibleRecipes = $derived(fieldwork.F.recipes.filter((recipe: any) => recipe.menu === recipeMenu));
   const recipesInMenu = (menu: string) => fieldwork.F.recipes.filter((recipe: any) => recipe.menu === menu).length;
   const hungerFill = $derived(Math.max(0, Math.min(1, gameState.fieldwork.hunger / fieldwork.F.hunger.max)));
   const recipeCost = (recipe: any) => [
     ...Object.entries(recipe.foods).map(([id, amount]) => `${amount} ${fieldwork.foodById[id]?.name || id}`),
-    ...Object.entries(recipe.materials).map(([id, amount]) => `${amount} ${id}`),
+    ...Object.entries(recipe.materials).map(([id, amount]) => `${amount} ${fieldwork.materialById[id]?.name || id}`),
     ...Object.entries(recipe.herbs).map(([tier, amount]) => `${amount} ${tier} herb`),
   ].join(' · ');
 </script>
@@ -105,8 +104,8 @@
     <div class="activity-copy">
       <b>{activityTitle}</b>
       <small>
-        {#if site === 'mine'}Mine {fieldHarvestAmount(gameState, 'mining', fieldwork.F.actions.mine.yield)} ore/action · rich vein {(fieldDropChance(gameState, 'mining', 'mine', fieldwork.F.actions.mine.rare_drop_chance) * 100).toFixed(1)}% · Mst {fieldMasteryLevel(gameState, 'mining', 'mine')}
-        {:else if site === 'grove'}Cut {fieldHarvestAmount(gameState, 'woodcutting', fieldwork.F.actions.grove.yield)} timber/action · rarewood {(fieldDropChance(gameState, 'woodcutting', 'grove', fieldwork.F.actions.grove.rare_drop_chance) * 100).toFixed(1)}% · Mst {fieldMasteryLevel(gameState, 'woodcutting', 'grove')}
+        {#if site === 'mine'}Mine {fieldHarvestAmount(gameState, 'mining', fieldwork.F.actions.mine.yield)} ore/action · local find: {fieldwork.materialById[regional?.mine]?.name} · Mst {fieldMasteryLevel(gameState, 'mining', 'mine')}
+        {:else if site === 'grove'}Cut {fieldHarvestAmount(gameState, 'woodcutting', fieldwork.F.actions.grove.yield)} timber/action · local wood: {fieldwork.materialById[regional?.grove]?.name} · forage: {fieldwork.foodById[regional?.food]?.name}
         {:else if site === 'hunt'}Drop chance and portions improve with Hunting level and species Mastery · humans may drop cooked rations, Goblins raw haunches
         {:else if site === 'dungeon'}A special dungeon run starts from this map hex
         {:else}Choose a field hex from the map to see its activity{/if}
@@ -229,7 +228,7 @@
   .recipe-tabs button { display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); }
   .recipe-tabs button.selected { color: var(--gold); border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--panel)); }
   .recipe-tabs small { color: inherit; font-family: var(--num); }
-  .recipes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: var(--spacing-sm); min-height: 0; }
+  .recipes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-sm); min-height: 0; overflow: auto; }
   .recipe { display: grid; align-content: start; gap: var(--spacing-xs); min-width: 0; overflow: hidden; border-top: 1px solid var(--edge); padding: var(--spacing-sm) var(--spacing-xs); background: color-mix(in srgb, var(--panel) 64%, transparent); }
   .recipe.locked { opacity: .56; }
   .recipe-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--spacing-xs); }

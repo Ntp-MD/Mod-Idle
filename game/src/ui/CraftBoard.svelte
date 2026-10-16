@@ -29,7 +29,6 @@
   import stoneCorrupt from '../icon/misc/stones/stone-corrupt.svg?url';
   import runeStone from '../icon/misc/stones/rune-stone.svg?url';
   import crystalOne from '../icon/misc/stones/crystal-cluster-1.svg?url';
-  import crystalTwo from '../icon/misc/stones/crystal-cluster-2.svg?url';
   import crystalGrowth from '../icon/misc/stones/crystal-growth.svg?url';
 
   let { game, item, where = null, index = -1, onpick, onrun, wornOf, note = '', embedded = false, stoneRequest = null, onstoneclear = () => {} }: {
@@ -123,7 +122,7 @@
       imprint stones after — each cell carries the stone's own icon and the count it holds. */
   const STONE_ICON: Record<string, string> = {
     reroll_value: stoneRerollValue, tier: stoneRerollTier, add: stoneAdd, remove: stoneRemove,
-    replace: runeStone, quality: stoneQuality, polish: crystalOne, reforge: crystalTwo,
+    replace: runeStone, quality: stoneQuality, polish: crystalOne, reforge: crystalOne,
     rebirth: crystalGrowth, corrupt: stoneCorrupt, repair: stoneRepair, imprint: runeStone,
   };
   const CATALOGUE = ['reroll_value', 'tier', 'add', 'remove', 'replace', 'quality', 'polish', 'reforge', 'rebirth', 'corrupt', 'repair'];

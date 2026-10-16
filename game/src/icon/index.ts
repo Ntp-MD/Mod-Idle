@@ -10,9 +10,9 @@ import broadSword from './weapon/broadsword.svg?url';
 import warhammer from './weapon/warhammer.svg?url';
 import goblin from './character/goblin-head-1.svg?url';
 import bootPrints from './equipment/boot-prints.svg?url';
-import ogre from './character/ogre-1.svg?url';
+import ogre from './character/minotaur-2.svg?url';
 import skull from './character/dread-skull.svg?url';
-import cloak from './equipment/cloak-1.svg?url';
+import cloak from './equipment/cape.svg?url';
 import wolf from './character/wolf-head-2.svg?url';
 import crystal from './misc/stones/crystal-cluster-1.svg?url';
 import crossShield from './equipment/cross-shield.svg?url';
@@ -23,10 +23,10 @@ import dragonShield from './equipment/dragon-shield.svg?url';
 import crossedSwords from './weapon/crossed-swords-1.svg?url';
 import spiderWeb from './character/spider-web-1.svg?url';
 import pendant from './equipment/gem-pendant.svg?url';
-import gauntlet from './equipment/gauntlet-1.svg?url';
+import gauntlet from './equipment/gloves.svg?url';
 import armorUpgrade from './equipment/armor-upgrade.svg?url';
 import clothes from './equipment/clothes.svg?url';
-import coins from './currency/coins-pile.svg?url';
+import coins from './currency/coin-purse.svg?url';
 import roastFood from './misc/food-roast-meat.svg?url';
 import berryFruit from './enviroment/berry-bush.svg?url';
 import mushroomFood from './misc/mushroom.svg?url';
@@ -43,14 +43,14 @@ import helmet from './equipment/helmet-1.svg?url';
 import ring from './equipment/swirl-ring.svg?url';
 import accuracyMark from './interface/bullseye.svg?url';
 import allStatsMark from './interface/d12.svg?url';
-import cooldownMark from './interface/stopwatch.svg?url';
+import cooldownMark from './misc/hourglass.svg?url';
 import healthMark from './interface/heart-beats.svg?url';
-import strengthMark from './currency/attribute-strength.svg?url';
+import strengthMark from './weapon/battle-axe-1.svg?url';
 import intelligenceMark from './currency/attribute-intelligence.svg?url';
-import agilityMark from './currency/attribute-agility.svg?url';
-import dexterityMark from './currency/attribute-dexterity.svg?url';
+import agilityMark from './skill/buff/dodging.svg?url';
+import dexterityMark from './weapon/bow-arrow.svg?url';
 import wisdomMark from './currency/attribute-wisdom.svg?url';
-import luckMark from './currency/attribute-luck.svg?url';
+import luckMark from './enviroment/clover-1.svg?url';
 import armorMark from './equipment/layer-armour.svg?url';
 import armorPenMark from './equipment/layer-armour-penetration.svg?url';
 import energyShieldMark from './equipment/layer-energy-shield.svg?url';
@@ -75,23 +75,22 @@ import curseSkillMark from './skill/type-curse-skill.svg?url';
 import healSkillMark from './skill/type-heal-skill.svg?url';
 
 // The four species the shelf carries a real creature for; the rest still fall back to the dread-skull.
-import minotaur from './character/bull.svg?url';
+import minotaur from './character/minotaur-1.svg?url';
 import dragon from './character/wyvern.svg?url';
 import lizardman from './character/lizardman.svg?url';
 import werewolf from './character/wolf-howl.svg?url';
-import troll from './character/troll.svg?url';
-import kobold from './character/bad-gnome.svg?url';
-import skeleton from './character/skeleton.svg?url';
+import troll from './character/minotaur-1.svg?url';
+import kobold from './character/goblin-head-1.svg?url';
 import mummy from './character/mummy-head.svg?url';
-import vampire from './character/vampire-dracula.svg?url';
+import vampire from './character/bat-1.svg?url';
 import demon from './character/daemon-skull.svg?url';
-import orc from './character/orc-head.svg?url';
-import giant from './character/giant.svg?url';
-import human from './character/archer.svg?url';
-import elf from './character/woman-elf-face.svg?url';
+import orc from './character/orc.svg?url';
+import giant from './character/giant-squid.svg?url';
+import human from './character/female.svg?url';
+import elf from './character/female.svg?url';
 import treant from './character/ent-mouth.svg?url';
 import dryad from './enviroment/tree-face.svg?url';
-import sirenIcon from './character/siren.svg?url';
+import sirenIcon from './character/mermaid.svg?url';
 import wraithIcon from './character/wraith.svg?url';
 import impIcon from './character/imp.svg?url';
 import wyvernIcon from './character/dragon-head-2.svg?url';
@@ -101,9 +100,9 @@ import oozeIcon from './character/acid-blob.svg?url';
 import mistIcon from './character/jellyfish.svg?url';
 import salamanderIcon from './character/salamander.svg?url';
 import wispIcon from './character/spark-spirit.svg?url';
-import sharkIcon from './character/fish-monster.svg?url';
+import sharkIcon from './character/angler-fish.svg?url';
 import crabIcon from './character/crab.svg?url';
-import archonIcon from './character/sun-priest.svg?url';
+import archonIcon from './character/harpy.svg?url';
 
 const armorBySlot: Record<string, string> = {
   helmet,
@@ -132,6 +131,46 @@ function skillAsset(...paths: string[]): string | undefined {
   return undefined;
 }
 
+/**
+ * The self-generated shelf. `0.self-gen-png/` is the primary art for everything it covers and the
+ * vector shelf below is the fallback, so a new figure needs only a file named after the thing —
+ * a species id, or a Draught's colour — and no code.
+ */
+const selfGenAssets = import.meta.glob<string>('./0.self-gen-png/**/*.png', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
+/** Indexed by file name alone: the category folder is how the art is filed, not part of the lookup,
+ *  so a figure can move between folders without a code change. */
+const selfGenByName = new Map<string, string>(
+  Object.entries(selfGenAssets).map(([p, url]) => [p.slice(p.lastIndexOf('/') + 1).replace(/\.png$/, ''), url]),
+);
+
+function selfGen(name: string): string | undefined {
+  return selfGenByName.get(name);
+}
+
+/** Two shelf files stand for a name the data does not carry. */
+const selfGenAlias: Record<string, string> = { human: 'player' };
+
+/** The hub's art: the self-generated figure where the shelf carries one, the vector mark where it does
+ *  not. The rail is ringed and small, so a named file is the whole contract — no code per tab. */
+export function hubIcon(name: string, fallback: string): string {
+  return selfGen(name) ?? fallback;
+}
+
+/** Draught art follows the liquid, so each tier of each pool reads apart in the bag. */
+const draughtArt: Record<string, string> = {
+  'red draught': 'hp-potion',
+  'yellow draught': 'orange-potion',
+  'white draught': 'white-potion',
+  'sky draught': 'mana-potion',
+  'blue draught': 'blue-potion',
+  'deep blue draught': 'puple-potion',
+};
+
 const mobBySpecies: Record<string, string> = {
   goblin,
   slime: cloudRing,
@@ -147,7 +186,6 @@ const mobBySpecies: Record<string, string> = {
   lizardman,
   werewolf,
   kobold,
-  skeleton,
   mummy,
   vampire,
   ogre,
@@ -270,7 +308,11 @@ export function stackIcon(group: string, name: string): string {
   const item = name.toLowerCase();
   if (category === 'stones') return crystal;
   if (category === 'herbs') return leaf;
-  if (category === 'draughts' || category === 'condensed') return item.includes('mana') ? manaPotion : healthPotion;
+  if (category === 'draughts') {
+    return selfGen(draughtArt[item]) ?? (item.includes('mana') ? manaPotion : healthPotion);
+  }
+  // the Condensed is every Draught cooked down, so it wears the one bottle that holds every colour
+  if (category === 'condensed') return selfGen('rainbow-potion') ?? healthPotion;
     if (category === 'food') {
       if (item.includes('berry') || item.includes('nut')) return berryFruit;
       if (item.includes('mushroom')) return mushroomFood;
@@ -282,7 +324,8 @@ export function stackIcon(group: string, name: string): string {
 }
 
 export function mobIcon(species: string): string {
-  return mobBySpecies[species.toLowerCase()] ?? skull;
+  const key = species.toLowerCase();
+  return selfGen(selfGenAlias[key] ?? key) ?? mobBySpecies[key] ?? skull;
 }
 
 /** The mark a boss field label carries (§11): the same dread-skull the junk stream uses. */

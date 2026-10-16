@@ -537,6 +537,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     delete (s as any).zoneFocus;
   }
   if (!s.town) s.town = newTown();
+  // Additive market records preserve every existing stack and gold balance. Empty supply means full demand.
+  s.town.market ||= {};
+  s.town.marketCredit ??= 0;
   // v11 · the HUD reads a transient event ring (`fx`), which a write never stores.
   if (!Array.isArray(s.fx)) s.fx = [];
   if (!s.fxSeq) s.fxSeq = 0;
@@ -558,6 +561,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     if (fw.materials) delete fw.materials.meat;
     s.fieldwork = fw;
   }
+  s.fieldwork.materials = { ...newFieldwork().materials, ...s.fieldwork.materials };
+  s.fieldwork.foods = { ...newFieldwork().foods, ...s.fieldwork.foods };
   // a farm saved before the automation block existed gets it off; the player opts in
   if (s.farm && !s.farm.autoFarm) { s.farm.autoFarm = { plant: false, harvest: false, brew: false }; s.farm.lastAutoFarmAt = -9999; }
   // an older character auto-allocates its points (the idle default); manual is the opt-out 

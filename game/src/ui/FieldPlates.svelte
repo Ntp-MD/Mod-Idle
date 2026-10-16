@@ -10,7 +10,7 @@
   import { ownsSkill } from '../sim/skills';
   import { bossMark } from '../icon';
   import faceMark from '../icon/equipment/helmet-1.svg?url';
-  import alignMark from '../icon/currency/attribute-dexterity.svg?url';
+  import alignMark from '../icon/skill/layer-elemental-alignment.svg?url';
   import type { GameState, Mob, FxEvent } from '../sim/types';
   import type { Character } from '../sim/player';
   import type { Statuses, StatusName } from '../sim/combat';

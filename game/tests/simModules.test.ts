@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { E, eng, sm, TOWN, loot, farm as FARM } from '../src/engine/client';
+import { E, eng, sm, TOWN, loot, trade, farm as FARM } from '../src/engine/client';
 import { newGame } from '../src/sim/game';
 import { bagStacks, slotsUsed, slotsFree, slotsAvailable, addTo, fits, bagSlots, pouchSlots } from '../src/sim/slots';
 import { newPresets, storePreset, switchPreset, autoSelect, bindZone } from '../src/sim/presets';
@@ -175,18 +175,25 @@ describe('the town board and its stalls', () => {
     expect(boss.count).toBeGreaterThan(0);
   });
 
-  it('mints gold from Variant and Species junk at the Counterhand using each item rarity', () => {
+  it('quotes Variant and Species junk from their rarity base values and shared town demand', () => {
     const s = newGame();
-    // Variant and Species items each resolve to their declared rarity; `junk.rarities` owns the price.
+    // Rarity owns base value; both deliveries spend the same commercial category demand.
     const drop = (Object.values((E.mob as any).variant_drops) as any[])[0];
     const price = (E.junk as any).rarities[drop.rarity].sell_gold;
     const speciesItem = E.mob.species[0].junk_items.common;
+    const first = trade.byId[`junk:${drop.item}`];
+    const second = trade.byId[`junk:${speciesItem}`];
+    expect(first.value).toBe(price);
+    expect(second.value).toBe(E.junk.rarities.common.sell_gold);
+    expect(second.group).toBe(first.group);
+    const a = trade.quote(startSettlement(), first, 3, undefined, s.clockSec);
+    const b = trade.quote(startSettlement(), second, 2, { used: a.used, atSec: a.atSec }, s.clockSec);
     s.junk[drop.item] = 3;
     s.junk[speciesItem] = 2;
     s.counters.gold = 0;
     const r = sellJunk(s);
     expect(r.pieces).toBe(5);
-    expect(r.gold).toBe(price * 3 + (E.junk as any).rarities.common.sell_gold * 2);
+    expect(r.gold + s.town.marketCredit).toBeCloseTo(a.gold + b.gold, 9);
     expect(s.counters.gold).toBe(r.gold);
     expect(s.junk[drop.item]).toBe(0);
     expect(s.junk[speciesItem]).toBe(0);

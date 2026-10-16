@@ -460,8 +460,6 @@ export interface MobCfg {
   form_level_cap: number;
   /** Optional field labels keyed by zone id, then Species id. Missing rows inherit the prior label. */
   forms: Record<string, Record<string, MobForm>>;
-  /** Optional catalog projection for authored field forms; not a spawn table. */
-  form_catalog: Record<string, Record<string, MobForm>>;
   zones: MobZone[];
   species: MobSpecies[];
   /** Fixed-level normal Variants by Species id; Elite/Boss/Unique are ranks, never rows here. */
@@ -599,6 +597,15 @@ export interface FarmCfg {
 }
 
 export interface FieldworkCfg {
+  materials: { id: string; name: string; group: string }[];
+  regional_drop_chance: number;
+  regional_food_chance: number;
+  regional_food_yield: number;
+  regional_sources: Record<string, { mine: string; grove: string; food: string }>;
+  workshop_recipes: {
+    id: string; name: string; skill: 'mining' | 'woodcutting'; level: number; xp: number;
+    materials: Record<string, number>; yield: number;
+  }[];
   level_divisor: number;
   level_cap: number;
   mastery_divisor: number;

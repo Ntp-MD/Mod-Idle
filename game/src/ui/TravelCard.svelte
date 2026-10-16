@@ -70,8 +70,8 @@
     town: 'the settlement itself — safe ground, and a Waypoint',
     sub: `a sub-zone of ${settlement.name} — standing here hunts this side's cast`,
     wild: site === 'dungeon' ? `special dungeon entrance near ${settlement.name}`
-      : site === 'mine' ? `mine site near ${settlement.name} — set Camp here to mine ore`
-        : site === 'grove' ? `rare grove near ${settlement.name} — set Camp here to gather timber and rarewood`
+      : site === 'mine' ? `mine near ${settlement.name} — ore and ${fieldwork.materialById[fieldwork.F.regional_sources[settlement.zone]?.mine]?.name || 'local minerals'}`
+        : site === 'grove' ? `grove near ${settlement.name} — timber and ${fieldwork.materialById[fieldwork.F.regional_sources[settlement.zone]?.grove]?.name || 'local wood'}`
           : `wild field near ${settlement.name}`,
     bare: `open hunting ground in ${settlement.name}'s zone ${settlement.zone} — the full zone cast can appear`,
   })[dest.kind]);

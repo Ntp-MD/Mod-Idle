@@ -179,7 +179,7 @@ function runChecks() {
   soft('X5', BANDS.every((b) => BAND[b].drops_per_hr === Math.round(BAND[b].kills_derived * (BAND[b].drop_chance_pct / 100))) && BAND.high_full_lck.drops_per_hr === Math.round(BAND.high_full_lck.kills_derived * (BAND.high_full_lck.drop_chance_pct / 100)),
     `F3 = F1 × F2 for all four rows: ${['low', 'mid', 'high', 'high_full_lck'].map((b) => `${f0(BAND[b].drops_per_hr)} ${BAND_LABEL[b]}`).join(' · ')}`);
   soft('X6', BANDS.every((b) => BAND[b].junk_per_hr === BAND[b].drops_per_hr - BAND[b].upgrades_per_hr),
-    `junk = drops − upgrades everywhere, so gold and stones share one ceiling (G2 · G8)`);
+    `reference junk = drops − upgrades everywhere; the base junk-value and stone streams share the loot ceiling before town demand and field goods (G2 · G8)`);
   // The craft pacing is priced in KILLS (the kills-not-hours rule): what a kill pays is a drop line, so a set's cost is the
   // kills it takes, never an hour. `perKillK` turns each hourly figure into its per-kill drop, and
   // `killsFor` reads a set's stone count back out as kills off that same line.
@@ -671,10 +671,10 @@ function runChecks() {
   // not spend the pool at all — so the share is REPORTED, not gated, until a rebalance re-prices the
   // line range (an owner decision, never a side effect). What stays hard is the mechanics: a real
   // pool, the exact clock, and player-only.
-  if (!(ES.delay_sec >= 3 && ES.delay_sec <= 8)) esProblems.push(`es delay ${ES.delay_sec} sec is outside the 3-8 sec band`);
+  if (!(ES.delay_sec > 0)) esProblems.push(`es delay ${ES.delay_sec} sec must be positive`);
   if (!ES.player_only || ROWS.some((r) => r.es)) esProblems.push('Energy Shield leaked to the mob side (it would double-count mob_HP · checks.md H1)');
   add('X25', esProblems.length === 0, esProblems.length ? esProblems.join(' · ')
-    : `Energy Shield is Wis plus gear (owner ruling): Wis ${f0(eng.statAt(S.level_cap))} × ${K.K_WIS_ES} and ${M.energy_shield_flat_t1} flat, × (1 + ${M.max_energy_shield_pct}%) = ${f0(DERIVED.es_pool)} at the ceiling, and regen is ${ES.regen_pct}% of the pool per sec — ${f1(DERIVED.es_regen)}/sec after ${ES.delay_sec} sec without a hit, so the base rate alone returns the whole pool in ${f1(DERIVED.es_recover_sec)} sec · an \`es_regen\` skill, Mod or passive amplifies the rate · ${f1(DERIVED.es_share_of_hp * 100)}% of a caster build's ${f0(DERIVED.es_cast_hp)} HP · **player-only** so mob_HP stays the single survivability anchor`);
+    : `Energy Shield is Wis plus gear (owner ruling): Wis ${f0(eng.statAt(S.level_cap))} × ${K.K_WIS_ES} and ${M.energy_shield_flat_t1} flat, × (1 + ${M.max_energy_shield_pct}%) = ${f0(DERIVED.es_pool)} at the ceiling, and regen is ${ES.regen_pct}% of the pool per sec — ${f1(DERIVED.es_regen)}/sec after ${ES.delay_sec} sec without a hit, so the base rate alone returns the whole pool in ${f1(DERIVED.es_recover_sec)} sec · an \`es_regen\` skill, Mod or passive amplifies the rate · ${f1(DERIVED.es_share_of_hp * 100)}% of a caster build's ${f0(DERIVED.es_cast_hp)} HP · positive recharge delay and **player-only** so mob_HP stays the single survivability anchor`);
 
   // Species resistance: each Species owns one Element and answers it at the flat species res; no Element
   // counters another, so every other Element meets no res at all (mob.resist_rules · X54)
@@ -871,7 +871,7 @@ function runChecks() {
   soft('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
     : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds stone (${IV.stack_size.stone}/slot, weightless), herb ${IV.stack_size.herb}/slot, potion ${IV.stack_size.potion}/slot, material ${IV.stack_size.material}/slot, food ${IV.stack_size.food}/slot; gold takes no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + gear craft are Settlement-only, meal cooking is Camp-only`);
 
-  // Junk is gold's primary mint now (Ragnarok-style); every rarity must reproduce the published
+  // Junk rarity values preserve the reference mint; every rarity must reproduce the published
   // junk line, so rarity changes the flavour and the price but not the expected income
   {
     const J = E.junk || {};
@@ -923,7 +923,7 @@ function runChecks() {
     }
     const junkHr = BAND.high.kills_derived * perKill;
     add('X39', jp.length === 0, jp.length ? jp.join(' · ')
-      : `mob junk is gold's primary mint: ${names.length} unique variant items plus ${speciesItemOwner.size} unique Species alternatives across ${Object.keys(J.rarities).length} rarities · each Species alternative shares its rarity's existing sale price, and each rarity's chance = the line / its sell, so expected gold is ${f2(perKill)}/kill for any variant and the junk line stays ${f0(junkHr)}/hr · every declared Variant and Unique carries exactly one row · stacks ${J.stack}/slot, weightless`);
+      : `mob junk has ${names.length} unique variant items plus ${speciesItemOwner.size} unique Species alternatives across ${Object.keys(J.rarities).length} rarities · each Species alternative shares its rarity's base value, and each rarity's chance = the line / its base value, so reference gold is ${f2(perKill)}/kill and ${f0(junkHr)}/hr before town demand · every declared Variant and Unique carries exactly one row · stacks ${J.stack}/slot, weightless`);
   }
 
   // X57: a Species may author any number of Variants. Bands are valid and non-overlapping;

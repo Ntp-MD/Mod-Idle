@@ -47,8 +47,8 @@ export function newFieldwork(): FieldworkState {
     freeRelocationsRemaining: fieldwork.F.camp.free_relocations,
     pushReturn: null,
     action: null,
-    materials: { ore: 0, timber: 0, rarewood: 0 },
-    foods: Object.fromEntries(fieldwork.F.foods.map((food: any) => [food.id, 0])),
+    materials: Object.fromEntries(fieldwork.F.materials.map((material: any) => [material.id, 0])),
+    foods: Object.fromEntries(fieldwork.foods.map((food: any) => [food.id, 0])),
     hunger: fieldwork.F.hunger.max,
     autoEat: {
       enabled: fieldwork.F.hunger.auto_eat.enabled_default,
@@ -81,7 +81,7 @@ export function tickHunger(state: GameState, online = true): string | null {
     const emergencyRaw = kind === 'raw' && config.auto_eat.emergency_raw_at_zero && fw.hunger <= 0;
     if (kind === 'raw' && !fw.autoEat.allowRaw && !emergencyRaw) continue;
     if (kind === 'cooked' && activeMeal(state) && fw.hunger > 0) continue;
-    const candidates = fieldwork.F.foods
+    const candidates = fieldwork.foods
       .filter((food: any) => food.edible && food.kind === kind && (food.auto_eat || (kind === 'raw' && (fw.autoEat.allowRaw || emergencyRaw))) && (fw.foods[food.id] || 0) > 0)
       .sort((a: any, b: any) => b.hunger_restore - a.hunger_restore);
     const food = candidates[0];
@@ -248,6 +248,17 @@ export function tickFieldwork(state: GameState, rng: () => number): void {
     }
     if (cfg.food_drop_chance && cfg.food_id && rng() < fieldDropChance(state, skill, action.kind, cfg.food_drop_chance)) {
       addTo(state, state.fieldwork.foods, cfg.food_id, 'food', 1);
+    }
+    const regional = fieldwork.F.regional_sources[String(state.zone)];
+    if (regional) {
+      const resource = regional[action.kind];
+      if (rng() < fieldDropChance(state, skill, resource, fieldwork.F.regional_drop_chance)) {
+        const received = addTo(state, state.fieldwork.materials, resource, 'material', fieldHarvestAmount(state, skill, cfg.yield));
+        if (received) state.fieldwork.skills[skill].mastery[resource] = (state.fieldwork.skills[skill].mastery[resource] || 0) + cfg.mastery_xp;
+      }
+      if (action.kind === 'grove' && rng() < fieldDropChance(state, skill, regional.food, fieldwork.F.regional_food_chance)) {
+        addTo(state, state.fieldwork.foods, regional.food, 'food', fieldwork.F.regional_food_yield);
+      }
     }
     action.nextAt += cfg.interval_sec;
   }
