@@ -22,11 +22,12 @@ export function createFieldwork(F: FieldworkCfg) {
   }))];
   const foodById = Object.fromEntries(foods.map((food) => [food.id, food]));
   const materialById = Object.fromEntries(F.materials.map((material) => [material.id, material]));
-  const workshopById = Object.fromEntries(F.workshop_recipes.map((recipe) => [recipe.id, recipe]));
+  const workshopRecipes = [...F.workshop_recipes, ...F.smithing_recipes.map((recipe) => ({ ...recipe, skill: 'smithing' as const }))];
+  const workshopById = Object.fromEntries(workshopRecipes.map((recipe) => [recipe.id, recipe]));
   const siteAt = (wild: number | null | undefined): 'dungeon' | 'mine' | 'grove' | null => {
     if (wild == null) return null;
     const sites = F.wild_site_index;
     return wild === sites.dungeon ? 'dungeon' : wild === sites.mine ? 'mine' : wild === sites.grove ? 'grove' : null;
   };
-  return { F, foods, skillLevel, masteryLevel, harvestBonus, dropChanceAt, recipeById, foodById, materialById, workshopById, siteAt };
+  return { F, foods, skillLevel, masteryLevel, harvestBonus, dropChanceAt, recipeById, foodById, materialById, workshopById, workshopRecipes, siteAt };
 }

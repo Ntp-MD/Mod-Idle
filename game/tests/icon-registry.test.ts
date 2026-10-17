@@ -21,9 +21,9 @@ describe('entity icon registry', () => {
   });
 
   it('prefers stable item registrations and uses a visible type fallback for unknown content', () => {
-    expect(stackIcon('food', 'Renamed display label', 'food:hunters_roast')).toBe(icon('hunter-s-roast'));
+    expect(stackIcon('food', 'Renamed display label', 'food:hunters_roast')).toBe(icon('hunters-roast'));
     expect(stackEntry({ key: 'hunters_roast', name: "Hunter's Roast", group: 'food', capKind: 'food', count: 1, weight: 0 }, 0).icon)
-      .toBe(icon('hunter-s-roast'));
+      .toBe(icon('hunters-roast'));
     expect(stackIcon('materials', 'Unknown material', 'material:not-yet-authored')).toBe(icon('minerals'));
     expect(skillIcon('attack.fireball', 'attack')).toBe(icon('fireball'));
     expect(skillIcon('future.new_skill', 'attack')).toBe(icon('type-active-skill'));

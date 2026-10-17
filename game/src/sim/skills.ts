@@ -313,6 +313,32 @@ export function costNow(s: SkillState, id: string, aoe = false): string {
   return `${spec} · ${Math.round(cost.amount)} ${resource} now`;
 }
 
+/** Whether a named reward adds ownership or useful progress on the Duplicate Ladder. */
+export function usefulSkillDuplicate(s: SkillState, id: string): boolean {
+  if (!Object.hasOwn(sm.byId, id)) return false;
+  return !ownsSkill(s, id) || ((sm.byId[id].cd ?? 0) > 0 && s.owned[id] < sm.LADDER_MAX_DUPLICATES);
+}
+
+/** Grant one known skill without drawing RNG or enabling its toggle track. */
+export function grantNamedSkill(
+  s: SkillState, id: string, options: { duplicate?: boolean; level?: number } = {},
+): { id: string; duplicate: boolean } | null {
+  if (!Object.hasOwn(sm.byId, id)) return null;
+  if (options.level !== undefined && (!Number.isSafeInteger(options.level) || options.level < 1 || options.level > E.skill_xp.level_cap)) return null;
+  const chosen = sm.byId[id];
+  const duplicate = ownsSkill(s, id);
+  if (!duplicate) s.owned[id] = 0;
+  else if (options.duplicate !== false) s.owned[id] += 1;
+  s.xp[id] ??= 0;
+  if (options.level !== undefined) s.xp[id] = Math.max(s.xp[id], sm.skillXpForLevel(options.level));
+  if (!duplicate) {
+    const free = s.list.findIndex((x) => x === null);
+    // A zero-CD filler remains the player's rotation choice, as with ordinary drops.
+    if (free >= 0 && (chosen.cd ?? 0) > 0 && ['attack', 'curse', 'heal'].includes(chosen.type as string)) s.list[free] = id;
+  }
+  return { id, duplicate };
+}
+
 /** Grant a skill drop: a new skill, or a duplicate that feeds that skill's own ladder. */
 export function grantSkill(s: SkillState, rng: () => number): { id: string; duplicate: boolean } | null {
   const pool = sm.all();
@@ -320,18 +346,10 @@ export function grantSkill(s: SkillState, rng: () => number): { id: string; dupl
   const pickFrom = fresh.length && rng() < 0.7 ? fresh : pool;
   const chosen = pickFrom[Math.floor(rng() * pickFrom.length)];
   if (!chosen) return null;
-  const duplicate = ownsSkill(s, chosen.id);
-  s.owned[chosen.id] = (s.owned[chosen.id] || 0) + (duplicate ? 1 : 0);
-  if (!duplicate) {
-    s.xp[chosen.id] = 0;
-    const free = s.list.findIndex((x) => x === null);
-    // a row with no timer of its own (`cd 0`) is the FILLER: it is a rotation choice, so a drop never
-    // slots it for the player — the bar it fills is the one whose timed slots it should sit under
-    const filler = (chosen as any).cd === 0;
-    if (free >= 0 && !filler && ['attack', 'curse', 'heal'].includes(chosen.type as string)) s.list[free] = chosen.id;
-    // A new toggle-track skill is collected, not activated; the player decides when it goes up.
-  }
-  return { id: chosen.id, duplicate };
+  const granted = grantNamedSkill(s, chosen.id);
+  // Ordinary first drops historically reset stray XP for an unowned skill.
+  if (granted && !granted.duplicate) s.xp[chosen.id] = 0;
+  return granted;
 }
 
 /** Every kill pays 1 XP to each slotted or open skill (`engine.json` skill_xp). */

@@ -30,10 +30,10 @@ const OUT = path.join(ROOT, 'game/src/icon/map/map-overlay.svg');
 
 const F = MAP.field;
 const COL = MAP.terrain_colors;
-const GCOL = MAP.ground_colors;
-/** The ground is the field's palette, not a second one: every anchor is the terrain it is named for
- *  closed on the paper by `field.ground_fade`. */
-const GFADE = F.ground_fade;
+/** The order the country's ramp walks, one way round the wheel: the endless ground is printed from
+ *  `terrain_colors` itself, closed toward the paper by `field.deep_close`, so one terrain has one colour
+ *  and the field's edge cannot drift away from the country outside it. */
+const RAMP = F.ground_ramp;
 const R = F.radius;
 const SQ3 = Math.sqrt(3);
 /** Two pointy-top neighbours sit SQ3*R apart and each reaches SQ3*r/2 past its centre, so r = R - GAP/SQ3. */
@@ -121,8 +121,6 @@ const towardHeld = (hex, t) => {
   const [h, s, l] = hslOf(hex);
   return hslToHex([h, SHEET_HSL[1] + (s - SHEET_HSL[1]) * (1 - t), SHEET_HSL[2] + (l - SHEET_HSL[2]) * (1 - t)]);
 };
-/** the ramp the data declares, derived from the terrain colours its keys are named for. */
-const groundRamp = () => Object.keys(GCOL).map((k) => towardHeld(COL[k], GFADE));
 /** the ramp's hues with the wheel's wrap taken out, so a step past red reads as the turn it is. */
 const hueWalk = (hexes) => {
   const out = [];
@@ -186,10 +184,8 @@ const SPREAD = MAP.cells.map((entry) => {
   return { town: entry.town, q: node.q, r: node.r, k: spreadTone.get(entry.town) };
 });
 /**
- * The bare cells, each printed with the terrain of the settlement it is nearest, closed on the paper by
- * a fade that runs from `fade_near` at the nearest to exactly `ground_fade` at the farthest — the value
- * the ground past the field is anchored at. So the field's outer ring and the country outside it are the
- * same colour and the two cannot drift apart.
+ * The bare cells: each printed with the terrain of the settlement it is nearest, at that terrain's own
+ * colour. There is no distance fade, so the field's outer ring is the same colour as the country past it.
  */
 const BARE = (() => {
   const list = [];
@@ -201,15 +197,7 @@ const BARE = (() => {
     }, null);
     list.push({ id, d: near.d, tone: near.t.tone });
   }
-  const bMin = Math.min(...list.map((b) => b.d));
-  const bMax = Math.max(...list.map((b) => b.d));
-  const fade = (d) => (bMax === bMin ? GFADE
-    : F.fade_near + (GFADE - F.fade_near) * (d - bMin) / (bMax - bMin));
-  return {
-    max: bMax,
-    byId: new Map(list.map((b) => [b.id, { ...b, fill: towardHeld(b.tone, fade(b.d)) }])),
-    edge: list.filter((b) => b.d === bMax).map((b) => ({ id: b.id, fill: towardHeld(b.tone, fade(b.d)) })),
-  };
+  return { byId: new Map(list.map((b) => [b.id, { ...b, fill: b.tone }])) };
 })();
 
 // ------------------------------------------------------------------ the walk graph the sheet draws
@@ -419,18 +407,17 @@ function viewBox() {
  * The ground the field lies on: the same hex lattice, drawn on past the field so zooming out never
  * reaches an edge — pretending to be terrain, not a flat paper, so the field reads as one region of a
  * larger world. Its tone is the field's own rule carried outward, not a second pattern: a ground hex
- * lies in the country of the settlement it is nearest, and wears that settlement's spread terrain at its
- * `ground_colors` anchor — the same terrain the bare cells around that town are printed in — so the
- * colours meet the map's regions at the field's border and go on with them instead of starting afresh
- * outside it. The settlement layout is read on the tile's own repeats, which is what lets one tile stand
+ * lies in the country of the settlement it is nearest, and wears that settlement's spread terrain closed
+ * on the paper by `field.deep_close` — the same terrain the bare cells around that town are printed in —
+ * so the colours meet the map's regions at the field's border and go on with them, not afresh outside it. The settlement layout is read on the tile's own repeats, which is what lets one tile stand
  * for an endless ground; the two lattice translations that carry a tile edge are (N,0) and (N/2,N). A
  * value noise, periodic with the tile, then drifts a hex one step either way on the ramp, so a country's
  * edge is a fringe of its neighbour's tone and not a cut, and the ground reads as country rather than as
  * a chessboard. The tile and the field share the one lattice, so the ground lines up with the cells,
- * not behind them. `hazeDef` lays the aerial wash over all of it.
+ * not behind them.
  */
 function hexGridDefs() {
-  const keys = Object.keys(GCOL);
+  const keys = RAMP;
   const N = 32, G = 8;                 // hexes per tile edge, and the fringing noise's control points
   const w = N * SQ3 * R, h = N * 1.5 * R;
   // the ground closes half the seam the cells keep, so it reads as country and not as a mesh
@@ -471,7 +458,7 @@ function hexGridDefs() {
       const k = Math.min(keys.length - 1, Math.max(0, country(i - ((j - (j & 1)) >> 1), j) + drift));
       const cx = SQ3 * R * (i + (j & 1) / 2), cy = 1.5 * R * j;
       // a path, not a polygon: M10 counts the sheet's polygons as its cells, and the ground is not one
-      hexes.push(`      <path d="M${hexPts(cx, cy, gr).split(' ').join('L')}Z" fill="${GCOL[keys[k]]}"/>`);
+      hexes.push(`      <path d="M${hexPts(cx, cy, gr).split(' ').join('L')}Z" fill="${towardHeld(COL[keys[k]], F.deep_close)}"/>`);
     }
   }
   return [
@@ -481,26 +468,7 @@ function hexGridDefs() {
   ];
 }
 /** How many fields of ground are laid past each edge — enough that the frame is hexes at the lowest zoom. */
-const GROUND_SPAN = 5;
-/**
- * Aerial perspective: one radial wash centred on the field's own viewBox centre, transparent out to
- * `haze_clear` half-diagonals — the whole field, and the ring of ground that has to match it — then
- * deepening on the paper from `ground_fade`, where the outermost bare cell and the first ground hex are
- * both laid, to `fade_far` by `haze_reach`. So the ground sinks on past the value the field stops at, the
- * hard ring where the field ended is gone, and the lattice reads as land falling away instead of a
- * wallpaper tile. Painted after the hexes and before the cells, so no cell is ever veiled and the client
- * still drives only `polygon.cell` and `rect.paper` (M10).
- */
-function hazeDef(v) {
-  const D = Math.hypot(v.vw / 2, v.vh / 2);
-  return [
-    `    <radialGradient id="haze" gradientUnits="userSpaceOnUse" cx="${(v.vx + v.vw / 2).toFixed(1)}" cy="${(v.vy + v.vh / 2).toFixed(1)}" r="${(F.haze_reach * D).toFixed(1)}">`,
-    `      <stop offset="0" stop-color="${F.sheet}" stop-opacity="0"/>`,
-    `      <stop offset="${(F.haze_clear / F.haze_reach).toFixed(4)}" stop-color="${F.sheet}" stop-opacity="0"/>`,
-    `      <stop offset="1" stop-color="${F.sheet}" stop-opacity="${F.fade_far}"/>`,
-    '    </radialGradient>',
-  ];
-}
+const GROUND_SPAN = 3;
 /** The ground's own box: the field laid `GROUND_SPAN` fields past each edge. */
 function groundBox(v) {
   const x = v.vx - GROUND_SPAN * v.vw, y = v.vy - GROUND_SPAN * v.vh;
@@ -512,72 +480,6 @@ function groundRects(v) {
   return [
     `  <rect class="paper" ${box} fill="${F.sheet}"/>`,
     `  <rect ${box} fill="url(#hexgrid)"/>`,
-    `  <rect class="haze" ${box} fill="url(#haze)" pointer-events="none"/>`,
-  ];
-}
-/**
- * The endless zone's weather. The cloud starts AT the field's own edge and thickens outward, so the
- * ground past the last cell is covered rather than merely faded: one soft `#cloud` puff, a feathered
- * rectangular mask that hides all of it inside the field (no cell is ever veiled, and no click is
- * stolen), a flat fog wash on the outer ground, and a drifting blob field that grows the further out
- * it goes. Reads `field.cloud_tone` / `field.cloud_opacity`.
- */
-function cloudDefs(v) {
-  const b = groundBox(v);
-  // the collar: how far past the sheet's border the feather opens, as a share of the field's width
-  const feather = v.vw * 0.05;
-  return [
-    '    <radialGradient id="cloud" cx="0.5" cy="0.5" r="0.5">',
-    `      <stop offset="0" stop-color="${F.cloud_tone}" stop-opacity="${F.cloud_opacity}"/>`,
-    `      <stop offset="0.55" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity / 2).toFixed(3)}"/>`,
-    `      <stop offset="1" stop-color="${F.cloud_tone}" stop-opacity="0"/>`,
-    '    </radialGradient>',
-    `    <filter id="fogFeather" x="-25%" y="-25%" width="150%" height="150%">`,
-    `      <feGaussianBlur stdDeviation="${(feather * 0.55).toFixed(1)}"/>`,
-    '    </filter>',
-    `    <mask id="cloudMask">`,
-    `      <rect x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" fill="#fff"/>`,
-    `      <rect x="${(v.vx - feather).toFixed(1)}" y="${(v.vy - feather).toFixed(1)}" width="${(v.vw + feather * 2).toFixed(1)}" height="${(v.vh + feather * 2).toFixed(1)}" fill="#000" filter="url(#fogFeather)"/>`,
-    '    </mask>',
-    `    <linearGradient id="fogWash" gradientUnits="userSpaceOnUse" x1="${v.vx.toFixed(1)}" y1="${v.vy.toFixed(1)}" x2="${v.vx.toFixed(1)}" y2="${(v.vy - GROUND_SPAN * v.vh).toFixed(1)}">`,
-    `      <stop offset="0" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity * 0.22).toFixed(3)}"/>`,
-    `      <stop offset="1" stop-color="${F.cloud_tone}" stop-opacity="${(F.cloud_opacity * 0.6).toFixed(3)}"/>`,
-    '    </linearGradient>',
-  ];
-}
-/**
- * The cloud field itself: clusters seeded in bands outward from the sheet's border, so the near collar
- * is a wall of weather and the far ground is buried in it. Deterministic (one seed, no `Math.random`)
- * so the written sheet is stable, painted after the haze and before the cells, `pointer-events="none"`
- * so a click still reaches a cell.
- */
-function cloudLayer(v) {
-  const cx = v.vx + v.vw / 2, cy = v.vy + v.vh / 2;
-  const D = Math.hypot(v.vw / 2, v.vh / 2);
-  let seed = 0x9e3779b9;
-  const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-  const blobs = [];
-  // eight bands, each one field-radius wider than the last, with more clusters as the band recedes —
-  // the eye reads that as weather that never ends rather than a ring with a wall behind it
-  const BANDS = [[1.02, 1.35, 10], [1.35, 1.8, 12], [1.8, 2.35, 14], [2.35, 3, 15], [3, 3.8, 17], [3.8, 4.8, 18], [4.8, 6, 20], [6, 7.4, 22]];
-  for (const [from, to, count] of BANDS) {
-    for (let i = 0; i < count; i++) {
-      const ang = rnd() * Math.PI * 2;
-      const rad = D * (from + rnd() * (to - from));
-      const x = cx + Math.cos(ang) * rad, y = cy + Math.sin(ang) * rad * 0.72;
-      const rx = (0.1 + rnd() * 0.18) * D * (1 + from * 0.12), ry = rx * (0.36 + rnd() * 0.3);
-      const near = Math.max(0.32, 1 - (from - 1.02) * 0.12);
-      blobs.push(`      <ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="url(#cloud)" opacity="${(near * (0.55 + rnd() * 0.45)).toFixed(2)}"/>`);
-    }
-  }
-  const b = groundBox(v);
-  const box = `x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}"`;
-  return [
-    `  <rect class="fog-wash" ${box} fill="url(#fogWash)" mask="url(#cloudMask)" pointer-events="none"/>`,
-    '  <g class="clouds" mask="url(#cloudMask)" pointer-events="none">',
-    '    <animateTransform attributeName="transform" type="translate" dur="150s" repeatCount="indefinite" values="0 0; 8 5; 0 0"/>',
-    ...blobs,
-    '  </g>',
   ];
 }
 
@@ -592,11 +494,8 @@ function render(): string {
     ...['M3 15 16 4l13 11M6 13v15h20V13M12 28v-9h8v9', 'M9 15h3M20 15h3', 'M16 4V2'].map((d) => `      <path d="${d}"/>`),
     '    </g>',
     ...hexGridDefs(),
-    ...hazeDef(v),
-    ...cloudDefs(v),
     '  </defs>',
     ...groundRects(v),
-    ...cloudLayer(v),
     ...fieldGroup(),
     ...walkGroup(),
     ...watermarkGroup(),

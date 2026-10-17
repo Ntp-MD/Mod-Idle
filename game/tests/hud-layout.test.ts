@@ -1,0 +1,160 @@
+import { describe, expect, it } from 'vitest';
+import {
+  DEFAULT_HUD_LAYOUT, DEFAULT_MODAL_AREA, HUD_LAYOUT_VERSION, HUD_REGION_META,
+  copyHudLayout, migrateHudLayout, salvageHudLayout, validateHudLayout,
+  type GridArea, type HudLayout,
+} from '../src/ui/hud-layout';
+
+const area = (rowStart: number, rowEnd: number, columnStart: number, columnEnd: number): GridArea =>
+  ({ rowStart, rowEnd, columnStart, columnEnd });
+
+const region = (id: string, a: GridArea, justify = 'stretch', align = 'stretch') =>
+  ({ id, label: id, area: a, justify, align });
+
+/** An old layout file with a separate game-controls placement on the bottom row. */
+function legacyFile(hudOverrides: Record<string, unknown> = {}) {
+  const hud: Record<string, unknown> = {};
+  for (const { id } of HUD_REGION_META) {
+    hud[id] = region(id, DEFAULT_HUD_LAYOUT[id].area);
+  }
+  hud.controls = region('controls', area(15, 15, 12, 15), 'end', 'stretch');
+  return JSON.stringify({ version: 1, hud: { ...hud, ...hudOverrides }, modal: DEFAULT_MODAL_AREA });
+}
+
+describe('HUD layout migration', () => {
+  it('keeps the shipped default layout overlap-free', () => {
+    expect(validateHudLayout(DEFAULT_HUD_LAYOUT)).toBeNull();
+  });
+
+  it('preserves the combat field and folds a retired controls anchor into the right-edge dock', () => {
+    const custom = region('feed', area(10, 12, 1, 2));
+    const migrated = migrateHudLayout(legacyFile({ feed: custom }));
+    expect(migrated.version).toBe(HUD_LAYOUT_VERSION);
+    expect(migrated.notice).toMatch(/automation.*menu rail/i);
+    expect(validateHudLayout(migrated.hud)).toBeNull();
+    // the custom feed placement survives untouched
+    expect(migrated.hud.feed.area).toEqual(custom.area);
+    expect(migrated.hud.field.area).toEqual(DEFAULT_HUD_LAYOUT.field.area);
+    expect(migrated.hud.commands.area).toEqual(DEFAULT_HUD_LAYOUT.commands.area);
+  });
+
+  it('folds a v3 automation region into the new commands dock without moving the combat field', () => {
+    const source: Record<string, unknown> = {};
+    for (const { id } of HUD_REGION_META) if (id !== 'commands') source[id] = { ...DEFAULT_HUD_LAYOUT[id], area: { ...DEFAULT_HUD_LAYOUT[id].area } };
+    source.field = { ...DEFAULT_HUD_LAYOUT.field, area: area(4, 10, 4, 12) };
+    source.automation = region('automation', area(7, 9, 14, 15), 'end', 'center');
+    const migrated = migrateHudLayout({ version: 3, hud: source, modal: DEFAULT_MODAL_AREA });
+    expect(migrated.hud.field.area).toEqual(area(4, 10, 4, 12));
+    expect(migrated.hud.commands.area).toEqual(DEFAULT_HUD_LAYOUT.commands.area);
+    expect(migrated.notice).toMatch(/automation.*menu rail/i);
+    expect(validateHudLayout(migrated.hud)).toBeNull();
+  });
+
+  it('migrates a v4 layout that already uses the current top-band placement', () => {
+    const source = copyHudLayout(DEFAULT_HUD_LAYOUT);
+    source.field.area = area(4, 10, 4, 12);
+    source.commands.area = area(12, 15, 12, 15);
+    const file = JSON.stringify({ version: 4, hud: source, modal: DEFAULT_MODAL_AREA });
+    const migrated = migrateHudLayout(file);
+    expect(migrated.hud.field.area).toEqual(area(4, 10, 4, 12));
+    expect(migrated.hud.commands.area).toEqual(area(12, 15, 12, 15));
+    expect(migrated.notice).toBeNull();
+  });
+
+  it('reflows the stock v4 target, menu and field-panel areas without changing custom field placement', () => {
+    const source = copyHudLayout(DEFAULT_HUD_LAYOUT);
+    source.target.area = area(1, 2, 6, 10);
+    source.menu.area = area(1, 1, 11, 15);
+    source.panels.area = area(2, 6, 13, 14);
+    source.field.area = area(4, 10, 4, 12);
+    const migrated = migrateHudLayout({ version: 4, hud: source, modal: DEFAULT_MODAL_AREA });
+    expect(migrated.hud.target.area).toEqual(DEFAULT_HUD_LAYOUT.target.area);
+    expect(migrated.hud.menu.area).toEqual(DEFAULT_HUD_LAYOUT.menu.area);
+    expect(migrated.hud.panels.area).toEqual(DEFAULT_HUD_LAYOUT.panels.area);
+    expect(migrated.hud.field.area).toEqual(source.field.area);
+    expect(migrated.notice).toMatch(/stock hud regions.*wrapped menu rail/i);
+    expect(validateHudLayout(migrated.hud)).toBeNull();
+  });
+
+  it('preserves a custom v4 target while moving the stock menu and panels', () => {
+    const source = copyHudLayout(DEFAULT_HUD_LAYOUT);
+    source.target.area = area(1, 2, 5, 9);
+    source.menu.area = area(1, 1, 11, 15);
+    source.panels.area = area(2, 6, 13, 14);
+    const migrated = migrateHudLayout({ version: 4, hud: source, modal: DEFAULT_MODAL_AREA });
+    expect(migrated.hud.target.area).toEqual(source.target.area);
+    expect(migrated.hud.menu.area).toEqual(DEFAULT_HUD_LAYOUT.menu.area);
+    expect(migrated.hud.panels.area).toEqual(DEFAULT_HUD_LAYOUT.panels.area);
+    expect(migrated.notice).toMatch(/stock hud regions.*wrapped menu rail/i);
+    expect(validateHudLayout(migrated.hud)).toBeNull();
+  });
+
+  it('reflows the interim v5 stock layout and leaves edited regions alone', () => {
+    const source = copyHudLayout(DEFAULT_HUD_LAYOUT);
+    source.target.area = area(1, 2, 3, 6);
+    source.menu.area = area(1, 1, 7, 15);
+    source.panels.area = area(2, 6, 13, 14);
+    const migrated = migrateHudLayout({ version: 5, hud: source, modal: DEFAULT_MODAL_AREA });
+    expect(migrated.hud.target.area).toEqual(DEFAULT_HUD_LAYOUT.target.area);
+    expect(migrated.hud.menu.area).toEqual(DEFAULT_HUD_LAYOUT.menu.area);
+    expect(migrated.hud.panels.area).toEqual(DEFAULT_HUD_LAYOUT.panels.area);
+    expect(migrated.notice).toMatch(/wrapped menu rail/i);
+    expect(validateHudLayout(migrated.hud)).toBeNull();
+  });
+
+  it('refuses files the strict migration cannot honour', () => {
+    const backfilled = migrateHudLayout(JSON.stringify({ version: 4, hud: {}, modal: DEFAULT_MODAL_AREA }));
+    expect(backfilled.hud).toEqual(DEFAULT_HUD_LAYOUT);
+    expect(() => migrateHudLayout(JSON.stringify({ version: 1, modal: DEFAULT_MODAL_AREA }))).toThrow(/region map/);
+    expect(() => migrateHudLayout('not json')).toThrow();
+  });
+
+  it('salvages a conflicting layout region by region instead of discarding it', () => {
+    // strict migration throws on this file: two saved regions claim the same cells, and there is no
+    // controls anchor to expand — the salvage must keep what fits and default only the conflict
+    const broken = JSON.stringify({
+      version: HUD_LAYOUT_VERSION,
+      hud: {
+        objectives: region('objectives', area(1, 4, 1, 2)),
+        feed: region('feed', area(1, 4, 1, 2)), // overlaps objectives — cannot also be kept
+        menu: region('menu', area(1, 1, 12, 15)),
+      },
+      modal: DEFAULT_MODAL_AREA,
+    });
+    expect(() => migrateHudLayout(broken)).toThrow();
+    const salvaged = salvageHudLayout(broken);
+    expect(validateHudLayout(salvaged.hud)).toBeNull();
+    expect(salvaged.version).toBe(HUD_LAYOUT_VERSION);
+    // the first fitting regions keep their saved placement; the conflicting one falls back to default
+    expect(salvaged.hud.objectives.area).toEqual(area(1, 4, 1, 2));
+    expect(salvaged.hud.menu.area).toEqual(area(1, 1, 12, 15));
+    expect(salvaged.hud.feed.area).not.toEqual(area(1, 4, 1, 2));
+    expect(salvaged.notice).toMatch(/region/);
+  });
+
+  it('salvages unreadable input to defaults without throwing', () => {
+    for (const garbage of ['not json', null, undefined, 42, JSON.stringify({ version: 99 })]) {
+      const salvaged = salvageHudLayout(garbage as unknown);
+      expect(validateHudLayout(salvaged.hud)).toBeNull();
+      expect(salvaged.modal).toEqual(DEFAULT_MODAL_AREA);
+    }
+  });
+
+  it('salvages the legacy controls anchor while keeping the card in the combat field', () => {
+    const hud: Record<string, unknown> = { controls: region('controls', area(15, 15, 12, 15), 'end', 'end') };
+    const salvaged = salvageHudLayout(JSON.stringify({ version: 1, hud, modal: DEFAULT_MODAL_AREA }));
+    expect(validateHudLayout(salvaged.hud)).toBeNull();
+    expect(salvaged.hud.field.area).toEqual(DEFAULT_HUD_LAYOUT.field.area);
+    expect(salvaged.notice).toMatch(/region/);
+  });
+
+  it('accepts every region list the Studio exposes, so no reader can fall out of sync', () => {
+    const layout = copyHudLayout() as HudLayout;
+    for (const { id } of HUD_REGION_META) expect(layout[id].id).toBe(id);
+    expect(HUD_REGION_META.map(({ id }) => id)).toContain('field');
+    expect(HUD_REGION_META.map(({ id }) => id)).not.toContain('controls');
+    expect(HUD_REGION_META.map(({ id }) => id)).not.toContain('automation');
+    expect(HUD_REGION_META.map(({ id }) => id)).toContain('commands');
+    expect(HUD_REGION_META.map(({ id }) => id)).not.toContain('player');
+  });
+});

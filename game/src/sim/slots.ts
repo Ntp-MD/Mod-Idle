@@ -100,6 +100,43 @@ export function addTo(
 /** Would a grant of this size fit? Used by producers that must not consume a cost they can't bank. */
 export interface BagCost { bucket: Record<string, number>; key: string; capKind: string; amount: number }
 
+/** Preview the complete character-bag exchange without consuming costs or granting outputs. */
+export function fitsTransaction(state: GameState, costs: BagCost[], grants: BagCost[]): boolean {
+  const canonical = new Map(BUCKETS.map((entry) => [entry.read(state), entry.cap]));
+  const grouped = new Map<Record<string, number>, Map<string, { costs: number; grants: number }>>();
+  for (const [entries, kind] of [[costs, 'costs'], [grants, 'grants']] as const) {
+    for (const entry of entries) {
+      const cap = INV.stack_size[entry.capKind];
+      if (!Number.isSafeInteger(entry.amount) || entry.amount < 0
+        || !Number.isSafeInteger(cap) || cap <= 0 || canonical.get(entry.bucket) !== entry.capKind) return false;
+      let keys = grouped.get(entry.bucket);
+      if (!keys) { keys = new Map(); grouped.set(entry.bucket, keys); }
+      const total = keys.get(entry.key) || { costs: 0, grants: 0 };
+      total[kind] += entry.amount;
+      if (!Number.isSafeInteger(total[kind])) return false;
+      keys.set(entry.key, total);
+    }
+  }
+  let used = 0;
+  for (const [bucket, capKind] of canonical) {
+    const cap = INV.stack_size[capKind];
+    if (!Number.isSafeInteger(cap) || cap <= 0) return false;
+    const changes = grouped.get(bucket);
+    const keys = new Set([...Object.keys(bucket), ...(changes?.keys() || [])]);
+    for (const key of keys) {
+      const before = Object.hasOwn(bucket, key) ? bucket[key] : 0;
+      const change = changes?.get(key);
+      if (!Number.isSafeInteger(before) || before < 0 || (change?.costs || 0) > before) return false;
+      const after = before - (change?.costs || 0) + (change?.grants || 0);
+      if (!Number.isSafeInteger(after) || after < 0) return false;
+      used += slotsFor(after, cap);
+      if (!Number.isSafeInteger(used)) return false;
+    }
+  }
+  const available = slotsAvailable(state);
+  return Number.isSafeInteger(available) && available >= 0 && used <= available;
+}
+
 export function fitsAll(state: GameState, grants: BagCost[]): boolean {
   const grouped = new Map<Record<string, number>, Map<string, { amount: number; capKind: string }>>();
   for (const grant of grants) {

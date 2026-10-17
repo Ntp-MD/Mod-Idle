@@ -1,5 +1,5 @@
 {
-  "note": "Presentation only (X33 · M7). The field is the simulator's own lattice: engine.json `road` holds one settlement per cell in axial coordinates measured from the starting settlement, and this file names the cells they land on. A cell id (row letter A-O plus column number 1-20) is a reference mark drawn on the sheet, never a position the simulation reads. What the sheet draws: every cell of the field, the terrain a cell stands on, the settlement mark on its own cell, one named sub-zone cell and one named wild cell per side of a town, the walk graph between settlements, the landmark marks, the region names and the travel pin. Nothing here carries a level band, a sub-zone name or a race — those are the engine's, printed into the cells by tools/map.ts, so the sheet and the content cannot disagree. A wild cell is a side of a town with no sub-zone on it yet: it is named after the town it rings and holds no content of its own until one is written. Wild-side cells also name their fieldwork kind at its stable site index. The environment_terrain crosswalk joins map labels to mob vocabulary for validation; the game reads neither map data nor the crosswalk. Each map region also lists the gameplay zone region names it groups, checked against the zone IDs.",
+  "note": "Presentation only (X33 · M7): the game reads neither this file nor `environment_terrain`. A cell id (row letter A-O + column 1-20) is a mark drawn on the sheet, never a position the simulation reads. tools/map.ts prints level bands, sub-zone names and races from engine.json, so the sheet and the content cannot disagree. A wild cell is a side of a town with no sub-zone on it yet — named after the town it rings, holding no content of its own, and naming its fieldwork kind at the stable site index. Each map region lists the gameplay zone regions it groups, checked against the zone IDs.",
   "field": {
     "cols": 20,
     "rows": 15,
@@ -9,31 +9,36 @@
     "cell_id": "row letter A-O + col number 1-20",
     "centre": "the starting settlement sits on the centre cell, and the walk graph is measured from it",
     "sheet": "#0b1016",
-    "stroke": "#1e2833",
-    "bare_tone": "#1b2430",
-    "fade_near": 0.18,
-    "fade_far": 0.8,
-    "ground_fade": 0.62,
-    "haze_clear": 1.15,
-    "haze_reach": 5,
-    "cloud_tone": "#8ea6c4",
-    "cloud_opacity": 0.3,
-    "cloud_note": "The endless zone reads as weather, not a wallpaper tile: cloud begins at the field's own border and thickens outward in bands, so the far ground is covered rather than merely faded. A feathered rectangular mask keeps every cell of the field clear and every click on it, a flat fog wash sits on all outer ground, and seeded clusters drift slowly over it. `cloud_tone` is the pale the clusters are drawn in, and `cloud_opacity` their peak alpha; both are map.json's, so the client still reads no coordinate (M7).",
-    "note": "Pointy-top hexes drawn on the lattice radius, then shrunk by the gap so neighbours leave bare ground between their edges. A cell with no zone on it takes the terrain of the nearest settlement, laid on thinner the further out it sits, and the outermost of them is closed on the paper to exactly `ground_fade` — the value the ground past the field is printed at — so the field's border and the country outside it are one colour and the two cannot drift apart. The ground past the field is that same rule carried on, not a second pattern: a hex outside lies in the country of the settlement it is nearest, so the colours meet the map's own regions at the field's border and go on with them. `ground_fade` is how far each terrain colour is closed on the paper to print its `ground_colors` anchor, holding that terrain's hue — an rgb lerp travels onto the paper's own hue instead and drags a mauve into a violet no terrain stands on. `ground_colors` lists its keys in the order the ramp walks them, one way round the wheel from the rock end to the ash end, and every terrain a settlement spreads is one of them; a country may drift one step to either neighbour on the ramp, so its edge is a fringe and not a cut. `haze_clear` and `haze_reach` are field half-diagonals measured from the viewBox centre: the aerial wash is transparent out to `haze_clear`, so the whole field and the ring of ground that has to match it are untouched, then deepens on the paper from `ground_fade`, where the field's edge and the first ground hex both stand, to `fade_far` by `haze_reach`, so the far ground sinks on past the value the field stops at and the ring where the field ended is gone."
+    "stroke": "#222d39",
+    "bare_tone": "#1f2b39",
+    "note": "Pointy-top hexes on `radius`, shrunk by `gap` so neighbours leave bare ground between their edges. A cell with no zone takes the terrain of its nearest settlement. One authored colour per terrain in `terrain_colors`; the country past the field is that colour closed on `sheet` by `deep_close` at held hue, and `ground_ramp` is the wheel order a country may drift one step along. `bare_tone` and `stroke` are the frame between hexes, not a terrain. The rule and its rationale live in docs/DECISIONS.md.",
+    "ground_ramp": [
+      "rock",
+      "snow",
+      "water",
+      "marsh",
+      "forest",
+      "grass",
+      "moor",
+      "salt",
+      "waste",
+      "ash"
+    ],
+    "deep_close": 0.25
   },
   "terrain_colors": {
-    "water": "#14384a",
-    "marsh": "#1b3a32",
+    "water": "#143a4d",
+    "marsh": "#1b3b33",
     "grass": "#2c4220",
-    "forest": "#16301c",
-    "rock": "#30343d",
-    "snow": "#45525f",
+    "forest": "#1a3a21",
+    "rock": "#31353e",
+    "snow": "#414c59",
     "moor": "#343b1f",
-    "waste": "#3f2f1a",
-    "ash": "#3f2530",
+    "waste": "#402f1a",
+    "ash": "#452834",
     "salt": "#3d382e",
-    "village": "#36401f",
-    "camp": "#42301b",
+    "village": "#353f1f",
+    "camp": "#43311b",
     "town": "#4b4327",
     "wild": "#333a28"
   },
@@ -83,18 +88,6 @@
     "volcano": "ash",
     "warrens": "rock",
     "waste": "waste"
-  },
-  "ground_colors": {
-    "rock": "#171c27",
-    "snow": "#1e2934",
-    "water": "#102028",
-    "marsh": "#11231f",
-    "forest": "#0f2013",
-    "grass": "#1a2713",
-    "moor": "#202412",
-    "salt": "#272117",
-    "waste": "#251c11",
-    "ash": "#26141c"
   },
   "cells": [
     {
@@ -713,7 +706,10 @@
         1,
         14
       ],
-      "zone_regions": ["pinewood road", "slow water"]
+      "zone_regions": [
+        "pinewood road",
+        "slow water"
+      ]
     },
     {
       "name": "Ashfall Wood",
@@ -721,14 +717,19 @@
         16,
         17
       ],
-      "zone_regions": ["ash fields", "storm terrace"]
+      "zone_regions": [
+        "ash fields",
+        "storm terrace"
+      ]
     },
     {
       "name": "Wolfmoor",
       "zones": [
         3
       ],
-      "zone_regions": ["wolf country"]
+      "zone_regions": [
+        "wolf country"
+      ]
     },
     {
       "name": "Highspire Peaks",
@@ -737,7 +738,11 @@
         8,
         9
       ],
-      "zone_regions": ["frost hold", "high crags", "the bone gate"]
+      "zone_regions": [
+        "frost hold",
+        "high crags",
+        "the bone gate"
+      ]
     },
     {
       "name": "Frosthold Snows",
@@ -745,7 +750,10 @@
         10,
         18
       ],
-      "zone_regions": ["the vermolch mire", "wet lowland"]
+      "zone_regions": [
+        "the vermolch mire",
+        "wet lowland"
+      ]
     },
     {
       "name": "Greyfen Waste",
@@ -753,7 +761,10 @@
         4,
         5
       ],
-      "zone_regions": ["salt flats", "wet lowland"]
+      "zone_regions": [
+        "salt flats",
+        "wet lowland"
+      ]
     },
     {
       "name": "Emberhold Ruins",
@@ -761,7 +772,10 @@
         11,
         13
       ],
-      "zone_regions": ["open moor", "slag and foundry heat"]
+      "zone_regions": [
+        "open moor",
+        "slag and foundry heat"
+      ]
     },
     {
       "name": "Nettlecrag Deeps",
@@ -769,21 +783,28 @@
         7,
         12
       ],
-      "zone_regions": ["drowned river mouth", "thorn country"]
+      "zone_regions": [
+        "drowned river mouth",
+        "thorn country"
+      ]
     },
     {
       "name": "Wyrmback Shore",
       "zones": [
         15
       ],
-      "zone_regions": ["wyrm breeding ground"]
+      "zone_regions": [
+        "wyrm breeding ground"
+      ]
     },
     {
       "name": "The Pale Sanctum",
       "zones": [
         6
       ],
-      "zone_regions": ["the pale bloom"]
+      "zone_regions": [
+        "the pale bloom"
+      ]
     }
   ]
 }

@@ -281,6 +281,8 @@ export interface MobSpecies {
   element: string;
   carries_weapon: boolean;
   accuracy_mult: number;
+  /** Authored fixed spawn level for each zone this Species inhabits; never derived from player level. */
+  zone_levels?: Record<string, number>;
   /** The damage tag: which half of the incoming hit Armour and resistance each answer (X31). */
   damage: string;
   /** Explicit potion-drop permission; independent of the Species' Race. */
@@ -462,7 +464,7 @@ export interface MobCfg {
   forms: Record<string, Record<string, MobForm>>;
   zones: MobZone[];
   species: MobSpecies[];
-  /** Fixed-level normal Variants by Species id; Elite/Boss/Unique are ranks, never rows here. */
+  /** Normal Variant bands by Species id; they select name/Core while zone_levels sets actual spawn level. */
   variants?: Record<string, MobVariant[]>;
   /** What each of those names drops: its base junk item, sale rarity and stream lean (`X56`). */
   variant_drops?: Record<string, VariantDrop>;
@@ -562,6 +564,8 @@ export interface DungeonCfg {
   mob_cap: number;
   group_cap: number;
   cooldown_sec: number;
+  retreat_keep_min: number;
+  retreat_keep_max: number;
   note?: string;
 }
 
@@ -581,6 +585,14 @@ export interface RoadCfg {
   encounter_rule: string;
   push_rule: string;
   waypoint_rule: string;
+  patrol: {
+    min_stops: number;
+    max_stops: number;
+    groups_per_stop: number;
+    repeat_default: boolean;
+    auto_return_threshold_pct: number;
+    auto_return_default: boolean;
+  };
   seen_rule?: string;
 }
 
@@ -603,9 +615,15 @@ export interface FieldworkCfg {
   regional_food_yield: number;
   regional_sources: Record<string, { mine: string; grove: string; food: string }>;
   workshop_recipes: {
-    id: string; name: string; skill: 'mining' | 'woodcutting'; level: number; xp: number;
+    id: string; name: string; skill: 'mining' | 'woodcutting' | 'smithing'; level: number; xp: number; mastery_xp?: number;
     materials: Record<string, number>; yield: number;
   }[];
+  smithing_recipes: { id: string; name: string; level: number; xp: number; mastery_xp: number; materials: Record<string, number>; yield: number }[];
+  fishing: { foods: string[]; interval_sec: number; yield: number; xp: number; mastery_xp: number };
+  life_skill_combat: {
+    budget: number; track_cap: number; weights: Record<string, number>; rungs: number[];
+    effects: Record<string, { stat: string; unit: 'pct' | 'percentage_points' }>;
+  };
   level_divisor: number;
   level_cap: number;
   mastery_divisor: number;
@@ -636,7 +654,7 @@ export interface FieldworkCfg {
   };
   camp: { free_relocations: number; relocate_ore: number; relocate_timber: number };
   wild_site_index: { dungeon: number; mine: number; grove: number };
-  actions: Record<'mine' | 'grove', {
+  actions: Record<'mine' | 'grove' | 'fish', {
     resource: string; yield: number; interval_sec: number; xp: number; mastery_xp: number;
     rare_drop_chance: number; rare_resource: string;
     food_drop_chance?: number; food_id?: string;
@@ -720,7 +738,11 @@ export interface EngineData {
   dungeon: DungeonCfg;
   inventory: InventoryCfg;
   item_level: ItemLevelCfg;
-  salvage: any;
+  salvage: {
+    note?: string;
+    outputs: Record<string, number>;
+    alchemy: { scrap_cost: number; value_yield: number; outputs_per_tier_stone: number };
+  };
   save: any;
   junk: any;
   aoe: any;

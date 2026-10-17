@@ -4,17 +4,26 @@ import { itemName } from './item-name';
 import { playerSwing, mobSwing, rollStatus, poisonBurst, dotDamageParts, decayStatusStack, type Statuses, type StatusName } from './combat';
 import { rollDrop } from './drop';
 import { abandonRun, payoutStacks } from './dungeon';
-import { newTown, progressTasks, tickTown, taskReward } from './town';
+import { selectDungeonRescue, type DungeonRescueEntry } from '../../../engine/dungeon-rescue.ts';
+import { newAlchemyLedger } from '../../../engine/alchemy.ts';
+import { canDissolve, dissolve } from './salvage';
+import { depositMany, newTown, progressTasks, stashTabCount, tickTown, taskReward } from './town';
+import { deliveryPauseReason, tickDeliveries } from './delivery';
+import { tickBlackMarket } from './black-market';
 import { STAT_KEYS, type StatKey } from '../engine/client';
 import { chooseJunkItem, leanReweightMany } from '../../../engine/loot.ts';
 import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm } from './farm';
-import { newFieldwork, tickFieldwork, tickHunger, resolveTravelEvent, recordHuntKill, withMeal, withHunger, pushToFieldCamp, finishPushAtCamp } from './fieldwork';
-import { road, walkZonesHex, arrive, ownerOf, zoneOf } from './road';
+import { newFieldwork, tickFieldwork, tickHunger, resolveTravelEvent, recordHuntKill, withMeal, withHunger, pushToFieldCamp, finishPushAtCamp, lifeSkillBonuses } from './fieldwork';
+import { road, walkZonesHex, arrive, ownerOf, zoneOf, startWalk } from './road';
+import {
+  driveAutoReturn, drivePatrol, finishAutoReturnDeposit, maybeStartAutoReturn,
+  newAutoReturnState, newPatrolState, recordPatrolGroupClear,
+} from './exploration';
 import { weaponByName, masteryLevel, payMastery, dropMultiplier } from './mastery';
 import { newPresets, switchPreset, autoSelect } from './presets';
 import { newCollector, newGrants, wants, col } from './collector';
 import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from './filter';
-import { addTo, fitsAll } from './slots';
+import { addTo } from './slots';
 import { settlementOfZone, settlementById } from './town';
 import { effectsActive, esAbsorbPct } from './skills';
 import { mark as markSnapshot } from './snapshot';
@@ -127,6 +136,8 @@ export function newGame(seed = 20260101): GameState {
     walk: null,
     // minute one stands on the starting settlement's own hex — rank 0, so it is safe ground
     cell: { q: start.q, r: start.r, sub: null, wild: null },
+    patrol: newPatrolState(),
+    autoReturn: newAutoReturnState(),
     skills: newSkillState(),
     healUp: null,
     junk: {},
@@ -149,6 +160,7 @@ export function newGame(seed = 20260101): GameState {
     town: newTown(),
     farm: newFarm(),
     fieldwork: newFieldwork(),
+    alchemy: newAlchemyLedger(E.salvage.alchemy.outputs_per_tier_stone),
     zone: E.opening.settlement_zone as number,
     group: [],
     phase: 'fighting',
@@ -238,7 +250,7 @@ function pickBody(rng: () => number, bodies: string[], pack: Record<string, numb
   return bodies[bodies.length - 1];
 }
 
-function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null): Mob {
+function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null): Mob {
   const z = eng.zoneById(zoneId);
   const zonePool = speciesInZone(zoneId);
   // a sub-zone is what a spawn table rolls against: it names its own species pool and one Element from the
@@ -249,8 +261,7 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   const stood = standSub != null && subs[standSub] ? subs[standSub] : null;
   const sub = kind !== 'boss' && subs.length ? (stood || subs[Math.floor(rng() * subs.length)]) : null;
   const speciesPool = sub ? zonePool.filter((sp: any) => sub.species.includes(sp.id)) : zonePool;
-  // past the form cap the variant bands stop: spawns read the legacy per-species zone level (frozen)
-  const frozen = (z.levels as number[])[0] > E.mob.form_level_cap;
+  // Every normal/Elite reads its Species' authored level in this zone, including past the form cap.
   let rank: string = kind;
   let bossProfile: any = null;
   let body = 'medium';
@@ -295,12 +306,11 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
     }
   }
   const top: [number, number] = [(z.levels as number[])[1], (z.levels as number[])[1]];
-  const base = eng.spawnAt(zoneId, playerLevel, body, species.id, bossProfile,
-    rank === 'unique' ? top : (variant && !frozen ? variant.levels : null),
-    rank === 'unique' ? null : (variant ? variant.core : null));
-  // the spawn's level is the variant's own fixed level (`mob.variants[].levels`): a spawn never
-  // follows the attacker's level, so every line below — the Elite's HP and PS, the mob card's
-  // level, the drop's item level — reads the one level the engine priced the shape at
+  const base = eng.spawnAt(zoneId, body, species.id, bossProfile,
+    rank === 'unique' ? null : (variant ? variant.core : null),
+    rank === 'unique' ? top[1] : null);
+  // The Species' authored zone level prices every normal/Elite spawn. Variant selects its Core and
+  // drop identity; neither it nor the attacker changes that fixed level.
   const lv = base.level;
   const size = eng.sizeById(body)!;
   // body classes no longer scale HP: every mob of a species reads the same curve at its own level,
@@ -309,7 +319,6 @@ function spawnMob(rng: () => number, zoneId: number, playerLevel: number, kind: 
   const hp = rank === 'elite'
     ? (eng.mobHpAt(lv) + flat) * E.mob.elite.hp // the Elite multiplier rides the same curve the engine adds its flat terms to
     : base.hp;
-  const psMult = eng.speciesPsMult(zoneId, species.id);
   // the Elite swaps the Large body's own ps factor for its multiplier; the boss keeps the spawn
   // shape whole (the zone-mean divide included), exactly like any other body of its species
   const ps = rank === 'elite' ? base.ps / size.ps * E.mob.elite.ps : base.ps;
@@ -368,6 +377,7 @@ function swapWeakestKept(s: GameState, item: Item, score: number): boolean {
     if (v < worstScore) { worstScore = v; worst = i; }
   });
   if (worst < 0 || !(score > worstScore)) return false;
+  if (!canDissolve(s)) { s.counters.stopped = (s.counters.stopped || 0) + 1; return false; }
   s.bag[worst] = item;
   dissolve(s);
   push(s, `Bag swap · ${itemName(item)} (${item.slot}) in, ${worstScore.toFixed(2)}-score piece dissolved`);
@@ -409,35 +419,21 @@ function escrowProvisions(s: GameState, herbHad: Record<string, number>, potionH
   }
 }
 
-/** One piece becomes one Value stone, and every 500 owes a tier stone (checks.md F15). */
-function dissolve(s: GameState): void {
-  payStone(s, 'reroll_value', 1);
-  s.counters.salvaged = (s.counters.salvaged || 0) + 1;
-  if (s.counters.salvaged % E.salvage.pieces_per_tier_stone === 0) {
-    payStone(s, 'tier', 1);
-    push(s, `Salvage milestone · ${s.counters.salvaged} pieces dissolved → 1 Tier stone`);
-  }
-}
-
 /**
- * The player's own dissolve, on the one piece they picked: the same Value stone the bag filter pays for a
- * rejected drop, so a hand-salvage and an auto-dissolve can never disagree about what a piece is worth.
- * The two pieces the bulk verbs already spare — a locked one and one promised to a Collector set — are
- * refused here too, with the reason said out loud.
+ * The player's own dissolve, on the one piece they picked: the same resource bundle (ore + Scrap) the
+ * bag filter pays for a rejected drop, so a hand-salvage and an auto-dissolve can never disagree about
+ * what a piece is worth. The two pieces the bulk verbs already spare — a locked one and one promised
+ * to a Collector set — are refused here too, with the reason said out loud.
  */
 export function salvageBag(s: GameState, bagIndex: number): { ok: boolean; why?: string } {
   const item = s.bag[bagIndex];
   if (!item) return { ok: false, why: 'nothing in that bag slot' };
   if (item.locked) return { ok: false, why: 'that piece is locked' };
   if (item.heldFor) return { ok: false, why: 'that piece is promised to a Collector set' };
-  const grants = [{ bucket: s.counters.stones, key: 'reroll_value', capKind: 'stone', amount: 1 }];
-  if (((s.counters.salvaged || 0) + 1) % E.salvage.pieces_per_tier_stone === 0) {
-    grants.push({ bucket: s.counters.stones, key: 'tier', capKind: 'stone', amount: 1 });
-  }
-  if (!s.dungeon && !fitsAll(s, grants)) return { ok: false, why: 'make room in the character bag for the salvage stones' };
+  if (!canDissolve(s)) return { ok: false, why: 'make room in the character bag for the whole salvage resource bundle' };
   s.bag.splice(bagIndex, 1);
   dissolve(s);
-  push(s, `Salvaged ${itemName(item)} → 1 Value stone`);
+  push(s, `Salvaged ${itemName(item)} → ${Object.entries(E.salvage.outputs).map(([key, count]) => `${count} ${key}`).join(' + ')}`);
   return { ok: true };
 }
 
@@ -458,7 +454,7 @@ function awardDrop(s: GameState, rng: () => number, band: string, ilvl: number, 
  */
 export function adjudicateDrop(s: GameState, item: Item): void {
   // the bag filter keeps a drop only when it outscores the piece worn in that slot by more than
-  // noise; anything else dissolves for 1 Value stone, never for gold (loot.md §4)
+  // noise; anything else dissolves for the salvage resource bundle, never for gold (loot.md §4)
   // A waiting piece contributes no power. For rings, an empty cell is free and a full pair compares
   // against its weaker member — the same cell Auto Equip would replace.
   const worn = s.gear.filter((g): g is Item => g !== null && g.slot === item.slot);
@@ -468,8 +464,8 @@ export function adjudicateDrop(s: GameState, item: Item): void {
   const score = loot.score({ ...item, q: item.q ?? 0 });
   // the filter is OFF by default: a slot the player has not turned on keeps every drop
   // and dissolves nothing, so the player opts in per slot before a piece is ever thrown away.
-  // Only an enabled slot runs the published rule — a piece that fails it dissolves for 1 Reroll
-  // value stone (always kept), never for gold (`loot.md` §4).
+  // Only an enabled slot runs the published rule — a piece that fails it dissolves for the salvage
+  // resource bundle when the whole bundle fits (always kept), never for gold (`loot.md` §4).
   const rule = ruleFor(s.filter, item.slot);
   const verdict = rule.enabled
     ? loot.keepsDrop(
@@ -480,8 +476,9 @@ export function adjudicateDrop(s: GameState, item: Item): void {
   // An upgrade is for the character first. Collector reservations catch pieces that fail to improve
   // the worn cell, before a filter can dissolve them for a stone.
   const set = wornScore !== undefined && score <= wornScore ? wants(s, item) : null;
-  // a client auto-dissolve floor, read on the item's own level: stones only, never gold (the two mints
-  // are untouched by AGENT §5). A set-wanted or player-locked piece is spared; the collector runs first.
+  // a client auto-dissolve floor, read on the item's own level: salvage resources only, never gold
+  // (the two mints are untouched by AGENT §5). A set-wanted or player-locked piece is spared; the
+  // collector runs first.
   const belowFloor = (s.autoDissolveLevel || 0) > 0 && !item.locked && item.ilvl < (s.autoDissolveLevel || 0);
   if (set) {
     // the Collector sink runs before the filter dissolves a piece the set wants
@@ -493,17 +490,17 @@ export function adjudicateDrop(s: GameState, item: Item): void {
       // a full pile picks up nothing and deletes nothing — the hold waits like any other pickup
       s.counters.overflow = (s.counters.overflow || 0) + 1;
     }
-  } else if (belowFloor) {
+  } else if (belowFloor && !item.heldFor) {
     dissolve(s);
-  } else if (verdict.keep) {
+  } else if (verdict.keep || item.locked || item.heldFor) {
     // The sim keeps the piece; the client's Auto Equip setting decides whether it is worn now.
     if (s.bag.length < E.inventory.adventure_slots) {
       s.bag.unshift(item);
       push(s, `Drop kept (${verdict.reason}): level ${item.ilvl} ${item.quality} ${item.tier} ${itemName(item)} (${item.slot})`);
     } else if (verdict.reason === 'upgrade' && swapWeakestKept(s, item, verdict.score)) {
       // the bag keeps the best decision per slot instead of the first fifty arrivals: a piece that
-      // beat the bar replaces the piece it beat, and the loser dissolves for its one stone. The
-      // character still wears nothing it was not told to wear (owner ruling).
+      // beat the bar replaces the piece it beat, and the loser dissolves for its salvage resources
+      // when they fit. The character still wears nothing it was not told to wear (owner ruling).
     } else {
       // overflow is stop_pickup: a full bag picks up nothing and deletes nothing
       s.counters.overflow = (s.counters.overflow || 0) + 1;
@@ -607,7 +604,7 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
       }
     }
   }
-  progressTasks(s, mob.kind, mob.zone);
+  progressTasks(s, mob.kind, mob.zone, mob.speciesId, s.walk ? null : s.cell?.sub ?? null);
   // a run escrows provisioning: herbs and potions write only here, so the delta is exact
   const herbHad = s.dungeon ? { ...s.farm.herbs } : null;
   const potionHad = s.dungeon ? { ...s.farm.potions } : null;
@@ -678,8 +675,12 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
  */
 function completeDungeonRun(s: GameState): void {
   const run = s.dungeon!;
-  const paid = payoutStacks(s);
   s.dungeon = null;
+  const paid = payoutStacks(s, run);
+  s.group = [];
+  s.curses = newCurses();
+  s.mobStatus = newMobStatusStore();
+  s.spawnIn = 0;
   let gear = 0;
   for (const item of run.escrow.items) {
     adjudicateDrop(s, item);
@@ -688,6 +689,51 @@ function completeDungeonRun(s: GameState): void {
   }
   s.dungeonClearedAt = s.clockSec;
   push(s, `Dungeon cleared — ${run.total} mobs · escrow paid: ${gear} gear, ${paid.junk} junk, ${paid.stones} stones, ${paid.herbs} herbs, ${paid.potions} potions · cooling down ${E.dungeon.cooldown_sec}s`);
+}
+
+/** Retreat selects saved loot once, then uses the same pickup/filter rules as a clear. */
+export function retreatDungeon(s: GameState, access: { writer: boolean } = { writer: true }): {
+  ok: boolean; why?: string; selected?: number; received?: number; rejected?: number;
+} {
+  if (!access.writer) return { ok: false, why: 'this tab is read-only' };
+  const run = s.dungeon;
+  if (!run) return { ok: false, why: 'no active dungeon run' };
+  const entries: DungeonRescueEntry<Item>[] = run.escrow.items.map((item, index) => ({ bucket: 'items', key: String(index).padStart(16, '0'), count: 1, stackSize: 1, item }));
+  for (const bucket of ['junk', 'stones', 'herbs', 'potions', 'materials'] as const) {
+    const cap = E.inventory.stack_size[bucket === 'junk' || bucket === 'stones' ? 'stone' : bucket === 'herbs' ? 'herb' : bucket === 'materials' ? 'material' : 'potion'];
+    for (const [key, count] of Object.entries(run.escrow[bucket] || {})) entries.push({ bucket, key, count, stackSize: cap });
+  }
+  const rng = mulberry32(s.rngState);
+  let draws = 0;
+  let selected: DungeonRescueEntry<Item>[];
+  try {
+    selected = selectDungeonRescue(entries, { min: E.dungeon.retreat_keep_min, max: E.dungeon.retreat_keep_max }, () => { draws++; return rng(); });
+  } catch { return { ok: false, why: 'invalid dungeon escrow or rescue configuration' }; }
+  if (draws) s.rngState++;
+  s.dungeon = null;
+  s.group = [];
+  s.curses = newCurses();
+  s.mobStatus = newMobStatusStore();
+  s.spawnIn = 0;
+  s.hunting = false;
+  s.dungeonClearedAt = s.clockSec;
+  let received = 0, total = 0;
+  for (const entry of selected) {
+    total += entry.count;
+    if (entry.bucket === 'items') {
+      const bagBefore = s.bag.length, salvageBefore = s.counters.salvaged || 0;
+      adjudicateDrop(s, entry.item!);
+      if (s.bag.includes(entry.item!) || s.bag.length > bagBefore || (s.counters.salvaged || 0) > salvageBefore) received++;
+    } else {
+      const bucket = entry.bucket === 'junk' ? s.junk : entry.bucket === 'stones' ? s.counters.stones : entry.bucket === 'herbs' ? s.farm.herbs : entry.bucket === 'materials' ? s.fieldwork.materials : s.farm.potions;
+      const got = addTo(s, bucket, entry.key, entry.bucket === 'junk' || entry.bucket === 'stones' ? 'stone' : entry.bucket === 'herbs' ? 'herb' : entry.bucket === 'materials' ? 'material' : 'potion', entry.count);
+      if (entry.bucket === 'junk') s.counters.junk += got;
+      received += got;
+    }
+  }
+  const rejected = total - received;
+  push(s, `Dungeon Retreat — selected ${selected.length} stacks (${total} units), received ${received}, capacity-rejected ${rejected}; the rest forfeited · cooling down ${E.dungeon.cooldown_sec}s`);
+  return { ok: true, selected: total, received, rejected };
 }
 
 /**
@@ -703,7 +749,7 @@ function spawnWalkEncounter(s: GameState, rng: () => number) {
   const [lo, hi] = eng.groupRangeOf(lower, walk.sub);
   const size = Math.max(1, Math.round(lo + rng() * ((hi || lo || 1) - (lo || 1))));
   const mobs: any[] = [];
-  for (let i = 0; i < size; i++) mobs.push(spawnMob(rng, lower, s.player.level, 'normal', undefined, walk.sub));
+  for (let i = 0; i < size; i++) mobs.push(spawnMob(rng, lower, 'normal', undefined, walk.sub));
   s.group = mobs;
   push(s, `Ambushed on block ${walk.blocksWalked + 1} of ${walk.blocksTotal} · ${size} in ${z.name}`);
 }
@@ -711,6 +757,24 @@ function spawnWalkEncounter(s: GameState, rng: () => number) {
 export function push(s: GameState, text: string) {
   s.log.unshift({ sec: s.clockSec, text });
   if (s.log.length > 60) s.log.length = 60;
+}
+
+function runExplorationAutomation(s: GameState, online: boolean, wasPatrolling = s.patrol.active) {
+  const triggered = maybeStartAutoReturn(s, online, wasPatrolling);
+  if (triggered) push(s, triggered);
+  const automatic = driveAutoReturn(s, online);
+  if (automatic.message) push(s, automatic.message);
+  if (automatic.deposit) {
+    s.hunting = false;
+    const moved = stashTabCount(s) > 0 ? depositMany(s, s.bag.map((_, i) => i), 0) : 0;
+    push(s, finishAutoReturnDeposit(s, moved));
+    const resume = driveAutoReturn(s, online);
+    if (resume.message) push(s, resume.message);
+  }
+  if (s.autoReturn.phase === 'idle') {
+    const patrol = drivePatrol(s, online);
+    if (patrol) push(s, patrol);
+  }
 }
 
 /**
@@ -724,6 +788,7 @@ export function huntZone(s: GameState, id: number): { ok: boolean; why?: string 
   if (node) s.cell = { q: node.q, r: node.r, sub: null, wild: null };
   s.zone = id;
   s.group = [];
+  s.fieldwork.action = null;
   s.player.atkTimer = 0;
   s.hunting = true;
   return { ok: true };
@@ -743,6 +808,7 @@ export function huntHere(s: GameState): { ok: boolean; why?: string } {
   }
   s.zone = zoneOf(s.cell) ?? s.zone;
   s.group = [];
+  s.fieldwork.action = null;
   s.player.atkTimer = 0;
   s.hunting = true;
   return { ok: true };
@@ -806,11 +872,20 @@ export function credit(s: GameState, kind: 'swing' | 'cast' | 'dot', amount: num
 }
 
 /** One second of the world. Fixed tick, every unit on its own timer (combat.md §1). */
-export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boolean; autoSkills?: boolean } = {}): GameState {
+export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boolean; autoSkills?: boolean; writer?: boolean } = {}): GameState {
+  if (opts.writer === false) return s;
+  const pausedAtStart = !!deliveryPauseReason(s);
+  const rng = mulberry32(s.rngState++);
+  const result = tickWorld(s, statuses, opts, rng);
+  tickDeliveries(result, rng, opts.online !== false, pausedAtStart, { writer: true });
+  tickBlackMarket(result, rng, { writer: true }, opts.online !== false);
+  return result;
+}
+
+function tickWorld(s: GameState, statuses: Statuses, opts: { online?: boolean; autoSkills?: boolean }, rng: () => number): GameState {
   const online = opts.online !== false;
   const autoSkills = opts.autoSkills !== false;
   s.online = online;
-  const rng = mulberry32(s.rngState++);
   s.clockSec++;
   s.counters.playSec++;
   const foodNote = tickHunger(s, online);
@@ -821,7 +896,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // pool is read against already includes them; manual players bank and spend by hand.
   if (s.player.autoSpend && s.player.statPoints > 0) spendReference(s);
   const effects = effectsActive(s.skills);
-  const c = withHunger(withMeal(buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effects, s.player.points, s.player.treeRanks), s), s);
+  const c = withHunger(withMeal(buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effects, s.player.points, s.player.treeRanks, lifeSkillBonuses(s)), s), s);
   // a pool is bounded by what it is: never below nothing, never above what the sheet says it holds.
   // The bars read these straight, so an unbounded value here is what shows as a negative number there.
   s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
@@ -834,14 +909,10 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       minutes: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarPrice(rng())),
     };
   }
-  // the owner's travel switch: 'forward' climbs through settlements already opened, using the
-  // zone's own level band as the only condition (`mob.zones.levels`) — no new number, and it never
-  // walks: reaching a settlement the player has not opened is a walk, and a walk is online only.
-  // Forward Mode is a chapter ladder (owner ask): win the zone (its band is behind you) and the walk
-  // moves on; a Push sends the character back to the last zone it held (below) and this same rule
-  // refuses to re-enter the zone it was chased out of until a level has been gained against it.
-  // Forward Mode stands down inside a dungeon: the run owns the zone until it ends
-  if (s.travel === 'forward' && !s.dungeon) {
+  // Forward Mode follows the opened chapter ladder on foot. A newly discovered settlement still
+  // needs the player's first walk; known chapters become an online walk when the current band is behind.
+  // A Push returns to the last zone held and blocks re-entry until a level is gained against it.
+  if (s.travel === 'forward' && !s.dungeon && !s.walk && !s.patrol.active && s.autoReturn.phase === 'idle') {
     const here = eng.zoneById(s.zone);
     if (s.player.level > here.levels[1]) {
       const next = eng.ZONES.find((z: any) => z.id > here.id
@@ -849,16 +920,14 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       const blocked = next && next.id === s.forwardBlockedZone
         && s.player.level <= (s.forwardBlockedLevel ?? 0);
       if (next && !blocked) {
-        s.forwardSafe = here.id; // the zone just left is the floor a Push falls back to
-        s.zone = next.id;
-        // a climb moves the feet too, so the cell the zone is read from stays the zone's own town
         const there = road.nodeById(settlementOfZone(next.id)?.id || '');
-        if (there) s.cell = { q: there.q, r: there.r, sub: null, wild: null };
-        s.group = [];
-        s.spawnIn = 0;
-        s.hunting = true; // a climb is a hunt, not a rest
-        s.lastAutoZone = -1; // the preset bound to the new zone is picked on this same tick
-        push(s, `Moving on to ${next.name} (levels ${next.levels.join('-')})`);
+        if (there) {
+          const walk = startWalk(s, { q: there.q, r: there.r, sub: null, wild: null });
+          if (walk.ok) {
+            s.forwardSafe = here.id; // the zone just left is the floor a Push falls back to
+            push(s, `Walking to ${next.name} (levels ${next.levels.join('-')})`);
+          }
+        }
       }
     }
   }
@@ -868,6 +937,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     autoSelect(s, s.zone);
   }
   tickTown(s, rng);
+  runExplorationAutomation(s, online);
 
   if (s.phase === 'camp') {
     s.campSec--;
@@ -893,20 +963,23 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
       walk.blocksLeft--;
       walk.blocksWalked++;
       walk.secLeft = road.blockSec;
-      // the step is an event the sheet can animate: the route lights one cell at a time
-      fx(s, {
-        kind: 'travel', side: 'self',
-        text: `block ${walk.blocksWalked} of ${walk.blocksTotal}`, colour: hitColour(null),
-      });
+      // A crossed block says nothing: no number floats off the character and no line is logged for it —
+      // the walk reads as the one word on the field plus the route lighting itself off `blocksWalked`,
+      // one cell per block (`walkedCells`). Only arriving, and being ambushed, are events.
       const trailEvent = resolveTravelEvent(s, rng);
       if (trailEvent) push(s, `Trail event · ${trailEvent}`);
       if (walk.blocksLeft <= 0) {
         const arrived = arrive(s, walk);
         if (arrived) {
+          if (s.lastAutoZone !== s.zone) {
+            s.lastAutoZone = s.zone;
+            autoSelect(s, s.zone);
+          }
           push(s, arrived.first
             ? `Arrived on foot at ${arrived.name} — its Waypoint is open`
             : `Arrived at ${arrived.name}`);
           fx(s, { kind: 'travel', side: 'self', text: `arrived · ${arrived.name}`, colour: hitColour(null) });
+          runExplorationAutomation(s, online);
         }
       } else if (road.rollEncounter(rng)) {
         spawnWalkEncounter(s, rng);
@@ -927,7 +1000,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     const [rlo, rhi] = (eng.zoneById(run.zone).group as string).split('-').map(Number);
     const size = DG.clampGroup(intBetween(rng, rlo || 1, rhi || rlo || 1), run.left);
     if (size > 0) {
-      s.group = Array.from({ length: size }, () => spawnMob(rng, run.zone, s.player.level, 'normal'));
+      s.group = Array.from({ length: size }, () => spawnMob(rng, run.zone, 'normal'));
       s.group.sort((m) => (m.line === 'front' ? -1 : 1));
       s.spawnIn = L.group_spawn_sec;
       s.farm.usesThisFight = 0;
@@ -943,10 +1016,10 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
     if (online && !s.bossDueAt) s.bossDueAt = s.clockSec + BOSS_EVERY_SEC;
     const wantBoss = online && s.bossDueAt !== undefined && s.clockSec >= s.bossDueAt;
     s.group = wantBoss
-      ? [spawnMob(rng, s.zone, s.player.level, 'boss')]
+      ? [spawnMob(rng, s.zone, 'boss')]
       : wantElite
-        ? [spawnMob(rng, s.zone, s.player.level, 'elite', undefined, s.cell?.sub)]
-        : Array.from({ length: groupSize }, () => spawnMob(rng, s.zone, s.player.level, 'normal', undefined, s.cell?.sub));
+        ? [spawnMob(rng, s.zone, 'elite', undefined, s.cell?.sub)]
+        : Array.from({ length: groupSize }, () => spawnMob(rng, s.zone, 'normal', undefined, s.cell?.sub));
     // the queue is front line first, so a reach-1 attack always has the front slot (combat.md §2b)
     s.group.sort((m) => (m.line === 'front' ? -1 : 1));
     s.spawnIn = L.group_spawn_sec;
@@ -1154,6 +1227,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   // casting the same skill twice in the same tick
   if (autoSkills && critLanded) fireTrigger(trig.crit);
 
+  const hadGroupBeforeDamage = s.group.length > 0;
   // statuses age once a second, and the DoT they deal lands before the mob swings back
   for (const mob of s.group) {
     const dot = stepMobParts(s.mobStatus, mob.id);
@@ -1168,6 +1242,12 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   while (s.group.some((m) => m.hp <= 0)) {
     const dead = s.group.splice(s.group.findIndex((m) => m.hp <= 0), 1)[0];
     onKill(s, rng, dead, c, statuses);
+  }
+  if (hadGroupBeforeDamage && s.group.length === 0) {
+    const wasPatrolling = s.patrol.active;
+    const patrolNote = recordPatrolGroupClear(s, online);
+    if (patrolNote) push(s, patrolNote);
+    runExplorationAutomation(s, online, wasPatrolling);
   }
 
   // mob clocks
@@ -1343,7 +1423,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
  * Int — so the bar is bounded again here, otherwise it reads above what the character now holds.
  */
 function clampPools(s: GameState): void {
-  const c = withHunger(withMeal(buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills), s.player.points, s.player.treeRanks), s), s);
+  const c = withHunger(withMeal(buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills), s.player.points, s.player.treeRanks, lifeSkillBonuses(s)), s), s);
   s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
   s.player.es = Math.min(Math.max(0, s.player.es), c.es);
   s.player.hp = Math.min(s.player.hp, c.maxHp);

@@ -2,11 +2,15 @@
   import { onMount } from 'svelte';
   import { cubicOut } from 'svelte/easing';
   import { prefersReducedMotion, Tween } from 'svelte/motion';
-  import { eng, E, sm, TOWN, tree, loot, fieldwork } from './engine/client';
+  import { eng, E, sm, TOWN, tree, loot, fieldwork, trade } from './engine/client';
   import { buildCharacter } from './sim/player';
-  import { withMeal, withHunger, fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from './sim/fieldwork';
-  import { sellGoods, processMaterials } from './sim/trade';
-  import { newGame, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, carried, heldWeaponName, huntZone, huntHere, salvageBag } from './sim/game';
+import { withMeal, withHunger, fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal, lifeSkillBonuses } from './sim/fieldwork';
+  import { sellGoods, processMaterials, tradeBucket } from './sim/trade';
+import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from './sim/delivery';
+import { buyBlackMarket } from './sim/black-market';
+  import DeliveryNotice from './ui/DeliveryNotice.svelte';
+  import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from './sim/alchemy';
+  import { newGame, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, carried, heldWeaponName, huntZone, huntHere, salvageBag, retreatDungeon } from './sim/game';
   import { reservedPct, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, costNow, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
@@ -14,7 +18,7 @@
   import SlotGrid from './ui/SlotGrid.svelte';
   import Panel from './ui/Panel.svelte';
   import HudLayoutEditor from './ui/HudLayoutEditor.svelte';
-  import { copyHudLayout, DEFAULT_HUD_LAYOUT, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, validGridArea, validateHudLayout, type GridArea, type HudLayout } from './ui/hud-layout';
+  import { copyHudLayout, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_LAYOUT_VERSION, migrateHudLayout, salvageHudLayout, validGridArea, validateHudLayout, type GridArea, type HudLayout } from './ui/hud-layout';
   import TravelCard from './ui/TravelCard.svelte';
   import TownHub from './ui/TownHub.svelte';
   import Market from './ui/Market.svelte';
@@ -28,13 +32,11 @@
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
   import type { MenuItem } from './ui/menu';
   import { ramp, cellLabel, paintSheet, type Picked } from './ui/map';
-  import { fxByMob as bucketFx, plateBeat, plateStrike, plateGesture } from './ui/plate';
   import { setCastDrag, readCastDrag } from './ui/drag';
   import { snapCounters, buildAwayReport, fieldLabel, describeSnap } from './ui/hud';
-  import { bar, curseWords, statusWords } from './ui/field';
+  import { bar } from './ui/field';
   import { fxOut } from './ui/motion';
   import FieldPlates from './ui/FieldPlates.svelte';
-  import ExpBar from './ui/ExpBar.svelte';
   import LogBox from './ui/LogBox.svelte';
   import { feedEventsAfter } from './ui/logbox';
   import {
@@ -42,11 +44,12 @@
     standingShare, standingTier, canTravel, claimTask, npcOf,
   } from './sim/town';
   import { doCraft, stoneName, atSettlement, type CraftOp, type Where } from './sim/craft';
-  import { farm, farmLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
+import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPotion, condense } from './sim/farm';
   import { stashTabCount, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
 import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
   import { respecStats } from './sim/respec';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, warpRow, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
+  import { clearPatrolStops, startPatrol as startPatrolRun, stopPatrol as stopPatrolRun, togglePatrolStop } from './sim/exploration';
   import { enterDungeon, cooldownLeft } from './sim/dungeon';
   import { masteryLabel, masteryLevel, weaponSkillBonusPct, WEAPONS } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
@@ -57,7 +60,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   import { FILTER_SLOTS, ruleFor, setRule, describeRule } from './sim/filter';
   import { equipFromBag, autoEquip, unequip } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
-  import { describe as describeGoal } from './sim/goal';
+  import { describe as describeGoal, lifeSkillMilestones } from './sim/goal';
   import { hubIcon, icon, mobIcon, skillIcon } from './icon';
   import { bossMark } from './icon';
   // The HUD's own marks, read off the same icon shelf the slots draw from by file name — no second asset set,
@@ -85,13 +88,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const stayMark = icon('rest-campfire');
   const climbMark = icon('ladder-stack');
   const autoEquipMark = icon('heavy-helm');
-  const skillSettingsMark = icon('skill-settings');
   const newCharacterMark = icon('perspective-dice-six-faces-random');
   // the field sheet, generated by tools/map.ts and inlined so the travel pin, the plotted route and
   // the picked cell are all toggled by id — the client reads no coordinate, only settlement ids and
   // cell keys it already holds (X33 · M7 · M10)
   import mapOverlayRaw from './icon/map/map-overlay.svg?raw';
-  import fogCloudUrl from './assets/fog-cloud.png?url';
   import type { GameState, Item, Cell, Mob, FxEvent } from './sim/types';
   import type { StatKey } from './engine/client';
   import type { Statuses } from './sim/combat';
@@ -99,8 +100,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
   const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
+  let showcaseSample = $state('delivery');
 
-  function showcaseGame(): GameState {
+  function showcaseGame(scenario = 'delivery'): GameState {
     const sample = newGame();
     sample.fieldwork.materials['copper-ore'] = 12;
     sample.fieldwork.materials.timber = 8;
@@ -118,6 +120,34 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (activeSkill) {
       sample.skills.owned[activeSkill.id] = 0;
       sample.skills.list[0] = activeSkill.id;
+    }
+    if (scenario === 'expedition') {
+      const seedTask = sample.town.tasks[0]!;
+      sample.town.tasks[1] = {
+        ...structuredClone(seedTask),
+        kind: 'expedition', zone: 1,
+        targetSpecies: E.mob.zones[0].subzones?.[0]?.species?.[0] || 'goblin',
+        subzone: 0, progress: 1,
+      };
+    } else if (scenario !== 'field') {
+      const draws = [0, 0.99, 0, 0, 0];
+      const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
+      if (contract) {
+        const good = trade.byId[contract.good];
+        tradeBucket(sample, good)[good.key] = contract.target;
+        if (scenario === 'full-bag') {
+          tradeBucket(sample, good)[good.key] += contract.target;
+          const free = Math.max(0, slotsAvailable(sample) - slotsUsed(sample));
+          sample.counters.stones.reroll_value = free * E.inventory.stack_size.stone;
+        }
+        if (scenario === 'fallback' && contract.reward.skill) sample.skills.owned[contract.reward.skill] = sm.LADDER_MAX_DUPLICATES;
+        if (scenario === 'expired') {
+          deliver(sample, contract.id, Math.max(1, Math.floor(contract.target / 2)), { writer: true });
+          sample.clockSec += contract.dueAtDeliverySec - sample.town.deliveryClockSec;
+          sample.town.deliveryClockSec = contract.dueAtDeliverySec;
+          tickDeliveries(sample, () => 1, false, true, { writer: true });
+        }
+      }
     }
     return sample;
   }
@@ -181,6 +211,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let hudGridVisible = $state(false);
   let layoutEditorOpen = $state(false);
   let hudLayout = $state(copyHudLayout());
+  let hudLayoutNotice = $state<string | null>(null);
   let modalLayout = $state<GridArea>({ ...DEFAULT_MODAL_AREA });
   const hudLayoutAreas = $derived(hudGridTemplate(hudLayout));
   const modalGridArea = $derived(gridAreaCss(modalLayout));
@@ -188,7 +219,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (validateHudLayout(nextHud) || !validGridArea(nextModal)) return;
     hudLayout = copyHudLayout(nextHud);
     modalLayout = { ...nextModal };
-    if (!showcaseMode) localStorage.setItem(HUD_LAYOUT_STORAGE_KEY, JSON.stringify({ version: 1, hud: hudLayout, modal: modalLayout }));
+    hudLayoutNotice = null;
+    if (!showcaseMode) localStorage.setItem(HUD_LAYOUT_STORAGE_KEY, JSON.stringify({ version: HUD_LAYOUT_VERSION, hud: hudLayout, modal: modalLayout, notice: null }));
     layoutEditorOpen = false;
   }
   const openLayoutEditor = () => { layoutEditorOpen = true; more = false; };
@@ -196,6 +228,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let selectedTreeNodeId = $state('impact.1');
   const selectedTreeVerdict = $derived(canSpendTree(gameState, selectedTreeNodeId));
   let sheetOpen = $state(false);
+  /** the sheet's own tabs: the final values, and the life-skill reference read */
+  let sheetTab = $state<'stats' | 'life'>('stats');
   let saveNote = $state('');
   type AccountWriterState = 'checking' | 'owner' | 'readonly' | 'waiting' | 'unsupported';
   let accountWriterState = $state<AccountWriterState>('checking');
@@ -203,15 +237,24 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let takeoverController: AbortController | null = null;
   let takeoverSlot = $state<SlotName>('slot1');
   const canWriteAccount = $derived(accountWriterState === 'owner');
+  const transactionWriter = $derived(showcaseMode ? showcaseSample !== 'read-only' : canWriteAccount);
+  let marketView = $state<'trade' | 'workshop' | 'stall' | 'deliveries' | 'black-market'>('trade');
+  let marketTownId = $state('');
+  const deliveryNotice = $derived(Object.values(gameState.town.contracts).flat().find((contract) => contract.status === 'open' && !contract.announced));
   const accountWriterMessage = $derived(accountWriterState === 'owner'
     ? 'This tab controls saves for the account.'
     : accountWriterState === 'readonly'
-      ? 'Another tab controls this account. You can load and play here, but saving and restoring are paused.'
+      ? 'Another tab controls this account. You can inspect saves here; progression and transactions wait for takeover.'
       : accountWriterState === 'waiting'
         ? 'Waiting for the other tab to release account control.'
         : accountWriterState === 'unsupported'
           ? 'This browser cannot coordinate account saves. Saving is disabled to protect progress.'
           : 'Checking account save access…');
+  function requireAccountWriter(action: string): boolean {
+    if (showcaseMode || canWriteAccount) return true;
+    saveNote = `${accountWriterMessage} Open Save and take over before ${action}.`;
+    return false;
+  }
 
   let settings = $state<ClientSettings>({ ...DEFAULT_SETTINGS });
   function setSetting<K extends keyof ClientSettings>(k: K, v: ClientSettings[K]) {
@@ -222,10 +265,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function setSpeed(m: 1 | 2 | 4) {
     speed = m;
     setSetting('speed', m);
-    saveNote = running ? `the clock runs ×${m}` : saveNote;
+    saveNote = !showcaseMode && !canWriteAccount
+      ? `Clock speed ×${m} will apply when this tab controls progress.`
+      : running ? `the clock runs ×${m}` : saveNote;
   }
 
-  /** Escape uncovers the field: map focus drops, the two dock overlays go with it, and a pick that was
+  /** Escape uncovers the field: map focus drops, the dock overlays go with it, and a pick that was
       never travelled to is dropped rather than left ringing under the HUD. A desk screen closes itself. */
   function onfieldKey(ev: KeyboardEvent) {
     if (showcaseMode) return;
@@ -277,7 +322,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function runAction(action: string) {
     if (action === 'screen.field') { panel = null; sheetOpen = false; alloc = false; picked = null; pickedCell = null; return; }
     if (action === 'sheet.open') { sheetOpen = !sheetOpen; return; }
-    if (action === 'game.pause') { running = !running; saveNote = running ? 'the clock is running again' : 'paused — the field holds still'; return; }
+    if (action === 'game.pause') {
+      if (!requireAccountWriter('pausing or resuming')) return;
+      running = !running;
+      saveNote = running ? 'the clock is running again' : 'paused — the field holds still';
+      return;
+    }
     if (action.startsWith('screen.')) { openPanel(action.slice(7) as PanelId); return; }
     if (action === 'equip.best') { doBestEquip(); return; }
     if (action.startsWith('stash.tab')) {
@@ -352,13 +402,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const ring = $derived(gameState.fx || []);
   const fieldFx = $derived(ring.filter((e) => e.side === 'field' && !(e.kind === 'hit' && e.mobId) && !(e.kind === 'block' && e.mobId)).slice(0, 9));
   // the character's own answers live on its own corner now (taken blows pop like damage, block
-  // words and status procs beside them), so the shared column keeps only what names no body
-  const selfFx = $derived(ring.filter((e) => e.side === 'self' && !(e.kind === 'travel' && e.text?.startsWith('arrived ·')) && e.kind !== 'level' && e.kind !== 'block' && e.kind !== 'proc' && e.kind !== 'taken').slice(0, 5));
-  const fxByMob = $derived(bucketFx(ring));
+  // words and status procs beside them), so the shared column keeps only what names no body — and a
+  // walk floats nothing, so the word on the field is the whole of its read
+  const selfFx = $derived(ring.filter((e) => e.side === 'self' && e.kind !== 'travel' && e.kind !== 'level' && e.kind !== 'block' && e.kind !== 'proc' && e.kind !== 'taken').slice(0, 5));
   const latestTaken = $derived(ring.find((e) => e.side === 'self' && e.kind === 'taken') || null);
-  const latestLand = $derived(ring.find((e) => e.side === 'field' && e.kind === 'hit' && (e.via === 'swing' || e.via === 'cast')) || null);
-  const selfArt = $derived(plateGesture(latestTaken, latestLand));
   const plates = $derived([...gameState.group]);
+  /** the field is a fight, not a backdrop: cards answer to the Field tab or to a live fight only */
+  const inCombat = $derived(gameState.phase === 'fighting' && gameState.group.length > 0);
+  const showCombatCards = $derived(panel === null || inCombat);
   /** the row that last fired — a press or a buff coming up are both the order being worked — so the bar
    *  lights the slot that actually pressed instead of the one the eye expects */
   const latestFire = $derived((gameState.fx || []).find((e) => !!e.skillId && (e.kind === 'cast' || e.kind === 'buff')) || null);
@@ -367,14 +418,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const xpPct = $derived(Math.max(0, Math.min(100, (gameState.player.xp / eng.xpToNext(gameState.player.level)) * 100)));
 
   type FeedLine = { id: number; text: string; tone: string; chan: 'combat' | 'loot' | 'system' };
-  type ChatTab = 'all' | 'combat' | 'loot' | 'system';
+  type ChatTab = 'all' | 'combat' | 'loot' | 'system' | 'objectives';
   let feed = $state<FeedLine[]>([]);
   let feedSeen = 0;
-  const CHAT_TABS: [ChatTab, string][] = [['all', 'all'], ['combat', 'combat'], ['loot', 'loot'], ['system', 'system']];
+  const CHAT_TABS: [ChatTab, string][] = [['all', 'all'], ['combat', 'combat'], ['loot', 'loot'], ['system', 'system'], ['objectives', 'objectives']];
   /** which channel of the chronicle is showing: one stream, read one way at a time, the way a chat box
       splits what a kill said from what the world said */
   let chatTab = $state<ChatTab>('all');
   const chatShown = $derived((chatTab === 'all' ? feed : feed.filter((l) => l.chan === chatTab)).slice(-8));
+  /** the run's target: reference, so it reads as the chronicle's last tab */
+  const objectivesRead = $derived({ goal: describeGoal() });
   $effect(() => {
     const fresh = ring.filter((e) =>
       (e.kind === 'kill' || e.kind === 'level' || e.kind === 'travel' || e.kind === 'buff' || e.kind === 'drop') && e.text);
@@ -397,15 +450,37 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   // the away report's own reads live in `ui/hud.ts`, where a test can reach them
 
-  let c = $derived(withHunger(withMeal(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points, gameState.player.treeRanks), gameState), gameState));
+  let c = $derived(withHunger(withMeal(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points, gameState.player.treeRanks, lifeSkillBonuses(gameState)), gameState), gameState));
   const hpFill = $derived(c.maxHp > 0 ? Math.max(0, Math.min(1, shownHp / c.maxHp)) : 0);
   const esFill = $derived(c.es > 0 ? Math.max(0, Math.min(1, shownEs / c.es)) : 0);
   const manaFill = $derived(c.maxMana > 0 ? Math.max(0, Math.min(1, shownMana / c.maxMana)) : 0);
+  /** The shield breaking. ES is a pool rather than a body, so the sim raises no event for it going down:
+   *  the client watches the pool itself and mounts one shatter on the drop to nothing, which is the one
+   *  moment the pool is worth a whole gesture. `shatter` counts the breaks, so a shield that comes back
+   *  and falls again earns a new one. The first pass only seeds the previous value — a character that
+   *  starts without a shield has not just lost one. */
+  let shatter = $state(0);
+  let lastEs = 0;
+  let esSeeded = false;
+  $effect(() => {
+    const es = gameState.player.es;
+    if (!esSeeded) { esSeeded = true; lastEs = es; return; }
+    if (lastEs > 0 && es <= 0 && c.es > 0) shatter++;
+    lastEs = es;
+  });
   let zone = $derived(eng.zoneById(gameState.zone));
   const fieldworkSite = $derived(fieldSite(gameState.cell));
   const fieldCampHere = $derived(atFieldCamp(gameState));
   const fieldworkBusy = $derived(!!gameState.walk || gameState.phase === 'camp' || !!gameState.dungeon);
-  const hungerFill = $derived(Math.max(0, Math.min(1, gameState.fieldwork.hunger / fieldwork.F.hunger.max)));
+
+  /** The tracked open wants, in the objectives column: town, good, progress and the deadline clock,
+   *  read from the same delivery sim the Market board reads — tracking is a reminder, never an accept. */
+  const trackedDeliveries = $derived(gameState.town.trackedContractIds
+    .map((id) => contractById(gameState, id))
+    .filter((contract) => contract && contract.status === 'open'));
+  const deliveryPause = $derived(deliveryPauseReason(gameState));
+  const settlementName = (id: string) => TOWN.settlements.find((town) => town.id === id)?.name || id;
+  const deliveryClock = (seconds: number) => `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 
   // The two bags the slot grid draws, each in the shape the player chose. Order and mode are theirs;
   // every value inside a slot is read from the engine, never recomputed here.
@@ -487,6 +562,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function step() {
+    if (!showcaseMode && !canWriteAccount) return;
     // `tick` mutates the state in place. `gameState` is a deep `$state` proxy, so its fine-grained
     // signals fire on their own — no need to clone the whole root and reassign, which used to
     // invalidate every `$derived` (bag sorts, character rebuild) once a second on an idle tick.
@@ -512,17 +588,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       return () => document.body.classList.remove('ui-showcase');
     }
     try {
-      const savedLayout = localStorage.getItem(HUD_LAYOUT_STORAGE_KEY);
+      // Older layouts kept vitals and Game controls in separate regions. The v6 migration keeps the
+      // combat field placement, combines all eight controls at bottom-right, and moves stock panels below the wrapped rail.
+      const savedLayout = localStorage.getItem(HUD_LAYOUT_STORAGE_KEY)
+        || HUD_LAYOUT_PREVIOUS_STORAGE_KEYS.map((key) => localStorage.getItem(key)).find((value) => value !== null);
       if (savedLayout) {
-        const parsed = JSON.parse(savedLayout) as { hud?: HudLayout; modal?: GridArea };
-        if (parsed.hud && parsed.modal && validGridArea(parsed.modal)) {
-          const savedHud = copyHudLayout(parsed.hud);
-          if (!validateHudLayout(savedHud)) hudLayout = savedHud;
-          modalLayout = { ...parsed.modal };
-        }
+        let migrated;
+        try { migrated = migrateHudLayout(savedLayout); } catch { migrated = salvageHudLayout(savedLayout); }
+        hudLayout = migrated.hud;
+        modalLayout = migrated.modal;
+        hudLayoutNotice = migrated.notice;
+        if (migrated.notice) saveNote = migrated.notice;
+        localStorage.setItem(HUD_LAYOUT_STORAGE_KEY, JSON.stringify({ version: HUD_LAYOUT_VERSION, hud: hudLayout, modal: modalLayout, notice: hudLayoutNotice }));
+        for (const key of HUD_LAYOUT_PREVIOUS_STORAGE_KEYS) localStorage.removeItem(key);
       }
     } catch {
-      localStorage.removeItem(HUD_LAYOUT_STORAGE_KEY);
+      // storage itself is unreachable (private mode, quota): play on the defaults in memory and
+      // leave whatever is on disk alone rather than destroying a layout we could not read
     }
     // The unload flush must be synchronous: IndexedDB commits asynchronously and the page can be gone
     // first, so `writeSaveSync` writes the mirror in one turn. It refreshes the away stamp too, so a
@@ -554,7 +636,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       const away = (Date.now() - (gameState.lastSavedAt || Date.now())) / 1000;
       // no upper bound: the window itself is capped by the save rule (`offline_cap_hr`), so an old
       // file still catches up on the capped window instead of being skipped for being too old
-      if (away > 5) {
+      if (away > 5 && canWriteAccount) {
         const before = snapCounters(gameState);
         const r = await catchUpAsync(gameState, statuses, away, { autoSkills: settings.autoSkills !== false });
         awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
@@ -580,7 +662,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           // a wake that ran late is measured, never assumed; the tab's own throttling is the only clock
           const elapsed = Math.max(0, (now - last) / 1000);
           last = now;
-          if (paused || !running) { acc = 0; cooldownStepMs = 0; return; }
+          if (!canWriteAccount || paused || !running) { acc = 0; cooldownStepMs = 0; return; }
           const batch = schedulerBatch(acc, speed, elapsed);
           acc = batch.acc;
           if (batch.ticks > 0) cooldownStepMs = (batch.ticks / speed) * 1000;
@@ -613,7 +695,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   function doSalvage(index: number) {
     const r = salvageBag(gameState, index);
-    equipNote = r.ok ? 'That piece dissolved — 1 Value stone into the pile' : `Cannot salvage: ${r.why}`;
+    equipNote = r.ok ? 'That piece dissolved — Iron Ore and Scrap entered the resources' : `Cannot salvage: ${r.why}`;
     gameState = { ...gameState };
   }
 
@@ -643,7 +725,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (townLive && tabs) out.push({ label: `Stash it → Tab ${stashTab + 1}`, onpick: () => doDeposit(entry.index, stashTab) });
     out.push({
       label: 'Dissolve',
-      hint: '1 Value stone',
+      hint: 'Iron Ore + Scrap',
       danger: true,
       disabled: Boolean(it.locked || it.heldFor),
       onpick: () => doSalvage(entry.index),
@@ -691,6 +773,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function goToZone(id: number) {
+    if (!requireAccountWriter('starting a hunt')) return;
     const r = huntZone(gameState, id);
     if (!r.ok) {
       const s = settlementOfZone(id);
@@ -709,6 +792,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    * side named rolls the zone whole (`road.standing_rule`). This is the verb a click on the ground buys.
    */
   function doHuntHere() {
+    if (!requireAccountWriter('hunting')) return;
     const r = huntHere(gameState);
     if (!r.ok) { saveNote = `Cannot hunt here: ${r.why}`; gameState = { ...gameState }; return; }
     const z = eng.zoneById(gameState.zone);
@@ -737,9 +821,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  function doStartFieldAction(kind: 'mine' | 'grove') {
+  function doStartFieldAction(kind: 'mine' | 'grove' | 'fish') {
     const r = startFieldAction(gameState, kind);
-    saveNote = r.ok ? (kind === 'mine' ? 'Mining started' : 'Woodcutting started') : `Cannot gather: ${r.why}`;
+    saveNote = r.ok ? (kind === 'mine' ? 'Mining started' : kind === 'grove' ? 'Woodcutting started' : 'Fishing started') : `Cannot gather: ${r.why}`;
     gameState = { ...gameState };
   }
 
@@ -749,11 +833,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  function doCookMeal(id: string) {
+  function doCookMeal(id: string, count = 1) {
     const recipe = fieldwork.recipeById[id];
-    const r = cookMeal(gameState, id);
-    saveNote = r.ok ? `${recipe?.name || id} cooked` : `Cannot cook: ${r.why}`;
-    if (r.ok) push(gameState, `Camp kitchen · ${recipe?.name || id} cooked`);
+    const r = cookMeal(gameState, id, count);
+    const made = r.made ?? (r.ok ? 1 : 0);
+    saveNote = r.ok ? `${recipe?.name || id} · ${made} cooked${r.why ? ` · stopped: ${r.why}` : ''}` : `Cannot cook: ${r.why}`;
+    if (r.ok) push(gameState, `Camp kitchen · ${recipe?.name || id} ×${made}`);
     gameState = { ...gameState };
   }
 
@@ -805,13 +890,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   async function restore(index: number) {
     if (showcaseMode || !canWriteAccount) return;
-    const s = await restoreSnapshot(snapSlot, index);
-    if (!s) { snapNote = 'That backup is gone'; return; }
-    statuses = {};
-    gameState = s;
-    const what = describeSnap(snaps[index]);
-    await loadSnaps();
-    snapNote = `Rewound ${snapSlot} to the backup taken ${what} — the character went back whole, stones and craft counts with it`;
+    try {
+      const s = await restoreSnapshot(snapSlot, index);
+      if (!s) { snapNote = 'That backup is gone'; return; }
+      statuses = {};
+      gameState = s;
+      const what = describeSnap(snaps[index]);
+      await loadSnaps();
+      snapNote = `Rewound ${snapSlot} to the backup taken ${what} — the character went back whole, stones and craft counts with it`;
+    } catch (error) {
+      snapNote = `Cannot rewind: ${error instanceof Error ? error.message : 'the backup failed validation'}`;
+    }
   }
 
 
@@ -830,18 +919,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       gameState = { ...s };
       const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
       const before = snapCounters(gameState);
-      const r = await catchUpAsync(gameState, statuses, away, { autoSkills: settings.autoSkills !== false });
-      if (settings.autoEquip !== false) equipCarriedBest();
+      const r = canWriteAccount ? await catchUpAsync(gameState, statuses, away, { autoSkills: settings.autoSkills !== false }) : { simulated: 0, capped: false };
+      if (canWriteAccount && settings.autoEquip !== false) equipCarriedBest();
       awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
       // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
       lastSlot = slot;
       takeoverSlot = slot;
-      gameState.lastSavedAt = Date.now();
+      if (canWriteAccount) gameState.lastSavedAt = Date.now();
       saveNote = canWriteAccount
         ? `Loaded ${slot} — ${r.simulated} sec caught up`
         : `Loaded ${slot} read-only — ${r.simulated} sec caught up`;
       gameState = { ...gameState };
       return true;
+    } catch (error) {
+      // a save that fails migration validation (removed content, illegal transitions) must say so —
+      // an unhandled rejection leaves the player staring at the slot they just clicked
+      saveNote = `Cannot load ${slot}: ${error instanceof Error ? error.message : 'the save failed validation'}`;
+      return false;
     } finally {
       paused = false;
     }
@@ -935,16 +1029,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
      `zoom` scales it about the frame's own origin. Pan and zoom answer only in map focus — the resting
      sheet is a blurred ghost, and dragging a ghost would move the ground under a HUD nobody is aiming
      at. Reset reframes it, Centre puts the settlement you stand in back under the middle. */
-  // the floor is where the sheet stops costing frames: below it the endless ground puts enough hexes on
-  // screen that panning lags (owner ruling)
-  const MAP_BASE_ZOOM = 1.24, MAP_MIN_ZOOM = 0.5, MAP_MAX_ZOOM = 3;
+  // The readout calls the drawn frame 100%: the map is drawn at double the base hex size there (owner
+  // ruling), so the scale is a plain multiplier over `MAP_BASE_ZOOM`, not the readout number itself. The
+  // sheet opens and resets at 75% of that frame (owner ruling) — a wider first look, over the same
+  // reference the readout, the zoom buttons and the fit math all count from. The zoom range is 25%–300%
+  // (owner ruling); the endless ground spans three fields past each edge, so the frame still rests on
+  // drawn ground at the floor.
+  const MAP_BASE_ZOOM = 2, MAP_MIN_ZOOM = 0.5, MAP_MAX_ZOOM = 6;
+  /** The frame the sheet opens on and `reset` returns to: three quarters of the drawn 100% frame. */
+  const MAP_OPEN_ZOOM = MAP_BASE_ZOOM * 0.75;
   const HEX_NEIGHBORS: ReadonlyArray<readonly [number, number]> = [
     [1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1],
   ];
   const MAP_ARROW_VECTORS = {
     ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1],
   } as const;
-  let zoom = $state(MAP_BASE_ZOOM);
+  let zoom = $state(MAP_OPEN_ZOOM);
   let panX = $state(0);
   let panY = $state(0);
   let dragging = $state(false);
@@ -961,25 +1061,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (picked) s = s.replace(/<g class="node( capital)?" data-node="([a-z_]+)"/g, (m, cap, id) => (id === picked ? `<g class="node${cap || ''} picked" data-node="${id}"` : m));
     return s;
   });
-  const mapWithMist = $derived.by(() => {
-    const paper = mapMarkup.match(/<rect class="paper" x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"/);
-    const viewBox = mapMarkup.match(/<svg\b[^>]*\bviewBox="([^"]+)"/);
-    if (!paper || !viewBox) return mapMarkup;
-    const paperX = Number(paper[1]), paperY = Number(paper[2]);
-    const paperW = Number(paper[3]), paperH = Number(paper[4]);
-    const [viewX, viewY, viewW, viewH] = viewBox[1].trim().split(/\s+/).map(Number);
-    if (![paperX, paperY, paperW, paperH, viewX, viewY, viewW, viewH].every(Number.isFinite)) return mapMarkup;
-    const tileW = paperW / 7, tileH = paperH / 6;
-    const patternImage = (x: number, y: number, w: number, h: number, alpha: number) =>
-      `<image href="${fogCloudUrl}" x="${(tileW * x).toFixed(1)}" y="${(tileH * y).toFixed(1)}" width="${(tileW * w).toFixed(1)}" height="${(tileH * h).toFixed(1)}" opacity="${alpha.toFixed(2)}" preserveAspectRatio="none"/>`;
-    const pattern = `<pattern id="map-mist-static" patternUnits="userSpaceOnUse" x="${paperX}" y="${paperY}" width="${tileW.toFixed(1)}" height="${tileH.toFixed(1)}">${patternImage(.04, .06, .56, .5, .55)}${patternImage(.44, .26, .5, .46, .42)}${patternImage(.16, .6, .48, .36, .36)}</pattern>`;
-    const driftingCloud = (x: number, y: number, w: number, h: number, motion: string, alpha: number) =>
-      `<image class="${motion}" href="${fogCloudUrl}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" opacity="${alpha.toFixed(2)}" preserveAspectRatio="none"/>`;
-    const movingClouds = `<g class="map-mist-drift" aria-hidden="true" pointer-events="none">${driftingCloud(viewX + viewW * .04, viewY + viewH * .12, viewW * .42, viewH * .34, 'mist-drift-a', .15)}${driftingCloud(viewX + viewW * .54, viewY + viewH * .06, viewW * .4, viewH * .34, 'mist-drift-b', .12)}${driftingCloud(viewX + viewW * .32, viewY + viewH * .58, viewW * .44, viewH * .34, 'mist-drift-c', .13)}</g>`;
-    const withPattern = mapMarkup.replace('</defs>', `${pattern}</defs>`);
-    const mist = `<g class="map-mist-world" aria-hidden="true" pointer-events="none"><rect x="${paperX}" y="${paperY}" width="${paperW}" height="${paperH}" fill="url(#map-mist-static)" opacity=".16"/></g>${movingClouds}`;
-    return withPattern.replace('</svg>', `${mist}</svg>`);
-  });
   const rampCss = $derived(E.mob.zones.map((_: any, i: number) => ramp(i)).join(','));
   /**
    * The sheet is repainted after every `{@html}` rebuild — the fills, the walk graph, the cell ids, the
@@ -988,7 +1069,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    * markup rebuild both drive one repaint.
    */
   $effect(() => {
-    void mapWithMist;
+    void mapMarkup;
     const root = sheet;
     if (!root) return;
     paintSheet(root, { view, gateLevel, showIds, showWalk, pickedCell, gameState });
@@ -1114,7 +1195,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (o) mapZoomAt(o.x, o.y, k);
   }
   function mapReset() {
-    zoom = MAP_BASE_ZOOM; panX = 0; panY = 0;
+    zoom = MAP_OPEN_ZOOM; panX = 0; panY = 0;
   }
   /**
    * Centre on the settlement you stand in. The cell is measured in the sheet's own units and put
@@ -1216,35 +1297,66 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   });
   /**
    * The destination card's place on screen: the end of its anchor that has the room (AGENTS.md §Interface Surfaces) — above
-   * the picked cell's own mark, or below it when the sheet's top edge is nearer — clamped inside the map.
+   * the picked cell's own mark, or below it when the sheet's top edge is nearer — clear of the menu rail and inside the map.
    * The card is placed by the box it measures, so the measure runs again whenever the sheet moves the
    * cell (a pan or a zoom) or the pick moves to another cell.
    */
   let cardAt = $state<{ x: number; y: number } | null>(null);
   let mapcardEl = $state<HTMLDivElement | null>(null);
+  let mapcardMeasure = $state(0);
+  $effect(() => {
+    const card = mapcardEl;
+    if (!card) return;
+    const observer = new ResizeObserver(() => mapcardMeasure++);
+    observer.observe(card);
+    const resize = () => mapcardMeasure++;
+    window.addEventListener('resize', resize);
+    return () => { observer.disconnect(); window.removeEventListener('resize', resize); };
+  });
   $effect(() => {
     if (!pickedCell || panel !== 'map' || !sheet) { cardAt = null; return; }
     // zoom, pan and the mounted card are read for the tracking alone: the rects below already carry
     // them physically, and the reads are what make the measure rerun when they move
-    void zoom; void panX; void panY; void mapcardEl;
+    void zoom; void panX; void panY; void mapcardEl; void mapcardMeasure;
     const poly = sheet.querySelector(`polygon.cell[data-ax="${pickedCell.q},${pickedCell.r}"]`) as SVGGraphicsElement | null;
     if (!poly) { cardAt = null; return; }
     const b = poly.getBoundingClientRect();
     const area = sheet.getBoundingClientRect();
+    const m = Number.parseFloat(getComputedStyle(sheet).getPropertyValue('--spacing-md')) || 0;
+    const railBottom = document.querySelector('.stage nav.rail')?.getBoundingClientRect().bottom ?? area.top;
+    const stage = document.querySelector('.stage')?.getBoundingClientRect();
+    const minY = Math.max(area.top + m, railBottom + m, (stage?.top ?? 0) + m);
+    const safeBottom = Math.min(area.bottom, window.innerHeight);
+    const availableHeight = Math.max(0, safeBottom - minY - m);
+    if (mapcardEl && availableHeight > 0) mapcardEl.style.maxHeight = `${availableHeight}px`;
     const cw = mapcardEl?.offsetWidth ?? 0;
     const ch = mapcardEl?.offsetHeight ?? 0;
-    const m = 12;
-    const minY = area.top + m;
-    const maxY = Math.max(minY, area.bottom - ch - m);
+    const maxY = Math.max(minY, safeBottom - ch - m);
     const aboveY = b.top - ch - m;
     const belowY = b.bottom + m;
-    const aboveFits = aboveY >= minY;
-    const belowFits = belowY <= maxY;
-    const y = aboveFits ? aboveY : belowFits ? belowY
-      : b.top - area.top >= area.bottom - b.bottom ? minY : maxY;
-    let x = b.left + b.width / 2;
-    if (cw) x = Math.min(area.right - cw / 2 - m, Math.max(area.left + cw / 2 + m, x));
-    cardAt = { x, y };
+    const centreX = b.left + b.width / 2;
+    const blockers = [...document.querySelectorAll('.field-feed, .topright, .field-travel-actions, .commands-dock, .targetbar, .combat-player-slot')]
+      .map((el) => el.getBoundingClientRect());
+    const clampX = (value: number) => cw
+      ? Math.min(area.right - cw / 2 - m, Math.max(area.left + cw / 2 + m, value))
+      : value;
+    const xCandidates = [...new Set([centreX, ...blockers.flatMap((r) => [r.left - cw / 2 - m, r.right + cw / 2 + m])].map(clampX))];
+    const yCandidates = [...new Set([aboveY, belowY, minY, maxY])].filter((y) => y >= minY && y <= maxY);
+    const placements = xCandidates.flatMap((x) => yCandidates.map((y) => {
+      const collisions = blockers.reduce((sum, r) => {
+        const w = Math.max(0, Math.min(x + cw / 2, r.right) - Math.max(x - cw / 2, r.left));
+        const h = Math.max(0, Math.min(y + ch, r.bottom) - Math.max(y, r.top));
+        return sum + w * h;
+      }, 0);
+      const distance = Math.abs(x - centreX) + Math.abs(y - aboveY);
+      return { x, y, score: collisions * 1000 + distance };
+    }));
+    const best = placements.sort((a, bY) => a.score - bY.score)[0];
+    const x = best?.x ?? clampX(centreX);
+    const y = best?.y ?? minY;
+    // `.stage` owns the map transform, so its fixed descendants resolve left/top from that containing block.
+    // The measurements above are viewport coordinates; convert them back before assigning inline offsets.
+    cardAt = { x: x - (stage?.left ?? 0), y: y - (stage?.top ?? 0) };
   });
   /**
    * The settlement the panel speaks for: the one under the pick, or the one you stand in when nothing
@@ -1275,18 +1387,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       label: name === 'bare' ? "no zone · nearest settlement's terrain"
         : name === 'town' ? 'settlement' : name === 'wild' ? 'wild side' : name }));
   });
-  /** The walking read: one trail of boot prints, a left foot then a right, laid along the walk and lit from
-   *  where the walk has reached. `x` is a print's place along the stride, so the lit fraction is the walk's
-   *  own progress — the sim's tick drives it, and nothing here is a looping animation. */
-  const travelTrail = Array.from({ length: 7 }, (_, i) => ({ right: i % 2 === 1, x: i / 6 }));
-  /** Blocks behind plus the part of the block under foot — the same clock the tracker's note counts on,
-      so the trail fills on the sim's tick and stops by itself when the clock is paused. */
-  const walkPct = $derived.by(() => {
-    const w = gameState.walk;
-    if (!w) return 0;
-    const part = w.blocksLeft ? 1 - w.secLeft / road.blockSec : 1;
-    return Math.min(1, Math.max(0, (w.blocksTotal - w.blocksLeft + part) / w.blocksTotal));
-  });
   const firstBand = $derived(E.mob.zones[0].levels);
   const lastBand = $derived(E.mob.zones[E.mob.zones.length - 1].levels);
   const liveBands = $derived(E.mob.zones.filter((z: any) => z.levels[0] <= gateLevel).length);
@@ -1306,6 +1406,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   );
 
   function doSell() {
+    if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
     const r = sellJunk(gameState);
     push(gameState, `Counterhand: sold ${r.pieces} junk for ${r.gold.toFixed(TOWN.trade.currency_decimals)} gold`);
     if (r.pieces > 0) fx(gameState, { kind: 'sell', side: 'self', text: `+${fmtNum(r.gold)} gold`, colour: E.elements.crit_colour || 'var(--gold)' });
@@ -1313,6 +1414,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function doTrade(id: string, count: number) {
+    if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
     const result = sellGoods(gameState, id, count);
     saveNote = result.ok ? `Sold ${count} for ${result.gold.toFixed(TOWN.trade.currency_decimals)} gold` : `Cannot sell: ${result.why}`;
     if (result.ok) push(gameState, saveNote);
@@ -1320,6 +1422,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function doProcess(id: string) {
+    if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
     const result = processMaterials(gameState, id);
     saveNote = result.ok ? `Made ${fieldwork.workshopById[id].name}` : `Cannot make: ${result.why}`;
     if (result.ok) push(gameState, saveNote);
@@ -1332,9 +1435,46 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function doBuy(rowId: string, settlementId = town!.id) {
+    if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
     const r = buy(gameState, settlementId, rowId);
     saveNote = r.ok ? `Bought ${r.row.item}` : `Cannot buy: ${r.why}`;
     gameState = { ...gameState };
+  }
+
+  function doDelivery(id: string, count: number) {
+    const result = deliver(gameState, id, count, { writer: transactionWriter });
+    saveNote = result.ok ? `Delivery ${result.completed ? 'completed' : 'recorded'} · ${result.gold!.toFixed(TOWN.trade.currency_decimals)} gold paid` : `Cannot deliver: ${result.why}`;
+    if (result.ok) push(gameState, saveNote);
+    gameState = { ...gameState };
+  }
+
+  function doBlackMarketBuy(townId: string, offerId: string) {
+    const result = buyBlackMarket(gameState, townId, offerId, { writer: transactionWriter });
+    saveNote = result.ok ? `Black Market purchase · ${result.offer.kind === 'skill' ? `${sm.byId[result.offer.skill!]?.name} XP Level ${result.offer.level}` : `${result.offer.count} ${result.offer.kind === 'stone' ? result.offer.stone : result.offer.good}`} for ${result.offer.price} gold` : `Cannot buy: ${result.why}`;
+    if (result.ok) push(gameState, saveNote);
+    gameState = { ...gameState };
+  }
+
+  function openBlackMarket() {
+    marketView = 'black-market';
+    marketTownId = town?.id || '';
+    panel = 'market';
+  }
+  function doTrackDelivery(id: string, tracked: boolean) {
+    trackDelivery(gameState, id, tracked, { writer: transactionWriter }); gameState = { ...gameState };
+  }
+  function doAcknowledgeDelivery(id: string) {
+    acknowledgeDelivery(gameState, id, { writer: transactionWriter }); gameState = { ...gameState };
+  }
+  function doDismissDelivery(id: string) {
+    announceDelivery(gameState, id, { writer: transactionWriter }); gameState = { ...gameState };
+  }
+  function openDeliveryWant(id: string) {
+    const contract = Object.values(gameState.town.contracts).flat().find((entry) => entry.id === id);
+    if (!contract) return;
+    marketView = 'deliveries'; marketTownId = contract.town; panel = 'market';
+    if (transactionWriter) doDismissDelivery(id);
+    if (showcaseMode) document.getElementById('panel-market')?.scrollIntoView();
   }
 
   function doClaim(i: number, choice?: string) {
@@ -1350,7 +1490,70 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
+  function goToTask(task: any) {
+    if (task?.kind !== 'expedition' || task.subzone == null) return;
+    const settlement = TOWN.settlements.find((entry: any) => entry.zone === task.zone);
+    if (!settlement || !sheet) { saveNote = 'Open the map to locate this Expedition'; return; }
+    const visited = gameState.town.visited.includes(settlement.id);
+    const selector = visited
+      ? `polygon.cell.sub[data-node="${settlement.id}"][data-sub="${task.subzone}"]`
+      : `polygon.cell.town[data-node="${settlement.id}"]`;
+    const target = sheet.querySelector(selector);
+    if (!target) { saveNote = 'This Expedition location is not on the current map'; return; }
+    panel = 'map'; mapHelpOpen = true; pickMapCell(target);
+  }
+
+  function togglePickedPatrolStop() {
+    if (!requireAccountWriter('editing Patrol route')) return;
+    if (!pickedCell || !pickedSettlement || pickedCell.kind !== 'sub' || pickedCell.sub == null) return;
+    const result = togglePatrolStop(gameState, {
+      zone: pickedSettlement.zone,
+      subzone: pickedCell.sub,
+      cell: { q: pickedCell.q, r: pickedCell.r, sub: pickedCell.sub, wild: null },
+    });
+    if (!result.ok) saveNote = `Cannot change Patrol: ${result.why}`;
+    else {
+      const name = eng.zoneById(pickedSettlement.zone).subzones?.[pickedCell.sub]?.name || 'Sub-zone';
+      push(gameState, result.added ? `${name} added to Patrol` : `${name} removed from Patrol`);
+      saveNote = '';
+    }
+    gameState = { ...gameState };
+  }
+
+  function doStartPatrol() {
+    if (!requireAccountWriter('starting Patrol')) return;
+    const result = startPatrolRun(gameState);
+    if (!result.ok) saveNote = `Cannot start Patrol: ${result.why}`;
+    else { push(gameState, `Patrol started · ${gameState.patrol.stops.length} stops`); saveNote = ''; }
+    gameState = { ...gameState };
+  }
+
+  function doStopPatrol() {
+    if (!requireAccountWriter('stopping Patrol')) return;
+    stopPatrolRun(gameState);
+    push(gameState, 'Patrol stopped');
+    gameState = { ...gameState };
+  }
+
+  function doClearPatrol() {
+    if (!requireAccountWriter('clearing Patrol route')) return;
+    if (clearPatrolStops(gameState)) push(gameState, 'Patrol route cleared');
+    gameState = { ...gameState };
+  }
+
+  function setPatrolRepeat(repeat: boolean) {
+    gameState.patrol.repeat = repeat;
+    gameState = { ...gameState };
+  }
+
+  function setAutoReturn(enabled: boolean) {
+    gameState.autoReturn.enabled = enabled;
+    push(gameState, enabled ? `Auto-Return on · stash trip at ${E.road.patrol.auto_return_threshold_pct}% bag` : 'Auto-Return off');
+    gameState = { ...gameState };
+  }
+
   function travelTo(id: string) {
+    if (!requireAccountWriter('warping')) return;
     const s = settlementById(id)!;
     const saved = walkBlocks(gameState.town.waypoint, id);
     const r = warpTo(gameState, id);
@@ -1367,11 +1570,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const warpFee = $derived(warpRow()?.m_per_block ?? 0);
 
   function doWalk(dest: Picked | Cell & { key?: string }) {
+    if (!requireAccountWriter('walking')) return;
     const r = startWalk(gameState, dest);
     if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
     // the walk takes the frame: the map closes and the field carries the walking read, because a sharp
     // map and the HUD cannot share a square (AGENTS.md §Interface Surfaces three-state rule). The pick is spent with it —
-    // in field view the card has no box left to measure, and a card parked there sits on the self-plate.
+    // in field view the card has no box left to measure, and a card parked there sits on the player's own card.
     panel = null;
     picked = null;
     pickedCell = null;
@@ -1387,9 +1591,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   });
 
   function doDungeon() {
+    if (!transactionWriter) return;
     const r = enterDungeon(gameState);
     if (!r.ok) { saveNote = `Cannot enter: ${r.why}`; gameState = { ...gameState }; return; }
     push(gameState, `Entered the dungeon — ${gameState.dungeon!.total} mobs, loot held in escrow until the last one falls`);
+    gameState = { ...gameState };
+  }
+
+  function doRetreat() {
+    const result = retreatDungeon(gameState, { writer: transactionWriter });
+    saveNote = result.ok ? `Retreat: selected ${result.selected}, received ${result.received}, rejected ${result.rejected}.` : `Cannot retreat: ${result.why}`;
+    gameState = { ...gameState };
+  }
+
+  function doScrapAlchemy(count = 1) {
+    const result = transmuteScrap(gameState, count, { writer: transactionWriter });
+    farmNote = result.ok ? `Alchemy: ${result.made} Value stones + ${result.tier} Tier stones${result.why ? ` · stopped: ${result.why}` : ''}` : `Alchemy: ${result.why}`;
     gameState = { ...gameState };
   }
 
@@ -1513,12 +1730,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
-  /** Where the feet are, in the name the player acts on: a settlement's own for its ground, the zone's
+  /** Where the feet are or are heading, in the name the player acts on: a settlement's own for its ground, the zone's
    *  for everything else. The rest read and the empty field both answer to it, so neither can name the
    *  wrong place for the same ground. */
   const hereName = $derived(townLive ? (town?.name ?? 'the field') : zone.name);
   const placeRead = $derived.by(() => {
-    if (gameState.walk) return `On the road to ${walkNote(gameState)}`;
+    if (gameState.walk) return `To ${walkNote(gameState)}`;
     if (gameState.cell?.sub != null) return zone.subzones?.[gameState.cell.sub]?.name ?? 'Sub-zone';
     if (gameState.cell?.wild != null) return gameState.cell.wild === 0 ? 'Dungeon side' : `Wild side ${gameState.cell.wild + 1}`;
     if (townLive) return town?.name ?? 'Settlement';
@@ -1531,19 +1748,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
    *  field names the clock that will fill it, and ground that fields nothing names the action that would. */
   const phaseRead = $derived.by(() => {
     if (gameState.phase === 'camp') {
-      return `Pushed — recovering at camp for ${gameState.campSec} sec. No death, no loss: time is the only cost.`;
+      return `Recovering at Camp · ${Math.max(0, Math.ceil(gameState.campSec))}s`;
     }
-    const swing = `${c.hitsPerSec.toFixed(2)} hits/sec with ${c.weaponName}${c.weaponElement ? `, carrying ${c.weaponElement}` : ', carrying no Element'}`;
-    if (gameState.walk) {
-      return `Walking — block ${gameState.walk.blocksTotal - gameState.walk.blocksLeft + 1} of ${gameState.walk.blocksTotal} · ${swing}`;
-    }
-    if (!gameState.hunting) {
-      return `At rest in ${hereName} — nothing is being attacked. Pick a cell on the map and hunt it.`;
-    }
+    if (gameState.walk) return gameState.autoReturn.phase !== 'idle'
+      ? gameState.group.length ? 'Ambushed · Auto-Return paused' : gameState.autoReturn.phase === 'to-stop' ? 'Returning to Patrol…' : 'Auto-Return…'
+      : gameState.patrol.active ? gameState.group.length ? 'Patrol ambush' : 'Patrol traveling…'
+        : gameState.group.length ? 'Ambushed on the road' : 'Traveling…';
+    if (gameState.autoReturn.phase === 'waiting') return 'Patrol paused · Auto-Return waits for an online trip';
+    if (gameState.autoReturn.phase === 'to-town') return 'Auto-Return · waiting for the settlement';
+    if (gameState.autoReturn.phase === 'to-stop') return 'Patrol resuming';
+    if (!gameState.hunting) return 'At rest';
     if (!gameState.group.length) {
-      return `Hunting ${hereName} — next group in ${Math.max(0, gameState.spawnIn)} sec · ${swing}`;
+      return gameState.patrol.active
+        ? `Patrol ${gameState.patrol.index + 1}/${gameState.patrol.stops.length} · next group in ${Math.max(0, gameState.spawnIn)}s`
+        : `Hunting · next group in ${Math.max(0, gameState.spawnIn)}s`;
     }
-    return `Fighting — ${swing}`;
+    return `Fighting · ${c.hitsPerSec.toFixed(2)} hits/s${gameState.patrol.active ? ` · Patrol ${gameState.patrol.index + 1}/${gameState.patrol.stops.length}` : ''}`;
   });
 
   // A press reads as its own flat damage plus its effectiveness on the caster's power line — the
@@ -1650,10 +1870,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function setTravel(mode: 'stay' | 'forward') {
+    if (!requireAccountWriter('changing travel mode')) return;
     gameState.travel = mode;
     gameState = { ...gameState };
     push(gameState, mode === 'forward'
-      ? 'Climbing: the walk moves on through settlements already opened, and falls back to the last zone held when a Push lands'
+      ? 'Forward: walk to the next opened settlement when its level band is behind; a Push returns to the last zone held'
       : 'Staying: you farm this zone until you travel yourself');
     gameState = { ...gameState };
   }
@@ -1670,11 +1891,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 <svelte:head><title>{showcaseMode ? 'ModWorld UI Showcase' : 'ModWorld'}</title></svelte:head>
 
+<div class="showcase-frame" class:active={showcaseMode}>
 {#if showcaseMode}
   <header class="showcase-banner">
     <div>
       <h1>UI Showcase</h1>
       <p>Live game components · sample state · changes to source UI appear here through Vite HMR</p>
+      <label>Gameplay sample <select aria-label="Gameplay sample" value={showcaseSample} onchange={(event) => {
+        showcaseSample = event.currentTarget.value; gameState = showcaseGame(showcaseSample); statuses = {}; panel = showcaseSample === 'expedition' ? 'desk' : null; if (showcaseSample === 'expedition') deskTab = 'guild'; marketView = 'deliveries'; marketTownId = '';
+      }}>
+        <option value="field">Field baseline</option><option value="delivery">Delivery want</option><option value="full-bag">Delivery reward bag full</option>
+        <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option>
+        <option value="expedition">Expedition task</option>
+      </select></label>
     </div>
     <a href="/">Return to the game</a>
   </header>
@@ -1688,6 +1917,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <a href="#panel-passive-tree">Tree</a>
     <a href="#panel-town">Town</a>
     <a href="#panel-market">Market</a>
+    <a href="#panel-delivery-notice">Delivery notice</a>
     <a href="#panel-keyboard">Keys</a>
     <a href="#panel-field-camp">Camp</a>
     <a href="#panel-farm">Farm</a>
@@ -1704,7 +1934,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     they need the room. Widen the window, or set the browser zoom out.</p>
 </div>
 
-<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
+<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
   <!-- The field lies on the map: one generated sheet, laid flat behind the HUD, dimmed and out of focus
        until the pointer reaches for it or the MAP tab brings it into focus. It is the only copy and the
        surface a place is picked, plotted and walked on — no modal sits between the player and a cell. -->
@@ -1718,7 +1948,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     use:mapField
   >
     <div class="map-sheet" style:transform={`translate(${panX.toFixed(1)}px, ${panY.toFixed(1)}px) scale(${zoom.toFixed(4)})`}>
-      {@html mapWithMist}
+      {@html mapMarkup}
     </div>
     <span class="aloud" aria-live="polite" aria-atomic="true">{pickedCell ? `Selected block ${pickedCell.key}: ${pickedCell.label}` : ''}</span>
   </div>
@@ -1744,7 +1974,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <div class="map-reference">
       <Minimap markup={mapMarkup} cell={gameState.cell} onopen={() => togglePanel('map')} />
     </div>
-    <div class="zone-tag">
+    <div class="zone-tag" class:traveling={Boolean(gameState.walk)}>
       <img class="zone-emblem" src={waypointMark} alt="" aria-hidden="true" />
       <div class="zone-copy">
         <strong>{zone.name}</strong>
@@ -1752,16 +1982,34 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       </div>
       <b class="zone-level">Lv {zone.levels[0]}–{zone.levels[1]}</b>
     </div>
+    {#if !showcaseMode && accountWriterState !== 'owner' && accountWriterState !== 'checking'}
+      {@const accountHoldLabel = accountWriterState === 'readonly'
+        ? 'Read-only · another tab controls progress'
+        : accountWriterState === 'waiting'
+          ? 'Waiting for account control'
+          : 'Progression paused · save control unavailable'}
+      <div class="account-hold" role="status" aria-live="polite">
+        <span class="chip chip-tag locked">{accountHoldLabel}</span>
+        <button class="btn btn-quiet" type="button" onclick={() => openPanel('save')}
+                title="Open Save to take over account control">Open Save</button>
+      </div>
+    {/if}
     <div class="tracker">
       <p class="phase">{phaseRead}</p>
-      <div class="hunger-read" class:empty={gameState.fieldwork.hunger <= 0} title={gameState.fieldwork.hunger <= 0 ? `Hunger empty · HP regeneration reduced by ${fieldwork.F.hunger.empty_hp_regen_cut_pct}% · ES recharge unchanged` : 'Hunger · travel and field activity consume supplies'}>
-        <span>Hunger</span><b>{Math.floor(gameState.fieldwork.hunger)}%</b>
-        <i><em style={`--fill:${hungerFill.toFixed(3)}`}></em></i>
-      </div>
+      {#if gameState.patrol.active}
+        <button class="btn btn-quiet" type="button" onclick={doStopPatrol} disabled={!transactionWriter}>Stop Patrol</button>
+      {/if}
+      {#if gameState.dungeon}<button onclick={doRetreat} disabled={!transactionWriter}>Retreat · rescue {E.dungeon.retreat_keep_min}–{E.dungeon.retreat_keep_max} random stacks</button>{/if}
+      {#if trackedDeliveries.length}
+        <div class="tracked-wants" aria-label="Tracked delivery wants">
+          {#each trackedDeliveries as contract (contract!.id)}
+            <p>{settlementName(contract!.town)} · {trade.byId[contract!.good]?.name || contract!.good} · {contract!.delivered}/{contract!.target} · {deliveryClock(deliveryTimeLeft(gameState, contract!))}{deliveryPause ? ` · paused: ${deliveryPause}` : ''}</p>
+          {/each}
+        </div>
+      {/if}
       {#if bagFull}
         <p class="alarm-line">Bag full — the zone has stopped paying. Walk to a settlement and deposit.</p>
       {/if}
-      <p class="objective">{describeGoal()}</p>
     </div>
   </div>
   <div class="field-travel-actions" aria-label="Travel and map controls"
@@ -1786,7 +2034,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         </button>
         {#if mapHelpOpen}
           <div class="map-tools">
-            <span role="group" aria-label="Sheet view" class="map-views">
+              <span role="group" aria-label="Map view" class="map-views">
               {#each [['terrain', 'terrain'], ['band', 'level band'], ['gate', 'level gate']] as [v, label] (v)}
                 <label><input type="radio" name="mapview" bind:group={view} value={v} />{label}</label>
               {/each}
@@ -1798,7 +2046,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             <label><input type="checkbox" bind:checked={showIds} /> cell ids</label>
             <span role="group" aria-label="Map view" class="map-zoom">
               <button onclick={() => mapZoomBy(1 / 1.25)} aria-label="Zoom out" title="Zoom out">−</button>
-              <b>{Math.round(zoom * 100)}%</b>
+              <b>{Math.round((zoom / MAP_BASE_ZOOM) * 100)}%</b>
               <button onclick={() => mapZoomBy(1.25)} aria-label="Zoom in" title="Zoom in">+</button>
               <button onclick={mapCentre} title="Centre on the settlement you stand in">centre</button>
               <button onclick={mapReset} title="Reset the map view">reset</button>
@@ -1809,7 +2057,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             <span class="swatch ramp"><i style:background={`linear-gradient(90deg,${rampCss})`}></i>{firstBand[0]} … {lastBand[1]}</span>
           </div>
           {#if gameState.walk}
-            <p class="map-hint"><small>Walking to <b>{walkNote(gameState)}</b> · block {gameState.walk.blocksTotal - gameState.walk.blocksLeft + 1}/{gameState.walk.blocksTotal} · ambush chance {E.road.encounter_chance_pct}% per block.</small></p>
+            <p class="map-hint"><small>{gameState.group.length ? 'Ambushed en route to' : 'Traveling to'} <b>{walkNote(gameState)}</b>.</small></p>
           {:else}
             <p class="map-hint"><small>Click a cell to travel · drag to pan · scroll to zoom. <b>Centre</b> returns to your position.</small></p>
           {/if}
@@ -1828,8 +2076,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   {/if}
 
   {#if awayReport}
-    <div class="toast">
-      <button class="quit" onclick={() => (awayReport = null)} aria-label="Dismiss">✕</button>
+    <div class="toast notice-toast">
+      <button class="quit btn btn-flat" onclick={() => (awayReport = null)} aria-label="Dismiss">✕</button>
       <strong>Welcome back</strong>
       <span>away {awayReport.mins} min · {awayReport.secs} sec simulated{awayReport.capped ? ' (capped at the offline limit)' : ''}</span>
       <span>+{fmtNum(awayReport.kills)} kills · {fmtNum(awayReport.drops)} items · {fmtNum(awayReport.stones)} stones · {fmtNum(awayReport.junk)} junk · {fmtNum(awayReport.gold)} gold{awayReport.levels ? ` · +${awayReport.levels} level${awayReport.levels > 1 ? 's' : ''}` : ''} · quality floor {awayReport.quality}</span>
@@ -1843,11 +2091,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <!-- the level's points, spent where the level is read: this overlay is the only place a point is
            added, and Respec stays a settlement service so a field refund cannot serve a build switch
            mid-fight -->
-      <section class="pop" aria-label="Allocate points">
-        <header><h3>Allocate · level {gameState.player.level}</h3>
-          <button class="quit" onclick={() => (alloc = false)} aria-label="Close allocate" title="Close (Esc)">✕</button>
+      <section class="allocate-panel panel-bracket" aria-label="Allocate points">
+        <header class="panel-head"><h3>Allocate · level {gameState.player.level}</h3>
+          <button class="quit btn btn-ghost btn-icon" onclick={() => (alloc = false)} aria-label="Close allocate" title="Close (Esc)">✕</button>
         </header>
-        <div class="pop-body">
+        <div class="allocate-panel-body">
           <p><small>Levels grant <b>points</b>, not stats: unspent <b>{gameState.player.statPoints}</b> · tree points banked <b>{gameState.player.treePoints}</b>. <label><input type="checkbox" checked={gameState.player.autoSpend} onchange={() => { gameState.player.autoSpend = !gameState.player.autoSpend; gameState = { ...gameState }; }} /> auto-allocate evenly (idle default)</label> — turn it off to bank points and spend them by hand. Respec is free, at the town Counterhand.</small></p>
           <table class="stats">
             <tbody>
@@ -1871,42 +2119,32 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   </div>
 
-  {#if (!alloc && !more) || showcaseMode}
-    <div class="field-auto-actions" role="group" aria-label="Field automation"
-         style:justify-self={hudLayout.automation.justify} style:align-self={hudLayout.automation.align}
-         style:width={hudLayout.automation.justify === 'stretch' ? '100%' : null}>
-      <button class="tab field-auto-tab" class:here={panel === 'skills'} type="button"
-              aria-label="Skill settings" aria-expanded={panel === 'skills'}
-              title={`Skill settings — cast order and modes · ${keyFor('screen.skills')}`}
-              aria-keyshortcuts={keyFor('screen.skills')} onclick={() => togglePanel('skills')}>
-        <span class="toggle-ring" class:here={panel === 'skills'}><img src={skillSettingsMark} alt="" aria-hidden="true" /></span><span class="cap">Skill Settings</span>
-      </button>
-      <button class="tab field-auto-tab" class:here={settings.autoSkills !== false} type="button"
-              aria-label={`Auto skills ${settings.autoSkills === false ? 'off' : 'on'}`}
-              aria-pressed={settings.autoSkills !== false}
-              title={`Auto skills · ${settings.autoSkills === false ? 'off' : 'on'}`}
-              onclick={() => setSetting('autoSkills', settings.autoSkills === false)}>
-        <span class="field-auto-icon toggle-ring" class:here={settings.autoSkills !== false}>
-          <img src={skillMark} alt="" aria-hidden="true" />
+  <div class="commands-dock"
+       style:justify-self={hudLayout.commands.justify} style:align-self={hudLayout.commands.align}
+       style:width={hudLayout.commands.justify === 'stretch' ? '100%' : 'fit-content'}>
+    <div class="command-row game-controls-row" role="group" aria-label="Game controls">
+      {#each SPEEDS as m (m)}
+        <button class="tab field-auto-tab command-control" class:here={speed === m} type="button"
+                aria-label={`Game speed ×${m}`} aria-pressed={speed === m}
+                title={`Clock speed ×${m}`} onclick={() => setSpeed(m)}>
+          <span class="toggle-ring speed-mark" class:here={speed === m}>×{m}</span>
+          <span class="cap">Speed ×{m}</span>
+        </button>
+      {/each}
+      <button class="tab field-auto-tab command-control" class:here={!running} type="button"
+              title={!showcaseMode && !canWriteAccount ? accountWriterMessage : `${running ? 'Pause' : 'Resume'} · ${keyFor('game.pause')}`}
+              aria-label={running ? 'Pause game' : 'Resume game'} aria-pressed={!running}
+              aria-keyshortcuts={keyFor('game.pause')} disabled={!showcaseMode && !canWriteAccount}
+              onclick={() => (running = !running)}>
+        <span class="toggle-ring" class:here={!running}>
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            {#if running}<path d="M11 9v14M21 9v14" />{:else}<path d="m12 9 12 7-12 7z" />{/if}
+          </svg>
         </span>
-        <span class="cap">Auto Skills</span>
-      </button>
-      <button class="tab field-auto-tab" class:here={settings.autoEquip !== false} type="button"
-              aria-label={`Auto equip ${settings.autoEquip === false ? 'off' : 'on'}`}
-              aria-pressed={settings.autoEquip !== false}
-              title={`Auto equip · ${settings.autoEquip === false ? 'off' : 'on'} · better drops are equipped automatically`}
-              onclick={toggleAutoEquip}>
-        <span class="field-auto-icon toggle-ring" class:here={settings.autoEquip !== false}>
-          <img src={autoEquipMark} alt="" aria-hidden="true" />
-        </span>
-        <span class="cap">Auto Equip</span>
-      </button>
-      <button class="tab field-auto-tab" class:here={panel === 'camp'} type="button"
-              aria-label="Field Camp" aria-pressed={panel === 'camp'} title="Field Camp" onclick={() => togglePanel('camp')}>
-        <span class="toggle-ring" class:here={panel === 'camp'}><img src={campMark} alt="" aria-hidden="true" /></span><span class="cap">Camp</span>
+        <span class="cap">{running ? 'Pause' : 'Resume'}</span>
       </button>
     </div>
-  {/if}
+  </div>
 
   <!-- top-right, under the minimap: what the hunt is worth right now, so a decision never needs a panel opened -->
   {#if saveNote}
@@ -1930,6 +2168,27 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <div class="orb-well">
             <i class="orb-fill" style={`--fill:${hpFill.toFixed(3)}`} aria-hidden="true"></i>
             <span class="orb-gloss" aria-hidden="true"></span>
+            {#if latestTaken}
+              <!-- the blow the glass has just taken: keyed on the event, so a fast fight re-stamps the ripple
+                   instead of looping it. The sim names no body for a self-side hit, so the point it lands on
+                   comes off the event's own id — successive blows strike different places on the sphere
+                   without a second number ever being stored. The ring is who carried the blow and the core
+                   is what the blow was: while the shield stands the ring wears the shield's own light, and a
+                   damage-over-time tick (`via === 'dot'`), which the shield never eats, keeps the ring in
+                   the element's colour with the core. -->
+              {#key latestTaken.id}
+                <span class="orb-hit" aria-hidden="true"
+                      style={`--fx:${latestTaken.colour}; `
+                        + `--hit-guard:${shownEs > 0 && latestTaken.via !== 'dot' ? 'var(--es-lit)' : 'var(--fx)'}; `
+                        + `--hit-x:${28 + (latestTaken.id % 44)}%; --hit-y:${22 + (latestTaken.id % 39)}%`}></span>
+              {/key}
+            {/if}
+            {#if shatter}
+              <!-- the shield going down, mounted once per break from the pool-watch in the script -->
+              {#key shatter}
+                <span class="orb-shatter" aria-hidden="true"></span>
+              {/key}
+            {/if}
           </div>
         </div>
       </div>
@@ -1978,68 +2237,51 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <div class="orb-well">
             <i class="orb-fill" style={`--fill:${manaFill.toFixed(3)}`} aria-hidden="true"></i>
             <span class="orb-gloss" aria-hidden="true"></span>
+            {#if latestFire}
+              <!-- a press going out: the base of the glass takes a breath, once per cast, keyed on the event -->
+              {#key latestFire.id}
+                <span class="orb-cast" aria-hidden="true" style={`--fx:${latestFire.colour}`}></span>
+              {/key}
+            {/if}
           </div>
         </div>
       </div>
     </div>
-    <ExpBar level={gameState.player.level} pct={xpPct}
-            allocOpen={alloc} onAllocate={() => { alloc = !alloc; }} />
-  </div>
-
-  <!-- bottom-right controls use the same circular menu language as the rest of the HUD. -->
-  <div class="controls-dock" role="group" aria-label="Game controls" style:justify-self={hudLayout.controls.justify} style:align-self={hudLayout.controls.align}
-       style:width={hudLayout.controls.justify === 'stretch' ? '100%' : null}>
-    <div class="speed-menu" role="group" aria-label="Game speed">
-      <div class="speed-options">
-        {#each SPEEDS as m}
-          <button class="speed-orb toggle-ring" class:here={speed === m} aria-pressed={speed === m} type="button"
-                  onclick={() => setSpeed(m)} title={`Clock speed ×${m}`}>×{m}</button>
-        {/each}
-      </div>
-      <span class="cap">Speed</span>
-    </div>
-    <button class="tab control-tab" class:here={!running} type="button" onclick={() => (running = !running)}
-            title={`${running ? 'Pause' : 'Resume'} · ${keyFor('game.pause')}`}
-            aria-label={running ? 'Pause game' : 'Resume game'} aria-pressed={!running}
-            aria-keyshortcuts={keyFor('game.pause')}>
-      <span class="control-icon toggle-ring" class:here={!running}>
-        <svg viewBox="0 0 32 32" aria-hidden="true">
-          {#if running}<path d="M11 9v14M21 9v14" />{:else}<path d="m12 9 12 7-12 7z" />{/if}
-        </svg>
-      </span>
-      <span class="cap">{running ? 'Pause' : 'Resume'}</span>
-    </button>
   </div>
 
   <!-- the middle of the frame is the group itself: one plate per mob, HP as the loudest thing on it, and
-       every landed blow popping its own figure off the plate it hit -->
-  <div class="field" style:justify-self={hudLayout.field.justify} style:align-self={hudLayout.field.align}>
-            <FieldPlates s={gameState} c={c} ring={ring} plates={plates} statuses={statuses} zone={zone} town={town} townLive={townLive}
-                         vitals={{ hp: shownHp, es: shownEs, mana: shownMana }}
-                 plateMotion={plateMotion} fxOutMs={fxOutMs} />
-  </div>
-
-  <!-- The hit ring: what the sim just did that has no body to stand on, drawn as an event rather than read
-       back out of a total. A hit names its mob and rises over that plate; this column keeps a kill — whose
-       mob leaves the field the same tick — and a drop, which is loot on the character. `counters.damageBy`
-       says how much a build dealt; this says when, in what colour, and with what landing — the number wears
-       the Element that carried the hit, a crit wears the game's one accent, and a status proc wears the colour
-       of the Element that inflicted it (a cold proc is the same ice as a cold hit). Colours come out of
-       `engine.json` `elements`, never typed here. -->
-  <div class="floaters" aria-hidden="true">
-    <div class="float-side field-side">
-      {#each fieldFx as e (e.id)}
-        <span class="fx fx-{e.kind}" class:crit={e.crit} out:fxOut={{ ms: fxOutMs }} style="--fx:{e.colour}; --lane:{e.id % 7}">{e.text}</span>
-      {/each}
+       every landed blow popping its own figure off the plate it hit. It mounts on the Field tab or over a
+       live fight, and on nothing else — a screen that is not the field does not wear the field's cards. -->
+  {#if showCombatCards}
+    <div class="field" class:clear={plates.length === 0} style:justify-self={hudLayout.field.justify} style:align-self={hudLayout.field.align}>
+      <FieldPlates s={gameState} ring={ring} plates={plates} zone={zone} town={town} townLive={townLive} c={c}
+                 vitals={{ hp: shownHp, es: shownEs, mana: shownMana }} statuses={statuses} reserved={reserved}
+                 xpPct={xpPct} allocOpen={alloc} onAllocate={() => { alloc = !alloc; }} fmtNum={fmtNum}
+                 plateMotion={plateMotion} fxOutMs={fxOutMs} selfFx={selfFx} />
     </div>
-    {#if latestTaken}
-      <!-- the character's own answer to being hit: the frame's edge takes the colour of what landed,
-           so a chaos hit and a physical one are felt differently before the number is even read -->
-      {#key latestTaken.id}
-        <span class="veil" style="--fx:{latestTaken.colour}"></span>
-      {/key}
-    {/if}
-  </div>
+
+    <!-- The hit ring: what the sim just did that has no body to stand on, drawn as an event rather than read
+         back out of a total. A hit names its mob and rises over that plate; this column keeps a kill — whose
+         mob leaves the field the same tick — and a drop, which is loot on the character. `counters.damageBy`
+         says how much a build dealt; this says when, in what colour, and with what landing — the number wears
+         the Element that carried the hit, a crit wears the game's one accent, and a status proc wears the colour
+         of the Element that inflicted it (a cold proc is the same ice as a cold hit). Colours come out of
+         `engine.json` `elements`, never typed here. -->
+    <div class="floaters" aria-hidden="true">
+      <div class="float-side field-side">
+        {#each fieldFx as e (e.id)}
+          <span class="fx fx-{e.kind}" class:crit={e.crit} class:pop={e.kind === 'drop'} class:pop-loot={e.kind === 'drop'} out:fxOut={{ ms: fxOutMs }} style="--fx:{e.colour}; --lane:{e.id % 7}">{e.text}</span>
+        {/each}
+      </div>
+      {#if latestTaken}
+        <!-- the character's own answer to being hit: the frame's edge takes the colour of what landed,
+             so a chaos hit and a physical one are felt differently before the number is even read -->
+        {#key latestTaken.id}
+          <span class="veil" style="--fx:{latestTaken.colour}"></span>
+        {/key}
+      {/if}
+    </div>
+  {/if}
 
   <!-- the pick made on the map the field stands on: the card that plots the walk and offers the trip,
        anchored to the cell it speaks for in map focus — the desk it opens is the only screen a place owns -->
@@ -2053,6 +2295,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         settlement={pickedSettlement}
         dest={pickedDest}
         busy={!!gameState.walk}
+        patrol={gameState.patrol}
+        autoReturnEnabled={gameState.autoReturn.enabled}
+        minPatrolStops={E.road.patrol.min_stops}
+        maxPatrolStops={E.road.patrol.max_stops}
+        groupsPerStop={E.road.patrol.groups_per_stop}
+        autoReturnPct={E.road.patrol.auto_return_threshold_pct}
         fare={warpPrice(pickedSettlement.id)}
         afford={gameState.counters.gold >= warpPrice(pickedSettlement.id)}
         dungeon={dungeonView}
@@ -2060,10 +2308,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         onwarp={travelTo}
         onhunt={doHuntHere}
         ondungeon={doDungeon}
+        onretreat={doRetreat}
         ondesk={() => (panel = 'desk')}
         onclear={() => { picked = null; pickedCell = null; }}
         oncamp={doEstablishCamp}
         oncampui={() => (panel = 'camp')}
+        onTogglePatrolStop={togglePickedPatrolStop}
+        onStartPatrol={doStartPatrol}
+        onStopPatrol={doStopPatrol}
+        onClearPatrol={doClearPatrol}
+        onPatrolRepeat={(repeat) => { gameState.patrol.repeat = repeat; gameState = { ...gameState }; }}
+        onAutoReturn={setAutoReturn}
       />
     </div>
   {/if}
@@ -2071,7 +2326,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <!-- the chronicle stays in the bottom-left corner -->
   <div class="field-feed" style:justify-self={hudLayout.feed.justify} style:align-self={hudLayout.feed.align}
        style:width={hudLayout.feed.justify === 'stretch' ? '100%' : 'auto'}>
-    <LogBox lines={chatShown} tabs={CHAT_TABS} active={chatTab} hasActivity={feed.length > 0} onTab={(tab) => (chatTab = tab)} />
+    <LogBox lines={chatShown} tabs={CHAT_TABS} active={chatTab} hasActivity={feed.length > 0} objectives={objectivesRead} onTab={(tab) => (chatTab = tab)} />
   </div>
 
   <!-- every note the client gives by press — a refusal, a forge outcome, a deposit — is said out loud as
@@ -2089,14 +2344,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       {@const label = RAIL_LABEL[p]}
       {@const key = keyFor(SCREEN_ACTION[p])}
       {@const far = TOWN_PANELS.includes(p) && !townLive}
-      {@const badge = p === 'tree' ? gameState.player.statPoints : 0}
       <button class="tab" class:here={panel === p} class:far={far}
               onclick={() => togglePanel(p)}
               title={`${label}${far ? ' — a settlement service, walk or warp into one first' : ''} · ${key}`}
               aria-keyshortcuts={key} aria-label={label}>
         <span class="toggle-ring" class:here={panel === p}><img src={RAIL_ICON[p]} alt="" aria-hidden="true" /></span>
         <span class="cap">{label}</span>
-        {#if badge > 0}<span class="count">{badge}</span>{/if}
       </button>
       {#if p === 'skills'}
         <button class="tab" class:here={sheetOpen} aria-expanded={sheetOpen}
@@ -2106,6 +2359,30 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         </button>
       {/if}
     {/each}
+    <button class="tab field-auto-tab" class:here={settings.autoSkills !== false} type="button"
+            aria-label={`Auto skills ${settings.autoSkills === false ? 'off' : 'on'}`}
+            aria-pressed={settings.autoSkills !== false}
+            title={`Auto skills · ${settings.autoSkills === false ? 'off' : 'on'}`}
+            onclick={() => setSetting('autoSkills', settings.autoSkills === false)}>
+      <span class="field-auto-icon toggle-ring" class:here={settings.autoSkills !== false}>
+        <img src={skillMark} alt="" aria-hidden="true" />
+      </span>
+      <span class="cap">Auto Skills</span>
+    </button>
+    <button class="tab field-auto-tab" class:here={settings.autoEquip !== false} type="button"
+            aria-label={`Auto equip ${settings.autoEquip === false ? 'off' : 'on'}`}
+            aria-pressed={settings.autoEquip !== false}
+            title={`Auto equip · ${settings.autoEquip === false ? 'off' : 'on'} · better drops are equipped automatically`}
+            onclick={toggleAutoEquip}>
+      <span class="field-auto-icon toggle-ring" class:here={settings.autoEquip !== false}>
+        <img src={autoEquipMark} alt="" aria-hidden="true" />
+      </span>
+      <span class="cap">Auto Equip</span>
+    </button>
+    <button class="tab field-auto-tab" class:here={panel === 'camp'} type="button"
+            aria-label="Field Camp" aria-pressed={panel === 'camp'} title="Field Camp" onclick={() => togglePanel('camp')}>
+      <span class="toggle-ring" class:here={panel === 'camp'}><img src={campMark} alt="" aria-hidden="true" /></span><span class="cap">Camp</span>
+    </button>
     <button class="tab" class:here={more} onclick={() => (more = !more)}
             aria-expanded={more} aria-haspopup="true" title="More screens and HUD tools · Esc closes" aria-label="More">
       <span class="toggle-ring" class:here={more}><img src={moreMark} alt="" aria-hidden="true" /></span>
@@ -2116,11 +2393,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         {#each MORE_RAIL as p}
           {@const label = RAIL_LABEL[p]}
           {@const far = TOWN_PANELS.includes(p) && !townLive}
+          {@const badge = p === 'tree' ? treePointsFree(gameState) : 0}
           <button class="moreitem" role="menuitem" class:here={panel === p} class:far={far}
+                  aria-label={badge > 0 ? `${label}, ${badge} unspent tree points` : label}
                   onclick={() => { togglePanel(p); more = false; }}
                   title={`${label} · ${keyFor(SCREEN_ACTION[p])}`}>
             <span class="toggle-ring" class:here={panel === p}><img src={RAIL_ICON[p]} alt="" aria-hidden="true" /></span>
             <span>{label}</span>
+            {#if badge > 0}<span class="badge badge-count urgent more-count">{badge}</span>{/if}
           </button>
         {/each}
         <button class="moreitem" role="menuitemcheckbox" aria-checked={hudGridVisible}
@@ -2138,6 +2418,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     {/if}
   </nav>
 </div>
+</div>
 
 {#if hudGridVisible}
   <div class="hud-grid-debug" aria-hidden="true">
@@ -2147,7 +2428,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 {#if layoutEditorOpen || showcaseMode}
   <Panel title="HUD Layout Studio" subtitle="Arrange live HUD groups and the shared screen canvas" width="wide" showcase={showcaseMode} gridArea="2 / 3 / 15 / 14" onclose={() => (layoutEditorOpen = false)}>
-    <HudLayoutEditor hud={hudLayout} modal={modalLayout} onapply={applyHudLayout} />
+    <HudLayoutEditor hud={hudLayout} modal={modalLayout} migrationNotice={hudLayoutNotice} onapply={applyHudLayout} />
   </Panel>
 {/if}
 
@@ -2167,6 +2448,35 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         <span>New character</span>
       </button>
     </div>
+    <div class="sides" role="tablist" aria-label="Character sheet views">
+      <button role="tab" class="btn btn-quiet" class:picked={sheetTab === 'stats'} aria-selected={sheetTab === 'stats'}
+              onclick={() => (sheetTab = 'stats')}>Stats</button>
+      <button role="tab" class="btn btn-quiet" class:picked={sheetTab === 'life'} aria-selected={sheetTab === 'life'}
+              onclick={() => (sheetTab = 'life')}>Life skills</button>
+    </div>
+    {#if sheetTab === 'life'}
+      <!-- the rung read has no doll to hang and no fight to describe: it is a reference table and the one
+           note that says what a rung does, so it fills the panel's own width -->
+      <div class="sheet-layout sheet-life">
+        <div class="sheet-values" aria-label="Life skill milestones">
+          <section class="sheet-stat-group">
+            <h3>Life skill rungs</h3>
+            <table class="stats"><tbody>
+              {#each lifeSkillMilestones(gameState) as rung (rung.id)}
+                <tr><td>{rung.id}</td><td>Lv {rung.level}</td><td>{rung.complete ? 'all rungs reached' : `next rung ${rung.next}`}</td></tr>
+              {/each}
+            </tbody></table>
+          </section>
+          <section class="sheet-stat-group">
+            <h3>How a rung pays</h3>
+            <p class="sheet-gate">
+              Informational only: every rung adds its fixed share to the life-skill combat budget, grants no separate
+              reward and never touches the final-boss gate. Levels and training live on the Field Camp board.
+            </p>
+          </section>
+        </div>
+      </div>
+    {:else}
     <div class="sheet-layout">
       <section class="sheet-doll" aria-label="Worn equipment">
         <h3>Worn gear <span>{gameState.gear.filter(Boolean).length} / {E.stat.item_slots}</span></h3>
@@ -2183,6 +2493,19 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               {/each}
             </tbody></table>
           </section>
+          <section class="sheet-stat-group">
+            <h3>Combat effects</h3>
+            <table class="stats"><tbody>
+              <tr><td>Crit</td><td>{c.critPool.toFixed(1)} pool · {c.critChance.toFixed(1)}% chance · {c.critDmg.toFixed(0)}% damage</td></tr>
+              <tr><td>Armour penetration</td><td>{c.armourPen.toFixed(1)}%</td></tr>
+              <tr><td>Chance to bleed</td><td>{c.bleedChance.toFixed(1)}%</td></tr>
+              <tr><td>Chance to stun</td><td>{c.stunChance.toFixed(1)}%</td></tr>
+              <tr><td>Element alignment</td><td>{c.alignment.toFixed(1)}%</td></tr>
+              <tr><td>Leech</td><td>{c.leechPct.toFixed(1)}%</td></tr>
+            </tbody></table>
+          </section>
+        </div>
+        <div class="sheet-value-column">
           <section class="sheet-stat-group">
             <h3>Attack and power</h3>
             <table class="stats"><tbody>
@@ -2202,19 +2525,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               <tr><td>Global damage</td><td>×{E.global.damage_mult.toFixed(2)}</td></tr>
             </tbody></table>
           </section>
+          <section class="sheet-stat-group">
+            <h3>The gate</h3>
+            <p class="sheet-gate">
+              {#if gameState.goal.done}
+                Met at {Math.round(gameState.goal.done.clockSec / 60)} min · level {gameState.goal.done.level} · {gameState.goal.attempts} spawns. The run keeps going for better item quality; there is no prestige.
+              {:else}
+                Not met yet · {gameState.goal.attempts === 0 ? 'no spawn of this boss yet' : `${gameState.goal.attempts} spawn${gameState.goal.attempts === 1 ? '' : 's'}`} · a Push resets the count.
+              {/if}
+            </p>
+          </section>
         </div>
         <div class="sheet-value-column">
-          <section class="sheet-stat-group">
-            <h3>Combat effects</h3>
-            <table class="stats"><tbody>
-              <tr><td>Crit</td><td>{c.critPool.toFixed(1)} pool · {c.critChance.toFixed(1)}% chance · {c.critDmg.toFixed(0)}% damage</td></tr>
-              <tr><td>Armour penetration</td><td>{c.armourPen.toFixed(1)}%</td></tr>
-              <tr><td>Chance to bleed</td><td>{c.bleedChance.toFixed(1)}%</td></tr>
-              <tr><td>Chance to stun</td><td>{c.stunChance.toFixed(1)}%</td></tr>
-              <tr><td>Element alignment</td><td>{c.alignment.toFixed(1)}%</td></tr>
-              <tr><td>Leech</td><td>{c.leechPct.toFixed(1)}%</td></tr>
-            </tbody></table>
-          </section>
           <section class="sheet-stat-group">
             <h3>Defence</h3>
             <table class="stats"><tbody>
@@ -2239,19 +2561,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               <tr><td>All-Element</td><td>{c.resistance.toFixed(1)}% before typed bonuses</td></tr>
             </tbody></table>
           </section>
-          <section class="sheet-stat-group">
-            <h3>The gate</h3>
-            <p class="sheet-gate">
-              {#if gameState.goal.done}
-                Met at {Math.round(gameState.goal.done.clockSec / 60)} min · level {gameState.goal.done.level} · {gameState.goal.attempts} spawns. The run keeps going for better item quality; there is no prestige.
-              {:else}
-                Not met yet · {gameState.goal.attempts === 0 ? 'no spawn of this boss yet' : `${gameState.goal.attempts} spawn${gameState.goal.attempts === 1 ? '' : 's'}`} · a Push resets the count.
-              {/if}
-            </p>
-          </section>
         </div>
       </div>
     </div>
+    {/if}
   </Panel>
 {/if}
 
@@ -2259,10 +2572,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <Panel title="Inventory" subtitle={invSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <!-- Inventory and warehouse share this window; Forge and Craft open from their own More menu entries. -->
     <div class="sides" role="tablist" aria-label="Inventory">
-      <button role="tab" class:active={invTab === 'inv'} aria-selected={invTab === 'inv'} onclick={() => (invTab = 'inv')}>
+      <button role="tab" class="btn btn-quiet" class:picked={invTab === 'inv'} aria-selected={invTab === 'inv'} onclick={() => (invTab = 'inv')}>
         Inventory · pile {gameState.bag.length} / {E.inventory.adventure_slots} · bag {slotsUsed(gameState)} / {slotsAvailable(gameState)}
       </button>
-      <button role="tab" class:active={invTab === 'stash'} aria-selected={invTab === 'stash'} disabled={!townLive}
+      <button role="tab" class="btn btn-quiet" class:picked={invTab === 'stash'} aria-selected={invTab === 'stash'} disabled={!townLive}
               onclick={() => (invTab = 'stash')}
               title={townLive ? `The warehouse the same record opens in every settlement · ${keyFor('screen.stash')}` : 'A settlement service — walk or warp into one first'}>
         Stash · {tabs} tab{tabs === 1 ? '' : 's'}{townLive ? '' : ' · not here'}
@@ -2307,7 +2620,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <h3>Hunt pile · what this trip kept</h3>
           <nav class="bagcats" aria-label="Narrow the pile by kind">
             {#each pileGroups as g (g.id)}
-              <button class:on={bagCat === g.id} onclick={() => (bagCat = g.id)}>
+              <button class="btn btn-quiet" class:picked={bagCat === g.id} onclick={() => (bagCat = g.id)}>
                 <span>{g.label}</span><b>{g.n}</b>
               </button>
             {/each}
@@ -2334,6 +2647,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               onmode={(m) => (tempMode = m)}
               sort={tempSort}
               onsort={(k) => (tempSort = k)}
+              pageSize={70}
               wornOf={wornOf}
               onequip={equip}
               actions={pileActions}
@@ -2358,7 +2672,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       </div>
       <details class="filter">
         <summary>Bag filter — what this run keeps</summary>
-        <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. Turn a slot on and a piece that fails its rule turns into 1 Value stone on the spot (stones are always kept, never discarded) — nothing is deleted.</small></p>
+        <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. An enabled slot converts a rejected piece into the complete Iron Ore + Scrap bundle. If either output cannot fit, the piece stays unpicked.</small></p>
         <table>
           <thead><tr><th>Slot</th><th>Filter</th><th>Keep when it beats the worn piece by</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
           <tbody>
@@ -2366,9 +2680,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               {@const r = ruleFor(gameState.filter, slot)}
               <tr>
                 <td>{slot}</td>
-                <td><input type="checkbox" checked={r.enabled} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
-                <td><input type="number" min="0" step="1" value={r.margin_pct} disabled={!r.enabled} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
-                <td><input type="checkbox" checked={r.keep_missing_element} disabled={!r.enabled} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
+                <td><input type="checkbox" aria-label={`Enable bag filter for ${slot}`} checked={r.enabled} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
+                <td><input type="number" aria-label={`Minimum improvement over worn ${slot}, percent`} min="0" step="1" value={r.margin_pct} disabled={!r.enabled} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
+                <td><input type="checkbox" aria-label={`Keep ${slot} with Element resistance missing`} checked={r.keep_missing_element} disabled={!r.enabled} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
                 <td>{describeRule(r)}</td>
               </tr>
             {/each}
@@ -2408,10 +2722,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <Panel title="Skills" subtitle={`${ACTIVE_SLOTS} slots, cast top-down`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="skills-panel">
     <div class="skill-tabs" role="tablist" aria-label="Skill sections">
-      <button role="tab" class:active={skillTab === 'loadout'} aria-selected={skillTab === 'loadout'} onclick={() => (skillTab = 'loadout')}>Loadout</button>
-      <button role="tab" class:active={skillTab === 'owned'} aria-selected={skillTab === 'owned'} onclick={() => (skillTab = 'owned')}>Owned skills</button>
-      <button role="tab" class:active={skillTab === 'effects'} aria-selected={skillTab === 'effects'} onclick={() => (skillTab = 'effects')}>Buffs & auras</button>
-      <button role="tab" class:active={skillTab === 'mastery'} aria-selected={skillTab === 'mastery'} onclick={() => (skillTab = 'mastery')}>Mastery & curses</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={skillTab === 'loadout'} aria-selected={skillTab === 'loadout'} onclick={() => (skillTab = 'loadout')}>Loadout</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={skillTab === 'owned'} aria-selected={skillTab === 'owned'} onclick={() => (skillTab = 'owned')}>Owned skills</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={skillTab === 'effects'} aria-selected={skillTab === 'effects'} onclick={() => (skillTab = 'effects')}>Buffs & auras</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={skillTab === 'mastery'} aria-selected={skillTab === 'mastery'} onclick={() => (skillTab = 'mastery')}>Mastery & curses</button>
     </div>
     {#if skillNote}<p class="skill-note" role="status">{skillNote}</p>{/if}
     {#if skillTab === 'loadout'}
@@ -2439,7 +2753,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr>
             <td>{i + 1}</td>
             <td>
-              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}{#if !sm.weaponFits(k, heldWeaponName(gameState) || '')}<span class="chip locked" title={`${k.name} fires only while a ${k.weapon === 'bow' ? 'bow or crossbow' : k.weapon} is held — you hold ${heldWeaponName(gameState) || 'nothing'}`}>needs {k.weapon === 'bow' ? 'bow/crossbow' : k.weapon}</span>{/if}</span>{:else}—{/if}
+              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}{#if !sm.weaponFits(k, heldWeaponName(gameState) || '')}<span class="chip chip-tag locked" title={`${k.name} fires only while a ${k.weapon === 'bow' ? 'bow or crossbow' : k.weapon} is held — you hold ${heldWeaponName(gameState) || 'nothing'}`}>needs {k.weapon === 'bow' ? 'bow/crossbow' : k.weapon}</span>{/if}</span>{:else}—{/if}
             </td>
             <td>{k && id ? (k.base_flat != null ? pressText(k) : k.type) : ''}</td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
@@ -2448,7 +2762,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             <td>{id ? `${(gameState.skills.cd[id] || 0).toFixed(1)}s${(gameState.skills.buffUp[id] || 0) > 0 ? ` · window ${gameState.skills.buffUp[id]}s` : ''}` : ''}</td>
             <td>
               {#if id}
-                <select value={modeOf(gameState.skills, id)} onchange={(e) => setMode(id, (e.target as HTMLSelectElement).value)}>
+                <select aria-label={`Cast mode for ${sm.byId[id]?.name || id}`} value={modeOf(gameState.skills, id)} onchange={(e) => setMode(id, (e.target as HTMLSelectElement).value)}>
                   <option value="always">always</option>
                   <option value="conditional">conditional</option>
                   <option value="never">never</option>
@@ -2464,7 +2778,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               {:else}—{/if}
             </td>
             <td>
-              <select value={id || ''} onchange={(e) => setSlot(i, (e.target as HTMLSelectElement).value)}>
+              <select aria-label={`Skill in slot ${i + 1}`} value={id || ''} onchange={(e) => setSlot(i, (e.target as HTMLSelectElement).value)}>
                 <option value="">empty</option>
                 {#each ownedActives as k2}<option value={k2.id} selected={id === k2.id}>{k2.name}</option>{/each}
               </select>
@@ -2582,6 +2896,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <Panel title="Town" subtitle={`${town?.name ?? 'the field'} · ${townLive ? 'standing here' : 'not standing here'}`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <TownHub state={gameState} town={town} here={townLive} {tabs}
              onopen={(id) => openPanel(id as PanelId)} onwarp={travelTo} onsellall={doSell}
+             onblackmarket={openBlackMarket}
              onbest={doBestEquip}
              onstashall={() => doDepositAll(stashTab)} />
   </Panel>
@@ -2589,7 +2904,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 {#if panel === 'market' || showcaseMode}
   <Panel title="Market" subtitle={`${town?.name ?? ''} · demand, cargo and town services`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <Market state={gameState} town={town} here={townLive} onbuy={doBuy} onsell={doSell} ontrade={doTrade} onprocess={doProcess} onroute={showTradeRoute} />
+    <Market state={gameState} town={town} here={townLive} writer={transactionWriter} onbuy={doBuy} onsell={doSell} ontrade={doTrade} onprocess={doProcess} onroute={showTradeRoute}
+            ondeliver={doDelivery} ontrack={doTrackDelivery} onack={doAcknowledgeDelivery} onblackmarketbuy={doBlackMarketBuy} bind:view={marketView} bind:marketId={marketTownId} />
+  </Panel>
+{/if}
+
+{#if deliveryNotice && (showcaseMode || transactionWriter && panel === null)}
+  <Panel title="Delivery notice" subtitle="An optional town opportunity" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={() => doDismissDelivery(deliveryNotice!.id)}>
+    <DeliveryNotice state={gameState} contract={deliveryNotice} writer={transactionWriter}
+      ontrack={() => doTrackDelivery(deliveryNotice!.id, true)} ondetails={() => openDeliveryWant(deliveryNotice!.id)} ondismiss={() => doDismissDelivery(deliveryNotice!.id)} />
   </Panel>
 {/if}
 
@@ -2624,11 +2947,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 {#if panel === 'farm' || showcaseMode}
   <Panel title="Farm" subtitle={farmSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="farm-panel">
-    <p><small>{gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h a cycle · {farm.plotsMax} plots at most ({plots} yours).</small></p>
+    <p><small>{gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h base cycle · tier Mastery XP low {gameState.farm.mastery.low} (Lv {farmMasteryLevel(gameState, 'low')}), mid {gameState.farm.mastery.mid} (Lv {farmMasteryLevel(gameState, 'mid')}), high {gameState.farm.mastery.high} (Lv {farmMasteryLevel(gameState, 'high')}) · at most 10% future growth-time reduction; ready times already set are unchanged · {farm.plotsMax} plots at most ({plots} yours).</small></p>
     <div class="farm-tabs" role="tablist" aria-label="Farm sections">
-      <button role="tab" class:active={farmTab === 'plots'} aria-selected={farmTab === 'plots'} onclick={() => (farmTab = 'plots')}>Plots & herbs</button>
-      <button role="tab" class:active={farmTab === 'alchemy'} aria-selected={farmTab === 'alchemy'} onclick={() => (farmTab = 'alchemy')}>Alchemy</button>
-      <button role="tab" class:active={farmTab === 'automation'} aria-selected={farmTab === 'automation'} onclick={() => (farmTab = 'automation')}>Auto use</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={farmTab === 'plots'} aria-selected={farmTab === 'plots'} onclick={() => (farmTab = 'plots')}>Plots & herbs</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={farmTab === 'alchemy'} aria-selected={farmTab === 'alchemy'} onclick={() => (farmTab = 'alchemy')}>Alchemy</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={farmTab === 'automation'} aria-selected={farmTab === 'automation'} onclick={() => (farmTab = 'automation')}>Auto use</button>
     </div>
 
     {#if farmTab === 'plots'}
@@ -2641,7 +2964,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr>
             <td>{i + 1}</td>
             <td>
-              <select value={p?.tier || 'low'} onchange={(e) => doPlant(i, (e.target as HTMLSelectElement).value)}>
+              <select aria-label={`Grow tier for plot ${i + 1}`} value={p?.tier || 'low'} onchange={(e) => doPlant(i, (e.target as HTMLSelectElement).value)}>
                 {#each farm.TIERS as tier}
                   <option value={tier} selected={p?.tier === tier}>{tier}{!farm.canGrow(fl, tier) ? ` (needs level ${farm.F.tier_unlock_level[tier]})` : ''}</option>
                 {/each}
@@ -2660,6 +2983,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
     {#if farmTab === 'alchemy'}
     <h3>Alchemy</h3>
+    {@const scrapPreview = previewScrapAlchemy(gameState, { writer: transactionWriter })}
+    {@const tierProgress = alchemyTierProgress(gameState.alchemy)}
+    {@const scrapBatch = Math.floor((gameState.fieldwork.materials.scrap || 0) / E.salvage.alchemy.scrap_cost)}
+    <p>{gameState.fieldwork.materials.scrap || 0} Scrap carried · {E.salvage.alchemy.scrap_cost} Scrap → {E.salvage.alchemy.value_yield} Value stone. One Tier stone per {tierProgress.interval} eligible Value outputs — {tierProgress.outputsToNext} more to the next · {tierProgress.paid} earned so far. Legacy fractional progress is preserved.</p>
+    <button disabled={!scrapPreview.ok} title={scrapPreview.ok ? 'Immediate settlement recipe' : scrapPreview.why} onclick={() => doScrapAlchemy()}>Transmute Scrap</button>
+    <button disabled={!scrapPreview.ok || scrapBatch < 1} title={scrapBatch < 1 ? `Needs ${E.salvage.alchemy.scrap_cost} Scrap per transmutation` : `Batch ${scrapBatch} single transmutes, stopping at the first refusal`} onclick={() => doScrapAlchemy(scrapBatch)}>Transmute all {scrapBatch} Scrap</button>
+    {#if !scrapPreview.ok}<p>{scrapPreview.why}</p>{/if}
     <table>
       <thead><tr><th>Draught</th><th>Effect</th><th>Cost</th><th>Held</th><th></th></tr></thead>
       <tbody>
@@ -2703,11 +3033,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <Panel title="Settlement" subtitle={deskSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="desk-panel">
     <div class="desk-tabs" role="tablist" aria-label="Settlement sections">
-      <button role="tab" class:active={deskTab === 'services'} aria-selected={deskTab === 'services'} onclick={() => (deskTab = 'services')}>Services</button>
-      <button role="tab" class:active={deskTab === 'stall'} aria-selected={deskTab === 'stall'} onclick={() => (deskTab = 'stall')}>Stall</button>
-      <button role="tab" class:active={deskTab === 'guild'} aria-selected={deskTab === 'guild'} onclick={() => (deskTab = 'guild')}>Guild & Collector</button>
-      <button role="tab" class:active={deskTab === 'hunt'} aria-selected={deskTab === 'hunt'} onclick={() => (deskTab = 'hunt')}>Hunt</button>
-      <button role="tab" class:active={deskTab === 'walk'} aria-selected={deskTab === 'walk'} onclick={() => (deskTab = 'walk')}>Walk</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'services'} aria-selected={deskTab === 'services'} onclick={() => (deskTab = 'services')}>Services</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'stall'} aria-selected={deskTab === 'stall'} onclick={() => (deskTab = 'stall')}>Stall</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'guild'} aria-selected={deskTab === 'guild'} onclick={() => (deskTab = 'guild')}>Guild & Collector</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'hunt'} aria-selected={deskTab === 'hunt'} onclick={() => (deskTab = 'hunt')}>Hunt</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'walk'} aria-selected={deskTab === 'walk'} onclick={() => (deskTab = 'walk')}>Walk</button>
     </div>
     <div class="desk-content">
 
@@ -2723,7 +3053,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <h4>Counterhand · the gold mint</h4>
       <p>Gold {gameState.counters.gold.toFixed(1)} · junk unsold {junkTotal} ({junkLines.join(' · ') || 'none'}) · stones {stonesLine()}</p>
       <button onclick={doSell} disabled={!viewHere || junkTotal === 0}>Sell all junk here</button>
-      <p><small>The Counterhand pays for junk and gathered goods at this town's current demand. Open Market to sell supplies selectively, compare buyers and plan a route. Rejected gear dissolves into Value stones.</small></p>
+      <p><small>The Counterhand pays for junk and gathered goods at this town's current demand. Open Market to sell supplies selectively, compare buyers and plan a route. Dissolved gear yields Iron Ore and Scrap; Scrap can be transmuted into Value stones in Alchemy.</small></p>
 
       <h4>Respec · free</h4>
       <p><small>Hand every allocated stat point back and re-spend them — free, and only in a settlement.</small></p>
@@ -2766,11 +3096,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             {#each gameState.town.tasks as t, i}
               <tr>
                 <td>{i + 1}</td>
-                <td>{t ? `${t.kind} ×${t.n}` : 'refills in ' + (() => { const s = Math.max(0, gameState.town.refillAt[i] - gameState.clockSec); return s >= 3600 ? (s / 3600).toFixed(1) + 'h' : s >= 60 ? Math.round(s / 60) + 'm' : Math.round(s) + 's'; })()}</td>
+                <td>{t ? t.kind === 'expedition'
+                  ? `${t.n} Elite · ${E.mob.species.find((sp: any) => sp.id === t.targetSpecies)?.name || t.targetSpecies} · ${eng.zoneById(t.zone).subzones?.[t.subzone ?? 0]?.name || 'subzone'}`
+                  : `${t.kind} ×${t.n}`
+                  : 'refills in ' + (() => { const s = Math.max(0, gameState.town.refillAt[i] - gameState.clockSec); return s >= 3600 ? (s / 3600).toFixed(1) + 'h' : s >= 60 ? Math.round(s / 60) + 'm' : Math.round(s) + 's'; })()}</td>
                 <td>{t ? eng.zoneById(t.zone).name : ''}</td>
                 <td>{t ? `${t.progress} / ${t.n}` : ''}</td>
                 <td>{t ? (t.alt ? `${t.count} ${t.stone} or ${t.alt.count} ${t.alt.stone}` : `${t.count} ${t.stone} stone`) : ''}</td>
                 <td>{#if t}
+                  {#if t.kind === 'expedition'}
+                    <button class="btn btn-quiet" onclick={() => goToTask(t)}>Map target</button>
+                  {/if}
                   {#if t.alt}
                     <button disabled={t.progress < t.n} onclick={() => doClaim(i, t.stone)}>{t.stone}</button>
                     <button disabled={t.progress < t.n} onclick={() => doClaim(i, t.alt!.stone)}>{t.alt.stone}</button>
@@ -2833,7 +3169,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <tr class:picked={!!home && picked === home} onclick={() => home && select(home)}>
             <td>{z.id} · {z.name}</td>
             <td>{z.levels.join('-')}</td>
-            <td>{z.hp.join(' → ')}</td>
+            <td class="mob-hp">{z.hp.map((hp: number) => fmtNum(hp)).join(' → ')}</td>
             <td>{z.quality}</td>
             <td>{eng.zoneElements(z.id).join(', ')}</td>
             <td>{z.group}</td>
@@ -2881,9 +3217,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <Panel title="Save" subtitle="local only" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="save-panel">
     <div class="save-tabs" role="tablist" aria-label="Save sections">
-      <button role="tab" class:active={saveTab === 'slots'} aria-selected={saveTab === 'slots'} onclick={() => (saveTab = 'slots')}>Slots</button>
-      <button role="tab" class:active={saveTab === 'backups'} aria-selected={saveTab === 'backups'} onclick={() => { saveTab = 'backups'; loadSnaps(); }}>Backups</button>
-      <button role="tab" class:active={saveTab === 'settings'} aria-selected={saveTab === 'settings'} onclick={() => (saveTab = 'settings')}>Settings</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={saveTab === 'slots'} aria-selected={saveTab === 'slots'} onclick={() => (saveTab = 'slots')}>Slots</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={saveTab === 'backups'} aria-selected={saveTab === 'backups'} onclick={() => { saveTab = 'backups'; loadSnaps(); }}>Backups</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={saveTab === 'settings'} aria-selected={saveTab === 'settings'} onclick={() => (saveTab = 'settings')}>Settings</button>
     </div>
     {#if showcaseMode}<p class="showcase-note">Save, load, backup, import, and export are disabled here. This page never reads or writes a player save.</p>{/if}
     {#if !showcaseMode}
@@ -2944,7 +3280,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <label>Auto-dissolve drops below item level
       <input type="number" min="0" step="1" value={gameState.autoDissolveLevel ?? 0}
         onchange={(e) => { gameState.autoDissolveLevel = Math.max(0, Number((e.target as HTMLInputElement).value) || 0); gameState = { ...gameState }; }} />
-      <small>{' '}— a piece under the floor turns into Reroll stones instead; zero keeps every drop for a decision</small>
+      <small>{' '}— a piece under the floor is dissolved into salvage resources (ore and Scrap) instead; zero keeps every drop for a decision</small>
     </label>
     <p><small>Auto-dissolve turns a piece into Reroll stones, never gold — the Counterhand is still the only place junk becomes gold. A locked or Collector-held piece is spared.</small></p>
     {/if}
@@ -2956,18 +3292,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   button.active { border-color: var(--gold); color: var(--gold); }
 
   :global(body.ui-showcase) { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+  .showcase-frame { display: contents; }
+  .showcase-frame.active { display: grid; grid-template-rows: auto auto minmax(0, 1fr); height: 100vh; }
   .showcase-banner {
     display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--screen-pad); border-bottom: 1px solid var(--line);
+    padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line);
     background: linear-gradient(90deg, var(--panel), var(--bg));
   }
+  .showcase-banner > div { display: flex; flex: 1; align-items: center; gap: var(--spacing-md); min-width: 0; }
   .showcase-banner h1 { margin: 0; color: var(--gold); font-size: var(--font-md); }
-  .showcase-banner p { margin: var(--spacing-xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .showcase-banner p { flex: 1; min-width: 0; margin: 0; color: var(--dim); font-size: var(--font-xs); }
+  .showcase-banner label { flex: none; }
   .showcase-banner a { flex: none; padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-xs); text-decoration: none; }
   .showcase-index { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
   .showcase-index a { padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-xs); color: var(--dim); font-size: var(--font-xs); text-decoration: none; white-space: nowrap; }
   .showcase-index a:hover, .showcase-index a:focus-visible { border-color: var(--gold); color: var(--gold-lit); }
-  .showcase-note { margin: 0 0 var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-xs); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
+  .showcase-note { padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-xs); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
 
 
   .map-back {
@@ -2992,9 +3332,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-back::after {
     content: '';
     position: absolute; inset: 0; z-index: var(--z-underlay); pointer-events: none;
-    background: radial-gradient(ellipse 76% 68% at 50% 48%, transparent 67%,
-      color-mix(in srgb, var(--ground) 30%, transparent) 78%,
-      color-mix(in srgb, var(--ground) 84%, transparent) 100%);
+    background: radial-gradient(ellipse 88% 80% at 50% 48%, transparent 74%,
+      color-mix(in srgb, var(--ground) 58%, transparent) 88%,
+      color-mix(in srgb, var(--ground) 98%, transparent) 100%);
   }
 
   .map-sheet {
@@ -3014,10 +3354,22 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-back:focus-visible { --ring-offset: -2px; }
 
   .stage.mapmode .map-back { --dof: 0px; --map-lift: 1; --map-sat: 1; opacity: 1; cursor: grab; }
+  /* In map focus the sheet is meant to be read, so its no-op filter and its layer hint come off: both
+     force the SVG to be rasterised once and then upscaled by the zoom transform, which is what smears
+     the hex labels. Dropped, the browser redraws the sheet's vectors at the zoomed resolution instead,
+     so the type stays sharp at every zoom. The resting veil keeps its blur. */
+  .stage.mapmode .map-sheet { filter: none; will-change: auto; }
 
   .map-back.dragging { cursor: grabbing; transition: opacity var(--motion-ui) var(--ease-ui), filter var(--motion-ui) var(--ease-ui); }
-  .stage.mapmode .field { display: none; }
-
+  /* The field's cards are mounted by state, not by CSS: `showCombatCards` decides whether the combat scene
+     exists at all. These rules only shape the one case where the scene and the map overlap — a fight that
+     starts while the map is open. The map stays the readable surface; the player card is the fight's tell. */
+  .stage.mapmode .field { display: block; pointer-events: none; }
+  :global(.stage.mapmode .field > :not(.combat-player-slot)) { display: none; }
+  :global(.stage.mapmode .field .combat-player-slot) { pointer-events: none; }
+  :global(.stage.mapmode .field .combat-player-slot button) { pointer-events: auto; }
+  :global(.stage.mapmode .field .combat-player-slot .self-side) { display: none; }
+  .stage.mapmode .floaters { display: none; }
 
   .stage.mapmode .tracker { display: none; }
   .stage.mapmode .targetbar { display: none; }
@@ -3035,14 +3387,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-guide:not(.open) { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); padding: 0; background: none; border: 0; border-radius: var(--radius-sm); box-shadow: none; backdrop-filter: none; }
   .map-guide.open { width: clamp(188px, 14.52vw, 405px); }
   .map-hint { margin: 0; max-width: 100%; line-height: 1.3; }
-  .map-help-toggle { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); padding: 0; color: var(--dim); background: none; border: 0; border-radius: var(--radius-sm); font-size: var(--font-xs); }
+  .map-help-toggle { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); color: var(--dim); background: none; border: 0; border-radius: var(--radius-sm); font-size: var(--font-xs); }
   .map-help-toggle:hover { color: var(--text); }
   .map-views { display: flex; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-sm); width: 100%; }
   .map-views label, .map-tools label { display: inline-flex; align-items: center; gap: var(--spacing-xs); white-space: nowrap; }
   .map-level input[type=range] { width: clamp(100px, 7.74vw, 216px); }
 
   .map-zoom { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); width: 100%; }
-  .map-zoom button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); min-width: var(--icon-lg); line-height: 1.2; }
+  .map-zoom button { font-size: var(--font-xs); min-width: var(--icon-lg); line-height: 1.2; }
   .map-zoom b { font-family: var(--num); font-size: var(--font-xs); font-weight: 500; color: var(--dim); min-width: var(--icon-lg); text-align: center; }
   .map-legend { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); }
   .map-legend .swatch { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
@@ -3051,10 +3403,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .mapcard {
     position: fixed; left: 50%; bottom: clamp(58px, 4.45vw, 124px); transform: translateX(-50%);
-    width: min(clamp(350px, 27.11vw, 756px), 52%); z-index: var(--z-highlight);
+    width: min(clamp(350px, 27.11vw, 756px), 52%); z-index: var(--z-highlight); overflow-y: auto;
   }
   .picklist tr { cursor: pointer; }
   .picklist tr.picked { background: var(--panel); }
+  .desk-content .picklist .mob-hp { white-space: nowrap; }
 
 
   .stage {
@@ -3066,14 +3419,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
     --controls-h: calc(var(--rail) + var(--spacing-sm));
 
-    --band-toast: clamp(32px, 4.14vw, 132px);
+    --menu-row-h: calc(var(--icon-hub) + var(--font-xs) + var(--spacing-xs) + var(--spacing-xs) + var(--spacing-xs));
+    --band-toast: calc(var(--screen-pad) + var(--menu-row-h) + var(--spacing-sm) + var(--menu-row-h) + var(--spacing-xs) + var(--spacing-xs) + var(--spacing-xs));
     --band-note: clamp(64px, 7.89vw, 264px);
     background:
       radial-gradient(120% 85% at 50% 115%, color-mix(in srgb, var(--glow-moss) 30%, transparent), transparent 62%),
       radial-gradient(95% 70% at 50% -12%, color-mix(in srgb, var(--glow-dusk) 32%, transparent), transparent 64%),
       linear-gradient(180deg, var(--ground) 0%, var(--ground-2) 45%, var(--ground-3) 100%);
   }
-  .stage.showcase { position: relative; inset: auto; width: 100%; height: clamp(720px, 56.25vw, 1200px); margin-inline: auto; }
+  .stage.showcase { position: relative; inset: auto; width: 100%; height: auto; min-height: 0; }
   .stage.showcase .mapcard { position: absolute; }
 
   .stage::after {
@@ -3084,14 +3438,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .stage:has(.toast) .field { grid-row-start: 5; }
   .stage:not(:has(.toast)) .save-note { top: var(--band-toast); }
+  .stage:has(.toast) .save-note { top: calc(var(--band-toast) + var(--band-note)); }
 
   .toast {
     position: absolute; top: var(--band-toast); left: 50%; transform: translateX(-50%); z-index: var(--z-floater);
     display: flex; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-sm); align-items: baseline; max-width: min(clamp(575px, 44.53vw, 1242px), 62%);
-    border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent); border-radius: var(--radius-sm); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs);
-    background: var(--glass); box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+    padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs);
   }
-  .toast .quit { background: none; border: none; padding: 0; color: var(--dim); }
 
 
   .dock {
@@ -3099,38 +3452,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-xs);
     pointer-events: none;
   }
-  .pop::before, .pop::after {
-    content: ''; position: absolute; width: clamp(8px, 0.63vw, 16px); height: clamp(8px, 0.63vw, 16px); pointer-events: none;
-    border: 2px solid color-mix(in srgb, var(--gold) 62%, transparent);
-  }
-  .pop::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
-  .pop::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
-
-
-  .pop {
+  .allocate-panel {
     pointer-events: auto; flex: 0 1 auto; align-self: stretch; min-height: 0; max-height: clamp(320px, 42vw, 900px);
-    position: relative;
     display: flex; flex-direction: column;
-    border: 1px solid var(--hud-edge); border-radius: var(--radius-sm);
-    background: var(--hud-face);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, .6); backdrop-filter: blur(8px);
-    animation: pop .14s ease-out;
   }
-  .pop > header {
-    display: flex; align-items: baseline; gap: var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-xs);
-    border-bottom: 1px solid color-mix(in srgb, var(--gold) 26%, var(--edge)); border-radius: var(--radius-sm);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 14%, transparent), transparent);
+  .allocate-panel > header {
+    display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-xs);
+    border-radius: var(--radius-sm);
   }
-  .pop > header h3 { margin: 0; flex: none; color: var(--gold); font-size: var(--font-xs); letter-spacing: clamp(2px, 0.10vw, 3px); text-transform: uppercase; }
-  .pop .quit {
-    margin-left: auto; width: var(--icon-md); height: var(--icon-md); padding: 0; line-height: 1;
-    background: none; border: 1px solid var(--edge); color: var(--dim);
-  }
-  .pop .quit:hover { color: var(--text); border-color: var(--gold); }
-  .pop-body { padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm); overflow: hidden; min-height: 0; }
-  .pop-body p { margin: var(--spacing-xs) 0; font-size: var(--font-xs); }
-  @keyframes pop { from { transform: translateY(var(--x-pull-note)); opacity: .3; } to { transform: none; opacity: 1; } }
-
+  .allocate-panel .quit { width: var(--icon-md); height: var(--icon-md); place-content: center; display: grid; }
+  .allocate-panel-body { display: grid; align-content: start; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm); overflow: hidden; min-height: 0; }
+  .allocate-panel-body p { font-size: var(--font-xs); }
 
   .pill {
     display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-round);
@@ -3146,41 +3478,39 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
 
   .tracker {
-
     width: var(--objectives-w); pointer-events: auto; z-index: var(--z-content);
     display: grid; gap: var(--spacing-xs); align-content: start; justify-items: stretch;
   }
-  .tracker > * {
+  /* every live read wears the same strip, so the column reads as one hanging instrument */
+  .tracker .phase, .tracker .tracked-wants, .tracker .alarm-line {
     margin: 0; padding: var(--spacing-xs) var(--spacing-xs); border-radius: var(--radius-sm); font-size: var(--font-xs);
     background: linear-gradient(90deg, rgba(0, 0, 0, .66), rgba(0, 0, 0, .38) 78%, transparent);
   }
+  .account-hold { display: grid; justify-items: start; gap: var(--spacing-xs); }
+  .account-hold .chip { display: flex; max-width: 100%; padding: var(--spacing-xs) var(--spacing-xs); white-space: normal; line-height: 1.2; }
+  /* the phase and the alarm are the two reads the eye takes without looking for them, so they carry the
+     one step up in the type scale; everything reference-sized stays at the dense read */
   .tracker .phase {
     color: var(--gold-lit); text-transform: uppercase;
     letter-spacing: clamp(1px, 0.05vw, 2px);
     box-shadow: inset 2px 0 0 var(--gold);
+    font-size: var(--font-sm); font-weight: 650; line-height: 1.25;
   }
-  .hunger-read { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-xs) var(--spacing-xs); color: var(--dim); }
-  .hunger-read b { color: var(--gold-lit); font-family: var(--num); font-weight: 600; }
-  .hunger-read i { grid-column: 1 / -1; display: block; height: 3px; overflow: hidden; border-radius: var(--radius-round); background: color-mix(in srgb, var(--text) 16%, transparent); }
-  .hunger-read i em { display: block; width: 100%; height: 100%; transform: scaleX(var(--fill)); transform-origin: left center; background: var(--gold); transition: transform var(--motion-ui) var(--ease-ui); }
-  .hunger-read.empty b { color: var(--alarm); }
-  .hunger-read.empty i em { background: var(--alarm); }
-  .tracker .phase, .tracker .objective, .tracker .alarm-line {
+  .tracked-wants { display: grid; gap: var(--spacing-xs); color: var(--dim); }
+  .tracked-wants p { margin: 0; font-size: var(--font-xs); line-height: 1.35; }
+  .tracker .phase, .tracker .alarm-line {
     overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical;
   }
-  .alarm-line { color: var(--alarm); }
-  .objective { color: var(--gold); }
+  .alarm-line { color: var(--alarm); font-size: var(--font-sm); font-weight: 600; line-height: 1.25; }
 
 
   .field {
     min-width: 0; min-height: 0;
-    display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: var(--spacing-md);
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: var(--spacing-md);
     overflow: visible;
+    padding-bottom: calc(var(--card-w) * 1.5 + var(--pad-area));
 
     --card-w: var(--field-card-size);
-    --plate-h: calc(var(--card-w) * 7 / 5);
-
-    padding-bottom: calc(var(--plate-h) + var(--spacing-xl));
 
     pointer-events: none;
 
@@ -3219,33 +3549,46 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .vital-orb {
     position: relative; flex: none; width: var(--orb-size); height: var(--orb-size); padding: var(--spacing-xs);
     isolation: isolate; border-radius: var(--radius-round); background: var(--face-floor); container-type: inline-size;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .12);
+    /* the socket keeps a caught light on its upper lip, so the piece sits in the same room as the glass
+       it holds instead of reading as a flat ring behind it */
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .18);
   }
   .vital-orb::after {
     content: ''; position: absolute; inset: 0; z-index: var(--z-floater); pointer-events: none;
     background: url('./assets/orb-skin.webp') center / contain no-repeat;
     -webkit-mask: radial-gradient(circle, transparent 0 58%, var(--text) 70%);
             mask: radial-gradient(circle, transparent 0 58%, var(--text) 70%);
-    filter: brightness(1.2) contrast(1.1);
+    filter: brightness(1.3) contrast(1.15);
   }
   .orb-well {
     position: absolute; inset: var(--spacing-xs); overflow: hidden; border-radius: var(--radius-round);
     background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, .09), transparent 34%), var(--face-floor);
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, .8);
+    /* the glass wall: a hairline of light the whole way round, the bowl's shadow under the fill, a darker
+       base for the bounce light to land on, and a contact shadow outside the sphere so it sits down in
+       the socket instead of floating on the ring */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .6), inset 0 0 0 1px rgba(255, 255, 255, .10),
+                inset 0 2px 10px rgba(0, 0, 0, .8), inset 0 -12px 20px rgba(0, 0, 0, .45);
   }
   .orb-well::before {
     content: ''; position: absolute; inset: 0; z-index: var(--z-content); pointer-events: none;
     background: url('./assets/orb-skin.webp') center / cover no-repeat;
     mix-blend-mode: soft-light; opacity: .8;
   }
+  /* The shield thins as it is spent. Its height already follows `--shield-strength` (the pool's own
+     fraction, set on the orb); now its weight follows it too. Even at full the shield is a *film* rather
+     than a cover — ES is the light over the pool, and the pool's own colour stays readable underneath it —
+     so a draining shield lets red come up through the glass long before the waterline drops. The waterline
+     itself stays the crisp hairline on the top edge, and that is what names the level. */
   .life-orb .orb-well::after {
     content: ''; position: absolute; inset: 0; z-index: var(--z-effect); pointer-events: none;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--es-lit) 78%, transparent), transparent 5%),
-                radial-gradient(circle at 35% 20%, color-mix(in srgb, var(--es-lit) 75%, transparent), transparent 66%),
-                linear-gradient(145deg, color-mix(in srgb, var(--es) 65%, var(--mana)),
-                                          color-mix(in srgb, var(--mana) 70%, var(--face-floor)));
-    border-top: 1px solid color-mix(in srgb, var(--es-lit) 78%, transparent);
-    opacity: .42; transform: scaleY(var(--shield-strength)); transform-origin: bottom;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--es-lit) 80%, transparent), transparent 3%),
+                radial-gradient(circle at 35% 20%, color-mix(in srgb, var(--es-lit) 52%, transparent), transparent 66%),
+                linear-gradient(145deg, color-mix(in srgb, var(--es) 58%, transparent),
+                                          color-mix(in srgb, var(--mana) 46%, transparent));
+    border-top: 1px solid color-mix(in srgb, var(--es-lit) 88%, transparent);
+    opacity: calc(.16 + var(--shield-strength) * .34);
+    filter: saturate(calc(.7 + var(--shield-strength) * .5)) brightness(calc(.86 + var(--shield-strength) * .3));
+    transform: scaleY(var(--shield-strength)); transform-origin: bottom;
   }
   .mana-orb.reserved .orb-well::after {
     content: ''; position: absolute; top: 0; left: 0; right: 0; z-index: var(--z-effect); pointer-events: none;
@@ -3295,17 +3638,95 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   @media (prefers-reduced-motion: reduce) {
     .orb-fill { transition: none; }
     .orb-fill::before, .orb-fill::after { animation: none; }
+    .orb-hit, .orb-cast, .orb-shatter { animation: none; opacity: 0; }
   }
+  /* The glass over the liquid, read in the order the eye takes it: the pin-point specular and its
+     corona, the long shallow gleam a ceiling tube leaves across it, the band of "room" caught along the
+     top, the smaller reflection a glass sphere throws low and opposite the pin-point, a mirrored horizon
+     that lights the top half and sinks the bottom, and the bounce light the floor throws back up under
+     the lower rim. The pin-point is raw white on purpose — it is the one place in the orb where a colour
+     would read as dirt on the glass — and it sits above the frame's own mask, so the ring never eats it.
+     `backdrop-filter` is what makes the whole thing glass instead of paint: it blurs and lifts the fill
+     and the marble behind the layer, exactly what the knob of real glass does. Everything is clipped by
+     the well, which is what keeps the highlights on the sphere. Nothing here moves: a mirrored ball is
+     still, and a sheen crossing it would read as a decal rather than as a surface. */
   .orb-gloss {
     position: absolute; inset: 0; z-index: var(--z-highlight); pointer-events: none;
-    background: radial-gradient(ellipse at 36% 18%, rgba(255, 255, 255, .18), transparent 32%),
-                linear-gradient(145deg, rgba(255, 255, 255, .06), transparent 45% 65%, rgba(0, 0, 0, .36));
+    backdrop-filter: blur(2px) saturate(1.4) brightness(1.12);
+    background:
+      radial-gradient(circle at 31% 19%, rgba(255, 255, 255, .98) 0, rgba(255, 255, 255, .5) 3.5%, rgba(255, 255, 255, 0) 12%),
+      radial-gradient(ellipse 46% 32% at 30% 17%, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 70%),
+      radial-gradient(ellipse 58% 5% at 37% 21%, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 76%),
+      radial-gradient(ellipse 74% 20% at 44% 7%, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 74%),
+      radial-gradient(ellipse 15% 10% at 72% 74%, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 72%),
+      linear-gradient(168deg, rgba(255, 255, 255, .1) 0 30%, rgba(255, 255, 255, 0) 46% 55%, rgba(0, 0, 0, .52) 100%),
+      radial-gradient(ellipse 62% 18% at 54% 97%, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 74%);
+  }
+  /* Dispersion at the glass edge: the thickness the eye reads as "this is a solid lump". It is the one
+     place a hint of spectrum is allowed and it stays on the outer ring only, faint enough that it is a
+     colour found on looking rather than a rainbow worn on the front. */
+  .orb-gloss::after {
+    content: ''; position: absolute; inset: 0; border-radius: var(--radius-round); pointer-events: none;
+    background: conic-gradient(from 205deg at 50% 50%,
+      color-mix(in srgb, var(--focus) 42%, transparent), rgba(255, 255, 255, 0) 24%,
+      color-mix(in srgb, var(--alarm) 36%, transparent) 50%, rgba(255, 255, 255, 0) 70%,
+      color-mix(in srgb, var(--focus) 42%, transparent));
+    -webkit-mask: radial-gradient(circle, transparent 0 76%, var(--text) 90%);
+            mask: radial-gradient(circle, transparent 0 76%, var(--text) 90%);
+    opacity: .45;
+  }
+  /* The blow the glass has taken: one ring and one hot spot at the point it landed, mounted per event so a
+     fast fight re-stamps it instead of looping it. The sim names no body for a self-side hit, so the point
+     is read off the event's own id. `left`/`top` carry the place and `transform` the swell, because one
+     property cannot hold both. */
+  .orb-hit {
+    position: absolute; z-index: var(--z-label); pointer-events: none;
+    left: calc(var(--hit-x, 50%) - var(--icon-xs) / 2); top: calc(var(--hit-y, 40%) - var(--icon-xs) / 2);
+    width: var(--icon-xs); height: var(--icon-xs);
+    /* the ring is who carried the blow — the shield's own light while it stands — and the core is what the
+       blow was, the attacker's own Element, which the sim sets whether or not the shield ate it */
+    border: 1.5px solid color-mix(in srgb, var(--hit-guard, var(--fx, var(--alarm))) 85%, var(--text));
+    border-radius: var(--radius-round);
+    background: radial-gradient(circle, color-mix(in srgb, var(--fx, var(--alarm)) 70%, var(--text)) 0, rgba(255, 255, 255, 0) 72%);
+    animation: orb-hit var(--motion-map) var(--ease-out) forwards;
+  }
+  @keyframes orb-hit {
+    from { transform: scale(.35); opacity: 1; }
+    to { transform: scale(3); opacity: 0; }
+  }
+  /* The shield going down: a ring at the glass edge falls inward while a white core burns off — a shield
+     breaks toward the body it was covering, not outward at the room — and it is over inside one map
+     motion, so it never competes with the next blow's ripple. Mounted per break, never on a loop. */
+  .orb-shatter {
+    position: absolute; inset: 0; z-index: var(--z-label); pointer-events: none; border-radius: var(--radius-round);
+    background: radial-gradient(circle, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 54%),
+                radial-gradient(circle, rgba(255, 255, 255, 0) 44%,
+                  color-mix(in srgb, var(--es-lit) 78%, transparent) 68%, rgba(255, 255, 255, 0) 88%);
+    opacity: 0;
+    animation: orb-shatter var(--motion-map) var(--ease-out) forwards;
+  }
+  @keyframes orb-shatter {
+    from { transform: scale(1.04); opacity: .95; filter: brightness(1.7); }
+    to { transform: scale(.7); opacity: 0; filter: brightness(1); }
+  }
+  /* A press going out: the base of the glass takes a breath, once per cast. Short and low, because the row
+     fires constantly — a long swell would read as a pulse of its own rather than as an answer to a press. */
+  .orb-cast {
+    position: absolute; inset: auto 0 0; z-index: var(--z-label); pointer-events: none;
+    height: 46%; transform-origin: bottom center;
+    background: radial-gradient(ellipse 68% 100% at 50% 100%,
+      color-mix(in srgb, var(--fx, var(--mana-lit)) 55%, transparent), rgba(255, 255, 255, 0) 72%);
+    animation: orb-cast var(--motion-ui) var(--ease-out) forwards;
+  }
+  @keyframes orb-cast {
+    from { transform: scaleY(.55); opacity: .75; }
+    to { transform: scaleY(1.3); opacity: 0; }
   }
 
 
   .casts {
-    display: flex; flex-flow: row wrap; justify-content: center;
-    align-items: flex-end; align-content: flex-end; gap: var(--spacing-xs); max-width: calc(var(--slot-skill-size) * 7 + var(--spacing-xs) * 6);
+    display: grid; grid-template-columns: repeat(7, var(--slot-skill-size)); justify-content: center;
+    align-content: flex-end; gap: var(--spacing-xs);
   }
   .cast {
     position: relative; width: var(--slot-skill-size); height: var(--slot-skill-size);
@@ -3328,7 +3749,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .cast.filler { border-color: rgba(255, 255, 255, .18); }
   .cast small {
     position: absolute; inset: 0; display: grid; place-items: center; border-radius: var(--radius-round);
-    background: none; font-size: max(var(--font-xs), calc(var(--slot-skill-size) * .3)); color: var(--gold-lit);
+    background: none; font-size: clamp(var(--font-xs), calc(var(--slot-skill-size) * .3), var(--font-md)); color: var(--gold-lit);
     font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
   }
 
@@ -3342,13 +3763,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .cast b { position: absolute; top: clamp(-8px, -0.29vw, -4px); left: clamp(-3px, -0.10vw, -1px); font-size: var(--font-xs); color: var(--dim); }
 
 
-  .controls-dock {
-    z-index: var(--z-control);
-    display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-end;
-    gap: var(--spacing-xs); padding: var(--spacing-xs);
-    background: none; border: 0; border-radius: var(--radius-sm); box-shadow: none;
-  }
-  .control-tab { min-width: var(--icon-lg); }
   .toggle-ring {
     position: relative; isolation: isolate; flex: none; display: grid; place-items: center;
     width: var(--icon-hub); height: var(--icon-hub); padding: var(--spacing-xs);
@@ -3378,16 +3792,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     mask: radial-gradient(circle closest-side, transparent 82%, #000 90%, transparent 100%);
     filter: drop-shadow(0 0 var(--spacing-xs) var(--gold-lit));
   }
-  .control-icon { transition: transform var(--motion-fast) var(--ease-ui); }
-  .control-icon > svg { stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .control-tab:hover .control-icon { transform: translateY(-1px); }
-  .speed-menu { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs); color: var(--dim); }
-  .speed-menu .cap { font-size: var(--font-xs); line-height: 1; text-transform: capitalize; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); }
-  .speed-options { display: flex; align-items: center; gap: var(--spacing-xs); }
-  .speed-orb { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; transition: color var(--motion-fast) var(--ease-ui); }
-  .speed-orb:hover { color: var(--text); }
-  .speed-orb.here { color: var(--gold-lit); }
-  .speed-orb:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   @keyframes auto-border-light { to { transform: rotate(1turn); } }
   @media (prefers-reduced-motion: reduce) {
     .toggle-ring.here::before, .toggle-ring.here::after { animation: none !important; }
@@ -3405,10 +3809,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .topright > * { pointer-events: auto; }
   .toprow { display: flex; gap: var(--spacing-xs); align-items: center; }
-  .field-auto-actions {
-    z-index: var(--z-travel);
-    display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs);
-  }
+  .command-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); place-items: center; gap: var(--spacing-xs); min-width: 0; }
+  .commands-dock { display: grid; grid-template-rows: auto; align-content: center; gap: var(--spacing-xs); min-width: 0; max-width: 100%; pointer-events: none; }
+  .commands-dock > * { pointer-events: auto; }
+  .commands-dock .field-auto-tab { width: 100%; min-width: 0; white-space: normal; }
+  .commands-dock .tab .cap { max-width: 100%; white-space: normal; text-align: center; }
+  .speed-mark { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
+  .speed-mark.here { color: var(--gold-lit); }
   .field-travel-actions {
     grid-area: travel; z-index: var(--z-travel); width: fit-content; min-width: 0;
     display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs);
@@ -3428,22 +3835,26 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .zone-emblem { flex: none; width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; opacity: .9; }
   .zone-copy { display: grid; gap: var(--spacing-xs); min-width: 0; flex: 1; }
   .zone-copy strong, .zone-copy span { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .zone-tag.traveling { align-items: flex-start; }
+  .zone-tag.traveling .zone-copy span { overflow: visible; white-space: normal; }
   .zone-copy strong { color: var(--text); font-size: var(--font-xs); font-weight: 650; }
   .zone-copy span { color: var(--dim); font-size: var(--font-xs); }
   .zone-level { flex: none; padding-left: var(--spacing-xs); border-left: 1px solid var(--edge); color: var(--gold-lit); font-size: var(--font-xs); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .travel-actions { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: var(--spacing-xs); }
   .travel-action {
     display: flex; flex-direction: column; align-items: center; justify-content: center; width: fit-content; gap: var(--spacing-xs); min-width: 0;
-    padding: var(--spacing-xs) var(--spacing-xs); border: 0; border-radius: var(--radius-sm);
+    border: 0; border-radius: var(--radius-sm);
     background: none; color: var(--dim); font-size: var(--font-xs); white-space: nowrap;
     transition: color var(--motion-fast) var(--ease-ui);
   }
   .travel-action:hover { color: var(--text); }
   .travel-action.here { color: var(--gold-lit); }
   .zone-emblem { padding: var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box; }
-  .tab:hover .toggle-ring, .moreitem:hover .toggle-ring, .travel-action:hover .toggle-ring, .map-help-toggle:hover .toggle-ring { border-color: var(--gold); }
+  .tab:hover .toggle-ring, .moreitem:hover .toggle-ring, .travel-action:hover .toggle-ring,
+  .map-help-toggle:hover .toggle-ring { border-color: var(--gold); }
   .tab:focus-visible, .moreitem:focus-visible, .travel-action:focus-visible, .map-help-toggle:focus-visible { outline: none; }
-  .tab:focus-visible .toggle-ring, .moreitem:focus-visible .toggle-ring, .travel-action:focus-visible .toggle-ring, .map-help-toggle:focus-visible .toggle-ring {
+  .tab:focus-visible .toggle-ring, .moreitem:focus-visible .toggle-ring, .travel-action:focus-visible .toggle-ring,
+  .map-help-toggle:focus-visible .toggle-ring {
     outline: 2px solid var(--focus); outline-offset: 2px;
   }
 
@@ -3492,7 +3903,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .rail {
     z-index: var(--z-navigation);
-    display: flex; flex-direction: row; flex-wrap: nowrap; align-items: stretch; justify-content: flex-end; gap: var(--spacing-sm);
+    display: flex; flex-direction: row; flex-wrap: wrap; align-items: stretch; justify-content: flex-start; gap: var(--spacing-sm);
     padding: var(--spacing-xs);
   }
   .purse { display: inline-flex; align-items: center; gap: var(--spacing-xs); flex: none; font-variant-numeric: tabular-nums; }
@@ -3501,18 +3912,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .purse i { font-size: var(--font-xs); font-style: normal; color: var(--dim); line-height: 1; text-transform: uppercase; letter-spacing: 1px; }
   .tab {
     position: relative; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs);
-    min-width: var(--icon-lg); padding: var(--spacing-xs) var(--spacing-xs);
+    min-width: var(--icon-lg);
     border: 0; border-radius: var(--radius-sm); background: none; color: var(--dim);
     transition: color var(--motion-fast) var(--ease-ui);
   }
   .tab img { object-fit: contain; opacity: .82; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9)); transition: transform var(--motion-fast) var(--ease-ui); }
   .tab:hover img { transform: translateY(-1px); opacity: 1; }
-  .tab .cap { font-size: var(--font-xs); line-height: 1; text-transform: capitalize; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); }
-  .tab .count {
-    position: absolute; top: 0; right: 0; min-width: var(--icon-xs); padding: 0 var(--spacing-xs);
-    border-radius: var(--radius-round); background: linear-gradient(180deg, var(--hot), var(--hot-deep)); border: 1px solid rgba(0, 0, 0, .45);
-    color: var(--text); font-size: var(--font-xs); font-variant-numeric: tabular-nums; text-align: center;
-  }
+  .tab .cap { font-size: var(--font-xs); line-height: 1.2; text-transform: capitalize; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); }
   .tab:hover { color: var(--text); }
   .tab.here { color: var(--gold-lit); }
 
@@ -3528,12 +3934,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     box-shadow: var(--shadow-soft);
   }
   .moreitem {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs);
+    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs);
     min-width: var(--icon-lg); padding: var(--spacing-xs) var(--spacing-xs); border: 0; border-radius: var(--radius-sm);
     background: none; color: var(--dim);
     font-size: var(--font-xs); line-height: 1; text-transform: capitalize; text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
     transition: color var(--motion-fast) var(--ease-ui);
   }
+  .more-count { position: absolute; top: 0; right: 0; }
   .moreitem img, .moreitem svg { object-fit: contain; opacity: .82; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9)); transition: transform var(--motion-fast) var(--ease-ui), opacity var(--motion-fast) var(--ease-ui); }
   .moreitem:hover img, .moreitem:hover svg { transform: translateY(-1px); opacity: 1; }
   .moreitem svg { fill: none; stroke: currentColor; stroke-width: 1.5; }
@@ -3543,28 +3950,27 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .moreitem.far img { filter: grayscale(.6); }
 
 
-  .invbody { min-height: 0; overflow: visible; }
+  .invbody { display: grid; align-content: start; gap: var(--spacing-sm); min-height: 0; overflow: visible; }
   .invbody > section { min-height: 0; overflow: visible; }
 
 
-  .sides { display: flex; gap: var(--spacing-xs); margin-bottom: var(--spacing-sm); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
-  .sides button { border-radius: var(--radius-sm); font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-sm); }
-  .sides button.active { border-color: var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); }
-  .sides button:disabled:hover { border-color: var(--line); color: var(--text); }
+  .sides { display: flex; gap: var(--spacing-xs); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
 
-  .poewin { display: grid; grid-template-columns: 1.25fr 1fr; gap: var(--spacing-sm); align-items: start; min-height: 0; }
-  .poecol { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
+  /* the two boards share one row grid, so the pile and the carried bag start on the same line however
+     tall each board's own tool band is */
+  .poewin { display: grid; grid-template-columns: 1.25fr 1fr; grid-auto-rows: min-content; gap: var(--spacing-sm); align-items: start; min-height: 0; }
+  .poecol { display: grid; grid-template-rows: subgrid; grid-row: span 3; gap: var(--spacing-xs); min-width: 0; }
   .poecol h3 { margin: 0; font-size: var(--font-xs); color: var(--dim); letter-spacing: clamp(1px, 0.05vw, 2px); text-transform: uppercase; }
   .bagshell.poecol { grid-template-columns: 1fr; }
   .poecol .bagcats { flex-direction: row; flex-wrap: wrap; }
-  .sheet-tools { display: flex; justify-content: flex-end; margin-bottom: var(--spacing-sm); }
+  .sheet-tools { display: flex; justify-content: flex-end; }
   .sheet-layout {
     flex: 1; min-height: 0; display: grid;
-    grid-template-columns: minmax(clamp(188px, 14.52vw, 405px), .72fr) minmax(0, 1.8fr);
+    grid-template-columns: minmax(clamp(188px, 14.52vw, 405px), .5fr) minmax(0, 1.8fr);
     gap: var(--spacing-md); overflow: hidden;
   }
-  .sheet-doll { min-width: 0; border-right: 1px solid var(--line); padding-right: var(--spacing-md); }
-  .sheet-doll h3 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); margin: 0 0 var(--spacing-sm); font-size: var(--font-sm); }
+  .sheet-doll { display: flex; flex-direction: column; gap: var(--spacing-sm); min-width: 0; border-right: 1px solid var(--line); padding-right: var(--spacing-md); }
+  .sheet-doll h3 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); font-size: var(--font-sm); }
   .sheet-doll h3 span { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
   .sheet-values {
     display: grid;
@@ -3572,14 +3978,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gap: var(--spacing-md); align-content: start; min-height: 0; height: 100%; overflow: auto;
   }
   .sheet-value-column { display: flex; flex-direction: column; gap: var(--spacing-md); min-width: 0; }
-  .sheet-stat-group { min-width: 0; }
-  .sheet-stat-group h3 { margin: 0 0 var(--spacing-xs); color: var(--gold-lit); font-size: var(--font-sm); }
+  .sheet-stat-group { display: grid; gap: var(--spacing-xs); min-width: 0; }
+  .sheet-stat-group h3 { color: var(--gold-lit); font-size: var(--font-sm); }
   .sheet-values .stats { width: 100%; border-collapse: collapse; }
   .sheet-values .stats td { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); line-height: 1.15; vertical-align: top; }
   .sheet-values .stats td:first-child { width: 40%; }
   .sheet-values .stats small { color: var(--dim); font-size: var(--font-xs); }
+  /* the life-skill tab has no doll to hang and nothing to summarise: one table, one note, full width */
+  .sheet-layout.sheet-life { grid-template-columns: minmax(0, 1fr); }
+  .sheet-life .stats td:first-child { text-transform: capitalize; }
   .sheet-gate { margin: 0; color: var(--dim); font-size: var(--font-xs); }
-  .sheet-new-character { display: inline-flex; align-items: center; gap: var(--spacing-xs); margin-left: auto; padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-xs); background: color-mix(in srgb, var(--hot) 6%, var(--panel)); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; transition: border-color var(--motion-fast) var(--ease-ui), color var(--motion-fast) var(--ease-ui), background var(--motion-fast) var(--ease-ui); }
+  .sheet-new-character { display: inline-flex; align-items: center; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-xs); background: color-mix(in srgb, var(--hot) 6%, var(--panel)); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; transition: border-color var(--motion-fast) var(--ease-ui), color var(--motion-fast) var(--ease-ui), background var(--motion-fast) var(--ease-ui); }
   .sheet-new-character img { width: var(--icon-xs); height: var(--icon-xs); padding: 0; border: 0; background: none; object-fit: contain; }
   .sheet-new-character:hover { border-color: color-mix(in srgb, var(--hot) 58%, var(--edge)); background: color-mix(in srgb, var(--hot) 12%, var(--panel)); color: var(--alarm); }
 
@@ -3593,19 +4002,20 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .bagcats button {
     display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs);
     text-align: left; border-radius: var(--radius-sm); border: 1px solid transparent; background: none;
-    color: var(--dim); font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-sm);
+    color: var(--dim); font-size: var(--font-xs);
   }
   .bagcats button b { color: var(--text); font-variant-numeric: tabular-nums; }
-  .bagcats button.on { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 34%, transparent); background: color-mix(in srgb, var(--gold) 10%, transparent); }
   .bagmain { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
   .bagtools { display: flex; align-items: center; gap: var(--spacing-sm); flex-wrap: wrap; }
   .bagtools .grow { flex: 1; }
   .bagsearch { min-width: clamp(69px, 5.32vw, 149px); }
   .bagtier { display: inline-flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); }
   .bagtools .best:hover { border-color: var(--good); }
-  .equipnote { margin: var(--x-pull-note) 0 var(--spacing-sm); font-size: var(--font-xs); color: var(--good); }
-  .bagblock { border: 0; }
+  .equipnote { position: relative; top: var(--x-pull-note); font-size: var(--font-xs); color: var(--good); }
+  .bagblock { display: grid; align-content: start; gap: var(--spacing-xs); border: 0; }
+  .bagblock:has(.filter[open]) .poewin { display: none; }
   .skill-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+  .skill-label .chip { padding-inline: var(--spacing-xs); }
   .skill-label img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; flex: none; }
 
   .gate {
@@ -3617,57 +4027,50 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .gate-editor td { background: color-mix(in srgb, var(--gold) 5%, transparent); font-size: var(--font-xs); }
   .gate-editor label { white-space: nowrap; }
   .gate-editor input[type='number'] { width: var(--icon-xl); }
-  .bagblock + .bagblock { border-top: 1px solid var(--line); margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); }
+  .bagblock + .bagblock { border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
   .stats td { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
   .stats td:first-child { color: var(--dim); width: 45%; }
   .save-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; align-content: start; gap: var(--spacing-sm); }
-  .account-writer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); }
+  .account-writer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); }
   .account-writer.owner { border-color: color-mix(in srgb, var(--good) 48%, var(--line)); }
   .account-writer p { flex: 1 1 clamp(150px, 11.62vw, 324px); min-width: 0; color: var(--dim); font-size: var(--font-xs); }
   .account-writer.owner p { color: var(--good-lit); }
   .account-writer label { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
   .account-writer select, .account-writer button { font-size: var(--font-xs); border-radius: var(--radius-xs); }
-  .save-tabs, .farm-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); flex: none; }
-  .save-tabs button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
-  .save-tabs button.active { border-color: var(--gold); color: var(--gold); }
-  .save-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; }
+  .save-tabs, .farm-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); flex: none; }
+  .save-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
   .save-panel h2 { margin: 0; font-size: var(--font-md); }
   .save-panel p { margin: 0; }
   .save-panel table { font-size: var(--font-xs); }
   .save-note-inline { color: var(--good); font-size: var(--font-xs); }
   .desk-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .desk-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); flex: none; }
-  .desk-tabs button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
-  .desk-tabs button.active { border-color: var(--gold); color: var(--gold); }
-  .desk-content { flex: 1; min-height: 0; overflow: hidden; }
-  .desk-content > h3 { margin: var(--spacing-xs) 0; font-size: var(--font-sm); }
-  .desk-content > p { margin: var(--spacing-xs) 0; font-size: var(--font-xs); }
+  .desk-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); flex: none; }
+  .desk-content { display: flex; flex-direction: column; gap: var(--spacing-xs); flex: 1; min-height: 0; overflow: auto; }
+  .desk-content p { font-size: var(--font-xs); }
   .desk-content .picklist th, .desk-content .picklist td { padding: var(--spacing-xs) var(--spacing-xs); line-height: 1.1; font-size: var(--font-xs); }
-  .desk-content .picklist button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .desk-content .picklist button { font-size: var(--font-xs); }
   .skills-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .skill-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); flex: none; }
-  .skill-tabs button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
-  .skill-tabs button.active { border-color: var(--gold); color: var(--gold); }
+  .skill-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); flex: none; }
   .skill-note { margin: 0; color: var(--good); font-size: var(--font-xs); }
   .skill-view { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .skill-view h3 { margin: var(--spacing-xs) 0 0; }
+  .skill-view h3 { margin: 0; }
   .skill-view table { width: 100%; }
   .skill-view th, .skill-view td { padding: var(--spacing-xs) var(--spacing-xs); line-height: 1.15; font-size: var(--font-xs); }
   .skill-view select { max-width: 100%; padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
   .skill-view .skill-label { gap: var(--spacing-xs); }
   .skill-view .skill-label img { width: var(--icon-xs); height: var(--icon-xs); }
   .skill-view label { font-size: var(--font-xs); }
-  .skill-view .prose { margin: 0; }
+  .skill-view .prose { display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .skill-owned-grid, .skill-effect-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(113px, 8.71vw, 243px), 1fr)); gap: var(--spacing-xs); align-content: start; }
   .skill-owned-grid { flex: 1; min-height: 0; overflow: hidden; }
   .skill-owned { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); background: var(--inset); }
   .skill-owned .skill-label { min-width: 0; }
   .skill-owned .skill-label b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-xs); font-weight: 500; }
   .skill-owned small { flex: none; color: var(--dim); font-size: var(--font-xs); }
-  .empty-owned { grid-column: 1 / -1; margin: var(--spacing-xs) 0; color: var(--dim); font-size: var(--font-xs); }
+  .empty-owned { grid-column: 1 / -1; color: var(--dim); font-size: var(--font-xs); }
   .effects-view { gap: var(--spacing-xs); }
-  .effects-view section { min-width: 0; }
-  .effects-view h3 { margin: var(--spacing-xs) 0; }
+  .effects-view section { display: grid; gap: var(--spacing-xs); min-width: 0; }
+  .effects-view h3 { margin: 0; }
   .skill-effect-grid label { display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; margin: 0; padding: var(--spacing-xs) var(--spacing-xs); border-bottom: 1px solid var(--line); }
   .skill-effect-grid .skill-label { min-width: 0; overflow: hidden; }
   .skill-effect-grid .skill-label img { flex: none; }
@@ -3676,33 +4079,29 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .reserve-note { margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .farm-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .farm-panel > p { margin: 0; font-size: var(--font-xs); }
-  .farm-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); flex: none; }
-  .farm-tabs button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
-  .farm-tabs button.active { border-color: var(--gold); color: var(--gold); }
+  .farm-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); flex: none; }
   .farm-note { color: var(--good); }
-  .filter { margin-top: var(--spacing-xs); }
+  .filter { display: grid; align-content: start; gap: var(--spacing-xs); }
   .filter summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
-  .filter table { margin-top: var(--spacing-xs); }
+  .filter table { margin: 0; }
 
-  .prose { margin: var(--spacing-xs) 0; }
+  .prose { display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .prose summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
   .prose summary:hover { color: var(--text); }
-  .prose p:first-of-type { margin-top: var(--spacing-xs); }
-  .weight { margin: 0 0 var(--spacing-xs); }
+  .weight { margin: 0; }
   .weight small { color: var(--dim); }
   .warn { color: var(--alarm); }
 
-  .townnote { margin: var(--spacing-xs) 0 0; font-size: var(--font-xs); color: var(--good); }
+  .townnote { font-size: var(--font-xs); color: var(--good); }
 
   .aloud {
-    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+    position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden;
     clip-path: inset(50%); white-space: nowrap; border: 0;
   }
 
   .knob:focus-visible, .cast:focus-visible, .face:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .controls-dock button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
-  .pop :is(button, select, input, summary):focus-visible { outline-offset: 1px; }
+  .allocate-panel :is(button, select, input, summary):focus-visible { outline-offset: 1px; }
 
 
   .floaters { position: absolute; inset: 0; pointer-events: none; z-index: var(--z-floater); }
@@ -3710,8 +4109,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .field-side { right: var(--screen-pad); bottom: calc(var(--controls-h) + var(--screen-pad) * 2); left: auto; transform: none; align-items: flex-end; }
 
-  .self-side { left: 50%; bottom: calc(100% + var(--spacing-xs)); transform: translateX(-50%); align-items: center; }
-  .fx {
+  .fx:not(.pop-loot) {
     --lane: 0;
     font-family: var(--num);
     font-size: var(--font-sm);
@@ -3723,7 +4121,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .fx-hit { font-size: var(--font-md); -webkit-text-stroke: .45px currentColor; }
   .fx-hit.crit { font-size: var(--font-lg); -webkit-text-stroke-width: .8px; animation: fx-crit 1.9s cubic-bezier(.15, .8, .3, 1) forwards; }
-  .fx-proc, .fx-block, .fx-kill, .fx-cast, .fx-travel, .fx-warp, .fx-sell, .fx-drop, .fx-craft, .fx-taken, .fx-buff {
+  .fx-proc, .fx-block, .fx-kill, .fx-cast, .fx-travel, .fx-warp, .fx-sell, .fx-craft, .fx-taken, .fx-buff {
     font-family: var(--ui);
     font-size: var(--font-xs);
     text-transform: uppercase;
@@ -3733,6 +4131,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     border-radius: var(--radius-round);
     background: color-mix(in srgb, var(--fx, var(--panel)) 14%, transparent);
   }
+  .fx-drop { padding: var(--spacing-xs); }
   .fx-proc { animation: fx-proc 1.3s ease-out forwards; }
   .fx-cast { animation: fx-cast 1.1s ease-out forwards; }
   .fx-travel, .fx-warp { animation: fx-drift 1.6s linear forwards; }
@@ -3753,9 +4152,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     font-size: var(--font-sm);
     animation: fx-heal 1.1s ease-out forwards;
   }
+  .fx-buff, .fx-heal { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .fx-buff::before, .fx-heal::before {
     content: '';
-    display: inline-block; width: var(--icon-xs); height: var(--icon-xs); margin-right: var(--spacing-xs); vertical-align: clamp(-2px, -0.05vw, -1px);
+    display: inline-block; width: var(--icon-xs); height: var(--icon-xs);
     background: var(--fx, var(--text));
     -webkit-mask-size: contain; mask-size: contain;
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
@@ -3796,14 +4196,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     18% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.18); }
     70% { opacity: 1; transform: translateX(-50%) translateY(clamp(-7px, -0.24vw, -3px)) scale(1); }
     100% { opacity: 0; transform: translateX(-50%) translateY(clamp(-35px, -1.26vw, -16px)) scale(1); }
-  }
-
-  @keyframes fx-rise {
-    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(4px, 0.29vw, 8px)) scale(.55); }
-    14% { opacity: 1; }
-    32% { transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-43px, -1.55vw, -20px)) scale(1.08); }
-    60% { opacity: 1; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-51px, -1.84vw, -24px)) scale(1); }
-    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-70px, -2.52vw, -32px)) scale(.96); }
   }
 
   @keyframes fx-crit {
@@ -3862,6 +4254,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     min-width: 0;
     min-height: 0;
     align-self: start;
+    display: grid; gap: var(--spacing-sm);
   }
   .targetbar {
     grid-area: target;
@@ -3874,7 +4267,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .rail {
     grid-area: menu;
     position: relative;
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
     min-width: 0;
     justify-self: end;
@@ -3886,6 +4279,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     min-width: 0;
     min-height: 0;
   }
+  .field.clear { justify-content: center; }
   .dock {
     grid-area: panels;
     width: 100%;
@@ -3895,14 +4289,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     justify-self: stretch;
     align-self: stretch;
   }
-  .dock .pop { width: 100%; max-width: 100%; max-height: 100%; flex: 1 1 auto; }
-  .field-auto-actions {
-    grid-area: automation;
-    width: fit-content;
+  .dock .allocate-panel { width: 100%; max-width: 100%; max-height: 100%; flex: 1 1 auto; }
+  .commands-dock {
+    grid-area: commands;
+    width: 100%;
     min-width: 0;
     max-width: 100%;
-    justify-self: end;
-    align-self: center;
+    min-height: 0;
+    justify-self: stretch;
+    align-self: stretch;
   }
   .actionbar {
     grid-area: actionbar;
@@ -3915,17 +4310,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gap: var(--spacing-xs);
   }
   .action-cluster { max-width: 100%; gap: var(--spacing-xs); }
-  .controls-dock {
-    grid-area: controls;
-    min-width: 0;
-    min-height: 0;
-    align-self: stretch;
-    justify-self: end;
-    width: fit-content;
-    max-width: 100%;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs);
-  }
   .field-feed {
     grid-area: feed;
     width: 100%;
@@ -3933,10 +4317,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     min-height: 0;
     align-self: stretch;
   }
-  .stage :is(.topright, .targetbar, .rail, .field-travel-actions, .field, .dock, .field-auto-actions, .field-feed, .actionbar, .controls-dock) {
+  .stage :is(.topright, .targetbar, .field-travel-actions, .field, .dock, .commands-dock, .field-feed, .actionbar) {
     padding: var(--pad-area);
   }
-  .stage .field { padding-bottom: calc(var(--plate-h) + var(--pad-area)); }
+  .stage .rail { padding: var(--spacing-xs); }
+  .stage .field { padding-bottom: calc(var(--card-w) * 1.5 + var(--pad-area)); }
   .field-feed :global(.combatlog) { width: 100%; min-height: 0; }
   .tracker { width: 100%; }
   .hud-grid-debug {

@@ -134,7 +134,7 @@
     --font-md: clamp(17px, 1.28vw, 36px);
     --font-lg: clamp(22px, 1.67vw, 47px);
     --font-xl: clamp(29px, 2.18vw, 62px);
-    --icon-xs: clamp(11px, 12vw, 23px);
+    --icon-xs: clamp(11px, 0.72vw, 23px);
     --icon-sm: clamp(14px, 1vw, 31px);
     --icon-md: clamp(21px, 1.50vw, 45px);
     --icon-lg: clamp(32px, 3vw, 68px);

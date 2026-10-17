@@ -13,6 +13,7 @@ export interface DungeonEscrow {
   stones: Record<string, number>;
   herbs: Record<string, number>;
   potions: Record<string, number>;
+  materials: Record<string, number>;
 }
 
 export interface DungeonRun {
@@ -22,7 +23,7 @@ export interface DungeonRun {
   escrow: DungeonEscrow;
 }
 
-export const newEscrow = (): DungeonEscrow => ({ items: [], junk: {}, stones: {}, herbs: {}, potions: {} });
+export const newEscrow = (): DungeonEscrow => ({ items: [], junk: {}, stones: {}, herbs: {}, potions: {}, materials: {} });
 
 export const cooldownLeft = (s: GameState): number => D.cooldownLeft(s.clockSec, s.dungeonClearedAt);
 
@@ -40,6 +41,7 @@ export function enterDungeon(s: GameState): { ok: boolean; why?: string } {
   if (s.group.length) return { ok: false, why: 'finish the fight first' };
   s.dungeon = { zone: s.zone, left: D.mobCap, total: D.mobCap, escrow: newEscrow() };
   s.group = [];
+  s.fieldwork.action = null;
   s.spawnIn = 0;
   // stepping in is heading out: safe ground ends where the run begins
   s.hunting = true;
@@ -56,9 +58,8 @@ export function abandonRun(s: GameState, why: string): string {
  * Merge the escrow's stacks back through the ordinary pickup rule (`stop_pickup`): what the bag
  * cannot hold is left where it fell, exactly as a kill's own roll would be. Returns what landed.
  */
-export function payoutStacks(s: GameState): { junk: number; stones: number; herbs: number; potions: number } {
-  const run = s.dungeon!;
-  const out = { junk: 0, stones: 0, herbs: 0, potions: 0 };
+export function payoutStacks(s: GameState, run: DungeonRun = s.dungeon!): { junk: number; stones: number; herbs: number; potions: number; materials: number } {
+  const out = { junk: 0, stones: 0, herbs: 0, potions: 0, materials: 0 };
   for (const [k, v] of Object.entries(run.escrow.junk)) {
     const got = addTo(s, s.junk, k, 'stone', v);
     out.junk += got;
@@ -67,9 +68,11 @@ export function payoutStacks(s: GameState): { junk: number; stones: number; herb
   for (const [k, v] of Object.entries(run.escrow.stones)) out.stones += addTo(s, s.counters.stones, k, 'stone', v);
   for (const [k, v] of Object.entries(run.escrow.herbs)) out.herbs += addTo(s, s.farm.herbs, k, 'herb', v);
   for (const [k, v] of Object.entries(run.escrow.potions)) out.potions += addTo(s, s.farm.potions, k, 'potion', v);
+  for (const [k, v] of Object.entries(run.escrow.materials || {})) out.materials += addTo(s, s.fieldwork.materials, k, 'material', v);
   run.escrow.junk = {};
   run.escrow.stones = {};
   run.escrow.herbs = {};
   run.escrow.potions = {};
+  run.escrow.materials = {};
   return out;
 }

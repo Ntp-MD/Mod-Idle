@@ -108,9 +108,9 @@
   <header class="item-heading">
     <h4>{itemName(item)}</h4>
     <div class="item-meta">
-      <span class="chip rare-chip">Item level {item.ilvl}</span>
-      <span class="chip">{item.slot}</span>
-      {#if rar}<span class="chip rar-chip">{rar.name}</span>{/if}
+      <span class="chip chip-tag upper xp">Item level {item.ilvl}</span>
+      <span class="chip chip-tag upper">{item.slot}</span>
+      {#if rar}<span class="chip chip-rarity">{rar.name}</span>{/if}
       <span class="meta-note">{item.quality} band · {tierLabel}</span>
     </div>
   </header>
@@ -195,13 +195,12 @@
   .item-heading { display: grid; gap: var(--spacing-xs); }
   h4 { margin: 0; font-size: var(--font-sm); color: var(--rar, var(--text)); }
   .item-meta { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; color: var(--dim); font-size: var(--font-xs); }
-  .chip { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: clamp(0px, 0.05vw, 1px); }
-  .rare-chip { color: var(--xp); border-color: var(--xp); }
-  .rar-chip { color: var(--rar, var(--dim)); border-color: color-mix(in srgb, var(--rar, var(--line)) 60%, var(--line)); text-transform: capitalize; }
+  .chip { padding: 0 var(--spacing-xs); }
   .dim { color: var(--dim); }
   .meta-note { color: var(--dim); }
   .tag.up { margin: 0; color: var(--xp); font-size: var(--font-xs); }
-  .section-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); margin-bottom: var(--spacing-xs); }
+  .detail section { display: grid; gap: var(--spacing-xs); }
+  .section-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); }
   h5 { margin: 0; color: var(--gold-lit); font-size: var(--font-xs); }
   .section-heading p { margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .lines { display: grid; gap: var(--spacing-xs); list-style: none; margin: 0; padding: 0; }
@@ -248,7 +247,7 @@
   .gear { display: grid; gap: var(--spacing-xs); padding-top: var(--spacing-xs); border-top: 1px solid var(--line); }
   .gear-row { display: flex; align-items: center; gap: var(--spacing-xs); color: var(--text); font-variant-numeric: tabular-nums; }
   .gear-row strong { font-size: var(--font-xs); }
-  .gear-note { margin: var(--spacing-xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .gear-note { color: var(--dim); font-size: var(--font-xs); }
   .summary { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: var(--spacing-sm); padding-top: var(--spacing-xs); border-top: 1px solid var(--line); }
   .weight { display: flex; align-items: baseline; gap: var(--spacing-xs); margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .weight strong { color: var(--text); font-variant-numeric: tabular-nums; }

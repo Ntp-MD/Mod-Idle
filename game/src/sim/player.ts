@@ -4,6 +4,7 @@ import { weaponWeightOf } from './drop';
 import type { Item, ModLine } from './types';
 import { tree } from '../engine/client';
 import type { StatKey } from '../engine/client';
+import type { LifeSkillBonus } from '../../../engine/life-skills.ts';
 
 /** Mod id → the character line it feeds. The ids are the mods.json rows; nothing is typed here. */
 const PCT_LINE: Record<string, string> = {
@@ -229,6 +230,7 @@ export function buildCharacter(
   effects: EffectFold = { add: {}, mult: {} },
   points?: Record<StatKey, number>,
   treeRanks?: Record<string, number>,
+  life: LifeSkillBonus = {},
 ): Character {
   const mainHand = gear.find((g) => g && !g.broken && g.slot === 'main hand') || null;
   const lines = sumLines(gear, tree ? tree.linesOf(treeRanks, mainHand?.base || '') : undefined);
@@ -315,14 +317,14 @@ export function buildCharacter(
     elem: elemTotal,
     /** Per-Element conversion percent, from the conversion aura rows (empty when none is up). */
     conversion,
-    accuracy: eng.playerAccuracy(core.dex, lines.accPct),
-    evasion: eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct) + a(effects, 'evasion'),
+    accuracy: eng.playerAccuracy(core.dex, lines.accPct + (life.accuracy_pct || 0)),
+    evasion: eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct + (life.evasion_pct || 0)) + a(effects, 'evasion'),
     evasionChance: eng.evasionChance(
-      eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct) + a(effects, 'evasion'),
+      eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct + (life.evasion_pct || 0)) + a(effects, 'evasion'),
       eng.refAttackerAcc(level),
     ),
     armour: (eng.armourOf(core.str) + lines.armourFlat + a(effects, 'armour')) * m(effects, 'armour')
-      * (1 + lines.armourPct / 100),
+      * (1 + (lines.armourPct + (life.armour_pct || 0)) / 100),
     es: eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis),
     // ES regen is `regen_pct`% of the max pool per second; a Mod line or an `es_regen` skill/passive
     // amplifies it, both feeding the one `ampPct` argument the engine already carries.
@@ -330,15 +332,15 @@ export function buildCharacter(
     maxHp: eng.maxHpOf(core.vit, level, lines.hpPct, lines.hpFlat),
     // the regen lines multiply the stat's own regen — the engine already carries the % argument, so
     // a buff and a Mod line feed the same formula rather than each doing their own arithmetic
-    hpRegen: eng.hpRegenOf(core.vit, lines.hpRegenPct + a(effects, 'hp_regen'), lines.hpRegenFlat),
+    hpRegen: eng.hpRegenOf(core.vit, lines.hpRegenPct + a(effects, 'hp_regen') + (life.hp_regen_pct || 0), lines.hpRegenFlat),
     maxMana: eng.maxManaOf(core.int, level, lines.manaPct, lines.manaFlat),
-    manaRegen: eng.manaRegenOf(core.int, lines.manaRegenPct + a(effects, 'mana_regen'), lines.manaRegenFlat),
+    manaRegen: eng.manaRegenOf(core.int, lines.manaRegenPct + a(effects, 'mana_regen') + (life.mana_regen_pct || 0), lines.manaRegenFlat),
     critPool,
     critChance: eng.critChanceOf(critPool),
     critDmg: eng.critDmgOf(critPool, lines.critDmgPct),
     perfectDodge: eng.perfectDodgeChance(core.lck, lines.pdodgePct),
     block: eng.blockChance(lines.blockPct),
-    armourPen: lines.armourPenPct,
+    armourPen: lines.armourPenPct + (life.armour_pen || 0),
     bleedChance: lines.bleedChancePct,
     stunChance: eng.stunChanceFrom(alignment, lines.stunChancePct),
     alignment,

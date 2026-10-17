@@ -100,13 +100,13 @@
       <div class="grid" role="group" aria-label="Hunt pile — drop a stored piece here to take it back"
            ondragover={(e) => e.preventDefault()} ondrop={(e) => dropOn('pile', e)}>
         {#each pileView as e, k (e.index)}
-          <button class="cell" class:here={side === 'pile' && at === pileAt * PAGE + k} class:lock={e.item?.locked}
+          <button class="cell slot slot-gear" class:selected={side === 'pile' && at === pileAt * PAGE + k} class:locked={e.item?.locked}
                   style:--rar={rankTone(e.item)}
                   draggable="true"
                   ondragstart={(ev) => dragFrom('pile', e.index, ev)}
                   onclick={() => pick('pile', pileAt * PAGE + k)} aria-label={e.title}>
-            <img src={e.icon} alt="" aria-hidden="true" />
-            {#if (e.item?.upgrade_lv || 0) > 0}<b class="pl">+{e.item?.upgrade_lv}</b>{/if}
+            <img class="slot-icon" src={e.icon} alt="" aria-hidden="true" />
+            {#if (e.item?.upgrade_lv || 0) > 0}<b class="badge badge-count xp plus">+{e.item?.upgrade_lv}</b>{/if}
           </button>
         {:else}
           <p class="dim">The pile is empty.</p>
@@ -137,13 +137,13 @@
         <div class="grid" role="group" aria-label={`Stash tab ${tab + 1} — drop a pile piece here to deposit it`}
              ondragover={(e) => e.preventDefault()} ondrop={(e) => dropOn('stash', e)}>
           {#each storedView as it, k (stashAt * PAGE + k)}
-            <button class="cell" class:here={side === 'stash' && at === stashAt * PAGE + k} class:lock={it.locked}
+            <button class="cell slot slot-gear" class:selected={side === 'stash' && at === stashAt * PAGE + k} class:locked={it.locked}
                     style:--rar={rankTone(it)}
                     draggable="true"
                     ondragstart={(ev) => dragFrom('stash', stashAt * PAGE + k, ev)}
                     onclick={() => pick('stash', stashAt * PAGE + k)} aria-label={itemName(it)}>
-              <img src={gearIcon(it)} alt="" aria-hidden="true" />
-              {#if (it.upgrade_lv || 0) > 0}<b class="pl">+{it.upgrade_lv}</b>{/if}
+              <img class="slot-icon" src={gearIcon(it)} alt="" aria-hidden="true" />
+              {#if (it.upgrade_lv || 0) > 0}<b class="badge badge-count xp plus">+{it.upgrade_lv}</b>{/if}
             </button>
           {:else}
             <p class="dim">This tab is empty.</p>
@@ -190,7 +190,7 @@
 
 <style>
   .board { display: grid; gap: var(--spacing-sm); }
-  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); }
+  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); }
   .tb { display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
   .tb b { font-family: var(--num); color: var(--dim); font-weight: 500; }
   .tb.here { border-color: var(--gold); color: var(--gold); background: var(--surface-selected); }
@@ -211,21 +211,18 @@
     /* one cell is one piece, so an empty row of the grid is a gap in the warehouse rather than a message */
   }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
+  .pager button { font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
   /* an empty side says so across the whole shelf, not down one cell's width */
   .grid p { grid-column: 1 / -1; max-width: clamp(325px, 25.17vw, 702px); font-size: var(--font-xs); }
   .cell {
-    position: relative; aspect-ratio: 1 / 1; padding: 0; border-radius: var(--radius-sm); background: var(--inset);
-    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
+    position: relative; aspect-ratio: 1 / 1; display: grid; place-items: center;
   }
-  .cell img { position: absolute; inset: 0; margin: auto; width: var(--icon-md); height: var(--icon-md); object-fit: contain; pointer-events: none; }
-  .cell .pl { position: absolute; left: clamp(2px, 0.10vw, 3px); bottom: clamp(1px, 0.05vw, 1px); font-size: var(--font-xs); color: var(--xp); }
-  .cell.lock { border-style: dashed; border-color: var(--dim); }
-  .cell.here { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(232, 193, 105, .5); background: rgba(232, 193, 105, .1); }
+  .cell img { width: var(--icon-md); height: var(--icon-md); object-fit: contain; pointer-events: none; }
+  .cell .plus { position: absolute; left: clamp(2px, 0.10vw, 3px); bottom: clamp(1px, 0.05vw, 1px); }
 
-  .bulk { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; }
-  .bulk select, .bulk button { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
+  .bulk { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
+  .bulk select, .bulk button { font-size: var(--font-xs); }
 
   .draw {
     display: grid; grid-template-columns: minmax(clamp(225px, 17.47vw, 486px), clamp(300px, 23.28vw, 648px)) 1fr; gap: var(--spacing-md); align-items: start;
@@ -234,7 +231,7 @@
   .moves { display: grid; gap: var(--spacing-xs); justify-items: start; }
   .go { border-color: rgba(232, 193, 105, .5); color: var(--gold); }
   .lk { font-size: var(--font-xs); }
-  .moves p { margin: var(--spacing-xs) 0 0; color: var(--dim); max-width: clamp(425px, 32.91vw, 918px); }
+  .moves p { color: var(--dim); max-width: clamp(425px, 32.91vw, 918px); }
 
   @media (max-width: 1280px) {
     .grids, .draw { grid-template-columns: 1fr; }

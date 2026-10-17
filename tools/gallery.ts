@@ -122,14 +122,14 @@ body {
   display: flex; flex-direction: column; --tile: 104px; --sheet: var(--panel);
 }
 .bar {
-  display: flex; align-items: center; gap: .55rem; flex-wrap: wrap;
+  display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap;
   padding: .5rem .8rem; background: var(--panel); border-bottom: 1px solid var(--line);
 }
 .bar h1 { font-size: .95rem; margin: 0; letter-spacing: .02em; }
 /* one tab per shelf: the library you pick from, and the shelf the client actually carries */
-.tabs { display: flex; gap: .3rem; }
+.tabs { display: flex; gap: var(--spacing-sm); }
 .tabs button {
-  display: flex; gap: .4rem; align-items: baseline; padding: .28rem .65rem;
+  display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .28rem .65rem;
   background: none; border-color: transparent; color: var(--dim); border-radius: var(--radius-sm);
 }
 .tabs button:hover { color: var(--text); border-color: var(--line); }
@@ -142,12 +142,13 @@ button:hover, select:hover { border-color: var(--gold); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 label.k { color: var(--dim); font-size: .74rem; }
 .read { color: var(--dim); font-family: var(--num); font-variant-numeric: tabular-nums; }
-.favbar { display: flex; gap: .35rem; align-items: center; }
+.favbar { display: flex; gap: var(--spacing-sm); align-items: center; }
 button#favOnly[on] { color: var(--gold); border-color: var(--gold); }
 button#send { color: var(--text); border-color: var(--gold); }
 button#send[busy] { opacity: .6; cursor: progress; }
 .sent { color: var(--good); font-size: .74rem; }
-.hint { color: var(--dim); font-size: .72rem; margin-left: auto; }
+.bar-tools { display: flex; flex: 1; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; min-width: 0; }
+.hint { flex: none; color: var(--dim); font-size: .72rem; }
 .split { flex: 1; display: flex; min-height: 0; }
 .folders {
   width: 15rem; flex: none; overflow: auto; padding: .3rem 0 .8rem;
@@ -160,7 +161,7 @@ button#send[busy] { opacity: .6; cursor: progress; }
   text-transform: uppercase; color: var(--dim);
 }
 .folders button {
-  display: flex; justify-content: space-between; gap: .5rem; width: 100%;
+  display: flex; justify-content: space-between; gap: var(--spacing-sm); width: 100%;
   border: 0; border-radius: var(--radius-sm); background: none; color: var(--dim);
   padding: .18rem .8rem .18rem 1.35rem; text-align: left;
 }
@@ -176,11 +177,11 @@ button#send[busy] { opacity: .6; cursor: progress; }
     linear-gradient(45deg, #9aa4b2 25%, transparent 25%, transparent 75%, #9aa4b2 75%);
 }
 .grid {
-  display: grid; gap: .45rem; align-content: start;
+  display: grid; gap: var(--spacing-sm); align-content: start;
   grid-template-columns: repeat(auto-fill, minmax(var(--tile), 1fr));
 }
 .tile {
-  position: relative; display: flex; flex-direction: column; align-items: center; gap: .25rem;
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs);
   padding: .3rem; border: 1px solid var(--line); border-radius: var(--radius-sm); cursor: pointer;
   background: var(--sheet);
   background-image: var(--checker, none); background-size: 12px 12px; background-position: 0 0, 6px 6px;
@@ -209,11 +210,10 @@ button#send[busy] { opacity: .6; cursor: progress; }
 .glyph.raw { background: var(--g) center / contain no-repeat; }
 .glyph.ink { background: var(--text); -webkit-mask: var(--g) center / contain no-repeat; mask: var(--g) center / contain no-repeat; }
 .stage.lit .glyph.ink, .stage.check .glyph.ink { background: #1b202a; }
-.none { padding: 2rem; color: var(--dim); text-align: center; grid-column: 1 / -1; }
-.none button { margin-top: .5rem; }
+.none { display: grid; justify-items: center; gap: var(--spacing-sm); padding: 2rem; color: var(--dim); text-align: center; grid-column: 1 / -1; }
 .box {
   position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: .8rem; background: rgba(9,12,17,.94);
+  align-items: center; justify-content: center; gap: var(--spacing-md); background: rgba(9,12,17,.94);
 }
 .box[hidden] { display: none; }
 .box .art {
@@ -222,7 +222,7 @@ button#send[busy] { opacity: .6; cursor: progress; }
 }
 .box .art .glyph { width: min(58vh, 70vw); height: min(58vh, 70vw); }
 .box .meta { color: var(--dim); font-family: var(--num); font-size: .8rem; text-align: center; }
-.box .row { display: flex; gap: .5rem; }
+.box .row { display: flex; gap: var(--spacing-md); }
 .box .close { position: absolute; top: .8rem; right: .9rem; }
 .box .side { position: absolute; top: 50%; transform: translateY(-50%); padding: .5rem .7rem; }
 .box .prev { left: .9rem; }
@@ -232,30 +232,32 @@ button#send[busy] { opacity: .6; cursor: progress; }
 <body>
 <div class="bar">
   <h1>ModWorld · art</h1>
-  <div class="tabs" id="tabs"></div>
-  <input id="q" type="search" placeholder="Search a sheet…" autocomplete="off" spellcheck="false">
-  <select id="ink" title="which sheets to show">
+  <div class="bar-tools">
+    <div class="tabs" id="tabs"></div>
+    <input id="q" type="search" placeholder="Search a sheet…" autocomplete="off" spellcheck="false">
+    <select id="ink" title="which sheets to show">
     <option value="">all ink</option>
     <option value="w">white only</option>
     <option value="n">not white</option>
-  </select>
-  <select id="mode" title="how to paint a sheet">
+    </select>
+    <select id="mode" title="how to paint a sheet">
     <option value="raw">as the file</option>
     <option value="ink">ink — as the client paints</option>
-  </select>
-  <select id="surface" title="what to lay the sheet on">
+    </select>
+    <select id="surface" title="what to lay the sheet on">
     <option value="dark">dark sheet</option>
     <option value="lit">light sheet</option>
     <option value="check">checker</option>
-  </select>
-  <label class="k" for="size">tile</label>
-  <input id="size" type="range" min="56" max="200" step="4" style="width:5.5rem">
-  <span class="favbar">
-    <button id="favOnly" title="show only the sheets you starred">★ <span id="favN">0</span></button>
-    <button id="send" title="hand the starred sheets to the agent to move into game/src/icon">Move the favs</button>
-    <span class="read" id="sent"></span>
-  </span>
-  <span class="read" id="count"></span>
+    </select>
+    <label class="k" for="size">tile</label>
+    <input id="size" type="range" min="56" max="200" step="4" style="width:5.5rem">
+    <span class="favbar">
+      <button id="favOnly" title="show only the sheets you starred">★ <span id="favN">0</span></button>
+      <button id="send" title="hand the starred sheets to the agent to move into game/src/icon">Move the favs</button>
+      <span class="read" id="sent"></span>
+    </span>
+    <span class="read" id="count"></span>
+  </div>
   <span class="hint">/ search · click to open · f star · ← → walk · Esc close · m ink · c sheet</span>
 </div>
 <div class="split">

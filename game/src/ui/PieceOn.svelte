@@ -93,14 +93,14 @@
   <div class="row">
     {#each pickView as p (p.where + ':' + p.i)}
       <button
-        class="chip"
-        class:now={p.where === where && p.i === index}
+        class="chip chip-tag"
+        class:picked={p.where === where && p.i === index}
         onclick={() => onpick(p.where, p.i)}
         title={`${p.e.title} · ${p.e.sub}`}
         aria-label={`${p.e.title}, ${p.where === 'gear' ? 'worn in ' + p.e.slot : 'in the hunt pile'}`}>
         <img src={p.e.icon} alt="" aria-hidden="true" />
         <span>{p.e.title}</span>
-        {#if p.e.item.upgrade_lv}<b class="pl">+{p.e.item.upgrade_lv}</b>{/if}
+        {#if p.e.item.upgrade_lv}<b class="plus">+{p.e.item.upgrade_lv}</b>{/if}
       </button>
       {:else}
         <span class="dim">Nothing carried yet.</span>
@@ -132,12 +132,13 @@
     position: absolute; right: clamp(-5px, -0.19vw, -2px); bottom: clamp(-5px, -0.19vw, -2px); font-family: var(--num); font-size: var(--font-xs);
     color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 var(--spacing-xs);
   }
+  .who { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
   .who h3 { margin: 0; font-size: var(--font-sm); }
   .who .lv { color: var(--xp); font-family: var(--num); }
-  .sub { margin: var(--spacing-xs) 0 0; color: var(--dim); font-size: var(--font-xs); }
+  .sub { color: var(--dim); font-size: var(--font-xs); }
   .src { color: var(--mob); font-size: var(--font-xs); }
   .src::before { content: '· '; }
-  .vs { margin: var(--spacing-xs) 0 0; font-size: var(--font-xs); font-family: var(--num); color: var(--alarm); }
+  .vs { font-size: var(--font-xs); font-family: var(--num); color: var(--alarm); }
   .vs.better { color: var(--good); }
   .flags { display: grid; gap: var(--spacing-xs); justify-items: end; }
   .flag { font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-round); padding: var(--spacing-xs) var(--spacing-xs); }
@@ -148,14 +149,9 @@
   .picker { display: grid; gap: var(--spacing-xs); }
   .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: var(--spacing-xs); text-transform: uppercase; }
   .row { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
-  .chip {
-    display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) var(--spacing-xs);
-    font-size: var(--font-xs); border-radius: var(--radius-round); background: var(--inset);
-  }
+  .chip { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .chip img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
-  .chip .pl { color: var(--xp); font-family: var(--num); }
-  .chip.now { border-color: var(--gold); background: var(--surface-selected); color: var(--gold); }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .pager button { font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
 </style>

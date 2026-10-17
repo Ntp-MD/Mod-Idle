@@ -331,19 +331,22 @@
                   <td class="no">{i + 1}</td>
                   <td>
                     <span class="mod-label"><img src={modIcon(l.id, l.stat, l.element)} alt="" aria-hidden="true" />{lineName(l.id)}{craftedMark(l)}</span>
-                    {#if fixed}<span class="tag">Frame Mod</span>{/if}
-                    {#if bound}<span class="tag">Bound</span>{/if}
-                    {#if l.element}<span class="tag el">{l.element}</span>{/if}
+                    {#if fixed}<span class="chip chip-tag">Frame Mod</span>{/if}
+                    {#if bound}<span class="chip chip-tag">Bound</span>{/if}
+                    {#if l.element}<span class="chip chip-tag element">{l.element}</span>{/if}
                   </td>
                   <td class="val">
-                    {l.value}
-                    {#if !valueLocked && r}<small>{r.floor}…{r.hi}</small>{/if}
+                    <span class="value-line">{l.value}
+                      {#if !valueLocked && r}<small>{r.floor}…{r.hi}</small>{/if}
+                    </span>
                   </td>
                   <td>
-                    <span class="band" aria-label={`tier ${lineTier(l)}`}>
-                      {#each bandOf(l) as on}<i class:on={on}></i>{/each}
+                    <span class="tier-line">
+                      <span class="band" aria-label={`tier ${lineTier(l)}`}>
+                        {#each bandOf(l) as on}<i class:on={on}></i>{/each}
+                      </span>
+                      <span class="t">{lineTier(l)}</span>
                     </span>
-                    <span class="t">{lineTier(l)}</span>
                   </td>
                   <td class="verbs">
                     {#if fixed}
@@ -512,7 +515,6 @@
      centre column is the work and stays the widest */
   .bench { display: grid; grid-template-columns: minmax(clamp(138px, 10.70vw, 297px), clamp(169px, 13.12vw, 364px)) minmax(0, 1fr) minmax(clamp(156px, 12.10vw, 338px), clamp(188px, 14.52vw, 405px)); gap: var(--spacing-md); align-items: start; }
   .stash, .bagcol { position: sticky; top: 0; }
-  h4 { margin: 0 0 var(--spacing-xs); }
   /* the currency tab: one cell per stone, icon and count, the name on the hover — the purse is read
      at a glance the way a stash tab is, not scanned as a list */
   .tab { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(38px, 2.90vw, 81px), 1fr)); gap: var(--spacing-xs); }
@@ -525,48 +527,48 @@
     position: absolute; right: clamp(2px, 0.19vw, 5px); bottom: clamp(2px, 0.10vw, 3px);
     font-family: var(--num); font-size: var(--font-xs); color: var(--text); text-shadow: 0 1px 0 rgba(0, 0, 0, .9);
   }
-  .tip { margin: var(--spacing-xs) 0 0; }
   .mod-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+  .chip { padding-inline: var(--spacing-xs); }
   .mod-label img, .mod-icon { width: var(--icon-xs); height: var(--icon-xs); flex: none; object-fit: contain; opacity: .9; vertical-align: middle; }
   .val { color: var(--text); }
-  .val small { color: var(--mob); font-size: var(--font-xs); margin-left: var(--spacing-xs); }
+  .value-line { display: inline-flex; align-items: baseline; gap: var(--spacing-xs); }
+  .val small { color: var(--mob); font-size: var(--font-xs); }
   .no { color: var(--mob); width: var(--icon-lg); }
-  .tag { margin-left: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-round); padding: 0 var(--spacing-xs); }
-  .tag.el { color: var(--es-lit); border-color: color-mix(in srgb, var(--es) 40%, transparent); }
   tr.fixed td { opacity: .72; }
 
   /* the tier a line sits in is a band of three, because Tier is a set of steps and not a number */
-  .band { display: inline-flex; gap: var(--spacing-xs); margin-right: var(--spacing-xs); vertical-align: middle; }
+  .tier-line { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+  .band { display: inline-flex; gap: var(--spacing-xs); vertical-align: middle; }
   .band i { width: var(--icon-xs); height: 4px; border-radius: var(--radius-round); background: var(--bar); border: 1px solid var(--line); }
   .band i.on { background: var(--gold); border-color: var(--gold); }
   .t { font-size: var(--font-xs); color: var(--dim); }
 
-  .verbs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; }
-  .verbs button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .verbs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
+  .verbs button { font-size: var(--font-xs); }
   .verbs button:disabled { opacity: .42; cursor: not-allowed; }
   .verbs button.armed { border-color: var(--gold); color: var(--gold); }
   /* the Replace stone's own choice: the line it names, from the pool this Base already draws */
-  .pick { display: inline-flex; gap: var(--spacing-xs); align-items: center; width: 100%; margin-top: var(--spacing-xs); }
+  .pick { display: inline-flex; gap: var(--spacing-xs); align-items: center; width: 100%; }
   .pick select { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); }
-  .pick button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); border-color: var(--gold); }
+  .pick button { font-size: var(--font-xs); border-color: var(--gold); }
   .prices { font-size: var(--font-xs); color: var(--mob); }
-  .foot { margin: var(--spacing-xs) 0 0; color: var(--dim); }
+  .foot { color: var(--dim); }
   /* the explainers fold: the table and the presses lead, the prose waits one press away */
-  .more { margin: var(--spacing-xs) 0 0; }
+  .more { display: grid; gap: var(--spacing-xs); }
   .more summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
-  .more p { margin: var(--spacing-xs) 0 0; }
   .work { display: grid; gap: var(--spacing-md); }
 
   .wbtns { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(162px, 12.58vw, 351px), 1fr)); gap: var(--spacing-xs); }
   .bench-work .wbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bench-work .wbtns .pick { display: flex; flex-wrap: wrap; align-content: start; }
   .bench-work .wbtns .pick select, .bench-work .wbtns .pick button { flex: 1 1 clamp(69px, 5.32vw, 149px); min-width: 0; }
-  .wbtns > button { display: grid; gap: var(--spacing-xs); justify-items: start; text-align: left; padding: var(--spacing-xs) var(--spacing-sm); }
+  .wbtns > button { display: grid; gap: var(--spacing-xs); justify-items: start; text-align: left; }
   .wbtns b { font-size: var(--font-xs); }
   .wbtns span { font-size: var(--font-xs); color: var(--dim); }
   .wbtns button:disabled { opacity: .45; cursor: not-allowed; }
-  .now { margin: var(--spacing-xs) 0 0; font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
-  .result { margin: var(--spacing-xs) 0 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs); background: var(--panel); border: 1px solid var(--edge); }
+  .whole { display: grid; align-content: start; gap: var(--spacing-xs); }
+  .now { font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
+  .result { padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs); background: var(--panel); border: 1px solid var(--edge); }
 
   @media (max-width: 1280px) {
     .bench { grid-template-columns: 1fr; }

@@ -17,5 +17,6 @@ export const CAGES: { label: string; script: string; args: string[] }[] = [
   { label: 'imprint cage', script: 'tools/imprint.ts', args: ['--checks'] },
   { label: 'map cage', script: 'tools/map.ts', args: ['--checks'] },
   { label: 'trade cage', script: 'tools/trade.ts', args: ['--checks'] },
+  { label: 'delivery cage', script: 'tools/delivery.ts', args: ['--checks'] },
   { label: 'icon cage', script: 'tools/icons.ts', args: ['--checks'] },
 ];

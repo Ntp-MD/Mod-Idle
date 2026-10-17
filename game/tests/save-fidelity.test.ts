@@ -28,6 +28,27 @@ describe('skill toggles on a restored character', () => {
   });
 });
 
+describe('saved exploration controls', () => {
+  it('backfills a v15 save with an empty Patrol and disabled Auto-Return without changing progress', () => {
+    const source = newGame(86);
+    source.counters.kills = 12;
+    source.town.tasks[0]!.progress = 1;
+    source.bag = [structuredClone(source.gear.find(Boolean)!)];
+    const legacy = JSON.parse(exportJson(source));
+    legacy.version = 15;
+    delete legacy.state.patrol;
+    delete legacy.state.autoReturn;
+
+    const restored = importJson(JSON.stringify(legacy));
+    expect(restored.patrol).toEqual({ stops: [], active: false, repeat: true, index: 0, groupsCleared: 0 });
+    expect(restored.autoReturn).toEqual({ enabled: false, phase: 'idle', resumeCell: null });
+    expect(restored.counters.kills).toBe(12);
+    expect(restored.town.tasks[0]!.progress).toBe(1);
+    expect(restored.bag).toHaveLength(source.bag.length);
+    expect(restored.bag[0]).toMatchObject(source.bag[0]);
+  });
+});
+
 describe('the cell under the feet survives a save', () => {
   it('a walk in flight and the standing hex round-trip unchanged', () => {
     const s = newGame(91);
@@ -140,8 +161,8 @@ describe('offline time is AFK, not a second play session', () => {
   });
 });
 
-describe('the salvage milestone', () => {
-  it('owes one Tier stone per 500 pieces dissolved', () => {
+describe('salvage resource history', () => {
+  it('records successful conversions without producing Alchemy milestones', () => {
     const s = newGame(45);
     huntZone(s, s.zone);
     setLevel(s, 90);
@@ -154,9 +175,9 @@ describe('the salvage milestone', () => {
     // the milestone is a count of salvaged pieces, so the run stops when one has been salvaged
     for (let i = 0; i < 60000 && (s.counters.salvaged || 0) === 0; i++) tick(s, {});
     expect(s.counters.salvaged || 0).toBeGreaterThan(0);
-    const owed = Math.floor((s.counters.salvaged || 0) / E.salvage.pieces_per_tier_stone);
-    expect(s.counters.stones.tier || 0).toBeGreaterThanOrEqual(owed);
-    if (owed > 0) expect(s.log.some((l) => /Salvage milestone/.test(l.text))).toBe(true);
+    expect(s.fieldwork.materials.scrap).toBe((s.counters.salvaged || 0) * E.salvage.outputs.scrap);
+    expect(s.alchemy.eligibleOutputs).toBe(0);
+    expect(s.alchemy.paidMilestones).toBe(0);
   });
 });
 

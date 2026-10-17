@@ -17,6 +17,15 @@ export interface TradeGood {
 
 /** One catalogue and one price curve for both the client and reports. No gameplay RNG is spent. */
 export function createTrade(E: EngineData, C: TradeCfg) {
+  const floorCurrency = (value: number) => {
+    const scale = 10 ** C.currency_decimals;
+    return Math.floor((value + Number.EPSILON * Math.max(1, value) * scale) * scale) / scale;
+  };
+  const settleCurrency = (value: number, credit = 0) => {
+    const total = value + credit;
+    const gold = floorCurrency(total);
+    return { gold, credit: Math.max(0, total - gold) };
+  };
   const fw = createFieldwork(E.fieldwork);
   const byId: Record<string, TradeGood> = {};
   const add = (bucket: TradeGood['bucket'], key: string, name: string, group: string, value: number, sourceZones: number[] = []) => {
@@ -51,6 +60,9 @@ export function createTrade(E: EngineData, C: TradeCfg) {
   for (const recipe of E.fieldwork.workshop_recipes) {
     byId[`material:${recipe.id}`].value = inputValue('material', recipe.materials, recipe.name) * C.workshop_value_mult / recipe.yield;
   }
+  for (const recipe of E.fieldwork.smithing_recipes) {
+    byId[`material:${recipe.id}`].value = inputValue('material', recipe.materials, recipe.name) * C.workshop_value_mult / recipe.yield;
+  }
   for (const recipe of E.fieldwork.recipes) {
     byId[`food:${recipe.id}`].value = (inputValue('food', recipe.foods, recipe.name) + inputValue('material', recipe.materials, recipe.name)
       + inputValue('herb', recipe.herbs, recipe.name)) * C.recipe_value_mult;
@@ -75,5 +87,5 @@ export function createTrade(E: EngineData, C: TradeCfg) {
     const gold = volume * C.floor_mult + area * (peak(town, good) - C.floor_mult);
     return { count: units, gold, demand: remaining / C.capacity_gold, used: Math.min(C.capacity_gold, used + volume), atSec: now };
   };
-  return { C, byId, goods: Object.values(byId), peak, usedAt, quote };
+  return { C, byId, goods: Object.values(byId), peak, usedAt, quote, floorCurrency, settleCurrency };
 }

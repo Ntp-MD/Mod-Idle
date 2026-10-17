@@ -130,7 +130,7 @@
     --font-md: clamp(17px, 1.28vw, 36px);
     --font-lg: clamp(22px, 1.67vw, 47px);
     --font-xl: clamp(29px, 2.18vw, 62px);
-    --icon-xs: clamp(11px, 12vw, 23px);
+    --icon-xs: clamp(11px, 0.72vw, 23px);
     --icon-sm: clamp(14px, 1vw, 31px);
     --icon-md: clamp(21px, 1.50vw, 45px);
     --icon-lg: clamp(32px, 3vw, 68px);
@@ -159,20 +159,23 @@
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: var(--font-xs)/1.55 var(--ui); }
+body { margin: 0; display: flex; justify-content: center; background: var(--bg); color: var(--text); font: var(--font-xs)/1.55 var(--ui); }
 a { color: var(--gold); text-decoration: none; }
 a:hover { text-decoration: underline; }
-.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 116rem; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
-nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+.layout { display: flex; align-items: flex-start; gap: var(--spacing-xl); width: 100%; max-width: 116rem; padding: 2rem 2.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: var(--spacing-sm); }
 nav a { color: var(--dim); }
 nav a.on { color: var(--gold); }
-main { flex: 1; min-width: 0; }
-h1 { margin: 0 0 .3rem; font-size: var(--font-md); }
-.lead { color: var(--dim); margin: 0 0 2rem; }
-section { margin: 0 0 2.2rem; }
-h2 { font-size: var(--font-sm); margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
-h3 { font-size: var(--font-xs); margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
-.note { color: var(--dim); font-size: var(--font-xs); margin: .3rem 0 .6rem; }
+main { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-xl); min-width: 0; }
+.page-head { display: grid; gap: var(--spacing-xs); }
+.page-content { display: grid; gap: var(--spacing-xl); }
+h1 { font-size: var(--font-md); }
+.lead { color: var(--dim); }
+section { display: grid; gap: var(--spacing-sm); }
+h2 { font-size: var(--font-sm); border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: var(--font-xs); }
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
 table { border-collapse: collapse; width: 100%; font-size: var(--font-xs); }
 th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--dim); font-weight: 600; }
@@ -183,10 +186,10 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 /* One table, its rows split into tabbed groups: the strip is a radio group, each tab is a <tbody>, and a
    press swaps which body shows over the shared header — no script, so the static build and the live wiki
    behave alike. Generic over the group count a page declares (three here). */
-.tabs { margin: .9rem 0 1.4rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
 .tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .tabs > label {
-  display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
+  display: inline-flex; align-items: baseline; gap: var(--spacing-sm); padding: .3em .9em;
   border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
   color: var(--dim); font-size: var(--font-xs); cursor: pointer;
 }
@@ -199,73 +202,74 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
-.tabs table { margin-top: 0; }
-.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.tabs table { flex: 1 0 100%; width: 100%; }
+.twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
 td:first-child { white-space: nowrap; }
-.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: var(--font-xs); }
-.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls { list-style: none; display: grid; gap: var(--spacing-xs); padding: 0; font-size: var(--font-xs); }
+.rolls li { position: relative; display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .02rem .25rem; }
 .rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
 .rolls .rn { position: relative; flex: 1; }
 .rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: var(--font-xs); white-space: nowrap; opacity: .8; }
 .rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; }
+.cell-stack { display: grid; gap: var(--spacing-xs); }
 td .hy { color: var(--dim); font-size: var(--font-xs); }
-.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: var(--font-xs); }
-.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx { list-style: none; display: grid; gap: var(--spacing-xs); padding: 0; font-size: var(--font-xs); }
+.fx li { display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
 .fx li:last-child { border-bottom: 0; }
 .fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
 .fx .fk em { color: var(--text); font-style: normal; }
 .fx .fs { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
 .fx .fv { font-family: var(--num); white-space: nowrap; }
-td .sub { display: block; color: var(--dim); font-size: var(--font-xs); margin-top: .15rem; }
+td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .rolls .forced .rn { color: var(--gold); }
 .rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: var(--font-xs); }
-.plist { list-style: none; margin: .15rem 0 0; padding: 0; font-size: var(--font-xs); }
+.plist { list-style: none; margin: 0; padding: 0; font-size: var(--font-xs); }
 /* one grid for the whole cell: every key shares track one at the width of the longest key in that
    cell, every value takes track two — display:contents promotes each key/value pair to the grid,
    so a spelled-out label like "damage per second" costs no wrap and nothing runs into its number */
-.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: .5rem; row-gap: .03rem; }
+.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: var(--spacing-md); row-gap: var(--spacing-xs); }
 .plist li { display: contents; }
 .plist .pk { font-family: var(--ui); color: var(--dim); }
 .plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
-.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
-.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem .8rem; padding: .65rem .8rem; cursor: pointer; }
+.zone { display: grid; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-md); padding: .65rem .8rem; cursor: pointer; }
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
 .zone-title { font-weight: 600; }
 .zone-meta { color: var(--dim); font-size: var(--font-xs); }
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
-.zone-body { padding: .1rem .8rem .8rem; }
-@media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-.race-roster { display: grid; gap: .9rem; margin-top: .5rem; }
-.race-group { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
-.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
-.race-group > header h3 { margin: 0; color: var(--gold); font-size: var(--font-xs); }
+.zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
+@media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
+.race-roster { display: grid; gap: var(--spacing-md); }
+.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
+.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
+.race-group > header h3 { color: var(--gold); font-size: var(--font-xs); }
 .race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
-.race-empty { margin: .55rem .2rem .2rem; color: var(--dim); font-size: var(--font-xs); }
-.species-roster { display: grid; gap: .65rem; margin-top: .6rem; }
-.species-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
-.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.species-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
-.species-entry > header h4 { margin: 0; color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
+.race-empty { color: var(--dim); font-size: var(--font-xs); }
+.species-roster { display: grid; gap: var(--spacing-md); }
+.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
+.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.species-entry h4 { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
+.species-entry > header h4 { color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
 .species-count { color: var(--gold); }
-.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
-.species-facts div { display: grid; gap: .1rem; min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
+.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--spacing-sm) var(--spacing-md); }
+.species-facts div { display: grid; gap: var(--spacing-xs); min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
 .species-facts b { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
 .species-entry table { font-size: var(--font-xs); }
 .species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
 @media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
-.legend { margin: 0; padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
-.legend li { margin: .3rem 0; }
+.legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
-ol { margin: .2rem 0; padding-left: 1.3rem; }
-li { margin: .15rem 0; }</style><div class="layout">
+ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }</style><div class="layout">
 <nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="on" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Bestiary</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
-<main><h1>Survival, field skills and provisions</h1><p class="lead">A fight you lose costs time, never a piece and never a level. Read the pools, player-set Field Camp, Hunger, field provisions and the farm that feeds alchemy.</p><section><h2>The pools</h2><p class="note">Respec is free wherever a settlement is (<code>stat.respec_cost</code> reads <span class="num">0</span>), because a locked build would punish you harder than a lost fight does.</p><table><thead><tr><th>Pool</th><th>What it is</th><th>Full at the reference build</th><th>How it comes back</th></tr></thead><tbody><tr><td>Health</td><td>the pool every avoidance layer protects</td><td><span class="num">12,596</span></td><td>27.1 a second off the Vit line — <code>hpRegenOf</code></td></tr><tr><td>Mana</td><td>the pool Mana-cost skills spend from; HP-cost skills debit the current HP pool, while auras reserve Max Mana</td><td><span class="num">2,779</span></td><td>69.5 a second, so an empty pool refills in 40 sec — <code>manaRegenOf</code></td></tr><tr><td>Energy Shield</td><td>the caster’s second pool, spent before Health, and player-only</td><td><span class="num">573</span></td><td>17.2 a second, but only once 3 sec have passed without a hit — <code>esRegenOf</code></td></tr></tbody></table></section>
+<main><header class="page-head"><h1>Survival, field skills and provisions</h1><p class="lead">A fight you lose costs time, never a piece and never a level. Read the pools, player-set Field Camp, Hunger, field provisions and the farm that feeds alchemy.</p></header>
+<div class="page-content"><section><h2>The pools</h2><p class="note">Respec is free wherever a settlement is (<code>stat.respec_cost</code> reads <span class="num">0</span>), because a locked build would punish you harder than a lost fight does.</p><table><thead><tr><th>Pool</th><th>What it is</th><th>Full at the reference build</th><th>How it comes back</th></tr></thead><tbody><tr><td>Health</td><td>the pool every avoidance layer protects</td><td><span class="num">12,596</span></td><td>27.1 a second off the Vit line — <code>hpRegenOf</code></td></tr><tr><td>Mana</td><td>the pool Mana-cost skills spend from; HP-cost skills debit the current HP pool, while auras reserve Max Mana</td><td><span class="num">2,779</span></td><td>69.5 a second, so an empty pool refills in 40 sec — <code>manaRegenOf</code></td></tr><tr><td>Energy Shield</td><td>the caster’s second pool, spent before Health, and player-only</td><td><span class="num">573</span></td><td>17.2 a second, but only once 3 sec have passed without a hit — <code>esRegenOf</code></td></tr></tbody></table></section>
+<section><h2>Your combat readout</h2><p>The You card stays at the near edge of the combat scene with current HP, Energy Shield when present, Mana and Hunger. It remains visible when the Map is open, while mob plates and combat effects hide. It also carries the player’s combat feedback. Speed and Pause/Resume sit in the bottom-right Game controls row, while the automation controls (Auto Skills, Auto Equip, Camp) ride the top menu rail. The top-left column keeps only live reads — minimap, zone, the phase line, tracked delivery wants and the bag alarm — the run’s target is the Chronicle’s own Objectives tab, and the life-skill rungs are the Sheet’s Life skills tab.</p></section>
 <section><h2>What a Push costs</h2><p class="note">Nothing on this list is a number: a Push is the cost of the fight, not a tax on the character.</p><ul class="fx">
       <li><span class="fk">There is no death.</span><span class="fs">rule</span><span class="fv">a fight you lose rests you at camp and costs time only</span></li>
       <li><span class="fk">A Push on the walk is the ordinary Push.</span><span class="fs">rule</span><span class="fv">with a Field Camp in this zone, recovery returns there and ends the walk; otherwise the route resumes at its ambush block (<code>road.push_rule</code>)</span></li>
@@ -273,7 +277,7 @@ li { margin: .15rem 0; }</style><div class="layout">
       <li><span class="fk">Your preset goes back to the main one.</span><span class="fs">rule</span><span class="fv">and a cooldown already counting keeps counting (<code>presets.cooldowns_persist_on_push</code>)</span></li>
       <li><span class="fk">A broken piece contributes nothing.</span><span class="fs">rule</span><span class="fv">the Armourer clears it and refills protection — <a href="crafting.html">Crafting</a></span></li>
     </ul></section>
-<section><h2>Field Camp and life skills</h2><p class="note">The first Field Camp and one relocation are free; later moves cost 1 ore and 5 timber. It is safe ground in its zone, allows field gathering and cooking, and receives a Push. Only one meal buff is active at a time. Field skill XP and Mastery are separate from character XP.</p><table><thead><tr><th>Skill</th><th>Field site</th><th>What it yields</th></tr></thead><tbody><tr><td>Mining</td><td>wild-side index 1</td><td>1 ore every 10 sec · rich-vein chance scales with Mining and Mine Mastery</td></tr><tr><td>Woodcutting</td><td>wild-side index 2</td><td>1 timber per action · rarewood and herb chances scale with Woodcutting and Grove Mastery</td></tr><tr><td>Hunting</td><td>bare field hexes</td><td>raw meat and lineage provision chances and quantities scale with Hunting and each lineage’s Mastery</td></tr><tr><td>Cooking</td><td>active Field Camp</td><td>turn raw food, fruit, edible herbs and ingredients into timed combat meals</td></tr></tbody></table></section>
+<section><h2>Field Camp and life skills</h2><p class="note">The first Field Camp and one relocation are free; later moves cost 1 ore and 5 timber. It is safe ground in its zone, allows field gathering and cooking, and receives a Push. Only one meal buff is active at a time. Field skill XP and Mastery are separate from character XP.</p><table><thead><tr><th>Skill</th><th>Field site</th><th>What it yields</th></tr></thead><tbody><tr><td>Mining</td><td>wild-side index 1</td><td>1 ore every 10 sec · rich-vein chance scales with Mining and Mine Mastery</td></tr><tr><td>Woodcutting</td><td>wild-side index 2</td><td>1 timber per action · rarewood and herb chances scale with Woodcutting and Grove Mastery</td></tr><tr><td>Hunting</td><td>bare field hexes</td><td>raw meat and lineage provision chances and quantities scale with Hunting and each lineage’s Mastery</td></tr><tr><td>Fishing</td><td>Field Camp in a zone with an authored fishing source</td><td>1 catch of River Fish or Shellfish every 10 sec</td></tr><tr><td>Smithing</td><td>safe and idle at a settlement</td><td>Iron Bar · 2 Iron Ore · Iron Brackets · 2 Iron Bar + 1 Timber</td></tr><tr><td>Cooking</td><td>active Field Camp</td><td>turn raw food, fruit, edible herbs and ingredients into timed combat meals</td></tr></tbody></table></section>
 <section><h2>Field-skill progression</h2><p class="note">The field-drop bonus increases each configured material or provision chance multiplicatively; gear and crafting-stone drops are unchanged. Skill levels increase harvest quantity at the listed milestones, and Hunting applies that quantity bonus to raw meat and lineage provisions.</p><table><thead><tr><th>Progress</th><th>Benefit</th><th>Read from</th></tr></thead><tbody><tr><td>Harvest milestones</td><td>+1 unit per action at Skill levels 5 · 10 · 15</td><td><code>fieldwork.progression.harvest_bonus_*</code></td></tr><tr><td>Field drop rate</td><td>+0.5% per Skill level after 1 and +0.3% per resource Mastery level after 1, up to +40%</td><td><code>fieldwork.progression.drop_rate_bonus_*</code></td></tr></tbody></table></section>
 <section><h2>Food drops from hunts</h2><p class="note">These lineage drops are separate from the raw-meat roll. Goblins may leave raw haunches, human patrols may leave cooked rations, and forest folk can yield edible moonmint.</p><table><thead><tr><th>Lineage</th><th>Provision</th><th>Chance</th><th>Quantity</th></tr></thead><tbody><tr><td>goblin</td><td>Goblin Haunch</td><td>22.0%</td><td>1–2</td></tr><tr><td>human</td><td>Soldier's Ration</td><td>18.0%</td><td>1–1</td></tr><tr><td>elf · dryad</td><td>Moonmint</td><td>8.0%</td><td>1–2</td></tr><tr><td>slime · lizardman</td><td>Field Mushroom</td><td>6.0%</td><td>1–1</td></tr><tr><td>troll · giant · ogre</td><td>Forest Nuts</td><td>4.0%</td><td>1–2</td></tr><tr><td>treant</td><td>Forest Nuts</td><td>5.0%</td><td>1–2</td></tr><tr><td>kobold · beetle</td><td>Field Mushroom</td><td>5.0%</td><td>1–1</td></tr><tr><td>archon · wisp</td><td>Moonmint</td><td>4.0%</td><td>1–2</td></tr><tr><td>ooze · spider</td><td>Field Mushroom</td><td>5.0%</td><td>1–1</td></tr><tr><td>hornet</td><td>Aromatic Herb</td><td>5.0%</td><td>1–1</td></tr><tr><td>mist</td><td>Wild Berries</td><td>4.0%</td><td>1–1</td></tr><tr><td>siren · shark</td><td>River Fish</td><td>12.0%</td><td>1–2</td></tr><tr><td>crab</td><td>Shellfish</td><td>15.0%</td><td>1–2</td></tr><tr><td>dryad · treant</td><td>Marsh Sage</td><td>6.0%</td><td>1–1</td></tr></tbody></table></section>
 <section><h2>Ore and timber from kills</h2><p class="note">A body that is already metal or wood can leave a piece of it, paid into the same Material store the `mine` and `grove` sites fill. The site stays the bulk source — it owns the rate, the Skill XP and the Mastery — so a kill is the chance you meet on the way there, never the way to cap a Material.</p><table><thead><tr><th>Lineage</th><th>Material</th><th>Chance</th><th>Quantity</th></tr></thead><tbody><tr><td>golem</td><td>ore</td><td>5.0%</td><td>1–1</td></tr><tr><td>crab · beetle</td><td>ore</td><td>4.0%</td><td>1–1</td></tr><tr><td>treant · dryad</td><td>timber</td><td>6.0%</td><td>1–1</td></tr><tr><td>siren</td><td>timber</td><td>3.0%</td><td>1–1</td></tr><tr><td>treant</td><td>rarewood</td><td>2.0%</td><td>1–1</td></tr><tr><td>golem</td><td>rarewood</td><td>1.0%</td><td>1–1</td></tr></tbody></table></section>
@@ -281,7 +285,7 @@ li { margin: .15rem 0; }</style><div class="layout">
 <section><h2>Camp kitchen menu</h2><p class="note">Cook at a player-set Field Camp. A cooked meal restores Hunger and replaces the one active meal buff. Cooking, brewing and condensing count the bag space freed by their ingredients; if the output still cannot fit, nothing is spent.</p><table><thead><tr><th>Menu</th><th>Dish</th><th>Cooking level</th><th>Ingredients</th><th>Hunger and timed effect</th></tr></thead><tbody><tr><td>Hearth</td><td>Trail Stew</td><td>1</td><td>2 Raw Game Meat</td><td>+42 Hunger · 15 min · +5% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Hunter's Roast</td><td>6</td><td>3 Raw Game Meat · 1 Field Mushroom · 1 rarewood · 1 mid herb</td><td>+58 Hunger · 30 min · +9% damage · +0.4% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Warden Broth</td><td>11</td><td>2 Raw Game Meat · 1 Aromatic Herb · 1 high herb</td><td>+64 Hunger · 45 min · +7% damage · +0.6% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Grilled Skewer</td><td>1</td><td>1 Raw Game Meat · 1 Field Mushroom</td><td>+32 Hunger · 10 min · +3% damage · +0.1% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Berry Porridge</td><td>1</td><td>2 Wild Berries · 1 Forest Nuts · 1 low herb</td><td>+38 Hunger · 10 min · +2% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Soldier's Ration</td><td>1</td><td>1 Raw Game Meat · 1 Forest Nuts</td><td>+40 Hunger · 15 min · +2% damage · +0.1% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Goblin Bone Broth</td><td>3</td><td>2 Goblin Haunch · 1 Field Mushroom · 1 Moonmint</td><td>+54 Hunger · 20 min · +5% damage · +0.3% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Moonmint Tea</td><td>2</td><td>2 Moonmint · 1 Wild Berries</td><td>+34 Hunger · 20 min · +0% damage · +0.5% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Sunroot Porridge</td><td>4</td><td>2 Sunroot · 1 Wild Berries · 1 low herb</td><td>+46 Hunger · 25 min · +3% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Spiced Trail Roast</td><td>7</td><td>2 Raw Game Meat · 1 Forest Nuts · 1 Aromatic Herb · 1 rarewood · 1 mid herb</td><td>+62 Hunger · 35 min · +8% damage · +0.4% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Salted Fish</td><td>2</td><td>2 River Fish · 1 rock-salt · 1 timber</td><td>+55 Hunger · 30 min · +4% damage · +0.3% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Cedar-smoked Game</td><td>5</td><td>3 Raw Game Meat · 1 Aromatic Herb · 1 cedar-wood</td><td>+60 Hunger · 40 min · +6% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Shellfish Chowder</td><td>6</td><td>2 Shellfish · 1 Field Mushroom · 1 rock-salt · 1 mid herb</td><td>+62 Hunger · 30 min · +3% damage · +0.6% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Pine Nut Bread</td><td>2</td><td>2 Wild Grain · 1 Forest Nuts · 1 pine-wood · 1 low herb</td><td>+50 Hunger · 25 min · +3% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Marsh Sage Tea</td><td>3</td><td>2 Marsh Sage · 1 Moonmint · 1 willow-wood</td><td>+40 Hunger · 30 min · +0% damage · +0.5% Max HP regen/sec</td></tr></tbody></table></section>
 <section><h2>Potions</h2><p class="note">Provisioning, not power: one shared cooldown of 30 sec, at most 3 a fight, switched off entirely on a Boss (<code>potions.boss_suppressed</code>), 2 weight each. Auto-use starts on at 30% Health and 25% Mana. That is why no potion moves a health line anywhere in the design.</p><table><thead><tr><th>Draught</th><th>Pool</th><th>Band</th><th>Effect</th><th>Brewed from</th></tr></thead><tbody><tr><td>Red Draught</td><td>hp</td><td>low</td><td><span class="num">10% of the pool, instantly</span></td><td><span class="hy">3 herbs + 1 Reroll Value Stones</span></td></tr><tr><td>Yellow Draught</td><td>hp</td><td>mid</td><td><span class="num">20% of the pool, instantly</span></td><td><span class="hy">5 herbs + 2 Reroll Value Stones</span></td></tr><tr><td>White Draught</td><td>hp</td><td>high</td><td><span class="num">30% of the pool, instantly</span></td><td><span class="hy">8 herbs + 4 Reroll Value Stones</span></td></tr><tr><td>Sky Draught</td><td>mana</td><td>low</td><td><span class="num">15% of the pool, instantly</span></td><td><span class="hy">3 herbs + 1 Reroll Value Stones</span></td></tr><tr><td>Blue Draught</td><td>mana</td><td>mid</td><td><span class="num">25% of the pool, instantly</span></td><td><span class="hy">5 herbs + 2 Reroll Value Stones</span></td></tr><tr><td>Deep Blue Draught</td><td>mana</td><td>high</td><td><span class="num">35% of the pool, instantly</span></td><td><span class="hy">8 herbs + 4 Reroll Value Stones</span></td></tr></tbody></table></section>
 <section><h2>Condensed</h2><p class="note">The one craft that turns a stack into a smaller stack: it buys bag space, never a bigger pool.</p><table><thead><tr><th></th><th>What it takes</th><th>What it gives</th></tr></thead><tbody><tr><td>A Condensed draught</td><td>10 bottles + 4 Reroll Value Stones</td><td>×10 effect, at 12 weight (20 carried loose)</td></tr></tbody></table></section>
-<section><h2>The herb farm</h2><p class="note">Settlement Farming provisions herbs for alchemy. Mining, Woodcutting, Hunting and Cooking are separate field skills; none of their XP is character XP.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Plots</td><td>3 to start, 2 bought, 5 at most</td><td><code>farm.plots</code></td></tr><tr><td>A grow</td><td>4.0 hours, then 3 herbs</td><td><code>farm.growth_hours</code> · <code>farm.yield_per_harvest</code></td></tr><tr><td>A replant</td><td>1 herb of the harvest goes back into the ground</td><td><code>farm.seed_cost_herbs</code></td></tr><tr><td>A day</td><td>2 taps, and up to 12.0 hours of growth are paid while you are away</td><td><code>farm.taps_per_day</code> · <code>farm.offline_cap_hours</code></td></tr><tr><td>A level</td><td>cap 20 · 20 XP a harvest · the same curve as Weapon Mastery</td><td><code>farm.level_*</code></td></tr><tr><td>Which draughts open</td><td>low from 1 · mid from 6 · high from 11</td><td><code>farm.tier_unlock_level</code></td></tr></tbody></table></section>
-<section><h2>Herbs from the ground versus herbs from a fight</h2><p class="note">The bundle roll is its own, separate from gear and stones, and the lowest band pays nothing on it (<code>herbs</code> reads the mid and high chances only). A plot out-taps a hunt; a hunt out-pays a plot in everything else.</p><table><thead><tr><th>Zone band</th><th>A bundle a kill</th><th>A bundle holds</th><th>A brewable draught a kill</th></tr></thead><tbody><tr><td>low</td><td>0.0%</td><td>1-3 herbs</td><td>0.0%</td></tr><tr><td>mid</td><td>2.0%</td><td>1-3 herbs</td><td>0.8%</td></tr><tr><td>high</td><td>3.0%</td><td>1-3 herbs</td><td>0.8%</td></tr></tbody></table></section>
+<section><h2>The herb farm</h2><p class="note">Settlement Farming provisions herbs for alchemy. Mining, Woodcutting, Hunting and Cooking are separate field skills; none of their XP is character XP.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Plots</td><td>3 to start, 2 bought, 5 at most</td><td><code>farm.plots</code></td></tr><tr><td>A grow</td><td>4.0 hours, then 3 herbs</td><td><code>farm.growth_hours</code> · <code>farm.yield_per_harvest</code></td></tr><tr><td>A replant</td><td>1 herb of the harvest goes back into the ground</td><td><code>farm.seed_cost_herbs</code></td></tr><tr><td>A day</td><td>2 taps, and up to 12.0 hours of growth are paid while you are away</td><td><code>farm.taps_per_day</code> · <code>farm.offline_cap_hours</code></td></tr><tr><td>A level</td><td>cap 100 · 20 XP a harvest · the same curve as Weapon Mastery</td><td><code>farm.level_*</code></td></tr><tr><td>Which draughts open</td><td>low from 1 · mid from 6 · high from 11</td><td><code>farm.tier_unlock_level</code></td></tr></tbody></table></section>
+<section><h2>Herbs from the ground versus herbs from a fight</h2><p class="note">The bundle roll is its own, separate from gear and stones, and the lowest band pays nothing on it (<code>herbs</code> reads the mid and high chances only). A plot out-taps a hunt; a hunt out-pays a plot in everything else.</p><table><thead><tr><th>Zone band</th><th>A bundle a kill</th><th>A bundle holds</th><th>A brewable draught a kill</th></tr></thead><tbody><tr><td>low</td><td>0.0%</td><td>1-3 herbs</td><td>0.0%</td></tr><tr><td>mid</td><td>2.0%</td><td>1-3 herbs</td><td>0.8%</td></tr><tr><td>high</td><td>3.0%</td><td>1-3 herbs</td><td>0.8%</td></tr></tbody></table></section></div>
 <p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
 </main></div></body></html>

@@ -79,12 +79,12 @@
 
 <svelte:window onkeydown={showcase ? undefined : onkey} />
 
-<div class="veil" class:front={topmost} class:showcase style={`--panel-grid-area:${gridArea};`} role="presentation" onclick={showcase ? undefined : onground}>
-  <div class="box {width}" class:fixed class:showcase role={showcase ? 'region' : 'dialog'} aria-modal={showcase ? undefined : 'true'} aria-labelledby={labelId} tabindex="-1" bind:this={box}>
+<div class="veil" class:panel-veil={!showcase} class:front={topmost} class:showcase style={`--panel-grid-area:${gridArea};`} role="presentation" onclick={showcase ? undefined : onground}>
+  <div class="box panel-solid {width}" class:panel-showcase={showcase} class:fixed class:showcase role={showcase ? 'region' : 'dialog'} aria-modal={showcase ? undefined : 'true'} aria-labelledby={labelId} tabindex="-1" bind:this={box}>
     <header class="panel-head">
       <h2 id={labelId}>{title}</h2>
       {#if subtitle}<p class="sub">{subtitle}</p>{/if}
-      <button class="quit" onclick={onclose} disabled={showcase} aria-label="Close {title}" title={showcase ? 'Panel stays visible in the Showcase' : 'Close (Esc)'}>✕</button>
+      <button class="quit btn btn-ghost btn-icon" onclick={onclose} disabled={showcase} aria-label="Close {title}" title={showcase ? 'Panel stays visible in the Showcase' : 'Close (Esc)'}>✕</button>
     </header>
     <div class="body" class:fixed class:showcase>
       {@render children()}
@@ -102,8 +102,6 @@
     grid-template-rows: repeat(15, minmax(0, 1fr));
     align-items: stretch;
     justify-items: stretch;
-    background: rgba(6, 9, 13, .68);
-    backdrop-filter: blur(4px);
   }
   .veil.front { z-index: var(--z-popover); }
   .box {
@@ -117,43 +115,36 @@
     overflow: hidden;
     height: 100%;
     max-height: 100%;
-    background: var(--bg);
-    border-inline: 1px solid var(--edge);
-    box-shadow: 0 0 60px rgba(0, 0, 0, .6);
     outline: none;
-    animation: slide .16s ease-out;
   }
   .wide { width: 100%; }
   /* Tab bars and compact pages stay inside the shared modal canvas without a scrollbar. */
   .box.fixed { height: 100%; max-height: 100%; }
-  .veil.showcase { position: relative; inset: auto; z-index: auto; display: block; padding: var(--spacing-md) var(--screen-pad); background: none; backdrop-filter: none; }
+  .veil.showcase { position: relative; inset: auto; z-index: auto; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; padding: var(--spacing-md) var(--screen-pad); }
   .veil.showcase.front { z-index: auto; }
   .box.showcase {
     width: clamp(960px, 92vw, 1900px); max-width: calc(100% - 2 * var(--screen-pad));
-    height: auto; max-height: none; min-height: 0; margin-inline: auto; overflow: visible;
-    border: 1px solid var(--edge); border-radius: var(--radius-md); box-shadow: var(--shadow-soft); animation: none;
+    height: auto; max-height: none; min-height: 0; overflow: visible;
   }
   .box.fixed.showcase { height: auto; max-height: none; }
   .body.showcase { overflow: visible; }
   .body.fixed.showcase { display: block; height: auto; max-height: none; }
-  @keyframes slide { from { transform: translateY(clamp(15px, 1.16vw, 32px)); opacity: .4; } to { transform: none; opacity: 1; } }
   .panel-head {
     display: flex;
     align-items: baseline;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm);
-    border-bottom: 1px solid var(--edge);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent);
     flex: none;
   }
-  .panel-head h2 { margin: 0; flex: none; color: var(--gold); letter-spacing: clamp(2px, 0.10vw, 3px); }
-  .sub { margin: 0; flex: 1; color: var(--dim); font-size: var(--font-xs); }
+  /* A square icon control centres its glyph itself: the tag's own padding is uneven (xs down, md across),
+     so a ✕ left to text layout sits off-centre in its token-sized box. */
   .quit {
-    background: none; border: 1px solid var(--edge); color: var(--dim); border-radius: var(--radius-xs);
-    width: var(--icon-md); height: var(--icon-md); padding: 0; line-height: 1;
+    width: var(--icon-md);
+    height: var(--icon-md);
+    place-content: center;
+    display: grid;
   }
-  .quit:hover { color: var(--text); border-color: var(--gold); }
   /* The flex child may shrink to the canvas; content must fit its own compact layout. */
   .body { padding: var(--spacing-md); overflow: hidden; min-width: 0; min-height: 0; }
-  .body.fixed { overflow: hidden; display: flex; flex-direction: column; }
+  .body.fixed { overflow: hidden; display: flex; flex-direction: column; gap: var(--spacing-sm); }
 </style>

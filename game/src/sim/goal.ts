@@ -1,4 +1,6 @@
-import { eng } from '../engine/client';
+import { E, eng } from '../engine/client';
+import { fieldSkillLevel, type FieldSkillId } from './fieldwork';
+import { farmLevel } from './farm';
 import type { GameState, Mob } from './types';
 
 /**
@@ -60,4 +62,15 @@ export function watch(s: GameState): void {
 export function describe(): string {
   const t = target();
   return `${t.name} · ${t.zoneName} (zone ${t.zone}) · level ${t.level} · HP ${Math.round(t.hp).toLocaleString('en-US')} · one spawn, no Push`;
+}
+
+/** Informational life-skill rung progress; it never touches final-boss completion state. */
+export function lifeSkillMilestones(s: GameState) {
+  const levels: Record<string, number> = Object.fromEntries(Object.keys(s.fieldwork.skills).map((id) => [id, fieldSkillLevel(s, id as FieldSkillId)]));
+  levels.farming = farmLevel(s);
+  return Object.keys(E.fieldwork.life_skill_combat.weights).map((id) => {
+    const level = levels[id] || 1;
+    const next = E.fieldwork.life_skill_combat.rungs.find((rung) => rung > level) ?? null;
+    return { id, level, next, complete: next === null };
+  });
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    copyHudLayout, DEFAULT_HUD_LAYOUT, DEFAULT_MODAL_AREA, HUD_REGION_META,
+    copyHudLayout, DEFAULT_HUD_LAYOUT, DEFAULT_MODAL_AREA, HUD_LAYOUT_VERSION, HUD_REGION_META, migrateHudLayout,
     moveGridArea, validGridArea, validateHudLayout,
     type GridAlign, type GridArea, type HudLayout, type HudRegionId,
   } from './hud-layout';
@@ -14,17 +14,18 @@
   }));
   const TONES: Record<RegionId, string> = {
     objectives: 'var(--focus)', target: 'var(--hot)', menu: 'var(--gold)', field: 'var(--good-lit)',
-    travel: 'var(--focus)', panels: 'var(--gold-lit)', automation: 'var(--good-lit)', feed: 'var(--dim)',
-    actionbar: 'var(--mana-lit)', controls: 'var(--hp-lit)', panel: 'var(--gold)',
+    travel: 'var(--focus)', panels: 'var(--gold-lit)', commands: 'var(--good-lit)', feed: 'var(--dim)',
+    actionbar: 'var(--mana-lit)', panel: 'var(--gold)',
   };
   const ALIGNMENTS: [GridAlign, string][] = [
     ['start', 'Start'], ['center', 'Center'], ['end', 'End'], ['stretch', 'Stretch'],
   ];
 
-  let { hud, modal, onapply }: {
+  let { hud, modal, onapply, migrationNotice = null }: {
     hud: HudLayout;
     modal: GridArea;
     onapply: (hud: HudLayout, modal: GridArea) => void;
+    migrationNotice?: string | null;
   } = $props();
   let layer = $state<Layer>('hud');
   let hudDraft = $state(copyHudLayout(DEFAULT_HUD_LAYOUT));
@@ -33,10 +34,12 @@
   let focusedCell = $state({ row: 1, column: 1 });
   let notice = $state('');
   let gridEl = $state<HTMLDivElement | null>(null);
+  let layoutFile = $state<HTMLInputElement | null>(null);
 
   $effect(() => {
     hudDraft = copyHudLayout(hud);
     modalDraft = { ...modal };
+    if (migrationNotice) notice = migrationNotice;
   });
 
   const issue = $derived(layer === 'hud' ? validateHudLayout(hudDraft) : (validGridArea(modalDraft) ? null : 'Panel canvas goes outside the grid.'));
@@ -63,8 +66,8 @@
 
   function shortLabel(id: RegionId): string {
     const labels: Record<RegionId, string> = {
-      objectives: 'MAP', target: 'MOB', menu: 'MENU', travel: 'TRAVEL', field: 'FIELD', panels: 'PANELS', automation: 'AUTO',
-      feed: 'LOG', actionbar: 'VITALS', controls: 'CTRL', panel: 'PANEL',
+      objectives: 'MAP', target: 'MOB', menu: 'MENU', travel: 'TRAVEL', field: 'FIELD', panels: 'PANELS', commands: 'CMD',
+      feed: 'LOG', actionbar: 'VITALS', panel: 'PANEL',
     };
     return labels[id];
   }
@@ -187,7 +190,9 @@
   }
 
   function exportLayout() {
-    const contents = JSON.stringify({ version: 1, hud: hudDraft, modal: modalDraft }, null, 2);
+    if (issue) { notice = issue; return; }
+    const normalized = migrateHudLayout({ version: HUD_LAYOUT_VERSION, hud: hudDraft, modal: modalDraft, notice: migrationNotice });
+    const contents = JSON.stringify({ version: HUD_LAYOUT_VERSION, hud: normalized.hud, modal: normalized.modal, notice: normalized.notice }, null, 2);
     const url = URL.createObjectURL(new Blob([contents], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = url;
@@ -195,6 +200,23 @@
     link.click();
     URL.revokeObjectURL(url);
     notice = 'Layout exported.';
+  }
+
+  async function importLayout(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const imported = migrateHudLayout(await file.text());
+      hudDraft = imported.hud;
+      modalDraft = imported.modal;
+      selected = 'field';
+      notice = imported.notice || 'Layout imported. Apply to preview it in the game.';
+    } catch (error) {
+      notice = error instanceof Error ? `Cannot import layout: ${error.message}` : 'Cannot import this layout.';
+    } finally {
+      input.value = '';
+    }
   }
 </script>
 
@@ -223,6 +245,7 @@
     <div class="editor-actions">
       <button onclick={resetLayer}>Reset layer</button>
       <button onclick={exportLayout}>Export JSON</button>
+      <label class="layout-import">Import JSON <input type="file" accept=".json,application/json" aria-label="Import HUD layout JSON" onchange={importLayout} /></label>
     </div>
   </aside>
 
@@ -293,6 +316,7 @@
         </select>
       </label>
     {/if}
+    <div class="inspector-spacer" aria-hidden="true"></div>
     <button class="apply" disabled={!!issue} onclick={applyLayout}>Apply layout</button>
   </aside>
 </div>
@@ -308,20 +332,24 @@
   }
   .layout-palette, .layout-workspace, .layout-inspector { min-width: 0; min-height: 0; }
   .layout-palette, .layout-inspector { display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  h3 { margin: 0; color: var(--gold); font-size: var(--font-xs); }
+  h3 { margin: 0; font-size: var(--font-xs); }
   .layer-switch { display: flex; gap: var(--spacing-xs); }
-  .layer-switch button { flex: 1; padding: var(--spacing-xs); font-size: var(--font-xs); }
+  .layer-switch button { flex: 1; font-size: var(--font-xs); }
   .layer-switch .active { color: var(--gold-lit); border-color: var(--gold); }
-  .component-list { display: grid; align-content: start; gap: var(--spacing-xs); min-height: 0; }
+  .component-list { display: grid; flex: 1; align-content: start; gap: var(--spacing-xs); min-height: 0; }
   .component {
     display: grid; grid-template-columns: var(--icon-xs) minmax(0, 1fr); align-items: center; gap: var(--spacing-xs);
-    min-width: 0; padding: var(--spacing-xs); text-align: left; font-size: var(--font-xs); color: var(--text);
+    min-width: 0; text-align: left; font-size: var(--font-xs); color: var(--text);
   }
   .component i { width: var(--icon-xs); height: var(--icon-xs); border: 1px solid var(--region-tone); background: color-mix(in srgb, var(--region-tone) 22%, transparent); }
   .component span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .component.selected { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--panel)); }
-  .editor-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xs); margin-top: auto; }
-  .editor-actions button, .apply { padding: var(--spacing-xs); font-size: var(--font-xs); }
+  .editor-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); min-width: 0; }
+  .editor-actions button { min-width: 0; }
+  .editor-actions .layout-import { grid-column: 1 / -1; }
+  .editor-actions button, .apply { font-size: var(--font-xs); }
+  .layout-import { display: grid; gap: var(--spacing-xs); min-width: 0; color: var(--dim); font-size: var(--font-xs); }
+  .layout-import input { min-width: 0; max-width: 100%; font-size: var(--font-xs); }
   .layout-workspace { display: flex; flex-direction: column; justify-content: center; gap: var(--spacing-xs); }
   .canvas-heading { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); }
   .canvas-heading span, .layout-inspector p { margin: 0; color: var(--dim); font-size: var(--font-xs); line-height: 1.35; }
@@ -333,7 +361,7 @@
   }
   .grid-cell {
     display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
-    min-width: 0; min-height: 0; padding: var(--spacing-xs); border-radius: var(--radius-sm); border-top: 0; border-left: 0;
+    min-width: 0; min-height: 0; border-radius: var(--radius-sm); border-top: 0; border-left: 0;
     background: transparent; text-align: left; color: var(--dim);
   }
   .grid-cell small { font: var(--font-xs) / 1 var(--num); opacity: .7; }
@@ -348,7 +376,8 @@
   .coordinates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); }
   .layout-inspector label { display: grid; gap: var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
   .layout-inspector select { min-width: 0; padding: var(--spacing-xs); font-size: var(--font-xs); }
-  .apply { margin-top: auto; color: var(--gold-lit); border-color: var(--gold); }
+  .inspector-spacer { flex: 1; min-height: 0; }
+  .apply { color: var(--gold-lit); border-color: var(--gold); }
   .apply:disabled { opacity: .45; }
   .notice, .issue { margin: 0; font-size: var(--font-xs); }
   .notice { color: var(--good-lit); }

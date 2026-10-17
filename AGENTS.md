@@ -20,7 +20,7 @@ ModWorld is a single-player, browser-only open-world idle RPG with no server. Pl
 | `tools/data/`   | Canonical numeric and game content data; see ownership table                                                                |
 | `tools/`        | Cages, reports, and shared readers: `lib/engine.ts`, `lib/roster.ts`, `lib/skillmodel.ts`, `lib/json.ts`                    |
 | `game/`         | Browser client: `src/engine/client.ts` (same JSON and `createEngine`), `src/sim/`, `src/state/save.ts`, `src/ui/`, `tests/` |
-| `docs/`         | `DECISIONS.md`, `glossary.md`, `stone-list.md`, and generated player wiki `docs/wiki/`                                      |
+| `docs/`         | `DECISIONS.md`, `glossary.md`, `skins.md`, `stone-list.md`, and generated player wiki `docs/wiki/`                          |
 | Repository root | `AGENTS.md`                                                                                                                 |
 
 ### Data ownership — `tools/data/`
@@ -76,9 +76,12 @@ Before starting a dev server, check `Get-NetTCPConnection -LocalPort 5173`. Reus
 
 **Read `game/src/styles/variables.css` before changing CSS.** Use shared tokens for repeatable values; one-off art effects may remain local.
 
+**Read `docs/skins.md` before writing or moving any style.** It fixes the three layers — `base.css` owns tag geometry, `skins.css` owns appearance, a component's `<style>` owns layout only — the `<family>-<skin>.<state>` naming (`btn-ghost.toggled`), and the per-surface migration and verification recipe. Appearance never lives in a contextual selector such as `.desk-tabs button`; a new look is a skin in `skins.css`, written once and reused everywhere.
+
 - Fonts: `--font-xs`, `--font-sm`, `--font-md`, `--font-lg`, `--font-xl`.
 - Icons/images: `--icon-xs`, `--icon-sm`, `--icon-md`, `--icon-lg`, `--icon-xl`.
 - Spacing: `--spacing-xs` (3px), `--spacing-sm` (5px), `--spacing-md` (10px), `--spacing-lg` (20px), `--spacing-xl` (30px). `--seam` is a 1px hairline, **not** spacing.
+- Put spacing between siblings on the parent with `gap`; never use a child's margin to create distance or push it into place. Zero margins may reset browser defaults only.
 - Radii: `--radius-xs` (4px, compact), `--radius-sm` (8px, standard/cards), `--radius-md` (12px, panels), `--radius-round` (50%, circles/capsules). No one-off radii or responsive radius ramps.
 - Colors, shadows, motion, easing, and stacking come from `variables.css`. Use local `--z-underlay`–`--z-toast` and named app-wide `--z-*` tokens as applicable; use established fast/UI/map/travel motion values. Recurring colors become shared tokens.
 - Use an exact matching token, otherwise the nearest existing token; do not invent one-off shared-size values. `--icon-hub`, `--slot-skill-size`, and `--pad-area` are HUD-only.

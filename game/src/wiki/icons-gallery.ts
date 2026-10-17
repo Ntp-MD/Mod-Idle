@@ -106,16 +106,54 @@ export const GALLERY_RUNTIME = `(function () {
   searchInput.type = 'search';
   searchInput.placeholder = 'Search ' + ALL.length + ' icons…';
   searchInput.setAttribute('aria-label', 'Search icons');
-  searchInput.style.cssText = 'width:100%;padding:.4rem .6rem;margin-bottom:.6rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--text);font:inherit;';
+  searchInput.style.cssText = 'width:100%;padding:.4rem .6rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--text);font:inherit;';
 
   var tabs = document.createElement('div');
-  tabs.style.cssText = 'display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;';
+  tabs.style.cssText = 'display:flex;flex-wrap:wrap;gap:var(--spacing-xs);';
 
   var count = document.createElement('p');
-  count.style.cssText = 'margin:0 0 .5rem;font-size:var(--font-xs);color:var(--dim);';
+  count.style.cssText = 'font-size:var(--font-xs);color:var(--dim);';
+
+  /* the marks live in this browser only, so the page has to hand them out: copy for a paste,
+     download for a file the repo can read back */
+  var bar = document.createElement('div');
+  bar.style.cssText = 'display:none;flex-wrap:wrap;gap:var(--spacing-xs);align-items:center;';
+  var barText = document.createElement('span');
+  barText.style.cssText = 'font-size:var(--font-xs);color:var(--dim);';
+  var BTN = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-sm);background:transparent;color:var(--gold);cursor:pointer;font-size:var(--font-xs);';
+  var copyBtn = document.createElement('button');
+  copyBtn.style.cssText = BTN;
+  copyBtn.onclick = function () {
+    var text = marked.join('\\n');
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+      barText.textContent = 'clipboard needs a secure context — use Download instead';
+      return;
+    }
+    navigator.clipboard.writeText(text).then(function () {
+      barText.textContent = 'copied ' + marked.length + ' paths — paste them to the agent';
+    }, function () {
+      barText.textContent = 'clipboard refused — use Download instead';
+    });
+  };
+  var dlBtn = document.createElement('button');
+  dlBtn.style.cssText = BTN;
+  dlBtn.onclick = function () {
+    var blob = new Blob([JSON.stringify(marked, null, 1)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'icon-marks.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    barText.textContent = 'wrote icon-marks.json — tell the agent where it landed';
+  };
+  bar.appendChild(barText);
+  bar.appendChild(copyBtn);
+  bar.appendChild(dlBtn);
 
   var grid = document.createElement('div');
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;';
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:var(--spacing-sm);';
 
   var TAB_ON = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-sm);background:var(--gold);color:#000;cursor:pointer;font-size:var(--font-xs);';
   var TAB_OFF = 'padding:.25rem .6rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:transparent;color:var(--text);cursor:pointer;font-size:var(--font-xs);';
@@ -153,7 +191,7 @@ export const GALLERY_RUNTIME = `(function () {
 
   function card(item) {
     var el = document.createElement('div');
-    el.style.cssText = 'border:1px solid var(--line);border-radius:var(--radius-sm);padding:.4rem;text-align:center;position:relative;background:var(--panel);';
+    el.style.cssText = 'display:grid;justify-items:center;align-content:start;gap:var(--spacing-xs);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.4rem;text-align:center;position:relative;background:var(--panel);';
 
     var on = hasFav(item.path);
     var star = document.createElement('button');
@@ -191,12 +229,12 @@ export const GALLERY_RUNTIME = `(function () {
     img.src = item.url;
     img.alt = item.name;
     img.loading = 'lazy';
-    img.style.cssText = 'width:48px;height:48px;display:block;margin:0 auto;';
+    img.style.cssText = 'width:48px;height:48px;display:block;';
 
     var label = document.createElement('div');
     label.textContent = item.name;
     label.title = item.path;
-    label.style.cssText = 'font-size:var(--font-xs);color:var(--dim);margin-top:.25rem;word-break:break-all;line-height:1.25;';
+    label.style.cssText = 'font-size:var(--font-xs);color:var(--dim);word-break:break-all;line-height:1.25;';
 
     el.appendChild(star);
     el.appendChild(marker);
@@ -205,8 +243,20 @@ export const GALLERY_RUNTIME = `(function () {
     return el;
   }
 
+  function renderBar() {
+    if (!marked.length) {
+      bar.style.display = 'none';
+      return;
+    }
+    bar.style.display = 'flex';
+    barText.textContent = marked.length + ' marked for removal';
+    copyBtn.textContent = 'Copy paths';
+    dlBtn.textContent = 'Download icon-marks.json';
+  }
+
   function render() {
     renderTabs();
+    renderBar();
     var items = ALL.filter(keeps);
     var visibleTotal = showMarked ? marked.length : ALL.length - marked.length;
     count.textContent = items.length + ' of ' + visibleTotal + ' icons'
@@ -221,9 +271,11 @@ export const GALLERY_RUNTIME = `(function () {
   };
 
   mount.textContent = '';
+  mount.style.cssText = 'display:flex;flex-direction:column;gap:var(--spacing-md);min-width:0;';
   mount.appendChild(searchInput);
   mount.appendChild(tabs);
   mount.appendChild(count);
+  mount.appendChild(bar);
   mount.appendChild(grid);
   render();
 })();`;

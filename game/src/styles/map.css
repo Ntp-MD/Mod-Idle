@@ -56,12 +56,3 @@
 .sheet svg .pin.here, .sheet svg .pin.target { display: inline; }
 .sheet svg .pin.target circle:first-child { fill: color-mix(in srgb, var(--pin-target-glow) 22%, transparent); stroke: var(--pin-target); }
 .sheet svg .pin.target circle:last-child { fill: var(--pin-target); }
-
-.sheet svg .map-mist-world, .sheet svg .map-mist-drift { pointer-events: none; }
-.sheet svg .map-mist-drift image { transform-box: fill-box; transform-origin: center; will-change: transform; }
-.sheet svg .map-mist-drift .mist-drift-a { animation: map-mist-drift-a 22s ease-in-out infinite alternate; }
-.sheet svg .map-mist-drift .mist-drift-b { animation: map-mist-drift-b 28s ease-in-out infinite alternate; }
-.sheet svg .map-mist-drift .mist-drift-c { animation: map-mist-drift-c 24s ease-in-out infinite alternate; }
-@keyframes map-mist-drift-a { to { transform: translate(4%, -5%) scale(1.04); } }
-@keyframes map-mist-drift-b { to { transform: translate(-5%, 4%) scale(1.03); } }
-@keyframes map-mist-drift-c { to { transform: translate(3%, 5%) scale(1.04); } }

@@ -906,7 +906,7 @@
     "elite_n": 3,
     "elite_n_rule": "the count the rebalance pass sizes; the client runs on this number and the board never types it twice",
     "reward_minutes_of_band_income": 15,
-    "reward_rule": "an Elite hunt pays Tier stones sized at reward_minutes_of_band_income of that band's own stone income (engine.stonesForMinutes); a Boss hunt pays its own Remove stone, exactly as tasks.md writes it. The plain kill-count task is gone, so the board pays no Value stones at all",
+    "reward_rule": "Elite and Expedition hunts pay Tier stones sized at reward_minutes_of_band_income of that band's own stone income (engine.stonesForMinutes); a Boss hunt pays its own Remove stone. Expeditions require target Species Elites at a named subzone, so the location objective replaces the old plain kill-count task and the board still pays no Value stones.",
     "boss_reward": {
       "remove": 1,
       "reroll_tier": 4
@@ -914,8 +914,9 @@
     "boss_reward_rule": "winner's choice, exactly as tasks.md writes it",
     "boss_n": 1,
     "boss_n_rule": "one spawn of the zone's boss, within the run it is offered in",
-    "offer_weight_elite": 0.75,
-    "offer_weight_rule": "the Elite hunt weighs this share of an offer against the Boss hunt's remainder (tasks.md). Typed in town.ts rather than in the client, because the board's roll is a read the client performs on the data",
+    "offer_weight_elite": 0.5,
+    "offer_weight_expedition": 0.25,
+    "offer_weight_rule": "Elite and Expedition share the former 75% Tier-stone offer share; Boss uses the remaining 25%. Expedition rewards replace, rather than add to, the previous Tier-stone offer budget. Typed in town.ts rather than in the client, because the board's roll is a read the client performs on the data",
     "income_bound_pct": 10,
     "income_bound_rule": "hard rule: all task rewards together stay inside this share of the day's loot flows — bonus stones inside the same funnel, never income on top (DECISIONS.md §The task board). T19 gates it: a slot's natural claims plus every skip a day can buy must keep the whole board's Tier-stone drip under the bound",
     "refill_sec": 86400,
@@ -926,7 +927,7 @@
   "pending": [
     {
       "number": "Task reward sizing (DECISIONS.md §The task board rebalance)",
-      "breaks": "the income bound is now gated (T19) and holds at the daily refill cadence; the owner's remaining call is only sizing taste — elite_n, reward_minutes_of_band_income and offer_weight_elite",
+      "breaks": "the income bound is now gated (T19) and holds at the daily refill cadence; the owner's remaining call is only sizing taste — elite_n, reward_minutes_of_band_income and the split between Elite and Expedition offers",
       "status": "open"
     },
     {
@@ -983,6 +984,7 @@
       "high": 3
     },
     "material_values": {
+      "scrap": 0.5,
       "ore": 0.2,
       "timber": 0.2,
       "rarewood": 1.5,
@@ -1254,5 +1256,274 @@
       }
     },
     "note": "The Counterhand buys gathered goods and junk. Each town has stable import needs and abundant exports. Sales spend a shared category demand pool measured in base gold; it recovers over simulation time, including credited offline time. Quotes integrate the declining premium across the whole sale, so splitting stacks does not improve payment. Goods cannot be bought back; gold buys existing convenience services only. Base junk drop expectations and stall pricing anchors remain reference values, while realised trade income depends on destination and supply."
+  },
+  "delivery": {
+    "derivation_version": 1,
+    "trigger_interval_sec": 1800,
+    "trigger_chance": 0.4,
+    "active_slots": 1,
+    "history_limit": 8,
+    "count_min": 1,
+    "count_max": 8,
+    "stack_share": 0.25,
+    "deadline_min_sec": 900,
+    "deadline_max_sec": 21600,
+    "production_allowance": 1.75,
+    "deadline_allowance_sec": 600,
+    "reward_minutes": 5,
+    "fallback_minutes": 3,
+    "minimum_stones": 1,
+    "premium_base": 1.5,
+    "premium_per_difficulty": 0.1,
+    "processing_weight": 0.3,
+    "count_exponent": 0.5,
+    "band_weights": {
+      "low": 1,
+      "mid": 1.5,
+      "high": 2
+    },
+    "rarity_weights": {
+      "common": 1,
+      "uncommon": 1.5,
+      "rare": 2.5
+    },
+    "target_weights": {
+      "junk": 1,
+      "material": 2,
+      "food": 2,
+      "herb": 1
+    },
+    "default_target_weight": 1,
+    "skill_chance": 0.2,
+    "default_skill_weight": 1,
+    "skill_weights": {},
+    "skill_band_weights": {
+      "low": 1,
+      "mid": 1,
+      "high": 1
+    },
+    "stones": [
+      {
+        "key": "tier",
+        "income": "tier",
+        "weight": 5
+      },
+      {
+        "key": "reroll_value",
+        "income": "reroll_value",
+        "weight": 2
+      },
+      {
+        "key": "add",
+        "income": "add",
+        "weight": 1
+      },
+      {
+        "key": "imprint_accuracy",
+        "income": "tier",
+        "weight": 1
+      }
+    ],
+    "fallback_stone": "tier",
+    "pause_states": [
+      "camp",
+      "dungeon"
+    ]
+  },
+  "black_market": {
+    "refresh_interval_sec": 1800,
+    "offers_per_refresh": 3,
+    "item_count_min": 1,
+    "item_count_max": 3,
+    "resale_cover_multiplier": 1.25,
+    "rarity_price_multiplier": {
+      "low": 1.2,
+      "mid": 1.5,
+      "high": 2
+    },
+    "materials": [
+      {
+        "good": "material:rarewood",
+        "weight": 3,
+        "rarity": "low"
+      },
+      {
+        "good": "material:rock-salt",
+        "weight": 2,
+        "rarity": "mid"
+      },
+      {
+        "good": "material:silver-ore",
+        "weight": 3,
+        "rarity": "high"
+      },
+      {
+        "good": "material:willow-wood",
+        "weight": 2,
+        "rarity": "mid"
+      },
+      {
+        "good": "material:cedar-wood",
+        "weight": 2,
+        "rarity": "high"
+      }
+    ],
+    "stones": [
+      {
+        "key": "repair",
+        "weight": 3,
+        "count_min": 1,
+        "count_max": 2,
+        "price_gold": 180
+      },
+      {
+        "key": "corrupt",
+        "weight": 2,
+        "count_min": 1,
+        "count_max": 1,
+        "price_gold": 420
+      },
+      {
+        "key": "polish",
+        "weight": 2,
+        "count_min": 1,
+        "count_max": 2,
+        "price_gold": 240
+      },
+      {
+        "key": "reforge",
+        "weight": 1,
+        "count_min": 1,
+        "count_max": 1,
+        "price_gold": 550
+      },
+      {
+        "key": "rebirth",
+        "weight": 1,
+        "count_min": 1,
+        "count_max": 1,
+        "price_gold": 700
+      },
+      {
+        "key": "imprint_accuracy",
+        "weight": 2,
+        "count_min": 1,
+        "count_max": 2,
+        "price_gold": 260
+      }
+    ],
+    "skill_weights": {
+      "attack.fireball": 1,
+      "attack.flame_bolt": 1,
+      "attack.firestorm": 1,
+      "attack.meteor": 1,
+      "attack.flame_wisp": 1,
+      "attack.frost_bolt": 1,
+      "attack.ice_shard": 1,
+      "attack.ice_lance": 1,
+      "attack.blizzard": 1,
+      "attack.frozen_orb": 1,
+      "attack.frostbite": 1,
+      "attack.chain_lightning": 1,
+      "attack.lightning_bolt": 1,
+      "attack.spark": 1,
+      "attack.thunder_strike": 1,
+      "attack.storm_call": 1,
+      "attack.static_field": 1,
+      "attack.poison_bolt": 1,
+      "attack.venom_spray": 1,
+      "attack.acid_arrow": 1,
+      "attack.toxic_cloud": 1,
+      "attack.chaos_bolt": 1,
+      "attack.void_blast": 1,
+      "attack.sand_storm": 1,
+      "attack.earth_splitter": 1,
+      "attack.fan_of_knives": 1,
+      "attack.backstab": 1,
+      "attack.poisoned_edge": 1,
+      "attack.sidestep": 1,
+      "attack.nerve_strike": 1,
+      "attack.impale": 1,
+      "attack.skewer_line": 1,
+      "attack.reach_thrust": 1,
+      "attack.low_sweep": 1,
+      "attack.skull_crack": 1,
+      "attack.ground_slam": 1,
+      "attack.bone_breaker": 1,
+      "attack.iron_toll": 1,
+      "attack.wide_swing": 1,
+      "attack.whirlaxe": 1,
+      "attack.carnage": 1,
+      "attack.cleave_down": 1,
+      "attack.cleave": 1,
+      "attack.elemental_break": 1,
+      "attack.whirlwind": 1,
+      "attack.shield_bash": 1,
+      "attack.puncture": 1,
+      "attack.reap": 1,
+      "attack.piercing_shot": 1,
+      "attack.arrow_shower": 1,
+      "attack.headshot": 1,
+      "attack.pierce_the_veil": 1,
+      "attack.earth_shock": 1,
+      "buff.warcry": 1,
+      "buff.berserker": 1,
+      "buff.iron_will": 1,
+      "buff.holy_veil": 1,
+      "buff.ghost_dance": 1,
+      "buff.earth_wall": 1,
+      "buff.magia_drive": 1,
+      "buff.energy_absorb": 1,
+      "buff.flame_guard": 1,
+      "curse.weaken": 1,
+      "curse.blinding_mark": 1,
+      "curse.expose": 1,
+      "curse.cripple": 1,
+      "curse.jinx": 1,
+      "curse.venom_bind": 1,
+      "heal.heal": 1,
+      "heal.greater_heal": 1,
+      "heal.cleanse": 1,
+      "aura.wraith_of_fury": 1,
+      "aura.clarity": 1,
+      "aura.haste": 1,
+      "aura.vitality": 1,
+      "aura.herald_of_ash": 1,
+      "aura.herald_of_frost": 1,
+      "aura.herald_of_lightning": 1,
+      "aura.ember_conversion": 1,
+      "aura.rime_conversion": 1,
+      "aura.storm_conversion": 1,
+      "aura.cast_on_crit": 1,
+      "aura.cast_on_damage_taken": 1,
+      "aura.rimbo_form": 1,
+      "aura.elemental_fury": 1,
+      "aura.trinity_form": 1,
+      "aura.grace": 1,
+      "aura.iron_guard": 1,
+      "aura.energy_guard": 1
+    },
+    "skill_level_offers": [
+      {
+        "level": 5,
+        "weight": 2,
+        "price_gold": 250
+      },
+      {
+        "level": 10,
+        "weight": 2,
+        "price_gold": 1500
+      },
+      {
+        "level": 15,
+        "weight": 2,
+        "price_gold": 8000
+      },
+      {
+        "level": 20,
+        "weight": 3,
+        "price_gold": 25000
+      }
+    ]
   }
 }

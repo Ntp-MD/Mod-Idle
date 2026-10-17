@@ -90,7 +90,6 @@
     display: flex; align-items: baseline; gap: var(--spacing-xs);
     justify-content: space-between;
     text-align: left;
-    padding: var(--spacing-xs) var(--spacing-xs);
     font-size: var(--font-xs);
     background: none;
     border: 1px solid transparent;

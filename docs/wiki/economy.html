@@ -130,7 +130,7 @@
     --font-md: clamp(17px, 1.28vw, 36px);
     --font-lg: clamp(22px, 1.67vw, 47px);
     --font-xl: clamp(29px, 2.18vw, 62px);
-    --icon-xs: clamp(11px, 12vw, 23px);
+    --icon-xs: clamp(11px, 0.72vw, 23px);
     --icon-sm: clamp(14px, 1vw, 31px);
     --icon-md: clamp(21px, 1.50vw, 45px);
     --icon-lg: clamp(32px, 3vw, 68px);
@@ -159,20 +159,23 @@
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: var(--font-xs)/1.55 var(--ui); }
+body { margin: 0; display: flex; justify-content: center; background: var(--bg); color: var(--text); font: var(--font-xs)/1.55 var(--ui); }
 a { color: var(--gold); text-decoration: none; }
 a:hover { text-decoration: underline; }
-.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 116rem; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
-nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+.layout { display: flex; align-items: flex-start; gap: var(--spacing-xl); width: 100%; max-width: 116rem; padding: 2rem 2.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: var(--spacing-sm); }
 nav a { color: var(--dim); }
 nav a.on { color: var(--gold); }
-main { flex: 1; min-width: 0; }
-h1 { margin: 0 0 .3rem; font-size: var(--font-md); }
-.lead { color: var(--dim); margin: 0 0 2rem; }
-section { margin: 0 0 2.2rem; }
-h2 { font-size: var(--font-sm); margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
-h3 { font-size: var(--font-xs); margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
-.note { color: var(--dim); font-size: var(--font-xs); margin: .3rem 0 .6rem; }
+main { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-xl); min-width: 0; }
+.page-head { display: grid; gap: var(--spacing-xs); }
+.page-content { display: grid; gap: var(--spacing-xl); }
+h1 { font-size: var(--font-md); }
+.lead { color: var(--dim); }
+section { display: grid; gap: var(--spacing-sm); }
+h2 { font-size: var(--font-sm); border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: var(--font-xs); }
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
 table { border-collapse: collapse; width: 100%; font-size: var(--font-xs); }
 th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--dim); font-weight: 600; }
@@ -183,10 +186,10 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 /* One table, its rows split into tabbed groups: the strip is a radio group, each tab is a <tbody>, and a
    press swaps which body shows over the shared header — no script, so the static build and the live wiki
    behave alike. Generic over the group count a page declares (three here). */
-.tabs { margin: .9rem 0 1.4rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
 .tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .tabs > label {
-  display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
+  display: inline-flex; align-items: baseline; gap: var(--spacing-sm); padding: .3em .9em;
   border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
   color: var(--dim); font-size: var(--font-xs); cursor: pointer;
 }
@@ -199,83 +202,85 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
-.tabs table { margin-top: 0; }
-.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.tabs table { flex: 1 0 100%; width: 100%; }
+.twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
 td:first-child { white-space: nowrap; }
-.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: var(--font-xs); }
-.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls { list-style: none; display: grid; gap: var(--spacing-xs); padding: 0; font-size: var(--font-xs); }
+.rolls li { position: relative; display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .02rem .25rem; }
 .rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
 .rolls .rn { position: relative; flex: 1; }
 .rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: var(--font-xs); white-space: nowrap; opacity: .8; }
 .rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; }
+.cell-stack { display: grid; gap: var(--spacing-xs); }
 td .hy { color: var(--dim); font-size: var(--font-xs); }
-.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: var(--font-xs); }
-.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx { list-style: none; display: grid; gap: var(--spacing-xs); padding: 0; font-size: var(--font-xs); }
+.fx li { display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
 .fx li:last-child { border-bottom: 0; }
 .fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
 .fx .fk em { color: var(--text); font-style: normal; }
 .fx .fs { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
 .fx .fv { font-family: var(--num); white-space: nowrap; }
-td .sub { display: block; color: var(--dim); font-size: var(--font-xs); margin-top: .15rem; }
+td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .rolls .forced .rn { color: var(--gold); }
 .rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: var(--font-xs); }
-.plist { list-style: none; margin: .15rem 0 0; padding: 0; font-size: var(--font-xs); }
+.plist { list-style: none; margin: 0; padding: 0; font-size: var(--font-xs); }
 /* one grid for the whole cell: every key shares track one at the width of the longest key in that
    cell, every value takes track two — display:contents promotes each key/value pair to the grid,
    so a spelled-out label like "damage per second" costs no wrap and nothing runs into its number */
-.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: .5rem; row-gap: .03rem; }
+.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: var(--spacing-md); row-gap: var(--spacing-xs); }
 .plist li { display: contents; }
 .plist .pk { font-family: var(--ui); color: var(--dim); }
 .plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
-.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
-.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem .8rem; padding: .65rem .8rem; cursor: pointer; }
+.zone { display: grid; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-md); padding: .65rem .8rem; cursor: pointer; }
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
 .zone-title { font-weight: 600; }
 .zone-meta { color: var(--dim); font-size: var(--font-xs); }
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
-.zone-body { padding: .1rem .8rem .8rem; }
-@media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-.race-roster { display: grid; gap: .9rem; margin-top: .5rem; }
-.race-group { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
-.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
-.race-group > header h3 { margin: 0; color: var(--gold); font-size: var(--font-xs); }
+.zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
+@media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
+.race-roster { display: grid; gap: var(--spacing-md); }
+.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
+.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
+.race-group > header h3 { color: var(--gold); font-size: var(--font-xs); }
 .race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
-.race-empty { margin: .55rem .2rem .2rem; color: var(--dim); font-size: var(--font-xs); }
-.species-roster { display: grid; gap: .65rem; margin-top: .6rem; }
-.species-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
-.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.species-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
-.species-entry > header h4 { margin: 0; color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
+.race-empty { color: var(--dim); font-size: var(--font-xs); }
+.species-roster { display: grid; gap: var(--spacing-md); }
+.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
+.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.species-entry h4 { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
+.species-entry > header h4 { color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
 .species-count { color: var(--gold); }
-.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
-.species-facts div { display: grid; gap: .1rem; min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
+.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--spacing-sm) var(--spacing-md); }
+.species-facts div { display: grid; gap: var(--spacing-xs); min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
 .species-facts b { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
 .species-entry table { font-size: var(--font-xs); }
 .species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
 @media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
-.legend { margin: 0; padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
-.legend li { margin: .3rem 0; }
+.legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
-ol { margin: .2rem 0; padding-left: 1.3rem; }
-li { margin: .15rem 0; }</style><div class="layout">
+ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }</style><div class="layout">
 <nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Bestiary</a><a class="" href="towns.html">Towns</a><a class="on" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
-<main><h1>The two currencies</h1><p class="lead">Crafting stones buy power. Gold buys convenience. They never convert into each other.</p><section><h2>Crafting</h2><p>Every verb, price and stone source lives on the <a href="crafting.html">Crafting</a> page.</p></section>
+<main><header class="page-head"><h1>The two currencies</h1><p class="lead">Crafting stones buy power. Gold buys convenience. They never convert into each other.</p></header>
+<div class="page-content"><section><h2>Crafting</h2><p>Every verb, price and stone source lives on the <a href="crafting.html">Crafting</a> page.</p></section>
 <section><h2>Gold: where it comes from</h2><p class="note">These are reference junk values before market demand, and town service prices still use this baseline. The Counterhand also buys gathered materials, provisions and farm herbs. Actual payment depends on the buyer, the quantity and how much of that category the town has already received.</p><table><thead><tr><th>Band</th><th>Kills an hour</th><th>Junk an hour</th><th>Gold a minute</th></tr></thead><tbody><tr><td>low</td><td><span class="num">497</span></td><td><span class="num">50</span></td><td>0.8 gold</td></tr><tr><td>mid</td><td><span class="num">582</span></td><td><span class="num">69</span></td><td>1.2 gold</td></tr><tr><td>high</td><td><span class="num">645</span></td><td><span class="num">87</span></td><td>1.5 gold</td></tr></tbody></table></section>
 <section><h2>Town buyers and trade routes</h2><p class="note">At full demand, imported goods pay up to ×2.60 base value; abundant exports pay up to ×0.85. Deliveries consume the shared category pool of 120 base gold and the price approaches ×0.60. Demand recovers over 4 game hours, including credited away time. A bulk quote includes the whole price decline; splitting a stack earns the same total. Open Market to compare buyers, walking distance, warp fees and net proceeds, then select Map route. Goods can be sold only while standing in that town.</p><table><thead><tr><th>Town</th><th>Import needs</th><th>Abundant exports</th><th>Why it buys</th></tr></thead><tbody><tr><td>Eastgate</td><td>ore · craft · relics</td><td>wood</td><td>Road repairs and new workshops need metals and fittings.</td></tr><tr><td>Highspire</td><td>wood · cooked · herb</td><td>ore</td><td>Miners need timber supports, meals and herbs.</td></tr><tr><td>Wolf Cross</td><td>ore · Salted Fish · craft</td><td>raw · wood</td><td>Hunters trade local game for tools and preserved fish.</td></tr><tr><td>Greyfen</td><td>wood · raw · herb · fruit</td><td>Rock Salt</td><td>Dryland kitchens need fresh game, herbs and fuel.</td></tr><tr><td>Saltmarrow</td><td>wood · cooked · trophies</td><td>Rock Salt</td><td>Tomb crews need supplies for long expeditions.</td></tr><tr><td>The Pale Spire</td><td>Silver Inlay · herb · curios</td><td>Silver Ore</td><td>Sanctum artisans commission inlay and botanical supplies.</td></tr><tr><td>Blackwater Reach</td><td>craft · Pine Nut Bread · salvage · ingredient</td><td>River Fish · wood</td><td>Boat builders need fittings and dry provisions.</td></tr><tr><td>Bonegate</td><td>cooked · wood · herb</td><td>relics · ore</td><td>Wardens consume fuel and food at the old gate.</td></tr><tr><td>Frosthold</td><td>Cedar-smoked Game · wood · herb</td><td>ore</td><td>Cold camps pay for long meals and firewood.</td></tr><tr><td>Vermolch</td><td>craft · Salted Fish · curios</td><td>wood · Marsh Sage</td><td>Mire settlements need tools and food that travels.</td></tr><tr><td>Duskmoor</td><td>wood · raw · botanicals</td><td>ore · Wild Grain</td><td>Moor kitchens and shelters consume forest supplies.</td></tr><tr><td>Nettlecrag</td><td>wood · cooked · herb</td><td>ore</td><td>Deep crews import timber, meals and medicinal herbs.</td></tr><tr><td>Emberhold</td><td>wood · Copper Fittings · River Fish</td><td>Iron Ore</td><td>Foundries consume wood and copper fittings.</td></tr><tr><td>Millbrook</td><td>ore · craft · trophies</td><td>wood · River Fish</td><td>Waterworks need metal parts and tools.</td></tr><tr><td>Wyrmback</td><td>wood · craft · Marsh Sage Tea</td><td>Shellfish · Rock Salt</td><td>Coastal crews import hull timber and warming tea.</td></tr><tr><td>Ashfall</td><td>ore · Shellfish Chowder · curios</td><td>wood · herb</td><td>Forest artisans need metal and coastal provisions.</td></tr><tr><td>Ironrow</td><td>wood · Pine Nut Bread · herb</td><td>Silver Ore</td><td>Terrace workshops need timber and expedition food.</td></tr><tr><td>Thornwake</td><td>Cedar-smoked Game · craft · relics</td><td>ore · wood</td><td>Frontier crews pay for finished supplies and rare trophies.</td></tr></tbody></table></section>
 <section><h2>Regional gathering</h2><p class="note">Regional bonuses supplement common ore, timber and rarewood. Keep stock for Camp and recipes, or carry it to a town that needs it. Mining and Woodcutting improve bonus chances and harvests.</p><table><thead><tr><th>Town field</th><th>Mine bonus</th><th>Grove bonus</th><th>Grove forage</th></tr></thead><tbody><tr><td>Eastgate</td><td>Copper Ore</td><td>Pine Wood</td><td>Wild Grain</td></tr><tr><td>Highspire</td><td>Iron Ore</td><td>Hardwood</td><td>Forest Nuts</td></tr><tr><td>Wolf Cross</td><td>Copper Ore</td><td>Willow Wood</td><td>Marsh Sage</td></tr><tr><td>Greyfen</td><td>Rock Salt</td><td>Willow Wood</td><td>Marsh Sage</td></tr><tr><td>Saltmarrow</td><td>Rock Salt</td><td>Cedar Wood</td><td>Sunroot</td></tr><tr><td>The Pale Spire</td><td>Silver Ore</td><td>Cedar Wood</td><td>Moonmint</td></tr><tr><td>Blackwater Reach</td><td>Rock Salt</td><td>Willow Wood</td><td>River Fish</td></tr><tr><td>Bonegate</td><td>Iron Ore</td><td>Hardwood</td><td>Field Mushroom</td></tr><tr><td>Frosthold</td><td>Iron Ore</td><td>Pine Wood</td><td>Forest Nuts</td></tr><tr><td>Vermolch</td><td>Copper Ore</td><td>Willow Wood</td><td>Marsh Sage</td></tr><tr><td>Duskmoor</td><td>Iron Ore</td><td>Pine Wood</td><td>Wild Grain</td></tr><tr><td>Nettlecrag</td><td>Silver Ore</td><td>Hardwood</td><td>Field Mushroom</td></tr><tr><td>Emberhold</td><td>Iron Ore</td><td>Cedar Wood</td><td>Sunroot</td></tr><tr><td>Millbrook</td><td>Copper Ore</td><td>Willow Wood</td><td>River Fish</td></tr><tr><td>Wyrmback</td><td>Rock Salt</td><td>Cedar Wood</td><td>Shellfish</td></tr><tr><td>Ashfall</td><td>Silver Ore</td><td>Hardwood</td><td>Moonmint</td></tr><tr><td>Ironrow</td><td>Silver Ore</td><td>Cedar Wood</td><td>Sunroot</td></tr><tr><td>Thornwake</td><td>Iron Ore</td><td>Pine Wood</td><td>Marsh Sage</td></tr></tbody></table></section>
+<section><h2>Delivery wants</h2><p>Visited towns independently get an online offer opportunity every 30 minutes, with a 40.0% trigger chance. Opening Market never rolls an offer. A want names its good, count, issuing town, deadline and exact completion reward up front; there is no Accept step.</p><p>Bring carried goods to that town. Each partial hand-in pays the live market quote immediately, including the normal fractional-gold carry. The frozen completion bonus pays once when the full count is met. At expiry you keep all market gold already paid and forfeit only the unearned bonus. A promised skill grants the named skill or its shown fallback stones if no useful duplicate remains, never both.</p><p>Track is an optional reminder. Deadlines use credited game time, including credited offline time, and pause during Camp recovery or an active dungeon run. Offline time creates no new offers. Production, inputs and reachable travel inform the deadline; expected rare-drop time is not a guaranteed catch. Distance never increases the completion reward.</p><p>Market keeps partial and terminal recaps from recorded proceeds. Older unread recaps merge into a saved summary when the history limit is reached; acknowledging a recap pays nothing. A full reward bag refuses the final delivery without spending goods, gold, demand or progress, so make room and retry before expiry.</p></section>
+<section><h2>Black Market</h2><p class="note"><p>Each visited settlement runs its own Black Market stall in the Market screen: rare materials, craft stones and named skills at a target XP Level, bought with Gold — the one owner-sanctioned exception to the rule that gold buys services everywhere else in town. Stock is rolled per town, frozen in the save, and refreshes only while the game is online; opening the panel, walking away, a reload, an import or the real-world clock never rerolls it.</p><p>A skill offer grants the skill if you do not own it and raises its XP Level to the offered band when that is an upgrade. It never lowers progress, never adds a Duplicate Ladder rung, and a skill that already sits at or above the offered level cannot be bought again. Prices cover resale: materials sell above the peak trade multiplier, and selling them back goes through the ordinary Counterhand demand, so a buy-and-resell loop is a guaranteed loss.</p></p><table><thead><tr><th>Rule</th><th>The number</th></tr></thead><tbody><tr><td>Offers per settlement</td><td>3 at a time</td></tr><tr><td>Refresh</td><td>every 30 online minutes, per visited town</td></tr><tr><td>Material price</td><td>peak trade value × 1.25 resale cover × its rarity multiplier</td></tr><tr><td>Skill XP Level bands</td><td>Level 5 · 250 gold · Level 10 · 1,500 gold · Level 15 · 8,000 gold · Level 20 · 25,000 gold</td></tr></tbody></table></section>
 <section><h2>Workshop cargo</h2><p class="note">Use the Market Workshop while standing in a settlement. Finished cargo has a derived base value above its inputs, but the buyer’s remaining demand still decides the actual offer. Making a good spends its listed materials and grants field skill XP. A full bag refuses the action without spending anything.</p><table><thead><tr><th>Finished good</th><th>Field skill</th><th>Materials</th><th>Base value</th></tr></thead><tbody><tr><td>Copper Fittings</td><td>mining Lv 1</td><td>2 Copper Ore · 1 Timber</td><td>2.70 gold</td></tr><tr><td>Iron Tools</td><td>mining Lv 3</td><td>2 Iron Ore · 1 Hardwood</td><td>4.65 gold</td></tr><tr><td>Silver Inlay</td><td>mining Lv 5</td><td>2 Silver Ore · 1 Rarewood</td><td>7.65 gold</td></tr><tr><td>Seasoned Planks</td><td>woodcutting Lv 1</td><td>1 Pine Wood · 1 Willow Wood</td><td>1.65 gold</td></tr></tbody></table></section>
-<section><h2>Gold: what it buys</h2><p class="note">Gold never buys gear, a Mod, a potion or a stone. A better build earns gold faster without ever turning gold into power.</p><table><thead><tr><th>Buys</th><th>Lines that buy it</th><th>Written as</th><th>What a line is worth</th></tr></thead><tbody><tr><td>space</td><td><span class="num">15</span></td><td>40–540 minutes of the band’s income</td><td><span class="hy">Stash tab 1 · Stash tab 2 · Stash tab 3 · Stash tab 4 · Stash tab 5 · Stash tab 6 · Herb pouch II · Herb pouch III · Bag category slot (herbs / stones / gear display) · Plot deed 4 · Plot deed 5 · House · Ashfall · House · Highspire · House · Vermolch · Potion carrier slot (belt display)</span></td></tr><tr><td>time</td><td><span class="num">4</span></td><td>8–16 minutes of the band’s income</td><td><span class="hy">Task skip token · Armourer repair (clears Broken, refills protection to 5) · Armourer repair at Ironrow · Waypoint warp (to a settlement already reached on foot)</span></td></tr><tr><td>information</td><td><span class="num">2</span></td><td>15–30 minutes of the band’s income</td><td><span class="hy">Saved filter preset slot (extra) · Collector set hint (prints which school the set wants)</span></td></tr><tr><td>appearance</td><td><span class="num">4</span></td><td>30–300 minutes of the band’s income</td><td><span class="hy">Curio pedlar stock: banner · Base tint · title · Prestige title line (per quality band) · Coldres banner (settlement cosmetic) · Heavy-school Base tint</span></td></tr></tbody></table></section>
+<section><h2>Gold: what it buys</h2><p class="note">At ordinary stalls gold never buys gear, a Mod or a potion. The Black Market is the one owner-sanctioned exception: it sells rare materials, craft stones and named Skill XP Levels for gold. A better build still earns gold faster than gold can buy a build.</p><table><thead><tr><th>Buys</th><th>Lines that buy it</th><th>Written as</th><th>What a line is worth</th></tr></thead><tbody><tr><td>space</td><td><span class="num">15</span></td><td>40–540 minutes of the band’s income</td><td><span class="hy">Stash tab 1 · Stash tab 2 · Stash tab 3 · Stash tab 4 · Stash tab 5 · Stash tab 6 · Herb pouch II · Herb pouch III · Bag category slot (herbs / stones / gear display) · Plot deed 4 · Plot deed 5 · House · Ashfall · House · Highspire · House · Vermolch · Potion carrier slot (belt display)</span></td></tr><tr><td>time</td><td><span class="num">4</span></td><td>8–16 minutes of the band’s income</td><td><span class="hy">Task skip token · Armourer repair (clears Broken, refills protection to 5) · Armourer repair at Ironrow · Waypoint warp (to a settlement already reached on foot)</span></td></tr><tr><td>information</td><td><span class="num">2</span></td><td>15–30 minutes of the band’s income</td><td><span class="hy">Saved filter preset slot (extra) · Collector set hint (prints which school the set wants)</span></td></tr><tr><td>appearance</td><td><span class="num">4</span></td><td>30–300 minutes of the band’s income</td><td><span class="hy">Curio pedlar stock: banner · Base tint · title · Prestige title line (per quality band) · Coldres banner (settlement cosmetic) · Heavy-school Base tint</span></td></tr></tbody></table></section>
 <section><h2>What is deliberately absent</h2><ul class="fx">
-      <li><span class="fk">No sink that sells power.</span><span class="fs">rule</span><span class="fv">the loot funnel is the only road to a stronger piece</span></li>
+      <li><span class="fk">One sanctioned sink sells power.</span><span class="fs">exception</span><span class="fv">the Black Market sells named Skill XP Levels and craft stones for gold — every other stall still sells space, time, information and appearance</span></li>
       <li><span class="fk">No player auction.</span><span class="fs">rule</span><span class="fv">trade is between the character and town buyers</span></li>
       <li><span class="fk">No prestige currency.</span><span class="fs">rule</span><span class="fv">nothing resets what you earned — <a href="builds.html">Builds</a></span></li>
       <li><span class="fk">No timed shop, no sale.</span><span class="fs">rule</span><span class="fv">time is not a design constraint, so no screen sells urgency</span></li>
-    </ul></section>
+    </ul></section></div>
 <p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
 </main></div></body></html>

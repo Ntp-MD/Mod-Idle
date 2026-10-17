@@ -30,13 +30,13 @@ const BLOCK_SEC = ENGINE.road.block_sec;
  *  claim about the worst case and has to be settled by arithmetic rather than left to luck. */
 const MAX_GROUP = ENGINE.mob.zones.reduce((n, z) => Math.max(n, Number(String(z.group ?? '').split('-').pop()) || 0), 0);
 /** every beat the field can play, each mounted by a fact from the sim rather than by a stylesheet's clock.
- *  A mob's beats are read off `.mob` and the character's off `.self-plate`, never mixed: the harness counts
- *  mob plates elsewhere, and the two cards wear the same furniture on purpose. */
+ *  A mob's beats are read off `.mob` and the character's off `.player-card` in its HUD region, never
+ *  mixed: the harness counts mob plates elsewhere, and the two cards wear the same furniture on purpose. */
 const BEATS = {
   arc: '.mob .arc', burst: '.mob .burst', flare: '.cast .flare',
   buff: '.fx-buff', heal: '.fx-heal', level: '.levelup',
-  park: '.mob .plate-fx .pop', selfPark: '.self-plate .plate-fx .pop',
-  knock: '.art.knock', lunge: '.charge.lunge', rim: '.mob .flash', selfRim: '.self-plate .flash',
+  park: '.mob .plate-fx .pop', selfPark: '.player-card .pops .pop',
+  knock: '.art.knock', lunge: '.charge.lunge', rim: '.mob .flash', selfRim: '.player-card .flash',
 };
 const BEAT_ORDER = Object.keys(BEATS);
 /** every `--fx` ink the field wore while it watched, and the peak count of each beat. An animation that never
@@ -126,8 +126,7 @@ for (const size of sizes) {
         const stage = document.querySelector('.stage')?.getBoundingClientRect();
         const field = document.querySelector('.field');
         const box = field?.getBoundingClientRect();
-        const you = document.querySelector('.self-plate')?.getBoundingClientRect();
-        if (!stage || !box || !you) return null;
+        if (!stage || !box) return null;
         const r = (el) => el.getBoundingClientRect();
         const cross = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
         const mobs = Array.from(document.querySelectorAll('.mob:not(.grave)'));
@@ -140,16 +139,57 @@ for (const size of sizes) {
             const a = r(el);
             return mobs.some((m) => cross(r(m), a));
           }));
-        // the character's own card lives in the band the field reserves for it. Everything about it is a
-        // layout claim: inside the box, off every other read, under the group rather than in it, and the
-        // reserve has to be the height the card actually takes
-        const cs = getComputedStyle(field);
-        const reserve = parseFloat(cs.paddingBottom) || 0;
-        const gutter = ['.tracker', '.vitals', '.chronicle', '.pockets', '.actionbar']
-          .filter((sel) => Array.from(document.querySelectorAll(sel)).some((el) => cross(r(el), you)));
-        const inside = you.left >= box.left - 1 && you.right <= box.right + 1
-          && you.top >= box.top - 1 && you.bottom <= box.bottom + 1;
-        const onGroup = mobs.filter((m) => cross(r(m), you)).length;
+        // the vital card stays in its original combat-scene position; Game controls use the bottom-right
+        // Commands row and the automation controls ride the top menu rail
+        const combat = document.querySelector('.combat-player-slot');
+        const card = document.querySelector('.player-card');
+        const cardBody = card?.querySelector('.card-body');
+        const commands = document.querySelector('.commands-dock');
+        const gameControls = commands?.querySelector('.game-controls-row');
+        const railAutomation = document.querySelectorAll('.rail .field-auto-tab').length;
+        const you = card
+          ? {
+            mounted: !!combat && !!field?.contains(card) && cross(r(card), r(combat)),
+            identity: (card.textContent || '').includes('You'),
+            bodyText: (cardBody?.textContent || '').trim(),
+            hp: !!card.querySelector('.meter.hp'),
+            es: !!card.querySelector('.meter.es'),
+            mana: !!card.querySelector('.meter.mana'),
+            exp: !!card.querySelector('.meter.exp[role="progressbar"]'),
+            ratio: r(card).height ? r(card).width / r(card).height : null,
+            mobRatio: mobs.length && r(mobs[0]).height ? r(mobs[0]).width / r(mobs[0]).height : null,
+            expRadius: card.querySelector('.meter.exp') ? getComputedStyle(card.querySelector('.meter.exp')).borderRadius : null,
+            mobBarRadius: document.querySelector('.mobbar') ? getComputedStyle(document.querySelector('.mobbar')).borderRadius : null,
+            playerBuffRail: !!card.querySelector('.rail.buffs'),
+            playerDebuffRail: !!card.querySelector('.rail.debuffs'),
+            controlsInCard: !!card.querySelector('.control-tab, .speed-orb'),
+            onGroup: mobs.filter((m) => cross(r(m), r(card))).length,
+            onBar: Array.from(document.querySelectorAll('.actionbar')).some((el) => cross(r(el), r(card))),
+          }
+          : null;
+        const gameBoxes = gameControls ? Array.from(gameControls.querySelectorAll('button')).map((b) => r(b)) : [];
+        const dock = commands && gameControls
+          ? {
+            buttons: commands.querySelectorAll('button').length,
+            automation: railAutomation,
+            game: gameBoxes.length,
+            // one row means the four buttons share a vertical band; a stack would give each its own
+            oneRow: gameBoxes.length > 0 && gameBoxes.every((b) => b.bottom > Math.min(...gameBoxes.map((o) => o.top))),
+            inStage: !!document.querySelector('.stage')?.contains(commands),
+          }
+          : null;
+        // the objectives column holds only live reads, so its box must clear everything below it - and the
+        // reference read must be the chronicle's own tab, not a column of its own
+        const tracker = document.querySelector('.tracker');
+        const intoColumn = tracker
+          ? ['.chronicle', '.field-travel-actions', '.actionbar']
+            .filter((sel) => Array.from(document.querySelectorAll(sel)).some((el) => cross(r(tracker), r(el))))
+          : [];
+        const tabs = Array.from(document.querySelectorAll('.chattabs button')).map((b) => (b.textContent || '').trim().toLowerCase());
+        const objectives = {
+          tab: tabs.includes('objectives'),
+          intoColumn,
+        };
         return {
           // the box is the layout claim, so it is measured whether or not a group happens to be on screen
           delta: (box.left + box.right) / 2 - (stage.left + stage.width / 2),
@@ -158,9 +198,8 @@ for (const size of sizes) {
           // the starting zone fields one mob, so a live overlap reading proves nothing about a full group:
           // the widest group the engine sends is measured against the room the box actually has
           room: box.width,
-          need: mobs.length ? r(mobs[0]).width * 3 + (parseFloat(cs.columnGap) || 0) * 2 : 0,
-          you: { inside, onGroup, gutter, height: you.height, reserve,
-            roomDelta: (you.left + you.right) / 2 - (stage.left + stage.width / 2) },
+          need: mobs.length ? r(mobs[0]).width * 3 + (parseFloat(getComputedStyle(field).columnGap) || 0) * 2 : 0,
+          you, dock, objectives,
         };
       });
       if (!off) problems.push(`${size.name}: the mob field could not be measured`);
@@ -172,16 +211,71 @@ for (const size of sizes) {
         else fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
           `group centred: box ${off.delta.toFixed(1)}px off middle, plates ${(off.groupDelta ?? 0).toFixed(1)}px, ${off.plates} on screen, `
           + `a 3-group needs ${off.need.toFixed(0)}px of ${off.room.toFixed(0)}px, no overlap\n`);
-        // the self plate: on the near edge, on the frame's own axis, and in the band the field kept for it
+        // the card stays in combat; the Game controls use the bottom-right Commands row
         const y = off.you;
-        if (!y.inside) problems.push(`${size.name}: the character's plate is not inside the mob field`);
-        if (y.onGroup) problems.push(`${size.name}: the character's plate overlaps ${y.onGroup} live mob plate(s) — the band it stands in is not reserved`);
-        if (y.gutter.length) problems.push(`${size.name}: the character's plate overlaps ${y.gutter.join(', ')}`);
-        if (Math.abs(y.roomDelta) > tol) problems.push(`${size.name}: the character's plate sits ${y.roomDelta.toFixed(0)}px off the middle of the frame`);
-        if (y.height > y.reserve + 1) problems.push(`${size.name}: the character's plate is ${y.height.toFixed(0)}px tall and the field reserves ${y.reserve.toFixed(0)}px — it reaches into the group`);
+        if (!y) problems.push(`${size.name}: the player vital card never mounted`);
+        else {
+          if (!y.mounted) problems.push(`${size.name}: the player vital card is not inside the combat field`);
+          if (!y.identity) problems.push(`${size.name}: the player vital card shows no You identity`);
+          if (!y.hp || !y.mana || !y.exp) problems.push(`${size.name}: the player card is missing HP, Mana or EXP`);
+          if (/Hunger|Alignment/.test(y.bodyText)) problems.push(`${size.name}: Hunger or Status Alignment remains inside the player card`);
+          if (y.ratio == null || y.mobRatio == null || Math.abs(y.ratio - y.mobRatio) > 0.01) problems.push(`${size.name}: the player vital card ratio ${y.ratio?.toFixed(3)} does not match the mob-card ratio ${y.mobRatio?.toFixed(3)}`);
+          if (y.expRadius !== y.mobBarRadius) problems.push(`${size.name}: the EXP radius ${y.expRadius} does not match the mob bar radius ${y.mobBarRadius}`);
+          if (!y.playerBuffRail || !y.playerDebuffRail) problems.push(`${size.name}: the player card is missing an outside buff or debuff rail`);
+          if (y.controlsInCard) problems.push(`${size.name}: Game controls are still mounted in the player vital card`);
+          if (y.onGroup) problems.push(`${size.name}: the player vital card overlaps ${y.onGroup} live mob plate(s)`);
+          if (y.onBar) problems.push(`${size.name}: the player vital card overlaps the action bar`);
+          fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
+            'player card: mounted in the combat field with You, HP, ES, Mana and EXP, off mob plates and the action bar\n');
+        }
+        const d = off.dock;
+        if (!d) problems.push(`${size.name}: the Game controls dock never mounted`);
+        else {
+          if (!d.inStage) problems.push(`${size.name}: the Game controls dock is outside the live HUD grid`);
+          if (d.automation !== 3) problems.push(`${size.name}: the menu rail carries ${d.automation} automation controls, expected three`);
+          if (d.game !== 4 || d.buttons !== 4) problems.push(`${size.name}: Game controls has ${d.game} buttons (${d.buttons} total), expected one row of four`);
+          else if (!d.oneRow) problems.push(`${size.name}: the Game controls stack instead of sitting in one row`);
+          fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
+            `game controls: ${d.game} in the bottom-right HUD row; automation: ${d.automation} in the menu rail\n`);
+        }
+        const o = off.objectives;
+        if (!o.tab) problems.push(`${size.name}: the chronicle carries no Objectives tab`);
+        else if (o.intoColumn.length) problems.push(`${size.name}: the objectives column runs into ${o.intoColumn.join(', ')}`);
         else fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
-          `self plate: ${y.height.toFixed(0)}px in a ${y.reserve.toFixed(0)}px band, on the middle of the frame and off every gutter read\n`);
+          'objectives: the column keeps live reads and clears the chronicle, travel controls and action bar; the run\'s target is the chronicle\'s Objectives tab\n');
       }
+    }
+    if (name === 'map') {
+      const mapCard = await page.evaluate(() => {
+        const stage = document.querySelector('.stage');
+        const field = document.querySelector('.field');
+        const card = document.querySelector('.player-card');
+        if (!stage || !field || !card) return null;
+        const box = card.getBoundingClientRect();
+        const cardTarget = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+        let mapClickThrough = false;
+        for (const cell of document.querySelectorAll('.map-back svg polygon.cell')) {
+          const rect = cell.getBoundingClientRect();
+          if (rect.width < 2 || rect.height < 2 || rect.left < 0 || rect.top < 0 || rect.right > innerWidth || rect.bottom > innerHeight) continue;
+          if (rect.right > box.left && rect.left < box.right && rect.bottom > box.top && rect.top < box.bottom) continue;
+          const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+          if (target?.closest('.map-back')) { mapClickThrough = true; break; }
+        }
+        const combatOnly = Array.from(field.children).filter((child) => !child.classList.contains('combat-player-slot'));
+        return {
+          mapmode: stage.classList.contains('mapmode'),
+          cardVisible: box.width > 0 && box.height > 0 && getComputedStyle(card).display !== 'none',
+          cardInField: field.contains(card),
+          cardReceivesPointer: !!cardTarget?.closest('.player-card'),
+          mapClickThrough,
+          combatHidden: combatOnly.every((child) => getComputedStyle(child).display === 'none' || child.getBoundingClientRect().height === 0),
+        };
+      });
+      if (!mapCard?.mapmode) problems.push(`${size.name}: the Map screen did not enter map mode`);
+      if (!mapCard?.cardVisible || !mapCard.cardInField) problems.push(`${size.name}: the vital card disappeared from the combat edge while the Map was open`);
+      if (!mapCard?.cardReceivesPointer) problems.push(`${size.name}: the Map intercepted pointer input over the vital card`);
+      if (!mapCard?.mapClickThrough) problems.push(`${size.name}: the vital-card field overlay blocks map clicks outside the card`);
+      if (!mapCard?.combatHidden) problems.push(`${size.name}: combat-only field content remains visible over the map`);
     }
     // the Bags screen opens on whichever side serves the ground under the character, so shoot the other
     // side too rather than trusting the default
@@ -207,11 +301,11 @@ for (const size of sizes) {
     fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`), `${name}: ${text}\n`);
     if (key === null) { /* the field stays open for the next press */ }
   }
-  // The walk and what it walks into: a walk closes the map and raises the field, where one trail of boot
-  // prints fills from the left as the blocks are crossed, and the moment the feet reach wild ground the
-  // fight starts on its own — no button pressed, because arriving on a fight is the fight. Shot on a real
-  // click and a real Enter and asserted rather than eyeballed: a screen that looks right in a PNG but never
-  // mounted the trail, or never swung, is the failure this catches.
+  // The walk and what it walks into: a walk closes the map and raises the field, where the one word
+  // "Traveling…" stands in place of the trail the walk used to count blocks with, and the moment the feet
+  // reach wild ground the fight starts on its own — no button pressed, because arriving on a fight is the
+  // fight. Shot on a real click and a real Enter and asserted rather than eyeballed: a screen that looks
+  // right in a PNG but still counts blocks, or never swung, is the failure this catches.
   await page.keyboard.press('1');
   await page.waitForTimeout(500);
   const candidates = await page.evaluate(() => {
@@ -265,48 +359,38 @@ for (const size of sizes) {
       await page.waitForTimeout(300);
       await page.keyboard.press('Enter');
       await page.waitForTimeout(700);
-      const read = () => page.evaluate(() => {
-        const t = document.querySelector('.field .travel');
-        const prints = Array.from(document.querySelectorAll('.field .travel .print'));
-        const cs = prints.length ? getComputedStyle(prints[0]) : null;
-        return {
-          mapmode: document.querySelector('.stage')?.classList.contains('mapmode') ?? null,
-          trail: !!t, prints: prints.length,
-          p: t ? parseFloat(getComputedStyle(t).getPropertyValue('--p')) : NaN,
-          mask: cs ? (cs.webkitMaskImage || cs.maskImage || '') : '',
-          // the two feet are the shelf's one glyph split down the middle: the mask-position says which half
-          // a print wears, so an alternating stride is measured, not assumed
-          feet: new Set(prints.map((q) => getComputedStyle(q).getPropertyValue('mask-position'))).size,
-          // the reads this replaced: a half-deleted figure, a sliding band or the old dot bed must fail
-          old: !!document.querySelector('.traveller') || !!document.querySelector('.hexband')
-            || !!document.querySelector('.field .travel .dot'),
-        };
-      });
+      const read = () => page.evaluate(() => ({
+        mapmode: document.querySelector('.stage')?.classList.contains('mapmode') ?? null,
+        // a walk is one word: the field says it, the tracker's line says it, and neither counts blocks
+        word: (document.querySelector('.field .clear-field b')?.textContent || '').trim(),
+        phase: (document.querySelector('.tracker .phase')?.textContent || '').trim(),
+        // the read this replaced: seven boot prints laid in a stride, and the old figure or scrolling band
+        prints: document.querySelectorAll('.field .print, .field .travel').length,
+        old: !!document.querySelector('.traveller') || !!document.querySelector('.hexband'),
+      }));
       const trip = await read();
       await page.waitForTimeout(2000);
       const later = await read();
       await page.screenshot({ path: path.join(OUT, `${size.name}-travel.png`) });
       fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
-        `travel: map closed ${!trip.mapmode}, trail of ${trip.prints} prints in ${trip.feet} feet at ${trip.p}, `
-        + `filled to ${later.p}, mark ${trip.mask.startsWith('url(') ? 'masked' : 'MISSING'}\n`);
+        `travel: map closed ${!trip.mapmode}, field says "${trip.word}" and the tracker says "${trip.phase}", `
+        + `no prints (${trip.prints}) and no block counter\n`);
       if (trip.mapmode) problems.push(`${size.name}: the walk did not raise the field — the map is still in focus`);
-      if (!trip.trail || trip.prints !== 7) problems.push(`${size.name}: the walk mounted ${trip.prints} prints instead of the stride's seven`);
-      if (!(trip.p >= 0 && trip.p <= 1)) problems.push(`${size.name}: the trail's progress read is not a fraction of the walk (${trip.p})`);
-      if (!trip.mask.startsWith('url(')) problems.push(`${size.name}: the prints are unmasked rectangles — the shelf's boot glyph never reached them`);
-      if (trip.feet < 2) problems.push(`${size.name}: every print wears the same foot, so the trail is a row of copies and not a stride`);
+      if (trip.word !== 'Traveling…') problems.push(`${size.name}: the field says "${trip.word}" on a walk instead of "Traveling…"`);
+      if (trip.phase !== 'Traveling…') problems.push(`${size.name}: the tracker says "${trip.phase}" on a walk instead of "Traveling…"`);
+      if (trip.prints) problems.push(`${size.name}: the walk still lays ${trip.prints} boot prints on the field`);
       if (trip.old) problems.push(`${size.name}: the old bed, the walking figure or its scrolling band is still on the field`);
-      if (!later.trail) problems.push(`${size.name}: the trail vanished before the walk was due to end`);
-      else if (!(later.p > trip.p)) problems.push(`${size.name}: the trail did not fill as the walk crossed its blocks (${trip.p} then ${later.p})`);
-      // the arrival: the trail goes, the plate comes, and nothing was pressed in between
+      if (later.word) problems.push(`${size.name}: the walk read outlived its own walk`);
+      // the arrival: the word goes, the plate comes, and nothing was pressed in between
       const secs = best.blocks * BLOCK_SEC;
       try {
         await page.waitForSelector('.mob', { timeout: secs * 1000 + 20000 });
       } catch { /* the leg below reports what was not on screen */ }
       const fought = await page.evaluate(() => ({
-        travel: !!document.querySelector('.field .travel'),
+        read: !!document.querySelector('.field .clear-field b'),
         plates: document.querySelectorAll('.mob:not(.grave)').length,
       }));
-      if (fought.travel) problems.push(`${size.name}: the trail is still on the field after the walk ended`);
+      if (fought.read) problems.push(`${size.name}: the walk read is still on the field after the walk ended`);
       if (!fought.plates) problems.push(`${size.name}: the walk ended on wild ground and no mob was fielded — the fight did not start by itself`);
       // The numbers: every blow that landed on a mob pops its own figure off that mob's plate
       // (up to four the ring still holds), and the shared column keeps only what has no body to stand
@@ -340,9 +424,9 @@ for (const size of sizes) {
           bad: [...new Set(all.map(ink))].filter((c) => !q.allowed.includes(c)),
           // the character's own card: a blow that landed on it pops its figure there and the rim is
           // worn there rather than only on the mob's plate
-          you: !!document.querySelector('.self-plate'),
-          youRim: !!document.querySelector('.self-plate .flash'),
-          youPark: document.querySelectorAll('.self-plate .plate-fx .pop').length,
+          you: !!document.querySelector('.player-card'),
+          youRim: !!document.querySelector('.player-card .flash'),
+          youPark: document.querySelectorAll('.player-card .pops .pop').length,
           front: !!front,
           frontMark: !!(mark && parseFloat(mark.borderTopWidth) > 0 && parseFloat(mark.borderLeftWidth) > 0),
           parkedRight: parkedRight.length === 0 || parkedRight.every(Boolean),
@@ -363,7 +447,7 @@ for (const size of sizes) {
           + `(most ${fight.stacked} on one, ${fight.parkedRight ? 'each on its top-right above the frame' : 'ONE NOT ON ITS TOP-RIGHT'}), `
           + `${fight.flashed} plate rimmed, shared column holds ${fight.column} hit(s), `
           + `the front body is ${fight.front ? (fight.frontMark ? 'marked' : 'UNMARKED') : 'missing'}, `
-          + `the character's card ${fight.you ? 'stands on the field' : 'is MISSING'} with ${fight.youPark} figure(s)\n`);
+          + `the character's card ${fight.you ? 'stands in its HUD region' : 'is MISSING'} with ${fight.youPark} figure(s)\n`);
         if (!fight.onPlate) problems.push(`${size.name}: no damage figure parked on a plate — the hit is still going to one shared column`);
         if (!fight.parkedRight) problems.push(`${size.name}: a parked figure is not stamped on its card's top-right above the frame`);
         if (!fight.front) problems.push(`${size.name}: no plate on the field is marked as the body the next swing waits on`);
@@ -415,9 +499,9 @@ for (const size of sizes) {
         return { perRow, rows, stack: card.height * rows + gap * (rows - 1), room: box.height - reserve, reserve };
       }, MAX_GROUP);
       if (!stack) problems.push(`${size.name}: no mob plate was on the field, so the wrapped group could not be measured`);
-      else if (stack.stack > stack.room) problems.push(`${size.name}: ${MAX_GROUP} mobs at ${stack.perRow} to a row need ${stack.rows} rows and ${stack.stack.toFixed(0)}px of height but the field leaves ${stack.room.toFixed(0)}px above the band the character's plate stands in`);
+      else if (stack.stack > stack.room) problems.push(`${size.name}: ${MAX_GROUP} mobs at ${stack.perRow} to a row need ${stack.rows} rows and ${stack.stack.toFixed(0)}px of height but the field leaves ${stack.room.toFixed(0)}px above its bottom padding`);
       else fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
-        `wrapped group: ${MAX_GROUP} mobs at ${stack.perRow} to a row is ${stack.rows} row(s) of ${stack.stack.toFixed(0)}px in the ${stack.room.toFixed(0)}px left above a ${stack.reserve.toFixed(0)}px band\n`);
+        `wrapped group: ${MAX_GROUP} mobs at ${stack.perRow} to a row is ${stack.rows} row(s) of ${stack.stack.toFixed(0)}px in the ${stack.room.toFixed(0)}px above a ${stack.reserve.toFixed(0)}px bottom pad\n`);
       // back to the map so the ground legs below start from the same place every run
       await page.keyboard.press('1');
       await page.waitForTimeout(300);

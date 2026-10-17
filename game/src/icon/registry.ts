@@ -5,10 +5,7 @@ export const ICON_REGISTRY = {
     byBase: {} as Record<string, string>,
   },
   item: {
-    byId: {
-      'food:hunters_roast': 'hunter-s-roast',
-      'food:soldiers_ration': 'soldier-s-ration',
-    } as Record<string, string>,
+    byId: {} as Record<string, string>,
     fallbackByGroup: {
       stones: ['crystal-cluster-1'],
       herbs: ['herb-bundle', 'leaf'],

@@ -23,7 +23,7 @@ row says so.
 |---|---|---|---|---|
 | Reroll Value Stone | Reroll value on a line · `reroll_value` | Re-rolls one Unbound line's value inside its own Tier, never below that slot's floor | `craft.reroll_value_stones_per_use` | A dissolved piece (bag filter) · the potion bench (`potions.craft`) |
 | Random Reroll Value Stone | Reroll value on a random line · `reroll_value` | Same re-roll, but the stone picks the line | `craft.reroll_value_stones_per_use` | As Reroll Value Stone |
-| Refine Line Stone | Refine a line · `tier` | Climbs one line's value inside its own Tier | `craft.refine_stones_per_use` | Elite `loot.elite_tier_stones` · Boss `loot.boss_tier_stones` · salvage milestone `loot.pieces_per_tier_stone` · the task board |
+| Refine Line Stone | Refine a line · `tier` | Climbs one line's value inside its own Tier | `craft.refine_stones_per_use` | Elite `loot.elite_tier_stones` · Boss `loot.boss_tier_stones` · Alchemy milestone `salvage.alchemy.outputs_per_tier_stone` · delivery wants and the task board |
 | Reroll Tier Stone | Roll a tier on a line · `tier` | Re-rolls one line's Tier | `craft.roll_stones_per_use` | As Refine Line Stone |
 | Reroll Mod Stone | Roll a new Mod on a line · `tier` | New Mod identity on one line, rolled the way a drop rolls one | `craft.roll_stones_per_use` | As Refine Line Stone |
 | Whole Reroll Mod Stone | Roll a new Mod on the piece · `tier` | That roll on every Unbound line at once; the price counts the lines | `craft.roll_stones_per_use` a line | As Refine Line Stone |

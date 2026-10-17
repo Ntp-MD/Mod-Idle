@@ -73,6 +73,15 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Foe** | The **Field of Enemies** — every mob the character is fighting at once. |
 | **Elite** | A flag on a Large body, never a size of its own: a rank over the rolled variant, keeping its name. |
 
+# Field and HUD
+
+| Term | Meaning |
+|---|---|
+| **Player Vital Card** | The You identity, current HP/ES/Mana/EXP and player combat feedback inside a portrait frame matching the mob cards; active buffs and debuffs sit outside it on opposite sides. |
+| **Commands dock** | The bottom-right HUD region, rows 14–15 of columns 12–15, with the four Game controls (Speed ×1/×2/×4 and Pause/Resume) in one row of tabs hugging its right edge. |
+| **Menu hub** | The top menu rail: main screen navigation (Map, Bags, Skills, Craft, Sheet), the three field automation controls (Auto Skills, Auto Equip, Camp), and the More menu. |
+| **Objectives** | The last tab of the Chronicle: the run's target. The life-skill rungs read on the Sheet's own **Life skills** tab. The top-left column keeps only the live reads — minimap, zone, phase, tracked wants and the bag alarm. |
+
 # Elements and Statuses
 
 | Term | Meaning |
@@ -108,18 +117,22 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Corrupt stone / Repair stone** | The rarest stones in the game. |
 | **Upgrade** | Adds Gear Mod points to a piece, one step at a time, with rising failure odds. |
 | **Corrupt** | One gamble per piece: a roll that can take the piece somewhere better or ruin it. |
-| **Salvage** | Disposal of gear below the filter line, with a milestone payout. |
+| **Salvage** | Dismantling gear into base ore and Scrap; it does not directly mint a Value stone. |
+| **Scrap** | The material produced by Salvage and consumed by Alchemy to make Value stones. |
+| **Alchemy** | A settlement recipe that immediately converts Scrap into Value stones and advances Alchemy-based Tier milestones. |
 | **Bag filter** | What makes every drop a decision: **keep** it, **dissolve** it, or **sell** it. |
 | **adventure bag** | The bag of kept gear carried while adventuring. |
 | **character bag** | The bag of carried consumables, field materials and provisions. |
 | **stash** | Settlement storage, organisation only. |
-| **herb** | A plant drop, consumed rather than equipped or sold. |
-| **field material** | A stack from Mine, Rare Grove or hunting activity, carried in the character bag. |
+| **herb** | A gathered or farmed plant used for brewing/cooking or sold as a trade good. |
+| **field material** | A carried stack produced by Mine, Rare Grove, Smithing or hunting activity. |
+| **Fishing** | A timed gathering activity at a Field Camp in a zone with an authored fishing source. |
+| **Smithing** | Settlement recipes that process ore and timber into metal or components; it does not craft gear. |
 | **meal** | A cooked food item; eating one replaces the active timed combat buff. |
 | **Hunger** | A saved field provision meter. Travel, hunting and gathering spend it; at zero, HP regeneration is reduced, while Energy Shield recharge is unchanged. |
 | **Auto Eat** | A saved per-character setting that consumes eligible carried cooked food, then fruit, then edible field herbs at the chosen Hunger threshold. Ingredients are never edible; raw food is opt-in before Hunger is empty and may be used as an empty-Hunger emergency. |
 | **provision** | A carried raw food, fruit, edible field herb, cooking ingredient or cooked meal. Their effects and sources are defined in `engine.json` `fieldwork.foods`, `fieldwork.hunt` and `fieldwork.recipes`. |
-| **trail event** | An independent travel-block event that can provide food or restore Hunger without replacing the block's ambush roll. |
+| **trail event** | An independent travel-block event that finds the current zone's regional food or restores Hunger; it never replaces the block's ambush roll. |
 | **junk** | A flavoured drop from a **variant**, sold to the settlement Counterhand for gold. |
 | **trade good** | Carried junk, material, provision or farm herb that a town Counterhand buys; ingredients can instead be kept for their recipes and field uses. |
 | **Demand** | A town's unfilled appetite for one goods category. Supplying it lowers that category's premium until demand recovers over game time. |
@@ -139,15 +152,26 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Block** | One hex of the world lattice; a walk is counted in blocks. |
 | **Walk** | Crossing blocks from the cell the feet are on to the cell clicked. |
 | **Waypoint** | A settlement opened by arriving on foot: after that a warp there is instant. |
+| **Forward** | Auto-walk to the next already-open settlement when the current zone's level band is behind; new settlements still need a first walk. |
+| **Patrol** | An optional repeatable walk-and-hunt circuit through two or three named subzones in one visited zone. It clears a set of groups at each stop and can be stopped at any time. |
+| **Expedition** | A Guild task to defeat named Species Elites from one exact subzone; it has no deadline and keeps the regular Elite task payout. |
+| **Auto-Return** | Optional Patrol help that walks to town near a full gear bag, stashes unlocked pieces, and resumes the saved route when space was freed. It never sells or discards gear. |
 | **Hunt** | Leaving safe ground to fight from the cell the feet stand on; sub-zones pick a cast, bare ground hunts the whole zone. |
 | **Field Camp** | One player-set safe hex. It enables field gathering and cooking, and receives a Push in its zone. |
 | **Mine** | A wild-side fieldwork hex that yields ore while gathering at a Camp. |
 | **Rare Grove** | A wild-side fieldwork hex that yields timber and can yield rarewood while gathering at a Camp. |
 | **Dungeon run** | A **mode**, not a place: one dungeon per zone, entered at its wild-side index 0. |
+| **Retreat** | Ends a dungeon run, rescues a seeded random subset of legal loot stacks through normal pickup/filter rules, forfeits the rest and starts the dungeon cooldown. Selected loot can still be refused by a full bag. |
 | **Escrow** | What a dungeon run holds while it runs: the per-kill rolls banked instead of paid. |
 | **Wild side** | The untamed cells on a settlement's own land. |
 | **Standing** | A per-settlement unlock counter earned from the flows that already exist. |
-| **Gold** | The quality-of-life medium, minted by selling junk. |
+| **Gold** | The town-spending medium earned by selling trade goods and completing delivery wants. |
+| **Delivery want / Delivery Contract** | A town's timed request for a named carried good and count. Every partial hand-in pays its live market value; completing the count earns the frozen bonus. There is no Accept step. |
+| **Track** | An informational reminder for an open delivery want; tracking is not acceptance and is not required to deliver. |
+| **Delivery clock** | Credited game time used for delivery deadlines, paused during Camp recovery or an active dungeon run. Online opportunities use their own timers. |
+| **Delivery recap** | Saved quantities and actual market/bonus proceeds from a hand-in or terminal want; expiry forfeits only the unearned completion bonus. |
+| **Black Market** | A per-settlement gold stall selling rare materials, craft stones and named **Skill XP Levels** from an explicit whitelist. Each visited town's stock is frozen in the save and refreshes only while online. The one owner-sanctioned exception to the rule that gold buys town services only. |
+| **Skill XP Level** | A skill's own level, earned from kill XP up to the configured cap. A Black Market skill offer grants ownership when missing and raises the level only when that is an upgrade; it never lowers progress, never adds a Duplicate Ladder rung, and is distinct from life-skill Mastery. |
 | **Collector set** | A named bundle of gear pieces a settlement wants handed in. |
 | **Reservation** | An aura holding back a share of Max Mana. |
 | **reserve tier** | The share of the pool one aura holds back. |

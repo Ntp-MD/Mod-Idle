@@ -389,17 +389,17 @@ const slotSections = (names: string[]) => names.map((slot: string) => {
         const own = forced(b);
         if (own.length) {
           const shared = own.length > 1 ? `<div class="sub">one line; its ${own.length} Mods share one budget, ×${SCALE[String(own.length)]} each</div>` : '';
-          return rollList(own.map((id) => ({ id, chance: 1, forced: true }))) + shared + gearMod(b);
+          return `<div class="cell-stack">${rollList(own.map((id) => ({ id, chance: 1, forced: true })))}${shared}${gearMod(b)}</div>`;
         }
-        return `<div class="sub">line 1 is drawn here — the slot has no Mod of its own, and no Stat Mod</div>`
-          + rollList(redraw(pool(b).filter((e: any) => !(loot.STAT_IDS as string[]).includes(e.id)))) + gearMod(b);
+        return `<div class="cell-stack"><div class="sub">line 1 is drawn here — the slot has no Mod of its own, and no Stat Mod</div>`
+          + rollList(redraw(pool(b).filter((e: any) => !(loot.STAT_IDS as string[]).includes(e.id)))) + gearMod(b) + '</div>';
       };
       // Bound and Unbound lines draw the one slot pool; only the stone lock tells them apart,
       // so the pool is printed once instead of in two identical columns.
       const rows = frames.map((b: any) => [
         esc(b.name), wrap(n1(b.weight)),
         baseCell(b),
-        `<div class="sub">${n0(IL.bound_slots)} Bound, locked at drop · ${spacing(NORM)} Unbound, editable (+${n0(IL.mods_added_cap)} by Add)</div>` + rollList(laterPool(b)),
+        `<div class="cell-stack"><div class="sub">${n0(IL.bound_slots)} Bound, locked at drop · ${spacing(NORM)} Unbound, editable (+${n0(IL.mods_added_cap)} by Add)</div>` + rollList(laterPool(b)) + '</div>',
       ]);
       return `<h3>${esc(slot)}</h3><div class="twrap">` + table(['Frame', 'Weight', 'Frame Mod', 'Rollable lines'], rows) + `</div>`;
 }).join('');
@@ -519,7 +519,7 @@ page({
       // the sheet prints the same name (tools/map.ts owns it); the wiki only reads it back
       esc(s.name + ' Dungeon'), wrap(n0(s.zone)), esc(s.band),
       `${n0(E.dungeon.mob_cap)} mobs · groups of ${n0(E.dungeon.group_cap)}`,
-    ])), `One dungeon per zone, entered at wild-side index ${n0((E.fieldwork as any).wild_site_index.dungeon)}. Same mobs, same rolls as the zone — but loot waits in escrow until the last mob falls, a Push forfeits it, and a cleared run cools down ${n0(E.dungeon.cooldown_sec / 60)} minutes.`),
+    ])), `One dungeon per zone, entered at wild-side index ${n0((E.fieldwork as any).wild_site_index.dungeon)}. Same mobs, same rolls as the zone — loot waits in escrow until the last mob falls. Retreat rescues ${n0(E.dungeon.retreat_keep_min)}–${n0(E.dungeon.retreat_keep_max)} random legal stacks, forfeits the rest and starts the same ${n0(E.dungeon.cooldown_sec / 60)} minute cooldown as a clear. Normal bag capacity and gear filters still apply; the recap reports selected, received and rejected amounts. Empty Retreat also cools down. A Push forfeits everything. Cooldown pauses offline.`),
     block('Species', table(['Species', 'Race', 'Zones', 'Body classes', 'Damage', 'Element', 'What its body does', 'Health line'], (E.mob.species || []).map((sp: any) => [
       esc(sp.name), esc(sp.race), list(sp.zones), list(sp.sizes), esc(sp.damage), esc((sp as any).element),
       list(eng.mechanicWordsOf((sp as any).mechanics)) || 'an ordinary body', esc(sp.trait || ''),
@@ -578,12 +578,13 @@ page({
         ['Damage', esc(sp.damage)],
         ['Element', esc(sp.element)],
         ['Zones', list(sp.zones)],
+        ['Fixed levels', list(Object.entries(sp.zone_levels || {}).map(([zone, level]: [string, any]) => `Z${zone} · L${n0(level)}`))],
       ].map(([label, value]) => `<div><b>${esc(label)}</b><span>${value || '—'}</span></div>`).join('');
       return `<article class="species-entry">`
         + `<header><h4>${esc(sp.name)}</h4><span class="species-count">${n0(variants.length)} variants · ${n0(uniques.length)} uniques</span></header>`
         + `<div class="species-facts">${facts}</div>`
         + `<h4>Variants and junk drops</h4>`
-        + table(['Variant', 'Level', 'Role', 'Core', 'Junk outcomes · each %', 'Base junk / kill', 'Lean', 'Extra drops'], drops)
+        + table(['Variant', 'Selection band', 'Role', 'Core', 'Junk outcomes · each %', 'Base junk / kill', 'Lean', 'Extra drops'], drops)
         + `</article>`;
     };
     const raceSections = races.map((race) => {
@@ -636,7 +637,7 @@ page({
       ])), 'A settlement adds no clicks to automate and no power. Its stall stock grows with your Standing there, and the Waypoint is opened by walking to it — see <a href="travel.html">Travel</a>.'),
       block('Who sells what', table(['NPC', 'What they deal in', 'Where they are'], (TOWN.npcs || []).map((n: any) => [
         esc(n.name), esc(n.kind), esc(n.rule || ''),
-      ])), 'A vendor never sells gear, Mods, potions or stones — gold buys space, time, information and appearance only (<code>economy.md</code> rule, printed on <a href="economy.html">Economy</a>).'),
+      ])), 'An NPC vendor never sells gear, Mods or potions — the stalls buy space, time, information and appearance. The one owner-sanctioned exception is the Black Market inside the Market screen, where gold buys rare materials, craft stones and named Skill XP Levels (<a href="economy.html">Economy</a>).'),
       block('Standing', table(['Tier', 'Reach it at', 'Unlocks'], (TOWN.standing?.tiers || []).map((t: any) => [
         esc(t.name), `${n0(t.share * 100)}% of the band's kills`, esc(t.unlocks),
       ])), `Earned from ${esc(String((TOWN.standing as any).earnt_from || ''))} — and Standing is never bought. What it grants: ${list((TOWN.standing as any).grants || [])}.`),
@@ -645,6 +646,8 @@ page({
         ['A slot refills', TS.refill_sec >= 3600 ? `every ${n0(TS.refill_sec / 3600)} hours` : `every ${n0(TS.refill_sec / 60)} minutes`, '<code>task_sizing.refill_sec</code>'],
         ['A free skip', `${n0(TS.free_skip_per_day)} a day, plus a bought one on top`, '<code>task_sizing.free_skip_per_day</code>'],
         ['An Elite hunt asks for', wrap(n0(TS.elite_n)), '<code>task_sizing.elite_n</code>'],
+        ['An Expedition asks for', `${n0(TS.elite_n)} target Species Elites in one named subzone`, '<code>task_sizing.elite_n</code> · <code>mob.zones[].subzones</code>'],
+        ['Elite / Expedition share', `${pc1(TS.offer_weight_elite)} / ${pc1(TS.offer_weight_expedition)}`, 'same total Tier-stone offer share as before'],
         ['What it pays', `a slice of that band’s own stone income: ${n0(TS.reward_minutes_of_band_income)} minutes of it`, '<code>task_sizing.reward_minutes_of_band_income</code>'],
         ['A Boss hunt pays', Object.entries(TS.boss_reward || {}).map(([k, v]: any) => `${n0(v)} ${esc(String(k).replace(/_/g, ' '))}`).join(' + '), 'winner’s choice, exactly as the board writes it'],
       ]), `${(() => {
@@ -653,7 +656,7 @@ page({
           return `${stone('tier', p.tier)} · ${stone('add', p.add)} · ${stone('reroll_value', p.reroll_value)}`;
         };
         return `Read through <code>engine.taskPayout</code>, so a task is a slice of the income you would have earned anyway — the board never mints a stone out of nothing. At the ${n0(TS.reward_minutes_of_band_income)}-minute slice: low band ${pay('low')} · mid band ${pay('mid')} · high band ${pay('high')}`;
-      })()}. A plain kill-count task is gone: the board asks for Elites and bosses, and pays stones only. Claim rewards at a settlement; if the character bag is full, the task stays claimable until there is room.`),
+      })()}. A plain kill-count task is gone: the board asks for Elites, named subzone Expeditions and bosses, and pays stones only. Expeditions count only the target Species’ Elites killed while standing on the target subzone; there is no deadline. Claim rewards at a settlement; if the stone bag is full, the task stays claimable until there is room.`),
       block('One-time lines', table(['Item', 'Sold by', 'Buys', 'Costs, in gold at that band', 'Note'], (TOWN.one_time || []).map((l: any) => [
         esc(l.item), esc(NPC[l.npc]?.name || l.npc || ''), esc(l.kind), price(l),
         `<span class="hy">${[extra(l), l.discount ? `at ${esc((TOWN.settlements || []).find((s: any) => s.id === l.discount.settlement)?.name || l.discount.settlement)} it costs ${goldAt(l.discount.m, (TOWN.settlements || []).find((s: any) => s.id === l.discount.settlement)?.band || l.charge_band)}` : ''].filter(Boolean).join(' · ')}</span>`,
@@ -693,6 +696,13 @@ page({
       const source = (E.fieldwork as any).regional_sources[town.zone];
       return [esc(town.name), esc(fieldwork.materialById[source.mine].name), esc(fieldwork.materialById[source.grove].name), esc(fieldwork.foodById[source.food].name)];
     })), 'Regional bonuses supplement common ore, timber and rarewood. Keep stock for Camp and recipes, or carry it to a town that needs it. Mining and Woodcutting improve bonus chances and harvests.'),
+    block('Delivery wants', `<p>Visited towns independently get an online offer opportunity every ${n0(TOWN.delivery.trigger_interval_sec / 60)} minutes, with a ${pc1(TOWN.delivery.trigger_chance)} trigger chance. Opening Market never rolls an offer. A want names its good, count, issuing town, deadline and exact completion reward up front; there is no Accept step.</p><p>Bring carried goods to that town. Each partial hand-in pays the live market quote immediately, including the normal fractional-gold carry. The frozen completion bonus pays once when the full count is met. At expiry you keep all market gold already paid and forfeit only the unearned bonus. A promised skill grants the named skill or its shown fallback stones if no useful duplicate remains, never both.</p><p>Track is an optional reminder. Deadlines use credited game time, including credited offline time, and pause during Camp recovery or an active dungeon run. Offline time creates no new offers. Production, inputs and reachable travel inform the deadline; expected rare-drop time is not a guaranteed catch. Distance never increases the completion reward.</p><p>Market keeps partial and terminal recaps from recorded proceeds. Older unread recaps merge into a saved summary when the history limit is reached; acknowledging a recap pays nothing. A full reward bag refuses the final delivery without spending goods, gold, demand or progress, so make room and retry before expiry.</p>`),
+    block('Black Market', table(['Rule', 'The number'], [
+      ['Offers per settlement', `${n0(TOWN.black_market.offers_per_refresh)} at a time`],
+      ['Refresh', `every ${n0(TOWN.black_market.refresh_interval_sec / 60)} online minutes, per visited town`],
+      ['Material price', `peak trade value × ${n2(TOWN.black_market.resale_cover_multiplier)} resale cover × its rarity multiplier`],
+      ['Skill XP Level bands', TOWN.black_market.skill_level_offers.map((row: any) => `Level ${n0(row.level)} · ${n0(row.price_gold)} gold`).join(' · ')],
+    ]), `<p>Each visited settlement runs its own Black Market stall in the Market screen: rare materials, craft stones and named skills at a target XP Level, bought with Gold — the one owner-sanctioned exception to the rule that gold buys services everywhere else in town. Stock is rolled per town, frozen in the save, and refreshes only while the game is online; opening the panel, walking away, a reload, an import or the real-world clock never rerolls it.</p><p>A skill offer grants the skill if you do not own it and raises its XP Level to the offered band when that is an upgrade. It never lowers progress, never adds a Duplicate Ladder rung, and a skill that already sits at or above the offered level cannot be bought again. Prices cover resale: materials sell above the peak trade multiplier, and selling them back goes through the ordinary Counterhand demand, so a buy-and-resell loop is a guaranteed loss.</p>`),
     block('Workshop cargo', table(['Finished good', 'Field skill', 'Materials', 'Base value'], (E.fieldwork as any).workshop_recipes.map((recipe: any) => [
       esc(recipe.name), `${esc(recipe.skill)} Lv ${n0(recipe.level)}`, esc(Object.entries(recipe.materials).map(([id, count]) => `${count} ${fieldwork.materialById[id].name}`).join(' · ')), `${n2(trade.byId[`material:${recipe.id}`].value)} gold`,
     ])), 'Use the Market Workshop while standing in a settlement. Finished cargo has a derived base value above its inputs, but the buyer’s remaining demand still decides the actual offer. Making a good spends its listed materials and grants field skill XP. A full bag refuses the action without spending anything.'),
@@ -704,9 +714,9 @@ page({
           cents.length ? `${n0(Math.min(...cents))}–${n0(Math.max(...cents))} minutes of the band’s income` : '<span class="hy">none</span>',
           `<span class="hy">${esc(lines.map((l: any) => l.item).join(' · '))}</span>`];
       })),
-      'Gold never buys gear, a Mod, a potion or a stone. A better build earns gold faster without ever turning gold into power.'),
+      'At ordinary stalls gold never buys gear, a Mod or a potion. The Black Market is the one owner-sanctioned exception: it sells rare materials, craft stones and named Skill XP Levels for gold. A better build still earns gold faster than gold can buy a build.'),
     block('What is deliberately absent', `<ul class="fx">
-      <li><span class="fk">No sink that sells power.</span><span class="fs">rule</span><span class="fv">the loot funnel is the only road to a stronger piece</span></li>
+      <li><span class="fk">One sanctioned sink sells power.</span><span class="fs">exception</span><span class="fv">the Black Market sells named Skill XP Levels and craft stones for gold — every other stall still sells space, time, information and appearance</span></li>
       <li><span class="fk">No player auction.</span><span class="fs">rule</span><span class="fv">trade is between the character and town buyers</span></li>
       <li><span class="fk">No prestige currency.</span><span class="fs">rule</span><span class="fv">nothing resets what you earned — <a href="builds.html">Builds</a></span></li>
       <li><span class="fk">No timed shop, no sale.</span><span class="fs">rule</span><span class="fv">time is not a design constraint, so no screen sells urgency</span></li>
@@ -818,7 +828,7 @@ page({
       const pct = (v: any) => { const p = Number(v) * 100; return (Number.isInteger(p) ? n0(p) : n1(p)) + '%'; };
       const chance = (v: any) => Number(v) < 1 ? pct(v) + ' per kill' : n0(v) + (Number(v) === 1 ? ' stone' : ' stones');
       return table(['Stone', 'Elite', 'Boss', 'Every kill'], [
-        [STONE_NAME.reroll_value, '—', '—', 'one per dissolved piece, plus one ' + STONE_NAME.tier + ' per ' + n0(E.salvage.pieces_per_tier_stone) + ' dissolved'],
+        [STONE_NAME.reroll_value, '—', '—', `${n0(E.salvage.alchemy.value_yield)} per ${n0(E.salvage.alchemy.scrap_cost)} Scrap via Alchemy`],
         [STONE_NAME.tier, chance(E.loot.elite_tier_stones), chance(E.loot.boss_tier_stones), '—'],
         [STONE_NAME.add, chance(E.loot.elite_add_stone_chance), chance(E.loot.boss_add_stones), '—'],
         [STONE_NAME.quality, chance(E.loot.quality_stone_sources.elite_quality_chance), chance(E.loot.quality_stone_sources.boss_quality_stones), chance(E.loot.quality_stone_sources.monster_quality_chance)],
@@ -973,7 +983,7 @@ page({
         `${n1((E.loot as any).boss_per_hour)} an hour, and online only`],
       ['Unique', `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).hp)}`, `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).ps)}`, '<span class="hy">reads as a body</span>', 'alone',
         `${pc1((E.loot as any).unique_chance)} of spawns`],
-    ]), `An Elite is a spawn flag forced onto a Large body, never a fifth size, so no two multipliers ever stack — it keeps the selected Variant's name and junk. A Boss is one named creature per zone (${n0((E.mob.bosses || []).length)} of them) and is the only place the Add, Replace and Corrupt stones are paid — see <a href="idle.html">Away &amp; bag</a>. A Species may have no Unique or several (${n0(((E.mob as any).uniques || []).length)} total): each is a wild boss that replaces its Species' spawn, paying Elite stones with ×${n0(E.xp.unique_mult)} XP. A mob uses its Variant's authored level band (<code>mob.variants[].levels</code>), which is why <a href="mobs.html">the Bestiary</a> prints each band.`),
+    ]), `An Elite is a spawn flag forced onto a Large body, never a fifth size, so no two multipliers ever stack — it keeps the selected Variant's name and junk. A Boss is one named creature per zone (${n0((E.mob.bosses || []).length)} of them) and is the only place the Add, Replace and Corrupt stones are paid — see <a href="idle.html">Away &amp; bag</a>. A Species may have no Unique or several (${n0(((E.mob as any).uniques || []).length)} total): each is a wild boss that replaces its Species' spawn, paying Elite stones with ×${n0(E.xp.unique_mult)} XP. The Variant band selects name and Core; the fixed level for each zone comes from <code>mob.species[].zone_levels</code>.`),
   ],
 });
 
@@ -990,6 +1000,7 @@ page({
       ['Energy Shield', 'the caster’s second pool, spent before Health, and player-only', wrap(n0(DV.es_pool)),
         `${n1(DV.es_regen)} a second, but only once ${n0((E.energy_shield as any).delay_sec)} sec have passed without a hit — <code>esRegenOf</code>`],
     ]), 'Respec is free wherever a settlement is (<code>stat.respec_cost</code> reads ' + wrap(n0(S.respec_cost)) + '), because a locked build would punish you harder than a lost fight does.'),
+    block('Your combat readout', '<p>The You card stays at the near edge of the combat scene with current HP, Energy Shield when present, Mana and Hunger. It remains visible when the Map is open, while mob plates and combat effects hide. It also carries the player’s combat feedback. Speed and Pause/Resume sit in the bottom-right Game controls row, while the automation controls (Auto Skills, Auto Equip, Camp) ride the top menu rail. The top-left column keeps only live reads — minimap, zone, the phase line, tracked delivery wants and the bag alarm — the run’s target is the Chronicle’s own Objectives tab, and the life-skill rungs are the Sheet’s Life skills tab.</p>'),
     block('What a Push costs', `<ul class="fx">
       <li><span class="fk">There is no death.</span><span class="fs">rule</span><span class="fv">a fight you lose rests you at camp and costs time only</span></li>
       <li><span class="fk">A Push on the walk is the ordinary Push.</span><span class="fs">rule</span><span class="fv">with a Field Camp in this zone, recovery returns there and ends the walk; otherwise the route resumes at its ambush block (<code>road.push_rule</code>)</span></li>
@@ -1001,6 +1012,8 @@ page({
       ['Mining', `wild-side index ${n0((E.fieldwork as any).wild_site_index.mine)}`, `${n0((E.fieldwork as any).actions.mine.yield)} ore every ${n0((E.fieldwork as any).actions.mine.interval_sec)} sec · rich-vein chance scales with Mining and Mine Mastery`],
       ['Woodcutting', `wild-side index ${n0((E.fieldwork as any).wild_site_index.grove)}`, `${n0((E.fieldwork as any).actions.grove.yield)} timber per action · rarewood and herb chances scale with Woodcutting and Grove Mastery`],
       ['Hunting', 'bare field hexes', `raw meat and lineage provision chances and quantities scale with Hunting and each lineage’s Mastery`],
+      ['Fishing', 'Field Camp in a zone with an authored fishing source', `${n0((E.fieldwork as any).fishing.yield)} catch of ${(E.fieldwork as any).fishing.foods.map((id: string) => fieldwork.foodById[id]?.name || id).join(' or ')} every ${n0((E.fieldwork as any).fishing.interval_sec)} sec`],
+      ['Smithing', 'safe and idle at a settlement', (E.fieldwork as any).smithing_recipes.map((recipe: any) => `${esc(recipe.name)} · ${Object.entries(recipe.materials).map(([id, count]) => `${count} ${fieldwork.materialById[id]?.name || id}`).join(' + ')}`).join(' · ')],
       ['Cooking', 'active Field Camp', 'turn raw food, fruit, edible herbs and ingredients into timed combat meals'],
     ]), `The first Field Camp and one relocation are free; later moves cost ${n0((E.fieldwork as any).camp.relocate_ore)} ore and ${n0((E.fieldwork as any).camp.relocate_timber)} timber. It is safe ground in its zone, allows field gathering and cooking, and receives a Push. Only one meal buff is active at a time. Field skill XP and Mastery are separate from character XP.`),
     block('Field-skill progression', table(['Progress', 'Benefit', 'Read from'], [
@@ -1083,8 +1096,8 @@ page({
       ])),
       'Away keeps the zone’s Item quality band and clamps the Item level to the first level of that band (<code>floorLevelOf</code>). Online drops use the mob’s level.'),
     block('The streams an Elite or a Boss owns', table(['Stone or piece', 'Every kill', 'An Elite', 'A Boss'], [
-      [STONE_NAME.tier, 'one per ' + n0((E.salvage as any).pieces_per_tier_stone) + ' pieces dissolved', wrap(n2((E.loot as any).elite_tier_stones)), wrap(n0((E.loot as any).boss_tier_stones))],
-      [STONE_NAME.reroll_value, 'one per piece dissolved', '<span class="hy">same</span>', '<span class="hy">same</span>'],
+      [STONE_NAME.tier, `${n0(E.salvage.alchemy.outputs_per_tier_stone)} eligible Value from Alchemy`, wrap(n2((E.loot as any).elite_tier_stones)), wrap(n0((E.loot as any).boss_tier_stones))],
+      [STONE_NAME.reroll_value, 'via Alchemy — one per dissolved piece’s Scrap', '<span class="hy">same</span>', '<span class="hy">same</span>'],
       [STONE_NAME.add, 'never', pc1((E.loot as any).elite_add_stone_chance), wrap(n0((E.loot as any).boss_add_stones))],
       ['Quality', pc1((E.loot as any).quality_stone_sources.monster_quality_chance), pc1((E.loot as any).quality_stone_sources.elite_quality_chance),
         wrap(n0((E.loot as any).quality_stone_sources.boss_quality_stones))],
@@ -1101,7 +1114,7 @@ page({
         `stones ${n2((E.inventory as any).unit_weight.stone)} · herbs and potions ${n2((E.inventory as any).unit_weight.herb)} · materials ${n2((E.inventory as any).unit_weight.material)} · provisions ${n2((E.inventory as any).unit_weight.food)} each`],
       ['Gold', 'no slot at all (<code>gold_uses_slot</code>)', 'the junk money', '—', '—'],
       ['Junk', `${n0((E.junk as any).stack)} a slot`, 'what the Counterhand buys', 'deep stacks', `${n2((E.junk as any).unit_weight)} each`],
-    ]), `A full bag is a pause, never a loss: <code>inventory.overflow</code> reads “${esc((E.inventory as any).overflow)}” — pickups stop, nothing auto-converts and nothing is deleted, and the client says which happened. A piece that cannot be carried is left on the ground. Manual salvage also waits if its Value stone, or a milestone Tier stone, cannot fit. Gear crafting and Stash are settlement services; Camp cooking is the field exception. The Stash is one warehouse that every settlement’s counter opens.`),
+    ]), `A full bag is a pause, never a loss: pickups stop when a complete output bundle cannot fit. Manual salvage preserves the piece unless both Iron Ore and Scrap fit together. Alchemy preflights Scrap and every Value and Tier output before consumption. Gear crafting and Stash are settlement services; Camp cooking is the field exception. The Stash is one warehouse that every settlement’s counter opens.`),
     block('Weight', table(['Carried', 'The cut to your attack speed', 'Read from'], [
       ['Your capacity', wrap(n1(eng.weightCapacityOf(EVEN))) + ' at the even split — Str is the only line that lifts it', '<code>weightCapacityOf</code>'],
       ['At capacity or under', `${pc1(eng.encumbranceOf(eng.weightCapacityOf(EVEN), EVEN))} cut`, '<code>encumbranceOf</code>'],
@@ -1114,7 +1127,7 @@ page({
       ['Keep a missing Element', 'keeps Elemental resistance of an Element you do not hold', yes((E.loot as any).filter.rules.default_keep_missing_element)],
       ['On by default', 'a fresh character keeps every drop and dissolves nothing', yes((E.loot as any).filter.rules.default_enabled)],
       ['Stored per slot', 'a player setting, so a raised threshold is never a second copy of the number', '<span class="hy"><code>loot.filter.rules</code></span>'],
-    ]), 'Only a slot whose filter is armed dissolves a piece, and a dissolved piece pays the Value stone. Manual salvage keeps the piece if its payout cannot fit. Auto Equip preserves locked worn pieces and skips Broken gear. Stones are always kept.'),
+    ]), 'Only a slot whose filter is armed dissolves a piece. Successful dissolution yields Iron Ore and Scrap together; overflow leaves gear unpicked. Manual salvage protects locked and Collector-promised gear, and bag replacement waits unless both outputs fit. Alchemy turns Scrap into Value, and only successfully produced Value advances Tier milestones.'),
     block('Junk: reference values', table(['Junk kind', 'Base value', 'A kill pays it', 'Expected base gold a kill'],
       Object.entries((E.junk as any).rarities || {}).map(([r, v]: any) => [
         esc(r), wrap(`${n0(v.sell_gold)} gold`), pc1(v.drop_chance_per_kill), wrap(n2(v.sell_gold * v.drop_chance_per_kill)),
@@ -1127,16 +1140,19 @@ page({
   file: 'travel.html',
   nav: 'Travel',
   title: 'Travel and the Waypoint',
-  lead: 'The world is a hex sheet and a walk is a count of blocks. Blocks come out of the lattice coordinates, never a typed distance, so a route has a length and never a price.',
+  lead: 'The world is a hex sheet and a walk is a count of blocks. Fixed zone rosters, local Expeditions and Patrol routes give a reason to choose where to hunt.',
   body: [
     block('One block', table(['', 'The number', 'Read from'], [
       ['Time', wrap(n0(road.blockSec)) + ' sec a block', '<code>road.block_sec</code>'],
       ['An encounter a block', pc1(road.encounterChance()), '<code>road.encounter_chance_pct</code>'],
-      ['A trail event a block', pc1((E.fieldwork as any).travel_events.chance_per_block), 'an independent supply or rest roll; it never replaces the encounter roll'],
-      ['What ambushes you', 'an ordinary mob group from the lower of the two zones the walk joins, at that zone’s own level range and at the pack of the side it walks onto — the zone’s own pack on bare ground', '<code>road.encounter_rule</code>'],
+      ['A trail event a block', pc1((E.fieldwork as any).travel_events.chance_per_block), 'an independent local-food or rest roll; it never replaces the encounter roll'],
+      ['What ambushes you', 'an ordinary mob group from the lower of the two zones the walk joins, at each Species’ fixed zone level and at the pack of the side it walks onto', '<code>road.encounter_rule</code> · <code>mob.species[].zone_levels</code>'],
       ['What it pays', 'the ordinary per-kill drop roll and nothing else', '<code>road.encounter_rule</code> — no purse, no chest, no Standing, no stone'],
       ['Losing one', 'a same-zone Field Camp receives you and ends the walk; without one, recover and resume at the ambush block', '<code>road.push_rule</code>'],
-    ]), 'Walking pays no gold directly. It can carry cargo to a buyer with better demand; compare the extra sale value with travel time, provisions and any Waypoint fee in Market.'),
+      ['Forward', 'walks to the next already-open settlement when the current zone’s level band is behind', '<code>travel = forward</code> · online only'],
+      ['Patrol', `${n0(E.road.patrol.max_stops)} subzones · ${n0(E.road.patrol.groups_per_stop)} groups per stop`, 'choose the order; repeat or stop whenever you want'],
+      ['Auto-Return', `${n0(E.road.patrol.auto_return_threshold_pct)}% adventure-bag threshold`, 'stashes unlocked gear at town and resumes Patrol if space was freed'],
+    ]), 'A Patrol changes the fixed Species pools as it moves between subzones. An Expedition asks for named Species Elites at one exact subzone. Auto-Return keeps a long route from stopping at a full gear bag; it never sells or discards gear.'),
     block('Every settlement, from the start', (() => {
       const start: any = (TOWN.settlements || []).find((s: any) => s.start) || (TOWN.settlements || [])[0];
       const warp: any = (TOWN.repeatable || []).find((l: any) => l.id === 'waypoint_warp') || { m_per_block: 0 };
@@ -1245,20 +1261,23 @@ export const extractTokens = (css: string): string => {
 
 /** The wiki's layout rules. They name tokens only, so this file holds no colour of its own. */
 export const LAYOUT = `* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: var(--font-xs)/1.55 var(--ui); }
+body { margin: 0; display: flex; justify-content: center; background: var(--bg); color: var(--text); font: var(--font-xs)/1.55 var(--ui); }
 a { color: var(--gold); text-decoration: none; }
 a:hover { text-decoration: underline; }
-.layout { display: flex; align-items: flex-start; gap: 2rem; max-width: 116rem; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
-nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: .35rem; }
+.layout { display: flex; align-items: flex-start; gap: var(--spacing-xl); width: 100%; max-width: 116rem; padding: 2rem 2.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: var(--spacing-sm); }
 nav a { color: var(--dim); }
 nav a.on { color: var(--gold); }
-main { flex: 1; min-width: 0; }
-h1 { margin: 0 0 .3rem; font-size: var(--font-md); }
-.lead { color: var(--dim); margin: 0 0 2rem; }
-section { margin: 0 0 2.2rem; }
-h2 { font-size: var(--font-sm); margin: 0 0 .3rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
-h3 { font-size: var(--font-xs); margin: 1.1rem 0 .3rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
-.note { color: var(--dim); font-size: var(--font-xs); margin: .3rem 0 .6rem; }
+main { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-xl); min-width: 0; }
+.page-head { display: grid; gap: var(--spacing-xs); }
+.page-content { display: grid; gap: var(--spacing-xl); }
+h1 { font-size: var(--font-md); }
+.lead { color: var(--dim); }
+section { display: grid; gap: var(--spacing-sm); }
+h2 { font-size: var(--font-sm); border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: var(--font-xs); }
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
 table { border-collapse: collapse; width: 100%; font-size: var(--font-xs); }
 th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--dim); font-weight: 600; }
@@ -1269,10 +1288,10 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 /* One table, its rows split into tabbed groups: the strip is a radio group, each tab is a <tbody>, and a
    press swaps which body shows over the shared header — no script, so the static build and the live wiki
    behave alike. Generic over the group count a page declares (three here). */
-.tabs { margin: .9rem 0 1.4rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
 .tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .tabs > label {
-  display: inline-flex; align-items: baseline; gap: .45em; padding: .3em .9em; margin: 0 .25rem -.0625rem 0;
+  display: inline-flex; align-items: baseline; gap: var(--spacing-sm); padding: .3em .9em;
   border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
   color: var(--dim); font-size: var(--font-xs); cursor: pointer;
 }
@@ -1285,78 +1304,78 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
-.tabs table { margin-top: 0; }
-.twrap { overflow: hidden; margin: 0 -0.25rem; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.tabs table { flex: 1 0 100%; width: 100%; }
+.twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
 td:first-child { white-space: nowrap; }
-.rolls { list-style: none; margin: .25rem 0 0; padding: 0; font-size: var(--font-xs); }
-.rolls li { position: relative; display: flex; gap: .35rem; align-items: baseline; padding: .02rem .25rem; }
+.rolls { list-style: none; display: grid; gap: var(--spacing-xs); padding: 0; font-size: var(--font-xs); }
+.rolls li { position: relative; display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .02rem .25rem; }
 .rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
 .rolls .rn { position: relative; flex: 1; }
 .rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: var(--font-xs); white-space: nowrap; opacity: .8; }
 .rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; }
+.cell-stack { display: grid; gap: var(--spacing-xs); }
 td .hy { color: var(--dim); font-size: var(--font-xs); }
-.fx { list-style: none; margin: .2rem 0 0; padding: 0; font-size: var(--font-xs); }
-.fx li { display: flex; gap: .35rem; align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx { list-style: none; display: grid; gap: var(--spacing-xs); padding: 0; font-size: var(--font-xs); }
+.fx li { display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
 .fx li:last-child { border-bottom: 0; }
 .fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
 .fx .fk em { color: var(--text); font-style: normal; }
 .fx .fs { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
 .fx .fv { font-family: var(--num); white-space: nowrap; }
-td .sub { display: block; color: var(--dim); font-size: var(--font-xs); margin-top: .15rem; }
+td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .rolls .forced .rn { color: var(--gold); }
 .rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: var(--font-xs); }
-.plist { list-style: none; margin: .15rem 0 0; padding: 0; font-size: var(--font-xs); }
+.plist { list-style: none; margin: 0; padding: 0; font-size: var(--font-xs); }
 /* one grid for the whole cell: every key shares track one at the width of the longest key in that
    cell, every value takes track two — display:contents promotes each key/value pair to the grid,
    so a spelled-out label like "damage per second" costs no wrap and nothing runs into its number */
-.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: .5rem; row-gap: .03rem; }
+.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: var(--spacing-md); row-gap: var(--spacing-xs); }
 .plist li { display: contents; }
 .plist .pk { font-family: var(--ui); color: var(--dim); }
 .plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
-.zone { margin: .65rem 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
-.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem .8rem; padding: .65rem .8rem; cursor: pointer; }
+.zone { display: grid; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-md); padding: .65rem .8rem; cursor: pointer; }
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
 .zone-title { font-weight: 600; }
 .zone-meta { color: var(--dim); font-size: var(--font-xs); }
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
-.zone-body { padding: .1rem .8rem .8rem; }
-@media (max-width: 40rem) { .zone > summary { display: block; } .zone-meta { display: block; margin-top: .25rem; } }
-.race-roster { display: grid; gap: .9rem; margin-top: .5rem; }
-.race-group { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
-.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
-.race-group > header h3 { margin: 0; color: var(--gold); font-size: var(--font-xs); }
+.zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
+@media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
+.race-roster { display: grid; gap: var(--spacing-md); }
+.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
+.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
+.race-group > header h3 { color: var(--gold); font-size: var(--font-xs); }
 .race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
-.race-empty { margin: .55rem .2rem .2rem; color: var(--dim); font-size: var(--font-xs); }
-.species-roster { display: grid; gap: .65rem; margin-top: .6rem; }
-.species-entry { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
-.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.species-entry h4 { margin: .45rem 0 .2rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
-.species-entry > header h4 { margin: 0; color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
+.race-empty { color: var(--dim); font-size: var(--font-xs); }
+.species-roster { display: grid; gap: var(--spacing-md); }
+.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
+.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
+.species-entry h4 { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
+.species-entry > header h4 { color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
 .species-count { color: var(--gold); }
-.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem .8rem; margin: .55rem 0 .75rem; }
-.species-facts div { display: grid; gap: .1rem; min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
+.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--spacing-sm) var(--spacing-md); }
+.species-facts div { display: grid; gap: var(--spacing-xs); min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
 .species-facts b { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
 .species-entry table { font-size: var(--font-xs); }
 .species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
 @media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
-.legend { margin: 0; padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
-.legend li { margin: .3rem 0; }
+.legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
-ol { margin: .2rem 0; padding-left: 1.3rem; }
-li { margin: .15rem 0; }`;
+ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }`;
 
 /** Everything inside <body>: the theme, the nav and the page. */
 export const pageBody = (p: Page, active: string, tokens: string): string =>
   `<style>${tokens}
 ${LAYOUT}</style><div class="layout">
 <nav>${PAGES.map((q) => `<a class="${q.file === active ? 'on' : ''}" href="${q.file}">${esc(q.nav)}</a>`).join('')}</nav>
-<main><h1>${esc(p.title)}</h1><p class="lead">${p.lead}</p>${p.body.join('\n')}
+<main><header class="page-head"><h1>${esc(p.title)}</h1><p class="lead">${p.lead}</p></header>
+<div class="page-content">${p.body.join('\n')}</div>
 <p class="note">Rendered from <span class="num">tools/data/*.json</span> and <span class="num">engine/</span> — nothing here is typed by hand.</p>
 </main></div>`;
 

@@ -138,9 +138,9 @@ BLOCKS['group-F'] = () => {
     ['F2', 'drops per kill', `${L.base_drop_chance * 100}% × (1 + Lck×${K.K_LCK_DROP})`, `${f1(b.low.drop_chance_pct)}% (L${L.bands.low.lck_level}) · ${f1(b.mid.drop_chance_pct)}% (L${L.bands.mid.lck_level}) · ${f1(b.high.drop_chance_pct)}% (L${L.bands.high.lck_level}) · ${f1(b.high_full_lck.drop_chance_pct)}% (full Lck ${f0(CEIL)})`],
     ['F3', 'drops per clear cycle', `F1 × F2`, `${f2(grp('low') * chance('low'))} low · ${f2(grp('mid') * chance('mid'))} mid · ${f2(grp('high') * chance('high'))} high`],
     ['F4', 'upgrades per drop', E.f_rows_carried.find((r) => r.id === 'F4').expression, E.f_rows_carried.find((r) => r.id === 'F4').value],
-    ['F5', 'junk per kill (gold)', `(drops − upgrades) per kill × ${TS.gold_per_junk_piece}`, `**${perKill('high', b.high.junk_per_hr).toFixed(4)}**`],
-    ['F6', 'Reroll value uses per kill', `F5 ÷ ${C.reroll_value_stones_per_use}`, `**${perKill('high', STONE.reroll_uses_per_hr).toFixed(4)}**`],
-    ['F7', 'Tier stone per kill', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones).toFixed(4)} (${L.elite_spawn_chance * 100}% of kills ×${L.elite_tier_stones}) + boss ${perKill('high', L.boss_per_hour * L.boss_tier_stones).toFixed(4)} (${bossPerKill} ×${L.boss_tier_stones})`, `${perKill('high', STONE.tier_stones_per_hr).toFixed(4)}`],
+    ['F5', 'eligible salvage pieces per kill', `(drops − upgrades) per kill`, `**${perKill('high', b.high.junk_per_hr).toFixed(4)}**`],
+    ['F6', 'Alchemy Value stones per kill', `F5 × ${E.salvage.outputs.scrap} Scrap × ${E.salvage.alchemy.value_yield} Value ÷ ${E.salvage.alchemy.scrap_cost} Scrap`, `**${perKill('high', eng.rerollValueStonesPerHr('high')).toFixed(4)}**`],
+    ['F7', 'Tier stone per kill, including Alchemy', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_tier_stones).toFixed(4)} + boss ${perKill('high', L.boss_per_hour * L.boss_tier_stones).toFixed(4)} + Alchemy ${perKill('high', eng.alchemyTierStonesPerHr('high')).toFixed(4)} (${E.salvage.alchemy.outputs_per_tier_stone} Value per Tier)`, `${perKill('high', STONE.tier_stones_per_hr).toFixed(4)}`],
     ['F8', 'Refines per kill', `F7 ÷ ${C.refine_stones_per_use}`, `**${perKill('high', STONE.refines_per_hr).toFixed(4)}**`],
     ['F9', 'Add stone per kill', `elite ${perKill('high', b.high.kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance).toFixed(4)} (${L.elite_spawn_chance * 100}% of kills × ${L.elite_add_stone_chance * 100}% chance) + boss ${perKill('high', L.boss_per_hour * L.boss_add_stones).toFixed(4)} (${bossPerKill} ×${L.boss_add_stones})`, `**${perKill('high', STONE.add_stones_per_hr).toFixed(4)}**`],
     ['F10', 'Ascend per kill', `min(F9 ÷ ${C.ascend_add_stones} Add, F7 ÷ ${C.ascend_tier_stones} tier) — the scarcer stone sets the pace`, `**${perKill('high', STONE.ascend_per_hr).toFixed(4)}** · full 12-piece set **${f0(STONE.ascend_hours_full_set * b.high.kills_derived)} kills** (Add alone ${f0(STONE.add_hours_full_set * b.high.kills_derived)} kills · tier stones alone ${f0(STONE.tier_hours_full_set * b.high.kills_derived)} kills → tier stones bind)`],
@@ -273,8 +273,8 @@ function runChecks() {
     : `${boltRows.length} magic weapon(s) of ${(BASES_JSON.weapons || []).length} flick a bolt instead of swinging (${boltRows.join(' · ')}) · a bolt is a press on the attack clock with no mana and no cooldown, worth the attack ladder's floor ${f2(boltFloor)}% of the finished hit, so the filler is never a downgrade and the bar can carry real cooldowns (HugePatch section 14c)`);
 
   // X53: species.zones owns zone eligibility; each subzone is an independent Species pool and pools may overlap.
-  // Their union must cover the zone cast. Variants are fixed-level rows, never subzone declarations:
-  // a real zone chooses the ladder row containing its midpoint, and subzones carry no variant list.
+  // Their union must cover the zone cast. Variants supply names/Core by zone midpoint; zone_levels supplies
+  // each Species' actual fixed level, and subzones carry no variant list.
   const subProblems: string[] = [];
   {
     const raceSet = new Set((E.mob.races?.set || []) as string[]);
@@ -650,11 +650,31 @@ function runChecks() {
     const sp = E.mob.species.find((x) => x.id === r.speciesId)!;
     if (/Elite/.test(r.kind)) {
       if (!sp.sizes.includes('large')) rp.push(`Elite ${r.id}: ${sp.name} has no Large body to flag`);
+      const zone = eng.zoneById(r.zone);
+      const fixedLevel = sp.zone_levels?.[r.zone];
+      if (!Number.isInteger(fixedLevel) || fixedLevel! < zone.levels[0] || fixedLevel! > zone.levels[1]) {
+        rp.push(`Elite ${r.id} has no static Species level inside ${zone.levels[0]}–${zone.levels[1]}`);
+      }
+      if (r.level !== fixedLevel) rp.push(`Elite ${r.id} level does not match its static Species zone level`);
       if (Math.abs(r.hpBaseTo - eng.mobHpAt(r.level) * E.mob.elite.hp) > 1) rp.push(`Elite ${r.id} Base HP is not the curve at its own level ×${E.mob.elite.hp}`);
+      const flat = eng.LG.hp_per_level * (r.level - 1) + r.vit * eng.K.K_VIT_HP;
+      const expectedHp = (eng.mobHpAt(r.level) + flat) * E.mob.elite.hp;
+      if (Math.abs(r.hpFrom - expectedHp) > 1) rp.push(`Elite ${r.id} HP does not multiply the complete mobHP by ${E.mob.elite.hp}`);
+      const variantCore = eng.variantsInZone(r.speciesId, r.zone).find((v: any) => v.name === r.variant)?.core;
+      const expectedPs = eng.mobPsAt(r.level) * E.mob.elite.ps / eng.zoneBodyFactor(r.zone) * eng.speciesPsMult(r.zone, r.speciesId, variantCore);
+      if (Math.abs(r.ps - expectedPs) > 0.01) rp.push(`Elite ${r.id} PS does not match the live spawn formula`);
     } else if (/Boss/.test(r.kind)) {
       if (Math.abs(r.hpBaseTo - eng.mobHpAt(r.level)) > 1) rp.push(`Boss ${r.id} Base HP is not mob_HP at its own level — body classes no longer scale HP`);
     } else {
       if (Math.abs(r.hpBaseTo - eng.mobHpAt(r.level)) > 1) rp.push(`${r.id} Base HP does not equal the curve at its own level — body classes no longer scale HP`);
+      if (!/Unique/.test(r.kind)) {
+        const zone = eng.zoneById(r.zone);
+        const fixedLevel = sp.zone_levels?.[r.zone];
+        if (!Number.isInteger(fixedLevel) || fixedLevel! < zone.levels[0] || fixedLevel! > zone.levels[1]) {
+          rp.push(`${r.id} has no static Species level inside ${zone.levels[0]}–${zone.levels[1]}`);
+        }
+        if (r.level !== fixedLevel) rp.push(`${r.id} level does not match its static Species zone level`);
+      }
     }
   }
   add('X23', rp.length === 0, rp.length ? rp.join(' · ')

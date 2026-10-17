@@ -49,6 +49,9 @@ export function priceGold(row: any, settlementId: string, state?: GameState, blo
 export function newTown(): TownState {
   const start = startSettlement();
   return {
+    deliveryClockSec: 0, contractTriggerRemainingSec: { [start]: TOWN.delivery.trigger_interval_sec },
+    contractSerial: 0, contracts: {}, trackedContractIds: [], deliverySummaries: {},
+    blackMarket: {},
     market: {},
     marketCredit: 0,
     visited: [start], owned: [], waypoint: start,
@@ -130,7 +133,7 @@ export function sellJunk(state: GameState): { pieces: number; gold: number } {
 
 export function taskReward(kind: string, band: string): { stone: string; count: number } {
   const pay = eng.taskPayout(band, TS.reward_minutes_of_band_income);
-  if (kind === 'elite') return { stone: 'tier', count: pay.tier };
+  if (kind === 'elite' || kind === 'expedition') return { stone: 'tier', count: pay.tier };
   return { stone: 'remove', count: TS.boss_reward.remove };
 }
 
@@ -138,13 +141,30 @@ export function taskReward(kind: string, band: string): { stone: string; count: 
 export function rollTask(rng: () => number, state: GameState): TaskSlot {
   const maxZone = Math.max(1, Math.min(eng.ZONES.length, state.zone));
   const zone = 1 + Math.floor(rng() * maxZone);
-  // the board has two kinds: an Elite hunt (the old third kind, the plain kill-count task, is gone) and a
-  // Boss hunt. Their weight against each other is the data's own line, not a number typed here.
-  const kind = rng() < TS.offer_weight_elite ? 'elite' : 'boss';
+  // Expedition offers take their share from the existing Elite/Tier offer budget; the Boss share stays put.
+  const offer = rng();
+  const eliteEdge = TS.offer_weight_elite;
+  const expeditionEdge = eliteEdge + TS.offer_weight_expedition;
+  let kind: TaskSlot['kind'] = offer < eliteEdge ? 'elite' : offer < expeditionEdge ? 'expedition' : 'boss';
+  let targetSpecies: string | undefined;
+  let subzone: number | undefined;
+  if (kind === 'expedition') {
+    const choices = (eng.zoneById(zone).subzones || []).flatMap((side: any, index: number) =>
+      (side.species || []).map((speciesId: string) => ({ speciesId, subzone: index })));
+    if (choices.length) {
+      const target = choices[Math.min(choices.length - 1, Math.floor(rng() * choices.length))];
+      targetSpecies = target.speciesId;
+      subzone = target.subzone;
+    } else kind = 'elite';
+  }
   const band = eng.zoneById(zone).quality.startsWith('high') ? 'high' : eng.zoneById(zone).quality.startsWith('mid') ? 'mid' : 'low';
-  const n = kind === 'elite' ? TS.elite_n : TS.boss_n;
+  const n = kind === 'boss' ? TS.boss_n : TS.elite_n;
   const reward = taskReward(kind, band);
   const task: TaskSlot = { kind, zone, n, progress: 0, stone: reward.stone as any, count: reward.count, claimed: false, offeredAt: state.clockSec };
+  if (kind === 'expedition' && targetSpecies != null && subzone != null) {
+    task.targetSpecies = targetSpecies;
+    task.subzone = subzone;
+  }
   // the Boss hunt's second payout rides on the slot so the claim can pay either (tasks.md)
   if (kind === 'boss') task.alt = { stone: 'tier', count: TS.boss_reward.reroll_tier } as any;
   return task;
@@ -212,13 +232,16 @@ export function withdrawMany(state: GameState, tab: number, indices: number[]): 
   return moved;
 }
 
-/** Kills feed the board the moment they match the slot's kind and zone. */
-export function progressTasks(state: GameState, mobKind: string, zone: number) {
+/** Kills feed the board when they match the task's rank, zone and, for Expeditions, exact hunting cell. */
+export function progressTasks(state: GameState, mobKind: string, zone: number, speciesId?: string, subzone?: number | null) {
   for (const task of state.town.tasks) {
     if (!task || task.claimed || task.zone !== zone) continue;
     const isElite = mobKind === 'Elite';
     const isBoss = mobKind.startsWith('Boss') || mobKind.startsWith('Unique');
     if (task.kind === 'elite' && isElite) task.progress = Math.min(task.n, task.progress + 1);
+    else if (task.kind === 'expedition' && isElite && task.targetSpecies === speciesId && task.subzone === subzone) {
+      task.progress = Math.min(task.n, task.progress + 1);
+    }
     else if (task.kind === 'boss' && isBoss) task.progress = Math.min(task.n, task.progress + 1);
   }
 }

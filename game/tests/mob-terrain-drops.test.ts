@@ -141,8 +141,8 @@ describe('mob, terrain and drop data', () => {
         const zone = E.mob.zones.find((entry: any) => entry.id === zoneId)!;
         const form = (E.mob.forms as any)[zoneId]?.[species.id];
         const assigned = eng.variantsInZone(species.id, zoneId)[0] || null;
-        const mob = eng.spawnAt(zoneId, species.zone_levels[zoneId], species.sizes[0], species.id,
-          undefined, zone.levels[0] <= E.mob.form_level_cap ? assigned?.levels : undefined, assigned?.core);
+        const mob = eng.spawnAt(zoneId, species.sizes[0], species.id, undefined, assigned?.core);
+        expect(mob.level).toBe(species.zone_levels[zoneId]);
         if (zone.levels[0] <= E.mob.form_level_cap) {
           if (form) expect(form.levels).toEqual(zone.levels);
           const previousForm = [...E.mob.zones]
@@ -179,7 +179,7 @@ describe('mob, terrain and drop data', () => {
     delete data.mob.forms['2'].goblin;
     const fallbackEngine = createEngine(data);
     const variant = fallbackEngine.variantsInZone('goblin', 2)[0];
-    const mob = fallbackEngine.spawnAt(2, 11, 'small', 'goblin', undefined, variant.levels, variant.core);
+    const mob = fallbackEngine.spawnAt(2, 'small', 'goblin', undefined, variant.core);
 
     expect(mob.formName).toBe(data.mob.forms['1'].goblin.name);
     expect(mob.core).toEqual(variant.core);
@@ -256,7 +256,7 @@ describe('mob, terrain and drop data', () => {
         const variants = eng.variantsInZone(mob.speciesId!, zoneId);
         expect(variants).toHaveLength(1);
         expect(mob.variant).toBe(variants[0]!.name);
-        expect(mob.level).toBe(eng.variantLevelOf(variants[0]));
+        expect(mob.level).toBe((E.mob.species as any[]).find((sp) => sp.id === mob.speciesId)!.zone_levels[zoneId]);
         expect(mob.core).toEqual(variants[0]!.core);
       }
     }
@@ -376,7 +376,7 @@ const speciesRow = (id: string) => (E.mob.species as any[]).find((sp: any) => sp
 /** A spawn of one lineage in one of its own zones, shaped exactly as the sim shapes it. */
 const spawnOf = (id: string, body?: string) => {
   const sp = speciesRow(id);
-  return eng.spawnAt(sp.zones[0], 30, body || sp.sizes[0], sp.id);
+  return eng.spawnAt(sp.zones[0], body || sp.sizes[0], sp.id);
 };
 
 describe('the species trait read as a mechanic', () => {

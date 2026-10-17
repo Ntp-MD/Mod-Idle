@@ -192,8 +192,10 @@
         <button onclick={() => (showImprints = false)}>Regular stones</button>
         <b>{imprintStones.length} imprints</b>
       </div>
-      <input class="imprint-search" type="search" placeholder="Find an imprint…" aria-label="Find an imprint stone"
-             bind:value={imprintQuery} oninput={() => (imprintPage = 0)} />
+      <div class="stone-search">
+        <input class="imprint-search" type="search" placeholder="Find an imprint…" aria-label="Find an imprint stone"
+               bind:value={imprintQuery} oninput={() => (imprintPage = 0)} />
+      </div>
       <div class="imprint-list" aria-live="polite">
         {#each imprintView as stone (stone.key)}
           <button class="imprint-row" class:chosen={inspectedKey === stone.key} title={stone.name}
@@ -235,9 +237,11 @@
         {/each}
       </div>
       {#if ownedRegular.length < regularStones.length}
-        <button class="all-types" onclick={() => (showAllRegular = !showAllRegular)}>
-          {showAllRegular ? 'Show held only' : 'Show all types'}
-        </button>
+        <div class="stone-actions">
+          <button class="all-types" onclick={() => (showAllRegular = !showAllRegular)}>
+            {showAllRegular ? 'Show held only' : 'Show all types'}
+          </button>
+        </div>
       {/if}
     {/if}
     <div class="stone-detail" aria-live="polite">
@@ -308,11 +312,13 @@
       <h3>Inventory</h3>
       <span>Hunt pile · {game.bag.length} / {E.inventory.adventure_slots}</span>
     </div>
-    <input type="search" class="pile-search" placeholder="Find gear…" aria-label="Find gear to craft" bind:value={bagQuery} />
-    <SlotGrid entries={shownBag} capacity={E.inventory.adventure_slots} mode="grid" {wornOf}
-              selectedIndex={where === 'bag' ? index : null}
-              onpick={(position) => selectPiece('bag', position)}
-              ondragitem={(entry, event) => startDrag('bag', entry.index, event)} />
+    <div class="inventory-content">
+      <input type="search" class="pile-search" placeholder="Find gear…" aria-label="Find gear to craft" bind:value={bagQuery} />
+      <SlotGrid entries={shownBag} capacity={E.inventory.adventure_slots} mode="grid" {wornOf}
+                selectedIndex={where === 'bag' ? index : null}
+                onpick={(position) => selectPiece('bag', position)}
+                ondragitem={(entry, event) => startDrag('bag', entry.index, event)} />
+    </div>
   </aside>
 </div>
 
@@ -328,17 +334,17 @@
   .craft-pane { grid-area: craft; }
   .equipment-pane { grid-area: equipment; }
   .inventory-pane { grid-area: inventory; }
-  .stone-pane { display: flex; flex-direction: column; overflow: hidden; }
-  .craft-pane { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+  .stone-pane { display: flex; flex-direction: column; gap: var(--spacing-xs); overflow: hidden; }
+  .craft-pane { display: flex; flex-direction: column; gap: var(--spacing-sm); overflow: hidden; background: var(--bg); }
   .equipment-pane, .inventory-pane { display: flex; flex-direction: column; overflow: hidden; }
   .pane-head, .pile-head {
     display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs);
     padding: var(--spacing-sm); border-bottom: 1px solid var(--line);
   }
-  h3 { margin: 0; color: var(--gold); font-size: var(--font-sm); }
+  h3 { margin: 0; }
   .pane-head span, .pile-head span { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
   .stone-controls { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); color: var(--dim); font-size: var(--font-xs); }
-  .stone-controls button { padding: var(--spacing-xs) var(--spacing-xs); color: var(--gold); font-size: var(--font-xs); }
+  .stone-controls button { color: var(--gold); font-size: var(--font-xs); }
   .stone-controls b { font-weight: 500; font-variant-numeric: tabular-nums; }
   .stone-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); align-content: start; padding: 0 var(--spacing-sm); min-height: 0; }
   .stone-tile { position: relative; display: grid; grid-template-columns: var(--icon-sm) minmax(0, 1fr); align-items: center; gap: var(--spacing-xs); min-width: 0; min-height: var(--icon-lg); padding: var(--spacing-xs); text-align: left; background: var(--inset); }
@@ -349,23 +355,25 @@
   .stone-tile[draggable="true"]:active, .imprint-row[draggable="true"]:active { cursor: grabbing; }
   .stone-tile.unowned { opacity: .65; }
   .stone-tile.chosen, .imprint-row.chosen { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--inset)); }
-  .all-types { align-self: flex-start; margin: var(--spacing-xs) var(--spacing-sm); padding: var(--spacing-xs) var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
-  .imprint-search { margin: 0 var(--spacing-sm) var(--spacing-xs); min-width: 0; }
+  .stone-search, .stone-actions { padding-inline: var(--spacing-sm); }
+  .all-types { align-self: flex-start; color: var(--dim); font-size: var(--font-xs); }
+  .imprint-search { width: 100%; min-width: 0; }
   .imprint-list { flex: 1; min-height: 0; display: grid; grid-template-rows: repeat(8, minmax(0, 1fr)); gap: var(--spacing-xs); padding: 0 var(--spacing-sm); }
   .imprint-row { display: grid; grid-template-columns: var(--icon-sm) minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-xs); min-width: 0; min-height: 0; padding: var(--spacing-xs) var(--spacing-xs); text-align: left; background: var(--inset); }
   .imprint-row img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
   .imprint-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-xs); }
   .imprint-row b { color: var(--gold-lit); font-family: var(--num); font-size: var(--font-xs); }
   .imprint-pages { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
-  .imprint-pages button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .imprint-pages button { font-size: var(--font-xs); }
   .imprint-pages button:disabled { opacity: .4; }
-  .stone-empty { grid-column: 1 / -1; margin: var(--spacing-xs) 0; color: var(--dim); font-size: var(--font-xs); }
-  .stone-detail { display: grid; gap: var(--spacing-xs); margin-top: auto; padding: var(--spacing-sm); border-top: 1px solid var(--line); font-size: var(--font-xs); }
+  .stone-empty { grid-column: 1 / -1; color: var(--dim); font-size: var(--font-xs); }
+  .stone-grid { flex: 1; min-height: 0; }
+  .stone-detail { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); border-top: 1px solid var(--line); font-size: var(--font-xs); }
   .stone-detail strong { color: var(--gold-lit); font-weight: 600; }
   .stone-detail span { color: var(--dim); }
   .drop-slot {
-    display: flex; align-items: center; gap: var(--spacing-sm); min-height: clamp(81px, 6.29vw, 176px);
-    margin: var(--spacing-sm); padding: var(--spacing-sm); border: 1px dashed var(--gold);
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-sm); min-height: clamp(81px, 6.29vw, 176px);
+    padding: var(--spacing-sm); border: 1px dashed var(--gold);
     background: color-mix(in srgb, var(--gold) 6%, var(--inset)); transition: background var(--motion-fast) var(--ease-ui), border-color var(--motion-fast) var(--ease-ui);
   }
   .drop-slot.ready { border-style: solid; border-color: var(--focus); background: color-mix(in srgb, var(--focus) 14%, var(--inset)); }
@@ -377,13 +385,14 @@
   .piece-copy { display: grid; gap: var(--spacing-xs); min-width: 0; }
   .piece-copy strong { color: var(--text); font-size: var(--font-sm); }
   .piece-copy span, .piece-copy small { color: var(--dim); font-size: var(--font-xs); }
-  .clear { margin-left: auto; align-self: start; font-size: var(--font-xs); }
+  .clear { justify-self: end; align-self: start; font-size: var(--font-xs); }
   .operations { flex: 1; min-height: 0; overflow: hidden; padding: var(--spacing-xs); display: grid; align-content: start; gap: var(--spacing-xs); }
   .work-note { margin: 0; color: var(--gold-lit); font-size: var(--font-xs); }
   .empty-work { margin: 0; color: var(--dim); font-size: var(--font-sm); }
   .doll-wrap { padding: var(--spacing-xs); }
   .pile-head { flex: none; }
-  .pile-search { display: block; flex: none; width: calc(100% - var(--spacing-sm) * 2); margin: var(--spacing-sm); }
-  .inventory-pane :global(.grid) { flex: 1; min-height: 0; overflow: hidden; align-content: start; grid-template-columns: repeat(auto-fill, minmax(var(--icon-lg), 1fr)); margin: 0 var(--spacing-sm) var(--spacing-sm); }
+  .inventory-content { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-sm); min-height: 0; padding: 0 var(--spacing-sm) var(--spacing-sm); }
+  .pile-search { display: block; flex: none; width: 100%; }
+  .inventory-pane :global(.grid) { flex: 1; min-height: 0; overflow: hidden; align-content: start; grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .inventory-pane :global(.bar) { display: none; }
 </style>

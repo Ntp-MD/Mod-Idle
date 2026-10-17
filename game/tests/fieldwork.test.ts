@@ -228,9 +228,11 @@ describe('field Camp and fieldwork', () => {
 
   it('rolls independent trail events for supplies and rest', () => {
     const state = newGame();
+    const localFood = fieldwork.F.regional_sources[state.zone].food;
     const event = resolveTravelEvent(state, () => 0);
-    expect(event).toContain('Wild Berries');
-    expect(state.fieldwork.foods.wild_berries).toBeGreaterThan(0);
+    expect(event).toContain(fieldwork.foodById[localFood].name);
+    expect(event).toContain(E.mob.zones.find((zone: any) => zone.id === state.zone)!.name);
+    expect(state.fieldwork.foods[localFood]).toBeGreaterThan(0);
   });
 
   it('drops raw Goblin Haunch, cooked human rations and edible herbs from their matching species', () => {

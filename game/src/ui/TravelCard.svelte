@@ -14,7 +14,11 @@
    */
   let {
     dest, settlement, busy = false, fare = 0, afford = true, dungeon = null,
-    onwalk, onwarp, onhunt, ondesk, onclear, ondungeon, oncamp = () => {}, oncampui = () => {},
+    patrol = { stops: [], active: false, repeat: true, index: 0, groupsCleared: 0 }, autoReturnEnabled = false,
+    minPatrolStops = 2, maxPatrolStops = 3, groupsPerStop = 3, autoReturnPct = 90,
+    onwalk, onwarp, onhunt, ondesk, onclear, ondungeon, onretreat = () => {}, oncamp = () => {}, oncampui = () => {},
+    onTogglePatrolStop = () => {}, onStartPatrol = () => {}, onStopPatrol = () => {}, onClearPatrol = () => {},
+    onPatrolRepeat = (_repeat: boolean) => {}, onAutoReturn = (_enabled: boolean) => {},
   }: {
     /** the picked cell and everything the field knows about it */
     dest: {
@@ -38,24 +42,42 @@
     afford?: boolean;
     /** the run the card speaks for: inside with a count, or outside with the cooldown left */
     dungeon?: { active: boolean; left: number; total: number; cooldown: number } | null;
+    patrol?: { stops: { zone: number; subzone: number; cell: { q: number; r: number } }[]; active: boolean; repeat: boolean; index: number; groupsCleared: number };
+    autoReturnEnabled?: boolean;
+    minPatrolStops?: number;
+    maxPatrolStops?: number;
+    groupsPerStop?: number;
+    autoReturnPct?: number;
     onwalk: () => void;
     onwarp: (id: string) => void;
     onhunt: () => void;
     ondesk: () => void;
     onclear: () => void;
     ondungeon: () => void;
+    onretreat?: () => void;
     oncamp?: () => void;
     oncampui?: () => void;
+    onTogglePatrolStop?: () => void;
+    onStartPatrol?: () => void;
+    onStopPatrol?: () => void;
+    onClearPatrol?: () => void;
+    onPatrolRepeat?: (repeat: boolean) => void;
+    onAutoReturn?: (enabled: boolean) => void;
   } = $props();
   const site = $derived(dest.kind === 'wild' ? fieldwork.siteAt(dest.wild) : dest.kind === 'bare' || dest.kind === 'sub' ? 'hunt' : null);
   const isDungeon = $derived(site === 'dungeon');
   const zone = $derived(eng.zoneById(settlement.zone));
   const subzone = $derived(dest.kind === 'sub' && dest.sub != null ? zone.subzones?.[dest.sub] ?? null : null);
   const encounterNames = $derived.by(() => {
-    // fixed-level Variants field the side whose band they own; subzones hold Species ids.
+    // The zone's fixed levels belong to Species; its selected Variant supplies the name and Core.
     const speciesIds = subzone ? (subzone.species || []) : eng.speciesInZone(settlement.zone);
-    const names = [...new Set(speciesIds.flatMap((id: string) => eng.variantsInZone(id, settlement.zone).map((v: any) => v.name)))];
-    return names.length ? names : speciesIds.map((id: string) => eng.speciesById(id)?.name ?? id);
+    const rows = speciesIds.flatMap((id: string) => {
+      const species = eng.speciesById(id);
+      const level = species?.zone_levels?.[settlement.zone];
+      const names = eng.variantsInZone(id, settlement.zone).map((variant: any) => variant.name);
+      return (names.length ? names : [species?.name ?? id]).map((name: string) => `${name} · Lv ${level ?? zone.levels[0]}`);
+    });
+    return [...new Set(rows)];
   });
   const uniqueNames = $derived.by(() => {
     // A Species may have no Unique or several; Elite remains a rank over the rolled Variant.
@@ -65,6 +87,11 @@
   const zoneBoss = $derived(E.mob.bosses.find((boss: any) => boss.zone === settlement.zone) ?? null);
   /** The side's own pack, Elite rate and body mix — what standing here rolls (`mob.spawn_packs`). */
   const sideWords = $derived(sideSpawnWords(subzone?.spawn));
+  const patrolNames = $derived(patrol.stops.map((stop) => eng.zoneById(stop.zone)?.subzones?.[stop.subzone]?.name || `Sub-zone ${stop.subzone + 1}`));
+  const selectedPatrolStop = $derived(dest.kind === 'sub' && dest.sub != null
+    && patrol.stops.some((stop) => stop.zone === settlement.zone && stop.subzone === dest.sub));
+  const patrolHere = $derived(patrol.stops[patrol.index]
+    ? eng.zoneById(patrol.stops[patrol.index].zone)?.subzones?.[patrol.stops[patrol.index].subzone]?.name || '' : '');
   /** The one line that says what standing here is good for. */
   const ground = $derived(({
     town: 'the settlement itself — safe ground, and a Waypoint',
@@ -107,7 +134,7 @@
       <strong>Encounter guide</strong>
       <span>{subzone ? subzone.name : 'Zone pool'} · Lv {zone.levels[0]}–{zone.levels[1]}</span>
     </header>
-    <ul class="dest-mob-list" title="Each variant haunts only its own level band">
+    <ul class="dest-mob-list" title="Species levels are fixed for this zone; Variants supply the names and Core">
       {#each encounterNames as name (name)}<li>{name}</li>{/each}
     </ul>
     {#if uniqueNames.length || zoneBoss || sideWords.length}
@@ -128,6 +155,7 @@
       <p>Dungeon · up to {E.dungeon.mob_cap} mobs in groups of {E.dungeon.group_cap}. Loot stays in escrow until the last one falls; a Push forfeits it.</p>
       {#if dungeon?.active}
         <span class="dest-state">In progress · {dungeon.left}/{dungeon.total} left</span>
+        <button class="dest-secondary" onclick={onretreat}>Retreat · rescue {E.dungeon.retreat_keep_min}–{E.dungeon.retreat_keep_max} random stacks</button>
       {:else if (dungeon?.cooldown ?? 0) > 0}
         <span class="dest-state">Cooling down · {dungeon?.cooldown}s left</span>
       {:else if dest.self}
@@ -143,29 +171,56 @@
   {/if}
 
   <footer class="dest-actions">
-    {#if !dest.self}
-      <button class="dest-primary" onclick={onwalk} disabled={busy}>{dest.walking ? 'Walking…' : 'Walk here'}</button>
-      {#if dest.kind === 'town' && dest.here && dest.node}
-        <button class="dest-secondary" onclick={() => onwarp(dest.node!)} disabled={!afford}
-                title={afford ? `Warp for ${fare} gold` : `Needs ${fare} gold`}>
-          Waypoint · {fare} gold
+    <div class="dest-primary-actions">
+      {#if !dest.self}
+        <button class="dest-primary" onclick={onwalk} disabled={busy}>{dest.walking ? 'Walking…' : 'Walk here'}</button>
+        {#if dest.kind === 'town' && dest.here && dest.node}
+          <button class="dest-secondary" onclick={() => onwarp(dest.node!)} disabled={!afford}
+                  title={afford ? `Warp for ${fare} gold` : `Needs ${fare} gold`}>
+            Waypoint · {fare} gold
+          </button>
+        {/if}
+      {:else}
+        {#if isDungeon && !dungeon?.active && (dungeon?.cooldown ?? 0) <= 0}
+          <button class="dest-primary" onclick={ondungeon}>Enter dungeon</button>
+        {/if}
+        <button class="dest-primary" onclick={onhunt}>{dest.kind === 'sub' ? 'Hunt this sub-zone' : 'Hunt here'}</button>
+        {#if dest.kind !== 'town'}
+          <button class="dest-secondary" onclick={oncampui}>Camp & skills</button>
+          <button class="dest-secondary" onclick={oncamp} title="Set up a safe field Camp here">Set Camp</button>
+        {/if}
+      {/if}
+      {#if dest.kind === 'town'}
+        <button class="dest-secondary" onclick={ondesk}>The desk</button>
+      {/if}
+      {#if dest.kind === 'sub' && !patrol.active}
+        <button class="dest-secondary" onclick={onTogglePatrolStop} disabled={busy || (patrol.stops.length >= maxPatrolStops && !selectedPatrolStop)}>
+          {selectedPatrolStop ? 'Remove Patrol stop' : 'Add Patrol stop'}
         </button>
       {/if}
-    {:else}
-      {#if isDungeon && !dungeon?.active && (dungeon?.cooldown ?? 0) <= 0}
-        <button class="dest-primary" onclick={ondungeon}>Enter dungeon</button>
+      {#if patrol.active}
+        <button class="dest-primary" onclick={onStopPatrol}>Stop Patrol</button>
+      {:else if patrol.stops.length >= minPatrolStops}
+        <button class="dest-primary" onclick={onStartPatrol} disabled={busy}>Start Patrol</button>
       {/if}
-      <button class="dest-primary" onclick={onhunt}>{dest.kind === 'sub' ? 'Hunt this sub-zone' : 'Hunt here'}</button>
-      {#if dest.kind !== 'town'}
-        <button class="dest-secondary" onclick={oncampui}>Camp & skills</button>
-        <button class="dest-secondary" onclick={oncamp} title="Set up a safe field Camp here">Set Camp</button>
+      {#if patrol.stops.length && !patrol.active}
+        <button class="dest-secondary" onclick={onClearPatrol} disabled={busy}>Clear route</button>
       {/if}
-    {/if}
-    {#if dest.kind === 'town'}
-      <button class="dest-secondary" onclick={ondesk}>The desk</button>
-    {/if}
+    </div>
     <button class="dest-clear" onclick={onclear}>Clear</button>
   </footer>
+
+  {#if dest.kind === 'sub' || patrol.stops.length}
+    <details class="dest-dungeon">
+      <summary class="dest-note">Patrol · {patrol.stops.length}/{maxPatrolStops} stops{patrol.active ? ` · ${patrolHere} · ${patrol.groupsCleared}/${groupsPerStop} groups` : ''}</summary>
+      {#if patrolNames.length}<p class="dest-note">{patrolNames.join(' → ')}</p>{/if}
+      <label><input type="checkbox" checked={patrol.repeat} onchange={(event) => onPatrolRepeat(event.currentTarget.checked)} disabled={patrol.active} /> Repeat route</label>
+      <label><input type="checkbox" checked={autoReturnEnabled} onchange={(event) => onAutoReturn(event.currentTarget.checked)} /> Auto-Return at {autoReturnPct}% bag, stash unlocked gear, resume</label>
+      {#if patrol.stops.length < minPatrolStops}
+        <p class="dest-note">Choose at least {minPatrolStops} subzones in one visited zone. Patrol hunts each stop's fixed roster.</p>
+      {/if}
+    </details>
+  {/if}
 </div>
 
 <style>
@@ -200,15 +255,16 @@
   .dest-dungeon p { margin: 0; color: var(--dim); line-height: 1.35; }
   .dest-state { justify-self: start; color: var(--gold-lit); }
   .dest-state.ready { color: var(--good-lit); }
-  .dest-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs); }
+  .dest-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-sm); }
+  .dest-primary-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-sm); }
   .dest-actions button {
-    padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-xs);
+    border: 1px solid var(--edge); border-radius: var(--radius-xs);
     background: var(--panel); color: var(--text); font-size: var(--font-xs); transition: border-color var(--motion-fast) var(--ease-ui), background var(--motion-fast) var(--ease-ui), color var(--motion-fast) var(--ease-ui);
   }
   .dest-actions button:hover { border-color: var(--gold); }
   .dest-actions .dest-primary { border-color: color-mix(in srgb, var(--gold) 54%, var(--edge)); background: color-mix(in srgb, var(--gold) 12%, var(--panel)); color: var(--gold-lit); }
   .dest-actions .dest-primary:hover { background: color-mix(in srgb, var(--gold) 20%, var(--panel)); }
-  .dest-actions .dest-clear { margin-left: auto; background: transparent; color: var(--dim); }
+  .dest-actions .dest-clear { background: transparent; color: var(--dim); }
   .dest-actions button:disabled { opacity: .45; cursor: not-allowed; }
   .dest-actions button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   @keyframes pop { from { transform: translateY(var(--x-pull-note)); opacity: .3; } to { transform: none; opacity: 1; } }

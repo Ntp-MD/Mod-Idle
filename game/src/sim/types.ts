@@ -1,5 +1,6 @@
 import type { StatKey } from '../engine/client';
 import type { Hex } from '../../../engine/road.ts';
+import type { AlchemyLedger } from '../../../engine/alchemy.ts';
 
 export interface ModExtra {
   id: string;
@@ -80,7 +81,7 @@ export interface Mob {
   /** The combat subzone's environment, which can add a conserved drop lean. */
   environment?: string;
   /**
-   * The fixed-level variant name this spawn rolled (`mob.variants` → `mob.variant_drops`), or the
+   * The selected Variant name this spawn rolled (`mob.variants` → `mob.variant_drops`), or the
    * fixed boss/unique name for those ranks. It owns both the junk item the mob pays and the stream
    * it leans, so two mobs of one species are not one drop table. Elite keeps the rolled variant.
    */
@@ -161,7 +162,8 @@ export interface Counters {
   zoneKills: Record<number, number>;
   pushes: number;
   drops: number;
-  /** Gear pieces dissolved by the bag filter; every 500 owes one Tier stone (F15). */
+  /** Gear pieces dissolved by the bag filter. Historical record — Tier milestones now count eligible
+   *  Alchemy Value outputs on the versioned `alchemy` ledger, not this counter. */
   salvaged?: number;
   /** Every point of damage the character dealt, so a DPS figure is state-backed, not inferred. */
   damage?: number;
@@ -198,8 +200,11 @@ export interface HealBuff {
 /** A task slot on the Guild board (`tasks.md`). A Boss hunt pays winner's choice: the
     default `stone`/`count` (the Remove stone) or the `alt` it names (the Reroll tier count). */
 export interface TaskSlot {
-  kind: 'elite' | 'boss';
+  kind: 'elite' | 'expedition' | 'boss';
   zone: number;
+  /** Expedition target. This Species must be defeated as an Elite at this subzone. */
+  targetSpecies?: string;
+  subzone?: number;
   n: number;
   progress: number;
   stone: 'reroll_value' | 'tier' | 'remove';
@@ -210,6 +215,13 @@ export interface TaskSlot {
 }
 
 export interface TownState {
+  deliveryClockSec: number;
+  contractTriggerRemainingSec: Record<string, number>;
+  contractSerial: number;
+  contracts: Record<string, import('./delivery-types').DeliveryContract[]>;
+  trackedContractIds: string[];
+  deliverySummaries: Record<string, import('./delivery-types').DeliverySummary>;
+  blackMarket: Record<string, import('./black-market').BlackMarketTownState>;
   /** Base-value supply already delivered, decaying over simulation time at each town and category. */
   market: Record<string, Record<string, { used: number; atSec: number }>>;
   /** Earned fractions below the currency display unit carry forward into the next sale. */
@@ -259,6 +271,27 @@ export interface Cell {
   sub: number | null;
   /** The wild-side index of this cell, or null — side 0 is where a zone's dungeon is entered. */
   wild: number | null;
+}
+
+export interface PatrolStop {
+  zone: number;
+  subzone: number;
+  cell: Cell;
+}
+
+export interface PatrolState {
+  stops: PatrolStop[];
+  active: boolean;
+  repeat: boolean;
+  index: number;
+  groupsCleared: number;
+}
+
+export interface AutoReturnState {
+  enabled: boolean;
+  phase: 'idle' | 'waiting' | 'to-town' | 'to-stop';
+  /** The stop to resume after a safe stash deposit. */
+  resumeCell: Cell | null;
 }
 
 /**
@@ -312,6 +345,8 @@ export interface GameState {
   walk: Walk | null;
   /** The hex the feet are on — a town, a side of one, or bare ground (`road.standing_rule`). */
   cell: Cell | null;
+  patrol: PatrolState;
+  autoReturn: AutoReturnState;
   skills: SkillState;
   healUp: HealBuff | null;
   /** Unsold junk, keyed by the variant item's own name (`mob.variant_drops`). */
@@ -363,6 +398,7 @@ export interface GameState {
   town: TownState;
   farm: FarmState;
   fieldwork: FieldworkState;
+  alchemy: AlchemyLedger;
   zone: number;
   group: Mob[];
   phase: Phase;

@@ -265,20 +265,20 @@ describe('audit follow-up', () => {
     expect(s.counters.stones.remove).toBe(1);
   });
 
-  it.each([false, true])('manual salvage preserves gear when its payout cannot fit (milestone: %s)', (milestone) => {
+  it.each([false, true])('manual salvage preflights both resource outputs (existing iron stack: %s)', (existing) => {
     const s = newGame();
     s.bag = [armour()];
-    s.counters.stones.reroll_value = milestone ? 1 : 0;
-    s.counters.stones.tier = 0;
-    if (milestone) s.counters.salvaged = E.salvage.pieces_per_tier_stone - 1;
+    if (existing) s.fieldwork.materials['iron-ore'] = 1;
     fillBag(s);
     const before = exportJson(s);
     expect(salvageBag(s, 0).ok).toBe(false);
     expect(exportJson(s)).toBe(before);
     delete s.junk['filler-0'];
+    if (!existing) delete s.junk['filler-1'];
     expect(salvageBag(s, 0).ok).toBe(true);
     expect(s.bag).toHaveLength(0);
-    if (milestone) expect(s.counters.stones.tier).toBe(1);
+    expect(s.fieldwork.materials.scrap).toBe(1);
+    expect(s.fieldwork.materials['iron-ore']).toBe(existing ? 2 : 1);
   });
 
   it.each([false, true])('a lethal hit causes Push before recovery (active heal: %s)', (activeHeal) => {

@@ -55,14 +55,14 @@
 
   <div class="group-tabs" role="tablist" aria-label="Key binding groups">
     {#each groups as g (g)}
-      <button role="tab" class:active={activeGroup === g} aria-selected={activeGroup === g} onclick={() => (activeGroup = g)}>{KEYGROUP_LABEL[g]}</button>
+      <button role="tab" class="btn btn-quiet" class:toggled={activeGroup === g} aria-selected={activeGroup === g} onclick={() => (activeGroup = g)}>{KEYGROUP_LABEL[g]}</button>
     {/each}
   </div>
 
   <section class="grp" aria-label={KEYGROUP_LABEL[activeGroup]}>
     <h4>{KEYGROUP_LABEL[activeGroup]}</h4>
     <table class="kb">
-      <thead><tr><th>Action</th><th>Where it works</th><th>Key</th><th></th></tr></thead>
+      <thead><tr><th>Action</th><th>Where it works</th><th>Key</th><th>Actions</th></tr></thead>
       <tbody>
         {#each KEYBINDS.filter((b) => b.group === activeGroup) as b (b.id)}
           {@const hot = capturing === b.id}
@@ -71,11 +71,13 @@
             <td class="act">{b.label}</td>
             <td class="where">{b.where}</td>
             <td>
-              <button class="cap" class:waiting={hot} onclick={() => (capturing = hot ? null : b.id)}
-                      aria-label={hot ? `Press a key for ${b.label}` : `Rebind ${b.label} to ${formatKey(binds[b.id])}`}>
-                {#if hot}press a key…{:else}{formatKey(binds[b.id])}{/if}
-              </button>
-              {#if dup}<span class="warn">twice</span>{/if}
+              <div class="key-value">
+                <button class="cap" class:waiting={hot} onclick={() => (capturing = hot ? null : b.id)}
+                        aria-label={hot ? `Press a key for ${b.label}` : `Rebind ${b.label} to ${formatKey(binds[b.id])}`}>
+                  {#if hot}press a key…{:else}{formatKey(binds[b.id])}{/if}
+                </button>
+                {#if dup}<span class="warn">twice</span>{/if}
+              </div>
             </td>
             <td class="tail">
               {#if offDefault(b.id)}
@@ -104,12 +106,10 @@
     background: color-mix(in srgb, var(--gold) 10%, transparent); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); color: var(--gold-lit);
   }
   .clash b { font-family: var(--num); color: var(--gold); }
-  .group-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
-  .group-tabs button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
-  .group-tabs button.active { border-color: var(--gold); color: var(--gold); }
+  .group-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
   .grp { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: var(--spacing-xs); }
-  .grp h4 { margin: var(--spacing-xs) 0 0; }
-  .kb td { border-bottom-color: var(--line); }
+  .key-value { display: flex; align-items: center; gap: var(--spacing-xs); }
+  .kb td { border-bottom-color: var(--line); padding-bottom: 0; }
   .kb .act { font-family: var(--ui); color: var(--text); font-size: var(--font-xs); }
   .kb .where { font-family: var(--ui); color: var(--mob); font-size: var(--font-xs); }
   .kb .tail { display: flex; gap: var(--spacing-xs); justify-content: flex-end; align-items: center; }
@@ -120,6 +120,6 @@
   .cap.waiting { border-color: var(--focus); color: var(--focus); background: color-mix(in srgb, var(--focus) 10%, transparent); }
   tr.hot { background: color-mix(in srgb, var(--focus) 7%, transparent); }
   tr.dup .cap { border-color: var(--hp); }
-  .warn { margin-left: var(--spacing-xs); font-size: var(--font-xs); color: var(--alarm); }
+  .warn { font-size: var(--font-xs); color: var(--alarm); }
   .foot { margin: 0; color: var(--dim); }
 </style>

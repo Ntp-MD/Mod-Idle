@@ -341,7 +341,8 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   /**
    * The bag filter: keep a drop only when it beats the piece worn in the same slot by more than
    * noise — `upgrade_margin_pct` — or when it carries an Element the player has no answer to
-   * (loot.md §4). Anything else dissolves for 1 Value stone, never for gold (`economy.md`).
+   * (loot.md §4). Anything else salvages into the configured material bundle; Value stones come later
+   * from the settlement Alchemy recipe.
    *
    * The last argument is one slot's configured thresholds (`save.md`): a raised margin and the Element
    * keep-list switch. Every value falls back to the published rule, so a caller that configures nothing

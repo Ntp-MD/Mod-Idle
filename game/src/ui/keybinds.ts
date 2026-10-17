@@ -56,10 +56,10 @@ export const KEYBINDS: Keybind[] = [
 
   { id: 'game.pause', label: 'Pause or resume the clock', group: 'field', def: 'Space', where: 'the field' },
 
-  { id: 'map.zoom.in', label: 'Zoom the sheet in', group: 'map', def: '+', where: 'map focus' },
-  { id: 'map.zoom.out', label: 'Zoom the sheet out', group: 'map', def: '-', where: 'map focus' },
-  { id: 'map.zoom.reset', label: 'Reset the sheet view', group: 'map', def: '0', where: 'map focus' },
-  { id: 'map.view.next', label: 'Next sheet view — terrain, band, gate', group: 'map', def: 'v', where: 'map focus' },
+  { id: 'map.zoom.in', label: 'Zoom the map in', group: 'map', def: '+', where: 'map focus' },
+  { id: 'map.zoom.out', label: 'Zoom the map out', group: 'map', def: '-', where: 'map focus' },
+  { id: 'map.zoom.reset', label: 'Reset the map view', group: 'map', def: '0', where: 'map focus' },
+  { id: 'map.view.next', label: 'Next map view — terrain, band, gate', group: 'map', def: 'v', where: 'map focus' },
   { id: 'map.walk', label: 'Show or hide the walk graph', group: 'map', def: 'w', where: 'map focus' },
   { id: 'map.ids', label: 'Show or hide the cell ids', group: 'map', def: 'i', where: 'map focus' },
   { id: 'map.centre', label: 'Centre on where you stand', group: 'map', def: 'z', where: 'map focus' },
@@ -102,8 +102,11 @@ export function isModifierKey(ev: KeyboardEvent): boolean {
 
 /** What the player reads on a key cap: the symbols they see on the board, not the internal token. */
 export function formatKey(token: string): string {
-  return token
-    .split('+')
+  const plusBase = token === '+' || token.endsWith('++');
+  const parts = plusBase
+    ? [...(token === '+' ? [] : token.slice(0, -2).split('+')), '+']
+    : token.split('+');
+  return parts
     .map((part) => ({ Ctrl: 'Ctrl', Alt: 'Alt', Shift: '⇧', Meta: '⌘', Space: 'Space', Escape: 'Esc', Enter: '↵' } as Record<string, string>)[part] || part.toUpperCase())
     .join(' ');
 }

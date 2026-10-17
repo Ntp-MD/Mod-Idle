@@ -1,6 +1,10 @@
 import type { GameState } from '../sim/types';
+import { normalizeAlchemyLedger } from '../../../engine/alchemy.ts';
+import { normalizeBlackMarket } from '../sim/black-market';
 import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive, newSkillState } from '../sim/skills';
 import { newTown } from '../sim/town';
+import { normalizeDeliveries } from '../sim/delivery';
+import { normalizeExplorationState } from '../sim/exploration';
 import { newFarm } from '../sim/farm';
 import { newFieldwork } from '../sim/fieldwork';
 import { newPresets } from '../sim/presets';
@@ -30,11 +34,12 @@ import { road } from '../sim/road';
 // rather than two settlement ids, so a v11 walk is re-read through the walk graph's own coordinates and
 // an in-flight route that names no settlement is dropped rather than left to compute NaN blocks.
 // v13 adds the persistent field Camp, field-skill tracks, materials, meals and active meal timer.
-// v14 adds Hunger, Auto Eat, ten carried food types and persistent trail-event provisions.
+// v14 adds Hunger, Auto Eat, ten carried food types and persistent trail-event provisions. v15 adds
+// the Alchemy ledger. v16 adds optional Patrol and Auto-Return settings with an empty-route default.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 14;
+export const SCHEMA_VERSION = 16;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
@@ -537,6 +542,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     delete (s as any).zoneFocus;
   }
   if (!s.town) s.town = newTown();
+  // v16 · optional saved Patrol and Auto-Return backfill to an empty, disabled route; existing
+  // inventory, task progress and location are preserved.
+  normalizeExplorationState(s);
   // Additive market records preserve every existing stack and gold balance. Empty supply means full demand.
   s.town.market ||= {};
   s.town.marketCredit ??= 0;
@@ -563,6 +571,18 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   }
   s.fieldwork.materials = { ...newFieldwork().materials, ...s.fieldwork.materials };
   s.fieldwork.foods = { ...newFieldwork().foods, ...s.fieldwork.foods };
+  const fieldDefaults = newFieldwork();
+  for (const key of Object.keys(fieldDefaults.skills) as (keyof typeof fieldDefaults.skills)[]) {
+    const saved = s.fieldwork.skills?.[key];
+    if (!saved) s.fieldwork.skills[key] = { xp: 0, mastery: {} };
+    else { saved.mastery ||= {}; }
+  }
+  s.farm.mastery ||= { low: 0, mid: 0, high: 0 };
+  for (const tier of ['low', 'mid', 'high']) s.farm.mastery[tier] ||= 0;
+  s.alchemy = normalizeAlchemyLedger(s.alchemy, E.salvage.alchemy.outputs_per_tier_stone, fromVersion < 15 ? s.counters.salvaged : undefined);
+  normalizeBlackMarket(s);
+  if (s.dungeon) s.dungeon.escrow.materials ||= {};
+  normalizeDeliveries(s);
   // a farm saved before the automation block existed gets it off; the player opts in
   if (s.farm && !s.farm.autoFarm) { s.farm.autoFarm = { plant: false, harvest: false, brew: false }; s.farm.lastAutoFarmAt = -9999; }
   // an older character auto-allocates its points (the idle default); manual is the opt-out 
@@ -669,12 +689,12 @@ export function exportJson(state: GameState): string {
 export function importJson(text: string): GameState {
   const parsed = JSON.parse(text);
   const version = parsed.version == null ? 'none' : parsed.version;
-  if (parsed.version !== SCHEMA_VERSION) {
+  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 15 && parsed.version !== 14) {
     throw new Error(`schema version ${version} ≠ ${SCHEMA_VERSION}`);
   }
   const state = parsed.state as GameState;
   if (!state.player || !state.counters) throw new Error('not a ModWorld save');
-  return migrate(state);
+  return migrate(state, parsed.version);
 }
 
 export const saveSlots = SLOTS;

@@ -1,10 +1,11 @@
-import { E, fieldwork } from '../engine/client';
+import { E, fieldwork, lifeSkills } from '../engine/client';
 import type { Character } from './player';
 import type { GameState, Cell } from './types';
 import { addTo, fits } from './slots';
 import { currentCell, rankOf, zoneOf } from './road';
+import { farmLevel } from './farm';
 
-export type FieldSkillId = 'mining' | 'woodcutting' | 'hunting' | 'cooking';
+export type FieldSkillId = 'mining' | 'woodcutting' | 'hunting' | 'cooking' | 'fishing' | 'smithing';
 export interface FieldSkillTrack {
   xp: number;
   mastery: Record<string, number>;
@@ -14,7 +15,7 @@ export interface FieldCamp {
   zone: number;
 }
 export interface FieldAction {
-  kind: 'mine' | 'grove';
+  kind: 'mine' | 'grove' | 'fish';
   nextAt: number;
 }
 export interface FieldMeal {
@@ -55,7 +56,7 @@ export function newFieldwork(): FieldworkState {
       threshold: fieldwork.F.hunger.auto_eat.threshold_default,
       allowRaw: fieldwork.F.hunger.auto_eat.allow_raw_default,
     },
-    skills: { mining: track(), woodcutting: track(), hunting: track(), cooking: track() },
+    skills: { mining: track(), woodcutting: track(), hunting: track(), cooking: track(), fishing: track(), smithing: track() },
     activeMeal: null,
   };
 }
@@ -106,10 +107,14 @@ export function resolveTravelEvent(state: GameState, rng: () => number): string 
     return `${event.text} · Hunger ${Math.floor(state.fieldwork.hunger)}%`;
   }
   const amount = event.amount_min + Math.floor(rng() * (event.amount_max - event.amount_min + 1));
-  const food = fieldwork.foodById[event.food_id];
+  const localFood = fieldwork.F.regional_sources?.[state.zone]?.food;
+  const food = fieldwork.foodById[localFood] || fieldwork.foodById[event.food_id];
   if (!food) return null;
   const received = addTo(state, state.fieldwork.foods, food.id, 'food', amount);
-  return received ? `${event.text} · ${food.name} ×${received}` : `${event.text}, but the food bag is full`;
+  const zoneName = E.mob.zones.find((zone: any) => zone.id === state.zone)?.name || 'the trail';
+  return received
+    ? `Found ${food.name} along ${zoneName} · ${food.name} ×${received}`
+    : `Found ${food.name} along ${zoneName}, but the food bag is full`;
 }
 
 export function fieldSkillLevel(state: GameState, id: FieldSkillId): number {
@@ -118,6 +123,12 @@ export function fieldSkillLevel(state: GameState, id: FieldSkillId): number {
 
 export function fieldMasteryLevel(state: GameState, id: FieldSkillId, key: string): number {
   return fieldwork.masteryLevel(state.fieldwork.skills[id]?.mastery[key] || 0);
+}
+
+export function lifeSkillBonuses(state: GameState) {
+  const levels: Record<string, number> = Object.fromEntries(Object.keys(state.fieldwork.skills).map((id) => [id, fieldSkillLevel(state, id as FieldSkillId)]));
+  levels.farming = farmLevel(state);
+  return lifeSkills.bonuses(levels);
 }
 
 export function fieldHarvestBonus(state: GameState, id: FieldSkillId): number {
@@ -206,12 +217,15 @@ export function returnToCamp(state: GameState): { ok: boolean; why?: string } {
   return { ok: true };
 }
 
-export function startFieldAction(state: GameState, kind: 'mine' | 'grove'): { ok: boolean; why?: string } {
+export function startFieldAction(state: GameState, kind: 'mine' | 'grove' | 'fish'): { ok: boolean; why?: string } {
   if (!campHere(state)) return { ok: false, why: 'set Camp on this hex first' };
   if (state.hunting || state.group.length) return { ok: false, why: 'return to safe Camp before gathering' };
   if (state.phase === 'camp' || state.dungeon || state.walk) return { ok: false, why: 'gathering is unavailable right now' };
-  if (fieldSite(state.cell) !== kind) return { ok: false, why: kind === 'mine' ? 'stand at a Mine hex' : 'stand at a Rare Grove' };
-  state.fieldwork.action = { kind, nextAt: state.clockSec + fieldwork.F.actions[kind].interval_sec };
+  if (kind === 'fish') {
+    const food = fieldwork.F.regional_sources[String(state.zone)]?.food;
+    if (!food || !fieldwork.F.fishing.foods.includes(food)) return { ok: false, why: 'this zone has no authored fishing source' };
+  } else if (fieldSite(state.cell) !== kind) return { ok: false, why: kind === 'mine' ? 'stand at a Mine hex' : 'stand at a Rare Grove' };
+  state.fieldwork.action = { kind, nextAt: state.clockSec + (kind === 'fish' ? fieldwork.F.fishing.interval_sec : fieldwork.F.actions[kind].interval_sec) };
   return { ok: true };
 }
 
@@ -234,9 +248,18 @@ export function tickFieldwork(state: GameState, rng: () => number): void {
     state.fieldwork.action = null;
     return;
   }
-  const cfg = fieldwork.F.actions[action.kind];
-  const skill: FieldSkillId = action.kind === 'mine' ? 'mining' : 'woodcutting';
+  const skill: FieldSkillId = action.kind === 'mine' ? 'mining' : action.kind === 'grove' ? 'woodcutting' : 'fishing';
   while (action.nextAt <= state.clockSec) {
+    if (action.kind === 'fish') {
+      const foodId = fieldwork.F.regional_sources[String(state.zone)]?.food;
+      const food = foodId && fieldwork.F.fishing.foods.includes(foodId) ? fieldwork.foodById[foodId] : null;
+      const received = food ? addTo(state, state.fieldwork.foods, food.id, 'food', fieldHarvestAmount(state, 'fishing', fieldwork.F.fishing.yield)) : 0;
+      if (!received) { state.fieldwork.action = null; return; }
+      grantSkill(state, 'fishing', fieldwork.F.fishing.xp, food!.id, fieldwork.F.fishing.mastery_xp);
+      action.nextAt += fieldwork.F.fishing.interval_sec;
+      continue;
+    }
+    const cfg = fieldwork.F.actions[action.kind];
     const received = addTo(state, state.fieldwork.materials, cfg.resource, 'material', fieldHarvestAmount(state, skill, cfg.yield));
     if (!received) {
       state.fieldwork.action = null;
@@ -317,16 +340,21 @@ export function canCook(state: GameState, recipeId: string): { ok: boolean; why?
   return { ok: true };
 }
 
-export function cookMeal(state: GameState, recipeId: string): { ok: boolean; why?: string } {
-  const verdict = canCook(state, recipeId);
-  if (!verdict.ok) return verdict;
-  const recipe = fieldwork.recipeById[recipeId];
-  for (const [name, amount] of Object.entries(recipe.materials as Record<string, number>)) state.fieldwork.materials[name] -= amount;
-  for (const [name, amount] of Object.entries(recipe.foods as Record<string, number>)) state.fieldwork.foods[name] -= amount;
-  for (const [tier, amount] of Object.entries(recipe.herbs as Record<string, number>)) state.farm.herbs[tier] -= amount;
-  addTo(state, state.fieldwork.foods, recipe.id, 'food', 1);
-  grantSkill(state, 'cooking', recipe.xp, recipe.id, recipe.mastery_xp);
-  return { ok: true };
+export function cookMeal(state: GameState, recipeId: string, count = 1): { ok: boolean; why?: string; made?: number } {
+  if (!Number.isSafeInteger(count) || count < 1) return { ok: false, why: 'choose a positive whole batch', made: 0 };
+  const batch = Math.min(count, 1 + Math.floor(fieldMasteryLevel(state, 'cooking', recipeId) / 20));
+  let made = 0;
+  for (; made < batch; made++) {
+    const verdict = canCook(state, recipeId);
+    if (!verdict.ok) return count === 1 ? { ok: made > 0, why: verdict.why } : { ok: made > 0, why: verdict.why, made };
+    const recipe = fieldwork.recipeById[recipeId];
+    for (const [name, amount] of Object.entries(recipe.materials as Record<string, number>)) state.fieldwork.materials[name] -= amount;
+    for (const [name, amount] of Object.entries(recipe.foods as Record<string, number>)) state.fieldwork.foods[name] -= amount;
+    for (const [tier, amount] of Object.entries(recipe.herbs as Record<string, number>)) state.farm.herbs[tier] -= amount;
+    addTo(state, state.fieldwork.foods, recipe.id, 'food', 1);
+    grantSkill(state, 'cooking', recipe.xp, recipe.id, recipe.mastery_xp);
+  }
+  return count === 1 ? { ok: true } : { ok: true, made };
 }
 
 export function eatMeal(state: GameState, recipeId: string): { ok: boolean; why?: string } {

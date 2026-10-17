@@ -2,7 +2,7 @@
   import type { TreeNode } from '../../../engine/tree';
   import type { GameState } from '../sim/types';
 
-  let { nodes, graph, state, selectedId, verdict, onselect, onbuy } = $props<{
+  let { nodes, graph, state, selectedId, verdict, onselect, onbuy }: {
     nodes: TreeNode[];
     graph: { start: { x: number; y: number } };
     state: GameState;
@@ -10,7 +10,7 @@
     verdict: { ok: boolean; why?: string };
     onselect: (id: string) => void;
     onbuy: (id: string) => void;
-  }>();
+  } = $props();
 
   const selected = $derived(nodes.find((node: TreeNode) => node.id === selectedId) || nodes[0]);
   const ownedRank = (id: string) => state.player.treeRanks?.[id] || 0;

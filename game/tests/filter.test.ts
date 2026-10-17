@@ -5,6 +5,7 @@ import { autoEquip } from '../src/sim/gear';
 import { wants } from '../src/sim/collector';
 import { rollDrop } from '../src/sim/drop';
 import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS } from '../src/sim/filter';
+import { slotsAvailable, slotsUsed } from '../src/sim/slots';
 import { mark, reason, arm, SAVE_CFG } from '../src/sim/snapshot';
 import { mulberry32 } from '../src/engine/client-helpers';
 import {
@@ -47,6 +48,40 @@ describe('the bag filter reads per-slot thresholds', () => {
     s.bag = [waiting];
     adjudicateDrop(s, incoming);
     expect(s.bag).toContain(incoming);
+  });
+
+  it('keeps the weakest kept piece and leaves the drop unpicked when the swap cannot dissolve it', () => {
+    const s = newGame(10);
+    setRule(s.filter, 'ring', { enabled: true, margin_pct: 0 });
+    const ring = (value: number) => piece({ slot: 'ring', base: 'Iron Band', lines: [{ id: 'all_stat_flat', value, slice: 1 }] });
+    const kept = ring(10);
+    const incoming = ring(30);
+    const worn = s.gear.find((g) => g?.slot === 'ring')!;
+    expect(loot.score(incoming)).toBeGreaterThan(loot.score({ ...worn, q: worn.q ?? 0 }));
+    // a full adventure pile forces the swap path, and full character stacks with the ore key at its
+    // cap make the dissolve bundle not fit: the swap must refuse rather than silently delete the loser
+    s.fieldwork.materials['iron-ore'] = E.inventory.stack_size.material;
+    for (let i = 0; slotsUsed(s) < slotsAvailable(s); i++) s.junk[`filler-${i}`] = 1;
+    s.bag = [kept];
+    while (s.bag.length < E.inventory.adventure_slots) s.bag.push(ring(40));
+    const overflow = s.counters.overflow || 0;
+    const stopped = s.counters.stopped || 0;
+    const salvaged = s.counters.salvaged || 0;
+    adjudicateDrop(s, incoming);
+    expect(s.bag).toContain(kept);
+    expect(s.bag).not.toContain(incoming);
+    expect(s.counters.overflow).toBe(overflow + 1);
+    expect(s.counters.stopped).toBe(stopped + 1);
+    expect(s.counters.salvaged || 0).toBe(salvaged);
+    expect(s.fieldwork.materials.scrap || 0).toBe(0);
+    // once the bundle fits again (a freed junk slot plus the dropped ore stack), the same drop
+    // swaps: the loser dissolves and the incoming piece lands
+    delete s.junk['filler-0'];
+    s.fieldwork.materials['iron-ore'] = 0;
+    adjudicateDrop(s, incoming);
+    expect(s.bag).toContain(incoming);
+    expect(s.fieldwork.materials['iron-ore']).toBe(1);
+    expect(s.fieldwork.materials.scrap).toBe(1);
   });
 
   it('keeps a Collector-wanted upgrade available for Auto Equip', () => {
@@ -205,7 +240,7 @@ describe('walking snapshots', () => {
     if (s.player.level > 1) expect(s.pendingSnapshot).toBe('level');
     await writeSave('slot2', s);
     expect(JSON.parse((globalThis as any).localStorage.getItem('modworld:slot2')!).version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(14);
+    expect(SCHEMA_VERSION).toBe(16);
     const round = importJson(exportJson(s));
     expect(round.filter).toBeTruthy();
     expect(round.pendingSnapshot).toBe(null);

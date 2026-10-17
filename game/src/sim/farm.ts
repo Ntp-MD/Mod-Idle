@@ -1,4 +1,4 @@
-import { farm } from '../engine/client';
+import { farm, fieldwork } from '../engine/client';
 import type { GameState } from './types';
 import type { Character } from './player';
 import { addTo, fits } from './slots';
@@ -15,6 +15,7 @@ export interface Plot {
 export interface FarmState {
   plots: Plot[];
   xp: number;
+  mastery: Record<string, number>;
   herbs: Record<string, number>;
   potions: Record<string, number>;
   condensed: Record<string, number>;
@@ -33,6 +34,7 @@ export function newFarm(): FarmState {
   return {
     plots: farm.F.plots.base ? Array.from({ length: farm.F.plots.base }, () => ({ tier: null, plantedAt: 0, readyAt: 0 })) : [],
     xp: 0,
+    mastery: { low: 0, mid: 0, high: 0 },
     herbs: Object.fromEntries(farm.TIERS.map((t: string) => [t, 0])),
     potions: Object.fromEntries(farm.P.list.map((p: any) => [p.name, 0])),
     condensed: Object.fromEntries(farm.P.list.map((p: any) => [p.name, 0])),
@@ -83,7 +85,7 @@ export function plant(state: GameState, index: number, tier: string): { ok: bool
   if (seedCost) state.farm.herbs[tier] -= seedCost;
   plot.tier = tier;
   plot.plantedAt = state.clockSec;
-  plot.readyAt = state.clockSec + farm.growthSec;
+  plot.readyAt = state.clockSec + farmGrowthSec(state, tier);
   return { ok: true };
 }
 
@@ -98,10 +100,21 @@ export function harvest(state: GameState, index: number): { ok: boolean; why?: s
   }
   addTo(state, state.farm.herbs, tier, 'herb', herbs);
   state.farm.xp += farm.xpPerHarvest;
+  state.farm.mastery[tier] = (state.farm.mastery[tier] || 0) + 1;
   // the crop regrows on its own clock, which is why the track costs two taps a day, not twenty
   plot.plantedAt = plot.readyAt;
-  plot.readyAt = plot.plantedAt + farm.growthSec;
+  plot.readyAt = plot.plantedAt + farmGrowthSec(state, tier);
   return { ok: true, herbs, xp: farm.xpPerHarvest };
+}
+
+export function farmMasteryLevel(state: GameState, tier: string): number {
+  return fieldwork.masteryLevel(state.farm.mastery?.[tier] || 0);
+}
+
+export function farmGrowthSec(state: GameState, tier: string): number {
+  const level = farmMasteryLevel(state, tier);
+  const progress = Math.max(0, Math.min(1, (level - 1) / (fieldwork.F.mastery_cap - 1)));
+  return farm.growthSec * (1 - 0.1 * progress);
 }
 
 export function craftPotion(state: GameState, name: string): { ok: boolean; why?: string } {

@@ -52,7 +52,7 @@
 <style>
   .mini-map {
     position: relative; z-index: var(--z-hud-control);
-    width: var(--minimap-size); height: var(--minimap-size); padding: 0;
+    width: var(--minimap-size); height: var(--minimap-size);
     border-radius: var(--radius-round); overflow: hidden; cursor: pointer;
     background: var(--glass);
     border: 2px solid color-mix(in srgb, var(--gold) 45%, var(--edge));

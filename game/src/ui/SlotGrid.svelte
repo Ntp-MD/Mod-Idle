@@ -160,6 +160,7 @@
   }
 </script>
 
+<div class="slot-grid-stack">
 <div class="bar">
   {#if onsort}
     <span class="lab">Order</span>
@@ -169,8 +170,10 @@
   {/if}
   {#if onmode}
     <span class="spacer"></span>
-    <button class={mode === 'grid' ? 'active' : ''} onclick={() => onmode('grid')}>Grid slots</button>
-    <button class={mode === 'list' ? 'active' : ''} onclick={() => onmode('list')}>Item list</button>
+    <span class="views">
+      <button class={mode === 'grid' ? 'active' : ''} onclick={() => onmode('grid')}>Grid slots</button>
+      <button class={mode === 'list' ? 'active' : ''} onclick={() => onmode('list')}>Item list</button>
+    </span>
   {/if}
 </div>
 
@@ -180,6 +183,8 @@
       {#if cell.entry}
         <button
           class="slot"
+          class:slot-gear={cell.entry.kind === 'gear' || cell.entry.kind === 'worn'}
+          class:slot-stack={cell.entry.kind === 'stack'}
           style={cell.area ? `grid-area:${cell.area}` : ''}
           style:--rar={cell.entry.item ? rankTone(cell.entry.item) : null}
           class:gear={cell.entry.kind === 'gear' || cell.entry.kind === 'worn'}
@@ -201,8 +206,8 @@
           aria-label={cell.entry.kind === 'stack' ? `${cell.entry.title} ×${cell.entry.count}` : cell.entry.title}
         >
           <img class="slot-icon" src={cell.entry.icon} alt="" aria-hidden="true" />
-          {#if cell.entry.count}<span class="count">{cell.entry.count}</span>{/if}
-          {#if cell.entry.item && (cell.entry.item.upgrade_lv || 0) > 0}<span class="plus">+{cell.entry.item.upgrade_lv}</span>{/if}
+          {#if cell.entry.count}<span class="badge badge-count count">{cell.entry.count}</span>{/if}
+          {#if cell.entry.item && (cell.entry.item.upgrade_lv || 0) > 0}<span class="badge badge-count xp plus">+{cell.entry.item.upgrade_lv}</span>{/if}
           {#if cell.entry.item && cell.entry.kind !== 'worn'}
             <!-- the comparison the list mode already prints, on the square itself: whether this piece
                  beats what the slot wears, before the pointer ever lands on it -->
@@ -211,7 +216,7 @@
           {/if}
         </button>
       {:else}
-        <span class="slot empty" style={cell.area ? `grid-area:${cell.area}` : ''} aria-hidden="true">
+        <span class="slot slot-empty empty" style={cell.area ? `grid-area:${cell.area}` : ''} aria-hidden="true">
           {#if cell.slot != null}
             <!-- the doll's bare cells carry the slot's own glyph, so an unworn body still reads as a
                  body with places to fill; a plain grid keeps its wordless blanks -->
@@ -253,6 +258,7 @@
     <button disabled={at === pages - 1} onclick={() => (page = at + 1)} aria-label="Next page">›</button>
   </div>
 {/if}
+</div>
 
 {#if hover && place}
   <!-- Equipping closes the card: the decision is made, and the piece it described is no longer here. -->
@@ -290,12 +296,18 @@
 {/if}
 
 <style>
-  .bar { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; margin-bottom: var(--spacing-xs); }
+  .slot-grid-stack { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-xs); min-width: 0; min-height: 0; }
+  .slot-grid-stack > .grid { flex: 1; min-height: 0; }
+  .slot-grid-stack > .doll { align-self: center; }
+  .bar { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
   .lab { color: var(--dim); font-size: var(--font-xs); }
   .spacer { flex: 1; }
-  .bar button { padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .views { display: flex; align-items: center; gap: var(--spacing-sm); flex: none; }
+  .bar button { font-size: var(--font-xs); }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(34px, 2.61vw, 73px), 1fr)); gap: var(--spacing-xs); }
+  /* ten squares to a row, everywhere the bag shows: 100 adventure slots, 50 carried slots and a
+     30-item page all land on whole rows, so the count never depends on the panel's width */
+  .grid { display: grid; grid-template-columns: repeat(10, minmax(0, var(--icon-lg))); justify-content: center; gap: var(--spacing-xs); }
 
   /* The equipment panel: three columns by five rows, no body drawn — the `.` cells are the blanks. */
   .doll {
@@ -310,54 +322,38 @@
       ".       boots   .";
     gap: var(--spacing-xs);
     width: fit-content;
-    margin: 0 auto var(--spacing-sm);
   }
   .doll.compact-doll {
     grid-template-columns: repeat(3, calc(var(--icon-xl) - var(--spacing-xs)));
-    margin-bottom: var(--spacing-xs);
   }
 
   .slot {
     position: relative;
     aspect-ratio: 1 / 1;
-    padding: 0;
-    background: var(--inset);
-    /* the edge wears the piece's rarity; a stack has none and keeps the frame's own line */
-    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
-    border-radius: var(--radius-sm);
   }
-  /* the icon carries a whisper of the same ink, so a rarity reads across a full grid before any hover */
-  .slot .slot-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rar, transparent) 55%, transparent)); }
-  .slot.worn { box-shadow: inset 0 0 0 1px var(--line); background: var(--panel); }
-  .slot.selected { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
   /* the comparison badge: how far this piece sits from what the slot already wears */
   .slot .delta {
     position: absolute; right: clamp(2px, 0.10vw, 3px); top: clamp(1px, 0.05vw, 1px);
     font-family: var(--num); font-size: var(--font-xs); line-height: 1;
-    color: var(--dim); text-shadow: 0 1px 0 rgba(0, 0, 0, .8);
   }
-  .slot .delta.up { color: var(--good); }
-  .slot .delta.down { color: var(--hp); }
-  .slot.held { border-style: dashed; border-color: var(--good); }
-  .slot.empty { display: flex; align-items: center; justify-content: center; background: var(--inset); border-style: dotted; cursor: default; }
-  .slot-glyph { position: absolute; inset: 16%; width: 68%; height: 68%; object-fit: contain; opacity: .2; pointer-events: none; }
-  .slotname { position: relative; font-size: var(--font-xs); color: var(--dim); opacity: .55; text-align: center; line-height: 1.05; padding: 0 var(--spacing-xs); }
+  .slot.empty { display: flex; align-items: center; justify-content: center; cursor: default; }
+  .slot-glyph { position: absolute; inset: 16%; width: 68%; height: 68%; object-fit: contain; pointer-events: none; }
+  .slotname { position: relative; font-size: var(--font-xs); text-align: center; line-height: 1.05; padding: 0 var(--spacing-xs); }
   .slot-icon {
     position: absolute;
     inset: 17%;
     width: 66%;
     height: 66%;
     object-fit: contain;
-    opacity: .92;
     pointer-events: none;
   }
-  .count, .plus { position: absolute; z-index: var(--z-underlay); font-size: var(--font-xs); line-height: 1; }
+  .count, .plus { position: absolute; z-index: var(--z-underlay); line-height: 1; }
   .count { right: var(--spacing-xs); bottom: var(--spacing-xs); }
-  .plus { left: var(--spacing-xs); bottom: var(--spacing-xs); color: var(--xp); }
+  .plus { left: var(--spacing-xs); bottom: var(--spacing-xs); }
 
   .list td, .list th { font-size: var(--font-xs); }
-  .pager { display: flex; align-items: center; gap: var(--spacing-xs); margin-top: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
+  .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
+  .pager button { font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
   .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--rar, var(--text)); }
   .list-title img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
@@ -373,6 +369,8 @@
   }
   .pop.blind { visibility: hidden; }
   .plain {
+    display: grid;
+    gap: var(--spacing-xs);
     background: var(--inset);
     border: 1px solid var(--line);
     padding: var(--spacing-xs) var(--spacing-sm);
@@ -380,5 +378,5 @@
     min-width: clamp(150px, 11.62vw, 324px);
   }
   .plain h4 { margin: 0; }
-  .plain p { margin: var(--spacing-xs) 0 0; color: var(--dim); }
+  .plain p { color: var(--dim); }
 </style>

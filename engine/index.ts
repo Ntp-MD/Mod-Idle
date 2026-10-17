@@ -117,9 +117,6 @@ export function createEngine(E: EngineData) {
   /** A Species' fixed-level normal Variants (`mob.variants`): names, bands and authored Core, never ranks. */
   const variantsOf = (speciesId: string): { name: string; levels: [number, number]; core: MobCore }[] =>
     (((E.mob as any).variants || {})[speciesId] || []) as { name: string; levels: [number, number]; core: MobCore }[];
-  /** The fixed level a variant haunts: its band's midpoint, never the attacker's level. */
-  const variantLevelOf = (v: { levels: [number, number] }): number =>
-    Math.round(((v.levels as number[])[0] + (v.levels as number[])[1]) / 2);
   /**
    * One variant a zone can field. Prefer the band containing the zone midpoint; in a gap, carry
    * forward the nearest earlier band, or use the first band before any band starts. Above the cap,
@@ -873,14 +870,21 @@ export function createEngine(E: EngineData) {
    */
   const goldPrice = (m: number, b: string) => Math.round(m * goldPerMinute(b) + 1e-9);
 
-  // Stone income per hour, by band — the same three expressions the STONE block prints for high.
-  const rerollValueStonesPerHr = (band: string) => Math.round(BAND[band].junk_per_hr / C.reroll_value_stones_per_use);
+  // BAND.junk_per_hr is rejected gear (drops minus upgrades), not the trade-good junk stream.
+  // Reference income assumes that gear is salvaged, its resources can be carried and its scrap is
+  // processed immediately. Full bags, disabled filters and manual processing can defer this income.
+  const rerollValueStonesPerHr = (band: string) => Math.round(
+    BAND[band].junk_per_hr * E.salvage.outputs.scrap * E.salvage.alchemy.value_yield / E.salvage.alchemy.scrap_cost,
+  );
+  // Craft costs change how many presses that supply buys, never how many stones a reward grants.
+  const rerollUsesPerHr = (band: string) => Math.round(rerollValueStonesPerHr(band) / C.reroll_value_stones_per_use);
+  const alchemyTierStonesPerHr = (band: string) => rerollValueStonesPerHr(band) / E.salvage.alchemy.outputs_per_tier_stone;
   // The elite half of the tier-stone ladder, named once so the boss share is the only thing the total
   // adds. A town rate and a stone rate are the same expression and must not be typed twice.
   const eliteTierStonesPerHr = (band: string) => Math.round(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_tier_stones);
-  // A wild unique pays the Elite stone lines, so the clock Boss keeps the only boss payout and the
-  // craft pacing gates never move: only the XP mix below knows the unique's own multiplier.
-  const tierStonesPerHr = (band: string) => eliteTierStonesPerHr(band) + L.boss_per_hour * L.boss_tier_stones;
+  // A wild unique pays the Elite stone lines; the clock Boss owns the boss payout. Alchemy's
+  // eligible-output milestone adds its expected share once beside those combat sources.
+  const tierStonesPerHr = (band: string) => eliteTierStonesPerHr(band) + L.boss_per_hour * L.boss_tier_stones + alchemyTierStonesPerHr(band);
   const addStonesPerHr = (band: string) => r2(BAND[band].kills_derived * L.elite_spawn_chance * L.elite_add_stone_chance + L.boss_per_hour * L.boss_add_stones);
 
   // ---- the three craft stones the ladder costs but the loot table did not pay
@@ -916,7 +920,9 @@ export function createEngine(E: EngineData) {
   const bossThirdPerSet = C.upgrade_costs.slice(C.upgrade_breaks_from - 1).reduce((t, n) => t + n, 0) * C.ascend_items_per_set;
 
   const STONE: Record<string, number> = {
-    reroll_uses_per_hr: rerollValueStonesPerHr('high'),
+    reroll_value_stones_per_hr: rerollValueStonesPerHr('high'),
+    reroll_uses_per_hr: rerollUsesPerHr('high'),
+    alchemy_tier_stones_per_hr: alchemyTierStonesPerHr('high'),
     tier_stones_per_hr: tierStonesPerHr('high'),
     add_stones_per_hr: addStonesPerHr('high'),
   };
@@ -971,7 +977,7 @@ export function createEngine(E: EngineData) {
 
   function mobRoster() {
     const out: any[] = [];
-    // one species × variant placement: the shared normal/Elite row shape at the variant's own level
+    // one species × selected Variant placement: the Species owns the live level in this zone
     const variantRows = (z: any, sp: any, v: { name: string; levels: [number, number]; core: MobCore } | null, lvl: number, tag: string | null) => {
       const innate = [(sp as any).element];
       const form = formOf(sp, z.id);
@@ -1009,13 +1015,13 @@ export function createEngine(E: EngineData) {
       if (sp.sizes.includes('large')) {
         const el = E.mob.elite;
         const hpBase = mobHpAt(lvl) * el.hp;
-        const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
+        const hp = (mobHpAt(lvl) + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP) * el.hp;
         out.push({
           id: `z${z.id}_${sp.id}_${tag || 'v'}_elite`, zone: z.id, zoneName: z.name, levels, level: lvl,
           kind: el.name, species: sp.name, formName: form.name, speciesId: sp.id, variant: vname, innate, weapon: sp.carries_weapon, core,
           hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
           manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
-          ps: psEdge * el.ps * speciesPsMultOf(z.id, sp, variantCore),
+          ps: psEdge * el.ps / bf * speciesPsMultOf(z.id, sp, variantCore),
           acc: mobAcc(core.dex, sp.accuracy_mult),
           ev: mobEvasion(core.dex, 'elite'),
           armour: core.str * K.K_ARMOUR,
@@ -1070,7 +1076,7 @@ export function createEngine(E: EngineData) {
         if (realBand) {
           // a real band fields the one variant containing this zone's midpoint — never a zone-level table
           const ladder = variantsInZone(sp.id, z.id);
-          ladder.forEach((v, i) => variantRows(z, sp, v, variantLevelOf(v), `v${i}`));
+          ladder.forEach((v, i) => variantRows(z, sp, v, mobLevelIn(sp, z.id), `v${i}`));
         } else {
           // frozen past the cap: keep the last Variant and Core, but use the legacy static zone level
           const lvl = mobLevelIn(sp, z.id);
@@ -1113,11 +1119,10 @@ export function createEngine(E: EngineData) {
     return out;
   }
 
-  // ---- the mob that actually spawns: a normal mob's level and Core are STATIC per variant
-  // (`mob.variants[].levels` + `.core`), so a spawn does not follow the attacker's level. Past the form
-  // cap the bands stop and the legacy per-species zone level (`mob.species[].zone_levels`) answers.
+  // ---- the mob that actually spawns: Species zone_levels owns its fixed level; the selected Variant
+  // owns its name and authored Core. Neither reads the attacker's level.
 
-  function spawnAt(zoneId: number, level: number, bodyId = 'medium', speciesId: string | null = null, boss?: any, variantLevels?: [number, number] | null, variantCore?: Partial<MobCore> | null) {
+  function spawnAt(zoneId: number, bodyId = 'medium', speciesId: string | null = null, boss?: any, variantCore?: Partial<MobCore> | null, levelOverride?: number | null) {
     const z = zoneById(zoneId)!;
     const candidates = E.mob.species.filter((sp) => sp.zones.includes(zoneId) && (!speciesId || sp.id === speciesId));
     const baseSpecies = candidates.length
@@ -1125,7 +1130,7 @@ export function createEngine(E: EngineData) {
       : E.mob.species[0];
     const sp = mobProfileOf(baseSpecies, boss, zoneId);
     const form = formOf(baseSpecies, zoneId);
-    const lv = variantLevels ? variantLevelOf({ levels: variantLevels }) : mobLevelIn(sp, zoneId);
+    const lv = levelOverride ?? mobLevelIn(sp, zoneId);
     const size = sizeById(bodyId) || sizeById('medium')!;
     const bf = zoneBodyFactor(zoneId);
     // Base HP is the zone curve; the mob's own pools add the flat level grant and the K_core term
@@ -1168,7 +1173,7 @@ export function createEngine(E: EngineData) {
     mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
     speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
     ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, MEAN_CORE, mobStatsOf, speciesInZone, zoneElements, zoneBodyFactor, mobEvasion, mobAcc,
-    variantsOf, variantsInZone, variantLevelOf, uniquesOf, mobDodge, refAttackerAcc,
+    variantsOf, variantsInZone, uniquesOf, mobDodge, refAttackerAcc,
     subzoneAt, groupRangeOf, eliteChanceOf, spawnPackOf,
     mobImmuneOf, mobClockMultOf, mobWeakOf, mobBurstOf, mechanicWordsOf, packWordOf,
     mobResOf, mobResByElementOf,
@@ -1185,7 +1190,7 @@ export function createEngine(E: EngineData) {
     // loot + xp
     lckOf, dropChance, killsDerived, goldPerMinute, goldPrice, killsToLevel, xpToNext, xpPerKill, CHECKPOINTS_KILLS, PUSH_KILLS_91_100, SETTLEMENT_BUDGET_KILLS,
     floorOf, qualityIndexOf, spanOf, floorLevelOf,
-    rerollValueStonesPerHr, eliteTierStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr,
+    rerollValueStonesPerHr, rerollUsesPerHr, alchemyTierStonesPerHr, eliteTierStonesPerHr, tierStonesPerHr, addStonesPerHr, qualityStonesPerHr, repairStonesPerHr, corruptStonesPerHr,
     polishStonesPerHr, reforgeStonesPerHr, rebirthStonesPerHr, ascendStonesPerPiece,
     stonesForMinutes, taskPayout,
     // formatting

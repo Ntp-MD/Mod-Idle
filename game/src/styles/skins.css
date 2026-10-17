@@ -1,0 +1,494 @@
+/**
+ * Skins — the appearance layer.
+ *
+ * `base.css` gives every tag its geometry; a component's own <style> gives layout and size.
+ * This file is the only place a *look* is written. A skin paints: colour, border, glow, motion.
+ * It never sets padding, margin, gap, width or height — a skin that needs a size is in the
+ * wrong file. Naming is `<family>-<skin>` plus a bare state word (`.toggled`, `.picked`), and a
+ * skin is named for how it looks, never for the screen that wears it.
+ *
+ * Contract: docs*skins.md
+ */
+
+/* ---- buttons ------------------------------------------------------------------
+ * base already gives: panel background, 1px line border, --radius-xs, base padding,
+ * gold hover, focus ring, active press, disabled fade. A skin only departs from that.
+ */
+
+/* quiet: the compact control. Smaller words, inert until it is the one. */
+.btn-quiet {
+    font-size: var(--font-xs);
+}
+.btn-quiet.toggled {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* picked: the one that holds a choice, told apart from `toggled` by a gold wash under it. */
+.btn-quiet.picked {
+    border-color: color-mix(in srgb, var(--gold) 34%, transparent);
+    color: var(--gold);
+    background: color-mix(in srgb, var(--gold) 10%, var(--panel));
+}
+
+/* dagger: the press that does the thing — the panel's one loud action. */
+.btn-dagger {
+    border-color: var(--good);
+    color: var(--good-lit);
+}
+
+/* ghost: no face, an edge only. It sits in a strip of controls without shouting for itself. */
+.btn-ghost {
+    background: none;
+    border-color: var(--edge);
+    color: var(--dim);
+}
+.btn-ghost.toggled {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* gold: the primary press that sells or commits inside a board. */
+.btn-gold {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* danger: the press that costs something. */
+.btn-danger {
+    color: var(--hp);
+}
+.btn-danger:hover:not(:disabled) {
+    border-color: var(--hp);
+}
+
+/* icon: a control whose size is a token, not its text. Geometry stays with the component. */
+.btn-icon {
+    line-height: 1;
+}
+
+/* flat: a press with no face and no edge at all — the corner ✕ that must not frame itself. */
+.btn-flat {
+    background: none;
+    border: none;
+    color: var(--dim);
+}
+
+/* prop: an object the player works with, standing on its own ground. It wears no control face
+ * because the object is the control: the shape says what it is, and the colour says whether it can
+ * do anything. `--fed` (0..1, how well the station is fed) is set by the component and draws the
+ * ember at the prop's feet — a fire burning as well as its Hunger lets it, and nothing at all when
+ * the station is cold. Sizes stay with the component; only the paint is here. */
+.btn-prop {
+    background: none;
+    border: none;
+    color: var(--text);
+}
+.btn-prop.toggled { color: var(--gold-lit); }
+.btn-prop.off { color: var(--dim); }
+.btn-prop.busy { color: var(--gold); }
+/* the foot: a contact shadow, so a prop stands on the ground instead of floating over it. */
+.btn-prop::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: var(--spacing-xs);
+    width: var(--icon-lg);
+    height: var(--spacing-sm);
+    transform: translateX(-50%);
+    border-radius: var(--radius-round);
+    background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, .6), transparent 72%);
+    pointer-events: none;
+}
+/* the ember: the station's own condition, warm while it is fed and gone when it is not. */
+.btn-prop::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: var(--spacing-xs);
+    width: var(--icon-lg);
+    height: var(--icon-lg);
+    transform: translateX(-50%) translateY(34%);
+    border-radius: var(--radius-round);
+    background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--hot) 62%, transparent), transparent 70%);
+    opacity: calc(var(--fed, 0) * .72);
+    filter: blur(var(--dof-rest));
+    pointer-events: none;
+}
+
+/* ---- text roles ----------------------------------------------------------------
+ * Shared readings. A role paints; a component may still set the size its density
+ * needs, so a note reads the same in a board, a log or a tooltip.
+ */
+
+/* note: the muted aside — size included, because a footnote is always small. */
+.text-note {
+    color: var(--dim);
+    font-size: var(--font-xs);
+}
+/* dim: the muted aside that must keep its parent's size. */
+.text-dim {
+    color: var(--dim);
+}
+/* value: a number the player compares — gold, price, stock. */
+.text-value {
+    color: var(--gold);
+}
+/* good: a settled, positive outcome. */
+.text-good {
+    color: var(--good-lit);
+}
+/* accent: a deadline or a warm highlight that is not a value. */
+.text-accent {
+    color: var(--gold-lit);
+}
+/* alarm: a refusal or a forfeit. */
+.text-alarm {
+    color: var(--alarm);
+}
+
+/* selectable: a row or tab that can be chosen; the chosen one wears the gold edge. */
+.selectable.selected {
+    border-color: var(--gold);
+    background: var(--surface-selected);
+}
+
+/* plate-mark: the framed icon tile a board uses to head a line. */
+.plate-mark {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-sm);
+    background: var(--panel);
+}
+
+/* plate-ground: the ground objects stand on. It is a recessed face with a horizon drawn at the foot
+ * of the props above it, so a row of objects reads as standing somewhere rather than floating on a
+ * panel. The horizon sits at the prop height from the top, which is why the stops are tokens. */
+.plate-ground {
+    border-radius: var(--radius-sm);
+    background: linear-gradient(180deg,
+        transparent 0 calc(var(--icon-xl) + var(--spacing-md)),
+        color-mix(in srgb, var(--ground) 60%, transparent) calc(var(--icon-xl) + var(--spacing-md)),
+        transparent calc(var(--icon-xl) + var(--spacing-xl)));
+}
+
+/* ---- panels --------------------------------------------------------------------
+ * A panel skin paints the surface; the component that mounts it owns position, grid
+ * area, size and scroll.
+ */
+
+/* veil: the scrim a modal sits on. */
+.panel-veil {
+    background: rgba(6, 9, 13, .68);
+    backdrop-filter: blur(4px);
+}
+
+/* solid: the shared modal canvas. */
+.panel-solid {
+    background: var(--bg);
+    border-inline: 1px solid var(--edge);
+    box-shadow: 0 0 60px rgba(0, 0, 0, .6);
+    animation: panel-slide .16s ease-out;
+}
+
+/* showcase: the same canvas framed, because the showcase page has no scrim behind it. */
+.panel-showcase {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft);
+    animation: none;
+}
+
+/* head: the gold-washed strip that names a surface and carries its close press. */
+.panel-head {
+    border-bottom: 1px solid var(--edge);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent);
+}
+.panel-head h2 { flex: none; color: var(--gold); letter-spacing: clamp(2px, 0.10vw, 3px); }
+.panel-head .sub { flex: 1; color: var(--dim); font-size: var(--font-xs); }
+.panel-head h3 { flex: none; color: var(--gold); font-size: var(--font-xs); letter-spacing: clamp(2px, 0.10vw, 3px); text-transform: uppercase; }
+
+/* bracket: a desk hung in the dock — HUD face plus the two crop marks that say "this is a desk". */
+.panel-bracket {
+    position: relative;
+    border: 1px solid var(--hud-edge);
+    border-radius: var(--radius-sm);
+    background: var(--hud-face);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .6);
+    backdrop-filter: blur(8px);
+    animation: panel-pop .14s ease-out;
+}
+.panel-bracket::before,
+.panel-bracket::after {
+    content: '';
+    position: absolute;
+    width: clamp(8px, 0.63vw, 16px);
+    height: clamp(8px, 0.63vw, 16px);
+    pointer-events: none;
+    border: 2px solid color-mix(in srgb, var(--gold) 62%, transparent);
+}
+.panel-bracket::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+.panel-bracket::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+/* ---- notices ------------------------------------------------------------------ */
+
+/* toast: the one line the client says out loud, over the field. */
+.notice-toast {
+    border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent);
+    border-radius: var(--radius-sm);
+    background: var(--glass);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+}
+
+/* ---- combat cards -----------------------------------------------------------------
+ * The whole fight is read on one card: the player's plate and every body's plate wear the same
+ * face, ring, name, rail and badge, so two cards read apart by what stands in them — an extra
+ * resource, an Element mark, a body's kind — and never by how they are painted.
+ */
+
+/* combat: the card face — a warm edge over the HUD's own glass. */
+.card-combat {
+    border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
+    border-radius: var(--radius-sm);
+    background: var(--hud-face);
+    box-shadow: var(--shadow-soft);
+}
+
+/* front: the body the next swing waits on. elite and boss out-rank it, as they out-rank each other. */
+.card-combat.front { border-color: var(--gold); }
+.card-combat.elite { border-color: var(--elite); }
+.card-combat.boss { border-color: var(--boss); }
+
+/* portrait: the body's own face, ringed in gold — a card is known by its shape before its words. */
+.card-portrait {
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-round);
+    background: var(--face-top);
+}
+
+/* name: the card's line, and the ink a body's kind changes. */
+.card-name { color: var(--gold-lit); font-weight: 700; }
+.card-name.elite { color: var(--elite-ink); }
+.card-name.boss { color: var(--boss-ink); }
+
+/* meter: one rail for every resource — the rail is the same, the resource is the read. The component
+ * sizes the rail, lifts the figure over it and owns how fast the fill travels. */
+.track-meter {
+    border-radius: var(--radius-xs);
+    background: rgba(255, 255, 255, .09);
+}
+.track-meter > i {
+    border-radius: var(--radius-xs);
+    background-size: calc(100% / max(var(--w, 1), .001)) 100%;
+    transform: scaleX(var(--fill));
+    transform-origin: left center;
+}
+.track-meter.hp > i { background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
+.track-meter.es > i { background-image: linear-gradient(90deg, var(--es), var(--es-lit)); }
+.track-meter.mana > i { background-image: linear-gradient(90deg, var(--mana), var(--mana-lit)); }
+.track-meter.exp > i { background-image: linear-gradient(90deg, var(--xp), var(--xp-lit)); }
+
+/* gauge: the Hunger rail — gold while fed, alarm when empty. The component sizes the rail. */
+.gauge-hunger > i { background: var(--bar-2); }
+.gauge-hunger em { background: var(--gold); }
+.gauge-hunger.empty em { background: var(--alarm); }
+
+/* tab-rail: one press in a segmented filter strip. The strip frames; the press keeps its divider. */
+.tab-rail {
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--edge);
+    color: var(--dim);
+}
+.tab-rail.active {
+    color: var(--gold-lit);
+    background: color-mix(in srgb, var(--gold) 12%, transparent);
+    box-shadow: inset 0 -1px 0 var(--gold);
+}
+/* strip: the rail's frame; a second line of presses is divided from the first. */
+.tab-strip > .tab-rail:nth-child(n+4) {
+    border-top: 1px solid var(--edge);
+}
+
+/* status: a buff or debuff mark riding a card's rail, with the time left in its corner. */
+.badge-status {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-round);
+    background: var(--glass);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .6);
+}
+.badge-status.buff { border-color: color-mix(in srgb, var(--good-lit) 60%, var(--edge)); }
+.badge-status.debuff { border-color: color-mix(in srgb, var(--alarm) 70%, var(--edge)); }
+.badge-status small {
+    color: var(--text);
+    font-family: var(--num);
+    text-shadow: 0 1px 2px var(--bg);
+    transform: scale(.72);
+    transform-origin: right bottom;
+}
+
+/* count: a compact value badge; urgent marks points that need the player's attention. */
+.badge-count {
+    border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
+    border-radius: var(--radius-round);
+    background: var(--glass);
+    color: var(--gold-lit);
+    font-family: var(--num);
+    font-size: var(--font-xs);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+.badge-count.urgent {
+    border-color: color-mix(in srgb, var(--hot-deep) 70%, var(--edge));
+    background: linear-gradient(180deg, var(--hot), var(--hot-deep));
+    color: var(--text);
+}
+.badge-count.xp { border-color: color-mix(in srgb, var(--xp) 55%, var(--edge)); color: var(--xp); }
+
+/* tag: a quiet label; picked, locked and semantic accents keep one shared shape. */
+.chip-tag {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-round);
+    background: var(--glass);
+    color: var(--dim);
+    font-size: var(--font-xs);
+}
+.chip-tag.picked {
+    border-color: var(--gold);
+    background: var(--surface-selected);
+    color: var(--gold);
+}
+.chip-tag.here { border-color: color-mix(in srgb, var(--good) 50%, var(--edge)); color: var(--good-lit); }
+.chip-tag.locked { border-style: dashed; }
+.chip-tag.element { color: var(--es-lit); border-color: color-mix(in srgb, var(--es) 40%, transparent); }
+.chip-tag.xp { color: var(--xp); border-color: var(--xp); }
+.chip-tag.upper { text-transform: uppercase; letter-spacing: clamp(0px, 0.05vw, 1px); }
+.chip-tag .plus { color: var(--xp); font-family: var(--num); }
+
+/* rarity: the same label reads the item's own quality colour from --rar. */
+.chip-rarity {
+    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 60%, var(--line));
+    border-radius: var(--radius-round);
+    background: color-mix(in srgb, var(--rar, var(--glass)) 10%, transparent);
+    color: var(--rar, var(--dim));
+    font-size: var(--font-xs);
+    text-transform: capitalize;
+}
+
+/* gear: rarity-tinted frame for a real piece. Empty and carried-stack cells use their own skins. */
+.slot-gear {
+    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
+    border-radius: var(--radius-sm);
+    background: var(--inset);
+}
+.slot-gear .slot-icon { opacity: .92; filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rar, transparent) 55%, transparent)); }
+.slot-stack .slot-icon { opacity: .92; }
+.slot-gear.worn { box-shadow: inset 0 0 0 1px var(--line); background: var(--panel); }
+.slot-gear.selected { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.slot-gear.held { border-style: dashed; border-color: var(--good); }
+.slot-gear.locked { border-style: dashed; border-color: var(--dim); }
+.slot-gear .delta { color: var(--dim); text-shadow: 0 1px 0 rgba(0, 0, 0, .8); }
+.slot-gear .delta.up { color: var(--good); }
+.slot-gear .delta.down { color: var(--hp); }
+
+/* stack: a material cell without gear rarity. */
+.slot-stack {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--inset);
+}
+.slot-stack.selected { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.slot-stack.held { border-style: dashed; border-color: var(--good); }
+
+/* empty: a dotted place that still names its gear slot in the doll. */
+.slot-empty {
+    border: 1px dotted var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--inset);
+}
+.slot-empty .slotname { color: var(--dim); opacity: .55; }
+.slot-empty .slot-glyph { opacity: .2; }
+
+/* damage: combat numbers share one readable face on mobs and player. */
+.pop-damage {
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--bg) 78%, transparent), transparent 72%);
+    color: color-mix(in srgb, var(--fx, var(--text)) 25%, var(--text));
+    font-family: var(--num);
+    font-size: var(--font-lg);
+    font-weight: 800;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, .95), 0 0 var(--spacing-md) color-mix(in srgb, var(--fx, var(--text)) 45%, transparent);
+    -webkit-text-stroke: 1px var(--bg);
+    animation: combat-pop-number 1.1s cubic-bezier(.18, .78, .3, 1) both;
+    animation-delay: calc(var(--lane) * 70ms);
+}
+.pop-damage.critical {
+    color: var(--gold-lit);
+    font-size: var(--font-xl);
+    letter-spacing: 1px;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, .95), 0 0 var(--spacing-lg) color-mix(in srgb, var(--gold) 62%, transparent);
+    -webkit-text-stroke-width: 1.3px;
+    animation-name: combat-pop-critical;
+    animation-duration: 1.25s;
+}
+.pop-damage.dot { font-size: var(--font-sm); animation-duration: .8s; }
+.pop-damage.incoming { color: var(--alarm); font-size: var(--font-md); }
+
+/* word: a dodge, miss or block sits apart from a damage number. */
+.pop-word {
+    background: none;
+    border: 0;
+    color: var(--fx, var(--text));
+    font-family: var(--ui);
+    font-size: var(--font-xs);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    -webkit-text-stroke: 0;
+    animation: combat-pop-number 1.1s cubic-bezier(.18, .78, .3, 1) both;
+    animation-delay: calc(var(--lane) * 70ms);
+}
+
+/* loot: a field drop is a compact, coloured pill among combat numbers. */
+.pop-loot {
+    border: 1px solid color-mix(in srgb, var(--fx, var(--gold)) 55%, transparent);
+    border-radius: var(--radius-round);
+    background: color-mix(in srgb, var(--fx, var(--gold)) 14%, transparent);
+    color: var(--fx, var(--gold-lit));
+    font-family: var(--ui);
+    font-size: var(--font-xs);
+    font-weight: 600;
+    letter-spacing: clamp(1px, 0.05vw, 2px);
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .85), 0 var(--spacing-xs) clamp(4px, 0.34vw, 9px) rgba(0, 0, 0, .7);
+    animation: fx-rise 1.5s cubic-bezier(.2, .6, .3, 1) forwards;
+    white-space: nowrap;
+}
+
+@keyframes fx-rise {
+    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(4px, 0.29vw, 8px)) scale(.55); }
+    14% { opacity: 1; }
+    32% { transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-43px, -1.55vw, -20px)) scale(1.08); }
+    60% { opacity: 1; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-51px, -1.84vw, -24px)) scale(1); }
+    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-70px, -2.52vw, -32px)) scale(.96); }
+}
+
+@keyframes combat-pop-number {
+    0% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), var(--spacing-md)) scale(.7); }
+    20% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-xs))) scale(1.16); }
+    60% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-lg))) scale(1); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * clamp(63px, 4.84vw, 135px))) scale(.94); }
+}
+@keyframes combat-pop-critical {
+    0% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), var(--spacing-md)) scale(.6); }
+    24% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-sm))) scale(1.4); }
+    52% { opacity: 1; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * var(--spacing-lg))) scale(1.06); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--lane) * var(--spacing-md) - var(--spacing-lg)), calc(-1 * clamp(63px, 4.84vw, 135px))) scale(.96); }
+}
+
+@keyframes panel-slide {
+    from { transform: translateY(clamp(15px, 1.16vw, 32px)); opacity: .4; }
+    to { transform: none; opacity: 1; }
+}
+@keyframes panel-pop {
+    from { transform: translateY(var(--x-pull-note)); opacity: .3; }
+    to { transform: none; opacity: 1; }
+}

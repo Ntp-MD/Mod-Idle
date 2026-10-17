@@ -3,8 +3,8 @@ import type { TradeGood } from '../../../engine/trade';
 import type { GameState } from './types';
 import { atSettlement } from './craft';
 import { currentCell, ownerOf, cellBlocks, settlementCell, warpCost } from './road';
-import { addTo, fits } from './slots';
-import { fieldSkillLevel } from './fieldwork';
+import { addTo, fits, fitsTransaction } from './slots';
+import { fieldMasteryLevel, fieldSkillLevel } from './fieldwork';
 
 export { trade };
 export type { TradeGood };
@@ -19,11 +19,7 @@ export function quoteSale(state: GameState, town: string, id: string, count: num
   const good = trade.byId[id];
   if (!good || !TOWN.trade.towns[town as keyof typeof TOWN.trade.towns]) return null;
   const quote = trade.quote(town, good, count, state.town.market?.[town]?.[good.group], state.clockSec);
-  const total = quote.gold + (state.town.marketCredit || 0);
-  const scale = 10 ** trade.C.currency_decimals;
-  const precision = Number.EPSILON * Math.max(1, total) * scale;
-  const gold = Math.floor((total + precision) * scale) / scale;
-  return { ...quote, gold, credit: Math.max(0, total - gold) };
+  return { ...quote, ...trade.settleCurrency(quote.gold, state.town.marketCredit || 0) };
 }
 
 /** Supply is shared by category at a town. Quotes are reads; only a successful sale spends demand. */
@@ -59,19 +55,26 @@ export function canProcess(state: GameState, id: string): { ok: boolean; why?: s
   const recipe = fieldwork.workshopById[id];
   if (!recipe) return { ok: false, why: 'unknown workshop recipe' };
   if (!atSettlement(state)) return { ok: false, why: 'visit a settlement workshop' };
+  if (state.walk || state.hunting || state.group.length || state.dungeon || state.phase === 'camp' || state.fieldwork.action) return { ok: false, why: 'finish the active field activity before workshop crafting' };
   if (fieldSkillLevel(state, recipe.skill) < recipe.level) return { ok: false, why: `${recipe.skill} level ${recipe.level} required` };
   const costs = Object.entries(recipe.materials as Record<string, number>).map(([key, amount]) => ({ bucket: state.fieldwork.materials, key, amount, capKind: 'material' }));
   for (const cost of costs) if ((cost.bucket[cost.key] || 0) < cost.amount) return { ok: false, why: `needs ${cost.amount} ${fieldwork.materialById[cost.key]?.name || cost.key}` };
-  if (!fits(state, state.fieldwork.materials, id, 'material', recipe.yield, costs)) return { ok: false, why: 'make room in the character bag' };
+  if (!fitsTransaction(state, costs, [{ bucket: state.fieldwork.materials, key: id, capKind: 'material', amount: recipe.yield }])) return { ok: false, why: 'make room in the character bag' };
   return { ok: true };
 }
 
 export function processMaterials(state: GameState, id: string): { ok: boolean; why?: string } {
-  const verdict = canProcess(state, id);
-  if (!verdict.ok) return verdict;
   const recipe = fieldwork.workshopById[id];
-  for (const [key, amount] of Object.entries(recipe.materials as Record<string, number>)) state.fieldwork.materials[key] -= amount;
-  addTo(state, state.fieldwork.materials, id, 'material', recipe.yield);
-  state.fieldwork.skills[recipe.skill as 'mining' | 'woodcutting'].xp += recipe.xp;
+  if (!recipe) return { ok: false, why: 'unknown workshop recipe' };
+  const batch = recipe.skill === 'smithing' ? 1 + Math.floor(fieldMasteryLevel(state, 'smithing', id) / 20) : 1;
+  let made = 0;
+  for (; made < batch; made++) {
+    const verdict = canProcess(state, id);
+    if (!verdict.ok) return { ok: made > 0, why: verdict.why };
+    for (const [key, amount] of Object.entries(recipe.materials as Record<string, number>)) state.fieldwork.materials[key] -= amount;
+    addTo(state, state.fieldwork.materials, id, 'material', recipe.yield);
+    state.fieldwork.skills[recipe.skill as 'mining' | 'woodcutting' | 'smithing'].xp += recipe.xp;
+    if (recipe.skill === 'smithing') state.fieldwork.skills.smithing.mastery[id] = (state.fieldwork.skills.smithing.mastery[id] || 0) + (recipe.mastery_xp || 1);
+  }
   return { ok: true };
 }

@@ -129,7 +129,7 @@
     {#if stones.length}
       {#each stones as [k, v]}<span>{v} × {stoneName(k)}</span>{/each}
     {:else}
-      <span class="dim">No stones in the purse — rejected drops dissolve into Value stones, and Guild tasks pay the rest.</span>
+      <span class="dim">No stones in the purse — Salvage makes Iron Ore and Scrap; transmute Scrap at settlement Alchemy for Value stones. Guild tasks pay the rest.</span>
     {/if}
   </p>{/if}
   {/if}
@@ -139,7 +139,7 @@
   .forge { display: grid; gap: var(--spacing-md); }
   .compact-forge { display: grid; gap: var(--spacing-xs); min-width: 0; }
   .compact-rungs { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--icon-md), 1fr)); gap: var(--spacing-xs); }
-  .compact-rung { min-width: 0; display: grid; justify-items: center; gap: 1px; padding: var(--spacing-xs) 0; border: 1px solid var(--line); background: var(--panel); font-family: var(--num); font-size: var(--font-xs); line-height: 1; }
+  .compact-rung { min-width: 0; display: grid; justify-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) 0; border: 1px solid var(--line); background: var(--panel); font-family: var(--num); font-size: var(--font-xs); line-height: 1; }
   .compact-rung b { color: var(--dim); font-weight: 500; }
   .compact-rung span, .compact-rung small { color: var(--mob); font-size: var(--font-xs); }
   .compact-rung.risky b { color: var(--hot); }
@@ -147,7 +147,7 @@
   .compact-rung.next b { color: var(--gold); }
   .compact-facts { color: var(--dim); font-size: var(--font-xs); line-height: 1.1; }
   .compact-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-xs); }
-  .compact-actions button { min-width: 0; padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
+  .compact-actions button { min-width: 0; font-size: var(--font-xs); }
 
   /* the ladder is the screen: a rung reads as a rung, climbed from the left, with the lit one being the
      press the button under it makes */
@@ -166,7 +166,7 @@
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent), 0 6px 18px rgba(0, 0, 0, .4);
   }
   .rung.next b { color: var(--gold); font-size: var(--font-sm); }
-  .scale { margin: var(--x-pull-scale) 0 0; color: var(--mob); }
+  .scale { position: relative; top: var(--x-pull-scale); color: var(--mob); }
 
   .press { display: grid; grid-template-columns: 1fr minmax(clamp(200px, 15.49vw, 432px), clamp(275px, 21.30vw, 594px)); gap: var(--spacing-md); align-items: start; }
   .odds { display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-md); align-items: center; }
@@ -190,8 +190,7 @@
   .refuse { margin: 0; font-size: var(--font-xs); color: var(--alarm); }
   .repair, .corrupt { font-size: var(--font-xs); }
   .corrupt { border-color: color-mix(in srgb, var(--elite) 70%, transparent); color: var(--curse); }
-  .gamble { margin: var(--spacing-xs) 0 0; display: grid; gap: var(--spacing-xs); }
-  .gamble small { color: var(--dim); font-size: var(--font-xs); }
+  .gamble { display: grid; gap: var(--spacing-xs); }
 
   .result { margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs); background: color-mix(in srgb, var(--hp) 16%, transparent); color: var(--alarm); }
   .result.good { background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good-lit); }
