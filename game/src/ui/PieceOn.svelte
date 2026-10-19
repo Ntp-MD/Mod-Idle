@@ -25,7 +25,7 @@
     wornOf: (slot: string) => Item | null;
     /** the craft bench reads its bag pieces off the bag column beside it, so its picker lists worn only */
     wornOnly?: boolean;
-    /** the picker folds past this many chips: a forge bench can list the whole hunt pile, and a hundred
+    /** the picker folds past this many chips: a forge bench can list every piece in the bag, and a hundred
         chips would push the ladder off the modal */
     pickPageSize?: number;
   } = $props();
@@ -37,17 +37,17 @@
   const plus = $derived(item?.upgrade_lv || 0);
   const broken = $derived(Boolean(item?.broken));
   const corrupted = $derived(Boolean(item?.corrupted));
-  const at = $derived(where === 'gear' ? 'worn · ' + (item?.slot || '') : where === 'bag' ? 'from the hunt pile' : '');
+  const at = $derived(where === 'gear' ? 'worn · ' + (item?.slot || '') : where === 'bag' ? 'from the bag' : '');
 
-  /** worn first, then the pile, each strongest first inside its own group */
+  /** worn first, then the bag, each strongest first inside its own group */
   const picks = $derived.by(() => {
     const worn = game.gear.map((g, i) => (g ? { where: 'gear' as Where, i, e: gearEntry(g, i) } : null)).filter(Boolean) as any[];
     if (wornOnly) return worn.sort((a, b) => b.e.score - a.e.score);
-    const pile = game.bag.map((g, i) => ({ where: 'bag' as Where, i, e: gearEntry(g, i) }));
+    const carried = game.bag.map((g, i) => ({ where: 'bag' as Where, i, e: gearEntry(g, i) }));
     const byScore = (a: any, b: any) => b.e.score - a.e.score;
-    return [...worn.sort(byScore), ...pile.sort(byScore)];
+    return [...worn.sort(byScore), ...carried.sort(byScore)];
   });
-  /** the picker's own page: the worn list never fills one, the hunt pile fills several */
+  /** the picker's own page: the worn list never fills one, the bag's pieces fill several */
   let pickPage = $state(0);
   const pickPages = $derived(Math.max(1, Math.ceil(picks.length / pickPageSize)));
   const pickAt = $derived(Math.min(pickPage, pickPages - 1));
@@ -97,7 +97,7 @@
         class:picked={p.where === where && p.i === index}
         onclick={() => onpick(p.where, p.i)}
         title={`${p.e.title} · ${p.e.sub}`}
-        aria-label={`${p.e.title}, ${p.where === 'gear' ? 'worn in ' + p.e.slot : 'in the hunt pile'}`}>
+        aria-label={`${p.e.title}, ${p.where === 'gear' ? 'worn in ' + p.e.slot : 'in the bag'}`}>
         <img src={p.e.icon} alt="" aria-hidden="true" />
         <span>{p.e.title}</span>
         {#if p.e.item.upgrade_lv}<b class="plus">+{p.e.item.upgrade_lv}</b>{/if}
@@ -118,19 +118,19 @@
 <style>
   .head {
     display: grid; grid-template-columns: auto 1fr auto; gap: var(--spacing-md); align-items: center;
-    padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-sm); background: var(--glass);
+    padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-card); background: var(--glass);
   }
   .head.none { grid-template-columns: 1fr; color: var(--dim); }
   .head.broken { border-color: color-mix(in srgb, var(--hp) 60%, transparent); }
   .head.corrupted { border-color: color-mix(in srgb, var(--curse) 50%, transparent); }
   .tile {
-    position: relative; width: var(--icon-xl); height: var(--icon-xl); display: grid; place-items: center;
-    border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset);
+    position: relative; width: calc(var(--icon-card) * 1.4); height: calc(var(--icon-card) * 1.4); display: grid; place-items: center;
+    border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset);
   }
-  .tile img { width: var(--icon-lg); height: var(--icon-lg); object-fit: contain; }
+  .tile img { width: var(--icon-card); height: var(--icon-card); object-fit: contain; }
   .tile .plus {
     position: absolute; right: clamp(-5px, -0.19vw, -2px); bottom: clamp(-5px, -0.19vw, -2px); font-family: var(--num); font-size: var(--font-xs);
-    color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 var(--spacing-xs);
+    color: var(--xp); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 var(--spacing-xs);
   }
   .who { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
   .who h3 { margin: 0; font-size: var(--font-sm); }
@@ -141,7 +141,7 @@
   .vs { font-size: var(--font-xs); font-family: var(--num); color: var(--alarm); }
   .vs.better { color: var(--good); }
   .flags { display: grid; gap: var(--spacing-xs); justify-items: end; }
-  .flag { font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-round); padding: var(--spacing-xs) var(--spacing-xs); }
+  .flag { font-size: var(--font-xs); color: var(--dim); border: 1px solid var(--line); border-radius: var(--radius-card); padding: var(--spacing-xs) var(--spacing-xs); }
   .flag.bad { color: var(--alarm); border-color: var(--hp); }
   .flag.warn { color: var(--curse); border-color: var(--elite); }
   .flag.ok { color: var(--good); border-color: color-mix(in srgb, var(--good) 50%, transparent); }
@@ -150,7 +150,7 @@
   .lab { color: var(--dim); font-size: var(--font-xs); letter-spacing: var(--spacing-xs); text-transform: uppercase; }
   .row { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
   .chip { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
-  .chip img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .chip img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
   .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
   .pager button { font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }

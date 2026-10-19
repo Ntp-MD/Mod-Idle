@@ -231,7 +231,6 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const e = editable(item, index);
     if (!e.ok) return e;
     const line = e.line;
-    const slices = loot.sliceCount();
     const slice = loot.tierSlice(rng());
     const [lo, hi] = loot.rangeOf(line.id, item.ilvl, item.q, slice);
     const value = lo + Math.floor(rng() * (hi - lo + 1));
@@ -261,7 +260,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const g = guard(item, 'remove');
     if (!g.ok) return g;
     if (item.lines.length <= UNTOUCHABLE) return { ok: false, why: 'only the Frame and Bound lines are left on this piece' };
-    const candidates = item.lines.map((l: any, i: number) => i).slice(UNTOUCHABLE);
+    const candidates = [...item.lines.keys()].slice(UNTOUCHABLE);
     const pick = candidates[Math.floor(rng() * candidates.length)];
     return { ok: true, item: { ...item, lines: item.lines.filter((_: any, i: number) => i !== pick) }, changed: { index: pick } };
   }
@@ -396,7 +395,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
 
   /** The lines one scope holds: everything above the floor it is told to work in. */
   const scopeOf = (item: any, floor: number) =>
-    item.lines.map((l: any, i: number) => i).slice(floor);
+    [...item.lines.keys()].slice(floor);
 
   /**
    * Reroll mod: one named line (Frame Mod excepted) loses its identity and draws a fresh Mod from the

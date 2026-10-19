@@ -14,7 +14,9 @@
       "WebFetch(*)",
       "WebFetch(*)",
       "WebFetch(*)",
-      "WebFetch(*)"
+      "WebFetch(*)",
+      "Bash(ls ~/.qoder/skills 2>/dev/null; ls ~/.codex/skills 2>/dev/null; find ~/.qoder ~/.codex C:/Users/disda/Desktop/Mod-Idle -maxdepth 4 -iname \"*ponytail*\" 2>/dev/null)",
+      "Read(//c/Users/disda/.codex/**)"
     ]
   }
 }

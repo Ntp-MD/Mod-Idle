@@ -157,11 +157,6 @@ export function campHere(state: GameState): boolean {
   return !state.walk && camp.zone === state.zone && camp.cell.q === feet.q && camp.cell.r === feet.r;
 }
 
-export function campSiteName(cell: Cell | null | undefined): string {
-  const site = fieldSite(cell);
-  return site === 'mine' ? 'Mine' : site === 'grove' ? 'Rare Grove' : site === 'hunt' ? 'Hunting Ground' : site === 'dungeon' ? 'Dungeon' : 'Settlement';
-}
-
 /** Establish the first safe field Camp for free; each relocation consumes the configured timber cost. */
 export function establishCamp(state: GameState): { ok: boolean; why?: string; moved?: boolean } {
   if (state.walk) return { ok: false, why: 'finish the walk first' };
@@ -217,14 +212,20 @@ export function returnToCamp(state: GameState): { ok: boolean; why?: string } {
   return { ok: true };
 }
 
-export function startFieldAction(state: GameState, kind: 'mine' | 'grove' | 'fish'): { ok: boolean; why?: string } {
-  if (!campHere(state)) return { ok: false, why: 'set Camp on this hex first' };
-  if (state.hunting || state.group.length) return { ok: false, why: 'return to safe Camp before gathering' };
-  if (state.phase === 'camp' || state.dungeon || state.walk) return { ok: false, why: 'gathering is unavailable right now' };
+export function fieldActionProblem(state: GameState, kind: 'mine' | 'grove' | 'fish'): string | null {
+  if (!campHere(state)) return 'set Camp on this hex first';
+  if (state.hunting || state.group.length) return 'return to safe Camp before gathering';
+  if (state.phase === 'camp' || state.dungeon || state.walk) return 'gathering is unavailable right now';
   if (kind === 'fish') {
     const food = fieldwork.F.regional_sources[String(state.zone)]?.food;
-    if (!food || !fieldwork.F.fishing.foods.includes(food)) return { ok: false, why: 'this zone has no authored fishing source' };
-  } else if (fieldSite(state.cell) !== kind) return { ok: false, why: kind === 'mine' ? 'stand at a Mine hex' : 'stand at a Rare Grove' };
+    if (!food || !fieldwork.F.fishing.foods.includes(food)) return 'this zone has no authored fishing source';
+  } else if (fieldSite(state.cell) !== kind) return kind === 'mine' ? 'stand at a Mine hex' : 'stand at a Rare Grove';
+  return null;
+}
+
+export function startFieldAction(state: GameState, kind: 'mine' | 'grove' | 'fish'): { ok: boolean; why?: string } {
+  const why = fieldActionProblem(state, kind);
+  if (why) return { ok: false, why };
   state.fieldwork.action = { kind, nextAt: state.clockSec + (kind === 'fish' ? fieldwork.F.fishing.interval_sec : fieldwork.F.actions[kind].interval_sec) };
   return { ok: true };
 }
@@ -336,7 +337,7 @@ export function canCook(state: GameState, recipeId: string): { ok: boolean; why?
     ...Object.entries(recipe.foods as Record<string, number>).map(([key, amount]) => ({ bucket: state.fieldwork.foods, key, amount, capKind: 'food' })),
     ...Object.entries(recipe.herbs as Record<string, number>).map(([key, amount]) => ({ bucket: state.farm.herbs, key, amount, capKind: 'herb' })),
   ];
-  if (!fits(state, state.fieldwork.foods, recipe.id, 'food', 1, costs)) return { ok: false, why: 'character bag has no room for food' };
+  if (!fits(state, state.fieldwork.foods, recipe.id, 'food', 1, costs)) return { ok: false, why: 'bag has no room for food' };
   return { ok: true };
 }
 

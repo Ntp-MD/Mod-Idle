@@ -39,11 +39,17 @@ export function createFarm(E: EngineData) {
     return (herbChance(band) * ((H.bundle_min + H.bundle_max) / 2)) / cost;
   };
 
-  /** A draught's effect is `base + step × (index − 1)` percent of its pool. */
-  function potionEffect(potion: PotionsCfg['list'][number]) {
-    const base = potion.pool === 'hp' ? P.hp_base_pct : P.mana_base_pct;
-    const step = potion.pool === 'hp' ? P.hp_step_pct : P.mana_step_pct;
+  /** A draught's share of one pool: `base + step × (index − 1)` percent; a `both` draught pays both. */
+  function potionPct(potion: PotionsCfg['list'][number], pool: string) {
+    if (potion.pool !== 'both' && potion.pool !== pool) return 0;
+    const base = pool === 'hp' ? P.hp_base_pct : P.mana_base_pct;
+    const step = pool === 'hp' ? P.hp_step_pct : P.mana_step_pct;
     return base + step * (potion.index - 1);
+  }
+
+  /** A draught's total effect, the figure auto-use ranks bottles by. */
+  function potionEffect(potion: PotionsCfg['list'][number]) {
+    return potionPct(potion, 'hp') + potionPct(potion, 'mana');
   }
 
   const potionByName: Record<string, PotionsCfg['list'][number]> = {};
@@ -68,7 +74,7 @@ export function createFarm(E: EngineData) {
 
   return {
     F, P, H, TIERS, farmLevel, farmXpForLevel, canGrow, growthSec, plotsMax,
-    herbChance, potionDropChance, potionEffect, potionByName, bestPotion, craftCost, condensedCost, fightLimits,
+    herbChance, potionDropChance, potionEffect, potionPct, potionByName, bestPotion, craftCost, condensedCost, fightLimits,
     yieldPerHarvest: F.yield_per_harvest,
     /** A seed is one herb of the tier being planted (farm.md's own cycle). */
     seedCostHerbs: F.seed_cost_herbs,

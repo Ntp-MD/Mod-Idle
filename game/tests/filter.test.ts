@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { E, eng, loot } from '../src/engine/client';
-import { newGame, tick, setLevel, huntZone, adjudicateDrop } from '../src/sim/game';
+import { newGame, tick, setLevel, huntZone, adjudicateDrop, runFilterNow } from '../src/sim/game';
+import { openingGear } from '../src/sim/player';
 import { autoEquip } from '../src/sim/gear';
 import { wants } from '../src/sim/collector';
 import { rollDrop } from '../src/sim/drop';
-import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS } from '../src/sim/filter';
+import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS, presetSlots, savePreset, loadPreset, clearPreset } from '../src/sim/filter';
 import { slotsAvailable, slotsUsed } from '../src/sim/slots';
 import { mark, reason, arm, SAVE_CFG } from '../src/sim/snapshot';
 import { mulberry32 } from '../src/engine/client-helpers';
@@ -38,6 +39,7 @@ describe('a drop carries its Element as a stored value', () => {
 describe('the bag filter reads per-slot thresholds', () => {
   it('compares a new drop with worn gear, never a stronger piece waiting in the bag', () => {
     const s = newGame(10);
+    s.gear = openingGear();
     setRule(s.filter, 'ring', { enabled: true, margin_pct: 0 });
     const ring = (value: number) => piece({ slot: 'ring', base: 'Iron Band', lines: [{ id: 'all_stat_flat', value, slice: 1 }] });
     const waiting = ring(30);
@@ -52,18 +54,18 @@ describe('the bag filter reads per-slot thresholds', () => {
 
   it('keeps the weakest kept piece and leaves the drop unpicked when the swap cannot dissolve it', () => {
     const s = newGame(10);
+    s.gear = openingGear();
     setRule(s.filter, 'ring', { enabled: true, margin_pct: 0 });
     const ring = (value: number) => piece({ slot: 'ring', base: 'Iron Band', lines: [{ id: 'all_stat_flat', value, slice: 1 }] });
     const kept = ring(10);
     const incoming = ring(30);
     const worn = s.gear.find((g) => g?.slot === 'ring')!;
     expect(loot.score(incoming)).toBeGreaterThan(loot.score({ ...worn, q: worn.q ?? 0 }));
-    // a full adventure pile forces the swap path, and full character stacks with the ore key at its
-    // cap make the dissolve bundle not fit: the swap must refuse rather than silently delete the loser
+    // a full bag forces the swap path, and the ore key already at its cap makes the dissolve bundle
+    // not fit: the swap must refuse rather than silently delete the loser
     s.fieldwork.materials['iron-ore'] = E.inventory.stack_size.material;
-    for (let i = 0; slotsUsed(s) < slotsAvailable(s); i++) s.junk[`filler-${i}`] = 1;
     s.bag = [kept];
-    while (s.bag.length < E.inventory.adventure_slots) s.bag.push(ring(40));
+    while (slotsUsed(s) < slotsAvailable(s)) s.bag.push(ring(40));
     const overflow = s.counters.overflow || 0;
     const stopped = s.counters.stopped || 0;
     const salvaged = s.counters.salvaged || 0;
@@ -74,18 +76,21 @@ describe('the bag filter reads per-slot thresholds', () => {
     expect(s.counters.stopped).toBe(stopped + 1);
     expect(s.counters.salvaged || 0).toBe(salvaged);
     expect(s.fieldwork.materials.scrap || 0).toBe(0);
-    // once the bundle fits again (a freed junk slot plus the dropped ore stack), the same drop
-    // swaps: the loser dissolves and the incoming piece lands
-    delete s.junk['filler-0'];
-    s.fieldwork.materials['iron-ore'] = 0;
+    // once the ore and scrap keys already hold room under their cap, the dissolve bundle costs no new
+    // slot, so the same drop swaps even on a full bag: the loser dissolves and the incoming piece lands
+    s.bag.pop();
+    s.fieldwork.materials['iron-ore'] = 5;
+    s.fieldwork.materials.scrap = 5;
     adjudicateDrop(s, incoming);
     expect(s.bag).toContain(incoming);
-    expect(s.fieldwork.materials['iron-ore']).toBe(1);
-    expect(s.fieldwork.materials.scrap).toBe(1);
+    expect(s.bag).not.toContain(kept);
+    expect(s.fieldwork.materials['iron-ore']).toBe(6);
+    expect(s.fieldwork.materials.scrap).toBe(6);
   });
 
   it('keeps a Collector-wanted upgrade available for Auto Equip', () => {
     const s = newGame(10);
+    s.gear = openingGear();
     const drop = Array.from({ length: 100 }, (_, i) => rollDrop(mulberry32(i + 1), 'low', E.item_level.spans[0].from))
       .find((item) => wants(s, item) && s.gear.some((g) => g?.slot === item.slot
         && loot.score(item) > loot.score({ ...g, q: g.q ?? 0 })));
@@ -150,6 +155,93 @@ describe('the bag filter reads per-slot thresholds', () => {
     // premise (AGENTS.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.
     for (let i = 0; i < 40000 && s.counters.drops === 0; i++) tick(s, {});
     expect(s.counters.drops).toBeGreaterThan(0);
+  });
+});
+
+describe('the filter keeps presets like settings, not like drops', () => {
+  it('stores a whole rule table and loads it back with the keep-list re-read', () => {
+    const s = newGame(30);
+    expect(s.filterPresets).toEqual([]);
+    setRule(s.filter, 'helmet', { enabled: true, margin_pct: 25, keep_missing_element: false });
+    expect(savePreset(s, 0)).toBe(true);
+    expect(s.filterPresets[0]?.bySlot.helmet).toEqual({ enabled: true, margin_pct: 25, keep_missing_element: false });
+    // the live table moves on, then a load puts the stored one back and nothing else about the bag moves
+    setRule(s.filter, 'chest', { enabled: true });
+    const bagBefore = [...s.bag];
+    expect(loadPreset(s, 0)).toBe(true);
+    expect(ruleFor(s.filter, 'helmet')).toEqual({ enabled: true, margin_pct: 25, keep_missing_element: false });
+    expect(ruleFor(s.filter, 'chest')).toEqual(ruleFor(newFilter(), 'chest'));
+    expect(s.bag).toEqual(bagBefore);
+  });
+
+  it('one slot is the character’s own; a Collector set pays exactly one more, never two', () => {
+    const s = newGame(31);
+    expect(s.filterPresets).toEqual([]);
+    expect(savePreset(s, 1)).toBe(false);
+    s.grants.filter_presets = 2;
+    expect(savePreset(s, 1)).toBe(true);
+    expect(savePreset(s, 2)).toBe(true);
+    expect(savePreset(s, 3)).toBe(false);
+    expect(presetSlots(s)).toBe(3);
+    clearPreset(s, 1);
+    expect(s.filterPresets[1]).toBe(null);
+  });
+
+  it('rides a save round trip, and an older save gains an empty list instead of an undefined one', () => {
+    const s = newGame(32);
+    savePreset(s, 0);
+    const round = importJson(exportJson(s));
+    expect(round.filterPresets[0]?.bySlot.helmet).toEqual(ruleFor(s.filter, 'helmet'));
+    const raw = JSON.parse(exportJson(s));
+    delete (raw.state as any).filterPresets;
+    expect(importJson(JSON.stringify(raw)).filterPresets).toEqual([]);
+    // a hand-edited row is read as a rule table or dropped, and its numbers come back in bounds
+    const mess = JSON.parse(exportJson(s));
+    (mess.state as any).filterPresets = [{ bySlot: { helmet: { enabled: 1, margin_pct: -5, keep_missing_element: 'yes' } } }, 'junk', null];
+    const safe = importJson(JSON.stringify(mess));
+    expect(safe.filterPresets[0]?.bySlot.helmet).toEqual({ enabled: true, margin_pct: 0, keep_missing_element: true });
+    expect(safe.filterPresets[1]).toBe(null);
+    expect(safe.filterPresets[2]).toBe(null);
+  });
+});
+
+describe('running the filter over the bag is the one verdict, at scale', () => {
+  const helm = (value: number, over: Partial<Item> = {}): Item =>
+    piece({ slot: 'helmet', base: 'coif', lines: [{ id: 'max_hp_flat', value, slice: 0 }], ...over });
+
+  it('melts the pieces a fresh drop would have dissolved and spares the locked and held ones', () => {
+    const s = newGame(10);
+    setRule(s.filter, 'helmet', { enabled: true, margin_pct: 0 });
+    s.gear[loot.SLOTS.indexOf('helmet')] = helm(40);
+    const strong = helm(78);
+    const lockedWeak = helm(10, { locked: true });
+    const heldWeak = helm(10, { heldFor: 'ram_school' });
+    s.bag = [helm(10), helm(11), strong, lockedWeak, heldWeak];
+    const r = runFilterNow(s);
+    expect(r.dissolved).toBe(2);
+    expect(r.spared).toBe(2);
+    expect(s.bag).toEqual([strong, lockedWeak, heldWeak]);
+    expect(s.counters.salvaged).toBe(2);
+    expect(s.fieldwork.materials['iron-ore']).toBe(2);
+    expect(s.fieldwork.materials.scrap).toBe(2);
+  });
+
+  it('dissolves nothing when the filter is off, and refuses a half job when the bundle will not fit', () => {
+    const s = newGame(10);
+    s.gear[loot.SLOTS.indexOf('helmet')] = helm(40);
+    s.bag = [helm(10), helm(41)];
+    // the filter is off, so no slot has a rule to fail and no piece melts
+    expect(runFilterNow(s).dissolved).toBe(0);
+    expect(s.bag).toHaveLength(2);
+    // a full bag cannot take the next salvage bundle, so the press refuses rather than melting part
+    setRule(s.filter, 'helmet', { enabled: true, margin_pct: 0 });
+    s.bag = [helm(10), helm(10)];
+    while (slotsUsed(s) < slotsAvailable(s)) s.bag.push(helm(41));
+    const r = runFilterNow(s);
+    expect(r.dissolved).toBe(0);
+    expect(r.why).toBeTruthy();
+    expect(s.bag.filter((it) => it.lines[0]?.value === 10)).toHaveLength(2);
+    expect(s.counters.salvaged || 0).toBe(0);
   });
 });
 
@@ -240,7 +332,7 @@ describe('walking snapshots', () => {
     if (s.player.level > 1) expect(s.pendingSnapshot).toBe('level');
     await writeSave('slot2', s);
     expect(JSON.parse((globalThis as any).localStorage.getItem('modworld:slot2')!).version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(16);
+    expect(SCHEMA_VERSION).toBe(17);
     const round = importJson(exportJson(s));
     expect(round.filter).toBeTruthy();
     expect(round.pendingSnapshot).toBe(null);

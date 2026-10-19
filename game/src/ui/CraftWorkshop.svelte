@@ -1,398 +1,464 @@
 <script lang="ts">
-  import { E } from '../engine/client';
-  import { gearIcon, icon } from '../icon';
+  import { onMount, tick } from 'svelte';
+  import { E, loot } from '../engine/client';
+  import { gearIcon, modIcon } from '../icon';
   import { itemName } from '../sim/item-name';
-  import { craft, stoneName, type CraftOp, type Where } from '../sim/craft';
-  import { gearEntry, type SlotEntry } from './bag';
+  import { craft, craftedMark, lineName, lineTier, stoneName, replaceChoices, pressName, type CraftOp, type Where } from '../sim/craft';
+  import { slotsFree } from '../sim/slots';
+  import { gearEntry, pieceRank, type SlotEntry } from './bag';
+  import { shelfStones, stoneIcon, stoneQuality, STONE_MIME } from './stones';
+  import { modesForStone, stoneUseReason } from './craft-use';
   import SlotGrid from './SlotGrid.svelte';
-  import Forge from './Forge.svelte';
-  import CraftBoard from './CraftBoard.svelte';
   import type { GameState, Item } from '../sim/types';
-  // Each stone wears the press it buys — the same marks the Craft board hangs on the purse.
-  const stoneRerollValue = icon('swirl-ring');
-  const stoneRerollTier = icon('ladder-stack');
-  const stoneAdd = icon('add-plus');
-  const stoneRemove = icon('remove-minus');
-  const stoneQuality = icon('level-up');
-  const stoneRepair = icon('anvil-impact');
-  const stoneCorrupt = icon('cursed-star');
-  const runeStone = icon('keystone-node');
-  const crystalOne = icon('crystal-cluster-1');
-  const crystalGrowth = icon('crystal-growth');
 
-  let { game, item, where = null, index = -1, onpick, onclear, onrun, wornOf, note = '' }: {
-    game: GameState;
-    item: Item | null;
-    where?: Where | null;
-    index?: number;
-    onpick: (where: Where, index: number) => void;
-    onclear: () => void;
-    onrun: (op: CraftOp, line?: number, pick?: string) => void;
-    wornOf: (slot: string) => Item | null;
-    note?: string;
+  let { game, item, where = null, index = -1, onpick, onclear, onrun, wornOf, note = '',
+    stashTabs = 0, stashTab = 0, writer = true, onStashTab = () => {}, onTakeStash = () => false, onStore = () => false,
+  }: {
+    game: GameState; item: Item | null; where?: Where | null; index?: number;
+    onpick: (where: Where, index: number) => void; onclear: () => void;
+    onrun: (op: CraftOp, line?: number, pick?: string) => boolean;
+    wornOf: (slot: string) => Item | null; note?: string; stashTabs?: number; stashTab?: number; writer?: boolean;
+    onStashTab?: (tab: number) => void; onTakeStash?: (tab: number, index: number) => boolean; onStore?: (index: number, tab: number) => boolean;
   } = $props();
 
   const MIME = 'application/x-modworld-gear';
-  const STONE_MIME = 'application/x-modworld-stone';
-  const STONES = [
-    { key: 'reroll_value', icon: stoneRerollValue, detail: 'Reroll a Mod value inside its Tier' },
-    { key: 'tier', icon: stoneRerollTier, detail: 'Change a Mod Tier' },
-    { key: 'add', icon: stoneAdd, detail: 'Add an Unbound Mod' },
-    { key: 'remove', icon: stoneRemove, detail: 'Remove an Unbound Mod' },
-    { key: 'replace', icon: runeStone, detail: 'Change a Mod identity' },
-    { key: 'quality', icon: stoneQuality, detail: 'Enhance a gear piece one step' },
-    { key: 'polish', icon: crystalOne, detail: 'Reroll every Mod value' },
-    { key: 'reforge', icon: crystalOne, detail: 'Redraw the piece Tier' },
-    { key: 'rebirth', icon: crystalGrowth, detail: 'Redraw Unbound Mods' },
-    { key: 'corrupt', icon: stoneCorrupt, detail: 'One permanent gamble' },
-    { key: 'repair', icon: stoneRepair, detail: 'Repair a Broken piece' },
-  ];
-
+  const FRAME = craft.PIECE_FLOOR as number;
+  const UNT = craft.UNTOUCHABLE as number;
   const held = $derived(game.counters.stones || {});
-  const regularStones = $derived(STONES.map((stone) => ({ ...stone, name: stoneName(stone.key), count: Number(held[stone.key] || 0) })));
-  const imprintStones = $derived(Object.entries(held)
-    .filter(([key, count]) => key.startsWith('imprint_') && Number(count) > 0)
-    .map(([key, count]) => ({ key, icon: runeStone, detail: 'Write this named Mod', name: stoneName(key), count: Number(count) }))
-    .sort((a, b) => a.name.localeCompare(b.name)));
-  const ownedRegular = $derived(regularStones.filter((stone) => stone.count > 0));
-  const ownedKinds = $derived(ownedRegular.length + imprintStones.length);
-  const totalStones = $derived(regularStones.reduce((total, stone) => total + stone.count, 0)
-    + imprintStones.reduce((total, stone) => total + stone.count, 0));
-  let showAllRegular = $state(false);
-  let showImprints = $state(false);
-  let imprintQuery = $state('');
-  let imprintPage = $state(0);
-  let inspectedKey = $state<string | null>(null);
-  const regularView = $derived(showAllRegular ? regularStones : ownedRegular);
-  const imprintMatches = $derived(imprintStones.filter((stone) => stone.name.toLowerCase().includes(imprintQuery.trim().toLowerCase())));
-  const IMPRINTS_PER_PAGE = 8;
-  const imprintPages = $derived(Math.max(1, Math.ceil(imprintMatches.length / IMPRINTS_PER_PAGE)));
-  const imprintAt = $derived(Math.min(imprintPage, imprintPages - 1));
-  const imprintView = $derived(imprintMatches.slice(imprintAt * IMPRINTS_PER_PAGE, (imprintAt + 1) * IMPRINTS_PER_PAGE));
-  const inspectedStone = $derived([...regularStones, ...imprintStones].find((stone) => stone.key === inspectedKey) ?? null);
-  const wornEntries = $derived(game.gear
-    .map((piece, position) => piece ? ({ ...gearEntry(piece, position), kind: 'worn' } as SlotEntry) : null)
-    .filter((entry): entry is SlotEntry => entry !== null));
-  const bagEntries = $derived(game.bag.map((piece, position) => gearEntry(piece, position)));
+  const stones = $derived(shelfStones(held, true));
+  let stoneQuery = $state('');
+  let stonePage = $state(0);
+  let stoneCapacity = $state(1);
+  let sourceCapacity = $state(1);
+  const filteredStones = $derived(stones.filter(s => `${s.name} ${s.detail}`.toLowerCase().includes(stoneQuery.toLowerCase().trim())));
+  const stonePages = $derived(Math.max(1, Math.ceil(filteredStones.length / stoneCapacity)));
+  const stoneAt = $derived(Math.min(stonePage, stonePages - 1));
+  const shownStones = $derived(filteredStones.slice(stoneAt * stoneCapacity, (stoneAt + 1) * stoneCapacity));
+  let selectedKey = $state('');
+  let armed = $state(false);
+  let modeOp = $state<CraftOp>('reroll_random');
+  let chosenMod = $state('');
+  let busy = $state(false);
+  let message = $state('');
+  let pointer = $state<{ x: number; y: number } | null>(null);
+  let before = $state<Item | null>(null);
+  let resultOp = $state('');
+  let resultKind = $state<CraftOp | null>(null);
+  let targetLine = $state<number | null>(null);
+  const selectedStone = $derived(stones.find(s => s.key === selectedKey));
+  const modes = $derived(modesForStone(selectedKey));
+  const mode = $derived(modes.find(m => m.op === modeOp) || modes[0]);
+  const pickValue = $derived(selectedKey.startsWith('imprint_') ? selectedKey.slice('imprint_'.length) : chosenMod);
+  const choices = $derived(item && where != null && index >= 0 ? replaceChoices(game, where, index) : []);
+  const costs = $derived(item && mode ? Object.entries(craft.costOf(mode.op, item, pickValue || undefined)).map(([key, amount]) => ({ key, amount: Number(amount), owned: Number(held[key] || 0) })) : []);
+  const rank = $derived(pieceRank(item));
+  const upgradeStep = $derived(item ? Math.min((item.upgrade_lv || 0) + 1, craft.C.upgrade_cap) : 0);
+  const upgradeChance = $derived(craft.successPct(upgradeStep));
+  $effect(() => {
+    const at = filteredStones.findIndex(s => s.key === selectedKey);
+    if (at >= 0) stonePage = Math.floor(at / stoneCapacity);
+  });
+
+  let sourceTab = $state<'inventory' | 'equipped' | 'stash'>('inventory');
+  let stashPicked = $state(-1);
+  let stashQuery = $state('');
   let bagQuery = $state('');
-  const shownBag = $derived(bagEntries.filter((entry) =>
-    `${entry.title} ${entry.slot} ${entry.sub}`.toLowerCase().includes(bagQuery.trim().toLowerCase())));
   let dropReady = $state(false);
-  let dropKind = $state<'piece' | 'stone' | null>(null);
-  let dropNote = $state('');
-  let stoneRequestId = 0;
-  let stoneRequest = $state<{ key: string; id: number; applied?: boolean } | null>(null);
+  const wornEntries = $derived(game.gear.map((piece, position) => piece ? ({ ...gearEntry(piece, position), kind: 'worn' } as SlotEntry) : null).filter((e): e is SlotEntry => e !== null));
+  const bagEntries = $derived(game.bag.map((piece, position) => gearEntry(piece, position)));
+  const shownBag = $derived(bagEntries.filter(e => `${e.title} ${e.slot} ${e.sub}`.toLowerCase().includes(bagQuery.trim().toLowerCase())));
+  const stashItems = $derived(game.stash[stashTab] || []);
+  const stashEntries = $derived(stashItems.map((piece, position) => gearEntry(piece, position)));
+  const shownStash = $derived(stashEntries.filter(e => `${e.title} ${e.slot} ${e.sub}`.toLowerCase().includes(stashQuery.trim().toLowerCase())));
+  const stashTotal = $derived(game.stash.reduce((total, tab) => total + tab.length, 0));
+  const bagFull = $derived(slotsFree(game) < 1);
 
-  const STONE_OP: Partial<Record<string, CraftOp>> = {
-    reroll_value: 'reroll_random', add: 'add', remove: 'remove', quality: 'upgrade',
-    repair: 'repair', corrupt: 'corrupt', polish: 'polish', reforge: 'reforge', rebirth: 'rebirth',
-  };
-
-  function selectPiece(source: Where, position: number) {
-    stoneRequest = null;
-    dropNote = '';
-    onpick(source, position);
+  function fitSource(node: HTMLElement) {
+    const observer = new ResizeObserver(() => {
+      const css = getComputedStyle(node);
+      const slot = parseFloat(css.getPropertyValue('--slot-item'));
+      const gap = parseFloat(css.getPropertyValue('--spacing-xs'));
+      const pager = parseFloat(css.fontSize) * 2 + parseFloat(css.getPropertyValue('--spacing-sm')) * 2;
+      sourceCapacity = Math.max(1, Math.floor((node.clientWidth + gap) / (slot + gap)) * Math.floor((node.clientHeight - pager + gap) / (slot + gap)));
+    });
+    observer.observe(node);
+    return { destroy: () => observer.disconnect() };
   }
-
-  function clearBench() {
-    stoneRequest = null;
-    dropNote = '';
-    onclear();
+  function fitCurrency(node: HTMLElement) {
+    const observer = new ResizeObserver(() => {
+      const css = getComputedStyle(node);
+      const columns = css.gridTemplateColumns.split(' ').length;
+      const row = parseFloat(css.gridAutoRows);
+      const gap = parseFloat(css.rowGap);
+      stoneCapacity = Math.max(1, columns * Math.floor((node.clientHeight + gap) / (row + gap)));
+    });
+    observer.observe(node);
+    return { destroy: () => observer.disconnect() };
   }
-
+  function cancelStone() { armed = false; pointer = null; }
+  onMount(() => {
+    const cancelKey = (event: KeyboardEvent) => {
+      if (armed && event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); cancelStone(); }
+    };
+    const cancelRight = (event: MouseEvent) => {
+      if (!armed || (event.target as Element)?.closest('[data-stone]')) return;
+      event.preventDefault(); event.stopImmediatePropagation(); cancelStone();
+    };
+    window.addEventListener('keydown', cancelKey, true);
+    window.addEventListener('contextmenu', cancelRight, true);
+    return () => { window.removeEventListener('keydown', cancelKey, true); window.removeEventListener('contextmenu', cancelRight, true); };
+  });
+  function armStone(key: string, event?: MouseEvent) {
+    if (busy) return;
+    message = '';
+    targetLine = null;
+    if (selectedKey !== key) { modeOp = modesForStone(key)[0]?.op || 'reroll_random'; chosenMod = ''; }
+    selectedKey = key;
+    if (!writer) { message = 'Read-only. Take account control before using a stone.'; cancelStone(); return; }
+    if (!(held[key] > 0)) { message = `No ${stoneName(key)} left.`; cancelStone(); return; }
+    armed = true;
+    if (event && (event.clientX || event.clientY)) pointer = { x: event.clientX, y: event.clientY };
+  }
+  function reason(line: number | null) {
+    return mode ? stoneUseReason(game, item, where, index, mode, line, pickValue, writer) : 'Choose a stone first.';
+  }
+  function modLabel(line: { id: string; stat?: string | null; element?: string | null }) {
+    return [lineName(line.id), line.stat?.toUpperCase(), line.element].filter(Boolean).join(' · ');
+  }
+  function targetHint() {
+    if (mode?.target !== 'line' || targetLine == null || !item?.lines[targetLine]) return mode?.target === 'line' ? 'Click a highlighted Mod line.' : 'Click the item to use once.';
+    const refusal = reason(targetLine);
+    if (refusal) return refusal;
+    const line = item.lines[targetLine];
+    if (mode.op === 'reroll') {
+      const [lo, hi] = loot.rangeOf(line.id, item.ilvl, item.q ?? 0, line.slice ?? 2);
+      return `${modLabel(line)} · ${Math.max(lo, item.baselines?.[targetLine] ?? lo, line.value)}–${hi} possible · ${lineTier(line)} kept`;
+    }
+    return `${pressName(mode.op)} · ${modLabel(line)}`;
+  }
+  function lineChanged(i: number) {
+    if (!before || !item) return false;
+    return JSON.stringify(before.lines[i]) !== JSON.stringify(item.lines[i]);
+  }
+  async function applyStone(line: number | null, repeat: boolean) {
+    if (!armed || !mode || busy) return;
+    const refusal = reason(line);
+    if (refusal) { message = refusal; return; }
+    busy = true;
+    const snapshot = structuredClone($state.snapshot(item!));
+    const success = onrun(mode.op, line ?? 0, pickValue || undefined);
+    if (success) { before = snapshot; resultOp = pressName(mode.op); resultKind = mode.op; message = ''; }
+    await tick();
+    busy = false;
+    if (!success) message = note || 'This stone could not be applied.';
+    if (success && (!repeat || !(held[selectedKey] > 0))) cancelStone();
+    if (success && repeat && armed && !craft.guard(item, mode.op).ok) { message = craft.guard(item, mode.op).why; cancelStone(); }
+  }
+  function sourceReadiness(entry: SlotEntry, source: Where): 'ready' | 'unavailable' | null {
+    if (!armed || !mode || !entry.item) return null;
+    const usable = mode.target === 'piece'
+      ? !stoneUseReason(game, entry.item, source, entry.index, mode, null, pickValue, writer)
+      : entry.item.lines.some((_, line) => !stoneUseReason(game, entry.item!, source, entry.index, mode, line, pickValue, writer));
+    return usable ? 'ready' : 'unavailable';
+  }
+  function selectPiece(source: Where, position: number) { before = null; resultOp = ''; message = ''; onpick(source, position); }
+  async function pickSource(source: Where, position: number, repeat = false) {
+    if (busy) return;
+    selectPiece(source, position);
+    await tick();
+    // A line-targeting stone opens the piece for an explicit line click; it never guesses a line.
+    if (armed && mode?.target === 'piece') await applyStone(null, repeat);
+  }
+  function clearBench() { if (busy) return; cancelStone(); before = null; resultOp = ''; message = ''; onclear(); }
+  function takeStashItem() {
+    if (stashPicked < 0 || bagFull || !writer || busy) return;
+    if (!onTakeStash(stashTab, stashPicked)) return;
+    sourceTab = 'inventory'; stashPicked = -1; selectPiece('bag', 0);
+  }
+  function storeBenchItem() {
+    if (where !== 'bag' || index < 0 || !writer || !stashTabs || busy) return;
+    if (!onStore(index, stashTab)) return;
+    sourceTab = 'stash'; stashPicked = -1; clearBench();
+  }
   function startDrag(source: Where, position: number, event: DragEvent) {
-    if (!event.dataTransfer) return;
-    event.dataTransfer.setData(MIME, JSON.stringify({ where: source, index: position }));
-    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer?.setData(MIME, JSON.stringify({ where: source, index: position }));
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy';
   }
-
-  function startStoneDrag(key: string, event: DragEvent) {
-    if (!event.dataTransfer) return;
-    inspectedKey = key;
-    event.dataTransfer.setData(STONE_MIME, key);
-    event.dataTransfer.effectAllowed = 'copy';
+  function startStashDrag(position: number, event: DragEvent) {
+    event.dataTransfer?.setData(MIME, JSON.stringify({ where: 'stash', index: position, tab: stashTab }));
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy';
   }
-
-  function useStone(key: string) {
-    if (!item || where == null || index < 0) {
-      dropNote = 'Select an equipped or inventory piece before using a stone.';
-      return;
-    }
-    if (!(held[key] > 0)) {
-      dropNote = `No ${stoneName(key)} left in the stack.`;
-      return;
-    }
-    inspectedKey = key;
-    const direct = STONE_OP[key];
-    if (direct) {
-      stoneRequestId += 1;
-      stoneRequest = { key, id: stoneRequestId, applied: true };
-      dropNote = '';
-      onrun(direct);
-      return;
-    }
-    const firstUnbound = item.lines.findIndex((_, line) => line >= craft.UNTOUCHABLE);
-    if ((key === 'tier' || key.startsWith('imprint_')) && firstUnbound < 0) {
-      dropNote = `${stoneName(key)} needs an Unbound Mod line on this piece.`;
-      return;
-    }
-    stoneRequestId += 1;
-    stoneRequest = { key, id: stoneRequestId };
-    dropNote = '';
+  function dragStone(key: string, event: DragEvent) {
+    armStone(key); event.dataTransfer?.setData(STONE_MIME, key);
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy';
   }
-
   function dragOver(event: DragEvent) {
-    const types = Array.from(event.dataTransfer?.types ?? []);
-    const hasPiece = types.includes(MIME);
-    const hasStone = types.includes(STONE_MIME);
-    if (!hasPiece && !hasStone) return;
-    event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
-    dropReady = true;
-    dropKind = hasStone ? 'stone' : 'piece';
+    if (!Array.from(event.dataTransfer?.types || []).some(t => t === MIME || t === STONE_MIME)) return;
+    event.preventDefault(); dropReady = true;
   }
-
   function leaveDrop(event: DragEvent) {
-    const target = event.currentTarget as HTMLElement;
-    if (event.relatedTarget instanceof Node && target.contains(event.relatedTarget)) return;
-    dropReady = false;
-    dropKind = null;
+    if (!(event.relatedTarget instanceof Node && (event.currentTarget as Element).contains(event.relatedTarget))) dropReady = false;
   }
-
-  function drop(event: DragEvent) {
-    event.preventDefault();
-    dropReady = false;
-    dropKind = null;
-    const stone = event.dataTransfer?.getData(STONE_MIME);
-    if (stone) {
-      useStone(stone);
-      return;
-    }
-    const raw = event.dataTransfer?.getData(MIME);
-    if (!raw) return;
+  async function drop(event: DragEvent) {
+    event.preventDefault(); dropReady = false;
+    const key = event.dataTransfer?.getData(STONE_MIME);
+    if (key) { armStone(key); if (mode?.target === 'piece') await applyStone(null, event.shiftKey); return; }
     try {
-      const picked = JSON.parse(raw) as { where?: string; index?: number };
-      if ((picked.where !== 'gear' && picked.where !== 'bag') || !Number.isInteger(picked.index)) return;
-      const position = picked.index as number;
-      const source = picked.where === 'gear' ? game.gear : game.bag;
-      if (position < 0 || !source[position]) return;
-      selectPiece(picked.where, position);
-    } catch { /* ignore drops from outside the equipment grids */ }
+      const picked = JSON.parse(event.dataTransfer?.getData(MIME) || '{}');
+      if (!Number.isInteger(picked.index)) return;
+      if (picked.where === 'stash' && Number.isInteger(picked.tab)) {
+        if (onTakeStash(picked.tab, picked.index)) { sourceTab = 'inventory'; selectPiece('bag', 0); }
+      } else if ((picked.where === 'bag' || picked.where === 'gear') && (picked.where === 'bag' ? game.bag : game.gear)[picked.index]) selectPiece(picked.where, picked.index);
+    } catch { /* Ignore unrelated drags. */ }
   }
 </script>
 
-<div class="workshop" role="group" aria-label="Crafting workspace" ondragend={() => { dropReady = false; dropKind = null; }}>
-  <aside class="stone-pane" aria-label="Crafting stones">
+<div class="workshop" class:armed role="group" aria-label="Crafting workspace"
+     onpointermove={(event) => { if (armed) pointer = { x: event.clientX, y: event.clientY }; }}
+     onpointerleave={() => (pointer = null)} ondragend={() => (dropReady = false)}>
+  <aside class="pane currency-pane" aria-label="Crafting stones">
+    <header class="pane-head"><h3>Stones</h3><span>{stones.filter(s => s.count > 0).length} kinds held</span></header>
+    <input type="search" placeholder="Find a stone…" aria-label="Find crafting stones" bind:value={stoneQuery} oninput={() => (stonePage = 0)} />
+    <div class="currency-grid" use:fitCurrency>
+      {#each shownStones as stone (stone.key)}
+        <button type="button" data-stone={stone.key} class="currency-tile" class:selected={selectedKey === stone.key}
+                class:unowned={stone.count === 0} aria-pressed={armed && selectedKey === stone.key}
+                aria-label={`${stone.name}, ${stone.count} held`} title={`${stone.name} · ${stone.detail} · right-click to use`}
+                draggable={stone.count > 0} ondragstart={(event) => dragStone(stone.key, event)}
+                oncontextmenu={(event) => { event.preventDefault(); event.stopPropagation(); if (armed && selectedKey === stone.key) cancelStone(); else armStone(stone.key, event); }}
+                onclick={(event) => armStone(stone.key, event)}>
+          <span class="currency-art"><img src={stone.icon} alt="" /><b class="badge badge-count">{stone.count}</b></span>
+          <span>{stone.name.replace(/^Imprint — /, '').replace(/ Stone$/, '')}</span>
+        </button>
+      {/each}
+      {#if !shownStones.length}<p class="text-note">No matching stone.</p>{/if}
+    </div>
+    {#if stonePages > 1}
+      <nav class="currency-pages" aria-label="Stone pages">
+        <button class="btn-quiet" disabled={stoneAt === 0} onclick={() => stonePage = stoneAt - 1} aria-label="Previous stones">Previous</button>
+        <small>{stoneAt + 1} / {stonePages}</small>
+        <button class="btn-quiet" disabled={stoneAt + 1 === stonePages} onclick={() => stonePage = stoneAt + 1} aria-label="Next stones">Next</button>
+      </nav>
+    {/if}
+    {#if selectedStone && mode}
+      <section class="stone-inspector surface-hud" aria-label="Selected stone">
+        <header><strong>{selectedStone.name}</strong><span class="chip chip-tag" class:toggled={armed}>{armed ? 'Ready to use' : 'Selected'}</span></header>
+        {#if modes.length > 1}
+          <label>Use <select aria-label="Stone operation" value={mode.op} onchange={(event) => { modeOp = event.currentTarget.value as CraftOp; chosenMod = ''; message = ''; }}>
+            {#each modes as option (option.op)}<option value={option.op}>{pressName(option.op)}</option>{/each}
+          </select></label>
+        {:else}<p class="text-note">{pressName(mode.op)}</p>{/if}
+        {#if mode.pick}
+          <label>New Mod <select aria-label="Choose replacement Mod" bind:value={chosenMod} disabled={!item}>
+            <option value="">Choose a Mod…</option>
+            {#each choices as id (id)}<option value={id}>{lineName(id)}</option>{/each}
+          </select></label>
+        {/if}
+        <div class="stone-costs" aria-label="Cost per use">
+          {#each costs as cost (cost.key)}<span class="cost" class:text-alarm={cost.owned < cost.amount}><img src={stoneIcon(cost.key)} alt="" />{cost.amount} <small>/ {cost.owned} held</small></span>{/each}
+        </div>
+        <p class="text-note">{selectedStone.detail}</p>
+        <p class="text-note">{targetHint()}</p>
+        {#if selectedKey === 'quality' && item}
+          <div class="enhancement-info surface-hud"><strong>+{item.upgrade_lv || 0} → +{upgradeStep}</strong><span>{Math.round(upgradeChance)}% success</span><span>Protection {item.protection_left ?? craft.C.protection_start}/{craft.C.protection_start}</span>
+            <small>{upgradeStep < craft.C.upgrade_breaks_from ? `A miss drops to +${Math.max(0, upgradeStep - 1)}.` : (item.protection_left ?? craft.C.protection_start) > 0 ? 'A miss spends a protection charge and drops one step.' : 'A miss leaves this item Broken.'}</small></div>
+        {/if}
+        {#if selectedKey === 'corrupt' && item}<p class="warning text-alarm">One irreversible use. May change an Element, lower quality or break this item.</p>{/if}
+        <button class="btn-quiet" type="button" onclick={() => armed ? cancelStone() : armStone(selectedKey)}>{armed ? 'Cancel · Esc' : 'Use this stone'}</button>
+      </section>
+    {:else}<p class="stone-guide text-note">Right-click a stone, then click your item. Hold Shift to keep using it.</p>{/if}
+  </aside>
+
+  <section class="pane bench-pane surface-hud" aria-label="Crafting bench item" style:--rar={rank?.tone ?? null}
+           ondragover={dragOver} ondragleave={leaveDrop} ondrop={drop}>
+    <header class="pane-head"><h3>Workbench</h3><span>{item ? where === 'gear' ? 'Equipped' : 'Bag' : 'Choose an item'}</span></header>
+    <div class="bench-body">
+      {#if item}
+      <button type="button" class="item-target craft-target" class:ready={armed && mode?.target === 'piece' && !reason(null)}
+              class:selected={dropReady} disabled={!item || !armed || busy || mode?.target !== 'piece'}
+              aria-label={item ? `Apply selected stone to ${itemName(item)}` : 'Empty crafting bench'}
+              title={armed ? reason(null) || 'Click to use · Shift-click to repeat' : 'Right-click a stone to begin'}
+              onclick={(event) => applyStone(null, event.shiftKey)}>
+        <span class="item-art"><img src={item ? gearIcon(item) : stoneQuality} alt="" /></span>
+        <span class="item-heading"><strong>{item ? itemName(item) : 'Place an item here'}</strong>
+          <span>{item ? `${item.quality} · ${item.tier} · level ${item.ilvl} · +${item.upgrade_lv || 0}` : 'Choose from Equipment, Bag or Stash →'}</span>
+          {#if item?.broken}<b class="text-alarm">Broken · use a Repair Stone</b>{:else if item?.corrupted}<b class="text-alarm">Corrupted</b>{/if}
+        </span>
+      </button>
+      {/if}
+      {#if item}
+        <div class="mod-heading"><span>Mod</span><span>Value · Tier</span></div>
+        <ul class="item-lines" aria-label="Item Mod lines">
+          {#each item.lines as line, i (i)}
+            {@const kind = i < FRAME ? 'Frame' : i < UNT ? 'Bound' : 'Unbound'}
+            {@const valid = armed && mode?.target === 'line' && !reason(i)}
+            <li>
+              <button type="button" class="line-row craft-target" onpointerenter={() => (targetLine = i)} onfocus={() => (targetLine = i)} class:ready={valid} class:changed={lineChanged(i)}
+                      aria-label={`Line ${i + 1}: ${lineName(line.id)}, ${line.value}, ${lineTier(line)}`}
+                      aria-disabled={armed && mode?.target === 'line' && !!reason(i)} disabled={busy}
+                      title={armed && mode?.target === 'line' ? reason(i) || 'Click to use · Shift-click to repeat' : `${kind} Mod · ${lineName(line.id)}`}
+                      onclick={(event) => { if (armed && mode?.target === 'line') applyStone(i, event.shiftKey); }}>
+                <small class="line-kind">{kind}</small>
+                <span class="line-name"><img src={modIcon(line.id, line.stat, line.element)} alt="" /><span>{modLabel(line)}{craftedMark(line)}{#each line.extra || [] as extra}<small class="line-extra">+ {modLabel(extra)} {extra.value}</small>{/each}</span></span>
+                <span class="line-value">{#if lineChanged(i) && before?.lines[i]?.id === line.id}<small class="previous-value">{before.lines[i].value} → </small>{/if}<b>{line.value}</b> <small>{lineTier(line)}</small></span>
+              </button>
+            </li>
+          {/each}
+        </ul>
+        <div class="bench-tools">
+          <span class="text-note">{item.lines.length} Mod lines · {item.mods_added || 0}/{E.item_level.mods_added_cap} added</span>
+          <div>{#if where === 'bag'}<button class="btn-quiet" disabled={!writer || !stashTabs || busy} onclick={storeBenchItem}>Store · Tab {stashTab + 1}</button>{/if}<button class="btn-quiet" onclick={clearBench} disabled={busy} aria-label="Remove item from crafting bench">Clear</button></div>
+        </div>
+      {:else}
+        <div class="bench-empty"><img src={stoneQuality} alt="" /><strong>Choose an item to craft</strong><p class="text-note">Choose Bag, Equipped or Stash on the right, or drag an item here.</p></div>
+      {/if}
+    </div>
+    <footer class="bench-footer">
+      {#if message}<p class="text-alarm" role="status">{message}</p>
+      {:else if resultOp && note}<div class="craft-result" role="status"><strong>{resultOp}</strong><p title={note}>{['rebirth', 'reroll_mod_all', 'replace_all'].includes(resultKind || '') ? note.replace(/^[a-z_]+:\s*/, '').split(' · ')[0] : note.replace(/^[a-z_]+:\s*/, '')}</p></div>
+      {:else if armed}<p class="text-value" role="status">{reason(null) || 'Ready · click the item to apply.'}</p>
+      {:else}<p class="text-note">Right-click to select · click to apply · Shift-click to repeat · Esc to cancel</p>{/if}
+    </footer>
+  </section>
+  <aside class="pane sources-pane " aria-label="Gear sources">
     <header class="pane-head">
-      <h3>Stones</h3>
-      <span>{ownedKinds} kinds · {totalStones} held</span>
+      <h3>Equipment</h3>
+      <span>{sourceTab === 'inventory' ? `Bag · ${game.bag.length} piece${game.bag.length === 1 ? '' : 's'}` : sourceTab === 'equipped' ? `${wornEntries.length} worn` : `Stash · ${stashTotal} stored`}</span>
     </header>
-    {#if showImprints}
-      <div class="stone-controls">
-        <button onclick={() => (showImprints = false)}>Regular stones</button>
-        <b>{imprintStones.length} imprints</b>
+    <div class="source-tabs" role="tablist" aria-label="Gear sources for the bench">
+      <button role="tab" class="btn btn-quiet" class:toggled={sourceTab === 'equipped'} aria-selected={sourceTab === 'equipped'} onclick={() => (sourceTab = 'equipped')}>
+        Equipped · {wornEntries.length}
+      </button>
+      <button role="tab" class="btn btn-quiet" class:toggled={sourceTab === 'inventory'} aria-selected={sourceTab === 'inventory'} onclick={() => { sourceTab = 'inventory'; stashPicked = -1; }}>
+        Bag · {game.bag.length}
+      </button>
+      <button role="tab" class="btn btn-quiet" class:toggled={sourceTab === 'stash'} aria-selected={sourceTab === 'stash'} onclick={() => { if (sourceTab !== 'stash') stashQuery = ''; sourceTab = 'stash'; stashPicked = -1; }}>
+        Stash · {stashTabs} tab{stashTabs === 1 ? '' : 's'}
+      </button>
+    </div>
+    {#if sourceTab === 'equipped'}
+      <div class="source-grid" use:fitSource>
+        <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} fixed layout="grid" {wornOf}
+                  selectedIndex={where === 'gear' ? index : null} targetState={(entry) => sourceReadiness(entry, 'gear')}
+                  onpick={(position, event) => pickSource('gear', position, Boolean(event?.shiftKey))}
+                  ondragitem={(entry, event) => startDrag('gear', entry.index, event)} />
       </div>
-      <div class="stone-search">
-        <input class="imprint-search" type="search" placeholder="Find an imprint…" aria-label="Find an imprint stone"
-               bind:value={imprintQuery} oninput={() => (imprintPage = 0)} />
-      </div>
-      <div class="imprint-list" aria-live="polite">
-        {#each imprintView as stone (stone.key)}
-          <button class="imprint-row" class:chosen={inspectedKey === stone.key} title={stone.name}
-                  aria-pressed={inspectedKey === stone.key} draggable={stone.count > 0}
-                  ondragstart={(event) => startStoneDrag(stone.key, event)} onclick={() => (inspectedKey = stone.key)}>
-            <img src={stone.icon} alt="" aria-hidden="true" />
-            <span>{stone.name.replace(/^Imprint — /, '')}</span>
-            <b>{stone.count}</b>
-          </button>
-        {:else}
-          <p class="stone-empty">{imprintStones.length ? 'No imprint matches that name.' : 'No imprint stones held yet.'}</p>
-        {/each}
-      </div>
-      <div class="imprint-pages" role="group" aria-label="Imprint stone pages">
-        <button disabled={imprintAt === 0} onclick={() => (imprintPage = imprintAt - 1)}>Previous</button>
-        <span>{imprintAt + 1} / {imprintPages}</span>
-        <button disabled={imprintAt === imprintPages - 1} onclick={() => (imprintPage = imprintAt + 1)}>Next</button>
+    {:else if sourceTab === 'inventory'}
+      <div class="source-body">
+        <input type="search" class="source-search" placeholder="Find gear…" aria-label="Find gear to craft" bind:value={bagQuery} />
+        {#if !shownBag.length}<p class="text-note">{game.bag.length ? 'No equipment matches this search.' : 'Your bag has no equipment.'}</p>{/if}
+        <div class="source-grid" use:fitSource>
+        <SlotGrid entries={shownBag} capacity={shownBag.length} mode="grid" pageSize={sourceCapacity} padPage={false} {wornOf}
+                  selectedIndex={where === 'bag' ? index : null} targetState={(entry) => sourceReadiness(entry, 'bag')}
+                  onpick={(position, event) => pickSource('bag', position, Boolean(event?.shiftKey))}
+                  ondragitem={(entry, event) => startDrag('bag', entry.index, event)} />
+        </div>
       </div>
     {:else}
-      <div class="stone-controls">
-        <span>Regular stones</span>
-        <button class="imprint-open" aria-expanded="false" onclick={() => { showImprints = true; imprintPage = 0; }}>
-          Imprints · {imprintStones.length}
-        </button>
-      </div>
-      <div class="stone-grid">
-        {#each regularView as stone (stone.key)}
-          <button class="stone-tile" class:unowned={stone.count === 0} class:chosen={inspectedKey === stone.key}
-                  title={`${stone.name} · ${stone.count} held · ${stone.detail}`}
-                  aria-label={`${stone.name}, ${stone.count} held. Inspect details`}
-                  aria-pressed={inspectedKey === stone.key} draggable={stone.count > 0}
-                  ondragstart={(event) => startStoneDrag(stone.key, event)} onclick={() => (inspectedKey = stone.key)}>
-            <img src={stone.icon} alt="" aria-hidden="true" />
-            <b>{stone.count}</b>
-            <span>{stone.name.replace(/ Stone$/, '')}</span>
-          </button>
-        {:else}
-          <p class="stone-empty">No regular stones held. Open all types to see the catalogue.</p>
-        {/each}
-      </div>
-      {#if ownedRegular.length < regularStones.length}
-        <div class="stone-actions">
-          <button class="all-types" onclick={() => (showAllRegular = !showAllRegular)}>
-            {showAllRegular ? 'Show held only' : 'Show all types'}
-          </button>
+      {#if stashTabs > 0}
+        <div class="stash-head">
+          <div class="stash-tabs" role="tablist" aria-label="Stash tabs for crafting">
+            {#each Array(stashTabs) as _, tabIndex (tabIndex)}
+              <button role="tab" class="btn btn-quiet" class:toggled={tabIndex === stashTab} aria-selected={tabIndex === stashTab}
+                      onclick={() => { onStashTab(tabIndex); stashPicked = -1; stashQuery = ''; }}>
+                Tab {tabIndex + 1}<b>{` ${(game.stash[tabIndex] || []).length}`}</b>
+              </button>
+            {/each}
+          </div>
         </div>
+        {#if stashItems.length}
+          <div class="source-body">
+            <input type="search" class="source-search" placeholder="Find stashed gear…" aria-label="Find gear in Stash" bind:value={stashQuery} oninput={() => (stashPicked = -1)} />
+            <div class="source-grid" use:fitSource>
+            <SlotGrid entries={shownStash} capacity={shownStash.length} mode="grid" pageSize={sourceCapacity} padPage={false} {wornOf}
+                      selectedIndex={stashPicked}
+                      onpick={(position) => (stashPicked = position)}
+                      ondragitem={(entry, event) => startStashDrag(entry.index, event)} />
+            </div>
+            <div class="source-actions">
+              <button class="btn btn-gold" disabled={!writer || stashPicked < 0 || bagFull}
+                      title={bagFull ? 'Free a bag slot before taking this piece' : 'Withdraw this piece into the bag and place it on the bench'}
+                      onclick={takeStashItem}>Take to bench</button>
+            </div>
+            <small class="text-note">Crafting uses the bag.</small>
+          </div>
+        {:else}
+          <p class="source-empty text-note">This Stash tab is empty. Store a piece here or choose another tab.</p>
+        {/if}
+      {:else}
+        <p class="source-empty text-note">No Stash tab yet. Buy one at a settlement stall to keep workpieces here.</p>
       {/if}
     {/if}
-    <div class="stone-detail" aria-live="polite">
-      {#if inspectedStone}
-        <strong>{inspectedStone.name} · {inspectedStone.count} held</strong>
-        <span>{inspectedStone.detail}</span>
-      {:else}
-        <span>Select a stone to read what it does.</span>
-      {/if}
-    </div>
-  </aside>
-
-  <section class="craft-pane" aria-label="Crafting bench">
-    <header class="pane-head">
-      <h3>Craft</h3>
-      <span>Drag gear to select · drag a stone onto the piece to use it</span>
-    </header>
-    <div class="drop-slot" class:ready={dropReady} class:stone-ready={dropKind === 'stone'} role="group" aria-label="Item on the crafting bench"
-         ondragover={dragOver} ondragleave={leaveDrop} ondrop={drop}>
-      {#if item}
-        <div class="piece-icon"><img src={gearIcon(item)} alt="" aria-hidden="true" /></div>
-        <div class="piece-copy">
-          <strong>{itemName(item)}{item.upgrade_lv ? ` +${item.upgrade_lv}` : ''}</strong>
-          <span>{where === 'gear' ? 'Equipped' : 'Inventory'} · {item.slot} · level {item.ilvl}</span>
-          <small>{item.quality} quality · {item.tier} · {item.lines.length} Mod lines · hover gear for full Mods</small>
-          {#if dropReady}<small class="drop-hint">{dropKind === 'stone' ? 'Release to use this stone' : 'Release to select this piece'}</small>{/if}
-        </div>
-        <button class="clear" onclick={clearBench} aria-label="Remove item from crafting bench">Clear</button>
-      {:else}
-        <div class="piece-icon vacant"><img src={stoneQuality} alt="" aria-hidden="true" /></div>
-        <div class="piece-copy">
-          <strong>Place a piece here</strong>
-          <span>Drag from Equipped or Inventory</span>
-          <small>Drag gear from Equipped or Inventory here first.</small>
-          {#if dropReady}<small class="drop-hint">Release to select this piece</small>{/if}
-        </div>
-      {/if}
-    </div>
-    <div class="operations">
-      {#if item}
-        {#if dropNote}<p class="work-note" role="status">{dropNote}</p>{/if}
-        {#if note}<p class="work-note" role="status">{note}</p>{/if}
-        <Forge state={game} {item} {where} {index} {onpick} onrun={(op) => onrun(op, 0)} {wornOf} embedded compact />
-        <CraftBoard {game} {item} {where} {index} {onpick} {onrun} {wornOf} {stoneRequest}
-                    onstoneclear={() => (stoneRequest = null)} embedded />
-      {:else}
-        {#if dropNote}<p class="work-note" role="status">{dropNote}</p>{/if}
-        <p class="empty-work">Select a piece to see the stones and actions it can use.</p>
-      {/if}
-    </div>
-  </section>
-
-  <aside class="equipment-pane" aria-label="Equipped gear">
-    <header class="pane-head">
-      <h3>Equipped</h3>
-      <span>Click or drag an equipped piece</span>
-    </header>
-    <div class="doll-wrap">
-      <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} fixed layout="doll" compactDoll {wornOf}
-                selectedIndex={where === 'gear' ? index : null}
-                onpick={(position) => selectPiece('gear', position)}
-                ondragitem={(entry, event) => startDrag('gear', entry.index, event)} />
-    </div>
-  </aside>
-
-  <aside class="inventory-pane" aria-label="Inventory gear">
-    <div class="pile-head">
-      <h3>Inventory</h3>
-      <span>Hunt pile · {game.bag.length} / {E.inventory.adventure_slots}</span>
-    </div>
-    <div class="inventory-content">
-      <input type="search" class="pile-search" placeholder="Find gear…" aria-label="Find gear to craft" bind:value={bagQuery} />
-      <SlotGrid entries={shownBag} capacity={E.inventory.adventure_slots} mode="grid" {wornOf}
-                selectedIndex={where === 'bag' ? index : null}
-                onpick={(position) => selectPiece('bag', position)}
-                ondragitem={(entry, event) => startDrag('bag', entry.index, event)} />
-    </div>
   </aside>
 </div>
 
+{#if armed && selectedStone && pointer}
+  <div class="stone-cursor" style:left={`clamp(0px, ${pointer.x}px, calc(100vw - var(--slot-item) - var(--spacing-xl)))`} style:top={`clamp(0px, ${pointer.y}px, calc(100vh - var(--slot-item) - var(--spacing-xl)))`} aria-hidden="true"><img src={selectedStone.icon} alt="" /><span class="badge badge-count">{held[selectedKey] || 0}</span></div>
+{/if}
+
 <style>
-  .workshop {
-    display: grid; grid-template-columns: minmax(clamp(150px, 11.62vw, 324px), .75fr) minmax(0, 2.1fr) minmax(clamp(150px, 11.62vw, 324px), 1fr);
-    grid-template-rows: minmax(clamp(200px, 15.49vw, 432px), 1.2fr) minmax(clamp(150px, 11.62vw, 324px), .9fr);
-    grid-template-areas: "stones craft equipment" "stones inventory inventory";
-    gap: var(--spacing-sm); width: 100%; height: 100%; min-height: 0;
-  }
-  .stone-pane, .craft-pane, .equipment-pane, .inventory-pane { min-width: 0; min-height: 0; border: 1px solid var(--line); background: var(--panel); }
-  .stone-pane { grid-area: stones; }
-  .craft-pane { grid-area: craft; }
-  .equipment-pane { grid-area: equipment; }
-  .inventory-pane { grid-area: inventory; }
-  .stone-pane { display: flex; flex-direction: column; gap: var(--spacing-xs); overflow: hidden; }
-  .craft-pane { display: flex; flex-direction: column; gap: var(--spacing-sm); overflow: hidden; background: var(--bg); }
-  .equipment-pane, .inventory-pane { display: flex; flex-direction: column; overflow: hidden; }
-  .pane-head, .pile-head {
-    display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs);
-    padding: var(--spacing-sm); border-bottom: 1px solid var(--line);
-  }
-  h3 { margin: 0; }
-  .pane-head span, .pile-head span { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
-  .stone-controls { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); color: var(--dim); font-size: var(--font-xs); }
-  .stone-controls button { color: var(--gold); font-size: var(--font-xs); }
-  .stone-controls b { font-weight: 500; font-variant-numeric: tabular-nums; }
-  .stone-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); align-content: start; padding: 0 var(--spacing-sm); min-height: 0; }
-  .stone-tile { position: relative; display: grid; grid-template-columns: var(--icon-sm) minmax(0, 1fr); align-items: center; gap: var(--spacing-xs); min-width: 0; min-height: var(--icon-lg); padding: var(--spacing-xs); text-align: left; background: var(--inset); }
-  .stone-tile img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
-  .stone-tile span { grid-column: 1 / -1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dim); font-size: var(--font-xs); }
-  .stone-tile b { justify-self: end; color: var(--gold-lit); font-family: var(--num); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
-  .stone-tile[draggable="true"], .imprint-row[draggable="true"] { cursor: grab; }
-  .stone-tile[draggable="true"]:active, .imprint-row[draggable="true"]:active { cursor: grabbing; }
-  .stone-tile.unowned { opacity: .65; }
-  .stone-tile.chosen, .imprint-row.chosen { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--inset)); }
-  .stone-search, .stone-actions { padding-inline: var(--spacing-sm); }
-  .all-types { align-self: flex-start; color: var(--dim); font-size: var(--font-xs); }
-  .imprint-search { width: 100%; min-width: 0; }
-  .imprint-list { flex: 1; min-height: 0; display: grid; grid-template-rows: repeat(8, minmax(0, 1fr)); gap: var(--spacing-xs); padding: 0 var(--spacing-sm); }
-  .imprint-row { display: grid; grid-template-columns: var(--icon-sm) minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-xs); min-width: 0; min-height: 0; padding: var(--spacing-xs) var(--spacing-xs); text-align: left; background: var(--inset); }
-  .imprint-row img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
-  .imprint-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-xs); }
-  .imprint-row b { color: var(--gold-lit); font-family: var(--num); font-size: var(--font-xs); }
-  .imprint-pages { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
-  .imprint-pages button { font-size: var(--font-xs); }
-  .imprint-pages button:disabled { opacity: .4; }
-  .stone-empty { grid-column: 1 / -1; color: var(--dim); font-size: var(--font-xs); }
-  .stone-grid { flex: 1; min-height: 0; }
-  .stone-detail { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); border-top: 1px solid var(--line); font-size: var(--font-xs); }
-  .stone-detail strong { color: var(--gold-lit); font-weight: 600; }
-  .stone-detail span { color: var(--dim); }
-  .drop-slot {
-    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-sm); min-height: clamp(81px, 6.29vw, 176px);
-    padding: var(--spacing-sm); border: 1px dashed var(--gold);
-    background: color-mix(in srgb, var(--gold) 6%, var(--inset)); transition: background var(--motion-fast) var(--ease-ui), border-color var(--motion-fast) var(--ease-ui);
-  }
-  .drop-slot.ready { border-style: solid; border-color: var(--focus); background: color-mix(in srgb, var(--focus) 14%, var(--inset)); }
-  .drop-slot.stone-ready { border-style: solid; border-color: var(--gold-lit); background: color-mix(in srgb, var(--gold) 14%, var(--inset)); }
-  .drop-hint { color: var(--gold-lit) !important; }
-  .piece-icon { flex: none; width: var(--icon-xl); aspect-ratio: 1; display: grid; place-items: center; border: 1px solid var(--edge); background: var(--inset); }
-  .piece-icon img { width: 80%; height: 80%; object-fit: contain; }
-  .piece-icon.vacant img { opacity: .38; }
-  .piece-copy { display: grid; gap: var(--spacing-xs); min-width: 0; }
-  .piece-copy strong { color: var(--text); font-size: var(--font-sm); }
-  .piece-copy span, .piece-copy small { color: var(--dim); font-size: var(--font-xs); }
-  .clear { justify-self: end; align-self: start; font-size: var(--font-xs); }
-  .operations { flex: 1; min-height: 0; overflow: hidden; padding: var(--spacing-xs); display: grid; align-content: start; gap: var(--spacing-xs); }
-  .work-note { margin: 0; color: var(--gold-lit); font-size: var(--font-xs); }
-  .empty-work { margin: 0; color: var(--dim); font-size: var(--font-sm); }
-  .doll-wrap { padding: var(--spacing-xs); }
-  .pile-head { flex: none; }
-  .inventory-content { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-sm); min-height: 0; padding: 0 var(--spacing-sm) var(--spacing-sm); }
-  .pile-search { display: block; flex: none; width: 100%; }
-  .inventory-pane :global(.grid) { flex: 1; min-height: 0; overflow: hidden; align-content: start; grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .inventory-pane :global(.bar) { display: none; }
+  .workshop { display: grid; grid-template-columns: minmax(240px, .9fr) minmax(0, 1.75fr) minmax(280px, 1.15fr); gap: var(--spacing-lg); width: 100%; height: 100%; min-height: 0; }
+  :global(.box.showcase) .workshop { height: clamp(560px, 37vw, 760px); }
+  .pane { display: flex; flex-direction: column; gap: var(--spacing-sm); min-width: 0; min-height: 0; }
+  .pane-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--spacing-sm); }
+  .pane-head span { font-size: var(--font-xs); }
+  .pane input { width: 100%; min-width: 0; }
+  .currency-grid { --currency-row: calc(var(--slot-item) + var(--font-xs) * 2.4 + var(--spacing-xs) * 3); display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(var(--slot-item) * 2), 1fr)); grid-auto-rows: var(--currency-row); align-content: start; gap: var(--spacing-xs); min-height: 0; flex: 1; }
+  .currency-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs); min-width: 0; padding: var(--spacing-xs); font-size: var(--font-xs); line-height: 1.2; }
+  .currency-art { position: relative; display: block; width: var(--slot-item); height: var(--slot-item); flex: none; }
+  .currency-art img { width: 100%; height: 100%; object-fit: contain; }
+  .currency-art b { position: absolute; right: calc(var(--spacing-xs) * -1); bottom: 0; }
+  .currency-pages { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); }
+  .stone-inspector { display: grid; gap: var(--spacing-sm); padding: var(--spacing-sm); }
+  .stone-inspector header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); }
+  .stone-inspector strong { font-size: var(--font-sm); }
+  .stone-inspector label { display: grid; gap: var(--spacing-xs); font-size: var(--font-xs); }
+  .stone-inspector select { width: 100%; min-width: 0; font-size: var(--font-xs); }
+  .stone-inspector p, .stone-guide { margin: 0; font-size: var(--font-xs); }
+  .stone-costs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
+  .cost { display: inline-flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-sm); }
+  .cost img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
+  .bench-pane { padding: var(--spacing-md); }
+  .bench-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-sm); }
+  .item-target { display: flex; align-items: center; gap: var(--spacing-md); width: 100%; padding: var(--spacing-md); text-align: left; }
+  .item-art { display: grid; place-items: center; width: calc(var(--icon-card) * 1.4); height: calc(var(--icon-card) * 1.4); flex: none; }
+  .item-art img { width: 100%; height: 100%; object-fit: contain; }
+  .item-heading { display: grid; gap: var(--spacing-xs); min-width: 0; }
+  .item-heading strong { font-size: var(--font-md); overflow-wrap: anywhere; }
+  .item-heading > span, .item-heading b { font-size: var(--font-xs); }
+  .mod-heading { display: flex; justify-content: space-between; gap: var(--spacing-sm); font-size: var(--font-xs); }
+  .item-lines { display: grid; gap: var(--spacing-xs); padding: 0; margin: 0; list-style: none; }
+  .line-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-sm); width: 100%; padding: var(--spacing-xs) var(--spacing-sm); text-align: left; min-width: 0; }
+  .line-kind { font-size: var(--font-xs); }
+  .line-name { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); min-width: 0; overflow-wrap: anywhere; }
+  .line-extra { display: block; font-size: var(--font-xs); }
+  .line-name img { width: var(--icon-label); height: var(--icon-label); flex: none; object-fit: contain; }
+  .line-value { text-align: right; font-size: var(--font-sm); font-variant-numeric: tabular-nums; }
+  .line-value small { font-size: var(--font-xs); }
+  .bench-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--spacing-xs); }
+  .bench-tools > div { display: flex; gap: var(--spacing-xs); }
+  .bench-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-sm); text-align: center; }
+  .bench-empty img { width: var(--icon-card); height: var(--icon-card); object-fit: contain; }
+  .bench-empty p { margin: 0; max-width: 34ch; }
+  .bench-footer { display: grid; gap: var(--spacing-xs); padding-top: var(--spacing-sm); }
+  .bench-footer p { margin: 0; font-size: var(--font-xs); line-height: 1.4; overflow-wrap: anywhere; }
+  .craft-result { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--spacing-xs) var(--spacing-sm); }
+  .craft-result strong { font-size: var(--font-xs); }
+  .enhancement-info { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--spacing-xs) var(--spacing-sm); padding: var(--spacing-sm); font-size: var(--font-xs); }
+  .enhancement-info small { flex-basis: 100%; }
+  .warning { font-size: var(--font-xs); margin: 0; }
+  .source-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+  .source-body { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-sm); min-height: 0; }
+  .source-grid { flex: 1; min-height: 0; min-width: 0; }
+  .source-grid :global(.slot-grid-stack) { display: flex; flex-direction: column; height: 100%; gap: var(--spacing-sm); }
+  .source-grid :global(.grid) { flex: 1; min-height: 0; align-content: start; }
+  .source-grid :global(.bar) { display: none; }
+  .source-grid :global(.slot .delta) { display: none; }
+  .stash-head { display: grid; gap: var(--spacing-xs); }
+  .stash-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+  .source-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
+  .source-empty { font-size: var(--font-xs); }
+  .stone-cursor { position: fixed; z-index: var(--z-toast); pointer-events: none; display: flex; align-items: flex-end; gap: var(--spacing-xs); transform: translate(var(--spacing-md), var(--spacing-md)); }
+  .stone-cursor img { width: var(--slot-item); height: var(--slot-item); object-fit: contain; }
+  .workshop.armed :global(button) { cursor: crosshair; }
 </style>

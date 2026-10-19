@@ -1,14 +1,7 @@
 /**
- * Shared engine math — the single source for stat ceilings, derived caps,
- * the loot model and craft throughput. Read by tools/check.ts (groups A · B · C · F)
- * and by every reader that needs a derived figure.
- *
- * Nothing here is a number copied by hand: every value is computed from
- * tools/data/engine.json, and every cage asserts the result against engine/ and the client.
- *
- * This file binds the data to `engine/index.ts` and hands the whole suite back as one object. It
- * names no member of that suite: a cage reaches `eng.<anything>` straight off the engine, so a new
- * engine figure is readable by every cage the moment it exists — the mirror cannot fall behind.
+ * Shared engine math for tools/: binds tools/data/engine.json to `engine/index.ts` and returns the
+ * whole suite as one object. No hand-copied numbers, and no named members — a cage reaches
+ * `eng.<anything>` directly, so a new engine figure is readable by every cage the moment it exists.
  */
 
 import path from 'node:path';

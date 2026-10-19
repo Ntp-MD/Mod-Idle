@@ -150,8 +150,8 @@
           10
         ],
         "hp": [
-          120,
-          629
+          60,
+          315
         ],
         "quality": "low",
         "group": "1-2",
@@ -2474,7 +2474,7 @@
     ],
     "elite": {
       "name": "Elite",
-      "hp": 6,
+      "hp": 1.8,
       "ps": 4,
       "evasion_pct": 0,
       "group": "alone",
@@ -14918,6 +14918,12 @@
         "pool": "mana",
         "tier": "high",
         "index": 3
+      },
+      {
+        "name": "White Potion",
+        "pool": "both",
+        "tier": "low",
+        "index": 1
       }
     ]
   },
@@ -15181,8 +15187,7 @@
     "retreat_keep_max": 2
   },
   "inventory": {
-    "adventure_slots": 100,
-    "character_slots": 50,
+    "character_slots": 300,
     "stack_size": {
       "stone": 999,
       "herb": 100,
@@ -15200,7 +15205,7 @@
     "gold_uses_slot": false,
     "offline_cap_hr": 12,
     "overflow": "stop_pickup",
-    "note": "Adventure bag (the temporary inventory) = 100 slots of gear loot, 1 piece per slot, weight counted. Full = pickups pause: nothing auto-converts and nothing is deleted. Character bag = 50 slots: stones stack 999/slot and are weightless; herbs, potions, materials and all provisions stack 100/slot and weigh 0.1/unit; gold takes no slot. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Gear crafting and Stash are Settlement-only; Camp cooking is the field exception. The Stash is one warehouse on the character and every settlement's counter opens the same one, so standing in a town the bag panel is the Stash by default and the Adventure pile sits one click behind it - the temporary bag is the travelling face of the linked warehouse, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear now fills at the measured upgrade rate (F4), not at the junk flow."
+    "note": "One bag = 300 slots. A kept gear piece takes one slot and a consumable stack takes one, and both are counted against the same 300. Stones and junk stack 999/slot and are weightless; herbs, potions, materials and provisions stack 100/slot and weigh 0.1/unit; gold takes no slot. Full = pickups pause: nothing auto-converts and nothing is deleted. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Gear crafting and Stash are Settlement-only; Camp cooking is the field exception. The Stash is one warehouse on the character and every settlement's counter opens the same one, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear fills at the measured upgrade rate (F4), not at the junk flow."
   },
   "item_level": {
     "note": "The one axis an item's strength rides (item-level.md). The value a Mod line rolls is a window that climbs with the item's level: the window's floor climbs from the band below (so a mid-band piece starts able to roll the low band's floor and ends above it), the ceiling is the band's own top, and the roll lands in one of the window's thirds - the top third is the rarest, so a high-level drop is a chance and not a formality. The Unbound line count is not on that ladder: it is drawn inside `unbound_slots` at drop, so two pieces of one level and one band can still differ in width.",
@@ -15277,7 +15282,7 @@
         "drop_chance_per_kill": 0.0053953
       }
     },
-    "note": "RO-style mob junk: a fourth drop stream, sold to the Settlement Counterhand for gold. `mob.variant_drops` owns each Variant's base item, rarity and lean; `mob.species[].junk_items` may add an alternate item in any selected rarity. A successful rarity roll pays the Variant item or its Species alternative when present at the Variant's rarity price, so each rarity's drop_chance_per_kill remains junk_per_kill / sell_gold and a kill keeps the reference base gold line (F3). Variant rarity buys drop frequency at a flat expected base value: common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat - which is also the bag-pressure trade. Junk stacks 999/slot and is weightless (like stones), so it fills adventure-bag slots and drives Settlement trips without a weight tax. The Counterhand buys this junk at its town demand quote alongside gathered materials, provisions and herbs; walking itself pays no gold - the old 'sell a rejected gear piece for 1 gold' option is retired."
+    "note": "RO-style mob junk: a fourth drop stream, sold to the Settlement Counterhand for gold. `mob.variant_drops` owns each Variant's base item, rarity and lean; `mob.species[].junk_items` may add an alternate item in any selected rarity. A successful rarity roll pays the Variant item or its Species alternative when present at the Variant's rarity price, so each rarity's drop_chance_per_kill remains junk_per_kill / sell_gold and a kill keeps the reference base gold line (F3). Variant rarity buys drop frequency at a flat expected base value: common junk is frequent and cheap, rare junk is rare and dear, and the expected value is flat - which is also the bag-pressure trade. Junk stacks 999/slot and is weightless (like stones), so it fills bag slots and drives Settlement trips without a weight tax. The Counterhand buys this junk at its town demand quote alongside gathered materials, provisions and herbs; walking itself pays no gold - the old 'sell a rejected gear piece for 1 gold' option is retired."
   },
   "aoe": {
     "per_target_pct": 60,
@@ -15460,12 +15465,16 @@
     "crit_colour": "#e8c169"
   },
   "opening": {
-    "note": "Minute one. Everything the game hands the player before they touch anything, so a client can create a playable character from one read. The set is hand-authored junk, not a drop: one line per slot, so no Bound pair and no craftable Mod is involved, and the loot roll can never produce it. Every line is derived by the client, never typed here - `openingGear()` calls the same `loot.frameModAtFloor` a pre-skeleton save restore uses - so the frame per slot is the data's whole job and no number can drift. The main hand is the worst roll in the table the mob-health curve already assumes at level 1; a free top-tier weapon would pay more damage than the curve allows.",
+    "note": "Minute one. Everything the game hands the player before they touch anything, so a client can create a playable character from one read. The player starts wearing nothing and pockets the `potions` kit - one draught per pool - so the first fight is survivable by drinking, not by free frames. The `gear` set below is the hand-authored reference set the OP gates still shape-check (one line per slot, floor Frame Mod, no Bound pair); it is not worn until the owner reopens starting gear. Every line is derived by the client, never typed here - `openingGear()` calls the same `loot.frameModAtFloor` a pre-skeleton save restore uses - so the frame per slot is the data's whole job and no number can drift.",
     "settlement": "Eastgate",
     "settlement_zone": 1,
     "level": 1,
     "gold": 0,
     "stones": {},
+    "potions": {
+      "Red Draught": 1,
+      "Sky Draught": 1
+    },
     "gear": [
       {
         "slot": "main hand",

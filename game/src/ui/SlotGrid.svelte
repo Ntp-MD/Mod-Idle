@@ -8,13 +8,12 @@
   import SlotMenu from './SlotMenu.svelte';
   import type { MenuItem } from './menu';
   import type { Item } from '../sim/types';
+  import type { Snippet } from 'svelte';
 
   /**
-   * The equipment panel's fixed grid (owner layout): three columns by five rows around where a
-   * body would stand, but no body is drawn — the empty cells are simply gaps. One `grid-area` per
-   * canonical slot, addressed by name (`loot.SLOTS` order) rather than array index. The blank corners
-   * are not rendered at all; they are the `.` cells the template leaves empty. The earring fills the
-   * cell beside the belt, so only the two bottom corners stay blank.
+   * The equipment panel's fixed grid (owner layout): 3×5, no body drawn, blank corners not rendered.
+   * Slots are addressed by `loot.SLOTS` name, never by array index; the earring beside the belt leaves
+   * only the two bottom corners blank.
    */
   const DOLL_LAYOUT: { area: string; slot: number }[] = [
     { area: 'cape', slot: 9 }, { area: 'helmet', slot: 0 }, { area: 'amulet', slot: 8 },
@@ -25,20 +24,20 @@
   ];
 
   /**
-   * A bag drawn as slots — the Melvor shape, where one square is one thing and the grid *is* the
-   * inventory. Two modes because a hunt wants the grid and a decision wants the words, and a sort bar
-   * because fifty pieces have dropped since the last trip. Hovering a slot opens the detail card
-   * (`ItemDetail.svelte`) and the card's own Equip button is the only way a piece gets worn, which is
-   * the owner's rule rather than a convenience.
+   * A bag drawn as slots: grid mode for the bag, list mode for decisions, sort bar for volume.
+   * The detail card's own Equip button is the only way a piece gets worn — the owner's rule, not a
+   * convenience.
    */
-  let { entries, capacity, mode = 'grid', layout = 'grid', compactDoll = false, onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, fixed = false, empty = 'Empty.', onpick = null, ondragitem = null, selectedIndex = null, pageSize = 0, actions = null }: {
+  let { entries, capacity, mode = 'grid', layout = 'grid', compactDoll = false, compactGrid = false, onmode = null, sort = 'newest', onsort = null, wornOf, onequip = null, fixed = false, empty = 'Empty.', onpick = null, ondragitem = null, selectedIndex = null, targetState = null, pageSize = 0, padPage = true, actions = null, lead = null }: {
     entries: SlotEntry[];
     capacity: number;
     mode?: 'grid' | 'list';
     /** `doll` draws the fixed equipment panel on the five-row slot grid (no body) */
-    layout?: 'grid' | 'doll';
+    layout?: 'grid' | 'doll' | 'equipment';
     /** a narrower doll for a side panel with an adjacent inventory grid */
     compactDoll?: boolean;
+    /** smaller cells for a full-capacity inventory that must fit the panel */
+    compactGrid?: boolean;
     onmode?: ((m: 'grid' | 'list') => void) | null;
     sort?: SortKey;
     onsort?: ((k: SortKey) => void) | null;
@@ -49,21 +48,26 @@
     fixed?: boolean;
     empty?: string;
     /** when set, a press on a gear piece hands it over instead of opening the card — the craft bench's way onto itself */
-    onpick?: ((index: number) => void) | null;
+    onpick?: ((index: number, event?: MouseEvent) => void) | null;
     /** an optional drag source for gear and worn pieces; the caller owns the drop payload */
     ondragitem?: ((entry: SlotEntry, event: DragEvent) => void) | null;
     /** the source position currently placed on a workbench */
     selectedIndex?: number | null;
+    /** Optional craft-cursor feedback; ordinary inventory grids keep their existing appearance. */
+    targetState?: ((entry: SlotEntry) => 'ready' | 'unavailable' | null) | null;
     /** a page holds this many slots, and a pager folds the rest: every page is the same height, so a
         paged grid never grows the modal it sits in (the doll layout is never paged) */
     pageSize?: number;
+    /** Selection browsers may omit empty page cells; inventory retains its full page by default. */
+    padPage?: boolean;
     /** the verbs a right-click offers on a square — the caller owns them, so a grid in one panel and the
         same grid in another can answer differently without this component knowing why */
     actions?: ((entry: SlotEntry) => MenuItem[]) | null;
+    /** the caller's own controls, joined to the front of the sort bar — the bag reads its filter from here */
+    lead?: Snippet | null;
   } = $props();
 
-  /** The hovered piece and the box of the square it came from. The card's own place is derived from the
-      pair plus the size the card measures, so nothing here has to guess how tall a piece's card is. */
+  /** the hovered piece and its square's box; the card places itself from these plus its own measured size */
   let hover = $state<{ entry: SlotEntry; top: number; left: number; right: number; bottom: number } | null>(null);
   let gridEl = $state<HTMLElement | null>(null);
   let popEl = $state<HTMLElement | null>(null);
@@ -82,11 +86,7 @@
     return [...entries, ...Array.from({ length: Math.max(0, capacity - entries.length) }, () => null)];
   });
 
-  /**
-   * The doll addresses slots by name, not array index — a piece sits at its own slot's index, but the
-   * two rings share the name `ring`, so each entry claims the first still-free canonical slot that
-   * names it.
-   */
+  /** the two rings share the name `ring`, so each entry claims the first still-free canonical slot that names it */
   const dollCells = $derived.by(() => {
     const slots = loot.SLOTS as string[];
     const used = new Set<number>();
@@ -110,13 +110,16 @@
   const at = $derived(Math.min(page, pages - 1));
 
   const shown: Cell[] = $derived.by(() => {
+    if (layout === 'equipment') {
+      return dollCells.map((entry, slot) => ({ area: null, slot, entry }));
+    }
     if (layout === 'doll') {
       return DOLL_LAYOUT.map(({ area, slot }) => ({ area, slot, entry: dollCells[slot] ?? null }));
     }
     const list = pageSize > 0 ? cells.slice(at * perPage, at * perPage + perPage) : cells;
     // padded back to a full page: every page draws the same count of slots, so flipping pages never
     // moves the pager or anything under the grid
-    if (pageSize > 0) while (list.length < perPage) list.push(null);
+    if (pageSize > 0 && padPage) while (list.length < perPage) list.push(null);
     return list.map((entry) => ({ area: null, slot: null, entry }));
   });
   /** the list mode folds on the same page, over the entries rather than the padded cells */
@@ -127,8 +130,7 @@
     hover = { entry, top: b.top, left: b.left, right: b.right, bottom: b.bottom };
   }
 
-  /** The slot's own menu, opened where the pointer is: the verbs come from the caller, so this component
-      only knows that a square can offer some. */
+  /** the verbs come from the caller; this component only knows a square can offer some */
   function openMenu(e: MouseEvent, entry: SlotEntry) {
     if (!actions || !actions(entry).length) return;
     e.preventDefault();
@@ -136,12 +138,7 @@
     menu = { x: e.clientX, y: e.clientY, entry };
   }
 
-  /**
-   * Where the card goes: beside the square, on the square's own line, and turned to the other side or the
-   * other end whenever that is where the room actually is. The card measures itself, so a five-line piece
-   * and a stack chip are each placed by the box they really have — an assumed size is what used to run a
-   * tall card off the bottom of a short screen.
-   */
+  /** the card measures itself and flips side/end to fit — an assumed size used to run tall cards off-screen */
   const place = $derived(hover && popPlace(hover, { w: popW, h: popH }, window.innerWidth, window.innerHeight));
 
   /** Keep the card while the pointer or focus moves to another filled slot or into the card itself.
@@ -162,6 +159,7 @@
 
 <div class="slot-grid-stack">
 <div class="bar">
+  {#if lead}{@render lead()}{/if}
   {#if onsort}
     <span class="lab">Order</span>
     {#each Object.keys(SORT_LABELS) as k}
@@ -178,11 +176,15 @@
 </div>
 
 {#if mode === 'grid'}
-  <div class={layout === 'doll' ? 'doll' : 'grid'} class:compact-doll={layout === 'doll' && compactDoll} bind:this={gridEl}>
+  <div class={layout === 'doll' ? 'doll' : layout === 'equipment' ? 'equipment' : 'grid'} class:compact-doll={layout === 'doll' && compactDoll} class:compact-grid={compactGrid && layout === 'grid'} bind:this={gridEl}>
     {#each shown as cell, pos (pos)}
       {#if cell.entry}
+        {@const craftState = targetState?.(cell.entry) ?? null}
         <button
           class="slot"
+          class:craft-target={craftState !== null}
+          class:ready={craftState === 'ready'}
+          class:unavailable={craftState === 'unavailable'}
           class:slot-gear={cell.entry.kind === 'gear' || cell.entry.kind === 'worn'}
           class:slot-stack={cell.entry.kind === 'stack'}
           style={cell.area ? `grid-area:${cell.area}` : ''}
@@ -200,12 +202,15 @@
           onmouseleave={(e) => leaveTo(e.relatedTarget)}
           oncontextmenu={(e) => openMenu(e, cell.entry!)}
           onclick={(e) => {
-            if (onpick && cell.entry?.item) { hover = null; onpick(cell.entry.index); }
+            if (onpick && cell.entry?.item) { hover = null; onpick(cell.entry.index, e); }
             else open(e.currentTarget, cell.entry!);
           }}
           aria-label={cell.entry.kind === 'stack' ? `${cell.entry.title} ×${cell.entry.count}` : cell.entry.title}
         >
           <img class="slot-icon" src={cell.entry.icon} alt="" aria-hidden="true" />
+          {#if layout === 'equipment'}
+            <span class="equipment-label"><small class="text-note">{cell.entry.slot}</small><span>{cell.entry.title}</span></span>
+          {/if}
           {#if cell.entry.count}<span class="badge badge-count count">{cell.entry.count}</span>{/if}
           {#if cell.entry.item && (cell.entry.item.upgrade_lv || 0) > 0}<span class="badge badge-count xp plus">+{cell.entry.item.upgrade_lv}</span>{/if}
           {#if cell.entry.item && cell.entry.kind !== 'worn'}
@@ -216,12 +221,19 @@
           {/if}
         </button>
       {:else}
-        <span class="slot slot-empty empty" style={cell.area ? `grid-area:${cell.area}` : ''} aria-hidden="true">
+        <span class="slot slot-empty empty" style={cell.area ? `grid-area:${cell.area}` : ''}
+              role={compactDoll || layout === 'equipment' ? 'img' : undefined} aria-hidden={!compactDoll && layout !== 'equipment'}
+              aria-label={(compactDoll || layout === 'equipment') && cell.slot != null ? `Empty ${loot.SLOTS[cell.slot]} slot` : undefined}
+              title={(compactDoll || layout === 'equipment') && cell.slot != null ? `Empty ${loot.SLOTS[cell.slot]} slot` : undefined}>
           {#if cell.slot != null}
             <!-- the doll's bare cells carry the slot's own glyph, so an unworn body still reads as a
                  body with places to fill; a plain grid keeps its wordless blanks -->
-            {#if layout === 'doll'}<img class="slot-glyph" src={slotIcon(loot.SLOTS[cell.slot])} alt="" />{/if}
-            <span class="slotname">{loot.SLOTS[cell.slot]}</span>
+            {#if layout === 'doll' || layout === 'equipment'}<img class="slot-glyph" src={slotIcon(loot.SLOTS[cell.slot])} alt="" />{/if}
+            {#if layout === 'equipment'}
+              <span class="equipment-label"><span>{loot.SLOTS[cell.slot]}</span><small class="text-note">Empty</small></span>
+            {:else}
+              <span class="slotname">{loot.SLOTS[cell.slot]}</span>
+            {/if}
           {/if}
         </span>
       {/if}
@@ -297,7 +309,8 @@
 
 <style>
   .slot-grid-stack { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-xs); min-width: 0; min-height: 0; }
-  .slot-grid-stack > .grid { flex: 1; min-height: 0; }
+  /* Squares keep their token size; each panel fits as many columns as its width allows. */
+  .slot-grid-stack > .grid { align-content: start; min-height: 0; }
   .slot-grid-stack > .doll { align-self: center; }
   .bar { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
   .lab { color: var(--dim); font-size: var(--font-xs); }
@@ -305,9 +318,8 @@
   .views { display: flex; align-items: center; gap: var(--spacing-sm); flex: none; }
   .bar button { font-size: var(--font-xs); }
 
-  /* ten squares to a row, everywhere the bag shows: 100 adventure slots, 50 carried slots and a
-     30-item page all land on whole rows, so the count never depends on the panel's width */
-  .grid { display: grid; grid-template-columns: repeat(10, minmax(0, var(--icon-lg))); justify-content: center; gap: var(--spacing-xs); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, var(--slot-item)); justify-content: start; gap: var(--spacing-xs); }
+  .grid.compact-grid { grid-template-columns: repeat(auto-fill, var(--slot-item)); }
 
   /* The equipment panel: three columns by five rows, no body drawn — the `.` cells are the blanks. */
   .doll {
@@ -324,8 +336,14 @@
     width: fit-content;
   }
   .doll.compact-doll {
-    grid-template-columns: repeat(3, calc(var(--icon-xl) - var(--spacing-xs)));
+    grid-template-columns: repeat(3, min(calc(var(--icon-card) * 1.4 - var(--spacing-xs)), 4.5vh));
   }
+  .compact-doll .slotname { display: none; }
+  .equipment { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); align-content: start; }
+  .equipment .slot { display: grid; grid-template-columns: var(--slot-item) minmax(0, 1fr); align-items: center; gap: var(--spacing-xs); aspect-ratio: auto; padding: 0 var(--spacing-xs); min-width: 0; }
+  .equipment .slot.empty { display: grid; justify-content: stretch; }
+  .equipment .slot-icon, .equipment .slot-glyph { position: static; width: var(--slot-item); height: var(--slot-item); object-fit: contain; }
+  .equipment-label { display: grid; gap: 0; min-width: 0; text-align: left; overflow-wrap: anywhere; font-size: var(--font-xs); line-height: 1.15; }
 
   .slot {
     position: relative;
@@ -356,13 +374,10 @@
   .pager button { font-size: var(--font-xs); }
   .pager button:disabled { opacity: .4; }
   .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--rar, var(--text)); }
-  .list-title img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .list-title img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
   .dim { color: var(--dim); }
 
-  /* the card is placed by `place` above, out of the slot's box and its own measured one. It is capped to the
-     frame and scrolls inside itself, so a piece with more lines than a short screen has room is read by
-     scrolling rather than by being cut. `blind` is the first frame only: the card cannot be measured until it
-     paints, and a card that has not been measured has no business being seen. */
+  /* capped to the frame and self-scrolling; `blind` is the first frame only — unmeasured, unseen */
   .pop {
     position: fixed; z-index: var(--z-hud-control);
     max-height: none; overflow: hidden;

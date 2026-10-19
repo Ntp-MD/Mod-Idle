@@ -63,7 +63,7 @@ describe('Fishing and safe activities', () => {
   it('stops on primary full-bag refusal without skill or Mastery XP', () => {
     const state = fishingCamp();
     state.junk['full-bag fixture'] = slotsAvailable(state) * E.inventory.stack_size.stone;
-    // Remove opening provisions so the fixture contains exactly a full character bag.
+    // Remove opening provisions so the fixture contains exactly a full bag.
     for (const bucket of [state.farm.herbs, state.counters.stones, state.farm.potions, state.farm.condensed,
       state.fieldwork.foods, state.fieldwork.materials]) for (const key of Object.keys(bucket)) bucket[key] = 0;
     expect(startFieldAction(state, 'fish').ok).toBe(true);

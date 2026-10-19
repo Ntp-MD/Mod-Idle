@@ -38,8 +38,7 @@
 
 <div class="keys">
   <div class="top">
-    <p><small>Press a key to rebind it, Esc to back out of a row without changing it. The map is a client
-      setting, shared by all three save slots, and it never enters a save file.</small></p>
+    <p><small>Press a key to rebind · Esc backs out.</small></p>
     <button onclick={onreset}>Restore every default</button>
   </div>
 
@@ -93,8 +92,7 @@
     </table>
   </section>
 
-  <p class="foot"><small>The rail prints each screen's key on its own tab, and a control that has one names
-    it in its tooltip — so a binding you never set here is still a binding you can find on screen.</small></p>
+  <p class="foot"><small>Every screen's key prints on its own tab.</small></p>
 </div>
 
 <style>
@@ -102,7 +100,7 @@
   .top { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; justify-content: space-between; }
   .top p { margin: 0; color: var(--dim); max-width: clamp(575px, 44.53vw, 1242px); }
   .clash {
-    margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs); line-height: 1.5;
+    margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-card); font-size: var(--font-xs); line-height: 1.5;
     background: color-mix(in srgb, var(--gold) 10%, transparent); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); color: var(--gold-lit);
   }
   .clash b { font-family: var(--num); color: var(--gold); }

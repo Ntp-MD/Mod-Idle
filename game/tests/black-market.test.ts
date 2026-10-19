@@ -37,7 +37,7 @@ function unchanged<T>(state: ReturnType<typeof newGame>, action: () => T) {
   expect(JSON.stringify(state)).toBe(before);
   return result;
 }
-function fillCharacterBag(state: ReturnType<typeof newGame>) {
+function fillBag(state: ReturnType<typeof newGame>) {
   for (const bucket of [state.counters.stones, state.farm.herbs, state.farm.potions, state.farm.condensed,
     state.fieldwork.materials, state.fieldwork.foods, state.junk]) for (const key of Object.keys(bucket)) bucket[key] = 0;
   state.junk.fixture = slotsAvailable(state) * E.inventory.stack_size.stone;
@@ -80,7 +80,7 @@ describe('Black Market stock and purchases', () => {
 
   it.each(['material', 'stone'] as const)('refuses full-bag %s output without spending Gold or stock', (kind) => {
     const { state, town, offer } = fixture(kind);
-    fillCharacterBag(state);
+    fillBag(state);
     expect(unchanged(state, () => buyBlackMarket(state, town, offer.id, writer)).ok).toBe(false);
     state.junk.fixture -= E.inventory.stack_size.stone;
     expect(buyBlackMarket(state, town, offer.id, writer).ok).toBe(true);
@@ -107,7 +107,7 @@ describe('Black Market stock and purchases', () => {
     const toggle = sm.all().find((row) => row.type === 'aura' || row.type === 'buff')!;
     offer.skill = toggle.id; offer.level = E.skill_xp.level_cap;
     delete state.skills.owned[toggle.id]; delete state.skills.xp[toggle.id];
-    fillCharacterBag(state); // Skill entitlement needs no character-bag slot.
+    fillBag(state); // Skill entitlement needs no bag slot.
     expect(buyBlackMarket(state, town, offer.id, writer).ok).toBe(true);
     expect(Object.hasOwn(state.skills.owned, toggle.id)).toBe(true);
     expect(state.skills.owned[toggle.id]).toBe(0);

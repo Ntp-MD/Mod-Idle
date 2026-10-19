@@ -594,7 +594,7 @@
       "charge_band": "mid",
       "qty": 1,
       "ladder": "herb_pouch",
-      "note": "one more slot in the character bag (`inventory.character_slots` is the base)",
+      "note": "one more slot in the bag (`inventory.character_slots` is the base)",
       "character_slot_grant": 1
     },
     {
@@ -606,7 +606,7 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "herb_pouch",
-      "note": "one more slot in the character bag (`inventory.character_slots` is the base)",
+      "note": "one more slot in the bag (`inventory.character_slots` is the base)",
       "character_slot_grant": 1
     },
     {

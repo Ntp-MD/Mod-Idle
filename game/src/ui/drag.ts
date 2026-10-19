@@ -7,7 +7,7 @@
  * index-addressed verb in the client already carries.
  */
 export type DragRef = {
-  where: 'pile' | 'carried' | 'worn' | 'stash';
+  where: 'bag' | 'worn' | 'stash';
   index: number;
   /** the stash tab a `stash` ref came from */
   tab?: number;
@@ -51,4 +51,20 @@ export function readCastDrag(e: DragEvent): CastRef | null {
   if (raw == null || raw === '') return null;
   const index = Number(raw);
   return Number.isFinite(index) ? { index } : null;
+}
+
+/**
+ * The pouch's bead: a drag names one carried draught by its ladder name, which is the whole identity
+ * a quickbar square holds.
+ */
+const POTION_MIME = 'application/x-modworld-draught';
+
+export function setPotionDrag(e: DragEvent, name: string): void {
+  if (!e.dataTransfer) return;
+  e.dataTransfer.setData(POTION_MIME, name);
+  e.dataTransfer.effectAllowed = 'copy';
+}
+
+export function readPotionDrag(e: DragEvent): string | null {
+  return e.dataTransfer?.getData(POTION_MIME) || null;
 }

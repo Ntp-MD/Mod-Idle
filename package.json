@@ -7,7 +7,6 @@
     "verify": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/verify.ts",
     "wiki": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/wiki.ts build",
     "skills": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/skills.ts",
-    "tree": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/tree.ts",
     "map": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/map.ts",
     "map:check": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/map.ts --checks",
     "gallery": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/gallery.ts",

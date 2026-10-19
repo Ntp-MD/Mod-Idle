@@ -9,6 +9,7 @@ import { exportJson, importJson, migrate } from '../src/state/save';
 
 const inTown = (id = 'eastgate') => {
   const state = newGame(91);
+  state.farm.potions['Red Draught'] = 0; state.farm.potions['Sky Draught'] = 0;
   state.cell = settlementCell(id)!;
   state.zone = TOWN.settlements.find((town) => town.id === id)!.zone;
   state.hunting = false; state.group = [];

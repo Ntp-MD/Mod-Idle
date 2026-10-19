@@ -449,7 +449,7 @@ function targetCount(skill: any, group: Mob[]): number {
 }
 
 /**
- * The rotation: cycle the 14 slots top-down and cast the first skill whose cooldown is ready and
+ * The rotation: cycle the active slots top-down and cast the first skill whose cooldown is ready and
  * whose mana fits the usable pool. No manual presses — the player only arranges order.
  */
 export function castOnce(

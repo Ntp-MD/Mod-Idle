@@ -332,7 +332,3 @@ export function dotDamageParts(c: Character, statuses: Statuses): { burn: number
   const poison = rawPoison * scale;
   return { burn, poison, bleed, total: burn + poison + bleed };
 }
-
-export function dotDamage(c: Character, statuses: Statuses): number {
-  return dotDamageParts(c, statuses).total;
-}

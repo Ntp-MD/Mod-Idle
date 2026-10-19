@@ -59,7 +59,7 @@ export function canProcess(state: GameState, id: string): { ok: boolean; why?: s
   if (fieldSkillLevel(state, recipe.skill) < recipe.level) return { ok: false, why: `${recipe.skill} level ${recipe.level} required` };
   const costs = Object.entries(recipe.materials as Record<string, number>).map(([key, amount]) => ({ bucket: state.fieldwork.materials, key, amount, capKind: 'material' }));
   for (const cost of costs) if ((cost.bucket[cost.key] || 0) < cost.amount) return { ok: false, why: `needs ${cost.amount} ${fieldwork.materialById[cost.key]?.name || cost.key}` };
-  if (!fitsTransaction(state, costs, [{ bucket: state.fieldwork.materials, key: id, capKind: 'material', amount: recipe.yield }])) return { ok: false, why: 'make room in the character bag' };
+  if (!fitsTransaction(state, costs, [{ bucket: state.fieldwork.materials, key: id, capKind: 'material', amount: recipe.yield }])) return { ok: false, why: 'make room in the bag' };
   return { ok: true };
 }
 

@@ -22,16 +22,10 @@
     --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
     --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
 
-    /* Shared radius scale: tight controls, standard surfaces, major panels, circles and capsules. */
-    --radius-round: 50%;
-    --radius-xs: 4px;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-
     /* Shared visual states */
-    --surface-selected: rgba(232, 193, 105, .12);
-    --shadow-raised: 0 8px 24px rgba(0, 0, 0, .5);
-    --shadow-soft: 0 4px 14px rgba(0, 0, 0, .45);
+    --surface-selected: rgba(232, 193, 105, 0.12);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.45);
 
     /* Shared motion */
     --motion-fast: 150ms;
@@ -41,7 +35,7 @@
     --ease-ui: ease;
     --ease-out: ease-out;
     --ease-linear: linear;
-    --ease-glide: cubic-bezier(.2, .8, .2, 1);
+    --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
 
     /* Shared stacking order; small values are component-local layers. */
     --z-underlay: 1;
@@ -67,7 +61,7 @@
 
     --screen-pad: var(--spacing-md);
     --pad-area: 20px;
-    --bar-h: clamp(12px, 0.87vw, 22px);
+    --bar-h: 14px;
 
     --minimap-size: clamp(100px, 7.74vw, 216px);
     --objectives-w: clamp(170px, 11.96vw, 300px);
@@ -124,35 +118,35 @@
 
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
-
-    --font-xs: clamp(12px, 0.90vw, 24px);
-    --font-sm: clamp(14px, 1.04vw, 28px);
+    --radius-round: 50%;
+    --radius-card: 8px;
+    --font-xs: 14px;
+    --font-sm: 16px;
     --font-md: clamp(17px, 1.28vw, 36px);
     --font-lg: clamp(22px, 1.67vw, 47px);
     --font-xl: clamp(29px, 2.18vw, 62px);
-    --icon-xs: clamp(11px, 0.72vw, 23px);
-    --icon-sm: clamp(14px, 1vw, 31px);
-    --icon-md: clamp(21px, 1.50vw, 45px);
-    --icon-lg: clamp(32px, 3vw, 68px);
-    --icon-xl: clamp(44px, 4vw, 95px);
-
+    --icon-detail: clamp(11px, 0.72vw, 23px);
+    --icon-label: clamp(14px, 1vw, 31px);
+    --icon-card: clamp(32px, 3vw, 68px);
     --icon-hub: clamp(40px, 4vw, 60px);
-    --icon-hub-img: 50%;
-    --slot-skill-size: clamp(30px, 4vw, 70px);
+    --icon-hub-img: 70%;
+    --input-narrow: clamp(44px, 4vw, 95px);
+    --slot-item: 40px;
+    --slot-skill-size: 50px;
     --field-card-size: clamp(125px, 8.63vw, 180px);
-    --spacing-xs: 3px;
-    --spacing-sm: 5px;
-    --spacing-md: 10px;
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
     --spacing-lg: 20px;
-    --spacing-xl: 30px;
+    --spacing-xl: 40px;
     --seam: 1px;
 
     --sheet-fs-region: clamp(9px, 0.54vw, 15px);
-    --sheet-fs-walk: clamp(8px, 0.40vw, 11px);
-    --sheet-fs-place: clamp(9px, 0.50vw, 14px);
-    --sheet-fs-capital: clamp(10px, 0.60vw, 17px);
+    --sheet-fs-walk: clamp(8px, 0.4vw, 11px);
+    --sheet-fs-place: clamp(9px, 0.5vw, 14px);
+    --sheet-fs-capital: clamp(10px, 0.6vw, 17px);
     --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
-    --sheet-fs-id: clamp(7px, 0.40vw, 11px);
+    --sheet-fs-id: clamp(7px, 0.4vw, 11px);
     --x-pull-arc: clamp(-46px, -1.65vw, -21px);
     --x-pull-burst: clamp(-32px, -1.16vw, -15px);
     --x-pull-scale: clamp(-14px, -0.48vw, -6px);
@@ -190,7 +184,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .tabs > label {
   display: inline-flex; align-items: baseline; gap: var(--spacing-sm); padding: .3em .9em;
-  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-card);
   color: var(--dim); font-size: var(--font-xs); cursor: pointer;
 }
 .tabs > label b { color: var(--mob); font-weight: 500; }
@@ -203,7 +197,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
 .tabs table { flex: 1 0 100%; width: 100%; }
-.twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
@@ -226,15 +220,7 @@ td .hy { color: var(--dim); font-size: var(--font-xs); }
 td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .rolls .forced .rn { color: var(--gold); }
 .rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: var(--font-xs); }
-.plist { list-style: none; margin: 0; padding: 0; font-size: var(--font-xs); }
-/* one grid for the whole cell: every key shares track one at the width of the longest key in that
-   cell, every value takes track two — display:contents promotes each key/value pair to the grid,
-   so a spelled-out label like "damage per second" costs no wrap and nothing runs into its number */
-.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: var(--spacing-md); row-gap: var(--spacing-xs); }
-.plist li { display: contents; }
-.plist .pk { font-family: var(--ui); color: var(--dim); }
-.plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
-.zone { display: grid; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.zone { display: grid; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
 .zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-md); padding: .65rem .8rem; cursor: pointer; }
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
@@ -244,13 +230,13 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
 .race-roster { display: grid; gap: var(--spacing-md); }
-.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
+.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .65rem; }
 .race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
 .race-group > header h3 { color: var(--gold); font-size: var(--font-xs); }
 .race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
 .race-empty { color: var(--dim); font-size: var(--font-xs); }
 .species-roster { display: grid; gap: var(--spacing-md); }
-.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
+.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); padding: .65rem .8rem .8rem; }
 .species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
 .species-entry h4 { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
 .species-entry > header h4 { color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
@@ -264,7 +250,7 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 @media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
 .legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
-.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
 ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }</style><div class="layout">
 <nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="on" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Bestiary</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
 <main><header class="page-head"><h1>Items</h1><p class="lead">A piece of gear is a <strong>frame</strong> plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth.</p></header>

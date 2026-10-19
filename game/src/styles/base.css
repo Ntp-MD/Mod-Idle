@@ -28,8 +28,7 @@ small {
 
 p,
 td,
-th,
-.copyable {
+th {
     user-select: text;
     -webkit-user-select: text;
 }
@@ -93,7 +92,7 @@ select {
     background: var(--panel);
     color: var(--text);
     border: 1px solid var(--line);
-    border-radius: var(--radius-xs);
+    border-radius: var(--radius-card);
     padding: var(--spacing-xs) var(--spacing-md);
     font: inherit;
     cursor: pointer;
@@ -136,11 +135,12 @@ input[type="radio"] {
     accent-color: var(--gold);
 }
 input[type="number"],
-input[type="text"] {
+input[type="text"],
+input[type="search"] {
     background: var(--inset);
     color: var(--text);
     border: 1px solid var(--line);
-    border-radius: var(--radius-xs);
+    border-radius: var(--radius-card);
     padding: var(--spacing-xs) var(--spacing-xs);
     font: inherit;
     font-family: var(--num);
@@ -163,15 +163,15 @@ a {
     scrollbar-color: var(--bar) transparent;
 }
 *::-webkit-scrollbar {
-    width: var(--icon-xs);
-    height: var(--icon-xs);
+    width: var(--icon-detail);
+    height: var(--icon-detail);
 }
 *::-webkit-scrollbar-track {
     background: transparent;
 }
 *::-webkit-scrollbar-thumb {
     background: var(--bar);
-    border-radius: var(--radius-round);
+    border-radius: var(--radius-card);
 }
 *::-webkit-scrollbar-thumb:hover {
     border-color: var(--gold);

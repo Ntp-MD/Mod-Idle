@@ -56,6 +56,8 @@ export const SLOT_COUNT = E.stat.item_slots as number;
 export interface Lines {
   [key: string]: any;
   statBy: Record<StatKey, { flat: number; pct: number }>;
+  /** Elemental resistance lines that name an Element — fire does not top up cold */
+  resBy: Record<string, number>;
 }
 
 export function emptyGear(): (Item | null)[] {
@@ -67,6 +69,7 @@ export function sumLines(gear: (Item | null)[], extra?: { id: string; value: num
   for (const key of Object.values(PCT_LINE)) acc[key] = 0;
   for (const key of Object.values(FLAT_LINE)) acc[key] = 0;
   acc.elemBy = {} as Record<string, { flat: number; pct: number }>;
+  acc.resBy = {};
   for (const k of STAT_KEYS) acc.statBy[k] = { flat: 0, pct: 0 };
   // the passive tree is a second line source (`engine/tree.ts`): it feeds the same buckets gear does,
   // so a bought rank moves the same number the piece would have
@@ -91,8 +94,10 @@ export function sumLines(gear: (Item | null)[], extra?: { id: string; value: num
         // The cap unlock belongs exclusively to passive ranks, including for imported gear.
         if (part.id === 'elemental_resistance_cap_pct') continue;
         const stat = (part as any).stat as StatKey | undefined;
+        const partElement = (part as any).element || line.element;
         if (part.id === 'stat_mod_flat' && stat) acc.statBy[stat].flat += part.value;
-        // the all-stats sibling lifts every Core stat by the one value it rolled 
+        // a resistance line that names its Element hardens that Element alone (owner ruling)
+        else if (part.id === 'elemental_resistance' && partElement) acc.resBy[partElement] = (acc.resBy[partElement] || 0) + part.value;
         else if (part.id === 'all_stat_flat') for (const k of STAT_KEYS) acc.statBy[k].flat += part.value;
         else if (PCT_LINE[part.id]) acc[PCT_LINE[part.id]] += part.value;
         else if (FLAT_LINE[part.id]) acc[FLAT_LINE[part.id]] += part.value;
@@ -188,11 +193,11 @@ export interface Carried {
   herbs?: number;
   materials?: number;
   food?: number;
-  /** The hunt pile's own piece weights: a kept piece rides against the capacity until worn or stashed. */
+  /** The carried pieces' own weights: a kept piece rides against the capacity until worn or stashed. */
   bagWeight?: number;
 }
 
-/** Everything carried that weighs: the worn pieces, the hunt pile, and consumables (formula-utility.md §11). */
+/** Everything carried that weighs: the worn pieces, the kept pieces in the bag, and consumables (formula-utility.md §11). */
 export function weightOfCarry(gear: (Item | null)[], carried: Carried = {}, heldMasteryLevel = 0): number {
   // Mastery lightens the held weapon only, up to -20% of its own weight
   const worn = gear.reduce((t, g) => t + (g?.slot === 'main hand'
@@ -282,6 +287,8 @@ export function buildCharacter(
     if (!key.startsWith('elemental_resistance:')) continue;
     resByElement[key.split(':')[1]] = (resByElement[key.split(':')[1]] || 0) + v;
   }
+  // gear lines that named their Element join the same per-Element pool
+  for (const [el, v] of Object.entries(lines.resBy || {})) resByElement[el] = (resByElement[el] || 0) + v;
   // The engine row gives each named type its attack tempo.
   const aspdDefault = E.build.weapon_aspd_default;
   const weaponStats = mainHand ? E.weapons.find((weapon: any) => weapon.name === mainHand.base) : null;

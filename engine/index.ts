@@ -10,7 +10,7 @@
  * the same defect as a number typed twice (AGENTS.md — Numbers · DECISIONS.md §Stack).
  */
 
-import type { BasesData, EngineData, MobCore, MobSize, MobSubzone, MobZone, Rng, WeaponCfg } from './types.ts';
+import type { BasesData, EngineData, MobCore, MobSize, MobSubzone, MobZone, WeaponCfg } from './types.ts';
 import { ladderMult } from './skills.ts';
 
 const BANDS = ['low', 'mid', 'high'];
@@ -479,7 +479,6 @@ export function createEngine(E: EngineData) {
     for (const sp of cast) for (const sid of sp.sizes) {
       const weight = E.mob.spawn_weights[sid] || 0;
       if (!weight) continue;
-      const zone = zoneById(zoneId);
       const variantCore = variantsInZone(sp.id, zoneId)[0]?.core;
       w += weight; sum += weight * speciesPowerOf(sp, zoneId, variantCore);
     }
@@ -1198,4 +1197,4 @@ export function createEngine(E: EngineData) {
   };
 }
 
-export { BANDS, BAND_KEYS, r1, r2, fmt };
+export { BANDS, BAND_KEYS, fmt };

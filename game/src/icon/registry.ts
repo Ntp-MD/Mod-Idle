@@ -29,8 +29,8 @@ export const ICON_REGISTRY = {
     } as Record<string, string>,
   },
   character: {
-    byId: { 'player.default': 'black-knight-helm' } as Record<string, string>,
-    fallback: 'black-knight-helm',
+    byId: { 'player.default': 'knight-helmet' } as Record<string, string>,
+    fallback: 'knight-helmet',
   },
 } as const;
 
@@ -48,6 +48,7 @@ const DRAUGHT_ART: Record<string, string> = {
   'sky draught': 'mana-potion',
   'blue draught': 'blue-potion',
   'deep blue draught': 'puple-potion',
+  'white potion': 'white-potion',
 };
 
 /** Candidate shelf keys in priority order: registered ID, stable ID slug, label slug, safe fallback. */

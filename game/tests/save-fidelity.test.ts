@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng, sm } from '../src/engine/client';
 import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/game';
-import { buildCharacter, emptyGear } from '../src/sim/player';
+import { buildCharacter, emptyGear, openingGear } from '../src/sim/player';
 import { craft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
 import { setRule } from '../src/sim/filter';
@@ -31,6 +31,7 @@ describe('skill toggles on a restored character', () => {
 describe('saved exploration controls', () => {
   it('backfills a v15 save with an empty Patrol and disabled Auto-Return without changing progress', () => {
     const source = newGame(86);
+    source.gear = openingGear();
     source.counters.kills = 12;
     source.town.tasks[0]!.progress = 1;
     source.bag = [structuredClone(source.gear.find(Boolean)!)];

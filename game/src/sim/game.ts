@@ -1,5 +1,5 @@
 import { eng, E, sm, loot, TOWN, tree, dungeon as DG } from '../engine/client';
-import { buildCharacter, openingGear, SLOT_COUNT } from './player';
+import { buildCharacter, emptyGear, SLOT_COUNT } from './player';
 import { itemName } from './item-name';
 import { playerSwing, mobSwing, rollStatus, poisonBurst, dotDamageParts, decayStatusStack, type Statuses, type StatusName } from './combat';
 import { rollDrop } from './drop';
@@ -12,7 +12,7 @@ import { deliveryPauseReason, tickDeliveries } from './delivery';
 import { tickBlackMarket } from './black-market';
 import { STAT_KEYS, type StatKey } from '../engine/client';
 import { chooseJunkItem, leanReweightMany } from '../../../engine/loot.ts';
-import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm } from './farm';
+import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm, QUICKBAR_SLOTS } from './farm';
 import { newFieldwork, tickFieldwork, tickHunger, resolveTravelEvent, recordHuntKill, withMeal, withHunger, pushToFieldCamp, finishPushAtCamp, lifeSkillBonuses } from './fieldwork';
 import { road, walkZonesHex, arrive, ownerOf, zoneOf, startWalk } from './road';
 import {
@@ -23,7 +23,7 @@ import { weaponByName, masteryLevel, payMastery, dropMultiplier } from './master
 import { newPresets, switchPreset, autoSelect } from './presets';
 import { newCollector, newGrants, wants, col } from './collector';
 import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from './filter';
-import { addTo } from './slots';
+import { addTo, slotsFree } from './slots';
 import { settlementOfZone, settlementById } from './town';
 import { effectsActive, esAbsorbPct } from './skills';
 import { mark as markSnapshot } from './snapshot';
@@ -54,7 +54,7 @@ const MOB_CLOCK_CAP = 1 / E.caps.attack_interval_sec;
 const mobClock = (kind: string, mult = 1) =>
   Math.min(((kind.startsWith('Boss') || kind.startsWith('Unique')) ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal) * mult, MOB_CLOCK_CAP);
 
-/** What the character carries besides gear: potions, condensed bottles and herbs all weigh. */
+/** the held weapon's base name, for the read that names what is in hand */
 export function heldWeaponName(s: GameState): string | null {
   const main = s.gear.find((g) => g && !g.broken && g.slot === 'main hand');
   const w = main ? weaponByName(main.base) : null;
@@ -68,7 +68,7 @@ export function carried(s: GameState) {
   const herbs = Object.values(s.farm.herbs).reduce((a: number, b: number) => a + b, 0);
   const materials = Object.values(s.fieldwork.materials).reduce((a: number, b: number) => a + b, 0);
   const food = Object.values(s.fieldwork.foods).reduce((a: number, b: number) => a + b, 0);
-  // the hunt pile rides on the back: its pieces weigh what their Base says, against the same capacity
+  // the kept pieces ride on the back: each weighs what its Base says, against the same capacity
   const bagWeight = s.bag.reduce((t, g) => t + (g?.weight || 0), 0);
   return { potions: bottles, condensed, herbs, materials, food, bagWeight };
 }
@@ -107,7 +107,7 @@ export function setLevel(s: GameState, level: number): void {
 }
 
 export function newGame(seed = 20260101): GameState {
-  const gear = openingGear();
+  const gear = emptyGear();
   const level = E.opening.level as number;
   const c = buildCharacter(level, gear, {}, 0, undefined, ZERO_POINTS());
   const start = road.nodeById(E.road.nodes[0].id) || E.road.nodes[0];
@@ -139,6 +139,7 @@ export function newGame(seed = 20260101): GameState {
     patrol: newPatrolState(),
     autoReturn: newAutoReturnState(),
     skills: newSkillState(),
+    quickbar: Array.from({ length: QUICKBAR_SLOTS }, () => null),
     healUp: null,
     junk: {},
     mastery: {},
@@ -148,6 +149,7 @@ export function newGame(seed = 20260101): GameState {
     grants: newGrants(),
     pedlar: { day: 0, minutes: [], bought: 0 },
     filter: newFilter(),
+    filterPresets: [],
     travel: 'stay',
     // minute one stands in town: safe ground fields no mobs until the character heads out
     hunting: false,
@@ -200,6 +202,8 @@ export function newGame(seed = 20260101): GameState {
     offeredAt: 0,
   };
   refreshFilter(s);
+  // the opening kit comes from the data: no worn gear, one draught per pool in the pocket
+  for (const [name, count] of Object.entries(E.opening.potions as Record<string, number>)) s.farm.potions[name] = count;
   return s;
 }
 
@@ -430,11 +434,37 @@ export function salvageBag(s: GameState, bagIndex: number): { ok: boolean; why?:
   if (!item) return { ok: false, why: 'nothing in that bag slot' };
   if (item.locked) return { ok: false, why: 'that piece is locked' };
   if (item.heldFor) return { ok: false, why: 'that piece is promised to a Collector set' };
-  if (!canDissolve(s)) return { ok: false, why: 'make room in the character bag for the whole salvage resource bundle' };
+  if (!canDissolve(s)) return { ok: false, why: 'make room in the bag for the whole salvage resource bundle' };
   s.bag.splice(bagIndex, 1);
   dissolve(s);
   push(s, `Salvaged ${itemName(item)} → ${Object.entries(E.salvage.outputs).map(([key, count]) => `${count} ${key}`).join(' + ')}`);
   return { ok: true };
+}
+
+/**
+ * One press runs the bag filter over what is already carried: every unlocked, unheld piece that fails
+ * the same verdict a fresh drop gets dissolves for its salvage bundle, and the players the bulk verbs
+ * spare — a locked one and one promised to a Collector set — are counted, not moved. Half a job is
+ * refused rather than begun when the next bundle would not fit: a partial salvage would hide a rule.
+ */
+export function runFilterNow(s: GameState): { dissolved: number; spared: number; why?: string } {
+  let dissolved = 0;
+  let spared = 0;
+  for (let i = s.bag.length - 1; i >= 0; i--) {
+    const item = s.bag[i];
+    if (!item) continue;
+    if (item.locked || item.heldFor) { spared++; continue; }
+    if (filterVerdict(s, item).verdict.keep) continue;
+    if (!canDissolve(s)) {
+      push(s, `Filter run stopped — the bag cannot take the next salvage bundle (${dissolved} melted so far)`);
+      return { dissolved, spared, why: 'the bag cannot take the next salvage bundle' };
+    }
+    s.bag.splice(i, 1);
+    dissolve(s);
+    dissolved++;
+  }
+  if (dissolved) push(s, `Filter run melted ${dissolved} carried piece${dissolved === 1 ? '' : 's'} into ore and Scrap${spared ? ` · ${spared} left alone` : ''}`);
+  return { dissolved, spared };
 }
 
 /**
@@ -448,15 +478,10 @@ function awardDrop(s: GameState, rng: () => number, band: string, ilvl: number, 
 }
 
 /**
- * One rolled piece through the bag filter. A mob kill — on foot, in an ambush or paid out of a
- * dungeon escrow — and any future item source use this same path, so "what the filter keeps" can
- * never mean two different things.
+ * The one filter verdict, shared by the drop path and the bag's own run-the-filter verb, so "what the
+ * filter would do" has one reader and a bulk press can never disagree with a fresh drop.
  */
-export function adjudicateDrop(s: GameState, item: Item): void {
-  // the bag filter keeps a drop only when it outscores the piece worn in that slot by more than
-  // noise; anything else dissolves for the salvage resource bundle, never for gold (loot.md §4)
-  // A waiting piece contributes no power. For rings, an empty cell is free and a full pair compares
-  // against its weaker member — the same cell Auto Equip would replace.
+export function filterVerdict(s: GameState, item: Item) {
   const worn = s.gear.filter((g): g is Item => g !== null && g.slot === item.slot);
   const slotCount = loot.SLOTS.filter((slot: string) => slot === item.slot).length;
   const wornScore = worn.length < slotCount ? undefined
@@ -473,6 +498,20 @@ export function adjudicateDrop(s: GameState, item: Item): void {
       L.filter.upgrade_margin_pct / 100, rule,
     )
     : { keep: true, reason: 'filter off', score };
+  return { wornScore, score, verdict };
+}
+
+/**
+ * One rolled piece through the bag filter. A mob kill — on foot, in an ambush or paid out of a
+ * dungeon escrow — and any future item source use this same path, so "what the filter keeps" can
+ * never mean two different things.
+ */
+export function adjudicateDrop(s: GameState, item: Item): void {
+  // the bag filter keeps a drop only when it outscores the piece worn in that slot by more than
+  // noise; anything else dissolves for the salvage resource bundle, never for gold (loot.md §4)
+  // A waiting piece contributes no power. For rings, an empty cell is free and a full pair compares
+  // against its weaker member — the same cell Auto Equip would replace.
+  const { wornScore, score, verdict } = filterVerdict(s, item);
   // An upgrade is for the character first. Collector reservations catch pieces that fail to improve
   // the worn cell, before a filter can dissolve them for a stone.
   const set = wornScore !== undefined && score <= wornScore ? wants(s, item) : null;
@@ -482,25 +521,25 @@ export function adjudicateDrop(s: GameState, item: Item): void {
   const belowFloor = (s.autoDissolveLevel || 0) > 0 && !item.locked && item.ilvl < (s.autoDissolveLevel || 0);
   if (set) {
     // the Collector sink runs before the filter dissolves a piece the set wants
-    if (s.bag.length < E.inventory.adventure_slots) {
+    if (slotsFree(s) >= 1) {
       item.heldFor = set.id;
       s.bag.unshift(item);
       push(s, `Held for the ${set.name} set · ${itemName(item)} (${item.slot})`);
     } else {
-      // a full pile picks up nothing and deletes nothing — the hold waits like any other pickup
+      // a full bag picks up nothing and deletes nothing — the hold waits like any other pickup
       s.counters.overflow = (s.counters.overflow || 0) + 1;
     }
   } else if (belowFloor && !item.heldFor) {
     dissolve(s);
   } else if (verdict.keep || item.locked || item.heldFor) {
     // The sim keeps the piece; the client's Auto Equip setting decides whether it is worn now.
-    if (s.bag.length < E.inventory.adventure_slots) {
+    if (slotsFree(s) >= 1) {
       s.bag.unshift(item);
       push(s, `Drop kept (${verdict.reason}): level ${item.ilvl} ${item.quality} ${item.tier} ${itemName(item)} (${item.slot})`);
     } else if (verdict.reason === 'upgrade' && swapWeakestKept(s, item, verdict.score)) {
-      // the bag keeps the best decision per slot instead of the first fifty arrivals: a piece that
-      // beat the bar replaces the piece it beat, and the loser dissolves for its salvage resources
-      // when they fit. The character still wears nothing it was not told to wear (owner ruling).
+      // the bag keeps the best decision per slot instead of the first arrivals: a piece that beat the
+      // bar replaces the piece it beat, and the loser dissolves for its salvage resources when they
+      // fit. The character still wears nothing it was not told to wear (owner ruling).
     } else {
       // overflow is stop_pickup: a full bag picks up nothing and deletes nothing
       s.counters.overflow = (s.counters.overflow || 0) + 1;

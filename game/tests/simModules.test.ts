@@ -21,7 +21,7 @@ const piece = (base: string, slot = 'helmet'): Item => ({
   slot, base, ilvl: 1, quality: 'low', tier: 'T1', lines: [], weight: 0,
 }) as unknown as Item;
 
-describe('the character bag counts slots the way the data prices them', () => {
+describe('the bag counts slots the way the data prices them', () => {
   it('reads the published slot count and adds only what a pouch deed granted', () => {
     const s = newGame();
     expect(bagSlots).toBe(E.inventory.character_slots);
@@ -35,6 +35,7 @@ describe('the character bag counts slots the way the data prices them', () => {
 
   it('counts one slot per stack and refuses a grant the bag cannot hold, without deleting anything', () => {
     const s = newGame();
+    s.farm.potions['Red Draught'] = 0; s.farm.potions['Sky Draught'] = 0;;
     const cap = (E.inventory.stack_size as Record<string, number>).stone;
     const empty = slotsFree(s);
     expect(bagStacks(s).length).toBe(0);
@@ -51,8 +52,18 @@ describe('the character bag counts slots the way the data prices them', () => {
     expect(s.counters.stopped).toBe(1);
   });
 
+  it('counts a kept gear piece against the same pool the stacks use', () => {
+    const s = newGame();
+    s.farm.potions['Red Draught'] = 0; s.farm.potions['Sky Draught'] = 0;;
+    const empty = slotsFree(s);
+    s.bag = [piece('Iron Band', 'ring')];
+    expect(slotsUsed(s)).toBe(1);
+    expect(slotsFree(s)).toBe(empty - 1);
+  });
+
   it('never counts gold as a slot', () => {
     const s = newGame();
+    s.farm.potions['Red Draught'] = 0; s.farm.potions['Sky Draught'] = 0;;
     s.counters.gold = 1e9;
     expect(slotsUsed(s)).toBe(0);
   });
@@ -140,6 +151,7 @@ describe('the farm', () => {
 
   it('pays a draught only when the herbs, the stones and a free slot are all there', () => {
     const s = newGame();
+    s.farm.potions['Red Draught'] = 0; s.farm.potions['Sky Draught'] = 0;;
     const name = Object.keys(s.farm.potions)[0];
     expect(craftPotion(s, 'no such draught').ok).toBe(false);
     expect(craftPotion(s, name).ok).toBe(false);

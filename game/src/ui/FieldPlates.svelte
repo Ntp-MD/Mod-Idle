@@ -20,11 +20,11 @@
    * sim's event ring and nothing else: no clock, no state of its own, every gesture mounted by a fact
    * the sim raised (`ui/plate.ts`).
    */
-  let { s, c, ring, plates, statuses, zone, town, townLive, vitals, reserved, xpPct, allocOpen, onAllocate,
+  let { s, c, ring, plates, statuses, zone, town, townLive, vitals, reserved, onSheet,
     fmtNum, selfFx, plateMotion, fxOutMs }: {
     s: GameState; c: Character; ring: FxEvent[]; plates: Mob[]; statuses: Statuses; zone: any;
     town: any; townLive: boolean; vitals: { hp: number; es: number; mana: number }; reserved: number;
-    xpPct: number; allocOpen: boolean; onAllocate: () => void; fmtNum: (n: number) => string; selfFx: FxEvent[];
+    onSheet: () => void; fmtNum: (n: number) => string; selfFx: FxEvent[];
     plateMotion: number; fxOutMs: number;
   } = $props();
 
@@ -223,7 +223,7 @@
 {/if}
 
 <div class="combat-player-slot">
-  <PlayerVitalCard s={s} {c} {ring} {statuses} {vitals} {reserved} {xpPct} {allocOpen} {onAllocate} {fxOutMs} {fmtNum} />
+  <PlayerVitalCard s={s} {c} {ring} {statuses} {vitals} {reserved} {onSheet} {fxOutMs} {fmtNum} />
   <div class="float-side self-side" aria-hidden="true">
     {#each selfFx as e (e.id)}
       <span class="fx fx-{e.kind}" class:pop={e.kind === 'drop'} class:pop-loot={e.kind === 'drop'} out:fxOut={{ ms: fxOutMs }} style="--fx:{e.colour}; --lane:{e.id % 3}">{e.text}</span>
@@ -235,14 +235,15 @@
 
   .clear-field span{ font-size: var(--font-xs); }
 
-  /* the player's own column rises above the card, so a taken blow never sits on the card's words */
+  /* player's combat feedback sits just right of the card, clear of its identity and vitals */
   .combat-player-slot .self-side {
-    position: absolute; left: 50%; bottom: calc(100% + var(--spacing-xs));
-    transform: translateX(-50%); display: flex; flex-direction: column-reverse; align-items: center; gap: var(--spacing-xs);
+    position: absolute; left: calc(100% + var(--card-w) + var(--spacing-xs)); bottom: 0;
+    display: flex; flex-direction: column-reverse; align-items: flex-start; gap: var(--spacing-xs);
   }
+  .combat-player-slot .self-side .fx { translate: var(--rail) 0; }
 
   .combat-player-slot {
-    position: absolute; left: 50%; bottom: var(--spacing-lg); z-index: var(--z-content);
+    position: absolute; left: 50%; bottom: 0; z-index: var(--z-content);
     width: min(var(--card-w), calc(100% - var(--pad-area) * 2)); aspect-ratio: 5 / 7;
     transform: translateX(-50%); pointer-events: auto;
   }
@@ -250,7 +251,6 @@
   /* the charge wrapper wears the whole card face, so an attack run moves the card and not just what is
      drawn inside it. The shell above keeps the slot: size, place in the row and the reads pinned to it. */
   .mob .charge{
-    --lunge: 1;
     width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; padding: var(--spacing-md);
   }
 
@@ -274,30 +274,30 @@
      edge that goes with them is the `front` state of `card-combat`. The marks are the read that survives an
      elite or a boss border, which out-ranks the edge colour on the same plate. */
   .mob.front .charge::before, .mob.front .charge::after{
-    content: ''; position: absolute; width: var(--icon-sm); height: var(--icon-sm); pointer-events: none;
+    content: ''; position: absolute; width: var(--icon-label); height: var(--icon-label); pointer-events: none;
     border: 2.5px solid color-mix(in srgb, var(--text) 90%, transparent);
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .85));
   }
 
-  .mob.front .charge::before{ top: var(--x-pull-scale); left: var(--x-pull-scale); border-right: 0; border-bottom: 0; border-top-left-radius: var(--radius-sm); }
+  .mob.front .charge::before{ top: var(--x-pull-scale); left: var(--x-pull-scale); border-right: 0; border-bottom: 0; border-top-left-radius: var(--radius-card); }
 
-  .mob.front .charge::after{ bottom: var(--x-pull-scale); right: var(--x-pull-scale); border-left: 0; border-top: 0; border-bottom-right-radius: var(--radius-sm); }
+  .mob.front .charge::after{ bottom: var(--x-pull-scale); right: var(--x-pull-scale); border-left: 0; border-top: 0; border-bottom-right-radius: var(--radius-card); }
 
   /* the head holds the identity alone: the innate Element mark rides the corner out of the flow, so the
      portrait, the name and the level centre on the card the way the player's own card centres */
   .mob-head { position: relative; width: 100%; min-width: 0; }
   .innate-rail { position: absolute; top: 0; right: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .innate-mark { display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
-  .innate-mark img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .innate-mark { display: grid; place-items: center; width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
+  .innate-mark img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
 
   /* the card head is a column: the body's own portrait on top and centred, its name under it. A mob
      is recognised by its shape before its words, so the face leads rather than sitting beside the
      text it labels. */
   .identity{ display: flex; flex-direction: column; align-items: center; justify-items: center; gap: var(--spacing-sm); min-width: 0; text-align: center; }
   .identity-text{ display: grid; justify-items: center; min-width: 0; }
-  .mob .portrait{ width: calc(var(--icon-lg) * 4 / 5); height: calc(var(--icon-lg) * 4 / 5); flex: none; object-fit: contain; padding: var(--spacing-sm); }
+  .mob .portrait{ width: calc(var(--icon-card) * 4 / 5); height: calc(var(--icon-card) * 4 / 5); flex: none; object-fit: contain; padding: var(--spacing-sm); }
 
-  .mob-name .tier-mark{ width: var(--icon-sm); height: var(--icon-sm); }
+  .mob-name .tier-mark{ width: var(--icon-label); height: var(--icon-label); }
 
   .mob-level { color: var(--dim); font-size: var(--font-xs); line-height: 1.15; }
 
@@ -318,10 +318,10 @@
     display: flex; flex-direction: column; gap: var(--spacing-xs); pointer-events: none;
   }
   .mob-status-badge {
-    position: relative; display: grid; place-items: center; width: var(--icon-md); height: var(--icon-md);
+    position: relative; display: grid; place-items: center; width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5);
     pointer-events: auto;
   }
-  .mob-status-badge img { width: var(--icon-sm); height: var(--icon-sm); object-fit: contain; }
+  .mob-status-badge img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
   .mob-status-badge small {
     position: absolute; right: 0; bottom: 0; max-width: 100%; overflow: hidden;
     font-size: var(--font-xs); line-height: 1;
@@ -334,13 +334,21 @@
      rides the sim's own step while the HUD's meters arrive already eased. */
   .mobbar i{ display: block; height: 100%; width: 100%; transition: transform var(--motion-travel) var(--ease-glide); }
 
-  /* Each number starts at the body struck, fans into its own lane, then lifts clear of the card. */
+  /* The numbers never ride the card face: they mount at the card's right edge and climb the open air in
+     lanes a little staggered apart — the column hangs beside the plate instead of over its words and art.
+     `--lane` is each event's own slot, so two blows travel as two columns spaced a step across, roughly
+     keeping the previous layer compromise in floating text terms. The pop-word column rides the same seam. */
   .mob .plate-fx{
     position: absolute; inset: 0; z-index: var(--z-label); pointer-events: none;
   }
 
   .plate-fx .pop{
-    position: absolute; left: 50%; top: 58%; white-space: nowrap;
+    position: absolute; left: calc(100% + (var(--lane, 0) * var(--spacing-xs))); top: 58%;
+    /* the shared keyframes centre the column on its anchor (`translate(-50%, …)`); this `translate: 50% 0`
+       cancels that, so the number's LEFT edge sits at the card's right edge — the whole figure floats
+       outside the card, never over the art or the words */
+    translate: 50% 0;
+    white-space: nowrap;
     padding: var(--spacing-xs);
   }
   .float-side .pop-loot { padding: var(--spacing-xs); }
@@ -353,7 +361,7 @@
   .mob .charge.lunge.clash { --reach: calc(clamp(63px, 4.84vw, 135px) / 2); }
   .mob .flash {
     position: absolute; inset: -1px; z-index: var(--z-highlight); border: 1px solid var(--fx, var(--edge));
-    border-radius: var(--radius-sm); pointer-events: none;
+    border-radius: var(--radius-card); pointer-events: none;
     box-shadow: inset 0 0 var(--spacing-sm) color-mix(in srgb, var(--fx, var(--text)) 58%, transparent);
     animation: plate-flash .32s ease-out forwards;
   }
@@ -378,7 +386,7 @@
      contributes only alpha, so the Element that carried the hit paints the blade. */
   .mob .arc{
     position: absolute; left: calc(50% + var(--x-pull-arc)); top: calc(clamp(24px, 1.84vw, 51px) + var(--x-pull-arc)); z-index: var(--z-highlight); pointer-events: none;
-    width: var(--icon-xl); height: var(--icon-xl);
+    width: calc(var(--icon-card) * 1.4); height: calc(var(--icon-card) * 1.4);
     background: var(--fx, var(--text));
     -webkit-mask: url('../icon/gear/crossed-swords-1.png') center / contain no-repeat;
             mask: url('../icon/gear/crossed-swords-1.png') center / contain no-repeat;
@@ -388,7 +396,7 @@
   /* a press lands as a burst and not a cut, so the two halves of a build read apart before a number is read */
   .mob .burst{
     position: absolute; left: calc(50% + var(--x-pull-burst)); top: calc(clamp(24px, 1.84vw, 51px) + var(--x-pull-burst)); z-index: var(--z-highlight); pointer-events: none;
-    width: var(--icon-lg); height: var(--icon-lg);
+    width: var(--icon-card); height: var(--icon-card);
     border: 2px solid var(--fx, var(--text)); border-radius: var(--radius-round);
     animation: plate-burst .34s ease-out forwards;
   }

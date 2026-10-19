@@ -1,8 +1,8 @@
-import { eng, E, TOWN } from '../engine/client';
+import { eng, TOWN } from '../engine/client';
 import { dayOf } from './game';
 import type { GameState, TaskSlot, TownState } from './types';
 import { atSettlement } from './craft';
-import { addTo, fits } from './slots';
+import { addTo, fits, slotsFree } from './slots';
 import { sellGoods, tradeInventory } from './trade';
 
 /**
@@ -171,12 +171,14 @@ export function rollTask(rng: () => number, state: GameState): TaskSlot {
 }
 
 /** No Bag Cap exists, so stash tabs are organisation rather than space (`loot.md` §4 · towns.md). */
+export const STASH_TAB_CAP = 6;
+
 export function stashTabCount(state: GameState): number {
   const bought = state.town.owned.filter((id: string) => /^stash_tab_\d/.test(id)).length;
   const houses = state.town.owned.filter((id: string) => /^house_/.test(id)).length * 2;
   // the Reliquary set pays a tab directly, bypassing the one-time price ladder
   const granted = state.grants ? state.grants.stash_tabs : 0;
-  return Math.min(6, bought + houses + granted);
+  return Math.min(STASH_TAB_CAP, bought + houses + granted);
 }
 
 /** Deposit and withdraw only happen at a settlement (`inventory.note`). */
@@ -195,7 +197,7 @@ export function withdraw(state: GameState, tab: number, index: number): { ok: bo
   if (!atSettlement(state)) return { ok: false, why: 'stash transfers are a settlement service' };
   const item = state.stash[tab]?.[index];
   if (!item) return { ok: false, why: 'empty' };
-  if (state.bag.length >= E.inventory.adventure_slots) return { ok: false, why: 'the bag is full' };
+  if (slotsFree(state) < 1) return { ok: false, why: 'the bag is full' };
   state.bag.unshift(item);
   state.stash[tab].splice(index, 1);
   return { ok: true };
@@ -217,14 +219,14 @@ export function depositMany(state: GameState, indices: number[], tab: number): n
   return moved;
 }
 
-/** Bulk withdraw: stop at a full adventure bag; a locked piece stays where it is. */
+/** Bulk withdraw: stop at a full bag; a locked piece stays where it is. */
 export function withdrawMany(state: GameState, tab: number, indices: number[]): number {
   if (!atSettlement(state)) return 0;
   let moved = 0;
   for (const i of [...indices].sort((a, b) => b - a)) {
     const item = state.stash[tab]?.[i];
     if (!item || item.locked) continue;
-    if (state.bag.length >= E.inventory.adventure_slots) break;
+    if (slotsFree(state) < 1) break;
     state.bag.unshift(item);
     state.stash[tab].splice(i, 1);
     moved++;

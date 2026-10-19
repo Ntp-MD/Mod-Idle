@@ -3,7 +3,7 @@ import { E, BASES, STAT_KEYS, loot } from '../src/engine/client';
 import { newGame, tick, equippedCount, huntZone, carried } from '../src/sim/game';
 import { equipFromBag, gearModOf, autoEquip } from '../src/sim/gear';
 import { itemName } from '../src/sim/item-name';
-import { buildCharacter, emptyGear } from '../src/sim/player';
+import { buildCharacter, emptyGear, openingGear } from '../src/sim/player';
 import { craft as clientCraft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
 import { mulberry32 } from '../src/engine/client-helpers';
@@ -160,24 +160,26 @@ describe('equipping from the bag', () => {
     expect(s.gear[7]!.lines[0].value).toBe(5);
   });
 
-  it('refuses a swap onto a full pile instead of deleting its last piece', () => {
-    // the pile never deletes: a full bag refuses the equip the same way a take-off refuses,
-    // otherwise wearing a piece while the pile is full would silently drop its last kept piece
+  it('lets a swap land on a full bag, because a swap is slot-neutral and deletes nothing', () => {
+    // the bag never deletes: the piece leaves and the displaced one takes its place, so a full bag is
+    // never a reason to refuse a swap — only a take-off needs a free slot of its own
     const s = newGame(78);
     const ring = (v: number): Item =>
       ({ slot: 'ring', base: 'Band', ilvl: 20, quality: 'mid', tier: 'T1', q: 1, lines: [{ id: 'all_stat_flat', value: v, slice: 1 }] } as Item);
     s.bag = [];
-    const cap = E.inventory.adventure_slots as number;
+    s.gear[6] = ring(1);
+    s.gear[7] = ring(1);
+    const cap = E.inventory.character_slots as number;
     for (let i = 0; i < cap - 1; i++) s.bag.push(ring(1)); // distinct keeps the deletion observable
     const upgrade = ring(50);
-    s.bag.unshift(upgrade); // the pile is now exactly full, and the last piece is one to keep
+    s.bag.unshift(upgrade); // the bag is now exactly full
     expect(s.bag.length).toBe(cap);
-    const lastBefore = s.bag[cap - 1]!;
+    const worn = [s.gear[6]!, s.gear[7]!];
     const r = equipFromBag(s, 0);
-    expect(r.ok).toBe(false);
-    expect(r.why).toBeTruthy();
+    expect(r.ok).toBe(true);
     expect(s.bag.length).toBe(cap);
-    expect(s.bag[cap - 1]).toBe(lastBefore);
+    expect(s.gear.some((g) => g && g.lines[0]?.value === 50)).toBe(true); // the upgrade went on
+    expect(worn).toContain(s.bag[0]); // and the piece it displaced is back in the bag, not deleted
   });
 });
 
@@ -194,10 +196,10 @@ describe('putting on the best gear the character carries', () => {
     expect(sheet().core).toEqual(before.core);
   });
 
-  it('counts the hunt pile against weight capacity, though never toward stats', () => {
-    // the bag rides on the back, the rule DECISIONS.md states as "weight counted" and the wiki
-    // prints as "counted against your weight capacity": its pieces weigh what their Base says, so
-    // a full pile of heavy frames slows the swing — while the piece still contributes no stat
+  it('counts the bag against weight capacity, though never toward stats', () => {
+    // the bag rides on the back, the rule the wiki prints as "counted against your weight capacity":
+    // its pieces weigh what their Base says, so a bag of heavy frames slows the swing — while the
+    // piece still contributes no stat
     const s = newGame(79);
     const sheet = () => buildCharacter(s.player.level, s.gear, carried(s), 0, undefined, s.player.points, s.player.treeRanks);
     const before = sheet();
@@ -210,19 +212,23 @@ describe('putting on the best gear the character carries', () => {
     expect(after.core).toEqual(before.core); // carried weight is not a stat line
   });
 
-  it('says the pile is full when a swap is refused, instead of claiming nothing better is carried', () => {
+  it('swaps a worn piece out even with a full bag, instead of claiming nothing better is carried', () => {
     const s = newGame(79);
-    const upgrade = piece('chest', 999);
-    const cap = E.inventory.adventure_slots as number;
-    while (s.bag.length < cap) s.bag.push(piece('ring', 1)); // no room for a displaced piece
+    s.bag = [];
+    s.gear[6] = piece('ring', 1);
+    s.gear[7] = piece('ring', 1);
+    const upgrade = piece('ring', 999);
+    const cap = E.inventory.character_slots as number;
+    while (s.bag.length < cap) s.bag.push(piece('ring', 1)); // a full bag, and a swap still has a home
     s.bag.unshift(upgrade);
     autoEquip(s, 0);
-    expect(s.log[0]!.text).toContain('hunt pile is full');
+    expect(s.log[0]!.text).toContain('Best gear on');
     expect(s.log[0]!.text).not.toContain('already the best');
   });
 
   it('wears a real low-band drop that beats the opening piece', () => {
     const s = newGame(79);
+    s.gear = openingGear();
     const drop = Array.from({ length: 100 }, (_, i) => rollDrop(mulberry32(i + 1), 'low', E.item_level.spans[0].from))
       .find((item) => s.gear.some((g) => g?.slot === item.slot && score(item) > score(g)));
     expect(drop).toBeDefined();
@@ -231,7 +237,7 @@ describe('putting on the best gear the character carries', () => {
     expect(s.gear.some((g) => g === drop || (g?.base === drop!.base && g.lines.length === drop!.lines.length))).toBe(true);
   });
 
-  it('wears what is stronger and leaves the rest in the pile', () => {
+  it('wears what is stronger and leaves the rest in the bag', () => {
     const s = newGame(80);
     s.bag = [];
     s.gear[0] = null; // a bare cell is always worth filling, so the swap needs no guess about the start set

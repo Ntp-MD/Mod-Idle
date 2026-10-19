@@ -56,7 +56,7 @@
     <button class="selectable" class:selected={view === 'black-market'} onclick={() => view = 'black-market'}>Black Market{#if blackMarketStock}<b class="badge badge-count tab-count" title={`${blackMarketStock} offer${blackMarketStock === 1 ? '' : 's'} in stock`}>{blackMarketStock}</b>{/if}</button>
   </nav>
   {#if view === 'trade'}
-    <p class="market-note text-note">{profile.needs} Supplying a category lowers its price; demand recovers over {TOWN.trade.recovery_sec / 3600} game hours.</p>
+    <p class="market-note text-note">{profile.needs} Supplying a category lowers its price.</p>
     <div class="trade-layout">
       <section class="cargo" aria-label="Carried trade goods">
         <header><h3>Your cargo</h3><select aria-label="Filter cargo" bind:value={filter}>
@@ -73,7 +73,7 @@
           {/each}
         </div>
         <button disabled={!writer || !local || !cargo.some((row) => row.good.bucket === 'junk')} onclick={onsell}>Sell all junk here</button>
-        <small>Food, herbs and materials are sold only when you select them. Keep supplies for Camp and recipes.</small>
+        <small>Food, herbs and materials sell only when you select them.</small>
       </section>
       <section class="offer" aria-label="Sale quote and trade routes">
         <div class="item-heading"><h3>{selected.name}</h3><span>{carried} carried</span></div>
@@ -102,7 +102,7 @@
             </div>
           {/each}
         </div>
-        <small class="footnote">Quotes use current demand. A walk costs time and provisions; a warp spends gold. Demand can recover during the journey. Gold fractions carry into your next sale.</small>
+        <small class="footnote">Quotes use current demand.</small>
       </section>
     </div>
   {:else if view === 'deliveries'}
@@ -110,7 +110,7 @@
   {:else if view === 'black-market'}
     <BlackMarketBoard state={gameState} townId={market.id} here={local} {writer} onbuy={onblackmarketbuy} />
   {:else if view === 'workshop'}
-    <p class="market-note">Turn regional materials into finished trade goods. New Smithing recipes settle immediately while idle in town; old Metal and Wood recipes keep their Mining and Woodcutting tracks.</p>
+    <p class="market-note">Regional materials become finished trade goods.</p>
     <div class="workshop">
       {#each fieldwork.workshopRecipes as recipe (recipe.id)}
         {@const verdict = canProcess(gameState, recipe.id)}
@@ -123,7 +123,7 @@
       {/each}
     </div>
   {:else}
-    <p class="market-note">Gold buys town services, organisation and appearance. Prices follow this settlement's band.</p>
+    <p class="market-note">Gold buys town services, organisation and appearance.</p>
     <div class="wares">
       {#each stock as row (row.id)}
         {@const price = priceGold(row, market.id, gameState)}
@@ -159,7 +159,7 @@
   .cargo > button { justify-self: start; }
   .catalogue select { min-width: 0; max-width: clamp(150px, 16.94vw, 350px); }
   .provenance { line-height: 1.5; }
-  .sale-line { justify-content: space-between; padding: var(--spacing-md); background: var(--inset); border-radius: var(--radius-sm); gap: var(--spacing-sm); }
+  .sale-line { justify-content: space-between; padding: var(--spacing-md); background: var(--inset); border-radius: var(--radius-card); gap: var(--spacing-sm); }
   .sale-actions { display: flex; align-items: center; gap: var(--spacing-sm); }
   .sale-line input { width: clamp(55px, 4.36vw, 90px); }
   .buyer-list { display: grid; max-height: clamp(220px, 26vw, 520px); overflow: auto; }
@@ -173,7 +173,7 @@
   .workshop-row div { display: grid; gap: var(--spacing-xs); }
   .workshop-row p { font-size: var(--font-sm); }
   .wares { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-md); }
-  .ware { display: grid; gap: var(--spacing-sm); align-content: start; padding: var(--spacing-md); background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .ware { display: grid; gap: var(--spacing-sm); align-content: start; padding: var(--spacing-md); background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-card); }
   .ware button { justify-self: start; }
   @media (max-width: 1023px) { .trade-layout { grid-template-columns: minmax(0, 1fr); } .wares { grid-template-columns: minmax(0, 1fr); } }
 </style>

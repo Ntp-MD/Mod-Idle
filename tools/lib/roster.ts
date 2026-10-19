@@ -184,7 +184,6 @@ function gates(): G.GateRow[] {
   // level buys more damage than mana and the maxed rotation is the efficient one — that is the design.
   const costStep = SM13.COST_LEVEL_STEP, dmgStep = SM13.LEVEL_STEP;
   const atCap = (step: number) => 1 + (SX.level_cap - 1) * step / 100;
-  const ratio = atCap(costStep) / atCap(dmgStep);
   const priced = pricedRows;
   const offLadder = priced.filter((s) => Math.abs(
     SM13.costOf(s, { skillLevel: SX.level_cap }).amount / SM13.costOf(s, { skillLevel: 1 }).amount - atCap(costStep)) > 1e-9).map((s) => s.id);

@@ -1,5 +1,6 @@
 import { E, eng } from '../engine/client';
 import type { AutoReturnState, Cell, GameState, PatrolState, PatrolStop } from './types';
+import { slotsAvailable, slotsUsed } from './slots';
 import { currentCell, ownerOf, rankOf, road, startWalk, zoneOf } from './road';
 
 const CFG = E.road.patrol;
@@ -168,7 +169,9 @@ export function recordPatrolGroupClear(state: GameState, online: boolean): strin
   return online ? advancePatrol(state) : null;
 }
 
-export const autoReturnThreshold = () => Math.ceil(E.inventory.adventure_slots * CFG.auto_return_threshold_pct / 100);
+/** The bag's own size sets the trip's watermark: `pct` of every slot the character carries. */
+export const autoReturnThreshold = (state: GameState) =>
+  Math.ceil(slotsAvailable(state) * CFG.auto_return_threshold_pct / 100);
 
 function startReturnWalk(state: GameState): string | null {
   const feet = currentCell(state);
@@ -192,7 +195,7 @@ function startReturnWalk(state: GameState): string | null {
 
 export function maybeStartAutoReturn(state: GameState, online: boolean, wasPatrolling = state.patrol.active): string | null {
   if (!wasPatrolling || !state.autoReturn.enabled || state.autoReturn.phase !== 'idle'
-    || state.bag.length < autoReturnThreshold() || state.walk || state.group.length || state.dungeon || state.phase === 'camp') return null;
+    || slotsUsed(state) < autoReturnThreshold(state) || state.walk || state.group.length || state.dungeon || state.phase === 'camp') return null;
   state.autoReturn.resumeCell = state.patrol.active && state.cell ? structuredClone(state.cell) : null;
   state.autoReturn.phase = online ? 'to-town' : 'waiting';
   state.hunting = false;
@@ -234,7 +237,7 @@ export function driveAutoReturn(state: GameState, online: boolean): { message: s
 
 export function finishAutoReturnDeposit(state: GameState, moved: number): string {
   const resume = state.autoReturn.resumeCell;
-  if (moved <= 0 || state.bag.length >= autoReturnThreshold()) {
+  if (moved <= 0 || slotsUsed(state) >= autoReturnThreshold(state)) {
     state.autoReturn.phase = 'idle';
     state.autoReturn.resumeCell = null;
     state.patrol.active = false;
@@ -251,10 +254,4 @@ export function finishAutoReturnDeposit(state: GameState, moved: number): string
   }
   state.autoReturn.phase = 'to-stop';
   return `Auto-Return · stashed ${moved} pieces; returning to Patrol`;
-}
-
-export function finishAutoReturnStop(state: GameState): void {
-  if (state.autoReturn.phase !== 'to-stop') return;
-  state.autoReturn.phase = 'idle';
-  state.autoReturn.resumeCell = null;
 }

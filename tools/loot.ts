@@ -31,7 +31,7 @@ import { createLoot } from '../engine/loot.ts';
 
 const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
 
-const { E, L, BAND, BAND_KEYS, BANDS, WEAPONS }: any = eng;
+const { E, L, BAND, BAND_KEYS, BANDS }: any = eng;
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 
@@ -48,7 +48,7 @@ const SEED0 = 20260101;    // fixed, so a cage run is reproducible
 const LOOT = createLoot(E, MODS);
 const {
   SLOTS, TIER_NAME, ELEMENTS,
-  FLAT_GROUP, weightOf, rangeOf, sliceCount, tierSlice, statOf,
+  FLAT_GROUP, weightOf, rangeOf, tierSlice, statOf,
 } = LOOT;
 // the band ladder and its level spans, read once (`item_level` — item-level.md)
 const BAND_INDEX: Record<string, number> = { low: 0, mid: 1, high: 2 };
@@ -57,21 +57,6 @@ const SPAN: Record<string, [number, number]> = Object.fromEntries(
 );
 
 // ---------------------------------------------------------------- parse the Bases out of item-base.md
-
-const clean = (s: any) => s.replace(/\s+/g, ' ').trim();
-const splitMods = (s: any) => s.split('·').map(clean).filter((x: any) => x && x !== '—' && x !== '-');
-
-/** Mod id from the doc's display name ("Max HP %" → max_hp). */
-const idOf = (name: any) => {
-  const n = clean(name).toLowerCase();
-  let hit = null;
-  for (const m of MODS.mods) {
-    const full = m.name.toLowerCase();
-    const bare = full.replace(/\s+(flat|%)$/, '');
-    if (n === full || n === bare || n.startsWith(full + ' ') || n === bare) hit = hit || m.id;
-  }
-  return hit;
-};
 
 // The Base frames and their Gear Mod school come from tools/data/bases.json, which
 // `node tools/bases.ts --checks` gates against item-base.md. The client reads the same file, so a
@@ -89,7 +74,7 @@ const DUAL_WIELD = WEAPON_TYPES.filter((w: any) => w.dual_wield);
 
 // ---------------------------------------------------------------- rng
 
-const { mulberry32, pick, intBetween, pickBand, weightedPick } = LOOT; // engine/loot.ts owns the roll
+const { mulberry32, pick, intBetween, weightedPick } = LOOT; // engine/loot.ts owns the roll
 
 /** One option out of a weighted list — the frame / weapon pick at step 2. */
 function pickWeighted(rng: any, options: any[]) {
@@ -215,7 +200,6 @@ function measureBand(band: any, opts: any = {}) {
   const runs: any[] = [];
   for (let t = 0; t < (opts.trials || TRIALS); t++) runs.push(runBand(band, SEED0 + t * 7919, opts));
   const avg = (f: any) => runs.reduce((s: any, r: any) => s + f(r), 0) / runs.length;
-  const keepRates = runs.map((r: any) => r.keepRate);
   const mean = avg((r: any) => r.keepRate);
   const sd = Math.sqrt(avg((r: any) => (r.keepRate - mean) ** 2));
   return {

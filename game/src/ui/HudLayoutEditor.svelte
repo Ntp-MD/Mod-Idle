@@ -1,8 +1,8 @@
 <script lang="ts">
   import {
     copyHudLayout, DEFAULT_HUD_LAYOUT, DEFAULT_MODAL_AREA, HUD_LAYOUT_VERSION, HUD_REGION_META, migrateHudLayout,
-    moveGridArea, validGridArea, validateHudLayout,
-    type GridAlign, type GridArea, type HudLayout, type HudRegionId,
+    moveGridArea, rectFromArea, validGridArea, validRect, validateHudLayout,
+    type GridAlign, type GridArea, type HudPlacement, type HudLayout, type HudRegionId, type RegionRect,
   } from './hud-layout';
 
   type Layer = 'hud' | 'modal';
@@ -13,7 +13,7 @@
     column: (index % 15) + 1,
   }));
   const TONES: Record<RegionId, string> = {
-    objectives: 'var(--focus)', target: 'var(--hot)', menu: 'var(--gold)', field: 'var(--good-lit)',
+    tasks: 'var(--gold-lit)', objectives: 'var(--focus)', target: 'var(--hot)', menu: 'var(--gold)', field: 'var(--good-lit)',
     travel: 'var(--focus)', panels: 'var(--gold-lit)', commands: 'var(--good-lit)', feed: 'var(--dim)',
     actionbar: 'var(--mana-lit)', panel: 'var(--gold)',
   };
@@ -54,8 +54,10 @@
       const a = modalDraft;
       return row >= a.rowStart && row <= a.rowEnd && column >= a.columnStart && column <= a.columnEnd ? 'panel' : null;
     }
-    return HUD_REGION_META.find(({ id }) => {
-      const a = hudDraft[id].area;
+    return [...HUD_REGION_META.filter(({ id }) => id !== 'field'), ...HUD_REGION_META.filter(({ id }) => id === 'field')].find(({ id }) => {
+      const region = hudDraft[id];
+      if (id !== 'field' && region.mode === 'absolute') return false;
+      const a = region.area;
       return row >= a.rowStart && row <= a.rowEnd && column >= a.columnStart && column <= a.columnEnd;
     })?.id ?? null;
   }
@@ -66,7 +68,7 @@
 
   function shortLabel(id: RegionId): string {
     const labels: Record<RegionId, string> = {
-      objectives: 'MAP', target: 'MOB', menu: 'MENU', travel: 'TRAVEL', field: 'FIELD', panels: 'PANELS', commands: 'CMD',
+      tasks: 'GOALS', objectives: 'MAP', target: 'MOB', menu: 'MENU', travel: 'TRAVEL', field: 'FIELD', panels: 'PANELS', commands: 'CMD',
       feed: 'LOG', actionbar: 'VITALS', panel: 'PANEL',
     };
     return labels[id];
@@ -170,6 +172,36 @@
     hudDraft = { ...hudDraft, [selected]: { ...hudDraft[selected], [axis]: value } };
   }
 
+  const isAbsolute = $derived(layer === 'hud' && selected !== 'panel' && hudDraft[selected as HudRegionId].mode === 'absolute');
+  const absoluteIds = $derived(HUD_REGION_META.filter(({ id }) => id !== 'field' && hudDraft[id].mode === 'absolute').map(({ id }) => hudDraft[id].label));
+  const activeRect = $derived(layer === 'hud' && selected !== 'panel' ? hudDraft[selected as HudRegionId].rect : null);
+
+  function setPlacement(value: HudPlacement) {
+    if (layer !== 'hud' || selected === 'panel') return;
+    const next = copyHudLayout(hudDraft);
+    const region = next[selected];
+    if (region.mode === value) return;
+    if (value === 'absolute') region.rect = rectFromArea(region.area);
+    region.mode = value;
+    hudDraft = next;
+    notice = '';
+  }
+
+  function setRect(key: keyof RegionRect, value: number) {
+    if (layer !== 'hud' || selected === 'panel') return;
+    const next = copyHudLayout(hudDraft);
+    const rect = next[selected].rect;
+    rect[key] = Math.round(value * 10) / 10;
+    if (!validRect(rect)) { rect[key] = hudDraft[selected].rect[key]; notice = 'That free box would leave no room — keep x/y within −10…100 and w/h within 2…120 percent.'; return; }
+    hudDraft = next;
+    notice = '';
+  }
+
+  function setZ(value: number) {
+    if (layer !== 'hud' || selected === 'panel') return;
+    hudDraft = { ...hudDraft, [selected]: { ...hudDraft[selected], z: Number.isFinite(value) ? Math.round(value) : 0 } };
+  }
+
   function resetLayer() {
     if (layer === 'hud') {
       hudDraft = copyHudLayout(DEFAULT_HUD_LAYOUT);
@@ -233,6 +265,7 @@
             <button class="component" class:selected={selected === region.id} draggable="true" title={region.description}
                   ondragstart={(event) => dragStart(event, region.id)} onclick={() => chooseRegion(region.id)}>
             <i style={`--region-tone:${TONES[region.id]}`}></i><span>{region.label}</span>
+            {#if region.id === 'field' || hudDraft[region.id].mode === 'absolute'}<em class="abs-tag">ABS</em>{/if}
           </button>
         {/each}
       {:else}
@@ -247,6 +280,10 @@
       <button onclick={exportLayout}>Export JSON</button>
       <label class="layout-import">Import JSON <input type="file" accept=".json,application/json" aria-label="Import HUD layout JSON" onchange={importLayout} /></label>
     </div>
+    <p class="abs-list" aria-label="Absolutely positioned UI">
+      <strong>Absolute:</strong> Combat field (overlay, always) · experience bar (pinned bottom) · panel veil and popovers (fixed)
+      {#if absoluteIds.length} · free-boxed now: {absoluteIds.join(', ')}{/if}
+    </p>
   </aside>
 
   <section class="layout-workspace" aria-label="15 by 15 layout canvas">
@@ -273,8 +310,12 @@
       {/each}
       {#if layer === 'hud'}
         {#each HUD_REGION_META as region (region.id)}
-          {@const area = hudDraft[region.id].area}
-          <span class="region-caption" style={`--region-tone:${TONES[region.id]};grid-row:${area.rowStart}/${area.rowEnd + 1};grid-column:${area.columnStart}/${area.columnEnd + 1}`}>{shortLabel(region.id)}</span>
+          {#if hudDraft[region.id].mode === 'absolute'}
+            <span class="region-caption abs-caption" style={`--region-tone:${TONES[region.id]};left:${hudDraft[region.id].rect.x}%;top:${hudDraft[region.id].rect.y}%;width:${hudDraft[region.id].rect.w}%;height:${hudDraft[region.id].rect.h}%`}>{shortLabel(region.id)}<em>ABS</em></span>
+          {:else}
+            {@const area = hudDraft[region.id].area}
+            <span class="region-caption" style={`--region-tone:${TONES[region.id]};grid-row:${area.rowStart}/${area.rowEnd + 1};grid-column:${area.columnStart}/${area.columnEnd + 1}`}>{shortLabel(region.id)}</span>
+          {/if}
         {/each}
       {:else}
         <span class="region-caption" style={`--region-tone:${TONES.panel};grid-row:${modalDraft.rowStart}/${modalDraft.rowEnd + 1};grid-column:${modalDraft.columnStart}/${modalDraft.columnEnd + 1}`}>{shortLabel('panel')}</span>
@@ -290,21 +331,54 @@
     <p class="editor-help">
       <strong>How to use:</strong>
       {#if layer === 'hud'}
-        Select a group and click an empty cell, or drag it from the list. Change the inclusive row/column bounds to resize it; alignment positions its contents. Reset restores this layer's draft. Apply updates the HUD; in Showcase it changes the preview only.
+        Select a group and click an empty cell, or drag it from the list. Change the inclusive row/column bounds to resize it; alignment positions its contents. Placement "Absolute box" frees the region from the grid: it then sits at its own x/y percent of the stage with its own size and Z-index. Reset restores this layer's draft. Apply updates the HUD; in Showcase it changes the preview only.
       {:else}
         Set the shared panel bounds with the inclusive coordinates. Reset restores this layer's draft. Apply updates the game; in Showcase it changes the preview only.
       {/if}
     </p>
-    <div class="coordinates">
-      {#each [['rowStart', 'Row from'], ['rowEnd', 'Row to'], ['columnStart', 'Column from'], ['columnEnd', 'Column to']] as [key, label] (key)}
-        <label>{label}
-          <select value={activeArea[key as Coordinate]} onchange={(event) => setCoordinate(key as Coordinate, Number(event.currentTarget.value))}>
-            {#each Array.from({ length: 15 }, (_, index) => index + 1) as value (value)}<option value={value}>{value}</option>{/each}
-          </select>
-        </label>
-      {/each}
-    </div>
+    {#if layer === 'modal'}
+      <div class="coordinates">
+        {#each [['rowStart', 'Row from'], ['rowEnd', 'Row to'], ['columnStart', 'Column from'], ['columnEnd', 'Column to']] as [key, label] (key)}
+          <label>{label}
+            <select value={modalDraft[key as Coordinate]} onchange={(event) => setCoordinate(key as Coordinate, Number(event.currentTarget.value))}>
+              {#each Array.from({ length: 15 }, (_, index) => index + 1) as value (value)}<option value={value}>{value}</option>{/each}
+            </select>
+          </label>
+        {/each}
+      </div>
+    {/if}
     {#if layer === 'hud' && selected !== 'panel'}
+      <label>Placement
+        <select value={hudDraft[selected].mode} onchange={(event) => setPlacement(event.currentTarget.value as HudPlacement)}>
+          <option value="grid">Grid cells</option>
+          <option value="absolute">Absolute box</option>
+        </select>
+      </label>
+      {#if isAbsolute && activeRect}
+        <div class="coordinates">
+          {#each [['x', 'X %'], ['y', 'Y %'], ['w', 'Width %'], ['h', 'Height %']] as [key, label] (key)}
+            <label>{label}
+              <input type="number" min="-10" max="120" step="0.5" value={activeRect[key as keyof RegionRect]}
+                     onchange={(event) => setRect(key as keyof RegionRect, Number(event.currentTarget.value) || 0)} />
+            </label>
+          {/each}
+        </div>
+      {:else if selected !== 'field'}
+        <div class="coordinates">
+          {#each [['rowStart', 'Row from'], ['rowEnd', 'Row to'], ['columnStart', 'Column from'], ['columnEnd', 'Column to']] as [key, label] (key)}
+            <label>{label}
+              <select value={activeArea[key as Coordinate]} onchange={(event) => setCoordinate(key as Coordinate, Number(event.currentTarget.value))}>
+                {#each Array.from({ length: 15 }, (_, index) => index + 1) as value (value)}<option value={value}>{value}</option>{/each}
+              </select>
+            </label>
+          {/each}
+        </div>
+      {/if}
+      <label>Z-index
+        <input type="number" step="1" value={hudDraft[selected].z}
+               title="0 keeps the region's shipped stacking layer; any other number overrides it"
+               onchange={(event) => setZ(Number(event.currentTarget.value))} />
+      </label>
       <label>Horizontal alignment
         <select value={hudDraft[selected].justify} onchange={(event) => setAlignment('justify', event.currentTarget.value as GridAlign)}>
           {#each ALIGNMENTS as [value, label] (value)}<option {value}>{label}</option>{/each}
@@ -338,10 +412,10 @@
   .layer-switch .active { color: var(--gold-lit); border-color: var(--gold); }
   .component-list { display: grid; flex: 1; align-content: start; gap: var(--spacing-xs); min-height: 0; }
   .component {
-    display: grid; grid-template-columns: var(--icon-xs) minmax(0, 1fr); align-items: center; gap: var(--spacing-xs);
+    display: grid; grid-template-columns: var(--icon-detail) minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-xs);
     min-width: 0; text-align: left; font-size: var(--font-xs); color: var(--text);
   }
-  .component i { width: var(--icon-xs); height: var(--icon-xs); border: 1px solid var(--region-tone); background: color-mix(in srgb, var(--region-tone) 22%, transparent); }
+  .component i { width: var(--icon-detail); height: var(--icon-detail); border: 1px solid var(--region-tone); background: color-mix(in srgb, var(--region-tone) 22%, transparent); }
   .component span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .component.selected { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--panel)); }
   .editor-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); min-width: 0; }
@@ -357,11 +431,12 @@
   .layout-inspector .editor-help strong { color: var(--text); }
   .layout-grid {
     display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); grid-template-rows: repeat(15, minmax(0, 1fr));
+    position: relative;
     width: 100%; max-height: 100%; aspect-ratio: 16 / 9; align-self: center; min-height: 0; border: 1px solid var(--hud-edge); background: var(--bg);
   }
   .grid-cell {
     display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
-    min-width: 0; min-height: 0; border-radius: var(--radius-sm); border-top: 0; border-left: 0;
+    min-width: 0; min-height: 0; border-radius: var(--radius-card); border-top: 0; border-left: 0;
     background: transparent; text-align: left; color: var(--dim);
   }
   .grid-cell small { font: var(--font-xs) / 1 var(--num); opacity: .7; }
@@ -371,6 +446,14 @@
     line-height: 1; letter-spacing: .02em; text-shadow: 0 1px 2px var(--bg);
   }
   .grid-cell.occupied { background: color-mix(in srgb, var(--region-tone) 14%, transparent); border-color: color-mix(in srgb, var(--region-tone) 55%, var(--line)); }
+  .abs-caption {
+    position: absolute; z-index: var(--z-popover); display: flex; align-items: center; justify-content: center; gap: 4px;
+    border: 1px dashed var(--region-tone); background: color-mix(in srgb, var(--region-tone) 10%, transparent);
+  }
+  .abs-caption em { font-style: normal; font-size: calc(var(--font-xs) * .85); color: var(--dim); }
+  .component .abs-tag { font-style: normal; font-size: var(--font-xs); color: var(--dim); }
+  .abs-list { margin: 0; color: var(--dim); font-size: var(--font-xs); line-height: 1.35; }
+  .abs-list strong { color: var(--text); }
   .grid-cell.chosen { box-shadow: inset 0 0 0 1px var(--gold); background: color-mix(in srgb, var(--gold) 20%, var(--region-tone)); }
   .grid-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; z-index: var(--z-underlay); }
   .coordinates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); }

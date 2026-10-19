@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { E, eng, TOWN, fieldwork } from '../src/engine/client';
 import { newGame, setLevel, tick } from '../src/sim/game';
+import { openingGear } from '../src/sim/player';
 import { depositMany } from '../src/sim/town';
 import { road, settlementCell, zoneOf, rankOf } from '../src/sim/road';
 import { resolveTravelEvent } from '../src/sim/fieldwork';
@@ -135,6 +136,7 @@ describe('local Patrol and Auto-Return', () => {
 
   it('stashes unlocked gear before resuming and pauses safely when nothing can be moved', () => {
     const state = newGame(84);
+    state.gear = openingGear();
     const [first, second] = stopsForZone(state.zone);
     state.patrol.stops = [first, second];
     state.patrol.active = true;
@@ -143,7 +145,7 @@ describe('local Patrol and Auto-Return', () => {
     state.autoReturn.enabled = true;
     state.grants.stash_tabs = 1;
     const gear = structuredClone(state.gear.find(Boolean)!);
-    state.bag = Array.from({ length: autoReturnThreshold() }, () => structuredClone(gear));
+    state.bag = Array.from({ length: autoReturnThreshold(state) }, () => structuredClone(gear));
     expect(maybeStartAutoReturn(state, true)).toContain('Auto-Return');
     expect(state.autoReturn.phase).toBe('to-town');
 
@@ -152,12 +154,13 @@ describe('local Patrol and Auto-Return', () => {
     state.cell = { ...home, sub: null, wild: null };
     expect(driveAutoReturn(state, true).deposit).toBe(true);
     const moved = depositMany(state, state.bag.map((_, i) => i), 0);
-    expect(moved).toBe(autoReturnThreshold());
+    expect(moved).toBe(autoReturnThreshold(state));
     expect(finishAutoReturnDeposit(state, moved)).toContain('returning to Patrol');
     expect(driveAutoReturn(state, true).message).toContain('heading back');
     expect((state.walk as any)?.to).toMatchObject({ q: first.cell.q, r: first.cell.r });
 
     const locked = newGame(85);
+    locked.gear = openingGear();
     const [lockedFirst, lockedSecond] = stopsForZone(locked.zone);
     locked.patrol.stops = [lockedFirst, lockedSecond];
     locked.patrol.active = true;
@@ -167,7 +170,7 @@ describe('local Patrol and Auto-Return', () => {
     locked.grants.stash_tabs = 1;
     const protectedGear = structuredClone(locked.gear.find(Boolean)!);
     protectedGear.locked = true;
-    locked.bag = Array.from({ length: autoReturnThreshold() }, () => structuredClone(protectedGear));
+    locked.bag = Array.from({ length: autoReturnThreshold(locked) }, () => structuredClone(protectedGear));
     maybeStartAutoReturn(locked, true);
     locked.walk = null;
     locked.cell = { ...home, sub: null, wild: null };
@@ -175,7 +178,7 @@ describe('local Patrol and Auto-Return', () => {
     const lockedMoved = depositMany(locked, locked.bag.map((_, i) => i), 0);
     expect(lockedMoved).toBe(0);
     expect(finishAutoReturnDeposit(locked, lockedMoved)).toContain('no unlocked gear');
-    expect(locked.bag).toHaveLength(autoReturnThreshold());
+    expect(locked.bag).toHaveLength(autoReturnThreshold(locked));
     expect(locked.patrol.active).toBe(false);
   });
 });

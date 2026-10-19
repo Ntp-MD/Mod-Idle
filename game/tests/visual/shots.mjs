@@ -108,7 +108,7 @@ for (const size of sizes) {
   page.on('pageerror', (e) => problems.push(`${size.name} pageerror: ${e.message}`));
   await page.goto(URL, { waitUntil: 'networkidle' });
   await page.waitForSelector('.stage', { timeout: 15000 });
-  // let the fight run a few seconds so the mob plates, the chronicle and the pile all have content in them
+  // let the fight run a few seconds so the mob plates, the chronicle and the bag all have content in them
   await page.waitForTimeout(4000);
   // the read file is per run, not a log: a stale line from the last run reads like a passing check
   fs.rmSync(path.join(OUT, `${size.name}-read.txt`), { force: true });
@@ -146,7 +146,6 @@ for (const size of sizes) {
         const cardBody = card?.querySelector('.card-body');
         const commands = document.querySelector('.commands-dock');
         const gameControls = commands?.querySelector('.game-controls-row');
-        const railAutomation = document.querySelectorAll('.rail .field-auto-tab').length;
         const you = card
           ? {
             mounted: !!combat && !!field?.contains(card) && cross(r(card), r(combat)),
@@ -155,11 +154,9 @@ for (const size of sizes) {
             hp: !!card.querySelector('.meter.hp'),
             es: !!card.querySelector('.meter.es'),
             mana: !!card.querySelector('.meter.mana'),
-            exp: !!card.querySelector('.meter.exp[role="progressbar"]'),
+            exp: !!document.querySelector('.actionbar .track-meter.exp[role="progressbar"]'),
             ratio: r(card).height ? r(card).width / r(card).height : null,
             mobRatio: mobs.length && r(mobs[0]).height ? r(mobs[0]).width / r(mobs[0]).height : null,
-            expRadius: card.querySelector('.meter.exp') ? getComputedStyle(card.querySelector('.meter.exp')).borderRadius : null,
-            mobBarRadius: document.querySelector('.mobbar') ? getComputedStyle(document.querySelector('.mobbar')).borderRadius : null,
             playerBuffRail: !!card.querySelector('.rail.buffs'),
             playerDebuffRail: !!card.querySelector('.rail.debuffs'),
             controlsInCard: !!card.querySelector('.control-tab, .speed-orb'),
@@ -170,16 +167,15 @@ for (const size of sizes) {
         const gameBoxes = gameControls ? Array.from(gameControls.querySelectorAll('button')).map((b) => r(b)) : [];
         const dock = commands && gameControls
           ? {
-            buttons: commands.querySelectorAll('button').length,
-            automation: railAutomation,
+            buttons: commands.querySelectorAll('.hub-control').length,
+            automation: commands.querySelectorAll('button[aria-pressed][title^="Auto"]').length,
             game: gameBoxes.length,
             // one row means the four buttons share a vertical band; a stack would give each its own
             oneRow: gameBoxes.length > 0 && gameBoxes.every((b) => b.bottom > Math.min(...gameBoxes.map((o) => o.top))),
             inStage: !!document.querySelector('.stage')?.contains(commands),
           }
           : null;
-        // the objectives column holds only live reads, so its box must clear everything below it - and the
-        // reference read must be the chronicle's own tab, not a column of its own
+        // The location column clears travel and vitals; Objectives is a separate collapsible feed.
         const tracker = document.querySelector('.tracker');
         const intoColumn = tracker
           ? ['.chronicle', '.field-travel-actions', '.actionbar']
@@ -187,7 +183,7 @@ for (const size of sizes) {
           : [];
         const tabs = Array.from(document.querySelectorAll('.chattabs button')).map((b) => (b.textContent || '').trim().toLowerCase());
         const objectives = {
-          tab: tabs.includes('objectives'),
+          separate: !tabs.includes('objectives') && !!document.querySelector('.field-objectives .disclosure-toggle[aria-expanded]'),
           intoColumn,
         };
         return {
@@ -217,32 +213,32 @@ for (const size of sizes) {
         else {
           if (!y.mounted) problems.push(`${size.name}: the player vital card is not inside the combat field`);
           if (!y.identity) problems.push(`${size.name}: the player vital card shows no You identity`);
-          if (!y.hp || !y.mana || !y.exp) problems.push(`${size.name}: the player card is missing HP, Mana or EXP`);
+          if (!y.hp || !y.mana) problems.push(`${size.name}: the player card is missing HP or Mana`);
+          if (!y.exp) problems.push(`${size.name}: the EXP bar is missing from the vital hub`);
           if (/Hunger|Alignment/.test(y.bodyText)) problems.push(`${size.name}: Hunger or Status Alignment remains inside the player card`);
           if (y.ratio == null || y.mobRatio == null || Math.abs(y.ratio - y.mobRatio) > 0.01) problems.push(`${size.name}: the player vital card ratio ${y.ratio?.toFixed(3)} does not match the mob-card ratio ${y.mobRatio?.toFixed(3)}`);
-          if (y.expRadius !== y.mobBarRadius) problems.push(`${size.name}: the EXP radius ${y.expRadius} does not match the mob bar radius ${y.mobBarRadius}`);
           if (!y.playerBuffRail || !y.playerDebuffRail) problems.push(`${size.name}: the player card is missing an outside buff or debuff rail`);
           if (y.controlsInCard) problems.push(`${size.name}: Game controls are still mounted in the player vital card`);
           if (y.onGroup) problems.push(`${size.name}: the player vital card overlaps ${y.onGroup} live mob plate(s)`);
           if (y.onBar) problems.push(`${size.name}: the player vital card overlaps the action bar`);
           fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
-            'player card: mounted in the combat field with You, HP, ES, Mana and EXP, off mob plates and the action bar\n');
+            'player card: mounted in the combat field with You, HP, ES and Mana; the EXP bar is pinned to the screen bottom edge, off mob plates and the action bar\n');
         }
         const d = off.dock;
         if (!d) problems.push(`${size.name}: the Game controls dock never mounted`);
         else {
           if (!d.inStage) problems.push(`${size.name}: the Game controls dock is outside the live HUD grid`);
-          if (d.automation !== 3) problems.push(`${size.name}: the menu rail carries ${d.automation} automation controls, expected three`);
-          if (d.game !== 4 || d.buttons !== 4) problems.push(`${size.name}: Game controls has ${d.game} buttons (${d.buttons} total), expected one row of four`);
+          if (d.automation !== 2) problems.push(`${size.name}: Game controls carries ${d.automation} automation controls, expected two`);
+          if (d.game !== 6 || d.buttons !== 6) problems.push(`${size.name}: Game controls has ${d.game} buttons (${d.buttons} total), expected one horizontal control group`);
           else if (!d.oneRow) problems.push(`${size.name}: the Game controls stack instead of sitting in one row`);
           fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
-            `game controls: ${d.game} in the bottom-right HUD row; automation: ${d.automation} in the menu rail\n`);
+            `game controls: ${d.game} in the bottom-right HUD row; automation: ${d.automation} in the same group\n`);
         }
         const o = off.objectives;
-        if (!o.tab) problems.push(`${size.name}: the chronicle carries no Objectives tab`);
+        if (!o.separate) problems.push(`${size.name}: Objectives is missing its separate collapsible feed`);
         else if (o.intoColumn.length) problems.push(`${size.name}: the objectives column runs into ${o.intoColumn.join(', ')}`);
         else fs.appendFileSync(path.join(OUT, `${size.name}-read.txt`),
-          'objectives: the column keeps live reads and clears the chronicle, travel controls and action bar; the run\'s target is the chronicle\'s Objectives tab\n');
+          'objectives: separate collapsible feed; location clears the chronicle, travel controls and action bar\n');
       }
     }
     if (name === 'map') {
@@ -283,15 +279,15 @@ for (const size of sizes) {
       // the bag screen has no rail tab: its round knob on the cast order carries it, and the key press that
       // opened this screen is the proof the binding survived the tab's removal
       const rail = await page.evaluate(() => ({
-        tab: Array.from(document.querySelectorAll('.rail .tab span'))
+        tab: Array.from(document.querySelectorAll('.rail .hub-control span'))
           .some((s) => (s.textContent || '').trim().toLowerCase() === 'bags'),
         lit: !!document.querySelector('[aria-label="Bags"].here'),
       }));
       if (rail.tab) problems.push(`${size.name}: the rail still carries a bags tab the bottom bar already offers`);
       if (!rail.lit) problems.push(`${size.name}: the bags screen is open and no knob on the bar answers for it`);
-      const pile = await page.$('.sides button');
-      if (pile) { await pile.click(); await page.waitForTimeout(350); }
-      await page.screenshot({ path: path.join(OUT, `${size.name}-bags-pile.png`) });
+      const sideButton = await page.$('.sides button');
+      if (sideButton) { await sideButton.click(); await page.waitForTimeout(350); }
+      await page.screenshot({ path: path.join(OUT, `${size.name}-bags-side.png`) });
     }
     // what the screen actually says, kept as text so a diff can be read without opening a PNG
     const text = await page.evaluate(() => {
@@ -535,7 +531,7 @@ for (const size of sizes) {
       body: read('body'),
       map: read('.map-back'),
       mapLabel: read('.sheet svg text'),
-      railTab: read('.rail .tab'),
+      railTab: read('.rail .hub-control'),
       logLine: read('.chronicle div'),
       prose: read('.kb td'),
       head: read('.kb .act'),
@@ -559,10 +555,10 @@ for (const size of sizes) {
   await page.keyboard.press('Escape');
 
   // the best-gear press: shot, and the answer it printed is kept as text so a silent no-op cannot pass.
-  // The press is taken only once the hunt has actually banked pieces — waiting on the pile rather than on
+  // The press is taken only once the hunt has actually banked pieces — waiting on the bag rather than on
   // a clock, so the reading is made on a live bag (a time premise · AGENTS.md)
   // A real swap, on screen. The client's own Export gives a save; the same pieces with their lines made
-  // stronger go back into the pile through the client's own Import; the press then has to dress the body.
+  // stronger go back into the bag through the client's own Import; the press then has to dress the body.
   // Every step is a control the player has, so this proves the wiring and the rule together — and a note
   // that reports no swap here is a failure, not a clean run.
   await page.keyboard.press('Escape');

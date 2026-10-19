@@ -34,12 +34,6 @@ export function chooseJunkItem(
   return alternative && rng() >= 0.5 ? alternative : variantItem;
 }
 
-export const pickBand = (rng: Rng, table: [string, number][]) => {
-  const r = rng();
-  let acc = 0;
-  for (const [band, chance] of table) { acc += chance; if (r < acc) return band; }
-  return table[table.length - 1][0];
-};
 
 export function weightedPick(rng: Rng, entries: { id: string; w: number }[]) {
   let total = 0;
@@ -406,6 +400,6 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     BAND_LABEL, RW, MAX_OF, NAME_OF, BANDS_OF, WEIGHT_BY_ID, FLAT_GROUP, ELEMENTS, ARMOUR_SLOTS,
     weightOf, windowAt, spanT, rangeOf, sliceCount, tierSlice, score, keepsDrop, notYetFound, statOf, blockedBy,
     slotUnion, poolFor, poolChances, frameModRoll, frameModAtFloor, linesAtDrop,
-    mulberry32, pick, intBetween, pickBand, weightedPick,
+    mulberry32, pick, intBetween, weightedPick,
   };
 }

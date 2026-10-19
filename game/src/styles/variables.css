@@ -1,5 +1,3 @@
-
-
 @property --skill-cooldown-progress {
     syntax: "<percentage>";
     inherits: false;
@@ -26,16 +24,10 @@
     --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
     --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
 
-    /* Shared radius scale: tight controls, standard surfaces, major panels, circles and capsules. */
-    --radius-round: 50%;
-    --radius-xs: 4px;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-
     /* Shared visual states */
-    --surface-selected: rgba(232, 193, 105, .12);
-    --shadow-raised: 0 8px 24px rgba(0, 0, 0, .5);
-    --shadow-soft: 0 4px 14px rgba(0, 0, 0, .45);
+    --surface-selected: rgba(232, 193, 105, 0.12);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.45);
 
     /* Shared motion */
     --motion-fast: 150ms;
@@ -45,7 +37,7 @@
     --ease-ui: ease;
     --ease-out: ease-out;
     --ease-linear: linear;
-    --ease-glide: cubic-bezier(.2, .8, .2, 1);
+    --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
 
     /* Shared stacking order; small values are component-local layers. */
     --z-underlay: 1;
@@ -71,7 +63,7 @@
 
     --screen-pad: var(--spacing-md);
     --pad-area: 20px;
-    --bar-h: clamp(12px, 0.87vw, 22px);
+    --bar-h: 14px;
 
     --minimap-size: clamp(100px, 7.74vw, 216px);
     --objectives-w: clamp(170px, 11.96vw, 300px);
@@ -128,35 +120,35 @@
 
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
-
-    --font-xs: clamp(12px, 0.90vw, 24px);
-    --font-sm: clamp(14px, 1.04vw, 28px);
+    --radius-round: 50%;
+    --radius-card: 8px;
+    --font-xs: 14px;
+    --font-sm: 16px;
     --font-md: clamp(17px, 1.28vw, 36px);
     --font-lg: clamp(22px, 1.67vw, 47px);
     --font-xl: clamp(29px, 2.18vw, 62px);
-    --icon-xs: clamp(11px, 0.72vw, 23px);
-    --icon-sm: clamp(14px, 1vw, 31px);
-    --icon-md: clamp(21px, 1.50vw, 45px);
-    --icon-lg: clamp(32px, 3vw, 68px);
-    --icon-xl: clamp(44px, 4vw, 95px);
-
+    --icon-detail: clamp(11px, 0.72vw, 23px);
+    --icon-label: clamp(14px, 1vw, 31px);
+    --icon-card: clamp(32px, 3vw, 68px);
     --icon-hub: clamp(40px, 4vw, 60px);
-    --icon-hub-img: 50%;
-    --slot-skill-size: clamp(30px, 4vw, 70px);
+    --icon-hub-img: 70%;
+    --input-narrow: clamp(44px, 4vw, 95px);
+    --slot-item: 40px;
+    --slot-skill-size: 50px;
     --field-card-size: clamp(125px, 8.63vw, 180px);
-    --spacing-xs: 3px;
-    --spacing-sm: 5px;
-    --spacing-md: 10px;
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
     --spacing-lg: 20px;
-    --spacing-xl: 30px;
+    --spacing-xl: 40px;
     --seam: 1px;
 
     --sheet-fs-region: clamp(9px, 0.54vw, 15px);
-    --sheet-fs-walk: clamp(8px, 0.40vw, 11px);
-    --sheet-fs-place: clamp(9px, 0.50vw, 14px);
-    --sheet-fs-capital: clamp(10px, 0.60vw, 17px);
+    --sheet-fs-walk: clamp(8px, 0.4vw, 11px);
+    --sheet-fs-place: clamp(9px, 0.5vw, 14px);
+    --sheet-fs-capital: clamp(10px, 0.6vw, 17px);
     --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
-    --sheet-fs-id: clamp(7px, 0.40vw, 11px);
+    --sheet-fs-id: clamp(7px, 0.4vw, 11px);
     --x-pull-arc: clamp(-46px, -1.65vw, -21px);
     --x-pull-burst: clamp(-32px, -1.16vw, -15px);
     --x-pull-scale: clamp(-14px, -0.48vw, -6px);

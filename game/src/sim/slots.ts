@@ -2,15 +2,16 @@ import { E, TOWN, fieldwork } from '../engine/client';
 import type { GameState } from './types';
 
 /**
- * The character bag as the design defines it: thirty slots of carried consumables, where stones and
- * junk stack 999 per slot and are weightless, herbs and potions stack 100 per slot, and gold takes no
- * slot at all (`glossary.md` · `loot.md` §4 · `engine.json` `inventory`).
+ * The bag as the design defines it: one pool of carried slots, where a kept gear piece takes one slot
+ * and a consumable stack takes one, stones and junk stack 999 per slot and are weightless, herbs and
+ * potions stack 100 per slot, and gold takes no slot at all (`glossary.md` · `loot.md` §4 ·
+ * `engine.json` `inventory`).
  *
- * Until now the client counted every one of those media as an unbounded number, so the bag existed
- * on paper only until this module. Nothing here adds a number: the caps, the slot count and the
- * overflow verb all come from `inventory`, and the verb is the one the doc already chose —
- * `stop_pickup` — so a grant that would not fit is simply not made, and is never converted into a
- * different medium or deleted.
+ * There is no second, temporary bag: what a kill keeps and what the character carries share the one
+ * count, so the number the panel prints is the number every capacity check uses. Nothing here adds a
+ * number: the caps, the slot count and the overflow verb all come from `inventory`, and the verb is
+ * the one the doc already chose — `stop_pickup` — so a grant that would not fit is simply not made,
+ * and is never converted into a different medium or deleted.
  */
 
 const INV = E.inventory as {
@@ -46,7 +47,7 @@ export interface BagStack {
 }
 
 /**
- * Every stack in the character bag, category by category. `slotsUsed` counts these, so the grid and
+ * Every stack in the bag, category by category. `slotsUsed` counts these, so the grid and
  * the slot number can never disagree — the panel draws this list and owns no number of its own.
  */
 export function bagStacks(state: GameState): BagStack[] {
@@ -65,10 +66,11 @@ export function bagStacks(state: GameState): BagStack[] {
   return out;
 }
 
-/** Slots the bag is using now: one per full or partial stack, by category. */
+/** Slots the bag is using now: one per carried gear piece, plus one per full or partial stack. */
 export function slotsUsed(state: GameState): number {
-  return bagStacks(state)
-    .reduce((sum, s) => sum + slotsFor(s.count, (E.inventory.stack_size as Record<string, number>)[s.capKind]), 0);
+  return (state.bag?.length || 0)
+    + bagStacks(state)
+      .reduce((sum, s) => sum + slotsFor(s.count, (E.inventory.stack_size as Record<string, number>)[s.capKind]), 0);
 }
 
 export const slotsFree = (state: GameState): number => slotsAvailable(state) - slotsUsed(state);
@@ -100,7 +102,7 @@ export function addTo(
 /** Would a grant of this size fit? Used by producers that must not consume a cost they can't bank. */
 export interface BagCost { bucket: Record<string, number>; key: string; capKind: string; amount: number }
 
-/** Preview the complete character-bag exchange without consuming costs or granting outputs. */
+/** Preview the complete bag exchange without consuming costs or granting outputs. */
 export function fitsTransaction(state: GameState, costs: BagCost[], grants: BagCost[]): boolean {
   const canonical = new Map(BUCKETS.map((entry) => [entry.read(state), entry.cap]));
   const grouped = new Map<Record<string, number>, Map<string, { costs: number; grants: number }>>();
@@ -117,7 +119,8 @@ export function fitsTransaction(state: GameState, costs: BagCost[], grants: BagC
       keys.set(entry.key, total);
     }
   }
-  let used = 0;
+  // the one pool: kept gear pieces take a slot each, and the stacks below take theirs out of the same count
+  let used = state.bag?.length || 0;
   for (const [bucket, capKind] of canonical) {
     const cap = INV.stack_size[capKind];
     if (!Number.isSafeInteger(cap) || cap <= 0) return false;
@@ -137,24 +140,6 @@ export function fitsTransaction(state: GameState, costs: BagCost[], grants: BagC
   return Number.isSafeInteger(available) && available >= 0 && used <= available;
 }
 
-export function fitsAll(state: GameState, grants: BagCost[]): boolean {
-  const grouped = new Map<Record<string, number>, Map<string, { amount: number; capKind: string }>>();
-  for (const grant of grants) {
-    if (grant.amount < 0) return false;
-    if (!grouped.has(grant.bucket)) grouped.set(grant.bucket, new Map());
-    const bucket = grouped.get(grant.bucket)!;
-    const prior = bucket.get(grant.key);
-    bucket.set(grant.key, { capKind: grant.capKind, amount: (prior?.amount || 0) + grant.amount });
-  }
-  let need = 0;
-  for (const [bucket, keys] of grouped) for (const [key, grant] of keys) {
-    const cap = (E.inventory.stack_size as Record<string, number>)[grant.capKind];
-    const before = bucket[key] || 0;
-    need += slotsFor(before + grant.amount, cap) - slotsFor(before, cap);
-  }
-  return need <= slotsFree(state);
-}
-
 export const fits = (state: GameState, bucket: Record<string, number>, key: string, capKind: string, amount: number, costs: BagCost[] = []): boolean => {
   const cap = (E.inventory.stack_size as Record<string, number>)[capKind];
   let before = bucket[key] || 0;
@@ -169,7 +154,7 @@ export const fits = (state: GameState, bucket: Record<string, number>, key: stri
   return slotsFor(before + amount, cap) - slotsFor(before, cap) <= slotsFree(state) + freed;
 };
 
-/** Extra character-bag slots the Porter's pouch lines sold — each is a `space` line. */
+/** Extra bag slots the Porter's pouch lines sold — each is a `space` line. */
 export function pouchSlots(state: GameState): number {
   const owned = (state.town && state.town.owned) || [];
   let granted = 0;

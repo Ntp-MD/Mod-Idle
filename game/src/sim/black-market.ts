@@ -43,10 +43,10 @@ export function blackMarketOfferReason(state: GameState, town: string, offerId: 
   if (offer.kind === 'material') {
     const good = trade.byId[offer.good || ''];
     if (!good || good.bucket !== 'material') return 'Saved material is no longer available.';
-    if (!fitsTransaction(state, [], [{ bucket: state.fieldwork.materials, key: good.key, capKind: 'material', amount: offer.count }])) return 'Make room in the character bag for this material.';
+    if (!fitsTransaction(state, [], [{ bucket: state.fieldwork.materials, key: good.key, capKind: 'material', amount: offer.count }])) return 'Make room in the bag for this material.';
   } else if (offer.kind === 'stone') {
     if (!offer.stone || !validStone(offer.stone)) return 'Saved stone is no longer available.';
-    if (!fitsTransaction(state, [], [{ bucket: state.counters.stones, key: offer.stone, capKind: 'stone', amount: offer.count }])) return 'Make room in the character bag for this stone.';
+    if (!fitsTransaction(state, [], [{ bucket: state.counters.stones, key: offer.stone, capKind: 'stone', amount: offer.count }])) return 'Make room in the bag for this stone.';
   } else if (offer.kind === 'skill') {
     if (!offer.skill || !sm.byId[offer.skill] || !Number.isSafeInteger(offer.level) || offer.level! < 1 || offer.level! > E.skill_xp.level_cap) return 'Saved skill offer is no longer available.';
     if (Object.hasOwn(state.skills.owned, offer.skill) && (state.skills.xp[offer.skill] || 0) >= sm.skillXpForLevel(offer.level!)) return 'This skill already has that XP Level or higher.';
@@ -104,10 +104,10 @@ export function buyBlackMarket(state: GameState, town: string, offerId: string, 
     const good = trade.byId[offer.good || ''];
     if (!good || good.bucket !== 'material' || !Number.isSafeInteger(offer.count)) return refuse('saved material is no longer available');
     material = { bucket: state.fieldwork.materials, key: good.key, capKind: 'material', amount: offer.count };
-    if (!fitsTransaction(state, [], [material])) return refuse('make room in the character bag for this material');
+    if (!fitsTransaction(state, [], [material])) return refuse('make room in the bag for this material');
   } else if (offer.kind === 'stone') {
     if (!offer.stone || !validStone(offer.stone)) return refuse('saved stone is no longer available');
-    if (!fitsTransaction(state, [], [{ bucket: state.counters.stones, key: offer.stone, capKind: 'stone', amount: offer.count }])) return refuse('make room in the character bag for this stone');
+    if (!fitsTransaction(state, [], [{ bucket: state.counters.stones, key: offer.stone, capKind: 'stone', amount: offer.count }])) return refuse('make room in the bag for this stone');
   } else {
     const skillId = offer.skill;
     const skill = skillId ? sm.byId[skillId] : null;

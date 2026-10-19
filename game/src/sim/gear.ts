@@ -1,7 +1,8 @@
-import { E, BASES, loot } from '../engine/client';
+import { BASES, loot } from '../engine/client';
 import { itemName } from './item-name';
 import { push } from './game';
 import { refresh as refreshFilter } from './filter';
+import { slotsFree } from './slots';
 import type { GameState, Item } from './types';
 
 /**
@@ -61,9 +62,8 @@ export function equipFromBag(s: GameState, bagIndex: number, quiet = false, prot
   const at = cellFor(gear, item, protectLocked);
   if (at < 0) return { ok: false, why: 'no empty slot left to wear it in' };
   const prev = gear[at];
-  // the pile never deletes: a swap needs a free cell in it, the same way a take-off does
-  if (prev && s.bag.length >= E.inventory.adventure_slots)
-    return { ok: false, why: 'the hunt pile is full' };
+  // a swap is slot-neutral — the piece leaves the bag and the one it displaced takes its place — so a
+  // full bag is never a reason to refuse a swap; a take-off still needs a free slot of its own.
   // a Stat Mod line already carries its own Core stat, baked at drop, so wearing changes
   // nothing about it — the piece is worn exactly as it was rolled
   gear[at] = { ...item };
@@ -84,7 +84,7 @@ export function equipFromBag(s: GameState, bagIndex: number, quiet = false, prot
 export function unequip(s: GameState, cell: number, quiet = false): { ok: boolean; why?: string } {
   const item = s.gear[cell];
   if (!item) return { ok: false, why: 'nothing is worn in that slot' };
-  if (s.bag.length >= E.inventory.adventure_slots) return { ok: false, why: 'the hunt pile is full' };
+  if (slotsFree(s) < 1) return { ok: false, why: 'the bag is full' };
   const gear = [...s.gear];
   gear[cell] = null;
   s.gear = gear;
@@ -112,7 +112,7 @@ const untouchable = (item: Item) =>
 
 export interface EquipResult {
   swaps: EquipSwap[];
-  /** pile pieces still left alone after the press */
+  /** carried pieces still left alone after the press */
   spared: { locked: number; set: number; broken: number };
   /** stored pieces that would beat something worn — the warehouse is reported, never raided */
   inStash: number;
@@ -130,18 +130,18 @@ export interface EquipResult {
  *   nothing and a body never churns over a rounding error. An empty cell is always worth filling.
  * - **Nothing the player pinned moves** — locked and Broken pieces stay put. A Collector reservation
  *   yields to an upgrade, and wearing clears the reservation.
- * - **Only what the character carries** is worked: worn gear and the hunt pile. The warehouse is a decision
+ * - **Only what the character carries** is worked: worn gear and the carried pieces. The warehouse is a decision
  *   away, so the result counts what is better in there instead of quietly emptying it into the body.
  * - **Auto Equip is enabled or the player pressed it.** Either path reads this same rule.
  *
- * Each pass re-reads the pile, because wearing one piece shifts every index after it.
+ * Each pass re-reads the carried pieces, because wearing one piece shifts every index after it.
  */
 export function autoEquip(s: GameState, marginPct = 0): EquipResult {
   const swaps: EquipSwap[] = [];
   let refused: string | null = null;
   // one swap per cell the body owns is the most any press can do, so the pass count is bounded by the body
   for (let pass = 0; pass < s.gear.length; pass++) {
-    // the whole pile read against the body it has now, then the single best swap taken. The pile is
+    // the whole carried list read against the body it has now, then the single best swap taken. It is
     // re-read every pass because wearing a piece shifts every index after it.
     const best = s.bag
       .map((item, bagIndex) => ({ item, bagIndex }))
@@ -181,14 +181,12 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
   if (swaps.length) {
     push(s, `Best gear on — ${swaps.length} piece${swaps.length === 1 ? '' : 's'} went up: ${swaps.map(where).join(', ')}`);
   } else if (refused) {
-    // a refusal is its own answer: the pile heard "nothing better is carried" and that would be a lie
-    push(s, `Nothing went on — ${refused === 'the hunt pile is full'
-      ? 'the hunt pile is full, so a swap has nowhere to put the piece it takes off'
-      : refused}`);
+    // a refusal is its own answer: the press heard "nothing better is carried" and that would be a lie
+    push(s, `Nothing went on — ${refused}`);
   } else {
     const held = spared.locked + spared.set + spared.broken;
     push(s, `Nothing to change — what you wear is already the best you carry`
-      + (held ? `, and ${held} piece${held === 1 ? '' : 's'} in the pile are left alone (locked, promised to a set, or Broken)` : ''));
+      + (held ? `, and ${held} piece${held === 1 ? '' : 's'} in the bag are left alone (locked, promised to a set, or Broken)` : ''));
   }
   return { swaps, spared, inStash };
 }

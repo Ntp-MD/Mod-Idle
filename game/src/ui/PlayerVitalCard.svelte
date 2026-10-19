@@ -11,7 +11,7 @@
     import type { Statuses, StatusName } from "../sim/combat";
 
     /**
-     * The player's own combat card: one You identity, HP/ES/Mana/EXP readouts and combat feedback.
+     * The player's own combat card: one You identity, HP/ES/Mana readouts and combat feedback.
      * Its 5:7 portrait frame uses the same width as a mob card. Buff and debuff badges
      * flank the frame on their respective sides; Game controls live together in their own bottom-right HUD region.
      *
@@ -25,9 +25,7 @@
         statuses,
         vitals,
         reserved,
-        xpPct,
-        allocOpen,
-        onAllocate,
+        onSheet,
         fxOutMs,
         fmtNum,
     }: {
@@ -37,15 +35,13 @@
         statuses: Statuses;
         vitals: { hp: number; es: number; mana: number };
         reserved: number;
-        xpPct: number;
-        allocOpen: boolean;
-        onAllocate: () => void;
+        onSheet: () => void;
         fxOutMs: number;
         fmtNum: (n: number) => string;
     } = $props();
 
     const faceMark = characterIcon();
-    let portraitAnchor = $state<HTMLImageElement | null>(null);
+    let cardAnchor = $state<HTMLDivElement | null>(null);
 
     const shortTime = (secs: number) => (secs >= 60 ? `${Math.ceil(secs / 60)}m` : String(secs));
 
@@ -62,30 +58,31 @@
     const latestLand = $derived(ring.find((e) => e.side === "field" && e.kind === "hit" && (e.via === "swing" || e.via === "cast")) || null);
     const selfArt = $derived(plateGesture(latestTaken, latestLand));
     /** The blow taken is the louder fact; a strictly newer swing of the character's own is ignored here —
-     *  the card no longer charges the field, so only the knock gesture has a body to land on. */
+     *  on a shared second the card is already away charging the field, so only a one-sided exchange
+     *  leaves a knock to land on. */
     const knocked = $derived(selfArt?.gesture === "knock" && latestTaken?.sec !== latestLand?.sec);
     const takenPops = $derived(ring.filter((e) => e.side === "self" && e.kind === "taken" && e.value).slice(0, 3));
     const defenseWords = $derived(ring.filter((e) => e.side === "self" && (e.kind === "block" || e.kind === "proc")).slice(0, 3));
     let lastLungeId = -1;
-    let portraitAnimation: Animation | null = null;
+    let cardAnimation: Animation | null = null;
     $effect(() => {
         const hit = latestLand;
-        const portrait = portraitAnchor;
-        if (!hit || !portrait || hit.id === lastLungeId) return;
+        const card = cardAnchor;
+        if (!hit || !card || hit.id === lastLungeId) return;
         lastLungeId = hit.id;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         const frame = requestAnimationFrame(() => {
-            if (!portrait.isConnected) return;
+            if (!card.isConnected) return;
             const field = document.querySelector(".field") as HTMLElement | null;
             if (!field) return;
             const mobs = Array.from(field.querySelectorAll<HTMLElement>(".mob"));
             const target = mobs.find((mob) => mob.dataset.mobId === hit.mobId) || mobs[0];
-            const sourceRect = portrait.getBoundingClientRect();
+            const sourceRect = card.getBoundingClientRect();
             const targetRect = target?.getBoundingClientRect() || field.getBoundingClientRect();
             const dx = (targetRect.left + targetRect.width / 2 - sourceRect.left - sourceRect.width / 2) * 0.72;
             const dy = (targetRect.top + targetRect.height / 2 - sourceRect.top - sourceRect.height / 2) * 0.72;
-            portraitAnimation?.cancel();
-            portraitAnimation = portrait.animate(
+            cardAnimation?.cancel();
+            cardAnimation = card.animate(
                 [
                     { transform: "translate(0, 0) scale(1)", offset: 0 },
                     { transform: "translate(0, 2px) scale(.97)", offset: 0.16 },
@@ -149,7 +146,7 @@
             <span class="pop pop-word" out:fxOut={{ ms: fxOutMs }} style="--fx:{defenseColour(e.text)}; --lane:{e.id % 4}">{e.text}</span>
         {/each}
     </div>
-    <div class="card-body card card-combat">
+    <div class="card-body card card-combat" bind:this={cardAnchor}>
         <div class="vitals">
             {#if latestTaken}
                 {#key latestTaken.id}
@@ -159,16 +156,15 @@
             {#key selfArt ? selfArt.id : "self-idle"}
                 <div class="cardface" class:knock={knocked}>
                     <div class="identity">
-                        <img class="portrait card-portrait" bind:this={portraitAnchor} src={faceMark} alt="" aria-hidden="true" />
+                        <img class="portrait card-portrait" src={faceMark} alt="" aria-hidden="true" />
                         <div>
                             <p class="name card-name">You</p>
                             <button
                                 class="level-button btn btn-flat"
                                 type="button"
-                                aria-expanded={allocOpen}
-                                aria-label={`Allocate stat points · level ${c.level}`}
-                                title="Allocate stat points"
-                                onclick={onAllocate}>Level {c.level}</button
+                                aria-label={`Open character sheet · level ${c.level}`}
+                                title="Open character sheet · allocate stat points"
+                                onclick={onSheet}>Level {c.level}</button
                             >
                         </div>
                     </div>
@@ -186,12 +182,9 @@
                             role="img"
                             aria-label={`Mana ${fmtNum(Math.max(0, Math.round(vitals.mana)))} of ${fmtNum(c.maxMana)}${reserved > 0 ? `, ${reserved}% reserved by auras` : ""}`}
                         >
-                            <i style={bar(vitals.mana, c.maxMana)}></i><b>{fmtNum(Math.max(0, Math.round(vitals.mana)))} / {fmtNum(c.maxMana)}</b>
-                        </span>
-                        <span class="meter track track-meter exp" role="progressbar" aria-label={`Experience progress at level ${c.level}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={xpPct}>
-                            <i style={bar(xpPct, 100)}></i><b>{xpPct.toFixed(1)}%</b>
-                        </span>
-                    </div>
+                             <i style={bar(vitals.mana, c.maxMana)}></i><b>{fmtNum(Math.max(0, Math.round(vitals.mana)))} / {fmtNum(c.maxMana)}</b>
+                         </span>
+                     </div>
                 </div>
             {/key}
         </div>
@@ -326,7 +319,7 @@
         z-index: var(--z-highlight);
         pointer-events: none;
         border: 1px solid var(--fx, var(--edge));
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius-card);
         box-shadow: inset 0 0 var(--spacing-sm) color-mix(in srgb, var(--fx, var(--text)) 58%, transparent);
         animation: card-flash 0.32s ease-out forwards;
     }
@@ -339,13 +332,14 @@
     }
     .pop {
         position: absolute;
-        left: 50%;
-        top: calc(-1 * var(--spacing-xl));
+        left: calc(100% + var(--spacing-xs) + (var(--lane, 0) * var(--spacing-xs)));
+        top: 50%;
+        translate: 50% 0;
         white-space: nowrap;
         padding: var(--spacing-sm);
     }
     .pop-word {
-        top: calc(-1 * (var(--spacing-xl) + var(--font-md)));
+        top: calc(50% + var(--font-md));
     }
 
     .rails {
@@ -367,13 +361,13 @@
         position: relative;
         display: grid;
         place-items: center;
-        width: var(--icon-md);
-        height: var(--icon-md);
+        width: calc(var(--icon-label) * 1.5);
+        height: calc(var(--icon-label) * 1.5);
         pointer-events: auto;
     }
     .badge img {
-        width: var(--icon-sm);
-        height: var(--icon-sm);
+        width: var(--icon-label);
+        height: var(--icon-label);
         object-fit: contain;
     }
     .badge small {
@@ -402,15 +396,15 @@
         min-width: 0;
     }
     .portrait {
-        width: var(--icon-lg);
-        height: var(--icon-lg);
+        width: var(--icon-card);
+        height: var(--icon-card);
         flex: none;
         object-fit: contain;
         padding: var(--spacing-sm);
     }
     .player-card.combat .portrait {
-        width: calc(var(--icon-lg) * 4 / 5);
-        height: calc(var(--icon-lg) * 4 / 5);
+        width: calc(var(--icon-card) * 4 / 5);
+        height: calc(var(--icon-card) * 4 / 5);
     }
     .name {
         margin: 0;

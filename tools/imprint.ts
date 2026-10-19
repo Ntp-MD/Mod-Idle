@@ -196,7 +196,7 @@ function checks() {
   const rb = CRAFT.rebirth(deep, POOL, rng);
   if (!rb.ok) im8.push(`Rebirth refused a piece with Unbound lines: ${rb.why}`);
   else {
-    if (rb.item.lines.slice(0, CRAFT.UNTOUCHABLE).map((l: any, i: number) => l.id).join(',')
+    if (rb.item.lines.slice(0, CRAFT.UNTOUCHABLE).map((l: any) => l.id).join(',')
       !== deep.lines.slice(0, CRAFT.UNTOUCHABLE).map((l: any) => l.id).join(',')) im8.push('Rebirth touched the Frame Mod or the Bound pair');
     if (rb.item.lines.length !== deep.lines.length) im8.push('Rebirth moved the line count');
     if ((rb.item.mods_added || 0) !== (deep.mods_added || 0)) im8.push('Rebirth spent an Add charge');

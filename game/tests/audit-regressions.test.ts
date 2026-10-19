@@ -237,7 +237,7 @@ describe('the Corrupt gamble pays what its table promises', () => {
 });
 
 describe('the Collector never consumes a pinned piece', () => {
-  it('a turn-in leaves the locked held piece in the pile and names it', () => {
+  it('a turn-in leaves the locked held piece in the bag and names it', () => {
     const s = newGame(38);
     const set = col.sets[0];
     const settlement = settlementById(set.settlement)!;

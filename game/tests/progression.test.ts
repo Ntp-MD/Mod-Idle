@@ -6,7 +6,7 @@ import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines } 
 import { newGoal, target, onSpawn, onKill, watch } from '../src/sim/goal';
 import type { GameState, Mob } from '../src/sim/types';
 import { respecStats } from '../src/sim/respec';
-import { buildCharacter } from '../src/sim/player';
+import { buildCharacter, openingGear } from '../src/sim/player';
 
 /** The three progression side-tracks the game runs beside the level bar: Mastery, the passive tree, the
  *  win gate. Each one's rules live in the sim; these read them through the same calls the client makes. */
@@ -125,6 +125,7 @@ describe('settlement respec', () => {
 describe('resistance ceiling', () => {
   it('caps at 75% normally and lets only passive ranks extend it to 90%', () => {
     const s = newGame();
+    s.gear = openingGear();
     const item = s.gear.find((g) => g)!;
     item.lines = [
       { id: 'elemental_resistance', value: 200 },

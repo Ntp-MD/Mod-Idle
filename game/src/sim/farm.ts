@@ -96,7 +96,7 @@ export function harvest(state: GameState, index: number): { ok: boolean; why?: s
   const tier = plot.tier;
   const herbs = farm.yieldPerHarvest;
   if (!fits(state, state.farm.herbs, tier, 'herb', herbs)) {
-    return { ok: false, why: 'the character bag has no slot left for this crop — sell or brew first' };
+    return { ok: false, why: 'the bag has no slot left for this crop — sell or brew first' };
   }
   addTo(state, state.farm.herbs, tier, 'herb', herbs);
   state.farm.xp += farm.xpPerHarvest;
@@ -129,7 +129,7 @@ export function craftPotion(state: GameState, name: string): { ok: boolean; why?
   if (!fits(state, state.farm.potions, name, 'potion', 1, [
     { bucket: state.farm.herbs, key: potion.tier, capKind: 'herb', amount: cost.herbs },
     { bucket: state.counters.stones, key: 'reroll_value', capKind: 'stone', amount: cost.reroll_value_stones },
-  ])) return { ok: false, why: 'no free slot in the character bag' };
+  ])) return { ok: false, why: 'no free slot in the bag' };
   state.farm.herbs[potion.tier] -= cost.herbs;
   state.counters.stones.reroll_value -= cost.reroll_value_stones;
   addTo(state, state.farm.potions, name, 'potion', 1);
@@ -144,7 +144,7 @@ export function condense(state: GameState, name: string): { ok: boolean; why?: s
   if (!fits(state, state.farm.condensed, name, 'potion', 1, [
     { bucket: state.farm.potions, key: name, capKind: 'potion', amount: cost.bottles },
     { bucket: state.counters.stones, key: 'reroll_value', capKind: 'stone', amount: cost.reroll_value },
-  ])) return { ok: false, why: 'no free slot in the character bag' };
+  ])) return { ok: false, why: 'no free slot in the bag' };
   state.farm.potions[name] -= cost.bottles;
   state.counters.stones.reroll_value -= cost.reroll_value;
   addTo(state, state.farm.condensed, name, 'potion', 1);
@@ -153,6 +153,51 @@ export function condense(state: GameState, name: string): { ok: boolean; why?: s
 
 const bottleWorth = (state: GameState, name: string) =>
   (state.farm.condensed[name] || 0) * farm.P.condensed.effect_mult + (state.farm.potions[name] || 0);
+
+/** Drink one bottle: a condensed dose counts as ten, and a `both` draught fills both pools. */
+function applyPotion(state: GameState, c: Character, potion: any): { hp: number; mana: number } {
+  const condensed = (state.farm.condensed[potion.name] || 0) > 0;
+  if (condensed) state.farm.condensed[potion.name] -= 1;
+  else state.farm.potions[potion.name] -= 1;
+  const mult = condensed ? farm.P.condensed.effect_mult : 1;
+  const hp = (c.maxHp * farm.potionPct(potion, 'hp') * mult) / 100;
+  const mana = (c.maxMana * farm.potionPct(potion, 'mana') * mult) / 100;
+  if (hp) state.player.hp = Math.min(c.maxHp, state.player.hp + hp);
+  if (mana) state.player.mana = Math.min(c.maxMana, state.player.mana + mana);
+  state.farm.lastDrinkAt = state.clockSec;
+  state.farm.usesThisFight++;
+  return { hp, mana };
+}
+
+/** Manual sip from the Farm board: the same fight limits bind it, but the player names the bottle. */
+export function drink(state: GameState, c: Character, name: string, mobIsBoss: boolean): { ok: boolean; why?: string } {
+  const potion = farm.potionByName[name];
+  if (!potion) return { ok: false, why: 'no such draught' };
+  if (bottleWorth(state, name) < 1) return { ok: false, why: 'none carried' };
+  const lim = farm.fightLimits();
+  if (mobIsBoss && lim.bossSuppressed) return { ok: false, why: 'suppressed on a boss' };
+  if (state.farm.usesThisFight >= lim.maxUsesPerFight) return { ok: false, why: 'no uses left this fight' };
+  if (state.clockSec - state.farm.lastDrinkAt < lim.sharedCooldownSec) return { ok: false, why: 'on cooldown' };
+  applyPotion(state, c, potion);
+  return { ok: true };
+}
+
+/** The bar above the casts: seven squares, each holding one draught's name. */
+export const QUICKBAR_SLOTS = 7;
+
+/** The draughts actually carried, in ladder order — what a quickbar square cycles through. */
+export function ownedPotions(state: GameState): string[] {
+  return farm.P.list.filter((p: any) => bottleWorth(state, p.name) > 0).map((p: any) => p.name);
+}
+
+/** Right-click on a quickbar square: step to the next carried draught, with empty as one of the stops. */
+export function cycleQuickbar(state: GameState, slot: number): string | null {
+  const owned = ownedPotions(state);
+  const stops = [null, ...owned];
+  const at = stops.indexOf(state.quickbar[slot] ?? null);
+  state.quickbar[slot] = stops[(at + 1) % stops.length];
+  return state.quickbar[slot];
+}
 
 /** Auto-use drinks the best available bottle of a pool, and a condensed one is ten of the same. */
 export function maybeDrink(state: GameState, c: Character, mobIsBoss: boolean): { name: string; pool: string; amount: number } | null {
@@ -166,20 +211,11 @@ export function maybeDrink(state: GameState, c: Character, mobIsBoss: boolean): 
     : state.farm.autoUse.mana && manaPct < state.farm.threshold.mana ? 'mana'
       : null;
   if (!pool) return null;
-  const candidates = farm.P.list.filter((p: any) => p.pool === pool && bottleWorth(state, p.name) > 0);
+  const candidates = farm.P.list.filter((p: any) => (p.pool === pool || p.pool === 'both') && bottleWorth(state, p.name) > 0);
   if (!candidates.length) return null;
   const potion = candidates.sort((a: any, b: any) => farm.potionEffect(b) - farm.potionEffect(a))[0];
-  const condensed = (state.farm.condensed[potion.name] || 0) > 0;
-  if (condensed) state.farm.condensed[potion.name] -= 1;
-  else state.farm.potions[potion.name] -= 1;
-  const mult = condensed ? farm.P.condensed.effect_mult : 1;
-  const pct = farm.potionEffect(potion) * mult;
-  const amount = pool === 'hp' ? (c.maxHp * pct) / 100 : (c.maxMana * pct) / 100;
-  if (pool === 'hp') state.player.hp = Math.min(c.maxHp, state.player.hp + amount);
-  else state.player.mana = Math.min(c.maxMana, state.player.mana + amount);
-  state.farm.lastDrinkAt = state.clockSec;
-  state.farm.usesThisFight++;
-  return { name: potion.name, pool, amount };
+  const { hp, mana } = applyPotion(state, c, potion);
+  return { name: potion.name, pool, amount: pool === 'hp' ? hp : mana };
 }
 
 /** Client-side brew cadence: a potion at most once every this many seconds while auto-brew is on. */

@@ -169,7 +169,7 @@ export interface Counters {
   damage?: number;
   /** The same damage split by what dealt it — the swing, a press, or a status ticking over time. */
   damageBy?: { swing: number; cast: number; dot: number };
-  /** Grants the thirty-slot character bag refused (`inventory.overflow` · `slots.ts`). */
+  /** Grants the full bag refused (`inventory.overflow` · `slots.ts`). */
   stopped?: number;
   overflow?: number;
   junk: number;
@@ -348,6 +348,8 @@ export interface GameState {
   patrol: PatrolState;
   autoReturn: AutoReturnState;
   skills: SkillState;
+  /** seven squares above the skill bar, each holding a carried potion's name or nothing */
+  quickbar: (string | null)[];
   healUp: HealBuff | null;
   /** Unsold junk, keyed by the variant item's own name (`mob.variant_drops`). */
   junk: Record<string, number>;
@@ -363,6 +365,8 @@ export interface GameState {
   lastAutoZone?: number;
   /** Per-slot bag filter thresholds and the "not yet found" keep-list (`loot.md` §4 · `save.md`). */
   filter: FilterState;
+  /** Saved rule tables for the filter — one slot the character owns, more as Collector rewards pay out. */
+  filterPresets: ({ bySlot: FilterState['bySlot'] } | null)[];
   /** 'stay' keeps hunting this zone; 'forward' climbs once its own level band is behind. */
   travel: 'stay' | 'forward';
   /**

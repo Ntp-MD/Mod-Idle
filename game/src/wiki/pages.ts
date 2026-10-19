@@ -85,12 +85,9 @@ const TYPES: string[] = SKILLS.meta.types;
 const esc = (s: any): string => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string));
 const n0 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—');
 const n1 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
+/** A published multiplier keeps its decimal: ×1.8 must never render as ×2. */
+const xOf = (n: any): string => (Number.isFinite(Number(n)) ? String(Math.round(Number(n) * 10) / 10) : '—');
 const list = (a: any): string => (a || []).map((x: any) => esc(x)).join(' · ');
-/** A cell as a compact bullet list, one fact per line — easier to scan than a `·`-packed run. */
-const plist = (items: string[]): string =>
-  `<ul class="plist">${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
-/** A range collapses to one figure when both ends agree (a mob's level is static). */
-const span = (a: any, b: any): string => (n0(a) === n0(b) ? n0(a) : `${n0(a)}–${n0(b)}`);
 const pctList = (a: any): string => (a || []).map((x: any) => `${(Number(x) * 100).toFixed(1)}%`).join(' · ');
 const rowHtml = (cells: any[]): string => `<tr>${cells.map((c) => `<td>${c == null ? '' : String(c)}</td>`).join('')}</tr>`;
 const table = (head: string[], rows: any[][]): string =>
@@ -168,12 +165,12 @@ page({
       <li><strong>Fight</strong> — the character attacks on the clock; paid skills use flat Mana or current-HP costs, while auras reserve Max Mana.</li>
       <li><strong>Loot</strong> — kills pay XP and their separate gear, junk, stone and skill-piece rolls; hunting can also yield field provisions.</li>
       <li><strong>Decide</strong> — equip the piece, or feed it to the crafting stones.</li>
-      <li><strong>Craft</strong> at a settlement: drag gear to the bench and a stone stack to the target; hover a piece to inspect its Mods.</li>
+      <li><strong>Craft</strong> at a settlement: choose gear for the bench, right-click a stone, then click the item or a highlighted Mod line. Shift-click repeats; Esc cancels.</li>
       <li><strong>Climb</strong> to the next zone. A Push costs recovery time: a Field Camp in that zone receives you and ends the walk; otherwise the route resumes at its ambush block.</li>
     </ol>`, 'The whole game is one screen — the field — and the panels behind it.'),
     block('What is in the game', table(['', 'Count', 'What it is'], [
       ['Zones', wrap(n0(eng.ZONES.length)), 'each with its own level band, Element and group size'],
-      ['Worn pieces', wrap(n0(E.opening.gear.length)), `over ${n0(BASES.slots.length)} slot names — every slot has its own frames and Mod pools`],
+      ['Worn slots', wrap(n0(BASES.slots.length)), `minute one starts them all empty · ${n0(E.opening.gear.length)} hand-authored reference frames wait in the data — every slot has its own frames and Mod pools`],
       ['Skills', wrap(n0(sm.all().length)), TYPES.map((t: string) => `${sm.of(t).length} ${t}`).join(' · ')],
       ['Mob Species', wrap(n0(E.mob.species.length)), 'grouped into fantasy Races'],
       ['Elements', wrap(n0(E.elements.order.length)), list(E.elements.order)],
@@ -728,7 +725,7 @@ page({
   file: 'crafting.html',
   nav: 'Crafting',
   title: 'Crafting',
-  lead: 'Stones change what a piece <em>is</em>; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. Use the settlement Craft bench to drag stones from your stack onto an equipped or carried target. Every price below is read, never typed.',
+  lead: 'Stones change what a piece <em>is</em>; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. At the settlement Craft bench, right-click a stone and click an equipped or carried item, or a highlighted Mod line for a targeted use. Hold Shift to keep using the stone; Esc or right-click cancels. Every price below is read, never typed.',
   body: [
     block('Use the Craft bench', `<ol>
       <li>Drag a piece from Equipped or Inventory into the central bench slot.</li>
@@ -977,11 +974,11 @@ page({
       ['On the mob side', 'the heavy physical lineages put bleed on us out of the damage they are already priced at', '<code>bleed.mob_side</code> — no extra power, so no health line moves'],
     ]), 'It is on this page rather than under <a href="elements.html">Elements</a> because it is the one damage-over-time no resistance answers.'),
     block('Elite and Boss', table(['', 'Health', 'Damage', 'Base evasion', 'Comes in', 'How often'], [
-      ['Elite', `×${n0((E.mob.elite as any).hp)}`, `×${n0((E.mob.elite as any).ps)}`, `+${n0((E.mob.elite as any).evasion_pct)}%`, esc((E.mob.elite as any).group),
+      ['Elite', `×${xOf((E.mob.elite as any).hp)}`, `×${xOf((E.mob.elite as any).ps)}`, `+${n0((E.mob.elite as any).evasion_pct)}%`, esc((E.mob.elite as any).group),
         `${pc1((E.loot as any).elite_spawn_chance)} of kills`],
-      ['Boss', `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).hp)}`, `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).ps)}`, '<span class="hy">reads as a body</span>', 'alone',
+      ['Boss', `×${xOf((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).hp)}`, `×${xOf((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).ps)}`, '<span class="hy">reads as a body</span>', 'alone',
         `${n1((E.loot as any).boss_per_hour)} an hour, and online only`],
-      ['Unique', `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).hp)}`, `×${n0((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).ps)}`, '<span class="hy">reads as a body</span>', 'alone',
+      ['Unique', `×${xOf((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).hp)}`, `×${xOf((E.mob.sizes.find((s: any) => s.id === 'boss') || {} as any).ps)}`, '<span class="hy">reads as a body</span>', 'alone',
         `${pc1((E.loot as any).unique_chance)} of spawns`],
     ]), `An Elite is a spawn flag forced onto a Large body, never a fifth size, so no two multipliers ever stack — it keeps the selected Variant's name and junk. A Boss is one named creature per zone (${n0((E.mob.bosses || []).length)} of them) and is the only place the Add, Replace and Corrupt stones are paid — see <a href="idle.html">Away &amp; bag</a>. A Species may have no Unique or several (${n0(((E.mob as any).uniques || []).length)} total): each is a wild boss that replaces its Species' spawn, paying Elite stones with ×${n0(E.xp.unique_mult)} XP. The Variant band selects name and Core; the fixed level for each zone comes from <code>mob.species[].zone_levels</code>.`),
   ],
@@ -1052,11 +1049,13 @@ page({
       'Cook at a player-set Field Camp. A cooked meal restores Hunger and replaces the one active meal buff. Cooking, brewing and condensing count the bag space freed by their ingredients; if the output still cannot fit, nothing is spent.'),
     block('Potions', table(['Draught', 'Pool', 'Band', 'Effect', 'Brewed from'],
       ((E.potions as any).list || []).map((p: any) => [
-        esc(p.name), esc(p.pool), esc(p.tier),
-        wrap(`${n0(farm.potionEffect(p))}% of the pool, instantly`),
+        esc(p.name), p.pool === 'both' ? 'HP + Mana' : esc(p.pool), esc(p.tier),
+        wrap(p.pool === 'both'
+          ? `${n0(farm.potionPct(p, 'hp'))}% Max HP + ${n0(farm.potionPct(p, 'mana'))}% Max Mana, instantly`
+          : `${n0(farm.potionEffect(p))}% of the pool, instantly`),
         `<span class="hy">${n0((E.potions as any).craft[p.tier].herbs)} herbs + ${n0((E.potions as any).craft[p.tier].reroll_value_stones)} ${STONE_NAME.reroll_value}s</span>`,
       ])),
-      `Provisioning, not power: one shared cooldown of ${n0((E.potions as any).shared_cooldown_sec)} sec, at most ${n0((E.potions as any).max_uses_per_fight)} a fight, switched off entirely on a Boss (<code>potions.boss_suppressed</code>), ${n0((E.potions as any).weight)} weight each. Auto-use starts on at ${pts((E.potions as any).auto_use_default.hp_pct)} Health and ${pts((E.potions as any).auto_use_default.mana_pct)} Mana. That is why no potion moves a health line anywhere in the design.`),
+      `Provisioning, not power: one shared cooldown of ${n0((E.potions as any).shared_cooldown_sec)} sec, at most ${n0((E.potions as any).max_uses_per_fight)} a fight, switched off entirely on a Boss (<code>potions.boss_suppressed</code>), ${n0((E.potions as any).weight)} weight each. Auto-use starts on at ${pts((E.potions as any).auto_use_default.hp_pct)} Health and ${pts((E.potions as any).auto_use_default.mana_pct)} Mana; a draught can also be drunk by hand from the Farm board or a quickbar square, through the same cooldown and per-fight cap. That is why no potion moves a health line anywhere in the design.`),
     block('Condensed', table(['', 'What it takes', 'What it gives'], [
       ['A Condensed draught', `${n0((E.potions as any).condensed.cost_bottles)} bottles + ${n0((E.potions as any).condensed.cost_reroll_value_stones)} ${STONE_NAME.reroll_value}s`,
         `×${n0((E.potions as any).condensed.effect_mult)} effect, at ${n0((E.potions as any).condensed.weight)} weight (${n0((E.potions as any).condensed.weight_loose)} carried loose)`],
@@ -1107,14 +1106,13 @@ page({
       ['Corrupt', 'never', 'never', pc1((E.loot as any).corrupt_stone_sources.boss_corrupt_chance)],
       ['A skill piece', pc1((E.skill_drop as any).normal), pc1((E.skill_drop as any).elite), pc1((E.skill_drop as any).boss)],
     ]), 'The value half of the craft engine keeps running while you are away, because a dissolved piece pays it. Everything else on this table is a reason to be in the chair — see <a href="crafting.html">Crafting</a> for what each stone spends.'),
-    block('The two bags', table(['Bag', 'Slots', 'What goes in it', 'How it stacks', 'What it weighs'], [
-      ['Adventure bag', wrap(n0((E.inventory as any).adventure_slots)), 'gear loot, one piece per slot', 'one piece a slot', 'counted against your weight capacity'],
-      ['Character bag', wrap(n0((E.inventory as any).character_slots)), 'stones, herbs, potions, field materials and provisions',
-        `stones ${n0((E.inventory as any).stack_size.stone)} a slot · herbs and potions ${n0((E.inventory as any).stack_size.herb)} · materials ${n0((E.inventory as any).stack_size.material)} · provisions ${n0((E.inventory as any).stack_size.food)} a slot`,
-        `stones ${n2((E.inventory as any).unit_weight.stone)} · herbs and potions ${n2((E.inventory as any).unit_weight.herb)} · materials ${n2((E.inventory as any).unit_weight.material)} · provisions ${n2((E.inventory as any).unit_weight.food)} each`],
+    block('The bag', table(['Carried', 'Slots', 'What goes in it', 'How it stacks', 'What it weighs'], [
+      ['The bag', wrap(n0((E.inventory as any).character_slots)), 'everything you carry on the hunt: gear loot, and stones, herbs, potions, field materials and provisions',
+        `gear one piece a slot · stones ${n0((E.inventory as any).stack_size.stone)} a slot · herbs and potions ${n0((E.inventory as any).stack_size.herb)} · materials ${n0((E.inventory as any).stack_size.material)} · provisions ${n0((E.inventory as any).stack_size.food)} a slot`,
+        `gear each piece · stones weightless (${n2((E.inventory as any).unit_weight.stone)}) · herbs and potions ${n2((E.inventory as any).unit_weight.herb)} · materials ${n2((E.inventory as any).unit_weight.material)} · provisions ${n2((E.inventory as any).unit_weight.food)} each`],
       ['Gold', 'no slot at all (<code>gold_uses_slot</code>)', 'the junk money', '—', '—'],
-      ['Junk', `${n0((E.junk as any).stack)} a slot`, 'what the Counterhand buys', 'deep stacks', `${n2((E.junk as any).unit_weight)} each`],
-    ]), `A full bag is a pause, never a loss: pickups stop when a complete output bundle cannot fit. Manual salvage preserves the piece unless both Iron Ore and Scrap fit together. Alchemy preflights Scrap and every Value and Tier output before consumption. Gear crafting and Stash are settlement services; Camp cooking is the field exception. The Stash is one warehouse that every settlement’s counter opens.`),
+      ['Junk', `${n0((E.junk as any).stack)} a slot`, 'what the Counterhand buys', 'deep stacks, and it shares the bag', `${n2((E.junk as any).unit_weight)} each`],
+    ]), `One bag, one count: a kept gear piece, a consumable stack and a junk stack each take a slot out of the same ${n0((E.inventory as any).character_slots)}. A full bag is a pause, never a loss: pickups stop when a complete output bundle cannot fit. Manual salvage preserves the piece unless both Iron Ore and Scrap fit together. Alchemy preflights Scrap and every Value and Tier output before consumption. Gear crafting and Stash are settlement services; Camp cooking is the field exception. The Stash is one warehouse that every settlement’s counter opens.`),
     block('Weight', table(['Carried', 'The cut to your attack speed', 'Read from'], [
       ['Your capacity', wrap(n1(eng.weightCapacityOf(EVEN))) + ' at the even split — Str is the only line that lifts it', '<code>weightCapacityOf</code>'],
       ['At capacity or under', `${pc1(eng.encumbranceOf(eng.weightCapacityOf(EVEN), EVEN))} cut`, '<code>encumbranceOf</code>'],
@@ -1127,7 +1125,7 @@ page({
       ['Keep a missing Element', 'keeps Elemental resistance of an Element you do not hold', yes((E.loot as any).filter.rules.default_keep_missing_element)],
       ['On by default', 'a fresh character keeps every drop and dissolves nothing', yes((E.loot as any).filter.rules.default_enabled)],
       ['Stored per slot', 'a player setting, so a raised threshold is never a second copy of the number', '<span class="hy"><code>loot.filter.rules</code></span>'],
-    ]), 'Only a slot whose filter is armed dissolves a piece. Successful dissolution yields Iron Ore and Scrap together; overflow leaves gear unpicked. Manual salvage protects locked and Collector-promised gear, and bag replacement waits unless both outputs fit. Alchemy turns Scrap into Value, and only successfully produced Value advances Tier milestones.'),
+    ]), 'Only a slot whose filter is armed dissolves a piece. Successful dissolution yields Iron Ore and Scrap together; overflow leaves gear unpicked. Manual salvage protects locked and Collector-promised gear, and bag replacement waits unless both outputs fit. Alchemy turns Scrap into Value, and only successfully produced Value advances Tier milestones. <em>Filter presets</em> store a whole rule table to reload later: the first slot is the character\u2019s own and each Collector set pays one more. <em>Run the filter over the bag</em> gives every carried piece the same verdict a fresh drop gets \u2014 the ones that fail dissolve for their salvage bundle, while locked and Collector-held pieces are always spared.'),
     block('Junk: reference values', table(['Junk kind', 'Base value', 'A kill pays it', 'Expected base gold a kill'],
       Object.entries((E.junk as any).rarities || {}).map(([r, v]: any) => [
         esc(r), wrap(`${n0(v.sell_gold)} gold`), pc1(v.drop_chance_per_kill), wrap(n2(v.sell_gold * v.drop_chance_per_kill)),
@@ -1151,8 +1149,8 @@ page({
       ['Losing one', 'a same-zone Field Camp receives you and ends the walk; without one, recover and resume at the ambush block', '<code>road.push_rule</code>'],
       ['Forward', 'walks to the next already-open settlement when the current zone’s level band is behind', '<code>travel = forward</code> · online only'],
       ['Patrol', `${n0(E.road.patrol.max_stops)} subzones · ${n0(E.road.patrol.groups_per_stop)} groups per stop`, 'choose the order; repeat or stop whenever you want'],
-      ['Auto-Return', `${n0(E.road.patrol.auto_return_threshold_pct)}% adventure-bag threshold`, 'stashes unlocked gear at town and resumes Patrol if space was freed'],
-    ]), 'A Patrol changes the fixed Species pools as it moves between subzones. An Expedition asks for named Species Elites at one exact subzone. Auto-Return keeps a long route from stopping at a full gear bag; it never sells or discards gear.'),
+      ['Auto-Return', `${n0(E.road.patrol.auto_return_threshold_pct)}% of the bag's slots used`, 'stashes unlocked gear at town and resumes Patrol if space was freed'],
+    ]), 'A Patrol changes the fixed Species pools as it moves between subzones. An Expedition asks for named Species Elites at one exact subzone. Auto-Return keeps a long route from stopping at a full bag; it never sells or discards gear.'),
     block('Every settlement, from the start', (() => {
       const start: any = (TOWN.settlements || []).find((s: any) => s.start) || (TOWN.settlements || [])[0];
       const warp: any = (TOWN.repeatable || []).find((l: any) => l.id === 'waypoint_warp') || { m_per_block: 0 };
@@ -1292,7 +1290,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .tabs > label {
   display: inline-flex; align-items: baseline; gap: var(--spacing-sm); padding: .3em .9em;
-  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-card);
   color: var(--dim); font-size: var(--font-xs); cursor: pointer;
 }
 .tabs > label b { color: var(--mob); font-weight: 500; }
@@ -1305,7 +1303,7 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
 .tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
 .tabs table { flex: 1 0 100%; width: 100%; }
-.twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
 .twrap th, .twrap td { overflow-wrap: anywhere; }
 .twrap td:first-child { white-space: normal; }
@@ -1328,15 +1326,7 @@ td .hy { color: var(--dim); font-size: var(--font-xs); }
 td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .rolls .forced .rn { color: var(--gold); }
 .rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: var(--font-xs); }
-.plist { list-style: none; margin: 0; padding: 0; font-size: var(--font-xs); }
-/* one grid for the whole cell: every key shares track one at the width of the longest key in that
-   cell, every value takes track two — display:contents promotes each key/value pair to the grid,
-   so a spelled-out label like "damage per second" costs no wrap and nothing runs into its number */
-.plist { display: grid; grid-template-columns: minmax(4rem, max-content) minmax(2.5rem, 1fr); column-gap: var(--spacing-md); row-gap: var(--spacing-xs); }
-.plist li { display: contents; }
-.plist .pk { font-family: var(--ui); color: var(--dim); }
-.plist .pv { font-family: var(--num); font-variant-numeric: tabular-nums; min-width: 0; }
-.zone { display: grid; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.zone { display: grid; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
 .zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-md); padding: .65rem .8rem; cursor: pointer; }
 .zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .zone > summary::marker { color: var(--gold); }
@@ -1346,13 +1336,13 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
 .race-roster { display: grid; gap: var(--spacing-md); }
-.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); padding: .65rem; }
+.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .65rem; }
 .race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
 .race-group > header h3 { color: var(--gold); font-size: var(--font-xs); }
 .race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
 .race-empty { color: var(--dim); font-size: var(--font-xs); }
 .species-roster { display: grid; gap: var(--spacing-md); }
-.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); padding: .65rem .8rem .8rem; }
+.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); padding: .65rem .8rem .8rem; }
 .species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
 .species-entry h4 { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
 .species-entry > header h4 { color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
@@ -1366,7 +1356,7 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 @media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
 .legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
-.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
 ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }`;
 
 /** Everything inside <body>: the theme, the nav and the page. */

@@ -106,7 +106,7 @@ export const GALLERY_RUNTIME = `(function () {
   searchInput.type = 'search';
   searchInput.placeholder = 'Search ' + ALL.length + ' icons…';
   searchInput.setAttribute('aria-label', 'Search icons');
-  searchInput.style.cssText = 'width:100%;padding:.4rem .6rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--text);font:inherit;';
+  searchInput.style.cssText = 'width:100%;padding:.4rem .6rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-card);color:var(--text);font:inherit;';
 
   var tabs = document.createElement('div');
   tabs.style.cssText = 'display:flex;flex-wrap:wrap;gap:var(--spacing-xs);';
@@ -120,7 +120,7 @@ export const GALLERY_RUNTIME = `(function () {
   bar.style.cssText = 'display:none;flex-wrap:wrap;gap:var(--spacing-xs);align-items:center;';
   var barText = document.createElement('span');
   barText.style.cssText = 'font-size:var(--font-xs);color:var(--dim);';
-  var BTN = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-sm);background:transparent;color:var(--gold);cursor:pointer;font-size:var(--font-xs);';
+  var BTN = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-card);background:transparent;color:var(--gold);cursor:pointer;font-size:var(--font-xs);';
   var copyBtn = document.createElement('button');
   copyBtn.style.cssText = BTN;
   copyBtn.onclick = function () {
@@ -155,8 +155,8 @@ export const GALLERY_RUNTIME = `(function () {
   var grid = document.createElement('div');
   grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:var(--spacing-sm);';
 
-  var TAB_ON = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-sm);background:var(--gold);color:#000;cursor:pointer;font-size:var(--font-xs);';
-  var TAB_OFF = 'padding:.25rem .6rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:transparent;color:var(--text);cursor:pointer;font-size:var(--font-xs);';
+  var TAB_ON = 'padding:.25rem .6rem;border:1px solid var(--gold);border-radius:var(--radius-card);background:var(--gold);color:#000;cursor:pointer;font-size:var(--font-xs);';
+  var TAB_OFF = 'padding:.25rem .6rem;border:1px solid var(--line);border-radius:var(--radius-card);background:transparent;color:var(--text);cursor:pointer;font-size:var(--font-xs);';
 
   function renderTabs() {
     tabs.textContent = '';
@@ -191,7 +191,7 @@ export const GALLERY_RUNTIME = `(function () {
 
   function card(item) {
     var el = document.createElement('div');
-    el.style.cssText = 'display:grid;justify-items:center;align-content:start;gap:var(--spacing-xs);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.4rem;text-align:center;position:relative;background:var(--panel);';
+    el.style.cssText = 'display:grid;justify-items:center;align-content:start;gap:var(--spacing-xs);border:1px solid var(--line);border-radius:var(--radius-card);padding:.4rem;text-align:center;position:relative;background:var(--panel);';
 
     var on = hasFav(item.path);
     var star = document.createElement('button');
@@ -205,7 +205,7 @@ export const GALLERY_RUNTIME = `(function () {
     marker.type = 'button';
     marker.setAttribute('aria-label', (isMarked ? 'Unmark ' : 'Mark ') + item.name + ' for removal');
     marker.title = isMarked ? 'Unmark for removal' : 'Mark for removal';
-    marker.style.cssText = 'position:absolute;top:2px;left:2px;display:flex;align-items:center;justify-content:center;width:var(--icon-sm);height:var(--icon-sm);padding:0;border:1px solid var(--line);border-radius:var(--radius-round);background:' + (isMarked ? 'var(--gold)' : 'var(--panel)') + ';color:' + (isMarked ? 'var(--bg)' : 'var(--dim)') + ';cursor:pointer;';
+    marker.style.cssText = 'position:absolute;top:2px;left:2px;display:flex;align-items:center;justify-content:center;width:var(--icon-label);height:var(--icon-label);padding:0;border:1px solid var(--line);border-radius:var(--radius-round);background:' + (isMarked ? 'var(--gold)' : 'var(--panel)') + ';color:' + (isMarked ? 'var(--bg)' : 'var(--dim)') + ';cursor:pointer;';
     marker.onmouseenter = function () { marker.style.background = isMarked ? 'var(--gold)' : 'var(--surface-selected)'; };
     marker.onmouseleave = function () { marker.style.background = isMarked ? 'var(--gold)' : 'var(--panel)'; };
     marker.onfocus = function () { marker.style.outline = '2px solid var(--focus)'; };
@@ -213,7 +213,7 @@ export const GALLERY_RUNTIME = `(function () {
     var flag = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     flag.setAttribute('viewBox', '0 0 16 16');
     flag.setAttribute('aria-hidden', 'true');
-    flag.style.cssText = 'width:var(--icon-xs);height:var(--icon-xs);';
+    flag.style.cssText = 'width:var(--icon-detail);height:var(--icon-detail);';
     var flagPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     flagPath.setAttribute('d', 'M4 14V3m0 1h8l-2 3 2 3H4');
     flagPath.setAttribute('fill', 'none');

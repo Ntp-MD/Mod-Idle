@@ -80,7 +80,7 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Player Vital Card** | The You identity, current HP/ES/Mana/EXP and player combat feedback inside a portrait frame matching the mob cards; active buffs and debuffs sit outside it on opposite sides. |
 | **Commands dock** | The bottom-right HUD region, rows 14–15 of columns 12–15, with the four Game controls (Speed ×1/×2/×4 and Pause/Resume) in one row of tabs hugging its right edge. |
 | **Menu hub** | The top menu rail: main screen navigation (Map, Bags, Skills, Craft, Sheet), the three field automation controls (Auto Skills, Auto Equip, Camp), and the More menu. |
-| **Objectives** | The last tab of the Chronicle: the run's target. The life-skill rungs read on the Sheet's own **Life skills** tab. The top-left column keeps only the live reads — minimap, zone, phase, tracked wants and the bag alarm. |
+| **Objectives** | A collapsible HUD feed for the run's target and tracked delivery wants. Life-skill rungs read on the Sheet's **Life skills** tab; Chronicle keeps combat, loot and system events. |
 
 # Elements and Statuses
 
@@ -121,8 +121,7 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Scrap** | The material produced by Salvage and consumed by Alchemy to make Value stones. |
 | **Alchemy** | A settlement recipe that immediately converts Scrap into Value stones and advances Alchemy-based Tier milestones. |
 | **Bag filter** | What makes every drop a decision: **keep** it, **dissolve** it, or **sell** it. |
-| **adventure bag** | The bag of kept gear carried while adventuring. |
-| **character bag** | The bag of carried consumables, field materials and provisions. |
+| **bag** | What the character carries: kept gear (one piece a slot) and carried consumable, field-material and junk stacks, all counted against one slot pool. |
 | **stash** | Settlement storage, organisation only. |
 | **herb** | A gathered or farmed plant used for brewing/cooking or sold as a trade good. |
 | **field material** | A carried stack produced by Mine, Rare Grove, Smithing or hunting activity. |
@@ -155,7 +154,7 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Forward** | Auto-walk to the next already-open settlement when the current zone's level band is behind; new settlements still need a first walk. |
 | **Patrol** | An optional repeatable walk-and-hunt circuit through two or three named subzones in one visited zone. It clears a set of groups at each stop and can be stopped at any time. |
 | **Expedition** | A Guild task to defeat named Species Elites from one exact subzone; it has no deadline and keeps the regular Elite task payout. |
-| **Auto-Return** | Optional Patrol help that walks to town near a full gear bag, stashes unlocked pieces, and resumes the saved route when space was freed. It never sells or discards gear. |
+| **Auto-Return** | Optional Patrol help that walks to town once the bag nears full, stashes unlocked pieces, and resumes the saved route when space was freed. It never sells or discards gear. |
 | **Hunt** | Leaving safe ground to fight from the cell the feet stand on; sub-zones pick a cast, bare ground hunts the whole zone. |
 | **Field Camp** | One player-set safe hex. It enables field gathering and cooking, and receives a Push in its zone. |
 | **Mine** | A wild-side fieldwork hex that yields ore while gathering at a Camp. |

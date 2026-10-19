@@ -18,14 +18,12 @@ import { readJson } from './lib/json.ts';
 import { createSkillModel } from '../engine/skills.ts';
 import { createLoot, leanReweight, leanReweightMany } from '../engine/loot.ts';
 
-const { E, S, K, M, LG, BAND, BANDS, BAND_KEYS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
+const { E, S, K, M, LG, BAND, BANDS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
 const MODS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/mods.json'), 'utf8'));
 const BASES_JSON = readJson(path.join(import.meta.dirname, 'data/bases.json'));
-const MAP = readJson(path.join(ROOT, 'tools/data/map.json'));
 const f0 = (x: number) => Math.round(x).toLocaleString('en-US');
 const f1 = (x: number) => x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const f2 = (x: number) => x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const r2 = (x: number) => Math.round(x * 100) / 100;
 
 const BAND_LABEL: Record<string, string> = { low: 'low', mid: 'mid', high: 'high', high_full_lck: 'full Lck' };
 
@@ -757,19 +755,6 @@ function runChecks() {
       : `mob_HP(L) is anchored at every zone edge and linearly interpolated inside a zone, so every level 1-${S.level_cap} has a value (${f0(eng.mobHpAt(1))} → ${f0(eng.mobHpAt(S.level_cap))}, strictly rising) · mob_PS(L) is \`typical_gear_DPS(L) ÷ ${K.mob_damage_divisor}\` for the zone's AVERAGE mob, and each Species Variant moves it by (\`power_base + ${K.K_MOB_PS_STAT} ×\` the Str/Int its \`damage\` tag reads) over the zone mean`);
   }
 
-  // One home for every Cap: core-stats.md is the list a player reads, so it must equal the data.
-  const CAP_LINES = [
-    ['aspd', /Attack speed - % .+ Cap (\d+)/],
-    ['evasion', /^Evasion - % Cap (\d+)/],
-    ['perfect_dodge', /^Perfect dodge - % Cap (\d+)/],
-    ['cdr', /^Cooldown reduction - % Cap (\d+)/],
-    ['elem_res', /^Elemental resistance .+Cap (\d+) per Element/],
-  ];
-  const un = [
-    ['crit_chance', /^Critical chance - % (no Cap)/],
-    ['accuracy', /^Accuracy - numeric value, (no Cap)/],
-    ['alignment', /^Elemental alignment - % (no Cap)/],
-  ];
   // · the Gear Mod ladder is bounded by the published ceiling of the very line it raises, the
   // same `mod_max` row `tools/loot.ts` rolls it from — so +Cap can never out-print a T1 rolled line.
   const GM = E.craft.gear_mod_per_level, GM_CAP = E.craft.upgrade_cap;
@@ -876,20 +861,19 @@ function runChecks() {
   add('X33', RP.length === 0, RP.length ? RP.join(' · ')
     : `reach is the whole positional model (no tiles, no movement): ${allWeapons.length} weapons mapped to ${Object.keys(E.mob.reach.bands).length} bands · ${E.mob.species.length} species all carry a line (${E.mob.species.filter((sp) => sp.line === 'front').length} front · ${E.mob.species.filter((sp) => sp.line === 'stand-off').length} stand-off)`);
 
-  // Inventory: an adventure bag that fills and pauses, a character bag of stacks, town-only stash/craft
+  // Inventory: one bag of gear pieces and carried stacks that fills and pauses, town-only stash/craft
   const IV = E.inventory || {};
   const ivp = [];
-  if (!(IV.adventure_slots > 0)) ivp.push('no adventure bag size');
-  if (!(IV.character_slots > 0)) ivp.push('no character bag size');
+  if (!(IV.character_slots > 0)) ivp.push('no bag size');
+  if ((IV as any).adventure_slots !== undefined) ivp.push('adventure_slots is gone — one bag holds gear and stacks against character_slots');
   if (IV.overflow !== 'stop_pickup') ivp.push('overflow must be stop_pickup — a full bag pauses pickups, nothing auto-converts');
   for (const k of ['stone', 'herb', 'potion', 'material', 'food']) if (!(IV.stack_size && IV.stack_size[k] > 0)) ivp.push(`no stack size for ${k}`);
   for (const k of ['herb', 'potion', 'material', 'food']) if (!(IV.unit_weight && IV.unit_weight[k] >= 0)) ivp.push(`no unit weight for ${k}`);
   if (IV.gold_uses_slot !== false) ivp.push('gold must not consume a slot');
   const gearHr = L.bands.high.upgrades_per_hr;                       // kept gear/hr = measured upgrades (F4)
-  const gearFill = IV.adventure_slots / gearHr;
-  const stoneSlotHr = IV.stack_size.stone / BAND.high.junk_per_hr;   // one stone slot of value stones
+  const gearFill = IV.character_slots / gearHr;
   soft('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
-    : `adventure bag ${IV.adventure_slots} slots (kept gear only) fills in ~${f1(gearFill)} hr at the high band's measured ${gearHr} upgrades/hr · character bag ${IV.character_slots} slots holds stone (${IV.stack_size.stone}/slot, weightless), herb ${IV.stack_size.herb}/slot, potion ${IV.stack_size.potion}/slot, material ${IV.stack_size.material}/slot, food ${IV.stack_size.food}/slot; gold takes no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + gear craft are Settlement-only, meal cooking is Camp-only`);
+    : `the bag holds ${IV.character_slots} slots — gear pieces at one a slot fills it in ~${f1(gearFill)} hr of kept gear at the high band's measured ${gearHr} upgrades/hr, and stacks share the same count: stone (${IV.stack_size.stone}/slot, weightless), herb ${IV.stack_size.herb}/slot, potion ${IV.stack_size.potion}/slot, material ${IV.stack_size.material}/slot, food ${IV.stack_size.food}/slot; gold takes no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + gear craft are Settlement-only, meal cooking is Camp-only`);
 
   // Junk rarity values preserve the reference mint; every rarity must reproduce the published
   // junk line, so rarity changes the flavour and the price but not the expected income
@@ -1180,9 +1164,6 @@ function runChecks() {
   const opMain = OP_PIECES.find((p) => p.g.slot === 'main hand');
   const givenFlat = opMain ? opMain.lines.reduce((s, l) => s + (l.id === 'physical_power_flat' ? l.value : 0)
     + (l.extra || []).reduce((n: number, part: any) => n + (part.id === 'physical_power_flat' ? part.value : 0), 0), 0) : 0;
-  const opPhys = opStat * K.K_STR + givenFlat;
-  const opDps = opPhys * (opWpn ? opWpn.weapon_aspd * opWpn.weapon_mult : 0);
-  const opMobHp = opZone.hp[0];
   const pwRange = MODS.mods.find((m: any) => m.id === 'physical_power_flat');
   // the curve prices this mob against exactly this character, so the opening line must be the RULE's own
   // floor for a two-Mod line — the worst slice's low end scaled by `value_scale` — and never a typed

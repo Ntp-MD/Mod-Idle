@@ -18,7 +18,7 @@ export function previewScrapAlchemy(s: GameState, access: { writer: boolean } = 
   const grants = [{ bucket: s.counters.stones, key: 'reroll_value', capKind: 'stone', amount: recipe.value_yield },
     { bucket: s.counters.stones, key: 'tier', capKind: 'stone', amount: future.tierDue }];
   if ((s.fieldwork.materials.scrap || 0) < recipe.scrap_cost) return refuse(`needs ${recipe.scrap_cost} Scrap`);
-  if (!fitsTransaction(s, costs, grants)) return refuse('make character-bag room for all Value and Tier stones');
+  if (!fitsTransaction(s, costs, grants)) return refuse('make bag room for all Value and Tier stones');
   return { ok: true as const, future, costs, grants };
 }
 

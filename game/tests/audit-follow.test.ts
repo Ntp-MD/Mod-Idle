@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BASES, E, ED, eng, fieldwork, loot, sm, tree } from '../src/engine/client';
 import { createCraft } from '../../engine/craft';
 import { heldWeaponName, newGame, salvageBag, tick } from '../src/sim/game';
-import { buildCharacter } from '../src/sim/player';
+import { buildCharacter, openingGear } from '../src/sim/player';
 import { atSettlement, doCraft } from '../src/sim/craft';
 import { autoEquip, equipFromBag } from '../src/sim/gear';
 import { slotsAvailable, slotsUsed } from '../src/sim/slots';
@@ -148,6 +148,7 @@ describe('audit follow-up', () => {
 
   it('a weapon broken while worn loses its weapon identity, Element and clock', () => {
     const s = newGame();
+    s.gear = openingGear();
     const weapon = s.gear.find((g) => g?.slot === 'main hand')!;
     weapon.lines = [{ id: 'elemental_power_flat', value: 100, element: 'fire' }];
     weapon.broken = true;
@@ -161,6 +162,7 @@ describe('audit follow-up', () => {
 
   it('Auto Equip does not replace locked worn equipment', () => {
     const s = newGame();
+    s.gear = openingGear();
     const item = armour();
     const at = loot.SLOTS.findIndex((slot: string) => slot === item.slot);
     s.gear[at]!.locked = true;
@@ -214,6 +216,9 @@ describe('audit follow-up', () => {
 
   it('crafts a bottle in a full bag when spending the ingredients frees space', () => {
     const s = newGame();
+    s.gear = openingGear();
+    s.farm.potions['Red Draught'] = 0;
+    s.farm.potions['Sky Draught'] = 0;
     const potion = farm.P.list[0];
     const cost = farm.craftCost(potion.tier);
     s.farm.herbs[potion.tier] = cost.herbs;

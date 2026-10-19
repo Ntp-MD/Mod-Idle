@@ -1,6 +1,7 @@
 <script lang="ts">
   import { E, eng, fieldwork } from '../engine/client';
   import { sideSpawnWords } from './hud';
+  import { destinationSite, type MapDestination, type DestinationAction } from './destination';
 
   /**
    * The destination card: what a picked cell is, what it costs to get there, and the verbs that take
@@ -13,27 +14,22 @@
    * whose field it is, because that is where its zone comes from.
    */
   let {
-    dest, settlement, busy = false, fare = 0, afford = true, dungeon = null,
+    dest, primary, writable = true, campHere = false, campHunting = false, warpReason = '', notice = '',
+    settlement, busy = false, fare = 0, afford = true, dungeon = null,
     patrol = { stops: [], active: false, repeat: true, index: 0, groupsCleared: 0 }, autoReturnEnabled = false,
     minPatrolStops = 2, maxPatrolStops = 3, groupsPerStop = 3, autoReturnPct = 90,
-    onwalk, onwarp, onhunt, ondesk, onclear, ondungeon, onretreat = () => {}, oncamp = () => {}, oncampui = () => {},
+    onprimary, onwarp, onclear, onreturncamp = () => {}, oncampui = () => {},
     onTogglePatrolStop = () => {}, onStartPatrol = () => {}, onStopPatrol = () => {}, onClearPatrol = () => {},
     onPatrolRepeat = (_repeat: boolean) => {}, onAutoReturn = (_enabled: boolean) => {},
   }: {
     /** the picked cell and everything the field knows about it */
-    dest: {
-      key: string;
-      kind: 'town' | 'sub' | 'wild' | 'bare';
-      label: string;
-      node: string | null;
-      sub: number | null;
-      wild: number | null;
-      self: boolean;
-      walking: boolean;
-      here: boolean;
-      blocks: number;
-      sec: number;
-    };
+    dest: MapDestination;
+    primary: DestinationAction;
+    writable?: boolean;
+    campHere?: boolean;
+    campHunting?: boolean;
+    warpReason?: string;
+    notice?: string;
     /** the settlement that owns the cell — itself at rank 0, its nearest one on bare ground */
     settlement: any;
     busy?: boolean;
@@ -48,14 +44,10 @@
     maxPatrolStops?: number;
     groupsPerStop?: number;
     autoReturnPct?: number;
-    onwalk: () => void;
+    onprimary: () => void;
     onwarp: (id: string) => void;
-    onhunt: () => void;
-    ondesk: () => void;
     onclear: () => void;
-    ondungeon: () => void;
-    onretreat?: () => void;
-    oncamp?: () => void;
+    onreturncamp?: () => void;
     oncampui?: () => void;
     onTogglePatrolStop?: () => void;
     onStartPatrol?: () => void;
@@ -64,9 +56,12 @@
     onPatrolRepeat?: (repeat: boolean) => void;
     onAutoReturn?: (enabled: boolean) => void;
   } = $props();
-  const site = $derived(dest.kind === 'wild' ? fieldwork.siteAt(dest.wild) : dest.kind === 'bare' || dest.kind === 'sub' ? 'hunt' : null);
+  const site = $derived(destinationSite(dest));
+  const typeName = $derived(dest.kind === 'town' ? 'Settlement' : site === 'mine' ? 'Mine' : site === 'grove' ? 'Rare Grove' : site === 'dungeon' ? 'Dungeon entrance' : 'Hunting ground');
+  const warpBlocked = $derived(!writable ? 'Read-only: another tab controls progress.' : busy ? 'Finish traveling or recovering first.' : warpReason || (!afford ? `Needs ${fare} gold.` : ''));
   const isDungeon = $derived(site === 'dungeon');
   const zone = $derived(eng.zoneById(settlement.zone));
+  const ambushChance = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(E.road.encounter_chance_pct);
   const subzone = $derived(dest.kind === 'sub' && dest.sub != null ? zone.subzones?.[dest.sub] ?? null : null);
   const encounterNames = $derived.by(() => {
     // The zone's fixed levels belong to Species; its selected Variant supplies the name and Core.
@@ -104,168 +99,131 @@
   })[dest.kind]);
 </script>
 
-<div class="dest">
+<div class="dest surface-popover" role="dialog" aria-modal="false" aria-label={`Destination: ${dest.label}`} tabindex="-1"
+         onkeydown={(event) => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); onclear(); } }}>
   <header class="dest-head">
-    <h2>{dest.label}</h2>
-    <span class="dest-cell">Cell {dest.key}</span>
-  </header>
-
-  <p class="dest-summary">{ground}</p>
-
-  <div class="dest-meta">
-    <div class="dest-stat">
-      <span>Zone</span>
-      <strong>{settlement.zone} · {settlement.band} band{settlement.capital ? ` · ${settlement.capital} capital` : ''}</strong>
+    <div class="dest-identity">
+      <h2 class="text-accent">{dest.label}</h2>
+      <p class="text-note">{typeName} · Lv {zone.levels[0]}–{zone.levels[1]}</p>
     </div>
-    {#if !dest.self}
-      <div class="dest-stat">
-        <span>Route</span>
-        <strong>{dest.blocks} blocks · {dest.sec}s total</strong>
-      </div>
-      <div class="dest-stat">
-        <span>Ambush</span>
-        <strong>{E.road.encounter_chance_pct}% per block</strong>
-      </div>
+    <button class="btn btn-flat btn-icon dest-close" type="button" onclick={onclear} aria-label="Close selection" title="Close selection · Esc">
+      <svg class="icon-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8" /></svg>
+    </button>
+  </header>
+  <p class="text-note">{settlement.name} · Zone {settlement.zone} · {settlement.band} band · Cell {dest.key}</p>
+  {#if !dest.self}
+    <div class="dest-trip">
+      <strong>{dest.blocks} {dest.blocks === 1 ? 'block' : 'blocks'} · {dest.sec}s</strong>
+      <span class="text-note">Ambush {ambushChance}% / block</span>
+    </div>
+  {:else}
+    <p class="text-good">You are here{campHere ? ' · Field Camp' : ''}</p>
+  {/if}
+  <div class="dest-actions">
+    <button class="btn btn-gold" type="button" onclick={onprimary} disabled={primary.disabled}
+            onkeydown={(event) => { if (event.key === 'Enter' && event.repeat) event.preventDefault(); }}
+            aria-label={primary.label} aria-keyshortcuts="Enter" title={primary.reason || `${primary.label} · Enter`}>
+      {primary.label}<small class="text-note">Enter</small>
+    </button>
+    {#if dest.kind === 'town' && !dest.self && dest.here && dest.node}
+      <button class="btn btn-quiet" type="button" onclick={() => onwarp(dest.node!)} disabled={!!warpBlocked}
+              title={warpBlocked || `Warp for ${fare} gold`}>Waypoint · {fare} gold</button>
+    {/if}
+    {#if dest.self && dest.kind !== 'town'}
+      {#if campHunting}
+        <button class="btn btn-quiet" type="button" onclick={onreturncamp} disabled={!writable || busy}>Return to Camp</button>
+      {/if}
+      <button class="btn btn-quiet" type="button" onclick={oncampui}>{(site === 'mine' || site === 'grove') && !campHere ? 'Set up Camp' : 'Camp & skills'}</button>
     {/if}
   </div>
-
-  <section class="dest-guide" aria-label="Possible encounters">
-    <header class="dest-guide-head">
-      <strong>Encounter guide</strong>
-      <span>{subzone ? subzone.name : 'Zone pool'} · Lv {zone.levels[0]}–{zone.levels[1]}</span>
-    </header>
-    <ul class="dest-mob-list" title="Species levels are fixed for this zone; Variants supply the names and Core">
-      {#each encounterNames as name (name)}<li>{name}</li>{/each}
-    </ul>
-    {#if uniqueNames.length || zoneBoss || sideWords.length}
-      <div class="dest-specials">
-        {#if sideWords.length}<span><b>This side</b> {sideWords.join(' · ')}</span>{/if}
-        {#if uniqueNames.length}<span><b>Unique</b> {uniqueNames.join(' · ')}</span>{/if}
-        {#if zoneBoss}<span><b>Boss</b> {zoneBoss.name}</span>{/if}
-      </div>
-    {/if}
-  </section>
-
+  {#if primary.reason}<p class="text-note" role="status">{primary.reason}</p>{/if}
+  {#if notice}<p class="text-note">{notice}</p>{/if}
   {#if dest.kind === 'town' && !dest.self}
-    <p class="dest-note">{dest.here ? `Reached before · Waypoint ${fare} gold to warp${afford ? '' : ' · purse too light'}` : 'First trip on foot — the Waypoint opens after arrival'}</p>
+    {#if !dest.here}<p class="text-note">First trip on foot · Waypoint opens after arrival.</p>
+    {:else if warpBlocked}<p class="text-note">{warpBlocked}</p>{/if}
+  {/if}
+  {#if isDungeon && dest.self && dungeon?.active}
+    <p class="text-note">{dungeon.left}/{dungeon.total} mobs left · Retreat rescues {E.dungeon.retreat_keep_min}–{E.dungeon.retreat_keep_max} random stacks.</p>
   {/if}
 
-  {#if isDungeon}
-    <div class="dest-dungeon">
-      <p>Dungeon · up to {E.dungeon.mob_cap} mobs in groups of {E.dungeon.group_cap}. Loot stays in escrow until the last one falls; a Push forfeits it.</p>
-      {#if dungeon?.active}
-        <span class="dest-state">In progress · {dungeon.left}/{dungeon.total} left</span>
-        <button class="dest-secondary" onclick={onretreat}>Retreat · rescue {E.dungeon.retreat_keep_min}–{E.dungeon.retreat_keep_max} random stacks</button>
-      {:else if (dungeon?.cooldown ?? 0) > 0}
-        <span class="dest-state">Cooling down · {dungeon?.cooldown}s left</span>
-      {:else if dest.self}
-        <span class="dest-state ready">Ready to enter</span>
-      {:else}
-        <span class="dest-state">Stand on this cell to enter</span>
+  <details class="dest-section" name="map-destination-sections">
+    <summary><span>Details</span><svg class="icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
+    <div class="dest-section-body">
+      <p class="text-note">{ground}</p>
+      {#if settlement.capital}<p class="text-note">{settlement.capital} capital</p>{/if}
+      {#if site === 'hunt' || isDungeon}
+        <section class="dest-guide" aria-label="Possible encounters">
+          <strong class="text-accent">{subzone ? subzone.name : 'Zone pool'}</strong>
+          <details class="dest-roster" name="map-encounter-roster" open>
+            <summary>Monsters · {encounterNames.length}</summary>
+            <ul class="dest-mob-list">
+              {#each encounterNames as name (name)}<li>{name}</li>{/each}
+            </ul>
+          </details>
+          {#if sideWords.length}<p class="text-note"><b>This side</b> {sideWords.join(' · ')}</p>{/if}
+          {#if uniqueNames.length}
+            <details class="dest-roster" name="map-encounter-roster">
+              <summary>Unique · {uniqueNames.length}</summary>
+              <ul class="dest-mob-list">{#each uniqueNames as name (name)}<li>{name}</li>{/each}</ul>
+            </details>
+          {/if}
+          {#if zoneBoss}<p class="text-note"><b>Boss</b> {zoneBoss.name}</p>{/if}
+        </section>
+      {/if}
+      {#if isDungeon}
+        <p class="text-note">Up to {E.dungeon.mob_cap} mobs in groups of {E.dungeon.group_cap}. Loot stays in escrow until the last falls.</p>
+        {#if (dungeon?.cooldown ?? 0) > 0}<p class="text-note">Cooldown · {dungeon?.cooldown}s remaining.</p>{/if}
       {/if}
     </div>
-  {/if}
+  </details>
 
-  {#if dest.self}
-    <p class="dest-note current">You are standing here</p>
-  {/if}
-
-  <footer class="dest-actions">
-    <div class="dest-primary-actions">
-      {#if !dest.self}
-        <button class="dest-primary" onclick={onwalk} disabled={busy}>{dest.walking ? 'Walking…' : 'Walk here'}</button>
-        {#if dest.kind === 'town' && dest.here && dest.node}
-          <button class="dest-secondary" onclick={() => onwarp(dest.node!)} disabled={!afford}
-                  title={afford ? `Warp for ${fare} gold` : `Needs ${fare} gold`}>
-            Waypoint · {fare} gold
-          </button>
+  <details class="dest-section" name="map-destination-sections">
+    <summary><span>Route{patrol.stops.length ? ` · ${patrol.stops.length}/${maxPatrolStops} stops` : ''}</span><svg class="icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
+    <div class="dest-section-body">
+      {#if patrolNames.length}<p>{patrolNames.join(' → ')}</p>{/if}
+      {#if patrol.active}<p class="text-note">{patrolHere} · {patrol.groupsCleared}/{groupsPerStop} groups</p>{/if}
+      <div class="dest-actions">
+        {#if dest.kind === 'sub' && !patrol.active}
+          <button class="btn btn-quiet" type="button" onclick={onTogglePatrolStop}
+                  disabled={!writable || busy || !dest.here || (patrol.stops.length >= maxPatrolStops && !selectedPatrolStop)}
+                  title={!dest.here ? 'Visit the settlement first.' : ''}>{selectedPatrolStop ? 'Remove Patrol stop' : 'Add Patrol stop'}</button>
         {/if}
-      {:else}
-        {#if isDungeon && !dungeon?.active && (dungeon?.cooldown ?? 0) <= 0}
-          <button class="dest-primary" onclick={ondungeon}>Enter dungeon</button>
+        {#if patrol.active}
+          <button class="btn btn-quiet" type="button" onclick={onStopPatrol} disabled={!writable}>Stop Patrol</button>
+        {:else if patrol.stops.length >= minPatrolStops}
+          <button class="btn btn-gold" type="button" onclick={onStartPatrol} disabled={!writable || busy}>Start Patrol</button>
         {/if}
-        <button class="dest-primary" onclick={onhunt}>{dest.kind === 'sub' ? 'Hunt this sub-zone' : 'Hunt here'}</button>
-        {#if dest.kind !== 'town'}
-          <button class="dest-secondary" onclick={oncampui}>Camp & skills</button>
-          <button class="dest-secondary" onclick={oncamp} title="Set up a safe field Camp here">Set Camp</button>
+        {#if patrol.stops.length && !patrol.active}
+          <button class="btn btn-quiet" type="button" onclick={onClearPatrol} disabled={!writable || busy}>Clear route</button>
         {/if}
-      {/if}
-      {#if dest.kind === 'town'}
-        <button class="dest-secondary" onclick={ondesk}>The desk</button>
-      {/if}
-      {#if dest.kind === 'sub' && !patrol.active}
-        <button class="dest-secondary" onclick={onTogglePatrolStop} disabled={busy || (patrol.stops.length >= maxPatrolStops && !selectedPatrolStop)}>
-          {selectedPatrolStop ? 'Remove Patrol stop' : 'Add Patrol stop'}
-        </button>
-      {/if}
-      {#if patrol.active}
-        <button class="dest-primary" onclick={onStopPatrol}>Stop Patrol</button>
-      {:else if patrol.stops.length >= minPatrolStops}
-        <button class="dest-primary" onclick={onStartPatrol} disabled={busy}>Start Patrol</button>
-      {/if}
-      {#if patrol.stops.length && !patrol.active}
-        <button class="dest-secondary" onclick={onClearPatrol} disabled={busy}>Clear route</button>
-      {/if}
-    </div>
-    <button class="dest-clear" onclick={onclear}>Clear</button>
-  </footer>
-
-  {#if dest.kind === 'sub' || patrol.stops.length}
-    <details class="dest-dungeon">
-      <summary class="dest-note">Patrol · {patrol.stops.length}/{maxPatrolStops} stops{patrol.active ? ` · ${patrolHere} · ${patrol.groupsCleared}/${groupsPerStop} groups` : ''}</summary>
-      {#if patrolNames.length}<p class="dest-note">{patrolNames.join(' → ')}</p>{/if}
-      <label><input type="checkbox" checked={patrol.repeat} onchange={(event) => onPatrolRepeat(event.currentTarget.checked)} disabled={patrol.active} /> Repeat route</label>
-      <label><input type="checkbox" checked={autoReturnEnabled} onchange={(event) => onAutoReturn(event.currentTarget.checked)} /> Auto-Return at {autoReturnPct}% bag, stash unlocked gear, resume</label>
+      </div>
+      <label class="dest-setting"><input type="checkbox" checked={patrol.repeat} onchange={(event) => onPatrolRepeat(event.currentTarget.checked)} disabled={!writable || patrol.active} /> Repeat Patrol</label>
+      <label class="dest-setting"><input type="checkbox" checked={autoReturnEnabled} onchange={(event) => onAutoReturn(event.currentTarget.checked)} disabled={!writable} /> Auto-Return at {autoReturnPct}% bag</label>
+      <p class="text-note">Auto-Return stashes unlocked gear, then resumes Patrol.</p>
       {#if patrol.stops.length < minPatrolStops}
-        <p class="dest-note">Choose at least {minPatrolStops} subzones in one visited zone. Patrol hunts each stop's fixed roster.</p>
+        <p class="text-note">Choose at least {minPatrolStops} subzones in one visited zone. Patrol hunts each stop’s roster.</p>
       {/if}
-    </details>
-  {/if}
+    </div>
+  </details>
 </div>
 
 <style>
-  /* the card floats over its selected cell: title, place, travel read and choices have separate stops */
-  .dest {
-    display: grid; gap: var(--spacing-xs); min-width: 0;
-    border: 1px solid var(--edge); border-radius: var(--radius-md); padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-xs);
-    background: var(--glass); backdrop-filter: blur(8px); box-shadow: 0 14px 40px rgba(0, 0, 0, .55);
-    animation: pop .14s ease-out;
-  }
-  .dest-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; }
-  .dest-head h2 { min-width: 0; margin: 0; overflow: hidden; color: var(--text); font-size: var(--font-sm); font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-  .dest-cell { flex: none; padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-xs); color: var(--gold-lit); font-variant-numeric: tabular-nums; }
-  .dest-summary { margin: 0; color: var(--text); line-height: 1.35; }
-  .dest-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(69px, 5.32vw, 149px), 1fr)); gap: var(--spacing-sm); padding: var(--spacing-xs) 0; border-block: 1px solid var(--edge); }
-  .dest-stat { display: grid; gap: var(--spacing-xs); min-width: 0; }
-  .dest-stat span { color: var(--dim); letter-spacing: 1px; text-transform: uppercase; }
-  .dest-stat strong { color: var(--text); font-weight: 600; }
-  .dest-guide { display: grid; gap: var(--spacing-xs); min-width: 0; }
-  .dest-guide-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--edge); }
-  .dest-guide-head strong { color: var(--text); font-size: var(--font-sm); font-weight: 600; }
-  .dest-guide-head span { flex: none; color: var(--gold-lit); font-variant-numeric: tabular-nums; }
-  .dest-mob-list {
-    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm);
-    max-height: clamp(106px, 8.23vw, 230px); margin: 0; padding: 0; overflow-y: auto; list-style: none;
-  }
-  .dest-mob-list li { min-width: 0; padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--edge); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dest-specials { display: flex; flex-direction: column; gap: var(--spacing-xs); color: var(--dim); }
-  .dest-specials b { color: var(--gold-lit); font-weight: 600; }
-  .dest-note { margin: 0; color: var(--dim); }
-  .dest-dungeon { display: grid; gap: var(--spacing-xs); }
-  .dest-dungeon p { margin: 0; color: var(--dim); line-height: 1.35; }
-  .dest-state { justify-self: start; color: var(--gold-lit); }
-  .dest-state.ready { color: var(--good-lit); }
-  .dest-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-sm); }
-  .dest-primary-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-sm); }
-  .dest-actions button {
-    border: 1px solid var(--edge); border-radius: var(--radius-xs);
-    background: var(--panel); color: var(--text); font-size: var(--font-xs); transition: border-color var(--motion-fast) var(--ease-ui), background var(--motion-fast) var(--ease-ui), color var(--motion-fast) var(--ease-ui);
-  }
-  .dest-actions button:hover { border-color: var(--gold); }
-  .dest-actions .dest-primary { border-color: color-mix(in srgb, var(--gold) 54%, var(--edge)); background: color-mix(in srgb, var(--gold) 12%, var(--panel)); color: var(--gold-lit); }
-  .dest-actions .dest-primary:hover { background: color-mix(in srgb, var(--gold) 20%, var(--panel)); }
-  .dest-actions .dest-clear { background: transparent; color: var(--dim); }
-  .dest-actions button:disabled { opacity: .45; cursor: not-allowed; }
-  .dest-actions button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  @keyframes pop { from { transform: translateY(var(--x-pull-note)); opacity: .3; } to { transform: none; opacity: 1; } }
+  .dest { display: grid; gap: var(--spacing-sm); min-width: 0; padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-xs); }
+  .dest p { margin: 0; line-height: 1.35; }
+  .dest-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; }
+  .dest-identity { display: grid; gap: var(--spacing-xs); min-width: 0; }
+  .dest-head h2 { margin: 0; font-size: var(--font-sm); overflow-wrap: anywhere; }
+  .dest-close { display: grid; place-items: center; flex: none; padding: var(--spacing-xs); }
+  .dest-close svg, .dest-chevron { width: var(--icon-label); height: var(--icon-label); flex: none; }
+  .dest-trip, .dest-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs) var(--spacing-sm); }
+  .dest-actions button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-sm); font-size: var(--font-xs); }
+  .dest-section { min-width: 0; }
+  .dest-section summary { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); cursor: pointer; padding-block: var(--spacing-xs); }
+  .dest-section[open] > summary .dest-chevron { transform: rotate(180deg); }
+  .dest-section-body, .dest-guide { display: grid; gap: var(--spacing-sm); min-width: 0; }
+  .dest-section-body { padding-block: var(--spacing-xs); }
+  .dest-mob-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm); margin: 0; padding: 0; list-style: none; }
+  .dest-mob-list li { min-width: 0; overflow-wrap: anywhere; }
+  .dest-setting { display: flex; align-items: flex-start; gap: var(--spacing-xs); }
+  .dest-roster summary { display: list-item; padding-block: var(--spacing-xs); }
 </style>

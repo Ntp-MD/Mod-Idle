@@ -699,7 +699,6 @@ export interface PotionsCfg {
 }
 
 export interface InventoryCfg {
-  adventure_slots: number;
   character_slots: number;
   stack_size: Record<string, number>;
   unit_weight: Record<string, number>;

@@ -174,7 +174,7 @@ export function previewDelivery(state: GameState, id: string, count: number, acc
   const fallback = complete && !!contract.reward.skill && !skill;
   const stones = complete ? [contract.reward.stone, ...(fallback ? [contract.reward.fallback] : [])] : [];
   const capKind = good.bucket === 'junk' ? 'stone' : good.bucket;
-  if (!fitsTransaction(state, [{ bucket, key: good.key, capKind, amount: count }], stones.map((stone) => ({ bucket: state.counters.stones, key: stone.key, capKind: 'stone', amount: stone.count })))) return refuse('make character-bag room for the complete reward bundle');
+  if (!fitsTransaction(state, [{ bucket, key: good.key, capKind, amount: count }], stones.map((stone) => ({ bucket: state.counters.stones, key: stone.key, capKind: 'stone', amount: stone.count })))) return refuse('make bag room for the complete reward bundle');
   return { ok: true as const, contract, good, count, quote, complete, skill, fallback, stones };
 }
 

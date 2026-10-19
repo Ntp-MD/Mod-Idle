@@ -93,6 +93,8 @@
 </div>
 
 <style>
+  /* A panel draws a second Hub Grid over the stage: the box names a cell rectangle and its body holds the
+     panel's one scroll owner, so the canvas itself never scrolls — see docs/skins.md. */
   .veil {
     position: fixed;
     inset: 0;
@@ -139,12 +141,12 @@
   /* A square icon control centres its glyph itself: the tag's own padding is uneven (xs down, md across),
      so a ✕ left to text layout sits off-centre in its token-sized box. */
   .quit {
-    width: var(--icon-md);
-    height: var(--icon-md);
+    width: calc(var(--icon-label) * 1.5);
+    height: calc(var(--icon-label) * 1.5);
     place-content: center;
     display: grid;
   }
   /* The flex child may shrink to the canvas; content must fit its own compact layout. */
   .body { padding: var(--spacing-md); overflow: hidden; min-width: 0; min-height: 0; }
-  .body.fixed { overflow: hidden; display: flex; flex-direction: column; gap: var(--spacing-sm); }
+  .body.fixed { overflow: hidden; display: flex; flex: 1 1 auto; flex-direction: column; gap: var(--spacing-sm); }
 </style>

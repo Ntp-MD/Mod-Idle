@@ -21,7 +21,7 @@
 </script>
 
 <section class="deliveries" aria-label="Delivery contracts">
-  <p class="explanation text-dim">Bring the wanted goods to the issuing town. Every hand-in pays its current market value immediately; complete the count before the deadline to earn the frozen bonus. Track keeps a reminder.</p>
+  <p class="explanation text-dim">Hand-ins pay market value now · complete the count before the deadline for the bonus.</p>
   {#if !writer}<p class="text-alarm" role="status">This tab is read-only. Deliveries, tracking and recap acknowledgement are disabled.</p>{/if}
   <div class="wants">
     {#each open as contract (contract.id)}
@@ -81,7 +81,7 @@
   .deliveries { font-size: var(--font-sm); }
   .deliveries p, .deliveries h3 { margin: 0; }
   .explanation { line-height: 1.5; }
-  .want { padding: var(--spacing-md); border: 1px solid var(--edge); border-radius: var(--radius-sm); background: var(--inset); }
+  .want { padding: var(--spacing-md); border: 1px solid var(--edge); border-radius: var(--radius-card); background: var(--inset); }
   .want header, .actions { display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
   .want header { justify-content: space-between; }
   .want header div { display: grid; gap: var(--spacing-xs); }

@@ -1,7 +1,7 @@
 {
   "meta": {
     "note": "The roster source of truth and the only home of a skill number. engine/skills.ts is the one calculator and the client calls the same function, so a press is never typed twice. tools/skills.ts --calc prints the workshop; --checks runs the mechanic gate.",
-    "active_slots": 14,
+    "active_slots": 16,
     "types": [
       "attack",
       "buff",

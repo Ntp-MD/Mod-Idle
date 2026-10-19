@@ -103,7 +103,7 @@
                 gap: var(--spacing-xs);
                 padding: var(--spacing-md) var(--spacing-xs) var(--spacing-xs);
                 border: 1px dashed rgba(127, 212, 255, 0.35);
-                border-radius: 8px;
+                border-radius: var(--radius-card);
                 background: rgba(127, 212, 255, 0.03);
             }
             /* corner tags on one header line: name at top-left, coordinates at top-right */
@@ -199,14 +199,14 @@
                 flex: none;
                 padding: var(--spacing-xs) var(--spacing-xs);
                 border: 1px solid var(--edge);
-                border-radius: 6px;
+                border-radius: var(--radius-card);
                 background: var(--glass);
                 color: var(--text);
                 white-space: nowrap;
             }
             .orb {
-                width: var(--icon-xl);
-                height: var(--icon-xl);
+                width: calc(var(--icon-card) * 1.4);
+                height: calc(var(--icon-card) * 1.4);
                 border-radius: 50%;
                 border: 1px solid var(--edge);
                 background: var(--hud-face);
@@ -214,7 +214,7 @@
             .slab {
                 width: 100%;
                 height: var(--spacing-sm);
-                border-radius: 4px;
+                border-radius: var(--radius-card);
                 background: var(--glass);
             }
         </style>

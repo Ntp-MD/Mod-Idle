@@ -46,13 +46,6 @@ export function currentCell(state: GameState): Hex {
   return { q: home.q, r: home.r };
 }
 
-/** "Eastgate → Millbrook", the label the UI shows for a walk in either direction. */
-export function walkLabel(fromId: string, toId: string): string {
-  const a = settlementById(fromId)?.name ?? fromId;
-  const b = settlementById(toId)?.name ?? toId;
-  return `${a} → ${b}`;
-}
-
 /**
  * What the HUD says while a walk runs: the cell the feet are heading for, named by what stands on it
  * and the settlement whose ground it is. A walk joins two cells, so the sentence quotes the destination
@@ -75,16 +68,6 @@ export function walkNote(state: GameState): string {
 }
 
 export const walkBlocks = (fromId: string, toId: string): number => road.blocksBetween(fromId, toId);
-
-/**
- * The plotted route as the cells it crosses, keyed the way the sheet keys a cell. A far destination
- * is never jumped to: the walk is this chain, one cell per block, and the map lights it up one cell
- * at a time. The keys come from the walk graph's own coordinates, so the client matches a label the
- * generated sheet already carries and reads no position table (X33 · M7).
- */
-export function walkRoute(fromId: string, toId: string): string[] {
-  return road.routeBetween(fromId, toId).map((h: { q: number; r: number }) => `${h.q},${h.r}`);
-}
 
 /** A Waypoint exists for every settlement the character has arrived at on foot, once. */
 export function waypointUnlocked(state: GameState, id: string): boolean {
@@ -238,25 +221,10 @@ export function arrive(state: GameState, walk: Walk) {
   };
 }
 
-/** Turn back: the walk is dropped and the feet go back to the cell the route started on. */
-export function endWalk(state: GameState) {
-  const w = state.walk;
-  state.walk = null;
-  if (w) state.cell = { q: w.from.q, r: w.from.r, sub: null, wild: null };
-  state.group = [];
-}
-
 /** Which zone an encounter on a walk draws from: the lower-numbered of the two it joins. */
 export function walkZonesHex(from: Hex, to: Hex): { lower: number; higher: number } {
   const a = settlementZone(ownerOf(from).id) ?? 0;
   const b = settlementZone(ownerOf(to).id) ?? 0;
-  return { lower: Math.min(a, b), higher: Math.max(a, b) };
-}
-
-/** The same rule read from settlement ids, for a caller that has names rather than cells. */
-export function walkZones(fromId: string, toId: string): { lower: number; higher: number } {
-  const a = settlementZone(fromId) ?? 0;
-  const b = settlementZone(toId) ?? 0;
   return { lower: Math.min(a, b), higher: Math.max(a, b) };
 }
 

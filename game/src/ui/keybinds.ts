@@ -56,6 +56,14 @@ export const KEYBINDS: Keybind[] = [
 
   { id: 'game.pause', label: 'Pause or resume the clock', group: 'field', def: 'Space', where: 'the field' },
 
+  { id: 'item.1', label: 'Drink shortcut item 1', group: 'field', def: 'F1', where: 'the quickbar' },
+  { id: 'item.2', label: 'Drink shortcut item 2', group: 'field', def: 'F2', where: 'the quickbar' },
+  { id: 'item.3', label: 'Drink shortcut item 3', group: 'field', def: 'F3', where: 'the quickbar' },
+  { id: 'item.4', label: 'Drink shortcut item 4', group: 'field', def: 'F4', where: 'the quickbar' },
+  { id: 'item.5', label: 'Drink shortcut item 5', group: 'field', def: 'F5', where: 'the quickbar' },
+  { id: 'item.6', label: 'Drink shortcut item 6', group: 'field', def: 'F6', where: 'the quickbar' },
+  { id: 'item.7', label: 'Drink shortcut item 7', group: 'field', def: 'F7', where: 'the quickbar' },
+
   { id: 'map.zoom.in', label: 'Zoom the map in', group: 'map', def: '+', where: 'map focus' },
   { id: 'map.zoom.out', label: 'Zoom the map out', group: 'map', def: '-', where: 'map focus' },
   { id: 'map.zoom.reset', label: 'Reset the map view', group: 'map', def: '0', where: 'map focus' },
@@ -68,7 +76,7 @@ export const KEYBINDS: Keybind[] = [
   { id: 'equip.best', label: 'Put on the best gear you carry', group: 'warehouse', def: 'q', where: 'bags or town' },
   { id: 'stash.tab.next', label: 'Next stash tab', group: 'warehouse', def: 'n', where: 'the stash' },
   { id: 'stash.tab.prev', label: 'Previous stash tab', group: 'warehouse', def: 'm', where: 'the stash' },
-  { id: 'warehouse.stash.all', label: 'Stash every unlocked piece from the pile', group: 'warehouse', def: 'e', where: 'the stash' },
+  { id: 'warehouse.stash.all', label: 'Stash every unlocked piece from the bag', group: 'warehouse', def: 'e', where: 'the stash' },
   { id: 'warehouse.take.all', label: 'Take back every unlocked piece of the open tab', group: 'warehouse', def: 'Shift+e', where: 'the stash' },
 ];
 

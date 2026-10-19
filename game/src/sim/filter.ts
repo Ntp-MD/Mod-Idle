@@ -71,3 +71,39 @@ export function describeRule(rule: SlotRule): string {
   if (!rule.keep_missing_element) parts.push('an unknown Element does not count');
   return parts.join(' · ');
 }
+
+/**
+ * Bag-filter presets (`grants.filter_presets`): one slot the character always owns, and one more each
+ * time a Collector set pays a preset reward. A preset stores only the rule table — the keep-list is
+ * re-read from what the character wears at the moment the preset is loaded, because it is a filter
+ * condition, not a setting.
+ */
+export interface FilterPreset {
+  bySlot: Record<string, SlotRule>;
+}
+
+/** The first slot is the character's own; every reward pays exactly one more. */
+export const presetSlots = (s: GameState): number => 1 + (s.grants?.filter_presets || 0);
+
+/** Write the live rule table over preset `i`. A slot the character has not earned is refused. */
+export function savePreset(s: GameState, i: number): boolean {
+  if (i < 0 || i >= presetSlots(s)) return false;
+  const bySlot: Record<string, SlotRule> = {};
+  for (const slot of FILTER_SLOTS) bySlot[slot] = clone(ruleFor(s.filter, slot));
+  s.filterPresets[i] = { bySlot };
+  return true;
+}
+
+/** Load preset `i`: the whole table, re-read as it stands — nothing else about the bag moves. */
+export function loadPreset(s: GameState, i: number): boolean {
+  const p = s.filterPresets?.[i];
+  if (!p || typeof p.bySlot !== 'object' || p.bySlot === null) return false;
+  s.filter.bySlot = Object.fromEntries(Object.entries(p.bySlot).map(([slot, rule]) => [slot, clone(rule)]));
+  refresh(s);
+  return true;
+}
+
+/** Empty preset `i`. An empty slot reads as "nothing stored here yet" in the panel. */
+export function clearPreset(s: GameState, i: number): void {
+  if (i >= 0 && i < (s.filterPresets ?? []).length) s.filterPresets[i] = null;
+}

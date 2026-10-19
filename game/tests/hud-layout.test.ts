@@ -26,8 +26,44 @@ describe('HUD layout migration', () => {
     expect(validateHudLayout(DEFAULT_HUD_LAYOUT)).toBeNull();
   });
 
+  it('lets an absolute region overlap and round-trips its box and z-index', () => {
+    const next = copyHudLayout(DEFAULT_HUD_LAYOUT);
+    next.feed = { ...next.feed, mode: 'absolute', rect: { x: 55.5, y: 12, w: 30, h: 18 }, z: 7 };
+    expect(validateHudLayout(next)).toBeNull();
+    const round = migrateHudLayout({ version: HUD_LAYOUT_VERSION, hud: next, modal: DEFAULT_MODAL_AREA });
+    expect(round.hud.feed.mode).toBe('absolute');
+    expect(round.hud.feed.rect).toEqual({ x: 55.5, y: 12, w: 30, h: 18 });
+    expect(round.hud.feed.z).toBe(7);
+  });
+
+  it('refuses an absolute region whose box makes no sense', () => {
+    const next = copyHudLayout(DEFAULT_HUD_LAYOUT);
+    next.feed = { ...next.feed, mode: 'absolute', rect: { x: 0, y: 0, w: 0, h: 50 } };
+    expect(validateHudLayout(next)).toMatch(/invalid free box/);
+  });
+
+  it('falls back to grid placement when a saved box is unreadable', () => {
+    const next = copyHudLayout(DEFAULT_HUD_LAYOUT);
+    next.feed = { ...next.feed, mode: 'absolute', rect: { x: NaN, y: 0, w: 30, h: 18 } };
+    const fixed = copyHudLayout(next);
+    expect(fixed.feed.mode).toBe('absolute');
+    expect(fixed.feed.rect).toEqual(DEFAULT_HUD_LAYOUT.feed.rect);
+  });
+
+  it('extends the unchanged stock Game controls through M12–M15 while preserving custom placement', () => {
+    const source = copyHudLayout(DEFAULT_HUD_LAYOUT);
+    source.commands.area = area(14, 15, 12, 15);
+    const migrated = migrateHudLayout({ version: 9, hud: source, modal: DEFAULT_MODAL_AREA });
+    expect(migrated.hud.commands.area).toEqual(DEFAULT_HUD_LAYOUT.commands.area);
+    expect(migrated.notice).toMatch(/M12–M15/);
+    expect(validateHudLayout(migrated.hud)).toBeNull();
+
+    source.commands.area = area(12, 13, 12, 15);
+    expect(migrateHudLayout({ version: 9, hud: source, modal: DEFAULT_MODAL_AREA }).hud.commands.area).toEqual(source.commands.area);
+  });
+
   it('preserves the combat field and folds a retired controls anchor into the right-edge dock', () => {
-    const custom = region('feed', area(10, 12, 1, 2));
+    const custom = region('feed', area(11, 13, 1, 2));
     const migrated = migrateHudLayout(legacyFile({ feed: custom }));
     expect(migrated.version).toBe(HUD_LAYOUT_VERSION);
     expect(migrated.notice).toMatch(/automation.*menu rail/i);

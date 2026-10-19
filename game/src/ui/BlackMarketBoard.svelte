@@ -26,7 +26,7 @@
 </script>
 
 <section class="black-market" aria-label="Black Market stock">
-  <p class="market-note">A separate settlement service for rare materials, craft stones and named skill XP Levels. Offers have fixed prices and stock. Gold buys an XP Level only when it improves that skill; Duplicate Ladder stays unchanged.</p>
+  <p class="market-note">Rare materials, craft stones and skill XP Levels at fixed prices and stock.</p>
   {#if !here}
     <p class="state text-note">Stand in {TOWN.settlements.find((town: any) => town.id === townId)?.name || 'the issuing settlement'} to browse its live stock and buy.</p>
   {:else if !stock}
@@ -58,9 +58,9 @@
   .black-market { display: grid; gap: var(--spacing-md); align-content: start; }
   .black-market p { margin: 0; }
   .offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(260px, 20vw, 360px), 1fr)); gap: var(--spacing-sm); }
-  .offer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--spacing-sm); align-items: center; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: var(--spacing-sm); background: var(--panel); }
+  .offer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--spacing-sm); align-items: center; border: 1px solid var(--line); border-radius: var(--radius-card); padding: var(--spacing-sm); background: var(--panel); }
   .offer > div { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; }
-  .offer-icon { width: var(--icon-md); height: var(--icon-md); flex: none; object-fit: contain; }
+  .offer-icon { width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); flex: none; object-fit: contain; }
   .offer-text { display: grid; gap: var(--spacing-xs); min-width: 0; }
   .offer h3 { margin: 0; }
   .offer strong { white-space: nowrap; }

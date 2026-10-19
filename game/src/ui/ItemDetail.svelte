@@ -8,11 +8,9 @@
   import type { Item } from '../sim/types';
 
   /**
-   * The detail card a slot shows on hover. The whole card is a projection: every value and every name
-   * comes out of the rolled line and `mods.json`, so it cannot drift from the drop the player is
-   * reading. A line prints as `<value> <plain words>` — no plus sign and no Mod-book name — while
-   * Frame, Bound, and Unbound lines are named directly so fixed and editable Mods do not rely on
-   * colour alone.
+   * The detail card a slot shows on hover: a pure projection of the rolled line and `mods.json`, so
+   * it cannot drift from the drop being read. A line prints as `<value> <plain words>`; Frame, Bound
+   * and Unbound lines are named directly so fixed vs editable never relies on colour alone.
    *
    * The skeleton reads top to bottom (`item-base.md`): line 1 is the Frame Mod the frame owns, lines
    * 2-3 the Bound pair, then the Unbound lines the drop drew — the Mods the stones may edit. The
@@ -186,7 +184,7 @@
     background: var(--bg);
     /* the card leads with its rarity edge, the way the slot it came from does */
     border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 45%, var(--line));
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-card);
     padding: var(--spacing-xs) var(--spacing-sm);
     display: grid;
     gap: var(--spacing-xs);
@@ -204,15 +202,14 @@
   h5 { margin: 0; color: var(--gold-lit); font-size: var(--font-xs); }
   .section-heading p { margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .lines { display: grid; gap: var(--spacing-xs); list-style: none; margin: 0; padding: 0; }
-  /* Every Mod line is a stamped bar: an ink-to-dark sweep with the words in the ink colour, so the
-     value reads first and the kind is carried by the bar's edge and tint, never by the words. */
+  /* Mod lines: the bar's edge and tint carry the kind, never the words */
   .lines li {
     --bar-a: color-mix(in srgb, var(--line) 62%, var(--panel));
     --bar-b: color-mix(in srgb, var(--panel) 45%, var(--bg));
     display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--spacing-xs) var(--spacing-xs);
     padding: var(--spacing-xs) var(--spacing-xs);
     border-left: 1px solid var(--line);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-card);
     color: var(--text);
     font-variant-numeric: tabular-nums;
     background: linear-gradient(90deg, var(--bar-a), var(--bar-b) 62%, transparent);
@@ -222,7 +219,7 @@
   .line.bound .line-kind { color: var(--xp-lit); }
   .line-body { display: flex; flex: 1 1 clamp(125px, 9.68vw, 200px); flex-wrap: wrap; align-items: center; gap: var(--spacing-xs) var(--spacing-xs); min-width: 0; }
   .mod-part { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; white-space: normal; }
-  .mod-part img, .cmp img, .gear-row img { width: var(--icon-xs); height: var(--icon-xs); flex: none; object-fit: contain; opacity: .9; }
+  .mod-part img, .cmp img, .gear-row img { width: var(--icon-detail); height: var(--icon-detail); flex: none; object-fit: contain; opacity: .9; }
   .mod-sep { color: var(--dim); }
   .crafted { color: var(--dim); }
   /* the two fixed kinds keep their colour in the bar, not in the words: Frame Mod red, Bound pair yellow */
@@ -241,7 +238,7 @@
      upgrade tag wears), lost and under in red — the aggregate % on the foot is still the headline. */
   .comparison { padding-top: var(--spacing-xs); border-top: 1px solid var(--line); }
   .cmp { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); font-size: var(--font-xs); }
-  .cmp li { display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-xs); border-radius: var(--radius-sm); color: var(--dim); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--panel) 45%, transparent); }
+  .cmp li { display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-xs); border-radius: var(--radius-card); color: var(--dim); font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--panel) 45%, transparent); }
   .cmp li.over, .cmp li.gained { color: var(--xp); }
   .cmp li.under, .cmp li.lost { color: var(--hp); }
   .gear { display: grid; gap: var(--spacing-xs); padding-top: var(--spacing-xs); border-top: 1px solid var(--line); }

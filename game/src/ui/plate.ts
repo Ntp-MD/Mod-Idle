@@ -77,49 +77,6 @@ export function platePark(by: Map<string, FxEvent[]>, id: string): Parked | null
 }
 
 /**
- * The figure a body holds on its own card: what the ring still parks there. When the ring drains — about a
- * second after the last blow — the figure leaves with it (owner ruling), so a standing body never wears a
- * stale total.
- *
- * `list` is the narrowed set of blows to add up, newest first, and it is taken as given rather than
- * filtered again: the caller that narrowed to one body's `hit` lines and the caller that narrowed to the
- * character's `taken` lines are both handing over "the blows that landed", and a second filter in here
- * would quietly drop one of the two.
- *
- * `held` is the caller's cache and is written here on purpose: growth is counted on event ids — only a blow
- * newer than the one the held figure last stamped adds to it — so a burst that keeps landing inside the same
- * second adds onto the figure the ring already showed instead of counting a blow twice.
- */
-export function latchedFrom(list: FxEvent[], held: Map<string, Parked>, key: string): Parked | null {
-  const head = list[0];
-  const last = held.get(key);
-  if (!head) return null;
-  let value: Parked;
-  if (last && last.sec === head.sec) {
-    if (last.id === head.id) return last;
-    let sum = last.sum;
-    for (const e of list) {
-      if (e.sec !== head.sec || e.id <= last.id) continue;
-      sum += e.value || 0;
-    }
-    value = { id: head.id, sec: head.sec, sum, colour: head.colour, crit: head.crit };
-  } else {
-    value = parked(list)!;
-  }
-  held.set(key, value);
-  return value;
-}
-
-/** The same read against one body's bucket, which is what `hits` narrows that bucket to. */
-export function latchedPark(
-  by: Map<string, FxEvent[]>,
-  id: string,
-  held: Map<string, Parked>,
-): Parked | null {
-  return latchedFrom(hits(by, id), held, id);
-}
-
-/**
  * The body's own strike: the newest blow it carried against the character. A blocked swing is still a swing,
  * so both halves of a defence name their striker, and the plate that swung is the one that leans.
  */

@@ -5,13 +5,14 @@
    * The field and the town are the two ways to use the client, so the town gets its own front door rather
    * than a rail tab buried among the screens it leads to. It is a list of services, not a gallery of cards:
    * a row names the service, says what it costs the character to use it, and prints the live state that
-   * makes pressing it worth while — how many stall lines the purse covers, how many pieces the pile is
+   * makes pressing it worth while — how many stall lines the purse covers, how many pieces the bag is
    * holding, how many tasks are ready to claim.
    *
    * Every number is read from the sim modules the cages already test; nothing here restates a rule.
    */
   import { E, eng } from '../engine/client';
   import { canBuy, stockOf, settlementById, standingTier, standingShare } from '../sim/town';
+  import { slotsAvailable, slotsUsed } from '../sim/slots';
   import { craft } from '../sim/craft';
   import type { GameState } from '../sim/types';
   import { icon } from '../icon';
@@ -35,8 +36,9 @@
     onblackmarket: () => void;
   } = $props();
 
-  const cap = $derived(E.inventory.adventure_slots as number);
-  const pile = $derived(state.bag.length);
+  const capacity = $derived(slotsAvailable(state));
+  const used = $derived(slotsUsed(state));
+  const pieces = $derived(state.bag.length);
   const stored = $derived(state.stash.reduce((n, t) => n + t.length, 0));
   const junk = $derived(Object.values(state.junk).reduce((a, b) => a + (b as number), 0));
   const stock = $derived(stockOf(town.id));
@@ -81,7 +83,7 @@
     <div class="purse">
       <span><b>{state.counters.gold.toFixed(0)}</b> gold</span>
       <span><b>{stones}</b> stones</span>
-      <span><b>{pile}</b> / {cap} in the pile</span>
+      <span><b>{used}</b> / {capacity} bag slots</span>
     </div>
   </div>
 
@@ -103,8 +105,8 @@
       <section class="qol">
         <h4>Before you leave town</h4>
         <div class="qrow">
-          <span>Hunt pile</span><b>{pile} / {cap}</b>
-          <button class="mini" disabled={!pile || !tabs} onclick={onstashall}>Stash it all</button>
+          <span>Bag · pieces to stash</span><b>{pieces} · {used} / {capacity} slots</b>
+          <button class="mini" disabled={!pieces || !tabs} onclick={onstashall}>Stash it all</button>
         </div>
         <div class="qrow">
           <span>Junk to sell</span><b>{junk}</b>
@@ -118,9 +120,6 @@
           <span>Gear worn</span><b>{wornCount} of {E.stat.item_slots}</b>
           <button class="mini" onclick={onbest}>Put on the best I carry</button>
         </div>
-        <p><small>The stash is one record on the character, not a chest in this house: the tabs you fill here
-          are the tabs you open in every settlement on the map. Filling the pile is the only thing that stops
-          a zone paying, and this is where it empties.</small></p>
       </section>
 
       <section class="ways">
@@ -130,7 +129,7 @@
           {#each opened as s (s.id)}
             <button class="chip chip-tag btn btn-quiet" onclick={() => onwarp(s.id)} title="Warp to {s.name}, free and instant">{s.name}</button>
           {:else}
-            <span class="dim">No other Waypoint opened yet — a Waypoint is earned by walking to a settlement once.</span>
+            <span class="dim">No other Waypoint opened yet.</span>
           {/each}
         </div>
       </section>
@@ -141,7 +140,7 @@
 <style>
   .town { display: grid; gap: var(--spacing-md); height: 100%; min-height: 0; align-content: start; }
   .out {
-    margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs);
+    margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-card); font-size: var(--font-xs);
     background: color-mix(in srgb, var(--hp) 14%, transparent); border: 1px solid color-mix(in srgb, var(--hp) 45%, transparent); color: var(--alarm);
   }
   .lead { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: baseline; justify-content: space-between; }
@@ -155,19 +154,19 @@
   .services { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-xs); }
   .services .row {
     display: grid; grid-template-columns: clamp(94px, 7.31vw, 202px) clamp(113px, 8.71vw, 243px) 1fr minmax(0, clamp(113px, 12.58vw, 351px)); gap: var(--spacing-sm); align-items: baseline;
-    width: 100%; text-align: left; border-radius: var(--radius-sm);
+    width: 100%; text-align: left; border-radius: var(--radius-card);
     background: var(--glass); border: 1px solid var(--edge);
   }
   .services .nm { font-size: var(--font-sm); color: var(--gold); }
   .service-name { display: flex; align-items: center; gap: var(--spacing-xs); }
-  .service-name img { width: var(--icon-md); height: var(--icon-md); flex: none; object-fit: contain; opacity: .9; }
+  .service-name img { width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); flex: none; object-fit: contain; opacity: .9; }
   .services .by { font-size: var(--font-xs); color: var(--mob); }
   .services .say { font-size: var(--font-xs); color: var(--text); }
   .services .live { font-size: var(--font-xs); color: var(--dim); font-family: var(--num); min-width: 0; text-align: right; overflow-wrap: anywhere; }
   .services .row:disabled { opacity: .5; cursor: not-allowed; }
 
   .aside { display: grid; gap: var(--spacing-sm); }
-  .qol, .ways { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-sm); }
+  .qol, .ways { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-card); }
   .qol h4, .ways h4 { margin: 0; }
   /* one row, two columns: the thing and how much of it there is. The press takes the line below and
      stands on the right edge, so a long label never runs the row out of the aside */
@@ -176,7 +175,6 @@
   .qrow span { font-size: var(--font-xs); color: var(--dim); }
   .qrow b { font-family: var(--num); font-size: var(--font-xs); text-align: right; }
   .qol { display: grid; gap: var(--spacing-xs); }
-  .qol p { color: var(--dim); }
   .chips { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
   .chips span.chip { padding: var(--spacing-xs) var(--spacing-xs); }
 

@@ -85,7 +85,7 @@
       </div>
     {/each}
   </div>
-  <p class="scale"><small>left is the next rung, right is the top of the ladder · % is the published chance of the step · the number under it is Upgrade Stones it asks for</small></p>
+  <p class="scale"><small>% is the chance · the number under it is Upgrade Stones asked.</small></p>
 
   {#if item}
     <div class="press">
@@ -117,8 +117,7 @@
                   onclick={() => onrun('corrupt')}>
             Corrupt · 1 {stoneName('corrupt')}
           </button>
-          <small>one press per piece, ever. It is the only stone allowed to change a line's Element — and it
-            can take the quality step down. After it, no stone of any kind touches this piece again.</small>
+          <small>One press per piece, ever — the only stone that changes a line's Element.</small>
         </p>
       </div>
     </div>
@@ -129,7 +128,7 @@
     {#if stones.length}
       {#each stones as [k, v]}<span>{v} × {stoneName(k)}</span>{/each}
     {:else}
-      <span class="dim">No stones in the purse — Salvage makes Iron Ore and Scrap; transmute Scrap at settlement Alchemy for Value stones. Guild tasks pay the rest.</span>
+      <span class="dim">No stones in the purse — Salvage and Alchemy make them; Guild tasks pay the rest.</span>
     {/if}
   </p>{/if}
   {/if}
@@ -138,7 +137,9 @@
 <style>
   .forge { display: grid; gap: var(--spacing-md); }
   .compact-forge { display: grid; gap: var(--spacing-xs); min-width: 0; }
-  .compact-rungs { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--icon-md), 1fr)); gap: var(--spacing-xs); }
+  /* a rung must be wide enough for the "100%" it prints: at a bare icon width the fifteen steps fit
+     one 21px column each at a 1366 bench and the figures spill into their neighbours */
+  .compact-rungs { display: grid; grid-template-columns: repeat(auto-fit, minmax(calc(var(--icon-label) * 1.5 + var(--spacing-md)), 1fr)); gap: var(--spacing-xs); }
   .compact-rung { min-width: 0; display: grid; justify-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) 0; border: 1px solid var(--line); background: var(--panel); font-family: var(--num); font-size: var(--font-xs); line-height: 1; }
   .compact-rung b { color: var(--dim); font-weight: 500; }
   .compact-rung span, .compact-rung small { color: var(--mob); font-size: var(--font-xs); }
@@ -154,7 +155,7 @@
   .ladder { display: flex; gap: var(--spacing-xs); align-items: stretch; }
   .rung {
     flex: 1 1 0; min-width: 0; display: grid; gap: var(--spacing-xs); justify-items: center; align-content: center;
-    padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel);
+    padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel);
   }
   .rung b { font-family: var(--num); font-size: var(--font-xs); color: var(--dim); }
   .rung .pc, .rung .st { font-family: var(--num); font-size: var(--font-xs); color: var(--mob); }
@@ -172,7 +173,7 @@
   .odds { display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-md); align-items: center; }
   .big {
     display: grid; gap: var(--spacing-xs); justify-items: center; padding: var(--spacing-sm) var(--spacing-md); min-width: clamp(81px, 6.29vw, 176px);
-    border: 1px solid var(--edge); border-radius: var(--radius-sm); background: var(--glass);
+    border: 1px solid var(--edge); border-radius: var(--radius-card); background: var(--glass);
   }
   .big b { font-family: var(--num); font-size: var(--font-xl); line-height: 1; color: var(--gold); }
   .big.safe b { color: var(--good); }
@@ -183,7 +184,7 @@
 
   .acts { display: grid; gap: var(--spacing-xs); }
   .hammer {
-    padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-sm); border-radius: var(--radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-sm); border-radius: var(--radius-card);
     border-color: color-mix(in srgb, var(--gold) 55%, transparent); background: color-mix(in srgb, var(--gold) 13%, transparent); color: var(--gold);
   }
   .hammer:disabled { opacity: .5; }
@@ -192,7 +193,7 @@
   .corrupt { border-color: color-mix(in srgb, var(--elite) 70%, transparent); color: var(--curse); }
   .gamble { display: grid; gap: var(--spacing-xs); }
 
-  .result { margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-xs); background: color-mix(in srgb, var(--hp) 16%, transparent); color: var(--alarm); }
+  .result { margin: 0; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-card); font-size: var(--font-xs); background: color-mix(in srgb, var(--hp) 16%, transparent); color: var(--alarm); }
   .result.good { background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good-lit); }
   .purse { margin: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); color: var(--dim); font-family: var(--num); }
 

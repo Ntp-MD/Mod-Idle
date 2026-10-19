@@ -123,7 +123,7 @@ describe('Dungeon Retreat state and payouts', () => {
     }
   });
 
-  it('rejects a rescued stack whole when the character bag is full', () => {
+  it('rejects a rescued stack whole when the bag is full', () => {
     const state = entered();
     state.counters.stones = { tier: E.inventory.stack_size.stone * slotsAvailable(state) };
     state.farm.herbs = {}; state.farm.potions = {}; state.farm.condensed = {};
@@ -136,9 +136,9 @@ describe('Dungeon Retreat state and payouts', () => {
     expect(state.dungeon).toBeNull();
   });
 
-  it('rejects selected gear through the existing Adventure bag capacity rule', () => {
+  it('rejects selected gear through the existing bag capacity rule', () => {
     const state = entered(), item = piece();
-    state.bag = Array.from({ length: E.inventory.adventure_slots }, piece);
+    state.bag = Array.from({ length: E.inventory.character_slots }, piece);
     state.dungeon!.escrow.items = [item];
     const before = [...state.bag];
     expect(retreatDungeon(state)).toEqual({ ok: true, selected: 1, received: 0, rejected: 1 });

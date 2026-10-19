@@ -1,6 +1,6 @@
 # Agent Rules — ModWorld
 
-ModWorld is a single-player, browser-only open-world idle RPG with no server. Players grind monsters, assemble builds from drops, and earn progress while the window is open or closed. `docs/DECISIONS.md` records design decisions; this file defines the agent's working rules.
+ModWorld is a single-player, browser-only open-world idle RPG with no server. Players grind monsters, assemble builds from drops, and earn progress while the window is open or closed. `docs/DECISIONS.md` is the owner's brief of core rules; this file defines the agent's working rules.
 
 ## Operating Principles
 
@@ -20,7 +20,7 @@ ModWorld is a single-player, browser-only open-world idle RPG with no server. Pl
 | `tools/data/`   | Canonical numeric and game content data; see ownership table                                                                |
 | `tools/`        | Cages, reports, and shared readers: `lib/engine.ts`, `lib/roster.ts`, `lib/skillmodel.ts`, `lib/json.ts`                    |
 | `game/`         | Browser client: `src/engine/client.ts` (same JSON and `createEngine`), `src/sim/`, `src/state/save.ts`, `src/ui/`, `tests/` |
-| `docs/`         | `DECISIONS.md`, `glossary.md`, `skins.md`, `stone-list.md`, and generated player wiki `docs/wiki/`                          |
+| `docs/`         | `DECISIONS.md`, `glossary.md`, `skins.md`, `stone-list.md`, and generated player wiki `docs/wiki/`          |
 | Repository root | `AGENTS.md`                                                                                                                 |
 
 ### Data ownership — `tools/data/`
@@ -40,7 +40,7 @@ Numerical game rules belong in `tools/data/<domain>.json`, never duplicated as l
 ## Context and Authorization
 
 - Check `docs/glossary.md` before creating, renaming, or interpreting game terminology; use current names. Consult only relevant sections of `docs/DECISIONS.md`.
-- Update `DECISIONS.md` when an implementation changes or establishes a design rule. Do not add redundant notes for routine implementation details.
+- `docs/DECISIONS.md` is the owner's brief of core rules (stats, mobs, combat, travel, drops and economy, saves, RNG). Never write to it unless the owner asks. Keep visual and layout choices in code; `docs/skins.md` describes how UI code is organized.
 - Ask before changes that materially alter requested behavior or scope, override an owner ruling, add dependencies, or introduce unsafe/lossy save changes. Otherwise make routine decisions and proceed without extra approval. Optional skills create no approval gates.
 
 ## Commands and Environment
@@ -56,7 +56,7 @@ Before starting a dev server, check `Get-NetTCPConnection -LocalPort 5173`. Reus
 ## Verification by Change Type
 
 - **Gameplay/data:** run relevant cages, tests, and typecheck; expand checks when shared behavior changes.
-- **UI:** run typecheck and relevant tests. For behavior/layout changes, verify actual interactions and appearance in the integrated browser at **1920 × 1080**.
+- **UI:** run typecheck and focused tests for changed behavior. For behavior/layout changes, inspect actual interactions and appearance in the integrated browser at **1920 × 1080 only**; use another viewport only when the owner requests it.
 - **Docs-only:** check content and diff; no gameplay suite unless the change affects generated content or code.
 - **Wiki:** run `pnpm wiki` when data, engine behavior, wiki source, or player-facing rules change. `docs/wiki/*.html` is generated from `game/src/wiki/pages.ts`; rebuild, never hand-edit.
 - Tests verify system correctness, **not prescribed balance**. Do not encode pacing bands, price pace, tuned windows, or content counts (minimum or maximum) as gates.
@@ -68,26 +68,21 @@ Before starting a dev server, check `Get-NetTCPConnection -LocalPort 5173`. Reus
 - **Playwright runs inside an IDE browser tab, never a standalone or headless instance.** Open (or reuse) the IDE's browser on the target URL first, then drive that tab; if the tool cannot attach to it, report that instead of launching a separate window. One visible tab per check, at **1920 × 1080**, closed when the verification ends.
 - For HUD work, also use `#panel-hud-layout-studio`: **Studio Apply** previews; **game Apply** saves. Verify changes move the live region at **1920 × 1080**.
 - All new/moved HUD groups use shared `HudLayout`: `HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT`, and matching values in `App.svelte`. New regions backfill defaults for older layouts. Do not position regions via CSS-only coordinates; keep Studio descriptions current.
+- Layout follows the Hub Grid: fixed shell that never scrolls, 15 × 15 `HudLayout` regions, and one scroll owner per region. Placement is data; see `docs/skins.md`.
 - Field map interactions support pointer and keyboard: arrow keys select adjacent Block, Enter walks or warps through a known Waypoint, and selections are announced.
 - `tools/data/map.json` owns layout; `tools/map.ts` generates overlay SVG. **Never read `map.json` in `engine/` or `game/src/`.** One tab holds an exclusive Web Lock for writes; other tabs are read-only until takeover. Without Web Locks, saving stays disabled.
 - Character sheet composition belongs to `game/src/sim/player.ts`, formulas to `engine/index.ts`, and numbers to data JSON; do not duplicate these responsibilities.
 
-### Design tokens and sizing
+### UI markup and CSS organization
 
-**Read `game/src/styles/variables.css` before changing CSS.** Use shared tokens for repeatable values; one-off art effects may remain local.
+Read `game/src/styles/variables.css` and `docs/skins.md` before editing styles. They describe the reusable values and where CSS belongs; they do not prescribe the layout or appearance of a feature.
 
-**Read `docs/skins.md` before writing or moving any style.** It fixes the three layers — `base.css` owns tag geometry, `skins.css` owns appearance, a component's `<style>` owns layout only — the `<family>-<skin>.<state>` naming (`btn-ghost.toggled`), and the per-surface migration and verification recipe. Appearance never lives in a contextual selector such as `.desk-tabs button`; a new look is a skin in `skins.css`, written once and reused everywhere.
-
-- Fonts: `--font-xs`, `--font-sm`, `--font-md`, `--font-lg`, `--font-xl`.
-- Icons/images: `--icon-xs`, `--icon-sm`, `--icon-md`, `--icon-lg`, `--icon-xl`.
-- Spacing: `--spacing-xs` (3px), `--spacing-sm` (5px), `--spacing-md` (10px), `--spacing-lg` (20px), `--spacing-xl` (30px). `--seam` is a 1px hairline, **not** spacing.
-- Put spacing between siblings on the parent with `gap`; never use a child's margin to create distance or push it into place. Zero margins may reset browser defaults only.
-- Radii: `--radius-xs` (4px, compact), `--radius-sm` (8px, standard/cards), `--radius-md` (12px, panels), `--radius-round` (50%, circles/capsules). No one-off radii or responsive radius ramps.
-- Colors, shadows, motion, easing, and stacking come from `variables.css`. Use local `--z-underlay`–`--z-toast` and named app-wide `--z-*` tokens as applicable; use established fast/UI/map/travel motion values. Recurring colors become shared tokens.
-- Use an exact matching token, otherwise the nearest existing token; do not invent one-off shared-size values. `--icon-hub`, `--slot-skill-size`, and `--pad-area` are HUD-only.
-- Raw values under 5px are permitted for shadows, blurs, borders, outlines, and letter-spacing; **never** hardcode `gap`, `padding`, or `margin`. No raw component CSS dimensions ≥5px where a size token is required.
-- For component-specific responsive sizing only, use bounded `clamp(<floor>px, <preferred vw>, <ceiling>px)` based on 2066px design width, whole-pixel bounds, and slopes with at most two decimals. No global multiplier: Grid Area owns position, tokens own dimensions.
-- Ask before introducing/changing a shared token or design figure. UI sizing is complete only when there are no unbounded ramps or prohibited raw sizes.
+- Use semantic HTML and native controls. Label inputs, keep heading order meaningful, and support pointer, keyboard and visible focus. Add ARIA when native semantics are insufficient.
+- Keep shared tag defaults in `base.css`, reusable appearance in `skins.css`, and layout and responsive behavior in component styles. Avoid duplicating a property across layers or painting controls through contextual selectors.
+- Use CSS variables for recurring values. Add or update a shared variable when a concept is reused; keep one-off layout values local. Place space between siblings with the parent layout's `gap`.
+- Let Grid and Flexbox respond to available space. Do not encode a column count, component size, or breakpoint as a project-wide rule unless the feature itself requires it.
+- In the hub (HUD shell and its regions), stack with flex column. Do not use `flex-wrap` or a `grid-template` there unless a real two-dimensional layout or content wrapping requires it; the 15 × 15 stage grid and genuinely two-dimensional groups (e.g. the more-box icon grid) are the necessary exceptions.
+- Do not write inline `style` attributes in markup for static or one-off appearance — position, size, colour and spacing belong in a class in the component's `<style>` or the shared layers. The only inline bindings allowed are values computed from runtime state: CSS custom properties (`--fill`, `--fx`, `--shield-strength`, `--pad-area` overrides and the like) and HudLayout placement (`style:justify-self`, `style:align-self`, `style:width`). `docs/skins.md` keeps "placement is data" in force; nothing in that exception licenses a hard-coded literal in `style=`.
 
 ## Data, Saves, and Git Boundaries
 

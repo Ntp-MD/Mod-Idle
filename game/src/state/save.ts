@@ -5,7 +5,8 @@ import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive,
 import { newTown } from '../sim/town';
 import { normalizeDeliveries } from '../sim/delivery';
 import { normalizeExplorationState } from '../sim/exploration';
-import { newFarm } from '../sim/farm';
+import { newFarm, QUICKBAR_SLOTS } from '../sim/farm';
+import { slotsAvailable, slotsUsed } from '../sim/slots';
 import { newFieldwork } from '../sim/fieldwork';
 import { newPresets } from '../sim/presets';
 import { newCollector, newGrants } from '../sim/collector';
@@ -39,7 +40,7 @@ import { road } from '../sim/road';
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 16;
+export const SCHEMA_VERSION = 17;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
@@ -452,6 +453,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     s.cell = { q: home.q, r: home.r, sub: null, wild: null };
   }
   if (!s.dungeon) s.dungeon = null;
+  // the quickbar arrived after v17: an old save opens with seven empty squares
+  if (!Array.isArray(s.quickbar) || s.quickbar.length !== QUICKBAR_SLOTS)
+    s.quickbar = Array.from({ length: QUICKBAR_SLOTS }, (_, i) => (Array.isArray(s.quickbar) ? s.quickbar[i] ?? null : null));
   // saves from before safe ground were always hunting: keep them hunting
   if (s.hunting == null) s.hunting = true;
   // pieces from before the drop-count stamp gain it back: current Unbound lines minus Add stones
@@ -589,6 +593,17 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (s.player && s.player.autoSpend == null) s.player.autoSpend = true;
   repairLegacyAutoSpend(s);
   if (!s.stash) s.stash = [];
+  // v17 · the temporary adventure bag is gone: a kept gear piece and a carried stack now share the
+  // one bag, so a legacy save carrying more pieces than the shared bag has room for moves the excess
+  // into the first stash tab, oldest piece first. Nothing is deleted and a save that already fits is
+  // left exactly as it was; an imported file that overflows is repaired by the same rule.
+  if (Array.isArray(s.bag)) {
+    for (let over = slotsUsed(s) - slotsAvailable(s); over > 0 && s.bag.length; over--) {
+      const item = s.bag.pop()!;
+      if (!s.stash.length) s.stash.push([]);
+      s.stash[0].unshift(item);
+    }
+  }
   // an older save auto-dissolves nothing; the player opts in with a level floor
   if (s.autoDissolveLevel == null) s.autoDissolveLevel = 0;
   if (!s.mastery) s.mastery = {};
@@ -610,6 +625,22 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.grants) s.grants = newGrants();
   if (!s.pedlar) s.pedlar = { day: 0, minutes: [], bought: 0 };
   if (!s.filter) s.filter = newFilter();
+  if (!Array.isArray(s.filterPresets)) s.filterPresets = [];
+  // a preset is only a rule table; anything a hand edit left beside or inside it is not a filter, and
+  // a rule's numbers come back inside what the live filter can produce
+  s.filterPresets = s.filterPresets.map((p) => {
+    if (!p || typeof p.bySlot !== 'object' || p.bySlot === null) return null;
+    const bySlot: Record<string, any> = {};
+    for (const [slot, rule] of Object.entries(p.bySlot)) {
+      if (!rule || typeof rule !== 'object') continue;
+      bySlot[slot] = {
+        enabled: Boolean(rule.enabled),
+        margin_pct: Math.max(0, Math.floor(Number(rule.margin_pct) || 0)),
+        keep_missing_element: Boolean(rule.keep_missing_element),
+      };
+    }
+    return { bySlot };
+  });
   if (s.travel !== 'forward') s.travel = 'stay';
   if (!s.goal) s.goal = newGoal();
   if (!s.curses) s.curses = newCurses();
@@ -689,7 +720,7 @@ export function exportJson(state: GameState): string {
 export function importJson(text: string): GameState {
   const parsed = JSON.parse(text);
   const version = parsed.version == null ? 'none' : parsed.version;
-  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 15 && parsed.version !== 14) {
+  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
     throw new Error(`schema version ${version} ≠ ${SCHEMA_VERSION}`);
   }
   const state = parsed.state as GameState;

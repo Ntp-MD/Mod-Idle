@@ -19,7 +19,7 @@ function preview(state: ReturnType<typeof newGame>, costs: BagCost[], grants: Ba
   return result;
 }
 
-describe('complete character-bag transaction preview', () => {
+describe('complete bag transaction preview', () => {
   it('refuses two rewards that overflow together even when either fits alone', () => {
     const state = emptyBag();
     state.junk.filler = (slotsAvailable(state) - 1) * E.inventory.stack_size.stone;
@@ -75,13 +75,14 @@ describe('complete character-bag transaction preview', () => {
     expect(preview(state, [], [valid])).toBe(false);
   });
 
-  it('keeps Adventure gear capacity separate from character stack capacity', () => {
+  it('counts kept gear and carried stacks against the same slot pool', () => {
     const state = emptyBag();
-    state.bag = new Array(E.inventory.adventure_slots).fill(state.gear[0]);
     const reward: BagCost = { bucket: state.counters.stones, key: 'tier', capKind: 'stone', amount: 1 };
     expect(preview(state, [], [reward])).toBe(true);
-    state.junk.filler = slotsAvailable(state) * E.inventory.stack_size.stone;
+    state.bag = new Array(slotsAvailable(state)).fill(state.gear[0]);
+    expect(preview(state, [], [reward])).toBe(false);
     state.bag = [];
+    state.junk.filler = slotsAvailable(state) * E.inventory.stack_size.stone;
     expect(preview(state, [], [reward])).toBe(false);
   });
 });
