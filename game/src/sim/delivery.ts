@@ -86,7 +86,7 @@ export function offerDelivery(state: GameState, town: string, rng: () => number,
   const skillChance = deliveryConfig.skill_chance * (deliveryConfig.skill_band_weights[route.band as keyof typeof deliveryConfig.skill_band_weights] || 0);
   const skill = rng() < skillChance ? choose(eligible, (entry) => (deliveryConfig.skill_weights as Record<string, number>)[entry.id] ?? deliveryConfig.default_skill_weight, rng)?.id || null : null;
   const rawQuote = trade.quote(town, target.good, count, state.town.market[town]?.[target.good.group], state.clockSec);
-  const premium = deliveryConfig.premium_base + route.difficulty * deliveryConfig.premium_per_difficulty;
+  const premium = delivery.premium(route.difficulty, state.town.hagglingXp);
   const serial = state.town.contractSerial + 1;
   if (!Number.isSafeInteger(serial)) return null;
   const contract: DeliveryContract = {
@@ -191,6 +191,7 @@ export function deliver(state: GameState, id: string, count: number, access: Wri
     state.counters.gold += contract.reward.gold;
     contract.paidBonus = { gold: contract.reward.gold, stones: preview.stones.map((stone) => ({ ...stone })), skill: preview.skill, fallback: preview.fallback };
     contract.status = 'completed'; contract.terminalAt = state.town.deliveryClockSec;
+    state.town.hagglingXp += trade.hagglingXp(contract.acquisition.difficulty);
   }
   pruneDeliveries(state);
   return { ok: true, gold: result.gold + (preview.complete ? contract.reward.gold : 0), completed: preview.complete };

@@ -31,13 +31,13 @@
       {@const count = quantities[contract.id] ?? Math.max(1, Math.min(carried || remaining, remaining))}
       {@const preview = previewDelivery(gameState, contract.id, count, { writer })}
       <article class="want">
-        <header><div><h3>{good.name}</h3><small>{townName(contract.town)} · {contract.id}</small></div><strong class="text-value">{contract.delivered} / {contract.target}</strong></header>
+        <header><div><h3>{good.name}</h3><small>{townName(contract.town)}</small></div><strong class="text-value">{contract.delivered} / {contract.target}</strong></header>
         <p class="text-accent">{time(deliveryTimeLeft(gameState, contract))} left{pause ? ` · paused: ${pause}` : ''}</p>
         <p><b>Completion bonus</b> {gold(contract.reward.gold)} gold + {contract.reward.stone.count} {stoneName(contract.reward.stone.key)}</p>
         {#if contract.reward.skill}<p><b>Skill</b> {sm.byId[contract.reward.skill]?.name} — or {contract.reward.fallback.count} {stoneName(contract.reward.fallback.key)} if no useful duplicate remains.</p>{/if}
         <p class="carried text-dim">{carried} carried · {remaining} still wanted · {gold(contract.baseGold)} market gold already paid</p>
         <div class="actions">
-          <label>Quantity <input type="number" min="1" max={remaining} step="1" aria-label={`Delivery quantity ${contract.id}`} value={count} oninput={(event) => quantities[contract.id] = event.currentTarget.valueAsNumber} /></label>
+          <label>Quantity <input type="number" min="1" max={remaining} step="1" aria-label={`Delivery quantity for ${good.name} at ${townName(contract.town)}`} value={count} oninput={(event) => quantities[contract.id] = event.currentTarget.valueAsNumber} /></label>
           <button disabled={!preview.ok} title={preview.ok ? `Receive ${gold(preview.quote.gold)} market gold${preview.complete ? ' and the completion bonus' : ''}` : preview.why} onclick={() => ondeliver(contract.id, count)}>Deliver {count || 'goods'}</button>
           <button disabled={!writer} aria-pressed={gameState.town.trackedContractIds.includes(contract.id)} onclick={() => ontrack(contract.id, !gameState.town.trackedContractIds.includes(contract.id))}>{gameState.town.trackedContractIds.includes(contract.id) ? 'Untrack' : 'Track'}</button>
         </div>

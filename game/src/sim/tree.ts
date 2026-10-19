@@ -3,11 +3,11 @@ import type { GameState } from './types';
 import { atSettlement } from './craft';
 
 /**
- * Spending the passive tree (`skill-tree.md` · `engine/tree.ts`).
+ * Spending the passive tree (`engine/tree.ts`).
  *
  * A level banks one point; one point buys one rank; a node opens from any owned adjacent path, and a node
  * holds three ranks. Respec is **free**, at the town Counterhand — the same
- * rule the Core stat points obey, because the build is the player's to express (`AGENTS.md` D11), so
+ * rule the Core attribute points obey, because the build is the player's to express (`docs/game-rules.md` §Completion and progression), so
  * taking it back costs nothing.
  */
 

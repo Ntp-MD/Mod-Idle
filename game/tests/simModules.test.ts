@@ -4,7 +4,8 @@ import { newGame } from '../src/sim/game';
 import { bagStacks, slotsUsed, slotsFree, slotsAvailable, addTo, fits, bagSlots, pouchSlots } from '../src/sim/slots';
 import { newPresets, storePreset, switchPreset, autoSelect, bindZone } from '../src/sim/presets';
 import { newFarm, plotCount, farmLevel, plant, harvest, craftPotion, condense } from '../src/sim/farm';
-import { startSettlement, stockOf, standingShare, standingTier, sellJunk, taskReward, stashTabCount, canBuy, buy, priceGold } from '../src/sim/town';
+import { startSettlement, stockOf, standingShare, standingTier, standingProgress, sellJunk, taskReward, stashTabCount, canBuy, buy, priceGold } from '../src/sim/town';
+import { presetSlots, savePreset } from '../src/sim/filter';
 import { newCollector, newGrants, heldFor, heldCount, turnIn } from '../src/sim/collector';
 import { rollDrop } from '../src/sim/drop';
 import { mulberry32 } from '../src/engine/client-helpers';
@@ -176,6 +177,51 @@ describe('the town board and its stalls', () => {
     const home = startSettlement();
     expect(standingShare(s, home)).toBe(0);
     expect(standingTier(s, home)).toBe(0);
+  });
+
+  it('reports integer Standing thresholds and has no next target at the final tier', () => {
+    const s = newGame();
+    const home = startSettlement();
+    const zone = TOWN.settlements.find((town: any) => town.id === home)!.zone;
+    const budget = eng.SETTLEMENT_BUDGET_KILLS[zone];
+    for (const [index, tier] of TOWN.standing.tiers.entries()) {
+      const required = Math.ceil(tier.share * budget);
+      s.counters.zoneKills[zone] = required - 1;
+      expect(standingProgress(s, home)).toMatchObject({
+        tier: index, kills: required - 1, budget,
+        next: { name: tier.name, kills: required, remaining: 1 },
+      });
+      s.counters.zoneKills[zone] = required;
+      expect(standingProgress(s, home).tier).toBe(index + 1);
+      s.counters.zoneKills[zone] = required + 1;
+      expect(standingProgress(s, home).tier).toBe(index + 1);
+    }
+    expect(standingProgress(s, home).next).toBeUndefined();
+  });
+
+  it('gates shop purchases on the seller town and credits bought preset slots', () => {
+    const s = newGame();
+    const home = startSettlement();
+    const row = TOWN.one_time.find((line: any) => line.id === 'filter_preset')!;
+    const highspire = TOWN.settlements.find((town: any) => town.id === 'highspire')!;
+    const required = Math.ceil(TOWN.standing.tiers[row.required_standing_tier - 1].share
+      * eng.SETTLEMENT_BUDGET_KILLS[highspire.zone]);
+    s.counters.gold = priceGold(row, home, s) * 2;
+    s.counters.zoneKills[highspire.zone] = required;
+
+    expect(canBuy(s, home, row.id)).toMatchObject({ ok: false, why: expect.stringContaining('Standing Tier III') });
+    const gold = s.counters.gold;
+    expect(buy(s, home, row.id).ok).toBe(false);
+    expect(s.counters.gold).toBe(gold);
+    expect(s.town.owned).not.toContain(row.id);
+    expect(canBuy(s, 'highspire', row.id).ok).toBe(true);
+
+    const homeZone = TOWN.settlements.find((town: any) => town.id === home)!.zone;
+    s.counters.zoneKills[homeZone] = Math.ceil(TOWN.standing.tiers[2].share
+      * eng.SETTLEMENT_BUDGET_KILLS[homeZone]);
+    expect(buy(s, home, row.id).ok).toBe(true);
+    expect(presetSlots(s)).toBe(2);
+    expect(savePreset(s, 1)).toBe(true);
   });
 
   it('pays a task in the stone its kind names', () => {

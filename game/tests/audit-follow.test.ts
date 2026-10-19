@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BASES, E, ED, eng, fieldwork, loot, sm, tree } from '../src/engine/client';
+import { BASES, E, ED, eng, fieldwork, loot, sm, tree, TOWN } from '../src/engine/client';
 import { createCraft } from '../../engine/craft';
 import { heldWeaponName, newGame, salvageBag, tick } from '../src/sim/game';
 import { buildCharacter, openingGear } from '../src/sim/player';
@@ -116,6 +116,10 @@ describe('audit follow-up', () => {
     const s = newGame();
     const town = s.town.waypoint;
     const row = stockOf(town).find((r) => !r.display_only)!;
+    const zone = settlementById(town)!.zone;
+    s.counters.zoneKills[zone] = row.required_standing_tier
+      ? Math.ceil(TOWN.standing.tiers[row.required_standing_tier - 1].share * eng.SETTLEMENT_BUDGET_KILLS[zone])
+      : 0;
     s.counters.gold = 1e9;
     expect(canBuy(s, town, row.id).ok).toBe(true);
     s.junk.test = 1;

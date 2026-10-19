@@ -1,18 +1,12 @@
-import { eng, TOWN } from '../engine/client';
+import { eng, TOWN, trade } from '../engine/client';
 import { dayOf } from './game';
 import type { GameState, TaskSlot, TownState } from './types';
 import { atSettlement } from './craft';
 import { addTo, fits, slotsFree } from './slots';
 import { sellGoods, tradeInventory } from './trade';
 
-/**
- * The settlement layer. Stall prices here are "minutes of reference full-sell income" converted through the
- * shared engine's `goldPerMinute`, so a drop-rate change moves the stall prices in the client the
- * same moment it moves them in `towns-stalls.md` (`economy.md` · checks.md T2-T7).
- *
- * Gold buys space, time, information and appearance only — never gear, Mods, potions or stones
- * (`DECISIONS.md` §Product), and the purchase list is filtered to the kinds `town.json` `invariants` allows.
- */
+/** Ordinary town services use reference income and Haggling discounts. Allowed kinds come from
+ *  town.json; the rare-goods exception belongs to the separate Black Market. */
 
 const TS = TOWN.task_sizing;
 
@@ -43,7 +37,8 @@ export function priceMinutes(row: any, settlementId: string, state?: GameState, 
 export function priceGold(row: any, settlementId: string, state?: GameState, blocks = 1): number {
   const s = settlementById(settlementId)!;
   const band = row.charge_band || s.band;
-  return Math.round(priceMinutes(row, settlementId, state, blocks) * eng.goldPerMinute(band) * 100) / 100;
+  return Math.round(priceMinutes(row, settlementId, state, blocks) * eng.goldPerMinute(band)
+    * trade.haggling(state?.town.hagglingXp ?? 0).serviceMult * 100) / 100;
 }
 
 export function newTown(): TownState {
@@ -54,26 +49,44 @@ export function newTown(): TownState {
     blackMarket: {},
     market: {},
     marketCredit: 0,
+    hagglingXp: 0,
     visited: [start], owned: [], waypoint: start,
     tasks: new Array(TS.slots).fill(null), refillAt: new Array(TS.slots).fill(0),
     skipsToday: 0, skipDay: 0,
   };
 }
 
-/** Standing is earned by kills in that settlement's own zone (`town.json` standing.earnt_from). */
-export function standingShare(state: GameState, settlementId: string): number {
-  const s = settlementById(settlementId)!;
-  // the budget is the curve's own slice for that zone, so Standing is read straight off it
-  const budget = eng.SETTLEMENT_BUDGET_KILLS[s.zone];
-  return budget > 0 ? (state.counters.zoneKills[s.zone] || 0) / budget : 0;
+export interface StandingProgress {
+  tier: number;
+  share: number;
+  kills: number;
+  budget: number;
+  next?: { name: string; kills: number; remaining: number };
 }
 
-export function standingTier(state: GameState, settlementId: string): number {
-  const share = standingShare(state, settlementId);
-  let tier = 0;
-  TOWN.standing.tiers.forEach((t: any, i: number) => { if (share >= t.share) tier = i + 1; });
-  return tier;
+/** Standing is earned by kills in that settlement's own zone (`town.json` standing.earnt_from). */
+export function standingProgress(state: GameState, settlementId: string): StandingProgress {
+  const s = settlementById(settlementId);
+  if (!s) return { tier: 0, share: 0, kills: 0, budget: 0 };
+  const budget = eng.SETTLEMENT_BUDGET_KILLS[s.zone];
+  const kills = state.counters.zoneKills[s.zone] || 0;
+  const tiers = TOWN.standing.tiers;
+  const share = budget > 0 ? kills / budget : 0;
+  const tier = budget > 0
+    ? tiers.filter((entry: any) => kills >= Math.ceil(entry.share * budget)).length
+    : 0;
+  const nextTier = tiers[tier];
+  const nextKills = budget > 0 && nextTier ? Math.ceil(nextTier.share * budget) : undefined;
+  return {
+    tier, share, kills, budget,
+    ...(nextTier && nextKills != null ? {
+      next: { name: nextTier.name, kills: nextKills, remaining: Math.max(0, nextKills - kills) },
+    } : {}),
+  };
 }
+
+export const standingShare = (state: GameState, settlementId: string): number => standingProgress(state, settlementId).share;
+export const standingTier = (state: GameState, settlementId: string): number => standingProgress(state, settlementId).tier;
 
 /** A Waypoint exists for every settlement walked to on foot, once; warping to it costs gold (`waypoint_warp`). */
 export function canTravel(state: GameState, settlementId: string): boolean {
@@ -95,6 +108,15 @@ export function canBuy(state: GameState, settlementId: string, rowId: string): B
   }
   if (row.qty && state.town.owned.filter((id) => id === rowId).length >= row.qty) return { ok: false, why: 'sold out here' };
   if (row.per_day_cap && dailyUsed(state, rowId) >= row.per_day_cap) return { ok: false, why: `daily cap of ${row.per_day_cap} reached` };
+  const requiredTier = row.required_standing_tier;
+  const tiers = TOWN.standing.tiers;
+  if (!Number.isSafeInteger(requiredTier) || requiredTier < 0 || requiredTier > tiers.length) {
+    return { ok: false, why: `invalid Standing requirement for ${rowId}` };
+  }
+  if (standingTier(state, settlementId) < requiredTier) {
+    const tierName = tiers[requiredTier - 1].name;
+    return { ok: false, why: `requires Standing Tier ${tierName} in ${settlementById(settlementId)?.name || 'this settlement'}`, row };
+  }
   const gold = priceGold(row, settlementId, state);
   if (state.counters.gold < gold) return { ok: false, why: `needs ${gold} gold`, row, gold };
   return { ok: true, row, gold };
@@ -265,7 +287,7 @@ export function claimTask(state: GameState, index: number, choice?: string): boo
   return true;
 }
 
-/** Slots refill `task_sizing.refill_sec` after a claim (the daily direction layer: a day, not an hour); the free skip is once per slot per day (`DECISIONS.md` §The task board). */
+/** task_sizing owns refill delay and daily skip allowances. */
 export function tickTown(state: GameState, rng: () => number) {
   const day = dayOf(state.clockSec);
   if (day !== state.town.skipDay) { state.town.skipDay = day; state.town.skipsToday = 0; }

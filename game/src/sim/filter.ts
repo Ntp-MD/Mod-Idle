@@ -1,4 +1,4 @@
-import { E, loot } from '../engine/client';
+import { E, TOWN, loot } from '../engine/client';
 import type { GameState } from './types';
 
 /**
@@ -82,8 +82,10 @@ export interface FilterPreset {
   bySlot: Record<string, SlotRule>;
 }
 
-/** The first slot is the character's own; every reward pays exactly one more. */
-export const presetSlots = (s: GameState): number => 1 + (s.grants?.filter_presets || 0);
+/** The first slot is the character’s own; shop purchases and Collector rewards each add one. */
+const presetRow = TOWN.one_time.find((row: any) => row.id === 'filter_preset');
+export const presetSlots = (s: GameState): number => 1 + (s.grants?.filter_presets || 0)
+  + (presetRow?.filter_preset_grant || 0) * s.town.owned.filter((id) => id === presetRow?.id).length;
 
 /** Write the live rule table over preset `i`. A slot the character has not earned is refused. */
 export function savePreset(s: GameState, i: number): boolean {

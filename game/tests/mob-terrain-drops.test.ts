@@ -92,6 +92,13 @@ describe('mob, terrain and drop data', () => {
     expect(power.every((value: number) => Number.isFinite(value) && value > 0)).toBe(true);
   });
 
+  it('puts Int above Str on every magic-damage Variant', () => {
+    const variants = (E.mob.species as any[]).flatMap((species) =>
+      ((E.mob.variants as any)[species.id] || []).filter((variant: any) => (variant.damage ?? species.damage) === 'magic'));
+    expect(variants.length).toBeGreaterThan(0);
+    for (const variant of variants) expect(variant.core.int).toBeGreaterThan(variant.core.str);
+  });
+
   it('keeps Race classification separate from explicit potion eligibility', () => {
     const races = new Set((E.mob.races as any).set as string[]);
     expect(E.mob.species.every((species: any) => races.has(species.race))).toBe(true);
@@ -119,6 +126,32 @@ describe('mob, terrain and drop data', () => {
     expect(testEngine.variantsInZone('goblin', 1).map((variant: any) => variant.name)).toEqual([ladder[0].name]);
     expect(testEngine.variantsInZone('goblin', 4).map((variant: any) => variant.name)).toEqual([ladder[0].name]);
     expect(testEngine.variantsInZone('goblin', 7).map((variant: any) => variant.name)).toEqual([ladder[1].name]);
+  });
+
+  it('lets a caster Variant use magic damage without changing its Species siblings or zone power', () => {
+    const beforeData = structuredClone(engineData);
+    const oldCaster = beforeData.mob.variants.goblin.find((variant: any) => variant.name === 'Shaman Goblin');
+    delete oldCaster.damage;
+    oldCaster.core.str = 20;
+    oldCaster.core.int = 4;
+    const oldPhysicalCore = oldCaster.core.str;
+    const before = createEngine(beforeData).spawnAt(5, 'medium', 'goblin');
+    const data = structuredClone(engineData);
+    const caster = data.mob.variants.goblin.find((variant: any) => variant.name === 'Shaman Goblin');
+    caster.damage = 'magic';
+
+    const testEngine = createEngine(data);
+    const shaman = testEngine.spawnAt(5, 'medium', 'goblin');
+    const sneak = testEngine.spawnAt(1, 'medium', 'goblin');
+
+    expect(shaman.damage).toBe('magic');
+    expect(shaman.core.int).toBe(oldPhysicalCore);
+    expect(shaman.core.int).toBeGreaterThan(shaman.core.str);
+    expect(shaman.ps).toBeCloseTo(before.ps, 10);
+    expect(testEngine.damageSplit(shaman.damage)).toEqual([0, 1]);
+    expect(testEngine.mobRoster().find((row: any) => row.zone === 5 && row.speciesId === 'goblin'
+      && row.variant === 'Shaman Goblin' && row.kind === 'Small')?.damage).toBe('magic');
+    expect(sneak.damage).toBe('physical');
   });
 
   it('supports Species with no Unique or several Uniques', () => {

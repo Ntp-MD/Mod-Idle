@@ -154,7 +154,8 @@ describe('Black Market stock and purchases', () => {
       const good = trade.byId[candidate.key];
       const price = blackMarket.price(candidate, candidate.countMin);
       for (const town of TOWN.settlements) {
-        expect(price).toBeGreaterThanOrEqual(trade.quote(town.id, good, candidate.countMin, undefined, 0).gold);
+        expect(price).toBeGreaterThan(trade.quote(town.id, good, candidate.countMin, undefined, 0).gold
+          * trade.haggling(trade.hagglingXpForLevel(TOWN.trade.haggling.level_cap)).saleMult);
       }
     }
   });

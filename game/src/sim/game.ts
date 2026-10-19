@@ -78,7 +78,7 @@ const ZERO_POINTS = (): Record<StatKey, number> =>
   Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Record<StatKey, number>;
 
 /**
- * Spend banked points on the least-invested Core stats — the REFERENCE allocation the published
+ * Spend banked points on the least-invested Core attributes — the REFERENCE allocation the published
  * numbers (and `mob_HP`) are priced against. Choosing by current totals carries the remainder across
  * 5-point level grants, instead of restarting at Strength and starving the last stats every level.
  */
@@ -270,7 +270,7 @@ function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 
   let bossProfile: any = null;
   let body = 'medium';
   let species = pick(rng, speciesPool);
-  let variant: { name: string; levels: [number, number]; core: Record<string, number> } | null = null;
+  let variant: { name: string; levels: [number, number]; core: Record<string, number>; damage?: 'physical' | 'magic' | 'mixed' } | null = null;
   let fixedName: string | null = null;
   const rollVariant = (sp: any) => pick(rng, eng.variantsInZone(sp.id, zoneId)) || null;
   if (bodyHint) {
@@ -312,9 +312,10 @@ function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 
   const top: [number, number] = [(z.levels as number[])[1], (z.levels as number[])[1]];
   const base = eng.spawnAt(zoneId, body, species.id, bossProfile,
     rank === 'unique' ? null : (variant ? variant.core : null),
-    rank === 'unique' ? top[1] : null);
-  // The Species' authored zone level prices every normal/Elite spawn. Variant selects its Core and
-  // drop identity; neither it nor the attacker changes that fixed level.
+    rank === 'unique' ? top[1] : null,
+    rank === 'unique' ? null : variant?.damage);
+  // The Species' authored zone level prices every normal/Elite spawn. Variant selects its Core,
+  // damage type and drop identity; neither it nor the attacker changes that fixed level.
   const lv = base.level;
   const size = eng.sizeById(body)!;
   // body classes no longer scale HP: every mob of a species reads the same curve at its own level,

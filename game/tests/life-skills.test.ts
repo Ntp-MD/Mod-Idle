@@ -9,6 +9,7 @@ import { farmGrowthSec, farmLevel, harvest, plant } from '../src/sim/farm';
 import { processMaterials } from '../src/sim/trade';
 import { buildCharacter } from '../src/sim/player';
 import { reservedPct, usableMana } from '../src/sim/skills';
+import { lifeSkillMilestones } from '../src/sim/goal';
 import { settlementCell, startWalk, zoneOf } from '../src/sim/road';
 import { slotsAvailable } from '../src/sim/slots';
 import { exportJson, importJson, migrate } from '../src/state/save';
@@ -195,6 +196,25 @@ describe('Smithing, cooking batches and Farming Mastery', () => {
 });
 
 describe('life-skill combat composition and compatibility', () => {
+  it('reports the current combat benefit per track without changing final-boss progress', () => {
+    const state = safeTown();
+    const goal = structuredClone(state.goal);
+    expect(lifeSkillMilestones(state).find((row) => row.id === 'farming')!.bonus).toBe(0);
+    const rung = E.fieldwork.life_skill_combat.rungs[0];
+    state.farm.xp = (rung - 1) ** 2 * E.farm.level_divisor;
+    state.fieldwork.skills.cooking.xp = xpAt(rung);
+    const rows = lifeSkillMilestones(state);
+    const farming = rows.find((row) => row.id === 'farming')!;
+    const cooking = rows.find((row) => row.id === 'cooking')!;
+    expect(farming.stat).toBe(E.fieldwork.life_skill_combat.effects.farming.stat);
+    expect(farming.unit).toBe(E.fieldwork.life_skill_combat.effects.farming.unit);
+    expect(farming.bonus).toBe(lifeSkills.bonuses({ farming: farmLevel(state) }).hp_regen_pct);
+    expect(cooking.bonus).toBe(lifeSkills.bonuses({ cooking: fieldSkillLevel(state, 'cooking') }).hp_regen_pct);
+    expect(farming.bonus).toBeGreaterThan(0);
+    expect(farming.bonus + cooking.bonus).toBeCloseTo(lifeSkillBonuses(state).hp_regen_pct!, 12);
+    expect(state.goal).toEqual(goal);
+  });
+
   it('keeps every fixed share monotone and does not redistribute unused track allocations', () => {
     const cfg = E.fieldwork.life_skill_combat;
     const cap = E.fieldwork.level_cap;

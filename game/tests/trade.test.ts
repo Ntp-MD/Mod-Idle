@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { E, TOWN, fieldwork, trade } from '../src/engine/client';
 import { newGame, tick } from '../src/sim/game';
 import { sellGoods, quoteSale, processMaterials, canProcess, marketDestinations } from '../src/sim/trade';
-import { sellJunk } from '../src/sim/town';
+import { sellJunk, priceGold, stockOf, buy } from '../src/sim/town';
 import { settlementCell, startWalk, arrive } from '../src/sim/road';
 import { cookMeal, eatMeal, tickFieldwork } from '../src/sim/fieldwork';
 import { exportJson, importJson, migrate } from '../src/state/save';
@@ -116,18 +116,69 @@ describe('town demand and cargo', () => {
   });
 
   it('adds current catalogue and market defaults to old saves without losing any counts or XP', () => {
-    const old = inTown() as any; delete old.town.market; delete old.town.marketCredit;
+    const old = inTown() as any; delete old.town.market; delete old.town.marketCredit; delete old.town.hagglingXp;
     old.fieldwork.materials = { ore: 9, timber: 7, rarewood: 2, keepsake: 1 };
     old.fieldwork.foods.raw_game_meat = 11; old.fieldwork.skills.mining.xp = 123;
     old.counters.gold = 42.25;
     const upgraded = migrate(old, 14);
     expect(upgraded.town.market).toEqual({});
     expect(upgraded.town.marketCredit).toBe(0);
+    expect(upgraded.town.hagglingXp).toBe(0);
     expect(upgraded.fieldwork.materials).toMatchObject({ ore: 9, timber: 7, rarewood: 2, keepsake: 1, 'copper-ore': 0 });
     expect(upgraded.fieldwork.foods.raw_game_meat).toBe(11);
     expect(upgraded.fieldwork.skills.mining.xp).toBe(123);
     expect(upgraded.counters.gold).toBe(42.25);
     expect(migrate(structuredClone(upgraded), 14)).toEqual(upgraded);
+  });
+});
+
+describe('Haggling', () => {
+  it('starts without bonuses, advances at XP thresholds and caps every benefit', () => {
+    expect(trade.haggling(0)).toMatchObject({ level: 1, saleMult: 1, deliveryMult: 1, serviceMult: 1 });
+    const threshold = trade.hagglingXpForLevel(2);
+    expect(trade.haggling(threshold - 1).level).toBe(1);
+    expect(trade.haggling(threshold).level).toBe(2);
+    const max = trade.haggling(trade.hagglingXpForLevel(TOWN.trade.haggling.level_cap));
+    expect(max.nextXp).toBeNull();
+    expect(max.saleMult).toBeCloseTo(1 + TOWN.trade.haggling.sale_bonus_max_pct / 100);
+    expect(max.deliveryMult).toBeCloseTo(1 + TOWN.trade.haggling.delivery_bonus_max_pct / 100);
+    expect(max.serviceMult).toBeCloseTo(1 - TOWN.trade.haggling.service_discount_max_pct / 100);
+    expect(trade.haggling(Number.MAX_SAFE_INTEGER)).toEqual(max);
+  });
+
+  it('preserves split sales, demand, carry and XP with active bonuses', () => {
+    const bulk = inTown();
+    bulk.town.hagglingXp = trade.hagglingXpForLevel(TOWN.trade.haggling.level_cap);
+    bulk.town.marketCredit = 0.003;
+    bulk.fieldwork.materials['copper-ore'] = 100;
+    const split = structuredClone(bulk);
+    expect(sellGoods(bulk, 'material:copper-ore', 100).ok).toBe(true);
+    for (let i = 0; i < 100; i++) expect(sellGoods(split, 'material:copper-ore', 1).ok).toBe(true);
+    expect(split.counters.gold).toBeCloseTo(bulk.counters.gold, 9);
+    expect(split.town.marketCredit).toBeCloseTo(bulk.town.marketCredit, 9);
+    expect(split.town.market.eastgate.ore.used).toBeCloseTo(bulk.town.market.eastgate.ore.used, 12);
+    expect(split.town.market.eastgate.ore.atSec).toBe(bulk.town.market.eastgate.ore.atSec);
+    expect(split.town.hagglingXp).toBe(bulk.town.hagglingXp);
+    const loaded = importJson(exportJson(bulk));
+    expect(loaded.town.hagglingXp).toBe(bulk.town.hagglingXp);
+    expect(quoteSale(loaded, 'eastgate', 'material:copper-ore', 1)).toEqual(quoteSale(bulk, 'eastgate', 'material:copper-ore', 1));
+  });
+
+  it('charges the discounted service quote and rejects invalid saved XP', () => {
+    const state = inTown(), town = 'eastgate';
+    const row = stockOf(town).find((entry) => TOWN.invariants.allowed_kinds.includes(entry.kind))!;
+    const base = priceGold(row, town, state);
+    state.town.hagglingXp = trade.hagglingXpForLevel(TOWN.trade.haggling.level_cap);
+    const quoted = priceGold(row, town, state);
+    expect(quoted).toBeLessThan(base);
+    state.counters.gold = quoted;
+    expect(buy(state, town, row.id)).toMatchObject({ ok: true, gold: quoted });
+    expect(state.counters.gold).toBe(0);
+    for (const xp of [-1, Infinity, '10']) {
+      const invalid = structuredClone(state) as any;
+      invalid.town.hagglingXp = xp;
+      expect(() => migrate(invalid)).toThrow('invalid Haggling XP');
+    }
   });
 });
 

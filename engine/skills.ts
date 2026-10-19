@@ -27,7 +27,7 @@ import type { EngineData, SkillRow, SkillsData } from './types.ts';
  * The two damage ladders (the PoE shape, owner ruling): `Attack damage %` scales the attack ladder —
  * a weapon's own swing and a phys-basis press — and `Spell damage %` scales the spell ladder — a
  * magic-basis press and a magic weapon's bolt. Each bucket adds only inside itself, the pair never
- * crosses, and no Core stat moves: this multiplies what the ladder already deals. A magic-basis press
+ * crosses, and no Core attributes change: this multiplies what the ladder already deals. A magic-basis press
  * carries its Element share inside the press, so the spell half of the pair scales it too; a swing's
  * Element pools stay outside the attack bucket, because the swing's Element is not the attack.
  */

@@ -38,6 +38,7 @@
   const unreadRecaps = $derived((gameState.town.contracts[market.id] || []).filter((contract) => contract.status !== 'open' && !contract.recapAcknowledged).length
     + (gameState.town.deliverySummaries[market.id]?.unread ? 1 : 0));
   const blackMarketStock = $derived(gameState.town.blackMarket[market.id]?.offers.filter((offer) => offer.remaining > 0).length || 0);
+  const haggling = $derived(trade.haggling(gameState.town.hagglingXp));
 </script>
 
 <div class="market">
@@ -48,6 +49,7 @@
     </select></label>
     <span class="location text-note">{!writer ? 'Read-only prices' : local ? 'Trading here' : 'Prices only · travel here to trade'}</span>
   </header>
+  <p class="text-note">Haggling Lv {haggling.level}/{TOWN.trade.haggling.level_cap} · {gameState.town.hagglingXp.toFixed(1)} XP{haggling.nextXp !== null ? ` / ${haggling.nextXp} for next level` : ' · max level'} · sales +{((haggling.saleMult - 1) * 100).toFixed(1)}% · new delivery bonuses +{((haggling.deliveryMult - 1) * 100).toFixed(1)}% · town services −{((1 - haggling.serviceMult) * 100).toFixed(1)}%. Complete deliveries to earn XP.</p>
   <nav class="market-tabs" aria-label="Market sections">
     <button class="selectable" class:selected={view === 'trade'} onclick={() => view = 'trade'}>Sell goods & routes</button>
     <button class="selectable" class:selected={view === 'deliveries'} onclick={() => view = 'deliveries'}>Delivery wants{#if openWants + unreadRecaps}<b class="badge badge-count tab-count" title={`${openWants} open · ${unreadRecaps} unread recap${unreadRecaps === 1 ? '' : 's'}`}>{openWants + unreadRecaps}</b>{/if}</button>
@@ -129,6 +131,7 @@
         {@const price = priceGold(row, market.id, gameState)}
         {@const verdict = canBuy(gameState, market.id, row.id)}
         <article class="ware"><h3>{row.item}</h3><p class="text-note">{row.kind} · {npcOf(row.npc)?.name || row.npc}</p><strong class="text-value">{gold(price)} gold</strong>
+          {#if !verdict.ok}<small class="text-note">{verdict.why}</small>{/if}
           <button disabled={!writer || !local || !verdict.ok} title={verdict.why || 'Buy this town service'} onclick={() => onbuy(row.id, market.id)}>Buy</button>
         </article>
       {:else}<p>No stall lines at this settlement.</p>{/each}

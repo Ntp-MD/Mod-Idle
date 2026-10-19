@@ -119,6 +119,8 @@ describe('delivery offers and transactions', () => {
   it('preserves bulk/split proceeds, category demand and currency carry', () => {
     const { state: bulk, contract } = fixture();
     bulk.town.marketCredit = 0.003;
+    bulk.town.hagglingXp = trade.hagglingXpForLevel(2) - 1;
+    const initialXp = bulk.town.hagglingXp;
     const split = structuredClone(bulk);
     expect(deliver(bulk, contract.id, contract.target, writer).ok).toBe(true);
     for (let i = 0; i < contract.target; i++) expect(deliver(split, contract.id, 1, writer).ok).toBe(true);
@@ -129,6 +131,25 @@ describe('delivery offers and transactions', () => {
     expect(split.town.market[contract.town][group].atSec).toBe(bulk.town.market[contract.town][group].atSec);
     expect(split.counters.stones).toEqual(bulk.counters.stones);
     expect(contractById(split, contract.id)?.baseGold).toBeCloseTo(contract.baseGold, 9);
+    expect(bulk.town.hagglingXp).toBe(initialXp + trade.hagglingXp(contract.acquisition.difficulty));
+    expect(split.town.hagglingXp).toBe(bulk.town.hagglingXp);
+    expect(trade.haggling(split.town.hagglingXp).level).toBeGreaterThan(1);
+    unchanged(split, () => deliver(split, contract.id, 1, writer));
+  });
+
+  it('applies Haggling to new bonuses while preserving existing promises', () => {
+    const state = fresh(), town = state.town.visited[0];
+    const old = offerDelivery(state, town, () => 0, writer)!;
+    const promised = structuredClone(old.reward);
+    state.town.hagglingXp = trade.hagglingXpForLevel(TOWN.trade.haggling.level_cap);
+    expect(contractById(state, old.id)?.reward).toEqual(promised);
+    const experienced = fresh();
+    experienced.town.hagglingXp = state.town.hagglingXp;
+    const offer = offerDelivery(experienced, town, () => 0, writer)!;
+    expect(offer.good).toBe(old.good);
+    expect(offer.reward.premium - 1).toBeCloseTo((old.reward.premium - 1) * trade.haggling(experienced.town.hagglingXp).deliveryMult);
+    expect(offer.reward.gold).toBeGreaterThan(old.reward.gold);
+    expect(importJson(exportJson(state)).town.contracts[town][0].reward).toEqual(promised);
   });
 
   it('grants the stored fresh skill without toggling it, then useful duplicates without resetting XP', () => {

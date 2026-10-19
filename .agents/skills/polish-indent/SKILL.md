@@ -1,7 +1,6 @@
 ---
-name: PolishIndent
-description: Condenses text without flattening the voice. Use when asked to shorten, tighten, trim, or polish prose, docs, UI copy, or a skill description.
-disable-model-invocation: false
+name: polish-indent
+description: "PolishIndent: condense prose, docs and UI copy without flattening the voice. Use when asked to shorten, tighten, trim or polish text."
 ---
 
 # PolishIndent

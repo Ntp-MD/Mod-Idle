@@ -211,8 +211,10 @@ export function createDelivery(E: EngineData, C: DeliveryCfg, trade: ReturnType<
   const capFor = (good: TradeGood) => E.inventory.stack_size[good.bucket === 'junk' ? 'stone' : good.bucket];
   const deadline = (route: Acquisition) => Math.max(C.deadline_min_sec, Math.ceil(route.productionSec * C.production_allowance + route.travelSec + C.deadline_allowance_sec));
   const targetWeight = (good: TradeGood) => C.target_weights[good.id] ?? C.target_weights[good.bucket] ?? C.default_target_weight;
+  const premium = (difficulty: number, hagglingXp = 0) => 1 + (C.premium_base + difficulty * C.premium_per_difficulty - 1)
+    * trade.haggling(hagglingXp).deliveryMult;
   const stoneBundle = (band: string, difficulty: number, key: string, income: 'tier' | 'reroll_value' | 'add', fallback = false) => ({
     key, count: Math.max(C.minimum_stones, eng.taskPayout(band, (fallback ? C.fallback_minutes : C.reward_minutes) * difficulty)[income]),
   });
-  return { C, sources, acquisition, capFor, deadline, targetWeight, stoneBundle, band };
+  return { C, sources, acquisition, capFor, deadline, targetWeight, premium, stoneBundle, band };
 }

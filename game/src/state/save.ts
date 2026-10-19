@@ -22,7 +22,7 @@ import { road } from '../sim/road';
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
 // converted — a converted save could carry a Reroll baseline or craft counter that never existed.
-// v4 is the 7-line skeleton: a v3 item is re-stamped, not discarded. v5 bakes the Core stat
+// v4 is the 7-line skeleton: a v3 item is re-stamped, not discarded. v5 bakes the Core attribute
 // onto every Stat Mod line, so a v4 piece keeps the stat its player chose. v6 grows the worn
 // set to a thirteenth slot, the earring, so a v5 gear array is padded back to full length.
 // v9 is the item level: the value window moved onto the level and Rarity was retired, and a v8 item
@@ -351,7 +351,7 @@ function levelItem(item: any): void {
 }
 
 /**
- * A v4 item predates the stat roll: its Stat Mod line was told which Core stat to feed by the
+ * A v4 item predates the stat roll: its Stat Mod line was told which Core attribute to feed by the
  * player (`item.chosenStat`), and the line itself carried none. This bakes that choice onto the line,
  * or the piece's own first stat when nobody chose, so a migrated save keeps exactly the numbers it had
  * and every later Stat Mod line names its own stat the way a fresh drop does.
@@ -552,6 +552,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // Additive market records preserve every existing stack and gold balance. Empty supply means full demand.
   s.town.market ||= {};
   s.town.marketCredit ??= 0;
+  s.town.hagglingXp ??= 0;
+  if (!Number.isFinite(s.town.hagglingXp) || s.town.hagglingXp < 0) throw new Error('invalid Haggling XP');
   // v11 · the HUD reads a transient event ring (`fx`), which a write never stores.
   if (!Array.isArray(s.fx)) s.fx = [];
   if (!s.fxSeq) s.fxSeq = 0;

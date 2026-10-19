@@ -1,6 +1,6 @@
 // The single place the client touches the numeric sources.
 // engine.json / mods.json are the same files tools/*.js read, and createEngine is the same
-// module the cages call — so a number the client shows is the number the cage gates (DECISIONS.md §Stack).
+// module the cages call — the client and reports share one source of calculations.
 import engineJson from '../../../tools/data/engine.json' with { type: 'json' };
 import modsJson from '../../../tools/data/mods.json' with { type: 'json' };
 import skillsJson from '../../../tools/data/skills.json' with { type: 'json' };

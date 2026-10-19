@@ -1,4 +1,4 @@
-import { TD, BD } from '../engine/client';
+import { TOWN, TD, BD } from '../engine/client';
 import { createCollector } from '../../../engine/collector.ts';
 import { standingTier } from './town';
 import type { GameState } from './types';
@@ -23,9 +23,9 @@ export function newCollector(): { done: Record<string, boolean>; hints: Record<s
   return { done: {}, hints: {} };
 }
 
-/** Tier II standing in that settlement opens its set slots (`town.json` standing.tiers). */
+/** The configured Standing tier opens the set slots (`town.json` standing.collector_required_tier). */
 export function setUnlocked(state: GameState, set: any): boolean {
-  return standingTier(state, set.settlement) >= 2;
+  return standingTier(state, set.settlement) >= TOWN.standing.collector_required_tier;
 }
 
 /** Held pieces may sit in the bag or in the stash; the Collector reads both. */
@@ -55,7 +55,11 @@ export function turnIn(state: GameState, settlementId: string): { ok: boolean; w
   if (!atSettlement(state, settlementId)) return { ok: false, why: 'stand in this settlement to turn in the set' };
   const set = col.setAt(settlementId);
   if (!set) return { ok: false, why: 'no Collector set here' };
-  if (!setUnlocked(state, set)) return { ok: false, why: 'Tier II standing in this settlement opens the set slots' };
+  if (!setUnlocked(state, set)) {
+    const tier = TOWN.standing.collector_required_tier;
+    const name = TOWN.standing.tiers[tier - 1]?.name ?? String(tier);
+    return { ok: false, why: `Tier ${name} Standing in this settlement opens the set slots` };
+  }
   if (state.collector.done[set.id]) return { ok: false, why: 'this set is already turned in' };
   // nothing the player pinned moves (`gear.ts`'s own rule, the same one salvage and the bulk verbs
   // keep): a locked held piece is invisible to the turn-in, so the set reports what is missing

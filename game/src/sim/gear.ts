@@ -64,7 +64,7 @@ export function equipFromBag(s: GameState, bagIndex: number, quiet = false, prot
   const prev = gear[at];
   // a swap is slot-neutral — the piece leaves the bag and the one it displaced takes its place — so a
   // full bag is never a reason to refuse a swap; a take-off still needs a free slot of its own.
-  // a Stat Mod line already carries its own Core stat, baked at drop, so wearing changes
+  // a Stat Mod line already carries its own Core attribute, baked at drop, so wearing changes
   // nothing about it — the piece is worn exactly as it was rolled
   gear[at] = { ...item };
   // Wearing a reserved Collector piece is the player's choice to use it in the build.

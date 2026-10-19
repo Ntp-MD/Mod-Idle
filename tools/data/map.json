@@ -11,7 +11,7 @@
     "sheet": "#0b1016",
     "stroke": "#222d39",
     "bare_tone": "#1f2b39",
-    "note": "Pointy-top hexes on `radius`, shrunk by `gap` so neighbours leave bare ground between their edges. A cell with no zone takes the terrain of its nearest settlement. One authored colour per terrain in `terrain_colors`; the country past the field is that colour closed on `sheet` by `deep_close` at held hue, and `ground_ramp` is the wheel order a country may drift one step along. `bare_tone` and `stroke` are the frame between hexes, not a terrain. The rule and its rationale live in docs/DECISIONS.md.",
+    "note": "Pointy-top hexes on `radius`, shrunk by `gap` so neighbours leave bare ground between their edges. A cell with no zone takes the terrain of its nearest settlement. One authored colour per terrain in `terrain_colors`; the country past the field is that colour closed on `sheet` by `deep_close` at held hue, and `ground_ramp` is the wheel order a country may drift one step along. `bare_tone` and `stroke` are the frame between hexes, not a terrain.",
     "ground_ramp": [
       "rock",
       "snow",

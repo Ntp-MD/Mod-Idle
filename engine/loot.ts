@@ -152,12 +152,12 @@ export function createLoot(E: EngineData, MODS: ModsData) {
 
   const STAT_ID = 'stat_mod_flat';
   // The Stat Mod slot (item-base.md · equipment-slot-pools.md): one line, and the piece may hold it as
-  // a single Core stat (`stat_mod_flat`) or as all seven at once (`all_stat_flat`). The
+  // a single Core attribute (`stat_mod_flat`) or as all seven at once (`all_stat_flat`). The
   // family is every `group: "Stat Mod"` row in `mods.json`, so a third sibling would join it with no
   // code change; the slot holds exactly one of them (`blockedBy` below).
   const STAT_IDS: string[] = MODS.mods.filter((m) => m.group === 'Stat Mod').map((m) => m.id);
   // The stats a Stat Mod line may feed, owned by the Mod row itself (`mods.json` `rolls`, gated by
-  // checks.md X44 against core-stats.md's seven). A `stat_mod_flat` line bakes its stat at drop, so
+  // checks.md X44 against the seven Core attributes). A `stat_mod_flat` line bakes its stat at drop, so
   // the pick is data the roller reads, not a per-character choice made later; a sibling that feeds no
   // single stat (`all_stat_flat`) carries no `rolls` and bakes nothing.
   const STAT_ROLLS_OF: Record<string, string[]> = {};
@@ -374,7 +374,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   }
 
   /**
-   * The Core stat a `stat_mod_flat` line bakes at drop — `undefined` for every Mod with no `rolls`,
+   * The Core attribute a `stat_mod_flat` line bakes at drop — `undefined` for every Mod with no `rolls`,
    * so a caller can spread it straight onto the line it is building. The pool is the Mod row's own
    * `rolls` (`mods.json`), one home for the seven (checks.md X44). `all_stat_flat` feeds all seven at
    * once instead of one, so it carries no `rolls` and bakes nothing.

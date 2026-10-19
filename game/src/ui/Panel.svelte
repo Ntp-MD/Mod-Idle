@@ -94,7 +94,7 @@
 
 <style>
   /* A panel draws a second Hub Grid over the stage: the box names a cell rectangle and its body holds the
-     panel's one scroll owner, so the canvas itself never scrolls — see docs/skins.md. */
+     panel's one scroll owner, so the canvas itself never scrolls — see AGENTS.md §UI integration. */
   .veil {
     position: fixed;
     inset: 0;

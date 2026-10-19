@@ -54,7 +54,7 @@ describe('fixed zone rosters', () => {
       const expectedHp = (eng.mobHpAt(row.level) + flat) * E.mob.elite.hp;
       const variant = eng.variantsInZone(row.speciesId, row.zone)[0]!;
       const expectedPs = eng.mobPsAt(row.level) * E.mob.elite.ps / eng.zoneBodyFactor(row.zone)
-        * eng.speciesPsMult(row.zone, row.speciesId, variant.core);
+        * eng.speciesPsMult(row.zone, row.speciesId, variant.core, variant.damage);
       expect(row.hpFrom).toBeCloseTo(expectedHp, 8);
       expect(row.ps).toBeCloseTo(expectedPs, 8);
     }

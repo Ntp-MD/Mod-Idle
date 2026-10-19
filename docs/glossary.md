@@ -1,8 +1,6 @@
 # Glossary
 
-The shared language of the design: every file uses these words with exactly these meanings, and when two systems disagree it is usually because one of them used a word loosely.
-
-This file fixes what a word **means**. Every constraint, cap and rule that rides on one lives in `DECISIONS.md`; the figures live in `tools/data/`. Values are never typed here.
+Short definitions of game terms. Read only the terms needed for the task. Document ownership and update policy: [AGENTS.md](../AGENTS.md#document-map).
 
 # The 2 Layers of an Item
 
@@ -21,16 +19,17 @@ Two words that are constantly confused:
 - **Offensive / Defensive** are **Mod pools** — which Mods may roll on which slot.
 - **Attack layer / Defend layer** is the **runtime order** — what happens to one number, in sequence.
 
-The order itself is a rule: see `DECISIONS.md`.
+Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 
 # Item and Mod Vocabulary
 
 | Term | Meaning |
 |---|---|
+| **Stat** | A numeric value that measures or affects a character's or mob's capabilities; includes Core attributes and derived stats. |
 | **Mod** | One rolled stat line on an item, read as `name value (Tier)`. |
 | **Flat** | A value added straight into the stat, before any % modifier runs. |
 | **%** | A multiplier applied to the finished stat. |
-| **Stat Mod** | A Mod that is neither Offensive nor Defensive. It rolls any of the seven Core stats, and it rolls on every item. |
+| **Stat Mod** | A Mod that is neither Offensive nor Defensive. It rolls one or all of the seven Core attributes, and it rolls on every item. |
 | **Frame Mod** | The first line of a dropped item — the frame's own line, rolled from the slot's Frame-Mod pool. |
 | **Weapon type** | The held weapon family that sets its attack tempo, damage multiplier, skill pool and bound skills. |
 | **Weapon frame** | A named variant inside a weapon type. It fixes that drop's Frame Mod identity and carries its own drop weight and value bias. |
@@ -46,9 +45,10 @@ The order itself is a rule: see `DECISIONS.md`.
 
 | Term | Meaning |
 |---|---|
-| **Core stat** | The seven attributes: str · vit · dex · agi · wis · int · lck. |
-| **K value** | The hidden constant that converts a stat into a game value — `K_STR` is physical power a point of Str. |
-| **Cap** | The ceiling on a stat, where one exists. Critical chance and Accuracy deliberately have none. |
+| **Core attribute** | One of the seven foundational values: Str · Agi · Vit · Dex · Int · Wis · Lck. |
+| **Derived stat** | A combat value calculated from Core attributes and other inputs such as level, gear or effects. |
+| **K value** | The hidden constant that converts a Core attribute into a game value — `K_STR` is physical power a point of Str. |
+| **Cap** | An upper limit applied to a value. |
 | **Alignment** | Dex spent twice: the gate **every rolled status** passes — an Element status, bleed, and a stun — **and** the multiplier on an Element status's damage. |
 | **Physical power / Magic power** | The damage derived from the character. There is no weapon Base power. |
 | **Elemental power** | The third damage path, derived from Int and named by the weapon's own Element. |
@@ -77,10 +77,10 @@ The order itself is a rule: see `DECISIONS.md`.
 
 | Term | Meaning |
 |---|---|
-| **Player Vital Card** | The You identity, current HP/ES/Mana/EXP and player combat feedback inside a portrait frame matching the mob cards; active buffs and debuffs sit outside it on opposite sides. |
-| **Commands dock** | The bottom-right HUD region, rows 14–15 of columns 12–15, with the four Game controls (Speed ×1/×2/×4 and Pause/Resume) in one row of tabs hugging its right edge. |
-| **Menu hub** | The top menu rail: main screen navigation (Map, Bags, Skills, Craft, Sheet), the three field automation controls (Auto Skills, Auto Equip, Camp), and the More menu. |
-| **Objectives** | A collapsible HUD feed for the run's target and tracked delivery wants. Life-skill rungs read on the Sheet's **Life skills** tab; Chronicle keeps combat, loot and system events. |
+| **Player Vital Card** | The player identity, vitals and combat-feedback component. |
+| **Commands dock** | The HUD group for game speed and pause/resume controls. |
+| **Menu hub** | The HUD group for navigation and field controls. |
+| **Objectives** | The HUD feed for the run target and tracked Delivery wants. |
 
 # Elements and Statuses
 
@@ -110,11 +110,11 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Imprint stone** | Rewrites one Unbound line as the stone's own Mod, with a fresh roll from that Mod's window. |
 | **Quality stone** | The only source of Gear Mod points. |
 | **Tier stone** | Buys the tier presses. |
-| **Value stone** | The cheapest stone, minted by dissolving junk. |
+| **Value stone** | A stone spent on rerolling Mod values. |
 | **Polish stone** | Buys Polish the piece. |
 | **Reforge stone** | Buys Reforge the piece: the Tier redrawn across the whole piece. |
 | **Rebirth stone** | Buys Rebirth the Unbound lines — the set the piece holds, Add lines included. |
-| **Corrupt stone / Repair stone** | The rarest stones in the game. |
+| **Corrupt stone / Repair stone** | Stones spent on the Corrupt and Repair presses. |
 | **Upgrade** | Adds Gear Mod points to a piece, one step at a time, with rising failure odds. |
 | **Corrupt** | One gamble per piece: a roll that can take the piece somewhere better or ruin it. |
 | **Salvage** | Dismantling gear into base ore and Scrap; it does not directly mint a Value stone. |
@@ -128,16 +128,16 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Fishing** | A timed gathering activity at a Field Camp in a zone with an authored fishing source. |
 | **Smithing** | Settlement recipes that process ore and timber into metal or components; it does not craft gear. |
 | **meal** | A cooked food item; eating one replaces the active timed combat buff. |
-| **Hunger** | A saved field provision meter. Travel, hunting and gathering spend it; at zero, HP regeneration is reduced, while Energy Shield recharge is unchanged. |
-| **Auto Eat** | A saved per-character setting that consumes eligible carried cooked food, then fruit, then edible field herbs at the chosen Hunger threshold. Ingredients are never edible; raw food is opt-in before Hunger is empty and may be used as an empty-Hunger emergency. |
-| **provision** | A carried raw food, fruit, edible field herb, cooking ingredient or cooked meal. Their effects and sources are defined in `engine.json` `fieldwork.foods`, `fieldwork.hunt` and `fieldwork.recipes`. |
+| **Hunger** | The character's food/provision meter. |
+| **Auto Eat** | Automatic consumption of carried provisions to restore Hunger. |
+| **provision** | Carried food or cooking ingredients. |
 | **trail event** | An independent travel-block event that finds the current zone's regional food or restores Hunger; it never replaces the block's ambush roll. |
 | **junk** | A flavoured drop from a **variant**, sold to the settlement Counterhand for gold. |
 | **trade good** | Carried junk, material, provision or farm herb that a town Counterhand buys; ingredients can instead be kept for their recipes and field uses. |
 | **Demand** | A town's unfilled appetite for one goods category. Supplying it lowers that category's premium until demand recovers over game time. |
 | **Supply** | The saved base value already delivered into a town's category demand pool; it is shared across items in that category. |
 | **Workshop** | A settlement service that consumes gathered materials to make finished trade goods and grants the recipe's field skill XP. |
-| **variant** | One named form of a Species (`mob.variants`): it owns a level band, authored Core allocation and the junk row it pays. A Species may author any number of Variants. |
+| **variant** | One named form of a Species (`mob.variants`): it owns a level band, authored Core allocation, may override the Species' default damage type, and selects its junk row. A Species may author any number of Variants. |
 | **unique** | A named wild boss belonging to a Species (`mob.uniques`): an optional rare upgrade of a normal spawn. A Species can have none or several. |
 
 # Town and Economy
@@ -152,25 +152,26 @@ The order itself is a rule: see `DECISIONS.md`.
 | **Walk** | Crossing blocks from the cell the feet are on to the cell clicked. |
 | **Waypoint** | A settlement opened by arriving on foot: after that a warp there is instant. |
 | **Forward** | Auto-walk to the next already-open settlement when the current zone's level band is behind; new settlements still need a first walk. |
-| **Patrol** | An optional repeatable walk-and-hunt circuit through two or three named subzones in one visited zone. It clears a set of groups at each stop and can be stopped at any time. |
-| **Expedition** | A Guild task to defeat named Species Elites from one exact subzone; it has no deadline and keeps the regular Elite task payout. |
+| **Patrol** | An optional walk-and-hunt circuit through named subzones in one visited zone. |
+| **Expedition** | A Guild task targeting one Species' Elites in one subzone. |
 | **Auto-Return** | Optional Patrol help that walks to town once the bag nears full, stashes unlocked pieces, and resumes the saved route when space was freed. It never sells or discards gear. |
 | **Hunt** | Leaving safe ground to fight from the cell the feet stand on; sub-zones pick a cast, bare ground hunts the whole zone. |
 | **Field Camp** | One player-set safe hex. It enables field gathering and cooking, and receives a Push in its zone. |
 | **Mine** | A wild-side fieldwork hex that yields ore while gathering at a Camp. |
 | **Rare Grove** | A wild-side fieldwork hex that yields timber and can yield rarewood while gathering at a Camp. |
 | **Dungeon run** | A **mode**, not a place: one dungeon per zone, entered at its wild-side index 0. |
-| **Retreat** | Ends a dungeon run, rescues a seeded random subset of legal loot stacks through normal pickup/filter rules, forfeits the rest and starts the dungeon cooldown. Selected loot can still be refused by a full bag. |
+| **Retreat** | Leaving a dungeon run with a subset of its escrow loot. |
 | **Escrow** | What a dungeon run holds while it runs: the per-kill rolls banked instead of paid. |
 | **Wild side** | The untamed cells on a settlement's own land. |
-| **Standing** | A per-settlement unlock counter earned from the flows that already exist. |
+| **Standing** | A per-settlement tier earned from kills in that settlement's zone; it unlocks listed town services and Collector set turn-ins. |
 | **Gold** | The town-spending medium earned by selling trade goods and completing delivery wants. |
-| **Delivery want / Delivery Contract** | A town's timed request for a named carried good and count. Every partial hand-in pays its live market value; completing the count earns the frozen bonus. There is no Accept step. |
-| **Track** | An informational reminder for an open delivery want; tracking is not acceptance and is not required to deliver. |
-| **Delivery clock** | Credited game time used for delivery deadlines, paused during Camp recovery or an active dungeon run. Online opportunities use their own timers. |
-| **Delivery recap** | Saved quantities and actual market/bonus proceeds from a hand-in or terminal want; expiry forfeits only the unearned completion bonus. |
-| **Black Market** | A per-settlement gold stall selling rare materials, craft stones and named **Skill XP Levels** from an explicit whitelist. Each visited town's stock is frozen in the save and refreshes only while online. The one owner-sanctioned exception to the rule that gold buys town services only. |
-| **Skill XP Level** | A skill's own level, earned from kill XP up to the configured cap. A Black Market skill offer grants ownership when missing and raises the level only when that is an upgrade; it never lowers progress, never adds a Duplicate Ladder rung, and is distinct from life-skill Mastery. |
+| **Haggling** | Town trading progression, separate from combat skills, Standing and life-skill Mastery. |
+| **Delivery want / Delivery Contract** | A timed town request for a named good and quantity, with a completion reward. |
+| **Track** | An informational reminder for an open Delivery want. |
+| **Delivery clock** | The simulation clock used for Delivery deadlines. |
+| **Delivery recap** | The saved outcome and proceeds of a Delivery want. |
+| **Black Market** | The town stall selling rare goods and named Skill XP Levels for Gold. |
+| **Skill XP Level** | A combat skill's own XP-based level, distinct from the Duplicate Ladder and life-skill Mastery. |
 | **Collector set** | A named bundle of gear pieces a settlement wants handed in. |
 | **Reservation** | An aura holding back a share of Max Mana. |
 | **reserve tier** | The share of the pool one aura holds back. |

@@ -22,7 +22,7 @@
 </script>
 
 <div class="stat-allocator">
-  <header><h3 class="text-accent">Core stats</h3><strong class="text-value" aria-live="polite">{statPoints} unspent</strong></header>
+  <header><h3 class="text-accent">Core attributes</h3><strong class="text-value" aria-live="polite">{statPoints} unspent</strong></header>
   <label class="allocator-auto text-note"><input type="checkbox" checked={autoSpend} onchange={ontoggleauto} /> Auto-allocate evenly</label>
   <table class="stats"><tbody>
     {#each stats as k (k)}
@@ -45,7 +45,7 @@
   <p class="allocator-left text-note">Level {level} · <b>{treePoints}</b> tree points banked</p>
   <details class="allocator-help text-note">
     <summary>Allocation help</summary>
-    <p>Levels grant points, not stats. Turn off auto-allocation to bank points and spend them by hand. Respec is free at the town Counterhand.</p>
+    <p>Levels grant points; they do not raise Core attributes automatically. Turn off auto-allocation to bank points and spend them by hand. Respec is free at the town Counterhand.</p>
   </details>
 </div>
 

@@ -1,4 +1,11 @@
+---
+name: audit-ux-ui
+description: Visual, usability and consistency audit of the rendered game UI from a senior idle-RPG designer perspective, with a fix-and-verify workflow. Use when a UI/UX audit is requested; not for routine single-component tweaks.
+---
+
 Act as a Senior Game UI/UX Designer and Frontend Engineer specializing in mobile-style Idle RPGs played in desktop browsers.
+
+Use this work order only for a requested UI audit. [AGENTS.md](../../../AGENTS.md) owns scope, document roles and verification. A routine UI change does not trigger this whole audit or a documentation rewrite; the current request can change earlier visual choices.
 
 Perform a comprehensive visual, usability, and consistency audit of the existing game interface. Inspect the actual rendered UI and source code, identify verified issues, implement targeted fixes, and visually validate the results.
 
@@ -121,7 +128,7 @@ Check:
 - Mouse hover interactions and tooltips
 - Modal positioning and sizing
 - Scroll containment
-- Responsive behavior at different desktop resolutions
+- Responsive behavior at the viewport(s) authorized by `AGENTS.md` or the current request
 
 Preserve mobile-style visual identity without blindly inheriting mobile limitations.
 
@@ -160,7 +167,7 @@ Do not sacrifice readability or interaction clarity for visual compactness.
 
 1. Identify the relevant screens and shared components.
 2. Inspect existing design tokens and UI conventions.
-3. Capture actual rendered screenshots at representative viewport sizes.
+3. Inspect actual rendered screenshots at the viewport(s) authorized by `AGENTS.md` or the current request.
 4. Identify and classify objective visual and usability issues.
 5. Prioritize by severity, frequency, and gameplay impact.
 6. Fix underlying layout and styling causes.

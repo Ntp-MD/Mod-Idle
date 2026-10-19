@@ -91,7 +91,7 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
     taken.add(id);
     const slice = loot.tierSlice(u);
     const [lo, hi] = loot.rangeOf(id, ilvl, q, slice);
-    // a Stat Mod bakes the Core stat it feeds here, at drop, the way a PoE implicit carries its own
+    // a Stat Mod bakes the Core attribute it feeds here, at drop, the way a PoE implicit carries its own
     // stat; every other id leaves `stat` undefined (`mods.json` `rolls`)
     const stat = loot.statOf(id, rng) as ModLine['stat'];
     // an Elemental line always carries its Element: it is a stored value, never derived from a

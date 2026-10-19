@@ -101,7 +101,7 @@
     "dot_cap_note": "burn + poison + the earth line a row leaves (Sand Storm), combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches it exactly at 5 stacks x 0.30, so a maxed fire build fills the whole budget on its own",
     "proc_chance": 0.2,
     "mob_control_budget_pct": 0.15,
-    "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action and stun chance has no Cap, while a separate rolling stop-time budget (mob_control_budget_pct) limits total stopped time. Chill/shock/Cripple speed cuts obey their own Caps, so no fight can be stun-locked. No mob resist stat (DECISIONS.md §Standing intent). combat.md §5b"
+    "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action and stun chance has no Cap, while a separate rolling stop-time budget (mob_control_budget_pct) limits total stopped time. Chill/shock/Cripple speed cuts obey their own Caps, so no fight can be stun-locked. No mob resist stat. combat.md §5b"
   },
   "mob": {
     "races": {
@@ -122,8 +122,8 @@
     },
     "form_level_cap": 100,
     "note": "Family > Species > Variant: Family is a broad fantasy grouping, Species is an individual creature lineage, and each Species may own any number of named level Variants. Body classes remain the four card sizes. Innate Element stays a separate spawn roll (world.md).",
-    "stat_block": "`mob.forms` holds optional named field forms for real zone bands. Each Species may author as many fixed-level Variants as the fantasy content needs; the zone midpoint selects the Variant's name, live combat Core and drop identity, while `zone_levels[zoneId]` supplies its actual fixed spawn level. Forms are optional field labels and legacy projections; runtime normal and Elite spawns read the selected Variant Core and authored Species zone level. No Core line or level scales at runtime.",
-    "power_note": "A mob's damage per second is its own power over the zone mean, times the published mob_PS(L) curve: power = mob.species[].power_base + K_MOB_PS_STAT x the Core Stat its `damage` tag reads (physical -> Str, magic -> Int, mixed -> both halves, the same split mob.damage_split spends). The zone's average mob is the published curve — each Species multiplier is read against that same zone mean, so the average is 1 by construction and no gate re-checks it, so the species term only moves the mobs actually in front of the player and no zone edge, timeline, ladder or survival number changes. `power_base` is the per-species Base knob - 1.00 is neutral, and raising or lowering it tilts a species without touching its stat vector.",
+    "stat_block": "`mob.forms` holds optional named field forms for real zone bands. Each Species may author as many fixed-level Variants as the fantasy content needs; the zone midpoint selects the Variant's name, live combat Core, optional damage override and drop identity, while `zone_levels[zoneId]` supplies its actual fixed spawn level. A Variant inherits its Species' default damage type unless it overrides it. Forms are optional field labels and legacy projections; runtime normal and Elite spawns read the selected Variant Core and damage type plus the authored Species zone level. No Core line or level scales at runtime.",
+    "power_note": "A mob's damage per second is its own power over the zone mean, times the published mob_PS(L) curve: power = mob.species[].power_base + K_MOB_PS_STAT × (wPhys × Str + wMagic × Int), where [wPhys, wMagic] comes from the selected Variant damage override or its Species default. The same split mob.damage_split spends divides the hit. The zone's average mob is the published curve — each Species multiplier is read against that same zone mean, so the average is 1 by construction and no gate re-checks it, so the species term only moves the mobs actually in front of the player and no zone edge, timeline, ladder or survival number changes. `power_base` is the per-species Base knob - 1.00 is neutral, and raising or lowering it tilts a species without touching its stat vector.",
     "attack_clock_per_sec": {
       "normal": 1,
       "elite": 1,
@@ -1433,7 +1433,7 @@
         0.5,
         0.5
       ],
-      "note": "a species tag decides how its hit is divided: physical is entirely the armour-able half, magic is entirely the res-able half, mixed is the old 50/50. This is what makes the tag a rule instead of decoration: Treant and Golem are answered by Armour and chill, Slime and Dryad only by Elemental resistance."
+      "note": "A Variant may override its Species' default damage type; the selected tag divides its hit: physical is entirely the armour-able half, magic is entirely the Element-resistible half, mixed is 50/50. This makes the tag a rule instead of decoration: the right Core attribute drives power and the hit meets the matching defence."
     },
     "reach": {
       "bands": {
@@ -2483,7 +2483,7 @@
     "size_rules": [
       "Four card sizes, copied from Ragnarok: Small · Medium · Large · Boss. A size REPLACES the base numbers, it never multiplies with Elite or with another size.",
       "Small and Medium form the groups world.md counts (1-2 / 2-3 / 3-5). Large, Elite and Boss always appear alone. Each species carries only the sizes that fit it; every species with normal variants needs Small or Medium to enter a group, while Large remains the solo Elite body.",
-      "The body class carries a base Evasion as a percent on top of its species Dex line: Small +20%, Medium +10%, and nothing above Medium - a Large, Elite or Boss body is not punished for its size, it simply presents all of itself. The rating under the percent is the mob's own flat Core stat line (`mob.stat`), never a level number.",
+      "The body class carries a base Evasion as a percent on top of its species Dex line: Small +20%, Medium +10%, and nothing above Medium - a Large, Elite or Boss body is not punished for its size, it simply presents all of itself. The rating under the percent is the mob's own flat Core attribute line (`mob.stat`), never a level number.",
       "Size raises HP faster than PS, so a Large mob takes longer to kill without hitting proportionally harder - that is what makes Small the farming body and Large the roadblock."
     ],
     "species": [
@@ -4813,14 +4813,15 @@
             60
           ],
           "core": {
-            "str": 20,
+            "str": 14,
             "agi": 20,
             "vit": 15,
             "dex": 29,
-            "int": 4,
+            "int": 20,
             "wis": 3,
             "lck": 19
-          }
+          },
+          "damage": "magic"
         },
         {
           "name": "Tallow Goblin",
@@ -5059,14 +5060,15 @@
             60
           ],
           "core": {
-            "str": 22,
+            "str": 18,
             "agi": 16,
             "vit": 22,
             "dex": 27,
-            "int": 4,
+            "int": 22,
             "wis": 3,
             "lck": 17
-          }
+          },
+          "damage": "magic"
         },
         {
           "name": "Clubhand Ogre",
@@ -5305,14 +5307,15 @@
             60
           ],
           "core": {
-            "str": 20,
+            "str": 12,
             "agi": 13,
             "vit": 26,
             "dex": 28,
-            "int": 4,
+            "int": 20,
             "wis": 3,
             "lck": 17
-          }
+          },
+          "damage": "magic"
         },
         {
           "name": "Rattleblade Skeleton",
@@ -6125,14 +6128,15 @@
             60
           ],
           "core": {
-            "str": 18,
+            "str": 12,
             "agi": 18,
             "vit": 15,
             "dex": 33,
-            "int": 4,
+            "int": 18,
             "wis": 3,
             "lck": 19
-          }
+          },
+          "damage": "magic"
         },
         {
           "name": "Duelist",
@@ -6207,14 +6211,15 @@
             60
           ],
           "core": {
-            "str": 17,
+            "str": 14,
             "agi": 21,
             "vit": 16,
             "dex": 29,
-            "int": 4,
+            "int": 17,
             "wis": 3,
             "lck": 20
-          }
+          },
+          "damage": "magic"
         },
         {
           "name": "Reed Spear Lizardman",
@@ -12958,7 +12963,7 @@
     },
     "resist_rules": "A Species owns one Element (mob.species[].element): it attacks with it and answers it at the flat mob.species_res_pct in every zone. No Element counters another and no profile tilts the Vit line - the other four Elements meet no res at all. The same Cap the player obeys holds every line. A declared Element weakness (`mob.trait_mechanics.element_weak`) is a damage amplifier on the body, never a res line, so this map stays exactly as stated here (X54). A declared Element weakness (`mob.trait_mechanics.element_weak`) is a damage amplifier on the body, never a res line, so this map stays exactly as stated here (X54).",
     "skills_enabled": false,
-    "skills_note": "Mobs carry NO skills in the current build. What a mob does is its damage tag, the Element its Species owns, and the trait mechanics named in `mob.species[].mechanics` (X74) — no Species entry carries a skill field, and X55 fails if one appears while skills_enabled is false.",
+    "skills_note": "Mobs carry NO skills in the current build. What a mob does is its selected Variant damage type (or its Species default), the Element its Species owns, and the trait mechanics named in `mob.species[].mechanics` (X74) — no Species entry carries a skill field, and X55 fails if one appears while skills_enabled is false.",
     "species_res_pct": 20,
     "trait_mechanics": {
       "note": "A species' trait is read as a mechanic, not as a sentence. The set is closed: every key is a rule the client runs, and `mob.species[].mechanics` names which ones a lineage carries. None of them touches mob_HP, mob PS, the drop line or the stone funnel - the published anchors stay as they are. What changes is what a fight reads like: a body that cannot bleed, a body that bursts, a body that swings faster for the same damage per second, a body that flinches from one Element.",
@@ -13030,7 +13035,7 @@
     "res_mod_items": 3,
     "cdr_mod_items": 11,
     "cdr_buff_pct": 0,
-    "base_note": "The flat base each pool starts from before its Core stat is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term · Max Mana = mana_base + Int x K_INT_MP + level term · weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening set - the sword at 35 and the junk frames at 230 - is carried untaxed."
+    "base_note": "The flat base each pool starts from before its Core attribute is added (owner ruling): Max HP = hp_base + Vit x K_VIT_HP + level term · Max Mana = mana_base + Int x K_INT_MP + level term · weight capacity = weight_base + Str x K_STR_WEIGHT. A level-1 character (stat 12) reads 540 HP / 148 mana / 1,024 capacity, so the opening set - the sword at 35 and the junk frames at 230 - is carried untaxed."
   },
   "xp": {
     "per_kill_mob_level": 10,
@@ -13231,7 +13236,7 @@
         "v100": "+96% of a fresh build's uninvested stat line, and it thins toward the flat ceiling as the stats fill",
         "early": "+11%",
         "weight": 0.5,
-        "why": "A PoE-style all-attributes line: one roll lifts all seven Core stats at once, so it is weighted rarer than the single-stat Stat Mod flat it shares the slot with"
+        "why": "A PoE-style all-attributes line: one roll lifts all seven Core attributes at once, so it is weighted rarer than the single-stat Stat Mod flat it shares the slot with"
       },
       {
         "label": "Elemental alignment %",
@@ -13515,7 +13520,7 @@
     "regen_pct": 3,
     "player_only": true,
     "chaos_bypasses": false,
-    "note": "Elemental resistance is a GEAR line (owner ruling): no Core stat feeds it, so `K_MOB_RES` belongs to the mob stat vector alone and the player reads the resistance off the Mod rows. Energy Shield is fed by Wis flat (`K_WIS_ES`) with the gear lines riding on top (owner ruling): pool = (`Wis` x `K_WIS_ES` + `energy_shield_flat`) x (1 + `max_energy_shield_pct`/100). Regen is `regen_pct` (3) percent of the max pool per second once `delay_sec` (3) have passed without a hit, so the base rate alone returns the whole pool in 100 / `regen_pct` sec - the same full-pool span the mana pool was tuned to. Regen is amplified by an `es_regen` line from a skill, Mod or passive: rate x (1 + `es_regen`/100), and that is the only way it moves. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Hits of every Element, including chaos, and burn DoT drain Energy Shield before HP; poison and bleed DoT bypass it. Armour + Elemental resistance shrink the hit that drains it."
+    "note": "Elemental resistance is a GEAR line (owner ruling): no Core attribute feeds it, so `K_MOB_RES` belongs to the mob stat vector alone and the player reads the resistance off the Mod rows. Energy Shield is fed by Wis flat (`K_WIS_ES`) with the gear lines riding on top (owner ruling): pool = (`Wis` x `K_WIS_ES` + `energy_shield_flat`) x (1 + `max_energy_shield_pct`/100). Regen is `regen_pct` (3) percent of the max pool per second once `delay_sec` (3) have passed without a hit, so the base rate alone returns the whole pool in 100 / `regen_pct` sec - the same full-pool span the mana pool was tuned to. Regen is amplified by an `es_regen` line from a skill, Mod or passive: rate x (1 + `es_regen`/100), and that is the only way it moves. The 3 sec delay is the owner's ruling: it puts the shield back inside a normal mob swing gap, so a caster who breaks contact recovers a tick before the next hit lands. Player-only on purpose: mobs already size their survivability from mob_HP, so giving them a second pool would count the same anchor twice (checks.md H1). Hits of every Element, including chaos, and burn DoT drain Energy Shield before HP; poison and bleed DoT bypass it. Armour + Elemental resistance shrink the hit that drains it."
   },
   "evasion_roll": {
     "opening_rating": 12,

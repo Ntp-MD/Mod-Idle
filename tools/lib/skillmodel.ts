@@ -2,7 +2,7 @@
  * Skill model — a thin bridge over engine/skills.ts.
  *
  * The calculator itself lives in the shared module so the client presses the same numbers the
- * workshop prints (DECISIONS.md §Stack). Nothing is computed on this side: the bridge hands the
+ * workshop prints. Nothing is computed on this side: the bridge hands the
  * whole suite over as one object, so every figure the shared model publishes is readable by every
  * cage without this file naming it first.
  */
@@ -19,7 +19,7 @@ const REF: any = eng.REF;
 
 /**
  * The two reference builds a press is printed against live in `engine/index.ts` (`REF`), because the
- * roster table and the client must read the same bases (DECISIONS.md §Stack).
+ * roster table and the client must read the same bases.
  */
 const model: any = Object.assign({}, M, {
   referenceBases: () => REF,

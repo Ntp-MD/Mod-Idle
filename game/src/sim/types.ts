@@ -18,7 +18,7 @@ export interface ModLine {
    */
   element?: string | null;
   /**
-   * The Core stat a `stat_mod_flat` line feeds, rolled at drop and baked into the line the way a
+   * The Core attribute a `stat_mod_flat` line feeds, rolled at drop and baked into the line the way a
    * PoE implicit carries its own stat. Only that line carries it — its `all_stat_flat` sibling
    * feeds all seven at once and bakes nothing; the pool is `mods.json` `stat_mod_flat.rolls`.
    */
@@ -82,8 +82,8 @@ export interface Mob {
   environment?: string;
   /**
    * The selected Variant name this spawn rolled (`mob.variants` → `mob.variant_drops`), or the
-   * fixed boss/unique name for those ranks. It owns both the junk item the mob pays and the stream
-   * it leans, so two mobs of one species are not one drop table. Elite keeps the rolled variant.
+   * fixed boss/unique name for those ranks. It may override the Species' default damage type and
+   * selects junk item/lean, so two mobs of one Species can differ. Elite keeps the Variant.
    */
   variant?: string;
   kind: string;
@@ -136,7 +136,7 @@ export type SnapshotReason = string;
 export interface Player {
   level: number;
   xp: number;
-  /** Points allocated into each Core stat: `stat = base + points x point_value`. */
+  /** Points allocated into each Core attribute: `stat = base + points x point_value`. */
   points: Record<StatKey, number>;
   /** Stat points banked from levels, not yet spent. */
   statPoints: number;
@@ -226,6 +226,7 @@ export interface TownState {
   market: Record<string, Record<string, { used: number; atSec: number }>>;
   /** Earned fractions below the currency display unit carry forward into the next sale. */
   marketCredit: number;
+  hagglingXp: number;
   visited: string[];
   owned: string[];
   waypoint: string;

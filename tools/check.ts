@@ -658,8 +658,9 @@ function runChecks() {
       const flat = eng.LG.hp_per_level * (r.level - 1) + r.vit * eng.K.K_VIT_HP;
       const expectedHp = (eng.mobHpAt(r.level) + flat) * E.mob.elite.hp;
       if (Math.abs(r.hpFrom - expectedHp) > 1) rp.push(`Elite ${r.id} HP does not multiply the complete mobHP by ${E.mob.elite.hp}`);
-      const variantCore = eng.variantsInZone(r.speciesId, r.zone).find((v: any) => v.name === r.variant)?.core;
-      const expectedPs = eng.mobPsAt(r.level) * E.mob.elite.ps / eng.zoneBodyFactor(r.zone) * eng.speciesPsMult(r.zone, r.speciesId, variantCore);
+      const variant = eng.variantsInZone(r.speciesId, r.zone).find((v: any) => v.name === r.variant);
+      const expectedPs = eng.mobPsAt(r.level) * E.mob.elite.ps / eng.zoneBodyFactor(r.zone)
+        * eng.speciesPsMult(r.zone, r.speciesId, variant?.core, variant?.damage);
       if (Math.abs(r.ps - expectedPs) > 0.01) rp.push(`Elite ${r.id} PS does not match the live spawn formula`);
     } else if (/Boss/.test(r.kind)) {
       if (Math.abs(r.hpBaseTo - eng.mobHpAt(r.level)) > 1) rp.push(`Boss ${r.id} Base HP is not mob_HP at its own level — body classes no longer scale HP`);
@@ -719,7 +720,7 @@ function runChecks() {
     if (E.mob.skills_enabled) sk.push('skills_enabled is true but the mob skill system is not built');
     for (const sp of E.mob.species) if ((sp as any).skills) sk.push(`${sp.id} carries a skill field while skills_enabled is false`);
     add('X55', sk.length === 0, sk.length ? sk.join(' · ')
-      : `mobs carry no skills — a species' damage tag, its Element and its trait mechanics (X74) are the whole of its behaviour; ${E.mob.species.length} species checked, none carries a skill field while skills_enabled is false`);
+      : `mobs carry no skills — their Species/Variant damage type, Species Element and trait mechanics (X74) define behaviour; ${E.mob.species.length} species checked, none carries a skill field while skills_enabled is false`);
   }
 
   // Zone identity lives in `mob.zones` alone. Bands repeat every three zones, so each band owns
@@ -840,11 +841,21 @@ function runChecks() {
       : `the two buckets are ${BUCKET.map(([id]) => id).join(' + ')}: real % lines, each with a \`mod_weights\` row, each on the weapon pool and on no armour slot · a press multiplies once, on its own ladder only (${physRow.id} reads Attack damage %, ${magicRow.id} reads Spell damage %, the other half of the pair is x1.00 on both) · a swing rides the attack bucket and a magic weapon's bolt the spell one · an empty bucket is x1, so every published press stays the empty-bucket baseline`);
   }
 
-  // The species damage tag is now a rule: it divides the incoming hit
-  const splitTags = [...new Set(E.mob.species.map((r) => r.damage))];
-  const spProblems = splitTags.filter((t) => !E.mob.damage_split[t] || Math.abs(E.mob.damage_split[t][0] + E.mob.damage_split[t][1] - 1) > 1e-9);
-  const counts = splitTags.map((t) => `${t} ${E.mob.species.filter((r) => r.damage === t).length}`);
-  add('X31', spProblems.length === 0, spProblems.length ? `no valid split for: ${spProblems.join(', ')}` : `every species damage tag resolves to a real split (${counts.join(' · ')}) · physical is the whole armour-able half (Knight · Golem · Troll answered by Armour and chill), magic is the whole res-able half (Slime · Seraph only reachable through res), mixed keeps the old 50/50`);
+  // Species provide a default damage type; individual Variants may override it.
+  const variantsBySpecies = ((E.mob as any).variants || {}) as Record<string, any[]>;
+  const variantDamageTags = Object.values(variantsBySpecies)
+    .flatMap((ladder: any[]) => ladder.filter((variant) => variant.damage !== undefined).map((variant) => variant.damage));
+  const splitTags: string[] = [...new Set([...E.mob.species.map((r) => r.damage), ...variantDamageTags])];
+  const damageProblems = splitTags.filter((t) => !E.mob.damage_split[t] || Math.abs(E.mob.damage_split[t][0] + E.mob.damage_split[t][1] - 1) > 1e-9);
+  const magicCoreProblems: string[] = [];
+  for (const sp of E.mob.species) for (const variant of variantsBySpecies[sp.id] || []) {
+    if ((variant.damage ?? sp.damage) === 'magic' && variant.core.int <= variant.core.str) {
+      magicCoreProblems.push(`${sp.id}/${variant.name}: magic damage needs Int above Str`);
+    }
+  }
+  const damageProfileProblems = [...damageProblems, ...magicCoreProblems];
+  add('X31', damageProfileProblems.length === 0, damageProfileProblems.join(' · ')
+    || 'Species defaults and Variant overrides resolve to real splits; magic damage Variants put Int above Str');
 
   // With a mob's level STATIC per variant (`mob.variants[].levels`; the legacy per-species zone
   // table `mob.species[].zone_levels` answers only past the form cap), the zone average no longer

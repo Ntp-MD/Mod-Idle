@@ -47,7 +47,7 @@ import { buyBlackMarket } from './sim/black-market';
   import { feedEventsAfter } from './ui/logbox';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
-    standingShare, standingTier, canTravel, claimTask, npcOf,
+    standingProgress, canTravel, claimTask, npcOf,
   } from './sim/town';
   import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from './sim/craft';
 import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPotion, condense, drink, cycleQuickbar } from './sim/farm';
@@ -318,6 +318,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let sheetOpen = $state(false);
   /** the sheet's own tabs: the final values, and the life-skill reference read */
   let sheetTab = $state<'stats' | 'life'>('stats');
+  const LIFE_BONUS_LABELS: Record<string, string> = {
+    armour_pct: 'Armour', evasion_pct: 'Evasion rating', accuracy_pct: 'Accuracy',
+    hp_regen_pct: 'HP regeneration', mana_regen_pct: 'Mana regeneration', armour_pen: 'Armour penetration',
+  };
   function sheetTabKeydown(event: KeyboardEvent) {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
@@ -1490,7 +1494,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     }
   }
   /**
-   * The destination card's place on screen: the end of its anchor that has the room (AGENTS.md §Interface Surfaces) — above
+   * The destination card's place on screen: the end of its anchor that has the room — above
    * the picked cell's own mark, or below it when the sheet's top edge is nearer — clear of the menu rail and inside the map.
    * The card is placed by the box it measures, so the measure runs again whenever the sheet moves the
    * cell (a pan or a zoom) or the pick moves to another cell.
@@ -1560,6 +1564,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const viewTown = $derived(pickedSettlement ?? town);
   const viewHere = $derived(!!viewTown && viewTown.id === townId);
   const viewStock = $derived(stockOf(viewTown?.id ?? ''));
+  const viewStanding = $derived(standingProgress(gameState, viewTown?.id ?? ''));
   const viewColSet = $derived(col.setAt(viewTown?.id));
   /**
    * The sheet's own key, read off the tones it carries: one entry per terrain, in the order the field
@@ -1762,7 +1767,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const r = startWalk(gameState, dest);
     if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
     // the walk takes the frame: the map closes and the field carries the walking read, because a sharp
-    // map and the HUD cannot share a square (AGENTS.md §Interface Surfaces three-state rule). The pick is spent with it —
+    // map and the HUD cannot share a square. The pick is spent with it —
     // in field view the card has no box left to measure, and a card parked there sits on the player's own card.
     panel = null;
     picked = null;
@@ -2621,6 +2626,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             {#if badge > 0}<span class="badge badge-count urgent more-count">{badge}</span>{/if}
           </button>
         {/each}
+        <a class="hub-control wiki-link" href="/wiki.html" target="_blank" rel="noopener noreferrer"
+           title="Open the game wiki in a new tab" aria-label="Open the game wiki in a new tab">
+          <span class="toggle-ring"><img src={deskMark} alt="" aria-hidden="true" /></span>
+          <span class="cap">Wiki</span>
+        </a>
             <button type="button" class="hub-control"
                 onclick={() => (hudGridVisible = !hudGridVisible)} title="Toggle the viewport grid">
           <span class="toggle-ring" class:here={hudGridVisible}>
@@ -2684,18 +2694,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <section class="sheet-stat-group">
             <h3 class="text-accent">Life skill rungs</h3>
             <table class="stats table-metrics">
-              <thead><tr><th scope="col">Life skill</th><th scope="col">Level</th><th scope="col">Next rung</th></tr></thead>
+              <thead><tr><th scope="col">Life skill</th><th scope="col">Level</th><th scope="col">Current combat benefit</th><th scope="col">Next rung</th></tr></thead>
               <tbody>
               {#each lifeSkillMilestones(gameState) as rung (rung.id)}
-                <tr><td>{rung.id}</td><td>Lv {rung.level}</td><td>{#if rung.complete}<span class="text-good">All rungs reached</span>{:else}{rung.next}{/if}</td></tr>
+                <tr><td>{rung.id}</td><td>Lv {rung.level}</td><td>{LIFE_BONUS_LABELS[rung.stat]} +{rung.bonus.toFixed(2)}{rung.unit === 'percentage_points' ? ' percentage points' : '%'}</td><td>{#if rung.complete}<span class="text-good">All rungs reached</span>{:else}{rung.next}{/if}</td></tr>
               {/each}
             </tbody></table>
           </section>
           <section class="sheet-stat-group">
             <h3 class="text-accent">How a rung pays</h3>
             <p class="sheet-gate">
-              Informational only: every rung adds its fixed share to the life-skill combat budget, grants no separate
-              reward and never touches the final-boss gate. Levels and training live on the Field Camp board.
+              Milestone bonuses apply automatically and reserve no Mana. Train at the matching field activity,
+              Farm or Workshop. Combat skills and character XP progress separately.
             </p>
           </section>
         </div>
@@ -3334,7 +3344,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <button onclick={doRespecTree} disabled={!townLive || !viewHere || !treePointsSpent(gameState)}>Respec the tree — refund {treePointsSpent(gameState)} point{treePointsSpent(gameState) === 1 ? '' : 's'}</button>
 
       <h4>Standing</h4>
-      <p>Tier {standingTier(gameState, viewTown.id)} / {TOWN.standing.tiers.length} · {(standingShare(gameState, viewTown.id) * 100).toFixed(1)}% of the {eng.SETTLEMENT_BUDGET_KILLS[viewTown.zone].toLocaleString('en-US')} kills in zone {viewTown.zone} that Tier I asks for. Standing buys stock lines, set slots and cosmetics — never a stat, a Mod, a stone or anything mob_HP reads.</p>
+      <p>Tier {viewStanding.tier} / {TOWN.standing.tiers.length} · {(viewStanding.share * 100).toFixed(1)}% of zone {viewTown.zone}'s kill budget · {viewStanding.kills.toLocaleString('en-US')} kills · {viewStanding.budget > 0 ? viewStanding.next ? `${viewStanding.next.remaining.toLocaleString('en-US')} more to Tier ${viewStanding.next.name} (${viewStanding.next.kills.toLocaleString('en-US')} total)` : 'all Standing tiers reached' : 'Standing unavailable'}. Standing unlocks town services, Collector slots and appearance purchases; it never grants a stat, a Mod, a stone or anything mob_HP reads.</p>
       {/if}
 
       {#if deskTab === 'stall'}
@@ -3350,7 +3360,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
               <td>{row.kind}</td>
               <td>{priceMinutes(row, viewTown.id, gameState)} m{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
               <td>{priceGold(row, viewTown.id, gameState)}</td>
-              <td>{#if viewHere}<button onclick={() => doBuy(row.id)} disabled={!check.ok}>{check.ok ? 'buy' : check.why}</button>{:else}<span class="dim">elsewhere</span>{/if}</td>
+              <td>{#if !check.ok}<small>{check.why}</small>{/if}{#if viewHere}<button onclick={() => doBuy(row.id)} disabled={!check.ok}>buy</button>{:else}<span class="dim">elsewhere</span>{/if}</td>
             </tr>
           {/each}
         </tbody>
@@ -3686,7 +3696,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .desk-content .picklist .mob-hp { white-space: nowrap; }
 
 
-  /* the Hub Grid shell: fixed, never scrolls; an overgrown region scrolls inside itself (docs/skins.md) */
+  /* the Hub Grid shell: fixed; an overgrown region scrolls inside itself (AGENTS.md §UI integration) */
   .stage {
     position: fixed;
     inset: 0;
@@ -4155,6 +4165,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     align-items: center; justify-content: flex-start; gap: var(--spacing-xs);
     min-width: var(--icon-hub); padding: 0;
   }
+  .wiki-link { text-decoration: none; }
   .hub-control .cap { white-space: nowrap; text-align: center; }
 
   .morebox {
@@ -4187,7 +4198,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .bagshell { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--spacing-sm); align-items: start; min-width: 0; }
   .sheet-tools { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); }
-  /* Equipment over Core stats, beside the complete character values. */
+  /* Equipment over Core attributes, beside the complete character values. */
   .sheet-layout {
     flex: 1; min-height: 0; display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);

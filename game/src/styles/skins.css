@@ -1,13 +1,8 @@
 /**
  * Skins — the appearance layer.
  *
- * `base.css` gives every tag its geometry; a component's own <style> gives layout and size.
- * This file is the only place a *look* is written. A skin paints: colour, border, glow, motion.
- * It never sets padding, margin, gap, width or height — a skin that needs a size is in the
- * wrong file. Naming is `<family>-<skin>` plus a bare state word (`.toggled`, `.picked`), and a
- * skin is named for how it looks, never for the screen that wears it.
- *
- * Contract: docs*skins.md
+ * Reusable appearance lives here; tag defaults in base.css, tokens in variables.css,
+ * and component layout in each component's <style>. See AGENTS.md §UI integration.
  */
 
 /* ---- buttons ------------------------------------------------------------------

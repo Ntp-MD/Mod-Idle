@@ -3,6 +3,10 @@ import { createFieldwork } from './fieldwork.ts';
 
 export interface TradeCfg {
   currency_decimals: number;
+  haggling: {
+    level_cap: number; level_divisor: number; xp_per_difficulty: number;
+    sale_bonus_max_pct: number; delivery_bonus_max_pct: number; service_discount_max_pct: number;
+  };
   floor_mult: number; neutral_peak: number; import_peak: number; export_peak: number;
   capacity_gold: number; recovery_sec: number; recipe_value_mult: number; workshop_value_mult: number;
   food_values: Record<string, number>; herb_values: Record<string, number>; material_values: Record<string, number>;
@@ -17,6 +21,16 @@ export interface TradeGood {
 
 /** One catalogue and one price curve for both the client and reports. No gameplay RNG is spent. */
 export function createTrade(E: EngineData, C: TradeCfg) {
+  const hagglingXpForLevel = (level: number) => (level - 1) ** 2 * C.haggling.level_divisor;
+  const hagglingXp = (difficulty: number) => difficulty * C.haggling.xp_per_difficulty;
+  const haggling = (xp: number) => {
+    const level = Math.min(C.haggling.level_cap, Math.floor(Math.sqrt(Math.max(0, xp) / C.haggling.level_divisor)) + 1);
+    const progress = (level - 1) / (C.haggling.level_cap - 1);
+    return { level, nextXp: level < C.haggling.level_cap ? hagglingXpForLevel(level + 1) : null,
+      saleMult: 1 + progress * C.haggling.sale_bonus_max_pct / 100,
+      deliveryMult: 1 + progress * C.haggling.delivery_bonus_max_pct / 100,
+      serviceMult: 1 - progress * C.haggling.service_discount_max_pct / 100 };
+  };
   const floorCurrency = (value: number) => {
     const scale = 10 ** C.currency_decimals;
     return Math.floor((value + Number.EPSILON * Math.max(1, value) * scale) * scale) / scale;
@@ -87,5 +101,5 @@ export function createTrade(E: EngineData, C: TradeCfg) {
     const gold = volume * C.floor_mult + area * (peak(town, good) - C.floor_mult);
     return { count: units, gold, demand: remaining / C.capacity_gold, used: Math.min(C.capacity_gold, used + volume), atSec: now };
   };
-  return { C, byId, goods: Object.values(byId), peak, usedAt, quote, floorCurrency, settleCurrency };
+  return { C, byId, goods: Object.values(byId), peak, usedAt, quote, floorCurrency, settleCurrency, haggling, hagglingXp, hagglingXpForLevel };
 }

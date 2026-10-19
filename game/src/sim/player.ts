@@ -297,7 +297,7 @@ export function buildCharacter(
     : aspdDefault;
   const used = weightOfCarry(gear, carried, heldMasteryLevel);
   const burden = eng.encumbranceOf(used, core.str);
-  // the Cap is applied LAST (core-stats.md · formula.md): after the aspd Mod band inside the
+  // the Cap is applied LAST (docs/DECISIONS.md): after the aspd Mod band inside the
   // formula, after a multiplicative aspd buff (Haste's ×1.15) and after the weight tax — so no
   // build passes 5 hits/sec, which is the clock rule the whole game is priced against
   const aspd = eng.capAspd(

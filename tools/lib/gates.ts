@@ -1,5 +1,5 @@
 /**
- * The gate/watch contract — one home (AGENTS.md §Numbers).
+ * The gate/watch contract — one home (AGENTS.md §Commands and verification).
  *
  * A **gate** is a condition: a copy, a wiring, a shape or coverage break, a direction flip, a Cap's
  * reachability, a binding cap, a pointer. It FAILs the run.

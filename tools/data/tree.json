@@ -1,6 +1,6 @@
 {
   "meta": {
-    "note": "The passive tree is a connected three-wing network: impact (offence), control (defence) and stream (sustain/Core stats), with 21 nodes per wing and a 22nd control node raising the Elemental resistance Cap. A free centre start connects the first node of every wing; 7th, 14th and 21st ranks cross-link the wings, so owned paths can branch and reconnect. Node ids stay branch.index so existing allocations survive the visual and pathing remake. Every paid node still grants a real line; there are no keystones. There are 64 nodes, 192 ranks and one point per rank. Values remain fractions of mods.json maxima: a shallow node's rank 3 is a tenth, a deep node's is a fifth, and the published rates remain the empty-tree baseline.",
+    "note": "The passive tree is a connected three-wing network: impact (offence), control (defence) and stream (sustain/Core attributes), with 21 nodes per wing and a 22nd control node raising the Elemental resistance Cap. A free centre start connects the first node of every wing; 7th, 14th and 21st ranks cross-link the wings, so owned paths can branch and reconnect. Node ids stay branch.index so existing allocations survive the visual and pathing remake. Every paid node still grants a real line; there are no keystones. There are 64 nodes, 192 ranks and one point per rank. Values remain fractions of mods.json maxima: a shallow node's rank 3 is a tenth, a deep node's is a fifth, and the published rates remain the empty-tree baseline.",
     "node_columns": [
       "Node",
       "Line",

@@ -528,7 +528,8 @@
         "settlement": "eastgate",
         "m": 30
       },
-      "note": "no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 24 gold teaching price"
+      "note": "no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 24 gold teaching price",
+      "required_standing_tier": 1
     },
     {
       "id": "stash_tab_2",
@@ -539,7 +540,8 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": ""
+      "note": "",
+      "required_standing_tier": 1
     },
     {
       "id": "stash_tab_3",
@@ -550,7 +552,8 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": ""
+      "note": "",
+      "required_standing_tier": 1
     },
     {
       "id": "stash_tab_4",
@@ -561,7 +564,8 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": ""
+      "note": "",
+      "required_standing_tier": 1
     },
     {
       "id": "stash_tab_5",
@@ -572,7 +576,8 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": ""
+      "note": "",
+      "required_standing_tier": 1
     },
     {
       "id": "stash_tab_6",
@@ -583,7 +588,8 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "stash_tab",
-      "note": "Cap 6 tabs"
+      "note": "Cap 6 tabs",
+      "required_standing_tier": 1
     },
     {
       "id": "herb_pouch_ii",
@@ -595,7 +601,8 @@
       "qty": 1,
       "ladder": "herb_pouch",
       "note": "one more slot in the bag (`inventory.character_slots` is the base)",
-      "character_slot_grant": 1
+      "character_slot_grant": 1,
+      "required_standing_tier": 1
     },
     {
       "id": "herb_pouch_iii",
@@ -607,7 +614,8 @@
       "qty": 1,
       "ladder": "herb_pouch",
       "note": "one more slot in the bag (`inventory.character_slots` is the base)",
-      "character_slot_grant": 1
+      "character_slot_grant": 1,
+      "required_standing_tier": 1
     },
     {
       "id": "bag_slot",
@@ -619,7 +627,8 @@
       "qty": 3,
       "ladder": null,
       "display_only": true,
-      "note": "display and sorting only · sells no stone, no gear"
+      "note": "display and sorting only · sells no stone, no gear",
+      "required_standing_tier": 0
     },
     {
       "id": "plot_deed_4",
@@ -630,7 +639,8 @@
       "charge_band": "mid",
       "qty": 1,
       "ladder": "plot_deed",
-      "note": "4th farm plot (farm.md)"
+      "note": "4th farm plot (farm.md)",
+      "required_standing_tier": 1
     },
     {
       "id": "plot_deed_5",
@@ -641,7 +651,8 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "plot_deed",
-      "note": "5th plot · the most expensive non-cosmetic line"
+      "note": "5th plot · the most expensive non-cosmetic line",
+      "required_standing_tier": 1
     },
     {
       "id": "house_ashfall",
@@ -652,7 +663,8 @@
       "charge_band": "low",
       "qty": 1,
       "ladder": "house",
-      "note": "2 stash tabs + 1 farm plot, no combat effect"
+      "note": "2 stash tabs + 1 farm plot, no combat effect",
+      "required_standing_tier": 1
     },
     {
       "id": "house_highspire",
@@ -663,7 +675,8 @@
       "charge_band": "mid",
       "qty": 1,
       "ladder": "house",
-      "note": ""
+      "note": "",
+      "required_standing_tier": 1
     },
     {
       "id": "house_vermolch",
@@ -674,7 +687,8 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "house",
-      "note": ""
+      "note": "",
+      "required_standing_tier": 1
     },
     {
       "id": "filter_preset",
@@ -685,7 +699,9 @@
       "charge": "one_per_band",
       "qty": 3,
       "ladder": null,
-      "note": "preset switching is a concept.md reason-to-open"
+      "note": "preset switching is a concept.md reason-to-open",
+      "required_standing_tier": 3,
+      "filter_preset_grant": 1
     },
     {
       "id": "potion_carrier_slot",
@@ -697,7 +713,8 @@
       "qty": 1,
       "ladder": null,
       "display_only": true,
-      "note": "display only · the carrier pays the weight tax in formula.md section 11 · sells no potion"
+      "note": "display only · the carrier pays the weight tax in formula.md section 11 · sells no potion",
+      "required_standing_tier": 0
     }
   ],
   "repeatable": [
@@ -709,7 +726,8 @@
       "m": 8,
       "charge_band": "high",
       "per_day_cap": 3,
-      "note": "1 per task slot per day on top of the free skip in tasks.md · 3/day = 31 gold/day"
+      "note": "1 per task slot per day on top of the free skip in tasks.md · 3/day = 31 gold/day",
+      "required_standing_tier": 0
     },
     {
       "id": "repair",
@@ -718,7 +736,8 @@
       "kind": "time",
       "m": 16,
       "charge_band": "high",
-      "note": "must stay above the elite time that earns 1 Tier stone · re-check at F9"
+      "note": "must stay above the elite time that earns 1 Tier stone · re-check at F9",
+      "required_standing_tier": 0
     },
     {
       "id": "repair_ironrow",
@@ -727,7 +746,8 @@
       "kind": "time",
       "m": 14,
       "charge_band": "high",
-      "note": "the armourer town discount, and only there · still above the tier-stone floor"
+      "note": "the armourer town discount, and only there · still above the tier-stone floor",
+      "required_standing_tier": 0
     },
     {
       "id": "pedlar_rotation",
@@ -738,7 +758,8 @@
       "m_max": 120,
       "charge_band": "high",
       "per_day_cap": 3,
-      "note": "3 slots per real day · appearance only"
+      "note": "3 slots per real day · appearance only",
+      "required_standing_tier": 3
     },
     {
       "id": "prestige_title",
@@ -747,7 +768,8 @@
       "kind": "appearance",
       "m": 300,
       "charge_band": "high",
-      "note": "the only intentionally expensive line"
+      "note": "the only intentionally expensive line",
+      "required_standing_tier": 3
     },
     {
       "id": "banner_coldres",
@@ -756,7 +778,8 @@
       "kind": "appearance",
       "m": 90,
       "charge_band": "mid",
-      "note": "one per settlement · Wolf Cross only"
+      "note": "one per settlement · Wolf Cross only",
+      "required_standing_tier": 3
     },
     {
       "id": "tint_heavy",
@@ -765,7 +788,8 @@
       "kind": "appearance",
       "m": 45,
       "charge_band": "high",
-      "note": "stocked only by the Siege Armourer at Frosthold · appearance only"
+      "note": "stocked only by the Siege Armourer at Frosthold · appearance only",
+      "required_standing_tier": 3
     },
     {
       "id": "collector_hint",
@@ -774,7 +798,8 @@
       "kind": "information",
       "m": 15,
       "charge_band": "high",
-      "note": "information only · pays no item and sells no piece"
+      "note": "information only · pays no item and sells no piece",
+      "required_standing_tier": 0
     },
     {
       "id": "waypoint_warp",
@@ -783,7 +808,8 @@
       "waypoint": true,
       "m_per_block": 2,
       "charge_band": "mid",
-      "note": "The Waypoint's own price, not a stall line: it is stocked by no settlement and bought by no vendor, so no `stock` array names it. A warp buys back the walk's time at the destination settlement's band, priced off the blocks the walk would have crossed (one gold-minute a block walked), so a short hop is cheap and a crossing of the map is not. It is gold into a sink, never gold out of one: it mints nothing, gates no zone, and opens no Waypoint the foot has not earned. Anchor inside the existing ladder: a 7-block hop costs 14 minutes (an Armourer repair is 16), a 20-block crossing 40 minutes (a pedlar appearance slot is 30-120)."
+      "note": "The Waypoint's own price, not a stall line: it is stocked by no settlement and bought by no vendor, so no `stock` array names it. A warp buys back the walk's time at the destination settlement's band, priced off the blocks the walk would have crossed (one gold-minute a block walked), so a short hop is cheap and a crossing of the map is not. It is gold into a sink, never gold out of one: it mints nothing, gates no zone, and opens no Waypoint the foot has not earned. Anchor inside the existing ladder: a 7-block hop costs 14 minutes (an Armourer repair is 16), a 20-block crossing 40 minutes (a pedlar appearance slot is 30-120).",
+      "required_standing_tier": 0
     }
   ],
   "essentials": [
@@ -806,7 +832,7 @@
       {
         "name": "I",
         "share": 0.3,
-        "unlocks": "that stall's second stock line"
+        "unlocks": "storage, capacity, house and farm expansions"
       },
       {
         "name": "II",
@@ -816,10 +842,10 @@
       {
         "name": "III",
         "share": 1.4,
-        "unlocks": "the cosmetic / tip line (banner · title · preset slot)"
+        "unlocks": "appearance purchases and extra saved filter presets"
       }
     ],
-    "earnt_from": "kills in that settlement's own zone (F1), plus tasks and boss kills there — both are extra progress on top of these thresholds, never a substitute for them",
+    "earnt_from": "kills in that settlement's own zone (F1)",
     "grants": [
       "vendor stock lines",
       "Collector set slots",
@@ -832,7 +858,8 @@
       "any Mod value",
       "any stone",
       "anything mob_HP reads"
-    ]
+    ],
+    "collector_required_tier": 2
   },
   "collector_sets": [
     {
@@ -918,15 +945,15 @@
     "offer_weight_expedition": 0.25,
     "offer_weight_rule": "Elite and Expedition share the former 75% Tier-stone offer share; Boss uses the remaining 25%. Expedition rewards replace, rather than add to, the previous Tier-stone offer budget. Typed in town.ts rather than in the client, because the board's roll is a read the client performs on the data",
     "income_bound_pct": 10,
-    "income_bound_rule": "hard rule: all task rewards together stay inside this share of the day's loot flows — bonus stones inside the same funnel, never income on top (DECISIONS.md §The task board). T19 gates it: a slot's natural claims plus every skip a day can buy must keep the whole board's Tier-stone drip under the bound",
+    "income_bound_rule": "Sizing guidance only, not an enforced ceiling. Task and Delivery stones derive from eng.taskPayout within the existing stone funnel; do not gate a prescribed income share (docs/game-rules.md).",
     "refill_sec": 86400,
-    "refill_rule": "a finished or skipped slot refills once its clock runs out; the board is the daily direction layer, so the clock is a day, not an hour — at an hour the three slots churn 72 claims a day and breach income_bound_pct by ~7x (T19)",
+    "refill_rule": "A finished or skipped slot refills once its configured clock runs out.",
     "slots": 3,
     "free_skip_per_day": 1
   },
   "pending": [
     {
-      "number": "Task reward sizing (DECISIONS.md §The task board rebalance)",
+      "number": "Task rewards derive through eng.taskPayout using task_sizing",
       "breaks": "the income bound is now gated (T19) and holds at the daily refill cadence; the owner's remaining call is only sizing taste — elite_n, reward_minutes_of_band_income and the split between Elite and Expedition offers",
       "status": "open"
     },
@@ -963,6 +990,14 @@
   },
   "trade": {
     "currency_decimals": 2,
+    "haggling": {
+      "level_cap": 99,
+      "level_divisor": 10,
+      "xp_per_difficulty": 10,
+      "sale_bonus_max_pct": 20,
+      "delivery_bonus_max_pct": 15,
+      "service_discount_max_pct": 10
+    },
     "floor_mult": 0.6,
     "neutral_peak": 1.15,
     "import_peak": 2.6,

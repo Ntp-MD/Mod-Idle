@@ -19,7 +19,7 @@ export function quoteSale(state: GameState, town: string, id: string, count: num
   const good = trade.byId[id];
   if (!good || !TOWN.trade.towns[town as keyof typeof TOWN.trade.towns]) return null;
   const quote = trade.quote(town, good, count, state.town.market?.[town]?.[good.group], state.clockSec);
-  return { ...quote, ...trade.settleCurrency(quote.gold, state.town.marketCredit || 0) };
+  return { ...quote, ...trade.settleCurrency(quote.gold * trade.haggling(state.town.hagglingXp).saleMult, state.town.marketCredit || 0) };
 }
 
 /** Supply is shared by category at a town. Quotes are reads; only a successful sale spends demand. */

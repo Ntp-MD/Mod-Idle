@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { eng, E, ED, loot, sm, MODS, fieldwork } from '../src/engine/client';
+import { eng, E, ED, loot, sm, MODS, fieldwork, TOWN } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
 import { newGame, tick, huntZone, carried, setLevel, catchUp } from '../src/sim/game';
 import { buildCharacter } from '../src/sim/player';
@@ -237,6 +237,26 @@ describe('the Corrupt gamble pays what its table promises', () => {
 });
 
 describe('the Collector never consumes a pinned piece', () => {
+  it('opens and pays once at the exact configured Standing threshold', () => {
+    const s = newGame(39);
+    const set = col.sets[0];
+    const settlement = settlementById(set.settlement)!;
+    const threshold = TOWN.standing.collector_required_tier;
+    const kills = Math.ceil(TOWN.standing.tiers[threshold - 1].share * eng.SETTLEMENT_BUDGET_KILLS[settlement.zone]);
+    s.cell = { ...settlementCell(set.settlement)!, sub: null, wild: null };
+    s.zone = settlement.zone;
+    s.counters.zoneKills[settlement.zone] = kills - 1;
+    s.bag = set.parsed.map((p: any) => ({ slot: p.slot, base: p.name, ilvl: 1, quality: 'low', tier: 'T1', q: 0, lines: [], heldFor: set.id }));
+    const locked = turnIn(s, set.settlement);
+    expect(locked.ok).toBe(false);
+    expect(locked.why).toContain(`Tier ${TOWN.standing.tiers[threshold - 1].name} Standing`);
+    s.counters.zoneKills[settlement.zone] = kills;
+
+    expect(turnIn(s, set.settlement)).toMatchObject({ ok: true, reward: set.reward });
+    expect(s.collector.done[set.id]).toBe(true);
+    expect(turnIn(s, set.settlement).why).toBe('this set is already turned in');
+  });
+
   it('a turn-in leaves the locked held piece in the bag and names it', () => {
     const s = newGame(38);
     const set = col.sets[0];
@@ -288,6 +308,28 @@ describe('the zone Elements column is what spawns there, not a declared copy', (
 
   it('leaves no declared column behind to drift out of agreement again', () => {
     for (const z of E.mob.zones as any[]) expect(z.elements, z.name).toBeUndefined();
+  });
+});
+
+describe('the wiki overview reads the live slot and mob-health contracts', () => {
+  it('counts worn cells and describes zone Elements as the cast, not a zone theme', () => {
+    const html = PAGES.find((p) => p.file === 'index.html')!.body.join('\n');
+    expect(html).toContain(`<td>Worn slots</td><td><span class="num">${E.stat.item_slots}</span></td>`);
+    expect(html).toContain('spawn Elements');
+    expect(html).not.toContain('each with its own level band, Element and group size');
+  });
+
+  it('does not print a missing body-class health multiplier as ×—', () => {
+    const world = PAGES.find((p) => p.file === 'world.html')!.body.join('\n');
+    const combat = PAGES.find((p) => p.file === 'combat.html')!.body.join('\n');
+    const bodyAt = world.indexOf('<h2>Body classes</h2>');
+    const body = world.slice(bodyAt, world.indexOf('</section>', bodyAt));
+    const eliteAt = combat.indexOf('<h2>Elite and Boss</h2>');
+    const ranks = combat.slice(eliteAt, combat.indexOf('</section>', eliteAt));
+    expect(body).not.toContain('<th>Health</th>');
+    expect(body).not.toContain('×—');
+    expect(ranks).not.toContain('×—');
+    expect(ranks).toContain('profile Core');
   });
 });
 

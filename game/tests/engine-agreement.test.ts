@@ -6,7 +6,7 @@ import { newGame, tick, catchUp, huntZone, carried } from '../src/sim/game';
 
 // The cages load tools/lib/engine.ts, which is a bridge over the same engine/index.ts the client
 // calls. Requiring it here proves the client and the cages resolve to one module and one data file
-// — the promise DECISIONS.md §Stack ("The one rule") makes.
+// — the shared-source ownership described in AGENTS.md.
 const require = createRequire(import.meta.url);
 const cage = require('../../tools/lib/engine.ts').eng;
 

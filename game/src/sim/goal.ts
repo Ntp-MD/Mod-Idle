@@ -1,4 +1,5 @@
-import { E, eng } from '../engine/client';
+import { E, eng, lifeSkills } from '../engine/client';
+import type { LifeSkillBonus, LifeSkillId } from '../../../engine/life-skills.ts';
 import { fieldSkillLevel, type FieldSkillId } from './fieldwork';
 import { farmLevel } from './farm';
 import type { GameState, Mob } from './types';
@@ -68,9 +69,12 @@ export function describe(): string {
 export function lifeSkillMilestones(s: GameState) {
   const levels: Record<string, number> = Object.fromEntries(Object.keys(s.fieldwork.skills).map((id) => [id, fieldSkillLevel(s, id as FieldSkillId)]));
   levels.farming = farmLevel(s);
-  return Object.keys(E.fieldwork.life_skill_combat.weights).map((id) => {
+  return (Object.keys(E.fieldwork.life_skill_combat.weights) as LifeSkillId[]).map((id) => {
     const level = levels[id] || 1;
     const next = E.fieldwork.life_skill_combat.rungs.find((rung) => rung > level) ?? null;
-    return { id, level, next, complete: next === null };
+    const effect = lifeSkills.C.effects[id];
+    const stat = effect.stat as keyof LifeSkillBonus;
+    return { id, level, next, complete: next === null, stat, unit: effect.unit,
+      bonus: lifeSkills.bonuses({ [id]: level })[stat] || 0 };
   });
 }

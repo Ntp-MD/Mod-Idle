@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { E, BASES, SKILLS, eng, tree } from '../src/engine/client';
+import { E, BASES, SKILLS, MODS, TREE_SPEC, eng, tree } from '../src/engine/client';
+import { createTree } from '../../engine/tree';
 import { newGame } from '../src/sim/game';
 import { mastery, masteryLevel, dropMultiplier, weaponSkillBonusPct } from '../src/sim/mastery';
 import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines } from '../src/sim/tree';
@@ -45,6 +46,19 @@ describe('weapon Mastery', () => {
 describe('the passive tree', () => {
   const spent = (s: GameState) => treePointsSpent(s);
   const firstWithNeeds = () => Object.values(tree.byId as Record<string, any>).find((n: any) => n.needs.length && !n.needs.includes('start')) as any;
+
+  it('reads the shallow boundary and rank count from the tree spec', () => {
+    const spec = structuredClone(TREE_SPEC) as any;
+    spec.shallow_nodes = 1;
+    spec.rank_tiers.shallow = [0.1, 0.2];
+    spec.rank_tiers.deep = [0.2, 0.4];
+    const model = createTree(spec, MODS);
+    expect(model.shallowNodes).toBe(1);
+    expect(model.ranks).toBe(2);
+    expect(model.nodes[0].tier).toBe('shallow');
+    expect(model.nodes[1].tier).toBe('deep');
+    expect(model.nodes.every((node) => node.ranks === 2 && node.values.length === 2)).toBe(true);
+  });
 
   it('refuses a rank with no point banked and one past the node cap', () => {
     const s = newGame();

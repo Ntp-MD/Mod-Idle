@@ -266,6 +266,8 @@ export interface MobCore {
   [key: string]: number;
 }
 
+export type MobDamageType = 'physical' | 'magic' | 'mixed';
+
 export interface MobSpecies {
   id: string;
   name: string;
@@ -283,8 +285,8 @@ export interface MobSpecies {
   accuracy_mult: number;
   /** Authored fixed spawn level for each zone this Species inhabits; never derived from player level. */
   zone_levels?: Record<string, number>;
-  /** The damage tag: which half of the incoming hit Armour and resistance each answer (X31). */
-  damage: string;
+  /** Default damage type; a normal Variant may override it. */
+  damage: MobDamageType;
   /** Explicit potion-drop permission; independent of the Species' Race. */
   potion_source?: boolean;
   trait?: string;
@@ -362,11 +364,12 @@ export interface MobZone {
   subzones?: MobSubzone[];
 }
 
-/** One fixed-level normal variant: its name, level band and authored combat Core. */
+/** One fixed-level normal variant: its name, level band, combat Core and optional damage override. */
 export interface MobVariant {
   name: string;
   levels: [number, number];
   core: MobCore;
+  damage?: MobDamageType;
 }
 
 export type MobRaceId =
@@ -388,7 +391,7 @@ export interface MobBoss {
   /** A boss runs its species' trait mechanics unless it declares its own. */
   mechanics?: Record<string, string | boolean>;
   element: string;
-  damage: 'physical' | 'magic' | 'mixed';
+  damage: MobDamageType;
   accuracy_mult: number;
   reads_as: 'small' | 'medium' | 'large';
 }
@@ -402,7 +405,7 @@ export interface MobUnique {
   /** A unique runs its species' trait mechanics unless it declares its own. */
   mechanics?: Record<string, string | boolean>;
   element: string;
-  damage: 'physical' | 'magic' | 'mixed';
+  damage: MobDamageType;
   accuracy_mult: number;
   reads_as: 'small' | 'medium' | 'large';
 }

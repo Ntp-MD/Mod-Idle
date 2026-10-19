@@ -11,7 +11,7 @@
    * Every number is read from the sim modules the cages already test; nothing here restates a rule.
    */
   import { E, eng } from '../engine/client';
-  import { canBuy, stockOf, settlementById, standingTier, standingShare } from '../sim/town';
+  import { canBuy, stockOf, settlementById, standingProgress } from '../sim/town';
   import { slotsAvailable, slotsUsed } from '../sim/slots';
   import { craft } from '../sim/craft';
   import type { GameState } from '../sim/types';
@@ -44,8 +44,7 @@
   const stock = $derived(stockOf(town.id));
   const buys = $derived(here ? stock.filter((r: any) => canBuy(state, town.id, r.id).ok).length : 0);
   const ready = $derived(state.town.tasks.filter((t) => t && t.progress >= t.n).length);
-  const tier = $derived(here ? standingTier(state, town.id) : 0);
-  const share = $derived(here ? (standingShare(state, town.id) * 100).toFixed(1) : '0');
+  const standing = $derived(standingProgress(state, town.id));
   const stones = $derived(Object.values(state.counters.stones).reduce((a, b) => a + (b as number), 0));
   /** the piece the forge would take on next, if there is one worth naming */
   const worn = $derived(state.gear.filter(Boolean) as any[]);
@@ -56,10 +55,10 @@
     { id: 'market', name: 'Market', icon: marketMark, by: 'the Counterhand and the workshop', say: 'Sell gathered goods, compare town demand, process materials and plan trade routes', live: buys ? `${buys} stall line${buys === 1 ? '' : 's'} your purse covers` : junk ? `${junk} junk to sell` : 'Compare buyers and regional supplies' },
     { id: 'black-market', name: 'Black Market', icon: marketMark, by: 'the back-alley broker', say: 'Buy rare materials, craft stones and named skill XP Levels; max level offers are in the stock pool', live: state.town.blackMarket[town.id] ? `${state.town.blackMarket[town.id].offers.filter((offer) => offer.remaining > 0).length} offers in stock` : 'Stock arrives on the next online settlement tick' },
     { id: 'forge', name: 'Forge', icon: forgeMark, by: 'the Armourer', say: 'Enhance a piece up the + ladder, repair a Broken one, or take the one Corrupt gamble', live: lowest ? `${lowest.slot} is the least forged · +${lowest.upgrade_lv || 0} of +${craft.C.upgrade_cap}` : 'nothing worn yet' },
-    { id: 'craft', name: 'Craft house', icon: craftMark, by: 'the Armourer and the Herbalist', say: 'Move a mod line inside its Tier, push it a Tier up, add or remove a mod, ascend the piece', live: stones ? `${stones} stones in the purse` : 'no stones — a rejected drop dissolves into them' },
+    { id: 'craft', name: 'Craft house', icon: craftMark, by: 'the Armourer and the Herbalist', say: 'Move a mod line inside its Tier, push it a Tier up, add or remove a mod, ascend the piece', live: stones ? `${stones} stones in the purse` : 'no stones — Salvage supplies Scrap for Alchemy' },
     { id: 'stash', name: 'Stash', icon: stashMark, by: 'the Porter', say: 'The warehouse the same record opens in every settlement', live: tabs ? `${stored} stored · ${tabs} tab${tabs === 1 ? '' : 's'}` : 'no tab bought yet' },
     { id: 'desk', name: 'Desk', icon: deskMark, by: 'the Guild clerk and the Collector', say: 'Standing, the board, a set turn-in, the hunt and walk tables', live: ready ? `${ready} task${ready === 1 ? '' : 's'} ready to claim` : `${state.town.tasks.filter(Boolean).length} of ${state.town.tasks.length} board slots filled` },
-    { id: 'farm', name: 'Farm', icon: farmMark, by: 'the Herbalist', say: 'Herb plots, brewing and condensing — the life skill, and it grants no power', live: `${state.farm.plots.filter((p: any) => p?.tier).length} plot(s) sown` },
+    { id: 'farm', name: 'Farm', icon: farmMark, by: 'the Herbalist', say: 'Herb plots, brewing and condensing', live: `${state.farm.plots.filter((p: any) => p?.tier).length} plot(s) sown` },
   ]);
 </script>
 
@@ -77,7 +76,13 @@
       <h3>{town.name}</h3>
       <p class="sub">
         zone {town.zone} · {eng.zoneById(town.zone).name} · Innate Element {town.innate.join(' / ')} ·
-        standing Tier {tier} ({share}% of the zone's kill budget)
+        standing Tier {standing.tier} ({(standing.share * 100).toFixed(1)}% of zone budget) ·
+        {standing.kills.toLocaleString()} zone kills ·
+        {standing.budget > 0
+          ? standing.next
+            ? `${standing.next.remaining.toLocaleString()} more to Tier ${standing.next.name} (${standing.next.kills.toLocaleString()} total)`
+            : 'all Standing tiers reached'
+          : 'Standing unavailable'}
       </p>
     </div>
     <div class="purse">

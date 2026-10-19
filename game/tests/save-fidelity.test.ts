@@ -209,6 +209,13 @@ describe('the save schema and the account', () => {
     expect(() => importJson(JSON.stringify({ state: s }))).toThrow(/schema version none/);
   });
 
+  it('rejects a future local schema before migration touches its state', () => {
+    const future = structuredClone(newGame(520));
+    const before = structuredClone(future);
+    expect(() => migrate(future, SCHEMA_VERSION + 1)).toThrow(/schema version 18/);
+    expect(future).toEqual(before);
+  });
+
   it('fills subsystems a older save never had', () => {
     const bare = { player: { level: 1 }, counters: { kills: 0 } } as any;
     const m = migrate(bare);

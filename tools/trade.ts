@@ -12,10 +12,24 @@ import type { EngineData, ModsData, SkillsData } from '../engine/types.ts';
 
 const root = path.resolve(import.meta.dirname, '..');
 const E = readJson<EngineData>(path.join(root, 'tools/data/engine.json'));
-const T = readJson<{ trade: TradeCfg; black_market: BlackMarketCfg; settlements: { id: string; zone: number }[] }>(path.join(root, 'tools/data/town.json'));
+const T = readJson<{
+  trade: TradeCfg;
+  black_market: BlackMarketCfg;
+  standing: { tiers: { name: string; share: number }[]; collector_required_tier: number };
+  one_time: { id: string; required_standing_tier: number; filter_preset_grant?: number }[];
+  repeatable: { id: string; required_standing_tier: number; filter_preset_grant?: number }[];
+  settlements: { id: string; zone: number; stock: string[] }[];
+  collector_sets: { id: string; settlement: string }[];
+}>(path.join(root, 'tools/data/town.json'));
 const trade = createTrade(E, T.trade);
 const G = gates();
 const C = T.trade;
+const H = C.haggling;
+G.add('TC10', Number.isSafeInteger(H.level_cap) && H.level_cap > 1
+  && [H.level_divisor, H.xp_per_difficulty].every((n) => Number.isFinite(n) && n > 0)
+  && [H.sale_bonus_max_pct, H.delivery_bonus_max_pct, H.service_discount_max_pct].every((n) => Number.isFinite(n) && n >= 0)
+  && H.service_discount_max_pct < 100,
+  'Haggling progression is finite, bonuses are nonnegative and service prices remain positive');
 G.add('TC1', [C.floor_mult, C.neutral_peak, C.import_peak, C.export_peak, C.capacity_gold, C.recovery_sec, C.recipe_value_mult, C.workshop_value_mult].every((n) => Number.isFinite(n) && n > 0)
   && [C.neutral_peak, C.import_peak, C.export_peak].every((n) => n >= C.floor_mult)
   && Number.isInteger(C.currency_decimals) && C.currency_decimals >= 0 && C.currency_decimals <= 100,
@@ -70,6 +84,36 @@ G.add('TC4', !recipes.length, recipes.join(' · ') || 'cooking and workshop inpu
 
 const whole = (value: number, minimum = 0) => Number.isSafeInteger(value) && value >= minimum;
 const nonnegative = (value: number) => Number.isFinite(value) && value >= 0;
+const standingProblems: string[] = [];
+const standingTiers = T.standing.tiers;
+if (!standingTiers.length || standingTiers.some((tier, index) => !tier.name || !Number.isFinite(tier.share)
+  || tier.share <= 0 || index > 0 && tier.share <= standingTiers[index - 1].share)) {
+  standingProblems.push('tier shares must be finite, positive and strictly increasing');
+}
+if (!whole(T.standing.collector_required_tier, 1) || T.standing.collector_required_tier > standingTiers.length) {
+  standingProblems.push('Collector Standing requirement must name a configured tier');
+}
+const shopRows = [...T.one_time, ...T.repeatable];
+const shopIds = new Set<string>();
+for (const row of shopRows) {
+  if (shopIds.has(row.id)) standingProblems.push(`duplicate shop row ${row.id}`);
+  shopIds.add(row.id);
+  if (!whole(row.required_standing_tier) || row.required_standing_tier > standingTiers.length) {
+    standingProblems.push(`${row.id}: invalid Standing requirement`);
+  }
+  if (row.id === 'filter_preset' && !whole(row.filter_preset_grant ?? Number.NaN, 1)) {
+    standingProblems.push('filter_preset must grant a positive whole number of preset slots');
+  }
+}
+const stockedIds = new Set([...shopIds, ...T.collector_sets.map((set) => set.id)]);
+for (const settlement of T.settlements) {
+  for (const id of settlement.stock) if (!stockedIds.has(id)) standingProblems.push(`${settlement.id}: unknown stock row ${id}`);
+}
+for (const set of T.collector_sets) if (!T.settlements.some((settlement) => settlement.id === set.settlement)) {
+  standingProblems.push(`${set.id}: unknown Collector settlement ${set.settlement}`);
+}
+G.add('TC11', !standingProblems.length, standingProblems.join(' · ')
+  || 'Standing tiers increase safely; shop requirements, preset grants, Collector tier and stock references resolve');
 const salvage: string[] = [];
 for (const [key, amount] of Object.entries(E.salvage.outputs)) {
   if (!Object.hasOwn(trade.byId, `material:${key}`) || !whole(amount, 1) || amount > E.inventory.stack_size.material) {
@@ -196,7 +240,7 @@ try {
   for (const candidate of market.candidates) for (const count of new Set([candidate.countMin, candidate.countMax])) {
     const price = market.price(candidate, count);
     // Fresh demand can never pay more than this linear bound, even when split across towns.
-    const resale = candidate.kind === 'material' ? trade.byId[candidate.key].value * peak * count : 0;
+    const resale = candidate.kind === 'material' ? trade.byId[candidate.key].value * peak * count * trade.haggling(trade.hagglingXpForLevel(H.level_cap)).saleMult : 0;
     if (!positive(price) || price > Number.MAX_SAFE_INTEGER || !(price > resale)) blackMarket.push(`${candidate.key}/${count}: purchase price fails the conservative market resale bound`);
   }
 } catch (error) { blackMarket.push(String(error)); }

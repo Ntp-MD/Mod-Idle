@@ -596,7 +596,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const id = loot.weightedPick(rng, free.map((m) => ({ id: m, w: loot.weightOf(m, item.q) })));
     const slice = loot.tierSlice(rng());
     const [lo, hi] = loot.rangeOf(id, item.ilvl, item.q, slice);
-    // a Stat Mod stone bakes the Core stat too, the same way a drop does: the piece's own
+    // a Stat Mod stone bakes the Core attribute too, the same way a drop does: the piece's own
     // line carries which stat it feeds, so an added Stat Mod is as specific as a rolled one
     const stat = loot.statOf(id, rng);
     // the line an Add stone filled is a crafted line whatever Mod later replaces its identity

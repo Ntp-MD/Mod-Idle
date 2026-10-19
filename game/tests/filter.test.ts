@@ -187,6 +187,18 @@ describe('the filter keeps presets like settings, not like drops', () => {
     expect(s.filterPresets[1]).toBe(null);
   });
 
+  it('derives purchased preset slots from ownership and preserves them through a save round trip', () => {
+    const s = newGame(33);
+    s.town.owned.push('filter_preset');
+    s.grants.filter_presets = 1;
+    expect(presetSlots(s)).toBe(3);
+    expect(savePreset(s, 2)).toBe(true);
+
+    const round = importJson(exportJson(s));
+    expect(presetSlots(round)).toBe(3);
+    expect(savePreset(round, 3)).toBe(false);
+  });
+
   it('rides a save round trip, and an older save gains an empty list instead of an undefined one', () => {
     const s = newGame(32);
     savePreset(s, 0);

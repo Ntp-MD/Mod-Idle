@@ -1,0 +1,1 @@
+Read and follow [AGENTS.md](../AGENTS.md) at the repository root before working. It owns document roles, reading scope, workflow and verification. Reuse it if already loaded; keep project rules there.
