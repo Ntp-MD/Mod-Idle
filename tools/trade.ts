@@ -15,7 +15,10 @@ const E = readJson<EngineData>(path.join(root, 'tools/data/engine.json'));
 const T = readJson<{
   trade: TradeCfg;
   black_market: BlackMarketCfg;
-  standing: { tiers: { name: string; share: number }[]; collector_required_tier: number };
+  standing: {
+    tiers: { name: string; share: number }[]; collector_required_tier: number;
+    camp_aid_credit_share: number; camp_aid_credit_cap_share: number;
+  };
   one_time: { id: string; required_standing_tier: number; filter_preset_grant?: number }[];
   repeatable: { id: string; required_standing_tier: number; filter_preset_grant?: number }[];
   settlements: { id: string; zone: number; stock: string[] }[];
@@ -89,6 +92,11 @@ const standingTiers = T.standing.tiers;
 if (!standingTiers.length || standingTiers.some((tier, index) => !tier.name || !Number.isFinite(tier.share)
   || tier.share <= 0 || index > 0 && tier.share <= standingTiers[index - 1].share)) {
   standingProblems.push('tier shares must be finite, positive and strictly increasing');
+}
+if (!Number.isFinite(T.standing.camp_aid_credit_share) || T.standing.camp_aid_credit_share <= 0
+  || !Number.isFinite(T.standing.camp_aid_credit_cap_share)
+  || T.standing.camp_aid_credit_cap_share < T.standing.camp_aid_credit_share) {
+  standingProblems.push('Camp aid Standing credit must be positive and within its lifetime cap');
 }
 if (!whole(T.standing.collector_required_tier, 1) || T.standing.collector_required_tier > standingTiers.length) {
   standingProblems.push('Collector Standing requirement must name a configured tier');

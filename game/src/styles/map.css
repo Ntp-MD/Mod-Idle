@@ -35,6 +35,10 @@
 .map-fishing-rod, .map-fish-ripple { fill: none; stroke: #d8c38c; }
 .map-pot-steam { fill: none; stroke: #e2dac0; animation: map-cook-steam 2s ease-in-out infinite; }
 .map-field-camp:not(.is-occupied) .map-camp-smoke { display: none; }
+.map-camp-encounter .map-encounter-mark { fill: #d5ae67; stroke: #3c2c1c; stroke-width: 1.5; filter: drop-shadow(0 0 2px #f6d488); }
+.map-camp-encounter.is-warning .map-encounter-mark { animation: map-encounter-warning 1.3s ease-in-out infinite; }
+.map-camp-encounter.is-choice .map-encounter-mark { fill: #f1cf7d; }
+.map-camp-encounter.is-combat .map-encounter-mark { fill: #ef896b; }
 .map-activity-label { fill: #ffe4a3; stroke: #302919; stroke-width: 1.5; paint-order: stroke; font-size: 4px; font-weight: 700; }
 .map-stop-flag { fill: #273e49; stroke: #d4bb86; }
 .map-stop-number { fill: #fff2c9; font-size: 6px; font-weight: 700; }
@@ -46,8 +50,9 @@
 @keyframes map-mine-pulse { 50% { opacity: .72; } }
 @keyframes map-cook-steam { 50% { opacity: .55; } }
 @media (prefers-reduced-motion: reduce) {
-  .map-mob.is-fighting .map-mob-species, .map-camp-smoke, .map-camp-fire, .map-mine-glow ellipse, .map-pot-steam { animation: none; }
+  .map-mob.is-fighting .map-mob-species, .map-camp-smoke, .map-camp-fire, .map-mine-glow ellipse, .map-pot-steam, .map-camp-encounter .map-encounter-mark { animation: none; }
 }
+@keyframes map-encounter-warning { 50% { opacity: .45; transform: scale(.92); } }
 .map-mob-shadow { fill: #342b1b; opacity: .3; }
 .map-mob-species {
   filter: drop-shadow(0 .5px .35px #554025);

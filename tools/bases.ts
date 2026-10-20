@@ -50,10 +50,12 @@ function capacities(): any {
   };
 }
 
-function checks(): any[] {
+function checks(source?: any): any[] {
   const { add, soft, rows } = G.gates();
+  // The file the cage gates — or another object, so a caller can prove a broken structure FAILs
+  // without writing a broken file.
   let current: any = null;
-  try { current = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { current = null; }
+  try { current = source ?? JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { current = null; }
   if (!current) throw new Error('tools/data/bases.json is missing');
   // bases.json is the source now — nothing parses a doc into it
   const doc = current;
@@ -122,9 +124,11 @@ function checks(): any[] {
     return !row || w.weapon_aspd != null || w.weapon_mult != null
       || ENGINE.weaponMult(row.weapon_aspd, w.name) !== row.weapon_mult;
   });
-  add('BS6', weapons.length === 11 && multBad.length === 0, multBad.length
+  // The table must exist and every row must read its clock and multiplier from engine.json. How many
+  // weapon types there are is a roster count, not a condition: the gate is the table's own shape.
+  add('BS6', weapons.length > 0 && multBad.length === 0, multBad.length
     ? `weapon rows disagree with engine.json: ${multBad.map((w: any) => w.name).join(', ')}`
-    : 'all 11 Base weapons read their named attack speed and multiplier from engine.json');
+    : `every Base weapon (${weapons.length}) reads its named attack speed and multiplier from engine.json`);
   const blocked = current.weapon_pools?.['main hand']?.Blocked || [];
   const primary = current.weapon_pools?.['main hand']?.Primary || [];
   const secondary = current.weapon_pools?.['main hand']?.Secondary || [];
@@ -171,7 +175,7 @@ function checks(): any[] {
     if (!Array.isArray(ids) || !ids.length) typePoolProblems.push(`${w.name} has no named pool`);
     else for (const id of ids) if (!KNOWN_MOD_IDS.has(id)) typePoolProblems.push(`${w.name}: unknown pool line ${id}`);
   }
-  add('BS11', typePoolProblems.length === 0,
+  add('BS14', typePoolProblems.length === 0,
     typePoolProblems.length ? typePoolProblems.join(' · ') : `${weapons.length} weapon types each have a valid named Mod pool`);
   // B13: the weight column exists and every type carries one.
   const noWeight = weapons.filter((w: any) => !(w.weight > 0));
@@ -204,10 +208,16 @@ function report(): void {
   G.report(checks());
 }
 
-if (process.argv.includes('--checks')) {
-  report();
-} else {
-  console.log('Bases cage — tools/data/bases.json is the source\n\n  node tools/bases.ts --checks   gate the Base tables\n');
+/** The CLI runs only when this file is the entry point, so a test may import `checks` without the
+ *  cage reporting (and setting the exit code) behind it. */
+const isEntry = process.argv[1] ? path.resolve(process.argv[1]) === path.resolve(import.meta.filename) : false;
+
+if (isEntry) {
+  if (process.argv.includes('--checks')) {
+    report();
+  } else {
+    console.log('Bases cage — tools/data/bases.json is the source\n\n  node tools/bases.ts --checks   gate the Base tables\n');
+  }
 }
 
 export { checks, capacities };

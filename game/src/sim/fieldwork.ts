@@ -1,6 +1,6 @@
 import { E, fieldwork, lifeSkills } from '../engine/client';
 import type { Character } from './player';
-import type { GameState, Cell } from './types';
+import type { GameState, Cell, Mob } from './types';
 import { addTo, fits } from './slots';
 import { currentCell, rankOf, zoneOf } from './road';
 import { farmLevel } from './farm';
@@ -22,6 +22,30 @@ export interface FieldMeal {
   id: string;
   untilSec: number;
 }
+export type CampEncounterPolicy = 'avoid' | 'defend' | 'engage';
+export type CampEncounterKind = 'sounds' | 'prowler' | 'traveler' | 'nest' | 'herd' | 'injured' | 'discovered';
+export interface CampEncounterActive {
+  id: number;
+  kind: CampEncounterKind;
+  stage: 'warning' | 'choice' | 'combat';
+  origin: Cell;
+  warningSec: number;
+  choiceSec: number;
+  payload: Record<string, unknown>;
+  preparedGroup: Mob[];
+  participantIds: string[];
+}
+export interface CampEncounterState {
+  policy: CampEncounterPolicy;
+  streamState: number;
+  serial: number;
+  graceSec: number;
+  checkSec: number;
+  cooldownSec: number;
+  exposureSec: number;
+  active: CampEncounterActive | null;
+  recap: string | null;
+}
 export interface AutoEatSettings {
   enabled: boolean;
   threshold: number;
@@ -38,11 +62,62 @@ export interface FieldworkState {
   autoEat: AutoEatSettings;
   skills: Record<FieldSkillId, FieldSkillTrack>;
   activeMeal: FieldMeal | null;
+  campEncounters: CampEncounterState;
 }
 
 const track = (): FieldSkillTrack => ({ xp: 0, mastery: {} });
 
-export function newFieldwork(): FieldworkState {
+export function newCampEncounterState(seed = 0): CampEncounterState {
+  return {
+    policy: 'avoid', streamState: (seed ^ 0x43414d50) >>> 0, serial: 0,
+    graceSec: fieldwork.F.camp_encounters.arrival_grace_sec, checkSec: 0,
+    cooldownSec: 0, exposureSec: 0, active: null, recap: null,
+  };
+}
+
+export function normalizeCampEncounterState(state: GameState): void {
+  const defaults = newCampEncounterState(state.seed);
+  const raw = state.fieldwork.campEncounters;
+  if (!raw || typeof raw !== 'object') {
+    state.fieldwork.campEncounters = defaults;
+    return;
+  }
+  if (!['avoid', 'defend', 'engage'].includes(raw.policy)) raw.policy = 'avoid';
+  for (const key of ['streamState', 'serial', 'graceSec', 'checkSec', 'cooldownSec', 'exposureSec'] as const) {
+    if (!Number.isSafeInteger(raw[key]) || raw[key] < 0) raw[key] = defaults[key];
+  }
+  raw.streamState >>>= 0;
+  raw.exposureSec = Math.min(raw.exposureSec, fieldwork.F.camp_encounters.exposure_cap_sec);
+  const active = raw.active;
+  if (active != null) {
+    const cell = active.origin;
+    const validCell = cell && Number.isSafeInteger(cell.q) && Number.isSafeInteger(cell.r)
+      && (cell.sub == null || Number.isSafeInteger(cell.sub)) && (cell.wild == null || Number.isSafeInteger(cell.wild));
+    const validGroup = Array.isArray(active.preparedGroup) && active.preparedGroup.every((mob) =>
+      mob && typeof mob.id === 'string' && typeof mob.speciesId === 'string'
+      && ['Small', 'Medium'].includes(mob.kind) && Number.isFinite(mob.hp) && mob.hp > 0
+      && Number.isFinite(mob.hpMax) && mob.hpMax >= mob.hp && Number.isSafeInteger(mob.zone));
+    const validActive = typeof active === 'object' && Number.isSafeInteger(active.id) && active.id > 0
+      && Number.isSafeInteger(raw.serial) && active.id <= raw.serial
+      && ['sounds', 'prowler', 'traveler', 'nest', 'herd', 'injured', 'discovered'].includes(active.kind)
+      && ['warning', 'choice', 'combat'].includes(active.stage) && validCell
+      && Number.isSafeInteger(active.warningSec) && active.warningSec >= 0
+      && Number.isSafeInteger(active.choiceSec) && active.choiceSec >= 0
+      && active.payload && typeof active.payload === 'object' && !Array.isArray(active.payload)
+      && validGroup && Array.isArray(active.participantIds)
+      && active.participantIds.every((id: unknown) => typeof id === 'string')
+      && (active.stage !== 'combat' || active.participantIds.length > 0 && active.preparedGroup.length === 0)
+      && (active.stage === 'combat' || !['sounds', 'prowler', 'nest', 'discovered'].includes(active.kind) || active.preparedGroup.length > 0)
+      && (active.stage === 'combat' || active.participantIds.length === 0);
+    if (!validActive) {
+      raw.active = null;
+      raw.cooldownSec = Math.max(raw.cooldownSec, fieldwork.F.camp_encounters.cooldown_sec);
+    }
+  }
+  if (typeof raw.recap !== 'string') raw.recap = null;
+}
+
+export function newFieldwork(seed = 0): FieldworkState {
   return {
     camp: null,
     freeRelocationsRemaining: fieldwork.F.camp.free_relocations,
@@ -58,6 +133,7 @@ export function newFieldwork(): FieldworkState {
     },
     skills: { mining: track(), woodcutting: track(), hunting: track(), cooking: track(), fishing: track(), smithing: track() },
     activeMeal: null,
+    campEncounters: newCampEncounterState(seed),
   };
 }
 
@@ -218,6 +294,7 @@ export function returnToCamp(state: GameState): { ok: boolean; why?: string } {
 
 export function fieldActionProblem(state: GameState, kind: 'mine' | 'grove' | 'fish'): string | null {
   if (!campHere(state)) return 'set Camp on this hex first';
+  if (state.fieldwork.campEncounters?.active?.kind === 'nest') return 'clear the nearby nest before gathering';
   if (state.hunting || state.group.length) return 'return to safe Camp before gathering';
   if (state.phase === 'camp' || state.dungeon || state.walk) return 'gathering is unavailable right now';
   if (kind === 'fish') {

@@ -31,6 +31,8 @@ export interface TreeNode {
 
 export interface TreeSpec {
   point_cost_per_rank: number;
+  /** How many of a branch's nodes are the shallow tier; the rest are deep. */
+  shallow_nodes: number;
   rank_tiers: { shallow: number[]; deep: number[] };
   branches: Record<string, { line: string; values?: number[]; name?: string; weapon?: string }[]>;
   graph: {
@@ -44,18 +46,33 @@ export interface TreeSpec {
   };
 }
 
-/** How many of a branch's nodes are the shallow tier; the rest are deep. */
-const SHALLOW_NODES = 14;
-const RANKS = 3;
+/**
+ * The spec's own shape, read before a node is built: the shallow boundary and the rank ladder come
+ * from the data, so a spec that lost a key would otherwise build a tree nobody asked for. Each
+ * refusal names the key that is wrong.
+ */
+function readSpec(spec: TreeSpec): { shallowNodes: number; ranks: number } {
+  const shallow = spec?.rank_tiers?.shallow;
+  const deep = spec?.rank_tiers?.deep;
+  if (!Array.isArray(shallow) || !Array.isArray(deep) || shallow.length === 0 || deep.length === 0)
+    throw new Error('tree spec: rank_tiers.shallow and rank_tiers.deep must both be nonempty arrays');
+  if (shallow.length !== deep.length)
+    throw new Error(`tree spec: rank_tiers.shallow (${shallow.length}) and rank_tiers.deep (${deep.length}) must have the same length`);
+  const shallowNodes = spec.shallow_nodes;
+  if (!Number.isInteger(shallowNodes) || shallowNodes < 0)
+    throw new Error('tree spec: shallow_nodes must be a whole number of nodes, zero or more');
+  return { shallowNodes, ranks: shallow.length };
+}
 
 export function createTree(spec: TreeSpec, mods: any) {
+  const { shallowNodes, ranks } = readSpec(spec);
   const maxOf = (id: string) => Number((mods.mods.find((m: any) => m.id === id) || {}).max ?? 0);
   const cost = spec.point_cost_per_rank;
 
   const nodes: TreeNode[] = [];
   for (const [branch, list] of Object.entries(spec.branches)) {
     list.forEach((entry, i) => {
-      const tier: TreeNode['tier'] = i < SHALLOW_NODES ? 'shallow' : 'deep';
+      const tier: TreeNode['tier'] = i < shallowNodes ? 'shallow' : 'deep';
       const mult = spec.rank_tiers[tier];
       let prev = 0;
       // a node never grants zero and a rank never grants less than the one below it: a 3%-max line
@@ -75,7 +92,7 @@ export function createTree(spec: TreeSpec, mods: any) {
         x: spec.graph.start.x + Math.cos(angle) * radius,
         y: spec.graph.start.y + Math.sin(angle) * radius,
         needs: i === 0 ? ['start'] : [`${branch}.${i}`],
-        ranks: RANKS, points: RANKS * cost,
+        ranks, points: ranks * cost,
       });
     });
   }
@@ -107,5 +124,5 @@ export function createTree(spec: TreeSpec, mods: any) {
   const pointsSpent = (ranks: Record<string, number> | undefined) =>
     Object.entries(ranks || {}).reduce((s, [id, r]) => s + (byId[id] ? Math.min(byId[id].ranks, Math.max(0, r)) * cost : 0), 0);
 
-  return { nodes, byId, branches, graph: spec.graph, cost, ranks: RANKS, shallowNodes: SHALLOW_NODES, linesOf, pointsSpent };
+  return { nodes, byId, branches, graph: spec.graph, cost, ranks, shallowNodes, linesOf, pointsSpent };
 }

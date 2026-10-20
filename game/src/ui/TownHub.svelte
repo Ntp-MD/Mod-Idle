@@ -77,10 +77,10 @@
       <p class="sub">
         zone {town.zone} · {eng.zoneById(town.zone).name} · Innate Element {town.innate.join(' / ')} ·
         standing Tier {standing.tier} ({(standing.share * 100).toFixed(1)}% of zone budget) ·
-        {standing.kills.toLocaleString()} zone kills ·
+        {standing.kills.toLocaleString()} zone kills + {standing.helpCredit.toLocaleString()} Camp aid = {standing.progress.toLocaleString()} Standing progress ·
         {standing.budget > 0
           ? standing.next
-            ? `${standing.next.remaining.toLocaleString()} more to Tier ${standing.next.name} (${standing.next.kills.toLocaleString()} total)`
+            ? `${standing.next.remaining.toLocaleString()} more to Tier ${standing.next.name} (${standing.next.requiredProgress.toLocaleString()} progress)`
             : 'all Standing tiers reached'
           : 'Standing unavailable'}
       </p>

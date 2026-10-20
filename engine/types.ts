@@ -29,8 +29,24 @@ export interface StatCfg {
   note: string;
 }
 
-/** Named engine constants — a map by nature, so it stays an index rather than 28 hand-copied keys. */
-export type KMap = Record<string, number>;
+/**
+ * The engine's named constants — the keys `engine.json` `K` must carry. The list is the contract:
+ * a constant the engine reads but the data dropped must fail the loader, and a name the engine
+ * never declared must fail the compiler, instead of reading as `undefined` inside a formula.
+ */
+export const K_KEYS = [
+  'K_STR', 'K_INT', 'K_ELEM', 'K_VIT_HP', 'K_VIT_REGEN', 'K_INT_MP', 'K_INT_MREGEN', 'K_AGI_ASPD',
+  'K_WIS_CDR', 'K_WIS_ES', 'K_DEX_ACC', 'K_DEX_ALIGN', 'K_MOB_RES', 'K_VIT_STUNREC', 'K_LCK_CRIT',
+  'K_LCK_PDOGE', 'K_LCK_DROP', 'K_STR_WEIGHT', 'K_PDOGE', 'K_CRIT_CAP', 'K_CRIT_OVERFLOW',
+  'K_STUN_PER_ALIGN', 'K_EVASION', 'K_ARMOUR', 'armour_divisor', 'mob_damage_divisor',
+  'K_MOB_PS_STAT', 'K_BLEED', 'K_BLEED_CHANCE', 'bleed_time_sec', 'K_MOB_DODGE',
+] as const;
+
+/** One named engine constant, by the name the data gives it. */
+export type KKey = (typeof K_KEYS)[number];
+
+/** The constant map: a finite set of named numbers, not an open index. */
+export type KMap = Record<KKey, number>;
 
 export interface Caps {
   /** No Cap (owner ruling) — `null` is the data's word for "keeps climbing". */
@@ -157,6 +173,20 @@ export interface RebirthStoneSource {
   note?: string;
 }
 
+/** The bag filter's own rules (`engine.json` `loot.filter`) — the margin and the two defaults. */
+export interface LootFilterCfg {
+  /** A swap must beat what is worn in the same slot by this much to be worth dissolving the old piece. */
+  upgrade_margin_pct: number;
+  rules: {
+    /** A fresh character keeps every drop and dissolves nothing. */
+    default_enabled: boolean;
+    /** Whether a missing Element counts as an upgrade. */
+    default_keep_missing_element: boolean;
+    note?: string;
+  };
+  note?: string;
+}
+
 export interface LootCfg {
   bands: Record<string, LootBand>;
   base_drop_chance: number;
@@ -180,6 +210,11 @@ export interface LootCfg {
   rebirth_stone_sources: RebirthStoneSource;
   /** Line 1's value scale. */
   frame_mod: FrameModCfg;
+  /** The window's thirds: the roll under the first cut is the top third (T1), under the second the
+   *  middle (T2), above it the bottom (T3). The odds every Mod shares. */
+  tier_split: [number, number];
+  /** The bag filter's margin and defaults — the player's own threshold, never a second copy of a number. */
+  filter: LootFilterCfg;
   /** A variant's lean: the stream its row tilts the three collectible streams toward (`shift_pct`). */
   variant_lean: { shift_pct: number; categories: string[]; note?: string };
 }
@@ -656,6 +691,13 @@ export interface FieldworkCfg {
     }[];
   };
   camp: { free_relocations: number; relocate_ore: number; relocate_timber: number };
+  camp_encounters: {
+    arrival_grace_sec: number; check_interval_sec: number; chance_per_check: number;
+    warning_sec: number; choice_sec: number; cooldown_sec: number;
+    exposure_threshold_sec: number; exposure_cap_sec: number; exposure_decay_per_sec: number;
+    kinds: ('sounds' | 'prowler' | 'traveler' | 'nest' | 'herd' | 'injured' | 'discovered')[];
+    barter_food: number; aid_food: number; aid_potion_count: number;
+  };
   wild_site_index: { dungeon: number; mine: number; grove: number };
   actions: Record<'mine' | 'grove' | 'fish', {
     resource: string; yield: number; interval_sec: number; xp: number; mastery_xp: number;
@@ -711,6 +753,13 @@ export interface InventoryCfg {
   note: string;
 }
 
+/** The Max HP press lines (`engine.json` `max_hp_press`) — what a press takes of a pool it reads. */
+export interface MaxHpPressCfg {
+  /** The share a Boss or Unique takes of the target's own maximum pool. */
+  boss_pct: number;
+  note?: string;
+}
+
 export interface EngineData {
   meta: any;
   stat: StatCfg;
@@ -748,6 +797,7 @@ export interface EngineData {
   save: any;
   junk: any;
   aoe: any;
+  max_hp_press: MaxHpPressCfg;
   craft: CraftCfg;
   town_shared: TownShared;
   f_rows_carried: any[];
@@ -781,7 +831,8 @@ export interface SkillRow {
   modelled_by?: string;
   rules?: string[];
   kind?: string;
-  duration?: number;
+  /** The window the row grants, in the data's own words (`"8 sec"`) — the sim reads the seconds off it. */
+  duration?: string;
   /** The reserve tier name this aura draws from (`reserve_tiers`). */
   reserve?: string;
   effects?: { stat: string; element?: string; op: string; value: number; subject?: string; condition?: string; cap?: number }[];
@@ -803,6 +854,12 @@ export interface SkillsData {
       /** The existing data key names the step shared by typed Mana and HP skill costs. */
       mana_level_step_pct?: number;
       cast_reference?: { cdr_pct: number; ladder_pct: number };
+      /** The duplicate ladder: each rung's cooldown reduction and the duplicates it costs. */
+      ladder: { rows: { step: number; cdr: number; cost: number }[]; note?: string };
+      /** How many duplicates convert into one of a chosen skill. */
+      conversion_duplicates: number;
+      /** What a press of the weapon's own skill group is worth: 0.25 is +25%. */
+      group_bonus: number;
     };
     /** The three numbers a conditional row's leg opens at (`tools/data/skills.json` `cast_conditions`). */
     cast_conditions: { hp_below_pct_default: number; mana_floor_pct_default: number; min_targets_default: number };
@@ -834,5 +891,7 @@ export interface BasesData {
 /** A town record (`tools/data/town.json`) — only the fields the collector reads. */
 export interface TownData {
   collector_sets: { id: string; settlement: string; pieces: string[]; quality: string; reward: string; pays_gold: boolean }[];
-  repeatable: { id: string; m: number; m_min?: number; m_max?: number }[];
+  /** A repeatable line prices itself one way or another: a fixed `m`, a band (`m_min`/`m_max`), or
+   *  a per-block rate. The row that has none of them is not a price — it is a rule. */
+  repeatable: { id: string; m?: number; m_min?: number; m_max?: number; m_per_block?: number }[];
 }

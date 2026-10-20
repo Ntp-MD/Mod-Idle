@@ -225,6 +225,49 @@ describe('the save schema and the account', () => {
     expect(m.collector.done).toEqual({});
   });
 
+  it('backfills Camp encounter and help Standing state without changing the save schema', () => {
+    const old = newGame(541);
+    delete (old.fieldwork as any).campEncounters;
+    delete (old.town as any).helpCredit;
+    const restored = migrate(old, 16);
+    expect(restored.fieldwork.campEncounters).toMatchObject({
+      policy: 'avoid', streamState: (541 ^ 0x43414d50) >>> 0, serial: 0, active: null,
+    });
+    expect(restored.town.helpCredit).toEqual({});
+    expect(SCHEMA_VERSION).toBe(17);
+  });
+
+  it('round-trips active Camp encounter state and aid credit', () => {
+    const state = newGame(542);
+    state.fieldwork.campEncounters = {
+      ...state.fieldwork.campEncounters, policy: 'defend', serial: 3, exposureSec: 300,
+      active: {
+        id: 3, kind: 'traveler', stage: 'choice', origin: { q: 0, r: 0, sub: null, wild: null },
+        warningSec: 0, choiceSec: 21, payload: { foodId: 'forest_nuts', amount: 2 },
+        preparedGroup: [], participantIds: [],
+      },
+    };
+    state.town.helpCredit['eastgate'] = 25;
+    const restored = importJson(exportJson(state));
+    expect(restored.fieldwork.campEncounters).toEqual(state.fieldwork.campEncounters);
+    expect(restored.town.helpCredit).toEqual(state.town.helpCredit);
+  });
+
+  it('drops a corrupt Camp encounter without paying, spawning or clearing unrelated progress', () => {
+    const state = newGame(543);
+    state.fieldwork.campEncounters.serial = 4;
+    state.fieldwork.campEncounters.active = {
+      id: 4, kind: 'prowler', stage: 'warning', origin: { q: 0, r: 0, sub: null, wild: null },
+      warningSec: 10, choiceSec: 45, payload: {}, preparedGroup: [] as any, participantIds: [],
+    };
+    state.town.helpCredit['eastgate'] = 8;
+    const migrated = migrate(JSON.parse(JSON.stringify(state)));
+    expect(migrated.fieldwork.campEncounters.active).toBeNull();
+    expect(migrated.fieldwork.campEncounters.cooldownSec).toBeGreaterThan(0);
+    expect(migrated.group).toEqual(state.group);
+    expect(migrated.town.helpCredit['eastgate']).toBe(8);
+  });
+
   it('re-stamps a pre-level piece: it gains its band\u2019s first level and keeps every value', () => {
     const v8 = newGame(53);
     // a v8 piece as the old axis wrote it: a Rarity, a band, and the old slice order (T1 = the bottom)

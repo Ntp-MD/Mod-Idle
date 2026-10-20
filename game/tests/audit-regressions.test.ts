@@ -37,6 +37,18 @@ const sheet = (over: Partial<Character> = {}): Character =>
 // buildCharacter with no points reads the reference line; the over rides land on top
 const char = (over: Partial<Character>): Character => ({ ...sheet({}), ...over } as Character);
 
+/** The section a `<h2>` opens. A heading that moved, or a slice that finds nothing, fails here
+ *  instead of asserting against an empty string. */
+const sectionOf = (html: string, heading: string): string => {
+  const at = html.indexOf(`<h2>${heading}</h2>`);
+  expect(at, heading).toBeGreaterThan(-1);
+  const end = html.indexOf('</section>', at);
+  expect(end, heading).toBeGreaterThan(at);
+  const body = html.slice(at, end);
+  expect(body.length, heading).toBeGreaterThan(`<h2>${heading}</h2>`.length);
+  return body;
+};
+
 describe('mob-side DoT pays its full duration', () => {
   it('a 5-sec bleed pays 5 ticks — 0.70 of the hit, not 0.56', () => {
     const store = newMobStatusStore();
@@ -322,14 +334,16 @@ describe('the wiki overview reads the live slot and mob-health contracts', () =>
   it('does not print a missing body-class health multiplier as ×—', () => {
     const world = PAGES.find((p) => p.file === 'world.html')!.body.join('\n');
     const combat = PAGES.find((p) => p.file === 'combat.html')!.body.join('\n');
-    const bodyAt = world.indexOf('<h2>Body classes</h2>');
-    const body = world.slice(bodyAt, world.indexOf('</section>', bodyAt));
-    const eliteAt = combat.indexOf('<h2>Elite and Boss</h2>');
-    const ranks = combat.slice(eliteAt, combat.indexOf('</section>', eliteAt));
+    const body = sectionOf(world, 'Body classes');
+    const ranks = sectionOf(combat, 'Elite, Unique and Boss');
     expect(body).not.toContain('<th>Health</th>');
     expect(body).not.toContain('×—');
     expect(ranks).not.toContain('×—');
-    expect(ranks).toContain('profile Core');
+    // A body class carries no Health of its own: Boss and Unique take theirs from their own Core
+    // profile with no rank multiplier, and Elite multiplies the complete Health of its variant.
+    expect(ranks).toContain('BaseHP(L, Boss Core)');
+    expect(ranks).toContain('BaseHP(zoneTop, Unique Core)');
+    expect(ranks).toContain('BaseHP(L, Variant Core) ×');
   });
 });
 

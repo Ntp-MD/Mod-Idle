@@ -24,6 +24,8 @@ export interface DestinationAction {
   label: string;
   disabled: boolean;
   reason: string;
+  /** What an enabled action will pause while it runs; the card states it before the press. */
+  warn?: string;
 }
 
 export const destinationSite = (dest: MapDestination) => dest.kind === 'wild'
@@ -39,8 +41,16 @@ export function destinationPrimary(state: GameState, dest: MapDestination, writa
     state.walk ? 'Finish the current walk first.' : state.phase === 'camp' ? 'Recover at Camp before traveling.' : '');
   if (dest.kind === 'town') return action('town', 'Open town');
   const trail = trailSiteAt(currentCell(state));
-  if (trail && !state.mapJournal?.claimedSites.includes(trail.id)) return action('investigate', 'Investigate site',
-    state.dungeon ? 'Leave the dungeon first.' : state.phase === 'camp' ? 'Recover at Camp first.' : state.group.length ? 'Finish the fight first.' : '');
+  if (trail && !state.mapJournal?.claimedSites.includes(trail.id)) {
+    const paused = [state.patrol.active ? 'Patrol' : '', state.hunting ? 'hunting' : '',
+      state.fieldwork.action ? 'gathering' : '', state.autoReturn.phase !== 'idle' ? 'Auto-Return' : ''].filter(Boolean);
+    return {
+      ...action('investigate', 'Investigate site',
+        state.dungeon ? 'Leave the dungeon first.' : state.phase === 'camp' ? 'Recover at Camp first.'
+          : state.group.length ? 'Finish the fight first.' : ''),
+      warn: paused.length ? `Claiming this site pauses ${paused.join(' and ')}.` : '',
+    };
+  }
   const site = destinationSite(dest);
   if (site === 'dungeon') {
     if (state.dungeon) return action('retreat', 'Retreat');

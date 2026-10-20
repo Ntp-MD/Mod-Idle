@@ -4,15 +4,47 @@
   import { ownerOf } from '../sim/road';
   import { settlementById } from '../sim/town';
   import { mapKnowledge, trailSites, trailSiteKind } from '../sim/map-exploration';
-  let { state, writable, onSelect, onStart, onStop, onClear, onMove } : {
+  import type { CampEncounterAction, CampEncounterPolicy } from '../sim/camp-encounters';
+  let { state, writable, onSelect, onStart, onStop, onClear, onMove, onEncounter, onPolicy } : {
     state: GameState; writable: boolean;
     onSelect: (hex: { q: number; r: number }) => void;
     onStart: () => void; onStop: () => void; onClear: () => void;
     onMove: (index: number, direction: -1 | 1) => void;
+    onEncounter: (id: number, action: CampEncounterAction) => void;
+    onPolicy: (policy: CampEncounterPolicy) => void;
   } = $props();
   const sites = $derived(trailSites.filter(site => mapKnowledge(state, site) !== 'unknown'));
   const known = $derived(new Set([...(state.mapJournal?.scouted || []), ...(state.mapJournal?.visited || [])]).size);
   const activityName = (kind?: string) => kind ? ({ mine: 'Mining', grove: 'Woodcutting', fish: 'Fishing' } as Record<string, string>)[kind] || kind : '';
+  const encounter = $derived(state.fieldwork.campEncounters.active);
+  const encounterName = $derived(encounter ? ({ sounds: 'A sound nearby', prowler: 'A Mob approaches', traveler: 'A traveler at Camp', nest: 'A nest near the worksite', herd: 'Herd tracks', injured: 'An injured traveler', discovered: 'Your Camp was found' } as const)[encounter.kind] : '');
+  const encounterActions = $derived.by((): { label: string; action: CampEncounterAction; disabled?: boolean }[] => {
+    if (!encounter || encounter.stage === 'combat') return [];
+    if (encounter.kind === 'sounds') return encounter.stage === 'warning'
+      ? [{ label: 'Investigate', action: 'investigate' }, { label: 'Stay quiet', action: 'quiet' }]
+      : [{ label: 'Fight', action: 'fight' }, { label: 'Withdraw', action: 'quiet' }];
+    if (encounter.kind === 'prowler') return [
+      { label: 'Fight', action: 'fight' }, { label: 'Secure supplies', action: 'secure' },
+    ];
+    if (encounter.kind === 'discovered') return [
+      { label: 'Fight', action: 'fight' }, { label: 'Shelter', action: 'shelter' },
+    ];
+    if (encounter.kind === 'nest') return [
+      { label: 'Clear the nest', action: 'fight' }, { label: 'Wait it out', action: 'pause' },
+    ];
+    if (encounter.kind === 'traveler') return [
+      { label: 'Listen to local news', action: 'listen' },
+      { label: 'Trade food for ore', action: 'trade-ore', disabled: !(encounter.payload.materials as string[] || []).includes('ore') },
+      { label: 'Trade food for timber', action: 'trade-timber', disabled: !(encounter.payload.materials as string[] || []).includes('timber') },
+      { label: 'Decline', action: 'decline' },
+    ];
+    if (encounter.kind === 'herd') return [{ label: 'Follow the tracks', action: 'follow' }, { label: 'Let them pass', action: 'dismiss' }];
+    return [
+      { label: `Help with ${encounter.payload.foodAmount} provisions`, action: 'help-food', disabled: !encounter.payload.foodId || (state.fieldwork.foods[String(encounter.payload.foodId)] || 0) < Number(encounter.payload.foodAmount) },
+      { label: `Give ${encounter.payload.potionName || 'an HP draught'}`, action: 'help-potion', disabled: !encounter.payload.potionName || (state.farm.potions[String(encounter.payload.potionName)] || 0) < Number(encounter.payload.potionAmount) },
+      { label: 'Decline', action: 'decline' },
+    ];
+  });
 </script>
 
 <details class="map-tools-section" name="map-tools-sections" open>
@@ -21,6 +53,35 @@
     <p class="text-note">{state.mapJournal?.visited.length || 0} explored · {known} known. Approach landmarks to scout their roster and supplies.</p>
     {#if state.fieldwork.camp}
       <button class="btn btn-quiet" type="button" onclick={() => onSelect(state.fieldwork.camp!.cell)}>Locate Field Camp{state.fieldwork.action ? ` · ${activityName(state.fieldwork.action.kind)}` : ''}</button>
+      <label class="camp-policy">When Camp is threatened
+        <select aria-label="Camp threat policy" value={state.fieldwork.campEncounters.policy} disabled={!writable}
+          onchange={(event) => onPolicy(event.currentTarget.value as CampEncounterPolicy)}>
+          <option value="avoid">Avoid fights</option><option value="defend">Defend Camp</option><option value="engage">Engage early</option>
+        </select>
+      </label>
+    {/if}
+    {#if encounter}
+      <section class="camp-encounter" aria-label="Camp encounter" aria-live="polite">
+        <h3>{encounterName}</h3>
+        <p>{encounter.stage === 'warning' ? `Warning · ${encounter.warningSec}s · ${state.fieldwork.campEncounters.policy} policy`
+          : encounter.stage === 'choice' ? `Choose before the threat reaches Camp · ${encounter.choiceSec}s`
+            : `Fighting · ${encounter.participantIds.length} group members`}</p>
+        {#if encounter.kind === 'traveler'}<p>Offer: {encounter.payload.foodAmount} regional provisions for ore or timber.</p>{/if}
+        {#if encounter.kind === 'sounds' && encounter.stage === 'choice'}
+          <p>Tracks reveal {E.mob.species.find((sp: any) => sp.id === encounter!.payload.species)?.name || 'a nearby Species'}.</p>
+        {/if}
+        {#if encounter.kind === 'herd'}<p>Tracks lead toward a known Expedition subzone. Following starts an ordinary hunt.</p>{/if}
+        {#if encounter.kind === 'injured'}<p>Helping earns {encounter.payload.credit} Standing progress for {encounter.payload.settlementId}.</p>{/if}
+        {#if encounter.stage === 'combat'}<p>Stay or use the ordinary retreat controls. Any rewards already earned are kept.</p>
+        {:else}<div class="camp-encounter-actions">
+          {#each encounterActions as option}
+            <button class="btn btn-quiet" type="button" disabled={!writable || option.disabled}
+              onclick={() => onEncounter(encounter!.id, option.action)}>{option.label}</button>
+          {/each}
+        </div>{/if}
+      </section>
+    {:else if state.fieldwork.campEncounters.recap}
+      <p class="text-note" aria-live="polite">{state.fieldwork.campEncounters.recap}</p>
     {/if}
     {#if state.autoReturn.phase !== 'idle'}<p class="text-accent">Auto-Return · {state.autoReturn.phase === 'to-stop' ? 'resuming Patrol' : state.autoReturn.phase === 'waiting' ? 'waiting for online travel' : 'returning to town'}</p>{/if}
     <ol class="journey-stops" aria-label="Patrol itinerary">
@@ -58,6 +119,10 @@
 <style>
   .map-journey, .journey-sites, .journey-stops { display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .map-journey { padding-block: var(--spacing-sm); }
+.camp-policy { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); }
+.camp-encounter { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-card); background: var(--inset); }
+.camp-encounter h3, .camp-encounter p { margin: 0; }
+.camp-encounter-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
   .map-journey p { margin: 0; line-height: 1.4; }
   .journey-stops { padding: 0; margin: 0; list-style: none; }
   .journey-stops li { display: flex; align-items: center; gap: var(--spacing-xs); }

@@ -60,6 +60,22 @@ describe('the passive tree', () => {
     expect(model.nodes.every((node) => node.ranks === 2 && node.values.length === 2)).toBe(true);
   });
 
+  it('refuses a tree spec it cannot build, and names the key that is wrong', () => {
+    const spec = structuredClone(TREE_SPEC) as any;
+    const noBoundary = structuredClone(spec);
+    delete noBoundary.shallow_nodes;
+    expect(() => createTree(noBoundary, MODS)).toThrow(/shallow_nodes/);
+
+    const noTiers = structuredClone(spec);
+    noTiers.rank_tiers.shallow = [];
+    expect(() => createTree(noTiers, MODS)).toThrow(/rank_tiers/);
+
+    const raggedTiers = structuredClone(spec);
+    raggedTiers.rank_tiers.deep = [0.2, 0.4];
+    expect(() => createTree(raggedTiers, MODS)).toThrow(/same length/);
+  });
+
+
   it('refuses a rank with no point banked and one past the node cap', () => {
     const s = newGame();
     s.player.treePoints = 0;

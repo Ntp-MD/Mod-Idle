@@ -615,8 +615,10 @@ function runChecks() {
   if (!(evLo < evRef && evRef < evHi)) evProblems.push(`species evasion is degenerate: range ${f0(evLo)}-${f0(evHi)} does not straddle the reference ${f0(evRef)}`);
   // The two hit anchors are pacing targets the owner reads by eye, not conditions: they move with
   // any balance pass and only the eye can say whether the new figure is the one they meant.
+  // What is a condition is the COPY: a published figure that no longer agrees with the engine it was
+  // published from is a stale copy, and `--sync` is the repair.
   if (Math.round(DERIVED.ref_build_hit_pct) !== E.build.hit_chance_pct) evProblems.push(`build.hit_chance_pct ${E.build.hit_chance_pct} vs engine ${Math.round(DERIVED.ref_build_hit_pct)} — run \`node tools/check.ts --sync\` to re-publish it`);
-  soft('X21', evProblems.length === 0,
+  add('X21', evProblems.length === 0,
     evProblems.length ? evProblems.join(' · ')
       : `reference Evasion = its authored Core Dex × K_EVASION ${K.K_EVASION} × body base percent (Small +20% · Medium +10% · Large 0%) · reference (mean form, Medium body) ${f1(evRef)} · same-level no-gear hit chances ${f1(Math.min(...hits))}-${f1(Math.max(...hits))}% · a Full-Dex player still eats ${f1(mobHitFullDex)}% of the top accuracy tier before Evasion`);
 
@@ -883,7 +885,10 @@ function runChecks() {
   if (IV.gold_uses_slot !== false) ivp.push('gold must not consume a slot');
   const gearHr = L.bands.high.upgrades_per_hr;                       // kept gear/hr = measured upgrades (F4)
   const gearFill = IV.character_slots / gearHr;
-  soft('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
+  // The bag's own rules are conditions, not pacing: a bag with no size, a missing stack size, a
+  // retired key or a wrong overflow is a broken contract. The hours a bag takes to fill are the
+  // measured figure, and they stay in the line below.
+  add('X34', ivp.length === 0, ivp.length ? ivp.join(' · ')
     : `the bag holds ${IV.character_slots} slots — gear pieces at one a slot fills it in ~${f1(gearFill)} hr of kept gear at the high band's measured ${gearHr} upgrades/hr, and stacks share the same count: stone (${IV.stack_size.stone}/slot, weightless), herb ${IV.stack_size.herb}/slot, potion ${IV.stack_size.potion}/slot, material ${IV.stack_size.material}/slot, food ${IV.stack_size.food}/slot; gold takes no slot · full = pickups pause, nothing auto-converts, nothing is deleted · stash + gear craft are Settlement-only, meal cooking is Camp-only`);
 
   // Junk rarity values preserve the reference mint; every rarity must reproduce the published
@@ -1011,7 +1016,13 @@ function runChecks() {
       : `each Species' normal Variants share one archetype lean and its Uniques carry 'none': ${leaned} leans checked (${normalLeaned} normal rows), each lean raises its stream and conserves ${sum(sample).toFixed(2)} expected drops/kill (mob.variant_drops · loot.variant_lean)`);
   }
 
-  // The AoE rule is data now, and its shape must stay a real trade: lose at 1 target, win at the Cap
+  // The AoE rule is data now, and its shape must stay a real trade: lose at 1 target, win at the Cap.
+  // What is a condition and what is a measurement:
+  //  - the shape of the fields — a percentage, a target cap, and a mana multiplier that really is a
+  //    cost (below 1x it stops being one) — is a condition;
+  //  - the trade the block exists to hold (AoE loses at one target, wins at the Cap) is the owning
+  //    rule (skill-pool-system.md), so it is a condition too;
+  //  - the damage-per-mana figures are measurements, and they are printed, not gated.
   {
     const A = E.aoe || {};
     const p = [];
@@ -1021,7 +1032,7 @@ function runChecks() {
     const dpm = (n: number) => (Math.min(n, A.target_cap) * A.per_target_pct) / 100 / A.mana_mult;
     if (!(dpm(1) < 1)) p.push('aoe must lose to single-target damage per mana at 1 target');
     if (!(dpm(A.target_cap) > 1)) p.push('aoe must beat single-target damage per mana at the Cap');
-    soft('X40', p.length === 0, p.length ? p.join(' · ')
+    add('X40', p.length === 0, p.length ? p.join(' · ')
       : `the AoE rule is data: ${A.per_target_pct}% per target · Cap ${A.target_cap} · mana ×${A.mana_mult} → damage per mana ${f2(dpm(1))}× / ${f2(dpm(2))}× / ${f2(dpm(A.target_cap))}×, so AoE loses at 1 target and wins at the Cap (skill-pool-system.md)`);
   }
 

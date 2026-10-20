@@ -147,6 +147,7 @@
     {/if}
   </div>
   {#if primary.reason}<p class="text-note" role="status">{primary.reason}</p>{/if}
+  {#if !primary.disabled && primary.warn}<p class="text-note">{primary.warn}</p>{/if}
   {#if notice && notice !== intel?.recentEvent}<p class="text-note">{notice}</p>{/if}
   {#if intel}
     <div class="dest-intel" aria-label="Destination intelligence">

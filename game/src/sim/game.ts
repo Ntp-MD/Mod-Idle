@@ -34,6 +34,7 @@ import {
   newMobStatusStore, applyWeaponRiders, stepMobParts, holdPoison, forgetDead as forgetMobStatus,
   modsOn as statusModsOn, targetMods, holdsCondition,
 } from './mobStatus';
+import { tickCampEncounters, campEncounterEligible } from './camp-encounters';
 import {
   newSkillState, tickSkills, castOnce, paySkillXp, grantSkill, buffNeedsRecast, skillCd, usableMana, spendableMana, buffRuleUp,
   skillLevel, triggerAuras, type TriggerAura,
@@ -162,7 +163,7 @@ export function newGame(seed = 20260101): GameState {
     nextSnapshotAt: 0,
     town: newTown(),
     farm: newFarm(),
-    fieldwork: newFieldwork(),
+    fieldwork: newFieldwork(seed),
     alchemy: newAlchemyLedger(E.salvage.alchemy.outputs_per_tier_stone),
     zone: E.opening.settlement_zone as number,
     group: [],
@@ -256,7 +257,8 @@ function pickBody(rng: () => number, bodies: string[], pack: Record<string, numb
   return bodies[bodies.length - 1];
 }
 
-function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null): Mob {
+function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null,
+  options: { allowWildUnique?: boolean } = {}): Mob {
   const z = eng.zoneById(zoneId);
   const zonePool = speciesInZone(zoneId);
   // a sub-zone is what a spawn table rolls against: it names its own species pool and one Element from the
@@ -303,7 +305,7 @@ function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 
     variant = rollVariant(species);
     // A species may have no wild unique or several; choose only after its rare proc lands.
     const uniques = uniquesInSpecies(species.id);
-    if (uniques.length && rng() < (E.loot.unique_chance || 0)) {
+    if (options.allowWildUnique !== false && uniques.length && rng() < (E.loot.unique_chance || 0)) {
       rank = 'unique';
       bossProfile = uniques.length === 1 ? uniques[0] : pick(rng, uniques);
       body = 'boss';
@@ -918,10 +920,20 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   if (opts.writer === false) return s;
   const pausedAtStart = !!deliveryPauseReason(s);
   const rng = mulberry32(s.rngState++);
+  /* The Camp gate is read before the world moves, so a walk that ends, a Push that recovers or a
+     fight that clears this second cannot open a Camp event on the same tick. */
+  const campEligibleAtStart = campEncounterEligible(s);
   const result = tickWorld(s, statuses, opts, rng);
   if (opts.online !== false) recordMapDiscovery(result);
   tickDeliveries(result, rng, opts.online !== false, pausedAtStart, { writer: true });
   tickBlackMarket(result, rng, { writer: true }, opts.online !== false);
+  tickCampEncounters(result, opts.online !== false, (zone, subzone, campRng) => {
+    const [lo, hi] = eng.groupRangeOf(zone, subzone);
+    const size = intBetween(campRng, lo || 1, hi || lo || 1);
+    const group = Array.from({ length: size }, () => spawnMob(campRng, zone, 'normal', undefined, subzone,
+      { allowWildUnique: false }));
+    return group.sort((a, b) => (a.line === 'front' ? -1 : 1) - (b.line === 'front' ? -1 : 1));
+  }, { eligibleAtStart: campEligibleAtStart });
   return result;
 }
 

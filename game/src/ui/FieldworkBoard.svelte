@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fieldwork } from '../engine/client';
-  import { activeMeal, canCook, fieldHarvestAmount, fieldMasteryLevel, fieldSkillLevel } from '../sim/fieldwork';
+  import { activeMeal, canCook, fieldActionProblem, fieldHarvestAmount, fieldMasteryLevel, fieldSkillLevel } from '../sim/fieldwork';
   import type { GameState } from '../sim/types';
   import { stackIcon, icon } from '../icon';
 
@@ -100,6 +100,8 @@
   const canSetCamp = $derived(!inTown && !busy && !recovering && !gameState.dungeon);
   const campMoveLabel = $derived(gameState.fieldwork.freeRelocationsRemaining > 0 ? 'Move Camp · free' : `Move Camp · ${fieldwork.F.camp.relocate_ore} ore · ${fieldwork.F.camp.relocate_timber} timber`);
   const siteAction = $derived(site === 'mine' ? 'mine' : site === 'grove' ? 'grove' : null);
+  const gatheringProblem = $derived(siteAction ? fieldActionProblem(gameState, siteAction) : null);
+  const fishingProblem = $derived(fieldActionProblem(gameState, 'fish'));
   const fishingId = $derived(regional && fieldwork.F.fishing.foods.includes(regional.food) ? regional.food : null);
   const activityTitle = $derived(site === 'mine' ? 'Mine' : site === 'grove' ? 'Rare Grove' : site === 'hunt' ? 'Hunting Ground' : site === 'dungeon' ? 'Dungeon Entrance' : 'Field');
   const activityMark = $derived(site === 'mine' ? pickIcon : site === 'grove' ? treeIcon : site === 'hunt' ? meatIcon : tentIcon);
@@ -218,7 +220,7 @@
           {#if gameState.fieldwork.action?.kind === siteAction}
             <button class="btn btn-quiet" onclick={onstop}>Stop gathering</button>
           {:else}
-            <button class="btn btn-quiet" disabled={!campHere || gameState.hunting || recovering} onclick={() => onstart(siteAction)} title={campHere ? '' : 'Set Camp on this hex to gather'}>
+            <button class="btn btn-quiet" disabled={!!gatheringProblem} onclick={() => onstart(siteAction)} title={gatheringProblem || 'Gather at your Camp'}>
               {siteAction === 'mine' ? 'Start mining' : 'Start woodcutting'}
             </button>
           {/if}
@@ -226,7 +228,7 @@
           {#if gameState.fieldwork.action?.kind === 'fish'}
             <button class="btn btn-quiet" onclick={onstop}>Stop fishing</button>
           {:else}
-            <button class="btn btn-quiet" disabled={gameState.hunting || recovering} onclick={() => onstart('fish')}>Start fishing · {fieldwork.foodById[fishingId]?.name}</button>
+            <button class="btn btn-quiet" disabled={!!fishingProblem} title={fishingProblem || 'Fish at your Camp'} onclick={() => onstart('fish')}>Start fishing · {fieldwork.foodById[fishingId]?.name}</button>
           {/if}
         {/if}
       </div>

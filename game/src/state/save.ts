@@ -8,7 +8,7 @@ import { normalizeExplorationState } from '../sim/exploration';
 import { normalizeMapJournal } from '../sim/map-exploration';
 import { newFarm, QUICKBAR_SLOTS } from '../sim/farm';
 import { slotsAvailable, slotsUsed } from '../sim/slots';
-import { newFieldwork } from '../sim/fieldwork';
+import { newFieldwork, normalizeCampEncounterState } from '../sim/fieldwork';
 import { newPresets } from '../sim/presets';
 import { newCollector, newGrants } from '../sim/collector';
 import { newFilter, refresh as refreshFilter } from '../sim/filter';
@@ -17,7 +17,7 @@ import { buildCharacter } from '../sim/player';
 import { newCurses } from '../sim/curse';
 import { newMobStatusStore } from '../sim/mobStatus';
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
-import { E, BASES, eng, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
+import { E, TOWN, BASES, eng, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
 import { road } from '../sim/road';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
@@ -548,6 +548,11 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     delete (s as any).zoneFocus;
   }
   if (!s.town) s.town = newTown();
+  s.town.helpCredit ||= {};
+  if (typeof s.town.helpCredit !== 'object' || Array.isArray(s.town.helpCredit)) s.town.helpCredit = {};
+  const settlements = new Set((TOWN.settlements as { id: string }[]).map(row => row.id));
+  for (const [id, amount] of Object.entries(s.town.helpCredit))
+    if (!settlements.has(id) || !Number.isSafeInteger(amount) || amount < 0) delete s.town.helpCredit[id];
   // v16 · optional saved Patrol and Auto-Return backfill to an empty, disabled route; existing
   // inventory, task progress and location are preserved.
   normalizeExplorationState(s);
@@ -562,7 +567,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.fxSeq) s.fxSeq = 0;
   if (!s.farm) s.farm = newFarm();
   // v13 · field gathering, Camp and cooked meals did not exist in a v12 save.
-  if (fromVersion < 13 || !s.fieldwork) s.fieldwork = newFieldwork();
+  if (fromVersion < 13 || !s.fieldwork) s.fieldwork = newFieldwork(s.seed);
+  s.fieldwork.campEncounters ||= newFieldwork(s.seed).campEncounters;
+  normalizeCampEncounterState(s);
   // v14 · carry old meal and meat stacks into the unified provision bag, then add Hunger and Auto Eat.
   if (fromVersion < 14 || !s.fieldwork.foods) {
     const defaults = newFieldwork();

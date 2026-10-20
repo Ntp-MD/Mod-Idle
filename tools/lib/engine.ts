@@ -8,11 +8,13 @@ import path from 'node:path';
 import { readJson } from './json.ts';
 import * as shared from '../../engine/index.ts';
 import { createRoad } from '../../engine/road.ts';
-import type { EngineData } from '../../engine/types.ts';
+import { validateEngineData } from '../../engine/validate.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const ENGINE_JSON = path.join(import.meta.dirname, '..', 'data', 'engine.json');
-const E = readJson<EngineData>(ENGINE_JSON);
+/** The same check the browser client runs: a file that lost a constant or a section the factories
+ *  read is refused by path, before a cage reads a number out of it. */
+const E = validateEngineData(readJson(ENGINE_JSON));
 
 /**
  * The cage-side engine: the shared suite over `tools/data/engine.json`, plus the raw data it was

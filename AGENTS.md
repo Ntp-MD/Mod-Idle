@@ -40,6 +40,17 @@ For repository implementation, fixes, reviews and investigation, apply [lean-age
 - If output is truncated, narrow the query or select a useful slice. On failure, identify the cause before retrying; retry only with a changed approach or new evidence. Repeated failure without new evidence calls for reassessment or a blocker report.
 - Follow the verification scope below. Stop when acceptance criteria and required checks are satisfied. Review an unexpectedly long tool sequence for avoidable work; a call count never justifies skipping essential verification.
 
+## Temporary files and cleanup
+
+- Prefer direct commands and in-memory processing. Create temporary files only when required by a tool or when they materially simplify the task.
+- Put temporary files in one task-specific directory under the operating system's temporary directory, within permitted filesystem boundaries. If that location is unavailable, use one task-specific temporary directory inside the active workspace. Do not scatter scripts, screenshots, reports, logs or scratch files throughout the workspace.
+- Keep requested deliverables in their intended project locations; do not treat them as temporary files.
+- Track temporary files and background processes created during the task. Remove temporary files when no longer needed and before finishing; stop task-created helper processes when no longer needed. Keep services needed to use the requested result running and report them at handoff.
+- Delete only files or directories created by the current task. Before recursive deletion, verify the resolved absolute target is inside the task's temporary directory. Never use broad cleanup patterns or delete pre-existing files as housekeeping.
+- Do not create transcript files, duplicate source copies, backup files or permanent helper scripts unless the task requires them.
+- Before finishing, review task-created artifacts and remove unused files. Report any temporary files or helper processes that could not be cleaned up, including their locations or identifiers and the reason.
+- Efficiency and cleanup must not skip required verification or compromise existing work.
+
 ## Code and data ownership
 
 | Location | Responsibility |

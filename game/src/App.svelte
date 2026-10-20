@@ -5,6 +5,7 @@
   import { eng, E, sm, TOWN, tree, loot, fieldwork, trade } from './engine/client';
   import { buildCharacter } from './sim/player';
 import { withMeal, withHunger, fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal, lifeSkillBonuses } from './sim/fieldwork';
+import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from './sim/camp-encounters';
   import { sellGoods, processMaterials, tradeBucket } from './sim/trade';
 import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from './sim/delivery';
 import { buyBlackMarket } from './sim/black-market';
@@ -114,6 +115,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   function showcaseGame(scenario = 'delivery'): GameState {
     const sample = newGame();
+    const campEventExamples = new Set(['map-camp-sounds', 'map-camp-prowler', 'map-camp-traveler', 'map-camp-nest',
+      'map-camp-herd', 'map-camp-injured', 'map-camp-discovered', 'map-camp-combat', 'map-camp-timeout',
+      'map-camp-full-bag', 'map-camp-readonly']);
     sample.fieldwork.materials['copper-ore'] = 12;
     sample.fieldwork.materials.timber = 8;
     sample.fieldwork.foods['river-fish'] = 5;
@@ -165,7 +169,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         targetSpecies: E.mob.zones[0].subzones?.[0]?.species?.[0] || 'goblin',
         subzone: 0, progress: 1,
       };
-    } else if (scenario !== 'field' && scenario !== 'craft-stash' && scenario !== 'map-mine' && scenario !== 'map-adventure') {
+    } else if (scenario !== 'field' && scenario !== 'craft-stash' && scenario !== 'map-mine'
+      && scenario !== 'map-adventure' && !campEventExamples.has(scenario)) {
       const draws = [0, 0.99, 0, 0, 0];
       const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
       if (contract) {
@@ -225,14 +230,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         sample.fxSeq = events.length;
       }
     }
-    if (scenario === 'map-mine' || scenario === 'map-adventure') {
+    if (scenario === 'map-mine' || scenario === 'map-adventure' || campEventExamples.has(scenario)) {
       const svg = new DOMParser().parseFromString(mapOverlayRaw, 'image/svg+xml');
       const mine = svg.querySelector(`polygon.cell[data-node="${sample.town.waypoint}"][data-wild="${fieldwork.F.wild_site_index.mine}"]`);
       const axes = mine?.getAttribute('data-ax')?.split(',').map(Number);
       if (axes?.length === 2) sample.cell = { q: axes[0], r: axes[1], sub: null, wild: fieldwork.F.wild_site_index.mine };
       sample.group = []; sample.hunting = false; sample.fx = [];
       recordMapDiscovery(sample);
-      if (scenario === 'map-adventure' && sample.cell) {
+      if ((scenario === 'map-adventure' || campEventExamples.has(scenario)) && sample.cell) {
         establishCamp(sample);
         startFieldAction(sample, 'mine');
         sample.fieldwork.hunger = fieldwork.F.hunger.max / 2;
@@ -246,6 +251,57 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         for (const stop of sample.patrol.stops) { sample.cell = stop.cell; recordMapDiscovery(sample); }
         sample.cell = mineCell; recordMapDiscovery(sample);
         sample.counters.zoneKills[sample.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[sample.zone] * TOWN.standing.tiers[1].share);
+        if (scenario === 'map-adventure' || campEventExamples.has(scenario)) {
+          const eventKind = scenario === 'map-adventure' ? 'prowler'
+            : scenario.endsWith('full-bag') || scenario.endsWith('readonly') ? 'traveler'
+              : scenario.endsWith('timeout') || scenario.endsWith('combat') ? 'discovered'
+                : scenario.slice('map-camp-'.length);
+          const firstStop = sample.patrol.stops[0];
+          const speciesId = E.mob.zones[sample.zone - 1]?.subzones?.[0]?.species?.[0] || E.mob.species[0].id;
+          const species = E.mob.species.find((entry: any) => entry.id === speciesId);
+          const mob = {
+            id: 'camp-showcase-mob', species: species?.name || 'Kobold', speciesId, kind: 'Small',
+            zone: sample.zone, level: 1, hp: 40, hpMax: 40, ps: 4, acc: 1, evasion: 0, dodgeRate: 0,
+            armour: 0, res: 0, damage: 'physical', innate: ['fire'], xp: 12, line: 'front',
+            hitsPerSec: 0.2, atkTimer: 0, engageSec: 0,
+          } as any;
+          const foodId = (E.fieldwork.regional_sources as Record<string, { food: string }>)[String(sample.zone)].food;
+          const payload: Record<string, unknown> = {};
+          if (['sounds', 'prowler', 'nest', 'discovered'].includes(eventKind)) payload.species = speciesId;
+          if (eventKind === 'traveler') {
+            sample.fieldwork.foods[foodId] = Math.max(scenario.endsWith('full-bag') ? E.inventory.stack_size.food : 2,
+              sample.fieldwork.foods[foodId] || 0);
+            payload.foodId = foodId; payload.foodAmount = 2; payload.materials = ['ore', 'timber'];
+          }
+          if (eventKind === 'injured') {
+            sample.fieldwork.foods[foodId] = Math.max(2, sample.fieldwork.foods[foodId] || 0);
+            payload.settlementId = sample.town.waypoint; payload.foodId = foodId; payload.foodAmount = 2;
+            payload.potionName = 'Red Draught'; payload.potionAmount = 1; payload.credit = 1;
+          }
+          if (eventKind === 'herd') {
+            const herdSpecies = E.mob.zones[sample.zone - 1]?.subzones?.[firstStop?.subzone || 0]?.species?.[0] || speciesId;
+            payload.species = herdSpecies; payload.zone = sample.zone; payload.subzone = firstStop?.subzone || 0;
+            payload.cell = firstStop?.cell || mineCell;
+            sample.town.tasks[1] = { ...structuredClone(sample.town.tasks[0]!), kind: 'expedition', zone: sample.zone,
+              targetSpecies: herdSpecies, subzone: firstStop?.subzone || 0, progress: 0, claimed: false };
+          }
+          const combat = scenario.endsWith('combat');
+          const timeout = scenario.endsWith('timeout');
+          sample.fieldwork.campEncounters.serial = 1;
+          sample.fieldwork.campEncounters.active = {
+            id: 1, kind: eventKind as any, stage: combat ? 'combat' : timeout ? 'choice' : 'warning',
+            origin: structuredClone(sample.fieldwork.camp!.cell), warningSec: timeout ? 0 : 15,
+            choiceSec: timeout ? 1 : 45, payload,
+            preparedGroup: combat ? [] : ['sounds', 'prowler', 'nest', 'discovered'].includes(eventKind) ? [mob] : [],
+            participantIds: combat ? [mob.id] : [],
+          };
+          if (['sounds', 'prowler', 'nest', 'discovered'].includes(eventKind)) sample.fieldwork.action = null;
+          if (combat) sample.group = [mob];
+          if (scenario.endsWith('full-bag')) {
+            const piece = rollDrop(mulberry32(20260102), 'low', 1);
+            for (let i = 0, count = slotsAvailable(sample) - slotsUsed(sample); i < count; i++) sample.bag.push(structuredClone(piece));
+          }
+        }
       }
     }
     return sample;
@@ -357,7 +413,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let takeoverController: AbortController | null = null;
   let takeoverSlot = $state<SlotName>('slot1');
   const canWriteAccount = $derived(accountWriterState === 'owner');
-  const transactionWriter = $derived(showcaseMode ? showcaseSample !== 'read-only' : canWriteAccount);
+  const transactionWriter = $derived(showcaseMode ? showcaseSample !== 'read-only' && showcaseSample !== 'map-camp-readonly' : canWriteAccount);
   let marketView = $state<'trade' | 'workshop' | 'stall' | 'deliveries' | 'black-market'>('trade');
   let marketTownId = $state('');
   const deliveryNotice = $derived(Object.values(gameState.town.contracts).flat().find((contract) => contract.status === 'open' && !contract.announced));
@@ -981,6 +1037,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       panel = 'map';
       return;
     }
+    cancelCampEncounter(gameState, 'Left Camp to hunt');
     push(gameState, `Heading out to hunt in ${eng.zoneById(id).name} (levels ${eng.zoneById(id).levels.join('-')})`);
     gameState = { ...gameState };
   }
@@ -993,6 +1050,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (!requireAccountWriter('hunting')) return;
     const r = huntHere(gameState);
     if (!r.ok) { saveNote = `Cannot hunt here: ${r.why}`; gameState = { ...gameState }; return; }
+    cancelCampEncounter(gameState, 'Left Camp to hunt');
     const z = eng.zoneById(gameState.zone);
     push(gameState, `Hunting ${pickedCell?.kind === 'sub' ? `${pickedCell.label} in ${z.name}` : z.name} (levels ${z.levels.join('-')}) from ${pickedCell?.key}`);
     gameState = { ...gameState };
@@ -1001,20 +1059,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function doEstablishCamp() {
     if (!requireAccountWriter('setting Field Camp')) return;
     const r = establishCamp(gameState);
+    if (r.ok) cancelCampEncounter(gameState, 'Camp relocated');
     saveNote = r.ok ? (r.moved ? `Camp moved · ${fieldCellName}` : `Camp established · ${fieldCellName}`) : `Cannot set Camp: ${r.why}`;
     if (r.ok) push(gameState, r.moved ? `Camp moved to ${fieldCellName}` : `Field Camp established at ${fieldCellName}`);
     gameState = { ...gameState };
   }
 
   function doLeaveCamp() {
+    if (!requireAccountWriter('leaving Camp')) return;
     const r = leaveCamp(gameState);
+    if (r.ok) cancelCampEncounter(gameState, 'Left Camp to hunt');
     saveNote = r.ok ? 'Leaving Camp · hunting resumed' : `Cannot leave Camp: ${r.why}`;
     if (r.ok) push(gameState, `Hunting resumed in ${zone.name}`);
     gameState = { ...gameState };
   }
 
   function doReturnCamp() {
+    if (!requireAccountWriter('returning to Camp')) return;
     const r = returnToCamp(gameState);
+    if (r.ok) cancelCampEncounter(gameState, 'Returned to Camp');
     saveNote = r.ok ? 'Back at Camp · combat paused' : `Cannot return to Camp: ${r.why}`;
     if (r.ok) push(gameState, `Returned to Camp in ${zone.name}`);
     gameState = { ...gameState };
@@ -1032,6 +1095,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     gameState = { ...gameState };
   }
 
+  function doCampEncounter(id: number, action: CampEncounterAction) {
+    const result = chooseCampEncounter(gameState, id, action, transactionWriter);
+    saveNote = result.ok ? '' : `Cannot respond: ${result.why}`;
+    if (result.ok && (action === 'fight' || action === 'follow')) {
+      if (action === 'fight') push(gameState, 'Camp encounter · fight started');
+      travelScene = action === 'follow';
+      if (showcaseMode) running = true;
+      panel = 'map';
+    }
+    gameState = { ...gameState };
+  }
+
+  function doCampPolicy(policy: CampEncounterPolicy) {
+    if (!setCampEncounterPolicy(gameState, policy, transactionWriter)) return;
+    gameState = { ...gameState };
+  }
+
   function doCookMeal(id: string, count = 1) {
     const recipe = fieldwork.recipeById[id];
     const r = cookMeal(gameState, id, count);
@@ -1040,7 +1120,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (r.ok) {
       const text = `Camp kitchen · ${recipe?.name || id} ×${made}`;
       recordMapDiscovery(gameState);
-      gameState.mapJournal!.lastEvent = { ...currentCell(gameState), text, atSec: gameState.clockSec };
+      gameState.mapJournal!.lastEvent = { ...currentCell(gameState), text, atSec: gameState.clockSec, activity: 'cook' };
       push(gameState, text);
     }
     gameState = { ...gameState };
@@ -1229,6 +1309,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     try { localStorage.setItem(MAP_NAMES_KEY, show ? 'shown' : 'hidden'); } catch { /* UI preference can stay in memory. */ }
   }
   let mapHelpOpen = $state(false);
+  let lastAutoOpenedCampEvent = '';
+  $effect(() => {
+    const event = gameState.fieldwork.campEncounters.active;
+    if (!event) return;
+    const key = `${gameState.seed}:${event.id}:${event.stage}`;
+    if (key === lastAutoOpenedCampEvent) return;
+    lastAutoOpenedCampEvent = key;
+    panel = 'map';
+    mapHelpOpen = true;
+  });
   /** the one copy of the generated sheet: the ground the field is drawn on, and the surface a place is
       pointed at. Map focus sharpens it; nothing else paints a second map */
   let sheet = $state<HTMLElement | null>(null);
@@ -1462,8 +1552,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return () => cancelAnimationFrame(frame);
   });
   $effect(() => {
-    if (!showcaseMode || !travelScene) return;
-    // The showcase can preview a requested walk through the real simulator without touching saves.
+    if (!showcaseMode) return;
+    // The showcase can preview online timers and requested walks through the real simulator without touching saves.
     const timer = setInterval(() => { if (running && !paused) step(); }, 1000 / speed);
     return () => clearInterval(timer);
   });
@@ -1554,7 +1644,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const key = `${walk.from.q},${walk.from.r}:${walk.to.q},${walk.to.r}`;
     if (key === automaticWalkKey) return;
     automaticWalkKey = key;
-    travelScene = true;
+      travelScene = true;
     panel = 'map';
   });
   /**
@@ -1805,6 +1895,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const result = startPatrolRun(gameState);
     if (!result.ok) saveNote = `Cannot start Patrol: ${result.why}`;
     else {
+      cancelCampEncounter(gameState, 'Started a Patrol');
       push(gameState, `Patrol started · ${gameState.patrol.stops.length} stops`); saveNote = '';
       travelScene = true; panel = 'map';
       if (showcaseMode) running = true;
@@ -1842,6 +1933,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const saved = walkBlocks(gameState.town.waypoint, id);
     const r = warpTo(gameState, id);
     if (!r.ok) { saveNote = `Cannot warp: ${r.why}`; gameState = { ...gameState }; return; }
+    cancelCampEncounter(gameState, 'Left Camp');
     // a manual jump is the new floor: a later Push in Forward Mode falls back to the zone just left
     gameState.forwardSafe = gameState.zone;
     if (r.forfeit) push(gameState, r.forfeit);
@@ -1858,6 +1950,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (!requireAccountWriter('walking')) return;
     const r = startWalk(gameState, dest);
     if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
+    cancelCampEncounter(gameState, 'Left Camp');
     // Travel stays on the board; the presentation switches to combat after the pawn settles.
     travelScene = true;
     if (showcaseMode) running = true;
@@ -2254,18 +2347,21 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <p>Live game components · sample state · changes to source UI appear here through Vite HMR</p>
       <label>Gameplay sample <select aria-label="Gameplay sample" value={showcaseSample} onchange={(event) => {
         showcaseSample = event.currentTarget.value; gameState = showcaseGame(showcaseSample);
+        travelScene = false;
+        running = false;
         statuses = showcaseSample === 'combat-fx' ? {
           burn: { stacks: 1, secLeft: 8, perSec: 12 },
           chill: { stacks: 1, secLeft: 10, perSec: 0 },
           bleed: { stacks: 1, secLeft: 6, perSec: 8 },
         } : {};
         bench = null; benchNote = ''; picked = null; pickedCell = null;
-        panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' || showcaseSample === 'map-adventure' ? 'map' : null;
+        panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' || showcaseSample === 'map-adventure' || showcaseSample.startsWith('map-camp-') ? 'map' : null;
         if (showcaseSample === 'expedition') deskTab = 'guild'; marketView = 'deliveries'; marketTownId = '';
       }}>
         <option value="field">Field baseline</option><option value="delivery">Delivery want</option><option value="full-bag">Delivery reward bag full</option>
         <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option>
         <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option>
+        <option value="map-camp-sounds">Map · Camp sounds</option><option value="map-camp-prowler">Map · Camp prowler</option><option value="map-camp-traveler">Map · Camp traveler</option><option value="map-camp-nest">Map · Camp nest</option><option value="map-camp-herd">Map · Camp herd</option><option value="map-camp-injured">Map · Camp aid</option><option value="map-camp-discovered">Map · Camp discovered</option><option value="map-camp-combat">Map · Camp combat</option><option value="map-camp-timeout">Map · Camp timeout</option><option value="map-camp-full-bag">Map · Camp full bag</option><option value="map-camp-readonly">Map · Camp read only</option>
       </select></label>
     </div>
     <a href="/">Return to the game</a>
@@ -2370,7 +2466,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         <CollapseToggle label="Map tools" controls="map-tools-content" bind:expanded={mapHelpOpen} />
         <div id="map-tools-content" class="map-tools-content hub-collapsible" hidden={!mapHelpOpen}>
           <MapJourney state={gameState} writable={transactionWriter} onSelect={locateMapHex}
-            onStart={doStartPatrol} onStop={doStopPatrol} onClear={doClearPatrol} onMove={reorderPatrol} />
+            onStart={doStartPatrol} onStop={doStopPatrol} onClear={doClearPatrol} onMove={reorderPatrol}
+            onEncounter={doCampEncounter} onPolicy={doCampPolicy} />
           <details class="map-tools-section" name="map-tools-sections">
             <summary><span>Controls</span><svg class="icon-chevron map-tools-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
             <div class="map-tools">
@@ -3438,7 +3535,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <button onclick={doRespecTree} disabled={!townLive || !viewHere || !treePointsSpent(gameState)}>Respec the tree — refund {treePointsSpent(gameState)} point{treePointsSpent(gameState) === 1 ? '' : 's'}</button>
 
       <h4>Standing</h4>
-      <p>Tier {viewStanding.tier} / {TOWN.standing.tiers.length} · {(viewStanding.share * 100).toFixed(1)}% of zone {viewTown.zone}'s kill budget · {viewStanding.kills.toLocaleString('en-US')} kills · {viewStanding.budget > 0 ? viewStanding.next ? `${viewStanding.next.remaining.toLocaleString('en-US')} more to Tier ${viewStanding.next.name} (${viewStanding.next.kills.toLocaleString('en-US')} total)` : 'all Standing tiers reached' : 'Standing unavailable'}. Standing unlocks town services, Collector slots and appearance purchases; it never grants a stat, a Mod, a stone or anything mob_HP reads.</p>
+      <p>Tier {viewStanding.tier} / {TOWN.standing.tiers.length} · {(viewStanding.share * 100).toFixed(1)}% of zone {viewTown.zone}'s kill budget · {viewStanding.kills.toLocaleString('en-US')} kills + {viewStanding.helpCredit.toLocaleString('en-US')} Camp aid = {viewStanding.progress.toLocaleString('en-US')} progress · {viewStanding.budget > 0 ? viewStanding.next ? `${viewStanding.next.remaining.toLocaleString('en-US')} more to Tier ${viewStanding.next.name} (${viewStanding.next.requiredProgress.toLocaleString('en-US')} progress)` : 'all Standing tiers reached' : 'Standing unavailable'}. Standing unlocks town services, Collector slots and appearance purchases; it never grants a stat, a Mod, a stone or anything mob_HP reads.</p>
       {/if}
 
       {#if deskTab === 'stall'}
@@ -3504,7 +3601,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           ? 'Turned in · the pieces are gone and the reward is yours.'
           : setUnlocked(gameState, viewColSet)
             ? 'Tier II standing here has opened the set slots.'
-            : `Tier II standing in ${viewColSet.settlement} opens the set slots — ${TOWN.standing.tiers[1].share * 100}% of this zone's kill budget.`}</small></p>
+            : `Tier II standing in ${viewColSet.settlement} opens the set slots — kills and Camp aid equal to ${TOWN.standing.tiers[1].share * 100}% of this zone's budget.`}</small></p>
         <table>
           <thead><tr><th>Piece</th><th>Slot</th><th>Held</th><th>Quality asked</th></tr></thead>
           <tbody>

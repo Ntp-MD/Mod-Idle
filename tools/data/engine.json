@@ -13723,10 +13723,27 @@
         { "id": "nettlecrag-trail", "q": -7, "r": 0, "kind": "hunting-tracks" },
         { "id": "blackwater-reach-trail", "q": 3, "r": -7, "kind": "abandoned-camp" },
         { "id": "wyrmback-trail", "q": -11, "r": 3, "kind": "provision-caravan" },
-        { "id": "pale-spire-trail", "q": 7, "r": -2, "kind": "hunting-tracks" }
+        { "id": "pale-spire-trail", "q": 7, "r": -2, "kind": "hunting-tracks" },
+        { "id": "greyfen-trail-2", "q": 1, "r": 4, "kind": "abandoned-camp" },
+        { "id": "saltmarrow-trail-2", "q": 6, "r": -2, "kind": "abandoned-camp" },
+        { "id": "pale-spire-trail-2", "q": 5, "r": 2, "kind": "abandoned-camp" },
+        { "id": "millbrook-trail-2", "q": -6, "r": -1, "kind": "abandoned-camp" },
+        { "id": "emberhold-trail-2", "q": 8, "r": -1, "kind": "provision-caravan" },
+        { "id": "blackwater-reach-trail-2", "q": 6, "r": -7, "kind": "provision-caravan" },
+        { "id": "blackwater-reach-trail-3", "q": 5, "r": -5, "kind": "hunting-tracks" },
+        { "id": "bonegate-trail-2", "q": 1, "r": -6, "kind": "provision-caravan" },
+        { "id": "bonegate-trail-3", "q": -3, "r": -4, "kind": "hunting-tracks" },
+        { "id": "frosthold-trail-2", "q": -5, "r": 6, "kind": "abandoned-camp" },
+        { "id": "frosthold-trail-3", "q": -8, "r": 6, "kind": "hunting-tracks" },
+        { "id": "ashfall-trail-2", "q": 7, "r": 5, "kind": "abandoned-camp" },
+        { "id": "ashfall-trail-3", "q": 4, "r": 5, "kind": "provision-caravan" },
+        { "id": "ironrow-trail-2", "q": -9, "r": 5, "kind": "provision-caravan" },
+        { "id": "ironrow-trail-3", "q": -10, "r": 6, "kind": "hunting-tracks" },
+        { "id": "thornwake-trail-2", "q": 12, "r": -7, "kind": "provision-caravan" },
+        { "id": "thornwake-trail-3", "q": 12, "r": -6, "kind": "hunting-tracks" }
       ]
     },
-    "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not replace ambushes. All rates and effects live here; map.json remains presentation only. Regional Mine and Grove bonus yields are authored per zone in regional_sources. Existing ore, timber and rarewood keep their keys and uses. Workshop recipes consume gathered materials at a settlement and produce trade goods; all cooking recipes also define edible cooked provisions.",
+    "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not replace ambushes. Trail sites are authored per settlement and scale with its band — one in low, two in mid, three in high — each on its own bare block outside any named side, and a settlement with no spare bare block keeps the one it has. All rates and effects live here; map.json remains presentation only. Regional Mine and Grove bonus yields are authored per zone in regional_sources. Existing ore, timber and rarewood keep their keys and uses. Workshop recipes consume gathered materials at a settlement and produce trade goods; all cooking recipes also define edible cooked provisions.",
     "level_divisor": 100,
     "level_cap": 100,
     "mastery_divisor": 25,
@@ -13995,6 +14012,21 @@
       "relocate_ore": 1,
       "relocate_timber": 5,
       "note": "The first field Camp and its first relocation are free, so the player can reach both gathering sites. Later relocations consume ore and timber. A Camp is safe ground and the field Push return point for its zone."
+    },
+    "camp_encounters": {
+      "arrival_grace_sec": 180,
+      "check_interval_sec": 120,
+      "chance_per_check": 0.5,
+      "warning_sec": 15,
+      "choice_sec": 45,
+      "cooldown_sec": 240,
+      "exposure_threshold_sec": 900,
+      "exposure_cap_sec": 900,
+      "exposure_decay_per_sec": 1,
+      "kinds": ["sounds", "prowler", "traveler", "nest", "herd", "injured", "discovered"],
+      "barter_food": 2,
+      "aid_food": 2,
+      "aid_potion_count": 1
     },
     "wild_site_index": {
       "dungeon": 0,
@@ -15027,6 +15059,10 @@
         "3": 0.55
       }
     },
+    "tier_split": [
+      0.5,
+      0.83
+    ],
     "ttk_per_mob_sec": 4.583,
     "group_spawn_sec": 4,
     "bands": {

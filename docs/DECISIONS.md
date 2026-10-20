@@ -93,6 +93,12 @@ Boss and Unique HP have no rank multiplier: their Core profile supplies VIT. Eli
 
 `mobHP` excludes equipment and passive-tree power. Live spawns and roster reports use the same level, Core, damage type, Species, zone, size and boss inputs, including the Elite zone-body factor.
 
+## Standing progress
+
+For settlement `s` in zone `z`, `progress = zoneKills[z] + town.helpCredit[s]`. `tier` is the number of configured shares whose `ceil(share × settlementBudget[z])` is at most `progress`. `share = progress / settlementBudget[z]` when the budget is positive; otherwise the tier and share are zero. Keep `zoneKills` as actual kills. Camp aid credit is settlement-owned and capped by `town.json`.
+
+The shared helper is `engine/standing.ts`; `sim/town.ts` adapts saved state and every service, Collector and map reader uses the same tier result.
+
 ## Trade and currency
 
 `engine/trade.ts` owns catalogue values and the integrated demand curve. Supply is measured in base gold per town/category; `now` is credited simulation time. `peak` selects the town's import, export or neutral coefficient.

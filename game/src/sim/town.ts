@@ -4,6 +4,7 @@ import type { GameState, TaskSlot, TownState } from './types';
 import { atSettlement } from './craft';
 import { addTo, fits, slotsFree } from './slots';
 import { sellGoods, tradeInventory } from './trade';
+import { standingProgressOf } from '../../../engine/standing.ts';
 
 /** Ordinary town services use reference income and Haggling discounts. Allowed kinds come from
  *  town.json; the rare-goods exception belongs to the separate Black Market. */
@@ -47,6 +48,7 @@ export function newTown(): TownState {
     deliveryClockSec: 0, contractTriggerRemainingSec: { [start]: TOWN.delivery.trigger_interval_sec },
     contractSerial: 0, contracts: {}, trackedContractIds: [], deliverySummaries: {},
     blackMarket: {},
+    helpCredit: {},
     market: {},
     marketCredit: 0,
     hagglingXp: 0,
@@ -60,29 +62,19 @@ export interface StandingProgress {
   tier: number;
   share: number;
   kills: number;
+  helpCredit: number;
+  progress: number;
   budget: number;
-  next?: { name: string; kills: number; remaining: number };
+  next?: { name: string; kills: number; requiredProgress: number; remaining: number };
 }
 
-/** Standing is earned by kills in that settlement's own zone (`town.json` standing.earnt_from). */
+/** Standing progress combines zone kills with capped aid credit for the specific settlement. */
 export function standingProgress(state: GameState, settlementId: string): StandingProgress {
   const s = settlementById(settlementId);
-  if (!s) return { tier: 0, share: 0, kills: 0, budget: 0 };
+  if (!s) return { tier: 0, share: 0, kills: 0, helpCredit: 0, progress: 0, budget: 0 };
   const budget = eng.SETTLEMENT_BUDGET_KILLS[s.zone];
   const kills = state.counters.zoneKills[s.zone] || 0;
-  const tiers = TOWN.standing.tiers;
-  const share = budget > 0 ? kills / budget : 0;
-  const tier = budget > 0
-    ? tiers.filter((entry: any) => kills >= Math.ceil(entry.share * budget)).length
-    : 0;
-  const nextTier = tiers[tier];
-  const nextKills = budget > 0 && nextTier ? Math.ceil(nextTier.share * budget) : undefined;
-  return {
-    tier, share, kills, budget,
-    ...(nextTier && nextKills != null ? {
-      next: { name: nextTier.name, kills: nextKills, remaining: Math.max(0, nextKills - kills) },
-    } : {}),
-  };
+  return standingProgressOf(kills, state.town.helpCredit[settlementId] || 0, budget, TOWN.standing.tiers);
 }
 
 export const standingShare = (state: GameState, settlementId: string): number => standingProgress(state, settlementId).share;

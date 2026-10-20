@@ -222,6 +222,8 @@ export interface TownState {
   trackedContractIds: string[];
   deliverySummaries: Record<string, import('./delivery-types').DeliverySummary>;
   blackMarket: Record<string, import('./black-market').BlackMarketTownState>;
+  /** Standing credit from one-time Camp aid, kept separate from actual zone kills. */
+  helpCredit: Record<string, number>;
   /** Base-value supply already delivered, decaying over simulation time at each town and category. */
   market: Record<string, Record<string, { used: number; atSec: number }>>;
   /** Earned fractions below the currency display unit carry forward into the next sale. */

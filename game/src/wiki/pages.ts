@@ -637,7 +637,7 @@ page({
       ])), 'The Black Market is the only gold shop that sells materials, craft stones or Skill XP.'),
       block('Standing', table(['Tier', 'Reach it at', 'Unlocks'], (TOWN.standing?.tiers || []).map((t: any) => [
         esc(t.name), `${n0(t.share * 100)}% of the settlement zone kill budget`, esc(t.unlocks),
-      ])), `<code>Standing threshold = ceil(tier.share × zone kill budget)</code>. Source: ${esc(String((TOWN.standing as any).earnt_from || ''))}.`),
+      ])), `<code>Standing progress = zone kills + settlement Camp aid credit</code>; <code>tier threshold = ceil(tier.share × zone kill budget)</code>. Source: ${esc(String((TOWN.standing as any).earnt_from || ''))}.`),
       block('The task board', table(['', 'The number', 'Read from'], [
         ['Slots open at once', wrap(n0(TS.slots)), '<code>task_sizing.slots</code>'],
         ['A slot refills', TS.refill_sec >= 3600 ? `every ${n0(TS.refill_sec / 3600)} hours` : `every ${n0(TS.refill_sec / 60)} minutes`, '<code>task_sizing.refill_sec</code>'],
@@ -1015,6 +1015,24 @@ page({
       ['Smithing', 'safe and idle at a settlement', (E.fieldwork as any).smithing_recipes.map((recipe: any) => `${esc(recipe.name)} · ${Object.entries(recipe.materials).map(([id, count]) => `${count} ${fieldwork.materialById[id]?.name || id}`).join(' + ')}`).join(' · ')],
       ['Cooking', 'active Field Camp', 'turn raw food, fruit, edible herbs and ingredients into timed combat meals'],
     ]), `Camp relocation after the free moves costs ${n0((E.fieldwork as any).camp.relocate_ore)} ore + ${n0((E.fieldwork as any).camp.relocate_timber)} timber. Field Skill XP and Mastery are separate tracks.`),
+    block('Camp encounters', `<p>A Field Camp can draw one encounter at a time while you stand at it, online, not hunting and not already in a fight. Each character keeps its own seeded Camp stream: the encounter, its offers and its prepared group are frozen when it appears, so previewing it, refusing it, reloading and going offline never reroll it. The warning, the choice and Camp exposure run on credited online time only.</p>`
+      + table(['Encounter', 'What it is', 'What you can do'], [
+        ['Sounds', 'a noise just off the Camp', 'Investigate surveys the Camp and its neighbours once and shows the prepared group, then you Fight or Withdraw; Stay quiet lets it pass'],
+        ['Prowler', 'a silhouette at the fire', 'Fight the prepared normal group, or Secure supplies and wait it out with your work stopped and nothing deducted'],
+        ['Traveler', 'a traveller at the fire', 'Listen for news, which surveys the blocks around you; Trade provisions for ore or timber; or Decline'],
+        ['Nest', 'a nest at the worksite', 'mining and woodcutting stop while it is there; Clear it with one normal fight or wait it out — no nest record survives it'],
+        ['Herd', 'tracks toward a scouted Expedition subzone', 'Follow starts an ordinary walk and an ordinary hunt on arrival; nothing is reserved and no task is credited'],
+        ['Injured', 'a traveller from the Camp’s settlement', 'give provisions or one ordinary HP draught for one-time Standing credit, or Decline'],
+        ['Discovered', 'your Camp has been found', 'Fight, Shelter through the warning, or move the Camp by the ordinary relocation'],
+      ])
+      + `<p>The Camp policy decides what happens when you do not answer:</p>`
+      + table(['Policy', 'What it does'], [
+        ['Avoid fights', 'the work stops and you shelter through the warning and the choice, then the threat passes'],
+        ['Defend Camp', 'you fight only when the warned threat reaches the Camp at the end of the choice'],
+        ['Engage early', 'you start the prepared fight as soon as the warning ends, before the threat reaches the fire'],
+      ])
+      + `<p>An encounter fight is an ordinary normal group from the Camp’s own zone: no Elite, no Unique, no extra reward, and the ordinary per-kill drop still pays. Walking, warping, relocating the Camp or leaving to hunt ends the offer once; what you already earned stays earned, and a policy never spends, trades or follows for you. Camp exposure grows while you camp and fades while you are away, and moving the tent does not clear it.</p>`
+      + `<code>check every ${n0((E.fieldwork as any).camp_encounters.check_interval_sec)} sec</code> · <code>grace ${n0((E.fieldwork as any).camp_encounters.arrival_grace_sec)} sec</code> · <code>chance ${pc1((E.fieldwork as any).camp_encounters.chance_per_check)}</code> · <code>warning ${n0((E.fieldwork as any).camp_encounters.warning_sec)} sec</code> · <code>choice ${n0((E.fieldwork as any).camp_encounters.choice_sec)} sec</code> · <code>quiet ${n0((E.fieldwork as any).camp_encounters.cooldown_sec)} sec</code> · <code>exposure ${n0((E.fieldwork as any).camp_encounters.exposure_threshold_sec)} sec</code>`),
     block('Field-skill progression', table(['Progress', 'Benefit', 'Read from'], [
       ['Harvest milestones', `+${n0((E.fieldwork as any).progression.harvest_bonus_per_level)} unit per action at Skill levels ${list((E.fieldwork as any).progression.harvest_bonus_levels)}`, '<code>fieldwork.progression.harvest_bonus_*</code>'],
       ['Field drop rate', `+${n1((E.fieldwork as any).progression.drop_rate_bonus_per_skill_level_pct)}% per Skill level after 1 and +${n1((E.fieldwork as any).progression.drop_rate_bonus_per_mastery_level_pct)}% per resource Mastery level after 1, up to +${n0((E.fieldwork as any).progression.drop_rate_bonus_cap_pct)}%`, '<code>fieldwork.progression.drop_rate_bonus_*</code>'],

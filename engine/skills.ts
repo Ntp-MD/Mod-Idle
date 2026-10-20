@@ -6,14 +6,6 @@
  * (`skill-pool.md` · `skill-pool-system.md`).
  */
 
-/** Duplicate → ladder cooldown reduction (`skill-pool-system.md` "Duplicates → ladder"). */
-export const LADDER = [
-  { step: 1, cdr: 5, cost: 1 }, { step: 2, cdr: 10, cost: 1 }, { step: 3, cdr: 15, cost: 2 },
-  { step: 4, cdr: 20, cost: 2 }, { step: 5, cdr: 25, cost: 3 }, { step: 6, cdr: 30, cost: 3 },
-];
-/** Any 2 duplicates convert into 1 of a chosen skill (`skill-pool-system.md`). */
-export const CONVERSION = 2;
-
 /** Weapon type → skill group (`skill-pool.md` "Weapon groups"). */
 export const WEAPON_GROUPS = {
   melee: ['sword', 'axe', 'dagger', 'mace', 'spear', 'two-handed sword', 'two-handed axe'],
@@ -35,7 +27,22 @@ export const ladderMult = (basis: string, attackPct = 0, spellPct = 0) =>
   1 + ((basis === 'magic' ? spellPct : attackPct) || 0) / 100;
 
 export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
-  const F = (SKILLS.meta && SKILLS.meta.formula) || {};
+  const F: Partial<NonNullable<SkillsData['meta']['formula']>> = SKILLS.meta?.formula ?? {};
+
+  /**
+   * The duplicate ladder (skills.json `meta.formula.ladder`): each rung buys a share of cooldown
+   * reduction and costs duplicates of its own (`skill-pool-system.md` "Duplicates → ladder"). The
+   * roster file owns it — the wiki prints the same rows — so the model reads it rather than typing it.
+   */
+  const LADDER: { step: number; cdr: number; cost: number }[] = (F.ladder?.rows || []).map((r) => ({ step: r.step, cdr: r.cdr, cost: r.cost }));
+  if (!LADDER.length) throw new Error('skills.json: meta.formula.ladder.rows must list the duplicate ladder');
+  if (F.conversion_duplicates == null || F.group_bonus == null)
+    throw new Error('skills.json: meta.formula must carry conversion_duplicates and group_bonus');
+  /** Any 2 duplicates convert into 1 of a chosen skill (`skill-pool-system.md`). */
+  const CONVERSION = F.conversion_duplicates;
+  /** A matching weapon group grants the group's own bonus (`skill-pool.md`). */
+  const GROUP_BONUS = F.group_bonus;
+
   /**
    * The per-level table: one row per skill level, carrying the multiplier a press and an effect
    * carry at that level. It is the only home of the ramp — a row states its level-1 numbers and the
@@ -204,8 +211,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     return best.group;
   }
 
-  /** A matching weapon group grants +25% skill damage (`skill-pool.md`). */
-  const GROUP_BONUS = 0.25;
+  /** A matching weapon group grants the group's own bonus (`skill-pool.md`). */
   const groupBonus = (skill: SkillRow, weaponName: string) =>
     !skill.group || skill.group === 'all' || skill.group === weaponGroupOf(weaponName) ? 1 + GROUP_BONUS : 1;
   /**

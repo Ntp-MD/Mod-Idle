@@ -5,7 +5,7 @@
     "derived_fields": [
       "gold price",
       "junk per kill",
-      "Standing kill thresholds",
+      "Standing progress and thresholds",
       "lifetime supply",
       "demand ratio",
       "skip-token day ceiling",
@@ -845,7 +845,9 @@
         "unlocks": "appearance purchases and extra saved filter presets"
       }
     ],
-    "earnt_from": "kills in that settlement's own zone (F1)",
+    "earnt_from": "kills in that settlement's own zone plus capped one-time Camp aid credit (F1)",
+    "camp_aid_credit_share": 0.01,
+    "camp_aid_credit_cap_share": 0.1,
     "grants": [
       "vendor stock lines",
       "Collector set slots",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { newGame, tick } from '../src/sim/game';
-import { currentCell, rankOf, road, startWalk, zoneOf } from '../src/sim/road';
+import { currentCell, ownerOf, rankOf, road, startWalk, zoneOf } from '../src/sim/road';
 import { exportJson, importJson, migrate } from '../src/state/save';
 import { slotsAvailable } from '../src/sim/slots';
 import { movePatrolStop } from '../src/sim/exploration';
@@ -101,6 +101,10 @@ describe('map journal and trail sites', () => {
       expect(trailSiteKind(site)).toBeTruthy();
       expect(seen.has(hexKey(site))).toBe(false);
       seen.add(hexKey(site));
+      // The name carries the region a site belongs to, so a data edit cannot quietly move one
+      // into a neighbour's field and keep the label that tells the player where they are.
+      const slug = ownerOf(site).id.replace(/^the_/, '').replace(/_/g, '-');
+      expect(site.id.startsWith(`${slug}-trail`)).toBe(true);
     }
   });
   it('reorders an idle itinerary but cannot reorder an active Patrol', () => {
@@ -179,5 +183,20 @@ describe('map journal and trail sites', () => {
     s.group = [];
     expect(investigateTrailSite(s, site.id).ok).toBe(true);
     expect(destinationPrimary(s, dest).kind).toBe('hunt');
+  });
+  it('states what an Investigate pauses, and keeps the Camp activity on the journal event', () => {
+    const s = newGame(), site = trailSites.find(row => row.kind === 'hunting-tracks')!;
+    place(s, site);
+    const dest = { key: 'site', kind: 'bare' as const, label: 'Trail site', node: null, sub: null, wild: null, self: true, walking: false, here: true, blocks: 0, sec: 0 };
+    s.patrol.active = true; s.hunting = true;
+    expect(destinationPrimary(s, dest)).toMatchObject({ kind: 'investigate', disabled: false, warn: 'Claiming this site pauses Patrol and hunting.' });
+    s.patrol.active = false; s.hunting = false;
+    expect(destinationPrimary(s, dest).warn).toBe('');
+    s.mapJournal!.lastEvent = { q: site.q, r: site.r, text: 'Camp kitchen · Stew ×1', atSec: s.clockSec, activity: 'cook' };
+    const restored = importJson(exportJson(s));
+    expect(restored.mapJournal!.lastEvent).toMatchObject({ activity: 'cook' });
+    restored.mapJournal!.lastEvent = { ...restored.mapJournal!.lastEvent!, activity: 5 as unknown as string };
+    normalizeMapJournal(restored);
+    expect(restored.mapJournal!.lastEvent!.activity).toBeUndefined();
   });
 });

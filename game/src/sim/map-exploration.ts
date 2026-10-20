@@ -8,7 +8,7 @@ export interface MapJournal {
   scouted: string[];
   claimedSites: string[];
   lastPosition?: string;
-  lastEvent?: { q: number; r: number; text: string; atSec: number };
+  lastEvent?: { q: number; r: number; text: string; atSec: number; activity?: string };
 }
 export type MapKnowledge = 'unknown' | 'scouted' | 'explored';
 export const MAP_EXPLORATION = E.fieldwork.map_exploration;
@@ -29,6 +29,12 @@ function survey(journal: MapJournal, h: { q: number; r: number }, radius: number
   journal.scouted = [...seen];
 }
 
+/** Record nearby knowledge from an explicit online Camp investigation without marking travel. */
+export function surveyMapAround(state: GameState, h: { q: number; r: number }, radius = MAP_EXPLORATION.reveal_radius): void {
+  const journal = state.mapJournal ||= newJournal();
+  survey(journal, h, Math.max(0, Math.floor(radius)));
+}
+
 /** Additive migration: only known towns and the current block can be reconstructed from old saves. */
 export function normalizeMapJournal(state: GameState) {
   const raw = state.mapJournal;
@@ -40,7 +46,11 @@ export function normalizeMapJournal(state: GameState) {
   journal.claimedSites = Array.isArray(raw?.claimedSites)
     ? [...new Set(raw.claimedSites.filter(id => trailSites.some(site => site.id === id)))] : [];
   if (raw?.lastEvent && Number.isInteger(raw.lastEvent.q) && Number.isInteger(raw.lastEvent.r)
-    && typeof raw.lastEvent.text === 'string' && Number.isFinite(raw.lastEvent.atSec)) journal.lastEvent = raw.lastEvent;
+    && typeof raw.lastEvent.text === 'string' && Number.isFinite(raw.lastEvent.atSec)) {
+    const { q, r, text, atSec } = raw.lastEvent;
+    journal.lastEvent = typeof raw.lastEvent.activity === 'string'
+      ? { q, r, text, atSec, activity: raw.lastEvent.activity } : { q, r, text, atSec };
+  }
   for (const id of state.town.visited) {
     const node = road.nodeById(id);
     if (!node) continue;

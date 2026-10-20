@@ -11,7 +11,7 @@ import type { BasesData, TownData } from './types.ts';
 
 export function createCollector(TOWN: TownData, BASES: BasesData) {
   const SETS = TOWN.collector_sets;
-  const HINT_PRICE_M = (TOWN.repeatable.find((r) => r.id === 'collector_hint') || { m: 15 }).m;
+  const HINT_PRICE_M = TOWN.repeatable.find((r) => r.id === 'collector_hint')?.m ?? 15;
   const PEDLAR = TOWN.repeatable.find((r) => r.id === 'pedlar_rotation')!;
 
   /** "coif (helmet)" → { name, slot }. */

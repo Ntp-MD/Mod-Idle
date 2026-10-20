@@ -11,6 +11,7 @@
     ]
   },
   "point_cost_per_rank": 1,
+  "shallow_nodes": 14,
   "rank_tiers": {
     "shallow": [
       0.03333333333333333,

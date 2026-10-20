@@ -47,8 +47,8 @@ const SEED0 = 20260101;    // fixed, so a cage run is reproducible
 // rolls and a drop the cage simulates come off the same item-level / window / third machinery.
 const LOOT = createLoot(E, MODS);
 const {
-  SLOTS, TIER_NAME, ELEMENTS,
-  FLAT_GROUP, weightOf, rangeOf, tierSlice, statOf,
+  SLOTS, TIER_NAME,
+  FLAT_GROUP, tierSlice,
 } = LOOT;
 // the band ladder and its level spans, read once (`item_level` — item-level.md)
 const BAND_INDEX: Record<string, number> = { low: 0, mid: 1, high: 2 };
@@ -62,63 +62,18 @@ const SPAN: Record<string, [number, number]> = Object.fromEntries(
 // `node tools/bases.ts --checks` gates against item-base.md. The client reads the same file, so a
 // drop the simulation scores and a drop the game rolls are built from one table.
 const BASES_JSON = readJson(path.join(import.meta.dirname, 'data', 'bases.json'));
-const BASES = BASES_JSON.bases.reduce((by: any, b: any) => {
-  (by[b.slot] = by[b.slot] || []).push(b);
-  return by;
-}, {});
 const SCHOOL = Object.fromEntries(BASES_JSON.bases.filter((b: any) => b.school).map((b: any) => [b.name, b.school]));
-
-/** The weapon types and the dual-wieldable subset, from `equipment-weapon.md` via bases.json. */
-const WEAPON_TYPES = BASES_JSON.weapons;
-const DUAL_WIELD = WEAPON_TYPES.filter((w: any) => w.dual_wield);
 
 // ---------------------------------------------------------------- rng
 
-const { mulberry32, pick, intBetween, weightedPick } = LOOT; // engine/loot.ts owns the roll
-
-/** One option out of a weighted list — the frame / weapon pick at step 2. */
-function pickWeighted(rng: any, options: any[]) {
-  const total = options.reduce((s: any, o: any) => s + o.weight, 0);
-  let r = rng() * total;
-  for (const o of options) { r -= o.weight; if (r <= 0) return o; }
-  return options[options.length - 1];
-}
+const { mulberry32, pick } = LOOT; // engine/loot.ts owns the roll
 
 // ---------------------------------------------------------------- the roll (loot.md section 1, seven steps)
-
-/**
- * Step 2 — the frame inside the rolled slot. Main hand picks a weapon type by weight; the off hand
- * picks equally among its Shield / Book frames and one dual-wielded weapon, so a shield or a book can
- * actually drop (item-base.md); every other slot picks a
- * Base by weight.
- */
-function rollBase(rng: any, slot: any, bias: any) {
-  if (slot === 'main hand') {
-    const weapon = pickWeighted(rng, WEAPON_TYPES.map((w: any) => ({ weapon: w, weight: bias && bias.weapon_weight ? bias.weapon_weight : 1 }))).weapon;
-    // A10: the type picks the frame pool, and the frame is what the piece is called and what it forces
-    const frames = (BASES_JSON.weapon_frames || {})[weapon.name] || [];
-    const frame = frames.length ? pickWeighted(rng, frames.map((f: any) => ({ frame: f, weight: f.drop_weight || 1 }))).frame : null;
-    return { frame, weapon };
-  }
-  if (slot === 'off hand') {
-    const options = [
-      ...BASES['off hand'].map((f: any) => ({ frame: f, weight: 1 })),
-      { weapon: pick(rng, DUAL_WIELD), weight: 1 },
-    ];
-    const selected = pickWeighted(rng, options);
-    if (!selected.weapon) return selected;
-    const frames = (BASES_JSON.weapon_frames || {})[selected.weapon.name] || [];
-    const frame = frames.length ? pickWeighted(rng, frames.map((f: any) => ({ frame: f, weight: f.drop_weight || 1 }))).frame : null;
-    return { weapon: selected.weapon, frame };
-  }
-  const frames = BASES[slot].map((b: any) => ({ frame: b, weight: bias && bias.frame_weight ? bias.frame_weight(b) : 1 }));
-  return pickWeighted(rng, frames);
-}
 
 /** Steps 3-7 plus the Mod lines: one dropped item (loot.md section 1). */
 function rollItem(rng: any, band: any, bias: any) {
   const slot = pick(rng, SLOTS);
-  const chosen = rollBase(rng, slot, bias);
+  const chosen = LOOT.rollBase(rng, BASES_JSON, slot, bias);
   const frame = chosen.frame || null;
   const weapon = chosen.weapon || null;
   const b = band === 'high_full_lck' ? 'high' : band;
@@ -127,30 +82,9 @@ function rollItem(rng: any, band: any, bias: any) {
   // draws uniformly across it — the same spread of items a real run sees (`item_level.spans`)
   const [from, to] = SPAN[b];
   const ilvl = from + Math.floor(rng() * (to - from + 1));
-  const u = rng(); // one Tier draw per item, shared by line 1 and every Unbound line
-
-  // line 1 is the Frame Mod: it is rolled first, off the frame, before any Unbound line
-  const lines: any[] = LOOT.frameModRoll(BASES_JSON, slot, frame, weapon, rng, ilvl, q, u);
-  // every id the piece already holds — a Frame Mod line's `extra` Mods included, exactly as the client
-  // does (`game/src/sim/drop.ts`), so a line never appears twice on one piece in either roll
-  const taken = new Set<string>(lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
-  const pool = LOOT.poolFor(BASES_JSON, slot, frame, weapon).filter((e: any) => !taken.has(e.id));
-  const target = LOOT.linesAtDrop(rng);
-
-  while (lines.length < target) {
-    const blocked = LOOT.blockedBy(taken);
-    const remaining = pool.filter((e: any) => !taken.has(e.id) && !blocked.has(e.id));
-    if (!remaining.length) break; // an off hand simply publishes fewer lines (item-base.md)
-    const id = weightedPick(rng, remaining.map((e: any) => ({ id: e.id, w: e.role * weightOf(e.id, q) })));
-    taken.add(id);
-    const slice = tierSlice(u);
-    const [lo, hi] = rangeOf(id, ilvl, q, slice);
-    // A Stat Mod bakes the Core stat it feeds at drop, and the draw it spends sits in this exact
-    // position in the client's roll (`game/src/sim/drop.ts`). Skipping it would shift every later
-    // draw, so one seed would stop producing one item across the two rolls.
-    const stat = statOf(id, rng);
-    lines.push({ id, value: intBetween(rng, lo, hi), slice, element: id.startsWith('elemental_') ? pick(rng, ELEMENTS) : null, ...(stat ? { stat } : {}) });
-  }
+  // the lines themselves are the shared builder's (`engine/loot.ts`), so a simulated drop and a
+  // dropped one cannot disagree about the piece they carry
+  const { lines, u } = LOOT.buildLines(BASES_JSON, { slot, frame, weapon, ilvl, q }, rng);
 
   return { slot, base: weapon ? weapon.name : frame.name, ilvl, quality: BANDS[q], tier: (TIER_NAME as any)[tierSlice(u)], q, lines };
 }
@@ -408,11 +342,15 @@ function gates(rows: any, bias: any) {
 
 const arg = process.argv[2];
 
-if (arg === '--checks') {
+/** The CLI runs only when this file is the entry point, so a test may import the roll without the
+ *  cage measuring anything (or setting the exit code) behind it. */
+const isEntry = process.argv[1] ? path.resolve(process.argv[1]) === path.resolve(import.meta.filename) : false;
+
+if (isEntry && arg === '--checks') {
   G.report(gates(ALL(), biasExperiment()));
-} else if (arg === '--sync') {
+} else if (isEntry && arg === '--sync') {
   sync();
-} else if (arg === '--sim') {
+} else if (isEntry && arg === '--sim') {
   const rows = ALL();
   console.log('band            drops   upgrades  keep%   up/1k   score   flat/drop  lines/item');
   for (const r of rows) {
@@ -431,7 +369,7 @@ if (arg === '--checks') {
   for (const r of rows) console.log(r.band.padEnd(15) + '1/14 ' + r.hourUp[0].toFixed(1) + ' · 2/14-4/14 ' + (r.hourUp[1] + r.hourUp[2] + r.hourUp[3]).toFixed(1) + ' · 5/14-12/14 ' + r.hourUp.slice(4, 12).reduce((a: any, b: any) => a + b, 0).toFixed(1));
   console.log('\nbase bias:');
   for (const b of biasExperiment()) console.log('  ' + b.label.padEnd(48) + ' keep ' + b.keepRate.toFixed(2) + '%  up/1k ' + (b.perHr / BAND.high.drops_per_hr * 1000).toFixed(1) + '  score ' + b.avgScore.toFixed(2));
-} else {
+} else if (isEntry) {
   console.log(`loot cage — the seven roll steps, measured
 
   node tools/loot.ts --checks   invariants
@@ -439,3 +377,5 @@ if (arg === '--checks') {
   node tools/loot.ts --sync     hand the measured upgrades/hr back to engine.json
 `);
 }
+
+export { rollItem, measureBand, LOOT, BASES_JSON };

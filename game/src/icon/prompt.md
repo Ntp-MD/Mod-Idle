@@ -1,1 +1,0 @@
-Clean 2D fantasy RPG 250x250px aspect ratio 1 white icon, bold white silhouette with simple cutout details, minimal flat shapes, high contrast, crisp vector-like edges, centered on a transparent background, instantly readable at small size. No text, border, UI, scenery, or drop shadow. list from below

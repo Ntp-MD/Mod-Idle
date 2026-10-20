@@ -1,9 +1,0 @@
-
-> modworld-game@0.1.0 check
-> svelte-check --tsconfig ./tsconfig.json
-
-Loading svelte-check in workspace: c:\Users\disda\Desktop\Mod-Idle\game
-Getting Svelte diagnostics...
-
-[32msvelte-check found 0 errors and 0 warnings
-[39m

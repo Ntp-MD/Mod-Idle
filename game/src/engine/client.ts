@@ -20,6 +20,7 @@ import { createTrade, type TradeCfg } from '../../../engine/trade.ts';
 import { createDelivery, type DeliveryCfg } from '../../../engine/delivery.ts';
 import { createSkillModel } from '../../../engine/skills.ts';
 import { createTree } from '../../../engine/tree.ts';
+import { validateEngineData } from '../../../engine/validate.ts';
 import type { EngineData, ModsData, SkillsData } from '../../../engine/types.ts';
 // Each export keeps the type TypeScript infers from its own JSON file. A hand-written interface would be
 // a second copy of the data's shape — the same defect as a second copy of a number, and it drifts the
@@ -33,20 +34,24 @@ export const TREE_SPEC = treeJson;
 
 /** The shared math, instantiated once. Every formula in the game comes out of this object.
  *
- *  The four `*_DATA` bindings are the JSON→engine seam: each constructor takes the engine's own declared
+ *  The `*_DATA` bindings are the JSON→engine seam: each constructor takes the engine's own declared
  *  view of its file, and a JSON import cannot state a fixed-length pair where `MobZone` declares
  *  `[number, number]`, so the arity is written once here rather than dropped from the declaration.
  *  `E`/`MODS`/`SKILLS`/`TOWN`/`BASES` above stay the files' inferred shape — that is what types every
- *  number the HUD prints, and it is what caught `MobZone` declaring no `quality` the data carries. */
-const ENGINE_DATA = engineJson as unknown as EngineData;
-const MODS_DATA = modsJson as unknown as ModsData;
-const SKILLS_DATA = skillsJson as unknown as SkillsData;
-const TREE_DATA = treeJson as unknown as Parameters<typeof createTree>[0];
+ *  number the HUD prints, and it is what caught `MobZone` declaring no `quality` the data carries.
+ *
+ *  The engine's own view is checked, not asserted: `validateEngineData` refuses a file that lost a
+ *  constant or a section the factories read, naming the path, and its `K` parameter fails the build
+ *  when the file lost a constant the engine still declares. */
+const ENGINE_DATA: EngineData = validateEngineData(engineJson);
+const MODS_DATA: ModsData = modsJson;
+const SKILLS_DATA: SkillsData = skillsJson;
+const TREE_DATA: Parameters<typeof createTree>[0] = treeJson;
 /** The typed views the sim modules pass into the shared factories, where the raw JSON's inferred
  *  shape (a `levels: number[]` where the engine declares a pair) would not satisfy the seam. */
 export const ED = ENGINE_DATA;
-export const TD = townJson as unknown as Parameters<typeof createCollector>[0];
-export const BD = basesJson as unknown as Parameters<typeof createCollector>[1];
+export const TD: Parameters<typeof createCollector>[0] = townJson;
+export const BD: Parameters<typeof createCollector>[1] = basesJson;
 
 export const eng = createEngine(ENGINE_DATA);
 export const dungeon = createDungeon(ENGINE_DATA);
