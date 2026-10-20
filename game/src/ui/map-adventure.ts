@@ -1,4 +1,4 @@
-import { E, TOWN } from '../engine/client';
+import { E, eng, TOWN } from '../engine/client';
 import type { GameState } from '../sim/types';
 import { currentCell } from '../sim/road';
 import { standingProgress } from '../sim/town';
@@ -18,6 +18,23 @@ export function campActivityArt(activity: CampActivity): string {
   if (activity === 'fish') return '<g class="map-camp-props" transform="translate(11 4) scale(.55)"><path class="map-fishing-rod" d="M-10-12Q-1-7 3 4m0 0q2 4 5 1m-5-1v6"/><path class="map-fish-ripple" d="M-10 9q4-3 8 0m2 2q4-3 8 0"/></g>';
   if (activity === 'cook') return '<g class="map-camp-props" transform="translate(0 1) scale(.55)"><path class="map-pot-steam" d="M-5-2q-2-3 0-5m4 5q-2-3 0-5m4 5q-2-3 0-5"/></g>';
   return '';
+}
+
+export function hasUniqueTrace(speciesIds: string[]): boolean {
+  return speciesIds.some(id => eng.uniquesOf(id).length > 0);
+}
+
+export function mapEventArt(text: string): string {
+  const event = text.toLowerCase();
+  if (event.startsWith('abandoned camp')) return `${tent}<path class="map-event-fire" d="M1 4q-6-2-1-9q0 4 3 3q5 5-2 6Z"/>`;
+  if (event.startsWith('provision caravan')) return `<g transform="translate(8 4) scale(.7)">${cart}</g>`;
+  if (event.startsWith('hunting tracks')) return `<g transform="translate(2 6) scale(.8)">${tracks}</g>`;
+  if (event.startsWith('camp kitchen')) return campActivityArt('cook');
+  if (event.includes('clear spring')) return '<g class="map-event-spring"><path d="M-10 3q5-4 10 0t10 0M-8 7q4-3 8 0t8 0"/><path d="M0-9q-5 6 0 9q5-3 0-9Z"/></g>';
+  if (event.includes('mushroom')) return '<g class="map-event-mushroom"><path d="M-8 2q0-8 8-8t8 8H-8Z"/><path d="M-3 2v7h6V2"/></g>';
+  if (event.includes('sunroot') || event.includes('moonmint')) return '<path class="map-event-sprig" d="M0 9V-7m0 6q-9-7-10-1q5 5 10 1m0-4q8-8 10-2q-4 6-10 2"/>';
+  if (event.startsWith('found ')) return '<g class="map-event-food"><path d="M-7-2q0-5 7-5t7 5v10H-7Z"/><path d="M-4-2q4-4 8 0m-4-5v-3"/></g>';
+  return '<path d="m13-5 3 5-3 5-3-5Z"/>';
 }
 
 /** Read-only board scenery follows the real simulation; drawing consumes no gameplay randomness. */
@@ -57,8 +74,19 @@ export function paintMapAdventure(root: HTMLElement, state: GameState, terrainVi
           + (standing.tier > 1 ? '<path class="map-town-lamp" d="M-7 9V2m-2-3 2-4 2 4-2 3Z"/>' : '')
           + (standing.tier > 2 ? '<path class="map-town-guild" d="M11-4v-9h7v7l-3 3-4-3m3-3 1-2 1 2-1 2Z"/>' : '') + '</g>');
       }
-    } else if (cell.hasAttribute('data-sub') && knowledge === 'unknown' && hexDistance(feet, h) <= MAP_EXPLORATION.reveal_radius + 1) {
-      place(h, 'map-wild-hint', 'Unidentified tracks · approach to scout this block', `<g transform="translate(3 9) scale(.5)">${tracks}</g>`);
+    } else if (cell.hasAttribute('data-sub')) {
+      const distance = hexDistance(feet, h);
+      if (knowledge === 'unknown' && distance <= MAP_EXPLORATION.reveal_radius + 1) {
+        place(h, 'map-wild-hint', 'Unidentified tracks · approach to scout this block', `<g transform="translate(3 9) scale(.5)">${tracks}</g>`);
+      } else if (knowledge !== 'unknown' && distance <= MAP_EXPLORATION.reveal_radius) {
+        const settlement = TOWN.settlements.find(row => row.id === cell.getAttribute('data-node'));
+        const species = settlement && cell.getAttribute('data-sub') != null
+          ? eng.zoneById(settlement.zone).subzones?.[Number(cell.getAttribute('data-sub'))]?.species || [] : [];
+        if (hasUniqueTrace(species)) {
+          place(h, 'map-unique-traces', 'Unique traces · review this sub-zone roster',
+            '<g transform="translate(-14 8) scale(.55)"><path class="map-unique-claw" d="m-8 6 3-9m3 10 3-12m3 11 3-9"/><circle cx="0" cy="0" r="10"/></g>');
+        }
+      }
     }
   }
   for (const site of trailSites) {
@@ -95,10 +123,13 @@ export function paintMapAdventure(root: HTMLElement, state: GameState, terrainVi
       + (active ? `<rect class="map-stop-progress" x="-21" y="10" width="${12 * state.patrol.groupsCleared / E.road.patrol.groups_per_stop}" height="2"/>` : ''));
   });
   if (event && state.clockSec - event.atSec <= MAP_EXPLORATION.event_display_sec) {
-    place(event, 'map-recent-event', event.text, '<path d="m13-5 3 5-3 5-3-5Z"/>');
+    place(event, 'map-recent-event', event.text, mapEventArt(event.text));
   }
   const markup = entries.join('');
   if (rendered.get(layer) !== markup) { layer.innerHTML = markup; rendered.set(layer, markup); }
-  board.querySelectorAll('.map-mob').forEach(mob => mob.classList.toggle('is-fighting',
-    mob.getAttribute('data-cell') === byAx.get(hexKey(feet))?.getAttribute('data-cell') && state.group.length > 0));
+  board.querySelectorAll('.map-mob').forEach(mob => {
+    const fighting = mob.getAttribute('data-cell') === byAx.get(hexKey(feet))?.getAttribute('data-cell') && state.group.length > 0;
+    mob.classList.toggle('is-fighting', fighting);
+    mob.setAttribute('aria-label', `${mob.getAttribute('data-species') || 'Mob'} ${fighting ? 'in combat' : 'nearby'} on block ${mob.getAttribute('data-cell') || ''}`);
+  });
 }

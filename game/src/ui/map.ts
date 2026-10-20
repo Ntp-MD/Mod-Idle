@@ -241,6 +241,12 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
       marker = document.createElementNS(NS, 'g');
       marker.setAttribute('class', 'map-mob'); marker.setAttribute('data-cell', site.key);
       marker.setAttribute('role', 'img');
+      const stage = document.createElementNS(NS, 'image');
+      stage.setAttribute('class', 'map-mob-stage');
+      stage.setAttribute('href', '/map/mob-stage.png');
+      stage.setAttribute('x', '-25'); stage.setAttribute('y', '-38');
+      stage.setAttribute('width', '50'); stage.setAttribute('height', '42');
+      stage.setAttribute('preserveAspectRatio', 'xMidYMax meet');
       const shadow = document.createElementNS(NS, 'ellipse');
       shadow.setAttribute('class', 'map-mob-shadow');
       shadow.setAttribute('cx', '8'); shadow.setAttribute('cy', '2');
@@ -250,10 +256,11 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
       species.setAttribute('x', '-5'); species.setAttribute('y', '-24');
       species.setAttribute('width', '26'); species.setAttribute('height', '29');
       species.setAttribute('preserveAspectRatio', 'xMidYMax meet');
-      marker.append(shadow, species); parent.append(marker);
+      marker.append(stage, shadow, species); parent.append(marker);
     }
     if (marker.parentNode !== parent) parent.append(marker);
-    marker.setAttribute('aria-label', `${site.species} on block ${site.key}`);
+    marker.setAttribute('data-species', site.species);
+    marker.setAttribute('aria-label', `${site.species} nearby on block ${site.key}`);
     const art = mapSpeciesArt(site.species);
     const figure = marker.querySelector('image')!;
     figure.setAttribute('href', art || mobIcon(site.species));
