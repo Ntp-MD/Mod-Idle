@@ -26,6 +26,7 @@ describe('nearby map encounters', () => {
   });
   it('resolves map diorama art for every species present in a zone', () => {
     const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
+    expect(existsSync(resolve(publicDir, 'map/mob-stage.png'))).toBe(true);
     const species = new Set(E.mob.zones.flatMap((zone: any) => eng.speciesInZone(zone.id)));
     for (const id of species) {
       const art = mapSpeciesArt(id);

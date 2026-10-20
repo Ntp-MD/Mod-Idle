@@ -8,6 +8,9 @@
 .map-projection { position: absolute; inset: 0; }
 
 .map-mob { pointer-events: none; }
+.map-mob-stage { display: none; }
+.map-mob.is-fighting .map-mob-stage { display: block; }
+.map-mob.is-fighting .map-mob-shadow { opacity: 0; }
 .sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="unknown"] { opacity: .38; }
 .sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="scouted"] { opacity: .8; }
 .sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="explored"] { opacity: 1; }
@@ -45,6 +48,13 @@
 .map-patrol-stop.is-active .map-stop-flag { fill: #476d79; stroke: #f8d477; stroke-width: 1.5; }
 .map-stop-progress { fill: #e8c169; }
 .map-recent-event { fill: var(--gold); stroke: #694f29; }
+.map-event-food { fill: #c99a51; stroke: #594126; }
+.map-event-spring { fill: none; stroke: #91d2dc; }
+.map-event-mushroom { fill: #c6805c; stroke: #593a2c; }
+.map-event-sprig { fill: #a9c379; stroke: #47633d; }
+.map-recent-event .map-event-fire { fill: #efb84c; stroke: #af6028; }
+.map-unique-claw { fill: none; stroke: #d9ac4f; stroke-width: 1.8; }
+.map-unique-traces circle { fill: #402e29; stroke: #d9ac4f; stroke-width: 1.4; }
 @keyframes map-camp-smoke { to { stroke-dashoffset: -14; } }
 @keyframes map-camp-flame { 50% { opacity: .6; } }
 @keyframes map-mine-pulse { 50% { opacity: .72; } }

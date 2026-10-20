@@ -1,4 +1,4 @@
-import { E, TOWN } from '../engine/client';
+import { E, eng, TOWN } from '../engine/client';
 import type { GameState } from '../sim/types';
 import { currentCell } from '../sim/road';
 import { standingProgress } from '../sim/town';
@@ -21,6 +21,7 @@ export function campActivityArt(activity: CampActivity): string {
   return '';
 }
 
+<<<<<<< HEAD
 /** One block of the board as the sheet holds it: where it is and what stands on it. */
 export interface AdventureCell { ax: string; q: number; r: number; town: string | null; sub: boolean }
 /** What the board says about a block, before any of it reaches the DOM. */
@@ -125,6 +126,23 @@ export function adventureView(state: GameState, cells: AdventureCell[]): Adventu
 export function adventureTitle(original: string, town: boolean, discovery: MapKnowledge): string {
   if (discovery !== 'unknown') return original;
   return town ? original.replace(/\s*·\s*Lv\s*\d+[–-]\d+\s*$/, '') : 'Unexplored ground';
+=======
+export function hasUniqueTrace(speciesIds: string[]): boolean {
+  return speciesIds.some(id => eng.uniquesOf(id).length > 0);
+}
+
+export function mapEventArt(text: string): string {
+  const event = text.toLowerCase();
+  if (event.startsWith('abandoned camp')) return `${tent}<path class="map-event-fire" d="M1 4q-6-2-1-9q0 4 3 3q5 5-2 6Z"/>`;
+  if (event.startsWith('provision caravan')) return `<g transform="translate(8 4) scale(.7)">${cart}</g>`;
+  if (event.startsWith('hunting tracks')) return `<g transform="translate(2 6) scale(.8)">${tracks}</g>`;
+  if (event.startsWith('camp kitchen')) return campActivityArt('cook');
+  if (event.includes('clear spring')) return '<g class="map-event-spring"><path d="M-10 3q5-4 10 0t10 0M-8 7q4-3 8 0t8 0"/><path d="M0-9q-5 6 0 9q5-3 0-9Z"/></g>';
+  if (event.includes('mushroom')) return '<g class="map-event-mushroom"><path d="M-8 2q0-8 8-8t8 8H-8Z"/><path d="M-3 2v7h6V2"/></g>';
+  if (event.includes('sunroot') || event.includes('moonmint')) return '<path class="map-event-sprig" d="M0 9V-7m0 6q-9-7-10-1q5 5 10 1m0-4q8-8 10-2q-4 6-10 2"/>';
+  if (event.startsWith('found ')) return '<g class="map-event-food"><path d="M-7-2q0-5 7-5t7 5v10H-7Z"/><path d="M-4-2q4-4 8 0m-4-5v-3"/></g>';
+  return '<path d="m13-5 3 5-3 5-3-5Z"/>';
+>>>>>>> c0a8e1af8a35e683896d7dd6ac4d4cd6f33319b2
 }
 
 /** Read-only board scenery follows the real simulation; drawing consumes no gameplay randomness. */
@@ -135,6 +153,7 @@ export function paintMapAdventure(root: HTMLElement, state: GameState, terrainVi
   if (!layer) { layer = document.createElementNS('http://www.w3.org/2000/svg', 'g'); layer.id = 'map-adventure'; board.append(layer); }
   layer.setAttribute('pointer-events', 'none');
   layer.setAttribute('display', terrainView ? '' : 'none');
+<<<<<<< HEAD
   /* This paint runs on every tick, so no block may re-query the board for its own mark or scan a
      journal array that grows with playtime: cells, figures and the journal are indexed once here. */
   const cells: AdventureCell[] = [], byAx = new Map<string, SVGPolygonElement>();
@@ -160,6 +179,87 @@ export function paintMapAdventure(root: HTMLElement, state: GameState, terrainVi
     setIf(figure, 'data-discovery', mark.discovery);
     setIf(figure, 'data-activity', mark.activity);
     if (mark.standing != null) setIf(figure, 'data-standing', mark.standing);
+=======
+  const feet = currentCell(state), entries: string[] = [];
+  const cells = Array.from(svg.querySelectorAll<SVGPolygonElement>('polygon.cell'));
+  const byAx = new Map(cells.map(cell => [cell.getAttribute('data-ax'), cell]));
+  const place = (h: { q: number; r: number }, cls: string, label: string, art: string) => {
+    const cell = byAx.get(hexKey(h));
+    if (!cell) return;
+    const box = cell.getBBox();
+    entries.push(`<g class="${cls}" data-ax="${hexKey(h)}" transform="${mapUprightAt(box.x + box.width / 2, box.y + box.height / 2)}" role="img" aria-label="${esc(label)}"><title>${esc(label)}</title>${art}</g>`);
+  };
+  for (const cell of cells) {
+    const [q, r] = cell.getAttribute('data-ax')!.split(',').map(Number), h = { q, r };
+    const knowledge = mapKnowledge(state, h);
+    cell.setAttribute('data-discovery', knowledge);
+    const figure = board.querySelector(`[data-figure-ax="${q},${r}"]`);
+    figure?.classList.toggle('map-settlement-figure', cell.classList.contains('town'));
+    figure?.setAttribute('data-discovery', knowledge);
+    figure?.setAttribute('data-activity', hexDistance(feet, h) === 0
+      ? state.fieldwork.action?.kind || (state.group.length ? 'combat' : 'idle') : 'idle');
+    const town = cell.classList.contains('town') && cell.getAttribute('data-node');
+    if (town) {
+      const standing = standingProgress(state, town);
+      figure?.setAttribute('data-standing', String(standing.tier));
+      if (state.town.visited.includes(town) && standing.tier > 0) {
+        const name = `Standing ${TOWN.standing.tiers[standing.tier - 1]?.name || standing.tier}`;
+        place(h, 'map-town-life', name, `<g transform="translate(0 5) scale(.6)"><path class="map-town-banner" d="M-17 7V-9h9v9l-4-2-5 2"/>`
+          + '<path class="map-stall-wood" d="M6 8V2h10v6M4 8h14"/><path class="map-stall-cloth" d="M4 2l3-5h8l3 5Z"/>'
+          + (standing.tier > 1 ? '<path class="map-town-lamp" d="M-7 9V2m-2-3 2-4 2 4-2 3Z"/>' : '')
+          + (standing.tier > 2 ? '<path class="map-town-guild" d="M11-4v-9h7v7l-3 3-4-3m3-3 1-2 1 2-1 2Z"/>' : '') + '</g>');
+      }
+    } else if (cell.hasAttribute('data-sub')) {
+      const distance = hexDistance(feet, h);
+      if (knowledge === 'unknown' && distance <= MAP_EXPLORATION.reveal_radius + 1) {
+        place(h, 'map-wild-hint', 'Unidentified tracks · approach to scout this block', `<g transform="translate(3 9) scale(.5)">${tracks}</g>`);
+      } else if (knowledge !== 'unknown' && distance <= MAP_EXPLORATION.reveal_radius) {
+        const settlement = TOWN.settlements.find(row => row.id === cell.getAttribute('data-node'));
+        const species = settlement && cell.getAttribute('data-sub') != null
+          ? eng.zoneById(settlement.zone).subzones?.[Number(cell.getAttribute('data-sub'))]?.species || [] : [];
+        if (hasUniqueTrace(species)) {
+          place(h, 'map-unique-traces', 'Unique traces · review this sub-zone roster',
+            '<g transform="translate(-14 8) scale(.55)"><path class="map-unique-claw" d="m-8 6 3-9m3 10 3-12m3 11 3-9"/><circle cx="0" cy="0" r="10"/></g>');
+        }
+      }
+    }
+  }
+  for (const site of trailSites) {
+    if (mapKnowledge(state, site) === 'unknown') continue;
+    if (state.fieldwork.camp && hexDistance(state.fieldwork.camp.cell, site) === 0) continue;
+    const used = !!state.mapJournal?.claimedSites.includes(site.id);
+    const kind = trailSiteKind(site);
+    place(site, `map-trail-site${used ? ' is-explored' : ''}`, `${kind.name}${used ? ' · explored' : ' · walk here to investigate'}`,
+      site.kind === 'provision-caravan' ? `${tent}<g transform="translate(8 4) scale(.45)">${cart}</g>`
+        : site.kind === 'hunting-tracks' ? `<g transform="translate(3 9) scale(.65)">${tracks}</g>` : tent);
+  }
+  const event = state.mapJournal?.lastEvent;
+  const camp = state.fieldwork.camp;
+  if (camp) {
+    const here = hexDistance(feet, camp.cell) === 0 && !state.walk;
+    const action = here ? state.fieldwork.action?.kind : null;
+    const cooking = !!event && event.q === camp.cell.q && event.r === camp.cell.r
+      && event.text.startsWith('Camp kitchen') && state.clockSec - event.atSec <= MAP_EXPLORATION.event_display_sec;
+    const activity: CampActivity = action || (cooking ? 'cook' : null);
+    const activityName = activity === 'mine' ? 'Mining' : activity === 'grove' ? 'Woodcutting'
+      : activity === 'fish' ? 'Fishing' : activity === 'cook' ? 'Cooking' : '';
+    if (action === 'mine') place(camp.cell, 'map-mine-glow', 'Mining · working light on the ore seam', '<ellipse cx="5" cy="7" rx="17" ry="7"/>');
+    place(camp.cell, `map-field-camp${here ? ' is-occupied' : ''}${action ? ' is-working' : ''}`,
+      `Field Camp${activityName ? ` · ${activityName}` : ''}`, '<image href="/map/terrain/camp.png" x="-16" y="-16" width="29" height="25" preserveAspectRatio="xMidYMax meet"/>'
+      + campActivityArt(activity)
+      + '<path class="map-camp-smoke" d="M2-10q-4-5 0-9q4-4 0-8"/>'
+      + (here ? '<path class="map-camp-fire" d="M1 4q-6-2-1-9q0 4 3 3q5 5-2 6Z"/>' : '')
+      + (activityName ? `<text class="map-activity-label" x="0" y="15">${activityName}</text>` : ''));
+  }
+  state.patrol.stops.forEach((stop, i) => {
+    const active = state.patrol.active && state.patrol.index === i;
+    place(stop.cell, `map-patrol-stop${active ? ' is-active' : ''}`, `Patrol stop ${i + 1}${active ? ` · ${state.patrol.groupsCleared}/${E.road.patrol.groups_per_stop} groups` : ''}`,
+      `<path class="map-stop-flag" d="M-21 12V-8h12v15l-6-3-6 3"/><text class="map-stop-number" x="-15" y="1">${i + 1}</text>`
+      + (active ? `<rect class="map-stop-progress" x="-21" y="10" width="${12 * state.patrol.groupsCleared / E.road.patrol.groups_per_stop}" height="2"/>` : ''));
+  });
+  if (event && state.clockSec - event.atSec <= MAP_EXPLORATION.event_display_sec) {
+    place(event, 'map-recent-event', event.text, mapEventArt(event.text));
+>>>>>>> c0a8e1af8a35e683896d7dd6ac4d4cd6f33319b2
   }
   figures.forEach((figure, ax) => {
     const cell = byAx.get(ax);
@@ -181,7 +281,15 @@ export function paintMapAdventure(root: HTMLElement, state: GameState, terrainVi
     return `<g class="${placement.cls}" data-ax="${placement.ax}" transform="${mapUprightAt(box.x + box.width / 2, box.y + box.height / 2)}" role="img" aria-label="${esc(placement.label)}"><title>${esc(placement.label)}</title>${placement.art}</g>`;
   }).join('');
   if (rendered.get(layer) !== markup) { layer.innerHTML = markup; rendered.set(layer, markup); }
+<<<<<<< HEAD
   const feetCell = byAx.get(hexKey(currentCell(state)));
   board.querySelectorAll('.map-mob').forEach(mob => mob.classList.toggle('is-fighting',
     mob.getAttribute('data-cell') === feetCell?.getAttribute('data-cell') && state.group.length > 0));
+=======
+  board.querySelectorAll('.map-mob').forEach(mob => {
+    const fighting = mob.getAttribute('data-cell') === byAx.get(hexKey(feet))?.getAttribute('data-cell') && state.group.length > 0;
+    mob.classList.toggle('is-fighting', fighting);
+    mob.setAttribute('aria-label', `${mob.getAttribute('data-species') || 'Mob'} ${fighting ? 'in combat' : 'nearby'} on block ${mob.getAttribute('data-cell') || ''}`);
+  });
+>>>>>>> c0a8e1af8a35e683896d7dd6ac4d4cd6f33319b2
 }

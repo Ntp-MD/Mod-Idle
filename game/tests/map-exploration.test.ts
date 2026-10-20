@@ -7,8 +7,8 @@ import { movePatrolStop } from '../src/sim/exploration';
 import { establishCamp } from '../src/sim/fieldwork';
 import { destinationIntel } from '../src/ui/map-intel';
 import { destinationPrimary } from '../src/ui/destination';
-import { campActivityArt } from '../src/ui/map-adventure';
-import { E, TOWN } from '../src/engine/client';
+import { campActivityArt, hasUniqueTrace, mapEventArt } from '../src/ui/map-adventure';
+import { E, eng, TOWN } from '../src/engine/client';
 import {
   hexKey, hexDistance, investigateTrailSite, mapKnowledge, normalizeMapJournal,
   recordMapDiscovery, trailSiteKind, trailSites, MAP_EXPLORATION,
@@ -161,6 +161,18 @@ describe('map journal and trail sites', () => {
     expect(campActivityArt('fish')).toContain('map-fishing-rod');
     expect(campActivityArt('cook')).toContain('map-pot-steam');
     expect(campActivityArt(null)).toBe('');
+  });
+  it('marks actual Unique rosters and gives recent road events their own board art', () => {
+    const ids = new Set(E.mob.zones.flatMap((zone: any) => eng.speciesInZone(zone.id)));
+    const uniqueSpecies = [...ids].find(id => eng.uniquesOf(id).length > 0)!;
+    expect(hasUniqueTrace([uniqueSpecies])).toBe(true);
+    expect(hasUniqueTrace([])).toBe(false);
+    expect(mapEventArt('Found wild berries along the trail')).toContain('map-event-food');
+    expect(mapEventArt('A clear spring restores your strength · Hunger 20%')).toContain('map-event-spring');
+    expect(mapEventArt('Abandoned Camp · Hunger 30%')).toContain('map-event-fire');
+    expect(mapEventArt('Provision Caravan · Raw Game Meat ×2')).toContain('map-cart');
+    expect(mapEventArt('Hunting Tracks · surveyed nearby')).toContain('map-tracks');
+    expect(mapEventArt('Camp kitchen · Trail Stew ×1')).toContain('map-pot-steam');
   });
   it('refuses a trail-site reward during combat without erasing the current group', () => {
     const s = newGame(), site = trailSites.find(row => row.kind === 'provision-caravan')!;
