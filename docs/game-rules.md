@@ -23,6 +23,8 @@ Current intent and non-obvious behavior constraints. These can change with the o
 - Expedition tasks count only the named Species' Elites hunted from the named subzone, have no deadline, and use the Elite Tier-stone payout. Their offer share comes from the Elite share; combined share stays unchanged.
 - Auto-Return defaults off for older saves. At the configured bag threshold it finishes the current group, walks to the owning settlement, stashes unlocked gear and resumes if space was freed. Locked gear stays carried. If nothing moves, stop at town without selling or discarding.
 - Trail food uses the current region's `fieldwork.regional_sources.food`. Food and ambush rolls are independent; trail events add no currency or stone faucet.
+- The map journal remembers explored blocks and nearby scouted blocks. Only online movement expands the journal; old saves reconstruct known settlement centres and the current block without inventing travel history. Geography stays visible while unscouted encounter details remain hidden.
+- Authored trail sites are optional one-time stops per character: abandoned camps restore Hunger, provision caravans grant regional food under the existing bag-capacity rule, and hunting tracks survey surrounding blocks. Investigating requires standing on the site outside travel, recovery, dungeon runs and active fights; it stops hunting and pauses Patrol without clearing its itinerary. Establishing or relocating Field Camp also requires a clear field and pauses Patrol. A refused food bundle leaves the site available. These sites consume no loot RNG and grant no currency, stones or XP.
 
 ## Economy and town transactions
 

@@ -162,6 +162,7 @@ export function establishCamp(state: GameState): { ok: boolean; why?: string; mo
   if (state.walk) return { ok: false, why: 'finish the walk first' };
   if (state.phase === 'camp') return { ok: false, why: 'recovering after a Push' };
   if (state.dungeon) return { ok: false, why: 'leave the dungeon before setting Camp' };
+  if (state.group.length) return { ok: false, why: 'finish the fight first' };
   if (!state.cell || rankOf(state.cell) === 0) return { ok: false, why: 'Camp must be set on a field hex' };
   const feet = currentCell(state);
   const prior = state.fieldwork.camp;
@@ -180,6 +181,9 @@ export function establishCamp(state: GameState): { ok: boolean; why?: string; mo
   if (oreCost) state.fieldwork.materials.ore -= oreCost;
   const cell = { ...state.cell, q: feet.q, r: feet.r };
   state.fieldwork.camp = { cell, zone: zoneOf(feet) ?? state.zone };
+  state.patrol.active = false;
+  state.autoReturn.phase = 'idle';
+  state.autoReturn.resumeCell = null;
   state.fieldwork.action = null;
   state.group = [];
   state.hunting = false;

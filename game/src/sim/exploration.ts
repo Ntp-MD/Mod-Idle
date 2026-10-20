@@ -13,6 +13,15 @@ export const newAutoReturnState = (): AutoReturnState => ({
   enabled: CFG.auto_return_default, phase: 'idle', resumeCell: null,
 });
 
+export function movePatrolStop(state: GameState, index: number, direction: -1 | 1): boolean {
+  const next = index + direction;
+  if (state.patrol.active || state.walk || index < 0 || index >= state.patrol.stops.length || next < 0 || next >= state.patrol.stops.length) return false;
+  [state.patrol.stops[index], state.patrol.stops[next]] = [state.patrol.stops[next], state.patrol.stops[index]];
+  state.patrol.index = 0;
+  state.patrol.groupsCleared = 0;
+  return true;
+}
+
 const at = (a: { q: number; r: number } | null | undefined, b: { q: number; r: number } | null | undefined) =>
   !!a && !!b && a.q === b.q && a.r === b.r;
 

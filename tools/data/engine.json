@@ -13696,6 +13696,36 @@
     "mastery_divisor": 25
   },
   "fieldwork": {
+    "map_exploration": {
+      "reveal_radius": 1,
+      "tracks_radius": 2,
+      "event_display_sec": 45,
+      "kinds": {
+        "abandoned-camp": { "name": "Abandoned Camp", "description": "A sheltered fire pit and fresh water. Stop here to restore Hunger once.", "hunger_restore": 30 },
+        "provision-caravan": { "name": "Provision Caravan", "description": "Travelers have a spare bundle of the region's provisions. Collect it once.", "food_count": 2 },
+        "hunting-tracks": { "name": "Hunting Tracks", "description": "Follow the tracks to survey the surrounding blocks and learn their hunting grounds." }
+      },
+      "sites": [
+        { "id": "eastgate-trail", "q": 2, "r": -2, "kind": "abandoned-camp" },
+        { "id": "millbrook-trail", "q": -7, "r": -4, "kind": "provision-caravan" },
+        { "id": "ashfall-trail", "q": 6, "r": 2, "kind": "hunting-tracks" },
+        { "id": "ironrow-trail", "q": -12, "r": 5, "kind": "abandoned-camp" },
+        { "id": "wolf-cross-trail", "q": -2, "r": -3, "kind": "provision-caravan" },
+        { "id": "highspire-trail", "q": 1, "r": -5, "kind": "hunting-tracks" },
+        { "id": "bonegate-trail", "q": -1, "r": -7, "kind": "abandoned-camp" },
+        { "id": "frosthold-trail", "q": -6, "r": 3, "kind": "provision-caravan" },
+        { "id": "vermolch-trail", "q": -1, "r": 4, "kind": "hunting-tracks" },
+        { "id": "thornwake-trail", "q": 9, "r": -7, "kind": "abandoned-camp" },
+        { "id": "greyfen-trail", "q": 3, "r": 0, "kind": "provision-caravan" },
+        { "id": "saltmarrow-trail", "q": 4, "r": -4, "kind": "hunting-tracks" },
+        { "id": "emberhold-trail", "q": 11, "r": -5, "kind": "abandoned-camp" },
+        { "id": "duskmoor-trail", "q": 7, "r": -6, "kind": "provision-caravan" },
+        { "id": "nettlecrag-trail", "q": -7, "r": 0, "kind": "hunting-tracks" },
+        { "id": "blackwater-reach-trail", "q": 3, "r": -7, "kind": "abandoned-camp" },
+        { "id": "wyrmback-trail", "q": -11, "r": 3, "kind": "provision-caravan" },
+        { "id": "pale-spire-trail", "q": 7, "r": -2, "kind": "hunting-tracks" }
+      ]
+    },
     "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not replace ambushes. All rates and effects live here; map.json remains presentation only. Regional Mine and Grove bonus yields are authored per zone in regional_sources. Existing ore, timber and rarewood keep their keys and uses. Workshop recipes consume gathered materials at a settlement and produce trade goods; all cooking recipes also define edible cooked provisions.",
     "level_divisor": 100,
     "level_cap": 100,

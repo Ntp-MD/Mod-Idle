@@ -132,6 +132,9 @@ Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 | **Auto Eat** | Automatic consumption of carried provisions to restore Hunger. |
 | **provision** | Carried food or cooking ingredients. |
 | **trail event** | An independent travel-block event that finds the current zone's regional food or restores Hunger; it never replaces the block's ambush roll. |
+| **trail site** | An authored optional map stop offering a one-time regional provision bundle, Hunger restoration or a survey of surrounding blocks. |
+| **scouted block** | A block whose landmark and encounter details have been learned by approaching it or surveying Hunting Tracks. |
+| **explored block** | A block the character has stood on; the map journal remembers it across saves. |
 | **junk** | A flavoured drop from a **variant**, sold to the settlement Counterhand for gold. |
 | **trade good** | Carried junk, material, provision or farm herb that a town Counterhand buys; ingredients can instead be kept for their recipes and field uses. |
 | **Demand** | A town's unfilled appetite for one goods category. Supplying it lowers that category's premium until demand recovers over game time. |

@@ -23,6 +23,10 @@ import { buyBlackMarket } from './sim/black-market';
   import HudLayoutEditor from './ui/HudLayoutEditor.svelte';
   import { copyHudLayout, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_LAYOUT_VERSION, migrateHudLayout, regionStyleCss, salvageHudLayout, validGridArea, validateHudLayout, type GridArea, type HudLayout, type HudRegionId } from './ui/hud-layout';
   import TravelCard from './ui/TravelCard.svelte';
+  import MapJourney from './ui/MapJourney.svelte';
+  import { destinationIntel } from './ui/map-intel';
+  import { investigateTrailSite, recordMapDiscovery } from './sim/map-exploration';
+  import { movePatrolStop } from './sim/exploration';
   import { destinationPrimary } from './ui/destination';
   import TownHub from './ui/TownHub.svelte';
   import Market from './ui/Market.svelte';
@@ -36,7 +40,8 @@ import { buyBlackMarket } from './sim/black-market';
   import { KEYBINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/keybinds';
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
   import type { MenuItem } from './ui/menu';
-  import { ramp, cellLabel, paintSheet, type Picked } from './ui/map';
+  import { ramp, cellLabel, paintSheet, paintMapNames, type Picked } from './ui/map';
+  import { mapTravelPhase } from './ui/map-travel';
   import { setCastDrag, readCastDrag } from './ui/drag';
   import { snapCounters, buildAwayReport, fieldLabel, describeSnap } from './ui/hud';
   import { bar } from './ui/field';
@@ -67,7 +72,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   import { equipFromBag, autoEquip, unequip } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
   import { describe as describeGoal, lifeSkillMilestones } from './sim/goal';
-  import { hubIcon, icon, mobIcon, skillIcon } from './icon';
+  import { hubIcon, icon, skillIcon } from './icon';
   import { bossMark } from './icon';
   // The HUD's own marks, read off the same icon shelf the slots draw from by file name — no second asset set,
   // and no import to rewrite when a figure is redrawn, renamed or moved between category folders.
@@ -160,7 +165,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         targetSpecies: E.mob.zones[0].subzones?.[0]?.species?.[0] || 'goblin',
         subzone: 0, progress: 1,
       };
-    } else if (scenario !== 'field' && scenario !== 'craft-stash' && scenario !== 'map-mine') {
+    } else if (scenario !== 'field' && scenario !== 'craft-stash' && scenario !== 'map-mine' && scenario !== 'map-adventure') {
       const draws = [0, 0.99, 0, 0, 0];
       const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
       if (contract) {
@@ -220,12 +225,28 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         sample.fxSeq = events.length;
       }
     }
-    if (scenario === 'map-mine') {
+    if (scenario === 'map-mine' || scenario === 'map-adventure') {
       const svg = new DOMParser().parseFromString(mapOverlayRaw, 'image/svg+xml');
       const mine = svg.querySelector(`polygon.cell[data-node="${sample.town.waypoint}"][data-wild="${fieldwork.F.wild_site_index.mine}"]`);
       const axes = mine?.getAttribute('data-ax')?.split(',').map(Number);
       if (axes?.length === 2) sample.cell = { q: axes[0], r: axes[1], sub: null, wild: fieldwork.F.wild_site_index.mine };
       sample.group = []; sample.hunting = false; sample.fx = [];
+      recordMapDiscovery(sample);
+      if (scenario === 'map-adventure' && sample.cell) {
+        establishCamp(sample);
+        startFieldAction(sample, 'mine');
+        sample.fieldwork.hunger = fieldwork.F.hunger.max / 2;
+        const mineCell = { ...sample.cell };
+        const stops = Array.from(svg.querySelectorAll(`polygon.cell[data-node="${sample.town.waypoint}"][data-sub]`)).slice(0, E.road.patrol.max_stops);
+        sample.patrol.stops = stops.map(cell => {
+          const [q, r] = cell.getAttribute('data-ax')!.split(',').map(Number);
+          const subzone = Number(cell.getAttribute('data-sub'));
+          return { zone: sample.zone, subzone, cell: { q, r, sub: subzone, wild: null } };
+        });
+        for (const stop of sample.patrol.stops) { sample.cell = stop.cell; recordMapDiscovery(sample); }
+        sample.cell = mineCell; recordMapDiscovery(sample);
+        sample.counters.zoneKills[sample.zone] = Math.ceil(eng.SETTLEMENT_BUDGET_KILLS[sample.zone] * TOWN.standing.tiers[1].share);
+      }
     }
     return sample;
   }
@@ -286,6 +307,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // the game opens on the ground, not on the fight: the first read is where the character stands and
   // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame
   let panel = $state<PanelId | null>(showcaseMode ? null : 'map');
+  let travelScene = $state(false);
   let more = $state(false);
   let locationExpanded = $state(true);
   let controlsExpanded = $state(true);
@@ -536,6 +558,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const plates = $derived([...gameState.group]);
   /** the field is a fight, not a backdrop: cards answer to the Field tab or to a live fight only */
   const inCombat = $derived(gameState.phase === 'fighting' && gameState.group.length > 0);
+  const travelPhase = $derived(mapTravelPhase(travelScene, !!gameState.walk, inCombat));
+  const travelFeet = $derived.by(() => { const p = currentCell(gameState); return `${p.q},${p.r}`; });
   const showCombatCards = $derived(panel === null || inCombat);
   /** the row that last fired — a press or a buff coming up are both the order being worked — so the bar
    *  lights the slot that actually pressed instead of the one the eye expects */
@@ -975,6 +999,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
 
   function doEstablishCamp() {
+    if (!requireAccountWriter('setting Field Camp')) return;
     const r = establishCamp(gameState);
     saveNote = r.ok ? (r.moved ? `Camp moved · ${fieldCellName}` : `Camp established · ${fieldCellName}`) : `Cannot set Camp: ${r.why}`;
     if (r.ok) push(gameState, r.moved ? `Camp moved to ${fieldCellName}` : `Field Camp established at ${fieldCellName}`);
@@ -1012,7 +1037,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const r = cookMeal(gameState, id, count);
     const made = r.made ?? (r.ok ? 1 : 0);
     saveNote = r.ok ? `${recipe?.name || id} · ${made} cooked${r.why ? ` · stopped: ${r.why}` : ''}` : `Cannot cook: ${r.why}`;
-    if (r.ok) push(gameState, `Camp kitchen · ${recipe?.name || id} ×${made}`);
+    if (r.ok) {
+      const text = `Camp kitchen · ${recipe?.name || id} ×${made}`;
+      recordMapDiscovery(gameState);
+      gameState.mapJournal!.lastEvent = { ...currentCell(gameState), text, atSec: gameState.clockSec };
+      push(gameState, text);
+    }
     gameState = { ...gameState };
   }
 
@@ -1186,6 +1216,18 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let gateLevel = $state(1);
   let showWalk = $state(false);
   let showIds = $state(false);
+  const MAP_NAMES_KEY = 'modworld.map-names.v1';
+  let showMapNames = $state(true);
+  let hoveredMapCell = $state<string | null>(null);
+  let mapNameMeasure = $state(0);
+  onMount(() => {
+    try { showMapNames = localStorage.getItem(MAP_NAMES_KEY) !== 'hidden'; } catch { /* UI preference can stay in memory. */ }
+    void document.fonts.ready.then(() => mapNameMeasure++);
+  });
+  function setMapNames(show: boolean) {
+    showMapNames = show;
+    try { localStorage.setItem(MAP_NAMES_KEY, show ? 'shown' : 'hidden'); } catch { /* UI preference can stay in memory. */ }
+  }
   let mapHelpOpen = $state(false);
   /** the one copy of the generated sheet: the ground the field is drawn on, and the surface a place is
       pointed at. Map focus sharpens it; nothing else paints a second map */
@@ -1210,8 +1252,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // (owner ruling); the endless ground spans three fields past each edge, so the frame still rests on
   // drawn ground at the floor.
   const MAP_BASE_ZOOM = 2, MAP_MIN_ZOOM = 0.5, MAP_MAX_ZOOM = 6;
-  /** The frame the sheet opens on and `reset` returns to: three quarters of the drawn 100% frame. */
-  const MAP_OPEN_ZOOM = MAP_BASE_ZOOM * 0.75;
+  /** Open on the local tabletop scene; zooming out reveals the wider world. */
+  const MAP_OPEN_ZOOM = MAP_BASE_ZOOM * 1.5;
   const HEX_NEIGHBORS: ReadonlyArray<readonly [number, number]> = [
     [1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1],
   ];
@@ -1225,16 +1267,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // The map overlay with the travel pin toggled by id: the pin sits on the settlement you stand in,
   // the destination is marked while a walk runs, and the mark you have clicked is ringed. No
   // coordinate is read here — only settlement ids and cell keys the client already holds (X33 · M7).
-  const mapMarkup = $derived.by(() => {
-    let s = mapOverlayRaw.replace(/^<\?xml[^>]*\?>\s*/, '');
-    // the pin marks the settlement the feet are in; once a walk runs the character is on the road and
-    // only the hex mark tells the truth, so the pin does not stay planted behind it
-    if (!gameState.walk) s = s.replace(`<g class="pin" data-node="${townId}"`, `<g class="pin here" data-node="${townId}"`);
-    const walk = gameState.walk;
-    if (walk && walk.kind === 'town' && walk.node !== townId) s = s.replace(`<g class="pin" data-node="${walk.node}"`, `<g class="pin target" data-node="${walk.node}"`);
-    if (picked) s = s.replace(/<g class="node( capital)?" data-node="([a-z_]+)"/g, (m, cap, id) => (id === picked ? `<g class="node${cap || ''} picked" data-node="${id}"` : m));
-    return s;
-  });
+  const mapMarkup = mapOverlayRaw.replace(/^<\?xml[^>]*\?>\s*/, '');
   const rampCss = $derived(E.mob.zones.map((_: any, i: number) => ramp(i)).join(','));
   /**
    * The sheet is repainted after every `{@html}` rebuild — the fills, the walk graph, the cell ids, the
@@ -1246,7 +1279,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     void mapMarkup;
     const root = sheet;
     if (!root) return;
-    paintSheet(root, { view, gateLevel, showIds, showWalk, pickedCell, gameState });
+    paintSheet(root, { view, gateLevel, showIds, showWalk, pickedCell, gameState, townId });
+  });
+  $effect(() => {
+    const root = sheet, show = showMapNames, hovered = hoveredMapCell, selected = pickedCell?.key || null;
+    void zoom; void panX; void panY; void mapNameMeasure; void travelFeet;
+    if (!root) return;
+    const frame = requestAnimationFrame(() => paintMapNames(root, { show, hovered, picked: selected }));
+    return () => cancelAnimationFrame(frame);
   });
   /**
    * The clicked cell, read off the sheet's own marks. Every cell of the field is a place to stand
@@ -1272,11 +1312,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   function pickMapCell(cell: Element) {
     const next = cellLabel(cell);
+    mapHelpOpen = false;
     saveNote = '';
     pickedCell = next;
     picked = next.kind === 'bare' ? null : cell.getAttribute('data-node') || null;
   }
   function select(id: string) {
+    mapHelpOpen = false;
     const cell = settlementCell(id);
     if (picked === id && pickedCell?.kind === 'town') { picked = null; pickedCell = null; return; }
     picked = id;
@@ -1289,7 +1331,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const [q, r] = ax.split(',').map(Number);
     if (!Number.isFinite(q) || !Number.isFinite(r)) return null;
 
-    const box = origin.getBBox();
+    const box = origin.getBoundingClientRect();
     const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
     const [ux, uy] = direction;
     let nearest: SVGPolygonElement | null = null;
@@ -1297,7 +1339,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     for (const [dq, dr] of HEX_NEIGHBORS) {
       const candidate = sheet.querySelector<SVGPolygonElement>(`polygon.cell[data-ax="${q + dq},${r + dr}"]`);
       if (!candidate) continue;
-      const nextBox = candidate.getBBox();
+      const nextBox = candidate.getBoundingClientRect();
       const dx = nextBox.x + nextBox.width / 2 - cx;
       const dy = nextBox.y + nextBox.height / 2 - cy;
       const forward = dx * ux + dy * uy;
@@ -1345,12 +1387,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const svg = sheet?.querySelector('svg') as SVGSVGElement | null;
     const paper = svg?.querySelector('rect.paper') as SVGRectElement | null;
     if (!r || !svg || !paper) return;
-    const vb = svg.viewBox.baseVal;
-    const s = Math.min(r.width / vb.width, r.height / vb.height);
-    const left = (r.width - vb.width * s) / 2 + (Number(paper.getAttribute('x')) - vb.x) * s;
-    const top = (r.height - vb.height * s) / 2 + (Number(paper.getAttribute('y')) - vb.y) * s;
-    const right = left + Number(paper.getAttribute('width')) * s;
-    const bottom = top + Number(paper.getAttribute('height')) * s;
+    const bounds = paper.getBBox(), matrix = paper.getCTM();
+    if (!matrix) return;
+    const corners = [[bounds.x, bounds.y], [bounds.x + bounds.width, bounds.y],
+      [bounds.x, bounds.y + bounds.height], [bounds.x + bounds.width, bounds.y + bounds.height]]
+      .map(([x, y]) => new DOMPoint(x, y).matrixTransform(matrix));
+    const left = Math.min(...corners.map(p => p.x)), right = Math.max(...corners.map(p => p.x));
+    const top = Math.min(...corners.map(p => p.y)), bottom = Math.max(...corners.map(p => p.y));
     const ox = r.width / 2, oy = r.height * .46;
     // the stop is kept half a frame further out than the edge itself, so the edge is never on screen
     const mx = r.width / 2, my = r.height / 2;
@@ -1373,6 +1416,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   function mapReset() {
     zoom = MAP_OPEN_ZOOM; panX = 0; panY = 0;
+    requestAnimationFrame(mapCentre);
   }
   /**
    * Centre on the settlement you stand in. The cell is measured in the sheet's own units and put
@@ -1382,16 +1426,47 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function mapCentre() {
     const r = sheet?.getBoundingClientRect();
     const svg = sheet?.querySelector('svg') as SVGSVGElement | null;
-    const cell = sheet?.querySelector(`polygon.cell.town[data-node="${townId}"]`) as SVGGraphicsElement | null;
+    const feet = currentCell(gameState);
+    const cell = sheet?.querySelector(`polygon.cell[data-ax="${feet.q},${feet.r}"]`) as SVGGraphicsElement | null;
     if (!r || !svg || !cell) return;
-    const vb = svg.viewBox.baseVal, b = cell.getBBox();
-    const s = Math.min(r.width / vb.width, r.height / vb.height);
-    const cx = (r.width - vb.width * s) / 2 + (b.x + b.width / 2 - vb.x) * s - r.width / 2;
-    const cy = (r.height - vb.height * s) / 2 + (b.y + b.height / 2 - vb.y) * s - r.height * .46;
+    const b = cell.getBBox(), matrix = cell.getCTM();
+    if (!matrix) return;
+    const point = new DOMPoint(b.x + b.width / 2, b.y + b.height / 2).matrixTransform(matrix);
+    const cx = point.x - r.width / 2;
+    const cy = point.y - r.height * .46;
     panX = -zoom * cx;
     panY = -zoom * cy;
     mapClampPan(zoom);
   }
+  $effect(() => {
+    if (!sheet || panel !== 'map') return;
+    const frame = requestAnimationFrame(mapCentre);
+    return () => cancelAnimationFrame(frame);
+  });
+  $effect(() => {
+    const phase = travelPhase;
+    if (phase === 'travel') panel = 'map';
+    if (phase === 'arrived') travelScene = false;
+    if (phase !== 'combat') return;
+    const duration = prefersReducedMotion.current ? 0 : parseFloat(getComputedStyle(sheet!).getPropertyValue('--motion-map')) || 450;
+    const timer = setTimeout(() => {
+      if (panel === 'map') panel = null;
+      if (!gameState.walk) travelScene = false;
+    }, duration);
+    return () => clearTimeout(timer);
+  });
+  $effect(() => {
+    void travelFeet;
+    if (travelPhase !== 'travel' && travelPhase !== 'combat') return;
+    const frame = requestAnimationFrame(mapCentre);
+    return () => cancelAnimationFrame(frame);
+  });
+  $effect(() => {
+    if (!showcaseMode || !travelScene) return;
+    // The showcase can preview a requested walk through the real simulator without touching saves.
+    const timer = setInterval(() => { if (running && !paused) step(); }, 1000 / speed);
+    return () => clearInterval(timer);
+  });
   /**
    * The handlers and the sheet reference are bound by an action rather than a directive: the field
    * arrives as inlined `{@html}` the compiler never sees, so there is no element for a binding to sit on.
@@ -1411,7 +1486,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       moved = false;
     };
     const onMove = (ev: PointerEvent) => {
-      if (!down) return;
+      if (!down) {
+        if (ev.pointerType !== 'touch') hoveredMapCell = (ev.target as Element)?.closest('polygon.cell')?.getAttribute('data-cell') || null;
+        return;
+      }
+      hoveredMapCell = null;
       const dx = ev.clientX - down.x, dy = ev.clientY - down.y;
       if (!moved && Math.hypot(dx, dy) < 4) return;
       // the sheet claims the pointer only once the drag is real: capturing on the press retargets the
@@ -1431,6 +1510,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       ev.preventDefault();
       mapZoomAt(ev.clientX, ev.clientY, ev.deltaY < 0 ? 1.12 : 1 / 1.12);
     };
+    const onLeave = () => { hoveredMapCell = null; };
+    const onTransform = (ev: Event) => { if ((ev.target as Element).classList.contains('map-sheet')) mapNameMeasure++; };
+    const measure = new ResizeObserver(() => mapNameMeasure++);
+    measure.observe(node);
     node.addEventListener('click', click);
     node.addEventListener('keydown', key);
     node.addEventListener('pointerdown', onDown);
@@ -1438,7 +1521,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     node.addEventListener('pointerup', onUp);
     node.addEventListener('pointercancel', onUp);
     node.addEventListener('wheel', onWheel, { passive: false });
+    node.addEventListener('pointerleave', onLeave);
+    node.addEventListener('transitionend', onTransform);
     return { destroy() {
+      measure.disconnect();
+      node.removeEventListener('pointerleave', onLeave);
+      node.removeEventListener('transitionend', onTransform);
       if (sheet === node) sheet = null;
       node.removeEventListener('click', click);
       node.removeEventListener('keydown', key);
@@ -1450,6 +1538,25 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     } };
   }
   const pickedSettlement = $derived(pickedCell ? settlementById(ownerOf({ q: pickedCell.q, r: pickedCell.r }).id) : null);
+  // The tools and destination share the left HUD space; selecting a destination folds the tools,
+  // and reopening the tools releases the selection rather than covering either set of controls.
+  $effect(() => {
+    if (panel === 'map' && mapHelpOpen && pickedCell) {
+      pickedCell = null;
+      picked = null;
+    }
+  });
+  let automaticWalkKey = $state('');
+  $effect(() => {
+    const walk = gameState.walk;
+    if (!walk) { automaticWalkKey = ''; return; }
+    if (!gameState.patrol.active && gameState.autoReturn.phase === 'idle') return;
+    const key = `${walk.from.q},${walk.from.r}:${walk.to.q},${walk.to.r}`;
+    if (key === automaticWalkKey) return;
+    automaticWalkKey = key;
+    travelScene = true;
+    panel = 'map';
+  });
   /**
    * The card's whole subject: the picked cell, what stands on it, what it costs to reach from where the
    * feet are, and whether the feet are already there.
@@ -1473,6 +1580,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     };
   });
   const pickedPrimary = $derived(pickedDest ? destinationPrimary(gameState, pickedDest, transactionWriter) : null);
+  const pickedIntel = $derived(pickedCell && pickedDest?.node ? destinationIntel(gameState, pickedCell, pickedDest.node, pickedDest.blocks) : null);
+
+  function doInvestigateTrailSite() {
+    if (!requireAccountWriter('investigating a trail site') || !pickedIntel?.site) return;
+    const result = investigateTrailSite(gameState, pickedIntel.site.id);
+    saveNote = result.ok ? result.message || 'Site explored' : result.why || 'Cannot investigate';
+    if (result.ok) push(gameState, saveNote);
+    gameState = { ...gameState };
+  }
+  function locateMapHex(hex: { q: number; r: number }) {
+    const cell = sheet?.querySelector(`polygon.cell[data-ax="${hex.q},${hex.r}"]`);
+    if (cell) pickMapCell(cell);
+  }
+  function reorderPatrol(index: number, direction: -1 | 1) {
+    if (!requireAccountWriter('reordering Patrol')) return;
+    if (movePatrolStop(gameState, index, direction)) gameState = { ...gameState };
+  }
 
   function clearMapSelection() {
     picked = null; pickedCell = null; saveNote = '';
@@ -1485,6 +1609,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (action.kind !== 'town' && !requireAccountWriter('using this destination')) return;
     switch (action.kind) {
       case 'walk': doWalk(pickedCell); break;
+      case 'investigate': doInvestigateTrailSite(); break;
       case 'town': panel = 'desk'; break;
       case 'hunt': doHuntHere(); break;
       case 'dungeon': doDungeon(); break;
@@ -1493,68 +1618,30 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       case 'stop-gather': doStopFieldAction(); break;
     }
   }
-  /**
-   * The destination card's place on screen: the end of its anchor that has the room — above
-   * the picked cell's own mark, or below it when the sheet's top edge is nearer — clear of the menu rail and inside the map.
-   * The card is placed by the box it measures, so the measure runs again whenever the sheet moves the
-   * cell (a pan or a zoom) or the pick moves to another cell.
-   */
-  let cardAt = $state<{ x: number; y: number } | null>(null);
   let mapcardEl = $state<HTMLDivElement | null>(null);
-  let mapcardMeasure = $state(0);
+  // The card owns the existing Panels HUD region. Move the scene only if a new selection
+  // would land underneath that region; expanding details never moves the card over the map.
   $effect(() => {
-    const card = mapcardEl;
-    if (!card) return;
-    const observer = new ResizeObserver(() => mapcardMeasure++);
-    observer.observe(card);
-    const resize = () => mapcardMeasure++;
-    window.addEventListener('resize', resize);
-    return () => { observer.disconnect(); window.removeEventListener('resize', resize); };
-  });
-  $effect(() => {
-    if (!pickedCell || panel !== 'map' || !sheet) { cardAt = null; return; }
-    // zoom, pan and the mounted card are read for the tracking alone: the rects below already carry
-    // them physically, and the reads are what make the measure rerun when they move
-    void zoom; void panX; void panY; void mapcardEl; void mapcardMeasure;
-    const poly = sheet.querySelector(`polygon.cell[data-ax="${pickedCell.q},${pickedCell.r}"]`) as SVGGraphicsElement | null;
-    if (!poly) { cardAt = null; return; }
-    const b = poly.getBoundingClientRect();
-    const area = sheet.getBoundingClientRect();
-    const m = Number.parseFloat(getComputedStyle(sheet).getPropertyValue('--spacing-md')) || 0;
-    const railBottom = document.querySelector('.stage nav.rail')?.getBoundingClientRect().bottom ?? area.top;
-    const stage = document.querySelector('.stage')?.getBoundingClientRect();
-    const minY = Math.max(area.top + m, railBottom + m, (stage?.top ?? 0) + m);
-    const safeBottom = Math.min(area.bottom, window.innerHeight);
-    const availableHeight = Math.max(0, safeBottom - minY - m);
-    if (mapcardEl && availableHeight > 0) mapcardEl.style.maxHeight = `${availableHeight}px`;
-    const cw = mapcardEl?.offsetWidth ?? 0;
-    const ch = mapcardEl?.offsetHeight ?? 0;
-    const maxY = Math.max(minY, safeBottom - ch - m);
-    const aboveY = b.top - ch - m;
-    const belowY = b.bottom + m;
-    const centreX = b.left + b.width / 2;
-    const blockers = Array.from(document.querySelectorAll('.field-feed, .field-objectives, .topright, .field-travel-actions, .commands-dock, .targetbar, .combat-player-slot'))
-      .map((el) => el.getBoundingClientRect());
-    const clampX = (value: number) => cw
-      ? Math.min(area.right - cw / 2 - m, Math.max(area.left + cw / 2 + m, value))
-      : value;
-    const xCandidates = [...new Set([centreX, ...blockers.flatMap((r) => [r.left - cw / 2 - m, r.right + cw / 2 + m])].map(clampX))];
-    const yCandidates = [...new Set([aboveY, belowY, minY, maxY])].filter((y) => y >= minY && y <= maxY);
-    const placements = xCandidates.flatMap((x) => yCandidates.map((y) => {
-      const collisions = blockers.reduce((sum, r) => {
-        const w = Math.max(0, Math.min(x + cw / 2, r.right) - Math.max(x - cw / 2, r.left));
-        const h = Math.max(0, Math.min(y + ch, r.bottom) - Math.max(y, r.top));
-        return sum + w * h;
-      }, 0);
-      const distance = Math.abs(x - centreX) + Math.abs(y - aboveY);
-      return { x, y, score: collisions * 1000 + distance };
-    }));
-    const best = placements.sort((a, bY) => a.score - bY.score)[0];
-    const x = best?.x ?? clampX(centreX);
-    const y = best?.y ?? minY;
-    // `.stage` owns the map transform, so its fixed descendants resolve left/top from that containing block.
-    // The measurements above are viewport coordinates; convert them back before assigning inline offsets.
-    cardAt = { x: x - (stage?.left ?? 0), y: y - (stage?.top ?? 0) };
+    const selected = pickedCell, card = mapcardEl, field = sheet;
+    void hudLayout;
+    if (!selected || !card || !field || panel !== 'map') return;
+    const frame = requestAnimationFrame(() => {
+      const cell = field.querySelector(`polygon.cell[data-cell="${selected.key}"]`);
+      if (!cell) return;
+      const boxes = [cell, field.querySelector(`.map-mob[data-cell="${selected.key}"]`),
+        field.querySelector(`[data-figure-ax="${selected.q},${selected.r}"]`)]
+        .filter((el): el is Element => !!el).map(el => el.getBoundingClientRect());
+      const left = Math.min(...boxes.map(b => b.left)), right = Math.max(...boxes.map(b => b.right));
+      const top = Math.min(...boxes.map(b => b.top)), bottom = Math.max(...boxes.map(b => b.bottom));
+      const panelBox = card.getBoundingClientRect(), area = field.getBoundingClientRect();
+      if (right <= panelBox.left || left >= panelBox.right || bottom <= panelBox.top || top >= panelBox.bottom) return;
+      const gap = parseFloat(getComputedStyle(field).getPropertyValue('--spacing-md')) || 16;
+      const moves = [panelBox.right + gap - left, panelBox.left - gap - right]
+        .filter(dx => left + dx >= area.left + gap && right + dx <= area.right - gap)
+        .sort((a, b) => Math.abs(a) - Math.abs(b));
+      if (moves.length) { panX += moves[0]; mapClampPan(zoom); }
+    });
+    return () => cancelAnimationFrame(frame);
   });
   /**
    * The settlement the panel speaks for: the one under the pick, or the one you stand in when nothing
@@ -1717,7 +1804,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (!requireAccountWriter('starting Patrol')) return;
     const result = startPatrolRun(gameState);
     if (!result.ok) saveNote = `Cannot start Patrol: ${result.why}`;
-    else { push(gameState, `Patrol started · ${gameState.patrol.stops.length} stops`); saveNote = ''; }
+    else {
+      push(gameState, `Patrol started · ${gameState.patrol.stops.length} stops`); saveNote = '';
+      travelScene = true; panel = 'map';
+      if (showcaseMode) running = true;
+    }
     gameState = { ...gameState };
   }
 
@@ -1756,6 +1847,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (r.forfeit) push(gameState, r.forfeit);
     push(gameState, `Waypoint to ${s.name} — ${r.gold} gold for the ${saved} blocks it saves`);
     fx(gameState, { kind: 'warp', side: 'self', text: `warp · ${s.name}`, colour: hitColour(null) });
+    recordMapDiscovery(gameState);
     gameState = { ...gameState };
   }
 
@@ -1766,10 +1858,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (!requireAccountWriter('walking')) return;
     const r = startWalk(gameState, dest);
     if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
-    // the walk takes the frame: the map closes and the field carries the walking read, because a sharp
-    // map and the HUD cannot share a square. The pick is spent with it —
-    // in field view the card has no box left to measure, and a card parked there sits on the player's own card.
-    panel = null;
+    // Travel stays on the board; the presentation switches to combat after the pawn settles.
+    travelScene = true;
+    if (showcaseMode) running = true;
+    panel = 'map';
     picked = null;
     pickedCell = null;
     if (r.forfeit) push(gameState, r.forfeit);
@@ -2168,12 +2260,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           bleed: { stacks: 1, secLeft: 6, perSec: 8 },
         } : {};
         bench = null; benchNote = ''; picked = null; pickedCell = null;
-        panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' ? 'map' : null;
+        panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' || showcaseSample === 'map-adventure' ? 'map' : null;
         if (showcaseSample === 'expedition') deskTab = 'guild'; marketView = 'deliveries'; marketTownId = '';
       }}>
         <option value="field">Field baseline</option><option value="delivery">Delivery want</option><option value="full-bag">Delivery reward bag full</option>
         <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option>
-        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="map-mine">Map · Mine & Camp</option>
+        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option>
       </select></label>
     </div>
     <a href="/">Return to the game</a>
@@ -2216,7 +2308,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     use:mapField
   >
     <div class="map-sheet" style:transform={`translate(${panX.toFixed(1)}px, ${panY.toFixed(1)}px) scale(${zoom.toFixed(4)})`}>
-      {@html mapMarkup}
+      <div class="map-projection">{@html mapMarkup}</div>
     </div>
     <span class="aloud" aria-live="polite" aria-atomic="true">{pickedCell ? `Selected block ${pickedCell.key}: ${pickedCell.label}` : ''}</span>
   </div>
@@ -2277,7 +2369,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <div class="map-guide" class:open={mapHelpOpen} class:surface-popover={mapHelpOpen}>
         <CollapseToggle label="Map tools" controls="map-tools-content" bind:expanded={mapHelpOpen} />
         <div id="map-tools-content" class="map-tools-content hub-collapsible" hidden={!mapHelpOpen}>
-          <details class="map-tools-section" name="map-tools-sections" open>
+          <MapJourney state={gameState} writable={transactionWriter} onSelect={locateMapHex}
+            onStart={doStartPatrol} onStop={doStopPatrol} onClear={doClearPatrol} onMove={reorderPatrol} />
+          <details class="map-tools-section" name="map-tools-sections">
             <summary><span>Controls</span><svg class="icon-chevron map-tools-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
             <div class="map-tools">
               <div role="group" aria-label="Map zoom" class="map-zoom">
@@ -2299,6 +2393,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
                 <label class="map-level text-note">Level <input aria-label="Map level gate" type="range" min={firstBand[0]} max={lastBand[1]} bind:value={gateLevel} /> <output>{gateLevel}</output></label>
               {/if}
               <div class="map-overlays" role="group" aria-label="Map overlays">
+                <label title="Show area names; towns always, subzones only when zoomed close, wild sides and levels on hover/select"><input type="checkbox" checked={showMapNames} onchange={event => setMapNames(event.currentTarget.checked)} /> Area names</label>
                 <label title="Show walking connections between settlements"><input type="checkbox" bind:checked={showWalk} /> Connections</label>
                 <label title="Show hex cell identifiers"><input type="checkbox" bind:checked={showIds} /> Cell IDs</label>
               </div>
@@ -2518,22 +2613,21 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     </div>
   {/if}
 
-  <!-- the walk card, anchored to the cell it speaks for in map focus -->
+  <!-- Destination details use the shared Panels HUD region beside the map scene. -->
   {#if pickedSettlement && pickedDest && pickedPrimary && panel === 'map'}
-    <div class="mapcard" bind:this={mapcardEl}
-         style:left={cardAt ? `${cardAt.x.toFixed(1)}px` : null}
-         style:top={cardAt ? `${cardAt.y.toFixed(1)}px` : null}
-         style:bottom={cardAt ? 'auto' : null}
-         style:transform={cardAt ? 'translateX(-50%)' : null}>
+    <div class="mapcard" bind:this={mapcardEl} data-hud-region="panels" style={place('panels')}>
       <TravelCard
         settlement={pickedSettlement}
         dest={pickedDest}
         primary={pickedPrimary}
+        intel={pickedIntel}
+        onSetCamp={doEstablishCamp}
         notice={saveNote}
         writable={transactionWriter}
         campHere={pickedDest.self && fieldCampHere}
         campHunting={pickedDest.self && fieldCampHere && gameState.hunting}
         busy={!!gameState.walk || gameState.phase === 'camp'}
+        fightActive={gameState.group.length > 0}
         warpReason={pickedDest.node === gameState.town.waypoint ? 'This is your current Waypoint.' : ''}
         patrol={gameState.patrol}
         autoReturnEnabled={gameState.autoReturn.enabled}
@@ -3600,8 +3694,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
     --dof: var(--dof-rest);
 
-    --map-lift: .92;
-    --map-sat: .85;
+    --map-lift: .58;
+    --map-sat: .72;
 
     opacity: calc(1 - var(--dof) / 12);
 
@@ -3620,6 +3714,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     background: radial-gradient(ellipse 88% 80% at 50% 48%, transparent 74%,
       color-mix(in srgb, var(--ground) 58%, transparent) 88%,
       color-mix(in srgb, var(--ground) 98%, transparent) 100%);
+  }
+  .stage.mapmode .map-back::after {
+    background: radial-gradient(ellipse 88% 80% at 50% 48%, transparent 74%,
+      rgba(92, 69, 36, .12) 88%, rgba(67, 48, 25, .24) 100%);
   }
 
   .map-sheet {
@@ -3645,7 +3743,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   .map-back.dragging { cursor: grabbing; transition: opacity var(--motion-ui) var(--ease-ui), filter var(--motion-ui) var(--ease-ui); }
   /* cards mount by state (`showCombatCards`); these rules only shape the fight-over-map overlap */
-  .stage.mapmode .field { display: block; pointer-events: none; }
+  .stage.mapmode .field { display: none; pointer-events: none; }
   :global(.stage.mapmode .field > :not(.combat-player-slot)) { display: none; }
   :global(.stage.mapmode .field .combat-player-slot) { pointer-events: none; }
   :global(.stage.mapmode .field .combat-player-slot button) { pointer-events: auto; }
@@ -3688,9 +3786,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-legend .ramp i { flex: 1; width: auto; }
 
   .mapcard {
-    position: fixed; left: 50%; bottom: clamp(58px, 4.45vw, 124px); transform: translateX(-50%);
-    width: min(clamp(350px, 27.11vw, 756px), 52%); z-index: var(--z-highlight); overflow-y: auto;
+    grid-area: panels; position: relative; display: flex; flex-direction: column;
+    min-width: 0; min-height: 0; max-height: 100%;
+    z-index: var(--z-highlight); overflow-y: auto;
   }
+  .mapcard :global(.dest) { flex: none; }
   .picklist tr { cursor: pointer; }
   .picklist tr.picked { background: var(--panel); }
   .desk-content .picklist .mob-hp { white-space: nowrap; }
@@ -3715,7 +3815,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       linear-gradient(180deg, var(--ground) 0%, var(--ground-2) 45%, var(--ground-3) 100%);
   }
   .stage.showcase { position: relative; inset: auto; width: 100%; height: auto; min-height: 0; }
-  .stage.showcase .mapcard { position: absolute; }
 
   .stage::after {
     content: ''; position: absolute; inset: 0; z-index: var(--z-underlay); pointer-events: none;

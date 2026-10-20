@@ -1,0 +1,42 @@
+/** Completed tabletop figures; unpainted species keep their existing icon. */
+const SPECIES_ART: Readonly<Record<string, string>> = {
+  kobold: '/map/species/kobold.png',
+  goblin: '/map/species/goblin.png',
+  lizardman: '/map/species/lizardman.png',
+  orc: '/map/species/orc.png',
+  ogre: '/map/species/ogre.png',
+  troll: '/map/species/troll.png',
+  minotaur: '/map/species/minotaur.png',
+  skeleton: '/map/species/skeleton.png',
+  mummy: '/map/species/mummy.png',
+  vampire: '/map/species/vampire-v2.png',
+  demon: '/map/species/demon.png',
+  slime: '/map/species/slime.png',
+  spider: '/map/species/spider.png',
+  wolf: '/map/species/wolf.png',
+  golem: '/map/species/golem.png',
+  dragon: '/map/species/dragon.png',
+  treant: '/map/species/treant-v2.png',
+  human: '/map/species/human.png',
+  elf: '/map/species/elf-v2.png',
+  giant: '/map/species/giant.png',
+  werewolf: '/map/species/werewolf.png',
+  dryad: '/map/species/dryad.png',
+  siren: '/map/species/siren.png',
+  wraith: '/map/species/wraith.png',
+  imp: '/map/species/imp.png',
+  wyvern: '/map/species/wyvern.png',
+  beetle: '/map/species/beetle-v2.png',
+  hornet: '/map/species/hornet.png',
+  ooze: '/map/species/ooze.png',
+  mist: '/map/species/mist.png',
+  salamander: '/map/species/salamander.png',
+  wisp: '/map/species/wisp.png',
+  shark: '/map/species/shark.png',
+  crab: '/map/species/crab-v2.png',
+  archon: '/map/species/archon-v2.png',
+};
+
+export function mapSpeciesArt(species: string): string | undefined {
+  return SPECIES_ART[species.toLowerCase()];
+}

@@ -348,6 +348,7 @@ export interface GameState {
   cell: Cell | null;
   patrol: PatrolState;
   autoReturn: AutoReturnState;
+  mapJournal?: import('./map-exploration').MapJournal;
   skills: SkillState;
   /** seven squares above the skill bar, each holding a carried potion's name or nothing */
   quickbar: (string | null)[];

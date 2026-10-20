@@ -5,6 +5,7 @@ import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive,
 import { newTown } from '../sim/town';
 import { normalizeDeliveries } from '../sim/delivery';
 import { normalizeExplorationState } from '../sim/exploration';
+import { normalizeMapJournal } from '../sim/map-exploration';
 import { newFarm, QUICKBAR_SLOTS } from '../sim/farm';
 import { slotsAvailable, slotsUsed } from '../sim/slots';
 import { newFieldwork } from '../sim/fieldwork';
@@ -396,6 +397,7 @@ function repairLegacyAutoSpend(s: GameState): void {
 
 /** A save written by an earlier build is missing whole subsystems; fill the shape in. */
 export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): GameState {
+  if (!Number.isInteger(fromVersion) || fromVersion < 0 || fromVersion > SCHEMA_VERSION) throw new Error(`schema version ${fromVersion} is not supported`);
   if (fromVersion < 4) {
     for (const item of s.gear || []) restampItem(item);
     for (const item of s.bag || []) restampItem(item);
@@ -549,6 +551,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // v16 · optional saved Patrol and Auto-Return backfill to an empty, disabled route; existing
   // inventory, task progress and location are preserved.
   normalizeExplorationState(s);
+  normalizeMapJournal(s);
   // Additive market records preserve every existing stack and gold balance. Empty supply means full demand.
   s.town.market ||= {};
   s.town.marketCredit ??= 0;

@@ -8,7 +8,7 @@
   const thumb = $derived.by(() => {
     const doc = new DOMParser().parseFromString(markup, 'image/svg+xml');
     const svg = doc.documentElement;
-    const base = (svg.getAttribute('viewBox') || '0 0 100 100').split(/\s+/).map(Number);
+    const base = (svg.getAttribute('data-plan-view-box') || svg.getAttribute('viewBox') || '0 0 100 100').split(/\s+/).map(Number);
     let cells = '';
     for (const p of Array.from(svg.querySelectorAll('polygon.cell'))) {
       p.querySelector('title')?.remove();

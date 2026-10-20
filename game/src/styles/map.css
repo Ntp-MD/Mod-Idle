@@ -1,19 +1,112 @@
 
 
-.sheet svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sheet .map-projection > svg { display: block; width: 100%; height: auto; overflow: visible; }
 .sheet svg text { text-anchor: middle; dominant-baseline: central; user-select: none; }
 
-.map-back svg { width: 100%; height: 100%; }
+.map-back .map-projection > svg { width: 100%; height: 100%; }
+
+.map-projection { position: absolute; inset: 0; }
+
+.map-mob { pointer-events: none; }
+.sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="unknown"] { opacity: .38; }
+.sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="scouted"] { opacity: .8; }
+.sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="explored"] { opacity: 1; }
+.map-mob.is-fighting .map-mob-species { transform-box: fill-box; transform-origin: 50% 100%; animation: map-mob-battle 1.2s var(--ease-glide) infinite; }
+@keyframes map-mob-battle { 50% { transform: translate(-1px, -1px) rotate(-3deg); } }
+#map-adventure path { stroke-linejoin: round; stroke-linecap: round; stroke-width: 1; }
+.map-tent { fill: #b58245; stroke: #4f3621; }
+.map-cart { fill: #ad7252; stroke: #442d22; }
+.map-cart-wheel { fill: #533c28; stroke: #d3b57d; }
+.map-tracks { fill: #634e30; stroke: #d1b983; }
+.map-wild-hint { opacity: .65; }
+.map-trail-site.is-explored { opacity: .4; }
+.map-town-banner { fill: var(--gold); stroke: #604625; }
+.map-stall-wood { fill: #6c4b31; stroke: #3c2a1a; }
+.map-stall-cloth { fill: #bc7655; stroke: #54382c; }
+.map-town-lamp { fill: #f9db7e; stroke: #8c672c; filter: drop-shadow(0 0 2px #ffc961); }
+.map-town-guild { fill: #76629f; stroke: #ddbd79; }
+.map-camp-smoke { fill: none; stroke: #e2dac0; opacity: .5; stroke-dasharray: 4 3; animation: map-camp-smoke 3s linear infinite; }
+.map-camp-fire { fill: #efb84c; stroke: #af6028; animation: map-camp-flame 1.5s ease-in-out infinite; }
+.map-mine-glow ellipse { fill: #f3c966; opacity: .42; filter: drop-shadow(0 0 3px #ffcf63); animation: map-mine-pulse 1.7s ease-in-out infinite; }
+.map-camp-props path { stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.2; }
+.map-pickaxe, .map-axe { fill: #92714d; stroke: #39291b; }
+.map-ore { fill: #8fbbb1; stroke: #415c50; }
+.map-log { fill: #98704b; stroke: #49311f; }
+.map-fishing-rod, .map-fish-ripple { fill: none; stroke: #d8c38c; }
+.map-pot-steam { fill: none; stroke: #e2dac0; animation: map-cook-steam 2s ease-in-out infinite; }
+.map-field-camp:not(.is-occupied) .map-camp-smoke { display: none; }
+.map-activity-label { fill: #ffe4a3; stroke: #302919; stroke-width: 1.5; paint-order: stroke; font-size: 4px; font-weight: 700; }
+.map-stop-flag { fill: #273e49; stroke: #d4bb86; }
+.map-stop-number { fill: #fff2c9; font-size: 6px; font-weight: 700; }
+.map-patrol-stop.is-active .map-stop-flag { fill: #476d79; stroke: #f8d477; stroke-width: 1.5; }
+.map-stop-progress { fill: #e8c169; }
+.map-recent-event { fill: var(--gold); stroke: #694f29; }
+@keyframes map-camp-smoke { to { stroke-dashoffset: -14; } }
+@keyframes map-camp-flame { 50% { opacity: .6; } }
+@keyframes map-mine-pulse { 50% { opacity: .72; } }
+@keyframes map-cook-steam { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) {
+  .map-mob.is-fighting .map-mob-species, .map-camp-smoke, .map-camp-fire, .map-mine-glow ellipse, .map-pot-steam { animation: none; }
+}
+.map-mob-shadow { fill: #342b1b; opacity: .3; }
+.map-mob-species {
+  filter: drop-shadow(0 .5px .35px #554025);
+  animation: map-mob-appear 240ms var(--ease-glide) both;
+}
+@keyframes map-mob-appear { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .map-mob-species { animation: none; }
+}
 
 .sheet svg text, .sheet svg line, .sheet svg .pin, .sheet svg .watermark { pointer-events: none; }
 
-.sheet svg .cell { stroke-linejoin: round; transition: fill var(--motion-fast) var(--ease-linear); }
+.sheet svg .tile-depth-cell { fill: #997649; stroke: #997649; stroke-linejoin: round; }
+.sheet svg #terrain-textures { opacity: .95; pointer-events: none; }
+.sheet svg #terrain-textures .terrain-texture { stroke: none; }
+.sheet svg .terrain-figure { filter: drop-shadow(1px 3px 2px rgba(47, 38, 22, .45)); }
+/* Relief always reads as ground: slightly muted so labels, markers and mobs sit visually above it. */
+.sheet svg #terrain-relief { opacity: .92; }
+.sheet svg .node > use { display: none; }
+.sheet svg #labels, .sheet svg #regions { display: none; }
+#map-names { pointer-events: none; }
+.sheet svg .map-name rect { fill: #18221c; stroke: #6c795d; stroke-width: 1; }
+.sheet svg .map-name-title { font-size: var(--font-xs); font-weight: 600; fill: #fff3d4; }
+.sheet svg .town-name .map-name-title { font-size: var(--font-sm); font-weight: 700; }
+.sheet svg .map-name-level { font-size: calc(var(--font-xs) - 2px); fill: #d5dcbf; }
+.sheet svg .important-name rect { stroke: var(--gold); stroke-width: 1.5; }
+/* Slanted label ribbons: every map name hugs its own lower hex edge, name + zone band on
+   one line. Towns keep the ribbon plate; subs/wilds ride bare type with a halo. */
+.sheet svg .map-name-slanted rect { fill: color-mix(in srgb, #18221c 78%, transparent); stroke-width: .7; }
+.sheet svg .map-name-slanted .map-name-title { font-size: calc(var(--font-xs) - 2px); font-weight: 600; letter-spacing: .4px; }
+/* Quiet sub/wild labels: no box, halo instead — same slant, same size, only the plate differs. */
+.sheet svg .map-name-bare .map-name-title { fill: #efe6cd; stroke: rgba(10, 14, 10, .9); stroke-width: 3; paint-order: stroke; }
+.sheet svg .sub-name .map-name-title { font-weight: 600; opacity: .95; }
+.sheet svg .wild-name .map-name-title { font-weight: 500; font-style: italic; opacity: .9; }
+.map-back.sheet svg .node .place { font-size: 5px; stroke-width: 1.2; }
+.map-back.sheet svg .node.capital .place { font-size: 6px; }
+.map-back.sheet svg .zonelabel .zonename { font-size: 3.3px; stroke: #e6d2a8; stroke-width: .7; paint-order: stroke; }
+.map-back.sheet svg .zonelabel .zoneband { font-size: 2.8px; }
+.stage.mapmode .sheet svg .pin.here { display: none; }
+.sheet svg[data-view="band"] #terrain-relief,
+.sheet svg[data-view="gate"] #terrain-relief { opacity: .18; }
+.sheet svg[data-view="band"] #terrain-textures,
+.sheet svg[data-view="gate"] #terrain-textures { opacity: .16; }
+
+.map-back.sheet {
+  --sheet-ink: #4b3b27;
+  --sheet-place: #3b2d1d;
+  --sheet-id: #766143;
+  --dim: #6f624a;
+  --map-tile-edge: #e6d2a8;
+}
+
+.sheet svg .cell { stroke: var(--map-tile-edge); stroke-width: 1.15; stroke-linejoin: round; transition: fill var(--motion-fast) var(--ease-linear); }
 .sheet svg .cell { cursor: pointer; }
 .sheet svg .cell:hover { fill-opacity: .82; }
 
-.sheet svg .cell.site-dungeon { stroke: var(--curse); stroke-width: 1.6; }
-.sheet svg .cell.site-mine { stroke: var(--es-lit); stroke-width: 1.6; }
-.sheet svg .cell.site-grove { stroke: var(--good-lit); stroke-width: 1.6; }
+.sheet svg .cell.site-dungeon { stroke: color-mix(in srgb, var(--curse) 40%, #c7b783); stroke-width: 1.1; }
+.sheet svg .cell.site-mine { stroke: color-mix(in srgb, var(--es-lit) 40%, #c7b783); stroke-width: 1.1; }
+.sheet svg .cell.site-grove { stroke: color-mix(in srgb, var(--good-lit) 40%, #c7b783); stroke-width: 1.1; }
 .sheet svg .cell.field-camp { stroke: var(--gold); stroke-width: 3; stroke-dasharray: 3 2; }
 
 .sheet svg .cell.route, .sheet svg .cell.walked, .sheet svg .cell.picked, .sheet svg .cell.standing { stroke-opacity: 1; }
@@ -29,20 +122,29 @@
 .sheet svg .you { pointer-events: none; transition: transform var(--motion-map) var(--ease-out); }
 .sheet svg .you .hex { fill: var(--gold); fill-opacity: .2; stroke: none; }
 .sheet svg .you .mark { fill: var(--gold); stroke: var(--bg); stroke-width: 1.4; }
-.sheet svg .you.walking .mark { animation: stride 2s ease-in-out infinite; }
-@keyframes stride { 50% { opacity: .6; } }
+.sheet svg .you.stepping .mark {
+  transform-box: fill-box; transform-origin: 50% 100%;
+  animation: map-board-step var(--motion-map) var(--ease-out);
+}
+@keyframes map-board-step { 50% { transform: translateY(-2px) rotate(-2deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .sheet svg .you { transition: none; }
+  .sheet svg .you.stepping .mark { animation: none; }
+}
 
 .sheet svg .walk { stroke: var(--gold); stroke-width: 1.6; stroke-opacity: .8; }
 .sheet svg .walk-blk { font-size: var(--sheet-fs-walk); fill: var(--gold); font-weight: 600; }
 
 .sheet svg .region { font-size: var(--sheet-fs-region); letter-spacing: 1.2px; fill: var(--sheet-ink); stroke: var(--ground);
   stroke-width: 2.2; paint-order: stroke; font-weight: 700; text-transform: uppercase; opacity: .28; }
+.map-back.sheet svg .region { stroke: #d8c49a; stroke-width: 2.8; }
 
 .sheet svg .watermark circle { fill: var(--gold); stroke: none; }
 .sheet svg .watermark circle.halo { fill: none; stroke: var(--ground); stroke-width: 1.6; stroke-opacity: .75; }
 
 .sheet svg .node .place { font-size: var(--sheet-fs-place); fill: var(--sheet-place); stroke: var(--ground); stroke-width: 2.6;
   paint-order: stroke; font-weight: 700; }
+.map-back.sheet svg .node .place { stroke: #d8c49a; stroke-width: 3.2; }
 .sheet svg .node.capital .place { font-size: var(--sheet-fs-capital); }
 .sheet svg .zonelabel .zonename { font-size: var(--sheet-fs-zonename); fill: var(--sheet-ink); font-weight: 600; }
 .sheet svg .zonelabel .zoneband { font-size: var(--sheet-fs-id); fill: var(--dim); }
@@ -50,9 +152,8 @@
 .sheet svg .cellid { font-size: var(--sheet-fs-id); fill: var(--sheet-id); }
 .sheet svg [data-node] { cursor: pointer; }
 .sheet svg .node.picked .place { fill: var(--focus); }
+/* Position reads off the hex edge itself: a thick inner edge on the settlement cell, so the middle
+   of the hex — terrain, icon, mob art — stays uncovered. */
 .sheet svg .pin { display: none; }
-.sheet svg .pin circle:first-child { fill: color-mix(in srgb, var(--pin-here-glow) 22%, transparent); stroke: var(--pin-here); stroke-width: 3.5; }
-.sheet svg .pin circle:last-child { fill: var(--pin-here); }
-.sheet svg .pin.here, .sheet svg .pin.target { display: inline; }
-.sheet svg .pin.target circle:first-child { fill: color-mix(in srgb, var(--pin-target-glow) 22%, transparent); stroke: var(--pin-target); }
-.sheet svg .pin.target circle:last-child { fill: var(--pin-target); }
+.sheet svg .cell.pin-here { stroke: var(--pin-here); stroke-width: 3; stroke-opacity: 1; }
+.sheet svg .cell.pin-target { stroke: var(--pin-target); stroke-width: 3; stroke-dasharray: 6 3; stroke-opacity: 1; }

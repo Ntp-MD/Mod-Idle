@@ -89,6 +89,18 @@ describe('field Camp and fieldwork', () => {
     expect(fieldMasteryLevel(state, 'mining', 'mine')).toBe(fieldwork.masteryLevel(fieldwork.F.actions.mine.mastery_xp));
   });
 
+  it('does not erase an active fight when asked to establish Camp', () => {
+    const state = newGame();
+    standAt(state, fieldwork.F.wild_site_index.mine);
+    state.hunting = true;
+    state.group = [{ species: 'wolf' } as any];
+    const group = structuredClone(state.group);
+    expect(establishCamp(state)).toMatchObject({ ok: false, why: 'finish the fight first' });
+    expect(state.group).toEqual(group);
+    expect(state.fieldwork.camp).toBeNull();
+    expect(state.hunting).toBe(true);
+  });
+
   it('adds configured harvest units at Skill level milestones in both Mines and Rare Groves', () => {
     const milestone = fieldwork.F.progression.harvest_bonus_levels[0];
     const cases = [

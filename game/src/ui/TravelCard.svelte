@@ -2,6 +2,7 @@
   import { E, eng, fieldwork } from '../engine/client';
   import { sideSpawnWords } from './hud';
   import { destinationSite, type MapDestination, type DestinationAction } from './destination';
+  import type { MapIntel } from './map-intel';
 
   /**
    * The destination card: what a picked cell is, what it costs to get there, and the verbs that take
@@ -14,20 +15,22 @@
    * whose field it is, because that is where its zone comes from.
    */
   let {
-    dest, primary, writable = true, campHere = false, campHunting = false, warpReason = '', notice = '',
-    settlement, busy = false, fare = 0, afford = true, dungeon = null,
+    dest, primary, writable = true, campHere = false, campHunting = false, fightActive = false, warpReason = '', notice = '',
+    settlement, busy = false, fare = 0, afford = true, dungeon = null, intel = null,
     patrol = { stops: [], active: false, repeat: true, index: 0, groupsCleared: 0 }, autoReturnEnabled = false,
     minPatrolStops = 2, maxPatrolStops = 3, groupsPerStop = 3, autoReturnPct = 90,
-    onprimary, onwarp, onclear, onreturncamp = () => {}, oncampui = () => {},
+    onprimary, onwarp, onclear, onreturncamp = () => {}, oncampui = () => {}, onSetCamp = () => {},
     onTogglePatrolStop = () => {}, onStartPatrol = () => {}, onStopPatrol = () => {}, onClearPatrol = () => {},
     onPatrolRepeat = (_repeat: boolean) => {}, onAutoReturn = (_enabled: boolean) => {},
   }: {
     /** the picked cell and everything the field knows about it */
     dest: MapDestination;
     primary: DestinationAction;
+    intel?: MapIntel | null;
     writable?: boolean;
     campHere?: boolean;
     campHunting?: boolean;
+    fightActive?: boolean;
     warpReason?: string;
     notice?: string;
     /** the settlement that owns the cell — itself at rank 0, its nearest one on bare ground */
@@ -49,6 +52,7 @@
     onclear: () => void;
     onreturncamp?: () => void;
     oncampui?: () => void;
+    onSetCamp?: () => void;
     onTogglePatrolStop?: () => void;
     onStartPatrol?: () => void;
     onStopPatrol?: () => void;
@@ -99,22 +103,26 @@
   })[dest.kind]);
 </script>
 
-<div class="dest surface-popover" role="dialog" aria-modal="false" aria-label={`Destination: ${dest.label}`} tabindex="-1"
+<div class="dest surface-popover" role="dialog" aria-modal="false" aria-label={`Destination: ${intel?.site?.name || (intel && !intel.known && dest.kind !== 'town' ? `Unexplored block ${dest.key}` : dest.label)}`} tabindex="-1"
          onkeydown={(event) => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); onclear(); } }}>
   <header class="dest-head">
     <div class="dest-identity">
-      <h2 class="text-accent">{dest.label}</h2>
-      <p class="text-note">{typeName} · Lv {zone.levels[0]}–{zone.levels[1]}</p>
+      <h2 class="text-accent">{intel && !intel.known && dest.kind !== 'town' ? `Unexplored block ${dest.key}` : intel?.site?.name || dest.label}</h2>
+      <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? 'Unscouted block' : `${typeName} · Lv ${zone.levels[0]}–${zone.levels[1]}`}</p>
     </div>
     <button class="btn btn-flat btn-icon dest-close" type="button" onclick={onclear} aria-label="Close selection" title="Close selection · Esc">
       <svg class="icon-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8" /></svg>
     </button>
   </header>
-  <p class="text-note">{settlement.name} · Zone {settlement.zone} · {settlement.band} band · Cell {dest.key}</p>
+  <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? `Cell ${dest.key} · details hidden until scouted` : `${settlement.name} · Zone ${settlement.zone} · ${settlement.band} band · Cell ${dest.key}`}</p>
+  {#if intel}
+    <p>{intel.purpose}</p>
+  {/if}
   {#if !dest.self}
     <div class="dest-trip">
       <strong>{dest.blocks} {dest.blocks === 1 ? 'block' : 'blocks'} · {dest.sec}s</strong>
       <span class="text-note">Ambush {ambushChance}% / block</span>
+      {#if intel}<span class="text-note">{intel.ambushRisk}% chance of at least one ambush on this route</span>{/if}
     </div>
   {:else}
     <p class="text-good">You are here{campHere ? ' · Field Camp' : ''}</p>
@@ -130,6 +138,8 @@
               title={warpBlocked || `Warp for ${fare} gold`}>Waypoint · {fare} gold</button>
     {/if}
     {#if dest.self && dest.kind !== 'town'}
+      {#if !campHere}<button class="btn btn-quiet" type="button" onclick={onSetCamp} disabled={!writable || busy || fightActive}
+        title={fightActive ? 'Finish the current fight before setting Camp.' : 'Set Field Camp on this hex.'}>Set Field Camp here</button>{/if}
       {#if campHunting}
         <button class="btn btn-quiet" type="button" onclick={onreturncamp} disabled={!writable || busy}>Return to Camp</button>
       {/if}
@@ -137,7 +147,22 @@
     {/if}
   </div>
   {#if primary.reason}<p class="text-note" role="status">{primary.reason}</p>{/if}
-  {#if notice}<p class="text-note">{notice}</p>{/if}
+  {#if notice && notice !== intel?.recentEvent}<p class="text-note">{notice}</p>{/if}
+  {#if intel}
+    <div class="dest-intel" aria-label="Destination intelligence">
+      <p class="text-accent">{intel.knowledge === 'explored' ? 'Explored' : intel.known ? 'Scouted' : 'Unexplored'} · {intel.levelNote}</p>
+      {#if intel.encounters.length}<p class="text-note"><b>Species</b> {intel.encounters.slice(0, 4).join(' · ')}{intel.encounters.length > 4 ? ` · +${intel.encounters.length - 4} more` : ''}</p>{/if}
+      {#if intel.resources.length}<p class="text-note"><b>Supplies</b> {intel.resources.join(' · ')}</p>{/if}
+      {#each intel.objectives as objective}<p class="text-good">{objective}</p>{/each}
+      {#if intel.campDistance != null}<p class="text-note">Field Camp · {intel.campDistance} {intel.campDistance === 1 ? 'block' : 'blocks'} from this destination</p>{/if}
+      {#if intel.standing}
+        <p class="text-accent">{intel.standing.label} · {intel.standing.next}</p>
+        {#each intel.standing.unlocked as unlock}<p class="text-note">Unlocked · {unlock}</p>{/each}
+      {/if}
+      {#if intel.site?.claimed}<p class="text-note">Site explored</p>{/if}
+      {#if intel.recentEvent}<p class="text-good">{intel.recentEvent}</p>{/if}
+    </div>
+  {/if}
   {#if dest.kind === 'town' && !dest.self}
     {#if !dest.here}<p class="text-note">First trip on foot · Waypoint opens after arrival.</p>
     {:else if warpBlocked}<p class="text-note">{warpBlocked}</p>{/if}
@@ -149,9 +174,9 @@
   <details class="dest-section" name="map-destination-sections">
     <summary><span>Details</span><svg class="icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
     <div class="dest-section-body">
-      <p class="text-note">{ground}</p>
-      {#if settlement.capital}<p class="text-note">{settlement.capital} capital</p>{/if}
-      {#if site === 'hunt' || isDungeon}
+      <p class="text-note">{intel && !intel.known ? intel.purpose : ground}</p>
+      {#if settlement.capital && (!intel || intel.known || dest.kind === 'town')}<p class="text-note">{settlement.capital} capital</p>{/if}
+      {#if (!intel || intel.known) && (site === 'hunt' || isDungeon)}
         <section class="dest-guide" aria-label="Possible encounters">
           <strong class="text-accent">{subzone ? subzone.name : 'Zone pool'}</strong>
           <details class="dest-roster" name="map-encounter-roster" open>
@@ -177,7 +202,7 @@
     </div>
   </details>
 
-  <details class="dest-section" name="map-destination-sections">
+  <details class="dest-section" name="map-destination-sections" open={patrol.stops.length > 0 || dest.kind === 'sub'}>
     <summary><span>Route{patrol.stops.length ? ` · ${patrol.stops.length}/${maxPatrolStops} stops` : ''}</span><svg class="icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
     <div class="dest-section-body">
       {#if patrolNames.length}<p>{patrolNames.join(' → ')}</p>{/if}
@@ -210,6 +235,7 @@
 <style>
   .dest { display: grid; gap: var(--spacing-sm); min-width: 0; padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-xs); }
   .dest p { margin: 0; line-height: 1.35; }
+  .dest-intel { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-block: var(--spacing-xs); }
   .dest-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; }
   .dest-identity { display: grid; gap: var(--spacing-xs); min-width: 0; }
   .dest-head h2 { margin: 0; font-size: var(--font-sm); overflow-wrap: anywhere; }

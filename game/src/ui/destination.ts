@@ -2,6 +2,8 @@ import { fieldwork } from '../engine/client';
 import { cooldownLeft } from '../sim/dungeon';
 import { fieldActionProblem } from '../sim/fieldwork';
 import type { GameState } from '../sim/types';
+import { currentCell } from '../sim/road';
+import { trailSiteAt } from '../sim/map-exploration';
 
 export interface MapDestination {
   key: string;
@@ -18,7 +20,7 @@ export interface MapDestination {
 }
 
 export interface DestinationAction {
-  kind: 'walk' | 'town' | 'hunt' | 'dungeon' | 'retreat' | 'mine' | 'grove' | 'stop-gather';
+  kind: 'walk' | 'town' | 'hunt' | 'dungeon' | 'retreat' | 'mine' | 'grove' | 'stop-gather' | 'investigate';
   label: string;
   disabled: boolean;
   reason: string;
@@ -36,6 +38,9 @@ export function destinationPrimary(state: GameState, dest: MapDestination, writa
   if (!dest.self) return action('walk', dest.walking ? 'Walking…' : 'Walk here',
     state.walk ? 'Finish the current walk first.' : state.phase === 'camp' ? 'Recover at Camp before traveling.' : '');
   if (dest.kind === 'town') return action('town', 'Open town');
+  const trail = trailSiteAt(currentCell(state));
+  if (trail && !state.mapJournal?.claimedSites.includes(trail.id)) return action('investigate', 'Investigate site',
+    state.dungeon ? 'Leave the dungeon first.' : state.phase === 'camp' ? 'Recover at Camp first.' : state.group.length ? 'Finish the fight first.' : '');
   const site = destinationSite(dest);
   if (site === 'dungeon') {
     if (state.dungeon) return action('retreat', 'Retreat');

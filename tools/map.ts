@@ -21,6 +21,8 @@ import path from 'node:path';
 import { readJson } from './lib/json.ts';
 import * as G from './lib/gates.ts';
 import { createRoad } from '../engine/road.ts';
+import { MAP_CAMERA_TRANSFORM, projectMapPoint, mapUprightAt, mapUprightAround, projectMapBounds } from '../game/src/ui/map-projection.ts';
+import { TERRAIN_ART, terrainVariant, terrainComposition } from '../game/src/ui/map-terrain.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const MAP = readJson(path.join(ROOT, 'tools/data/map.json'));
@@ -38,6 +40,24 @@ const R = F.radius;
 const SQ3 = Math.sqrt(3);
 /** Two pointy-top neighbours sit SQ3*R apart and each reaches SQ3*r/2 past its centre, so r = R - GAP/SQ3. */
 const HEX_R = R - F.gap / SQ3;
+const TILE_DEPTH = 3;
+const TEXTURE_ROTATIONS = [0, 60, 120, 240, 300];
+const TEXTURE_ASSETS = {
+  grass: '/map/grass-overlay.png',
+  forest: '/map/forest-overlay.png',
+  rock: '/map/rock-overlay.png',
+  water: '/map/water-overlay.png',
+};
+const LANDMARK_ART = {
+  'village-small': '/map/settlements/human-village-small.png',
+  'village-medium': '/map/settlements/human-village-medium.png',
+  'village-large': '/map/settlements/human-village-large.png',
+  'city-small': '/map/settlements/human-city-small.png',
+  'city-medium': '/map/settlements/human-city-medium.png',
+  'city-large': '/map/settlements/human-city-large.png',
+  'city-capital': '/map/settlements/human-city-capital.png',
+};
+const settlementLandmark = (town) => MAP.settlement_landmarks[town] || 'city-medium';
 const PX = ([q, r]) => [SQ3 * (q + r / 2) * R, 1.5 * r * R];
 const key = (q, r) => q + ',' + r;
 const hd = (a, b) => {
@@ -176,7 +196,7 @@ for (const entry of MAP.cells) {
 }
 const townPoints = MAP.cells.map((entry) => {
   const node = roadNodes.find((n) => n.id === entry.town);
-  return { town: entry.town, q: node.q, r: node.r, tone: COL[spreadTone.get(entry.town)] };
+  return { town: entry.town, q: node.q, r: node.r, k: spreadTone.get(entry.town), tone: COL[spreadTone.get(entry.town)] };
 });
 /** The country each settlement holds: its cell and the terrain key it spreads over its bare ground. */
 const SPREAD = MAP.cells.map((entry) => {
@@ -195,7 +215,7 @@ const BARE = (() => {
       const d = hd([c.q, c.r], [t.q, t.r]);
       return !best || d < best.d ? { d, t } : best;
     }, null);
-    list.push({ id, d: near.d, tone: near.t.tone });
+    list.push({ id, d: near.d, tone: near.t.tone, terrain: near.t.k });
   }
   return { byId: new Map(list.map((b) => [b.id, { ...b, fill: b.tone }])) };
 })();
@@ -258,11 +278,56 @@ function wrap(text, max) {
 const levelText = (zone) => 'Lv ' + (zone.levels || []).join('-');
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
+function terrainFor(id, c) {
+  const o = claims.get(key(c.q, c.r));
+  if (o?.kind === 'wild') {
+    const site = Object.entries(E.fieldwork.wild_site_index).find(([, index]) => index === o.j)?.[0];
+    return site === 'mine' ? 'rock' : site === 'dungeon' ? 'ash' : 'forest';
+  }
+  return !o ? BARE.byId.get(id).terrain
+    : o.kind === 'sub' ? o.terrain
+      : o.kind === 'town' ? 'town' : 'wild';
+}
+
+function textureFamilyFor(id, c) {
+  const terrain = terrainFor(id, c);
+  return (TERRAIN_ART[terrain] || TERRAIN_ART.grass).surface;
+}
+
+function terrainTextureDefs() {
+  const lines = [];
+  for (const [family, href] of Object.entries(TEXTURE_ASSETS)) {
+    const opacity = family === 'water' ? 0.95 : family === 'rock' ? 0.7 : family === 'forest' ? 0.25 : 0.85;
+    TEXTURE_ROTATIONS.forEach((rotation, variant) => {
+      // Keep the wash centred on its hex: the image stays centred at .5,.5 so the
+      // pattern rotation spins around the hex middle instead of throwing it sideways.
+      const size = 1.2 + variant * .08;
+      const xy = (1 - size) / 2;
+      lines.push(
+        `    <pattern id="texture-${family}-${variant}" patternUnits="objectBoundingBox" patternContentUnits="objectBoundingBox" width="1" height="1" patternTransform="rotate(${rotation} .5 .5)">`,
+        `      <image href="${href}" x="${xy}" y="${xy}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" opacity="${opacity}"/>`,
+        '    </pattern>',
+      );
+    });
+  }
+  return lines;
+}
+
+function depthGroup() {
+  const lines = ['  <g id="tile-depth" pointer-events="none">'];
+  for (const [, c] of CELLS) {
+    lines.push(`    <polygon class="tile-depth-cell" points="${hexPts(c.x, c.y + TILE_DEPTH)}"/>`);
+  }
+  lines.push('  </g>');
+  return lines;
+}
+
 function fieldGroup() {
   const lines = ['  <g id="field">'];
   for (const [id, c] of CELLS) {
     const k = key(c.q, c.r);
     const o = claims.get(k);
+    const texture = textureFamilyFor(id, c);
     let fill, cls;
     if (o) {
       cls = o.kind;
@@ -281,7 +346,10 @@ function fieldGroup() {
       o ? `data-zone="${o.s.zone}"` : '',
       o && o.kind === 'sub' ? `data-sub="${o.j}"` : '',
       o && o.kind === 'wild' ? `data-wild="${o.j}"` : '',
+      o && o.kind === 'town' ? `data-landmark="${settlementLandmark(o.town)}"` : '',
       `data-terrain="${o ? (o.kind === 'sub' ? o.terrain : o.kind) : 'bare'}"`,
+      `data-texture="${texture}"`,
+      `data-biome="${terrainFor(id, c)}" data-variant="${terrainVariant(terrainFor(id, c), c.q, c.r) + 1}"`,
       band ? `data-band="${band.id - 1}" data-lo="${band.levels[0]}" data-hi="${band.levels[1]}"` : '',
       `fill="${fill}"`,
       `data-tone="${fill}"`,
@@ -291,6 +359,53 @@ function fieldGroup() {
       ? `<title>${esc(o.kind === 'town' ? o.s.name : o.name)} · ${esc(o.s.name)} · ${levelText(o.s && zoneById(o.s.zone))}</title>`
       : `<title>${id} · no zone yet</title>`;
     lines.push(`    <polygon ${attrs}>${title}</polygon>`);
+  }
+  lines.push('  </g>');
+  return lines;
+}
+
+function textureGroup() {
+  const lines = ['  <g id="terrain-textures" pointer-events="none">'];
+  for (const [id, c] of CELLS) {
+    const family = textureFamilyFor(id, c);
+    const variant = terrainVariant(terrainFor(id, c), c.q, c.r);
+    lines.push(`    <polygon class="terrain-texture texture-${family}" points="${hexPts(c.x, c.y)}" fill="url(#texture-${family}-${variant})"/>`);
+  }
+  lines.push('  </g>');
+  return lines;
+}
+
+/** Upright relief is drawn back-to-front; only the ground receives the camera's foreshortening. */
+function reliefGroup() {
+  const cells = [...CELLS.entries()].sort(([, a], [, b]) => projectMapPoint(a.x, a.y).y - projectMapPoint(b.x, b.y).y);
+  const lines = ['  <g id="terrain-relief" pointer-events="none">'];
+  for (const [id, c] of cells) {
+    const terrain = terrainFor(id, c);
+    const claim = claims.get(key(c.q, c.r));
+    const encounter = claim?.kind === 'sub';
+    const variant = terrainVariant(terrain, c.q, c.r);
+    const profile = TERRAIN_ART[terrain] || TERRAIN_ART.grass;
+    const props = terrainComposition(variant, encounter);
+    // Feet plant near the hex middle and crowns stay low, so relief reads as standing on its own
+    // ground instead of pasted over the neighbour above.
+    const image = (href, x, y, width, ratio) => `<image href="${href}" x="${x - width / 2}" y="${y + 4 - width * ratio * .78}" width="${width}" height="${width * ratio}" preserveAspectRatio="xMidYMax meet"/>`;
+    let back = '', front = '';
+    if (terrain === 'town') {
+      const townArt = LANDMARK_ART[settlementLandmark(claim.town)] || profile.prop;
+      back += image(townArt, -2, 0, 40, profile.height);
+      for (const prop of props.filter(p => p.front)) front += image(TERRAIN_ART.forest.prop, prop.x, prop.y, prop.width, .82);
+    } else {
+      for (const prop of props) {
+        const art = image(profile.prop, prop.x, prop.y, prop.width, profile.height);
+        if (prop.front) front += art; else back += art;
+      }
+    }
+    if (encounter || claim?.kind === 'wild' && claim.j === E.fieldwork.wild_site_index.dungeon) {
+      const openBiome = ['village', 'camp', 'water', 'marsh'].includes(terrain);
+      back += image('/map/terrain/encounter-ruins.png', openBiome ? -15 : variant % 2 ? -2 : 2,
+        openBiome ? -6 : 6, openBiome ? 22 : 38 + variant, .85);
+    }
+    lines.push(`    <g class="terrain-figure${encounter ? ' encounter-diorama' : ''}" data-figure-ax="${c.q},${c.r}" data-terrain-variant="${variant + 1}" transform="${mapUprightAt(c.x, c.y)}"><g class="terrain-back">${back}</g><g class="terrain-occupant"></g><g class="terrain-front">${front}</g></g>`);
   }
   lines.push('  </g>');
   return lines;
@@ -308,22 +423,23 @@ function walkGroup() {
   return lines;
 }
 
+
 function labelGroups() {
   const towns = [], zones = [], ids = [];
   for (const entry of MAP.cells) {
     const s = settlementById(entry.town);
     const zone = zoneById(s.zone);
     const c = CELLS.get(entry.cell);
-    towns.push(`    <g class="node${s.capital ? ' capital' : ''}" data-node="${entry.town}" data-zone="${zone.id}">`
+    towns.push(`    <g class="node${s.capital ? ' capital' : ''}" data-node="${entry.town}" data-zone="${zone.id}" transform="${mapUprightAround(c.x, c.y)}">`
       + `<use href="#icon-town" transform="translate(${(c.x - 6.8).toFixed(1)},${(c.y - 18).toFixed(1)}) scale(0.42)"/>`
-      + `<text class="place" x="${c.x.toFixed(1)}" y="${(c.y + 4).toFixed(1)}">${esc(s.name)}</text>`
+      + `<text class="place" x="${c.x.toFixed(1)}" y="${(c.y + 18).toFixed(1)}">${esc(s.name)}</text>`
       + `</g>`);
     ids.push(`    <text class="cellid" data-cell="${entry.cell}" x="${c.x.toFixed(1)}" y="${(c.y + 14).toFixed(1)}">${entry.cell}</text>`);
     const put = (cell, name, band) => {
       const h = CELLS.get(cell);
       const lines = wrap(name, 12);
       const lh = 8.4, top = h.y - ((lines.length - 1) * lh) / 2 - 9;
-      zones.push(`    <g class="zonelabel" data-cell="${cell}">`
+      zones.push(`    <g class="zonelabel" data-cell="${cell}" transform="${mapUprightAround(h.x, h.y)}">`
         + lines.map((l, i) => `<text class="zonename" x="${h.x.toFixed(1)}" y="${(top + i * lh).toFixed(1)}">${esc(l)}</text>`).join('')
         + `<text class="zoneband" x="${h.x.toFixed(1)}" y="${(h.y + 13).toFixed(1)}">${levelText(band)}</text>`
         + `</g>`);
@@ -397,11 +513,14 @@ function markersGroup() {
 
 function viewBox() {
   const xs = [...CELLS.values()].map((c) => c.x), ys = [...CELLS.values()].map((c) => c.y);
-  const padX = (SQ3 * R) / 2 + 1, padY = R + 1;
+  const padX = (SQ3 * R) / 2 + 1, padY = R + TILE_DEPTH + 1;
   const vx = Math.min(...xs) - padX, vy = Math.min(...ys) - padY;
   const vw = Math.max(...xs) + padX - vx, vh = Math.max(...ys) + padY - vy;
   return { vx, vy, vw, vh };
 }
+
+/** Compress the field around its center to project it from a 46-degree camera elevation. */
+const projectedViewBox = projectMapBounds;
 
 /**
  * The ground the field lies on: the same hex lattice, drawn on past the field so zooming out never
@@ -485,23 +604,30 @@ function groundRects(v) {
 
 function render(): string {
   const v = viewBox();
+  const projected = projectedViewBox(v);
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     `<!-- GENERATED by tools/map.ts from tools/data/map.json — do not hand-edit. One polygon per cell of the ${F.cols} x ${F.rows} field; the content in the cells is the engine's. -->`,
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${v.vx.toFixed(1)} ${v.vy.toFixed(1)} ${v.vw.toFixed(1)} ${v.vh.toFixed(1)}" width="${Math.round(v.vw)}" height="${Math.round(v.vh)}" font-family="Inter, 'Segoe UI', system-ui, sans-serif">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" data-plan-view-box="${v.vx} ${v.vy} ${v.vw} ${v.vh}" viewBox="${projected.vx.toFixed(1)} ${projected.vy.toFixed(1)} ${projected.vw.toFixed(1)} ${projected.vh.toFixed(1)}" width="${Math.round(projected.vw)}" height="${Math.round(projected.vh)}" font-family="Inter, 'Segoe UI', system-ui, sans-serif">`,
     '  <defs>',
-    '    <g id="icon-town" fill="none" stroke="#f0e5cb" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">',
+    '    <g id="icon-town" fill="none" stroke="#6f5732" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">',
     ...['M3 15 16 4l13 11M6 13v15h20V13M12 28v-9h8v9', 'M9 15h3M20 15h3', 'M16 4V2'].map((d) => `      <path d="${d}"/>`),
     '    </g>',
+    ...terrainTextureDefs(),
     ...hexGridDefs(),
     '  </defs>',
+    `  <g id="projected-board" transform="${MAP_CAMERA_TRANSFORM}">`,
     ...groundRects(v),
+    ...depthGroup(),
     ...fieldGroup(),
+    ...textureGroup(),
     ...walkGroup(),
     ...watermarkGroup(),
     ...regionGroup(),
+    ...reliefGroup(),
     ...labelGroups(),
     ...markersGroup(),
+    '  </g>',
     '</svg>',
     '',
   ];
@@ -510,12 +636,13 @@ function render(): string {
 
 function write() {
   const v = viewBox();
+  const projected = projectedViewBox(v);
   const svg = render();
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, svg);
   const subs = MAP.cells.reduce((n, c) => n + c.subs.length, 0);
   const wild = MAP.cells.reduce((n, c) => n + c.wild.length, 0);
-  console.log(`wrote ${path.relative(ROOT, OUT)} · ${CELLS.size} cells of a ${F.cols} x ${F.rows} field · ${MAP.cells.length} settlements · ${subs} sub-zone cells · ${wild} wild cells · ${WALK.length} walk stretches / ${WALK.reduce((n, e) => n + e.blocks, 0)} blocks · ${Math.round(v.vw)}x${Math.round(v.vh)} (ratio ${(v.vw / v.vh).toFixed(4)})`);
+  console.log(`wrote ${path.relative(ROOT, OUT)} · ${CELLS.size} cells of a ${F.cols} x ${F.rows} field · ${MAP.cells.length} settlements · ${subs} sub-zone cells · ${wild} wild cells · ${WALK.length} walk stretches / ${WALK.reduce((n, e) => n + e.blocks, 0)} blocks · ${Math.round(projected.vw)}x${Math.round(projected.vh)} (ratio ${(projected.vw / projected.vh).toFixed(4)})`);
 }
 
 // ------------------------------------------------------------------ the gate
@@ -535,6 +662,19 @@ let M13NOTE = '';
 
 function checks() {
   const problems = [];
+  const landmarkAssignments = MAP.settlement_landmarks || {};
+  const settlementNames = MAP.cells.map(c => c.town);
+  if (Object.keys(landmarkAssignments).length !== settlementNames.length || settlementNames.some(town => !LANDMARK_ART[landmarkAssignments[town]])) {
+    problems.push('settlement landmark assignments must cover every town with a known art type');
+  }
+  for (const [town, landmark] of Object.entries(landmarkAssignments)) {
+    if (!settlementNames.includes(town)) problems.push(`settlement landmark assignment names unknown town ${town}`);
+    if (!LANDMARK_ART[landmark]) problems.push(`settlement ${town} references unknown landmark art ${landmark}`);
+    else if (!fs.existsSync(path.join(ROOT, 'game/public', LANDMARK_ART[landmark].slice(1)))) problems.push(`landmark art file is missing for ${town}: ${LANDMARK_ART[landmark]}`);
+  }
+  for (const [name, asset] of Object.entries(LANDMARK_ART)) {
+    if (!fs.existsSync(path.join(ROOT, 'game/public', asset.slice(1)))) problems.push(`landmark art file is missing for type ${name}: ${asset}`);
+  }
   // the five-block reach of the standing rule is a design window, not a wiring fact (owner ruling ·
   // AGENTS §3): a far cell is only ever reported, never a failure.
   M13NOTE = '';
@@ -659,11 +799,12 @@ if (args.includes('--checks')) {
   claim('M10', /cell polygons|cell keys|travel pins|walk stretches|sheet not written/, `the sheet carries ${F.hexes} keyed cells, a pin per settlement and ${WALK.length} walk stretches`);
   claim('M11', /sub-zone cells for|no wild cell|not the name printed/, `one named sub-zone cell per sub-zone (${subs}) and a wild side left for every town (${wild})`);
   claim('M13', /no click there|two owners|printed as|bare ground yet|carries no axial key|carries a sub\/wild index|prints zone|standing rule read/, `every cell a click can land on resolves to the settlement that owns it, by distance alone (${M13NOTE})`);
+  claim('M14', /settlement landmark assignment|landmark art file/, `all ${MAP.cells.length} settlements use known, present landmark art files`);
   G.report(g.rows());
 } else if (args.includes('--write')) {
   write();
 } else {
   console.log('map.ts — the generated field sheet');
   console.log('  --write    write game/src/icon/map/map-overlay.svg from tools/data/map.json');
-  console.log('  --checks   run M2, M3, M6, M7, M10, M11, M13 (field consistency)');
+  console.log('  --checks   run M2, M3, M6, M7, M10, M11, M13, M14 (field and landmark consistency)');
 }

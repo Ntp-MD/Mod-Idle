@@ -14,7 +14,8 @@ import { STAT_KEYS, type StatKey } from '../engine/client';
 import { chooseJunkItem, leanReweightMany } from '../../../engine/loot.ts';
 import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm, QUICKBAR_SLOTS } from './farm';
 import { newFieldwork, tickFieldwork, tickHunger, resolveTravelEvent, recordHuntKill, withMeal, withHunger, pushToFieldCamp, finishPushAtCamp, lifeSkillBonuses } from './fieldwork';
-import { road, walkZonesHex, arrive, ownerOf, zoneOf, startWalk } from './road';
+import { road, walkZonesHex, arrive, ownerOf, zoneOf, startWalk, currentCell as currentCellForJournal } from './road';
+import { normalizeMapJournal, recordMapDiscovery } from './map-exploration';
 import {
   driveAutoReturn, drivePatrol, finishAutoReturnDeposit, maybeStartAutoReturn,
   newAutoReturnState, newPatrolState, recordPatrolGroupClear,
@@ -204,6 +205,7 @@ export function newGame(seed = 20260101): GameState {
   refreshFilter(s);
   // the opening kit comes from the data: no worn gear, one draught per pool in the pocket
   for (const [name, count] of Object.entries(E.opening.potions as Record<string, number>)) s.farm.potions[name] = count;
+  normalizeMapJournal(s);
   return s;
 }
 
@@ -917,6 +919,7 @@ export function tick(s: GameState, statuses: Statuses = {}, opts: { online?: boo
   const pausedAtStart = !!deliveryPauseReason(s);
   const rng = mulberry32(s.rngState++);
   const result = tickWorld(s, statuses, opts, rng);
+  if (opts.online !== false) recordMapDiscovery(result);
   tickDeliveries(result, rng, opts.online !== false, pausedAtStart, { writer: true });
   tickBlackMarket(result, rng, { writer: true }, opts.online !== false);
   return result;
@@ -1003,11 +1006,16 @@ function tickWorld(s: GameState, statuses: Statuses, opts: { online?: boolean; a
       walk.blocksLeft--;
       walk.blocksWalked++;
       walk.secLeft = road.blockSec;
+      recordMapDiscovery(s);
       // A crossed block says nothing: no number floats off the character and no line is logged for it —
       // the walk reads as the one word on the field plus the route lighting itself off `blocksWalked`,
       // one cell per block (`walkedCells`). Only arriving, and being ambushed, are events.
       const trailEvent = resolveTravelEvent(s, rng);
-      if (trailEvent) push(s, `Trail event · ${trailEvent}`);
+      if (trailEvent) {
+        const feet = currentCellForJournal(s);
+        s.mapJournal!.lastEvent = { ...feet, text: trailEvent, atSec: s.clockSec };
+        push(s, `Trail event · ${trailEvent}`);
+      }
       if (walk.blocksLeft <= 0) {
         const arrived = arrive(s, walk);
         if (arrived) {

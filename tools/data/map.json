@@ -5,12 +5,12 @@
     "rows": 15,
     "hexes": 300,
     "radius": 34,
-    "gap": 5,
+    "gap": 2,
     "cell_id": "row letter A-O + col number 1-20",
     "centre": "the starting settlement sits on the centre cell, and the walk graph is measured from it",
-    "sheet": "#0b1016",
-    "stroke": "#222d39",
-    "bare_tone": "#1f2b39",
+    "sheet": "#d8c49a",
+    "stroke": "#705b3d",
+    "bare_tone": "#8a7954",
     "note": "Pointy-top hexes on `radius`, shrunk by `gap` so neighbours leave bare ground between their edges. A cell with no zone takes the terrain of its nearest settlement. One authored colour per terrain in `terrain_colors`; the country past the field is that colour closed on `sheet` by `deep_close` at held hue, and `ground_ramp` is the wheel order a country may drift one step along. `bare_tone` and `stroke` are the frame between hexes, not a terrain.",
     "ground_ramp": [
       "rock",
@@ -27,20 +27,20 @@
     "deep_close": 0.25
   },
   "terrain_colors": {
-    "water": "#143a4d",
-    "marsh": "#1b3b33",
-    "grass": "#2c4220",
-    "forest": "#1a3a21",
-    "rock": "#31353e",
-    "snow": "#414c59",
-    "moor": "#343b1f",
-    "waste": "#402f1a",
-    "ash": "#452834",
-    "salt": "#3d382e",
-    "village": "#353f1f",
-    "camp": "#43311b",
-    "town": "#4b4327",
-    "wild": "#333a28"
+    "water": "#477c8d",
+    "marsh": "#687d5b",
+    "grass": "#869c5b",
+    "forest": "#4f7548",
+    "rock": "#827c70",
+    "snow": "#b9c8c8",
+    "moor": "#958960",
+    "waste": "#a77845",
+    "ash": "#80666b",
+    "salt": "#bfaa7a",
+    "village": "#98a66d",
+    "camp": "#a78351",
+    "town": "#b89b60",
+    "wild": "#78865b"
   },
   "environment_terrain": {
     "abyss": "waste",
@@ -667,38 +667,27 @@
       ]
     }
   ],
-  "watermarks": [
-    {
-      "id": "eastgate-castle",
-      "kind": "castle",
-      "anchor": "eastgate",
-      "label": "Eastgate Castle"
-    },
-    {
-      "id": "highspire-keep",
-      "kind": "castle",
-      "anchor": "highspire",
-      "label": "Highspire Keep"
-    },
-    {
-      "id": "pale-spire",
-      "kind": "tower",
-      "anchor": "the_pale_spire",
-      "label": "The Pale Spire"
-    },
-    {
-      "id": "wolf-moor-lake",
-      "kind": "lake",
-      "anchor": "wolf_cross",
-      "label": "Wolf Moor"
-    },
-    {
-      "id": "bonegate-ruins",
-      "kind": "ruins",
-      "anchor": "bonegate",
-      "label": "Bonegate Ruins"
-    }
-  ],
+  "watermarks": [],
+  "settlement_landmarks": {
+    "eastgate": "city-small",
+    "millbrook": "village-small",
+    "thornwake": "city-large",
+    "ironrow": "city-large",
+    "ashfall": "city-capital",
+    "wolf_cross": "village-medium",
+    "greyfen": "village-large",
+    "saltmarrow": "city-medium",
+    "frosthold": "city-large",
+    "vermolch": "village-small",
+    "duskmoor": "village-large",
+    "nettlecrag": "village-small",
+    "emberhold": "city-medium",
+    "wyrmback": "city-large",
+    "the_pale_spire": "city-capital",
+    "blackwater_reach": "city-medium",
+    "bonegate": "village-medium",
+    "highspire": "city-small"
+  },
   "regions": [
     {
       "name": "Eastgate Vale",
