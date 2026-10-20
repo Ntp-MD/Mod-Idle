@@ -12,6 +12,8 @@ export interface DeliveryCfg {
   band_weights: Record<string, number>; rarity_weights: Record<string, number>; target_weights: Record<string, number>;
   default_target_weight: number; skill_chance: number; default_skill_weight: number;
   skill_weights: Record<string, number>; skill_band_weights: Record<string, number>;
+  /** The chance a completed Delivery pays an attainment point, and how the band moves it (D2). */
+  attainment_chance: number; attainment_band_weights: Record<string, number>;
   stones: { key: string; income: 'tier' | 'reroll_value' | 'add'; weight: number }[];
   fallback_stone: 'tier' | 'reroll_value' | 'add'; pause_states: ('camp' | 'dungeon')[];
 }

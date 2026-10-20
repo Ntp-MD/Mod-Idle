@@ -8,29 +8,22 @@
 .map-projection { position: absolute; inset: 0; }
 
 .map-mob { pointer-events: none; }
-.map-mob-stage { display: none; }
-.map-mob.is-fighting .map-mob-stage { display: block; }
-.map-mob.is-fighting .map-mob-shadow { opacity: 0; }
-.sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="unknown"] { opacity: .38; }
-.sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="scouted"] { opacity: .8; }
-.sheet svg .terrain-figure:is(.encounter-diorama, .map-settlement-figure)[data-discovery="explored"] { opacity: 1; }
-.map-mob.is-fighting .map-mob-species { transform-box: fill-box; transform-origin: 50% 100%; animation: map-mob-battle 1.2s var(--ease-glide) infinite; }
+.sheet svg .diorama-figure[data-discovery="unknown"] > .diorama-art { filter: saturate(.65) brightness(.91); }
+.sheet svg .diorama-figure:is([data-camp="true"], [data-trail-site="true"]) > .diorama-art { display: none; }
+.map-mob.is-fighting .map-mob-body { transform-box: fill-box; transform-origin: 50% 100%; animation: map-mob-battle 1.2s var(--ease-glide) infinite; }
 @keyframes map-mob-battle { 50% { transform: translate(-1px, -1px) rotate(-3deg); } }
-#map-adventure path { stroke-linejoin: round; stroke-linecap: round; stroke-width: 1; }
-.map-tent { fill: #b58245; stroke: #4f3621; }
-.map-cart { fill: #ad7252; stroke: #442d22; }
-.map-cart-wheel { fill: #533c28; stroke: #d3b57d; }
+.map-piece path { stroke-linejoin: round; stroke-linecap: round; stroke-width: 1; }
 .map-tracks { fill: #634e30; stroke: #d1b983; }
 .map-wild-hint { opacity: .65; }
-.map-trail-site.is-explored { opacity: .4; }
+.map-trail-site.is-explored { filter: saturate(.4) brightness(.85); }
 .map-town-banner { fill: var(--gold); stroke: #604625; }
 .map-stall-wood { fill: #6c4b31; stroke: #3c2a1a; }
 .map-stall-cloth { fill: #bc7655; stroke: #54382c; }
 .map-town-lamp { fill: #f9db7e; stroke: #8c672c; filter: drop-shadow(0 0 2px #ffc961); }
 .map-town-guild { fill: #76629f; stroke: #ddbd79; }
-.map-camp-smoke { fill: none; stroke: #e2dac0; opacity: .5; stroke-dasharray: 4 3; animation: map-camp-smoke 3s linear infinite; }
+.map-camp-smoke { fill: none; stroke: #e2dac0; opacity: .5; animation: map-camp-smoke 4s ease-out infinite; }
 .map-camp-fire { fill: #efb84c; stroke: #af6028; animation: map-camp-flame 1.5s ease-in-out infinite; }
-.map-mine-glow ellipse { fill: #f3c966; opacity: .42; filter: drop-shadow(0 0 3px #ffcf63); animation: map-mine-pulse 1.7s ease-in-out infinite; }
+.map-mine-glow ellipse { fill: #f3c966; opacity: .24; animation: map-mine-pulse 2.4s ease-in-out infinite; }
 .map-camp-props path { stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.2; }
 .map-pickaxe, .map-axe { fill: #92714d; stroke: #39291b; }
 .map-ore { fill: #8fbbb1; stroke: #415c50; }
@@ -38,49 +31,43 @@
 .map-fishing-rod, .map-fish-ripple { fill: none; stroke: #d8c38c; }
 .map-pot-steam { fill: none; stroke: #e2dac0; animation: map-cook-steam 2s ease-in-out infinite; }
 .map-field-camp:not(.is-occupied) .map-camp-smoke { display: none; }
-.map-camp-encounter .map-encounter-mark { fill: #d5ae67; stroke: #3c2c1c; stroke-width: 1.5; filter: drop-shadow(0 0 2px #f6d488); }
-.map-camp-encounter.is-warning .map-encounter-mark { animation: map-encounter-warning 1.3s ease-in-out infinite; }
-.map-camp-encounter.is-choice .map-encounter-mark { fill: #f1cf7d; }
-.map-camp-encounter.is-combat .map-encounter-mark { fill: #ef896b; }
+.map-camp-encounter { filter: drop-shadow(.4px 1px .5px #40301f); }
+.map-threat-pennant { fill: #b85d42; stroke: #55351f; }
 .map-activity-label { fill: #ffe4a3; stroke: #302919; stroke-width: 1.5; paint-order: stroke; font-size: 4px; font-weight: 700; }
 .map-stop-flag { fill: #273e49; stroke: #d4bb86; }
 .map-stop-number { fill: #fff2c9; font-size: 6px; font-weight: 700; }
 .map-patrol-stop.is-active .map-stop-flag { fill: #476d79; stroke: #f8d477; stroke-width: 1.5; }
 .map-stop-progress { fill: #e8c169; }
+.map-expedition-flag { fill: #7c9c68; stroke: #344d2b; }
 .map-recent-event { fill: var(--gold); stroke: #694f29; }
 .map-event-food { fill: #c99a51; stroke: #594126; }
 .map-event-spring { fill: none; stroke: #91d2dc; }
 .map-event-mushroom { fill: #c6805c; stroke: #593a2c; }
 .map-event-sprig { fill: #a9c379; stroke: #47633d; }
 .map-recent-event .map-event-fire { fill: #efb84c; stroke: #af6028; }
-.map-unique-claw { fill: none; stroke: #d9ac4f; stroke-width: 1.8; }
-.map-unique-traces circle { fill: #402e29; stroke: #d9ac4f; stroke-width: 1.4; }
-@keyframes map-camp-smoke { to { stroke-dashoffset: -14; } }
+@keyframes map-camp-smoke { from { opacity: .1; transform: translateY(1px); } 35% { opacity: .45; } to { opacity: 0; transform: translate(1px, -3px); } }
 @keyframes map-camp-flame { 50% { opacity: .6; } }
 @keyframes map-mine-pulse { 50% { opacity: .72; } }
 @keyframes map-cook-steam { 50% { opacity: .55; } }
 @media (prefers-reduced-motion: reduce) {
-  .map-mob.is-fighting .map-mob-species, .map-camp-smoke, .map-camp-fire, .map-mine-glow ellipse, .map-pot-steam, .map-camp-encounter .map-encounter-mark { animation: none; }
+  .map-mob.is-fighting .map-mob-body, .map-camp-smoke, .map-camp-fire, .map-mine-glow ellipse, .map-pot-steam { animation: none; }
 }
-@keyframes map-encounter-warning { 50% { opacity: .45; transform: scale(.92); } }
 .map-mob-shadow { fill: #342b1b; opacity: .3; }
-.map-mob-species {
+.map-mob-body {
   filter: drop-shadow(0 .5px .35px #554025);
   animation: map-mob-appear 240ms var(--ease-glide) both;
 }
 @keyframes map-mob-appear { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .map-mob-species { animation: none; }
+  .map-mob-body { animation: none; }
 }
 
 .sheet svg text, .sheet svg line, .sheet svg .pin, .sheet svg .watermark { pointer-events: none; }
 
 .sheet svg .tile-depth-cell { fill: #997649; stroke: #997649; stroke-linejoin: round; }
-.sheet svg #terrain-textures { opacity: .95; pointer-events: none; }
-.sheet svg #terrain-textures .terrain-texture { stroke: none; }
-.sheet svg .terrain-figure { filter: drop-shadow(1px 3px 2px rgba(47, 38, 22, .45)); }
+.sheet svg .diorama-figure { filter: drop-shadow(.6px 1.2px .7px rgba(47, 38, 22, .35)); }
 /* Relief always reads as ground: slightly muted so labels, markers and mobs sit visually above it. */
-.sheet svg #terrain-relief { opacity: .92; }
+.sheet svg #layer-diorama { opacity: 1; }
 .sheet svg .node > use { display: none; }
 .sheet svg #labels, .sheet svg #regions { display: none; }
 #map-names { pointer-events: none; }
@@ -102,10 +89,8 @@
 .map-back.sheet svg .zonelabel .zonename { font-size: 3.3px; stroke: #e6d2a8; stroke-width: .7; paint-order: stroke; }
 .map-back.sheet svg .zonelabel .zoneband { font-size: 2.8px; }
 .stage.mapmode .sheet svg .pin.here { display: none; }
-.sheet svg[data-view="band"] #terrain-relief,
-.sheet svg[data-view="gate"] #terrain-relief { opacity: .18; }
-.sheet svg[data-view="band"] #terrain-textures,
-.sheet svg[data-view="gate"] #terrain-textures { opacity: .16; }
+.sheet svg[data-view="band"] #layer-diorama,
+.sheet svg[data-view="gate"] #layer-diorama { opacity: .18; }
 
 .map-back.sheet {
   --sheet-ink: #4b3b27;
@@ -137,6 +122,7 @@
 .sheet svg .you { pointer-events: none; transition: transform var(--motion-map) var(--ease-out); }
 .sheet svg .you .hex { fill: var(--gold); fill-opacity: .2; stroke: none; }
 .sheet svg .you .mark { fill: var(--gold); stroke: var(--bg); stroke-width: 1.4; }
+.sheet svg .you.returning .mark { filter: drop-shadow(.5px 1px .7px #c5a464); }
 .sheet svg .you.stepping .mark {
   transform-box: fill-box; transform-origin: 50% 100%;
   animation: map-board-step var(--motion-map) var(--ease-out);

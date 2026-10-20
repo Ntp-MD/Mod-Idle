@@ -1,0 +1,51 @@
+{
+  "sources": [
+    {
+      "sha256": "521b1e1b798ba6194a543b06d21e96580b7cc99a4e4865bc8ecfc97072653cae",
+      "path": "game/src/ui/map-projection.ts"
+    },
+    {
+      "sha256": "2584150620f78880e45e726be8f10ebf420fd673e24da7586ab212fa4cf76873",
+      "path": "game/public/map/terrain/templates/terrain-hex.json"
+    },
+    {
+      "sha256": "7d91de1dade87565062e2fa001a93c8a3fd9981c2e8b873daac5836abe7a294d",
+      "path": "tools/map.ts"
+    },
+    {
+      "sha256": "a441cbdde347c65ef557a2e201a27a57ff06b464fafcf73bc5b7f3e3faa34323",
+      "path": "game/src/ui/map-terrain.ts"
+    },
+    {
+      "sha256": "64b7430b454b6d3e6fcbd8300df7d5cd8e653c5d6f0aa43d92898b521fb110e4",
+      "path": "game/src/ui/map-terrain-footprints.json"
+    },
+    {
+      "sha256": "39916ecde5a7c911c4a80d51ba8a3fb1c0f5cdee4a2868b87b13b4fabb4593da",
+      "path": "art-reference/map/source-assets.json"
+    },
+    {
+      "sha256": "33175b8b1ebdb7d505d3429240601b5476e4c77eae5677e0e720b14da9fe4e5f",
+      "path": "docs/map-art.md"
+    },
+    {
+      "sha256": "39cc081e3a1456a2ef47b9f402ec8f31e942b74797c37e35b55f200456ff761e",
+      "path": "game/public/map/terrain/forest-relief.png"
+    },
+    {
+      "sha256": "f9530982658e235129f2939eaa8a25cc06479d97e33230007bf8683343047732",
+      "path": "game/public/map/terrain/forest-relief-1.png"
+    },
+    {
+      "sha256": "beacde9269e7a7c6a4f2699afc40be0cd89b1d7671837e7decc02090fd77350d",
+      "path": "game/public/map/terrain/mountain-relief-1.png"
+    },
+    {
+      "sha256": "ccd3ee4e2df264ecd1a227b5bb77498c46792b5999ee66323ba2e1944299178b",
+      "path": "output/map-calibration/registration.json"
+    }
+  ],
+  "generatedAtUtc": "2026-10-20T18:40:03.9658875+00:00",
+  "purpose": "Portable reference snapshots, not model training and not asset approval.",
+  "integrationWarnings": []
+}

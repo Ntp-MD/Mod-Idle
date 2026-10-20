@@ -5,51 +5,9 @@ import type { Item, ModLine } from './types';
 import { tree } from '../engine/client';
 import type { StatKey } from '../engine/client';
 import type { LifeSkillBonus } from '../../../engine/life-skills.ts';
-
-/** Mod id → the character line it feeds. The ids are the mods.json rows; nothing is typed here. */
-const PCT_LINE: Record<string, string> = {
-  physical_power: 'physPct',
-  magic_power: 'magicPct',
-  attack_speed: 'aspdPct',
-  accuracy: 'accPct',
-  critical_chance: 'critPct',
-  critical_damage: 'critDmgPct',
-  max_hp: 'hpPct',
-  max_mana: 'manaPct',
-  max_energy_shield_pct: 'esPct',
-  energy_shield_regen: 'esRegenPct',
-  life_regen_pct: 'hpRegenPct',
-  mana_regen_pct: 'manaRegenPct',
-  elemental_power: 'elemPct',
-  elemental_resistance: 'resPct',
-  all_resistance_pct: 'allResPct',
-  elemental_resistance_cap_pct: 'resCapPct',
-  elemental_alignment: 'alignPct',
-  attack_damage_pct: 'attackDamagePct',
-  spell_damage_pct: 'spellDamagePct',
-  cooldown_reduction: 'cdrPct',
-  armour_pct: 'armourPct',
-  evasion_pct: 'evasionPct',
-  perfect_dodge_pct: 'pdodgePct',
-  status_resistance_pct: 'statusResPct',
-  // the four line-1 Frame Mods (item-base.md): block, penetration and the two chances
-  block_chance: 'blockPct',
-  armour_pen: 'armourPenPct',
-  bleed_chance: 'bleedChancePct',
-  stun_chance: 'stunChancePct',
-};
-const FLAT_LINE: Record<string, string> = {
-  physical_power_flat: 'physFlat',
-  magic_power_flat: 'magicFlat',
-  elemental_power_flat: 'elemFlat',
-  armour_flat: 'armourFlat',
-  evasion_flat: 'evasionFlat',
-  energy_shield_flat: 'esFlat',
-  max_hp_flat: 'hpFlat',
-  max_mana_flat: 'manaFlat',
-  life_regen_flat: 'hpRegenFlat',
-  mana_regen_flat: 'manaRegenFlat',
-};
+// The sheet's line tables live apart (`sim/lines.ts`) so the passive-tree cage can check that every
+// node grants a line the character sheet actually acts on.
+import { PCT_LINE, FLAT_LINE } from './lines.ts';
 
 export const SLOT_COUNT = E.stat.item_slots as number;
 
@@ -75,7 +33,12 @@ export function sumLines(gear: (Item | null)[], extra?: { id: string; value: num
   // so a bought rank moves the same number the piece would have
   for (const part of extra || []) {
     if (part.id === 'all_stat_flat') for (const k of STAT_KEYS) acc.statBy[k].flat += part.value;
-    else if (part.id === 'stat_mod_flat' && part.stat) acc.statBy[part.stat as StatKey].flat += part.value;
+    // a piece carries the stat it rolled at drop; a tree line carries none, so it feeds every Core
+    // attribute — the tree cannot pick one, and a stat line that did nothing would be a silent no-op
+    else if (part.id === 'stat_mod_flat') {
+      if (part.stat) acc.statBy[part.stat as StatKey].flat += part.value;
+      else for (const k of STAT_KEYS) acc.statBy[k].flat += part.value;
+    }
     else if (PCT_LINE[part.id]) acc[PCT_LINE[part.id]] += part.value;
     else if (FLAT_LINE[part.id]) acc[FLAT_LINE[part.id]] += part.value;
   }
@@ -227,6 +190,50 @@ export interface EffectFold {
 const m = (t: EffectFold, k: string) => t.mult[k] ?? 1;
 const a = (t: EffectFold, k: string) => t.add[k] ?? 0;
 
+/**
+ * The rules a set of bought ranks carries, applied to the folded sheet.
+ *
+ * A keystone's drawback (D4) takes a named line away, and the removal lands after the gear and the
+ * tree have both folded — so the line is gone from the whole sheet, not only from the tree's share.
+ * A keystone may also raise a named Cap, and that rides the same line the sheet already reads.
+ */
+export function applyTreeRules(
+  lines: Lines,
+  rules: { kind: string; target: string; value?: number }[] = [],
+): Lines {
+  for (const rule of rules) {
+    if (rule.kind === 'remove') {
+      if (PCT_LINE[rule.target]) lines[PCT_LINE[rule.target]] = 0;
+      if (FLAT_LINE[rule.target]) lines[FLAT_LINE[rule.target]] = 0;
+    } else if (rule.kind === 'cap_unlock') {
+      if (PCT_LINE[rule.target]) lines[PCT_LINE[rule.target]] += rule.value ?? 0;
+      if (FLAT_LINE[rule.target]) lines[FLAT_LINE[rule.target]] += rule.value ?? 0;
+    }
+  }
+  return lines;
+}
+
+/**
+ * The per-Element conversion the sheet routes: the aura rows' `damage_conversion:<element>` and the
+ * tree's own conversion rules, in one place.
+ */
+export function conversionOf(
+  effects: EffectFold,
+  rules: { kind: string; target: string; value?: number }[] = [],
+): Record<string, number> {
+  const conversion: Record<string, number> = {};
+  for (const [key, v] of Object.entries(effects.add || {})) {
+    if (!key.startsWith('damage_conversion:')) continue;
+    const el = key.split(':')[1];
+    conversion[el] = (conversion[el] || 0) + v;
+  }
+  for (const rule of rules) {
+    if (rule.kind !== 'convert') continue;
+    conversion[rule.target] = (conversion[rule.target] || 0) + (rule.value ?? 0);
+  }
+  return conversion;
+}
+
 export function buildCharacter(
   level: number,
   gear: (Item | null)[],
@@ -238,7 +245,13 @@ export function buildCharacter(
   life: LifeSkillBonus = {},
 ): Character {
   const mainHand = gear.find((g) => g && !g.broken && g.slot === 'main hand') || null;
-  const lines = sumLines(gear, tree ? tree.linesOf(treeRanks, mainHand?.base || '') : undefined);
+  // the tree's own lines: the bought ranks' grants and the lines its threshold clusters have earned
+  const treeLines = tree ? tree.linesOf(treeRanks, mainHand?.base || '') : [];
+  const treeRules = tree ? tree.rulesOf(treeRanks) : [];
+  const treeClusters = tree ? tree.clusterState(treeRanks).grants : [];
+  const lines = sumLines(gear, [...treeLines, ...treeClusters]);
+  // a keystone's rules land on the folded sheet: a drawback takes the line away, a Cap raise lifts it
+  applyTreeRules(lines, treeRules);
   const core = {} as Record<StatKey, number>;
   // With no allocation given, fall back to the REFERENCE even-split line — the build every published
   // number and every test is measured against. The client passes the player's own `points`.
@@ -250,36 +263,29 @@ export function buildCharacter(
   // a weapon's Element is a stored line on the piece, not a property of the weapon types:
   // `equipment-weapon.md` carries no Element column, and `crafting.md` forbids locking one
   const weaponElement = mainHand ? (mainHand.lines.find((l) => l.element)?.element ?? null) : null;
-  // the K_ELEM base belongs to the piece's own Element; each added line belongs to the Element it
-  // carries, so a two-Element weapon is split and a one-Element one reads exactly as it did before
-  const elemFromGear = (core.int * E.K.K_ELEM + lines.elemFlat) * (1 + lines.elemPct / 100);
   // a Herald adds flat damage of one named Element *on top of* what the gear already carries,
   // so it joins that Element's pool, lifts the total, and leaves every other pool as it was
   const herald: Record<string, number> = {};
   for (const [key, v] of Object.entries(effects.add || {})) {
     if (!key.startsWith('elemental_power:')) continue;
     const el = key.split(':')[1];
-    herald[el] = (herald[el] || 0) + v * (1 + lines.elemPct / 100);
+    herald[el] = (herald[el] || 0) + v;
   }
   // conversion (draft/convert-damage.md): the aura rows' `damage_conversion:<element>` fold into a
   // per-Element percent, the same `stat:element` key shape the Herald bonus reads — the swing and the
-  // physical-basis press route their physical share through it, a magic-basis press never does
-  const conversion: Record<string, number> = {};
-  for (const [key, v] of Object.entries(effects.add || {})) {
-    if (!key.startsWith('damage_conversion:')) continue;
-    const el = key.split(':')[1];
-    conversion[el] = (conversion[el] || 0) + v;
-  }
-  const elemTotal = elemFromGear + Object.values(herald).reduce((t, v) => t + v, 0);
-  const elemByElement: Record<string, number> = {};
-  for (const [el, bucket] of Object.entries((lines.elemBy || {}) as Record<string, { flat: number; pct: number }>)) {
-    const base = el === weaponElement ? core.int * E.K.K_ELEM : 0;
-    elemByElement[el] = (base + bucket.flat) * (1 + (lines.elemPct + bucket.pct) / 100);
-  }
-  // anything no line names keeps the rest of the pool unattributed, and is never countered either way
-  const named = Object.values(elemByElement).reduce((a2, b2) => a2 + b2, 0);
-  if (elemFromGear - named !== 0) elemByElement[''] = elemFromGear - named;
-  for (const [el, v] of Object.entries(herald)) elemByElement[el] = (elemByElement[el] || 0) + v;
+  // physical-basis press route their physical share through it, a magic-basis press never does. A
+  // keystone may route the same way.
+  const conversion = conversionOf(effects, treeRules);
+  // the elemental pools: the engine owns the rule (DECISIONS: per Element, the flat pool plus
+  // `Int x K_ELEM` for the weapon's own Element, scaled by the shared and Element-specific percents)
+  const elemPower = eng.elementalPowerOf({
+    intCore: core.int,
+    weaponElement,
+    flat: lines.elemFlat,
+    pct: lines.elemPct,
+    byElement: (lines.elemBy || {}) as Record<string, { flat: number; pct: number }>,
+    herald,
+  });
   // Trinity Form names the Elements it hardens against, so each one gets its own resistance line
   // (per-Element pools, spent on the incoming half by element)
   const resByElement: Record<string, number> = {};
@@ -320,8 +326,8 @@ export function buildCharacter(
     magic: eng.magicOf(core.int, lines.magicFlat, lines.magicPct, weaponAspd, mainHand?.base),
     attackDamage: lines.attackDamagePct,
     spellDamage: lines.spellDamagePct,
-    elemByElement,
-    elem: elemTotal,
+    elemByElement: elemPower.byElement,
+    elem: elemPower.total,
     /** Per-Element conversion percent, from the conversion aura rows (empty when none is up). */
     conversion,
     accuracy: eng.playerAccuracy(core.dex, lines.accPct + (life.accuracy_pct || 0)),

@@ -12,6 +12,7 @@ import { newCurses, applyCurse, spreadOnDeath, lineValue } from '../src/sim/curs
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
+import { mobFixture } from './mobFixture';
 
 /**
  * The roster rows whose behaviour the sim spends.
@@ -24,12 +25,7 @@ import type { Mob } from '../src/sim/types';
 const row = (id: string) => sm.byId[id]!;
 const valueOf = (id: string, stat: string) => row(id)!.effects!.find((e: any) => e.stat === stat)!.value;
 
-const mob = (over: Partial<Mob> = {}): Mob => ({
-  id: 'm1', species: 'Rat', kind: 'Small', zone: 1, level: 20,
-  hp: 1e9, hpMax: 1e9, ps: 200, acc: 500, evasion: 0, dodgeRate: 0, armour: 0, res: 0,
-  damage: 'mixed', innate: ['fire'], xp: 1, line: 'front', hitsPerSec: 1, atkTimer: 0, engageSec: 0,
-  ...over,
-} as Mob);
+  const mob = (over: Partial<Mob> = {}): Mob => mobFixture({ acc: 500, ...over });
 
 function cast(id: string, c: Character, group: Mob[], env: any = {}, seed = 7) {
   const s = newSkillState();

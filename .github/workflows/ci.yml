@@ -1,0 +1,60 @@
+name: CI
+
+# The checks are the ones AGENTS.md names, in the order it names them. Every command is the
+# repository's own script, so CI runs exactly what a developer runs locally:
+#
+#   npm run typecheck              the engine and the tools (tsc --noEmit)
+#   npm --prefix game run check    the client (svelte-check)
+#   npm run verify                 every cage (tools/verify.ts)
+#   npm test                       the test suite (vitest)
+#
+# Node 22 is the runtime the code asks for: `node --experimental-strip-types` needs 22.6 or newer,
+# and `game/.npmrc` passes that flag to every suite that loads a TypeScript module.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            game/package-lock.json
+
+      # The root package holds the engine's tooling; the client is its own package with its own
+      # lockfile, and its `modworld-specs` dependency is a link to the root — so the root installs first.
+      - name: Install the engine and the tools
+        run: npm ci
+
+      - name: Install the client
+        run: npm ci --prefix game
+
+      - name: Typecheck the engine and the tools
+        run: npm run typecheck
+
+      - name: Typecheck the client
+        run: npm --prefix game run check
+
+      - name: Run the cages
+        run: npm run verify
+
+      - name: Run the test suite
+        run: npm test
+
+      # The wiki is generated from the same source the game reads, so a stale page is a defect:
+      # rebuilding must leave the committed pages exactly as they are.
+      - name: Rebuild the wiki
+        run: npm run wiki
+
+      - name: The generated wiki matches its source
+        run: git diff --exit-code -- docs/wiki

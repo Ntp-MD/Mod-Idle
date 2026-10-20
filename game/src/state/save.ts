@@ -527,6 +527,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.junk) s.junk = {};
   // a save from before the tree existed holds no ranks; the points it banked are still there
   if (s.player && !s.player.treeRanks) s.player.treeRanks = {};
+  if (s.player && s.player.attainmentPoints == null) s.player.attainmentPoints = 0;
   // junk used to be carried per RARITY; the item is per variant now, so a pre-variant stack is moved
   // onto one item of its own rarity. Every rarity is worth the same gold per kill by construction, so
   // the move is value-exact — nothing is deleted and no gold is minted (`junk.rarities` · X39).
@@ -676,7 +677,6 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       s.player.es = Math.max(0, finite(s.player.es, 0));
       // points in hand cannot exceed what the level curve has paid out in total
       s.player.statPoints = Math.max(0, Math.min(eng.pointsAt(lv), Math.floor(finite(s.player.statPoints, 0))));
-      s.player.treePoints = Math.max(0, Math.min(eng.treePointsAt(lv), Math.floor(finite(s.player.treePoints, 0))));
       s.player.points = Object.fromEntries(STAT_KEYS.map((k) => [k, Math.max(0, Math.floor(finite(s.player.points?.[k], 0)))])) as Record<StatKey, number>;
       let spent = Object.values(s.player.points).reduce((a, b) => a + b, 0);
       if (spent > eng.pointsAt(lv)) {
@@ -691,11 +691,17 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
         if (!tree.byId[id]) delete ranks[id];
         else ranks[id] = Math.max(0, Math.min(tree.byId[id].ranks, Math.floor(finite(ranks[id], 0))));
       }
-      if (tree.pointsSpent(ranks) > eng.treePointsAt(lv)) {
+      // the tree's points in hand are what the level has paid out MINUS what the ranks have spent, so a
+      // save written under an older rate is recomputed rather than clamped (D8)
+      s.player.attainmentPoints = Math.max(0, Math.floor(finite(s.player.attainmentPoints, 0)));
+      const treeBudget = tree.pointsAt(lv, E.stat.level_cap);
+      const treeSpent = tree.pointsSpent(ranks);
+      if (treeSpent > treeBudget) {
         for (const id of Object.keys(ranks)) delete ranks[id];
-        s.player.treePoints = eng.treePointsAt(lv);
+        s.player.treePoints = treeBudget;
+      } else {
+        s.player.treePoints = treeBudget - treeSpent;
       }
-      s.player.treePoints = Math.min(s.player.treePoints, eng.treePointsAt(lv) - tree.pointsSpent(ranks));
       const fixUpgrade = (item: any) => {
         if (!item || item.upgrade_lv == null) return;
         item.upgrade_lv = Math.max(0, Math.min(E.craft.upgrade_cap, Math.floor(finite(item.upgrade_lv, 0))));

@@ -726,18 +726,27 @@ function runChecks() {
   }
 
   // Zone identity lives in `mob.zones` alone. Bands repeat every three zones, so each band owns
-  // however many zones fall in its 30-level window — read off the zone list, never typed.
+  // however many zones fall in its 30-level window. The band list is read from `item_level.spans`
+  // (the ladder that owns band names) and the expected group size from `loot.bands[band].group_mobs`
+  // (the number that band already owns), so a zone's own `group` string must average to it.
   const zp: string[] = [];
-  const GROUP_AVG: Record<string, string> = { low: '1-2', mid: '2-3', high: '3-5' };
-  for (const band of Object.keys(GROUP_AVG)) {
-    const inBand = ZONES.filter((z) => z.quality.startsWith(band));
-    if (!inBand.length) zp.push(`band ${band} owns no zone — the band rule would print an empty row`);
-    for (const z of inBand) {
-      if (z.group !== GROUP_AVG[band]) zp.push(`zone ${z.id} group "${z.group}" does not match the ${band} band rule (${GROUP_AVG[band]})`);
+  const SPAN_BANDS = E.item_level.spans.map((s) => s.band);
+  const bandOfZone = (z: (typeof ZONES)[number]) => z.quality.split(' ')[0];
+  for (const z of ZONES) {
+    if (!SPAN_BANDS.includes(bandOfZone(z))) zp.push(`zone ${z.id} names the band "${bandOfZone(z)}", which item_level.spans does not carry`);
+  }
+  for (const band of SPAN_BANDS) {
+    const want = E.loot.bands[band]?.group_mobs;
+    if (want == null) { zp.push(`the ${band} band has no loot.bands row to own a group size`); continue; }
+    for (const z of ZONES.filter((zz) => bandOfZone(zz) === band)) {
+      const [lo, hi] = String(z.group).split('-').map(Number);
+      if (!Number.isFinite(lo) || !Number.isFinite(hi)) { zp.push(`zone ${z.id} group "${z.group}" is not a readable range`); continue; }
+      const avg = (lo + hi) / 2;
+      if (Math.abs(avg - want) > 1e-9) zp.push(`zone ${z.id} group "${z.group}" averages ${avg}, not the ${want} the ${band} band owns (loot.bands.${band}.group_mobs)`);
     }
   }
   add('X26', zp.length === 0, zp.length ? zp.join(' · ')
-    : `zone identity has one home — engine.json mob.zones: every zone's group average matches the band its own \`quality\` names (${ZONES.length} zones read from the list, no per-band zone count is required)`);
+    : `zone identity has one home — engine.json mob.zones: every zone's group average matches the group size its own band owns (${ZONES.length} zones read from the list, the band list from item_level.spans, the expected size from loot.bands[band].group_mobs — no per-band group string is typed)`);
 
   // B2: mob_HP(L) is defined at every level, not only the published anchors (X37). The curve is
   // anchored at each zone edge and interpolated inside the zone, so a mob at an unlisted level

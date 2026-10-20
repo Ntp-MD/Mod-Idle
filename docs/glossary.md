@@ -95,6 +95,23 @@ Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 | **mark** (chaos) | A growing multiplier on the hit it rides, plus leech. |
 | **bleed** | Physical damage over time. **Not an Element** — no Element tag and no resistance line. |
 
+# The passive tree
+
+| Term | Meaning |
+|---|---|
+| **Wing** | One of the tree's twelve branches — a theme of lines, each radiating from the centre start. |
+| **Node** | One thing the tree grants: a line, or several at once, with a value per rank. |
+| **Rank** | One step of a node. A three-rank node holds three rising values; a one-rank node holds one. |
+| **Line node** | A node that grants one line. |
+| **Mark** | A one-rank line node — a single point on the tree. |
+| **Notable** | A one-rank node that grants several lines at once: the payoff at the end of a lane. |
+| **Keystone** | A node paid in **attainment** points. It may carry a drawback, and it belongs to a group. |
+| **Capstone** | The node at the top of a wing, granting several lines at once. |
+| **Attainment point** | The tree's second currency. A completed Delivery contract pays one; keystones are bought with them. |
+| **Keystone group** | A one-of family: holding one member blocks its siblings. The tree's only exclusivity. |
+| **Line budget** | The share of a line the tree may hand out in total — 130% of that line's maximum. A rank never grants nothing, so a line with many nodes can sit a little over its share. |
+| **Tree point** | The ordinary tree currency. The level curve pays two a level, and one buys one rank. |
+
 # Crafting
 
 | Term | Meaning |

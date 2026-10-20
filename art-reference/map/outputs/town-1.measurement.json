@@ -1,0 +1,39 @@
+{
+  "method": "Alpha >=128 row extrema, convex hull simplified to six vertices; cyclic order matched to current template. Requires visual review; not a camera-angle certificate.",
+  "width": 1605,
+  "height": 980,
+  "pixelFormat": "Format32bppArgb",
+  "cornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "groundFill": "#979915",
+  "vertices": [
+    [
+      1341,
+      140
+    ],
+    [
+      1602,
+      618
+    ],
+    [
+      1057,
+      978
+    ],
+    [
+      233,
+      844
+    ],
+    [
+      4,
+      398
+    ],
+    [
+      592,
+      3
+    ]
+  ]
+}

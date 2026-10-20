@@ -40,7 +40,6 @@ export function createEngine(E: EngineData) {
   const pointsAt = (level: number) =>
     S.points_per_level * (Math.min(level, S.paragon_from - 1) - 1)
     + S.paragon_points_per_level * Math.max(0, Math.min(level, S.level_cap) - (S.paragon_from - 1));
-  const treePointsAt = (level: number) => S.tree_points_base + Math.max(0, Math.min(level, S.level_cap) - 1) * S.tree_points_per_level;
   /** A stat's value from the points spent into it: `base + points x point_value`. */
   const statOf = (points: number) => S.base + points * S.point_value;
   /** The REFERENCE build: a level's points split evenly over the 7 stats. Every published number
@@ -566,6 +565,41 @@ export function createEngine(E: EngineData) {
   const physOf = (str: number, flat: number, pct: number, weaponAspd: number, weaponName?: string) => (str * K.K_STR + flat) * (1 + pct / 100) * weaponMult(weaponAspd, weaponName);
   const magicOf = (int: number, flat: number, pct: number, weaponAspd: number, weaponName?: string) => (int * K.K_INT + flat) * (1 + pct / 100) * weaponMult(weaponAspd, weaponName);
 
+  // ---- elemental power (DECISIONS: per Element, the flat pool + `Int x K_ELEM` for the weapon's own
+  // Element, scaled by the shared and the Element-specific percents).
+  // A Herald adds flat damage of one named Element ON TOP of what the gear already carries, so it
+  // joins that Element's pool, lifts the total, and leaves every other pool as it was. Anything no
+  // line names keeps the rest of the pool unattributed — the `''` key — and is never countered either
+  // way. The parts always sum back to the total: the split never invents or loses pool.
+  const elementalPowerOf = (o: {
+    /** The character's own Int, the source of the `K_ELEM` base. */
+    intCore: number;
+    /** The Element the held weapon carries, or null for none. */
+    weaponElement: string | null;
+    /** The shared flat pool (`elemental_power_flat`, every line). */
+    flat: number;
+    /** The shared percent pool (`elemental_power`, every line). */
+    pct: number;
+    /** The per-Element pools: a line that carries an Element of its own. */
+    byElement: Record<string, { flat: number; pct: number }>;
+    /** A Herald's flat addition per named Element, before the shared percent rides it. */
+    herald: Record<string, number>;
+  }) => {
+    const fromGear = (o.intCore * K.K_ELEM + o.flat) * (1 + o.pct / 100);
+    const herald: Record<string, number> = {};
+    for (const [el, v] of Object.entries(o.herald)) herald[el] = (herald[el] || 0) + v * (1 + o.pct / 100);
+    const total = fromGear + Object.values(herald).reduce((t, v) => t + v, 0);
+    const byElement: Record<string, number> = {};
+    for (const [el, bucket] of Object.entries(o.byElement)) {
+      const base = el === o.weaponElement ? o.intCore * K.K_ELEM : 0;
+      byElement[el] = (base + bucket.flat) * (1 + (o.pct + bucket.pct) / 100);
+    }
+    const named = Object.values(byElement).reduce((a, b) => a + b, 0);
+    if (fromGear - named !== 0) byElement[''] = fromGear - named;
+    for (const [el, v] of Object.entries(herald)) byElement[el] = (byElement[el] || 0) + v;
+    return { total, byElement };
+  };
+
   // Evasion is ONE layer, and AGI carries it (owner ruling): the rating is `agi × K_EVASION` plus
   // the gear `evasion_flat` × `evasion_pct` lines. The opening slice has a small share while points
   // earned beyond it keep their value, then the effective rating is opposed by attacker accuracy.
@@ -820,8 +854,17 @@ export function createEngine(E: EngineData) {
   // integral — a level's cost divided by what the cast of that level actually pays (an elite is worth
   // `elite_mult` and the boss clock adds its share). Nothing here is typed a second time, so a curve
   // re-shape moves the checkpoints, the bands and the town budgets together.
-  const CHECKPOINT_LEVELS = [10, 30, 60, 90, 100, 120, 150, 180, 190];
-  const bandOfLevel = (lv: number) => (lv <= 30 ? 'low' : lv <= 60 ? 'mid' : 'high');
+  // Two kinds of checkpoint, one curve. The gameplay levels are the band edges and the push window:
+  // `BAND.*.band_kills` and `PUSH_KILLS_91_100` read them, so they must exist. The sampling levels are
+  // the report's extra rows — no gameplay figure reads them, so dropping one would only remove a
+  // printed line. The values stay where they were; only the two jobs are separated and named.
+  const GAMEPLAY_CHECKPOINT_LEVELS = [30, 60, 90, 100];
+  const SAMPLING_CHECKPOINT_LEVELS = [10, 120, 150, 180, 190];
+  const CHECKPOINT_LEVELS = [...GAMEPLAY_CHECKPOINT_LEVELS, ...SAMPLING_CHECKPOINT_LEVELS].sort((a, b) => a - b);
+  // The gameplay levels, in order: the low band ends here, the mid band, the high band, and the end of
+  // the push window.
+  const [LOW_BAND_END, MID_BAND_END, HIGH_BAND_END, PUSH_WINDOW_END] = GAMEPLAY_CHECKPOINT_LEVELS;
+  const bandOfLevel = (lv: number) => (lv <= LOW_BAND_END ? 'low' : lv <= MID_BAND_END ? 'mid' : 'high');
   const xpMix = (kph: number) => {
     const elite = L.elite_spawn_chance;
     const bossShare = L.boss_per_hour / kph;
@@ -840,10 +883,10 @@ export function createEngine(E: EngineData) {
   }
   // a band is a COUNT of kills between two checkpoints, never a stretch of hours: how long a band
   // takes is the player's own pace.
-  BAND.low.band_kills = CHECKPOINTS_KILLS.level_30;
-  BAND.mid.band_kills = CHECKPOINTS_KILLS.level_60 - CHECKPOINTS_KILLS.level_30;
-  BAND.high.band_kills = CHECKPOINTS_KILLS.level_90 - CHECKPOINTS_KILLS.level_60;
-  const PUSH_KILLS_91_100 = CHECKPOINTS_KILLS.level_100 - CHECKPOINTS_KILLS.level_90;
+  BAND.low.band_kills = CHECKPOINTS_KILLS[`level_${LOW_BAND_END}`];
+  BAND.mid.band_kills = CHECKPOINTS_KILLS[`level_${MID_BAND_END}`] - CHECKPOINTS_KILLS[`level_${LOW_BAND_END}`];
+  BAND.high.band_kills = CHECKPOINTS_KILLS[`level_${HIGH_BAND_END}`] - CHECKPOINTS_KILLS[`level_${MID_BAND_END}`];
+  const PUSH_KILLS_91_100 = CHECKPOINTS_KILLS[`level_${PUSH_WINDOW_END}`] - CHECKPOINTS_KILLS[`level_${HIGH_BAND_END}`];
   // ---- a settlement's budget, DERIVED from the same curve
   // Every settlement owns one zone, a zone is ten levels, and the last one also absorbs the stretch
   // past the eighteenth zone up to the level cap — so the budgets ARE the run's slices and they sum to
@@ -1142,7 +1185,7 @@ export function createEngine(E: EngineData) {
     const damage = boss ? sp.damage : variantDamage ?? selectedVariant?.damage ?? sp.damage;
     const core = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, zoneId, selectedVariantCore)]));
     const vit = core.vit;
-    const hp = hpBase + LG.hp_per_level * (lv - 1) + vit * K.K_VIT_HP;
+    const hp = mobHpOf(lv, vit);
     const mana = mobManaOf(lv, core.int);
     const ps = mobPsAt(lv) * size.ps / bf * speciesPsMultOf(zoneId, sp, selectedVariantCore, damage);
     return {
@@ -1172,9 +1215,9 @@ export function createEngine(E: EngineData) {
   return {
     E, S, K, M, LG, L, C, TS, ES, CAP, CURVE, X,
     BANDS, BAND_KEYS, BAND, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, REF, REFERENCE, WEAPONS, STONE, LCK_BOUND,
-    statAt, statWithItems, ceilStat, pointsAt, treePointsAt, statOf,
+    statAt, statWithItems, ceilStat, pointsAt, statOf,
     // mob curve
-    mobHpAt, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
+    mobHpAt, mobHpOf, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
     speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
     ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, MEAN_CORE, mobStatsOf, speciesInZone, zoneElements, zoneBodyFactor, mobEvasion, mobAcc,
     variantsOf, variantsInZone, uniquesOf, mobDodge, refAttackerAcc,
@@ -1184,7 +1227,7 @@ export function createEngine(E: EngineData) {
   evasionChance, evasionRating,
     MEAN_SPECIES_DEX, MOB_EVASION_REF, SPECIES_EVASION, sizeEvasionPct, damageSplit, mobRoster, spawnAt,
     // player lines
-    aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, playerAccuracy, hitVs, hitChance,
+    aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, elementalPowerOf, playerAccuracy, hitVs, hitChance,
     dodgeRate, dodgeChance, perfectDodgeChance, blockChance, armourPenCut, stunChanceFrom, bleedChanceFrom,
     critPool, critChanceOf, critDmgOf,
     maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf, esRegenOf, cdrOf,

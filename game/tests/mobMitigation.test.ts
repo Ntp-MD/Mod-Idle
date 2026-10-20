@@ -8,6 +8,7 @@ import { newMobStatusStore, stepMob, applyBleed, modsOn, targetMods } from '../s
 import { NO_CURSE, applyCurse, newCurses, modsFromAuraFold, modsOn as curseModsOn } from '../src/sim/curse';
 import { castOnce, newSkillState, effectsActive } from '../src/sim/skills';
 import type { Item, Mob } from '../src/sim/types';
+import { mobFixture } from './mobFixture';
 
 const valueOf = (id: string, stat: string) => sm.byId[id]!.effects!.find((e: any) => e.stat === stat)!.value;
 
@@ -29,12 +30,7 @@ function castPress(id: string, c: ReturnType<typeof buildCharacter>, target: Mob
  * DoT still walks past them (status.mob_side: DoT lands in full · armour does not reduce bleed).
  */
 
-const mob = (over: Partial<Mob> = {}): Mob => ({
-  id: 'm1', species: 'Rat', kind: 'Small', zone: 1, level: 90,
-  hp: 1e9, hpMax: 1e9, ps: 200, acc: 400, evasion: 0, dodgeRate: 0, armour: 0, res: 0,
-  damage: 'mixed', innate: ['fire'], xp: 1, line: 'front', hitsPerSec: 1, atkTimer: 0, engageSec: 0,
-  ...over,
-} as Mob);
+  const mob = (over: Partial<Mob> = {}): Mob => mobFixture({ level: 90, ...over });
 
 const C = () => buildCharacter(90, emptyGear());
 

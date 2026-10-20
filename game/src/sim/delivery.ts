@@ -69,6 +69,8 @@ export function deliveryCandidates(state: GameState, town: string) {
 }
 
 /** RNG order: target → count → stone → optional skill chance → optional named skill. */
+/** The attainment roll is last on purpose: no earlier roll changes its value, so a contract's
+ *  reward never moves after the player has seen it. */
 export function offerDelivery(state: GameState, town: string, rng: () => number, access: WriterAccess): DeliveryContract | null {
   if (!access.writer || !state.town.visited.includes(town) || !townById(town)) return null;
   if ((state.town.contracts[town] || []).filter((contract) => contract.status === 'open').length >= deliveryConfig.active_slots) return null;
@@ -85,6 +87,9 @@ export function offerDelivery(state: GameState, town: string, rng: () => number,
   const eligible = sm.all().filter((skill) => usefulSkillDuplicate(state.skills, skill.id));
   const skillChance = deliveryConfig.skill_chance * (deliveryConfig.skill_band_weights[route.band as keyof typeof deliveryConfig.skill_band_weights] || 0);
   const skill = rng() < skillChance ? choose(eligible, (entry) => (deliveryConfig.skill_weights as Record<string, number>)[entry.id] ?? deliveryConfig.default_skill_weight, rng)?.id || null : null;
+  const attainmentChance = deliveryConfig.attainment_chance
+    * (deliveryConfig.attainment_band_weights[route.band as keyof typeof deliveryConfig.attainment_band_weights] || 0);
+  const attainment = rng() < attainmentChance ? 1 : 0;
   const rawQuote = trade.quote(town, target.good, count, state.town.market[town]?.[target.good.group], state.clockSec);
   const premium = delivery.premium(route.difficulty, state.town.hagglingXp);
   const serial = state.town.contractSerial + 1;
@@ -93,7 +98,8 @@ export function offerDelivery(state: GameState, town: string, rng: () => number,
     id: `delivery:${town}:${serial}`, serial, town, good: target.good.id, target: count, delivered: 0,
     acquisition: route, derivationVersion: deliveryConfig.derivation_version,
     reward: { gold: trade.floorCurrency(rawQuote.gold * (premium - 1)), stone: delivery.stoneBundle(route.band, route.difficulty, stone.key, stone.income), skill,
-      fallback: delivery.stoneBundle(route.band, route.difficulty, deliveryConfig.fallback_stone, deliveryConfig.fallback_stone, true), quoteGold: rawQuote.gold, premium },
+      fallback: delivery.stoneBundle(route.band, route.difficulty, deliveryConfig.fallback_stone, deliveryConfig.fallback_stone, true), quoteGold: rawQuote.gold, premium,
+      attainment },
     triggeredAtClockSec: state.clockSec, dueAtDeliverySec: state.town.deliveryClockSec + delivery.deadline(route), status: 'open', terminalAt: null,
     baseGold: 0, lastQuantity: 0, lastGold: 0, paidBonus: null, recapAcknowledged: true, announced: false,
   };
@@ -173,9 +179,10 @@ export function previewDelivery(state: GameState, id: string, count: number, acc
   const skill = complete && contract.reward.skill && usefulSkillDuplicate(state.skills, contract.reward.skill) ? contract.reward.skill : null;
   const fallback = complete && !!contract.reward.skill && !skill;
   const stones = complete ? [contract.reward.stone, ...(fallback ? [contract.reward.fallback] : [])] : [];
+  const attainment = complete ? (contract.reward.attainment ?? 0) : 0;
   const capKind = good.bucket === 'junk' ? 'stone' : good.bucket;
   if (!fitsTransaction(state, [{ bucket, key: good.key, capKind, amount: count }], stones.map((stone) => ({ bucket: state.counters.stones, key: stone.key, capKind: 'stone', amount: stone.count })))) return refuse('make bag room for the complete reward bundle');
-  return { ok: true as const, contract, good, count, quote, complete, skill, fallback, stones };
+  return { ok: true as const, contract, good, count, quote, complete, skill, fallback, stones, attainment };
 }
 
 export function deliver(state: GameState, id: string, count: number, access: WriterAccess): { ok: boolean; why?: string; gold?: number; completed?: boolean } {
@@ -188,6 +195,9 @@ export function deliver(state: GameState, id: string, count: number, access: Wri
   if (preview.complete) {
     for (const stone of preview.stones) addTo(state, state.counters.stones, stone.key, 'stone', stone.count);
     if (preview.skill) grantNamedSkill(state.skills, preview.skill);
+    // the attainment point is paid on completion, next to the skill (D2): it is the rare half of the
+    // contract's reward, and it was frozen into the offer before the player saw it
+    state.player.attainmentPoints = (state.player.attainmentPoints ?? 0) + (preview.attainment ?? 0);
     state.counters.gold += contract.reward.gold;
     contract.paidBonus = { gold: contract.reward.gold, stones: preview.stones.map((stone) => ({ ...stone })), skill: preview.skill, fallback: preview.fallback };
     contract.status = 'completed'; contract.terminalAt = state.town.deliveryClockSec;

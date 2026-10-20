@@ -144,6 +144,8 @@ export interface Player {
   autoSpend: boolean;
   /** Banked passive-tree points. */
   treePoints: number;
+  /** The attainment points a keystone is paid in (D2). */
+  attainmentPoints?: number;
   /** Bought ranks, keyed by node id (`impact.1` … `control.21`) — 0-3 each, `engine/tree.ts` owns the nodes. */
   treeRanks?: Record<string, number>;
   hp: number;

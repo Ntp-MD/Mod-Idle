@@ -1365,7 +1365,13 @@
     "pause_states": [
       "camp",
       "dungeon"
-    ]
+    ],
+    "attainment_chance": 0.08,
+    "attainment_band_weights": {
+      "low": 0.5,
+      "mid": 1,
+      "high": 2
+    }
   },
   "black_market": {
     "refresh_interval_sec": 1800,

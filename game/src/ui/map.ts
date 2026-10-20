@@ -7,8 +7,15 @@ import { lowerLeftEdge, mapLevelBand, mapNameLines, mapSlantDeg, placeMapNames, 
 import { nearbyMapEncounters, type MapEncounterSite } from './map-encounters';
 import { mobIcon } from '../icon';
 import { mapSpeciesArt } from './map-species-art';
-import { paintMapAdventure } from './map-adventure';
+import { paintMapAdventure, uniqueTraceSpecies } from './map-adventure';
+import { mapSprite } from './map-sprites';
 import { trailSiteAt, trailSiteKind } from '../sim/map-exploration';
+
+const figureArt = new WeakMap<Element, string>();
+function paintFigureArt(element: Element, markup: string) {
+  if (figureArt.get(element) === markup) return;
+  element.innerHTML = markup; figureArt.set(element, markup);
+}
 
 /**
  * The map cluster's own reader — the geometry and the sheet repaint that `App.svelte` used to hold
@@ -136,8 +143,8 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
   // Position reads off the hex edge, not a circle mid-cell: the settlement cell itself carries the
   // state, so terrain, icons and mob art stay uncovered. A settlement polygon carries `data-node`
   // with no `data-sub`/`data-wild`; sides carry one of those, so excluding them lands on the town.
-  const hereTown = !walk ? opts.townId : null;
-  const targetTown = walk && walk.kind === 'town' && walk.node !== opts.townId ? walk.node : null;
+  const hereTown = !walk && rankOf(currentCell(gameState)) === 0 ? opts.townId : null;
+  const targetTown = walk && walk.kind === 'town' ? walk.node : null;
   if (hereTown || targetTown) {
     const townCell = (id: string | null) => {
       if (!id) return null;
@@ -146,7 +153,7 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
     };
     const here = hereTown && townCell(hereTown);
     if (here) (here as Element).classList.add('pin-here');
-    const target = targetTown && targetTown !== hereTown && townCell(targetTown);
+    const target = targetTown && townCell(targetTown);
     if (target) (target as Element).classList.add('pin-target');
   }
   const toggle = (id: string, on: boolean) => {
@@ -189,14 +196,12 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
       const NS = 'http://www.w3.org/2000/svg';
       you = document.createElementNS(NS, 'g');
       you.setAttribute('class', 'you');
-      const mark = document.createElementNS(NS, 'image');
-      mark.setAttribute('class', 'mark');
-      mark.setAttribute('href', '/map/traveler-piece.png');
-      mark.setAttribute('x', '-30'); mark.setAttribute('y', '-26');
-      mark.setAttribute('width', '30'); mark.setAttribute('height', '38');
-      you.append(mark);
-      (svg.querySelector('#projected-board') || svg).appendChild(you);
     }
+    const actors = svg.querySelector<SVGGElement>('#actors') || svg.querySelector<SVGGElement>('#projected-board') || svg;
+    if (you.parentNode !== actors) actors.append(you);
+    const own = actors.querySelector<SVGGElement>(`[data-actor-ax="${feet.q},${feet.r}"]`);
+    if (own && own.parentNode === actors && own.nextElementSibling !== you) actors.insertBefore(you, own.nextElementSibling);
+    paintFigureArt(you, mapSprite('/map/characters/traveler-piece.png', -24, -28, 21, 32, 'mark'));
     const position = `${feet.q},${feet.r}`;
     const previous = you.getAttribute('data-position');
     if (previous && previous !== position) {
@@ -207,6 +212,7 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
     you.setAttribute('data-position', position);
     you.setAttribute('transform', mapUprightAt(cx, cy));
     you.classList.toggle('walking', !!walk);
+    you.classList.toggle('returning', gameState.autoReturn.phase !== 'idle');
   }
   const board = svg?.querySelector('#projected-board');
   if (!board) return;
@@ -214,7 +220,8 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
     const townId = cell.getAttribute('data-node'), sub = cell.getAttribute('data-sub');
     if (!townId || sub == null) return [];
     const town = settlementById(townId);
-    const id = town && eng.zoneById(town.zone).subzones?.[Number(sub)]?.species?.[0];
+    const species = town && eng.zoneById(town.zone).subzones?.[Number(sub)]?.species || [];
+    const id = uniqueTraceSpecies(species) || species[0];
     if (!id) return [];
     const [q, r] = (cell.getAttribute('data-ax') || '').split(',').map(Number);
     return [{ key: cell.getAttribute('data-cell')!, q, r, species: eng.speciesById(id)?.name || id }];
@@ -224,8 +231,11 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
     sites.push({ key: at!.getAttribute('data-cell')!, q: feet.q, r: feet.r, species: activeSpecies });
   }
   const campCell = gameState.fieldwork.camp?.cell;
-  const nearby = v === 'terrain' ? nearbyMapEncounters(sites, feet, activeSpecies).filter(site =>
-    !campCell || site.q !== campCell.q || site.r !== campCell.r || (activeSpecies && site.q === feet.q && site.r === feet.r)) : [];
+  const nearby = v === 'terrain' ? nearbyMapEncounters(sites, feet, activeSpecies).filter(site => {
+    const activeHere = activeSpecies && site.q === feet.q && site.r === feet.r;
+    const campHere = campCell && site.q === campCell.q && site.r === campCell.r;
+    return activeHere || !campHere && !trailSiteAt(site);
+  }) : [];
   const visible = new Set(nearby.map(site => site.key));
   board.querySelectorAll<SVGGElement>('.map-mob').forEach(marker => {
     if (!visible.has(marker.getAttribute('data-cell') || '')) marker.remove();
@@ -234,41 +244,22 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
   for (const site of nearby) {
     const cell = root.querySelector<SVGPolygonElement>(`polygon.cell[data-cell="${site.key}"]`)!;
     const box = cell.getBBox();
-    const pocket = board.querySelector<SVGGElement>(`[data-figure-ax="${site.q},${site.r}"] .terrain-occupant`);
-    const parent = pocket || board;
+    const pocket = board.querySelector<SVGGElement>(`[data-actor-ax="${site.q},${site.r}"] .actor-slot`);
+    const parent = pocket || board.querySelector('#actors') || board;
     let marker = board.querySelector<SVGGElement>(`.map-mob[data-cell="${site.key}"]`);
     if (!marker) {
       marker = document.createElementNS(NS, 'g');
       marker.setAttribute('class', 'map-mob'); marker.setAttribute('data-cell', site.key);
       marker.setAttribute('role', 'img');
-      const stage = document.createElementNS(NS, 'image');
-      stage.setAttribute('class', 'map-mob-stage');
-      stage.setAttribute('href', '/map/mob-stage.png');
-      stage.setAttribute('x', '-25'); stage.setAttribute('y', '-38');
-      stage.setAttribute('width', '50'); stage.setAttribute('height', '42');
-      stage.setAttribute('preserveAspectRatio', 'xMidYMax meet');
-      const shadow = document.createElementNS(NS, 'ellipse');
-      shadow.setAttribute('class', 'map-mob-shadow');
-      shadow.setAttribute('cx', '8'); shadow.setAttribute('cy', '2');
-      shadow.setAttribute('rx', '7'); shadow.setAttribute('ry', '2');
-      const species = document.createElementNS(NS, 'image');
-      species.setAttribute('class', 'map-mob-species');
-      species.setAttribute('x', '-5'); species.setAttribute('y', '-24');
-      species.setAttribute('width', '26'); species.setAttribute('height', '29');
-      species.setAttribute('preserveAspectRatio', 'xMidYMax meet');
-      marker.append(stage, shadow, species); parent.append(marker);
+      parent.append(marker);
     }
     if (marker.parentNode !== parent) parent.append(marker);
     marker.setAttribute('data-species', site.species);
     marker.setAttribute('aria-label', `${site.species} nearby on block ${site.key}`);
-    const art = mapSpeciesArt(site.species);
-    const figure = marker.querySelector('image')!;
-    figure.setAttribute('href', art || mobIcon(site.species));
-    figure.setAttribute('x', art ? '-12' : '-5');
-    figure.setAttribute('y', art ? '-35' : '-24');
-    figure.setAttribute('width', art ? '40' : '26');
-    figure.setAttribute('height', art ? '40' : '29');
-    marker.setAttribute('transform', pocket ? 'translate(0 0)' : mapUprightAt(box.x + box.width / 2, box.y + box.height / 2));
+    const art = mapSpeciesArt(site.species) || mobIcon(site.species);
+    paintFigureArt(marker, '<ellipse class="map-mob-shadow" cx="7" cy="3" rx="7" ry="2"/>'
+      + mapSprite(art, -7, -27, 28, 30, 'map-mob-body'));
+    marker.setAttribute('transform', mapUprightAt(box.x + box.width / 2, box.y + box.height / 2));
   }
   paintMapAdventure(root, gameState, v === 'terrain');
 }
@@ -333,6 +324,7 @@ export function paintMapNames(root: HTMLElement, opts: { show: boolean; hovered:
     const forced = key === opts.hovered || key === opts.picked;
     if (!forced && (!opts.show || overview || !cell.hasAttribute('data-node'))) continue;
     const label = cellLabel(cell), box = cell.getBBox();
+    if (!forced && label.kind !== 'town' && cell.getAttribute('data-discovery') === 'unknown') continue;
     // Zoom tiers: towns always, subs only when close, wild sides only on hover/pick.
     if (!forced && label.kind === 'sub' && !close) continue;
     if (!forced && label.kind === 'wild') continue;
@@ -369,7 +361,7 @@ export function paintMapNames(root: HTMLElement, opts: { show: boolean; hovered:
     const worldAnchor = new DOMPoint(sx, sy).matrixTransform(inv);
     const trailSite = trailSiteAt(label);
     const name = label.kind !== 'town' && cell.getAttribute('data-discovery') === 'unknown' ? 'Unexplored ground'
-      : trailSite ? trailSiteKind(trailSite).name : label.label;
+      : trailSite ? `${trailSiteKind(trailSite).name}${cell.getAttribute('data-trail-claimed') === 'true' ? ' · explored' : ''}` : label.label;
     add(key, name, worldAnchor.x, worldAnchor.y, cls, level, forced,
       priority, { angleDeg: edge.angleDeg });
   }

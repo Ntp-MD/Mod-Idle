@@ -1,8 +1,11 @@
 {
+  "version": 2,
   "meta": {
-    "note": "The passive tree is a connected three-wing network: impact (offence), control (defence) and stream (sustain/Core attributes), with 21 nodes per wing and a 22nd control node raising the Elemental resistance Cap. A free centre start connects the first node of every wing; 7th, 14th and 21st ranks cross-link the wings, so owned paths can branch and reconnect. Node ids stay branch.index so existing allocations survive the visual and pathing remake. Every paid node still grants a real line; there are no keystones. There are 64 nodes, 192 ranks and one point per rank. Values remain fractions of mods.json maxima: a shallow node's rank 3 is a tenth, a deep node's is a fifth, and the published rates remain the empty-tree baseline.",
+    "note": "There are 306 nodes and 564 ranks in twelve wings: impact (offence), control (defence) and stream (sustain/Core attributes), with might, fleet, ward, aim, lore, vital, fortune, hex and edge joining them. A free centre start connects the first node of every wing, and the 7th depth rings the wings to one another, so owned paths can branch and reconnect. Node ids stay wing.index, so an existing allocation keeps its meaning. Every node grants one or more lines and the values are written out here, so the tree's own numbers no longer move when a loot line's maximum moves. A node's kind sets its rank count, its cost and the currency it is paid in: a keystone is paid in attainment points and carries a drawback, and a node is bought when it is connected to a path the character already owns - there is no attribute requirement on any node. The wings sit on a pitch around the centre and the layout is derived from the topology rather than hand-placed. One point buys one rank.",
     "node_columns": [
       "Node",
+      "Wing",
+      "Kind",
       "Line",
       "Rank 1",
       "Rank 2",
@@ -10,8 +13,102 @@
       "Needs"
     ]
   },
-  "point_cost_per_rank": 1,
-  "shallow_nodes": 14,
+  "points": {
+    "currencies": {
+      "tree": {
+        "base": 3,
+        "per_level": 2
+      },
+      "attainment": {
+        "base": 0,
+        "sources": [
+          {
+            "id": "delivery.completed",
+            "per": 1
+          }
+        ]
+      }
+    },
+    "budget_pct": 130
+  },
+  "node_kinds": {
+    "line": {
+      "ranks": 3,
+      "cost": 1,
+      "currency": "tree"
+    },
+    "mark": {
+      "ranks": 1,
+      "cost": 1,
+      "currency": "tree"
+    },
+    "notable": {
+      "ranks": 1,
+      "cost": 1,
+      "currency": "tree"
+    },
+    "keystone": {
+      "ranks": 1,
+      "cost": 1,
+      "currency": "attainment"
+    },
+    "capstone": {
+      "ranks": 1,
+      "cost": 1,
+      "currency": "tree"
+    }
+  },
+  "keystone_groups": [
+    {
+      "id": "group.ember.a",
+      "name": "Ember",
+      "members": [
+        "might.23",
+        "hex.23"
+      ]
+    },
+    {
+      "id": "group.ember.b",
+      "name": "Ember",
+      "members": [
+        "edge.23",
+        "impact.keystone"
+      ]
+    },
+    {
+      "id": "group.frost.a",
+      "name": "Frost",
+      "members": [
+        "fleet.23",
+        "aim.23"
+      ]
+    },
+    {
+      "id": "group.frost.b",
+      "name": "Frost",
+      "members": [
+        "fortune.23",
+        "control.keystone"
+      ]
+    },
+    {
+      "id": "group.ward.a",
+      "name": "Ward",
+      "members": [
+        "ward.23",
+        "vital.23"
+      ]
+    },
+    {
+      "id": "group.spell.a",
+      "name": "Spell",
+      "members": [
+        "lore.23",
+        "stream.keystone"
+      ]
+    }
+  ],
+  "clusters": [],
   "rank_tiers": {
     "shallow": [
       0.03333333333333333,
@@ -24,603 +121,5923 @@
       0.2
     ]
   },
-  "graph": {
+  "shallow_nodes": 14,
+  "layout": {
+    "algorithm": "radial-topology",
     "start": {
-      "x": 50,
-      "y": 50
+      "x": 0,
+      "y": 0
     },
-    "nodes_per_ring": 7,
-    "ring_radii": [
-      15,
-      29,
-      42
-    ],
-    "extra_radius": 47,
-    "arc_span_deg": 60,
-    "branch_angle_deg": {
+    "wing_anchor_deg": {
+      "aim": 180,
+      "fortune": 210,
+      "might": 240,
       "impact": 270,
+      "edge": 300,
+      "hex": 330,
+      "lore": 0,
       "control": 30,
+      "ward": 60,
+      "vital": 90,
+      "fleet": 120,
       "stream": 150
     },
-    "crosslink_ranks": [
-      7,
-      14,
-      21
-    ]
+    "nodes_per_ring": 7,
+    "ring_gap": 14,
+    "arc_span_deg": 60,
+    "wing_clearance_deg": 6,
+    "node_radius": 1.4
   },
-  "branches": {
-    "impact": [
-      {
-        "line": "physical_power_flat",
-        "values": [
-          4,
-          8,
-          12
-        ]
-      },
-      {
-        "line": "physical_power",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "accuracy",
-        "values": [
-          1,
-          3,
-          4
-        ]
-      },
-      {
-        "line": "attack_speed",
-        "values": [
-          1,
-          3,
-          4
-        ]
-      },
-      {
-        "line": "critical_chance",
-        "values": [
-          1,
-          1,
-          1
-        ]
-      },
-      {
-        "line": "critical_damage",
-        "values": [
-          6,
-          12,
-          18
-        ]
-      },
-      {
-        "line": "armour_pen",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "bleed_chance",
-        "values": [
-          1,
-          2,
-          3
-        ]
-      },
-      {
-        "line": "stun_chance",
-        "values": [
-          1,
-          2,
-          3
-        ]
-      },
-      {
-        "line": "magic_power_flat",
-        "values": [
-          4,
-          8,
-          12
-        ]
-      },
-      {
-        "line": "magic_power",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "elemental_power_flat",
-        "values": [
-          3,
-          6,
-          10
-        ]
-      },
-      {
-        "line": "elemental_power",
-        "values": [
-          1,
-          1,
-          2
-        ]
-      },
-      {
-        "line": "elemental_alignment",
-        "values": [
-          1,
-          1,
-          1
-        ]
-      },
-      {
-        "line": "physical_power_flat",
-        "values": [
-          8,
-          16,
-          24
-        ]
-      },
-      {
-        "line": "physical_power",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "critical_chance",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "critical_damage",
-        "values": [
-          12,
-          24,
-          36
-        ]
-      },
-      {
-        "line": "magic_power",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "elemental_power",
-        "values": [
-          1,
-          3,
-          4
-        ]
-      },
-      {
-        "line": "armour_pen",
-        "values": [
-          1,
-          1,
-          2
-        ]
-      },
-      {
-        "line": "bleed_chance",
-        "name": "One-Handed Axe",
-        "weapon": "one-handed axe"
-      },
-      {
-        "line": "critical_chance",
-        "name": "Dagger",
-        "weapon": "dagger"
-      },
-      {
-        "line": "critical_damage",
-        "name": "Two-Handed Sword",
-        "weapon": "two-handed sword"
-      },
-      {
-        "line": "bleed_chance",
-        "name": "Two-Handed Axe",
-        "weapon": "two-handed axe"
-      },
-      {
-        "line": "attack_speed",
-        "name": "One-Handed Sword",
-        "weapon": "one-handed sword"
-      }
-    ],
-    "control": [
-      {
-        "line": "armour_flat",
-        "values": [
-          2,
-          4,
-          6
-        ]
-      },
-      {
-        "line": "armour_pct",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "evasion_flat",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "evasion_pct",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "block_chance",
-        "values": [
-          3,
-          5,
-          8
-        ]
-      },
-      {
-        "line": "elemental_resistance",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "all_resistance_pct",
-        "values": [
-          1,
-          2,
-          3
-        ]
-      },
-      {
-        "line": "status_resistance_pct",
-        "values": [
-          1,
-          3,
-          4
-        ]
-      },
-      {
-        "line": "max_hp_flat",
-        "values": [
-          10,
-          20,
-          30
-        ]
-      },
-      {
-        "line": "max_hp",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "energy_shield_flat",
-        "values": [
-          3,
-          6,
-          9
-        ]
-      },
-      {
-        "line": "max_energy_shield_pct",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "life_regen_flat",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "cooldown_reduction",
-        "values": [
-          1,
-          3,
-          4
-        ]
-      },
-      {
-        "line": "armour_flat",
-        "values": [
-          4,
-          8,
-          12
-        ]
-      },
-      {
-        "line": "evasion_flat",
-        "values": [
-          3,
-          6,
-          9
-        ]
-      },
-      {
-        "line": "max_hp_flat",
-        "values": [
-          20,
-          40,
-          60
-        ]
-      },
-      {
-        "line": "energy_shield_flat",
-        "values": [
-          6,
-          12,
-          18
-        ]
-      },
-      {
-        "line": "perfect_dodge_pct",
-        "values": [
-          1,
-          1,
-          1
-        ]
-      },
-      {
-        "line": "all_resistance_pct",
-        "values": [
-          2,
-          4,
-          6
-        ]
-      },
-      {
-        "line": "max_hp",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "elemental_resistance_cap_pct",
-        "values": [
-          5,
-          10,
-          15
-        ]
-      },
-      {
-        "line": "accuracy",
-        "name": "Spear",
-        "weapon": "spear"
-      },
-      {
-        "line": "accuracy",
-        "name": "Bow",
-        "weapon": "bow"
-      },
-      {
-        "line": "armour_pen",
-        "name": "Crossbow",
-        "weapon": "crossbow"
-      }
-    ],
-    "stream": [
-      {
-        "line": "max_mana_flat",
-        "values": [
-          7,
-          14,
-          21
-        ]
-      },
-      {
-        "line": "mana_regen_flat",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "mana_regen_pct",
-        "values": [
-          1,
-          3,
-          4
-        ]
-      },
-      {
-        "line": "max_mana",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "energy_shield_regen",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "life_regen_pct",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "all_stat_flat",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "all_stat_flat",
-        "values": [
-          1,
-          3,
-          4
-        ]
-      },
-      {
-        "line": "max_mana_flat",
-        "values": [
-          7,
-          14,
-          21
-        ]
-      },
-      {
-        "line": "mana_regen_flat",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "mana_regen_pct",
-        "values": [
-          1,
-          3,
-          4
-        ]
-      },
-      {
-        "line": "max_mana",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "energy_shield_regen",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "life_regen_pct",
-        "values": [
-          1,
-          2,
-          2
-        ]
-      },
-      {
-        "line": "all_stat_flat",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "all_stat_flat",
-        "values": [
-          3,
-          5,
-          8
-        ]
-      },
-      {
-        "line": "max_mana",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "mana_regen_pct",
-        "values": [
-          3,
-          5,
-          8
-        ]
-      },
-      {
-        "line": "life_regen_pct",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "all_stat_flat",
-        "values": [
-          2,
-          3,
-          5
-        ]
-      },
-      {
-        "line": "all_stat_flat",
-        "values": [
-          3,
-          5,
-          8
-        ]
-      },
-      {
-        "line": "cooldown_reduction",
-        "name": "Wand",
-        "weapon": "wand"
-      },
-      {
-        "line": "elemental_power_flat",
-        "name": "Staff",
-        "weapon": "staff"
-      },
-      {
-        "line": "stun_chance",
-        "name": "Mace",
-        "weapon": "mace"
-      }
-    ]
-  }
+  "nodes": [
+    {
+      "id": "impact.1",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "physical_power_flat",
+          "values": [
+            4,
+            6,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.2",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.1"
+      ],
+      "grants": [
+        {
+          "id": "physical_power",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.3",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.2"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.4",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.3"
+      ],
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1,
+            3,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.5",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.4"
+      ],
+      "grants": [
+        {
+          "id": "critical_chance",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.6",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.5"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            3,
+            6,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.7",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.6",
+        "control.7",
+        "stream.7"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.8",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.7"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.9",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.8"
+      ],
+      "grants": [
+        {
+          "id": "stun_chance",
+          "values": [
+            1,
+            1,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.10",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.9"
+      ],
+      "grants": [
+        {
+          "id": "magic_power_flat",
+          "values": [
+            12,
+            19,
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.11",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.10"
+      ],
+      "grants": [
+        {
+          "id": "magic_power",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.12",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.11"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power_flat",
+          "values": [
+            3,
+            5,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.13",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.12"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.14",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.13",
+        "control.14",
+        "stream.14"
+      ],
+      "grants": [
+        {
+          "id": "elemental_alignment",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.15",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.14"
+      ],
+      "grants": [
+        {
+          "id": "physical_power_flat",
+          "values": [
+            6,
+            14,
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.16",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.15"
+      ],
+      "grants": [
+        {
+          "id": "physical_power",
+          "values": [
+            1,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.17",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.16",
+        "might.17"
+      ],
+      "grants": [
+        {
+          "id": "critical_chance",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.18",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.17"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            6,
+            13,
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.19",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.18"
+      ],
+      "grants": [
+        {
+          "id": "magic_power",
+          "values": [
+            1,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.20",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.19"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power",
+          "values": [
+            1,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.21",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.20",
+        "control.21",
+        "stream.21"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.22",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.21"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "name": "One-Handed Axe",
+      "weapon": "one-handed axe"
+    },
+    {
+      "id": "impact.23",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.22"
+      ],
+      "grants": [
+        {
+          "id": "critical_chance",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "name": "Dagger",
+      "weapon": "dagger"
+    },
+    {
+      "id": "impact.24",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.23"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            6,
+            13,
+            19
+          ]
+        }
+      ],
+      "name": "Two-Handed Sword",
+      "weapon": "two-handed sword"
+    },
+    {
+      "id": "impact.25",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.24"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "name": "Two-Handed Axe",
+      "weapon": "two-handed axe"
+    },
+    {
+      "id": "impact.26",
+      "wing": "impact",
+      "kind": "line",
+      "needs": [
+        "impact.25"
+      ],
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "name": "One-Handed Sword",
+      "weapon": "one-handed sword"
+    },
+    {
+      "id": "control.1",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            1,
+            4,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.2",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.1"
+      ],
+      "grants": [
+        {
+          "id": "armour_pct",
+          "values": [
+            3,
+            3,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.3",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.2"
+      ],
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1,
+            3,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.4",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.3"
+      ],
+      "grants": [
+        {
+          "id": "evasion_pct",
+          "values": [
+            3,
+            3,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.5",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.4"
+      ],
+      "grants": [
+        {
+          "id": "block_chance",
+          "values": [
+            8,
+            12,
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.6",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.5"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance",
+          "values": [
+            4,
+            8,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.7",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.6",
+        "impact.7",
+        "stream.7"
+      ],
+      "grants": [
+        {
+          "id": "all_resistance_pct",
+          "values": [
+            1,
+            1,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.8",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.7"
+      ],
+      "grants": [
+        {
+          "id": "status_resistance_pct",
+          "values": [
+            3,
+            7,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.9",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.8"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            9,
+            17,
+            26
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.10",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.9"
+      ],
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.11",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.10"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            3,
+            5,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.12",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.11"
+      ],
+      "grants": [
+        {
+          "id": "max_energy_shield_pct",
+          "values": [
+            3,
+            3,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.13",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.12"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_flat",
+          "values": [
+            4,
+            8,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.14",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.13",
+        "impact.14",
+        "stream.14"
+      ],
+      "grants": [
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1,
+            3,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.15",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.14"
+      ],
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            4,
+            6,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.16",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.15"
+      ],
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            3,
+            5,
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.17",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.16",
+        "lore.17"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            17,
+            35,
+            52
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.18",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.17"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            5,
+            10,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.19",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.18"
+      ],
+      "grants": [
+        {
+          "id": "perfect_dodge_pct",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.20",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.19"
+      ],
+      "grants": [
+        {
+          "id": "all_resistance_pct",
+          "values": [
+            1,
+            4,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.21",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.20",
+        "impact.21",
+        "stream.21"
+      ],
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.22",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.21"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance_cap_pct",
+          "values": [
+            10,
+            20,
+            29
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.23",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.22"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            2,
+            2,
+            3
+          ]
+        }
+      ],
+      "name": "Spear",
+      "weapon": "spear"
+    },
+    {
+      "id": "control.24",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.23"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            2,
+            2,
+            4
+          ]
+        }
+      ],
+      "name": "Bow",
+      "weapon": "bow"
+    },
+    {
+      "id": "control.25",
+      "wing": "control",
+      "kind": "line",
+      "needs": [
+        "control.24"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ],
+      "name": "Crossbow",
+      "weapon": "crossbow"
+    },
+    {
+      "id": "stream.1",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            10,
+            18,
+            26
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.2",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.1"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_flat",
+          "values": [
+            2,
+            4,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.3",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.2"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.4",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.3"
+      ],
+      "grants": [
+        {
+          "id": "max_mana",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.5",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.4"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            2,
+            4,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.6",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.5"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.7",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.6",
+        "control.7",
+        "impact.7"
+      ],
+      "grants": [
+        {
+          "id": "all_stat_flat",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.8",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.7"
+      ],
+      "grants": [
+        {
+          "id": "all_stat_flat",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.9",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.8"
+      ],
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            10,
+            18,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.10",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.9"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_flat",
+          "values": [
+            2,
+            4,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.11",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.10"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.12",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.11"
+      ],
+      "grants": [
+        {
+          "id": "max_mana",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.13",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.12"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            2,
+            4,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.14",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.13",
+        "control.14",
+        "impact.14"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.15",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.14"
+      ],
+      "grants": [
+        {
+          "id": "all_stat_flat",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.16",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.15"
+      ],
+      "grants": [
+        {
+          "id": "all_stat_flat",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.17",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.16",
+        "fleet.17"
+      ],
+      "grants": [
+        {
+          "id": "max_mana",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.18",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.17"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            2,
+            3,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.19",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.18"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.20",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.19"
+      ],
+      "grants": [
+        {
+          "id": "all_stat_flat",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.21",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.20",
+        "control.21",
+        "impact.21"
+      ],
+      "grants": [
+        {
+          "id": "all_stat_flat",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.22",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.21"
+      ],
+      "grants": [
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "name": "Wand",
+      "weapon": "wand"
+    },
+    {
+      "id": "stream.23",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.22"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power_flat",
+          "values": [
+            5,
+            12,
+            17
+          ]
+        }
+      ],
+      "name": "Staff",
+      "weapon": "staff"
+    },
+    {
+      "id": "stream.24",
+      "wing": "stream",
+      "kind": "line",
+      "needs": [
+        "stream.23"
+      ],
+      "grants": [
+        {
+          "id": "stun_chance",
+          "values": [
+            1,
+            4,
+            6
+          ]
+        }
+      ],
+      "name": "Mace",
+      "weapon": "mace"
+    },
+    {
+      "id": "impact.notable.1",
+      "wing": "impact",
+      "kind": "notable",
+      "needs": [
+        "impact.21"
+      ],
+      "name": "Flurry",
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "physical_power_flat",
+          "values": [
+            5
+          ]
+        },
+        {
+          "id": "critical_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.notable.2",
+      "wing": "impact",
+      "kind": "notable",
+      "needs": [
+        "impact.14"
+      ],
+      "name": "Execute",
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.notable.3",
+      "wing": "impact",
+      "kind": "notable",
+      "needs": [
+        "impact.7"
+      ],
+      "name": "Gale",
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "physical_power",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "critical_damage",
+          "values": [
+            28
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.notable.1",
+      "wing": "control",
+      "kind": "notable",
+      "needs": [
+        "control.22"
+      ],
+      "name": "Bastion",
+      "grants": [
+        {
+          "id": "block_chance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "armour_flat",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "elemental_resistance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.notable.2",
+      "wing": "control",
+      "kind": "notable",
+      "needs": [
+        "control.14"
+      ],
+      "name": "Skin",
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "armour_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "max_hp_flat",
+          "values": [
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.notable.3",
+      "wing": "control",
+      "kind": "notable",
+      "needs": [
+        "control.7"
+      ],
+      "name": "Mirror",
+      "grants": [
+        {
+          "id": "perfect_dodge_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "evasion_flat",
+          "values": [
+            3
+          ]
+        },
+        {
+          "id": "block_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.notable.1",
+      "wing": "stream",
+      "kind": "notable",
+      "needs": [
+        "stream.21"
+      ],
+      "name": "Deep Well",
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.notable.2",
+      "wing": "stream",
+      "kind": "notable",
+      "needs": [
+        "stream.14"
+      ],
+      "name": "Temper",
+      "grants": [
+        {
+          "id": "all_stat_flat",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.notable.3",
+      "wing": "stream",
+      "kind": "notable",
+      "needs": [
+        "stream.7"
+      ],
+      "name": "Flow",
+      "grants": [
+        {
+          "id": "mana_regen_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact.keystone",
+      "wing": "impact",
+      "kind": "keystone",
+      "needs": [
+        "impact.notable.1"
+      ],
+      "name": "Berserk",
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "armour_pct"
+      },
+      "group": "group.ember.b"
+    },
+    {
+      "id": "impact.capstone",
+      "wing": "impact",
+      "kind": "capstone",
+      "needs": [
+        "impact.keystone"
+      ],
+      "name": "Warbringer",
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "physical_power_flat",
+          "values": [
+            5
+          ]
+        },
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control.keystone",
+      "wing": "control",
+      "kind": "keystone",
+      "needs": [
+        "control.notable.1"
+      ],
+      "name": "Bulwark",
+      "grants": [
+        {
+          "id": "block_chance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "armour_flat",
+          "values": [
+            2
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "perfect_dodge_pct"
+      },
+      "group": "group.frost.b"
+    },
+    {
+      "id": "control.capstone",
+      "wing": "control",
+      "kind": "capstone",
+      "needs": [
+        "control.keystone"
+      ],
+      "name": "Aegis",
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "block_chance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream.keystone",
+      "wing": "stream",
+      "kind": "keystone",
+      "needs": [
+        "stream.notable.1"
+      ],
+      "name": "Cascade",
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            5
+          ]
+        },
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "max_hp_flat"
+      },
+      "group": "group.spell.a"
+    },
+    {
+      "id": "stream.capstone",
+      "wing": "stream",
+      "kind": "capstone",
+      "needs": [
+        "stream.keystone"
+      ],
+      "name": "Spring",
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            5
+          ]
+        },
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "all_stat_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.1",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.2",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.1"
+      ],
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.3",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.1"
+      ],
+      "grants": [
+        {
+          "id": "physical_power_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.4",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.1"
+      ],
+      "grants": [
+        {
+          "id": "block_chance",
+          "values": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.5",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.2"
+      ],
+      "grants": [
+        {
+          "id": "armour_pct",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.6",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.3"
+      ],
+      "grants": [
+        {
+          "id": "physical_power",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.7",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.4"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.8",
+      "wing": "might",
+      "kind": "line",
+      "needs": [
+        "might.5"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4,
+            5,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.9",
+      "wing": "might",
+      "kind": "line",
+      "needs": [
+        "might.6"
+      ],
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.10",
+      "wing": "might",
+      "kind": "line",
+      "needs": [
+        "might.7"
+      ],
+      "grants": [
+        {
+          "id": "physical_power",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.11",
+      "wing": "might",
+      "kind": "line",
+      "needs": [
+        "might.8"
+      ],
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            2,
+            3,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.12",
+      "wing": "might",
+      "kind": "line",
+      "needs": [
+        "might.9"
+      ],
+      "grants": [
+        {
+          "id": "physical_power_flat",
+          "values": [
+            4,
+            6,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.13",
+      "wing": "might",
+      "kind": "line",
+      "needs": [
+        "might.10"
+      ],
+      "grants": [
+        {
+          "id": "block_chance",
+          "values": [
+            3,
+            5,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.14",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.11"
+      ],
+      "grants": [
+        {
+          "id": "armour_pct",
+          "values": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.15",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.12"
+      ],
+      "grants": [
+        {
+          "id": "physical_power",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.16",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.13"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.17",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.14",
+        "fortune.17"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.18",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.15"
+      ],
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.19",
+      "wing": "might",
+      "kind": "mark",
+      "needs": [
+        "might.16"
+      ],
+      "grants": [
+        {
+          "id": "physical_power",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.20",
+      "wing": "might",
+      "kind": "notable",
+      "needs": [
+        "might.17"
+      ],
+      "name": "armour_flat",
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "armour_pct",
+          "values": [
+            3
+          ]
+        },
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.21",
+      "wing": "might",
+      "kind": "notable",
+      "needs": [
+        "might.18"
+      ],
+      "name": "physical_power_flat",
+      "grants": [
+        {
+          "id": "physical_power_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "physical_power",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.22",
+      "wing": "might",
+      "kind": "notable",
+      "needs": [
+        "might.19"
+      ],
+      "name": "block_chance",
+      "grants": [
+        {
+          "id": "block_chance",
+          "values": [
+            3
+          ]
+        },
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "physical_power",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "might.23",
+      "wing": "might",
+      "kind": "keystone",
+      "needs": [
+        "might.20"
+      ],
+      "name": "Ironwall",
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            2
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "block_chance"
+      },
+      "group": "group.ember.a"
+    },
+    {
+      "id": "might.24",
+      "wing": "might",
+      "kind": "capstone",
+      "needs": [
+        "might.23"
+      ],
+      "name": "armour_flat",
+      "grants": [
+        {
+          "id": "armour_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "physical_power_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.1",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.2",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.1"
+      ],
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.3",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.1"
+      ],
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.4",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.1"
+      ],
+      "grants": [
+        {
+          "id": "perfect_dodge_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.5",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.2"
+      ],
+      "grants": [
+        {
+          "id": "evasion_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.6",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.3"
+      ],
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.7",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.4"
+      ],
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.8",
+      "wing": "fleet",
+      "kind": "line",
+      "needs": [
+        "fleet.5"
+      ],
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.9",
+      "wing": "fleet",
+      "kind": "line",
+      "needs": [
+        "fleet.6"
+      ],
+      "grants": [
+        {
+          "id": "perfect_dodge_pct",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.10",
+      "wing": "fleet",
+      "kind": "line",
+      "needs": [
+        "fleet.7"
+      ],
+      "grants": [
+        {
+          "id": "evasion_pct",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.11",
+      "wing": "fleet",
+      "kind": "line",
+      "needs": [
+        "fleet.8"
+      ],
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.12",
+      "wing": "fleet",
+      "kind": "line",
+      "needs": [
+        "fleet.9"
+      ],
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.13",
+      "wing": "fleet",
+      "kind": "line",
+      "needs": [
+        "fleet.10"
+      ],
+      "grants": [
+        {
+          "id": "perfect_dodge_pct",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.14",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.11"
+      ],
+      "grants": [
+        {
+          "id": "evasion_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.15",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.12"
+      ],
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.16",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.13"
+      ],
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.17",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.14",
+        "vital.17"
+      ],
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.18",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.15"
+      ],
+      "grants": [
+        {
+          "id": "perfect_dodge_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.19",
+      "wing": "fleet",
+      "kind": "mark",
+      "needs": [
+        "fleet.16"
+      ],
+      "grants": [
+        {
+          "id": "evasion_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.20",
+      "wing": "fleet",
+      "kind": "notable",
+      "needs": [
+        "fleet.17"
+      ],
+      "name": "evasion_flat",
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "evasion_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.21",
+      "wing": "fleet",
+      "kind": "notable",
+      "needs": [
+        "fleet.18"
+      ],
+      "name": "attack_speed",
+      "grants": [
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "evasion_flat",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "perfect_dodge_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.22",
+      "wing": "fleet",
+      "kind": "notable",
+      "needs": [
+        "fleet.19"
+      ],
+      "name": "perfect_dodge_pct",
+      "grants": [
+        {
+          "id": "perfect_dodge_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "evasion_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleet.23",
+      "wing": "fleet",
+      "kind": "keystone",
+      "needs": [
+        "fleet.20"
+      ],
+      "name": "Ghost",
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "armour_flat"
+      },
+      "group": "group.frost.a"
+    },
+    {
+      "id": "fleet.24",
+      "wing": "fleet",
+      "kind": "capstone",
+      "needs": [
+        "fleet.23"
+      ],
+      "name": "evasion_flat",
+      "grants": [
+        {
+          "id": "evasion_flat",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_speed",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "evasion_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.1",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.2",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.1"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.3",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.1"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.4",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.1"
+      ],
+      "grants": [
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.5",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.2"
+      ],
+      "grants": [
+        {
+          "id": "max_energy_shield_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.6",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.3"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.7",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.4"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.8",
+      "wing": "ward",
+      "kind": "line",
+      "needs": [
+        "ward.5"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.9",
+      "wing": "ward",
+      "kind": "line",
+      "needs": [
+        "ward.6"
+      ],
+      "grants": [
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.10",
+      "wing": "ward",
+      "kind": "line",
+      "needs": [
+        "ward.7"
+      ],
+      "grants": [
+        {
+          "id": "max_energy_shield_pct",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.11",
+      "wing": "ward",
+      "kind": "line",
+      "needs": [
+        "ward.8"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2,
+            4,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.12",
+      "wing": "ward",
+      "kind": "line",
+      "needs": [
+        "ward.9"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.13",
+      "wing": "ward",
+      "kind": "line",
+      "needs": [
+        "ward.10"
+      ],
+      "grants": [
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.14",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.11"
+      ],
+      "grants": [
+        {
+          "id": "max_energy_shield_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.15",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.12"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.16",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.13"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.17",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.14",
+        "control.17"
+      ],
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.18",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.15"
+      ],
+      "grants": [
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.19",
+      "wing": "ward",
+      "kind": "mark",
+      "needs": [
+        "ward.16"
+      ],
+      "grants": [
+        {
+          "id": "max_energy_shield_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.20",
+      "wing": "ward",
+      "kind": "notable",
+      "needs": [
+        "ward.17"
+      ],
+      "name": "energy_shield_flat",
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "max_energy_shield_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.21",
+      "wing": "ward",
+      "kind": "notable",
+      "needs": [
+        "ward.18"
+      ],
+      "name": "energy_shield_regen",
+      "grants": [
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.22",
+      "wing": "ward",
+      "kind": "notable",
+      "needs": [
+        "ward.19"
+      ],
+      "name": "cooldown_reduction",
+      "grants": [
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "max_energy_shield_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ward.23",
+      "wing": "ward",
+      "kind": "keystone",
+      "needs": [
+        "ward.20"
+      ],
+      "name": "Prism",
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "life_regen_flat"
+      },
+      "group": "group.ward.a"
+    },
+    {
+      "id": "ward.24",
+      "wing": "ward",
+      "kind": "capstone",
+      "needs": [
+        "ward.23"
+      ],
+      "name": "energy_shield_flat",
+      "grants": [
+        {
+          "id": "energy_shield_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "cooldown_reduction",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "energy_shield_regen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.1",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.2",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.1"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.3",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.1"
+      ],
+      "grants": [
+        {
+          "id": "elemental_alignment",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.4",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.1"
+      ],
+      "grants": [
+        {
+          "id": "status_resistance_pct",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.5",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.2"
+      ],
+      "grants": [
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.6",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.3"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.7",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.4"
+      ],
+      "grants": [
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.8",
+      "wing": "aim",
+      "kind": "line",
+      "needs": [
+        "aim.5"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.9",
+      "wing": "aim",
+      "kind": "line",
+      "needs": [
+        "aim.6"
+      ],
+      "grants": [
+        {
+          "id": "stun_chance",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.10",
+      "wing": "aim",
+      "kind": "line",
+      "needs": [
+        "aim.7"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.11",
+      "wing": "aim",
+      "kind": "line",
+      "needs": [
+        "aim.8"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.12",
+      "wing": "aim",
+      "kind": "line",
+      "needs": [
+        "aim.9"
+      ],
+      "grants": [
+        {
+          "id": "elemental_alignment",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.13",
+      "wing": "aim",
+      "kind": "line",
+      "needs": [
+        "aim.10"
+      ],
+      "grants": [
+        {
+          "id": "status_resistance_pct",
+          "values": [
+            2,
+            3,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.14",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.11"
+      ],
+      "grants": [
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.15",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.12"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.16",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.13"
+      ],
+      "grants": [
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.17",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.14",
+        "stream.17"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.18",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.15"
+      ],
+      "grants": [
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.19",
+      "wing": "aim",
+      "kind": "mark",
+      "needs": [
+        "aim.16"
+      ],
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.20",
+      "wing": "aim",
+      "kind": "notable",
+      "needs": [
+        "aim.17"
+      ],
+      "name": "accuracy",
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.21",
+      "wing": "aim",
+      "kind": "notable",
+      "needs": [
+        "aim.18"
+      ],
+      "name": "elemental_alignment",
+      "grants": [
+        {
+          "id": "elemental_alignment",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.22",
+      "wing": "aim",
+      "kind": "notable",
+      "needs": [
+        "aim.19"
+      ],
+      "name": "status_resistance_pct",
+      "grants": [
+        {
+          "id": "status_resistance_pct",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aim.23",
+      "wing": "aim",
+      "kind": "keystone",
+      "needs": [
+        "aim.20"
+      ],
+      "name": "Deadeye",
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "armour_pen"
+      },
+      "group": "group.frost.a"
+    },
+    {
+      "id": "aim.24",
+      "wing": "aim",
+      "kind": "capstone",
+      "needs": [
+        "aim.23"
+      ],
+      "name": "accuracy",
+      "grants": [
+        {
+          "id": "accuracy",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "status_resistance_pct",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "stun_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.1",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "magic_power_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.2",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.1"
+      ],
+      "grants": [
+        {
+          "id": "magic_power_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.3",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.1"
+      ],
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.4",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.1"
+      ],
+      "grants": [
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.5",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.2"
+      ],
+      "grants": [
+        {
+          "id": "magic_power",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.6",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.3"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.7",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.4"
+      ],
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.8",
+      "wing": "lore",
+      "kind": "line",
+      "needs": [
+        "lore.5"
+      ],
+      "grants": [
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.9",
+      "wing": "lore",
+      "kind": "line",
+      "needs": [
+        "lore.6"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1,
+            2,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.10",
+      "wing": "lore",
+      "kind": "line",
+      "needs": [
+        "lore.7"
+      ],
+      "grants": [
+        {
+          "id": "magic_power",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.11",
+      "wing": "lore",
+      "kind": "line",
+      "needs": [
+        "lore.8"
+      ],
+      "grants": [
+        {
+          "id": "magic_power_flat",
+          "values": [
+            4,
+            7,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.12",
+      "wing": "lore",
+      "kind": "line",
+      "needs": [
+        "lore.9"
+      ],
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            6,
+            9,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.13",
+      "wing": "lore",
+      "kind": "line",
+      "needs": [
+        "lore.10"
+      ],
+      "grants": [
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.14",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.11"
+      ],
+      "grants": [
+        {
+          "id": "magic_power",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.15",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.12"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_flat",
+          "values": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.16",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.13"
+      ],
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.17",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.14",
+        "hex.17"
+      ],
+      "grants": [
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.18",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.15"
+      ],
+      "grants": [
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.19",
+      "wing": "lore",
+      "kind": "mark",
+      "needs": [
+        "lore.16"
+      ],
+      "grants": [
+        {
+          "id": "magic_power",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.20",
+      "wing": "lore",
+      "kind": "notable",
+      "needs": [
+        "lore.17"
+      ],
+      "name": "magic_power_flat",
+      "grants": [
+        {
+          "id": "magic_power_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "magic_power",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.21",
+      "wing": "lore",
+      "kind": "notable",
+      "needs": [
+        "lore.18"
+      ],
+      "name": "max_mana_flat",
+      "grants": [
+        {
+          "id": "max_mana_flat",
+          "values": [
+            6
+          ]
+        },
+        {
+          "id": "mana_regen_flat",
+          "values": [
+            5
+          ]
+        },
+        {
+          "id": "mana_regen_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.22",
+      "wing": "lore",
+      "kind": "notable",
+      "needs": [
+        "lore.19"
+      ],
+      "name": "spell_damage_pct",
+      "grants": [
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "max_mana_flat",
+          "values": [
+            6
+          ]
+        },
+        {
+          "id": "magic_power",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lore.23",
+      "wing": "lore",
+      "kind": "keystone",
+      "needs": [
+        "lore.20"
+      ],
+      "name": "Archmage",
+      "grants": [
+        {
+          "id": "magic_power_flat",
+          "values": [
+            4
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "max_mana_flat"
+      },
+      "group": "group.spell.a"
+    },
+    {
+      "id": "lore.24",
+      "wing": "lore",
+      "kind": "capstone",
+      "needs": [
+        "lore.23"
+      ],
+      "name": "magic_power_flat",
+      "grants": [
+        {
+          "id": "magic_power_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "max_mana_flat",
+          "values": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.1",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.2",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.1"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.3",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.1"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.4",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.1"
+      ],
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.5",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.2"
+      ],
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.6",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.3"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.7",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.4"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.8",
+      "wing": "vital",
+      "kind": "line",
+      "needs": [
+        "vital.5"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_flat",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.9",
+      "wing": "vital",
+      "kind": "line",
+      "needs": [
+        "vital.6"
+      ],
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.10",
+      "wing": "vital",
+      "kind": "line",
+      "needs": [
+        "vital.7"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.11",
+      "wing": "vital",
+      "kind": "line",
+      "needs": [
+        "vital.8"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4,
+            5,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.12",
+      "wing": "vital",
+      "kind": "line",
+      "needs": [
+        "vital.9"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_flat",
+          "values": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.13",
+      "wing": "vital",
+      "kind": "line",
+      "needs": [
+        "vital.10"
+      ],
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.14",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.11"
+      ],
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.15",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.12"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.16",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.13"
+      ],
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.17",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.14",
+        "ward.17"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.18",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.15"
+      ],
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.19",
+      "wing": "vital",
+      "kind": "mark",
+      "needs": [
+        "vital.16"
+      ],
+      "grants": [
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.20",
+      "wing": "vital",
+      "kind": "notable",
+      "needs": [
+        "vital.17"
+      ],
+      "name": "max_hp_flat",
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "max_hp",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "life_regen_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.21",
+      "wing": "vital",
+      "kind": "notable",
+      "needs": [
+        "vital.18"
+      ],
+      "name": "life_regen_flat",
+      "grants": [
+        {
+          "id": "life_regen_flat",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "max_hp",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.22",
+      "wing": "vital",
+      "kind": "notable",
+      "needs": [
+        "vital.19"
+      ],
+      "name": "max_hp",
+      "grants": [
+        {
+          "id": "max_hp",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "life_regen_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vital.23",
+      "wing": "vital",
+      "kind": "keystone",
+      "needs": [
+        "vital.20"
+      ],
+      "name": "Anchor",
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "life_regen_flat"
+      },
+      "group": "group.ward.a"
+    },
+    {
+      "id": "vital.24",
+      "wing": "vital",
+      "kind": "capstone",
+      "needs": [
+        "vital.23"
+      ],
+      "name": "max_hp_flat",
+      "grants": [
+        {
+          "id": "max_hp_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "max_hp",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "life_regen_flat",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.1",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.2",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.1"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.3",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.1"
+      ],
+      "grants": [
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.4",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.1"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.5",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.2"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.6",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.3"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.7",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.4"
+      ],
+      "grants": [
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.8",
+      "wing": "fortune",
+      "kind": "line",
+      "needs": [
+        "fortune.5"
+      ],
+      "grants": [
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2,
+            3,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.9",
+      "wing": "fortune",
+      "kind": "line",
+      "needs": [
+        "fortune.6"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.10",
+      "wing": "fortune",
+      "kind": "line",
+      "needs": [
+        "fortune.7"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.11",
+      "wing": "fortune",
+      "kind": "line",
+      "needs": [
+        "fortune.8"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.12",
+      "wing": "fortune",
+      "kind": "line",
+      "needs": [
+        "fortune.9"
+      ],
+      "grants": [
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2,
+            3,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.13",
+      "wing": "fortune",
+      "kind": "line",
+      "needs": [
+        "fortune.10"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.14",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.11"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.15",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.12"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.16",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.13"
+      ],
+      "grants": [
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.17",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.14",
+        "aim.17"
+      ],
+      "grants": [
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.18",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.15"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.19",
+      "wing": "fortune",
+      "kind": "mark",
+      "needs": [
+        "fortune.16"
+      ],
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.20",
+      "wing": "fortune",
+      "kind": "notable",
+      "needs": [
+        "fortune.17"
+      ],
+      "name": "critical_damage",
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.21",
+      "wing": "fortune",
+      "kind": "notable",
+      "needs": [
+        "fortune.18"
+      ],
+      "name": "stat_mod_flat",
+      "grants": [
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.22",
+      "wing": "fortune",
+      "kind": "notable",
+      "needs": [
+        "fortune.19"
+      ],
+      "name": "critical_damage",
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortune.23",
+      "wing": "fortune",
+      "kind": "keystone",
+      "needs": [
+        "fortune.20"
+      ],
+      "name": "Loaded",
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "block_chance"
+      },
+      "group": "group.frost.b"
+    },
+    {
+      "id": "fortune.24",
+      "wing": "fortune",
+      "kind": "capstone",
+      "needs": [
+        "fortune.23"
+      ],
+      "name": "critical_damage",
+      "grants": [
+        {
+          "id": "critical_damage",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "stat_mod_flat",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.1",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.2",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.1"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power_flat",
+          "values": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.3",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.1"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.4",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.1"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance_cap_pct",
+          "values": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.5",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.2"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power",
+          "values": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.6",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.3"
+      ],
+      "grants": [
+        {
+          "id": "all_resistance_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.7",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.4"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.8",
+      "wing": "hex",
+      "kind": "line",
+      "needs": [
+        "hex.5"
+      ],
+      "grants": [
+        {
+          "id": "elemental_alignment",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.9",
+      "wing": "hex",
+      "kind": "line",
+      "needs": [
+        "hex.6"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance_cap_pct",
+          "values": [
+            3,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.10",
+      "wing": "hex",
+      "kind": "line",
+      "needs": [
+        "hex.7"
+      ],
+      "grants": [
+        {
+          "id": "all_resistance_pct",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.11",
+      "wing": "hex",
+      "kind": "line",
+      "needs": [
+        "hex.8"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power_flat",
+          "values": [
+            4,
+            5,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.12",
+      "wing": "hex",
+      "kind": "line",
+      "needs": [
+        "hex.9"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance",
+          "values": [
+            1,
+            2,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.13",
+      "wing": "hex",
+      "kind": "line",
+      "needs": [
+        "hex.10"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance_cap_pct",
+          "values": [
+            3,
+            4,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.14",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.11"
+      ],
+      "grants": [
+        {
+          "id": "elemental_power",
+          "values": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.15",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.12"
+      ],
+      "grants": [
+        {
+          "id": "all_resistance_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.16",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.13"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.17",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.14",
+        "edge.17"
+      ],
+      "grants": [
+        {
+          "id": "elemental_alignment",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.18",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.15"
+      ],
+      "grants": [
+        {
+          "id": "elemental_resistance_cap_pct",
+          "values": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.19",
+      "wing": "hex",
+      "kind": "mark",
+      "needs": [
+        "hex.16"
+      ],
+      "grants": [
+        {
+          "id": "all_resistance_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.20",
+      "wing": "hex",
+      "kind": "notable",
+      "needs": [
+        "hex.17"
+      ],
+      "name": "elemental_power_flat",
+      "grants": [
+        {
+          "id": "elemental_power_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "elemental_power",
+          "values": [
+            2
+          ]
+        },
+        {
+          "id": "elemental_alignment",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.21",
+      "wing": "hex",
+      "kind": "notable",
+      "needs": [
+        "hex.18"
+      ],
+      "name": "elemental_resistance",
+      "grants": [
+        {
+          "id": "elemental_resistance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "all_resistance_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "elemental_resistance_cap_pct",
+          "values": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.22",
+      "wing": "hex",
+      "kind": "notable",
+      "needs": [
+        "hex.19"
+      ],
+      "name": "elemental_resistance_cap_pct",
+      "grants": [
+        {
+          "id": "elemental_resistance_cap_pct",
+          "values": [
+            3
+          ]
+        },
+        {
+          "id": "elemental_resistance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "all_resistance_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hex.23",
+      "wing": "hex",
+      "kind": "keystone",
+      "needs": [
+        "hex.20"
+      ],
+      "name": "Ember",
+      "grants": [
+        {
+          "id": "elemental_power_flat",
+          "values": [
+            4
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "all_resistance_pct"
+      },
+      "group": "group.ember.a"
+    },
+    {
+      "id": "hex.24",
+      "wing": "hex",
+      "kind": "capstone",
+      "needs": [
+        "hex.23"
+      ],
+      "name": "elemental_power_flat",
+      "grants": [
+        {
+          "id": "elemental_power_flat",
+          "values": [
+            4
+          ]
+        },
+        {
+          "id": "elemental_resistance_cap_pct",
+          "values": [
+            3
+          ]
+        },
+        {
+          "id": "elemental_resistance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.1",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "start"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.2",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.1"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.3",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.1"
+      ],
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.4",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.1"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.5",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.2"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.6",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.3"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.7",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.4"
+      ],
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.8",
+      "wing": "edge",
+      "kind": "line",
+      "needs": [
+        "edge.5"
+      ],
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.9",
+      "wing": "edge",
+      "kind": "line",
+      "needs": [
+        "edge.6"
+      ],
+      "grants": [
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.10",
+      "wing": "edge",
+      "kind": "line",
+      "needs": [
+        "edge.7"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.11",
+      "wing": "edge",
+      "kind": "line",
+      "needs": [
+        "edge.8"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.12",
+      "wing": "edge",
+      "kind": "line",
+      "needs": [
+        "edge.9"
+      ],
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.13",
+      "wing": "edge",
+      "kind": "line",
+      "needs": [
+        "edge.10"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.14",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.11"
+      ],
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.15",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.12"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.16",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.13"
+      ],
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.17",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.14",
+        "impact.17"
+      ],
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.18",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.15"
+      ],
+      "grants": [
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.19",
+      "wing": "edge",
+      "kind": "mark",
+      "needs": [
+        "edge.16"
+      ],
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.20",
+      "wing": "edge",
+      "kind": "notable",
+      "needs": [
+        "edge.17"
+      ],
+      "name": "armour_pen",
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.21",
+      "wing": "edge",
+      "kind": "notable",
+      "needs": [
+        "edge.18"
+      ],
+      "name": "attack_damage_pct",
+      "grants": [
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "spell_damage_pct",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.22",
+      "wing": "edge",
+      "kind": "notable",
+      "needs": [
+        "edge.19"
+      ],
+      "name": "bleed_chance",
+      "grants": [
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge.23",
+      "wing": "edge",
+      "kind": "keystone",
+      "needs": [
+        "edge.20"
+      ],
+      "name": "Reaver",
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        }
+      ],
+      "rule": {
+        "kind": "remove",
+        "target": "armour_flat"
+      },
+      "group": "group.ember.b"
+    },
+    {
+      "id": "edge.24",
+      "wing": "edge",
+      "kind": "capstone",
+      "needs": [
+        "edge.23"
+      ],
+      "name": "armour_pen",
+      "grants": [
+        {
+          "id": "armour_pen",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "attack_damage_pct",
+          "values": [
+            1
+          ]
+        },
+        {
+          "id": "bleed_chance",
+          "values": [
+            1
+          ]
+        }
+      ]
+    }
+  ]
 }

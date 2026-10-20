@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { E, eng, sm } from '../src/engine/client';
+import { E, eng, sm, tree } from '../src/engine/client';
 import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/game';
 import { buildCharacter, emptyGear, openingGear } from '../src/sim/player';
 import { craft } from '../src/sim/craft';
@@ -323,7 +323,34 @@ describe('the save schema and the account', () => {
     delete old.player.treeRanks;
     const m = migrate(JSON.parse(JSON.stringify(old)));
     expect(m.player.treeRanks).toEqual({});
-    expect(m.player.treePoints).toBe(eng.treePointsAt(30));
+    expect(m.player.treePoints).toBe(tree.pointsAt(30, E.stat.level_cap));
+  });
+
+  it('grants two tree points a level, so a level-cap character holds 381', () => {
+    // D8: the level curve pays two tree points a level, and the tree's budget lives in its own spec
+    expect(tree.currency('tree').per_level).toBe(2);
+    expect(tree.pointsAt(E.stat.level_cap, E.stat.level_cap)).toBe(381);
+  });
+
+  it('raises an old save\'s tree points to the new rate, less what it spent', () => {
+    // a save written under the old one-a-level rate: the bank is whatever it was, and the load
+    // recomputes it from the level the character actually holds
+    const old = newGame(59);
+    setLevel(old, 40);
+    expect(spendTreePoint(old, 'impact.1').ok).toBe(true);
+    old.player.treePoints = 3;
+    const m = migrate(JSON.parse(JSON.stringify(old)));
+    expect(m.player.treePoints).toBe(tree.pointsAt(40, E.stat.level_cap) - treePointsSpent(m));
+  });
+
+  it('still wipes a build whose ranks outrun the level it is loaded at', () => {
+    // the overflow rule is unchanged: a rank count the level cannot pay for is not a build
+    const old = newGame(60);
+    setLevel(old, 2);
+    old.player.treeRanks = { 'impact.1': 3, 'impact.2': 3 };
+    const m = migrate(JSON.parse(JSON.stringify(old)));
+    expect(m.player.treeRanks).toEqual({});
+    expect(m.player.treePoints).toBe(tree.pointsAt(2, E.stat.level_cap));
   });
 
   it('moves a shared condition list onto the rows that were reading it', () => {
@@ -388,7 +415,7 @@ describe('an imported file cannot be an impossible state', () => {
     expect(m.zone).toBe(eng.ZONES[0].id);
     expect(Number.isFinite(m.player.hp)).toBe(true);
     expect(m.player.statPoints).toBeLessThanOrEqual(eng.pointsAt(m.player.level));
-    expect(m.player.treePoints).toBeLessThanOrEqual(eng.treePointsAt(m.player.level));
+    expect(m.player.treePoints).toBeLessThanOrEqual(tree.pointsAt(m.player.level, E.stat.level_cap));
     expect(m.player.treeRanks!['wing.nope']).toBeUndefined();
     expect(Number.isFinite(m.fieldwork.hunger)).toBe(true);
     expect(m.skills.list).not.toContain('attack.nope');

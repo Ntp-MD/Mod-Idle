@@ -29,7 +29,9 @@ const template = (() => {
   const originalMin = deliveryConfig.count_min, originalMax = deliveryConfig.count_max;
   deliveryConfig.count_min = deliveryConfig.count_max = 3;
   try {
-    const draws = [0, 0, 0, 0.99];
+    // the draws follow the offer's roll order: target, count, stone, the skill chance, and the
+    // attainment roll last — the last two miss, so the fixture carries no skill and no point
+    const draws = [0, 0, 0, 0.99, 0.99];
     const offer = offerDelivery(templateState, templateState.town.visited[0], () => draws.shift() ?? 0, writer);
     if (!offer) throw new Error('delivery fixture could not generate a valid offer');
     return structuredClone(offer);
@@ -84,6 +86,28 @@ describe('delivery offers and transactions', () => {
     expect(offer.reward).toEqual(promise);
     const loaded = importJson(exportJson(state));
     expect(contractById(loaded, offer.id)?.reward).toEqual(promise);
+  });
+
+  it('pays an attainment point on completion when the roll hit, and none when it missed', () => {
+    // the point is frozen into the offer: the player sees the contract before the delivery is paid
+    const { state, contract, good } = fixture();
+    const hit = structuredClone(contract);
+    hit.reward.attainment = 1;
+    state.town.contracts[contract.town] = [hit];
+    expect(previewDelivery(state, hit.id, hit.target, writer)).toMatchObject({ ok: true, attainment: 1 });
+    expect(state.player.attainmentPoints ?? 0).toBe(0);
+    expect(deliver(state, hit.id, hit.target, writer).completed).toBe(true);
+    expect(state.player.attainmentPoints).toBe(1);
+
+    // and a contract whose roll missed pays nothing
+    const other = fresh();
+    const missed = structuredClone(contract);
+    missed.reward.attainment = 0;
+    other.town.contractSerial = missed.serial;
+    other.town.contracts[missed.town] = [missed];
+    tradeBucket(other, good)[good.key] = missed.target;
+    expect(deliver(other, missed.id, missed.target, writer).completed).toBe(true);
+    expect(other.player.attainmentPoints ?? 0).toBe(0);
   });
 
   it('uses distinct monotonic identities for identical wants and releases terminal slots', () => {

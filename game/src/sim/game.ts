@@ -104,7 +104,7 @@ export function setLevel(s: GameState, level: number): void {
   s.player.statPoints = Math.max(0, eng.pointsAt(level) - spent);
   // the same shortcut has to bank the tree points the level is worth, or a character placed at a level
   // holds none and the tree cannot be touched at all
-  s.player.treePoints = Math.max(0, eng.treePointsAt(level) - tree.pointsSpent(s.player.treeRanks));
+  s.player.treePoints = Math.max(0, tree.pointsAt(level, E.stat.level_cap) - tree.pointsSpent(s.player.treeRanks));
   spendReference(s);
 }
 
@@ -122,9 +122,10 @@ export function newGame(seed = 20260101): GameState {
       points: ZERO_POINTS(),
       statPoints: 0,
       autoSpend: true,
-      // the level curve pays tree points from level one (`stat.tree_points_base`): a fresh
+      // the level curve pays tree points from level one (the tree's own base): a fresh
       // character starts with them in hand, the same number setLevel banks on the same level
-      treePoints: eng.treePointsAt(level),
+      treePoints: tree.pointsAt(level, E.stat.level_cap),
+      attainmentPoints: 0,
       treeRanks: {},
       hp: c.maxHp,
       mana: c.maxMana,
@@ -257,7 +258,7 @@ function pickBody(rng: () => number, bodies: string[], pack: Record<string, numb
   return bodies[bodies.length - 1];
 }
 
-function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null,
+export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null,
   options: { allowWildUnique?: boolean } = {}): Mob {
   const z = eng.zoneById(zoneId);
   const zonePool = speciesInZone(zoneId);
@@ -324,9 +325,8 @@ function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 
   const size = eng.sizeById(body)!;
   // body classes no longer scale HP: every mob of a species reads the same curve at its own level,
   // so the boss takes the same spawn shape any mob of its species takes
-  const flat = eng.LG.hp_per_level * (lv - 1) + base.vit * eng.K.K_VIT_HP;
   const hp = rank === 'elite'
-    ? (eng.mobHpAt(lv) + flat) * E.mob.elite.hp // the Elite multiplier rides the same curve the engine adds its flat terms to
+    ? eng.mobHpOf(lv, base.vit) * E.mob.elite.hp // the Elite multiplier rides the same curve the engine adds its flat terms to
     : base.hp;
   // the Elite swaps the Large body's own ps factor for its multiplier; the boss keeps the spawn
   // shape whole (the zone-mean divide included), exactly like any other body of its species
@@ -582,8 +582,9 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     s.player.level++;
     const per = s.player.level >= E.stat.paragon_from ? E.stat.paragon_points_per_level : E.stat.points_per_level;
     s.player.statPoints += per;
-    s.player.treePoints += E.stat.tree_points_per_level;
-    push(s, `Level ${s.player.level} — +${per} stat points, +${E.stat.tree_points_per_level} tree point${E.stat.tree_points_per_level === 1 ? '' : 's'}`);
+    const treePer = tree.currency('tree').per_level ?? 0;
+    s.player.treePoints += treePer;
+    push(s, `Level ${s.player.level} — +${per} stat points, +${treePer} tree point${treePer === 1 ? '' : 's'}`);
     // the one beat the whole frame is allowed to take: the level is the reason the character is here, so it
     // wears the HUD's own accent rather than an Element, and it is raised on the character's half
     fx(s, { kind: 'level', side: 'self', text: `Level ${s.player.level}`, colour: hitColour(null, true) });

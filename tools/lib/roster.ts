@@ -1,7 +1,7 @@
 /**
  * Skill-roster loader — the shared read of tools/data/skills.json.
  *
- * Everything that needs the roster (tools/skills.ts, tools/tree.ts)
+ * Everything that needs the roster (tools/skills.ts)
  * goes through here, so the count, the name→id map and the mechanic gate have one
  * definition. Counts are always derived from the data; nothing hand-types "43".
  */

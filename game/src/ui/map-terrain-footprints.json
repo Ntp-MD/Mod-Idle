@@ -1,0 +1,68 @@
+{
+  "/map/terrain/forest-relief-1.png": {
+    "width": 1606,
+    "height": 979,
+    "groundFill": "#60733f",
+    "vertices": [[1363,141],[1602,595],[1021,975],[250,846],[3,378],[561,2]]
+  },
+  "/map/terrain/mountain-relief-1.png": {
+    "width": 1606,
+    "height": 979,
+    "groundFill": "#68641f",
+    "vertices": [[1344,164],[1596,607],[1025,976],[230,826],[4,382],[565,0]]
+  },
+  "/map/terrain/grass-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#827d1c",
+    "vertices": [[1379,177],[1600,572],[1007,979],[231,814],[1,396],[556,0]]
+  },
+  "/map/terrain/snow-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#e2e4e9",
+    "vertices": [[1379,166],[1602,576],[1021,977],[238,817],[7,387],[592,1]]
+  },
+  "/map/terrain/water-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#0686a4",
+    "vertices": [[1383,130],[1602,565],[1014,975],[234,843],[3,364],[549,2]]
+  },
+  "/map/terrain/marsh-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#594e12",
+    "vertices": [[1310,134],[1603,600],[1023,972],[276,841],[3,361],[550,0]]
+  },
+  "/map/terrain/moor-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#765b1f",
+    "vertices": [[1359,131],[1599,608],[1050,977],[235,851],[4,378],[562,3]]
+  },
+  "/map/terrain/salt-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#f3c583",
+    "vertices": [[1326,133],[1596,574],[1003,960],[252,810],[12,387],[597,3]]
+  },
+  "/map/terrain/waste-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#c86134",
+    "vertices": [[1347,140],[1601,600],[1013,970],[237,837],[4,380],[571,6]]
+  },
+  "/map/landmark/town-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#979915",
+    "vertices": [[1341,140],[1602,618],[1057,978],[233,844],[4,398],[592,3]]
+  },
+  "/map/terrain/ash-1.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#4d3735",
+    "vertices": [[1358,147],[1593,567],[1016,974],[243,838],[11,380],[590,2]]
+  }
+}

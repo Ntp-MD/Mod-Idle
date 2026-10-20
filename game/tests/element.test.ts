@@ -5,12 +5,9 @@ import { playerSwing } from '../src/sim/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Item, Mob } from '../src/sim/types';
+import { mobFixture } from './mobFixture';
 
-const mobOf = (innate: string[]): Mob => ({
-  id: 'm', species: 'Slime', kind: 'Small', zone: 1, level: 20, hp: 1e9, hpMax: 1e9,
-  ps: 100, acc: 100, evasion: 0, dodgeRate: 0, armour: 0, res: 0, damage: 'mixed',
-  innate, xp: 1, line: 'front', hitsPerSec: 1, atkTimer: 0, engageSec: 0,
-} as Mob);
+const mobOf = (innate: string[]): Mob => mobFixture({ id: 'm', species: 'Slime', ps: 100, acc: 100, innate });
 
 /** A main hand that carries one Elemental line, so the piece has a stored Element. */
 const weaponWith = (element: string | null): (Item | null)[] => {

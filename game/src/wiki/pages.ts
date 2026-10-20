@@ -132,13 +132,22 @@ const stone = (key: string, n: any): string => `${n0(n)} ${STONE_NAME[key]}${Num
 const pressOf = (op: string): string => PRESS_NAME[op] || op;
 
 /**
- * The tree shape the data holds: `branches` is keyed by branch name, and each branch holds its nodes
- * keyed by index. Counting is therefore a read, not a second copy of "63".
+ * The tree shape the data holds: the wings and the nodes on them. Counting is therefore a read, not a
+ * second copy of "63".
  */
 const treeNodes = () => ({
-  branches: Object.keys((TREE_SPEC as any).branches || {}).length,
+  branches: ((tree as any).branches || []).length,
   count: ((tree as any).nodes || []).length,
-  perBranch: (name: string) => Object.keys((TREE_SPEC as any).branches?.[name] || {}).length,
+  perBranch: (name: string) => ((tree as any).nodes || []).filter((n: any) => n.wing === name).length,
+  /** The ranks a wing holds, and the points they cost — the kinds' own numbers. */
+  ranksOf: (name: string) => ((tree as any).nodes || [])
+    .filter((n: any) => n.wing === name)
+    .reduce((s: number, n: any) => s + (n.ranks || 0), 0),
+  costOf: (name: string) => ((tree as any).nodes || [])
+    .filter((n: any) => n.wing === name)
+    .reduce((s: number, n: any) => s + (n.cost || 0) * (n.ranks || 0), 0),
+  /** The depth at which the wings are ringed to one another, read off the topology. */
+  crosslinks: ((tree as any).crosslinkDepths || []) as number[],
 });
 const TREE_CFG = TREE_SPEC as any;
 const weaponFrameCounts = (BASES.weapons || []).map((weapon: any) => ((BASES.weapon_frames as any)?.[weapon.name] || []).length);
@@ -176,7 +185,7 @@ page({
       ['Elements', wrap(n0(E.elements.order.length)), list(E.elements.order)],
       ['Settlements', wrap(n0(TOWN.settlements.length)), 'shops, storage, tasks and crafting'],
       ['Dungeons', wrap(n0(TOWN.settlements.length)), 'one per settlement — escrowed loot, forfeited on a Push'],
-      ['Passive tree', wrap(n0(treeNodes().count)), `${treeNodes().branches} wings · a centre start, cross-links at ranks ${list((TREE_CFG.graph as any).crosslink_ranks)} · ${n0(TREE_CFG.point_cost_per_rank)} point a rank`],
+      ['Passive tree', wrap(n0(treeNodes().count)), `${treeNodes().branches} wings · a centre start, the wings ringed at depth ${list(treeNodes().crosslinks)} · ${n0(((tree as any).kinds?.line?.cost ?? 1))} point a rank`],
     ])),
   ],
 });
@@ -486,7 +495,7 @@ page({
       ['Max Mana', wrap(`+${n0(E.level_gain.mp_per_level)}`), wrap(n0(E.level_gain.mana_base))],
       ['Carry weight', '—', wrap(n0(E.level_gain.weight_base))],
       ['Attribute points', `${wrap(n0(E.stat.points_per_level))} · ${wrap(n0(E.stat.paragon_points_per_level))} past level ${wrap(n0(E.stat.paragon_from))}`, 'spent by hand'],
-      ['Tree points', wrap(n0(E.stat.tree_points_per_level)), wrap(n0(E.stat.tree_points_base))],
+      ['Tree points', wrap(n0((tree as any).currencies?.tree?.per_level ?? 0)), wrap(n0((tree as any).currencies?.tree?.base ?? 0))],
     ]), `<code>pointsAt(L) = points_per_level × (min(L, paragon_from − 1) − 1) + paragon_points_per_level × max(0, min(L, level_cap) − (paragon_from − 1))</code>.`),
     block('Caps', table(['Line', 'Cap', 'What that means'], Object.entries(E.caps as Record<string, any>)
       .filter(([k, v]) => (typeof v === 'number' || v === null) && k !== 'elem_res_max')
@@ -867,9 +876,9 @@ page({
       ['Account-wide', `+${pts((BASES.mastery as any).drop_bonus_per_type_pct)} drop rate per weapon type once that type reaches Mastery ${n0((BASES.mastery as any).drop_bonus_level_required)}`, `across ${n0((BASES.weapons || []).length)} types — <code>mastery.dropMultiplier</code>`],
       ['The ladder', `${n0((BASES.mastery as any).xp_per_kill)} Mastery XP a kill, the same curve shape as the herb farm, capped at ${n0((BASES.mastery as any).level_cap)}`, '<code>engine/mastery.ts</code>'],
     ]), `<code>MasteryLevel = min(cap, floor(sqrt(XP / divisor)) + 1)</code>; <code>weightDiscount = min(cap, level × perLevel)</code>. Matching skills get full skill bonus; other skills get <code>full × offTypeMultiplier</code>.`),
-    block('The passive tree', table(['Wing', 'Nodes', 'Ranks', 'Points'], Object.keys(TREE_CFG.branches || {}).map((name: string) => [
-      esc(name), wrap(n0(treeNodes().perBranch(name))), wrap(n0(TREE_CFG.rank_tiers?.shallow?.length ?? 3)), wrap(n0(TREE_CFG.point_cost_per_rank * (TREE_CFG.rank_tiers?.shallow?.length ?? 3) * treeNodes().perBranch(name))),
-    ])), `<code>treePoints(L) = tree_points_base + (L − 1) × tree_points_per_level</code>; <code>line gain = authored line × rank_tier_pct</code>. Weapon lines apply only while that weapon is held.`),
+    block('The passive tree', table(['Wing', 'Nodes', 'Ranks', 'Points'], ((tree as any).branches || []).map((name: string) => [
+      esc(name), wrap(n0(treeNodes().perBranch(name))), wrap(n0(treeNodes().ranksOf(name))), wrap(n0(treeNodes().costOf(name))),
+    ])), `<code>treePoints(L) = tree base + (L - 1) x tree per level</code>; <code>a node grants the lines the spec writes out, one value per rank</code>. The wings are ringed at depth ${list(treeNodes().crosslinks)}. Weapon lines apply only while that weapon is held.`),
   ],
 });
 

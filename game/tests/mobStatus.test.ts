@@ -11,6 +11,7 @@ import { sm } from '../src/engine/client';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Item, Mob } from '../src/sim/types';
+import { mobFixture } from './mobFixture';
 
 const S = E.status as any;
 const K = E.K as any;
@@ -27,11 +28,7 @@ const charWith = (element: string | null, alignment: number): Character => {
   return { ...c, alignment };
 };
 
-const mob = (over: Partial<Mob> = {}): Mob => ({
-  id: 'm1', species: 'Rat', kind: 'Small', zone: 1, level: 20, hp: 1e9, hpMax: 1e9,
-  ps: 200, acc: 400, evasion: 0, dodgeRate: 0, armour: 0, res: 0, damage: 'mixed',
-  innate: ['fire'], xp: 1, line: 'front', hitsPerSec: 1, atkTimer: 0, engageSec: 0, ...over,
-} as Mob);
+  const mob = (over: Partial<Mob> = {}): Mob => mobFixture(over);
 
 /** A store with one fire caster hitting until a status is definitely on the target. */
 function inflict(element: string, c: Character, tries = 400) {

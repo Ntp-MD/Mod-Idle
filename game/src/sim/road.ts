@@ -8,7 +8,7 @@ import type { GameState, Cell, Walk } from './types';
 /** The walk model is `client.ts`'s own instance — one object for the sim, the map views and the wiki. */
 export { road };
 
-const settlementById = (id: string) => TOWN.settlements.find((s: any) => s.id === id);
+const settlementById = (id: string) => TOWN.settlements.find((s) => s.id === id);
 
 export const settlementZone = (id: string): number | null => settlementById(id)?.zone ?? null;
 
@@ -19,8 +19,8 @@ export const settlementZone = (id: string): number | null => settlementById(id)?
  */
 export const standingOrder: string[] = TOWN.settlements
   .slice()
-  .sort((a: any, b: any) => (a.zone ?? 0) - (b.zone ?? 0))
-  .map((s: any) => s.id);
+  .sort((a, b) => (a.zone ?? 0) - (b.zone ?? 0))
+  .map((s) => s.id);
 
 /** The settlement a cell belongs to — itself when the cell is a town, its nearest one otherwise. */
 export const ownerOf = (h: Hex) => road.owningNode(h, standingOrder);
@@ -56,7 +56,7 @@ export function walkNote(state: GameState): string {
   if (!w) return '';
   const own = w.node ? settlementById(w.node) : null;
   const name = own?.name ?? w.node ?? 'the field';
-  const subs = own ? ((E.mob.zones.find((z: any) => z.id === own.zone)?.subzones) || []) : [];
+  const subs = own ? (E.mob.zones.find((z) => z.id === own.zone)?.subzones || []) : [];
   // The site a wild side carries is `fieldwork.wild_site_index`, read through the shared `siteAt` —
   // the index is data, so the sentence may not type it.
   const site = w.kind === 'wild' ? fieldwork.siteAt(w.wild) : null;

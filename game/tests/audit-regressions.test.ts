@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { eng, E, ED, loot, sm, MODS, fieldwork, TOWN } from '../src/engine/client';
+import { eng, E, ED, loot, sm, MODS, fieldwork, TOWN, tree } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
 import { newGame, tick, huntZone, carried, setLevel, catchUp } from '../src/sim/game';
 import { buildCharacter } from '../src/sim/player';
@@ -17,6 +17,7 @@ import { switchPreset } from '../src/sim/presets';
 import { PAGES } from '../src/wiki/pages';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
+import { mobFixture } from './mobFixture';
 
 /**
  * Regressions for the end-to-end audit: each test pins a rule the live code had drifted from —
@@ -24,13 +25,10 @@ import type { Mob } from '../src/sim/types';
  * the clocks the module contract says move together.
  */
 
-const mob = (over: Partial<Mob> = {}): Mob =>
-  ({
-    id: 'm1', species: 'Goblin', kind: 'Small', zone: 1, level: 1,
-    hp: 1000, hpMax: 1000, xp: 10, ps: 100, hitsPerSec: 1, acc: 50, evasion: 10, dodgeRate: 0,
-    damage: 'phys', innate: ['fire'], align: 100, crit: 0,
-    ...over,
-  } as Mob);
+  const mob = (over: Partial<Mob> = {}): Mob => mobFixture({
+    species: 'Goblin', level: 1, hp: 1000, hpMax: 1000, xp: 10, ps: 100, acc: 50, evasion: 10,
+    damage: 'phys', align: 100, crit: 0, ...over,
+  });
 
 const sheet = (over: Partial<Character> = {}): Character =>
   buildCharacter(1, new Array(13).fill(null), {}, 0, undefined, undefined, undefined);
@@ -201,7 +199,7 @@ describe('a Push is a clean rest', () => {
 describe('progression holds the curve it is priced on', () => {
   it('a fresh character holds the tree points its level curve pays', () => {
     const s = newGame(36);
-    expect(s.player.treePoints).toBe(eng.treePointsAt(E.opening.level));
+    expect(s.player.treePoints).toBe(tree.pointsAt(E.opening.level, E.stat.level_cap));
   });
 
   it('a run that cleared mid-away does not over-charge its cooldown', () => {

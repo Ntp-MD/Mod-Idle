@@ -10,6 +10,7 @@ Single-player, browser-only idle RPG; no server. This is the shared entry point 
 | `docs/DECISIONS.md` | Formulas, variables and calculation order | Changing the relevant calculation |
 | `docs/glossary.md` | Short definitions of game terms | A term is ambiguous, new or renamed |
 | `docs/game-rules.md` | Current gameplay intent and non-obvious behavior constraints | Changing the relevant game system |
+| `docs/map-art.md` | Map terrain artwork contract and the projected ground footprint | Producing or placing terrain hex art |
 | `tools/data/*.json` | Numbers, tuning, catalogues and content | Changing or tracing those values |
 | `engine/`, `game/src/` | Implementation, interfaces and UI appearance | Working on the affected code |
 | `game/src/wiki/pages.ts` | Player-facing wiki source | Changing what the wiki explains |

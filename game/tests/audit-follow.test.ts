@@ -17,6 +17,7 @@ import { buy, canBuy, claimTask, deposit, depositMany, sellJunk, settlementById,
 import { col, turnIn } from '../src/sim/collector';
 import { switchPreset } from '../src/sim/presets';
 import type { Item, Mob } from '../src/sim/types';
+import { mobFixture } from './mobFixture';
 
 const craft = createCraft(ED, loot);
 const armour = (): Item => {
@@ -209,12 +210,12 @@ describe('audit follow-up', () => {
     s.player.points.vit = -10;
     s.player.statPoints = eng.pointsAt(2);
     s.player.treeRanks = { [tree.nodes[0].id]: 1 };
-    s.player.treePoints = eng.treePointsAt(2);
+    s.player.treePoints = tree.pointsAt(2, E.stat.level_cap);
     const back = importJson(exportJson(s));
     expect(back.player.points.str).toBe(3);
     expect(back.player.points.vit).toBe(0);
     expect(Object.values(back.player.points).reduce((sum, n) => sum + n, 0) + back.player.statPoints).toBeLessThanOrEqual(eng.pointsAt(2));
-    expect(tree.pointsSpent(back.player.treeRanks) + back.player.treePoints).toBeLessThanOrEqual(eng.treePointsAt(2));
+    expect(tree.pointsSpent(back.player.treeRanks) + back.player.treePoints).toBeLessThanOrEqual(tree.pointsAt(2, E.stat.level_cap));
     expect(importJson(exportJson(back))).toEqual(back);
   });
 
@@ -308,11 +309,9 @@ describe('audit follow-up', () => {
   });
 });
 
-const hitMob = (over: Partial<Mob> = {}): Mob => ({
-  id: 'm', kind: 'Small', hp: 1e9, hpMax: 1e9, xp: 1, ps: 100, hitsPerSec: 1, acc: 1,
-  evasion: 0, dodgeRate: 0, damage: 'physical', innate: [], align: 0, crit: 0, armour: 0, res: 0,
-  atkTimer: 0, engageSec: 0, line: 'front', ...over,
-} as Mob);
+const hitMob = (over: Partial<Mob> = {}): Mob => mobFixture({
+  id: 'm', ps: 100, acc: 1, damage: 'physical', innate: [], align: 0, crit: 0, ...over,
+});
 const flat = (v: number) => () => v;
 
 describe('audit follow-up: character, combat order and recovery', () => {

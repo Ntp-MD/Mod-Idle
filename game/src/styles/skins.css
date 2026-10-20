@@ -589,7 +589,15 @@
 .hub-control.here { color: var(--gold-lit); }
 .hub-control.far { opacity: .5; }
 .hub-control.far img { filter: grayscale(.6); }
-.hub-control .cap { font-size: var(--font-xs); line-height: 1.2; text-transform: capitalize; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); }
+/* The rail's captions sit on the map art, where a soft drop shadow alone loses the light text
+   against bright terrain — so each glyph carries its own dark edge, and a spread shadow seats it. */
+.hub-control .cap {
+  font-size: var(--font-xs); line-height: 1.2; text-transform: capitalize;
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, .8), 1px -1px 0 rgba(0, 0, 0, .8), -1px 1px 0 rgba(0, 0, 0, .8), 1px 1px 0 rgba(0, 0, 0, .8), 0 0 5px rgba(0, 0, 0, .9);
+}
+.rail .hud-slide-handle .disclosure-toggle strong {
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, .8), 1px -1px 0 rgba(0, 0, 0, .8), -1px 1px 0 rgba(0, 0, 0, .8), 1px 1px 0 rgba(0, 0, 0, .8), 0 0 5px rgba(0, 0, 0, .9);
+}
 .hub-control:hover .toggle-ring { border-color: var(--gold); }
 .hub-control:focus-visible { outline: none; }
 .hub-control:focus-visible .toggle-ring { outline: 2px solid var(--focus); outline-offset: 2px; }

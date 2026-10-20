@@ -6,17 +6,15 @@ import { newCurses, applyCurse, modsOn, tickCurses, psMult, accMult, takenMult, 
 import { mulberry32 } from '../src/engine/client-helpers';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Mob } from '../src/sim/types';
+import { mobFixture } from './mobFixture';
 
 const row = (id: string) => sm.byId[id]!;
 const valueOf = (id: string, stat: string) =>
   row(id)!.effects!.find((e: any) => e.stat === stat)!.value;
 
-const mobOf = (over: Partial<Mob> = {}): Mob => ({
-  id: 'mob-1', species: 'Rat', kind: 'Small', zone: 1, level: 20,
-  hp: 100000, hpMax: 100000, ps: 500, acc: 500, evasion: 100, dodgeRate: 0,
-  armour: 0, res: 0, damage: 'mixed', innate: ['fire'], xp: 10, line: 'front',
-  hitsPerSec: 1, atkTimer: 0, engageSec: 0, ...over,
-} as Mob);
+  const mobOf = (over: Partial<Mob> = {}): Mob => mobFixture({
+    id: 'mob-1', hp: 100000, hpMax: 100000, ps: 500, acc: 500, evasion: 100, xp: 10, ...over,
+  });
 
 function cursed(...ids: string[]) {
   const store = newCurses();

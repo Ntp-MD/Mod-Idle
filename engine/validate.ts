@@ -60,7 +60,7 @@ const REQUIRED_SECTIONS = [
 /** The `stat` block the level curve and the sheet read. */
 const REQUIRED_STAT = [
   'base', 'level_cap', 'mob_level_cap', 'item_slots', 'core_flat_max', 'split_items',
-  'points_per_level', 'point_value', 'tree_points_base', 'tree_points_per_level',
+    'points_per_level', 'point_value',
 ] as const;
 
 /** The `caps` block: every Cap is a number or an explicit `null` (no Cap). */

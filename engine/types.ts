@@ -22,8 +22,6 @@ export interface StatCfg {
   point_value: number;
   paragon_from: number;
   paragon_points_per_level: number;
-  tree_points_base: number;
-  tree_points_per_level: number;
   reference_build: string;
   respec_cost: number;
   note: string;

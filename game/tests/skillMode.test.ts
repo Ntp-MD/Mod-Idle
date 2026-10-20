@@ -6,6 +6,7 @@ import { castOnce, newSkillState, condOf, NO_COND } from '../src/sim/skills';
 import { newMobStatusStore, setStacks } from '../src/sim/mobStatus';
 import { newCurses, applyCurse } from '../src/sim/curse';
 import type { Mob } from '../src/sim/types';
+import { mobFixture } from './mobFixture';
 
 /**
  * The per-slot switch and each row's own condition list.
@@ -17,11 +18,7 @@ import type { Mob } from '../src/sim/types';
  * and a finisher for low pool at the same time; the legs are the five named ones, never free text.
  */
 
-const mob = (kind = 'Medium', id = 'm1'): Mob => ({
-  id, species: 'Rat', zone: 1, level: 90, kind, hp: 1e9, hpMax: 1e9,
-  ps: 600, acc: 900, armour: 0, res: 0, evasion: 0, dodgeRate: 0, innate: ['fire'],
-  damage: 'mixed', hitsPerSec: 1, atkTimer: 0,
-} as Mob);
+  const mob = (kind = 'Medium', id = 'm1'): Mob => mobFixture({ id, kind, level: 90, ps: 600, acc: 900 });
 
 /** A slotted attack row whose press always lands (the target has no evasion and no dodge). */
 const ATTACK = 'attack.cleave';

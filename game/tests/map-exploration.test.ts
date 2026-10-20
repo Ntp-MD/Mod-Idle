@@ -170,7 +170,7 @@ describe('map journal and trail sites', () => {
     expect(mapEventArt('Found wild berries along the trail')).toContain('map-event-food');
     expect(mapEventArt('A clear spring restores your strength · Hunger 20%')).toContain('map-event-spring');
     expect(mapEventArt('Abandoned Camp · Hunger 30%')).toContain('map-event-fire');
-    expect(mapEventArt('Provision Caravan · Raw Game Meat ×2')).toContain('map-cart');
+    expect(mapEventArt('Provision Caravan · Raw Game Meat ×2')).toContain('provision-caravan.png');
     expect(mapEventArt('Hunting Tracks · surveyed nearby')).toContain('map-tracks');
     expect(mapEventArt('Camp kitchen · Trail Stew ×1')).toContain('map-pot-steam');
   });

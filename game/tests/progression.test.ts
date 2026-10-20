@@ -8,6 +8,7 @@ import { newGoal, target, onSpawn, onKill, watch } from '../src/sim/goal';
 import type { GameState, Mob } from '../src/sim/types';
 import { respecStats } from '../src/sim/respec';
 import { buildCharacter, openingGear } from '../src/sim/player';
+import { mobFixture } from './mobFixture';
 
 /** The three progression side-tracks the game runs beside the level bar: Mastery, the passive tree, the
  *  win gate. Each one's rules live in the sim; these read them through the same calls the client makes. */
@@ -47,17 +48,21 @@ describe('the passive tree', () => {
   const spent = (s: GameState) => treePointsSpent(s);
   const firstWithNeeds = () => Object.values(tree.byId as Record<string, any>).find((n: any) => n.needs.length && !n.needs.includes('start')) as any;
 
-  it('reads the shallow boundary and rank count from the tree spec', () => {
+  it('reads the shallow boundary and the rank count from the tree spec', () => {
     const spec = structuredClone(TREE_SPEC) as any;
     spec.shallow_nodes = 1;
-    spec.rank_tiers.shallow = [0.1, 0.2];
-    spec.rank_tiers.deep = [0.2, 0.4];
     const model = createTree(spec, MODS);
     expect(model.shallowNodes).toBe(1);
-    expect(model.ranks).toBe(2);
     expect(model.nodes[0].tier).toBe('shallow');
     expect(model.nodes[1].tier).toBe('deep');
-    expect(model.nodes.every((node) => node.ranks === 2 && node.values.length === 2)).toBe(true);
+    // a node's rank count comes from its kind, and its values are the ones the file carries: the
+    // drafting tables are an aid, not a rule the live tree follows (D5)
+    const line = model.nodes.filter((node) => node.kind === 'line');
+    const notable = model.nodes.filter((node) => node.kind === 'notable');
+    expect(line.every((node) => node.ranks === 3)).toBe(true);
+    expect(notable.every((node) => node.ranks === 1)).toBe(true);
+    expect(model.nodes[0].values.length).toBe(3);
+    expect(model.nodes[0].values[0]).toBeGreaterThan(0);
   });
 
   it('refuses a tree spec it cannot build, and names the key that is wrong', () => {
@@ -153,7 +158,7 @@ describe('settlement respec', () => {
 });
 
 describe('resistance ceiling', () => {
-  it('caps at 75% normally and lets only passive ranks extend it to 90%', () => {
+  it('caps at the data’s own ceiling normally and lets only passive ranks extend it', () => {
     const s = newGame();
     s.gear = openingGear();
     const item = s.gear.find((g) => g)!;
@@ -162,24 +167,22 @@ describe('resistance ceiling', () => {
       { id: 'elemental_resistance_cap_pct', value: 15 },
     ];
     const base = buildCharacter(s.player.level, [item]);
-    expect(base.resCap).toBe(75);
-    expect(base.resistance).toBe(75);
+    expect(base.resCap).toBe(E.caps.elem_res);
+    expect(base.resistance).toBe(E.caps.elem_res);
     const node = Object.values(tree.byId).find((n) => n.line === 'elemental_resistance_cap_pct')!;
     for (let rank = 1; rank <= node.ranks; rank++) {
       const c = buildCharacter(s.player.level, [item], {}, 0, undefined, undefined, { [node.id]: rank });
-      expect(c.resCap).toBe(Math.min(90, 75 + node.values[rank - 1]));
+      expect(c.resCap).toBe(Math.min(E.caps.elem_res_max, E.caps.elem_res + node.values[rank - 1]));
       expect(c.resistance).toBe(c.resCap);
     }
-    expect(eng.elemResCapOf(1000)).toBe(90);
+    expect(eng.elemResCapOf(1000)).toBe(E.caps.elem_res_max);
   });
 });
 
 describe('the win gate', () => {
-  const bossOf = (zone: number, id = 'b1'): Mob => ({
-    id, species: 'Slime', kind: 'Boss', zone, level: 20, hp: 1e6, hpMax: 1e6, ps: 100, acc: 100,
-    evasion: 0, dodgeRate: 0, armour: 0, res: 0, damage: 'mixed', innate: [], xp: 1, line: 'front',
-    hitsPerSec: 1, atkTimer: 0, engageSec: 0,
-  });
+    const bossOf = (zone: number, id = 'b1'): Mob => mobFixture({
+      id, species: 'Slime', kind: 'Boss', zone, hp: 1e6, hpMax: 1e6, ps: 100, acc: 100, innate: [],
+    });
 
   it('arms only on the final zone boss, and counts the attempt', () => {
     const s = newGame();

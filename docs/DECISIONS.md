@@ -16,6 +16,38 @@ statOf(points) = stat.base + points × stat.point_value
 
 The reference line splits evenly (`pointsAt(L) / 7`); players use actual allocation.
 
+## The passive tree
+
+The tree's own numbers live in `tools/data/tree.json` and its formulas in `engine/tree.ts`. The tree never changes a published figure: `mobHP` excludes it, and the reference build allocates no tree at all.
+
+**The shape.** Twelve wings on a pitch around a centre start. A node grants one or more lines, and the values it grants are written out in the file — the tree's numbers are the tree's own and do not move when a loot line's maximum moves. The geometry is derived from the topology: a node's depth and lane come from its parents, and the `layout` block turns those into positions. A node id is a save key, so it keeps its meaning for ever.
+
+**The kinds.** A kind sets a node's rank count, its cost and the currency it is paid in.
+
+| Kind | Ranks | Cost | Currency | Grants |
+|---|---|---|---|---|
+| `line` | 3 | 1 | tree | one line, three rising values |
+| `mark` | 1 | 1 | tree | one line, one value |
+| `notable` | 1 | 1 | tree | three lines at once |
+| `keystone` | 1 | 1 | attainment | one line and a drawback |
+| `capstone` | 1 | 1 | tree | three lines at once |
+
+**The points.** Tree points come from the level curve — the level curve in `engine.json` owns the stat points, and the tree's own budget and rate live in the tree's spec (`points.currencies.tree`). A keystone is paid in **attainment** points, which a completed Delivery contract pays: the roll is made at offer time, last in the offer's roll order, and frozen into the contract before the player sees it.
+
+**The rules.** A keystone may carry exactly one drawback, from a bounded vocabulary. There are no others: a rule outside this set is refused by name, so a node is never bought and quietly does nothing.
+
+| Rule | Meaning |
+|---|---|
+| `remove` | the character no longer receives the named line — the drawback, applied after the gear and the tree have both folded, so the line is gone from the whole sheet |
+| `cap_unlock` | raises a named Cap, through the same line the sheet already reads |
+| `convert` | routes a percent of the physical share into a named Element, the route a conversion aura takes |
+
+**The groups.** A keystone group is a one-of family: holding one member blocks its siblings, and it is the only exclusivity in the tree. There is no unlock condition on any node — a node is bought when it is connected to a path the character already owns.
+
+**The budget.** A line has a budget, and the tree never hands out more of a line than its budget: the total across the whole tree is capped at 130% of that line's `mods.json` maximum. The values are derived from that budget, not typed; a rank never grants nothing and never grants less than the rank below it, so a line with many nodes can sit a little over its share, and a line that cannot carry a fraction gives one.
+
+**Why the tree is shaped this way.** The wings are open to every character — the commitment lives in the keystone groups, not in a gate — and there is no attribute requirement on any node: the reference build splits its points evenly, so any absolute threshold would be passed by everybody or by nobody, and connectivity is a rule a player already understands. A keystone is paid in its own currency so it never competes with the ordinary nodes for the same point, and it may carry a drawback so the choice is a shape and not only a number. The budget exists because a value ladder would make the far nodes of a wing several times more point-efficient than the near ones, and a budget has no such preference: the worth of a point depends on the line, not on where the node sits.
+
 ### Derived stats
 
 `C` = final Core-attribute values, `F` = flat lines, `P` = percent lines, `K_*` from `engine.json`.

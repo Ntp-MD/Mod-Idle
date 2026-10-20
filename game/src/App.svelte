@@ -112,8 +112,16 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
   const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
   let showcaseSample = $state('delivery');
+  let hex3dPrototypeView = $state<any>(null);
+  $effect(() => {
+    if (!showcaseMode || showcaseSample !== 'map-hex-3d') return;
+    let current = true;
+    import('./ui/Hex3dPrototype.svelte').then(module => { if (current) hex3dPrototypeView = module.default; });
+    return () => { current = false; hex3dPrototypeView = null; };
+  });
 
   function showcaseGame(scenario = 'delivery'): GameState {
+    if (scenario === 'map-hex-3d') scenario = 'map-adventure';
     const sample = newGame();
     const campEventExamples = new Set(['map-camp-sounds', 'map-camp-prowler', 'map-camp-traveler', 'map-camp-nest',
       'map-camp-herd', 'map-camp-injured', 'map-camp-discovered', 'map-camp-combat', 'map-camp-timeout',
@@ -1296,6 +1304,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   let gateLevel = $state(1);
   let showWalk = $state(false);
   let showIds = $state(false);
+  let showHexCalibration = $state(false);
   const MAP_NAMES_KEY = 'modworld.map-names.v1';
   let showMapNames = $state(true);
   let hoveredMapCell = $state<string | null>(null);
@@ -2355,12 +2364,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           bleed: { stacks: 1, secLeft: 6, perSec: 8 },
         } : {};
         bench = null; benchNote = ''; picked = null; pickedCell = null;
-        panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' || showcaseSample === 'map-adventure' || showcaseSample.startsWith('map-camp-') ? 'map' : null;
+        panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' || showcaseSample === 'map-adventure' || showcaseSample === 'map-hex-3d' || showcaseSample.startsWith('map-camp-') ? 'map' : null;
         if (showcaseSample === 'expedition') deskTab = 'guild'; marketView = 'deliveries'; marketTownId = '';
       }}>
         <option value="field">Field baseline</option><option value="delivery">Delivery want</option><option value="full-bag">Delivery reward bag full</option>
         <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option>
-        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option>
+        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option><option value="map-hex-3d">Map · Three.js hex prototype</option>
         <option value="map-camp-sounds">Map · Camp sounds</option><option value="map-camp-prowler">Map · Camp prowler</option><option value="map-camp-traveler">Map · Camp traveler</option><option value="map-camp-nest">Map · Camp nest</option><option value="map-camp-herd">Map · Camp herd</option><option value="map-camp-injured">Map · Camp aid</option><option value="map-camp-discovered">Map · Camp discovered</option><option value="map-camp-combat">Map · Camp combat</option><option value="map-camp-timeout">Map · Camp timeout</option><option value="map-camp-full-bag">Map · Camp full bag</option><option value="map-camp-readonly">Map · Camp read only</option>
       </select></label>
     </div>
@@ -2393,6 +2402,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 </div>
 
 <div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
+  {#if showcaseMode && showcaseSample === 'map-hex-3d' && hex3dPrototypeView}
+    {@const Hex3dPrototype = hex3dPrototypeView}
+    <Hex3dPrototype onClose={() => {
+      showcaseSample = 'map-adventure'; gameState = showcaseGame('map-adventure'); panel = 'map';
+    }} />
+  {/if}
   <!-- one generated map sheet behind the HUD — the only copy, and the surface a place is picked on -->
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
@@ -2404,7 +2419,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     use:mapField
   >
     <div class="map-sheet" style:transform={`translate(${panX.toFixed(1)}px, ${panY.toFixed(1)}px) scale(${zoom.toFixed(4)})`}>
-      <div class="map-projection">{@html mapMarkup}</div>
+      <div class="map-projection" class:hex-calibrating={showHexCalibration}>{@html mapMarkup}</div>
     </div>
     <span class="aloud" aria-live="polite" aria-atomic="true">{pickedCell ? `Selected block ${pickedCell.key}: ${pickedCell.label}` : ''}</span>
   </div>
@@ -2461,7 +2476,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   </div>
   {#if panel === 'map'}
   <div class="field-travel-actions" aria-label="Map tools"
-       style={place('travel', '100%', '')}>
+       data-hud-region={mapHelpOpen ? 'panels' : 'travel'}
+       style={place(mapHelpOpen ? 'panels' : 'travel', '100%', mapHelpOpen ? '100%' : '')}>
       <div class="map-guide" class:open={mapHelpOpen} class:surface-popover={mapHelpOpen}>
         <CollapseToggle label="Map tools" controls="map-tools-content" bind:expanded={mapHelpOpen} />
         <div id="map-tools-content" class="map-tools-content hub-collapsible" hidden={!mapHelpOpen}>
@@ -2493,6 +2509,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
                 <label title="Show area names; towns always, subzones only when zoomed close, wild sides and levels on hover/select"><input type="checkbox" checked={showMapNames} onchange={event => setMapNames(event.currentTarget.checked)} /> Area names</label>
                 <label title="Show walking connections between settlements"><input type="checkbox" bind:checked={showWalk} /> Connections</label>
                 <label title="Show hex cell identifiers"><input type="checkbox" bind:checked={showIds} /> Cell IDs</label>
+                {#if import.meta.env.DEV}<label title="Compare artwork with the exact projected ground footprint"><input type="checkbox" bind:checked={showHexCalibration} /> Hex alignment</label>{/if}
               </div>
               <p class="map-hint text-note">Select a hex · Drag to pan · Scroll to zoom</p>
               {#if gameState.walk}
@@ -2505,6 +2522,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             <div class="map-legend text-note">
               {#each legend as l (l.name)}<span class="swatch"><i class="swatch-color" style:background={l.tone} aria-hidden="true"></i><span>{l.label}</span></span>{/each}
               <span class="swatch ramp"><i class="swatch-color" style:background={`linear-gradient(90deg,${rampCss})`} aria-hidden="true"></i><span>Lv {firstBand[0]}–{lastBand[1]}</span></span>
+              <p>Numbered flags mark Patrol stops. Green pennants mark your Expedition destinations. Creature figures show the local roster; an active fight moves the figure on your hex.</p>
             </div>
           </details>
         </div>
@@ -3356,7 +3374,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <PassiveTreeBoard
       nodes={tree.nodes}
       graph={tree.graph}
-      state={gameState}
+      layout={tree.layout}
+      game={gameState}
       selectedId={selectedTreeNodeId}
       verdict={selectedTreeVerdict}
       onselect={(id) => (selectedTreeNodeId = id)}
@@ -3765,6 +3784,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 </svg>
 
 <style>
+  :global(.hex-calibration) { display: none; }
+  .hex-calibrating :global(.hex-calibration) { display: inline; }
   button.active { border-color: var(--gold); color: var(--gold); }
 
   :global(body.ui-showcase) { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
@@ -3859,7 +3880,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-reference { position: relative; display: flex; justify-content: flex-start; width: 100%; }
   .map-reference :global(.mini-map) { flex: none; }
   .map-guide { position: relative; z-index: var(--z-content); display: grid; align-content: start; gap: var(--spacing-xs); width: fit-content; max-width: 100%; min-width: 0; }
-  .map-guide.open { width: 100%; padding: var(--spacing-sm); }
+  .map-guide.open { width: 100%; padding: var(--spacing-sm); display: flex; flex-direction: column; min-height: 0; max-height: 100%; }
+  .map-guide.open .map-tools-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .map-tools-content, .map-tools { display: grid; gap: var(--spacing-sm); min-width: 0; font-size: var(--font-xs); }
   .map-tools-section { min-width: 0; }
   .map-tools-section summary { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); padding-block: var(--spacing-xs); cursor: pointer; }
@@ -3880,6 +3902,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .map-legend .swatch { display: flex; align-items: flex-start; gap: var(--spacing-xs); min-width: 0; line-height: 1.2; }
   .map-legend .swatch i { width: var(--icon-detail); height: var(--icon-detail); flex: none; }
   .map-legend .ramp { grid-column: 1 / -1; align-items: center; }
+  .map-legend p { grid-column: 1 / -1; margin: 0; line-height: 1.4; }
   .map-legend .ramp i { flex: 1; width: auto; }
 
   .mapcard {
@@ -4267,7 +4290,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .speed-mark { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
   .speed-mark.here { color: var(--gold-lit); }
   .field-travel-actions {
-    grid-area: travel; z-index: var(--z-travel); width: 100%; min-width: 0;
+    grid-area: travel; z-index: var(--z-travel); width: 100%; min-width: 0; min-height: 0; max-height: 100%;
     display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs);
     pointer-events: none;
   }

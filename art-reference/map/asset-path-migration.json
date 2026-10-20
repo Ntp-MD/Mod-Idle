@@ -1,0 +1,527 @@
+[
+  {
+    "old": "diorama/settlements/town.png",
+    "new": "landmark/town-settlement.png",
+    "oldUrl": "/map/diorama/settlements/town.png",
+    "newUrl": "/map/landmark/town-settlement.png",
+    "sha256": "38a49eb6c93def09fb8f03856970329334cd7d08cbadecd1395e9905afd79a85"
+  },
+  {
+    "old": "diorama/terrain/ash.png",
+    "new": "terrain/ash.png",
+    "oldUrl": "/map/diorama/terrain/ash.png",
+    "newUrl": "/map/terrain/ash.png",
+    "sha256": "06644084755b6a3e729be77b6fb5ec23e44f3322eb6d26c54fc23d227533d21d"
+  },
+  {
+    "old": "diorama/terrain/camp.png",
+    "new": "landmark/camp.png",
+    "oldUrl": "/map/diorama/terrain/camp.png",
+    "newUrl": "/map/landmark/camp.png",
+    "sha256": "ce79692475dc42baec8248f5e3247cc5476da893db8bdbc0afffb70e7236bf94"
+  },
+  {
+    "old": "diorama/terrain/encounter-ruins.png",
+    "new": "landmark/encounter-ruins.png",
+    "oldUrl": "/map/diorama/terrain/encounter-ruins.png",
+    "newUrl": "/map/landmark/encounter-ruins.png",
+    "sha256": "d5dd22b0db24c7fee3a736111bd5957e776e211df007968635a0347dddedf911"
+  },
+  {
+    "old": "diorama/terrain/forest-relief.png",
+    "new": "terrain/forest-relief.png",
+    "oldUrl": "/map/diorama/terrain/forest-relief.png",
+    "newUrl": "/map/terrain/forest-relief.png",
+    "sha256": "39cc081e3a1456a2ef47b9f402ec8f31e942b74797c37e35b55f200456ff761e"
+  },
+  {
+    "old": "diorama/terrain/grass.png",
+    "new": "terrain/grass.png",
+    "oldUrl": "/map/diorama/terrain/grass.png",
+    "newUrl": "/map/terrain/grass.png",
+    "sha256": "5d5d8a472b111a02e2fa5f382a0bf5acd69cc61d386a6bded61d1d8523993b47"
+  },
+  {
+    "old": "diorama/terrain/marsh.png",
+    "new": "terrain/marsh.png",
+    "oldUrl": "/map/diorama/terrain/marsh.png",
+    "newUrl": "/map/terrain/marsh.png",
+    "sha256": "f94b9f6fbeef72ec8a1a5c1e38372e4394e1b660817725a4764656495c565658"
+  },
+  {
+    "old": "diorama/terrain/moor.png",
+    "new": "terrain/moor.png",
+    "oldUrl": "/map/diorama/terrain/moor.png",
+    "newUrl": "/map/terrain/moor.png",
+    "sha256": "e529b9a6bb978fcd65386037be1de5d345cfd7a4670fba3b46c2156c5c2590be"
+  },
+  {
+    "old": "diorama/terrain/mountain-relief.png",
+    "new": "terrain/mountain-relief.png",
+    "oldUrl": "/map/diorama/terrain/mountain-relief.png",
+    "newUrl": "/map/terrain/mountain-relief.png",
+    "sha256": "233efc6492178b13f94634571831531e910599a2626277d3a65708484ce58f67"
+  },
+  {
+    "old": "diorama/terrain/salt.png",
+    "new": "terrain/salt.png",
+    "oldUrl": "/map/diorama/terrain/salt.png",
+    "newUrl": "/map/terrain/salt.png",
+    "sha256": "e5d4f9b37c865dfa793106b06c8c2296aa2591f4198e9b4c75244dd1d5eec533"
+  },
+  {
+    "old": "diorama/terrain/snow.png",
+    "new": "terrain/snow.png",
+    "oldUrl": "/map/diorama/terrain/snow.png",
+    "newUrl": "/map/terrain/snow.png",
+    "sha256": "fdf3139d831b0017085a78156903c9cfece88277ecdbfb9a6e80221e4279db49"
+  },
+  {
+    "old": "diorama/terrain/town.png",
+    "new": "landmark/town.png",
+    "oldUrl": "/map/diorama/terrain/town.png",
+    "newUrl": "/map/landmark/town.png",
+    "sha256": "b1fe8ad075e30f2507de335b8472f27a85c0a664c1f241c4f6807cd8375628e3"
+  },
+  {
+    "old": "diorama/terrain/village.png",
+    "new": "landmark/village.png",
+    "oldUrl": "/map/diorama/terrain/village.png",
+    "newUrl": "/map/landmark/village.png",
+    "sha256": "5afea67136a67447c2ee321fb38b7c1d7ee359e5da1b5252638fe9318ee967c7"
+  },
+  {
+    "old": "diorama/terrain/waste.png",
+    "new": "terrain/waste.png",
+    "oldUrl": "/map/diorama/terrain/waste.png",
+    "newUrl": "/map/terrain/waste.png",
+    "sha256": "53a83f6c262d9b6e0296c451264a491b7ae4dcc899a538ad0f678d0b4e1b9ce8"
+  },
+  {
+    "old": "diorama/terrain/water.png",
+    "new": "terrain/water.png",
+    "oldUrl": "/map/diorama/terrain/water.png",
+    "newUrl": "/map/terrain/water.png",
+    "sha256": "3b18e8e913a0884fe457760e91ce84e120fef5d58164971e2f3e8e3dfb9c6ee3"
+  },
+  {
+    "old": "diorama/terrain-hex/ash-1.png",
+    "new": "terrain/ash-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/ash-1.png",
+    "newUrl": "/map/terrain/ash-1.png",
+    "sha256": "375602c9eec4b82d39866cedf1d1e616d4352d36ac27e6f0ce8541182600e01c"
+  },
+  {
+    "old": "diorama/terrain-hex/forest-relief-1.png",
+    "new": "terrain/forest-relief-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/forest-relief-1.png",
+    "newUrl": "/map/terrain/forest-relief-1.png",
+    "sha256": "f9530982658e235129f2939eaa8a25cc06479d97e33230007bf8683343047732"
+  },
+  {
+    "old": "diorama/terrain-hex/grass-1.png",
+    "new": "terrain/grass-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/grass-1.png",
+    "newUrl": "/map/terrain/grass-1.png",
+    "sha256": "ecf20485ac3377188f69a33b53e14d7a7af23c713526cfc3740c5872ab535860"
+  },
+  {
+    "old": "diorama/terrain-hex/marsh-1.png",
+    "new": "terrain/marsh-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/marsh-1.png",
+    "newUrl": "/map/terrain/marsh-1.png",
+    "sha256": "b1b19debcfaa846e7bb3ff023e59681ecf37fac218a5e0733bc0d7182730aae6"
+  },
+  {
+    "old": "diorama/terrain-hex/moor-1.png",
+    "new": "terrain/moor-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/moor-1.png",
+    "newUrl": "/map/terrain/moor-1.png",
+    "sha256": "457ce56aaaf68054ef2dba45f56af5d1acc3b8cdc20f9adbe1fe6e54cceac0f7"
+  },
+  {
+    "old": "diorama/terrain-hex/mountain-relief-1.png",
+    "new": "terrain/mountain-relief-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/mountain-relief-1.png",
+    "newUrl": "/map/terrain/mountain-relief-1.png",
+    "sha256": "beacde9269e7a7c6a4f2699afc40be0cd89b1d7671837e7decc02090fd77350d"
+  },
+  {
+    "old": "diorama/terrain-hex/salt-1.png",
+    "new": "terrain/salt-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/salt-1.png",
+    "newUrl": "/map/terrain/salt-1.png",
+    "sha256": "ea75644bb763ff8ffc11d1a4355ebbcaf60fd0c1c8479b0324548d86c8df1bec"
+  },
+  {
+    "old": "diorama/terrain-hex/snow-1.png",
+    "new": "terrain/snow-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/snow-1.png",
+    "newUrl": "/map/terrain/snow-1.png",
+    "sha256": "2e4d1861ec14f3e67d111e534a595f395eaac7e22da8e357f1436e5f4b0a64ed"
+  },
+  {
+    "old": "diorama/terrain-hex/town-1.png",
+    "new": "landmark/town-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/town-1.png",
+    "newUrl": "/map/landmark/town-1.png",
+    "sha256": "364f60ad885d78293ed8beb6b4312724b4d16de16452f8fde57ebd84f6357cc6"
+  },
+  {
+    "old": "diorama/terrain-hex/waste-1.png",
+    "new": "terrain/waste-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/waste-1.png",
+    "newUrl": "/map/terrain/waste-1.png",
+    "sha256": "9fff166a5c35d628775d5149da1c4a2879aa4a57a9a5bfd7a4ee4a2f85cdcc15"
+  },
+  {
+    "old": "diorama/terrain-hex/water-1.png",
+    "new": "terrain/water-1.png",
+    "oldUrl": "/map/diorama/terrain-hex/water-1.png",
+    "newUrl": "/map/terrain/water-1.png",
+    "sha256": "db56c5e70ad7a1279f1d0e708cac0224b97467008cc21e8434967357868c4cfb"
+  },
+  {
+    "old": "objects/mob-stage.png",
+    "new": "landmark/mob-stage.png",
+    "oldUrl": "/map/objects/mob-stage.png",
+    "newUrl": "/map/landmark/mob-stage.png",
+    "sha256": "f746163019a6ab397d12bd23d1816c30075fc7e6d734fa7175195edc6ab6dd6d"
+  },
+  {
+    "old": "objects/town-popup.png",
+    "new": "landmark/town-popup.png",
+    "oldUrl": "/map/objects/town-popup.png",
+    "newUrl": "/map/landmark/town-popup.png",
+    "sha256": "6e95ad1d55593983ad508dc9b7fc3467245ea33455e7b69194dbe9ea18fc1823"
+  },
+  {
+    "old": "objects/traveler-piece.png",
+    "new": "characters/traveler-piece.png",
+    "oldUrl": "/map/objects/traveler-piece.png",
+    "newUrl": "/map/characters/traveler-piece.png",
+    "sha256": "b5b439388acf531c16d81e5bd1eb2b435a4f2cb989f07d979ce46785b6a1f461"
+  },
+  {
+    "old": "objects/props/camp-unlit.png",
+    "new": "landmark/camp-unlit.png",
+    "oldUrl": "/map/objects/props/camp-unlit.png",
+    "newUrl": "/map/landmark/camp-unlit.png",
+    "sha256": "a5b63593502fd22f34c2ad702025844c3660c72503becea663bf451c60843659"
+  },
+  {
+    "old": "objects/props/provision-caravan.png",
+    "new": "landmark/provision-caravan.png",
+    "oldUrl": "/map/objects/props/provision-caravan.png",
+    "newUrl": "/map/landmark/provision-caravan.png",
+    "sha256": "24ed52b602be5683f7e555445187ce50198b44a6f84c253addf97fd3f71f2132"
+  },
+  {
+    "old": "objects/species/archon-v2.png",
+    "new": "characters/archon-v2.png",
+    "oldUrl": "/map/objects/species/archon-v2.png",
+    "newUrl": "/map/characters/archon-v2.png",
+    "sha256": "748a1dd0a62fb572d82787ea97432e01fb995ebb305f3b91a34e2a46d5a3e333"
+  },
+  {
+    "old": "objects/species/archon.png",
+    "new": "characters/archon.png",
+    "oldUrl": "/map/objects/species/archon.png",
+    "newUrl": "/map/characters/archon.png",
+    "sha256": "c3f0f2b272d8f0048d046f7ef82daa750bdadfcc5d4416629ce74e5b199682b7"
+  },
+  {
+    "old": "objects/species/beetle-v2.png",
+    "new": "characters/beetle-v2.png",
+    "oldUrl": "/map/objects/species/beetle-v2.png",
+    "newUrl": "/map/characters/beetle-v2.png",
+    "sha256": "241dbcfeb81d7d9d3b5e98badbe00125175a195e64c32cbcb337c519ad7f1678"
+  },
+  {
+    "old": "objects/species/beetle.png",
+    "new": "characters/beetle.png",
+    "oldUrl": "/map/objects/species/beetle.png",
+    "newUrl": "/map/characters/beetle.png",
+    "sha256": "0a7a76b0ddd7c7204d5c3373af402c6860c6b27b5ef1ad3d93d0aa853dc5340e"
+  },
+  {
+    "old": "objects/species/crab-v2.png",
+    "new": "characters/crab-v2.png",
+    "oldUrl": "/map/objects/species/crab-v2.png",
+    "newUrl": "/map/characters/crab-v2.png",
+    "sha256": "e4d4655fb3dc1e84addac13c3ee4a35d1ab71a755fd2391795b3418e3bc96be5"
+  },
+  {
+    "old": "objects/species/crab.png",
+    "new": "characters/crab.png",
+    "oldUrl": "/map/objects/species/crab.png",
+    "newUrl": "/map/characters/crab.png",
+    "sha256": "059649a136446d16cac2ce695d0b695a6424bc6e13aa22584714e5911e9f48c8"
+  },
+  {
+    "old": "objects/species/demon.png",
+    "new": "characters/demon.png",
+    "oldUrl": "/map/objects/species/demon.png",
+    "newUrl": "/map/characters/demon.png",
+    "sha256": "f25208742385f39b6b627ddf5a3f652f3c8e6cc6951a8b337846ee2fbe6a373b"
+  },
+  {
+    "old": "objects/species/dragon.png",
+    "new": "characters/dragon.png",
+    "oldUrl": "/map/objects/species/dragon.png",
+    "newUrl": "/map/characters/dragon.png",
+    "sha256": "2b378f1421e360dc4d460db721cdd56b08eca5d951bd34b5c7b367b592d00f3a"
+  },
+  {
+    "old": "objects/species/dryad.png",
+    "new": "characters/dryad.png",
+    "oldUrl": "/map/objects/species/dryad.png",
+    "newUrl": "/map/characters/dryad.png",
+    "sha256": "15b810a85640e409a4b5a7137f67eee5e75736ef5eb052ed8395656a32cb0a5d"
+  },
+  {
+    "old": "objects/species/elf-v2.png",
+    "new": "characters/elf-v2.png",
+    "oldUrl": "/map/objects/species/elf-v2.png",
+    "newUrl": "/map/characters/elf-v2.png",
+    "sha256": "3f084d11d2dca6101364aa143caa22107dd23fed5fb040d003100d38cbfade31"
+  },
+  {
+    "old": "objects/species/elf.png",
+    "new": "characters/elf.png",
+    "oldUrl": "/map/objects/species/elf.png",
+    "newUrl": "/map/characters/elf.png",
+    "sha256": "919698fe7e4486d852532fca7121ec38de4b1603d9cafb3d3bba63aa26783870"
+  },
+  {
+    "old": "objects/species/giant.png",
+    "new": "characters/giant.png",
+    "oldUrl": "/map/objects/species/giant.png",
+    "newUrl": "/map/characters/giant.png",
+    "sha256": "ed92c8fe17d9f543517a31adc02da81ed79c7d3c99b0ed61f1fe9ea94e64b7dd"
+  },
+  {
+    "old": "objects/species/goblin.png",
+    "new": "characters/goblin.png",
+    "oldUrl": "/map/objects/species/goblin.png",
+    "newUrl": "/map/characters/goblin.png",
+    "sha256": "0a440289c8434fb1746a1ef728d02366ea22b6812a3786c9fc048107c0e57f44"
+  },
+  {
+    "old": "objects/species/golem.png",
+    "new": "characters/golem.png",
+    "oldUrl": "/map/objects/species/golem.png",
+    "newUrl": "/map/characters/golem.png",
+    "sha256": "f8d3b885009f0cc19a5da79ab326c187df8e43ffe286c6619faecc1b532efb3c"
+  },
+  {
+    "old": "objects/species/hornet.png",
+    "new": "characters/hornet.png",
+    "oldUrl": "/map/objects/species/hornet.png",
+    "newUrl": "/map/characters/hornet.png",
+    "sha256": "c0c885e950558e145bb7a37c87b6ad98931aead5d10cae96ca75d100c443c7b8"
+  },
+  {
+    "old": "objects/species/human.png",
+    "new": "characters/human.png",
+    "oldUrl": "/map/objects/species/human.png",
+    "newUrl": "/map/characters/human.png",
+    "sha256": "19c594bd1f8b39b257ed6aae14091f09779c9e745951b5c9e030e5a761e4000d"
+  },
+  {
+    "old": "objects/species/imp.png",
+    "new": "characters/imp.png",
+    "oldUrl": "/map/objects/species/imp.png",
+    "newUrl": "/map/characters/imp.png",
+    "sha256": "85f9a67a7b18ec76653293dc4edcf8ebfcf500cb29959f04ff8e34078b3d2a2c"
+  },
+  {
+    "old": "objects/species/kobold.png",
+    "new": "characters/kobold.png",
+    "oldUrl": "/map/objects/species/kobold.png",
+    "newUrl": "/map/characters/kobold.png",
+    "sha256": "44bb30320b36cdc70006014d17fd7245816904dc0a5d58a07a41222dc279d64c"
+  },
+  {
+    "old": "objects/species/lizardman.png",
+    "new": "characters/lizardman.png",
+    "oldUrl": "/map/objects/species/lizardman.png",
+    "newUrl": "/map/characters/lizardman.png",
+    "sha256": "9249ba282d36dd7378fb6bde9494b9569b26f329edc92a91fceca4cc826a227b"
+  },
+  {
+    "old": "objects/species/minotaur.png",
+    "new": "characters/minotaur.png",
+    "oldUrl": "/map/objects/species/minotaur.png",
+    "newUrl": "/map/characters/minotaur.png",
+    "sha256": "d693bc4d737285c3148d9cf15f3db0b11eb6c6e889e1f8d6791c83a5e598c401"
+  },
+  {
+    "old": "objects/species/mist.png",
+    "new": "characters/mist.png",
+    "oldUrl": "/map/objects/species/mist.png",
+    "newUrl": "/map/characters/mist.png",
+    "sha256": "70764b5a55e9dc67b54170abae6cc03483d5e8907139e2e337c835ec48031db6"
+  },
+  {
+    "old": "objects/species/mummy.png",
+    "new": "characters/mummy.png",
+    "oldUrl": "/map/objects/species/mummy.png",
+    "newUrl": "/map/characters/mummy.png",
+    "sha256": "632e187fd4c2d1e795a74578d4e83fc2963e30c0a66791632ee8c466054fe45c"
+  },
+  {
+    "old": "objects/species/ogre.png",
+    "new": "characters/ogre.png",
+    "oldUrl": "/map/objects/species/ogre.png",
+    "newUrl": "/map/characters/ogre.png",
+    "sha256": "66a9c49f63194c19da0452c24a422969f60838f34adc1558e89ecb00e54183ed"
+  },
+  {
+    "old": "objects/species/ooze.png",
+    "new": "characters/ooze.png",
+    "oldUrl": "/map/objects/species/ooze.png",
+    "newUrl": "/map/characters/ooze.png",
+    "sha256": "75cae80485e18faf5a983f2c1de351e322e69958c6c3cc725f97a9df9740572e"
+  },
+  {
+    "old": "objects/species/orc.png",
+    "new": "characters/orc.png",
+    "oldUrl": "/map/objects/species/orc.png",
+    "newUrl": "/map/characters/orc.png",
+    "sha256": "d710b69a23953175d401e2596e6e026a906456a082485919af4e75f3799d35c5"
+  },
+  {
+    "old": "objects/species/salamander.png",
+    "new": "characters/salamander.png",
+    "oldUrl": "/map/objects/species/salamander.png",
+    "newUrl": "/map/characters/salamander.png",
+    "sha256": "dbe6eb7361b48446815669a9f4db249966e125cc9fe35ee60d7dbcb15a91cf4a"
+  },
+  {
+    "old": "objects/species/shark.png",
+    "new": "characters/shark.png",
+    "oldUrl": "/map/objects/species/shark.png",
+    "newUrl": "/map/characters/shark.png",
+    "sha256": "f1d02d3d089c20b0ba7dbea7b98bac86efd139f5314c07329178a499c0766cb1"
+  },
+  {
+    "old": "objects/species/siren.png",
+    "new": "characters/siren.png",
+    "oldUrl": "/map/objects/species/siren.png",
+    "newUrl": "/map/characters/siren.png",
+    "sha256": "d69d210db10c384d9aa7327d4a7685fbfc128beb62f3c0e9164785ced36f039e"
+  },
+  {
+    "old": "objects/species/skeleton.png",
+    "new": "characters/skeleton.png",
+    "oldUrl": "/map/objects/species/skeleton.png",
+    "newUrl": "/map/characters/skeleton.png",
+    "sha256": "7c49a586e99195102d18bb1f98b794663063bbe62562391b811651af7646fbda"
+  },
+  {
+    "old": "objects/species/slime.png",
+    "new": "characters/slime.png",
+    "oldUrl": "/map/objects/species/slime.png",
+    "newUrl": "/map/characters/slime.png",
+    "sha256": "917aa24406062d1d88a2eec8c3b2d2439f91b1d6924abf84139eb6d4c0fc327a"
+  },
+  {
+    "old": "objects/species/spider.png",
+    "new": "characters/spider.png",
+    "oldUrl": "/map/objects/species/spider.png",
+    "newUrl": "/map/characters/spider.png",
+    "sha256": "f9e4c9f6c054a67357a46d7be36a3272cab7bb6f2109a1a8a5a492dc86f2d277"
+  },
+  {
+    "old": "objects/species/treant-v2.png",
+    "new": "characters/treant-v2.png",
+    "oldUrl": "/map/objects/species/treant-v2.png",
+    "newUrl": "/map/characters/treant-v2.png",
+    "sha256": "ad70ade4b1479da5b5ee70d6c09dabc6b5e685410b77a1293ace643fa9f20a4a"
+  },
+  {
+    "old": "objects/species/treant.png",
+    "new": "characters/treant.png",
+    "oldUrl": "/map/objects/species/treant.png",
+    "newUrl": "/map/characters/treant.png",
+    "sha256": "6d69fa3aee9adda740d05f436b78dc9638139b9d1ffeee84572bc64bc8ef275a"
+  },
+  {
+    "old": "objects/species/troll.png",
+    "new": "characters/troll.png",
+    "oldUrl": "/map/objects/species/troll.png",
+    "newUrl": "/map/characters/troll.png",
+    "sha256": "877cc9abd31824456a72b20e5564489007d7477fe3cc5053925e23bd151507c7"
+  },
+  {
+    "old": "objects/species/vampire-v2.png",
+    "new": "characters/vampire-v2.png",
+    "oldUrl": "/map/objects/species/vampire-v2.png",
+    "newUrl": "/map/characters/vampire-v2.png",
+    "sha256": "c5c50da459775b67f2ebb9d35675c6754ec23ac07824a1278f1ebf8e2f3e4611"
+  },
+  {
+    "old": "objects/species/vampire.png",
+    "new": "characters/vampire.png",
+    "oldUrl": "/map/objects/species/vampire.png",
+    "newUrl": "/map/characters/vampire.png",
+    "sha256": "2391472ca622473d9a8a38c3422b152c1b7a952a2eb5ea89d447aded65ae96a0"
+  },
+  {
+    "old": "objects/species/werewolf.png",
+    "new": "characters/werewolf.png",
+    "oldUrl": "/map/objects/species/werewolf.png",
+    "newUrl": "/map/characters/werewolf.png",
+    "sha256": "f031fe819e987c3c36be96aea588bf22eaa60a1996d9411c001aa049afbaba6a"
+  },
+  {
+    "old": "objects/species/wisp.png",
+    "new": "characters/wisp.png",
+    "oldUrl": "/map/objects/species/wisp.png",
+    "newUrl": "/map/characters/wisp.png",
+    "sha256": "23c32cbc3754341f629a4b8b465db0bc629d71c3e004c9ae946e1f72051bccdc"
+  },
+  {
+    "old": "objects/species/wolf.png",
+    "new": "characters/wolf.png",
+    "oldUrl": "/map/objects/species/wolf.png",
+    "newUrl": "/map/characters/wolf.png",
+    "sha256": "45fc37e5286ee9f5b3b59f114974150ab8f4f2c9ddf17229e98484ad6b471482"
+  },
+  {
+    "old": "objects/species/wraith.png",
+    "new": "characters/wraith.png",
+    "oldUrl": "/map/objects/species/wraith.png",
+    "newUrl": "/map/characters/wraith.png",
+    "sha256": "35e69ef4a41dbf119f839408ba7400b00f74648a00fc53fd3585553ef14942c5"
+  },
+  {
+    "old": "objects/species/wyvern.png",
+    "new": "characters/wyvern.png",
+    "oldUrl": "/map/objects/species/wyvern.png",
+    "newUrl": "/map/characters/wyvern.png",
+    "sha256": "36fd6480ac95066998c2ed28f187ad8e18d26a2b475f4d0da956aca2c8307af3"
+  },
+  {
+    "old": "templates/terrain-hex.json",
+    "new": "terrain/templates/terrain-hex.json",
+    "oldUrl": "/map/templates/terrain-hex.json",
+    "newUrl": "/map/terrain/templates/terrain-hex.json",
+    "sha256": "2584150620f78880e45e726be8f10ebf420fd673e24da7586ab212fa4cf76873"
+  },
+  {
+    "old": "templates/terrain-hex.png",
+    "new": "terrain/templates/terrain-hex.png",
+    "oldUrl": "/map/templates/terrain-hex.png",
+    "newUrl": "/map/terrain/templates/terrain-hex.png",
+    "sha256": "d09d33d4dc0edf5d663a7de30c08abc82da3ad66172ce573b86b76bf14799712"
+  },
+  {
+    "old": "templates/terrain-hex.svg",
+    "new": "terrain/templates/terrain-hex.svg",
+    "oldUrl": "/map/templates/terrain-hex.svg",
+    "newUrl": "/map/terrain/templates/terrain-hex.svg",
+    "sha256": "9781ea677a1a95ac069e9981e3a0484d8d7d4aef67d0b1d9d4f27fc4a99898a7"
+  }
+]

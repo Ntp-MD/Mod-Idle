@@ -70,7 +70,7 @@ export const HUD_REGION_META: { id: HudRegionId; label: string; description: str
   { id: 'tasks', label: 'Objectives', description: 'Collapsible run goal and tracked delivery progress at the upper right, columns 13–15. The header remains available when collapsed.' },
   { id: 'target', label: 'Target bar', description: 'Current enemy name and health bar, centered over the combat field.' },
   { id: 'menu', label: 'Menu rail', description: 'Horizontal screen navigation slides into the right edge. The remaining header names the current screen and opens the same buttons again.' },
-  { id: 'travel', label: 'Map tools', description: 'Collapsible Map tools with separate Controls and Map key sections. Controls has zoom, Centre/Reset, terrain/level views and overlays. Stay Here / Forward is part of Game controls.' },
+  { id: 'travel', label: 'Map tools', description: 'Collapsed Map tools shortcut. Expanded Journey, Controls and Map key share the Field panels region with the destination card, with one scrollable body.' },
   { id: 'field', label: 'Combat field', description: 'Absolute combat overlay, always horizontally centered. Rows set vertical bounds; the column span sets width. It may overlap other HUD regions; the player card anchors to its bottom edge.' },
   { id: 'panels', label: 'Field panels', description: 'Contextual field panels and the map destination card. Destination details scroll inside this region while the selected hex stays clear beside it.' },
   { id: 'commands', label: 'Game controls', description: 'Horizontal Stay Here / Forward, Auto Skills, Auto Equip, speed and Pause/Resume group in M12–M15 slides into the right edge. The remaining Game controls button reopens it; hover shows travel mode, speed, automation and running state.' },

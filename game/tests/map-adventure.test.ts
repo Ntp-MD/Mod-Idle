@@ -32,6 +32,11 @@ describe('adventure board placements', () => {
     expect(adventureView(s, [cellOf(feet)]).marks[0].activity).toBe('combat');
     s.group = [];
     expect(adventureView(s, [cellOf(feet)]).marks[0].activity).toBe('idle');
+    s.walk = { from: feet, to: near, node: null, kind: 'bare', sub: null, wild: null,
+      blocksTotal: 1, blocksLeft: 1, secLeft: 1, blocksWalked: 0 };
+    expect(adventureView(s, [cellOf(feet)]).marks[0].activity).toBe('travel');
+    s.group = [{ species: 'wolf' } as never];
+    expect(adventureView(s, [cellOf(feet)]).marks[0].activity).toBe('combat');
   });
   it('suggests tracks only on unknown named sides within a block of approaching', () => {
     const s = newGame(), feet = currentCell(s);
@@ -41,6 +46,14 @@ describe('adventure board placements', () => {
     expect(at(view, 'map-wild-hint')[0].ax).toBe(hexKey(ring2));
     s.mapJournal!.scouted.push(hexKey(ring2));
     expect(at(adventureView(s, [cellOf(ring2, { sub: true })]), 'map-wild-hint')).toHaveLength(0);
+  });
+  it('shares the territory figure for Unique clues without adding a second monster or revealing distant clues', () => {
+    const s = newGame(), near = road.neighbours(currentCell(s))[0];
+    const view = adventureView(s, [cellOf(near, { sub: true, uniqueSpecies: 'wolf' }),
+      cellOf({ q: near.q + 6, r: near.r }, { sub: true, uniqueSpecies: 'wolf' })]);
+    expect(view.marks[0].uniqueSpecies).toBe('wolf');
+    expect(view.marks[1].uniqueSpecies).toBeUndefined();
+    expect(at(view, 'map-unique-traces')).toHaveLength(0);
   });
   it('grows a settlement from a flag to a lamp to a guild sign as Standing rises', () => {
     const s = newGame(), town = road.nodeById(s.town.visited[0]) ?? currentCell(s);
@@ -61,6 +74,17 @@ describe('adventure board placements', () => {
     expect(three.label).toBe('Standing III');
     expect(at(adventureView(s, cells.map(c => ({ ...c, town: 'never-visited' }))), 'map-town-life')).toHaveLength(0);
   });
+  it('marks only known, matching and unclaimed Expedition destinations', () => {
+    const s = newGame(), near = road.neighbours(currentCell(s))[0];
+    s.town.tasks[0] = { ...s.town.tasks[0]!, kind: 'expedition', zone: s.zone, subzone: 0, progress: 1, n: 3, claimed: false };
+    const matching = cellOf(near, { sub: true, zone: s.zone, subzone: 0 });
+    const view = adventureView(s, [matching, cellOf(near, { sub: true, zone: s.zone, subzone: 1 }),
+      cellOf({ q: near.q + 6, r: near.r }, { sub: true, zone: s.zone, subzone: 0 })]);
+    expect(at(view, 'map-expedition')).toHaveLength(1);
+    expect(at(view, 'map-expedition')[0].label).toBe('Expedition · 1/3');
+    s.town.tasks[0]!.claimed = true;
+    expect(at(adventureView(s, [matching]), 'map-expedition')).toHaveLength(0);
+  });
   it('hides a trail site until it is known, dims it once claimed, and yields to a Camp', () => {
     const s = newGame(), site = trailSites.find(row => row.kind === 'abandoned-camp')!;
     const key = hexKey(site), cells = [cellOf(site)];
@@ -69,7 +93,7 @@ describe('adventure board placements', () => {
     s.mapJournal!.scouted.push(key);
     expect(sites()[0].label).toContain('walk here to investigate');
     expect(sites()[0].cls).not.toContain('is-explored');
-    expect(sites()[0].art).toContain('camp.png');
+    expect(sites()[0].art).toContain('camp-unlit.png');
     s.mapJournal!.claimedSites.push(site.id);
     expect(sites()[0].cls).toContain('is-explored');
     expect(sites()[0].label).toContain('explored');

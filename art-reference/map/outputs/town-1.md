@@ -1,0 +1,15 @@
+# Human town version 1
+
+- Generator: built-in image generation with transparent background.
+- Intended layer: complete projected hex town terrain. Selected through both the town catalogue and settlement landmark renderer.
+- Actual output: 1605 × 980 PNG, RGBA; all four canvas corners transparent.
+- Shape reference: `../geometry/hex-mask.png`.
+- Architecture/style reference: original `game/public/map/landmark/town.png`; human medieval fantasy, blue roofs and ivory stone, not the old tall cutout framing.
+- Measurement: [town-1.measurement.json](town-1.measurement.json); alpha ≥128 convex hull simplified to six vertices, sampled ground fill.
+- Integration: `game/public/map/landmark/town-1.png`; original terrain and settlement images and the unmodified generated candidate preserved.
+- Status: installed and appearance inspected in the integrated Showcase at a 1920 × 1080 CSS viewport; all 18 settlement cells reference this image. Control-point/shared-edge checks, typecheck and map gates passed. User requested the next asset group after generation; no separate interaction-test result is claimed.
+- Evidence: [in-game view](town-1.in-game.png), [registration](town-1.registration.json).
+
+## Exact generation prompt
+
+Create ONE NEW production game asset: a small HUMAN medieval fantasy TOWN on a complete projected hex terrain tile. Reference 1 is the EXACT ground silhouette and framing mask. Reference 2 is ONLY the approved human architecture, blue slate roofs, warm ivory stone, timber details and painterly fantasy style. Do not copy its tall cutout composition. Reference canvas 1024x625. Ground is a full opaque grass-and-earth hex reaching every edge. Compose a compact lived-in human town in the central 65%: one modest stone watchtower with a blue conical roof and a small plain blue banner, surrounded by four or five small half-timber/stone houses with blue roofs. Show roof tops clearly from above; buildings are miniature board-game scenery, not full-screen hero illustrations. Tower including banner maximum 32% of canvas height, houses about 15-20%. Keep the town group balanced around the hex centre and leave a visible low grassy ground margin. A few small shrubs and stones only. Every roof, banner, tree, shadow and building fully inside the supplied hex silhouette, at least 8% clearance. Orthographic elevation 38 degrees above horizontal; board yaw -16 in renderer coordinates; match reference 1 ground footprint, not a stock symmetric isometric hex. Warm human fantasy otherworld settlement, coherent muted natural colours, soft top-left lighting. No modern buildings, alien or elven architecture, skyscraper tower, huge fortress wall, pedestal, circular base, thick tile platform, external roads, path overlays, water scene, labels, text, UI, sky, outer shadow or backdrop. Single tile only; genuinely transparent RGBA outside, opaque ground inside. No transparent padding or extra rotation. Ground vertices clockwise from upper right on reference canvas: (878.5533,78.6473),(1024,391.1473),(657.4467,625),(145.4467,546.3527),(0,233.8527),(366.5533,0).

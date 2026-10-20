@@ -1,0 +1,20 @@
+[
+  {
+    "role": "Painterly style and palette ONLY. Freeform tall scenery; unsuitable as a full-hex shape reference.",
+    "sha256": "39cc081e3a1456a2ef47b9f402ec8f31e942b74797c37e35b55f200456ff761e",
+    "file": "forest-original-style.png",
+    "source": "game/public/map/terrain/forest-relief.png"
+  },
+  {
+    "role": "Composition and style example. Raw generated footprint is approximate; renderer registration is required. Not a certified camera reference.",
+    "sha256": "f9530982658e235129f2939eaa8a25cc06479d97e33230007bf8683343047732",
+    "file": "forest-relief-1.png",
+    "source": "game/public/map/terrain/forest-relief-1.png"
+  },
+  {
+    "role": "User-approved mountain composition and scale in the actual map. Raw footprint requires registration. Not a certified 3D camera reference.",
+    "sha256": "beacde9269e7a7c6a4f2699afc40be0cd89b1d7671837e7decc02090fd77350d",
+    "file": "mountain-relief-1.png",
+    "source": "game/public/map/terrain/mountain-relief-1.png"
+  }
+]

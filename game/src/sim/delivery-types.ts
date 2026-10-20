@@ -3,6 +3,8 @@ import type { Acquisition } from '../../../engine/delivery';
 export interface StoneReward { key: string; count: number }
 export interface DeliveryReward {
   gold: number; stone: StoneReward; skill: string | null; fallback: StoneReward;
+  /** The attainment point the contract pays on completion (D2) — frozen at offer time. */
+  attainment: number;
   quoteGold: number; premium: number;
 }
 export interface DeliveryContract {

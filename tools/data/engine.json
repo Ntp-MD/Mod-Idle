@@ -17,11 +17,9 @@
     "point_value": 1,
     "paragon_from": 101,
     "paragon_points_per_level": 2,
-    "tree_points_per_level": 1,
-    "tree_points_base": 3,
     "reference_build": "split",
     "respec_cost": 0,
-    "note": "Stats are SPENT, not granted (owner ruling). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190) and 1 tree point, and `stat = base + points x point_value`. `tree_points_base` is what a character starts with in hand, and it exists for one reason: T6 holds the identity that the tree's ranks are exactly what the level cap grants. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat)."
+    "note": "Stats are SPENT, not granted (owner ruling). `per_level` is gone: a level grants 5 stat points (2 in Paragon, levels 101-190), and `stat = base + points x point_value`. The tree's own points are the tree's business: its budget and the rate a level pays live in `tools/data/tree.json` (`points.currencies.tree`), and the level curve grants two of them a level, so a level-cap character holds 381 points against a tree that is deliberately wider than that budget - the ranks are not what the level cap grants. The player allocates freely, mid-combat, and Respec is free but town-only. `statAt(level)` is no longer the player line - it is the REFERENCE even-split line (points/7), the build every published number and mob_HP is priced against; the focused max (all points and all 13 items in one stat) is the ceiling, printed beside it. `per_level` survives only on the player reference ramp if re-added; the mob stat line is flat (mob.stat)."
   },
   "K": {
     "K_STR": 5,
@@ -13701,46 +13699,232 @@
       "tracks_radius": 2,
       "event_display_sec": 45,
       "kinds": {
-        "abandoned-camp": { "name": "Abandoned Camp", "description": "A sheltered fire pit and fresh water. Stop here to restore Hunger once.", "hunger_restore": 30 },
-        "provision-caravan": { "name": "Provision Caravan", "description": "Travelers have a spare bundle of the region's provisions. Collect it once.", "food_count": 2 },
-        "hunting-tracks": { "name": "Hunting Tracks", "description": "Follow the tracks to survey the surrounding blocks and learn their hunting grounds." }
+        "abandoned-camp": {
+          "name": "Abandoned Camp",
+          "description": "A sheltered fire pit and fresh water. Stop here to restore Hunger once.",
+          "hunger_restore": 30
+        },
+        "provision-caravan": {
+          "name": "Provision Caravan",
+          "description": "Travelers have a spare bundle of the region's provisions. Collect it once.",
+          "food_count": 2
+        },
+        "hunting-tracks": {
+          "name": "Hunting Tracks",
+          "description": "Follow the tracks to survey the surrounding blocks and learn their hunting grounds."
+        }
       },
       "sites": [
-        { "id": "eastgate-trail", "q": 2, "r": -2, "kind": "abandoned-camp" },
-        { "id": "millbrook-trail", "q": -7, "r": -4, "kind": "provision-caravan" },
-        { "id": "ashfall-trail", "q": 6, "r": 2, "kind": "hunting-tracks" },
-        { "id": "ironrow-trail", "q": -12, "r": 5, "kind": "abandoned-camp" },
-        { "id": "wolf-cross-trail", "q": -2, "r": -3, "kind": "provision-caravan" },
-        { "id": "highspire-trail", "q": 1, "r": -5, "kind": "hunting-tracks" },
-        { "id": "bonegate-trail", "q": -1, "r": -7, "kind": "abandoned-camp" },
-        { "id": "frosthold-trail", "q": -6, "r": 3, "kind": "provision-caravan" },
-        { "id": "vermolch-trail", "q": -1, "r": 4, "kind": "hunting-tracks" },
-        { "id": "thornwake-trail", "q": 9, "r": -7, "kind": "abandoned-camp" },
-        { "id": "greyfen-trail", "q": 3, "r": 0, "kind": "provision-caravan" },
-        { "id": "saltmarrow-trail", "q": 4, "r": -4, "kind": "hunting-tracks" },
-        { "id": "emberhold-trail", "q": 11, "r": -5, "kind": "abandoned-camp" },
-        { "id": "duskmoor-trail", "q": 7, "r": -6, "kind": "provision-caravan" },
-        { "id": "nettlecrag-trail", "q": -7, "r": 0, "kind": "hunting-tracks" },
-        { "id": "blackwater-reach-trail", "q": 3, "r": -7, "kind": "abandoned-camp" },
-        { "id": "wyrmback-trail", "q": -11, "r": 3, "kind": "provision-caravan" },
-        { "id": "pale-spire-trail", "q": 7, "r": -2, "kind": "hunting-tracks" },
-        { "id": "greyfen-trail-2", "q": 1, "r": 4, "kind": "abandoned-camp" },
-        { "id": "saltmarrow-trail-2", "q": 6, "r": -2, "kind": "abandoned-camp" },
-        { "id": "pale-spire-trail-2", "q": 5, "r": 2, "kind": "abandoned-camp" },
-        { "id": "millbrook-trail-2", "q": -6, "r": -1, "kind": "abandoned-camp" },
-        { "id": "emberhold-trail-2", "q": 8, "r": -1, "kind": "provision-caravan" },
-        { "id": "blackwater-reach-trail-2", "q": 6, "r": -7, "kind": "provision-caravan" },
-        { "id": "blackwater-reach-trail-3", "q": 5, "r": -5, "kind": "hunting-tracks" },
-        { "id": "bonegate-trail-2", "q": 1, "r": -6, "kind": "provision-caravan" },
-        { "id": "bonegate-trail-3", "q": -3, "r": -4, "kind": "hunting-tracks" },
-        { "id": "frosthold-trail-2", "q": -5, "r": 6, "kind": "abandoned-camp" },
-        { "id": "frosthold-trail-3", "q": -8, "r": 6, "kind": "hunting-tracks" },
-        { "id": "ashfall-trail-2", "q": 7, "r": 5, "kind": "abandoned-camp" },
-        { "id": "ashfall-trail-3", "q": 4, "r": 5, "kind": "provision-caravan" },
-        { "id": "ironrow-trail-2", "q": -9, "r": 5, "kind": "provision-caravan" },
-        { "id": "ironrow-trail-3", "q": -10, "r": 6, "kind": "hunting-tracks" },
-        { "id": "thornwake-trail-2", "q": 12, "r": -7, "kind": "provision-caravan" },
-        { "id": "thornwake-trail-3", "q": 12, "r": -6, "kind": "hunting-tracks" }
+        {
+          "id": "eastgate-trail",
+          "q": 2,
+          "r": -2,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "millbrook-trail",
+          "q": -7,
+          "r": -4,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "ashfall-trail",
+          "q": 6,
+          "r": 2,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "ironrow-trail",
+          "q": -12,
+          "r": 5,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "wolf-cross-trail",
+          "q": -2,
+          "r": -3,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "highspire-trail",
+          "q": 1,
+          "r": -5,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "bonegate-trail",
+          "q": -1,
+          "r": -7,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "frosthold-trail",
+          "q": -6,
+          "r": 3,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "vermolch-trail",
+          "q": -1,
+          "r": 4,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "thornwake-trail",
+          "q": 9,
+          "r": -7,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "greyfen-trail",
+          "q": 3,
+          "r": 0,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "saltmarrow-trail",
+          "q": 4,
+          "r": -4,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "emberhold-trail",
+          "q": 11,
+          "r": -5,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "duskmoor-trail",
+          "q": 7,
+          "r": -6,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "nettlecrag-trail",
+          "q": -7,
+          "r": 0,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "blackwater-reach-trail",
+          "q": 3,
+          "r": -7,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "wyrmback-trail",
+          "q": -11,
+          "r": 3,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "pale-spire-trail",
+          "q": 7,
+          "r": -2,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "greyfen-trail-2",
+          "q": 1,
+          "r": 4,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "saltmarrow-trail-2",
+          "q": 6,
+          "r": -2,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "pale-spire-trail-2",
+          "q": 5,
+          "r": 2,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "millbrook-trail-2",
+          "q": -6,
+          "r": -1,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "emberhold-trail-2",
+          "q": 8,
+          "r": -1,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "blackwater-reach-trail-2",
+          "q": 6,
+          "r": -7,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "blackwater-reach-trail-3",
+          "q": 5,
+          "r": -5,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "bonegate-trail-2",
+          "q": 1,
+          "r": -6,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "bonegate-trail-3",
+          "q": -3,
+          "r": -4,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "frosthold-trail-2",
+          "q": -5,
+          "r": 6,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "frosthold-trail-3",
+          "q": -8,
+          "r": 6,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "ashfall-trail-2",
+          "q": 7,
+          "r": 5,
+          "kind": "abandoned-camp"
+        },
+        {
+          "id": "ashfall-trail-3",
+          "q": 4,
+          "r": 5,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "ironrow-trail-2",
+          "q": -9,
+          "r": 5,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "ironrow-trail-3",
+          "q": -10,
+          "r": 6,
+          "kind": "hunting-tracks"
+        },
+        {
+          "id": "thornwake-trail-2",
+          "q": 12,
+          "r": -7,
+          "kind": "provision-caravan"
+        },
+        {
+          "id": "thornwake-trail-3",
+          "q": 12,
+          "r": -6,
+          "kind": "hunting-tracks"
+        }
       ]
     },
     "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not replace ambushes. Trail sites are authored per settlement and scale with its band — one in low, two in mid, three in high — each on its own bare block outside any named side, and a settlement with no spare bare block keeps the one it has. All rates and effects live here; map.json remains presentation only. Regional Mine and Grove bonus yields are authored per zone in regional_sources. Existing ore, timber and rarewood keep their keys and uses. Workshop recipes consume gathered materials at a settlement and produce trade goods; all cooking recipes also define edible cooked provisions.",
@@ -14023,7 +14207,15 @@
       "exposure_threshold_sec": 900,
       "exposure_cap_sec": 900,
       "exposure_decay_per_sec": 1,
-      "kinds": ["sounds", "prowler", "traveler", "nest", "herd", "injured", "discovered"],
+      "kinds": [
+        "sounds",
+        "prowler",
+        "traveler",
+        "nest",
+        "herd",
+        "injured",
+        "discovered"
+      ],
       "barter_food": 2,
       "aid_food": 2,
       "aid_potion_count": 1
