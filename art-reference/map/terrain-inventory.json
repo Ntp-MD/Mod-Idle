@@ -17,10 +17,12 @@
       "category": "terrain",
       "versions": [
         "ash-1.png",
+        "ash-2.png",
         "ash.png"
       ],
       "registered": [
-        "ash-1.png"
+        "ash-1.png",
+        "ash-2.png"
       ],
       "catalogue": [
         {
@@ -74,10 +76,12 @@
       "category": "terrain",
       "versions": [
         "forest-relief-1.png",
+        "forest-relief-2.png",
         "forest-relief.png"
       ],
       "registered": [
-        "forest-relief-1.png"
+        "forest-relief-1.png",
+        "forest-relief-2.png"
       ],
       "catalogue": [
         {
@@ -99,10 +103,12 @@
       "category": "terrain",
       "versions": [
         "grass-1.png",
+        "grass-2.png",
         "grass.png"
       ],
       "registered": [
-        "grass-1.png"
+        "grass-1.png",
+        "grass-2.png"
       ],
       "catalogue": [
         {
@@ -120,10 +126,12 @@
       "category": "terrain",
       "versions": [
         "marsh-1.png",
+        "marsh-2.png",
         "marsh.png"
       ],
       "registered": [
-        "marsh-1.png"
+        "marsh-1.png",
+        "marsh-2.png"
       ],
       "catalogue": [
         {
@@ -141,10 +149,12 @@
       "category": "terrain",
       "versions": [
         "moor-1.png",
+        "moor-2.png",
         "moor.png"
       ],
       "registered": [
-        "moor-1.png"
+        "moor-1.png",
+        "moor-2.png"
       ],
       "catalogue": [
         {
@@ -162,10 +172,12 @@
       "category": "terrain",
       "versions": [
         "mountain-relief-1.png",
+        "mountain-relief-2.png",
         "mountain-relief.png"
       ],
       "registered": [
-        "mountain-relief-1.png"
+        "mountain-relief-1.png",
+        "mountain-relief-2.png"
       ],
       "catalogue": [
         {
@@ -183,10 +195,12 @@
       "category": "terrain",
       "versions": [
         "salt-1.png",
+        "salt-2.png",
         "salt.png"
       ],
       "registered": [
-        "salt-1.png"
+        "salt-1.png",
+        "salt-2.png"
       ],
       "catalogue": [
         {
@@ -204,10 +218,12 @@
       "category": "terrain",
       "versions": [
         "snow-1.png",
+        "snow-2.png",
         "snow.png"
       ],
       "registered": [
-        "snow-1.png"
+        "snow-1.png",
+        "snow-2.png"
       ],
       "catalogue": [
         {
@@ -264,10 +280,12 @@
       "category": "terrain",
       "versions": [
         "waste-1.png",
+        "waste-2.png",
         "waste.png"
       ],
       "registered": [
-        "waste-1.png"
+        "waste-1.png",
+        "waste-2.png"
       ],
       "catalogue": [
         {
@@ -285,10 +303,12 @@
       "category": "terrain",
       "versions": [
         "water-1.png",
+        "water-2.png",
         "water.png"
       ],
       "registered": [
-        "water-1.png"
+        "water-1.png",
+        "water-2.png"
       ],
       "catalogue": [
         {

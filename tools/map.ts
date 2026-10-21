@@ -27,7 +27,7 @@ import { readJson } from './lib/json.ts';
 import * as G from './lib/gates.ts';
 import { createRoad } from '../engine/road.ts';
 import { MAP_CAMERA_TRANSFORM, projectMapPoint, mapUprightAt, mapUprightAround, projectMapBounds, projectedHex, footprintShapeError } from '../game/src/ui/map-projection.ts';
-import { TERRAIN_ART } from '../game/src/ui/map-terrain.ts';
+import { TERRAIN_ART, TERRAIN_VARIANTS } from '../game/src/ui/map-terrain.ts';
 import { mapSpriteWidth } from '../game/src/ui/map-sprites.ts';
 import footprints from '../game/src/ui/map-terrain-footprints.json' with { type: 'json' };
 import type { EngineData, MobZone } from '../engine/types.ts';
@@ -484,6 +484,16 @@ function cellsBackToFront(): [string, CellRow][] {
   return [...CELLS.entries()].sort(([, a], [, b]) => projectMapPoint(a.x, a.y).y - projectMapPoint(b.x, b.y).y);
 }
 
+/** The tile a hex shows: a stable pick, so the same hex always carries the same picture. */
+function variantPick(id: string, count: number): number {
+  let hash = 2166136261;
+  for (let i = 0; i < id.length; i++) {
+    hash ^= id.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) % count;
+}
+
 /** Layer 2 relief: one terrain piece per hex, its ground footprint sized to the projected hex. */
 function dioramaGroup(): string[] {
   const lines = ['  <g id="layer-diorama" pointer-events="none">'];
@@ -493,7 +503,9 @@ function dioramaGroup(): string[] {
     const art = terrain === 'town'
       ? LANDMARK_ART[settlementLandmark(claim?.town ?? '')] || TERRAIN_ART.town
       : TERRAIN_ART[terrain] || TERRAIN_ART.grass;
-    const href = art;
+    // A biome may carry more than one tile; the hex takes one of them, and always the same one.
+    const tiles = terrain === 'town' ? [art] : [art, ...(TERRAIN_VARIANTS[terrain] ?? [])];
+    const href = tiles[variantPick(id, tiles.length)];
     // Settlement and terrain canvases share the same footprint registration.
     const body = href in footprints
       ? hexArtwork(href)

@@ -1,0 +1,45 @@
+{
+  "asset": "/map/terrain/ash-2.png",
+  "instances": 25,
+  "source": {
+    "width": 1606,
+    "height": 979,
+    "groundFill": "#63443d",
+    "vertices": [
+      [
+        1381,
+        149
+      ],
+      [
+        1598,
+        532
+      ],
+      [
+        1060,
+        971
+      ],
+      [
+        261,
+        827
+      ],
+      [
+        6,
+        391
+      ],
+      [
+        557,
+        1
+      ]
+    ]
+  },
+  "maxMapUnitError": 1.4238583238573986e-14,
+  "maxErrorAt1024": 2.2874910056194154e-13,
+  "checks": {
+    "sixVertices": true,
+    "center": true,
+    "sharedEdges": true,
+    "actualPngDimensions": true,
+    "installedCopyUnmodified": true
+  },
+  "limitation": "Control-point registration only; inspect pixel edges, object perspective and appearance in the live map separately."
+}

@@ -14,6 +14,8 @@ The descriptive camera is orthographic, elevation 38° above ground and board ya
 
 The terrain catalogue is `game/src/ui/map-terrain.ts`. Preserve originals and use numbered sibling assets (`forest-relief-1.png`, `forest-relief-2.png`, etc.). Selecting a replacement is an explicit catalogue change; filename numbering does not automatically activate it.
 
+`TERRAIN_ART` holds the tile a biome shows by default. `TERRAIN_VARIANTS` holds the other tiles that same biome may show; the map generator picks one of them per hex, stably, so a stretch of one biome reads as ground instead of one repeated picture. A variant needs its own measured footprint before it may be listed, and the biome's own art is never repeated in its variant list.
+
 Settlements select their art through `LANDMARK_ART` in `tools/map.ts`, whose default town image comes from `TERRAIN_ART.town`. The selected image then uses the same full-hex registration as other terrain. A future landmark variant must be selected there as well as having its asset/footprint available. M15 checks art placement on settlement cells too.
 
 Generated images may approximate the requested polygon. Measure the six ground vertices before activation with the measurement tool, which reads the tile's own silhouette and stores measured pixel coordinates, source dimensions and an opaque ground fill in `game/src/ui/map-terrain-footprints.json`:

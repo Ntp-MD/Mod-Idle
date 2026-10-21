@@ -64,5 +64,65 @@
     "height": 980,
     "groundFill": "#4d3735",
     "vertices": [[1358,147],[1593,567],[1016,974],[243,838],[11,380],[590,2]]
+  },
+  "/map/terrain/grass-2.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#938518",
+    "vertices": [[1379,177],[1602,566],[1013,978],[232,812],[2,396],[549,1]]
+  },
+  "/map/terrain/forest-relief-2.png": {
+    "width": 1606,
+    "height": 979,
+    "groundFill": "#646020",
+    "vertices": [[1364,139],[1601,600],[1031,976],[237,843],[4,378],[562,1]]
+  },
+  "/map/terrain/mountain-relief-2.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#947a2b",
+    "vertices": [[1350,162],[1602,600],[1029,978],[233,829],[2,383],[550,0]]
+  },
+  "/map/terrain/snow-2.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#edebea",
+    "vertices": [[1379,164],[1598,574],[1036,979],[246,821],[8,393],[587,0]]
+  },
+  "/map/terrain/water-2.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#289ba4",
+    "vertices": [[1375,136],[1603,551],[1033,979],[235,839],[2,390],[539,0]]
+  },
+  "/map/terrain/marsh-2.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#5f5814",
+    "vertices": [[1302,132],[1598,607],[1036,976],[271,845],[5,353],[542,2]]
+  },
+  "/map/terrain/moor-2.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#7f5923",
+    "vertices": [[1340,140],[1602,608],[1049,976],[245,846],[6,389],[556,1]]
+  },
+  "/map/terrain/salt-2.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#f3cfab",
+    "vertices": [[1314,164],[1604,561],[979,979],[278,809],[2,373],[577,3]]
+  },
+  "/map/terrain/waste-2.png": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#e37136",
+    "vertices": [[1348,144],[1603,582],[1036,979],[233,833],[2,391],[555,0]]
+  },
+  "/map/terrain/ash-2.png": {
+    "width": 1606,
+    "height": 979,
+    "groundFill": "#63443d",
+    "vertices": [[1381,149],[1598,532],[1060,971],[261,827],[6,391],[557,1]]
   }
 }

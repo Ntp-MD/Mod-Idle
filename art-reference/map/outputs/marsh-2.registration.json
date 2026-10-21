@@ -1,0 +1,45 @@
+{
+  "asset": "/map/terrain/marsh-2.png",
+  "instances": 13,
+  "source": {
+    "width": 1605,
+    "height": 980,
+    "groundFill": "#5f5814",
+    "vertices": [
+      [
+        1302,
+        132
+      ],
+      [
+        1598,
+        607
+      ],
+      [
+        1036,
+        976
+      ],
+      [
+        271,
+        845
+      ],
+      [
+        5,
+        353
+      ],
+      [
+        542,
+        2
+      ]
+    ]
+  },
+  "maxMapUnitError": 1.1546319456101628e-14,
+  "maxErrorAt1024": 1.8549669908370845e-13,
+  "checks": {
+    "sixVertices": true,
+    "center": true,
+    "sharedEdges": true,
+    "actualPngDimensions": true,
+    "installedCopyUnmodified": true
+  },
+  "limitation": "Control-point registration only; inspect pixel edges, object perspective and appearance in the live map separately."
+}
