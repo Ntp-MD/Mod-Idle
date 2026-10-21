@@ -78,19 +78,19 @@ Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate eith
 - Current shell: fixed 15 × 15 Hub Grid, shared `HudLayout` regions and one scroll owner per region. Added/moved regions update `HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT` in `game/src/ui/hud-layout.ts` and matching `App.svelte` wiring; backfill old saved layouts. Appearance inside regions follows the requested design.
 - New panels connect through `PANELS`, `RAIL`, icon/label maps and keyboard actions in `App.svelte`. Reuse existing shared controls such as `CollapseToggle.svelte` where appropriate; choose Grid/Flex and composition for the task.
 - Keep native semantics, labels, keyboard access and visible focus. Map arrows select adjacent Blocks; Enter walks or uses a known Waypoint, with selection announcements.
-- Inspect actual components with HMR in the integrated browser at `http://localhost:5173/__showcase#showcase-field`, **1920 × 1080 only** unless another viewport is requested. Use one visible tab; close it after verification. Attach Playwright to it; report attachment failure instead of launching a standalone/headless browser or building a mirror.
+- Inspect actual components with HMR in the integrated browser at `http://localhost:5173/__showcase#showcase-field`, **1920 × 1080 only** unless another viewport is requested. Use one visible tab; close it after verification. Playwright is not installed in this repository — never launch a standalone/headless browser or build a mirror; verify UI with the dev server, focused tests and `npm --prefix game run check`, using whichever browser the session already provides, and report the failure if none is available.
 - For HUD placement also use `#panel-hud-layout-studio`: **Studio Apply** previews; **game Apply** saves. Verify the live region moves. Change shared layout machinery when the task calls for it, preserving working interactions and saved-layout compatibility.
 
 ## Commands and verification
 
 Windows + PowerShell; forward slashes in code paths. Run commands from the applicable root or `game/` package.
 
-- Development: `pnpm install`, `pnpm dev`; **port 5173 only**. Check `Get-NetTCPConnection -LocalPort 5173` first. Reuse an existing server; never start a second or kill one to reclaim the port.
-- Gameplay/data: relevant cages/tests and `pnpm typecheck`; broaden checks when shared behavior changes. `pnpm verify` runs all cages; `pnpm test` runs `game/tests/`.
+- Development: `npm install`, `npm run dev`; **port 5173 only**. Check `Get-NetTCPConnection -LocalPort 5173` first. Reuse an existing server; never start a second or kill one to reclaim the port.
+- Gameplay/data: relevant cages/tests and `npm run typecheck`; broaden checks when shared behavior changes. `npm run verify` runs all cages; `npm test` runs `game/tests/`.
 - UI: typecheck, focused tests for changed behavior, and integrated-browser interaction/appearance checks for behavior/layout changes.
 - Docs/comments only: inspect the edited files and local links; no gameplay suite or browser check.
-- Wiki: `pnpm wiki` when wiki source, displayed data/formulas or player-facing behavior changes. `docs/wiki/*.html` is generated; never hand-edit. UI-only changes do not trigger wiki rebuilds.
-- Other generators: `pnpm skills`, `pnpm gallery`, or the relevant `tools/` entry point when its input changes.
+- Wiki: `npm run wiki` when wiki source, displayed data/formulas or player-facing behavior changes. `docs/wiki/*.html` is generated; never hand-edit. UI-only changes do not trigger wiki rebuilds.
+- Other generators: `npm run skills`, `npm run gallery`, or the relevant `tools/` entry point when its input changes.
 - Verify correctness/compatibility, not prescribed balance or content counts. Do not gate pacing bands, prices, tuned windows, roster sizes or content quotas. Do not rerun passing checks without a relevant change or unresolved concern.
 
 ## Saves and workspace boundaries

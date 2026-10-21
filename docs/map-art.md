@@ -1,6 +1,6 @@
 # Map terrain artwork contract
 
-The ground projection is owned by `game/src/ui/map-projection.ts`. Run `pnpm map --write` to regenerate the map and the matching templates in `game/public/map/terrain/templates/`.
+The ground projection is owned by `game/src/ui/map-projection.ts`. Run `npm run map -- --write` to regenerate the map and the matching templates in `game/public/map/terrain/templates/`.
 
 The portable [map art reference kit](../art-reference/map/README.md) contains shape references, role-labelled style references, agent briefs and prompts. Its refresh script derives geometry directly from the projection without rebuilding or modifying the live map.
 
