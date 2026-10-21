@@ -1,23 +1,23 @@
 {
-    "generatedAtUtc":  "2026-10-20T19:27:23.6132666+00:00",
+    "generatedAtUtc":  "2026-10-21T03:23:02.9945806+00:00",
     "integrationWarnings":  [
 
                             ],
     "sources":  [
                     {
-                        "sha256":  "521b1e1b798ba6194a543b06d21e96580b7cc99a4e4865bc8ecfc97072653cae",
+                        "sha256":  "c2a463137c13792b6585d4169f2d657991f8357e18015ab38cf98dfe68e5495b",
                         "path":  "game/src/ui/map-projection.ts"
                     },
                     {
-                        "sha256":  "2584150620f78880e45e726be8f10ebf420fd673e24da7586ab212fa4cf76873",
+                        "sha256":  "df3c0c12fef108fafba77af7eea217b667bac20191c4453ee5b2e87f1388491c",
                         "path":  "game/public/map/terrain/templates/terrain-hex.json"
                     },
                     {
-                        "sha256":  "0bcf371f07aaed49ab80baaaf85a7629449ba6b76baa127412a916764eee0298",
+                        "sha256":  "69ca43ed2e547143369b4a5cdc48b72aff5e5980cff7a4f37947f23a251c5a99",
                         "path":  "tools/map.ts"
                     },
                     {
-                        "sha256":  "866b58012a40eca9959076ace262e282b1be45a01d87c6b4a0a43e11ffcfc8f6",
+                        "sha256":  "cb89606839a189d72999db38b620096a366addc0be4168d7b88c13a5e9b84e18",
                         "path":  "game/src/ui/map-terrain.ts"
                     },
                     {
@@ -25,11 +25,11 @@
                         "path":  "game/src/ui/map-terrain-footprints.json"
                     },
                     {
-                        "sha256":  "39916ecde5a7c911c4a80d51ba8a3fb1c0f5cdee4a2868b87b13b4fabb4593da",
+                        "sha256":  "71261255e2954a6ddee14b5ee88685fcdfed2e44cf78c7b0108b9499e9f1a7a1",
                         "path":  "art-reference/map/source-assets.json"
                     },
                     {
-                        "sha256":  "c63e3e5391758111e5d0a363a509e40ff055af5ade2219fcf708fc6bab49784f",
+                        "sha256":  "5aabb54396968ca3b6a2415c9688c568c305f033db0ff52d70649fe7a15f3aee",
                         "path":  "docs/map-art.md"
                     },
                     {
@@ -45,8 +45,8 @@
                         "path":  "game/public/map/terrain/mountain-relief-1.png"
                     },
                     {
-                        "sha256":  "ccd3ee4e2df264ecd1a227b5bb77498c46792b5999ee66323ba2e1944299178b",
-                        "path":  "output/map-calibration/registration.json"
+                        "sha256":  "5848de3c40cdaafbf9b98b6576b7f66938da77ff676ea9a1a6df70c6e79612e9",
+                        "path":  "art-reference/map-calibration/registration.json"
                     }
                 ],
     "purpose":  "Portable reference snapshots, not model training and not asset approval."

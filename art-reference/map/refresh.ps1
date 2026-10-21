@@ -90,12 +90,12 @@ $sample = @{}
 $exampleAsset = '/map/terrain/forest-relief-1.png'
 if ($current.PSObject.Properties[$exampleAsset]) { $sample[$exampleAsset] = $current.PSObject.Properties[$exampleAsset].Value }
 # Example is sourced from the recorded measurement, never synthesized for another image.
-$measurementPath = Join-Path $repoRoot 'output/map-calibration/registration.json'
+$measurementPath = Join-Path $repoRoot 'art-reference/map-calibration/registration.json'
 if (Test-Path -LiteralPath $measurementPath) {
     $recorded = Get-Content -LiteralPath $measurementPath -Raw | ConvertFrom-Json
     if ($recorded.asset -eq '/map/terrain/forest-relief-1.png' -and $recorded.source.groundFill) {
         $sample = @{ $recorded.asset = $recorded.source }
-        $sourcePaths += 'output/map-calibration/registration.json'
+        $sourcePaths += 'art-reference/map-calibration/registration.json'
     }
 }
 Write-JsonFile (Join-Path $exampleDir 'footprint-format.json') $sample

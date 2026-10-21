@@ -1,15 +1,14 @@
 /**
  * The art browser: scans the icon shelves and writes `art/gallery.html` — every sheet in one grid, one
- * click to blow it up, and a star to queue a library sheet for the client.
+ * click to blow it up, and a star to bookmark a sheet for the agent.
  *
  *   node tools/gallery.ts             rebuild the page (the default)
  *   node tools/gallery.ts --quiet     …and say nothing but the path
  *   node tools/gallery.ts --serve     rebuild, then serve the repo on :5269 so the star can land on disk
  *   node tools/gallery.ts --favs      print the queue `art/favs.json` holds
  *
- * Two tabs, one per shelf: `art/svg-lib/` is the library the owner picks from, and `game/src/icon/` is
- * what the client carries. The page lives in `art/` and reaches each shelf by a relative path, so it
- * opens straight from the disk with no server.
+ * One tab per shelf: `game/src/icon/`, the sheets the client carries. The page lives in `art/` and
+ * reaches the shelf by a relative path, so it opens straight from the disk with no server.
  *
  * `art/gallery.html` is a generated view: never hand-edited, always rebuildable, and the folders are the
  * truth — a sheet dropped on either shelf lands on the grid at the next build. The palette is read out of
@@ -36,10 +35,9 @@ const OUT = path.join(ROOT, 'art', 'gallery.html');
 const FAVS = path.join(ROOT, 'art', 'favs.json');
 const PORT = 5269;
 
-/** The two tabs. `pick: true` is the shelf a star is offered on; `base` reaches it from `art/`. */
+/** The tabs. `pick: true` is the shelf a star is offered on; `base` reaches it from `art/`. */
 const SHELVES = [
-  { label: 'art/svg-lib', note: 'the library to pick from', dir: path.join(ROOT, 'art/svg-lib'), base: '../art/svg-lib', pick: true },
-  { label: 'game/src/icon', note: 'what the client carries', dir: path.join(ROOT, 'game/src/icon'), base: '../game/src/icon', pick: false },
+  { label: 'game/src/icon', note: 'the sheets the client carries', dir: path.join(ROOT, 'game/src/icon'), base: '../game/src/icon', pick: false },
 ];
 
 /**
@@ -86,8 +84,8 @@ function scan(root: string, dir: string, into: Record<string, Shelf>): void {
   }
 }
 
-/* the game's own sheets lead each shelf: a shorter top folder sorts first, so a bare `svg` never lands
-   behind `svg-lib` just because a hyphen is a lower code point than a slash */
+/* the client's own folder leads each shelf: a shorter top folder sorts first, so a bare `svg`
+   never lands behind a deeper sibling just because a hyphen is a lower code point than a slash */
 const rank = (k: string): [number, string, string] => [k.split('/')[0].length, k.split('/')[0], k];
 const shelves = SHELVES.map((s) => {
   const dirs: Record<string, Shelf> = {};
@@ -126,7 +124,7 @@ body {
   padding: .5rem .8rem; background: var(--panel); border-bottom: 1px solid var(--line);
 }
 .bar h1 { font-size: .95rem; margin: 0; letter-spacing: .02em; }
-/* one tab per shelf: the library you pick from, and the shelf the client actually carries */
+/* one tab per shelf: here, the shelf the client actually carries */
 .tabs { display: flex; gap: var(--spacing-sm); }
 .tabs button {
   display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .28rem .65rem;
@@ -566,6 +564,7 @@ const html = PAGE.replace('__TOKENS__', () => extractTokens(fs.readFileSync(path
   .replace('__DATA__', () => JSON.stringify(shelves))
   .replaceAll('__PORT__', String(PORT));
 
+fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, html, 'utf8');
 
 /** A Windows path needs the third slash before the drive letter, or the browser reads it as a host. */
